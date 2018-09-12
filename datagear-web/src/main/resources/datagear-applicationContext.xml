@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+     http://www.springframework.org/schema/aop 
+     http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+     http://www.springframework.org/schema/context 
+     http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+     
+    <bean id="propertyConfigurer"
+    		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    	<property name="location">
+    		<value>/WEB-INF/config/datagear.properties</value>
+    	</property>
+    </bean>
+    
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+    	<property name="basenames">
+    		<list>
+    			<value>locales.datagear</value>
+    		</list>
+    	</property>
+    </bean>
+    
+    <bean id="blobToFilePlaceholderFileContent" class="org.datagear.web.util.DirectoryFactory.FileContent">
+    	<property name="name" value="[BLOB]" />
+		<property name="content" value="BLOB-PLACEHOLDER" />
+		<property name="encoding" value="UTF-8" />
+    </bean>
+    
+    <bean id="blobFileManagerDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
+    	<property name="directoryName" value="${directory.blob}" />
+    	<property name="initFileContents">
+    		<list>
+    			<ref bean="blobToFilePlaceholderFileContent" />
+    		</list>
+    	</property>
+    </bean>
+    <bean id="blobFileManagerDirectory" factory-bean="blobFileManagerDirectoryFactory" factory-method="getDirectory" />
+    
+    <bean id="blobToFilePlaceholderName" factory-bean="blobToFilePlaceholderFileContent" factory-method="getName" />
+    
+    <bean id="driverEntityManagerRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
+    	<property name="directoryName" value="${directory.driver}" />
+    </bean>
+    <bean id="driverEntityManagerRootDirectory" factory-bean="driverEntityManagerRootDirectoryFactory" factory-method="getDirectory" />
+    
+    <bean id="derbyRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
+    	<property name="directoryName" value="${directory.derby}" />
+    	<property name="createIfInexistence" value="false" />
+    </bean>
+    
+    <bean id="schemaUrlBuilderResourceDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
+    	<property name="directoryName" value="${directory.url_builder}" />
+    </bean>
+    <bean id="schemaUrlBuilderResourceDirectory" factory-bean="schemaUrlBuilderResourceDirectoryFactory" factory-method="getDirectory" />
+    
+    <bean id="tempDriverLibraryRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
+    	<property name="directoryName" value="${directory.temp.driverEntity}" />
+    </bean>
+    <bean id="tempDriverLibraryRootDirectory" factory-bean="tempDriverLibraryRootDirectoryFactory" factory-method="getDirectory" />
+    
+    <bean id="dataSource"
+    		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName">
+			<value>org.apache.derby.jdbc.EmbeddedDriver</value>
+		</property>
+		<property name="url">
+			<value>jdbc:derby:#{derbyRootDirectoryFactory.getDirectoryAbsolutePath()};create=true</value>
+		</property>
+		<!--
+		<property name="username">
+			<value></value>
+		</property>
+		<property name="password">
+			<value></value>
+		</property>
+		-->
+    </bean>
+    
+    <bean id="dbVersionManager" class="org.datagear.management.dbversion.DbVersionManager" init-method="upgrade">
+    	<property name="dataSource" ref="dataSource" />
+    </bean>
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath*:org/datagear/management/mapper/*.xml" />
+	</bean>
+	
+	<bean id="databaseInfoResolver" class="org.datagear.dbinfo.GenericDatabaseInfoResolver">
+		<property name="devotedDatabaseInfoResolvers">
+			<list>
+				<bean class="org.datagear.dbinfo.WildcardDevotedDatabaseInfoResolver" />
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="driverEntityManager" class="org.datagear.connection.XmlDriverEntityManager">
+		<constructor-arg ref="driverEntityManagerRootDirectory" />
+	</bean>
+	
+	<bean id="xmlDriverEntityManagerInitializer" class="org.datagear.web.util.XmlDriverEntityManagerInitializer" init-method="init" depends-on="driverEntityManager">
+		<property name="xmlDriverEntityManager" ref="driverEntityManager" />
+	</bean>
+	
+	<bean id="connectionSource" class="org.datagear.connection.DefaultConnectionSource">
+		<property name="driverEntityManager" ref="driverEntityManager" />
+		<property name="driverChecker">
+			<bean class="org.datagear.web.util.SqlDriverChecker">
+				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="primitiveModelSource" class="org.datagear.dbmodel.DatabasePrimitiveModelSource" />
+	<bean id="primitiveModelResolver" class="org.datagear.dbmodel.TypeMapPrimitiveModelResolver">
+		<property name="primitiveModelSource" ref="primitiveModelSource" />
+	</bean>
+	
+	<bean id="columnConverterResolver" class="org.datagear.dbmodel.TypeMapColumnConverterResolver">
+		<property name="literalColumnConverterMap">
+			<map>
+				<entry key="BINARY">
+					<bean class="org.datagear.persistence.columnconverter.BytesColumnConverter">
+						<property name="directory" ref="blobFileManagerDirectory" />
+					</bean>
+				</entry>
+				<entry key="BLOB">
+					<bean class="org.datagear.persistence.columnconverter.BlobColumnConverter">
+						<property name="directory" ref="blobFileManagerDirectory" />
+					</bean>
+				</entry>
+				<entry key="CLOB">
+					<bean class="org.datagear.persistence.columnconverter.ClobColumnConverter">
+						<property name="directory" ref="blobFileManagerDirectory" />
+					</bean>
+				</entry>
+				<entry key="LONGNVARCHAR">
+					<bean class="org.datagear.persistence.columnconverter.StringColumnConverter">
+						<property name="directory" ref="blobFileManagerDirectory" />
+					</bean>
+				</entry>
+				<entry key="LONGVARBINARY">
+					<bean class="org.datagear.persistence.columnconverter.BytesColumnConverter">
+						<property name="directory" ref="blobFileManagerDirectory" />
+					</bean>
+				</entry>
+				<entry key="LONGVARCHAR">
+					<bean class="org.datagear.persistence.columnconverter.StringColumnConverter">
+						<property name="directory" ref="blobFileManagerDirectory" />
+					</bean>
+				</entry>
+				<entry key="NCLOB">
+					<bean class="org.datagear.persistence.columnconverter.ClobColumnConverter">
+						<property name="directory" ref="blobFileManagerDirectory" />
+					</bean>
+				</entry>
+				<entry key="VARBINARY">
+					<bean class="org.datagear.persistence.columnconverter.BytesColumnConverter">
+						<property name="directory" ref="blobFileManagerDirectory" />
+					</bean>
+				</entry>
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="databaseModelResolver" class="org.datagear.dbmodel.GenericDatabaseModelResolver">
+		<property name="devotedDatabaseModelResolvers">
+			<list>
+				<bean class="org.datagear.dbmodel.WildcardDevotedDatabaseModelResolver">
+					<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+					<property name="primitiveModelResolver" ref="primitiveModelResolver" />
+					<property name="columnConverterResolver" ref="columnConverterResolver" />
+					<property name="conversionService" ref="conversionService" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="cachedDbModelFactory" class="org.datagear.web.util.CachedDbModelFactoryImpl" init-method="init">
+		<property name="databaseModelResolver" ref="databaseModelResolver" />
+	</bean>
+	
+	<bean id="dialectSource" class="org.datagear.persistence.support.DefaultDialectSource">
+		<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+		<property name="dialectBuilders">
+			<list>
+				<bean class="org.datagear.persistence.support.dialect.MysqlDialectBuilder" />
+				<bean class="org.datagear.persistence.support.dialect.OracleDialectBuilder" />
+				<bean class="org.datagear.persistence.support.dialect.SqlServerDialectBuilder" />
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="selectOptions" class="org.datagear.persistence.support.SelectOptions" />
+	
+	<bean id="persistenceManager" class="org.datagear.persistence.support.DefaultPersistenceManager">
+		<property name="dialectSource" ref="dialectSource" />
+		<property name="conversionService" ref="conversionService" />
+		<property name="selectPersistenceOperation">
+			<bean class="org.datagear.persistence.support.SelectPersistenceOperation">
+				<property name="selectOptions" ref="selectOptions" />
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="schemaService" class="org.datagear.management.service.impl.SchemaServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<property name="driverEntityManager" ref='driverEntityManager' />
+		<property name="schemaCache">
+			<bean class="org.datagear.web.util.SchemaCacheImpl" />
+		</property>
+	</bean>
+	
+	<bean id="passwordEncoder" class="org.springframework.security.crypto.password.StandardPasswordEncoder" />
+	
+	<bean id="userPasswordEncoder" class="org.datagear.web.security.UserPasswordEncoderImpl">
+		<property name="passwordEncoder" ref="passwordEncoder" />
+	</bean>
+    
+	<bean id="userService" class="org.datagear.management.service.impl.UserServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<property name="userPasswordEncoder" ref="userPasswordEncoder" />
+	</bean>
+	
+	<bean id="globalSettingService" class="org.datagear.management.service.impl.GlobalSettingServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<property name="smtpSettingPasswordEncryptor">
+			<bean class="org.datagear.web.security.SmtpSettingPasswordEncryptorImpl" />
+		</property>
+	</bean>
+	
+	<bean id="resetPasswordRequestService" class="org.datagear.management.service.impl.ResetPasswordRequestServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<property name="userPasswordEncoder" ref="userPasswordEncoder" />
+	</bean>
+	
+	<bean id="resetPasswordRequestConfig" class="org.datagear.web.ResetPasswordRequestConfig">
+		<property name="handleDelayHours" value="${resetPasswordRequestDelayHours}" />
+		<property name="historyRetainDays" value="${resetPasswordRequestHistoryRetainDays}" />
+	</bean>
+	
+	<bean id="resetPasswordRequestHistoryService" class="org.datagear.management.service.impl.ResetPasswordRequestHistoryServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="sqlDateFormatter" class="org.datagear.web.format.SqlDateFormatter" />
+	<bean id="sqlTimeFormatter" class="org.datagear.web.format.SqlTimeFormatter" />
+	<bean id="sqlTimestampFormatter" class="org.datagear.web.format.SqlTimestampFormatter" />
+	<bean id="dateFormatter" class="org.datagear.web.format.DateFormatter" />
+    
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+    	<property name="converters">
+    		<set>
+    			<bean class="org.datagear.web.convert.StringToFileConverter">
+    				<property name="directory" ref="blobFileManagerDirectory" />
+    			</bean>
+    		</set>
+    	</property>
+    	<property name="formatters">
+    		<set>
+    			<ref bean="sqlDateFormatter" />
+    			<ref bean="sqlTimeFormatter" />
+    			<ref bean="sqlTimestampFormatter" />
+    			<ref bean="dateFormatter" />
+    		</set>
+    	</property>
+    </bean>
+    
+    <bean id ="modelDataConverter" class="org.datagear.web.convert.ModelDataConverter">
+		<property name="conversionService" ref="conversionService" />
+	</bean>
+	
+    <bean id ="classDataConverter" class="org.datagear.web.convert.ClassDataConverter">
+		<property name="conversionService" ref="conversionService" />
+	</bean>
+	
+	<bean id="fileSerializer" class="org.datagear.web.json.fastjson.FileSerializer">
+		<property name="directory" ref="blobFileManagerDirectory" />
+		<property name="deleteHeadSeparator" value="true" />
+	</bean>
+	<bean id="fastJsonConfigFactory" class="org.datagear.web.json.fastjson.FastJsonConfigFactory">
+		<property name="objectSerializerStringMap">
+			<map>
+				<entry key="java.io.File" value-ref="fileSerializer" />
+			</map>
+		</property>
+	</bean>
+	<bean id="serializeConfig" factory-bean="fastJsonConfigFactory" factory-method="getSerializeConfig" />
+	<bean id="fastJsonConfig" factory-bean="fastJsonConfigFactory" factory-method="getFastJsonConfig" />
+	<bean id="serializerFeatures" factory-bean="fastJsonConfigFactory" factory-method="getSerializerFeatures" />
+	
+	<!-- 定时任务开始 -->
+	
+	<!-- 删除过期的BLOB文件 -->
+	<bean id="deleteExpiredFileJob" class="org.datagear.web.scheduling.DeleteExpiredFileJob">
+		<property name="directory" ref="blobFileManagerDirectory" />
+		<property name="ignoreFileName" ref="blobToFilePlaceholderName" />
+		<property name="expireThresholdMinutes" value="1440" />
+	</bean>
+	<bean id="deleteExpiredFileJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="deleteExpiredFileJob" />
+		<property name="targetMethod" value="delete" />
+	</bean>
+	<bean id="deleteExpiredFileJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="deleteExpiredFileJobDetail" />
+		<property name="cronExpression" value="0 0 1 * * ?" /><!-- 每天凌晨1点 -->
+	</bean>
+	
+	<!-- 处理重置密码请求 -->
+	<bean id="handleResetPasswordRequestJob" class="org.datagear.web.scheduling.HandleResetPasswordRequestJob">
+		<property name="resetPasswordRequestService" ref="resetPasswordRequestService" />
+		<property name="resetPasswordRequestConfig" ref="resetPasswordRequestConfig" />
+		<property name="userService" ref="userService" />
+		<property name="resetPasswordRequestHistoryService" ref="resetPasswordRequestHistoryService" />
+	</bean>
+	<bean id="handleResetPasswordRequestJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="handleResetPasswordRequestJob" />
+		<property name="targetMethod" value="handle" />
+	</bean>
+	<bean id="handleResetPasswordRequestJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="handleResetPasswordRequestJobDetail" />
+		<property name="cronExpression" value="0 * * * * ?" /><!-- 每分钟 -->
+	</bean>
+	
+	<!-- 删除过期的重置密码请求历史数据 -->
+	<bean id="deleteExpiredResetPasswordRequestHistoryJob" class="org.datagear.web.scheduling.DeleteExpiredResetPasswordRequestHistoryJob">
+		<property name="resetPasswordRequestConfig" ref="resetPasswordRequestConfig" />
+		<property name="resetPasswordRequestHistoryService" ref="resetPasswordRequestHistoryService" />
+	</bean>
+	<bean id="deleteExpiredResetPasswordRequestHistoryJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="deleteExpiredResetPasswordRequestHistoryJob" />
+		<property name="targetMethod" value="delete" />
+	</bean>
+	<bean id="deleteExpiredResetPasswordRequestHistoryJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="deleteExpiredResetPasswordRequestHistoryJobDetail" />
+		<property name="cronExpression" value="0 0 2 * * ?" /><!-- 每天凌晨2点 -->
+	</bean>
+	
+	<!-- 删除临时驱动程序文件 -->
+	<bean id="deleteTempDriverLibraryFileJob" class="org.datagear.web.scheduling.DeleteExpiredFileJob">
+		<property name="directory" ref="tempDriverLibraryRootDirectory" />
+		<property name="expireThresholdMinutes" value="600" />
+	</bean>
+	<bean id="deleteTempDriverLibraryFileJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="deleteTempDriverLibraryFileJob" />
+		<property name="targetMethod" value="delete" />
+	</bean>
+	<bean id="deleteTempDriverLibraryFileJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="deleteTempDriverLibraryFileJobDetail" />
+		<property name="cronExpression" value="0 0 1 * * ?" /><!-- 每天凌晨1点 -->
+	</bean>
+	
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="deleteExpiredFileJobCronTrigger" />
+				<ref bean="handleResetPasswordRequestJobCronTrigger" />
+				<ref bean="deleteExpiredResetPasswordRequestHistoryJobCronTrigger" />
+				<ref bean="deleteTempDriverLibraryFileJobCronTrigger" />
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 定时任务结束 -->
+	
+</beans>

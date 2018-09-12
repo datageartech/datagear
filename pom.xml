@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.datagear</groupId>
+	<artifactId>datagear</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>datagear</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compile.source>1.6</maven.compile.source>
+		<maven.compile.target>1.6</maven.compile.target>
+		<junit.version>4.11</junit.version>
+		<spring.version>3.2.3.RELEASE</spring.version>
+		<slf4j.version>1.7.9</slf4j.version>
+		<slf4j-log4j12.version>1.7.9</slf4j-log4j12.version>
+		<log4j.version>1.2.17</log4j.version>
+	</properties>
+	
+	<modules>
+		<module>datagear-model</module>
+		<module>datagear-connection</module>
+		<module>datagear-dbinfo</module>
+		<module>datagear-persistence</module>
+		<module>datagear-dbmodel</module>
+		<module>datagear-management</module>
+		<module>datagear-web</module>
+    	<module>datagear-webembd</module>
+	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>${maven.compile.source}</source>
+					<target>${maven.compile.target}</target>
+				</configuration>
+				<executions>
+					<execution>
+						<id>compile-tests</id>
+						<phase>process-test-sources</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+						<configuration>
+							<source>${maven.compile.source}</source>
+							<target>${maven.compile.target}</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

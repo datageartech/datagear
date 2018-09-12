@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.GlobalSetting">
+
+	<insert id="insert">
+		INSERT INTO DATAGEAR_GLOBALSETTING
+			(
+			SETTING_ID, SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_CONNECTION_TYPE, SMTP_SYSTEM_EMAIL
+			)
+		VALUES
+			(
+			'GLOBAL_SETTING_ID',
+			#{entity.smtpSetting.host}, #{entity.smtpSetting.port}, #{entity.smtpSetting.username}, 
+			#{entity.smtpSetting.password}, #{entity.smtpSetting.connectionType}, #{entity.smtpSetting.systemEmail}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE DATAGEAR_GLOBALSETTING SET
+			SMTP_HOST = #{entity.smtpSetting.host},
+			SMTP_PORT = #{entity.smtpSetting.port},
+			SMTP_USERNAME = #{entity.smtpSetting.username},
+			<if test="entity.smtpSetting.password != null and entity.smtpSetting.password != ''">
+			SMTP_PASSWORD = #{entity.smtpSetting.password},
+			</if>
+			SMTP_CONNECTION_TYPE = #{entity.smtpSetting.connectionType},
+			SMTP_SYSTEM_EMAIL = #{entity.smtpSetting.systemEmail}
+		WHERE
+			SETTING_ID = 'GLOBAL_SETTING_ID'
+	</update>
+	
+	<select id="get" resultType="org.datagear.management.domain.GlobalSetting">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+	</select>
+	
+	<sql id="queryView">
+		SELECT
+			A.SMTP_HOST AS ${_iq_}smtpSetting.host${_iq_},
+			A.SMTP_PORT AS ${_iq_}smtpSetting.port${_iq_},
+			A.SMTP_USERNAME AS ${_iq_}smtpSetting.username${_iq_},
+			A.SMTP_PASSWORD AS ${_iq_}smtpSetting.password${_iq_},
+			A.SMTP_CONNECTION_TYPE AS ${_iq_}smtpSetting.connectionType${_iq_},
+			A.SMTP_SYSTEM_EMAIL AS ${_iq_}smtpSetting.systemEmail${_iq_}
+		FROM
+			DATAGEAR_GLOBALSETTING A
+		WHERE
+			A.SETTING_ID = 'GLOBAL_SETTING_ID'
+	</sql>
+</mapper>

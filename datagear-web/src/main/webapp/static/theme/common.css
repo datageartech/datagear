@@ -1,0 +1,807 @@
+/*
+ * Copyright (c) 2018 by datagear.org.
+ */
+
+@CHARSET "UTF-8";
+
+body{
+	margin: 0;
+	padding: 0;
+}
+.small-text{
+	font-size:small;
+}
+
+a.link,
+a.link:link,
+a.link:visited,
+a.link:active{
+	color: #333333;
+	text-decoration: none;
+}
+a.link:hover{
+	color: #003eff;
+	text-decoration: none;
+}
+
+/*表单*/
+form{}
+form .form-head{}
+form .form-content{}
+form .form-content .form-item{
+	padding: .3em .3em;
+	display: table;
+}
+form .form-content .form-item .form-item-label{
+	display: table-cell;
+	vertical-align: middle;
+}
+form .form-content .form-item .form-item-label label{
+	display: inline-block;
+	width: 10em;
+	white-space: nowrap;
+	overflow: hidden;
+}
+form .form-content .form-item .form-item-value{
+	display: table-cell;
+	vertical-align: middle;
+	padding-left: 0.2em;
+}
+form .form-content .form-item .form-item-value input[type=text],
+form .form-content .form-item .form-item-value input[type=password],
+form .form-content .form-item .form-item-value textarea{
+	margin-right: 0.3em;/*文本框与后面按钮间距*/
+	width: 15em;
+}
+form .form-content .form-item .form-item-value input[type=text],
+form .form-content .form-item .form-item-value input[type=password]{
+	height: 1.5em;
+}
+form .form-content .form-item .form-item-value textarea{
+	width: 20em;
+	height: 3em;
+}
+form .form-content .form-item .form-item-value .file-input-show{/*文件展示文本*/
+}
+form .form-content .form-item .form-item-value .file-info{/*展示上传文件信息元素*/
+	display: inline-block;
+	margin-left: 0.5em;
+}
+form .form-content .form-item .form-item-value .file-info .file-name{
+	display: inline-block;
+}
+form .form-content .form-item .form-item-value .file-info .file-size{
+	display: inline-block;
+	margin-left: 0.3em;
+}
+form .form-content .form-item .form-item-value .file-info .upload-percent{
+	display: inline-block;
+	margin-left: 0.5em;
+}
+form .form-content .form-item .form-item-value .file-info .file-delete{
+	margin-left: 0.5em;
+	cursor: pointer;
+}
+form .form-content .form-item label.error{
+	color: red;
+	display: table-cell;
+	vertical-align: middle;
+	padding-left: 0.2em;
+}
+form .form-content .form-item .form-item-value input[type=text].error,
+form .form-content .form-item .form-item-value input[type=password].error,
+form .form-content .form-item .form-item-value textarea.error{
+	border: 1px solid red;
+}
+form .form-content .form-item .input-desc{
+	display: inline-block;
+	color: #BBB;
+}
+form .form-content .form-item .input-desc-date{
+	
+}
+form .form-foot{
+	padding-top: .5em;
+	text-align: center;
+}
+form .form-foot .ui-button{
+	margin-left: .5em;
+	margin-right: .5em;
+}
+
+/*首选操作按钮*/
+.ui-button.recommended{
+	border: 1px solid #0066ff;
+	background-color: #4a97ff;
+	color: #ffffff;
+}
+.ui-button.recommended:hover, .ui-button.recommended:focus{
+	border: 1px solid #0066ff;
+	background-color: #338aff;
+	color: #ffffff;
+}
+.ui-button.recommended:active{
+	border: 1px solid #003eff;
+	background-color: #007FFF;
+	color: #ffffff;
+}
+
+/*对话框*/
+.ui-dialog .dialog-titlebar-pin{
+	position: absolute;
+    right: 2.0em;
+    top: 50%;
+    width: 20px;
+    margin: -10px 0 0 0;
+    padding: 1px;
+    height: 20px;
+}
+/*可保持ui-state-active状态组件样式，默认图标是灰色，这了改成白色*/
+.stated-active.ui-state-active .ui-icon, .stated-active.ui-state-active:focus .ui-icon, .stated-active.ui-state-active:hover .ui-icon{
+    background-image: url(default/jquery-ui-1.12.1/images/ui-icons_ffffff_256x240.png);
+}
+
+/*jquery-ui*/
+.ui-menu .ui-menu-item-wrapper{
+	padding: .4em 1em;/*菜单条目扩大*/
+}
+.ui-controlgroup.ui-controlgroup-horizontal{
+	padding-left: 1px;/*横向边框重叠*/
+}
+.ui-controlgroup.ui-controlgroup-horizontal .ui-controlgroup-item{
+	margin-left: -1px;/*横向边框重叠*/
+}
+.ui-controlgroup .ui-button-icon-only{
+	width: 1em;/*减小图标宽度*/
+}
+.ui-controlgroup .ui-button-icon-only .ui-icon{
+	top: 30%;/*图标按钮，上下居中*/
+}
+.ui-tabs .ui-tabs-panel{
+	padding: 0.8em 0.9em;
+}
+/*jquery.layout*/
+.ui-layout-pane{
+	border: 1px solid #c5c5c5;
+}
+.ui-layout-resizer{
+	background-color: #ededed;
+}
+.ui-layout-resizer-open-hover, .ui-layout-resizer-dragging{
+	background: #ededed;
+}
+.ui-layout-resizer-dragging{
+	border-width: 0px;
+}
+.ui-layout-toggler{
+	border-width: 0px;
+}
+.ui-layout-toggler-hover, .ui-layout-resizer-hover .ui-layout-toggler-hover{
+	/*background-color: #007fff;*/
+}
+
+/*jstree*/
+/*将jstree图标改为jquery-ui*/
+.jstree-default .jstree-node,
+.jstree-default .jstree-initial-node{
+	margin-top: 2px;
+	position: relative;
+}
+.jstree-default .jstree-hovered,
+.jstree-default .jstree-clicked, .jstree-default .jstree-clicked.jstree-hovered{
+	border-radius: 3px;
+}
+.jstree-default .jstree-anchor{
+	padding: 0.2em 0.3em 0.2em 0.1em;
+	margin-left: 28px;
+	line-height: 1.6em;
+	height: 1.6em;
+	position: relative;
+}
+.jstree-default .jstree-icon:empty, .jstree-default .jstree-icon{
+	width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+    overflow: hidden;
+    background-repeat: no-repeat;
+}
+ .jstree-default .jstree-node > .jstree-icon{
+    position: absolute;
+    top: 1em;
+    margin-top: -8px;
+    margin-left: 0.3em;
+ }
+.jstree-default .jstree-anchor > .jstree-icon{
+	margin-left: 0;
+}
+.jstree-default > .jstree-no-dots .jstree-closed > .jstree-ocl{
+	background-position: -32px -16px;
+}
+.jstree-default > .jstree-no-dots .jstree-open > .jstree-ocl{
+	background-position: -48px -16px;
+}
+.jstree-default > .jstree-no-dots .jstree-loading > .jstree-ocl{
+	background-position: -176px -64px;
+}
+.jstree-default .jstree-themeicon{
+	background-position: 0 -96px;
+}
+.jstree-default .jstree-leaf .jstree-themeicon{
+	background-position: -32px -96px;
+}
+.jstree-default .jstree-anchor > .jstree-themeicon-hidden{
+	background-image: none;
+}
+
+/*Datatables*/
+.dataTable th, .dataTable tr {   
+    white-space: nowrap !important;  
+}
+.dataTables_wrapper .ui-toolbar{
+	display: none;
+}
+table.dataTable.no-footer{
+	border-bottom: none;
+}
+.dataTable thead .property-name-token{
+	font-weight: bold;
+}
+
+/*提示框*/
+.ui-tooltip{
+	max-width: unset;/*取消宽度限制*/
+}
+.ui-tooltip .ui-tooltip-content a{
+	font-weight: bold;
+	margin-left: 0.3em;
+	margin-right: 0.3em;
+}
+.ui-tooltip .ui-tooltip-content .error-detail-icon{
+	cursor: pointer;
+}
+
+/*错误消息对话框*/
+.error-dialog{
+}
+.error-dialog .error-content{
+	display: inline-block;
+	width: 100%;
+	height: 99%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	overflow: auto;
+}
+.error-dialog .error-content pre{
+	margin: 0;
+}
+
+/*确认对话框*/
+.dialog-confirm{}
+.dialog-confirm .ui-icon-alert{
+	margin-right: 0.5em;
+}
+.dialog-confirm .confirm-content{
+	display: inline-block;
+}
+
+/**轻型菜单，初始只有图标*/
+.lightweight-menu,
+.ui-menu.lightweight-menu{
+	list-style: none;
+	display: inline-block;
+	border: 0;
+	padding: 0;
+    margin: 0;
+    outline: 0;
+    background: none;
+}
+.lightweight-menu li,
+.ui-menu.lightweight-menu li{
+	white-space: nowrap;
+}
+.lightweight-menu > li,
+.ui-menu.lightweight-menu > li{
+	display: inline-block;
+	padding: 0 0;
+	margin: 0 0;
+}
+.lightweight-menu li a,
+.ui-menu.lightweight-menu li a{
+	text-decoration: none;
+    width: 100%;
+    text-align: left;
+}
+.lightweight-menu > li .ui-menu-item-wrapper,
+.ui-menu.lightweight-menu > li .ui-menu-item-wrapper{
+	display: inline-block;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.lightweight-menu > li > .ui-menu-item-wrapper,
+.ui-menu.lightweight-menu > li > .ui-menu-item-wrapper{
+	display: inline-block;
+	margin: 0 0;
+	padding: 0 0;
+}
+.lightweight-menu > li .ui-menu-item-wrapper .ui-menu-icon,
+.ui-menu.lightweight-menu > li .ui-menu-item-wrapper .ui-menu-icon{
+	display: none;
+}
+
+/*登录页*/
+.page-data-form-login form .form-item .form-item-label label{
+	width: 8em;
+}
+.page-data-form-login form .form-item .form-item-value input[type='text'],
+.page-data-form-login form .form-item .form-item-value input[type='password']{
+	width:10em;
+}
+
+/*注册页*/
+.page-data-form-register form .form-item .form-item-label label{
+	width: 8em;
+}
+.page-data-form-register form .form-item .form-item-value input[type='text'],
+.page-data-form-register form .form-item .form-item-value input[type='password']{
+	width:10em;
+}
+
+.page-register-success .register-success-content{
+	margin-top: 5em;
+	text-align: center;
+	font-size: large;
+}
+.page-register-success .register-success-content a{
+	margin: 0 0.3em;
+	font-weight: bold;
+}
+
+/*主页*/
+.ui-layout-pane{
+}
+.ui-layout-west.ui-layout-pane{
+	padding: 1px 1px;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.main-page-head{
+	display: inline-block;
+	width: 100%;
+	height: 1.6em;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.main-page-head .toolbar{
+	float: right;
+	text-align: right;
+	vertical-align: middle;
+	margin-right: 0.2em;
+}
+/**系统设置图标*/
+.main-page-head .toolbar #systemSetMenu{
+	float:left;
+	margin-right: 0.5em;
+}
+.main-page-head .toolbar #systemSetMenu > li,
+.main-page-head .toolbar #systemSetMenu > li > .ui-menu-item-wrapper{
+	width: 1.3em;
+	height: 1.3em;
+}
+.main-page-head .toolbar #systemSetMenu > li > .ui-menu-item-wrapper .ui-icon{
+	left: 0px;
+}
+.main-page-head .toolbar #systemSetMenu .theme-sample{
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	vertical-align: middle;
+	margin-left: 0.5em;
+}
+.main-page-head .toolbar #systemSetMenu .theme-sample-lightness{
+	background: #FFFFFF;
+}
+.main-page-head .toolbar #systemSetMenu .theme-sample-dark{
+	background: #000000;
+}
+.main-page-head .toolbar #systemSetMenu .theme-sample-green{
+	background: #285c00;
+}
+.main-page-head .toolbar .user-name{
+	display: inline-block;
+	font-weight: bold;
+}
+.main-page-head .toolbar .link{
+	margin-left: 0.5em;
+}
+.main-page-content{
+	position: absolute;
+	top: 1.6em;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+}
+.main-page-content .schema-panel{
+	display: inline-block;
+	width: 100%;
+	height: 100%;
+	border: none;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.main-page-content .schema-panel .schema-panel-head{
+	display: inline-block;
+	width: 100%;
+	height: 2.5em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding-top: 0.3em;
+	vertical-align: middle;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-title{
+	vertical-align: middle;
+    white-space: nowrap;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation{
+	text-align: right;
+	vertical-align: middle;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search{
+	display: inline-block;
+	margin-right: 0.3em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search input[type='text']{
+	border: 0;
+	width: 4em;
+	height: 1.4em;
+	padding: 0 0;
+	margin-left: 1px;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button{
+	border: 0px;
+	width: 1em;
+	height: 1.4em;
+	margin: 0 0;
+	padding-left: 0.6em;
+	padding-right: 0.6em;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button .ui-icon{
+	opacity: 0.6;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .add-schema-button{
+	border: 0px;
+	height: 1.5em;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu{
+	float: right;
+	margin-right: 0.1em;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li > .ui-menu-item-wrapper{
+	width: 1.5em;
+	height: 1.6em;
+	margin-top: 0.1em;
+}
+.main-page-content .schema-panel .schema-panel-content{
+	position: absolute;
+    display: block;
+    top: 2.5em;
+    bottom: 0em;
+    left: 0em;
+    right: 0em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding-top: 0.2em;
+	overflow-x: auto;
+	overflow-y: auto;
+}
+/*树结构中的更多表节点*/
+.main-page-content .schema-panel .schema-panel-content .more-table{
+	font-weight: bold;
+	font-style: italic;
+}
+.main-page-content .main-tabs{
+    position: absolute;
+    display: block;
+    top: 0.5em;
+    bottom: 0.5em;
+    left: 0.5em;
+    right: 0.5em;
+}
+.main-page-content .main-tabs .ui-tabs-nav{
+	height: 2.3em;
+	overflow: hidden;
+	padding-right: 25px;
+}
+.main-page-content .main-tabs .tab-show-hidden{
+	position: absolute;
+	top: 1em;
+	right: 6px;
+	cursor: pointer;
+	width: 16px;
+    height: 16px;
+    border: none;
+    padding: 0 0;
+}
+.main-page-content .main-tabs .tab-operation{
+	display: inline-block;
+	width: 16px;
+}
+.main-page-content .main-tabs .tab-operation .tab-operation-more{
+	float: left;
+	text-align: center;
+	cursor: pointer;
+	width: 16px;
+	height: 16px;
+}
+.main-page-content .main-tabs .ui-tabs-nav .ui-tabs-anchor{
+}
+.main-page-content .main-tabs .ui-tabs-nav .ui-icon{
+	cursor: pointer;
+}
+.main-page-content .main-tabs .ui-tabs-nav .category-bar{
+    position:  absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    border: none;
+}
+.main-page-content .main-tabs .ui-tabs-panel{
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+}
+.main-page-content .tab-more-operation-menu.ui-menu,
+.main-page-content .tab-more-tab-menu.ui-menu{
+	padding: 0.2em 0.2em;
+}
+.main-page-content .tab-more-operation-menu.ui-menu .ui-menu-item,
+.main-page-content .tab-more-tab-menu.ui-menu .ui-menu-item{
+	font-size: small;
+}
+
+/*驱动信息管理表单页*/
+.page-data-form-driverEntity{
+}
+.page-data-form-driverEntity .driver-files{
+	display: inline-block;
+	width: 20em;
+	height: 8em;
+	overflow: auto;
+	padding: 3px 2px;
+}
+.page-data-form-driverEntity .driver-files .driver-file{
+	margin-bottom: 5px;
+	padding: 2px 2px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.page-data-form-driverEntity .driver-files .driver-file .driver-file-icon{
+	cursor: pointer;
+	margin-right: 0.2em;
+}
+.page-data-form-driverEntity .driver-files .driver-file .driver-file-info{
+	white-space: nowrap;
+	overflow: hidden;
+}
+.page-data-form-driverEntity .driver-upload-parent{
+	display: inline-block;
+	float: right;
+	margin-left: 0.2em;
+}
+/*驱动程序导入表单页*/
+.page-data-form-driverEntityImport{
+}
+.page-data-form-driverEntityImport .driver-entity-infos{
+	display: inline-block;
+	width: 30em;
+	height: 15em;
+	overflow: auto;
+	padding: 3px 2px;
+}
+.page-data-form-driverEntityImport .driver-entity-infos .driver-entity-item{
+	margin-bottom: 5px;
+	padding: 2px 2px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.page-data-form-driverEntityImport .driver-entity-infos .driver-entity-item .ui-icon-close{
+	cursor: pointer;
+	margin-right: 0.2em;
+}
+.page-data-form-driverEntityImport .driver-entity-infos .driver-entity-item .driver-entity-info{
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+/*表单页*/
+.page-data-form{
+}
+
+/*查询表单*/
+.search-form{
+}
+.search-form .keyword-widget{
+	display: inline-block;
+	margin-left: 0.1em;
+}
+.search-form .keyword-widget .like-switch-icon{
+	width: 12px;
+	margin-left: -3px;
+	cursor: pointer;
+}
+.search-form .keyword-widget .input-keyword{
+	width: 15em;
+	height: 1.8em;
+	margin-left: 2px;
+	border: none;
+}
+.search-form .search-condition-icon-parent{
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+}
+.search-form .search-condition-icon{
+}
+.search-form .search-condition-icon-tip{
+	position: absolute;
+	display: none;
+	left: 0px;
+	top: 7px;
+}
+.search-form .condition-panel-parent{
+	position: relative;
+}
+.search-form .condition-panel-parent .condition-panel{
+	position: absolute;
+	z-index: 2;
+	display: none;
+	margin-left: 0.1em;
+	padding: 0.2em 0.2em;
+}
+.search-form .condition-panel-parent .condition-panel .condition-panel-title-bar{
+	text-align: right;
+	height: 16px;
+	cursor: move;
+}
+.search-form .condition-panel-parent .condition-panel .ui-icon{
+	margin: 0 0;
+	cursor: pointer;
+}
+.search-form .condition-panel-parent .condition-panel .condition-parent{
+	position: relative;
+}
+.search-form .condition-panel-parent .condition-panel .condition-parent textarea{
+	width: 25em;
+	height: 6em;
+	position: relative;
+	margin-top: 2px;
+	border-width: 0;
+	border-bottom-width: 1px;
+	/*resize: none;*/
+}
+.search-form .condition-panel-parent .condition-panel .condition-action{
+	height: 16px;
+	font-size: 8px;
+}
+.search-form .condition-panel-parent .condition-panel .condition-panel-submit-icon{
+	float: right;
+}
+.search-form .ui-autocomplete{
+    max-height: 8em;
+    max-width: 20em;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-size: 0.8em;
+}
+
+/*表格页*/
+.page-data-grid{
+	position: relative;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+}
+.page-data-grid .head{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 2.5em;
+	display: inline-block;
+	padding: .25em 0;
+}
+.page-data-grid .head .search{
+	float:left;
+}
+.page-data-grid .head .operation{
+	float: right;
+}
+.page-data-grid .content{
+	position: absolute;
+	width: 100%;
+	top: 3em;
+	bottom: 2em;
+}
+.page-data-grid .content.content-hidden-foot{
+	bottom: 0em;
+}
+.page-data-grid .foot{
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 2em;
+	display: inline-block;
+	padding: 0 0;
+}
+.page-data-grid .foot.hidden-foot{
+	height: 0;
+}
+
+.schema-build-url-form .schema-build-url-dbtype-select.ui-button{
+	width: 13em;
+}
+
+.page-data-form-reset-password{
+	position: absolute;
+	width: auto;
+	left: 9%;
+	right: 9%;
+}
+.page-data-form-reset-password .head{
+	margin-top: 1em;
+	font-size: larger;
+	font-weight: bold;
+	text-align: center;
+}
+.page-data-form-reset-password .content .steps{
+	margin-top: 2em;
+	margin-bottom: 1em;
+}
+.page-data-form-reset-password .content .steps .step{
+	display: inline-block;
+	font-size: larger;
+	width: 18%;
+    margin-right: 2%;
+    padding: 0.5em 2%;
+}
+.page-data-form-reset-password .content .form-content{
+	height: 10em;
+	padding: 2em 3em;
+}
+.page-data-form-reset-password .content .form-foot .ui-button{
+	width: 14em;
+}
+.page-data-form-reset-password .content .form-content .step-finish-content{
+	font-size: large;
+}
+.page-data-form-reset-password .content .form-content .step-finish-content a{
+	margin: 0 0.3em;
+	font-weight: bold;
+}
+.page-data-form-reset-password .content .form-content .skip-check-user-admin-warn{
+	margin-top: 0.2em;
+	padding: 0.3em 0.3em;
+}
+.page-data-form-reset-password .content .form-content .skip-check-user-admin-warn .ui-icon-info{
+	margin-right: 0.3em;
+}
+
+.page-data-form-globalSetting{}
+.page-data-form-globalSetting .global-setting-select.ui-button{
+	width: 13em;
+}

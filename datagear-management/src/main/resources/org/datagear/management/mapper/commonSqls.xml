@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="common">
+	
+	<sql id="pagingQueryHead">
+	</sql>
+	
+	<sql id="pagingQueryFoot">
+		OFFSET ${pagingQueryStartIndex} ROWS FETCH NEXT ${pagingQueryRows} ROWS ONLY
+	</sql>
+	
+	<sql id="queryCondition">
+		<if test="queryCondition != null">
+		AND (${queryCondition})
+		</if>
+	</sql>
+	
+	<sql id="queryOrder">
+		<if test="queryOrder != null">
+		ORDER BY ${queryOrder}
+		</if>
+	</sql>
+</mapper>

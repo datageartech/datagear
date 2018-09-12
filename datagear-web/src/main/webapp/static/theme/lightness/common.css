@@ -1,0 +1,121 @@
+/*
+ * Copyright (c) 2018 by datagear.org.
+ */
+
+@CHARSET "UTF-8";
+
+body{
+	background-color: #ffffff;
+	color: #333333;
+}
+
+a.link,
+a.link:link,
+a.link:visited,
+a.link:active{
+	color: #333333;
+}
+a.link:hover{
+	color: #003eff;
+}
+
+/*表单*/
+form .form-content .form-item label.error{
+	color: red;
+}
+form .form-content .form-item .form-item-value input[type=text].error,
+form .form-content .form-item .form-item-value input[type=password].error,
+form .form-content .form-item .form-item-value textarea.error{
+	border: 1px solid red;
+}
+form .form-content .form-item .input-desc{
+	color: #BBB;
+}
+
+/*首选操作按钮*/
+.ui-button.recommended, .ui-button.recommended:active{
+	border: 1px solid 003eff;
+	background-color: #007FFF;
+	color: #ffffff;
+}
+.ui-button.recommended:hover, .ui-button.recommended:focus{
+	border: 1px solid 003eff;
+	background-color: #0075ea;
+	color: #ffffff;
+}
+
+/*对话框*/
+/*可保持ui-state-active状态组件样式，默认图标是灰色，这了改成白色*/
+.stated-active.ui-state-active .ui-icon, .stated-active.ui-state-active:focus .ui-icon, .stated-active.ui-state-active:hover .ui-icon{
+    background-image: url(jquery-ui-1.12.1/images/ui-icons_ffffff_256x240.png);
+}
+
+/*jquery.layout*/
+.ui-layout-pane{
+	border: 1px solid #c5c5c5;
+	background-color: #FFFFFF;
+	border-top-width: 0px;
+}
+.ui-layout-resizer, .ui-layout-resizer-open-hover, .ui-layout-resizer-dragging{
+	background-color: #ededed;
+}
+.ui-layout-toggler{
+	background-color: #626262;
+}
+.ui-layout-toggler-hover, .ui-layout-resizer-hover .ui-layout-toggler-hover{
+	background-color: #f58400;
+}
+
+/*jstree*/
+.jstree-default .jstree-node{
+	color: #454545;
+}
+.jstree-default .jstree-anchor{
+	border: 1px solid #FFF;
+}
+.jstree-default .jstree-hovered{
+	border: 1px solid #dddddd;
+	background-color: #EDEDED;
+	color: #454545;
+}
+.jstree-default .jstree-clicked, .jstree-default .jstree-clicked.jstree-hovered{
+	border: 1px solid #003eff;
+	background-color: #007fff;
+	color: #ffffff;
+}
+.jstree-default .jstree-icon,
+.jstree-default > .jstree-container-ul .jstree-loading > .jstree-ocl{
+	background-image: url(jquery-ui-1.12.1/images/ui-icons_444444_256x240.png);
+}
+.jstree-default .jstree-clicked .jstree-icon{
+	background-image: url(jquery-ui-1.12.1/images/ui-icons_ffffff_256x240.png);
+}
+
+/*Datatables*/
+table.dataTable tbody tr {
+	background-color: #ffffff;
+}
+table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
+	background-color: #f6f6f6;
+}
+table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
+	background-color: #f2f2f2;
+}
+table.dataTable tbody > tr.selected,
+table.dataTable tbody > tr > .selected,
+
+table.dataTable.stripe tbody > tr.odd.selected,
+table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected,
+table.dataTable.display tbody > tr.odd > .selected,
+
+table.dataTable.hover tbody > tr.selected:hover,
+table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover,
+table.dataTable.display tbody > tr > .selected:hover {
+	background-color: #007FFF;
+	color: #ffffff;
+}
+
+/*主页*/
+.main-page-head{
+	border-bottom: 1px solid #DDDDDD;
+}

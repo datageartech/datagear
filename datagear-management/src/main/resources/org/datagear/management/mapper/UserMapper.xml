@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.User">
+
+	<insert id="insert">
+		INSERT INTO DATAGEAR_USER
+			(
+			USER_ID, USER_NAME, USER_PASSWORD, USER_REAL_NAME, USER_EMAIL, USER_IS_ADMIN, USER_CREATE_TIME
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.name}, #{entity.password}, #{entity.realName}, #{entity.email}, #{entity.admin}, #{entity.createTime}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE DATAGEAR_USER SET
+			USER_NAME = #{entity.name},
+			<if test="entity.password != null and entity.password != ''">
+			USER_PASSWORD = #{entity.password},
+			</if>
+			USER_REAL_NAME = #{entity.realName},
+			USER_EMAIL = #{entity.email},
+			USER_IS_ADMIN = #{entity.admin}
+		WHERE
+			USER_ID = #{entity.id}
+			<if test="OPERATOR != null and OPERATOR.admin != true">
+			AND USER_ID = #{OPERATOR.id}
+			</if>
+	</update>
+	
+	<update id="updatePasswordById">
+		UPDATE DATAGEAR_USER SET
+			USER_PASSWORD = #{password}
+		WHERE
+			USER_ID = #{id}
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM DATAGEAR_USER
+		WHERE
+			USER_ID = #{id}
+			<if test="OPERATOR != null and OPERATOR.admin != true">
+			AND USER_ID = #{OPERATOR.id}
+			</if>
+	</delete>
+	
+	<select id="getById" resultType="org.datagear.management.domain.User">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="getByName" resultType="org.datagear.management.domain.User">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			T.${_iq_}name${_iq_} = #{name}
+	</select>
+	
+	<select id="query" resultType="org.datagear.management.domain.User">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+		<include refid="common.queryOrder" />
+	</select>
+	
+	<sql id="queryView">
+		SELECT
+			A.USER_ID AS ${_iq_}id${_iq_},
+			A.USER_NAME AS ${_iq_}name${_iq_},
+			A.USER_PASSWORD AS ${_iq_}password${_iq_},
+			A.USER_REAL_NAME AS ${_iq_}realName${_iq_},
+			A.USER_EMAIL AS ${_iq_}email${_iq_},
+			A.USER_IS_ADMIN AS ${_iq_}admin${_iq_},
+			A.USER_CREATE_TIME AS ${_iq_}createTime${_iq_}
+		FROM
+			DATAGEAR_USER A
+	</sql>
+	
+	<sql id="queryCondition">
+		1 = 1
+		<if test="queryKeyword != null">
+		AND
+		(
+			${_iq_}name${_iq_} LIKE #{queryKeyword} OR
+			${_iq_}realName${_iq_} LIKE #{queryKeyword}
+		)
+		</if>
+		<include refid="common.queryCondition" />
+	</sql>
+</mapper>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.Schema">
+
+	<insert id="insert">
+		INSERT INTO DATAGEAR_SCHEMA
+			(
+			SCHEMA_ID, SCHEMA_TITLE, SCHEMA_URL, SCHEMA_USER, SCHEMA_PASSWORD,
+			SCHEMA_CREATE_USER_ID, SCHEMA_CREATE_TIME, SCHEMA_SHARED, DRIVER_ENTITY_ID
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.title}, #{entity.url}, #{entity.user}, #{entity.password},
+			#{entity.createUser.id}, #{entity.createTime}, #{entity.shared}, #{entity.driverEntity.id, jdbcType=VARCHAR}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE DATAGEAR_SCHEMA SET
+			SCHEMA_TITLE = #{entity.title},
+			SCHEMA_URL = #{entity.url},
+			SCHEMA_USER = #{entity.user},
+			SCHEMA_PASSWORD = #{entity.password},
+			SCHEMA_SHARED = #{entity.shared},
+			DRIVER_ENTITY_ID = #{entity.driverEntity.id, jdbcType=VARCHAR}
+		WHERE
+			SCHEMA_ID = #{entity.id}
+			<if test="OPERATOR != null and OPERATOR.admin != true">
+			AND SCHEMA_CREATE_USER_ID = #{OPERATOR.id}
+			</if>
+	</update>
+	
+	<update id="updateCreateUserId">
+		UPDATE DATAGEAR_SCHEMA SET
+			SCHEMA_CREATE_USER_ID = #{newUserId}
+		WHERE
+			SCHEMA_CREATE_USER_ID = #{oldUserId}
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM DATAGEAR_SCHEMA
+		WHERE
+			SCHEMA_ID = #{id}
+			<if test="OPERATOR != null and OPERATOR.admin != true">
+			AND SCHEMA_CREATE_USER_ID = #{OPERATOR.id}
+			</if>
+	</delete>
+	
+	<delete id="deleteByUserId">
+		DELETE FROM DATAGEAR_SCHEMA
+		WHERE
+			SCHEMA_CREATE_USER_ID IN
+			<foreach item="item" index="index" collection="userIds" open="(" separator="," close=")">
+			#{item}
+			</foreach>
+	</delete>
+	
+	<select id="getById" resultType="org.datagear.management.domain.Schema">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+			AND T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="query" resultType="org.datagear.management.domain.Schema">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+		<include refid="common.queryOrder" />
+	</select>
+	
+	<sql id="queryView">
+		SELECT
+			A.SCHEMA_ID AS ${_iq_}id${_iq_},
+			A.SCHEMA_TITLE AS ${_iq_}title${_iq_},
+			A.SCHEMA_URL AS ${_iq_}url${_iq_},
+			A.SCHEMA_USER AS ${_iq_}user${_iq_},
+			A.SCHEMA_PASSWORD AS ${_iq_}password${_iq_},
+			A.SCHEMA_CREATE_TIME AS ${_iq_}createTime${_iq_},
+			A.SCHEMA_SHARED AS ${_iq_}shared${_iq_},
+			A.DRIVER_ENTITY_ID AS ${_iq_}driverEntity.id${_iq_},
+			A.SCHEMA_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
+			B.USER_NAME AS ${_iq_}createUser.name${_iq_},
+			(CASE WHEN B.USER_IS_ADMIN IS NULL THEN '0' ELSE B.USER_IS_ADMIN END) AS ${_iq_}createUser.admin${_iq_},
+			(CASE WHEN B.USER_ID IS NULL THEN '1' ELSE '0' END) AS ${_iq_}createUser.anonymous${_iq_},
+			B.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_}
+		FROM
+			DATAGEAR_SCHEMA A
+		LEFT JOIN
+			DATAGEAR_USER B
+		ON
+			A.SCHEMA_CREATE_USER_ID = B.USER_ID
+	</sql>
+	
+	<sql id="queryCondition">
+		1 = 1
+		<if test="queryKeyword != null">
+		AND
+		(
+			${_iq_}title${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}SCHEMA_URL${_iq_} LIKE #{queryKeyword}
+		)
+		</if>
+		<if test="OPERATOR != null and OPERATOR.admin != true">
+		AND (T.${_iq_}createUser.id${_iq_} = #{OPERATOR.id} OR T.${_iq_}shared${_iq_} = 'true')
+		</if>
+		<include refid="common.queryCondition" />
+	</sql>
+</mapper>

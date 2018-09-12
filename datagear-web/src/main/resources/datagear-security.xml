@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security-3.2.xsd
+		http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+	
+	<http pattern="/static/*" security="none" />
+	<http pattern="/login" security="none" />
+	<http pattern="/register/*" security="none" />
+	<http pattern="/resetPassword/*" security="none" />
+	<http pattern="/resetPasswordRequestHistory/*" security="none" />
+	<http pattern="/notification/*" security="none" />
+	
+	<http>
+		
+		<!-- 驱动程序管理 -->
+		<intercept-url pattern="/driverEntity/add" access="ROLE_ADMIN" />
+		<intercept-url pattern="/driverEntity/saveAdd" access="ROLE_ADMIN" />
+		<intercept-url pattern="/driverEntity/import" access="ROLE_ADMIN" />
+		<intercept-url pattern="/driverEntity/uploadImportFile" access="ROLE_ADMIN" />
+		<intercept-url pattern="/driverEntity/saveImport" access="ROLE_ADMIN" />
+		<intercept-url pattern="/driverEntity/edit" access="ROLE_ADMIN" />
+		<intercept-url pattern="/driverEntity/saveEdit" access="ROLE_ADMIN" />
+		<intercept-url pattern="/driverEntity/delete" access="ROLE_ADMIN" />
+		<intercept-url pattern="/driverEntity/query" access="ROLE_ADMIN" />
+		<intercept-url pattern="/driverEntity/uploadDriverFile" access="ROLE_ADMIN" />
+		<intercept-url pattern="/driverEntity/deleteDriverFile" access="ROLE_ADMIN" />
+		
+		<!-- 用户管理 -->
+		<intercept-url pattern="/user/add" access="ROLE_ADMIN" />
+		<intercept-url pattern="/user/saveAdd" access="ROLE_ADMIN" />
+		<intercept-url pattern="/user/edit" access="ROLE_ADMIN" />
+		<intercept-url pattern="/user/saveEdit" access="ROLE_ADMIN" />
+		<intercept-url pattern="/user/delete" access="ROLE_ADMIN" />
+		<intercept-url pattern="/user/query" access="ROLE_ADMIN" />
+		
+		<!-- 全局设置 -->
+		<intercept-url pattern="/globalSetting/*" access="ROLE_ADMIN" />
+		
+		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER, ROLE_ADMIN" />
+	
+		<!-- 表单登录页登录 -->
+		<form-login login-page="/login" login-processing-url="/login/doLogin"
+			username-parameter="name" password-parameter="password"
+		 	authentication-success-handler-ref="authenticationSuccessHandler" />
+		
+		<!-- 记住登录 -->
+		<remember-me key="REMEMBER_ME_KEY" remember-me-parameter="autoLogin" token-validity-seconds="94608000"
+			user-service-ref="userDetailsService" />
+		
+		<logout logout-url="/logout" invalidate-session="true" />
+		
+	</http>
+	
+	<authentication-manager>
+		<authentication-provider user-service-ref="userDetailsService">
+			<password-encoder ref="passwordEncoder" />
+		</authentication-provider>
+	</authentication-manager>
+	
+	<beans:bean id="userDetailsService" class="org.datagear.web.security.UserDetailsServiceImpl">
+		<beans:property name="userService" ref="userService" />
+	</beans:bean>
+	
+	<beans:bean id="authenticationSuccessHandler" class="org.datagear.web.security.AuthenticationSuccessHandlerImpl">
+		<beans:property name="schemaService" ref="schemaService" />
+	</beans:bean>
+	
+</beans:beans>
