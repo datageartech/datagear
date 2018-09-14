@@ -1056,33 +1056,28 @@
 	<div class="ui-layout-west">
 		<div class="ui-widget ui-widget-content schema-panel">
 			<div class="schema-panel-head">
-				<table style="width:100%; border:0;">
-					<tr><td>
-						<div class="schema-panel-title"><fmt:message key='main.schema' /></div>
-					</td><td>
-						<div class="schema-panel-operation">
-							<div class="ui-widget ui-widget-content ui-corner-all search">
-								<form id="schemaSearchForm" action="javascript:void(0);">
-								<input name="keyword" type="text" value="" class="ui-widget ui-widget-content" title="<fmt:message key='main.searchTable' />" /><button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><fmt:message key='add' /></button>
-								<input name="pageSize" type="hidden" value="100" />
-								</form>
-							</div>
-							<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" title="<fmt:message key='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><fmt:message key='add' /></button>
-							<ul id="schemaOperationMenu" class="lightweight-menu">
-								<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
-									<ul>
-										<li class="schema-operation-edit"><div><fmt:message key='edit' /></div></li>
-										<li class="schema-operation-delete"><div><fmt:message key='delete' /></div></li>
-										<li class="schema-operation-view"><div><fmt:message key='view' /></div></li>
-										<li class="schema-operation-refresh" title="<fmt:message key='main.schemaOperationMenuRefreshComment' />"><div><fmt:message key='refresh' /></div></li>
-										<li class="ui-widget-header"></li>
-										<li class="schema-operation-reload" title="<fmt:message key='main.schemaOperationMenuReloadComment' />"><div><fmt:message key='reload' /></div></li>
-									</ul>
-								</li>
+				<div class="schema-panel-title"><fmt:message key='main.schema' /></div>
+				<div class="schema-panel-operation">
+					<div class="ui-widget ui-widget-content ui-corner-all search">
+						<form id="schemaSearchForm" action="javascript:void(0);">
+						<input name="keyword" type="text" value="" class="ui-widget ui-widget-content" title="<fmt:message key='main.searchTable' />" /><button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><fmt:message key='find' /></button>
+						<input name="pageSize" type="hidden" value="100" />
+						</form>
+					</div>
+					<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" title="<fmt:message key='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><fmt:message key='add' /></button>
+					<ul id="schemaOperationMenu" class="lightweight-menu">
+						<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
+							<ul>
+								<li class="schema-operation-edit"><div><fmt:message key='edit' /></div></li>
+								<li class="schema-operation-delete"><div><fmt:message key='delete' /></div></li>
+								<li class="schema-operation-view"><div><fmt:message key='view' /></div></li>
+								<li class="schema-operation-refresh" title="<fmt:message key='main.schemaOperationMenuRefreshComment' />"><div><fmt:message key='refresh' /></div></li>
+								<li class="ui-widget-header"></li>
+								<li class="schema-operation-reload" title="<fmt:message key='main.schemaOperationMenuReloadComment' />"><div><fmt:message key='reload' /></div></li>
 							</ul>
-						</div>
-					</td></tr>
-				</table>
+						</li>
+					</ul>
+				</div>
 			</div>
 			<div class="schema-panel-content">
 			</div>

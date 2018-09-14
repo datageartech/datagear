@@ -439,6 +439,7 @@ table.dataTable.no-footer{
 .main-page-content .schema-panel .schema-panel-head{
 	display: inline-block;
 	width: 100%;
+	min-width: 14em;
 	height: 2.5em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
@@ -447,10 +448,13 @@ table.dataTable.no-footer{
 	vertical-align: middle;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-title{
+	float: left;
 	vertical-align: middle;
     white-space: nowrap;
+    padding-left: 0.1em;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation{
+	float: right;
 	text-align: right;
 	vertical-align: middle;
 }
@@ -490,7 +494,7 @@ table.dataTable.no-footer{
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li > .ui-menu-item-wrapper{
 	width: 1.5em;
 	height: 1.6em;
-	margin-top: 0.1em;
+	margin-top: 0.05em;
 }
 .main-page-content .schema-panel .schema-panel-content{
 	position: absolute;
