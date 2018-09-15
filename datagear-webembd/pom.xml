@@ -14,7 +14,7 @@
 	
 	<properties>
 		<jetty.version>9.4.11.v20180605</jetty.version>
-		<dist.target.dir>${project.build.directory}/${project.name}</dist.target.dir>
+		<dist.target.dir>${project.build.directory}/datagear-${project.version}</dist.target.dir>
 	</properties>
 	
 	<dependencies>
@@ -135,8 +135,10 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<copy file="../datagear-web/target/datagear-web-${project.version}.war" todir="${dist.target.dir}" />
+								<copy file="../datagear-web/target/datagear-web-${project.version}.war" todir="${dist.target.dir}/lib" />
 								<copy file="${project.build.directory}/${project.name}-${project.version}.jar" todir="${dist.target.dir}/lib" />
+								<delete dir="${dist.target.dir}/logs" includeEmptyDirs="true" />
+								<mkdir dir="${dist.target.dir}/logs"/>
 							</tasks>
 						</configuration>
 					</execution>
