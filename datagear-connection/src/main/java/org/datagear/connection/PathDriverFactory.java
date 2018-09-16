@@ -107,9 +107,12 @@ public class PathDriverFactory
 		{
 			throw new DriverNotFoundException(this.path.getPath(), driverClassName, e);
 		}
+		catch (Error e)
+		{
+			throw new DriverLoadErrorException(e);
+		}
 		catch (Throwable t)
 		{
-			// 可能会出现Error，这里也一并捕获包装
 			throw new PathDriverFactoryException(t);
 		}
 
