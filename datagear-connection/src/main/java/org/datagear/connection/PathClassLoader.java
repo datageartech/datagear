@@ -106,6 +106,9 @@ public class PathClassLoader extends ClassLoader
 	@Override
 	public InputStream getResourceAsStream(String name)
 	{
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("start getting resource as stream for [" + name + "]");
+
 		ResourceInfo resourceInfo = findResourceInfo(name);
 
 		if (resourceInfo == null)
@@ -129,7 +132,7 @@ public class PathClassLoader extends ClassLoader
 		}
 
 		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("Got resource as stream " + "[" + name + "] in file ["
+			LOGGER.debug("finish getting resource as stream for [" + name + "] in file ["
 					+ resourceInfo.getFileOfResource().getPath() + "]");
 
 		return new ByteArrayInputStream(bytes);
@@ -204,6 +207,9 @@ public class PathClassLoader extends ClassLoader
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException
 	{
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("start finding class for [" + name + "]");
+
 		String classFilePath = classNameToPath(name);
 
 		ResourceInfo classResourceInfo = findResourceInfo(classFilePath);
@@ -225,7 +231,7 @@ public class PathClassLoader extends ClassLoader
 		Class<?> clazz = defineClass(name, classBytes, 0, classBytes.length);
 
 		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("Found and loaded class [" + name + "] in file ["
+			LOGGER.debug("finish finding class for [" + name + "] in file ["
 					+ classResourceInfo.getFileOfResource().getPath() + "]");
 
 		return clazz;

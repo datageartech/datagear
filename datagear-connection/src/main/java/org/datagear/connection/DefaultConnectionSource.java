@@ -9,6 +9,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +33,7 @@ public class DefaultConnectionSource implements ConnectionSource
 
 	private DriverChecker driverChecker = new SimpleDriverChecker();
 
-	private ConcurrentMap<String, DriverEntity> urlPreferedDriverEntityMap = new ConcurrentHashMap<String, DriverEntity>();
+	private ConcurrentMap<String, PreferedDriverEntityResult> urlPreferedDriverEntityMap = new ConcurrentHashMap<String, PreferedDriverEntityResult>();
 
 	private volatile long driverEntityManagerLastModified = -1;
 
@@ -81,16 +83,11 @@ public class DefaultConnectionSource implements ConnectionSource
 	@Override
 	public Connection getConnection(ConnectionOption connectionOption) throws ConnectionSourceException
 	{
-		Driver driver = findPreferredDriver(connectionOption);
-
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("Found prefered Driver [" + toDriverString(driver) + "] for [" + connectionOption + "]");
-
-		return getConnection(driver, connectionOption);
+		return getPreferredConnection(connectionOption);
 	}
 
 	/**
-	 * 查找首选{@linkplain Driver}。
+	 * 获取首选{@linkplain Connection}。
 	 * 
 	 * @param connectionOption
 	 * @return
@@ -98,11 +95,9 @@ public class DefaultConnectionSource implements ConnectionSource
 	 *             当找不到时抛出此异常
 	 * @throws ConnectionSourceException
 	 */
-	protected Driver findPreferredDriver(ConnectionOption connectionOption)
+	protected Connection getPreferredConnection(ConnectionOption connectionOption)
 			throws UnsupportedGetConnectionException, ConnectionSourceException
 	{
-		Driver preferedDriver = null;
-
 		if (this.driverEntityManager.getLastModified() > this.driverEntityManagerLastModified)
 		{
 			this.driverEntityManagerLastModified = this.driverEntityManager.getLastModified();
@@ -111,122 +106,172 @@ public class DefaultConnectionSource implements ConnectionSource
 
 		String url = connectionOption.getUrl();
 
-		DriverEntity preferedDriverEntity = this.urlPreferedDriverEntityMap.get(url);
+		PreferedDriverEntityResult preferedDriverEntityResult = this.urlPreferedDriverEntityMap.get(url);
 
-		if (preferedDriverEntity != null)
+		if (preferedDriverEntityResult != null)
 		{
-			try
+			if (preferedDriverEntityResult.hasDriverEntity())
 			{
-				preferedDriver = this.driverEntityManager.getDriver(preferedDriverEntity);
+				DriverEntity preferedDriverEntity = preferedDriverEntityResult.getDriverEntity();
+
+				Driver preferedDriver = this.driverEntityManager.getDriver(preferedDriverEntity);
+				Connection preferedConnection = getConnection(preferedDriver, connectionOption);
+
+				if (LOGGER.isDebugEnabled())
+					LOGGER.debug("Got prefered connection by cached [" + preferedDriverEntity + "] for ["
+							+ connectionOption + "]");
+
+				return preferedConnection;
 			}
-			catch (Throwable t)
+			else
 			{
-				if (LOGGER.isErrorEnabled())
-					LOGGER.error("Getting Driver by cached [" + preferedDriverEntity + "]  for [" + connectionOption
-							+ "] error", t);
+				if (LOGGER.isDebugEnabled())
+					LOGGER.debug("Got null connection by cached no-prefered " + DriverEntity.class.getSimpleName()
+							+ " for [" + connectionOption + "]");
+
+				throw new UnsupportedGetConnectionException(connectionOption);
 			}
 		}
 
-		if (preferedDriver == null)
+		Connection preferedConnection = null;
+
+		List<DriverEntityDriver> accepted = new ArrayList<DriverEntityDriver>();
+		List<DriverEntityDriver> checked = new ArrayList<DriverEntityDriver>();
+
+		findOrderedAcceptedAndCheckedDriverEntityDrivers(connectionOption, accepted, checked);
+
+		// 如果仅使用checked列表，那么当连接参数有误时（比如密码错误），所有checked都无法通过从而导致抛出UnsupportedGetConnectionException，
+		// 这样就无法向用户展示连接错误信息，所以下面加入一个accepted元素，用于在这种情况是抛出友好的异常
+		if (accepted.size() > 0)
+			checked.add(accepted.get(0));
+
+		for (int i = 0, len = checked.size(); i < len; i++)
 		{
-			List<DriverEntityDriver> accepted = new ArrayList<DriverEntityDriver>();
-			List<DriverEntityDriver> checked = new ArrayList<DriverEntityDriver>();
+			DriverEntityDriver driverEntityDriver = checked.get(i);
+			DriverEntity driverEntity = driverEntityDriver.getDriverEntity();
 
-			List<DriverEntity> driverEntities = this.driverEntityManager.getAll();
-
-			for (DriverEntity driverEntity : driverEntities)
+			try
 			{
-				Driver driver = null;
+				preferedConnection = getConnection(driverEntityDriver.getDriver(), connectionOption);
+
+				this.urlPreferedDriverEntityMap.put(connectionOption.getUrl(),
+						new PreferedDriverEntityResult(driverEntity));
+
+				break;
+			}
+			catch (ConnectionSourceException e)
+			{
+				if (i == len - 1)
+				{
+					// 使用最后一个最为首选，这样下次获取时，可以使用缓存中的它，直接抛出异常供上层应用知晓，不用再查找一次
+					this.urlPreferedDriverEntityMap.put(connectionOption.getUrl(),
+							new PreferedDriverEntityResult(driverEntity));
+
+					// 抛出最后一个异常，供上层应用知晓
+					throw e;
+				}
+				else
+				{
+					if (LOGGER.isDebugEnabled())
+						LOGGER.debug(
+								"Getting connection with [" + driverEntity + "]  for [" + connectionOption + "] error",
+								e);
+				}
+			}
+		}
+
+		if (preferedConnection == null)
+		{
+			this.urlPreferedDriverEntityMap.put(connectionOption.getUrl(), new PreferedDriverEntityResult());
+
+			throw new UnsupportedGetConnectionException(connectionOption);
+		}
+		else
+			return preferedConnection;
+	}
+
+	/**
+	 * 查找经过首选优先级排序接受和校验的{@linkplain DriverEntityDriver}列表。
+	 * <p>
+	 * 越靠前的首选优先级越高。
+	 * </p>
+	 * 
+	 * @param connectionOption
+	 * @param accepted
+	 * @param checked
+	 */
+	protected void findOrderedAcceptedAndCheckedDriverEntityDrivers(ConnectionOption connectionOption,
+			List<DriverEntityDriver> accepted, List<DriverEntityDriver> checked)
+	{
+		List<DriverEntity> driverEntities = this.driverEntityManager.getAll();
+
+		for (DriverEntity driverEntity : driverEntities)
+		{
+			Driver driver = null;
+
+			try
+			{
+				driver = this.driverEntityManager.getDriver(driverEntity);
+			}
+			catch (Throwable t)
+			{
+				if (LOGGER.isDebugEnabled())
+					LOGGER.debug("Getting Driver with [" + driverEntity + "] for getting prefered connection for ["
+							+ connectionOption + "] error", t);
+			}
+
+			if (driver != null)
+			{
+				boolean accept = false;
 
 				try
 				{
-					driver = this.driverEntityManager.getDriver(driverEntity);
+					accept = acceptsURL(driver, connectionOption.getUrl());
 				}
 				catch (Throwable t)
 				{
-					if (LOGGER.isErrorEnabled())
-						LOGGER.error("Getting Driver with [" + driverEntity + "] for finding prefered Driver for ["
-								+ connectionOption + "] error", t);
+					if (LOGGER.isDebugEnabled())
+						LOGGER.debug("Checking if url accepted with [" + driverEntity
+								+ "] for getting prefered connection for [" + connectionOption + "] error", t);
 				}
 
-				if (driver != null)
+				if (accept)
 				{
-					boolean accept = false;
+					DriverEntityDriver driverEntityDriver = new DriverEntityDriver(driverEntity, driver);
+
+					accepted.add(driverEntityDriver);
 
 					try
 					{
-						accept = acceptsURL(driver, connectionOption.getUrl());
+						if (this.driverChecker.check(driver, connectionOption, true))
+							checked.add(driverEntityDriver);
 					}
 					catch (Throwable t)
 					{
 					}
-
-					if (accept)
-					{
-						DriverEntityDriver driverEntityDriver = new DriverEntityDriver(driverEntity, driver);
-						accepted.add(driverEntityDriver);
-
-						try
-						{
-							if (this.driverChecker.check(driver, connectionOption, true))
-								checked.add(driverEntityDriver);
-						}
-						catch (Throwable t)
-						{
-						}
-					}
 				}
 			}
-
-			DriverEntityDriver preferedChecked = findPreferedDriverEntityDriver(checked);
-
-			if (preferedChecked != null)
-			{
-				preferedDriver = preferedChecked.getDriver();
-				this.urlPreferedDriverEntityMap.put(url, preferedChecked.getDriverEntity());
-			}
-			else
-			{
-				DriverEntityDriver preferedAccepted = findPreferedDriverEntityDriver(accepted);
-
-				// 如果连接参数有误（比如密码错误），会导致所有校验都不通过而抛出UnsupportedGetConnectionException异常，不太合适，
-				// 所以，如果没有找到校验通过的，那么就使用可接受URL的，但是不应该加入缓存
-				if (preferedAccepted != null)
-					preferedDriver = preferedAccepted.getDriver();
-			}
 		}
 
-		if (preferedDriver == null)
-			throw new UnsupportedGetConnectionException(connectionOption);
-
-		return preferedDriver;
-	}
-
-	/**
-	 * 查找首选{@linkplain DriverEntityDriver}。
-	 * <p>
-	 * 如果差找不到，将返回{@code null}。
-	 * </p>
-	 * 
-	 * @param checked
-	 * @return
-	 */
-	protected DriverEntityDriver findPreferedDriverEntityDriver(List<DriverEntityDriver> checked)
-	{
-		DriverEntityDriver prefered = null;
-
-		for (DriverEntityDriver candidate : checked)
+		Comparator<DriverEntityDriver> comparator = new Comparator<DriverEntityDriver>()
 		{
-			if (prefered == null)
-				prefered = candidate;
-			else
+			@Override
+			public int compare(DriverEntityDriver o1, DriverEntityDriver o2)
 			{
-				if (candidate.isPreferedThan(prefered))
-					prefered = candidate;
-			}
-		}
+				Driver d1 = o1.getDriver();
+				Driver d2 = o2.getDriver();
 
-		return prefered;
+				if (isHigherVersion(d1, d2))
+					return -1;
+				else if (isHigherVersion(d2, d1))
+					return 1;
+				else
+					return 0;
+			}
+		};
+
+		Collections.sort(accepted, comparator);
+		Collections.sort(checked, comparator);
 	}
 
 	protected boolean acceptsURL(Driver driver, String url)
@@ -248,9 +293,10 @@ public class DefaultConnectionSource implements ConnectionSource
 	 * @param connectionOption
 	 * @return
 	 * @throws EstablishConnectionException
+	 * @throws ConnectionSourceException
 	 */
 	protected Connection getConnection(Driver driver, ConnectionOption connectionOption)
-			throws EstablishConnectionException
+			throws EstablishConnectionException, ConnectionSourceException
 	{
 		Properties extraProperties = getExtraConnectionProperties(driver);
 		Properties properties = null;
@@ -270,6 +316,10 @@ public class DefaultConnectionSource implements ConnectionSource
 		catch (SQLException e)
 		{
 			throw new EstablishConnectionException(connectionOption, e);
+		}
+		catch (Throwable t)
+		{
+			throw new ConnectionSourceException(t);
 		}
 	}
 
@@ -294,6 +344,64 @@ public class DefaultConnectionSource implements ConnectionSource
 	protected Properties getExtraConnectionProperties(Driver driver)
 	{
 		return null;
+	}
+
+	/**
+	 * {@code driver1}的版本是否高于{@linkplain driver2}。
+	 * 
+	 * @param driver1
+	 * @param driver2
+	 * @return
+	 */
+	protected boolean isHigherVersion(Driver driver1, Driver driver2)
+	{
+		int myMajorVersion = driver1.getMajorVersion();
+		int myMinorVersion = driver1.getMinorVersion();
+		int youMajorVersion = driver2.getMajorVersion();
+		int youMinorVersion = driver2.getMinorVersion();
+
+		if (myMajorVersion > youMajorVersion)
+			return true;
+		else if (myMajorVersion < youMajorVersion)
+			return false;
+		else
+		{
+			if (myMinorVersion > youMinorVersion)
+				return true;
+			else
+				return false;
+		}
+	}
+
+	protected static class PreferedDriverEntityResult
+	{
+		private DriverEntity driverEntity;
+
+		public PreferedDriverEntityResult()
+		{
+			super();
+		}
+
+		public PreferedDriverEntityResult(DriverEntity driverEntity)
+		{
+			super();
+			this.driverEntity = driverEntity;
+		}
+
+		public boolean hasDriverEntity()
+		{
+			return (this.driverEntity != null);
+		}
+
+		public DriverEntity getDriverEntity()
+		{
+			return driverEntity;
+		}
+
+		public void setDriverEntity(DriverEntity driverEntity)
+		{
+			this.driverEntity = driverEntity;
+		}
 	}
 
 	protected static class DriverEntityDriver
@@ -332,32 +440,6 @@ public class DefaultConnectionSource implements ConnectionSource
 		public void setDriver(Driver driver)
 		{
 			this.driver = driver;
-		}
-
-		/**
-		 * 是否比给定{@linkplain DriverEntityDriver}更首选。
-		 * 
-		 * @param driverEntityDriver
-		 * @return
-		 */
-		public boolean isPreferedThan(DriverEntityDriver driverEntityDriver)
-		{
-			int myMajorVersion = this.driver.getMajorVersion();
-			int myMinorVersion = this.driver.getMinorVersion();
-			int youMajorVersion = driverEntityDriver.driver.getMajorVersion();
-			int youMinorVersion = driverEntityDriver.driver.getMinorVersion();
-
-			if (myMajorVersion > youMajorVersion)
-				return true;
-			else if (myMajorVersion < youMajorVersion)
-				return false;
-			else
-			{
-				if (myMinorVersion > youMinorVersion)
-					return true;
-				else
-					return false;
-			}
 		}
 	}
 }
