@@ -106,7 +106,7 @@ public class XmlDriverEntityManagerTest
 			catch (PathDriverFactoryException e)
 			{
 				// 如果当前JRE小于8，将会抛出此异常
-				assertEquals(DriverLoadErrorException.class, e.getClass());
+				assertEquals(DriverNotFoundException.class, e.getClass());
 			}
 		}
 

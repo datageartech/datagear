@@ -248,6 +248,10 @@ public class DefaultConnectionSource implements ConnectionSource
 					}
 					catch (Throwable t)
 					{
+						if (LOGGER.isDebugEnabled())
+							LOGGER.debug("checking if [" + driverEntity
+									+ "] 's driver checked for getting prefered connection for [" + connectionOption
+									+ "] error", t);
 					}
 				}
 			}
