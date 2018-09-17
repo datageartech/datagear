@@ -372,7 +372,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		addIdentifierQuoteParameter(params);
 		addQueryaram(params, pagingQuery);
 
-		int total = selectOneMybatis(statement + "Count", params);
+		int total = (Integer) selectOneMybatis(statement + "Count", params);
 
 		PagingData<T> pagingData = new PagingData<T>(pagingQuery.getPage(), total, pagingQuery.getPageSize());
 
