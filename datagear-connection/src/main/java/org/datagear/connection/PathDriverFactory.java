@@ -159,7 +159,14 @@ public class PathDriverFactory
 	 */
 	public synchronized void release() throws PathDriverFactoryException
 	{
-		releaseJdbcDrivers();
+		try
+		{
+			releaseJdbcDrivers();
+		}
+		finally
+		{
+			this.pathClassLoader.close();
+		}
 	}
 
 	/**

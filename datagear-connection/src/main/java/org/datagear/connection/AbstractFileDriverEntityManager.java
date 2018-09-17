@@ -48,13 +48,13 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 	private String driverEntityFileEncoding = DEFAULT_DRIVER_ENTITY_FILE_ENCODING;
 
-	private Map<String, PathDriverFactoryInfo> pathDriverFactoryInfoMap = new HashMap<String, PathDriverFactoryInfo>();
+	private transient Map<String, PathDriverFactoryInfo> pathDriverFactoryInfoMap = new HashMap<String, PathDriverFactoryInfo>();
 
-	private List<DriverEntity> driverEntities = null;
+	private transient List<DriverEntity> driverEntities = null;
 
-	private File driverEntityInfoFile = null;
+	private transient File driverEntityInfoFile = null;
 
-	private long driverEntityInfoFileLastModified = -1;
+	private transient long driverEntityInfoFileLastModified = -1;
 
 	public AbstractFileDriverEntityManager()
 	{

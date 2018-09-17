@@ -4,20 +4,23 @@
 
 package org.datagear.connection;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipFile;
@@ -34,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author datagear@163.com
  *
  */
-public class PathClassLoader extends ClassLoader
+public class PathClassLoader extends ClassLoader implements Closeable
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PathClassLoader.class);
 
@@ -45,6 +48,9 @@ public class PathClassLoader extends ClassLoader
 
 	/** 要强制加载类路径之外的类名套集 */
 	private Set<String> outsideForceLoads;
+
+	/** 此目录中的jar文件列表 */
+	private transient List<JarFileInfo> jarFileInfos = new ArrayList<JarFileInfo>();
 
 	public PathClassLoader(String path)
 	{
@@ -65,11 +71,28 @@ public class PathClassLoader extends ClassLoader
 	{
 		super(parent);
 		this.path = path;
+
+		findJarFileInfos(this.path, this.jarFileInfos);
 	}
 
+	/**
+	 * 获取路径。
+	 * 
+	 * @return
+	 */
 	public File getPath()
 	{
-		return path;
+		return this.path;
+	}
+
+	/**
+	 * 获取路径对应的所有{@linkplain JarFileInfo}列表。
+	 * 
+	 * @return
+	 */
+	public List<JarFileInfo> getJarFileInfos()
+	{
+		return this.jarFileInfos;
 	}
 
 	public Set<String> getOutsideForceLoads()
@@ -92,15 +115,98 @@ public class PathClassLoader extends ClassLoader
 
 	/**
 	 * 关闭。
+	 * <p>
+	 * 关闭将释放占用资源，并使之不再可用。
+	 * </p>
 	 */
+	@Override
 	public void close()
 	{
+		for (JarFileInfo jarFileInfo : this.jarFileInfos)
+		{
+			JarFile jarFile = jarFileInfo.getJarFile();
+			close(jarFile);
+		}
 	}
 
 	@Override
-	protected void finalize() throws Throwable
+	public URL getResource(String name)
 	{
-		close();
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("start getting resource URL for [" + name + "]");
+
+		ResourceInfo resourceInfo = findResourceInfo(name);
+
+		if (resourceInfo == null)
+		{
+			ClassLoader parent = getParentClassLoader();
+
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("delegate parent class loader for getting resource URL for [" + name + "]");
+
+			return parent.getResource(name);
+		}
+
+		try
+		{
+			URL url = getResourceURL(resourceInfo);
+
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("got resource URL [" + url + "] for [" + name + "] in file ["
+						+ resourceInfo.getFile().getPath() + "]");
+
+			return url;
+		}
+		catch (IOException e)
+		{
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("getting resource URL for [" + name + "] in file [" + resourceInfo.getFile().getPath()
+						+ "] error", e);
+		}
+
+		return null;
+	}
+
+	@Override
+	public Enumeration<URL> getResources(String name) throws IOException
+	{
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("start getting resource URLs for [" + name + "]");
+
+		List<ResourceInfo> resourceInfos = findResourceInfos(name);
+
+		if (resourceInfos == null || resourceInfos.isEmpty())
+		{
+			ClassLoader parent = getParentClassLoader();
+
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("delegate parent class loader for getting resource URLs for [" + name + "]");
+
+			return parent.getResources(name);
+		}
+
+		try
+		{
+			Vector<URL> urls = new Vector<URL>();
+
+			for (ResourceInfo resourceInfo : resourceInfos)
+			{
+				URL url = getResourceURL(resourceInfo);
+				urls.add(url);
+			}
+
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("got resource URLs for [" + name + "] in path [" + this.path.getPath() + "]");
+
+			return urls.elements();
+		}
+		catch (IOException e)
+		{
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("getting resource URLs for [" + name + "] in path [" + this.path.getPath() + "] error", e);
+		}
+
+		return null;
 	}
 
 	@Override
@@ -113,44 +219,62 @@ public class PathClassLoader extends ClassLoader
 
 		if (resourceInfo == null)
 		{
-			ClassLoader parent = getParent();
-			if (parent == null)
-				parent = PathClassLoader.class.getClassLoader();
+			ClassLoader parent = getParentClassLoader();
+
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("delegate parent class loader for getting resource as stream for [" + name + "]");
 
 			return parent.getResourceAsStream(name);
 		}
 
-		byte[] bytes = null;
-
 		try
 		{
-			bytes = getResourceBytes(resourceInfo);
+			byte[] bytes = getResourceBytes(resourceInfo);
+
+			InputStream in = new ByteArrayInputStream(bytes);
+
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug(
+						"got resource as stream for [" + name + "] in file [" + resourceInfo.getFile().getPath() + "]");
+
+			return in;
 		}
 		catch (IOException e)
 		{
-			return null;
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("getting resource as stream for [" + name + "] in file ["
+						+ resourceInfo.getFile().getPath() + "] error", e);
 		}
 
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("finish getting resource as stream for [" + name + "] in file ["
-					+ resourceInfo.getFileOfResource().getPath() + "]");
-
-		return new ByteArrayInputStream(bytes);
+		return null;
 	}
 
 	@Override
 	protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException
 	{
+		if (LOGGER.isDebugEnabled())
+			LOGGER.debug("start loading class [" + name + "]");
+
 		Class<?> clazz = findLoadedClass(name);
 
 		if (clazz == null)
 		{
-			try
+			if (name.startsWith("java"))
+				;
+			else
 			{
-				clazz = findClass(name);
-			}
-			catch (Exception e)
-			{
+				try
+				{
+					clazz = findClass(name);
+				}
+				catch (ClassNotFoundException e)
+				{
+				}
+				catch (Throwable t)
+				{
+					if (LOGGER.isDebugEnabled())
+						LOGGER.debug("finding class [" + name + "] error", t);
+				}
 			}
 		}
 
@@ -174,6 +298,10 @@ public class PathClassLoader extends ClassLoader
 				{
 					throw new ClassNotFoundException(name, e);
 				}
+				finally
+				{
+					close(in);
+				}
 
 				clazz = defineClass(name, bytes, 0, bytes.length);
 			}
@@ -181,21 +309,12 @@ public class PathClassLoader extends ClassLoader
 
 		if (clazz == null)
 		{
-			ClassLoader parent = getParent();
-			if (parent == null)
-				parent = PathClassLoader.class.getClassLoader();
+			ClassLoader parent = getParentClassLoader();
 
-			// 先尝试父加载器加载类，这样可以避免Java标准库被覆盖
-			if (clazz == null)
-			{
-				try
-				{
-					clazz = Class.forName(name, false, parent);
-				}
-				catch (ClassNotFoundException e)
-				{
-				}
-			}
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("delegate parent class loader for loading class [" + name + "]");
+
+			clazz = Class.forName(name, false, parent);
 		}
 
 		if (resolve)
@@ -208,7 +327,7 @@ public class PathClassLoader extends ClassLoader
 	protected Class<?> findClass(String name) throws ClassNotFoundException
 	{
 		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("start finding class for [" + name + "]");
+			LOGGER.debug("start finding class [" + name + "]");
 
 		String classFilePath = classNameToPath(name);
 
@@ -222,6 +341,9 @@ public class PathClassLoader extends ClassLoader
 		try
 		{
 			classBytes = getResourceBytes(classResourceInfo);
+
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("found class for [" + name + "] in file [" + classResourceInfo.getFile().getPath() + "]");
 		}
 		catch (IOException e)
 		{
@@ -230,11 +352,43 @@ public class PathClassLoader extends ClassLoader
 
 		Class<?> clazz = defineClass(name, classBytes, 0, classBytes.length);
 
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("finish finding class for [" + name + "] in file ["
-					+ classResourceInfo.getFileOfResource().getPath() + "]");
-
 		return clazz;
+	}
+
+	/**
+	 * 获取上级类加载器。
+	 * 
+	 * @return
+	 */
+	protected ClassLoader getParentClassLoader()
+	{
+		ClassLoader parent = getParent();
+		if (parent == null)
+			parent = PathClassLoader.class.getClassLoader();
+
+		return parent;
+	}
+
+	/**
+	 * 获取{@linkplain ResourceInfo}的{@linkplain URL}。
+	 * 
+	 * @param resourceInfo
+	 * @return
+	 * @throws IOException
+	 */
+	protected URL getResourceURL(ResourceInfo resourceInfo) throws IOException
+	{
+		if (resourceInfo.isJarEntity())
+		{
+			StringBuilder sb = new StringBuilder("jar:");
+			sb.append(resourceInfo.getFile().toURI().toURL().toString());
+			sb.append("!/");
+			sb.append(resourceInfo.getJarEntry().getName());
+
+			return new URL(sb.toString());
+		}
+		else
+			return resourceInfo.getFile().toURI().toURL();
 	}
 
 	/**
@@ -246,31 +400,52 @@ public class PathClassLoader extends ClassLoader
 	 */
 	protected byte[] getResourceBytes(ResourceInfo resourceInfo) throws IOException
 	{
-		try
+		if (resourceInfo.isJarEntity())
 		{
-			return getBytes(resourceInfo.getIn());
+			JarFile jarFile = resourceInfo.getJarFile();
+			JarEntry jarEntry = resourceInfo.getJarEntry();
+
+			InputStream in = null;
+
+			try
+			{
+				in = jarFile.getInputStream(jarEntry);
+				return getBytes(in);
+			}
+			finally
+			{
+				close(in);
+			}
 		}
-		finally
+		else
 		{
-			close(resourceInfo.getIn());
+			BufferedInputStream in = null;
 
-			if (resourceInfo.hasJarFileOfResource())
-				close(resourceInfo.getJarFileOfResource());
+			try
+			{
+				in = new BufferedInputStream(new FileInputStream(resourceInfo.getFile()));
+				return getBytes(in);
+			}
+			finally
+			{
+				close(in);
+			}
 		}
-
 	}
 
 	/**
 	 * 查找资源的{@linkplain ResourceInfo}。
+	 * <p>
+	 * 如果找不到资源，将返回{@code null}。
+	 * </p>
 	 * 
 	 * @param resourcePath
 	 * @return
 	 */
 	protected ResourceInfo findResourceInfo(String resourcePath)
 	{
-		InputStream in = null;
-		File fileOfResource = null;
-		JarFile jarFileOfResource = null;
+		while (resourcePath.startsWith("/"))
+			resourcePath = resourcePath.substring(1);
 
 		// 尝试从文件路径加载
 		if (this.path.isDirectory())
@@ -278,61 +453,55 @@ public class PathClassLoader extends ClassLoader
 			File file = new File(this.path, resourcePath);
 
 			if (file.exists())
-			{
-				try
-				{
-					in = new FileInputStream(file);
-					fileOfResource = file;
-				}
-				catch (FileNotFoundException e)
-				{
-					in = null;
-				}
-			}
+				return new ResourceInfo(resourcePath, file);
 		}
 
-		if (in == null)
+		for (JarFileInfo jarFileInfo : this.jarFileInfos)
 		{
-			List<File> files = getFilesOfJar(this.path);
+			JarFile jarFile = jarFileInfo.getJarFile();
+			JarEntry jarEntry = jarFile.getJarEntry(resourcePath);
 
-			for (int i = 0, len = files.size(); i < len; i++)
-			{
-				File file = files.get(i);
-
-				boolean isMe = false;
-				JarFile tmpJarFile = null;
-
-				try
-				{
-					tmpJarFile = new JarFile(file);
-					JarEntry jarEntry = tmpJarFile.getJarEntry(resourcePath);
-
-					if (jarEntry != null)
-					{
-						in = tmpJarFile.getInputStream(jarEntry);
-						fileOfResource = file;
-						jarFileOfResource = tmpJarFile;
-						isMe = true;
-						break;
-					}
-				}
-				catch (IOException e)
-				{
-				}
-				finally
-				{
-					if (!isMe)
-						close(tmpJarFile);
-				}
-			}
+			if (jarEntry != null)
+				return new ResourceInfo(resourcePath, jarFileInfo.getFile(), jarFile, jarEntry);
 		}
 
-		if (in == null)
-			return null;
+		return null;
+	}
 
-		ResourceInfo resourceInfo = new ResourceInfo(in, fileOfResource, jarFileOfResource);
+	/**
+	 * 查找资源的{@linkplain ResourceInfo}列表。
+	 * 
+	 * @param resourcePath
+	 * @return
+	 */
+	protected List<ResourceInfo> findResourceInfos(String resourcePath)
+	{
+		while (resourcePath.startsWith("/"))
+			resourcePath = resourcePath.substring(1);
 
-		return resourceInfo;
+		List<ResourceInfo> resourceInfos = new ArrayList<ResourceInfo>();
+
+		// 尝试从文件路径加载
+		if (this.path.isDirectory())
+		{
+			File file = new File(this.path, resourcePath);
+
+			if (file.exists())
+				resourceInfos.add(new ResourceInfo(resourcePath, file));
+
+			return resourceInfos;
+		}
+
+		for (JarFileInfo jarFileInfo : this.jarFileInfos)
+		{
+			JarFile jarFile = jarFileInfo.getJarFile();
+			JarEntry jarEntry = jarFile.getJarEntry(resourcePath);
+
+			if (jarEntry != null)
+				resourceInfos.add(new ResourceInfo(resourcePath, jarFileInfo.getFile(), jarFile, jarEntry));
+		}
+
+		return resourceInfos;
 	}
 
 	/**
@@ -358,16 +527,18 @@ public class PathClassLoader extends ClassLoader
 	}
 
 	/**
-	 * 获取jar文件列表。
+	 * 查找{@linkplain JarFile}，并将对应的{@linkplain JarFileInfo}写入指定列表。
 	 * 
 	 * @param path
-	 * @return
+	 * @param jarFileInfos
 	 */
-	protected List<File> getFilesOfJar(File path)
+	protected void findJarFileInfos(File path, List<JarFileInfo> jarFileInfos)
 	{
+		List<File> files = new ArrayList<File>();
+
 		if (path.isDirectory())
 		{
-			File[] files = path.listFiles(new FileFilter()
+			File[] listFiles = path.listFiles(new FileFilter()
 			{
 				@Override
 				public boolean accept(File pathname)
@@ -376,16 +547,27 @@ public class PathClassLoader extends ClassLoader
 				}
 			});
 
-			return Arrays.asList(files);
+			Collections.addAll(files, listFiles);
 		}
 		else
 		{
-			List<File> jarFiles = new ArrayList<File>();
-
 			if (isJarFile(path))
-				jarFiles.add(path);
+				files.add(path);
+		}
 
-			return jarFiles;
+		for (File file : files)
+		{
+			try
+			{
+				JarFile jarFile = new JarFile(file);
+				jarFileInfos.add(new JarFileInfo(jarFile, file));
+			}
+			catch (IOException e)
+			{
+				if (LOGGER.isDebugEnabled())
+					LOGGER.debug("build " + JarFile.class.getSimpleName() + " for file [" + file
+							+ "] error, it will be ignored", e);
+			}
 		}
 	}
 
@@ -465,58 +647,127 @@ public class PathClassLoader extends ClassLoader
 
 	protected static class ResourceInfo
 	{
-		private InputStream in;
+		/** 资源路径 */
+		private String path;
 
-		private File fileOfResource;
+		/** 资源对应的文件 */
+		private File file;
 
-		private JarFile jarFileOfResource;
+		/** 当资源在jar文件内时，文件对应的JarFile */
+		private JarFile jarFile;
 
-		public ResourceInfo()
+		/** 当资源在jar文件内时，资源对应的JarEntity */
+		private JarEntry jarEntry;
+
+		public ResourceInfo(String path, File file)
+		{
+			super();
+			this.path = path;
+			this.file = file;
+		}
+
+		public ResourceInfo(String path, File file, JarFile jarFile, JarEntry jarEntry)
+		{
+			super();
+			this.path = path;
+			this.file = file;
+			this.jarFile = jarFile;
+			this.jarEntry = jarEntry;
+		}
+
+		/**
+		 * 获取资源路径。
+		 * 
+		 * @return
+		 */
+		public String getPath()
+		{
+			return path;
+		}
+
+		/**
+		 * 获取资源对应的文件。
+		 * 
+		 * @return
+		 */
+		public File getFile()
+		{
+			return file;
+		}
+
+		/**
+		 * 资源是否是jar内的资源。
+		 * 
+		 * @return
+		 */
+		public boolean isJarEntity()
+		{
+			return (this.jarFile != null);
+		}
+
+		/**
+		 * 当资源是jar内资源时，获取所在的jar文件。
+		 * 
+		 * @return
+		 */
+		public JarFile getJarFile()
+		{
+			return jarFile;
+		}
+
+		/**
+		 * 当资源是jar内资源时，获取资源对应的{@linkplain JarEntry}。
+		 * 
+		 * @return
+		 */
+		public JarEntry getJarEntry()
+		{
+			return jarEntry;
+		}
+	}
+
+	/**
+	 * {@linkplain JarFile}信息。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class JarFileInfo
+	{
+		private JarFile jarFile;
+
+		private File file;
+
+		public JarFileInfo()
 		{
 			super();
 		}
 
-		public ResourceInfo(InputStream in, File fileOfResource, JarFile jarFileOfResource)
+		public JarFileInfo(JarFile jarFile, File file)
 		{
 			super();
-			this.in = in;
-			this.fileOfResource = fileOfResource;
-			this.jarFileOfResource = jarFileOfResource;
+			this.jarFile = jarFile;
+			this.file = file;
 		}
 
-		public InputStream getIn()
+		public JarFile getJarFile()
 		{
-			return in;
+			return jarFile;
 		}
 
-		public void setIn(InputStream in)
+		public void setJarFile(JarFile jarFile)
 		{
-			this.in = in;
+			this.jarFile = jarFile;
 		}
 
-		public File getFileOfResource()
+		public File getFile()
 		{
-			return fileOfResource;
+			return file;
 		}
 
-		public void setFileOfResource(File fileOfResource)
+		public void setFile(File file)
 		{
-			this.fileOfResource = fileOfResource;
-		}
-
-		public boolean hasJarFileOfResource()
-		{
-			return jarFileOfResource != null;
-		}
-
-		public JarFile getJarFileOfResource()
-		{
-			return jarFileOfResource;
-		}
-
-		public void setJarFileOfResource(JarFile jarFileOfResource)
-		{
-			this.jarFileOfResource = jarFileOfResource;
+			this.file = file;
 		}
 	}
 }
