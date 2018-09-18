@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.Configuration;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,20 +65,13 @@ public class App
 		webAppContext.setContextPath("/");
 		webAppContext.setWar(appConfig.getWebappLocation());
 
-		Configuration.ClassList classlist = Configuration.ClassList.setServerDefault(server);
-		classlist.addBefore("org.eclipse.jetty.webapp.JettyWebXmlConfiguration",
-				"org.eclipse.jetty.annotations.AnnotationConfiguration");
-
-		webAppContext.setAttribute("org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern",
-				".*/[^/]*servlet-api-[^/]*\\.jar$|.*/javax.servlet.jsp.jstl-.*\\.jar$|.*/[^/]*taglibs.*\\.jar$");
-
 		server.setHandler(webAppContext);
 
 		server.start();
 
 		while (!server.isStarted())
 		{
-			Thread.sleep(1000);
+			Thread.sleep(500);
 		}
 
 		System.out.println(INFO_WRAP_LINE);
