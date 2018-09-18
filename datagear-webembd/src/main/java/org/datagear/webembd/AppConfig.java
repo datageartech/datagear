@@ -27,6 +27,13 @@ public class AppConfig implements Serializable
 		super();
 	}
 
+	public AppConfig(int serverPort, String webappLocation)
+	{
+		super();
+		this.serverPort = serverPort;
+		this.webappLocation = webappLocation;
+	}
+
 	public int getServerPort()
 	{
 		return serverPort;
