@@ -23,13 +23,15 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.zip.ZipFile;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * 特定路径类加载器。
+ * <p>
+ * 此类实例在使用前需要调用其{@linkplain #init()}方法，在弃用前，需要调用其{@linkplain #close()}方法。
+ * </p>
  * <p>
  * 注意：此类会优先从{@linkplain #getPath()}路径中加载类，因此，不应该将标准库放入此路径中。
  * </p>
@@ -49,8 +51,11 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	/** 要强制加载类路径之外的类名套集 */
 	private Set<String> outsideForceLoads;
 
+	/** 是否一直持有路径下的JAR文件，开启可以提高类加载效率 */
+	private boolean holdJarFile = false;
+
 	/** 此目录中的jar文件列表 */
-	private transient List<JarFileInfo> jarFileInfos = new ArrayList<JarFileInfo>();
+	private transient List<JarFileHolder> jarFileHolders = new ArrayList<JarFileHolder>();
 
 	public PathClassLoader(String path)
 	{
@@ -71,28 +76,16 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	{
 		super(parent);
 		this.path = path;
-
-		findJarFileInfos(this.path, this.jarFileInfos);
 	}
 
-	/**
-	 * 获取路径。
-	 * 
-	 * @return
-	 */
 	public File getPath()
 	{
 		return this.path;
 	}
 
-	/**
-	 * 获取路径对应的所有{@linkplain JarFileInfo}列表。
-	 * 
-	 * @return
-	 */
-	public List<JarFileInfo> getJarFileInfos()
+	public void setPath(File path)
 	{
-		return this.jarFileInfos;
+		this.path = path;
 	}
 
 	public Set<String> getOutsideForceLoads()
@@ -114,6 +107,47 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	}
 
 	/**
+	 * 是否持有路径下的JAR文件。
+	 * 
+	 * @return
+	 */
+	public boolean isHoldJarFile()
+	{
+		return holdJarFile;
+	}
+
+	/**
+	 * 设置是否持有路径下的所有JAR文件。
+	 * <p>
+	 * 如果设置为{@code true}，那么在{@linkplain #init()}中将初始化所有JAR文件，这样可以提高类加载效率，但是会一直占用JAR文件，导致其无法被修改。
+	 * </p>
+	 * <p>
+	 * 如果设置为{@code false}，在{@linkplain #init()}不会初始化JAR文件，而是在每次加载类的时候即时访问，这样会降低类加载效率，但是不会占用JAR文件，使其可被编辑。
+	 * </p>
+	 * <p>
+	 * 此项的默认值为{@code false}。
+	 * </p>
+	 * 
+	 * @param holdJarFile
+	 */
+	public void setHoldJarFile(boolean holdJarFile)
+	{
+		this.holdJarFile = holdJarFile;
+	}
+
+	/**
+	 * 初始化。
+	 */
+	public void init()
+	{
+		if (this.holdJarFile)
+		{
+			this.jarFileHolders.clear();
+			findJarFileHolders(this.path, this.jarFileHolders, false);
+		}
+	}
+
+	/**
 	 * 关闭。
 	 * <p>
 	 * 关闭将释放占用资源，并使之不再可用。
@@ -122,10 +156,9 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	@Override
 	public void close()
 	{
-		for (JarFileInfo jarFileInfo : this.jarFileInfos)
+		for (JarFileHolder jarFileHolder : this.jarFileHolders)
 		{
-			JarFile jarFile = jarFileInfo.getJarFile();
-			close(jarFile);
+			close(jarFileHolder);
 		}
 	}
 
@@ -135,9 +168,9 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("start getting resource URL for [" + name + "]");
 
-		ResourceInfo resourceInfo = findResourceInfo(name);
+		ResourceHolder resourceHolder = findResourceHolder(name);
 
-		if (resourceInfo == null)
+		if (resourceHolder == null)
 		{
 			ClassLoader parent = getParentClassLoader();
 
@@ -149,19 +182,23 @@ public class PathClassLoader extends ClassLoader implements Closeable
 
 		try
 		{
-			URL url = getResourceURL(resourceInfo);
+			URL url = getResourceURL(resourceHolder);
 
 			if (LOGGER.isDebugEnabled())
 				LOGGER.debug("got resource URL [" + url + "] for [" + name + "] in file ["
-						+ resourceInfo.getFile().getPath() + "]");
+						+ resourceHolder.getFile().getPath() + "]");
 
 			return url;
 		}
 		catch (IOException e)
 		{
 			if (LOGGER.isDebugEnabled())
-				LOGGER.debug("getting resource URL for [" + name + "] in file [" + resourceInfo.getFile().getPath()
+				LOGGER.debug("getting resource URL for [" + name + "] in file [" + resourceHolder.getFile().getPath()
 						+ "] error", e);
+		}
+		finally
+		{
+			close(resourceHolder);
 		}
 
 		return null;
@@ -173,9 +210,9 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("start getting resource URLs for [" + name + "]");
 
-		List<ResourceInfo> resourceInfos = findResourceInfos(name);
+		List<ResourceHolder> resourceHolders = findResourceHolders(name);
 
-		if (resourceInfos == null || resourceInfos.isEmpty())
+		if (resourceHolders == null || resourceHolders.isEmpty())
 		{
 			ClassLoader parent = getParentClassLoader();
 
@@ -189,9 +226,9 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		{
 			Vector<URL> urls = new Vector<URL>();
 
-			for (ResourceInfo resourceInfo : resourceInfos)
+			for (ResourceHolder resourceHolder : resourceHolders)
 			{
-				URL url = getResourceURL(resourceInfo);
+				URL url = getResourceURL(resourceHolder);
 				urls.add(url);
 			}
 
@@ -205,6 +242,11 @@ public class PathClassLoader extends ClassLoader implements Closeable
 			if (LOGGER.isDebugEnabled())
 				LOGGER.debug("getting resource URLs for [" + name + "] in path [" + this.path.getPath() + "] error", e);
 		}
+		finally
+		{
+			for (ResourceHolder resourceHolder : resourceHolders)
+				close(resourceHolder);
+		}
 
 		return null;
 	}
@@ -215,9 +257,9 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("start getting resource as stream for [" + name + "]");
 
-		ResourceInfo resourceInfo = findResourceInfo(name);
+		ResourceHolder resourceHolder = findResourceHolder(name);
 
-		if (resourceInfo == null)
+		if (resourceHolder == null)
 		{
 			ClassLoader parent = getParentClassLoader();
 
@@ -229,13 +271,13 @@ public class PathClassLoader extends ClassLoader implements Closeable
 
 		try
 		{
-			byte[] bytes = getResourceBytes(resourceInfo);
+			byte[] bytes = getResourceBytes(resourceHolder);
 
 			InputStream in = new ByteArrayInputStream(bytes);
 
 			if (LOGGER.isDebugEnabled())
-				LOGGER.debug(
-						"got resource as stream for [" + name + "] in file [" + resourceInfo.getFile().getPath() + "]");
+				LOGGER.debug("got resource as stream for [" + name + "] in file [" + resourceHolder.getFile().getPath()
+						+ "]");
 
 			return in;
 		}
@@ -243,7 +285,11 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		{
 			if (LOGGER.isDebugEnabled())
 				LOGGER.debug("getting resource as stream for [" + name + "] in file ["
-						+ resourceInfo.getFile().getPath() + "] error", e);
+						+ resourceHolder.getFile().getPath() + "] error", e);
+		}
+		finally
+		{
+			close(resourceHolder);
 		}
 
 		return null;
@@ -331,23 +377,28 @@ public class PathClassLoader extends ClassLoader implements Closeable
 
 		String classFilePath = classNameToPath(name);
 
-		ResourceInfo classResourceInfo = findResourceInfo(classFilePath);
+		ResourceHolder classResourceHolder = findResourceHolder(classFilePath);
 
-		if (classResourceInfo == null)
+		if (classResourceHolder == null)
 			throw new ClassNotFoundException(name);
 
 		byte[] classBytes = null;
 
 		try
 		{
-			classBytes = getResourceBytes(classResourceInfo);
+			classBytes = getResourceBytes(classResourceHolder);
 
 			if (LOGGER.isDebugEnabled())
-				LOGGER.debug("found class for [" + name + "] in file [" + classResourceInfo.getFile().getPath() + "]");
+				LOGGER.debug(
+						"found class for [" + name + "] in file [" + classResourceHolder.getFile().getPath() + "]");
 		}
 		catch (IOException e)
 		{
 			throw new ClassNotFoundException(name, e);
+		}
+		finally
+		{
+			close(classResourceHolder);
 		}
 
 		Class<?> clazz = defineClass(name, classBytes, 0, classBytes.length);
@@ -370,40 +421,40 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	}
 
 	/**
-	 * 获取{@linkplain ResourceInfo}的{@linkplain URL}。
+	 * 获取{@linkplain ResourceHolder}的{@linkplain URL}。
 	 * 
-	 * @param resourceInfo
+	 * @param resourceHolder
 	 * @return
 	 * @throws IOException
 	 */
-	protected URL getResourceURL(ResourceInfo resourceInfo) throws IOException
+	protected URL getResourceURL(ResourceHolder resourceHolder) throws IOException
 	{
-		if (resourceInfo.isJarEntity())
+		if (resourceHolder.isJarEntity())
 		{
 			StringBuilder sb = new StringBuilder("jar:");
-			sb.append(resourceInfo.getFile().toURI().toURL().toString());
+			sb.append(resourceHolder.getFile().toURI().toURL().toString());
 			sb.append("!/");
-			sb.append(resourceInfo.getJarEntry().getName());
+			sb.append(resourceHolder.getJarEntry().getName());
 
 			return new URL(sb.toString());
 		}
 		else
-			return resourceInfo.getFile().toURI().toURL();
+			return resourceHolder.getFile().toURI().toURL();
 	}
 
 	/**
-	 * 获取{@linkplain ResourceInfo}的字节数组。
+	 * 获取{@linkplain ResourceHolder}的字节数组。
 	 * 
-	 * @param resourceInfo
+	 * @param resourceHolder
 	 * @return
 	 * @throws IOException
 	 */
-	protected byte[] getResourceBytes(ResourceInfo resourceInfo) throws IOException
+	protected byte[] getResourceBytes(ResourceHolder resourceHolder) throws IOException
 	{
-		if (resourceInfo.isJarEntity())
+		if (resourceHolder.isJarEntity())
 		{
-			JarFile jarFile = resourceInfo.getJarFile();
-			JarEntry jarEntry = resourceInfo.getJarEntry();
+			JarFile jarFile = resourceHolder.getJarFile();
+			JarEntry jarEntry = resourceHolder.getJarEntry();
 
 			InputStream in = null;
 
@@ -423,7 +474,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 
 			try
 			{
-				in = new BufferedInputStream(new FileInputStream(resourceInfo.getFile()));
+				in = new BufferedInputStream(new FileInputStream(resourceHolder.getFile()));
 				return getBytes(in);
 			}
 			finally
@@ -434,7 +485,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	}
 
 	/**
-	 * 查找资源的{@linkplain ResourceInfo}。
+	 * 查找资源的{@linkplain ResourceHolder}。
 	 * <p>
 	 * 如果找不到资源，将返回{@code null}。
 	 * </p>
@@ -442,7 +493,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	 * @param resourcePath
 	 * @return
 	 */
-	protected ResourceInfo findResourceInfo(String resourcePath)
+	protected ResourceHolder findResourceHolder(String resourcePath)
 	{
 		while (resourcePath.startsWith("/"))
 			resourcePath = resourcePath.substring(1);
@@ -453,33 +504,39 @@ public class PathClassLoader extends ClassLoader implements Closeable
 			File file = new File(this.path, resourcePath);
 
 			if (file.exists())
-				return new ResourceInfo(resourcePath, file);
+				return new ResourceHolder(resourcePath, file);
 		}
 
-		for (JarFileInfo jarFileInfo : this.jarFileInfos)
+		ResourceHolder resourceHolder = null;
+
+		List<JarFileHolder> jarFileHolders = getJarFileHolders();
+
+		for (JarFileHolder jarFileHolder : jarFileHolders)
 		{
-			JarFile jarFile = jarFileInfo.getJarFile();
+			JarFile jarFile = jarFileHolder.getJarFile();
 			JarEntry jarEntry = jarFile.getJarEntry(resourcePath);
 
-			if (jarEntry != null)
-				return new ResourceInfo(resourcePath, jarFileInfo.getFile(), jarFile, jarEntry);
+			if (jarEntry != null && resourceHolder == null)
+				resourceHolder = new ResourceHolder(resourcePath, jarFileHolder, jarEntry);
+			else
+				close(jarFileHolder);
 		}
 
-		return null;
+		return resourceHolder;
 	}
 
 	/**
-	 * 查找资源的{@linkplain ResourceInfo}列表。
+	 * 查找资源的{@linkplain ResourceHolder}列表。
 	 * 
 	 * @param resourcePath
 	 * @return
 	 */
-	protected List<ResourceInfo> findResourceInfos(String resourcePath)
+	protected List<ResourceHolder> findResourceHolders(String resourcePath)
 	{
 		while (resourcePath.startsWith("/"))
 			resourcePath = resourcePath.substring(1);
 
-		List<ResourceInfo> resourceInfos = new ArrayList<ResourceInfo>();
+		List<ResourceHolder> resourceInfos = new ArrayList<ResourceHolder>();
 
 		// 尝试从文件路径加载
 		if (this.path.isDirectory())
@@ -487,21 +544,43 @@ public class PathClassLoader extends ClassLoader implements Closeable
 			File file = new File(this.path, resourcePath);
 
 			if (file.exists())
-				resourceInfos.add(new ResourceInfo(resourcePath, file));
+				resourceInfos.add(new ResourceHolder(resourcePath, file));
 
 			return resourceInfos;
 		}
 
-		for (JarFileInfo jarFileInfo : this.jarFileInfos)
+		List<JarFileHolder> jarFileHolders = getJarFileHolders();
+
+		for (JarFileHolder jarFileHolder : jarFileHolders)
 		{
-			JarFile jarFile = jarFileInfo.getJarFile();
+			JarFile jarFile = jarFileHolder.getJarFile();
 			JarEntry jarEntry = jarFile.getJarEntry(resourcePath);
 
 			if (jarEntry != null)
-				resourceInfos.add(new ResourceInfo(resourcePath, jarFileInfo.getFile(), jarFile, jarEntry));
+				resourceInfos.add(new ResourceHolder(resourcePath, jarFileHolder, jarEntry));
+			else
+				close(jarFileHolder);
 		}
 
 		return resourceInfos;
+	}
+
+	/**
+	 * 获取{@linkplain #path}对应的所有{@linkplain JarFileHolder}列表。
+	 * 
+	 * @return
+	 */
+	protected List<JarFileHolder> getJarFileHolders()
+	{
+		if (this.holdJarFile)
+			return this.jarFileHolders;
+		else
+		{
+			List<JarFileHolder> jarFileHolders = new ArrayList<JarFileHolder>();
+			findJarFileHolders(this.path, jarFileHolders, true);
+
+			return jarFileHolders;
+		}
 	}
 
 	/**
@@ -527,12 +606,13 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	}
 
 	/**
-	 * 查找{@linkplain JarFile}，并将对应的{@linkplain JarFileInfo}写入指定列表。
+	 * 查找{@linkplain JarFile}，并将对应的{@linkplain JarFileHolder}写入指定列表。
 	 * 
 	 * @param path
-	 * @param jarFileInfos
+	 * @param jarFileHolders
+	 * @param closeJarFileOnClose
 	 */
-	protected void findJarFileInfos(File path, List<JarFileInfo> jarFileInfos)
+	protected void findJarFileHolders(File path, List<JarFileHolder> jarFileHolders, boolean closeJarFileOnClose)
 	{
 		List<File> files = new ArrayList<File>();
 
@@ -560,7 +640,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 			try
 			{
 				JarFile jarFile = new JarFile(file);
-				jarFileInfos.add(new JarFileInfo(jarFile, file));
+				jarFileHolders.add(new JarFileHolder(jarFile, file, closeJarFileOnClose));
 			}
 			catch (IOException e)
 			{
@@ -620,32 +700,13 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		}
 	}
 
-	/**
-	 * 关闭{@linkplain ZipFile}。
-	 * 
-	 * @param zipFile
-	 */
-	protected void close(ZipFile zipFile)
-	{
-		if (zipFile == null)
-			return;
-
-		try
-		{
-			zipFile.close();
-		}
-		catch (Throwable t)
-		{
-		}
-	}
-
 	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [path=" + path + "]";
 	}
 
-	protected static class ResourceInfo
+	protected static class ResourceHolder implements Closeable
 	{
 		/** 资源路径 */
 		private String path;
@@ -654,24 +715,24 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		private File file;
 
 		/** 当资源在jar文件内时，文件对应的JarFile */
-		private JarFile jarFile;
+		private JarFileHolder jarFileHolder;
 
 		/** 当资源在jar文件内时，资源对应的JarEntity */
 		private JarEntry jarEntry;
 
-		public ResourceInfo(String path, File file)
+		public ResourceHolder(String path, File file)
 		{
 			super();
 			this.path = path;
 			this.file = file;
 		}
 
-		public ResourceInfo(String path, File file, JarFile jarFile, JarEntry jarEntry)
+		public ResourceHolder(String path, JarFileHolder jarFileHolder, JarEntry jarEntry)
 		{
 			super();
 			this.path = path;
-			this.file = file;
-			this.jarFile = jarFile;
+			this.file = jarFileHolder.getFile();
+			this.jarFileHolder = jarFileHolder;
 			this.jarEntry = jarEntry;
 		}
 
@@ -702,7 +763,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		 */
 		public boolean isJarEntity()
 		{
-			return (this.jarFile != null);
+			return (this.jarEntry != null);
 		}
 
 		/**
@@ -712,7 +773,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		 */
 		public JarFile getJarFile()
 		{
-			return jarFile;
+			return this.jarFileHolder.getJarFile();
 		}
 
 		/**
@@ -724,6 +785,15 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		{
 			return jarEntry;
 		}
+
+		@Override
+		public void close() throws IOException
+		{
+			if (this.jarFileHolder != null)
+			{
+				this.jarFileHolder.close();
+			}
+		}
 	}
 
 	/**
@@ -732,22 +802,26 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class JarFileInfo
+	public static class JarFileHolder implements Closeable
 	{
 		private JarFile jarFile;
 
+		/** JarFile对应的文件 */
 		private File file;
 
-		public JarFileInfo()
+		private boolean closeJarFileOnClose;
+
+		public JarFileHolder()
 		{
 			super();
 		}
 
-		public JarFileInfo(JarFile jarFile, File file)
+		public JarFileHolder(JarFile jarFile, File file, boolean closeJarFileOnClose)
 		{
 			super();
 			this.jarFile = jarFile;
 			this.file = file;
+			this.closeJarFileOnClose = closeJarFileOnClose;
 		}
 
 		public JarFile getJarFile()
@@ -755,19 +829,23 @@ public class PathClassLoader extends ClassLoader implements Closeable
 			return jarFile;
 		}
 
-		public void setJarFile(JarFile jarFile)
-		{
-			this.jarFile = jarFile;
-		}
-
 		public File getFile()
 		{
 			return file;
 		}
 
-		public void setFile(File file)
+		public boolean isCloseJarFileOnClose()
 		{
-			this.file = file;
+			return closeJarFileOnClose;
+		}
+
+		@Override
+		public void close() throws IOException
+		{
+			if (this.closeJarFileOnClose)
+				this.jarFile.close();
+			else
+				;
 		}
 	}
 }

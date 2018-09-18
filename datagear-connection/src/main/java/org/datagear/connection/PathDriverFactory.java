@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * 特定路径JDBC驱动工厂。
  * <p>
- * 注意：创建实例后，要调用{@linkplain #init()}初始化。
+ * 此类实例在使用前需要调用其{@linkplain #init()}方法，在弃用前，需要调用其{@linkplain #release()}方法。
  * </p>
  * 
  * @author datagear@163.com
@@ -58,8 +58,7 @@ public class PathDriverFactory
 		if (this.pathClassLoader != null)
 			return;
 
-		this.pathClassLoader = new PathClassLoader(this.path);
-		this.pathClassLoader.setOutsideForceLoads(DriverTool.class.getName());
+		this.pathClassLoader = initPathClassLoader(this.path);
 
 		try
 		{
@@ -78,6 +77,41 @@ public class PathDriverFactory
 		{
 			throw new PathDriverFactoryException(e);
 		}
+	}
+
+	/**
+	 * 释放资源。
+	 * 
+	 * @throws PathDriverFactoryException
+	 */
+	public synchronized void release() throws PathDriverFactoryException
+	{
+		try
+		{
+			releaseJdbcDrivers();
+		}
+		finally
+		{
+			this.pathClassLoader.close();
+		}
+	}
+
+	/**
+	 * 初始化{@linkplain PathClassLoader}。
+	 * 
+	 * @param path
+	 * @return
+	 */
+	protected PathClassLoader initPathClassLoader(File path)
+	{
+		PathClassLoader pathClassLoader = new PathClassLoader(path);
+
+		pathClassLoader.setOutsideForceLoads(DriverTool.class.getName());
+		// 系统设计为允许随时编辑驱动程序库，为了满足此要求，只能牺牲类加载效率
+		pathClassLoader.setHoldJarFile(false);
+		pathClassLoader.init();
+
+		return pathClassLoader;
 	}
 
 	/**
@@ -149,23 +183,6 @@ public class PathDriverFactory
 		catch (NoSuchMethodException e)
 		{
 			throw new PathDriverFactoryException(e);
-		}
-	}
-
-	/**
-	 * 释放资源。
-	 * 
-	 * @throws PathDriverFactoryException
-	 */
-	public synchronized void release() throws PathDriverFactoryException
-	{
-		try
-		{
-			releaseJdbcDrivers();
-		}
-		finally
-		{
-			this.pathClassLoader.close();
 		}
 	}
 
