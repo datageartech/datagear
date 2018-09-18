@@ -217,7 +217,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionDriverNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			DriverNotFoundException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForException(request, exception, false, exception.getDriverClassName());
 
 		return ERROR_PAGE_URL;
 	}
