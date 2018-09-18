@@ -32,6 +32,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 基于文件的{@linkplain DriverEntityManager}。
+ * <p>
+ * 此类实例在使用前需要调用其{@linkplain #init()}方法，在弃用前，需要调用其{@linkplain #releaseAll()}方法。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -331,13 +334,13 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public void releaseDriver(DriverEntity driverEntity) throws DriverEntityManagerException
+	public void release(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
 		removePathDriverFactory(driverEntity);
 	}
 
 	@Override
-	public synchronized void releaseAllDrivers()
+	public synchronized void releaseAll()
 	{
 		for (Map.Entry<String, PathDriverFactoryInfo> entry : this.pathDriverFactoryInfoMap.entrySet())
 		{

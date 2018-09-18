@@ -190,7 +190,14 @@ public class DriverEntityController extends AbstractController
 			XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager(directory);
 			driverEntityManager.init();
 
-			return driverEntityManager.getAll();
+			try
+			{
+				return driverEntityManager.getAll();
+			}
+			finally
+			{
+				driverEntityManager.releaseAll();
+			}
 		}
 		catch (DriverEntityManagerException e)
 		{

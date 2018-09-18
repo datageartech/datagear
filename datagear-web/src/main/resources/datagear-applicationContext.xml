@@ -104,7 +104,7 @@
 		</property>
 	</bean>
 	
-	<bean id="driverEntityManager" class="org.datagear.connection.XmlDriverEntityManager" destroy-method="releaseAllDrivers">
+	<bean id="driverEntityManager" class="org.datagear.connection.XmlDriverEntityManager" destroy-method="releaseAll">
 		<constructor-arg ref="driverEntityManagerRootDirectory" />
 	</bean>
 	

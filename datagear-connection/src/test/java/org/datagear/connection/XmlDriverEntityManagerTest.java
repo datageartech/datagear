@@ -51,32 +51,39 @@ public class XmlDriverEntityManagerTest
 		XmlDriverEntityManager xmlDriverEntityManager = new XmlDriverEntityManager("target/drivers/");
 		xmlDriverEntityManager.init();
 
-		DriverEntity[] expected = new DriverEntity[5];
+		try
+		{
+			DriverEntity[] expected = new DriverEntity[5];
 
-		DriverEntity driverEntity0 = new DriverEntity("mysql", "com.mysql.Driver");
-		expected[0] = driverEntity0;
+			DriverEntity driverEntity0 = new DriverEntity("mysql", "com.mysql.Driver");
+			expected[0] = driverEntity0;
 
-		DriverEntity driverEntity1 = new DriverEntity("oracle", "oracle.jdbc.OracleDriver");
-		expected[1] = driverEntity1;
+			DriverEntity driverEntity1 = new DriverEntity("oracle", "oracle.jdbc.OracleDriver");
+			expected[1] = driverEntity1;
 
-		DriverEntity driverEntity2 = new DriverEntity("my", "my.jdbc.MyDriver");
-		driverEntity2.setDisplayName("my");
-		driverEntity2.setDisplayDesc("my-description, used for database <a>, b, c");
-		expected[2] = driverEntity2;
+			DriverEntity driverEntity2 = new DriverEntity("my", "my.jdbc.MyDriver");
+			driverEntity2.setDisplayName("my");
+			driverEntity2.setDisplayDesc("my-description, used for database <a>, b, c");
+			expected[2] = driverEntity2;
 
-		DriverEntity driverEntity3 = new DriverEntity("my1", "my.jdbc.MyDriver");
-		driverEntity3.setDisplayDesc("my-description1");
-		expected[3] = driverEntity3;
+			DriverEntity driverEntity3 = new DriverEntity("my1", "my.jdbc.MyDriver");
+			driverEntity3.setDisplayDesc("my-description1");
+			expected[3] = driverEntity3;
 
-		DriverEntity driverEntity4 = new DriverEntity("mysql-jre8", "com.mysql.cj.Driver");
-		expected[4] = driverEntity4;
+			DriverEntity driverEntity4 = new DriverEntity("mysql-jre8", "com.mysql.cj.Driver");
+			expected[4] = driverEntity4;
 
-		xmlDriverEntityManager.add(expected);
+			xmlDriverEntityManager.add(expected);
 
-		List<DriverEntity> actualList = xmlDriverEntityManager.getAll();
-		DriverEntity[] actual = actualList.toArray(new DriverEntity[actualList.size()]);
+			List<DriverEntity> actualList = xmlDriverEntityManager.getAll();
+			DriverEntity[] actual = actualList.toArray(new DriverEntity[actualList.size()]);
 
-		Assert.assertArrayEquals(expected, actual);
+			Assert.assertArrayEquals(expected, actual);
+		}
+		finally
+		{
+			xmlDriverEntityManager.releaseAll();
+		}
 	}
 
 	@Test
@@ -86,43 +93,10 @@ public class XmlDriverEntityManagerTest
 
 		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("src/test/resources/drivers");
 
-		{
-			Driver driver = driverEntityManager.getDriver(DriverEntity.valueOf("mysql", "com.mysql.jdbc.Driver"));
-			assertNotNull(driver);
-			assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
-		}
-
-		println();
-
-		{
-			try
-			{
-				Driver driver = driverEntityManager
-						.getDriver(DriverEntity.valueOf("mysql-jre8", "com.mysql.cj.jdbc.Driver"));
-
-				assertNotNull(driver);
-				assertEquals("com.mysql.cj.jdbc.Driver", driver.getClass().getName());
-			}
-			catch (PathDriverFactoryException e)
-			{
-				// 如果当前JRE小于8，将会抛出此异常
-				assertEquals(DriverNotFoundException.class, e.getClass());
-			}
-		}
-
-		println();
-
-		{
-			Driver driver = driverEntityManager.getDriver(DriverEntity.valueOf("oracle", "oracle.jdbc.OracleDriver"));
-			assertNotNull(driver);
-			assertEquals("oracle.jdbc.OracleDriver", driver.getClass().getName());
-		}
-
-		println();
-
+		try
 		{
 			{
-				Driver driver = driverEntityManager.getDriver(DriverEntity.valueOf("mixed", "com.mysql.jdbc.Driver"));
+				Driver driver = driverEntityManager.getDriver(DriverEntity.valueOf("mysql", "com.mysql.jdbc.Driver"));
 				assertNotNull(driver);
 				assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
 			}
@@ -130,18 +104,58 @@ public class XmlDriverEntityManagerTest
 			println();
 
 			{
+				try
+				{
+					Driver driver = driverEntityManager
+							.getDriver(DriverEntity.valueOf("mysql-jre8", "com.mysql.cj.jdbc.Driver"));
+
+					assertNotNull(driver);
+					assertEquals("com.mysql.cj.jdbc.Driver", driver.getClass().getName());
+				}
+				catch (PathDriverFactoryException e)
+				{
+					// 如果当前JRE小于8，将会抛出此异常
+					assertEquals(DriverNotFoundException.class, e.getClass());
+				}
+			}
+
+			println();
+
+			{
 				Driver driver = driverEntityManager
-						.getDriver(DriverEntity.valueOf("mixed", "oracle.jdbc.OracleDriver"));
+						.getDriver(DriverEntity.valueOf("oracle", "oracle.jdbc.OracleDriver"));
 				assertNotNull(driver);
 				assertEquals("oracle.jdbc.OracleDriver", driver.getClass().getName());
 			}
+
+			println();
+
+			{
+				{
+					Driver driver = driverEntityManager
+							.getDriver(DriverEntity.valueOf("mixed", "com.mysql.jdbc.Driver"));
+					assertNotNull(driver);
+					assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
+				}
+
+				println();
+
+				{
+					Driver driver = driverEntityManager
+							.getDriver(DriverEntity.valueOf("mixed", "oracle.jdbc.OracleDriver"));
+					assertNotNull(driver);
+					assertEquals("oracle.jdbc.OracleDriver", driver.getClass().getName());
+				}
+			}
+
+			println();
+
+			printlnMyContextDrivers();
 		}
-
-		println();
-
-		driverEntityManager.releaseAllDrivers();
-
-		printlnMyContextDrivers();
+		finally
+		{
+			driverEntityManager.releaseAll();
+		}
 	}
 
 	@Test
@@ -149,40 +163,47 @@ public class XmlDriverEntityManagerTest
 	{
 		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("src/test/resources/drivers");
 
-		DriverEntity driverEntity = DriverEntity.valueOf("mysql", "com.mysql.jdbc.Driver");
-
-		Driver driver = driverEntityManager.getDriver(driverEntity);
-		ClassLoader classLoader = driver.getClass().getClassLoader();
-
-		assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
-
-		Driver unmodifiedDriver = driverEntityManager.getDriver(driverEntity);
-		ClassLoader unmodifiedClassLoader = unmodifiedDriver.getClass().getClassLoader();
-
-		assertEquals("com.mysql.jdbc.Driver", unmodifiedDriver.getClass().getName());
-
-		assertEquals(classLoader, unmodifiedClassLoader);
-
-		File modifiedFile = new File(driverEntityManager.getRootDirectory(), "mysql/modified.txt");
-		Writer writer = null;
 		try
 		{
-			writer = new BufferedWriter(new FileWriter(modifiedFile));
-			writer.write("modified");
+			DriverEntity driverEntity = DriverEntity.valueOf("mysql", "com.mysql.jdbc.Driver");
+
+			Driver driver = driverEntityManager.getDriver(driverEntity);
+			ClassLoader classLoader = driver.getClass().getClassLoader();
+
+			assertEquals("com.mysql.jdbc.Driver", driver.getClass().getName());
+
+			Driver unmodifiedDriver = driverEntityManager.getDriver(driverEntity);
+			ClassLoader unmodifiedClassLoader = unmodifiedDriver.getClass().getClassLoader();
+
+			assertEquals("com.mysql.jdbc.Driver", unmodifiedDriver.getClass().getName());
+
+			assertEquals(classLoader, unmodifiedClassLoader);
+
+			File modifiedFile = new File(driverEntityManager.getRootDirectory(), "mysql/modified.txt");
+			Writer writer = null;
+			try
+			{
+				writer = new BufferedWriter(new FileWriter(modifiedFile));
+				writer.write("modified");
+			}
+			finally
+			{
+				writer.close();
+			}
+
+			Driver modifiedDriver = driverEntityManager.getDriver(driverEntity);
+			ClassLoader modifiedClassLoader = modifiedDriver.getClass().getClassLoader();
+
+			assertEquals("com.mysql.jdbc.Driver", modifiedDriver.getClass().getName());
+
+			assertNotEquals(classLoader, modifiedClassLoader);
+
+			modifiedFile.delete();
 		}
 		finally
 		{
-			writer.close();
+			driverEntityManager.releaseAll();
 		}
-
-		Driver modifiedDriver = driverEntityManager.getDriver(driverEntity);
-		ClassLoader modifiedClassLoader = modifiedDriver.getClass().getClassLoader();
-
-		assertEquals("com.mysql.jdbc.Driver", modifiedDriver.getClass().getName());
-
-		assertNotEquals(classLoader, modifiedClassLoader);
-
-		modifiedFile.delete();
 	}
 
 	protected static void printlnMyContextDrivers()

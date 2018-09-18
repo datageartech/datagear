@@ -136,15 +136,15 @@ public interface DriverEntityManager
 	Driver getDriver(DriverEntity driverEntity) throws DriverEntityManagerException;
 
 	/**
-	 * 释放驱动程序库资源。
+	 * 释放指定{@linkplain DriverEntity}的资源。
 	 * 
 	 * @param driverEntity
 	 * @throws DriverEntityManagerException
 	 */
-	void releaseDriver(DriverEntity driverEntity) throws DriverEntityManagerException;
+	void release(DriverEntity driverEntity) throws DriverEntityManagerException;
 
 	/**
-	 * 释放所有驱动程序库资源。
+	 * 释放所有资源。
 	 */
-	void releaseAllDrivers();
+	void releaseAll();
 }

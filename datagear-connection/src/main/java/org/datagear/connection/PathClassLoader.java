@@ -158,7 +158,10 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	{
 		for (JarFileHolder jarFileHolder : this.jarFileHolders)
 		{
-			close(jarFileHolder);
+			JarFileHolder tmpJarFileHolder = new JarFileHolder(jarFileHolder.getJarFile(), jarFileHolder.getFile(),
+					true);
+
+			close(tmpJarFileHolder);
 		}
 	}
 
