@@ -24,11 +24,11 @@ public class App
 
 	private static final String LOG_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-	private static final String APPLICATION_NAME = "application";
+	private static final String APPLICATION_NAME = "[数据齿轮]";
 
 	private static final String INFO_WRAP_LINE = "-----------------------------------------";
 
-	public static void main(String[] args) throws Exception
+	public static void main(String[] args) throws Throwable
 	{
 		System.out.println(INFO_WRAP_LINE);
 		System.out.println(
@@ -39,22 +39,33 @@ public class App
 		LOGGER.info("starting " + APPLICATION_NAME);
 		LOGGER.info(INFO_WRAP_LINE);
 
-		AppConfigFactory appConfigFactory = new AppConfigFactory();
-		AppConfig appConfig = appConfigFactory.get();
+		Server server = null;
 
-		Server server = new Server(appConfig.getServerPort());
-
-		WebAppContext webAppContext = new WebAppContext();
-		webAppContext.setContextPath("/");
-		webAppContext.setWar(appConfig.getWebappLocation());
-
-		server.setHandler(webAppContext);
-
-		server.start();
-
-		while (!server.isStarted())
+		try
 		{
-			Thread.sleep(500);
+			AppConfigFactory appConfigFactory = new AppConfigFactory();
+			AppConfig appConfig = appConfigFactory.get();
+
+			server = new Server(appConfig.getServerPort());
+
+			WebAppContext webAppContext = new WebAppContext();
+			webAppContext.setContextPath("/");
+			webAppContext.setWar(appConfig.getWebappLocation());
+
+			server.setHandler(webAppContext);
+
+			server.start();
+
+			while (!server.isStarted())
+			{
+				Thread.sleep(500);
+			}
+		}
+		catch (Throwable t)
+		{
+			LOGGER.error("start " + APPLICATION_NAME + " failed", t);
+
+			throw t;
 		}
 
 		System.out.println(INFO_WRAP_LINE);

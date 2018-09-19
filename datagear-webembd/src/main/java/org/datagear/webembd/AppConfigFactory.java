@@ -80,6 +80,11 @@ public class AppConfigFactory
 					+ "] value [" + portStr + "] is not legal number");
 		}
 
+		File webappFile = new File(location);
+		if (!webappFile.exists())
+			throw new AppConfigFactoryException("configuration property [" + CONFIG_PROPERTY_WEBAPP_LOCATION
+					+ "] value [" + location + "] is illegal, no file found");
+
 		return new AppConfig(port, location);
 	}
 
