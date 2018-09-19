@@ -673,7 +673,7 @@ table.dataTable.no-footer{
 	position: absolute;
 	display: none;
 	left: 0px;
-	top: 7px;
+	top: 12px;
 }
 .search-form .condition-panel-parent{
 	position: relative;
