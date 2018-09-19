@@ -299,7 +299,8 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	}
 
 	@Override
-	protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException
+	protected synchronized Class<?> loadClass(String name, boolean resolve)
+			throws ClassNotFoundException, ClassFormatError
 	{
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("start loading class [" + name + "]");
@@ -318,11 +319,12 @@ public class PathClassLoader extends ClassLoader implements Closeable
 				}
 				catch (ClassNotFoundException e)
 				{
+					// 找不到类，则代理给父类加载器
 				}
-				catch (Throwable t)
+				catch (ClassFormatError e)
 				{
-					if (LOGGER.isDebugEnabled())
-						LOGGER.debug("finding class [" + name + "] error", t);
+					// 类加载出错（比如版本不兼容），则抛出
+					throw e;
 				}
 			}
 		}
@@ -373,7 +375,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 	}
 
 	@Override
-	protected Class<?> findClass(String name) throws ClassNotFoundException
+	protected Class<?> findClass(String name) throws ClassNotFoundException, ClassFormatError
 	{
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("start finding class [" + name + "]");

@@ -141,9 +141,9 @@ public class PathDriverFactory
 		{
 			throw new DriverNotFoundException(this.path.getPath(), driverClassName, e);
 		}
-		catch (Error e)
+		catch (ClassFormatError e)
 		{
-			throw new DriverLoadErrorException(e);
+			throw new DriverClassFormatErrorException(e);
 		}
 		catch (Throwable t)
 		{

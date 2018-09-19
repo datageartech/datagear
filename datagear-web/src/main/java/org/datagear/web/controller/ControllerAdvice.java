@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSourceException;
+import org.datagear.connection.DriverClassFormatErrorException;
 import org.datagear.connection.DriverEntityManagerException;
 import org.datagear.connection.DriverNotFoundException;
 import org.datagear.connection.EstablishConnectionException;
@@ -218,6 +219,16 @@ public class ControllerAdvice extends AbstractController
 			DriverNotFoundException exception)
 	{
 		setOperationMessageForException(request, exception, false, exception.getDriverClassName());
+
+		return ERROR_PAGE_URL;
+	}
+
+	@ExceptionHandler(DriverClassFormatErrorException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleConnectionDriverClassFormatErrorException(HttpServletRequest request,
+			HttpServletResponse response, DriverClassFormatErrorException exception)
+	{
+		setOperationMessageForException(request, exception, false);
 
 		return ERROR_PAGE_URL;
 	}
