@@ -4,7 +4,7 @@
 
 	<groupId>org.datagear</groupId>
 	<artifactId>datagear</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>pom</packaging>
 
 	<name>datagear</name>
@@ -68,6 +68,16 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<!-- 统一更新子模块版本号为父模块版本号插件 -->
+			<!-- mvn -N versions:update-child-modules -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<generateBackupPoms>false</generateBackupPoms>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
