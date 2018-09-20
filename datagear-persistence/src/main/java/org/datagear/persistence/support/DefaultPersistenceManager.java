@@ -38,6 +38,8 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 
 	private ConversionService conversionService;
 
+	private ExpressionResolver expressionResolver;
+
 	private InsertPersistenceOperation insertPersistenceOperation;
 
 	private UpdatePersistenceOperation updatePersistenceOperation;
@@ -56,10 +58,13 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		super();
 
 		this.dialectSource = dialectSource;
-		this.insertPersistenceOperation = new InsertPersistenceOperation(this.conversionService);
+		this.conversionService = conversionService;
+		this.expressionResolver = new ExpressionResolver();
+		this.insertPersistenceOperation = new InsertPersistenceOperation(this.conversionService,
+				this.expressionResolver);
 		this.deletePersistenceOperation = new DeletePersistenceOperation();
 		this.updatePersistenceOperation = new UpdatePersistenceOperation(this.insertPersistenceOperation,
-				this.deletePersistenceOperation, this.conversionService);
+				this.deletePersistenceOperation, this.conversionService, this.expressionResolver);
 		this.selectPersistenceOperation = new SelectPersistenceOperation();
 	}
 
@@ -83,6 +88,18 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		this.conversionService = conversionService;
 		this.insertPersistenceOperation.setConversionService(conversionService);
 		this.updatePersistenceOperation.setConversionService(conversionService);
+	}
+
+	public ExpressionResolver getExpressionResolver()
+	{
+		return expressionResolver;
+	}
+
+	public void setExpressionResolver(ExpressionResolver expressionResolver)
+	{
+		this.expressionResolver = expressionResolver;
+		this.insertPersistenceOperation.setExpressionResolver(expressionResolver);
+		this.updatePersistenceOperation.setExpressionResolver(expressionResolver);
 	}
 
 	public InsertPersistenceOperation getInsertPersistenceOperation()

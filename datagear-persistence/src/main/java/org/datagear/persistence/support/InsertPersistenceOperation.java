@@ -24,6 +24,7 @@ import org.datagear.persistence.mapper.ModelTableMapper;
 import org.datagear.persistence.mapper.PropertyModelMapper;
 import org.datagear.persistence.mapper.PropertyTableMapper;
 import org.datagear.persistence.mapper.RelationMapper;
+import org.datagear.persistence.support.ExpressionResolver.Expression;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -36,15 +37,18 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 {
 	private ConversionService conversionService;
 
+	private ExpressionResolver expressionResolver;
+
 	public InsertPersistenceOperation()
 	{
 		super();
 	}
 
-	public InsertPersistenceOperation(ConversionService conversionService)
+	public InsertPersistenceOperation(ConversionService conversionService, ExpressionResolver expressionResolver)
 	{
 		super();
 		this.conversionService = conversionService;
+		this.expressionResolver = expressionResolver;
 	}
 
 	public ConversionService getConversionService()
@@ -55,6 +59,16 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	public void setConversionService(ConversionService conversionService)
 	{
 		this.conversionService = conversionService;
+	}
+
+	public ExpressionResolver getExpressionResolver()
+	{
+		return expressionResolver;
+	}
+
+	public void setExpressionResolver(ExpressionResolver expressionResolver)
+	{
+		this.expressionResolver = expressionResolver;
 	}
 
 	/**
@@ -83,7 +97,7 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param property
 	 * @param relationMapper
 	 * @param propertyValue
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * @return
 	 */
@@ -108,18 +122,18 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            附加列值，允许为{@code null}
 	 * @param ignorePropertyName
 	 *            忽略的属性名称，用于处理双向关联时，允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * 
 	 */
 	protected int insert(Connection cn, Dialect dialect, String table, Model model, Object obj,
 			String[] extraColumnNames, Object[] extraColumnValues, String ignorePropertyName,
-			Map<String, Object> sqlResultMap)
+			Map<String, Object> expressionValueCache)
 	{
 		int count = insertModelTableData(cn, dialect, table, model, obj, extraColumnNames, extraColumnValues,
-				ignorePropertyName, sqlResultMap);
+				ignorePropertyName, expressionValueCache);
 
-		insertPropertyTableData(cn, dialect, table, model, obj, ignorePropertyName, sqlResultMap);
+		insertPropertyTableData(cn, dialect, table, model, obj, ignorePropertyName, expressionValueCache);
 
 		return count;
 	}
@@ -141,13 +155,13 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            附加列值，允许为{@code null}
 	 * @param ignorePropertyName
 	 *            忽略的属性名称，允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * 
 	 */
 	protected int insertModelTableData(Connection cn, Dialect dialect, String table, Model model, Object obj,
 			String[] extraColumnNames, Object[] extraColumnValues, String ignorePropertyName,
-			Map<String, Object> sqlResultMap)
+			Map<String, Object> expressionValueCache)
 	{
 		Property[] properties = model.getProperties();
 		Object[] propertyValues = MU.getPropertyValues(model, obj, properties);
@@ -165,10 +179,11 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			Object propertyValue = propertyValues[i];
 
-			if (PMU.isSqlExpression(propertyValue))
+			List<Expression> expressions = this.expressionResolver.resolve(propertyValue);
+			if (expressions != null && !expressions.isEmpty())
 			{
-				propertyValue = executeQueryForGetPropertySqlValueResult(cn, model, property, (String) propertyValue,
-						sqlResultMap, this.conversionService);
+				propertyValue = evaluatePropertyValueForQueryExpressions(cn, model, property, (String) propertyValue,
+						expressions, expressionValueCache, this.conversionService, this.expressionResolver);
 
 				propertyValues[i] = propertyValue;
 				property.set(obj, propertyValue);
@@ -260,11 +275,11 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param obj
 	 * @param ignorePropertyName
 	 *            忽略的属性名称，用于处理双向关联时，允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 */
 	protected void insertPropertyTableData(Connection cn, Dialect dialect, String table, Model model, Object obj,
-			String ignorePropertyName, Map<String, Object> sqlResultMap)
+			String ignorePropertyName, Map<String, Object> expressionValueCache)
 	{
 		Property[] properties = model.getProperties();
 
@@ -280,7 +295,7 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 				continue;
 
 			insertPropertyTableData(cn, dialect, table, model, obj, property, getRelationMapper(model, property),
-					propertyValue, sqlResultMap);
+					propertyValue, expressionValueCache);
 		}
 	}
 
@@ -295,16 +310,17 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param property
 	 * @param relationMapper
 	 * @param propertyValue
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * @return
 	 */
 	protected int insertPropertyTableData(Connection cn, Dialect dialect, String table, Model model, Object obj,
-			Property property, RelationMapper relationMapper, Object propertyValue, Map<String, Object> sqlResultMap)
+			Property property, RelationMapper relationMapper, Object propertyValue,
+			Map<String, Object> expressionValueCache)
 	{
 		int count = 0;
 
-		if (PMU.isSqlExpression(propertyValue))
+		if (this.expressionResolver.isExpression(propertyValue))
 		{
 			return PERSISTENCE_IGNORED;
 		}
@@ -314,7 +330,7 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 					propertyValue);
 
 			return insertPropertyTableData(cn, dialect, table, model, obj, property, propertyModelMapper,
-					toArray(propertyValue), null, sqlResultMap);
+					toArray(propertyValue), null, expressionValueCache);
 		}
 		else
 		{
@@ -335,7 +351,7 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 
 				int myCount = insertPropertyTableData(cn, dialect, table, model, obj, property,
 						PropertyModelMapper.valueOf(property, relationMapper, propertyModel), myPropValues,
-						myPropValueIdexes, sqlResultMap);
+						myPropValueIdexes, expressionValueCache);
 
 				if (myCount > 0)
 					count += myCount;
@@ -358,12 +374,12 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param propValues
 	 * @param propValueOrders
 	 *            允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 */
 	protected int insertPropertyTableData(Connection cn, Dialect dialect, String table, Model model, Object obj,
 			Property property, PropertyModelMapper<?> propertyModelMapper, Object[] propValues, long[] propValueOrders,
-			Map<String, Object> sqlResultMap)
+			Map<String, Object> expressionValueCache)
 	{
 		if (propertyModelMapper.isModelTableMapperInfo())
 		{
@@ -380,21 +396,21 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 				throw new IllegalArgumentException();
 
 			return insertPropertyTableDataForCompositeModelTableMapper(cn, dialect, table, model, obj, property, mpmm,
-					propValues[0], sqlResultMap);
+					propValues[0], expressionValueCache);
 		}
 		else if (propertyModelMapper.isPropertyTableMapperInfo())
 		{
 			PropertyModelMapper<PropertyTableMapper> ppmm = propertyModelMapper.castPropertyTableMapperInfo();
 
 			return insertPropertyTableDataForPropertyTableMapper(cn, dialect, table, model, obj, property, ppmm,
-					propValues, propValueOrders, sqlResultMap);
+					propValues, propValueOrders, expressionValueCache);
 		}
 		else if (propertyModelMapper.isJoinTableMapperInfo())
 		{
 			PropertyModelMapper<JoinTableMapper> jpmm = propertyModelMapper.castJoinTableMapperInfo();
 
 			return insertPropertyTableDataForJoinTableMapper(cn, dialect, table, model, obj, property, jpmm, propValues,
-					propValueOrders, sqlResultMap);
+					propValueOrders, expressionValueCache);
 		}
 		else
 			throw new UnsupportedOperationException();
@@ -411,13 +427,13 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param property
 	 * @param propertyModelMapper
 	 * @param propValue
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * 
 	 */
 	protected int insertPropertyTableDataForCompositeModelTableMapper(Connection cn, Dialect dialect, String table,
 			Model model, Object obj, Property property, PropertyModelMapper<ModelTableMapper> propertyModelMapper,
-			Object propValue, Map<String, Object> sqlResultMap)
+			Object propValue, Map<String, Object> expressionValueCache)
 	{
 		Model propertyModel = propertyModelMapper.getModel();
 
@@ -425,7 +441,7 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 			return PERSISTENCE_IGNORED;
 
 		return insert(cn, dialect, getTableName(propertyModel), propertyModel, propValue, null, null, null,
-				sqlResultMap);
+				expressionValueCache);
 	}
 
 	/**
@@ -441,25 +457,25 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param propValues
 	 * @param propValueOrders
 	 *            允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * @return
 	 */
 	protected int insertPropertyTableDataForPropertyTableMapper(Connection cn, Dialect dialect, String table,
 			Model model, Object obj, Property property, PropertyModelMapper<PropertyTableMapper> propertyModelMapper,
-			Object[] propValues, long[] propValueOrders, Map<String, Object> sqlResultMap)
+			Object[] propValues, long[] propValueOrders, Map<String, Object> expressionValueCache)
 	{
 		PropertyTableMapper mapper = propertyModelMapper.getMapper();
 
 		if (mapper.isPrimitivePropertyMapper())
 		{
 			return insertPropertyTableDataForPrimitiveValuePropertyTableMapper(cn, dialect, table, model, obj, property,
-					propertyModelMapper, propValues, propValueOrders, sqlResultMap);
+					propertyModelMapper, propValues, propValueOrders, expressionValueCache);
 		}
 		else
 		{
 			return insertPropertyTableDataForCompositePropertyTableMapper(cn, dialect, table, model, obj, property,
-					propertyModelMapper, propValues, propValueOrders, sqlResultMap);
+					propertyModelMapper, propValues, propValueOrders, expressionValueCache);
 		}
 	}
 
@@ -476,14 +492,14 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param propValues
 	 * @param propValueOrders
 	 *            允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * 
 	 */
 	protected int insertPropertyTableDataForPrimitiveValuePropertyTableMapper(Connection cn, Dialect dialect,
 			String table, Model model, Object obj, Property property,
 			PropertyModelMapper<PropertyTableMapper> propertyModelMapper, Object[] propValues, long[] propValueOrders,
-			Map<String, Object> sqlResultMap)
+			Map<String, Object> expressionValueCache)
 	{
 		int count = 0;
 
@@ -515,9 +531,12 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 		{
 			Object propertyValue = propValues[i];
 
-			if (PMU.isSqlExpression(propertyValue))
-				propertyValue = executeQueryForGetPropertySqlValueResult(cn, model, property, (String) propertyValue,
-						sqlResultMap, this.conversionService);
+			List<Expression> expressions = this.expressionResolver.resolve(propertyValue);
+			if (expressions != null && !expressions.isEmpty())
+			{
+				propertyValue = evaluatePropertyValueForQueryExpressions(cn, model, property, (String) propertyValue,
+						expressions, expressionValueCache, this.conversionService, this.expressionResolver);
+			}
 
 			Object columnValue = getColumnValue(cn, model, property, propertyModelMapper, propertyValue);
 
@@ -550,13 +569,13 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param propValues
 	 * @param propValueOrders
 	 *            允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * @return
 	 */
 	protected int insertPropertyTableDataForCompositePropertyTableMapper(Connection cn, Dialect dialect, String table,
 			Model model, Object obj, Property property, PropertyModelMapper<PropertyTableMapper> propertyModelMapper,
-			Object[] propValues, long[] propValueOrders, Map<String, Object> sqlResultMap)
+			Object[] propValues, long[] propValueOrders, Map<String, Object> expressionValueCache)
 	{
 		int count = 0;
 
@@ -577,7 +596,7 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 						(propValueOrders == null ? null : propValueOrders[i]));
 
 				int myCount = insert(cn, dialect, ptable, propertyModel, propValues[i], allMapperColumNames,
-						allMapperColumnValues, getMappedByWith(mapper), sqlResultMap);
+						allMapperColumnValues, getMappedByWith(mapper), expressionValueCache);
 
 				if (myCount > 0)
 					count += myCount;
@@ -674,13 +693,13 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param propValues
 	 * @param propValueOrders
 	 *            允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * 
 	 */
 	protected int insertPropertyTableDataForJoinTableMapper(Connection cn, Dialect dialect, String table, Model model,
 			Object obj, Property property, PropertyModelMapper<JoinTableMapper> propertyModelMapper,
-			Object[] propValues, long[] propValueOrders, Map<String, Object> sqlResultMap)
+			Object[] propValues, long[] propValueOrders, Map<String, Object> expressionValueCache)
 	{
 		Model propertyModel = propertyModelMapper.getModel();
 
@@ -690,7 +709,7 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 		{
 			if (PMU.isPrivate(model, property, propertyModel))
 			{
-				insert(cn, dialect, ptable, propertyModel, propValues[i], null, null, null, sqlResultMap);
+				insert(cn, dialect, ptable, propertyModel, propValues[i], null, null, null, expressionValueCache);
 			}
 		}
 
@@ -825,7 +844,7 @@ public class InsertPersistenceOperation extends AbstractModelPersistenceOperatio
 				if (valueGenerator != null)
 					propValue = valueGenerator.generate(model, property, obj);
 
-				if (propValue != null && !PMU.isSqlExpression(propValue))
+				if (propValue != null && this.expressionResolver.isExpression(propValue))
 					property.set(obj, propValue);
 			}
 		}

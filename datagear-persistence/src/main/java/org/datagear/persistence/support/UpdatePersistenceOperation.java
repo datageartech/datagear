@@ -24,6 +24,7 @@ import org.datagear.persistence.mapper.ModelTableMapper;
 import org.datagear.persistence.mapper.PropertyModelMapper;
 import org.datagear.persistence.mapper.PropertyTableMapper;
 import org.datagear.persistence.mapper.RelationMapper;
+import org.datagear.persistence.support.ExpressionResolver.Expression;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -46,18 +47,22 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 
 	private ConversionService conversionService;
 
+	private ExpressionResolver expressionResolver;
+
 	public UpdatePersistenceOperation()
 	{
 		super();
 	}
 
 	public UpdatePersistenceOperation(InsertPersistenceOperation insertPersistenceOperation,
-			DeletePersistenceOperation deletePersistenceOperation, ConversionService conversionService)
+			DeletePersistenceOperation deletePersistenceOperation, ConversionService conversionService,
+			ExpressionResolver expressionResolver)
 	{
 		super();
 		this.insertPersistenceOperation = insertPersistenceOperation;
 		this.deletePersistenceOperation = deletePersistenceOperation;
 		this.conversionService = conversionService;
+		this.expressionResolver = expressionResolver;
 	}
 
 	public boolean isHandleMultipleProperty()
@@ -98,6 +103,16 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 	public void setConversionService(ConversionService conversionService)
 	{
 		this.conversionService = conversionService;
+	}
+
+	public ExpressionResolver getExpressionResolver()
+	{
+		return expressionResolver;
+	}
+
+	public void setExpressionResolver(ExpressionResolver expressionResolver)
+	{
+		this.expressionResolver = expressionResolver;
 	}
 
 	/**
@@ -166,13 +181,13 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            附加列值，允许为{@code null}
 	 * @param ignorePropertyName
 	 *            忽略的属性名称，用于处理双向关联时，允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * @return
 	 */
 	protected int update(Connection cn, Dialect dialect, String table, Model model, SqlBuilder originalCondition,
 			Object originalObj, Object updateObj, String[] extraColumnNames, Object[] extraColumnValues,
-			String ignorePropertyName, Map<String, Object> sqlResultMap)
+			String ignorePropertyName, Map<String, Object> expressionValueCache)
 	{
 		int count = 0;
 
@@ -192,10 +207,11 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 
 			Object propertyValue = updatePropertyValues[i];
 
-			if (PMU.isSqlExpression(propertyValue))
+			List<Expression> expressions = this.expressionResolver.resolve(propertyValue);
+			if (expressions != null && !expressions.isEmpty())
 			{
-				propertyValue = executeQueryForGetPropertySqlValueResult(cn, model, property, (String) propertyValue,
-						sqlResultMap, this.conversionService);
+				propertyValue = evaluatePropertyValueForQueryExpressions(cn, model, property, (String) propertyValue,
+						expressions, expressionValueCache, this.conversionService, this.expressionResolver);
 
 				updatePropertyValues[i] = propertyValue;
 				property.set(updateObj, propertyValue);
@@ -252,11 +268,12 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 						{
 							int myUpdateCount = updatePropertyTableData(cn, dialect, table, model, originalCondition,
 									property, pmm, originalPropertyValue, updatePropertyValue, updateObj, false,
-									sqlResultMap);
+									expressionValueCache);
 
 							if (myUpdateCount == 0)
 								insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model, updateObj,
-										property, pmm, new Object[] { updatePropertyValue }, null, sqlResultMap);
+										property, pmm, new Object[] { updatePropertyValue }, null,
+										expressionValueCache);
 						}
 						else
 						{
@@ -290,12 +307,12 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 				int myUpdateCount = updatePropertyTableData(cn, dialect, table, model, updateCondition,
 						updateInfo.getProperty(), updateInfo.getPropertyModelMapper(),
 						originalPropertyValues[updateInfo.getPropertyIndex()], updatePropertyValue, null, false,
-						sqlResultMap);
+						expressionValueCache);
 
 				if (myUpdateCount == 0)
 					insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model, updateObj,
 							updateInfo.getProperty(), updateInfo.getPropertyModelMapper(),
-							new Object[] { updatePropertyValue }, null, sqlResultMap);
+							new Object[] { updatePropertyValue }, null, expressionValueCache);
 			}
 		}
 
@@ -410,14 +427,14 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            需要处理外键更新的对象，允许为{@code null}
 	 * @param updateModelTable
 	 *            是否更新模型表数据
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * @return
 	 */
 	protected int updatePropertyTableData(Connection cn, Dialect dialect, String table, Model model,
 			SqlBuilder condition, Property property, PropertyModelMapper<?> propertyModelMapper,
 			Object originalPropertyValue, Object updatePropertyValue, Object keyUpdateObj, boolean updateModelTable,
-			Map<String, Object> sqlResultMap)
+			Map<String, Object> expressionValueCache)
 	{
 		int count = 0;
 
@@ -426,21 +443,21 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 			PropertyModelMapper<ModelTableMapper> mpmm = propertyModelMapper.castModelTableMapperInfo();
 
 			count = updatePropertyTableDataForModelTableMapper(cn, dialect, table, model, condition, property, mpmm,
-					originalPropertyValue, updatePropertyValue, updateModelTable, sqlResultMap);
+					originalPropertyValue, updatePropertyValue, updateModelTable, expressionValueCache);
 		}
 		else if (propertyModelMapper.isPropertyTableMapperInfo())
 		{
 			PropertyModelMapper<PropertyTableMapper> ppmm = propertyModelMapper.castPropertyTableMapperInfo();
 
 			count = updatePropertyTableDataForPropertyTableMapper(cn, dialect, table, model, condition, property, ppmm,
-					originalPropertyValue, updatePropertyValue, keyUpdateObj, sqlResultMap);
+					originalPropertyValue, updatePropertyValue, keyUpdateObj, expressionValueCache);
 		}
 		else if (propertyModelMapper.isJoinTableMapperInfo())
 		{
 			PropertyModelMapper<JoinTableMapper> jpmm = propertyModelMapper.castJoinTableMapperInfo();
 
 			count = updatePropertyTableDataForJoinTableMapper(cn, dialect, table, model, condition, property, jpmm,
-					originalPropertyValue, updatePropertyValue, keyUpdateObj, sqlResultMap);
+					originalPropertyValue, updatePropertyValue, keyUpdateObj, expressionValueCache);
 		}
 		else
 			throw new UnsupportedOperationException();
@@ -465,14 +482,14 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            待更新的属性值，允许为{@code null}
 	 * @param updateModelTable
 	 *            是否更新模型表数据
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * @return
 	 */
 	protected int updatePropertyTableDataForModelTableMapper(Connection cn, Dialect dialect, String table, Model model,
 			SqlBuilder condition, Property property, PropertyModelMapper<ModelTableMapper> propertyModelMapper,
 			Object originalPropertyValue, Object updatePropertyValue, boolean updateModelTable,
-			Map<String, Object> sqlResultMap)
+			Map<String, Object> expressionValueCache)
 	{
 		int count = 0;
 
@@ -502,7 +519,7 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 			{
 				count = update(cn, dialect, table, pmodel,
 						buildRecordCondition(cn, dialect, pmodel, originalPropertyValue, null), originalPropertyValue,
-						updatePropertyValue, null, null, getMappedByWith(mapper), sqlResultMap);
+						updatePropertyValue, null, null, getMappedByWith(mapper), expressionValueCache);
 
 				if (updateModelTable)
 				{
@@ -554,14 +571,14 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            待更新的属性值，允许为{@code null}
 	 * @param keyUpdateObj
 	 *            需要处理外键更新的对象，允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * @return
 	 */
 	protected int updatePropertyTableDataForPropertyTableMapper(Connection cn, Dialect dialect, String table,
 			Model model, SqlBuilder condition, Property property,
 			PropertyModelMapper<PropertyTableMapper> propertyModelMapper, Object originalPropertyValue,
-			Object updatePropertyValue, Object keyUpdateObj, Map<String, Object> sqlResultMap)
+			Object updatePropertyValue, Object keyUpdateObj, Map<String, Object> expressionValueCache)
 	{
 		int count = 0;
 
@@ -604,10 +621,17 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 				{
 					String columnName = toQuoteName(dialect, mapper.getPrimitiveColumnName());
 
-					if (PMU.isSqlExpression(updatePropertyValue))
+					List<Expression> expressions = this.expressionResolver.resolve(updatePropertyValue);
+					if (expressions != null && !expressions.isEmpty())
 					{
-						String sqlValue = PMU.getSqlForSqlExpression(updatePropertyValue);
-						sql.sqldSuffix(columnName, "=" + sqlValue);
+						updatePropertyValue = evaluatePropertyValueForQueryExpressions(cn, model, property,
+								(String) updatePropertyValue, expressions, expressionValueCache, this.conversionService,
+								this.expressionResolver);
+
+						Object columnValue = getColumnValue(cn, model, property, propertyModelMapper,
+								updatePropertyValue);
+
+						sql.sqldSuffix(columnName, "=" + columnValue);
 					}
 					else
 					{
@@ -629,7 +653,7 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 		{
 			count = update(cn, dialect, getTableName(propertyModel), propertyModel, ptableCondition,
 					originalPropertyValue, updatePropertyValue, mkeyColumnNames, mkeyColumnValues,
-					getMappedByWith(propertyModelMapper.getMapper()), sqlResultMap);
+					getMappedByWith(propertyModelMapper.getMapper()), expressionValueCache);
 		}
 
 		return count;
@@ -651,14 +675,14 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            待更新的属性值，允许为{@code null}
 	 * @param keyUpdateObj
 	 *            需要处理外键更新的对象，允许为{@code null}
-	 * @param sqlResultMap
+	 * @param expressionValueCache
 	 *            用于缓存SQL表达式求值结果的映射表
 	 * @return
 	 */
 	protected int updatePropertyTableDataForJoinTableMapper(Connection cn, Dialect dialect, String table, Model model,
 			SqlBuilder condition, Property property, PropertyModelMapper<JoinTableMapper> propertyModelMapper,
 			Object originalPropertyValue, Object updatePropertyValue, Object keyUpdateObj,
-			Map<String, Object> sqlResultMap)
+			Map<String, Object> expressionValueCache)
 	{
 		int count = 0;
 
@@ -677,7 +701,7 @@ public class UpdatePersistenceOperation extends AbstractModelPersistenceOperatio
 		{
 			count = update(cn, dialect, getTableName(propertyModel), propertyModel, ptableCondition,
 					originalPropertyValue, updatePropertyValue, null, null,
-					getMappedByWith(propertyModelMapper.getMapper()), sqlResultMap);
+					getMappedByWith(propertyModelMapper.getMapper()), expressionValueCache);
 
 			if (keyUpdateObj != null)
 			{

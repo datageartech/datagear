@@ -20,6 +20,7 @@ import org.datagear.dbinfo.TableNotExistsException;
 import org.datagear.dbmodel.DatabaseModelResolverException;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.UnsupportedDialectException;
+import org.datagear.persistence.support.SqlExpressionErrorException;
 import org.datagear.web.convert.IllegalSourceValueException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
@@ -143,10 +144,10 @@ public class ControllerAdvice extends AbstractController
 		return ERROR_PAGE_URL;
 	}
 
-	@ExceptionHandler(PersistenceException.class)
+	@ExceptionHandler(SqlExpressionErrorException.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public String handlePersistencePersistenceException(HttpServletRequest request, HttpServletResponse response,
-			PersistenceException exception)
+	public String handlePersistenceSqlExpressionErrorException(HttpServletRequest request, HttpServletResponse response,
+			SqlExpressionErrorException exception)
 	{
 		setOperationMessageForException(request, exception, true);
 
@@ -159,6 +160,16 @@ public class ControllerAdvice extends AbstractController
 			UnsupportedDialectException exception)
 	{
 		setOperationMessageForException(request, exception, false);
+
+		return ERROR_PAGE_URL;
+	}
+
+	@ExceptionHandler(PersistenceException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public String handlePersistencePersistenceException(HttpServletRequest request, HttpServletResponse response,
+			PersistenceException exception)
+	{
+		setOperationMessageForException(request, exception, true);
 
 		return ERROR_PAGE_URL;
 	}

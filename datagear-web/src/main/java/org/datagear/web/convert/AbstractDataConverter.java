@@ -32,7 +32,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.datagear.model.support.DefaultDynamicBean;
 import org.datagear.model.support.DynamicBean;
 import org.datagear.model.support.PropertyPath;
-import org.datagear.persistence.support.PMU;
+import org.datagear.persistence.support.ExpressionResolver;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -64,6 +64,8 @@ public abstract class AbstractDataConverter
 
 	private ConversionService conversionService;
 
+	private ExpressionResolver expressionResolver = new ExpressionResolver();
+
 	private Map<Class<?>, Class<?>> instanceTypeMap = new HashMap<Class<?>, Class<?>>();
 
 	public AbstractDataConverter()
@@ -87,6 +89,16 @@ public abstract class AbstractDataConverter
 	public void setConversionService(ConversionService conversionService)
 	{
 		this.conversionService = conversionService;
+	}
+
+	public ExpressionResolver getExpressionResolver()
+	{
+		return expressionResolver;
+	}
+
+	public void setExpressionResolver(ExpressionResolver expressionResolver)
+	{
+		this.expressionResolver = expressionResolver;
 	}
 
 	public Map<Class<?>, Class<?>> getInstanceTypeMap()
@@ -155,7 +167,7 @@ public abstract class AbstractDataConverter
 		{
 			String str = (String) obj;
 
-			if (PMU.isSqlExpression(str))
+			if (this.expressionResolver.isExpression(str))
 				return (T) str;
 
 			if (str.isEmpty() && !String.class.equals(targetType))

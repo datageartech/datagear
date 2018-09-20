@@ -22,65 +22,6 @@ import org.datagear.persistence.mapper.RelationMapper;
  */
 public class PMU
 {
-	public static final String SQL_EXPRESSION_START = "#{";
-
-	public static final String SQL_EXPRESSION_END = "}";
-
-	/**
-	 * 判断给定值是否是SQL表达式字符串（“#{...}”格式）。
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public static boolean isSqlExpression(Object value)
-	{
-		if (value == null || !(value instanceof String))
-			return false;
-
-		String svalue = (String) value;
-
-		return (svalue.startsWith(SQL_EXPRESSION_START) && svalue.endsWith(SQL_EXPRESSION_END));
-	}
-
-	/**
-	 * 判断给定值是否是SQL表达式字符串（“#{...}”格式）。
-	 * 
-	 * @param value
-	 * @return
-	 */
-	public static boolean isSqlExpression(String value)
-	{
-		if (value == null)
-			return false;
-
-		return (value.startsWith(SQL_EXPRESSION_START) && value.endsWith(SQL_EXPRESSION_END));
-	}
-
-	/**
-	 * 获取SQL表达式字符串对应的SQL。
-	 * 
-	 * @param sqlExpression
-	 * @return
-	 */
-	public static String getSqlForSqlExpression(Object sqlExpression)
-	{
-		String sqlExpressionStr = (String) sqlExpression;
-
-		return getSqlForSqlExpression(sqlExpressionStr);
-	}
-
-	/**
-	 * 获取SQL表达式字符串对应的SQL。
-	 * 
-	 * @param sqlExpression
-	 * @return
-	 */
-	public static String getSqlForSqlExpression(String sqlExpression)
-	{
-		return sqlExpression.substring(SQL_EXPRESSION_START.length(),
-				sqlExpression.length() - SQL_EXPRESSION_END.length());
-	}
-
 	/**
 	 * 判断给定{@linkplain Property}的具体{@linkplain Model}是否是私有的。
 	 * <p>

@@ -8,16 +8,17 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.datagear.connection.JdbcUtil;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.support.MU;
-import org.datagear.model.support.PropertyModel;
-import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.UnsupportedModelCharacterException;
-import org.springframework.core.convert.ConversionException;
+import org.datagear.persistence.support.ExpressionResolver.Expression;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -34,7 +35,7 @@ import org.springframework.core.convert.ConversionService;
  * @author datagear@163.com
  *
  */
-public class AbstractModelPersistenceOperation extends AbstractModelDataAccessObject
+public abstract class AbstractModelPersistenceOperation extends AbstractModelDataAccessObject
 {
 	public AbstractModelPersistenceOperation()
 	{
@@ -42,71 +43,90 @@ public class AbstractModelPersistenceOperation extends AbstractModelDataAccessOb
 	}
 
 	/**
-	 * 执行给定的属性值SQL语句并获取真正的属性值。
+	 * 计算给定表达式的真正属性值。
 	 * 
 	 * @param cn
 	 * @param model
 	 * @param property
-	 * @param sqlExpression
-	 * @param sqlResultMap
-	 *            用于缓存SQL表达式求值结果的映射表
+	 * @param expressionPropValue
+	 * @param expressions
+	 * @param expressionValueCache
 	 * @param conversionService
+	 * @param expressionResolver
 	 * @return
 	 */
-	protected Object executeQueryForGetPropertySqlValueResult(Connection cn, Model model, Property property,
-			String sqlExpression, Map<String, Object> sqlResultMap, ConversionService conversionService)
+	protected Object evaluatePropertyValueForQueryExpressions(Connection cn, Model model, Property property,
+			String expressionPropValue, List<Expression> expressions, Map<String, Object> expressionValueCache,
+			ConversionService conversionService, ExpressionResolver expressionResolver)
 	{
 		if (!MU.isSingleProperty(property) || !MU.isConcretePrimitiveProperty(property))
-			throw new UnsupportedModelCharacterException("[" + model + "] 's [" + property + "] is sql value ["
-					+ sqlExpression + "], it must be single, concrete and primitive.");
+			throw new UnsupportedModelCharacterException("[" + model + "] 's [" + property + "] is sql expression ["
+					+ expressionPropValue + "], it must be single, concrete and primitive.");
 
-		if (sqlResultMap.containsKey(sqlExpression))
+		List<Object> expressionValues = new ArrayList<Object>();
+
+		for (int i = 0, len = expressions.size(); i < len; i++)
 		{
-			Object propertyValue = sqlResultMap.get(sqlExpression);
+			Expression expression = expressions.get(i);
 
-			Model pmodel = property.getModel();
+			String cacheKey = (expression.hasName() ? expression.getName() : expression.getContent());
 
-			if (propertyValue != null && !MU.isType(pmodel, propertyValue.getClass()))
+			if (expressionValueCache.containsKey(cacheKey))
 			{
+				Object value = expressionValueCache.get(cacheKey);
+				expressionValues.add(value);
+			}
+			else if (!isSelectSql(expression.getContent()))
+			{
+				expressionValues.add(expression.getExpression());
+			}
+			else
+			{
+				Statement st = null;
+				ResultSet rs = null;
 				try
 				{
-					propertyValue = conversionService.convert(propertyValue, pmodel.getType());
+					st = cn.createStatement();
+					rs = st.executeQuery(expression.getContent());
+
+					Object value = null;
+
+					if (rs.next())
+						value = rs.getObject(1);
+
+					expressionValues.add(value);
+					expressionValueCache.put(cacheKey, value);
 				}
-				catch (ConversionException e)
+				catch (SQLException e)
 				{
-
+					throw new SqlExpressionErrorException(expression, e);
+				}
+				finally
+				{
+					JdbcUtil.closeResultSet(rs);
+					JdbcUtil.closeStatement(st);
 				}
 			}
-
-			return propertyValue;
 		}
-		else
-		{
-			Statement st = null;
-			ResultSet rs = null;
-			try
-			{
-				st = cn.createStatement();
-				rs = st.executeQuery(PMU.getSqlForSqlExpression(sqlExpression));
 
-				Object propertyValue = null;
+		String evaluated = expressionResolver.evaluate(expressionPropValue, expressions, expressionValues, "");
 
-				if (rs.next())
-					propertyValue = toPropertyValue(cn, rs, 1, 1, model, property, PropertyModel.valueOf(property, 0));
-
-				sqlResultMap.put(sqlExpression, propertyValue);
-
-				return propertyValue;
-			}
-			catch (SQLException e)
-			{
-				throw new PersistenceException(e);
-			}
-			finally
-			{
-				JdbcUtil.closeResultSet(rs);
-				JdbcUtil.closeStatement(st);
-			}
-		}
+		return conversionService.convert(evaluated, property.getModel().getType());
 	}
+
+	/**
+	 * 判断给定SQL语句是否是“SELECT”语句。
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	protected boolean isSelectSql(String sql)
+	{
+		if (sql == null || sql.isEmpty())
+			return false;
+
+		return Pattern.matches(SELECT_SQL_REGEX, sql);
+	}
+
+	protected static final String SELECT_SQL_REGEX = "^\\s*((?i)select)\\s+\\S+[\\s\\S]*$";
 }
