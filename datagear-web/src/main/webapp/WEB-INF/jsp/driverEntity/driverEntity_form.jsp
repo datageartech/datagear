@@ -22,7 +22,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 <html>
 <head>
 <%@ include file="../include/html_head.jsp" %>
-<title><fmt:message key='<%=titleMessageKey%>' /><%@ include file="../include/html_title_app_name.jsp" %></title>
+<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='<%=titleMessageKey%>' /></title>
 </head>
 <body>
 <div id="${pageId}" class="page-data-form page-data-form-driverEntity">

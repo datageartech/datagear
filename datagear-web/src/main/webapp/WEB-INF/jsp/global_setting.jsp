@@ -14,7 +14,7 @@
 <html>
 <head>
 <%@ include file="include/html_head.jsp" %>
-<title><fmt:message key='globalSetting.globalSetting' /><%@ include file="include/html_title_app_name.jsp" %></title>
+<title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='globalSetting.globalSetting' /></title>
 </head>
 <body>
 <div id="${pageId}" class="page-data-form page-data-form-globalSetting">

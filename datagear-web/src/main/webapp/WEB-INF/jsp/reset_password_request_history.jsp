@@ -13,7 +13,7 @@
 <html style="height:100%;">
 <head>
 <%@ include file="include/html_head.jsp" %>
-<title><fmt:message key='resetPasswordRequestHistory.resetPasswordRequestHistory' /><%@ include file="include/html_title_app_name.jsp" %></title>
+<title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='resetPasswordRequestHistory.resetPasswordRequestHistory' /></title>
 </head>
 <body style="height:100%;">
 <%if(!ajaxRequest){%>

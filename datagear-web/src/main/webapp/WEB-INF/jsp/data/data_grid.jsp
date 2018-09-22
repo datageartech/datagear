@@ -22,7 +22,7 @@ List<PropertyPathNameLabel> conditionSource = (List<PropertyPathNameLabel>)reque
 <html style="height:100%;">
 <head>
 <%@ include file="../include/html_head.jsp" %>
-<title><fmt:message key='query' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValue(model, WebUtils.getLocale(request))%><%@ include file="../include/html_title_app_name.jsp" %></title>
+<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='query' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValue(model, WebUtils.getLocale(request))%></title>
 </head>
 <body style="height:100%;">
 <%if(!ajaxRequest){%>

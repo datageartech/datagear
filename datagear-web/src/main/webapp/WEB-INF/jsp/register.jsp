@@ -12,7 +12,7 @@
 <html>
 <head>
 <%@ include file="include/html_head.jsp" %>
-<title><fmt:message key='register.register' /><%@ include file="include/html_title_app_name.jsp" %></title>
+<title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='register.register' /></title>
 </head>
 <body>
 <div id="${pageId}">

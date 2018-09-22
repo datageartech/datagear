@@ -34,7 +34,7 @@ if(loginUser == null)
 <html>
 <head>
 <%@ include file="include/html_head.jsp" %>
-<title><fmt:message key='login.login' /><%@ include file="include/html_title_app_name.jsp" %></title>
+<title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='login.login' /></title>
 </head>
 <body>
 <div id="${pageId}">

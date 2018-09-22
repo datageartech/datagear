@@ -16,7 +16,7 @@ String loginUrl = request.getContextPath() + "/login";
 <head>
 <%@ include file="include/html_head.jsp" %>
 <meta http-equiv="refresh" content="3;url=<%=loginUrl%>">
-<title><fmt:message key='register.registerSuccess' /><%@ include file="include/html_title_app_name.jsp" %></title>
+<title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='register.registerSuccess' /></title>
 </head>
 <body>
 <div id="${pageId}">

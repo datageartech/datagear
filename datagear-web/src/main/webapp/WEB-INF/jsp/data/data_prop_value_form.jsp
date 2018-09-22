@@ -33,7 +33,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 <html>
 <head>
 <%@ include file="../include/html_head.jsp" %>
-<title><fmt:message key='<%=titleOperationMessageKey%>' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValuePath(model, propertyPath, WebUtils.getLocale(request))%><%@ include file="../include/html_title_app_name.jsp" %></title>
+<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='<%=titleOperationMessageKey%>' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValuePath(model, propertyPath, WebUtils.getLocale(request))%></title>
 </head>
 <body>
 <div id="${pageId}" class="page-data-form page-data-form-propvalue">

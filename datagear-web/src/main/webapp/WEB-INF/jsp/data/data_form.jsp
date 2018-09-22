@@ -29,7 +29,7 @@ String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
 <html>
 <head>
 <%@ include file="../include/html_head.jsp" %>
-<title><fmt:message key='<%=titleOperationMessageKey%>' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValue(model, WebUtils.getLocale(request))%><%@ include file="../include/html_title_app_name.jsp" %></title>
+<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='<%=titleOperationMessageKey%>' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValue(model, WebUtils.getLocale(request))%></title>
 </head>
 <body>
 <div id="${pageId}" class="page-data-form">

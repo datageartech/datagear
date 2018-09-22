@@ -12,7 +12,7 @@
 <html>
 <head>
 <%@ include file="include/html_head.jsp" %>
-<title><fmt:message key='main.mainPage' /><%@ include file="include/html_title_app_name.jsp" %></title>
+<title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='main.mainPage' /></title>
 <%@ include file="include/page_js_obj.jsp" %>
 <script type="text/javascript">
 (function(pageObj)

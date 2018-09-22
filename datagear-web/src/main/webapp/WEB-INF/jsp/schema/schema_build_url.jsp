@@ -29,7 +29,7 @@ if(urlBuilderJsFileNames != null)
 	}
 }
 %>
-<title><fmt:message key='schema.schemaBuildUrl' /><%@ include file="../include/html_title_app_name.jsp" %></title>
+<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='schema.schemaBuildUrl' /></title>
 </head>
 <body>
 <div id="${pageId}" class="schema-build-url-form">

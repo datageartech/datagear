@@ -45,7 +45,7 @@ if(operationMessage == null)
 <html>
 <head>
 <%@ include file="include/html_head.jsp" %>
-<title><fmt:message key='error.errorOccure' /><%@ include file="include/html_title_app_name.jsp" %></title>
+<title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='error.errorOccure' /></title>
 </head>
 <body>
 <%@ include file="include/jsp_operation_message.jsp" %>

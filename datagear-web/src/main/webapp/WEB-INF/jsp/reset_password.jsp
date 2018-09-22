@@ -35,7 +35,7 @@ String loginUrl = request.getContextPath() + "/login";
 <%if(step.isFinalStep() && !step.isSkipCheckUserAdmin()){%>
 <meta http-equiv="refresh" content="4;url=<%=loginUrl%>">
 <%}%>
-<title><fmt:message key='resetPassword.resetPassword' /><%@ include file="include/html_title_app_name.jsp" %></title>
+<title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='resetPassword.resetPassword' /></title>
 </head>
 <body>
 <div id="${pageId}">

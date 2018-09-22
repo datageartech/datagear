@@ -20,7 +20,7 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 <html style="height:100%;">
 <head>
 <%@ include file="../include/html_head.jsp" %>
-<title><fmt:message key='<%=titleMessageKey%>' /><%@ include file="../include/html_title_app_name.jsp" %></title>
+<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='<%=titleMessageKey%>' /></title>
 </head>
 <body style="height:100%;">
 <%if(!ajaxRequest){%>
