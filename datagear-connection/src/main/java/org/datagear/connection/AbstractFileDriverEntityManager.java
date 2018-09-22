@@ -174,25 +174,25 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public synchronized DriverEntity get(String path) throws DriverEntityManagerException
+	public synchronized DriverEntity get(String id) throws DriverEntityManagerException
 	{
 		reloadDriverEntityFileIfModified();
 
-		int index = findDriverEntityIndex(this.driverEntities, path);
+		int index = findDriverEntityIndex(this.driverEntities, id);
 
 		return (index < 0 ? null : this.driverEntities.get(index));
 	}
 
 	@Override
-	public synchronized void delete(String... paths) throws DriverEntityManagerException
+	public synchronized void delete(String... ids) throws DriverEntityManagerException
 	{
 		int removeCount = 0;
 
-		for (int i = 0; i < paths.length; i++)
+		for (int i = 0; i < ids.length; i++)
 		{
-			removeCount += removeExists(driverEntities, paths[i]);
+			removeCount += removeExists(driverEntities, ids[i]);
 
-			deleteDriverLibraryDirectory(paths[i]);
+			deleteDriverLibraryDirectory(ids[i]);
 		}
 
 		if (removeCount > 0)

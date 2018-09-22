@@ -50,6 +50,14 @@ public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 
 	public static final String ELEMENT_NAME_DISPLAY_DESC = "display-desc";
 
+	public static final String ELEMENT_NAME_JRE_VERSION = "jre-version";
+
+	public static final String ELEMENT_NAME_DATABASE_NAME = "database-name";
+
+	public static final String ELEMENT_NAME_DATABASE_VERSIONS = "database-versions";
+
+	public static final String ELEMENT_NAME_DATABASE_VERSION = "database-version";
+
 	public XmlDriverEntityManager()
 	{
 		super();
@@ -107,6 +115,38 @@ public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 						driverEntity.setDisplayName(nodeContent);
 					else if (ELEMENT_NAME_DISPLAY_DESC.equalsIgnoreCase(nodeName))
 						driverEntity.setDisplayDesc(nodeContent);
+					else if (ELEMENT_NAME_JRE_VERSION.equalsIgnoreCase(nodeName))
+						driverEntity.setJreVersion(nodeContent);
+					else if (ELEMENT_NAME_DATABASE_NAME.equalsIgnoreCase(nodeName))
+						driverEntity.setDatabaseName(nodeContent);
+					else if (ELEMENT_NAME_DATABASE_VERSIONS.equalsIgnoreCase(nodeName))
+					{
+						NodeList dbVersionChildren = child.getChildNodes();
+						int dbVersionLength = dbVersionChildren.getLength();
+
+						if (dbVersionLength > 0)
+						{
+							List<String> databaseVersions = new ArrayList<String>(dbVersionLength);
+
+							for (int k = 0; k < dbVersionLength; k++)
+							{
+								Node dbVersionNode = dbVersionChildren.item(k);
+
+								if (!ELEMENT_NAME_DATABASE_VERSION.equalsIgnoreCase(dbVersionNode.getNodeName()))
+									continue;
+
+								String dbVersionNodeContent = dbVersionNode.getTextContent();
+								if (dbVersionNodeContent != null)
+									dbVersionNodeContent = dbVersionNodeContent.trim();
+
+								if (!dbVersionNodeContent.isEmpty())
+									databaseVersions.add(dbVersionNodeContent);
+							}
+
+							if (!databaseVersions.isEmpty())
+								driverEntity.setDatabaseVersions(databaseVersions);
+						}
+					}
 				}
 
 				if (driverEntity.getId() != null && !driverEntity.getId().isEmpty()
@@ -137,7 +177,6 @@ public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 	protected void writeDriverEntities(List<DriverEntity> driverEntities, File driverEntityInfoFile)
 			throws DriverEntityManagerException
 	{
-
 		Writer writer = getDriverEntityInfoFileWriter();
 
 		try
@@ -158,19 +197,61 @@ public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 					Element idEle = document.createElement(ELEMENT_NAME_ID);
 					idEle.setTextContent(driverEntity.getId());
 
+					driverEntityEle.appendChild(idEle);
+
 					Element driverClassNameEle = document.createElement(ELEMENT_NAME_DRIVER_CLASS_NAME);
 					driverClassNameEle.setTextContent(driverEntity.getDriverClassName());
 
-					Element displayNameEle = document.createElement(ELEMENT_NAME_DISPLAY_NAME);
-					displayNameEle.setTextContent(driverEntity.getDisplayName());
-
-					Element displayDescEle = document.createElement(ELEMENT_NAME_DISPLAY_DESC);
-					displayDescEle.setTextContent(driverEntity.getDisplayDesc());
-
-					driverEntityEle.appendChild(idEle);
 					driverEntityEle.appendChild(driverClassNameEle);
-					driverEntityEle.appendChild(displayNameEle);
-					driverEntityEle.appendChild(displayDescEle);
+
+					if (driverEntity.hasDisplayName())
+					{
+						Element displayNameEle = document.createElement(ELEMENT_NAME_DISPLAY_NAME);
+						displayNameEle.setTextContent(driverEntity.getDisplayName());
+
+						driverEntityEle.appendChild(displayNameEle);
+					}
+
+					if (driverEntity.hasDisplayDesc())
+					{
+						Element displayDescEle = document.createElement(ELEMENT_NAME_DISPLAY_DESC);
+						displayDescEle.setTextContent(driverEntity.getDisplayDesc());
+
+						driverEntityEle.appendChild(displayDescEle);
+					}
+
+					if (driverEntity.hasJreVersion())
+					{
+						Element jreVersionEle = document.createElement(ELEMENT_NAME_JRE_VERSION);
+						jreVersionEle.setTextContent(driverEntity.getJreVersion());
+
+						driverEntityEle.appendChild(jreVersionEle);
+					}
+
+					if (driverEntity.hasDatabaseName())
+					{
+						Element databaseNameEle = document.createElement(ELEMENT_NAME_DATABASE_NAME);
+						databaseNameEle.setTextContent(driverEntity.getDatabaseName());
+
+						driverEntityEle.appendChild(databaseNameEle);
+					}
+
+					if (driverEntity.hasDatabaseVersions())
+					{
+						Element databaseVersionsEle = document.createElement(ELEMENT_NAME_DATABASE_VERSIONS);
+
+						List<String> databaseVersions = driverEntity.getDatabaseVersions();
+
+						for (String databaseVersion : databaseVersions)
+						{
+							Element databaseVersionEle = document.createElement(ELEMENT_NAME_DATABASE_VERSION);
+							databaseVersionEle.setTextContent(databaseVersion);
+
+							databaseVersionsEle.appendChild(databaseVersionEle);
+						}
+
+						driverEntityEle.appendChild(databaseVersionsEle);
+					}
 
 					root.appendChild(driverEntityEle);
 				}

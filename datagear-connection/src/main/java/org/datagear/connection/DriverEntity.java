@@ -5,6 +5,7 @@
 package org.datagear.connection;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * JDBC驱动程序实体。
@@ -27,6 +28,15 @@ public class DriverEntity implements Serializable
 
 	/** 展示描述 */
 	private String displayDesc;
+
+	/** 驱动程序的最低JRE版本 */
+	private String jreVersion;
+
+	/** 驱动程序支持的数据库名称 */
+	private String databaseName;
+
+	/** 驱动程序支持的数据库版本 */
+	private List<String> databaseVersions;
 
 	public DriverEntity()
 	{
@@ -98,6 +108,51 @@ public class DriverEntity implements Serializable
 			return getDriverClassName();
 	}
 
+	public boolean hasJreVersion()
+	{
+		return (this.jreVersion != null && !this.jreVersion.isEmpty());
+	}
+
+	public String getJreVersion()
+	{
+		return jreVersion;
+	}
+
+	public void setJreVersion(String jreVersion)
+	{
+		this.jreVersion = jreVersion;
+	}
+
+	public boolean hasDatabaseName()
+	{
+		return (this.databaseName != null && !this.databaseName.isEmpty());
+	}
+
+	public String getDatabaseName()
+	{
+		return databaseName;
+	}
+
+	public void setDatabaseName(String databaseName)
+	{
+		this.databaseName = databaseName;
+	}
+
+	public boolean hasDatabaseVersions()
+	{
+		return (this.databaseVersions != null && !this.databaseName.isEmpty());
+	}
+
+	public List<String> getDatabaseVersions()
+	{
+		return databaseVersions;
+	}
+
+	public void setDatabaseVersions(List<String> databaseVersions)
+	{
+		this.databaseVersions = databaseVersions;
+	}
+
 	@Override
 	public int hashCode()
 	{
@@ -131,7 +186,8 @@ public class DriverEntity implements Serializable
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [id=" + id + ", driverClassName=" + driverClassName + ", displayName="
-				+ displayName + ", displayDesc=" + displayDesc + "]";
+				+ displayName + ", displayDesc=" + displayDesc + ", jreVersion=" + jreVersion + ", databaseName="
+				+ databaseName + ", databaseVersions=" + databaseVersions + "]";
 	}
 
 	/**
