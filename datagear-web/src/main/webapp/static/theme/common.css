@@ -7,6 +7,7 @@
 body{
 	margin: 0;
 	padding: 0;
+	font-family: inherit;/*使用系统默认字体，ui库里某些字体对中文支持有问题，导致selectmenu渲染中文条目高度不一致而出现切换闪动*/
 }
 .small-text{
 	font-size:small;
@@ -142,6 +143,9 @@ form .form-foot .ui-button{
 }
 
 /*jquery-ui*/
+.ui-widget{
+	font-family: inherit;/*使用系统默认字体，ui库里某些字体对中文支持有问题，导致selectmenu渲染中文条目高度不一致而出现切换闪动*/
+}
 .ui-menu .ui-menu-item-wrapper{
 	padding: .4em 1em;/*菜单条目扩大*/
 }
@@ -160,6 +164,7 @@ form .form-foot .ui-button{
 .ui-tabs .ui-tabs-panel{
 	padding: 0.8em 0.9em;
 }
+
 /*jquery.layout*/
 .ui-layout-pane{
 	border: 1px solid #c5c5c5;
@@ -503,7 +508,7 @@ table.dataTable.no-footer{
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li > .ui-menu-item-wrapper{
 	width: 1.5em;
 	height: 1.5em;
-    margin-top: 1px;
+    margin-top: 2px;
 }
 .main-page-content .schema-panel .schema-panel-content{
 	position: absolute;
