@@ -1013,6 +1013,7 @@
 </head>
 <body id="${pageId}">
 <div class="main-page-head">
+	<%@ include file="include/html_logo.jsp" %>
 	<div class="toolbar">
 		<ul id="systemSetMenu" class="lightweight-menu">
 			<li class="system-set-root"><span><span class="ui-icon ui-icon-gear"></span></span>

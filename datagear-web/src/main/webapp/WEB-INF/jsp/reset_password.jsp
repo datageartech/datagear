@@ -40,6 +40,7 @@ String loginUrl = request.getContextPath() + "/login";
 <body>
 <div id="${pageId}">
 	<div class="main-page-head main-page-head-reset-passord">
+		<%@ include file="include/html_logo.jsp" %>
 		<div class="toolbar">
 			<a class="link" href="javascript:void(0);" id="viewResetPasswordAdminReqHistoryLink"><fmt:message key='resetPassword.viewResetPasswordAdminReqHistory' /></a>
 			<a class="link" href="<c:url value="/login" />"><fmt:message key='resetPassword.backToLoginPage' /></a>
