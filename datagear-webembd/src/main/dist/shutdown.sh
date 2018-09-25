@@ -27,18 +27,16 @@ readAppPID(){
 readAppPID
 
 if [ $APP_PID -ne 0 ]; then
-	echo "$ECHO_PREFIX application is already running, PID is $APP_PID"
-	echo "$ECHO_PREFIX starting [Failed]"
-else
-	echo "$ECHO_PREFIX starting..."
-	nohup $JAVA_HOME/bin/java $JAVA_OPTS -cp .:lib/* $APP_MAIN >/dev/null 2>&1 &
-	readAppPID
-	if [ $APP_PID -ne 0 ]; then
-		echo "$ECHO_PREFIX PID is $APP_PID"
-		echo "$ECHO_PREFIX starting [OK]"
+	echo "$ECHO_PREFIX stopping... (PID=$APP_PID)"
+	kill -9 $APP_PID
+	if [ $? -eq 0 ]; then
+		echo "$ECHO_PREFIX stopping [OK]"
 	else
-		echo "$ECHO_PREFIX starting [Failed]"
+		echo "$ECHO_PREFIX stopping [Failed]"
 	fi
+else
+	echo "$ECHO_PREFIX application is not running"
+	echo "$ECHO_PREFIX stopping [Failed]"
 fi
 
 echo "$BORDER"
