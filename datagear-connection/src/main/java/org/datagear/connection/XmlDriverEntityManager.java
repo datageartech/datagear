@@ -61,6 +61,7 @@ public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 	public XmlDriverEntityManager()
 	{
 		super();
+		setDriverEntityInfoFileName(DEFAULT_DRIVER_ENTITY_INFO_FILE_NAME);
 	}
 
 	public XmlDriverEntityManager(String rootDirectory)
