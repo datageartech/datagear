@@ -114,6 +114,9 @@ table.dataTable.display tbody > tr > .selected:hover {
 	background-color: #007FFF;
 	color: #ffffff;
 }
+table.dataTable tbody tr.selected .checkbox .ui-icon{
+	background-image: url(jquery-ui-1.12.1/images/ui-icons_444444_256x240.png);
+}
 
 /*ึ๗าณ*/
 .main-page-head{

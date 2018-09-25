@@ -27,9 +27,19 @@ pageObj.sort = undefined;
 		var height =  pageObj.element(".content").height() - 50;
 		return height;
 	};
-
+	
+	pageObj.renderCheckColumn = function(data, type, row, meta)
+	{
+		return "<div class='ui-widget ui-widget-content ui-corner-all checkbox'><span class='ui-icon ui-icon-check'></span></div>";
+	};
+	
 	pageObj.getTableSettings = function(columns, initDatas)
 	{
+		var newColumns = [
+				{ title : "<fmt:message key='select' />", data : "", defaultContent: "", width : "4em", orderable : false, render : pageObj.renderCheckColumn, className : "column-check" }
+			];
+		newColumns = newColumns.concat(columns);
+		
 		var settings=
 		{
 			"scrollX": true,
@@ -37,12 +47,28 @@ pageObj.sort = undefined;
 	        "scrollCollapse": false,
 			"paging" : false,
 			"searching" : false,
-			"select" : true,
+			"select" : { style : 'os' },
 			"data": (initDatas || []),
-		    "columns": columns,
+			"order": [[1, "asc"]],
+		    "columns": newColumns,
 		    "language":
 		    {
 				"emptyTable": "<fmt:message key='noData' />"
+			},
+			"createdRow": function(row, data, dataIndex)
+			{
+				$(".column-check", row).click(function(event)
+				{
+					event.stopPropagation();
+					
+					var tr = $(this).closest("tr");
+					var selected = tr.hasClass("selected");
+					
+					if(selected)
+						pageObj.table.DataTable().row(tr).deselect();
+					else
+						pageObj.table.DataTable().row(tr).select();
+				});
 			}
 		};
 		
@@ -94,6 +120,25 @@ pageObj.sort = undefined;
 	    	
 	    	return false;
 	    });
+		
+		$(".dataTables_scrollHead .column-check", pageObj.table.DataTable().table().container()).click(function()
+		{
+			var $this = $(this);
+			var checked = $this.hasClass("all-checked");
+			
+			var rows = pageObj.table.DataTable().rows();
+			
+			if(checked)
+			{
+				rows.deselect();
+				$this.removeClass("all-checked");
+			}
+			else
+			{
+				rows.select();
+				$this.addClass("all-checked");
+			}
+		});
 	};
 	
 	pageObj.setPagingData = function(pagingData)

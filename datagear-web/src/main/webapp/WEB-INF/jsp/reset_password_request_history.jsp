@@ -136,7 +136,7 @@
 		pageObj.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.effectiveTime' />", "effectiveTime"),
 	];
 	var tableSettings = pageObj.getTableSettings(tableColumns);
-	tableSettings.order=[[0,"desc"]];
+	tableSettings.order=[[1,"desc"]];
 	pageObj.initTable(tableSettings);
 	pageObj.initPagination();
 	pageObj.refresh();

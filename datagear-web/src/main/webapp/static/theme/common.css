@@ -249,8 +249,37 @@ form .form-foot .ui-button{
 table.dataTable.no-footer{
 	border-bottom: none;
 }
-.dataTable thead .property-name-token{
+table.dataTable thead th,
+table.dataTable tfoot th{
+	font-weight: normal;
+}
+table.dataTable thead .property-name-token{
 	font-weight: bold;
+}
+table.dataTable .column-check{
+	text-align: center;
+	padding-left: 0px;
+	padding-right: 0px;
+	-webkit-user-select:none;
+	-moz-user-select:none;
+	-ms-user-select:none;
+	user-select:none;
+}
+table.dataTable thead tr .column-check{
+	cursor: pointer;
+}
+table.dataTable tbody tr .checkbox{
+	position: relative;
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	text-align: center;
+}
+table.dataTable tbody tr .checkbox .ui-icon{
+	background-image: none;
+	margin-top: -9px;
+}
+table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 
 /*ÌáÊ¾¿ò*/
