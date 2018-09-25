@@ -258,8 +258,8 @@ table.dataTable thead .property-name-token{
 }
 table.dataTable .column-check{
 	text-align: center;
-	padding-left: 0px;
-	padding-right: 0px;
+	padding-left: 0.8em;
+	padding-right: 0.8em;
 	-webkit-user-select:none;
 	-moz-user-select:none;
 	-ms-user-select:none;

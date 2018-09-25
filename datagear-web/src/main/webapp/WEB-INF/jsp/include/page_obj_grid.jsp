@@ -36,7 +36,7 @@ pageObj.sort = undefined;
 	pageObj.getTableSettings = function(columns, initDatas)
 	{
 		var newColumns = [
-				{ title : "<fmt:message key='select' />", data : "", defaultContent: "", width : "4em", orderable : false, render : pageObj.renderCheckColumn, className : "column-check" }
+				{ title : "<fmt:message key='select' />", data : "", defaultContent: "", width : "3em", orderable : false, render : pageObj.renderCheckColumn, className : "column-check" }
 			];
 		newColumns = newColumns.concat(columns);
 		
