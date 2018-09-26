@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Driver;
 import java.util.List;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * {@linkplain DriverEntity}管理器。
@@ -147,4 +149,36 @@ public interface DriverEntityManager
 	 * 释放所有资源。
 	 */
 	void releaseAll();
+
+	/**
+	 * 导出至ZIP。
+	 * 
+	 * @param out
+	 * @param ids
+	 *            要筛选导出的{@linkplain DriverEntity#getId()}，如果为空，表示全部导出。
+	 * @throws DriverEntityManagerException
+	 */
+	void exportToZip(ZipOutputStream out, String... ids) throws DriverEntityManagerException;
+
+	/**
+	 * 由ZIP导入。
+	 * 
+	 * @param in
+	 * @param ids
+	 *            要筛选导入的{@linkplain DriverEntity#getId()}，如果为空，表示全部导入。
+	 * @throws DriverEntityManagerException
+	 */
+	void importFromZip(ZipInputStream in, String... ids) throws DriverEntityManagerException;
+
+	/**
+	 * 从ZIP输入流中读取{@linkplain DriverEntity}列表。
+	 * <p>
+	 * 如果输入流中不包含{@linkplain #driverEntityInfoFileName}的文件，返回空列表。
+	 * </p>
+	 * 
+	 * @param in
+	 * @return
+	 * @throws DriverEntityManagerException
+	 */
+	List<DriverEntity> readDriverEntitiesFromZip(ZipInputStream in) throws DriverEntityManagerException;
 }

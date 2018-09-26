@@ -18,8 +18,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -34,8 +32,6 @@ import org.xml.sax.InputSource;
  */
 public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(XmlDriverEntityManager.class);
-
 	public static final String DEFAULT_DRIVER_ENTITY_INFO_FILE_NAME = "driverEntityInfo.xml";
 
 	public static final String ELEMENT_NAME_ROOT = "driver-entities";
@@ -75,20 +71,19 @@ public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 	}
 
 	@Override
-	protected List<DriverEntity> readDriverEntities(File driverEntityInfoFile) throws DriverEntityManagerException
+	protected List<DriverEntity> readDriverEntities(Reader in) throws DriverEntityManagerException
 	{
 		List<DriverEntity> driverEntities = new ArrayList<DriverEntity>();
 
 		DocumentBuilderFactory documentBuilderFactory;
 		DocumentBuilder documentBuilder;
 		Document document;
-		Reader reader = getDriverEntityInfoFileReader();
 
 		try
 		{
 			documentBuilderFactory = DocumentBuilderFactory.newInstance();
 			documentBuilder = documentBuilderFactory.newDocumentBuilder();
-			document = documentBuilder.parse(new InputSource(reader));
+			document = documentBuilder.parse(new InputSource(in));
 
 			NodeList nodeList = document.getElementsByTagName(ELEMENT_NAME_DRIVER_ENTITY);
 
@@ -150,15 +145,10 @@ public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 					}
 				}
 
-				if (driverEntity.getId() != null && !driverEntity.getId().isEmpty()
-						&& driverEntity.getDriverClassName() != null && !driverEntity.getDriverClassName().isEmpty())
+				if (isValidDriverEntity(driverEntity))
 				{
 					removeExists(driverEntities, driverEntity.getId());
 					driverEntities.add(driverEntity);
-
-					if (LOGGER.isDebugEnabled())
-						LOGGER.debug(
-								"Read a [" + driverEntity + "] from file [" + driverEntityInfoFile.getPath() + "]");
 				}
 			}
 		}
@@ -166,20 +156,14 @@ public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 		{
 			throw new DriverEntityManagerException(e);
 		}
-		finally
-		{
-			close(reader);
-		}
 
 		return driverEntities;
 	}
 
 	@Override
-	protected void writeDriverEntities(List<DriverEntity> driverEntities, File driverEntityInfoFile)
+	protected void writeDriverEntities(List<DriverEntity> driverEntities, Writer out)
 			throws DriverEntityManagerException
 	{
-		Writer writer = getDriverEntityInfoFileWriter();
-
 		try
 		{
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
@@ -263,15 +247,11 @@ public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			transformer.transform(new DOMSource(document), new StreamResult(writer));
+			transformer.transform(new DOMSource(document), new StreamResult(out));
 		}
 		catch (Exception e)
 		{
 			throw new DriverEntityManagerException(e);
-		}
-		finally
-		{
-			close(writer);
 		}
 	}
 }

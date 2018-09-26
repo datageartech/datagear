@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<driver-entities>
+	<driver-entity>
+		<id>mysql</id>
+		<driver-class-name>com.mysql.jdbc.Driver</driver-class-name>
+	</driver-entity>
+	<driver-entity>
+		<id>mysql-jre8</id>
+		<driver-class-name>com.mysql.cj.jdbc.Driver</driver-class-name>
+	</driver-entity>
+	<driver-entity>
+		<id>oracle</id>
+		<driver-class-name>oracle.jdbc.OracleDriver</driver-class-name>
+	</driver-entity>
+</driver-entities>

@@ -8,11 +8,14 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,6 +29,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,7 +142,6 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		for (DriverEntity driverEntity : driverEntities)
 		{
 			removeExists(this.driverEntities, driverEntity.getId());
-
 			this.driverEntities.add(driverEntity);
 		}
 
@@ -224,9 +229,9 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		try
 		{
 			out = new BufferedOutputStream(new FileOutputStream(file));
-			write(in, out);
+			read(in, out);
 		}
-		catch (FileNotFoundException e)
+		catch (IOException e)
 		{
 			throw new DriverEntityManagerException(e);
 		}
@@ -287,9 +292,9 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		try
 		{
 			in = new BufferedInputStream(new FileInputStream(file));
-			write(in, out);
+			read(in, out);
 		}
-		catch (FileNotFoundException e)
+		catch (IOException e)
 		{
 			throw new DriverLibraryNotFoundException(driverEntity, libraryName);
 		}
@@ -356,6 +361,227 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		}
 
 		this.pathDriverFactoryInfoMap = new HashMap<String, PathDriverFactoryInfo>();
+	}
+
+	@Override
+	public synchronized void exportToZip(ZipOutputStream out, String... ids) throws DriverEntityManagerException
+	{
+		List<DriverEntity> exported = null;
+
+		if (ids == null || ids.length == 0)
+			exported = this.driverEntities;
+		else
+		{
+			exported = new ArrayList<DriverEntity>();
+			for (DriverEntity driverEntity : this.driverEntities)
+			{
+				if (isValidDriverEntityForIdArray(driverEntity, ids))
+					exported.add(driverEntity);
+			}
+		}
+
+		try
+		{
+			ZipEntry driverEntityInfoZipEntry = new ZipEntry(this.driverEntityInfoFileName);
+			out.putNextEntry(driverEntityInfoZipEntry);
+
+			Writer writer = getDriverEntityInfoFileWriter(out);
+
+			try
+			{
+				writeDriverEntities(exported, writer);
+			}
+			finally
+			{
+				flush(writer);
+			}
+		}
+		catch (IOException e)
+		{
+			throw new DriverEntityManagerException(e);
+		}
+
+		try
+		{
+			for (DriverEntity driverEntity : exported)
+			{
+				File libraryDirectory = getDriverLibraryDirectory(driverEntity.getId(), false);
+				writeFileToZipOutputStream(out, libraryDirectory, libraryDirectory.getName());
+			}
+		}
+		catch (IOException e)
+		{
+			throw new DriverEntityManagerException(e);
+		}
+	}
+
+	@Override
+	public synchronized void importFromZip(ZipInputStream in, String... ids) throws DriverEntityManagerException
+	{
+		ZipEntry zipEntry = null;
+
+		try
+		{
+			while ((zipEntry = in.getNextEntry()) != null)
+			{
+				if (isDriverEntityInfoFileZipEntry(zipEntry))
+				{
+					// 这里不能直接使用in，readDriverEntities实现会关闭in导致后面无法读取
+					Reader reader = getDriverEntityInfoFileReader(getByteArrayInputStream(in));
+
+					try
+					{
+						List<DriverEntity> driverEntities = readDriverEntities(reader);
+
+						for (DriverEntity driverEntity : driverEntities)
+						{
+							if (isValidDriverEntityForIdArray(driverEntity, ids))
+							{
+								removeExists(this.driverEntities, driverEntity.getId());
+								this.driverEntities.add(driverEntity);
+							}
+						}
+					}
+					finally
+					{
+						close(reader);
+					}
+				}
+				else if (isValidZipEntryForIdArray(zipEntry, ids))
+				{
+					File file = getFileInRootDirectory(zipEntry.getName());
+
+					if (zipEntry.isDirectory())
+					{
+						if (file.exists())
+							deleteFileIn(file);
+						else
+							file.mkdirs();
+					}
+					else
+					{
+						OutputStream out = null;
+
+						try
+						{
+							out = new FileOutputStream(file);
+							read(in, out);
+						}
+						finally
+						{
+							flush(out);
+							close(out);
+						}
+					}
+				}
+
+				in.closeEntry();
+			}
+
+			write();
+		}
+		catch (IOException e)
+		{
+			throw new DriverEntityManagerException(e);
+		}
+	}
+
+	@Override
+	public List<DriverEntity> readDriverEntitiesFromZip(ZipInputStream in) throws DriverEntityManagerException
+	{
+		List<DriverEntity> driverEntities = null;
+
+		ZipEntry zipEntry = null;
+		try
+		{
+			while ((zipEntry = in.getNextEntry()) != null)
+			{
+				if (isDriverEntityInfoFileZipEntry(zipEntry))
+				{
+					// 这里不能直接使用in，readDriverEntities实现会关闭in导致后面无法读取
+					Reader reader = getDriverEntityInfoFileReader(getByteArrayInputStream(in));
+
+					try
+					{
+						driverEntities = readDriverEntities(reader);
+					}
+					finally
+					{
+						close(reader);
+					}
+				}
+
+				in.closeEntry();
+			}
+
+			return (driverEntities == null ? new ArrayList<DriverEntity>(0) : driverEntities);
+		}
+		catch (IOException e)
+		{
+			throw new DriverEntityManagerException(e);
+		}
+	}
+
+	/**
+	 * 判断给定{@linkplain ZipEntry}是否是{@linkplain DriverEntity}信息文件。
+	 * 
+	 * @param zipEntry
+	 * @return
+	 */
+	protected boolean isDriverEntityInfoFileZipEntry(ZipEntry zipEntry)
+	{
+		String name = zipEntry.getName();
+
+		return name.equals(this.driverEntityInfoFileName);
+	}
+
+	/**
+	 * 判断给定{@linkplain ZipEntry}是否是指定{@linkplain DriverEntity#getId()}数组元素的库。
+	 * 
+	 * @param zipEntry
+	 * @param driverEntityIds
+	 * @return
+	 */
+	protected boolean isValidZipEntryForIdArray(ZipEntry zipEntry, String... driverEntityIds)
+	{
+		if (driverEntityIds == null || driverEntityIds.length == 0)
+			return true;
+
+		String name = zipEntry.getName();
+
+		if (name.startsWith("/"))
+			name = name.substring(1);
+
+		for (String driverEntityId : driverEntityIds)
+		{
+			if (name.startsWith(driverEntityId))
+				return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * 是否在数组中有效。
+	 * 
+	 * @param driverEntity
+	 * @param ids
+	 * @return
+	 */
+	protected boolean isValidDriverEntityForIdArray(DriverEntity driverEntity, String... ids)
+	{
+		if (ids == null || ids.length == 0)
+			return true;
+
+		String myId = driverEntity.getId();
+
+		for (String id : ids)
+		{
+			if (myId.equals(id))
+				return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -444,8 +670,19 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 */
 	protected void checkInput(DriverEntity driverEntity)
 	{
-		if (isBlank(driverEntity.getId()) || isBlank(driverEntity.getDriverClassName()))
+		if (!isValidDriverEntity(driverEntity))
 			throw new IllegalArgumentException();
+	}
+
+	/**
+	 * 是否是合法的{@linkplain DriverEntity}。
+	 * 
+	 * @param driverEntity
+	 * @return
+	 */
+	protected boolean isValidDriverEntity(DriverEntity driverEntity)
+	{
+		return (!isBlank(driverEntity.getId()) && !isBlank(driverEntity.getDriverClassName()));
 	}
 
 	protected boolean reloadDriverEntityFileIfModified()
@@ -515,7 +752,18 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		List<DriverEntity> driverEntities = null;
 
 		if (this.driverEntityInfoFile.exists())
-			driverEntities = readDriverEntities(this.driverEntityInfoFile);
+		{
+			Reader in = getDriverEntityInfoFileReader();
+
+			try
+			{
+				driverEntities = readDriverEntities(in);
+			}
+			finally
+			{
+				close(in);
+			}
+		}
 		else
 			driverEntities = new ArrayList<DriverEntity>();
 
@@ -524,14 +772,16 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	/**
-	 * 从文件中读取{@linkplain DriverEntity}列表。
+	 * 从输入流中读取{@linkplain DriverEntity}列表。
+	 * <p>
+	 * 返回结果中不应该包含{@linkplain #isValidDriverEntity(DriverEntity)}为{@code false}的元素。
+	 * </p>
 	 * 
-	 * @param driverEntityInfoFile
+	 * @param in
 	 * @return
 	 * @throws DriverEntityManagerException
 	 */
-	protected abstract List<DriverEntity> readDriverEntities(File driverEntityInfoFile)
-			throws DriverEntityManagerException;
+	protected abstract List<DriverEntity> readDriverEntities(Reader in) throws DriverEntityManagerException;
 
 	/**
 	 * 将{@linkplain #driverEntities}列表写入文件。
@@ -540,17 +790,26 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 */
 	protected void write() throws DriverEntityManagerException
 	{
-		writeDriverEntities(this.driverEntities, this.driverEntityInfoFile);
+		Writer out = getDriverEntityInfoFileWriter();
+
+		try
+		{
+			writeDriverEntities(this.driverEntities, out);
+		}
+		finally
+		{
+			close(out);
+		}
 	}
 
 	/**
-	 * 将{@linkplain DriverEntity}列表写入文件。
+	 * 将{@linkplain DriverEntity}列表写入输出流。
 	 * 
 	 * @param driverEntities
-	 * @param driverEntityInfoFile
+	 * @param writer
 	 * @throws DriverEntityManagerException
 	 */
-	protected abstract void writeDriverEntities(List<DriverEntity> driverEntities, File driverEntityInfoFile)
+	protected abstract void writeDriverEntities(List<DriverEntity> driverEntities, Writer writer)
 			throws DriverEntityManagerException;
 
 	/**
@@ -563,17 +822,57 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		try
 		{
-			return new BufferedReader(new InputStreamReader(new FileInputStream(this.driverEntityInfoFile),
-					this.driverEntityFileEncoding));
+			return getDriverEntityInfoFileReader(new FileInputStream(this.driverEntityInfoFile));
 		}
 		catch (FileNotFoundException e)
 		{
 			throw new DriverEntityManagerException(e);
 		}
+	}
+
+	/**
+	 * 获取{@linkplain #driverEntityInfoFile}输入流。
+	 * 
+	 * @return
+	 * @throws DriverEntityManagerException
+	 */
+	protected Reader getDriverEntityInfoFileReader(InputStream in) throws DriverEntityManagerException
+	{
+		try
+		{
+			return new BufferedReader(new InputStreamReader(in, this.driverEntityFileEncoding));
+		}
 		catch (UnsupportedEncodingException e)
 		{
 			throw new DriverEntityManagerException(e);
 		}
+	}
+
+	/**
+	 * 获取{@linkplain ByteArrayInputStream}输入流。
+	 * 
+	 * @param in
+	 * @return
+	 * @throws DriverEntityManagerException
+	 */
+	protected ByteArrayInputStream getByteArrayInputStream(ZipInputStream in) throws DriverEntityManagerException
+	{
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		try
+		{
+			read(in, out);
+		}
+		catch (IOException e)
+		{
+			throw new DriverEntityManagerException(e);
+		}
+		finally
+		{
+			close(out);
+		}
+
+		return new ByteArrayInputStream(out.toByteArray());
 	}
 
 	/**
@@ -586,12 +885,26 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		try
 		{
-			return new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.driverEntityInfoFile),
-					this.driverEntityFileEncoding));
+			return getDriverEntityInfoFileWriter(new FileOutputStream(this.driverEntityInfoFile));
 		}
 		catch (FileNotFoundException e)
 		{
 			throw new DriverEntityManagerException(e);
+		}
+	}
+
+	/**
+	 * 获取{@linkplain #driverEntityInfoFile}输出流。
+	 * 
+	 * @param out
+	 * @return
+	 * @throws DriverEntityManagerException
+	 */
+	protected Writer getDriverEntityInfoFileWriter(OutputStream out) throws DriverEntityManagerException
+	{
+		try
+		{
+			return new BufferedWriter(new OutputStreamWriter(out, this.driverEntityFileEncoding));
 		}
 		catch (UnsupportedEncodingException e)
 		{
@@ -633,6 +946,20 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		}
 	}
 
+	protected void flush(Flushable flushable)
+	{
+		if (flushable == null)
+			return;
+
+		try
+		{
+			flushable.flush();
+		}
+		catch (IOException e)
+		{
+		}
+	}
+
 	/**
 	 * 获取驱动库文件。
 	 * 
@@ -657,12 +984,23 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 */
 	protected File getDriverLibraryDirectory(String driverEntityId, boolean create)
 	{
-		File file = new File(this.rootDirectory, driverEntityId);
+		File file = getFileInRootDirectory(getDriverLibraryDirectoryName(driverEntityId));
 
 		if (create && !file.exists())
 			file.mkdirs();
 
 		return file;
+	}
+
+	/**
+	 * 获取驱动库的目录名称。
+	 * 
+	 * @param driverEntityId
+	 * @return
+	 */
+	protected String getDriverLibraryDirectoryName(String driverEntityId)
+	{
+		return driverEntityId;
 	}
 
 	/**
@@ -674,6 +1012,18 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		File file = getDriverLibraryDirectory(driverEntityId, false);
 		deleteFile(file);
+	}
+
+	/**
+	 * 获取文件。
+	 * 
+	 * @param directoryName
+	 * @param create
+	 * @return
+	 */
+	protected File getFileInRootDirectory(String fileName)
+	{
+		return new File(this.rootDirectory, fileName);
 	}
 
 	/**
@@ -723,19 +1073,63 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 * @param out
 	 * @throws IOException
 	 */
-	protected void write(InputStream in, OutputStream out) throws DriverEntityManagerException
+	protected void read(InputStream in, OutputStream out) throws IOException
 	{
 		byte[] cache = new byte[1024];
 		int readLen = -1;
 
-		try
+		while ((readLen = in.read(cache)) > -1)
+			out.write(cache, 0, readLen);
+	}
+
+	/**
+	 * 将文件写入ZIP输出流。
+	 * 
+	 * @param out
+	 * @param file
+	 * @param zipEntryName
+	 * @throws IOException
+	 */
+	protected void writeFileToZipOutputStream(ZipOutputStream out, File file, String zipEntryName) throws IOException
+	{
+		if (!file.exists())
+			return;
+
+		boolean isDirectory = file.isDirectory();
+
+		if (isDirectory && !zipEntryName.endsWith("/"))
+			zipEntryName = zipEntryName + "/";
+
+		ZipEntry zipEntry = new ZipEntry(zipEntryName);
+
+		out.putNextEntry(zipEntry);
+
+		if (!isDirectory)
 		{
-			while ((readLen = in.read(cache)) > -1)
-				out.write(cache, 0, readLen);
+			InputStream fileIn = null;
+
+			try
+			{
+				fileIn = new FileInputStream(file);
+				read(fileIn, out);
+			}
+			finally
+			{
+				close(fileIn);
+			}
 		}
-		catch (IOException e)
+
+		out.closeEntry();
+
+		if (isDirectory)
 		{
-			throw new DriverEntityManagerException(e);
+			File[] children = file.listFiles();
+
+			for (File child : children)
+			{
+				String myName = zipEntryName + child.getName();
+				writeFileToZipOutputStream(out, child, myName);
+			}
 		}
 	}
 
