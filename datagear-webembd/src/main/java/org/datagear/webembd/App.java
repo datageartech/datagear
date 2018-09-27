@@ -24,19 +24,16 @@ public class App
 
 	private static final String LOG_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-	private static final String APPLICATION_NAME = "[数据齿轮]";
-
 	private static final String INFO_WRAP_LINE = "-----------------------------------------";
 
 	public static void main(String[] args) throws Throwable
 	{
 		System.out.println(INFO_WRAP_LINE);
-		System.out.println(
-				"[" + new SimpleDateFormat(LOG_DATE_FORMAT).format(new Date()) + "] starting " + APPLICATION_NAME);
+		System.out.println("[" + new SimpleDateFormat(LOG_DATE_FORMAT).format(new Date()) + "] starting...");
 		System.out.println(INFO_WRAP_LINE);
 
 		LOGGER.info(INFO_WRAP_LINE);
-		LOGGER.info("starting " + APPLICATION_NAME);
+		LOGGER.info("starting...");
 		LOGGER.info(INFO_WRAP_LINE);
 
 		Server server = null;
@@ -63,18 +60,17 @@ public class App
 		}
 		catch (Throwable t)
 		{
-			LOGGER.error("start " + APPLICATION_NAME + " failed", t);
+			LOGGER.error("starting failed", t);
 
 			throw t;
 		}
 
 		System.out.println(INFO_WRAP_LINE);
-		System.out.println(
-				"[" + new SimpleDateFormat(LOG_DATE_FORMAT).format(new Date()) + "] started " + APPLICATION_NAME);
+		System.out.println("[" + new SimpleDateFormat(LOG_DATE_FORMAT).format(new Date()) + "] starting [OK]");
 		System.out.println(INFO_WRAP_LINE);
 
 		LOGGER.info(INFO_WRAP_LINE);
-		LOGGER.info("started " + APPLICATION_NAME);
+		LOGGER.info("starting [OK]");
 		LOGGER.info(INFO_WRAP_LINE);
 
 		try
@@ -84,12 +80,11 @@ public class App
 		catch (InterruptedException e)
 		{
 			System.out.println(INFO_WRAP_LINE);
-			System.out.println(
-					"[" + new SimpleDateFormat(LOG_DATE_FORMAT).format(new Date()) + "] stopped " + APPLICATION_NAME);
+			System.out.println("[" + new SimpleDateFormat(LOG_DATE_FORMAT).format(new Date()) + "] stopping... ");
 			System.out.println(INFO_WRAP_LINE);
 
 			LOGGER.info(INFO_WRAP_LINE);
-			LOGGER.info("stopped " + APPLICATION_NAME);
+			LOGGER.info("stopping [OK]");
 			LOGGER.info(INFO_WRAP_LINE);
 		}
 	}
