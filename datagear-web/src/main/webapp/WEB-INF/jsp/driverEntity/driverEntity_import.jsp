@@ -84,7 +84,7 @@
 				$(this).closest(".driver-entity-item").remove();
 			});
 			
-			var content = driverEntity.displayText + " ("+driverEntity.driverClassName+")";
+			var content = driverEntity.displayText;
 			$("<span class='driver-entity-info' />").attr("title", content).text(content)
 			.appendTo($item);
 		}
