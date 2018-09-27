@@ -52,6 +52,18 @@ public class IOUtil
 	}
 
 	/**
+	 * 获取文件对象。
+	 * 
+	 * @param directory
+	 * @param file
+	 * @return
+	 */
+	public static File getFile(File directory, String file)
+	{
+		return new File(directory, file);
+	}
+
+	/**
 	 * 删除文件。
 	 * 
 	 * @param file
@@ -105,6 +117,52 @@ public class IOUtil
 
 		while ((readLen = in.read(cache)) > -1)
 			out.write(cache, 0, readLen);
+	}
+
+	/**
+	 * 将文件写入输出流。
+	 * 
+	 * @param file
+	 * @param out
+	 * @throws IOException
+	 */
+	public static void write(File file, OutputStream out) throws IOException
+	{
+		InputStream in = null;
+
+		try
+		{
+			in = getInputStream(file);
+
+			write(in, out);
+		}
+		finally
+		{
+			close(in);
+		}
+	}
+
+	/**
+	 * 将输入流写入文件。
+	 * 
+	 * @param in
+	 * @param file
+	 * @throws IOException
+	 */
+	public static void write(InputStream in, File file) throws IOException
+	{
+		OutputStream out = null;
+
+		try
+		{
+			out = getOutputStream(file);
+
+			write(in, out);
+		}
+		finally
+		{
+			close(out);
+		}
 	}
 
 	/**
@@ -328,6 +386,19 @@ public class IOUtil
 	/**
 	 * 获取ZIP输入流。
 	 * 
+	 * @param in
+	 * @return
+	 */
+	public static ZipInputStream getZipInputStream(InputStream in)
+	{
+		ZipInputStream zin = new ZipInputStream(in);
+
+		return zin;
+	}
+
+	/**
+	 * 获取ZIP输入流。
+	 * 
 	 * @param file
 	 * @return
 	 * @throws FileNotFoundException
@@ -356,6 +427,19 @@ public class IOUtil
 	/**
 	 * 获取ZIP输出流。
 	 * 
+	 * @param out
+	 * @return
+	 */
+	public static ZipOutputStream getZipOutputStream(OutputStream out)
+	{
+		ZipOutputStream zout = new ZipOutputStream(out);
+
+		return zout;
+	}
+
+	/**
+	 * 获取ZIP输出流。
+	 * 
 	 * @param file
 	 * @return
 	 * @throws FileNotFoundException
@@ -379,6 +463,52 @@ public class IOUtil
 		ZipOutputStream out = new ZipOutputStream(getOutputStream(file));
 
 		return out;
+	}
+
+	/**
+	 * 解压ZIP输入流至指定文件夹。
+	 * 
+	 * @param zipInputStream
+	 * @param directory
+	 * @throws IOException
+	 */
+	public static void unzip(ZipInputStream zipInputStream, File directory) throws IOException
+	{
+		if (!directory.exists())
+			directory.mkdirs();
+
+		ZipEntry zipEntry = null;
+
+		while ((zipEntry = zipInputStream.getNextEntry()) != null)
+		{
+			File my = new File(directory, zipEntry.getName());
+
+			if (zipEntry.isDirectory())
+			{
+				if (!my.exists())
+					my.mkdirs();
+			}
+			else
+			{
+				File parent = my.getParentFile();
+
+				if (parent != null && !parent.exists())
+					parent.mkdirs();
+
+				OutputStream out = getOutputStream(my);
+
+				try
+				{
+					write(zipInputStream, out);
+				}
+				finally
+				{
+					close(out);
+				}
+			}
+
+			zipInputStream.closeEntry();
+		}
 	}
 
 	/**
