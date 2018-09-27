@@ -39,8 +39,9 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEnti
 				<input name="confirmButton" type="button" class="recommended" value="<fmt:message key='confirm' />" />
 				<input name="viewButton" type="button" value="<fmt:message key='view' />" />
 			<%}else{%>
-				<input name="addButton" type="button" value="<fmt:message key='add' />" />
 				<input name="importButton" type="button" value="<fmt:message key='import' />" />
+				<input name="exportButton" type="button" value="<fmt:message key='export' />" />
+				<input name="addButton" type="button" value="<fmt:message key='add' />" />
 				<input name="editButton" type="button" value="<fmt:message key='edit' />" />
 				<input name="viewButton" type="button" value="<fmt:message key='view' />" />
 				<input name="deleteButton" type="button" value="<fmt:message key='delete' />" />
@@ -147,6 +148,16 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEnti
 					}
 				}
 			});
+		});
+
+		pageObj.element("input[name=exportButton]").click(function()
+		{
+			var selectedDatas = pageObj.getSelectedData();
+			var param = $.getPropertyParamString(selectedDatas, "id");
+			
+			var options = {target : "_file"};
+			
+			pageObj.open(pageObj.url("export?"+param), options);
 		});
 		
 		pageObj.element("input[name=editButton]").click(function()

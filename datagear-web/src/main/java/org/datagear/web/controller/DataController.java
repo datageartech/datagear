@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
+import org.datagear.connection.IOUtil;
 import org.datagear.dbmodel.CachedDbModelFactory;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
@@ -1194,11 +1195,12 @@ public class DataController extends AbstractSchemaModelController
 		{
 			out = response.getOutputStream();
 
-			FileUtils.write(this.blobFileManagerDirectory, fileName, out);
+			File file = IOUtil.getFile(this.blobFileManagerDirectory, fileName);
+			IOUtil.write(file, out);
 		}
 		finally
 		{
-			FileUtils.close(out);
+			IOUtil.close(out);
 		}
 	}
 
@@ -1207,11 +1209,11 @@ public class DataController extends AbstractSchemaModelController
 	public FileInfo delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") String fileName) throws Throwable
 	{
-		File file = FileUtils.getFile(this.blobFileManagerDirectory, fileName);
+		File file = IOUtil.getFile(this.blobFileManagerDirectory, fileName);
 
 		FileInfo fileInfo = FileUtils.getFileInfo(file);
 
-		FileUtils.deleteFile(file);
+		IOUtil.deleteFile(file);
 
 		return fileInfo;
 	}

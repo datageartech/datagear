@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +18,7 @@ import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
 import org.datagear.connection.DriverEntityManagerException;
 import org.datagear.connection.DriverLibraryInfo;
+import org.datagear.connection.IOUtil;
 import org.datagear.connection.XmlDriverEntityManager;
 import org.datagear.dbinfo.TableInfo;
 import org.datagear.persistence.PagingQuery;
@@ -138,7 +140,7 @@ public class DriverEntityController extends AbstractController
 
 				if (driverLibraryFile.exists())
 				{
-					InputStream in = FileUtils.getInputStream(driverLibraryFile);
+					InputStream in = IOUtil.getInputStream(driverLibraryFile);
 
 					try
 					{
@@ -146,7 +148,7 @@ public class DriverEntityController extends AbstractController
 					}
 					finally
 					{
-						FileUtils.close(in);
+						IOUtil.close(in);
 					}
 				}
 			}
@@ -172,118 +174,82 @@ public class DriverEntityController extends AbstractController
 	{
 		File directory = getTempImportDirectory(importId, true);
 
-		FileUtils.deleteFileIn(directory);
+		IOUtil.clearDirectory(directory);
 
-		ZipInputStream in = new ZipInputStream(multipartFile.getInputStream());
+		File importFile = IOUtil.getFile(directory, TEMP_IMPORT_FILE_NAME);
 
+		InputStream in = null;
+		OutputStream importFileOut = null;
 		try
 		{
-			FileUtils.unzip(in, directory);
+			in = multipartFile.getInputStream();
+			importFileOut = IOUtil.getOutputStream(importFile);
+			IOUtil.write(in, importFileOut);
 		}
 		finally
 		{
-			FileUtils.close(in);
+			IOUtil.close(in);
+			IOUtil.close(importFileOut);
 		}
+
+		ZipInputStream importFileIn = IOUtil.getZipInputStream(importFile);
+
+		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager(directory);
 
 		try
 		{
-			XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager(directory);
 			driverEntityManager.init();
 
-			try
-			{
-				return driverEntityManager.getAll();
-			}
-			finally
-			{
-				driverEntityManager.releaseAll();
-			}
+			return driverEntityManager.readDriverEntitiesFromZip(importFileIn);
 		}
 		catch (DriverEntityManagerException e)
 		{
 			throw new IllegalImportDriverEntityFileFormatException(e);
+		}
+		finally
+		{
+			IOUtil.close(importFileIn);
+			driverEntityManager.releaseAll();
 		}
 	}
 
 	@RequestMapping(value = "/saveImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveImport(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("importId") String importId, @RequestParam("driverEntity.id") String[] driverEntityIds,
-			@RequestParam("driverEntity.driverClassName") String[] driverEntityDriverClassNames,
-			@RequestParam(value = "driverEntity.displayName", required = false) String[] driverEntityDisplayNames,
-			@RequestParam(value = "driverEntity.displayDesc", required = false) String[] driverEntityDisplayDescs)
+			@RequestParam("importId") String importId, @RequestParam("driverEntity.id") String[] driverEntityIds)
 			throws Exception
 	{
 		File directory = getTempImportDirectory(importId, false);
+		File importFile = IOUtil.getFile(directory, TEMP_IMPORT_FILE_NAME);
 
-		if (!directory.exists())
-			throw new IllegalInputException("import directory [" + importId + "] not exists");
+		if (!importFile.exists())
+			throw new IllegalInputException("import file for [" + importId + "] not exists");
 
-		if (driverEntityIds.length != driverEntityDriverClassNames.length)
-			throw new IllegalInputException();
+		ZipInputStream in = IOUtil.getZipInputStream(importFile);
 
-		if (driverEntityDisplayNames != null && driverEntityDisplayNames.length != driverEntityIds.length)
-			throw new IllegalInputException();
-
-		if (driverEntityDisplayDescs != null && driverEntityDisplayDescs.length != driverEntityIds.length)
-			throw new IllegalInputException();
-
-		DriverEntity[] driverEntities = new DriverEntity[driverEntityIds.length];
-
-		for (int i = 0; i < driverEntityIds.length; i++)
-		{
-			if (isBlank(driverEntityIds[i]) || isBlank(driverEntityDriverClassNames[i]))
-				throw new IllegalInputException();
-
-			DriverEntity driverEntity = new DriverEntity(driverEntityIds[i], driverEntityDriverClassNames[i]);
-
-			String displayName = (driverEntityDisplayNames != null ? driverEntityDisplayNames[i] : null);
-			if (isBlank(displayName))
-				displayName = driverEntityDriverClassNames[i];
-
-			driverEntity.setDisplayName(displayName);
-			driverEntity.setDisplayDesc((driverEntityDisplayDescs != null ? driverEntityDisplayDescs[i] : null));
-
-			driverEntities[i] = driverEntity;
-		}
-
-		this.driverEntityManager.add(driverEntities);
-
-		for (int i = 0; i < driverEntities.length; i++)
-		{
-			DriverEntity driverEntity = driverEntities[i];
-
-			File myDriverPath = new File(directory, driverEntity.getId());
-
-			if (myDriverPath.exists())
-			{
-				File[] libraryFiles = myDriverPath.listFiles();
-
-				if (libraryFiles.length > 0)
-				{
-					this.driverEntityManager.deleteDriverLibrary(driverEntity);
-
-					for (File libraryFile : libraryFiles)
-					{
-						if (libraryFile.isDirectory())
-							continue;
-
-						InputStream in = FileUtils.getInputStream(libraryFile);
-
-						try
-						{
-							this.driverEntityManager.addDriverLibrary(driverEntity, libraryFile.getName(), in);
-						}
-						finally
-						{
-							FileUtils.close(in);
-						}
-					}
-				}
-			}
-		}
+		this.driverEntityManager.importFromZip(in, driverEntityIds);
 
 		return buildOperationMessageSuccessResponseEntity(request, buildMessageCode("import.success"));
+	}
+
+	@RequestMapping(value = "/export")
+	public void export(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(value = "id", required = false) String[] driverEntityIds) throws Exception
+	{
+		response.addHeader("Content-Disposition", "attachment;filename=drivers.zip");
+		response.setContentType("application/octet-stream");
+
+		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());
+
+		try
+		{
+			this.driverEntityManager.exportToZip(zout, driverEntityIds);
+		}
+		finally
+		{
+			zout.flush();
+			zout.close();
+		}
 	}
 
 	@RequestMapping("/edit")
@@ -383,7 +349,7 @@ public class DriverEntityController extends AbstractController
 			}
 			finally
 			{
-				FileUtils.close(in);
+				IOUtil.close(in);
 			}
 
 			List<DriverLibraryInfo> driverLibraryInfos = this.driverEntityManager.getDriverLibraryInfos(driverEntity);
@@ -423,7 +389,7 @@ public class DriverEntityController extends AbstractController
 
 			// 即使文件不存在也不抛出异常了，会导致浏览器跳转到新的错误提示页面
 			if (tempFile.exists())
-				FileUtils.write(tempFile, out);
+				IOUtil.write(tempFile, out);
 		}
 	}
 
@@ -448,7 +414,7 @@ public class DriverEntityController extends AbstractController
 			File directory = getTempDriverLibraryDirectoryNotNull(id);
 			File tempFile = getTempDriverLibraryFile(directory, fileName);
 
-			FileUtils.deleteFile(tempFile);
+			IOUtil.deleteFile(tempFile);
 
 			fileInfos = FileUtils.getFileInfos(directory);
 		}

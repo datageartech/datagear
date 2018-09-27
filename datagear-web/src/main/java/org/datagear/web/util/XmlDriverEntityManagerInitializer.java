@@ -10,6 +10,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
 
+import org.datagear.connection.IOUtil;
 import org.datagear.connection.XmlDriverEntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +112,7 @@ public class XmlDriverEntityManagerInitializer implements ServletContextAware
 			{
 				ZipInputStream in = new ZipInputStream(resource.getInputStream());
 
-				FileUtils.unzip(in, this.xmlDriverEntityManager.getRootDirectory());
+				IOUtil.unzip(in, this.xmlDriverEntityManager.getRootDirectory());
 			}
 		}
 

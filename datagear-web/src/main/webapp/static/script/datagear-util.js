@@ -513,6 +513,34 @@
 		},
 		
 		/**
+		 * 获取对象或者对象数组的属性值参数字符串，例如：“id=1&id=2&id=3”
+		 */
+		getPropertyParamString : function(objOrArray, propertyName)
+		{
+			var re = "";
+			
+			if(!$.isArray(objOrArray))
+				objOrArray = [objOrArray];
+			
+			for(var i=0; i<objOrArray.length; i++)
+			{
+				var ele = objOrArray[i];
+				
+				var pv = (ele ? ele[propertyName] : null);
+				
+				if(pv == undefined || pv == null)
+					pv = "";
+				
+				if(re != "")
+					re += "&";
+				
+				re += propertyName + "=" + encodeURIComponent(pv);
+			}
+			
+			return re;
+		},
+		
+		/**
 		 * 如果是字符串且超过指定长度，则将其截断。
 		 * 
 		 * @param str 必选，待截断的字符串

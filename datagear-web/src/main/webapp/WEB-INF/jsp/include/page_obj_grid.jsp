@@ -184,6 +184,15 @@ pageObj.sort = undefined;
 		}
 	};
 	
+	//获取选中数据
+	pageObj.getSelectedData = function()
+	{
+		var rows = pageObj.table.DataTable().rows('.selected');
+		var rowsData = pageObj.getRowsData(rows);
+		
+		return (rowsData || []);
+	};
+	
 	pageObj.getRowsData = function(rows)
 	{
 		if(rows == undefined)
