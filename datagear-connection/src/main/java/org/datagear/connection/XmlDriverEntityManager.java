@@ -161,7 +161,7 @@ public class XmlDriverEntityManager extends AbstractFileDriverEntityManager
 	}
 
 	@Override
-	protected void writeDriverEntities(List<DriverEntity> driverEntities, Writer out)
+	protected void writeDriverEntities(Writer out, List<DriverEntity> driverEntities)
 			throws DriverEntityManagerException
 	{
 		try

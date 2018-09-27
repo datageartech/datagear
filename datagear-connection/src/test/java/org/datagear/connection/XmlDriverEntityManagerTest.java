@@ -8,11 +8,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.Writer;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -258,7 +254,7 @@ public class XmlDriverEntityManagerTest
 			Writer writer = null;
 			try
 			{
-				writer = new BufferedWriter(new FileWriter(modifiedFile));
+				writer = IOUtil.getWriter(modifiedFile);
 				writer.write("modified");
 			}
 			finally
@@ -300,17 +296,17 @@ public class XmlDriverEntityManagerTest
 			expected = driverEntityManager.getAll();
 
 			{
-				ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(zipFilePath)));
+				ZipOutputStream out = IOUtil.getZipOutputStream(zipFilePath);
 				driverEntityManager.exportToZip(out);
-				out.close();
+				IOUtil.close(out);
 
 				Assert.assertTrue(new File(zipFilePath).exists());
 			}
 
 			{
-				ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(zipFilePathFiltered)));
+				ZipOutputStream out = IOUtil.getZipOutputStream(zipFilePathFiltered);
 				driverEntityManager.exportToZip(out, "mysql", "oracle");
-				out.close();
+				IOUtil.close(out);
 
 				Assert.assertTrue(new File(zipFilePathFiltered).exists());
 
@@ -323,9 +319,9 @@ public class XmlDriverEntityManagerTest
 			XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("target/exportToZipTest");
 			driverEntityManager.init();
 
-			ZipInputStream in = new ZipInputStream(new FileInputStream(new File(zipFilePath)));
+			ZipInputStream in = IOUtil.getZipInputStream(zipFilePath);
 			driverEntityManager.importFromZip(in);
-			in.close();
+			IOUtil.close(in);
 
 			Assert.assertEquals(expected, driverEntityManager.getAll());
 		}
@@ -334,9 +330,9 @@ public class XmlDriverEntityManagerTest
 			XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("target/exportToZipTestFiltered");
 			driverEntityManager.init();
 
-			ZipInputStream in = new ZipInputStream(new FileInputStream(new File(zipFilePathFiltered)));
+			ZipInputStream in = IOUtil.getZipInputStream(zipFilePathFiltered);
 			driverEntityManager.importFromZip(in);
-			in.close();
+			IOUtil.close(in);
 
 			Assert.assertEquals(expectedFiltered, driverEntityManager.getAll());
 		}
@@ -359,18 +355,18 @@ public class XmlDriverEntityManagerTest
 			expected = driverEntityManager.getAll();
 
 			{
-				ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(zipFilePath)));
+				ZipOutputStream out = IOUtil.getZipOutputStream(zipFilePath);
 				driverEntityManager.exportToZip(out);
-				out.close();
+				IOUtil.close(out);
 			}
 		}
 
 		XmlDriverEntityManager driverEntityManager = new XmlDriverEntityManager("target/readDriverEntitiesFromZip");
 		driverEntityManager.init();
 
-		ZipInputStream in = new ZipInputStream(new FileInputStream(new File(zipFilePath)));
+		ZipInputStream in = IOUtil.getZipInputStream(zipFilePath);
 		List<DriverEntity> driverEntities = driverEntityManager.readDriverEntitiesFromZip(in);
-		in.close();
+		IOUtil.close(in);
 
 		Assert.assertEquals(expected, driverEntities);
 	}

@@ -4,23 +4,13 @@
 
 package org.datagear.connection;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -128,7 +118,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 			this.rootDirectory.mkdirs();
 
 		this.driverEntityInfoFile = getDriverEntityInfoFile();
-		read();
+		readDriverEntities();
 	}
 
 	@Override
@@ -137,7 +127,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		reloadDriverEntityFileIfModified();
 
 		for (DriverEntity driverEntity : driverEntities)
-			checkInput(driverEntity);
+			checkValidDriverEntity(driverEntity);
 
 		for (DriverEntity driverEntity : driverEntities)
 		{
@@ -145,7 +135,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 			this.driverEntities.add(driverEntity);
 		}
 
-		write();
+		writeDriverEntities();
 	}
 
 	@Override
@@ -154,7 +144,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		reloadDriverEntityFileIfModified();
 
 		for (DriverEntity driverEntity : driverEntities)
-			checkInput(driverEntity);
+			checkValidDriverEntity(driverEntity);
 
 		boolean[] updated = new boolean[driverEntities.length];
 
@@ -173,7 +163,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 				updated[i] = false;
 		}
 
-		write();
+		writeDriverEntities();
 
 		return updated;
 	}
@@ -201,7 +191,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		}
 
 		if (removeCount > 0)
-			write();
+			writeDriverEntities();
 	}
 
 	@Override
@@ -229,7 +219,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		try
 		{
 			out = new BufferedOutputStream(new FileOutputStream(file));
-			read(in, out);
+			IOUtil.write(in, out);
 		}
 		catch (IOException e)
 		{
@@ -237,7 +227,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		}
 		finally
 		{
-			close(out);
+			IOUtil.close(out);
 		}
 	}
 
@@ -253,7 +243,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		for (String ln : libraryName)
 		{
 			File file = new File(directory, ln);
-			deleteFile(file);
+			IOUtil.deleteFile(file);
 		}
 	}
 
@@ -262,7 +252,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		File directory = getDriverLibraryDirectory(driverEntity.getId(), false);
 
-		deleteFileIn(directory);
+		IOUtil.clearDirectory(directory);
 	}
 
 	@Override
@@ -273,7 +263,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 		try
 		{
-			return new BufferedInputStream(new FileInputStream(file));
+			return IOUtil.getInputStream(file);
 		}
 		catch (FileNotFoundException e)
 		{
@@ -291,8 +281,8 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 		try
 		{
-			in = new BufferedInputStream(new FileInputStream(file));
-			read(in, out);
+			in = IOUtil.getInputStream(file);
+			IOUtil.write(in, out);
 		}
 		catch (IOException e)
 		{
@@ -300,7 +290,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		}
 		finally
 		{
-			close(in);
+			IOUtil.close(in);
 		}
 	}
 
@@ -389,11 +379,11 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 
 			try
 			{
-				writeDriverEntities(exported, writer);
+				writeDriverEntities(writer, exported);
 			}
 			finally
 			{
-				flush(writer);
+				IOUtil.flush(writer);
 			}
 		}
 		catch (IOException e)
@@ -406,7 +396,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 			for (DriverEntity driverEntity : exported)
 			{
 				File libraryDirectory = getDriverLibraryDirectory(driverEntity.getId(), false);
-				writeFileToZipOutputStream(out, libraryDirectory, libraryDirectory.getName());
+				IOUtil.writeFileToZipOutputStream(out, libraryDirectory, libraryDirectory.getName());
 			}
 		}
 		catch (IOException e)
@@ -427,7 +417,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 				if (isDriverEntityInfoFileZipEntry(zipEntry))
 				{
 					// 这里不能直接使用in，readDriverEntities实现会关闭in导致后面无法读取
-					Reader reader = getDriverEntityInfoFileReader(getByteArrayInputStream(in));
+					Reader reader = getDriverEntityInfoFileReader(IOUtil.getByteArrayInputStream(in));
 
 					try
 					{
@@ -444,7 +434,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 					}
 					finally
 					{
-						close(reader);
+						IOUtil.close(reader);
 					}
 				}
 				else if (isValidZipEntryForIdArray(zipEntry, ids))
@@ -454,7 +444,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 					if (zipEntry.isDirectory())
 					{
 						if (file.exists())
-							deleteFileIn(file);
+							IOUtil.clearDirectory(file);
 						else
 							file.mkdirs();
 					}
@@ -465,12 +455,11 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 						try
 						{
 							out = new FileOutputStream(file);
-							read(in, out);
+							IOUtil.write(in, out);
 						}
 						finally
 						{
-							flush(out);
-							close(out);
+							IOUtil.close(out);
 						}
 					}
 				}
@@ -478,7 +467,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 				in.closeEntry();
 			}
 
-			write();
+			writeDriverEntities();
 		}
 		catch (IOException e)
 		{
@@ -499,7 +488,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 				if (isDriverEntityInfoFileZipEntry(zipEntry))
 				{
 					// 这里不能直接使用in，readDriverEntities实现会关闭in导致后面无法读取
-					Reader reader = getDriverEntityInfoFileReader(getByteArrayInputStream(in));
+					Reader reader = getDriverEntityInfoFileReader(IOUtil.getByteArrayInputStream(in));
 
 					try
 					{
@@ -507,7 +496,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 					}
 					finally
 					{
-						close(reader);
+						IOUtil.close(reader);
 					}
 				}
 
@@ -548,9 +537,6 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 			return true;
 
 		String name = zipEntry.getName();
-
-		if (name.startsWith("/"))
-			name = name.substring(1);
 
 		for (String driverEntityId : driverEntityIds)
 		{
@@ -664,11 +650,12 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	/**
-	 * 校验输入。
+	 * 校验{@linkplain DriverEntity}。
 	 * 
 	 * @param driverEntity
+	 * @throws IllegalArgumentException
 	 */
-	protected void checkInput(DriverEntity driverEntity)
+	protected void checkValidDriverEntity(DriverEntity driverEntity) throws IllegalArgumentException
 	{
 		if (!isValidDriverEntity(driverEntity))
 			throw new IllegalArgumentException();
@@ -692,7 +679,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		if (thisModified == this.driverEntityInfoFileLastModified)
 			return false;
 
-		read();
+		readDriverEntities();
 
 		return true;
 	}
@@ -747,7 +734,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 * @return
 	 * @throws DriverEntityManagerException
 	 */
-	protected void read() throws DriverEntityManagerException
+	protected void readDriverEntities() throws DriverEntityManagerException
 	{
 		List<DriverEntity> driverEntities = null;
 
@@ -761,7 +748,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 			}
 			finally
 			{
-				close(in);
+				IOUtil.close(in);
 			}
 		}
 		else
@@ -788,28 +775,28 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	 * 
 	 * @throws DriverEntityManagerException
 	 */
-	protected void write() throws DriverEntityManagerException
+	protected void writeDriverEntities() throws DriverEntityManagerException
 	{
 		Writer out = getDriverEntityInfoFileWriter();
 
 		try
 		{
-			writeDriverEntities(this.driverEntities, out);
+			writeDriverEntities(out, this.driverEntities);
 		}
 		finally
 		{
-			close(out);
+			IOUtil.close(out);
 		}
 	}
 
 	/**
 	 * 将{@linkplain DriverEntity}列表写入输出流。
 	 * 
-	 * @param driverEntities
 	 * @param writer
+	 * @param driverEntities
 	 * @throws DriverEntityManagerException
 	 */
-	protected abstract void writeDriverEntities(List<DriverEntity> driverEntities, Writer writer)
+	protected abstract void writeDriverEntities(Writer writer, List<DriverEntity> driverEntities)
 			throws DriverEntityManagerException;
 
 	/**
@@ -822,7 +809,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		try
 		{
-			return getDriverEntityInfoFileReader(new FileInputStream(this.driverEntityInfoFile));
+			return getDriverEntityInfoFileReader(IOUtil.getInputStream(this.driverEntityInfoFile));
 		}
 		catch (FileNotFoundException e)
 		{
@@ -840,39 +827,12 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		try
 		{
-			return new BufferedReader(new InputStreamReader(in, this.driverEntityFileEncoding));
+			return IOUtil.getReader(in, this.driverEntityFileEncoding);
 		}
 		catch (UnsupportedEncodingException e)
 		{
 			throw new DriverEntityManagerException(e);
 		}
-	}
-
-	/**
-	 * 获取{@linkplain ByteArrayInputStream}输入流。
-	 * 
-	 * @param in
-	 * @return
-	 * @throws DriverEntityManagerException
-	 */
-	protected ByteArrayInputStream getByteArrayInputStream(ZipInputStream in) throws DriverEntityManagerException
-	{
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-		try
-		{
-			read(in, out);
-		}
-		catch (IOException e)
-		{
-			throw new DriverEntityManagerException(e);
-		}
-		finally
-		{
-			close(out);
-		}
-
-		return new ByteArrayInputStream(out.toByteArray());
 	}
 
 	/**
@@ -885,7 +845,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		try
 		{
-			return getDriverEntityInfoFileWriter(new FileOutputStream(this.driverEntityInfoFile));
+			return getDriverEntityInfoFileWriter(IOUtil.getOutputStream(this.driverEntityInfoFile));
 		}
 		catch (FileNotFoundException e)
 		{
@@ -904,7 +864,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		try
 		{
-			return new BufferedWriter(new OutputStreamWriter(out, this.driverEntityFileEncoding));
+			return IOUtil.getWriter(out, this.driverEntityFileEncoding);
 		}
 		catch (UnsupportedEncodingException e)
 		{
@@ -930,34 +890,6 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 			return true;
 
 		return false;
-	}
-
-	protected void close(Closeable closeable)
-	{
-		if (closeable == null)
-			return;
-
-		try
-		{
-			closeable.close();
-		}
-		catch (Exception e)
-		{
-		}
-	}
-
-	protected void flush(Flushable flushable)
-	{
-		if (flushable == null)
-			return;
-
-		try
-		{
-			flushable.flush();
-		}
-		catch (IOException e)
-		{
-		}
 	}
 
 	/**
@@ -1011,7 +943,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	protected void deleteDriverLibraryDirectory(String driverEntityId)
 	{
 		File file = getDriverLibraryDirectory(driverEntityId, false);
-		deleteFile(file);
+		IOUtil.deleteFile(file);
 	}
 
 	/**
@@ -1024,113 +956,6 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	protected File getFileInRootDirectory(String fileName)
 	{
 		return new File(this.rootDirectory, fileName);
-	}
-
-	/**
-	 * 删除文件。
-	 * 
-	 * @param file
-	 */
-	protected void deleteFile(File file)
-	{
-		if (!file.exists())
-			return;
-
-		if (file.isDirectory())
-		{
-			File[] children = file.listFiles();
-
-			for (File child : children)
-				deleteFile(child);
-		}
-
-		file.delete();
-	}
-
-	/**
-	 * 删除文件夹里的所有文件。
-	 * 
-	 * @param directory
-	 */
-	protected void deleteFileIn(File directory)
-	{
-		if (!directory.exists())
-			return;
-
-		if (directory.isDirectory())
-		{
-			File[] children = directory.listFiles();
-
-			for (File child : children)
-				deleteFile(child);
-		}
-	}
-
-	/**
-	 * 读取输入流，并写入输出流。
-	 * 
-	 * @param in
-	 * @param out
-	 * @throws IOException
-	 */
-	protected void read(InputStream in, OutputStream out) throws IOException
-	{
-		byte[] cache = new byte[1024];
-		int readLen = -1;
-
-		while ((readLen = in.read(cache)) > -1)
-			out.write(cache, 0, readLen);
-	}
-
-	/**
-	 * 将文件写入ZIP输出流。
-	 * 
-	 * @param out
-	 * @param file
-	 * @param zipEntryName
-	 * @throws IOException
-	 */
-	protected void writeFileToZipOutputStream(ZipOutputStream out, File file, String zipEntryName) throws IOException
-	{
-		if (!file.exists())
-			return;
-
-		boolean isDirectory = file.isDirectory();
-
-		if (isDirectory && !zipEntryName.endsWith("/"))
-			zipEntryName = zipEntryName + "/";
-
-		ZipEntry zipEntry = new ZipEntry(zipEntryName);
-
-		out.putNextEntry(zipEntry);
-
-		if (!isDirectory)
-		{
-			InputStream fileIn = null;
-
-			try
-			{
-				fileIn = new FileInputStream(file);
-				read(fileIn, out);
-			}
-			finally
-			{
-				close(fileIn);
-			}
-		}
-
-		out.closeEntry();
-
-		if (isDirectory)
-		{
-			File[] children = file.listFiles();
-
-			for (File child : children)
-			{
-				String myName = zipEntryName + child.getName();
-				writeFileToZipOutputStream(out, child, myName);
-			}
-		}
 	}
 
 	protected static class PathDriverFactoryInfo

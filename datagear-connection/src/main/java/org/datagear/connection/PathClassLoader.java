@@ -4,13 +4,10 @@
 
 package org.datagear.connection;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -161,7 +158,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 			JarFileHolder tmpJarFileHolder = new JarFileHolder(jarFileHolder.getJarFile(), jarFileHolder.getFile(),
 					true);
 
-			close(tmpJarFileHolder);
+			IOUtil.close(tmpJarFileHolder);
 		}
 	}
 
@@ -201,7 +198,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		}
 		finally
 		{
-			close(resourceHolder);
+			IOUtil.close(resourceHolder);
 		}
 
 		return null;
@@ -248,7 +245,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		finally
 		{
 			for (ResourceHolder resourceHolder : resourceHolders)
-				close(resourceHolder);
+				IOUtil.close(resourceHolder);
 		}
 
 		return null;
@@ -292,7 +289,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		}
 		finally
 		{
-			close(resourceHolder);
+			IOUtil.close(resourceHolder);
 		}
 
 		return null;
@@ -343,7 +340,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 
 				try
 				{
-					bytes = getBytes(in);
+					bytes = IOUtil.getBytes(in);
 				}
 				catch (IOException e)
 				{
@@ -351,7 +348,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 				}
 				finally
 				{
-					close(in);
+					IOUtil.close(in);
 				}
 
 				clazz = defineClass(name, bytes, 0, bytes.length);
@@ -403,7 +400,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		}
 		finally
 		{
-			close(classResourceHolder);
+			IOUtil.close(classResourceHolder);
 		}
 
 		Class<?> clazz = defineClass(name, classBytes, 0, classBytes.length);
@@ -466,25 +463,25 @@ public class PathClassLoader extends ClassLoader implements Closeable
 			try
 			{
 				in = jarFile.getInputStream(jarEntry);
-				return getBytes(in);
+				return IOUtil.getBytes(in);
 			}
 			finally
 			{
-				close(in);
+				IOUtil.close(in);
 			}
 		}
 		else
 		{
-			BufferedInputStream in = null;
+			InputStream in = null;
 
 			try
 			{
-				in = new BufferedInputStream(new FileInputStream(resourceHolder.getFile()));
-				return getBytes(in);
+				in = IOUtil.getInputStream(resourceHolder.getFile());
+				return IOUtil.getBytes(in);
 			}
 			finally
 			{
-				close(in);
+				IOUtil.close(in);
 			}
 		}
 	}
@@ -524,7 +521,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 			if (jarEntry != null && resourceHolder == null)
 				resourceHolder = new ResourceHolder(resourcePath, jarFileHolder, jarEntry);
 			else
-				close(jarFileHolder);
+				IOUtil.close(jarFileHolder);
 		}
 
 		return resourceHolder;
@@ -564,7 +561,7 @@ public class PathClassLoader extends ClassLoader implements Closeable
 			if (jarEntry != null)
 				resourceInfos.add(new ResourceHolder(resourcePath, jarFileHolder, jarEntry));
 			else
-				close(jarFileHolder);
+				IOUtil.close(jarFileHolder);
 		}
 
 		return resourceInfos;
@@ -586,28 +583,6 @@ public class PathClassLoader extends ClassLoader implements Closeable
 
 			return jarFileHolders;
 		}
-	}
-
-	/**
-	 * 读取输入流字节数组。
-	 * 
-	 * @param in
-	 * @return
-	 * @throws IOException
-	 */
-	protected byte[] getBytes(InputStream in) throws IOException
-	{
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-		byte[] buffer = new byte[1024];
-		int readLen = 0;
-
-		while ((readLen = in.read(buffer)) > 0)
-			bos.write(buffer, 0, readLen);
-
-		byte[] bytes = bos.toByteArray();
-
-		return bytes;
 	}
 
 	/**
@@ -686,23 +661,6 @@ public class PathClassLoader extends ClassLoader implements Closeable
 		path.append(CLASS_FILE_SUFFIX);
 
 		return path.toString();
-	}
-
-	/**
-	 * 关闭{@linkplain Closeable}。
-	 */
-	protected void close(Closeable closeable)
-	{
-		if (closeable == null)
-			return;
-
-		try
-		{
-			closeable.close();
-		}
-		catch (Throwable t)
-		{
-		}
 	}
 
 	@Override
