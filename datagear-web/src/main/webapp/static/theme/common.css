@@ -626,6 +626,10 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 .main-page-content .tab-more-tab-menu.ui-menu{
 	padding: 0.2em 0.2em;
 }
+.main-page-content .tab-more-tab-menu.ui-menu{
+	max-height: 30em;
+	overflow: auto;
+}
 .main-page-content .tab-more-operation-menu.ui-menu .ui-menu-item,
 .main-page-content .tab-more-tab-menu.ui-menu .ui-menu-item{
 	font-size: small;
