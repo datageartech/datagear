@@ -365,6 +365,12 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	display: none;
 }
 
+/*´íÎóÒ³*/
+.page-error{
+	padding-top: 2em;
+	text-align: center;
+}
+
 /*µÇÂ¼Ò³*/
 .page-data-form-login form .form-item .form-item-label label{
 	width: 8em;

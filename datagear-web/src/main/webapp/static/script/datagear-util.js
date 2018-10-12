@@ -414,14 +414,19 @@
 			if(preTooltipTimeoutCloseId)
 				window.clearTimeout(preTooltipTimeoutCloseId);
 			
+			var tooltipParent = document.body;
+			var customTooltipParent = $(".tooltip-parent");
+			if(customTooltipParent.length > 0)
+				tooltipParent = customTooltipParent[0];
+			
 			var tooltipId = $.uid("tooltip");
 			
 			tooltip = $("<div class='global-tooltip' style='display:none;' title=''>").attr("id", tooltipId)
-			.prependTo(document.body).tooltip(
+			.prependTo(tooltipParent).tooltip(
 			{
 				tooltipClass: tooltipClass,
 				content: content,
-				position: { my: "center top", at: "center top+3", of: document.body, collision: "flipfit" },
+				position: { my: "center top", at: "center top+3", of: tooltipParent, collision: "flipfit" },
 				open: function(event, ui)
 				{
 					if(delayMs >= 0)

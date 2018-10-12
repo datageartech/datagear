@@ -21,6 +21,10 @@ if(operationMessage == null)
 	WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(application);
 	
 	Integer statusCode = (Integer)request.getAttribute("javax.servlet.error.status_code");
+
+	if(statusCode == null)
+		statusCode = response.getStatus();
+	
 	String message = (String)request.getAttribute("javax.servlet.error.message");
 	Throwable throwable = (Throwable)request.getAttribute("javax.servlet.error.exception");
 	
@@ -48,6 +52,20 @@ if(operationMessage == null)
 <title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='error.errorOccure' /></title>
 </head>
 <body>
+<%if(ajaxRequest){%>
 <%@ include file="include/jsp_operation_message.jsp" %>
+<%}else{%>
+<div>
+	<div class="main-page-head">
+		<%@ include file="include/html_logo.jsp" %>
+		<div class="toolbar">
+			<a class="link" href="<c:url value="/" />"><fmt:message key='backToMainPage' /></a>
+		</div>
+	</div>
+	<div class="page-error">
+		<%@ include file="include/jsp_operation_message.jsp" %>
+	</div>
+</div>
+<%}%>
 </body>
 </html>
