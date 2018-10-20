@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by datagear.org.
+ * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
 package org.datagear.web;
