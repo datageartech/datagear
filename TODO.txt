@@ -1,2 +1,0 @@
-[web]添加内置常用数据库驱动；
-[web,webembd]版权、许可文件、readme文件；
