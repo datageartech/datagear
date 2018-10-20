@@ -153,6 +153,42 @@ public class DriverEntity implements Serializable
 		this.databaseVersions = databaseVersions;
 	}
 
+	public String getDisplayDescMore()
+	{
+		if (this.displayDesc != null && !this.displayDesc.isEmpty())
+			return this.displayDesc;
+		else
+		{
+			StringBuilder sb = new StringBuilder();
+
+			if (this.databaseName != null && !this.databaseName.isEmpty())
+			{
+				if (sb.length() != 0)
+					sb.append(", ");
+
+				sb.append("DB: " + this.databaseName);
+			}
+
+			if (this.databaseVersions != null && !this.databaseVersions.isEmpty())
+			{
+				if (sb.length() != 0)
+					sb.append(", ");
+
+				sb.append("Versions: " + this.databaseVersions.toString());
+			}
+
+			if (this.jreVersion != null && !this.jreVersion.isEmpty())
+			{
+				if (sb.length() != 0)
+					sb.append(", ");
+
+				sb.append("JRE: " + this.jreVersion);
+			}
+
+			return sb.toString();
+		}
+	}
+
 	@Override
 	public int hashCode()
 	{

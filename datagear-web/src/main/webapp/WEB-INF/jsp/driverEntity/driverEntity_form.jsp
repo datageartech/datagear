@@ -51,7 +51,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 					<label><fmt:message key='driverEntity.displayDesc' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="displayDesc" class="ui-widget ui-widget-content"><c:out value='${driverEntity.displayDesc}' /></textarea>
+					<textarea name="displayDesc" class="ui-widget ui-widget-content"><c:out value='${driverEntity.displayDescMore}' /></textarea>
 				</div>
 			</div>
 			<div class="form-item">

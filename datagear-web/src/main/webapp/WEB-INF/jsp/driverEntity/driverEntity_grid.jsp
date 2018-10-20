@@ -261,7 +261,7 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEnti
 		pageObj.buildTableColumValueOption("<fmt:message key='driverEntity.id' />", "id", true),
 		pageObj.buildTableColumValueOption("<fmt:message key='driverEntity.displayName' />", "displayName"),
 		pageObj.buildTableColumValueOption("<fmt:message key='driverEntity.driverClassName' />", "driverClassName"),
-		pageObj.buildTableColumValueOption("<fmt:message key='driverEntity.displayDesc' />", "displayDesc"),
+		pageObj.buildTableColumValueOption("<fmt:message key='driverEntity.displayDesc' />", "displayDescMore"),
 		pageObj.buildTableColumValueOption("", "displayText", true)
 	];
 	var tableSettings = pageObj.getTableSettings(tableColumns);
