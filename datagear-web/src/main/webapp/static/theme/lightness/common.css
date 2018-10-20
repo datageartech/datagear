@@ -19,7 +19,7 @@ a.link:hover{
 	color: #003eff;
 }
 
-/*±íµ¥*/
+/*è¡¨å•*/
 form .form-content .form-item label.error{
 	color: red;
 }
@@ -32,7 +32,7 @@ form .form-content .form-item .input-desc{
 	color: #BBB;
 }
 
-/*Ê×Ñ¡²Ù×÷°´Å¥*/
+/*é¦–é€‰æ“ä½œæŒ‰é’®*/
 .ui-button.recommended, .ui-button.recommended:active{
 	border: 1px solid 003eff;
 	background-color: #007FFF;
@@ -44,8 +44,8 @@ form .form-content .form-item .input-desc{
 	color: #ffffff;
 }
 
-/*¶Ô»°¿ò*/
-/*¿É±£³Öui-state-active×´Ì¬×é¼şÑùÊ½£¬Ä¬ÈÏÍ¼±êÊÇ»ÒÉ«£¬ÕâÁË¸Ä³É°×É«*/
+/*å¯¹è¯æ¡†*/
+/*å¯ä¿æŒui-state-activeçŠ¶æ€ç»„ä»¶æ ·å¼ï¼Œé»˜è®¤å›¾æ ‡æ˜¯ç°è‰²ï¼Œè¿™äº†æ”¹æˆç™½è‰²*/
 .stated-active.ui-state-active .ui-icon, .stated-active.ui-state-active:focus .ui-icon, .stated-active.ui-state-active:hover .ui-icon{
     background-image: url(jquery-ui-1.12.1/images/ui-icons_ffffff_256x240.png);
 }
@@ -118,7 +118,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	background-image: url(jquery-ui-1.12.1/images/ui-icons_444444_256x240.png);
 }
 
-/*Ö÷Ò³*/
+/*ä¸»é¡µ*/
 .main-page-head{
 	border-bottom: 1px solid #DDDDDD;
 }

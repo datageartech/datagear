@@ -7,7 +7,7 @@
 body{
 	margin: 0;
 	padding: 0;
-	font-family: inherit;/*Ê¹ÓÃÏµÍ³Ä¬ÈÏ×ÖÌå£¬ui¿âÀïÄ³Ğ©×ÖÌå¶ÔÖĞÎÄÖ§³ÖÓĞÎÊÌâ£¬µ¼ÖÂselectmenuäÖÈ¾ÖĞÎÄÌõÄ¿¸ß¶È²»Ò»ÖÂ¶ø³öÏÖÇĞ»»ÉÁ¶¯*/
+	font-family: inherit;/*ä½¿ç”¨ç³»ç»Ÿé»˜è®¤å­—ä½“ï¼Œuiåº“é‡ŒæŸäº›å­—ä½“å¯¹ä¸­æ–‡æ”¯æŒæœ‰é—®é¢˜ï¼Œå¯¼è‡´selectmenuæ¸²æŸ“ä¸­æ–‡æ¡ç›®é«˜åº¦ä¸ä¸€è‡´è€Œå‡ºç°åˆ‡æ¢é—ªåŠ¨*/
 }
 .small-text{
 	font-size:small;
@@ -25,7 +25,7 @@ a.link:hover{
 	text-decoration: none;
 }
 
-/*±íµ¥*/
+/*è¡¨å•*/
 form{}
 form .form-head{}
 form .form-content{}
@@ -51,7 +51,7 @@ form .form-content .form-item .form-item-value{
 form .form-content .form-item .form-item-value input[type=text],
 form .form-content .form-item .form-item-value input[type=password],
 form .form-content .form-item .form-item-value textarea{
-	margin-right: 0.3em;/*ÎÄ±¾¿òÓëºóÃæ°´Å¥¼ä¾à*/
+	margin-right: 0.3em;/*æ–‡æœ¬æ¡†ä¸åé¢æŒ‰é’®é—´è·*/
 	width: 15em;
 }
 form .form-content .form-item .form-item-value input[type=text],
@@ -62,9 +62,9 @@ form .form-content .form-item .form-item-value textarea{
 	width: 20em;
 	height: 3em;
 }
-form .form-content .form-item .form-item-value .file-input-show{/*ÎÄ¼şÕ¹Ê¾ÎÄ±¾*/
+form .form-content .form-item .form-item-value .file-input-show{/*æ–‡ä»¶å±•ç¤ºæ–‡æœ¬*/
 }
-form .form-content .form-item .form-item-value .file-info{/*Õ¹Ê¾ÉÏ´«ÎÄ¼şĞÅÏ¢ÔªËØ*/
+form .form-content .form-item .form-item-value .file-info{/*å±•ç¤ºä¸Šä¼ æ–‡ä»¶ä¿¡æ¯å…ƒç´ */
 	display: inline-block;
 	margin-left: 0.5em;
 }
@@ -110,7 +110,7 @@ form .form-foot .ui-button{
 	margin-right: .5em;
 }
 
-/*Ê×Ñ¡²Ù×÷°´Å¥*/
+/*é¦–é€‰æ“ä½œæŒ‰é’®*/
 .ui-button.recommended{
 	border: 1px solid #0066ff;
 	background-color: #4a97ff;
@@ -127,7 +127,7 @@ form .form-foot .ui-button{
 	color: #ffffff;
 }
 
-/*¶Ô»°¿ò*/
+/*å¯¹è¯æ¡†*/
 .ui-dialog .dialog-titlebar-pin{
 	position: absolute;
     right: 2.0em;
@@ -137,29 +137,29 @@ form .form-foot .ui-button{
     padding: 1px;
     height: 20px;
 }
-/*¿É±£³Öui-state-active×´Ì¬×é¼şÑùÊ½£¬Ä¬ÈÏÍ¼±êÊÇ»ÒÉ«£¬ÕâÁË¸Ä³É°×É«*/
+/*å¯ä¿æŒui-state-activeçŠ¶æ€ç»„ä»¶æ ·å¼ï¼Œé»˜è®¤å›¾æ ‡æ˜¯ç°è‰²ï¼Œè¿™äº†æ”¹æˆç™½è‰²*/
 .stated-active.ui-state-active .ui-icon, .stated-active.ui-state-active:focus .ui-icon, .stated-active.ui-state-active:hover .ui-icon{
     background-image: url(default/jquery-ui-1.12.1/images/ui-icons_ffffff_256x240.png);
 }
 
 /*jquery-ui*/
 .ui-widget{
-	font-family: inherit;/*Ê¹ÓÃÏµÍ³Ä¬ÈÏ×ÖÌå£¬ui¿âÀïÄ³Ğ©×ÖÌå¶ÔÖĞÎÄÖ§³ÖÓĞÎÊÌâ£¬µ¼ÖÂselectmenuäÖÈ¾ÖĞÎÄÌõÄ¿¸ß¶È²»Ò»ÖÂ¶ø³öÏÖÇĞ»»ÉÁ¶¯*/
+	font-family: inherit;/*ä½¿ç”¨ç³»ç»Ÿé»˜è®¤å­—ä½“ï¼Œuiåº“é‡ŒæŸäº›å­—ä½“å¯¹ä¸­æ–‡æ”¯æŒæœ‰é—®é¢˜ï¼Œå¯¼è‡´selectmenuæ¸²æŸ“ä¸­æ–‡æ¡ç›®é«˜åº¦ä¸ä¸€è‡´è€Œå‡ºç°åˆ‡æ¢é—ªåŠ¨*/
 }
 .ui-menu .ui-menu-item-wrapper{
-	padding: .4em 1em;/*²Ëµ¥ÌõÄ¿À©´ó*/
+	padding: .4em 1em;/*èœå•æ¡ç›®æ‰©å¤§*/
 }
 .ui-controlgroup.ui-controlgroup-horizontal{
-	padding-left: 1px;/*ºáÏò±ß¿òÖØµş*/
+	padding-left: 1px;/*æ¨ªå‘è¾¹æ¡†é‡å */
 }
 .ui-controlgroup.ui-controlgroup-horizontal .ui-controlgroup-item{
-	margin-left: -1px;/*ºáÏò±ß¿òÖØµş*/
+	margin-left: -1px;/*æ¨ªå‘è¾¹æ¡†é‡å */
 }
 .ui-controlgroup .ui-button-icon-only{
-	width: 1em;/*¼õĞ¡Í¼±ê¿í¶È*/
+	width: 1em;/*å‡å°å›¾æ ‡å®½åº¦*/
 }
 .ui-controlgroup .ui-button-icon-only .ui-icon{
-	top: 30%;/*Í¼±ê°´Å¥£¬ÉÏÏÂ¾ÓÖĞ*/
+	top: 30%;/*å›¾æ ‡æŒ‰é’®ï¼Œä¸Šä¸‹å±…ä¸­*/
 }
 .ui-tabs .ui-tabs-panel{
 	padding: 0.8em 0.9em;
@@ -186,7 +186,7 @@ form .form-foot .ui-button{
 }
 
 /*jstree*/
-/*½«jstreeÍ¼±ê¸ÄÎªjquery-ui*/
+/*å°†jstreeå›¾æ ‡æ”¹ä¸ºjquery-ui*/
 .jstree-default .jstree-node,
 .jstree-default .jstree-initial-node{
 	margin-top: 2px;
@@ -282,9 +282,9 @@ table.dataTable tbody tr .checkbox .ui-icon{
 table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 
-/*ÌáÊ¾¿ò*/
+/*æç¤ºæ¡†*/
 .ui-tooltip{
-	max-width: unset;/*È¡Ïû¿í¶ÈÏŞÖÆ*/
+	max-width: unset;/*å–æ¶ˆå®½åº¦é™åˆ¶*/
 }
 .ui-tooltip .ui-tooltip-content a{
 	font-weight: bold;
@@ -295,7 +295,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	cursor: pointer;
 }
 
-/*´íÎóÏûÏ¢¶Ô»°¿ò*/
+/*é”™è¯¯æ¶ˆæ¯å¯¹è¯æ¡†*/
 .error-dialog{
 }
 .error-dialog .error-content{
@@ -311,7 +311,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	margin: 0;
 }
 
-/*È·ÈÏ¶Ô»°¿ò*/
+/*ç¡®è®¤å¯¹è¯æ¡†*/
 .dialog-confirm{}
 .dialog-confirm .ui-icon-alert{
 	margin-right: 0.5em;
@@ -320,7 +320,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	display: inline-block;
 }
 
-/**ÇáĞÍ²Ëµ¥£¬³õÊ¼Ö»ÓĞÍ¼±ê*/
+/**è½»å‹èœå•ï¼Œåˆå§‹åªæœ‰å›¾æ ‡*/
 .lightweight-menu,
 .ui-menu.lightweight-menu{
 	list-style: none;
@@ -365,13 +365,13 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	display: none;
 }
 
-/*´íÎóÒ³*/
+/*é”™è¯¯é¡µ*/
 .page-error{
 	padding-top: 2em;
 	text-align: center;
 }
 
-/*µÇÂ¼Ò³*/
+/*ç™»å½•é¡µ*/
 .page-data-form-login form .form-item .form-item-label label{
 	width: 8em;
 }
@@ -380,7 +380,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	width:10em;
 }
 
-/*×¢²áÒ³*/
+/*æ³¨å†Œé¡µ*/
 .page-data-form-register form .form-item .form-item-label label{
 	width: 8em;
 }
@@ -399,7 +399,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	font-weight: bold;
 }
 
-/*Ö÷Ò³*/
+/*ä¸»é¡µ*/
 .ui-layout-pane{
 }
 .ui-layout-west.ui-layout-pane{
@@ -444,7 +444,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	vertical-align: middle;
 	margin-right: 0.2em;
 }
-/**ÏµÍ³ÉèÖÃÍ¼±ê*/
+/**ç³»ç»Ÿè®¾ç½®å›¾æ ‡*/
 .main-page-head .toolbar #systemSetMenu{
 	float:left;
 	margin-right: 0.5em;
@@ -570,7 +570,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	overflow-x: auto;
 	overflow-y: auto;
 }
-/*Ê÷½á¹¹ÖĞµÄ¸ü¶à±í½Úµã*/
+/*æ ‘ç»“æ„ä¸­çš„æ›´å¤šè¡¨èŠ‚ç‚¹*/
 .main-page-content .schema-panel .schema-panel-content .more-table{
 	font-weight: bold;
 	font-style: italic;
@@ -641,7 +641,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	font-size: small;
 }
 
-/*Çı¶¯ĞÅÏ¢¹ÜÀí±íµ¥Ò³*/
+/*é©±åŠ¨ä¿¡æ¯ç®¡ç†è¡¨å•é¡µ*/
 .page-data-form-driverEntity{
 }
 .page-data-form-driverEntity .driver-files{
@@ -670,7 +670,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	float: right;
 	margin-left: 0.2em;
 }
-/*Çı¶¯³ÌĞòµ¼Èë±íµ¥Ò³*/
+/*é©±åŠ¨ç¨‹åºå¯¼å…¥è¡¨å•é¡µ*/
 .page-data-form-driverEntityImport{
 }
 .page-data-form-driverEntityImport .driver-entity-infos{
@@ -695,11 +695,11 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	overflow: hidden;
 }
 
-/*±íµ¥Ò³*/
+/*è¡¨å•é¡µ*/
 .page-data-form{
 }
 
-/*²éÑ¯±íµ¥*/
+/*æŸ¥è¯¢è¡¨å•*/
 .search-form{
 }
 .search-form .keyword-widget{
@@ -776,7 +776,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
     font-size: 0.8em;
 }
 
-/*±í¸ñÒ³*/
+/*è¡¨æ ¼é¡µ*/
 .page-data-grid{
 	position: relative;
 	width: 100%;
