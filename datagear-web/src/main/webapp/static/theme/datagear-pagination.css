@@ -71,12 +71,14 @@
 	cursor: pointer;
 	margin: 0.1em 0.2em;
 	font-size: small;
+	padding: 0.3em 0.6em;
 }
 .pagination .page.ui-state-disabled{
 }
 .pagination .to-page{
 	display: inline-block;
 	padding-left: 0.3em;
+	vertical-align: middle;
 }
 .pagination .to-page input[type=text]{
 	vertical-align: middle;
