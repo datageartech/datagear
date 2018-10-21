@@ -375,16 +375,22 @@
 			
 			var button=$("<input type='button' />").attr("__propName", propName);
 			
-			button.attr("value", (options.readonly ? options.labels.view : options.labels.edit))
-			.click(function()
+			button.attr("value", (options.readonly ? options.labels.view : options.labels.edit));
+			
+			if(options.readonly && !propValue)
+				button.attr("disabled", true);
+			else
 			{
-				var myPropName = $(this).attr("__propName");
-				var myproperty = $.model.getProperty(_this.options.model, myPropName);
-				var myConcreteModel = myproperty.model;//TODO 处理抽象属性
-				
-				var callback = (_this.options.readonly ? _this.options.viewMultiplePropertyValue : _this.options.editMultiplePropertyValue);
-				callback.call(_this.element, myproperty, myConcreteModel);
-			});
+				button.click(function()
+				{
+					var myPropName = $(this).attr("__propName");
+					var myproperty = $.model.getProperty(_this.options.model, myPropName);
+					var myConcreteModel = myproperty.model;//TODO 处理抽象属性
+					
+					var callback = (_this.options.readonly ? _this.options.viewMultiplePropertyValue : _this.options.editMultiplePropertyValue);
+					callback.call(_this.element, myproperty, myConcreteModel);
+				});
+			}
 			
 			button.appendTo(valuediv).button();
 		},
