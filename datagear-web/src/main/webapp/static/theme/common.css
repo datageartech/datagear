@@ -52,15 +52,15 @@ form .form-content .form-item .form-item-value input[type=text],
 form .form-content .form-item .form-item-value input[type=password],
 form .form-content .form-item .form-item-value textarea{
 	margin-right: 0.3em;/*文本框与后面按钮间距*/
-	width: 15em;
+	width: 20em;
 }
 form .form-content .form-item .form-item-value input[type=text],
 form .form-content .form-item .form-item-value input[type=password]{
 	height: 1.5em;
 }
 form .form-content .form-item .form-item-value textarea{
-	width: 20em;
-	height: 3em;
+	width: 25em;
+	height: 5em;
 }
 form .form-content .form-item .form-item-value .file-input-show{/*文件展示文本*/
 }
