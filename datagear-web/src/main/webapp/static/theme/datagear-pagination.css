@@ -69,8 +69,8 @@
 .pagination .page{
 	display: inline-block;
 	cursor: pointer;
-	padding: 0.4em 0.4em 0.2em 0.4em;
 	margin: 0.1em 0.2em;
+	font-size: small;
 }
 .pagination .page.ui-state-disabled{
 }

@@ -143,7 +143,11 @@ form .form-foot .ui-button{
 }
 
 /*jquery-ui*/
-.ui-widget{
+.ui-widget,
+.ui-widget input,
+.ui-widget select,
+.ui-widget textarea,
+.ui-widget button{
 	font-family: inherit;/*使用系统默认字体，ui库里某些字体对中文支持有问题，导致selectmenu渲染中文条目高度不一致而出现切换闪动*/
 }
 .ui-menu .ui-menu-item-wrapper{
@@ -162,7 +166,7 @@ form .form-foot .ui-button{
 	top: 30%;/*图标按钮，上下居中*/
 }
 .ui-tabs .ui-tabs-panel{
-	padding: 0.8em 0.9em;
+	padding: 0.5em 0.7em;
 }
 
 /*jquery.layout*/
@@ -524,6 +528,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+	vertical-align: middle;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search input[type='text']{
 	border: 0;
@@ -539,6 +544,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	margin: 0 0;
 	padding-left: 0.6em;
 	padding-right: 0.6em;
+	margin-top: -0.2em;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button .ui-icon{
 	opacity: 0.6;
