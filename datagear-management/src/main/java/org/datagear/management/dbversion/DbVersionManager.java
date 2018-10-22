@@ -14,11 +14,23 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.datagear.connection.JdbcUtil;
+import org.datagear.management.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * 数据库版本管理器。
+ * <p>
+ * 此类用于读取SQL脚本文件，执行数据库版本升级。
+ * </p>
+ * <p>
+ * 它对SQL脚本文件格式有如下规范：
+ * </p>
+ * <ul>
+ * <li>以“--”开头的行表示注释行，将被忽略执行；</li>
+ * <li>空行用于分隔SQL语句；</li>
+ * <li>“--version[1.0.0]...”是版本行，用于标识后续的SQL版本，直到下一个版本行或者文件末尾；</li>
+ * </ul>
  * 
  * @author datagear@163.com
  *
@@ -28,18 +40,28 @@ public class DbVersionManager
 	private static final Logger LOGGER = LoggerFactory.getLogger(DbVersionManager.class);
 
 	/** 脚本资源文件路径 */
-	protected static final String SCRIPT_RESOURCE = "org/datagear/management/ddl/datagear.sql";
+	public static final String SQL_SCRIPT_RESOURCE = "org/datagear/management/ddl/datagear.sql";
 
 	/** 脚本资源文件编码 */
-	protected static final String SCRIPT_RESOURCE_ENCODING = "UTF-8";
+	public static final String DEFAULT_SQL_SCRIPT_ENCODING = "UTF-8";
 
 	/** 数据库SQL文件中版本号注释开头标识 */
-	protected static final String VERSION_LINE_PREFIX = "--version[";
+	public static final String DEFAULT_VERSION_LINE_PREFIX = "--version[";
 
 	/** 数据库SQL文件中版本号注释结尾标识 */
-	protected static final String VERSION_LINE_SUFFIX = "]";
+	public static final String DEFAULT_VERSION_LINE_SUFFIX = "]";
 
-	public static final String VERSION_TABLE_NAME = "DATAGEAR_VERSION";
+	public static final String DEFAULT_VERSION_TABLE_NAME = "DATAGEAR_VERSION";
+
+	private String sqlScriptLocation = SQL_SCRIPT_RESOURCE;
+
+	private String sqlScriptEncoding = DEFAULT_SQL_SCRIPT_ENCODING;
+
+	private String versionLinePrefix = DEFAULT_VERSION_LINE_PREFIX;
+
+	private String versionLineSuffix = DEFAULT_VERSION_LINE_SUFFIX;
+
+	private String versionTableName = DEFAULT_VERSION_TABLE_NAME;
 
 	private DataSource dataSource;
 
@@ -52,6 +74,56 @@ public class DbVersionManager
 	{
 		super();
 		this.dataSource = dataSource;
+	}
+
+	public String getSqlScriptLocation()
+	{
+		return sqlScriptLocation;
+	}
+
+	public void setSqlScriptLocation(String sqlScriptLocation)
+	{
+		this.sqlScriptLocation = sqlScriptLocation;
+	}
+
+	public String getSqlScriptEncoding()
+	{
+		return sqlScriptEncoding;
+	}
+
+	public void setSqlScriptEncoding(String sqlScriptEncoding)
+	{
+		this.sqlScriptEncoding = sqlScriptEncoding;
+	}
+
+	public String getVersionLinePrefix()
+	{
+		return versionLinePrefix;
+	}
+
+	public void setVersionLinePrefix(String versionLinePrefix)
+	{
+		this.versionLinePrefix = versionLinePrefix;
+	}
+
+	public String getVersionLineSuffix()
+	{
+		return versionLineSuffix;
+	}
+
+	public void setVersionLineSuffix(String versionLineSuffix)
+	{
+		this.versionLineSuffix = versionLineSuffix;
+	}
+
+	public String getVersionTableName()
+	{
+		return versionTableName;
+	}
+
+	public void setVersionTableName(String versionTableName)
+	{
+		this.versionTableName = versionTableName;
 	}
 
 	public DataSource getDataSource()
@@ -170,7 +242,7 @@ public class DbVersionManager
 		Statement st = cn.createStatement();
 
 		ResultSet rs = st.executeQuery(
-				"SELECT VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD FROM " + VERSION_TABLE_NAME);
+				"SELECT VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD FROM " + this.versionTableName);
 
 		if (rs.next())
 		{
@@ -194,7 +266,7 @@ public class DbVersionManager
 	 */
 	protected void updateVersion(Connection cn, Version version) throws SQLException
 	{
-		PreparedStatement st = cn.prepareStatement("UPDATE " + VERSION_TABLE_NAME
+		PreparedStatement st = cn.prepareStatement("UPDATE " + this.versionTableName
 				+ " SET VERSION_MAJOR = ?, VERSION_MINOR = ?, VERSION_REVISION = ?, VERSION_BUILD = ?");
 
 		st.setString(1, version.getMajor());
@@ -206,7 +278,7 @@ public class DbVersionManager
 
 		if (count == 0)
 		{
-			st = cn.prepareStatement("INSERT INTO " + VERSION_TABLE_NAME
+			st = cn.prepareStatement("INSERT INTO " + this.versionTableName
 					+ " (VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD) VALUES(?, ?, ?, ?)");
 
 			st.setString(1, version.getMajor());
@@ -246,7 +318,7 @@ public class DbVersionManager
 
 			if (LOGGER.isInfoEnabled())
 				LOGGER.info("Got upgrade sqls for verion from [" + from + "] to [" + target + "], line from ["
-						+ upgradeSqls.getStartLine() + "] in [" + SCRIPT_RESOURCE + "]");
+						+ upgradeSqls.getStartLine() + "] in [" + this.sqlScriptLocation + "]");
 
 			executeSqls(cn, upgradeSqls.getSqls());
 		}
@@ -298,9 +370,7 @@ public class DbVersionManager
 
 		Version target = null;
 
-		BufferedReader reader = new BufferedReader(
-				new InputStreamReader(DbVersionManager.class.getClassLoader().getResourceAsStream(SCRIPT_RESOURCE),
-						SCRIPT_RESOURCE_ENCODING));
+		BufferedReader reader = getSqlScriptBufferedReader();
 
 		int readStart = -1;
 
@@ -335,7 +405,7 @@ public class DbVersionManager
 						String trimSql = sql.toString().trim();
 
 						if (!trimSql.isEmpty())
-							sqls.add(trimSql);
+							sqls.add(postProcessSql(trimSql));
 
 						sql.delete(0, sql.length());
 					}
@@ -367,7 +437,7 @@ public class DbVersionManager
 			String trimSql = sql.toString().trim();
 
 			if (!trimSql.isEmpty())
-				sqls.add(trimSql);
+				sqls.add(postProcessSql(trimSql));
 		}
 		finally
 		{
@@ -378,6 +448,35 @@ public class DbVersionManager
 			return null;
 		else
 			return new UpgradeSqls(sqls, target, readStart);
+	}
+
+	/**
+	 * 后置处理SQL语句。
+	 * 
+	 * @param trimSql
+	 * @return
+	 */
+	protected String postProcessSql(String trimSql)
+	{
+		if (trimSql.endsWith(";"))
+			trimSql = trimSql.substring(0, trimSql.length() - 1);
+
+		return trimSql;
+	}
+
+	/**
+	 * 获取SQL脚本输入流。
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	protected BufferedReader getSqlScriptBufferedReader() throws IOException
+	{
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				DbVersionManager.class.getClassLoader().getResourceAsStream(this.sqlScriptLocation),
+				this.sqlScriptEncoding));
+
+		return reader;
 	}
 
 	/**
@@ -410,7 +509,7 @@ public class DbVersionManager
 	 */
 	protected boolean isVersionLine(String trimLine)
 	{
-		return trimLine.startsWith(VERSION_LINE_PREFIX);
+		return trimLine.startsWith(this.versionLinePrefix);
 	}
 
 	/**
@@ -421,13 +520,13 @@ public class DbVersionManager
 	 */
 	protected Version extractVersion(String line)
 	{
-		int start = line.indexOf(VERSION_LINE_PREFIX);
+		int start = line.indexOf(this.versionLinePrefix);
 
 		if (start < 0)
 			throw new IllegalArgumentException("[" + line + "] is not version line");
 
-		start = start + VERSION_LINE_PREFIX.length();
-		int end = line.indexOf(VERSION_LINE_SUFFIX, start);
+		start = start + this.versionLinePrefix.length();
+		int end = line.indexOf(this.versionLineSuffix, start);
 
 		String version = line.substring(start, end);
 

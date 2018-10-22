@@ -2,7 +2,7 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.management.dbversion;
+package org.datagear.management;
 
 import java.io.Serializable;
 
