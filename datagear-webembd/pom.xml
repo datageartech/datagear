@@ -14,6 +14,7 @@
 	
 	<properties>
 		<dist.target.dir>${project.build.directory}/datagear-${project.version}</dist.target.dir>
+		<dist.package.target.dir>${project.build.directory}/datagear-${project.version}-packages</dist.package.target.dir>
 	</properties>
 	
 	<dependencies>
@@ -133,7 +134,10 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<zip destfile="target/datagear-${project.version}.zip" basedir="target" includes="datagear-${project.version}/**/*" />
+								<delete dir="${dist.package.target.dir}" includeEmptyDirs="true" />
+								<mkdir dir="${dist.package.target.dir}"/>
+								<zip destfile="${dist.package.target.dir}/datagear-${project.version}.zip" basedir="${project.build.directory}" includes="datagear-${project.version}/**/*" />
+								<copy file="../datagear-web/target/datagear-web-${project.version}.war" tofile="${dist.package.target.dir}/datagear-${project.version}.war" />
 							</tasks>
 						</configuration>
 					</execution>
