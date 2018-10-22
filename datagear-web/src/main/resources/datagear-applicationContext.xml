@@ -15,7 +15,7 @@
     <bean id="propertyConfigurer"
     		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     	<property name="location">
-    		<value>/WEB-INF/config/datagear.properties</value>
+    		<value>classpath:datagear.properties</value>
     	</property>
     </bean>
     

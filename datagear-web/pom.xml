@@ -14,7 +14,7 @@
 	<packaging>war</packaging>
 	
 	<properties>
-		<dist.log4j.rootLogger>DEBUG, A1</dist.log4j.rootLogger>
+		<dist.log4j.rootLogger>INFO, A1</dist.log4j.rootLogger>
 	</properties>
 	
 	<dependencies>
@@ -156,8 +156,7 @@
 			    <artifactId>maven-antrun-plugin</artifactId>
 			    <version>1.4</version>
 			    <executions>
-			    	
-			    	<!-- 打包前将log4j由DEBUG改为ERROR，打包后恢复为DEBUG -->
+			    	<!-- 打包前修改log4j的日志设置 -->
 			    	<execution>
 			    		<id>updateLog4jLevelToError</id>
 			    		<phase>prepare-package</phase>
@@ -166,21 +165,8 @@
 			    		</goals>
 			    		<configuration>
 			    			<tasks>
-			    				<replace file="src/main/webapp/WEB-INF/config/log4j.properties"
+			    				<replace file="${project.build.outputDirectory}/log4j.properties"
 			    					token="DEBUG, A0" value="${dist.log4j.rootLogger}" />
-			    			</tasks>
-			    		</configuration>
-			    	</execution>
-			    	<execution>
-			    		<id>resetLog4jLevelToDebug</id>
-			    		<phase>package</phase>
-			    		<goals>
-			    			<goal>run</goal>
-			    		</goals>
-			    		<configuration>
-			    			<tasks>
-			    				<replace file="src/main/webapp/WEB-INF/config/log4j.properties"
-			    					token="${dist.log4j.rootLogger}" value="DEBUG, A0" />
 			    			</tasks>
 			    		</configuration>
 			    	</execution>
