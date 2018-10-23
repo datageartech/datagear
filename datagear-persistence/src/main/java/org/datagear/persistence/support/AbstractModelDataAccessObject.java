@@ -1320,16 +1320,15 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 					{
 						int jdbcTypeValue = jdbcType.getValue(propertyModelMapper.getIndex());
 
-						if (Types.BINARY == jdbcTypeValue || Types.BLOB == jdbcTypeValue
-								|| Types.LONGVARBINARY == jdbcTypeValue || Types.VARBINARY == jdbcTypeValue)
+						if (Types.BIT == jdbcTypeValue || Types.TINYINT == jdbcTypeValue
+								|| Types.SMALLINT == jdbcTypeValue || Types.INTEGER == jdbcTypeValue
+								|| Types.BIGINT == jdbcTypeValue || Types.NUMERIC == jdbcTypeValue
+								|| Types.CHAR == jdbcTypeValue || Types.VARCHAR == jdbcTypeValue)
 						{
-							add = false;
-						}
-						else
-						{
-							// XXX CLOB要不要呢？
 							add = true;
 						}
+						else
+							add = false;
 					}
 					else
 					{
