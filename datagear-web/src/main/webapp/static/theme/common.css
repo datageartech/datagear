@@ -560,7 +560,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li > .ui-menu-item-wrapper{
 	width: 1.5em;
 	height: 1.5em;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 .main-page-content .schema-panel .schema-panel-content{
 	position: absolute;
