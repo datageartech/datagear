@@ -49,6 +49,7 @@ import org.datagear.persistence.features.ColumnConverter;
 import org.datagear.persistence.features.ColumnName;
 import org.datagear.persistence.features.JdbcType;
 import org.datagear.persistence.features.KeyRule;
+import org.datagear.persistence.features.KeyRule.RuleType;
 import org.datagear.persistence.features.MappedBy;
 import org.datagear.persistence.features.ModelKeyColumnName;
 import org.datagear.persistence.features.ModelKeyDeleteRule;
@@ -61,7 +62,6 @@ import org.datagear.persistence.features.PropertyKeyPropertyName;
 import org.datagear.persistence.features.PropertyKeyUpdateRule;
 import org.datagear.persistence.features.RelationPoint;
 import org.datagear.persistence.features.TableName;
-import org.datagear.persistence.features.KeyRule.RuleType;
 import org.datagear.persistence.mapper.RelationMapper;
 import org.datagear.persistence.mapper.RelationMapperResolver;
 import org.springframework.core.convert.ConversionService;
@@ -1355,15 +1355,11 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	{
 		boolean isCollection = true;
 
-		List<String> jtableFkColumnNameList = new ArrayList<String>();
-		jtableFkColumnNameList.addAll(Arrays.asList(getFkColumnNamesForImportedKeyInfo(modelImportedKeyInfos)));
-		jtableFkColumnNameList.addAll(Arrays.asList(getFkColumnNamesForImportedKeyInfo(propertyImportedKeyInfos)));
+		String[] jtableMfkColumnName = getFkColumnNamesForImportedKeyInfo(modelImportedKeyInfos);
 
-		String[] jtableFkColumnName = jtableFkColumnNameList.toArray(new String[jtableFkColumnNameList.size()]);
+		// 如果join表内的模型端外键是主键或者唯一键，则说明是单元属性；否则，是多元属性
 
-		// 如果属性表内的外键是主键或者唯一键，则说明是单元属性
-
-		if (equalsIgnoreOrder(jtableFkColumnName, joinEntireTableInfo.getPrimaryKeyColumnNames()))
+		if (equalsIgnoreOrder(jtableMfkColumnName, joinEntireTableInfo.getPrimaryKeyColumnNames()))
 			isCollection = false;
 		else
 		{
@@ -1373,7 +1369,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			{
 				for (String[] jtableUkColumnName : jtableUkColumnNames)
 				{
-					if (equalsIgnoreOrder(jtableFkColumnName, jtableUkColumnName))
+					if (equalsIgnoreOrder(jtableMfkColumnName, jtableUkColumnName))
 					{
 						isCollection = false;
 						break;
@@ -2753,8 +2749,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	 * 注意：此方法不能在{@linkplain #doResolve(Connection, ModelManager, ModelManager, String, String)}内部调用。
 	 * </p>
 	 * <p>
-	 * 注意：要等所有{@linkplain org.datagear.persistence.features}
-	 * 特性都解析设置完成后，才能执行此方法。
+	 * 注意：要等所有{@linkplain org.datagear.persistence.features} 特性都解析设置完成后，才能执行此方法。
 	 * </p>
 	 * 
 	 * @param model
