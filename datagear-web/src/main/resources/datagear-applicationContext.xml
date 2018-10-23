@@ -20,6 +20,7 @@
     			<value>classpath:version.properties</value>
     		</list>
     	</property>
+    	<property name="fileEncoding" value="UTF-8" />
     </bean>
     
     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">

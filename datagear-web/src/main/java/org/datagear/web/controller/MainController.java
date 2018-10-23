@@ -6,6 +6,7 @@ package org.datagear.web.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,12 +18,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  */
 @Controller
-@RequestMapping("/main")
 public class MainController extends AbstractController
 {
+	private String version;
+
 	public MainController()
 	{
 		super();
+	}
+
+	public MainController(String version)
+	{
+		super();
+		this.version = version;
+	}
+
+	public String getVersion()
+	{
+		return version;
+	}
+
+	@Value("${version}")
+	public void setVersion(String version)
+	{
+		this.version = version;
 	}
 
 	/**
@@ -32,9 +51,17 @@ public class MainController extends AbstractController
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping
+	@RequestMapping("/main")
 	public String main(HttpServletRequest request, Model model)
 	{
 		return "/main";
+	}
+
+	@RequestMapping("/about")
+	public String about(HttpServletRequest request)
+	{
+		request.setAttribute("version", this.version);
+
+		return "/about";
 	}
 }

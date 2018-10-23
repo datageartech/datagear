@@ -42,6 +42,7 @@ form .form-content .form-item .form-item-label label{
 	width: 10em;
 	white-space: nowrap;
 	overflow: hidden;
+	vertical-align: middle;
 }
 form .form-content .form-item .form-item-value{
 	display: table-cell;
@@ -878,4 +879,12 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 .page-data-form-globalSetting{}
 .page-data-form-globalSetting .global-setting-select.ui-button{
 	width: 13em;
+}
+
+/*关于页*/
+.page-about form .form-content .form-item .form-item-label label{
+	width: 6em;
+}
+.page-about form .form-content .form-item{
+	padding: 0.5em 0.3em;
 }

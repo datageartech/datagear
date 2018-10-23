@@ -9,6 +9,17 @@
         http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 
+ 	<bean id="servletPropertyConfigurer"
+    		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    	<property name="locations">
+    		<list>
+    			<value>classpath:datagear.properties</value>
+    			<value>classpath:version.properties</value>
+    		</list>
+    	</property>
+    	<property name="fileEncoding" value="UTF-8" />
+    </bean>
+
     <context:component-scan base-package="org.datagear.web.controller"/>
     
     <!--jackson无法处理循环引用，因而改用fastjson-->

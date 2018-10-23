@@ -309,6 +309,10 @@
 				{
 					pageObj.open(contextPath+"/user/personalSet");
 				}
+				else if($item.hasClass("about"))
+				{
+					pageObj.open(contextPath+"/about", { width : "50%" });
+				}
 			}
 		});
 		
@@ -1038,6 +1042,9 @@
 							<li class=""><a href="<%=request.getContextPath()%>/?theme=dark"><fmt:message key='main.changeTheme.dark' /><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span></a></li>
 							<li class=""><a href="<%=request.getContextPath()%>/?theme=green"><fmt:message key='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
 						</ul>
+					</li>
+					<li class="about">
+						<a href="javascript:void(0);"><fmt:message key='main.about' /></a>
 					</li>
 				</ul>
 			</li>
