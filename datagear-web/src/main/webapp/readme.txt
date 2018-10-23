@@ -6,14 +6,4 @@
 
 启动前请确保已安装Java 6及以上版本的运行环境。
 
-开始：
-1. 启动：
-	Linux：执行startup.sh
-	Windows：执行startup.bat
-2、使用：
-	打开浏览器，在地址栏中输入：
-	http://[数据齿轮服务的IP地址]:50401
-	例如：
-	http://192.168.1.1:50401
-
 详细文档请参考：http://www.datagear.tech/documentation

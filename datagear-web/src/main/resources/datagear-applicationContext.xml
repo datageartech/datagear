@@ -14,8 +14,11 @@
      
     <bean id="propertyConfigurer"
     		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    	<property name="location">
-    		<value>classpath:datagear.properties</value>
+    	<property name="locations">
+    		<list>
+    			<value>classpath:datagear.properties</value>
+    			<value>classpath:version.properties</value>
+    		</list>
     	</property>
     </bean>
     

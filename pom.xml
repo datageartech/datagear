@@ -79,6 +79,49 @@
 					<generateBackupPoms>false</generateBackupPoms>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-antrun-plugin</artifactId>
+			    <version>1.4</version>
+			    <executions>
+			    	<execution>
+			    		<id>default-cli</id>
+			    		<goals>
+			    			<goal>run</goal>
+			    		</goals>
+			    		<configuration>
+			    			<tasks>
+			    				<!-- 为management模块的datagear.sql添加版本号行 -->
+			    				<echo file="datagear-management/src/main/resources/org/datagear/management/ddl/datagear.sql" encoding="UTF-8" append="true">
+${line.separator}
+-----------------------------------------
+--version[${project.version}], DO NOT EDIT THIS LINE!
+-----------------------------------------
+${line.separator}
+</echo>
+								<!-- 替换web模块version.properties中的版本号 -->
+								<replaceregexp file="datagear-web/src/main/resources/version.properties" encoding="UTF-8" match="version=\d+(\.\d+){1,2}(\-\w+){0,1}" replace="version=${project.version}" />
+								
+								<!-- 替换web模块readme.txt中的版本号 -->
+								<replaceregexp file="datagear-web/src/main/webapp/readme.txt" encoding="UTF-8" match="数据齿轮\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="数据齿轮-v${project.version}" />
+								
+								<!-- 为web模块的changelog.txt添加版本号行 -->
+			    				<echo file="datagear-web/src/main/webapp/WEB-INF/changelog.txt" encoding="UTF-8" append="true">
+${line.separator}
+-----------------------------------------
+--v${project.version}
+-----------------------------------------
+${line.separator}
+</echo>
+								
+								<!-- 替换webembd模块version.properties中的版本号 -->
+								<replaceregexp file="datagear-webembd/src/main/dist/readme.txt" encoding="UTF-8" match="数据齿轮\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="数据齿轮-v${project.version}" />
+								
+			    			</tasks>
+			    		</configuration>
+			    	</execution>
+			    </executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
