@@ -63,7 +63,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 					</div>
 					<%if(!readonly){%>
 					<div class="driver-upload-parent">
-						<div class="fileinput-button"><fmt:message key='upload' /><input type="file"></div>
+						<div class="ui-widget ui-corner-all ui-button fileinput-button"><fmt:message key='upload' /><input type="file"></div>
 						<div class="file-info"></div>
 					</div>
 					<%}%>
