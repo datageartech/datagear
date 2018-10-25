@@ -440,7 +440,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		if (keyword != null && !keyword.isEmpty())
 		{
 			if (!keyword.startsWith("%") && !keyword.endsWith("%"))
-				keyword = keyword + "%";
+				keyword = "%" + keyword + "%";
 
 			param.put(QUERY_PARAM_KEYWORD, keyword);
 		}

@@ -9,7 +9,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.dbinfo.TableInfo;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
@@ -17,7 +16,6 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.support.UUID;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
-import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -224,8 +222,6 @@ public class UserController extends AbstractController
 
 		List<User> users = this.userService.query(WebUtils.getUser(request, response), pagingQuery);
 
-		users = findByKeyword(users, pagingQuery.getKeyword());
-
 		return users;
 	}
 
@@ -271,25 +267,6 @@ public class UserController extends AbstractController
 		this.userService.update(user);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
-	}
-
-	/**
-	 * 根据表名称关键字查询{@linkplain TableInfo}列表。
-	 * 
-	 * @param users
-	 * @param tableNameKeyword
-	 * @return
-	 */
-	protected List<User> findByKeyword(List<User> users, String keyword)
-	{
-		return KeywordMatcher.<User> match(users, keyword, new KeywordMatcher.MatchValue<User>()
-		{
-			@Override
-			public String[] get(User t)
-			{
-				return new String[] { t.getName() };
-			}
-		});
 	}
 
 	@Override
