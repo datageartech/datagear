@@ -75,7 +75,7 @@
 						<input type="text" name="smtpSetting.systemEmail" value="<c:out value='${globalSetting.smtpSetting.systemEmail}' />" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
-				<div class="form-item">
+				<div class="form-item" style="height:3em;">
 					<div class="form-item-label">
 						<label>&nbsp;</label>
 					</div>
@@ -83,9 +83,9 @@
 						<button type="button" id="testSmtpButton"><fmt:message key='globalSetting.testSmtp' /></button>
 						&nbsp;&nbsp;
 						<span id="testSmtpPanel" style="display: none;">
-							<fmt:message key='globalSetting.testSmtp.recevierEmail' />
+							<fmt:message key='globalSetting.testSmtp.recevierEmail' />&nbsp;
 							<input type="text" name="testSmtpRecevierEmail" value="" class="ui-widget ui-widget-content" />
-							<button type="button" id="testSmtpSendButton"><fmt:message key='globalSetting.testSmtp.send' /></button>
+							<button type="button" id="testSmtpSendButton" style="vertical-align:baseline;"><fmt:message key='globalSetting.testSmtp.send' /></button>
 						</span>
 					</div>
 				</div>
