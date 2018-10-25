@@ -59,11 +59,6 @@
     	<property name="createIfInexistence" value="false" />
     </bean>
     
-    <bean id="schemaUrlBuilderResourceDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
-    	<property name="directoryName" value="${directory.url_builder}" />
-    </bean>
-    <bean id="schemaUrlBuilderResourceDirectory" factory-bean="schemaUrlBuilderResourceDirectoryFactory" factory-method="getDirectory" />
-    
     <bean id="tempDriverLibraryRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
     	<property name="directoryName" value="${directory.temp.driverEntity}" />
     </bean>

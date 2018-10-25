@@ -44,6 +44,10 @@
 		<!-- 全局设置 -->
 		<intercept-url pattern="/globalSetting/*" access="ROLE_ADMIN" />
 		
+		<!-- 设置数据库URL构建器脚本 -->
+		<intercept-url pattern="/schemaUrlBuilder/editScriptCode" access="ROLE_ADMIN" />
+		<intercept-url pattern="/schemaUrlBuilder/saveScriptCode" access="ROLE_ADMIN" />
+		
 		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER, ROLE_ADMIN" />
 	
 		<!-- 表单登录页登录 -->

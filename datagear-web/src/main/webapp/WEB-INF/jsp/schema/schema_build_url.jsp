@@ -13,22 +13,18 @@
 <head>
 <%@ include file="../include/html_head.jsp" %>
 <script type="text/javascript">
-$.schemaUrlBuilder.removeCustom();
-</script>
-<%
-String[] urlBuilderJsFileNames = (String[])request.getAttribute("schemaUrlBuilderResources");
-if(urlBuilderJsFileNames != null)
+$.schemaUrlBuilder.clear();
+try
 {
-	long notCacheCode = new java.util.Date().getTime();
-	for(int i=0; i<urlBuilderJsFileNames.length; i++)
-	{
-		String fileName = urlBuilderJsFileNames[i];
-%>
-<script src="<%=request.getContextPath()%>/schemaUrlBuilder/script/<%=fileName%>?_=<%=notCacheCode%>" type="text/javascript"></script>
-<%
-	}
+$.schemaUrlBuilder.add(
+<%=request.getAttribute("scriptCode")%>
+);
 }
-%>
+catch(e)
+{
+	$.tipError("<fmt:message key='schema.loadUrlBuilderScriptError' />");
+}
+</script>
 <title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='schema.schemaBuildUrl' /></title>
 </head>
 <body>
@@ -38,10 +34,10 @@ if(urlBuilderJsFileNames != null)
 		<div class="form-content">
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><fmt:message key='schema.url.dbType' /></label>
+					<label><fmt:message key='schema.url.dbName' /></label>
 				</div>
 				<div class="form-item-value">
-					<select name="dbType">
+					<select name="dbName">
 					</select>
 				</div>
 			</div>
@@ -80,7 +76,7 @@ if(urlBuilderJsFileNames != null)
 (function(pageObj)
 {
 	pageObj.form = pageObj.element("#${pageId}-form");
-	pageObj.dbTypeSelect = pageObj.element("select[name='dbType']");
+	pageObj.dbNameSelect = pageObj.element("select[name='dbName']");
 
 	var pageParam = pageObj.pageParam();
 	
@@ -92,17 +88,17 @@ if(urlBuilderJsFileNames != null)
 	for(var i=0; i<builderInfos.length; i++)
 	{
 		var builderInfo = builderInfos[i];
-		$("<option>").attr("value", builderInfo.dbType).html(builderInfo.dbName).appendTo(pageObj.dbTypeSelect);
+		$("<option>").attr("value", builderInfo.dbName).html(builderInfo.dbDesc).appendTo(pageObj.dbNameSelect);
 	}
 	
-	pageObj.dbTypeSelect.selectmenu(
+	pageObj.dbNameSelect.selectmenu(
 	{
 		"classes" : { "ui-selectmenu-button" : "schema-build-url-dbtype-select" },
 		change : function(event, ui)
 		{
-			var dbType = ui.item.value;
+			var dbName = ui.item.value;
 			
-			var defaultUrlInfo = $.schemaUrlBuilder.defaultValue(dbType);
+			var defaultUrlInfo = $.schemaUrlBuilder.defaultValue(dbName);
 			pageObj.setFormUrlValue(defaultUrlInfo);
 		}
 	});
@@ -123,7 +119,7 @@ if(urlBuilderJsFileNames != null)
 	
 	pageObj.buildFormUrl = function()
 	{
-		var dbType = pageObj.dbTypeSelect.val();
+		var dbName = pageObj.dbNameSelect.val();
 		
 		var value = {};
 		
@@ -134,7 +130,7 @@ if(urlBuilderJsFileNames != null)
 			value[input.attr("name")] = input.val();
 		}
 		
-		return $.schemaUrlBuilder.build(dbType, value);
+		return $.schemaUrlBuilder.build(dbName, value);
 	};
 	
 	pageObj.form.validate(
@@ -167,14 +163,14 @@ if(urlBuilderJsFileNames != null)
 		
 		if(urlInfo != null)
 		{
-			pageObj.dbTypeSelect.val(urlInfo.dbType);
-			pageObj.dbTypeSelect.selectmenu("refresh");
+			pageObj.dbNameSelect.val(urlInfo.dbName);
+			pageObj.dbNameSelect.selectmenu("refresh");
 			initUrlValue = urlInfo.value;
 		}
 	}
 	
 	if(!initUrlValue)
-		initUrlValue = $.schemaUrlBuilder.defaultValue(pageObj.dbTypeSelect.val());
+		initUrlValue = $.schemaUrlBuilder.defaultValue(pageObj.dbNameSelect.val());
 	
 	pageObj.setFormUrlValue(initUrlValue);
 })

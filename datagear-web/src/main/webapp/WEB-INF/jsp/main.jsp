@@ -285,6 +285,10 @@
 				{
 					pageObj.open(contextPath+"/globalSetting");
 				}
+				else if($item.hasClass("system-set-schema-url-builder"))
+				{
+					pageObj.open(contextPath+"/schemaUrlBuilder/editScriptCode");
+				}
 				else if($item.hasClass("system-set-driverEntity-add"))
 				{
 					pageObj.open(contextPath+"/driverEntity/add");
@@ -1024,8 +1028,6 @@
 				<ul style="display:none;">
 					<%if(!user.isAnonymous()){ %>
 					<%if(user.isAdmin()){ %>
-					<li class="system-set-global-setting"><a href="javascript:void(0);"><fmt:message key='main.globalSetting' /></a></li>
-					<li class="ui-widget-header"></li>
 					<li class="system-set-driverEntity-manage"><a href="javascript:void(0);"><fmt:message key='main.manageDriverEntity' /></a></li>
 					<li class="system-set-driverEntity-add"><a href="javascript:void(0);"><fmt:message key='main.addDriverEntity' /></a></li>
 					<li class="ui-widget-header"></li>
@@ -1034,6 +1036,14 @@
 					<li class="ui-widget-header"></li>
 					<%}%>
 					<li class="system-set-personal-set"><a href="javascript:void(0);"><fmt:message key='main.personalSet' /></a></li>
+					<%if(user.isAdmin()){ %>
+					<li class=""><a href="javascript:void(0);"><fmt:message key='main.globalSetting' /></a>
+						<ul>
+							<li class="system-set-global-setting"><a href="javascript:void(0);"><fmt:message key='globalSetting.smtpSetting' /></a></li>
+							<li class="system-set-schema-url-builder"><a href="javascript:void(0);"><fmt:message key='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
+						</ul>
+					</li>
+					<%}%>
 					<li class="ui-widget-header"></li>
 					<%}%>
 					<li class=""><a href="javascript:void(0);"><fmt:message key='main.changeTheme' /></a>
