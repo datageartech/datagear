@@ -354,6 +354,14 @@
 		},
 		
 		/**
+		 * 初始化指定元素内的所有按钮。
+		 */
+		initButtons : function($parent)
+		{
+			$("input:submit, input:button, input:reset, button", $parent).button();
+		},
+		
+		/**
 		 * 提示成功。
 		 */
 		tipSuccess : function(content, delayMs)

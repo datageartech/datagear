@@ -64,49 +64,10 @@ List<PropertyPathNameLabel> conditionSource = (List<PropertyPathNameLabel>)reque
 {
 	pageObj.conditionSource = <%writeJson(application, out, conditionSource);%>;
 	
-	$("input:submit, input:button, input:reset, button", pageObj.element(".operation")).button();
+	$.initButtons(pageObj.element(".operation"));
 	
 	pageObj.onModel(function(model)
 	{
-		pageObj.search = function(searchParam)
-		{
-			pageObj.refresh(searchParam, null, null);
-		};
-		
-		pageObj.paging = function(pagingParam)
-		{
-			pageObj.refresh(null, pagingParam, null);
-			return false;
-		};
-		
-		pageObj.sort = function(order)
-		{
-			pageObj.refresh(null, null, order);
-		};
-		
-		pageObj.refresh = function(searchParam, pagingParam, order)
-		{
-			if(!searchParam)
-				searchParam = pageObj.getSearchParam();
-			if(!pagingParam)
-				pagingParam = pageObj.getPagingParam();
-			if(!order)
-				order = pageObj.getOrderTyped();
-			
-			var url = pageObj.url("queryData");
-			
-			var param = {};
-			
-			$.extend(param, searchParam);
-			$.extend(param, pagingParam);
-			$.extend(param, { "order" : order });
-			
-			$.getJSONOnPost(url, param, function(pagingData)
-			{
-				pageObj.setPagingData(pagingData);
-			});
-		};
-		
 		<%if(!readonly){%>
 			pageObj.element("input[name=addButton]").click(function()
 			{
@@ -162,12 +123,11 @@ List<PropertyPathNameLabel> conditionSource = (List<PropertyPathNameLabel>)reque
 				return re;
 			});
 		<%}%>
-
+		
 		pageObj.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(pageObj.conditionSource);
 		pageObj.initConditionPanel();
-		pageObj.initModelTable(model);
 		pageObj.initPagination();
-		pageObj.refresh();
+		pageObj.initModelDataTableAjax(pageObj.url("queryData"), model);
 	});
 })
 (${pageId});

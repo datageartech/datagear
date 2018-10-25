@@ -71,7 +71,7 @@ else
 	pageObj.isMultipleSelect = <%=isMultipleSelect%>;
 	pageObj.conditionSource = <%writeJson(application, out, conditionSource);%>;
 	
-	$("input:submit, input:button, input:reset, button", pageObj.element(".operation")).button();
+	$.initButtons(pageObj.element(".operation"));
 	
 	pageObj.onModel(function(model)
 	{
@@ -80,47 +80,20 @@ else
 		var propertyModel = propertyInfo.model;
 		
 		pageObj.mappedByWith = $.model.findMappedByWith(property, propertyModel);
-		
-		pageObj.search = function(searchParam)
-		{
-			pageObj.refresh(searchParam, null);
-		};
-		
-		pageObj.paging = function(pagingParam)
-		{
-			pageObj.refresh(null, pagingParam);
-			return false;
-		};
 
-		pageObj.sort = function(order)
-		{
-			pageObj.refresh(null, null, order);
-		};
+		pageObj.dataTableAjaxParamParent = pageObj.dataTableAjaxParam;
 		
-		pageObj.refresh = function(searchParam, pagingParam, order)
+		pageObj.dataTableAjaxParam = function()
 		{
-			if(!searchParam)
-				searchParam = pageObj.getSearchParam();
-			if(!pagingParam)
-				pagingParam = pageObj.getPagingParam();
-			if(!order)
-				order = pageObj.getOrderTyped();
+			var param = pageObj.dataTableAjaxParamParent();
 			
-			var url = pageObj.url("selectPropValueData");
-			var param =
+			$.extend(param, 
 			{
 				"data" : pageObj.data,
 				"propName" : pageObj.propName
-			};
-			
-			$.extend(param, searchParam);
-			$.extend(param, pagingParam);
-			$.extend(param, { "order" : order });
-			
-			$.getJSONOnPost(url, param, function(pagingData)
-			{
-				pageObj.setPagingData(pagingData);
 			});
+			
+			return param;
 		};
 		
 		pageObj.element("input[name=confirmButton]").click(function()
@@ -211,9 +184,8 @@ else
 		
 		pageObj.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(pageObj.conditionSource);
 		pageObj.initConditionPanel();
-		pageObj.initModelTable(propertyModel);
 		pageObj.initPagination();
-		pageObj.refresh();
+		pageObj.initModelDataTableAjax(pageObj.url("selectPropValueData"), propertyModel);
 	});
 })
 (${pageId});

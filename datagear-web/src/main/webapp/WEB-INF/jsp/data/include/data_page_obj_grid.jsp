@@ -8,12 +8,26 @@
 <script type="text/javascript">
 (function(pageObj)
 {
-	pageObj.initModelTable = function(model, datas, ignorePropertyNames)
+	/**
+	 * 构建Model的本地表格。
+	 */
+	pageObj.initModelDataTableLocal = function(model, data, ignorePropertyNames)
 	{
-		var tableColumns = $.buildDataTablesColumns(model, {"ignorePropertyNames" : ignorePropertyNames});
-		var tableSettings = pageObj.getTableSettings(tableColumns, datas);
+		var columns = $.buildDataTablesColumns(model, {"ignorePropertyNames" : ignorePropertyNames});
+		var settings = pageObj.buildDataTableSettingsLocal(columns, data);
 		
-		pageObj.initTable(tableSettings);
+		pageObj.initDataTable(settings);
+	};
+	
+	/**
+	 * 构建Model的ajax表格。
+	 */
+	pageObj.initModelDataTableAjax = function(url, model, ignorePropertyNames)
+	{
+		var columns = $.buildDataTablesColumns(model, {"ignorePropertyNames" : ignorePropertyNames});
+		var settings = pageObj.buildDataTableSettingsAjax(columns, url);
+		
+		pageObj.initDataTable(settings);
 	};
 })
 (${pageId});

@@ -85,7 +85,7 @@ if(loginUser == null)
 	pageObj.form = pageObj.element("#${pageId}-form");
 	
 	//需要先渲染按钮，不然对话框尺寸不合适，出现滚动条
-	$("input:submit, input:button, input:reset, button", pageObj.element()).button();
+	$.initButtons(pageObj.element());
 	//元素设置了“checked='checked'”后icon显示有问题，这里先隐藏
 	$("input[type=checkbox]", pageObj.element()).checkboxradio({icon:false});
 	

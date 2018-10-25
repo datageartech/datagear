@@ -222,7 +222,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
 	pageObj.element("input[name='shared']").checkboxradio({icon:false});
 	pageObj.element(".schema-shared-radios").controlgroup();
 	
-	$("input:submit, input:button, input:reset, button", pageObj.page).button();
+	$.initButtons(pageObj.element());
 	
 	if(pageObj.isDriverEntityEmpty)
 		pageObj.schemaDriverEntityFormItem.hide();

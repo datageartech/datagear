@@ -22,10 +22,7 @@
 <div id="${pageId}" class="page-data-grid page-data-grid-reset-password-request-history">
 	<div class="head">
 		<div class="search">
-			<form id="${pageId}-searchForm" class="search-form" action="#">
-				<div class="ui-widget ui-widget-content keyword-widget"><input name="keyword" type="text" class="ui-widget ui-widget-content input-keyword" /></div>
-				<input name="submit" type="submit" value="<fmt:message key='query' />" />
-			</form>
+			<%@ include file="include/page_obj_searchform.html.jsp" %>
 		</div>
 		<div class="operation">
 		</div>
@@ -42,75 +39,15 @@
 </div>
 <%}%>
 <%@ include file="include/page_js_obj.jsp" %>
+<%@ include file="include/page_obj_searchform_js.jsp" %>
 <%@ include file="include/page_obj_pagination.jsp" %>
 <%@ include file="include/page_obj_grid.jsp" %>
 <script type="text/javascript">
 (function(pageObj)
 {
-	$("input:submit, input:button, input:reset, button", pageObj.element(".head")).button();
-	
 	pageObj.url = function(action)
 	{
 		return contextPath + "/resetPasswordRequestHistory/" + action;
-	};
-	
-	pageObj.searchForm = pageObj.element(".search-form");
-	pageObj.searchForm.submit(function()
-	{
-		var searchParam = pageObj.getSearchParam();
-		
-		pageObj.search(searchParam);
-		
-		return false;
-	});
-	
-	pageObj.search = function(searchParam)
-	{
-		pageObj.refresh(searchParam, null, null);
-	};
-	
-	pageObj.paging = function(pagingParam)
-	{
-		pageObj.refresh(null, pagingParam, null);
-		return false;
-	};
-	
-	pageObj.sort = function(order)
-	{
-		pageObj.refresh(null, null, order);
-	};
-	
-	pageObj.refresh = function(searchParam, pagingParam, order)
-	{
-		if(!searchParam)
-			searchParam = pageObj.getSearchParam();
-		if(!pagingParam)
-			pagingParam = pageObj.getPagingParam();
-		if(!order)
-			order = pageObj.getOrderTyped();
-		
-		var url = pageObj.url("pagingQueryData");
-		
-		var param = {};
-		
-		$.extend(param, searchParam);
-		$.extend(param, pagingParam);
-		$.extend(param, { "order" : order });
-		
-		$.getJSONOnPost(url, param, function(pagingData)
-		{
-			pageObj.setPagingData(pagingData);
-		});
-	};
-	
-	pageObj.getSearchParam = function()
-	{
-		var param =
-		{
-			"keyword" : $.trim(pageObj.element("input[name='keyword']", pageObj.searchForm).val())
-		};
-		
-		return param;
 	};
 	
 	pageObj.buildTableColumValueOption = function(title, data)
@@ -135,11 +72,12 @@
 		pageObj.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.username' />", "resetPasswordRequest.user.name"),
 		pageObj.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.effectiveTime' />", "effectiveTime"),
 	];
-	var tableSettings = pageObj.getTableSettings(tableColumns);
-	tableSettings.order=[[1,"desc"]];
-	pageObj.initTable(tableSettings);
+	
 	pageObj.initPagination();
-	pageObj.refresh();
+	
+	var tableSettings = pageObj.buildDataTableSettingsAjax(tableColumns, pageObj.url("pagingQueryData"));
+	tableSettings.order=[[1,"desc"]];
+	pageObj.initDataTable(tableSettings);
 })
 (${pageId});
 </script>

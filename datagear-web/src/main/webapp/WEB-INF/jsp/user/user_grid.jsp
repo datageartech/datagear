@@ -29,10 +29,7 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 <div id="${pageId}" class="page-data-grid page-data-grid-user">
 	<div class="head">
 		<div class="search">
-			<form id="${pageId}-searchForm" class="search-form" action="#">
-				<div class="ui-widget ui-widget-content keyword-widget"><input name="keyword" type="text" class="ui-widget ui-widget-content input-keyword" /></div>
-				<input name="submit" type="submit" value="<fmt:message key='query' />" />
-			</form>
+			<%@ include file="../include/page_obj_searchform.html.jsp" %>
 		</div>
 		<div class="operation">
 			<%if(selectonly){%>
@@ -58,66 +55,16 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 </div>
 <%}%>
 <%@ include file="../include/page_js_obj.jsp" %>
+<%@ include file="../include/page_obj_searchform_js.jsp" %>
 <%@ include file="../include/page_obj_grid.jsp" %>
 <script type="text/javascript">
 (function(pageObj)
 {
-	$("input:submit, input:button, input:reset, button", pageObj.element(".head")).button();
+	$.initButtons(pageObj.element(".operation"));
 	
 	pageObj.url = function(action)
 	{
 		return contextPath + "/user/" + action;
-	};
-	
-	pageObj.searchForm = pageObj.element(".search-form");
-	pageObj.searchForm.submit(function()
-	{
-		var searchParam = pageObj.getSearchParam();
-		
-		pageObj.search(searchParam);
-		
-		return false;
-	});
-	
-	
-	pageObj.search = function(searchParam)
-	{
-		pageObj.refresh(searchParam, null);
-	};
-	
-	pageObj.sort = function(order)
-	{
-		pageObj.refresh(null, order);
-	};
-	
-	pageObj.refresh = function(searchParam, order)
-	{
-		if(!searchParam)
-			searchParam = pageObj.getSearchParam();
-		if(!order)
-			order = pageObj.getOrderTyped();
-		
-		var url = pageObj.url("queryData");
-		
-		var param = {};
-		
-		$.extend(param, searchParam);
-		$.extend(param, { "order" : order });
-		
-		$.getJSONOnPost(url, param, function(data)
-		{
-			pageObj.setTableData(data);
-		});
-	};
-
-	pageObj.getSearchParam = function()
-	{
-		var param =
-		{
-			"keyword" : $.trim(pageObj.element("input[name='keyword']", pageObj.searchForm).val())
-		};
-		
-		return param;
 	};
 	
 	<%if(!selectonly){%>
@@ -179,14 +126,7 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 				{
 					"confirm" : function()
 					{
-						var data = "";
-						for(var i=0; i< rows.length; i++)
-						{
-							if(data != "")
-								data += "&";
-							
-							data += "id=" + rows[i].id;
-						}
+						var data = $.getPropertyParamString(rows, "id");
 						
 						$.post(pageObj.url("delete"), data, function()
 						{
@@ -248,9 +188,8 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 		pageObj.buildTableColumValueOption("<fmt:message key='user.admin' />", "admin"),
 		pageObj.buildTableColumValueOption("<fmt:message key='user.createTime' />", "createTime")
 	];
-	var tableSettings = pageObj.getTableSettings(tableColumns);
-	pageObj.initTable(tableSettings);
-	pageObj.refresh();
+	var tableSettings = pageObj.buildDataTableSettingsAjax(tableColumns, pageObj.url("queryData"));
+	pageObj.initDataTable(tableSettings);
 })
 (${pageId});
 </script>

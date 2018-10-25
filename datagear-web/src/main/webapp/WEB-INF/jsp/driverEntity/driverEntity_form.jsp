@@ -83,7 +83,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 <script type="text/javascript">
 (function(pageObj)
 {
-	pageObj.element("input:submit, input:button, input:reset, button, .fileinput-button").button();
+	$.initButtons(pageObj.element());
 	
 	pageObj.form = pageObj.element("#${pageId}-form");
 	pageObj.driverFiles = pageObj.element(".driver-files");

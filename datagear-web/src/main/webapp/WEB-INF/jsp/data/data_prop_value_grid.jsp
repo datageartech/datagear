@@ -44,7 +44,9 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 <div id="${pageId}" class="page-data-grid page-data-grid-empv">
 	<div class="head">
 		<div class="search">
+			<%if(!clientOperation){%>
 			<%@ include file="include/data_page_obj_searchform_html.jsp" %>
+			<%}%>
 		</div>
 		<div class="operation">
 			<%if(readonly){%>
@@ -73,8 +75,10 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 </div>
 <%}%>
 <%@ include file="include/data_page_obj.jsp" %>
+<%if(!clientOperation){%>
 <%@ include file="include/data_page_obj_searchform_js.jsp" %>
 <%@ include file="../include/page_obj_pagination.jsp" %>
+<%}%>
 <%@ include file="include/data_page_obj_grid.jsp" %>
 <script type="text/javascript">
 (function(pageObj)
@@ -83,9 +87,12 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	pageObj.data = $.unref(<%writeJson(application, out, data);%>);
 	pageObj.propName = "<%=propName%>";
 	pageObj.clientOperation = <%=clientOperation%>;
+	
+	<%if(!clientOperation){%>
 	pageObj.conditionSource = <%writeJson(application, out, conditionSource);%>;
-
-	$("input:submit, input:button, input:reset, button", pageObj.element(".operation")).button();
+	<%}%>
+	
+	$.initButtons(pageObj.element(".operation"));
 	
 	pageObj.buildActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
 	{
@@ -124,51 +131,19 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		
 		pageObj.mappedByWith = $.model.findMappedByWith(property, propertyModel);
 		
-		pageObj.search = function(searchParam)
-		{
-			pageObj.refresh(searchParam, null);
-		};
+		pageObj.dataTableAjaxParamParent = pageObj.dataTableAjaxParam;
 		
-		pageObj.paging = function(pagingParam)
+		pageObj.dataTableAjaxParam = function()
 		{
-			pageObj.refresh(null, pagingParam);
-			return false;
-		};
-
-		pageObj.sort = function(order)
-		{
-			pageObj.refresh(null, null, order);
-		};
-		
-		pageObj.refresh = function(searchParam, pagingParam, order)
-		{
-			//客户端操作不支持刷新
-			if(pageObj.clientOperation)
-				return;
+			var param = pageObj.dataTableAjaxParamParent();
 			
-			if(!searchParam)
-				searchParam = pageObj.getSearchParam();
-			if(!pagingParam)
-				pagingParam = pageObj.getPagingParam();
-			if(!order)
-				order = pageObj.getOrderTyped();
-			
-			var url = pageObj.url("queryMultiplePropValueData");
-			
-			var param =
+			$.extend(param, 
 			{
 				"data" : pageObj.data,
 				"propName" : pageObj.propName
-			};
-			
-			$.extend(param, searchParam);
-			$.extend(param, pagingParam);
-			$.extend(param, { "order" : order });
-			
-			$.getJSONOnPost(url, param, function(pagingData)
-			{
-				pageObj.setPagingData(pagingData);
 			});
+			
+			return param;
 		};
 		
 		pageObj.element("input[name=viewButton]").click(function()
@@ -347,16 +322,14 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				return re;
 			});
 		<%}%>
-
-		pageObj.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(pageObj.conditionSource);
-		pageObj.initConditionPanel();
-		pageObj.initModelTable(propertyModel, $.model.propValue(pageObj.data, pageObj.propName), pageObj.mappedByWith);
 		
 		<%if(clientOperation){%>
-		
+		pageObj.initModelDataTableLocal(propertyModel, $.model.propValue(pageObj.data, pageObj.propName), pageObj.mappedByWith);
 		<%}else{%>
-			pageObj.initPagination();
-			pageObj.refresh();
+		pageObj.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(pageObj.conditionSource);
+		pageObj.initConditionPanel();
+		pageObj.initPagination();
+		pageObj.initModelDataTableAjax(pageObj.url("queryMultiplePropValueData"), propertyModel, pageObj.mappedByWith);
 		<%}%>
 	});
 })

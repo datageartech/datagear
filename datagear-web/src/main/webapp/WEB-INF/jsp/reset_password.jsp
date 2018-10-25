@@ -158,9 +158,10 @@ String loginUrl = request.getContextPath() + "/login";
 <script type="text/javascript">
 (function(pageObj)
 {
-	pageObj.form = pageObj.element("#${pageId}-form");
 	//需要先渲染按钮，不然对话框尺寸不合适，出现滚动条
-	$("input:submit, input:button, input:reset, button", pageObj.element()).button();
+	$.initButtons(pageObj.element());
+	
+	pageObj.form = pageObj.element("#${pageId}-form");
 	
 	pageObj.element("#viewResetPasswordAdminReqHistoryLink").click(function()
 	{

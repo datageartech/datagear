@@ -102,7 +102,7 @@
 <script type="text/javascript">
 (function(pageObj)
 {
-	pageObj.element("input:submit, input:button, input:reset, button, .fileinput-button").button();
+	$.initButtons(pageObj.element());
 	
 	pageObj.form = pageObj.element("#${pageId}-form");
 	pageObj.testSmtpUrl = "<%=request.getContextPath()%>/globalSetting/testSmtp";

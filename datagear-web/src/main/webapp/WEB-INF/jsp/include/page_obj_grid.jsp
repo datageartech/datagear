@@ -9,23 +9,26 @@
 
 依赖：
 page_js_obj.jsp
-
-变量：
-//排序回调函数，允许为null，格式为：function(order){}
-pageObj.sort = undefined;
 --%>
 <script type="text/javascript">
 (function(pageObj)
 {
 	pageObj.table = pageObj.element("#${pageId}-table");
-	//上一次order，DataTables会在某些无关的情况产生order事件，这里存储上一次order，用于比较并忽略排序
-	pageObj.previousOrder = undefined;
 	
 	//计算表格高度
 	pageObj.calTableHeight = function()
 	{
-		var height =  pageObj.element(".content").height() - 50;
+		var height =  pageObj.element("> .content").actual("innerHeight") - 50;
+		
 		return height;
+	};
+	
+	//计算表格宽度
+	pageObj.calTableWidth = function()
+	{
+		var width = pageObj.element("> .content").actual("innerWidth");
+		
+		return width;
 	};
 	
 	pageObj.renderCheckColumn = function(data, type, row, meta)
@@ -33,14 +36,149 @@ pageObj.sort = undefined;
 		return "<div class='ui-widget ui-widget-content ui-corner-all checkbox'><span class='ui-icon ui-icon-check'></span></div>";
 	};
 	
-	pageObj.getTableSettings = function(columns, initDatas)
+	/**
+	 * 默认pageObj.buildDataTableSettingsAjax请求参数实现。
+	 */
+	pageObj.dataTableAjaxParam = function()
+	{
+		var param = {};
+		
+		if(pageObj.searchParam)
+			$.extend(param, pageObj.searchParam);
+		
+		if(pageObj.pagingParam)
+			$.extend(param, pageObj.pagingParam);
+		
+		return param;
+	};
+	
+	/**
+	 * 默认pageObj.buildDataTableSettingsAjax请求成功回调实现。
+	 */
+	pageObj.dataTableAjaxSuccess = function(pagingData, textStatus, jqXHR)
+	{
+		if(pageObj.refreshPagination)
+			pageObj.refreshPagination(pagingData.total, pagingData.page, pagingData.pageSize);
+	};
+	
+	/**
+	 * 集成data_page_obj_searchform_js.jsp的默认实现。
+	 */
+	pageObj.search = function(searchParam)
+	{
+		pageObj.searchParam = searchParam;
+		
+		pageObj.refresh();
+	};
+	
+	/**
+	 * 集成page_obj_pagination.jsp的默认实现。
+	 */
+	pageObj.paging = function(pagingParam)
+	{
+		pageObj.pagingParam = pagingParam;
+		pageObj.refresh();
+		
+		return false;
+	};
+	
+	/**
+	 * 构建ajax数据表格选项。
+	 * 此ajax选项支持两个回调函数：
+	 *   pageObj.dataTableAjaxParam() 用于扩展ajax请求参数；
+	 *   pageObj.dataTableAjaxSuccess(pagingData, textStatus, jqXHR) ajax成功回调函数；
+	 * @param columns 必选，列元数据
+	 * @param url 必选，ajax请求URL
+	 * @param ajaxSuccessCallback 可选，ajax成功回调函数，function(pagingData, textStatus, jqXHR){}
+	 * @param settings 可选，其他选项
+	 */
+	pageObj.buildDataTableSettingsAjax = function(columns, url, settings)
+	{
+		settings = $.extend(
+		{
+			"serverSide": true,
+			"columns" : columns,
+			"ajax" : function(data, callback, settings)
+			{
+				var nameOrder = [];
+				
+				for(var i=0; i<data.order.length; i++)
+					nameOrder[i] = { "name" : data.columns[data.order[i].column].data, "type" : data.order[i].dir };
+				
+				var myData = undefined;
+				
+				if($.isFunction(pageObj.dataTableAjaxParam))
+					myData = pageObj.dataTableAjaxParam();
+				else
+					myData = pageObj.dataTableAjaxParam;
+				
+				var param = $.extend({ "order" : nameOrder }, myData);
+				
+				$.ajax(
+				{
+					url : url,
+					dataType : "json",
+					type : "POST",
+					data : param,
+					success : function(data, textStatus, jqXHR)
+					{
+						var isPagingData = (data.page != undefined && data.pageSize != undefined);
+						
+						if(isPagingData)
+						{
+							data.data = data.items;
+							callback(data);
+						}
+						else
+						{
+							var tableData = { "data" : data };
+							callback(tableData);
+						}
+						
+						if(pageObj.dataTableAjaxSuccess)
+							pageObj.dataTableAjaxSuccess(data, textStatus, jqXHR);
+					}
+				});
+			}
+		},
+		settings);
+		
+		return pageObj.buildDataTableSettings(settings);
+	};
+	
+	/**
+	 * 构建本地数据表格选项。
+	 * @param columns 必选，列元数据
+	 * @param data 可选，初始数据
+	 * @param settings 可选，其他选项
+	 */
+	pageObj.buildDataTableSettingsLocal = function(columns, data, settings)
+	{
+		settings = $.extend(
+		{
+			"columns" : columns,
+			"data" : (data ? data : [])
+		}, 
+		settings);
+		
+		return pageObj.buildDataTableSettings(settings);
+	};
+	
+	/**
+	 * 构建表格选项。
+	 * @param settings 必选，选项
+	 */
+	pageObj.buildDataTableSettings = function(settings)
 	{
 		var newColumns = [
-				{ title : "<fmt:message key='select' />", data : "", defaultContent: "", width : "3em", orderable : false, render : pageObj.renderCheckColumn, className : "column-check" }
+				{
+					title : "<fmt:message key='select' />", data : "", defaultContent: "", width : "3em",
+					orderable : false, render : pageObj.renderCheckColumn, className : "column-check"
+				}
 			];
-		newColumns = newColumns.concat(columns);
+		newColumns = newColumns.concat(settings.columns);
 		
-		var settings=
+		settings = $.extend(
 		{
 			"scrollX": true,
 			"scrollY" : pageObj.calTableHeight(),
@@ -48,12 +186,11 @@ pageObj.sort = undefined;
 			"paging" : false,
 			"searching" : false,
 			"select" : { style : 'os' },
-			"data": (initDatas || []),
 			"order": [[1, "asc"]],
-		    "columns": newColumns,
 		    "language":
 		    {
-				"emptyTable": "<fmt:message key='noData' />"
+				"emptyTable": "<fmt:message key='dataTables.noData' />",
+				"zeroRecords" : "<fmt:message key='dataTables.zeroRecords' />"
 			},
 			"createdRow": function(row, data, dataIndex)
 			{
@@ -70,56 +207,18 @@ pageObj.sort = undefined;
 						pageObj.table.DataTable().row(tr).select();
 				});
 			}
-		};
+		},
+		settings);
+		
+		settings.columns = newColumns;
 		
 		return settings;
 	};
 	
-	pageObj.initTable = function(tableSettings)
+	pageObj.initDataTable = function(tableSettings)
 	{
 		pageObj.tableSettings = tableSettings;
-		pageObj.table.dataTable(tableSettings)
-		.on("order.dt", function(event, settings)
-		{
-			var doSort = false;
-			
-			var currentOrder = pageObj.getOrder();
-			
-			if(!pageObj.previousOrder)
-				doSort=true;
-			else
-			{
-				if(pageObj.previousOrder.length != currentOrder.length)
-					doSort = true;
-				else
-				{
-					var po = pageObj.previousOrder;
-					var co = currentOrder;
-					
-					for(var i=0; i<po.length; i++)
-					{
-						if(po[i][0] != co[i][0] || po[i][1] != co[i][1])
-						{
-							doSort = true;
-							break;
-						}
-					}
-				}
-			}
-			
-	    	if(doSort)
-	    	{
-	    		if(pageObj.sort)
-	    		{
-	    			var propNameOrder = pageObj.copyOrder(currentOrder, pageObj.tableSettings.columns);
-	    			pageObj.sort(propNameOrder, currentOrder);
-	    		}
-	    		
-	    		pageObj.previousOrder = pageObj.copyOrder(currentOrder);
-	    	}
-	    	
-	    	return false;
-	    });
+		pageObj.table.dataTable(tableSettings);
 		
 		$(".dataTables_scrollHead .column-check", pageObj.table.DataTable().table().container()).click(function()
 		{
@@ -141,13 +240,9 @@ pageObj.sort = undefined;
 		});
 	};
 	
-	pageObj.setPagingData = function(pagingData)
+	pageObj.refresh = function()
 	{
-		pageObj.deleteAllRow();
-		pageObj.addRowData(pagingData.items);
-		
-		if(pageObj.refreshPagination)
-			pageObj.refreshPagination(pagingData.total, pagingData.page, pagingData.pageSize);
+		pageObj.table.DataTable().draw();
 	};
 	
 	pageObj.setTableData = function(tableDatas)
@@ -259,44 +354,6 @@ pageObj.sort = undefined;
 		pageObj.table.DataTable().rows().remove();
 	};
 	
-	pageObj.getOrder = function()
-	{
-		var table = pageObj.table.DataTable();
-		
-    	return table.order();
-	};
-	
-	pageObj.getOrderTyped = function()
-	{
-    	var order = pageObj.getOrder();
-    	return pageObj.copyOrder(order, pageObj.tableSettings.columns);
-	};
-	
-	pageObj.copyOrder = function(order, columns)
-	{
-		var target = [];
-		
-		for(var i=0; i<order.length; i++)
-		{
-			if(columns)
-			{
-				target[i] =
-				{
-					"name" : columns[order[i][0]].data,
-					"type" : order[i][1]
-				};
-			}
-			else
-			{
-				target[i] = [];
-				target[i][0] = order[i][0];
-				target[i][1] = order[i][1];
-			}
-		}
-		
-		return target;
-	};
-	
 	//表格高度自适应
 	$(window).on('resize', function(e) 
 	{
@@ -304,9 +361,12 @@ pageObj.sort = undefined;
 		
 		pageObj.tableResizeTimer = setTimeout(function()
 		{
-			var table = pageObj.table.DataTable();
-			pageObj.element('.dataTables_scrollBody').css('height', pageObj.calTableHeight()+"px");      
-			table.draw();
+			var width = pageObj.calTableWidth();
+			var height = pageObj.calTableHeight();
+			
+			pageObj.element('.dataTables_scrollHeadInner').css('width', width+"px");
+			pageObj.element('.dataTables_scrollHeadInner > .dataTable').css('width', width+"px");
+			pageObj.element('.dataTables_scrollBody').css('height', height+"px");
 		},
 		250);
 	});

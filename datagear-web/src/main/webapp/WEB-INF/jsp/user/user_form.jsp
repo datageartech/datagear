@@ -105,7 +105,8 @@ boolean isAdd = "saveAdd".equals(formAction);
 {
 	pageObj.form = pageObj.element("#${pageId}-form");
 	
-	pageObj.element("input:submit, input:button, input:reset, button, .fileinput-button").button();
+	$.initButtons(pageObj.element());
+	
 	<%--禁用新建管理员账号功能
 	pageObj.element("input[name='admin']").checkboxradio({icon:false});
 	pageObj.element(".user-admin-radios").controlgroup();

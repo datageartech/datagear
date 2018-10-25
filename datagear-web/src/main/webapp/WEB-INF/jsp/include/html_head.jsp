@@ -41,6 +41,7 @@ var contextPath="<%=request.getContextPath()%>";
 <script src="<c:url value="/static/script/jquery-validation-1.17.0/jquery.validate.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/jquery-validation-1.17.0/additional-methods.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/textarea-helper-0.3.1/textarea-helper.js" />" type="text/javascript"></script>
+<script src="<c:url value="/static/script/jquery.actual-1.0.19/jquery.actual.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/datagear-pagination.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/datagear-model.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/datagear-modelcache.js" />" type="text/javascript"></script>
