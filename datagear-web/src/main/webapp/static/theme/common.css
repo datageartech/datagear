@@ -551,6 +551,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	border: 0px;
 	width: 2em;
 	height: 1.5em;
+	margin-right: 1px;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu{
 	float: right;
