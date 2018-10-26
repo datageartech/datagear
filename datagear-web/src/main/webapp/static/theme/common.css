@@ -30,37 +30,45 @@ form{}
 form .form-head{}
 form .form-content{}
 form .form-content .form-item{
-	padding: .3em .3em;
-	display: table;
+	padding: .3em 0;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	min-width: 10em;
 }
 form .form-content .form-item .form-item-label{
-	display: table-cell;
+	display: inline-block;
+	width: 19%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 	vertical-align: middle;
 }
 form .form-content .form-item .form-item-label label{
-	display: inline-block;
-	width: 10em;
 	white-space: nowrap;
 	overflow: hidden;
 	vertical-align: middle;
 }
 form .form-content .form-item .form-item-value{
-	display: table-cell;
+	display: inline-block;
+	width: 80%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 	vertical-align: middle;
-	padding-left: 0.2em;
 }
 form .form-content .form-item .form-item-value input[type=text],
 form .form-content .form-item .form-item-value input[type=password],
 form .form-content .form-item .form-item-value textarea{
 	margin-right: 0.3em;/*文本框与后面按钮间距*/
-	width: 20em;
+	width: 50%;
 }
 form .form-content .form-item .form-item-value input[type=text],
 form .form-content .form-item .form-item-value input[type=password]{
 	height: 1.5em;
 }
 form .form-content .form-item .form-item-value textarea{
-	width: 25em;
+	width: 60%;
 	height: 5em;
 }
 form .form-content .form-item .form-item-value .file-input-show{/*文件展示文本*/
@@ -86,8 +94,6 @@ form .form-content .form-item .form-item-value .file-info .file-delete{
 }
 form .form-content .form-item label.error{
 	color: red;
-	display: table-cell;
-	vertical-align: middle;
 	padding-left: 0.2em;
 }
 form .form-content .form-item .form-item-value input[type=text].error,
@@ -385,15 +391,6 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	width:10em;
 }
 
-/*注册页*/
-.page-data-form-register form .form-item .form-item-label label{
-	width: 8em;
-}
-.page-data-form-register form .form-item .form-item-value input[type='text'],
-.page-data-form-register form .form-item .form-item-value input[type='password']{
-	width:10em;
-}
-
 .page-register-success .register-success-content{
 	margin-top: 5em;
 	text-align: center;
@@ -504,47 +501,56 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 .main-page-content .schema-panel .schema-panel-head{
 	display: inline-block;
 	width: 100%;
-	min-width: 14em;
+	min-width: 15em;
 	height: 2.5em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	padding-top: 0.3em;
-	vertical-align: middle;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-title{
-	float: left;
-	vertical-align: middle;
-    white-space: nowrap;
-    padding-left: 0.1em;
-}
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation{
-	float: right;
-	text-align: right;
-	vertical-align: middle;
-}
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search{
 	display: inline-block;
-	margin-right: 0.3em;
+	width: 30%;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-	vertical-align: middle;
+    white-space: nowrap;
 }
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search input[type='text']{
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation{
+	display: inline-block;
+	width: 68%;
+	float: right;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	position: relative;
+	text-align: right;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search{
+	position: absolute;
+	left: 0;
+	right: 4em;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search form{
+	position: relative;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .keyword-input-parent{
+	position: absolute;
+	left: 1px;
+	right: 2.0em;
+	top: 0;
+	bottom: 0;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .keyword-input-parent .keyword-input{
+	width: 100%;
+	height: 100%;
 	border: 0;
-	width: 4em;
-	height: 1.4em;
 	padding: 0 0;
-	margin-left: 1px;
 }
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button{
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button.ui-button{
 	border: 0px;
-	width: 1em;
 	height: 1.4em;
 	margin: 0 0;
-	padding-left: 0.6em;
-	padding-right: 0.6em;
 	margin-top: -0.2em;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button .ui-icon{
@@ -552,11 +558,11 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .add-schema-button{
 	border: 0px;
+	width: 2em;
 	height: 1.5em;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu{
 	float: right;
-	margin-right: 0.1em;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li > .ui-menu-item-wrapper{
 	width: 1.5em;
@@ -674,7 +680,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 .page-data-form-driverEntity .driver-upload-parent{
 	display: inline-block;
-	float: right;
+	vertical-align: top;
 	margin-left: 0.2em;
 }
 /*驱动程序导入表单页*/
@@ -827,9 +833,6 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	height: 0;
 }
 
-.page-data-form-buildSchemaUrl .schema-build-url-dbtype-select.ui-button{
-	width: 18em;
-}
 .page-data-form-buildSchemaUrl .url-preview{
 	margin-top: 1em;
 	text-align: center;
@@ -845,12 +848,11 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	padding-right: 2em;
 }
 .page-data-form-schemaUrlBuilder form .form-content .form-item .form-item-value textarea.script-code-textarea{
-	width: 30em;
 	height: 22em;
 }
 .page-data-form-schemaUrlBuilder .script-code-note{
 	display: inline-block;
-	width: 15em;
+	width: 35%;
 	height: 22em;
 	overflow: auto;
 }
@@ -901,17 +903,4 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 .page-data-form-reset-password .content .form-content .skip-check-user-admin-warn .ui-icon-info{
 	margin-right: 0.3em;
-}
-
-.page-data-form-globalSetting{}
-.page-data-form-globalSetting .global-setting-select.ui-button{
-	width: 13em;
-}
-
-/*关于页*/
-.page-about form .form-content .form-item .form-item-label label{
-	width: 6em;
-}
-.page-about form .form-content .form-item{
-	padding: 0.5em 0.3em;
 }

@@ -95,7 +95,7 @@ if(loginUser == null)
 		position: {my : "center top", at : "center top+75"},
 		resizable: false,
 		draggable: true,
-		width: "35%",
+		width: "41%",
 		beforeClose: function(){ return false; }
 	});
 	
@@ -113,7 +113,7 @@ if(loginUser == null)
 		},
 		errorPlacement : function(error, element)
 		{
-			error.appendTo(element.closest(".form-item"));
+			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	

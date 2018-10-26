@@ -165,7 +165,7 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 		},
 		errorPlacement : function(error, element)
 		{
-			error.appendTo(element.closest(".form-item"));
+			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	

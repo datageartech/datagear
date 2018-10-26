@@ -43,7 +43,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
 					<label><fmt:message key='schema.url' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="url" value="<c:out value='${schema.url}' />" style="width:35em;" class="ui-widget ui-widget-content" />
+					<input type="text" name="url" value="<c:out value='${schema.url}' />" class="ui-widget ui-widget-content" />
 					<%if(!readonly){%>
 					<span id="schemaBuildUrlHelp" class="ui-state-default ui-corner-all" style="cursor: pointer;" title="<fmt:message key='schema.urlHelp' />"><span class="ui-icon ui-icon-help"></span></span>&nbsp;
 					<%}%>
@@ -214,7 +214,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
 		},
 		errorPlacement : function(error, element)
 		{
-			error.appendTo(element.closest(".form-item"));
+			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	<%}%>

@@ -1078,8 +1078,8 @@
 				<div class="schema-panel-operation">
 					<div class="ui-widget ui-widget-content ui-corner-all search">
 						<form id="schemaSearchForm" action="javascript:void(0);">
-						<input name="keyword" type="text" value="" class="ui-widget ui-widget-content" title="<fmt:message key='main.searchTable' />" /><button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><fmt:message key='find' /></button>
-						<input name="pageSize" type="hidden" value="100" />
+							<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" title="<fmt:message key='main.searchTable' />" /></div><button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><fmt:message key='find' /></button>
+							<input name="pageSize" type="hidden" value="100" />
 						</form>
 					</div>
 					<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" title="<fmt:message key='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><fmt:message key='add' /></button>

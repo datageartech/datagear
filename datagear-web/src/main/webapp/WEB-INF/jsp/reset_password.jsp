@@ -226,7 +226,7 @@ String loginUrl = request.getContextPath() + "/login";
 		<%}%>
 		errorPlacement : function(error, element)
 		{
-			error.appendTo(element.closest(".form-item"));
+			error.appendTo(element.closest(".form-item-value"));
 		},
 		submitHandler : function(form)
 		{

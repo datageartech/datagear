@@ -216,7 +216,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 		},
 		errorPlacement : function(error, element)
 		{
-			error.appendTo(element.closest(".form-item"));
+			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
 	<%}%>
