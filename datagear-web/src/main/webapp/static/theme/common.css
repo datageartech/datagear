@@ -809,6 +809,10 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	float: right;
 	margin-top: 0;
 }
+.ui-dialog .search-form .condition-panel .ui-resizable-se{
+	width: 16px;
+	height: 16px;
+}
 .search-form .ui-autocomplete{
     max-height: 8em;
     max-width: 20em;
