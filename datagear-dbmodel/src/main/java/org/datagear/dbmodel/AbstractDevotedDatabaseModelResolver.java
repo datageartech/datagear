@@ -1805,6 +1805,8 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 				if ((dvStr.startsWith("\"") && dvStr.endsWith("\"")) || (dvStr.startsWith("'") && dvStr.endsWith("'")))
 					dvStr = dvStr.substring(1, length - 1);
 			}
+
+			defaultValue = dvStr;
 		}
 
 		propertyBuilder.setDefaultValue(defaultValue);
