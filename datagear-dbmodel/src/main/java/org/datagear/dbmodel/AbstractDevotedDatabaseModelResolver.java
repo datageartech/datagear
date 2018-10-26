@@ -1794,13 +1794,17 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			}
 		}
 
-		// 将空引号字符串置空
 		if (defaultValue instanceof String)
 		{
-			String defaultValueStr = (String) defaultValue;
+			String dvStr = (String) defaultValue;
+			int length = dvStr.length();
 
-			if (defaultValueStr.equals("\"\"") || defaultValueStr.equals("''"))
-				defaultValue = "";
+			// 去除开头和结尾的引号
+			if (length > 1)
+			{
+				if ((dvStr.startsWith("\"") && dvStr.endsWith("\"")) || (dvStr.startsWith("'") && dvStr.endsWith("'")))
+					dvStr = dvStr.substring(1, length - 1);
+			}
 		}
 
 		propertyBuilder.setDefaultValue(defaultValue);
