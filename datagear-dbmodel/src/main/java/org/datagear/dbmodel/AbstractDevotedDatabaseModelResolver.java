@@ -1794,6 +1794,15 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			}
 		}
 
+		// 将空引号字符串置空
+		if (defaultValue instanceof String)
+		{
+			String defaultValueStr = (String) defaultValue;
+
+			if (defaultValueStr.equals("\"\"") || defaultValueStr.equals("''"))
+				defaultValue = "";
+		}
+
 		propertyBuilder.setDefaultValue(defaultValue);
 	}
 
