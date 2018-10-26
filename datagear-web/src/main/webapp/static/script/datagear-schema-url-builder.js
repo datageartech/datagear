@@ -180,7 +180,7 @@
 			{
 				var myBuilder = ele[j];
 				
-				if(myBuilder.dbName)
+				if(myBuilder && myBuilder.dbName)
 				{
 					if(myBuilder.order == undefined)
 						myBuilder.order = order;

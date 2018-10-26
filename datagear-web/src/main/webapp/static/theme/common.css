@@ -827,8 +827,35 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	height: 0;
 }
 
-.schema-build-url-form .schema-build-url-dbtype-select.ui-button{
-	width: 13em;
+.page-data-form-buildSchemaUrl .schema-build-url-dbtype-select.ui-button{
+	width: 18em;
+}
+.page-data-form-buildSchemaUrl .url-preview{
+	margin-top: 1em;
+	text-align: center;
+	height: 2em;
+	font-weight: bold;
+}
+
+.page-data-form-schemaUrlBuilder .form-item-value-scriptCode{
+	display: block;
+}
+.page-data-form-schemaUrlBuilder .preview-script-code-button.ui-button{
+	padding-left: 2em;
+	padding-right: 2em;
+}
+.page-data-form-schemaUrlBuilder form .form-content .form-item .form-item-value textarea.script-code-textarea{
+	width: 30em;
+	height: 22em;
+}
+.page-data-form-schemaUrlBuilder .script-code-note{
+	display: inline-block;
+	width: 15em;
+	height: 22em;
+	overflow: auto;
+}
+.page-data-form-schemaUrlBuilder .script-code-note span{
+	white-space: nowrap;
 }
 
 .page-data-form-reset-password{

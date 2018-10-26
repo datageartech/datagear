@@ -24,8 +24,37 @@
 				<div class="form-item-label">
 					<label><fmt:message key='schemaUrlBuilder.scriptCode' /></label>
 				</div>
+				<div class="form-item-value form-item-value-scriptCode">
+					<textarea name="scriptCode" class="ui-widget ui-widget-content script-code-textarea"><c:out value='${scriptCode}' /></textarea>
+					<div class="script-code-note">
+					<span><fmt:message key='schemaUrlBuilder.scriptCodeNote.0' /></span>
+					<pre>
+{
+   //<fmt:message key='schemaUrlBuilder.scriptCodeNote.required' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.dbName' />
+   dbName : "...",
+   
+   //<fmt:message key='schemaUrlBuilder.scriptCodeNote.required' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.template' />
+   template : "...{host}...{port}...{name}...",
+   
+   //<fmt:message key='schemaUrlBuilder.scriptCodeNote.optional' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.defaultValue' />
+   defaultValue : { host : "...", port : "...", name : "" },
+   
+   //<fmt:message key='schemaUrlBuilder.scriptCodeNote.optional' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.dbDesc' />
+   dbDesc : "...",
+   
+   //<fmt:message key='schemaUrlBuilder.scriptCodeNote.optional' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.order' />
+   order : 6
+}</pre>
+					<span><fmt:message key='schemaUrlBuilder.scriptCodeNote.1' /></span>
+					</div>
+				</div>
+			</div>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label>&nbsp;</label>
+				</div>
 				<div class="form-item-value">
-					<textarea name="scriptCode" style="width:30em; height: 20em;"><c:out value='${scriptCode}' /></textarea>
+					<button id="previewScriptCode" type="button" class="preview-script-code-button"><fmt:message key='preview' /></button>
 				</div>
 			</div>
 		</div>
@@ -43,6 +72,14 @@
 	$.initButtons(pageObj.element());
 	
 	pageObj.form = pageObj.element("#${pageId}-form");
+	
+	pageObj.element("#previewScriptCode").click(function()
+	{
+		pageObj.open(contextPath+"/schemaUrlBuilder/previewScriptCode",
+		{
+			data : { "scriptCode" : pageObj.element("textarea[name='scriptCode']").val() }
+		});
+	});
 	
 	pageObj.form.validate(
 	{

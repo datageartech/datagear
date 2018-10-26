@@ -106,11 +106,22 @@ public class SchemaUrlBuilderController extends AbstractSchemaModelController im
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
 
+	@RequestMapping("/previewScriptCode")
+	public String previewScriptCode(HttpServletRequest request,
+			@RequestParam(value = "scriptCode", required = false) String scriptCode) throws IOException
+	{
+		request.setAttribute("scriptCode", scriptCode);
+		request.setAttribute("preview", "1");
+
+		return "/schema/schema_build_url";
+	}
+
 	@RequestMapping("/buildUrl")
-	public String buildSchemaUrl(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel) throws IOException
+	public String buildSchemaUrl(HttpServletRequest request, @RequestParam(value = "url", required = false) String url)
+			throws IOException
 	{
 		request.setAttribute("scriptCode", getUrlBuilderScript());
+		request.setAttribute("url", url);
 
 		return "/schema/schema_build_url";
 	}
@@ -119,6 +130,11 @@ public class SchemaUrlBuilderController extends AbstractSchemaModelController im
 	{
 		if (scriptCode == null)
 			scriptCode = "";
+
+		scriptCode = scriptCode.trim();
+
+		if (scriptCode.endsWith(","))
+			scriptCode = scriptCode.substring(0, scriptCode.length() - 1);
 
 		Writer out = IOUtil.getWriter(this.schemaUrlBuilderScriptFile, DB_URL_BUILDER_ENCODING);
 

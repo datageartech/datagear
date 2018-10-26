@@ -7,28 +7,24 @@
 <%@ include file="../include/jsp_import.jsp" %>
 <%@ include file="../include/jsp_ajax_request.jsp" %>
 <%@ include file="../include/jsp_jstl.jsp" %>
+<%@ include file="../include/jsp_method_get_string_value.jsp" %>
 <%@ include file="../include/jsp_page_id.jsp" %>
 <%@ include file="../include/html_doctype.jsp" %>
+<%
+boolean isPreview = "1".equals(getStringValue(request, "preview"));
+%>
 <html>
 <head>
 <%@ include file="../include/html_head.jsp" %>
-<script type="text/javascript">
-$.schemaUrlBuilder.clear();
-try
-{
-$.schemaUrlBuilder.add(
-<%=request.getAttribute("scriptCode")%>
-);
-}
-catch(e)
-{
-	$.tipError("<fmt:message key='schema.loadUrlBuilderScriptError' />");
-}
-</script>
 <title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='schema.schemaBuildUrl' /></title>
 </head>
 <body>
-<div id="${pageId}" class="schema-build-url-form">
+<div id="${pageId}" class="page-data-form page-data-form-buildSchemaUrl">
+	<div id="dbUrlBuilderScriptCode" style="display: none;">
+		$.schemaUrlBuilder.add(
+		<%=request.getAttribute("scriptCode")%>
+		);
+	</div>
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
@@ -70,6 +66,9 @@ catch(e)
 			<input type="submit" value="<fmt:message key='confirm' />" class="recommended" />
 		</div>
 	</form>
+	<%if(isPreview){%>
+	<div class="url-preview"></div>
+	<%}%>
 </div>
 <%@ include file="../include/page_js_obj.jsp" %>
 <script type="text/javascript">
@@ -78,11 +77,20 @@ catch(e)
 	pageObj.form = pageObj.element("#${pageId}-form");
 	pageObj.dbNameSelect = pageObj.element("select[name='dbName']");
 
-	var pageParam = pageObj.pageParam();
-	
-	pageObj.initUrl = (pageParam && pageParam.initUrl ? pageParam.initUrl : "");
+	pageObj.initUrl = "<c:out value='${url}' />";
 	
 	$("input:submit, input:button, input:reset, button", pageObj.page).button();
+	
+	$.schemaUrlBuilder.clear();
+	var scriptCode = pageObj.element("#dbUrlBuilderScriptCode").text();
+	try
+	{
+		eval(scriptCode);
+	}
+	catch(e)
+	{
+		$.tipError("<fmt:message key='schema.loadUrlBuilderScriptError' /><fmt:message key='colon' />" + e.message);
+	}
 	
 	var builderInfos = $.schemaUrlBuilder.list();
 	for(var i=0; i<builderInfos.length; i++)
@@ -137,15 +145,21 @@ catch(e)
 	{
 		submitHandler : function(form)
 		{
+			var url = pageObj.buildFormUrl();
+			
+			<%if(isPreview){%>
+			pageObj.element(".url-preview").text(url);
+			<%}else{%>
 			var pageParam = pageObj.pageParam();
 			
 			var close = true;
 			
 			if(pageParam && pageParam.setSchemaUrl)
-				close = (pageParam.setSchemaUrl(pageObj.buildFormUrl()) != false);
+				close = (pageParam.setSchemaUrl(url) != false);
 			
 			if(close)
 				pageObj.close();
+			<%}%>
 			
 			return false;
 		},

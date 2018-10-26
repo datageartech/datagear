@@ -132,10 +132,10 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
 	{
 		pageObj.open(contextPath+"/schemaUrlBuilder/buildUrl",
 		{
+			data : { url : pageObj.element("input[name='url']").val() },
 			width: "60%",
 			pageParam :
 			{
-				"initUrl" : pageObj.element("input[name='url']").val(),
 				"setSchemaUrl" : function(url)
 				{
 					pageObj.element("input[name='url']").val(url);

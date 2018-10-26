@@ -47,6 +47,7 @@
 		<!-- 设置数据库URL构建器脚本 -->
 		<intercept-url pattern="/schemaUrlBuilder/editScriptCode" access="ROLE_ADMIN" />
 		<intercept-url pattern="/schemaUrlBuilder/saveScriptCode" access="ROLE_ADMIN" />
+		<intercept-url pattern="/schemaUrlBuilder/previewScriptCode" access="ROLE_ADMIN" />
 		
 		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER, ROLE_ADMIN" />
 	
