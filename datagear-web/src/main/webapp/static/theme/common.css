@@ -735,6 +735,9 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	top: 0;
 	bottom: 0;
 }
+.search-form .keyword-widget.simple .keyword-input-parent{
+	left: 0;
+}
 .search-form .keyword-widget .keyword-input-parent .keyword-input{
     width: 100%;
     height: 100%;
