@@ -382,15 +382,6 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	text-align: center;
 }
 
-/*登录页*/
-.page-data-form-login form .form-item .form-item-label label{
-	width: 8em;
-}
-.page-data-form-login form .form-item .form-item-value input[type='text'],
-.page-data-form-login form .form-item .form-item-value input[type='password']{
-	width:10em;
-}
-
 .page-register-success .register-success-content{
 	margin-top: 5em;
 	text-align: center;
