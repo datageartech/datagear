@@ -9,14 +9,14 @@
 --%>
 <form id="${pageId}-searchForm" class="search-form" action="#" tabindex="0">
 	<div class="ui-widget ui-widget-content keyword-widget">
-	<span class="ui-icon like-switch-icon ui-icon-radio-off" title="<fmt:message key='data.likeTitle' />"></span><input name="keyword" type="text" class="ui-widget ui-widget-content input-keyword" tabindex="2" />
+	<span class="ui-icon like-switch-icon ui-icon-radio-off" title="<fmt:message key='data.likeTitle' />"></span><div class="keyword-input-parent"><input name="keyword" type="text" class="ui-widget ui-widget-content keyword-input" tabindex="2" /></div>
 	<input type="hidden" name="notLike" value="" />
 	</div>
 	<div class="search-condition-icon-parent" title="<fmt:message key='data.conditionPanelWithShortcut' />">
 		<span class="ui-icon ui-icon-caret-1-s search-condition-icon"></span>
 		<span class="ui-icon ui-icon-bullet search-condition-icon-tip"></span>
 	</div>
-	<input name="submit" type="submit" value="<fmt:message key='query' />" tabindex="3" />
+	<button type="submit" class="ui-button ui-corner-all ui-widget" tabindex="3"><fmt:message key='query' /></button>
 	<div class="condition-panel-parent">
 		<div class="ui-widget ui-widget-content ui-widget-shadow condition-panel" tabindex="0">
 			<div class="ui-corner-all ui-widget-header ui-helper-clearfix ui-draggable-handle condition-panel-title-bar">

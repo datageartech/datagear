@@ -261,6 +261,7 @@ pageObj.conditionAutocompleteSource = undefined;
 	});
 	
 	pageObj.conditionPanel.draggable({ handle: ".condition-panel-title-bar" });
+	pageObj.conditionPanel.resizable();
 	
 	pageObj.element("input:submit", pageObj.searchForm).button();
 	pageObj.updateNotLikeKeyword();

@@ -714,21 +714,33 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 
 /*查询表单*/
 .search-form{
+	position: relative;
 }
 .search-form .keyword-widget{
 	display: inline-block;
+	width: 70%;
+	height: 2em;
 	margin-left: 0.1em;
+	vertical-align: middle;
+	position: relative;
 }
-.search-form .keyword-widget .like-switch-icon{
-	width: 12px;
-	margin-left: -3px;
+.search-form .keyword-widget .like-switch-icon.ui-icon{
 	cursor: pointer;
+	margin-top: 0.2em;
 }
-.search-form .keyword-widget .input-keyword{
-	width: 15em;
-	height: 1.8em;
-	margin-left: 2px;
-	border: none;
+.search-form .keyword-widget .keyword-input-parent{
+	position: absolute;
+	left: 18px;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+.search-form .keyword-widget .keyword-input-parent .keyword-input{
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 0 0;
+    margin: 0 0;
 }
 .search-form .search-condition-icon-parent{
 	position: relative;
@@ -745,41 +757,57 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 .search-form .condition-panel-parent{
 	position: relative;
+	width: 90%;
 }
 .search-form .condition-panel-parent .condition-panel{
-	position: absolute;
+	display: inline-block;
+	width: 100%;
+	height: 9em;
 	z-index: 2;
-	display: none;
 	margin-left: 0.1em;
-	padding: 0.2em 0.2em;
+	padding: 2px 2px;
+	position: relative;
 }
 .search-form .condition-panel-parent .condition-panel .condition-panel-title-bar{
 	text-align: right;
 	height: 16px;
 	cursor: move;
 }
+.search-form .condition-panel-parent .condition-panel .condition-panel-title-bar .condition-panel-resetpos-icon.ui-icon{
+	margin-top: -0.6em;
+}
 .search-form .condition-panel-parent .condition-panel .ui-icon{
-	margin: 0 0;
 	cursor: pointer;
 }
 .search-form .condition-panel-parent .condition-panel .condition-parent{
-	position: relative;
+	position: absolute;
+	top: 21px;
+	bottom: 21px;
+	left: 3px;
+	right: 3px;
+	display: inline-block;
 }
 .search-form .condition-panel-parent .condition-panel .condition-parent textarea{
-	width: 25em;
-	height: 6em;
+	display: inline-block;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	resize: none;
 	position: relative;
-	margin-top: 2px;
-	border-width: 0;
-	border-bottom-width: 1px;
-	/*resize: none;*/
 }
 .search-form .condition-panel-parent .condition-panel .condition-action{
+	position: absolute;
+	left: 2px;
+	bottom: 2px;
+	right: 25px;
 	height: 16px;
 	font-size: 8px;
 }
-.search-form .condition-panel-parent .condition-panel .condition-panel-submit-icon{
+.search-form .condition-panel-parent .condition-panel .condition-panel-submit-icon.ui-icon{
 	float: right;
+	margin-top: 0;
 }
 .search-form .ui-autocomplete{
     max-height: 8em;
@@ -795,21 +823,22 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	width: 100%;
 	height: 100%;
 	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .page-data-grid .head{
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
 	height: 2.5em;
-	display: inline-block;
 	padding: .25em 0;
 }
 .page-data-grid .head .search{
-	float:left;
+	display: inline-block;
+	width: 41%;
 }
 .page-data-grid .head .operation{
+	display: inline-block;
 	float: right;
+	width: 57%;
+	text-align: right;
 }
 .page-data-grid .content{
 	position: absolute;
