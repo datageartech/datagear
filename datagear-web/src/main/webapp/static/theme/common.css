@@ -932,3 +932,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 .page-data-form-reset-password .content .form-content .skip-check-user-admin-warn .ui-icon-info{
 	margin-right: 0.3em;
 }
+
+.page-about .copyright{
+	padding-top: 4.1em;
+}
