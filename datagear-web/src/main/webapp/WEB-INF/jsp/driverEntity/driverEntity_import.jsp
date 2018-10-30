@@ -39,7 +39,7 @@
 				</div>
 				<div class="form-item-value">
 					<input type="hidden" name="inputForValidate" value="" />
-					<div class="ui-widget ui-widget-content driver-entity-infos"></div>
+					<div class="ui-widget ui-widget-content input driver-entity-infos"></div>
 				</div>
 			</div>
 		</div>

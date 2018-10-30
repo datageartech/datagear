@@ -59,7 +59,8 @@ form .form-content .form-item .form-item-value{
 }
 form .form-content .form-item .form-item-value input[type=text],
 form .form-content .form-item .form-item-value input[type=password],
-form .form-content .form-item .form-item-value textarea{
+form .form-content .form-item .form-item-value textarea,
+form .form-content .form-item .form-item-value .input{
 	margin-right: 0.3em;/*文本框与后面按钮间距*/
 	width: 50%;
 }
@@ -651,7 +652,6 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 .page-data-form-driverEntity .driver-files{
 	display: inline-block;
-	width: 20em;
 	height: 8em;
 	overflow: auto;
 	padding: 3px 2px;
@@ -680,7 +680,6 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 .page-data-form-driverEntityImport .driver-entity-infos{
 	display: inline-block;
-	width: 30em;
 	height: 15em;
 	overflow: auto;
 	padding: 3px 2px;
