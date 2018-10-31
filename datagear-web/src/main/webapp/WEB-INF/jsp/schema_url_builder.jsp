@@ -39,9 +39,6 @@
    //<fmt:message key='schemaUrlBuilder.scriptCodeNote.optional' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.defaultValue' />
    defaultValue : { host : "...", port : "...", name : "" },
    
-   //<fmt:message key='schemaUrlBuilder.scriptCodeNote.optional' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.dbDesc' />
-   dbDesc : "...",
-   
    //<fmt:message key='schemaUrlBuilder.scriptCodeNote.optional' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.order' />
    order : 6
 }</pre>
