@@ -157,8 +157,18 @@
 	
 	pageObj.schemaToJstreeNode = function(schema)
 	{
+		schema.text = schema.title;
+		
 		var tempSchema = (schema.createUser && schema.createUser.anonymous);
-		schema.text = schema.title + (tempSchema ? " <span class='ui-icon ui-icon-notice' title='<fmt:message key='main.tempSchema' />'></span>" : "");
+		
+		if(tempSchema)
+			schema.text += " <span class='ui-icon ui-icon-notice' title='<fmt:message key='main.tempSchema' />'></span>";
+		else
+		{
+			if(schema.createUser && pageObj.userId != schema.createUser.id && schema.createUser.nameLabel)
+				schema.text += " <span class='schema-tree-create-user-label small-text ui-state-disabled' title='<fmt:message key='main.schemaCreateUser' />'>" + schema.createUser.nameLabel + "</span>";
+		}
+		
 		schema.children = true;
 		
 		return schema;
@@ -252,13 +262,8 @@
 	
 	pageObj.refreshSchemaTree = function()
 	{
-		$.get(contextPath+"/schema/list", function(schemas)
-		{
-			schemas = pageObj.schemaToJstreeNode(schemas);
-			
-			var $tree = pageObj.element(".schema-panel-content");
-			$tree.jstree(true).refresh(true);
-		});
+		var $tree = pageObj.element(".schema-panel-content");
+		$tree.jstree(true).refresh(true);
 	};
 	
 	$(document).ready(function()
@@ -319,6 +324,23 @@
 				}
 			}
 		});
+		
+		pageObj.element("#schemaSearchSwitch").click(function()
+		{
+			var $icon = $(".ui-icon", this);
+			
+			if($icon.hasClass("ui-icon-document"))
+				$icon.removeClass("ui-icon-document").addClass("ui-icon-folder-collapsed").attr("title", "<fmt:message key='main.searchSchema' />");
+			else
+				$icon.removeClass("ui-icon-folder-collapsed").addClass("ui-icon-document").attr("title", "<fmt:message key='main.searchTable' />");
+		});
+		
+		pageObj.isSearchTable = function()
+		{
+			var $icon = pageObj.element("#schemaSearchSwitch > .ui-icon");
+			
+			return $icon.hasClass("ui-icon-document");
+		};
 		
 		pageObj.element("#schemaOperationMenu").menu(
 		{
@@ -603,6 +625,7 @@
 				{
 					"data" :
 					{
+						"type" : "POST",
 						"url" : function(node)
 						{
 							//根节点
@@ -616,7 +639,16 @@
 						},
 						"data" : function(node)
 						{
-							return pageObj.getSearchSchemaFormData();
+							var isSearchTable = pageObj.isSearchTable();
+							
+							//根节点
+							if((node.id == "#" && !isSearchTable)
+									|| (pageObj.isSchemaNode(node) && isSearchTable))
+							{
+								return pageObj.getSearchSchemaFormData();
+							}
+							else
+								return {};
 						},
 						"success" : function(data, textStatus, jqXHR)
 						{
@@ -718,45 +750,52 @@
 		
 		pageObj.element("#schemaSearchForm").submit(function()
 		{
-			pageObj.selectNodeAfterLoad = true;
-			
 			var jstree = pageObj.element(".schema-panel-content").jstree(true);
 			
-			var searchSchemaNodes = [];
-			
-			var selNodes = jstree.get_selected(true);
-			for(var i=0; i<selNodes.length; i++)
+			if(pageObj.isSearchTable())
 			{
-				var selNode = selNodes[i];
+				pageObj.selectNodeAfterLoad = true;
 				
-				while(selNode && !pageObj.isSchemaNode(selNode))
-					selNode = jstree.get_node(selNode.parent);
+				var searchSchemaNodes = [];
 				
-				if(selNode)
-					searchSchemaNodes.push(selNode);
+				var selNodes = jstree.get_selected(true);
+				for(var i=0; i<selNodes.length; i++)
+				{
+					var selNode = selNodes[i];
+					
+					while(selNode && !pageObj.isSchemaNode(selNode))
+						selNode = jstree.get_node(selNode.parent);
+					
+					if(selNode)
+						searchSchemaNodes.push(selNode);
+				}
+				
+				//没有选中的话则取第一个
+				if(searchSchemaNodes.length == 0)
+				{
+					var rootNode = jstree.get_node($.jstree.root);
+					var firstSchemaNode = (rootNode.children && rootNode.children.length > 0 ? jstree.get_node(rootNode.children[0]) : undefined);
+					
+					if(firstSchemaNode)
+						searchSchemaNodes.push(firstSchemaNode);
+				}
+				
+				for(var i=0; i<searchSchemaNodes.length; i++)
+				{
+					var searchSchemaNode = searchSchemaNodes[i];
+					
+					//如果这次的搜索结果为空，下载再搜索的话，节点不会自动打开，
+					//使用load_node.jstree事件处理来解决此问题，则会让节点闪烁，效果不好
+					//因此这里设置state.opened=true，不会有上述问题
+					if(!searchSchemaNode.state.opened)
+						searchSchemaNode.state.opened = true;
+					
+					jstree.refresh_node(searchSchemaNode);
+				}
 			}
-			
-			//没有选中的话则取第一个
-			if(searchSchemaNodes.length == 0)
+			else
 			{
-				var rootNode = jstree.get_node($.jstree.root);
-				var firstSchemaNode = (rootNode.children && rootNode.children.length > 0 ? jstree.get_node(rootNode.children[0]) : undefined);
-				
-				if(firstSchemaNode)
-					searchSchemaNodes.push(firstSchemaNode);
-			}
-			
-			for(var i=0; i<searchSchemaNodes.length; i++)
-			{
-				var searchSchemaNode = searchSchemaNodes[i];
-				
-				//如果这次的搜索结果为空，下载再搜索的话，节点不会自动打开，
-				//使用load_node.jstree事件处理来解决此问题，则会让节点闪烁，效果不好
-				//因此这里设置state.opened=true，不会有上述问题
-				if(!searchSchemaNode.state.opened)
-					searchSchemaNode.state.opened = true;
-				
-				jstree.refresh_node(searchSchemaNode);
+				pageObj.refreshSchemaTree();
 			}
 		});
 		
@@ -1078,7 +1117,9 @@
 				<div class="schema-panel-operation">
 					<div class="ui-widget ui-widget-content ui-corner-all search">
 						<form id="schemaSearchForm" action="javascript:void(0);">
-							<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" title="<fmt:message key='main.searchTable' />" /></div><button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><fmt:message key='find' /></button>
+							<div id="schemaSearchSwitch" class="schema-search-switch"><span class="ui-icon ui-icon-document search-switch-icon" title="<fmt:message key='main.searchTable' />"></span></div>
+							<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" /></div>
+							<button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><fmt:message key='find' /></button>
 							<input name="pageSize" type="hidden" value="100" />
 						</form>
 					</div>

@@ -526,10 +526,16 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search form{
 	position: relative;
 }
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .schema-search-switch{
+	display: inline-block;
+	float: left;
+	opacity: 0.5;
+	cursor: pointer;
+}
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .keyword-input-parent{
 	position: absolute;
-	left: 1px;
-	right: 2.0em;
+	left: 16px;
+	right: 1.4em;
 	top: 0;
 	bottom: 0;
 }
@@ -541,9 +547,12 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button.ui-button{
 	border: 0px;
+	width: 1.4em;
 	height: 1.4em;
 	margin: 0 0;
 	margin-top: -0.2em;
+	padding-left: 0;
+	padding-right: 0;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button .ui-icon{
 	opacity: 0.6;

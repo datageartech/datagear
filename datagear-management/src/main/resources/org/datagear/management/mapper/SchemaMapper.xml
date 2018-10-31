@@ -88,6 +88,7 @@
 			A.DRIVER_ENTITY_ID AS ${_iq_}driverEntity.id${_iq_},
 			A.SCHEMA_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			B.USER_NAME AS ${_iq_}createUser.name${_iq_},
+			B.USER_REAL_NAME AS ${_iq_}createUser.realName${_iq_},
 			(CASE WHEN B.USER_IS_ADMIN IS NULL THEN '0' ELSE B.USER_IS_ADMIN END) AS ${_iq_}createUser.admin${_iq_},
 			(CASE WHEN B.USER_ID IS NULL THEN '1' ELSE '0' END) AS ${_iq_}createUser.anonymous${_iq_},
 			B.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_}
@@ -105,7 +106,8 @@
 		AND
 		(
 			${_iq_}title${_iq_} LIKE #{queryKeyword}
-			OR ${_iq_}SCHEMA_URL${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}createUser.name${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}createUser.realName${_iq_} LIKE #{queryKeyword}
 		)
 		</if>
 		<if test="OPERATOR != null and OPERATOR.admin != true">

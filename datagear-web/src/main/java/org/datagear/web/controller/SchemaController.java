@@ -200,7 +200,8 @@ public class SchemaController extends AbstractSchemaModelController
 
 	@RequestMapping(value = "/list", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<Schema> list(HttpServletRequest request, HttpServletResponse response)
+	public List<Schema> list(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(value = "keyword", required = false) String keyword)
 	{
 		User user = WebUtils.getUser(request, response);
 
@@ -218,6 +219,7 @@ public class SchemaController extends AbstractSchemaModelController
 		}
 
 		Query query = new Query();
+		query.setKeyword(keyword);
 		query.setOrders(Order.valueOf("title", Order.ASC));
 
 		List<Schema> schemas = getSchemaService().query(user, query);
