@@ -1274,9 +1274,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			String sizeQuoteAlias = toQuoteName(dialect, sizeAlias);
 
 			if (selectSql != null)
-			{
-				selectSql.sqld(ptableAliasQuote + "." + sizeQuoteAlias + " AS " + sizeQuoteAlias);
-			}
+				selectSql.sqld("(CASE WHEN " + ptableAliasQuote + "." + sizeQuoteAlias + " IS NOT NULL THEN "
+						+ ptableAliasQuote + "." + sizeQuoteAlias + " ELSE 0 END) AS " + sizeQuoteAlias);
 
 			if (selectColumnPropertyPaths != null)
 			{
@@ -1397,7 +1396,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			String sizeQuoteAlias = toQuoteName(dialect, sizeAlias);
 
 			if (selectSql != null)
-				selectSql.sqld(jointableAliasQuote + "." + sizeQuoteAlias);
+				selectSql.sqld("(CASE WHEN " + jointableAliasQuote + "." + sizeQuoteAlias + " IS NOT NULL THEN "
+						+ jointableAliasQuote + "." + sizeQuoteAlias + " ELSE 0 END) AS " + sizeQuoteAlias);
 
 			if (selectColumnPropertyPaths != null)
 			{
@@ -1873,7 +1873,10 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 						{
 							int size = rs.getInt(sizeColIndex);
 
-							if (!rs.wasNull())
+							// 当需要返回null时，此属性值应该也为null
+							boolean setToNull = ((size == 0 || rs.wasNull()) && !emptyIfAllColumnValuesNull);
+
+							if (!setToNull)
 							{
 								SizeOnlyCollection<Object> sizeOnlyCollection = SizeOnlyCollection
 										.instance(property.getCollectionType());
