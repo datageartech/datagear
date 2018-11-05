@@ -239,6 +239,13 @@
 		//jstree的_append_json_data方法有“if(data.d){data = data.d;...}”的逻辑，可以用来适配数据
 		pagingData.d = pagingData.items;
 	};
+
+	pageObj.isSearchTable = function()
+	{
+		var $icon = pageObj.element("#schemaSearchSwitch > .ui-icon");
+		
+		return $icon.hasClass("ui-icon-document");
+	};
 	
 	pageObj.getSearchSchemaFormData = function()
 	{
@@ -246,6 +253,24 @@
 		var keyword = $("input[name='keyword']", form).val();
 		var pageSize = $("input[name='pageSize']", form).val();
 		return {"keyword" : keyword, "pageSize" : pageSize};
+	};
+	
+	pageObj.getSearchSchemaFormDataForSchema = function()
+	{
+		if(pageObj.isSearchTable())
+			return {};
+		else
+			return pageObj.getSearchSchemaFormData();
+	};
+	
+	pageObj.getSearchSchemaFormDataForTable = function()
+	{
+		var data = pageObj.getSearchSchemaFormData();
+		
+		if(!pageObj.isSearchTable())
+			data["keyword"] = "";
+		
+		return data;
 	};
 	
 	pageObj.evalTabPanelTop = function($tab)
@@ -324,7 +349,7 @@
 				}
 			}
 		});
-		
+
 		pageObj.element("#schemaSearchSwitch").click(function()
 		{
 			var $icon = $(".ui-icon", this);
@@ -334,13 +359,6 @@
 			else
 				$icon.removeClass("ui-icon-folder-collapsed").addClass("ui-icon-document").attr("title", "<fmt:message key='main.searchTable' />");
 		});
-		
-		pageObj.isSearchTable = function()
-		{
-			var $icon = pageObj.element("#schemaSearchSwitch > .ui-icon");
-			
-			return $icon.hasClass("ui-icon-document");
-		};
 		
 		pageObj.element("#schemaOperationMenu").menu(
 		{
@@ -631,7 +649,6 @@
 							//根节点
 							if(node.id == "#")
 								return contextPath+"/schema/list";
-							//方案节点
 							else if(pageObj.isSchemaNode(node))
 							{
 								return contextPath+"/schema/"+node.id+"/pagingQueryTable"
@@ -639,16 +656,10 @@
 						},
 						"data" : function(node)
 						{
-							var isSearchTable = pageObj.isSearchTable();
-							
-							//根节点
-							if((node.id == "#" && !isSearchTable)
-									|| (pageObj.isSchemaNode(node) && isSearchTable))
-							{
-								return pageObj.getSearchSchemaFormData();
-							}
-							else
-								return {};
+							if(node.id == "#")
+								return pageObj.getSearchSchemaFormDataForSchema();
+							else if(pageObj.isSchemaNode(node))
+								return pageObj.getSearchSchemaFormDataForTable();
 						},
 						"success" : function(data, textStatus, jqXHR)
 						{
@@ -709,8 +720,8 @@
 					var $moreTableNode = tree.get_node(data.node, true);
 					$(".more-table", $moreTableNode).html("<fmt:message key='main.loadingTable' />");
 					
-					var param = pageObj.getSearchSchemaFormData();
-					$.extend(param, data.node.original.nextPageInfo);
+					var param = pageObj.getSearchSchemaFormDataForTable();
+					param = $.extend({}, data.node.original.nextPageInfo, param);
 					
 					$.ajax(contextPath+"/schema/"+schemaId+"/pagingQueryTable",
 					{
