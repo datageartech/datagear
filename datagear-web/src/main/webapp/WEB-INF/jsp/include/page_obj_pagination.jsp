@@ -37,6 +37,7 @@ pageObj.paging = undefined;
 			pageSizeSetLabel : "<fmt:message key='confirm' />",
 			toPageLabel : "<fmt:message key='jumpto' />",
 			pageSizeCookie: "<%=org.datagear.web.util.WebUtils.COOKIE_PAGINATION_SIZE%>",
+			pageSizeCookiePath: "<%=request.getContextPath()%>/",
 			update: function(page, pageSize, total)
 			{
 				var pagingParam =

@@ -29,6 +29,9 @@
 			
 			//可选，页大小cookie名
 			pageSizeCookie : "pagination.pageSize",
+
+			//可选，页大小cookie路径
+			pageSizeCookiePath : "/",
 			
 			pageSizeSetLabel : "确定",
 			
@@ -212,7 +215,7 @@
 			else if(key == 'pageSize')
 			{
 				if(this.options.pageSizeCookie)
-					$.cookie(this.options.pageSizeCookie, value, { expires : 365*5 });
+					$.cookie(this.options.pageSizeCookie, value, { expires : 365*5, path: this.options.pageSizeCookiePath });
 			}
 			
 			this._super(key, value);
