@@ -1796,20 +1796,20 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		 * @param rs
 		 * @param row
 		 * @param model
-		 * @param emptyIfAllColumnValuesNull
-		 *            当所有列值都为{@code null}时，是否返回一个空对象实例而非{@code null}。
+		 * @param nullIfAllColumnValuesNull
+		 *            当所有列值都为{@code null}时，是否返回{@code null}。
 		 * @return
 		 * @throws Exception
 		 */
 		protected Object convert(Map<PropertyPath, Object> propertyColIndexMap, ResultSet rs, int row, Model model,
-				boolean emptyIfAllColumnValuesNull) throws Exception
+				boolean nullIfAllColumnValuesNull) throws Exception
 		{
 			boolean allColumnValuesNull = false;
 
 			if (propertyColIndexMap == null || propertyColIndexMap.isEmpty())
 				allColumnValuesNull = true;
 
-			if (allColumnValuesNull && !emptyIfAllColumnValuesNull)
+			if (allColumnValuesNull && nullIfAllColumnValuesNull)
 				return null;
 
 			Object obj = model.newInstance();
@@ -1874,7 +1874,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 							int size = rs.getInt(sizeColIndex);
 
 							// 当需要返回null时，此属性值应该也为null
-							boolean setToNull = ((size == 0 || rs.wasNull()) && !emptyIfAllColumnValuesNull);
+							boolean setToNull = ((size == 0 || rs.wasNull()) && nullIfAllColumnValuesNull);
 
 							if (!setToNull)
 							{
@@ -1939,9 +1939,9 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				}
 			}
 
-			if (allColumnValuesNull || propValues.isEmpty())
+			if (nullIfAllColumnValuesNull && (allColumnValuesNull || propValues.isEmpty()))
 			{
-				return (emptyIfAllColumnValuesNull ? obj : null);
+				return null;
 			}
 			else
 			{
@@ -1974,7 +1974,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			PropertyModelMapper<?> propertyModelMapper = PropertyModelMapper.valueOf(property, relationMapper,
 					propertyModel.getIndex());
 
-			Object propValue = convert(propertyPropertyColIndexMap, rs, row, propertyModelMapper.getModel(), false);
+			Object propValue = convert(propertyPropertyColIndexMap, rs, row, propertyModelMapper.getModel(), true);
 
 			// 双向关联赋值
 			if (propValue != null)
@@ -2134,7 +2134,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			try
 			{
-				return convert(propertyColIndexMap, rs, row, this.model, true);
+				return convert(propertyColIndexMap, rs, row, this.model, false);
 			}
 			catch (Exception e)
 			{
