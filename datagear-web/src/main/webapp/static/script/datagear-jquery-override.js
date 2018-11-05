@@ -22,7 +22,11 @@
 	rCRLF = /\r?\n/g,
 	rsubmitterTypes = /^(?:submit|button|image|reset|file)$/i,
 	rsubmittable = /^(?:input|select|textarea|keygen)/i;
-
+	
+	//XXX 新增内容
+	var ALL_PROPERTY_VALUE_NULL_PLACE_HOLDER = "___ALL_5_PROPERTY_0_VALUE_4_NULL_0_PLACE_1_HOLDER___";
+	//XXX 新增内容
+	
 	function buildParams( prefix, obj, traditional, add ) {
 		var name;
 	
@@ -55,6 +59,10 @@
 	
 		} else if ( !traditional && jQuery.type( obj ) === "object" ) {
 	
+			//XXX 新增内容
+			var allPropertyValueNull = true;
+			//XXX 新增内容
+			
 			// Serialize object item.
 			for ( name in obj ) {
 				
@@ -63,9 +71,18 @@
 				//XXX 原内容
 				//XXX 替换内容
 				//将param[name]格式的参数名修改为param.name格式
+				var value = obj[ name ];
 				buildParams( prefix + "." + name, obj[ name ], traditional, add );
+				if(value != null) allPropertyValueNull=false;
 				//XXX 替换内容
 			}
+			
+			//XXX 新增内容
+			//由于下面的add函数不会将null转递给后台，那么所有属性值都为null的空对象将无法传递到后台，这样会导致某些逻辑无法实现，比如删除操作
+			//所以这里添加了一个占位符参数，使得后台可以将此类对象参数转换为空对象
+			if(allPropertyValueNull)
+				buildParams( prefix + "." + ALL_PROPERTY_VALUE_NULL_PLACE_HOLDER, "", traditional, add );
+			//XXX 新增内容
 	
 		} else {
 	

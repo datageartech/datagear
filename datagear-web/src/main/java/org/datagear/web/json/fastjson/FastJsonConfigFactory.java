@@ -25,7 +25,8 @@ import com.alibaba.fastjson.support.config.FastJsonConfig;
  */
 public class FastJsonConfigFactory
 {
-	private static final SerializerFeature[] SERIALIZER_FEATURES = new SerializerFeature[0];
+	private static final SerializerFeature[] SERIALIZER_FEATURES = new SerializerFeature[] {
+			SerializerFeature.WriteMapNullValue };
 
 	private Map<Class<?>, ObjectSerializer> objectSerializerMap = new HashMap<Class<?>, ObjectSerializer>();
 
@@ -116,9 +117,11 @@ public class FastJsonConfigFactory
 	public FastJsonConfig getFastJsonConfig()
 	{
 		SerializeConfig serializeConfig = getSerializeConfig();
+		SerializerFeature[] serializerFeatures = getSerializerFeatures();
 
 		FastJsonConfig fastJsonConfig = new FastJsonConfig();
 		fastJsonConfig.setSerializeConfig(serializeConfig);
+		fastJsonConfig.setSerializerFeatures(serializerFeatures);
 
 		return fastJsonConfig;
 	}
