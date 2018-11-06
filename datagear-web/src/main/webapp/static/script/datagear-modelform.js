@@ -377,7 +377,7 @@
 			
 			button.attr("value", (options.readonly ? options.labels.view : options.labels.edit));
 			
-			if(options.readonly && !propValue)
+			if(options.readonly && (!propValue || !propValue.size || propValue.size==0))
 				button.attr("disabled", true);
 			else
 			{
