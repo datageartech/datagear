@@ -30,8 +30,8 @@
 					<span><fmt:message key='schemaUrlBuilder.scriptCodeNote.0' /></span>
 					<pre>
 {
-   //<fmt:message key='schemaUrlBuilder.scriptCodeNote.required' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.dbName' />
-   dbName : "...",
+   //<fmt:message key='schemaUrlBuilder.scriptCodeNote.required' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.dbType' />
+   dbType : "...",
    
    //<fmt:message key='schemaUrlBuilder.scriptCodeNote.required' /><fmt:message key='comma' /><fmt:message key='schemaUrlBuilder.scriptCodeNote.template' />
    template : "...{host}...{port}...{name}...",

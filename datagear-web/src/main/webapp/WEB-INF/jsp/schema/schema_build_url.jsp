@@ -30,10 +30,10 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 		<div class="form-content">
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><fmt:message key='schema.url.dbName' /></label>
+					<label><fmt:message key='schema.url.dbType' /></label>
 				</div>
 				<div class="form-item-value">
-					<select name="dbName">
+					<select name="dbType">
 					</select>
 				</div>
 			</div>
@@ -75,7 +75,7 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 (function(pageObj)
 {
 	pageObj.form = pageObj.element("#${pageId}-form");
-	pageObj.dbNameSelect = pageObj.element("select[name='dbName']");
+	pageObj.dbTypeSelect = pageObj.element("select[name='dbType']");
 
 	pageObj.initUrl = "<c:out value='${url}' />";
 	
@@ -96,17 +96,17 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 	for(var i=0; i<builderInfos.length; i++)
 	{
 		var builderInfo = builderInfos[i];
-		$("<option>").attr("value", builderInfo.dbName).html(builderInfo.dbDesc).appendTo(pageObj.dbNameSelect);
+		$("<option>").attr("value", builderInfo.dbType).html(builderInfo.dbDesc).appendTo(pageObj.dbTypeSelect);
 	}
 	
-	pageObj.dbNameSelect.selectmenu(
+	pageObj.dbTypeSelect.selectmenu(
 	{
 		"classes" : { "ui-selectmenu-button" : "schema-build-url-dbtype-select" },
 		change : function(event, ui)
 		{
-			var dbName = ui.item.value;
+			var dbType = ui.item.value;
 			
-			var defaultUrlInfo = $.schemaUrlBuilder.defaultValue(dbName);
+			var defaultUrlInfo = $.schemaUrlBuilder.defaultValue(dbType);
 			pageObj.setFormUrlValue(defaultUrlInfo);
 		}
 	});
@@ -127,7 +127,7 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 	
 	pageObj.buildFormUrl = function()
 	{
-		var dbName = pageObj.dbNameSelect.val();
+		var dbType = pageObj.dbTypeSelect.val();
 		
 		var value = {};
 		
@@ -138,7 +138,7 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 			value[input.attr("name")] = input.val();
 		}
 		
-		return $.schemaUrlBuilder.build(dbName, value);
+		return $.schemaUrlBuilder.build(dbType, value);
 	};
 	
 	pageObj.form.validate(
@@ -177,14 +177,14 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 		
 		if(urlInfo != null)
 		{
-			pageObj.dbNameSelect.val(urlInfo.dbName);
-			pageObj.dbNameSelect.selectmenu("refresh");
+			pageObj.dbTypeSelect.val(urlInfo.dbType);
+			pageObj.dbTypeSelect.selectmenu("refresh");
 			initUrlValue = urlInfo.value;
 		}
 	}
 	
 	if(!initUrlValue)
-		initUrlValue = $.schemaUrlBuilder.defaultValue(pageObj.dbNameSelect.val());
+		initUrlValue = $.schemaUrlBuilder.defaultValue(pageObj.dbTypeSelect.val());
 	
 	pageObj.setFormUrlValue(initUrlValue);
 })

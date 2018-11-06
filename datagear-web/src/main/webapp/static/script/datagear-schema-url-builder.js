@@ -27,11 +27,11 @@
 		
 		var builders = $.schemaUrlBuilder.builders;
 		
-		for(var dbName in builders)
+		for(var dbType in builders)
 		{
-			var builder = builders[dbName];
+			var builder = builders[dbType];
 			
-			infoArray.push({ "dbName" : dbName, "dbDesc" : (builder.dbDesc || dbName), "order" : builder.order });
+			infoArray.push({ "dbType" : dbType, "dbDesc" : (builder.dbDesc || dbType), "order" : builder.order });
 		}
 		
 		infoArray.sort(function(a, b)
@@ -50,12 +50,12 @@
 	/**
 	 * 构建JDBC连接URL。
 	 * 
-	 * @param dbName 数据库类型标识
+	 * @param dbType 数据库类型标识
 	 * @param value URL值对象
 	 */
-	schemaUrlBuilder.build = function(dbName, value)
+	schemaUrlBuilder.build = function(dbType, value)
 	{
-		var builder = $.schemaUrlBuilder.builders[dbName];
+		var builder = $.schemaUrlBuilder.builders[dbType];
 		
 		if(!builder)
 			return "";
@@ -70,7 +70,7 @@
 	
 	/**
 	 * 由JDBC连接URL解析连接信息。
-	 * 返回对象格式：{ dbName : "", value : { host : "", port : "", name : "" } }。
+	 * 返回对象格式：{ dbType : "", value : { host : "", port : "", name : "" } }。
 	 * 如果无法解析，返回null。
 	 * 
 	 * @param url JDBC连接URL
@@ -79,9 +79,9 @@
 	{
 		var builders = $.schemaUrlBuilder.builders;
 		
-		for(var dbName in builders)
+		for(var dbType in builders)
 		{
-			var builder = builders[dbName];
+			var builder = builders[dbType];
 			
 			var value = null;
 			
@@ -91,7 +91,7 @@
 				value = $.schemaUrlBuilder._resolveValue(builder.template, url);
 			
 			if(value != null)
-				return { dbName : dbName, value : value };
+				return { dbType : dbType, value : value };
 		}
 		
 		return null;
@@ -100,11 +100,11 @@
 	/**
 	 * 获取数据库的默认URL值对象。
 	 * 
-	 * @param dbName 数据库类型标识
+	 * @param dbType 数据库类型标识
 	 */
-	schemaUrlBuilder.defaultValue = function(dbName)
+	schemaUrlBuilder.defaultValue = function(dbType)
 	{
-		var builder = $.schemaUrlBuilder.builders[dbName];
+		var builder = $.schemaUrlBuilder.builders[dbType];
 		
 		if(!builder)
 			return {};
@@ -115,11 +115,11 @@
 	/**
 	 * 是否包含指定数据库类型标识的构建器。
 	 * 
-	 * @param dbName 数据库类型标识
+	 * @param dbType 数据库类型标识
 	 */
-	schemaUrlBuilder.contains = function(dbName)
+	schemaUrlBuilder.contains = function(dbType)
 	{
-		return ($.schemaUrlBuilder.builders[dbName] != undefined);
+		return ($.schemaUrlBuilder.builders[dbType] != undefined);
 	};
 	
 	/**
@@ -128,8 +128,8 @@
 	 * @param builder 构建器，可以有两种格式：
 	 * 1.
 	 * {
-	 *   //必选，数据库名称
-	 *   dbName : "...",
+	 *   //必选，数据库类型
+	 *   dbType : "...",
 	 *   
 	 *   //必选，模板
 	 *   template : "...{host}...{port}...{name}...",
@@ -146,8 +146,8 @@
 	 * 
 	 * 2.
 	 * {
-	 *   //必选，数据库名称
-	 *   dbName : "...",
+	 *   //必选，数据库类型
+	 *   dbType : "...",
 	 *   
 	 *   //必选，由{ host : "...", port : "...", name : "" }值对象构建URL的函数
 	 *   build : function(value){ ... },
@@ -180,12 +180,12 @@
 			{
 				var myBuilder = ele[j];
 				
-				if(myBuilder && myBuilder.dbName)
+				if(myBuilder && myBuilder.dbType)
 				{
 					if(myBuilder.order == undefined)
 						myBuilder.order = order;
 					
-					$.schemaUrlBuilder.builders[myBuilder.dbName] = myBuilder;
+					$.schemaUrlBuilder.builders[myBuilder.dbType] = myBuilder;
 					
 					order++;
 				}
@@ -202,8 +202,8 @@
 		
 		var removed = [];
 		
-		for(var dbName in builders)
-			removed.push(dbName);
+		for(var dbType in builders)
+			removed.push(dbType);
 		
 		for(var i=0; i< removed.length; i++)
 			delete builders[removed[i]];

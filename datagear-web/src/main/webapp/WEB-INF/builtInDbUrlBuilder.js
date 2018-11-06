@@ -1,5 +1,5 @@
 {
-	dbName : "MySQL",
+	dbType : "MySQL",
 	template : "jdbc:mysql://{host}:{port}/{name}",
 	defaultValue :
 	{
@@ -9,7 +9,7 @@
 	}
 },
 {
-	dbName : "PostgreSQL",
+	dbType : "PostgreSQL",
 	template : "jdbc:postgresql://{host}:{port}/{name}",
 	defaultValue :
 	{
@@ -19,7 +19,7 @@
 	}
 },
 {
-	dbName : "Oracle",
+	dbType : "Oracle",
 	template : "jdbc:oracle:thin:@{host}:{port}/{name}",
 	defaultValue :
 	{
@@ -29,7 +29,7 @@
 	}
 },
 {
-	dbName : "SQL Server",
+	dbType : "SQL Server",
 	template : "jdbc:sqlserver://{host}:{port};DatabaseName={name}",
 	defaultValue :
 	{
@@ -39,7 +39,7 @@
 	}
 },
 {
-	dbName : "DB2",
+	dbType : "DB2",
 	template : "jdbc:db2://{host}:{port}/{name}",
 	defaultValue :
 	{
@@ -49,7 +49,7 @@
 	}
 },
 {
-	dbName : "Sybase",
+	dbType : "Sybase",
 	template : "jdbc:sybase:Tds:{host}:{port}/{name}",
 	defaultValue :
 	{
