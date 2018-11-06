@@ -16,8 +16,8 @@ jsp_jstl.jsp
 <script type="text/javascript">
 var contextPath="<%=request.getContextPath()%>";
 </script>
-<link href="<%=request.getContextPath()%>/static/theme/<spring:theme code='theme' />/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="stylesheet" />
-<link href="<%=request.getContextPath()%>/static/theme/<spring:theme code='theme' />/jquery-ui-1.12.1/jquery-ui.theme.css" type="text/css" rel="stylesheet" />
+<link id="css_jquery_ui" href="<%=request.getContextPath()%>/static/theme/<spring:theme code='theme' />/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="stylesheet" />
+<link id="css_jquery_ui_theme" href="<%=request.getContextPath()%>/static/theme/<spring:theme code='theme' />/jquery-ui-1.12.1/jquery-ui.theme.css" type="text/css" rel="stylesheet" />
 <link href="<%=request.getContextPath()%>/static/theme/jquery.layout-1.4.0/jquery.layout.css" type="text/css" rel="stylesheet" />
 <link href="<%=request.getContextPath()%>/static/theme/jstree-3.3.4/style.css" type="text/css" rel="stylesheet" />
 <link href="<%=request.getContextPath()%>/static/theme/DataTables-1.10.15/dataTables.jqueryui.css" type="text/css" rel="stylesheet" />
@@ -25,7 +25,7 @@ var contextPath="<%=request.getContextPath()%>";
 <link href="<%=request.getContextPath()%>/static/theme/jQuery-File-Upload-9.21.0/jquery.fileupload.css" type="text/css" rel="stylesheet" />
 <link href="<%=request.getContextPath()%>/static/theme/datagear-pagination.css" type="text/css" rel="stylesheet" />
 <link href="<%=request.getContextPath()%>/static/theme/common.css" type="text/css" rel="stylesheet" />
-<link href="<%=request.getContextPath()%>/static/theme/<spring:theme code='theme' />/common.css" type="text/css" rel="stylesheet" />
+<link id="css_common" href="<%=request.getContextPath()%>/static/theme/<spring:theme code='theme' />/common.css" type="text/css" rel="stylesheet" />
 
 <script src="<c:url value="/static/script/jquery/jquery-1.12.4.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/jquery-ui-1.12.1/jquery-ui.js" />" type="text/javascript"></script>

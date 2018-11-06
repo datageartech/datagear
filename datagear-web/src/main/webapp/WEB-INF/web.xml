@@ -81,6 +81,7 @@
 		<url-pattern>/register/*</url-pattern>
 		<url-pattern>/main/*</url-pattern>
 		<url-pattern>/about/*</url-pattern>
+		<url-pattern>/changeThemeData</url-pattern>
 		<url-pattern>/user/*</url-pattern>
 		<url-pattern>/driverEntity/*</url-pattern>
 		<url-pattern>/schema/*</url-pattern>

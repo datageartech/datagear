@@ -64,4 +64,10 @@ public class MainController extends AbstractController
 
 		return "/about";
 	}
+
+	@RequestMapping(value = "/changeThemeData", produces = CONTENT_TYPE_JSON)
+	public String changeThemeData(HttpServletRequest request)
+	{
+		return "/change_theme_data";
+	}
 }

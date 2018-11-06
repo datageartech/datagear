@@ -343,6 +343,16 @@
 				{
 					pageObj.open(contextPath+"/user/personalSet");
 				}
+				else if($item.hasClass("theme-item"))
+				{
+					var theme = $item.attr("theme");
+					
+					$.getJSON(contextPath+"/changeThemeData?theme="+theme, function(data)
+					{
+						for(var i=0; i<data.length; i++)
+							$(data[i].selector).attr(data[i].attr, data[i].value);
+					});
+				}
 				else if($item.hasClass("about"))
 				{
 					pageObj.open(contextPath+"/about", { width : "50%" });
@@ -1098,9 +1108,9 @@
 					<%}%>
 					<li class=""><a href="javascript:void(0);"><fmt:message key='main.changeTheme' /></a>
 						<ul>
-							<li class=""><a href="<%=request.getContextPath()%>/?theme=lightness"><fmt:message key='main.changeTheme.lightness' /><span class="ui-widget ui-widget-content theme-sample theme-sample-lightness"></span></a></li>
-							<li class=""><a href="<%=request.getContextPath()%>/?theme=dark"><fmt:message key='main.changeTheme.dark' /><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span></a></li>
-							<li class=""><a href="<%=request.getContextPath()%>/?theme=green"><fmt:message key='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
+							<li class="theme-item" theme="lightness"><a href="javascript:void(0);"><fmt:message key='main.changeTheme.lightness' /><span class="ui-widget ui-widget-content theme-sample theme-sample-lightness"></span></a></li>
+							<li class="theme-item" theme="dark"><a href="javascript:void(0);"><fmt:message key='main.changeTheme.dark' /><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span></a></li>
+							<li class="theme-item" theme="green"><a href="javascript:void(0);"><fmt:message key='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
 						</ul>
 					</li>
 					<li class="about">
