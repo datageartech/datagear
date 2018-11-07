@@ -41,6 +41,7 @@ if(loginUser == null)
 	<div class="main-page-head">
 		<%@ include file="include/html_logo.jsp" %>
 		<div class="toolbar">
+			<a class="link" href="<c:url value="/register" />"><fmt:message key='register.register' /></a>
 			<a class="link" href="<c:url value="/" />"><fmt:message key='backToMainPage' /></a>
 		</div>
 	</div>

@@ -11,12 +11,11 @@
 		http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 	
-	<http pattern="/static/*" security="none" />
-	<http pattern="/login" security="none" />
-	<http pattern="/register/*" security="none" />
-	<http pattern="/resetPassword/*" security="none" />
-	<http pattern="/resetPasswordRequestHistory/*" security="none" />
-	<http pattern="/notification/*" security="none" />
+	<beans:bean id="sercurityDisableAnonymous" class="java.lang.Boolean">
+		<beans:constructor-arg value="${disableAnonymous}" />
+	</beans:bean>
+	
+	<http pattern="/static/**" security="none" />
 	
 	<http>
 		
@@ -42,15 +41,22 @@
 		<intercept-url pattern="/user/query" access="ROLE_ADMIN" />
 		
 		<!-- 全局设置 -->
-		<intercept-url pattern="/globalSetting/*" access="ROLE_ADMIN" />
+		<intercept-url pattern="/globalSetting/**" access="ROLE_ADMIN" />
 		
 		<!-- 设置数据库URL构建器脚本 -->
 		<intercept-url pattern="/schemaUrlBuilder/editScriptCode" access="ROLE_ADMIN" />
 		<intercept-url pattern="/schemaUrlBuilder/saveScriptCode" access="ROLE_ADMIN" />
 		<intercept-url pattern="/schemaUrlBuilder/previewScriptCode" access="ROLE_ADMIN" />
 		
-		<intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER, ROLE_ADMIN" />
-	
+		<intercept-url pattern="/login/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="/register/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="/resetPassword/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="/resetPasswordRequestHistory/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
+		<intercept-url pattern="/notification/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
+		<intercept-url pattern="/changeThemeData/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
+		
+		<intercept-url pattern="/**" access="#{sercurityDisableAnonymous ? 'ROLE_USER, ROLE_ADMIN' : 'IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER, ROLE_ADMIN'}" />
+		
 		<!-- 表单登录页登录 -->
 		<form-login login-page="/login" login-processing-url="/login/doLogin"
 			username-parameter="name" password-parameter="password"
