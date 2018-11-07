@@ -8,6 +8,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -21,9 +24,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/login")
 public class LoginController extends AbstractController
 {
+	private boolean disableRegister = false;
+
 	public LoginController()
 	{
 		super();
+	}
+
+	public boolean isDisableRegister()
+	{
+		return disableRegister;
+	}
+
+	@Value("${disableRegister}")
+	public void setDisableRegister(boolean disableRegister)
+	{
+		this.disableRegister = disableRegister;
 	}
 
 	/**
@@ -32,8 +48,10 @@ public class LoginController extends AbstractController
 	 * @return
 	 */
 	@RequestMapping
-	public String login()
+	public String login(HttpServletRequest request)
 	{
+		request.setAttribute("disableRegister", this.disableRegister);
+
 		return "/login";
 	}
 

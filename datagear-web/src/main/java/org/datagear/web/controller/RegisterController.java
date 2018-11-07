@@ -14,7 +14,9 @@ import org.datagear.management.service.UserService;
 import org.datagear.persistence.support.UUID;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +40,8 @@ public class RegisterController extends AbstractController
 	@Autowired
 	private UserService userService;
 
+	private boolean disableRegister = false;
+
 	public RegisterController()
 	{
 		super();
@@ -60,9 +64,27 @@ public class RegisterController extends AbstractController
 		this.userService = userService;
 	}
 
+	public boolean isDisableRegister()
+	{
+		return disableRegister;
+	}
+
+	@Value("${disableRegister}")
+	public void setDisableRegister(boolean disableRegister)
+	{
+		this.disableRegister = disableRegister;
+	}
+
 	@RequestMapping
 	public String register(HttpServletRequest request, org.springframework.ui.Model model)
 	{
+		if (this.disableRegister)
+		{
+			WebUtils.setOperationMessage(request,
+					buildOperationMessageFail(request, buildMessageCode("registerDisabled")));
+			return ERROR_PAGE_URL;
+		}
+
 		User user = new User();
 
 		model.addAttribute("user", user);
@@ -75,6 +97,10 @@ public class RegisterController extends AbstractController
 	public ResponseEntity<OperationMessage> doRegister(HttpServletRequest request, HttpServletResponse response,
 			User user, @RequestParam("confirmPassword") String confirmPassword)
 	{
+		if (this.disableRegister)
+			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					buildMessageCode("registerDisabled"));
+
 		if (isBlank(user.getName()) || isBlank(user.getPassword()) || isBlank(confirmPassword)
 				|| !confirmPassword.equals(user.getPassword()))
 			throw new IllegalInputException();

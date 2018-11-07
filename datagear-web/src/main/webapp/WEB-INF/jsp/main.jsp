@@ -1126,7 +1126,9 @@
 		<a class="link" href="<c:url value="/logout" />"><fmt:message key='main.logout' /></a>
 		<%}else{%>
 		<a class="link" href="<c:url value="/login" />"><fmt:message key='main.login' /></a>
+		<c:if test='${!disableRegister}'>
 		<a class="link" href="<c:url value="/register" />"><fmt:message key='main.register' /></a>
+		</c:if>
 		<%}%>
 	</div>
 </div>

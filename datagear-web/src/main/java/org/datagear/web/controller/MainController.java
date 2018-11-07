@@ -22,6 +22,8 @@ public class MainController extends AbstractController
 {
 	private String version;
 
+	private boolean disableRegister = false;
+
 	public MainController()
 	{
 		super();
@@ -44,6 +46,17 @@ public class MainController extends AbstractController
 		this.version = version;
 	}
 
+	public boolean isDisableRegister()
+	{
+		return disableRegister;
+	}
+
+	@Value("${disableRegister}")
+	public void setDisableRegister(boolean disableRegister)
+	{
+		this.disableRegister = disableRegister;
+	}
+
 	/**
 	 * 打开主页面。
 	 * 
@@ -54,6 +67,8 @@ public class MainController extends AbstractController
 	@RequestMapping("/main")
 	public String main(HttpServletRequest request, Model model)
 	{
+		request.setAttribute("disableRegister", this.disableRegister);
+
 		return "/main";
 	}
 
