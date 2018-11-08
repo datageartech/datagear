@@ -30,6 +30,11 @@ import org.datagear.model.Property;
  * “<i>element-index</i>”是元素索引数值。
  * </p>
  * <p>
+ * 注意：如果属性路径字符串的<i>property-name</i>中包含'.'、'['、']'、'<'、'>'字符，
+ * 则需要先将它们转义为"\."、"\["、"\]"、"\<"、"\>"字符串（参考{@linkplain #escapePropertyName(String)}），
+ * 才能保证{@linkplain #valueOf(String)}解析正确。
+ * </p>
+ * <p>
  * 示例：
  * </p>
  * <p>
@@ -51,6 +56,8 @@ import org.datagear.model.Property;
 public class PropertyPath implements Serializable
 {
 	private static final long serialVersionUID = 1L;
+
+	public static final char ESCAPOR = '\\';
 
 	public static final char PROPERTY = '.';
 
@@ -504,75 +511,325 @@ public class PropertyPath implements Serializable
 	}
 
 	/**
-	 * 由字符串构建<i>属性值定位符</i>。
+	 * 由字符串构建{@linkplain PropertyPath}。
 	 * 
-	 * @param pvl
+	 * @param propertyPath
 	 * @return
 	 */
-	public static PropertyPath valueOf(String pvl)
+	public static PropertyPath valueOf(String propertyPath)
 	{
-		Segment[] segments = parse(pvl);
+		Segment[] segments = parse(propertyPath);
 		return new PropertyPath(segments);
 	}
 
 	/**
-	 * 解析字符串。
+	 * 转义属性名使其符合{@linkplain PropertyPath}规范。
 	 * 
-	 * @param pp
+	 * @param propertyName
 	 * @return
 	 */
-	protected static Segment[] parse(String propertyPathStr)
+	public static String escapePropertyName(String propertyName)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		char[] cs = propertyName.toCharArray();
+
+		for (int i = 0; i < cs.length; i++)
+		{
+			char c = cs[i];
+
+			if (isKeyword(c))
+			{
+				sb.append(ESCAPOR);
+				sb.append(c);
+			}
+			else
+				sb.append(c);
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * 反转义由{@linkplain #escapePropertyName(String)}转义的属性名。
+	 * 
+	 * @param propertyName
+	 * @return
+	 */
+	public static String unescapePropertyName(String propertyName)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		char[] cs = propertyName.toCharArray();
+
+		for (int i = 0, length = cs.length; i < cs.length; i++)
+		{
+			char c = cs[i];
+
+			if (c == ESCAPOR)
+			{
+				char cin = ((i + 1) < length ? cs[i + 1] : 0);
+
+				if (isKeyword(cin))
+				{
+					i = i + 1;
+					sb.append(cin);
+				}
+				else
+					sb.append(c);
+			}
+			else
+				sb.append(c);
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * 转义属性名使其符合{@linkplain PropertyPath}规范，并可直接作为字符串的字面值。
+	 * 
+	 * @param propertyName
+	 */
+	public static String escapePropertyNameLiteral(String propertyName)
+	{
+		String epn = escapePropertyName(propertyName);
+
+		StringBuilder sb = new StringBuilder();
+
+		char[] cs = epn.toCharArray();
+
+		for (int i = 0; i < cs.length; i++)
+		{
+			char c = cs[i];
+
+			if (c == '\\')
+			{
+				sb.append("\\\\");
+			}
+			else if (c == '\"' || c == '\'')
+			{
+				sb.append("\\");
+				sb.append(c);
+			}
+			else
+				sb.append(c);
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * 反转义由{@linkplain #unescapePropertyNameLiteral(String)}转义的属性名。
+	 * 
+	 * @param propertyName
+	 */
+	public static String unescapePropertyNameLiteral(String propertyName)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		char[] cs = propertyName.toCharArray();
+
+		for (int i = 0; i < cs.length; i++)
+		{
+			char c = cs[i];
+			char cn = ((i + 1) < cs.length ? cs[i + 1] : 0);
+
+			if (c == '\\' && cn == '\\')
+			{
+				sb.append('\\');
+
+				i = i + 1;
+			}
+			else if (c == '\\' && (cn == '\"' || cn == '\''))
+			{
+				sb.append(cn);
+
+				i = i + 1;
+			}
+			else
+				sb.append(c);
+		}
+
+		return unescapePropertyName(sb.toString());
+	}
+
+	/**
+	 * 解析属性路径字符串对应的{@linkplain Segment}数组。
+	 * 
+	 * @param propertyPath
+	 * @return
+	 * @throws IllegalPropertyPathException
+	 */
+	protected static Segment[] parse(String propertyPath) throws IllegalPropertyPathException
 	{
 		List<Segment> segmentList = new ArrayList<Segment>();
 
-		char[] cs = propertyPathStr.toCharArray();
+		char[] cs = propertyPath.toCharArray();
+		StringBuilder cache = new StringBuilder();
 
-		StringBuilder segmentStrCache = new StringBuilder();
-		for (int i = 0, length = cs.length;; i++)
+		for (int i = 0, length = cs.length; i < length; i++)
 		{
-			if (i >= length)
-			{
-				parseSegmentAndClear(propertyPathStr, segmentStrCache, i, segmentList);
-				break;
-			}
-
 			char c = cs[i];
 
-			if (isBlankChar(c))
-				continue;
-
-			if (c == PROPERTY)
+			// 元素
+			if (c == ELEMENT_L)
 			{
-				parseSegmentAndClear(propertyPathStr, segmentStrCache, i, segmentList);
-			}
-			// '['
-			else if (c == ELEMENT_L)
-			{
-				parseSegmentAndClear(propertyPathStr, segmentStrCache, i, segmentList);
+				Segment preSegment = (segmentList.isEmpty() ? null : segmentList.get(segmentList.size() - 1));
 
-				segmentStrCache.append(c);
+				if (preSegment != null && preSegment.isElement())
+					throw new IllegalPropertyPathException(
+							"[" + propertyPath + "] is illegal, sequential element is not allowed");
 
-				for (i = i + 1; i < length; i++)
+				int j = i + 1;
+				boolean hasCloseChar = false;
+
+				for (; j < length; j++)
 				{
-					char cj = cs[i];
+					char cj = cs[j];
 
-					if (isBlankChar(cj))
-						continue;
-
-					segmentStrCache.append(cj);
-
-					if ((c == ELEMENT_L && cj == ELEMENT_R))
+					if (cj == ESCAPOR)
 					{
+						char cjn = ((j + 1) < length ? cs[j + 1] : 0);
+
+						if (isKeyword(cjn))
+						{
+							j = j + 1;
+							appendIgnoreBlank(cache, cjn);
+						}
+						else
+							appendIgnoreBlank(cache, cj);
+					}
+					else if (cj == ELEMENT_R)
+					{
+						hasCloseChar = true;
 						break;
 					}
+					else
+						appendIgnoreBlank(cache, cj);
 				}
 
-				parseSegmentAndClear(propertyPathStr, segmentStrCache, i, segmentList);
+				if (!hasCloseChar)
+					throw new IllegalPropertyPathException(
+							"[" + propertyPath + "] is illegal, '" + ELEMENT_R + "' required at position [" + j + "]");
+
+				String indexStr = toStringWithClear(cache);
+				int index;
+
+				try
+				{
+					index = Integer.parseInt(indexStr);
+				}
+				catch (NumberFormatException e)
+				{
+					throw new IllegalPropertyPathException("[" + propertyPath + "] is illegal, [" + indexStr
+							+ "] of position [" + (i + 1) + "] is not integer");
+				}
+
+				segmentList.add(new Segment(index));
+
+				i = j;
+			}
+			// 属性具体模型索引
+			else if (c == CONCRETE_L)
+			{
+				Segment property = (segmentList.isEmpty() ? null : segmentList.get(segmentList.size() - 1));
+
+				if (property == null || !property.isProperty())
+					throw new IllegalPropertyPathException(
+							"[" + propertyPath + "] is illegal, property name required before position [" + i + "]");
+
+				int j = i + 1;
+				boolean hasCloseChar = false;
+
+				for (; j < length; j++)
+				{
+					char cj = cs[j];
+
+					if (cj == ESCAPOR)
+					{
+						char cjn = ((j + 1) < length ? cs[j + 1] : 0);
+
+						if (isKeyword(cjn))
+						{
+							j = j + 1;
+							appendIgnoreBlank(cache, cjn);
+						}
+						else
+							appendIgnoreBlank(cache, cj);
+					}
+					else if (cj == CONCRETE_R)
+					{
+						hasCloseChar = true;
+						break;
+					}
+					else
+						appendIgnoreBlank(cache, cj);
+				}
+
+				if (!hasCloseChar)
+					throw new IllegalPropertyPathException(
+							"[" + propertyPath + "] is illegal, '" + CONCRETE_R + "' required at position [" + j + "]");
+
+				String indexStr = toStringWithClear(cache);
+				int index;
+
+				try
+				{
+					index = Integer.parseInt(indexStr);
+				}
+				catch (NumberFormatException e)
+				{
+					throw new IllegalPropertyPathException("[" + propertyPath + "] is illegal, [" + indexStr
+							+ "] of position [" + (i + 1) + "] is not integer");
+				}
+
+				property.setPropertyModelIndex(index);
+
+				i = j;
+			}
+			// 属性名
+			else if (c == PROPERTY || i == 0)
+			{
+				int j = (c == PROPERTY ? i + 1 : i);
+
+				for (; j < length; j++)
+				{
+					char cj = cs[j];
+
+					if (cj == ESCAPOR)
+					{
+						char cjn = ((j + 1) < length ? cs[j + 1] : 0);
+
+						if (isKeyword(cjn))
+						{
+							j = j + 1;
+							appendIgnoreBlank(cache, cjn);
+						}
+						else
+							appendIgnoreBlank(cache, cj);
+					}
+					else if (cj == PROPERTY || cj == ELEMENT_L || cj == CONCRETE_L)
+					{
+						j = j - 1;
+						break;
+					}
+					else
+						appendIgnoreBlank(cache, cj);
+				}
+
+				String propertyName = toStringWithClear(cache);
+
+				if (propertyName.isEmpty())
+					throw new IllegalPropertyPathException(
+							"[" + propertyPath + "] is illegal, property name character must be present at position ["
+									+ (c == PROPERTY ? i + 1 : i) + "]");
+
+				segmentList.add(new Segment(propertyName));
+
+				i = j;
 			}
 			else
-			{
-				segmentStrCache.append(c);
-			}
+				throw new IllegalPropertyPathException("[" + propertyPath + "] is illegal");
 		}
 
 		Segment[] segments = new Segment[segmentList.size()];
@@ -582,110 +839,45 @@ public class PropertyPath implements Serializable
 	}
 
 	/**
-	 * 解析。
+	 * 判断字符是否是关键字。
 	 * 
-	 * @param propertyPathStr
-	 * @param segmentStrCache
-	 * @param segmentList
-	 * @throws IllegalPropertyPathException
+	 * @param c
+	 * @return
 	 */
-	protected static void parseSegmentAndClear(String propertyPathStr, StringBuilder segmentStrCache,
-			int segmentStrIndex, List<Segment> segmentList) throws IllegalPropertyPathException
+	protected static boolean isKeyword(char c)
 	{
-		int cacheLen = segmentStrCache.length();
-		if (cacheLen > 0)
-		{
-			Segment segment = parseSegment(propertyPathStr, segmentStrCache.toString(), segmentStrIndex);
-
-			// 不能有连续的元素属性路径
-			if (segment.isElement())
-			{
-				Segment pre = (segmentList.isEmpty() ? null : segmentList.get(segmentList.size() - 1));
-
-				if (pre != null && pre.isElement())
-					throw new IllegalPropertyPathException(
-							"[" + propertyPathStr + "] is illegal at [" + segmentStrIndex + "] index");
-			}
-
-			segmentList.add(segment);
-			segmentStrCache.delete(0, cacheLen);
-		}
+		return c == PROPERTY || c == ELEMENT_L || c == ELEMENT_R || c == CONCRETE_L || c == CONCRETE_R;
 	}
 
 	/**
-	 * 解析{@linkplain Segment}。
+	 * 添加字符并忽略空格符。
 	 * 
-	 * @param propertyPathStr
-	 * @param segmentStr
-	 * @param segmentStrIndex
+	 * @param sb
+	 * @param c
 	 * @return
 	 */
-	protected static Segment parseSegment(String propertyPathStr, String segmentStr, int segmentStrIndex)
+	protected static boolean appendIgnoreBlank(StringBuilder sb, char c)
 	{
-		int len = segmentStr.length();
-
-		char c0 = segmentStr.charAt(0);
-		char cl = segmentStr.charAt(len - 1);
-
-		String value = segmentStr;
-
-		if (c0 == ELEMENT_L && cl == ELEMENT_R)
-		{
-			if (len < 3)
-				throw new IllegalPropertyPathException(
-						"[" + propertyPathStr + "] is illegal at [" + segmentStrIndex + "] index");
-
-			value = value.substring(1, len - 1);
-
-			if (isIntegerString(value))
-				return new Segment(Integer.parseInt(value));
-			else
-				throw new IllegalPropertyPathException(
-						"[" + propertyPathStr + "] is illegal at [" + segmentStrIndex + "] index");
-		}
-		else
-		{
-			if (cl == CONCRETE_R)
-			{
-				int crtl = value.lastIndexOf(CONCRETE_L);
-
-				if (crtl < 1 || crtl > len - 3)
-					throw new IllegalPropertyPathException(
-							"[" + propertyPathStr + "] is illegal at [" + segmentStrIndex + "] index");
-
-				String strIndex = value.substring(crtl + 1, len - 1);
-
-				if (isIntegerString(strIndex))
-					return new Segment(value.substring(0, crtl), Integer.parseInt(strIndex));
-				else
-					throw new IllegalPropertyPathException(
-							"[" + propertyPathStr + "] is illegal at [" + segmentStrIndex + "] index");
-			}
-			else
-				return new Segment(value);
-		}
-	}
-
-	/**
-	 * 是否是整数字符串。
-	 * 
-	 * @param s
-	 * @return
-	 */
-	protected static boolean isIntegerString(String s)
-	{
-		if (s == null || s.isEmpty())
+		if (isBlankChar(c))
 			return false;
 
-		char[] cs = s.toCharArray();
-
-		for (char c : cs)
-		{
-			if (c < '0' || c > '9')
-				return false;
-		}
-
+		sb.append(c);
 		return true;
+	}
+
+	/**
+	 * 转换为字符串并清除。
+	 * 
+	 * @param sb
+	 * @return
+	 */
+	protected static String toStringWithClear(StringBuilder sb)
+	{
+		String str = sb.toString();
+
+		sb.delete(0, sb.length());
+
+		return str;
 	}
 
 	/**
@@ -838,14 +1030,15 @@ public class PropertyPath implements Serializable
 		public String toString()
 		{
 			if (isElement())
-				return String.valueOf(ELEMENT_L) + this.elementIndex.toString() + String.valueOf(ELEMENT_R);
+				return ELEMENT_L_STRING + this.elementIndex.toString() + ELEMENT_R_STRING;
 			else
 			{
+				String propertyName = escapePropertyName(this.propertyName);
+
 				if (hasPropertyModelIndex())
-					return this.propertyName + String.valueOf(CONCRETE_L) + this.propertyModelIndex
-							+ String.valueOf(CONCRETE_R);
+					return propertyName + CONCRETE_L_STRING + this.propertyModelIndex + CONCRETE_R_STRING;
 				else
-					return this.propertyName;
+					return propertyName;
 			}
 		}
 	}

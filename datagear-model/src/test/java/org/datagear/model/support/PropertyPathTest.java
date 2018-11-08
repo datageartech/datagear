@@ -4,7 +4,6 @@
 
 package org.datagear.model.support;
 
-import org.datagear.model.support.PropertyPath;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -75,6 +74,69 @@ public class PropertyPathTest
 
 			Assert.assertEquals(pp, propertyPath.toString());
 		}
+
+		{
+			String pp = "prop\\.erty.prop\\[erty.prop\\]erty.prop\\<erty.prop\\>erty.prop\\erty";
+			PropertyPath propertyPath = PropertyPath.valueOf(pp);
+
+			Assert.assertEquals(6, propertyPath.length());
+
+			Assert.assertEquals("prop.erty", propertyPath.getPropertyName(0));
+
+			Assert.assertEquals("prop[erty", propertyPath.getPropertyName(1));
+
+			Assert.assertEquals("prop]erty", propertyPath.getPropertyName(2));
+
+			Assert.assertEquals("prop<erty", propertyPath.getPropertyName(3));
+
+			Assert.assertEquals("prop>erty", propertyPath.getPropertyName(4));
+
+			Assert.assertEquals("prop\\erty", propertyPath.getPropertyName(5));
+		}
 	}
 
+	@Test
+	public void escapePropertyNameTest()
+	{
+		String pn = "p.r[o]p<e>rt\\y";
+		String epn = PropertyPath.escapePropertyName(pn);
+
+		Assert.assertEquals("p\\.r\\[o\\]p\\<e\\>rt\\y", epn);
+	}
+
+	@Test
+	public void unescapePropertyNameTest()
+	{
+		String epn = "p\\.r\\[o\\]p\\<e\\>rt\\y";
+		String pn = PropertyPath.unescapePropertyName(epn);
+
+		Assert.assertEquals("p.r[o]p<e>rt\\y", pn);
+	}
+
+	@Test
+	public void escapePropertyNameLiteralTest()
+	{
+		String pn = "p.r[o]p<e>r\'\"t\\y";
+		String epn = PropertyPath.escapePropertyNameLiteral(pn);
+
+		Assert.assertEquals("p\\\\.r\\\\[o\\\\]p\\\\<e\\\\>r\\\'\\\"t\\\\y", epn);
+	}
+
+	@Test
+	public void unescapePropertyNameLiteralTest()
+	{
+		{
+			String epn = "p\\\\.r\\\\[o\\\\]p\\\\<e\\\\>r\\\'\\\"t\\\\y";
+			String pn = PropertyPath.unescapePropertyNameLiteral(epn);
+
+			Assert.assertEquals("p.r[o]p<e>r\'\"t\\y", pn);
+		}
+
+		{
+			String epn = "p\\.r\\[o\\]p\\<e\\>r\'\"t\\y";
+			String pn = PropertyPath.unescapePropertyNameLiteral(epn);
+
+			Assert.assertEquals("p.r[o]p<e>r\'\"t\\y", pn);
+		}
+	}
 }
