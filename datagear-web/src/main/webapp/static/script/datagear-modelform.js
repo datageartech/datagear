@@ -449,7 +449,12 @@
 			{
 				var fileDownloadButton = $("<button class='download-button' />").attr("__propName", propName)
 					.html(options.labels.downloadFile)
-					.appendTo(valuediv).button();
+					.appendTo(valuediv);
+				
+				if(!propValue)
+					fileDownloadButton.attr("disabled", true);
+				
+				fileDownloadButton.button();
 				
 				fileDownloadButton.click(function()
 				{
@@ -460,8 +465,7 @@
 					
 					var myConcreteModel = myproperty.model;//TODO 处理抽象属性
 		    		
-	    			if(propValue)
-	    				_this.options.downloadSinglePropertyValueFile.call(_this.element, myproperty, myConcreteModel, propValue);
+	    			_this.options.downloadSinglePropertyValueFile.call(_this.element, myproperty, myConcreteModel, propValue);
 				});
 			}
 			else
