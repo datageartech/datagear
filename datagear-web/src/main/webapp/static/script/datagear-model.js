@@ -11,6 +11,315 @@
 (function($, undefined)
 {
 	var $model = ($.model || ($.model = {}));
+	var $propertyPath = ($.propertyPath || ($.propertyPath = {}));
+
+	/**
+	 * org.datagear.model.support.PropertyPath工具函数。
+	 */
+	$.extend($propertyPath,
+	{
+		ESCAPOR : "\\",
+		
+		PROPERTY : ".",
+		
+		CONCRETE_L : "<",
+		
+		CONCRETE_R : ">",
+		
+		ELEMENT_L : "[",
+		
+		ELEMENT_R : "]",
+		
+		/**
+		 * 将属性路径字符串转换为属性路径数组。
+		 * 参考org.datagear.model.support.PropertyPath.parse(String)。
+		 */
+		arrayValueOf : function(propertyPath)
+		{
+			var segmentList = [];
+			
+			var cs = propertyPath;
+			var cache = "";
+			
+			for(var i=0, length = cs.length; i< length; i++)
+			{
+				var c = cs.charAt(i);
+				
+				if(c == this.ELEMENT_L)
+				{
+					var preSegment = (segmentList.length == 0 ? null : segmentList[segmentList.length - 1]);
+					
+					if (preSegment != null && preSegment.elementIndex != undefined)
+						throw new Error("[" + propertyPath + "] is illegal, sequential element is not allowed");
+					
+					var j = i + 1;
+					var hasCloseChar = false;
+
+					for (; j < length; j++)
+					{
+						var cj = cs.charAt(j);
+
+						if (cj == this.ESCAPOR)
+						{
+							var cjn = ((j + 1) < length ? cs.charAt(j+1) : 0);
+
+							if (this.isKeyword(cjn))
+							{
+								j = j + 1;
+								cache = this.appendIgnoreBlank(cache, cjn);
+							}
+							else
+								cache = this.appendIgnoreBlank(cache, cj);
+						}
+						else if (cj == this.ELEMENT_R)
+						{
+							hasCloseChar = true;
+							break;
+						}
+						else
+							cache = this.appendIgnoreBlank(cache, cj);
+					}
+
+					if (!hasCloseChar)
+						throw new Error("[" + propertyPath + "] is illegal, '" + this.ELEMENT_R + "' required at position [" + j + "]");
+
+					var indexStr = cache; cache="";
+					var index;
+
+					try
+					{
+						index = parseInt(indexStr);
+					}
+					catch (e)
+					{
+						throw new Error("[" + propertyPath + "] is illegal, [" + indexStr + "] of position [" + (i + 1) + "] is not integer");
+					}
+
+					segmentList.push({ elementIndex : index });
+
+					i = j;
+				}
+				// 属性具体模型索引
+				else if (c == this.CONCRETE_L)
+				{
+					var property = (segmentList.length == 0 ? null : segmentList[segmentList.length - 1]);
+					
+					if (property == null || property.propertyName == undefined)
+						throw new Error("[" + propertyPath + "] is illegal, property name required before position [" + i + "]");
+
+					var j = i + 1;
+					var hasCloseChar = false;
+
+					for (; j < length; j++)
+					{
+						var cj = cs.charAt(j);
+
+						if (cj == this.ESCAPOR)
+						{
+							var cjn = ((j + 1) < length ? cs.charAt(j+1) : 0);
+
+							if (this.isKeyword(cjn))
+							{
+								j = j + 1;
+								cache = this.appendIgnoreBlank(cache, cj);
+							}
+							else
+								cache = this.appendIgnoreBlank(cache, cj);
+						}
+						else if (cj == this.CONCRETE_R)
+						{
+							hasCloseChar = true;
+							break;
+						}
+						else
+							cache = this.appendIgnoreBlank(cache, cj);
+					}
+
+					if (!hasCloseChar)
+						throw new Error("[" + propertyPath + "] is illegal, '" + this.CONCRETE_R + "' required at position [" + j + "]");
+
+					var indexStr = cache; cache="";
+					var index;
+
+					try
+					{
+						index = parseInt(indexStr);
+					}
+					catch (e)
+					{
+						throw new Error("[" + propertyPath + "] is illegal, [" + indexStr + "] of position [" + (i + 1) + "] is not integer");
+					}
+
+					property.propertyModelIndex = index;
+
+					i = j;
+				}
+				// 属性名
+				else if (c == this.PROPERTY || i == 0)
+				{
+					var j = (c == this.PROPERTY ? i + 1 : i);
+
+					for (; j < length; j++)
+					{
+						var cj = cs.charAt(j);
+
+						if (cj == this.ESCAPOR)
+						{
+							var cjn = ((j + 1) < length ? cs.charAt(j+1) : 0);
+
+							if (this.isKeyword(cjn))
+							{
+								j = j + 1;
+								cache = this.appendIgnoreBlank(cache, cjn);
+							}
+							else
+								cache = this.appendIgnoreBlank(cache, cj);
+						}
+						else if (cj == this.PROPERTY || cj == this.ELEMENT_L || cj == this.CONCRETE_L)
+						{
+							j = j - 1;
+							break;
+						}
+						else
+							cache = this.appendIgnoreBlank(cache, cj);
+					}
+
+					var propertyName = cache; cache="";
+
+					if (propertyName == "")
+						throw new Error(
+								"[" + propertyPath + "] is illegal, property name character must be present at position ["
+										+ (c == PROPERTY ? i + 1 : i) + "]");
+
+					segmentList.push({ "propertyName" : propertyName});
+					
+					i = j;
+				}
+				else
+					throw new Error("[" + propertyPath + "] is illegal");
+			}
+			
+			return array;
+		},
+
+		/**
+		 * 在属性路径后面连接属性名称。
+		 * 
+		 * @param propertyPath 可选，属性路径
+		 * @param propertyName 必选，属性名
+		 */
+		concatPropertyName : function(propertyPath, propertyName)
+		{
+			if(propertyName == undefined)
+			{
+				propertyName = propertyPath;
+				propertyPath = undefined;
+			}
+			
+			propertyName = this.escapePropertyName(propertyName);
+			
+			if(propertyPath && propertyPath != "")
+				return propertyPath + this.PROPERTY + propertyName;
+			else
+				return propertyName;
+		},
+		
+		/**
+		 * 在属性路径后面连接元素索引。
+		 * 
+		 * @param propertyPath 可选，属性路径
+		 * @param elementIndex 必选，元素索引
+		 */
+		concatElementIndex : function(propertyPath, elementIndex)
+		{
+			if(elementIndex == undefined)
+			{
+				elementIndex = propertyPath;
+				propertyPath = undefined;
+			}
+			
+			if(!propertyPath)
+				propertyPath = "";
+			
+			return propertyPath + this.ELEMENT_L + elementIndex + this.ELEMENT_R;
+		},
+		
+		/**
+		 * 转义属性名使其符合PropertyPath规范。
+		 * 参考org.datagear.model.support.PropertyPath.escapePropertyName(String)。
+		 * 
+		 * @param propertyName
+		 */
+		escapePropertyName : function(propertyName)
+		{
+			var epn = "";
+			
+			for(var i=0; i<propertyName.length; i++)
+			{
+				var c = propertyName.charAt(i);
+				
+				if(this.isKeyword(c))
+					epn += ESCAPOR + c;
+				else
+					epn += c;
+			}
+			
+			return epn;
+		},
+		
+		/**
+		 * 反转义由escapePropertyName()转义的属性名。
+		 * 参考org.datagear.model.support.PropertyPath.unescapePropertyName(String)。
+		 */
+		unescapePropertyName : function(propertyName)
+		{
+			var pn = "";
+			
+			for(var i=0; i<propertyName.length; i++)
+			{
+				var c = propertyName.charAt(i);
+				
+				if(c == this.ESCAPOR)
+				{
+					var cin = ((i + 1) < propertyName.length ? propertyName.charAt(i + 1) : 0);
+					
+					if(this.isKeyword(cin))
+					{
+						i += 1;
+						pn += cin;
+					}
+					else
+						pn += c;
+				}
+				else
+					pn += c;
+			}
+			
+			return epn;
+		},
+		
+		isKeyword : function(c)
+		{
+			return (c == this.PROPERTY
+					|| c == this.CONCRETE_L
+					|| c == this.CONCRETE_R
+					|| c == this.ELEMENT_L
+					|| c == this.ELEMENT_R);
+		},
+		
+		appendIgnoreBlank : function(cache, c)
+		{
+			if (this.isBlankChar(c))
+				return cache;
+			
+			return cache += c;
+		},
+		
+		isBlankChar : function(c)
+		{
+			return c == ' ' || c == '\t' || c == '\r' || c == '\n';
+		}
+	});
 	
 	$.extend($model,
 	{
