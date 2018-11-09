@@ -30,7 +30,7 @@ import org.datagear.model.Property;
  * “<i>element-index</i>”是元素索引数值。
  * </p>
  * <p>
- * 注意：如果属性路径字符串的<i>property-name</i>中包含'.'、'['、']'、'<'、'>'字符，
+ * 注意：如果属性路径字符串的<i>property-name</i>中包含'.'、'['、']'、'<'、'>字符，
  * 则需要先将它们转义为"\."、"\["、"\]"、"\<"、"\>"字符串（参考{@linkplain #escapePropertyName(String)}），
  * 才能保证{@linkplain #valueOf(String)}解析正确。
  * </p>
@@ -586,71 +586,60 @@ public class PropertyPath implements Serializable
 	}
 
 	/**
-	 * 转义属性名使其符合{@linkplain PropertyPath}规范，并可直接作为字符串的字面值。
+	 * 在属性路径后面连接属性名称。
 	 * 
+	 * @param propertyPath
+	 *            属性路径，允许为{@code null}
 	 * @param propertyName
+	 *            要连接的属性名
+	 * @return
 	 */
-	public static String escapePropertyNameLiteral(String propertyName)
+	public static String concatPropertyName(String propertyPath, String propertyName)
 	{
-		String epn = escapePropertyName(propertyName);
+		propertyName = escapePropertyName(propertyName);
 
-		StringBuilder sb = new StringBuilder();
-
-		char[] cs = epn.toCharArray();
-
-		for (int i = 0; i < cs.length; i++)
-		{
-			char c = cs[i];
-
-			if (c == '\\')
-			{
-				sb.append("\\\\");
-			}
-			else if (c == '\"' || c == '\'')
-			{
-				sb.append("\\");
-				sb.append(c);
-			}
-			else
-				sb.append(c);
-		}
-
-		return sb.toString();
+		if (propertyPath == null || propertyPath.isEmpty())
+			return propertyName;
+		else
+			return propertyPath + PROPERTY + propertyName;
 	}
 
 	/**
-	 * 反转义由{@linkplain #unescapePropertyNameLiteral(String)}转义的属性名。
+	 * 在属性路径后面连接属性名称。
 	 * 
+	 * @param propertyPath
+	 *            属性路径，允许为{@code null}
 	 * @param propertyName
+	 *            要连接的属性名
+	 * @param propertyConcreteIndex
+	 *            要连接的属性具体模型索引
+	 * @return
 	 */
-	public static String unescapePropertyNameLiteral(String propertyName)
+	public static String concatPropertyName(String propertyPath, String propertyName, int propertyConcreteIndex)
 	{
-		StringBuilder sb = new StringBuilder();
+		propertyName = escapePropertyName(propertyName);
 
-		char[] cs = propertyName.toCharArray();
+		if (propertyPath == null || propertyPath.isEmpty())
+			return propertyName + CONCRETE_L + propertyConcreteIndex + CONCRETE_R;
+		else
+			return propertyPath + PROPERTY + propertyName + CONCRETE_L + propertyConcreteIndex + CONCRETE_R;
+	}
 
-		for (int i = 0; i < cs.length; i++)
-		{
-			char c = cs[i];
-			char cn = ((i + 1) < cs.length ? cs[i + 1] : 0);
-
-			if (c == '\\' && cn == '\\')
-			{
-				sb.append('\\');
-
-				i = i + 1;
-			}
-			else if (c == '\\' && (cn == '\"' || cn == '\''))
-			{
-				sb.append(cn);
-
-				i = i + 1;
-			}
-			else
-				sb.append(c);
-		}
-
-		return unescapePropertyName(sb.toString());
+	/**
+	 * 在属性路径后面连接元素索引。
+	 * 
+	 * @param propertyPath
+	 *            属性路径，允许为{@code null}
+	 * @param elementIndex
+	 *            要连接的元素索引
+	 * @return
+	 */
+	public static String concatElementIndex(String propertyPath, int elementIndex)
+	{
+		if (propertyPath == null || propertyPath.isEmpty())
+			return ELEMENT_L_STRING + elementIndex + ELEMENT_R;
+		else
+			return propertyPath + ELEMENT_L + elementIndex + ELEMENT_R;
 	}
 
 	/**
@@ -1030,7 +1019,7 @@ public class PropertyPath implements Serializable
 		public String toString()
 		{
 			if (isElement())
-				return ELEMENT_L_STRING + this.elementIndex.toString() + ELEMENT_R_STRING;
+				return ELEMENT_L_STRING + this.elementIndex + ELEMENT_R_STRING;
 			else
 			{
 				String propertyName = escapePropertyName(this.propertyName);

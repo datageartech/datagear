@@ -107,36 +107,11 @@ public class PropertyPathTest
 	@Test
 	public void unescapePropertyNameTest()
 	{
-		String epn = "p\\.r\\[o\\]p\\<e\\>rt\\y";
-		String pn = PropertyPath.unescapePropertyName(epn);
-
-		Assert.assertEquals("p.r[o]p<e>rt\\y", pn);
-	}
-
-	@Test
-	public void escapePropertyNameLiteralTest()
-	{
-		String pn = "p.r[o]p<e>r\'\"t\\y";
-		String epn = PropertyPath.escapePropertyNameLiteral(pn);
-
-		Assert.assertEquals("p\\\\.r\\\\[o\\\\]p\\\\<e\\\\>r\\\'\\\"t\\\\y", epn);
-	}
-
-	@Test
-	public void unescapePropertyNameLiteralTest()
-	{
 		{
-			String epn = "p\\\\.r\\\\[o\\\\]p\\\\<e\\\\>r\\\'\\\"t\\\\y";
-			String pn = PropertyPath.unescapePropertyNameLiteral(epn);
+			String epn = "p\\.r\\[o\\]p\\<e\\>rt\\y";
+			String pn = PropertyPath.unescapePropertyName(epn);
 
-			Assert.assertEquals("p.r[o]p<e>r\'\"t\\y", pn);
-		}
-
-		{
-			String epn = "p\\.r\\[o\\]p\\<e\\>r\'\"t\\y";
-			String pn = PropertyPath.unescapePropertyNameLiteral(epn);
-
-			Assert.assertEquals("p.r[o]p<e>r\'\"t\\y", pn);
+			Assert.assertEquals("p.r[o]p<e>rt\\y", pn);
 		}
 	}
 }
