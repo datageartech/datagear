@@ -608,8 +608,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	{
 		List<ColumnPropertyPath> propertyModelColumnPropertyPaths = new ArrayList<ColumnPropertyPath>();
 
-		String myPropertyPathPrefix = getPropertyModelPropertyPath(null, model, property, propertyModel,
-				PropertyPath.PROPERTY_STRING);
+		String myPropertyPathPrefix = getPropertyModelPropertyPath(model, property, propertyModel, null)
+				+ PropertyPath.PROPERTY_STRING;
 
 		for (ColumnPropertyPath columnPropertyPath : modelColumnPropertyPaths)
 		{
@@ -1151,8 +1151,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				if (selectColumnPropertyPaths != null)
 				{
 					ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(columnAlias, columnAliasQuote,
-							asTokenProperty, false, getPropertyModelPropertyPath(modelPropertyPath, model, property,
-									propertyModelMapper, null));
+							asTokenProperty, false,
+							getPropertyModelPropertyPath(model, property, propertyModelMapper, modelPropertyPath));
 					selectColumnPropertyPaths.add(columnPropertyPath);
 				}
 
@@ -1173,8 +1173,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				String myColumnAliasPrefix = getPropertyModelColumnAlias(modelColumnAliasPrefix, property,
 						propertyIndex, propertyModelMapper, PropertyPath.PROPERTY_STRING);
 
-				String myModelPropertyPath = getPropertyModelPropertyPath(modelPropertyPath, model, property,
-						propertyModelMapper, PropertyPath.PROPERTY_STRING);
+				String myModelPropertyPath = getPropertyModelPropertyPath(model, property, propertyModelMapper,
+						modelPropertyPath);
 
 				if (fromSql != null)
 					fromSql.sql(joinTypeSql);
@@ -1259,8 +1259,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		String myColumnAliasPrefix = getPropertyModelColumnAlias(modelColumnAliasPrefix, property, propertyIndex,
 				propertyModelMapper, PropertyPath.PROPERTY_STRING);
 
-		String myModelPropertyPath = getPropertyModelPropertyPath(modelPropertyPath, model, property,
-				propertyModelMapper, PropertyPath.PROPERTY_STRING);
+		String myModelPropertyPath = getPropertyModelPropertyPath(model, property, propertyModelMapper,
+				modelPropertyPath);
 
 		boolean isMultipleProperty = (relationMapper.isOneToMany() || relationMapper.isManyToMany());
 		boolean onlyCount = (isMultipleProperty && onlyCountForMultipleProperty);
@@ -1280,7 +1280,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			if (selectColumnPropertyPaths != null)
 			{
 				ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(sizeAlias, sizeQuoteAlias,
-						asTokenProperty, true, myModelPropertyPath + SizeOnlyCollection.SIZE_PROPERTY_NAME);
+						asTokenProperty, true,
+						PropertyPath.concatPropertyName(myModelPropertyPath, SizeOnlyCollection.SIZE_PROPERTY_NAME));
 				selectColumnPropertyPaths.add(columnPropertyPath);
 			}
 
@@ -1381,8 +1382,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		String myColumnAliasPrefix = getPropertyModelColumnAlias(modelColumnAliasPrefix, property, propertyIndex,
 				propertyModelMapper, PropertyPath.PROPERTY_STRING);
 
-		String myModelPropertyPath = getPropertyModelPropertyPath(modelPropertyPath, model, property,
-				propertyModelMapper, PropertyPath.PROPERTY_STRING);
+		String myModelPropertyPath = getPropertyModelPropertyPath(model, property, propertyModelMapper,
+				modelPropertyPath);
 
 		boolean isMultipleProperty = (relationMapper.isOneToMany() || relationMapper.isManyToMany());
 		boolean onlyCount = (isMultipleProperty && onlyCountForMultipleProperty);
@@ -1402,7 +1403,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			if (selectColumnPropertyPaths != null)
 			{
 				ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(sizeAlias, sizeQuoteAlias,
-						asTokenProperty, true, myModelPropertyPath + SizeOnlyCollection.SIZE_PROPERTY_NAME);
+						asTokenProperty, true,
+						PropertyPath.concatPropertyName(myModelPropertyPath, SizeOnlyCollection.SIZE_PROPERTY_NAME));
 				selectColumnPropertyPaths.add(columnPropertyPath);
 			}
 
@@ -1527,25 +1529,21 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	/**
 	 * 获取属性模型的属性路径。
 	 * 
-	 * @param prefix
 	 * @param model
 	 * @param property
 	 * @param pmm
-	 * @param suffix
+	 * @param prefixPropertyPath
+	 *            前置属性路径，允许为{@code null}
 	 * @return
 	 */
-	protected String getPropertyModelPropertyPath(String prefix, Model model, Property property, PropertyModel pmm,
-			String suffix)
+	protected String getPropertyModelPropertyPath(Model model, Property property, PropertyModel pmm,
+			String prefixPropertyPath)
 	{
+		String propertyName = property.getName();
+
 		String myPropertyPath = (MU.isAbstractedProperty(property)
-				? property.getName() + PropertyPath.CONCRETE_L + pmm.getIndex() + PropertyPath.CONCRETE_L
-				: property.getName());
-
-		if (prefix != null && !prefix.isEmpty())
-			myPropertyPath = prefix + myPropertyPath;
-
-		if (suffix != null)
-			myPropertyPath = myPropertyPath + suffix;
+				? PropertyPath.concatPropertyName(prefixPropertyPath, propertyName, pmm.getIndex())
+				: PropertyPath.concatPropertyName(prefixPropertyPath, propertyName));
 
 		return myPropertyPath;
 	}
