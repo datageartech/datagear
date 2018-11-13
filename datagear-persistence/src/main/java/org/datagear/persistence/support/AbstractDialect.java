@@ -41,6 +41,12 @@ public abstract class AbstractDialect implements Dialect
 		this.identifierQuote = identifierQuote;
 	}
 
+	@Override
+	public String quote(String name)
+	{
+		return this.identifierQuote + name + this.identifierQuote;
+	}
+
 	/**
 	 * 转换为排序SQL。
 	 * 

@@ -282,7 +282,7 @@ public class ModelUtils
 
 		if (appendModelLabel)
 		{
-			sb.append(getNameLabelValue(model, locale));
+			sb.append(PropertyPath.escapePropertyName(getNameLabelValue(model, locale)));
 			sb.append(splitter);
 		}
 
@@ -305,8 +305,9 @@ public class ModelUtils
 				if (i > 0)
 					sb.append(splitter);
 
+				// 集合属性值size没有Property
 				if (property == null)
-					sb.append(pname);
+					sb.append(PropertyPath.escapePropertyName(pname));
 				else
 					sb.append(getNameLabelValue(property, locale));
 
@@ -391,35 +392,37 @@ public class ModelUtils
 	{
 		String re = null;
 
-		String colNameStr = null;
-		String labelStr = null;
+		String columnName = null;
+		String nameLabel = null;
 
-		ColumnName tableName = property.getFeature(ColumnName.class);
-		if (tableName != null)
-			colNameStr = tableName.getValue();
+		ColumnName columnNameFeature = property.getFeature(ColumnName.class);
+		if (columnNameFeature != null)
+			columnName = columnNameFeature.getValue();
 
-		NameLabel nameLabel = property.getFeature(NameLabel.class);
+		NameLabel nameLabelFeature = property.getFeature(NameLabel.class);
 
-		if (nameLabel != null)
+		if (nameLabelFeature != null)
 		{
-			Label label = nameLabel.getValue();
+			Label label = nameLabelFeature.getValue();
 			if (label != null)
-				labelStr = label.getValue(locale);
+				nameLabel = label.getValue(locale);
 		}
 
 		// 两者相同，取一个即可
-		if (colNameStr != null && colNameStr.equalsIgnoreCase(labelStr))
-			labelStr = null;
+		if (columnName != null && columnName.equalsIgnoreCase(nameLabel))
+			nameLabel = null;
 
-		if (colNameStr == null || colNameStr.isEmpty())
-			re = labelStr;
-		else if (labelStr == null || labelStr.isEmpty())
-			re = colNameStr;
+		if (columnName == null || columnName.isEmpty())
+			re = nameLabel;
+		else if (nameLabel == null || nameLabel.isEmpty())
+			re = columnName;
 		else
-			re = colNameStr + "(" + labelStr + ")";
+			re = columnName + "(" + nameLabel + ")";
 
 		if (re == null || re.isEmpty())
 			re = property.getName();
+
+		re = PropertyPath.escapePropertyName(re);
 
 		return re;
 	}

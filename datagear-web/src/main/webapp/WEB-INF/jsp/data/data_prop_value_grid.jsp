@@ -17,7 +17,7 @@
 //初始数据，允许null
 Object data = request.getAttribute("data");
 //属性名称，不允许null
-String propName = getStringValue(request, "propName");
+String propertyPath = getStringValue(request, "propertyPath");
 //标题操作标签I18N关键字，不允许null
 String titleOperationMessageKey = getStringValue(request, "titleOperationMessageKey");
 //是否是客户端操作，允许为null
@@ -27,15 +27,15 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, "readonly"))
 //可用的查询条件列表，不允许为null
 List<PropertyPathNameLabel> conditionSource = (List<PropertyPathNameLabel>)request.getAttribute("conditionSource");
 
-PropertyPath propertyPath = ModelUtils.toPropertyPath(propName);
-PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyPathInfo);
+PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+PropertyPathInfo propertyPathInfoObj = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
+boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyPathInfoObj);
 
 %>
 <html style="height:100%;">
 <head>
 <%@ include file="../include/html_head.jsp" %>
-<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='<%=titleOperationMessageKey%>' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValuePath(model, propertyPath, WebUtils.getLocale(request))%></title>
+<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='<%=titleOperationMessageKey%>' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValuePath(model, propertyPathObj, WebUtils.getLocale(request))%></title>
 </head>
 <body style="height:100%;">
 <%if(!ajaxRequest){%>
@@ -85,7 +85,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 {
 	pageObj.readonly = <%=readonly%>;
 	pageObj.data = $.unref(<%writeJson(application, out, data);%>);
-	pageObj.propName = "<%=propName%>";
+	pageObj.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
 	pageObj.clientOperation = <%=clientOperation%>;
 	
 	<%if(!clientOperation){%>
@@ -96,7 +96,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	
 	pageObj.buildActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
 	{
-		var requestParams = { "data" : pageObj.data, "propName" : pageObj.propName, "clientOperation" : pageObj.clientOperation };
+		var requestParams = { "data" : pageObj.data, "propertyPath" : pageObj.propertyPath, "clientOperation" : pageObj.clientOperation };
 		if(extraRequestParams)
 			$.extend(requestParams, extraRequestParams);
 		
@@ -115,7 +115,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	{
 		var rowsData = pageObj.getRowsData();
 		
-		$.model.propValue(pageObj.data, pageObj.propName, rowsData);
+		$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, rowsData);
 		
 		var pageParam = pageObj.pageParam();
 		
@@ -125,7 +125,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	
 	pageObj.onModel(function(model)
 	{
-		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, pageObj.propName);
+		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, pageObj.propertyPath);
 		var property = propertyInfo.property;
 		var propertyModel = propertyInfo.model;
 		
@@ -140,7 +140,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 			$.extend(param, 
 			{
 				"data" : pageObj.data,
-				"propName" : pageObj.propName
+				"propertyPath" : pageObj.propertyPath
 			});
 			
 			return param;
@@ -156,24 +156,24 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				{
 					options = pageObj.buildActionOptions(property, propertyModel,
 							{
-								"propName" : pageObj.propName + "["+index+"]"
+								"propertyPath" : $.propertyPath.concatElementIndex(pageObj.propertyPath, index)
 							});
 					
 					pageObj.open(pageObj.url("viewMultiplePropValueElement"), options);
 				}
 				else
 				{
-					$.model.propValue(pageObj.data, pageObj.propName, [ row ]);
-					var propName = pageObj.propName + "[0]";
+					$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, [ row ]);
+					var propertyPath = $.propertyPath.concatElementIndex(pageObj.propertyPath, 0);
 					
 					options = pageObj.buildActionOptions(property, propertyModel,
 							{
-								"propName" : propName
+								"propertyPath" : propertyPath
 							});
 					
 					pageObj.open(pageObj.url("viewMultiplePropValueElement"), options);
 					
-					$.model.propValue(pageObj.data, pageObj.propName, []);
+					$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, []);
 				}
 			});
 		});
@@ -189,7 +189,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 					
 					options = pageObj.buildActionOptions(property, propertyModel,
 							{
-								"propName" : pageObj.propName + "["+index+"]"
+								"propertyPath" : $.propertyPath.concatElementIndex(pageObj.propertyPath, index)
 							},
 							{
 								"submit" : function(propValueElement)
@@ -205,7 +205,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				{
 					options = pageObj.buildActionOptions(property, propertyModel,
 							{
-								"propName" : pageObj.propName + "[0]"
+								"propertyPath" : $.propertyPath.concatElementIndex(pageObj.propertyPath, 0)
 							},
 							null);
 				}
@@ -236,7 +236,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 									}
 									else
 									{
-										var param = { "data" : pageObj.data, "propName" : pageObj.propName, "propValueElements" : rows };
+										var param = { "data" : pageObj.data, "propertyPath" : pageObj.propertyPath, "propValueElements" : rows };
 										
 										$.post(pageObj.url("saveAddMultiplePropValueElements"), param, function()
 										{
@@ -262,7 +262,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 					{
 						options = pageObj.buildActionOptions(property, propertyModel,
 								{
-									"propName" : pageObj.propName + "["+index+"]"
+									"propertyPath" : $.propertyPath.concatElementIndex(pageObj.propertyPath, index)
 								},
 								{
 									"submit" : function(propValueElement)
@@ -278,19 +278,19 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 					}
 					else
 					{
-						$.model.propValue(pageObj.data, pageObj.propName, [ row ]);
-						var propName = pageObj.propName + "[0]";
+						$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, [ row ]);
+						var propertyPath = $.propertyPath.concatElementIndex(pageObj.propertyPath, 0);
 						
 						options = pageObj.buildActionOptions(property, propertyModel,
 								{
-									"propName" : propName
+									"propertyPath" : propertyPath
 								});
 						
 						options.pinTitleButton = true;
 						
 						pageObj.open(pageObj.url("editMultiplePropValueElement"), options);
 						
-						$.model.propValue(pageObj.data, pageObj.propName, []);
+						$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, []);
 					}
 				});
 			});
@@ -324,7 +324,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		<%}%>
 		
 		<%if(clientOperation){%>
-		pageObj.initModelDataTableLocal(propertyModel, $.model.propValue(pageObj.data, pageObj.propName), pageObj.mappedByWith);
+		pageObj.initModelDataTableLocal(propertyModel, $.model.propertyPathValue(pageObj.data, pageObj.propertyPath), pageObj.mappedByWith);
 		<%}else{%>
 		pageObj.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(pageObj.conditionSource);
 		pageObj.initConditionPanel();

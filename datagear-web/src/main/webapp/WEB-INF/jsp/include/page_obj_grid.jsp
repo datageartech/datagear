@@ -103,7 +103,12 @@ page_js_obj.jsp
 				var nameOrder = [];
 				
 				for(var i=0; i<data.order.length; i++)
-					nameOrder[i] = { "name" : data.columns[data.order[i].column].data, "type" : data.order[i].dir };
+				{
+					var name = $.unescapePropertyNameForDataTables(data.columns[data.order[i].column].data);
+					name = $.propertyPath.escapePropertyName(name);
+					
+					nameOrder[i] = { "name" : name, "type" : data.order[i].dir };
+				}
 				
 				var myData = undefined;
 				

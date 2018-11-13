@@ -14,10 +14,13 @@
 <%@ include file="include/data_jsp_define.jsp" %>
 <%@ include file="../include/html_doctype.jsp" %>
 <%
+//初始数据，允许null
 Object data = request.getAttribute("data");
-String propName = request.getParameter("propName");
-PropertyPath propertyPath = ModelUtils.toPropertyPath(propName);
-PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+//属性名称，不允许null
+String propertyPath = request.getParameter("propertyPath");
+
+PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+PropertyPathInfo propertyPathInfoObj = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
 //可用的查询条件列表，不允许为null
 List<PropertyPathNameLabel> conditionSource = (List<PropertyPathNameLabel>)request.getAttribute("conditionSource");
 
@@ -25,12 +28,12 @@ boolean isMultipleSelect = false;
 if(request.getParameter("multiple") != null)
 	isMultipleSelect = true;
 else
-	isMultipleSelect = MU.isMultipleProperty(propertyPathInfo.getPropertyTail());
+	isMultipleSelect = MU.isMultipleProperty(propertyPathInfoObj.getPropertyTail());
 %>
 <html style="height:100%;">
 <head>
 <%@ include file="../include/html_head.jsp" %>
-<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='select' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValuePath(model, propertyPath, WebUtils.getLocale(request))%></title>
+<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='select' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValuePath(model, propertyPathObj, WebUtils.getLocale(request))%></title>
 </head>
 <body style="height:100%;">
 <%if(!ajaxRequest){%>
@@ -67,7 +70,7 @@ else
 (function(pageObj)
 {
 	pageObj.data = $.unref(<%writeJson(application, out, data);%>);
-	pageObj.propName = "${propName}";
+	pageObj.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
 	pageObj.isMultipleSelect = <%=isMultipleSelect%>;
 	pageObj.conditionSource = <%writeJson(application, out, conditionSource);%>;
 	
@@ -75,7 +78,7 @@ else
 	
 	pageObj.onModel(function(model)
 	{
-		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, pageObj.propName);
+		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, pageObj.propertyPath);
 		var property = propertyInfo.property;
 		var propertyModel = propertyInfo.model;
 		
@@ -90,7 +93,7 @@ else
 			$.extend(param, 
 			{
 				"data" : pageObj.data,
-				"propName" : pageObj.propName
+				"propertyPath" : pageObj.propertyPath
 			});
 			
 			return param;

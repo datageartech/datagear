@@ -43,7 +43,7 @@ pageObj.clientOperation = undefined;
 		pageObj.form.modelform("propValue", property.name, propValue);
 		
 		if(pageObj.data)
-			$.model.propValue(pageObj.data, property.name, propValue);
+			$.model.propertyValue(pageObj.data, property.name, propValue);
 	};
 	
 	pageObj.propertyAfterSaveHandler = function(property, propertyConcreteModel, propValue)
@@ -53,13 +53,13 @@ pageObj.clientOperation = undefined;
 		if(!pageObj.data)
 			pageObj.data = {};
 		
-		$.model.propValue(pageObj.data, property.name, propValue);
+		$.model.propertyValue(pageObj.data, property.name, propValue);
 	};
 	
 	//属性操作选项函数
 	pageObj.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
 	{
-		var requestParams = { "data" : pageObj.data, "propName" : property.name, "clientOperation" : pageObj.clientOperation };
+		var requestParams = { "data" : pageObj.data, "propertyPath" : $.propertyPath.escapePropertyName(property.name), "clientOperation" : pageObj.clientOperation };
 		if(extraRequestParams)
 			$.extend(requestParams, extraRequestParams);
 		

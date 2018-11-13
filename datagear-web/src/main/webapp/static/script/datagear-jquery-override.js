@@ -48,7 +48,7 @@
 						//XXX 原内容
 						//XXX 替换内容
 						//将param[name]格式的参数名修改为param.name格式
-						prefix + "[" + i + "]",
+						$.propertyPath.concatElementIndex(prefix, i),
 						//XXX 替换内容
 						v,
 						traditional,
@@ -72,7 +72,7 @@
 				//XXX 替换内容
 				//将param[name]格式的参数名修改为param.name格式
 				var value = obj[ name ];
-				buildParams( prefix + "." + name, obj[ name ], traditional, add );
+				buildParams($.propertyPath.concatPropertyName(prefix, name), obj[ name ], traditional, add );
 				if(value != null) allPropertyValueNull=false;
 				//XXX 替换内容
 			}

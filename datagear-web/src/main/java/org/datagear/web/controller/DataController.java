@@ -472,7 +472,7 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping("/{schemaId}/{modelName}/selectPropValue")
 	public String selectPropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName,
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath,
 			@RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
 	{
@@ -488,13 +488,13 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 						.getQueryPropValueSourceQueryResultMetaInfo(cn, model, data, propertyPathInfo);
 
 				springModel.addAttribute("data", data);
-				springModel.addAttribute("propName", propName);
+				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("conditionSource", getPropertyPathNameLabels(request, queryResultMetaInfo));
 			}
 		}.execute();
@@ -506,7 +506,7 @@ public class DataController extends AbstractSchemaModelController
 	@ResponseBody
 	public PagingData<Object> selectPropValueData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName)
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -522,7 +522,7 @@ public class DataController extends AbstractSchemaModelController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 
 				LOBConversionContext.set(buildQueryLobConversionSetting());
 
@@ -541,7 +541,7 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping("/{schemaId}/{modelName}/addSinglePropValue")
 	public String addSinglePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName)
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -555,7 +555,7 @@ public class DataController extends AbstractSchemaModelController
 				Object data = modelDataConverter.convert(dataParam, model);
 
 				springModel.addAttribute("data", data);
-				springModel.addAttribute("propName", propName);
+				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "add");
 				springModel.addAttribute("clientOperation", "true");
 				springModel.addAttribute("submitAction", "saveAddSinglePropValue");
@@ -572,7 +572,7 @@ public class DataController extends AbstractSchemaModelController
 	public ResponseEntity<OperationMessage> saveAddSinglePropValue(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
-			@RequestParam("propName") final String propName) throws Throwable
+			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueParam = getParamMap(request, "propValue");
@@ -587,7 +587,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 				Model propModel = propertyPathInfo.getModelTail();
 
 				Object propValue = modelDataConverter.convert(propValueParam, propModel);
@@ -607,7 +607,7 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping("/{schemaId}/{modelName}/editSinglePropValue")
 	public String editSinglePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName)
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -625,7 +625,8 @@ public class DataController extends AbstractSchemaModelController
 
 				if (!clientOperation)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
+							data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -638,7 +639,7 @@ public class DataController extends AbstractSchemaModelController
 				}
 
 				springModel.addAttribute("data", data);
-				springModel.addAttribute("propName", propName);
+				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
 				springModel.addAttribute("submitAction", "saveEditSinglePropValue");
 			}
@@ -654,7 +655,7 @@ public class DataController extends AbstractSchemaModelController
 	public ResponseEntity<OperationMessage> saveEditSinglePropValue(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
-			@RequestParam("propName") final String propName) throws Throwable
+			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueParam = getParamMap(request, "propValue");
@@ -669,7 +670,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 				Model propModel = propertyPathInfo.getModelTail();
 
 				Object propValue = modelDataConverter.convert(propValueParam, propModel);
@@ -689,7 +690,7 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping("/{schemaId}/{modelName}/viewSinglePropValue")
 	public String viewSinglePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName)
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -707,7 +708,8 @@ public class DataController extends AbstractSchemaModelController
 
 				if (!clientOperation)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
+							data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -720,7 +722,7 @@ public class DataController extends AbstractSchemaModelController
 				}
 
 				springModel.addAttribute("data", data);
-				springModel.addAttribute("propName", propName);
+				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("readonly", "true");
 				springModel.addAttribute("titleOperationMessageKey", "view");
 			}
@@ -734,7 +736,7 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping("/{schemaId}/{modelName}/editMultiplePropValue")
 	public String editMultiplePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName,
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath,
 			@RequestParam(value = "clientOperation", required = false) final Boolean clientOperation) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -749,13 +751,13 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 						.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
 
 				springModel.addAttribute("data", data);
-				springModel.addAttribute("propName", propName);
+				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
 				springModel.addAttribute("conditionSource", getPropertyPathNameLabels(request, queryResultMetaInfo));
 			}
@@ -768,7 +770,7 @@ public class DataController extends AbstractSchemaModelController
 	@ResponseBody
 	public PagingData<Object> queryMultiplePropValueData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName)
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -786,7 +788,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 
 				LOBConversionContext.set(buildQueryLobConversionSetting());
 
@@ -805,7 +807,7 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping("/{schemaId}/{modelName}/viewMultiplePropValue")
 	public String viewMultiplePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName)
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -820,13 +822,13 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 						.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
 
 				springModel.addAttribute("data", data);
-				springModel.addAttribute("propName", propName);
+				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("readonly", "true");
 				springModel.addAttribute("titleOperationMessageKey", "view");
 				springModel.addAttribute("conditionSource", getPropertyPathNameLabels(request, queryResultMetaInfo));
@@ -839,7 +841,7 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping("/{schemaId}/{modelName}/addMultiplePropValueElement")
 	public String addMultiplePropValueElement(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName)
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -853,7 +855,7 @@ public class DataController extends AbstractSchemaModelController
 				Object data = modelDataConverter.convert(dataParam, model);
 
 				springModel.addAttribute("data", data);
-				springModel.addAttribute("propName", propName);
+				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "add");
 				springModel.addAttribute("clientOperation", "true");
 				springModel.addAttribute("submitAction", "saveAddMultiplePropValueElement");
@@ -870,7 +872,7 @@ public class DataController extends AbstractSchemaModelController
 	public ResponseEntity<OperationMessage> saveAddMultiplePropValueElement(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
-			@RequestParam("propName") final String propName) throws Throwable
+			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propValue");
@@ -884,7 +886,7 @@ public class DataController extends AbstractSchemaModelController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 				Object propValueElement = modelDataConverter.convert(propValueElementParam,
 						propertyPathInfo.getModelTail());
 
@@ -906,7 +908,7 @@ public class DataController extends AbstractSchemaModelController
 	public ResponseEntity<OperationMessage> saveAddMultiplePropValueElements(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
-			@RequestParam("propName") final String propName) throws Throwable
+			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementsParam = getParamMap(request, "propValueElements");
@@ -920,7 +922,7 @@ public class DataController extends AbstractSchemaModelController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 				Object[] propValueElements = modelDataConverter.convertToArray(propValueElementsParam,
 						propertyPathInfo.getModelTail());
 
@@ -939,7 +941,7 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping("/{schemaId}/{modelName}/editMultiplePropValueElement")
 	public String editMultiplePropValueElement(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName)
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -957,7 +959,8 @@ public class DataController extends AbstractSchemaModelController
 
 				if (!clientOperation)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
+							data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -971,7 +974,7 @@ public class DataController extends AbstractSchemaModelController
 				}
 
 				springModel.addAttribute("data", data);
-				springModel.addAttribute("propName", propName);
+				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
 				springModel.addAttribute("submitAction", "saveEditMultiplePropValueElement");
 			}
@@ -987,7 +990,7 @@ public class DataController extends AbstractSchemaModelController
 	public ResponseEntity<OperationMessage> saveEditMultiplePropValueElement(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
-			@RequestParam("propName") final String propName) throws Throwable
+			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propValue");
@@ -1001,7 +1004,7 @@ public class DataController extends AbstractSchemaModelController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 				Object propValueElement = modelDataConverter.convert(propValueElementParam,
 						propertyPathInfo.getModelTail());
 
@@ -1022,7 +1025,7 @@ public class DataController extends AbstractSchemaModelController
 	public ResponseEntity<OperationMessage> deleteMultiplePropValueElements(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
-			@RequestParam("propName") final String propName) throws Throwable
+			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementsParam = getParamMap(request, "propValueElements");
@@ -1036,7 +1039,7 @@ public class DataController extends AbstractSchemaModelController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 				Object[] propValueElements = modelDataConverter.convertToArray(propValueElementsParam,
 						propertyPathInfo.getModelTail());
 
@@ -1055,7 +1058,7 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping("/{schemaId}/{modelName}/viewMultiplePropValueElement")
 	public String viewMultiplePropValueElement(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName)
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -1073,7 +1076,8 @@ public class DataController extends AbstractSchemaModelController
 
 				if (!clientOperation)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
+							data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -1087,7 +1091,7 @@ public class DataController extends AbstractSchemaModelController
 				}
 
 				springModel.addAttribute("data", data);
-				springModel.addAttribute("propName", propName);
+				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("readonly", "true");
 				springModel.addAttribute("titleOperationMessageKey", "view");
 			}
@@ -1101,7 +1105,7 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping(value = "/{schemaId}/{modelName}/downloadSinglePropertyValueFile")
 	public void downloadSinglePropertyValueFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propName") final String propName)
+			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -1115,7 +1119,7 @@ public class DataController extends AbstractSchemaModelController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propName, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 
 				Object propValue = persistenceManager.getPropValue(cn, model, data, propertyPathInfo);
 
@@ -1150,7 +1154,7 @@ public class DataController extends AbstractSchemaModelController
 				}
 				else
 					throw new IllegalArgumentException(
-							"The property value [" + propName + "] of [" + modelName + "] is not download-able");
+							"The property value [" + propertyPath + "] of [" + modelName + "] is not download-able");
 
 				out = response.getOutputStream();
 
@@ -1275,30 +1279,12 @@ public class DataController extends AbstractSchemaModelController
 	 * 获取{@linkplain Property}。
 	 * 
 	 * @param model
-	 * @param propName
+	 * @param propertyPath
 	 * @return
 	 */
-	protected Property getProperty(Model model, String propName)
+	protected Property getProperty(Model model, String propertyPath)
 	{
-		return model.getProperty(propName);
-	}
-
-	/**
-	 * 设置数据库标识符引用符号。
-	 * 
-	 * @param cn
-	 * @param springModel
-	 * @return
-	 * @throws Throwable
-	 */
-	protected String setDbIdentifierQuoteAttribute(Connection cn, org.springframework.ui.Model springModel)
-			throws Throwable
-	{
-		String dbIdentifierQuote = this.dialectSource.getDialect(cn).getIdentifierQuote();
-
-		springModel.addAttribute("dbIdentifierQuote", dbIdentifierQuote);
-
-		return dbIdentifierQuote;
+		return model.getProperty(propertyPath);
 	}
 
 	/**

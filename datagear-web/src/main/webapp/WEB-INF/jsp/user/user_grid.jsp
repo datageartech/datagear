@@ -172,7 +172,7 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 						data = "<fmt:message key='no' />";
 				}
 				
-				return data;
+				return $.escapeHtml(data);
 			},
 			defaultContent: "",
 		};

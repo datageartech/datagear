@@ -30,7 +30,7 @@
 				modelName = this.modelName;
 			}
 			
-			return contextPath + "/data/" + this.schemaId + "/" + modelName + "/" + action;
+			return contextPath + $.toPath("data", this.schemaId, modelName, action);
 		},
 		
 		/**

@@ -72,7 +72,7 @@ String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
 		pageObj.form.modelform(
 		{
 			model : model,
-			ignorePropertyNames : "<%=ignorePropertyName%>",
+			ignorePropertyNames : "<%=WebUtils.escapeJavaScriptStringValue(ignorePropertyName)%>",
 			data : pageObj.data,
 			readonly : pageObj.readonly,
 			submit : function()

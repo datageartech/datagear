@@ -199,7 +199,7 @@
 					throw new Error("[" + propertyPath + "] is illegal");
 			}
 			
-			return array;
+			return segmentList;
 		},
 
 		/**
@@ -207,21 +207,43 @@
 		 * 
 		 * @param propertyPath 可选，属性路径
 		 * @param propertyName 必选，属性名
+		 * @param propertyConcreteIndex 可选，属性具体模型索引
 		 */
-		concatPropertyName : function(propertyPath, propertyName)
+		concatPropertyName : function(propertyPath, propertyName, propertyConcreteIndex)
 		{
-			if(propertyName == undefined)
+			if(arguments.length == 1)
 			{
+				propertyConcreteIndex = undefined;
 				propertyName = propertyPath;
 				propertyPath = undefined;
+			}
+			else if(arguments.length == 2)
+			{
+				if($.isNumeric(propertyName))
+				{
+					propertyConcreteIndex = propertyName;
+					propertyName = propertyPath;
+					propertyPath = undefined;
+				}
+				else
+				{
+					propertyConcreteIndex = undefined;
+				}
 			}
 			
 			propertyName = this.escapePropertyName(propertyName);
 			
+			var re = "";
+			
 			if(propertyPath && propertyPath != "")
-				return propertyPath + this.PROPERTY + propertyName;
+				re = propertyPath + this.PROPERTY + propertyName;
 			else
-				return propertyName;
+				re = propertyName;
+			
+			if(propertyConcreteIndex != undefined)
+				re += this.CONCRETE_L + propertyConcreteIndex + this.CONCRETE_R;
+			
+			return re;
 		},
 		
 		/**
@@ -259,7 +281,7 @@
 				var c = propertyName.charAt(i);
 				
 				if(this.isKeyword(c))
-					epn += ESCAPOR + c;
+					epn += this.ESCAPOR + c;
 				else
 					epn += c;
 			}
@@ -295,7 +317,7 @@
 					pn += c;
 			}
 			
-			return epn;
+			return pn;
 		},
 		
 		isKeyword : function(c)
@@ -303,6 +325,13 @@
 			return (c == this.PROPERTY
 					|| c == this.CONCRETE_L
 					|| c == this.CONCRETE_R
+					|| c == this.ELEMENT_L
+					|| c == this.ELEMENT_R);
+		},
+		
+		isBeanAccessKeyword : function(c)
+		{
+			return (c == this.PROPERTY
 					|| c == this.ELEMENT_L
 					|| c == this.ELEMENT_R);
 		},
@@ -647,7 +676,7 @@
 						if(!re[j])
 							re[j] = {};
 						
-						re[j][propName] = this.propValue(obj[j], propName);
+						re[j][propName] = this.propertyValue(obj[j], propName);
 					}
 				}
 				
@@ -663,7 +692,7 @@
 					var propName = idProperties[i].name;
 					
 					for(var j=0; j<obj.length; j++)
-						this.propValue(obj[j], propName, id[j][propName]);
+						this.propertyValue(obj[j], propName, id[j][propName]);
 				}
 				
 				return id;
@@ -673,162 +702,106 @@
 		/**
 		 * 获取/设置对象属性值。
 		 * 
-		 * @param obj
-		 * @param propName
-		 * @parma propValue
+		 * @param obj 必选，对象
+		 * @param propertyName 必选，属性名称
+		 * @parma propertyValue 可选，属性值
 		 */
-		propValue : function(obj, propName, propValue)
+		propertyValue : function(obj, propertyName, propertyValue)
 		{
 			if(obj == undefined || obj == null)
 				throw new Error("[obj] must be defined");
 			
 			var isGet = (arguments.length == 2);
 			
-			var ppAry=propName.split(".");
+			if(isGet)
+				return obj[propertyName];
+			else
+				obj[propertyName] = propertyValue;
+		},
+
+		/**
+		 * 获取/设置对象属性值。
+		 * 
+		 * @param obj 必选，对象
+		 * @param propertyPath 必选，属性路径字符串
+		 * @parma propertyValue 可选，属性值
+		 */
+		propertyPathValue : function(obj, propertyPath, propertyValue)
+		{
+			if(obj == undefined || obj == null)
+				throw new Error("[obj] must be defined");
+			
+			var isGet = (arguments.length == 2);
+			
+			var propertyPathArray=$.propertyPath.arrayValueOf(propertyPath);
 			
 			var currentObj = obj;
 			
-			for(var i=0; i<ppAry.length; i++)
+			for(var i=0; i<propertyPathArray.length; i++)
 			{
-				if((currentObj == undefined || currentObj == null) && isGet)
-					return undefined;
-
-				var mySegment=ppAry[i];
+				var segment=propertyPathArray[i];
 				
-				var javaBeanPropertyNameSegment = undefined;
-				var arrayIndexSegment = undefined;
-
-				var bli = mySegment.indexOf("[");
-				
-				//JavaBean
-				if(bli < 0)
+				if(isGet)
 				{
-					javaBeanPropertyNameSegment = mySegment;
-				}
-				//数组
-				else if(bli == 0)
-				{
-					arrayIndexSegment = mySegment;
-				}
-				//JavaBean、数组组合
-				else
-				{
-					var bri = mySegment.indexOf("]", bli + 1);
+					if(currentObj == undefined || currentObj == null)
+						return undefined;
 					
-					javaBeanPropertyNameSegment = mySegment.substring(0, bli);
-					arrayIndexSegment = mySegment.substring(bli + 1, bri);
-				}
-				
-				var javaBeanPropertyName = undefined;
-				var arrayNumberIndex = undefined;
-				var arrayMapIndex = undefined;
-				
-				if(javaBeanPropertyNameSegment)
-				{
-					javaBeanPropertyName = javaBeanPropertyNameSegment;
-					
-					var qi = mySegment.indexOf("<");
-					if(qi > 0)
-						javaBeanPropertyName = javaBeanPropertyNameSegment.substring(0, qi);
-				}
-				
-				if(arrayIndexSegment)
-				{
-					try
-					{
-						arrayNumberIndex = parseInt(arrayIndexSegment);
-					}
-					catch(e)
-					{
-						arrayNumberIndex = undefined;
-						
-						//TODO 解析arrayMapIndex
-					}
-				}
-				
-				if(isGet || i < ppAry.length - 1)
-				{
-					if(javaBeanPropertyName != undefined)
-						currentObj = currentObj[javaBeanPropertyName];
-					
-					if(currentObj && arrayNumberIndex != undefined)
-						currentObj = currentObj[arrayNumberIndex];
-				}
-				else
-				{
-					if(javaBeanPropertyName != undefined && arrayNumberIndex != undefined)
-					{
-						if(!currentObj[javaBeanPropertyName]);
-							currentObj[javaBeanPropertyName] = [];
-						
-						currentObj[javaBeanPropertyName][arrayNumberIndex] = propValue;
-					}
-					else if(javaBeanPropertyName != undefined)
-					{
-						currentObj[javaBeanPropertyName] = propValue;
-					}
-					else if(arrayNumberIndex != undefined)
-					{
-						currentObj[arrayNumberIndex] = propValue;
-					}
+					if(segment.propertyName != undefined)
+						currentObj = currentObj[segment.propertyName];
+					else if(segment.elementIndex != undefined)
+						currentObj = currentObj[segment.elementIndex];
 					else
 						throw new Error();
+				}
+				else
+				{
+					if(i == propertyPathArray.length - 1)
+					{
+						if(segment.propertyName != undefined)
+							currentObj[segment.propertyName] = propertyValue;
+						else if(segment.elementIndex != undefined)
+							currentObj[segment.elementIndex] = propertyValue;
+						else
+							throw new Error();
+					}
+					
+					if(i < propertyPathArray.length - 1)
+					{
+						var myObj = undefined;
+						
+						if(segment.propertyName != undefined)
+							myObj = currentObj[segment.propertyName];
+						else if(segment.elementIndex != undefined)
+							myObj = currentObj[segment.elementIndex];
+						else
+							throw new Error();
+						
+						if(!myObj)
+						{
+							var nextSegment = propertyPathArray[i + 1];
+							
+							if(nextSegment.propertyName != undefined)
+							{
+								myObj = {};
+								currentObj[segment.propertyName] = myObj;
+							}
+							else if(nextSegment.elementIndex != undefined)
+							{
+								myObj = [];
+								currentObj[segment.elementIndex] = myObj;
+							}
+							else
+								throw new Error();
+							
+							currentObj = myObj;
+						}
+					}
 				}
 			}
 			
 			if(isGet)
 				return currentObj;
 		},
-		
-		/**
-		 * 复制为可用作KEY的对象，那些不可能被作为KEY的属性值将会被删除。
-		 * <p>
-		 * 数据对象可能包含LOB类的数据，在get请求时可能会导致URL超长，需要把它们删除。
-		 * </p>
-		 * 
-		 * @param model 模型
-		 * @param obj 模型数据对象
-		 * @param keepPropertyPath 不删除的属性路径
-		 */
-		/*
-		copyForKey : function(model, obj, keepPropertyPath)
-		{
-			var properties = model.properties;
-			
-			if(!properties)
-				return obj;
-			
-			if(!obj || !properties)
-				return {};
-			
-			var keyObj = {};
-			
-			var accessIndex = (keepPropertyPath ? keepPropertyPath.indexOf(".") : -1);
-			var reservePropName = (accessIndex > -1 ? keepPropertyPath.substring(0, accessIndex) : "");
-			
-			for(var i=0; i< properties.length; i++)
-			{
-				var property = properties[i];
-				var propName = property.name;
-				var propValue = obj[propName];
-				
-				var copy = false;
-				
-				if(propValue == null)//NULL属性值也拷贝，因为几乎不影响URL长度
-					copy = true;
-				else if(propName == reservePropName)
-					copy = true;
-				else if(this.isIdProperty(model, property))
-					copy = true;
-				else
-				{
-					
-				}
-			}
-			
-			return keyObj;
-		},
-		*/
 		
 		/**
 		 * 获取org.datagear.model.Label的文本。
@@ -920,18 +893,16 @@
 		{
 			var propertyInfo = { "parent" : parent, "property" : undefined, "model" : undefined };
 			
-			var segments = propertyPath.split(".");
+			var propertyPathArray=$.propertyPath.arrayValueOf(propertyPath);
 			
 			var parent = model;
 			
-			for(var i=0; i<segments.length; i++)
+			for(var i=0; i<propertyPathArray.length; i++)
 			{
-				var segment = segments[i];
-				
-				var elIdx = segment.indexOf("[");
+				var segment = propertyPathArray[i];
 				
 				//忽略元素片段
-				if(elIdx == 0)
+				if(segment.elementIndex != undefined)
 					continue;
 				
 				if(parent == null)
@@ -939,36 +910,15 @@
 				
 				propertyInfo.parent = parent;
 				
-				var propName = null;
-				var propModelIndex = null;
-				
-				var clIdx = segment.indexOf("<");
-				
-				var propNameEnd = segment.length;
-				if(clIdx > 0)
-					propNameEnd = clIdx;
-				else if(elIdx > 0)
-					propNameEnd = elIdx;
-				
-				propName = segment.substring(0, propNameEnd);
-				
-				if(clIdx > 0)
-				{
-					var crIdx = segment.indexOf(">", clIdx + 1);
-					
-					if(crIdx > 0)
-						propModelIndex = parseInt(segment.substring(clIdx + 1, crIdx));
-				}
-				
-				propertyInfo.property = this.getProperty(parent, propName);
+				propertyInfo.property = this.getProperty(parent, segment.propertyName);
 				
 				if(propertyInfo.property == null)
 					throw new Error("No Property named ["+propName+"] found int Model ["+model.name+"]");
 				
 				if(this.isConcreteProperty(propertyInfo.property))
 					propertyInfo.model = propertyInfo.property.model;
-				else if(propModelIndex)
-					propertyInfo.model = propertyInfo.property.models[propModelIndex];
+				else if(segment.propertyModelIndex)
+					propertyInfo.model = propertyInfo.property.models[propertyModelIndex];
 				
 				parent = propertyInfo.model;
 			}
@@ -1032,41 +982,47 @@
 		},
 		
 		/**
-		 * 获取属性标签。
+		 * 将属性名按照HTML规范转义。
 		 */
-		propertyLabel : function(property)
+		escapeHtml : function(text)
 		{
-			var propName = property.name;
-			var nameLabel = this.featureNameLable(property);
+			if(typeof(text) != "string")
+				return text;
 			
-			var label = propName + (nameLabel == propName || !nameLabel ? "" : "(" + nameLabel +")");
+			var epn = "";
 			
-			return label;
+			for(var i=0; i<text.length; i++)
+			{
+				var c = text.charAt(i);
+				
+				if(c == '<')
+					epn += '&lt;';
+				else if(c == '>')
+					epn += '&gt;';
+				else if(c == '&')
+					epn += '&amp;';
+				else if(c == '"')
+					epn += '&quot;';
+				else
+					epn += c;
+			}
+			
+			return epn;
 		},
 		
 		/**
 		 * 获取属性标签HTML。
+		 * 
+		 * @param property
+		 * @param tagName 可选，HTML标签名
 		 */
-		propertyLabelHtml : function(property)
+		propertyLabelHtml : function(property, tagName)
 		{
-			var propName = property.name;
-			var nameLabel = this.featureNameLable(property);
-			var isToken = this.hasFeatureToken(property);
+			if(!tagName)
+				tagName = "span";
 			
-			var label = "<span class='property-name"+(isToken ? " property-name-token" : "")+"'>"+propName +"</span>"
-				+ (nameLabel == propName || !nameLabel ? "" : "<span class='bracket bracket-left'>(</span><span class='prop-label'>"
-				+ nameLabel +"</span><span class='bracket bracket-right'>)</span>");
-			
-			return label;
-		},
-		
-		/**
-		 * 获取属性标签HTML。
-		 */
-		propertyLabelHtmlOfTitle : function(property, tagName)
-		{
-			var propName = property.name;
-			var nameLabel = this.featureNameLable(property);
+			var propName = this.escapeHtml(property.name);
+			var nameLabel = this.escapeHtml(this.featureNameLable(property));
 			var isToken = this.hasFeatureToken(property);
 			
 			var label = "<"+tagName+" class='property-name" + (isToken ? " property-name-token" : "") + "' title='"+nameLabel+"'>"+propName +"</"+tagName+">";
@@ -1129,7 +1085,7 @@
 				{
 					var property=tokenProperties[i];
 					
-					var v=this.propValue(obj, property.name);
+					var v=this.propertyValue(obj, property.name);
 					var tv = this.tokenProperty(property, v);
 					
 					if(re != "" && tv != "")

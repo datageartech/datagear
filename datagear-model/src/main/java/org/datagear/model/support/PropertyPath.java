@@ -530,6 +530,9 @@ public class PropertyPath implements Serializable
 	 */
 	public static String escapePropertyName(String propertyName)
 	{
+		if (propertyName == null || propertyName.isEmpty())
+			return propertyName;
+
 		StringBuilder sb = new StringBuilder();
 
 		char[] cs = propertyName.toCharArray();
@@ -558,6 +561,9 @@ public class PropertyPath implements Serializable
 	 */
 	public static String unescapePropertyName(String propertyName)
 	{
+		if (propertyName == null || propertyName.isEmpty())
+			return propertyName;
+
 		StringBuilder sb = new StringBuilder();
 
 		char[] cs = propertyName.toCharArray();
@@ -596,6 +602,9 @@ public class PropertyPath implements Serializable
 	 */
 	public static String concatPropertyName(String propertyPath, String propertyName)
 	{
+		if (propertyName == null || propertyName.isEmpty())
+			throw new IllegalArgumentException("[] must not be empty");
+
 		propertyName = escapePropertyName(propertyName);
 
 		if (propertyPath == null || propertyPath.isEmpty())
@@ -617,6 +626,9 @@ public class PropertyPath implements Serializable
 	 */
 	public static String concatPropertyName(String propertyPath, String propertyName, int propertyConcreteIndex)
 	{
+		if (propertyName == null || propertyName.isEmpty())
+			throw new IllegalArgumentException("[] must not be empty");
+
 		propertyName = escapePropertyName(propertyName);
 
 		if (propertyPath == null || propertyPath.isEmpty())

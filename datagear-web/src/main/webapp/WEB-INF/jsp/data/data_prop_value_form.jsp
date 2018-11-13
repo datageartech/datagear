@@ -16,7 +16,7 @@
 //初始数据，允许null
 Object data = request.getAttribute("data");
 //属性名称，不允许null
-String propName = getStringValue(request, "propName");
+String propertyPath = getStringValue(request, "propertyPath");
 //标题操作标签I18N关键字，不允许null
 String titleOperationMessageKey = getStringValue(request, "titleOperationMessageKey");
 //提交活动，pageObj.pageParam().submit(...)未定义时，不允许为null
@@ -26,14 +26,14 @@ boolean clientOperation = ("true".equalsIgnoreCase(getStringValue(request, "clie
 //是否只读操作，允许为null
 boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, "readonly")));
 
-PropertyPath propertyPath = ModelUtils.toPropertyPath(propName);
-PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyPathInfo);
+PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+PropertyPathInfo propertyPathInfoObj = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
+boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyPathInfoObj);
 %>
 <html>
 <head>
 <%@ include file="../include/html_head.jsp" %>
-<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='<%=titleOperationMessageKey%>' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValuePath(model, propertyPath, WebUtils.getLocale(request))%></title>
+<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='<%=titleOperationMessageKey%>' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValuePath(model, propertyPathObj, WebUtils.getLocale(request))%></title>
 </head>
 <body>
 <div id="${pageId}" class="page-data-form page-data-form-propvalue">
@@ -56,7 +56,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	pageObj.readonly = <%=readonly%>;
 	pageObj.submitAction = "<%=submitAction%>";
 	pageObj.data = ($.unref(<%writeJson(application, out, data);%>) || {});
-	pageObj.propName = "<%=propName%>";
+	pageObj.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
 	pageObj.clientOperation = <%=clientOperation%>;
 	
 	pageObj.superBuildPropertyActionOptions = pageObj.buildPropertyActionOptions;
@@ -64,19 +64,19 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	{
 		var actionParam = pageObj.superBuildPropertyActionOptions(property, propertyConcreteModel, extraRequestParams, extraPageParams);
 		
-		actionParam["data"]["propName"] = pageObj.propName + "." + property.name;
+		actionParam["data"]["propertyPath"] = $.propertyPath.concatPropertyName(pageObj.propertyPath, property.name);
 		actionParam["data"]["data"] = pageObj.data;
 		
 		//客户端操作则传递最新表单数据，因为不需要到服务端数据库查找验证
 		if(pageObj.clientOperation)
-			$.model.propValue(actionParam["data"]["data"], pageObj.propName, pageObj.form.modelform("data")); 
+			$.model.propertyPathValue(actionParam["data"]["data"], pageObj.propertyPath, pageObj.form.modelform("data")); 
 		
 		return actionParam;
 	};
 	
 	pageObj.onModel(function(model)
 	{
-		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, pageObj.propName);
+		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, pageObj.propertyPath);
 		var property = propertyInfo.property;
 		var propertyModel = propertyInfo.model;
 		
@@ -84,7 +84,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		{
 			model : propertyModel,
 			ignorePropertyNames : $.model.findMappedByWith(property, propertyModel),
-			data : $.model.propValue(pageObj.data, pageObj.propName),
+			data : $.model.propertyPathValue(pageObj.data, pageObj.propertyPath),
 			readonly : pageObj.readonly,
 			submit : function()
 			{
@@ -106,13 +106,13 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				else
 				{
 					var thisForm = this;
-					var param = { "data" : pageObj.data, "propName" : pageObj.propName, "propValue" : propValue };
+					var param = { "data" : pageObj.data, "propertyPath" : pageObj.propertyPath, "propValue" : propValue };
 					
 					$.post(pageObj.url(pageObj.submitAction), param, function(operationMessage)
 					{
 						//如果有初始数据，则更新为已保存至后台的数据
 						if(pageObj.data)
-							$.model.propValue(pageObj.data, pageObj.propName, operationMessage.data);
+							$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, operationMessage.data);
 						
 						if(pageParam && pageParam.afterSave)
 							close = (pageParam.afterSave(operationMessage.data) != false);

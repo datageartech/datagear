@@ -1268,9 +1268,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		String propertyName = propertyEntireTableInfo.getTableInfo().getName();
 
 		if (modelBuilder.hasProperty(propertyName))
-		{
 			propertyName = joinEntireTableInfo.getTableInfo().getName();
-		}
 
 		propertyBuilder.setName(propertyName);
 	}

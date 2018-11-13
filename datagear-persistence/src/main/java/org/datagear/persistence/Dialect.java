@@ -15,6 +15,14 @@ import java.sql.ResultSet;
 public interface Dialect
 {
 	/**
+	 * 为给定名字添加标识符引用符号。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	String quote(String name);
+
+	/**
 	 * 获取标识符引用符号。
 	 * <p>
 	 * 数据库中，对于包含某些特殊字符（比如：'.'）的标识符，通常需要在两侧添加引用符号，否则会出现语法错误。

@@ -31,7 +31,7 @@
 			if(typeof(contextPath) == "string")
 				url = contextPath;
 			
-			url = url + "/schema/" + schemaId+"/model/" + modelName;
+			url = url + "/schema/" + encodeURIComponent(schemaId) +"/model/" + encodeURIComponent(modelName);
 			
 			if(reload)
 				url = url +"?reload=1";

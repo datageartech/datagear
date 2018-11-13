@@ -174,12 +174,44 @@ public class WebUtils
 	}
 
 	/**
+	 * 转义HTML字符串。
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String escapeHtml(String s)
+	{
+		if (s == null || s.isEmpty())
+			return s;
+
+		StringBuilder sb = new StringBuilder();
+
+		char[] cs = s.toCharArray();
+
+		for (char c : cs)
+		{
+			if (c == '<')
+				sb.append("&lt;");
+			else if (c == '>')
+				sb.append("&gt;'");
+			else if (c == '&')
+				sb.append("&amp;'");
+			else if (c == '"')
+				sb.append("&quot;'");
+			else
+				sb.append(c);
+		}
+
+		return sb.toString();
+	}
+
+	/**
 	 * 转换为JavaScript语法的字符串。
 	 * 
 	 * @param s
 	 * @return
 	 */
-	public static String toJavaScriptStringValue(String s)
+	public static String escapeJavaScriptStringValue(String s)
 	{
 		if (s == null)
 			return "";

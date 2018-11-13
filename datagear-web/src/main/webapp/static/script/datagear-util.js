@@ -575,6 +575,91 @@
 		},
 		
 		/**
+		 * 转义HTML关键字。
+		 * 
+		 * @param text 要转义的文本
+		 */
+		escapeHtml : function(text)
+		{
+			return $.model.escapeHtml(text);
+		},
+		
+		/**
+		 * 将传入参数转义为路径。
+		 * 
+		 * @param elements 必选，路径元素
+		 */
+		toPath : function(elements)
+		{
+			var re="";
+			
+			for(var i=0; i< arguments.length; i++)
+			{
+				element = encodeURIComponent(arguments[i]);
+				
+				if(re.charAt(re.length - 1) != "/")
+					re += "/";
+				
+				re += element;
+			}
+			
+			return re;
+		},
+		
+		/**
+		 * 为DataTables转义属性名。
+		 * 参考jquery.dataTables.js的_fnSplitObjNotation函数。
+		 */
+		escapePropertyNameForDataTables : function(propertyName)
+		{
+			var pn = "";
+			
+			for(var i=0; i<propertyName.length; i++)
+			{
+				var c = propertyName.charAt(i);
+				
+				if(c == '.')
+				{
+					pn += "\\" + c;
+				}
+				else
+					pn += c;
+			}
+			
+			return pn;
+		},
+		
+		/**
+		 * 反转义由escapePropertyNameForDataTables转义的属性名。
+		 */
+		unescapePropertyNameForDataTables : function(propertyName)
+		{
+			var pn = "";
+			
+			for(var i=0; i<propertyName.length; i++)
+			{
+				var c = propertyName.charAt(i);
+				
+				if(c == '\\')
+				{
+					var cin = ((i + 1) < propertyName.length ? propertyName.charAt(i + 1) : 0);
+					
+					if(cin == '.')
+					{
+						i += 1;
+						pn += cin;
+					}
+					else
+						pn += c;
+				}
+				else
+					pn += c;
+			}
+			
+			return pn;
+		},
+		
+		/**
 		 * 构建Datatables组件的“columns”选项值。
 		 * 
 		 * @param model 必选，模型
@@ -607,8 +692,8 @@
 				
 				columns.push(
 				{
-					title: $.model.propertyLabelHtmlOfTitle(property, "a"),
-					data: propName,
+					title: $.model.propertyLabelHtml(property, "a"),
+					data: $.escapePropertyNameForDataTables(propName),
 					propertyIndex: i,
 					stringDisplayThreshold : options.stringDisplayThreshold,
 					render: function(data, type, row, meta)
@@ -628,7 +713,7 @@
 						if(propertyIndex == 0 && renderValue == "")
 							renderValue = "&nbsp;";
 						
-						return renderValue;
+						return $.escapeHtml(renderValue);
 					},
 					defaultContent: "",
 					orderable: !notReadable,
@@ -948,7 +1033,7 @@
 						{
 							var element = obj[i];
 							
-							copyArray[i] = $._ref((root ? root : obj), obj, element, path+"["+i+"]", objPathArray);
+							copyArray[i] = $._ref((root ? root : obj), obj, element, $.propertyPath.concatElementIndex(path, i), objPathArray);
 						}
 						
 						refObj = copyArray;
@@ -967,7 +1052,7 @@
 								propValue[$.REF_NAME] = $.REF_VALUE_THIS;
 							}
 							else
-								propValue = $._ref((root ? root : obj), obj, propValue, path+"."+propName, objPathArray);
+								propValue = $._ref((root ? root : obj), obj, propValue, $.propertyPath.concatPropertyName(path, propName), objPathArray);
 							
 							copyObj[propName] = propValue;
 						}

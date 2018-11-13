@@ -190,7 +190,7 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEnti
 			visible : !hidden,
 			render: function(data, type, row, meta)
 			{
-				return $.truncateIf(data);
+				return $.escapeHtml($.truncateIf(data));
 			},
 			defaultContent: "",
 		};

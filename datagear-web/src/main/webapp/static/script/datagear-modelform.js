@@ -187,7 +187,7 @@
 						continue;
 					
 					var propValue = this._propertyWidgets[propName].getValue();
-					$.model.propValue(data, propName, propValue);
+					$.model.propertyValue(data, propName, propValue);
 				}
 				
 				return data;
@@ -205,7 +205,7 @@
 					if($.model.hasFeatureNotReadable(property))
 						continue;
 					
-					var propValue = $.model.propValue(data, propName);
+					var propValue = $.model.propertyValue(data, propName);
 					this._propertyWidgets[propName].setValue(propValue);
 				}
 			}
@@ -285,7 +285,7 @@
 				}
 				
 				var propertyModel = property.model;
-				var propValue = $.model.propValue(data, propName);
+				var propValue = $.model.propertyValue(data, propName);
 				
 				var propertyWidget = (_this._propertyWidgets[propName] =
 				{

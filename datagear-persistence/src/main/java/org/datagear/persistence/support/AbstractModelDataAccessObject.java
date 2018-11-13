@@ -1462,9 +1462,7 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 */
 	protected String toQuoteName(Dialect dialect, String name)
 	{
-		String iq = dialect.getIdentifierQuote();
-
-		return iq + name + iq;
+		return dialect.quote(name);
 	}
 
 	/**
@@ -1478,10 +1476,8 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	{
 		String[] qnames = new String[names.length];
 
-		String iq = dialect.getIdentifierQuote();
-
 		for (int i = 0; i < names.length; i++)
-			qnames[i] = iq + names[i] + iq;
+			qnames[i] = dialect.quote(names[i]);
 
 		return qnames;
 	}

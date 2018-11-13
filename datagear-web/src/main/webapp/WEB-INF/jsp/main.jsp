@@ -46,7 +46,7 @@
 	    }
 	    else
 	    {
-	    	$.get(contextPath +"/data/"+schemaId+"/"+modelName+"/query", function(data)
+	    	$.get(contextPath + $.toPath("data", schemaId, modelName, "query"), function(data)
 	    	{
 	    		uiTabsNav.show();
 	    		
@@ -157,7 +157,7 @@
 	
 	pageObj.schemaToJstreeNode = function(schema)
 	{
-		schema.text = schema.title;
+		schema.text = $.escapeHtml(schema.title);
 		
 		var tempSchema = (schema.createUser && schema.createUser.anonymous);
 		
@@ -166,7 +166,7 @@
 		else
 		{
 			if(schema.createUser && pageObj.userId != schema.createUser.id && schema.createUser.nameLabel)
-				schema.text += " <span class='schema-tree-create-user-label small-text ui-state-disabled' title='<fmt:message key='main.schemaCreateUser' />'>" + schema.createUser.nameLabel + "</span>";
+				schema.text += " <span class='schema-tree-create-user-label small-text ui-state-disabled' title='<fmt:message key='main.schemaCreateUser' />'>" + $.escapeHtml(schema.createUser.nameLabel) + "</span>";
 		}
 		
 		schema.children = true;
@@ -191,7 +191,7 @@
 	
 	pageObj.tableToJstreeNode = function(table)
 	{
-		var text = table.name;
+		var text = $.escapeHtml(table.name);
 		
 		if(table.comment)
 			text = text + "("+table.comment+")";
@@ -508,7 +508,7 @@
 					
 					var schemaId = selNode.original.id;
 					
-					pageObj.open(contextPath+"/schema/"+($item.hasClass("schema-operation-edit") ? "edit" : "view")+"?id=" + schemaId, 
+					pageObj.open(contextPath+$.toPath("schema", ($item.hasClass("schema-operation-edit") ? "edit" : "view"))+"?id="+encodeURIComponent(schemaId), 
 					{
 						"pageParam" :
 						{
@@ -585,7 +585,7 @@
 					        	    var prelia = $("> li > a[href='#"+tabId+"']", uiTabsNav);
 					        	    if(prelia.length > 0)
 					        	    {
-					        	    	$.get(contextPath +"/data/"+schemaId+"/"+modelName+"/query", function(data)
+					        	    	$.get(contextPath + $.toPath("data", schemaId, modelName, "query"), function(data)
 					        	    	{
 					        	    	    uiTabsNav.show();
 					        	    	    
@@ -661,7 +661,7 @@
 								return contextPath+"/schema/list";
 							else if(pageObj.isSchemaNode(node))
 							{
-								return contextPath+"/schema/"+node.id+"/pagingQueryTable"
+								return contextPath + $.toPath("schema", node.id, "pagingQueryTable");
 							}
 						},
 						"data" : function(node)
@@ -733,7 +733,7 @@
 					var param = pageObj.getSearchSchemaFormDataForTable();
 					param = $.extend({}, data.node.original.nextPageInfo, param);
 					
-					$.ajax(contextPath+"/schema/"+schemaId+"/pagingQueryTable",
+					$.ajax(contextPath+$.toPath("schema", schemaId, "pagingQueryTable"),
 					{
 						data : param,
 						success : function(pagingData)
@@ -935,7 +935,7 @@
 				
 				if(item.hasClass("tab-operation-newwin"))
 				{
-					window.open(contextPath +"/data/"+schemaId+"/"+modelName+"/query");
+					window.open(contextPath + $.toPath("data", schemaId, modelName, "query"));
 				}
 				else if(item.hasClass("tab-operation-close-left"))
 				{
@@ -1121,7 +1121,7 @@
 		</ul>
 		<%if(!user.isAnonymous()){ %>
 		<div class="user-name">
-		<%=user.getNameLabel()%>
+		<c:out value='<%=user.getNameLabel()%>' />
 		</div>
 		<a class="link" href="<c:url value="/logout" />"><fmt:message key='main.logout' /></a>
 		<%}else{%>
