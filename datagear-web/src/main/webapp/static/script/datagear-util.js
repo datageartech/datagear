@@ -719,7 +719,7 @@
 						
 						//解决当所有属性值都为null时，行渲染会很细问题
 						if(propertyIndex == 0 && renderValue == "")
-							renderValue = "&nbsp;";
+							renderValue = " ";
 						
 						return $.escapeHtml(renderValue);
 					},
