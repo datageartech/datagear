@@ -5,14 +5,14 @@
 package org.datagear.dbmodel;
 
 /**
- * 简单{@linkplain ModelNameResolver}。
+ * 标识符{@linkplain ModelNameResolver}。
  * 
  * @author datagear@163.com
  *
  */
-public class SimpleModelNameResolver implements ModelNameResolver
+public class IdentifierModelNameResolver extends NameResolverSupport implements ModelNameResolver
 {
-	public SimpleModelNameResolver()
+	public IdentifierModelNameResolver()
 	{
 		super();
 	}
@@ -20,6 +20,6 @@ public class SimpleModelNameResolver implements ModelNameResolver
 	@Override
 	public String resolve(String tableName)
 	{
-		return tableName;
+		return resolveForIndentifier(tableName);
 	}
 }

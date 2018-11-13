@@ -5,6 +5,7 @@
 package org.datagear.web.controller;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,6 +17,7 @@ import org.datagear.connection.JdbcUtil;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbmodel.CachedDbModelFactory;
+import org.datagear.dbmodel.ModelNameResolver;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
@@ -53,6 +55,9 @@ public class SchemaController extends AbstractSchemaModelController
 	@Autowired
 	private DatabaseInfoResolver databaseInfoResolver;
 
+	@Autowired
+	private ModelNameResolver modelNameResolver;
+
 	public SchemaController()
 	{
 		super();
@@ -60,11 +65,12 @@ public class SchemaController extends AbstractSchemaModelController
 
 	public SchemaController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource, CachedDbModelFactory cachedDbModelFactory,
-			DatabaseInfoResolver databaseInfoResolver)
+			DatabaseInfoResolver databaseInfoResolver, ModelNameResolver modelNameResolver)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource, cachedDbModelFactory);
 
 		this.databaseInfoResolver = databaseInfoResolver;
+		this.modelNameResolver = modelNameResolver;
 	}
 
 	public DatabaseInfoResolver getDatabaseInfoResolver()
@@ -75,6 +81,16 @@ public class SchemaController extends AbstractSchemaModelController
 	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
 	{
 		this.databaseInfoResolver = databaseInfoResolver;
+	}
+
+	public ModelNameResolver getModelNameResolver()
+	{
+		return modelNameResolver;
+	}
+
+	public void setModelNameResolver(ModelNameResolver modelNameResolver)
+	{
+		this.modelNameResolver = modelNameResolver;
 	}
 
 	@RequestMapping("/add")
@@ -227,28 +243,9 @@ public class SchemaController extends AbstractSchemaModelController
 		return schemas;
 	}
 
-	@RequestMapping(value = "/{schemaId}/alltables", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public TableInfo[] allTables(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId) throws Exception
-	{
-		Schema schema = getSchemaNotNull(request, response, schemaId);
-
-		Connection cn = getSchemaConnection(schema);
-
-		try
-		{
-			return getDatabaseInfoResolver().getTableInfos(cn);
-		}
-		finally
-		{
-			JdbcUtil.closeConnection(cn);
-		}
-	}
-
 	@RequestMapping(value = "/{schemaId}/pagingQueryTable", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public PagingData<TableInfo> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<TableModelInfo> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId) throws Exception
 	{
 		PagingQuery pagingQuery = getPagingQuery(request, COOKIE_PAGINATION_SIZE);
@@ -268,12 +265,12 @@ public class SchemaController extends AbstractSchemaModelController
 
 		List<TableInfo> keywordTableInfos = findByKeyword(tableInfos, pagingQuery.getKeyword());
 
-		PagingData<TableInfo> pagingData = new PagingData<TableInfo>(pagingQuery.getPage(), keywordTableInfos.size(),
-				pagingQuery.getPageSize());
+		PagingData<TableModelInfo> pagingData = new PagingData<TableModelInfo>(pagingQuery.getPage(),
+				keywordTableInfos.size(), pagingQuery.getPageSize());
 
 		keywordTableInfos = keywordTableInfos.subList(pagingData.getStartIndex(), pagingData.getEndIndex());
 
-		pagingData.setItems(keywordTableInfos);
+		pagingData.setItems(toTableModelInfos(keywordTableInfos));
 
 		return pagingData;
 	}
@@ -319,5 +316,56 @@ public class SchemaController extends AbstractSchemaModelController
 				return new String[] { t.getName() };
 			}
 		});
+	}
+
+	protected List<TableModelInfo> toTableModelInfos(List<TableInfo> tableInfos)
+	{
+		List<TableModelInfo> tableModelInfos = new ArrayList<TableModelInfo>(tableInfos.size());
+
+		for (TableInfo tableInfo : tableInfos)
+		{
+			String modelName = this.modelNameResolver.resolve(tableInfo.getName());
+
+			tableModelInfos.add(new TableModelInfo(tableInfo, modelName));
+		}
+
+		return tableModelInfos;
+	}
+
+	/**
+	 * 表模型信息。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class TableModelInfo extends TableInfo
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String modelName;
+
+		public TableModelInfo()
+		{
+			super();
+		}
+
+		public TableModelInfo(TableInfo tableInfo, String modelName)
+		{
+			super();
+			super.setName(tableInfo.getName());
+			super.setType(tableInfo.getType());
+			super.setComment(tableInfo.getComment());
+			this.modelName = modelName;
+		}
+
+		public String getModelName()
+		{
+			return modelName;
+		}
+
+		public void setModelName(String modelName)
+		{
+			this.modelName = modelName;
+		}
 	}
 }

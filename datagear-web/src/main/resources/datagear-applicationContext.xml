@@ -173,6 +173,8 @@
 		</property>
 	</bean>
 	
+	<bean id="modelNameResolver" class="org.datagear.dbmodel.IdentifierModelNameResolver" />
+	
 	<bean id="databaseModelResolver" class="org.datagear.dbmodel.GenericDatabaseModelResolver">
 		<property name="devotedDatabaseModelResolvers">
 			<list>
@@ -181,6 +183,7 @@
 					<property name="primitiveModelResolver" ref="primitiveModelResolver" />
 					<property name="columnConverterResolver" ref="columnConverterResolver" />
 					<property name="conversionService" ref="conversionService" />
+					<property name="modelNameResolver" ref="modelNameResolver" />
 				</bean>
 			</list>
 		</property>
@@ -188,6 +191,7 @@
 	
 	<bean id="cachedDbModelFactory" class="org.datagear.web.util.CachedDbModelFactoryImpl" init-method="init">
 		<property name="databaseModelResolver" ref="databaseModelResolver" />
+		<property name="modelNameResolver" ref="modelNameResolver" />
 	</bean>
 	
 	<bean id="dialectSource" class="org.datagear.persistence.support.DefaultDialectSource">

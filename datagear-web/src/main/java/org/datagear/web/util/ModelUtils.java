@@ -188,83 +188,20 @@ public class ModelUtils
 	}
 
 	/**
-	 * 获取指定{@linkplain PropertyPath}的{@linkplain Property}。
-	 * 
-	 * @param model
-	 * @param propertyPath
-	 * @return
-	 */
-	// public static Property getProperty(Model model, PropertyPath
-	// propertyPath)
-	// {
-	// Property property = null;
-	//
-	// Model parent = model;
-	//
-	// for (int i = 0, len = propertyPath.length(); i < len; i++)
-	// {
-	// if (propertyPath.isElement(i))
-	// continue;
-	// else if (propertyPath.isProperty(i))
-	// {
-	// String pname = propertyPath.getPropertyName(i);
-	//
-	// property = model.getProperty(pname);
-	//
-	// if (property == null)
-	// throw new IllegalPropertyPathException("[" + propertyPath + "] is
-	// illegal, no Property named ["
-	// + pname + "] found in Model [" + parent + "]");
-	//
-	// if (i < len - 1)
-	// {
-	// if (MU.isConcreteProperty(property))
-	// parent = property.getModel();
-	// else if (MU.isAbstractedProperty(property))
-	// {
-	// if (!propertyPath.hasPropertyConcreteModelName(i))
-	// throw new IllegalPropertyPathException("[" + propertyPath
-	// + "] is illegal, concrete property model name should be defined after ["
-	// + pname
-	// + "]");
-	//
-	// String pcmn = propertyPath.getPropertyConcreteModelName(i);
-	//
-	// Model myModel = MU.getModel(MU.getModels(property), pcmn);
-	//
-	// if (myModel == null)
-	// throw new IllegalPropertyPathException("[" + propertyPath
-	// + "] is illegal, concrete property model not found of name [" + pcmn +
-	// "]");
-	//
-	// parent = myModel;
-	// }
-	// else
-	// throw new UnsupportedOperationException();
-	// }
-	// }
-	// else
-	// throw new UnsupportedOperationException();
-	// }
-	//
-	// return property;
-	// }
-
-	/**
-	 * 获取指定{@linkplain PropertyPath}的{@linkplain NameLabel}文本值。
+	 * 获取指定{@linkplain PropertyPath}的展示名称。
 	 * 
 	 * @param model
 	 * @param propertyPath
 	 * @param locale
 	 * @return
 	 */
-	public static String getNameLabelValuePath(Model model, PropertyPath propertyPath, Locale locale)
+	public static String displayName(Model model, PropertyPath propertyPath, Locale locale)
 	{
-		return getNameLabelValuePath(model, propertyPath, locale, " - ", true);
+		return displayName(model, propertyPath, locale, " - ", true);
 	}
 
 	/**
-	 * 获取指定{@linkplain PropertyPath}的{@linkplain NameLabel}文本值。
+	 * 获取指定{@linkplain PropertyPath}的展示名称。
 	 * 
 	 * @param model
 	 * @param propertyPath
@@ -275,14 +212,14 @@ public class ModelUtils
 	 *            是否在开头添加{@code model}的标签。
 	 * @return
 	 */
-	public static String getNameLabelValuePath(Model model, PropertyPath propertyPath, Locale locale, String splitter,
+	public static String displayName(Model model, PropertyPath propertyPath, Locale locale, String splitter,
 			boolean appendModelLabel)
 	{
 		StringBuilder sb = new StringBuilder();
 
 		if (appendModelLabel)
 		{
-			sb.append(PropertyPath.escapePropertyName(getNameLabelValue(model, locale)));
+			sb.append(displayName(model, locale));
 			sb.append(splitter);
 		}
 
@@ -295,7 +232,6 @@ public class ModelUtils
 			else if (propertyPath.isProperty(i))
 			{
 				String pname = propertyPath.getPropertyName(i);
-
 				Property property = parent.getProperty(pname);
 
 				if (i < len - 1 && property == null)
@@ -307,9 +243,9 @@ public class ModelUtils
 
 				// 集合属性值size没有Property
 				if (property == null)
-					sb.append(PropertyPath.escapePropertyName(pname));
+					sb.append(pname);
 				else
-					sb.append(getNameLabelValue(property, locale));
+					sb.append(displayName(property, locale));
 
 				if (i < len - 1)
 				{
@@ -338,92 +274,54 @@ public class ModelUtils
 	}
 
 	/**
-	 * 获取{@linkplain Model}的{@linkplain NameLabel}文本值。
+	 * 获取{@linkplain Model}的展示名称。
 	 * 
 	 * @param model
 	 * @param locale
 	 * @return
 	 */
-	public static String getNameLabelValue(Model model, Locale locale)
+	public static String displayName(Model model, Locale locale)
 	{
-		String re = null;
-
-		String tableNameStr = null;
-		String labelStr = null;
-
-		TableName tableName = model.getFeature(TableName.class);
-		if (tableName != null)
-			tableNameStr = tableName.getValue();
-
 		NameLabel nameLabel = model.getFeature(NameLabel.class);
 
 		if (nameLabel != null)
 		{
 			Label label = nameLabel.getValue();
+
 			if (label != null)
-				labelStr = label.getValue(locale);
+				return label.getValue(locale);
 		}
 
-		// 两者相同，取一个即可
-		if (tableNameStr != null && tableNameStr.equalsIgnoreCase(labelStr))
-			labelStr = null;
+		TableName tableName = model.getFeature(TableName.class);
+		if (tableName != null)
+			return tableName.getValue();
 
-		if (tableNameStr == null || tableNameStr.isEmpty())
-			re = labelStr;
-		else if (labelStr == null || labelStr.isEmpty())
-			re = tableNameStr;
-		else
-			re = tableNameStr + "(" + labelStr + ")";
-
-		if (re == null || re.isEmpty())
-			re = model.getName();
-
-		return re;
+		return model.getName();
 	}
 
 	/**
-	 * 获取{@linkplain Property}的{@linkplain NameLabel}文本值。
+	 * 获取{@linkplain Property}的展示名称。
 	 * 
 	 * @param property
 	 * @param locale
 	 * @return
 	 */
-	public static String getNameLabelValue(Property property, Locale locale)
+	public static String displayName(Property property, Locale locale)
 	{
-		String re = null;
+		NameLabel nameLabel = property.getFeature(NameLabel.class);
 
-		String columnName = null;
-		String nameLabel = null;
+		if (nameLabel != null)
+		{
+			Label label = nameLabel.getValue();
+
+			if (label != null)
+				return label.getValue(locale);
+		}
 
 		ColumnName columnNameFeature = property.getFeature(ColumnName.class);
 		if (columnNameFeature != null)
-			columnName = columnNameFeature.getValue();
+			return columnNameFeature.getValue();
 
-		NameLabel nameLabelFeature = property.getFeature(NameLabel.class);
-
-		if (nameLabelFeature != null)
-		{
-			Label label = nameLabelFeature.getValue();
-			if (label != null)
-				nameLabel = label.getValue(locale);
-		}
-
-		// 两者相同，取一个即可
-		if (columnName != null && columnName.equalsIgnoreCase(nameLabel))
-			nameLabel = null;
-
-		if (columnName == null || columnName.isEmpty())
-			re = nameLabel;
-		else if (nameLabel == null || nameLabel.isEmpty())
-			re = columnName;
-		else
-			re = columnName + "(" + nameLabel + ")";
-
-		if (re == null || re.isEmpty())
-			re = property.getName();
-
-		re = PropertyPath.escapePropertyName(re);
-
-		return re;
+		return property.getName();
 	}
 }

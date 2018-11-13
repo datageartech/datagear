@@ -612,6 +612,9 @@
 		 */
 		escapePropertyNameForDataTables : function(propertyName)
 		{
+			return propertyName;
+			
+			/* 后台dbmodel已经限定了propertyName不会包含特殊字符，不再需要此逻辑
 			var pn = "";
 			
 			for(var i=0; i<propertyName.length; i++)
@@ -627,6 +630,7 @@
 			}
 			
 			return pn;
+			*/
 		},
 		
 		/**
@@ -634,6 +638,9 @@
 		 */
 		unescapePropertyNameForDataTables : function(propertyName)
 		{
+			return propertyName;
+			
+			/* 后台dbmodel已经限定了propertyName不会包含特殊字符，不再需要此逻辑
 			var pn = "";
 			
 			for(var i=0; i<propertyName.length; i++)
@@ -657,6 +664,7 @@
 			}
 			
 			return pn;
+			*/
 		},
 		
 		/**
@@ -692,7 +700,7 @@
 				
 				columns.push(
 				{
-					title: $.model.propertyLabelHtml(property, "a"),
+					title: $.model.displayInfoHtml(property, "a"),
 					data: $.escapePropertyNameForDataTables(propName),
 					propertyIndex: i,
 					stringDisplayThreshold : options.stringDisplayThreshold,
@@ -736,23 +744,58 @@
 		/**
 		 * 构建查询条件Autocomplete组件的“source”选项值。
 		 * 
-		 * @param propertyPathNameLabels
+		 * @param propertyPathDisplayNames
 		 */
-		buildSearchConditionAutocompleteSource : function(propertyPathNameLabels)
+		buildSearchConditionAutocompleteSource : function(propertyPathDisplayNames)
 		{
 			var source = [];
 			
-			if(!propertyPathNameLabels)
+			if(!propertyPathDisplayNames)
 				return source;
 			
-			for(var i=0; i<propertyPathNameLabels.length; i++)
+			for(var i=0; i<propertyPathDisplayNames.length; i++)
 			{
-				var ppnl = propertyPathNameLabels[i];
+				var ppdn = propertyPathDisplayNames[i];
 				
-				source.push({label : ppnl.nameLabel, value : ppnl.propertyPath});
+				source.push({label : ppdn.displayName, value : ppdn.displayName, propertyPath : ppdn.propertyPath});
 			}
 			
 			return source;
+		},
+		
+		/**
+		 * 将展示名称查询条件字符串转换为属性路径查询条件字符串。
+		 * 
+		 * @param conditionSource 条件自动完成源数组，元素必须有"propertyPath"属性。
+		 * @param condition 展示名称查询条件字符串
+		 */
+		convertToPropertyPathCondtion : function(conditionSource, condition)
+		{
+			if(!condition)
+				return condition;
+			
+			var conditionSourceNew = [];
+			conditionSourceNew = conditionSourceNew.concat(conditionSource);
+			conditionSourceNew.sort(function(s0, s1)
+			{
+				if(s0.value.length > s1.value.length)
+					return -1;
+				else if(s0.value.length == s1.value.length)
+					return 0;
+				else
+					return 1;
+			});
+			
+			var re = condition;
+			
+			for(var i=0; i<conditionSourceNew.length; i++)
+			{
+				var cc = conditionSourceNew[i];
+				
+				re = re.replace(cc.value, cc.propertyPath);
+			}
+			
+			return re;
 		},
 		
 		/**

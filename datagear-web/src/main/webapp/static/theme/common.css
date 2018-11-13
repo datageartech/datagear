@@ -265,7 +265,7 @@ table.dataTable thead th,
 table.dataTable tfoot th{
 	font-weight: normal;
 }
-table.dataTable thead .property-name-token{
+table.dataTable thead .display-info-token{
 	font-weight: bold;
 }
 table.dataTable .column-check{

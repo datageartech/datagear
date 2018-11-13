@@ -54,7 +54,7 @@
 					
 					var j = i + 1;
 					var hasCloseChar = false;
-
+					
 					for (; j < length; j++)
 					{
 						var cj = cs.charAt(j);
@@ -274,6 +274,9 @@
 		 */
 		escapePropertyName : function(propertyName)
 		{
+			return propertyName;
+			
+			/* 后台dbmodel已经限定了propertyName不会包含特殊字符，不再需要此逻辑
 			var epn = "";
 			
 			for(var i=0; i<propertyName.length; i++)
@@ -287,6 +290,7 @@
 			}
 			
 			return epn;
+			*/
 		},
 		
 		/**
@@ -295,6 +299,9 @@
 		 */
 		unescapePropertyName : function(propertyName)
 		{
+			return propertyName;
+			
+			/* 后台dbmodel已经限定了propertyName不会包含特殊字符，不再需要此逻辑
 			var pn = "";
 			
 			for(var i=0; i<propertyName.length; i++)
@@ -318,6 +325,7 @@
 			}
 			
 			return pn;
+			*/
 		},
 		
 		isKeyword : function(c)
@@ -812,7 +820,7 @@
 		text : function(label)
 		{
 			if(!label)
-				return "??????";
+				return "";
 			
 			//TODO 根据客户端语言，返回特定文本
 			return label.value;
@@ -1009,23 +1017,59 @@
 			
 			return epn;
 		},
+
+		/**
+		 * 获取模型/属性的展示名称。
+		 */
+		displayName : function(modelOrProperty)
+		{
+			var nameLabel = this.feature(modelOrProperty, "NameLabel");
+			
+			if(nameLabel && nameLabel.value)
+				return this.escapeHtml(this.text(nameLabel.value));
+			
+			var columnName = this.feature(modelOrProperty, "ColumnName");
+			
+			if(columnName && columnName.value)
+				return this.escapeHtml(columnName.value);
+			
+			var tableName = this.feature(modelOrProperty, "TableName");
+			
+			if(tableName && tableName.value)
+				return this.escapeHtml(tableName.value);
+			
+			return this.escapeHtml(modelOrProperty.name);
+		},
 		
 		/**
-		 * 获取属性标签HTML。
+		 * 获取模型/属性的展示描述。
+		 */
+		displayDesc : function(modelOrProperty)
+		{
+			var descLabel = this.feature(modelOrProperty, "DescLabel");
+			
+			if(descLabel && descLabel.value)
+				return this.escapeHtml(this.text(descLabel.value));
+			else
+				return "";
+		},
+		
+		/**
+		 * 获取展示HTML。
 		 * 
-		 * @param property
+		 * @param modelOrProperty
 		 * @param tagName 可选，HTML标签名
 		 */
-		propertyLabelHtml : function(property, tagName)
+		displayInfoHtml : function(modelOrProperty, tagName)
 		{
 			if(!tagName)
 				tagName = "span";
 			
-			var propName = this.escapeHtml(property.name);
-			var nameLabel = this.escapeHtml(this.featureNameLable(property));
-			var isToken = this.hasFeatureToken(property);
+			var displayName = this.displayName(modelOrProperty);
+			var displayDesc = this.displayDesc(modelOrProperty);
+			var isToken = this.hasFeatureToken(modelOrProperty);
 			
-			var label = "<"+tagName+" class='property-name" + (isToken ? " property-name-token" : "") + "' title='"+nameLabel+"'>"+propName +"</"+tagName+">";
+			var label = "<"+tagName+" class='display-info" + (isToken ? " display-info-token" : "") + "' title='"+displayDesc+"'>"+displayName +"</"+tagName+">";
 			
 			return label;
 		},
@@ -1143,37 +1187,6 @@
 				return re.substr(0, 97) + "...";
 			else
 				return re;
-		},
-		
-		/**
-		 * 获取Model或者Property的NameLabel特性。
-		 */
-		featureNameLable : function(modelOrProperty)
-		{
-			var label = "";
-			
-			var nameLabel = this.feature(modelOrProperty, "NameLabel");
-			if(!nameLabel)
-				label = modelOrProperty.name;
-			else
-				label = this.text(nameLabel.value);
-			
-			if(!label)
-				label = "";
-			
-			return label;
-		},
-		
-		/**
-		 * 获取Model或者Property的NameLabel特性。
-		 */
-		featureDescLable : function(modelOrProperty)
-		{
-			var descLabel = this.feature(modelOrProperty, "DescLabel");
-			if(!descLabel)
-				return modelOrProperty.name;
-			else
-				return this.text(descLabel.value);
 		},
 		
 		/**

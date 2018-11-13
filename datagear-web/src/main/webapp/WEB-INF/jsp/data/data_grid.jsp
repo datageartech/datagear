@@ -4,7 +4,7 @@
  */
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@page import="org.datagear.web.vo.PropertyPathNameLabel"%>
+<%@page import="org.datagear.web.vo.PropertyPathDisplayName"%>
 <%@ include file="../include/jsp_import.jsp" %>
 <%@ include file="../include/jsp_ajax_request.jsp" %>
 <%@ include file="../include/jsp_jstl.jsp" %>
@@ -17,12 +17,16 @@
 //是否只读操作，允许为null
 boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, "readonly")));
 //可用的查询条件列表，不允许为null
-List<PropertyPathNameLabel> conditionSource = (List<PropertyPathNameLabel>)request.getAttribute("conditionSource");
+List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)request.getAttribute("conditionSource");
 %>
 <html style="height:100%;">
 <head>
 <%@ include file="../include/html_head.jsp" %>
-<title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='query' /><fmt:message key='titleSeparator' /><%=ModelUtils.getNameLabelValue(model, WebUtils.getLocale(request))%></title>
+<title>
+	<%@ include file="../include/html_title_app_name.jsp" %>
+	<fmt:message key='query' /><fmt:message key='titleSeparator' />
+	<%=WebUtils.escapeHtml(ModelUtils.displayName(model, WebUtils.getLocale(request)))%>
+</title>
 </head>
 <body style="height:100%;">
 <%if(!ajaxRequest){%>

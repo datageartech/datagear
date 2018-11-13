@@ -191,12 +191,12 @@
 	
 	pageObj.tableToJstreeNode = function(table)
 	{
-		var text = $.escapeHtml(table.name);
+		var text = table.name;
 		
 		if(table.comment)
 			text = text + "("+table.comment+")";
 		
-		table.text = text;
+		table.text = $.escapeHtml(text);
 		table.children = false;
 		
 		return table;

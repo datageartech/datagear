@@ -24,7 +24,7 @@ public abstract class AbstractDbModelFactory implements DbModelFactory
 {
 	private DatabaseModelResolver databaseModelResolver;
 
-	private ModelNameResolver modelNameResolver = new SimpleModelNameResolver();
+	private ModelNameResolver modelNameResolver = new IdentifierModelNameResolver();
 
 	public AbstractDbModelFactory()
 	{

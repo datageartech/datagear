@@ -48,7 +48,7 @@ import org.datagear.web.util.FileUtils;
 import org.datagear.web.util.ModelUtils;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.FileInfo;
-import org.datagear.web.vo.PropertyPathNameLabel;
+import org.datagear.web.vo.PropertyPathDisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -244,7 +244,7 @@ public class DataController extends AbstractSchemaModelController
 
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager.getQueryResultMetaInfo(cn, model);
 
-				springModel.addAttribute("conditionSource", getPropertyPathNameLabels(request, queryResultMetaInfo));
+				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
 			}
 		}.execute();
 
@@ -495,7 +495,7 @@ public class DataController extends AbstractSchemaModelController
 
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("conditionSource", getPropertyPathNameLabels(request, queryResultMetaInfo));
+				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
 			}
 		}.execute();
 
@@ -759,7 +759,7 @@ public class DataController extends AbstractSchemaModelController
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
-				springModel.addAttribute("conditionSource", getPropertyPathNameLabels(request, queryResultMetaInfo));
+				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
 			}
 		}.execute();
 
@@ -831,7 +831,7 @@ public class DataController extends AbstractSchemaModelController
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("readonly", "true");
 				springModel.addAttribute("titleOperationMessageKey", "view");
-				springModel.addAttribute("conditionSource", getPropertyPathNameLabels(request, queryResultMetaInfo));
+				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
 			}
 		}.execute();
 
@@ -1223,32 +1223,32 @@ public class DataController extends AbstractSchemaModelController
 	}
 
 	/**
-	 * 获取{@linkplain QueryResultMetaInfo}的{@linkplain PropertyPathNameLabel}列表。
+	 * 获取{@linkplain QueryResultMetaInfo}的{@linkplain PropertyPathDisplayName}列表。
 	 * 
 	 * @param request
 	 * @param queryResultMetaInfo
 	 * @return
 	 */
-	protected List<PropertyPathNameLabel> getPropertyPathNameLabels(HttpServletRequest request,
+	protected List<PropertyPathDisplayName> getPropertyPathDisplayNames(HttpServletRequest request,
 			QueryResultMetaInfo queryResultMetaInfo)
 	{
-		List<PropertyPathNameLabel> propertyPathNameLabels = new ArrayList<PropertyPathNameLabel>();
+		List<PropertyPathDisplayName> propertyPathDisplayNames = new ArrayList<PropertyPathDisplayName>();
 
 		List<ColumnPropertyPath> columnPropertyPaths = queryResultMetaInfo.getColumnPropertyPaths();
 		for (ColumnPropertyPath columnPropertyPath : columnPropertyPaths)
 		{
-			PropertyPathNameLabel propertyPathNameLabel = new PropertyPathNameLabel();
+			PropertyPathDisplayName propertyPathDisplayName = new PropertyPathDisplayName();
 
 			String propertyPath = columnPropertyPath.getPropertyPath();
 
-			propertyPathNameLabel.setPropertyPath(propertyPath);
-			propertyPathNameLabel.setNameLabel(ModelUtils.getNameLabelValuePath(queryResultMetaInfo.getModel(),
+			propertyPathDisplayName.setPropertyPath(propertyPath);
+			propertyPathDisplayName.setDisplayName(ModelUtils.displayName(queryResultMetaInfo.getModel(),
 					PropertyPath.valueOf(propertyPath), WebUtils.getLocale(request), ".", false));
 
-			propertyPathNameLabels.add(propertyPathNameLabel);
+			propertyPathDisplayNames.add(propertyPathDisplayName);
 		}
 
-		return propertyPathNameLabels;
+		return propertyPathDisplayNames;
 	}
 
 	/**

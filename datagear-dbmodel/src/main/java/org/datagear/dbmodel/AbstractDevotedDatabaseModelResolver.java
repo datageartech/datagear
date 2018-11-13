@@ -92,7 +92,9 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 
 	private ConversionService conversionService;
 
-	private ModelNameResolver modelNameResolver = new SimpleModelNameResolver();
+	private ModelNameResolver modelNameResolver = new IdentifierModelNameResolver();
+
+	private PropertyNameResolver propertyNameResolver = new IdentifierPropertyNameResolver();
 
 	private RelationMapperResolver relationMapperResolver = new RelationMapperResolver();
 
@@ -184,6 +186,16 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	public void setModelNameResolver(ModelNameResolver modelNameResolver)
 	{
 		this.modelNameResolver = modelNameResolver;
+	}
+
+	public PropertyNameResolver getPropertyNameResolver()
+	{
+		return propertyNameResolver;
+	}
+
+	public void setPropertyNameResolver(PropertyNameResolver propertyNameResolver)
+	{
+		this.propertyNameResolver = propertyNameResolver;
 	}
 
 	public RelationMapperResolver getRelationMapperResolver()
@@ -466,10 +478,10 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			EntireTableInfo entireTableInfo, List<ImportedKeyInfo> importedKeyInfos)
 			throws DatabaseModelResolverException
 	{
-		String propertyName = importedKeyInfos.get(0).getPkTableName();
+		String propertyName0 = importedKeyInfos.get(0).getPkTableName();
+		String propertyName1 = joinFkColumnNameForImportedKeyInfo(importedKeyInfos);
 
-		if (modelBuilder.hasProperty(propertyName))
-			propertyName = joinFkColumnNameForImportedKeyInfo(importedKeyInfos);
+		String propertyName = this.propertyNameResolver.resolve(modelBuilder, propertyName0, propertyName1);
 
 		propertyBuilder.setName(propertyName);
 	}
@@ -737,19 +749,14 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	{
 		Label label = null;
 
-		String propertyTableName = importedKeyInfos.get(0).getPkTableName();
+		ImportedKeyInfo importedKeyInfo = importedKeyInfos.get(0);
 
-		// 仅有一次对属性表的关联（参考resolveModelTableEntityPropertyName(...)），那么直接取属性表注释。
-		if (propertyTableName.equals(propertyBuilder.getName()))
-		{
-			TableInfo propertyTableInfo = resolveTableInfo(cn, propertyTableName);
-			label = new Label(propertyTableInfo.getComment());
-		}
-		else
-		{
-			List<ColumnInfo> columnInfos = getColumnInfosForImportedKeyInfos(entireTableInfo, importedKeyInfos);
-			label = new Label(joinColumnComment(columnInfos));
-		}
+		String nameLabelValue = importedKeyInfo.getPkTableName();
+
+		if (modelBuilder.hasPropertyWithNameLableValue(nameLabelValue))
+			nameLabelValue = joinFkColumnNameForImportedKeyInfo(importedKeyInfos) + "_" + nameLabelValue;
+
+		label = new Label(nameLabelValue);
 
 		addNameLabelFeature(propertyBuilder, label);
 	}
@@ -832,10 +839,10 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			EntireTableInfo entireTableInfo, EntireTableInfo propertyEntireTableInfo,
 			List<ExportedKeyInfo> exportedKeyInfos) throws DatabaseModelResolverException
 	{
-		String propertyName = propertyEntireTableInfo.getTableInfo().getName();
+		String propertyName0 = propertyEntireTableInfo.getTableInfo().getName();
+		String propertyName1 = propertyName0 + "_" + joinFkColumnNameForExportedKeyInfo(exportedKeyInfos);
 
-		if (modelBuilder.hasProperty(propertyName))
-			propertyName = propertyName + "_" + joinFkColumnNameForExportedKeyInfo(exportedKeyInfos);
+		String propertyName = this.propertyNameResolver.resolve(modelBuilder, propertyName0, propertyName1);
 
 		propertyBuilder.setName(propertyName);
 	}
@@ -1149,18 +1156,13 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		Label label = null;
 
 		TableInfo propertyTableInfo = propertyEntireTableInfo.getTableInfo();
-		String propertyTableName = propertyTableInfo.getName();
 
-		// 仅有一次对属性表的关联（参考resolvePropertyTablePropertyName(...)），那么直接取属性表注释。
-		if (propertyTableName.equals(propertyBuilder.getName()))
-		{
-			label = new Label(propertyTableInfo.getComment());
-		}
-		else
-		{
-			List<ColumnInfo> columnInfos = getColumnInfosForExportedKeyInfos(entireTableInfo, exportedKeyInfos);
-			label = new Label(joinColumnComment(columnInfos));
-		}
+		String nameLabelValue = propertyTableInfo.getName();
+
+		if (modelBuilder.hasPropertyWithNameLableValue(nameLabelValue))
+			nameLabelValue = joinFkColumnNameForExportedKeyInfo(exportedKeyInfos) + "_" + nameLabelValue;
+
+		label = new Label(nameLabelValue);
 
 		addNameLabelFeature(propertyBuilder, label);
 	}
@@ -1265,10 +1267,10 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			EntireTableInfo propertyEntireTableInfo, List<ImportedKeyInfo> modelImportedKeyInfos,
 			List<ImportedKeyInfo> propertyImportedKeyInfos) throws DatabaseModelResolverException
 	{
-		String propertyName = propertyEntireTableInfo.getTableInfo().getName();
+		String propertyName0 = propertyEntireTableInfo.getTableInfo().getName();
+		String propertyName1 = joinEntireTableInfo.getTableInfo().getName();
 
-		if (modelBuilder.hasProperty(propertyName))
-			propertyName = joinEntireTableInfo.getTableInfo().getName();
+		String propertyName = this.propertyNameResolver.resolve(modelBuilder, propertyName0, propertyName1);
 
 		propertyBuilder.setName(propertyName);
 	}
@@ -1565,18 +1567,16 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	{
 		Label label = null;
 
-		TableInfo propertyTableInfo = propertyEntireTableInfo.getTableInfo();
-		String propertyTableName = propertyTableInfo.getName();
+		String nameLabelValue = propertyEntireTableInfo.getTableInfo().getName();
 
-		// 仅有一次对属性表的关联（参考resolveJoinTableEntityPropertyName(...)），那么直接取属性表注释。
-		if (propertyTableName.equals(propertyBuilder.getName()))
-		{
-			label = new Label(propertyTableInfo.getComment());
-		}
-		else
-		{
-			label = new Label(joinEntireTableInfo.getTableInfo().getComment());
-		}
+		if (modelBuilder.hasPropertyWithNameLableValue(nameLabelValue))
+			nameLabelValue = joinEntireTableInfo.getTableInfo().getName();
+
+		if (modelBuilder.hasPropertyWithNameLableValue(nameLabelValue))
+			nameLabelValue = joinEntireTableInfo.getTableInfo().getName() + "_"
+					+ propertyEntireTableInfo.getTableInfo().getName();
+
+		label = new Label(nameLabelValue);
 
 		addNameLabelFeature(propertyBuilder, label);
 	}
@@ -1687,7 +1687,9 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			EntireTableInfo entireTableInfo, ColumnInfo columnInfo, int columnIndex)
 			throws DatabaseModelResolverException
 	{
-		propertyBuilder.setName(columnInfo.getName());
+		String propertyName = this.propertyNameResolver.resolve(modelBuilder, columnInfo.getName());
+
+		propertyBuilder.setName(propertyName);
 	}
 
 	/**
@@ -1958,11 +1960,10 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			EntireTableInfo entireTableInfo, ColumnInfo columnInfo, int columnIndex)
 			throws DatabaseModelResolverException
 	{
-		String nameLabel = columnInfo.getComment();
-		if (nameLabel == null || nameLabel.isEmpty())
-			nameLabel = columnInfo.getName();
+		String nameLabelValue = columnInfo.getName();
 
-		Label label = new Label(nameLabel);
+		Label label = new Label(nameLabelValue);
+
 		addNameLabelFeature(propertyBuilder, label);
 	}
 
@@ -2587,37 +2588,6 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		}
 	}
 
-	/**
-	 * 连接{@linkplain ColumnInfo#getComment()}。
-	 * 
-	 * @param columnInfos
-	 * @return
-	 */
-	protected String joinColumnComment(List<ColumnInfo> columnInfos)
-	{
-		int size = columnInfos.size();
-
-		if (size == 1)
-			return columnInfos.get(0).getComment();
-		else
-		{
-			StringBuilder sb = new StringBuilder();
-
-			for (int i = 0; i < size; i++)
-			{
-				if (sb.length() > 0)
-					sb.append("_");
-
-				String myComment = columnInfos.get(i).getComment();
-
-				if (myComment != null && !myComment.isEmpty())
-					sb.append(myComment);
-			}
-
-			return sb.toString();
-		}
-	}
-
 	protected ExportedFkInfo toExportedFkInfo(ExportedKeyInfo exportedKeyInfo)
 	{
 		return new ExportedFkInfo(exportedKeyInfo.getFkTableName(), exportedKeyInfo.getFkColumnName());
@@ -3103,7 +3073,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class ModelBuilder extends AbstractFeaturedBuilder
+	protected static class ModelBuilder extends AbstractFeaturedBuilder implements PropertyNameContext
 	{
 		private DefaultModel model;
 
@@ -3260,6 +3230,37 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			}
 
 			return false;
+		}
+
+		public boolean hasPropertyWithNameLableValue(String nameLabelValue)
+		{
+			if (this.properties == null)
+				return false;
+
+			for (Property property : this.properties)
+			{
+				NameLabel nameLabel = property.getFeature(NameLabel.class);
+
+				if (nameLabel == null)
+					continue;
+
+				if (nameLabelValue.equals(nameLabel.getValue().getValue()))
+					return true;
+			}
+
+			return false;
+		}
+
+		@Override
+		public String getModelName()
+		{
+			return this.model.getName();
+		}
+
+		@Override
+		public boolean isDuplicate(String propertyName)
+		{
+			return this.hasProperty(propertyName);
 		}
 	}
 

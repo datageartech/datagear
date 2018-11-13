@@ -49,11 +49,13 @@ pageObj.conditionAutocompleteSource = undefined;
 	
 	pageObj.getSearchParam = function()
 	{
+		var nameLableCondition = $.trim(pageObj.conditionTextarea.val());
+		
 		var param =
 		{
 			"keyword" : $.trim(pageObj.keywordInput.val()),
 			"notLike" : $.trim(pageObj.notLikeInput.val()),
-			"condition" : $.trim(pageObj.conditionTextarea.val())
+			"condition" : $.convertToPropertyPathCondtion(pageObj.conditionAutocompleteSource, nameLableCondition)
 		};
 		
 		return param;

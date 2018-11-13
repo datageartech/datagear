@@ -7,29 +7,29 @@ package org.datagear.web.vo;
 import java.io.Serializable;
 
 /**
- * 属性路径及其名字标签信息。
+ * 属性路径及其展示名称。
  * 
  * @author datagear@163.com
  *
  */
-public class PropertyPathNameLabel implements Serializable
+public class PropertyPathDisplayName implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	private String propertyPath;
 
-	private String nameLabel;
+	private String displayName;
 
-	public PropertyPathNameLabel()
+	public PropertyPathDisplayName()
 	{
 		super();
 	}
 
-	public PropertyPathNameLabel(String propertyPath, String nameLabel)
+	public PropertyPathDisplayName(String propertyPath, String displayName)
 	{
 		super();
 		this.propertyPath = propertyPath;
-		this.nameLabel = nameLabel;
+		this.displayName = displayName;
 	}
 
 	public String getPropertyPath()
@@ -42,19 +42,19 @@ public class PropertyPathNameLabel implements Serializable
 		this.propertyPath = propertyPath;
 	}
 
-	public String getNameLabel()
+	public String getDisplayName()
 	{
-		return nameLabel;
+		return displayName;
 	}
 
-	public void setNameLabel(String nameLabel)
+	public void setDisplayName(String displayName)
 	{
-		this.nameLabel = nameLabel;
+		this.displayName = displayName;
 	}
 
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [propertyPath=" + propertyPath + ", nameLabel=" + nameLabel + "]";
+		return getClass().getSimpleName() + " [propertyPath=" + propertyPath + ", displayName=" + displayName + "]";
 	}
 }
