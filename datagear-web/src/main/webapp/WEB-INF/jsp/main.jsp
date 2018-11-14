@@ -30,7 +30,7 @@
 			+"<div class='category-bar category-bar-"+'#'+"{schemaId}'></div>"
 			+"</li>";
 	
-	pageObj.addWorkTab = function(tabId, label, schema, modelName)
+	pageObj.addWorkTab = function(tabId, label, schema, tableName)
 	{
 		var schemaId = schema.id;
 		var schemaTitle = schema.title;
@@ -46,88 +46,97 @@
 	    }
 	    else
 	    {
-	    	$.get(contextPath + $.toPath("data", schemaId, modelName, "query"), function(data)
-	    	{
-	    		uiTabsNav.show();
-	    		
-	    		var li = $("> li > a[href='#"+tabId+"']", uiTabsNav);
-	    		var tabContentDiv = $("#"+tabId, mainTabs);
-	    		
-	    		//防止双击导致创建两次而引起界面错乱
-	    		if(li.length == 0)
-	    		{
-	    			li = $(pageObj.workTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, label).replace(/#\{schemaId\}/g, schemaId)).appendTo(uiTabsNav);
-	    			
-	    			if(!li.attr("id"))
-	    				li.attr("id", $.uid("main-tab-"));
-	    			
-	    			li.attr("schema-id", schemaId);
-	    			li.attr("model-name", modelName);
-	    			li.attr("title", schemaTitle +" : " + modelName);
-	    		}
-	    	    if(tabContentDiv.length == 0)
-	    	    	tabContentDiv = $("<div id='" + tabId + "'></div>").appendTo(mainTabs);
-	    	    
-	    	    mainTabs.tabs("refresh").tabs( "option", "active",  $("> li", uiTabsNav).length - 1);
-	    	    
-	    	    tabContentDiv.css("top", pageObj.evalTabPanelTop(mainTabs));
-	    	    tabContentDiv.html(data);
-	    	    
-	    	    $(".tab-operation .ui-icon-close", li).click(function()
-	    	    {
-	    	    	var li = $(this).parent().parent();
-	    	    	var tabId = $("a", li).attr("href");
-	    	    	
-	    	    	$(tabId, mainTabs).remove();
-	    	    	li.remove();
-	    	    	
-	    	    	mainTabs.tabs("refresh");
-	    	    	pageObj.refreshTabsNav(mainTabs);
-	    	    	 
-	 				if($("li", uiTabsNav).length == 0)
-	 					uiTabsNav.hide();
-	    	    });
-	    	    
-	    	    $(".tab-operation .tab-operation-more", li).click(function()
-	    	    {
-	    	    	var li = $(this).parent().parent();
-	    	    	var tabId = $("a", li).attr("href");
-	    	    	
-	    	    	pageObj.element("#tabMoreOperationMenuParent").show().css("left", "0px").css("top", "0px")
-	    	    		.position({"my" : "left top+1", "at": "right bottom", "of" : $(this), "collision": "flip flip"});
-
-	    	    	var menuItemDisabled = {};
-	    	    	
-	    	    	var hasPrev = (li.prev().length > 0);
-	    	    	var hasNext = (li.next().length > 0);
-	    	    	
-	    	    	menuItemDisabled[".tab-operation-close-left"] = !hasPrev;
-	    	    	menuItemDisabled[".tab-operation-close-right"] = !hasNext;
-	    	    	menuItemDisabled[".tab-operation-close-other"] = !hasPrev && !hasNext;
-	    	    	
-	    	    	var menu = pageObj.element("#tabMoreOperationMenu");
-	    	    	
-	    	    	for(var selector in menuItemDisabled)
-	    	    	{
-	    	    		if(menuItemDisabled[selector])
-	    	    			$(selector, menu).addClass("ui-state-disabled");
-	    	    		else
-	    	    			$(selector, menu).removeClass("ui-state-disabled");
-	    	    	}
-	    	    	
-	    	    	menu.attr("tab-id", tabId)
-	    	    		.attr("schema-id", li.attr("schema-id")).attr("model-name", li.attr("model-name"));
-	    	    });
-	    	});
+	    	var tooltipId = $.tipInfo("<fmt:message key='loading' />", -1);
+	    	$.ajax(
+			{
+				url : contextPath + $.toPath("data", schemaId, tableName, "query"), 
+	    		success:function(data)
+		    	{
+		    		uiTabsNav.show();
+		    		
+		    		var li = $("> li > a[href='#"+tabId+"']", uiTabsNav);
+		    		var tabContentDiv = $("#"+tabId, mainTabs);
+		    		
+		    		//防止双击导致创建两次而引起界面错乱
+		    		if(li.length == 0)
+		    		{
+		    			li = $(pageObj.workTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, label).replace(/#\{schemaId\}/g, schemaId)).appendTo(uiTabsNav);
+		    			
+		    			if(!li.attr("id"))
+		    				li.attr("id", $.uid("main-tab-"));
+		    			
+		    			li.attr("schema-id", schemaId);
+		    			li.attr("table-name", tableName);
+		    			li.attr("title", schemaTitle +" : " + tableName);
+		    		}
+		    	    if(tabContentDiv.length == 0)
+		    	    	tabContentDiv = $("<div id='" + tabId + "'></div>").appendTo(mainTabs);
+		    	    
+		    	    mainTabs.tabs("refresh").tabs( "option", "active",  $("> li", uiTabsNav).length - 1);
+		    	    
+		    	    tabContentDiv.css("top", pageObj.evalTabPanelTop(mainTabs));
+		    	    tabContentDiv.html(data);
+		    	    
+		    	    $(".tab-operation .ui-icon-close", li).click(function()
+		    	    {
+		    	    	var li = $(this).parent().parent();
+		    	    	var tabId = $("a", li).attr("href");
+		    	    	
+		    	    	$(tabId, mainTabs).remove();
+		    	    	li.remove();
+		    	    	
+		    	    	mainTabs.tabs("refresh");
+		    	    	pageObj.refreshTabsNav(mainTabs);
+		    	    	 
+		 				if($("li", uiTabsNav).length == 0)
+		 					uiTabsNav.hide();
+		    	    });
+		    	    
+		    	    $(".tab-operation .tab-operation-more", li).click(function()
+		    	    {
+		    	    	var li = $(this).parent().parent();
+		    	    	var tabId = $("a", li).attr("href");
+		    	    	
+		    	    	pageObj.element("#tabMoreOperationMenuParent").show().css("left", "0px").css("top", "0px")
+		    	    		.position({"my" : "left top+1", "at": "right bottom", "of" : $(this), "collision": "flip flip"});
+	
+		    	    	var menuItemDisabled = {};
+		    	    	
+		    	    	var hasPrev = (li.prev().length > 0);
+		    	    	var hasNext = (li.next().length > 0);
+		    	    	
+		    	    	menuItemDisabled[".tab-operation-close-left"] = !hasPrev;
+		    	    	menuItemDisabled[".tab-operation-close-right"] = !hasNext;
+		    	    	menuItemDisabled[".tab-operation-close-other"] = !hasPrev && !hasNext;
+		    	    	
+		    	    	var menu = pageObj.element("#tabMoreOperationMenu");
+		    	    	
+		    	    	for(var selector in menuItemDisabled)
+		    	    	{
+		    	    		if(menuItemDisabled[selector])
+		    	    			$(selector, menu).addClass("ui-state-disabled");
+		    	    		else
+		    	    			$(selector, menu).removeClass("ui-state-disabled");
+		    	    	}
+		    	    	
+		    	    	menu.attr("tab-id", tabId)
+		    	    		.attr("schema-id", li.attr("schema-id")).attr("table-name", li.attr("table-name"));
+		    	    });
+    			},
+	        	complete : function()
+	        	{
+	        		$.closeTip(tooltipId);
+	        	}
+			});
 	    }
 	};
 	
-	pageObj.genTabId = function(schemaId, modelName)
+	pageObj.genTabId = function(schemaId, tableName)
 	{
 		var map = (pageObj.genTabIdMap || (pageObj.genTabIdMap = {}));
 		
-		//不能直接使用这个key作为元素ID，因为modelName中可能存在与jquery冲突的字符，比如'$'
-		var key = schemaId +"_" + modelName;
+		//不能直接使用这个key作为元素ID，因为tableName中可能存在与jquery冲突的字符，比如'$'
+		var key = schemaId +"_" + tableName;
 		var value = map[key];
 		
 		if(value == undefined)
@@ -566,10 +575,10 @@
 							
 							var schemaId = schema.id;
 				        	var schemaTitle = schema.title;
-				        	var modelName = selNode.original.name;
+				        	var tableName = selNode.original.name;
 				        	
 				        	var tooltipId;
-				        	$.model.load(schemaId, modelName,
+				        	$.model.load(schemaId, tableName,
 				    	    {
 				        		beforeSend : function beforeSend(XHR)
 				        		{
@@ -577,7 +586,7 @@
 				        		},
 				        		success :  function(model)
 				        		{
-					        		var tabId = pageObj.genTabId(schemaId, modelName);
+					        		var tabId = pageObj.genTabId(schemaId, tableName);
 					        		
 					        		var mainTabs = pageObj.element("#mainTabs");
 					        		var uiTabsNav = mainTabs.find(".ui-tabs-nav");
@@ -585,7 +594,7 @@
 					        	    var prelia = $("> li > a[href='#"+tabId+"']", uiTabsNav);
 					        	    if(prelia.length > 0)
 					        	    {
-					        	    	$.get(contextPath + $.toPath("data", schemaId, modelName, "query"), function(data)
+					        	    	$.get(contextPath + $.toPath("data", schemaId, tableName, "query"), function(data)
 					        	    	{
 					        	    	    uiTabsNav.show();
 					        	    	    
@@ -698,24 +707,9 @@
 				
 				var schemaId = schema.id;
 	        	var schemaTitle = schema.title;
-	        	var modelName = data.node.original.name;
+	        	var tableName = data.node.original.name;
 	        	
-	        	var tooltipId;
-	        	$.model.on(schemaId, modelName,
-	        	{
-	        		beforeSend : function beforeSend(XHR)
-	        		{
-	        			tooltipId = $.tipInfo("<fmt:message key='loading' />", -1);
-	        		},
-	        		success : function(model)
-		        	{
-		        		pageObj.addWorkTab(pageObj.genTabId(schemaId, modelName), data.node.text, schema, modelName);
-		        	},
-		        	complete : function()
-		        	{
-		        		$.closeTip(tooltipId);
-		        	}
-	        	});
+				pageObj.addWorkTab(pageObj.genTabId(schemaId, tableName), data.node.text, schema, tableName);
 			}
 			else if(pageObj.isNextPageNode(data.node))
 			{
@@ -925,7 +919,7 @@
 			{
 				var item = ui.item;
 				var schemaId = $(this).attr("schema-id");
-				var modelName = $(this).attr("model-name");
+				var tableName = $(this).attr("table-name");
 				var tabId = $(this).attr("tab-id");
 				
 				var mainTabs = pageObj.element("#mainTabs");
@@ -935,7 +929,7 @@
 				
 				if(item.hasClass("tab-operation-newwin"))
 				{
-					window.open(contextPath + $.toPath("data", schemaId, modelName, "query"));
+					window.open(contextPath + $.toPath("data", schemaId, tableName, "query"));
 				}
 				else if(item.hasClass("tab-operation-close-left"))
 				{

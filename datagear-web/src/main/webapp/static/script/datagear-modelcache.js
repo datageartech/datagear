@@ -7,6 +7,7 @@
  * 
  * 依赖:
  * jquery.js
+ * datagear-model.js
  */
 (function($, undefined)
 {
@@ -21,17 +22,17 @@
 		 * 加载模型的URL。
 		 * 
 		 * @param schemaId
-		 * @param modelName
+		 * @param tableName
 		 * @param reload 是否让后台重新载入
 		 */
-		loadModelUrl : function(schemaId, modelName, reload)
+		loadModelUrl : function(schemaId, tableName, reload)
 		{
 			var url = "";
 			
 			if(typeof(contextPath) == "string")
 				url = contextPath;
 			
-			url = url + "/schema/" + encodeURIComponent(schemaId) +"/model/" + encodeURIComponent(modelName);
+			url = url + "/schema/" + encodeURIComponent(schemaId) +"/model/" + encodeURIComponent(tableName);
 			
 			if(reload)
 				url = url +"?reload=1";
@@ -43,52 +44,52 @@
 		 * 在指定模型上执行callback操作。
 		 * 
 		 * @param schemaId
-		 * @param modelName
+		 * @param tableName
 		 * @param callback
 		 */
-		on : function(schemaId, modelName, callback)
+		on : function(schemaId, tableName, callback)
 		{
-			this._on(schemaId, modelName, callback, false);
+			this._on(schemaId, tableName, callback, false);
 		},
 		
 		/**
 		 * 获取指定名称的模型对象。
 		 * 
 		 * @param schemaId
-		 * @param modelName
+		 * @param tableName
 		 */
-		get : function(schemaId, modelName)
+		get : function(schemaId, tableName)
 		{
-			return this._getCacheModel(schemaId, modelName);
+			return this._getCacheModel(schemaId, tableName);
 		},
 		
 		/**
 		 * 载入指定名称的模型对象。
 		 * 
 		 * @param schemaId
-		 * @param modelName
+		 * @param tableName
 		 * @param callback
 		 */
-		load : function(schemaId, modelName, callback)
+		load : function(schemaId, tableName, callback)
 		{
-			this._on(schemaId, modelName, callback, true);
+			this._on(schemaId, tableName, callback, true);
 		},
 		
 		/**
 		 * 在指定模型上执行callback。
 		 * 
 		 * @param schemaId
-		 * @param modelName 模型名
+		 * @param tableName 表名
 		 * @param callback || options callback：载入回调函数，格式为：function(model){ ... }，options：ajax请求options
 		 * @param reload 是否让后台重新载入
 		 */
-		_on : function(schemaId, modelName, callback, reload)
+		_on : function(schemaId, tableName, callback, reload)
 		{
-			var model = this._getCacheModel(schemaId, modelName);
+			var model = this._getCacheModel(schemaId, tableName);
 			
 			if(model == null || reload)
 			{
-				var loadUrl = this.loadModelUrl(schemaId, modelName, reload);
+				var loadUrl = this.loadModelUrl(schemaId, tableName, reload);
 				
 				var _this = this;
 				
@@ -137,11 +138,11 @@
 			}
 		},
 		
-		_getCacheModel : function(schemaId, modelName)
+		_getCacheModel : function(schemaId, tableName)
 		{
 			var models = (this.schemaModels[schemaId] || (this.schemaModels[schemaId] = {}));
 			
-			return models[modelName];
+			return models[tableName];
 		},
 		
 		_setCacheModel : function(schemaId, model)
@@ -160,7 +161,13 @@
 				return;
 			
 			myPutContext[model.name] = true;
-			modelCache[model.name] = model;
+			
+			var tableName = $.model.featureTableName(model);
+			
+			if(!tableName)
+				return;
+			
+			modelCache[tableName] = model;
 			
 			var properties = model.properties;
 			for(var i=0; i<properties.length; i++)

@@ -14,40 +14,40 @@
 		schemaId : "${schema.id}",
 		
 		//当前模型名称
-		modelName : "${model.name}",
+		tableName : "${tableName}",
 
 		/**
 		 * 生成指定操作的URL。
 		 *
-		 * @param modelName 可选，操作对应的模型名，默认是当前模型名
+		 * @param tableName 可选，操作对应的表名，默认是当前表名
 		 * @param action 操作名称
 		 */
-		url : function(modelName, action)
+		url : function(tableName, action)
 		{
 			if(!action)
 			{
-				action = modelName;
-				modelName = this.modelName;
+				action = tableName;
+				tableName = this.tableName;
 			}
 			
-			return contextPath + $.toPath("data", this.schemaId, modelName, action);
+			return contextPath + $.toPath("data", this.schemaId, tableName, action);
 		},
 		
 		/**
-		 * 对指定名称的模型执行操作。
+		 * 对指定表名的模型执行操作。
 		 *
-		 * @param modelName 可选，操作对应的模型名，默认是当前模型名
+		 * @param tableName 可选，操作对应的表名，默认是当前表名
 		 * @param callback 操作函数，格式为：function(model){ ... }
 		 */
-		onModel : function(modelName, callback)
+		onModel : function(tableName, callback)
 		{
 			if(!callback)
 			{
-				callback = modelName;
-				modelName = this.modelName;
+				callback = tableName;
+				tableName = this.tableName;
 			}
 			
-			$.model.on(this.schemaId, modelName, callback);
+			$.model.on(this.schemaId, tableName, callback);
 		}
 	};
 	

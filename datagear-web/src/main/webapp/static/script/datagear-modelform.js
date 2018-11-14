@@ -275,7 +275,7 @@
 				var labeldiv=$("<div class='form-item-label' />").appendTo(itemdiv);
 				var valuediv=$("<div class='form-item-value' />").appendTo(itemdiv);
 				
-				$("<label />").text($.model.displayName(property)).attr("title", $.model.displayDesc(property)).appendTo(labeldiv);
+				$("<label />").html($.model.displayName(property)).attr("title", $.model.displayDesc(property)).appendTo(labeldiv);
 				
 				if($.model.hasFeatureNotReadable(property))
 				{

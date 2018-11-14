@@ -35,7 +35,7 @@ import org.springframework.web.context.support.ServletContextResource;
  */
 @Controller
 @RequestMapping("/schemaUrlBuilder")
-public class SchemaUrlBuilderController extends AbstractSchemaModelController implements ServletContextAware
+public class SchemaUrlBuilderController extends AbstractController implements ServletContextAware
 {
 	protected static final String LINE_SEPARATOR = System.getProperty("line.separator");
 

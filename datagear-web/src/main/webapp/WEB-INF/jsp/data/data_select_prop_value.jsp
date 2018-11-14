@@ -85,11 +85,11 @@ else
 		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, pageObj.propertyPath);
 		var property = propertyInfo.property;
 		var propertyModel = propertyInfo.model;
+		var propertyModelTableName = $.model.featureTableName(propertyModel);
 		
 		pageObj.mappedByWith = $.model.findMappedByWith(property, propertyModel);
 
 		pageObj.dataTableAjaxParamParent = pageObj.dataTableAjaxParam;
-		
 		pageObj.dataTableAjaxParam = function()
 		{
 			var param = pageObj.dataTableAjaxParamParent();
@@ -160,7 +160,7 @@ else
 				}
 			}
 			
-			pageObj.open(pageObj.url(propertyModel.name, "add"), options);
+			pageObj.open(pageObj.url(propertyModelTableName, "add"), options);
 		});
 		
 		pageObj.element("input[name=editButton]").click(function()
@@ -169,7 +169,7 @@ else
 			{
 				var data = {"data" : row};
 				
-				pageObj.open(pageObj.url(propertyModel.name, "edit"),
+				pageObj.open(pageObj.url(propertyModelTableName, "edit"),
 				{
 					data : data
 				});
@@ -182,7 +182,7 @@ else
 			{
 				var data = {"data" : row};
 				
-				pageObj.open(pageObj.url(propertyModel.name, "view"),
+				pageObj.open(pageObj.url(propertyModelTableName, "view"),
 				{
 					data : data
 				});

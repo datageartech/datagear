@@ -172,6 +172,7 @@ public abstract class AbstractSchemaModelController extends AbstractController
 			this._schema = getSchemaNotNull(request, response, schemaId);
 
 			springModel.addAttribute("schema", this._schema);
+			springModel.addAttribute("tableName", this.tableName);
 
 			Model model = getCachedDbModelFactory().getCachedModel(schemaId, tableName);
 

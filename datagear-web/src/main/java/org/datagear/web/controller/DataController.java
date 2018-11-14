@@ -228,13 +228,13 @@ public class DataController extends AbstractSchemaModelController
 		this.sqlTimeFormatter = sqlTimeFormatter;
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/query")
+	@RequestMapping("/{schemaId}/{tableName}/query")
 	public String query(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam(value = "page", required = false) Integer page,
+			@PathVariable("tableName") String tableName, @RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
 	{
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -251,16 +251,16 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_grid";
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/queryData")
+	@RequestMapping("/{schemaId}/{tableName}/queryData")
 	@ResponseBody
 	public PagingData<Object> queryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName) throws Throwable
+			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final PagingQuery pagingQuery = getPagingQuery(request);
 
 		ReturnExecutor<PagingData<Object>> executor = new ReturnExecutor<PagingData<Object>>(request, response,
-				springModel, schemaId, modelName, true)
+				springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected PagingData<Object> execute(HttpServletRequest request, HttpServletResponse response,
@@ -281,12 +281,12 @@ public class DataController extends AbstractSchemaModelController
 		return executor.execute();
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/add")
+	@RequestMapping("/{schemaId}/{tableName}/add")
 	public String add(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName) throws Throwable
+			@PathVariable("tableName") String tableName) throws Throwable
 	{
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -303,15 +303,15 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_form";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{modelName}/saveAdd", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName) throws Throwable
+			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		Object data = new ReturnExecutor<Object>(request, response, springModel, schemaId, modelName, false)
+		Object data = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
@@ -332,14 +332,14 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/edit")
+	@RequestMapping("/{schemaId}/{tableName}/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName) throws Throwable
+			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final Object dataParam = getParamObj(request, "data");
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -370,16 +370,16 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_form";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{modelName}/saveEdit", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName) throws Throwable
+			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final Object originalDataParam = getParamObj(request, "originalData");
 		final Object dataParam = getParamMap(request, "data");
 
-		Object data = new ReturnExecutor<Object>(request, response, springModel, schemaId, modelName, false)
+		Object data = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
@@ -402,15 +402,15 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
-	@RequestMapping(value = "/{schemaId}/{modelName}/delete", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName) throws Throwable
+			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final Object dataParam = getParamObj(request, "data");
 
-		int deleteCount = new ReturnExecutor<Integer>(request, response, springModel, schemaId, modelName, false)
+		int deleteCount = new ReturnExecutor<Integer>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Integer execute(HttpServletRequest request, HttpServletResponse response,
@@ -432,14 +432,14 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/view")
+	@RequestMapping("/{schemaId}/{tableName}/view")
 	public String view(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName) throws Throwable
+			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final Object dataParam = getParamObj(request, "data");
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -469,16 +469,16 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_form";
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/selectPropValue")
+	@RequestMapping("/{schemaId}/{tableName}/selectPropValue")
 	public String selectPropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath,
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath,
 			@RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -502,18 +502,18 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_select_prop_value";
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/selectPropValueData")
+	@RequestMapping("/{schemaId}/{tableName}/selectPropValueData")
 	@ResponseBody
 	public PagingData<Object> selectPropValueData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final PagingQuery pagingQuery = getPagingQuery(request);
 
 		PagingData<Object> propValueSourcePagingData = new ReturnExecutor<PagingData<Object>>(request, response,
-				springModel, schemaId, modelName, true)
+				springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected PagingData<Object> execute(HttpServletRequest request, HttpServletResponse response,
@@ -538,15 +538,15 @@ public class DataController extends AbstractSchemaModelController
 		return propValueSourcePagingData;
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/addSinglePropValue")
+	@RequestMapping("/{schemaId}/{tableName}/addSinglePropValue")
 	public String addSinglePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -567,17 +567,17 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_prop_value_form";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{modelName}/saveAddSinglePropValue", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/saveAddSinglePropValue", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddSinglePropValue(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
+			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
 			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueParam = getParamMap(request, "propValue");
 
-		Object propValue = new ReturnExecutor<Object>(request, response, springModel, schemaId, modelName, false)
+		Object propValue = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
@@ -604,16 +604,16 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/editSinglePropValue")
+	@RequestMapping("/{schemaId}/{tableName}/editSinglePropValue")
 	public String editSinglePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final boolean clientOperation = isClientOperation(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -650,17 +650,17 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_prop_value_form";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{modelName}/saveEditSinglePropValue", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/saveEditSinglePropValue", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditSinglePropValue(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
+			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
 			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueParam = getParamMap(request, "propValue");
 
-		Object propValue = new ReturnExecutor<Object>(request, response, springModel, schemaId, modelName, false)
+		Object propValue = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
@@ -687,16 +687,16 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/viewSinglePropValue")
+	@RequestMapping("/{schemaId}/{tableName}/viewSinglePropValue")
 	public String viewSinglePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final boolean clientOperation = isClientOperation(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -733,15 +733,15 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_prop_value_form";
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/editMultiplePropValue")
+	@RequestMapping("/{schemaId}/{tableName}/editMultiplePropValue")
 	public String editMultiplePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath,
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath,
 			@RequestParam(value = "clientOperation", required = false) final Boolean clientOperation) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -766,11 +766,11 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_prop_value_grid";
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/queryMultiplePropValueData")
+	@RequestMapping("/{schemaId}/{tableName}/queryMultiplePropValueData")
 	@ResponseBody
 	public PagingData<Object> queryMultiplePropValueData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
@@ -778,7 +778,7 @@ public class DataController extends AbstractSchemaModelController
 		final PagingQuery pagingQuery = getPagingQuery(request);
 
 		PagingData<Object> pagingPropValue = new ReturnExecutor<PagingData<Object>>(request, response, springModel,
-				schemaId, modelName, true)
+				schemaId, tableName, true)
 		{
 			@Override
 			protected PagingData<Object> execute(HttpServletRequest request, HttpServletResponse response,
@@ -804,15 +804,15 @@ public class DataController extends AbstractSchemaModelController
 		return pagingPropValue;
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/viewMultiplePropValue")
+	@RequestMapping("/{schemaId}/{tableName}/viewMultiplePropValue")
 	public String viewMultiplePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -838,15 +838,15 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_prop_value_grid";
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/addMultiplePropValueElement")
+	@RequestMapping("/{schemaId}/{tableName}/addMultiplePropValueElement")
 	public String addMultiplePropValueElement(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -867,17 +867,17 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_prop_value_form";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{modelName}/saveAddMultiplePropValueElement", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/saveAddMultiplePropValueElement", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddMultiplePropValueElement(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
+			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
 			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propValue");
 
-		Object propValueElement = new ReturnExecutor<Object>(request, response, springModel, schemaId, modelName, false)
+		Object propValueElement = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
@@ -903,17 +903,17 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
-	@RequestMapping(value = "/{schemaId}/{modelName}/saveAddMultiplePropValueElements", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/saveAddMultiplePropValueElements", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddMultiplePropValueElements(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
+			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
 			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementsParam = getParamMap(request, "propValueElements");
 
-		int count = new ReturnExecutor<Integer>(request, response, springModel, schemaId, modelName, false)
+		int count = new ReturnExecutor<Integer>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Integer execute(HttpServletRequest request, HttpServletResponse response,
@@ -938,16 +938,16 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/editMultiplePropValueElement")
+	@RequestMapping("/{schemaId}/{tableName}/editMultiplePropValueElement")
 	public String editMultiplePropValueElement(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final boolean clientOperation = isClientOperation(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -985,17 +985,17 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_prop_value_form";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{modelName}/saveEditMultiplePropValueElement", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/saveEditMultiplePropValueElement", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditMultiplePropValueElement(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
+			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
 			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propValue");
 
-		Object propValueElement = new ReturnExecutor<Object>(request, response, springModel, schemaId, modelName, false)
+		Object propValueElement = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
@@ -1020,17 +1020,17 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
-	@RequestMapping(value = "/{schemaId}/{modelName}/deleteMultiplePropValueElements", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/deleteMultiplePropValueElements", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> deleteMultiplePropValueElements(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("modelName") String modelName,
+			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
 			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementsParam = getParamMap(request, "propValueElements");
 
-		int count = new ReturnExecutor<Integer>(request, response, springModel, schemaId, modelName, false)
+		int count = new ReturnExecutor<Integer>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Integer execute(HttpServletRequest request, HttpServletResponse response,
@@ -1055,16 +1055,16 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
-	@RequestMapping("/{schemaId}/{modelName}/viewMultiplePropValueElement")
+	@RequestMapping("/{schemaId}/{tableName}/viewMultiplePropValueElement")
 	public String viewMultiplePropValueElement(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final boolean clientOperation = isClientOperation(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, modelName, true)
+		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -1102,15 +1102,15 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_prop_value_form";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{modelName}/downloadSinglePropertyValueFile")
+	@RequestMapping(value = "/{schemaId}/{tableName}/downloadSinglePropertyValueFile")
 	public void downloadSinglePropertyValueFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("modelName") String modelName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		Object[] propValueInfo = new ReturnExecutor<Object[]>(request, response, springModel, schemaId, modelName, true)
+		Object[] propValueInfo = new ReturnExecutor<Object[]>(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected Object[] execute(HttpServletRequest request, HttpServletResponse response,
@@ -1154,7 +1154,7 @@ public class DataController extends AbstractSchemaModelController
 				}
 				else
 					throw new IllegalArgumentException(
-							"The property value [" + propertyPath + "] of [" + modelName + "] is not download-able");
+							"The property value [" + propertyPath + "] of [" + tableName + "] is not download-able");
 
 				out = response.getOutputStream();
 

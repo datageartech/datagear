@@ -1276,7 +1276,17 @@
 		{
 			return this.feature(property, "RelationMapper");
 		},
-
+		
+		/**
+		 * 获取模型对应的表名称。
+		 */
+		featureTableName : function(model)
+		{
+			var tableNameFeature = this.feature(model, "TableName");
+			
+			return tableNameFeature.value;
+		},
+		
 		/**
 		 * 判断模型类型是否是File。
 		 */
