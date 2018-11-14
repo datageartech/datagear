@@ -800,9 +800,9 @@
 							}
 							else
 								throw new Error();
-							
-							currentObj = myObj;
 						}
+						
+						currentObj = myObj;
 					}
 				}
 			}
