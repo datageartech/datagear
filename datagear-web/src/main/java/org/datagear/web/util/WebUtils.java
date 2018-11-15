@@ -193,11 +193,11 @@ public class WebUtils
 			if (c == '<')
 				sb.append("&lt;");
 			else if (c == '>')
-				sb.append("&gt;'");
+				sb.append("&gt;");
 			else if (c == '&')
-				sb.append("&amp;'");
+				sb.append("&amp;");
 			else if (c == '"')
-				sb.append("&quot;'");
+				sb.append("&quot;");
 			else
 				sb.append(c);
 		}

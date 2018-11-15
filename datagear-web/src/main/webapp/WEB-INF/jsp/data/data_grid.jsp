@@ -24,8 +24,12 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 <%@ include file="../include/html_head.jsp" %>
 <title>
 	<%@ include file="../include/html_title_app_name.jsp" %>
-	<fmt:message key='query' /><fmt:message key='titleSeparator' />
+	<fmt:message key='query' />
+	<fmt:message key='titleSeparator' />
 	<%=WebUtils.escapeHtml(ModelUtils.displayName(model, WebUtils.getLocale(request)))%>
+	<fmt:message key='bracketLeft' />
+	<%=WebUtils.escapeHtml(schema.getTitle())%>
+	<fmt:message key='bracketRight' />
 </title>
 </head>
 <body style="height:100%;">

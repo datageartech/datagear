@@ -67,7 +67,7 @@
 		    			
 		    			li.attr("schema-id", schemaId);
 		    			li.attr("table-name", tableName);
-		    			li.attr("title", schemaTitle +" : " + tableName);
+		    			li.attr("title", tableName + "<fmt:message key='bracketLeft' />" + schemaTitle + "<fmt:message key='bracketRight' />");
 		    		}
 		    	    if(tabContentDiv.length == 0)
 		    	    	tabContentDiv = $("<div id='" + tabId + "'></div>").appendTo(mainTabs);
