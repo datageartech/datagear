@@ -253,7 +253,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		
 					$.setGridPageHeightOption(options);
 					options.pinTitleButton = true;
-					pageObj.open(pageObj.url("selectPropValue?multiple"), options);
+					pageObj.open(pageObj.url("selectPropValue")+"?multiple", options);
 				});
 			<%}%>
 			
