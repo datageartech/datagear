@@ -233,16 +233,16 @@ public abstract class AbstractController
 	 * 
 	 * @param request
 	 * @param messageCode
-	 * @param exception
+	 * @param throwable
 	 * @param traceException
 	 * @param messageArgs
 	 */
-	protected void setOperationMessageForException(HttpServletRequest request, String messageCode, Exception exception,
+	protected void setOperationMessageForThrowable(HttpServletRequest request, String messageCode, Throwable throwable,
 			boolean traceException, Object... messageArgs)
 	{
 		OperationMessage operationMessage = buildOperationMessageFail(request, messageCode, messageArgs);
 		if (traceException)
-			operationMessage.setThrowable(exception);
+			operationMessage.setThrowable(throwable);
 
 		WebUtils.setOperationMessage(request, operationMessage);
 	}

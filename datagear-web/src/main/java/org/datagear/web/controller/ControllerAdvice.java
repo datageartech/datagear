@@ -149,7 +149,7 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceSqlExpressionErrorException(HttpServletRequest request, HttpServletResponse response,
 			SqlExpressionErrorException exception)
 	{
-		setOperationMessageForException(request, exception, true);
+		setOperationMessageForExceptionCause(request, exception);
 
 		return ERROR_PAGE_URL;
 	}
@@ -269,7 +269,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionEstablishConnectionException(HttpServletRequest request, HttpServletResponse response,
 			EstablishConnectionException exception)
 	{
-		setOperationMessageForException(request, exception, true);
+		setOperationMessageForExceptionCause(request, exception);
 
 		return ERROR_PAGE_URL;
 	}
@@ -279,7 +279,15 @@ public class ControllerAdvice extends AbstractController
 	{
 		String code = buildMessageCode(exception.getClass().getSimpleName());
 
-		setOperationMessageForException(request, code, exception, traceException, messageArgs);
+		setOperationMessageForThrowable(request, code, exception, traceException, messageArgs);
+	}
+
+	protected void setOperationMessageForExceptionCause(HttpServletRequest request, Exception exception,
+			Object... messageArgs)
+	{
+		String code = buildMessageCode(exception.getClass().getSimpleName());
+
+		setOperationMessageForThrowable(request, code, exception.getCause(), true, messageArgs);
 	}
 
 	@Override

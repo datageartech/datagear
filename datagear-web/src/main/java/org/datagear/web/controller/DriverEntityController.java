@@ -100,7 +100,7 @@ public class DriverEntityController extends AbstractController
 	{
 		String code = buildMessageCode("import." + IllegalImportDriverEntityFileFormatException.class.getSimpleName());
 
-		setOperationMessageForException(request, code, exception, false);
+		setOperationMessageForThrowable(request, code, exception, false);
 
 		return ERROR_PAGE_URL;
 	}
