@@ -25,6 +25,9 @@ public interface DatabaseInfoResolver
 
 	/**
 	 * 获取所有{@linkplain TableInfo}。
+	 * <p>
+	 * 此方法应该仅返回{@linkplain TableType#TABLE}、{@linkplain TableType#VIEW}的记录。
+	 * </p>
 	 * 
 	 * @param cn
 	 * @return

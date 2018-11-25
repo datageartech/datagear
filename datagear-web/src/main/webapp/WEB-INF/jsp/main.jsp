@@ -30,10 +30,12 @@
 			+"<div class='category-bar category-bar-"+'#'+"{schemaId}'></div>"
 			+"</li>";
 	
-	pageObj.addWorkTab = function(tabId, label, schema, tableName)
+	pageObj.addWorkTab = function(tabId, label, schema, tableInfo)
 	{
 		var schemaId = schema.id;
 		var schemaTitle = schema.title;
+		var tableName = tableInfo.name;
+		
 		
 		var mainTabs = pageObj.element("#mainTabs");
 		var uiTabsNav = mainTabs.find(".ui-tabs-nav");
@@ -65,9 +67,14 @@
 		    			if(!li.attr("id"))
 		    				li.attr("id", $.uid("main-tab-"));
 		    			
+		    			var lititle = (pageObj.isTableView(tableInfo) ? "<fmt:message key='main.tableType.view' />" : "<fmt:message key='main.tableType.table' />") + "<fmt:message key='colon' />" +tableName;
+    					if(tableInfo.comment)
+    						lititle += "<fmt:message key='bracketLeft' />" + tableInfo.comment + "<fmt:message key='bracketRight' />";
+    					lititle += "<fmt:message key='bracketLeft' />" + schemaTitle + "<fmt:message key='bracketRight' />";
+		    			
 		    			li.attr("schema-id", schemaId);
 		    			li.attr("table-name", tableName);
-		    			li.attr("title", tableName + "<fmt:message key='bracketLeft' />" + schemaTitle + "<fmt:message key='bracketRight' />");
+		    			li.attr("title", lititle);
 		    		}
 		    	    if(tabContentDiv.length == 0)
 		    	    	tabContentDiv = $("<div id='" + tabId + "'></div>").appendTo(mainTabs);
@@ -198,15 +205,27 @@
 		return (original.name != undefined && original.type != undefined);
 	};
 	
+	pageObj.isTableView = function(tableInfo)
+	{
+		return (tableInfo.type == "VIEW");
+	};
+	
 	pageObj.tableToJstreeNode = function(table)
 	{
 		var text = table.name;
 		
-		if(table.comment)
-			text = text + "("+table.comment+")";
-		
 		table.text = $.escapeHtml(text);
 		table.children = false;
+		
+		var licss = (pageObj.isTableView(table) ? "view-node" : "table-node");
+		table.li_attr = { "class" : licss };
+		
+		var atitle = (pageObj.isTableView(table) ? "<fmt:message key='main.tableType.view' />" : "<fmt:message key='main.tableType.table' />")
+					+"<fmt:message key='colon' />" + table.name;
+		if(table.comment)
+			atitle += "<fmt:message key='bracketLeft' />" + table.comment + "<fmt:message key='bracketRight' />";
+		
+		table.a_attr = { "title" :  atitle};
 		
 		return table;
 	};
@@ -221,7 +240,17 @@
 	
 	pageObj.createNextPageNode = function(pagingData)
 	{
-		var nextPageNode = {"text" : "<span class='more-table'><fmt:message key='main.moreTable' /></span>", "children" : false, "nextPageInfo" : { "page" : pagingData.page + 1, "pageSize" : pagingData.pageSize} };
+		var nextPageNode =
+		{
+			"text" : "<span class='more-table'><fmt:message key='main.moreTable' /></span>",
+			"children" : false,
+			"li_attr" : { "class" : "next-page-node" },
+			"nextPageInfo" :
+			{
+				"page" : pagingData.page + 1,
+				"pageSize" : pagingData.pageSize
+			}
+		};
 		
 		return nextPageNode;
 	};
@@ -709,7 +738,7 @@
 	        	var schemaTitle = schema.title;
 	        	var tableName = data.node.original.name;
 	        	
-				pageObj.addWorkTab(pageObj.genTabId(schemaId, tableName), data.node.text, schema, tableName);
+				pageObj.addWorkTab(pageObj.genTabId(schemaId, tableName), data.node.text, schema, data.node.original);
 			}
 			else if(pageObj.isNextPageNode(data.node))
 			{

@@ -222,6 +222,7 @@ form .form-foot .ui-button{
     vertical-align: middle;
     overflow: hidden;
     background-repeat: no-repeat;
+    margin-top: -3px;
 }
  .jstree-default .jstree-node > .jstree-icon{
     position: absolute;
@@ -246,6 +247,12 @@ form .form-foot .ui-button{
 }
 .jstree-default .jstree-leaf .jstree-themeicon{
 	background-position: -32px -96px;
+}
+.jstree-default .jstree-leaf.view-node .jstree-themeicon{
+	background-position: -112px -112px;
+}
+.jstree-default .jstree-leaf.next-page-node .jstree-themeicon{
+	background-position: -65px 0px;
 }
 .jstree-default .jstree-anchor > .jstree-themeicon-hidden{
 	background-image: none;

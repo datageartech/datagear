@@ -22,7 +22,8 @@ import org.datagear.connection.JdbcUtil;
  */
 public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedDatabaseInfoResolver
 {
-	protected static final String[] TABLE_TABLE_TYPES = new String[] { TableInfoResultSetSpec.TABLE_TYPE_TABLE };
+	protected static final String[] TABLE_TABLE_TYPES = new String[] { TableInfoResultSetSpec.TABLE_TYPE_TABLE,
+			TableInfoResultSetSpec.TABLE_TYPE_VIEW };
 
 	public AbstractDevotedDatabaseInfoResolver()
 	{

@@ -5,6 +5,8 @@
 package org.datagear.web.controller;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -247,6 +249,8 @@ public class SchemaController extends AbstractSchemaModelController
 			JdbcUtil.closeConnection(cn);
 		}
 
+		sortByTableName(tableInfos);
+
 		List<TableInfo> keywordTableInfos = findByKeyword(tableInfos, pagingQuery.getKeyword());
 
 		PagingData<TableInfo> pagingData = new PagingData<TableInfo>(pagingQuery.getPage(), keywordTableInfos.size(),
@@ -284,6 +288,16 @@ public class SchemaController extends AbstractSchemaModelController
 	}
 
 	/**
+	 * 将{@linkplain TableInfo}数组按照{@linkplain TableInfo#getName()}排序。
+	 * 
+	 * @param tableInfos
+	 */
+	protected void sortByTableName(TableInfo[] tableInfos)
+	{
+		Arrays.<TableInfo> sort(tableInfos, TABLE_INFO_SORT_BY_NAME_COMPARATOR);
+	}
+
+	/**
 	 * 根据表名称关键字查询{@linkplain TableInfo}列表。
 	 * 
 	 * @param tableInfos
@@ -301,4 +315,13 @@ public class SchemaController extends AbstractSchemaModelController
 			}
 		});
 	}
+
+	protected static Comparator<TableInfo> TABLE_INFO_SORT_BY_NAME_COMPARATOR = new Comparator<TableInfo>()
+	{
+		@Override
+		public int compare(TableInfo o1, TableInfo o2)
+		{
+			return o1.getName().compareTo(o2.getName());
+		}
+	};
 }
