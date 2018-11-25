@@ -4,6 +4,8 @@
 
 package org.datagear.web.controller;
 
+import java.sql.SQLException;
+
 import javax.mail.AuthenticationFailedException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -169,7 +171,10 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistencePersistenceException(HttpServletRequest request, HttpServletResponse response,
 			PersistenceException exception)
 	{
-		setOperationMessageForException(request, exception, true);
+		if (exception.getCause() instanceof SQLException)
+			setOperationMessageForExceptionCause(request, exception);
+		else
+			setOperationMessageForException(request, exception, true);
 
 		return ERROR_PAGE_URL;
 	}
