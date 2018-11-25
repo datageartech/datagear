@@ -9,10 +9,13 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.connection.JdbcUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 抽象{@linkplain DevotedDatabaseInfoResolver}。
@@ -22,6 +25,8 @@ import org.datagear.connection.JdbcUtil;
  */
 public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedDatabaseInfoResolver
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDevotedDatabaseInfoResolver.class);
+
 	protected static final String[] TABLE_TABLE_TYPES = new String[] { TableInfoResultSetSpec.TABLE_TYPE_TABLE,
 			TableInfoResultSetSpec.TABLE_TYPE_VIEW };
 
@@ -58,15 +63,119 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	}
 
 	@Override
+	public EntireTableInfo getEntireTableInfo(Connection cn, String tableName) throws DatabaseInfoResolverException
+	{
+		EntireTableInfo entireTableInfo = new EntireTableInfo();
+
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		TableInfo tableInfo = getTableInfo(cn, metaData, schema, tableName);
+		ColumnInfo[] columnInfos = getColumnInfos(cn, metaData, schema, tableName);
+		String[] primaryKeyColumnNames = getPrimaryKeyColumnNames(cn, metaData, schema, tableName);
+		String[][] uniqueKeyColumnNames = getUniqueKeyColumnNames(cn, metaData, schema, tableName);
+		ImportedKeyInfo[] importedKeyInfos = getImportedKeyInfos(cn, metaData, schema, tableName);
+		ExportedKeyInfo[] exportedKeyInfos = getExportedKeyInfos(cn, metaData, schema, tableName);
+
+		entireTableInfo.setTableInfo(tableInfo);
+		entireTableInfo.setColumnInfos(columnInfos);
+		entireTableInfo.setPrimaryKeyColumnNames(primaryKeyColumnNames);
+		entireTableInfo.setUniqueKeyColumnNames(uniqueKeyColumnNames);
+		entireTableInfo.setImportedKeyInfos(importedKeyInfos);
+		entireTableInfo.setExportedKeyInfos(exportedKeyInfos);
+
+		return entireTableInfo;
+	}
+
+	@Override
 	public TableInfo[] getTableInfos(Connection cn) throws DatabaseInfoResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		return getTableInfos(cn, metaData, schema);
+	}
+
+	@Override
+	public TableInfo getRandomTableInfo(Connection cn) throws DatabaseInfoResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		return getRandomTableInfo(cn, metaData, schema);
+	}
+
+	@Override
+	public TableInfo getTableInfo(Connection cn, String tableName) throws DatabaseInfoResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		return getTableInfo(cn, metaData, schema, tableName);
+	}
+
+	@Override
+	public ColumnInfo[] getColumnInfos(Connection cn, String tableName) throws DatabaseInfoResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		return getColumnInfos(cn, metaData, schema, tableName);
+	}
+
+	@Override
+	public ColumnInfo getRandomColumnInfo(Connection cn, String tableName) throws DatabaseInfoResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		return getRandomColumnInfo(cn, metaData, schema, tableName);
+	}
+
+	@Override
+	public String[] getPrimaryKeyColumnNames(Connection cn, String tableName) throws DatabaseInfoResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		return getPrimaryKeyColumnNames(cn, metaData, schema, tableName);
+	}
+
+	@Override
+	public String[][] getUniqueKeyColumnNames(Connection cn, String tableName) throws DatabaseInfoResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		return getUniqueKeyColumnNames(cn, metaData, schema, tableName);
+	}
+
+	@Override
+	public ImportedKeyInfo[] getImportedKeyInfos(Connection cn, String tableName) throws DatabaseInfoResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		return getImportedKeyInfos(cn, metaData, schema, tableName);
+	}
+
+	@Override
+	public ExportedKeyInfo[] getExportedKeyInfos(Connection cn, String tableName) throws DatabaseInfoResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		return getExportedKeyInfos(cn, metaData, schema, tableName);
+	}
+
+	protected TableInfo[] getTableInfos(Connection cn, DatabaseMetaData metaData, String schema)
+			throws DatabaseInfoResolverException
 	{
 		ResultSet rs = null;
 
 		try
 		{
-			DatabaseMetaData metaData = cn.getMetaData();
-
-			rs = this.getTableInfoResulSet(cn, metaData, getSchema(cn, metaData), null, getTableTypes());
+			rs = this.getTableInfoResulSet(cn, metaData, schema, null, getTableTypes());
 
 			List<TableInfo> tableInfos = getTableInfoResultSetSpec().read(rs);
 
@@ -86,16 +195,14 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		}
 	}
 
-	@Override
-	public TableInfo getRandomTableInfo(Connection cn) throws DatabaseInfoResolverException
+	protected TableInfo getRandomTableInfo(Connection cn, DatabaseMetaData metaData, String schema)
+			throws DatabaseInfoResolverException
 	{
 		ResultSet rs = null;
 
 		try
 		{
-			DatabaseMetaData metaData = cn.getMetaData();
-
-			rs = this.getTableInfoResulSet(cn, metaData, getSchema(cn, metaData), null, TABLE_TABLE_TYPES);
+			rs = this.getTableInfoResulSet(cn, metaData, schema, null, TABLE_TABLE_TYPES);
 
 			List<TableInfo> tableInfos = getTableInfoResultSetSpec().read(rs, 1, 1);
 
@@ -115,16 +222,14 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		}
 	}
 
-	@Override
-	public TableInfo getTableInfo(Connection cn, String tableName) throws DatabaseInfoResolverException
+	protected TableInfo getTableInfo(Connection cn, DatabaseMetaData metaData, String schema, String tableName)
+			throws DatabaseInfoResolverException
 	{
 		ResultSet rs = null;
 
 		try
 		{
-			DatabaseMetaData metaData = cn.getMetaData();
-
-			rs = getTableInfoResulSet(cn, metaData, getSchema(cn, metaData), tableName, getTableTypes());
+			rs = getTableInfoResulSet(cn, metaData, schema, tableName, getTableTypes());
 
 			List<TableInfo> tableInfos = getTableInfoResultSetSpec().read(rs);
 
@@ -147,38 +252,14 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		}
 	}
 
-	@Override
-	public EntireTableInfo getEntireTableInfo(Connection cn, String tableName) throws DatabaseInfoResolverException
-	{
-		EntireTableInfo entireTableInfo = new EntireTableInfo();
-
-		TableInfo tableInfo = getTableInfo(cn, tableName);
-		ColumnInfo[] columnInfos = getColumnInfos(cn, tableName);
-		String[] primaryKeyColumnNames = getPrimaryKeyColumnNames(cn, tableName);
-		String[][] uniqueKeyColumnNames = getUniqueKeyColumnNames(cn, tableName);
-		ImportedKeyInfo[] importedKeyInfos = getImportedKeyInfos(cn, tableName);
-		ExportedKeyInfo[] exportedKeyInfos = getExportedKeyInfos(cn, tableName);
-
-		entireTableInfo.setTableInfo(tableInfo);
-		entireTableInfo.setColumnInfos(columnInfos);
-		entireTableInfo.setPrimaryKeyColumnNames(primaryKeyColumnNames);
-		entireTableInfo.setUniqueKeyColumnNames(uniqueKeyColumnNames);
-		entireTableInfo.setImportedKeyInfos(importedKeyInfos);
-		entireTableInfo.setExportedKeyInfos(exportedKeyInfos);
-
-		return entireTableInfo;
-	}
-
-	@Override
-	public ColumnInfo[] getColumnInfos(Connection cn, String tableName) throws DatabaseInfoResolverException
+	protected ColumnInfo[] getColumnInfos(Connection cn, DatabaseMetaData metaData, String schema, String tableName)
+			throws DatabaseInfoResolverException
 	{
 		ResultSet rs = null;
 
 		try
 		{
-			DatabaseMetaData metaData = cn.getMetaData();
-
-			rs = getColumnInfoResulSet(cn, metaData, tableName);
+			rs = getColumnInfoResulSet(cn, metaData, schema, tableName);
 
 			List<ColumnInfo> columnInfos = getColumnInfoResultSetSpec().read(rs);
 
@@ -198,16 +279,14 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		}
 	}
 
-	@Override
-	public ColumnInfo getRandomColumnInfo(Connection cn, String tableName) throws DatabaseInfoResolverException
+	protected ColumnInfo getRandomColumnInfo(Connection cn, DatabaseMetaData metaData, String schema, String tableName)
+			throws DatabaseInfoResolverException
 	{
 		ResultSet rs = null;
 
 		try
 		{
-			DatabaseMetaData metaData = cn.getMetaData();
-
-			rs = getColumnInfoResulSet(cn, metaData, tableName);
+			rs = getColumnInfoResulSet(cn, metaData, schema, tableName);
 
 			List<ColumnInfo> columnInfos = getColumnInfoResultSetSpec().read(rs, 1, 1);
 
@@ -227,16 +306,14 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		}
 	}
 
-	@Override
-	public String[] getPrimaryKeyColumnNames(Connection cn, String tableName) throws DatabaseInfoResolverException
+	protected String[] getPrimaryKeyColumnNames(Connection cn, DatabaseMetaData metaData, String schema,
+			String tableName) throws DatabaseInfoResolverException
 	{
 		ResultSet rs = null;
 
 		try
 		{
-			DatabaseMetaData metaData = cn.getMetaData();
-
-			rs = getPrimaryKeyResulSet(cn, metaData, tableName);
+			rs = getPrimaryKeyResulSet(cn, metaData, schema, tableName);
 
 			List<PrimaryKeyInfo> primaryKeyInfos = getPrimaryKeyInfoResultSetSpec().read(rs);
 
@@ -249,6 +326,14 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 
 			return names;
 		}
+		// 当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常，为了简化处理逻辑，这里直接压制
+		catch (SQLNonTransientException e)
+		{
+			if (LOGGER.isWarnEnabled())
+				LOGGER.warn("An String[0] object will be returned for an SQLNonTransientException", e);
+
+			return new String[0];
+		}
 		catch (SQLException e)
 		{
 			throw new DatabaseInfoResolverException(e);
@@ -259,8 +344,8 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		}
 	}
 
-	@Override
-	public String[][] getUniqueKeyColumnNames(Connection cn, String tableName) throws DatabaseInfoResolverException
+	protected String[][] getUniqueKeyColumnNames(Connection cn, DatabaseMetaData metaData, String schema,
+			String tableName) throws DatabaseInfoResolverException
 	{
 		ResultSet rs = null;
 
@@ -269,9 +354,7 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 
 		try
 		{
-			DatabaseMetaData metaData = cn.getMetaData();
-
-			rs = getUniqueKeyResulSet(cn, metaData, tableName);
+			rs = getUniqueKeyResulSet(cn, metaData, schema, tableName);
 
 			List<UniqueKeyInfo> uniqueKeyInfos = getUniqueKeyInfoResultSetSpec().read(rs);
 
@@ -296,6 +379,14 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 				uniqueKeyColumnName.add(columnName);
 			}
 		}
+		// 当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常，为了简化处理逻辑，这里直接压制
+		catch (SQLNonTransientException e)
+		{
+			if (LOGGER.isWarnEnabled())
+				LOGGER.warn("An String[0][0] object will be returned for an SQLNonTransientException", e);
+
+			return new String[0][0];
+		}
 		catch (SQLException e)
 		{
 			throw new DatabaseInfoResolverException(e);
@@ -318,16 +409,14 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		return uniqueKeyColumnNamesAry;
 	}
 
-	@Override
-	public ImportedKeyInfo[] getImportedKeyInfos(Connection cn, String tableName) throws DatabaseInfoResolverException
+	protected ImportedKeyInfo[] getImportedKeyInfos(Connection cn, DatabaseMetaData metaData, String schema,
+			String tableName) throws DatabaseInfoResolverException
 	{
 		ResultSet rs = null;
 
 		try
 		{
-			DatabaseMetaData metaData = cn.getMetaData();
-
-			rs = getImportedKeyResulSet(cn, metaData, tableName);
+			rs = getImportedKeyResulSet(cn, metaData, schema, tableName);
 
 			List<ImportedKeyInfo> importedKeyInfos = getImportedKeyInfoResultSetSpec().read(rs);
 
@@ -336,6 +425,15 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 			postProcessImportedKeyInfo(array);
 
 			return array;
+		}
+		// 当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常，为了简化处理逻辑，这里直接压制
+		catch (SQLNonTransientException e)
+		{
+			if (LOGGER.isWarnEnabled())
+				LOGGER.warn("An " + ImportedKeyInfo.class.getSimpleName()
+						+ "[0] object will be returned for an SQLNonTransientException", e);
+
+			return new ImportedKeyInfo[0];
 		}
 		catch (SQLException e)
 		{
@@ -347,16 +445,14 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		}
 	}
 
-	@Override
-	public ExportedKeyInfo[] getExportedKeyInfos(Connection cn, String tableName) throws DatabaseInfoResolverException
+	protected ExportedKeyInfo[] getExportedKeyInfos(Connection cn, DatabaseMetaData metaData, String schema,
+			String tableName) throws DatabaseInfoResolverException
 	{
 		ResultSet rs = null;
 
 		try
 		{
-			DatabaseMetaData metaData = cn.getMetaData();
-
-			rs = getExportedKeyResulSet(cn, metaData, tableName);
+			rs = getExportedKeyResulSet(cn, metaData, schema, tableName);
 
 			List<ExportedKeyInfo> exportedKeyInfos = getExportedKeyInfoResultSetSpec().read(rs);
 
@@ -365,6 +461,15 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 			postProcessExportedKeyInfo(array);
 
 			return array;
+		}
+		// 当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常，为了简化处理逻辑，这里直接压制
+		catch (SQLNonTransientException e)
+		{
+			if (LOGGER.isWarnEnabled())
+				LOGGER.warn("An " + ExportedKeyInfo.class.getSimpleName()
+						+ "[0] object will be returned for an SQLNonTransientException", e);
+
+			return new ExportedKeyInfo[0];
 		}
 		catch (SQLException e)
 		{
@@ -405,8 +510,8 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	 * @return
 	 * @throws SQLException
 	 */
-	protected ResultSet getColumnInfoResulSet(Connection cn, DatabaseMetaData databaseMetaData, String tableName)
-			throws SQLException
+	protected ResultSet getColumnInfoResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
+			String tableName) throws SQLException
 	{
 		return databaseMetaData.getColumns(cn.getCatalog(), getSchema(cn, databaseMetaData), tableName, "%");
 	}
@@ -420,8 +525,8 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	 * @return
 	 * @throws SQLException
 	 */
-	protected ResultSet getPrimaryKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String tableName)
-			throws SQLException
+	protected ResultSet getPrimaryKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
+			String tableName) throws SQLException
 	{
 		return databaseMetaData.getPrimaryKeys(cn.getCatalog(), getSchema(cn, databaseMetaData), tableName);
 	}
@@ -435,8 +540,8 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	 * @return
 	 * @throws SQLException
 	 */
-	protected ResultSet getUniqueKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String tableName)
-			throws SQLException
+	protected ResultSet getUniqueKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
+			String tableName) throws SQLException
 	{
 		return databaseMetaData.getIndexInfo(cn.getCatalog(), getSchema(cn, databaseMetaData), tableName, true, false);
 	}
@@ -450,8 +555,8 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	 * @return
 	 * @throws SQLException
 	 */
-	protected ResultSet getImportedKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String tableName)
-			throws SQLException
+	protected ResultSet getImportedKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
+			String tableName) throws SQLException
 	{
 		return databaseMetaData.getImportedKeys(cn.getCatalog(), getSchema(cn, databaseMetaData), tableName);
 	}
@@ -465,8 +570,8 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	 * @return
 	 * @throws SQLException
 	 */
-	protected ResultSet getExportedKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String tableName)
-			throws SQLException
+	protected ResultSet getExportedKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
+			String tableName) throws SQLException
 	{
 		return databaseMetaData.getExportedKeys(cn.getCatalog(), getSchema(cn, databaseMetaData), tableName);
 	}
@@ -590,13 +695,33 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	}
 
 	/**
+	 * 获取{@linkplain DatabaseMetaData}。
+	 * 
+	 * @param cn
+	 * @return
+	 * @throws DatabaseInfoResolverException
+	 */
+	protected DatabaseMetaData getDatabaseMetaData(Connection cn) throws DatabaseInfoResolverException
+	{
+		try
+		{
+			return cn.getMetaData();
+		}
+		catch (SQLException e)
+		{
+			throw new DatabaseInfoResolverException(e);
+		}
+	}
+
+	/**
 	 * 获取指定连接的schema。
 	 * 
 	 * @param cn
 	 * @param databaseMetaData
 	 * @return
+	 * @throws DatabaseInfoResolverException
 	 */
-	protected String getSchema(Connection cn, DatabaseMetaData databaseMetaData)
+	protected String getSchema(Connection cn, DatabaseMetaData databaseMetaData) throws DatabaseInfoResolverException
 	{
 		// 在JDBC4.0（JDK1.6）中需要将其设置为null，才符合DatabaseMetaData.getTables(...)等接口的参数要求
 		String schema = null;

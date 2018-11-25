@@ -26,7 +26,7 @@ import org.springframework.beans.PropertyAccessorFactory;
  */
 public abstract class ResultSetSpec<T extends ResultSetSpecBean>
 {
-	private static final Logger log = LoggerFactory.getLogger(ResultSetSpec.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ResultSetSpec.class);
 
 	public ResultSetSpec()
 	{
@@ -151,8 +151,8 @@ public abstract class ResultSetSpec<T extends ResultSetSpecBean>
 				// 如果违反规范，则忽略此行数据，避免整个功能无法使用
 				catch (ResultSetValueNullException e)
 				{
-					if (log.isWarnEnabled())
-						log.warn("Reading [" + type.getName() + "] ignores a row data [" + bean + "] ", e);
+					if (LOGGER.isWarnEnabled())
+						LOGGER.warn("Reading [" + type.getName() + "] ignores a row data [" + bean + "] ", e);
 				}
 
 				readCount++;

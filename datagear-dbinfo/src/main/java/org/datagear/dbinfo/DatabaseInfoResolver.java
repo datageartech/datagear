@@ -24,6 +24,16 @@ public interface DatabaseInfoResolver
 	DatabaseInfo getDatabaseInfo(Connection cn) throws DatabaseInfoResolverException;
 
 	/**
+	 * 获取{@linkplain EntireTableInfo}。
+	 * 
+	 * @param cn
+	 * @param tableName
+	 * @return
+	 * @throws DatabaseInfoResolverException
+	 */
+	EntireTableInfo getEntireTableInfo(Connection cn, String tableName) throws DatabaseInfoResolverException;
+
+	/**
 	 * 获取所有{@linkplain TableInfo}。
 	 * <p>
 	 * 此方法应该仅返回{@linkplain TableType#TABLE}、{@linkplain TableType#VIEW}的记录。
@@ -59,16 +69,6 @@ public interface DatabaseInfoResolver
 	 * @throws DatabaseInfoResolverException
 	 */
 	TableInfo getTableInfo(Connection cn, String tableName) throws DatabaseInfoResolverException;
-
-	/**
-	 * 获取{@linkplain EntireTableInfo}。
-	 * 
-	 * @param cn
-	 * @param tableName
-	 * @return
-	 * @throws DatabaseInfoResolverException
-	 */
-	EntireTableInfo getEntireTableInfo(Connection cn, String tableName) throws DatabaseInfoResolverException;
 
 	/**
 	 * 获取指定表的{@linkplain ColumnInfo}。
