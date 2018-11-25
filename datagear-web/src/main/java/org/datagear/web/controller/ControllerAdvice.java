@@ -184,10 +184,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleDbmodelDatabaseInfoResolverException(HttpServletRequest request, HttpServletResponse response,
 			DatabaseInfoResolverException exception)
 	{
-		if (exception.getCause() instanceof SQLException)
-			setOperationMessageForExceptionCause(request, exception);
-		else
-			setOperationMessageForException(request, exception, true);
+		setOperationMessageForException(request, exception, true);
 
 		return ERROR_PAGE_URL;
 	}
