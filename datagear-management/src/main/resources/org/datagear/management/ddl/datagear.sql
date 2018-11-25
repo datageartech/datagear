@@ -74,3 +74,9 @@ CREATE TABLE DATAGEAR_SCHEMA
 	DRIVER_ENTITY_ID VARCHAR(100),
 	PRIMARY KEY (SCHEMA_ID)
 );
+
+
+-----------------------------------------
+--version[1.1.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
