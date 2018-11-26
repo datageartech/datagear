@@ -28,9 +28,6 @@ form .form-content .form-item .form-item-value input[type=password].error,
 form .form-content .form-item .form-item-value textarea.error{
 	border: 1px solid red;
 }
-form .form-content .form-item .input-desc{
-	color: #4ca20b;
-}
 
 /*首选操作按钮*/
 .ui-button.recommended, .ui-button.recommended:active{
