@@ -94,6 +94,18 @@
 			//可选，SQL时间格式
 			sqlTimeFormat : "",
 			
+			//可选，是否开启批量设置
+			batchSet : false,
+			
+			//batchSet=true时必选，批量执行数目参数名
+			batchCountParamName : "batchCount",
+			
+			//batchSet=true时必选，批量执行出错处理方式参数名
+			batchHandleErrorModeParamName : "batchHandleErrorMode",
+			
+			//batchSet=true时必选，批量执行出错处理方式枚举
+			batchHandleErrorModeEnum : ["IGNORE", "ABORT", "ROLLBACK"],
+			
 			//可选，标签
 			labels :
 			{
@@ -106,6 +118,12 @@
 				reset : "重置",
 				uploadFile : "上传",
 				downloadFile : "下载",
+				batchSet :
+				{
+					batchCount : "批量添加数目",
+					batchHandleErrorMode : "出错时",
+					batchHandleErrorModeEnum : ["忽略", "中止", "撤销"]
+				},
 				validation :
 				{
 					"required" : "此项必填"
@@ -147,11 +165,11 @@
 			
 			var maxHeight = windowHeight - windowHeight/4;
 			
-			$("<div class='form-head' />").appendTo(this.element);
-			$("<div class='form-content' style='max-height: "+maxHeight+"px; overflow: auto;' />").appendTo(this.element);
-			$("<div class='form-foot' />").appendTo(this.element);
+			var $formHead = $("<div class='form-head' />").appendTo(this.element);
+			var $formContent = $("<div class='form-content' style='max-height: "+maxHeight+"px; overflow: auto;' />").appendTo(this.element);
+			var $formFoot = $("<div class='form-foot' />").appendTo(this.element);
 			
-			this._render();
+			this._render($formHead, $formContent, $formFoot);
 		},
 		
 		_destroy: function()
@@ -249,15 +267,31 @@
 		/**
 		 * 绘制。
 		 */
-		_render : function()
+		_render : function($formHead, $formContent, $formFoot)
+		{
+			this._renderFormHead($formHead);
+			this._renderFormContent($formContent);
+			this._renderFormFoot($formFoot);
+		},
+		
+		/**
+		 * 绘制表单页头。
+		 */
+		_renderFormHead : function($formHead)
+		{
+			
+		},
+		
+		/**
+		 * 绘制表单页内容。
+		 */
+		_renderFormContent : function($formContent)
 		{
 			var _this = this;
 			
 			var options = this.options;
 			var model = options.model;
 			var data = options.data;
-			
-			var $formContent = $(".form-content", this.element);
 			
 			var properties = model.properties;
 			for(var i=0; i<properties.length; i++)
@@ -331,6 +365,16 @@
 					this._renderSingleCompositePropertyFormElement(property, propValue, itemdiv, labeldiv, valuediv, propertyWidget);
 				}
 			}
+		},
+
+		/**
+		 * 绘制表单页脚。
+		 */
+		_renderFormFoot : function($formFoot)
+		{
+			var _this = this;
+			
+			var options = this.options;
 			
 			if(options.readonly)
 			{
@@ -338,10 +382,36 @@
 			}
 			else
 			{
-				var footdiv = $(".form-foot", _this.element);
+				var $formOperation = $("<div class='form-operation' />").appendTo($formFoot);
 				
-				var submitbtn = $("<input type='submit' class='recommended' />").attr("value", _this.options.labels.submit).appendTo(footdiv).button();
-				var resetbtn = $("<input type='reset' />").attr("value", _this.options.labels.reset).appendTo(footdiv).button();
+				if(options.batchSet)
+				{
+					$formOperation.addClass("form-operation-batch-set");
+					
+					var $batchSetPanel = $("<div class='batch-set-panel' />").appendTo($formOperation);
+					
+					$("<label />").html(options.labels.batchSet.batchCount).appendTo($batchSetPanel);
+					$("<input type='text' name='"+options.batchCountParamName+"' class='batch-set-count ui-widget ui-widget-content ui-corner-all' />").appendTo($batchSetPanel);
+					
+					$("<label />").html(options.labels.batchSet.batchHandleErrorMode).appendTo($batchSetPanel);
+					var $errorModeSelect = $("<select name='"+options.batchHandleErrorModeParamName+"' class='ui-widget ui-widget-content ui-corner-all' />").appendTo($batchSetPanel);
+					for(var i=0; i<options.batchHandleErrorModeEnum.length; i++)
+						$("<option />").attr("value", options.batchHandleErrorModeEnum[i])
+							.html(options.labels.batchSet.batchHandleErrorModeEnum[i]).appendTo($errorModeSelect);
+					
+					var batchSetPanelWidth = $batchSetPanel.outerWidth();
+					$batchSetPanel.css("left", (0-batchSetPanelWidth - 4.1*2)+"px").hide();
+					
+					var $batchSetSwitch = $("<span class='batch-set-switch ui-icon ui-icon-gear'></span>").appendTo($formOperation);
+					
+					$batchSetSwitch.click(function()
+					{
+						$batchSetPanel.toggle();
+					});
+				}
+				
+				var submitbtn = $("<input type='submit' class='recommended' />").attr("value", _this.options.labels.submit).appendTo($formOperation).button();
+				var resetbtn = $("<input type='reset' />").attr("value", _this.options.labels.reset).appendTo($formOperation).button();
 				
 				var validateOptions = _this._getValidateOptions();
 				validateOptions.submitHandler = function(form)

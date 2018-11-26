@@ -28,6 +28,12 @@ pageObj.clientOperation = undefined;
 		select : "<fmt:message key='select' />",
 		submit : "<fmt:message key='save' />",
 		reset : "<fmt:message key='reset' />",
+		batchSet :
+		{
+			batchCount : "<fmt:message key='batchSet.batchCount' />",
+			batchHandleErrorMode : "<fmt:message key='batchSet.batchHandleErrorMode' />",
+			batchHandleErrorModeEnum : ["<fmt:message key='batchSet.batchHandleErrorMode.ignore' />", "<fmt:message key='batchSet.batchHandleErrorMode.abort' />", "<fmt:message key='batchSet.batchHandleErrorMode.rollback' />"]
+		},
 		validation :
 		{
 			required : "<fmt:message key='validation.required' />"

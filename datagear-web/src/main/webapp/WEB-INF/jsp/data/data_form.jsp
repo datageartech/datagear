@@ -159,6 +159,7 @@ String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
 				pageObj.downloadSinglePropertyValueFile(property, propertyConcreteModel);
 			},
 			validationRequiredAsAdd : ("saveAdd" == pageObj.submitAction),
+			batchSet : ("saveAdd" == pageObj.submitAction),
 			labels : pageObj.formLabels,
 			dateFormat : "<c:out value='${dateFormat}' />",
 			timestampFormat : "<c:out value='${sqlTimestampFormat}' />",

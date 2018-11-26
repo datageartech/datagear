@@ -109,8 +109,35 @@ form .form-content .form-item .input-desc-date{
 	
 }
 form .form-foot{
-	padding-top: .5em;
 	text-align: center;
+	padding-top: .5em;
+}
+form .form-foot .form-operation{
+	display: inline-block;
+}
+form .form-foot .form-operation.form-operation-batch-set{
+	position: relative;
+	padding-right: 16px;
+}
+form .form-foot .form-operation.form-operation-batch-set .batch-set-switch{
+	cursor: pointer;
+	opacity: 0.5;
+	filter: Alpha(Opacity=50);
+}
+form .form-foot .form-operation.form-operation-batch-set .batch-set-panel{
+	position: absolute;
+	left: -23em;
+	top: 0.4em;
+	display: inline-block;
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
+}
+form .form-foot .form-operation.form-operation-batch-set .batch-set-panel label{
+	margin-left: 1em;
+	margin-right: 0.41em;
+}
+form .form-foot .form-operation.form-operation-batch-set .batch-set-panel input.batch-set-count{
+	width: 3em;
 }
 form .form-foot .ui-button{
 	margin-left: .5em;
