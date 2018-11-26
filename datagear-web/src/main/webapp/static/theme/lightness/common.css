@@ -31,13 +31,13 @@ form .form-content .form-item .form-item-value textarea.error{
 
 /*首选操作按钮*/
 .ui-button.recommended, .ui-button.recommended:active{
-	border: 1px solid 003eff;
+	border: 1px solid #003eff;
 	background-color: #007FFF;
 	color: #ffffff;
 }
 .ui-button.recommended:hover, .ui-button.recommended:focus{
-	border: 1px solid 003eff;
-	background-color: #0075ea;
+	border: 1px solid #0033ca;
+	background-color: #003eff;
 	color: #ffffff;
 }
 
