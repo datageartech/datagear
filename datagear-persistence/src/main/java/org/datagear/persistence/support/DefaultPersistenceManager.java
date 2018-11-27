@@ -38,7 +38,9 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 
 	private ConversionService conversionService;
 
-	private ExpressionResolver expressionResolver;
+	private ExpressionResolver variableExpressionResolver;
+
+	private ExpressionResolver sqlExpressionResolver;
 
 	private InsertPersistenceOperation insertPersistenceOperation;
 
@@ -59,12 +61,20 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 
 		this.dialectSource = dialectSource;
 		this.conversionService = conversionService;
-		this.expressionResolver = new ExpressionResolver();
+
+		this.variableExpressionResolver = new VariableExpressionResolver();
+
+		this.sqlExpressionResolver = new SqlExpressionResolver();
+
 		this.insertPersistenceOperation = new InsertPersistenceOperation(this.conversionService,
-				this.expressionResolver);
+				this.variableExpressionResolver, this.sqlExpressionResolver);
+
 		this.deletePersistenceOperation = new DeletePersistenceOperation();
+
 		this.updatePersistenceOperation = new UpdatePersistenceOperation(this.insertPersistenceOperation,
-				this.deletePersistenceOperation, this.conversionService, this.expressionResolver);
+				this.deletePersistenceOperation, this.conversionService, this.variableExpressionResolver,
+				this.sqlExpressionResolver);
+
 		this.selectPersistenceOperation = new SelectPersistenceOperation();
 	}
 
@@ -90,16 +100,28 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		this.updatePersistenceOperation.setConversionService(conversionService);
 	}
 
-	public ExpressionResolver getExpressionResolver()
+	public ExpressionResolver getVariableExpressionResolver()
 	{
-		return expressionResolver;
+		return variableExpressionResolver;
 	}
 
-	public void setExpressionResolver(ExpressionResolver expressionResolver)
+	public void setVariableExpressionResolver(ExpressionResolver variableExpressionResolver)
 	{
-		this.expressionResolver = expressionResolver;
-		this.insertPersistenceOperation.setExpressionResolver(expressionResolver);
-		this.updatePersistenceOperation.setExpressionResolver(expressionResolver);
+		this.variableExpressionResolver = variableExpressionResolver;
+		this.insertPersistenceOperation.setVariableExpressionResolver(variableExpressionResolver);
+		this.updatePersistenceOperation.setVariableExpressionResolver(variableExpressionResolver);
+	}
+
+	public ExpressionResolver getSqlExpressionResolver()
+	{
+		return sqlExpressionResolver;
+	}
+
+	public void setSqlExpressionResolver(ExpressionResolver sqlExpressionResolver)
+	{
+		this.sqlExpressionResolver = sqlExpressionResolver;
+		this.insertPersistenceOperation.setSqlExpressionResolver(sqlExpressionResolver);
+		this.updatePersistenceOperation.setSqlExpressionResolver(sqlExpressionResolver);
 	}
 
 	public InsertPersistenceOperation getInsertPersistenceOperation()

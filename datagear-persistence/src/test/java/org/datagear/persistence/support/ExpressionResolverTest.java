@@ -169,6 +169,21 @@ public class ExpressionResolverTest
 				Assert.assertEquals("content2", e.getContent());
 			}
 		}
+
+		{
+			List<Expression> expressions = expressionResolver.resolve("prefix\\${content0}");
+
+			Assert.assertEquals(0, expressions.size());
+		}
+
+		{
+			List<Expression> expressions = expressionResolver.resolve("prefix${cont\\:ent\\}0}");
+
+			Assert.assertEquals(1, expressions.size());
+
+			Expression e = expressions.get(0);
+			Assert.assertEquals("cont:ent}0", e.getContent());
+		}
 	}
 
 	@Test

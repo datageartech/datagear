@@ -366,7 +366,8 @@
 		 */
 		tipSuccess : function(content, delayMs)
 		{
-			content = "<span class='ui-icon ui-icon-circle-check' style='margin-right:0.3em;'></span>" + content;
+			content = "<span class='tooltip-icon ui-icon ui-icon-circle-check'></span>"
+					+"<div class='content-value'>" + content +"</div>";
 			return $._tip("ui-state-default", content, (delayMs || 2000));
 		},
 		
@@ -375,8 +376,9 @@
 		 */
 		tipError : function(content, delayMs)
 		{
-			content = "<span class='ui-icon ui-icon-alert' style='margin-right:0.3em;'></span>" + content;
-			return $._tip("ui-state-error", content, (delayMs || 5000));
+			content = "<span class='tooltip-icon ui-icon ui-icon-alert'></span>"
+				+"<div class='content-value'>" + content +"</div>";
+			return $._tip("ui-state-error", content, (delayMs || 3500));
 		},
 		
 		/**
@@ -384,8 +386,9 @@
 		 */
 		tipInfo : function(content, delayMs)
 		{
-			content = "<span class='ui-icon ui-icon-info' style='margin-right:0.3em;'></span>" + content;
-			return $._tip("ui-state-highlight", content, (delayMs || 5000));
+			content = "<span class='tooltip-icon ui-icon ui-icon-info'></span>"
+				+"<div class='content-value'>" + content +"</div>";
+			return $._tip("ui-state-highlight", content, (delayMs || 3500));
 		},
 
 		/**
@@ -412,7 +415,7 @@
 		 */
 		_tip : function(tooltipClass, content, delayMs)
 		{
-			content = "<div style='padding-left:0.5em;padding-right:0.5em; white-space: nowrap;'>" + content +"</div>";
+			content = "<div class='content'>" + content +"</div>";
 			
 			var tooltip = $(".global-tooltip", document.body);
 			if(tooltip.length > 0)

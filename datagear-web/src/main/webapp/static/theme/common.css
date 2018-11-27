@@ -336,8 +336,25 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	margin-left: 0.3em;
 	margin-right: 0.3em;
 }
+.ui-tooltip .ui-tooltip-content .tooltip-icon{
+	margin-right: 0.41em;
+}
 .ui-tooltip .ui-tooltip-content .error-detail-icon{
 	cursor: pointer;
+}
+.ui-tooltip .ui-tooltip-content .content{
+	padding-left:0.5em;
+	padding-right:0.5em;
+	white-space: nowrap;
+}
+.ui-tooltip .ui-tooltip-content .content .content-value{
+	display: inline-block;
+}
+.ui-tooltip .ui-tooltip-content .content .content-value .content-value-sub{
+	display: inline-block;
+	max-width: 41em;
+	vertical-align: bottom;
+	overflow: hidden;
 }
 
 /*错误消息对话框*/

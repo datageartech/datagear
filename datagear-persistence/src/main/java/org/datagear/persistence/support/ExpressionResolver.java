@@ -20,7 +20,11 @@ import java.util.List;
  */
 public class ExpressionResolver
 {
-	public static final String DEFAULT_START_IDENTIFIER = "${";
+	/** "${"起始标识符 */
+	public static final String DEFAULT_START_IDENTIFIER_DOLLAR = "${";
+
+	/** "#{"起始标识符 */
+	public static final String DEFAULT_START_IDENTIFIER_SHARP = "#{";
 
 	public static final String DEFAULT_END_IDENTIFIER = "}";
 
@@ -28,7 +32,7 @@ public class ExpressionResolver
 
 	public static final char DEFAULT_ESCAPER = '\\';
 
-	private String startIdentifier = DEFAULT_START_IDENTIFIER;
+	private String startIdentifier = DEFAULT_START_IDENTIFIER_DOLLAR;
 
 	private String endIdentifier = DEFAULT_END_IDENTIFIER;
 
@@ -36,7 +40,7 @@ public class ExpressionResolver
 
 	private char escaper = DEFAULT_ESCAPER;
 
-	private transient char[] _startIdentifierChars = DEFAULT_START_IDENTIFIER.toCharArray();
+	private transient char[] _startIdentifierChars = DEFAULT_START_IDENTIFIER_DOLLAR.toCharArray();
 
 	private transient char[] _endIdentifierChars = DEFAULT_END_IDENTIFIER.toCharArray();
 
@@ -142,9 +146,27 @@ public class ExpressionResolver
 	 */
 	public List<Expression> resolve(String source)
 	{
-		List<Expression> expressions = new ArrayList<Expression>();
+		if (source == null || source.isEmpty())
+			return Collections.emptyList();
 
-		resolve(source, expressions);
+		List<Expression> expressions = null;
+
+		char[] cs = source.toCharArray();
+
+		Expression next = null;
+		int startIndex = 0;
+
+		while ((next = resolveNextExpression(cs, startIndex)) != null)
+		{
+			if (expressions == null)
+				expressions = new ArrayList<Expression>();
+
+			expressions.add(next);
+			startIndex = next.getEnd();
+		}
+
+		if (expressions == null)
+			expressions = Collections.emptyList();
 
 		return expressions;
 	}
@@ -193,29 +215,6 @@ public class ExpressionResolver
 	}
 
 	/**
-	 * 解析源字符串中的{@linkplain Expression}，并写入给定列表。
-	 * 
-	 * @param source
-	 * @param expressions
-	 */
-	protected void resolve(String source, List<Expression> expressions)
-	{
-		if (source == null || source.isEmpty())
-			return;
-
-		char[] cs = source.toCharArray();
-
-		Expression next = null;
-		int startIndex = 0;
-
-		while ((next = resolveNextExpression(cs, startIndex)) != null)
-		{
-			expressions.add(next);
-			startIndex = next.getEnd();
-		}
-	}
-
-	/**
 	 * 从给定起始位置解析下一个{@linkplain Expression}。
 	 * <p>
 	 * 如果没有，将返回{@code null}。
@@ -252,12 +251,12 @@ public class ExpressionResolver
 
 						if (cj == escaper)
 						{
-							if (cj < source.length - 1)
+							if (j < source.length - 1)
 							{
 								if (second != null)
-									second.append(cj);
+									second.append(source[j + 1]);
 								else
-									first.append(cj);
+									first.append(source[j + 1]);
 							}
 
 							j += 1;
@@ -295,7 +294,8 @@ public class ExpressionResolver
 							content = second.toString().trim();
 						}
 
-						return new Expression(new String(source, i, j + 1 - i), i, j + 1, name, content);
+						return new Expression(this.getStartIdentifier(), this.endIdentifier,
+								new String(source, i, j + 1 - i), i, j + 1, name, content);
 					}
 				}
 			}
@@ -331,7 +331,7 @@ public class ExpressionResolver
 	/**
 	 * 表达式。
 	 * <p>
-	 * 格式为：#{name:content}、#{content}
+	 * 格式为：${name:content}、${content}、#{name:content}、#{content}。
 	 * </p>
 	 * 
 	 * @author datagear@163.com
@@ -340,6 +340,12 @@ public class ExpressionResolver
 	public static class Expression implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
+
+		/** 起始标识符 */
+		private String startIdentifier;
+
+		/** 结束标识符 */
+		private String endIdentifier;
 
 		/** 表达式字符串 */
 		private String expression;
@@ -356,23 +362,49 @@ public class ExpressionResolver
 		/** 表达式内容 */
 		private String content;
 
-		public Expression(String expression, int start, int end, String content)
+		public Expression(String startIdentifier, String endIdentifier, String expression, int start, int end,
+				String content)
 		{
 			super();
+			this.startIdentifier = startIdentifier;
+			this.endIdentifier = endIdentifier;
 			this.expression = expression;
 			this.start = start;
 			this.end = end;
 			this.content = content;
 		}
 
-		public Expression(String expression, int start, int end, String name, String content)
+		public Expression(String startIdentifier, String endIdentifier, String expression, int start, int end,
+				String name, String content)
 		{
 			super();
+			this.startIdentifier = startIdentifier;
+			this.endIdentifier = endIdentifier;
 			this.expression = expression;
 			this.start = start;
 			this.end = end;
 			this.name = name;
 			this.content = content;
+		}
+
+		public String getStartIdentifier()
+		{
+			return startIdentifier;
+		}
+
+		protected void setStartIdentifier(String startIdentifier)
+		{
+			this.startIdentifier = startIdentifier;
+		}
+
+		public String getEndIdentifier()
+		{
+			return endIdentifier;
+		}
+
+		protected void setEndIdentifier(String endIdentifier)
+		{
+			this.endIdentifier = endIdentifier;
 		}
 
 		public String getExpression()

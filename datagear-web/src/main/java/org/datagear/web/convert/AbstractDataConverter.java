@@ -33,6 +33,8 @@ import org.datagear.model.support.DefaultDynamicBean;
 import org.datagear.model.support.DynamicBean;
 import org.datagear.model.support.PropertyPath;
 import org.datagear.persistence.support.ExpressionResolver;
+import org.datagear.persistence.support.SqlExpressionResolver;
+import org.datagear.persistence.support.VariableExpressionResolver;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -64,7 +66,9 @@ public abstract class AbstractDataConverter
 
 	private ConversionService conversionService;
 
-	private ExpressionResolver expressionResolver = new ExpressionResolver();
+	private ExpressionResolver variableExpressionResolver = new VariableExpressionResolver();
+
+	private ExpressionResolver sqlExpressionResolver = new SqlExpressionResolver();
 
 	private Map<Class<?>, Class<?>> instanceTypeMap = new HashMap<Class<?>, Class<?>>();
 
@@ -91,14 +95,24 @@ public abstract class AbstractDataConverter
 		this.conversionService = conversionService;
 	}
 
-	public ExpressionResolver getExpressionResolver()
+	public ExpressionResolver getVariableExpressionResolver()
 	{
-		return expressionResolver;
+		return variableExpressionResolver;
 	}
 
-	public void setExpressionResolver(ExpressionResolver expressionResolver)
+	public void setVariableExpressionResolver(ExpressionResolver variableExpressionResolver)
 	{
-		this.expressionResolver = expressionResolver;
+		this.variableExpressionResolver = variableExpressionResolver;
+	}
+
+	public ExpressionResolver getSqlExpressionResolver()
+	{
+		return sqlExpressionResolver;
+	}
+
+	public void setSqlExpressionResolver(ExpressionResolver sqlExpressionResolver)
+	{
+		this.sqlExpressionResolver = sqlExpressionResolver;
 	}
 
 	public Map<Class<?>, Class<?>> getInstanceTypeMap()
@@ -167,7 +181,7 @@ public abstract class AbstractDataConverter
 		{
 			String str = (String) obj;
 
-			if (this.expressionResolver.isExpression(str))
+			if (isExpression(str))
 				return (T) str;
 
 			if (str.isEmpty() && !String.class.equals(targetType))
@@ -383,6 +397,11 @@ public abstract class AbstractDataConverter
 			throw new ConverterException("No instance type found for type [" + type.getName() + "]");
 
 		return getInstanceType(instanceType);
+	}
+
+	protected boolean isExpression(Object obj)
+	{
+		return this.variableExpressionResolver.isExpression(obj) || this.sqlExpressionResolver.isExpression(obj);
 	}
 
 	/**

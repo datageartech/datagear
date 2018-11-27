@@ -13,12 +13,12 @@ import org.junit.Test;
  * @author datagear@163.com
  *
  */
-public class AbstractModelPersistenceOperationTest
+public class AbstractExpressionModelPersistenceOperationTest
 {
 	@Test
 	public void isSelectSqlTest()
 	{
-		AbstractModelPersistenceOperation persistenceOperation = new AbstractModelPersistenceOperation()
+		AbstractExpressionModelPersistenceOperation persistenceOperation = new AbstractExpressionModelPersistenceOperation()
 		{
 		};
 

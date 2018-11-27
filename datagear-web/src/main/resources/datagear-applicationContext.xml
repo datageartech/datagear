@@ -207,9 +207,15 @@
 	
 	<bean id="selectOptions" class="org.datagear.persistence.support.SelectOptions" />
 	
+	<bean id="variableExpressionResolver" class="org.datagear.persistence.support.VariableExpressionResolver" />
+	
+	<bean id="sqlExpressionResolver" class="org.datagear.persistence.support.SqlExpressionResolver" />
+	
 	<bean id="persistenceManager" class="org.datagear.persistence.support.DefaultPersistenceManager">
 		<property name="dialectSource" ref="dialectSource" />
 		<property name="conversionService" ref="conversionService" />
+		<property name="variableExpressionResolver" ref="variableExpressionResolver" />
+		<property name="sqlExpressionResolver" ref="sqlExpressionResolver" />
 		<property name="selectPersistenceOperation">
 			<bean class="org.datagear.persistence.support.SelectPersistenceOperation">
 				<property name="selectOptions" ref="selectOptions" />
@@ -282,10 +288,14 @@
     
     <bean id ="modelDataConverter" class="org.datagear.web.convert.ModelDataConverter">
 		<property name="conversionService" ref="conversionService" />
+		<property name="variableExpressionResolver" ref="variableExpressionResolver" />
+		<property name="sqlExpressionResolver" ref="sqlExpressionResolver" />
 	</bean>
 	
     <bean id ="classDataConverter" class="org.datagear.web.convert.ClassDataConverter">
 		<property name="conversionService" ref="conversionService" />
+		<property name="variableExpressionResolver" ref="variableExpressionResolver" />
+		<property name="sqlExpressionResolver" ref="sqlExpressionResolver" />
 	</bean>
 	
 	<bean id="fileSerializer" class="org.datagear.web.json.fastjson.FileSerializer">

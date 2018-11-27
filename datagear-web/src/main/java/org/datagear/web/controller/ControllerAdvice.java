@@ -23,6 +23,7 @@ import org.datagear.dbmodel.DatabaseModelResolverException;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.UnsupportedDialectException;
 import org.datagear.persistence.support.SqlExpressionErrorException;
+import org.datagear.persistence.support.VariableExpressionErrorException;
 import org.datagear.web.convert.IllegalSourceValueException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
@@ -50,7 +51,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerMissingServletRequestParameterException(HttpServletRequest request,
 			HttpServletResponse response, MissingServletRequestParameterException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(MissingServletRequestParameterException.class),
+				exception, false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -60,7 +62,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerBindException(HttpServletRequest request, HttpServletResponse response,
 			BindException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(BindException.class), exception, false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -70,7 +72,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerMethodArgumentNotValidException(HttpServletRequest request,
 			HttpServletResponse response, MethodArgumentNotValidException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(MethodArgumentNotValidException.class), exception,
+				false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -80,7 +83,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleAuthenticationFailedException(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationFailedException exception)
 	{
-		setOperationMessageForException(request, exception, true);
+		setOperationMessageForThrowable(request, buildMessageCode(AuthenticationFailedException.class), exception,
+				true);
 
 		return ERROR_PAGE_URL;
 	}
@@ -90,7 +94,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerIllegalInputException(HttpServletRequest request, HttpServletResponse response,
 			IllegalInputException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(IllegalInputException.class), exception, false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -100,7 +104,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerRecordNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			RecordNotFoundException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(RecordNotFoundException.class), exception, false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -110,7 +114,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerRecordNotFoundOrNoPermissionException(HttpServletRequest request,
 			HttpServletResponse response, RecordNotFoundOrPermissionDeniedException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(RecordNotFoundOrPermissionDeniedException.class),
+				exception, false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -120,7 +125,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerSchemaNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			SchemaNotFoundException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(SchemaNotFoundException.class), exception, false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -130,8 +135,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerIllegalSourceValueException(HttpServletRequest request, HttpServletResponse response,
 			IllegalSourceValueException exception)
 	{
-		setOperationMessageForException(request, exception, false, exception.getSourceValue(),
-				exception.getTargetType().getName());
+		setOperationMessageForThrowable(request, buildMessageCode(IllegalSourceValueException.class), exception, false,
+				exception.getSourceValue(), exception.getTargetType().getName());
 
 		return ERROR_PAGE_URL;
 	}
@@ -141,7 +146,19 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerFileNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			FileNotFoundException exception)
 	{
-		setOperationMessageForException(request, exception, false, exception.getFileName());
+		setOperationMessageForThrowable(request, buildMessageCode(FileNotFoundException.class), exception, false,
+				exception.getFileName());
+
+		return ERROR_PAGE_URL;
+	}
+
+	@ExceptionHandler(VariableExpressionErrorException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public String handlePersistenceVariableExpressionErrorException(HttpServletRequest request,
+			HttpServletResponse response, VariableExpressionErrorException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(VariableExpressionErrorException.class),
+				exception.getCause(), false, exception.getExpression().getContent());
 
 		return ERROR_PAGE_URL;
 	}
@@ -151,7 +168,8 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceSqlExpressionErrorException(HttpServletRequest request, HttpServletResponse response,
 			SqlExpressionErrorException exception)
 	{
-		setOperationMessageForExceptionCause(request, exception);
+		setOperationMessageForThrowable(request, buildMessageCode(SqlExpressionErrorException.class),
+				exception.getCause(), true, exception.getExpression().getContent());
 
 		return ERROR_PAGE_URL;
 	}
@@ -161,7 +179,7 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceUnsupportedDialectException(HttpServletRequest request, HttpServletResponse response,
 			UnsupportedDialectException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedDialectException.class), exception, false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -172,9 +190,10 @@ public class ControllerAdvice extends AbstractController
 			PersistenceException exception)
 	{
 		if (exception.getCause() instanceof SQLException)
-			setOperationMessageForExceptionCause(request, exception);
+			setOperationMessageForThrowable(request, buildMessageCode(PersistenceException.class), exception.getCause(),
+					true);
 		else
-			setOperationMessageForException(request, exception, true);
+			setOperationMessageForThrowable(request, buildMessageCode(PersistenceException.class), exception, true);
 
 		return ERROR_PAGE_URL;
 	}
@@ -184,7 +203,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleDbmodelDatabaseInfoResolverException(HttpServletRequest request, HttpServletResponse response,
 			DatabaseInfoResolverException exception)
 	{
-		setOperationMessageForException(request, exception, true);
+		setOperationMessageForThrowable(request, buildMessageCode(DatabaseInfoResolverException.class), exception,
+				true);
 
 		return ERROR_PAGE_URL;
 	}
@@ -194,7 +214,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleDbmodelDatabaseModelResolverException(HttpServletRequest request, HttpServletResponse response,
 			DatabaseModelResolverException exception)
 	{
-		setOperationMessageForException(request, exception, true);
+		setOperationMessageForThrowable(request, buildMessageCode(DatabaseModelResolverException.class), exception,
+				true);
 
 		return ERROR_PAGE_URL;
 	}
@@ -204,7 +225,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleDbmodelTableNotExistsException(HttpServletRequest request, HttpServletResponse response,
 			TableNotExistsException exception)
 	{
-		setOperationMessageForException(request, exception, false, exception.getTableName());
+		setOperationMessageForThrowable(request, buildMessageCode(TableNotExistsException.class), exception, false,
+				exception.getTableName());
 
 		return ERROR_PAGE_URL;
 	}
@@ -214,7 +236,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionConnectionSourceException(HttpServletRequest request, HttpServletResponse response,
 			ConnectionSourceException exception)
 	{
-		setOperationMessageForException(request, exception, true);
+		setOperationMessageForThrowable(request, buildMessageCode(ConnectionSourceException.class), exception, true);
 
 		return ERROR_PAGE_URL;
 	}
@@ -224,7 +246,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionDriverEntityManagerException(HttpServletRequest request, HttpServletResponse response,
 			DriverEntityManagerException exception)
 	{
-		setOperationMessageForException(request, exception, true);
+		setOperationMessageForThrowable(request, buildMessageCode(DriverEntityManagerException.class), exception, true);
 
 		return ERROR_PAGE_URL;
 	}
@@ -234,7 +256,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionDriverNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			DriverNotFoundException exception)
 	{
-		setOperationMessageForException(request, exception, false, exception.getDriverClassName());
+		setOperationMessageForThrowable(request, buildMessageCode(DriverNotFoundException.class), exception, false,
+				exception.getDriverClassName());
 
 		return ERROR_PAGE_URL;
 	}
@@ -244,7 +267,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionDriverClassFormatErrorException(HttpServletRequest request,
 			HttpServletResponse response, DriverClassFormatErrorException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(DriverClassFormatErrorException.class), exception,
+				false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -254,7 +278,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionURLNotAcceptedException(HttpServletRequest request, HttpServletResponse response,
 			URLNotAcceptedException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(URLNotAcceptedException.class), exception, false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -264,7 +288,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionUnsupportedGetConnectionException(HttpServletRequest request,
 			HttpServletResponse response, UnsupportedGetConnectionException exception)
 	{
-		setOperationMessageForException(request, exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedGetConnectionException.class), exception,
+				false);
 
 		return ERROR_PAGE_URL;
 	}
@@ -274,25 +299,15 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionEstablishConnectionException(HttpServletRequest request, HttpServletResponse response,
 			EstablishConnectionException exception)
 	{
-		setOperationMessageForExceptionCause(request, exception);
+		setOperationMessageForThrowable(request, buildMessageCode(EstablishConnectionException.class),
+				exception.getCause(), true);
 
 		return ERROR_PAGE_URL;
 	}
 
-	protected void setOperationMessageForException(HttpServletRequest request, Exception exception,
-			boolean traceException, Object... messageArgs)
+	protected String buildMessageCode(Class<? extends Throwable> clazz)
 	{
-		String code = buildMessageCode(exception.getClass().getSimpleName());
-
-		setOperationMessageForThrowable(request, code, exception, traceException, messageArgs);
-	}
-
-	protected void setOperationMessageForExceptionCause(HttpServletRequest request, Exception exception,
-			Object... messageArgs)
-	{
-		String code = buildMessageCode(exception.getClass().getSimpleName());
-
-		setOperationMessageForThrowable(request, code, exception.getCause(), true, messageArgs);
+		return buildMessageCode(clazz.getSimpleName());
 	}
 
 	@Override
