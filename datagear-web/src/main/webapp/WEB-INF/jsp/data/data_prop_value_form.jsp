@@ -168,6 +168,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				pageObj.downloadSinglePropertyValueFile(property, propertyConcreteModel);
 			},
 			validationRequiredAsAdd : ("saveAdd" == pageObj.submitAction),
+			batchSet : ("saveAddMultiplePropValueElement" == pageObj.submitAction),
 			labels : pageObj.formLabels,
 			dateFormat : "<c:out value='${dateFormat}' />",
 			timestampFormat : "<c:out value='${sqlTimestampFormat}' />",

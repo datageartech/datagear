@@ -30,6 +30,7 @@ pageObj.clientOperation = undefined;
 		reset : "<fmt:message key='reset' />",
 		batchSet :
 		{
+			batchSetSwitchTitle : "<fmt:message key='batchSet.batchSetSwitchTitle' />",
 			batchCount : "<fmt:message key='batchSet.batchCount' />",
 			batchHandleErrorMode : "<fmt:message key='batchSet.batchHandleErrorMode' />",
 			batchHandleErrorModeEnum : ["<fmt:message key='batchSet.batchHandleErrorMode.ignore' />", "<fmt:message key='batchSet.batchHandleErrorMode.abort' />", "<fmt:message key='batchSet.batchHandleErrorMode.rollback' />"]

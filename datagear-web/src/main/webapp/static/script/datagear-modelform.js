@@ -120,6 +120,7 @@
 				downloadFile : "下载",
 				batchSet :
 				{
+					batchSetSwitchTitle : "批量添加设置",
 					batchCount : "批量添加数目",
 					batchHandleErrorMode : "出错时",
 					batchHandleErrorModeEnum : ["忽略", "中止", "撤销"]
@@ -402,7 +403,7 @@
 					var batchSetPanelWidth = $batchSetPanel.outerWidth();
 					$batchSetPanel.css("left", (0-batchSetPanelWidth - 4.1*2)+"px").hide();
 					
-					var $batchSetSwitch = $("<span class='batch-set-switch ui-icon ui-icon-gear'></span>").appendTo($formOperation);
+					var $batchSetSwitch = $("<span class='batch-set-switch ui-icon ui-icon-gear'></span>").attr("title", options.labels.batchSet.batchSetSwitchTitle).appendTo($formOperation);
 					
 					$batchSetSwitch.click(function()
 					{
