@@ -1,6 +1,8 @@
 # 数据齿轮
 
-##官网
+浏览器/服务器架构的数据库管理系统。
+
+## 官网
 
 [http://www.datagear.tech](http://www.datagear.tech)
 
