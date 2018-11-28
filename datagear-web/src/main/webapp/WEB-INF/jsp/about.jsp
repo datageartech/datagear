@@ -44,9 +44,6 @@
 			</div>
 		</div>
 	</form>
-	<div class="copyright small-text" style="text-align: center;">
-		<fmt:message key='app.copyright' />
-	</div>
 </div>
 <%@ include file="include/page_js_obj.jsp" %>
 <script type="text/javascript">
