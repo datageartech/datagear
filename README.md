@@ -1,5 +1,11 @@
 # 数据齿轮
 
+浏览器/服务器架构的数据库管理系统。
+
+## 官网
+
+[http://www.datagear.tech](http://www.datagear.tech)
+
 ## 依赖
 
 	Java 6+
@@ -15,3 +21,4 @@
 2. 执行如下maven命令：
 
 	mvn -N versions:update-child-modules antrun:run
+

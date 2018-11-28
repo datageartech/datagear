@@ -189,6 +189,20 @@
 			    			</tasks>
 			    		</configuration>
 			    	</execution>
+			    	
+			    	<!-- 拷贝LICENSE文件 -->
+			    	<execution>
+			    		<id>copyLICENSE</id>
+			    		<phase>prepare-package</phase>
+			    		<goals>
+			    			<goal>run</goal>
+			    		</goals>
+			    		<configuration>
+			    			<tasks>
+			    				<copy file="../LICENSE" todir="${project.build.directory}/${project.build.finalName}" />
+			    			</tasks>
+			    		</configuration>
+			    	</execution>
 			    </executions>
 			</plugin>
 			

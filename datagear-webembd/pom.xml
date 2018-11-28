@@ -105,7 +105,7 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>copyJarsToTargetLib</id>
+						<id>copyToDistFolder</id>
 						<phase>package</phase>
 						<goals>
 							<goal>run</goal>
@@ -116,16 +116,11 @@
 								<copy file="${project.build.directory}/${project.name}-${project.version}.jar" todir="${dist.target.dir}/lib" />
 								<delete dir="${dist.target.dir}/logs" includeEmptyDirs="true" />
 								<mkdir dir="${dist.target.dir}/logs"/>
+								<copy file="../LICENSE" todir="${dist.target.dir}" />
 							</tasks>
 						</configuration>
 					</execution>
-				</executions>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
+					
 					<execution>
 						<id>distToZip</id>
 						<phase>package</phase>
