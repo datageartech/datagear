@@ -596,6 +596,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	height: 100%;
 	border: 0;
 	padding: 0 0;
+	font-size: small;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button.ui-button{
 	border: 0px;
