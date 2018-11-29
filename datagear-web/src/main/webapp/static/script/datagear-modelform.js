@@ -253,6 +253,27 @@
 		},
 		
 		/**
+		 * 获取除数据意外的参数对象，比如options.batchCountParamName、options.batchHandleErrorModeParamName参数。
+		 */
+		param : function()
+		{
+			var options = this.options;
+			
+			var batchCount = parseInt($("input[name='"+options.batchCountParamName+"']", this.element).val());
+			var batchHandleErrorMode = $("select[name='"+options.batchHandleErrorModeParamName+"']", this.element).val();
+			
+			var param = {};
+			
+			if(!isNaN(batchCount) && batchCount >= 0)
+			{
+				param[options.batchCountParamName] = batchCount;
+				param[options.batchHandleErrorModeParamName] = batchHandleErrorMode;
+			}
+			
+			return param;
+		},
+		
+		/**
 		 * 表单所处的对话框是否设置为钉住。
 		 */
 		isDialogPinned : function()
@@ -933,6 +954,9 @@
 					}
 				}
 			));
+			
+			var rules = (validateOptions.rules || (validateOptions.rules = {}));
+			rules[this.options.batchCountParamName] = { "number" : true, "min" : 0 };
 			
 			return validateOptions;
 		}

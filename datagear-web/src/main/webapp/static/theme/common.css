@@ -136,8 +136,12 @@ form .form-foot .form-operation.form-operation-batch-set .batch-set-panel label{
 	margin-left: 1em;
 	margin-right: 0.41em;
 }
-form .form-foot .form-operation.form-operation-batch-set .batch-set-panel input.batch-set-count{
+form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count{
 	width: 3em;
+}
+form .form-foot .form-operation.form-operation-batch-set .batch-set-panel .batch-set-count.error{
+	color: red;
+	border-color: red;
 }
 form .form-foot .ui-button{
 	margin-left: .5em;

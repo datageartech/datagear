@@ -83,6 +83,7 @@ String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
 			submit : function()
 			{
 				var data = $(this).modelform("data");
+				var formParam = $(this).modelform("param");
 				
 				var pageParam = pageObj.pageParam();
 				
@@ -91,7 +92,7 @@ String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
 				//父页面定义了submit回调函数，则优先执行
 				if(pageParam && pageParam.submit)
 				{
-					close = (pageParam.submit(data) != false);
+					close = (pageParam.submit(data, formParam) != false);
 					
 					if(close && !$(this).modelform("isDialogPinned"))
 						pageObj.close();
@@ -100,7 +101,7 @@ String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
 				else
 				{
 					var thisForm = this;
-					var param = {"data" : data, "originalData" : pageObj.originalData};
+					var param = $.extend(formParam, {"data" : data, "originalData" : pageObj.originalData});
 					
 					$.post(pageObj.url(pageObj.submitAction), param, function(operationMessage)
 					{
