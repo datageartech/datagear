@@ -299,6 +299,24 @@
 		},
 		
 		/**
+		 * 禁止操作。
+		 */
+		disableOperation : function()
+		{
+			$(".form-foot input[type='submit']", this.element).button("disable");
+			$(".form-foot input[type='reset']", this.element).button("disable");
+		},
+		
+		/**
+		 * 启用操作。
+		 */
+		enableOperation : function()
+		{
+			$(".form-foot input[type='submit']", this.element).button("enable");
+			$(".form-foot input[type='reset']", this.element).button("enable");
+		},
+		
+		/**
 		 * 绘制。
 		 */
 		_render : function($formHead, $formContent, $formFoot)

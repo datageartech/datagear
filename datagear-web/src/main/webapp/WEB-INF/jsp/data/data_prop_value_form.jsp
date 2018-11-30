@@ -115,23 +115,35 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				{
 					var thisForm = this;
 					var param = { "data" : pageObj.data, "propertyPath" : pageObj.propertyPath, "propValue" : propValue };
+
+					$(thisForm).modelform("disableOperation");
 					
-					$.post(pageObj.url(pageObj.submitAction), param, function(operationMessage)
+					$.ajax(pageObj.url(pageObj.submitAction), 
 					{
-						//如果有初始数据，则更新为已保存至后台的数据
-						if(pageObj.data)
-							$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, operationMessage.data);
-						
-						if(pageParam && pageParam.afterSave)
-							close = (pageParam.afterSave(operationMessage.data) != false);
-						
-						var pageObjParent = pageObj.parent();
-						if(pageObjParent && pageObjParent.refresh)
-							pageObjParent.refresh();
-						
-						if(close && !$(thisForm).modelform("isDialogPinned"))
-							pageObj.close();
-					}, "json");
+						"data" : param,
+						"success" : function(operationMessage)
+						{
+							//如果有初始数据，则更新为已保存至后台的数据
+							if(pageObj.data)
+								$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, operationMessage.data);
+							
+							if(pageParam && pageParam.afterSave)
+								close = (pageParam.afterSave(operationMessage.data) != false);
+							
+							var pageObjParent = pageObj.parent();
+							if(pageObjParent && pageObjParent.refresh)
+								pageObjParent.refresh();
+							
+							if(close && !$(thisForm).modelform("isDialogPinned"))
+								pageObj.close();
+						},
+						"dataType" : "json",
+						"complete" : function()
+						{
+							var $form = $(thisForm);
+							$form.modelform("enableOperation");
+						}
+					});
 				}
 				
 				return false;

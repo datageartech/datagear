@@ -106,6 +106,8 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 					var thisForm = this;
 					var param = $.extend(formParam, {"data" : data, "originalData" : pageObj.originalData});
 					
+					$(thisForm).modelform("disableOperation");
+					
 					$.ajax(pageObj.url(pageObj.submitAction), 
 					{
 						"data" : param,
@@ -139,6 +141,9 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 						"complete" : function()
 						{
 							var $form = $(thisForm);
+							
+							$form.modelform("enableOperation");
+							
 							var batchSubmit = $form.modelform("isBatchSubmit");
 							
 							if(batchSubmit)
