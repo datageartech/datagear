@@ -175,6 +175,9 @@ form .form-foot .ui-button{
     padding: 1px;
     height: 20px;
 }
+.ui-dialog .ui-dialog-title .ui-icon{
+	margin-right: 0.3em;
+}
 /*可保持ui-state-active状态组件样式，默认图标是灰色，这了改成白色*/
 .stated-active.ui-state-active .ui-icon, .stated-active.ui-state-active:focus .ui-icon, .stated-active.ui-state-active:hover .ui-icon{
     background-image: url(default/jquery-ui-1.12.1/images/ui-icons_ffffff_256x240.png);
@@ -343,8 +346,9 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 .ui-tooltip .ui-tooltip-content .tooltip-icon{
 	margin-right: 0.41em;
 }
-.ui-tooltip .ui-tooltip-content .error-detail-icon{
+.ui-tooltip .ui-tooltip-content .message-detail-icon{
 	cursor: pointer;
+	margin-left: 1em;
 }
 .ui-tooltip .ui-tooltip-content .content{
 	padding-left:0.5em;
@@ -361,10 +365,10 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	overflow: hidden;
 }
 
-/*错误消息对话框*/
-.error-dialog{
+/*操作消息对话框*/
+.operation-message-dialog{
 }
-.error-dialog .error-content{
+.operation-message-dialog .message-detail{
 	display: inline-block;
 	width: 100%;
 	height: 98%;
@@ -373,8 +377,12 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	border: 0;
 	overflow: auto;
 }
-.error-dialog .error-content pre{
+.operation-message-dialog .message-detail pre{
 	margin: 0;
+}
+.operation-message-dialog .message-detail .message-detail-item{
+	padding: 0.2em 0;
+	white-space: nowrap;
 }
 
 /*确认对话框*/

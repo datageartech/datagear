@@ -25,6 +25,8 @@ boolean clientOperation = ("true".equalsIgnoreCase(getStringValue(request, "clie
 boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, "readonly")));
 //忽略表单渲染和处理的属性名，允许为null
 String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
+//是否开启批量执行功能，允许为null
+boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet")));
 %>
 <html>
 <head>
@@ -59,6 +61,7 @@ String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
 	pageObj.originalData = $.unref(<%writeJson(application, out, data);%>);
 	pageObj.data = $.unref($.ref(pageObj.originalData));
 	pageObj.clientOperation = <%=clientOperation%>;
+	pageObj.batchSet = <%=batchSet%>;
 	
 	pageObj.superBuildPropertyActionOptions = pageObj.buildPropertyActionOptions;
 	pageObj.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
@@ -103,23 +106,48 @@ String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
 					var thisForm = this;
 					var param = $.extend(formParam, {"data" : data, "originalData" : pageObj.originalData});
 					
-					$.post(pageObj.url(pageObj.submitAction), param, function(operationMessage)
+					$.ajax(pageObj.url(pageObj.submitAction), 
 					{
-						pageObj.data = $.unref(operationMessage.data);
-						//如果有初始数据，则更新为已保存至后台的数据
-						//注意：不能直接赋值pageObj.data，因为是同一个引用，有可能会被修改，而pageObj.originalData不应该被修改
-						if(pageObj.originalData)
-							pageObj.originalData = $.unref($.ref(operationMessage.data));
-						
-						if(pageParam && pageParam.afterSave)
-							close = (pageParam.afterSave(operationMessage.data) != false);
-						
-						var pageObjParent = pageObj.parent();
-						if(pageObjParent && pageObjParent.refresh)
-							pageObjParent.refresh();
-						
-						if(close && !$(thisForm).modelform("isDialogPinned"))
-							pageObj.close();
+						"data" : param,
+						"success" : function(operationMessage)
+						{
+							var $form = $(thisForm);
+							var batchSubmit = $form.modelform("isBatchSubmit");
+							var isDialogPinned = $form.modelform("isDialogPinned");
+							
+							if(batchSubmit)
+								;
+							else
+							{
+								pageObj.data = $.unref(operationMessage.data);
+								//如果有初始数据，则更新为已保存至后台的数据
+								//注意：不能直接赋值pageObj.data，因为是同一个引用，有可能会被修改，而pageObj.originalData不应该被修改
+								if(pageObj.originalData)
+									pageObj.originalData = $.unref($.ref(operationMessage.data));
+								
+								if(pageParam && pageParam.afterSave)
+									close = (pageParam.afterSave(operationMessage.data) != false);
+								
+								var pageObjParent = pageObj.parent();
+								if(pageObjParent && pageObjParent.refresh)
+									pageObjParent.refresh();
+								
+								if(close && !isDialogPinned)
+									pageObj.close();
+							}
+						},
+						"complete" : function()
+						{
+							var $form = $(thisForm);
+							var batchSubmit = $form.modelform("isBatchSubmit");
+							
+							if(batchSubmit)
+							{
+								var pageObjParent = pageObj.parent();
+								if(pageObjParent && pageObjParent.refresh)
+									pageObjParent.refresh();
+							}
+						}
 					});
 				}
 				
@@ -160,7 +188,7 @@ String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
 				pageObj.downloadSinglePropertyValueFile(property, propertyConcreteModel);
 			},
 			validationRequiredAsAdd : ("saveAdd" == pageObj.submitAction),
-			batchSet : ("saveAdd" == pageObj.submitAction),
+			batchSet : pageObj.batchSet,
 			labels : pageObj.formLabels,
 			dateFormat : "<c:out value='${dateFormat}' />",
 			timestampFormat : "<c:out value='${sqlTimestampFormat}' />",

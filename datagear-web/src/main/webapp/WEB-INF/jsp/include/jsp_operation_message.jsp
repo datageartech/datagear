@@ -14,9 +14,9 @@ if(__operationMessage != null){
 	<div class="message">
 		<%=__operationMessage.getMessage()%>
 	</div>
-	<%if(__operationMessage.hasThrowableTrace()){%>
-	<div class="throwable">
-		<pre><%=__operationMessage.getThrowableTrace()%></pre>
+	<%if(__operationMessage.hasDetail()){%>
+	<div class="message-detail">
+		<pre><%=__operationMessage.getDetail()%></pre>
 	</div>
 	<%}%>
 </div>

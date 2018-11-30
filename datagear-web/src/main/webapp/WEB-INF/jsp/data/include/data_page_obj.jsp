@@ -21,16 +21,20 @@
 		 *
 		 * @param tableName 可选，操作对应的表名，默认是当前表名
 		 * @param action 操作名称
+		 * @param param URL后面加的参数，不需要以'?'开头
 		 */
-		url : function(tableName, action)
+		url : function(tableName, action, param)
 		{
-			if(!action)
+			if(action == undefined)
 			{
 				action = tableName;
 				tableName = this.tableName;
 			}
 			
-			return contextPath + $.toPath("data", this.schemaId, tableName, action);
+			if(!tableName)
+				tableName = this.tableName;
+			
+			return contextPath + $.toPath("data", this.schemaId, tableName, action) + (param ? "?" + param : "");
 		},
 		
 		/**

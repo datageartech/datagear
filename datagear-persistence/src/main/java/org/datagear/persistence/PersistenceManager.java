@@ -8,6 +8,7 @@ import java.sql.Connection;
 
 import org.datagear.model.Model;
 import org.datagear.model.support.PropertyPathInfo;
+import org.datagear.persistence.support.ExpressionEvaluationContext;
 
 /**
  * 持久化管理器。
@@ -18,6 +19,21 @@ import org.datagear.model.support.PropertyPathInfo;
 public interface PersistenceManager
 {
 	/**
+	 * 获取指定{@linkplain Model}的表名称。
+	 * 
+	 * @param model
+	 * @return
+	 */
+	String getTableName(Model model);
+
+	/**
+	 * 获取此{@linkplain PersistenceManager}使用的{@linkplain DialectSource}。
+	 * 
+	 * @return
+	 */
+	DialectSource getDialectSource();
+
+	/**
 	 * 插入数据。
 	 * 
 	 * @param cn
@@ -26,6 +42,21 @@ public interface PersistenceManager
 	 * @throws PersistenceException
 	 */
 	void insert(Connection cn, Model model, Object obj) throws PersistenceException;
+
+	/**
+	 * 插入数据
+	 * 
+	 * @param cn
+	 * @param dialect
+	 * @param table
+	 * @param model
+	 * @param obj
+	 * @param expressionEvaluationContext
+	 * @return
+	 * @throws PersistenceException
+	 */
+	int insert(Connection cn, Dialect dialect, String table, Model model, Object obj,
+			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException;
 
 	/**
 	 * 更新数据。
@@ -40,6 +71,22 @@ public interface PersistenceManager
 	 */
 	int update(Connection cn, Model model, Object originalObj, Object updateObj, boolean updateMultipleProperty)
 			throws PersistenceException;
+
+	/**
+	 * 更新数据。
+	 * 
+	 * @param cn
+	 * @param dialect
+	 * @param table
+	 * @param model
+	 * @param originalObj
+	 * @param updateObj
+	 * @param expressionEvaluationContext
+	 * @return
+	 * @throws PersistenceException
+	 */
+	int update(Connection cn, Dialect dialect, String table, Model model, Object originalObj, Object updateObj,
+			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException;
 
 	/**
 	 * 插入单元属性值。

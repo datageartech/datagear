@@ -253,7 +253,7 @@
 		},
 		
 		/**
-		 * 获取除数据意外的参数对象，比如options.batchCountParamName、options.batchHandleErrorModeParamName参数。
+		 * 获取除数据以外的参数对象，比如options.batchCountParamName、options.batchHandleErrorModeParamName参数。
 		 */
 		param : function()
 		{
@@ -271,6 +271,18 @@
 			}
 			
 			return param;
+		},
+		
+		/**
+		 * 是否是批量提交。
+		 */
+		isBatchSubmit : function()
+		{
+			var options = this.options;
+			
+			var batchCount = parseInt($("input[name='"+options.batchCountParamName+"']", this.element).val());
+			
+			return (batchCount >= 0);
 		},
 		
 		/**

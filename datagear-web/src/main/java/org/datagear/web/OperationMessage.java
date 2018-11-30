@@ -24,11 +24,14 @@ public class OperationMessage
 	/** 消息内容 */
 	private String message;
 
+	/** 消息详细内容 */
+	private String detail;
+
+	/** 是否是Throwable详细内容 */
+	private boolean throwableDetail;
+
 	/** 操作返回数据 */
 	private Object data;
-
-	/** 错误消息时的异常 */
-	private String throwableTrace;
 
 	public OperationMessage()
 	{
@@ -63,16 +66,6 @@ public class OperationMessage
 		return MessageType.FAIL.equals(this.type);
 	}
 
-	/**
-	 * 操作是否严重失败（产生{@linkplain #getException() 异常}）。
-	 * 
-	 * @return
-	 */
-	public boolean isFatalFail()
-	{
-		return isFail() && hasThrowableTrace();
-	}
-
 	public MessageType getType()
 	{
 		return type;
@@ -103,6 +96,31 @@ public class OperationMessage
 		this.message = message;
 	}
 
+	public boolean hasDetail()
+	{
+		return this.detail != null && !this.detail.isEmpty();
+	}
+
+	public String getDetail()
+	{
+		return detail;
+	}
+
+	public void setDetail(String detail)
+	{
+		this.detail = detail;
+	}
+
+	public boolean isThrowableDetail()
+	{
+		return throwableDetail;
+	}
+
+	public void setThrowableDetail(boolean throwableDetail)
+	{
+		this.throwableDetail = throwableDetail;
+	}
+
 	public boolean hasData()
 	{
 		return (this.data != null);
@@ -118,24 +136,10 @@ public class OperationMessage
 		this.data = data;
 	}
 
-	public boolean hasThrowableTrace()
-	{
-		return (this.throwableTrace != null && !this.throwableTrace.isEmpty());
-	}
-
-	public String getThrowableTrace()
-	{
-		return throwableTrace;
-	}
-
-	public void setThrowableTrace(String throwableTrace)
-	{
-		this.throwableTrace = throwableTrace;
-	}
-
 	public void setThrowable(Throwable throwable)
 	{
-		this.throwableTrace = printThrowableTrace(throwable);
+		this.detail = printThrowableTrace(throwable);
+		this.throwableDetail = true;
 	}
 
 	@Override
@@ -247,24 +251,24 @@ public class OperationMessage
 	}
 
 	/**
-	 * 构建操作严重失败消息。
+	 * 构建Throwable操作失败消息。
 	 * 
 	 * @param code
 	 * @param message
 	 * @param throwable
 	 * @return
 	 */
-	public static OperationMessage valueOfFatalFail(String code, String message, Throwable throwable)
+	public static OperationMessage valueOfThrowableFail(String code, String message, Throwable throwable)
 	{
 		OperationMessage om = new OperationMessage(MessageType.FAIL, code, message);
 
-		om.setThrowableTrace(printThrowableTrace(throwable));
+		om.setThrowable(throwable);
 
 		return om;
 	}
 
 	/**
-	 * 构建操作严重失败消息。
+	 * 构建Throwable操作失败消息。
 	 * 
 	 * @param code
 	 * @param message
@@ -272,11 +276,11 @@ public class OperationMessage
 	 * @param throwable
 	 * @return
 	 */
-	public static OperationMessage valueOfFatalFail(String code, String message, Object data, Throwable throwable)
+	public static OperationMessage valueOfThrowableFail(String code, String message, Object data, Throwable throwable)
 	{
 		OperationMessage om = new OperationMessage(MessageType.FAIL, code, message);
+		om.setThrowable(throwable);
 		om.setData(data);
-		om.setThrowableTrace(printThrowableTrace(throwable));
 
 		return om;
 	}

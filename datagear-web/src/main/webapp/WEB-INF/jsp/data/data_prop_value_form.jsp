@@ -25,6 +25,8 @@ String submitAction = getStringValue(request, "submitAction");
 boolean clientOperation = ("true".equalsIgnoreCase(getStringValue(request, "clientOperation")));
 //是否只读操作，允许为null
 boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, "readonly")));
+//是否开启批量执行功能，允许为null
+boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet")));
 
 PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 PropertyPathInfo propertyPathInfoObj = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
@@ -63,6 +65,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	pageObj.data = ($.unref(<%writeJson(application, out, data);%>) || {});
 	pageObj.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
 	pageObj.clientOperation = <%=clientOperation%>;
+	pageObj.batchSet = <%=batchSet%>;
 	
 	pageObj.superBuildPropertyActionOptions = pageObj.buildPropertyActionOptions;
 	pageObj.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
@@ -168,7 +171,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				pageObj.downloadSinglePropertyValueFile(property, propertyConcreteModel);
 			},
 			validationRequiredAsAdd : ("saveAdd" == pageObj.submitAction),
-			batchSet : ("saveAddMultiplePropValueElement" == pageObj.submitAction),
+			batchSet : pageObj.batchSet,
 			labels : pageObj.formLabels,
 			dateFormat : "<c:out value='${dateFormat}' />",
 			timestampFormat : "<c:out value='${sqlTimestampFormat}' />",

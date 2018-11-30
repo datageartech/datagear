@@ -95,6 +95,14 @@ public class ExpressionEvaluationContext
 	}
 
 	/**
+	 * 清除所有缓存值。
+	 */
+	public void clearCachedValue()
+	{
+		this.valueCache.clear();
+	}
+
+	/**
 	 * 获取{@linkplain #getVariableExpressionBean()}的{@linkplain VariableExpressionBean#getIndex()}的值。
 	 * 
 	 * @return

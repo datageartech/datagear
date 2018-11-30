@@ -79,7 +79,7 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 		<%if(!readonly){%>
 			pageObj.element("input[name=addButton]").click(function()
 			{
-				pageObj.open(pageObj.url("add"), { pinTitleButton : true });
+				pageObj.open(pageObj.url("", "add", "batchSet=true"), { pinTitleButton : true });
 			});
 			
 			pageObj.element("input[name=editButton]").click(function()

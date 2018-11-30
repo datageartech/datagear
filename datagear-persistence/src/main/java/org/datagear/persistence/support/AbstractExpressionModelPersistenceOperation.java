@@ -19,6 +19,7 @@ import org.datagear.model.support.MU;
 import org.datagear.persistence.UnsupportedModelCharacterException;
 import org.datagear.persistence.support.ExpressionResolver.Expression;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.expression.ExpressionException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
@@ -280,7 +281,7 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 			expressionValues.add(value);
 			expressionEvaluationContext.putCachedValue(expression, value);
 		}
-		catch (Exception e)
+		catch (ExpressionException e)
 		{
 			throw new VariableExpressionErrorException(expression, e);
 		}

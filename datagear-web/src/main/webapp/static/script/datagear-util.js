@@ -368,7 +368,7 @@
 		{
 			content = "<span class='tooltip-icon ui-icon ui-icon-circle-check'></span>"
 					+"<div class='content-value'>" + content +"</div>";
-			return $._tip("ui-state-default", content, (delayMs || 2000));
+			return $._tip("ui-state-default", content, (delayMs || 2500));
 		},
 		
 		/**
@@ -378,7 +378,7 @@
 		{
 			content = "<span class='tooltip-icon ui-icon ui-icon-alert'></span>"
 				+"<div class='content-value'>" + content +"</div>";
-			return $._tip("ui-state-error", content, (delayMs || 3500));
+			return $._tip("ui-state-error", content, (delayMs || 4100));
 		},
 		
 		/**
@@ -388,7 +388,7 @@
 		{
 			content = "<span class='tooltip-icon ui-icon ui-icon-info'></span>"
 				+"<div class='content-value'>" + content +"</div>";
-			return $._tip("ui-state-highlight", content, (delayMs || 3500));
+			return $._tip("ui-state-highlight", content, (delayMs || 4100));
 		},
 
 		/**
@@ -1342,86 +1342,127 @@
 			return null;
 		}
 	};
-	
-	$.handleAjaxError = function(jqXHR, errorThrown)
+
+	$.handleAjaxOperationMessage = function(jqXHR, errorThrown)
 	{
-		if(!window._showResponseErrorDetail)
+		if(!window._showAjaxOperationMessageDetail)
 		{
-			window._showResponseErrorDetail = function()
+			window._showAjaxOperationMessageDetail = function()
 			{
 				$.closeTip();
 				
-				var $errorDetail = $("#responseError");
+				var $operationMessageParent = $("#__operationMessageParent");
 				
-				var $dialog = $("<div id='dialog-"+new Date().getTime()+"' class='error-dialog'></div>").appendTo(document.body);
-				var $errorContent = $("<div class='ui-state-error error-content' />").appendTo($dialog);
-				$errorContent.html($(".throwable", $errorDetail).html());
+				var isSuccessMessage = ("true" == $operationMessageParent.attr("success"));
+				
+				var $dialog = $("<div id='dialog-"+new Date().getTime()+"' class='operation-message-dialog'></div>").appendTo(document.body);
+				
+				var $messageDetail = $("<div class='message-detail' />");
+				if(!isSuccessMessage)
+					$messageDetail.addClass("ui-state-error");
+				$messageDetail.appendTo($dialog);
+				$messageDetail.html($(".message-detail", $operationMessageParent).html());
 				
 				$._dialog($dialog,
 						{
-							title : $(".message", $errorDetail).text(),
+							title : $(".message", $operationMessageParent).text(),
 							modal : true,
 							height: "60%",
 							position: {my: "center top", at: "center top+3"},
 							classes:
 							{
-								"ui-dialog": "ui-corner-all ui-widget-shadow ui-state-error"
+								"ui-dialog": "ui-corner-all ui-widget-shadow" + (isSuccessMessage ? "" : "ui-state-error")
 							}
 						});
 				
 				var $dialogWidget = $dialog.dialog("widget");
-				$(".ui-dialog-titlebar", $dialogWidget).addClass("ui-state-error");
-				$(".ui-dialog-title", $dialogWidget).prepend("<span class='ui-icon ui-icon-alert' style='margin-right:0.3em;'></span>");
-				$(".ui-dialog-titlebar-close", $dialogWidget).addClass("ui-state-error");
+				
+				$(".ui-dialog-title", $dialogWidget).prepend("<span class='ui-icon "+(isSuccessMessage ? "ui-icon-circle-check" : "ui-icon-alert")+"'></span>");
+				
+				if(!isSuccessMessage)
+				{
+					$dialogWidget.addClass("ui-state-error");
+					$(".ui-dialog-titlebar", $dialogWidget).addClass("ui-state-error");
+					$(".ui-dialog-titlebar-close", $dialogWidget).addClass("ui-state-error");
+				}
 			};
 		}
 		
-		if(jqXHR.status != 200 && jqXHR.responseText)
+		var isSuccessMessage = (jqXHR.status == 200);
+		
+		if(jqXHR.responseText)
 		{
-			var $errorDiv = $("#responseError");
-			if($errorDiv.length == 0)
-				$errorDiv = $("<div id='responseError' style='display:none;' />").appendTo(document.body);
+			var $operationMessageParent = $("#__operationMessageParent");
+			if($operationMessageParent.length == 0)
+				$operationMessageParent = $("<div id='__operationMessageParent' style='display:none;' />").appendTo(document.body);
 			
 			var operationMessage = $.getResponseJson(jqXHR);
 			
+			var hasMessage = false;
+			
 			//操作消息的JSON响应
-			if(operationMessage)
+			if(operationMessage && operationMessage.type && operationMessage.code && operationMessage.message)
 			{
-				$errorDiv.empty();
+				$operationMessageParent.empty();
 				
-				var $omdiv = $("<div class='operation-message "+operationMessage.type+"' />").appendTo($errorDiv);
+				var $omdiv = $("<div class='operation-message "+operationMessage.type+"' />").appendTo($operationMessageParent);
 				var $mdiv = $("<div class='message' />").appendTo($omdiv).html(operationMessage.message);
 				
-				if(operationMessage.throwableTrace)
+				if(operationMessage.detail)
 				{
-					var $ddiv = $("<div class='throwable' />").appendTo($omdiv);
-					var $pre = $("<pre />").appendTo($ddiv).html(operationMessage.throwableTrace);
+					var $ddiv = $("<div class='message-detail' />").appendTo($omdiv);
+					if(operationMessage.throwableDetail)
+						$("<pre />").appendTo($ddiv).html(operationMessage.detail);
+					else
+						$("<div />").appendTo($ddiv).html(operationMessage.detail);
+				}
+				
+				hasMessage = true;
+			}
+			else
+			{
+				if(isSuccessMessage)
+					hasMessage = false;
+				else
+				{
+					//操作消息的HTML响应
+					$operationMessageParent.html(jqXHR.responseText);
+					hasMessage = true;
 				}
 			}
-			//操作消息的HTML响应
-			else
-				$errorDiv.html(jqXHR.responseText);
 			
-			var message = $(".message", $errorDiv).html();
-			
-			if($(".throwable", $errorDiv).length > 0)
-				message += "&nbsp;<span class='ui-icon ui-icon-comment error-detail-icon' onclick='_showResponseErrorDetail();'></span>";
-			
-			$.tipError(message);
+			if(hasMessage)
+			{
+				$operationMessageParent.attr("success", isSuccessMessage);
+				var message = $(".message", $operationMessageParent).html();
+				
+				if($(".message-detail", $operationMessageParent).length > 0)
+					message += "<span class='ui-icon ui-icon-comment message-detail-icon' onclick='_showAjaxOperationMessageDetail();'></span>";
+				
+				if(isSuccessMessage)
+					$.tipSuccess(message);
+				else
+					$.tipError(message);
+			}
 		}
 		else
 		{
-			var msg = (jqXHR.statusText || "Error");
-			
-			if(errorThrown && errorThrown.message)
+			if(isSuccessMessage)
+				;
+			else
 			{
-				if(msg)
-					msg += " : ";
+				var msg = (jqXHR.statusText || "Error");
 				
-				msg += errorThrown.message;
+				if(errorThrown && errorThrown.message)
+				{
+					if(msg)
+						msg += " : ";
+					
+					msg += errorThrown.message;
+				}
+				
+				$.tipError(msg);
 			}
-			
-			$.tipError(msg);
 		}
 	};
 	
@@ -1454,18 +1495,12 @@
 	
 	$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError)
 	{
-		$.handleAjaxError(jqXHR, thrownError);
+		$.handleAjaxOperationMessage(jqXHR, thrownError);
 	});
 	
 	$(document).ajaxSuccess(function(event, jqXHR, ajaxSettings, thrownError)
 	{
-		var responseJson = $.getResponseJson(jqXHR);
-		
-		//确定是操作消息JSON
-		if(responseJson && responseJson.type && responseJson.code && responseJson.message)
-		{
-			$.tipSuccess(responseJson.message);
-		}
+		$.handleAjaxOperationMessage(jqXHR, thrownError);
 	});
 })
 (jQuery);

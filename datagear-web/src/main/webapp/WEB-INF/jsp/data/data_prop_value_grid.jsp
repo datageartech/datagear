@@ -186,10 +186,13 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		<%if(!readonly){%>
 			pageObj.addMultiplePropValueElement = function()
 			{
+				var url = undefined;
 				var options = undefined;
 				
 				if(pageObj.clientOperation)
 				{
+					url = pageObj.url("addMultiplePropValueElement");
+					
 					var index = pageObj.table.DataTable().rows().data().length;
 					
 					options = pageObj.buildActionOptions(property, propertyModel,
@@ -208,6 +211,8 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				}
 				else
 				{
+					url = pageObj.url("", "addMultiplePropValueElement", "batchSet=true");
+					
 					options = pageObj.buildActionOptions(property, propertyModel,
 							{
 								"propertyPath" : $.propertyPath.concatElementIndex(pageObj.propertyPath, 0)
@@ -217,7 +222,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				
 				options.pinTitleButton = true;
 				
-				pageObj.open(pageObj.url("addMultiplePropValueElement"), options);
+				pageObj.open(url, options);
 			};
 			
 			<%if(isPrivatePropertyModel){%>

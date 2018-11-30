@@ -155,6 +155,8 @@ public abstract class AbstractSchemaModelController extends AbstractController
 
 		private boolean readonly;
 
+		private boolean customCommit = false;
+
 		public AbstractSchemaModelExecutor(HttpServletRequest request, HttpServletResponse response,
 				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly)
 		{
@@ -165,6 +167,21 @@ public abstract class AbstractSchemaModelController extends AbstractController
 			this.schemaId = schemaId;
 			this.tableName = tableName;
 			this.readonly = readonly;
+			this.customCommit = false;
+		}
+
+		public AbstractSchemaModelExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly,
+				boolean customCommit)
+		{
+			super();
+			this.request = request;
+			this.response = response;
+			this.springModel = springModel;
+			this.schemaId = schemaId;
+			this.tableName = tableName;
+			this.readonly = readonly;
+			this.customCommit = customCommit;
 		}
 
 		protected void doExecute() throws Throwable
@@ -185,7 +202,8 @@ public abstract class AbstractSchemaModelController extends AbstractController
 
 					doExecute(request, response, springModel, this._schema, model);
 
-					commitConnection();
+					if (!customCommit)
+						commitConnection();
 				}
 				catch (Throwable e)
 				{
@@ -207,7 +225,8 @@ public abstract class AbstractSchemaModelController extends AbstractController
 				{
 					doExecute(request, response, springModel, this._schema, model);
 
-					commitConnection();
+					if (!customCommit)
+						commitConnection();
 				}
 				catch (Exception e)
 				{
@@ -285,6 +304,13 @@ public abstract class AbstractSchemaModelController extends AbstractController
 			super(request, response, springModel, schemaId, tableName, readonly);
 		}
 
+		public ReturnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly,
+				boolean customCommit)
+		{
+			super(request, response, springModel, schemaId, tableName, readonly, customCommit);
+		}
+
 		public T execute() throws Throwable
 		{
 			doExecute();
@@ -328,6 +354,13 @@ public abstract class AbstractSchemaModelController extends AbstractController
 				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly)
 		{
 			super(request, response, springModel, schemaId, tableName, readonly);
+		}
+
+		public VoidExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly,
+				boolean customCommit)
+		{
+			super(request, response, springModel, schemaId, tableName, readonly, customCommit);
 		}
 
 		public void execute() throws Throwable

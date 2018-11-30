@@ -78,6 +78,7 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		this.selectPersistenceOperation = new SelectPersistenceOperation();
 	}
 
+	@Override
 	public DialectSource getDialectSource()
 	{
 		return dialectSource;
@@ -165,11 +166,24 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 	}
 
 	@Override
+	public String getTableName(Model model)
+	{
+		return super.getTableName(model);
+	}
+
+	@Override
 	public void insert(Connection cn, Model model, Object obj) throws PersistenceException
 	{
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
 		this.insertPersistenceOperation.insert(cn, dialect, getTableName(model), model, obj);
+	}
+
+	@Override
+	public int insert(Connection cn, Dialect dialect, String table, Model model, Object obj,
+			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException
+	{
+		return this.insertPersistenceOperation.insert(cn, dialect, table, model, obj, expressionEvaluationContext);
 	}
 
 	@Override
@@ -179,6 +193,14 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
 		return this.updatePersistenceOperation.update(cn, dialect, getTableName(model), model, originalObj, updateObj);
+	}
+
+	@Override
+	public int update(Connection cn, Dialect dialect, String table, Model model, Object originalObj, Object updateObj,
+			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException
+	{
+		return this.updatePersistenceOperation.update(cn, dialect, table, model, originalObj, updateObj,
+				expressionEvaluationContext);
 	}
 
 	@Override

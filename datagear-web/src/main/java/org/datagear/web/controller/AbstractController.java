@@ -17,6 +17,7 @@ import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -400,6 +401,9 @@ public abstract class AbstractController
 
 	/**
 	 * 获取I18N消息内容。
+	 * <p>
+	 * 如果找不到对应消息码的消息，则返回<code>"???[code]???"<code>（例如：{@code "???error???"}）。
+	 * </p>
 	 * 
 	 * @param request
 	 * @param code
@@ -408,7 +412,14 @@ public abstract class AbstractController
 	 */
 	protected String getMessage(HttpServletRequest request, String code, Object... args)
 	{
-		return this.messageSource.getMessage(code, args, WebUtils.getLocale(request));
+		try
+		{
+			return this.messageSource.getMessage(code, args, WebUtils.getLocale(request));
+		}
+		catch (NoSuchMessageException e)
+		{
+			return "???" + code + "???";
+		}
 	}
 
 	/**

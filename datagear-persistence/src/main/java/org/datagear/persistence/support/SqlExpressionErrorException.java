@@ -22,4 +22,10 @@ public class SqlExpressionErrorException extends ExpressionErrorException
 	{
 		super(expression, cause);
 	}
+
+	@Override
+	public SQLException getCause()
+	{
+		return (SQLException) super.getCause();
+	}
 }
