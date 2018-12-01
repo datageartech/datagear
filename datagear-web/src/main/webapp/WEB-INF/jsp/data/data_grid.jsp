@@ -111,24 +111,23 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 		});
 		
 		<%if(!readonly){%>
-			pageObj.element("input[name=deleteButton]").secondClick(
-			function()
+			pageObj.element("input[name=deleteButton]").click(function()
 			{
 				pageObj.executeOnSelects(function(rows)
 				{
-					var data = {"data" : rows};
-					
-					$.post(pageObj.url("delete"), data, function()
+					pageObj.confirm("<fmt:message key='confirmDelete' />",
 					{
-						pageObj.refresh();
+						"confirm" : function()
+						{
+							var data = {"data" : rows};
+							
+							$.post(pageObj.url("delete"), data, function()
+							{
+								pageObj.refresh();
+							});
+						}
 					});
 				});
-			},
-			function()
-			{
-				var re = false;
-				pageObj.executeOnSelects(function(row){ re = true; });
-				return re;
 			});
 		<%}%>
 		

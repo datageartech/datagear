@@ -305,31 +305,31 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				});
 			});
 			
-			pageObj.element("input[name=deleteButton]").secondClick(
+			pageObj.element("input[name=deleteButton]").click(
 			function()
 			{
 				pageObj.executeOnSelects(function(rows, indexes)
 				{
-					if(pageObj.clientOperation)
+					pageObj.confirm("<fmt:message key='confirmDelete' />",
 					{
-						pageObj.deleteRow(indexes);
-						pageObj.restoreGridData();
-					}
-					else
-					{
-						var options = pageObj.buildActionOptions(property, propertyModel, {"propValueElements" : rows}, null);
-						$.post(pageObj.url("deleteMultiplePropValueElements"), options.data, function()
+						"confirm" : function()
 						{
-							pageObj.refresh();
-						});
-					}
+							if(pageObj.clientOperation)
+							{
+								pageObj.deleteRow(indexes);
+								pageObj.restoreGridData();
+							}
+							else
+							{
+								var options = pageObj.buildActionOptions(property, propertyModel, {"propValueElements" : rows}, null);
+								$.post(pageObj.url("deleteMultiplePropValueElements"), options.data, function()
+								{
+									pageObj.refresh();
+								});
+							}
+						}
+					});
 				});
-			},
-			function()
-			{
-				var re = false;
-				pageObj.executeOnSelects(function(row){ re = true; });
-				return re;
 			});
 		<%}%>
 		
