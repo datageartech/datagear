@@ -364,170 +364,25 @@ public class DataController extends AbstractSchemaModelController
 	 * @throws Throwable
 	 */
 	protected ResponseEntity<OperationMessage> saveAddBatch(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, String schemaId, String tableName, final Integer batchCount,
-			final BatchHandleErrorMode batchHandleErrorMode) throws Throwable
+			org.springframework.ui.Model springModel, String schemaId, String tableName, int batchCount,
+			BatchHandleErrorMode batchHandleErrorMode) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		final int batchCountInt = (batchCount == null ? 0 : batchCount.intValue());
-
-		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
-				response, springModel, schemaId, tableName, false, true)
+		ResponseEntity<OperationMessage> batchResponseEntity = new BatchReturnExecutor(request, response, springModel,
+				schemaId, tableName, batchCount, batchHandleErrorMode)
 		{
 			@Override
-			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+			protected void doBatchUnit(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Model model, Connection cn,
+					Dialect dialect, String table, ExpressionEvaluationContext context) throws Throwable
 			{
-				Connection cn = getConnection();
-
-				List<BatchUnitResult> batchResults = new ArrayList<BatchUnitResult>();
-				int successCount = 0;
-				int failCount = 0;
-
-				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
-				String table = persistenceManager.getTableName(model);
-				ExpressionEvaluationContext context = new ExpressionEvaluationContext();
-
-				int index = 0;
-
-				for (; index < batchCountInt; index++)
-				{
-					try
-					{
-						Object data = modelDataConverter.convert(dataParam, model);
-						persistenceManager.insert(cn, dialect, table, model, data, context);
-
-						BatchUnitResult batchUnitResult = new BatchUnitResult(index);
-						batchResults.add(batchUnitResult);
-						successCount++;
-					}
-					catch (Exception e)
-					{
-						if (isBatchBreakException(e) && index == 0)
-							throw e;
-						else
-						{
-							BatchUnitResult batchUnitResult = new BatchUnitResult(index, e.getMessage());
-							batchResults.add(batchUnitResult);
-							failCount++;
-
-							if (BatchHandleErrorMode.ROLLBACK.equals(batchHandleErrorMode))
-							{
-								rollbackConnection();
-								break;
-							}
-							else if (BatchHandleErrorMode.ABORT.equals(batchHandleErrorMode))
-							{
-								commitConnection();
-								break;
-							}
-						}
-					}
-					finally
-					{
-						context.clearCachedValue();
-						context.incrementVariableIndex();
-					}
-				}
-
-				if (BatchHandleErrorMode.IGNORE.equals(batchHandleErrorMode))
-					commitConnection();
-
-				ResponseEntity<OperationMessage> responseEntity = null;
-
-				if (successCount == batchCountInt)// 全部成功
-				{
-					OperationMessage operationMessage = buildOperationMessageSuccess(request,
-							buildMessageCode("batchOperationSuccess"), batchCountInt, batchCountInt, 0);
-					operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
-
-					responseEntity = buildOperationMessageResponseEntity(HttpStatus.OK, operationMessage);
-				}
-				else if (failCount == batchCountInt)// 全部失败
-				{
-					OperationMessage operationMessage = buildOperationMessageFail(request,
-							buildMessageCode("batchOperationFail"), batchCountInt, 0, batchCountInt);
-					operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
-
-					responseEntity = buildOperationMessageResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
-				}
-				else
-				{
-					OperationMessage operationMessage = null;
-
-					if (BatchHandleErrorMode.IGNORE.equals(batchHandleErrorMode))
-					{
-						operationMessage = buildOperationMessageFail(request,
-								buildMessageCode("batchOperationFinish.ignore"), batchCountInt, successCount,
-								failCount);
-					}
-					else if (BatchHandleErrorMode.ROLLBACK.equals(batchHandleErrorMode))
-					{
-						operationMessage = buildOperationMessageFail(request,
-								buildMessageCode("batchOperationFinish.rollback"), batchCountInt, successCount);
-					}
-					else if (BatchHandleErrorMode.ABORT.equals(batchHandleErrorMode))
-					{
-						operationMessage = buildOperationMessageFail(request,
-								buildMessageCode("batchOperationFinish.abort"), batchCountInt, successCount,
-								batchCountInt - successCount);
-					}
-					else
-						throw new UnsupportedOperationException();
-
-					operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
-
-					responseEntity = buildOperationMessageResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
-				}
-
-				return responseEntity;
+				Object data = modelDataConverter.convert(dataParam, model);
+				persistenceManager.insert(cn, dialect, table, model, data, context);
 			}
 		}.execute();
 
-		return responseEntity;
-	}
-
-	protected String toBatchUnitResultHtml(HttpServletRequest request, List<BatchUnitResult> batchUnitResults)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		String mcs = buildMessageCode("batchUnitResult.successHtml");
-		String mcf = buildMessageCode("batchUnitResult.failHtml");
-
-		for (BatchUnitResult batchUnitResult : batchUnitResults)
-		{
-			if (batchUnitResult.isSuccess())
-				sb.append(getMessage(request, mcs, batchUnitResult.getIndex()));
-			else
-				sb.append(getMessage(request, mcf, batchUnitResult.getIndex(), batchUnitResult.getErrorMessage()));
-		}
-
-		return sb.toString();
-	}
-
-	/**
-	 * 判断异常是否是批处理断裂异常。
-	 * <p>
-	 * 如果是，那么批处理没有继续执行的必要。
-	 * </p>
-	 * 
-	 * @param e
-	 * @return
-	 */
-	protected boolean isBatchBreakException(Exception e)
-	{
-		if (e instanceof ConverterException)
-			return true;
-
-		// 变量表达式语法错误
-		if (e instanceof VariableExpressionErrorException && e.getCause() instanceof ParseException)
-			return true;
-
-		// SQL语法错误
-		if (e instanceof SqlExpressionErrorException && e.getCause() instanceof SQLNonTransientException)
-			return true;
-
-		return false;
+		return batchResponseEntity;
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/edit")
@@ -1070,7 +925,22 @@ public class DataController extends AbstractSchemaModelController
 	public ResponseEntity<OperationMessage> saveAddMultiplePropValueElement(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPath) throws Throwable
+			@RequestParam("propertyPath") final String propertyPath,
+			@RequestParam(value = "batchCount", required = false) Integer batchCount,
+			@RequestParam(value = "batchHandleErrorMode", required = false) BatchHandleErrorMode batchHandleErrorMode)
+			throws Throwable
+	{
+		if (batchCount != null && batchCount >= 0)
+			return saveAddMultiplePropValueElementBatch(request, response, springModel, schemaId, tableName,
+					propertyPath, batchCount, batchHandleErrorMode);
+		else
+			return saveAddMultiplePropValueElementSingle(request, response, springModel, schemaId, tableName,
+					propertyPath);
+	}
+
+	protected ResponseEntity<OperationMessage> saveAddMultiplePropValueElementSingle(HttpServletRequest request,
+			HttpServletResponse response, org.springframework.ui.Model springModel, String schemaId, String tableName,
+			final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propValue");
@@ -1099,6 +969,34 @@ public class DataController extends AbstractSchemaModelController
 		responseEntity.getBody().setData(propValueElement);
 
 		return responseEntity;
+	}
+
+	protected ResponseEntity<OperationMessage> saveAddMultiplePropValueElementBatch(HttpServletRequest request,
+			HttpServletResponse response, org.springframework.ui.Model springModel, String schemaId, String tableName,
+			final String propertyPath, int batchCount, BatchHandleErrorMode batchHandleErrorMode) throws Throwable
+	{
+		final Object dataParam = getParamMap(request, "data");
+		final Object propValueElementParam = getParamMap(request, "propValue");
+
+		ResponseEntity<OperationMessage> batchResponseEntity = new BatchReturnExecutor(request, response, springModel,
+				schemaId, tableName, batchCount, batchHandleErrorMode)
+		{
+			@Override
+			protected void doBatchUnit(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Model model, Connection cn,
+					Dialect dialect, String table, ExpressionEvaluationContext context) throws Throwable
+			{
+				Object data = modelDataConverter.convert(dataParam, model);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				Object propValueElement = modelDataConverter.convert(propValueElementParam,
+						propertyPathInfo.getModelTail());
+
+				persistenceManager.insertMultiplePropValueElement(cn, dialect, model, data, propertyPathInfo,
+						propValueElement, context);
+			}
+		}.execute();
+
+		return batchResponseEntity;
 	}
 
 	@RequestMapping(value = "/{schemaId}/{tableName}/saveAddMultiplePropValueElements", produces = CONTENT_TYPE_JSON)
@@ -1555,12 +1453,225 @@ public class DataController extends AbstractSchemaModelController
 	}
 
 	/**
+	 * 批量执行器。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected abstract class BatchReturnExecutor extends ReturnExecutor<ResponseEntity<OperationMessage>>
+	{
+		private int batchCount;
+
+		private BatchHandleErrorMode batchHandleErrorMode;
+
+		public BatchReturnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String schemaId, String tableName, int batchCount,
+				BatchHandleErrorMode batchHandleErrorMode)
+		{
+			super(request, response, springModel, schemaId, tableName, false, true);
+			this.batchCount = batchCount;
+			this.batchHandleErrorMode = batchHandleErrorMode;
+
+			if (this.batchHandleErrorMode == null)
+				this.batchHandleErrorMode = BatchHandleErrorMode.IGNORE;
+		}
+
+		public int getBatchCount()
+		{
+			return batchCount;
+		}
+
+		protected void setBatchCount(int batchCount)
+		{
+			this.batchCount = batchCount;
+		}
+
+		public BatchHandleErrorMode getBatchHandleErrorMode()
+		{
+			return batchHandleErrorMode;
+		}
+
+		protected void setBatchHandleErrorMode(BatchHandleErrorMode batchHandleErrorMode)
+		{
+			this.batchHandleErrorMode = batchHandleErrorMode;
+		}
+
+		@Override
+		protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+		{
+			Connection cn = getConnection();
+
+			List<BatchUnitResult> batchResults = new ArrayList<BatchUnitResult>();
+			int successCount = 0;
+			int failCount = 0;
+
+			Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
+			String table = persistenceManager.getTableName(model);
+			ExpressionEvaluationContext context = new ExpressionEvaluationContext();
+
+			int index = 0;
+
+			for (; index < this.batchCount; index++)
+			{
+				try
+				{
+					doBatchUnit(request, response, springModel, schema, model, cn, dialect, table, context);
+
+					BatchUnitResult batchUnitResult = new BatchUnitResult(index);
+					batchResults.add(batchUnitResult);
+					successCount++;
+				}
+				catch (Exception e)
+				{
+					if (isBatchBreakException(e) && index == 0)
+						throw e;
+					else
+					{
+						BatchUnitResult batchUnitResult = new BatchUnitResult(index, e.getMessage());
+						batchResults.add(batchUnitResult);
+						failCount++;
+
+						if (BatchHandleErrorMode.ROLLBACK.equals(this.batchHandleErrorMode))
+						{
+							rollbackConnection();
+							break;
+						}
+						else if (BatchHandleErrorMode.ABORT.equals(this.batchHandleErrorMode))
+						{
+							commitConnection();
+							break;
+						}
+					}
+				}
+				finally
+				{
+					context.clearCachedValue();
+					context.incrementVariableIndex();
+				}
+			}
+
+			if (BatchHandleErrorMode.IGNORE.equals(this.batchHandleErrorMode))
+				commitConnection();
+
+			ResponseEntity<OperationMessage> responseEntity = null;
+
+			if (successCount == this.batchCount)// 全部成功
+			{
+				OperationMessage operationMessage = buildOperationMessageSuccess(request,
+						buildMessageCode("batchOperationSuccess"), this.batchCount, this.batchCount, 0);
+				operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
+
+				responseEntity = buildOperationMessageResponseEntity(HttpStatus.OK, operationMessage);
+			}
+			else if (failCount == this.batchCount)// 全部失败
+			{
+				OperationMessage operationMessage = buildOperationMessageFail(request,
+						buildMessageCode("batchOperationFail"), this.batchCount, 0, this.batchCount);
+				operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
+
+				responseEntity = buildOperationMessageResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
+			}
+			else
+			{
+				OperationMessage operationMessage = null;
+
+				if (BatchHandleErrorMode.IGNORE.equals(this.batchHandleErrorMode))
+				{
+					operationMessage = buildOperationMessageFail(request,
+							buildMessageCode("batchOperationFinish.ignore"), this.batchCount, successCount, failCount);
+				}
+				else if (BatchHandleErrorMode.ROLLBACK.equals(this.batchHandleErrorMode))
+				{
+					operationMessage = buildOperationMessageFail(request,
+							buildMessageCode("batchOperationFinish.rollback"), this.batchCount, successCount);
+				}
+				else if (BatchHandleErrorMode.ABORT.equals(this.batchHandleErrorMode))
+				{
+					operationMessage = buildOperationMessageFail(request,
+							buildMessageCode("batchOperationFinish.abort"), this.batchCount, successCount,
+							this.batchCount - successCount);
+				}
+				else
+					throw new UnsupportedOperationException();
+
+				operationMessage.setDetail(toBatchUnitResultHtml(request, batchResults));
+
+				responseEntity = buildOperationMessageResponseEntity(HttpStatus.BAD_REQUEST, operationMessage);
+			}
+
+			return responseEntity;
+		}
+
+		/**
+		 * 判断异常是否是批处理打断异常。
+		 * <p>
+		 * 如果是，那么批处理没有继续执行的必要。
+		 * </p>
+		 * 
+		 * @param e
+		 * @return
+		 */
+		protected boolean isBatchBreakException(Exception e)
+		{
+			if (e instanceof ConverterException)
+				return true;
+
+			// 变量表达式语法错误
+			if (e instanceof VariableExpressionErrorException && e.getCause() instanceof ParseException)
+				return true;
+
+			// SQL语法错误
+			if (e instanceof SqlExpressionErrorException && e.getCause() instanceof SQLNonTransientException)
+				return true;
+
+			return false;
+		}
+
+		protected String toBatchUnitResultHtml(HttpServletRequest request, List<BatchUnitResult> batchUnitResults)
+		{
+			StringBuilder sb = new StringBuilder();
+
+			String mcs = buildMessageCode("batchUnitResult.successHtml");
+			String mcf = buildMessageCode("batchUnitResult.failHtml");
+
+			for (BatchUnitResult batchUnitResult : batchUnitResults)
+			{
+				if (batchUnitResult.isSuccess())
+					sb.append(getMessage(request, mcs, batchUnitResult.getIndex()));
+				else
+					sb.append(getMessage(request, mcf, batchUnitResult.getIndex(), batchUnitResult.getErrorMessage()));
+			}
+
+			return sb.toString();
+		}
+
+		/**
+		 * 执行批处理单元。
+		 * 
+		 * @param request
+		 * @param response
+		 * @param springModel
+		 * @param schema
+		 * @param model
+		 * @param cn
+		 * @param dialect
+		 * @param table
+		 * @param context
+		 * @throws Throwable
+		 */
+		protected abstract void doBatchUnit(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, Schema schema, Model model, Connection cn, Dialect dialect,
+				String table, ExpressionEvaluationContext context) throws Throwable;
+	}
+
+	/**
 	 * 批量操作单元执行结果。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class BatchUnitResult implements Serializable
+	protected static class BatchUnitResult implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -1646,14 +1757,5 @@ public class DataController extends AbstractSchemaModelController
 
 		/** 回滚 */
 		ROLLBACK
-	}
-
-	protected static class BatchInsertTask implements Runnable
-	{
-		@Override
-		public void run()
-		{
-			// TODO Auto-generated method stub
-		}
 	}
 }

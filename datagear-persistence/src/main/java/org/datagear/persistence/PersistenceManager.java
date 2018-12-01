@@ -118,12 +118,31 @@ public interface PersistenceManager
 	 * 插入多元属性值元素。
 	 * 
 	 * @param cn
+	 * @param model
+	 * @param obj
 	 * @param propertyPathInfo
-	 * @param propValue
+	 * @param propValueElements
 	 * @throws PersistenceException
 	 */
 	void insertMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
 			Object... propValueElements) throws PersistenceException;
+
+	/**
+	 * 插入多元属性值元素。
+	 * 
+	 * @param cn
+	 * @param dialect
+	 * @param table
+	 * @param model
+	 * @param obj
+	 * @param propertyPathInfo
+	 * @param propValueElement
+	 * @param expressionEvaluationContext
+	 * @throws PersistenceException
+	 */
+	void insertMultiplePropValueElement(Connection cn, Dialect dialect, Model model, Object obj,
+			PropertyPathInfo propertyPathInfo, Object propValueElement,
+			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException;
 
 	/**
 	 * 更新多元属性值元素。

@@ -97,6 +97,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 			submit : function()
 			{
 				var propValue = $(this).modelform("data");
+				var formParam = $(this).modelform("param");
 				
 				var close = true;
 				
@@ -105,7 +106,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				//父页面定义了submit回调函数，则优先执行
 				if(pageParam && pageParam.submit)
 				{
-					close = (pageParam.submit(propValue) != false);
+					close = (pageParam.submit(propValue, formParam) != false);
 
 					if(close && !$(this).modelform("isDialogPinned"))
 						pageObj.close();
@@ -114,8 +115,8 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				else
 				{
 					var thisForm = this;
-					var param = { "data" : pageObj.data, "propertyPath" : pageObj.propertyPath, "propValue" : propValue };
-
+					var param = $.extend(formParam, { "data" : pageObj.data, "propertyPath" : pageObj.propertyPath, "propValue" : propValue });
+					
 					$(thisForm).modelform("disableOperation");
 					
 					$.ajax(pageObj.url(pageObj.submitAction), 
@@ -123,25 +124,43 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 						"data" : param,
 						"success" : function(operationMessage)
 						{
-							//如果有初始数据，则更新为已保存至后台的数据
-							if(pageObj.data)
-								$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, operationMessage.data);
+							var $form = $(thisForm);
+							var batchSubmit = $form.modelform("isBatchSubmit");
+							var isDialogPinned = $form.modelform("isDialogPinned");
 							
-							if(pageParam && pageParam.afterSave)
-								close = (pageParam.afterSave(operationMessage.data) != false);
-							
-							var pageObjParent = pageObj.parent();
-							if(pageObjParent && pageObjParent.refresh)
-								pageObjParent.refresh();
-							
-							if(close && !$(thisForm).modelform("isDialogPinned"))
-								pageObj.close();
+							if(batchSubmit)
+								;
+							else
+							{
+								//如果有初始数据，则更新为已保存至后台的数据
+								if(pageObj.data)
+									$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, operationMessage.data);
+								
+								if(pageParam && pageParam.afterSave)
+									close = (pageParam.afterSave(operationMessage.data) != false);
+								
+								var pageObjParent = pageObj.parent();
+								if(pageObjParent && pageObjParent.refresh)
+									pageObjParent.refresh();
+								
+								if(close && !isDialogPinned)
+									pageObj.close();
+							}
 						},
 						"dataType" : "json",
 						"complete" : function()
 						{
 							var $form = $(thisForm);
 							$form.modelform("enableOperation");
+							
+							var batchSubmit = $form.modelform("isBatchSubmit");
+							
+							if(batchSubmit)
+							{
+								var pageObjParent = pageObj.parent();
+								if(pageObjParent && pageObjParent.refresh)
+									pageObjParent.refresh();
+							}
 						}
 					});
 				}

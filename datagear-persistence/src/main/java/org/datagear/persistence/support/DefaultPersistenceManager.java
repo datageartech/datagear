@@ -261,6 +261,22 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 	}
 
 	@Override
+	public void insertMultiplePropValueElement(Connection cn, Dialect dialect, Model model, Object obj,
+			PropertyPathInfo propertyPathInfo, Object propValueElement,
+			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException
+	{
+		checkPropertyPathInfoMultipleTail(propertyPathInfo);
+		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
+
+		Model ownerModel = propertyPathInfo.getOwnerModelTail();
+		Object ownerObj = propertyPathInfo.getOwnerObjTail();
+		Property property = propertyPathInfo.getPropertyTail();
+
+		insertPersistenceOperation.insertPropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel, ownerObj,
+				property, propValueElement, expressionEvaluationContext);
+	}
+
+	@Override
 	public void updateMultiplePropValueElement(Connection cn, Model model, Object obj,
 			PropertyPathInfo propertyPathInfo, Object propertyValueElement) throws PersistenceException
 	{
