@@ -204,7 +204,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 			validationRequiredAsAdd : ("saveAdd" == pageObj.submitAction),
 			batchSet : pageObj.batchSet,
 			labels : pageObj.formLabels,
-			dateFormat : "<c:out value='${dateFormat}' />",
+			dateFormat : "<c:out value='${sqlDateFormat}' />",
 			timestampFormat : "<c:out value='${sqlTimestampFormat}' />",
 			timeFormat : "<c:out value='${sqlTimeFormat}' />"
 		});
