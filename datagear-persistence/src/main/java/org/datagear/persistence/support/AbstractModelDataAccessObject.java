@@ -1320,10 +1320,15 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 					{
 						int jdbcTypeValue = jdbcType.getValue(propertyModelMapper.getIndex());
 
-						if (Types.BIT == jdbcTypeValue || Types.TINYINT == jdbcTypeValue
-								|| Types.SMALLINT == jdbcTypeValue || Types.INTEGER == jdbcTypeValue
-								|| Types.BIGINT == jdbcTypeValue || Types.NUMERIC == jdbcTypeValue
-								|| Types.CHAR == jdbcTypeValue || Types.VARCHAR == jdbcTypeValue)
+						if (Types.BIGINT == jdbcTypeValue || Types.BIT == jdbcTypeValue
+								|| Types.BOOLEAN == jdbcTypeValue || Types.CHAR == jdbcTypeValue
+								|| Types.DATE == jdbcTypeValue || Types.DECIMAL == jdbcTypeValue
+								|| Types.DOUBLE == jdbcTypeValue || Types.FLOAT == jdbcTypeValue
+								|| Types.INTEGER == jdbcTypeValue || Types.NULL == jdbcTypeValue
+								|| Types.NUMERIC == jdbcTypeValue || Types.REAL == jdbcTypeValue
+								|| Types.SMALLINT == jdbcTypeValue || Types.TIME == jdbcTypeValue
+								|| Types.TIMESTAMP == jdbcTypeValue || Types.TINYINT == jdbcTypeValue
+								|| Types.VARCHAR == jdbcTypeValue)
 						{
 							add = true;
 						}

@@ -5,9 +5,7 @@
 package org.datagear.web.format;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -18,6 +16,8 @@ import java.util.Locale;
  */
 public class SqlTimestampFormatter extends AbstractDateFormatter<Timestamp>
 {
+	public static final String PATTERN = "yyyy-MM-dd hh:mm:ss[.fff...]";
+
 	public SqlTimestampFormatter()
 	{
 		super();
@@ -26,16 +26,25 @@ public class SqlTimestampFormatter extends AbstractDateFormatter<Timestamp>
 	@Override
 	public Timestamp parse(String text, Locale locale) throws ParseException
 	{
-		Date date = parseToDate(text, locale);
-
-		return new Timestamp(date.getTime());
+		try
+		{
+			return Timestamp.valueOf(text);
+		}
+		catch (Exception e)
+		{
+			throw new ParseException(text, 0);
+		}
 	}
 
 	@Override
-	protected DateFormat getParseDateFormat(Locale locale)
+	public String print(Timestamp object, Locale locale)
 	{
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
+		return object.toString();
+	}
 
-		return dateFormat;
+	@Override
+	public String getParsePattern(Locale locale)
+	{
+		return PATTERN;
 	}
 }

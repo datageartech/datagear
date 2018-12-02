@@ -53,10 +53,6 @@ public class FastJsonConfigFactory
 		this.objectSerializerMap.put(java.sql.Timestamp.class, new LocaleSqlTimestampSerializer());
 		this.objectSerializerMap.put(java.util.Date.class, new LocaleDateSerializer());
 		this.objectSerializerMap.put(Class.class, new ClassSerializer(true));
-		// this.objectSerializerMap.put(DefaultDynamicBean.class, new
-		// DynamicBeanObjectSerializer());
-		// this.objectSerializerMap.put(DynamicBean.class, new
-		// DynamicBeanObjectSerializer());
 		this.objectSerializerMap.put(SizeOnlyList.class, new SizeOnlyCollectionSerializer());
 		this.objectSerializerMap.put(SizeOnlySet.class, new SizeOnlyCollectionSerializer());
 		this.objectSerializerMap.put(SizeOnlyQueue.class, new SizeOnlyCollectionSerializer());

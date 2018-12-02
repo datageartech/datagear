@@ -5,7 +5,6 @@
 package org.datagear.web.format;
 
 import java.sql.Date;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
@@ -17,6 +16,8 @@ import java.util.Locale;
  */
 public class SqlDateFormatter extends AbstractDateFormatter<Date>
 {
+	public static final String PATTERN = "yyyy-MM-dd";
+
 	public SqlDateFormatter()
 	{
 		super();
@@ -25,16 +26,25 @@ public class SqlDateFormatter extends AbstractDateFormatter<Date>
 	@Override
 	public Date parse(String text, Locale locale) throws ParseException
 	{
-		java.util.Date date = parseToDate(text, locale);
-
-		return new Date(date.getTime());
+		try
+		{
+			return Date.valueOf(text);
+		}
+		catch (Exception e)
+		{
+			throw new ParseException(text, 0);
+		}
 	}
 
 	@Override
-	protected DateFormat getParseDateFormat(Locale locale)
+	public String print(Date object, Locale locale)
 	{
-		DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, locale);
+		return object.toString();
+	}
 
-		return dateFormat;
+	@Override
+	public String getParsePattern(Locale locale)
+	{
+		return PATTERN;
 	}
 }

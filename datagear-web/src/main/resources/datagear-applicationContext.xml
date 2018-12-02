@@ -298,6 +298,18 @@
 		<property name="sqlExpressionResolver" ref="sqlExpressionResolver" />
 	</bean>
 	
+	<bean id="localeDateSerializer" class="org.datagear.web.json.fastjson.LocaleDateSerializer">
+		<property name="dateFormatter" ref="dateFormatter" />
+	</bean>
+	<bean id="localeSqlDateSerializer" class="org.datagear.web.json.fastjson.LocaleSqlDateSerializer">
+		<property name="sqlDateFormatter" ref="sqlDateFormatter" />
+	</bean>
+	<bean id="localeSqlTimeSerializer" class="org.datagear.web.json.fastjson.LocaleSqlTimeSerializer">
+		<property name="sqlTimeFormatter" ref="sqlTimeFormatter" />
+	</bean>
+	<bean id="localeSqlTimestampSerializer" class="org.datagear.web.json.fastjson.LocaleSqlTimestampSerializer">
+		<property name="sqlTimestampFormatter" ref="sqlTimestampFormatter" />
+	</bean>
 	<bean id="fileSerializer" class="org.datagear.web.json.fastjson.FileSerializer">
 		<property name="directory" ref="blobFileManagerDirectory" />
 		<property name="deleteHeadSeparator" value="true" />
@@ -305,6 +317,10 @@
 	<bean id="fastJsonConfigFactory" class="org.datagear.web.json.fastjson.FastJsonConfigFactory">
 		<property name="objectSerializerStringMap">
 			<map>
+				<entry key="java.util.Date" value-ref="localeDateSerializer" />
+				<entry key="java.sql.Date" value-ref="localeSqlDateSerializer" />
+				<entry key="java.sql.Time" value-ref="localeSqlTimeSerializer" />
+				<entry key="java.sql.Timestamp" value-ref="localeSqlTimestampSerializer" />
 				<entry key="java.io.File" value-ref="fileSerializer" />
 			</map>
 		</property>

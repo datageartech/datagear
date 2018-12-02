@@ -21,11 +21,17 @@ import com.alibaba.fastjson.serializer.ObjectSerializer;
  */
 public class LocaleSqlTimeSerializer implements ObjectSerializer
 {
-	private SqlTimeFormatter sqlTimeFormatter = new SqlTimeFormatter();
+	private SqlTimeFormatter sqlTimeFormatter;
 
 	public LocaleSqlTimeSerializer()
 	{
 		super();
+	}
+
+	public LocaleSqlTimeSerializer(SqlTimeFormatter sqlTimeFormatter)
+	{
+		super();
+		this.sqlTimeFormatter = sqlTimeFormatter;
 	}
 
 	public SqlTimeFormatter getSqlTimeFormatter()

@@ -5,9 +5,7 @@
 package org.datagear.web.format;
 
 import java.sql.Time;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -18,6 +16,8 @@ import java.util.Locale;
  */
 public class SqlTimeFormatter extends AbstractDateFormatter<Time>
 {
+	public static final String PATTERN = "hh:mm:ss";
+
 	public SqlTimeFormatter()
 	{
 		super();
@@ -26,16 +26,25 @@ public class SqlTimeFormatter extends AbstractDateFormatter<Time>
 	@Override
 	public Time parse(String text, Locale locale) throws ParseException
 	{
-		Date date = parseToDate(text, locale);
-
-		return new Time(date.getTime());
+		try
+		{
+			return Time.valueOf(text);
+		}
+		catch (Exception e)
+		{
+			throw new ParseException(text, 0);
+		}
 	}
 
 	@Override
-	protected DateFormat getParseDateFormat(Locale locale)
+	public String print(Time object, Locale locale)
 	{
-		DateFormat dateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM, locale);
+		return object.toString();
+	}
 
-		return dateFormat;
+	@Override
+	public String getParsePattern(Locale locale)
+	{
+		return PATTERN;
 	}
 }
