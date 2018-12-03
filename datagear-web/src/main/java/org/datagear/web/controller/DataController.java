@@ -1427,10 +1427,10 @@ public class DataController extends AbstractSchemaModelController
 	{
 		Locale locale = WebUtils.getLocale(request);
 
-		springModel.addAttribute("dateFormat", this.dateFormatter.getParsePattern(locale));
-		springModel.addAttribute("sqlDateFormat", this.sqlDateFormatter.getParsePattern(locale));
-		springModel.addAttribute("sqlTimestampFormat", this.sqlTimestampFormatter.getParsePattern(locale));
-		springModel.addAttribute("sqlTimeFormat", this.sqlTimeFormatter.getParsePattern(locale));
+		springModel.addAttribute("dateFormat", this.dateFormatter.getParsePatternDesc(locale));
+		springModel.addAttribute("sqlDateFormat", this.sqlDateFormatter.getParsePatternDesc(locale));
+		springModel.addAttribute("sqlTimestampFormat", this.sqlTimestampFormatter.getParsePatternDesc(locale));
+		springModel.addAttribute("sqlTimeFormat", this.sqlTimeFormatter.getParsePatternDesc(locale));
 	}
 
 	/**

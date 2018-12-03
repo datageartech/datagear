@@ -16,8 +16,6 @@ import java.util.Locale;
  */
 public class SqlDateFormatter extends AbstractDateFormatter<Date>
 {
-	public static final String PATTERN = "yyyy-MM-dd";
-
 	public SqlDateFormatter()
 	{
 		super();
@@ -32,19 +30,27 @@ public class SqlDateFormatter extends AbstractDateFormatter<Date>
 		}
 		catch (Exception e)
 		{
-			throw new ParseException(text, 0);
+			java.util.Date candidate = parseByPatterns(text, PATTERN_YEAR_MONTH_DAY, PATTERN_YEAR_MONTH, PATTERN_YEAR);
+
+			if (candidate != null)
+				return new Date(candidate.getTime());
+			else
+				throw new ParseException(text, 0);
 		}
 	}
 
 	@Override
 	public String print(Date object, Locale locale)
 	{
-		return object.toString();
+		// XXX 不能直接使用此处代码，因为它只能处理4位年份的日期，导致精度丢失
+		// return object.toString();
+
+		return formatByPattern(object, PATTERN_YEAR_MONTH_DAY);
 	}
 
 	@Override
-	public String getParsePattern(Locale locale)
+	public String getParsePatternDesc(Locale locale)
 	{
-		return PATTERN;
+		return PATTERN_YEAR_MONTH_DAY;
 	}
 }

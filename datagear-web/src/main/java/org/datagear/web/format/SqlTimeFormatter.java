@@ -16,7 +16,11 @@ import java.util.Locale;
  */
 public class SqlTimeFormatter extends AbstractDateFormatter<Time>
 {
-	public static final String PATTERN = "hh:mm:ss";
+	public static final String PATTERN_HOUR = "HH";
+
+	public static final String PATTERN_HOUR_MIN = "HH:mm";
+
+	public static final String PATTERN_HOUR_MIN_SEC = "HH:mm:ss";
 
 	public SqlTimeFormatter()
 	{
@@ -32,19 +36,25 @@ public class SqlTimeFormatter extends AbstractDateFormatter<Time>
 		}
 		catch (Exception e)
 		{
-			throw new ParseException(text, 0);
+			java.util.Date candidate = parseByPatterns(text, PATTERN_HOUR_MIN_SEC, PATTERN_HOUR_MIN, PATTERN_HOUR);
+
+			if (candidate != null)
+				return new Time(candidate.getTime());
+			else
+				throw new ParseException(text, 0);
 		}
 	}
 
 	@Override
 	public String print(Time object, Locale locale)
 	{
-		return object.toString();
+		// XXX 统一采用SqlDateFormatter.print(Date, Locale)的算法
+		return formatByPattern(object, PATTERN_HOUR_MIN_SEC);
 	}
 
 	@Override
-	public String getParsePattern(Locale locale)
+	public String getParsePatternDesc(Locale locale)
 	{
-		return PATTERN;
+		return PATTERN_HOUR_MIN_SEC;
 	}
 }
