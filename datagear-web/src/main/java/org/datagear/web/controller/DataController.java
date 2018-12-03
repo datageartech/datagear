@@ -404,14 +404,14 @@ public class DataController extends AbstractSchemaModelController
 
 				LOBConversionContext.set(buildGetLobConversionSetting());
 
-				data = persistenceManager.get(cn, model, data);
+				List<Object> resultList = persistenceManager.getByParam(cn, model, data);
 
 				LOBConversionContext.remove();
 
-				if (data == null)
+				if (resultList == null || resultList.isEmpty())
 					throw new RecordNotFoundException();
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", resultList.get(0));
 				springModel.addAttribute("titleOperationMessageKey", "edit");
 				springModel.addAttribute("clientOperation", "false");
 				springModel.addAttribute("submitAction", "saveEdit");
@@ -432,10 +432,11 @@ public class DataController extends AbstractSchemaModelController
 		final Object originalDataParam = getParamObj(request, "originalData");
 		final Object dataParam = getParamMap(request, "data");
 
-		Object data = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
+		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+				response, springModel, schemaId, tableName, false)
 		{
 			@Override
-			protected Object execute(HttpServletRequest request, HttpServletResponse response,
+			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
 				Connection cn = getConnection();
@@ -443,14 +444,18 @@ public class DataController extends AbstractSchemaModelController
 				Object originalData = modelDataConverter.convert(originalDataParam, model);
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				persistenceManager.update(cn, model, originalData, data, false);
+				int count = persistenceManager.update(cn, model, originalData, data, false);
 
-				return data;
+				if (count > 1)
+					throw new DuplicateRecordException(1, count);
+
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(
+						request, count);
+				responseEntity.getBody().setData(data);
+
+				return responseEntity;
 			}
 		}.execute();
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(data);
 
 		return responseEntity;
 	}
@@ -475,11 +480,15 @@ public class DataController extends AbstractSchemaModelController
 
 				int count = persistenceManager.delete(cn, model, datas);
 
+				if (count > datas.length)
+					throw new DuplicateRecordException(datas.length, count);
+
 				return count;
 			}
 		}.execute();
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteSuccessResponseEntity(request);
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteCountResponseEntity(request,
+				deleteCount);
 		responseEntity.getBody().setData(deleteCount);
 
 		return responseEntity;
@@ -504,14 +513,14 @@ public class DataController extends AbstractSchemaModelController
 
 				LOBConversionContext.set(buildGetLobConversionSetting());
 
-				data = persistenceManager.get(cn, model, data);
+				List<Object> resultList = persistenceManager.getByParam(cn, model, data);
 
 				LOBConversionContext.remove();
 
-				if (data == null)
+				if (resultList == null || resultList.isEmpty())
 					throw new RecordNotFoundException();
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", resultList.get(0));
 				springModel.addAttribute("titleOperationMessageKey", "view");
 				springModel.addAttribute("readonly", "true");
 			}
@@ -683,12 +692,12 @@ public class DataController extends AbstractSchemaModelController
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
-					Object propValue = persistenceManager.getPropValue(cn, model, data, propertyPathInfo);
+					List<Object> resultList = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
 
-					if (propValue == null)
+					if (resultList == null || resultList.isEmpty())
 						throw new RecordNotFoundException();
 
-					propertyPathInfo.setValueTail(propValue);
+					propertyPathInfo.setValueTail(resultList.get(0));
 				}
 
 				springModel.addAttribute("data", data);
@@ -713,10 +722,11 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueParam = getParamMap(request, "propValue");
 
-		Object propValue = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
+		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+				response, springModel, schemaId, tableName, false)
 		{
 			@Override
-			protected Object execute(HttpServletRequest request, HttpServletResponse response,
+			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
 				Connection cn = getConnection();
@@ -728,14 +738,18 @@ public class DataController extends AbstractSchemaModelController
 
 				Object propValue = modelDataConverter.convert(propValueParam, propModel);
 
-				persistenceManager.updateSinglePropValue(cn, model, data, propertyPathInfo, propValue);
+				int count = persistenceManager.updateSinglePropValue(cn, model, data, propertyPathInfo, propValue);
 
-				return propValue;
+				if (count > 1)
+					throw new DuplicateRecordException(1, count);
+
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(
+						request, count);
+				responseEntity.getBody().setData(propValue);
+
+				return responseEntity;
 			}
 		}.execute();
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(propValue);
 
 		return responseEntity;
 	}
@@ -766,12 +780,12 @@ public class DataController extends AbstractSchemaModelController
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
-					Object propValue = persistenceManager.getPropValue(cn, model, data, propertyPathInfo);
+					List<Object> resultList = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
 
-					if (propValue == null)
+					if (resultList == null || resultList.isEmpty())
 						throw new RecordNotFoundException();
 
-					propertyPathInfo.setValueTail(propValue);
+					propertyPathInfo.setValueTail(resultList);
 				}
 
 				springModel.addAttribute("data", data);
@@ -1060,13 +1074,13 @@ public class DataController extends AbstractSchemaModelController
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
-					Object propValue = persistenceManager.getMultiplePropValueElement(cn, model, data, propertyPathInfo,
-							propertyPathInfo.getValueTail());
+					List<Object> resultList = persistenceManager.getMultiplePropValueElementByParam(cn, model, data,
+							propertyPathInfo, propertyPathInfo.getValueTail());
 
-					if (propValue == null)
+					if (resultList == null || resultList.isEmpty())
 						throw new RecordNotFoundException();
 
-					propertyPathInfo.setValueTail(propValue);
+					propertyPathInfo.setValueTail(resultList.get(0));
 				}
 
 				springModel.addAttribute("data", data);
@@ -1091,10 +1105,11 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propValue");
 
-		Object propValueElement = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
+		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+				response, springModel, schemaId, tableName, false)
 		{
 			@Override
-			protected Object execute(HttpServletRequest request, HttpServletResponse response,
+			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
 				Connection cn = getConnection();
@@ -1104,14 +1119,19 @@ public class DataController extends AbstractSchemaModelController
 				Object propValueElement = modelDataConverter.convert(propValueElementParam,
 						propertyPathInfo.getModelTail());
 
-				persistenceManager.updateMultiplePropValueElement(cn, model, data, propertyPathInfo, propValueElement);
+				int count = persistenceManager.updateMultiplePropValueElement(cn, model, data, propertyPathInfo,
+						propValueElement);
 
-				return propValueElement;
+				if (count > 1)
+					throw new DuplicateRecordException(1, count);
+
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(
+						request, count);
+				responseEntity.getBody().setData(propValueElement);
+
+				return responseEntity;
 			}
 		}.execute();
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(propValueElement);
 
 		return responseEntity;
 	}
@@ -1139,13 +1159,18 @@ public class DataController extends AbstractSchemaModelController
 				Object[] propValueElements = modelDataConverter.convertToArray(propValueElementsParam,
 						propertyPathInfo.getModelTail());
 
-				persistenceManager.deleteMultiplePropValueElement(cn, model, data, propertyPathInfo, propValueElements);
+				int count = persistenceManager.deleteMultiplePropValueElement(cn, model, data, propertyPathInfo,
+						propValueElements);
 
-				return 1;
+				if (count > propValueElements.length)
+					throw new DuplicateRecordException(propValueElements.length, count);
+
+				return count;
 			}
 		}.execute();
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteSuccessResponseEntity(request);
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteCountResponseEntity(request,
+				count);
 		responseEntity.getBody().setData(count);
 
 		return responseEntity;
@@ -1177,13 +1202,13 @@ public class DataController extends AbstractSchemaModelController
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
-					Object propValue = persistenceManager.getMultiplePropValueElement(cn, model, data, propertyPathInfo,
-							propertyPathInfo.getValueTail());
+					List<Object> resultList = persistenceManager.getMultiplePropValueElementByParam(cn, model, data,
+							propertyPathInfo, propertyPathInfo.getValueTail());
 
-					if (propValue == null)
+					if (resultList == null || resultList.isEmpty())
 						throw new RecordNotFoundException();
 
-					propertyPathInfo.setValueTail(propValue);
+					propertyPathInfo.setValueTail(resultList.get(0));
 				}
 
 				springModel.addAttribute("data", data);
@@ -1217,9 +1242,10 @@ public class DataController extends AbstractSchemaModelController
 				Object data = modelDataConverter.convert(dataParam, model);
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 
-				Object propValue = persistenceManager.getPropValue(cn, model, data, propertyPathInfo);
+				List<Object> resultList = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
 
-				return new Object[] { propValue, propertyPathInfo.getPropertyTail().getName() };
+				return new Object[] { resultList == null || resultList.isEmpty() ? null : resultList.get(0),
+						propertyPathInfo.getPropertyTail().getName() };
 			}
 		}.execute();
 

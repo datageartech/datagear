@@ -5,6 +5,7 @@
 package org.datagear.persistence;
 
 import java.sql.Connection;
+import java.util.List;
 
 import org.datagear.model.Model;
 import org.datagear.model.support.PropertyPathInfo;
@@ -18,6 +19,12 @@ import org.datagear.persistence.support.ExpressionEvaluationContext;
  */
 public interface PersistenceManager
 {
+	/** 持久化操作被忽略标识。对于共享属性值，很多情况下不会被处理，此标识作为返回值 */
+	int PERSISTENCE_IGNORED = -1;
+
+	/** 当记录未做修改时，返回此标识 */
+	int PERSISTENCE_UNCHANGED = PERSISTENCE_IGNORED - 1;
+
 	/**
 	 * 获取指定{@linkplain Model}的表名称。
 	 * 
@@ -41,7 +48,7 @@ public interface PersistenceManager
 	 * @param obj
 	 * @throws PersistenceException
 	 */
-	void insert(Connection cn, Model model, Object obj) throws PersistenceException;
+	int insert(Connection cn, Model model, Object obj) throws PersistenceException;
 
 	/**
 	 * 插入数据
@@ -98,7 +105,7 @@ public interface PersistenceManager
 	 * @param propValue
 	 * @throws PersistenceException
 	 */
-	void insertSinglePropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+	int insertSinglePropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
 			Object propValue) throws PersistenceException;
 
 	/**
@@ -111,7 +118,7 @@ public interface PersistenceManager
 	 * @param propValue
 	 * @throws PersistenceException
 	 */
-	void updateSinglePropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+	int updateSinglePropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
 			Object propValue) throws PersistenceException;
 
 	/**
@@ -124,7 +131,7 @@ public interface PersistenceManager
 	 * @param propValueElements
 	 * @throws PersistenceException
 	 */
-	void insertMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+	int insertMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
 			Object... propValueElements) throws PersistenceException;
 
 	/**
@@ -140,7 +147,7 @@ public interface PersistenceManager
 	 * @param expressionEvaluationContext
 	 * @throws PersistenceException
 	 */
-	void insertMultiplePropValueElement(Connection cn, Dialect dialect, Model model, Object obj,
+	int insertMultiplePropValueElement(Connection cn, Dialect dialect, Model model, Object obj,
 			PropertyPathInfo propertyPathInfo, Object propValueElement,
 			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException;
 
@@ -154,7 +161,7 @@ public interface PersistenceManager
 	 * @param propertyValueElement
 	 * @throws PersistenceException
 	 */
-	void updateMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+	int updateMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
 			Object propertyValueElement) throws PersistenceException;
 
 	/**
@@ -178,11 +185,11 @@ public interface PersistenceManager
 	 * @param propValueElements
 	 * @throws PersistenceException
 	 */
-	void deleteMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+	int deleteMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
 			Object... propValueElements) throws PersistenceException;
 
 	/**
-	 * 获取对象。
+	 * 根据参数对象获取对象数组。
 	 * 
 	 * @param cn
 	 * @param model
@@ -190,7 +197,7 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	Object get(Connection cn, Model model, Object param) throws PersistenceException;
+	List<Object> getByParam(Connection cn, Model model, Object param) throws PersistenceException;
 
 	/**
 	 * 获取属性值。
@@ -202,7 +209,7 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	Object getPropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo)
+	List<Object> getPropValueByParam(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo)
 			throws PersistenceException;
 
 	/**
@@ -216,8 +223,8 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	Object getMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
-			Object propValueElementParam) throws PersistenceException;
+	List<Object> getMultiplePropValueElementByParam(Connection cn, Model model, Object obj,
+			PropertyPathInfo propertyPathInfo, Object propValueElementParam) throws PersistenceException;
 
 	/**
 	 * 分页查询。

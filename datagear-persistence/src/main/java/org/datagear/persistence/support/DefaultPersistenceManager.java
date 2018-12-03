@@ -5,6 +5,7 @@
 package org.datagear.persistence.support;
 
 import java.sql.Connection;
+import java.util.List;
 
 import org.datagear.model.Model;
 import org.datagear.model.Property;
@@ -172,11 +173,11 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 	}
 
 	@Override
-	public void insert(Connection cn, Model model, Object obj) throws PersistenceException
+	public int insert(Connection cn, Model model, Object obj) throws PersistenceException
 	{
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
-		this.insertPersistenceOperation.insert(cn, dialect, getTableName(model), model, obj);
+		return this.insertPersistenceOperation.insert(cn, dialect, getTableName(model), model, obj);
 	}
 
 	@Override
@@ -204,7 +205,7 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 	}
 
 	@Override
-	public void insertSinglePropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+	public int insertSinglePropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
 			Object propValue) throws PersistenceException
 	{
 		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
@@ -215,12 +216,12 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
-		insertPersistenceOperation.insertPropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel, ownerObj,
-				property, propValue);
+		return insertPersistenceOperation.insertPropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
+				ownerObj, property, propValue);
 	}
 
 	@Override
-	public void updateSinglePropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+	public int updateSinglePropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
 			Object propValue) throws PersistenceException
 	{
 		checkPropertyPathInfoModelTail(propertyPathInfo);
@@ -239,13 +240,13 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 
 		SqlBuilder condition = buildRecordCondition(cn, dialect, ownerModel, ownerObj, null);
 
-		updatePersistenceOperation.updatePropertyTableData(cn, dialect, getTableName(ownerModel), model, condition,
-				property, propertyModelMapper, propertyPathInfo.getValueTail(), propValue);
+		return updatePersistenceOperation.updatePropertyTableData(cn, dialect, getTableName(ownerModel), model,
+				condition, property, propertyModelMapper, propertyPathInfo.getValueTail(), propValue);
 	}
 
 	@Override
-	public void insertMultiplePropValueElement(Connection cn, Model model, Object obj,
-			PropertyPathInfo propertyPathInfo, Object... propValueElements) throws PersistenceException
+	public int insertMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+			Object... propValueElements) throws PersistenceException
 	{
 		checkPropertyPathInfoMultipleTail(propertyPathInfo);
 		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
@@ -256,12 +257,12 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
-		insertPersistenceOperation.insertPropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel, ownerObj,
-				property, propValueElements);
+		return insertPersistenceOperation.insertPropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
+				ownerObj, property, propValueElements);
 	}
 
 	@Override
-	public void insertMultiplePropValueElement(Connection cn, Dialect dialect, Model model, Object obj,
+	public int insertMultiplePropValueElement(Connection cn, Dialect dialect, Model model, Object obj,
 			PropertyPathInfo propertyPathInfo, Object propValueElement,
 			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException
 	{
@@ -272,13 +273,13 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		Object ownerObj = propertyPathInfo.getOwnerObjTail();
 		Property property = propertyPathInfo.getPropertyTail();
 
-		insertPersistenceOperation.insertPropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel, ownerObj,
-				property, propValueElement, expressionEvaluationContext);
+		return insertPersistenceOperation.insertPropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
+				ownerObj, property, propValueElement, expressionEvaluationContext);
 	}
 
 	@Override
-	public void updateMultiplePropValueElement(Connection cn, Model model, Object obj,
-			PropertyPathInfo propertyPathInfo, Object propertyValueElement) throws PersistenceException
+	public int updateMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+			Object propertyValueElement) throws PersistenceException
 	{
 		checkPropertyPathInfoMultipleTail(propertyPathInfo);
 		checkPropertyPathInfoModelTail(propertyPathInfo);
@@ -298,8 +299,8 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 
 		SqlBuilder condition = buildRecordCondition(cn, dialect, ownerModel, ownerObj, null);
 
-		updatePersistenceOperation.updatePropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel, condition,
-				property, propertyModelMapper, oldPropValueElement, propertyValueElement);
+		return updatePersistenceOperation.updatePropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
+				condition, property, propertyModelMapper, oldPropValueElement, propertyValueElement);
 	}
 
 	@Override
@@ -311,8 +312,8 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 	}
 
 	@Override
-	public void deleteMultiplePropValueElement(Connection cn, Model model, Object obj,
-			PropertyPathInfo propertyPathInfo, Object... propValueElements) throws PersistenceException
+	public int deleteMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+			Object... propValueElements) throws PersistenceException
 	{
 		checkPropertyPathInfoMultipleTail(propertyPathInfo);
 		checkPropertyPathInfoModelTail(propertyPathInfo);
@@ -332,12 +333,12 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		SqlBuilder propertyTableCondition = buildRecordCondition(cn, dialect, propertyModel, propValueElements,
 				getMappedByWith(propertyModelMapper.getMapper()));
 
-		deletePersistenceOperation.deletePropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
+		return deletePersistenceOperation.deletePropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
 				ownerRecordCondition, property, propertyModelMapper, propertyTableCondition, true);
 	}
 
 	@Override
-	public Object get(Connection cn, Model model, Object param) throws PersistenceException
+	public List<Object> getByParam(Connection cn, Model model, Object param) throws PersistenceException
 	{
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
@@ -345,7 +346,7 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 	}
 
 	@Override
-	public Object getPropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo)
+	public List<Object> getPropValueByParam(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo)
 			throws PersistenceException
 	{
 		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
@@ -362,8 +363,8 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 	}
 
 	@Override
-	public Object getMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
-			Object propValueElementParam) throws PersistenceException
+	public List<Object> getMultiplePropValueElementByParam(Connection cn, Model model, Object obj,
+			PropertyPathInfo propertyPathInfo, Object propValueElementParam) throws PersistenceException
 	{
 		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
 		checkPropertyPathInfoModelTail(propertyPathInfo);

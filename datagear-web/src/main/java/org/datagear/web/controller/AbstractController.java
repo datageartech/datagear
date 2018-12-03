@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Paging;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.persistence.PersistenceManager;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
@@ -274,6 +275,24 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 构建“保存”操作消息对应的{@linkplain ResponseEntity}。
+	 * 
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> buildOperationMessageSaveCountResponseEntity(HttpServletRequest request,
+			int saveCount)
+	{
+		if (saveCount > 0)
+			return buildOperationMessageSuccessResponseEntity(request, "saveSuccessWithCount", saveCount);
+		else if (saveCount == 0)
+			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, "saveFailWithNoData");
+		else if (saveCount == PersistenceManager.PERSISTENCE_UNCHANGED)
+			return buildOperationMessageSuccessResponseEntity(request, "saveSuccessWithNoChange", saveCount);
+		else
+			return buildOperationMessageSuccessResponseEntity(request, "saveSuccess");
+	}
+
+	/**
 	 * 构建“删除成功”操作消息对应的{@linkplain ResponseEntity}。
 	 * 
 	 * @return
@@ -282,6 +301,24 @@ public abstract class AbstractController
 			HttpServletRequest request)
 	{
 		return buildOperationMessageSuccessResponseEntity(request, "deleteSuccess");
+	}
+
+	/**
+	 * 构建“删除成功”操作消息对应的{@linkplain ResponseEntity}。
+	 * 
+	 * @param request
+	 * @param deleteCount
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> buildOperationMessageDeleteCountResponseEntity(
+			HttpServletRequest request, int deleteCount)
+	{
+		if (deleteCount > 0)
+			return buildOperationMessageSuccessResponseEntity(request, "deleteSuccessWithCount", deleteCount);
+		else if (deleteCount == 0)
+			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, "deleteFailWithNoData");
+		else
+			return buildOperationMessageSuccessResponseEntity(request, "deleteSuccess");
 	}
 
 	/**

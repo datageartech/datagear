@@ -22,7 +22,6 @@ import org.datagear.dbinfo.TableNotExistsException;
 import org.datagear.dbmodel.DatabaseModelResolverException;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.UnsupportedDialectException;
-import org.datagear.persistence.support.NotUniqueRecordException;
 import org.datagear.persistence.support.SqlExpressionErrorException;
 import org.datagear.persistence.support.VariableExpressionErrorException;
 import org.datagear.web.convert.IllegalSourceValueException;
@@ -153,6 +152,17 @@ public class ControllerAdvice extends AbstractController
 		return ERROR_PAGE_URL;
 	}
 
+	@ExceptionHandler(DuplicateRecordException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleControllerDuplicateRecordException(HttpServletRequest request, HttpServletResponse response,
+			DuplicateRecordException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(DuplicateRecordException.class), exception, false,
+				exception.getExpectedCount(), exception.getActualCount());
+
+		return ERROR_PAGE_URL;
+	}
+
 	@ExceptionHandler(VariableExpressionErrorException.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String handlePersistenceVariableExpressionErrorException(HttpServletRequest request,
@@ -181,16 +191,6 @@ public class ControllerAdvice extends AbstractController
 			UnsupportedDialectException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedDialectException.class), exception, false);
-
-		return ERROR_PAGE_URL;
-	}
-
-	@ExceptionHandler(NotUniqueRecordException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handlePersistenceNotUniqueRecordException(HttpServletRequest request, HttpServletResponse response,
-			NotUniqueRecordException exception)
-	{
-		setOperationMessageForThrowable(request, buildMessageCode(NotUniqueRecordException.class), exception, false);
 
 		return ERROR_PAGE_URL;
 	}

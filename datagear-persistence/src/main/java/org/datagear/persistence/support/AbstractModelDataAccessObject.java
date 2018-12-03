@@ -39,9 +39,6 @@ import org.datagear.persistence.mapper.RelationMapper;
  */
 public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 {
-	/** 持久化操作被忽略标识。对于共享属性值，很多情况下不会被处理，此标识作为返回值 */
-	public static final int PERSISTENCE_IGNORED = -1;
-
 	public AbstractModelDataAccessObject()
 	{
 		super();

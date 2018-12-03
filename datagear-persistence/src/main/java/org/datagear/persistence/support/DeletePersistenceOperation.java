@@ -9,6 +9,7 @@ import java.sql.Connection;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.persistence.Dialect;
+import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.features.KeyRule;
 import org.datagear.persistence.mapper.JoinTableMapper;
@@ -63,10 +64,7 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 
 		int count = delete(cn, dialect, table, model, condition, null);
 
-		if (count == objs.length)
-			return count;
-		else
-			throw new NotUniqueRecordException();
+		return count;
 	}
 
 	/**
@@ -331,7 +329,7 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 				return updatePropertyValueToNullForModelTableMapper(cn, dialect, table, model, propertyTableCondition,
 						property, propertyModelMapper);
 			else
-				return PERSISTENCE_IGNORED;
+				return PersistenceManager.PERSISTENCE_IGNORED;
 		}
 		else
 		{
@@ -358,7 +356,7 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 					return updatePropertyValueToNullForModelTableMapper(cn, dialect, table, model,
 							propertyTableCondition, property, propertyModelMapper);
 				else
-					return PERSISTENCE_IGNORED;
+					return PersistenceManager.PERSISTENCE_IGNORED;
 			}
 		}
 	}

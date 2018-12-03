@@ -15,6 +15,7 @@ import org.datagear.model.features.NotReadable;
 import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyModel;
 import org.datagear.persistence.Dialect;
+import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.features.KeyRule;
 import org.datagear.persistence.mapper.JoinTableMapper;
@@ -32,9 +33,6 @@ import org.springframework.core.convert.ConversionService;
  */
 public class UpdatePersistenceOperation extends AbstractExpressionModelPersistenceOperation
 {
-	/** 当记录未做修改时，返回此标识 */
-	public static final int UNCHANGED = PERSISTENCE_IGNORED - 1;
-
 	/** 是否处理多元属性 */
 	private boolean handleMultipleProperty = false;
 
@@ -420,7 +418,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			sql.sql(" WHERE ").sql(condition);
 
 		if (nowSqlLength == sqlLength)
-			return UNCHANGED;
+			return PersistenceManager.PERSISTENCE_UNCHANGED;
 		else
 			return executeUpdate(cn, sql);
 	}
@@ -523,7 +521,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 						originalPropertyValues, null, null, null);
 			}
 			else
-				count = PERSISTENCE_IGNORED;
+				count = PersistenceManager.PERSISTENCE_IGNORED;
 		}
 		else
 		{
@@ -561,7 +559,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 							originalPropertyValues, null, null, null);
 				}
 				else
-					return PERSISTENCE_IGNORED;
+					return PersistenceManager.PERSISTENCE_IGNORED;
 			}
 		}
 
@@ -623,7 +621,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 					updatePropertyValue);
 
 			if (!changed && mkeyColumnNames == null)
-				count = UNCHANGED;
+				count = PersistenceManager.PERSISTENCE_UNCHANGED;
 			else
 			{
 				SqlBuilder sql = SqlBuilder.valueOf();
@@ -728,7 +726,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 						property, propertyModelMapper, originalPropertyValue, updatePropertyValue, keyUpdateObj);
 			}
 			else
-				count = PERSISTENCE_IGNORED;
+				count = PersistenceManager.PERSISTENCE_IGNORED;
 		}
 
 		return count;

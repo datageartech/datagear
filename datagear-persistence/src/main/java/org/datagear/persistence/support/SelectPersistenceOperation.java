@@ -213,7 +213,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param param
 	 * @return
 	 */
-	public Object getByParam(Connection cn, Dialect dialect, String table, Model model, Object param)
+	public List<Object> getByParam(Connection cn, Dialect dialect, String table, Model model, Object param)
 	{
 		SqlBuilder condition = buildRecordCondition(cn, dialect, model, param, null);
 
@@ -221,17 +221,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		List<Object> list = query(cn, query, model, 1, -1);
 
-		if (list == null)
-			return null;
-
-		int size = list.size();
-
-		if (size == 0)
-			return null;
-		else if (size == 1)
-			return list.get(0);
-		else
-			throw new NotUniqueRecordException();
+		return list;
 	}
 
 	/**
@@ -245,7 +235,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param propertyModel
 	 * @return
 	 */
-	public Object getPropValueByParam(Connection cn, Dialect dialect, String table, Model model, Object param,
+	public List<Object> getPropValueByParam(Connection cn, Dialect dialect, String table, Model model, Object param,
 			Property property, PropertyModel propertyModel)
 	{
 		SqlBuilder modelTableFieldCondition = buildRecordCondition(cn, dialect, model, param, null);
@@ -259,24 +249,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		List<Object> list = queryPropValue(cn, dialect, table, query, model, property, propertyModelMapper, 1, -1);
 
-		if (list == null)
-			return null;
-
-		if (MU.isMultipleProperty(property))
-		{
-			return list;
-		}
-		else
-		{
-			int size = list.size();
-
-			if (size == 0)
-				return null;
-			else if (size == 1)
-				return list.get(0);
-			else
-				throw new NotUniqueRecordException();
-		}
+		return list;
 	}
 
 	/**
@@ -292,7 +265,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param propValueElementParam
 	 * @return
 	 */
-	public Object getMultiplePropValueElementByParam(Connection cn, Dialect dialect, String table, Model model,
+	public List<Object> getMultiplePropValueElementByParam(Connection cn, Dialect dialect, String table, Model model,
 			Object obj, Property property, PropertyModel propertyModel, Object propValueElementParam)
 	{
 		SqlBuilder modelTableFieldCondition = buildRecordCondition(cn, dialect, model, obj, null);
@@ -309,17 +282,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		List<Object> list = queryPropValue(cn, dialect, table, query, model, property, propertyModelMapper, 1, -1);
 
-		if (list == null)
-			return null;
-
-		int size = list.size();
-
-		if (size == 0)
-			return null;
-		else if (size == 1)
-			return list.get(0);
-		else
-			throw new NotUniqueRecordException();
+		return list;
 	}
 
 	/**
