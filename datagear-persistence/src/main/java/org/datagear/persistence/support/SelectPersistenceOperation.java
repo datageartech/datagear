@@ -33,6 +33,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.datagear.model.Model;
 import org.datagear.model.Property;
@@ -1581,8 +1583,10 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		if (str == null || str.isEmpty())
 			return str;
 
+		List<ColumnPropertyPath> myColumnPropertyPaths = new ArrayList<ColumnPropertyPath>(columnPropertyPaths);
+
 		// 优先替换更长的属性路径，避免长路径名里包含短路径名时导致替换错乱
-		Collections.sort(columnPropertyPaths, new Comparator<ColumnPropertyPath>()
+		Collections.sort(myColumnPropertyPaths, new Comparator<ColumnPropertyPath>()
 		{
 			@Override
 			public int compare(ColumnPropertyPath o1, ColumnPropertyPath o2)
@@ -1597,12 +1601,13 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			}
 		});
 
-		for (ColumnPropertyPath columnPropertyPath : columnPropertyPaths)
+		for (ColumnPropertyPath columnPropertyPath : myColumnPropertyPaths)
 		{
 			String pp = columnPropertyPath.getPropertyPath();
 			String qcn = columnPropertyPath.getQuoteColumnName();
 
-			str = str.replace(pp, qcn);
+			str = Pattern.compile(pp, Pattern.LITERAL | Pattern.CASE_INSENSITIVE).matcher(str)
+					.replaceAll(Matcher.quoteReplacement(qcn));
 		}
 
 		return str;
