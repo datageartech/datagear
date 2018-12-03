@@ -7,16 +7,32 @@
 <%@ page import="org.datagear.web.util.WebUtils"%>
 <%@ page import="org.datagear.web.OperationMessage"%>
 <%
-OperationMessage __operationMessage = WebUtils.getOperationMessage(request);
-if(__operationMessage != null){
+boolean __jom_jsonResponse = WebUtils.isJsonResponse(response);
+OperationMessage __jom_operationMessage = WebUtils.getOperationMessage(request);
+
+if(__jom_jsonResponse)
+{
+	if(__jom_operationMessage == null)
+	{
 %>
-<div class="operation-message <%=__operationMessage.getType()%>">
+		<%="{}"%>
+<%
+	}
+	else
+	{
+		writeJson(application, out, __jom_operationMessage);
+	}
+}
+else
+{
+%>
+<div class="operation-message <%=(__jom_operationMessage == null ? "" : __jom_operationMessage.getType())%>">
 	<div class="message">
-		<%=__operationMessage.getMessage()%>
+		<%=(__jom_operationMessage == null ? "" : __jom_operationMessage.getMessage())%>
 	</div>
-	<%if(__operationMessage.hasDetail()){%>
+	<%if(__jom_operationMessage != null && __jom_operationMessage.hasDetail()){%>
 	<div class="message-detail">
-		<pre><%=__operationMessage.getDetail()%></pre>
+		<pre><%=__jom_operationMessage.getDetail()%></pre>
 	</div>
 	<%}%>
 </div>

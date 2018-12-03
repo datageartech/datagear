@@ -50,7 +50,7 @@
 		<property name="suffix" value=".jsp"/>
 	</bean>
 	
-	<bean id="exceptionResolver" class="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver" />
+	<bean id="exceptionResolver" class="org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver" />
 	
 	<bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">
 		<property name="basenamePrefix" value="theme." />

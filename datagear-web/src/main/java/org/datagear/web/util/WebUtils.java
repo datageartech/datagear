@@ -257,4 +257,21 @@ public class WebUtils
 
 		return calendar.getTime();
 	}
+
+	/**
+	 * 判断是否是JSON响应。
+	 * 
+	 * @param response
+	 * @return
+	 */
+	public static boolean isJsonResponse(HttpServletResponse response)
+	{
+		String __contentType = response.getContentType();
+		if (__contentType == null)
+			__contentType = "";
+		else
+			__contentType = __contentType.toLowerCase();
+
+		return (__contentType.indexOf("json") >= 0);
+	}
 }

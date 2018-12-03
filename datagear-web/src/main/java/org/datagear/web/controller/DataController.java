@@ -246,7 +246,7 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_grid";
 	}
 
-	@RequestMapping("/{schemaId}/{tableName}/queryData")
+	@RequestMapping(value = "/{schemaId}/{tableName}/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<Object> queryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
@@ -555,7 +555,7 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_select_prop_value";
 	}
 
-	@RequestMapping("/{schemaId}/{tableName}/selectPropValueData")
+	@RequestMapping(value = "/{schemaId}/{tableName}/selectPropValueData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<Object> selectPropValueData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
@@ -819,7 +819,7 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_prop_value_grid";
 	}
 
-	@RequestMapping("/{schemaId}/{tableName}/queryMultiplePropValueData")
+	@RequestMapping(value = "/{schemaId}/{tableName}/queryMultiplePropValueData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<Object> queryMultiplePropValueData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,

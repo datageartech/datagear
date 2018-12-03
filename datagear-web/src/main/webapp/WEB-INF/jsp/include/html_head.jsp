@@ -9,10 +9,10 @@ jsp_ajax_request.jsp
 jsp_jstl.jsp
 --%>
 <%@ page language="java" pageEncoding="UTF-8"%>
-<%if(!ajaxRequest){%>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="description" content="" />
-<meta name="keywords" content="" />
+<meta name="description" content="数据齿轮, Data Gear, 数据, data, 数据库, database, 数据管理 , data management, 数据库管理, database management, 浏览器/服务器, B/S" />
+<meta name="keywords" content="数据齿轮, Data Gear, 数据, data, 数据库, database, 数据管理 , data management, 数据库管理, database management, 浏览器/服务器, B/S" />
+<%if(!ajaxRequest){%>
 <script type="text/javascript">
 var contextPath="<%=request.getContextPath()%>";
 </script>
