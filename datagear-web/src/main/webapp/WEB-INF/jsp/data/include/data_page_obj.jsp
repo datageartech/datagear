@@ -4,6 +4,7 @@
  */
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="org.datagear.web.controller.DataController" %>
 <%@ include file="../../include/page_js_obj.jsp" %>
 <script type="text/javascript">
 (function(pageObj)
@@ -52,6 +53,60 @@
 			}
 			
 			$.model.on(this.schemaId, tableName, callback);
+		},
+		
+		/**
+		 * 提交可处理重复记录的请求。
+		 */
+		ajaxSubmitForHandleDuplication : function(action, data, messageTemplate, ajaxOptions, ignoreDuplication)
+		{
+			var errorCallback = function(jqXHR, textStatus, errorThrown)
+			{
+				var callResult = undefined;
+				
+				if(ajaxOptions.error)
+					callResult = ajaxOptions.error.call(this, jqXHR, textStatus, errorThrown);
+
+				if(!ignoreDuplication)
+				{
+					var operationMessage = $.getResponseJson(jqXHR);
+					
+					if(operationMessage.code = "error.DuplicateRecordException")
+					{
+						var expected = (operationMessage.data && operationMessage.data.length > 0 ? operationMessage.data[0] : "???");
+						var actual = (operationMessage.data && operationMessage.data.length > 0 ? operationMessage.data[1] : "???");
+						
+						var message = messageTemplate.replace( /#\{expected\}/g, "" + expected).replace( /#\{actual\}/g, "" + actual);
+						
+						pageObj.confirm(message,
+						{
+							"confirm" : function()
+							{
+								$.closeTip();
+								
+								pageObj.ajaxSubmitForHandleDuplication(action, data, messageTemplate, ajaxOptions, true);
+							},
+							"cancel" : function()
+							{
+								$.closeTip();
+							}
+						});
+					}
+				}
+				
+				return callResult;
+			};
+			
+			var url;
+			
+			if(ignoreDuplication)
+				url = pageObj.url("", action, "<%=DataController.PARAM_IGNORE_DUPLICATION%>=true");
+			else
+				url = pageObj.url(action);
+			
+			var options = $.extend({}, ajaxOptions, { data : data, error : errorCallback, type : "POST" });
+			
+			$.ajax(url, options);
 		}
 	};
 	

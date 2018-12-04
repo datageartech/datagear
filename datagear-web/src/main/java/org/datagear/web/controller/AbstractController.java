@@ -246,6 +246,8 @@ public abstract class AbstractController
 		if (traceException)
 			operationMessage.setThrowable(throwable);
 
+		operationMessage.setData(messageArgs);
+
 		WebUtils.setOperationMessage(request, operationMessage);
 	}
 

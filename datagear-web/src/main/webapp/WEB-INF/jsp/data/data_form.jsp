@@ -106,16 +106,21 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 					var thisForm = this;
 					var param = $.extend(formParam, {"data" : data, "originalData" : pageObj.originalData});
 					
-					$(thisForm).modelform("disableOperation");
-					
-					$.ajax(pageObj.url(pageObj.submitAction), 
+					pageObj.ajaxSubmitForHandleDuplication(pageObj.submitAction, param, "<fmt:message key='save.continueIgnoreDuplicationTemplate' />",
 					{
-						"data" : param,
-						"success" : function(operationMessage)
+						beforeSend : function()
+						{
+							$(thisForm).modelform("disableOperation");
+						},
+						success : function(operationMessage)
 						{
 							var $form = $(thisForm);
 							var batchSubmit = $form.modelform("isBatchSubmit");
 							var isDialogPinned = $form.modelform("isDialogPinned");
+							
+							$form.modelform("enableOperation");
+							
+							pageObj.refreshParent();
 							
 							if(batchSubmit)
 								;
@@ -130,28 +135,19 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 								if(pageParam && pageParam.afterSave)
 									close = (pageParam.afterSave(operationMessage.data) != false);
 								
-								var pageObjParent = pageObj.parent();
-								if(pageObjParent && pageObjParent.refresh)
-									pageObjParent.refresh();
-								
 								if(close && !isDialogPinned)
 									pageObj.close();
 							}
 						},
-						"complete" : function()
+						error : function()
 						{
 							var $form = $(thisForm);
+							var batchSubmit = $form.modelform("isBatchSubmit");
 							
 							$form.modelform("enableOperation");
 							
-							var batchSubmit = $form.modelform("isBatchSubmit");
-							
 							if(batchSubmit)
-							{
-								var pageObjParent = pageObj.parent();
-								if(pageObjParent && pageObjParent.refresh)
-									pageObjParent.refresh();
-							}
+								pageObj.refreshParent();
 						}
 					});
 				}

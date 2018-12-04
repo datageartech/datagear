@@ -232,6 +232,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			}
 		}
 
+		boolean propertyUpdated = false;
+
 		List<UpdateInfoForAutoKeyUpdateRule> updateInfoForAutoKeyUpdateRules = new ArrayList<UpdateInfoForAutoKeyUpdateRule>();
 
 		// 先处理删除属性值，它不会受外键约束的影响；
@@ -255,8 +257,13 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			if (updatePropertyValue == null)
 			{
 				if (originalPropertyValue != null)
-					deletePersistenceOperation.deletePropertyTableData(cn, dialect, table, model, originalCondition,
-							property, relationMapper, null, false);
+				{
+					int myCount = deletePersistenceOperation.deletePropertyTableData(cn, dialect, table, model,
+							originalCondition, property, relationMapper, null, false);
+
+					if (propertyUpdated == false && myCount > 0)
+						propertyUpdated = true;
+				}
 				else
 					;
 			}
@@ -280,14 +287,17 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 
 						if (propertyKeyUpdateRule == null || propertyKeyUpdateRule.isManually())
 						{
-							int myUpdateCount = updatePropertyTableData(cn, dialect, table, model, originalCondition,
+							int myCount = updatePropertyTableData(cn, dialect, table, model, originalCondition,
 									property, pmm, originalPropertyValue, updatePropertyValue, updateObj, false,
 									expressionEvaluationContext);
 
-							if (myUpdateCount == 0)
-								insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model, updateObj,
-										property, pmm, new Object[] { updatePropertyValue }, null,
+							if (myCount == 0)
+								myCount = insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model,
+										updateObj, property, pmm, new Object[] { updatePropertyValue }, null,
 										expressionEvaluationContext);
+
+							if (propertyUpdated == false && myCount > 0)
+								propertyUpdated = true;
 						}
 						else
 						{
@@ -298,8 +308,11 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 					}
 					else
 					{
-						deletePersistenceOperation.deletePropertyTableData(cn, dialect, table, model, originalCondition,
-								property, pmm, null, false);
+						int myCount = deletePersistenceOperation.deletePropertyTableData(cn, dialect, table, model,
+								originalCondition, property, pmm, null, false);
+
+						if (propertyUpdated == false && myCount > 0)
+							propertyUpdated = true;
 					}
 				}
 			}
@@ -318,17 +331,24 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			{
 				Object updatePropertyValue = updateInfo.getUpdatePropertyValue();
 
-				int myUpdateCount = updatePropertyTableData(cn, dialect, table, model, updateCondition,
+				int myCount = updatePropertyTableData(cn, dialect, table, model, updateCondition,
 						updateInfo.getProperty(), updateInfo.getPropertyModelMapper(),
 						originalPropertyValues[updateInfo.getPropertyIndex()], updatePropertyValue, null, false,
 						expressionEvaluationContext);
 
-				if (myUpdateCount == 0)
-					insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model, updateObj,
+				if (myCount == 0)
+					myCount = insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model, updateObj,
 							updateInfo.getProperty(), updateInfo.getPropertyModelMapper(),
 							new Object[] { updatePropertyValue }, null, expressionEvaluationContext);
+
+				if (propertyUpdated == false && myCount > 0)
+					propertyUpdated = true;
 			}
 		}
+
+		// 仅修改了复合属性值时，也应该返回1
+		if (count < 0 && propertyUpdated)
+			count = 1;
 
 		return count;
 	}

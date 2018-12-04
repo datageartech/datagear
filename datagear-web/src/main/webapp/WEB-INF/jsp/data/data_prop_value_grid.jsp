@@ -322,9 +322,13 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 							else
 							{
 								var options = pageObj.buildActionOptions(property, propertyModel, {"propValueElements" : rows}, null);
-								$.post(pageObj.url("deleteMultiplePropValueElements"), options.data, function()
+								
+								pageObj.ajaxSubmitForHandleDuplication("deleteMultiplePropValueElements", options.data, "<fmt:message key='delete.continueIgnoreDuplicationTemplate' />",
 								{
-									pageObj.refresh();
+									"success" : function()
+									{
+										pageObj.refresh();
+									}
 								});
 							}
 						}

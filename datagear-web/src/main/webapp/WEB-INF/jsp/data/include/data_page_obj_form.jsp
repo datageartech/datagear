@@ -163,6 +163,19 @@ pageObj.clientOperation = undefined;
 		
 		pageObj.open(pageObj.url("downloadSinglePropertyValueFile"), options);
 	};
+	
+	pageObj.refreshParent = function()
+	{
+		var pageObjParent = pageObj.parent();
+		if(pageObjParent && pageObjParent.refresh && $.isFunction(pageObjParent.refresh))
+		{
+			try
+			{
+				pageObjParent.refresh();
+			}
+			catch(e){}
+		}
+	};
 })
 (${pageId});
 </script>

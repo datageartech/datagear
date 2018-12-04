@@ -80,6 +80,8 @@ public class DataController extends AbstractSchemaModelController
 {
 	public static final byte[] BLOB_TO_BYTES_PLACEHOLDER = new byte[] { 0x00 };
 
+	public static final String PARAM_IGNORE_DUPLICATION = "ignoreDuplication";
+
 	@Autowired
 	private PersistenceManager persistenceManager;
 
@@ -427,7 +429,9 @@ public class DataController extends AbstractSchemaModelController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName) throws Throwable
+			@PathVariable("tableName") String tableName,
+			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
+			throws Throwable
 	{
 		final Object originalDataParam = getParamObj(request, "originalData");
 		final Object dataParam = getParamMap(request, "data");
@@ -446,8 +450,7 @@ public class DataController extends AbstractSchemaModelController
 
 				int count = persistenceManager.update(cn, model, originalData, data, false);
 
-				if (count > 1)
-					throw new DuplicateRecordException(1, count);
+				checkDuplicateRecord(1, count, ignoreDuplication);
 
 				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(request,
 						count);
@@ -464,7 +467,9 @@ public class DataController extends AbstractSchemaModelController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName) throws Throwable
+			@PathVariable("tableName") String tableName,
+			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
+			throws Throwable
 	{
 		final Object dataParam = getParamObj(request, "data");
 
@@ -481,8 +486,7 @@ public class DataController extends AbstractSchemaModelController
 
 				int count = persistenceManager.delete(cn, model, datas);
 
-				if (count > datas.length)
-					throw new DuplicateRecordException(datas.length, count);
+				checkDuplicateRecord(datas.length, count, ignoreDuplication);
 
 				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteCountResponseEntity(
 						request, count);
@@ -718,7 +722,9 @@ public class DataController extends AbstractSchemaModelController
 	public ResponseEntity<OperationMessage> saveEditSinglePropValue(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPath) throws Throwable
+			@RequestParam("propertyPath") final String propertyPath,
+			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
+			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueParam = getParamMap(request, "propValue");
@@ -741,8 +747,7 @@ public class DataController extends AbstractSchemaModelController
 
 				int count = persistenceManager.updateSinglePropValue(cn, model, data, propertyPathInfo, propValue);
 
-				if (count > 1)
-					throw new DuplicateRecordException(1, count);
+				checkDuplicateRecord(1, count, ignoreDuplication);
 
 				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(request,
 						count);
@@ -1101,7 +1106,9 @@ public class DataController extends AbstractSchemaModelController
 	public ResponseEntity<OperationMessage> saveEditMultiplePropValueElement(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPath) throws Throwable
+			@RequestParam("propertyPath") final String propertyPath,
+			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
+			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propValue");
@@ -1123,8 +1130,7 @@ public class DataController extends AbstractSchemaModelController
 				int count = persistenceManager.updateMultiplePropValueElement(cn, model, data, propertyPathInfo,
 						propValueElement);
 
-				if (count > 1)
-					throw new DuplicateRecordException(1, count);
+				checkDuplicateRecord(1, count, ignoreDuplication);
 
 				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(request,
 						count);
@@ -1142,15 +1148,18 @@ public class DataController extends AbstractSchemaModelController
 	public ResponseEntity<OperationMessage> deleteMultiplePropValueElements(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPath) throws Throwable
+			@RequestParam("propertyPath") final String propertyPath,
+			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
+			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementsParam = getParamMap(request, "propValueElements");
 
-		int count = new ReturnExecutor<Integer>(request, response, springModel, schemaId, tableName, false)
+		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+				response, springModel, schemaId, tableName, false)
 		{
 			@Override
-			protected Integer execute(HttpServletRequest request, HttpServletResponse response,
+			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
 				Connection cn = getConnection();
@@ -1163,16 +1172,15 @@ public class DataController extends AbstractSchemaModelController
 				int count = persistenceManager.deleteMultiplePropValueElement(cn, model, data, propertyPathInfo,
 						propValueElements);
 
-				if (count > propValueElements.length)
-					throw new DuplicateRecordException(propValueElements.length, count);
+				checkDuplicateRecord(propValueElements.length, count, ignoreDuplication);
 
-				return count;
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteCountResponseEntity(
+						request, count);
+				responseEntity.getBody().setData(count);
+
+				return responseEntity;
 			}
 		}.execute();
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteCountResponseEntity(request,
-				count);
-		responseEntity.getBody().setData(count);
 
 		return responseEntity;
 	}
@@ -1414,6 +1422,13 @@ public class DataController extends AbstractSchemaModelController
 	protected Property getProperty(Model model, String propertyPath)
 	{
 		return model.getProperty(propertyPath);
+	}
+
+	protected void checkDuplicateRecord(int expectedCount, int actualCount, Boolean ignoreDuplication)
+			throws DuplicateRecordException
+	{
+		if (actualCount > expectedCount && !Boolean.TRUE.equals(ignoreDuplication))
+			throw new DuplicateRecordException(expectedCount, actualCount);
 	}
 
 	/**

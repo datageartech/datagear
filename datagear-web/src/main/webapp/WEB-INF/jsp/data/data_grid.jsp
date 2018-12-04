@@ -121,9 +121,12 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 						{
 							var data = {"data" : rows};
 							
-							$.post(pageObj.url("delete"), data, function()
+							pageObj.ajaxSubmitForHandleDuplication("delete", data, "<fmt:message key='delete.continueIgnoreDuplicationTemplate' />",
 							{
-								pageObj.refresh();
+								"success" : function()
+								{
+									pageObj.refresh();
+								}
 							});
 						}
 					});
