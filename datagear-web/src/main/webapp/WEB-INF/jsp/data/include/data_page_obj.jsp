@@ -71,7 +71,7 @@
 				{
 					var operationMessage = $.getResponseJson(jqXHR);
 					
-					if(operationMessage.code = "error.DuplicateRecordException")
+					if(operationMessage.code == "error.DuplicateRecordException")
 					{
 						var expected = (operationMessage.data && operationMessage.data.length > 0 ? operationMessage.data[0] : "???");
 						var actual = (operationMessage.data && operationMessage.data.length > 0 ? operationMessage.data[1] : "???");

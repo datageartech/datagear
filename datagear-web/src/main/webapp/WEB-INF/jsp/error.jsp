@@ -6,15 +6,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ include file="include/jsp_import.jsp" %>
 <%@ page import="org.springframework.web.context.support.WebApplicationContextUtils"%>
-<%@page import="org.springframework.web.context.WebApplicationContext"%>
+<%@ page import="org.springframework.web.context.WebApplicationContext"%>
 <%@ page import="org.datagear.web.OperationMessage"%>
+<%@ page import="org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver"%>
 <%@ page import="org.springframework.http.HttpStatus" %>
 <%@ page import="java.io.Serializable"%>
 <%@ include file="include/jsp_ajax_request.jsp" %>
 <%@ include file="include/jsp_jstl.jsp" %>
 <%@ include file="include/jsp_method_write_json.jsp" %>
 <%
-String expectedContentType = org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver.getHandlerContentType(request);
+String expectedContentType = DeliverContentTypeExceptionHandlerExceptionResolver.getHandlerContentType(request);
 if(expectedContentType != null && !expectedContentType.isEmpty())
 	response.setContentType(expectedContentType);
 
@@ -53,9 +54,7 @@ if(operationMessage == null)
 boolean jsonResponse = WebUtils.isJsonResponse(response);
 if(jsonResponse)
 {
-%>
-<%@ include file="include/jsp_operation_message.jsp" %>
-<%
+	writeJson(application, out, operationMessage);
 }
 else
 {
@@ -68,7 +67,16 @@ else
 </head>
 <body>
 <%if(ajaxRequest){%>
-<%@ include file="include/jsp_operation_message.jsp" %>
+<div class="operation-message <%=operationMessage.getType()%>">
+	<div class="message">
+		<%=operationMessage.getMessage()%>
+	</div>
+	<%if(operationMessage.hasDetail()){%>
+	<div class="message-detail">
+		<pre><%=operationMessage.getDetail()%></pre>
+	</div>
+	<%}%>
+</div>
 <%}else{%>
 <div>
 	<div class="main-page-head">
@@ -78,7 +86,16 @@ else
 		</div>
 	</div>
 	<div class="page-error">
-		<%@ include file="include/jsp_operation_message.jsp" %>
+		<div class="operation-message <%=operationMessage.getType()%>">
+			<div class="message">
+				<%=operationMessage.getMessage()%>
+			</div>
+			<%if(operationMessage.hasDetail()){%>
+			<div class="message-detail">
+				<pre><%=operationMessage.getDetail()%></pre>
+			</div>
+			<%}%>
+		</div>
 	</div>
 </div>
 <%}%>
