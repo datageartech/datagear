@@ -275,7 +275,7 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 构建“保存”操作消息对应的{@linkplain ResponseEntity}。
+	 * 构建保存操作消息对应的{@linkplain ResponseEntity}。
 	 * 
 	 * @return
 	 */
@@ -283,11 +283,11 @@ public abstract class AbstractController
 			int saveCount)
 	{
 		if (saveCount > 0)
-			return buildOperationMessageSuccessResponseEntity(request, "saveSuccessWithCount", saveCount);
+			return buildOperationMessageSuccessResponseEntity(request, "saveSuccess.withCount", saveCount);
 		else if (saveCount == 0)
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, "saveFailWithNoData");
+			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, "saveFail.zeroCount");
 		else if (saveCount == PersistenceManager.PERSISTENCE_UNCHANGED)
-			return buildOperationMessageSuccessResponseEntity(request, "saveSuccessWithNoChange", saveCount);
+			return buildOperationMessageSuccessResponseEntity(request, "saveSuccess.noChange", saveCount);
 		else
 			return buildOperationMessageSuccessResponseEntity(request, "saveSuccess");
 	}
@@ -304,19 +304,20 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 构建“删除成功”操作消息对应的{@linkplain ResponseEntity}。
+	 * 构建删除操作消息对应的{@linkplain ResponseEntity}。
 	 * 
 	 * @param request
 	 * @param deleteCount
+	 *            实际删除数目
 	 * @return
 	 */
 	protected ResponseEntity<OperationMessage> buildOperationMessageDeleteCountResponseEntity(
 			HttpServletRequest request, int deleteCount)
 	{
 		if (deleteCount > 0)
-			return buildOperationMessageSuccessResponseEntity(request, "deleteSuccessWithCount", deleteCount);
+			return buildOperationMessageSuccessResponseEntity(request, "deleteSuccess.withCount", deleteCount);
 		else if (deleteCount == 0)
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, "deleteFailWithNoData");
+			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, "deleteFail.zeroCount");
 		else
 			return buildOperationMessageSuccessResponseEntity(request, "deleteSuccess");
 	}

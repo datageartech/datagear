@@ -449,8 +449,8 @@ public class DataController extends AbstractSchemaModelController
 				if (count > 1)
 					throw new DuplicateRecordException(1, count);
 
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(
-						request, count);
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(request,
+						count);
 				responseEntity.getBody().setData(data);
 
 				return responseEntity;
@@ -468,10 +468,11 @@ public class DataController extends AbstractSchemaModelController
 	{
 		final Object dataParam = getParamObj(request, "data");
 
-		int deleteCount = new ReturnExecutor<Integer>(request, response, springModel, schemaId, tableName, false)
+		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+				response, springModel, schemaId, tableName, false)
 		{
 			@Override
-			protected Integer execute(HttpServletRequest request, HttpServletResponse response,
+			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
 				Connection cn = getConnection();
@@ -483,13 +484,13 @@ public class DataController extends AbstractSchemaModelController
 				if (count > datas.length)
 					throw new DuplicateRecordException(datas.length, count);
 
-				return count;
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteCountResponseEntity(
+						request, count);
+				responseEntity.getBody().setData(count);
+
+				return responseEntity;
 			}
 		}.execute();
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteCountResponseEntity(request,
-				deleteCount);
-		responseEntity.getBody().setData(deleteCount);
 
 		return responseEntity;
 	}
@@ -743,8 +744,8 @@ public class DataController extends AbstractSchemaModelController
 				if (count > 1)
 					throw new DuplicateRecordException(1, count);
 
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(
-						request, count);
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(request,
+						count);
 				responseEntity.getBody().setData(propValue);
 
 				return responseEntity;
@@ -1125,8 +1126,8 @@ public class DataController extends AbstractSchemaModelController
 				if (count > 1)
 					throw new DuplicateRecordException(1, count);
 
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(
-						request, count);
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(request,
+						count);
 				responseEntity.getBody().setData(propValueElement);
 
 				return responseEntity;
