@@ -791,7 +791,7 @@ public class DataController extends AbstractSchemaModelController
 					if (resultList == null || resultList.isEmpty())
 						throw new RecordNotFoundException();
 
-					propertyPathInfo.setValueTail(resultList);
+					propertyPathInfo.setValueTail(resultList.get(0));
 				}
 
 				springModel.addAttribute("data", data);
