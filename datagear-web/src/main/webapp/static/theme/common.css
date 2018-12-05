@@ -42,7 +42,6 @@ form .form-content .form-item .form-item-label{
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
-	vertical-align: middle;
 }
 form .form-content .form-item .form-item-label label{
 	white-space: nowrap;
@@ -1007,6 +1006,19 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	margin-right: 0.3em;
 }
 
-.page-about .copyright{
-	padding-top: 4.1em;
+.page-changelog form .form-content .form-item .form-item-label{
+	text-align: center;
+}
+.page-changelog form .form-content .form-item-version{
+	font-weight: bold;
+}
+.page-changelog .changelog-content{
+	margin-left: 0px;
+    padding-left: 1em;
+    padding-top: 0px;
+    margin-top: 0px;
+}
+.page-changelog .changelog-content .changelog-item{
+	padding-top: 0.41em;
+	padding-bottom: 0.41em;
 }

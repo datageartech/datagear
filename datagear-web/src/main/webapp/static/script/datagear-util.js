@@ -188,15 +188,15 @@
 		},
 		
 		/**
-		 * 判断给定dom元素是否在对话框中。
+		 * 判断给定dom元素是否在对话框中或者将要在对话框中显示。
 		 * 
 		 * @param dom 任意DOM元素
 		 */
 		isInDialog : function(dom)
 		{
-			var myDialog = $.getInDialog(dom);
+			var $dialogFlag = $(dom).closest(".dialog-content-container");
 			
-			return (myDialog && myDialog.length > 0);
+			return ($dialogFlag && $dialogFlag.length > 0);
 		},
 		
 		/**

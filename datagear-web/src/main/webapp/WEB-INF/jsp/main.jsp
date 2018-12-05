@@ -395,6 +395,14 @@
 				{
 					pageObj.open(contextPath+"/about", { width : "50%" });
 				}
+				else if($item.hasClass("documentation"))
+				{
+					window.open("http://www.datagear.tech/documentation/");
+				}
+				else if($item.hasClass("changelog"))
+				{
+					pageObj.open(contextPath+"/changelog", { width : "50%" });
+				}
 			}
 		});
 
@@ -1136,8 +1144,12 @@
 							<li class="theme-item" theme="green"><a href="javascript:void(0);"><fmt:message key='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
 						</ul>
 					</li>
-					<li class="about">
-						<a href="javascript:void(0);"><fmt:message key='main.about' /></a>
+					<li class="about"><a href="javascript:void(0);"><fmt:message key='help' /></a>
+						<ul>
+							<li class="about"><a href="javascript:void(0);"><fmt:message key='main.about' /></a></li>
+							<li class="documentation"><a href="javascript:void(0);"><fmt:message key='main.documentation' /></a></li>
+							<li class="changelog"><a href="javascript:void(0);"><fmt:message key='main.changelog' /></a></li>
+						</ul>
 					</li>
 				</ul>
 			</li>

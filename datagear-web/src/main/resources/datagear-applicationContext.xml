@@ -329,6 +329,8 @@
 	<bean id="fastJsonConfig" factory-bean="fastJsonConfigFactory" factory-method="getFastJsonConfig" />
 	<bean id="serializerFeatures" factory-bean="fastJsonConfigFactory" factory-method="getSerializerFeatures" />
 	
+	<bean id="changelogResolver" class="org.datagear.web.util.ChangelogResolver" />
+	
 	<!-- 定时任务开始 -->
 	
 	<!-- 删除过期的BLOB文件 -->

@@ -162,15 +162,27 @@
 			
 			this._propertyWidgets = {};
 			
-			var windowHeight = $(window).height();
-			
-			var maxHeight = windowHeight - windowHeight/4;
-			
 			var $formHead = $("<div class='form-head' />").appendTo(this.element);
-			var $formContent = $("<div class='form-content' style='max-height: "+maxHeight+"px; overflow: auto;' />").appendTo(this.element);
+			var $formContent = $("<div class='form-content' />").appendTo(this.element);
 			var $formFoot = $("<div class='form-foot' />").appendTo(this.element);
 			
 			this._render($formHead, $formContent, $formFoot);
+			
+			var maxHeight = $(window).height();
+			
+			if($.isInDialog(this.element))
+				maxHeight = maxHeight - maxHeight/4;
+			else
+			{
+				maxHeight = maxHeight - $formHead.outerHeight();
+				maxHeight = maxHeight - $formFoot.outerHeight();
+				maxHeight = maxHeight - 10;
+			}
+			
+			if(maxHeight < 50)
+				maxHeight = 50;
+			
+			$formContent.css("max-height", maxHeight+"px").css("overflow", "auto");
 		},
 		
 		_destroy: function()
