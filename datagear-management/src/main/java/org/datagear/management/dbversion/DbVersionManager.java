@@ -8,13 +8,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.datagear.connection.IOUtil;
 import org.datagear.connection.JdbcUtil;
-import org.datagear.management.Version;
+import org.datagear.management.util.AbstractVersionContentReader;
+import org.datagear.management.util.Version;
+import org.datagear.management.util.VersionContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,31 +37,24 @@ import org.slf4j.LoggerFactory;
  * @author datagear@163.com
  *
  */
-public class DbVersionManager
+public class DbVersionManager extends AbstractVersionContentReader
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DbVersionManager.class);
 
 	/** 脚本资源文件路径 */
 	public static final String SQL_SCRIPT_RESOURCE = "org/datagear/management/ddl/datagear.sql";
 
-	/** 脚本资源文件编码 */
-	public static final String DEFAULT_SQL_SCRIPT_ENCODING = "UTF-8";
-
 	/** 数据库SQL文件中版本号注释开头标识 */
-	public static final String DEFAULT_VERSION_LINE_PREFIX = "--version[";
+	public static final String VERSION_LINE_PREFIX = "--version[";
 
 	/** 数据库SQL文件中版本号注释结尾标识 */
-	public static final String DEFAULT_VERSION_LINE_SUFFIX = "]";
+	public static final String VERSION_LINE_SUFFIX = "]";
 
 	public static final String DEFAULT_VERSION_TABLE_NAME = "DATAGEAR_VERSION";
 
 	private String sqlScriptLocation = SQL_SCRIPT_RESOURCE;
 
-	private String sqlScriptEncoding = DEFAULT_SQL_SCRIPT_ENCODING;
-
-	private String versionLinePrefix = DEFAULT_VERSION_LINE_PREFIX;
-
-	private String versionLineSuffix = DEFAULT_VERSION_LINE_SUFFIX;
+	private String sqlScriptEncoding = ENCODING_UTF8;
 
 	private String versionTableName = DEFAULT_VERSION_TABLE_NAME;
 
@@ -94,26 +89,6 @@ public class DbVersionManager
 	public void setSqlScriptEncoding(String sqlScriptEncoding)
 	{
 		this.sqlScriptEncoding = sqlScriptEncoding;
-	}
-
-	public String getVersionLinePrefix()
-	{
-		return versionLinePrefix;
-	}
-
-	public void setVersionLinePrefix(String versionLinePrefix)
-	{
-		this.versionLinePrefix = versionLinePrefix;
-	}
-
-	public String getVersionLineSuffix()
-	{
-		return versionLineSuffix;
-	}
-
-	public void setVersionLineSuffix(String versionLineSuffix)
-	{
-		this.versionLineSuffix = versionLineSuffix;
 	}
 
 	public String getVersionTableName()
@@ -303,9 +278,9 @@ public class DbVersionManager
 	{
 		Version target = null;
 
-		UpgradeSqls upgradeSqls = extractUpgradeSqls(from);
+		List<VersionContent> versionContents = resolveUpgradeSqlVersionContents(from);
 
-		if (upgradeSqls == null)
+		if (versionContents == null || versionContents.isEmpty())
 		{
 			if (LOGGER.isInfoEnabled())
 				LOGGER.info("No upgrade sqls for verion [" + from + "], it is already the latest");
@@ -314,13 +289,17 @@ public class DbVersionManager
 		}
 		else
 		{
-			target = upgradeSqls.getTargetVersion();
+			for (VersionContent versionContent : versionContents)
+			{
+				target = versionContent.getVersion();
 
-			if (LOGGER.isInfoEnabled())
-				LOGGER.info("Got upgrade sqls for verion from [" + from + "] to [" + target + "], line from ["
-						+ upgradeSqls.getStartLine() + "] in [" + this.sqlScriptLocation + "]");
+				if (LOGGER.isInfoEnabled())
+					LOGGER.info("Got upgrade sqls for verion from [" + from + "] to [" + target + "] (line "
+							+ versionContent.getVersionStartLine() + " - " + versionContent.getVersionEndLine()
+							+ ") in [" + this.sqlScriptLocation + "]");
 
-			executeSqls(cn, upgradeSqls.getSqls());
+				executeSqls(cn, versionContent.getContents());
+			}
 		}
 
 		return target;
@@ -356,112 +335,90 @@ public class DbVersionManager
 	}
 
 	/**
-	 * 提取当前版本的升级SQL脚本。
-	 * <p>
-	 * 如果已是最新版本，返回{@code null}。
-	 * </p>
+	 * 解析升级SQL脚本内容。
 	 * 
 	 * @param current
 	 * @return
+	 * @throws IOException
 	 */
-	protected UpgradeSqls extractUpgradeSqls(Version current) throws IOException
+	protected List<VersionContent> resolveUpgradeSqlVersionContents(Version current) throws IOException
 	{
-		List<String> sqls = new ArrayList<String>();
-
-		Version target = null;
-
-		BufferedReader reader = getSqlScriptBufferedReader();
-
-		int readStart = -1;
-
-		int lineNumber = 1;
+		BufferedReader reader = null;
 
 		try
 		{
-			boolean canWrite = (current == null || Version.ZERO_VERSION.equals(current));
-			if (canWrite)
-				readStart = lineNumber;
+			reader = getSqlScriptBufferedReader();
 
-			StringBuilder sql = new StringBuilder();
-
-			String line = null;
-			while ((line = reader.readLine()) != null)
-			{
-				if (canWrite)
-				{
-					String trimLine = line.trim();
-
-					if (isVersionLine(trimLine))
-					{
-						target = extractVersion(line);
-					}
-					else if (isCommentLine(trimLine))
-					{
-						// 忽略注释行
-					}
-					else if (isEmptyLine(trimLine))
-					{
-						// 空行作为语句分隔符
-						String trimSql = sql.toString().trim();
-
-						if (!trimSql.isEmpty())
-							sqls.add(postProcessSql(trimSql));
-
-						sql.delete(0, sql.length());
-					}
-					else
-					{
-						if (sql.length() > 0)
-							sql.append("\r\n");
-
-						sql.append(line);
-					}
-				}
-				else
-				{
-					if (isVersionLine(line))
-					{
-						Version myVersion = extractVersion(line);
-
-						if (myVersion.isHigherThan(current))
-						{
-							canWrite = true;
-							readStart = lineNumber;
-						}
-					}
-				}
-
-				lineNumber++;
-			}
-
-			String trimSql = sql.toString().trim();
-
-			if (!trimSql.isEmpty())
-				sqls.add(postProcessSql(trimSql));
+			return resolveVersionContents(reader, current, null, false, true);
 		}
 		finally
 		{
-			reader.close();
+			IOUtil.close(reader);
 		}
-
-		if (target == null)
-			return null;
-		else
-			return new UpgradeSqls(sqls, target, readStart);
 	}
 
-	/**
-	 * 后置处理SQL语句。
-	 * 
-	 * @param trimSql
-	 * @return
-	 */
-	protected String postProcessSql(String trimSql)
+	@Override
+	protected void handleVersionContentLine(VersionContent versionContent, List<String> contents, StringBuilder cache,
+			String line)
 	{
-		if (trimSql.endsWith(";"))
-			trimSql = trimSql.substring(0, trimSql.length() - 1);
+		line = line.trim();
 
-		return trimSql;
+		// 空行作为SQL语句的分隔符
+		if (line.isEmpty())
+		{
+			String sql = cache.toString().trim();
+
+			if (!sql.isEmpty())
+			{
+				if (sql.endsWith(";"))
+					sql = sql.substring(0, sql.length() - 1);
+
+				contents.add(sql);
+
+				cache.delete(0, cache.length());
+			}
+		}
+		else
+		{
+			if (cache.length() > 0)
+				cache.append(LINE_SEPARATOR);
+
+			cache.append(line);
+		}
+	}
+
+	@Override
+	protected void finishVersionContent(VersionContent versionContent, List<String> contents, StringBuilder cache)
+	{
+		if (cache.length() > 0)
+		{
+			String sql = cache.toString().trim();
+
+			if (!sql.isEmpty())
+				contents.add(sql);
+		}
+	}
+
+	@Override
+	protected boolean isVersionLine(String line)
+	{
+		return line.startsWith(VERSION_LINE_PREFIX);
+	}
+
+	@Override
+	protected Version resolveVersion(String line)
+	{
+		int start = line.indexOf(VERSION_LINE_PREFIX);
+
+		if (start < 0)
+			throw new IllegalArgumentException("[" + line + "] is not version line");
+
+		start = start + VERSION_LINE_PREFIX.length();
+		int end = line.indexOf(VERSION_LINE_SUFFIX, start);
+
+		String version = line.substring(start, end);
+
+		return Version.valueOf(version);
 	}
 
 	/**
@@ -477,127 +434,5 @@ public class DbVersionManager
 				this.sqlScriptEncoding));
 
 		return reader;
-	}
-
-	/**
-	 * 是否空行。
-	 * 
-	 * @param trimLine
-	 * @return
-	 */
-	protected boolean isEmptyLine(String trimLine)
-	{
-		return trimLine.isEmpty();
-	}
-
-	/**
-	 * 是否是注释行。
-	 * 
-	 * @param trimLine
-	 * @return
-	 */
-	protected boolean isCommentLine(String trimLine)
-	{
-		return trimLine.startsWith("--");
-	}
-
-	/**
-	 * 判断给定行是否是版本标识行。
-	 * 
-	 * @param trimLine
-	 * @return
-	 */
-	protected boolean isVersionLine(String trimLine)
-	{
-		return trimLine.startsWith(this.versionLinePrefix);
-	}
-
-	/**
-	 * 从字符串中解析版本号。
-	 * 
-	 * @param line
-	 * @return
-	 */
-	protected Version extractVersion(String line)
-	{
-		int start = line.indexOf(this.versionLinePrefix);
-
-		if (start < 0)
-			throw new IllegalArgumentException("[" + line + "] is not version line");
-
-		start = start + this.versionLinePrefix.length();
-		int end = line.indexOf(this.versionLineSuffix, start);
-
-		String version = line.substring(start, end);
-
-		return Version.valueOf(version);
-	}
-
-	/**
-	 * 版本升级SQL脚本。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	protected static class UpgradeSqls
-	{
-		/** 脚本列表 */
-		private List<String> sqls;
-
-		/** 脚本的目标版本 */
-		private Version targetVersion;
-
-		/** 起始行 */
-		private int startLine;
-
-		public UpgradeSqls()
-		{
-			super();
-		}
-
-		public UpgradeSqls(List<String> sqls, Version targetVersion)
-		{
-			super();
-			this.sqls = sqls;
-			this.targetVersion = targetVersion;
-		}
-
-		public UpgradeSqls(List<String> sqls, Version targetVersion, int startLine)
-		{
-			super();
-			this.sqls = sqls;
-			this.targetVersion = targetVersion;
-			this.startLine = startLine;
-		}
-
-		public List<String> getSqls()
-		{
-			return sqls;
-		}
-
-		public void setSqls(List<String> sqls)
-		{
-			this.sqls = sqls;
-		}
-
-		public Version getTargetVersion()
-		{
-			return targetVersion;
-		}
-
-		public void setTargetVersion(Version targetVersion)
-		{
-			this.targetVersion = targetVersion;
-		}
-
-		public int getStartLine()
-		{
-			return startLine;
-		}
-
-		public void setStartLine(int startLine)
-		{
-			this.startLine = startLine;
-		}
 	}
 }
