@@ -310,7 +310,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 			{
 				pageObj.executeOnSelects(function(rows, indexes)
 				{
-					pageObj.confirm("<fmt:message key='confirmDelete' />",
+					pageObj.confirm("<fmt:message key='data.confirmDelete'><fmt:param>"+rows.length+"</fmt:param></fmt:message>",
 					{
 						"confirm" : function()
 						{

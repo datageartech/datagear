@@ -115,7 +115,7 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 			{
 				pageObj.executeOnSelects(function(rows)
 				{
-					pageObj.confirm("<fmt:message key='confirmDelete' />",
+					pageObj.confirm("<fmt:message key='data.confirmDelete'><fmt:param>"+rows.length+"</fmt:param></fmt:message>",
 					{
 						"confirm" : function()
 						{
