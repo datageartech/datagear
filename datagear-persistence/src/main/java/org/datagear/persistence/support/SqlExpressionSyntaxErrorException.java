@@ -7,21 +7,21 @@ package org.datagear.persistence.support;
 import org.datagear.persistence.support.ExpressionResolver.Expression;
 
 /**
- * 变量表达式出错异常。
+ * SQL表达式语法出错异常。
  * 
  * @author datagear@163.com
  *
  */
-public class VariableExpressionErrorException extends ExpressionErrorException
+public class SqlExpressionSyntaxErrorException extends SqlExpressionErrorException
 {
 	private static final long serialVersionUID = 1L;
 
-	public VariableExpressionErrorException(Expression expression)
+	public SqlExpressionSyntaxErrorException(Expression expression)
 	{
 		super(expression);
 	}
 
-	public VariableExpressionErrorException(Expression expression, Throwable cause)
+	public SqlExpressionSyntaxErrorException(Expression expression, Throwable cause)
 	{
 		super(expression, cause);
 	}

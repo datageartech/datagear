@@ -4,12 +4,10 @@
 
 package org.datagear.persistence.support;
 
-import java.sql.SQLException;
-
 import org.datagear.persistence.support.ExpressionResolver.Expression;
 
 /**
- * SQL {@linkplain Expression}执行错误。
+ * SQL表达式出错异常。
  * 
  * @author datagear@163.com
  *
@@ -18,14 +16,13 @@ public class SqlExpressionErrorException extends ExpressionErrorException
 {
 	private static final long serialVersionUID = 1L;
 
-	public SqlExpressionErrorException(Expression expression, SQLException cause)
+	public SqlExpressionErrorException(Expression expression)
 	{
-		super(expression, cause);
+		super(expression);
 	}
 
-	@Override
-	public SQLException getCause()
+	public SqlExpressionErrorException(Expression expression, Throwable cause)
 	{
-		return (SQLException) super.getCause();
+		super(expression, cause);
 	}
 }

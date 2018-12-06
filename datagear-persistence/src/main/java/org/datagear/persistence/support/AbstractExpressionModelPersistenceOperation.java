@@ -7,6 +7,7 @@ package org.datagear.persistence.support;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,6 @@ import org.datagear.model.support.MU;
 import org.datagear.persistence.UnsupportedModelCharacterException;
 import org.datagear.persistence.support.ExpressionResolver.Expression;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.expression.ExpressionException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
@@ -252,7 +252,10 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 		}
 		catch (SQLException e)
 		{
-			throw new SqlExpressionErrorException(expression, e);
+			if (e instanceof SQLNonTransientException)
+				throw new SqlExpressionSyntaxErrorException(expression, e);
+			else
+				throw new SqlExpressionErrorException(expression, e);
 		}
 		finally
 		{
@@ -273,15 +276,25 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 			ExpressionEvaluationContext expressionEvaluationContext, List<Object> expressionValues)
 			throws VariableExpressionErrorException
 	{
+		org.springframework.expression.Expression spelExpression = null;
+
 		try
 		{
-			Object value = this.spelExpressionParser.parseExpression(expression.getContent())
-					.getValue(expressionEvaluationContext.getVariableExpressionBean());
+			spelExpression = this.spelExpressionParser.parseExpression(expression.getContent());
+		}
+		catch (Exception e)
+		{
+			throw new VariableExpressionSyntaxErrorException(expression, e);
+		}
+
+		try
+		{
+			Object value = spelExpression.getValue(expressionEvaluationContext.getVariableExpressionBean());
 
 			expressionValues.add(value);
 			expressionEvaluationContext.putCachedValue(expression, value);
 		}
-		catch (ExpressionException e)
+		catch (Exception e)
 		{
 			throw new VariableExpressionErrorException(expression, e);
 		}

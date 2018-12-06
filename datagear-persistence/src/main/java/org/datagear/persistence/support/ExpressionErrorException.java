@@ -27,7 +27,7 @@ public class ExpressionErrorException extends PersistenceException
 
 	public ExpressionErrorException(Expression expression, Throwable cause)
 	{
-		super("Evaluate expression [" + expression.getContent() + "] error", cause);
+		super("Expression [" + expression.getContent() + "] error", cause);
 		this.expression = expression;
 	}
 

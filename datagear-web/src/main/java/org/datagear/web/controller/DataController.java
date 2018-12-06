@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.SQLNonTransientException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -40,8 +39,8 @@ import org.datagear.persistence.columnconverter.LOBConversionContext;
 import org.datagear.persistence.columnconverter.LOBConversionContext.LOBConversionSetting;
 import org.datagear.persistence.support.ExpressionEvaluationContext;
 import org.datagear.persistence.support.SelectOptions;
-import org.datagear.persistence.support.SqlExpressionErrorException;
-import org.datagear.persistence.support.VariableExpressionErrorException;
+import org.datagear.persistence.support.SqlExpressionSyntaxErrorException;
+import org.datagear.persistence.support.VariableExpressionSyntaxErrorException;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.convert.ConverterException;
@@ -58,7 +57,6 @@ import org.datagear.web.vo.PropertyPathDisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
-import org.springframework.expression.ParseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -1660,11 +1658,11 @@ public class DataController extends AbstractSchemaModelController
 				return true;
 
 			// 变量表达式语法错误
-			if (e instanceof VariableExpressionErrorException && e.getCause() instanceof ParseException)
+			if (e instanceof VariableExpressionSyntaxErrorException)
 				return true;
 
 			// SQL语法错误
-			if (e instanceof SqlExpressionErrorException && e.getCause() instanceof SQLNonTransientException)
+			if (e instanceof SqlExpressionSyntaxErrorException)
 				return true;
 
 			return false;
