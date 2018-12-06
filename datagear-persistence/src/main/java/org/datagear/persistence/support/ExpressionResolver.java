@@ -12,7 +12,10 @@ import java.util.List;
 /**
  * 表达式解析器。
  * <p>
- * 它解析字符串中类似“${content}”、“${name:content}”格式的表达式。
+ * 它解析字符串中类似"${content}"、"${name:content}"格式的表达式。
+ * </p>
+ * <p>
+ * 默认地，它使用{@code '\'}作为转义字符，字符串中的"\${"、"\:"、"\}"将作为普通字符。
  * </p>
  * 
  * @author datagear@163.com
@@ -195,8 +198,7 @@ public class ExpressionResolver
 			Expression expression = expressions.get(i);
 			Object value = values.get(i);
 
-			for (; gapStart < expression.getStart(); gapStart++)
-				result.append(cs[gapStart]);
+			copyForUnescape(cs, gapStart, expression.getStart(), result);
 
 			if (value == null)
 				result.append(nullValue);
@@ -208,10 +210,81 @@ public class ExpressionResolver
 			gapStart = expression.getEnd();
 		}
 
-		for (; gapStart < cs.length; gapStart++)
-			result.append(cs[gapStart]);
+		copyForUnescape(cs, gapStart, cs.length, result);
 
 		return result.toString();
+	}
+
+	/**
+	 * 将字符串进行表达式语法反转义。
+	 * <p>
+	 * 注意：它仅会反转义匹配表达式起始标识符、分隔标识符、结束标识符的的子串。
+	 * </p>
+	 * 
+	 * @param source
+	 * @return
+	 */
+	public String unescape(String source)
+	{
+		if (source == null || source.isEmpty())
+			return source;
+
+		StringBuilder sb = new StringBuilder();
+		char[] cs = source.toCharArray();
+
+		copyForUnescape(cs, 0, cs.length, sb);
+
+		return sb.toString();
+	}
+
+	/**
+	 * 将对象进行表达式语法反转义。
+	 * <p>
+	 * 如果{@code obj}不是字符串，将直接返回它。
+	 * </p>
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	public Object unescape(Object obj)
+	{
+		if (obj instanceof String)
+			return unescape((String) obj);
+		else
+			return obj;
+	}
+
+	/**
+	 * 将源字符数组中的某些字符拷贝到目标字符串缓冲，并进行表达式语法反转义。
+	 * <p>
+	 * 注意：为了减少输入时的转义麻烦，它仅会反转义匹配表达式起始标识符、分隔标识符、结束标识符的的字符串。
+	 * </p>
+	 * 
+	 * @param source
+	 * @param start
+	 * @param end
+	 * @param sb
+	 */
+	protected void copyForUnescape(char[] source, int start, int end, StringBuilder sb)
+	{
+		for (int i = start; i < end; i++)
+		{
+			char c = source[i];
+
+			if (c == this.escaper)
+			{
+				if (match(source, i + 1, this._startIdentifierChars, 0))
+					;
+				else if (match(source, i + 1, this._separatorChars, 0))
+					;
+				else if (match(source, i + 1, this._endIdentifierChars, 0))
+					;
+				else
+					sb.append(c);
+			}
+			else
+				sb.append(c);
+		}
 	}
 
 	/**
@@ -228,75 +301,81 @@ public class ExpressionResolver
 	{
 		for (int i = startIndex; i < source.length; i++)
 		{
-			char c = source[i];
+			char pci = (i < 1 ? 0 : source[i - 1]);
 
-			if (c == escaper)
+			// 是起始标识符并且前一个字符不是转义字符
+			if (match(source, i, this._startIdentifierChars, 0) && pci != this.escaper)
 			{
-				// 下一个字符为待转义字符，跳过
-				i += 1;
-			}
-			else if (c == this._startIdentifierChars[0])
-			{
-				boolean isStartIdentifier = match(source, i + 1, this._startIdentifierChars, 1);
+				StringBuilder first = new StringBuilder();
+				StringBuilder second = null;
 
-				if (isStartIdentifier)
+				int j = i + this._startIdentifierChars.length;
+				for (; j < source.length; j++)
 				{
-					StringBuilder first = new StringBuilder();
-					StringBuilder second = null;
+					char cj = source[j];
 
-					int j = i + this._startIdentifierChars.length;
-					for (; j < source.length; j++)
+					if (cj == this.escaper)
 					{
-						char cj = source[j];
+						if (match(source, j + 1, this._separatorChars, 0))
+						{
+							if (second != null)
+								second.append(this._separatorChars);
+							else
+								first.append(this._separatorChars);
 
-						if (cj == escaper)
+							j += this._separatorChars.length;
+						}
+						else if (match(source, j + 1, this._endIdentifierChars, 0))
 						{
-							if (j < source.length - 1)
-							{
-								if (second != null)
-									second.append(source[j + 1]);
-								else
-									first.append(source[j + 1]);
-							}
+							if (second != null)
+								second.append(this._endIdentifierChars);
+							else
+								first.append(this._endIdentifierChars);
 
-							j += 1;
-						}
-						else if (cj == this._separatorChars[0] && second == null
-								&& match(source, j + 1, this._separatorChars, 1))
-						{
-							j += this._separatorChars.length - 1;
-							second = new StringBuilder();
-						}
-						else if (cj == this._endIdentifierChars[0] && match(source, j + 1, this._endIdentifierChars, 1))
-						{
-							break;
+							j += this._endIdentifierChars.length;
 						}
 						else
 						{
 							if (second != null)
-								second.append(cj);
+								second.append(this._separatorChars);
 							else
-								first.append(cj);
+								first.append(this._separatorChars);
 						}
 					}
-
-					if (j == source.length || first.length() == 0 || (second != null && second.length() == 0))
-						continue;
+					else if (match(source, j, this._separatorChars, 0) && second == null)
+					{
+						j += this._separatorChars.length - 1;
+						second = new StringBuilder();
+					}
+					else if (match(source, j, this._endIdentifierChars, 0))
+					{
+						break;
+					}
 					else
 					{
-						String name = null, content = null;
-
-						if (second == null)
-							content = first.toString().trim();
+						if (second != null)
+							second.append(cj);
 						else
-						{
-							name = first.toString().trim();
-							content = second.toString().trim();
-						}
-
-						return new Expression(this.getStartIdentifier(), this.endIdentifier,
-								new String(source, i, j + 1 - i), i, j + 1, name, content);
+							first.append(cj);
 					}
+				}
+
+				if (j == source.length || first.length() == 0 || (second != null && second.length() == 0))
+					continue;
+				else
+				{
+					String name = null, content = null;
+
+					if (second == null)
+						content = first.toString().trim();
+					else
+					{
+						name = first.toString().trim();
+						content = second.toString().trim();
+					}
+
+					return new Expression(this.getStartIdentifier(), this.endIdentifier,
+							new String(source, i, j + 1 - i), i, j + 1, name, content);
 				}
 			}
 			else
@@ -304,6 +383,7 @@ public class ExpressionResolver
 		}
 
 		return null;
+
 	}
 
 	/**

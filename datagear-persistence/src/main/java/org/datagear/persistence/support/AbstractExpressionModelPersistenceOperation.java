@@ -138,6 +138,12 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 			Class<?> propertyType = property.getModel().getType();
 			propValue = this.conversionService.convert(evaluatedPropValue, propertyType);
 		}
+		else
+		{
+			// 处理可能的转义表达式
+			propValue = this.variableExpressionResolver.unescape(propValue);
+			propValue = this.sqlExpressionResolver.unescape(propValue);
+		}
 
 		return propValue;
 	}
