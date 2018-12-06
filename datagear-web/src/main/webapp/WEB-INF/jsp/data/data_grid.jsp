@@ -27,6 +27,14 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 	<fmt:message key='query' />
 	<fmt:message key='titleSeparator' />
 	<%=WebUtils.escapeHtml(ModelUtils.displayName(model, WebUtils.getLocale(request)))%>
+	<%
+	String diplayDesc = ModelUtils.displayDesc(model, WebUtils.getLocale(request));
+	if(diplayDesc != null && !diplayDesc.isEmpty()){
+	%>
+	<fmt:message key='bracketLeft' />
+	<%=WebUtils.escapeHtml(diplayDesc)%>
+	<fmt:message key='bracketRight' />
+	<%}%>
 	<fmt:message key='bracketLeft' />
 	<%=WebUtils.escapeHtml(schema.getTitle())%>
 	<fmt:message key='bracketRight' />

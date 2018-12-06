@@ -9,6 +9,7 @@ import java.util.Locale;
 import org.datagear.model.Label;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
+import org.datagear.model.features.DescLabel;
 import org.datagear.model.features.NameLabel;
 import org.datagear.model.support.IllegalPropertyPathException;
 import org.datagear.model.support.MU;
@@ -323,5 +324,49 @@ public class ModelUtils
 			return columnNameFeature.getValue();
 
 		return property.getName();
+	}
+
+	/**
+	 * 获取{@linkplain Model}的展示描述。
+	 * 
+	 * @param model
+	 * @param locale
+	 * @return
+	 */
+	public static String displayDesc(Model model, Locale locale)
+	{
+		DescLabel descLabel = model.getFeature(DescLabel.class);
+
+		if (descLabel != null)
+		{
+			Label label = descLabel.getValue();
+
+			if (label != null)
+				return label.getValue(locale);
+		}
+
+		return "";
+	}
+
+	/**
+	 * 获取{@linkplain Property}的展示描述。
+	 * 
+	 * @param model
+	 * @param locale
+	 * @return
+	 */
+	public static String displayDesc(Property property, Locale locale)
+	{
+		DescLabel descLabel = property.getFeature(DescLabel.class);
+
+		if (descLabel != null)
+		{
+			Label label = descLabel.getValue();
+
+			if (label != null)
+				return label.getValue(locale);
+		}
+
+		return "";
 	}
 }
