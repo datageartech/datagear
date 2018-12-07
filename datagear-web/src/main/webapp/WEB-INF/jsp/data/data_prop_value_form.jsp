@@ -43,7 +43,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 </title>
 </head>
 <body>
-<div id="${pageId}" class="page-data-form page-data-form-propvalue">
+<div id="${pageId}" class="page-form page-form-propvalue">
 	<div class="head">
 	</div>
 	<div class="content">

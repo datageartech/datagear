@@ -19,7 +19,7 @@
 <%if(!ajaxRequest){%>
 <div style="height:99%;">
 <%}%>
-<div id="${pageId}" class="page-data-grid page-data-grid-reset-password-request-history">
+<div id="${pageId}" class="page-grid page-grid-reset-password-request-history">
 	<div class="head">
 		<div class="search">
 			<%@ include file="include/page_obj_searchform.html.jsp" %>
@@ -32,7 +32,9 @@
 		</table>
 	</div>
 	<div class="foot">
-		<div id="${pageId}-pagination"></div>
+		<div class="pagination-wrapper">
+			<div id="${pageId}-pagination" class="pagination"></div>
+		</div>
 	</div>
 </div>
 <%if(!ajaxRequest){%>

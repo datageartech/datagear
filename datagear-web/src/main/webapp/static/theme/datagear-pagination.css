@@ -5,8 +5,6 @@
 @CHARSET "UTF-8";
 
 .pagination{
-	text-align: right;
-	padding: 0.1em 0.1em;
 }
 .pagination .label{
 	display: inline-block;

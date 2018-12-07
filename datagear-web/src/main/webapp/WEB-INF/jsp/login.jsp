@@ -47,7 +47,7 @@ if(loginUser == null)
 			<a class="link" href="<c:url value="/" />"><fmt:message key='backToMainPage' /></a>
 		</div>
 	</div>
-	<div class="page-data-form page-data-form-login">
+	<div class="page-form page-form-login">
 		<form id="${pageId}-form" action="<c:url value="/login/doLogin" />" method="POST">
 			<div class="form-head"></div>
 			<div class="form-content">
@@ -92,7 +92,7 @@ if(loginUser == null)
 	//元素设置了“checked='checked'”后icon显示有问题，这里先隐藏
 	$("input[type=checkbox]", pageObj.element()).checkboxradio({icon:false});
 	
-	var dialog=pageObj.element(".page-data-form").dialog({
+	var dialog=pageObj.element(".page-form").dialog({
 		appendTo: pageObj.element(),
 		title: "<fmt:message key='login.login' />",
 		position: {my : "center top", at : "center top+75"},

@@ -16,7 +16,7 @@
 <title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='schemaUrlBuilder.schemaUrlBuilder' /></title>
 </head>
 <body>
-<div id="${pageId}" class="page-data-form page-data-form-schemaUrlBuilder">
+<div id="${pageId}" class="page-form page-form-schemaUrlBuilder">
 	<form id="${pageId}-form" action="<%=request.getContextPath()%>/schemaUrlBuilder/saveScriptCode" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">

@@ -722,59 +722,59 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 
 /*驱动信息管理表单页*/
-.page-data-form-driverEntity{
+.page-form-driverEntity{
 }
-.page-data-form-driverEntity .driver-files{
+.page-form-driverEntity .driver-files{
 	display: inline-block;
 	height: 8em;
 	overflow: auto;
 	padding: 3px 2px;
 }
-.page-data-form-driverEntity .driver-files .driver-file{
+.page-form-driverEntity .driver-files .driver-file{
 	margin-bottom: 5px;
 	padding: 2px 2px;
 	white-space: nowrap;
 	overflow: hidden;
 }
-.page-data-form-driverEntity .driver-files .driver-file .driver-file-icon{
+.page-form-driverEntity .driver-files .driver-file .driver-file-icon{
 	cursor: pointer;
 	margin-right: 0.2em;
 }
-.page-data-form-driverEntity .driver-files .driver-file .driver-file-info{
+.page-form-driverEntity .driver-files .driver-file .driver-file-info{
 	white-space: nowrap;
 	overflow: hidden;
 }
-.page-data-form-driverEntity .driver-upload-parent{
+.page-form-driverEntity .driver-upload-parent{
 	display: inline-block;
 	vertical-align: top;
 	margin-left: 0.2em;
 }
 /*驱动程序导入表单页*/
-.page-data-form-driverEntityImport{
+.page-form-driverEntityImport{
 }
-.page-data-form-driverEntityImport .driver-entity-infos{
+.page-form-driverEntityImport .driver-entity-infos{
 	display: inline-block;
 	height: 15em;
 	overflow: auto;
 	padding: 3px 2px;
 }
-.page-data-form-driverEntityImport .driver-entity-infos .driver-entity-item{
+.page-form-driverEntityImport .driver-entity-infos .driver-entity-item{
 	margin-bottom: 5px;
 	padding: 2px 2px;
 	white-space: nowrap;
 	overflow: hidden;
 }
-.page-data-form-driverEntityImport .driver-entity-infos .driver-entity-item .ui-icon-close{
+.page-form-driverEntityImport .driver-entity-infos .driver-entity-item .ui-icon-close{
 	cursor: pointer;
 	margin-right: 0.2em;
 }
-.page-data-form-driverEntityImport .driver-entity-infos .driver-entity-item .driver-entity-info{
+.page-form-driverEntityImport .driver-entity-infos .driver-entity-item .driver-entity-info{
 	white-space: nowrap;
 	overflow: hidden;
 }
 
 /*表单页*/
-.page-data-form{
+.page-form{
 }
 
 /*查询表单*/
@@ -890,7 +890,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
 
 /*表格页*/
-.page-data-grid{
+.page-grid{
 	position: relative;
 	width: 100%;
 	height: 100%;
@@ -898,111 +898,155 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-data-grid .head{
+.page-grid .head{
 	height: 2.5em;
 	padding: .25em 0;
 }
-.page-data-grid .head .search{
+.page-grid .head .search{
 	display: inline-block;
 	width: 41%;
 }
-.page-data-grid .head .operation{
+.page-grid .head .operation{
 	display: inline-block;
 	float: right;
 	width: 57%;
 	text-align: right;
 }
-.page-data-grid .content{
+.page-grid .content{
 	position: absolute;
 	width: 100%;
 	top: 3em;
-	bottom: 2em;
+	bottom: 3em;
 }
-.page-data-grid .content.content-hidden-foot{
+.page-grid.page-grid-hidden-foot .content{
 	bottom: 0em;
 }
-.page-data-grid .foot{
+.page-grid .foot{
 	position: absolute;
 	bottom: 0;
 	left: 0;
 	width: 100%;
-	height: 2em;
+	height: 3em;
 	display: inline-block;
 	padding: 0 0;
 }
-.page-data-grid .foot.hidden-foot{
+.page-grid.page-grid-hidden-foot .foot{
 	height: 0;
 }
+.page-grid .foot .pagination-wrapper{
+	display: inline-block;
+	float: right;
+	width: 90%;
+	height: 100%;
+	position: relative;
+}
+.page-grid .foot .pagination-wrapper .pagination{
+	display: inline-block;
+	position: absolute;
+	bottom: 0;
+	right: 0.1em;
+}
+.page-grid .foot.foot-edit-grid .edit-grid{
+	display: inline-block;
+	width: 50%;
+	height: 100%;
+	position: relative;
+}
+.page-grid .foot.foot-edit-grid .edit-grid .edit-grid-switch-wrapper{
+	display: inline-block;
+	position: absolute;
+	font-size: small;
+	bottom: 0;
+	left: 0.1em;
+}
+.page-grid .foot.foot-edit-grid .edit-grid .edit-grid-operation{
+	display: inline-block;
+	position: absolute;
+	right: -3.5em;
+	bottom: 0;
+}
+.page-grid .foot.foot-edit-grid .edit-grid .edit-grid-operation .ui-button{
+	margin-left: 0.2em;
+	margin-right: 0.2em;
+}
+.page-grid .foot.foot-edit-grid .edit-grid .edit-grid-operation .ui-button.button-save{
+	padding-left: 2.5em;
+	padding-right: 2.5em;
+	margin-left: 1em;
+}
+.page-grid .foot.foot-edit-grid .pagination-wrapper{
+	width: 49%;
+}
 
-.page-data-form-buildSchemaUrl .url-preview{
+.page-form-buildSchemaUrl .url-preview{
 	margin-top: 1em;
 	text-align: center;
 	height: 2em;
 	font-weight: bold;
 }
 
-.page-data-form-schemaUrlBuilder .form-item-value-scriptCode{
+.page-form-schemaUrlBuilder .form-item-value-scriptCode{
 	display: block;
 }
-.page-data-form-schemaUrlBuilder .preview-script-code-button.ui-button{
+.page-form-schemaUrlBuilder .preview-script-code-button.ui-button{
 	padding-left: 2em;
 	padding-right: 2em;
 }
-.page-data-form-schemaUrlBuilder form .form-content .form-item .form-item-value textarea.script-code-textarea{
+.page-form-schemaUrlBuilder form .form-content .form-item .form-item-value textarea.script-code-textarea{
 	height: 22em;
 }
-.page-data-form-schemaUrlBuilder .script-code-note{
+.page-form-schemaUrlBuilder .script-code-note{
 	display: inline-block;
 	width: 35%;
 	height: 22em;
 	overflow: auto;
 }
-.page-data-form-schemaUrlBuilder .script-code-note span{
+.page-form-schemaUrlBuilder .script-code-note span{
 	white-space: nowrap;
 }
 
-.page-data-form-reset-password{
+.page-form-reset-password{
 	position: absolute;
 	width: auto;
 	left: 9%;
 	right: 9%;
 }
-.page-data-form-reset-password .head{
+.page-form-reset-password .head{
 	margin-top: 1em;
 	font-size: larger;
 	font-weight: bold;
 	text-align: center;
 }
-.page-data-form-reset-password .content .steps{
+.page-form-reset-password .content .steps{
 	margin-top: 2em;
 	margin-bottom: 1em;
 }
-.page-data-form-reset-password .content .steps .step{
+.page-form-reset-password .content .steps .step{
 	display: inline-block;
 	font-size: larger;
 	width: 18%;
     margin-right: 2%;
     padding: 0.5em 2%;
 }
-.page-data-form-reset-password .content .form-content{
+.page-form-reset-password .content .form-content{
 	height: 10em;
 	padding: 2em 3em;
 }
-.page-data-form-reset-password .content .form-foot .ui-button{
+.page-form-reset-password .content .form-foot .ui-button{
 	width: 14em;
 }
-.page-data-form-reset-password .content .form-content .step-finish-content{
+.page-form-reset-password .content .form-content .step-finish-content{
 	font-size: large;
 }
-.page-data-form-reset-password .content .form-content .step-finish-content a{
+.page-form-reset-password .content .form-content .step-finish-content a{
 	margin: 0 0.3em;
 	font-weight: bold;
 }
-.page-data-form-reset-password .content .form-content .skip-check-user-admin-warn{
+.page-form-reset-password .content .form-content .skip-check-user-admin-warn{
 	margin-top: 0.2em;
 	padding: 0.3em 0.3em;
 }
-.page-data-form-reset-password .content .form-content .skip-check-user-admin-warn .ui-icon-info{
+.page-form-reset-password .content .form-content .skip-check-user-admin-warn .ui-icon-info{
 	margin-right: 0.3em;
 }
 

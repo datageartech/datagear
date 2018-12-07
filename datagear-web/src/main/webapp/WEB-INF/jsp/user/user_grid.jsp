@@ -26,7 +26,7 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 <%if(!ajaxRequest){%>
 <div style="height:99%;">
 <%}%>
-<div id="${pageId}" class="page-data-grid page-data-grid-user">
+<div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-user">
 	<div class="head">
 		<div class="search">
 			<%@ include file="../include/page_obj_searchform.html.jsp" %>
@@ -48,7 +48,9 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 		</table>
 	</div>
 	<div class="foot">
-		<div id="${pageId}-pagination"></div>
+		<div class="pagination-wrapper">
+			<div id="${pageId}-pagination" class="pagination"></div>
+		</div>
 	</div>
 </div>
 <%if(!ajaxRequest){%>

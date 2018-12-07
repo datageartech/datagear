@@ -47,7 +47,7 @@ String loginUrl = request.getContextPath() + "/login";
 			<a class="link" href="<c:url value="/" />"><fmt:message key='backToMainPage' /></a>
 		</div>
 	</div>
-	<div class="page-data-form page-data-form-reset-password">
+	<div class="page-form page-form-reset-password">
 		<div class="head">
 			<fmt:message key='resetPassword.resetPassword' />
 		</div>

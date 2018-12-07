@@ -43,7 +43,7 @@ else
 <%if(!ajaxRequest){%>
 <div style="height:99%;">
 <%}%>
-<div id="${pageId}" class="page-data-grid page-data-grid-spv">
+<div id="${pageId}" class="page-grid page-grid-spv">
 	<div class="head">
 		<div class="search">
 			<%@ include file="include/data_page_obj_searchform_html.jsp" %>
@@ -60,7 +60,9 @@ else
 		</table>
 	</div>
 	<div class="foot">
-		<div id="${pageId}-pagination"></div>
+		<div class="pagination-wrapper">
+			<div id="${pageId}-pagination" class="pagination"></div>
+		</div>
 	</div>
 </div>
 <%if(!ajaxRequest){%>

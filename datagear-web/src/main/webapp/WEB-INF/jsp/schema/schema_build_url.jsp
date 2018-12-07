@@ -19,7 +19,7 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 <title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='schema.schemaBuildUrl' /></title>
 </head>
 <body>
-<div id="${pageId}" class="page-data-form page-data-form-buildSchemaUrl">
+<div id="${pageId}" class="page-form page-form-buildSchemaUrl">
 	<div id="dbUrlBuilderScriptCode" style="display: none;">
 		$.schemaUrlBuilder.add(
 		<%=request.getAttribute("scriptCode")%>

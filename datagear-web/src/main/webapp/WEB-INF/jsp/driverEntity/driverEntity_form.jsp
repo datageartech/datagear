@@ -25,7 +25,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 <title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='<%=titleMessageKey%>' /></title>
 </head>
 <body>
-<div id="${pageId}" class="page-data-form page-data-form-driverEntity">
+<div id="${pageId}" class="page-form page-form-driverEntity">
 	<form id="${pageId}-form" action="<%=request.getContextPath()%>/driverEntity/<%=formAction%>" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">

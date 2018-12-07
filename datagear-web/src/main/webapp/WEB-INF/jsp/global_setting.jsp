@@ -17,7 +17,7 @@
 <title><%@ include file="include/html_title_app_name.jsp" %><fmt:message key='globalSetting.smtpSetting' /></title>
 </head>
 <body>
-<div id="${pageId}" class="page-data-form page-data-form-globalSetting">
+<div id="${pageId}" class="page-form page-form-globalSetting">
 	<form id="${pageId}-form" action="<%=request.getContextPath()%>/globalSetting/save" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">

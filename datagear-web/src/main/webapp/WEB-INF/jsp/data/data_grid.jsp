@@ -44,7 +44,7 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 <%if(!ajaxRequest){%>
 <div style="height:99%;">
 <%}%>
-<div id="${pageId}" class="page-data-grid page-data-grid-query">
+<div id="${pageId}" class="page-grid page-grid-query">
 	<div class="head">
 		<div class="search">
 			<%@ include file="include/data_page_obj_searchform_html.jsp" %>
@@ -64,8 +64,13 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 		<table id="${pageId}-table" width="100%" class="hover stripe">
 		</table>
 	</div>
-	<div class="foot">
-		<div id="${pageId}-pagination"></div>
+	<div class="foot foot-edit-grid">
+		<%if(!readonly){%>
+		<%@ include file="include/data_page_obj_edit_grid_html.jsp" %>
+		<%}%>
+		<div class="pagination-wrapper">
+			<div id="${pageId}-pagination" class="pagination"></div>
+		</div>
 	</div>
 </div>
 <%if(!ajaxRequest){%>
@@ -75,6 +80,9 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 <%@ include file="include/data_page_obj_searchform_js.jsp" %>
 <%@ include file="../include/page_obj_pagination.jsp" %>
 <%@ include file="include/data_page_obj_grid.jsp" %>
+<%if(!readonly){%>
+<%@ include file="include/data_page_obj_edit_grid_js.jsp" %>
+<%}%>
 <script type="text/javascript">
 (function(pageObj)
 {

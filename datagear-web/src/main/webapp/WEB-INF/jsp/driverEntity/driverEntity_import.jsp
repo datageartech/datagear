@@ -17,7 +17,7 @@
 <title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='driverEntity.importDriverEntity' /></title>
 </head>
 <body>
-<div id="${pageId}" class="page-data-form page-data-form-driverEntityImport">
+<div id="${pageId}" class="page-form page-form-driverEntityImport">
 	<form id="${pageId}-form" action="<%=request.getContextPath()%>/driverEntity/saveImport" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">

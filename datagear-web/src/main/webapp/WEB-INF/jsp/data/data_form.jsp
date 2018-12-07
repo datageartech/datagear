@@ -39,7 +39,7 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 </title>
 </head>
 <body>
-<div id="${pageId}" class="page-data-form">
+<div id="${pageId}" class="page-form">
 	<div class="head">
 	</div>
 	<div class="content">

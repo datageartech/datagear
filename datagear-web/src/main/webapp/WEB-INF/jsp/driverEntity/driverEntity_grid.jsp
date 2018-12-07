@@ -26,7 +26,7 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEnti
 <%if(!ajaxRequest){%>
 <div style="height:99%;">
 <%}%>
-<div id="${pageId}" class="page-data-grid page-data-grid-driverEntity">
+<div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-driverEntity">
 	<div class="head">
 		<div class="search">
 			<%@ include file="../include/page_obj_searchform.html.jsp" %>
@@ -50,7 +50,9 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEnti
 		</table>
 	</div>
 	<div class="foot">
-		<div id="${pageId}-pagination"></div>
+		<div class="pagination-wrapper">
+			<div id="${pageId}-pagination" class="pagination"></div>
+		</div>
 	</div>
 </div>
 <%if(!ajaxRequest){%>

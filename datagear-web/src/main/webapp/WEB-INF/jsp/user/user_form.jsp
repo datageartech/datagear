@@ -27,7 +27,7 @@ boolean isAdd = "saveAdd".equals(formAction);
 <title><%@ include file="../include/html_title_app_name.jsp" %><fmt:message key='<%=titleMessageKey%>' /></title>
 </head>
 <body>
-<div id="${pageId}" class="page-data-form page-data-form-user">
+<div id="${pageId}" class="page-form page-form-user">
 	<form id="${pageId}-form" action="<%=request.getContextPath()%>/user/<%=formAction%>" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
