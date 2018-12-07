@@ -13,8 +13,8 @@
 		<input id="${pageId}-editGridSwitch" type="checkbox" value="1" />
 	</div>
 	<div class="edit-grid-operation">
-		<button id="${pageId}-editGridButtonCancel" type="button" class="button-cancel" style="display: none;">恢复</button>
-		<button id="${pageId}-editGridButtonCancelAll" type="button" class="button-cancel-all" style="display: none;">全部恢复</button>
+		<button id="${pageId}-editGridButtonCancel" type="button" class="button-cancel highlight" style="display: none;">恢复</button>
+		<button id="${pageId}-editGridButtonCancelAll" type="button" class="button-cancel-all highlight" style="display: none;">全部恢复</button>
 		<button id="${pageId}-editGridButtonSave" type="button" class="button-save recommended" style="display: none;">保存</button>
 	</div>
 </div>

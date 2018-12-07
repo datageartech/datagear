@@ -41,6 +41,17 @@ form .form-content .form-item .form-item-value textarea.error{
 	color: #ffffff;
 }
 
+/*高亮按钮*/
+.ui-button.highlight{
+	background-color: #489a0c; border: 1px solid #5cc510;
+}
+.ui-button.highlight:hover, .ui-button.highlight:focus{
+	background-color: #56b80e;
+}
+.ui-button.highlight:active{
+	background-color: #59c908;
+}
+
 /*对话框*/
 /*可保持ui-state-active状态组件样式，默认图标是灰色，这了改成白色*/
 .stated-active.ui-state-active .ui-icon, .stated-active.ui-state-active:focus .ui-icon, .stated-active.ui-state-active:hover .ui-icon{

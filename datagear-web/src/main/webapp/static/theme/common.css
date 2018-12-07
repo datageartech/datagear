@@ -164,6 +164,17 @@ form .form-foot .ui-button{
 	color: #ffffff;
 }
 
+/*高亮按钮*/
+.ui-button.highlight{
+	background-color: #dddddd;
+}
+.ui-button.highlight:hover, .ui-button.highlight:focus{
+	background-color: #e7e7e7;
+}
+.ui-button.highlight:active{
+	background-color: #007fff;
+}
+
 /*对话框*/
 .ui-dialog .dialog-titlebar-pin{
 	position: absolute;
@@ -964,6 +975,7 @@ table.dataTable tbody tr.selected .checkbox .ui-icon{
 	position: absolute;
 	right: -3.5em;
 	bottom: 0;
+	z-index: 1;
 }
 .page-grid .foot.foot-edit-grid .edit-grid .edit-grid-operation .ui-button{
 	margin-left: 0.2em;

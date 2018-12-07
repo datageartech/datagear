@@ -43,13 +43,19 @@ var ${pageId} =
 	 * 获取页面内的指定Jquery元素。
 	 *
 	 * @param selector 可选，选择器，默认返回当前页面元素
+	 * @param parent 可选，父元素
 	 */
-	element : function(selector)
+	element : function(selector, parent)
 	{
 		if(!selector)
 			return $("#${pageId}");
 		else
-			return $(selector, $("#${pageId}"));
+		{
+			if(parent)
+				return $(selector, parent);
+			else
+				return $(selector, $("#${pageId}"));
+		}
 	},
 	
 	/**
