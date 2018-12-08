@@ -240,9 +240,12 @@
 	
 	pageObj.createNextPageNode = function(pagingData)
 	{
+		var showCount = (pagingData.page > 0 ? pagingData.page-1 : 0) * pagingData.pageSize
+							+ (pagingData.items ? pagingData.items.length : 0);
+		
 		var nextPageNode =
 		{
-			"text" : "<span class='more-table'><fmt:message key='main.moreTable' /></span>",
+			"text" : "<span class='more-table'><fmt:message key='main.moreTable'><fmt:param>"+showCount+"</fmt:param><fmt:param>"+pagingData.total+"</fmt:param></fmt:message></span>",
 			"children" : false,
 			"li_attr" : { "class" : "next-page-node" },
 			"nextPageInfo" :
