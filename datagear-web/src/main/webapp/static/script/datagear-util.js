@@ -741,7 +741,7 @@
 		 */
 		setGridPageHeightOption : function(options)
 		{
-			options.height = $(window).height() * 0.6;
+			options.height = $(window).height() * 0.75;
 		},
 		
 		/**

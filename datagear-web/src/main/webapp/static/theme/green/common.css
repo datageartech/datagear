@@ -43,7 +43,8 @@ form .form-content .form-item .form-item-value textarea.error{
 
 /*高亮按钮*/
 .ui-button.highlight{
-	background-color: #489a0c; border: 1px solid #5cc510;
+	background-color: #489a0c;
+	border: 1px solid #70ec13;
 }
 .ui-button.highlight:hover, .ui-button.highlight:focus{
 	background-color: #56b80e;

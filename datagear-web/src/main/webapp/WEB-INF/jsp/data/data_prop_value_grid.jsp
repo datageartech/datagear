@@ -46,7 +46,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 <%if(!ajaxRequest){%>
 <div style="height:99%;">
 <%}%>
-<div id="${pageId}" class="page-grid <%if(clientOperation){%>page-grid-hidden-foot<%}%> page-grid-empv">
+<div id="${pageId}" class="page-grid page-grid-empv">
 	<div class="head">
 		<div class="search">
 			<%if(!clientOperation){%>
@@ -72,7 +72,10 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		<table id="${pageId}-table" style="width:100%;" class="hover stripe">
 		</table>
 	</div>
-	<div class="foot">
+	<div class="foot foot-edit-grid">
+		<%if(!readonly){%>
+		<%@ include file="include/data_page_obj_edit_grid_html.jsp" %>
+		<%}%>
 		<div class="pagination-wrapper">
 			<div id="${pageId}-pagination" class="pagination"></div>
 		</div>
@@ -87,6 +90,9 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 <%@ include file="../include/page_obj_pagination.jsp" %>
 <%}%>
 <%@ include file="include/data_page_obj_grid.jsp" %>
+<%if(!readonly){%>
+<%@ include file="include/data_page_obj_edit_grid_js.jsp" %>
+<%}%>
 <script type="text/javascript">
 (function(pageObj)
 {
