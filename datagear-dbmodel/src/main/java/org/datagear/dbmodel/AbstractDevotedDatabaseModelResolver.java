@@ -589,6 +589,8 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			EntireTableInfo entireTableInfo, List<ImportedKeyInfo> importedKeyInfos)
 			throws DatabaseModelResolverException
 	{
+		resolveModelTableEntityPropertyFeatureNameLabel(cn, globalModelManager, localModelManager, modelBuilder,
+				propertyBuilder, entireTableInfo, importedKeyInfos);
 		resolveModelTableEntityPropertyFeatureDescLabel(cn, globalModelManager, localModelManager, modelBuilder,
 				propertyBuilder, entireTableInfo, importedKeyInfos);
 		resolveModelTableEntityPropertyFeatureToken(cn, globalModelManager, localModelManager, modelBuilder,
@@ -731,6 +733,27 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	}
 
 	/**
+	 * 解析表内实体{@linkplain Property}的{@linkplain NameLabel}特性。
+	 * 
+	 * @param cn
+	 * @param globalModelManager
+	 * @param localModelManager
+	 * @param modelBuilder
+	 * @param propertyBuilder
+	 * @param entireTableInfo
+	 * @param importedKeyInfos
+	 * @throws DatabaseModelResolverException
+	 */
+	protected void resolveModelTableEntityPropertyFeatureNameLabel(Connection cn, ModelManager globalModelManager,
+			ModelManager localModelManager, ModelBuilder modelBuilder, PropertyBuilder propertyBuilder,
+			EntireTableInfo entireTableInfo, List<ImportedKeyInfo> importedKeyInfos)
+			throws DatabaseModelResolverException
+	{
+		String ptableName = importedKeyInfos.get(0).getPkTableName();
+		addNameLabelFeature(propertyBuilder, new Label(ptableName));
+	}
+
+	/**
 	 * 解析表内实体{@linkplain Property}的{@linkplain DescLabel}特性。
 	 * 
 	 * @param cn
@@ -758,7 +781,8 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 				descLabelValue = label.getValue();
 		}
 
-		addDescLabelFeature(propertyBuilder, new Label(descLabelValue));
+		if (descLabelValue != null && !descLabelValue.isEmpty())
+			addDescLabelFeature(propertyBuilder, new Label(descLabelValue));
 	}
 
 	/**
@@ -983,6 +1007,8 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			EntireTableInfo entireTableInfo, EntireTableInfo propertyEntireTableInfo,
 			List<ExportedKeyInfo> exportedKeyInfos) throws DatabaseModelResolverException
 	{
+		resolvePropertyTablePropertyFeatureNameLabel(cn, globalModelManager, localModelManager, modelBuilder,
+				propertyBuilder, entireTableInfo, propertyEntireTableInfo, exportedKeyInfos);
 		resolvePropertyTablePropertyFeatureDescLabel(cn, globalModelManager, localModelManager, modelBuilder,
 				propertyBuilder, entireTableInfo, propertyEntireTableInfo, exportedKeyInfos);
 		resolvePropertyTablePropertyFeatureToken(cn, globalModelManager, localModelManager, modelBuilder,
@@ -1135,6 +1161,29 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	}
 
 	/**
+	 * 解析属性表{@linkplain Property}的{@linkplain NameLabel}特性。
+	 * 
+	 * @param cn
+	 * @param globalModelManager
+	 * @param localModelManager
+	 * @param modelBuilder
+	 * @param propertyBuilder
+	 * @param entireTableInfo
+	 * @param propertyEntireTableInfo
+	 * @param exportedKeyInfos
+	 * @throws DatabaseModelResolverException
+	 * 
+	 */
+	protected void resolvePropertyTablePropertyFeatureNameLabel(Connection cn, ModelManager globalModelManager,
+			ModelManager localModelManager, ModelBuilder modelBuilder, PropertyBuilder propertyBuilder,
+			EntireTableInfo entireTableInfo, EntireTableInfo propertyEntireTableInfo,
+			List<ExportedKeyInfo> exportedKeyInfos) throws DatabaseModelResolverException
+	{
+		TableInfo propertyTableInfo = propertyEntireTableInfo.getTableInfo();
+		addNameLabelFeature(propertyBuilder, new Label(propertyTableInfo.getName()));
+	}
+
+	/**
 	 * 解析属性表{@linkplain Property}的{@linkplain DescLabel}特性。
 	 * 
 	 * @param cn
@@ -1154,7 +1203,10 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			List<ExportedKeyInfo> exportedKeyInfos) throws DatabaseModelResolverException
 	{
 		TableInfo propertyTableInfo = propertyEntireTableInfo.getTableInfo();
-		addDescLabelFeature(propertyBuilder, new Label(propertyTableInfo.getComment()));
+		String comment = propertyTableInfo.getComment();
+
+		if (comment != null && !comment.isEmpty())
+			addDescLabelFeature(propertyBuilder, new Label(comment));
 	}
 
 	/**
@@ -1419,6 +1471,9 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			EntireTableInfo propertyEntireTableInfo, List<ImportedKeyInfo> modelImportedKeyInfos,
 			List<ImportedKeyInfo> propertyImportedKeyInfos) throws DatabaseModelResolverException
 	{
+		resolveJoinTableEntityPropertyFeatureNameLabel(cn, globalModelManager, localModelManager, modelBuilder,
+				propertyBuilder, entireTableInfo, joinEntireTableInfo, propertyEntireTableInfo, modelImportedKeyInfos,
+				propertyImportedKeyInfos);
 		resolveJoinTableEntityPropertyFeatureDescLabel(cn, globalModelManager, localModelManager, modelBuilder,
 				propertyBuilder, entireTableInfo, joinEntireTableInfo, propertyEntireTableInfo, modelImportedKeyInfos,
 				propertyImportedKeyInfos);
@@ -1534,6 +1589,31 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	}
 
 	/**
+	 * 解析join表实体{@linkplain Property}的{@linkplain NameLabel}特性。
+	 * 
+	 * @param cn
+	 * @param globalModelManager
+	 * @param localModelManager
+	 * @param modelBuilder
+	 * @param propertyBuilder
+	 * @param entireTableInfo
+	 * @param joinEntireTableInfo
+	 * @param propertyEntireTableInfo
+	 * @param modelImportedKeyInfos
+	 * @param propertyImportedKeyInfos
+	 * @throws DatabaseModelResolverException
+	 * 
+	 */
+	protected void resolveJoinTableEntityPropertyFeatureNameLabel(Connection cn, ModelManager globalModelManager,
+			ModelManager localModelManager, ModelBuilder modelBuilder, PropertyBuilder propertyBuilder,
+			EntireTableInfo entireTableInfo, EntireTableInfo joinEntireTableInfo,
+			EntireTableInfo propertyEntireTableInfo, List<ImportedKeyInfo> modelImportedKeyInfos,
+			List<ImportedKeyInfo> propertyImportedKeyInfos) throws DatabaseModelResolverException
+	{
+		addNameLabelFeature(propertyBuilder, new Label(propertyEntireTableInfo.getTableInfo().getName()));
+	}
+
+	/**
 	 * 解析join表实体{@linkplain Property}的{@linkplain DescLabel}特性。
 	 * 
 	 * @param cn
@@ -1555,7 +1635,10 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			EntireTableInfo propertyEntireTableInfo, List<ImportedKeyInfo> modelImportedKeyInfos,
 			List<ImportedKeyInfo> propertyImportedKeyInfos) throws DatabaseModelResolverException
 	{
-		addDescLabelFeature(propertyBuilder, new Label(propertyEntireTableInfo.getTableInfo().getComment()));
+		String comment = propertyEntireTableInfo.getTableInfo().getComment();
+
+		if (comment != null && !comment.isEmpty())
+			addDescLabelFeature(propertyBuilder, new Label(comment));
 	}
 
 	/**
@@ -1937,8 +2020,10 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			EntireTableInfo entireTableInfo, ColumnInfo columnInfo, int columnIndex)
 			throws DatabaseModelResolverException
 	{
-		Label label = new Label(columnInfo.getComment());
-		addDescLabelFeature(propertyBuilder, label);
+		String comment = columnInfo.getComment();
+
+		if (comment != null && !comment.isEmpty())
+			addDescLabelFeature(propertyBuilder, new Label(comment));
 	}
 
 	/**
@@ -2064,8 +2149,10 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			ModelManager localModelManager, ModelBuilder modelBuilder, EntireTableInfo entireTableInfo)
 			throws DatabaseModelResolverException
 	{
-		TableInfo tableInfo = entireTableInfo.getTableInfo();
-		addDescLabelFeature(modelBuilder, new Label(tableInfo.getComment()));
+		String comment = entireTableInfo.getTableInfo().getComment();
+
+		if (comment != null && !comment.isEmpty())
+			addDescLabelFeature(modelBuilder, new Label(comment));
 	}
 
 	/**
@@ -2667,6 +2754,18 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		}
 
 		return isPrimitive;
+	}
+
+	/**
+	 * 添加{@linkplain NameLabel}特性。
+	 * 
+	 * @param abstractFeaturedBuilder
+	 * @param label
+	 */
+	protected void addNameLabelFeature(AbstractFeaturedBuilder abstractFeaturedBuilder, Label label)
+	{
+		NameLabel nameLabel = new NameLabel(label);
+		abstractFeaturedBuilder.addFeature(NameLabel.class, nameLabel);
 	}
 
 	/**
