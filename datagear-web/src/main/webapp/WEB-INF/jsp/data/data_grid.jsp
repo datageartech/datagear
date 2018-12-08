@@ -154,6 +154,7 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 		pageObj.initConditionPanel();
 		pageObj.initPagination();
 		pageObj.initModelDataTableAjax(pageObj.url("queryData"), model);
+		pageObj.initEditGrid();
 	});
 })
 (${pageId});

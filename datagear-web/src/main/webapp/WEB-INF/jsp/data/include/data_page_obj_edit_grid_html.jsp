@@ -9,12 +9,12 @@
 --%>
 <div class="edit-grid">
 	<div class="edit-grid-switch-wrapper">
-		<label for="${pageId}-editGridSwitch">编辑表格</label>
+		<label for="${pageId}-editGridSwitch"><fmt:message key='editGrid' /></label>
 		<input id="${pageId}-editGridSwitch" type="checkbox" value="1" />
 	</div>
 	<div class="edit-grid-operation">
-		<button id="${pageId}-editGridButtonCancel" type="button" class="button-cancel highlight" style="display: none;">恢复</button>
-		<button id="${pageId}-editGridButtonCancelAll" type="button" class="button-cancel-all highlight" style="display: none;">全部恢复</button>
-		<button id="${pageId}-editGridButtonSave" type="button" class="button-save recommended" style="display: none;">保存</button>
+		<button type="button" class="button-cancel highlight" style="display: none;"><fmt:message key='restore' /></button>
+		<button type="button" class="button-cancel-all highlight" style="display: none;"><fmt:message key='restoreAll' /></button>
+		<button type="button" class="button-save recommended" style="display: none;"><fmt:message key='save' /></button>
 	</div>
 </div>
