@@ -1147,7 +1147,7 @@
 							<li class="theme-item" theme="green"><a href="javascript:void(0);"><fmt:message key='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
 						</ul>
 					</li>
-					<li class="about"><a href="javascript:void(0);"><fmt:message key='help' /></a>
+					<li><a href="javascript:void(0);"><fmt:message key='help' /></a>
 						<ul>
 							<li class="about"><a href="javascript:void(0);"><fmt:message key='main.about' /></a></li>
 							<li class="documentation"><a href="javascript:void(0);"><fmt:message key='main.documentation' /></a></li>
