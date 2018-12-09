@@ -344,14 +344,25 @@ table.dataTable tbody tr .checkbox .ui-icon{
 }
 table.dataTable tbody tr.selected .checkbox .ui-icon{
 }
-table.dataTable tbody tr td .edit-cell-input{
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-}
 table.dataTable tbody th, table.dataTable tbody td{
 	padding: 0 0.5em;
 	height: 2.5em;
+}
+table.dataTable tbody tr td .edit-cell-input{
+}
+table.dataTable tbody tr td.cell-modified{
+	position: relative;
+}
+table.dataTable tbody tr td.cell-modified .cell-midified-tip{
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 16px;
+	height: 16px;
+}
+table.dataTable tbody tr td.cell-modified .cell-midified-tip.ui-state-error{
+    border-width: 0px;
+    background: none;
 }
 
 /*提示框*/
