@@ -132,14 +132,30 @@ data_page_obj_edit_grid_html.jsp
 			pageObj.markAsUnmodifiedCell($cell);
 		
 		var $input = $("<input type='text' class='edit-cell-input ui-widget ui-widget-content' />")
-			.attr("value", text).css("width", $cell.width()-5).appendTo($cell);
+			.css("width", $cell.width()-5).appendTo($cell);
 		
-		$input.on("blur", function(event)
+		$input
+		.blur(function(event)
 		{
 			pageObj.storeEditCell($cell, $(this).val());
+		})
+		.keyup(function(event)
+		{
+			var $this = $(this);
+			
+			//保存
+			if(event.keyCode == $.ui.keyCode.ENTER)
+			{
+				pageObj.storeEditCell($cell, $this.val());
+			}
+			//取消
+			else if(event.keyCode == $.ui.keyCode.ESCAPE)
+			{
+				pageObj.cancelEditCell($cell);
+			}
 		});
 		
-		$input.focus();
+		$input.val(text).focus();
 	};
 	
 	pageObj.storeEditCell = function($cell, value)
