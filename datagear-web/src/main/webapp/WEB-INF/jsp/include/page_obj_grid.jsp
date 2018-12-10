@@ -192,6 +192,7 @@ page_js_obj.jsp
 			"searching" : false,
 			"select" : { style : 'os' },
 			"order": [[1, "asc"]],
+			"fixedColumns": { leftColumns: 1 },
 		    "language":
 		    {
 				"emptyTable": "<fmt:message key='dataTables.noData' />",
