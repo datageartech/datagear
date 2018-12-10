@@ -353,7 +353,10 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		pageObj.initPagination();
 		pageObj.initModelDataTableAjax(pageObj.url("queryMultiplePropValueData"), propertyModel, pageObj.mappedByWith);
 		<%}%>
+		
+		<%if(!readonly){%>
 		pageObj.initEditGrid();
+		<%}%>
 	});
 })
 (${pageId});
