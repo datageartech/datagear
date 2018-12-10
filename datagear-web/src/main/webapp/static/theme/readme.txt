@@ -7,7 +7,7 @@ jQuery-File-Upload-9.21.0
 jquery.layout-1.4.0
 主题样式已在各主题的common.css中定义
 
-jstree-3.3.4
+jstree-3.3.7
 主题样式已在各主题的common.css中定义
 
 DataTables-1.10.18
