@@ -372,10 +372,19 @@ page_js_obj.jsp
 			
 			pageObj.tableResizeTimer = setTimeout(function()
 			{
-				var height = pageObj.calTableHeight();
-				pageObj.element('.dataTables_scrollBody').css('height', height);
+				var dtScrollBody = pageObj.element('.dataTables_scrollBody');
 				
-				pageObj.table.DataTable().draw();
+				var height = pageObj.calTableHeight();
+				var width = pageObj.element(".dataTable", dtScrollBody).actual("width");
+				
+				dtScrollBody.css('height', height);
+				pageObj.element('.dataTables_scrollHeadInner').css('width', width);
+				pageObj.element('.dataTables_scrollHeadInner > .dataTable').css('width', width);
+				
+				//XXX 不能使用下面的代码让表格自适应宽度，因为在隐藏选项卡中的表格宽度计算会有问题
+				//var height = pageObj.calTableHeight();
+				//pageObj.element('.dataTables_scrollBody').css('height', height);
+				//pageObj.table.DataTable().draw();
 			},
 			250);
 		}
