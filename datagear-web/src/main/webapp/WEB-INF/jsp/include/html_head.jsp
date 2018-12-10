@@ -20,8 +20,7 @@ var contextPath="<%=request.getContextPath()%>";
 <link id="css_jquery_ui_theme" href="<%=request.getContextPath()%>/static/theme/<spring:theme code='theme' />/jquery-ui-1.12.1/jquery-ui.theme.css" type="text/css" rel="stylesheet" />
 <link href="<%=request.getContextPath()%>/static/theme/jquery.layout-1.4.0/jquery.layout.css" type="text/css" rel="stylesheet" />
 <link href="<%=request.getContextPath()%>/static/theme/jstree-3.3.4/style.css" type="text/css" rel="stylesheet" />
-<link href="<%=request.getContextPath()%>/static/theme/DataTables-1.10.15/dataTables.jqueryui.css" type="text/css" rel="stylesheet" />
-<link href="<%=request.getContextPath()%>/static/theme/DataTables-1.10.15/select.jqueryui.css" type="text/css" rel="stylesheet" />
+<link href="<%=request.getContextPath()%>/static/theme/DataTables-1.10.18/datatables.min.css" type="text/css" rel="stylesheet" />
 <link href="<%=request.getContextPath()%>/static/theme/jQuery-File-Upload-9.21.0/jquery.fileupload.css" type="text/css" rel="stylesheet" />
 <link href="<%=request.getContextPath()%>/static/theme/datagear-pagination.css" type="text/css" rel="stylesheet" />
 <link href="<%=request.getContextPath()%>/static/theme/common.css" type="text/css" rel="stylesheet" />
@@ -31,9 +30,7 @@ var contextPath="<%=request.getContextPath()%>";
 <script src="<c:url value="/static/script/jquery-ui-1.12.1/jquery-ui.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/jquery.layout-1.4.0/jquery.layout.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/jstree-3.3.4/jstree.js" />" type="text/javascript"></script>
-<script src="<c:url value="/static/script/DataTables-1.10.15/jquery.dataTables.js" />" type="text/javascript"></script>
-<script src="<c:url value="/static/script/DataTables-1.10.15/dataTables.jqueryui.js" />" type="text/javascript"></script>
-<script src="<c:url value="/static/script/DataTables-1.10.15/dataTables.select.js" />" type="text/javascript"></script>
+<script src="<c:url value="/static/script/DataTables-1.10.18/datatables.min.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/jquery.form-3.51.0/jquery.form.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/jQuery-File-Upload-9.21.0/jquery.iframe-transport.js" />" type="text/javascript"></script>
 <script src="<c:url value="/static/script/jQuery-File-Upload-9.21.0/jquery.fileupload.js" />" type="text/javascript"></script>

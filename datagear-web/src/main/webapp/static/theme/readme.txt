@@ -10,7 +10,7 @@ jquery.layout-1.4.0
 jstree-3.3.4
 主题样式已在各主题的common.css中定义
 
-DataTables-1.10.15
+DataTables-1.10.18
 主题样式已在各主题的common.css中定义
 
 jquery-ui-1.12.1
