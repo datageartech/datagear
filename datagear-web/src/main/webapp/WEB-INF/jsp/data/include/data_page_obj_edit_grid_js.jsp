@@ -59,7 +59,7 @@ data_page_obj_edit_grid_html.jsp
 		}
 		
 		pageObj.isEnableEditGrid = true;
-
+		
 		pageObj.element(".head .search").addClass("ui-state-disabled");
 		pageObj.element(".foot .pagination").addClass("ui-state-disabled");
 		
@@ -236,7 +236,8 @@ data_page_obj_edit_grid_html.jsp
 			}
 		});
 		
-		pageObj.table.DataTable().on("click.dt", function(event, settings)
+		pageObj.table.DataTable()
+		.on("click.dt", function(event, settings)
 		{
 			if(pageObj.isEnableEditGrid)
 			{
@@ -253,6 +254,14 @@ data_page_obj_edit_grid_html.jsp
 			{
 				
 			}
+		})
+		.on("preDraw", function(event, settings)
+		{
+			//禁止表格重绘，比如排序
+			if(pageObj.isEnableEditGrid)
+				return false;
+			else
+				return true;
 		});
 		
 		pageObj.element(".button-cancel-all", pageObj.element(".edit-grid")).click(function()
