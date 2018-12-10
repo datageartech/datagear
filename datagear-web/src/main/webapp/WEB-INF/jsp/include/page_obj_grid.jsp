@@ -18,7 +18,7 @@ page_js_obj.jsp
 	//计算表格高度
 	pageObj.calTableHeight = function()
 	{
-		var height =  pageObj.element("> .content").actual("innerHeight") - 50;
+		var height =  pageObj.element("> .content").actual("height") - 50;
 		
 		return height;
 	};
@@ -26,7 +26,7 @@ page_js_obj.jsp
 	//计算表格宽度
 	pageObj.calTableWidth = function()
 	{
-		var width = pageObj.element("> .content").actual("innerWidth");
+		var width = pageObj.element("> .content").actual("width");
 		
 		return width;
 	};
@@ -360,20 +360,24 @@ page_js_obj.jsp
 	};
 	
 	//表格高度自适应
-	$(window).on('resize', function(e) 
+	$(window).on('resize', function(event) 
 	{
-		clearTimeout(pageObj.tableResizeTimer);
+		//窗口或者父元素（比如所在对话框）调整大小
+		var resize = (event.target == window || pageObj.table.closest(event.target).length > 0);
 		
-		pageObj.tableResizeTimer = setTimeout(function()
+		if(resize)
 		{
-			var width = pageObj.calTableWidth();
-			var height = pageObj.calTableHeight();
+			clearTimeout(pageObj.tableResizeTimer);
 			
-			pageObj.element('.dataTables_scrollHeadInner').css('width', width+"px");
-			pageObj.element('.dataTables_scrollHeadInner > .dataTable').css('width', width+"px");
-			pageObj.element('.dataTables_scrollBody').css('height', height+"px");
-		},
-		250);
+			pageObj.tableResizeTimer = setTimeout(function()
+			{
+				var height = pageObj.calTableHeight();
+				pageObj.element('.dataTables_scrollBody').css('height', height);
+				
+				pageObj.table.DataTable().draw();
+			},
+			250);
+		}
 	});
 })
 (${pageId});
