@@ -4,6 +4,7 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -116,7 +117,7 @@ public class SchemaServiceImpl extends AbstractMybatisEntityService<String, Sche
 				this.schemaCache.putSchema(schema);
 		}
 
-		return schema;
+		return cloneIf(schema);
 	}
 
 	@Override
@@ -137,7 +138,37 @@ public class SchemaServiceImpl extends AbstractMybatisEntityService<String, Sche
 				this.schemaCache.putSchema(schema);
 		}
 
-		return schema;
+		return cloneIf(schema);
+	}
+
+	@Override
+	public List<Schema> query(Query query)
+	{
+		return cloneIf(super.query(query));
+	}
+
+	@Override
+	public List<Schema> query(User user, Query query)
+	{
+		return cloneIf(super.query(user, query));
+	}
+
+	@Override
+	public PagingData<Schema> pagingQuery(PagingQuery pagingQuery)
+	{
+		PagingData<Schema> pagingData = super.pagingQuery(pagingQuery);
+		pagingData.setItems(cloneIf(pagingData.getItems()));
+
+		return pagingData;
+	}
+
+	@Override
+	public PagingData<Schema> pagingQuery(User user, PagingQuery pagingQuery)
+	{
+		PagingData<Schema> pagingData = super.pagingQuery(user, pagingQuery);
+		pagingData.setItems(cloneIf(pagingData.getItems()));
+
+		return pagingData;
 	}
 
 	@Override
@@ -244,6 +275,54 @@ public class SchemaServiceImpl extends AbstractMybatisEntityService<String, Sche
 		{
 			DriverEntity driverEntity = this.driverEntityManager.get(schema.getDriverEntity().getId());
 			schema.setDriverEntity(driverEntity);
+		}
+	}
+
+	/**
+	 * 如果设置了缓存则拷贝{@linkplain Schema}。
+	 * <p>
+	 * {@code get...()}方法返回对象修改属性值后不能影响缓存值，所以要进行拷贝。
+	 * </p>
+	 * 
+	 * @param schema
+	 * @return
+	 */
+	protected Schema cloneIf(Schema schema)
+	{
+		if (schema == null || this.schemaCache == null)
+			return schema;
+		else
+		{
+			try
+			{
+				return schema.clone();
+			}
+			catch (CloneNotSupportedException e)
+			{
+				throw new IllegalStateException(e);
+			}
+		}
+	}
+
+	protected List<Schema> cloneIf(List<Schema> schemas)
+	{
+		if (schemas == null || this.schemaCache == null)
+			return schemas;
+		else
+		{
+			List<Schema> clones = new ArrayList<Schema>(schemas.size());
+
+			try
+			{
+				for (Schema schema : schemas)
+					clones.add(schema.clone());
+
+				return clones;
+			}
+			catch (CloneNotSupportedException e)
+			{
+				throw new IllegalStateException(e);
+			}
 		}
 	}
 

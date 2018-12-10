@@ -15,7 +15,7 @@ import org.datagear.model.support.AbstractStringIdEntity;
  * @author datagear@163.com
  *
  */
-public class Schema extends AbstractStringIdEntity implements CreateUserEntity<String>
+public class Schema extends AbstractStringIdEntity implements CreateUserEntity<String>, Cloneable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -50,7 +50,7 @@ public class Schema extends AbstractStringIdEntity implements CreateUserEntity<S
 
 	public Schema(String id, String title, String url, String user, String password)
 	{
-		super();
+		super(id);
 		this.title = title;
 		this.url = url;
 		this.user = user;
@@ -159,11 +159,35 @@ public class Schema extends AbstractStringIdEntity implements CreateUserEntity<S
 		this.driverEntity = driverEntity;
 	}
 
+	/**
+	 * 清除密码属性值。
+	 * <p>
+	 * 密码是敏感信息，某些情况下需要清除。
+	 * </p>
+	 * 
+	 */
+	public void clearPassword()
+	{
+		this.password = null;
+	}
+
+	@Override
+	public Schema clone() throws CloneNotSupportedException
+	{
+		Schema schema = new Schema(getId(), title, url, user, password);
+		schema.setCreateUser(createUser);
+		schema.setCreateTime(createTime);
+		schema.setShared(shared);
+		schema.setDriverEntity(driverEntity);
+
+		return schema;
+	}
+
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [title=" + title + ", url=" + url + ", user=" + user + ", password="
-				+ password + ", createUser=" + createUser + ", createTime=" + createTime + ", shared=" + shared
-				+ ", driverEntity=" + driverEntity + "]";
+		return getClass().getSimpleName() + " [title=" + title + ", url=" + url + ", user=" + user + ", createUser="
+				+ createUser + ", createTime=" + createTime + ", shared=" + shared + ", driverEntity=" + driverEntity
+				+ "]";
 	}
 }

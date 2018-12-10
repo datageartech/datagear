@@ -172,6 +172,8 @@ public class SchemaController extends AbstractSchemaModelController
 		if (schema == null)
 			throw new RecordNotFoundException();
 
+		schema.clearPassword();
+
 		model.addAttribute("schema", schema);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.viewSchema");
 		model.addAttribute(KEY_READONLY, "true");
@@ -225,6 +227,12 @@ public class SchemaController extends AbstractSchemaModelController
 		query.setOrders(Order.valueOf("title", Order.ASC));
 
 		List<Schema> schemas = getSchemaService().query(user, query);
+
+		if (schemas != null)
+		{
+			for (Schema schema : schemas)
+				schema.clearPassword();
+		}
 
 		return schemas;
 	}
