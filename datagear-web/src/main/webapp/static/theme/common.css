@@ -62,6 +62,7 @@ form .form-content .form-item .form-item-value textarea,
 form .form-content .form-item .form-item-value .input{
 	margin-right: 0.3em;/*文本框与后面按钮间距*/
 	width: 50%;
+	vertical-align: middle;
 }
 form .form-content .form-item .form-item-value input[type=text],
 form .form-content .form-item .form-item-value input[type=password]{
