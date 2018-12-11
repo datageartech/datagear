@@ -211,6 +211,41 @@ page_js_obj.jsp
 						pageObj.table.DataTable().row(tr).deselect();
 					else
 						pageObj.table.DataTable().row(tr).select();
+				})
+				.hover(
+				function(event)
+				{
+					var rowIndex = $(this).parent().index() + 1;
+					pageObj.element(".dataTable").each(function()
+					{
+						$("tr:eq("+rowIndex+")", this).addClass("hover");
+					});
+				},
+				function(event)
+				{
+					var rowIndex = $(this).parent().index() + 1;
+					pageObj.element(".dataTable").each(function()
+					{
+						$("tr:eq("+rowIndex+")", this).removeClass("hover");
+					});
+				});
+				
+				$(row).hover(
+				function(event)
+				{
+					var rowIndex = $(this).index() + 1;
+					pageObj.element(".dataTable").each(function()
+					{
+						$("tr:eq("+rowIndex+")", this).addClass("hover");
+					});
+				},
+				function()
+				{
+					var rowIndex = $(this).index() + 1;
+					pageObj.element(".dataTable").each(function()
+					{
+						$("tr:eq("+rowIndex+")", this).removeClass("hover");
+					});
 				});
 			}
 		},
@@ -380,6 +415,8 @@ page_js_obj.jsp
 				dtScrollBody.css('height', height);
 				pageObj.element('.dataTables_scrollHeadInner').css('width', width);
 				pageObj.element('.dataTables_scrollHeadInner > .dataTable').css('width', width);
+				
+				pageObj.table.DataTable().fixedColumns().relayout();
 				
 				//XXX 不能使用下面的代码让表格自适应宽度，因为在隐藏选项卡中的表格宽度计算会有问题
 				//var height = pageObj.calTableHeight();

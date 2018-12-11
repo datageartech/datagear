@@ -107,9 +107,12 @@ table.dataTable tbody tr {
 table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
 	background-color: #f6f6f6;
 }
+table.dataTable.hover tbody tr.hover,
 table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
 	background-color: #f2f2f2;
 }
+table.dataTable.hover tbody tr.hover.selected,
+
 table.dataTable tbody > tr.selected,
 table.dataTable tbody > tr > .selected,
 
