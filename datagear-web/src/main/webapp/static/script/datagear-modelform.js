@@ -193,7 +193,11 @@
 		
 		_destroy: function()
 		{
-			//TODO
+			$(".form-foot", this.element).remove();
+			$(".form-content", this.element).remove();
+			$(".form-head", this.element).remove();
+			
+			this.element.removeClass("form");
 		},
 		
 		_setOption: function(key, value)
@@ -486,12 +490,12 @@
 				var resetbtn = $("<input type='reset' />").attr("value", _this.options.labels.reset).appendTo($formOperation).button();
 				
 				var validateOptions = _this._getValidateOptions();
-				validateOptions.submitHandler = function(form)
+				validateOptions.submitHandler = function(form, event)
 				{
 					var doSubmit = (_this.options.submit.call(_this.element, submitbtn) != false);
 					
 					if(doSubmit)
-						_this.element.submit();
+						form.submit();
 				};
 				
 				_this.element.validate(validateOptions);
