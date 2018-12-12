@@ -60,44 +60,44 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 <%@ include file="../include/page_obj_searchform_js.jsp" %>
 <%@ include file="../include/page_obj_grid.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	$.initButtons(pageObj.element(".operation"));
+	$.initButtons(po.element(".operation"));
 	
-	pageObj.url = function(action)
+	po.url = function(action)
 	{
 		return contextPath + "/user/" + action;
 	};
 	
 	<%if(!selectonly){%>
-		pageObj.element("input[name=addButton]").click(function()
+		po.element("input[name=addButton]").click(function()
 		{
-			pageObj.open(pageObj.url("add"),
+			po.open(po.url("add"),
 			{
 				pageParam :
 				{
 					afterSave : function()
 					{
-						pageObj.refresh();
+						po.refresh();
 					}
 				}
 			});
 		});
 		
-		pageObj.element("input[name=editButton]").click(function()
+		po.element("input[name=editButton]").click(function()
 		{
-			pageObj.executeOnSelect(function(row)
+			po.executeOnSelect(function(row)
 			{
 				var data = {"id" : row.id};
 				
-				pageObj.open(pageObj.url("edit"),
+				po.open(po.url("edit"),
 				{
 					data : data,
 					pageParam :
 					{
 						afterSave : function()
 						{
-							pageObj.refresh();
+							po.refresh();
 						}
 					}
 				});
@@ -105,13 +105,13 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 		});
 	<%}%>
 
-	pageObj.element("input[name=viewButton]").click(function()
+	po.element("input[name=viewButton]").click(function()
 	{
-		pageObj.executeOnSelect(function(row)
+		po.executeOnSelect(function(row)
 		{
 			var data = {"id" : row.id};
 			
-			pageObj.open(pageObj.url("view"),
+			po.open(po.url("view"),
 			{
 				data : data
 			});
@@ -119,20 +119,20 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 	});
 	
 	<%if(!selectonly){%>
-		pageObj.element("input[name=deleteButton]").click(
+		po.element("input[name=deleteButton]").click(
 		function()
 		{
-			pageObj.executeOnSelects(function(rows)
+			po.executeOnSelects(function(rows)
 			{
-				pageObj.confirm("<fmt:message key='user.confirmDelete' />",
+				po.confirm("<fmt:message key='user.confirmDelete' />",
 				{
 					"confirm" : function()
 					{
 						var data = $.getPropertyParamString(rows, "id");
 						
-						$.post(pageObj.url("delete"), data, function()
+						$.post(po.url("delete"), data, function()
 						{
-							pageObj.refresh();
+							po.refresh();
 						});
 					}
 				});
@@ -140,11 +140,11 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 		});
 	<%}%>
 	
-	pageObj.element("input[name=confirmButton]").click(function()
+	po.element("input[name=confirmButton]").click(function()
 	{
-		pageObj.executeOnSelect(function(row)
+		po.executeOnSelect(function(row)
 		{
-			var pageParam = pageObj.pageParam();
+			var pageParam = po.pageParam();
 			
 			var close = (pageParam && pageParam.submit ? pageParam.submit(row) : undefined);
 			
@@ -153,11 +153,11 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 				close = true;
 			
 			if(close)
-				pageObj.close();
+				po.close();
 		});
 	});
 	
-	pageObj.buildTableColumValueOption = function(title, data, hidden)
+	po.buildTableColumValueOption = function(title, data, hidden)
 	{
 		var option =
 		{
@@ -183,15 +183,15 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 	};
 	
 	var tableColumns = [
-		pageObj.buildTableColumValueOption("<fmt:message key='user.user.id' />", "id", true),
-		pageObj.buildTableColumValueOption("<fmt:message key='user.name' />", "name"),
-		pageObj.buildTableColumValueOption("<fmt:message key='user.realName' />", "realName"),
-		pageObj.buildTableColumValueOption("<fmt:message key='user.email' />", "email"),
-		pageObj.buildTableColumValueOption("<fmt:message key='user.admin' />", "admin"),
-		pageObj.buildTableColumValueOption("<fmt:message key='user.createTime' />", "createTime")
+		po.buildTableColumValueOption("<fmt:message key='user.user.id' />", "id", true),
+		po.buildTableColumValueOption("<fmt:message key='user.name' />", "name"),
+		po.buildTableColumValueOption("<fmt:message key='user.realName' />", "realName"),
+		po.buildTableColumValueOption("<fmt:message key='user.email' />", "email"),
+		po.buildTableColumValueOption("<fmt:message key='user.admin' />", "admin"),
+		po.buildTableColumValueOption("<fmt:message key='user.createTime' />", "createTime")
 	];
-	var tableSettings = pageObj.buildDataTableSettingsAjax(tableColumns, pageObj.url("queryData"));
-	pageObj.initDataTable(tableSettings);
+	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	po.initDataTable(tableSettings);
 })
 (${pageId});
 </script>

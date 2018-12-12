@@ -155,27 +155,26 @@ String loginUrl = request.getContextPath() + "/login";
 	</div>
 </div>
 <%@ include file="include/page_js_obj.jsp" %>
+<%@ include file="include/page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
 	//需要先渲染按钮，不然对话框尺寸不合适，出现滚动条
-	$.initButtons(pageObj.element());
+	$.initButtons(po.element());
 	
-	pageObj.form = pageObj.element("#${pageId}-form");
-	
-	pageObj.element("#viewResetPasswordAdminReqHistoryLink").click(function()
+	po.element("#viewResetPasswordAdminReqHistoryLink").click(function()
 	{
 		var options = {};
 		$.setGridPageHeightOption(options);
-		pageObj.open("<c:url value='/resetPasswordRequestHistory' />", options);
+		po.open("<c:url value='/resetPasswordRequestHistory' />", options);
 	});
 	
-	pageObj.element("#restartResetPassword").click(function()
+	po.element("#restartResetPassword").click(function()
 	{
 		window.location.href="<c:url value='/resetPassword' />";
 	});
 	
-	pageObj.element("#sendCheckCodeButton").click(function()
+	po.element("#sendCheckCodeButton").click(function()
 	{
 		var _this= $(this);
 		
@@ -192,10 +191,10 @@ String loginUrl = request.getContextPath() + "/login";
 						&& (operationMessage.code.indexOf("sendCheckCode.admin.smtpSettingNotSet") > 0
 								|| operationMessage.code.indexOf("sendCheckCode.admin.MessagingException") > 0))
 				{
-					pageObj.checkCodeNotRequired = true;
+					po.checkCodeNotRequired = true;
 				}
 				else
-					pageObj.checkCodeNotRequired = false;
+					po.checkCodeNotRequired = false;
 			},
 			complete : function()
 			{
@@ -206,13 +205,13 @@ String loginUrl = request.getContextPath() + "/login";
 	
 	$.validator.addMethod("checkCodeIfRequired", function(value, element, params)
 	{
-		if(pageObj.checkCodeNotRequired)
+		if(po.checkCodeNotRequired)
 			return true;
 		else
 			return (value.length > 0);
 	},"");
 	
-	pageObj.form.validate(
+	po.form().validate(
 	{
 		<%if(step.isStep(1)){%>
 		rules : { username : "required" },
@@ -221,7 +220,7 @@ String loginUrl = request.getContextPath() + "/login";
 		rules : { checkCode : "checkCodeIfRequired" },
 		messages : { checkCode : "<fmt:message key='validation.required' />" },
 		<%}else if(step.isStep(3)){%>
-		rules : { password : "required", confirmPassword : {"required" : true, "equalTo" : pageObj.element("input[name='password']")} },
+		rules : { password : "required", confirmPassword : {"required" : true, "equalTo" : po.element("input[name='password']")} },
 		messages : { password : "<fmt:message key='validation.required' />", confirmPassword : {"required" : "<fmt:message key='validation.required' />", "equalTo" : "<fmt:message key='resetPassword.validation.confirmPasswordError' />"} },
 		<%}%>
 		errorPlacement : function(error, element)

@@ -96,48 +96,49 @@
 	</form>
 </div>
 <%@ include file="include/page_js_obj.jsp" %>
+<%@ include file="include/page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	$.initButtons(pageObj.element());
+	$.initButtons(po.element());
+
+	po.testSmtpRecevierEmailInput = function(){ return this.element("input[name='testSmtpRecevierEmail']"); };
+	po.smtpSettingConnectionTypeSelect = function(){ return this.element("select[name='smtpSetting.connectionType']"); };
 	
-	pageObj.form = pageObj.element("#${pageId}-form");
-	pageObj.testSmtpUrl = "<%=request.getContextPath()%>/globalSetting/testSmtp";
-	pageObj.testSmtpRecevierEmailInput = pageObj.element("input[name='testSmtpRecevierEmail']");
-	
-	pageObj.smtpSettingConnectionTypeSelect = pageObj.element("select[name='smtpSetting.connectionType']");
-	pageObj.smtpSettingConnectionTypeSelect.val("<c:out value='${globalSetting.smtpSetting.connectionType}' />");
-	pageObj.smtpSettingConnectionTypeSelect.selectmenu(
+	po.testSmtpUrl = "<%=request.getContextPath()%>/globalSetting/testSmtp";
+	po.smtpSettingConnectionTypeSelect().val("<c:out value='${globalSetting.smtpSetting.connectionType}' />");
+	po.smtpSettingConnectionTypeSelect().selectmenu(
 	{
 		"classes" : { "ui-selectmenu-button" : "global-setting-select" }
 	});
 	
-	pageObj.element("#testSmtpButton").click(function()
+	po.element("#testSmtpButton").click(function()
 	{
-		pageObj.element("#testSmtpPanel").toggle();
+		po.element("#testSmtpPanel").toggle();
 	});
 	
-	pageObj.element("#testSmtpSendButton").click(function()
+	po.element("#testSmtpSendButton").click(function()
 	{
 		var _this= $(this);
 		
-		var initAction = pageObj.form.attr("action");
-		pageObj.form.attr("action", pageObj.testSmtpUrl);
+		var form = po.form();
+		var initAction = form.attr("action");
+		form.attr("action", po.testSmtpUrl);
 		
-		pageObj.testSmtpRecevierEmailInput.rules("add",
+		po.testSmtpRecevierEmailInput().rules("add",
 		{
 			"required" : true,
 			"email" : true,
 			messages : {"required" : "<fmt:message key='validation.required' />", "email" : "<fmt:message key='validation.email' />"}
 		});
 		
-		pageObj.form.submit();
+		form.submit();
 		
-		pageObj.form.attr("action", initAction);
-		pageObj.testSmtpRecevierEmailInput.rules("remove");
+		form.attr("action", initAction);
+		po.testSmtpRecevierEmailInput().rules("remove");
 	});
 	
-	pageObj.form.validate(
+	po.form().validate(
 	{
 		rules :
 		{
@@ -155,16 +156,16 @@
 		{
 			var $form = $(form);
 			
-			var isTestSmtp = (pageObj.testSmtpUrl == $form.attr("action"));
+			var isTestSmtp = (po.testSmtpUrl == $form.attr("action"));
 			
 			if(isTestSmtp)
-				pageObj.element("#testSmtpSendButton").button("disable");
+				po.element("#testSmtpSendButton").button("disable");
 			
 			$(form).ajaxSubmit(
 			{
 				success : function(response)
 				{
-					var pageParam = pageObj.pageParam();
+					var pageParam = po.pageParam();
 					
 					var close = false;
 					
@@ -172,12 +173,12 @@
 						close = (pageParam.afterSave() != false);
 					
 					if(close)
-						pageObj.close();
+						po.close();
 				},
 				complete : function()
 				{
 					if(isTestSmtp)
-						pageObj.element("#testSmtpSendButton").button("enable");
+						po.element("#testSmtpSendButton").button("enable");
 				}
 			});
 		},

@@ -56,16 +56,15 @@
 	</div>
 </div>
 <%@ include file="include/page_js_obj.jsp" %>
+<%@ include file="include/page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.form = pageObj.element("#${pageId}-form");
-	
-	if($.isInDialog(pageObj.form))
+	if($.isInDialog(po.form()))
 	{
 		var windowHeight = $(window).height();
 		var maxHeight = windowHeight - windowHeight/4;
-		pageObj.element(".form-content").css("max-height", maxHeight+"px").css("overflow", "auto");
+		po.element(".form-content").css("max-height", maxHeight+"px").css("overflow", "auto");
 	}
 })
 (${pageId});

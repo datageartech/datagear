@@ -100,26 +100,25 @@ boolean isAdd = "saveAdd".equals(formAction);
 	</form>
 </div>
 <%@ include file="../include/page_js_obj.jsp" %>
+<%@ include file="../include/page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.form = pageObj.element("#${pageId}-form");
-	
-	$.initButtons(pageObj.element());
+	$.initButtons(po.element());
 	
 	<%--禁用新建管理员账号功能
-	pageObj.element("input[name='admin']").checkboxradio({icon:false});
-	pageObj.element(".user-admin-radios").controlgroup();
+	po.element("input[name='admin']").checkboxradio({icon:false});
+	po.element(".user-admin-radios").controlgroup();
 	--%>
 	
-	pageObj.url = function(action)
+	po.url = function(action)
 	{
 		return contextPath + "/user/" + action;
 	};
 	
 	<%if(!readonly){%>
 	
-	pageObj.form.validate(
+	po.form().validate(
 	{
 		rules :
 		{
@@ -132,7 +131,7 @@ boolean isAdd = "saveAdd".equals(formAction);
 				<%if(isAdd){%>
 				"required" : true,
 				<%}%>
-				"equalTo" : pageObj.element("input[name='password']")
+				"equalTo" : po.element("input[name='password']")
 			},
 			email : "email"
 		},
@@ -157,7 +156,7 @@ boolean isAdd = "saveAdd".equals(formAction);
 			{
 				success : function()
 				{
-					var pageParam = pageObj.pageParam();
+					var pageParam = po.pageParam();
 					
 					var close = true;
 					
@@ -165,7 +164,7 @@ boolean isAdd = "saveAdd".equals(formAction);
 						close = (pageParam.afterSave() != false);
 					
 					if(close)
-						pageObj.close();
+						po.close();
 				}
 			});
 		},

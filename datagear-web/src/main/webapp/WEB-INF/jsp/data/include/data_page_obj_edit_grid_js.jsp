@@ -25,17 +25,9 @@ WebUtils.setPageId(request, editGridFormPageId);
 <%@ include file="../include/data_page_obj.jsp" %>
 <%@ include file="../include/data_page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.formPanel = pageObj.element();
-	pageObj.formPanel.hide();
-	
-	pageObj.form = pageObj.element("#<%=editGridFormPageId%>-form");
-	
-	pageObj.formEle = function()
-	{
-		return pageObj.element("#<%=editGridFormPageId%>-form");
-	};
+	po.element().hide();
 })
 (<%=editGridFormPageId%>);
 </script>
@@ -43,41 +35,41 @@ WebUtils.setPageId(request, editGridFormPageId);
 WebUtils.setPageId(request, gridPageId);
 %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.isEnableEditGrid = false;
+	po.isEnableEditGrid = false;
 	
 	//编辑表格对应的模型，会在initEditGrid函数中初始化
-	pageObj.editGridModel = undefined;
-	pageObj.editGridFormPage = <%=editGridFormPageId%>;
+	po.editGridModel = undefined;
+	po.editGridFormPage = <%=editGridFormPageId%>;
 	
-	pageObj.editGridSwitch = function()
+	po.editGridSwitch = function()
 	{
-		return pageObj.element("#${pageId}-editGridSwitch");
+		return po.element("#${pageId}-editGridSwitch");
 	};
 	
-	pageObj.editGridOperation = function()
+	po.editGridOperation = function()
 	{
-		return pageObj.element(".edit-grid-operation");
+		return po.element(".edit-grid-operation");
 	};
 	
-	pageObj.editGridOperationButtons = function()
+	po.editGridOperationButtons = function()
 	{
-		return pageObj.element(".edit-grid-operation button");
+		return po.element(".edit-grid-operation button");
 	};
 	
-	pageObj.editedCells = function()
+	po.editedCells = function()
 	{
-		return pageObj.element("tbody td.edit-cell, tbody td.cell-modified", pageObj.table);
+		return po.element("tbody td.edit-cell, tbody td.cell-modified", po.table());
 	};
 	
-	pageObj.enableEditGrid = function()
+	po.enableEditGrid = function()
 	{
-		var $headOperation = pageObj.element(".head .operation");
+		var $headOperation = po.element(".head .operation");
 		
-		if(pageObj.element(".edit-grid-button", $headOperation).length == 0)
+		if(po.element(".edit-grid-button", $headOperation).length == 0)
 		{
-			pageObj.element(".ui-button", $headOperation).addClass("not-edit-grid-button");
+			po.element(".ui-button", $headOperation).addClass("not-edit-grid-button");
 			
 			var $buttonWrapper = $("<div class='edit-grid-button-wrapper' style='display:inline-block;' />").appendTo($headOperation);
 			$("<button name='editGridAddButton' class='edit-grid-button highlight'><fmt:message key='add' /></button>&nbsp;"
@@ -89,42 +81,42 @@ WebUtils.setPageId(request, gridPageId);
 			$buttonWrapper.hide();
 		}
 		
-		pageObj.isEnableEditGrid = true;
+		po.isEnableEditGrid = true;
 		
-		pageObj.element(".head .search").addClass("ui-state-disabled");
-		pageObj.element(".foot .pagination").addClass("ui-state-disabled");
+		po.element(".head .search").addClass("ui-state-disabled");
+		po.element(".foot .pagination").addClass("ui-state-disabled");
 		
-		pageObj.editGridOperationButtons().show("fade");
-		pageObj.element(".ui-button.not-edit-grid-button", $headOperation).hide();
-		pageObj.element(".edit-grid-button-wrapper", $headOperation).show("fade", function()
+		po.editGridOperationButtons().show("fade");
+		po.element(".ui-button.not-edit-grid-button", $headOperation).hide();
+		po.element(".edit-grid-button-wrapper", $headOperation).show("fade", function()
 		{
 			//防止快速点击复选框导致都显示出来
-			if(!pageObj.isEnableEditGrid)
+			if(!po.isEnableEditGrid)
 				$(this).hide();
 		});
 	};
 	
-	pageObj.disableEditGrid = function()
+	po.disableEditGrid = function()
 	{
-		pageObj.isEnableEditGrid = false;
-		pageObj.cancelAllEditCell();
+		po.isEnableEditGrid = false;
+		po.cancelAllEditCell();
 		
-		var $headOperation = pageObj.element(".head .operation");
+		var $headOperation = po.element(".head .operation");
 
-		pageObj.element(".head .search").removeClass("ui-state-disabled");
-		pageObj.element(".foot .pagination").removeClass("ui-state-disabled");
+		po.element(".head .search").removeClass("ui-state-disabled");
+		po.element(".foot .pagination").removeClass("ui-state-disabled");
 		
-		pageObj.editGridOperationButtons().hide("fade");
-		pageObj.element(".edit-grid-button-wrapper", $headOperation).hide();
-		pageObj.element(".ui-button.not-edit-grid-button", $headOperation).show("fade", function()
+		po.editGridOperationButtons().hide("fade");
+		po.element(".edit-grid-button-wrapper", $headOperation).hide();
+		po.element(".ui-button.not-edit-grid-button", $headOperation).show("fade", function()
 		{
 			//防止快速点击复选框导致都显示出来
-			if(pageObj.isEnableEditGrid)
+			if(po.isEnableEditGrid)
 				$(this).hide();
 		});
 	};
 	
-	pageObj.markAsModifiedCell = function($cell)
+	po.markAsModifiedCell = function($cell)
 	{
 		if(!$cell.hasClass("cell-modified"))
 			$cell.addClass("cell-modified");
@@ -132,7 +124,7 @@ WebUtils.setPageId(request, gridPageId);
 		$("<div class='cell-midified-tip ui-state-error'><span class='ui-icon ui-icon-triangle-1-sw' /></div>").appendTo($cell);
 	};
 
-	pageObj.markAsUnmodifiedCell = function($cell)
+	po.markAsUnmodifiedCell = function($cell)
 	{
 		if($cell.hasClass("cell-modified"))
 			$cell.removeClass("cell-modified");
@@ -142,7 +134,7 @@ WebUtils.setPageId(request, gridPageId);
 			$cmt.remove();
 	};
 	
-	pageObj.beginEditCell = function($cell)
+	po.beginEditCell = function($cell)
 	{
 		$cell.addClass("edit-cell ui-state-highlight");
 		
@@ -156,35 +148,35 @@ WebUtils.setPageId(request, gridPageId);
 		}
 		
 		if(text != originalText)
-			pageObj.markAsModifiedCell($cell);
+			po.markAsModifiedCell($cell);
 		else
-			pageObj.markAsUnmodifiedCell($cell);
+			po.markAsUnmodifiedCell($cell);
 		
 		var cellIndex = $cell.index();
-		var settings = pageObj.table.DataTable().settings();
-		var cellProperty = $.getDataTablesColumnProperty(pageObj.editGridModel, settings, cellIndex);
+		var settings = po.table().DataTable().settings();
+		var cellProperty = $.getDataTablesColumnProperty(po.editGridModel, settings, cellIndex);
 		
-		//pageObj.editGridFormPage.form.empty();
-		pageObj.editGridFormPage.formPanel.appendTo($cell);
+		//po.editGridFormPage.form().empty();
+		po.editGridFormPage.element().appendTo($cell);
 		
-		pageObj.editGridFormPage.formEle().modelform(
+		po.editGridFormPage.form().modelform(
 		{
-			model : pageObj.editGridModel,
+			model : po.editGridModel,
 			renderProperty : function(property)
 			{
 				return property == cellProperty;
 			}
 		});
 		
-		pageObj.editGridFormPage.formPanel.show().position({my: "left top", at: "left bottom"});
+		po.editGridFormPage.element().show().position({my: "left top", at: "left bottom"});
 	};
 	
-	pageObj.storeEditCell = function($cell, value)
+	po.storeEditCell = function($cell, value)
 	{
-		pageObj.cancelEditCell($cell, value);
+		po.cancelEditCell($cell, value);
 	};
 	
-	pageObj.cancelEditCell = function($cell, newText)
+	po.cancelEditCell = function($cell, newText)
 	{
 		$cell.removeClass("edit-cell ui-state-highlight");
 		
@@ -194,58 +186,56 @@ WebUtils.setPageId(request, gridPageId);
 		if(text == undefined)
 			text = originalText;
 		
-		$cell.empty().text(text);
-		
 		if(text != originalText)
-			pageObj.markAsModifiedCell($cell);
+			po.markAsModifiedCell($cell);
 		else
-			pageObj.markAsUnmodifiedCell($cell);
+			po.markAsUnmodifiedCell($cell);
 		
-		pageObj.editGridFormPage.formPanel.hide();
-		pageObj.editGridFormPage.formEle().modelform("destroy").empty();
-		pageObj.editGridFormPage.formPanel.appendTo(pageObj.element());
+		po.editGridFormPage.element().hide();
+		po.editGridFormPage.form().modelform("destroy");
+		po.editGridFormPage.element().appendTo(po.element());
 	};
 	
-	pageObj.cancelAllEditCell = function($editedCells)
+	po.cancelAllEditCell = function($editedCells)
 	{
 		if(!$editedCells)
-			$editedCells = pageObj.editedCells();
+			$editedCells = po.editedCells();
 		
 		$editedCells.each(function()
 		{
-			pageObj.cancelEditCell($(this));
+			po.cancelEditCell($(this));
 		});
 	};
 	
-	pageObj.initEditGrid = function(model)
+	po.initEditGrid = function(model)
 	{
-		pageObj.editGridModel = model;
+		po.editGridModel = model;
 		
-		$.initButtons(pageObj.editGridOperation());
+		$.initButtons(po.editGridOperation());
 		
-		pageObj.editGridSwitch().checkboxradio({icon : false}).click(function(event)
+		po.editGridSwitch().checkboxradio({icon : false}).click(function(event)
 		{
 			var $thisCheckbox = $(this);
 			
 			if($(this).is(":checked"))
 			{
-				pageObj.enableEditGrid();
+				po.enableEditGrid();
 			}
 			else
 			{
-				var $editedCells = pageObj.editedCells();
+				var $editedCells = po.editedCells();
 				
 				if($editedCells.length > 1)
 				{
 					event.preventDefault();
 					event.stopPropagation();
 					
-					pageObj.confirm("<fmt:message key='data.confirmCancelAllEditedCell'><fmt:param>"+$editedCells.length+"</fmt:param></fmt:message>",
+					po.confirm("<fmt:message key='data.confirmCancelAllEditedCell'><fmt:param>"+$editedCells.length+"</fmt:param></fmt:message>",
 					{
 						"confirm" : function()
 						{
-							pageObj.cancelAllEditCell($editedCells);
-							pageObj.disableEditGrid();
+							po.cancelAllEditCell($editedCells);
+							po.disableEditGrid();
 							
 							$thisCheckbox.attr("checked", false);
 							$thisCheckbox.checkboxradio("refresh");
@@ -257,16 +247,16 @@ WebUtils.setPageId(request, gridPageId);
 				}
 				else
 				{
-					pageObj.cancelAllEditCell($editedCells);
-					pageObj.disableEditGrid();
+					po.cancelAllEditCell($editedCells);
+					po.disableEditGrid();
 				}
 			}
 		});
 		
-		pageObj.table.DataTable()
+		po.table().DataTable()
 		.on("click.dt", function(event)
 		{
-			if(pageObj.isEnableEditGrid)
+			if(po.isEnableEditGrid)
 			{
 				event.stopPropagation();
 				
@@ -274,7 +264,7 @@ WebUtils.setPageId(request, gridPageId);
 				
 				if(target.is("td"))
 				{
-					pageObj.beginEditCell(target);
+					po.beginEditCell(target);
 				}
 			}
 			else
@@ -285,28 +275,28 @@ WebUtils.setPageId(request, gridPageId);
 		.on("preDraw", function(event, settings)
 		{
 			//禁止表格重绘，比如排序
-			if(pageObj.isEnableEditGrid)
+			if(po.isEnableEditGrid)
 				return false;
 			else
 				return true;
 		});
 		
-		pageObj.element(".button-cancel-all", pageObj.element(".edit-grid")).click(function()
+		po.element(".button-cancel-all", po.element(".edit-grid")).click(function()
 		{
-			var $editedCells = pageObj.editedCells();
+			var $editedCells = po.editedCells();
 			
 			if($editedCells.length > 1)
 			{
-				pageObj.confirm("<fmt:message key='data.confirmCancelAllEditedCell'><fmt:param>"+$editedCells.length+"</fmt:param></fmt:message>",
+				po.confirm("<fmt:message key='data.confirmCancelAllEditedCell'><fmt:param>"+$editedCells.length+"</fmt:param></fmt:message>",
 				{
 					"confirm" : function()
 					{
-						pageObj.cancelAllEditCell($editedCells);
+						po.cancelAllEditCell($editedCells);
 					}
 				});
 			}
 			else
-				pageObj.cancelAllEditCell($editedCells);
+				po.cancelAllEditCell($editedCells);
 		});
 	};
 })

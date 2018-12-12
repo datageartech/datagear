@@ -13,32 +13,32 @@ page_obj_searchform_html.jsp
 
 变量：
 //查询回调函数，不允许为null，格式为：function(searchParam){}
-pageObj.search = undefined;
+po.search = undefined;
 --%>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.searchForm = pageObj.element("#${pageId}-searchForm");
+	po.searchForm = function(){ return this.element("#${pageId}-searchForm"); };
 	
-	pageObj.searchForm.submit(function()
+	po.searchForm().submit(function()
 	{
-		var searchParam = pageObj.getSearchParam();
-		pageObj.search(searchParam);
+		var searchParam = po.getSearchParam();
+		po.search(searchParam);
 		
 		return false;
 	});
 
-	pageObj.getSearchParam = function()
+	po.getSearchParam = function()
 	{
 		var param =
 		{
-			"keyword" : $.trim(pageObj.element("input[name='keyword']", pageObj.searchForm).val())
+			"keyword" : $.trim(po.element("input[name='keyword']", po.searchForm()).val())
 		};
 		
 		return param;
 	};
 	
-	pageObj.element("input:submit", pageObj.searchForm).button();
+	po.element("input:submit", po.searchForm()).button();
 })
 (${pageId});
 </script>

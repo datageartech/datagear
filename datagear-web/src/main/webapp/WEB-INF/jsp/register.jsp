@@ -77,18 +77,17 @@
 	</div>
 </div>
 <%@ include file="include/page_js_obj.jsp" %>
+<%@ include file="include/page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.form = pageObj.element("#${pageId}-form");
-	
 	//需要先渲染按钮，不然对话框尺寸不合适，出现滚动条
-	$.initButtons(pageObj.element());
+	$.initButtons(po.element());
 	//元素设置了“checked='checked'”后icon显示有问题，这里先隐藏
-	$("input[type=checkbox]", pageObj.element()).checkboxradio({icon:false});
+	$("input[type=checkbox]", po.element()).checkboxradio({icon:false});
 	
-	var dialog=pageObj.element(".page-form").dialog({
-		appendTo: pageObj.element(),
+	var dialog=po.element(".page-form").dialog({
+		appendTo: po.element(),
 		title: "<fmt:message key='register.register' />",
 		position: {my : "center top", at : "center top+75"},
 		resizable: false,
@@ -97,13 +96,13 @@
 		beforeClose: function(){ return false; }
 	});
 	
-	pageObj.form.validate(
+	po.form().validate(
 	{
 		rules :
 		{
 			name : "required",
 			password : "required",
-			confirmPassword : { "required" : true, "equalTo" : pageObj.element("input[name='password']") },
+			confirmPassword : { "required" : true, "equalTo" : po.element("input[name='password']") },
 			email : "email"
 		},
 		messages :

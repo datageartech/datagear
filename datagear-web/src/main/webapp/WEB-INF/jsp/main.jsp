@@ -15,14 +15,14 @@
 <title><fmt:message key='app.name' /></title>
 <%@ include file="include/page_js_obj.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
 	<%org.datagear.management.domain.User user = WebUtils.getUser(request, response);%>
-	pageObj.userId = "<%=user.getId()%>";
-	pageObj.isAnonymous = <%=user.isAnonymous()%>;
-	pageObj.isAdmin = <%=user.isAdmin()%>;
+	po.userId = "<%=user.getId()%>";
+	po.isAnonymous = <%=user.isAnonymous()%>;
+	po.isAdmin = <%=user.isAdmin()%>;
 	
-	pageObj.workTabTemplate = "<li style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
+	po.workTabTemplate = "<li style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
 			+"<div class='tab-operation'>"			
 			+"<span class='ui-icon ui-icon-close' title='<fmt:message key='close' />'>close</span>"
 			+"<div class='tab-operation-more' title='<fmt:message key='moreOperation' />'></div>"
@@ -30,14 +30,14 @@
 			+"<div class='category-bar category-bar-"+'#'+"{schemaId}'></div>"
 			+"</li>";
 	
-	pageObj.addWorkTab = function(tabId, label, schema, tableInfo)
+	po.addWorkTab = function(tabId, label, schema, tableInfo)
 	{
 		var schemaId = schema.id;
 		var schemaTitle = schema.title;
 		var tableName = tableInfo.name;
 		
 		
-		var mainTabs = pageObj.element("#mainTabs");
+		var mainTabs = po.element("#mainTabs");
 		var uiTabsNav = mainTabs.find(".ui-tabs-nav");
 		
 	    var prelia = $("> li > a[href='#"+tabId+"']", uiTabsNav);
@@ -62,12 +62,12 @@
 		    		//防止双击导致创建两次而引起界面错乱
 		    		if(li.length == 0)
 		    		{
-		    			li = $(pageObj.workTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, label).replace(/#\{schemaId\}/g, schemaId)).appendTo(uiTabsNav);
+		    			li = $(po.workTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, label).replace(/#\{schemaId\}/g, schemaId)).appendTo(uiTabsNav);
 		    			
 		    			if(!li.attr("id"))
 		    				li.attr("id", $.uid("main-tab-"));
 		    			
-		    			var lititle = (pageObj.isTableView(tableInfo) ? "<fmt:message key='main.tableType.view' />" : "<fmt:message key='main.tableType.table' />") + "<fmt:message key='colon' />" +tableName;
+		    			var lititle = (po.isTableView(tableInfo) ? "<fmt:message key='main.tableType.view' />" : "<fmt:message key='main.tableType.table' />") + "<fmt:message key='colon' />" +tableName;
     					if(tableInfo.comment)
     						lititle += "<fmt:message key='bracketLeft' />" + tableInfo.comment + "<fmt:message key='bracketRight' />";
     					lititle += "<fmt:message key='bracketLeft' />" + schemaTitle + "<fmt:message key='bracketRight' />";
@@ -81,7 +81,7 @@
 		    	    
 		    	    mainTabs.tabs("refresh").tabs( "option", "active",  $("> li", uiTabsNav).length - 1);
 		    	    
-		    	    tabContentDiv.css("top", pageObj.evalTabPanelTop(mainTabs));
+		    	    tabContentDiv.css("top", po.evalTabPanelTop(mainTabs));
 		    	    tabContentDiv.html(data);
 		    	    
 		    	    $(".tab-operation .ui-icon-close", li).click(function()
@@ -93,7 +93,7 @@
 		    	    	li.remove();
 		    	    	
 		    	    	mainTabs.tabs("refresh");
-		    	    	pageObj.refreshTabsNav(mainTabs);
+		    	    	po.refreshTabsNav(mainTabs);
 		    	    	 
 		 				if($("li", uiTabsNav).length == 0)
 		 					uiTabsNav.hide();
@@ -104,7 +104,7 @@
 		    	    	var li = $(this).parent().parent();
 		    	    	var tabId = $("a", li).attr("href");
 		    	    	
-		    	    	pageObj.element("#tabMoreOperationMenuParent").show().css("left", "0px").css("top", "0px")
+		    	    	po.element("#tabMoreOperationMenuParent").show().css("left", "0px").css("top", "0px")
 		    	    		.position({"my" : "left top+1", "at": "right bottom", "of" : $(this), "collision": "flip flip"});
 	
 		    	    	var menuItemDisabled = {};
@@ -116,7 +116,7 @@
 		    	    	menuItemDisabled[".tab-operation-close-right"] = !hasNext;
 		    	    	menuItemDisabled[".tab-operation-close-other"] = !hasPrev && !hasNext;
 		    	    	
-		    	    	var menu = pageObj.element("#tabMoreOperationMenu");
+		    	    	var menu = po.element("#tabMoreOperationMenu");
 		    	    	
 		    	    	for(var selector in menuItemDisabled)
 		    	    	{
@@ -138,9 +138,9 @@
 	    }
 	};
 	
-	pageObj.genTabId = function(schemaId, tableName)
+	po.genTabId = function(schemaId, tableName)
 	{
-		var map = (pageObj.genTabIdMap || (pageObj.genTabIdMap = {}));
+		var map = (po.genTabIdMap || (po.genTabIdMap = {}));
 		
 		//不能直接使用这个key作为元素ID，因为tableName中可能存在与jquery冲突的字符，比如'$'
 		var key = schemaId +"_" + tableName;
@@ -148,8 +148,8 @@
 		
 		if(value == undefined)
 		{
-			var nextNumber = (pageObj.genTabIdNextNumber != undefined 
-					? (pageObj.genTabIdNextNumber = pageObj.genTabIdNextNumber + 1) : (pageObj.genTabIdNextNumber = 0));
+			var nextNumber = (po.genTabIdNextNumber != undefined 
+					? (po.genTabIdNextNumber = po.genTabIdNextNumber + 1) : (po.genTabIdNextNumber = 0));
 			
 			value = "mainTabs-" + nextNumber;
 			map[key] = value;
@@ -158,7 +158,7 @@
 		return value;
 	};
 
-	pageObj.isSchemaNode = function(node)
+	po.isSchemaNode = function(node)
 	{
 		if(!node)
 			return false;
@@ -171,7 +171,7 @@
 		return (original.id != undefined && original.url != undefined);
 	};
 	
-	pageObj.schemaToJstreeNode = function(schema)
+	po.schemaToJstreeNode = function(schema)
 	{
 		schema.text = $.escapeHtml(schema.title);
 		
@@ -181,7 +181,7 @@
 			schema.text += " <span class='ui-icon ui-icon-notice' title='<fmt:message key='main.tempSchema' />'></span>";
 		else
 		{
-			if(schema.createUser && pageObj.userId != schema.createUser.id && schema.createUser.nameLabel)
+			if(schema.createUser && po.userId != schema.createUser.id && schema.createUser.nameLabel)
 				schema.text += " <span class='schema-tree-create-user-label small-text ui-state-disabled' title='<fmt:message key='main.schemaCreateUser' />'>" + $.escapeHtml(schema.createUser.nameLabel) + "</span>";
 		}
 		
@@ -190,37 +190,37 @@
 		return schema;
 	};
 	
-	pageObj.schemaToJstreeNodes = function(schemas)
+	po.schemaToJstreeNodes = function(schemas)
 	{
 		for(var i=0; i<schemas.length; i++)
-			pageObj.schemaToJstreeNode(schemas[i]);
+			po.schemaToJstreeNode(schemas[i]);
 		
 		return schemas;
 	};
 
-	pageObj.isTableNode = function(node)
+	po.isTableNode = function(node)
 	{
 		var original = node.original;
 		
 		return (original.name != undefined && original.type != undefined);
 	};
 	
-	pageObj.isTableView = function(tableInfo)
+	po.isTableView = function(tableInfo)
 	{
 		return (tableInfo.type == "VIEW");
 	};
 	
-	pageObj.tableToJstreeNode = function(table)
+	po.tableToJstreeNode = function(table)
 	{
 		var text = table.name;
 		
 		table.text = $.escapeHtml(text);
 		table.children = false;
 		
-		var licss = (pageObj.isTableView(table) ? "view-node" : "table-node");
+		var licss = (po.isTableView(table) ? "view-node" : "table-node");
 		table.li_attr = { "class" : licss };
 		
-		var atitle = (pageObj.isTableView(table) ? "<fmt:message key='main.tableType.view' />" : "<fmt:message key='main.tableType.table' />")
+		var atitle = (po.isTableView(table) ? "<fmt:message key='main.tableType.view' />" : "<fmt:message key='main.tableType.table' />")
 					+"<fmt:message key='colon' />" + table.name;
 		if(table.comment)
 			atitle += "<fmt:message key='bracketLeft' />" + table.comment + "<fmt:message key='bracketRight' />";
@@ -230,15 +230,15 @@
 		return table;
 	};
 	
-	pageObj.tableToJstreeNodes = function(tables)
+	po.tableToJstreeNodes = function(tables)
 	{
 		for(var i=0; i<tables.length; i++)
-			pageObj.tableToJstreeNode(tables[i]);
+			po.tableToJstreeNode(tables[i]);
 		
 		return tables;
 	};
 	
-	pageObj.createNextPageNode = function(pagingData)
+	po.createNextPageNode = function(pagingData)
 	{
 		var showCount = (pagingData.page > 0 ? pagingData.page-1 : 0) * pagingData.pageSize
 							+ (pagingData.items ? pagingData.items.length : 0);
@@ -258,21 +258,21 @@
 		return nextPageNode;
 	};
 	
-	pageObj.isNextPageNode = function(node)
+	po.isNextPageNode = function(node)
 	{
 		var original = node.original;
 		
 		return (original.nextPageInfo != undefined);
 	};
 
-	pageObj.toJstreeNodePagingData = function(pagingData)
+	po.toJstreeNodePagingData = function(pagingData)
 	{
-		pageObj.tableToJstreeNodes(pagingData.items);
+		po.tableToJstreeNodes(pagingData.items);
 		
 		//添加下一页节点
 		if(pagingData.page < pagingData.pages)
 		{
-			var nextPageNode = pageObj.createNextPageNode(pagingData);
+			var nextPageNode = po.createNextPageNode(pagingData);
 			
 			pagingData.items.push(nextPageNode);
 		}
@@ -281,40 +281,40 @@
 		pagingData.d = pagingData.items;
 	};
 
-	pageObj.isSearchTable = function()
+	po.isSearchTable = function()
 	{
-		var $icon = pageObj.element("#schemaSearchSwitch > .ui-icon");
+		var $icon = po.element("#schemaSearchSwitch > .ui-icon");
 		
 		return $icon.hasClass("ui-icon-document");
 	};
 	
-	pageObj.getSearchSchemaFormData = function()
+	po.getSearchSchemaFormData = function()
 	{
-		var form = pageObj.element("#schemaSearchForm");
+		var form = po.element("#schemaSearchForm");
 		var keyword = $("input[name='keyword']", form).val();
 		var pageSize = $("input[name='pageSize']", form).val();
 		return {"keyword" : keyword, "pageSize" : pageSize};
 	};
 	
-	pageObj.getSearchSchemaFormDataForSchema = function()
+	po.getSearchSchemaFormDataForSchema = function()
 	{
-		if(pageObj.isSearchTable())
+		if(po.isSearchTable())
 			return {};
 		else
-			return pageObj.getSearchSchemaFormData();
+			return po.getSearchSchemaFormData();
 	};
 	
-	pageObj.getSearchSchemaFormDataForTable = function()
+	po.getSearchSchemaFormDataForTable = function()
 	{
-		var data = pageObj.getSearchSchemaFormData();
+		var data = po.getSearchSchemaFormData();
 		
-		if(!pageObj.isSearchTable())
+		if(!po.isSearchTable())
 			data["keyword"] = "";
 		
 		return data;
 	};
 	
-	pageObj.evalTabPanelTop = function($tab)
+	po.evalTabPanelTop = function($tab)
 	{
 		var $nav = $("> ul", $tab);
 		
@@ -326,15 +326,15 @@
 		return top;
 	};
 	
-	pageObj.refreshSchemaTree = function()
+	po.refreshSchemaTree = function()
 	{
-		var $tree = pageObj.element(".schema-panel-content");
+		var $tree = po.element(".schema-panel-content");
 		$tree.jstree(true).refresh(true);
 	};
 	
 	$(document).ready(function()
 	{
-		pageObj.element(".main-page-content").layout(
+		po.element(".main-page-content").layout(
 		{
 			west :
 			{
@@ -342,7 +342,7 @@
 			}
 		});
 		
-		pageObj.element("#systemSetMenu").menu(
+		po.element("#systemSetMenu").menu(
 		{
 			position : {my:"right top", at: "right bottom-1"},
 			select : function(event, ui)
@@ -354,35 +354,35 @@
 				
 				if($item.hasClass("system-set-global-setting"))
 				{
-					pageObj.open(contextPath+"/globalSetting");
+					po.open(contextPath+"/globalSetting");
 				}
 				else if($item.hasClass("system-set-schema-url-builder"))
 				{
-					pageObj.open(contextPath+"/schemaUrlBuilder/editScriptCode");
+					po.open(contextPath+"/schemaUrlBuilder/editScriptCode");
 				}
 				else if($item.hasClass("system-set-driverEntity-add"))
 				{
-					pageObj.open(contextPath+"/driverEntity/add");
+					po.open(contextPath+"/driverEntity/add");
 				}
 				else if($item.hasClass("system-set-driverEntity-manage"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					pageObj.open(contextPath+"/driverEntity/query", options);
+					po.open(contextPath+"/driverEntity/query", options);
 				}
 				else  if($item.hasClass("system-set-user-add"))
 				{
-					pageObj.open(contextPath+"/user/add");
+					po.open(contextPath+"/user/add");
 				}
 				else if($item.hasClass("system-set-user-manage"))
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					pageObj.open(contextPath+"/user/query", options);
+					po.open(contextPath+"/user/query", options);
 				}
 				else if($item.hasClass("system-set-personal-set"))
 				{
-					pageObj.open(contextPath+"/user/personalSet");
+					po.open(contextPath+"/user/personalSet");
 				}
 				else if($item.hasClass("theme-item"))
 				{
@@ -396,7 +396,7 @@
 				}
 				else if($item.hasClass("about"))
 				{
-					pageObj.open(contextPath+"/about", { width : "50%" });
+					po.open(contextPath+"/about", { width : "50%" });
 				}
 				else if($item.hasClass("documentation"))
 				{
@@ -404,12 +404,12 @@
 				}
 				else if($item.hasClass("changelog"))
 				{
-					pageObj.open(contextPath+"/changelog", { width : "50%" });
+					po.open(contextPath+"/changelog", { width : "50%" });
 				}
 			}
 		});
 
-		pageObj.element("#schemaSearchSwitch").click(function()
+		po.element("#schemaSearchSwitch").click(function()
 		{
 			var $icon = $(".ui-icon", this);
 			
@@ -419,7 +419,7 @@
 				$icon.removeClass("ui-icon-folder-collapsed").addClass("ui-icon-document").attr("title", "<fmt:message key='main.searchTable' />");
 		});
 		
-		pageObj.element("#schemaOperationMenu").menu(
+		po.element("#schemaOperationMenu").menu(
 		{
 			position : {my:"right top", at: "right bottom-1"},
 			focus : function(event, ui)
@@ -437,7 +437,7 @@
 						"schema-operation-reload" : true,
 					};
 					
-					var jstree = pageObj.element(".schema-panel-content").jstree(true);
+					var jstree = po.element(".schema-panel-content").jstree(true);
 					var selNodes = jstree.get_selected(true);
 					
 					var disableCRUD = false;
@@ -449,7 +449,7 @@
 					{
 						for(var i=0; i<selNodes.length; i++)
 						{
-							if(!pageObj.isSchemaNode(selNodes[i]))
+							if(!po.isSchemaNode(selNodes[i]))
 							{
 								disableCRUD = true;
 								break;
@@ -469,7 +469,7 @@
 					//管理员、创建用户才能编辑和删除数据库
 					for(var i=0; i<selNodes.length; i++)
 					{
-						if(!pageObj.isSchemaNode(selNodes[i]))
+						if(!po.isSchemaNode(selNodes[i]))
 						{
 							diableEditAndDelete = true;
 							break;
@@ -477,7 +477,7 @@
 						
 						var schema = selNodes[i].original;
 						
-						if(!pageObj.isAdmin && schema.createUser != undefined && schema.createUser.id != pageObj.userId)
+						if(!po.isAdmin && schema.createUser != undefined && schema.createUser.id != po.userId)
 						{
 							diableEditAndDelete = true;
 							break;
@@ -497,11 +497,11 @@
 						var selSchemaCount = 0, selTableCount = 0;
 						for(var i=0; i<selNodes.length; i++)
 						{
-							if(pageObj.isTableNode(selNodes[i]))
+							if(po.isTableNode(selNodes[i]))
 							{
 								selTableCount++;
 							}
-							else if(pageObj.isSchemaNode(selNodes[i]))
+							else if(po.isSchemaNode(selNodes[i]))
 							{
 								selSchemaCount++;
 							}
@@ -514,7 +514,7 @@
 					//只要选中了表，就禁用重载按钮
 					for(var i=0; i<selNodes.length; i++)
 					{
-						if(pageObj.isTableNode(selNodes[i]))
+						if(po.isTableNode(selNodes[i]))
 						{
 							menuItemEnables["schema-operation-reload"] = false;
 							break;
@@ -539,7 +539,7 @@
 				if($item.hasClass("ui-state-disabled"))
 					return;
 				
-				var jstree = pageObj.element(".schema-panel-content").jstree(true);
+				var jstree = po.element(".schema-panel-content").jstree(true);
 				var selNodes = jstree.get_selected(true);
 				
 				if($item.hasClass("schema-operation-edit") || $item.hasClass("schema-operation-view"))
@@ -552,12 +552,12 @@
 					
 					var selNode = selNodes[0];
 					
-					if(!pageObj.isSchemaNode(selNode))
+					if(!po.isSchemaNode(selNode))
 						return;
 					
 					var schemaId = selNode.original.id;
 					
-					pageObj.open(contextPath+$.toPath("schema", ($item.hasClass("schema-operation-edit") ? "edit" : "view"))+"?id="+encodeURIComponent(schemaId), 
+					po.open(contextPath+$.toPath("schema", ($item.hasClass("schema-operation-edit") ? "edit" : "view"))+"?id="+encodeURIComponent(schemaId), 
 					{
 						"pageParam" :
 						{
@@ -573,7 +573,7 @@
 					if(!selNodes.length)
 						return;
 					
-					pageObj.confirm("<fmt:message key='main.confirmDeleteSchema' />",
+					po.confirm("<fmt:message key='main.confirmDeleteSchema' />",
 					{
 						"confirm" : function()
 						{
@@ -581,7 +581,7 @@
 							
 							for(var i=0; i<selNodes.length; i++)
 							{
-								if(pageObj.isSchemaNode(selNodes[i]))
+								if(po.isSchemaNode(selNodes[i]))
 								{
 									if(schemaIdParam != "")
 										schemaIdParam += "&";
@@ -602,7 +602,7 @@
 					if(!selNodes.length || selNodes.length < 1)
 						return;
 					
-					if(pageObj.isTableNode(selNodes[0]))
+					if(po.isTableNode(selNodes[0]))
 					{
 						if(selNodes.length != 1)
 						{
@@ -626,9 +626,9 @@
 				        		},
 				        		success :  function(model)
 				        		{
-					        		var tabId = pageObj.genTabId(schemaId, tableName);
+					        		var tabId = po.genTabId(schemaId, tableName);
 					        		
-					        		var mainTabs = pageObj.element("#mainTabs");
+					        		var mainTabs = po.element("#mainTabs");
 					        		var uiTabsNav = mainTabs.find(".ui-tabs-nav");
 					        		
 					        	    var prelia = $("> li > a[href='#"+tabId+"']", uiTabsNav);
@@ -652,11 +652,11 @@
 				        	});
 						}
 					}
-					else if(pageObj.isSchemaNode(selNodes[0]))
+					else if(po.isSchemaNode(selNodes[0]))
 					{
 						for(var i=0; i<selNodes.length; i++)
 						{
-							if(pageObj.isSchemaNode(selNodes[i]))
+							if(po.isSchemaNode(selNodes[i]))
 								jstree.refresh_node(selNodes[i]);
 						}
 					}
@@ -668,9 +668,9 @@
 			}
 		});
 		
-		pageObj.element("#addSchemaButton").click(function()
+		po.element("#addSchemaButton").click(function()
 		{
-			var jstree = pageObj.element(".schema-panel-content").jstree(true);
+			var jstree = po.element(".schema-panel-content").jstree(true);
 			var selNodes = jstree.get_selected(true);
 			
 			var copyId = undefined;
@@ -679,23 +679,23 @@
 			{
 				var selNode = selNodes[0];
 				
-				if(pageObj.isSchemaNode(selNode))
+				if(po.isSchemaNode(selNode))
 					copyId = selNode.original.id;
 			}
 			
-			pageObj.open(contextPath+"/schema/add" + (copyId != undefined ? "?copyId="+copyId : ""),
+			po.open(contextPath+"/schema/add" + (copyId != undefined ? "?copyId="+copyId : ""),
 			{
 				"pageParam" :
 				{
 					"afterSave" : function()
 					{
-						pageObj.refreshSchemaTree();
+						po.refreshSchemaTree();
 					}
 				}
 			});
 		});
 		
-		pageObj.element(".schema-panel-content").jstree
+		po.element(".schema-panel-content").jstree
 		(
 			{
 				"core" :
@@ -708,7 +708,7 @@
 							//根节点
 							if(node.id == "#")
 								return contextPath+"/schema/list";
-							else if(pageObj.isSchemaNode(node))
+							else if(po.isSchemaNode(node))
 							{
 								return contextPath + $.toPath("schema", node.id, "pagingQueryTable");
 							}
@@ -716,19 +716,19 @@
 						"data" : function(node)
 						{
 							if(node.id == "#")
-								return pageObj.getSearchSchemaFormDataForSchema();
-							else if(pageObj.isSchemaNode(node))
-								return pageObj.getSearchSchemaFormDataForTable();
+								return po.getSearchSchemaFormDataForSchema();
+							else if(po.isSchemaNode(node))
+								return po.getSearchSchemaFormDataForTable();
 						},
 						"success" : function(data, textStatus, jqXHR)
 						{
 							var url = this.url;
 							
 							if(url.indexOf("/schema/list") > -1)
-								pageObj.schemaToJstreeNodes(data);
+								po.schemaToJstreeNodes(data);
 							else if(url.indexOf("/pagingQueryTable") > -1)
 							{
-								pageObj.toJstreeNodePagingData(data);
+								po.toJstreeNodePagingData(data);
 							}
 						}
 					},
@@ -741,7 +741,7 @@
 		{
 			var tree = $(this).jstree(true);
 			
-			if(pageObj.isTableNode(data.node))
+			if(po.isTableNode(data.node))
 			{
 				var schema = tree.get_node(data.node.parent).original;
 				
@@ -749,9 +749,9 @@
 	        	var schemaTitle = schema.title;
 	        	var tableName = data.node.original.name;
 	        	
-				pageObj.addWorkTab(pageObj.genTabId(schemaId, tableName), data.node.text, schema, data.node.original);
+				po.addWorkTab(po.genTabId(schemaId, tableName), data.node.text, schema, data.node.original);
 			}
-			else if(pageObj.isNextPageNode(data.node))
+			else if(po.isNextPageNode(data.node))
 			{
 				if(!data.node.state.loadingNextPage)
 				{
@@ -764,7 +764,7 @@
 					var $moreTableNode = tree.get_node(data.node, true);
 					$(".more-table", $moreTableNode).html("<fmt:message key='main.loadingTable' />");
 					
-					var param = pageObj.getSearchSchemaFormDataForTable();
+					var param = po.getSearchSchemaFormDataForTable();
 					param = $.extend({}, data.node.original.nextPageInfo, param);
 					
 					$.ajax(contextPath+$.toPath("schema", schemaId, "pagingQueryTable"),
@@ -773,7 +773,7 @@
 						success : function(pagingData)
 						{
 							tree.delete_node(data.node);
-							pageObj.toJstreeNodePagingData(pagingData);
+							po.toJstreeNodePagingData(pagingData);
 							
 							var nodes = pagingData.items;
 							
@@ -795,21 +795,21 @@
 		{
 			var tree = $(this).jstree(true);
 			
-			if(pageObj.selectNodeAfterLoad)
+			if(po.selectNodeAfterLoad)
 			{
-				pageObj.selectNodeAfterLoad = false;
+				po.selectNodeAfterLoad = false;
 				
 				tree.select_node(data.node);
 			}
 		});
 		
-		pageObj.element("#schemaSearchForm").submit(function()
+		po.element("#schemaSearchForm").submit(function()
 		{
-			var jstree = pageObj.element(".schema-panel-content").jstree(true);
+			var jstree = po.element(".schema-panel-content").jstree(true);
 			
-			if(pageObj.isSearchTable())
+			if(po.isSearchTable())
 			{
-				pageObj.selectNodeAfterLoad = true;
+				po.selectNodeAfterLoad = true;
 				
 				var searchSchemaNodes = [];
 				
@@ -818,7 +818,7 @@
 				{
 					var selNode = selNodes[i];
 					
-					while(selNode && !pageObj.isSchemaNode(selNode))
+					while(selNode && !po.isSchemaNode(selNode))
 						selNode = jstree.get_node(selNode.parent);
 					
 					if(selNode)
@@ -850,11 +850,11 @@
 			}
 			else
 			{
-				pageObj.refreshSchemaTree();
+				po.refreshSchemaTree();
 			}
 		});
 		
-		pageObj.element("#mainTabs").tabs(
+		po.element("#mainTabs").tabs(
 		{
 			event: "click",
 			activate: function(event, ui)
@@ -862,7 +862,7 @@
 				var newTab = $(ui.newTab);
 				var newPanel = $(ui.newPanel);
 				
-				pageObj.refreshTabsNav($(this), newTab);
+				po.refreshTabsNav($(this), newTab);
 				
 				var newSchemaId = newTab.attr("schema-id");
 				
@@ -871,9 +871,9 @@
 			}
 		});
 		
-		pageObj.element("#mainTabs .ui-tabs-nav").hide();
+		po.element("#mainTabs .ui-tabs-nav").hide();
 		
-		pageObj.getTabsHiddens = function(tabsNav)
+		po.getTabsHiddens = function(tabsNav)
 		{
 			var tabsNavHeight = tabsNav.height();
 			
@@ -890,9 +890,9 @@
 			return hiddens;
 		};
 		
-		pageObj.refreshTabsNav = function(tabs, activeTab)
+		po.refreshTabsNav = function(tabs, activeTab)
 		{
-			var tabsNav = pageObj.element(".ui-tabs-nav", tabs);
+			var tabsNav = po.element(".ui-tabs-nav", tabs);
 			
 			if(activeTab == undefined)
 				activeTab = $("li.ui-tabs-active", tabsNav);
@@ -916,19 +916,19 @@
 			
 			var showHiddenButton = $(".tab-show-hidden", tabs);
 			
-			if(pageObj.getTabsHiddens(tabsNav).length > 0)
+			if(po.getTabsHiddens(tabsNav).length > 0)
 			{
 				if(showHiddenButton.length == 0)
 				{
 					showHiddenButton = $("<button class='ui-button ui-corner-all ui-widget ui-button-icon-only tab-show-hidden'><span class='ui-icon ui-icon-triangle-1-s'></span></button>").appendTo(tabs);
 					showHiddenButton.click(function()
 					{
-						var tabs = pageObj.element("#mainTabs");
-						var tabsNav = pageObj.element(".ui-tabs-nav", tabs);
+						var tabs = po.element("#mainTabs");
+						var tabsNav = po.element(".ui-tabs-nav", tabs);
 						
-						var hiddens = pageObj.getTabsHiddens(tabsNav);
+						var hiddens = po.getTabsHiddens(tabsNav);
 						
-						var menu = pageObj.element("#tabMoreTabMenu");
+						var menu = po.element("#tabMoreTabMenu");
 						menu.empty();
 						
 						for(var i=0; i<hiddens.length; i++)
@@ -940,7 +940,7 @@
 							$("<div />").html($(".ui-tabs-anchor", tab).text()).appendTo(mi);
 						}
 						
-		    	    	pageObj.element("#tabMoreTabMenuParent").show().css("left", "0px").css("top", "0px")
+		    	    	po.element("#tabMoreTabMenuParent").show().css("left", "0px").css("top", "0px")
 		    	    		.position({"my" : "left top+1", "at": "right bottom", "of" : $(this), "collision": "flip flip"});
 		    	    	
 						menu.menu("refresh");
@@ -953,7 +953,7 @@
 				showHiddenButton.hide();
 		};
 		
-		pageObj.element("#tabMoreOperationMenu").menu(
+		po.element("#tabMoreOperationMenu").menu(
 		{
 			select: function(event, ui)
 			{
@@ -962,7 +962,7 @@
 				var tableName = $(this).attr("table-name");
 				var tabId = $(this).attr("tab-id");
 				
-				var mainTabs = pageObj.element("#mainTabs");
+				var mainTabs = po.element("#mainTabs");
 				var uiTabsNav = mainTabs.find(".ui-tabs-nav");
 				var tabLink = $("a[href='"+tabId+"']", uiTabsNav);
 				var tabLi = tabLink.parent();
@@ -983,7 +983,7 @@
 					}
 					
 					mainTabs.tabs("refresh");
-					pageObj.refreshTabsNav(mainTabs);
+					po.refreshTabsNav(mainTabs);
 				}
 				else if(item.hasClass("tab-operation-close-right"))
 				{
@@ -997,7 +997,7 @@
 					}
 					
 					mainTabs.tabs("refresh");
-					pageObj.refreshTabsNav(mainTabs);
+					po.refreshTabsNav(mainTabs);
 				}
 				else if(item.hasClass("tab-operation-close-other"))
 				{
@@ -1015,7 +1015,7 @@
 					});
 					
 					mainTabs.tabs("refresh");
-					pageObj.refreshTabsNav(mainTabs);
+					po.refreshTabsNav(mainTabs);
 				}
 				else if(item.hasClass("tab-operation-close-all"))
 				{
@@ -1030,28 +1030,28 @@
 					});
 					
 					mainTabs.tabs("refresh");
-					pageObj.refreshTabsNav(mainTabs);
+					po.refreshTabsNav(mainTabs);
 				}
 				
 				if($("li", uiTabsNav).length == 0)
 					uiTabsNav.hide();
 				
-				pageObj.element("#tabMoreOperationMenuParent").hide();
+				po.element("#tabMoreOperationMenuParent").hide();
 			}
 		});
 		
-		pageObj.element("#tabMoreTabMenu").menu(
+		po.element("#tabMoreTabMenu").menu(
 		{
 			select: function(event, ui)
 			{
 				var item = ui.item;
 				var tabId = item.attr("tab-id");
 				
-				var mainTabs = pageObj.element("#mainTabs");
-				var myIndex = pageObj.element(".ui-tabs-nav li[id='"+tabId+"']", mainTabs).index();
+				var mainTabs = po.element("#mainTabs");
+				var myIndex = po.element(".ui-tabs-nav li[id='"+tabId+"']", mainTabs).index();
 		    	mainTabs.tabs("option", "active",  myIndex);
 				
-				pageObj.element("#tabMoreTabMenuParent").hide();
+				po.element("#tabMoreTabMenuParent").hide();
 			}
 		});
 		
@@ -1073,7 +1073,7 @@
 			};
 			
 			if(hide)
-				pageObj.element("#tabMoreOperationMenuParent").hide();
+				po.element("#tabMoreOperationMenuParent").hide();
 		});
 
 		$(document.body).click(function(e)
@@ -1094,7 +1094,7 @@
 			};
 			
 			if(hide)
-				pageObj.element("#tabMoreTabMenuParent").hide();
+				po.element("#tabMoreTabMenuParent").hide();
 		});
 		
 		//系统通知

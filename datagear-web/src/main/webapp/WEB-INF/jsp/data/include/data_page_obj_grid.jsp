@@ -6,28 +6,28 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ include file="../../include/page_obj_grid.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
 	/**
 	 * 构建Model的本地表格。
 	 */
-	pageObj.initModelDataTableLocal = function(model, data, ignorePropertyNames)
+	po.initModelDataTableLocal = function(model, data, ignorePropertyNames)
 	{
 		var columns = $.buildDataTablesColumns(model, {"ignorePropertyNames" : ignorePropertyNames});
-		var settings = pageObj.buildDataTableSettingsLocal(columns, data);
+		var settings = po.buildDataTableSettingsLocal(columns, data);
 		
-		pageObj.initDataTable(settings);
+		po.initDataTable(settings);
 	};
 	
 	/**
 	 * 构建Model的ajax表格。
 	 */
-	pageObj.initModelDataTableAjax = function(url, model, ignorePropertyNames)
+	po.initModelDataTableAjax = function(url, model, ignorePropertyNames)
 	{
 		var columns = $.buildDataTablesColumns(model, {"ignorePropertyNames" : ignorePropertyNames});
-		var settings = pageObj.buildDataTableSettingsAjax(columns, url);
+		var settings = po.buildDataTableSettingsAjax(columns, url);
 		
-		pageObj.initDataTable(settings);
+		po.initDataTable(settings);
 	};
 })
 (${pageId});

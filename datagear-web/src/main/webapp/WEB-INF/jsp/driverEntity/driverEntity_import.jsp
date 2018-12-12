@@ -49,29 +49,31 @@
 	</form>
 </div>
 <%@ include file="../include/page_js_obj.jsp" %>
+<%@ include file="../include/page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.element("input:submit, input:button, input:reset, button, .fileinput-button").button();
+	po.element("input:submit, input:button, input:reset, button, .fileinput-button").button();
 	
-	pageObj.form = pageObj.element("#${pageId}-form");
-	pageObj.driverEntityInfos = pageObj.element(".driver-entity-infos");
+	po.driverEntityInfos = function(){ return this.element(".driver-entity-infos"); };
 
-	pageObj.url = function(action)
+	po.fileUploadInfo = function(){ return this.element(".file-info"); };
+	
+	po.url = function(action)
 	{
 		return contextPath + "/driverEntity/" + action;
 	};
 	
-	pageObj.renderDriverEntityInfos = function(driverEntities)
+	po.renderDriverEntityInfos = function(driverEntities)
 	{
-		pageObj.driverEntityInfos.empty();
+		po.driverEntityInfos().empty();
 		
 		for(var i=0; i<driverEntities.length; i++)
 		{
 			var driverEntity = driverEntities[i];
 			
 			var $item = $("<div class='ui-widget ui-widget-content ui-corner-all driver-entity-item' />")
-				.appendTo(pageObj.driverEntityInfos);
+				.appendTo(po.driverEntityInfos());
 			
 			$("<input type='hidden' />").attr("name", "driverEntity.id").attr("value", driverEntity.id).appendTo($item);
 			$("<input type='hidden' />").attr("name", "driverEntity.driverClassName").attr("value", driverEntity.driverClassName).appendTo($item);
@@ -90,26 +92,24 @@
 		}
 	};
 	
-	pageObj.fileUploadInfo = pageObj.element(".file-info");
-	
-	pageObj.element(".fileinput-button").fileupload(
+	po.element(".fileinput-button").fileupload(
 	{
-		url : pageObj.url("uploadImportFile"),
+		url : po.url("uploadImportFile"),
 		paramName : "file",
 		success : function(serverDriverEntities, textStatus, jqXHR)
 		{
-			$.fileuploadsuccessHandlerForUploadInfo(pageObj.fileUploadInfo, false);
-			pageObj.renderDriverEntityInfos(serverDriverEntities);
+			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
+			po.renderDriverEntityInfos(serverDriverEntities);
 		}
 	})
 	.bind('fileuploadadd', function (e, data)
 	{
-		pageObj.form.validate().resetForm();
-		$.fileuploadaddHandlerForUploadInfo(e, data, pageObj.fileUploadInfo);
+		po.form().validate().resetForm();
+		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	})
 	.bind('fileuploadprogressall', function (e, data)
 	{
-		$.fileuploadprogressallHandlerForUploadInfo(e, data, pageObj.fileUploadInfo);
+		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
 	
 	$.validator.addMethod("importDriverEntityRequired", function(value, element)
@@ -120,7 +120,7 @@
 		return $driverEntityId.length > 0;
 	});
 	
-	pageObj.form.validate(
+	po.form().validate(
 	{
 		ignore : ".ignore",
 		rules :
@@ -137,7 +137,7 @@
 			{
 				success : function()
 				{
-					var pageParam = pageObj.pageParam();
+					var pageParam = po.pageParam();
 					
 					var close = true;
 					
@@ -145,7 +145,7 @@
 						close = (pageParam.afterSave() != false);
 					
 					if(close)
-						pageObj.close();
+						po.close();
 				}
 			});
 		},

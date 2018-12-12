@@ -45,14 +45,14 @@
 <%@ include file="include/page_obj_pagination.jsp" %>
 <%@ include file="include/page_obj_grid.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.url = function(action)
+	po.url = function(action)
 	{
 		return contextPath + "/resetPasswordRequestHistory/" + action;
 	};
 	
-	pageObj.buildTableColumValueOption = function(title, data)
+	po.buildTableColumValueOption = function(title, data)
 	{
 		var option =
 		{
@@ -69,17 +69,17 @@
 	};
 	
 	var tableColumns = [
-		pageObj.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.time' />", "resetPasswordRequest.time"),
-		pageObj.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.principal' />", "resetPasswordRequest.principal"),
-		pageObj.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.username' />", "resetPasswordRequest.user.name"),
-		pageObj.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.effectiveTime' />", "effectiveTime"),
+		po.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.time' />", "resetPasswordRequest.time"),
+		po.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.principal' />", "resetPasswordRequest.principal"),
+		po.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.username' />", "resetPasswordRequest.user.name"),
+		po.buildTableColumValueOption("<fmt:message key='resetPasswordRequestHistory.effectiveTime' />", "effectiveTime"),
 	];
 	
-	pageObj.initPagination();
+	po.initPagination();
 	
-	var tableSettings = pageObj.buildDataTableSettingsAjax(tableColumns, pageObj.url("pagingQueryData"));
+	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
 	tableSettings.order=[[1,"desc"]];
-	pageObj.initDataTable(tableSettings);
+	po.initDataTable(tableSettings);
 })
 (${pageId});
 </script>

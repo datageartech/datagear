@@ -13,61 +13,61 @@ data_page_obj_searchform_html.jsp
 
 变量：
 //查询回调函数，不允许为null，格式为：function(searchParam){}
-pageObj.search = undefined;
+po.search = undefined;
 //查询条件autocomplete初始数据，不允许为null
-pageObj.conditionAutocompleteSource = undefined;
+po.conditionAutocompleteSource = undefined;
 --%>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.searchForm = pageObj.element("#${pageId}-searchForm");
-	pageObj.likeSwitchIcon = pageObj.element(".like-switch-icon", pageObj.searchForm);
-	pageObj.notLikeInput = pageObj.element("input[name='notLike']", pageObj.searchForm);
-	pageObj.keywordInput = pageObj.element("input[name='keyword']", pageObj.searchForm);
-	pageObj.conditionPanel = pageObj.element(".condition-panel", pageObj.searchForm);
-	pageObj.conditionTextarea = pageObj.element("textarea[name='condition']", pageObj.searchForm);
-	pageObj.conditionIconParent = pageObj.element(".search-condition-icon-parent", pageObj.searchForm);
-	pageObj.conditionIcon = pageObj.element(".search-condition-icon", pageObj.searchForm);
-	pageObj.conditionIconTip = pageObj.element(".search-condition-icon-tip", pageObj.searchForm);
+	po.searchForm = function(){ return this.element("#${pageId}-searchForm"); };
+	po.likeSwitchIcon = function(){ return this.element(".like-switch-icon", this.searchForm()); };
+	po.notLikeInput = function(){ return this.element("input[name='notLike']", this.searchForm()); };
+	po.keywordInput = function(){ return this.element("input[name='keyword']", this.searchForm()); };
+	po.conditionPanel = function(){ return this.element(".condition-panel", this.searchForm()); };
+	po.conditionTextarea = function(){ return this.element("textarea[name='condition']", this.searchForm()); };
+	po.conditionIconParent = function(){ return this.element(".search-condition-icon-parent", this.searchForm()); };
+	po.conditionIcon = function(){ return this.element(".search-condition-icon", this.searchForm()); };
+	po.conditionIconTip = function(){ return this.element(".search-condition-icon-tip", this.searchForm()); };
 	
-	pageObj._closeCondtionPanelWhenSubmit = true;
+	po._closeCondtionPanelWhenSubmit = true;
 	
-	pageObj.searchForm.submit(function()
+	po.searchForm().submit(function()
 	{
-		var searchParam = pageObj.getSearchParam();
+		var searchParam = po.getSearchParam();
 		
-		pageObj.search(searchParam);
+		po.search(searchParam);
 		
-		if(pageObj._closeCondtionPanelWhenSubmit)
+		if(po._closeCondtionPanelWhenSubmit)
 		{
-			pageObj.closeCondtionPanel();
-			pageObj.keywordInput.focus();
+			po.closeCondtionPanel();
+			po.keywordInput().focus();
 		}
 		
 		return false;
 	});
 	
-	pageObj.getSearchParam = function()
+	po.getSearchParam = function()
 	{
-		var nameLableCondition = $.trim(pageObj.conditionTextarea.val());
+		var nameLableCondition = $.trim(po.conditionTextarea().val());
 		
 		var param =
 		{
-			"keyword" : $.trim(pageObj.keywordInput.val()),
-			"notLike" : $.trim(pageObj.notLikeInput.val()),
-			"condition" : $.convertToPropertyPathCondtion(pageObj.conditionAutocompleteSource, nameLableCondition)
+			"keyword" : $.trim(po.keywordInput().val()),
+			"notLike" : $.trim(po.notLikeInput().val()),
+			"condition" : $.convertToPropertyPathCondtion(po.conditionAutocompleteSource, nameLableCondition)
 		};
 		
 		return param;
 	};
 	
-	pageObj.clearSearchCondition = function()
+	po.clearSearchCondition = function()
 	{
-		pageObj.conditionTextarea.val("");
+		po.conditionTextarea().val("");
 	};
 
 	//提取用于autocomplete的关键词
-	pageObj.extractLastConditionTerm = function(text)
+	po.extractLastConditionTerm = function(text)
 	{
 		var term = "";
 		
@@ -84,16 +84,16 @@ pageObj.conditionAutocompleteSource = undefined;
 		return term;
 	};
 	
-	pageObj.initConditionPanel = function()
+	po.initConditionPanel = function()
 	{
-		pageObj.conditionTextarea.autocomplete(
+		po.conditionTextarea().autocomplete(
 		{
-			appendTo : pageObj.element(".condition-parent", pageObj.searchForm),
+			appendTo : po.element(".condition-parent", po.searchForm()),
 			minLength: 0,
 			autoFocus: false,
 			source: function(request, response)
 			{
-				response($.ui.autocomplete.filter(pageObj.conditionAutocompleteSource, pageObj.extractLastConditionTerm(request.term)));
+				response($.ui.autocomplete.filter(po.conditionAutocompleteSource, po.extractLastConditionTerm(request.term)));
 		    },
 	        focus: function()
 	        {
@@ -101,7 +101,7 @@ pageObj.conditionAutocompleteSource = undefined;
 			},
 			select: function(event, ui)
 			{
-				var lastTerm = pageObj.extractLastConditionTerm(this.value);
+				var lastTerm = po.extractLastConditionTerm(this.value);
 				
 	            this.value = (lastTerm.length > 0 ? this.value.substring(0, this.value.length - lastTerm.length) : this.value) + ui.item.value;
 	            return false;
@@ -112,8 +112,8 @@ pageObj.conditionAutocompleteSource = undefined;
 				//定位至光标位置
 				using : function(pos, eleInfo)
 				{
-					var pos = pageObj.conditionTextarea.textareaHelper('caretPos');
-					pos.top = pageObj.conditionTextarea.textareaHelper('height');
+					var pos = po.conditionTextarea().textareaHelper('caretPos');
+					pos.top = po.conditionTextarea().textareaHelper('height');
 					
 					$(this).css("left", pos.left + 6).css("top", pos.top);
 				}
@@ -126,98 +126,98 @@ pageObj.conditionAutocompleteSource = undefined;
 		});
 	};
 	
-	pageObj.updateNotLikeKeyword = function(notLike)
+	po.updateNotLikeKeyword = function(notLike)
 	{
 		if(notLike == undefined)
-			notLike = pageObj.notLikeInput.val();
+			notLike = po.notLikeInput().val();
 		
 		if(notLike)
 		{
-			pageObj.likeSwitchIcon.removeClass("ui-icon-radio-off").addClass("ui-icon-radio-on").attr("title", "<fmt:message key='data.notLikeTitle' />");
-			pageObj.notLikeInput.val("1");
+			po.likeSwitchIcon().removeClass("ui-icon-radio-off").addClass("ui-icon-radio-on").attr("title", "<fmt:message key='data.notLikeTitle' />");
+			po.notLikeInput().val("1");
 		}
 		else
 		{
-			pageObj.likeSwitchIcon.removeClass("ui-icon-radio-on").addClass("ui-icon-radio-off").attr("title", "<fmt:message key='data.likeTitle' />");
-			pageObj.notLikeInput.val("");
+			po.likeSwitchIcon().removeClass("ui-icon-radio-on").addClass("ui-icon-radio-off").attr("title", "<fmt:message key='data.likeTitle' />");
+			po.notLikeInput().val("");
 		}
 	};
 	
-	pageObj.switchLikeNotLikeKeyword = function()
+	po.switchLikeNotLikeKeyword = function()
 	{
-		if(pageObj.notLikeInput.val())
-			pageObj.updateNotLikeKeyword(false);
+		if(po.notLikeInput().val())
+			po.updateNotLikeKeyword(false);
 		else
-			pageObj.updateNotLikeKeyword(true);
+			po.updateNotLikeKeyword(true);
 	};
 	
-	pageObj.closeCondtionPanel = function()
+	po.closeCondtionPanel = function()
 	{
-		pageObj.conditionPanel.hide();
+		po.conditionPanel().hide();
 
-		pageObj.conditionIcon.removeClass("ui-icon-caret-1-n").addClass("ui-icon-caret-1-s");
+		po.conditionIcon().removeClass("ui-icon-caret-1-n").addClass("ui-icon-caret-1-s");
 		
-		if($.trim(pageObj.conditionTextarea.val()) != "")
-			pageObj.conditionIconTip.show();
+		if($.trim(po.conditionTextarea().val()) != "")
+			po.conditionIconTip().show();
 	};
 	
-	pageObj.openCondtionPanel = function()
+	po.openCondtionPanel = function()
 	{
-		pageObj.conditionPanel.show();
-		pageObj.conditionIcon.removeClass("ui-icon-caret-1-s").addClass("ui-icon-caret-1-n");
-		pageObj.conditionIconTip.hide();
-		pageObj.conditionTextarea.focus();
+		po.conditionPanel().show();
+		po.conditionIcon().removeClass("ui-icon-caret-1-s").addClass("ui-icon-caret-1-n");
+		po.conditionIconTip().hide();
+		po.conditionTextarea().focus();
 	};
 	
-	pageObj.likeSwitchIcon.click(function()
+	po.likeSwitchIcon().click(function()
 	{
-		pageObj.switchLikeNotLikeKeyword();
+		po.switchLikeNotLikeKeyword();
 
-		pageObj.keywordInput.focus();
+		po.keywordInput().focus();
 	});
 	
-	pageObj.conditionIconParent.click(function()
+	po.conditionIconParent().click(function()
 	{
-		if(pageObj.conditionIcon.hasClass("ui-icon-caret-1-s"))
+		if(po.conditionIcon().hasClass("ui-icon-caret-1-s"))
 		{
-			pageObj.openCondtionPanel();
+			po.openCondtionPanel();
 		}
 		else
 		{
-			pageObj.closeCondtionPanel();
+			po.closeCondtionPanel();
 		}
 	});
 	
-	pageObj.element(".condition-panel-resetpos-icon", pageObj.searchForm).click(function()
+	po.element(".condition-panel-resetpos-icon", po.searchForm()).click(function()
 	{
-		pageObj.conditionPanel.css("left", 0).css("top", 0);
+		po.conditionPanel().css("left", 0).css("top", 0);
 	});
 	
-	pageObj.element(".condition-panel-clear-icon", pageObj.searchForm).click(function()
+	po.element(".condition-panel-clear-icon", po.searchForm()).click(function()
 	{
-		pageObj.clearSearchCondition();
-		pageObj.conditionTextarea.focus();
+		po.clearSearchCondition();
+		po.conditionTextarea().focus();
 	});
 	
-	pageObj.element(".condition-panel-submit-icon", pageObj.searchForm).click(function()
+	po.element(".condition-panel-submit-icon", po.searchForm()).click(function()
 	{
-		pageObj._closeCondtionPanelWhenSubmit = false;
-		pageObj.searchForm.submit();
-		pageObj.conditionTextarea.focus();
-		pageObj._closeCondtionPanelWhenSubmit = true;
+		po._closeCondtionPanelWhenSubmit = false;
+		po.searchForm().submit();
+		po.conditionTextarea().focus();
+		po._closeCondtionPanelWhenSubmit = true;
 	});
 	
-	pageObj.searchForm.keydown(function(event)
+	po.searchForm().keydown(function(event)
 	{
 		//打开、关闭条件面板
 		if(event.keyCode == $.ui.keyCode.DOWN && event.ctrlKey)
 		{
-			if(pageObj.conditionPanel.is(":hidden"))
-				pageObj.openCondtionPanel();
+			if(po.conditionPanel().is(":hidden"))
+				po.openCondtionPanel();
 			else
 			{
-				pageObj.closeCondtionPanel();
-				pageObj.keywordInput.focus();
+				po.closeCondtionPanel();
+				po.keywordInput().focus();
 			}
 			
 			event.stopPropagation();
@@ -225,32 +225,32 @@ pageObj.conditionAutocompleteSource = undefined;
 		//切换“LIKE”与“NOT LIKE”
 		else if(event.keyCode == 49 && event.ctrlKey && event.shiftKey)
 		{
-			pageObj.switchLikeNotLikeKeyword();
+			po.switchLikeNotLikeKeyword();
 			event.stopPropagation();
 		}
 	});
 	
-	pageObj.conditionPanel.keydown(function(event)
+	po.conditionPanel().keydown(function(event)
 	{
 		if(event.keyCode == $.ui.keyCode.ENTER && event.ctrlKey)
 		{
-			pageObj._closeCondtionPanelWhenSubmit = false;
-			pageObj.searchForm.submit();
-			pageObj._closeCondtionPanelWhenSubmit = true;
+			po._closeCondtionPanelWhenSubmit = false;
+			po.searchForm().submit();
+			po._closeCondtionPanelWhenSubmit = true;
 			
 			event.stopPropagation();
 		}
 		else if(event.keyCode == $.ui.keyCode.ESCAPE)
 		{
-			pageObj.closeCondtionPanel();
-			pageObj.keywordInput.focus();
+			po.closeCondtionPanel();
+			po.keywordInput().focus();
 			
 			event.stopPropagation();
 		}
 		else if(event.keyCode == $.ui.keyCode.BACKSPACE && event.ctrlKey && event.shiftKey)
 		{
-			pageObj.clearSearchCondition();
-			pageObj.conditionTextarea.focus();
+			po.clearSearchCondition();
+			po.conditionTextarea().focus();
 			
 			event.stopPropagation();
 		}
@@ -258,16 +258,16 @@ pageObj.conditionAutocompleteSource = undefined;
 	
 	$(document.body).bind("click", function(event)
 	{
-		if($(event.target).closest(pageObj.searchForm).length == 0)
-			pageObj.closeCondtionPanel();
+		if($(event.target).closest(po.searchForm()).length == 0)
+			po.closeCondtionPanel();
 	});
 	
-	pageObj.conditionPanel.draggable({ handle: ".condition-panel-title-bar" });
-	pageObj.conditionPanel.resizable();
+	po.conditionPanel().draggable({ handle: ".condition-panel-title-bar" });
+	po.conditionPanel().resizable();
 	
-	pageObj.element("input:submit", pageObj.searchForm).button();
-	pageObj.updateNotLikeKeyword();
-	pageObj.closeCondtionPanel();
+	po.element("input:submit", po.searchForm()).button();
+	po.updateNotLikeKeyword();
+	po.closeCondtionPanel();
 })
 (${pageId});
 </script>

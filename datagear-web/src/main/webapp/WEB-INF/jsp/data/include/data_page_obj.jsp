@@ -7,9 +7,9 @@
 <%@ page import="org.datagear.web.controller.DataController" %>
 <%@ include file="../../include/page_js_obj.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	var dataPageObj =
+	var dpo =
 	{
 		//当前模式ID
 		schemaId : "${schema.id}",
@@ -78,13 +78,13 @@
 						
 						var message = messageTemplate.replace( /#\{expected\}/g, "" + expected).replace( /#\{actual\}/g, "" + actual);
 						
-						pageObj.confirm(message,
+						po.confirm(message,
 						{
 							"confirm" : function()
 							{
 								$.closeTip();
 								
-								pageObj.ajaxSubmitForHandleDuplication(action, data, messageTemplate, ajaxOptions, true);
+								po.ajaxSubmitForHandleDuplication(action, data, messageTemplate, ajaxOptions, true);
 							},
 							"cancel" : function()
 							{
@@ -100,9 +100,9 @@
 			var url;
 			
 			if(ignoreDuplication)
-				url = pageObj.url("", action, "<%=DataController.PARAM_IGNORE_DUPLICATION%>=true");
+				url = po.url("", action, "<%=DataController.PARAM_IGNORE_DUPLICATION%>=true");
 			else
-				url = pageObj.url(action);
+				url = po.url(action);
 			
 			var options = $.extend({}, ajaxOptions, { data : data, error : errorCallback, type : "POST" });
 			
@@ -110,7 +110,7 @@
 		}
 	};
 	
-	$.extend(pageObj, dataPageObj);
+	$.extend(po, dpo);
 })
 (${pageId});
 </script>

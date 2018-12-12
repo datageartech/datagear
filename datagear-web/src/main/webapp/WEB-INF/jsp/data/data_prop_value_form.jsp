@@ -19,7 +19,7 @@ Object data = request.getAttribute("data");
 String propertyPath = getStringValue(request, "propertyPath");
 //标题操作标签I18N关键字，不允许null
 String titleOperationMessageKey = getStringValue(request, "titleOperationMessageKey");
-//提交活动，pageObj.pageParam().submit(...)未定义时，不允许为null
+//提交活动，po.pageParam().submit(...)未定义时，不允许为null
 String submitAction = getStringValue(request, "submitAction");
 //是否是客户端操作，允许为null
 boolean clientOperation = ("true".equalsIgnoreCase(getStringValue(request, "clientOperation")));
@@ -56,44 +56,42 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 <%@ include file="include/data_page_obj.jsp" %>
 <%@ include file="include/data_page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.form = pageObj.element("#${pageId}-form");
+	po.readonly = <%=readonly%>;
+	po.submitAction = "<%=submitAction%>";
+	po.data = ($.unref(<%writeJson(application, out, data);%>) || {});
+	po.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
+	po.clientOperation = <%=clientOperation%>;
+	po.batchSet = <%=batchSet%>;
 	
-	pageObj.readonly = <%=readonly%>;
-	pageObj.submitAction = "<%=submitAction%>";
-	pageObj.data = ($.unref(<%writeJson(application, out, data);%>) || {});
-	pageObj.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
-	pageObj.clientOperation = <%=clientOperation%>;
-	pageObj.batchSet = <%=batchSet%>;
-	
-	pageObj.superBuildPropertyActionOptions = pageObj.buildPropertyActionOptions;
-	pageObj.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
+	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
+	po.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
 	{
-		var actionParam = pageObj.superBuildPropertyActionOptions(property, propertyConcreteModel, extraRequestParams, extraPageParams);
+		var actionParam = po.superBuildPropertyActionOptions(property, propertyConcreteModel, extraRequestParams, extraPageParams);
 		
-		actionParam["data"]["propertyPath"] = $.propertyPath.concatPropertyName(pageObj.propertyPath, property.name);
-		actionParam["data"]["data"] = pageObj.data;
+		actionParam["data"]["propertyPath"] = $.propertyPath.concatPropertyName(po.propertyPath, property.name);
+		actionParam["data"]["data"] = po.data;
 		
 		//客户端操作则传递最新表单数据，因为不需要到服务端数据库查找验证
-		if(pageObj.clientOperation)
-			$.model.propertyPathValue(actionParam["data"]["data"], pageObj.propertyPath, pageObj.form.modelform("data")); 
+		if(po.clientOperation)
+			$.model.propertyPathValue(actionParam["data"]["data"], po.propertyPath, po.form().modelform("data")); 
 		
 		return actionParam;
 	};
 	
-	pageObj.onModel(function(model)
+	po.onModel(function(model)
 	{
-		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, pageObj.propertyPath);
+		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, po.propertyPath);
 		var property = propertyInfo.property;
 		var propertyModel = propertyInfo.model;
 		
-		pageObj.form.modelform(
+		po.form().modelform(
 		{
 			model : propertyModel,
 			ignorePropertyNames : $.model.findMappedByWith(property, propertyModel),
-			data : $.model.propertyPathValue(pageObj.data, pageObj.propertyPath),
-			readonly : pageObj.readonly,
+			data : $.model.propertyPathValue(po.data, po.propertyPath),
+			readonly : po.readonly,
 			submit : function()
 			{
 				var propValue = $(this).modelform("data");
@@ -101,7 +99,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				
 				var close = true;
 				
-				var pageParam = pageObj.pageParam();
+				var pageParam = po.pageParam();
 				
 				//父页面定义了submit回调函数，则优先执行
 				if(pageParam && pageParam.submit)
@@ -109,15 +107,15 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 					close = (pageParam.submit(propValue, formParam) != false);
 
 					if(close && !$(this).modelform("isDialogPinned"))
-						pageObj.close();
+						po.close();
 				}
 				//否则，POST至后台
 				else
 				{
 					var thisForm = this;
-					var param = $.extend(formParam, { "data" : pageObj.data, "propertyPath" : pageObj.propertyPath, "propValue" : propValue });
+					var param = $.extend(formParam, { "data" : po.data, "propertyPath" : po.propertyPath, "propValue" : propValue });
 					
-					pageObj.ajaxSubmitForHandleDuplication(pageObj.submitAction, param, "<fmt:message key='save.continueIgnoreDuplicationTemplate' />",
+					po.ajaxSubmitForHandleDuplication(po.submitAction, param, "<fmt:message key='save.continueIgnoreDuplicationTemplate' />",
 					{
 						beforeSend : function()
 						{
@@ -131,21 +129,21 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 							
 							$form.modelform("enableOperation");
 
-							pageObj.refreshParent();
+							po.refreshParent();
 							
 							if(batchSubmit)
 								;
 							else
 							{
 								//如果有初始数据，则更新为已保存至后台的数据
-								if(pageObj.data)
-									$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, operationMessage.data);
+								if(po.data)
+									$.model.propertyPathValue(po.data, po.propertyPath, operationMessage.data);
 								
 								if(pageParam && pageParam.afterSave)
 									close = (pageParam.afterSave(operationMessage.data) != false);
 								
 								if(close && !isDialogPinned)
-									pageObj.close();
+									po.close();
 							}
 						},
 						error : function()
@@ -156,7 +154,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 							$form.modelform("enableOperation");
 							
 							if(batchSubmit)
-								pageObj.refreshParent();
+								po.refreshParent();
 						}
 					});
 				}
@@ -165,41 +163,41 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 			},
 			addSinglePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.addSinglePropertyValue(property, propertyConcreteModel);
+				po.addSinglePropertyValue(property, propertyConcreteModel);
 			},
 			editSinglePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.editSinglePropertyValue(property, propertyConcreteModel);
+				po.editSinglePropertyValue(property, propertyConcreteModel);
 			},
 			deleteSinglePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.deleteSinglePropertyValue(property, propertyConcreteModel);
+				po.deleteSinglePropertyValue(property, propertyConcreteModel);
 			},
 			selectSinglePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.selectSinglePropertyValue(property, propertyConcreteModel);
+				po.selectSinglePropertyValue(property, propertyConcreteModel);
 			},
 			viewSinglePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.viewSinglePropertyValue(property, propertyConcreteModel);
+				po.viewSinglePropertyValue(property, propertyConcreteModel);
 			},
 			editMultiplePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.editMultiplePropertyValue(property, propertyConcreteModel);
+				po.editMultiplePropertyValue(property, propertyConcreteModel);
 			},
 			viewMultiplePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.viewMultiplePropertyValue(property, propertyConcreteModel);
+				po.viewMultiplePropertyValue(property, propertyConcreteModel);
 			},
 			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
 			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",
 			downloadSinglePropertyValueFile : function(property, propertyConcreteModel)
 			{
-				pageObj.downloadSinglePropertyValueFile(property, propertyConcreteModel);
+				po.downloadSinglePropertyValueFile(property, propertyConcreteModel);
 			},
-			validationRequiredAsAdd : ("saveAdd" == pageObj.submitAction),
-			batchSet : pageObj.batchSet,
-			labels : pageObj.formLabels,
+			validationRequiredAsAdd : ("saveAdd" == po.submitAction),
+			batchSet : po.batchSet,
+			labels : po.formLabels,
 			dateFormat : "<c:out value='${sqlDateFormat}' />",
 			timestampFormat : "<c:out value='${sqlTimestampFormat}' />",
 			timeFormat : "<c:out value='${sqlTimeFormat}' />"

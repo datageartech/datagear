@@ -17,7 +17,7 @@
 Object data = request.getAttribute("data");
 //标题操作标签I18N关键字，不允许null
 String titleOperationMessageKey = getStringValue(request, "titleOperationMessageKey");
-//提交活动，pageObj.pageParam().submit(...)未定义时，不允许为null
+//提交活动，po.pageParam().submit(...)未定义时，不允许为null
 String submitAction = getStringValue(request, "submitAction");
 //是否是客户端操作，允许为null
 boolean clientOperation = ("true".equalsIgnoreCase(getStringValue(request, "clientOperation")));
@@ -52,43 +52,41 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 <%@ include file="include/data_page_obj.jsp" %>
 <%@ include file="include/data_page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.form = pageObj.element("#${pageId}-form");
+	po.readonly = <%=readonly%>;
+	po.submitAction = "<%=submitAction%>";
+	po.originalData = $.unref(<%writeJson(application, out, data);%>);
+	po.data = $.unref($.ref(po.originalData));
+	po.clientOperation = <%=clientOperation%>;
+	po.batchSet = <%=batchSet%>;
 	
-	pageObj.readonly = <%=readonly%>;
-	pageObj.submitAction = "<%=submitAction%>";
-	pageObj.originalData = $.unref(<%writeJson(application, out, data);%>);
-	pageObj.data = $.unref($.ref(pageObj.originalData));
-	pageObj.clientOperation = <%=clientOperation%>;
-	pageObj.batchSet = <%=batchSet%>;
-	
-	pageObj.superBuildPropertyActionOptions = pageObj.buildPropertyActionOptions;
-	pageObj.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
+	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
+	po.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
 	{
-		var actionParam = pageObj.superBuildPropertyActionOptions(property, propertyConcreteModel, extraRequestParams, extraPageParams);
+		var actionParam = po.superBuildPropertyActionOptions(property, propertyConcreteModel, extraRequestParams, extraPageParams);
 		
 		//客户端操作则传递最新表单数据，因为不需要到服务端数据库查找验证
-		if(pageObj.clientOperation)
-			actionParam["data"]["data"] = pageObj.form.modelform("data");
+		if(po.clientOperation)
+			actionParam["data"]["data"] = po.form().modelform("data");
 		
 		return actionParam;
 	};
 	
-	pageObj.onModel(function(model)
+	po.onModel(function(model)
 	{
-		pageObj.form.modelform(
+		po.form().modelform(
 		{
 			model : model,
 			ignorePropertyNames : "<%=WebUtils.escapeJavaScriptStringValue(ignorePropertyName)%>",
-			data : pageObj.data,
-			readonly : pageObj.readonly,
+			data : po.data,
+			readonly : po.readonly,
 			submit : function()
 			{
 				var data = $(this).modelform("data");
 				var formParam = $(this).modelform("param");
 				
-				var pageParam = pageObj.pageParam();
+				var pageParam = po.pageParam();
 				
 				var close = true;
 				
@@ -98,15 +96,15 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 					close = (pageParam.submit(data, formParam) != false);
 					
 					if(close && !$(this).modelform("isDialogPinned"))
-						pageObj.close();
+						po.close();
 				}
 				//否则，POST至后台
 				else
 				{
 					var thisForm = this;
-					var param = $.extend(formParam, {"data" : data, "originalData" : pageObj.originalData});
+					var param = $.extend(formParam, {"data" : data, "originalData" : po.originalData});
 					
-					pageObj.ajaxSubmitForHandleDuplication(pageObj.submitAction, param, "<fmt:message key='save.continueIgnoreDuplicationTemplate' />",
+					po.ajaxSubmitForHandleDuplication(po.submitAction, param, "<fmt:message key='save.continueIgnoreDuplicationTemplate' />",
 					{
 						beforeSend : function()
 						{
@@ -120,23 +118,23 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 							
 							$form.modelform("enableOperation");
 							
-							pageObj.refreshParent();
+							po.refreshParent();
 							
 							if(batchSubmit)
 								;
 							else
 							{
-								pageObj.data = $.unref(operationMessage.data);
+								po.data = $.unref(operationMessage.data);
 								//如果有初始数据，则更新为已保存至后台的数据
-								//注意：不能直接赋值pageObj.data，因为是同一个引用，有可能会被修改，而pageObj.originalData不应该被修改
-								if(pageObj.originalData)
-									pageObj.originalData = $.unref($.ref(operationMessage.data));
+								//注意：不能直接赋值po.data，因为是同一个引用，有可能会被修改，而po.originalData不应该被修改
+								if(po.originalData)
+									po.originalData = $.unref($.ref(operationMessage.data));
 								
 								if(pageParam && pageParam.afterSave)
 									close = (pageParam.afterSave(operationMessage.data) != false);
 								
 								if(close && !isDialogPinned)
-									pageObj.close();
+									po.close();
 							}
 						},
 						error : function()
@@ -147,7 +145,7 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 							$form.modelform("enableOperation");
 							
 							if(batchSubmit)
-								pageObj.refreshParent();
+								po.refreshParent();
 						}
 					});
 				}
@@ -156,41 +154,41 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 			},
 			addSinglePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.addSinglePropertyValue(property, propertyConcreteModel);
+				po.addSinglePropertyValue(property, propertyConcreteModel);
 			},
 			editSinglePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.editSinglePropertyValue(property, propertyConcreteModel);
+				po.editSinglePropertyValue(property, propertyConcreteModel);
 			},
 			deleteSinglePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.deleteSinglePropertyValue(property, propertyConcreteModel);
+				po.deleteSinglePropertyValue(property, propertyConcreteModel);
 			},
 			selectSinglePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.selectSinglePropertyValue(property, propertyConcreteModel);
+				po.selectSinglePropertyValue(property, propertyConcreteModel);
 			},
 			viewSinglePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.viewSinglePropertyValue(property, propertyConcreteModel);
+				po.viewSinglePropertyValue(property, propertyConcreteModel);
 			},
 			editMultiplePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.editMultiplePropertyValue(property, propertyConcreteModel);
+				po.editMultiplePropertyValue(property, propertyConcreteModel);
 			},
 			viewMultiplePropertyValue : function(property, propertyConcreteModel)
 			{
-				pageObj.viewMultiplePropertyValue(property, propertyConcreteModel);
+				po.viewMultiplePropertyValue(property, propertyConcreteModel);
 			},
 			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
 			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",
 			downloadSinglePropertyValueFile : function(property, propertyConcreteModel)
 			{
-				pageObj.downloadSinglePropertyValueFile(property, propertyConcreteModel);
+				po.downloadSinglePropertyValueFile(property, propertyConcreteModel);
 			},
-			validationRequiredAsAdd : ("saveAdd" == pageObj.submitAction),
-			batchSet : pageObj.batchSet,
-			labels : pageObj.formLabels,
+			validationRequiredAsAdd : ("saveAdd" == po.submitAction),
+			batchSet : po.batchSet,
+			labels : po.formLabels,
 			dateFormat : "<c:out value='${sqlDateFormat}' />",
 			timestampFormat : "<c:out value='${sqlTimestampFormat}' />",
 			timeFormat : "<c:out value='${sqlTimeFormat}' />"

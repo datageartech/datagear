@@ -63,22 +63,21 @@
 	</form>
 </div>
 <%@ include file="include/page_js_obj.jsp" %>
+<%@ include file="include/page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	$.initButtons(pageObj.element());
+	$.initButtons(po.element());
 	
-	pageObj.form = pageObj.element("#${pageId}-form");
-	
-	pageObj.element("#previewScriptCode").click(function()
+	po.element("#previewScriptCode").click(function()
 	{
-		pageObj.open(contextPath+"/schemaUrlBuilder/previewScriptCode",
+		po.open(contextPath+"/schemaUrlBuilder/previewScriptCode",
 		{
-			data : { "scriptCode" : pageObj.element("textarea[name='scriptCode']").val() }
+			data : { "scriptCode" : po.element("textarea[name='scriptCode']").val() }
 		});
 	});
 	
-	pageObj.form.validate(
+	po.form().validate(
 	{
 		submitHandler : function(form)
 		{
@@ -86,7 +85,7 @@
 			{
 				success : function(response)
 				{
-					var pageParam = pageObj.pageParam();
+					var pageParam = po.pageParam();
 					
 					var close = false;
 					
@@ -94,7 +93,7 @@
 						close = (pageParam.afterSave() != false);
 					
 					if(close)
-						pageObj.close();
+						po.close();
 				}
 			});
 		},

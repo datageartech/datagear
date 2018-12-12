@@ -118,33 +118,33 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
 	</form>
 </div>
 <%@ include file="../include/page_js_obj.jsp" %>
+<%@ include file="../include/page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.form = pageObj.element("#${pageId}-form");
-	pageObj.driverEntityFormItemValue =  pageObj.element("#driverEntityFormItemValue");
-	pageObj.schemaDriverEntityFormItem = pageObj.element("#schemaDriverEntityFormItem");
-	pageObj.isDriverEntityEmpty = (pageObj.element("input[name='driverEntity.id']").val() == "");
+	po.driverEntityFormItemValue = function(){ return this.element("#driverEntityFormItemValue"); };
+	po.schemaDriverEntityFormItem = function(){ return this.element("#schemaDriverEntityFormItem"); };
+	po.isDriverEntityEmpty = (po.element("input[name='driverEntity.id']").val() == "");
 	
 	<%if(!readonly){%>
 	
-	pageObj.element("#schemaBuildUrlHelp").click(function()
+	po.element("#schemaBuildUrlHelp").click(function()
 	{
-		pageObj.open(contextPath+"/schemaUrlBuilder/buildUrl",
+		po.open(contextPath+"/schemaUrlBuilder/buildUrl",
 		{
-			data : { url : pageObj.element("input[name='url']").val() },
+			data : { url : po.element("input[name='url']").val() },
 			width: "60%",
 			pageParam :
 			{
 				"setSchemaUrl" : function(url)
 				{
-					pageObj.element("input[name='url']").val(url);
+					po.element("input[name='url']").val(url);
 				}
 			}
 		});
 	});
 	
-	pageObj.element("#driverEntitySelectButton").click(function()
+	po.element("#driverEntitySelectButton").click(function()
 	{
 		var options =
 		{
@@ -152,18 +152,18 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
 			{
 				submit : function(driverEntity)
 				{
-					pageObj.element("input[name='driverEntity.id']").val(driverEntity.id);
-					pageObj.element("#driverEntityText").val(driverEntity.displayText);
+					po.element("input[name='driverEntity.id']").val(driverEntity.id);
+					po.element("#driverEntityText").val(driverEntity.displayText);
 				}
 			}
 		};
 		$.setGridPageHeightOption(options);
-		pageObj.open(contextPath+"/driverEntity/select", options);
+		po.open(contextPath+"/driverEntity/select", options);
 	});
 	
-	pageObj.element("#driverEntityActionSelect").selectmenu(
+	po.element("#driverEntityActionSelect").selectmenu(
 	{
-		appendTo: pageObj.driverEntityFormItemValue,
+		appendTo: po.driverEntityFormItemValue(),
 		classes:
 		{
 	          "ui-selectmenu-button": "ui-button-icon-only splitbutton-select"
@@ -174,15 +174,15 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
     		
 			if("del" == action)
     		{
-				pageObj.element("#driverEntityId").val("");
-				pageObj.element("#driverEntityText").val("");
+				po.element("#driverEntityId").val("");
+				po.element("#driverEntityText").val("");
     		}
     	}
 	});
 	
-	pageObj.element("#driverEntityActionGroup").controlgroup();
+	po.element("#driverEntityActionGroup").controlgroup();
 	
-	pageObj.form.validate(
+	po.form().validate(
 	{
 		rules :
 		{
@@ -200,7 +200,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
 			{
 				success : function()
 				{
-					var pageParam = pageObj.pageParam();
+					var pageParam = po.pageParam();
 					
 					var close = true;
 					
@@ -208,7 +208,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
 						close = (pageParam.afterSave() != false);
 					
 					if(close)
-						pageObj.close();
+						po.close();
 				}
 			});
 		},
@@ -219,30 +219,32 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
 	});
 	<%}%>
 	
-	pageObj.element("input[name='shared']").checkboxradio({icon:false});
-	pageObj.element(".schema-shared-radios").controlgroup();
+	po.element("input[name='shared']").checkboxradio({icon:false});
+	po.element(".schema-shared-radios").controlgroup();
 	
-	$.initButtons(pageObj.element());
+	$.initButtons(po.element());
 	
-	if(pageObj.isDriverEntityEmpty)
-		pageObj.schemaDriverEntityFormItem.hide();
+	if(po.isDriverEntityEmpty)
+		po.schemaDriverEntityFormItem().hide();
 	
 	<%if(!readonly){%>
-	$("#schemaAdvancedSet", pageObj.page).button(
+	$("#schemaAdvancedSet", po.page).button(
 	{
-		icon: (pageObj.schemaDriverEntityFormItem.is(":hidden") ? "ui-icon-triangle-1-s" : "ui-icon-triangle-1-n"),
+		icon: (po.schemaDriverEntityFormItem().is(":hidden") ? "ui-icon-triangle-1-s" : "ui-icon-triangle-1-n"),
 		showLabel: false
 	})
 	.click(function()
 	{
-		if(pageObj.schemaDriverEntityFormItem.is(":hidden"))
+		var item = po.schemaDriverEntityFormItem();
+		
+		if(item.is(":hidden"))
 		{
-			pageObj.schemaDriverEntityFormItem.show();
+			item.show();
 			$(this).button("option", "icon", "ui-icon-triangle-1-n");
 		}
 		else
 		{
-			pageObj.schemaDriverEntityFormItem.hide();
+			item.hide();
 			$(this).button("option", "icon", "ui-icon-triangle-1-s");
 		}
 	});

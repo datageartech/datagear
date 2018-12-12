@@ -1045,6 +1045,9 @@ table.dataTable tbody tr td.cell-modified .cell-midified-tip.ui-state-error{
 	padding-left: 2em;
 	padding-right: 2em;
 }
+.page-form-schemaUrlBuilder form .form-content .form-item .form-item-value textarea{
+	vertical-align: top;
+}
 .page-form-schemaUrlBuilder form .form-content .form-item .form-item-value textarea.script-code-textarea{
 	height: 22em;
 }

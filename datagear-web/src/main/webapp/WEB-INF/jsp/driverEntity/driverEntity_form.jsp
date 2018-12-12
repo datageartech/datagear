@@ -80,32 +80,33 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 	</form>
 </div>
 <%@ include file="../include/page_js_obj.jsp" %>
+<%@ include file="../include/page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	$.initButtons(pageObj.element());
+	$.initButtons(po.element());
 	
-	pageObj.form = pageObj.element("#${pageId}-form");
-	pageObj.driverFiles = pageObj.element(".driver-files");
-
-	pageObj.url = function(action)
+	po.driverFiles = function(){ return this.element(".driver-files"); };
+	po.fileUploadInfo = function(){ return this.element(".file-info"); };
+	
+	po.url = function(action)
 	{
 		return contextPath + "/driverEntity/" + action;
 	};
 	
-	pageObj.getDriverEntityId = function()
+	po.getDriverEntityId = function()
 	{
-		return pageObj.element("input[name='id']").val();
+		return po.element("input[name='id']").val();
 	};
 	
-	pageObj.renderDriverFiles = function(fileInfos)
+	po.renderDriverFiles = function(fileInfos)
 	{
-		pageObj.driverFiles.empty();
+		po.driverFiles().empty();
 		
 		for(var i=0; i<fileInfos.length; i++)
 		{
 			var $fileInfo = $("<div class='ui-widget ui-widget-content ui-corner-all driver-file' />")
-				.appendTo(pageObj.driverFiles);
+				.appendTo(po.driverFiles());
 			
 			<%if(!readonly){%>
 			$("<input type='hidden' />").attr("name", "driverLibraryName").attr("value", fileInfos[i].name).appendTo($fileInfo);
@@ -116,14 +117,14 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 			$deleteIcon.click(function()
 			{
 				var driverFile = $(this).attr("driverFile");
-				pageObj.confirm("<fmt:message key='driverEntity.confirmDeleteDriverFile' />",
+				po.confirm("<fmt:message key='driverEntity.confirmDeleteDriverFile' />",
 				{
 					"confirm" : function()
 					{
-						var id = pageObj.getDriverEntityId();
-						$.post(pageObj.url("deleteDriverFile"), {"id" : id, "file" : driverFile}, function(operationMessage)
+						var id = po.getDriverEntityId();
+						$.post(po.url("deleteDriverFile"), {"id" : id, "file" : driverFile}, function(operationMessage)
 						{
-							pageObj.renderDriverFiles(operationMessage.data);
+							po.renderDriverFiles(operationMessage.data);
 						});
 					}
 				});
@@ -134,10 +135,10 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 				.appendTo($fileInfo)
 				.click(function()
 				{
-					var id = pageObj.getDriverEntityId();
+					var id = po.getDriverEntityId();
 					var driverFile = $(this).text();
 					
-					$.postOnForm(pageObj.url("downloadDriverFile"),
+					$.postOnForm(po.url("downloadDriverFile"),
 					{
 						data : {"id" : id, "file" : driverFile}
 					});
@@ -145,46 +146,44 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 		}
 	};
 	
-	pageObj.refreshDriverFiles = function()
+	po.refreshDriverFiles = function()
 	{
-		var id = pageObj.getDriverEntityId();
+		var id = po.getDriverEntityId();
 		
 		if(id != "")
 		{
-			$.getJSON(pageObj.url("listDriverFile"), {"id" : id}, function(fileInfos)
+			$.getJSON(po.url("listDriverFile"), {"id" : id}, function(fileInfos)
 			{
-				pageObj.renderDriverFiles(fileInfos);
+				po.renderDriverFiles(fileInfos);
 			});
 		}
 	};
 	
 	<%if(!readonly){%>
 	
-	pageObj.fileUploadInfo = pageObj.element(".file-info");
-	
-	pageObj.element(".fileinput-button").fileupload(
+	po.element(".fileinput-button").fileupload(
 	{
-		url : pageObj.url("uploadDriverFile"),
+		url : po.url("uploadDriverFile"),
 		paramName : "file",
 		success : function(serverFileInfos, textStatus, jqXHR)
 		{
-			$.fileuploadsuccessHandlerForUploadInfo(pageObj.fileUploadInfo, true);
+			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), true);
 			
-			pageObj.renderDriverFiles(serverFileInfos);
+			po.renderDriverFiles(serverFileInfos);
 			
 			$.tipSuccess("<fmt:message key='uploadSuccess' />");
 		}
 	})
 	.bind('fileuploadadd', function (e, data)
 	{
-		$.fileuploadaddHandlerForUploadInfo(e, data, pageObj.fileUploadInfo);
+		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	})
 	.bind('fileuploadprogressall', function (e, data)
 	{
-		$.fileuploadprogressallHandlerForUploadInfo(e, data, pageObj.fileUploadInfo);
+		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
 
-	pageObj.form.validate(
+	po.form().validate(
 	{
 		rules :
 		{
@@ -202,7 +201,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 			{
 				success : function()
 				{
-					var pageParam = pageObj.pageParam();
+					var pageParam = po.pageParam();
 					
 					var close = true;
 					
@@ -210,7 +209,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 						close = (pageParam.afterSave() != false);
 					
 					if(close)
-						pageObj.close();
+						po.close();
 				}
 			});
 		},
@@ -222,7 +221,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEntity
 	<%}%>
 	
 	<%if(!"saveAdd".equals(formAction)){%>
-	pageObj.refreshDriverFiles();
+	po.refreshDriverFiles();
 	<%}%>
 })
 (${pageId});

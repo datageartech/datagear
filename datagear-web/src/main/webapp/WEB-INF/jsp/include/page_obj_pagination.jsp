@@ -12,27 +12,27 @@ data_page_obj.jsp
 
 变量：
 //分页回调函数，不允许为null，格式为：function(pagingParam){}
-pageObj.paging = undefined;
+po.paging = undefined;
 --%>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.pagination = pageObj.element("#${pageId}-pagination");
+	po.pagination = function(){ return this.element("#${pageId}-pagination"); };
 	
-	pageObj.getPagingParam = function()
+	po.getPagingParam = function()
 	{
 		var pagingParam =
 		{
-			"page" : pageObj.pagination.pagination("option", "page"),
-			"pageSize" : pageObj.pagination.pagination("option", "pageSize")
+			"page" : po.pagination().pagination("option", "page"),
+			"pageSize" : po.pagination().pagination("option", "pageSize")
 		};
 		
 		return pagingParam;
 	};
 	
-	pageObj.initPagination = function()
+	po.initPagination = function()
 	{
-		pageObj.pagination.pagination(
+		po.pagination().pagination(
 		{
 			pageSizeSetLabel : "<fmt:message key='confirm' />",
 			toPageLabel : "<fmt:message key='jumpto' />",
@@ -46,15 +46,15 @@ pageObj.paging = undefined;
 					"pageSize" : pageSize
 				};
 				
-				pageObj.paging(pagingParam);
+				po.paging(pagingParam);
 				return false;
 			}
 		});
 	};
 	
-	pageObj.refreshPagination = function(total, page, pageSize)
+	po.refreshPagination = function(total, page, pageSize)
 	{
-		pageObj.pagination
+		po.pagination()
 		.pagination("option", "total", total)
 		.pagination("option", "pageSize", pageSize)
 		.pagination("option", "page", page)

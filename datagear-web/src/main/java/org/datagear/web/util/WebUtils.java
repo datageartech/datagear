@@ -330,7 +330,33 @@ public class WebUtils
 	 */
 	public static String generatePageId()
 	{
-		return "p" + Long.toHexString(System.currentTimeMillis());
+		return generatePageId("p");
+	}
+
+	/**
+	 * 生成页面ID。
+	 * 
+	 * @param prefix
+	 * @return
+	 */
+	public static String generatePageId(String prefix)
+	{
+		String uuid = java.util.UUID.randomUUID().toString();
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(prefix);
+
+		char[] cs = uuid.toCharArray();
+		for (int i = 0; i < cs.length; i++)
+		{
+			char c = cs[i];
+
+			if (c != '-')
+				sb.append(c);
+		}
+
+		return sb.toString();
 	}
 
 	/**
@@ -353,5 +379,40 @@ public class WebUtils
 			parentPage = "";
 
 		return parentPage;
+	}
+
+	/**
+	 * 获取页面表单ID。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getPageFormId(HttpServletRequest request)
+	{
+		return getPageElementId(request, "form");
+	}
+
+	/**
+	 * 获取页面表格ID。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getPageTableId(HttpServletRequest request)
+	{
+		return getPageElementId(request, "table");
+	}
+
+	/**
+	 * 获取页面元素ID。
+	 * 
+	 * @param request
+	 * @param elementId
+	 * @return
+	 */
+	public static String getPageElementId(HttpServletRequest request, String elementId)
+	{
+		String pageId = getPageId(request);
+		return pageId + "-" + elementId;
 	}
 }

@@ -84,27 +84,27 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 <%@ include file="include/data_page_obj_edit_grid_js.jsp" %>
 <%}%>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.conditionSource = <%writeJson(application, out, conditionSource);%>;
+	po.conditionSource = <%writeJson(application, out, conditionSource);%>;
 	
-	$.initButtons(pageObj.element(".operation"));
+	$.initButtons(po.element(".operation"));
 	
-	pageObj.onModel(function(model)
+	po.onModel(function(model)
 	{
 		<%if(!readonly){%>
-			pageObj.element("input[name=addButton]").click(function()
+			po.element("input[name=addButton]").click(function()
 			{
-				pageObj.open(pageObj.url("", "add", "batchSet=true"), { pinTitleButton : true });
+				po.open(po.url("", "add", "batchSet=true"), { pinTitleButton : true });
 			});
 			
-			pageObj.element("input[name=editButton]").click(function()
+			po.element("input[name=editButton]").click(function()
 			{
-				pageObj.executeOnSelect(function(row)
+				po.executeOnSelect(function(row)
 				{
 					var data = {"data" : row};
 					
-					pageObj.open(pageObj.url("edit"),
+					po.open(po.url("edit"),
 					{
 						data : data,
 						pinTitleButton : true
@@ -113,13 +113,13 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 			});
 		<%}%>
 
-		pageObj.element("input[name=viewButton]").click(function()
+		po.element("input[name=viewButton]").click(function()
 		{
-			pageObj.executeOnSelect(function(row)
+			po.executeOnSelect(function(row)
 			{
 				var data = {"data" : row};
 				
-				pageObj.open(pageObj.url("view"),
+				po.open(po.url("view"),
 				{
 					data : data
 				});
@@ -127,21 +127,21 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 		});
 		
 		<%if(!readonly){%>
-			pageObj.element("input[name=deleteButton]").click(function()
+			po.element("input[name=deleteButton]").click(function()
 			{
-				pageObj.executeOnSelects(function(rows)
+				po.executeOnSelects(function(rows)
 				{
-					pageObj.confirm("<fmt:message key='data.confirmDelete'><fmt:param>"+rows.length+"</fmt:param></fmt:message>",
+					po.confirm("<fmt:message key='data.confirmDelete'><fmt:param>"+rows.length+"</fmt:param></fmt:message>",
 					{
 						"confirm" : function()
 						{
 							var data = {"data" : rows};
 							
-							pageObj.ajaxSubmitForHandleDuplication("delete", data, "<fmt:message key='delete.continueIgnoreDuplicationTemplate' />",
+							po.ajaxSubmitForHandleDuplication("delete", data, "<fmt:message key='delete.continueIgnoreDuplicationTemplate' />",
 							{
 								"success" : function()
 								{
-									pageObj.refresh();
+									po.refresh();
 								}
 							});
 						}
@@ -150,13 +150,13 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 			});
 		<%}%>
 		
-		pageObj.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(pageObj.conditionSource);
-		pageObj.initConditionPanel();
-		pageObj.initPagination();
-		pageObj.initModelDataTableAjax(pageObj.url("queryData"), model);
+		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(po.conditionSource);
+		po.initConditionPanel();
+		po.initPagination();
+		po.initModelDataTableAjax(po.url("queryData"), model);
 		
 		<%if(!readonly){%>
-		pageObj.initEditGrid(model);
+		po.initEditGrid(model);
 		<%}%>
 	});
 })

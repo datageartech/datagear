@@ -11,73 +11,73 @@
 page_js_obj.jsp
 --%>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.table = pageObj.element("#${pageId}-table");
+	po.table = function(){ return this.element("#${pageId}-table"); };
 	
 	//计算表格高度
-	pageObj.calTableHeight = function()
+	po.calTableHeight = function()
 	{
-		var height =  pageObj.element("> .content").actual("height") - 50;
+		var height =  po.element("> .content").actual("height") - 50;
 		
 		return height;
 	};
 	
 	//计算表格宽度
-	pageObj.calTableWidth = function()
+	po.calTableWidth = function()
 	{
-		var width = pageObj.element("> .content").actual("width");
+		var width = po.element("> .content").actual("width");
 		
 		return width;
 	};
 	
-	pageObj.renderCheckColumn = function(data, type, row, meta)
+	po.renderCheckColumn = function(data, type, row, meta)
 	{
 		return "<div class='ui-widget ui-widget-content ui-corner-all checkbox'><span class='ui-icon ui-icon-check'></span></div>";
 	};
 	
 	/**
-	 * 默认pageObj.buildDataTableSettingsAjax请求参数实现。
+	 * 默认po.buildDataTableSettingsAjax请求参数实现。
 	 */
-	pageObj.dataTableAjaxParam = function()
+	po.dataTableAjaxParam = function()
 	{
 		var param = {};
 		
-		if(pageObj.searchParam)
-			$.extend(param, pageObj.searchParam);
+		if(po.searchParam)
+			$.extend(param, po.searchParam);
 		
-		if(pageObj.pagingParam)
-			$.extend(param, pageObj.pagingParam);
+		if(po.pagingParam)
+			$.extend(param, po.pagingParam);
 		
 		return param;
 	};
 	
 	/**
-	 * 默认pageObj.buildDataTableSettingsAjax请求成功回调实现。
+	 * 默认po.buildDataTableSettingsAjax请求成功回调实现。
 	 */
-	pageObj.dataTableAjaxSuccess = function(pagingData, textStatus, jqXHR)
+	po.dataTableAjaxSuccess = function(pagingData, textStatus, jqXHR)
 	{
-		if(pageObj.refreshPagination)
-			pageObj.refreshPagination(pagingData.total, pagingData.page, pagingData.pageSize);
+		if(po.refreshPagination)
+			po.refreshPagination(pagingData.total, pagingData.page, pagingData.pageSize);
 	};
 	
 	/**
 	 * 集成data_page_obj_searchform_js.jsp的默认实现。
 	 */
-	pageObj.search = function(searchParam)
+	po.search = function(searchParam)
 	{
-		pageObj.searchParam = searchParam;
+		po.searchParam = searchParam;
 		
-		pageObj.refresh();
+		po.refresh();
 	};
 	
 	/**
 	 * 集成page_obj_pagination.jsp的默认实现。
 	 */
-	pageObj.paging = function(pagingParam)
+	po.paging = function(pagingParam)
 	{
-		pageObj.pagingParam = pagingParam;
-		pageObj.refresh();
+		po.pagingParam = pagingParam;
+		po.refresh();
 		
 		return false;
 	};
@@ -85,14 +85,14 @@ page_js_obj.jsp
 	/**
 	 * 构建ajax数据表格选项。
 	 * 此ajax选项支持两个回调函数：
-	 *   pageObj.dataTableAjaxParam() 用于扩展ajax请求参数；
-	 *   pageObj.dataTableAjaxSuccess(pagingData, textStatus, jqXHR) ajax成功回调函数；
+	 *   po.dataTableAjaxParam() 用于扩展ajax请求参数；
+	 *   po.dataTableAjaxSuccess(pagingData, textStatus, jqXHR) ajax成功回调函数；
 	 * @param columns 必选，列元数据
 	 * @param url 必选，ajax请求URL
 	 * @param ajaxSuccessCallback 可选，ajax成功回调函数，function(pagingData, textStatus, jqXHR){}
 	 * @param settings 可选，其他选项
 	 */
-	pageObj.buildDataTableSettingsAjax = function(columns, url, settings)
+	po.buildDataTableSettingsAjax = function(columns, url, settings)
 	{
 		settings = $.extend(
 		{
@@ -112,10 +112,10 @@ page_js_obj.jsp
 				
 				var myData = undefined;
 				
-				if($.isFunction(pageObj.dataTableAjaxParam))
-					myData = pageObj.dataTableAjaxParam();
+				if($.isFunction(po.dataTableAjaxParam))
+					myData = po.dataTableAjaxParam();
 				else
-					myData = pageObj.dataTableAjaxParam;
+					myData = po.dataTableAjaxParam;
 				
 				var param = $.extend({ "order" : nameOrder }, myData);
 				
@@ -140,15 +140,15 @@ page_js_obj.jsp
 							callback(tableData);
 						}
 						
-						if(pageObj.dataTableAjaxSuccess)
-							pageObj.dataTableAjaxSuccess(data, textStatus, jqXHR);
+						if(po.dataTableAjaxSuccess)
+							po.dataTableAjaxSuccess(data, textStatus, jqXHR);
 					}
 				});
 			}
 		},
 		settings);
 		
-		return pageObj.buildDataTableSettings(settings);
+		return po.buildDataTableSettings(settings);
 	};
 	
 	/**
@@ -157,7 +157,7 @@ page_js_obj.jsp
 	 * @param data 可选，初始数据
 	 * @param settings 可选，其他选项
 	 */
-	pageObj.buildDataTableSettingsLocal = function(columns, data, settings)
+	po.buildDataTableSettingsLocal = function(columns, data, settings)
 	{
 		settings = $.extend(
 		{
@@ -166,19 +166,19 @@ page_js_obj.jsp
 		}, 
 		settings);
 		
-		return pageObj.buildDataTableSettings(settings);
+		return po.buildDataTableSettings(settings);
 	};
 	
 	/**
 	 * 构建表格选项。
 	 * @param settings 必选，选项
 	 */
-	pageObj.buildDataTableSettings = function(settings)
+	po.buildDataTableSettings = function(settings)
 	{
 		var newColumns = [
 				{
 					title : "<fmt:message key='select' />", data : "", defaultContent: "", width : "3em",
-					orderable : false, render : pageObj.renderCheckColumn, className : "column-check"
+					orderable : false, render : po.renderCheckColumn, className : "column-check"
 				}
 			];
 		newColumns = newColumns.concat(settings.columns);
@@ -186,7 +186,7 @@ page_js_obj.jsp
 		settings = $.extend(
 		{
 			"scrollX": true,
-			"scrollY" : pageObj.calTableHeight(),
+			"scrollY" : po.calTableHeight(),
 	        "scrollCollapse": false,
 			"paging" : false,
 			"searching" : false,
@@ -208,16 +208,16 @@ page_js_obj.jsp
 					var selected = tr.hasClass("selected");
 					
 					if(selected)
-						pageObj.table.DataTable().row(tr).deselect();
+						po.table().DataTable().row(tr).deselect();
 					else
-						pageObj.table.DataTable().row(tr).select();
+						po.table().DataTable().row(tr).select();
 				})
 				//固定选择列后hover效果默认不能同步，需要自己实现
 				.hover(
 				function(event)
 				{
 					var rowIndex = $(this).parent().index() + 1;
-					pageObj.element(".dataTable").each(function()
+					po.element(".dataTable").each(function()
 					{
 						$("tr:eq("+rowIndex+")", this).addClass("hover");
 					});
@@ -225,7 +225,7 @@ page_js_obj.jsp
 				function(event)
 				{
 					var rowIndex = $(this).parent().index() + 1;
-					pageObj.element(".dataTable").each(function()
+					po.element(".dataTable").each(function()
 					{
 						$("tr:eq("+rowIndex+")", this).removeClass("hover");
 					});
@@ -236,7 +236,7 @@ page_js_obj.jsp
 				function(event)
 				{
 					var rowIndex = $(this).index() + 1;
-					pageObj.element(".dataTable").each(function()
+					po.element(".dataTable").each(function()
 					{
 						$("tr:eq("+rowIndex+")", this).addClass("hover");
 					});
@@ -244,7 +244,7 @@ page_js_obj.jsp
 				function()
 				{
 					var rowIndex = $(this).index() + 1;
-					pageObj.element(".dataTable").each(function()
+					po.element(".dataTable").each(function()
 					{
 						$("tr:eq("+rowIndex+")", this).removeClass("hover");
 					});
@@ -258,17 +258,17 @@ page_js_obj.jsp
 		return settings;
 	};
 	
-	pageObj.initDataTable = function(tableSettings)
+	po.initDataTable = function(tableSettings)
 	{
-		pageObj.tableSettings = tableSettings;
-		pageObj.table.dataTable(tableSettings);
+		po.tableSettings = tableSettings;
+		po.table().dataTable(tableSettings);
 		
-		$(".dataTables_scrollHead .column-check", pageObj.table.DataTable().table().container()).click(function()
+		$(".dataTables_scrollHead .column-check", po.table().DataTable().table().container()).click(function()
 		{
 			var $this = $(this);
 			var checked = $this.hasClass("all-checked");
 			
-			var rows = pageObj.table.DataTable().rows();
+			var rows = po.table().DataTable().rows();
 			
 			if(checked)
 			{
@@ -283,58 +283,58 @@ page_js_obj.jsp
 		});
 	};
 	
-	pageObj.refresh = function()
+	po.refresh = function()
 	{
-		pageObj.table.DataTable().draw();
+		po.table().DataTable().draw();
 	};
 	
-	pageObj.setTableData = function(tableDatas)
+	po.setTableData = function(tableDatas)
 	{
-		pageObj.deleteAllRow();
-		pageObj.addRowData(tableDatas);
+		po.deleteAllRow();
+		po.addRowData(tableDatas);
 	};
 
 	//单选处理函数
-	pageObj.executeOnSelect = function(callback)
+	po.executeOnSelect = function(callback)
 	{
-		var rows = pageObj.table.DataTable().rows('.selected');
-		var rowsData = pageObj.getRowsData(rows);
+		var rows = po.table().DataTable().rows('.selected');
+		var rowsData = po.getRowsData(rows);
 		
 		if(!rowsData || rowsData.length != 1)
 			$.tipInfo("<fmt:message key='pleaseSelectOnlyOneRow' />");
 		else
 		{
-			callback.call(pageObj, rowsData[0], pageObj.getRowsIndex(rows)[0]);
+			callback.call(po, rowsData[0], po.getRowsIndex(rows)[0]);
 		}
 	};
 	
 	//多选处理函数
-	pageObj.executeOnSelects = function(callback)
+	po.executeOnSelects = function(callback)
 	{
-		var rows = pageObj.table.DataTable().rows('.selected');
-		var rowsData = pageObj.getRowsData(rows);
+		var rows = po.table().DataTable().rows('.selected');
+		var rowsData = po.getRowsData(rows);
 		
 		if(!rowsData || rowsData.length < 1)
 			$.tipInfo("<fmt:message key='pleaseSelectAtLeastOneRow' />");
 		else
 		{
-			callback.call(pageObj, rowsData, pageObj.getRowsIndex(rows));
+			callback.call(po, rowsData, po.getRowsIndex(rows));
 		}
 	};
 	
 	//获取选中数据
-	pageObj.getSelectedData = function()
+	po.getSelectedData = function()
 	{
-		var rows = pageObj.table.DataTable().rows('.selected');
-		var rowsData = pageObj.getRowsData(rows);
+		var rows = po.table().DataTable().rows('.selected');
+		var rowsData = po.getRowsData(rows);
 		
 		return (rowsData || []);
 	};
 	
-	pageObj.getRowsData = function(rows)
+	po.getRowsData = function(rows)
 	{
 		if(rows == undefined)
-			rows = pageObj.table.DataTable().rows();
+			rows = po.table().DataTable().rows();
 		
 		var tableRowsData = rows.data();
 		
@@ -345,19 +345,19 @@ page_js_obj.jsp
 		return rowsData;
 	};
 	
-	pageObj.getRowsIndex = function(rows)
+	po.getRowsIndex = function(rows)
 	{
 		if(rows == undefined)
-			rows = pageObj.table.DataTable().rows();
+			rows = po.table().DataTable().rows();
 			
 		var indexes = rows.indexes();
 		
 		return indexes;
 	};
 	
-	pageObj.addRowData = function(data)
+	po.addRowData = function(data)
 	{
-		var table = pageObj.table.DataTable();
+		var table = po.table().DataTable();
 		
 		if($.isArray(data))
 			table.rows.add(data).draw();
@@ -365,9 +365,9 @@ page_js_obj.jsp
 			table.row.add(data).draw();
 	};
 	
-	pageObj.setRowData = function(rowIndex, data)
+	po.setRowData = function(rowIndex, data)
 	{
-		var table = pageObj.table.DataTable();
+		var table = po.table().DataTable();
 		
 		if(rowIndex.length != undefined)
 		{
@@ -380,9 +380,9 @@ page_js_obj.jsp
 			table.row(rowIndex).data(data).draw();
 	};
 	
-	pageObj.deleteRow = function(rowIndex)
+	po.deleteRow = function(rowIndex)
 	{
-		var table = pageObj.table.DataTable();
+		var table = po.table().DataTable();
 		
 		if(rowIndex.length != undefined)
 		{
@@ -392,38 +392,38 @@ page_js_obj.jsp
 			table.row(rowIndex).remove().draw();
 	};
 	
-	pageObj.deleteAllRow = function()
+	po.deleteAllRow = function()
 	{
-		pageObj.table.DataTable().rows().remove();
+		po.table().DataTable().rows().remove();
 	};
 	
 	//表格高度自适应
 	$(window).on('resize', function(event) 
 	{
 		//窗口或者父元素（比如所在对话框）调整大小
-		var resize = (event.target == window || pageObj.table.closest(event.target).length > 0);
+		var resize = (event.target == window || po.table().closest(event.target).length > 0);
 		
 		if(resize)
 		{
-			clearTimeout(pageObj.tableResizeTimer);
+			clearTimeout(po.tableResizeTimer);
 			
-			pageObj.tableResizeTimer = setTimeout(function()
+			po.tableResizeTimer = setTimeout(function()
 			{
-				var dtScrollBody = pageObj.element('.dataTables_scrollBody');
+				var dtScrollBody = po.element('.dataTables_scrollBody');
 				
-				var height = pageObj.calTableHeight();
-				var width = pageObj.element(".dataTable", dtScrollBody).actual("width");
+				var height = po.calTableHeight();
+				var width = po.element(".dataTable", dtScrollBody).actual("width");
 				
 				dtScrollBody.css('height', height);
-				pageObj.element('.dataTables_scrollHeadInner').css('width', width);
-				pageObj.element('.dataTables_scrollHeadInner > .dataTable').css('width', width);
+				po.element('.dataTables_scrollHeadInner').css('width', width);
+				po.element('.dataTables_scrollHeadInner > .dataTable').css('width', width);
 				
-				pageObj.table.DataTable().fixedColumns().relayout();
+				po.table().DataTable().fixedColumns().relayout();
 				
 				//XXX 不能使用下面的代码让表格自适应宽度，因为在隐藏选项卡中的表格宽度计算会有问题
-				//var height = pageObj.calTableHeight();
-				//pageObj.element('.dataTables_scrollBody').css('height', height);
-				//pageObj.table.DataTable().draw();
+				//var height = po.calTableHeight();
+				//po.element('.dataTables_scrollBody').css('height', height);
+				//po.table().DataTable().draw();
 			},
 			250);
 		}

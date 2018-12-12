@@ -94,22 +94,22 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 <%@ include file="include/data_page_obj_edit_grid_js.jsp" %>
 <%}%>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.readonly = <%=readonly%>;
-	pageObj.data = $.unref(<%writeJson(application, out, data);%>);
-	pageObj.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
-	pageObj.clientOperation = <%=clientOperation%>;
+	po.readonly = <%=readonly%>;
+	po.data = $.unref(<%writeJson(application, out, data);%>);
+	po.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
+	po.clientOperation = <%=clientOperation%>;
 	
 	<%if(!clientOperation){%>
-	pageObj.conditionSource = <%writeJson(application, out, conditionSource);%>;
+	po.conditionSource = <%writeJson(application, out, conditionSource);%>;
 	<%}%>
 	
-	$.initButtons(pageObj.element(".operation"));
+	$.initButtons(po.element(".operation"));
 	
-	pageObj.buildActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
+	po.buildActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
 	{
-		var requestParams = { "data" : pageObj.data, "propertyPath" : pageObj.propertyPath, "clientOperation" : pageObj.clientOperation };
+		var requestParams = { "data" : po.data, "propertyPath" : po.propertyPath, "clientOperation" : po.clientOperation };
 		if(extraRequestParams)
 			$.extend(requestParams, extraRequestParams);
 		
@@ -124,94 +124,94 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		return actionParam;
 	};
 	
-	pageObj.restoreGridData = function()
+	po.restoreGridData = function()
 	{
-		var rowsData = pageObj.getRowsData();
+		var rowsData = po.getRowsData();
 		
-		$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, rowsData);
+		$.model.propertyPathValue(po.data, po.propertyPath, rowsData);
 		
-		var pageParam = pageObj.pageParam();
+		var pageParam = po.pageParam();
 		
 		if(pageParam && pageParam.submit)
 			pageParam.submit(rowsData);
 	};
 	
-	pageObj.onModel(function(model)
+	po.onModel(function(model)
 	{
-		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, pageObj.propertyPath);
+		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, po.propertyPath);
 		var property = propertyInfo.property;
 		var propertyModel = propertyInfo.model;
 		
-		pageObj.mappedByWith = $.model.findMappedByWith(property, propertyModel);
+		po.mappedByWith = $.model.findMappedByWith(property, propertyModel);
 		
-		pageObj.dataTableAjaxParamParent = pageObj.dataTableAjaxParam;
+		po.dataTableAjaxParamParent = po.dataTableAjaxParam;
 		
-		pageObj.dataTableAjaxParam = function()
+		po.dataTableAjaxParam = function()
 		{
-			var param = pageObj.dataTableAjaxParamParent();
+			var param = po.dataTableAjaxParamParent();
 			
 			$.extend(param, 
 			{
-				"data" : pageObj.data,
-				"propertyPath" : pageObj.propertyPath
+				"data" : po.data,
+				"propertyPath" : po.propertyPath
 			});
 			
 			return param;
 		};
 		
-		pageObj.element("input[name=viewButton]").click(function()
+		po.element("input[name=viewButton]").click(function()
 		{
-			pageObj.executeOnSelect(function(row, index)
+			po.executeOnSelect(function(row, index)
 			{
 				var options = undefined;
 				
-				if(pageObj.clientOperation)
+				if(po.clientOperation)
 				{
-					options = pageObj.buildActionOptions(property, propertyModel,
+					options = po.buildActionOptions(property, propertyModel,
 							{
-								"propertyPath" : $.propertyPath.concatElementIndex(pageObj.propertyPath, index)
+								"propertyPath" : $.propertyPath.concatElementIndex(po.propertyPath, index)
 							});
 					
-					pageObj.open(pageObj.url("viewMultiplePropValueElement"), options);
+					po.open(po.url("viewMultiplePropValueElement"), options);
 				}
 				else
 				{
-					$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, [ row ]);
-					var propertyPath = $.propertyPath.concatElementIndex(pageObj.propertyPath, 0);
+					$.model.propertyPathValue(po.data, po.propertyPath, [ row ]);
+					var propertyPath = $.propertyPath.concatElementIndex(po.propertyPath, 0);
 					
-					options = pageObj.buildActionOptions(property, propertyModel,
+					options = po.buildActionOptions(property, propertyModel,
 							{
 								"propertyPath" : propertyPath
 							});
 					
-					pageObj.open(pageObj.url("viewMultiplePropValueElement"), options);
+					po.open(po.url("viewMultiplePropValueElement"), options);
 					
-					$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, []);
+					$.model.propertyPathValue(po.data, po.propertyPath, []);
 				}
 			});
 		});
 		
 		<%if(!readonly){%>
-			pageObj.addMultiplePropValueElement = function()
+			po.addMultiplePropValueElement = function()
 			{
 				var url = undefined;
 				var options = undefined;
 				
-				if(pageObj.clientOperation)
+				if(po.clientOperation)
 				{
-					url = pageObj.url("addMultiplePropValueElement");
+					url = po.url("addMultiplePropValueElement");
 					
-					var index = pageObj.table.DataTable().rows().data().length;
+					var index = po.table().DataTable().rows().data().length;
 					
-					options = pageObj.buildActionOptions(property, propertyModel,
+					options = po.buildActionOptions(property, propertyModel,
 							{
-								"propertyPath" : $.propertyPath.concatElementIndex(pageObj.propertyPath, index)
+								"propertyPath" : $.propertyPath.concatElementIndex(po.propertyPath, index)
 							},
 							{
 								"submit" : function(propValueElement)
 								{
-									pageObj.addRowData(propValueElement);
-									pageObj.restoreGridData();
+									po.addRowData(propValueElement);
+									po.restoreGridData();
 									
 									$.tipSuccess("<fmt:message key='haveAdd' />");
 								}
@@ -219,46 +219,46 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				}
 				else
 				{
-					url = pageObj.url("", "addMultiplePropValueElement", "batchSet=true");
+					url = po.url("", "addMultiplePropValueElement", "batchSet=true");
 					
-					options = pageObj.buildActionOptions(property, propertyModel,
+					options = po.buildActionOptions(property, propertyModel,
 							{
-								"propertyPath" : $.propertyPath.concatElementIndex(pageObj.propertyPath, 0)
+								"propertyPath" : $.propertyPath.concatElementIndex(po.propertyPath, 0)
 							},
 							null);
 				}
 				
 				options.pinTitleButton = true;
 				
-				pageObj.open(url, options);
+				po.open(url, options);
 			};
 			
 			<%if(isPrivatePropertyModel){%>
-				pageObj.element("input[name=addButton]").click(function()
+				po.element("input[name=addButton]").click(function()
 				{
-					pageObj.addMultiplePropValueElement();
+					po.addMultiplePropValueElement();
 				});
 			<%}else{%>
-				pageObj.element("input[name=selectButton]").click(function()
+				po.element("input[name=selectButton]").click(function()
 				{
-					var options = pageObj.buildActionOptions(property, propertyModel, null, 
+					var options = po.buildActionOptions(property, propertyModel, null, 
 							{
 								"submit" : function(rows)
 								{
-									if(pageObj.clientOperation)
+									if(po.clientOperation)
 									{
-										pageObj.addRowData(rows);
-										pageObj.restoreGridData();
+										po.addRowData(rows);
+										po.restoreGridData();
 										
 										$.tipSuccess("<fmt:message key='haveAdd' />");
 									}
 									else
 									{
-										var param = { "data" : pageObj.data, "propertyPath" : pageObj.propertyPath, "propValueElements" : rows };
+										var param = { "data" : po.data, "propertyPath" : po.propertyPath, "propValueElements" : rows };
 										
-										$.post(pageObj.url("saveAddMultiplePropValueElements"), param, function()
+										$.post(po.url("saveAddMultiplePropValueElements"), param, function()
 										{
-											pageObj.refresh();
+											po.refresh();
 										});
 									}
 								}
@@ -266,76 +266,76 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		
 					$.setGridPageHeightOption(options);
 					options.pinTitleButton = true;
-					pageObj.open(pageObj.url("selectPropValue")+"?multiple", options);
+					po.open(po.url("selectPropValue")+"?multiple", options);
 				});
 			<%}%>
 			
-			pageObj.element("input[name=editButton]").click(function()
+			po.element("input[name=editButton]").click(function()
 			{
-				pageObj.executeOnSelect(function(row, index)
+				po.executeOnSelect(function(row, index)
 				{
 					var options = undefined;
 					
-					if(pageObj.clientOperation)
+					if(po.clientOperation)
 					{
-						options = pageObj.buildActionOptions(property, propertyModel,
+						options = po.buildActionOptions(property, propertyModel,
 								{
-									"propertyPath" : $.propertyPath.concatElementIndex(pageObj.propertyPath, index)
+									"propertyPath" : $.propertyPath.concatElementIndex(po.propertyPath, index)
 								},
 								{
 									"submit" : function(propValueElement)
 									{
-										pageObj.setRowData(index, propValueElement);
-										pageObj.restoreGridData();
+										po.setRowData(index, propValueElement);
+										po.restoreGridData();
 									}
 								});
 						
 						options.pinTitleButton = true;
 						
-						pageObj.open(pageObj.url("editMultiplePropValueElement"), options);
+						po.open(po.url("editMultiplePropValueElement"), options);
 					}
 					else
 					{
-						$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, [ row ]);
-						var propertyPath = $.propertyPath.concatElementIndex(pageObj.propertyPath, 0);
+						$.model.propertyPathValue(po.data, po.propertyPath, [ row ]);
+						var propertyPath = $.propertyPath.concatElementIndex(po.propertyPath, 0);
 						
-						options = pageObj.buildActionOptions(property, propertyModel,
+						options = po.buildActionOptions(property, propertyModel,
 								{
 									"propertyPath" : propertyPath
 								});
 						
 						options.pinTitleButton = true;
 						
-						pageObj.open(pageObj.url("editMultiplePropValueElement"), options);
+						po.open(po.url("editMultiplePropValueElement"), options);
 						
-						$.model.propertyPathValue(pageObj.data, pageObj.propertyPath, []);
+						$.model.propertyPathValue(po.data, po.propertyPath, []);
 					}
 				});
 			});
 			
-			pageObj.element("input[name=deleteButton]").click(
+			po.element("input[name=deleteButton]").click(
 			function()
 			{
-				pageObj.executeOnSelects(function(rows, indexes)
+				po.executeOnSelects(function(rows, indexes)
 				{
-					pageObj.confirm("<fmt:message key='data.confirmDelete'><fmt:param>"+rows.length+"</fmt:param></fmt:message>",
+					po.confirm("<fmt:message key='data.confirmDelete'><fmt:param>"+rows.length+"</fmt:param></fmt:message>",
 					{
 						"confirm" : function()
 						{
-							if(pageObj.clientOperation)
+							if(po.clientOperation)
 							{
-								pageObj.deleteRow(indexes);
-								pageObj.restoreGridData();
+								po.deleteRow(indexes);
+								po.restoreGridData();
 							}
 							else
 							{
-								var options = pageObj.buildActionOptions(property, propertyModel, {"propValueElements" : rows}, null);
+								var options = po.buildActionOptions(property, propertyModel, {"propValueElements" : rows}, null);
 								
-								pageObj.ajaxSubmitForHandleDuplication("deleteMultiplePropValueElements", options.data, "<fmt:message key='delete.continueIgnoreDuplicationTemplate' />",
+								po.ajaxSubmitForHandleDuplication("deleteMultiplePropValueElements", options.data, "<fmt:message key='delete.continueIgnoreDuplicationTemplate' />",
 								{
 									"success" : function()
 									{
-										pageObj.refresh();
+										po.refresh();
 									}
 								});
 							}
@@ -346,16 +346,16 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		<%}%>
 		
 		<%if(clientOperation){%>
-		pageObj.initModelDataTableLocal(propertyModel, $.model.propertyPathValue(pageObj.data, pageObj.propertyPath), pageObj.mappedByWith);
+		po.initModelDataTableLocal(propertyModel, $.model.propertyPathValue(po.data, po.propertyPath), po.mappedByWith);
 		<%}else{%>
-		pageObj.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(pageObj.conditionSource);
-		pageObj.initConditionPanel();
-		pageObj.initPagination();
-		pageObj.initModelDataTableAjax(pageObj.url("queryMultiplePropValueData"), propertyModel, pageObj.mappedByWith);
+		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(po.conditionSource);
+		po.initConditionPanel();
+		po.initPagination();
+		po.initModelDataTableAjax(po.url("queryMultiplePropValueData"), propertyModel, po.mappedByWith);
 		<%}%>
 		
 		<%if(!readonly){%>
-		pageObj.initEditGrid(propertyModel);
+		po.initEditGrid(propertyModel);
 		<%}%>
 	});
 })

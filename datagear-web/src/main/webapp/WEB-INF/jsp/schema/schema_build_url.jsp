@@ -71,18 +71,18 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 	<%}%>
 </div>
 <%@ include file="../include/page_js_obj.jsp" %>
+<%@ include file="../include/page_obj_form.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.form = pageObj.element("#${pageId}-form");
-	pageObj.dbTypeSelect = pageObj.element("select[name='dbType']");
+	po.dbTypeSelect = function(){ return po.element("select[name='dbType']"); };
 
-	pageObj.initUrl = "<c:out value='${url}' />";
+	po.initUrl = "<c:out value='${url}' />";
 	
-	$("input:submit, input:button, input:reset, button", pageObj.page).button();
+	$("input:submit, input:button, input:reset, button", po.page).button();
 	
 	$.schemaUrlBuilder.clear();
-	var scriptCode = pageObj.element("#dbUrlBuilderScriptCode").text();
+	var scriptCode = po.element("#dbUrlBuilderScriptCode").text();
 	try
 	{
 		eval(scriptCode);
@@ -96,10 +96,10 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 	for(var i=0; i<builderInfos.length; i++)
 	{
 		var builderInfo = builderInfos[i];
-		$("<option>").attr("value", builderInfo.dbType).html(builderInfo.dbDesc).appendTo(pageObj.dbTypeSelect);
+		$("<option>").attr("value", builderInfo.dbType).html(builderInfo.dbDesc).appendTo(po.dbTypeSelect());
 	}
 	
-	pageObj.dbTypeSelect.selectmenu(
+	po.dbTypeSelect().selectmenu(
 	{
 		"classes" : { "ui-selectmenu-button" : "schema-build-url-dbtype-select" },
 		change : function(event, ui)
@@ -107,11 +107,11 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 			var dbType = ui.item.value;
 			
 			var defaultUrlInfo = $.schemaUrlBuilder.defaultValue(dbType);
-			pageObj.setFormUrlValue(defaultUrlInfo);
+			po.setFormUrlValue(defaultUrlInfo);
 		}
 	});
 	
-	pageObj.setFormUrlValue = function(value)
+	po.setFormUrlValue = function(value)
 	{
 		if(!value)
 			return;
@@ -121,17 +121,17 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 			var inputValue = value[name];
 			
 			if(inputValue)
-				pageObj.element("input[name='"+name+"']").val(inputValue);
+				po.element("input[name='"+name+"']").val(inputValue);
 		}
 	};
 	
-	pageObj.buildFormUrl = function()
+	po.buildFormUrl = function()
 	{
-		var dbType = pageObj.dbTypeSelect.val();
+		var dbType = po.dbTypeSelect().val();
 		
 		var value = {};
 		
-		var inputs = pageObj.element("input[type='text']");
+		var inputs = po.element("input[type='text']");
 		for(var i=0; i<inputs.length; i++)
 		{
 			var input = $(inputs[i]);
@@ -141,16 +141,16 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 		return $.schemaUrlBuilder.build(dbType, value);
 	};
 	
-	pageObj.form.validate(
+	po.form().validate(
 	{
 		submitHandler : function(form)
 		{
-			var url = pageObj.buildFormUrl();
+			var url = po.buildFormUrl();
 			
 			<%if(isPreview){%>
-			pageObj.element(".url-preview").text(url);
+			po.element(".url-preview").text(url);
 			<%}else{%>
-			var pageParam = pageObj.pageParam();
+			var pageParam = po.pageParam();
 			
 			var close = true;
 			
@@ -158,7 +158,7 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 				close = (pageParam.setSchemaUrl(url) != false);
 			
 			if(close)
-				pageObj.close();
+				po.close();
 			<%}%>
 			
 			return false;
@@ -171,22 +171,22 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 	
 	var initUrlValue = undefined;
 	
-	if(pageObj.initUrl)
+	if(po.initUrl)
 	{
-		var urlInfo = $.schemaUrlBuilder.extract(pageObj.initUrl);
+		var urlInfo = $.schemaUrlBuilder.extract(po.initUrl);
 		
 		if(urlInfo != null)
 		{
-			pageObj.dbTypeSelect.val(urlInfo.dbType);
-			pageObj.dbTypeSelect.selectmenu("refresh");
+			po.dbTypeSelect().val(urlInfo.dbType);
+			po.dbTypeSelect().selectmenu("refresh");
 			initUrlValue = urlInfo.value;
 		}
 	}
 	
 	if(!initUrlValue)
-		initUrlValue = $.schemaUrlBuilder.defaultValue(pageObj.dbTypeSelect.val());
+		initUrlValue = $.schemaUrlBuilder.defaultValue(po.dbTypeSelect().val());
 	
-	pageObj.setFormUrlValue(initUrlValue);
+	po.setFormUrlValue(initUrlValue);
 })
 (${pageId});
 </script>

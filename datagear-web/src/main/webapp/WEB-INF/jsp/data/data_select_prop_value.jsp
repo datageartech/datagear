@@ -73,73 +73,73 @@ else
 <%@ include file="../include/page_obj_pagination.jsp" %>
 <%@ include file="include/data_page_obj_grid.jsp" %>
 <script type="text/javascript">
-(function(pageObj)
+(function(po)
 {
-	pageObj.data = $.unref(<%writeJson(application, out, data);%>);
-	pageObj.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
-	pageObj.isMultipleSelect = <%=isMultipleSelect%>;
-	pageObj.conditionSource = <%writeJson(application, out, conditionSource);%>;
+	po.data = $.unref(<%writeJson(application, out, data);%>);
+	po.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
+	po.isMultipleSelect = <%=isMultipleSelect%>;
+	po.conditionSource = <%writeJson(application, out, conditionSource);%>;
 	
-	$.initButtons(pageObj.element(".operation"));
+	$.initButtons(po.element(".operation"));
 	
-	pageObj.onModel(function(model)
+	po.onModel(function(model)
 	{
-		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, pageObj.propertyPath);
+		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, po.propertyPath);
 		var property = propertyInfo.property;
 		var propertyModel = propertyInfo.model;
 		var propertyModelTableName = $.model.featureTableName(propertyModel);
 		
-		pageObj.mappedByWith = $.model.findMappedByWith(property, propertyModel);
+		po.mappedByWith = $.model.findMappedByWith(property, propertyModel);
 
-		pageObj.dataTableAjaxParamParent = pageObj.dataTableAjaxParam;
-		pageObj.dataTableAjaxParam = function()
+		po.dataTableAjaxParamParent = po.dataTableAjaxParam;
+		po.dataTableAjaxParam = function()
 		{
-			var param = pageObj.dataTableAjaxParamParent();
+			var param = po.dataTableAjaxParamParent();
 			
 			$.extend(param, 
 			{
-				"data" : pageObj.data,
-				"propertyPath" : pageObj.propertyPath
+				"data" : po.data,
+				"propertyPath" : po.propertyPath
 			});
 			
 			return param;
 		};
 		
-		pageObj.element("input[name=confirmButton]").click(function()
+		po.element("input[name=confirmButton]").click(function()
 		{
-			if(pageObj.isMultipleSelect)
+			if(po.isMultipleSelect)
 			{
-				pageObj.executeOnSelects(function(rows)
+				po.executeOnSelects(function(rows)
 				{
-					var pageParam = pageObj.pageParam();
+					var pageParam = po.pageParam();
 					
 					var close = (pageParam && pageParam.submit ? pageParam.submit(rows) : undefined);
 					
 					if(close == undefined)
 						close = true;
 					
-					if(close && !$.isDialogPinned($.getInDialog(pageObj.element())))
-						pageObj.close();
+					if(close && !$.isDialogPinned($.getInDialog(po.element())))
+						po.close();
 				});
 			}
 			else
 			{
-				pageObj.executeOnSelect(function(row)
+				po.executeOnSelect(function(row)
 				{
-					var pageParam = pageObj.pageParam();
+					var pageParam = po.pageParam();
 					
 					var close = (pageParam && pageParam.submit ? pageParam.submit(row) : undefined);
 					
 					if(close == undefined)
 						close = true;
 					
-					if(close && !$.isDialogPinned($.getInDialog(pageObj.element())))
-						pageObj.close();
+					if(close && !$.isDialogPinned($.getInDialog(po.element())))
+						po.close();
 				});
 			}
 		});
 		
-		pageObj.element("input[name=addButton]").click(function()
+		po.element("input[name=addButton]").click(function()
 		{
 			var options =
 			{
@@ -148,53 +148,53 @@ else
 				{
 					"afterSave" : function(data)
 					{
-						var pageParam = pageObj.pageParam();
+						var pageParam = po.pageParam();
 						
 						var close = (pageParam && pageParam.submit ? pageParam.submit(data) : undefined);
 						
 						//单选默认关闭，多选默认不关闭
 						if(close == undefined)
-							close = (pageObj.isMultipleSelect ? false : true);
+							close = (po.isMultipleSelect ? false : true);
 						
 						if(close)
-							pageObj.close();
+							po.close();
 					}
 				}
 			}
 			
-			pageObj.open(pageObj.url(propertyModelTableName, "add"), options);
+			po.open(po.url(propertyModelTableName, "add"), options);
 		});
 		
-		pageObj.element("input[name=editButton]").click(function()
+		po.element("input[name=editButton]").click(function()
 		{
-			pageObj.executeOnSelect(function(row)
+			po.executeOnSelect(function(row)
 			{
 				var data = {"data" : row};
 				
-				pageObj.open(pageObj.url(propertyModelTableName, "edit"),
+				po.open(po.url(propertyModelTableName, "edit"),
 				{
 					data : data
 				});
 			});
 		});
 		
-		pageObj.element("input[name=viewButton]").click(function()
+		po.element("input[name=viewButton]").click(function()
 		{
-			pageObj.executeOnSelect(function(row)
+			po.executeOnSelect(function(row)
 			{
 				var data = {"data" : row};
 				
-				pageObj.open(pageObj.url(propertyModelTableName, "view"),
+				po.open(po.url(propertyModelTableName, "view"),
 				{
 					data : data
 				});
 			});
 		});
 		
-		pageObj.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(pageObj.conditionSource);
-		pageObj.initConditionPanel();
-		pageObj.initPagination();
-		pageObj.initModelDataTableAjax(pageObj.url("selectPropValueData"), propertyModel);
+		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(po.conditionSource);
+		po.initConditionPanel();
+		po.initPagination();
+		po.initModelDataTableAjax(po.url("selectPropValueData"), propertyModel);
 	});
 })
 (${pageId});
