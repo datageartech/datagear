@@ -124,6 +124,7 @@ var ${pageId} =
 	
 	/**
 	 * 获取由open方法传递给此页面参数对象。
+	 * @param name 可选，页面参数对象属性名
 	 */
 	pageParam : function(name)
 	{

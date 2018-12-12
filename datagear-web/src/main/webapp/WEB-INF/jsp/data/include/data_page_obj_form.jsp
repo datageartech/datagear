@@ -41,8 +41,8 @@ pageObj.clientOperation = undefined;
 		}
 	};
 	
-	var pageParam = pageObj.pageParam();
-	if(pageParam && pageParam.submit)
+	//如果页面参数里定义了提交回调函数，则标签改为“确定”
+	if(pageObj.pageParam("submit"))
 		pageObj.formLabels.submit = "<fmt:message key='confirm' />";
 	
 	pageObj.propertySubmitHandler = function(property, propertyConcreteModel, propValue)
