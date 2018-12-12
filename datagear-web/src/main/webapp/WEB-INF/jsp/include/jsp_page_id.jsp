@@ -4,8 +4,8 @@
  */
 --%>
 <%@ page language="java" pageEncoding="UTF-8" %>
+<%@ page import="org.datagear.web.util.WebUtils" %>
 <%
-//用于为页面元素定义ID
-String pageId = "p" + Long.toHexString(System.currentTimeMillis());
-request.setAttribute("pageId", pageId);
+//设置页面客户端对象定义ID
+WebUtils.setPageId(request);
 %>

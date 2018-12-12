@@ -4,17 +4,13 @@
  */
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-String __parentPage = request.getParameter("__parentpage");
-if(__parentPage == null)
-	__parentPage = "";
-%>
+<%@ page import="org.datagear.web.util.WebUtils" %>
 <%--页面JS对象块 --%>
 <script type="text/javascript">
 var ${pageId} =
 {
 	//父页面对象ID
-	parentPageId : "<%=__parentPage%>",
+	parentPageId : "<%=WebUtils.getParentPageId(request)%>",
 	
 	//当前页面ID
 	pageId : "${pageId}",
@@ -64,7 +60,7 @@ var ${pageId} =
 	 */
 	open : function(url, options)
 	{
-		url = $.addParam(url, "__parentpage", this.pageId);
+		url = $.addParam(url, "<%=WebUtils.KEY_PARENT_PAGE_ID%>", this.pageId);
 		
 		options = (options || {});
 		

@@ -37,6 +37,12 @@ public class WebUtils
 	/** Servlet环境中存储操作消息的关键字 */
 	public static final String KEY_OPERATION_MESSAGE = "operationMessage";
 
+	/** 页面ID关键字 */
+	public static final String KEY_PAGE_ID = "pageId";
+
+	/** 父页面ID关键字 */
+	public static final String KEY_PARENT_PAGE_ID = "parentPageId";
+
 	/**
 	 * 获取当前用户（认证用户或者匿名用户）。
 	 * <p>
@@ -273,5 +279,79 @@ public class WebUtils
 			__contentType = __contentType.toLowerCase();
 
 		return (__contentType.indexOf("json") >= 0);
+	}
+
+	/**
+	 * 获取页面ID。
+	 * <p>
+	 * 页面ID作为一次请求的客户端标识，用于为客户端定义页面对象。
+	 * </p>
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getPageId(HttpServletRequest request)
+	{
+		return (String) request.getAttribute(KEY_PAGE_ID);
+	}
+
+	/**
+	 * 设置页面ID。
+	 * <p>
+	 * 设置后，在页面可以使用EL表达式<code>${pageId}</code>来获取。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param pageId
+	 */
+	public static void setPageId(HttpServletRequest request, String pageId)
+	{
+		request.setAttribute(KEY_PAGE_ID, pageId);
+	}
+
+	/**
+	 * 设置页面ID。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String setPageId(HttpServletRequest request)
+	{
+		String pageId = generatePageId();
+		setPageId(request, pageId);
+
+		return pageId;
+	}
+
+	/**
+	 * 生成页面ID。
+	 * 
+	 * @return
+	 */
+	public static String generatePageId()
+	{
+		return "p" + Long.toHexString(System.currentTimeMillis());
+	}
+
+	/**
+	 * 获取父页面ID。
+	 * <p>
+	 * 如果没有定义，则返回空字符串。
+	 * </p>
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getParentPageId(HttpServletRequest request)
+	{
+		String parentPage = request.getParameter(KEY_PARENT_PAGE_ID);
+
+		if (parentPage == null)
+			parentPage = (String) request.getAttribute(KEY_PARENT_PAGE_ID);
+
+		if (parentPage == null)
+			parentPage = "";
+
+		return parentPage;
 	}
 }
