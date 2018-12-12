@@ -349,6 +349,20 @@ table.dataTable tbody th, table.dataTable tbody td{
 	padding: 0 0.5em;
 	height: 2.5em;
 }
+table.dataTable tbody tr td.ui-state-highlight{
+	border-width: 0;
+}
+table.dataTable tbody tr td.edit-cell{
+	position: relative;
+}
+table.dataTable tr td.edit-cell .edit-cell-form-panel{
+	position: absolute;
+	padding: 0.41em 0.41em;
+	z-index: 1;
+}
+table.dataTable tr td.edit-cell .edit-cell-form-panel form .form-content .form-item .form-item-label{
+	display: none;
+}
 table.dataTable tbody tr td .edit-cell-input{
 }
 table.dataTable tbody tr td.cell-modified{
@@ -365,6 +379,7 @@ table.dataTable tbody tr td.cell-modified .cell-midified-tip.ui-state-error{
     border-width: 0px;
     background: none;
 }
+
 
 /*提示框*/
 .ui-tooltip{

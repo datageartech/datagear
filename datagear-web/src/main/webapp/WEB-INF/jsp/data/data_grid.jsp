@@ -156,7 +156,7 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 		pageObj.initModelDataTableAjax(pageObj.url("queryData"), model);
 		
 		<%if(!readonly){%>
-		pageObj.initEditGrid();
+		pageObj.initEditGrid(model);
 		<%}%>
 	});
 })

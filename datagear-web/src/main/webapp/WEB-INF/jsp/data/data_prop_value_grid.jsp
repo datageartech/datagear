@@ -355,7 +355,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		<%}%>
 		
 		<%if(!readonly){%>
-		pageObj.initEditGrid();
+		pageObj.initEditGrid(propertyModel);
 		<%}%>
 	});
 })

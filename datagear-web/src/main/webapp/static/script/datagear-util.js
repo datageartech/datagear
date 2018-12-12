@@ -122,15 +122,12 @@
 		{
 			var $dom = $(dom);
 			
-			if($dom.hasClass("dialog-content-container"))
-				return $dom.data("pageParam");
+			var dcc = $(dom).closest(".dialog-content-container");
+			
+			if(dcc.length == 0)
+				return undefined;
 			else
-			{
-				if($dom.is(document.body))
-					return null;
-				else
-					return $.pageParam($dom.parent());
-			}
+				return dcc.data("pageParam");
 		},
 		
 		/**
@@ -711,14 +708,14 @@
 					{
 						var renderValue = "";
 						
-						var _this = meta.settings.aoColumns[meta.col];
+						var thisColumn = meta.settings.aoColumns[meta.col];
 						
-						var propertyIndex = _this.propertyIndex;
+						var propertyIndex = thisColumn.propertyIndex;
 						var property = model.properties[propertyIndex];
 						var propertyModel = property.model;
 						
 						renderValue = $.model.tokenProperty(property, data);
-						renderValue = $.truncateIf(renderValue, "...", _this.stringDisplayThreshold);
+						renderValue = $.truncateIf(renderValue, "...", thisColumn.stringDisplayThreshold);
 						
 						//解决当所有属性值都为null时，行渲染会很细问题
 						if(propertyIndex == 0 && renderValue == "")
@@ -734,6 +731,28 @@
 			}
 			
 			return columns;
+		},
+		
+		/**
+		 * 根据列索引获取列对应的模型属性。
+		 */
+		getDataTablesColumnProperty : function(model, settings, columnIndex)
+		{
+			var columns = undefined;
+			
+			//column.render函数中的结构
+			if(settings.aoColumns)
+				columns = settings.aoColumns;
+			//.DataTable().settings()结构
+			else if(settings[0])
+				columns = settings[0].aoColumns;
+			
+			var propertyIndex = columns[columnIndex].propertyIndex;
+			
+			if(propertyIndex == undefined)
+				throw new Error("Not valid column index ["+columnIndex+"] for getting column property");
+			
+			return model.properties[propertyIndex];
 		},
 		
 		/**

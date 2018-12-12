@@ -212,6 +212,7 @@ page_js_obj.jsp
 					else
 						pageObj.table.DataTable().row(tr).select();
 				})
+				//固定选择列后hover效果默认不能同步，需要自己实现
 				.hover(
 				function(event)
 				{
@@ -230,6 +231,7 @@ page_js_obj.jsp
 					});
 				});
 				
+				//固定选择列后hover效果默认不能同步，需要自己实现
 				$(row).hover(
 				function(event)
 				{

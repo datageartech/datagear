@@ -24,6 +24,12 @@
 			//可选，忽略的属性名称，可以是数组或者单个字符串
 			ignorePropertyNames : undefined,
 			
+			//可选，是否渲染指定属性，此设置优先级低于ignorePropertyNames
+			renderProperty : function(property)
+			{
+				return true;
+			},
+			
 			//可选，表单数据
 			data : undefined,
 			
@@ -211,7 +217,7 @@
 					var property = properties[i];
 					var propName = property.name;
 					
-					if(this._isIgnorePropertyName(propName))
+					if(this._isIgnorePropertyName(property))
 						continue;
 					
 					if($.model.hasFeatureNotReadable(property))
@@ -230,7 +236,7 @@
 					var property = properties[i];
 					var propName = property.name;
 					
-					if(this._isIgnorePropertyName(propName))
+					if(this._isIgnorePropertyName(property))
 						continue;
 
 					if($.model.hasFeatureNotReadable(property))
@@ -259,7 +265,9 @@
 			}
 			else
 			{
-				if(!this._isIgnorePropertyName(propName))
+				var property = $.model.getProperty(this.options.model, propName);
+				
+				if(property && !this._isIgnorePropertyName(property))
 					this._propertyWidgets[propName].setValue(propValue);
 			}
 		},
@@ -363,7 +371,7 @@
 				var property = properties[i];
 				var propName = property.name;
 				
-				if(this._isIgnorePropertyName(propName))
+				if(this._isIgnorePropertyName(property))
 					continue;
 				
 				if($.model.isAbstractedProperty(property))
@@ -940,9 +948,14 @@
 		/**
 		 * 判断属性是否是忽略属性。
 		 */
-		_isIgnorePropertyName : function(propName)
+		_isIgnorePropertyName : function(property)
 		{
-			return $.model.containsOrEquals(this.options.ignorePropertyNames, propName);
+			var ignore = $.model.containsOrEquals(this.options.ignorePropertyNames, property.name);
+			
+			if(!ignore)
+				ignore = (this.options.renderProperty.call(this, property) == false);
+			
+			return ignore;
 		},
 		
 		/**

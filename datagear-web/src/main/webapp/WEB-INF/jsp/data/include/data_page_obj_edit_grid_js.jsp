@@ -4,21 +4,52 @@
  */
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page import="org.datagear.web.util.WebUtils"%>
 <%--
 编辑表格功能JS片段。
 
 依赖：
+page_js_obj.jsp
 page_obj_grid.jsp
-data_page_obj.jsp
 data_page_obj_edit_grid_html.jsp
 
 变量：
 
 --%>
+<%
+//在表格页面中内嵌一个用于编辑表格的表单页面，并使用它来构建单元格编辑面板，重用代码
+String gridPageId = WebUtils.getPageId(request);
+String editGridFormPageId = (String)request.getAttribute("editGridFormPageId");
+WebUtils.setPageId(request, editGridFormPageId);
+%>
+<%@ include file="../include/data_page_obj.jsp" %>
+<%@ include file="../include/data_page_obj_form.jsp" %>
+<script type="text/javascript">
+(function(pageObj)
+{
+	pageObj.formPanel = pageObj.element();
+	pageObj.formPanel.hide();
+	
+	pageObj.form = pageObj.element("#<%=editGridFormPageId%>-form");
+	
+	pageObj.formEle = function()
+	{
+		return pageObj.element("#<%=editGridFormPageId%>-form");
+	};
+})
+(<%=editGridFormPageId%>);
+</script>
+<%
+WebUtils.setPageId(request, gridPageId);
+%>
 <script type="text/javascript">
 (function(pageObj)
 {
 	pageObj.isEnableEditGrid = false;
+	
+	//编辑表格对应的模型，会在initEditGrid函数中初始化
+	pageObj.editGridModel = undefined;
+	pageObj.editGridFormPage = <%=editGridFormPageId%>;
 	
 	pageObj.editGridSwitch = function()
 	{
@@ -113,7 +144,7 @@ data_page_obj_edit_grid_html.jsp
 	
 	pageObj.beginEditCell = function($cell)
 	{
-		$cell.addClass("edit-cell");
+		$cell.addClass("edit-cell ui-state-highlight");
 		
 		var text = $cell.text();
 		var originalText = $cell.attr("original-text");
@@ -124,38 +155,28 @@ data_page_obj_edit_grid_html.jsp
 			originalText = text;
 		}
 		
-		$cell.empty();
-		
 		if(text != originalText)
 			pageObj.markAsModifiedCell($cell);
 		else
 			pageObj.markAsUnmodifiedCell($cell);
 		
-		var $input = $("<input type='text' class='edit-cell-input ui-widget ui-widget-content' />")
-			.css("width", $cell.width()-5).appendTo($cell);
+		var cellIndex = $cell.index();
+		var settings = pageObj.table.DataTable().settings();
+		var cellProperty = $.getDataTablesColumnProperty(pageObj.editGridModel, settings, cellIndex);
 		
-		$input
-		.blur(function(event)
+		//pageObj.editGridFormPage.form.empty();
+		pageObj.editGridFormPage.formPanel.appendTo($cell);
+		
+		pageObj.editGridFormPage.formEle().modelform(
 		{
-			pageObj.storeEditCell($cell, $(this).val());
-		})
-		.keyup(function(event)
-		{
-			var $this = $(this);
-			
-			//保存
-			if(event.keyCode == $.ui.keyCode.ENTER)
+			model : pageObj.editGridModel,
+			renderProperty : function(property)
 			{
-				pageObj.storeEditCell($cell, $this.val());
-			}
-			//取消
-			else if(event.keyCode == $.ui.keyCode.ESCAPE)
-			{
-				pageObj.cancelEditCell($cell);
+				return property == cellProperty;
 			}
 		});
 		
-		$input.val(text).focus();
+		pageObj.editGridFormPage.formPanel.show().position({my: "left top", at: "left bottom"});
 	};
 	
 	pageObj.storeEditCell = function($cell, value)
@@ -165,7 +186,7 @@ data_page_obj_edit_grid_html.jsp
 	
 	pageObj.cancelEditCell = function($cell, newText)
 	{
-		$cell.removeClass("edit-cell");
+		$cell.removeClass("edit-cell ui-state-highlight");
 		
 		var originalText = $cell.attr("original-text");
 		var text = newText;
@@ -179,6 +200,10 @@ data_page_obj_edit_grid_html.jsp
 			pageObj.markAsModifiedCell($cell);
 		else
 			pageObj.markAsUnmodifiedCell($cell);
+		
+		pageObj.editGridFormPage.formPanel.hide();
+		pageObj.editGridFormPage.formEle().modelform("destroy").empty();
+		pageObj.editGridFormPage.formPanel.appendTo(pageObj.element());
 	};
 	
 	pageObj.cancelAllEditCell = function($editedCells)
@@ -192,8 +217,10 @@ data_page_obj_edit_grid_html.jsp
 		});
 	};
 	
-	pageObj.initEditGrid = function()
+	pageObj.initEditGrid = function(model)
 	{
+		pageObj.editGridModel = model;
+		
 		$.initButtons(pageObj.editGridOperation());
 		
 		pageObj.editGridSwitch().checkboxradio({icon : false}).click(function(event)
@@ -237,7 +264,7 @@ data_page_obj_edit_grid_html.jsp
 		});
 		
 		pageObj.table.DataTable()
-		.on("click.dt", function(event, settings)
+		.on("click.dt", function(event)
 		{
 			if(pageObj.isEnableEditGrid)
 			{
