@@ -801,6 +801,155 @@
 		},
 		
 		/**
+		 * 处理点击选中单元格事件。
+		 */
+		handleCellSelectionForClick : function(dataTable, clickEvent, $clickCell)
+		{
+			//多选
+			if(clickEvent.ctrlKey)
+			{
+				if($clickCell.hasClass("selected"))
+					dataTable.cell($clickCell).deselect();
+				else
+					dataTable.cell($clickCell).select();
+			}
+			//区域选
+			else if(clickEvent.shiftKey)
+			{
+				var indexes = [];
+				indexes = indexes.concat($.makeArray(dataTable.cells(".selected").indexes()));
+				indexes = indexes.concat(dataTable.cell($clickCell).index());
+				
+				indexes = $.evalCellIndexesForRange(indexes);
+				
+				dataTable.cells(indexes).select();
+			}
+			//单选
+			else
+			{
+				var selectCells = dataTable.cells(".selected");
+				
+				if(selectCells.nodes().length == 1 && $clickCell.hasClass("selected"))
+					dataTable.cell($clickCell).deselect();
+				else
+				{
+					selectCells.deselect();
+					dataTable.cell($clickCell).select();
+				}
+			}
+		},
+		
+		/**
+		 * 处理单元格上、下、左、右按键事件导航。
+		 */
+		handleCellNavigationForKeydown : function(dataTable, keydownEvent)
+		{
+			var selectedCells = dataTable.cells(".selected");
+			
+			if(!selectedCells || selectedCells.length == 0)
+				return;
+			else
+			{
+				var cellIndexes = selectedCells.indexes();
+				var nextCellIndex = {};
+				
+				if(keydownEvent.keyCode == $.ui.keyCode.DOWN)
+				{
+					var cellIndex = cellIndexes[cellIndexes.length - 1];
+					nextCellIndex.row = cellIndex.row + 1;
+					nextCellIndex.column = cellIndex.column;
+				}
+				else if(keydownEvent.keyCode == $.ui.keyCode.UP)
+				{
+					var cellIndex = cellIndexes[0];
+					nextCellIndex.row = cellIndex.row - 1;
+					nextCellIndex.column = cellIndex.column;
+				}
+				else if(keydownEvent.keyCode == $.ui.keyCode.LEFT)
+				{
+					var cellIndex = cellIndexes[0];
+					nextCellIndex.row = cellIndex.row;
+					nextCellIndex.column = cellIndex.column - 1;
+				}
+				else if(keydownEvent.keyCode == $.ui.keyCode.RIGHT)
+				{
+					var cellIndex = cellIndexes[cellIndexes.length - 1];
+					nextCellIndex.row = cellIndex.row;
+					nextCellIndex.column = cellIndex.column + 1;
+				}
+				else
+					nextCellIndex = null;
+				
+				if(nextCellIndex != null)
+				{
+					var maxColumnIndex = $("> td", dataTable.row(0).node()).length - 1;
+					var maxRowIndex = dataTable.column(0).nodes().length - 1;
+					
+					if(nextCellIndex.row > maxRowIndex)
+						nextCellIndex.row = maxRowIndex;
+					if(nextCellIndex.row < 0)
+						nextCellIndex.row = 0;
+					
+					if(nextCellIndex.column > maxColumnIndex)
+						nextCellIndex.column = maxColumnIndex;
+					if(nextCellIndex.column < 1)
+						nextCellIndex.column = 1;
+					
+					selectedCells.deselect();
+					dataTable.cell(nextCellIndex).select();
+				}
+			}
+		},
+		
+		/**
+		 * 计算范围选择单元格index数组。
+		 */
+		evalCellIndexesForRange : function(cellIndexes, minColumnThreashold)
+		{
+			if(minColumnThreashold == undefined)
+				minColumnThreashold = 0;
+				
+			var minRow = Number.MAX_VALUE, minColumn = Number.MAX_VALUE, maxRow = 0, maxColumn = 0;
+			
+			for(var i=0; i< cellIndexes.length; i++)
+			{
+				var cellIndex = cellIndexes[i];
+				var row = cellIndex.row;
+				var column = cellIndex.column;
+				
+				if(minRow > row)
+					minRow = row;
+				
+				if(maxRow < row)
+					maxRow = row;
+				
+				if(minColumn > column)
+					minColumn = column;
+				
+				if(maxColumn < column)
+					maxColumn = column;
+			}
+			
+			if(minColumn < minColumnThreashold)
+				minColumn = minColumnThreashold;
+			
+			if(maxColumn< minColumnThreashold)
+				maxColumn = minColumnThreashold;
+			
+			var indexes = [];
+			
+			for(var i=minRow; i<=maxRow; i++)
+			{
+				for(var j=minColumn; j<=maxColumn; j++)
+				{
+					indexes.push({ row : i, column : j });
+				}
+			}
+			
+			return indexes;
+		},
+		
+		/**
 		 * 设置表格对话框高度option。
 		 */
 		setGridPageHeightOption : function(options)

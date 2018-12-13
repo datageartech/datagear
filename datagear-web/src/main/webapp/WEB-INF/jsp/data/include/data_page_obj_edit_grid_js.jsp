@@ -87,6 +87,9 @@ WebUtils.setPageId(request, gridPageId);
 		
 		po.isEnableEditGrid = true;
 		
+		var dataTable = po.table().DataTable();
+		$(dataTable.table().node()).attr("tabindex", 0);
+		
 		po.element(".head .search").addClass("ui-state-disabled");
 		po.element(".foot .pagination").addClass("ui-state-disabled");
 		
@@ -104,6 +107,9 @@ WebUtils.setPageId(request, gridPageId);
 	{
 		po.isEnableEditGrid = false;
 		po.cancelAllEditCell();
+
+		var dataTable = po.table().DataTable();
+		$(dataTable.table().node()).removeAttr("tabindex");
 		
 		var $headOperation = po.element(".head .operation");
 
@@ -275,45 +281,6 @@ WebUtils.setPageId(request, gridPageId);
 			}
 		});
 		
-		po.table().DataTable()
-		.on("click.dt", function(event)
-		{
-			var table = $(this).DataTable();
-			
-			if(po.isEnableEditGrid)
-			{
-				event.stopPropagation();
-				
-				var target = $(event.target);
-				
-				if(target.is("td"))
-				{
-					table.cell(".selected").deselect();
-					table.cell(target).select();
-				}
-			}
-			else
-			{
-				
-			}
-		})
-		.on("select", function(event, dataTable, type, indexes)
-		{
-			console.log("select");
-		})
-		.on("deselect", function(event, settings)
-		{
-			console.log("deselect");
-		})
-		.on("preDraw", function(event, settings)
-		{
-			//禁止表格重绘，比如排序
-			if(po.isEnableEditGrid)
-				return false;
-			else
-				return true;
-		});
-		
 		po.element(".button-cancel", po.element(".edit-grid")).click(function()
 		{
 			if(po.currentEditCell != null)
@@ -336,6 +303,70 @@ WebUtils.setPageId(request, gridPageId);
 			}
 			else
 				po.cancelAllEditCell($editedCells);
+		});
+		
+		po.table().DataTable()
+		.on("click", function(event)
+		{
+			if(po.isEnableEditGrid)
+			{
+				event.stopPropagation();
+				
+				var target = $(event.target);
+				
+				if(target.is("td"))
+				{
+					var table = $(this).DataTable();
+					
+					table.rows(".selected").deselect();
+					$.handleCellSelectionForClick(table, event, target);
+				}
+			}
+		})
+		.on("keydown", function(event)
+		{
+			if(po.isEnableEditGrid)
+			{
+				var table = $(this).DataTable();
+				
+				$.handleCellNavigationForKeydown(table, event);
+			}
+		})
+		.on("select", function(event, dataTable, type, indexes)
+		{
+			if(po.isEnableEditGrid)
+			{
+				if(type == "cell")
+				{
+					var $cells = $(dataTable.cells(indexes).nodes());
+				}
+				else if(type == "row")
+				{
+					dataTable.cells(".selected").deselect();
+				}
+			}
+			
+			console.log("select");
+		})
+		.on("deselect", function(event, dataTable, type, indexes)
+		{
+			if(po.isEnableEditGrid)
+			{
+				if(type == "cell")
+				{
+					var $cells = $(dataTable.cells(indexes).nodes());
+				}
+			}
+			
+			console.log("deselect");
+		})
+		.on("preDraw", function(event, settings)
+		{
+			//禁止表格重绘，比如排序
+			if(po.isEnableEditGrid)
+				return false;
+			else
+				return true;
 		});
 	};
 })

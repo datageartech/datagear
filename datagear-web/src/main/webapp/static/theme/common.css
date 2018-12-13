@@ -349,9 +349,6 @@ table.dataTable tbody th, table.dataTable tbody td{
 	padding: 0 0.5em;
 	height: 2.5em;
 }
-table.dataTable tbody tr td.ui-state-highlight{
-	border-width: 0;
-}
 table.dataTable tbody tr td.edit-cell{
 	position: relative;
 }
