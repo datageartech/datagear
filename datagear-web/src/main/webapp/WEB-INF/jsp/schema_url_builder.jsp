@@ -85,12 +85,7 @@
 			{
 				success : function(response)
 				{
-					var pageParam = po.pageParam();
-					
-					var close = false;
-					
-					if(pageParam && pageParam.afterSave)
-						close = (pageParam.afterSave() != false);
+					var close = (po.pageParamCall("afterSave")  != false);
 					
 					if(close)
 						po.close();

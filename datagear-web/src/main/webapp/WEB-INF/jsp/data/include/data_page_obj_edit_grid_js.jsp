@@ -28,6 +28,7 @@ WebUtils.setPageId(request, editGridFormPageId);
 (function(po)
 {
 	po.element().hide();
+	po.formLabels.submit = "<fmt:message key='confirm' />";
 })
 (<%=editGridFormPageId%>);
 </script>
@@ -41,7 +42,10 @@ WebUtils.setPageId(request, gridPageId);
 	
 	//编辑表格对应的模型，会在initEditGrid函数中初始化
 	po.editGridModel = undefined;
+	
 	po.editGridFormPage = <%=editGridFormPageId%>;
+	
+	po.currentEditCell = undefined;
 	
 	po.editGridSwitch = function()
 	{
@@ -136,6 +140,13 @@ WebUtils.setPageId(request, gridPageId);
 	
 	po.beginEditCell = function($cell)
 	{
+		if($cell.is(po.currentEditCell))
+			return;
+		else if(po.currentEditCell != null)
+			po.cancelEditCell(po.currentEditCell);
+		
+		po.currentEditCell = $cell;
+		
 		$cell.addClass("edit-cell ui-state-highlight");
 		
 		var text = $cell.text();
@@ -156,8 +167,7 @@ WebUtils.setPageId(request, gridPageId);
 		var settings = po.table().DataTable().settings();
 		var cellProperty = $.getDataTablesColumnProperty(po.editGridModel, settings, cellIndex);
 		
-		//po.editGridFormPage.form().empty();
-		po.editGridFormPage.element().appendTo($cell);
+		po.editGridFormPage.element().appendTo($cell).show().position({my: "left top", at: "left bottom"});
 		
 		po.editGridFormPage.form().modelform(
 		{
@@ -165,10 +175,14 @@ WebUtils.setPageId(request, gridPageId);
 			renderProperty : function(property)
 			{
 				return property == cellProperty;
-			}
+			},
+			submit : function()
+			{
+				alert("save cell");
+				return false;
+			},
+			labels : po.editGridFormPage.formLabels
 		});
-		
-		po.editGridFormPage.element().show().position({my: "left top", at: "left bottom"});
 	};
 	
 	po.storeEditCell = function($cell, value)
@@ -191,9 +205,17 @@ WebUtils.setPageId(request, gridPageId);
 		else
 			po.markAsUnmodifiedCell($cell);
 		
-		po.editGridFormPage.element().hide();
-		po.editGridFormPage.form().modelform("destroy");
-		po.editGridFormPage.element().appendTo(po.element());
+		po.currentEditCell = null;
+		
+		var editGridFormPageEle = po.editGridFormPage.element();
+		
+		if(editGridFormPageEle.parent().is($cell))
+		{
+			po.editGridFormPage.form().modelform("destroy");
+			
+			editGridFormPageEle.hide();
+			editGridFormPageEle.appendTo(po.element());
+		}
 	};
 	
 	po.cancelAllEditCell = function($editedCells)
@@ -256,6 +278,8 @@ WebUtils.setPageId(request, gridPageId);
 		po.table().DataTable()
 		.on("click.dt", function(event)
 		{
+			var table = $(this).DataTable();
+			
 			if(po.isEnableEditGrid)
 			{
 				event.stopPropagation();
@@ -264,13 +288,22 @@ WebUtils.setPageId(request, gridPageId);
 				
 				if(target.is("td"))
 				{
-					po.beginEditCell(target);
+					table.cell(".selected").deselect();
+					table.cell(target).select();
 				}
 			}
 			else
 			{
 				
 			}
+		})
+		.on("select", function(event, dataTable, type, indexes)
+		{
+			console.log("select");
+		})
+		.on("deselect", function(event, settings)
+		{
+			console.log("deselect");
 		})
 		.on("preDraw", function(event, settings)
 		{
@@ -279,6 +312,12 @@ WebUtils.setPageId(request, gridPageId);
 				return false;
 			else
 				return true;
+		});
+		
+		po.element(".button-cancel", po.element(".edit-grid")).click(function()
+		{
+			if(po.currentEditCell != null)
+				po.cancelAllEditCell(po.currentEditCell);
 		});
 		
 		po.element(".button-cancel-all", po.element(".edit-grid")).click(function()

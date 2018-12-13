@@ -86,14 +86,12 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 				var data = $(this).modelform("data");
 				var formParam = $(this).modelform("param");
 				
-				var pageParam = po.pageParam();
-				
 				var close = true;
 				
 				//父页面定义了submit回调函数，则优先执行
-				if(pageParam && pageParam.submit)
+				if(po.pageParam("submit"))
 				{
-					close = (pageParam.submit(data, formParam) != false);
+					close = (po.pageParamCall("submit", data, formParam) != false);
 					
 					if(close && !$(this).modelform("isDialogPinned"))
 						po.close();
@@ -130,8 +128,7 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 								if(po.originalData)
 									po.originalData = $.unref($.ref(operationMessage.data));
 								
-								if(pageParam && pageParam.afterSave)
-									close = (pageParam.afterSave(operationMessage.data) != false);
+								close = (po.pageParamCall("afterSave", operationMessage.data) != false);
 								
 								if(close && !isDialogPinned)
 									po.close();

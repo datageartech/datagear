@@ -94,7 +94,7 @@
 						var $dialog = $("<div id='dialog-"+new Date().getTime()+"' class='dialog-content-container'></div>").appendTo(container);
 						
 						if(options.pageParam)
-							$dialog.data("pageParam", options.pageParam);
+							$.pageParam($dialog, options.pageParam);
 						
 						$._dialog($dialog, options);
 						$dialog.html(data);
@@ -112,22 +112,67 @@
 			}
 		},
 		
+		/*用于支持$.pageParam函数的元素CSS类名*/
+		PAGE_PARAM_BINDER_CLASS : "page-param-binder",
+		
 		/**
-		 * 获取由$.open打开的页面所传递的页面参数。
-		 * 如果没有将返回null。
+		 * 获取/设置页面参数，设置页面参数，使页面在加载完成后可以在内部获取此参数。
 		 * 
-		 * @param dom 任意dom元素
+		 * @param $dom 必选，任意dom元素
+		 * @param param 可选，要设置的参数
 		 */
-		pageParam : function(dom)
+		pageParam : function($dom, param)
 		{
-			var $dom = $(dom);
-			
-			var dcc = $(dom).closest(".dialog-content-container");
-			
-			if(dcc.length == 0)
-				return undefined;
-			else
+			if(param == undefined)
+			{
+				var dcc = $dom.closest("." + $.PAGE_PARAM_BINDER_CLASS);
 				return dcc.data("pageParam");
+			}
+			else
+			{
+				$dom.addClass($.PAGE_PARAM_BINDER_CLASS);
+				$dom.data("pageParam", param);
+			}
+		},
+		
+		/**
+		 * 调用页面参数函数。
+		 * 如果没有页面参数或者指定的函数，返回undefined。
+		 * 
+		 * @param $dom 必选，任意dom元素
+		 * @param args... 可选，页面参数是函数时，函数参数；页面参数是对象时，[函数名, 函数参数]
+		 */
+		pageParamCall : function($dom, args)
+		{
+			var pageParam = $.pageParam($dom);
+			
+			//没有页面参数
+			if(!pageParam)
+			{
+				return undefined;
+			}
+			//页面参数是函数
+			else if($.isFunction(pageParam))
+			{
+				var pargs = $.makeArray(arguments).slice(1);
+				
+				pageParam.apply(window, pargs);
+			}
+			//页面参数是对象
+			else
+			{
+				if(arguments.length < 2)
+					throw new Error("The function name in the page param object to be call should be set");
+				
+				var fun = pageParam[arguments[1]];
+				
+				if(fun == undefined)
+					return undefined;
+				
+				var pargs = $.makeArray(arguments).slice(2);
+				
+				return fun.apply(pageParam, pargs);
+			}
 		},
 		
 		/**

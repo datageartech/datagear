@@ -200,12 +200,7 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, SchemaContro
 			{
 				success : function()
 				{
-					var pageParam = po.pageParam();
-					
-					var close = true;
-					
-					if(pageParam && pageParam.afterSave)
-						close = (pageParam.afterSave() != false);
+					var close = (po.pageParamCall("afterSave")  != false);
 					
 					if(close)
 						po.close();

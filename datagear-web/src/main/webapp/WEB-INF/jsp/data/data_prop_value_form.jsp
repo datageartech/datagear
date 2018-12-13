@@ -99,13 +99,11 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				
 				var close = true;
 				
-				var pageParam = po.pageParam();
-				
 				//父页面定义了submit回调函数，则优先执行
-				if(pageParam && pageParam.submit)
+				if(po.pageParam("submit"))
 				{
-					close = (pageParam.submit(propValue, formParam) != false);
-
+					close = (po.pageParamCall("submit", propValue, formParam) != false);
+					
 					if(close && !$(this).modelform("isDialogPinned"))
 						po.close();
 				}
@@ -139,8 +137,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 								if(po.data)
 									$.model.propertyPathValue(po.data, po.propertyPath, operationMessage.data);
 								
-								if(pageParam && pageParam.afterSave)
-									close = (pageParam.afterSave(operationMessage.data) != false);
+								close = (po.pageParamCall("afterSave", operationMessage.data) != false);
 								
 								if(close && !isDialogPinned)
 									po.close();

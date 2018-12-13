@@ -170,9 +170,7 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, DriverEnti
 	{
 		po.executeOnSelect(function(row)
 		{
-			var pageParam = po.pageParam();
-			
-			var close = (pageParam && pageParam.submit ? pageParam.submit(row) : undefined);
+			var close = po.pageParamCall("submit", row);
 			
 			//单选默认关闭
 			if(close == undefined)

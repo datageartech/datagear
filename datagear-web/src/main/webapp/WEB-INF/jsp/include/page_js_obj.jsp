@@ -119,19 +119,29 @@ var ${pageId} =
 	},
 	
 	/**
-	 * 获取由open方法传递给此页面参数对象。
+	 * 获取此页面参数对象。
 	 * @param name 可选，页面参数对象属性名
 	 */
 	pageParam : function(name)
 	{
-		var pageParamObj = $.pageParam(this.element());
+		var ppo = $.pageParam(this.element());
 		
 		if(name == undefined)
-			return pageParamObj;
+			return ppo;
 		else
 		{
-			return (pageParamObj ? pageParamObj[name] : undefined);
+			return (ppo ? ppo[name] : undefined);
 		}
+	},
+	
+	/**
+	 * 调用页面参数对象函数，参考$.pageParamCall。
+	 */
+	pageParamCall : function(args)
+	{
+		args = [this.element()].concat($.makeArray(arguments));
+		
+		return $.pageParamCall.apply($, args);
 	},
 	
 	/**

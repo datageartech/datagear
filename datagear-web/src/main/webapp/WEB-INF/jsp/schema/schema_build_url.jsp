@@ -150,12 +150,7 @@ boolean isPreview = "1".equals(getStringValue(request, "preview"));
 			<%if(isPreview){%>
 			po.element(".url-preview").text(url);
 			<%}else{%>
-			var pageParam = po.pageParam();
-			
-			var close = true;
-			
-			if(pageParam && pageParam.setSchemaUrl)
-				close = (pageParam.setSchemaUrl(url) != false);
+			var close = (po.pageParamCall("setSchemaUrl", url)  != false);
 			
 			if(close)
 				po.close();

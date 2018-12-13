@@ -130,10 +130,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		
 		$.model.propertyPathValue(po.data, po.propertyPath, rowsData);
 		
-		var pageParam = po.pageParam();
-		
-		if(pageParam && pageParam.submit)
-			pageParam.submit(rowsData);
+		po.pageParamCall("submit", rowsData);
 	};
 	
 	po.onModel(function(model)

@@ -111,9 +111,7 @@ else
 			{
 				po.executeOnSelects(function(rows)
 				{
-					var pageParam = po.pageParam();
-					
-					var close = (pageParam && pageParam.submit ? pageParam.submit(rows) : undefined);
+					var close = po.pageParamCall("submit", rows);
 					
 					if(close == undefined)
 						close = true;
@@ -126,9 +124,7 @@ else
 			{
 				po.executeOnSelect(function(row)
 				{
-					var pageParam = po.pageParam();
-					
-					var close = (pageParam && pageParam.submit ? pageParam.submit(row) : undefined);
+					var close = po.pageParamCall("submit", row);
 					
 					if(close == undefined)
 						close = true;
@@ -148,10 +144,8 @@ else
 				{
 					"afterSave" : function(data)
 					{
-						var pageParam = po.pageParam();
-						
-						var close = (pageParam && pageParam.submit ? pageParam.submit(data) : undefined);
-						
+						var close = po.pageParamCall("submit", data);
+							
 						//单选默认关闭，多选默认不关闭
 						if(close == undefined)
 							close = (po.isMultipleSelect ? false : true);
