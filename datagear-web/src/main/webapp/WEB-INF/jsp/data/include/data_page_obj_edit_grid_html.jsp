@@ -14,8 +14,8 @@
 		<input id="${pageId}-editGridSwitch" type="checkbox" value="1" />
 	</div>
 	<div class="edit-grid-operation">
-		<button type="button" class="button-cancel highlight" style="display: none;"><fmt:message key='cancel' /></button>
-		<button type="button" class="button-cancel-all highlight" style="display: none;"><fmt:message key='cancelAll' /></button>
+		<button type="button" class="button-restore highlight" style="display: none;"><fmt:message key='restore' /></button>
+		<button type="button" class="button-restore-all highlight" style="display: none;"><fmt:message key='restoreAll' /></button>
 		<button type="button" class="button-save recommended" style="display: none;"><fmt:message key='save' /></button>
 	</div>
 </div>
@@ -23,7 +23,10 @@
 String editGridFormPageId_html = WebUtils.generatePageId();
 request.setAttribute("editGridFormPageId", editGridFormPageId_html);
 %>
-<div id="<%=editGridFormPageId_html%>" class="edit-cell-form-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
-	<form id="<%=editGridFormPageId_html%>-form" method="POST" action="#">
-	</form>
+<div id="<%=editGridFormPageId_html%>" class="page-edit-grid-form">
+	<div class="form-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow" tabindex="1">
+		<div class="form-panel-title ui-corner-all ui-widget-header"></div>
+		<form id="<%=editGridFormPageId_html%>-form" method="POST" action="#">
+		</form>
+	</div>
 </div>

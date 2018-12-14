@@ -855,24 +855,41 @@
 		},
 		
 		/**
-		 * 获取指定名称的Property对象。
-		 * 
-		 * @param model
-		 * @param propName
+		 * 获取属性索引。
 		 */
-		getProperty : function(model, propName)
+		getPropertyIndex : function(model, propertyName)
 		{
 			var properties=model.properties;
 			for(var i=0; i<properties.length; i++)
 			{
-				var property=properties[i];
-				if(property.name == propName)
-				{
-					return property;
-				}
+				if(properties[i].name == propertyName)
+					return i;
 			}
 			
-			return null;
+			return -1;
+		},
+		
+		/**
+		 * 获取指定名称的Property对象。
+		 * 
+		 * @param model
+		 * @param propName 属性名称或者属性索引
+		 */
+		getProperty : function(model, propName)
+		{
+			//索引
+			if(typeof(propName) == "number")
+				return model.properties[propName];
+			//属性名
+			else
+			{
+				var index = this.getPropertyIndex(model, propName);
+				
+				if(index < 0)
+					throw new Error("No property named '"+propName+"'");
+				
+				return model.properties[index];
+			}
 		},
 		
 		/**

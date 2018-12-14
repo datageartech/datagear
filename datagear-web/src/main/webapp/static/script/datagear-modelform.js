@@ -25,7 +25,7 @@
 			ignorePropertyNames : undefined,
 			
 			//可选，是否渲染指定属性，此设置优先级低于ignorePropertyNames
-			renderProperty : function(property)
+			renderProperty : function(property, propertyIndex)
 			{
 				return true;
 			},
@@ -221,7 +221,7 @@
 					var property = properties[i];
 					var propName = property.name;
 					
-					if(this._isIgnorePropertyName(property))
+					if(this._isIgnorePropertyName(property, i))
 						continue;
 					
 					if($.model.hasFeatureNotReadable(property))
@@ -240,7 +240,7 @@
 					var property = properties[i];
 					var propName = property.name;
 					
-					if(this._isIgnorePropertyName(property))
+					if(this._isIgnorePropertyName(property, i))
 						continue;
 
 					if($.model.hasFeatureNotReadable(property))
@@ -269,9 +269,10 @@
 			}
 			else
 			{
-				var property = $.model.getProperty(this.options.model, propName);
+				var propertyIndex = $.model.getPropertyIndex(this.options.model, propName);
+				var property = $.model.getProperty(this.options.model, propertyIndex);
 				
-				if(property && !this._isIgnorePropertyName(property))
+				if(!this._isIgnorePropertyName(property, propertyIndex))
 					this._propertyWidgets[propName].setValue(propValue);
 			}
 		},
@@ -375,7 +376,7 @@
 				var property = properties[i];
 				var propName = property.name;
 				
-				if(this._isIgnorePropertyName(property))
+				if(this._isIgnorePropertyName(property, i))
 					continue;
 				
 				if($.model.isAbstractedProperty(property))
@@ -952,12 +953,12 @@
 		/**
 		 * 判断属性是否是忽略属性。
 		 */
-		_isIgnorePropertyName : function(property)
+		_isIgnorePropertyName : function(property, propertyIndex)
 		{
 			var ignore = $.model.containsOrEquals(this.options.ignorePropertyNames, property.name);
 			
 			if(!ignore)
-				ignore = (this.options.renderProperty.call(this, property) == false);
+				ignore = (this.options.renderProperty.call(this, property, propertyIndex) == false);
 			
 			return ignore;
 		},

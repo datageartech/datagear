@@ -781,23 +781,34 @@
 		/**
 		 * 根据列索引获取列对应的模型属性。
 		 */
-		getDataTablesColumnProperty : function(model, settings, columnIndex)
+		getDataTablesColumnPropertyIndexes : function(settings, cellIndexes)
 		{
-			var columns = undefined;
+			var columnMetas = undefined;
 			
 			//column.render函数中的结构
 			if(settings.aoColumns)
-				columns = settings.aoColumns;
+				columnMetas = settings.aoColumns;
 			//.DataTable().settings()结构
 			else if(settings[0])
-				columns = settings[0].aoColumns;
+				columnMetas = settings[0].aoColumns;
 			
-			var propertyIndex = columns[columnIndex].propertyIndex;
+			var columnIndexMap = {};
+			for(var i=0; i<cellIndexes.length; i++)
+				columnIndexMap[cellIndexes[i].column] = 1;
 			
-			if(propertyIndex == undefined)
-				throw new Error("Not valid column index ["+columnIndex+"] for getting column property");
+			var propertyIndexes = [];
 			
-			return model.properties[propertyIndex];
+			for(var ci in columnIndexMap)
+			{
+				var propertyIndex = columnMetas[ci].propertyIndex;
+				
+				if(propertyIndex == undefined)
+					throw new Error("Not valid column index ["+columnIndex+"] for getting column property");
+				
+				propertyIndexes.push(propertyIndex);
+			}
+			
+			return propertyIndexes;
 		},
 		
 		/**
@@ -809,9 +820,18 @@
 			if(clickEvent.ctrlKey)
 			{
 				if($clickCell.hasClass("selected"))
+				{
 					dataTable.cell($clickCell).deselect();
+					dataTable.cells(dataTable.cells(".selected").indexes()).select();
+				}
 				else
-					dataTable.cell($clickCell).select();
+				{
+					var indexes = [];
+					indexes = indexes.concat($.makeArray(dataTable.cells(".selected").indexes()));
+					indexes = indexes.concat(dataTable.cell($clickCell).index());
+					
+					dataTable.cells(indexes).select();
+				}
 			}
 			//区域选
 			else if(clickEvent.shiftKey)
@@ -895,8 +915,32 @@
 					if(nextCellIndex.column < 1)
 						nextCellIndex.column = 1;
 					
-					selectedCells.deselect();
-					dataTable.cell(nextCellIndex).select();
+					//多选
+					if(keydownEvent.ctrlKey)
+					{
+						var indexes = [];
+						indexes = indexes.concat($.makeArray(selectedCells.indexes()));
+						indexes = indexes.concat(nextCellIndex);
+						
+						dataTable.cells(indexes).select();
+					}
+					//区域选
+					else if(keydownEvent.shiftKey)
+					{
+						var indexes = [];
+						indexes = indexes.concat($.makeArray(selectedCells.indexes()));
+						indexes = indexes.concat(nextCellIndex);
+						
+						indexes = $.evalCellIndexesForRange(indexes);
+						
+						dataTable.cells(indexes).select();
+					}
+					//单选
+					else
+					{
+						selectedCells.deselect();
+						dataTable.cell(nextCellIndex).select();
+					}
 				}
 			}
 		},

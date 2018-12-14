@@ -27,6 +27,7 @@ WebUtils.setPageId(request, editGridFormPageId);
 <script type="text/javascript">
 (function(po)
 {
+	po.element().draggable({ handle : po.element(".form-panel-title") });
 	po.element().hide();
 	po.formLabels.submit = "<fmt:message key='confirm' />";
 })
@@ -44,8 +45,6 @@ WebUtils.setPageId(request, gridPageId);
 	po.editGridModel = undefined;
 	
 	po.editGridFormPage = <%=editGridFormPageId%>;
-	
-	po.currentEditCell = undefined;
 	
 	po.editGridSwitch = function()
 	{
@@ -105,10 +104,9 @@ WebUtils.setPageId(request, gridPageId);
 	
 	po.disableEditGrid = function()
 	{
-		po.isEnableEditGrid = false;
-		po.cancelAllEditCell();
-
 		var dataTable = po.table().DataTable();
+		dataTable.cells(".selected").deselect();
+		
 		$(dataTable.table().node()).removeAttr("tabindex");
 		
 		var $headOperation = po.element(".head .operation");
@@ -124,6 +122,8 @@ WebUtils.setPageId(request, gridPageId);
 			if(po.isEnableEditGrid)
 				$(this).hide();
 		});
+		
+		po.isEnableEditGrid = false;
 	};
 	
 	po.markAsModifiedCell = function($cell)
@@ -144,95 +144,82 @@ WebUtils.setPageId(request, gridPageId);
 			$cmt.remove();
 	};
 	
-	po.beginEditCell = function($cell)
+	//打开编辑面板
+	po.openEditCellPanel = function(table, indexes)
 	{
-		if($cell.is(po.currentEditCell))
-			return;
-		else if(po.currentEditCell != null)
-			po.cancelEditCell(po.currentEditCell);
+		var settings = table.settings();
 		
-		po.currentEditCell = $cell;
+		var $cellNodes = $(table.cells(indexes).nodes());
+		var $editFormCell = $($cellNodes[0]);
+		var propertyIndexes = $.getDataTablesColumnPropertyIndexes(settings, indexes);
 		
-		$cell.addClass("edit-cell ui-state-highlight");
+		$cellNodes.removeClass("cell-edit-form");
+		$editFormCell.addClass("cell-edit-form");
 		
-		var text = $cell.text();
-		var originalText = $cell.attr("original-text");
+		var $formPage = po.editGridFormPage.element();
 		
-		if(originalText == undefined)
-		{
-			$cell.attr("original-text", text);
-			originalText = text;
-		}
+		if(!$formPage.parent().is(po.element(".foot")))
+			po.editGridFormPage.form().modelform("destroy");
 		
-		if(text != originalText)
-			po.markAsModifiedCell($cell);
+		$formPage.appendTo($editFormCell).show();
+		
+		var form = po.editGridFormPage.form();
+		
+		//只有一个属性，隐藏标签，否则，显示标签
+		if(propertyIndexes.length == 1)
+			form.addClass("hide-form-label");
 		else
-			po.markAsUnmodifiedCell($cell);
+			form.removeClass("hide-form-label");
 		
-		var cellIndex = $cell.index();
-		var settings = po.table().DataTable().settings();
-		var cellProperty = $.getDataTablesColumnProperty(po.editGridModel, settings, cellIndex);
-		
-		po.editGridFormPage.element().appendTo($cell).show().position({my: "left top", at: "left bottom"});
-		
-		po.editGridFormPage.form().modelform(
+		form.modelform(
 		{
 			model : po.editGridModel,
-			renderProperty : function(property)
+			renderProperty : function(property, propertyIndex)
 			{
-				return property == cellProperty;
+				return ($.inArray(propertyIndex, propertyIndexes) >= 0);
 			},
 			submit : function()
 			{
-				alert("save cell");
+				console.log("save cells");
+				
+				var table = po.table().DataTable();
+				po.closeEditCellPanel(table);
+				
 				return false;
 			},
 			labels : po.editGridFormPage.formLabels
 		});
+		
+		//仅选中一个单元格，激活焦点
+		if(indexes.length == 1)
+			$(":input:not([readonly]):visible:eq(0)", form).focus();
 	};
 	
-	po.storeEditCell = function($cell, value)
+	//关闭编辑面板
+	po.closeEditCellPanel = function(table, deselectCellIndexes)
 	{
-		po.cancelEditCell($cell, value);
-	};
-	
-	po.cancelEditCell = function($cell, newText)
-	{
-		$cell.removeClass("edit-cell ui-state-highlight");
+		if(deselectCellIndexes)
+			$(table.cells(deselectCellIndexes).nodes()).removeClass("cell-edit-form");
 		
-		var originalText = $cell.attr("original-text");
-		var text = newText;
+		var $formPage = po.editGridFormPage.element();
 		
-		if(text == undefined)
-			text = originalText;
-		
-		if(text != originalText)
-			po.markAsModifiedCell($cell);
-		else
-			po.markAsUnmodifiedCell($cell);
-		
-		po.currentEditCell = null;
-		
-		var editGridFormPageEle = po.editGridFormPage.element();
-		
-		if(editGridFormPageEle.parent().is($cell))
+		var $foot = po.element(".foot");
+		if(!$formPage.parent().is($foot))
 		{
+			$formPage.hide();
+			
 			po.editGridFormPage.form().modelform("destroy");
 			
-			editGridFormPageEle.hide();
-			editGridFormPageEle.appendTo(po.element());
+			$formPage.appendTo($foot);
 		}
+		
+		$(table.table().node()).focus();
 	};
 	
-	po.cancelAllEditCell = function($editedCells)
+	//恢复单元格的数据
+	po.restoreEditCell = function(table, $cells)
 	{
-		if(!$editedCells)
-			$editedCells = po.editedCells();
 		
-		$editedCells.each(function()
-		{
-			po.cancelEditCell($(this));
-		});
 	};
 	
 	po.initEditGrid = function(model)
@@ -262,7 +249,6 @@ WebUtils.setPageId(request, gridPageId);
 					{
 						"confirm" : function()
 						{
-							po.cancelAllEditCell($editedCells);
 							po.disableEditGrid();
 							
 							$thisCheckbox.attr("checked", false);
@@ -275,34 +261,68 @@ WebUtils.setPageId(request, gridPageId);
 				}
 				else
 				{
-					po.cancelAllEditCell($editedCells);
 					po.disableEditGrid();
 				}
 			}
 		});
 		
-		po.element(".button-cancel", po.element(".edit-grid")).click(function()
+		po.element(".button-restore", po.element(".edit-grid")).click(function()
 		{
-			if(po.currentEditCell != null)
-				po.cancelAllEditCell(po.currentEditCell);
+			var table = po.table().DataTable();
+			var selectedCells = table.cells(".selected");
+			
+			po.restoreEditCell(table, selectedCells);
 		});
 		
-		po.element(".button-cancel-all", po.element(".edit-grid")).click(function()
+		po.element(".button-restore-all", po.element(".edit-grid")).click(function()
 		{
-			var $editedCells = po.editedCells();
+			var table = po.table().DataTable();
 			
-			if($editedCells.length > 1)
+			var modifiedCells = table.cells(".modified-cell");
+			var count = modifiedCells.nodes().length;
+			
+			if(count > 1)
 			{
-				po.confirm("<fmt:message key='data.confirmCancelAllEditedCell'><fmt:param>"+$editedCells.length+"</fmt:param></fmt:message>",
+				po.confirm("<fmt:message key='data.confirmCancelAllEditedCell'><fmt:param>"+count+"</fmt:param></fmt:message>",
 				{
 					"confirm" : function()
 					{
-						po.cancelAllEditCell($editedCells);
+						po.restoreEditCell(table, modifiedCells);
 					}
 				});
 			}
 			else
-				po.cancelAllEditCell($editedCells);
+				po.restoreEditCell(table, modifiedCells);
+		});
+		
+		po.editGridFormPage.element()
+		.focusin(function()
+		{
+			var $this = $(this);
+			$this.addClass("focus");
+		})
+		.focusout(function()
+		{
+			var $this = $(this);
+			$this.removeClass("focus");
+		});
+		
+		po.editGridFormPage.element(".form-panel")
+		.keydown(function(event)
+		{
+			if(event.keyCode == $.ui.keyCode.ESCAPE)
+			{
+				var table = po.table().DataTable();
+				po.closeEditCellPanel(table);
+			}
+			
+			//禁止冒泡，因为这些快捷键在表格上有特殊处理逻辑
+			if(event.keyCode == $.ui.keyCode.ESCAPE || event.keyCode == $.ui.keyCode.ENTER
+					|| event.keyCode == $.ui.keyCode.DOWN || event.keyCode == $.ui.keyCode.UP
+					|| event.keyCode == $.ui.keyCode.LEFT|| event.keyCode == $.ui.keyCode.RIGHT)
+			{
+				event.stopPropagation();
+			}
 		});
 		
 		po.table().DataTable()
@@ -310,6 +330,7 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			if(po.isEnableEditGrid)
 			{
+				//阻止冒泡的行选择事件
 				event.stopPropagation();
 				
 				var target = $(event.target);
@@ -329,7 +350,21 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				var table = $(this).DataTable();
 				
-				$.handleCellNavigationForKeydown(table, event);
+				if(event.keyCode == $.ui.keyCode.ESCAPE)
+				{
+					po.closeEditCellPanel(table);
+				}
+				else if(event.keyCode == $.ui.keyCode.ENTER)
+				{
+					event.preventDefault();
+					
+					var selectedIndexes = table.cells(".selected").indexes();
+					
+					if(selectedIndexes)
+						po.openEditCellPanel(table, selectedIndexes);
+				}
+				else
+					$.handleCellNavigationForKeydown(table, event);
 			}
 		})
 		.on("select", function(event, dataTable, type, indexes)
@@ -338,15 +373,13 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				if(type == "cell")
 				{
-					var $cells = $(dataTable.cells(indexes).nodes());
+					po.openEditCellPanel(dataTable, indexes);
 				}
 				else if(type == "row")
 				{
 					dataTable.cells(".selected").deselect();
 				}
 			}
-			
-			console.log("select");
 		})
 		.on("deselect", function(event, dataTable, type, indexes)
 		{
@@ -354,11 +387,12 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				if(type == "cell")
 				{
-					var $cells = $(dataTable.cells(indexes).nodes());
+					var $selectedCells = dataTable.cells(".selected").nodes();
+					
+					if($selectedCells.length == 0)
+						po.closeEditCellPanel(dataTable, indexes);
 				}
 			}
-			
-			console.log("deselect");
 		})
 		.on("preDraw", function(event, settings)
 		{

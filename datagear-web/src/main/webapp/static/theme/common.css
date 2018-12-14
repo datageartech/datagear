@@ -349,18 +349,38 @@ table.dataTable tbody th, table.dataTable tbody td{
 	padding: 0 0.5em;
 	height: 2.5em;
 }
-table.dataTable tbody tr td.edit-cell{
+table.dataTable tbody tr td.cell-edit-form{
 	position: relative;
 }
-table.dataTable tr td.edit-cell .edit-cell-form-panel{
+table.dataTable tr td.cell-edit-form .page-edit-grid-form{
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
+}
+table.dataTable tr td.cell-edit-form .page-edit-grid-form.focus{
+	opacity: 1;
+	filter: Alpha(Opacity=100);
+}
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel{
 	position: absolute;
-	padding: 0.41em 0.41em;
+	left: -0.5em;
+	top: 0.75em;
+	display: inline-block;
 	z-index: 1;
+	padding: 1px 1px;
 }
-table.dataTable tr td.edit-cell .edit-cell-form-panel form .form-content .form-item .form-item-label{
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-title{
+	height: 10px;
+    cursor: move;
+}
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form{
+	width: 40em;
+	padding: 0.41em 0.41em;
+}
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label{
+	width: 30em;
+}
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-label{
 	display: none;
-}
-table.dataTable tbody tr td .edit-cell-input{
 }
 table.dataTable tbody tr td.cell-modified{
 	position: relative;
