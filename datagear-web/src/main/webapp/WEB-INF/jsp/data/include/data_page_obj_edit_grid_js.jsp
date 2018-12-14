@@ -207,6 +207,9 @@ WebUtils.setPageId(request, gridPageId);
 		if(!$formPage.parent().is($foot))
 		{
 			$formPage.hide();
+
+			$formPage.css("left", 0);
+			$formPage.css("top", 0);
 			
 			po.editGridFormPage.form().modelform("destroy");
 			
