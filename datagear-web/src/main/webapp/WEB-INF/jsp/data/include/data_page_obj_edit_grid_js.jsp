@@ -148,6 +148,7 @@ WebUtils.setPageId(request, gridPageId);
 	po.openEditCellPanel = function(dataTable, indexes)
 	{
 		var $table = $(dataTable.table().node());
+		var $tableParent = $(dataTable.table().container());
 		var settings = dataTable.settings();
 		
 		var $cellNodes = $(dataTable.cells(indexes).nodes());
@@ -197,11 +198,11 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			//仅选中一个属性，激活焦点
 			$(":input:not([readonly]):visible:eq(0)", form).focus();
-			$formPanel.css("min-width", $table.width()/3);
+			$formPanel.css("min-width", $tableParent.width()/3);
 		}
 		else
 		{
-			$formPanel.css("min-width", $table.width()/2);
+			$formPanel.css("min-width", $tableParent.width()/2);
 		}
 		
 		$formPanel.position({ my : "left top", at : "left bottom", of : $editFormCell, within : $table});
@@ -219,9 +220,9 @@ WebUtils.setPageId(request, gridPageId);
 		if(!$formPage.parent().is($foot))
 		{
 			$formPage.hide();
-
-			$formPage.css("left", 0);
-			$formPage.css("top", 0);
+			
+			if($formPage.hasClass("focus"))
+				$formPage.removeClass("focus");
 			
 			po.editGridFormPage.form().modelform("destroy");
 			
@@ -316,11 +317,12 @@ WebUtils.setPageId(request, gridPageId);
 			var $this = $(this);
 			$this.addClass("focus");
 		})
+		/* XXX 不在这里加失去焦点效果了，当切换单元格时会有一种卡顿感觉
 		.focusout(function()
 		{
 			var $this = $(this);
 			$this.removeClass("focus");
-		});
+		})*/;
 		
 		po.editGridFormPage.element(".form-panel")
 		.keydown(function(event)
