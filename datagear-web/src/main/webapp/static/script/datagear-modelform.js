@@ -193,6 +193,12 @@
 		
 		_destroy: function()
 		{
+			if(!this.options.readonly)
+			{
+				var validator = this.element.validate();
+				validator.destroy();
+			}
+			
 			$(".form-foot", this.element).remove();
 			$(".form-content", this.element).remove();
 			$(".form-head", this.element).remove();
