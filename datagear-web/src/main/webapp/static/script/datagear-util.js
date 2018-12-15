@@ -1158,12 +1158,12 @@
 			
 			var fileName = data.files[0].name;
 			var prettySize = $.prettySize(data.files[0].size);
-			
+
+			$("<div class='upload-percent' />").text("0%").appendTo($fileUploadInfo);
 			$("<div class='file-name' />").html((fileName.length > 13 ? fileName.substr(0, 10)+"..." : fileName))
 				.attr("title", fileName)
 				.appendTo($fileUploadInfo);
 			$("<div class='file-size' />").html("("+prettySize+")").appendTo($fileUploadInfo);
-			$("<div class='upload-percent' />").text("0%").appendTo($fileUploadInfo);
 		},
 		
 		/**

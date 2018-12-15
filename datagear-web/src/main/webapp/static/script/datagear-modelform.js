@@ -386,7 +386,9 @@
 				var labeldiv=$("<div class='form-item-label' />").appendTo(itemdiv);
 				var valuediv=$("<div class='form-item-value' />").appendTo(itemdiv);
 				
-				$("<label />").html($.model.displayName(property)).attr("title", $.model.displayDesc(property)).appendTo(labeldiv);
+				var displayName = $.model.displayName(property);
+				var displayDesc = $.model.displayDesc(property);
+				$("<label />").html(displayName).attr("title", (displayDesc || displayName)).appendTo(labeldiv);
 				
 				if($.model.hasFeatureNotReadable(property))
 				{
@@ -516,6 +518,8 @@
 		 */
 		_renderMultiplePropertyFormElement : function(property, propValue, itemdiv, labeldiv, valuediv, propertyWidget)
 		{
+			valuediv.addClass("multiple-value");
+			
 			var _this = this;
 			var options = this.options;
 			var propName = property.name;
@@ -547,6 +551,8 @@
 		 */
 		_renderSinglePrimitivePropertySelectFormElement : function(property, propValue, itemdiv, labeldiv, valuediv, propertyWidget)
 		{
+			valuediv.addClass("select-value");
+			
 			var options = this.options;
 			var propName = property.name;
 			
@@ -580,6 +586,8 @@
 		 */
 		_renderSinglePrimitivePropertyFileFormElement : function(property, propValue, itemdiv, labeldiv, valuediv, propertyWidget)
 		{
+			valuediv.addClass("file-value");
+			
 			var _this = this;
 			var options = this.options;
 			var propName = property.name;
@@ -770,11 +778,15 @@
 			
 			if(maxLength && maxLength > options.asTextareaLength)
 			{
+				valuediv.addClass("textarea-value");
+				
 				textinput = $("<textarea class='ui-widget ui-widget-content' />").attr("name", propName)
 					.text((propValue == undefined || propValue == null) ? "" : propValue);
 			}
 			else
 			{
+				valuediv.addClass("text-value");
+				
 				textinput = $("<input type='text' class='ui-widget ui-widget-content' />").attr("name", propName)
 					.attr("value", ((propValue == undefined || propValue == null) ? "" : propValue));
 			}
@@ -818,6 +830,8 @@
 		 */
 		_renderSingleCompositePropertyFormElement : function(property, propValue, itemdiv, labeldiv, valuediv, propertyWidget)
 		{
+			valuediv.addClass("single-value");
+			
 			var _this = this;
 			var options = this.options;
 			var model = options.model;

@@ -56,6 +56,12 @@ form .form-content .form-item .form-item-value{
 	-webkit-box-sizing: border-box;
 	vertical-align: middle;
 }
+form .form-content .form-item .form-item-value.text-value{}
+form .form-content .form-item .form-item-value.textarea-value{}
+form .form-content .form-item .form-item-value.select-value{}
+form .form-content .form-item .form-item-value.file-value{}
+form .form-content .form-item .form-item-value.single-value{}
+form .form-content .form-item .form-item-value.multiple-value{}
 form .form-content .form-item .form-item-value input[type=text],
 form .form-content .form-item .form-item-value input[type=password],
 form .form-content .form-item .form-item-value textarea,
@@ -78,16 +84,16 @@ form .form-content .form-item .form-item-value .file-info{/*展示上传文件�
 	display: inline-block;
 	margin-left: 0.5em;
 }
+form .form-content .form-item .form-item-value .file-info .upload-percent{
+	display: inline-block;
+	margin-right: 0.5em;
+}
 form .form-content .form-item .form-item-value .file-info .file-name{
 	display: inline-block;
 }
 form .form-content .form-item .form-item-value .file-info .file-size{
 	display: inline-block;
 	margin-left: 0.3em;
-}
-form .form-content .form-item .form-item-value .file-info .upload-percent{
-	display: inline-block;
-	margin-left: 0.5em;
 }
 form .form-content .form-item .form-item-value .file-info .file-delete{
 	margin-left: 0.5em;
@@ -362,8 +368,6 @@ table.dataTable tr td.cell-edit-form .page-edit-grid-form.focus{
 }
 table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel{
 	position: absolute;
-	left: -0.5em;
-	top: 0.75em;
 	display: inline-block;
 	z-index: 1;
 	padding: 1px 1px;
@@ -372,15 +376,29 @@ table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-pane
 	height: 10px;
     cursor: move;
 }
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-title .close-icon{
+	float: right;
+	cursor: pointer;
+	opacity: 0.5;
+	filter: Alpha(Opacity=50);
+}
 table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form{
-	width: 40em;
 	padding: 0.41em 0.41em;
 }
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label{
-	width: 30em;
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form .form-operation input[type='reset']{
+	display: none;
 }
 table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-label{
 	display: none;
+}
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value{
+	width: 99%;
+}
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value.text-value input[type='text']{
+	width: 60%;
+}
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value.textarea-value textarea{
+	width: 70%;
 }
 table.dataTable tbody tr td.cell-modified{
 	position: relative;

@@ -145,11 +145,12 @@ WebUtils.setPageId(request, gridPageId);
 	};
 	
 	//打开编辑面板
-	po.openEditCellPanel = function(table, indexes)
+	po.openEditCellPanel = function(dataTable, indexes)
 	{
-		var settings = table.settings();
+		var $table = $(dataTable.table().node());
+		var settings = dataTable.settings();
 		
-		var $cellNodes = $(table.cells(indexes).nodes());
+		var $cellNodes = $(dataTable.cells(indexes).nodes());
 		var $editFormCell = $($cellNodes[0]);
 		var propertyIndexes = $.getDataTablesColumnPropertyIndexes(settings, indexes);
 		
@@ -157,6 +158,7 @@ WebUtils.setPageId(request, gridPageId);
 		$editFormCell.addClass("cell-edit-form");
 		
 		var $formPage = po.editGridFormPage.element();
+		var $formPanel = po.editGridFormPage.element(".form-panel");
 		
 		if(!$formPage.parent().is(po.element(".foot")))
 			po.editGridFormPage.form().modelform("destroy");
@@ -182,24 +184,34 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				console.log("save cells");
 				
-				var table = po.table().DataTable();
-				po.closeEditCellPanel(table);
+				var dataTable = po.table().DataTable();
+				po.closeEditCellPanel(dataTable);
 				
 				return false;
 			},
+			validationRequiredAsAdd: false,
 			labels : po.editGridFormPage.formLabels
 		});
 		
-		//仅选中一个单元格，激活焦点
-		if(indexes.length == 1)
+		if(propertyIndexes.length == 1)
+		{
+			//仅选中一个属性，激活焦点
 			$(":input:not([readonly]):visible:eq(0)", form).focus();
+			$formPanel.css("min-width", $table.width()/3);
+		}
+		else
+		{
+			$formPanel.css("min-width", $table.width()/2);
+		}
+		
+		$formPanel.position({ my : "left top", at : "left bottom", of : $editFormCell, within : $table});
 	};
 	
 	//关闭编辑面板
-	po.closeEditCellPanel = function(table, deselectCellIndexes)
+	po.closeEditCellPanel = function(dataTable, deselectCellIndexes)
 	{
 		if(deselectCellIndexes)
-			$(table.cells(deselectCellIndexes).nodes()).removeClass("cell-edit-form");
+			$(dataTable.cells(deselectCellIndexes).nodes()).removeClass("cell-edit-form");
 		
 		var $formPage = po.editGridFormPage.element();
 		
@@ -216,11 +228,11 @@ WebUtils.setPageId(request, gridPageId);
 			$formPage.appendTo($foot);
 		}
 		
-		$(table.table().node()).focus();
+		$(dataTable.table().node()).focus();
 	};
 	
 	//恢复单元格的数据
-	po.restoreEditCell = function(table, $cells)
+	po.restoreEditCell = function(dataTable, $cells)
 	{
 		
 	};
@@ -271,17 +283,17 @@ WebUtils.setPageId(request, gridPageId);
 		
 		po.element(".button-restore", po.element(".edit-grid")).click(function()
 		{
-			var table = po.table().DataTable();
-			var selectedCells = table.cells(".selected");
+			var dataTable = po.table().DataTable();
+			var selectedCells = dataTable.cells(".selected");
 			
-			po.restoreEditCell(table, selectedCells);
+			po.restoreEditCell(dataTable, selectedCells);
 		});
 		
 		po.element(".button-restore-all", po.element(".edit-grid")).click(function()
 		{
-			var table = po.table().DataTable();
+			var dataTable = po.table().DataTable();
 			
-			var modifiedCells = table.cells(".modified-cell");
+			var modifiedCells = dataTable.cells(".modified-cell");
 			var count = modifiedCells.nodes().length;
 			
 			if(count > 1)
@@ -290,12 +302,12 @@ WebUtils.setPageId(request, gridPageId);
 				{
 					"confirm" : function()
 					{
-						po.restoreEditCell(table, modifiedCells);
+						po.restoreEditCell(dataTable, modifiedCells);
 					}
 				});
 			}
 			else
-				po.restoreEditCell(table, modifiedCells);
+				po.restoreEditCell(dataTable, modifiedCells);
 		});
 		
 		po.editGridFormPage.element()
@@ -315,8 +327,8 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			if(event.keyCode == $.ui.keyCode.ESCAPE)
 			{
-				var table = po.table().DataTable();
-				po.closeEditCellPanel(table);
+				var dataTable = po.table().DataTable();
+				po.closeEditCellPanel(dataTable);
 			}
 			
 			//禁止冒泡，因为这些快捷键在表格上有特殊处理逻辑
@@ -326,6 +338,12 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				event.stopPropagation();
 			}
+		});
+		
+		po.editGridFormPage.element(".close-icon").click(function()
+		{
+			var dataTable = po.table().DataTable();
+			po.closeEditCellPanel(dataTable);
 		});
 		
 		po.table().DataTable()
@@ -340,10 +358,10 @@ WebUtils.setPageId(request, gridPageId);
 				
 				if(target.is("td"))
 				{
-					var table = $(this).DataTable();
+					var dataTable = $(this).DataTable();
 					
-					table.rows(".selected").deselect();
-					$.handleCellSelectionForClick(table, event, target);
+					dataTable.rows(".selected").deselect();
+					$.handleCellSelectionForClick(dataTable, event, target);
 				}
 			}
 		})
@@ -351,23 +369,23 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			if(po.isEnableEditGrid)
 			{
-				var table = $(this).DataTable();
+				var dataTable = $(this).DataTable();
 				
 				if(event.keyCode == $.ui.keyCode.ESCAPE)
 				{
-					po.closeEditCellPanel(table);
+					po.closeEditCellPanel(dataTable);
 				}
 				else if(event.keyCode == $.ui.keyCode.ENTER)
 				{
 					event.preventDefault();
 					
-					var selectedIndexes = table.cells(".selected").indexes();
+					var selectedIndexes = dataTable.cells(".selected").indexes();
 					
 					if(selectedIndexes)
-						po.openEditCellPanel(table, selectedIndexes);
+						po.openEditCellPanel(dataTable, selectedIndexes);
 				}
 				else
-					$.handleCellNavigationForKeydown(table, event);
+					$.handleCellNavigationForKeydown(dataTable, event);
 			}
 		})
 		.on("select", function(event, dataTable, type, indexes)
