@@ -814,7 +814,7 @@
 			
 			textinput.appendTo(valuediv);
 			
-			if(dateFormat != "")
+			if(dateFormat)
 				textinput.after("<div class='input-desc input-desc-date ui-state-disabled'>"+dateFormat+"</div>");
 			
 			propertyWidget.textinput = textinput[0];
