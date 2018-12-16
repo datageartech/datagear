@@ -374,17 +374,21 @@ WebUtils.setPageId(request, gridPageId);
 			}
 			else
 			{
-				var $editedCells = po.editedCells();
+				var dataTable = po.table().DataTable();
 				
-				if($editedCells.length > 1)
+				var modifiedCells = dataTable.cells(".cell-modified");
+				var count = modifiedCells.nodes().length;
+				
+				if(count > 1)
 				{
 					event.preventDefault();
 					event.stopPropagation();
 					
-					po.confirm("<fmt:message key='data.confirmCancelAllEditedCell'><fmt:param>"+$editedCells.length+"</fmt:param></fmt:message>",
+					po.confirm("<fmt:message key='data.confirmCancelAllEditedCell'><fmt:param>"+count+"</fmt:param></fmt:message>",
 					{
 						"confirm" : function()
 						{
+							po.restoreEditCell(dataTable, modifiedCells);
 							po.disableEditGrid();
 							
 							$thisCheckbox.attr("checked", false);
