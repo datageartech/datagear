@@ -40,7 +40,8 @@ WebUtils.setPageId(request, gridPageId);
 (function(po)
 {
 	po.isEnableEditGrid = false;
-	
+	//存储单元格初始值
+	po.editGridOriginalCellValues = {};
 	//编辑表格对应的模型，会在initEditGrid函数中初始化
 	po.editGridModel = undefined;
 	
@@ -59,6 +60,46 @@ WebUtils.setPageId(request, gridPageId);
 	po.editGridOperationButtons = function()
 	{
 		return po.element(".edit-grid-operation button");
+	};
+	
+	po.hasSetOriginalCellValue = function(cellIndex)
+	{
+		if(!po.editGridOriginalCellValues)
+			return false;
+		
+		var rowObj = po.editGridOriginalCellValues[cellIndex.row];
+		
+		if(!rowObj)
+			return false;
+		
+		return rowObj.hasOwnProperty(cellIndex.column);
+	};
+	
+	//获取/设置单元格初始值
+	po.originalCellValue = function(cellIndex, value)
+	{
+		if(arguments.length == 1)
+		{
+			if(!po.editGridOriginalCellValues)
+				return undefined;
+			
+			var rowObj = po.editGridOriginalCellValues[cellIndex.row];
+			
+			if(!rowObj)
+				return undefined;
+			
+			return rowObj[cellIndex.column];
+		}
+		else if(arguments.length == 2)
+		{
+			if(!po.editGridOriginalCellValues)
+				po.editGridOriginalCellValues = {};
+			
+			var rowObj = (po.editGridOriginalCellValues[cellIndex.row]
+							|| (po.editGridOriginalCellValues[cellIndex.row] = {}));
+			
+			rowObj[cellIndex.column] = value;
+		}
 	};
 	
 	po.editedCells = function()
@@ -131,17 +172,20 @@ WebUtils.setPageId(request, gridPageId);
 		if(!$cell.hasClass("cell-modified"))
 			$cell.addClass("cell-modified");
 		
-		$("<div class='cell-midified-tip ui-state-error'><span class='ui-icon ui-icon-triangle-1-sw' /></div>").appendTo($cell);
+		var $tip = $(".cell-midified-tip", $cell);
+		
+		if($tip.length == 0)
+			$("<div class='cell-midified-tip ui-state-error'><span class='ui-icon ui-icon-triangle-1-sw' /></div>").appendTo($cell);
 	};
-
+	
 	po.markAsUnmodifiedCell = function($cell)
 	{
 		if($cell.hasClass("cell-modified"))
 			$cell.removeClass("cell-modified");
 		
-		var $cmt = $(".cell-midified-tip", $cell);
-		if($cmt.length > 0)
-			$cmt.remove();
+		var $tip = $(".cell-midified-tip", $cell);
+		if($tip.length > 0)
+			$tip.remove();
 	};
 	
 	//打开编辑面板
@@ -153,7 +197,9 @@ WebUtils.setPageId(request, gridPageId);
 		
 		var $cellNodes = $(dataTable.cells(indexes).nodes());
 		var $editFormCell = $($cellNodes[0]);
-		var propertyIndexes = $.getDataTablesColumnPropertyIndexes(settings, indexes);
+		var propertyIndexesMap = $.getDataTablesColumnPropertyIndexesMap(settings, indexes);
+		var propertyCount = 0;
+		for(var pi in propertyIndexesMap){ propertyCount++; }
 		
 		$cellNodes.removeClass("cell-edit-form");
 		$editFormCell.addClass("cell-edit-form");
@@ -169,24 +215,50 @@ WebUtils.setPageId(request, gridPageId);
 		var form = po.editGridFormPage.form();
 		
 		//只有一个属性，隐藏标签，否则，显示标签
-		if(propertyIndexes.length == 1)
+		if(propertyCount == 1)
 			form.addClass("hide-form-label");
 		else
 			form.removeClass("hide-form-label");
 		
+		var model = po.editGridModel;
+		var data = {};
+		
+		for(var pi in propertyIndexesMap)
+		{
+			var pindexes = propertyIndexesMap[pi];
+			
+			//仅赋值仅有一行选中的属性值
+			if(pindexes.length == 1)
+			{
+				var property = $.model.getProperty(model, parseInt(pi));
+				var propertyValue = dataTable.cell(pindexes[0]).data();
+				
+				$.model.propertyValue(data, property.name, propertyValue);
+			}
+		}
+		
 		form.modelform(
 		{
 			model : po.editGridModel,
+			data : data,
+			cellIndexes : indexes,
+			propertyIndexesMap : propertyIndexesMap,
 			renderProperty : function(property, propertyIndex)
 			{
-				return ($.inArray(propertyIndex, propertyIndexes) >= 0);
+				return (propertyIndexesMap[propertyIndex] != undefined);
 			},
 			submit : function()
 			{
-				console.log("save cells");
+				var $this = $(this);
+				
+				var data = $this.modelform("data");
+				var cellIndexes = $this.modelform("option", "cellIndexes");
+				var propertyIndexesMap = $this.modelform("option", "propertyIndexesMap");
 				
 				var dataTable = po.table().DataTable();
-				po.closeEditCellPanel(dataTable);
+				
+				po.closeEditCellPanel(dataTable, cellIndexes);
+				po.saveEditCell(dataTable, propertyIndexesMap, data);
 				
 				return false;
 			},
@@ -194,7 +266,7 @@ WebUtils.setPageId(request, gridPageId);
 			labels : po.editGridFormPage.formLabels
 		});
 		
-		if(propertyIndexes.length == 1)
+		if(propertyCount == 1)
 		{
 			//仅选中一个属性，激活焦点
 			$(":input:not([readonly]):visible:eq(0)", form).focus();
@@ -232,10 +304,58 @@ WebUtils.setPageId(request, gridPageId);
 		$(dataTable.table().node()).focus();
 	};
 	
-	//恢复单元格的数据
-	po.restoreEditCell = function(dataTable, $cells)
+	po.saveEditCell = function(dataTable, propertyIndexesMap, data)
 	{
+		var model = po.editGridModel;
 		
+		for(var pi in propertyIndexesMap)
+		{
+			var pindexes = propertyIndexesMap[pi];
+			var property = $.model.getProperty(model, parseInt(pi));
+			var propertyValue = $.model.propertyValue(data, property.name);
+			
+			for(var i=0; i<pindexes.length; i++)
+			{
+				var index = pindexes[i];
+				
+				var cell = dataTable.cell(index);
+				
+				var originalValue = undefined;
+				if(po.hasSetOriginalCellValue(index))
+					originalValue = po.originalCellValue(index);
+				else
+				{
+					originalValue = cell.data();
+					po.originalCellValue(index, originalValue);
+				}
+				
+				cell.data(propertyValue).draw();
+				
+				if(propertyValue == originalValue)
+					po.markAsUnmodifiedCell($(cell.node()));
+				else
+					po.markAsModifiedCell($(cell.node()));
+			}
+		}
+	};
+	
+	//恢复单元格的数据
+	po.restoreEditCell = function(dataTable, cells)
+	{
+		po.closeEditCellPanel(dataTable, cells);
+		
+		cells.every(function()
+		{
+			var index = this.index();
+			
+			if(po.hasSetOriginalCellValue(index))
+			{
+				var originalValue = po.originalCellValue(index);
+				this.data(originalValue).draw();
+				
+				po.markAsUnmodifiedCell($(this.node()));
+			}
+		});
 	};
 	
 	po.initEditGrid = function(model)
@@ -294,7 +414,7 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			var dataTable = po.table().DataTable();
 			
-			var modifiedCells = dataTable.cells(".modified-cell");
+			var modifiedCells = dataTable.cells(".cell-modified");
 			var count = modifiedCells.nodes().length;
 			
 			if(count > 1)

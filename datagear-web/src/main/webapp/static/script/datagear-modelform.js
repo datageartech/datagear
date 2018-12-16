@@ -601,10 +601,10 @@
 			var fileInputShowName = "showNameOf" + propName;
 			
 			var fileInputHidden = $("<input type='hidden' />").attr("name", propName)
-				.attr("value", "").appendTo(valuediv);
+				.val("").appendTo(valuediv);
 			
 			var fileInputShow = $("<input type='text' class='ui-widget ui-widget-content file-input-show' />").attr("name", fileInputShowName)
-				.attr("value", "").attr("__propName", propName).appendTo(valuediv).attr("readonly", "readonly");
+				.val("").attr("__propName", propName).appendTo(valuediv).attr("readonly", "readonly");
 			
 			if(options.readonly)
 			{
@@ -794,7 +794,7 @@
 				valuediv.addClass("text-value");
 				
 				textinput = $("<input type='text' class='ui-widget ui-widget-content' />").attr("name", propName)
-					.attr("value", ((propValue == undefined || propValue == null) ? "" : propValue));
+					.val((propValue == undefined || propValue == null) ? "" : propValue);
 			}
 			
 			if(options.readonly)

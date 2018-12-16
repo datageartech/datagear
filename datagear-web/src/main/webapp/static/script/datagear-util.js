@@ -779,9 +779,9 @@
 		},
 		
 		/**
-		 * 根据列索引获取列对应的模型属性。
+		 * 根据单元格索引获取对应的模型属性索引-单元格索引映射表。
 		 */
-		getDataTablesColumnPropertyIndexes : function(settings, cellIndexes)
+		getDataTablesColumnPropertyIndexesMap : function(settings, cellIndexes)
 		{
 			var columnMetas = undefined;
 			
@@ -792,23 +792,20 @@
 			else if(settings[0])
 				columnMetas = settings[0].aoColumns;
 			
-			var columnIndexMap = {};
+			var propertyIndexesMap = {};
 			for(var i=0; i<cellIndexes.length; i++)
-				columnIndexMap[cellIndexes[i].column] = 1;
-			
-			var propertyIndexes = [];
-			
-			for(var ci in columnIndexMap)
 			{
-				var propertyIndex = columnMetas[ci].propertyIndex;
+				var index = cellIndexes[i];
+				var propertyIndex = columnMetas[index.column].propertyIndex;
 				
 				if(propertyIndex == undefined)
 					throw new Error("Not valid column index ["+columnIndex+"] for getting column property");
 				
-				propertyIndexes.push(propertyIndex);
+				var indexes = (propertyIndexesMap[propertyIndex] || (propertyIndexesMap[propertyIndex] = []));
+				indexes.push(index);
 			}
 			
-			return propertyIndexes;
+			return propertyIndexesMap;
 		},
 		
 		/**
