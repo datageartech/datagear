@@ -339,7 +339,8 @@
 			west :
 			{
 				size : "18%"
-			}
+			},
+			onresize_end : function(){ $(window).resize();/*触发page_obj_grid.jsp表格resize*/ }
 		});
 		
 		po.element("#systemSetMenu").menu(
