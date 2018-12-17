@@ -1049,7 +1049,7 @@ table.dataTable tbody tr td.cell-modified .cell-midified-tip.ui-state-error{
 .page-grid .foot.foot-edit-grid .edit-grid .edit-grid-operation{
 	display: inline-block;
 	position: absolute;
-	right: -3.5em;
+	right: 0;
 	bottom: 0;
 	z-index: 1;
 }
@@ -1058,9 +1058,9 @@ table.dataTable tbody tr td.cell-modified .cell-midified-tip.ui-state-error{
 	margin-right: 0.2em;
 }
 .page-grid .foot.foot-edit-grid .edit-grid .edit-grid-operation .ui-button.button-save{
-	padding-left: 2.5em;
-	padding-right: 2.5em;
-	margin-left: 1em;
+	padding-left: 3em;
+	padding-right: 3em;
+	margin-left: 2em;
 }
 .page-grid .foot.foot-edit-grid .pagination-wrapper{
 	width: 49%;

@@ -142,7 +142,11 @@ WebUtils.setPageId(request, gridPageId);
 		po.element(".head .search").addClass("ui-state-disabled");
 		po.element(".foot .pagination").addClass("ui-state-disabled");
 		
+		var $editGridOperation = po.editGridOperation();
+		//保存按钮居中
+		$editGridOperation.css("right", (0 - po.element(".button-save", $editGridOperation).outerWidth(true)/2));
 		po.editGridOperationButtons().show("fade");
+		
 		po.element(".ui-button.not-edit-grid-button", $headOperation).hide();
 		po.element(".edit-grid-button-wrapper", $headOperation).show("fade", function()
 		{
