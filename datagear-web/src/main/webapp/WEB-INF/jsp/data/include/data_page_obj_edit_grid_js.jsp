@@ -350,22 +350,53 @@ WebUtils.setPageId(request, gridPageId);
 	};
 	
 	//恢复单元格的数据
-	po.restoreEditCell = function(dataTable, cells)
+	po.restoreEditCell = function(dataTable, cells, confirmCallback, cancelCallback)
 	{
-		po.closeEditCellPanel(dataTable);
+		var count = cells.nodes().length;
 		
-		cells.every(function()
+		var _confirmCallback = function()
 		{
-			var index = this.index();
+			po.closeEditCellPanel(dataTable);
 			
-			if(po.hasSetOriginalCellValue(index))
+			cells.every(function()
 			{
-				var originalValue = po.originalCellValue(index);
-				this.data(originalValue).draw();
+				var index = this.index();
 				
-				po.markAsUnmodifiedCell($(this.node()));
-			}
-		});
+				if(po.hasSetOriginalCellValue(index))
+				{
+					var originalValue = po.originalCellValue(index);
+					this.data(originalValue).draw();
+					
+					po.markAsUnmodifiedCell($(this.node()));
+				}
+			});
+			
+			if(confirmCallback)
+				confirmCallback.call(po, dataTable, cells, count);
+		};
+		
+		var _cancelCallback = function()
+		{
+			if(cancelCallback)
+				cancelCallback.call(po, dataTable, cells, count);
+		};
+		
+		if(count > 1)
+		{
+			po.confirm("<fmt:message key='data.confirmRestoreEditCell'><fmt:param>"+count+"</fmt:param></fmt:message>",
+			{
+				"confirm" : function()
+				{
+					_confirmCallback();
+				},
+				"cancel" : function()
+				{
+					_cancelCallback();
+				}
+			});
+		}
+		else
+			_confirmCallback();
 	};
 	
 	po.initEditGrid = function(model)
@@ -374,45 +405,29 @@ WebUtils.setPageId(request, gridPageId);
 		
 		$.initButtons(po.editGridOperation());
 		
-		po.editGridSwitch().checkboxradio({icon : false}).click(function(event)
+		po.editGridSwitch().checkboxradio({icon : true}).change(function(event)
 		{
 			var $thisCheckbox = $(this);
 			
-			if($(this).is(":checked"))
+			if($thisCheckbox.is(":checked"))
 			{
 				po.enableEditGrid();
 			}
 			else
 			{
 				var dataTable = po.table().DataTable();
-				
 				var modifiedCells = dataTable.cells(".cell-modified");
-				var count = modifiedCells.nodes().length;
 				
-				if(count > 1)
-				{
-					event.preventDefault();
-					event.stopPropagation();
-					
-					po.confirm("<fmt:message key='data.confirmCancelAllEditedCell'><fmt:param>"+count+"</fmt:param></fmt:message>",
-					{
-						"confirm" : function()
-						{
-							po.restoreEditCell(dataTable, modifiedCells);
-							po.disableEditGrid();
-							
-							$thisCheckbox.attr("checked", false);
-							$thisCheckbox.checkboxradio("refresh");
-						},
-						"cancel" : function()
-						{
-						}
-					});
-				}
-				else
+				po.restoreEditCell(dataTable, modifiedCells,
+				function()
 				{
 					po.disableEditGrid();
-				}
+				},
+				function()
+				{
+					$thisCheckbox.prop("checked", true);
+					$thisCheckbox.checkboxradio("refresh");
+				});
 			}
 		});
 		
@@ -429,20 +444,8 @@ WebUtils.setPageId(request, gridPageId);
 			var dataTable = po.table().DataTable();
 			
 			var modifiedCells = dataTable.cells(".cell-modified");
-			var count = modifiedCells.nodes().length;
 			
-			if(count > 1)
-			{
-				po.confirm("<fmt:message key='data.confirmCancelAllEditedCell'><fmt:param>"+count+"</fmt:param></fmt:message>",
-				{
-					"confirm" : function()
-					{
-						po.restoreEditCell(dataTable, modifiedCells);
-					}
-				});
-			}
-			else
-				po.restoreEditCell(dataTable, modifiedCells);
+			po.restoreEditCell(dataTable, modifiedCells);
 		});
 		
 		po.editGridFormPage.element()
