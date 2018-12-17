@@ -123,6 +123,15 @@ WebUtils.setPageId(request, gridPageId);
 			$.initButtons($buttonWrapper);
 			
 			$buttonWrapper.hide();
+			
+			po.element("button[name='editGridEditButton']", $buttonWrapper).click(function()
+			{
+				var dataTable = po.table().DataTable();
+				var selectedIndexes = dataTable.cells(".selected").indexes();
+				
+				if(selectedIndexes)
+					po.openEditCellPanel(dataTable, selectedIndexes, true);
+			});
 		}
 		
 		po.isEnableEditGrid = true;
@@ -189,7 +198,7 @@ WebUtils.setPageId(request, gridPageId);
 	};
 	
 	//打开编辑面板
-	po.openEditCellPanel = function(dataTable, indexes)
+	po.openEditCellPanel = function(dataTable, indexes, focus)
 	{
 		var $table = $(dataTable.table().node());
 		var $tableParent = $(dataTable.table().container());
@@ -207,18 +216,23 @@ WebUtils.setPageId(request, gridPageId);
 		var $formPage = po.editGridFormPage.element();
 		var $formPanel = po.editGridFormPage.element(".form-panel");
 		
-		if(!$formPage.parent().is(po.element(".foot")))
+		if($formPage.parent().is("td"))
 			po.editGridFormPage.form().modelform("destroy");
-		
 		$formPage.appendTo($editFormCell).show();
 		
 		var form = po.editGridFormPage.form();
 		
 		//只有一个属性，隐藏标签，否则，显示标签
 		if(propertyCount == 1)
+		{
+			$formPanel.css("min-width", $tableParent.width()/3);
 			form.addClass("hide-form-label");
+		}
 		else
+		{
+			$formPanel.css("min-width", $tableParent.width()/2);
 			form.removeClass("hide-form-label");
+		}
 		
 		var model = po.editGridModel;
 		var data = {};
@@ -241,7 +255,6 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			model : po.editGridModel,
 			data : data,
-			cellIndexes : indexes,
 			propertyIndexesMap : propertyIndexesMap,
 			renderProperty : function(property, propertyIndex)
 			{
@@ -252,12 +265,11 @@ WebUtils.setPageId(request, gridPageId);
 				var $this = $(this);
 				
 				var data = $this.modelform("data");
-				var cellIndexes = $this.modelform("option", "cellIndexes");
 				var propertyIndexesMap = $this.modelform("option", "propertyIndexesMap");
 				
 				var dataTable = po.table().DataTable();
 				
-				po.closeEditCellPanel(dataTable, cellIndexes);
+				po.closeEditCellPanel(dataTable);
 				po.saveEditCell(dataTable, propertyIndexesMap, data);
 				
 				return false;
@@ -266,31 +278,25 @@ WebUtils.setPageId(request, gridPageId);
 			labels : po.editGridFormPage.formLabels
 		});
 		
-		if(propertyCount == 1)
+		if(propertyCount == 1 || focus)
 		{
 			//仅选中一个属性，激活焦点
 			$(":input:not([readonly]):visible:eq(0)", form).focus();
-			$formPanel.css("min-width", $tableParent.width()/3);
-		}
-		else
-		{
-			$formPanel.css("min-width", $tableParent.width()/2);
 		}
 		
 		$formPanel.position({ my : "left top", at : "left bottom", of : $editFormCell, within : $table});
 	};
 	
 	//关闭编辑面板
-	po.closeEditCellPanel = function(dataTable, deselectCellIndexes)
+	po.closeEditCellPanel = function(dataTable)
 	{
-		if(deselectCellIndexes)
-			$(dataTable.cells(deselectCellIndexes).nodes()).removeClass("cell-edit-form");
-		
 		var $formPage = po.editGridFormPage.element();
+		var $formPageParent = $formPage.parent();
 		
-		var $foot = po.element(".foot");
-		if(!$formPage.parent().is($foot))
+		if($formPageParent.is("td"))
 		{
+			$formPageParent.removeClass("cell-edit-form");
+			
 			$formPage.hide();
 			
 			if($formPage.hasClass("focus"))
@@ -298,7 +304,7 @@ WebUtils.setPageId(request, gridPageId);
 			
 			po.editGridFormPage.form().modelform("destroy");
 			
-			$formPage.appendTo($foot);
+			$formPage.appendTo(po.element(".foot"));
 		}
 		
 		$(dataTable.table().node()).focus();
@@ -342,7 +348,7 @@ WebUtils.setPageId(request, gridPageId);
 	//恢复单元格的数据
 	po.restoreEditCell = function(dataTable, cells)
 	{
-		po.closeEditCellPanel(dataTable, cells);
+		po.closeEditCellPanel(dataTable);
 		
 		cells.every(function()
 		{
@@ -503,13 +509,13 @@ WebUtils.setPageId(request, gridPageId);
 				}
 				else if(event.keyCode == $.ui.keyCode.ENTER)
 				{
-					//必须加下面这行代码，不然当打开的编辑面板表单是单一属性且输入框自动焦点时，会触发表单提交事件
+					//必须加下面这行代码，不然当打开的编辑面板表单输入框自动焦点时，会触发表单提交事件
 					event.preventDefault();
 					
 					var selectedIndexes = dataTable.cells(".selected").indexes();
 					
 					if(selectedIndexes)
-						po.openEditCellPanel(dataTable, selectedIndexes);
+						po.openEditCellPanel(dataTable, selectedIndexes, true);
 				}
 				else
 					$.handleCellNavigationForKeydown(dataTable, event);
@@ -535,10 +541,7 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				if(type == "cell")
 				{
-					var $selectedCells = dataTable.cells(".selected").nodes();
-					
-					if($selectedCells.length == 0)
-						po.closeEditCellPanel(dataTable, indexes);
+					po.closeEditCellPanel(dataTable, indexes);
 				}
 			}
 		})
