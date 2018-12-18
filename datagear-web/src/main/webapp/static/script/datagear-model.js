@@ -711,13 +711,15 @@
 		 * 获取/设置对象属性值。
 		 * 
 		 * @param obj 必选，对象
-		 * @param propertyName 必选，属性名称
+		 * @param property 必选，属性对象或者属性名称名称
 		 * @parma propertyValue 可选，属性值
 		 */
-		propertyValue : function(obj, propertyName, propertyValue)
+		propertyValue : function(obj, property, propertyValue)
 		{
 			if(obj == undefined || obj == null)
 				throw new Error("[obj] must be defined");
+			
+			var propertyName = (property.name ? property.name : property);
 			
 			var isGet = (arguments.length == 2);
 			

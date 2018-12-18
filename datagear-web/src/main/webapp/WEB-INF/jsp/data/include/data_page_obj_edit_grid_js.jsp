@@ -41,7 +41,7 @@ WebUtils.setPageId(request, gridPageId);
 {
 	po.isEnableEditGrid = false;
 	//存储单元格初始值
-	po.editGridOriginalCellValues = {};
+	po.editGridOriginalRowDatas = {};
 	//编辑表格对应的模型，会在initEditGrid函数中初始化
 	po.editGridModel = undefined;
 	
@@ -62,49 +62,30 @@ WebUtils.setPageId(request, gridPageId);
 		return po.element(".edit-grid-operation button");
 	};
 	
-	po.hasSetOriginalCellValue = function(cellIndex)
+	/**
+	 * 获取行初始数据对象。
+	 * @param dataTable 必选，DataTable的API对象
+	 * @param row 必选，行索引
+	 * @param forceStore 可选，是否强制缓存，默认为true
+	 */
+	po.originalRowData = function(dataTable, row, forceStore)
 	{
-		if(!po.editGridOriginalCellValues)
-			return false;
+		if(forceStore == undefined)
+			forceStore = true;
 		
-		var rowObj = po.editGridOriginalCellValues[cellIndex.row];
+		if(!po.editGridOriginalRowDatas)
+			po.editGridOriginalRowDatas = {};
 		
-		if(!rowObj)
-			return false;
+		var rowData = po.editGridOriginalRowDatas[row];
 		
-		return rowObj.hasOwnProperty(cellIndex.column);
-	};
-	
-	//获取/设置单元格初始值
-	po.originalCellValue = function(cellIndex, value)
-	{
-		if(arguments.length == 1)
+		if(!rowData && forceStore)
 		{
-			if(!po.editGridOriginalCellValues)
-				return undefined;
-			
-			var rowObj = po.editGridOriginalCellValues[cellIndex.row];
-			
-			if(!rowObj)
-				return undefined;
-			
-			return rowObj[cellIndex.column];
+			rowData = dataTable.row(row).data();
+			rowData = $.extend({}, rowData);
+			po.editGridOriginalRowDatas[row] = rowData;
 		}
-		else if(arguments.length == 2)
-		{
-			if(!po.editGridOriginalCellValues)
-				po.editGridOriginalCellValues = {};
-			
-			var rowObj = (po.editGridOriginalCellValues[cellIndex.row]
-							|| (po.editGridOriginalCellValues[cellIndex.row] = {}));
-			
-			rowObj[cellIndex.column] = value;
-		}
-	};
-	
-	po.editedCells = function()
-	{
-		return po.element("tbody td.edit-cell, tbody td.cell-modified", po.table());
+		
+		return rowData;
 	};
 	
 	po.enableEditGrid = function()
@@ -210,7 +191,7 @@ WebUtils.setPageId(request, gridPageId);
 		
 		var $cellNodes = $(dataTable.cells(indexes).nodes());
 		var $editFormCell = $($cellNodes[0]);
-		var propertyIndexesMap = $.getDataTablesColumnPropertyIndexesMap(settings, indexes);
+		var propertyIndexesMap = $.getDataTableCellPropertyIndexesMap(settings, indexes);
 		var propertyCount = 0;
 		for(var pi in propertyIndexesMap){ propertyCount++; }
 		
@@ -330,18 +311,12 @@ WebUtils.setPageId(request, gridPageId);
 				
 				var cell = dataTable.cell(index);
 				
-				var originalValue = undefined;
-				if(po.hasSetOriginalCellValue(index))
-					originalValue = po.originalCellValue(index);
-				else
-				{
-					originalValue = cell.data();
-					po.originalCellValue(index, originalValue);
-				}
+				var originalRowData = po.originalRowData(dataTable, index.row);
+				var originalCellValue = $.model.propertyValue(originalRowData, property);
 				
 				cell.data(propertyValue).draw();
 				
-				if(propertyValue == originalValue)
+				if(propertyValue == originalCellValue)
 					po.markAsUnmodifiedCell($(cell.node()));
 				else
 					po.markAsModifiedCell($(cell.node()));
@@ -358,17 +333,25 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			po.closeEditCellPanel(dataTable);
 			
+			var model = po.editGridModel;
+			var settings = dataTable.settings();
+			
 			cells.every(function()
 			{
 				var index = this.index();
 				
-				if(po.hasSetOriginalCellValue(index))
+				var originalRowData = po.originalRowData(dataTable, index.row, false);
+				
+				if(originalRowData)
 				{
-					var originalValue = po.originalCellValue(index);
-					this.data(originalValue).draw();
+					var propertyIndex = $.getDataTableCellPropertyIndex(settings, index);
+					var property = $.model.getProperty(model, propertyIndex);
+					var originalCellValue = $.model.propertyValue(originalRowData, property);
 					
-					po.markAsUnmodifiedCell($(this.node()));
+					this.data(originalCellValue).draw();
 				}
+				
+				po.markAsUnmodifiedCell($(this.node()));
 			});
 			
 			if(confirmCallback)

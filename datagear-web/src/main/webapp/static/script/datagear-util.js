@@ -779,18 +779,26 @@
 		},
 		
 		/**
+		 * 根据单元格索引获取对应的模型属性索引
+		 */
+		getDataTableCellPropertyIndex : function(settings, cellIndex)
+		{
+			var columnMetas = this.getDataTableColumnMetas(settings);
+			
+			var propertyIndex = columnMetas[cellIndex.column].propertyIndex;
+			
+			if(propertyIndex == undefined)
+				throw new Error("Not valid column index ["+columnIndex+"] for getting column property");
+			
+			return propertyIndex;
+		},
+		
+		/**
 		 * 根据单元格索引获取对应的模型属性索引-单元格索引映射表。
 		 */
-		getDataTablesColumnPropertyIndexesMap : function(settings, cellIndexes)
+		getDataTableCellPropertyIndexesMap : function(settings, cellIndexes)
 		{
-			var columnMetas = undefined;
-			
-			//column.render函数中的结构
-			if(settings.aoColumns)
-				columnMetas = settings.aoColumns;
-			//.DataTable().settings()结构
-			else if(settings[0])
-				columnMetas = settings[0].aoColumns;
+			var columnMetas = this.getDataTableColumnMetas(settings);
 			
 			var propertyIndexesMap = {};
 			for(var i=0; i<cellIndexes.length; i++)
@@ -806,6 +814,23 @@
 			}
 			
 			return propertyIndexesMap;
+		},
+		
+		/**
+		 * 获取DataTable的列元信息。
+		 */
+		getDataTableColumnMetas : function(settings)
+		{
+			var columnMetas = undefined;
+			
+			//column.render函数中的结构
+			if(settings.aoColumns)
+				columnMetas = settings.aoColumns;
+			//.DataTable().settings()结构
+			else if(settings[0])
+				columnMetas = settings[0].aoColumns;
+			
+			return columnMetas;
 		},
 		
 		/**
