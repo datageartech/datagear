@@ -397,6 +397,24 @@ page_js_obj.jsp
 		po.table().DataTable().rows().remove();
 	};
 	
+	po.resiseGrid = function()
+	{
+		var dataTable = po.table().DataTable();
+		
+		var tbodyTable = $(dataTable.table().body()).parent();
+		var tbodyTableParent = tbodyTable.parent();
+		var theadTable = $(dataTable.table().header()).parent();
+		
+		var height = po.calTableHeight();
+		//XXX 宽度页必须重设，因为在隐藏选项卡中的表格宽度自适应有问题
+		var width = tbodyTable.actual("width");
+		
+		tbodyTableParent.css('height', height);
+		theadTable.css('width', width);
+		
+		dataTable.fixedColumns().relayout();
+	};
+	
 	//表格高度自适应
 	$(window).on('resize', function(event) 
 	{
@@ -409,21 +427,7 @@ page_js_obj.jsp
 			
 			po.tableResizeTimer = setTimeout(function()
 			{
-				var dtScrollBody = po.element('.dataTables_scrollBody');
-				
-				var height = po.calTableHeight();
-				var width = po.element(".dataTable", dtScrollBody).actual("width");
-				
-				dtScrollBody.css('height', height);
-				po.element('.dataTables_scrollHeadInner').css('width', width);
-				po.element('.dataTables_scrollHeadInner > .dataTable').css('width', width);
-				
-				po.table().DataTable().fixedColumns().relayout();
-				
-				//XXX 不能使用下面的代码让表格自适应宽度，因为在隐藏选项卡中的表格宽度计算会有问题
-				//var height = po.calTableHeight();
-				//po.element('.dataTables_scrollBody').css('height', height);
-				//po.table().DataTable().draw();
+				po.resiseGrid();
 			},
 			250);
 		}
