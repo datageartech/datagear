@@ -109,6 +109,8 @@ public class DataController extends AbstractSchemaModelController
 	@Autowired
 	private SqlTimeFormatter sqlTimeFormatter;
 
+	private int queryLeftClobLengthOnReading = 250;
+
 	public DataController()
 	{
 		super();
@@ -223,6 +225,16 @@ public class DataController extends AbstractSchemaModelController
 		this.sqlTimeFormatter = sqlTimeFormatter;
 	}
 
+	public int getQueryLeftClobLengthOnReading()
+	{
+		return queryLeftClobLengthOnReading;
+	}
+
+	public void setQueryLeftClobLengthOnReading(int queryLeftClobLengthOnReading)
+	{
+		this.queryLeftClobLengthOnReading = queryLeftClobLengthOnReading;
+	}
+
 	@RequestMapping("/{schemaId}/{tableName}/query")
 	public String query(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
@@ -242,6 +254,8 @@ public class DataController extends AbstractSchemaModelController
 				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
 			}
 		}.execute();
+
+		setGridPageAttributes(request, springModel);
 
 		return "/data/data_grid";
 	}
@@ -293,7 +307,7 @@ public class DataController extends AbstractSchemaModelController
 			}
 		}.execute();
 
-		setParseDateFormats(request, springModel);
+		setFormPageAttributes(request, springModel);
 
 		return "/data/data_form";
 	}
@@ -418,7 +432,7 @@ public class DataController extends AbstractSchemaModelController
 			}
 		}.execute();
 
-		setParseDateFormats(request, springModel);
+		setFormPageAttributes(request, springModel);
 
 		return "/data/data_form";
 	}
@@ -529,7 +543,7 @@ public class DataController extends AbstractSchemaModelController
 			}
 		}.execute();
 
-		setParseDateFormats(request, springModel);
+		setFormPageAttributes(request, springModel);
 
 		return "/data/data_form";
 	}
@@ -563,6 +577,8 @@ public class DataController extends AbstractSchemaModelController
 				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
 			}
 		}.execute();
+
+		setGridPageAttributes(request, springModel);
 
 		return "/data/data_select_prop_value";
 	}
@@ -627,7 +643,7 @@ public class DataController extends AbstractSchemaModelController
 			}
 		}.execute();
 
-		setParseDateFormats(request, springModel);
+		setFormPageAttributes(request, springModel);
 
 		return "/data/data_prop_value_form";
 	}
@@ -710,7 +726,7 @@ public class DataController extends AbstractSchemaModelController
 			}
 		}.execute();
 
-		setParseDateFormats(request, springModel);
+		setFormPageAttributes(request, springModel);
 
 		return "/data/data_prop_value_form";
 	}
@@ -799,7 +815,7 @@ public class DataController extends AbstractSchemaModelController
 			}
 		}.execute();
 
-		setParseDateFormats(request, springModel);
+		setFormPageAttributes(request, springModel);
 
 		return "/data/data_prop_value_form";
 	}
@@ -833,6 +849,8 @@ public class DataController extends AbstractSchemaModelController
 				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
 			}
 		}.execute();
+
+		setGridPageAttributes(request, springModel);
 
 		return "/data/data_prop_value_grid";
 	}
@@ -906,6 +924,8 @@ public class DataController extends AbstractSchemaModelController
 			}
 		}.execute();
 
+		setGridPageAttributes(request, springModel);
+
 		return "/data/data_prop_value_grid";
 	}
 
@@ -933,7 +953,7 @@ public class DataController extends AbstractSchemaModelController
 			}
 		}.execute();
 
-		setParseDateFormats(request, springModel);
+		setFormPageAttributes(request, springModel);
 
 		return "/data/data_prop_value_form";
 	}
@@ -1094,7 +1114,7 @@ public class DataController extends AbstractSchemaModelController
 			}
 		}.execute();
 
-		setParseDateFormats(request, springModel);
+		setFormPageAttributes(request, springModel);
 
 		return "/data/data_prop_value_form";
 	}
@@ -1225,7 +1245,7 @@ public class DataController extends AbstractSchemaModelController
 			}
 		}.execute();
 
-		setParseDateFormats(request, springModel);
+		setFormPageAttributes(request, springModel);
 
 		return "/data/data_prop_value_form";
 	}
@@ -1395,7 +1415,8 @@ public class DataController extends AbstractSchemaModelController
 	{
 		File blobToFilePlaceholder = new File(this.blobFileManagerDirectory, this.blobToFilePlaceholderName);
 
-		return new LOBConversionSetting(blobToFilePlaceholder, BLOB_TO_BYTES_PLACEHOLDER, 100);
+		return new LOBConversionSetting(blobToFilePlaceholder, BLOB_TO_BYTES_PLACEHOLDER,
+				this.queryLeftClobLengthOnReading);
 	}
 
 	/**
@@ -1458,12 +1479,23 @@ public class DataController extends AbstractSchemaModelController
 	}
 
 	/**
-	 * 设置日期格式。
+	 * 设置表格页面属性。
 	 * 
 	 * @param request
 	 * @param springModel
 	 */
-	protected void setParseDateFormats(HttpServletRequest request, org.springframework.ui.Model springModel)
+	protected void setGridPageAttributes(HttpServletRequest request, org.springframework.ui.Model springModel)
+	{
+		springModel.addAttribute("queryLeftClobLengthOnReading", this.queryLeftClobLengthOnReading);
+	}
+
+	/**
+	 * 设置表单页面属性。
+	 * 
+	 * @param request
+	 * @param springModel
+	 */
+	protected void setFormPageAttributes(HttpServletRequest request, org.springframework.ui.Model springModel)
 	{
 		Locale locale = WebUtils.getLocale(request);
 

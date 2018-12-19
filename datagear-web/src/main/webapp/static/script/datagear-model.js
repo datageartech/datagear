@@ -469,6 +469,15 @@
 		},
 		
 		/**
+		 * 获取指定属性值对应的属性模型。
+		 */
+		getPropertyModelByValue : function(property, propertyValue)
+		{
+			//TODO 处理抽象属性
+			return property.model;
+		},
+		
+		/**
 		 * 判断属性是否是抽象属性。
 		 * 
 		 * @param property
@@ -1108,6 +1117,14 @@
 			
 			if(this.isPrimitiveModel(model))
 			{
+				if(this.isFileTypeModel(model))
+				{
+					var rawValue = this.getFilePropertyRawValue(obj);
+					var showValue = this.getFilePropertyShowValue(obj);
+					
+					obj = (showValue ? showValue : rawValue);
+				}
+				
 				re=obj+"";
 			}
 			else
@@ -1194,8 +1211,7 @@
 				}
 				else
 				{
-					//TODO 处理抽象属性
-					var propertyModel = property.model;
+					var propertyModel = this.getPropertyModelByValue(property, propertyValue);
 					
 					var ignorePropertyName = this.findMappedByWith(property, propertyModel);
 					re = this.token(propertyModel, v, ignorePropertyName);
@@ -1206,6 +1222,44 @@
 				return re.substr(0, 97) + "...";
 			else
 				return re;
+		},
+		
+		/**
+		 * 构建文件属性详细值对象。
+		 */
+		toFilePropertyDetailValue : function(value, showValue)
+		{
+			return { "value" : value, "showValue" : showValue };
+		},
+		
+		/**
+		 * 是否是文件属性详细值对象。
+		 */
+		isFilePropertyDetailValue : function(value)
+		{
+			return $.isPlainObject(value);
+		},
+		
+		/**
+		 * 获取原始文件属性值。
+		 */
+		getFilePropertyRawValue : function(value)
+		{
+			if(this.isFilePropertyDetailValue(value))
+				return value.value;
+			else
+				return value;
+		},
+		
+		/**
+		 * 获取显示文件属性值。
+		 */
+		getFilePropertyShowValue : function(value)
+		{
+			if(this.isFilePropertyDetailValue(value))
+				return value.showValue;
+			else
+				return undefined;
 		},
 		
 		/**

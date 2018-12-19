@@ -263,6 +263,7 @@ WebUtils.setPageId(request, gridPageId);
 			},
 			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
 			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",
+			filePropertyValueReturnDetail : true,
 			downloadSinglePropertyValueFile : function(property, propertyConcreteModel)
 			{
 				po.editGridFormPage.downloadSinglePropertyValueFile(property, propertyConcreteModel);

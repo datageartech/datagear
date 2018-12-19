@@ -757,7 +757,6 @@
 						
 						var propertyIndex = thisColumn.propertyIndex;
 						var property = model.properties[propertyIndex];
-						var propertyModel = property.model;
 						
 						renderValue = $.model.tokenProperty(property, data);
 						renderValue = $.truncateIf(renderValue, "...", thisColumn.stringDisplayThreshold);

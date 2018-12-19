@@ -78,6 +78,10 @@
 			//可选，文件属性值删除时的文件参数名
 			filePropertyDeleteParamName : "file",
 			
+			//可选，文件属性值是否采用详细信息对象，而非基本文件名称值
+			//详细信息对象格式：{ value : "...", showValue : "..." }
+			filePropertyValueReturnDetail : false,
+			
 			//"readonly=false"时必须，下载单元文件属性值处理函数
 			downloadSinglePropertyValueFile : function(property, propertyConcreteModel){ throw new Error("TODO"); },
 			
@@ -542,7 +546,7 @@
 				{
 					var myPropName = $(this).attr("__propName");
 					var myproperty = $.model.getProperty(_this.options.model, myPropName);
-					var myConcreteModel = myproperty.model;//TODO 处理抽象属性
+					var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
 					
 					var callback = (_this.options.readonly ? _this.options.viewMultiplePropertyValue : _this.options.editMultiplePropertyValue);
 					callback.call(_this.element, myproperty, myConcreteModel);
@@ -586,7 +590,7 @@
 			
 			this._addValidatorRequired(property, propName);
 		},
-
+		
 		/**
 		 * 渲染文件上传表单元素。
 		 */
@@ -612,7 +616,9 @@
 					.html(options.labels.downloadFile)
 					.appendTo(valuediv);
 				
-				if(!propValue)
+				var rawValue = $.model.getFilePropertyRawValue(propValue);
+				
+				if(!rawValue)
 					fileDownloadButton.attr("disabled", true);
 				
 				fileDownloadButton.button();
@@ -621,12 +627,9 @@
 				{
 					var myPropName = $(this).attr("__propName");
 					var myproperty = $.model.getProperty(_this.options.model, myPropName);
-					var myPropertyWidget = _this._propertyWidgets[myPropName];
-					var propValue = myPropertyWidget.getValue();
-					
-					var myConcreteModel = myproperty.model;//TODO 处理抽象属性
+					var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
 		    		
-	    			_this.options.downloadSinglePropertyValueFile.call(_this.element, myproperty, myConcreteModel, propValue);
+	    			_this.options.downloadSinglePropertyValueFile.call(_this.element, myproperty, myConcreteModel);
 				});
 			}
 			else
@@ -666,7 +669,7 @@
 						var propValue = this.__propValue;
 						var propertyWidget = _this._propertyWidgets[propName];
 						
-						propertyWidget.setValue(serverFileInfo.name, clientFileName, true);
+						propertyWidget.setValue({ "value" : serverFileInfo.name, "showValue" : clientFileName }, true);
 						
 						$.fileuploadsuccessHandlerForUploadInfo(fileInfoDiv);
 						
@@ -715,15 +718,15 @@
 			    		
 						var myproperty = $.model.getProperty(_this.options.model, myPropName);
 						var myPropertyWidget = _this._propertyWidgets[myPropName];
-						
-						var myConcreteModel = myproperty.model;//TODO 处理抽象属性
+		    			var propValue = myPropertyWidget.getValue();
+						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
 			    		
 			    		if("download" == action)
 			    		{
-			    			var propValue = myPropertyWidget.getValue();
+			    			var rawValue = $.model.getFilePropertyRawValue(propValue);
 			    			
-			    			if(propValue)
-			    				_this.options.downloadSinglePropertyValueFile.call(_this.element, myproperty, myConcreteModel, propValue);
+			    			if(rawValue)
+			    				_this.options.downloadSinglePropertyValueFile.call(_this.element, myproperty, myConcreteModel);
 			    		}
 			    		else if("del" == action)
 			    		{
@@ -742,20 +745,26 @@
 			
 			propertyWidget.getValue = function()
 			{
-				return $(this.fileInputHidden).val();
+				if(options.filePropertyValueReturnDetail)
+					return $.model.toFilePropertyDetailValue($(this.fileInputHidden).val(), $(this.fileInputShow).val());
+				else
+					return $(this.fileInputHidden).val();
 			};
-			propertyWidget.setValue = function(value, showValue, reserveFileInfo)
+			propertyWidget.setValue = function(value, reserveFileInfo)
 			{
-				$(this.fileInputHidden).val(value ? value : "");
+				var rawValue = $.model.getFilePropertyRawValue(value);
+				var showValue = $.model.getFilePropertyShowValue(value);
+				
+				$(this.fileInputHidden).val(rawValue ? rawValue : "");
 				
 				if(showValue)
 					$(this.fileInputShow).val(showValue);
 				else
-					$(this.fileInputShow).val((value ? value : ""));
+					$(this.fileInputShow).val((rawValue ? rawValue : ""));
 				
 				if(this.fileInfoDiv)
 				{
-					if(arguments.length >= 3 && reserveFileInfo)
+					if(reserveFileInfo)
 						;
 					else
 						$(this.fileInfoDiv).empty();
@@ -863,7 +872,7 @@
 					{
 						var myPropName = $(this).attr("__propName");
 						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myConcreteModel = myproperty.model;//TODO 处理抽象属性
+						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
 						_this.options.viewSinglePropertyValue.call(_this.element, myproperty, myConcreteModel);
 					});
 				}
@@ -880,7 +889,7 @@
 					{
 						var myPropName = $(this).attr("__propName");
 						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myConcreteModel = myproperty.model;//TODO 处理抽象属性
+						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
 						
 						_this.options.deleteSinglePropertyValue.call(_this.element, myproperty, myConcreteModel);
 					}
@@ -897,7 +906,7 @@
 					{
 						var myPropName = $(this).attr("__propName");
 						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myConcreteModel = myproperty.model;//TODO 处理抽象属性
+						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
 						var myPropertyWidget = _this._propertyWidgets[myPropName];
 						
 						//属性值必须动态判断，因为界面编辑时也可能设置值
@@ -912,7 +921,7 @@
 					{
 						var myPropName = $(this).attr("__propName");
 						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myConcreteModel = myproperty.model;//TODO 处理抽象属性
+						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
 						
 						_this.options.selectSinglePropertyValue.call(_this.element, myproperty, myConcreteModel);
 					});
@@ -937,7 +946,7 @@
 			    		var myPropName = $(ui.item.element).attr("__propName");
 			    		
 						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myConcreteModel = myproperty.model;//TODO 处理抽象属性
+						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
 			    		
 						/*共享属性这里暂时去掉添加、编辑操作了，因为和删除的概念不一致，因为删除仅会删除关联关系
 			    		if("edit" == action)
