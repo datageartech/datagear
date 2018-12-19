@@ -47,6 +47,8 @@ WebUtils.setPageId(request, gridPageId);
 	
 	po.editGridFormPage = <%=editGridFormPageId%>;
 	
+	po.queryLeftClobLengthOnReading = <%=request.getAttribute("queryLeftClobLengthOnReading")%>;
+	
 	po.editGridSwitch = function()
 	{
 		return po.element("#${pageId}-editGridSwitch");
@@ -145,7 +147,7 @@ WebUtils.setPageId(request, gridPageId);
 		$(dataTable.table().node()).removeAttr("tabindex");
 		
 		var $headOperation = po.element(".head .operation");
-
+		
 		po.element(".head .search").removeClass("ui-state-disabled");
 		po.element(".foot .pagination").removeClass("ui-state-disabled");
 		
@@ -259,8 +261,17 @@ WebUtils.setPageId(request, gridPageId);
 				
 				return false;
 			},
-			validationRequiredAsAdd: false,
-			labels : po.editGridFormPage.formLabels
+			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
+			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",
+			downloadSinglePropertyValueFile : function(property, propertyConcreteModel)
+			{
+				po.editGridFormPage.downloadSinglePropertyValueFile(property, propertyConcreteModel);
+			},
+			validationRequiredAsAdd : false,
+			labels : po.editGridFormPage.formLabels,
+			dateFormat : "<c:out value='${sqlDateFormat}' />",
+			timestampFormat : "<c:out value='${sqlTimestampFormat}' />",
+			timeFormat : "<c:out value='${sqlTimeFormat}' />"
 		});
 		
 		if(propertyCount == 1 || focus)
@@ -299,6 +310,8 @@ WebUtils.setPageId(request, gridPageId);
 	{
 		var model = po.editGridModel;
 		
+		var saveCount = 0;
+		
 		for(var pi in propertyIndexesMap)
 		{
 			var pindexes = propertyIndexesMap[pi];
@@ -320,8 +333,14 @@ WebUtils.setPageId(request, gridPageId);
 					po.markAsUnmodifiedCell($(cell.node()));
 				else
 					po.markAsModifiedCell($(cell.node()));
+				
+				saveCount++;
 			}
 		}
+		
+		//新值可能会影响单元格宽度，因此需要重设列宽
+		if(saveCount > 0)
+			dataTable.columns.adjust();
 	};
 	
 	//恢复单元格的数据
@@ -335,6 +354,8 @@ WebUtils.setPageId(request, gridPageId);
 			
 			var model = po.editGridModel;
 			var settings = dataTable.settings();
+
+			var restoreCount = 0;
 			
 			cells.every(function()
 			{
@@ -352,10 +373,16 @@ WebUtils.setPageId(request, gridPageId);
 				}
 				
 				po.markAsUnmodifiedCell($(this.node()));
+				
+				restoreCount++;
 			});
 			
 			if(confirmCallback)
 				confirmCallback.call(po, dataTable, cells, count);
+
+			//新值可能会影响单元格宽度，因此需要重设列宽
+			if(restoreCount > 0)
+				dataTable.columns.adjust();
 		};
 		
 		var _cancelCallback = function()
