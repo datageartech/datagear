@@ -86,6 +86,7 @@ public class ClassDataConverter extends AbstractDataConverter
 	 * @return
 	 * @throws ConverterException
 	 */
+	@SuppressWarnings("unchecked")
 	protected <T> T convertObj(String namePath, Object obj, Class<T> type, RefContext refContext)
 			throws ConverterException
 	{
@@ -98,10 +99,14 @@ public class ClassDataConverter extends AbstractDataConverter
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
-			@SuppressWarnings("unchecked")
 			Map<String, Object> map = (Map<String, Object>) obj;
 
-			T target = convertMap(namePath, map, type, refContext);
+			T target = null;
+
+			if (type.isArray())
+				target = (T) convertMapToArray(namePath, map, type.getComponentType(), refContext);
+			else
+				target = convertMap(namePath, map, type, refContext);
 
 			return target;
 		}

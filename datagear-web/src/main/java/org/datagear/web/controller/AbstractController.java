@@ -172,7 +172,6 @@ public abstract class AbstractController
 
 		int paramLen = param.length();
 
-		@SuppressWarnings("unchecked")
 		Map<String, String[]> paramMap = request.getParameterMap();
 
 		for (Map.Entry<String, String[]> entry : paramMap.entrySet())

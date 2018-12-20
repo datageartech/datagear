@@ -219,7 +219,7 @@
 			}
 			else if(arguments.length == 2)
 			{
-				if($.isNumeric(propertyName))
+				if(typeof(propertyName) == "number")
 				{
 					propertyConcreteIndex = propertyName;
 					propertyName = propertyPath;
@@ -401,6 +401,44 @@
 		{
 			return !this.isCompositeModel(model);
 		},
+
+		/**
+		 * 获取指定名称的Property对象。
+		 * 
+		 * @param model
+		 * @param propNameOrIndex 属性名称或者属性索引
+		 */
+		getProperty : function(model, propNameOrIndex)
+		{
+			//索引
+			if(typeof(propNameOrIndex) == "number")
+				return model.properties[propNameOrIndex];
+			//属性名
+			else
+			{
+				var index = this.getPropertyIndex(model, propNameOrIndex);
+				
+				if(index < 0)
+					throw new Error("No property named '"+propNameOrIndex+"'");
+				
+				return model.properties[index];
+			}
+		},
+		
+		/**
+		 * 获取属性索引。
+		 */
+		getPropertyIndex : function(model, propertyName)
+		{
+			var properties=model.properties;
+			for(var i=0; i<properties.length; i++)
+			{
+				if(properties[i].name == propertyName)
+					return i;
+			}
+			
+			return -1;
+		},
 		
 		/**
 		 * 获取指定名称/索引的模型。
@@ -469,12 +507,31 @@
 		},
 		
 		/**
+		 * 获取指定索引的属性模型。
+		 */
+		getPropertyModelByIndex : function(property, propertyModelIndex)
+		{
+			var propertyModels = this.getPropertyModels(property);
+			
+			return propertyModels[propertyModelIndex];
+		},
+		
+		/**
 		 * 获取指定属性值对应的属性模型。
 		 */
 		getPropertyModelByValue : function(property, propertyValue)
 		{
 			//TODO 处理抽象属性
 			return property.model;
+		},
+		
+		/**
+		 * 获取指定属性值对应的属性模型索引。
+		 */
+		getPropertyModelIndexByValue : function(property, propertyValue)
+		{
+			//TODO 处理抽象属性
+			return 0;
 		},
 		
 		/**
@@ -588,77 +645,6 @@
 			}
 			
 			return false;
-		},
-		
-		/**
-		 * 判断org.datagear.model.Featured对象是否有指定特性。
-		 * 
-		 * @param featured
-		 * @param featureName
-		 */
-		hasFeature : function(featured, featureName)
-		{
-			var features = featured.features;
-			
-			return !!features[featureName];
-		},
-		
-		/**
-		 * 获取/设置org.datagear.model.Featured对象的指定特性。
-		 * 
-		 * @param featured
-		 * @param featureName
-		 * @param featureValue
-		 */
-		feature : function(featured, featureName, featureValue)
-		{
-			var features = featured.features;
-			
-			if(featureValue == undefined)
-				return features[featureName];
-			else
-			{
-				features[featureName] = featureValue;
-				return featureValue;
-			}
-		},
-		
-		/**
-		 * 获取org.datagear.model.MapFeature的值。
-		 * 
-		 * @param mapFeature
-		 * @param key
-		 */
-		getMapFeatureValue : function(mapFeature, key)
-		{
-			if(!mapFeature)
-				return undefined;
-			
-			var re = (mapFeature.mapValues ? mapFeature.mapValues[key] : null);
-			
-			if(re == null || re == undefined)
-				re = mapFeature.value;
-			
-			return re;
-		},
-		
-		/**
-		 * 查找MappedBy目标或者源属性名，如果没有，此方法将返回undefined。
-		 */
-		findMappedByWith : function(property, propertyModel)
-		{
-			var propertyModelIndex = this.getPropertyModelIndex(property, propertyModel);
-			
-			//有MappedBy特性
-			var mappedBy = this.feature(property, "MappedBy");
-			var mappedByTarget = (mappedBy ? this.getMapFeatureValue(mappedBy, propertyModelIndex) : null);
-			if(mappedByTarget)
-				return mappedByTarget;
-			
-			var relationMapper = this.featureRelationMapper(property);
-			var mapper = relationMapper.mappers[propertyModelIndex];
-			
-			return mapper.mappedBySource;
 		},
 		
 		/**
@@ -863,44 +849,6 @@
 			}
 			
 			return data;
-		},
-		
-		/**
-		 * 获取属性索引。
-		 */
-		getPropertyIndex : function(model, propertyName)
-		{
-			var properties=model.properties;
-			for(var i=0; i<properties.length; i++)
-			{
-				if(properties[i].name == propertyName)
-					return i;
-			}
-			
-			return -1;
-		},
-		
-		/**
-		 * 获取指定名称的Property对象。
-		 * 
-		 * @param model
-		 * @param propName 属性名称或者属性索引
-		 */
-		getProperty : function(model, propName)
-		{
-			//索引
-			if(typeof(propName) == "number")
-				return model.properties[propName];
-			//属性名
-			else
-			{
-				var index = this.getPropertyIndex(model, propName);
-				
-				if(index < 0)
-					throw new Error("No property named '"+propName+"'");
-				
-				return model.properties[index];
-			}
 		},
 		
 		/**
@@ -1261,6 +1209,58 @@
 			else
 				return undefined;
 		},
+
+		/**
+		 * 判断org.datagear.model.Featured对象是否有指定特性。
+		 * 
+		 * @param featured
+		 * @param featureName
+		 */
+		hasFeature : function(featured, featureName)
+		{
+			var features = featured.features;
+			
+			return !!features[featureName];
+		},
+		
+		/**
+		 * 获取/设置org.datagear.model.Featured对象的指定特性。
+		 * 
+		 * @param featured
+		 * @param featureName
+		 * @param featureValue
+		 */
+		feature : function(featured, featureName, featureValue)
+		{
+			var features = featured.features;
+			
+			if(featureValue == undefined)
+				return features[featureName];
+			else
+			{
+				features[featureName] = featureValue;
+				return featureValue;
+			}
+		},
+		
+		/**
+		 * 获取org.datagear.model.MapFeature的值。
+		 * 
+		 * @param mapFeature
+		 * @param key
+		 */
+		getMapFeatureValue : function(mapFeature, key)
+		{
+			if(!mapFeature)
+				return undefined;
+			
+			var re = (mapFeature.mapValues ? mapFeature.mapValues[key] : null);
+			
+			if(re == null || re == undefined)
+				re = mapFeature.value;
+			
+			return re;
+		},
 		
 		/**
 		 * 判断是否有org.datagear.model.features.Select特性。
@@ -1358,6 +1358,35 @@
 			var tableNameFeature = this.feature(model, "TableName");
 			
 			return tableNameFeature.value;
+		},
+		
+		/**
+		 * 获取属性模型的JDBC类型值，如果没有，则返回undefined。
+		 */
+		featureJdbcTypeValue : function(property, propertyModelIndex)
+		{
+			var jdbcTypeFeature = this.feature(property, "JdbcType");
+			
+			return this.getMapFeatureValue(jdbcTypeFeature, propertyModelIndex);
+		},
+		
+		/**
+		 * 查找MappedBy目标或者源属性名，如果没有，此方法将返回undefined。
+		 */
+		findMappedByWith : function(property, propertyModel)
+		{
+			var propertyModelIndex = this.getPropertyModelIndex(property, propertyModel);
+			
+			//有MappedBy特性
+			var mappedBy = this.feature(property, "MappedBy");
+			var mappedByTarget = (mappedBy ? this.getMapFeatureValue(mappedBy, propertyModelIndex) : null);
+			if(mappedByTarget)
+				return mappedByTarget;
+			
+			var relationMapper = this.featureRelationMapper(property);
+			var mapper = relationMapper.mappers[propertyModelIndex];
+			
+			return mapper.mappedBySource;
 		},
 		
 		/**

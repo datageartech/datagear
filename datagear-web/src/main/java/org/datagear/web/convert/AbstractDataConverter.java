@@ -383,14 +383,22 @@ public abstract class AbstractDataConverter
 	 * @param type
 	 * @return
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected <T> Class<? extends T> getInstanceType(Class<? extends T> type)
 	{
+		if (type.isArray())
+		{
+			Class<?> componentType = getInstanceType(type.getComponentType());
+			Class<? extends T> instanceType = (Class) createArrayInstance(componentType, 0).getClass();
+
+			return instanceType;
+		}
+
 		int mod = type.getModifiers();
 
 		if (!Modifier.isInterface(mod) && !Modifier.isAbstract(mod))
 			return type;
 
-		@SuppressWarnings({ "unchecked" })
 		Class<? extends T> instanceType = (Class<? extends T>) this.instanceTypeMap.get(type);
 
 		if (instanceType == null)

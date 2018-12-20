@@ -3,8 +3,10 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 --%>
+<%@ page import="java.sql.NClob"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@page import="org.datagear.web.util.WebUtils"%>
+<%@ page import="org.datagear.web.util.WebUtils"%>
+<%@ page import="java.sql.Types"%>
 <%--
 编辑表格功能JS片段。
 
@@ -40,7 +42,7 @@ WebUtils.setPageId(request, gridPageId);
 (function(po)
 {
 	po.isEnableEditGrid = false;
-	//存储单元格初始值
+	//存储行初始值
 	po.editGridOriginalRowDatas = {};
 	//编辑表格对应的模型，会在initEditGrid函数中初始化
 	po.editGridModel = undefined;
@@ -113,7 +115,7 @@ WebUtils.setPageId(request, gridPageId);
 				var selectedIndexes = dataTable.cells(".selected").indexes();
 				
 				if(selectedIndexes)
-					po.openEditCellPanel(dataTable, selectedIndexes, true);
+					po.editCell(dataTable, selectedIndexes, true);
 			});
 		}
 		
@@ -184,21 +186,125 @@ WebUtils.setPageId(request, gridPageId);
 			$tip.remove();
 	};
 	
-	//打开编辑面板
-	po.openEditCellPanel = function(dataTable, indexes, focus)
+	//判断CLOB属性值是否已完全获取，如果不是CLOB属性，将直接返回true。
+	po.isClobPropertyValueFetchFully = function(property, propertyValue)
+	{
+		if(po.queryLeftClobLengthOnReading == null || po.queryLeftClobLengthOnReading < 0)
+			return true;
+		else
+		{
+			var propertyModelIndex = $.model.getPropertyModelIndexByValue(property, propertyValue);
+			var jdbcType = $.model.featureJdbcTypeValue(property);
+			
+			if(<%=Types.CLOB%> == jdbcType || <%=Types.NCLOB%> == jdbcType
+					|| <%=Types.LONGNVARCHAR%> == jdbcType || <%=Types.LONGVARCHAR%> == jdbcType)
+				return (propertyValue.length < po.queryLeftClobLengthOnReading);
+			else
+				return true;
+		}
+	};
+	
+	//编辑单元格
+	po.editCell = function(dataTable, indexes, focus)
+	{
+		var settings = dataTable.settings();
+		
+		var propertyIndexesMap = $.getDataTableCellPropertyIndexesMap(settings, indexes);
+		
+		var model = po.editGridModel;
+		var data = {};
+		
+		var needFetchPropertyValueRowDataMap = undefined;
+		var needFetchPropertyNamesMap = undefined;
+		
+		for(var pi in propertyIndexesMap)
+		{
+			var pindexes = propertyIndexesMap[pi];
+			
+			//仅赋值仅有一行选中的属性值
+			if(pindexes.length == 1)
+			{
+				var pindex = pindexes[0];
+				var property = $.model.getProperty(model, parseInt(pi));
+				var propertyValue = dataTable.cell(pindex).data();
+				
+				if(!po.isClobPropertyValueFetchFully(property, propertyValue))
+				{
+					if(!needFetchPropertyValueRowDataMap)
+					{
+						needFetchPropertyValueRowDataMap = {};
+						needFetchPropertyNamesMap = {};
+					}
+					
+					if(!needFetchPropertyValueRowDataMap[pindex.row])
+						needFetchPropertyValueRowDataMap[pindex.row] = po.originalRowData(dataTable, pindex.row);
+					
+					var propertyNames = (needFetchPropertyNamesMap[pindex.row] || (needFetchPropertyNamesMap[pindex.row] = []));
+					propertyNames.push(property.name);
+				}
+				else
+					$.model.propertyValue(data, property.name, propertyValue);
+			}
+		}
+		
+		if(needFetchPropertyValueRowDataMap)
+		{
+			var sortFunction = function(k0, k1)
+			{
+				var nk0 = parseInt(k0);
+				var nk1 = parseInt(k1);
+				
+				if(nk0 < nk1)
+					return -1;
+				else if(nk0 == nk1)
+					return 0;
+				else
+					return 1;
+			};
+			
+			var needFetchPropertyValueRowDataArray = $.getMapValues(needFetchPropertyValueRowDataMap, sortFunction);
+			var needFetchPropertyNamesArray = $.getMapValues(needFetchPropertyNamesMap, sortFunction);
+			
+			var param = { "datas" : needFetchPropertyValueRowDataArray, "propertyNames" : needFetchPropertyNamesArray };
+			$.post(po.url("getPropertyValues"), param, function(fetchedPropertyValuess)
+			{
+				if(fetchedPropertyValuess)
+				{
+					for(var i=0; i<needFetchPropertyNamesArray.length; i++)
+					{
+						var needFetchPropertyNames = needFetchPropertyNamesArray[i];
+						var fetchedPropertyValues = fetchedPropertyValuess[i];
+						
+						if(fetchedPropertyValues)
+						{
+							for(var j=0; j<needFetchPropertyNames.length; j++)
+							{
+								if(fetchedPropertyValues[j])
+									$.model.propertyValue(data, needFetchPropertyNames[j], fetchedPropertyValues[j]);
+							}
+						}
+					}
+				}
+				
+				po.showEditCellPanel(dataTable, indexes, propertyIndexesMap, data, focus);
+			});
+		}
+		else
+			po.showEditCellPanel(dataTable, indexes, propertyIndexesMap, data, focus);
+	};
+	
+	po.showEditCellPanel = function(dataTable, indexes, propertyIndexesMap, data, focus)
 	{
 		var $table = $(dataTable.table().node());
 		var $tableParent = $(dataTable.table().container());
-		var settings = dataTable.settings();
-		
 		var $cellNodes = $(dataTable.cells(indexes).nodes());
 		var $editFormCell = $($cellNodes[0]);
-		var propertyIndexesMap = $.getDataTableCellPropertyIndexesMap(settings, indexes);
-		var propertyCount = 0;
-		for(var pi in propertyIndexesMap){ propertyCount++; }
 		
 		$cellNodes.removeClass("cell-edit-form");
 		$editFormCell.addClass("cell-edit-form");
+		
+		var propertyCount = 0;
+		for(var pi in propertyIndexesMap){ propertyCount++; }
 		
 		var $formPage = po.editGridFormPage.element();
 		var $formPanel = po.editGridFormPage.element(".form-panel");
@@ -219,23 +325,6 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			$formPanel.css("min-width", $tableParent.width()/2);
 			form.removeClass("hide-form-label");
-		}
-		
-		var model = po.editGridModel;
-		var data = {};
-		
-		for(var pi in propertyIndexesMap)
-		{
-			var pindexes = propertyIndexesMap[pi];
-			
-			//仅赋值仅有一行选中的属性值
-			if(pindexes.length == 1)
-			{
-				var property = $.model.getProperty(model, parseInt(pi));
-				var propertyValue = dataTable.cell(pindexes[0]).data();
-				
-				$.model.propertyValue(data, property.name, propertyValue);
-			}
 		}
 		
 		form.modelform(
@@ -533,7 +622,7 @@ WebUtils.setPageId(request, gridPageId);
 					var selectedIndexes = dataTable.cells(".selected").indexes();
 					
 					if(selectedIndexes)
-						po.openEditCellPanel(dataTable, selectedIndexes, true);
+						po.editCell(dataTable, selectedIndexes, true);
 				}
 				else
 					$.handleCellNavigationForKeydown(dataTable, event);
@@ -545,7 +634,7 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				if(type == "cell")
 				{
-					po.openEditCellPanel(dataTable, indexes);
+					po.editCell(dataTable, indexes);
 				}
 				else if(type == "row")
 				{

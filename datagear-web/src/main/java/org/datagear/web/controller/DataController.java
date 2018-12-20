@@ -619,6 +619,78 @@ public class DataController extends AbstractSchemaModelController
 		return propValueSourcePagingData;
 	}
 
+	@RequestMapping(value = "/{schemaId}/{tableName}/getPropertyValues", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Object[][] getPropertyValues(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@PathVariable("tableName") String tableName) throws Throwable
+	{
+		final Object datasParam = getParamMap(request, "datas");
+		Object propertyNamesParam = getParamMap(request, "propertyNames");
+		final String[][] propertyNamess = getClassDataConverter().convertToArray(propertyNamesParam, String[].class);
+
+		Object[][] propertyValuess = new ReturnExecutor<Object[][]>(request, response, springModel, schemaId, tableName,
+				true)
+		{
+			@Override
+			protected Object[][] execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+			{
+				Connection cn = getConnection();
+
+				Object[] datas = modelDataConverter.convertToArray(datasParam, model);
+
+				Object[][] propertyValuess = new Object[datas.length][];
+
+				for (int i = 0; i < datas.length; i++)
+				{
+					Object data = datas[i];
+					String[] propertyNames = propertyNamess[i];
+
+					if (propertyNames == null || propertyNames.length == 0)
+					{
+						propertyValuess[i] = null;
+					}
+					// 一个属性，仅查询属性值
+					else if (propertyNames.length == 1)
+					{
+						PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model,
+								propertyNames[0], data);
+
+						Object propertyValue = persistenceManager.getPropValueByParam(cn, model, data,
+								propertyPathInfo);
+
+						propertyValuess[i] = new Object[] { propertyValue };
+					}
+					// 多个属性，则直接查询对象，再获取
+					else
+					{
+						data = persistenceManager.getByParam(cn, model, data);
+
+						Object[] propertyValues = new Object[propertyNames.length];
+
+						if (data != null)
+						{
+							for (int j = 0; j < propertyNames.length; j++)
+							{
+								PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model,
+										propertyNames[j], data);
+
+								propertyValues[j] = propertyPathInfo.getValueTail();
+							}
+						}
+
+						propertyValuess[i] = propertyValues;
+					}
+				}
+
+				return propertyValuess;
+			}
+		}.execute();
+
+		return propertyValuess;
+	}
+
 	@RequestMapping("/{schemaId}/{tableName}/addSinglePropValue")
 	public String addSinglePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,

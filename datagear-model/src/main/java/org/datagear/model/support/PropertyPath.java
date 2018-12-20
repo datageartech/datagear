@@ -675,12 +675,6 @@ public class PropertyPath implements Serializable
 			// 元素
 			if (c == ELEMENT_L)
 			{
-				Segment preSegment = (segmentList.isEmpty() ? null : segmentList.get(segmentList.size() - 1));
-
-				if (preSegment != null && preSegment.isElement())
-					throw new IllegalPropertyPathException(
-							"[" + propertyPath + "] is illegal, sequential element is not allowed");
-
 				int j = i + 1;
 				boolean hasCloseChar = false;
 

@@ -1199,6 +1199,32 @@
 				progress = 99;
 			
 			$(".upload-percent", $fileUploadInfo).text(progress +"%");
+		},
+		
+		/**
+		 * 获取映射表的值数组，并对其进行排序。
+		 */
+		getMapValues : function(map, sortfunction)
+		{
+			if(!map)
+				return [];
+			
+			var keyArray = [];
+			
+			for(var key in map)
+				keyArray.push(key);
+			
+			keyArray.sort(sortfunction);
+			
+			var valueArray = [];
+			
+			for(var i=0; i<keyArray.length; i++)
+			{
+				var value = map[keyArray[i]];
+				valueArray.push(value);
+			}
+			
+			return valueArray;
 		}
 	});
 	
