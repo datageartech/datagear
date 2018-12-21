@@ -44,6 +44,8 @@ WebUtils.setPageId(request, gridPageId);
 	po.isEnableEditGrid = false;
 	//存储行初始值
 	po.editGridOriginalRowDatas = {};
+	//存储行的指定属性值是否已从服务端加载
+	po.editGridFetchedPropertyValues = {};
 	//编辑表格对应的模型，会在initEditGrid函数中初始化
 	po.editGridModel = undefined;
 	
@@ -90,6 +92,24 @@ WebUtils.setPageId(request, gridPageId);
 		}
 		
 		return rowData;
+	};
+	
+	//获取/设置行的指定属性值是否已从服务端加载
+	po.fetchedPropertyValue = function(row, propertyName, fetched)
+	{
+		if(fetched == undefined)
+		{
+			var rowInfo = po.editGridFetchedPropertyValues[row];
+			if(!rowInfo)
+				return false;
+			
+			return rowInfo[propertyName];
+		}
+		else
+		{
+			var rowInfo = (po.editGridFetchedPropertyValues[row] || (po.editGridFetchedPropertyValues[row] = {}));
+			rowInfo[propertyName] = fetched;
+		}
 	};
 	
 	po.enableEditGrid = function()
@@ -186,11 +206,13 @@ WebUtils.setPageId(request, gridPageId);
 			$tip.remove();
 	};
 	
-	//判断CLOB属性值是否已完全获取，如果不是CLOB属性，将直接返回true。
-	po.isClobPropertyValueFetchFully = function(property, propertyValue)
+	//判断单元格是否需要从服务端加载数据
+	po.needFetchPropertyValue = function(dataTable, cellIndex, property, propertyValue)
 	{
+		var re = false;
+		
 		if(po.queryLeftClobLengthOnReading == null || po.queryLeftClobLengthOnReading < 0)
-			return true;
+			re = false;
 		else
 		{
 			var propertyModelIndex = $.model.getPropertyModelIndexByValue(property, propertyValue);
@@ -198,10 +220,22 @@ WebUtils.setPageId(request, gridPageId);
 			
 			if(<%=Types.CLOB%> == jdbcType || <%=Types.NCLOB%> == jdbcType
 					|| <%=Types.LONGNVARCHAR%> == jdbcType || <%=Types.LONGVARCHAR%> == jdbcType)
-				return (propertyValue.length < po.queryLeftClobLengthOnReading);
+				re = (propertyValue && propertyValue.length >= po.queryLeftClobLengthOnReading);
 			else
-				return true;
+				re = false;
 		}
+		
+		if(re)
+		{
+			var $cell = $(dataTable.cell(cellIndex).node());
+			
+			if(po.fetchedPropertyValue(cellIndex.row, property.name))
+				re = false;
+			else if($cell.hasClass("cell-modified"))
+				re = false;
+		}
+		
+		return re;
 	};
 	
 	//编辑单元格
@@ -228,7 +262,7 @@ WebUtils.setPageId(request, gridPageId);
 				var property = $.model.getProperty(model, parseInt(pi));
 				var propertyValue = dataTable.cell(pindex).data();
 				
-				if(!po.isClobPropertyValueFetchFully(property, propertyValue))
+				if(po.needFetchPropertyValue(dataTable, pindex, property, propertyValue))
 				{
 					if(!needFetchPropertyValueRowDataMap)
 					{
@@ -262,25 +296,42 @@ WebUtils.setPageId(request, gridPageId);
 					return 1;
 			};
 			
-			var needFetchPropertyValueRowDataArray = $.getMapValues(needFetchPropertyValueRowDataMap, sortFunction);
-			var needFetchPropertyNamesArray = $.getMapValues(needFetchPropertyNamesMap, sortFunction);
+			var needFetchPropertyValueRowDatas = $.getMapKeyValueArray(needFetchPropertyValueRowDataMap, sortFunction);
+			var needFetchPropertyValueRows = needFetchPropertyValueRowDatas.keys;
+			var needFetchPropertyValueDatas = needFetchPropertyValueRowDatas.values;
+			var needFetchPropertyNamess = $.getMapKeyValueArray(needFetchPropertyNamesMap, sortFunction).values;
 			
-			var param = { "datas" : needFetchPropertyValueRowDataArray, "propertyNames" : needFetchPropertyNamesArray };
+			var param = { "datas" : needFetchPropertyValueDatas, "propertyNames" : needFetchPropertyNamess };
 			$.post(po.url("getPropertyValues"), param, function(fetchedPropertyValuess)
 			{
 				if(fetchedPropertyValuess)
 				{
-					for(var i=0; i<needFetchPropertyNamesArray.length; i++)
+					for(var i=0; i<needFetchPropertyValueRows.length; i++)
 					{
-						var needFetchPropertyNames = needFetchPropertyNamesArray[i];
+						var needFetchPropertyValueRow = parseInt(needFetchPropertyValueRows[i]);
+						var needFetchPropertyValueData = needFetchPropertyValueDatas[i];
+						var needFetchPropertyNames = needFetchPropertyNamess[i];
 						var fetchedPropertyValues = fetchedPropertyValuess[i];
 						
 						if(fetchedPropertyValues)
 						{
 							for(var j=0; j<needFetchPropertyNames.length; j++)
 							{
-								if(fetchedPropertyValues[j])
-									$.model.propertyValue(data, needFetchPropertyNames[j], fetchedPropertyValues[j]);
+								var fetchedPropertyValue = fetchedPropertyValues[j];
+								
+								if(fetchedPropertyValue)
+								{
+									var needFetchPropertyName = needFetchPropertyNames[j];
+									
+									$.model.propertyValue(data, needFetchPropertyName, fetchedPropertyValue);
+									$.model.propertyValue(needFetchPropertyValueData, needFetchPropertyName, fetchedPropertyValue);
+									
+									var myColumn = $.getDataTableColumn(settings, needFetchPropertyName);
+									var myCell = dataTable.cell({ "row" : needFetchPropertyValueRow, "column" : myColumn });
+									myCell.data(fetchedPropertyValue);
+									
+									po.fetchedPropertyValue(needFetchPropertyValueRow, needFetchPropertyName, true);
+								}
 							}
 						}
 					}

@@ -657,20 +657,27 @@ public class DataController extends AbstractSchemaModelController
 						PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model,
 								propertyNames[0], data);
 
-						Object propertyValue = persistenceManager.getPropValueByParam(cn, model, data,
+						List<Object> propertyValues = persistenceManager.getPropValueByParam(cn, model, data,
 								propertyPathInfo);
+
+						Object propertyValue = null;
+
+						if (propertyValues != null && propertyValues.size() > 0)
+							propertyValue = propertyValues.get(0);
 
 						propertyValuess[i] = new Object[] { propertyValue };
 					}
 					// 多个属性，则直接查询对象，再获取
 					else
 					{
-						data = persistenceManager.getByParam(cn, model, data);
+						List<Object> dataList = persistenceManager.getByParam(cn, model, data);
 
 						Object[] propertyValues = new Object[propertyNames.length];
 
-						if (data != null)
+						if (dataList != null && dataList.size() > 0)
 						{
+							data = dataList.get(0);
+
 							for (int j = 0; j < propertyNames.length; j++)
 							{
 								PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model,

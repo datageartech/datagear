@@ -778,6 +778,26 @@
 		},
 		
 		/**
+		 * 获取指定属性名的列号。
+		 */
+		getDataTableColumn : function(settings, propertyName)
+		{
+			var columnMetas = this.getDataTableColumnMetas(settings);
+			
+			var escapedName = $.escapePropertyNameForDataTables(propertyName);
+			
+			for(var i=0; i<columnMetas.length; i++)
+			{
+				var columnMeta = columnMetas[i];
+				
+				if(escapedName == columnMeta.data)
+					return i;
+			}
+			
+			return -1;
+		},
+		
+		/**
 		 * 根据单元格索引获取对应的模型属性索引
 		 */
 		getDataTableCellPropertyIndex : function(settings, cellIndex)
@@ -1202,19 +1222,20 @@
 		},
 		
 		/**
-		 * 获取映射表的值数组，并对其进行排序。
+		 * 获取映射表的关键字、值数组对象，并可选对KEY进行排序。
+		 * 返回对象格式为：{ "keys" : [...], "values" : [...] }
+		 * @param map 必选，映射表对象
+		 * @param keySortfunction 可选，KEY排序函数
 		 */
-		getMapValues : function(map, sortfunction)
+		getMapKeyValueArray : function(map, keySortfunction)
 		{
-			if(!map)
-				return [];
-			
 			var keyArray = [];
 			
 			for(var key in map)
 				keyArray.push(key);
 			
-			keyArray.sort(sortfunction);
+			if(keySortfunction != undefined)
+				keyArray.sort(keySortfunction);
 			
 			var valueArray = [];
 			
@@ -1224,7 +1245,7 @@
 				valueArray.push(value);
 			}
 			
-			return valueArray;
+			return { "keys" : keyArray, "values" : valueArray };
 		}
 	});
 	
