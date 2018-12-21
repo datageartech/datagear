@@ -470,7 +470,8 @@ WebUtils.setPageId(request, gridPageId);
 				
 				cell.data(propertyValue).draw();
 				
-				if(propertyValue == originalCellValue)
+				if(propertyValue == originalCellValue
+						|| ($.model.isFilePropertyDetailValue(propertyValue) && $.model.getFilePropertyRawValue(propertyValue) == originalCellValue))
 					po.markAsUnmodifiedCell($(cell.node()));
 				else
 					po.markAsModifiedCell($(cell.node()));

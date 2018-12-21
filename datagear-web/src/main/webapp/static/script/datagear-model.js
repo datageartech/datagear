@@ -1185,7 +1185,7 @@
 		 */
 		isFilePropertyDetailValue : function(value)
 		{
-			return $.isPlainObject(value);
+			return $.isPlainObject(value) && value.hasOwnProperty("value") && value.hasOwnProperty("showValue");
 		},
 		
 		/**
