@@ -477,11 +477,13 @@ WebUtils.setPageId(request, gridPageId);
 					changed = false;
 				else
 				{
+					var tmpPropertyValue = propertyValue;
+					
 					if($.model.isShowableValue(propertyValue))
-						propertyValue = $.model.getShowableRawValue(propertyValue);
+						tmpPropertyValue = $.model.getShowableRawValue(propertyValue);
 					
 					//无原始值但是表单空字符串保存的情况
-					if((originalCellValue == null || originalCellValue == undefined) && (propertyValue == "" || propertyValue == null || propertyValue == undefined))
+					if((originalCellValue == null || originalCellValue == undefined) && (tmpPropertyValue == "" || tmpPropertyValue == null || tmpPropertyValue == undefined))
 						changed = false;
 				}
 				
