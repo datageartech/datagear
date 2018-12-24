@@ -1065,12 +1065,12 @@
 			
 			if(this.isPrimitiveModel(model))
 			{
-				if(this.isFileTypeModel(model))
+				if(this.isShowableValue(obj))
 				{
-					var rawValue = this.getFilePropertyRawValue(obj);
-					var showValue = this.getFilePropertyShowValue(obj);
+					var rawValue = this.getShowableRawValue(obj);
+					var labelValue = this.getShowableLabelValue(obj);
 					
-					obj = (showValue ? showValue : rawValue);
+					obj = (labelValue ? labelValue : rawValue);
 				}
 				
 				re=obj+"";
@@ -1172,44 +1172,6 @@
 				return re;
 		},
 		
-		/**
-		 * 构建文件属性详细值对象。
-		 */
-		toFilePropertyDetailValue : function(value, showValue)
-		{
-			return { "value" : value, "showValue" : showValue };
-		},
-		
-		/**
-		 * 是否是文件属性详细值对象。
-		 */
-		isFilePropertyDetailValue : function(value)
-		{
-			return $.isPlainObject(value) && value.hasOwnProperty("value") && value.hasOwnProperty("showValue");
-		},
-		
-		/**
-		 * 获取原始文件属性值。
-		 */
-		getFilePropertyRawValue : function(value)
-		{
-			if(this.isFilePropertyDetailValue(value))
-				return value.value;
-			else
-				return value;
-		},
-		
-		/**
-		 * 获取显示文件属性值。
-		 */
-		getFilePropertyShowValue : function(value)
-		{
-			if(this.isFilePropertyDetailValue(value))
-				return value.showValue;
-			else
-				return undefined;
-		},
-
 		/**
 		 * 判断org.datagear.model.Featured对象是否有指定特性。
 		 * 
@@ -1423,6 +1385,44 @@
 			}
 			
 			return false;
+		},
+		
+		/**
+		 * 是否是可展示值对象。
+		 */
+		isShowableValue : function(value)
+		{
+			return $.isPlainObject(value) && value.hasOwnProperty("value") && value.hasOwnProperty("labelValue");
+		},
+		
+		/**
+		 * 构建可展示值对象。
+		 */
+		toShowableValue : function(value, labelValue)
+		{
+			return { "value" : value, "labelValue" : labelValue };
+		},
+		
+		/**
+		 * 获取可展示值对象的原始值。
+		 */
+		getShowableRawValue : function(value)
+		{
+			if(this.isShowableValue(value))
+				return value.value;
+			else
+				return value;
+		},
+		
+		/**
+		 * 获取可展示值对象的标签值。
+		 */
+		getShowableLabelValue : function(value)
+		{
+			if(this.isShowableValue(value))
+				return value.labelValue;
+			else
+				return undefined;
 		}
 	});
 })

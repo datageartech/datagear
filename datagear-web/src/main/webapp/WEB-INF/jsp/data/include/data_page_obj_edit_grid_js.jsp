@@ -87,7 +87,8 @@ WebUtils.setPageId(request, gridPageId);
 		if(!rowData && forceStore)
 		{
 			rowData = dataTable.row(row).data();
-			rowData = $.extend({}, rowData);
+			//防止单元格编辑导致内部引用混乱
+			rowData = $.unref($.ref(rowData));
 			po.editGridOriginalRowDatas[row] = rowData;
 		}
 		
@@ -403,7 +404,7 @@ WebUtils.setPageId(request, gridPageId);
 			},
 			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
 			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",
-			filePropertyValueReturnDetail : true,
+			filePropertyReturnShowableValue : true,
 			downloadSinglePropertyValueFile : function(property, propertyConcreteModel)
 			{
 				po.editGridFormPage.downloadSinglePropertyValueFile(property, propertyConcreteModel);
@@ -470,11 +471,24 @@ WebUtils.setPageId(request, gridPageId);
 				
 				cell.data(propertyValue).draw();
 				
-				if(propertyValue == originalCellValue
-						|| ($.model.isFilePropertyDetailValue(propertyValue) && $.model.getFilePropertyRawValue(propertyValue) == originalCellValue))
-					po.markAsUnmodifiedCell($(cell.node()));
+				var changed = true;
+				
+				if(propertyValue == originalCellValue)
+					changed = false;
 				else
+				{
+					if($.model.isShowableValue(propertyValue))
+						propertyValue = $.model.getShowableRawValue(propertyValue);
+					
+					//无原始值但是表单空字符串保存的情况
+					if((originalCellValue == null || originalCellValue == undefined) && (propertyValue == "" || propertyValue == null || propertyValue == undefined))
+						changed = false;
+				}
+				
+				if(changed)
 					po.markAsModifiedCell($(cell.node()));
+				else
+					po.markAsUnmodifiedCell($(cell.node()));
 				
 				saveCount++;
 			}

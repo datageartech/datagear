@@ -78,9 +78,9 @@
 			//可选，文件属性值删除时的文件参数名
 			filePropertyDeleteParamName : "file",
 			
-			//可选，文件属性值是否采用详细信息对象，而非基本文件名称值
-			//详细信息对象格式：{ value : "...", showValue : "..." }
-			filePropertyValueReturnDetail : false,
+			//可选，文件属性值是否采用可展示值对象，而非基本文件名称值
+			//详细信息对象格式参考：$.model.toShowableValue
+			filePropertyReturnShowableValue : false,
 			
 			//"readonly=false"时必须，下载单元文件属性值处理函数
 			downloadSinglePropertyValueFile : function(property, propertyConcreteModel){ throw new Error("TODO"); },
@@ -616,7 +616,7 @@
 					.html(options.labels.downloadFile)
 					.appendTo(valuediv);
 				
-				var rawValue = $.model.getFilePropertyRawValue(propValue);
+				var rawValue = $.model.getShowableRawValue(propValue);
 				
 				if(!rawValue)
 					fileDownloadButton.attr("disabled", true);
@@ -669,7 +669,7 @@
 						var propValue = this.__propValue;
 						var propertyWidget = _this._propertyWidgets[propName];
 						
-						propertyWidget.setValue({ "value" : serverFileInfo.name, "showValue" : clientFileName }, true);
+						propertyWidget.setValue($.model.toShowableValue(serverFileInfo.name, clientFileName), true);
 						
 						$.fileuploadsuccessHandlerForUploadInfo(fileInfoDiv);
 						
@@ -723,7 +723,7 @@
 			    		
 			    		if("download" == action)
 			    		{
-			    			var rawValue = $.model.getFilePropertyRawValue(propValue);
+			    			var rawValue = $.model.getShowableRawValue(propValue);
 			    			
 			    			if(rawValue)
 			    				_this.options.downloadSinglePropertyValueFile.call(_this.element, myproperty, myConcreteModel);
@@ -745,20 +745,20 @@
 			
 			propertyWidget.getValue = function()
 			{
-				if(options.filePropertyValueReturnDetail)
-					return $.model.toFilePropertyDetailValue($(this.fileInputHidden).val(), $(this.fileInputShow).val());
+				if(options.filePropertyReturnShowableValue)
+					return $.model.toShowableValue($(this.fileInputHidden).val(), $(this.fileInputShow).val());
 				else
 					return $(this.fileInputHidden).val();
 			};
 			propertyWidget.setValue = function(value, reserveFileInfo)
 			{
-				var rawValue = $.model.getFilePropertyRawValue(value);
-				var showValue = $.model.getFilePropertyShowValue(value);
+				var rawValue = $.model.getShowableRawValue(value);
+				var labelValue = $.model.getShowableLabelValue(value);
 				
 				$(this.fileInputHidden).val(rawValue ? rawValue : "");
 				
-				if(showValue)
-					$(this.fileInputShow).val(showValue);
+				if(labelValue)
+					$(this.fileInputShow).val(labelValue);
 				else
 					$(this.fileInputShow).val((rawValue ? rawValue : ""));
 				

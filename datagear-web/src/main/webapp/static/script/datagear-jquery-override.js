@@ -56,6 +56,13 @@
 					);
 				}
 			} );
+			
+			
+		//XXX 新增内容
+		//处理可展示值对象，因为它仅在客户端展示，与后台类型不匹配，不应该传到后台
+		} else if($.model.isShowableValue(obj)){
+			add( prefix, $.model.getShowableRawValue(obj) );
+		//XXX 新增内容
 	
 		} else if ( !traditional && jQuery.type( obj ) === "object" ) {
 	
