@@ -48,7 +48,8 @@ WebUtils.setPageId(request, gridPageId);
 	po.editGridFetchedPropertyValues = {};
 	//编辑表格对应的模型，会在initEditGrid函数中初始化
 	po.editGridModel = undefined;
-	
+	//是否在单元格选中时编辑单元格，键盘快速导航时通常不需要打开编辑单元格面板
+	po.editCellOnSelect = true;
 	po.editGridFormPage = <%=editGridFormPageId%>;
 	
 	po.queryLeftClobLengthOnReading = <%=request.getAttribute("queryLeftClobLengthOnReading")%>;
@@ -499,6 +500,9 @@ WebUtils.setPageId(request, gridPageId);
 		//新值可能会影响单元格宽度，因此需要重设列宽
 		if(saveCount > 0)
 			dataTable.columns.adjust();
+		
+		//保存后的下一次选中单元格操作触发编辑
+		po.editCellOnSelect = true;
 	};
 	
 	//恢复单元格的数据
@@ -636,6 +640,8 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				var dataTable = po.table().DataTable();
 				po.closeEditCellPanel(dataTable);
+				
+				po.editCellOnSelect = false;
 			}
 			
 			//禁止冒泡，因为这些快捷键在表格上有特殊处理逻辑
@@ -651,6 +657,8 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			var dataTable = po.table().DataTable();
 			po.closeEditCellPanel(dataTable);
+			
+			po.editCellOnSelect = false;
 		});
 		
 		po.table().DataTable()
@@ -668,6 +676,9 @@ WebUtils.setPageId(request, gridPageId);
 					var dataTable = $(this).DataTable();
 					
 					dataTable.rows(".selected").deselect();
+					
+					po.editCellOnSelect = true;
+					
 					$.handleCellSelectionForClick(dataTable, event, target);
 				}
 			}
@@ -681,6 +692,8 @@ WebUtils.setPageId(request, gridPageId);
 				if(event.keyCode == $.ui.keyCode.ESCAPE)
 				{
 					po.closeEditCellPanel(dataTable);
+					
+					po.editCellOnSelect = false;
 				}
 				else if(event.keyCode == $.ui.keyCode.ENTER)
 				{
@@ -693,7 +706,9 @@ WebUtils.setPageId(request, gridPageId);
 						po.editCell(dataTable, selectedIndexes, true);
 				}
 				else
+				{
 					$.handleCellNavigationForKeydown(dataTable, event);
+				}
 			}
 		})
 		.on("select", function(event, dataTable, type, indexes)
@@ -702,7 +717,8 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				if(type == "cell")
 				{
-					po.editCell(dataTable, indexes);
+					if(po.editCellOnSelect)
+						po.editCell(dataTable, indexes);
 				}
 				else if(type == "row")
 				{
