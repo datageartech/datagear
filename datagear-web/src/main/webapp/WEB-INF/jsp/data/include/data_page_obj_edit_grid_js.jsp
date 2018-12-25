@@ -255,31 +255,45 @@ WebUtils.setPageId(request, gridPageId);
 		
 		for(var pi in propertyIndexesMap)
 		{
-			var pindexes = propertyIndexesMap[pi];
+			var property = $.model.getProperty(model, parseInt(pi));
 			
-			//仅赋值仅有一行选中的属性值
-			if(pindexes.length == 1)
+			var pindexes = propertyIndexesMap[pi];
+			var pindex0 = pindexes[0];
+			var propertyValue0 = dataTable.cell(pindex0).data();
+			
+			//仅从后台获取选中一行的属性值
+			if(pindexes.length == 1 && po.needFetchPropertyValue(dataTable, pindex0, property, propertyValue0))
 			{
-				var pindex = pindexes[0];
-				var property = $.model.getProperty(model, parseInt(pi));
-				var propertyValue = dataTable.cell(pindex).data();
-				
-				if(po.needFetchPropertyValue(dataTable, pindex, property, propertyValue))
+				if(!needFetchPropertyValueRowDataMap)
 				{
-					if(!needFetchPropertyValueRowDataMap)
-					{
-						needFetchPropertyValueRowDataMap = {};
-						needFetchPropertyNamesMap = {};
-					}
-					
-					if(!needFetchPropertyValueRowDataMap[pindex.row])
-						needFetchPropertyValueRowDataMap[pindex.row] = po.originalRowData(dataTable, pindex.row);
-					
-					var propertyNames = (needFetchPropertyNamesMap[pindex.row] || (needFetchPropertyNamesMap[pindex.row] = []));
-					propertyNames.push(property.name);
+					needFetchPropertyValueRowDataMap = {};
+					needFetchPropertyNamesMap = {};
 				}
-				else
-					$.model.propertyValue(data, property.name, propertyValue);
+				
+				if(!needFetchPropertyValueRowDataMap[pindex0.row])
+					needFetchPropertyValueRowDataMap[pindex0.row] = po.originalRowData(dataTable, pindex0.row);
+				
+				var propertyNames = (needFetchPropertyNamesMap[pindex0.row] || (needFetchPropertyNamesMap[pindex0.row] = []));
+				propertyNames.push(property.name);
+			}
+			else
+			{
+				var allColumnValueEquals = true;
+				
+				for(var i=1; i<pindexes.length; i++)
+				{
+					var pindex = pindexes[i];
+					var propertyValue = dataTable.cell(pindex).data();
+					
+					if(propertyValue != propertyValue0)
+					{
+						allColumnValueEquals = false;
+						break;
+					}
+				}
+				
+				if(allColumnValueEquals)
+					$.model.propertyValue(data, property.name, propertyValue0);
 			}
 		}
 		
@@ -403,6 +417,34 @@ WebUtils.setPageId(request, gridPageId);
 				
 				return false;
 			},
+			addSinglePropertyValue : function(property, propertyConcreteModel)
+			{
+				po.editGridFormPage.addSinglePropertyValue(property, propertyConcreteModel);
+			},
+			editSinglePropertyValue : function(property, propertyConcreteModel)
+			{
+				po.editGridFormPage.editSinglePropertyValue(property, propertyConcreteModel);
+			},
+			deleteSinglePropertyValue : function(property, propertyConcreteModel)
+			{
+				po.editGridFormPage.deleteSinglePropertyValue(property, propertyConcreteModel);
+			},
+			selectSinglePropertyValue : function(property, propertyConcreteModel)
+			{
+				po.editGridFormPage.selectSinglePropertyValue(property, propertyConcreteModel);
+			},
+			viewSinglePropertyValue : function(property, propertyConcreteModel)
+			{
+				po.editGridFormPage.viewSinglePropertyValue(property, propertyConcreteModel);
+			},
+			editMultiplePropertyValue : function(property, propertyConcreteModel)
+			{
+				po.editGridFormPage.editMultiplePropertyValue(property, propertyConcreteModel);
+			},
+			viewMultiplePropertyValue : function(property, propertyConcreteModel)
+			{
+				po.editGridFormPage.viewMultiplePropertyValue(property, propertyConcreteModel);
+			},
 			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
 			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",
 			filePropertyReturnShowableValue : true,
@@ -483,8 +525,11 @@ WebUtils.setPageId(request, gridPageId);
 					if($.model.isShowableValue(propertyValue))
 						tmpPropertyValue = $.model.getShowableRawValue(propertyValue);
 					
+					if(tmpPropertyValue == originalCellValue)
+						changed = false;
 					//无原始值但是表单空字符串保存的情况
-					if((originalCellValue == null || originalCellValue == undefined) && (tmpPropertyValue == "" || tmpPropertyValue == null || tmpPropertyValue == undefined))
+					else if((originalCellValue == null || originalCellValue == undefined)
+							&& (tmpPropertyValue == "" || tmpPropertyValue == null || tmpPropertyValue == undefined))
 						changed = false;
 				}
 				
