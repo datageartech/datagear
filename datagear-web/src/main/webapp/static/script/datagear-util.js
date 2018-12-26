@@ -1246,6 +1246,22 @@
 			}
 			
 			return { "keys" : keyArray, "values" : valueArray };
+		},
+		
+		/**
+		 * 获取属性个数。
+		 */
+		getPropertyCount : function(obj)
+		{
+			if(!obj)
+				return 0;
+			
+			var propertyCount = 0;
+			
+			for(var p in obj)
+				propertyCount++;
+			
+			return propertyCount;
 		}
 	});
 	

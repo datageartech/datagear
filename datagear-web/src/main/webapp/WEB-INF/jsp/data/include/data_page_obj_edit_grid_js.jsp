@@ -50,6 +50,7 @@ WebUtils.setPageId(request, gridPageId);
 	po.editGridModel = undefined;
 	//是否在单元格选中时编辑单元格，键盘快速导航时通常不需要打开编辑单元格面板
 	po.editCellOnSelect = true;
+	//内嵌的表单页面对象
 	po.editGridFormPage = <%=editGridFormPageId%>;
 	
 	po.queryLeftClobLengthOnReading = <%=request.getAttribute("queryLeftClobLengthOnReading")%>;
@@ -208,6 +209,13 @@ WebUtils.setPageId(request, gridPageId);
 			$tip.remove();
 	};
 	
+	po.isClientRowData = function(dataTable, row)
+	{
+		var $row = $(dataTable.row(row).node());
+		
+		return $row.hasClass("client-row-data");
+	};
+	
 	//判断单元格是否需要从服务端加载数据
 	po.needFetchPropertyValue = function(dataTable, cellIndex, property, propertyValue)
 	{
@@ -227,6 +235,9 @@ WebUtils.setPageId(request, gridPageId);
 				re = false;
 		}
 		
+		if(re && po.isClientRowData(dataTable, cellIndex.row))
+			re =  false;
+		
 		if(re)
 		{
 			var $cell = $(dataTable.cell(cellIndex).node());
@@ -240,18 +251,12 @@ WebUtils.setPageId(request, gridPageId);
 		return re;
 	};
 	
-	//编辑单元格
-	po.editCell = function(dataTable, indexes, focus)
+	//获取编辑表单初始数据
+	po.getEditCellFormInitData = function(dataTable, indexes, propertyIndexesMap, needFetchRowDataMap, needFetchPropertyNamesMap)
 	{
-		var settings = dataTable.settings();
-		
-		var propertyIndexesMap = $.getDataTableCellPropertyIndexesMap(settings, indexes);
-		
-		var model = po.editGridModel;
 		var data = {};
 		
-		var needFetchPropertyValueRowDataMap = undefined;
-		var needFetchPropertyNamesMap = undefined;
+		var model = po.editGridModel;
 		
 		for(var pi in propertyIndexesMap)
 		{
@@ -264,16 +269,12 @@ WebUtils.setPageId(request, gridPageId);
 			//仅从后台获取选中一行的属性值
 			if(pindexes.length == 1 && po.needFetchPropertyValue(dataTable, pindex0, property, propertyValue0))
 			{
-				if(!needFetchPropertyValueRowDataMap)
-				{
-					needFetchPropertyValueRowDataMap = {};
-					needFetchPropertyNamesMap = {};
-				}
+				var pindex0Row = pindex0.row;
 				
-				if(!needFetchPropertyValueRowDataMap[pindex0.row])
-					needFetchPropertyValueRowDataMap[pindex0.row] = po.originalRowData(dataTable, pindex0.row);
+				if(!needFetchRowDataMap[pindex0Row])
+					needFetchRowDataMap[pindex0Row] = po.originalRowData(dataTable, pindex0Row);
 				
-				var propertyNames = (needFetchPropertyNamesMap[pindex0.row] || (needFetchPropertyNamesMap[pindex0.row] = []));
+				var propertyNames = (needFetchPropertyNamesMap[pindex0Row] || (needFetchPropertyNamesMap[pindex0Row] = []));
 				propertyNames.push(property.name);
 			}
 			else
@@ -297,7 +298,75 @@ WebUtils.setPageId(request, gridPageId);
 			}
 		}
 		
-		if(needFetchPropertyValueRowDataMap)
+		return data;
+	};
+	
+	//构建编辑表格从后台获取单元格属性值的ajax选项。
+	po.buildEditCellFetchPropertyValuessAjaxOptions = function(dataTable, indexes, focus, propertyIndexesMap, data,
+			needFetchRows, needFetchRowDatas, needFetchPropertyNamess)
+	{
+		var options =
+		{
+			"type" : "POST",
+			"url" : po.url("getPropertyValuess"),
+			"data" : { "datas" : needFetchRowDatas, "propertyNamess" : needFetchPropertyNamess },
+			"success" : function(fetchedPropertyValuess)
+			{
+				if(fetchedPropertyValuess)
+				{
+					var settings = dataTable.settings();
+					
+					for(var i=0; i<needFetchRows.length; i++)
+					{
+						var needFetchRow = parseInt(needFetchRows[i]);
+						var needFetchRowData = needFetchRowDatas[i];
+						var needFetchPropertyNames = needFetchPropertyNamess[i];
+						var fetchedPropertyValues = fetchedPropertyValuess[i];
+						
+						if(fetchedPropertyValues)
+						{
+							for(var j=0; j<needFetchPropertyNames.length; j++)
+							{
+								var fetchedPropertyValue = fetchedPropertyValues[j];
+								
+								if(fetchedPropertyValue != null)
+								{
+									var needFetchPropertyName = needFetchPropertyNames[j];
+									
+									$.model.propertyValue(data, needFetchPropertyName, fetchedPropertyValue);
+									$.model.propertyValue(needFetchRowData, needFetchPropertyName, fetchedPropertyValue);
+									
+									var myColumn = $.getDataTableColumn(settings, needFetchPropertyName);
+									var myCell = dataTable.cell({ "row" : needFetchRow, "column" : myColumn });
+									myCell.data(fetchedPropertyValue);
+									
+									po.fetchedPropertyValue(needFetchRow, needFetchPropertyName, true);
+								}
+							}
+						}
+					}
+				}
+				
+				po.showEditCellPanel(dataTable, indexes, propertyIndexesMap, data, focus);
+			}
+		};
+		
+		return options;
+	};
+	
+	//编辑单元格
+	po.editCell = function(dataTable, indexes, focus)
+	{
+		var settings = dataTable.settings();
+		var propertyIndexesMap = $.getDataTableCellPropertyIndexesMap(settings, indexes);
+		var model = po.editGridModel;
+		var needFetchRowDataMap = {};
+		var needFetchPropertyNamesMap = {};
+		
+		var data = po.getEditCellFormInitData(dataTable, indexes, propertyIndexesMap,
+						needFetchRowDataMap, needFetchPropertyNamesMap);
+		
+		if($.getPropertyCount(needFetchRowDataMap) > 0)
 		{
 			var sortFunction = function(k0, k1)
 			{
@@ -312,49 +381,14 @@ WebUtils.setPageId(request, gridPageId);
 					return 1;
 			};
 			
-			var needFetchPropertyValueRowDatas = $.getMapKeyValueArray(needFetchPropertyValueRowDataMap, sortFunction);
-			var needFetchPropertyValueRows = needFetchPropertyValueRowDatas.keys;
-			var needFetchPropertyValueDatas = needFetchPropertyValueRowDatas.values;
+			var needFetchRowDataArrayObj = $.getMapKeyValueArray(needFetchRowDataMap, sortFunction);
+			var needFetchRows = needFetchRowDataArrayObj.keys;
+			var needFetchRowDatas = needFetchRowDataArrayObj.values;
 			var needFetchPropertyNamess = $.getMapKeyValueArray(needFetchPropertyNamesMap, sortFunction).values;
 			
-			var param = { "datas" : needFetchPropertyValueDatas, "propertyNames" : needFetchPropertyNamess };
-			$.post(po.url("getPropertyValues"), param, function(fetchedPropertyValuess)
-			{
-				if(fetchedPropertyValuess)
-				{
-					for(var i=0; i<needFetchPropertyValueRows.length; i++)
-					{
-						var needFetchPropertyValueRow = parseInt(needFetchPropertyValueRows[i]);
-						var needFetchPropertyValueData = needFetchPropertyValueDatas[i];
-						var needFetchPropertyNames = needFetchPropertyNamess[i];
-						var fetchedPropertyValues = fetchedPropertyValuess[i];
-						
-						if(fetchedPropertyValues)
-						{
-							for(var j=0; j<needFetchPropertyNames.length; j++)
-							{
-								var fetchedPropertyValue = fetchedPropertyValues[j];
-								
-								if(fetchedPropertyValue)
-								{
-									var needFetchPropertyName = needFetchPropertyNames[j];
-									
-									$.model.propertyValue(data, needFetchPropertyName, fetchedPropertyValue);
-									$.model.propertyValue(needFetchPropertyValueData, needFetchPropertyName, fetchedPropertyValue);
-									
-									var myColumn = $.getDataTableColumn(settings, needFetchPropertyName);
-									var myCell = dataTable.cell({ "row" : needFetchPropertyValueRow, "column" : myColumn });
-									myCell.data(fetchedPropertyValue);
-									
-									po.fetchedPropertyValue(needFetchPropertyValueRow, needFetchPropertyName, true);
-								}
-							}
-						}
-					}
-				}
-				
-				po.showEditCellPanel(dataTable, indexes, propertyIndexesMap, data, focus);
-			});
+			var fetchAjaxOptions = po.buildEditCellFetchPropertyValuessAjaxOptions(dataTable, indexes, focus, propertyIndexesMap, data,
+					needFetchRows, needFetchRowDatas, needFetchPropertyNamess);
+			$.ajax(fetchAjaxOptions);
 		}
 		else
 			po.showEditCellPanel(dataTable, indexes, propertyIndexesMap, data, focus);
@@ -362,6 +396,9 @@ WebUtils.setPageId(request, gridPageId);
 	
 	po.showEditCellPanel = function(dataTable, indexes, propertyIndexesMap, data, focus)
 	{
+		if(indexes.length == 0)
+			return;
+		
 		var $table = $(dataTable.table().node());
 		var $tableParent = $(dataTable.table().container());
 		var $cellNodes = $(dataTable.cells(indexes).nodes());
@@ -370,8 +407,7 @@ WebUtils.setPageId(request, gridPageId);
 		$cellNodes.removeClass("cell-edit-form");
 		$editFormCell.addClass("cell-edit-form");
 		
-		var propertyCount = 0;
-		for(var pi in propertyIndexesMap){ propertyCount++; }
+		var propertyCount = $.getPropertyCount(propertyIndexesMap);
 		
 		var $formPage = po.editGridFormPage.element();
 		var $formPanel = po.editGridFormPage.element(".form-panel");

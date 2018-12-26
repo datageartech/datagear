@@ -619,14 +619,14 @@ public class DataController extends AbstractSchemaModelController
 		return propValueSourcePagingData;
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/getPropertyValues", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/getPropertyValuess", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Object[][] getPropertyValues(HttpServletRequest request, HttpServletResponse response,
+	public Object[][] getPropertyValuess(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final Object datasParam = getParamMap(request, "datas");
-		Object propertyNamesParam = getParamMap(request, "propertyNames");
+		Object propertyNamesParam = getParamMap(request, "propertyNamess");
 		final String[][] propertyNamess = getClassDataConverter().convertToArray(propertyNamesParam, String[].class);
 
 		Object[][] propertyValuess = new ReturnExecutor<Object[][]>(request, response, springModel, schemaId, tableName,
