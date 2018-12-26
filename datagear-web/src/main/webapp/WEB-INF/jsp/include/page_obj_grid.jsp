@@ -397,7 +397,7 @@ page_js_obj.jsp
 		po.table().DataTable().rows().remove();
 	};
 	
-	po.resiseGrid = function()
+	po.resizeGrid = function()
 	{
 		var dataTable = po.table().DataTable();
 		
@@ -427,7 +427,7 @@ page_js_obj.jsp
 			
 			po.tableResizeTimer = setTimeout(function()
 			{
-				po.resiseGrid();
+				po.resizeGrid();
 			},
 			250);
 		}

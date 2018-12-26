@@ -80,6 +80,10 @@ public class DataController extends AbstractSchemaModelController
 
 	public static final String PARAM_IGNORE_DUPLICATION = "ignoreDuplication";
 
+	public static final String KEY_IS_CLIENT_FORM_DATA = "isClientFormData";
+
+	public static final String KEY_IS_CLIENT_GRID_DATA = "isClientGridData";
+
 	@Autowired
 	private PersistenceManager persistenceManager;
 
@@ -302,7 +306,7 @@ public class DataController extends AbstractSchemaModelController
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
 				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute("clientOperation", "true");
+				springModel.addAttribute(KEY_IS_CLIENT_FORM_DATA, "true");
 				springModel.addAttribute("submitAction", "saveAdd");
 			}
 		}.execute();
@@ -405,6 +409,7 @@ public class DataController extends AbstractSchemaModelController
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final Object dataParam = getParamObj(request, "data");
+		final boolean isClientFormData = isClientFormDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -416,18 +421,22 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				LOBConversionContext.set(buildGetLobConversionSetting());
+				if (!isClientFormData)
+				{
+					LOBConversionContext.set(buildGetLobConversionSetting());
 
-				List<Object> resultList = persistenceManager.getByParam(cn, model, data);
+					List<Object> resultList = persistenceManager.getByParam(cn, model, data);
 
-				LOBConversionContext.remove();
+					LOBConversionContext.remove();
 
-				if (resultList == null || resultList.isEmpty())
-					throw new RecordNotFoundException();
+					if (resultList == null || resultList.isEmpty())
+						throw new RecordNotFoundException();
 
-				springModel.addAttribute("data", resultList.get(0));
+					data = resultList.get(0);
+				}
+
+				springModel.addAttribute("data", data);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
-				springModel.addAttribute("clientOperation", "false");
 				springModel.addAttribute("submitAction", "saveEdit");
 			}
 		}.execute();
@@ -517,6 +526,7 @@ public class DataController extends AbstractSchemaModelController
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final Object dataParam = getParamObj(request, "data");
+		final boolean isClientFormData = isClientFormDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -528,16 +538,21 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				LOBConversionContext.set(buildGetLobConversionSetting());
+				if (!isClientFormData)
+				{
+					LOBConversionContext.set(buildGetLobConversionSetting());
 
-				List<Object> resultList = persistenceManager.getByParam(cn, model, data);
+					List<Object> resultList = persistenceManager.getByParam(cn, model, data);
 
-				LOBConversionContext.remove();
+					LOBConversionContext.remove();
 
-				if (resultList == null || resultList.isEmpty())
-					throw new RecordNotFoundException();
+					if (resultList == null || resultList.isEmpty())
+						throw new RecordNotFoundException();
 
-				springModel.addAttribute("data", resultList.get(0));
+					data = resultList.get(0);
+				}
+
+				springModel.addAttribute("data", data);
 				springModel.addAttribute("titleOperationMessageKey", "view");
 				springModel.addAttribute("readonly", "true");
 			}
@@ -717,7 +732,7 @@ public class DataController extends AbstractSchemaModelController
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute("clientOperation", "true");
+				springModel.addAttribute(KEY_IS_CLIENT_FORM_DATA, "true");
 				springModel.addAttribute("submitAction", "saveAddSinglePropValue");
 			}
 		}.execute();
@@ -771,7 +786,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final boolean clientOperation = isClientOperation(request);
+		final boolean isClientFormData = isClientFormDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -783,7 +798,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!clientOperation)
+				if (!isClientFormData)
 				{
 					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
 							data);
@@ -860,7 +875,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final boolean clientOperation = isClientOperation(request);
+		final boolean isClientFormData = isClientFormDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -872,7 +887,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!clientOperation)
+				if (!isClientFormData)
 				{
 					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
 							data);
@@ -902,10 +917,11 @@ public class DataController extends AbstractSchemaModelController
 	@RequestMapping("/{schemaId}/{tableName}/editMultiplePropValue")
 	public String editMultiplePropValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath,
-			@RequestParam(value = "clientOperation", required = false) final Boolean clientOperation) throws Throwable
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
+			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
+		final boolean isClientGridData = isClientGridDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -917,15 +933,20 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				if (!isClientGridData)
+				{
+					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
+							data);
+					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
+							.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
 
-				QueryResultMetaInfo queryResultMetaInfo = persistenceManager
-						.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
+					springModel.addAttribute("conditionSource",
+							getPropertyPathDisplayNames(request, queryResultMetaInfo));
+				}
 
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
-				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
 			}
 		}.execute();
 
@@ -979,6 +1000,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
+		final boolean isClientGridData = isClientGridDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -990,16 +1012,21 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				if (!isClientGridData)
+				{
+					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
+							data);
+					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
+							.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
 
-				QueryResultMetaInfo queryResultMetaInfo = persistenceManager
-						.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
+					springModel.addAttribute("conditionSource",
+							getPropertyPathDisplayNames(request, queryResultMetaInfo));
+				}
 
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("readonly", "true");
 				springModel.addAttribute("titleOperationMessageKey", "view");
-				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
 			}
 		}.execute();
 
@@ -1027,7 +1054,7 @@ public class DataController extends AbstractSchemaModelController
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute("clientOperation", "true");
+				springModel.addAttribute(KEY_IS_CLIENT_FORM_DATA, "true");
 				springModel.addAttribute("submitAction", "saveAddMultiplePropValueElement");
 			}
 		}.execute();
@@ -1158,7 +1185,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final boolean clientOperation = isClientOperation(request);
+		final boolean isClientGridData = isClientGridDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -1170,7 +1197,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!clientOperation)
+				if (!isClientGridData)
 				{
 					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
 							data);
@@ -1289,7 +1316,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final boolean clientOperation = isClientOperation(request);
+		final boolean isClientGridData = isClientGridDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -1301,7 +1328,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!clientOperation)
+				if (!isClientGridData)
 				{
 					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
 							data);
@@ -1530,19 +1557,35 @@ public class DataController extends AbstractSchemaModelController
 	}
 
 	/**
-	 * 判断请求是否是客户端操作。
+	 * 判断是否是客户端表单数据请求。
 	 * 
 	 * @param request
 	 * @return
 	 */
-	protected boolean isClientOperation(HttpServletRequest request)
+	protected boolean isClientFormDataRequest(HttpServletRequest request)
 	{
-		String clientOperation = request.getParameter("clientOperation");
+		String isClientFormData = request.getParameter(KEY_IS_CLIENT_FORM_DATA);
 
-		if (clientOperation == null)
+		if (isClientFormData == null)
 			return false;
 
-		return ("true".equals(clientOperation) || "1".equals(clientOperation));
+		return ("true".equals(isClientFormData) || "1".equals(isClientFormData));
+	}
+
+	/**
+	 * 判断是否是客户端表格数据请求。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected boolean isClientGridDataRequest(HttpServletRequest request)
+	{
+		String isClientGridData = request.getParameter(KEY_IS_CLIENT_FORM_DATA);
+
+		if (isClientGridData == null)
+			return false;
+
+		return ("true".equals(isClientGridData) || "1".equals(isClientGridData));
 	}
 
 	/**

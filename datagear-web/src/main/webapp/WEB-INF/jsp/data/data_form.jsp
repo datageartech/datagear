@@ -15,17 +15,17 @@
 <%
 //初始数据，允许null
 Object data = request.getAttribute("data");
+//初始数据是否是客户端数据，默认为false
+boolean isClientFormData = ("true".equalsIgnoreCase(getStringValue(request, "isClientFormData")));
 //标题操作标签I18N关键字，不允许null
 String titleOperationMessageKey = getStringValue(request, "titleOperationMessageKey");
 //提交活动，po.pageParam().submit(...)未定义时，不允许为null
 String submitAction = getStringValue(request, "submitAction");
-//是否是客户端操作，允许为null
-boolean clientOperation = ("true".equalsIgnoreCase(getStringValue(request, "clientOperation")));
-//是否只读操作，允许为null
+//是否只读操作，默认为false
 boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, "readonly")));
-//忽略表单渲染和处理的属性名，允许为null
+//忽略表单渲染和处理的属性名，默认为""
 String ignorePropertyName = getStringValue(request, "ignorePropertyName", "");
-//是否开启批量执行功能，允许为null
+//是否开启批量执行功能，默认为false
 boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet")));
 %>
 <html>
@@ -58,7 +58,7 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 	po.submitAction = "<%=submitAction%>";
 	po.originalData = $.unref(<%writeJson(application, out, data);%>);
 	po.data = $.unref($.ref(po.originalData));
-	po.clientOperation = <%=clientOperation%>;
+	po.isClientFormData = <%=isClientFormData%>;
 	po.batchSet = <%=batchSet%>;
 	
 	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
@@ -66,8 +66,8 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 	{
 		var actionParam = po.superBuildPropertyActionOptions(property, propertyConcreteModel, extraRequestParams, extraPageParams);
 		
-		//客户端操作则传递最新表单数据，因为不需要到服务端数据库查找验证
-		if(po.clientOperation)
+		//客户端数据则传递最新表单数据，因为不需要根据初始数据到服务端数据库查找
+		if(po.isClientFormData)
 			actionParam["data"]["data"] = po.form().modelform("data");
 		
 		return actionParam;

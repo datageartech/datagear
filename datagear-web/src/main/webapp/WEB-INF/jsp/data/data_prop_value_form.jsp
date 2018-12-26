@@ -17,15 +17,15 @@
 Object data = request.getAttribute("data");
 //属性名称，不允许null
 String propertyPath = getStringValue(request, "propertyPath");
+//初始属性值数据是否是客户端数据，默认为false
+boolean isClientFormData = ("true".equalsIgnoreCase(getStringValue(request, "isClientFormData")));
 //标题操作标签I18N关键字，不允许null
 String titleOperationMessageKey = getStringValue(request, "titleOperationMessageKey");
 //提交活动，po.pageParam().submit(...)未定义时，不允许为null
 String submitAction = getStringValue(request, "submitAction");
-//是否是客户端操作，允许为null
-boolean clientOperation = ("true".equalsIgnoreCase(getStringValue(request, "clientOperation")));
-//是否只读操作，允许为null
+//是否只读操作，默认为false
 boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, "readonly")));
-//是否开启批量执行功能，允许为null
+//是否开启批量执行功能，默认为false
 boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet")));
 
 PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
@@ -62,7 +62,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	po.submitAction = "<%=submitAction%>";
 	po.data = ($.unref(<%writeJson(application, out, data);%>) || {});
 	po.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
-	po.clientOperation = <%=clientOperation%>;
+	po.isClientFormData = <%=isClientFormData%>;
 	po.batchSet = <%=batchSet%>;
 	
 	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
@@ -73,8 +73,8 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		actionParam["data"]["propertyPath"] = $.propertyPath.concatPropertyName(po.propertyPath, property.name);
 		actionParam["data"]["data"] = po.data;
 		
-		//客户端操作则传递最新表单数据，因为不需要到服务端数据库查找验证
-		if(po.clientOperation)
+		//客户端属性值数据则传递最新表单数据，因为不需要根据初始属性值数据到服务端数据库查找
+		if(po.isClientFormData)
 			$.model.propertyPathValue(actionParam["data"]["data"], po.propertyPath, po.form().modelform("data")); 
 		
 		return actionParam;

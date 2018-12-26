@@ -5,13 +5,15 @@
 --%>
 <%--
 数据表单操作页面公用代码
-依赖：data_page_obj.jsp
+依赖：
+data_page_obj.jsp
+jsp_method_get_string_value.jsp
 
 依赖变量：
 //初始数据，由主页面定义，允许为null
 po.data = undefined;
-//是否是客户端操作，由主页面定义，允许为null
-po.clientOperation = undefined;
+//初始表单数据是否是客户端数据
+po.isClientFormData = undefined;
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@page import="org.datagear.web.util.WebUtils"%>
@@ -66,16 +68,23 @@ po.clientOperation = undefined;
 	//属性操作选项函数
 	po.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
 	{
-		var requestParams = { "data" : po.data, "propertyPath" : $.propertyPath.escapePropertyName(property.name), "clientOperation" : po.clientOperation };
+		var requestParams =
+		{
+			"data" : po.data,
+			"propertyPath" : $.propertyPath.escapePropertyName(property.name),
+			"isClientFormData" : po.isClientFormData,
+			"isClientGridData" : po.isClientFormData
+		};
+		
 		if(extraRequestParams)
 			$.extend(requestParams, extraRequestParams);
 		
-		//单元属性值都不即时保存，作为客户端操作
-		var clientOperation = (!$.model.isMultipleProperty(property) ? true : po.clientOperation);
+		//单元属性值都不即时保存
+		var clientSubmit = (!$.model.isMultipleProperty(property) ? true : po.isClientFormData);
 		
 		var pageParams = {};
 		
-		if(clientOperation)
+		if(clientSubmit)
 		{
 			$.extend(pageParams,
 			{

@@ -18,13 +18,13 @@
 Object data = request.getAttribute("data");
 //属性名称，不允许null
 String propertyPath = getStringValue(request, "propertyPath");
+//所有表格数据是否都是客户端数据，默认为false
+boolean isClientGridData = ("true".equalsIgnoreCase(getStringValue(request, "isClientGridData")));
 //标题操作标签I18N关键字，不允许null
 String titleOperationMessageKey = getStringValue(request, "titleOperationMessageKey");
-//是否是客户端操作，允许为null
-boolean clientOperation = ("true".equalsIgnoreCase(getStringValue(request, "clientOperation")));
-//是否只读操作，允许为null
+//是否只读操作，默认为false
 boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, "readonly")));
-//可用的查询条件列表，不允许为null
+//可用的查询条件列表，isClientGridData为false时不允许为null
 List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)request.getAttribute("conditionSource");
 
 PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
@@ -49,7 +49,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 <div id="${pageId}" class="page-grid page-grid-empv">
 	<div class="head">
 		<div class="search">
-			<%if(!clientOperation){%>
+			<%if(!isClientGridData){%>
 			<%@ include file="include/data_page_obj_searchform_html.jsp" %>
 			<%}%>
 		</div>
@@ -58,10 +58,10 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				<input name="viewButton" type="button" value="<fmt:message key='view' />" />
 			<%}else{%>
 				<%if(isPrivatePropertyModel){%>
-					<input name="addButton" type="button" value="<fmt:message key='add' />" />
-					<input name="editButton" type="button" value="<fmt:message key='edit' />" />
+				<input name="addButton" type="button" value="<fmt:message key='add' />" />
+				<input name="editButton" type="button" value="<fmt:message key='edit' />" />
 				<%}else{%>
-					<input name="selectButton" type="button" class="recommended" value="<fmt:message key='select' />" />
+				<input name="selectButton" type="button" class="recommended" value="<fmt:message key='select' />" />
 				<%}%>
 				<input name="viewButton" type="button" value="<fmt:message key='view' />" />
 				<input name="deleteButton" type="button" value="<fmt:message key='delete' />" />
@@ -85,7 +85,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 </div>
 <%}%>
 <%@ include file="include/data_page_obj.jsp" %>
-<%if(!clientOperation){%>
+<%if(!isClientGridData){%>
 <%@ include file="include/data_page_obj_searchform_js.jsp" %>
 <%@ include file="../include/page_obj_pagination.jsp" %>
 <%}%>
@@ -99,9 +99,9 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	po.readonly = <%=readonly%>;
 	po.data = $.unref(<%writeJson(application, out, data);%>);
 	po.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
-	po.clientOperation = <%=clientOperation%>;
+	po.isClientGridData = <%=isClientGridData%>;
 	
-	<%if(!clientOperation){%>
+	<%if(!isClientGridData){%>
 	po.conditionSource = <%writeJson(application, out, conditionSource);%>;
 	<%}%>
 	
@@ -109,7 +109,14 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	
 	po.buildActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
 	{
-		var requestParams = { "data" : po.data, "propertyPath" : po.propertyPath, "clientOperation" : po.clientOperation };
+		var requestParams =
+		{
+			"data" : po.data,
+			"propertyPath" : po.propertyPath,
+			"isClientGridData" : po.isClientGridData,
+			"isClientFormData" : po.isClientGridData
+		};
+		
 		if(extraRequestParams)
 			$.extend(requestParams, extraRequestParams);
 		
@@ -124,7 +131,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		return actionParam;
 	};
 	
-	po.restoreGridData = function()
+	po.storeGridData = function()
 	{
 		var rowsData = po.getRowsData();
 		
@@ -162,7 +169,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 			{
 				var options = undefined;
 				
-				if(po.clientOperation)
+				if(po.isClientGridData)
 				{
 					options = po.buildActionOptions(property, propertyModel,
 							{
@@ -194,7 +201,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				var url = undefined;
 				var options = undefined;
 				
-				if(po.clientOperation)
+				if(po.isClientGridData)
 				{
 					url = po.url("addMultiplePropValueElement");
 					
@@ -208,7 +215,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 								"submit" : function(propValueElement)
 								{
 									po.addRowData(propValueElement);
-									po.restoreGridData();
+									po.storeGridData();
 									
 									$.tipSuccess("<fmt:message key='haveAdd' />");
 								}
@@ -242,10 +249,10 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 							{
 								"submit" : function(rows)
 								{
-									if(po.clientOperation)
+									if(po.isClientGridData)
 									{
 										po.addRowData(rows);
-										po.restoreGridData();
+										po.storeGridData();
 										
 										$.tipSuccess("<fmt:message key='haveAdd' />");
 									}
@@ -273,7 +280,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				{
 					var options = undefined;
 					
-					if(po.clientOperation)
+					if(po.isClientGridData)
 					{
 						options = po.buildActionOptions(property, propertyModel,
 								{
@@ -283,7 +290,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 									"submit" : function(propValueElement)
 									{
 										po.setRowData(index, propValueElement);
-										po.restoreGridData();
+										po.storeGridData();
 									}
 								});
 						
@@ -319,10 +326,10 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 					{
 						"confirm" : function()
 						{
-							if(po.clientOperation)
+							if(po.isClientGridData)
 							{
 								po.deleteRow(indexes);
-								po.restoreGridData();
+								po.storeGridData();
 							}
 							else
 							{
@@ -342,7 +349,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 			});
 		<%}%>
 		
-		<%if(clientOperation){%>
+		<%if(isClientGridData){%>
 		po.initModelDataTableLocal(propertyModel, $.model.propertyPathValue(po.data, po.propertyPath), po.mappedByWith);
 		<%}else{%>
 		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(po.conditionSource);
