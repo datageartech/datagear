@@ -32,6 +32,8 @@ WebUtils.setPageId(request, editGridFormPageId);
 	po.element().draggable({ handle : po.element(".form-panel-title") });
 	po.element().hide();
 	po.formLabels.submit = "<fmt:message key='confirm' />";
+	
+	po.isClientFormData = true;
 })
 (<%=editGridFormPageId%>);
 </script>
@@ -221,14 +223,20 @@ WebUtils.setPageId(request, gridPageId);
 	{
 		var re = false;
 		
-		if(po.queryLeftClobLengthOnReading == null || po.queryLeftClobLengthOnReading < 0)
-			re = false;
+		var propertyModelIndex = $.model.getPropertyModelIndexByValue(property, propertyValue);
+		var propertyModel = $.model.getPropertyModelByIndex(property, propertyModelIndex);
+		
+		//单元私有复合属性
+		if(!$.model.isMultipleProperty(property) && $.model.isCompositeModel(propertyModel)
+				&& $.model.isPrivatePropertyModel(po.editGridModel, property, propertyModel))
+			re = true;
 		else
 		{
-			var propertyModelIndex = $.model.getPropertyModelIndexByValue(property, propertyValue);
 			var jdbcType = $.model.featureJdbcTypeValue(property);
 			
-			if(<%=Types.CLOB%> == jdbcType || <%=Types.NCLOB%> == jdbcType
+			if(po.queryLeftClobLengthOnReading == null || po.queryLeftClobLengthOnReading < 0)
+				re = false;
+			else if(<%=Types.CLOB%> == jdbcType || <%=Types.NCLOB%> == jdbcType
 					|| <%=Types.LONGNVARCHAR%> == jdbcType || <%=Types.LONGVARCHAR%> == jdbcType)
 				re = (propertyValue && propertyValue.length >= po.queryLeftClobLengthOnReading);
 			else
@@ -238,13 +246,14 @@ WebUtils.setPageId(request, gridPageId);
 		if(re && po.isClientRowData(dataTable, cellIndex.row))
 			re =  false;
 		
+		if(re && po.fetchedPropertyValue(cellIndex.row, property.name))
+			re = false;
+		
 		if(re)
 		{
 			var $cell = $(dataTable.cell(cellIndex).node());
 			
-			if(po.fetchedPropertyValue(cellIndex.row, property.name))
-				re = false;
-			else if($cell.hasClass("cell-modified"))
+			if($cell.hasClass("cell-modified"))
 				re = false;
 		}
 		
@@ -409,6 +418,9 @@ WebUtils.setPageId(request, gridPageId);
 		
 		var propertyCount = $.getPropertyCount(propertyIndexesMap);
 		
+		po.editGridFormPage.data = data;
+		po.editGridFormPage.currentPropertyIndexesMap = propertyIndexesMap;
+		
 		var $formPage = po.editGridFormPage.element();
 		var $formPanel = po.editGridFormPage.element(".form-panel");
 		
@@ -434,9 +446,9 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			model : po.editGridModel,
 			data : data,
-			propertyIndexesMap : propertyIndexesMap,
 			renderProperty : function(property, propertyIndex)
 			{
+				var propertyIndexesMap = po.editGridFormPage.currentPropertyIndexesMap;
 				return (propertyIndexesMap[propertyIndex] != undefined);
 			},
 			submit : function()
@@ -444,7 +456,7 @@ WebUtils.setPageId(request, gridPageId);
 				var $this = $(this);
 				
 				var data = $this.modelform("data");
-				var propertyIndexesMap = $this.modelform("option", "propertyIndexesMap");
+				var propertyIndexesMap = po.editGridFormPage.currentPropertyIndexesMap;
 				
 				var dataTable = po.table().DataTable();
 				

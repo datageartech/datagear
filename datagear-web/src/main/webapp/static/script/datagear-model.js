@@ -809,6 +809,24 @@
 		},
 		
 		/**
+		 * 获取多元属性值的长度。
+		 */
+		getMultiplePropertyValueLength : function(propertyValue)
+		{
+			if(!propertyValue)
+				return 0;
+			
+			//集合
+			if(propertyValue.size != undefined)
+				return propertyValue.size;
+			//数组
+			else if(propertyValue.length != undefined)
+				return propertyValue.length;
+			else
+				return 0;
+		},
+		
+		/**
 		 * 获取org.datagear.model.Label的文本。
 		 * 
 		 * @param label
@@ -1140,10 +1158,7 @@
 			
 			if(this.isMultipleProperty(property))
 			{
-				if(propertyValue && propertyValue.size != undefined)
-					re = propertyValue.size+"";
-				else
-					re="0";
+				re = this.getMultiplePropertyValueLength(propertyValue) + "";
 			}
 			else if(v == undefined || v == null)
 			{

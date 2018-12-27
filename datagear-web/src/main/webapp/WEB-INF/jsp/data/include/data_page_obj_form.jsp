@@ -65,6 +65,12 @@ po.isClientFormData = undefined;
 		$.model.propertyValue(po.data, property.name, propValue);
 	};
 	
+	po.isPropertyActionClientSubmit = function(property, propertyConcreteModel)
+	{
+		//单元属性值都不即时保存
+		return (!$.model.isMultipleProperty(property) ? true : po.isClientFormData);
+	};
+	
 	//属性操作选项函数
 	po.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
 	{
@@ -80,7 +86,7 @@ po.isClientFormData = undefined;
 			$.extend(requestParams, extraRequestParams);
 		
 		//单元属性值都不即时保存
-		var clientSubmit = (!$.model.isMultipleProperty(property) ? true : po.isClientFormData);
+		var clientSubmit = po.isPropertyActionClientSubmit(property, propertyConcreteModel);
 		
 		var pageParams = {};
 		
