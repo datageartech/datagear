@@ -16,7 +16,7 @@
 //初始数据，允许null
 Object data = request.getAttribute("data");
 //初始数据是否是客户端数据，默认为false
-boolean isClientFormData = ("true".equalsIgnoreCase(getStringValue(request, "isClientFormData")));
+boolean isClientPageData = ("true".equalsIgnoreCase(getStringValue(request, "isClientPageData")));
 //标题操作标签I18N关键字，不允许null
 String titleOperationMessageKey = getStringValue(request, "titleOperationMessageKey");
 //提交活动，po.pageParam().submit(...)未定义时，不允许为null
@@ -58,7 +58,7 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 	po.submitAction = "<%=submitAction%>";
 	po.originalData = $.unref(<%writeJson(application, out, data);%>);
 	po.data = $.unref($.ref(po.originalData));
-	po.isClientFormData = <%=isClientFormData%>;
+	po.isClientPageData = <%=isClientPageData%>;
 	po.batchSet = <%=batchSet%>;
 	
 	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
@@ -67,7 +67,7 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 		var actionParam = po.superBuildPropertyActionOptions(property, propertyConcreteModel, extraRequestParams, extraPageParams);
 		
 		//客户端数据则传递最新表单数据，因为不需要根据初始数据到服务端数据库查找
-		if(po.isClientFormData)
+		if(po.isClientPageData)
 			actionParam["data"]["data"] = po.form().modelform("data");
 		
 		return actionParam;

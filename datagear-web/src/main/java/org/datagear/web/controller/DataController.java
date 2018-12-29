@@ -80,9 +80,9 @@ public class DataController extends AbstractSchemaModelController
 
 	public static final String PARAM_IGNORE_DUPLICATION = "ignoreDuplication";
 
-	public static final String KEY_IS_CLIENT_FORM_DATA = "isClientFormData";
+	public static final String PARAM_IS_LOAD_PAGE_DATA = "isLoadPageData";
 
-	public static final String KEY_IS_CLIENT_GRID_DATA = "isClientGridData";
+	public static final String KEY_IS_CLIENT_PAGE_DATA = "isClientPageData";
 
 	@Autowired
 	private PersistenceManager persistenceManager;
@@ -306,7 +306,7 @@ public class DataController extends AbstractSchemaModelController
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
 				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute(KEY_IS_CLIENT_FORM_DATA, "true");
+				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, "true");
 				springModel.addAttribute("submitAction", "saveAdd");
 			}
 		}.execute();
@@ -409,7 +409,7 @@ public class DataController extends AbstractSchemaModelController
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final Object dataParam = getParamObj(request, "data");
-		final boolean isClientFormData = isClientFormDataRequest(request);
+		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -421,7 +421,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!isClientFormData)
+				if (isLoadPageData)
 				{
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -526,7 +526,7 @@ public class DataController extends AbstractSchemaModelController
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final Object dataParam = getParamObj(request, "data");
-		final boolean isClientFormData = isClientFormDataRequest(request);
+		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -538,7 +538,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!isClientFormData)
+				if (isLoadPageData)
 				{
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -732,7 +732,7 @@ public class DataController extends AbstractSchemaModelController
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute(KEY_IS_CLIENT_FORM_DATA, "true");
+				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, "true");
 				springModel.addAttribute("submitAction", "saveAddSinglePropValue");
 			}
 		}.execute();
@@ -786,7 +786,8 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final boolean isClientFormData = isClientFormDataRequest(request);
+		final Object propertyValueParam = getParamMap(request, "propertyValue");
+		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -797,11 +798,19 @@ public class DataController extends AbstractSchemaModelController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
+				Object propertyValue = null;
+				PropertyPathInfo propertyPathInfo = null;
 
-				if (!isClientFormData)
+				if (propertyValueParam != null)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
-							data);
+					propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+					propertyValue = modelDataConverter.convert(propertyValueParam, propertyPathInfo.getModelTail());
+				}
+
+				if (isLoadPageData)
+				{
+					if (propertyPathInfo == null)
+						propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -815,6 +824,7 @@ public class DataController extends AbstractSchemaModelController
 
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
+				springModel.addAttribute("propertyValue", propertyValue);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
 				springModel.addAttribute("submitAction", "saveEditSinglePropValue");
 			}
@@ -875,7 +885,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final boolean isClientFormData = isClientFormDataRequest(request);
+		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -887,7 +897,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!isClientFormData)
+				if (isLoadPageData)
 				{
 					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
 							data);
@@ -921,7 +931,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final boolean isClientGridData = isClientGridDataRequest(request);
+		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -933,7 +943,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!isClientGridData)
+				if (isLoadPageData)
 				{
 					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
 							data);
@@ -1000,7 +1010,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final boolean isClientGridData = isClientGridDataRequest(request);
+		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -1012,7 +1022,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!isClientGridData)
+				if (isLoadPageData)
 				{
 					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
 							data);
@@ -1054,7 +1064,7 @@ public class DataController extends AbstractSchemaModelController
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute(KEY_IS_CLIENT_FORM_DATA, "true");
+				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, "true");
 				springModel.addAttribute("submitAction", "saveAddMultiplePropValueElement");
 			}
 		}.execute();
@@ -1185,7 +1195,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final boolean isClientGridData = isClientGridDataRequest(request);
+		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -1197,7 +1207,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!isClientGridData)
+				if (isLoadPageData)
 				{
 					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
 							data);
@@ -1316,7 +1326,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final boolean isClientGridData = isClientGridDataRequest(request);
+		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -1328,7 +1338,7 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				if (!isClientGridData)
+				if (isLoadPageData)
 				{
 					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
 							data);
@@ -1557,35 +1567,38 @@ public class DataController extends AbstractSchemaModelController
 	}
 
 	/**
-	 * 判断是否是客户端表单数据请求。
+	 * 是否是加载页面数据请求。
 	 * 
 	 * @param request
 	 * @return
 	 */
-	protected boolean isClientFormDataRequest(HttpServletRequest request)
+	protected boolean isLoadPageDataRequest(HttpServletRequest request)
 	{
-		String isClientFormData = request.getParameter(KEY_IS_CLIENT_FORM_DATA);
+		Boolean re = getBooleanParamValue(request, KEY_IS_CLIENT_PAGE_DATA);
 
-		if (isClientFormData == null)
+		if (Boolean.TRUE.equals(re))
 			return false;
 
-		return ("true".equals(isClientFormData) || "1".equals(isClientFormData));
+		re = getBooleanParamValue(request, PARAM_IS_LOAD_PAGE_DATA);
+
+		return !Boolean.FALSE.equals(re);
 	}
 
 	/**
-	 * 判断是否是客户端表格数据请求。
+	 * 获取布尔参数值，如果没有参数将返回{@code null}。
 	 * 
 	 * @param request
+	 * @param paramName
 	 * @return
 	 */
-	protected boolean isClientGridDataRequest(HttpServletRequest request)
+	protected Boolean getBooleanParamValue(HttpServletRequest request, String paramName)
 	{
-		String isClientGridData = request.getParameter(KEY_IS_CLIENT_FORM_DATA);
+		String value = request.getParameter(paramName);
 
-		if (isClientGridData == null)
-			return false;
+		if (value == null)
+			return null;
 
-		return ("true".equals(isClientGridData) || "1".equals(isClientGridData));
+		return ("true".equals(value) || "1".equals(value));
 	}
 
 	/**

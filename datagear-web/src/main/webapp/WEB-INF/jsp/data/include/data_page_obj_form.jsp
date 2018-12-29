@@ -13,7 +13,7 @@ jsp_method_get_string_value.jsp
 //初始数据，由主页面定义，允许为null
 po.data = undefined;
 //初始表单数据是否是客户端数据
-po.isClientFormData = undefined;
+po.isClientPageData = undefined;
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@page import="org.datagear.web.util.WebUtils"%>
@@ -68,7 +68,7 @@ po.isClientFormData = undefined;
 	po.isPropertyActionClientSubmit = function(property, propertyConcreteModel)
 	{
 		//单元属性值都不即时保存
-		return (!$.model.isMultipleProperty(property) ? true : po.isClientFormData);
+		return (!$.model.isMultipleProperty(property) ? true : po.isClientPageData);
 	};
 	
 	//属性操作选项函数
@@ -78,8 +78,7 @@ po.isClientFormData = undefined;
 		{
 			"data" : po.data,
 			"propertyPath" : $.propertyPath.escapePropertyName(property.name),
-			"isClientFormData" : po.isClientFormData,
-			"isClientGridData" : po.isClientFormData
+			"isClientPageData" : po.isClientPageData
 		};
 		
 		if(extraRequestParams)

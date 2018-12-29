@@ -6,7 +6,6 @@
 <%@ page import="java.sql.NClob"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="org.datagear.web.util.WebUtils"%>
-<%@ page import="java.sql.Types"%>
 <%--
 编辑表格功能JS片段。
 
@@ -33,7 +32,52 @@ WebUtils.setPageId(request, editGridFormPageId);
 	po.element().hide();
 	po.formLabels.submit = "<fmt:message key='confirm' />";
 	
-	po.isClientFormData = true;
+	//由后面设置
+	po.gridPage = undefined;
+	
+	//由下面的showEditCellPanel设置
+	po.currentDataTable = undefined;
+	po.currentCellIndexes = undefined;
+	po.currentPropertyIndexesMap = undefined;
+	
+	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
+	po.buildPropertyActionOptions = function(property, propertyModel, extraRequestParams, extraPageParams)
+	{
+		var actionParam = po.superBuildPropertyActionOptions(property, propertyModel, extraRequestParams, extraPageParams);
+		
+		var singleRow = $.getDataTableRowIfSingle(po.currentCellIndexes);
+		
+		var isClientPageData = true;
+		
+		if(singleRow != null && !po.gridPage.isClientDataRow(po.currentDataTable, singleRow))
+		{
+			var myColumn = $.getDataTableColumn(po.currentDataTable.settings(), property.name);
+			var myCell = po.currentDataTable.cell({ "row" : singleRow, "column" : myColumn });
+			var $myCell = $(myCell.node());
+			
+			//如果已编辑，则要从单元格加载编辑值，并且采用客户端保存模式
+			if(po.gridPage.isModifiedCell($myCell))
+			{
+				isClientPageData = true;
+				actionParam["data"]["propertyValue"] = myCell.data();
+				actionParam["data"]["isLoadPageData"] = false;
+			}
+			else
+			{
+				//否则，采用服务端保存模式
+				isClientPageData = false;
+				
+				var data = po.gridPage.originalRowData(po.currentDataTable, singleRow);
+				data = $.unref($.ref(data));
+				
+				actionParam["data"]["data"] = data;
+			}
+		}
+		
+		actionParam["data"]["isClientPageData"] = isClientPageData;
+		
+		return actionParam;
+	}
 })
 (<%=editGridFormPageId%>);
 </script>
@@ -54,8 +98,7 @@ WebUtils.setPageId(request, gridPageId);
 	po.editCellOnSelect = true;
 	//内嵌的表单页面对象
 	po.editGridFormPage = <%=editGridFormPageId%>;
-	
-	po.queryLeftClobLengthOnReading = <%=request.getAttribute("queryLeftClobLengthOnReading")%>;
+	po.editGridFormPage.gridPage = po;
 	
 	po.editGridSwitch = function()
 	{
@@ -190,6 +233,11 @@ WebUtils.setPageId(request, gridPageId);
 		po.isEnableEditGrid = false;
 	};
 	
+	po.isModifiedCell = function($cell)
+	{
+		return $cell.hasClass("cell-modified");
+	};
+	
 	po.markAsModifiedCell = function($cell)
 	{
 		if(!$cell.hasClass("cell-modified"))
@@ -211,7 +259,7 @@ WebUtils.setPageId(request, gridPageId);
 			$tip.remove();
 	};
 	
-	po.isClientRowData = function(dataTable, row)
+	po.isClientDataRow = function(dataTable, row)
 	{
 		var $row = $(dataTable.row(row).node());
 		
@@ -221,6 +269,10 @@ WebUtils.setPageId(request, gridPageId);
 	//判断单元格是否需要从服务端加载数据
 	po.needFetchPropertyValue = function(dataTable, cellIndex, property, propertyValue)
 	{
+		if(propertyValue == null)
+			return false;
+		
+		/*
 		var re = false;
 		
 		var propertyModelIndex = $.model.getPropertyModelIndexByValue(property, propertyValue);
@@ -229,21 +281,18 @@ WebUtils.setPageId(request, gridPageId);
 		//单元私有复合属性
 		if(!$.model.isMultipleProperty(property) && $.model.isCompositeModel(propertyModel)
 				&& $.model.isPrivatePropertyModel(po.editGridModel, property, propertyModel))
-			re = true;
+		{
+			re = !po.isAllSinglePrimitivePropertyValueFullyFetched(propertyModel, propertyValue);
+		}
 		else
 		{
-			var jdbcType = $.model.featureJdbcTypeValue(property);
-			
-			if(po.queryLeftClobLengthOnReading == null || po.queryLeftClobLengthOnReading < 0)
-				re = false;
-			else if(<%=Types.CLOB%> == jdbcType || <%=Types.NCLOB%> == jdbcType
-					|| <%=Types.LONGNVARCHAR%> == jdbcType || <%=Types.LONGVARCHAR%> == jdbcType)
-				re = (propertyValue && propertyValue.length >= po.queryLeftClobLengthOnReading);
-			else
-				re = false;
+			re = !po.isSinglePrimitivePropertyValueFullyFetched(po.editGridModel, property, propertyValue);
 		}
+		*/
 		
-		if(re && po.isClientRowData(dataTable, cellIndex.row))
+		var re = !po.isSinglePrimitivePropertyValueFullyFetched(po.editGridModel, property, propertyValue);
+		
+		if(re && po.isClientDataRow(dataTable, cellIndex.row))
 			re =  false;
 		
 		if(re && po.fetchedPropertyValue(cellIndex.row, property.name))
@@ -253,7 +302,7 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			var $cell = $(dataTable.cell(cellIndex).node());
 			
-			if($cell.hasClass("cell-modified"))
+			if(po.isModifiedCell($cell))
 				re = false;
 		}
 		
@@ -419,6 +468,8 @@ WebUtils.setPageId(request, gridPageId);
 		var propertyCount = $.getPropertyCount(propertyIndexesMap);
 		
 		po.editGridFormPage.data = data;
+		po.editGridFormPage.currentDataTable = dataTable;
+		po.editGridFormPage.currentCellIndexes = indexes;
 		po.editGridFormPage.currentPropertyIndexesMap = propertyIndexesMap;
 		
 		var $formPage = po.editGridFormPage.element();
@@ -465,40 +516,40 @@ WebUtils.setPageId(request, gridPageId);
 				
 				return false;
 			},
-			addSinglePropertyValue : function(property, propertyConcreteModel)
+			addSinglePropertyValue : function(property, propertyModel)
 			{
-				po.editGridFormPage.addSinglePropertyValue(property, propertyConcreteModel);
+				po.editGridFormPage.addSinglePropertyValue(property, propertyModel);
 			},
-			editSinglePropertyValue : function(property, propertyConcreteModel)
+			editSinglePropertyValue : function(property, propertyModel)
 			{
-				po.editGridFormPage.editSinglePropertyValue(property, propertyConcreteModel);
+				po.editGridFormPage.editSinglePropertyValue(property, propertyModel);
 			},
-			deleteSinglePropertyValue : function(property, propertyConcreteModel)
+			deleteSinglePropertyValue : function(property, propertyModel)
 			{
-				po.editGridFormPage.deleteSinglePropertyValue(property, propertyConcreteModel);
+				po.editGridFormPage.deleteSinglePropertyValue(property, propertyModel);
 			},
-			selectSinglePropertyValue : function(property, propertyConcreteModel)
+			selectSinglePropertyValue : function(property, propertyModel)
 			{
-				po.editGridFormPage.selectSinglePropertyValue(property, propertyConcreteModel);
+				po.editGridFormPage.selectSinglePropertyValue(property, propertyModel);
 			},
-			viewSinglePropertyValue : function(property, propertyConcreteModel)
+			viewSinglePropertyValue : function(property, propertyModel)
 			{
-				po.editGridFormPage.viewSinglePropertyValue(property, propertyConcreteModel);
+				po.editGridFormPage.viewSinglePropertyValue(property, propertyModel);
 			},
-			editMultiplePropertyValue : function(property, propertyConcreteModel)
+			editMultiplePropertyValue : function(property, propertyModel)
 			{
-				po.editGridFormPage.editMultiplePropertyValue(property, propertyConcreteModel);
+				po.editGridFormPage.editMultiplePropertyValue(property, propertyModel);
 			},
-			viewMultiplePropertyValue : function(property, propertyConcreteModel)
+			viewMultiplePropertyValue : function(property, propertyModel)
 			{
-				po.editGridFormPage.viewMultiplePropertyValue(property, propertyConcreteModel);
+				po.editGridFormPage.viewMultiplePropertyValue(property, propertyModel);
 			},
 			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
 			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",
 			filePropertyReturnShowableValue : true,
-			downloadSinglePropertyValueFile : function(property, propertyConcreteModel)
+			downloadSinglePropertyValueFile : function(property, propertyModel)
 			{
-				po.editGridFormPage.downloadSinglePropertyValueFile(property, propertyConcreteModel);
+				po.editGridFormPage.downloadSinglePropertyValueFile(property, propertyModel);
 			},
 			validationRequiredAsAdd : false,
 			labels : po.editGridFormPage.formLabels,

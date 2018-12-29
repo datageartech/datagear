@@ -19,12 +19,12 @@ Object data = request.getAttribute("data");
 //属性名称，不允许null
 String propertyPath = getStringValue(request, "propertyPath");
 //所有表格数据是否都是客户端数据，默认为false
-boolean isClientGridData = ("true".equalsIgnoreCase(getStringValue(request, "isClientGridData")));
+boolean isClientPageData = ("true".equalsIgnoreCase(getStringValue(request, "isClientPageData")));
 //标题操作标签I18N关键字，不允许null
 String titleOperationMessageKey = getStringValue(request, "titleOperationMessageKey");
 //是否只读操作，默认为false
 boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, "readonly")));
-//可用的查询条件列表，isClientGridData为false时不允许为null
+//可用的查询条件列表，isClientPageData为false时不允许为null
 List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)request.getAttribute("conditionSource");
 
 PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
@@ -49,7 +49,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 <div id="${pageId}" class="page-grid page-grid-empv">
 	<div class="head">
 		<div class="search">
-			<%if(!isClientGridData){%>
+			<%if(!isClientPageData){%>
 			<%@ include file="include/data_page_obj_searchform_html.jsp" %>
 			<%}%>
 		</div>
@@ -85,7 +85,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 </div>
 <%}%>
 <%@ include file="include/data_page_obj.jsp" %>
-<%if(!isClientGridData){%>
+<%if(!isClientPageData){%>
 <%@ include file="include/data_page_obj_searchform_js.jsp" %>
 <%@ include file="../include/page_obj_pagination.jsp" %>
 <%}%>
@@ -99,9 +99,9 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	po.readonly = <%=readonly%>;
 	po.data = $.unref(<%writeJson(application, out, data);%>);
 	po.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
-	po.isClientGridData = <%=isClientGridData%>;
+	po.isClientPageData = <%=isClientPageData%>;
 	
-	<%if(!isClientGridData){%>
+	<%if(!isClientPageData){%>
 	po.conditionSource = <%writeJson(application, out, conditionSource);%>;
 	<%}%>
 	
@@ -113,8 +113,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		{
 			"data" : po.data,
 			"propertyPath" : po.propertyPath,
-			"isClientGridData" : po.isClientGridData,
-			"isClientFormData" : po.isClientGridData
+			"isClientPageData" : po.isClientPageData
 		};
 		
 		if(extraRequestParams)
@@ -169,7 +168,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 			{
 				var options = undefined;
 				
-				if(po.isClientGridData)
+				if(po.isClientPageData)
 				{
 					options = po.buildActionOptions(property, propertyModel,
 							{
@@ -201,7 +200,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				var url = undefined;
 				var options = undefined;
 				
-				if(po.isClientGridData)
+				if(po.isClientPageData)
 				{
 					url = po.url("addMultiplePropValueElement");
 					
@@ -249,7 +248,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 							{
 								"submit" : function(rows)
 								{
-									if(po.isClientGridData)
+									if(po.isClientPageData)
 									{
 										po.addRowData(rows);
 										po.storeGridData();
@@ -280,7 +279,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				{
 					var options = undefined;
 					
-					if(po.isClientGridData)
+					if(po.isClientPageData)
 					{
 						options = po.buildActionOptions(property, propertyModel,
 								{
@@ -326,7 +325,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 					{
 						"confirm" : function()
 						{
-							if(po.isClientGridData)
+							if(po.isClientPageData)
 							{
 								po.deleteRow(indexes);
 								po.storeGridData();
@@ -349,7 +348,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 			});
 		<%}%>
 		
-		<%if(isClientGridData){%>
+		<%if(isClientPageData){%>
 		po.initModelDataTableLocal(propertyModel, $.model.propertyPathValue(po.data, po.propertyPath), po.mappedByWith);
 		<%}else{%>
 		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(po.conditionSource);

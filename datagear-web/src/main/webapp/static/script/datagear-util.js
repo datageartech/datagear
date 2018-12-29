@@ -813,7 +813,7 @@
 		},
 		
 		/**
-		 * 根据单元格索引获取对应的模型属性索引-单元格索引映射表。
+		 * 根据单元格索引获取对应的模型属性索引-单元格索引数组映射表。
 		 */
 		getDataTableCellPropertyIndexesMap : function(settings, cellIndexes)
 		{
@@ -833,6 +833,48 @@
 			}
 			
 			return propertyIndexesMap;
+		},
+		
+		/**
+		 * 根据单元格索引获取对应的行号-单元格索引数组映射表。
+		 */
+		getDataTableRowIndexesMap : function(cellIndexes)
+		{
+			var rowIndexesMap = {};
+			
+			for(var i=0; i<cellIndexes.length; i++)
+			{
+				var index = cellIndexes[i];
+				
+				var rowIndexes = (rowIndexesMap[index.row] || (rowIndexesMap[index.row] = []));
+				rowIndexes.push(index);
+			}
+			
+			return rowIndexesMap;
+		},
+		
+		/**
+		 * 如果所有单元格都在一行内则获取行号，如果不在同一行将返回null
+		 */
+		getDataTableRowIfSingle : function(cellIndexes)
+		{
+			var row = null;
+			
+			for(var i=0; i<cellIndexes.length; i++)
+			{
+				var index = cellIndexes[i];
+				var myRow = index.row;
+				
+				if(row == null)
+					row = myRow;
+				else if(myRow != row)
+				{
+					row = null;
+					break;
+				}
+			}
+			
+			return row;
 		},
 		
 		/**

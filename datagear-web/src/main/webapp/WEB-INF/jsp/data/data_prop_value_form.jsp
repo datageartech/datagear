@@ -17,8 +17,10 @@
 Object data = request.getAttribute("data");
 //属性名称，不允许null
 String propertyPath = getStringValue(request, "propertyPath");
+//初始属性值，可用于设置初始表单数据，允许为null
+Object propertyValue = request.getAttribute("propertyValue");
 //初始属性值数据是否是客户端数据，默认为false
-boolean isClientFormData = ("true".equalsIgnoreCase(getStringValue(request, "isClientFormData")));
+boolean isClientPageData = ("true".equalsIgnoreCase(getStringValue(request, "isClientPageData")));
 //标题操作标签I18N关键字，不允许null
 String titleOperationMessageKey = getStringValue(request, "titleOperationMessageKey");
 //提交活动，po.pageParam().submit(...)未定义时，不允许为null
@@ -61,8 +63,9 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 	po.readonly = <%=readonly%>;
 	po.submitAction = "<%=submitAction%>";
 	po.data = ($.unref(<%writeJson(application, out, data);%>) || {});
+	po.propertyValue = $.unref(<%writeJson(application, out, propertyValue);%>);
 	po.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
-	po.isClientFormData = <%=isClientFormData%>;
+	po.isClientPageData = <%=isClientPageData%>;
 	po.batchSet = <%=batchSet%>;
 	
 	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
@@ -74,7 +77,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		actionParam["data"]["data"] = po.data;
 		
 		//客户端属性值数据则传递最新表单数据，因为不需要根据初始属性值数据到服务端数据库查找
-		if(po.isClientFormData)
+		if(po.isClientPageData)
 			$.model.propertyPathValue(actionParam["data"]["data"], po.propertyPath, po.form().modelform("data")); 
 		
 		return actionParam;
@@ -90,7 +93,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		{
 			model : propertyModel,
 			ignorePropertyNames : $.model.findMappedByWith(property, propertyModel),
-			data : $.model.propertyPathValue(po.data, po.propertyPath),
+			data : (po.propertyValue || $.model.propertyPathValue(po.data, po.propertyPath)),
 			readonly : po.readonly,
 			submit : function()
 			{
