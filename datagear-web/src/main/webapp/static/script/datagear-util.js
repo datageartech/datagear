@@ -1304,7 +1304,78 @@
 				propertyCount++;
 			
 			return propertyCount;
-		}
+		},
+		
+		/**
+		 * 判断两个对象是否深度相等。
+		 */
+		deepEquals : function(a, b, ignorePropertyNames, aStack, bStack)
+		{
+			if(a == b)
+				return true;
+			
+			if(a == null || b == null)
+				return false;
+			
+			var type = $.type(a);
+			
+			if($.type(b) != type)
+				return false;
+			
+			aStack = aStack || [];
+			bStack = bStack || [];
+			var length = aStack.length;
+			
+			 //检查是否有循环引用的部分
+		    while(length--)
+		    {
+		        if (aStack[length] == a)
+		            return bStack[length] == b;
+		    }
+		    
+		    aStack.push(a);
+		    bStack.push(b);
+		    
+		    //数组
+		    if(type == "array")
+		    {
+		    	length = a.length;
+		    	
+		    	if (b.length != length)
+		    		return false;
+		    	
+		    	while(length--)
+		    	{
+		    		if (!$.deepEquals(a[length], b[length], ignorePropertyNames, aStack, bStack))
+		    			return false;
+		    	}
+		    }
+		    //对象
+		    else
+		    {
+		    	var keys = Object.keys(a), key;
+		    	length = keys.length;
+		    	
+		    	if (Object.keys(b).length != length)
+		    		return false;
+		    	
+		    	while (length--)
+		    	{
+		    		key = keys[length];
+		    		
+		    		if($.model.containsOrEquals(ignorePropertyNames, key))
+		    			continue;
+		    		
+		    		if (!(b.hasOwnProperty(key) && $.deepEquals(a[key], b[key], null, aStack, bStack)))
+		    			return false;
+		    	}
+		    }
+		    
+		    aStack.pop();
+		    bStack.pop();
+		    
+		    return true;
+		},
 	});
 	
 	$.fn.extend(

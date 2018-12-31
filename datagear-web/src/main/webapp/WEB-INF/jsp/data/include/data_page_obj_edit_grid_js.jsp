@@ -286,24 +286,6 @@ WebUtils.setPageId(request, gridPageId);
 		if(propertyValue == null)
 			return false;
 		
-		/*
-		var re = false;
-		
-		var propertyModelIndex = $.model.getPropertyModelIndexByValue(property, propertyValue);
-		var propertyModel = $.model.getPropertyModelByIndex(property, propertyModelIndex);
-		
-		//单元私有复合属性
-		if(!$.model.isMultipleProperty(property) && $.model.isCompositeModel(propertyModel)
-				&& $.model.isPrivatePropertyModel(po.editGridModel, property, propertyModel))
-		{
-			re = !po.isAllSinglePrimitivePropertyValueFullyFetched(propertyModel, propertyValue);
-		}
-		else
-		{
-			re = !po.isSinglePrimitivePropertyValueFullyFetched(po.editGridModel, property, propertyValue);
-		}
-		*/
-		
 		var re = !po.isSinglePrimitivePropertyValueFullyFetched(po.editGridModel, property, propertyValue);
 		
 		if(re && po.isClientDataRow(dataTable, cellIndex.row))
@@ -616,10 +598,6 @@ WebUtils.setPageId(request, gridPageId);
 			var property = $.model.getProperty(model, parseInt(pi));
 			var propertyValue = $.model.propertyValue(data, property.name);
 			
-			//下面的cell.data(propertyValue)在propertyValue=undefined语义不对
-			if(propertyValue == undefined)
-				propertyValue = null;
-			
 			for(var i=0; i<pindexes.length; i++)
 			{
 				var index = pindexes[i];
@@ -628,30 +606,61 @@ WebUtils.setPageId(request, gridPageId);
 				
 				var originalRowData = po.originalRowData(dataTable, index.row);
 				var originalCellValue = $.model.propertyValue(originalRowData, property);
+				var myPropertyValue = propertyValue;
 				
-				cell.data(propertyValue).draw();
+				if($.model.isMultipleProperty(property))
+				{
+					//只允许集合属性值在初始值的基础上添加，因此当为null时即是恢复为初始值
+					if(!myPropertyValue || ($.isArray(myPropertyValue) && myPropertyValue.length == 0))
+						myPropertyValue = originalCellValue;
+				}
 				
 				var changed = true;
 				
-				if(propertyValue == originalCellValue)
+				if(myPropertyValue == originalCellValue)
 					changed = false;
 				else
 				{
-					var tmpPropertyValue = propertyValue;
+					if($.model.isShowableValue(myPropertyValue))
+						myPropertyValue = $.model.getShowableRawValue(myPropertyValue);
 					
-					if($.model.isShowableValue(propertyValue))
-						tmpPropertyValue = $.model.getShowableRawValue(propertyValue);
-					
-					if(tmpPropertyValue == originalCellValue)
+					if(myPropertyValue == originalCellValue)
 						changed = false;
 					//无原始值但是表单空字符串保存的情况
-					else if((originalCellValue == null || originalCellValue == undefined)
-							&& (tmpPropertyValue == "" || tmpPropertyValue == null || tmpPropertyValue == undefined))
+					else if((originalCellValue == null)
+							&& (myPropertyValue == "" || myPropertyValue == null))
 						changed = false;
+					else					
+					{
+						var ovType = $.type(originalCellValue);
+						if((ovType == "object" || ovType == "array") && $.type(myPropertyValue) == ovType)
+						{
+							var propertyModel = $.model.getPropertyModelByValue(property, originalCellValue);
+							
+							changed = !$.deepEquals(originalCellValue, myPropertyValue, 
+											$.model.findMappedByWith(property, propertyModel));
+						}
+					}
 				}
 				
 				if(changed)
-					po.markAsModifiedCell($(cell.node()));
+				{
+					var $cell = $(cell.node());
+					
+					//undefined值会使cell.data()语义不符
+					cell.data((propertyValue == undefined ? null : propertyValue)).draw();
+					
+					//多元属性值单元格显示“[原始元素个数]+[新加元素个数]”
+					if($.model.isMultipleProperty(property) && !po.isClientDataRow(dataTable, index.row))
+					{
+						var originalLen = $.model.getMultiplePropertyValueLength(originalCellValue);
+						var newLen = $.model.getMultiplePropertyValueLength(myPropertyValue);
+						
+						$cell.html(originalLen +"+"+newLen);
+					}
+					
+					po.markAsModifiedCell($cell);
+				}
 				else
 					po.markAsUnmodifiedCell($(cell.node()));
 				
