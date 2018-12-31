@@ -130,13 +130,14 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		return actionParam;
 	};
 	
-	po.storeGridData = function()
+	po.storeGridPropertyValue = function(gridPropertyValue)
 	{
-		var rowsData = po.getRowsData();
+		if(gridPropertyValue == undefined)
+			var gridPropertyValue = po.getRowsData();
 		
-		$.model.propertyPathValue(po.data, po.propertyPath, rowsData);
+		$.model.propertyPathValue(po.data, po.propertyPath, gridPropertyValue);
 		
-		po.pageParamCall("submit", rowsData);
+		po.pageParamCall("submit", gridPropertyValue);
 	};
 	
 	po.onModel(function(model)
@@ -214,7 +215,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 								"submit" : function(propValueElement)
 								{
 									po.addRowData(propValueElement);
-									po.storeGridData();
+									po.storeGridPropertyValue();
 									
 									$.tipSuccess("<fmt:message key='haveAdd' />");
 								}
@@ -251,7 +252,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 									if(po.isClientPageData)
 									{
 										po.addRowData(rows);
-										po.storeGridData();
+										po.storeGridPropertyValue();
 										
 										$.tipSuccess("<fmt:message key='haveAdd' />");
 									}
@@ -289,7 +290,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 									"submit" : function(propValueElement)
 									{
 										po.setRowData(index, propValueElement);
-										po.storeGridData();
+										po.storeGridPropertyValue();
 									}
 								});
 						
@@ -328,7 +329,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 							if(po.isClientPageData)
 							{
 								po.deleteRow(indexes);
-								po.storeGridData();
+								po.storeGridPropertyValue();
 							}
 							else
 							{

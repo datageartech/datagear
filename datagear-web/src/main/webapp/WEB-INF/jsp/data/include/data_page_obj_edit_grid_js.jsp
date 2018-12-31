@@ -40,6 +40,11 @@ WebUtils.setPageId(request, editGridFormPageId);
 	po.currentCellIndexes = undefined;
 	po.currentPropertyIndexesMap = undefined;
 	
+	po.isPropertyActionClientSubmit = function(property, propertyConcreteModel)
+	{
+		return true;
+	};
+	
 	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
 	po.buildPropertyActionOptions = function(property, propertyModel, extraRequestParams, extraPageParams)
 	{
@@ -49,28 +54,37 @@ WebUtils.setPageId(request, editGridFormPageId);
 		
 		var isClientPageData = true;
 		
+		//服务端数据
 		if(singleRow != null && !po.gridPage.isClientDataRow(po.currentDataTable, singleRow))
 		{
+			var data = po.gridPage.originalRowData(po.currentDataTable, singleRow);
+			data = $.unref($.ref(data));
+			actionParam["data"]["data"] = data;
+			
 			var myColumn = $.getDataTableColumn(po.currentDataTable.settings(), property.name);
 			var myCell = po.currentDataTable.cell({ "row" : singleRow, "column" : myColumn });
 			var $myCell = $(myCell.node());
 			
-			//如果已编辑，则要从单元格加载编辑值，并且采用客户端保存模式
-			if(po.gridPage.isModifiedCell($myCell))
-			{
-				isClientPageData = true;
-				actionParam["data"]["propertyValue"] = myCell.data();
-				actionParam["data"]["isLoadPageData"] = false;
-			}
+			var isModified = po.gridPage.isModifiedCell($myCell);
+			
+			//单元格没有任何修改，则直接采用服务端数据模式
+			if(!isModified)
+				isClientPageData = false;
 			else
 			{
-				//否则，采用服务端保存模式
-				isClientPageData = false;
-				
-				var data = po.gridPage.originalRowData(po.currentDataTable, singleRow);
-				data = $.unref($.ref(data));
-				
-				actionParam["data"]["data"] = data;
+				//集合属性值单元格修改了（多选编辑后），那么仅开启客户端数据模式，仅可添加、编辑、删除客户端集合属性值元素
+				if($.model.isMultipleProperty(property))
+				{
+					$.model.propertyValue(data, property, myCell.data());
+					isClientPageData = true;
+				}
+				else
+				{
+					actionParam["data"]["propertyValue"] = myCell.data();
+					var propertyValue = $.model.propertyValue(data, property);
+					//XXX 此处处理逻辑有缺陷，如果多选编辑了服务端单元属性值对象的集合属性值，然后再单选编辑时，单元属性值对象的集合属性值页面将仅会显示服务端数据
+					isClientPageData = !propertyValue;
+				}
 			}
 		}
 		
@@ -601,6 +615,10 @@ WebUtils.setPageId(request, gridPageId);
 			var pindexes = propertyIndexesMap[pi];
 			var property = $.model.getProperty(model, parseInt(pi));
 			var propertyValue = $.model.propertyValue(data, property.name);
+			
+			//下面的cell.data(propertyValue)在propertyValue=undefined语义不对
+			if(propertyValue == undefined)
+				propertyValue = null;
 			
 			for(var i=0; i<pindexes.length; i++)
 			{
