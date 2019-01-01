@@ -370,10 +370,16 @@ table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel{
 	position: absolute;
 	display: inline-block;
 	z-index: 1;
-	padding: 1px 1px;
+	padding: 1px 1px 0px 1px;
 }
 table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-title{
-	height: 10px;
+	height: 0.6em;
+}
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-foot{
+	height: 0.2em;
+}
+table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-dragger{
+    cursor: move;
 }
 table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-title .close-icon{
 	float: right;

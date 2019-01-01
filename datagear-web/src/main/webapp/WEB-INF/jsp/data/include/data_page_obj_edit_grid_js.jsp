@@ -28,7 +28,8 @@ WebUtils.setPageId(request, editGridFormPageId);
 <script type="text/javascript">
 (function(po)
 {
-	po.element().draggable();
+	//XXX 这里必须添加handle设置，不然元素的按键、鼠标事件都会无效
+	po.element().draggable({ handle : po.element(".form-panel-dragger") });
 	po.element().hide();
 	po.formLabels.submit = "<fmt:message key='confirm' />";
 	
@@ -802,13 +803,6 @@ WebUtils.setPageId(request, gridPageId);
 			if(!$this.hasClass("focus"))
 				$this.addClass("focus");
 		})
-		.click(function()
-		{
-			var $this = $(this);
-			
-			if(!$this.hasClass("focus"))
-				$this.addClass("focus");
-		});
 		/* XXX 不在这里加失去焦点效果了，当切换单元格时会有一种卡顿感觉
 		.focusout(function()
 		{
