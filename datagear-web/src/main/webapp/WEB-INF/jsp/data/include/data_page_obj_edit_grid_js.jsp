@@ -28,7 +28,7 @@ WebUtils.setPageId(request, editGridFormPageId);
 <script type="text/javascript">
 (function(po)
 {
-	po.element().draggable({ handle : po.element(".form-panel-title") });
+	po.element().draggable();
 	po.element().hide();
 	po.formLabels.submit = "<fmt:message key='confirm' />";
 	
@@ -193,6 +193,8 @@ WebUtils.setPageId(request, gridPageId);
 			
 			po.element("button[name='editGridEditButton']", $buttonWrapper).click(function()
 			{
+				po.editCellOnSelect = true;
+				
 				var dataTable = po.table().DataTable();
 				var selectedIndexes = dataTable.cells(".selected").indexes();
 				
@@ -201,9 +203,8 @@ WebUtils.setPageId(request, gridPageId);
 			});
 		}
 		
-		po.isEnableEditGrid = true;
-		
 		var dataTable = po.table().DataTable();
+		dataTable.rows(".selected").deselect();
 		$(dataTable.table().node()).attr("tabindex", 0);
 		
 		po.element(".head .search").addClass("ui-state-disabled");
@@ -221,11 +222,14 @@ WebUtils.setPageId(request, gridPageId);
 			if(!po.isEnableEditGrid)
 				$(this).hide();
 		});
+
+		po.isEnableEditGrid = true;
 	};
 	
 	po.disableEditGrid = function()
 	{
 		var dataTable = po.table().DataTable();
+		dataTable.rows(".selected").deselect();
 		dataTable.cells(".selected").deselect();
 		
 		$(dataTable.table().node()).removeAttr("tabindex");
@@ -454,7 +458,7 @@ WebUtils.setPageId(request, gridPageId);
 			return;
 		
 		var $table = $(dataTable.table().node());
-		var $tableParent = $(dataTable.table().container());
+		var $tableContainer = $(dataTable.table().container());
 		var $cellNodes = $(dataTable.cells(indexes).nodes());
 		var $editFormCell = $($cellNodes[0]);
 		
@@ -480,12 +484,12 @@ WebUtils.setPageId(request, gridPageId);
 		//只有一个属性，隐藏标签，否则，显示标签
 		if(propertyCount == 1)
 		{
-			$formPanel.css("min-width", $tableParent.width()/3);
+			$formPanel.css("min-width", $tableContainer.width()/3);
 			form.addClass("hide-form-label");
 		}
 		else
 		{
-			$formPanel.css("min-width", $tableParent.width()/2);
+			$formPanel.css("min-width", $tableContainer.width()/2);
 			form.removeClass("hide-form-label");
 		}
 		
@@ -795,8 +799,17 @@ WebUtils.setPageId(request, gridPageId);
 		.focusin(function()
 		{
 			var $this = $(this);
-			$this.addClass("focus");
+			
+			if(!$this.hasClass("focus"))
+				$this.addClass("focus");
 		})
+		.click(function()
+		{
+			var $this = $(this);
+			
+			if(!$this.hasClass("focus"))
+				$this.addClass("focus");
+		});
 		/* XXX 不在这里加失去焦点效果了，当切换单元格时会有一种卡顿感觉
 		.focusout(function()
 		{
@@ -893,7 +906,20 @@ WebUtils.setPageId(request, gridPageId);
 				}
 				else if(type == "row")
 				{
-					dataTable.cells(".selected").deselect();
+					var columnCount = $.getDataTableColumnCount(dataTable);
+					
+					var cellIndexes = dataTable.cells(".selected").indexes();
+					
+					for(var i=0; i<indexes.length; i++)
+					{
+						var row = indexes[i];
+						
+						for(var j=1; j<columnCount; j++)
+							cellIndexes.push({"row" : row, "column" : j});
+					}
+					
+					$(dataTable.table().node()).focus();
+					dataTable.cells(cellIndexes).select();
 				}
 			}
 		})
@@ -904,6 +930,25 @@ WebUtils.setPageId(request, gridPageId);
 				if(type == "cell")
 				{
 					po.closeEditCellPanel(dataTable, indexes);
+				}
+				else if(type == "row")
+				{
+					var columnCount = $.getDataTableColumnCount(dataTable);
+					
+					var cellIndexes = [];
+					
+					for(var i=0; i<indexes.length; i++)
+					{
+						var row = indexes[i];
+						
+						for(var j=1; j<columnCount; j++)
+							cellIndexes.push({"row" : row, "column" : j});
+					}
+					
+					dataTable.cells(cellIndexes).deselect();
+					
+					$(dataTable.table().node()).focus();
+					var selectedIndexes = dataTable.cells(".selected").select();
 				}
 			}
 		})

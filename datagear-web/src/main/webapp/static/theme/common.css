@@ -374,13 +374,12 @@ table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel{
 }
 table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-title{
 	height: 10px;
-    cursor: move;
 }
 table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-title .close-icon{
 	float: right;
 	cursor: pointer;
-	opacity: 0.5;
-	filter: Alpha(Opacity=50);
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
 }
 table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form{
 	padding: 0.41em 0.41em;

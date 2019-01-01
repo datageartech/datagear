@@ -25,7 +25,7 @@ request.setAttribute("editGridFormPageId", editGridFormPageId_html);
 %>
 <div id="<%=editGridFormPageId_html%>" class="page-edit-grid-form">
 	<div class="form-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow" tabindex="1">
-		<div class="form-panel-title ui-corner-all ui-widget-header">
+		<div class="form-panel-title">
 			<span class="close-icon ui-icon ui-icon-close"></span>
 		</div>
 		<form id="<%=editGridFormPageId_html%>-form" method="POST" action="#">

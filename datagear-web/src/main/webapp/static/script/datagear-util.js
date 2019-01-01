@@ -798,6 +798,32 @@
 		},
 		
 		/**
+		 * 获取DataTable列数。
+		 */
+		getDataTableColumnCount : function(dataTable, row)
+		{
+			if(row == undefined)
+				row = dataTable.row(0);
+			
+			var count = $("> td", row.node()).length;
+			
+			return count;
+		},
+		
+		/**
+		 * 获取DataTable行数。
+		 */
+		getDataTableRowCount : function(dataTable, column)
+		{
+			if(column == undefined)
+				column = dataTable.column(0);
+			
+			var count = column.nodes().length;
+			
+			return count;
+		},
+		
+		/**
 		 * 根据单元格索引获取对应的模型属性索引
 		 */
 		getDataTableCellPropertyIndex : function(settings, cellIndex)
@@ -985,8 +1011,8 @@
 				
 				if(nextCellIndex != null)
 				{
-					var maxColumnIndex = $("> td", dataTable.row(0).node()).length - 1;
-					var maxRowIndex = dataTable.column(0).nodes().length - 1;
+					var maxColumnIndex = this.getDataTableColumnCount(dataTable) - 1;
+					var maxRowIndex = this.getDataTableRowCount(dataTable) - 1;
 					
 					if(nextCellIndex.row > maxRowIndex)
 						nextCellIndex.row = maxRowIndex;
