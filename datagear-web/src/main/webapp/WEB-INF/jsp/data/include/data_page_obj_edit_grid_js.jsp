@@ -859,8 +859,6 @@ WebUtils.setPageId(request, gridPageId);
 				{
 					var dataTable = $(this).DataTable();
 					
-					dataTable.rows(".selected").deselect();
-					
 					po.editCellOnSelect = true;
 					
 					$.handleCellSelectionForClick(dataTable, event, target);
@@ -908,6 +906,9 @@ WebUtils.setPageId(request, gridPageId);
 				{
 					var columnCount = $.getDataTableColumnCount(dataTable);
 					
+					//编辑表格状态下无行选中状态，行选中操作仅作为选中此行的所有单元格处理，这样使逻辑简单一致
+					dataTable.rows(indexes).deselect();
+					
 					var cellIndexes = dataTable.cells(".selected").indexes();
 					
 					for(var i=0; i<indexes.length; i++)
@@ -931,25 +932,7 @@ WebUtils.setPageId(request, gridPageId);
 				{
 					po.closeEditCellPanel(dataTable, indexes);
 				}
-				else if(type == "row")
-				{
-					var columnCount = $.getDataTableColumnCount(dataTable);
-					
-					var cellIndexes = [];
-					
-					for(var i=0; i<indexes.length; i++)
-					{
-						var row = indexes[i];
-						
-						for(var j=1; j<columnCount; j++)
-							cellIndexes.push({"row" : row, "column" : j});
-					}
-					
-					dataTable.cells(cellIndexes).deselect();
-					
-					$(dataTable.table().node()).focus();
-					var selectedIndexes = dataTable.cells(".selected").select();
-				}
+				else if(type == "row"){}
 			}
 		})
 		.on("preDraw", function(event, settings)
