@@ -189,6 +189,7 @@ else
 		po.initConditionPanel();
 		po.initPagination();
 		po.initModelDataTableAjax(po.url("selectPropValueData"), propertyModel);
+		po.bindResizeDataTable();
 	});
 })
 (${pageId});

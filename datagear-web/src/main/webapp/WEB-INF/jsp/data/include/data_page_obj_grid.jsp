@@ -53,7 +53,7 @@
 	};
 	
 	/**
-	 * 构建Model的本地表格。
+	 * 构建Model的本地数据表格。
 	 */
 	po.initModelDataTableLocal = function(model, data, ignorePropertyNames)
 	{
@@ -64,7 +64,7 @@
 	};
 	
 	/**
-	 * 构建Model的ajax表格。
+	 * 构建Model的ajax数据表格。
 	 */
 	po.initModelDataTableAjax = function(url, model, ignorePropertyNames)
 	{

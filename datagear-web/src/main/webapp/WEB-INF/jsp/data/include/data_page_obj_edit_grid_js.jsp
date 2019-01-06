@@ -102,33 +102,19 @@ WebUtils.setPageId(request, gridPageId);
 <script type="text/javascript">
 (function(po)
 {
+	//内嵌的表单页面对象
+	po.editGridFormPage = <%=editGridFormPageId%>;
+	po.editGridFormPage.gridPage = po;
+	//编辑表格对应的模型，会在initEditGrid函数中初始化
+	po.editGridModel = undefined;
+	
 	po.isEnableEditGrid = false;
 	//存储行初始值
 	po.editGridOriginalRowDatas = {};
 	//存储行的指定属性值是否已从服务端加载
 	po.editGridFetchedPropertyValues = {};
-	//编辑表格对应的模型，会在initEditGrid函数中初始化
-	po.editGridModel = undefined;
 	//是否在单元格选中时编辑单元格，键盘快速导航时通常不需要打开编辑单元格面板
 	po.editCellOnSelect = true;
-	//内嵌的表单页面对象
-	po.editGridFormPage = <%=editGridFormPageId%>;
-	po.editGridFormPage.gridPage = po;
-	
-	po.editGridSwitch = function()
-	{
-		return po.element("#${pageId}-editGridSwitch");
-	};
-	
-	po.editGridOperation = function()
-	{
-		return po.element(".edit-grid-operation");
-	};
-	
-	po.editGridOperationButtons = function()
-	{
-		return po.element(".edit-grid-operation button");
-	};
 	
 	/**
 	 * 获取行初始数据对象。
@@ -175,6 +161,176 @@ WebUtils.setPageId(request, gridPageId);
 		}
 	};
 	
+	po.editTable = function()
+	{
+		var id = po.pageId +"-edit-table";
+		
+		var $editTable = po.element("#" + id);
+		if($editTable.length == 0)
+			$editTable = $("<table id='"+id+"' width='100%' class='hover stripe' tabindex='0'></table>").appendTo(po.element(".content"));
+		
+		return $editTable;
+	};
+	
+	po.bindEditDataTableEvents = function($table)
+	{
+		$table.DataTable()
+		.on("click", function(event)
+		{
+			if(po.isEnableEditGrid)
+			{
+				//阻止冒泡的行选择事件
+				event.stopPropagation();
+				
+				var target = $(event.target);
+				
+				if(target.is("td"))
+				{
+					var dataTable = $(this).DataTable();
+					
+					po.editCellOnSelect = true;
+					
+					$.handleCellSelectionForClick(dataTable, event, target);
+				}
+			}
+		})
+		.on("keydown", function(event)
+		{
+			if(po.isEnableEditGrid)
+			{
+				var dataTable = $(this).DataTable();
+				
+				if(event.keyCode == $.ui.keyCode.ESCAPE)
+				{
+					po.closeEditCellPanel(dataTable);
+					
+					po.editCellOnSelect = false;
+				}
+				else if(event.keyCode == $.ui.keyCode.ENTER)
+				{
+					//必须加下面这行代码，不然当打开的编辑面板表单输入框自动焦点时，会触发表单提交事件
+					event.preventDefault();
+					
+					var selectedIndexes = dataTable.cells(".selected").indexes();
+					
+					if(selectedIndexes)
+						po.editCell(dataTable, selectedIndexes, true);
+				}
+				else
+				{
+					$.handleCellNavigationForKeydown(dataTable, event);
+				}
+			}
+		})
+		.on("select", function(event, dataTable, type, indexes)
+		{
+			if(po.isEnableEditGrid)
+			{
+				if(type == "cell")
+				{
+					if(po.editCellOnSelect)
+						po.editCell(dataTable, indexes);
+				}
+				/*
+				else if(type == "row")
+				{
+					var columnCount = $.getDataTableColumnCount(dataTable);
+					
+					//编辑表格状态下无行选中状态，行选中操作仅作为选中此行的所有单元格处理，这样使逻辑简单一致
+					//dataTable.rows(indexes).deselect();
+					
+					var cellIndexes = dataTable.cells(".selected").indexes();
+					
+					for(var i=0; i<indexes.length; i++)
+					{
+						var row = indexes[i];
+						
+						for(var j=1; j<columnCount; j++)
+							cellIndexes.push({"row" : row, "column" : j});
+					}
+					
+					$(dataTable.table().node()).focus();
+					dataTable.cells(cellIndexes).select();
+				}
+				*/
+			}
+		})
+		.on("deselect", function(event, dataTable, type, indexes)
+		{
+			if(po.isEnableEditGrid)
+			{
+				if(type == "cell")
+				{
+					po.closeEditCellPanel(dataTable, indexes);
+				}
+				/*
+				else if(type == "row")
+				{
+					var columnCount = $.getDataTableColumnCount(dataTable);
+					
+					var cellIndexes = [];
+					for(var i=0; i< indexes.length; i++)
+					{
+						var row = indexes[i];
+						
+						for(var j=1; j<columnCount; j++)
+							cellIndexes.push({"row" : row, "column" : j});
+					}
+					
+					$(dataTable.table().node()).focus();
+					dataTable.cells(cellIndexes).deselect();
+				}
+				*/
+			}
+		})/*
+		.on("preDraw", function(event, settings)
+		{
+			//禁止表格重绘，比如排序
+			if(po.isEnableEditGrid)
+				return false;
+			else
+				return true;
+		})*/;
+	};
+	
+	po.initEditGridDataTable = function($editTable, dataTable)
+	{
+		var editTableData = $.makeArray(dataTable.rows().data());
+		
+		var columns = $.buildDataTablesColumns(po.editGridModel);
+		var settings = po.buildDataTableSettingsLocal(columns, editTableData);
+		
+		settings.ordering = false;
+		
+		var checkColumn = settings.columns[0];
+		checkColumn.render = function(data, type, row, meta)
+		{
+			var content = po.renderCheckColumn.call(this, data, type, row, meta);
+			
+			var className = "row-data-state";
+			var iconClassName = "ui-icon";
+			
+			if(data == "add-row")
+			{
+				iconClassName += " ui-icon-circle-plus";
+			}
+			else if(data == "delete-row")
+			{
+				className += " ui-state-error";
+				iconClassName += " ui-icon-circle-minus";
+			}
+			
+			content = content + "<div class='"+className+"'><span class='"+iconClassName+"'></span></div>";
+			
+			return content;
+		};
+		
+		po.initDataTable(settings, $editTable);
+		
+		po.editGridResizeHandler = po.bindResizeDataTable($editTable, "editTableResizeTimer");
+		po.bindEditDataTableEvents($editTable);
+	};
+	
 	po.enableEditGrid = function()
 	{
 		var $headOperation = po.element(".head .operation");
@@ -184,36 +340,83 @@ WebUtils.setPageId(request, gridPageId);
 			po.element(".ui-button", $headOperation).addClass("not-edit-grid-button");
 			
 			var $buttonWrapper = $("<div class='edit-grid-button-wrapper' style='display:inline-block;' />").appendTo($headOperation);
-			$("<button name='editGridEditButton' class='edit-grid-button highlight'><fmt:message key='edit' /></button>&nbsp;"
+			$("<button name='editGridAddButton' class='edit-grid-button highlight'><fmt:message key='add' /></button>&nbsp;"
+				+"<button name='editGridEditButton' class='edit-grid-button highlight'><fmt:message key='edit' /></button>&nbsp;"
 				+"<button name='editGridDeleteButton' class='edit-grid-button highlight'><fmt:message key='delete' /></button>").appendTo($buttonWrapper);
 			
 			$.initButtons($buttonWrapper);
 			
 			$buttonWrapper.hide();
 			
+			po.element("button[name='editGridAddButton']", $buttonWrapper).click(function()
+			{
+				po.editCellOnSelect = true;
+				
+				var dataTable = po.editTable().DataTable();
+				var row = dataTable.row.add($.model.instance(po.editGridModel));
+				$(row.node()).addClass("add-row");
+				row.draw();
+				dataTable.cell(row.index(), 0).data("add-row").draw();
+			});
+			
 			po.element("button[name='editGridEditButton']", $buttonWrapper).click(function()
 			{
 				po.editCellOnSelect = true;
 				
-				var dataTable = po.table().DataTable();
+				var dataTable = po.editTable().DataTable();
 				var selectedIndexes = dataTable.cells(".selected").indexes();
 				
 				if(selectedIndexes)
 					po.editCell(dataTable, selectedIndexes, true);
 			});
+			
+			po.element("button[name='editGridDeleteButton']", $buttonWrapper).click(function()
+			{
+				po.editCellOnSelect = true;
+				
+				var dataTable = po.editTable().DataTable();
+				
+				var selectedAddRows = dataTable.rows(".selected.add-row");
+				if(selectedAddRows)
+					selectedAddRows.remove().draw();
+				
+				var selectedRows = dataTable.rows(".selected");
+				
+				if(selectedRows)
+				{
+					selectedRows.deselect();
+					
+					selectedRows.every(function(rowIndex)
+					{
+						var row = dataTable.row(rowIndex);
+						var $row = $(row.node());
+						
+						$row.addClass("delete-row");
+						dataTable.cell(rowIndex, 0).data("delete-row").draw();
+					});
+				}
+			});
 		}
 		
 		var dataTable = po.table().DataTable();
-		dataTable.rows(".selected").deselect();
-		$(dataTable.table().node()).attr("tabindex", 0);
+		var $tableContainer = $(dataTable.table().container());
+		$tableContainer.hide();
+		
+		//新建本地模式的DataTable，因为server-side模式的DataTable不能添加行
+		var $editTable = po.editTable();
+		po.initEditGridDataTable($editTable, dataTable);
+		
+		po.editGridOriginalRowDatas = {};
+		po.editGridFetchedPropertyValues = {};
+		po.editCellOnSelect = true;
 		
 		po.element(".head .search").addClass("ui-state-disabled");
 		po.element(".foot .pagination").addClass("ui-state-disabled");
 		
-		var $editGridOperation = po.editGridOperation();
+		var $editGridOperation = po.element(".edit-grid-operation");
 		//保存按钮居中
 		$editGridOperation.css("right", (0 - po.element(".button-save", $editGridOperation).outerWidth(true)/2));
-		po.editGridOperationButtons().show("fade");
+		po.element(".edit-grid-operation button").show("fade");
 		
 		po.element(".ui-button.not-edit-grid-button", $headOperation).hide();
 		po.element(".edit-grid-button-wrapper", $headOperation).show("fade", function()
@@ -222,24 +425,27 @@ WebUtils.setPageId(request, gridPageId);
 			if(!po.isEnableEditGrid)
 				$(this).hide();
 		});
-
+		
 		po.isEnableEditGrid = true;
 	};
 	
 	po.disableEditGrid = function()
 	{
-		var dataTable = po.table().DataTable();
-		dataTable.rows(".selected").deselect();
-		dataTable.cells(".selected").deselect();
+		var $editTable = po.editTable();
+		$editTable.DataTable().destroy();
+		$editTable.remove();
+		$(window).unbind("resize", po.editGridResizeHandler);
 		
-		$(dataTable.table().node()).removeAttr("tabindex");
+		var $table = po.table();
+		var $tableContainer = $($table.DataTable().table().container());
+		$tableContainer.show();
 		
 		var $headOperation = po.element(".head .operation");
 		
 		po.element(".head .search").removeClass("ui-state-disabled");
 		po.element(".foot .pagination").removeClass("ui-state-disabled");
 		
-		po.editGridOperationButtons().hide("fade");
+		po.element(".edit-grid-operation button").hide("fade");
 		po.element(".edit-grid-button-wrapper", $headOperation).hide();
 		po.element(".ui-button.not-edit-grid-button", $headOperation).show("fade", function()
 		{
@@ -281,7 +487,7 @@ WebUtils.setPageId(request, gridPageId);
 	{
 		var $row = $(dataTable.row(row).node());
 		
-		return $row.hasClass("client-row-data");
+		return $row.hasClass("add-row");
 	};
 	
 	//判断单元格是否需要从服务端加载数据
@@ -509,7 +715,7 @@ WebUtils.setPageId(request, gridPageId);
 				var data = $this.modelform("data");
 				var propertyIndexesMap = po.editGridFormPage.currentPropertyIndexesMap;
 				
-				var dataTable = po.table().DataTable();
+				var dataTable = po.editTable().DataTable();
 				
 				po.closeEditCellPanel(dataTable);
 				po.saveEditCell(dataTable, propertyIndexesMap, data);
@@ -714,12 +920,12 @@ WebUtils.setPageId(request, gridPageId);
 				restoreCount++;
 			});
 			
-			if(confirmCallback)
-				confirmCallback.call(po, dataTable, cells, count);
-
 			//新值可能会影响单元格宽度，因此需要重设列宽
 			if(restoreCount > 0)
 				dataTable.columns.adjust();
+			
+			if(confirmCallback)
+				confirmCallback.call(po, dataTable, cells, count);
 		};
 		
 		var _cancelCallback = function()
@@ -750,9 +956,9 @@ WebUtils.setPageId(request, gridPageId);
 	{
 		po.editGridModel = model;
 		
-		$.initButtons(po.editGridOperation());
+		$.initButtons(po.element(".edit-grid-operation"));
 		
-		po.editGridSwitch().checkboxradio({icon : true}).change(function(event)
+		po.element("#${pageId}-editGridSwitch").checkboxradio({icon : true}).change(function(event)
 		{
 			var $thisCheckbox = $(this);
 			
@@ -762,7 +968,7 @@ WebUtils.setPageId(request, gridPageId);
 			}
 			else
 			{
-				var dataTable = po.table().DataTable();
+				var dataTable = po.editTable().DataTable();
 				var modifiedCells = dataTable.cells(".cell-modified");
 				
 				po.restoreEditCell(dataTable, modifiedCells,
@@ -780,7 +986,7 @@ WebUtils.setPageId(request, gridPageId);
 		
 		po.element(".button-restore", po.element(".edit-grid")).click(function()
 		{
-			var dataTable = po.table().DataTable();
+			var dataTable = po.editTable().DataTable();
 			var selectedCells = dataTable.cells(".selected");
 			
 			po.restoreEditCell(dataTable, selectedCells);
@@ -788,7 +994,7 @@ WebUtils.setPageId(request, gridPageId);
 		
 		po.element(".button-restore-all", po.element(".edit-grid")).click(function()
 		{
-			var dataTable = po.table().DataTable();
+			var dataTable = po.editTable().DataTable();
 			
 			var modifiedCells = dataTable.cells(".cell-modified");
 			
@@ -815,7 +1021,7 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			if(event.keyCode == $.ui.keyCode.ESCAPE)
 			{
-				var dataTable = po.table().DataTable();
+				var dataTable = po.editTable().DataTable();
 				po.closeEditCellPanel(dataTable);
 				
 				po.editCellOnSelect = false;
@@ -832,109 +1038,10 @@ WebUtils.setPageId(request, gridPageId);
 		
 		po.editGridFormPage.element(".close-icon").click(function()
 		{
-			var dataTable = po.table().DataTable();
+			var dataTable = po.editTable().DataTable();
 			po.closeEditCellPanel(dataTable);
 			
 			po.editCellOnSelect = false;
-		});
-		
-		po.table().DataTable()
-		.on("click", function(event)
-		{
-			if(po.isEnableEditGrid)
-			{
-				//阻止冒泡的行选择事件
-				event.stopPropagation();
-				
-				var target = $(event.target);
-				
-				if(target.is("td"))
-				{
-					var dataTable = $(this).DataTable();
-					
-					po.editCellOnSelect = true;
-					
-					$.handleCellSelectionForClick(dataTable, event, target);
-				}
-			}
-		})
-		.on("keydown", function(event)
-		{
-			if(po.isEnableEditGrid)
-			{
-				var dataTable = $(this).DataTable();
-				
-				if(event.keyCode == $.ui.keyCode.ESCAPE)
-				{
-					po.closeEditCellPanel(dataTable);
-					
-					po.editCellOnSelect = false;
-				}
-				else if(event.keyCode == $.ui.keyCode.ENTER)
-				{
-					//必须加下面这行代码，不然当打开的编辑面板表单输入框自动焦点时，会触发表单提交事件
-					event.preventDefault();
-					
-					var selectedIndexes = dataTable.cells(".selected").indexes();
-					
-					if(selectedIndexes)
-						po.editCell(dataTable, selectedIndexes, true);
-				}
-				else
-				{
-					$.handleCellNavigationForKeydown(dataTable, event);
-				}
-			}
-		})
-		.on("select", function(event, dataTable, type, indexes)
-		{
-			if(po.isEnableEditGrid)
-			{
-				if(type == "cell")
-				{
-					if(po.editCellOnSelect)
-						po.editCell(dataTable, indexes);
-				}
-				else if(type == "row")
-				{
-					var columnCount = $.getDataTableColumnCount(dataTable);
-					
-					//编辑表格状态下无行选中状态，行选中操作仅作为选中此行的所有单元格处理，这样使逻辑简单一致
-					dataTable.rows(indexes).deselect();
-					
-					var cellIndexes = dataTable.cells(".selected").indexes();
-					
-					for(var i=0; i<indexes.length; i++)
-					{
-						var row = indexes[i];
-						
-						for(var j=1; j<columnCount; j++)
-							cellIndexes.push({"row" : row, "column" : j});
-					}
-					
-					$(dataTable.table().node()).focus();
-					dataTable.cells(cellIndexes).select();
-				}
-			}
-		})
-		.on("deselect", function(event, dataTable, type, indexes)
-		{
-			if(po.isEnableEditGrid)
-			{
-				if(type == "cell")
-				{
-					po.closeEditCellPanel(dataTable, indexes);
-				}
-				else if(type == "row"){}
-			}
-		})
-		.on("preDraw", function(event, settings)
-		{
-			//禁止表格重绘，比如排序
-			if(po.isEnableEditGrid)
-				return false;
-			else
-				return true;
 		});
 	};
 })

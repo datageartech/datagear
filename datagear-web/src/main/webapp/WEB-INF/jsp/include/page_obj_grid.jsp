@@ -200,24 +200,27 @@ page_js_obj.jsp
 			},
 			"createdRow": function(row, data, dataIndex)
 			{
+				var $table = this;
+				
 				$(".column-check", row).click(function(event)
 				{
 					event.stopPropagation();
 					
 					var tr = $(this).closest("tr");
-					var selected = tr.hasClass("selected");
 					
-					if(selected)
-						po.table().DataTable().row(tr).deselect();
+					if(tr.hasClass("selected"))
+						$table.DataTable().row(tr).deselect();
 					else
-						po.table().DataTable().row(tr).select();
+						$table.DataTable().row(tr).select();
 				})
 				//固定选择列后hover效果默认不能同步，需要自己实现
 				.hover(
 				function(event)
 				{
+					var $tableContainer = $($table.DataTable().table().container());
+					
 					var rowIndex = $(this).parent().index() + 1;
-					po.element(".dataTable").each(function()
+					po.element(".dataTable", $tableContainer).each(function()
 					{
 						$("tr:eq("+rowIndex+")", this).addClass("hover");
 					});
@@ -225,7 +228,9 @@ page_js_obj.jsp
 				function(event)
 				{
 					var rowIndex = $(this).parent().index() + 1;
-					po.element(".dataTable").each(function()
+					var $tableContainer = $($table.DataTable().table().container());
+					
+					po.element(".dataTable", $tableContainer).each(function()
 					{
 						$("tr:eq("+rowIndex+")", this).removeClass("hover");
 					});
@@ -236,7 +241,9 @@ page_js_obj.jsp
 				function(event)
 				{
 					var rowIndex = $(this).index() + 1;
-					po.element(".dataTable").each(function()
+					var $tableContainer = $($table.DataTable().table().container());
+					
+					po.element(".dataTable", $tableContainer).each(function()
 					{
 						$("tr:eq("+rowIndex+")", this).addClass("hover");
 					});
@@ -244,7 +251,9 @@ page_js_obj.jsp
 				function()
 				{
 					var rowIndex = $(this).index() + 1;
-					po.element(".dataTable").each(function()
+					var $tableContainer = $($table.DataTable().table().container());
+					
+					po.element(".dataTable", $tableContainer).each(function()
 					{
 						$("tr:eq("+rowIndex+")", this).removeClass("hover");
 					});
@@ -258,17 +267,19 @@ page_js_obj.jsp
 		return settings;
 	};
 	
-	po.initDataTable = function(tableSettings)
+	po.initDataTable = function(tableSettings, $table)
 	{
-		po.tableSettings = tableSettings;
-		po.table().dataTable(tableSettings);
+		if($table == undefined)
+			$table = po.table();
 		
-		$(".dataTables_scrollHead .column-check", po.table().DataTable().table().container()).click(function()
+		$table.dataTable(tableSettings);
+		
+		$(".dataTables_scrollHead .column-check", $table.DataTable().table().container()).click(function()
 		{
 			var $this = $(this);
 			var checked = $this.hasClass("all-checked");
 			
-			var rows = po.table().DataTable().rows();
+			var rows = $table.DataTable().rows();
 			
 			if(checked)
 			{
@@ -397,9 +408,9 @@ page_js_obj.jsp
 		po.table().DataTable().rows().remove();
 	};
 	
-	po.resizeGrid = function()
+	po.resizeDataTable = function($table)
 	{
-		var dataTable = po.table().DataTable();
+		var dataTable = $table.DataTable();
 		
 		var tbodyTable = $(dataTable.table().body()).parent();
 		var tbodyTableParent = tbodyTable.parent();
@@ -415,23 +426,36 @@ page_js_obj.jsp
 		dataTable.fixedColumns().relayout();
 	};
 	
-	//表格高度自适应
-	$(window).on('resize', function(event) 
+	po.bindResizeDataTable = function($table, timerVar)
 	{
-		//窗口或者父元素（比如所在对话框）调整大小
-		var resize = (event.target == window || po.table().closest(event.target).length > 0);
+		if($table == undefined)
+			$table = po.table();
 		
-		if(resize)
+		if(timerVar == undefined)
+			timerVar = "resizeTableTimer";
+		
+		var resizeHandler = function(event) 
 		{
-			clearTimeout(po.tableResizeTimer);
+			//窗口或者父元素（比如所在对话框）调整大小
+			var resize = (event.target == window || $table.closest(event.target).length > 0);
 			
-			po.tableResizeTimer = setTimeout(function()
+			if(resize)
 			{
-				po.resizeGrid();
-			},
-			250);
-		}
-	});
+				clearTimeout(po[timerVar]);
+				
+				po[timerVar] = setTimeout(function()
+				{
+					po.resizeDataTable($table, timerVar);
+				},
+				250);
+			}
+		};
+		
+		//表格大小自适应
+		$(window).bind('resize', resizeHandler);
+		
+		return resizeHandler;
+	};
 })
 (${pageId});
 </script>

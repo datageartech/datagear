@@ -154,6 +154,7 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 		po.initConditionPanel();
 		po.initPagination();
 		po.initModelDataTableAjax(po.url("queryData"), model);
+		po.bindResizeDataTable();
 		
 		<%if(!readonly){%>
 		po.initEditGrid(model);

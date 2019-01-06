@@ -356,6 +356,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		po.initConditionPanel();
 		po.initPagination();
 		po.initModelDataTableAjax(po.url("queryMultiplePropValueData"), propertyModel, po.mappedByWith);
+		po.bindResizeDataTable();
 		<%}%>
 		
 		<%if(!readonly){%>
