@@ -59,6 +59,17 @@ form .form-content .form-item .form-item-value textarea.error{
     background-image: url(jquery-ui-1.12.1/images/ui-icons_222222_256x240.png);
 }
 
+/*checkboxradio组件*/
+.ui-checkboxradio-label .ui-icon-background {
+    box-shadow: none;
+}
+
+/*图标背景色*/
+.ui-icon-background,
+.ui-state-active .ui-icon-background {
+	background-color: #1e1e1e;
+}
+
 /*jquery.layout*/
 .ui-layout-pane{
 	border: 1px solid #666666;

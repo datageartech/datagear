@@ -75,7 +75,7 @@ if(loginUser == null)
 			</div>
 			<div class="form-foot small-text" style="text-align:right;">
 				<label for="auto-login-checkbox"><fmt:message key='login.autoLogin' /></label>
-	   			<input type="checkbox" id="auto-login-checkbox" name="autoLogin" value="1" checked="checked" />
+	   			<input type="checkbox" id="auto-login-checkbox" name="autoLogin" value="1" />
 	   			<a class="link" href="<c:url value='/resetPassword' />"><fmt:message key='login.fogetPassword' /></a>
 			</div>
 		</form>
@@ -88,8 +88,7 @@ if(loginUser == null)
 {
 	//需要先渲染按钮，不然对话框尺寸不合适，出现滚动条
 	$.initButtons(po.element());
-	//元素设置了“checked='checked'”后icon显示有问题，这里先隐藏
-	$("input[type=checkbox]", po.element()).checkboxradio({icon:false});
+	$("input[name=autoLogin]", po.element()).checkboxradio({icon:true});
 	
 	var dialog=po.element(".page-form").dialog({
 		appendTo: po.element(),
