@@ -1465,7 +1465,15 @@
 		REF_VALUE_PATH_PREFIX : "$",
 		
 		//$.unref处理标识
-		UNREF_FLAG : "___UNREF_FLAG",
+		UNREF_FLAG : "___DATA_GEAR_ZY_UNREF_FLAG___",
+		
+		/**
+		 * 复制对象。
+		 */
+		deepClone : function(obj)
+		{
+			return this.unref(this.ref(obj));
+		},
 		
 		/**
 		 * 复制对象，并将对象内的重复引用替换为引用路径，格式为：{ $.REF_NAME : $.REF_VALUE... }。

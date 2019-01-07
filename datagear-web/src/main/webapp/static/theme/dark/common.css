@@ -112,14 +112,11 @@ table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
 	background-color: #303030;
 }
 table.dataTable.hover tbody tr.hover.selected,
-
 table.dataTable tbody > tr.selected,
 table.dataTable tbody > tr > .selected,
-
 table.dataTable.stripe tbody > tr.odd.selected,
 table.dataTable.stripe tbody > tr.odd > .selected, table.dataTable.display tbody > tr.odd.selected,
 table.dataTable.display tbody > tr.odd > .selected,
-
 table.dataTable.hover tbody > tr.selected:hover,
 table.dataTable.hover tbody > tr > .selected:hover, table.dataTable.display tbody > tr.selected:hover,
 table.dataTable.display tbody > tr > .selected:hover {
@@ -128,6 +125,14 @@ table.dataTable.display tbody > tr > .selected:hover {
 }
 table.dataTable tbody tr.selected .checkbox .ui-icon{
 	background-image: url(jquery-ui-1.12.1/images/ui-icons_ffffff_256x240.png);
+}
+table.dataTable tbody > tr > .selected,
+table.dataTable.stripe tbody > tr.odd > .selected,
+table.dataTable.display tbody > tr.odd > .selected,
+table.dataTable.hover tbody > tr > .selected:hover,
+table.dataTable.display tbody > tr > .selected:hover {
+	background-color: #FFD700;
+	color: #333333;
 }
 
 /*主页*/

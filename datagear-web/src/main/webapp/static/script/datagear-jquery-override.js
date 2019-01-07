@@ -24,7 +24,8 @@
 	rsubmittable = /^(?:input|select|textarea|keygen)/i;
 	
 	//XXX 新增内容
-	var ALL_PROPERTY_VALUE_NULL_PLACE_HOLDER = "___ALL_5_PROPERTY_0_VALUE_4_NULL_0_PLACE_1_HOLDER___";
+	var NOT_REF_FLAG = "___DATA_GEAR_ZY_NOT_REF_FLAG___";
+	var ALL_PROPERTY_VALUE_NULL_PLACE_HOLDER = "___DATA_GEAR_ZY_ALL_PROPERTY_VALUE_NULL_PLACE_HOLDER___";
 	//XXX 新增内容
 	
 	function buildParams( prefix, obj, traditional, add ) {
@@ -171,11 +172,11 @@
 		var value;
 		
 		//XXX 新增内容
-		var isNotRef = (input[inputLength - 1] == "___not_ref_flag___");
+		var isNotRef = (input[inputLength - 1] == NOT_REF_FLAG);
 		if(isNotRef)
 			inputLength = inputLength - 1;
 		//XXX 新增内容
-
+		
 		for ( ; inputIndex < inputLength; inputIndex++ ) {
 			for ( key in input[ inputIndex ] ) {
 				value = input[ inputIndex ][ key ];
@@ -194,7 +195,7 @@
 							///$.widget.extend( {}, target[ key ], value ) :
 							//XXX 原内容
 							//XXX 替换内容
-							$.widget.extend( {}, target[ key ], value, "___not_ref_flag___" ) :
+							$.widget.extend( {}, target[ key ], value, NOT_REF_FLAG ) :
 							//XXX 替换内容
 
 							// Don't extend strings, arrays, etc. with objects
@@ -202,7 +203,7 @@
 							///$.widget.extend( {}, value );
 							//XXX 原内容
 							//XXX 替换内容
-							$.widget.extend( {}, value, "___not_ref_flag___" );
+							$.widget.extend( {}, value, NOT_REF_FLAG );
 							//XXX 替换内容
 
 					// Copy everything else by reference

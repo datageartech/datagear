@@ -169,6 +169,8 @@ page_js_obj.jsp
 		return po.buildDataTableSettings(settings);
 	};
 	
+	po.checkColumnPropertyName = "___DATA_GEAR_ZY_CHECK_COLUMN_PROPERTY___";
+	
 	/**
 	 * 构建表格选项。
 	 * @param settings 必选，选项
@@ -177,7 +179,7 @@ page_js_obj.jsp
 	{
 		var newColumns = [
 				{
-					title : "<fmt:message key='select' />", data : "", defaultContent: "", width : "3em",
+					title : "<fmt:message key='select' />", data : po.checkColumnPropertyName, defaultContent: "", width : "3em",
 					orderable : false, render : po.renderCheckColumn, className : "column-check"
 				}
 			];
@@ -274,7 +276,7 @@ page_js_obj.jsp
 		
 		$table.dataTable(tableSettings);
 		
-		$(".dataTables_scrollHead .column-check", $table.DataTable().table().container()).click(function()
+		$(".column-check", $($table.DataTable().table().header())).click(function()
 		{
 			var $this = $(this);
 			var checked = $this.hasClass("all-checked");

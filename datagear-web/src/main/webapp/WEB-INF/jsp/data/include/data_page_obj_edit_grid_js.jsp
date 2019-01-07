@@ -231,28 +231,6 @@ WebUtils.setPageId(request, gridPageId);
 					if(po.editCellOnSelect)
 						po.editCell(dataTable, indexes);
 				}
-				/*
-				else if(type == "row")
-				{
-					var columnCount = $.getDataTableColumnCount(dataTable);
-					
-					//编辑表格状态下无行选中状态，行选中操作仅作为选中此行的所有单元格处理，这样使逻辑简单一致
-					//dataTable.rows(indexes).deselect();
-					
-					var cellIndexes = dataTable.cells(".selected").indexes();
-					
-					for(var i=0; i<indexes.length; i++)
-					{
-						var row = indexes[i];
-						
-						for(var j=1; j<columnCount; j++)
-							cellIndexes.push({"row" : row, "column" : j});
-					}
-					
-					$(dataTable.table().node()).focus();
-					dataTable.cells(cellIndexes).select();
-				}
-				*/
 			}
 		})
 		.on("deselect", function(event, dataTable, type, indexes)
@@ -263,43 +241,18 @@ WebUtils.setPageId(request, gridPageId);
 				{
 					po.closeEditCellPanel(dataTable, indexes);
 				}
-				/*
-				else if(type == "row")
-				{
-					var columnCount = $.getDataTableColumnCount(dataTable);
-					
-					var cellIndexes = [];
-					for(var i=0; i< indexes.length; i++)
-					{
-						var row = indexes[i];
-						
-						for(var j=1; j<columnCount; j++)
-							cellIndexes.push({"row" : row, "column" : j});
-					}
-					
-					$(dataTable.table().node()).focus();
-					dataTable.cells(cellIndexes).deselect();
-				}
-				*/
 			}
-		})/*
-		.on("preDraw", function(event, settings)
-		{
-			//禁止表格重绘，比如排序
-			if(po.isEnableEditGrid)
-				return false;
-			else
-				return true;
-		})*/;
+		});
 	};
 	
 	po.initEditGridDataTable = function($editTable, dataTable)
 	{
-		var editTableData = $.makeArray(dataTable.rows().data());
+		var editTableData = $.deepClone($.makeArray(dataTable.rows().data()));
 		
 		var columns = $.buildDataTablesColumns(po.editGridModel);
 		var settings = po.buildDataTableSettingsLocal(columns, editTableData);
 		
+		//禁用排序，不然添加行会自动排序，不友好
 		settings.ordering = false;
 		
 		var checkColumn = settings.columns[0];
@@ -392,8 +345,11 @@ WebUtils.setPageId(request, gridPageId);
 						var $row = $(row.node());
 						
 						$row.addClass("delete-row");
-						dataTable.cell(rowIndex, 0).data("delete-row").draw();
+						dataTable.cell(rowIndex, 0).data("delete-row");
 					});
+					
+					//统一绘制，效率更高
+					dataTable.cells(selectedRows, 0).draw();
 				}
 			});
 		}
@@ -436,9 +392,10 @@ WebUtils.setPageId(request, gridPageId);
 		$editTable.remove();
 		$(window).unbind("resize", po.editGridResizeHandler);
 		
-		var $table = po.table();
-		var $tableContainer = $($table.DataTable().table().container());
+		var dataTable = po.table().DataTable();
+		var $tableContainer = $(dataTable.table().container());
 		$tableContainer.show();
+		dataTable.columns.adjust();
 		
 		var $headOperation = po.element(".head .operation");
 		
@@ -718,7 +675,7 @@ WebUtils.setPageId(request, gridPageId);
 				var dataTable = po.editTable().DataTable();
 				
 				po.closeEditCellPanel(dataTable);
-				po.saveEditCell(dataTable, propertyIndexesMap, data);
+				po.storeEditCell(dataTable, propertyIndexesMap, data);
 				
 				return false;
 			},
@@ -796,7 +753,8 @@ WebUtils.setPageId(request, gridPageId);
 		$(dataTable.table().node()).focus();
 	};
 	
-	po.saveEditCell = function(dataTable, propertyIndexesMap, data)
+	//将数据存储至表格
+	po.storeEditCell = function(dataTable, propertyIndexesMap, data)
 	{
 		var model = po.editGridModel;
 		
@@ -886,10 +844,17 @@ WebUtils.setPageId(request, gridPageId);
 		po.editCellOnSelect = true;
 	};
 	
-	//恢复单元格的数据
-	po.restoreEditCell = function(dataTable, cells, confirmCallback, cancelCallback)
+	//恢复表格数据为初始值
+	po.restoreEditCell = function(dataTable, editCells, addRows, deleteRows, confirmCount, confirmCallback, cancelCallback)
 	{
-		var count = cells.nodes().length;
+		var count = 0;
+		
+		if(editCells)
+			count += editCells.indexes().length;
+		if(addRows)
+			count += addRows.indexes().length;
+		if(deleteRows)
+			count += deleteRows.indexes().length;
 		
 		var _confirmCallback = function()
 		{
@@ -900,7 +865,7 @@ WebUtils.setPageId(request, gridPageId);
 
 			var restoreCount = 0;
 			
-			cells.every(function()
+			editCells.every(function()
 			{
 				var index = this.index();
 				
@@ -912,7 +877,7 @@ WebUtils.setPageId(request, gridPageId);
 					var property = $.model.getProperty(model, propertyIndex);
 					var originalCellValue = $.model.propertyValue(originalRowData, property);
 					
-					this.data(originalCellValue).draw();
+					this.data((originalCellValue == undefined ? null : originalCellValue)).draw();
 				}
 				
 				po.markAsUnmodifiedCell($(this.node()));
@@ -924,17 +889,32 @@ WebUtils.setPageId(request, gridPageId);
 			if(restoreCount > 0)
 				dataTable.columns.adjust();
 			
+			//删除新建行
+			addRows.remove().draw();
+			
+			//恢复删除行
+			deleteRows.every(function(rowIndex)
+			{
+				var row = dataTable.row(rowIndex);
+				var $row = $(row.node());
+				
+				$row.removeClass("delete-row");
+				dataTable.cell(rowIndex, 0).data("");
+			});
+			//统一绘制，效率更高
+			dataTable.cells(deleteRows, 0).draw();
+			
 			if(confirmCallback)
-				confirmCallback.call(po, dataTable, cells, count);
+				confirmCallback.call(po, dataTable, editCells, addRows, deleteRows);
 		};
 		
 		var _cancelCallback = function()
 		{
 			if(cancelCallback)
-				cancelCallback.call(po, dataTable, cells, count);
+				cancelCallback.call(po, dataTable, editCells, addRows, deleteRows);
 		};
 		
-		if(count > 1)
+		if(count >= confirmCount)
 		{
 			po.confirm("<fmt:message key='data.confirmRestoreEditCell'><fmt:param>"+count+"</fmt:param></fmt:message>",
 			{
@@ -970,8 +950,10 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				var dataTable = po.editTable().DataTable();
 				var modifiedCells = dataTable.cells(".cell-modified");
+				var addRows = dataTable.rows(".add-row");
+				var deleteRows = dataTable.rows(".delete-row");
 				
-				po.restoreEditCell(dataTable, modifiedCells,
+				po.restoreEditCell(dataTable, modifiedCells, addRows, deleteRows, 1,
 				function()
 				{
 					po.disableEditGrid();
@@ -988,8 +970,10 @@ WebUtils.setPageId(request, gridPageId);
 		{
 			var dataTable = po.editTable().DataTable();
 			var selectedCells = dataTable.cells(".selected");
+			var addRows = dataTable.rows(".selected.add-row");
+			var deleteRows = dataTable.rows(".selected.delete-row");
 			
-			po.restoreEditCell(dataTable, selectedCells);
+			po.restoreEditCell(dataTable, selectedCells, addRows, deleteRows, 2);
 		});
 		
 		po.element(".button-restore-all", po.element(".edit-grid")).click(function()
@@ -997,8 +981,10 @@ WebUtils.setPageId(request, gridPageId);
 			var dataTable = po.editTable().DataTable();
 			
 			var modifiedCells = dataTable.cells(".cell-modified");
+			var addRows = dataTable.rows(".add-row");
+			var deleteRows = dataTable.rows(".delete-row");
 			
-			po.restoreEditCell(dataTable, modifiedCells);
+			po.restoreEditCell(dataTable, modifiedCells, addRows, deleteRows, 2);
 		});
 		
 		po.editGridFormPage.element()
