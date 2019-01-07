@@ -279,6 +279,8 @@ WebUtils.setPageId(request, gridPageId);
 		};
 		
 		po.initDataTable(settings, $editTable);
+		//不加这一行，表头“选择”点击不起作用
+		$editTable.DataTable().fixedColumns().relayout();
 		
 		po.editGridResizeHandler = po.bindResizeDataTable($editTable, "editTableResizeTimer");
 		po.bindEditDataTableEvents($editTable);
@@ -395,6 +397,7 @@ WebUtils.setPageId(request, gridPageId);
 		var dataTable = po.table().DataTable();
 		var $tableContainer = $(dataTable.table().container());
 		$tableContainer.show();
+		//不加此行，窗口有resize后列宽不对
 		dataTable.columns.adjust();
 		
 		var $headOperation = po.element(".head .operation");
@@ -758,7 +761,9 @@ WebUtils.setPageId(request, gridPageId);
 	{
 		var model = po.editGridModel;
 		
-		var saveCount = 0;
+		var storeCount = 0;
+		var changedCellIndexes = [];
+		var unchangedCellIndexes = [];
 		
 		for(var pi in propertyIndexesMap)
 		{
@@ -798,7 +803,7 @@ WebUtils.setPageId(request, gridPageId);
 					else if((originalCellValue == null)
 							&& (myPropertyValue == "" || myPropertyValue == null))
 						changed = false;
-					else					
+					else
 					{
 						var ovType = $.type(originalCellValue);
 						if((ovType == "object" || ovType == "array") && $.type(myPropertyValue) == ovType)
@@ -824,7 +829,7 @@ WebUtils.setPageId(request, gridPageId);
 						var originalLen = $.model.getMultiplePropertyValueLength(originalCellValue);
 						var newLen = $.model.getMultiplePropertyValueLength(myPropertyValue);
 						
-						$cell.html(originalLen +"+"+newLen);
+						$cell.html(originalLen+"+"+newLen);
 					}
 					
 					po.markAsModifiedCell($cell);
@@ -832,12 +837,12 @@ WebUtils.setPageId(request, gridPageId);
 				else
 					po.markAsUnmodifiedCell($(cell.node()));
 				
-				saveCount++;
+				storeCount++;
 			}
 		}
 		
 		//新值可能会影响单元格宽度，因此需要重设列宽
-		if(saveCount > 0)
+		if(storeCount > 0)
 			dataTable.columns.adjust();
 		
 		//保存后的下一次选中单元格操作触发编辑
