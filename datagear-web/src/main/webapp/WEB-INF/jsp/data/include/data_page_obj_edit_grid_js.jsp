@@ -761,8 +761,9 @@ WebUtils.setPageId(request, gridPageId);
 	{
 		var model = po.editGridModel;
 		
-		var storeCount = 0;
 		var changedCellIndexes = [];
+		var changedCellValues = [];
+		var changedCellHtmls = [];
 		var unchangedCellIndexes = [];
 		
 		for(var pi in propertyIndexesMap)
@@ -774,8 +775,6 @@ WebUtils.setPageId(request, gridPageId);
 			for(var i=0; i<pindexes.length; i++)
 			{
 				var index = pindexes[i];
-				
-				var cell = dataTable.cell(index);
 				
 				var originalRowData = po.originalRowData(dataTable, index.row);
 				var originalCellValue = $.model.propertyValue(originalRowData, property);
@@ -818,10 +817,10 @@ WebUtils.setPageId(request, gridPageId);
 				
 				if(changed)
 				{
-					var $cell = $(cell.node());
+					changedCellIndexes.push(index);
 					
 					//undefined值会使cell.data()语义不符
-					cell.data((propertyValue == undefined ? null : propertyValue)).draw();
+					changedCellValues.push((propertyValue == undefined ? null : propertyValue));
 					
 					//多元属性值单元格显示“[原始元素个数]+[新加元素个数]”
 					if($.model.isMultipleProperty(property) && !po.isClientDataRow(dataTable, index.row))
@@ -829,20 +828,42 @@ WebUtils.setPageId(request, gridPageId);
 						var originalLen = $.model.getMultiplePropertyValueLength(originalCellValue);
 						var newLen = $.model.getMultiplePropertyValueLength(myPropertyValue);
 						
-						$cell.html(originalLen+"+"+newLen);
+						changedCellHtmls.push(originalLen+"+"+newLen);
 					}
-					
-					po.markAsModifiedCell($cell);
+					else
+						changedCellHtmls.push(null);
 				}
 				else
-					po.markAsUnmodifiedCell($(cell.node()));
-				
-				storeCount++;
+				{
+					unchangedCellIndexes.push(index);
+				}
 			}
 		}
 		
+		for(var i=0; i<changedCellIndexes.length; i++)
+			dataTable.cell(changedCellIndexes[i]).data(changedCellValues[i]);
+		
+		//统一绘制，效率更高
+		dataTable.cells(changedCellIndexes).draw();
+		
+		for(var i=0; i<changedCellIndexes.length; i++)
+		{
+			var $cell = $(dataTable.cell(changedCellIndexes[i]).node());
+			
+			if(changedCellHtmls[i] != null)
+				$cell.html(changedCellHtmls[i]);
+			
+			po.markAsModifiedCell($cell);
+		}
+		
+		for(var i=0; i<unchangedCellIndexes.length; i++)
+		{
+			var $cell = $(dataTable.cell(unchangedCellIndexes[i]).node());
+			po.markAsUnmodifiedCell($cell);
+		}
+		
 		//新值可能会影响单元格宽度，因此需要重设列宽
-		if(storeCount > 0)
+		if(changedCellIndexes.length > 0)
 			dataTable.columns.adjust();
 		
 		//保存后的下一次选中单元格操作触发编辑
@@ -882,13 +903,16 @@ WebUtils.setPageId(request, gridPageId);
 					var property = $.model.getProperty(model, propertyIndex);
 					var originalCellValue = $.model.propertyValue(originalRowData, property);
 					
-					this.data((originalCellValue == undefined ? null : originalCellValue)).draw();
+					this.data((originalCellValue == undefined ? null : originalCellValue));
 				}
 				
 				po.markAsUnmodifiedCell($(this.node()));
 				
 				restoreCount++;
 			});
+			
+			//统一绘制，效率更高
+			editCells.draw();
 			
 			//新值可能会影响单元格宽度，因此需要重设列宽
 			if(restoreCount > 0)
@@ -943,7 +967,10 @@ WebUtils.setPageId(request, gridPageId);
 		
 		$.initButtons(po.element(".edit-grid-operation"));
 		
-		po.element("#${pageId}-editGridSwitch").checkboxradio({icon : true}).change(function(event)
+		var $editGridSwitch = po.element("#${pageId}-editGridSwitch");
+		//XXX 某些浏览器在刷新页面后会记住选中状态(比如火狐)，这回导致页面逻辑出错，所以这里需要重置
+		$editGridSwitch.prop("checked", false);
+		$editGridSwitch.checkboxradio({icon : true}).change(function(event)
 		{
 			var $thisCheckbox = $(this);
 			
