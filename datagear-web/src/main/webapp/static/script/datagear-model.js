@@ -862,8 +862,8 @@
 				if(data[property.name] != undefined)
 					continue;
 				
-				if(property.defaultValue != undefined)
-					data[property.name] = property.defaultValue;
+				//如果没有默认值，明确赋值为null，避免某些页面逻辑错误（比如DataTable的cell().data()会取值为""空字符串）
+				data[property.name] = (property.defaultValue != undefined ? property.defaultValue : null);
 			}
 			
 			return data;

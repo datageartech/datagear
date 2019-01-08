@@ -142,7 +142,7 @@ table.dataTable.stripe tbody > tr.odd > .selected,
 table.dataTable.display tbody > tr.odd > .selected,
 table.dataTable.hover tbody > tr > .selected:hover,
 table.dataTable.display tbody > tr > .selected:hover {
-	background-color: #FFD700;
+	background-color: #FFB90F;
 	color: #333333;
 }
 

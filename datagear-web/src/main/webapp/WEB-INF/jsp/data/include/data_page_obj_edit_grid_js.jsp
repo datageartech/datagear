@@ -445,8 +445,10 @@ WebUtils.setPageId(request, gridPageId);
 	
 	po.isClientDataRow = function(dataTable, row)
 	{
-		var $row = $(dataTable.row(row).node());
+		if(po.isClientPageData)
+			return true;
 		
+		var $row = $(dataTable.row(row).node());
 		return $row.hasClass("add-row");
 	};
 	
