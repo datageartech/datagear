@@ -661,49 +661,9 @@ public class DataController extends AbstractSchemaModelController
 				{
 					Object data = datas[i];
 					String[] propertyNames = propertyNamess[i];
+					PropertyPath[] propertyPaths = toPropertyPaths(propertyNames, null);
 
-					if (propertyNames == null || propertyNames.length == 0)
-					{
-						propertyValuess[i] = null;
-					}
-					// 一个属性，仅查询属性值
-					else if (propertyNames.length == 1)
-					{
-						PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model,
-								propertyNames[0], data);
-
-						List<Object> propertyValues = persistenceManager.getPropValueByParam(cn, model, data,
-								propertyPathInfo);
-
-						Object propertyValue = null;
-
-						if (propertyValues != null && propertyValues.size() > 0)
-							propertyValue = propertyValues.get(0);
-
-						propertyValuess[i] = new Object[] { propertyValue };
-					}
-					// 多个属性，则直接查询对象，再获取
-					else
-					{
-						List<Object> dataList = persistenceManager.getByParam(cn, model, data);
-
-						Object[] propertyValues = new Object[propertyNames.length];
-
-						if (dataList != null && dataList.size() > 0)
-						{
-							data = dataList.get(0);
-
-							for (int j = 0; j < propertyNames.length; j++)
-							{
-								PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model,
-										propertyNames[j], data);
-
-								propertyValues[j] = propertyPathInfo.getValueTail();
-							}
-						}
-
-						propertyValuess[i] = propertyValues;
-					}
+					propertyValuess[i] = getPropertyValues(cn, model, data, propertyPaths);
 				}
 
 				return propertyValuess;
@@ -711,6 +671,128 @@ public class DataController extends AbstractSchemaModelController
 		}.execute();
 
 		return propertyValuess;
+	}
+
+	@RequestMapping(value = "/{schemaId}/{tableName}/getPropertyPropertyValuess", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Object[][] getPropertyPropertyValuess(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPathParam)
+			throws Throwable
+	{
+		final Object dataParam = getParamMap(request, "data");
+		final PropertyPath propertyPath = PropertyPath.valueOf(propertyPathParam);
+		final Object propertyValuesParam = getParamMap(request, "propertyValues");
+		Object propertyPropertyNamesParam = getParamMap(request, "propertyPropertyNamess");
+
+		final String[][] propertyPropertyNamess = getClassDataConverter().convertToArray(propertyPropertyNamesParam,
+				String[].class);
+
+		Object[][] propertyPropertyValuess = new ReturnExecutor<Object[][]>(request, response, springModel, schemaId,
+				tableName, true)
+		{
+			@Override
+			protected Object[][] execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+			{
+				Connection cn = getConnection();
+
+				Object data = modelDataConverter.convert(dataParam, model);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				Model propertyModel = propertyPathInfo.getModelTail();
+				Object[] propertyValues = modelDataConverter.convertToArray(propertyValuesParam, propertyModel);
+
+				Object[][] propertyPropertyValuess = new Object[propertyValues.length][];
+
+				for (int i = 0; i < propertyValues.length; i++)
+				{
+					Object propertyValue = propertyValues[i];
+					propertyPathInfo.setValueTail(propertyValue);
+
+					String[] propertyPropertyNames = propertyPropertyNamess[i];
+					PropertyPath[] propertyPaths = toPropertyPaths(propertyPropertyNames, propertyPath);
+
+					propertyPropertyValuess[i] = getPropertyValues(cn, model, data, propertyPaths);
+				}
+
+				return propertyPropertyValuess;
+			}
+		}.execute();
+
+		return propertyPropertyValuess;
+	}
+
+	protected PropertyPath[] toPropertyPaths(String[] propertyPaths, PropertyPath parent)
+	{
+		if (propertyPaths == null)
+			return null;
+
+		PropertyPath[] propertyPathsArry = new PropertyPath[propertyPaths.length];
+
+		for (int i = 0; i < propertyPaths.length; i++)
+		{
+			PropertyPath propertyPath = PropertyPath.valueOf(propertyPaths[i]);
+
+			if (parent != null)
+				propertyPath = parent.concat(propertyPath);
+
+			propertyPathsArry[i] = propertyPath;
+		}
+
+		return propertyPathsArry;
+	}
+
+	/**
+	 * 获取给定对象的多个属性值。
+	 * 
+	 * @param cn
+	 * @param model
+	 * @param data
+	 * @param propertyPaths
+	 * @return
+	 * @throws Throwable
+	 */
+	protected Object[] getPropertyValues(Connection cn, Model model, Object data, PropertyPath[] propertyPaths)
+			throws Throwable
+	{
+		if (propertyPaths == null || propertyPaths.length == 0)
+			return null;
+
+		Object[] propertyValues = new Object[propertyPaths.length];
+
+		// 一个属性，仅查询属性值
+		if (propertyPaths.length == 1)
+		{
+			PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPaths[0], data);
+
+			List<Object> myPropertyValues = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
+
+			Object propertyValue = null;
+
+			if (myPropertyValues != null && myPropertyValues.size() > 0)
+				propertyValue = myPropertyValues.get(0);
+
+			propertyValues[0] = new Object[] { propertyValue };
+		}
+		// 多个属性，则直接查询对象，再获取
+		else
+		{
+			List<Object> dataList = persistenceManager.getByParam(cn, model, data);
+
+			if (dataList != null && dataList.size() > 0)
+			{
+				data = dataList.get(0);
+
+				for (int i = 0; i < propertyPaths.length; i++)
+				{
+					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPaths[i],
+							data);
+					propertyValues[i] = propertyPathInfo.getValueTail();
+				}
+			}
+		}
+
+		return propertyValues;
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/addSinglePropValue")

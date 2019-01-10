@@ -451,6 +451,22 @@ public class PropertyPath implements Serializable
 	}
 
 	/**
+	 * 将{@code propertyPath}连接至此{@linkplain PropertyPath}的末尾，并产生一个新的{@linkplain PropertyPath}。
+	 * 
+	 * @param propertyPath
+	 * @return
+	 */
+	public PropertyPath concat(PropertyPath propertyPath)
+	{
+		Segment[] segments = new Segment[this.segments.length + propertyPath.segments.length];
+
+		System.arraycopy(this.segments, 0, segments, 0, this.segments.length);
+		System.arraycopy(propertyPath.segments, 0, segments, this.segments.length, propertyPath.segments.length);
+
+		return new PropertyPath(segments);
+	}
+
+	/**
 	 * 将此{@linkplain PropertyPath}连接至{@code parent}末尾。
 	 * 
 	 * @param parent

@@ -249,7 +249,7 @@ WebUtils.setPageId(request, gridPageId);
 	{
 		var editTableData = $.deepClone($.makeArray(dataTable.rows().data()));
 		
-		var columns = $.buildDataTablesColumns(po.editGridModel);
+		var columns = $.buildDataTablesColumns(po.editGridModel, {"ignorePropertyNames" : po.editGridIgnorePropertyNames});
 		var settings = po.buildDataTableSettingsLocal(columns, editTableData);
 		
 		//禁用排序，不然添加行会自动排序，不友好
@@ -963,9 +963,10 @@ WebUtils.setPageId(request, gridPageId);
 			_confirmCallback();
 	};
 	
-	po.initEditGrid = function(model)
+	po.initEditGrid = function(model, ignorePropertyNames)
 	{
 		po.editGridModel = model;
+		po.editGridIgnorePropertyNames = ignorePropertyNames;
 		
 		$.initButtons(po.element(".edit-grid-operation"));
 		

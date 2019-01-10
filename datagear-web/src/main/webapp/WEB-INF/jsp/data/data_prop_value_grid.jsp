@@ -140,6 +140,21 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		po.pageParamCall("submit", gridPropertyValue);
 	};
 	
+	<%if(!readonly){%>
+	po.superBuildEditCellFetchPropertyValuessAjaxOptions = po.buildEditCellFetchPropertyValuessAjaxOptions;
+	po.buildEditCellFetchPropertyValuessAjaxOptions = function(dataTable, indexes, focus, propertyIndexesMap, data,
+			needFetchRows, needFetchRowDatas, needFetchPropertyNamess)
+	{
+		var options = po.superBuildEditCellFetchPropertyValuessAjaxOptions(dataTable, indexes, focus, propertyIndexesMap, data,
+				needFetchRows, needFetchRowDatas, needFetchPropertyNamess);
+		
+		options.url = po.url("getPropertyPropertyValuess");
+		options.data = { "data" : po.data, "propertyPath" : po.propertyPath, "propertyValues" : needFetchRowDatas, "propertyPropertyNamess" : needFetchPropertyNamess };
+		
+		return options;
+	}
+	<%}%>
+	
 	po.onModel(function(model)
 	{
 		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, po.propertyPath);
@@ -360,7 +375,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		<%}%>
 		
 		<%if(!readonly){%>
-		po.initEditGrid(propertyModel);
+		po.initEditGrid(propertyModel, po.mappedByWith);
 		<%}%>
 	});
 })
