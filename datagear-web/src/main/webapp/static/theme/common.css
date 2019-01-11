@@ -47,6 +47,9 @@ form .form-content .form-item .form-item-label label{
 	white-space: nowrap;
 	overflow: hidden;
 	vertical-align: middle;
+	display: inline-block;
+	width: 95%;
+	overflow: hidden;
 }
 form .form-content .form-item .form-item-value{
 	display: inline-block;
