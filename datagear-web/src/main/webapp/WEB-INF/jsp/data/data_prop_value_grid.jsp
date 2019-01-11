@@ -30,7 +30,7 @@ List<PropertyPathDisplayName> conditionSource = (List<PropertyPathDisplayName>)r
 PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 PropertyPathInfo propertyPathInfoObj = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
 boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyPathInfoObj);
-
+boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 %>
 <html style="height:100%;">
 <head>
@@ -73,7 +73,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		</table>
 	</div>
 	<div class="foot foot-edit-grid">
-		<%if(!readonly){%>
+		<%if(isAllowEditGrid){%>
 		<%@ include file="include/data_page_obj_edit_grid_html.jsp" %>
 		<%}%>
 		<div class="pagination-wrapper">
@@ -90,7 +90,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 <%@ include file="../include/page_obj_pagination.jsp" %>
 <%}%>
 <%@ include file="include/data_page_obj_grid.jsp" %>
-<%if(!readonly){%>
+<%if(isAllowEditGrid){%>
 <%@ include file="include/data_page_obj_edit_grid_js.jsp" %>
 <%}%>
 <script type="text/javascript">
@@ -140,7 +140,30 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		po.pageParamCall("submit", gridPropertyValue);
 	};
 	
-	<%if(!readonly){%>
+	<%if(isAllowEditGrid){%>
+	po.editGridFormPage.dpvgSuperBuildPropertyActionOptions = po.editGridFormPage.buildPropertyActionOptions;
+	po.editGridFormPage.buildPropertyActionOptions = function(property, propertyModel, extraRequestParams, extraPageParams)
+	{
+		var actionParam = po.editGridFormPage.dpvgSuperBuildPropertyActionOptions(property, propertyModel, extraRequestParams,
+				extraPageParams);
+		
+		if(po.editGridFormPage.dpvgData == null)
+		{
+			po.editGridFormPage.dpvgData = $.deepClone(po.data);
+			if(po.editGridFormPage.dpvgData == null)
+				po.editGridFormPage.dpvgData = {};
+		}
+		
+		$.model.propertyPathValue(po.editGridFormPage.dpvgData, po.propertyPath, [ actionParam["data"]["data"] ]);
+		var myPropertyPath = $.propertyPath.concatElementIndex(po.propertyPath, 0);
+		myPropertyPath = $.propertyPath.concatPropertyName(myPropertyPath, property.name);
+		
+		actionParam["data"]["data"] = po.editGridFormPage.dpvgData;
+		actionParam["data"]["propertyPath"] = myPropertyPath;
+		
+		return actionParam;
+	};
+	
 	po.superBuildEditCellFetchPropertyValuessAjaxOptions = po.buildEditCellFetchPropertyValuessAjaxOptions;
 	po.buildEditCellFetchPropertyValuessAjaxOptions = function(dataTable, indexes, focus, propertyIndexesMap, data,
 			needFetchRows, needFetchRowDatas, needFetchPropertyNamess)
@@ -374,7 +397,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		po.bindResizeDataTable();
 		<%}%>
 		
-		<%if(!readonly){%>
+		<%if(isAllowEditGrid){%>
 		po.initEditGrid(propertyModel, po.mappedByWith);
 		<%}%>
 	});
