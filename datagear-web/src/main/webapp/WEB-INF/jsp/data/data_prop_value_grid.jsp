@@ -176,6 +176,11 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 		
 		return options;
 	}
+	
+	po.afterSaveClientEditCell = function(editDataTable, editTableData)
+	{
+		po.storeGridPropertyValue();
+	}
 	<%}%>
 	
 	po.onModel(function(model)
@@ -394,8 +399,9 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 		po.initConditionPanel();
 		po.initPagination();
 		po.initModelDataTableAjax(po.url("queryMultiplePropValueData"), propertyModel, po.mappedByWith);
-		po.bindResizeDataTable();
 		<%}%>
+		
+		po.bindResizeDataTable();
 		
 		<%if(isAllowEditGrid){%>
 		po.initEditGrid(propertyModel, po.mappedByWith);
