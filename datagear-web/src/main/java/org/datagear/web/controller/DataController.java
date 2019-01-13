@@ -14,8 +14,10 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -561,6 +563,93 @@ public class DataController extends AbstractSchemaModelController
 		setFormPageAttributes(request, springModel);
 
 		return "/data/data_form";
+	}
+
+	@RequestMapping(value = "/{schemaId}/{tableName}/saveEditCell", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEditCell(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@PathVariable("tableName") String tableName) throws Throwable
+	{
+		final Object updateDatasParam = getParamMap(request, "updateDatas");
+		final Object updatePropertyNamessParam = getParamMap(request, "updatePropertyNamess");
+		final Object updatePropertyValuessParam = getParamMap(request, "updatePropertyValuess");
+		final Object addDatasParam = getParamMap(request, "addDatas");
+		final Object deleteDatasParam = getParamMap(request, "deleteDatas");
+
+		final String[][] updatePropertyNamess = (updateDatasParam == null ? null
+				: getClassDataConverter().convertToArray(updatePropertyNamessParam, String[].class));
+
+		final Object[][] updatePropertyValueParamss = (updateDatasParam == null ? null
+				: getClassDataConverter().convertToArray(updatePropertyValuessParam, Object[].class));
+
+		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+				response, springModel, schemaId, tableName, false)
+		{
+			@Override
+			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+			{
+				Object[] updateDatas = modelDataConverter.convertToArray(updateDatasParam, model);
+				PropertyPathInfo[][] updatePropertyPathInfoss = null;
+				Object[][] updatePropertyValuess = null;
+
+				if (updateDatas != null && updateDatas.length > 0)
+				{
+					updatePropertyPathInfoss = new PropertyPathInfo[updatePropertyNamess.length][];
+					updatePropertyValuess = new Object[updatePropertyNamess.length][];
+
+					for (int i = 0; i < updateDatas.length; i++)
+					{
+						String[] updatePropertyNames = updatePropertyNamess[i];
+						Object[] updatePropertyValueParams = updatePropertyValueParamss[i];
+
+						PropertyPathInfo[] updatePropertyPathInfos = new PropertyPathInfo[updatePropertyNames.length];
+						Object[] updatePropertyValues = new Object[updatePropertyNames.length];
+
+						for (int j = 0; j < updatePropertyNames.length; j++)
+						{
+							updatePropertyPathInfos[j] = ModelUtils.toPropertyPathInfoConcrete(model,
+									PropertyPath.valueOf(updatePropertyNames[j]), updateDatas[i]);
+
+							Property tailProperty = updatePropertyPathInfos[j].getPropertyTail();
+							Model tailModel = updatePropertyPathInfos[j].getModelTail();
+
+							if (tailProperty.isArray())
+								updatePropertyValues[j] = modelDataConverter
+										.convertToArray(updatePropertyValueParams[j], tailModel);
+							else if (tailProperty.isCollection())
+								updatePropertyValues[j] = modelDataConverter.convertToCollection(
+										updatePropertyValueParams[j], tailModel, tailProperty.getCollectionType());
+							else
+								updatePropertyValues[j] = modelDataConverter.convert(updatePropertyValueParams[j],
+										tailModel);
+						}
+
+						updatePropertyPathInfoss[i] = updatePropertyPathInfos;
+						updatePropertyValuess[i] = updatePropertyValues;
+					}
+				}
+
+				Object[] addDatas = modelDataConverter.convertToArray(addDatasParam, model);
+				Object[] deleteDatas = modelDataConverter.convertToArray(deleteDatasParam, model);
+
+				// TODO 保存
+
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(
+						request);
+
+				Map<String, Object> responseDatas = new HashMap<String, Object>();
+				responseDatas.put("updatePropertyValuess", updatePropertyValuess);
+				responseDatas.put("addDatas", addDatas);
+
+				responseEntity.getBody().setData(responseDatas);
+
+				return responseEntity;
+			}
+		}.execute();
+
+		return responseEntity;
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/selectPropValue")

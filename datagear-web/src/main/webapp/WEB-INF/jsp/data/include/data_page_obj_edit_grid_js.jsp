@@ -874,14 +874,7 @@ WebUtils.setPageId(request, gridPageId);
 	//恢复表格数据为初始值
 	po.restoreEditCell = function(editDataTable, editCells, addRows, deleteRows, confirmCount, confirmCallback, cancelCallback)
 	{
-		var count = 0;
-		
-		if(editCells)
-			count += editCells.indexes().length;
-		if(addRows)
-			count += addRows.indexes().length;
-		if(deleteRows)
-			count += deleteRows.indexes().length;
+		var count = po.getEditCellCount(editDataTable, editCells, addRows, deleteRows);
 		
 		var _confirmCallback = function()
 		{
@@ -970,14 +963,7 @@ WebUtils.setPageId(request, gridPageId);
 		var addRows = editDataTable.rows(".add-row");
 		var deleteRows = editDataTable.rows(".delete-row");
 		
-		var count = 0;
-		
-		if(modifiedCells)
-			count += modifiedCells.indexes().length;
-		if(addRows)
-			count += addRows.indexes().length;
-		if(deleteRows)
-			count += deleteRows.indexes().length;
+		var count = po.getEditCellCount(editDataTable, modifiedCells, addRows, deleteRows);
 		
 		if(count <= 0)
 			return;
@@ -1009,14 +995,14 @@ WebUtils.setPageId(request, gridPageId);
 				
 				dataTable.draw();
 				
-				po.clearEditGrid(editDataTable, modifiedCells, addRows, deleteRows);
+				po.clearEditGrid(editDataTable, modifiedCells, null, addRows, null, deleteRows);
 				
 				po.afterSaveClientEditCell(editDataTable, editTableDatas);
 			}
 			else
 			{
-				po.clearEditGrid(editDataTable, modifiedCells, addRows, deleteRows);
-				po.afterSaveServerSideEditCell(editDataTable, modifiedCells, addRows, deleteRows);
+				var ajaxOptions = po.buildAjaxSaveEditCellOptions(editDataTable, modifiedCells, addRows, deleteRows);
+				$.ajax(ajaxOptions);
 			}
 		};
 		
@@ -1037,17 +1023,127 @@ WebUtils.setPageId(request, gridPageId);
 			_confirmCallback();
 	};
 	
-	//将表格中的编辑单元格、添加行置为已保存，删除标记为删除的行
-	po.clearEditGrid = function(editDataTable, modifiedCells, addRows, deleteRows)
+	po.buildAjaxSaveEditCellOptions = function(editDataTable, modifiedCells, addRows, deleteRows)
 	{
-		modifiedCells.every(function(index)
+		var updateDatas = [];
+		var updatePropertyNamess = [];
+		var updatePropertyValuess = [];
+		var addDatas  = $.makeArray(addRows.data());
+		var deleteDatas = [];
+		
+		var modifiedRowIndexesMap = $.getDataTableRowIndexesMap(modifiedCells.indexes());
+		var editDataTableSettings = editDataTable.settings();
+		for(var rowIndex in modifiedRowIndexesMap)
 		{
+			var myModifiedCellIndexes = modifiedRowIndexesMap[rowIndex];
+			
+			if(!myModifiedCellIndexes || myModifiedCellIndexes.length < 1)
+				continue;
+			
+			var row = editDataTable.row(rowIndex);
+			var $row = $(row.node());
+			
+			if($row.hasClass("add-row") || $row.hasClass("delete-row"))
+				continue;
+			
+			updateDatas.push(po.originalRowData(editDataTable, rowIndex));
+			
+			var updatePropertyNames = [];
+			var updatePropertyValues = [];
+			
+			for(var i = 0; i<myModifiedCellIndexes.length; i++)
+			{
+				var myModifiedCellIndex = myModifiedCellIndexes[i];
+				
+				var updatePropertyIndex = $.getDataTableCellPropertyIndex(editDataTableSettings, myModifiedCellIndex);
+				var updatePropertyName = $.model.getProperty(po.editGridModel, updatePropertyIndex).name;
+				var updatePropertyValue = editDataTable.cell(myModifiedCellIndex).data();
+				
+				updatePropertyNames.push(updatePropertyName);
+				updatePropertyValues.push(updatePropertyValue);
+			}
+			
+			updatePropertyNamess.push(updatePropertyNames);
+			updatePropertyValuess.push(updatePropertyValues);
+		}
+		
+		deleteRows.every(function(rowIndex)
+		{
+			var deleteData = po.originalRowData(editDataTable, rowIndex);
+			deleteDatas.push(deleteData);
+		});
+		
+		var options =
+		{
+			"type" : "POST",
+			"url" : po.url("saveEditCell"),
+			"data" :
+			{
+				"updateDatas" : updateDatas,
+				"updatePropertyNamess" : updatePropertyNamess,
+				"updatePropertyValuess" : updatePropertyValuess,
+				"addDatas" : addDatas,
+				"deleteDatas" : deleteDatas
+			},
+			"success" : function(operationMessage)
+			{
+				var updatePropertyValuess = operationMessage.data.updatePropertyValuess;
+				var addDatas = operationMessage.data.addDatas;
+				//TODO 更新表格中的数据为服务端已持久保存的数据
+				po.clearEditGrid(editDataTable, modifiedCells, null, addRows, addDatas, deleteRows);
+				po.afterSaveServerSideEditCell(editDataTable, modifiedCells, addRows, deleteRows);
+			}
+		};
+		
+		return options;
+	};
+
+	po.getEditCellCount = function(editDataTable, modifiedCells, addRows, deleteRows)
+	{
+		var count = 0;
+		
+		if(modifiedCells)
+		{
+			var modifiedRowIndexesMap = $.getDataTableRowIndexesMap(modifiedCells.indexes());
+			
+			for(var rowIndex in modifiedRowIndexesMap)
+			{
+				var row = editDataTable.row(rowIndex);
+				var $row = $(row.node());
+				
+				if($row.hasClass("add-row") || $row.hasClass("delete-row"))
+					continue;
+				
+				count += modifiedRowIndexesMap[rowIndex].length;
+			}
+		}
+		
+		if(addRows)
+			count += addRows.indexes().length;
+		
+		if(deleteRows)
+			count += deleteRows.indexes().length;
+		
+		return count;
+	};
+	
+	//将表格中的编辑单元格、添加行置为已保存，删除标记为删除的行
+	po.clearEditGrid = function(editDataTable, modifiedCells, modifiedCellsValue, addRows, addRowsValue, deleteRows)
+	{
+		modifiedCells.every(function(rowIndex, columnIndex, tableLoopCounter, cellLoopCounter)
+		{
+			if(modifiedCellsValue)
+				this.data(modifiedCellsValue[cellLoopCounter]);
+			
 			var $cell = $(this.node());
 			po.markAsUnmodifiedCell($cell);
 		});
 		
-		addRows.every(function()
+		addRows.every(function(rowIndex, tableLoopCounter, rowLoopCounter)
 		{
+			if(addRowsValue)
+				this.data(addRowsValue[rowLoopCounter]);
+			
 			var $row = $(this.node());
 			$row.removeClass("add-row");
 		});
@@ -1055,6 +1151,10 @@ WebUtils.setPageId(request, gridPageId);
 		deleteRows.remove();
 		
 		editDataTable.draw();
+		
+		po.editGridOriginalRowDatas = {};
+		po.editGridFetchedPropertyValues = {};
+		po.editCellOnSelect = true;
 	};
 	
 	po.initEditGrid = function(model, ignorePropertyNames)
