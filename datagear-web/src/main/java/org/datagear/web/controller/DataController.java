@@ -901,7 +901,7 @@ public class DataController extends AbstractSchemaModelController
 			if (myPropertyValues != null && myPropertyValues.size() > 0)
 				propertyValue = myPropertyValues.get(0);
 
-			propertyValues[0] = new Object[] { propertyValue };
+			propertyValues[0] = propertyValue;
 		}
 		// 多个属性，则直接查询对象，再获取
 		else
