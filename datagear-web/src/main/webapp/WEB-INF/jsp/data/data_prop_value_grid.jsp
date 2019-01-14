@@ -172,15 +172,51 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 				needFetchRows, needFetchRowDatas, needFetchPropertyNamess);
 		
 		options.url = po.url("getPropertyPropertyValuess");
-		options.data = { "data" : po.data, "propertyPath" : po.propertyPath, "propertyValues" : needFetchRowDatas, "propertyPropertyNamess" : needFetchPropertyNamess };
+		options.data =
+		{
+			"data" : po.data,
+			"propertyPath" : po.propertyPath,
+			"propertyValues" : needFetchRowDatas,
+			"propertyPropertyNamess" : needFetchPropertyNamess
+		};
 		
 		return options;
-	}
+	};
 	
 	po.afterSaveClientEditCell = function(editDataTable, editTableData)
 	{
 		po.storeGridPropertyValue();
-	}
+	};
+	
+	po.dpvgSuperBuildAjaxSaveEditCellOptions = po.buildAjaxSaveEditCellOptions;
+	po.buildAjaxSaveEditCellOptions = function(editDataTable, modifiedCells, addRows, deleteRows)
+	{
+		var options = po.dpvgSuperBuildAjaxSaveEditCellOptions(editDataTable, modifiedCells, addRows, deleteRows);
+		
+		options.url = po.url("savePropertyValuess");
+		
+		options.data["data"] = po.data;
+		options.data["propertyPath"] = po.propertyPath;
+		
+		return options;
+	};
+	
+	po.ajaxSaveEditCellOptionsNames =
+	{
+		paramNames : 
+		{
+			"updateDatas" : "updatePropertyValues",
+			"updatePropertyNamess" : "updatePropertyPropertyNamess",
+			"updatePropertyValuess" : "updatePropertyPropertyValuess",
+			"addDatas" : "addPropertyValues",
+			"deleteDatas" : "deletePropertyValues"
+		},
+		responseNames :
+		{
+			"updatePropertyValuess" : "updatePropertyPropertyNamess",
+			"addDatas" : "addPropertyValues"
+		}
+	};
 	<%}%>
 	
 	po.onModel(function(model)

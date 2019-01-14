@@ -565,9 +565,9 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_form";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/saveEditCell", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/savess", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditCell(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> savess(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
@@ -642,6 +642,46 @@ public class DataController extends AbstractSchemaModelController
 				Map<String, Object> responseDatas = new HashMap<String, Object>();
 				responseDatas.put("updatePropertyValuess", updatePropertyValuess);
 				responseDatas.put("addDatas", addDatas);
+
+				responseEntity.getBody().setData(responseDatas);
+
+				return responseEntity;
+			}
+		}.execute();
+
+		return responseEntity;
+	}
+
+	@RequestMapping(value = "/{schemaId}/{tableName}/savePropertyValuess", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> savePropertyValuess(HttpServletRequest request,
+			HttpServletResponse response, org.springframework.ui.Model springModel,
+			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
+			@RequestParam("propertyPath") final String propertyPathParam) throws Throwable
+	{
+		final Object dataParam = getParamMap(request, "data");
+		final PropertyPath propertyPath = PropertyPath.valueOf(propertyPathParam);
+		final Object updatePropertyValuesParam = getParamMap(request, "updatePropertyValues");
+		final Object updatePropertyPropertyNamessParam = getParamMap(request, "updatePropertyPropertyNamess");
+		final Object updatePropertyPropertyValuessParam = getParamMap(request, "updatePropertyPropertyValuess");
+		final Object addPropertyValuesParam = getParamMap(request, "addPropertyValues");
+		final Object deletePropertyValuesParam = getParamMap(request, "deletePropertyValues");
+
+		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+				response, springModel, schemaId, tableName, false)
+		{
+			@Override
+			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+			{
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(
+						request);
+
+				// TODO
+
+				Map<String, Object> responseDatas = new HashMap<String, Object>();
+				responseDatas.put("updatePropertyPropertyValuess", null);
+				responseDatas.put("addPropertyValues", null);
 
 				responseEntity.getBody().setData(responseDatas);
 
