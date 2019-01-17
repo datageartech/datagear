@@ -571,16 +571,16 @@ public class DataController extends AbstractSchemaModelController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
-		final Object updateDatasParam = getParamMap(request, "updateDatas");
+		final Object updatesParam = getParamMap(request, "updates");
 		final Object updatePropertyNamessParam = getParamMap(request, "updatePropertyNamess");
 		final Object updatePropertyValuessParam = getParamMap(request, "updatePropertyValuess");
-		final Object addDatasParam = getParamMap(request, "addDatas");
-		final Object deleteDatasParam = getParamMap(request, "deleteDatas");
+		final Object addsParam = getParamMap(request, "adds");
+		final Object deletesParam = getParamMap(request, "deletes");
 
-		final String[][] updatePropertyNamess = (updateDatasParam == null ? null
+		final String[][] updatePropertyNamess = (updatesParam == null ? null
 				: getClassDataConverter().convertToArray(updatePropertyNamessParam, String[].class));
 
-		final Object[][] updatePropertyValueParamss = (updateDatasParam == null ? null
+		final Object[][] updatePropertyValueParamss = (updatesParam == null ? null
 				: getClassDataConverter().convertToArray(updatePropertyValuessParam, Object[].class));
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
@@ -590,98 +590,51 @@ public class DataController extends AbstractSchemaModelController
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
-				Object[] updateDatas = modelDataConverter.convertToArray(updateDatasParam, model);
+				Connection cn = getConnection();
+
+				Object[] updates = modelDataConverter.convertToArray(updatesParam, model);
 				PropertyPathInfo[][] updatePropertyPathInfoss = null;
 				Object[][] updatePropertyValuess = null;
 
-				if (updateDatas != null && updateDatas.length > 0)
+				if (updates != null && updates.length > 0)
 				{
 					updatePropertyPathInfoss = new PropertyPathInfo[updatePropertyNamess.length][];
 					updatePropertyValuess = new Object[updatePropertyNamess.length][];
 
-					for (int i = 0; i < updateDatas.length; i++)
+					for (int i = 0; i < updates.length; i++)
 					{
 						String[] updatePropertyNames = updatePropertyNamess[i];
 						Object[] updatePropertyValueParams = updatePropertyValueParamss[i];
 
 						PropertyPathInfo[] updatePropertyPathInfos = new PropertyPathInfo[updatePropertyNames.length];
-						Object[] updatePropertyValues = new Object[updatePropertyNames.length];
-
-						for (int j = 0; j < updatePropertyNames.length; j++)
-						{
-							updatePropertyPathInfos[j] = ModelUtils.toPropertyPathInfoConcrete(model,
-									PropertyPath.valueOf(updatePropertyNames[j]), updateDatas[i]);
-
-							Property tailProperty = updatePropertyPathInfos[j].getPropertyTail();
-							Model tailModel = updatePropertyPathInfos[j].getModelTail();
-
-							if (tailProperty.isArray())
-								updatePropertyValues[j] = modelDataConverter
-										.convertToArray(updatePropertyValueParams[j], tailModel);
-							else if (tailProperty.isCollection())
-								updatePropertyValues[j] = modelDataConverter.convertToCollection(
-										updatePropertyValueParams[j], tailModel, tailProperty.getCollectionType());
-							else
-								updatePropertyValues[j] = modelDataConverter.convert(updatePropertyValueParams[j],
-										tailModel);
-						}
+						Object[] updatePropertyValues = convertToPropertyValues(model, updates[i], updatePropertyNames,
+								updatePropertyValueParams, updatePropertyPathInfos);
 
 						updatePropertyPathInfoss[i] = updatePropertyPathInfos;
 						updatePropertyValuess[i] = updatePropertyValues;
 					}
 				}
 
-				Object[] addDatas = modelDataConverter.convertToArray(addDatasParam, model);
-				Object[] deleteDatas = modelDataConverter.convertToArray(deleteDatasParam, model);
+				Object[] adds = modelDataConverter.convertToArray(addsParam, model);
+				Object[] deletes = modelDataConverter.convertToArray(deletesParam, model);
 
-				// TODO 保存
+				// TODO 执行更新
+
+				if (adds != null)
+				{
+					for (int i = 0; i < adds.length; i++)
+						persistenceManager.insert(cn, model, adds[i]);
+				}
+
+				if (deletes != null)
+					persistenceManager.delete(cn, model, deletes);
 
 				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(
 						request);
 
 				Map<String, Object> responseDatas = new HashMap<String, Object>();
 				responseDatas.put("updatePropertyValuess", updatePropertyValuess);
-				responseDatas.put("addDatas", addDatas);
-
-				responseEntity.getBody().setData(responseDatas);
-
-				return responseEntity;
-			}
-		}.execute();
-
-		return responseEntity;
-	}
-
-	@RequestMapping(value = "/{schemaId}/{tableName}/savePropertyValuess", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> savePropertyValuess(HttpServletRequest request,
-			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPathParam) throws Throwable
-	{
-		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPath = PropertyPath.valueOf(propertyPathParam);
-		final Object updatePropertyValuesParam = getParamMap(request, "updatePropertyValues");
-		final Object updatePropertyPropertyNamessParam = getParamMap(request, "updatePropertyPropertyNamess");
-		final Object updatePropertyPropertyValuessParam = getParamMap(request, "updatePropertyPropertyValuess");
-		final Object addPropertyValuesParam = getParamMap(request, "addPropertyValues");
-		final Object deletePropertyValuesParam = getParamMap(request, "deletePropertyValues");
-
-		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
-				response, springModel, schemaId, tableName, false)
-		{
-			@Override
-			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(
-						request);
-
-				// TODO
-
-				Map<String, Object> responseDatas = new HashMap<String, Object>();
-				responseDatas.put("updatePropertyPropertyValuess", null);
-				responseDatas.put("addPropertyValues", null);
+				responseDatas.put("adds", adds);
 
 				responseEntity.getBody().setData(responseDatas);
 
@@ -792,7 +745,7 @@ public class DataController extends AbstractSchemaModelController
 					String[] propertyNames = propertyNamess[i];
 					PropertyPath[] propertyPaths = toPropertyPaths(propertyNames, null);
 
-					propertyValuess[i] = getPropertyValues(cn, model, data, propertyPaths);
+					propertyValuess[i] = loadPropertyValues(cn, model, data, propertyPaths);
 				}
 
 				return propertyValuess;
@@ -841,7 +794,7 @@ public class DataController extends AbstractSchemaModelController
 					String[] propertyPropertyNames = propertyPropertyNamess[i];
 					PropertyPath[] propertyPaths = toPropertyPaths(propertyPropertyNames, propertyPath);
 
-					propertyPropertyValuess[i] = getPropertyValues(cn, model, data, propertyPaths);
+					propertyPropertyValuess[i] = loadPropertyValues(cn, model, data, propertyPaths);
 				}
 
 				return propertyPropertyValuess;
@@ -849,79 +802,6 @@ public class DataController extends AbstractSchemaModelController
 		}.execute();
 
 		return propertyPropertyValuess;
-	}
-
-	protected PropertyPath[] toPropertyPaths(String[] propertyPaths, PropertyPath parent)
-	{
-		if (propertyPaths == null)
-			return null;
-
-		PropertyPath[] propertyPathsArry = new PropertyPath[propertyPaths.length];
-
-		for (int i = 0; i < propertyPaths.length; i++)
-		{
-			PropertyPath propertyPath = PropertyPath.valueOf(propertyPaths[i]);
-
-			if (parent != null)
-				propertyPath = parent.concat(propertyPath);
-
-			propertyPathsArry[i] = propertyPath;
-		}
-
-		return propertyPathsArry;
-	}
-
-	/**
-	 * 获取给定对象的多个属性值。
-	 * 
-	 * @param cn
-	 * @param model
-	 * @param data
-	 * @param propertyPaths
-	 * @return
-	 * @throws Throwable
-	 */
-	protected Object[] getPropertyValues(Connection cn, Model model, Object data, PropertyPath[] propertyPaths)
-			throws Throwable
-	{
-		if (propertyPaths == null || propertyPaths.length == 0)
-			return null;
-
-		Object[] propertyValues = new Object[propertyPaths.length];
-
-		// 一个属性，仅查询属性值
-		if (propertyPaths.length == 1)
-		{
-			PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPaths[0], data);
-
-			List<Object> myPropertyValues = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
-
-			Object propertyValue = null;
-
-			if (myPropertyValues != null && myPropertyValues.size() > 0)
-				propertyValue = myPropertyValues.get(0);
-
-			propertyValues[0] = propertyValue;
-		}
-		// 多个属性，则直接查询对象，再获取
-		else
-		{
-			List<Object> dataList = persistenceManager.getByParam(cn, model, data);
-
-			if (dataList != null && dataList.size() > 0)
-			{
-				data = dataList.get(0);
-
-				for (int i = 0; i < propertyPaths.length; i++)
-				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPaths[i],
-							data);
-					propertyValues[i] = propertyPathInfo.getValueTail();
-				}
-			}
-		}
-
-		return propertyValues;
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/addSinglePropValue")
@@ -1530,6 +1410,88 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
+	@RequestMapping(value = "/{schemaId}/{tableName}/saveMultiplePropertyValueElementss", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveMultiplePropertyValuess(HttpServletRequest request,
+			HttpServletResponse response, org.springframework.ui.Model springModel,
+			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
+			@RequestParam("propertyPath") final String propertyPathParam) throws Throwable
+	{
+		final Object dataParam = getParamMap(request, "data");
+		final PropertyPath propertyPath = PropertyPath.valueOf(propertyPathParam);
+
+		final Object updatesParam = getParamMap(request, "updates");
+		final Object updatePropertyNamessParam = getParamMap(request, "updatePropertyNamess");
+		final Object updatePropertyValuessParam = getParamMap(request, "updatePropertyValuess");
+		final Object addsParam = getParamMap(request, "adds");
+		final Object deletesParam = getParamMap(request, "deletes");
+
+		final String[][] updatePropertyNamess = (updatesParam == null ? null
+				: getClassDataConverter().convertToArray(updatePropertyNamessParam, String[].class));
+
+		final Object[][] updatePropertyValueParamss = (updatesParam == null ? null
+				: getClassDataConverter().convertToArray(updatePropertyValuessParam, Object[].class));
+
+		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+				response, springModel, schemaId, tableName, false)
+		{
+			@Override
+			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+			{
+				Connection cn = getConnection();
+
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(
+						request);
+
+				Object data = modelDataConverter.convert(dataParam, model);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				Model propertyModel = propertyPathInfo.getModelTail();
+
+				Object[] updates = modelDataConverter.convertToArray(updatesParam, propertyModel);
+				PropertyPathInfo[][] updatePropertyPathInfoss = null;
+				Object[][] updatePropertyValuess = null;
+
+				if (updates != null && updates.length > 0)
+				{
+					updatePropertyPathInfoss = new PropertyPathInfo[updatePropertyNamess.length][];
+					updatePropertyValuess = new Object[updatePropertyNamess.length][];
+
+					for (int i = 0; i < updates.length; i++)
+					{
+						String[] updatePropertyNames = updatePropertyNamess[i];
+						Object[] updatePropertyValueParams = updatePropertyValueParamss[i];
+
+						PropertyPathInfo[] updatePropertyPathInfos = new PropertyPathInfo[updatePropertyNames.length];
+						Object[] updatePropertyValues = convertToPropertyValues(propertyModel, updates[i],
+								updatePropertyNames, updatePropertyValueParams, updatePropertyPathInfos);
+
+						updatePropertyPathInfoss[i] = updatePropertyPathInfos;
+						updatePropertyValuess[i] = updatePropertyValues;
+					}
+				}
+
+				Object[] adds = modelDataConverter.convertToArray(addsParam, propertyModel);
+				Object[] deletes = modelDataConverter.convertToArray(deletesParam, propertyModel);
+
+				// TODO 执行更新
+
+				persistenceManager.insertMultiplePropValueElement(cn, model, data, propertyPathInfo, adds);
+				persistenceManager.deleteMultiplePropValueElement(cn, model, data, propertyPathInfo, deletes);
+
+				Map<String, Object> responseDatas = new HashMap<String, Object>();
+				responseDatas.put("updatePropertyValuess", updatePropertyValuess);
+				responseDatas.put("adds", adds);
+
+				responseEntity.getBody().setData(responseDatas);
+
+				return responseEntity;
+			}
+		}.execute();
+
+		return responseEntity;
+	}
+
 	@RequestMapping("/{schemaId}/{tableName}/viewMultiplePropValueElement")
 	public String viewMultiplePropValueElement(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
@@ -1650,7 +1612,7 @@ public class DataController extends AbstractSchemaModelController
 
 	@RequestMapping(value = "/file/upload", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public FileInfo upload(HttpServletRequest request, @RequestParam("file") MultipartFile multipartFile)
+	public FileInfo fileUpload(HttpServletRequest request, @RequestParam("file") MultipartFile multipartFile)
 			throws Throwable
 	{
 		File file = FileUtils.generateUniqueFile(this.blobFileManagerDirectory);
@@ -1663,7 +1625,7 @@ public class DataController extends AbstractSchemaModelController
 	}
 
 	@RequestMapping(value = "/file/download")
-	public void download(HttpServletRequest request, HttpServletResponse response,
+	public void fileDownload(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") String fileName) throws Throwable
 	{
 		response.setCharacterEncoding("utf-8");
@@ -1686,7 +1648,7 @@ public class DataController extends AbstractSchemaModelController
 
 	@RequestMapping(value = "/file/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public FileInfo delete(HttpServletRequest request, HttpServletResponse response,
+	public FileInfo fileDelete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") String fileName) throws Throwable
 	{
 		File file = IOUtil.getFile(this.blobFileManagerDirectory, fileName);
@@ -1696,6 +1658,106 @@ public class DataController extends AbstractSchemaModelController
 		IOUtil.deleteFile(file);
 
 		return fileInfo;
+	}
+
+	protected Object[] convertToPropertyValues(Model model, Object data, String[] propertyNames,
+			Object[] propertyValueSources, PropertyPathInfo[] propertyPathInfos)
+	{
+		Object[] propertyValues = new Object[propertyNames.length];
+
+		for (int i = 0; i < propertyNames.length; i++)
+		{
+			PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model,
+					PropertyPath.valueOf(propertyNames[i]), data);
+
+			Property tailProperty = propertyPathInfo.getPropertyTail();
+			Model tailModel = propertyPathInfo.getModelTail();
+
+			if (tailProperty.isArray())
+				propertyValues[i] = modelDataConverter.convertToArray(propertyValueSources[i], tailModel);
+			else if (tailProperty.isCollection())
+				propertyValues[i] = modelDataConverter.convertToCollection(propertyValueSources[i], tailModel,
+						tailProperty.getCollectionType());
+			else
+				propertyValues[i] = modelDataConverter.convert(propertyValueSources[i], tailModel);
+
+			propertyPathInfos[i] = propertyPathInfo;
+		}
+
+		return propertyValues;
+	}
+
+	/**
+	 * 获取给定对象的多个属性值。
+	 * 
+	 * @param cn
+	 * @param model
+	 * @param data
+	 * @param propertyPaths
+	 * @return
+	 * @throws Throwable
+	 */
+	protected Object[] loadPropertyValues(Connection cn, Model model, Object data, PropertyPath[] propertyPaths)
+			throws Throwable
+	{
+		if (propertyPaths == null || propertyPaths.length == 0)
+			return null;
+
+		Object[] propertyValues = new Object[propertyPaths.length];
+
+		// 一个属性，仅查询属性值
+		if (propertyPaths.length == 1)
+		{
+			PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPaths[0], data);
+
+			List<Object> myPropertyValues = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
+
+			Object propertyValue = null;
+
+			if (myPropertyValues != null && myPropertyValues.size() > 0)
+				propertyValue = myPropertyValues.get(0);
+
+			propertyValues[0] = propertyValue;
+		}
+		// 多个属性，则直接查询对象，再获取
+		else
+		{
+			List<Object> dataList = persistenceManager.getByParam(cn, model, data);
+
+			if (dataList != null && dataList.size() > 0)
+			{
+				data = dataList.get(0);
+
+				for (int i = 0; i < propertyPaths.length; i++)
+				{
+					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPaths[i],
+							data);
+					propertyValues[i] = propertyPathInfo.getValueTail();
+				}
+			}
+		}
+
+		return propertyValues;
+	}
+
+	protected PropertyPath[] toPropertyPaths(String[] propertyPaths, PropertyPath parent)
+	{
+		if (propertyPaths == null)
+			return null;
+
+		PropertyPath[] propertyPathsArry = new PropertyPath[propertyPaths.length];
+
+		for (int i = 0; i < propertyPaths.length; i++)
+		{
+			PropertyPath propertyPath = PropertyPath.valueOf(propertyPaths[i]);
+
+			if (parent != null)
+				propertyPath = parent.concat(propertyPath);
+
+			propertyPathsArry[i] = propertyPath;
+		}
+
+		return propertyPathsArry;
 	}
 
 	@Override

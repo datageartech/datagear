@@ -193,29 +193,12 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 	{
 		var options = po.dpvgSuperBuildAjaxSaveEditCellOptions(editDataTable, modifiedCells, addRows, deleteRows);
 		
-		options.url = po.url("savePropertyValuess");
+		options.url = po.url("saveMultiplePropertyValueElementss");
 		
 		options.data["data"] = po.data;
 		options.data["propertyPath"] = po.propertyPath;
 		
 		return options;
-	};
-	
-	po.ajaxSaveEditCellOptionsNames =
-	{
-		paramNames : 
-		{
-			"updateDatas" : "updatePropertyValues",
-			"updatePropertyNamess" : "updatePropertyPropertyNamess",
-			"updatePropertyValuess" : "updatePropertyPropertyValuess",
-			"addDatas" : "addPropertyValues",
-			"deleteDatas" : "deletePropertyValues"
-		},
-		responseNames :
-		{
-			"updatePropertyValuess" : "updatePropertyPropertyNamess",
-			"addDatas" : "addPropertyValues"
-		}
 	};
 	<%}%>
 	

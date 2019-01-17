@@ -355,6 +355,9 @@ WebUtils.setPageId(request, gridPageId);
 			});
 		}
 		
+		po.element(".head .search").addClass("ui-state-disabled");
+		po.element(".foot .pagination").addClass("ui-state-disabled");
+		
 		var dataTable = po.table().DataTable();
 		var $tableContainer = $(dataTable.table().container());
 		$tableContainer.hide();
@@ -366,9 +369,6 @@ WebUtils.setPageId(request, gridPageId);
 		po.editGridOriginalRowDatas = {};
 		po.editGridFetchedPropertyValues = {};
 		po.editCellOnSelect = true;
-		
-		po.element(".head .search").addClass("ui-state-disabled");
-		po.element(".foot .pagination").addClass("ui-state-disabled");
 		
 		var $editGridOperation = po.element(".edit-grid-operation");
 		//保存按钮居中
@@ -955,7 +955,11 @@ WebUtils.setPageId(request, gridPageId);
 	};
 	
 	po.afterSaveClientEditCell = function(editDataTable, savedDatas){};
-	po.afterSaveServerSideEditCell = function(editDataTable, modifiedCells, addRows, deleteRows){};
+	
+	po.afterSaveServerSideEditCell = function(editDataTable, modifiedCells, addRows, deleteRows)
+	{
+		po.table().DataTable().draw();
+	};
 	
 	po.saveEditCell = function(editDataTable, confirmCount)
 	{
@@ -1025,12 +1029,12 @@ WebUtils.setPageId(request, gridPageId);
 	
 	po.buildAjaxSaveEditCellOptions = function(editDataTable, modifiedCells, addRows, deleteRows)
 	{
-		var updateDatas = [];
+		var updates = [];
 		var updatePropertyNamess = [];
 		var updatePropertyValuess = [];
 		var updateCellIndexess = [];
-		var addDatas  = $.makeArray(addRows.data());
-		var deleteDatas = [];
+		var adds  = $.makeArray(addRows.data());
+		var deletes = [];
 		
 		var modifiedRowIndexesMap = $.getDataTableRowIndexesMap(modifiedCells.indexes());
 		var editDataTableSettings = editDataTable.settings();
@@ -1047,7 +1051,7 @@ WebUtils.setPageId(request, gridPageId);
 			if($row.hasClass("add-row") || $row.hasClass("delete-row"))
 				continue;
 			
-			updateDatas.push(po.originalRowData(editDataTable, rowIndex));
+			updates.push(po.originalRowData(editDataTable, rowIndex));
 			
 			var updatePropertyNames = [];
 			var updatePropertyValues = [];
@@ -1074,26 +1078,26 @@ WebUtils.setPageId(request, gridPageId);
 		deleteRows.every(function(rowIndex)
 		{
 			var deleteData = po.originalRowData(editDataTable, rowIndex);
-			deleteDatas.push(deleteData);
+			deletes.push(deleteData);
 		});
-		
-		var data = {};
-		data[po.ajaxSaveEditCellOptionsNames.paramNames.updateDatas] = updateDatas;
-		data[po.ajaxSaveEditCellOptionsNames.paramNames.updatePropertyNamess] = updatePropertyNamess;
-		data[po.ajaxSaveEditCellOptionsNames.paramNames.updatePropertyValuess] = updatePropertyValuess;
-		data[po.ajaxSaveEditCellOptionsNames.paramNames.addDatas] = addDatas;
-		data[po.ajaxSaveEditCellOptionsNames.paramNames.deleteDatas] = deleteDatas;
 		
 		var options =
 		{
 			"type" : "POST",
 			"url" : po.url("savess"),
-			"data" : data,
+			"data" :
+			{
+				"updates" : updates,
+				"updatePropertyNamess" : updatePropertyNamess,
+				"updatePropertyValuess" : updatePropertyValuess,
+				"adds" : adds,
+				"deletes" : deletes
+			},
 			"success" : function(operationMessage)
 			{
 				po.ajaxSaveEditCellSuccessHandler(editDataTable, modifiedCells, addRows, deleteRows,
-						updateDatas, updatePropertyNamess, updatePropertyValuess, updateCellIndexess,
-						addDatas, deleteDatas, operationMessage);
+						updates, updatePropertyNamess, updatePropertyValuess, updateCellIndexess,
+						adds, deletes, operationMessage);
 			}
 		};
 		
@@ -1103,29 +1107,11 @@ WebUtils.setPageId(request, gridPageId);
 	po.ajaxSaveEditCellSuccessHandler = function(editDataTable, modifiedCells, addRows, deleteRows,
 			updateDatas, updatePropertyNamess, updatePropertyValuess, updateCellIndexess, addDatas, deleteDatas, operationMessage)
 	{
-		updatePropertyValuess = operationMessage.data[po.ajaxSaveEditCellOptionsNames.responseNames.updatePropertyValuess];
-		addDatas = operationMessage.data[po.ajaxSaveEditCellOptionsNames.responseNames.addDatas];
+		updatePropertyValuess = operationMessage.data["updatePropertyValuess"];
+		addDatas = operationMessage.data["adds"];
 		
-		//TODO 更新表格中的数据为服务端已持久保存的数据
 		po.clearEditGrid(editDataTable, modifiedCells, addRows, deleteRows, updateCellIndexess, updatePropertyValuess, addDatas);
 		po.afterSaveServerSideEditCell(editDataTable, modifiedCells, addRows, deleteRows);
-	};
-	
-	po.ajaxSaveEditCellOptionsNames =
-	{
-		paramNames : 
-		{
-			"updateDatas" : "updateDatas",
-			"updatePropertyNamess" : "updatePropertyNamess",
-			"updatePropertyValuess" : "updatePropertyValuess",
-			"addDatas" : "addDatas",
-			"deleteDatas" : "deleteDatas"
-		},
-		responseNames :
-		{
-			"updatePropertyValuess" : "updatePropertyValuess",
-			"addDatas" : "addDatas"
-		}
 	};
 	
 	po.getEditCellCount = function(editDataTable, modifiedCells, addRows, deleteRows)
