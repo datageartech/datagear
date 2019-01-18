@@ -59,7 +59,7 @@ WebUtils.setPageId(request, editGridFormPageId);
 		if(singleRow != null && !po.gridPage.isClientDataRow(po.currentDataTable, singleRow))
 		{
 			var data = po.gridPage.originalRowData(po.currentDataTable, singleRow);
-			data = $.unref($.ref(data));
+			data = $.deepClone(data);
 			actionParam["data"]["data"] = data;
 			
 			var myColumn = $.getDataTableColumn(po.currentDataTable.settings(), property.name);
@@ -109,10 +109,10 @@ WebUtils.setPageId(request, gridPageId);
 	po.editGridModel = undefined;
 	
 	po.isEnableEditGrid = false;
-	//存储行初始值
-	po.editGridOriginalRowDatas = {};
+	//存储行初始数据的映射表，在单元格修改前存储，用于支持恢复等操作
+	po.editGridOriginalRowDataMap = {};
 	//存储行的指定属性值是否已从服务端加载
-	po.editGridFetchedPropertyValues = {};
+	po.editGridFetchedPropertyValueMap = {};
 	//是否在单元格选中时编辑单元格，键盘快速导航时通常不需要打开编辑单元格面板
 	po.editCellOnSelect = true;
 	
@@ -120,25 +120,13 @@ WebUtils.setPageId(request, gridPageId);
 	 * 获取行初始数据对象。
 	 * @param editDataTable 必选，DataTable的API对象
 	 * @param row 必选，行索引
-	 * @param forceStore 可选，是否强制缓存，默认为true
 	 */
-	po.originalRowData = function(editDataTable, row, forceStore)
+	po.originalRowData = function(editDataTable, row)
 	{
-		if(forceStore == undefined)
-			forceStore = true;
+		var rowData = po.editGridOriginalRowDataMap[row];
 		
-		if(!po.editGridOriginalRowDatas)
-			po.editGridOriginalRowDatas = {};
-		
-		var rowData = po.editGridOriginalRowDatas[row];
-		
-		if(!rowData && forceStore)
-		{
+		if(!rowData)
 			rowData = editDataTable.row(row).data();
-			//防止单元格编辑导致内部引用混乱
-			rowData = $.unref($.ref(rowData));
-			po.editGridOriginalRowDatas[row] = rowData;
-		}
 		
 		return rowData;
 	};
@@ -148,7 +136,7 @@ WebUtils.setPageId(request, gridPageId);
 	{
 		if(fetched == undefined)
 		{
-			var rowInfo = po.editGridFetchedPropertyValues[row];
+			var rowInfo = po.editGridFetchedPropertyValueMap[row];
 			if(!rowInfo)
 				return false;
 			
@@ -156,7 +144,7 @@ WebUtils.setPageId(request, gridPageId);
 		}
 		else
 		{
-			var rowInfo = (po.editGridFetchedPropertyValues[row] || (po.editGridFetchedPropertyValues[row] = {}));
+			var rowInfo = (po.editGridFetchedPropertyValueMap[row] || (po.editGridFetchedPropertyValueMap[row] = {}));
 			rowInfo[propertyName] = fetched;
 		}
 	};
@@ -247,10 +235,12 @@ WebUtils.setPageId(request, gridPageId);
 	
 	po.initEditGridDataTable = function($editTable, dataTable)
 	{
-		var editTableData = $.deepClone($.makeArray(dataTable.rows().data()));
+		var editTableDatas = $.makeArray(dataTable.rows().data());
+		for(var i=0; i<editTableDatas.length; i++)
+			editTableDatas[po.checkColumnPropertyName] = undefined;
 		
 		var columns = $.buildDataTablesColumns(po.editGridModel, {"ignorePropertyNames" : po.editGridIgnorePropertyNames});
-		var settings = po.buildDataTableSettingsLocal(columns, editTableData);
+		var settings = po.buildDataTableSettingsLocal(columns, editTableDatas);
 		
 		//禁用排序，不然添加行会自动排序，不友好
 		settings.ordering = false;
@@ -366,8 +356,8 @@ WebUtils.setPageId(request, gridPageId);
 		var $editTable = po.editTable();
 		po.initEditGridDataTable($editTable, dataTable);
 		
-		po.editGridOriginalRowDatas = {};
-		po.editGridFetchedPropertyValues = {};
+		po.editGridOriginalRowDataMap = {};
+		po.editGridFetchedPropertyValueMap = {};
 		po.editCellOnSelect = true;
 		
 		var $editGridOperation = po.element(".edit-grid-operation");
@@ -820,8 +810,7 @@ WebUtils.setPageId(request, gridPageId);
 				{
 					changedCellIndexes.push(index);
 					
-					//undefined值会使cell.data()语义不符
-					changedCellValues.push((propertyValue == undefined ? null : propertyValue));
+					changedCellValues.push(propertyValue);
 					
 					//多元属性值单元格显示“[原始元素个数]+[新加元素个数]”
 					if($.model.isMultipleProperty(property) && !po.isClientDataRow(editDataTable, index.row))
@@ -842,7 +831,7 @@ WebUtils.setPageId(request, gridPageId);
 		}
 		
 		for(var i=0; i<changedCellIndexes.length; i++)
-			editDataTable.cell(changedCellIndexes[i]).data(changedCellValues[i]);
+			po.updateEditDataTableCellValue(editDataTable, changedCellIndexes[i], changedCellValues[i]);
 		
 		//统一绘制，效率更高
 		editDataTable.cells(changedCellIndexes).draw();
@@ -871,6 +860,24 @@ WebUtils.setPageId(request, gridPageId);
 		po.editCellOnSelect = true;
 	};
 	
+	//更新编辑表格单元格数据
+	po.updateEditDataTableCellValue = function(editDataTable, cellIndex, cellValue)
+	{
+		var rowIndex = cellIndex.row;
+		
+		if(!po.editGridOriginalRowDataMap[rowIndex])
+		{
+			var originalRowData = editDataTable.row(rowIndex).data();
+			po.editGridOriginalRowDataMap[rowIndex] = originalRowData;
+			
+			var clonedRowData = $.deepClone(originalRowData);
+			editDataTable.row(rowIndex).data(clonedRowData);
+		}
+		
+		//undefined值会使cell.data()语义不符
+		editDataTable.cell(cellIndex).data(cellValue == undefined ? null : cellValue);
+	};
+	
 	//恢复表格数据为初始值
 	po.restoreEditCell = function(editDataTable, editCells, addRows, deleteRows, confirmCount, confirmCallback, cancelCallback)
 	{
@@ -882,14 +889,14 @@ WebUtils.setPageId(request, gridPageId);
 			
 			var model = po.editGridModel;
 			var settings = editDataTable.settings();
-
-			var restoreCount = 0;
+			
+			var editCellCount = 0;
 			
 			editCells.every(function()
 			{
 				var index = this.index();
 				
-				var originalRowData = po.originalRowData(editDataTable, index.row, false);
+				var originalRowData = po.originalRowData(editDataTable, index.row);
 				
 				if(originalRowData)
 				{
@@ -902,29 +909,36 @@ WebUtils.setPageId(request, gridPageId);
 				
 				po.markAsUnmodifiedCell($(this.node()));
 				
-				restoreCount++;
+				editCellCount++;
 			});
-			
-			//统一绘制，效率更高
-			editCells.draw();
 			
 			//新值可能会影响单元格宽度，因此需要重设列宽
-			if(restoreCount > 0)
+			if(editCellCount > 0)
+			{
+				//统一绘制，效率更高
+				editCells.draw();
 				editDataTable.columns.adjust();
+			}
 			
 			//删除新建行
-			addRows.remove().draw();
+			var addRowsCount = addRows.indexes().length;
+			if(addRowsCount > 0)
+				addRows.remove().draw();
 			
 			//恢复删除行
-			deleteRows.every(function(rowIndex)
+			var deleteRowsCount = deleteRows.indexes().length;
+			if(deleteRowsCount > 0)
 			{
-				var $row = $(this.node());
-				
-				$row.removeClass("delete-row");
-				editDataTable.cell(rowIndex, 0).data("");
-			});
-			//统一绘制，效率更高
-			editDataTable.cells(deleteRows, 0).draw();
+				deleteRows.every(function(rowIndex)
+				{
+					var $row = $(this.node());
+					
+					$row.removeClass("delete-row");
+					editDataTable.cell(rowIndex, 0).data("");
+				});
+				//统一绘制，效率更高
+				editDataTable.cells(deleteRows, 0).draw();
+			}
 			
 			if(confirmCallback)
 				confirmCallback.call(po, editDataTable, editCells, addRows, deleteRows);
@@ -1181,8 +1195,8 @@ WebUtils.setPageId(request, gridPageId);
 		
 		editDataTable.draw();
 		
-		po.editGridOriginalRowDatas = {};
-		po.editGridFetchedPropertyValues = {};
+		po.editGridOriginalRowDataMap = {};
+		po.editGridFetchedPropertyValueMap = {};
 		po.editCellOnSelect = true;
 	};
 	

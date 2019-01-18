@@ -57,7 +57,7 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 	po.readonly = <%=readonly%>;
 	po.submitAction = "<%=submitAction%>";
 	po.originalData = $.unref(<%writeJson(application, out, data);%>);
-	po.data = $.unref($.ref(po.originalData));
+	po.data = $.deepClone(po.originalData);
 	po.isClientPageData = <%=isClientPageData%>;
 	po.batchSet = <%=batchSet%>;
 	
@@ -126,7 +126,7 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 								//如果有初始数据，则更新为已保存至后台的数据
 								//注意：不能直接赋值po.data，因为是同一个引用，有可能会被修改，而po.originalData不应该被修改
 								if(po.originalData)
-									po.originalData = $.unref($.ref(operationMessage.data));
+									po.originalData = $.deepClone(operationMessage.data);
 								
 								close = (po.pageParamCall("afterSave", operationMessage.data) != false);
 								
