@@ -132,6 +132,9 @@ public class ClassDataConverter extends AbstractDataConverter
 		if (map == null)
 			return null;
 
+		if (type.isInstance(map))
+			return (T) map;
+
 		if (isRefMap(map))
 		{
 			String ref = getRefValue(map);

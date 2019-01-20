@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.util.List;
 
 import org.datagear.model.Model;
+import org.datagear.model.Property;
 import org.datagear.model.support.PropertyPathInfo;
 import org.datagear.persistence.support.ExpressionEvaluationContext;
 
@@ -77,6 +78,20 @@ public interface PersistenceManager
 	 * @throws PersistenceException
 	 */
 	int update(Connection cn, Model model, Object originalObj, Object updateObj, boolean updateMultipleProperty)
+			throws PersistenceException;
+
+	/**
+	 * 更新数据对象。
+	 * 
+	 * @param cn
+	 * @param model
+	 * @param updateProperties
+	 * @param originalObj
+	 * @param updateObj
+	 * @return
+	 * @throws PersistenceException
+	 */
+	int update(Connection cn, Model model, Property[] updateProperties, Object originalObj, Object updateObj)
 			throws PersistenceException;
 
 	/**
@@ -163,6 +178,21 @@ public interface PersistenceManager
 	 */
 	int updateMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
 			Object propertyValueElement) throws PersistenceException;
+
+	/**
+	 * 更新多元属性值元素。
+	 * 
+	 * @param cn
+	 * @param model
+	 * @param obj
+	 * @param propertyPathInfo
+	 * @param updatePropertyProperties
+	 * @param propertyValueElement
+	 * @return
+	 * @throws PersistenceException
+	 */
+	int updateMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
+			Property[] updatePropertyProperties, Object propertyValueElement) throws PersistenceException;
 
 	/**
 	 * 删除对象。

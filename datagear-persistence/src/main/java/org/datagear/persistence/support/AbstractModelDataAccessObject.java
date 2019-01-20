@@ -731,7 +731,18 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 */
 	protected RelationMapper[] getRelationMappers(Model model)
 	{
-		Property[] properties = model.getProperties();
+		return getRelationMappers(model, model.getProperties());
+	}
+
+	/**
+	 * 获取{@linkplain RelationMapper}。
+	 * 
+	 * @param model
+	 * @param properties
+	 * @return
+	 */
+	protected RelationMapper[] getRelationMappers(Model model, Property[] properties)
+	{
 		RelationMapper[] relationMappers = new RelationMapper[properties.length];
 
 		for (int i = 0; i < properties.length; i++)
@@ -1443,10 +1454,13 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 		{
 			List<IndexValue<Object>> indexValues = new ArrayList<IndexValue<Object>>();
 
-			for (int j = 0; j < objs.length; j++)
+			if (objs != null)
 			{
-				if (MU.isModelData(models[i], objs[j]))
-					indexValues.add(new IndexValue<Object>(j, objs[j]));
+				for (int j = 0; j < objs.length; j++)
+				{
+					if (MU.isModelData(models[i], objs[j]))
+						indexValues.add(new IndexValue<Object>(j, objs[j]));
+				}
 			}
 
 			indexValuess[i] = indexValues;

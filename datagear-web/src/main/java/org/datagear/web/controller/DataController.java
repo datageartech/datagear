@@ -29,6 +29,7 @@ import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
+import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyPath;
 import org.datagear.model.support.PropertyPathInfo;
 import org.datagear.persistence.ColumnPropertyPath;
@@ -565,6 +566,17 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_form";
 	}
 
+	/**
+	 * 混合保存，包括添加、修改、删除。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param springModel
+	 * @param schemaId
+	 * @param tableName
+	 * @return
+	 * @throws Throwable
+	 */
 	@RequestMapping(value = "/{schemaId}/{tableName}/savess", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> savess(HttpServletRequest request, HttpServletResponse response,
@@ -593,12 +605,13 @@ public class DataController extends AbstractSchemaModelController
 				Connection cn = getConnection();
 
 				Object[] updates = modelDataConverter.convertToArray(updatesParam, model);
-				PropertyPathInfo[][] updatePropertyPathInfoss = null;
 				Object[][] updatePropertyValuess = null;
+
+				Object[] adds = modelDataConverter.convertToArray(addsParam, model);
+				Object[] deletes = modelDataConverter.convertToArray(deletesParam, model);
 
 				if (updates != null && updates.length > 0)
 				{
-					updatePropertyPathInfoss = new PropertyPathInfo[updatePropertyNamess.length][];
 					updatePropertyValuess = new Object[updatePropertyNamess.length][];
 
 					for (int i = 0; i < updates.length; i++)
@@ -606,19 +619,18 @@ public class DataController extends AbstractSchemaModelController
 						String[] updatePropertyNames = updatePropertyNamess[i];
 						Object[] updatePropertyValueParams = updatePropertyValueParamss[i];
 
-						PropertyPathInfo[] updatePropertyPathInfos = new PropertyPathInfo[updatePropertyNames.length];
+						Property[] updateProperties = new Property[updatePropertyNames.length];
 						Object[] updatePropertyValues = convertToPropertyValues(model, updates[i], updatePropertyNames,
-								updatePropertyValueParams, updatePropertyPathInfos);
+								updatePropertyValueParams, updateProperties);
 
-						updatePropertyPathInfoss[i] = updatePropertyPathInfos;
-						updatePropertyValuess[i] = updatePropertyValues;
+						Object updateObj = MU.clone(model, updates[i]);
+						MU.setPropertyValues(model, updateObj, updateProperties, updatePropertyValues);
+
+						persistenceManager.update(cn, model, updateProperties, updates[i], updateObj);
+
+						updatePropertyValuess[i] = MU.getPropertyValues(model, updateObj, updateProperties);
 					}
 				}
-
-				Object[] adds = modelDataConverter.convertToArray(addsParam, model);
-				Object[] deletes = modelDataConverter.convertToArray(deletesParam, model);
-
-				// TODO 执行更新
 
 				if (adds != null)
 				{
@@ -1410,6 +1422,18 @@ public class DataController extends AbstractSchemaModelController
 		return responseEntity;
 	}
 
+	/**
+	 * 混合保存多元属性值，包括添加、修改、删除。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param springModel
+	 * @param schemaId
+	 * @param tableName
+	 * @param propertyPathParam
+	 * @return
+	 * @throws Throwable
+	 */
 	@RequestMapping(value = "/{schemaId}/{tableName}/saveMultiplePropertyValueElementss", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveMultiplePropertyValuess(HttpServletRequest request,
@@ -1446,38 +1470,58 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-				Model propertyModel = propertyPathInfo.getModelTail();
+				Property propertyTail = propertyPathInfo.getPropertyTail();
+				Model modelTail = propertyPathInfo.getModelTail();
 
-				Object[] updates = modelDataConverter.convertToArray(updatesParam, propertyModel);
-				PropertyPathInfo[][] updatePropertyPathInfoss = null;
+				Object updates = null;
+
+				if (propertyTail.isArray())
+					updates = modelDataConverter.convertToArray(updatesParam, modelTail);
+				else if (propertyTail.isCollection())
+					updates = modelDataConverter.convertToCollection(updatesParam, modelTail,
+							propertyTail.getCollectionType());
+
+				propertyPathInfo.setValueTail(updates);
+
 				Object[][] updatePropertyValuess = null;
 
-				if (updates != null && updates.length > 0)
-				{
-					updatePropertyPathInfoss = new PropertyPathInfo[updatePropertyNamess.length][];
-					updatePropertyValuess = new Object[updatePropertyNamess.length][];
+				Object[] adds = modelDataConverter.convertToArray(addsParam, modelTail);
+				Object[] deletes = modelDataConverter.convertToArray(deletesParam, modelTail);
 
-					for (int i = 0; i < updates.length; i++)
+				if (updates != null)
+				{
+					updatePropertyValuess = new Object[updatePropertyValueParamss.length][];
+
+					for (int i = 0; i < updatePropertyValueParamss.length; i++)
 					{
+						PropertyPath myPropertyPath = PropertyPath
+								.valueOf(PropertyPath.concatElementIndex(propertyPathParam, i));
+						PropertyPathInfo myPropertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model,
+								myPropertyPath, data);
+
 						String[] updatePropertyNames = updatePropertyNamess[i];
 						Object[] updatePropertyValueParams = updatePropertyValueParamss[i];
 
-						PropertyPathInfo[] updatePropertyPathInfos = new PropertyPathInfo[updatePropertyNames.length];
-						Object[] updatePropertyValues = convertToPropertyValues(propertyModel, updates[i],
-								updatePropertyNames, updatePropertyValueParams, updatePropertyPathInfos);
+						Property[] updatePropertyProperties = new Property[updatePropertyNames.length];
+						Object[] updatePropertyPropertyValues = convertToPropertyValues(modelTail,
+								myPropertyPathInfo.getValueTail(), updatePropertyNames, updatePropertyValueParams,
+								updatePropertyProperties);
 
-						updatePropertyPathInfoss[i] = updatePropertyPathInfos;
-						updatePropertyValuess[i] = updatePropertyValues;
+						Object updateObj = MU.clone(model, myPropertyPathInfo.getValueTail());
+						MU.setPropertyValues(model, updateObj, updatePropertyProperties, updatePropertyPropertyValues);
+
+						persistenceManager.updateMultiplePropValueElement(cn, model, data, myPropertyPathInfo,
+								updatePropertyProperties, updateObj);
+
+						updatePropertyValuess[i] = MU.getPropertyValues(modelTail, updateObj, updatePropertyProperties);
 					}
 				}
 
-				Object[] adds = modelDataConverter.convertToArray(addsParam, propertyModel);
-				Object[] deletes = modelDataConverter.convertToArray(deletesParam, propertyModel);
+				if (adds != null && adds.length > 0)
+					persistenceManager.insertMultiplePropValueElement(cn, model, data, propertyPathInfo, adds);
 
-				// TODO 执行更新
-
-				persistenceManager.insertMultiplePropValueElement(cn, model, data, propertyPathInfo, adds);
-				persistenceManager.deleteMultiplePropValueElement(cn, model, data, propertyPathInfo, deletes);
+				if (deletes != null && deletes.length > 0)
+					persistenceManager.deleteMultiplePropValueElement(cn, model, data, propertyPathInfo, deletes);
 
 				Map<String, Object> responseDatas = new HashMap<String, Object>();
 				responseDatas.put("updatePropertyValuess", updatePropertyValuess);
@@ -1661,7 +1705,7 @@ public class DataController extends AbstractSchemaModelController
 	}
 
 	protected Object[] convertToPropertyValues(Model model, Object data, String[] propertyNames,
-			Object[] propertyValueSources, PropertyPathInfo[] propertyPathInfos)
+			Object[] propertyValueSources, Property[] properties)
 	{
 		Object[] propertyValues = new Object[propertyNames.length];
 
@@ -1681,7 +1725,7 @@ public class DataController extends AbstractSchemaModelController
 			else
 				propertyValues[i] = modelDataConverter.convert(propertyValueSources[i], tailModel);
 
-			propertyPathInfos[i] = propertyPathInfo;
+			properties[i] = tailProperty;
 		}
 
 		return propertyValues;

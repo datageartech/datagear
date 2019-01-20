@@ -4,6 +4,7 @@
 
 package org.datagear.model.support;
 
+import org.datagear.model.InstanceCreationException;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 
@@ -683,5 +684,40 @@ public class MU
 	public static void setPropertyValues(Model model, Object obj, Object[] propertyValues)
 	{
 		setPropertyValues(model, obj, model.getProperties(), propertyValues);
+	}
+
+	/**
+	 * 创建{@linkplain Model}实例对象。
+	 * 
+	 * @param model
+	 * @return
+	 * @throws InstanceCreationException
+	 */
+	public static Object instance(Model model) throws InstanceCreationException
+	{
+		return model.newInstance();
+	}
+
+	/**
+	 * 浅拷贝对象。
+	 * 
+	 * @param model
+	 * @param obj
+	 * @return
+	 * @throws InstanceCreationException
+	 */
+	public static Object clone(Model model, Object obj) throws InstanceCreationException
+	{
+		Object clonedObj = instance(model);
+
+		Property[] properties = model.getProperties();
+
+		for (Property property : properties)
+		{
+			Object pv = property.get(obj);
+			property.set(clonedObj, pv);
+		}
+
+		return clonedObj;
 	}
 }

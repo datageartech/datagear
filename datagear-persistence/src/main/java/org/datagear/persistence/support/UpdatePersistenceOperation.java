@@ -85,105 +85,118 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	}
 
 	/**
-	 * 更新。
 	 * 
 	 * @param cn
 	 * @param dialect
 	 * @param table
 	 * @param model
+	 * @param updateProperties
+	 *            要更新的属性，为{@code null}表示全部更新
 	 * @param originalObj
 	 *            原始数据
 	 * @param updateObj
 	 *            待更新的数据
 	 * @return
 	 */
-	public int update(Connection cn, Dialect dialect, String table, Model model, Object originalObj, Object updateObj)
+	public int update(Connection cn, Dialect dialect, String table, Model model, Property[] updateProperties,
+			Object originalObj, Object updateObj)
 	{
 		SqlBuilder originalCondition = buildRecordCondition(cn, dialect, model, originalObj, null);
 
-		return update(cn, dialect, table, model, originalCondition, originalObj, updateObj, null, null, null,
+		return update(cn, dialect, table, model, updateProperties, originalCondition, originalObj, updateObj, null,
+				null, null, new ExpressionEvaluationContext());
+	}
+
+	/**
+	 * 更新。
+	 * 
+	 * @param cn
+	 * @param dialect
+	 * @param table
+	 * @param model
+	 * @param updateProperties
+	 *            要更新的属性，为{@code null}表示全部更新
+	 * @param originalObj
+	 *            原始数据
+	 * @param updateObj
+	 *            待更新的数据
+	 * @param expressionEvaluationContext
+	 * @return
+	 */
+	public int update(Connection cn, Dialect dialect, String table, Model model, Property[] updateProperties,
+			Object originalObj, Object updateObj, ExpressionEvaluationContext expressionEvaluationContext)
+	{
+		SqlBuilder originalCondition = buildRecordCondition(cn, dialect, model, originalObj, null);
+
+		return update(cn, dialect, table, model, updateProperties, originalCondition, originalObj, updateObj, null,
+				null, null, expressionEvaluationContext);
+	}
+
+	/**
+	 * 更新属性表数据。
+	 * 
+	 * @param cn
+	 * @param dialect
+	 * @param table
+	 * @param model
+	 * @param condition
+	 * @param property
+	 * @param propertyModelMapper
+	 * @param updatePropertyProperties
+	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
+	 * @param originalPropertyValue
+	 *            原始属性值
+	 * @param updatePropertyValue
+	 *            待更新的属性值，允许为{@code null}
+	 * @return
+	 */
+	public int updatePropertyTableData(Connection cn, Dialect dialect, String table, Model model, SqlBuilder condition,
+			Property property, PropertyModelMapper<?> propertyModelMapper, Property[] updatePropertyProperties,
+			Object originalPropertyValue, Object updatePropertyValue)
+	{
+		return updatePropertyTableData(cn, dialect, table, model, condition, property, propertyModelMapper,
+				updatePropertyProperties, originalPropertyValue, updatePropertyValue, null, true,
 				new ExpressionEvaluationContext());
 	}
 
 	/**
-	 * 更新。
+	 * 更新属性表数据。
 	 * 
 	 * @param cn
 	 * @param dialect
 	 * @param table
 	 * @param model
-	 * @param originalObj
-	 *            原始数据
-	 * @param updateObj
-	 *            待更新的数据
+	 * @param condition
+	 * @param property
+	 * @param propertyModelMapper
+	 * @param updatePropertyProperties
+	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
+	 * @param originalPropertyValue
+	 *            原始属性值
+	 * @param updatePropertyValue
+	 *            待更新的属性值，允许为{@code null}
 	 * @param expressionEvaluationContext
 	 * @return
 	 */
-	public int update(Connection cn, Dialect dialect, String table, Model model, Object originalObj, Object updateObj,
+	public int updatePropertyTableData(Connection cn, Dialect dialect, String table, Model model, SqlBuilder condition,
+			Property property, PropertyModelMapper<?> propertyModelMapper, Property[] updatePropertyProperties,
+			Object originalPropertyValue, Object updatePropertyValue,
 			ExpressionEvaluationContext expressionEvaluationContext)
 	{
-		SqlBuilder originalCondition = buildRecordCondition(cn, dialect, model, originalObj, null);
-
-		return update(cn, dialect, table, model, originalCondition, originalObj, updateObj, null, null, null,
+		return updatePropertyTableData(cn, dialect, table, model, condition, property, propertyModelMapper,
+				updatePropertyProperties, originalPropertyValue, updatePropertyValue, null, true,
 				expressionEvaluationContext);
 	}
 
 	/**
-	 * 更新属性表数据。
-	 * 
-	 * @param cn
-	 * @param dialect
-	 * @param table
-	 * @param model
-	 * @param condition
-	 * @param property
-	 * @param propertyModelMapper
-	 * @param originalPropertyValue
-	 *            原始属性值
-	 * @param updatePropertyValue
-	 *            待更新的属性值，允许为{@code null}
-	 * @return
-	 */
-	public int updatePropertyTableData(Connection cn, Dialect dialect, String table, Model model, SqlBuilder condition,
-			Property property, PropertyModelMapper<?> propertyModelMapper, Object originalPropertyValue,
-			Object updatePropertyValue)
-	{
-		return updatePropertyTableData(cn, dialect, table, model, condition, property, propertyModelMapper,
-				originalPropertyValue, updatePropertyValue, null, true, new ExpressionEvaluationContext());
-	}
-
-	/**
-	 * 更新属性表数据。
-	 * 
-	 * @param cn
-	 * @param dialect
-	 * @param table
-	 * @param model
-	 * @param condition
-	 * @param property
-	 * @param propertyModelMapper
-	 * @param originalPropertyValue
-	 *            原始属性值
-	 * @param updatePropertyValue
-	 *            待更新的属性值，允许为{@code null}
-	 * @param expressionEvaluationContext
-	 * @return
-	 */
-	public int updatePropertyTableData(Connection cn, Dialect dialect, String table, Model model, SqlBuilder condition,
-			Property property, PropertyModelMapper<?> propertyModelMapper, Object originalPropertyValue,
-			Object updatePropertyValue, ExpressionEvaluationContext expressionEvaluationContext)
-	{
-		return updatePropertyTableData(cn, dialect, table, model, condition, property, propertyModelMapper,
-				originalPropertyValue, updatePropertyValue, null, true, expressionEvaluationContext);
-	}
-
-	/**
 	 * 更新。
 	 * 
 	 * @param cn
 	 * @param dialect
 	 * @param table
 	 * @param model
+	 * @param updateProperties
+	 *            要更新的属性，为{@code null}表示全部更新
 	 * @param originalCondition
 	 *            用于确定原始数据记录的模型表条件
 	 * @param originalObj
@@ -199,22 +212,25 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param expressionEvaluationContext
 	 * @return
 	 */
-	protected int update(Connection cn, Dialect dialect, String table, Model model, SqlBuilder originalCondition,
-			Object originalObj, Object updateObj, String[] extraColumnNames, Object[] extraColumnValues,
-			String ignorePropertyName, ExpressionEvaluationContext expressionEvaluationContext)
+	protected int update(Connection cn, Dialect dialect, String table, Model model, Property[] updateProperties,
+			SqlBuilder originalCondition, Object originalObj, Object updateObj, String[] extraColumnNames,
+			Object[] extraColumnValues, String ignorePropertyName,
+			ExpressionEvaluationContext expressionEvaluationContext)
 	{
 		int count = 0;
 
-		Property[] properties = model.getProperties();
-		RelationMapper[] relationMappers = getRelationMappers(model);
+		if (updateProperties == null)
+			updateProperties = model.getProperties();
 
-		Object[] originalPropertyValues = MU.getPropertyValues(model, originalObj);
-		Object[] updatePropertyValues = MU.getPropertyValues(model, updateObj, properties);
+		RelationMapper[] relationMappers = getRelationMappers(model, updateProperties);
+
+		Object[] originalPropertyValues = MU.getPropertyValues(model, originalObj, updateProperties);
+		Object[] updatePropertyValues = MU.getPropertyValues(model, updateObj, updateProperties);
 
 		// 先求得SQL表达式属性值并赋予obj，因为某些驱动程序并不支持任意设置Statement.getGeneratedKeys()
-		for (int i = 0; i < properties.length; i++)
+		for (int i = 0; i < updateProperties.length; i++)
 		{
-			Property property = properties[i];
+			Property property = updateProperties[i];
 
 			if (isUpdateIgnoreProperty(model, property, ignorePropertyName, true))
 				continue;
@@ -238,9 +254,9 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 
 		// 先处理删除属性值，它不会受外键约束的影响；
 		// 先处理KeyRule.isManually()为true的更新属性值操作，它不会受外键约束的影响，并且如果先更新模型表，里更的外键值可能会被更新，那么关联属性值更新则会失效；
-		for (int i = 0; i < properties.length; i++)
+		for (int i = 0; i < updateProperties.length; i++)
 		{
-			Property property = properties[i];
+			Property property = updateProperties[i];
 
 			if (isUpdateIgnoreProperty(model, property, ignorePropertyName, false))
 				continue;
@@ -288,7 +304,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 						if (propertyKeyUpdateRule == null || propertyKeyUpdateRule.isManually())
 						{
 							int myCount = updatePropertyTableData(cn, dialect, table, model, originalCondition,
-									property, pmm, originalPropertyValue, updatePropertyValue, updateObj, false,
+									property, pmm, null, originalPropertyValue, updatePropertyValue, updateObj, false,
 									expressionEvaluationContext);
 
 							if (myCount == 0)
@@ -319,7 +335,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		}
 
 		// 更新模型表数据
-		count = updateModelTableData(cn, dialect, table, model, originalCondition, properties, updateObj,
+		count = updateModelTableData(cn, dialect, table, model, originalCondition, updateProperties, updateObj,
 				originalPropertyValues, extraColumnNames, extraColumnValues, ignorePropertyName);
 
 		// 处理KeyRule.isManually()为false的更新属性值操作
@@ -332,7 +348,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 				Object updatePropertyValue = updateInfo.getUpdatePropertyValue();
 
 				int myCount = updatePropertyTableData(cn, dialect, table, model, updateCondition,
-						updateInfo.getProperty(), updateInfo.getPropertyModelMapper(),
+						updateInfo.getProperty(), updateInfo.getPropertyModelMapper(), null,
 						originalPropertyValues[updateInfo.getPropertyIndex()], updatePropertyValue, null, false,
 						expressionEvaluationContext);
 
@@ -453,6 +469,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param condition
 	 * @param property
 	 * @param propertyModelMapper
+	 * @param updatePropertyProperties
+	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
 	 * @param originalPropertyValue
 	 *            原始属性值
 	 * @param updatePropertyValue
@@ -466,8 +484,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 */
 	protected int updatePropertyTableData(Connection cn, Dialect dialect, String table, Model model,
 			SqlBuilder condition, Property property, PropertyModelMapper<?> propertyModelMapper,
-			Object originalPropertyValue, Object updatePropertyValue, Object keyUpdateObj, boolean updateModelTable,
-			ExpressionEvaluationContext expressionEvaluationContext)
+			Property[] updatePropertyProperties, Object originalPropertyValue, Object updatePropertyValue,
+			Object keyUpdateObj, boolean updateModelTable, ExpressionEvaluationContext expressionEvaluationContext)
 	{
 		int count = 0;
 
@@ -476,21 +494,24 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			PropertyModelMapper<ModelTableMapper> mpmm = propertyModelMapper.castModelTableMapperInfo();
 
 			count = updatePropertyTableDataForModelTableMapper(cn, dialect, table, model, condition, property, mpmm,
-					originalPropertyValue, updatePropertyValue, updateModelTable, expressionEvaluationContext);
+					updatePropertyProperties, originalPropertyValue, updatePropertyValue, updateModelTable,
+					expressionEvaluationContext);
 		}
 		else if (propertyModelMapper.isPropertyTableMapperInfo())
 		{
 			PropertyModelMapper<PropertyTableMapper> ppmm = propertyModelMapper.castPropertyTableMapperInfo();
 
 			count = updatePropertyTableDataForPropertyTableMapper(cn, dialect, table, model, condition, property, ppmm,
-					originalPropertyValue, updatePropertyValue, keyUpdateObj, expressionEvaluationContext);
+					updatePropertyProperties, originalPropertyValue, updatePropertyValue, keyUpdateObj,
+					expressionEvaluationContext);
 		}
 		else if (propertyModelMapper.isJoinTableMapperInfo())
 		{
 			PropertyModelMapper<JoinTableMapper> jpmm = propertyModelMapper.castJoinTableMapperInfo();
 
 			count = updatePropertyTableDataForJoinTableMapper(cn, dialect, table, model, condition, property, jpmm,
-					originalPropertyValue, updatePropertyValue, keyUpdateObj, expressionEvaluationContext);
+					updatePropertyProperties, originalPropertyValue, updatePropertyValue, keyUpdateObj,
+					expressionEvaluationContext);
 		}
 		else
 			throw new UnsupportedOperationException();
@@ -509,6 +530,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 *            模型表查询条件，允许为{@code null}
 	 * @param property
 	 * @param propertyModelMapper
+	 * @param updatePropertyProperties
+	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
 	 * @param originalPropertyValue
 	 *            原始属性值，基本属性值时允许为{@code null}
 	 * @param updatePropertyValue
@@ -520,8 +543,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 */
 	protected int updatePropertyTableDataForModelTableMapper(Connection cn, Dialect dialect, String table, Model model,
 			SqlBuilder condition, Property property, PropertyModelMapper<ModelTableMapper> propertyModelMapper,
-			Object originalPropertyValue, Object updatePropertyValue, boolean updateModelTable,
-			ExpressionEvaluationContext expressionEvaluationContext)
+			Property[] updatePropertyProperties, Object originalPropertyValue, Object updatePropertyValue,
+			boolean updateModelTable, ExpressionEvaluationContext expressionEvaluationContext)
 	{
 		int count = 0;
 
@@ -534,7 +557,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 				Property[] properties = new Property[] { property };
 				Object[] originalPropertyValues = new Object[] { originalPropertyValue };
 
-				Object updateObj = model.newInstance();
+				Object updateObj = MU.instance(model);
 				property.set(updateObj, updatePropertyValue);
 
 				count = updateModelTableData(cn, dialect, table, model, condition, properties, updateObj,
@@ -549,7 +572,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 
 			if (PMU.isPrivate(model, property, pmodel))
 			{
-				count = update(cn, dialect, table, pmodel,
+				count = update(cn, dialect, table, pmodel, null,
 						buildRecordCondition(cn, dialect, pmodel, originalPropertyValue, null), originalPropertyValue,
 						updatePropertyValue, null, null, getMappedByWith(mapper), expressionEvaluationContext);
 
@@ -596,7 +619,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param condition
 	 * @param property
 	 * @param propertyModelMapper
-	 *            属性表查询条件，允许为{@code null}。
+	 * @param updatePropertyProperties
+	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
 	 * @param originalPropertyValue
 	 *            原始属性值
 	 * @param updatePropertyValue
@@ -608,8 +632,9 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 */
 	protected int updatePropertyTableDataForPropertyTableMapper(Connection cn, Dialect dialect, String table,
 			Model model, SqlBuilder condition, Property property,
-			PropertyModelMapper<PropertyTableMapper> propertyModelMapper, Object originalPropertyValue,
-			Object updatePropertyValue, Object keyUpdateObj, ExpressionEvaluationContext expressionEvaluationContext)
+			PropertyModelMapper<PropertyTableMapper> propertyModelMapper, Property[] updatePropertyProperties,
+			Object originalPropertyValue, Object updatePropertyValue, Object keyUpdateObj,
+			ExpressionEvaluationContext expressionEvaluationContext)
 	{
 		int count = 0;
 
@@ -681,8 +706,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		}
 		else
 		{
-			count = update(cn, dialect, getTableName(propertyModel), propertyModel, ptableCondition,
-					originalPropertyValue, updatePropertyValue, mkeyColumnNames, mkeyColumnValues,
+			count = update(cn, dialect, getTableName(propertyModel), propertyModel, updatePropertyProperties,
+					ptableCondition, originalPropertyValue, updatePropertyValue, mkeyColumnNames, mkeyColumnValues,
 					getMappedByWith(propertyModelMapper.getMapper()), expressionEvaluationContext);
 		}
 
@@ -699,6 +724,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param condition
 	 * @param property
 	 * @param propertyModelMapper
+	 * @param updatePropertyProperties
+	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
 	 * @param originalPropertyValue
 	 *            原始属性值
 	 * @param updatePropertyValue
@@ -710,8 +737,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 */
 	protected int updatePropertyTableDataForJoinTableMapper(Connection cn, Dialect dialect, String table, Model model,
 			SqlBuilder condition, Property property, PropertyModelMapper<JoinTableMapper> propertyModelMapper,
-			Object originalPropertyValue, Object updatePropertyValue, Object keyUpdateObj,
-			ExpressionEvaluationContext expressionEvaluationContext)
+			Property[] updatePropertyProperties, Object originalPropertyValue, Object updatePropertyValue,
+			Object keyUpdateObj, ExpressionEvaluationContext expressionEvaluationContext)
 	{
 		int count = 0;
 
@@ -728,8 +755,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 
 		if (PMU.isPrivate(model, property, propertyModel))
 		{
-			count = update(cn, dialect, getTableName(propertyModel), propertyModel, ptableCondition,
-					originalPropertyValue, updatePropertyValue, null, null,
+			count = update(cn, dialect, getTableName(propertyModel), propertyModel, updatePropertyProperties,
+					ptableCondition, originalPropertyValue, updatePropertyValue, null, null,
 					getMappedByWith(propertyModelMapper.getMapper()), expressionEvaluationContext);
 
 			if (keyUpdateObj != null)
