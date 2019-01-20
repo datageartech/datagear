@@ -21,6 +21,7 @@ import org.datagear.model.support.PropertyModel;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.SqlBuilder;
+import org.datagear.persistence.collection.SizeOnlyCollection;
 import org.datagear.persistence.features.ColumnConverter;
 import org.datagear.persistence.features.JdbcType;
 import org.datagear.persistence.features.TableName;
@@ -1552,11 +1553,18 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 
 		if (obj instanceof Object[])
 			return (Object[]) obj;
-		else if (List.class.isAssignableFrom(obj.getClass()))
+
+		Class<?> objType = obj.getClass();
+
+		if (SizeOnlyCollection.class.isAssignableFrom(objType))
+		{
+			return new Object[0];
+		}
+		else if (List.class.isAssignableFrom(objType))
 		{
 			return ((List<Object>) obj).toArray();
 		}
-		else if (Collection.class.isAssignableFrom(obj.getClass()))
+		else if (Collection.class.isAssignableFrom(objType))
 		{
 			Collection<Object> cobj = (Collection<Object>) obj;
 

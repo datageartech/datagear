@@ -15,6 +15,7 @@ import org.datagear.model.features.NotReadable;
 import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyModel;
 import org.datagear.persistence.Dialect;
+import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.features.KeyRule;
@@ -33,9 +34,6 @@ import org.springframework.core.convert.ConversionService;
  */
 public class UpdatePersistenceOperation extends AbstractExpressionModelPersistenceOperation
 {
-	/** 是否处理多元属性 */
-	private boolean handleMultipleProperty = false;
-
 	private InsertPersistenceOperation insertPersistenceOperation;
 
 	private DeletePersistenceOperation deletePersistenceOperation;
@@ -52,16 +50,6 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		super(conversionService, variableExpressionResolver, sqlExpressionResolver);
 		this.insertPersistenceOperation = insertPersistenceOperation;
 		this.deletePersistenceOperation = deletePersistenceOperation;
-	}
-
-	public boolean isHandleMultipleProperty()
-	{
-		return handleMultipleProperty;
-	}
-
-	public void setHandleMultipleProperty(boolean handleMultipleProperty)
-	{
-		this.handleMultipleProperty = handleMultipleProperty;
 	}
 
 	public InsertPersistenceOperation getInsertPersistenceOperation()
@@ -261,11 +249,6 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			if (isUpdateIgnoreProperty(model, property, ignorePropertyName, false))
 				continue;
 
-			if (MU.isMultipleProperty(property))
-			{
-				// TODO 处理集合属性值更新
-			}
-
 			Object originalPropertyValue = originalPropertyValues[i];
 			Object updatePropertyValue = updatePropertyValues[i];
 			RelationMapper relationMapper = relationMappers[i];
@@ -274,14 +257,98 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			{
 				if (originalPropertyValue != null)
 				{
-					int myCount = deletePersistenceOperation.deletePropertyTableData(cn, dialect, table, model,
-							originalCondition, property, relationMapper, null, false);
+					// 更新操作时，不处理清除集合属性值
+					if (!MU.isMultipleProperty(property))
+					{
+						int myCount = deletePersistenceOperation.deletePropertyTableData(cn, dialect, table, model,
+								originalCondition, property, relationMapper, null, false);
+
+						if (propertyUpdated == false && myCount > 0)
+							propertyUpdated = true;
+					}
+				}
+				else
+					;
+			}
+			else if (MU.isMultipleProperty(property))
+			{
+				Model[] propertyModels = property.getModels();
+				PropertyModelMapper<?>[] propertyModelMappers = PropertyModelMapper.valueOf(property, relationMapper);
+
+				Object[] originalPropertyValueElements = toArray(originalPropertyValue);
+				Object[] updatePropertyValueElements = toArray(updatePropertyValue);
+
+				int opveLen = (originalPropertyValueElements == null ? 0 : originalPropertyValueElements.length);
+				int upevLen = (updatePropertyValueElements == null ? 0 : updatePropertyValueElements.length);
+
+				for (int j = 0; j < Math.max(opveLen, upevLen); j++)
+				{
+					Object originalPropertyValueElement = (j >= opveLen ? null : originalPropertyValueElements[j]);
+					Object updatePropertyValueElement = (j >= upevLen ? null : updatePropertyValueElements[j]);
+
+					int myCount = 0;
+
+					if (originalPropertyValueElement == null && updatePropertyValueElement == null)
+						continue;
+					// 添加
+					else if (originalPropertyValueElement == null)
+					{
+						int myMapperIndex = MU.getModelIndex(propertyModels, updatePropertyValueElement);
+						PropertyModelMapper<?> pmm = propertyModelMappers[myMapperIndex];
+
+						KeyRule propertyKeyUpdateRule = pmm.getMapper().getPropertyKeyUpdateRule();
+
+						if (propertyKeyUpdateRule == null || propertyKeyUpdateRule.isManually())
+						{
+							myCount = insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model,
+									updateObj, property, pmm, new Object[] { updatePropertyValueElement }, null,
+									expressionEvaluationContext);
+						}
+						else
+						{
+							UpdateInfoForAutoKeyUpdateRule updateInfo = new UpdateInfoForAutoKeyUpdateRule(property, i,
+									pmm, myMapperIndex, updatePropertyValueElement);
+							updateInfoForAutoKeyUpdateRules.add(updateInfo);
+						}
+					}
+					// 删除
+					else if (updatePropertyValueElement == null)
+					{
+						int myMapperIndex = MU.getModelIndex(propertyModels, originalPropertyValueElement);
+						PropertyModelMapper<?> pmm = propertyModelMappers[myMapperIndex];
+
+						myCount = deletePersistenceOperation.deletePropertyTableData(cn, dialect, table, model,
+								originalCondition, property, pmm, null, false);
+					}
+					// 更新
+					else
+					{
+						int myOriginalMapperIndex = MU.getModelIndex(propertyModels, originalPropertyValueElement);
+						int myUpdateMapperIndex = MU.getModelIndex(propertyModels, updatePropertyValueElement);
+
+						if (myOriginalMapperIndex != myUpdateMapperIndex)
+							throw new PersistenceException();
+
+						PropertyModelMapper<?> pmm = propertyModelMappers[myOriginalMapperIndex];
+						KeyRule propertyKeyUpdateRule = pmm.getMapper().getPropertyKeyUpdateRule();
+
+						if (propertyKeyUpdateRule == null || propertyKeyUpdateRule.isManually())
+						{
+							myCount = updatePropertyTableData(cn, dialect, table, model, originalCondition, property,
+									pmm, null, originalPropertyValueElement, updatePropertyValueElement, updateObj,
+									false, expressionEvaluationContext);
+						}
+						else
+						{
+							UpdateInfoForAutoKeyUpdateRule updateInfo = new UpdateInfoForAutoKeyUpdateRule(property, i,
+									pmm, myOriginalMapperIndex, updatePropertyValueElement);
+							updateInfoForAutoKeyUpdateRules.add(updateInfo);
+						}
+					}
 
 					if (propertyUpdated == false && myCount > 0)
 						propertyUpdated = true;
 				}
-				else
-					;
 			}
 			else
 			{
@@ -341,6 +408,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		// 处理KeyRule.isManually()为false的更新属性值操作
 		if (!updateInfoForAutoKeyUpdateRules.isEmpty())
 		{
+			// 在执行updateModelTableData后，关联外键会被级联更新，所以要使用updateObj构造条件
 			SqlBuilder updateCondition = buildRecordCondition(cn, dialect, model, updateObj, null);
 
 			for (UpdateInfoForAutoKeyUpdateRule updateInfo : updateInfoForAutoKeyUpdateRules)
@@ -829,25 +897,20 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param model
 	 * @param property
 	 * @param ignorePropertyName
-	 * @param forceIgnoreMultipleProperty
+	 * @param ignoreMultipleProperty
 	 * @return
 	 */
 	protected boolean isUpdateIgnoreProperty(Model model, Property property, String ignorePropertyName,
-			boolean forceIgnoreMultipleProperty)
+			boolean ignoreMultipleProperty)
 	{
+		if (MU.isMultipleProperty(property) && ignoreMultipleProperty)
+			return true;
+
 		if (ignorePropertyName != null && ignorePropertyName.equals(property.getName()))
 			return true;
 
 		if (property.hasFeature(NotReadable.class) || property.hasFeature(NotEditable.class))
 			return true;
-
-		if (MU.isMultipleProperty(property))
-		{
-			if (forceIgnoreMultipleProperty)
-				return true;
-
-			return (!this.handleMultipleProperty);
-		}
 
 		return false;
 	}
