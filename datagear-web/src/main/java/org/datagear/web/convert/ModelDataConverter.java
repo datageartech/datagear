@@ -100,6 +100,64 @@ public class ModelDataConverter extends AbstractDataConverter
 	}
 
 	/**
+	 * 转换属性值。
+	 * 
+	 * @param obj
+	 * @param model
+	 * @param propertyValueSource
+	 * @param propertyModel
+	 * @return
+	 * @throws ConverterException
+	 */
+	public Object convertToPropertyValue(Object obj, Model model, Object propertyValueSource,
+			PropertyModel propertyModel) throws ConverterException
+	{
+		if (propertyValueSource == null)
+			return null;
+
+		Property property = propertyModel.getProperty();
+		Model pmodel = propertyModel.getModel();
+
+		Object propertyValue = null;
+
+		if (property.isArray())
+			propertyValue = convertToArray(propertyValueSource, pmodel);
+		else if (property.isCollection())
+			propertyValue = convertToCollection(propertyValueSource, pmodel, property.getCollectionType());
+		else
+			propertyValue = convert(propertyValueSource, pmodel);
+
+		PMU.setPropertyValueMappedByIf(pmodel, obj, propertyModel, propertyValue);
+
+		return propertyValue;
+	}
+
+	/**
+	 * 转换为属性值元素。
+	 * 
+	 * @param obj
+	 * @param model
+	 * @param propertyValueElementSource
+	 * @param propertyModel
+	 * @return
+	 * @throws ConverterException
+	 */
+	public Object convertToPropertyValueElement(Object obj, Model model, Object propertyValueElementSource,
+			PropertyModel propertyModel) throws ConverterException
+	{
+		if (propertyValueElementSource == null)
+			return null;
+
+		Model pmodel = propertyModel.getModel();
+
+		Object propertyValueElement = convert(propertyValueElementSource, pmodel);
+
+		PMU.setPropertyValueMappedByIf(pmodel, obj, propertyModel, propertyValueElement);
+
+		return propertyValueElement;
+	}
+
+	/**
 	 * 处理延迟引用。
 	 * 
 	 * @param model
@@ -252,7 +310,7 @@ public class ModelDataConverter extends AbstractDataConverter
 				value = convertObj(myFullPropertyPath, rawValue, pmodel, refContext);
 			}
 
-			setPropertyValue(model, property, propertyModel, re, value);
+			setPropertyValue(model, re, propertyModel, value);
 		}
 
 		return re;
@@ -632,14 +690,12 @@ public class ModelDataConverter extends AbstractDataConverter
 	 * 设置属性值。
 	 * 
 	 * @param model
-	 * @param property
-	 * @param propertyModel
 	 * @param obj
+	 * @param propertyModel
 	 * @param propertyValue
 	 */
-	protected void setPropertyValue(Model model, Property property, PropertyModel propertyModel, Object obj,
-			Object propertyValue)
+	protected void setPropertyValue(Model model, Object obj, PropertyModel propertyModel, Object propertyValue)
 	{
-		PMU.setPropertyValue(model, property, propertyModel, obj, propertyValue);
+		PMU.setPropertyValue(model, obj, propertyModel, propertyValue);
 	}
 }

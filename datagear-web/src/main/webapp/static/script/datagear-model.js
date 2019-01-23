@@ -870,6 +870,17 @@
 		},
 		
 		/**
+		 * 构建SizeOnlyCollection。
+		 */
+		instanceSizeOnlyCollection : function(size)
+		{
+			if(size == undefined)
+				size = 0;
+			
+			return { "size" : size };
+		},
+		
+		/**
 		 * 获取结尾属性信息。
 		 * 
 		 * @param model

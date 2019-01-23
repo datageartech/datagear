@@ -21,7 +21,6 @@ import org.datagear.model.support.PropertyModel;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.SqlBuilder;
-import org.datagear.persistence.collection.SizeOnlyCollection;
 import org.datagear.persistence.features.ColumnConverter;
 import org.datagear.persistence.features.JdbcType;
 import org.datagear.persistence.features.TableName;
@@ -1545,42 +1544,9 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 * @param obj
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	protected Object[] toArray(Object obj)
 	{
-		if (obj == null)
-			return null;
-
-		if (obj instanceof Object[])
-			return (Object[]) obj;
-
-		Class<?> objType = obj.getClass();
-
-		if (SizeOnlyCollection.class.isAssignableFrom(objType))
-		{
-			return new Object[0];
-		}
-		else if (List.class.isAssignableFrom(objType))
-		{
-			return ((List<Object>) obj).toArray();
-		}
-		else if (Collection.class.isAssignableFrom(objType))
-		{
-			Collection<Object> cobj = (Collection<Object>) obj;
-
-			Object[] array = new Object[cobj.size()];
-
-			int i = 0;
-			for (Object eobj : cobj)
-			{
-				array[i] = eobj;
-				i++;
-			}
-
-			return array;
-		}
-		else
-			return new Object[] { obj };
+		return PMU.toArray(obj);
 	}
 
 	/**

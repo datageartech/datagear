@@ -119,14 +119,14 @@ WebUtils.setPageId(request, gridPageId);
 	/**
 	 * 获取行初始数据对象。
 	 * @param editDataTable 必选，DataTable的API对象
-	 * @param row 必选，行索引
+	 * @param rowIndex 必选，行索引
 	 */
-	po.originalRowData = function(editDataTable, row)
+	po.originalRowData = function(editDataTable, rowIndex)
 	{
-		var rowData = po.editGridOriginalRowDataMap[row];
+		var rowData = po.editGridOriginalRowDataMap[rowIndex];
 		
 		if(!rowData)
-			rowData = editDataTable.row(row).data();
+			rowData = editDataTable.row(rowIndex).data();
 		
 		return rowData;
 	};
@@ -501,7 +501,7 @@ WebUtils.setPageId(request, gridPageId);
 					var pindex = pindexes[i];
 					var propertyValue = editDataTable.cell(pindex).data();
 					
-					if(propertyValue != propertyValue0)
+					if(!$.deepEquals(propertyValue, propertyValue0))
 					{
 						allColumnValueEquals = false;
 						break;
@@ -810,7 +810,7 @@ WebUtils.setPageId(request, gridPageId);
 				{
 					changedCellIndexes.push(index);
 					
-					changedCellValues.push(propertyValue);
+					changedCellValues.push($.deepClone(propertyValue));
 					
 					//多元属性值单元格显示“[原始元素个数]+[新加元素个数]”
 					if($.model.isMultipleProperty(property) && !po.isClientDataRow(editDataTable, index.row))
@@ -1013,7 +1013,7 @@ WebUtils.setPageId(request, gridPageId);
 				
 				dataTable.draw();
 				
-				po.clearEditGrid(editDataTable, modifiedCells, addRows, deleteRows, null, null, null);
+				po.clearEditGrid(editDataTable, modifiedCells, addRows, deleteRows, null, null, null, null);
 				
 				po.afterSaveClientEditCell(editDataTable, editTableDatas);
 			}
@@ -1044,6 +1044,7 @@ WebUtils.setPageId(request, gridPageId);
 	po.buildAjaxSaveEditCellOptions = function(editDataTable, modifiedCells, addRows, deleteRows)
 	{
 		var updates = [];
+		var updatePropertyIndexess = [];
 		var updatePropertyNamess = [];
 		var updatePropertyValuess = [];
 		var updateCellIndexess = [];
@@ -1066,7 +1067,8 @@ WebUtils.setPageId(request, gridPageId);
 				continue;
 			
 			updates.push(po.originalRowData(editDataTable, rowIndex));
-			
+
+			var updatePropertyIndexes = [];
 			var updatePropertyNames = [];
 			var updatePropertyValues = [];
 			var updateCellIndexes = [];
@@ -1078,12 +1080,14 @@ WebUtils.setPageId(request, gridPageId);
 				var updatePropertyIndex = $.getDataTableCellPropertyIndex(editDataTableSettings, myModifiedCellIndex);
 				var updatePropertyName = $.model.getProperty(po.editGridModel, updatePropertyIndex).name;
 				var updatePropertyValue = editDataTable.cell(myModifiedCellIndex).data();
-				
+
+				updatePropertyIndexes.push(updatePropertyIndex);
 				updatePropertyNames.push(updatePropertyName);
 				updatePropertyValues.push(updatePropertyValue);
 				updateCellIndexes.push(myModifiedCellIndex);
 			}
 			
+			updatePropertyIndexess.push(updatePropertyIndexes);
 			updatePropertyNamess.push(updatePropertyNames);
 			updatePropertyValuess.push(updatePropertyValues);
 			updateCellIndexess.push(updateCellIndexes);
@@ -1110,7 +1114,7 @@ WebUtils.setPageId(request, gridPageId);
 			"success" : function(operationMessage)
 			{
 				po.ajaxSaveEditCellSuccessHandler(editDataTable, modifiedCells, addRows, deleteRows,
-						updates, updatePropertyNamess, updatePropertyValuess, updateCellIndexess,
+						updates, updatePropertyIndexess, updatePropertyNamess, updatePropertyValuess, updateCellIndexess,
 						adds, deletes, operationMessage);
 			}
 		};
@@ -1119,12 +1123,13 @@ WebUtils.setPageId(request, gridPageId);
 	};
 	
 	po.ajaxSaveEditCellSuccessHandler = function(editDataTable, modifiedCells, addRows, deleteRows,
-			updateDatas, updatePropertyNamess, updatePropertyValuess, updateCellIndexess, addDatas, deleteDatas, operationMessage)
+			updateDatas, updatePropertyIndexess, updatePropertyNamess, updatePropertyValuess, updateCellIndexess,
+			addDatas, deleteDatas, operationMessage)
 	{
 		updatePropertyValuess = operationMessage.data["updatePropertyValuess"];
 		addDatas = operationMessage.data["adds"];
 		
-		po.clearEditGrid(editDataTable, modifiedCells, addRows, deleteRows, updateCellIndexess, updatePropertyValuess, addDatas);
+		po.clearEditGrid(editDataTable, modifiedCells, addRows, deleteRows, updateCellIndexess, updatePropertyIndexess, updatePropertyValuess, addDatas);
 		po.afterSaveServerSideEditCell(editDataTable, modifiedCells, addRows, deleteRows);
 	};
 	
@@ -1158,8 +1163,8 @@ WebUtils.setPageId(request, gridPageId);
 	};
 	
 	//将表格中的编辑单元格、添加行置为已保存，删除标记为删除的行
-	po.clearEditGrid = function(editDataTable, modifiedCells, addRows, deleteRows, serverUpdateCellIndexess,
-			serverUpdateCellValuess, serverAddRowsValue)
+	po.clearEditGrid = function(editDataTable, modifiedCells, addRows, deleteRows, 
+			serverUpdateCellIndexess, serverUpdatePropertyIndexess, serverUpdateCellValuess, serverAddRowsValue)
 	{
 		modifiedCells.every(function(rowIndex, columnIndex, tableLoopCounter, cellLoopCounter)
 		{
@@ -1167,17 +1172,34 @@ WebUtils.setPageId(request, gridPageId);
 			po.markAsUnmodifiedCell($cell);
 		});
 		
-		if(serverUpdateCellIndexess != null && serverUpdateCellValuess != null)
+		if(serverUpdateCellIndexess != null && serverUpdatePropertyIndexess != null && serverUpdateCellValuess != null)
 		{
 			for(var i=0; i<serverUpdateCellIndexess.length; i++)
 			{
 				var serverUpdateCellIndexes = serverUpdateCellIndexess[i];
+				var serverUpdatePropertyIndexes = serverUpdatePropertyIndexess[i];
 				var serverUpdateCellValues = serverUpdateCellValuess[i];
 				
 				for(var j=0; j<serverUpdateCellIndexes.length; j++)
 				{
 					var cell = editDataTable.cell(serverUpdateCellIndexes[j]);
-					cell.data(serverUpdateCellValues[j]);
+					var serverUpdatePropertyIndex = serverUpdatePropertyIndexes[j];
+					var property = $.model.getProperty(po.editGridModel, serverUpdatePropertyIndex);
+					
+					//多元属性值仅允许添加操作，因此显示：原始数目+服务端添加的数目
+					if($.model.isMultipleProperty(property))
+					{
+						var originalRowData = po.originalRowData(editDataTable, serverUpdateCellIndexes[j].row);
+						var originalCellValue = $.model.propertyValue(originalRowData, property);
+						var originalLen = $.model.getMultiplePropertyValueLength(originalCellValue);
+						var serverUpdateLen = $.model.getMultiplePropertyValueLength(serverUpdateCellValues[j]);
+						
+						var sizeOnlyCollection = $.model.instanceSizeOnlyCollection(originalLen + serverUpdateLen);
+						
+						cell.data(sizeOnlyCollection);
+					}
+					else
+						cell.data(serverUpdateCellValues[j]);
 				}
 			}
 		}

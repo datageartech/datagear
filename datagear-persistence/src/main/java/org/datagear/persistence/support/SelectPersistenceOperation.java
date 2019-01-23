@@ -1936,24 +1936,9 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		protected Object convertToPropertyValue(Map<PropertyPath, Object> propertyPropertyColIndexMap, ResultSet rs,
 				int row, Model model, Property property, PropertyModel propertyModel, Object obj) throws Exception
 		{
-			RelationMapper relationMapper = getRelationMapper(model, property);
-			PropertyModelMapper<?> propertyModelMapper = PropertyModelMapper.valueOf(property, relationMapper,
-					propertyModel.getIndex());
+			Object propValue = convert(propertyPropertyColIndexMap, rs, row, propertyModel.getModel(), true);
 
-			Object propValue = convert(propertyPropertyColIndexMap, rs, row, propertyModelMapper.getModel(), true);
-
-			// 双向关联赋值
-			if (propValue != null)
-			{
-				String mappedWithPropertyName = getMappedByWith(propertyModelMapper.getMapper());
-				if (mappedWithPropertyName != null)
-				{
-					Property mappedWithProperty = propertyModelMapper.getModel().getProperty(mappedWithPropertyName);
-
-					if (!MU.isMultipleProperty(mappedWithProperty))
-						mappedWithProperty.set(propValue, obj);
-				}
-			}
+			PMU.setPropertyValueMappedByIf(model, obj, propertyModel, propValue);
 
 			return propValue;
 		}

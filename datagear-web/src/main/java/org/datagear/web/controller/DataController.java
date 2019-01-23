@@ -30,6 +30,7 @@ import org.datagear.management.service.SchemaService;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.support.MU;
+import org.datagear.model.support.PropertyModel;
 import org.datagear.model.support.PropertyPath;
 import org.datagear.model.support.PropertyPathInfo;
 import org.datagear.persistence.ColumnPropertyPath;
@@ -41,6 +42,7 @@ import org.datagear.persistence.QueryResultMetaInfo;
 import org.datagear.persistence.columnconverter.LOBConversionContext;
 import org.datagear.persistence.columnconverter.LOBConversionContext.LOBConversionSetting;
 import org.datagear.persistence.support.ExpressionEvaluationContext;
+import org.datagear.persistence.support.PMU;
 import org.datagear.persistence.support.SelectOptions;
 import org.datagear.persistence.support.SqlExpressionSyntaxErrorException;
 import org.datagear.persistence.support.VariableExpressionSyntaxErrorException;
@@ -866,9 +868,10 @@ public class DataController extends AbstractSchemaModelController
 				Object data = modelDataConverter.convert(dataParam, model);
 
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-				Model propModel = propertyPathInfo.getModelTail();
 
-				Object propValue = modelDataConverter.convert(propValueParam, propModel);
+				Object propValue = modelDataConverter.convertToPropertyValue(propertyPathInfo.getOwnerObjTail(),
+						propertyPathInfo.getOwnerModelTail(), propValueParam,
+						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
 
 				persistenceManager.insertSinglePropValue(cn, model, data, propertyPathInfo, propValue);
 
@@ -962,9 +965,10 @@ public class DataController extends AbstractSchemaModelController
 				Object data = modelDataConverter.convert(dataParam, model);
 
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-				Model propModel = propertyPathInfo.getModelTail();
 
-				Object propValue = modelDataConverter.convert(propValueParam, propModel);
+				Object propValue = modelDataConverter.convertToPropertyValue(propertyPathInfo.getOwnerObjTail(),
+						propertyPathInfo.getOwnerModelTail(), propValueParam,
+						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
 
 				int count = persistenceManager.updateSinglePropValue(cn, model, data, propertyPathInfo, propValue);
 
@@ -1212,8 +1216,10 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-				Object propValueElement = modelDataConverter.convert(propValueElementParam,
-						propertyPathInfo.getModelTail());
+
+				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
+						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
+						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
 
 				persistenceManager.insertMultiplePropValueElement(cn, model, data, propertyPathInfo,
 						new Object[] { propValueElement });
@@ -1245,8 +1251,10 @@ public class DataController extends AbstractSchemaModelController
 			{
 				Object data = modelDataConverter.convert(dataParam, model);
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-				Object propValueElement = modelDataConverter.convert(propValueElementParam,
-						propertyPathInfo.getModelTail());
+
+				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
+						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
+						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
 
 				persistenceManager.insertMultiplePropValueElement(cn, dialect, model, data, propertyPathInfo,
 						propValueElement, context);
@@ -1276,8 +1284,11 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-				Object[] propValueElements = modelDataConverter.convertToArray(propValueElementsParam,
-						propertyPathInfo.getModelTail());
+
+				Object[] propValueElements = PMU.toArray(modelDataConverter.convertToPropertyValue(
+						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(),
+						propValueElementsParam,
+						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail())));
 
 				persistenceManager.insertMultiplePropValueElement(cn, model, data, propertyPathInfo, propValueElements);
 
@@ -1361,8 +1372,10 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-				Object propValueElement = modelDataConverter.convert(propValueElementParam,
-						propertyPathInfo.getModelTail());
+
+				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
+						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
+						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
 
 				int count = persistenceManager.updateMultiplePropValueElement(cn, model, data, propertyPathInfo,
 						propValueElement);
@@ -1403,8 +1416,11 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-				Object[] propValueElements = modelDataConverter.convertToArray(propValueElementsParam,
-						propertyPathInfo.getModelTail());
+
+				Object[] propValueElements = PMU.toArray(modelDataConverter.convertToPropertyValue(
+						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(),
+						propValueElementsParam,
+						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail())));
 
 				int count = persistenceManager.deleteMultiplePropValueElement(cn, model, data, propertyPathInfo,
 						propValueElements);
@@ -1715,15 +1731,10 @@ public class DataController extends AbstractSchemaModelController
 					PropertyPath.valueOf(propertyNames[i]), data);
 
 			Property tailProperty = propertyPathInfo.getPropertyTail();
-			Model tailModel = propertyPathInfo.getModelTail();
+			PropertyModel tailPropertyModel = PropertyModel.valueOf(tailProperty, propertyPathInfo.getModelTail());
 
-			if (tailProperty.isArray())
-				propertyValues[i] = modelDataConverter.convertToArray(propertyValueSources[i], tailModel);
-			else if (tailProperty.isCollection())
-				propertyValues[i] = modelDataConverter.convertToCollection(propertyValueSources[i], tailModel,
-						tailProperty.getCollectionType());
-			else
-				propertyValues[i] = modelDataConverter.convert(propertyValueSources[i], tailModel);
+			propertyValues[i] = modelDataConverter.convertToPropertyValue(data, model, propertyValueSources[i],
+					tailPropertyModel);
 
 			properties[i] = tailProperty;
 		}
