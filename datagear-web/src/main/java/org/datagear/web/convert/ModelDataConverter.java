@@ -17,9 +17,9 @@ import org.datagear.model.support.DefaultDynamicBean;
 import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyModel;
 import org.datagear.model.support.PropertyPath;
+import org.datagear.model.support.PropertyPathInfo;
 import org.datagear.persistence.collection.SizeOnlyCollection;
-import org.datagear.persistence.mapper.Mapper;
-import org.datagear.persistence.mapper.RelationMapper;
+import org.datagear.persistence.support.PMU;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -50,7 +50,13 @@ public class ModelDataConverter extends AbstractDataConverter
 	 */
 	public Object convert(Object obj, Model model) throws ConverterException
 	{
-		return convertObj(null, obj, model, new RefContext());
+		RefContext refContext = new RefContext();
+
+		Object target = convertObj(null, obj, model, refContext);
+
+		handleLazyRefs(model, target, refContext);
+
+		return target;
 	}
 
 	/**
@@ -63,7 +69,13 @@ public class ModelDataConverter extends AbstractDataConverter
 	 */
 	public Object[] convertToArray(Object obj, Model model) throws ConverterException
 	{
-		return convertObjToArray(null, obj, model, new RefContext());
+		RefContext refContext = new RefContext();
+
+		Object[] target = convertObjToArray(null, obj, model, refContext);
+
+		handleLazyRefs(model, target, refContext);
+
+		return target;
 	}
 
 	/**
@@ -78,7 +90,46 @@ public class ModelDataConverter extends AbstractDataConverter
 	public Collection<Object> convertToCollection(Object obj, Model model, Class<? extends Collection> collectionType)
 			throws ConverterException
 	{
-		return convertObjToCollection(null, obj, model, collectionType, new RefContext());
+		RefContext refContext = new RefContext();
+
+		Collection<Object> target = convertObjToCollection(null, obj, model, collectionType, refContext);
+
+		handleLazyRefs(model, target, refContext);
+
+		return target;
+	}
+
+	/**
+	 * 处理延迟引用。
+	 * 
+	 * @param model
+	 * @param obj
+	 * @param refContext
+	 */
+	protected void handleLazyRefs(Model model, Object obj, RefContext refContext)
+	{
+		if (obj == null)
+			return;
+
+		if (!refContext.hasLazyRefs())
+			return;
+
+		Map<String, String> lazyRefs = refContext.getLazyRefs();
+
+		for (Map.Entry<String, String> entry : lazyRefs.entrySet())
+		{
+			String refValue = entry.getValue();
+
+			Object target = resolveRefTarget(refContext, refValue);
+
+			if (target != null)
+			{
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model,
+						PropertyPath.valueOf(entry.getKey()), obj);
+
+				propertyPathInfo.setValueTail(target);
+			}
+		}
 	}
 
 	/**
@@ -137,8 +188,18 @@ public class ModelDataConverter extends AbstractDataConverter
 
 		if (isRefMap(map))
 		{
-			String ref = getRefValue(map);
-			return resolveRefTarget(ref, refContext);
+			String refValue = getRefValue(map);
+			Object refTarget = resolveRefTarget(refContext, refValue);
+
+			// 引用有可能在目标未被解析前先被处理，此时需要延迟处理
+			if (refTarget != null)
+				return refTarget;
+			else
+			{
+				refContext.addLazyRefs(namePath, refValue);
+
+				return null;
+			}
 		}
 
 		Object re = model.newInstance();
@@ -191,7 +252,7 @@ public class ModelDataConverter extends AbstractDataConverter
 				value = convertObj(myFullPropertyPath, rawValue, pmodel, refContext);
 			}
 
-			setPropertyValue(pmodel, property, propertyModel, re, value);
+			setPropertyValue(model, property, propertyModel, re, value);
 		}
 
 		return re;
@@ -579,55 +640,6 @@ public class ModelDataConverter extends AbstractDataConverter
 	protected void setPropertyValue(Model model, Property property, PropertyModel propertyModel, Object obj,
 			Object propertyValue)
 	{
-		Model pmodel = propertyModel.getModel();
-
-		if (propertyValue == null)
-		{
-			if (pmodel.getType().isPrimitive())
-				;
-			else
-				property.set(obj, null);
-		}
-		else if (MU.isPrimitiveModel(pmodel))
-		{
-			property.set(obj, propertyValue);
-		}
-		else
-		{
-			property.set(obj, propertyValue);
-
-			RelationMapper relationMapper = property.getFeature(RelationMapper.class);
-			Mapper mapper = relationMapper.getMappers()[propertyModel.getIndex()];
-
-			String mappedTarget = null;
-			if (mapper.isMappedBySource())
-				mappedTarget = mapper.getMappedByTarget();
-			else if (mapper.isMappedByTarget())
-				mappedTarget = mapper.getMappedBySource();
-
-			// 反向设置属性值
-			if (mappedTarget != null)
-			{
-				Property mappedProperty = MU.getProperty(pmodel, mappedTarget);
-
-				if (property.isCollection())
-				{
-					@SuppressWarnings("unchecked")
-					Collection<Object> collection = (Collection<Object>) propertyValue;
-
-					for (Object ele : collection)
-						mappedProperty.set(ele, obj);
-				}
-				else if (property.isArray())
-				{
-					Object[] array = (Object[]) propertyValue;
-
-					for (Object ele : array)
-						mappedProperty.set(ele, obj);
-				}
-				else
-					mappedProperty.set(propertyValue, obj);
-			}
-		}
+		PMU.setPropertyValue(model, property, propertyModel, obj, propertyValue);
 	}
 }

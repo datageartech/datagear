@@ -293,11 +293,11 @@ public abstract class AbstractDataConverter
 	/**
 	 * 将{@linkplain #REF_NAME}的值解析为引用目标对象。
 	 * 
-	 * @param ref
 	 * @param refContext
+	 * @param ref
 	 * @return
 	 */
-	protected Object resolveRefTarget(String ref, RefContext refContext)
+	protected Object resolveRefTarget(RefContext refContext, String ref)
 	{
 		if (REF_VALUE_ROOT.equals(ref))
 			return refContext.getRoot();
@@ -603,6 +603,8 @@ public abstract class AbstractDataConverter
 
 		private Map<String, Object> pathObjects = new HashMap<String, Object>();
 
+		private Map<String, String> lazyRefs = new HashMap<String, String>();
+
 		public RefContext()
 		{
 			super();
@@ -649,6 +651,21 @@ public abstract class AbstractDataConverter
 
 			if (REF_VALUE_ROOT.equals(path))
 				this.root = object;
+		}
+
+		public boolean hasLazyRefs()
+		{
+			return (this.lazyRefs != null && !this.lazyRefs.isEmpty());
+		}
+
+		public Map<String, String> getLazyRefs()
+		{
+			return lazyRefs;
+		}
+
+		public void addLazyRefs(String path, String refValue)
+		{
+			this.lazyRefs.put(path, refValue);
 		}
 	}
 }

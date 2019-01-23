@@ -307,7 +307,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 						else
 						{
 							UpdateInfoForAutoKeyUpdateRule updateInfo = new UpdateInfoForAutoKeyUpdateRule(property, i,
-									pmm, myMapperIndex, updatePropertyValueElement);
+									pmm, myMapperIndex, originalPropertyValueElement, updatePropertyValueElement);
 							updateInfoForAutoKeyUpdateRules.add(updateInfo);
 						}
 					}
@@ -341,7 +341,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 						else
 						{
 							UpdateInfoForAutoKeyUpdateRule updateInfo = new UpdateInfoForAutoKeyUpdateRule(property, i,
-									pmm, myOriginalMapperIndex, updatePropertyValueElement);
+									pmm, myOriginalMapperIndex, originalPropertyValueElement,
+									updatePropertyValueElement);
 							updateInfoForAutoKeyUpdateRules.add(updateInfo);
 						}
 					}
@@ -385,7 +386,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 						else
 						{
 							UpdateInfoForAutoKeyUpdateRule updateInfo = new UpdateInfoForAutoKeyUpdateRule(property, i,
-									pmm, j, updatePropertyValue);
+									pmm, j, originalPropertyValue, updatePropertyValue);
 							updateInfoForAutoKeyUpdateRules.add(updateInfo);
 						}
 					}
@@ -417,7 +418,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 
 				int myCount = updatePropertyTableData(cn, dialect, table, model, updateCondition,
 						updateInfo.getProperty(), updateInfo.getPropertyModelMapper(), null,
-						originalPropertyValues[updateInfo.getPropertyIndex()], updatePropertyValue, null, false,
+						updateInfo.getOriginalPropertyValue(), updatePropertyValue, null, false,
 						expressionEvaluationContext);
 
 				if (myCount == 0)
@@ -968,6 +969,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 
 		private int propertyModelMapperIndex;
 
+		private Object originalPropertyValue;
+
 		private Object updatePropertyValue;
 
 		public UpdateInfoForAutoKeyUpdateRule()
@@ -976,13 +979,15 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		}
 
 		public UpdateInfoForAutoKeyUpdateRule(Property property, int propertyIndex,
-				PropertyModelMapper<?> propertyModelMapper, int propertyModelMapperIndex, Object updatePropertyValue)
+				PropertyModelMapper<?> propertyModelMapper, int propertyModelMapperIndex, Object originalPropertyValue,
+				Object updatePropertyValue)
 		{
 			super();
 			this.property = property;
 			this.propertyIndex = propertyIndex;
 			this.propertyModelMapper = propertyModelMapper;
 			this.propertyModelMapperIndex = propertyModelMapperIndex;
+			this.originalPropertyValue = originalPropertyValue;
 			this.updatePropertyValue = updatePropertyValue;
 		}
 
@@ -1024,6 +1029,16 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		public void setPropertyModelMapperIndex(int propertyModelMapperIndex)
 		{
 			this.propertyModelMapperIndex = propertyModelMapperIndex;
+		}
+
+		public Object getOriginalPropertyValue()
+		{
+			return originalPropertyValue;
+		}
+
+		public void setOriginalPropertyValue(Object originalPropertyValue)
+		{
+			this.originalPropertyValue = originalPropertyValue;
 		}
 
 		public Object getUpdatePropertyValue()

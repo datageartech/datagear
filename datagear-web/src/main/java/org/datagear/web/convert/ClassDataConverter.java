@@ -45,7 +45,13 @@ public class ClassDataConverter extends AbstractDataConverter
 	 */
 	public <T> T convert(Object obj, Class<T> type) throws ConverterException
 	{
-		return convertObj(null, obj, type, new RefContext());
+		RefContext refContext = new RefContext();
+
+		T target = convertObj(null, obj, type, refContext);
+
+		handleLazyRefs(target, refContext);
+
+		return target;
 	}
 
 	/**
@@ -58,7 +64,13 @@ public class ClassDataConverter extends AbstractDataConverter
 	 */
 	public <T> T[] convertToArray(Object obj, Class<T> type) throws ConverterException
 	{
-		return convertObjToArray(null, obj, type, new RefContext());
+		RefContext refContext = new RefContext();
+
+		T[] target = convertObjToArray(null, obj, type, refContext);
+
+		handleLazyRefs(target, refContext);
+
+		return target;
 	}
 
 	/**
@@ -73,7 +85,13 @@ public class ClassDataConverter extends AbstractDataConverter
 	public <T> Collection<T> convertToCollection(Object obj, Class<T> type, Class<? extends Collection> collectionType)
 			throws ConverterException
 	{
-		return convertObjToCollection(null, obj, type, collectionType, new RefContext());
+		RefContext refContext = new RefContext();
+
+		Collection<T> target = convertObjToCollection(null, obj, type, collectionType, refContext);
+
+		handleLazyRefs(target, refContext);
+
+		return target;
 	}
 
 	/**
@@ -137,9 +155,18 @@ public class ClassDataConverter extends AbstractDataConverter
 
 		if (isRefMap(map))
 		{
-			String ref = getRefValue(map);
+			String refValue = getRefValue(map);
+			Object refTarget = resolveRefTarget(refContext, refValue);
 
-			return (T) resolveRefTarget(ref, refContext);
+			// 引用有可能在目标未被解析前先被处理，此时需要延迟处理
+			if (refTarget != null)
+				return (T) refTarget;
+			else
+			{
+				refContext.addLazyRefs(namePath, refValue);
+
+				return null;
+			}
 		}
 
 		T re = createInstance(type);
@@ -511,6 +538,121 @@ public class ClassDataConverter extends AbstractDataConverter
 		}
 
 		return re;
+	}
+
+	/**
+	 * 处理延迟引用。
+	 * 
+	 * @param obj
+	 * @param refContext
+	 */
+	protected void handleLazyRefs(Object obj, RefContext refContext)
+	{
+		if (obj == null)
+			return;
+
+		if (!refContext.hasLazyRefs())
+			return;
+
+		Map<String, String> lazyRefs = refContext.getLazyRefs();
+
+		for (Map.Entry<String, String> entry : lazyRefs.entrySet())
+		{
+			String refValue = entry.getValue();
+
+			Object target = resolveRefTarget(refContext, refValue);
+
+			if (target != null)
+			{
+				PropertyPath propertyPath = PropertyPath.valueOf(entry.getKey());
+
+				setValue(obj, propertyPath, target);
+			}
+		}
+	}
+
+	/**
+	 * 设置对象属性值。
+	 * 
+	 * @param obj
+	 * @param propertyPath
+	 * @param value
+	 */
+	@SuppressWarnings("unchecked")
+	protected void setValue(Object obj, PropertyPath propertyPath, Object value)
+	{
+		Object owner = obj;
+
+		for (int i = 0, len = propertyPath.length(); i < len; i++)
+		{
+			if (owner == null)
+				throw new ConverterException("The owner object of index [" + i + "] must not be null");
+
+			if (i == len - 1)
+			{
+				if (owner instanceof Map<?, ?>)
+				{
+					if (!propertyPath.isProperty(i))
+						throw new ConverterException("The " + i + "-th must be property of [" + propertyPath + "]");
+
+					((Map<String, Object>) owner).put(propertyPath.getPropertyName(i), value);
+				}
+				else if (owner instanceof Object[])
+				{
+					if (!propertyPath.isElement(i))
+						throw new ConverterException("The " + i + "-th must be element of [" + propertyPath + "]");
+
+					((Object[]) owner)[propertyPath.getElementIndex(i)] = value;
+				}
+				else if (owner instanceof List<?>)
+				{
+					if (!propertyPath.isElement(i))
+						throw new ConverterException("The " + i + "-th must be element of [" + propertyPath + "]");
+
+					((List<Object>) owner).set(propertyPath.getElementIndex(i), value);
+				}
+				else
+				{
+					if (!propertyPath.isProperty(i))
+						throw new ConverterException("The " + i + "-th must be property of [" + propertyPath + "]");
+
+					BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(owner);
+					beanWrapper.setPropertyValue(propertyPath.getPropertyName(i), value);
+				}
+			}
+			else
+			{
+				if (owner instanceof Map<?, ?>)
+				{
+					if (!propertyPath.isProperty(i))
+						throw new ConverterException("The " + i + "-th must be property of [" + propertyPath + "]");
+
+					owner = ((Map<String, Object>) owner).get(propertyPath.getPropertyName(i));
+				}
+				else if (owner instanceof Object[])
+				{
+					if (!propertyPath.isElement(i))
+						throw new ConverterException("The " + i + "-th must be element of [" + propertyPath + "]");
+
+					owner = ((Object[]) owner)[propertyPath.getElementIndex(i)];
+				}
+				else if (owner instanceof List<?>)
+				{
+					if (!propertyPath.isElement(i))
+						throw new ConverterException("The " + i + "-th must be element of [" + propertyPath + "]");
+
+					owner = ((List<Object>) owner).get(propertyPath.getElementIndex(i));
+				}
+				else
+				{
+					if (!propertyPath.isProperty(i))
+						throw new ConverterException("The " + i + "-th must be property of [" + propertyPath + "]");
+
+					BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(owner);
+					owner = beanWrapper.getPropertyValue(propertyPath.getPropertyName(i));
+				}
+			}
+		}
 	}
 
 	/**
