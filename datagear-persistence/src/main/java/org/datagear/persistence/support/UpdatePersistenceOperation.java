@@ -406,28 +406,32 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		count = updateModelTableData(cn, dialect, table, model, originalCondition, updateProperties, updateObj,
 				originalPropertyValues, extraColumnNames, extraColumnValues, ignorePropertyName);
 
-		// 处理KeyRule.isManually()为false的更新属性值操作
-		if (!updateInfoForAutoKeyUpdateRules.isEmpty())
+		// 如果count=0，说明记录不存在，不应该再更新子记录，会报外键不存在的错
+		if (count != 0)
 		{
-			// 在执行updateModelTableData后，关联外键会被级联更新，所以要使用updateObj构造条件
-			SqlBuilder updateCondition = buildRecordCondition(cn, dialect, model, updateObj, null);
-
-			for (UpdateInfoForAutoKeyUpdateRule updateInfo : updateInfoForAutoKeyUpdateRules)
+			// 处理KeyRule.isManually()为false的更新属性值操作
+			if (!updateInfoForAutoKeyUpdateRules.isEmpty())
 			{
-				Object updatePropertyValue = updateInfo.getUpdatePropertyValue();
+				// 在执行updateModelTableData后，关联外键会被级联更新，所以要使用updateObj构造条件
+				SqlBuilder updateCondition = buildRecordCondition(cn, dialect, model, updateObj, null);
 
-				int myCount = updatePropertyTableData(cn, dialect, table, model, updateCondition,
-						updateInfo.getProperty(), updateInfo.getPropertyModelMapper(), null,
-						updateInfo.getOriginalPropertyValue(), updatePropertyValue, null, false,
-						expressionEvaluationContext);
+				for (UpdateInfoForAutoKeyUpdateRule updateInfo : updateInfoForAutoKeyUpdateRules)
+				{
+					Object updatePropertyValue = updateInfo.getUpdatePropertyValue();
 
-				if (myCount == 0)
-					myCount = insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model, updateObj,
-							updateInfo.getProperty(), updateInfo.getPropertyModelMapper(),
-							new Object[] { updatePropertyValue }, null, expressionEvaluationContext);
+					int myCount = updatePropertyTableData(cn, dialect, table, model, updateCondition,
+							updateInfo.getProperty(), updateInfo.getPropertyModelMapper(), null,
+							updateInfo.getOriginalPropertyValue(), updatePropertyValue, null, false,
+							expressionEvaluationContext);
 
-				if (propertyUpdated == false && myCount > 0)
-					propertyUpdated = true;
+					if (myCount == 0)
+						myCount = insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model,
+								updateObj, updateInfo.getProperty(), updateInfo.getPropertyModelMapper(),
+								new Object[] { updatePropertyValue }, null, expressionEvaluationContext);
+
+					if (propertyUpdated == false && myCount > 0)
+						propertyUpdated = true;
+				}
 			}
 		}
 

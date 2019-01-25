@@ -14,9 +14,9 @@
 		<input id="${pageId}-editGridSwitch" type="checkbox" value="1" />
 	</div>
 	<div class="edit-grid-operation">
-		<button type="button" class="button-restore highlight" style="display: none;"><fmt:message key='restore' /></button>
-		<button type="button" class="button-restore-all highlight" style="display: none;"><fmt:message key='restoreAll' /></button>
-		<button type="button" class="button-save recommended" style="display: none;"><fmt:message key='save' /></button>
+		<button type="button" class="edit-grid-button button-restore highlight" style="display: none;"><fmt:message key='restore' /></button>
+		<button type="button" class="edit-grid-button button-restore-all highlight" style="display: none;"><fmt:message key='restoreAll' /></button>
+		<button type="button" class="edit-grid-button button-save recommended" style="display: none;"><fmt:message key='save' /></button>
 	</div>
 </div>
 <%

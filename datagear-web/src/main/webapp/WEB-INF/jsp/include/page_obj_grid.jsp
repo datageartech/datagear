@@ -169,7 +169,7 @@ page_js_obj.jsp
 		return po.buildDataTableSettings(settings);
 	};
 	
-	po.checkColumnPropertyName = "___DATA_GEAR_ZY_CHECK_COLUMN_PROPERTY___";
+	po.TABLE_CHECK_COLUMN_PROPERTY_NAME = "___DATA_GEAR_ZY_CHECK_COLUMN_PROPERTY___";
 	
 	/**
 	 * 构建表格选项。
@@ -179,7 +179,7 @@ page_js_obj.jsp
 	{
 		var newColumns = [
 				{
-					title : "<fmt:message key='select' />", data : po.checkColumnPropertyName, defaultContent: "", width : "3em",
+					title : "<fmt:message key='select' />", data : po.TABLE_CHECK_COLUMN_PROPERTY_NAME, defaultContent: "", width : "3em",
 					orderable : false, render : po.renderCheckColumn, className : "column-check"
 				}
 			];
@@ -301,12 +301,12 @@ page_js_obj.jsp
 		po.table().DataTable().draw();
 	};
 	
-	po.setTableData = function(tableDatas)
+	po.setTableData = function(data, dataTable)
 	{
-		po.deleteAllRow();
-		po.addRowData(tableDatas);
+		dataTable = (dataTable || po.table().DataTable());
+		$.setDataTableData(dataTable, data);
 	};
-
+	
 	//单选处理函数
 	po.executeOnSelect = function(callback)
 	{

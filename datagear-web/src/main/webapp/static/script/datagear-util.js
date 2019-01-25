@@ -921,6 +921,34 @@
 		},
 		
 		/**
+		 * 设置表格数据。
+		 */
+		setDataTableData : function(dataTable, data, notDraw)
+		{
+			var rows = dataTable.rows();
+			var removeRowIndexes = [];
+			var dataIndex = 0;
+			
+			rows.every(function(rowIndex)
+			{
+				if(dataIndex >= data.length)
+					removeRowIndexes.push(rowIndex);
+				else
+					this.data(data[dataIndex]);
+				
+				dataIndex++;
+			});
+			
+			for(; dataIndex<data.length; dataIndex++)
+				var row = dataTable.row.add(data[dataIndex]);
+			
+			dataTable.rows(removeRowIndexes).remove();
+			
+			if(!notDraw)
+				dataTable.draw();
+		},
+		
+		/**
 		 * 处理点击选中单元格事件。
 		 */
 		handleCellSelectionForClick : function(dataTable, clickEvent, $clickCell)
@@ -1400,7 +1428,7 @@
 		    aStack.pop();
 		    bStack.pop();
 		    
-		    return true;
+		    return (a == b);
 		},
 	});
 	
