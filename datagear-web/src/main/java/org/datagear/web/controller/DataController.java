@@ -14,10 +14,9 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -607,15 +606,18 @@ public class DataController extends AbstractSchemaModelController
 				Connection cn = getConnection();
 
 				Object[] updates = modelDataConverter.convertToArray(updatesParam, model);
-				Object[][] updatePropertyValuess = null;
 
 				Object[] adds = modelDataConverter.convertToArray(addsParam, model);
 				Object[] deletes = modelDataConverter.convertToArray(deletesParam, model);
 
+				int expectedUpdateCount = (updates == null ? 0 : updates.length);
+				int expectedAddCount = (adds == null ? 0 : adds.length);
+				int expectedDeleteCount = (deletes == null ? 0 : deletes.length);
+
+				int acutalUpdateCount = 0, actualAddCount = 0, actualDeleteCount = 0;
+
 				if (updates != null && updates.length > 0)
 				{
-					updatePropertyValuess = new Object[updatePropertyNamess.length][];
-
 					for (int i = 0; i < updates.length; i++)
 					{
 						String[] updatePropertyNames = updatePropertyNamess[i];
@@ -628,29 +630,36 @@ public class DataController extends AbstractSchemaModelController
 						Object updateObj = MU.clone(model, updates[i]);
 						MU.setPropertyValues(model, updateObj, updateProperties, updatePropertyValues);
 
-						persistenceManager.update(cn, model, updateProperties, updates[i], updateObj);
+						int myUpdateCount = persistenceManager.update(cn, model, updateProperties, updates[i],
+								updateObj);
 
-						updatePropertyValuess[i] = MU.getPropertyValues(model, updateObj, updateProperties);
+						acutalUpdateCount += myUpdateCount;
 					}
 				}
 
-				if (adds != null)
+				if (adds != null && adds.length > 0)
 				{
 					for (int i = 0; i < adds.length; i++)
-						persistenceManager.insert(cn, model, adds[i]);
+					{
+						int myAddCount = persistenceManager.insert(cn, model, adds[i]);
+
+						actualAddCount += myAddCount;
+					}
 				}
 
-				if (deletes != null)
-					persistenceManager.delete(cn, model, deletes);
+				if (deletes != null && deletes.length > 0)
+				{
+					int myDeleteCount = persistenceManager.delete(cn, model, deletes);
 
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(
-						request);
+					actualDeleteCount += myDeleteCount;
+				}
 
-				Map<String, Object> responseDatas = new HashMap<String, Object>();
-				responseDatas.put("updatePropertyValuess", updatePropertyValuess);
-				responseDatas.put("adds", adds);
+				OperationMessage operationMessage = buildOperationMessageSuccess(request,
+						buildMessageCode("savessSuccess"), expectedUpdateCount, acutalUpdateCount, expectedAddCount,
+						actualAddCount, expectedDeleteCount, actualDeleteCount);
 
-				responseEntity.getBody().setData(responseDatas);
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageResponseEntity(HttpStatus.OK,
+						operationMessage);
 
 				return responseEntity;
 			}
@@ -1481,33 +1490,32 @@ public class DataController extends AbstractSchemaModelController
 			{
 				Connection cn = getConnection();
 
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(
-						request);
-
 				Object data = modelDataConverter.convert(dataParam, model);
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-				Property propertyTail = propertyPathInfo.getPropertyTail();
 				Model modelTail = propertyPathInfo.getModelTail();
 
-				Object updates = null;
-
-				if (propertyTail.isArray())
-					updates = modelDataConverter.convertToArray(updatesParam, modelTail);
-				else if (propertyTail.isCollection())
-					updates = modelDataConverter.convertToCollection(updatesParam, modelTail,
-							propertyTail.getCollectionType());
+				Object updates = modelDataConverter.convertToPropertyValue(propertyPathInfo.getOwnerObjTail(),
+						propertyPathInfo.getOwnerModelTail(), updatesParam,
+						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
 
 				propertyPathInfo.setValueTail(updates);
-
-				Object[][] updatePropertyValuess = null;
 
 				Object[] adds = modelDataConverter.convertToArray(addsParam, modelTail);
 				Object[] deletes = modelDataConverter.convertToArray(deletesParam, modelTail);
 
+				int expectedUpdateCount = 0;
+				int expectedAddCount = (adds == null ? 0 : adds.length);
+				int expectedDeleteCount = (deletes == null ? 0 : deletes.length);
+
+				if (updates instanceof Object[])
+					expectedUpdateCount = ((Object[]) updates).length;
+				else if (updates instanceof Collection<?>)
+					expectedUpdateCount = ((Collection<?>) updates).size();
+
+				int acutalUpdateCount = 0, actualAddCount = 0, actualDeleteCount = 0;
+
 				if (updates != null)
 				{
-					updatePropertyValuess = new Object[updatePropertyValueParamss.length][];
-
 					for (int i = 0; i < updatePropertyValueParamss.length; i++)
 					{
 						PropertyPath myPropertyPath = PropertyPath
@@ -1526,24 +1534,37 @@ public class DataController extends AbstractSchemaModelController
 						Object updateObj = MU.clone(model, myPropertyPathInfo.getValueTail());
 						MU.setPropertyValues(model, updateObj, updatePropertyProperties, updatePropertyPropertyValues);
 
-						persistenceManager.updateMultiplePropValueElement(cn, model, data, myPropertyPathInfo,
-								updatePropertyProperties, updateObj);
+						int myUpdateCount = persistenceManager.updateMultiplePropValueElement(cn, model, data,
+								myPropertyPathInfo, updatePropertyProperties, updateObj);
 
-						updatePropertyValuess[i] = MU.getPropertyValues(modelTail, updateObj, updatePropertyProperties);
+						acutalUpdateCount += myUpdateCount;
 					}
 				}
 
+				propertyPathInfo.setValueTail(null);
+
 				if (adds != null && adds.length > 0)
-					persistenceManager.insertMultiplePropValueElement(cn, model, data, propertyPathInfo, adds);
+				{
+					int myAddCount = persistenceManager.insertMultiplePropValueElement(cn, model, data,
+							propertyPathInfo, adds);
+
+					actualAddCount += myAddCount;
+				}
 
 				if (deletes != null && deletes.length > 0)
-					persistenceManager.deleteMultiplePropValueElement(cn, model, data, propertyPathInfo, deletes);
+				{
+					int myDeleteCount = persistenceManager.deleteMultiplePropValueElement(cn, model, data,
+							propertyPathInfo, deletes);
 
-				Map<String, Object> responseDatas = new HashMap<String, Object>();
-				responseDatas.put("updatePropertyValuess", updatePropertyValuess);
-				responseDatas.put("adds", adds);
+					actualDeleteCount += myDeleteCount;
+				}
 
-				responseEntity.getBody().setData(responseDatas);
+				OperationMessage operationMessage = buildOperationMessageSuccess(request,
+						buildMessageCode("savessSuccess"), expectedUpdateCount, acutalUpdateCount, expectedAddCount,
+						actualAddCount, expectedDeleteCount, actualDeleteCount);
+
+				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageResponseEntity(HttpStatus.OK,
+						operationMessage);
 
 				return responseEntity;
 			}
