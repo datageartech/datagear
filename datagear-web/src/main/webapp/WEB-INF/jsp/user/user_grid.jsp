@@ -164,14 +164,6 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 			visible : !hidden,
 			render: function(data, type, row, meta)
 			{
-				if(meta.col == 4)
-				{
-					if(data == true)
-						data = "<fmt:message key='yes' />";
-					else
-						data = "<fmt:message key='no' />";
-				}
-				
 				return $.escapeHtml(data);
 			},
 			defaultContent: "",
@@ -180,12 +172,23 @@ boolean selectonly = ("true".equalsIgnoreCase(getStringValue(request, AbstractCo
 		return option;
 	};
 	
+	var columnAdmin = po.buildTableColumValueOption("<fmt:message key='user.admin' />", "admin");
+	columnAdmin.render = function(data, type, row, meta)
+	{
+		if(data == true)
+			data = "<fmt:message key='yes' />";
+		else
+			data = "<fmt:message key='no' />";
+		
+		return data;
+	};
+	
 	var tableColumns = [
 		po.buildTableColumValueOption("<fmt:message key='user.user.id' />", "id", true),
 		po.buildTableColumValueOption("<fmt:message key='user.name' />", "name"),
 		po.buildTableColumValueOption("<fmt:message key='user.realName' />", "realName"),
 		po.buildTableColumValueOption("<fmt:message key='user.email' />", "email"),
-		po.buildTableColumValueOption("<fmt:message key='user.admin' />", "admin"),
+		columnAdmin,
 		po.buildTableColumValueOption("<fmt:message key='user.createTime' />", "createTime")
 	];
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
