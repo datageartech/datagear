@@ -276,7 +276,9 @@ page_js_obj.jsp
 		
 		$table.dataTable(tableSettings);
 		
-		$(".column-check", $($table.DataTable().table().header())).click(function()
+		var dataTable = $table.DataTable();
+		
+		$(".column-check", $(dataTable.table().header())).click(function()
 		{
 			var $this = $(this);
 			var checked = $this.hasClass("all-checked");
@@ -294,6 +296,10 @@ page_js_obj.jsp
 				$this.addClass("all-checked");
 			}
 		});
+		
+		//不加这一行，对话框中的初始空数据客户端表格添加记录后表头“选择”点击不起作用
+		if(tableSettings.fixedColumns)
+			dataTable.fixedColumns().relayout();
 	};
 	
 	po.refresh = function()

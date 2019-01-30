@@ -290,8 +290,6 @@ WebUtils.setPageId(request, gridPageId);
 		};
 		
 		po.initDataTable(settings, $editTable);
-		//不加这一行，表头“选择”点击不起作用
-		$editTable.DataTable().fixedColumns().relayout();
 		
 		po.editGridResizeHandler = po.bindResizeDataTable($editTable, "editTableResizeTimer");
 		po.bindEditDataTableEvents($editTable);
