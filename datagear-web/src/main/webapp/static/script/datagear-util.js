@@ -1376,6 +1376,10 @@
 			if($.type(b) != type)
 				return false;
 			
+			//基本类型
+			if(type != "array" && type != "object")
+				return (a == b);
+			
 			aStack = aStack || [];
 			bStack = bStack || [];
 			var length = aStack.length;
@@ -1428,7 +1432,7 @@
 		    aStack.pop();
 		    bStack.pop();
 		    
-		    return (a == b);
+		    return true;
 		},
 	});
 	

@@ -28,7 +28,8 @@ po.isClientPageData = undefined;
 		del : "<fmt:message key='delete' />",
 		view : "<fmt:message key='view' />",
 		select : "<fmt:message key='select' />",
-		submit : "<fmt:message key='save' />",
+		//如果页面参数里定义了提交回调函数，则submit标签改为“确定”
+		submit : (po.pageParam("submit") ? "<fmt:message key='confirm' />" : "<fmt:message key='save' />"),
 		reset : "<fmt:message key='reset' />",
 		batchSet :
 		{
@@ -43,16 +44,9 @@ po.isClientPageData = undefined;
 		}
 	};
 	
-	//如果页面参数里定义了提交回调函数，则标签改为“确定”
-	if(po.pageParam("submit"))
-		po.formLabels.submit = "<fmt:message key='confirm' />";
-	
 	po.propertySubmitHandler = function(property, propertyConcreteModel, propValue)
 	{
 		po.form().modelform("propValue", property.name, propValue);
-		
-		if(po.data)
-			$.model.propertyValue(po.data, property.name, propValue);
 	};
 	
 	po.propertyAfterSaveHandler = function(property, propertyConcreteModel, propValue)
@@ -72,14 +66,18 @@ po.isClientPageData = undefined;
 	};
 	
 	//属性操作选项函数
-	po.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
+	po.buildPropertyActionOptions = function(property, propertyConcreteModel, propertyValue, extraRequestParams, extraPageParams)
 	{
 		var requestParams =
 		{
-			"data" : po.data,
+			//如果页面是客户端数据则传递最新表单数据，因为不需要根据初始数据到服务端数据库查找
+			"data" : (po.isClientPageData ? po.form().modelform("data") : po.data),
 			"propertyPath" : $.propertyPath.escapePropertyName(property.name),
+			"propertyValue" : (po.isClientPageData ? null : propertyValue),
 			"isClientPageData" : po.isClientPageData
 		};
+		
+		var pageParams = {};
 		
 		if(extraRequestParams)
 			$.extend(requestParams, extraRequestParams);
@@ -87,15 +85,13 @@ po.isClientPageData = undefined;
 		//单元属性值都不即时保存
 		var clientSubmit = po.isPropertyActionClientSubmit(property, propertyConcreteModel);
 		
-		var pageParams = {};
-		
 		if(clientSubmit)
 		{
 			$.extend(pageParams,
 			{
-				"submit" : function(propValue)
+				"submit" : function(propertyValue)
 				{
-					po.propertySubmitHandler(property, propertyConcreteModel, propValue);
+					po.propertySubmitHandler(property, propertyConcreteModel, propertyValue);
 				}
 			});
 		}
@@ -103,9 +99,9 @@ po.isClientPageData = undefined;
 		{
 			$.extend(pageParams,
 			{
-				"afterSave" : function(propValue)
+				"afterSave" : function(propertyValue)
 				{
-					po.propertyAfterSaveHandler(property, propertyConcreteModel, propValue);
+					po.propertyAfterSaveHandler(property, propertyConcreteModel, propertyValue);
 				}
 			});
 		}
@@ -127,45 +123,49 @@ po.isClientPageData = undefined;
 		var options = po.buildPropertyActionOptions(property, propertyConcreteModel);
 		options.pinTitleButton=true;
 		
-		po.open(po.url("addSinglePropValue"), options);
+		if(po.isClientPageData)
+			po.open(po.url("addSinglePropValue"), options);
+		else
+			//服务端数据始终使用editSinglePropValue请求，因为受SelectOptions的影响，页面数据对象超过级联的属性值没有加载，无法判断是add还是edit
+			po.open(po.url("editSinglePropValue"), options);
 	};
 	
-	po.editSinglePropertyValue = function(property, propertyConcreteModel)
+	po.editSinglePropertyValue = function(property, propertyConcreteModel, propertyValue)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel);
+		var options = po.buildPropertyActionOptions(property, propertyConcreteModel, propertyValue);
 		options.pinTitleButton=true;
 		
 		po.open(po.url("editSinglePropValue"), options);
 	};
 	
-	po.deleteSinglePropertyValue = function(property, propertyConcreteModel)
+	po.deleteSinglePropertyValue = function(property, propertyConcreteModel, propertyValue)
 	{
-		po.propertySubmitHandler(property, propertyConcreteModel);
+		po.propertySubmitHandler(property, propertyConcreteModel, propertyValue);
 	};
 	
-	po.selectSinglePropertyValue = function(property, propertyConcreteModel)
+	po.selectSinglePropertyValue = function(property, propertyConcreteModel, propertyValue)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel);
+		var options = po.buildPropertyActionOptions(property, propertyConcreteModel, propertyValue);
 		$.setGridPageHeightOption(options);
 		po.open(po.url("selectPropValue"), options);
 	};
 	
-	po.viewSinglePropertyValue = function(property, propertyConcreteModel)
+	po.viewSinglePropertyValue = function(property, propertyConcreteModel, propertyValue)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel);
+		var options = po.buildPropertyActionOptions(property, propertyConcreteModel, propertyValue);
 		po.open(po.url("viewSinglePropValue"), options);
 	};
 	
-	po.editMultiplePropertyValue = function(property, propertyConcreteModel)
+	po.editMultiplePropertyValue = function(property, propertyConcreteModel, propertyValue)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel);
+		var options = po.buildPropertyActionOptions(property, propertyConcreteModel, propertyValue);
 		$.setGridPageHeightOption(options);
 		po.open(po.url("editMultiplePropValue"), options);
 	};
 	
-	po.viewMultiplePropertyValue = function(property, propertyConcreteModel)
+	po.viewMultiplePropertyValue = function(property, propertyConcreteModel, propertyValue)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel);
+		var options = po.buildPropertyActionOptions(property, propertyConcreteModel, propertyValue);
 		$.setGridPageHeightOption(options);
 		po.open(po.url("viewMultiplePropValue"), options);
 	};

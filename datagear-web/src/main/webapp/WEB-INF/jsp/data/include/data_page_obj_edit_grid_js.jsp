@@ -47,9 +47,10 @@ WebUtils.setPageId(request, editGridFormPageId);
 	};
 	
 	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
-	po.buildPropertyActionOptions = function(property, propertyModel, extraRequestParams, extraPageParams)
+	po.buildPropertyActionOptions = function(property, propertyModel, propertyValue, extraRequestParams, extraPageParams)
 	{
-		var actionParam = po.superBuildPropertyActionOptions(property, propertyModel, extraRequestParams, extraPageParams);
+		var actionParam = po.superBuildPropertyActionOptions(property, propertyModel, propertyValue,
+								extraRequestParams, extraPageParams);
 		
 		var singleRow = $.getDataTableRowIfSingle(po.currentCellIndexes);
 		
@@ -701,29 +702,29 @@ WebUtils.setPageId(request, gridPageId);
 			{
 				po.editGridFormPage.addSinglePropertyValue(property, propertyModel);
 			},
-			editSinglePropertyValue : function(property, propertyModel)
+			editSinglePropertyValue : function(property, propertyModel, propertyValue)
 			{
-				po.editGridFormPage.editSinglePropertyValue(property, propertyModel);
+				po.editGridFormPage.editSinglePropertyValue(property, propertyModel, propertyValue);
 			},
-			deleteSinglePropertyValue : function(property, propertyModel)
+			deleteSinglePropertyValue : function(property, propertyModel, propertyValue)
 			{
-				po.editGridFormPage.deleteSinglePropertyValue(property, propertyModel);
+				po.editGridFormPage.deleteSinglePropertyValue(property, propertyModel, propertyValue);
 			},
-			selectSinglePropertyValue : function(property, propertyModel)
+			selectSinglePropertyValue : function(property, propertyModel, propertyValue)
 			{
-				po.editGridFormPage.selectSinglePropertyValue(property, propertyModel);
+				po.editGridFormPage.selectSinglePropertyValue(property, propertyModel, propertyValue);
 			},
-			viewSinglePropertyValue : function(property, propertyModel)
+			viewSinglePropertyValue : function(property, propertyModel, propertyValue)
 			{
-				po.editGridFormPage.viewSinglePropertyValue(property, propertyModel);
+				po.editGridFormPage.viewSinglePropertyValue(property, propertyModel, propertyValue);
 			},
-			editMultiplePropertyValue : function(property, propertyModel)
+			editMultiplePropertyValue : function(property, propertyModel, propertyValue)
 			{
-				po.editGridFormPage.editMultiplePropertyValue(property, propertyModel);
+				po.editGridFormPage.editMultiplePropertyValue(property, propertyModel, propertyValue);
 			},
-			viewMultiplePropertyValue : function(property, propertyModel)
+			viewMultiplePropertyValue : function(property, propertyModel, propertyValue)
 			{
-				po.editGridFormPage.viewMultiplePropertyValue(property, propertyModel);
+				po.editGridFormPage.viewMultiplePropertyValue(property, propertyModel, propertyValue);
 			},
 			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
 			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",

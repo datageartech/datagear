@@ -31,8 +31,6 @@ boolean readonly = ("true".equalsIgnoreCase(getStringValue(request, "readonly"))
 boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet")));
 
 PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
-PropertyPathInfo propertyPathInfoObj = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
-boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyPathInfoObj);
 %>
 <html>
 <head>
@@ -60,25 +58,37 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 <script type="text/javascript">
 (function(po)
 {
+	po.data = ($.unref(<%writeJson(application, out, data);%>) || {});
+	po.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
+	po.propertyValue = ($.unref(<%writeJson(application, out, propertyValue);%>) || $.model.propertyPathValue(po.data, po.propertyPath));
 	po.readonly = <%=readonly%>;
 	po.submitAction = "<%=submitAction%>";
-	po.data = ($.unref(<%writeJson(application, out, data);%>) || {});
-	po.propertyValue = $.unref(<%writeJson(application, out, propertyValue);%>);
-	po.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
 	po.isClientPageData = <%=isClientPageData%>;
 	po.batchSet = <%=batchSet%>;
 	
+	if(!po.isClientPageData && po.propertyValue == null)
+		po.isClientPageData = true;
+	
 	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
-	po.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
+	po.buildPropertyActionOptions = function(property, propertyConcreteModel, propertyValue, extraRequestParams, extraPageParams)
 	{
-		var actionParam = po.superBuildPropertyActionOptions(property, propertyConcreteModel, extraRequestParams, extraPageParams);
+		var actionParam = po.superBuildPropertyActionOptions(property, propertyConcreteModel, propertyValue,
+				extraRequestParams, extraPageParams);
+		
+		if(po.isClientPageData)
+		{
+			//客户端属性值数据则传递最新表单数据，因为不需要根据初始属性值数据到服务端数据库查找
+			
+			var data = $.deepClone(po.data);
+			var formData = actionParam["data"]["data"];
+			$.model.propertyPathValue(data, po.propertyPath, formData); 
+			
+			actionParam["data"]["data"] = data;
+		}
+		else
+			actionParam["data"]["data"] = po.data;
 		
 		actionParam["data"]["propertyPath"] = $.propertyPath.concatPropertyName(po.propertyPath, property.name);
-		actionParam["data"]["data"] = po.data;
-		
-		//客户端属性值数据则传递最新表单数据，因为不需要根据初始属性值数据到服务端数据库查找
-		if(po.isClientPageData)
-			$.model.propertyPathValue(actionParam["data"]["data"], po.propertyPath, po.form().modelform("data")); 
 		
 		return actionParam;
 	};
@@ -93,11 +103,11 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 		{
 			model : propertyModel,
 			ignorePropertyNames : $.model.findMappedByWith(property, propertyModel),
-			data : (po.propertyValue || $.model.propertyPathValue(po.data, po.propertyPath)),
+			data : $.deepClone(po.propertyValue),
 			readonly : po.readonly,
 			submit : function()
 			{
-				var propValue = $(this).modelform("data");
+				var propertyValue = $(this).modelform("data");
 				var formParam = $(this).modelform("param");
 				
 				var close = true;
@@ -105,7 +115,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				//父页面定义了submit回调函数，则优先执行
 				if(po.pageParam("submit"))
 				{
-					close = (po.pageParamCall("submit", propValue, formParam) != false);
+					close = (po.pageParamCall("submit", propertyValue, formParam) != false);
 					
 					if(close && !$(this).modelform("isDialogPinned"))
 						po.close();
@@ -114,7 +124,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 				else
 				{
 					var thisForm = this;
-					var param = $.extend(formParam, { "data" : po.data, "propertyPath" : po.propertyPath, "propValue" : propValue });
+					var param = $.extend(formParam, { "data" : po.data, "propertyPath" : po.propertyPath, "propertyValue" : propertyValue });
 					
 					po.ajaxSubmitForHandleDuplication(po.submitAction, param, "<fmt:message key='save.continueIgnoreDuplicationTemplate' />",
 					{
@@ -129,7 +139,7 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 							var isDialogPinned = $form.modelform("isDialogPinned");
 							
 							$form.modelform("enableOperation");
-
+							
 							po.refreshParent();
 							
 							if(batchSubmit)
@@ -137,8 +147,11 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 							else
 							{
 								//如果有初始数据，则更新为已保存至后台的数据
-								if(po.data)
+								if(po.propertyValue != null)
+								{
 									$.model.propertyPathValue(po.data, po.propertyPath, operationMessage.data);
+									po.propertyValue = operationMessage.data;
+								}
 								
 								close = (po.pageParamCall("afterSave", operationMessage.data) != false);
 								
@@ -165,29 +178,29 @@ boolean isPrivatePropertyModel = ModelUtils.isPrivatePropertyModelTail(propertyP
 			{
 				po.addSinglePropertyValue(property, propertyConcreteModel);
 			},
-			editSinglePropertyValue : function(property, propertyConcreteModel)
+			editSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.editSinglePropertyValue(property, propertyConcreteModel);
+				po.editSinglePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
-			deleteSinglePropertyValue : function(property, propertyConcreteModel)
+			deleteSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.deleteSinglePropertyValue(property, propertyConcreteModel);
+				po.deleteSinglePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
-			selectSinglePropertyValue : function(property, propertyConcreteModel)
+			selectSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.selectSinglePropertyValue(property, propertyConcreteModel);
+				po.selectSinglePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
-			viewSinglePropertyValue : function(property, propertyConcreteModel)
+			viewSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.viewSinglePropertyValue(property, propertyConcreteModel);
+				po.viewSinglePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
-			editMultiplePropertyValue : function(property, propertyConcreteModel)
+			editMultiplePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.editMultiplePropertyValue(property, propertyConcreteModel);
+				po.editMultiplePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
-			viewMultiplePropertyValue : function(property, propertyConcreteModel)
+			viewMultiplePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.viewMultiplePropertyValue(property, propertyConcreteModel);
+				po.viewMultiplePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
 			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
 			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",

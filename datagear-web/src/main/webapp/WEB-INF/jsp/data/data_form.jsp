@@ -54,24 +54,14 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 <script type="text/javascript">
 (function(po)
 {
+	po.data = $.unref(<%writeJson(application, out, data);%>);
 	po.readonly = <%=readonly%>;
 	po.submitAction = "<%=submitAction%>";
-	po.originalData = $.unref(<%writeJson(application, out, data);%>);
-	po.data = $.deepClone(po.originalData);
 	po.isClientPageData = <%=isClientPageData%>;
 	po.batchSet = <%=batchSet%>;
 	
-	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
-	po.buildPropertyActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
-	{
-		var actionParam = po.superBuildPropertyActionOptions(property, propertyConcreteModel, extraRequestParams, extraPageParams);
-		
-		//客户端数据则传递最新表单数据，因为不需要根据初始数据到服务端数据库查找
-		if(po.isClientPageData)
-			actionParam["data"]["data"] = po.form().modelform("data");
-		
-		return actionParam;
-	};
+	if(!po.isClientPageData && po.data == null)
+		po.isClientPageData = true;
 	
 	po.onModel(function(model)
 	{
@@ -79,11 +69,12 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 		{
 			model : model,
 			ignorePropertyNames : "<%=WebUtils.escapeJavaScriptStringValue(ignorePropertyName)%>",
-			data : po.data,
+			//不能直接使用po.data，因为po.data作为原始数据，不应该被表单编辑变更
+			data : $.deepClone(po.data),
 			readonly : po.readonly,
 			submit : function()
 			{
-				var data = $(this).modelform("data");
+				var formData = $(this).modelform("data");
 				var formParam = $(this).modelform("param");
 				
 				var close = true;
@@ -91,7 +82,7 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 				//父页面定义了submit回调函数，则优先执行
 				if(po.pageParam("submit"))
 				{
-					close = (po.pageParamCall("submit", data, formParam) != false);
+					close = (po.pageParamCall("submit", formData, formParam) != false);
 					
 					if(close && !$(this).modelform("isDialogPinned"))
 						po.close();
@@ -100,7 +91,7 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 				else
 				{
 					var thisForm = this;
-					var param = $.extend(formParam, {"data" : data, "originalData" : po.originalData});
+					var param = $.extend(formParam, {"data" : formData, "originalData" : po.data});
 					
 					po.ajaxSubmitForHandleDuplication(po.submitAction, param, "<fmt:message key='save.continueIgnoreDuplicationTemplate' />",
 					{
@@ -122,11 +113,9 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 								;
 							else
 							{
-								po.data = $.unref(operationMessage.data);
-								//如果有初始数据，则更新为已保存至后台的数据
-								//注意：不能直接赋值po.data，因为是同一个引用，有可能会被修改，而po.originalData不应该被修改
-								if(po.originalData)
-									po.originalData = $.deepClone(operationMessage.data);
+								//如果有初值，则更新为后台已保存值（编辑时）；如果没有初值，则不更新（添加时）
+								if(po.data)
+									po.data = operationMessage.data;
 								
 								close = (po.pageParamCall("afterSave", operationMessage.data) != false);
 								
@@ -153,29 +142,29 @@ boolean batchSet = ("true".equalsIgnoreCase(getStringValue(request, "batchSet"))
 			{
 				po.addSinglePropertyValue(property, propertyConcreteModel);
 			},
-			editSinglePropertyValue : function(property, propertyConcreteModel)
+			editSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.editSinglePropertyValue(property, propertyConcreteModel);
+				po.editSinglePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
-			deleteSinglePropertyValue : function(property, propertyConcreteModel)
+			deleteSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.deleteSinglePropertyValue(property, propertyConcreteModel);
+				po.deleteSinglePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
-			selectSinglePropertyValue : function(property, propertyConcreteModel)
+			selectSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.selectSinglePropertyValue(property, propertyConcreteModel);
+				po.selectSinglePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
-			viewSinglePropertyValue : function(property, propertyConcreteModel)
+			viewSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.viewSinglePropertyValue(property, propertyConcreteModel);
+				po.viewSinglePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
-			editMultiplePropertyValue : function(property, propertyConcreteModel)
+			editMultiplePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.editMultiplePropertyValue(property, propertyConcreteModel);
+				po.editMultiplePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
-			viewMultiplePropertyValue : function(property, propertyConcreteModel)
+			viewMultiplePropertyValue : function(property, propertyConcreteModel, propertyValue)
 			{
-				po.viewMultiplePropertyValue(property, propertyConcreteModel);
+				po.viewMultiplePropertyValue(property, propertyConcreteModel, propertyValue);
 			},
 			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
 			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",

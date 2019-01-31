@@ -18,6 +18,8 @@
 Object data = request.getAttribute("data");
 //属性名称，不允许null
 String propertyPath = getStringValue(request, "propertyPath");
+//初始属性值，可用于设置初始表单数据，允许为null
+Object propertyValue = request.getAttribute("propertyValue");
 //所有表格数据是否都是客户端数据，默认为false
 boolean isClientPageData = ("true".equalsIgnoreCase(getStringValue(request, "isClientPageData")));
 //标题操作标签I18N关键字，不允许null
@@ -96,9 +98,10 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 <script type="text/javascript">
 (function(po)
 {
-	po.readonly = <%=readonly%>;
-	po.data = $.unref(<%writeJson(application, out, data);%>);
+	po.data = ($.unref(<%writeJson(application, out, data);%>) || {});
 	po.propertyPath = "<%=WebUtils.escapeJavaScriptStringValue(propertyPath)%>";
+	po.propertyValue = ($.unref(<%writeJson(application, out, propertyValue);%>) || $.model.propertyPathValue(po.data, po.propertyPath));
+	po.readonly = <%=readonly%>;
 	po.isClientPageData = <%=isClientPageData%>;
 	
 	<%if(!isClientPageData){%>
@@ -133,7 +136,7 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 	po.storeGridPropertyValue = function(gridPropertyValue)
 	{
 		if(gridPropertyValue == undefined)
-			var gridPropertyValue = po.getRowsData();
+			gridPropertyValue = po.getRowsData();
 		
 		$.model.propertyPathValue(po.data, po.propertyPath, gridPropertyValue);
 		
@@ -142,9 +145,9 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 	
 	<%if(isAllowEditGrid){%>
 	po.editGridFormPage.dpvgSuperBuildPropertyActionOptions = po.editGridFormPage.buildPropertyActionOptions;
-	po.editGridFormPage.buildPropertyActionOptions = function(property, propertyModel, extraRequestParams, extraPageParams)
+	po.editGridFormPage.buildPropertyActionOptions = function(property, propertyModel, propertyValue, extraRequestParams, extraPageParams)
 	{
-		var actionParam = po.editGridFormPage.dpvgSuperBuildPropertyActionOptions(property, propertyModel, extraRequestParams,
+		var actionParam = po.editGridFormPage.dpvgSuperBuildPropertyActionOptions(property, propertyModel, propertyValue, extraRequestParams,
 				extraPageParams);
 		
 		if(po.editGridFormPage.dpvgData == null)
@@ -242,6 +245,8 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 				}
 				else
 				{
+					var originalPropertyValue = $.model.propertyPathValue(po.data, po.propertyPath);
+					
 					$.model.propertyPathValue(po.data, po.propertyPath, [ row ]);
 					var propertyPath = $.propertyPath.concatElementIndex(po.propertyPath, 0);
 					
@@ -252,7 +257,7 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 					
 					po.open(po.url("viewMultiplePropValueElement"), options);
 					
-					$.model.propertyPathValue(po.data, po.propertyPath, []);
+					$.model.propertyPathValue(po.data, po.propertyPath, originalPropertyValue);
 				}
 			});
 		});
@@ -362,6 +367,8 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 					}
 					else
 					{
+						var originalPropertyValue = $.model.propertyPathValue(po.data, po.propertyPath);
+						
 						$.model.propertyPathValue(po.data, po.propertyPath, [ row ]);
 						var propertyPath = $.propertyPath.concatElementIndex(po.propertyPath, 0);
 						
@@ -374,7 +381,7 @@ boolean isAllowEditGrid = (isPrivatePropertyModel && !readonly);
 						
 						po.open(po.url("editMultiplePropValueElement"), options);
 						
-						$.model.propertyPathValue(po.data, po.propertyPath, []);
+						$.model.propertyPathValue(po.data, po.propertyPath, originalPropertyValue);
 					}
 				});
 			});

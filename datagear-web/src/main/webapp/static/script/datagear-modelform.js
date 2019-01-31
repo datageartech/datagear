@@ -49,22 +49,22 @@
 			addSinglePropertyValue : function(property, propertyConcreteModel){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，编辑单元属性值处理函数
-			editSinglePropertyValue : function(property, propertyConcreteModel){ throw new Error("TODO"); },
+			editSinglePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，删除单元属性值处理函数
-			deleteSinglePropertyValue : function(property, propertyConcreteModel){ throw new Error("TODO"); },
+			deleteSinglePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，选择单元属性值处理函数
-			selectSinglePropertyValue : function(property, propertyConcreteModel){ throw new Error("TODO"); },
+			selectSinglePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=true"时必须，查看单元属性值处理函数
-			viewSinglePropertyValue : function(property, propertyConcreteModel){ throw new Error("TODO"); },
+			viewSinglePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，编辑多元属性值处理函数
-			editMultiplePropertyValue : function(property, propertyConcreteModel){ throw new Error("TODO"); },
+			editMultiplePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=true"时必须，查看多元属性值处理函数
-			viewMultiplePropertyValue : function(property, propertyConcreteModel){ throw new Error("TODO"); },
+			viewMultiplePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，文件属性值上传地址
 			filePropertyUploadURL : "",
@@ -534,7 +534,7 @@
 			var options = this.options;
 			var propName = property.name;
 			
-			var button=$("<input type='button' />").attr("__propName", propName);
+			var button=$("<input type='button' />").attr("__propertyName", propName);
 			
 			button.attr("value", (options.readonly ? options.labels.view : options.labels.edit));
 			
@@ -544,12 +544,19 @@
 			{
 				button.click(function()
 				{
-					var myPropName = $(this).attr("__propName");
-					var myproperty = $.model.getProperty(_this.options.model, myPropName);
-					var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
+		    		var myPropertyName = $(this).attr("__propertyName");
+					var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
 					
-					var callback = (_this.options.readonly ? _this.options.viewMultiplePropertyValue : _this.options.editMultiplePropertyValue);
-					callback.call(_this.element, myproperty, myConcreteModel);
+					if(_this.options.readonly)
+					{
+						_this.options.viewMultiplePropertyValue.call(_this.element, myPropertyInfo.property,
+								myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+					}
+					else
+					{
+						_this.options.editMultiplePropertyValue.call(_this.element, myPropertyInfo.property,
+								myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+					}
 				});
 			}
 			
@@ -608,11 +615,11 @@
 				.val("").appendTo(valuediv);
 			
 			var fileInputShow = $("<input type='text' class='ui-widget ui-widget-content file-input-show' />").attr("name", fileInputShowName)
-				.val("").attr("__propName", propName).appendTo(valuediv).attr("readonly", "readonly");
+				.val("").attr("__propertyName", propName).appendTo(valuediv).attr("readonly", "readonly");
 			
 			if(options.readonly)
 			{
-				var fileDownloadButton = $("<button class='download-button' />").attr("__propName", propName)
+				var fileDownloadButton = $("<button class='download-button' />").attr("__propertyName", propName)
 					.html(options.labels.downloadFile)
 					.appendTo(valuediv);
 				
@@ -625,11 +632,11 @@
 				
 				fileDownloadButton.click(function()
 				{
-					var myPropName = $(this).attr("__propName");
-					var myproperty = $.model.getProperty(_this.options.model, myPropName);
-					var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
-		    		
-	    			_this.options.downloadSinglePropertyValueFile.call(_this.element, myproperty, myConcreteModel);
+		    		var myPropertyName = $(this).attr("__propertyName");
+					var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
+					
+	    			_this.options.downloadSinglePropertyValueFile.call(_this.element, myPropertyInfo.property,
+							myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
 				});
 			}
 			else
@@ -639,7 +646,7 @@
 					//Backspace删除属性值
 					if(event.keyCode == $.ui.keyCode.BACKSPACE)
 					{
-						var propName = $(this).attr("__propName");
+						var propName = $(this).attr("__propertyName");
 						var propertyWidget = _this._propertyWidgets[propName];
 						
 						propertyWidget.setValue(null);
@@ -657,7 +664,7 @@
 				
 				fileInput.fileupload(
 				{
-					__propName : propName,
+					__propertyName : propName,
 					__propValue : propValue,
 					url : options.filePropertyUploadURL,
 					paramName : options.filePropertyUploadParamName,
@@ -665,7 +672,7 @@
 					{
 						var clientFileName = this.files[0].name;
 						
-						var propName = this.__propName;
+						var propName = this.__propertyName;
 						var propValue = this.__propValue;
 						var propertyWidget = _this._propertyWidgets[propName];
 						
@@ -702,8 +709,8 @@
 				});
 				
 				var moreActionSelect = $("<select />").appendTo(actionGroup);
-				var downloadOption = $("<option value='download' />").attr("__propName", propName).html(options.labels.downloadFile).appendTo(moreActionSelect);
-				var delOption = $("<option value='del' />").attr("__propName", propName).html(options.labels.del).appendTo(moreActionSelect);
+				var downloadOption = $("<option value='download' />").attr("__propertyName", propName).html(options.labels.downloadFile).appendTo(moreActionSelect);
+				var delOption = $("<option value='del' />").attr("__propertyName", propName).html(options.labels.del).appendTo(moreActionSelect);
 				moreActionSelect.selectmenu(
 				{
 					appendTo: valuediv,
@@ -714,23 +721,21 @@
 				    select: function(event, ui)
 			    	{
 			    		var action = $(ui.item).attr("value");
-			    		var myPropName = $(ui.item.element).attr("__propName");
-			    		
-						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myPropertyWidget = _this._propertyWidgets[myPropName];
-		    			var propValue = myPropertyWidget.getValue();
-						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
-			    		
+			    		var myPropertyName = $(ui.item.element).attr("__propertyName");
+						var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
+						
 			    		if("download" == action)
 			    		{
-			    			var rawValue = $.model.getShowableRawValue(propValue);
+			    			var rawValue = $.model.getShowableRawValue(myPropertyInfo.propertyValue);
 			    			
 			    			if(rawValue)
-			    				_this.options.downloadSinglePropertyValueFile.call(_this.element, myproperty, myConcreteModel);
+			    				_this.options.downloadSinglePropertyValueFile.call(_this.element, myPropertyInfo.property,
+										myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
 			    		}
 			    		else if("del" == action)
 			    		{
-			    			_this.options.deleteSinglePropertyValue.call(_this.element, myproperty, myConcreteModel);
+			    			_this.options.deleteSinglePropertyValue.call(_this.element, myPropertyInfo.property,
+									myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
 			    		}
 			    	}
 				});
@@ -857,7 +862,7 @@
 			var textinput=$("<input type='text' class='ui-widget ui-widget-content' />").attr("name", textinputName).attr("readonly", true)
 							.val($.model.tokenProperty(property, propValue)).appendTo(valuediv);
 			
-			var button=$("<input type='button' />").attr("__propName", propName);
+			var button=$("<input type='button' />").attr("__propertyName", propName);
 			
 			//只读
 			if(options.readonly)
@@ -870,10 +875,11 @@
 				{
 					button.click(function()
 					{
-						var myPropName = $(this).attr("__propName");
-						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
-						_this.options.viewSinglePropertyValue.call(_this.element, myproperty, myConcreteModel);
+			    		var myPropertyName = $(this).attr("__propertyName");
+						var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
+						
+						_this.options.viewSinglePropertyValue.call(_this.element, myPropertyInfo.property,
+								myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
 					});
 				}
 				
@@ -882,16 +888,16 @@
 			//可编辑
 			else
 			{
-				textinput.attr("__propName", propName).keydown(function(event)
+				textinput.attr("__propertyName", propName).keydown(function(event)
 				{
 					//Backspace删除属性值
 					if(event.keyCode == $.ui.keyCode.BACKSPACE)
 					{
-						var myPropName = $(this).attr("__propName");
-						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
+			    		var myPropertyName = $(this).attr("__propertyName");
+						var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
 						
-						_this.options.deleteSinglePropertyValue.call(_this.element, myproperty, myConcreteModel);
+						_this.options.deleteSinglePropertyValue.call(_this.element, myPropertyInfo.property,
+								myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
 					}
 				});
 				
@@ -904,14 +910,20 @@
 				{
 					button.attr("value", options.labels.edit).click(function()
 					{
-						var myPropName = $(this).attr("__propName");
-						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
-						var myPropertyWidget = _this._propertyWidgets[myPropName];
+			    		var myPropertyName = $(this).attr("__propertyName");
+						var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
 						
 						//属性值必须动态判断，因为界面编辑时也可能设置值
-						var callback = (myPropertyWidget.getValue() ? _this.options.editSinglePropertyValue : _this.options.addSinglePropertyValue);
-						callback.call(_this.element, myproperty, myConcreteModel);
+						if(myPropertyInfo.propertyValue != null)
+						{
+							_this.options.editSinglePropertyValue.call(_this.element, myPropertyInfo.property,
+									myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+						}
+						else
+						{
+							_this.options.addSinglePropertyValue.call(_this.element, myPropertyInfo.property,
+									myPropertyInfo.propertyModel);
+						}
 					});
 				}
 				//公有字段
@@ -919,18 +931,15 @@
 				{
 					button.attr("value", options.labels.select).click(function()
 					{
-						var myPropName = $(this).attr("__propName");
-						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
+			    		var myPropertyName = $(this).attr("__propertyName");
+						var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
 						
-						_this.options.selectSinglePropertyValue.call(_this.element, myproperty, myConcreteModel);
+						_this.options.selectSinglePropertyValue.call(_this.element, myPropertyInfo.property,
+								myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
 					});
-					
-					//共享属性这里暂时去掉添加、编辑操作了，因为和删除的概念不一致，因为删除仅会删除关联关系
-					//$("<option value='edit' />").attr("__propName", propName).html(_this.options.labels.edit).appendTo(moreActionSelect);
 				}
 				
-				var delOption = $("<option value='del' />").attr("__propName", propName).html(_this.options.labels.del).appendTo(moreActionSelect);
+				var delOption = $("<option value='del' />").attr("__propertyName", propName).html(_this.options.labels.del).appendTo(moreActionSelect);
 				
 				actionGroup.appendTo(valuediv);
 				moreActionSelect.selectmenu(
@@ -943,24 +952,13 @@
 				    select: function(event, ui)
 			    	{
 			    		var action = $(ui.item).attr("value");
-			    		var myPropName = $(ui.item.element).attr("__propName");
+			    		var myPropertyName = $(ui.item.element).attr("__propertyName");
+						var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
 			    		
-						var myproperty = $.model.getProperty(_this.options.model, myPropName);
-						var myConcreteModel = $.model.getPropertyModelByValue(myproperty, propValue);
-			    		
-						/*共享属性这里暂时去掉添加、编辑操作了，因为和删除的概念不一致，因为删除仅会删除关联关系
-			    		if("edit" == action)
-			    		{
-			    			var myPropertyWidget = _this._propertyWidgets[myPropName];
-							
-							//属性值必须动态判断，因为界面编辑时也可能设置值
-							var callback = (myPropertyWidget.getValue() ? _this.options.editSinglePropertyValue : _this.options.addSinglePropertyValue);
-							callback.call(_this.element, myproperty, myConcreteModel);
-			    		}
-			    		else */
 						if("del" == action)
 			    		{
-			    			_this.options.deleteSinglePropertyValue.call(_this.element, myproperty, myConcreteModel);
+			    			_this.options.deleteSinglePropertyValue.call(_this.element, myPropertyInfo.property,
+			    					myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
 			    		}
 			    	}
 				});
@@ -977,6 +975,24 @@
 			}
 			
 			this._addValidatorRequired(property, textinputName);
+		},
+		
+		_getPropertyInfo : function(propertyName)
+		{
+			var property = $.model.getProperty(this.options.model, propertyName);
+			var propertyWidget = this._propertyWidgets[propertyName];
+			var propertyValue = propertyWidget.getValue();
+			var propertyModel = $.model.getPropertyModelByValue(property, propertyValue);
+			
+			var propertyInfo = 
+			{
+				"property" : property,
+				"propertyWidget" : propertyWidget,
+				"propertyValue" : propertyValue,
+				"propertyModel" : propertyModel
+			};
+			
+			return propertyInfo;
 		},
 		
 		/**

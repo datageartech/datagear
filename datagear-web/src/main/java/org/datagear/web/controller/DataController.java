@@ -847,51 +847,13 @@ public class DataController extends AbstractSchemaModelController
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "add");
 				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, "true");
-				springModel.addAttribute("submitAction", "saveAddSinglePropValue");
+				springModel.addAttribute("submitAction", "saveSinglePropValue");
 			}
 		}.execute();
 
 		setFormPageAttributes(request, springModel);
 
 		return "/data/data_prop_value_form";
-	}
-
-	@RequestMapping(value = "/{schemaId}/{tableName}/saveAddSinglePropValue", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAddSinglePropValue(HttpServletRequest request,
-			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPath) throws Throwable
-	{
-		final Object dataParam = getParamMap(request, "data");
-		final Object propValueParam = getParamMap(request, "propValue");
-
-		Object propValue = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
-		{
-			@Override
-			protected Object execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-
-				Object propValue = modelDataConverter.convertToPropertyValue(propertyPathInfo.getOwnerObjTail(),
-						propertyPathInfo.getOwnerModelTail(), propValueParam,
-						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
-
-				persistenceManager.insertSinglePropValue(cn, model, data, propertyPathInfo, propValue);
-
-				return propValue;
-			}
-		}.execute();
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(propValue);
-
-		return responseEntity;
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/editSinglePropValue")
@@ -910,16 +872,19 @@ public class DataController extends AbstractSchemaModelController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
-				Connection cn = getConnection();
-
 				Object data = modelDataConverter.convert(dataParam, model);
-				Object propertyValue = null;
+
 				PropertyPathInfo propertyPathInfo = null;
 
 				if (propertyValueParam != null)
 				{
 					propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
-					propertyValue = modelDataConverter.convert(propertyValueParam, propertyPathInfo.getModelTail());
+
+					// 这里不应该使用convertToPropertyValue，因为它会添加双向关联，导致页面引用混乱，再保存时又会导致转换混乱
+					Object propertyValue = modelDataConverter.convert(propertyValueParam,
+							propertyPathInfo.getModelTail());
+
+					springModel.addAttribute("propertyValue", propertyValue);
 				}
 
 				if (isLoadPageData)
@@ -929,19 +894,23 @@ public class DataController extends AbstractSchemaModelController
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
-					List<Object> resultList = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
+					List<Object> resultList = persistenceManager.getPropValueByParam(getConnection(), model, data,
+							propertyPathInfo);
 
-					if (resultList == null || resultList.isEmpty())
-						throw new RecordNotFoundException();
+					Object originalPropertyValue = (resultList == null || resultList.isEmpty() ? null
+							: resultList.get(0));
 
-					propertyPathInfo.setValueTail(resultList.get(0));
+					// 设置最新原始属性值，因为受SelectOptions的影响，select到页面的data对象超过级联的属性值不会加载
+					propertyPathInfo.setValueTail(originalPropertyValue);
+
+					springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA,
+							(originalPropertyValue == null ? "true" : "false"));
 				}
 
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("propertyValue", propertyValue);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
-				springModel.addAttribute("submitAction", "saveEditSinglePropValue");
+				springModel.addAttribute("submitAction", "saveSinglePropValue");
 			}
 		}.execute();
 
@@ -950,9 +919,9 @@ public class DataController extends AbstractSchemaModelController
 		return "/data/data_prop_value_form";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/saveEditSinglePropValue", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/saveSinglePropValue", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditSinglePropValue(HttpServletRequest request,
+	public ResponseEntity<OperationMessage> saveSinglePropValue(HttpServletRequest request,
 			HttpServletResponse response, org.springframework.ui.Model springModel,
 			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
 			@RequestParam("propertyPath") final String propertyPath,
@@ -960,7 +929,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final Object propValueParam = getParamMap(request, "propValue");
+		final Object propValueParam = getParamMap(request, "propertyValue");
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
 				response, springModel, schemaId, tableName, false)
@@ -980,6 +949,8 @@ public class DataController extends AbstractSchemaModelController
 						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
 
 				int count = persistenceManager.updateSinglePropValue(cn, model, data, propertyPathInfo, propValue);
+				if (count == 0)
+					count = persistenceManager.insertSinglePropValue(cn, model, data, propertyPathInfo, propValue);
 
 				checkDuplicateRecord(1, count, ignoreDuplication);
 
@@ -1001,6 +972,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
+		final Object propertyValueParam = getParamMap(request, "propertyValue");
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
@@ -1009,27 +981,44 @@ public class DataController extends AbstractSchemaModelController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
-				Connection cn = getConnection();
-
 				Object data = modelDataConverter.convert(dataParam, model);
+
+				Object propertyValue = null;
+				PropertyPathInfo propertyPathInfo = null;
 
 				if (isLoadPageData)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
-							data);
+					if (propertyPathInfo == null)
+						propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
-					List<Object> resultList = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
+					List<Object> resultList = persistenceManager.getPropValueByParam(getConnection(), model, data,
+							propertyPathInfo);
 
-					if (resultList == null || resultList.isEmpty())
-						throw new RecordNotFoundException();
+					Object originalPropertyValue = (resultList == null || resultList.isEmpty() ? null
+							: resultList.get(0));
 
-					propertyPathInfo.setValueTail(resultList.get(0));
+					// 设置最新原始属性值，因为受SelectOptions的影响，select到页面的data对象超过级联的属性值不会加载
+					propertyPathInfo.setValueTail(originalPropertyValue);
+
+					// 忽略参数传递属性值
+					propertyValue = originalPropertyValue;
+
+					if (originalPropertyValue == null)
+						springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, "true");
+				}
+				else if (propertyValueParam != null)
+				{
+					if (propertyPathInfo == null)
+						propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+
+					propertyValue = modelDataConverter.convert(propertyValueParam, propertyPathInfo.getModelTail());
 				}
 
 				springModel.addAttribute("data", data);
 				springModel.addAttribute("propertyPath", propertyPath);
+				springModel.addAttribute("propertyValue", propertyValue);
 				springModel.addAttribute("readonly", "true");
 				springModel.addAttribute("titleOperationMessageKey", "view");
 			}
@@ -1213,7 +1202,7 @@ public class DataController extends AbstractSchemaModelController
 			final String propertyPath) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final Object propValueElementParam = getParamMap(request, "propValue");
+		final Object propValueElementParam = getParamMap(request, "propertyValue");
 
 		Object propValueElement = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
 		{
@@ -1248,7 +1237,7 @@ public class DataController extends AbstractSchemaModelController
 			final String propertyPath, int batchCount, BatchHandleErrorMode batchHandleErrorMode) throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final Object propValueElementParam = getParamMap(request, "propValue");
+		final Object propValueElementParam = getParamMap(request, "propertyValue");
 
 		ResponseEntity<OperationMessage> batchResponseEntity = new BatchReturnExecutor(request, response, springModel,
 				schemaId, tableName, batchCount, batchHandleErrorMode)
@@ -1340,10 +1329,14 @@ public class DataController extends AbstractSchemaModelController
 					List<Object> resultList = persistenceManager.getMultiplePropValueElementByParam(cn, model, data,
 							propertyPathInfo, propertyPathInfo.getValueTail());
 
-					if (resultList == null || resultList.isEmpty())
+					Object originalPropertyValueElement = (resultList == null || resultList.isEmpty() ? null
+							: resultList.get(0));
+
+					if (originalPropertyValueElement == null)
 						throw new RecordNotFoundException();
 
-					propertyPathInfo.setValueTail(resultList.get(0));
+					// 设置最新原始属性值，因为受SelectOptions的影响，select到页面的data对象超过级联的属性值不会加载
+					propertyPathInfo.setValueTail(originalPropertyValueElement);
 				}
 
 				springModel.addAttribute("data", data);
@@ -1368,7 +1361,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final Object propValueElementParam = getParamMap(request, "propValue");
+		final Object propValueElementParam = getParamMap(request, "propertyValue");
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
 				response, springModel, schemaId, tableName, false)
@@ -1916,6 +1909,19 @@ public class DataController extends AbstractSchemaModelController
 	}
 
 	/**
+	 * 是否客户端数据请求。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected boolean isClientPageDataRequest(HttpServletRequest request)
+	{
+		Boolean re = getBooleanParamValue(request, KEY_IS_CLIENT_PAGE_DATA);
+
+		return Boolean.TRUE.equals(re);
+	}
+
+	/**
 	 * 是否是加载页面数据请求。
 	 * 
 	 * @param request
@@ -1923,12 +1929,10 @@ public class DataController extends AbstractSchemaModelController
 	 */
 	protected boolean isLoadPageDataRequest(HttpServletRequest request)
 	{
-		Boolean re = getBooleanParamValue(request, KEY_IS_CLIENT_PAGE_DATA);
-
-		if (Boolean.TRUE.equals(re))
+		if (isClientPageDataRequest(request))
 			return false;
 
-		re = getBooleanParamValue(request, PARAM_IS_LOAD_PAGE_DATA);
+		Boolean re = getBooleanParamValue(request, PARAM_IS_LOAD_PAGE_DATA);
 
 		return !Boolean.FALSE.equals(re);
 	}
