@@ -44,12 +44,12 @@ po.isClientPageData = undefined;
 		}
 	};
 	
-	po.propertySubmitHandler = function(property, propertyConcreteModel, propValue)
+	po.propertySubmitHandler = function(property, propertyModel, propValue)
 	{
 		po.form().modelform("propValue", property.name, propValue);
 	};
 	
-	po.propertyAfterSaveHandler = function(property, propertyConcreteModel, propValue)
+	po.propertyAfterSaveHandler = function(property, propertyModel, propValue)
 	{
 		po.form().modelform("propValue", property.name, propValue);
 		
@@ -59,14 +59,28 @@ po.isClientPageData = undefined;
 		$.model.propertyValue(po.data, property.name, propValue);
 	};
 	
-	po.isPropertyActionClientSubmit = function(property, propertyConcreteModel)
+	po.propertyDataTableAjaxSuccess = function(property, propertyModel, propertyValue, propertyValuePagingData)
+	{
+		var formPropertyValue = po.form().modelform("propValue", property.name);
+		if(formPropertyValue == null || $.model.isSizeOnlyCollection(formPropertyValue))
+			po.form().modelform("propValue", property.name, $.model.toSizeOnlyCollection(propertyValuePagingData.total));
+		
+		if(!po.data)
+			po.data = {};
+		
+		var propertyValue = $.model.propertyValue(po.data, property.name);
+		if(propertyValue == null || $.model.isSizeOnlyCollection(propertyValue))
+			$.model.propertyValue(po.data, property.name, $.model.toSizeOnlyCollection(propertyValuePagingData.total));
+	};
+	
+	po.isPropertyActionClientSubmit = function(property, propertyModel)
 	{
 		//单元属性值都不即时保存
 		return (!$.model.isMultipleProperty(property) ? true : po.isClientPageData);
 	};
 	
 	//属性操作选项函数
-	po.buildPropertyActionOptions = function(property, propertyConcreteModel, propertyValue, extraRequestParams, extraPageParams)
+	po.buildPropertyActionOptions = function(property, propertyModel, propertyValue, extraRequestParams, extraPageParams)
 	{
 		var requestParams =
 		{
@@ -83,7 +97,7 @@ po.isClientPageData = undefined;
 			$.extend(requestParams, extraRequestParams);
 		
 		//单元属性值都不即时保存
-		var clientSubmit = po.isPropertyActionClientSubmit(property, propertyConcreteModel);
+		var clientSubmit = po.isPropertyActionClientSubmit(property, propertyModel);
 		
 		if(clientSubmit)
 		{
@@ -91,7 +105,7 @@ po.isClientPageData = undefined;
 			{
 				"submit" : function(propertyValue)
 				{
-					po.propertySubmitHandler(property, propertyConcreteModel, propertyValue);
+					po.propertySubmitHandler(property, propertyModel, propertyValue);
 				}
 			});
 		}
@@ -101,7 +115,11 @@ po.isClientPageData = undefined;
 			{
 				"afterSave" : function(propertyValue)
 				{
-					po.propertyAfterSaveHandler(property, propertyConcreteModel, propertyValue);
+					po.propertyAfterSaveHandler(property, propertyModel, propertyValue);
+				},
+				"dataTableAjaxSuccess" : function(propertyValuePagingData)
+				{
+					po.propertyDataTableAjaxSuccess(property, propertyModel, propertyValue, propertyValuePagingData);
 				}
 			});
 		}
@@ -118,9 +136,9 @@ po.isClientPageData = undefined;
 		return actionParam;
 	};
 	
-	po.addSinglePropertyValue = function(property, propertyConcreteModel)
+	po.addSinglePropertyValue = function(property, propertyModel)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel);
+		var options = po.buildPropertyActionOptions(property, propertyModel);
 		options.pinTitleButton=true;
 		
 		if(po.isClientPageData)
@@ -130,49 +148,49 @@ po.isClientPageData = undefined;
 			po.open(po.url("editSinglePropValue"), options);
 	};
 	
-	po.editSinglePropertyValue = function(property, propertyConcreteModel, propertyValue)
+	po.editSinglePropertyValue = function(property, propertyModel, propertyValue)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel, propertyValue);
+		var options = po.buildPropertyActionOptions(property, propertyModel, propertyValue);
 		options.pinTitleButton=true;
 		
 		po.open(po.url("editSinglePropValue"), options);
 	};
 	
-	po.deleteSinglePropertyValue = function(property, propertyConcreteModel, propertyValue)
+	po.deleteSinglePropertyValue = function(property, propertyModel, propertyValue)
 	{
-		po.propertySubmitHandler(property, propertyConcreteModel, propertyValue);
+		po.propertySubmitHandler(property, propertyModel, propertyValue);
 	};
 	
-	po.selectSinglePropertyValue = function(property, propertyConcreteModel, propertyValue)
+	po.selectSinglePropertyValue = function(property, propertyModel, propertyValue)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel, propertyValue);
+		var options = po.buildPropertyActionOptions(property, propertyModel, propertyValue);
 		$.setGridPageHeightOption(options);
 		po.open(po.url("selectPropValue"), options);
 	};
 	
-	po.viewSinglePropertyValue = function(property, propertyConcreteModel, propertyValue)
+	po.viewSinglePropertyValue = function(property, propertyModel, propertyValue)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel, propertyValue);
+		var options = po.buildPropertyActionOptions(property, propertyModel, propertyValue);
 		po.open(po.url("viewSinglePropValue"), options);
 	};
 	
-	po.editMultiplePropertyValue = function(property, propertyConcreteModel, propertyValue)
+	po.editMultiplePropertyValue = function(property, propertyModel, propertyValue)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel, propertyValue);
+		var options = po.buildPropertyActionOptions(property, propertyModel, propertyValue);
 		$.setGridPageHeightOption(options);
 		po.open(po.url("editMultiplePropValue"), options);
 	};
 	
-	po.viewMultiplePropertyValue = function(property, propertyConcreteModel, propertyValue)
+	po.viewMultiplePropertyValue = function(property, propertyModel, propertyValue)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel, propertyValue);
+		var options = po.buildPropertyActionOptions(property, propertyModel, propertyValue);
 		$.setGridPageHeightOption(options);
 		po.open(po.url("viewMultiplePropValue"), options);
 	};
 	
-	po.downloadSinglePropertyValueFile = function(property, propertyConcreteModel)
+	po.downloadSinglePropertyValueFile = function(property, propertyModel)
 	{
-		var options = po.buildPropertyActionOptions(property, propertyConcreteModel);
+		var options = po.buildPropertyActionOptions(property, propertyModel);
 		options.target="_file";
 		
 		po.open(po.url("downloadSinglePropertyValueFile"), options);

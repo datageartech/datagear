@@ -59,6 +59,8 @@ page_js_obj.jsp
 	{
 		if(po.refreshPagination)
 			po.refreshPagination(pagingData.total, pagingData.page, pagingData.pageSize);
+		
+		po.pageParamCall("dataTableAjaxSuccess", pagingData, textStatus, jqXHR);
 	};
 	
 	/**

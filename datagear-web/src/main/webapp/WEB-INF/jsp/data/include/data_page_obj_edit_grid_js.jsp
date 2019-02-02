@@ -41,6 +41,54 @@ WebUtils.setPageId(request, editGridFormPageId);
 	po.currentCellIndexes = undefined;
 	po.currentPropertyIndexesMap = undefined;
 	
+	po.superPropertyDataTableAjaxSuccess = po.propertyDataTableAjaxSuccess;
+	po.propertyDataTableAjaxSuccess = function(property, propertyConcreteModel, propertyValue, propertyValuePagingData)
+	{
+		po.superPropertyDataTableAjaxSuccess(property, propertyConcreteModel, propertyValue, propertyValuePagingData);
+		
+		var singleRow = $.getDataTableRowIfSingle(po.currentCellIndexes);
+		
+		//更新服务端数据行的多元属性值数目
+		if(singleRow != null && !po.gridPage.isClientDataRow(po.currentDataTable, singleRow))
+		{
+			var originalData = po.gridPage.originalRowData(po.currentDataTable, singleRow);
+			var originalPropertyValue = $.model.propertyValue(originalData, property.name);
+			
+			if(propertyValuePagingData.total == $.model.getSizeOnlyCollectionSize(originalPropertyValue))
+				return;
+			
+			var myColumn = $.getDataTableColumn(po.currentDataTable.settings(), property.name);
+			var myCell = po.currentDataTable.cell({ "row" : singleRow, "column" : myColumn });
+			var $myCell = $(myCell.node());
+			
+			var $originalSize = $myCell.find(".original-size");
+			
+			if($originalSize.length > 0)
+				$originalSize.html(propertyValuePagingData.total);
+			else
+			{
+				var $valueWrapper = $myCell.find(".value-wrapper");
+				$valueWrapper.html(propertyValuePagingData.total);
+			}
+			
+			if(originalPropertyValue == null || $.model.isSizeOnlyCollection(originalPropertyValue))
+			{
+				$.model.propertyValue(originalData, property.name, $.model.toSizeOnlyCollection(propertyValuePagingData.total));
+				
+				//原表格的单元格也要更新
+				var dataTable = po.gridPage.table().DataTable();
+				var cell = dataTable.cell({ "row" : singleRow, "column" : myColumn });
+				cell.data($.model.toSizeOnlyCollection(propertyValuePagingData.total));
+			}
+			
+			var tableRowData = po.currentDataTable.row(singleRow).data();
+			var tableRowPropertyValue = $.model.propertyValue(tableRowData, property.name);
+			
+			if(tableRowPropertyValue == null || $.model.isSizeOnlyCollection(tableRowPropertyValue))
+				$.model.propertyValue(tableRowData, property.name, $.model.toSizeOnlyCollection(propertyValuePagingData.total));
+		}
+	}
+	
 	po.isPropertyActionClientSubmit = function(property, propertyConcreteModel)
 	{
 		return true;
@@ -91,6 +139,14 @@ WebUtils.setPageId(request, editGridFormPageId);
 		}
 		
 		actionParam["data"]["isClientPageData"] = isClientPageData;
+		
+		if(!isClientPageData)
+		{
+			actionParam["pageParam"]["dataTableAjaxSuccess"] = function(propertyValuePagingData)
+			{
+				po.propertyDataTableAjaxSuccess(property, propertyModel, propertyValue, propertyValuePagingData);
+			};
+		}
 		
 		return actionParam;
 	}
@@ -659,6 +715,12 @@ WebUtils.setPageId(request, gridPageId);
 		
 		if($formPage.parent().is("td"))
 			po.editGridFormPage.form().modelform("destroy");
+		
+		//将原单元格内容包裹元素，使原内容可操作
+		var $cellValueWrappper = $editFormCell.find("span.value-wrapper");
+		if($cellValueWrappper.length == 0)
+			$editFormCell.wrapInner("<span class='value-wrapper'></span>");
+		
 		$formPage.appendTo($editFormCell).show();
 		
 		var form = po.editGridFormPage.form();
@@ -767,6 +829,10 @@ WebUtils.setPageId(request, gridPageId);
 			po.editGridFormPage.form().modelform("destroy");
 			
 			$formPage.appendTo(po.element(".foot"));
+			
+			var $valueWrapper = $formPageParent.find("span.value-wrapper");
+			if($valueWrapper.length > 0)
+				$formPageParent.html($valueWrapper.html());
 		}
 		
 		$(editDataTable.table().node()).focus();
@@ -838,12 +904,12 @@ WebUtils.setPageId(request, gridPageId);
 					changedCellValues.push($.deepClone(propertyValue));
 					
 					//多元属性值单元格显示“[原始元素个数]+[新加元素个数]”
-					if($.model.isMultipleProperty(property) && !po.isClientDataRow(editDataTable, index.row))
+					if($.model.isMultipleProperty(property) && !po.isClientDataRow(editDataTable, index.row) && $.isArray(myPropertyValue))
 					{
 						var originalLen = $.model.getMultiplePropertyValueLength(originalCellValue);
 						var newLen = $.model.getMultiplePropertyValueLength(myPropertyValue);
 						
-						changedCellHtmls.push(originalLen+"+"+newLen);
+						changedCellHtmls.push("<span class='original-size'>"+originalLen+"</span>+<span class='add-size'>"+newLen+"</span>");
 					}
 					else
 						changedCellHtmls.push(null);

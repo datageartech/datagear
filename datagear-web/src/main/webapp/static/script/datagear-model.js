@@ -870,17 +870,6 @@
 		},
 		
 		/**
-		 * 构建SizeOnlyCollection。
-		 */
-		instanceSizeOnlyCollection : function(size)
-		{
-			if(size == undefined)
-				size = 0;
-			
-			return { "size" : size };
-		},
-		
-		/**
 		 * 获取结尾属性信息。
 		 * 
 		 * @param model
@@ -1454,6 +1443,49 @@
 				return value.labelValue;
 			else
 				return undefined;
+		},
+		
+		/**
+		 * 对象是否是SizeOnlyCollection。
+		 */
+		isSizeOnlyCollection : function(obj)
+		{
+			if(obj == null)
+				return false;
+			
+			var type = $.type(obj);
+			
+			if(type != "object")
+				return false;
+			
+			var keys = Object.keys(obj);
+			
+			if(keys.length != 1)
+				return false;
+			
+			return (keys[0] == "size");
+		},
+		
+		/**
+		 * 构建SizeOnlyCollection。
+		 */
+		toSizeOnlyCollection : function(size)
+		{
+			if(size == undefined)
+				size = 0;
+			
+			return { "size" : size };
+		},
+		
+		/**
+		 * 获取SizeOnlyCollection的数目。
+		 */
+		getSizeOnlyCollectionSize : function(obj)
+		{
+			if(!obj)
+				return undefined;
+			
+			return obj["size"];
 		}
 	});
 })
