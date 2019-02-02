@@ -80,7 +80,10 @@
 			
 			//可选，文件属性值是否采用可展示值对象，而非基本文件名称值
 			//详细信息对象格式参考：$.model.toShowableValue
-			filePropertyReturnShowableValue : false,
+			filePropertyReturnShowableValue : true,
+			
+			//可选，文件属性值默认展示标签值
+			filePropertyLabelValue : undefined,
 			
 			//"readonly=false"时必须，下载单元文件属性值处理函数
 			downloadSinglePropertyValueFile : function(property, propertyConcreteModel){ throw new Error("TODO"); },
@@ -751,12 +754,15 @@
 			propertyWidget.getValue = function()
 			{
 				if(options.filePropertyReturnShowableValue)
-					return $.model.toShowableValue($(this.fileInputHidden).val(), $(this.fileInputShow).val());
+					return $.model.toShowableValue($(this.fileInputHidden).val(), options.filePropertyLabelValue);
 				else
 					return $(this.fileInputHidden).val();
 			};
 			propertyWidget.setValue = function(value, reserveFileInfo)
 			{
+				if(value && options.filePropertyLabelValue != null && !$.model.isShowableValue(value))
+					value = $.model.toShowableValue(value, options.filePropertyLabelValue);
+				
 				var rawValue = $.model.getShowableRawValue(value);
 				var labelValue = $.model.getShowableLabelValue(value);
 				

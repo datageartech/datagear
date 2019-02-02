@@ -1087,7 +1087,7 @@
 		 */
 		token : function(model, obj, ignorePropertyNames)
 		{
-			if(obj == undefined || obj == null)
+			if(obj == null)
 				return "";
 			
 			var re="";
@@ -1100,6 +1100,11 @@
 					var labelValue = this.getShowableLabelValue(obj);
 					
 					obj = (labelValue ? labelValue : rawValue);
+				}
+				else
+				{
+					if(this.isFileTypeModel(model))
+						obj = "[BLOB]";
 				}
 				
 				re=obj+"";
@@ -1145,7 +1150,7 @@
 					var v=this.propertyValue(obj, property.name);
 					var tv = this.tokenProperty(property, v);
 					
-					if(re != "" && tv != "")
+					if(re != "")
 						re+=", ";
 					
 					re+=tv;

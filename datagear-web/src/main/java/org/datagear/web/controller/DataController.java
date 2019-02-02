@@ -1975,6 +1975,9 @@ public class DataController extends AbstractSchemaModelController
 	protected void setGridPageAttributes(HttpServletRequest request, org.springframework.ui.Model springModel)
 	{
 		springModel.addAttribute("queryLeftClobLengthOnReading", this.queryLeftClobLengthOnReading);
+
+		// 编辑表格需要表单属性
+		setFormPageAttributes(request, springModel);
 	}
 
 	/**
@@ -1991,6 +1994,7 @@ public class DataController extends AbstractSchemaModelController
 		springModel.addAttribute("sqlDateFormat", this.sqlDateFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("sqlTimestampFormat", this.sqlTimestampFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("sqlTimeFormat", this.sqlTimeFormatter.getParsePatternDesc(locale));
+		springModel.addAttribute("filePropertyLabelValue", this.blobToFilePlaceholderName);
 	}
 
 	/**

@@ -728,7 +728,6 @@ WebUtils.setPageId(request, gridPageId);
 			},
 			filePropertyUploadURL : "<c:url value='/data/file/upload' />",
 			filePropertyDeleteURL : "<c:url value='/data/file/delete' />",
-			filePropertyReturnShowableValue : true,
 			downloadSinglePropertyValueFile : function(property, propertyModel)
 			{
 				po.editGridFormPage.downloadSinglePropertyValueFile(property, propertyModel);
@@ -737,7 +736,8 @@ WebUtils.setPageId(request, gridPageId);
 			labels : po.editGridFormPage.formLabels,
 			dateFormat : "<c:out value='${sqlDateFormat}' />",
 			timestampFormat : "<c:out value='${sqlTimestampFormat}' />",
-			timeFormat : "<c:out value='${sqlTimeFormat}' />"
+			timeFormat : "<c:out value='${sqlTimeFormat}' />",
+			filePropertyLabelValue : "<c:out value='${filePropertyLabelValue}' />"
 		});
 		
 		if(propertyCount == 1 || focus)

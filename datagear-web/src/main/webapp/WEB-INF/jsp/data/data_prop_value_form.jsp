@@ -213,7 +213,8 @@ PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 			labels : po.formLabels,
 			dateFormat : "<c:out value='${sqlDateFormat}' />",
 			timestampFormat : "<c:out value='${sqlTimestampFormat}' />",
-			timeFormat : "<c:out value='${sqlTimeFormat}' />"
+			timeFormat : "<c:out value='${sqlTimeFormat}' />",
+			filePropertyLabelValue : "<c:out value='${filePropertyLabelValue}' />"
 		});
 	});
 })
