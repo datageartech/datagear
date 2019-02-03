@@ -61,6 +61,9 @@ po.isClientPageData = undefined;
 	
 	po.propertyDataTableAjaxSuccess = function(property, propertyModel, propertyValue, propertyValuePagingData)
 	{
+		if(!$.model.isMultipleProperty(property))
+			return;
+		
 		var formPropertyValue = po.form().modelform("propValue", property.name);
 		if(formPropertyValue == null || $.model.isSizeOnlyCollection(formPropertyValue))
 			po.form().modelform("propValue", property.name, $.model.toSizeOnlyCollection(propertyValuePagingData.total));

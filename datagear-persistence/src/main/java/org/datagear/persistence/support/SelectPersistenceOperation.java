@@ -631,11 +631,11 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			Property property, PropertyModelMapper<?> propertyModelMapper, int startRow, int count)
 	{
 		int propertyIndex = MU.getPropertyIndex(model, property);
-		Model pmodel = propertyModelMapper.getModel();
+		Model propertyModel = propertyModelMapper.getModel();
 
 		boolean canFetchPropertyColumnsOnly = false;
 
-		if (MU.isPrimitiveModel(pmodel))
+		if (MU.isPrimitiveModel(propertyModel))
 			canFetchPropertyColumnsOnly = true;
 		else
 		{
@@ -680,8 +680,13 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				{
 					Object pv = property.get(obj);
 
+					// XXX 即使pv为null也不应该忽略，因为是INNER JOIN查询
 					if (pv == null)
-						;
+					{
+						pv = propertyModel.newInstance();
+						PMU.setPropertyValueMappedByIf(model, obj, propertyModelMapper, pv);
+						propValueList.add(pv);
+					}
 					else if (pv instanceof Object[])
 					{
 						addArrayToList(propValueList, (Object[]) pv);

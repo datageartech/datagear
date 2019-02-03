@@ -1361,6 +1361,23 @@
 		},
 		
 		/**
+		 * 如果对象仅包含一个属性，返回属性名；否则返回null。
+		 */
+		getPropertyNameIfSingle : function(obj)
+		{
+			if(!obj)
+				return null;
+			
+			var keys = Object.keys(obj);
+	    	var length = keys.length;
+	    	
+	    	if(length != 1)
+	    		return null;
+	    	
+	    	return keys[0];
+		},
+		
+		/**
 		 * 判断两个对象是否深度相等。
 		 */
 		deepEquals : function(a, b, ignorePropertyNames, aStack, bStack)

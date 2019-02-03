@@ -41,10 +41,22 @@ WebUtils.setPageId(request, editGridFormPageId);
 	po.currentCellIndexes = undefined;
 	po.currentPropertyIndexesMap = undefined;
 	
+	po.superPropertySubmitHandler = po.propertySubmitHandler;
+	po.propertySubmitHandler = function(property, propertyModel, propValue)
+	{
+		po.superPropertySubmitHandler(property, propertyModel, propValue);
+		
+		if(po.isSubmitWhenPropertySubmit)
+			po.form().modelform("submit");
+	};
+	
 	po.superPropertyDataTableAjaxSuccess = po.propertyDataTableAjaxSuccess;
 	po.propertyDataTableAjaxSuccess = function(property, propertyConcreteModel, propertyValue, propertyValuePagingData)
 	{
 		po.superPropertyDataTableAjaxSuccess(property, propertyConcreteModel, propertyValue, propertyValuePagingData);
+		
+		if(!$.model.isMultipleProperty(property))
+			return;
 		
 		var singleRow = $.getDataTableRowIfSingle(po.currentCellIndexes);
 		
@@ -703,12 +715,29 @@ WebUtils.setPageId(request, gridPageId);
 		$cellNodes.removeClass("cell-edit-form");
 		$editFormCell.addClass("cell-edit-form");
 		
-		var propertyCount = $.getPropertyCount(propertyIndexesMap);
+		var singlePropertyIndex = $.getPropertyNameIfSingle(propertyIndexesMap);
+		var isHideFormPage = false;
+		
+		if(singlePropertyIndex != null)
+		{
+			var property = $.model.getProperty(po.editGridModel, parseInt(singlePropertyIndex));
+			
+			isHideFormPage = $.model.isMultipleProperty(property);
+			
+			if(!isHideFormPage)
+			{
+				var propertyValue = $.model.propertyValue(data, property.name);
+				var propertyModel = $.model.getPropertyModelByValue(property, propertyValue);
+				
+				isHideFormPage = $.model.isCompositeModel(propertyModel);
+			}
+		}
 		
 		po.editGridFormPage.data = data;
 		po.editGridFormPage.currentDataTable = editDataTable;
 		po.editGridFormPage.currentCellIndexes = indexes;
 		po.editGridFormPage.currentPropertyIndexesMap = propertyIndexesMap;
+		po.editGridFormPage.isSubmitWhenPropertySubmit = isHideFormPage;
 		
 		var $formPage = po.editGridFormPage.element();
 		var $formPanel = po.editGridFormPage.element(".form-panel");
@@ -721,12 +750,17 @@ WebUtils.setPageId(request, gridPageId);
 		if($cellValueWrappper.length == 0)
 			$editFormCell.wrapInner("<span class='value-wrapper'></span>");
 		
-		$formPage.appendTo($editFormCell).show();
+		$formPage.appendTo($editFormCell);
+		
+		if(isHideFormPage)
+			$formPage.hide();
+		else
+			$formPage.show();
 		
 		var form = po.editGridFormPage.form();
 		
 		//只有一个属性，隐藏标签，否则，显示标签
-		if(propertyCount == 1)
+		if(singlePropertyIndex != null)
 		{
 			$formPanel.css("min-width", $tableContainer.width()/3);
 			form.addClass("hide-form-label");
@@ -744,6 +778,7 @@ WebUtils.setPageId(request, gridPageId);
 			renderProperty : function(property, propertyIndex)
 			{
 				var propertyIndexesMap = po.editGridFormPage.currentPropertyIndexesMap;
+				
 				return (propertyIndexesMap[propertyIndex] != undefined);
 			},
 			submit : function()
@@ -760,6 +795,7 @@ WebUtils.setPageId(request, gridPageId);
 				
 				return false;
 			},
+			invalidHandler : (isHideFormPage ? undefined : function(){ $formPage.show(); }),
 			addSinglePropertyValue : function(property, propertyModel)
 			{
 				po.editGridFormPage.addSinglePropertyValue(property, propertyModel);
@@ -802,10 +838,10 @@ WebUtils.setPageId(request, gridPageId);
 			filePropertyLabelValue : "<c:out value='${filePropertyLabelValue}' />"
 		});
 		
-		if(propertyCount == 1 || focus)
+		if(singlePropertyIndex != null || focus)
 		{
-			//仅选中一个属性，激活焦点
-			$(":input:not([readonly]):visible:eq(0)", form).focus();
+			//激活第一个属性
+			form.modelform("activeProperty");
 		}
 		
 		$formPanel.position({ my : "left top", at : "left bottom", of : $editFormCell, within : $table});
@@ -1244,6 +1280,8 @@ WebUtils.setPageId(request, gridPageId);
 	//将表格中的编辑单元格、添加行置为已保存，删除标记为删除的行
 	po.clearEditGrid = function(editDataTable, modifiedCells, addRows, deleteRows, notDrawTable)
 	{
+		po.closeEditCellPanel(editDataTable);
+		
 		var needDraw = false;
 		
 		if(modifiedCells != null)
