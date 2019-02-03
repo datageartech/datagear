@@ -633,7 +633,8 @@ public class DataController extends AbstractSchemaModelController
 						int myUpdateCount = persistenceManager.update(cn, model, updateProperties, updates[i],
 								updateObj);
 
-						acutalUpdateCount += myUpdateCount;
+						if (myUpdateCount > 0)
+							acutalUpdateCount += myUpdateCount;
 					}
 				}
 
@@ -643,7 +644,8 @@ public class DataController extends AbstractSchemaModelController
 					{
 						int myAddCount = persistenceManager.insert(cn, model, adds[i]);
 
-						actualAddCount += myAddCount;
+						if (myAddCount > 0)
+							actualAddCount += myAddCount;
 					}
 				}
 
@@ -651,7 +653,8 @@ public class DataController extends AbstractSchemaModelController
 				{
 					int myDeleteCount = persistenceManager.delete(cn, model, deletes);
 
-					actualDeleteCount += myDeleteCount;
+					if (myDeleteCount > 0)
+						actualDeleteCount += myDeleteCount;
 				}
 
 				OperationMessage operationMessage = buildOperationMessageSuccess(request,
@@ -1530,7 +1533,8 @@ public class DataController extends AbstractSchemaModelController
 						int myUpdateCount = persistenceManager.updateMultiplePropValueElement(cn, model, data,
 								myPropertyPathInfo, updatePropertyProperties, updateObj);
 
-						acutalUpdateCount += myUpdateCount;
+						if (myUpdateCount > 0)
+							acutalUpdateCount += myUpdateCount;
 					}
 				}
 
@@ -1541,7 +1545,8 @@ public class DataController extends AbstractSchemaModelController
 					int myAddCount = persistenceManager.insertMultiplePropValueElement(cn, model, data,
 							propertyPathInfo, adds);
 
-					actualAddCount += myAddCount;
+					if (myAddCount > 0)
+						actualAddCount += myAddCount;
 				}
 
 				if (deletes != null && deletes.length > 0)
@@ -1549,7 +1554,8 @@ public class DataController extends AbstractSchemaModelController
 					int myDeleteCount = persistenceManager.deleteMultiplePropValueElement(cn, model, data,
 							propertyPathInfo, deletes);
 
-					actualDeleteCount += myDeleteCount;
+					if (myDeleteCount > 0)
+						actualDeleteCount += myDeleteCount;
 				}
 
 				OperationMessage operationMessage = buildOperationMessageSuccess(request,

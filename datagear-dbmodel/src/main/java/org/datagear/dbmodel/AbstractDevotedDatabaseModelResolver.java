@@ -963,7 +963,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		}
 
 		if (isCollection)
-			propertyBuilder.setCollectionType(Collection.class);
+			propertyBuilder.setCollectionType(List.class);
 	}
 
 	/**
@@ -1421,7 +1421,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		}
 
 		if (isCollection)
-			propertyBuilder.setCollectionType(Collection.class);
+			propertyBuilder.setCollectionType(List.class);
 	}
 
 	/**

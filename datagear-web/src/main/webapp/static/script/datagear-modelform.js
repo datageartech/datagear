@@ -675,9 +675,12 @@
 			var fileInputShow = $("<input type='text' class='ui-widget ui-widget-content file-input-show' />").attr("name", fileInputShowName)
 				.val("").attr("__propertyName", propName).appendTo(valuediv).attr("readonly", "readonly");
 			
+			var fileDownloadButton = null;
+			var fileInput = null;
+			
 			if(options.readonly)
 			{
-				var fileDownloadButton = $("<button class='download-button' />").attr("__propertyName", propName)
+				fileDownloadButton = $("<button class='download-button' />").attr("__propertyName", propName)
 					.html(options.labels.downloadFile)
 					.appendTo(valuediv);
 				
@@ -716,7 +719,7 @@
 				var fileUploadButton = $("<div class='fileinput-button' />").appendTo(actionGroup);
 				fileUploadButton.html(options.labels.uploadFile);
 				
-				var fileInput=$("<input type='file' />").appendTo(fileUploadButton);
+				fileInput=$("<input type='file' />").appendTo(fileUploadButton);
 				
 				var fileInfoDiv = $("<div class='file-info' />").appendTo(valuediv);
 				
@@ -805,7 +808,8 @@
 			
 			propertyWidget.fileInputHidden = fileInputHidden[0];
 			propertyWidget.fileInputShow = fileInputShow[0];
-			propertyWidget.fileInputElement = fileInput[0];
+			propertyWidget.fileDownloadButtonElement = (fileDownloadButton ? fileDownloadButton[0] : null);
+			propertyWidget.fileInputElement = (fileInput ? fileInput[0] : null);
 			
 			propertyWidget.getValue = function()
 			{
@@ -839,7 +843,11 @@
 			};
 			propertyWidget.active = function()
 			{
-				$(this.fileInputElement).focus();
+				if(this.fileDownloadButtonElement)
+					$(this.fileDownloadButtonElement).focus();
+				
+				if(this.fileInputElement)
+					$(this.fileInputElement).focus();
 			};
 			
 			propertyWidget.setValue(propValue);

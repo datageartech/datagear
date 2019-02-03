@@ -381,7 +381,7 @@ public class ModelDataConverter extends AbstractDataConverter
 		{
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			if (SizeOnlyCollection.isSizeOnlyMapForStringMap(map))
+			if (SizeOnlyCollection.isSizeOnlyMap(map))
 				collection = convertMapToSizeOnlyCollection(namePath, map, collectionType);
 			else
 				collection = convertMapToCollection(namePath, map, model, collectionType, refContext);

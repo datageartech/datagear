@@ -1139,10 +1139,22 @@
 					var v=this.propertyValue(obj, property.name);
 					var tv = this.tokenProperty(property, v);
 					
-					if(re != "")
-						re+=", ";
+					if(re != "" && tv != "")
+					{
+						re += ", ";
+					}
+					else if(re != "")
+					{
+						if(i < tokenProperties.length - 1)
+							re += ", ";
+					}
+					else
+					{
+						if(re != "")
+							re += ", ";
+					}
 					
-					re+=tv;
+					re += tv;
 				}
 			}
 			

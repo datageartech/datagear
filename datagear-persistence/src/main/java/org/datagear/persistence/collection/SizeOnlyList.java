@@ -5,6 +5,7 @@
 package org.datagear.persistence.collection;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -30,13 +31,13 @@ public class SizeOnlyList<E> extends SizeOnlyCollection<E> implements List<E>
 	@Override
 	public boolean addAll(int index, Collection<? extends E> c)
 	{
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override
 	public E get(int index)
 	{
-		throw new UnsupportedOperationException();
+		return null;
 	}
 
 	@Override
@@ -60,30 +61,30 @@ public class SizeOnlyList<E> extends SizeOnlyCollection<E> implements List<E>
 	@Override
 	public int indexOf(Object o)
 	{
-		throw new UnsupportedOperationException();
+		return -1;
 	}
 
 	@Override
 	public int lastIndexOf(Object o)
 	{
-		throw new UnsupportedOperationException();
+		return -1;
 	}
 
 	@Override
 	public ListIterator<E> listIterator()
 	{
-		throw new UnsupportedOperationException();
+		return Collections.<E> emptyList().listIterator();
 	}
 
 	@Override
 	public ListIterator<E> listIterator(int index)
 	{
-		throw new UnsupportedOperationException();
+		return Collections.<E> emptyList().listIterator();
 	}
 
 	@Override
 	public List<E> subList(int fromIndex, int toIndex)
 	{
-		throw new UnsupportedOperationException();
+		return Collections.emptyList();
 	}
 }

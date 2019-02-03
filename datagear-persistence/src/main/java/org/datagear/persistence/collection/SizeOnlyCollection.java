@@ -5,6 +5,7 @@
 package org.datagear.persistence.collection;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,37 +53,37 @@ public class SizeOnlyCollection<E> implements Collection<E>
 	@Override
 	public int size()
 	{
-		throw new UnsupportedOperationException();
+		return 0;
 	}
 
 	@Override
 	public boolean isEmpty()
 	{
-		throw new UnsupportedOperationException();
+		return true;
 	}
 
 	@Override
 	public boolean contains(Object o)
 	{
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override
 	public Iterator<E> iterator()
 	{
-		throw new UnsupportedOperationException();
+		return Collections.<E> emptyList().iterator();
 	}
 
 	@Override
 	public Object[] toArray()
 	{
-		throw new UnsupportedOperationException();
+		return new Object[0];
 	}
 
 	@Override
 	public <T> T[] toArray(T[] a)
 	{
-		throw new UnsupportedOperationException();
+		return a;
 	}
 
 	@Override
@@ -100,7 +101,7 @@ public class SizeOnlyCollection<E> implements Collection<E>
 	@Override
 	public boolean containsAll(Collection<?> c)
 	{
-		throw new UnsupportedOperationException();
+		return false;
 	}
 
 	@Override
@@ -124,7 +125,6 @@ public class SizeOnlyCollection<E> implements Collection<E>
 	@Override
 	public void clear()
 	{
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -351,11 +351,11 @@ public class SizeOnlyCollection<E> implements Collection<E>
 	public static SizeOnlyCollection<Object> instance(
 			@SuppressWarnings("rawtypes") Class<? extends Collection> collectionType)
 	{
-		if (List.class.equals(collectionType))
+		if (List.class.isAssignableFrom(collectionType))
 			return new SizeOnlyList<Object>();
-		else if (Set.class.equals(collectionType))
+		else if (Set.class.isAssignableFrom(collectionType))
 			return new SizeOnlySet<Object>();
-		else if (Collection.class.equals(collectionType))
+		else if (Collection.class.isAssignableFrom(collectionType))
 			return new SizeOnlyCollection<Object>();
 		else
 			throw new UnsupportedOperationException("Create [" + SizeOnlyCollection.class.getSimpleName() + "] for ["
