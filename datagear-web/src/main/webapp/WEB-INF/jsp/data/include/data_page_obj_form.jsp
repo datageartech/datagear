@@ -161,7 +161,7 @@ po.isClientPageData = undefined;
 	
 	po.deleteSinglePropertyValue = function(property, propertyModel, propertyValue)
 	{
-		po.propertySubmitHandler(property, propertyModel, propertyValue);
+		po.propertySubmitHandler(property, propertyModel, null);
 	};
 	
 	po.selectSinglePropertyValue = function(property, propertyModel, propertyValue)

@@ -393,6 +393,24 @@
 		},
 		
 		/**
+		 * 重置表单。
+		 */
+		reset : function()
+		{
+			var properties = this.options.model.properties;
+			
+			for(var i=0; i<properties.length; i++)
+			{
+				var property = properties[i];
+				
+				var propertyWidget = this._propertyWidgets[property.name];
+				
+				if(propertyWidget)
+					propertyWidget.setValue(propertyWidget.originalValue);
+			}
+		},
+		
+		/**
 		 * 绘制。
 		 */
 		_render : function($formHead, $formContent, $formFoot)
@@ -456,6 +474,8 @@
 					property : property,
 					
 					value : propValue,
+					
+					originalValue : propValue,
 					
 					getValue : function()
 					{
@@ -565,7 +585,10 @@
 					if(_this.options.reset.call(_this.element, resetbtn) != false)
 					{
 						_this.element.validate().resetForm();
+						_this.reset();
 					}
+					
+					return false;
 				});
 			}
 		},
