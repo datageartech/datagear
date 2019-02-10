@@ -238,6 +238,13 @@ WebUtils.setPageId(request, gridPageId);
 		return $editTable;
 	};
 	
+	//获取表格元素的父元素
+	po.dataTableParent = function(dataTable)
+	{
+		var $tableParent = $(dataTable.table().body()).parent().parent();
+		return $tableParent;
+	};
+	
 	po.bindEditDataTableEvents = function($table)
 	{
 		$table.DataTable()
@@ -394,9 +401,8 @@ WebUtils.setPageId(request, gridPageId);
 				editDataTable.cell(row.index(), 0).data("add-row").draw();
 				
 				//滚动到底部
-				var $tableParent = $(editDataTable.table().body()).parent().parent();
-				var scrollHeight = $tableParent.prop("scrollHeight");
-				$tableParent.scrollTop(scrollHeight);
+				var $editDataTableParent = po.dataTableParent(editDataTable);
+				$editDataTableParent.scrollTop($editDataTableParent.prop("scrollHeight"));
 			});
 			
 			po.element("button[name='editGridEditButton']", $buttonWrapper).click(function()
@@ -444,12 +450,14 @@ WebUtils.setPageId(request, gridPageId);
 		po.element(".foot .pagination").addClass("ui-state-disabled");
 		
 		var dataTable = po.table().DataTable();
+		var dataTableScrollTop = po.dataTableParent(dataTable).prop("scrollTop");
 		var $tableContainer = $(dataTable.table().container());
 		$tableContainer.hide();
 		
 		//新建本地模式的DataTable，因为server-side模式的DataTable不能添加行
 		var $editTable = po.editTable();
 		po.initEditGridDataTable($editTable, dataTable);
+		po.dataTableParent($editTable.DataTable()).scrollTop(dataTableScrollTop);
 		
 		po.resetEditGridCache();
 		
