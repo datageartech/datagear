@@ -338,7 +338,8 @@
 		{
 			west :
 			{
-				size : "18%"
+				size : "18%",
+				minSize : po.element(".schema-panel-head").css("min-width")
 			},
 			onresize_end : function(){ $(window).resize();/*触发page_obj_grid.jsp表格resize*/ }
 		});
