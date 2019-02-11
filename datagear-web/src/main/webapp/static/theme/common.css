@@ -359,57 +359,6 @@ table.dataTable tbody th, table.dataTable tbody td{
 	padding: 0 0.5em;
 	height: 2.5em;
 }
-table.dataTable tbody tr td.cell-edit-form{
-	position: relative;
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form{
-	display: inline-block;
-	opacity: 0.7;
-	filter: Alpha(Opacity=70);
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form.focus{
-	opacity: 1;
-	filter: Alpha(Opacity=100);
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel{
-	position: absolute;
-	display: inline-block;
-	z-index: 1;
-	padding: 1px 1px;
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-title{
-	height: 0.6em;
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-foot{
-	height: 0.2em;
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-dragger{
-    cursor: move;
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel .form-panel-title .close-icon{
-	float: right;
-	cursor: pointer;
-	opacity: 0.7;
-	filter: Alpha(Opacity=70);
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form{
-	padding: 0.41em 0.41em;
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form .form-operation input[type='reset']{
-	display: none;
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-label{
-	display: none;
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value{
-	width: 99%;
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value.text-value input[type='text']{
-	width: 60%;
-}
-table.dataTable tr td.cell-edit-form .page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value.textarea-value textarea{
-	width: 70%;
-}
 table.dataTable tbody tr td.cell-modified{
 	position: relative;
 }
@@ -447,6 +396,55 @@ table.dataTable tbody tr .column-check .row-data-state.ui-state-error{
 table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	margin-top: 0px;
 	vertical-align: top;
+}
+
+/*编辑表格表单页面*/
+.page-edit-grid-form{
+	position: absolute;
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
+}
+.page-edit-grid-form.focus{
+	opacity: 1;
+	filter: Alpha(Opacity=100);
+}
+.page-edit-grid-form .form-panel{
+	display: inline-block;
+	z-index: 1;
+	padding: 1px 1px;
+}
+.page-edit-grid-form .form-panel .form-panel-title{
+	height: 0.6em;
+}
+.page-edit-grid-form .form-panel .form-panel-foot{
+	height: 0.2em;
+}
+.page-edit-grid-form .form-panel .form-panel-dragger{
+    cursor: move;
+}
+.page-edit-grid-form .form-panel .form-panel-title .close-icon{
+	float: right;
+	cursor: pointer;
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
+}
+.page-edit-grid-form .form-panel form{
+	padding: 0.41em 0.41em;
+}
+.page-edit-grid-form .form-panel form .form-operation input[type='reset']{
+	display: none;
+}
+.page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-label{
+	display: none;
+}
+.page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value{
+	width: 99%;
+}
+.page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value.text-value input[type='text']{
+	width: 60%;
+}
+.page-edit-grid-form .form-panel form.hide-form-label .form-content .form-item .form-item-value.textarea-value textarea{
+	width: 70%;
 }
 
 

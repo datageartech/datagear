@@ -14,6 +14,14 @@
  */
 (function($, undefined)
 {
+	$.fn.extend(
+	{
+		isModelform : function()
+		{
+			return $(this).hasClass("model-form");
+		}
+	});
+	
 	$.widget("datagear.modelform",
 	{
 		options:
@@ -159,7 +167,7 @@
 			if(!this.element.is("form"))
 				throw new Error("The DOM must be <form>");
 			
-			this.element.addClass("form");
+			this.element.addClass("form model-form");
 			
 			var options=this.options;
 			var model=options.model;
@@ -213,7 +221,7 @@
 			$(".form-content", this.element).remove();
 			$(".form-head", this.element).remove();
 			
-			this.element.removeClass("form");
+			this.element.removeClass("form model-form");
 		},
 		
 		_setOption: function(key, value)

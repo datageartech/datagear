@@ -79,10 +79,7 @@ WebUtils.setPageId(request, editGridFormPageId);
 			if($originalSize.length > 0)
 				$originalSize.html(propertyValuePagingData.total);
 			else
-			{
-				var $valueWrapper = $myCell.find(".value-wrapper");
-				$valueWrapper.html(propertyValuePagingData.total);
-			}
+				$myCell.html(propertyValuePagingData.total);
 			
 			if(originalPropertyValue == null || $.model.isSizeOnlyCollection(originalPropertyValue))
 			{
@@ -736,11 +733,7 @@ WebUtils.setPageId(request, gridPageId);
 		
 		var $table = $(editDataTable.table().node());
 		var $tableContainer = $(editDataTable.table().container());
-		var $cellNodes = $(editDataTable.cells(indexes).nodes());
-		var $editFormCell = $($cellNodes[0]);
-		
-		$cellNodes.removeClass("cell-edit-form");
-		$editFormCell.addClass("cell-edit-form");
+		var $editFormCell = $(editDataTable.cell(indexes[0]).node());
 		
 		var singlePropertyIndex = $.getPropertyNameIfSingle(propertyIndexesMap);
 		var isHideFormPage = false;
@@ -768,37 +761,31 @@ WebUtils.setPageId(request, gridPageId);
 		
 		var $formPage = po.editGridFormPage.element();
 		var $formPanel = po.editGridFormPage.element(".form-panel");
+		var $form = po.editGridFormPage.form();
 		
-		if($formPage.parent().is("td"))
-			po.editGridFormPage.form().modelform("destroy");
+		if($form.isModelform())
+			$form.modelform("destroy");
 		
-		//将原单元格内容包裹元素，使原内容可操作
-		var $cellValueWrappper = $editFormCell.find("span.value-wrapper");
-		if($cellValueWrappper.length == 0)
-			$editFormCell.wrapInner("<span class='value-wrapper'></span>");
-		
-		$formPage.appendTo($editFormCell);
+		$formPage.appendTo(po.dataTableParent(editDataTable));
 		
 		if(isHideFormPage)
 			$formPage.hide();
 		else
 			$formPage.show();
 		
-		var form = po.editGridFormPage.form();
-		
 		//只有一个属性，隐藏标签，否则，显示标签
 		if(singlePropertyIndex != null)
 		{
 			$formPanel.css("min-width", $tableContainer.width()/3);
-			form.addClass("hide-form-label");
+			$form.addClass("hide-form-label");
 		}
 		else
 		{
 			$formPanel.css("min-width", $tableContainer.width()/2);
-			form.removeClass("hide-form-label");
+			$form.removeClass("hide-form-label");
 		}
 		
-		form.modelform(
+		$form.modelform(
 		{
 			model : po.editGridModel,
 			data : data,
@@ -865,37 +852,32 @@ WebUtils.setPageId(request, gridPageId);
 			filePropertyLabelValue : "<c:out value='${filePropertyLabelValue}' />"
 		});
 		
+		$formPage.position({ my : "left top", at : "left bottom", of : $editFormCell, within : $table});
+		
 		if(singlePropertyIndex != null || focus)
 		{
 			//激活第一个属性
-			form.modelform("activeProperty");
+			$form.modelform("activeProperty");
 		}
-		
-		$formPanel.position({ my : "left top", at : "left bottom", of : $editFormCell, within : $table});
 	};
 	
 	//关闭编辑面板
 	po.closeEditCellPanel = function(editDataTable)
 	{
 		var $formPage = po.editGridFormPage.element();
-		var $formPageParent = $formPage.parent();
+		var $form = po.editGridFormPage.form();
 		
-		if($formPageParent.is("td"))
+		if($form.isModelform())
 		{
-			$formPageParent.removeClass("cell-edit-form");
-			
 			$formPage.hide();
 			
 			if($formPage.hasClass("focus"))
 				$formPage.removeClass("focus");
 			
-			po.editGridFormPage.form().modelform("destroy");
+			//不销毁表单，因为isSubmitWhenPropertySubmit逻辑有可能多次关闭表单面板
+			//$form.modelform("destroy");
 			
 			$formPage.appendTo(po.element(".foot"));
-			
-			var $valueWrapper = $formPageParent.find("span.value-wrapper");
-			if($valueWrapper.length > 0)
-				$formPageParent.html($valueWrapper.html());
 		}
 		
 		$(editDataTable.table().node()).focus();
