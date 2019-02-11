@@ -334,12 +334,26 @@
 	
 	$(document).ready(function()
 	{
+		var westMinSize = po.element(".schema-panel-head").css("min-width");
+		
+		if(westMinSize)
+		{
+			var pxIndex = westMinSize.indexOf("px");
+			if(pxIndex > -1)
+				westMinSize = westMinSize.substring(0, pxIndex);
+		}
+		
+		westMinSize = parseInt(westMinSize);
+		
+		if(isNaN(westMinSize) || westMinSize < 245)
+			westMinSize = 245;
+		
 		po.element(".main-page-content").layout(
 		{
 			west :
 			{
 				size : "18%",
-				minSize : po.element(".schema-panel-head").css("min-width")
+				minSize : westMinSize
 			},
 			onresize_end : function(){ $(window).resize();/*触发page_obj_grid.jsp表格resize*/ }
 		});
