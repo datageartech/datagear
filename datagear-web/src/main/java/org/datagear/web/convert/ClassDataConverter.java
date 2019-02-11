@@ -276,7 +276,7 @@ public class ClassDataConverter extends AbstractDataConverter
 					refContext);
 		}
 		else
-			throw new UnsupportedOperationException();
+			collection = (Collection<T>) convertSimpleObj(obj, type, namePath);
 
 		return collection;
 	}
@@ -434,7 +434,7 @@ public class ClassDataConverter extends AbstractDataConverter
 			return convertCollectionToArray(namePath, (Collection<Object>) obj, type, refContext);
 		}
 		else
-			throw new UnsupportedOperationException();
+			return (T[]) convertSimpleObj(obj, type, namePath);
 	}
 
 	/**

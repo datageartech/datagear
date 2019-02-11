@@ -60,6 +60,9 @@ public abstract class AbstractDataConverter
 	/** 引用路径前缀 */
 	public static final String REF_VALUE_PATH_PREFIX = "$";
 
+	/** null值占位符，具有此值的源属性将被转换为null */
+	public static final String NULL_VALUE_PLACE_HOLDER = "___DATA_GEAR_ZY_NULL_VALUE_PLACE_HOLDER___";
+
 	protected static final PropertyPath REF_NAME_PROPERTY_PATH = PropertyPath.valueOf(REF_NAME);
 
 	protected static final ArrayElementKeyComparator ARRAY_ELEMENT_KEY_COMPARATOR = new ArrayElementKeyComparator();
@@ -184,7 +187,7 @@ public abstract class AbstractDataConverter
 			if (isExpression(str))
 				return (T) str;
 
-			if (str.isEmpty() && !String.class.equals(targetType))
+			if ((str.isEmpty() && !String.class.equals(targetType)) || NULL_VALUE_PLACE_HOLDER.equals(str))
 				obj = null;
 		}
 

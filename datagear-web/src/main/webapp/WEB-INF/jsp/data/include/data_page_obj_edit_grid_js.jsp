@@ -6,6 +6,7 @@
 <%@ page import="java.sql.NClob"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="org.datagear.web.util.WebUtils"%>
+<%@ page import="org.datagear.web.convert.AbstractDataConverter" %>
 <%--
 编辑表格功能JS片段。
 
@@ -423,12 +424,14 @@ WebUtils.setPageId(request, gridPageId);
 				var editDataTable = po.editTable().DataTable();
 				
 				var selectedAddRows = editDataTable.rows(".selected.add-row");
-				if(selectedAddRows)
+				var selectedAddRowIndexes = selectedAddRows.indexes();
+				if(selectedAddRowIndexes.length > 0)
 					selectedAddRows.remove().draw();
 				
 				var selectedRows = editDataTable.rows(".selected");
+				var selectedRowIndexes = selectedRows.indexes();
 				
-				if(selectedRows)
+				if(selectedRowIndexes.length > 0)
 				{
 					selectedRows.deselect();
 					
@@ -442,6 +445,22 @@ WebUtils.setPageId(request, gridPageId);
 					
 					//统一绘制，效率更高
 					editDataTable.cells(selectedRows, 0).draw();
+				}
+				
+				//删除单元格属性值
+				if(selectedAddRowIndexes.length <= 0 && selectedRowIndexes.length <= 0)
+				{
+					var selectedCells = editDataTable.cells(".selected");
+					var selectedCellIndexes = selectedCells.indexes();
+					
+					if(selectedCellIndexes.length > 0)
+					{
+						var settings = editDataTable.settings();
+						var propertyIndexesMap = $.getDataTableCellPropertyIndexesMap(settings, selectedCellIndexes);
+						
+						po.closeEditCellPanel(editDataTable);
+						po.storeEditCell(editDataTable, propertyIndexesMap, {});
+					}
 				}
 			});
 		}
@@ -1196,7 +1215,11 @@ WebUtils.setPageId(request, gridPageId);
 				var updatePropertyIndex = $.getDataTableCellPropertyIndex(editDataTableSettings, myModifiedCellIndex);
 				var updatePropertyName = $.model.getProperty(po.editGridModel, updatePropertyIndex).name;
 				var updatePropertyValue = editDataTable.cell(myModifiedCellIndex).data();
-
+				
+				//jquery会将null参数转化为空字符串，某些情况时不合逻辑，这里使用后台null转换占位值
+				if(updatePropertyValue == null)
+					updatePropertyValue = "<%=AbstractDataConverter.NULL_VALUE_PLACE_HOLDER%>";
+				
 				updatePropertyIndexes.push(updatePropertyIndex);
 				updatePropertyNames.push(updatePropertyName);
 				updatePropertyValues.push(updatePropertyValue);

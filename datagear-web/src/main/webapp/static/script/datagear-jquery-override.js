@@ -112,17 +112,9 @@
 			s = [],
 			add = function( key, value ) {
 	
-				//XXX 原内容（“///”移除后）
 				// If value is a function, invoke it and return its value
-				///value = jQuery.isFunction( value ) ? value() : ( value == null ? "" : value );
-				///s[ s.length ] = encodeURIComponent( key ) + "=" + encodeURIComponent( value );
-				//XXX 原内容
-				//XXX 替换内容
-				//对于null值，不传输到后台，以免复合null属性值类型转换报错
-				value = jQuery.isFunction( value ) ? value() : value;
-				if(value != null)
-					s[ s.length ] = encodeURIComponent( key ) + "=" + encodeURIComponent( value );
-				//XXX 替换内容
+				value = jQuery.isFunction( value ) ? value() : ( value == null ? "" : value );
+				s[ s.length ] = encodeURIComponent( key ) + "=" + encodeURIComponent( value );
 			};
 	
 		// Set traditional to true for jQuery <= 1.3.2 behavior.

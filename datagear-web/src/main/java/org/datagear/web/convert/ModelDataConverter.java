@@ -220,7 +220,7 @@ public class ModelDataConverter extends AbstractDataConverter
 				return target;
 			}
 			else
-				throw new ConverterException("Unsupported");
+				return convertSimpleObj(obj, model, namePath);
 		}
 		else
 		{
@@ -352,7 +352,7 @@ public class ModelDataConverter extends AbstractDataConverter
 			return convertCollectionToArray(namePath, (Collection<Object>) obj, model, refContext);
 		}
 		else
-			throw new UnsupportedOperationException();
+			return (Object[]) convertSimpleObj(obj, model, namePath);
 	}
 
 	/**
@@ -396,7 +396,7 @@ public class ModelDataConverter extends AbstractDataConverter
 					refContext);
 		}
 		else
-			throw new UnsupportedOperationException();
+			collection = (Collection<Object>) convertSimpleObj(obj, model, namePath);
 
 		return collection;
 	}
