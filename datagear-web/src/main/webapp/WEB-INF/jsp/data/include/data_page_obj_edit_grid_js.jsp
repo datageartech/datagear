@@ -888,10 +888,10 @@ WebUtils.setPageId(request, gridPageId);
 	{
 		var model = po.editGridModel;
 		
-		var changedCellIndexes = [];
-		var changedCellValues = [];
-		var changedCellHtmls = [];
-		var unchangedCellIndexes = [];
+		var storeCellIndexes = [];
+		var storeCellValues = [];
+		var storeCellHtmls = [];
+		var storeCellChanges = [];
 		
 		for(var pi in propertyIndexesMap)
 		{
@@ -942,11 +942,12 @@ WebUtils.setPageId(request, gridPageId);
 					}
 				}
 				
+				storeCellIndexes.push(index);
+				
 				if(changed)
 				{
-					changedCellIndexes.push(index);
-					
-					changedCellValues.push($.deepClone(propertyValue));
+					storeCellChanges.push(true);
+					storeCellValues.push($.deepClone(propertyValue));
 					
 					//多元属性值单元格显示“[原始元素个数]+[新加元素个数]”
 					if($.model.isMultipleProperty(property) && !po.isClientDataRow(editDataTable, index.row) && $.isArray(myPropertyValue))
@@ -954,42 +955,41 @@ WebUtils.setPageId(request, gridPageId);
 						var originalLen = $.model.getMultiplePropertyValueLength(originalCellValue);
 						var newLen = $.model.getMultiplePropertyValueLength(myPropertyValue);
 						
-						changedCellHtmls.push("<span class='original-size'>"+originalLen+"</span>+<span class='add-size'>"+newLen+"</span>");
+						storeCellHtmls.push("<span class='original-size'>"+originalLen+"</span>+<span class='add-size'>"+newLen+"</span>");
 					}
 					else
-						changedCellHtmls.push(null);
+						storeCellHtmls.push(null);
 				}
 				else
 				{
-					unchangedCellIndexes.push(index);
+					storeCellChanges.push(false);
+					storeCellValues.push($.deepClone(propertyValue));
+					storeCellHtmls.push(null);
 				}
 			}
 		}
 		
-		for(var i=0; i<changedCellIndexes.length; i++)
-			po.updateEditDataTableCellValue(editDataTable, changedCellIndexes[i], changedCellValues[i]);
+		for(var i=0; i<storeCellIndexes.length; i++)
+			po.updateEditDataTableCellValue(editDataTable, storeCellIndexes[i], storeCellValues[i]);
 		
 		//统一绘制，效率更高
-		editDataTable.cells(changedCellIndexes).draw();
+		editDataTable.cells(storeCellIndexes).draw();
 		
-		for(var i=0; i<changedCellIndexes.length; i++)
+		for(var i=0; i<storeCellChanges.length; i++)
 		{
-			var $cell = $(editDataTable.cell(changedCellIndexes[i]).node());
+			var $cell = $(editDataTable.cell(storeCellIndexes[i]).node());
 			
-			if(changedCellHtmls[i] != null)
-				$cell.html(changedCellHtmls[i]);
+			if(storeCellHtmls[i] != null)
+				$cell.html(storeCellHtmls[i]);
 			
-			po.markAsModifiedCell($cell);
-		}
-		
-		for(var i=0; i<unchangedCellIndexes.length; i++)
-		{
-			var $cell = $(editDataTable.cell(unchangedCellIndexes[i]).node());
-			po.markAsUnmodifiedCell($cell);
+			if(storeCellChanges[i] == true)
+				po.markAsModifiedCell($cell);
+			else
+				po.markAsUnmodifiedCell($cell);
 		}
 		
 		//新值可能会影响单元格宽度，因此需要重设列宽
-		if(changedCellIndexes.length > 0)
+		if(storeCellIndexes.length > 0)
 			editDataTable.columns.adjust();
 		
 		//保存后的下一次选中单元格操作触发编辑
