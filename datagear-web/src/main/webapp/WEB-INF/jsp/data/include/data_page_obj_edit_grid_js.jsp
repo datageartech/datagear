@@ -419,9 +419,10 @@ WebUtils.setPageId(request, gridPageId);
 			
 			po.element("button[name='editGridDeleteButton']", $buttonWrapper).click(function()
 			{
-				po.editCellOnSelect = true;
-				
 				var editDataTable = po.editTable().DataTable();
+				
+				po.closeEditCellPanel(editDataTable);
+				po.editCellOnSelect = true;
 				
 				var selectedAddRows = editDataTable.rows(".selected.add-row");
 				var selectedAddRowIndexes = selectedAddRows.indexes();
@@ -458,7 +459,6 @@ WebUtils.setPageId(request, gridPageId);
 						var settings = editDataTable.settings();
 						var propertyIndexesMap = $.getDataTableCellPropertyIndexesMap(settings, selectedCellIndexes);
 						
-						po.closeEditCellPanel(editDataTable);
 						po.storeEditCell(editDataTable, propertyIndexesMap, {});
 					}
 				}
