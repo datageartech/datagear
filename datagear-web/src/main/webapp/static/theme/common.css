@@ -1175,6 +1175,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 
 .page-changelog form .form-content .form-item .form-item-label{
 	text-align: center;
+	width: 15%;
 }
 .page-changelog form .form-content .form-item-version{
 	font-weight: bold;
