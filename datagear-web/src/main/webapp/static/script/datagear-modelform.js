@@ -845,7 +845,12 @@
 			propertyWidget.getValue = function()
 			{
 				if(options.filePropertyReturnShowableValue)
-					return $.model.toShowableValue($(this.fileInputHidden).val(), options.filePropertyLabelValue);
+				{
+					var value = $(this.fileInputHidden).val();
+					var labelValue = (value ? options.filePropertyLabelValue : "");
+					
+					return $.model.toShowableValue(value, labelValue);
+				}
 				else
 					return $(this.fileInputHidden).val();
 			};
