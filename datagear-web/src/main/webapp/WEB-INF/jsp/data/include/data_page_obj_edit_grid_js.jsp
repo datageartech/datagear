@@ -911,7 +911,10 @@ WebUtils.setPageId(request, gridPageId);
 				{
 					//只允许集合属性值在初始值的基础上添加，因此当为null时即是恢复为初始值
 					if(!myPropertyValue || ($.isArray(myPropertyValue) && myPropertyValue.length == 0))
+					{
 						myPropertyValue = originalCellValue;
+						propertyValue = originalCellValue;
+					}
 				}
 				
 				var changed = true;
