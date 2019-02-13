@@ -32,10 +32,11 @@
 	
 	po.addWorkTab = function(tabId, label, schema, tableInfo)
 	{
+		label = $.truncateIf(label, "..", 20);
+		
 		var schemaId = schema.id;
 		var schemaTitle = schema.title;
 		var tableName = tableInfo.name;
-		
 		
 		var mainTabs = po.element("#mainTabs");
 		var uiTabsNav = mainTabs.find(".ui-tabs-nav");
@@ -953,7 +954,7 @@
 							
 							var mi = $("<li />").appendTo(menu);
 							mi.attr("tab-id", tab.attr("id"));
-							$("<div />").html($(".ui-tabs-anchor", tab).text()).appendTo(mi);
+							$("<div />").html($(".ui-tabs-anchor", tab).text()).attr("title", tab.attr("title")).appendTo(mi);
 						}
 						
 		    	    	po.element("#tabMoreTabMenuParent").show().css("left", "0px").css("top", "0px")
