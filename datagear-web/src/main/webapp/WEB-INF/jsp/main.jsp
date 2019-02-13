@@ -420,7 +420,7 @@
 				}
 				else if($item.hasClass("changelog"))
 				{
-					po.open(contextPath+"/changelog", { width : "50%" });
+					po.open(contextPath+"/changelog");
 				}
 			}
 		});
