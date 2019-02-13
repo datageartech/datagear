@@ -210,12 +210,72 @@ page_js_obj.jsp
 				{
 					event.stopPropagation();
 					
-					var tr = $(this).closest("tr");
+					var dataTable = $table.DataTable();
 					
-					if(tr.hasClass("selected"))
-						$table.DataTable().row(tr).deselect();
+					var $tr = $(this).closest("tr");
+					var isSelected = $tr.hasClass("selected");
+					
+					if(event.shiftKey)
+					{
+						var myIndex = $tr.index();
+						
+						var rangeStart = -1;
+						var rangeEnd = -1;
+						
+						var $preTr;
+						
+						var test = $tr.prevUntil(":not(.selected)");
+						
+						if(isSelected)
+							$preTr = $tr.prevUntil(":not(.selected)").last();
+						else
+							$preTr = $tr.prevAll(".selected:first");
+						
+						if($preTr.length > 0)
+						{
+							rangeStart = $preTr.index();
+							rangeEnd = myIndex + 1;
+						}
+						else
+						{
+							var $nextTr;
+							
+							if(isSelected)
+								$nextTr = $tr.nextUntil(":not(.selected)").last();
+							else
+								$nextTr = $tr.nextAll(".selected:first");
+							
+							if($nextTr.length > 0)
+							{
+								rangeStart = myIndex;
+								rangeEnd = $nextTr.index() + 1;
+							}
+							else
+							{
+								rangeStart = myIndex;
+								rangeEnd = myIndex + 1;
+							}
+						}
+						
+						var selectedIndexes = [];
+						
+						for(var i=rangeStart; i<rangeEnd; i++)
+							selectedIndexes.push(i);
+						
+						if(isSelected)
+							dataTable.rows(selectedIndexes).deselect();
+						else
+							dataTable.rows(selectedIndexes).select();
+					}
 					else
-						$table.DataTable().row(tr).select();
+					{
+						if(isSelected)
+							dataTable.row($tr).deselect();
+						else
+						{
+							dataTable.row($tr).select();
+						}
+					}
 				})
 				//固定选择列后hover效果默认不能同步，需要自己实现
 				.hover(
