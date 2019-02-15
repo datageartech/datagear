@@ -1666,7 +1666,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		Order[] orders = query.getOrders();
 
-		Order[] re = new Order[orders.length];
+		List<Order> re = new ArrayList<Order>();
 
 		for (int i = 0; i < orders.length; i++)
 		{
@@ -1675,21 +1675,65 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			String orderName = order.getName();
 			String orderType = order.getType();
 
+			ColumnPropertyPath exactlyMatched = null;
+			List<ColumnPropertyPath> startsWiths = null;
+			boolean startsWithsHasToken = false;
+
 			for (ColumnPropertyPath columnPropertyPath : selectColumnPropertyPaths)
 			{
 				String propertyPath = columnPropertyPath.getPropertyPath();
 
-				if (propertyPath.startsWith(orderName) && (propertyPath.length() == orderName.length()
-						|| columnPropertyPath.isSizeColumn() || columnPropertyPath.isToken()))
+				if (propertyPath.startsWith(orderName))
 				{
-					orderName = columnPropertyPath.getQuoteColumnName();
+					// 基本属性
+					if (propertyPath.length() == orderName.length())
+					{
+						exactlyMatched = columnPropertyPath;
+						break;
+					}
+					// 单元复合属性、多元属性size
+					else
+					{
+						if (startsWiths == null)
+							startsWiths = new ArrayList<ColumnPropertyPath>();
+
+						startsWiths.add(columnPropertyPath);
+
+						if (!startsWithsHasToken && columnPropertyPath.isToken())
+							startsWithsHasToken = true;
+					}
 				}
 			}
 
-			re[i] = Order.valueOf(orderName, orderType);
+			if (exactlyMatched != null)
+			{
+				re.add(Order.valueOf(exactlyMatched.getQuoteColumnName(), orderType));
+			}
+			else if (startsWiths != null)
+			{
+				for (int j = 0; j < startsWiths.size(); j++)
+				{
+					ColumnPropertyPath startsWith = startsWiths.get(j);
+
+					// 先取所有Token属性
+					if (startsWithsHasToken)
+					{
+						if (startsWith.isToken())
+							re.add(Order.valueOf(startsWith.getQuoteColumnName(), orderType));
+					}
+					// 取前3个属性
+					else
+					{
+						if (j >= 3)
+							break;
+
+						re.add(Order.valueOf(startsWith.getQuoteColumnName(), orderType));
+					}
+				}
+			}
 		}
 
-		return re;
+		return re.toArray(new Order[re.size()]);
 	}
 
 	/**
