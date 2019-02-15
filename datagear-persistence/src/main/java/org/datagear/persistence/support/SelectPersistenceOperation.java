@@ -1674,7 +1674,12 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			String orderName = order.getName();
 			String orderType = order.getType();
+			
+			if(orderName == null)
+				continue;
 
+			int orderNameLength = orderName.length();
+			
 			ColumnPropertyPath exactlyMatched = null;
 			List<ColumnPropertyPath> startsWiths = null;
 			boolean startsWithsHasToken = false;
@@ -1686,21 +1691,26 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				if (propertyPath.startsWith(orderName))
 				{
 					// 基本属性
-					if (propertyPath.length() == orderName.length())
+					if (propertyPath.length() == orderNameLength)
 					{
 						exactlyMatched = columnPropertyPath;
 						break;
 					}
-					// 单元复合属性、多元属性size
 					else
 					{
-						if (startsWiths == null)
-							startsWiths = new ArrayList<ColumnPropertyPath>();
-
-						startsWiths.add(columnPropertyPath);
-
-						if (!startsWithsHasToken && columnPropertyPath.isToken())
-							startsWithsHasToken = true;
+						char c = propertyPath.charAt(orderNameLength);
+						
+						// 单元复合属性、多元属性size
+						if(c == PropertyPath.PROPERTY || c == PropertyPath.CONCRETE_L)
+						{
+							if (startsWiths == null)
+								startsWiths = new ArrayList<ColumnPropertyPath>();
+	
+							startsWiths.add(columnPropertyPath);
+	
+							if (!startsWithsHasToken && columnPropertyPath.isToken())
+								startsWithsHasToken = true;
+						}
 					}
 				}
 			}
@@ -1715,20 +1725,20 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				{
 					ColumnPropertyPath startsWith = startsWiths.get(j);
 
-					// 先取所有Token属性
+					// 优先取Token属性
 					if (startsWithsHasToken)
 					{
 						if (startsWith.isToken())
 							re.add(Order.valueOf(startsWith.getQuoteColumnName(), orderType));
 					}
-					// 取前3个属性
 					else
 					{
-						if (j >= 3)
-							break;
-
 						re.add(Order.valueOf(startsWith.getQuoteColumnName(), orderType));
 					}
+					
+					//无论是否Token属性，都仅取前三个，避免过多排序项影响性能
+					if(re.size() > 3)
+						break;
 				}
 			}
 		}
