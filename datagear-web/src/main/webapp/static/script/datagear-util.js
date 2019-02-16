@@ -195,7 +195,7 @@
 				
 				position: {my: "center top", at: "center top+6%"},
 				
-				width : "73%"
+				width : "80%"
 			},
 			options);
 			
