@@ -11,6 +11,9 @@ import java.net.URLEncoder;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.WebAttributes;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -50,6 +53,28 @@ public class LoginController extends AbstractController
 	@RequestMapping
 	public String login(HttpServletRequest request)
 	{
+		String loginUser = (String) request.getSession()
+				.getAttribute(org.datagear.web.controller.RegisterController.SESSION_KEY_REGISTER_USER_NAME);
+
+		// 参考org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler.saveException()
+		AuthenticationException authenticationException = (AuthenticationException) request.getSession()
+				.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+		if (authenticationException != null)
+		{
+			request.getSession().removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+
+			@SuppressWarnings("deprecation")
+			Authentication authentication = authenticationException.getAuthentication();
+
+			if (authentication != null && authentication.getPrincipal() != null)
+				loginUser = authentication.getPrincipal().toString();
+		}
+
+		if (loginUser == null)
+			loginUser = "";
+
+		request.setAttribute("loginUser", loginUser);
+		request.setAttribute("authenticationFailed", (authenticationException != null));
 		request.setAttribute("disableRegister", this.disableRegister);
 
 		return "/login";

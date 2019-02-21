@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.GlobalSetting;
 import org.datagear.management.domain.SmtpSetting;
-import org.datagear.management.domain.User;
 import org.datagear.management.domain.SmtpSetting.ConnectionType;
+import org.datagear.management.domain.User;
 import org.datagear.management.service.GlobalSettingService;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
@@ -79,6 +79,9 @@ public class GlobalSettingController extends AbstractController
 		}
 
 		model.addAttribute("globalSetting", globalSetting);
+		model.addAttribute("connectionTypePlain", ConnectionType.PLAIN);
+		model.addAttribute("connectionTypeSsl", ConnectionType.SSL);
+		model.addAttribute("connectionTypeTls", ConnectionType.TLS);
 
 		return "/global_setting";
 	}

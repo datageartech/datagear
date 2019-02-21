@@ -168,7 +168,7 @@ public class UserController extends AbstractController
 
 		model.addAttribute("user", user);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.viewUser");
-		model.addAttribute(KEY_READONLY, "true");
+		model.addAttribute(KEY_READONLY, true);
 
 		return "/user/user_form";
 	}

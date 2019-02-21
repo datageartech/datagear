@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Paging;
@@ -459,6 +460,48 @@ public abstract class AbstractController
 		{
 			return "???" + code + "???";
 		}
+	}
+
+	/**
+	 * 获取HTTP错误时的{@linkplain OperationMessage}。
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	protected OperationMessage getOperationMessageForHttpError(HttpServletRequest request, HttpServletResponse response)
+	{
+		OperationMessage operationMessage = WebUtils.getOperationMessage(request);
+
+		if (operationMessage == null)
+		{
+			Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
+
+			if (statusCode == null)
+				statusCode = response.getStatus();
+
+			String message = (String) request.getAttribute("javax.servlet.error.message");
+
+			String statusCodeKey = "error.httpError";
+
+			if (statusCode != null)
+			{
+				int sc = statusCode.intValue();
+				statusCodeKey += "." + sc;
+			}
+
+			try
+			{
+				message = getMessage(request, statusCodeKey, new Object[0]);
+			}
+			catch (Throwable t)
+			{
+			}
+
+			operationMessage = OperationMessage.valueOfFail(statusCodeKey, message);
+		}
+
+		return operationMessage;
 	}
 
 	/**

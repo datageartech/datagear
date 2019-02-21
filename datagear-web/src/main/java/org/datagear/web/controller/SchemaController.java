@@ -176,7 +176,7 @@ public class SchemaController extends AbstractSchemaModelController
 
 		model.addAttribute("schema", schema);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.viewSchema");
-		model.addAttribute(KEY_READONLY, "true");
+		model.addAttribute(KEY_READONLY, true);
 
 		return "/schema/schema_form";
 	}

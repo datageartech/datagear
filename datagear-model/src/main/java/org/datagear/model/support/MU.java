@@ -432,6 +432,9 @@ public class MU
 	 */
 	public static int getModelIndex(Model[] models, Object obj)
 	{
+		if (models.length == 1)
+			return 0;
+
 		if (obj == null)
 			throw new IllegalArgumentException("[obj] must not be null");
 

@@ -24,7 +24,11 @@ import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.UnsupportedDialectException;
 import org.datagear.persistence.support.SqlExpressionErrorException;
 import org.datagear.persistence.support.VariableExpressionErrorException;
+import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.IllegalSourceValueException;
+import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
+import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
+import org.datagear.web.util.WebUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -54,7 +58,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(MissingServletRequestParameterException.class),
 				exception, false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(BindException.class)
@@ -64,7 +68,7 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(BindException.class), exception, false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -75,7 +79,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(MethodArgumentNotValidException.class), exception,
 				false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(AuthenticationFailedException.class)
@@ -86,7 +90,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(AuthenticationFailedException.class), exception,
 				true);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(IllegalInputException.class)
@@ -96,7 +100,17 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(IllegalInputException.class), exception, false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(IllegalArgumentException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public String handleControllerIllegalArgumentException(HttpServletRequest request, HttpServletResponse response,
+			IllegalArgumentException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(IllegalArgumentException.class), exception, false);
+
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(RecordNotFoundException.class)
@@ -106,7 +120,7 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(RecordNotFoundException.class), exception, false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(RecordNotFoundOrPermissionDeniedException.class)
@@ -117,7 +131,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(RecordNotFoundOrPermissionDeniedException.class),
 				exception, false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(SchemaNotFoundException.class)
@@ -127,7 +141,7 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(SchemaNotFoundException.class), exception, false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(IllegalSourceValueException.class)
@@ -138,7 +152,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(IllegalSourceValueException.class), exception, false,
 				exception.getSourceValue(), exception.getTargetType().getName());
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(FileNotFoundException.class)
@@ -149,7 +163,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(FileNotFoundException.class), exception, false,
 				exception.getFileName());
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(DuplicateRecordException.class)
@@ -160,7 +174,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(DuplicateRecordException.class), exception, false,
 				exception.getExpectedCount(), exception.getActualCount());
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(VariableExpressionErrorException.class)
@@ -171,7 +185,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(VariableExpressionErrorException.class),
 				exception.getCause(), false, exception.getExpression().getContent());
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(SqlExpressionErrorException.class)
@@ -182,7 +196,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(SqlExpressionErrorException.class),
 				exception.getCause(), true, exception.getExpression().getContent());
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(UnsupportedDialectException.class)
@@ -192,7 +206,7 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedDialectException.class), exception, false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(PersistenceException.class)
@@ -206,7 +220,7 @@ public class ControllerAdvice extends AbstractController
 		else
 			setOperationMessageForThrowable(request, buildMessageCode(PersistenceException.class), exception, true);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(DatabaseInfoResolverException.class)
@@ -217,7 +231,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(DatabaseInfoResolverException.class), exception,
 				true);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(DatabaseModelResolverException.class)
@@ -228,7 +242,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(DatabaseModelResolverException.class), exception,
 				true);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(TableNotExistsException.class)
@@ -239,7 +253,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(TableNotExistsException.class), exception, false,
 				exception.getTableName());
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(ConnectionSourceException.class)
@@ -249,7 +263,7 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(ConnectionSourceException.class), exception, true);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(DriverEntityManagerException.class)
@@ -259,7 +273,7 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(DriverEntityManagerException.class), exception, true);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(DriverNotFoundException.class)
@@ -270,7 +284,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(DriverNotFoundException.class), exception, false,
 				exception.getDriverClassName());
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(DriverClassFormatErrorException.class)
@@ -281,7 +295,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(DriverClassFormatErrorException.class), exception,
 				false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(URLNotAcceptedException.class)
@@ -291,7 +305,7 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(URLNotAcceptedException.class), exception, false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(UnsupportedGetConnectionException.class)
@@ -302,7 +316,7 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedGetConnectionException.class), exception,
 				false);
 
-		return ERROR_PAGE_URL;
+		return getErrorView(request, response);
 	}
 
 	@ExceptionHandler(EstablishConnectionException.class)
@@ -313,7 +327,47 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(EstablishConnectionException.class),
 				exception.getCause(), true);
 
+		return getErrorView(request, response);
+	}
+
+	/**
+	 * 获取错误信息视图。
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	protected String getErrorView(HttpServletRequest request, HttpServletResponse response)
+	{
+		setAttributeIfIsJsonResponse(request, response);
 		return ERROR_PAGE_URL;
+	}
+
+	/**
+	 * 设置JSON响应的错误页面属性。
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	protected void setAttributeIfIsJsonResponse(HttpServletRequest request, HttpServletResponse response)
+	{
+		String expectedContentType = DeliverContentTypeExceptionHandlerExceptionResolver.getHandlerContentType(request);
+		if (expectedContentType != null && !expectedContentType.isEmpty())
+			response.setContentType(expectedContentType);
+
+		boolean isJsonResponse = WebUtils.isJsonResponse(response);
+
+		request.setAttribute("isJsonResponse", isJsonResponse);
+
+		if (isJsonResponse)
+		{
+			OperationMessage operationMessage = getOperationMessageForHttpError(request, response);
+
+			request.setAttribute(WebUtils.KEY_OPERATION_MESSAGE,
+					WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(operationMessage));
+
+			response.setContentType(CONTENT_TYPE_JSON);
+		}
 	}
 
 	protected String buildMessageCode(Class<? extends Throwable> clazz)

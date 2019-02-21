@@ -130,6 +130,8 @@ public class ResetPasswordController extends AbstractController
 			session.setAttribute(KEY_STEP, resetPasswordStep);
 		}
 
+		request.setAttribute("step", resetPasswordStep);
+
 		return "/reset_password";
 	}
 

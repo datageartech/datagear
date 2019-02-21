@@ -9,10 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.util.Version;
 import org.datagear.management.util.VersionContent;
 import org.datagear.web.util.ChangelogResolver;
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -86,10 +88,25 @@ public class MainController extends AbstractController
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping("/main")
-	public String main(HttpServletRequest request, Model model)
+	@RequestMapping("/")
+	public String main(HttpServletRequest request, HttpServletResponse response, Model model)
+	{
+		return mainForIndexHtml(request, response, model);
+	}
+
+	/**
+	 * 打开主页面。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping("/index.html")
+	public String mainForIndexHtml(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		request.setAttribute("disableRegister", this.disableRegister);
+		request.setAttribute("currentUser", WebUtils.getUser(request, response));
 
 		return "/main";
 	}
@@ -139,9 +156,11 @@ public class MainController extends AbstractController
 		return "/changelog";
 	}
 
-	@RequestMapping(value = "/changeThemeData", produces = CONTENT_TYPE_JSON)
-	public String changeThemeData(HttpServletRequest request)
+	@RequestMapping(value = "/changeThemeData")
+	public String changeThemeData(HttpServletRequest request, HttpServletResponse response)
 	{
+		response.setContentType(CONTENT_TYPE_JSON);
+
 		return "/change_theme_data";
 	}
 }

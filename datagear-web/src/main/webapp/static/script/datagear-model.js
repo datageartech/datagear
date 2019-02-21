@@ -704,6 +704,50 @@
 		
 		/**
 		 * 获取/设置对象属性值。
+		 */
+		modelPropertyValue : function(model, property, obj, propertyValue)
+		{
+			if(model == null || property == null || obj == null)
+				throw new Error("[model], [property], [obj] must be defined");
+			
+			var isGet = (arguments.length == 2);
+			
+			if(isGet)
+				return obj[property.name];
+			else
+			{
+				if(propertyValue == null)
+					obj[property.name] = propertyValue;
+				else
+				{
+					var propertyModel = this.getPropertyModelByValue(property, propertyValue);
+					var mappedWithPropertyName = this.findMappedByWith(property, propertyModel);
+					
+					if(mappedWithPropertyName)
+					{
+						//反向赋值
+						if(this.isMultipleProperty(property))
+						{
+							var length = (propertyValue.length ? propertyValue.length : 0);
+							for(var i=0; i<length; i++)
+							{
+								var ele = propertyValue[i];
+								
+								if(ele != null)
+									ele[mappedWithPropertyName] = obj;
+							}
+						}
+						else
+							propertyValue[mappedWithPropertyName] = obj;
+					}
+					else
+						obj[property.name] = propertyValue;
+				}
+			}
+		},
+		
+		/**
+		 * 获取/设置对象属性值。
 		 * 
 		 * @param obj 必选，对象
 		 * @param property 必选，属性对象或者属性名称名称

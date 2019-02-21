@@ -111,7 +111,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 			@RequestParam(value = "scriptCode", required = false) String scriptCode) throws IOException
 	{
 		request.setAttribute("scriptCode", scriptCode);
-		request.setAttribute("preview", "1");
+		request.setAttribute("preview", true);
 
 		return "/schema/schema_build_url";
 	}

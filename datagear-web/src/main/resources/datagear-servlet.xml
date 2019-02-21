@@ -45,9 +45,43 @@
 		</property>
 	</bean>
 	
+	<!--
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix" value="/WEB-INF/jsp"/>
 		<property name="suffix" value=".jsp"/>
+	</bean>
+	-->
+	
+	<bean id="writeJsonTemplateDirectiveModel" class="org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel">
+		<property name="serializeConfig" ref="serializeConfig" />
+		<property name="serializerFeatures" ref="serializerFeatures" />
+	</bean>
+	
+	<bean id="freeMarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPaths" value="/WEB-INF/view/" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+        		<prop key="date_format">yyyy-MM-dd</prop>
+				<prop key="number_format">#.##</prop>
+			</props>
+		</property>
+		<property name="freemarkerVariables">
+			<map>
+				<entry key="writeJson" value-ref="writeJsonTemplateDirectiveModel" />			
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="freeMarkerViewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="viewClass" value="org.datagear.web.freemarker.CustomFreeMarkerView" />
+		<property name="contentType" value="text/html;charset=UTF-8"></property>
+		<property name="exposeRequestAttributes" value="true" />
+		<property name="allowRequestOverride" value="true" />
+		<property name="cache" value="true" />
+		<property name="prefix" value="" />
+		<property name="suffix" value=".ftl" />
 	</bean>
 	
 	<bean id="exceptionResolver" class="org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver" />

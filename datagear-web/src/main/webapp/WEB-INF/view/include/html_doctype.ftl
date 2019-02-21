@@ -1,0 +1,1 @@
+<#if !isAjaxRequest><!DOCTYPE html></#if>

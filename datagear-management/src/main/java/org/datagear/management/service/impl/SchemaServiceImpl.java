@@ -113,7 +113,7 @@ public class SchemaServiceImpl extends AbstractMybatisEntityService<String, Sche
 		{
 			schema = super.getById(id);
 
-			if (this.schemaCache != null)
+			if (schema != null && this.schemaCache != null)
 				this.schemaCache.putSchema(schema);
 		}
 
@@ -134,7 +134,7 @@ public class SchemaServiceImpl extends AbstractMybatisEntityService<String, Sche
 		{
 			schema = super.getById(user, id);
 
-			if (this.schemaCache != null)
+			if (schema != null && this.schemaCache != null)
 				this.schemaCache.putSchema(schema);
 		}
 

@@ -285,7 +285,7 @@ public class DriverEntityController extends AbstractController
 
 		model.addAttribute("driverEntity", driverEntity);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "driverEntity.viewDriverEntity");
-		model.addAttribute(KEY_READONLY, "true");
+		model.addAttribute(KEY_READONLY, true);
 
 		return "/driverEntity/driverEntity_form";
 	}
@@ -312,7 +312,7 @@ public class DriverEntityController extends AbstractController
 	public String select(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "driverEntity.selectDriverEntity");
-		model.addAttribute(KEY_SELECTONLY, "true");
+		model.addAttribute(KEY_SELECTONLY, true);
 
 		return "/driverEntity/driverEntity_grid";
 	}

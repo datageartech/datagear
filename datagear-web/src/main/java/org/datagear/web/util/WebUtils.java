@@ -282,6 +282,20 @@ public class WebUtils
 	}
 
 	/**
+	 * 判断请求是否是ajax请求。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static boolean isAjaxRequest(HttpServletRequest request)
+	{
+		// 是否ajax请求，jquery库ajax可以使用此方案判断
+		boolean ajaxRequest = (request.getHeader("x-requested-with") != null);
+
+		return ajaxRequest;
+	}
+
+	/**
 	 * 获取页面ID。
 	 * <p>
 	 * 页面ID作为一次请求的客户端标识，用于为客户端定义页面对象。
@@ -414,5 +428,61 @@ public class WebUtils
 	{
 		String pageId = getPageId(request);
 		return pageId + "-" + elementId;
+	}
+
+	/**
+	 * 从请求获取布尔值。
+	 * 
+	 * @param request
+	 * @param name
+	 * @param defaultValue
+	 * @return
+	 */
+	public static boolean getBooleanValue(HttpServletRequest request, String name, boolean defaultValue)
+	{
+		Object value = request.getAttribute(name);
+
+		if (value != null)
+		{
+			if (value instanceof Boolean)
+				return (Boolean) value;
+
+			return ("true".equals(value.toString()) || "1".equals(value.toString()));
+		}
+
+		String paramValue = request.getParameter(name);
+
+		if (paramValue != null)
+			return ("true".equals(paramValue) || "1".equals(paramValue));
+
+		return defaultValue;
+	}
+
+	/**
+	 * 从请求获取字符串值。
+	 * 
+	 * @param request
+	 * @param name
+	 * @param defaultValue
+	 * @return
+	 */
+	public static String getStringValue(HttpServletRequest request, String name, String defaultValue)
+	{
+		Object value = request.getAttribute(name);
+
+		if (value != null)
+		{
+			if (value instanceof String)
+				return (String) value;
+
+			return value.toString();
+		}
+
+		String paramValue = request.getParameter(name);
+
+		if (paramValue != null)
+			return paramValue;
+
+		return defaultValue;
 	}
 }

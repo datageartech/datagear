@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -53,6 +54,7 @@ import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
 import org.datagear.web.format.SqlTimestampFormatter;
+import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.FileUtils;
 import org.datagear.web.util.ModelUtils;
 import org.datagear.web.util.WebUtils;
@@ -87,6 +89,12 @@ public class DataController extends AbstractSchemaModelController
 	public static final String PARAM_IS_LOAD_PAGE_DATA = "isLoadPageData";
 
 	public static final String KEY_IS_CLIENT_PAGE_DATA = "isClientPageData";
+
+	public static final String KEY_TITLE_DISPLAY_NAME = "titleDisplayName";
+
+	public static final String KEY_TITLE_DISPLAY_DESC = "titleDisplayDesc";
+
+	public static final String KEY_CONDITION_SOURCE = "conditionSource";
 
 	@Autowired
 	private PersistenceManager persistenceManager;
@@ -259,7 +267,12 @@ public class DataController extends AbstractSchemaModelController
 
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager.getQueryResultMetaInfo(cn, model);
 
-				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
+				springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel
+						.toWriteJsonTemplateModel(getPropertyPathDisplayNames(request, queryResultMetaInfo)));
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, WebUtils.getLocale(request)));
+				springModel.addAttribute(KEY_TITLE_DISPLAY_DESC,
+						ModelUtils.displayDesc(model, WebUtils.getLocale(request)));
 			}
 		}.execute();
 
@@ -310,7 +323,9 @@ public class DataController extends AbstractSchemaModelController
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
 				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, "true");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, WebUtils.getLocale(request)));
+				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, true);
 				springModel.addAttribute("submitAction", "saveAdd");
 			}
 		}.execute();
@@ -439,8 +454,10 @@ public class DataController extends AbstractSchemaModelController
 					data = resultList.get(0);
 				}
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("titleOperationMessageKey", "edit");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, WebUtils.getLocale(request)));
 				springModel.addAttribute("submitAction", "saveEdit");
 			}
 		}.execute();
@@ -556,9 +573,11 @@ public class DataController extends AbstractSchemaModelController
 					data = resultList.get(0);
 				}
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("titleOperationMessageKey", "view");
-				springModel.addAttribute("readonly", "true");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, WebUtils.getLocale(request)));
+				springModel.addAttribute("readonly", true);
 			}
 		}.execute();
 
@@ -695,9 +714,18 @@ public class DataController extends AbstractSchemaModelController
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 						.getQueryPropValueSourceQueryResultMetaInfo(cn, model, data, propertyPathInfo);
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("conditionSource", getPropertyPathDisplayNames(request, queryResultMetaInfo));
+				springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel
+						.toWriteJsonTemplateModel(getPropertyPathDisplayNames(request, queryResultMetaInfo)));
+
+				boolean isMultipleSelect = false;
+				if (request.getParameter("multiple") != null)
+					isMultipleSelect = true;
+				else
+					isMultipleSelect = MU.isMultipleProperty(propertyPathInfo.getPropertyTail());
+
+				springModel.addAttribute("isMultipleSelect", isMultipleSelect);
 			}
 		}.execute();
 
@@ -838,6 +866,8 @@ public class DataController extends AbstractSchemaModelController
 	{
 		final Object dataParam = getParamMap(request, "data");
 
+		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
@@ -846,10 +876,12 @@ public class DataController extends AbstractSchemaModelController
 			{
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, "true");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
+				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, true);
 				springModel.addAttribute("submitAction", "saveSinglePropValue");
 			}
 		}.execute();
@@ -867,6 +899,7 @@ public class DataController extends AbstractSchemaModelController
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propertyValueParam = getParamMap(request, "propertyValue");
+		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
@@ -881,13 +914,14 @@ public class DataController extends AbstractSchemaModelController
 
 				if (propertyValueParam != null)
 				{
-					propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+					propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
 
 					// 这里不应该使用convertToPropertyValue，因为它会添加双向关联，导致页面引用混乱，再保存时又会导致转换混乱
 					Object propertyValue = modelDataConverter.convert(propertyValueParam,
 							propertyPathInfo.getModelTail());
 
-					springModel.addAttribute("propertyValue", propertyValue);
+					springModel.addAttribute("propertyValue",
+							WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(propertyValue));
 				}
 
 				if (isLoadPageData)
@@ -906,13 +940,14 @@ public class DataController extends AbstractSchemaModelController
 					// 设置最新原始属性值，因为受SelectOptions的影响，select到页面的data对象超过级联的属性值不会加载
 					propertyPathInfo.setValueTail(originalPropertyValue);
 
-					springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA,
-							(originalPropertyValue == null ? "true" : "false"));
+					springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, (originalPropertyValue == null ? true : false));
 				}
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
 				springModel.addAttribute("submitAction", "saveSinglePropValue");
 			}
 		}.execute();
@@ -976,6 +1011,7 @@ public class DataController extends AbstractSchemaModelController
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propertyValueParam = getParamMap(request, "propertyValue");
+		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
@@ -992,7 +1028,7 @@ public class DataController extends AbstractSchemaModelController
 				if (isLoadPageData)
 				{
 					if (propertyPathInfo == null)
-						propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+						propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -1009,7 +1045,7 @@ public class DataController extends AbstractSchemaModelController
 					propertyValue = originalPropertyValue;
 
 					if (originalPropertyValue == null)
-						springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, "true");
+						springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, true);
 				}
 				else if (propertyValueParam != null)
 				{
@@ -1019,11 +1055,14 @@ public class DataController extends AbstractSchemaModelController
 					propertyValue = modelDataConverter.convert(propertyValueParam, propertyPathInfo.getModelTail());
 				}
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("propertyValue", propertyValue);
-				springModel.addAttribute("readonly", "true");
+				springModel.addAttribute("propertyValue",
+						WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(propertyValue));
+				springModel.addAttribute("readonly", true);
 				springModel.addAttribute("titleOperationMessageKey", "view");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
 			}
 		}.execute();
 
@@ -1039,6 +1078,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
+		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
@@ -1051,20 +1091,24 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
+
 				if (isLoadPageData)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
-							data);
 					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 							.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
 
-					springModel.addAttribute("conditionSource",
-							getPropertyPathDisplayNames(request, queryResultMetaInfo));
+					springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel
+							.toWriteJsonTemplateModel(getPropertyPathDisplayNames(request, queryResultMetaInfo)));
 				}
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
+				springModel.addAttribute("isPrivatePropertyModel",
+						ModelUtils.isPrivatePropertyModelTail(propertyPathInfo));
 			}
 		}.execute();
 
@@ -1118,6 +1162,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
+		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
@@ -1130,21 +1175,25 @@ public class DataController extends AbstractSchemaModelController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
+
 				if (isLoadPageData)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
-							data);
 					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 							.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
 
-					springModel.addAttribute("conditionSource",
-							getPropertyPathDisplayNames(request, queryResultMetaInfo));
+					springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel
+							.toWriteJsonTemplateModel(getPropertyPathDisplayNames(request, queryResultMetaInfo)));
 				}
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("readonly", "true");
+				springModel.addAttribute("readonly", true);
 				springModel.addAttribute("titleOperationMessageKey", "view");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
+				springModel.addAttribute("isPrivatePropertyModel",
+						ModelUtils.isPrivatePropertyModelTail(propertyPathInfo));
 			}
 		}.execute();
 
@@ -1160,6 +1209,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
+		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -1169,10 +1219,12 @@ public class DataController extends AbstractSchemaModelController
 			{
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, "true");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
+				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, true);
 				springModel.addAttribute("submitAction", "saveAddMultiplePropValueElement");
 			}
 		}.execute();
@@ -1310,6 +1362,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
+		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
@@ -1324,7 +1377,7 @@ public class DataController extends AbstractSchemaModelController
 
 				if (isLoadPageData)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
+					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj,
 							data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
@@ -1342,9 +1395,11 @@ public class DataController extends AbstractSchemaModelController
 					propertyPathInfo.setValueTail(originalPropertyValueElement);
 				}
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("propertyPath", propertyPath);
 				springModel.addAttribute("titleOperationMessageKey", "edit");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
 				springModel.addAttribute("submitAction", "saveEditMultiplePropValueElement");
 			}
 		}.execute();
@@ -1579,6 +1634,7 @@ public class DataController extends AbstractSchemaModelController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
+		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
@@ -1593,7 +1649,7 @@ public class DataController extends AbstractSchemaModelController
 
 				if (isLoadPageData)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath,
+					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj,
 							data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
@@ -1607,10 +1663,12 @@ public class DataController extends AbstractSchemaModelController
 					propertyPathInfo.setValueTail(resultList.get(0));
 				}
 
-				springModel.addAttribute("data", data);
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("readonly", "true");
+				springModel.addAttribute("readonly", true);
 				springModel.addAttribute("titleOperationMessageKey", "view");
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
 			}
 		}.execute();
 
@@ -1922,9 +1980,7 @@ public class DataController extends AbstractSchemaModelController
 	 */
 	protected boolean isClientPageDataRequest(HttpServletRequest request)
 	{
-		Boolean re = getBooleanParamValue(request, KEY_IS_CLIENT_PAGE_DATA);
-
-		return Boolean.TRUE.equals(re);
+		return WebUtils.getBooleanValue(request, KEY_IS_CLIENT_PAGE_DATA, false);
 	}
 
 	/**
@@ -1938,26 +1994,7 @@ public class DataController extends AbstractSchemaModelController
 		if (isClientPageDataRequest(request))
 			return false;
 
-		Boolean re = getBooleanParamValue(request, PARAM_IS_LOAD_PAGE_DATA);
-
-		return !Boolean.FALSE.equals(re);
-	}
-
-	/**
-	 * 获取布尔参数值，如果没有参数将返回{@code null}。
-	 * 
-	 * @param request
-	 * @param paramName
-	 * @return
-	 */
-	protected Boolean getBooleanParamValue(HttpServletRequest request, String paramName)
-	{
-		String value = request.getParameter(paramName);
-
-		if (value == null)
-			return null;
-
-		return ("true".equals(value) || "1".equals(value));
+		return WebUtils.getBooleanValue(request, PARAM_IS_LOAD_PAGE_DATA, true);
 	}
 
 	/**
@@ -1984,6 +2021,11 @@ public class DataController extends AbstractSchemaModelController
 
 		// 编辑表格需要表单属性
 		setFormPageAttributes(request, springModel);
+
+		springModel.addAttribute("Types_CLOB", Types.CLOB);
+		springModel.addAttribute("Types_NCLOB", Types.NCLOB);
+		springModel.addAttribute("Types_LONGNVARCHAR", Types.LONGNVARCHAR);
+		springModel.addAttribute("Types_LONGVARCHAR", Types.LONGVARCHAR);
 	}
 
 	/**
@@ -2001,6 +2043,36 @@ public class DataController extends AbstractSchemaModelController
 		springModel.addAttribute("sqlTimestampFormat", this.sqlTimestampFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("sqlTimeFormat", this.sqlTimeFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("filePropertyLabelValue", this.blobToFilePlaceholderName);
+
+		if (!containsAttributes(request, springModel, KEY_IS_CLIENT_PAGE_DATA))
+		{
+			boolean isClientPageData = WebUtils.getBooleanValue(request, KEY_IS_CLIENT_PAGE_DATA, false);
+			springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, isClientPageData);
+		}
+
+		if (!containsAttributes(request, springModel, "batchSet"))
+		{
+			boolean batchSet = WebUtils.getBooleanValue(request, "batchSet", false);
+			springModel.addAttribute("batchSet", batchSet);
+		}
+
+		if (!containsAttributes(request, springModel, "ignorePropertyName"))
+		{
+			String ignorePropertyName = WebUtils.getStringValue(request, "ignorePropertyName", "");
+			springModel.addAttribute("ignorePropertyName", ignorePropertyName);
+		}
+	}
+
+	protected boolean containsAttributes(HttpServletRequest request, org.springframework.ui.Model springModel,
+			String name)
+	{
+		if (request.getAttribute(name) != null)
+			return true;
+
+		if (springModel.containsAttribute(name))
+			return true;
+
+		return false;
 	}
 
 	/**
