@@ -80,3 +80,9 @@ CREATE TABLE DATAGEAR_SCHEMA
 --version[1.1.0], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
+
+
+-----------------------------------------
+--version[1.1.1], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
