@@ -54,7 +54,13 @@ Schema schema 数据库，不允许为null
 		resize : function(event, ui)
 		{
 			var parent = ui.element.parent();
-			$(".content-result", parent).height(parent.height() - ui.element.height());
+			var parentHeight = parent.height();
+			var editorHeight = ui.element.height();
+			var editorHeightPercent =  (editorHeight/parentHeight * 100) + "%";
+			var resultHeightpercent = ((parentHeight-editorHeight)/parentHeight * 100) + "%";
+			
+			ui.element.css("height", editorHeightPercent);
+			$(".content-result", parent).css("height", resultHeightpercent);
 			
 			return false;
 		}

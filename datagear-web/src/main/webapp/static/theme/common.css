@@ -1211,11 +1211,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	left: 0;
 	right: 0;
 	top: 1.5em;
-	bottom: 2em;
+	bottom: 1.5em;
 }
 .page-sqlpad .content .content-editor{
-	position: relative;
-	display: inline-block;
 	width: 100%;
 	height: 70%;
 	min-height: 10%;
@@ -1226,10 +1224,10 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	-webkit-box-sizing: border-box;
 }
 .page-sqlpad .content .content-result{
-	display: inline-block;
 	width: 100%;
 	height: 30%;
 	overflow: auto;
+	border-top-width: 0px;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
