@@ -20,13 +20,11 @@
 			+"<div class='category-bar category-bar-"+'#'+"{schemaId}'></div>"
 			+"</li>";
 	
-	po.addWorkTab = function(tabId, label, schema, tableInfo)
+	po.activeWorkTab = function(tabId, tabLabel, tabTitle, schema, url, tabType)
 	{
-		label = $.truncateIf(label, "..", 20);
+		tabLabel = $.truncateIf(tabLabel, "..", 20);
 		
 		var schemaId = schema.id;
-		var schemaTitle = schema.title;
-		var tableName = tableInfo.name;
 		
 		var mainTabs = po.element("#mainTabs");
 		var uiTabsNav = mainTabs.find(".ui-tabs-nav");
@@ -42,7 +40,7 @@
 	    	var tooltipId = $.tipInfo("<@spring.message code='loading' />", -1);
 	    	$.ajax(
 			{
-				url : contextPath + $.toPath("data", schemaId, tableName, "query"), 
+				url : url, 
 	    		success:function(data)
 		    	{
 		    		uiTabsNav.show();
@@ -53,20 +51,17 @@
 		    		//防止双击导致创建两次而引起界面错乱
 		    		if(li.length == 0)
 		    		{
-		    			li = $(po.workTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, label).replace(/#\{schemaId\}/g, schemaId)).appendTo(uiTabsNav);
+		    			li = $(po.workTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, tabLabel).replace(/#\{schemaId\}/g, schemaId)).appendTo(uiTabsNav);
 		    			
 		    			if(!li.attr("id"))
 		    				li.attr("id", $.uid("main-tab-"));
 		    			
-		    			var lititle = (po.isTableView(tableInfo) ? "<@spring.message code='main.tableType.view' />" : "<@spring.message code='main.tableType.table' />") + "<@spring.message code='colon' />" +tableName;
-    					if(tableInfo.comment)
-    						lititle += "<@spring.message code='bracketLeft' />" + tableInfo.comment + "<@spring.message code='bracketRight' />";
-    					lititle += "<@spring.message code='bracketLeft' />" + schemaTitle + "<@spring.message code='bracketRight' />";
-		    			
 		    			li.attr("schema-id", schemaId);
-		    			li.attr("table-name", tableName);
-		    			li.attr("title", lititle);
+		    			li.attr("tab-url", url);
+		    			li.attr("title", tabTitle);
+		    			li.attr("tab-type", tabType);
 		    		}
+		    		
 		    	    if(tabContentDiv.length == 0)
 		    	    	tabContentDiv = $("<div id='" + tabId + "'></div>").appendTo(mainTabs);
 		    	    
@@ -118,7 +113,7 @@
 		    	    	}
 		    	    	
 		    	    	menu.attr("tab-id", tabId)
-		    	    		.attr("schema-id", li.attr("schema-id")).attr("table-name", li.attr("table-name"));
+		    	    		.attr("schema-id", li.attr("schema-id")).attr("tab-url", li.attr("tab-url"));
 		    	    });
     			},
 	        	complete : function()
@@ -442,6 +437,7 @@
 						"schema-operation-view" : true,
 						"schema-operation-refresh" : true,
 						"schema-operation-reload" : true,
+						"schema-operation-sqlpad" : true
 					};
 					
 					var jstree = po.element(".schema-panel-content").jstree(true);
@@ -451,7 +447,10 @@
 					
 					//未选中数据库，则禁用CRUD按钮
 					if(!selNodes.length)
+					{
 						disableCRUD = true;
+						menuItemEnables["schema-operation-sqlpad"] = false;
+					}
 					else
 					{
 						for(var i=0; i<selNodes.length; i++)
@@ -672,6 +671,36 @@
 				{
 					jstree.refresh(true);
 				}
+				else if($item.hasClass("schema-operation-sqlpad"))
+				{
+					if(!selNodes.length || selNodes.length < 1)
+						return;
+					
+					if(selNodes.length != 1)
+					{
+						$.tipInfo("<@spring.message code='pleaseSelectOnlyOneRow' />");
+					}
+					else
+					{
+						var selNode = selNodes[0];
+						
+						var schema = null;
+						
+						if(po.isSchemaNode(selNode))
+							schema = selNode.original;
+						else if(po.isTableNode(selNode))
+							schema = jstree.get_node(selNode.parent).original;
+						
+						if(schema)
+						{
+							var tabTitle = "<@spring.message code='main.sqlpad' /><@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
+			    			
+							var tabUrl = "${contextPath}/sqlpad/" + schema.id;
+							
+							po.activeWorkTab(po.genTabId(schema.id, "sqlpad"), "<@spring.message code='main.sqlpad' />", tabTitle, schema, tabUrl, "sqlpad");
+						}
+					}
+				}
 			}
 		});
 		
@@ -751,12 +780,16 @@
 			if(po.isTableNode(data.node))
 			{
 				var schema = tree.get_node(data.node.parent).original;
+				var tableInfo = data.node.original;
 				
-				var schemaId = schema.id;
-	        	var schemaTitle = schema.title;
-	        	var tableName = data.node.original.name;
-	        	
-				po.addWorkTab(po.genTabId(schemaId, tableName), data.node.text, schema, data.node.original);
+	        	var tabTitle = (po.isTableView(tableInfo) ? "<@spring.message code='main.tableType.view' />" : "<@spring.message code='main.tableType.table' />") + "<@spring.message code='colon' />" + tableInfo.name;
+				if(tableInfo.comment)
+					tabTitle += "<@spring.message code='bracketLeft' />" + tableInfo.comment + "<@spring.message code='bracketRight' />";
+				tabTitle += "<@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
+    			
+				var tabUrl = contextPath + $.toPath("data", schema.id, tableInfo.name, "query");
+				
+				po.activeWorkTab(po.genTabId(schema.id, tableInfo.name), data.node.text, tabTitle, schema, tabUrl, "table");
 			}
 			else if(po.isNextPageNode(data.node))
 			{
@@ -966,7 +999,7 @@
 			{
 				var item = ui.item;
 				var schemaId = $(this).attr("schema-id");
-				var tableName = $(this).attr("table-name");
+				var tabUrl = $(this).attr("tab-url");
 				var tabId = $(this).attr("tab-id");
 				
 				var mainTabs = po.element("#mainTabs");
@@ -976,7 +1009,7 @@
 				
 				if(item.hasClass("tab-operation-newwin"))
 				{
-					window.open(contextPath + $.toPath("data", schemaId, tableName, "query"));
+					window.open(tabUrl);
 				}
 				else if(item.hasClass("tab-operation-close-left"))
 				{
@@ -1126,7 +1159,7 @@
 	<div class="toolbar">
 		<ul id="systemSetMenu" class="lightweight-menu">
 			<li class="system-set-root"><span><span class="ui-icon ui-icon-gear"></span></span>
-				<ul style="display:none;">
+				<ul style="display:none;" class="ui-widget-shadow">
 					<#if !currentUser.anonymous>
 					<#if currentUser.admin>
 					<li class="system-set-driverEntity-manage"><a href="javascript:void(0);"><@spring.message code='main.manageDriverEntity' /></a></li>
@@ -1139,7 +1172,7 @@
 					<li class="system-set-personal-set"><a href="javascript:void(0);"><@spring.message code='main.personalSet' /></a></li>
 					<#if currentUser.admin>
 					<li class=""><a href="javascript:void(0);"><@spring.message code='main.globalSetting' /></a>
-						<ul>
+						<ul class="ui-widget-shadow">
 							<li class="system-set-global-setting"><a href="javascript:void(0);"><@spring.message code='globalSetting.smtpSetting' /></a></li>
 							<li class="system-set-schema-url-builder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
 						</ul>
@@ -1148,14 +1181,14 @@
 					<li class="ui-widget-header"></li>
 					</#if>
 					<li class=""><a href="javascript:void(0);"><@spring.message code='main.changeTheme' /></a>
-						<ul>
+						<ul class="ui-widget-shadow">
 							<li class="theme-item" theme="lightness"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.lightness' /><span class="ui-widget ui-widget-content theme-sample theme-sample-lightness"></span></a></li>
 							<li class="theme-item" theme="dark"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.dark' /><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span></a></li>
 							<li class="theme-item" theme="green"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
 						</ul>
 					</li>
 					<li><a href="javascript:void(0);"><@spring.message code='help' /></a>
-						<ul>
+						<ul class="ui-widget-shadow">
 							<li class="about"><a href="javascript:void(0);"><@spring.message code='main.about' /></a></li>
 							<li class="documentation"><a href="javascript:void(0);"><@spring.message code='main.documentation' /></a></li>
 							<li class="changelog"><a href="javascript:void(0);"><@spring.message code='main.changelog' /></a></li>
@@ -1194,13 +1227,15 @@
 					<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 					<ul id="schemaOperationMenu" class="lightweight-menu">
 						<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
-							<ul>
-								<li class="schema-operation-edit"><div><@spring.message code='edit' /></div></li>
-								<li class="schema-operation-delete"><div><@spring.message code='delete' /></div></li>
-								<li class="schema-operation-view"><div><@spring.message code='view' /></div></li>
-								<li class="schema-operation-refresh" title="<@spring.message code='main.schemaOperationMenuRefreshComment' />"><div><@spring.message code='refresh' /></div></li>
+							<ul class="ui-widget-shadow">
+								<li class="schema-operation-edit"><a href="javascript:void(0);"><@spring.message code='edit' /></a></li>
+								<li class="schema-operation-delete"><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
+								<li class="schema-operation-view"><a href="javascript:void(0);"><@spring.message code='view' /></a></li>
+								<li class="schema-operation-refresh" title="<@spring.message code='main.schemaOperationMenuRefreshComment' />"><a href="javascript:void(0);"><@spring.message code='refresh' /></a></li>
 								<li class="ui-widget-header"></li>
-								<li class="schema-operation-reload" title="<@spring.message code='main.schemaOperationMenuReloadComment' />"><div><@spring.message code='reload' /></div></li>
+								<li class="schema-operation-reload" title="<@spring.message code='main.schemaOperationMenuReloadComment' />"><a href="javascript:void(0);"><@spring.message code='reload' /></a></li>
+								<li class="ui-widget-header"></li>
+								<li class="schema-operation-sqlpad"><a href="javascript:void(0);"><@spring.message code='main.sqlpad' /></a></li>
 							</ul>
 						</li>
 					</ul>

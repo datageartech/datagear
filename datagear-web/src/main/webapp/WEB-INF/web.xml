@@ -90,6 +90,7 @@
 		<url-pattern>/schema/*</url-pattern>
 		<url-pattern>/schemaUrlBuilder/*</url-pattern>
 		<url-pattern>/data/*</url-pattern>
+		<url-pattern>/sqlpad/*</url-pattern>
 		<url-pattern>/error</url-pattern>
 		<url-pattern>/resetPassword/*</url-pattern>
 		<url-pattern>/resetPasswordRequestHistory/*</url-pattern>

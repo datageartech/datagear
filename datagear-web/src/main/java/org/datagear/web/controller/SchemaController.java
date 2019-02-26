@@ -4,7 +4,6 @@
 
 package org.datagear.web.controller;
 
-import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -14,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
-import org.datagear.connection.JdbcUtil;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbmodel.CachedDbModelFactory;
@@ -48,7 +46,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping("/schema")
-public class SchemaController extends AbstractSchemaModelController
+public class SchemaController extends AbstractSchemaModelConnController
 {
 	public static final String COOKIE_PAGINATION_SIZE = "SCHEMA_PAGINATION_PAGE_SIZE";
 
@@ -240,22 +238,21 @@ public class SchemaController extends AbstractSchemaModelController
 	@RequestMapping(value = "/{schemaId}/pagingQueryTable", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<TableInfo> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId) throws Exception
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
 		PagingQuery pagingQuery = getPagingQuery(request, COOKIE_PAGINATION_SIZE);
 
-		Schema schema = getSchemaNotNull(request, response, schemaId);
-		Connection cn = getSchemaConnection(schema);
-		TableInfo[] tableInfos = null;
+		TableInfo[] tableInfos = new ReturnSchemaConnExecutor<TableInfo[]>(request, response, springModel, schemaId,
+				true)
+		{
+			@Override
+			protected TableInfo[] execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema) throws Throwable
+			{
+				return getDatabaseInfoResolver().getTableInfos(getConnection());
+			}
 
-		try
-		{
-			tableInfos = getDatabaseInfoResolver().getTableInfos(cn);
-		}
-		finally
-		{
-			JdbcUtil.closeConnection(cn);
-		}
+		}.execute();
 
 		sortByTableName(tableInfos);
 
@@ -281,8 +278,8 @@ public class SchemaController extends AbstractSchemaModelController
 		if (Boolean.TRUE.equals(forceReload))
 			getCachedDbModelFactory().removeCachedModel(schemaId, tableName);
 
-		ReturnExecutor<Model> executor = new ReturnExecutor<Model>(request, response, springModel, schemaId, tableName,
-				true)
+		ReturnSchemaModelConnExecutor<Model> executor = new ReturnSchemaModelConnExecutor<Model>(request, response,
+				springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected Model execute(HttpServletRequest request, HttpServletResponse response,

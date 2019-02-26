@@ -355,22 +355,9 @@ public class WebUtils
 	 */
 	public static String generatePageId(String prefix)
 	{
-		String uuid = java.util.UUID.randomUUID().toString();
-
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(prefix);
-
-		char[] cs = uuid.toCharArray();
-		for (int i = 0; i < cs.length; i++)
-		{
-			char c = cs[i];
-
-			if (c != '-')
-				sb.append(c);
-		}
-
-		return sb.toString();
+		long timeMs = System.currentTimeMillis();
+		long random = Math.round(Math.random() * 100000);
+		return prefix + Long.toHexString(timeMs) + Long.toHexString(random);
 	}
 
 	/**

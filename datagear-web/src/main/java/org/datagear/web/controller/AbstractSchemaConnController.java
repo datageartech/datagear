@@ -14,21 +14,19 @@ import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.JdbcUtil;
-import org.datagear.dbmodel.CachedDbModelFactory;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
-import org.datagear.model.Model;
 import org.datagear.web.convert.ClassDataConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 
 /**
- * 抽象{@linkplain Schema}、{@linkplain Model}
+ * 抽象{@linkplain Schema}连接控制器。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractSchemaModelController extends AbstractController
+public abstract class AbstractSchemaConnController extends AbstractController
 {
 	@Autowired
 	private SchemaService schemaService;
@@ -36,21 +34,17 @@ public abstract class AbstractSchemaModelController extends AbstractController
 	@Autowired
 	private ConnectionSource connectionSource;
 
-	@Autowired
-	private CachedDbModelFactory cachedDbModelFactory;
-
-	public AbstractSchemaModelController()
+	public AbstractSchemaConnController()
 	{
 		super();
 	}
 
-	public AbstractSchemaModelController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, CachedDbModelFactory cachedDbModelFactory)
+	public AbstractSchemaConnController(MessageSource messageSource, ClassDataConverter classDataConverter,
+			SchemaService schemaService, ConnectionSource connectionSource)
 	{
 		super(messageSource, classDataConverter);
 		this.schemaService = schemaService;
 		this.connectionSource = connectionSource;
-		this.cachedDbModelFactory = cachedDbModelFactory;
 	}
 
 	public SchemaService getSchemaService()
@@ -71,16 +65,6 @@ public abstract class AbstractSchemaModelController extends AbstractController
 	public void setConnectionSource(ConnectionSource connectionSource)
 	{
 		this.connectionSource = connectionSource;
-	}
-
-	public CachedDbModelFactory getCachedDbModelFactory()
-	{
-		return cachedDbModelFactory;
-	}
-
-	public void setCachedDbModelFactory(CachedDbModelFactory cachedDbModelFactory)
-	{
-		this.cachedDbModelFactory = cachedDbModelFactory;
 	}
 
 	/**
@@ -132,12 +116,12 @@ public abstract class AbstractSchemaModelController extends AbstractController
 	}
 
 	/**
-	 * 抽象模式、模型相关执行器。
+	 * 抽象模式连接执行器。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected abstract class AbstractSchemaModelExecutor
+	protected abstract class AbstractSchemaConnExecutor
 	{
 		private HttpServletRequest request;
 
@@ -147,8 +131,6 @@ public abstract class AbstractSchemaModelController extends AbstractController
 
 		private String schemaId;
 
-		private String tableName;
-
 		private Schema _schema;
 
 		private Connection _cn;
@@ -157,29 +139,26 @@ public abstract class AbstractSchemaModelController extends AbstractController
 
 		private boolean customCommit = false;
 
-		public AbstractSchemaModelExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly)
+		public AbstractSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String schemaId, boolean readonly)
 		{
 			super();
 			this.request = request;
 			this.response = response;
 			this.springModel = springModel;
 			this.schemaId = schemaId;
-			this.tableName = tableName;
 			this.readonly = readonly;
 			this.customCommit = false;
 		}
 
-		public AbstractSchemaModelExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly,
-				boolean customCommit)
+		public AbstractSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String schemaId, boolean readonly, boolean customCommit)
 		{
 			super();
 			this.request = request;
 			this.response = response;
 			this.springModel = springModel;
 			this.schemaId = schemaId;
-			this.tableName = tableName;
 			this.readonly = readonly;
 			this.customCommit = customCommit;
 		}
@@ -189,56 +168,24 @@ public abstract class AbstractSchemaModelController extends AbstractController
 			this._schema = getSchemaNotNull(request, response, schemaId);
 
 			springModel.addAttribute("schema", this._schema);
-			springModel.addAttribute("tableName", this.tableName);
 
-			Model model = getCachedDbModelFactory().getCachedModel(schemaId, tableName);
-
-			if (model == null)
+			try
 			{
-				try
-				{
-					model = getCachedDbModelFactory().getModel(getConnection(), schemaId, tableName);
-					springModel.addAttribute("model", model);
+				doExecute(request, response, springModel, this._schema);
 
-					doExecute(request, response, springModel, this._schema, model);
-
-					if (!customCommit)
-						commitConnection();
-				}
-				catch (Throwable e)
-				{
-					rollbackConnection();
-
-					throw e;
-				}
-				finally
-				{
-					if (this._cn != null)
-						JdbcUtil.closeConnection(this._cn);
-				}
+				if (!customCommit)
+					commitConnection();
 			}
-			else
+			catch (Throwable e)
 			{
-				springModel.addAttribute("model", model);
+				rollbackConnection();
 
-				try
-				{
-					doExecute(request, response, springModel, this._schema, model);
-
-					if (!customCommit)
-						commitConnection();
-				}
-				catch (Exception e)
-				{
-					rollbackConnection();
-
-					throw e;
-				}
-				finally
-				{
-					if (this._cn != null)
-						JdbcUtil.closeConnection(this._cn);
-				}
+				throw e;
+			}
+			finally
+			{
+				if (this._cn != null)
+					JdbcUtil.closeConnection(this._cn);
 			}
 		}
 
@@ -280,35 +227,33 @@ public abstract class AbstractSchemaModelController extends AbstractController
 		 * @param response
 		 * @param springModel
 		 * @param schema
-		 * @param model
 		 * @throws Throwable
 		 */
 		protected abstract void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable;
+				org.springframework.ui.Model springModel, Schema schema) throws Throwable;
 	}
 
 	/**
-	 * 带有返回值的模式、模型相关执行器。
+	 * 返回值{@linkplain AbstractSchemaConnExecutor}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 * @param <T>
 	 */
-	protected abstract class ReturnExecutor<T> extends AbstractSchemaModelExecutor
+	protected abstract class ReturnSchemaConnExecutor<T> extends AbstractSchemaConnExecutor
 	{
 		private T returnValue;
 
-		public ReturnExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly)
+		public ReturnSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String schemaId, boolean readonly)
 		{
-			super(request, response, springModel, schemaId, tableName, readonly);
+			super(request, response, springModel, schemaId, readonly);
 		}
 
-		public ReturnExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly,
-				boolean customCommit)
+		public ReturnSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String schemaId, boolean readonly, boolean customCommit)
 		{
-			super(request, response, springModel, schemaId, tableName, readonly, customCommit);
+			super(request, response, springModel, schemaId, readonly, customCommit);
 		}
 
 		public T execute() throws Throwable
@@ -319,9 +264,9 @@ public abstract class AbstractSchemaModelController extends AbstractController
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+				org.springframework.ui.Model springModel, Schema schema) throws Throwable
 		{
-			this.returnValue = execute(request, response, springModel, schema, model);
+			this.returnValue = execute(request, response, springModel, schema);
 		}
 
 		/**
@@ -334,33 +279,31 @@ public abstract class AbstractSchemaModelController extends AbstractController
 		 * @param response
 		 * @param springModel
 		 * @param schema
-		 * @param model
 		 * @return
 		 */
 		protected abstract T execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable;
+				org.springframework.ui.Model springModel, Schema schema) throws Throwable;
 	}
 
 	/**
-	 * 无返回值的模式、模型相关执行器。
+	 * 无返回值{@linkplain AbstractSchemaConnExecutor}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 * @param <T>
 	 */
-	protected abstract class VoidExecutor extends AbstractSchemaModelExecutor
+	protected abstract class VoidSchemaConnExecutor extends AbstractSchemaConnExecutor
 	{
-		public VoidExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly)
+		public VoidSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String schemaId, boolean readonly)
 		{
-			super(request, response, springModel, schemaId, tableName, readonly);
+			super(request, response, springModel, schemaId, readonly);
 		}
 
-		public VoidExecutor(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, String schemaId, String tableName, boolean readonly,
-				boolean customCommit)
+		public VoidSchemaConnExecutor(HttpServletRequest request, HttpServletResponse response,
+				org.springframework.ui.Model springModel, String schemaId, boolean readonly, boolean customCommit)
 		{
-			super(request, response, springModel, schemaId, tableName, readonly, customCommit);
+			super(request, response, springModel, schemaId, readonly, customCommit);
 		}
 
 		public void execute() throws Throwable
@@ -370,9 +313,9 @@ public abstract class AbstractSchemaModelController extends AbstractController
 
 		@Override
 		protected void doExecute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+				org.springframework.ui.Model springModel, Schema schema) throws Throwable
 		{
-			execute(request, response, springModel, schema, model);
+			execute(request, response, springModel, schema);
 		}
 
 		/**
@@ -385,10 +328,9 @@ public abstract class AbstractSchemaModelController extends AbstractController
 		 * @param response
 		 * @param springModel
 		 * @param schema
-		 * @param model
 		 * @return
 		 */
 		protected abstract void execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable;
+				org.springframework.ui.Model springModel, Schema schema) throws Throwable;
 	}
 }

@@ -80,7 +80,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 @RequestMapping("/data")
-public class DataController extends AbstractSchemaModelController
+public class DataController extends AbstractSchemaModelConnController
 {
 	public static final byte[] BLOB_TO_BYTES_PLACEHOLDER = new byte[] { 0x00 };
 
@@ -257,7 +257,7 @@ public class DataController extends AbstractSchemaModelController
 			@PathVariable("tableName") String tableName, @RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
 	{
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -289,7 +289,7 @@ public class DataController extends AbstractSchemaModelController
 	{
 		final PagingQuery pagingQuery = getPagingQuery(request);
 
-		ReturnExecutor<PagingData<Object>> executor = new ReturnExecutor<PagingData<Object>>(request, response,
+		ReturnSchemaModelConnExecutor<PagingData<Object>> executor = new ReturnSchemaModelConnExecutor<PagingData<Object>>(request, response,
 				springModel, schemaId, tableName, true)
 		{
 			@Override
@@ -316,7 +316,7 @@ public class DataController extends AbstractSchemaModelController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -366,7 +366,7 @@ public class DataController extends AbstractSchemaModelController
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		Object data = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
+		Object data = new ReturnSchemaModelConnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
@@ -430,7 +430,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamObj(request, "data");
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -478,7 +478,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object originalDataParam = getParamObj(request, "originalData");
 		final Object dataParam = getParamMap(request, "data");
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(request,
 				response, springModel, schemaId, tableName, false)
 		{
 			@Override
@@ -515,7 +515,7 @@ public class DataController extends AbstractSchemaModelController
 	{
 		final Object dataParam = getParamObj(request, "data");
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(request,
 				response, springModel, schemaId, tableName, false)
 		{
 			@Override
@@ -549,7 +549,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamObj(request, "data");
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -615,7 +615,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object[][] updatePropertyValueParamss = (updatesParam == null ? null
 				: getClassDataConverter().convertToArray(updatePropertyValuessParam, Object[].class));
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(request,
 				response, springModel, schemaId, tableName, false)
 		{
 			@Override
@@ -699,7 +699,7 @@ public class DataController extends AbstractSchemaModelController
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -744,7 +744,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamMap(request, "data");
 		final PagingQuery pagingQuery = getPagingQuery(request);
 
-		PagingData<Object> propValueSourcePagingData = new ReturnExecutor<PagingData<Object>>(request, response,
+		PagingData<Object> propValueSourcePagingData = new ReturnSchemaModelConnExecutor<PagingData<Object>>(request, response,
 				springModel, schemaId, tableName, true)
 		{
 			@Override
@@ -780,7 +780,7 @@ public class DataController extends AbstractSchemaModelController
 		Object propertyNamesParam = getParamMap(request, "propertyNamess");
 		final String[][] propertyNamess = getClassDataConverter().convertToArray(propertyNamesParam, String[].class);
 
-		Object[][] propertyValuess = new ReturnExecutor<Object[][]>(request, response, springModel, schemaId, tableName,
+		Object[][] propertyValuess = new ReturnSchemaModelConnExecutor<Object[][]>(request, response, springModel, schemaId, tableName,
 				true)
 		{
 			@Override
@@ -824,7 +824,7 @@ public class DataController extends AbstractSchemaModelController
 		final String[][] propertyPropertyNamess = getClassDataConverter().convertToArray(propertyPropertyNamesParam,
 				String[].class);
 
-		Object[][] propertyPropertyValuess = new ReturnExecutor<Object[][]>(request, response, springModel, schemaId,
+		Object[][] propertyPropertyValuess = new ReturnSchemaModelConnExecutor<Object[][]>(request, response, springModel, schemaId,
 				tableName, true)
 		{
 			@Override
@@ -868,7 +868,7 @@ public class DataController extends AbstractSchemaModelController
 
 		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -902,7 +902,7 @@ public class DataController extends AbstractSchemaModelController
 		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -969,7 +969,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueParam = getParamMap(request, "propertyValue");
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(request,
 				response, springModel, schemaId, tableName, false)
 		{
 			@Override
@@ -1014,7 +1014,7 @@ public class DataController extends AbstractSchemaModelController
 		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -1081,7 +1081,7 @@ public class DataController extends AbstractSchemaModelController
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -1128,7 +1128,7 @@ public class DataController extends AbstractSchemaModelController
 
 		final PagingQuery pagingQuery = getPagingQuery(request);
 
-		PagingData<Object> pagingPropValue = new ReturnExecutor<PagingData<Object>>(request, response, springModel,
+		PagingData<Object> pagingPropValue = new ReturnSchemaModelConnExecutor<PagingData<Object>>(request, response, springModel,
 				schemaId, tableName, true)
 		{
 			@Override
@@ -1165,7 +1165,7 @@ public class DataController extends AbstractSchemaModelController
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -1211,7 +1211,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamMap(request, "data");
 		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -1259,7 +1259,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propertyValue");
 
-		Object propValueElement = new ReturnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
+		Object propValueElement = new ReturnSchemaModelConnExecutor<Object>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
@@ -1327,7 +1327,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementsParam = getParamMap(request, "propValueElements");
 
-		int count = new ReturnExecutor<Integer>(request, response, springModel, schemaId, tableName, false)
+		int count = new ReturnSchemaModelConnExecutor<Integer>(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected Integer execute(HttpServletRequest request, HttpServletResponse response,
@@ -1365,7 +1365,7 @@ public class DataController extends AbstractSchemaModelController
 		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -1421,7 +1421,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propertyValue");
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(request,
 				response, springModel, schemaId, tableName, false)
 		{
 			@Override
@@ -1465,7 +1465,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementsParam = getParamMap(request, "propValueElements");
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(request,
 				response, springModel, schemaId, tableName, false)
 		{
 			@Override
@@ -1532,7 +1532,7 @@ public class DataController extends AbstractSchemaModelController
 		final Object[][] updatePropertyValueParamss = (updatesParam == null ? null
 				: getClassDataConverter().convertToArray(updatePropertyValuessParam, Object[].class));
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnExecutor<ResponseEntity<OperationMessage>>(request,
+		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(request,
 				response, springModel, schemaId, tableName, false)
 		{
 			@Override
@@ -1637,7 +1637,7 @@ public class DataController extends AbstractSchemaModelController
 		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
-		new VoidExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
@@ -1685,7 +1685,7 @@ public class DataController extends AbstractSchemaModelController
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		Object[] propValueInfo = new ReturnExecutor<Object[]>(request, response, springModel, schemaId, tableName, true)
+		Object[] propValueInfo = new ReturnSchemaModelConnExecutor<Object[]>(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected Object[] execute(HttpServletRequest request, HttpServletResponse response,
@@ -2100,7 +2100,7 @@ public class DataController extends AbstractSchemaModelController
 	 * @author datagear@163.com
 	 *
 	 */
-	protected abstract class BatchReturnExecutor extends ReturnExecutor<ResponseEntity<OperationMessage>>
+	protected abstract class BatchReturnExecutor extends ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>
 	{
 		private int batchCount;
 
