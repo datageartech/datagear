@@ -22,7 +22,7 @@
 					<label><@spring.message code='about.app.version' /></label>
 				</div>
 				<div class="form-item-value">
-					<c:out value='${version}' />
+					${version}
 				</div>
 			</div>
 			<div class="form-item">
