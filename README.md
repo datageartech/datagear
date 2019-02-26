@@ -10,10 +10,6 @@
 
 [http://www.datagear.tech](http://www.datagear.tech)
 
-## 下载
-
-[http://www.datagear.tech/download](http://www.datagear.tech/download/)
-
 ## 文档
 
 [http://www.datagear.tech/documentation](http://www.datagear.tech/documentation)
