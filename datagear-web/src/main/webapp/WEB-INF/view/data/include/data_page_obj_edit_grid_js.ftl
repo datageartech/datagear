@@ -351,8 +351,6 @@ data_page_obj_edit_grid_html.ftl
 		};
 		
 		po.initDataTable(settings, $editTable);
-		
-		po.editGridResizeHandler = po.bindResizeDataTable($editTable, "editTableResizeTimer");
 		po.bindEditDataTableEvents($editTable);
 	};
 	
@@ -461,6 +459,7 @@ data_page_obj_edit_grid_html.ftl
 		var $editTable = po.editTable();
 		po.initEditGridDataTable($editTable, dataTable);
 		po.dataTableParent($editTable.DataTable()).scrollTop(dataTableScrollTop);
+		po.expectedResizeDataTableElements.push($editTable[0]);
 		
 		po.resetEditGridCache();
 		
@@ -485,7 +484,7 @@ data_page_obj_edit_grid_html.ftl
 		var $editTable = po.editTable();
 		$editTable.DataTable().destroy();
 		$editTable.remove();
-		$(window).unbind("resize", po.editGridResizeHandler);
+		po.expectedResizeDataTableElements.pop();
 		
 		var dataTable = po.table().DataTable();
 		var $tableContainer = $(dataTable.table().container());

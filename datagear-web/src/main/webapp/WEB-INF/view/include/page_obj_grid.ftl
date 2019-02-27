@@ -472,46 +472,80 @@ page_js_obj.jsp
 		po.table().DataTable().rows().remove();
 	};
 	
-	po.resizeDataTable = function($table)
+	po.pageInTabsElement = po.element().closest(".ui-tabs");
+	po.pageInTabsElement = (po.pageInTabsElement.length > 0 ? po.pageInTabsElement[0] : null);
+	po.pageInDialogElement = po.element().closest(".ui-dialog");
+	po.pageInDialogElement = (po.pageInDialogElement.length > 0 ? po.pageInDialogElement[0] : null);
+	
+	po.isContainerResized = function()
 	{
-		var dataTable = $table.DataTable();
+		var containerSize = { width : -1, height : -1 };
 		
-		var tbodyTable = $(dataTable.table().body()).parent();
-		var tbodyTableParent = tbodyTable.parent();
-		var theadTable = $(dataTable.table().header()).parent();
+		var $container = null;
+		if(po.pageInTabsElement)
+			$container = $(po.pageInTabsElement);
+		else if(po.pageInDialogElement)
+			$container = $(po.pageInDialogElement);
+		else
+			$container = $(window);
 		
-		var height = po.calTableHeight();
-		//XXX 宽度页必须重设，因为在隐藏选项卡中的表格宽度自适应有问题
-		var width = tbodyTable.actual("width");
+		containerSize.width = $container.width();
+		containerSize.height = $container.height();
 		
-		tbodyTableParent.css('height', height);
-		theadTable.css('width', width);
+		var resized = false;
 		
-		dataTable.fixedColumns().relayout();
+		if(!po.prevContainerSize)
+			resized = true;
+		else
+			resized = (po.prevContainerSize.width != containerSize.width || po.prevContainerSize.height != containerSize.height);
+		
+		po.prevContainerSize = containerSize;
+		
+		return resized;
 	};
 	
-	po.bindResizeDataTable = function($table, timerVar)
+	po.expectedResizeDataTableElements = [po.table()[0]];
+	
+	po.resizeDataTable = function()
 	{
-		if($table == undefined)
-			$table = po.table();
+		var height = po.calTableHeight();
+		var width = -1;
 		
-		if(timerVar == undefined)
-			timerVar = "resizeTableTimer";
-		
+		for(var i=0; i<po.expectedResizeDataTableElements.length; i++)
+		{
+			var dataTable = $(po.expectedResizeDataTableElements[i]).DataTable();
+			var table = dataTable.table();
+			
+			var tbodyTable = $(table.body()).parent();
+			var tbodyTableParent = tbodyTable.parent();
+			var theadTable = $(table.header()).parent();
+			
+			if(width == -1)
+				width = tbodyTable.actual("width");
+			
+			tbodyTableParent.css('height', height);
+			//XXX 宽度页必须重设，因为在隐藏选项卡中的表格宽度自适应有问题
+			theadTable.css('width', width);
+			
+			dataTable.fixedColumns().relayout();
+			
+			console.log("["+i+"]table resized, width="+width+", height="+height);
+		}
+	};
+	
+	po.bindResizeDataTable = function()
+	{
 		var resizeHandler = function(event) 
 		{
-			//窗口或者父元素（比如所在对话框）调整大小
-			var resize = (event.target == window || $table.closest(event.target).length > 0);
-			
-			if(resize)
+			if(po.isContainerResized())
 			{
-				clearTimeout(po[timerVar]);
+				clearTimeout(po["resizeTableTimer"]);
 				
-				po[timerVar] = setTimeout(function()
+				po["resizeTableTimer"] = setTimeout(function()
 				{
-					po.resizeDataTable($table, timerVar);
+					po.resizeDataTable();
 				},
-				250);
+				500);
 			}
 		};
 		
