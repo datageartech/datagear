@@ -12,17 +12,9 @@ page_js_obj.jsp
 	//计算表格高度
 	po.calTableHeight = function()
 	{
-		var height =  po.element("> .content").actual("height") - 50;
+		var height =  po.element("> .content").height() - 50;
 		
 		return height;
-	};
-	
-	//计算表格宽度
-	po.calTableWidth = function()
-	{
-		var width = po.element("> .content").actual("width");
-		
-		return width;
 	};
 	
 	po.renderCheckColumn = function(data, type, row, meta)
@@ -184,6 +176,7 @@ page_js_obj.jsp
 		settings = $.extend(
 		{
 			"scrollX": true,
+			"autoWidth": true,
 			"scrollY" : po.calTableHeight(),
 	        "scrollCollapse": false,
 			"paging" : false,
@@ -472,64 +465,36 @@ page_js_obj.jsp
 		po.table().DataTable().rows().remove();
 	};
 	
-	po.pageInTabsElement = po.element().closest(".ui-tabs");
-	po.pageInTabsElement = (po.pageInTabsElement.length > 0 ? po.pageInTabsElement[0] : null);
-	po.pageInDialogElement = po.element().closest(".ui-dialog");
-	po.pageInDialogElement = (po.pageInDialogElement.length > 0 ? po.pageInDialogElement[0] : null);
-	
-	po.isContainerResized = function()
-	{
-		var containerSize = { width : -1, height : -1 };
-		
-		var $container = null;
-		if(po.pageInTabsElement)
-			$container = $(po.pageInTabsElement);
-		else if(po.pageInDialogElement)
-			$container = $(po.pageInDialogElement);
-		else
-			$container = $(window);
-		
-		containerSize.width = $container.width();
-		containerSize.height = $container.height();
-		
-		var resized = false;
-		
-		if(!po.prevContainerSize)
-			resized = true;
-		else
-			resized = (po.prevContainerSize.width != containerSize.width || po.prevContainerSize.height != containerSize.height);
-		
-		po.prevContainerSize = containerSize;
-		
-		return resized;
-	};
-	
 	po.expectedResizeDataTableElements = [po.table()[0]];
 	
-	po.resizeDataTable = function()
+	po.calChangedDataTableHeight = function()
 	{
-		var height = po.calTableHeight();
-		var width = -1;
+		var changedTableHeight = po.calTableHeight();
+		
+		if(changedTableHeight == po.prevTableHeight)
+		{
+			po.prevTableHeight = changedTableHeight;
+			changedTableHeight = null;
+		}
+		else
+			po.prevTableHeight = changedTableHeight;
+		
+		return changedTableHeight;
+	};
+	
+	po.updateDataTableHeight = function(height)
+	{
+		if(height == undefined)
+			height = po.calTableHeight();
 		
 		for(var i=0; i<po.expectedResizeDataTableElements.length; i++)
 		{
 			var dataTable = $(po.expectedResizeDataTableElements[i]).DataTable();
-			var table = dataTable.table();
+			var tableParent = $(dataTable.table().body()).parent().parent();
 			
-			var tbodyTable = $(table.body()).parent();
-			var tbodyTableParent = tbodyTable.parent();
-			var theadTable = $(table.header()).parent();
-			
-			if(width == -1)
-				width = tbodyTable.actual("width");
-			
-			tbodyTableParent.css('height', height);
-			//XXX 宽度页必须重设，因为在隐藏选项卡中的表格宽度自适应有问题
-			theadTable.css('width', width);
+			tableParent.css('height', height);
 			
 			dataTable.fixedColumns().relayout();
-			
-			console.log("["+i+"]table resized, width="+width+", height="+height);
 		}
 	};
 	
@@ -537,20 +502,43 @@ page_js_obj.jsp
 	{
 		var resizeHandler = function(event) 
 		{
-			if(po.isContainerResized())
+			//隐藏元素忽略，一是DataTables对隐藏表格的宽度计算有问题，另外，绑定太多处理函数会影响jquery.resizeable组件的效率，需要采用其他方法
+			if(po.element().is(":hidden"))
+				return;
+			
+			var changedHeight = po.calChangedDataTableHeight();
+			
+			if(changedHeight != null)
 			{
 				clearTimeout(po["resizeTableTimer"]);
 				
 				po["resizeTableTimer"] = setTimeout(function()
 				{
-					po.resizeDataTable();
+					po.updateDataTableHeight(changedHeight);
 				},
-				500);
+				250);
 			}
 		};
 		
-		//表格大小自适应
 		$(window).bind('resize', resizeHandler);
+		
+		//如果表格处于选项卡页中，则在选项卡显示时，调整表格大小
+		var tabsPanel = po.element().closest(".ui-tabs-panel");
+		if(tabsPanel.length > 0)
+		{
+			tabsPanel.data("showCallback", function()
+			{
+				for(var i=0; i<po.expectedResizeDataTableElements.length; i++)
+				{
+					var dataTable = $(po.expectedResizeDataTableElements[i]).DataTable();
+					dataTable.columns.adjust();
+				}
+				
+				var changedHeight = po.calChangedDataTableHeight();
+				if(changedHeight != null)
+					po.updateDataTableHeight(changedHeight);
+			});
+		}
 		
 		return resizeHandler;
 	};

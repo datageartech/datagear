@@ -908,6 +908,10 @@
 				
 				$(".ui-tabs-nav .category-bar", this).removeClass("ui-state-active");
 				$(".ui-tabs-nav .category-bar.category-bar-"+newSchemaId, this).addClass("ui-state-active");
+				
+				var panelShowCallback = newPanel.data("showCallback");
+				if(panelShowCallback)
+					panelShowCallback();
 			}
 		});
 		
