@@ -257,7 +257,7 @@ po.conditionAutocompleteSource = undefined;
 	});
 	
 	po.conditionPanel().draggable({ handle: ".condition-panel-title-bar" });
-	po.conditionPanel().resizable();
+	$.resizableStopPropagation(po.conditionPanel());
 	
 	po.element("input:submit", po.searchForm()).button();
 	po.updateNotLikeKeyword();

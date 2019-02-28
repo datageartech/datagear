@@ -404,6 +404,19 @@
 		},
 		
 		/**
+		 * 构建resizable组件，但是阻止resize事件冒泡，不然会触发window的所有resize事件，而影响resizable组件的响应
+		 */
+		resizableStopPropagation : function($element, options)
+		{
+			$element.resizable(options);
+			
+			$element.on("resize", function(event)
+			{
+				event.stopPropagation();
+			});
+		},
+		
+		/**
 		 * 提示成功。
 		 */
 		tipSuccess : function(content, delayMs)

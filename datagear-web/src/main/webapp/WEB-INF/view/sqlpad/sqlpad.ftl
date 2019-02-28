@@ -47,7 +47,7 @@ Schema schema 数据库，不允许为null
 {
 	$.initButtons(po.element(".operation"));
 	
-	po.element(".content-editor").resizable(
+	$.resizableStopPropagation(po.element(".content-editor"),
 	{
 		containment : "parent",
 		handles : "s",
