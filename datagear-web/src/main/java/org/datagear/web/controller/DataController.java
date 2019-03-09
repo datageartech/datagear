@@ -699,6 +699,8 @@ public class DataController extends AbstractSchemaModelConnController
 	{
 		final Object dataParam = getParamMap(request, "data");
 
+		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+
 		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
@@ -709,7 +711,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
 
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 						.getQueryPropValueSourceQueryResultMetaInfo(cn, model, data, propertyPathInfo);
@@ -726,6 +728,9 @@ public class DataController extends AbstractSchemaModelConnController
 					isMultipleSelect = MU.isMultipleProperty(propertyPathInfo.getPropertyTail());
 
 				springModel.addAttribute("isMultipleSelect", isMultipleSelect);
+				
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
+						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
 			}
 		}.execute();
 
