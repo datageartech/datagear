@@ -22,11 +22,20 @@ Schema schema 数据库，不允许为null
 	<div class="head">
 		head
 	</div>
-	<div class="content">
-		<div class="content-editor ui-widget ui-widget-content">
-			select * from project;
+	<div class="content ui-widget ui-widget-content">
+		<div class="content-editor">
+			<div class="content-edit-content">
+				<p>select * from project;</p>
+				<p>select * from project;</p>
+				<p>select * from project;</p>
+				<p>select * from project;</p>
+				<p>select * from project;</p>
+				<p>select * from project;</p>
+				<p>select * from project;</p>
+				<p>select * from project;</p>
+			</div>
 		</div>
-		<div class="content-result ui-widget ui-widget-content">
+		<div class="content-result">
 			<p>update ok</p>
 			<p>update ok</p>
 			<p>update ok</p>
@@ -51,6 +60,7 @@ Schema schema 数据库，不允许为null
 	{
 		containment : "parent",
 		handles : "s",
+		classes : { "ui-resizable-s" : "ui-widget-header" },
 		resize : function(event, ui)
 		{
 			var parent = ui.element.parent();

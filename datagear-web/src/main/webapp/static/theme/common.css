@@ -1214,14 +1214,29 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	bottom: 1.5em;
 }
 .page-sqlpad .content .content-editor{
+	position: relative;
 	width: 100%;
 	height: 70%;
 	min-height: 10%;
 	max-height: 90%;
-	overflow: auto;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+}
+.page-sqlpad .content .content-editor .content-edit-content{
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0.3em;
+	width: 100%;
+	overflow: auto;
+}
+.page-sqlpad .content .content-editor .ui-resizable-s{
+	bottom: 0px;
+	right: 0px;
+	width: auto;
+	height: 0.3em;
+	font-size: inherit;
 }
 .page-sqlpad .content .content-result{
 	width: 100%;
