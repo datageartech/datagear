@@ -911,7 +911,7 @@
 				
 				var panelShowCallback = newPanel.data("showCallback");
 				if(panelShowCallback)
-					panelShowCallback();
+					panelShowCallback(newPanel);
 			}
 		});
 		

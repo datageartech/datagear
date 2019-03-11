@@ -502,9 +502,14 @@ page_js_obj.jsp
 	{
 		var resizeHandler = function(event) 
 		{
-			//隐藏元素忽略，一是DataTables对隐藏表格的宽度计算有问题，另外，绑定太多处理函数会影响jquery.resizeable组件的效率，需要采用其他方法
-			if(po.element().is(":hidden"))
+			//忽略隐藏选项卡中的表格调整，仅在选项卡显示时才调整，
+			//一是DataTables对隐藏表格的宽度计算有问题，另外，绑定太多处理函数会影响jquery.resizeable组件的效率
+			var tabsPanel = po.element().closest(".ui-tabs-panel");
+			if(tabsPanel.is(":hidden"))
+			{
+				tabsPanel.attr("adjust-table-when-show", "1");
 				return;
+			}
 			
 			var changedHeight = po.calChangedDataTableHeight();
 			
@@ -526,8 +531,11 @@ page_js_obj.jsp
 		var tabsPanel = po.element().closest(".ui-tabs-panel");
 		if(tabsPanel.length > 0)
 		{
-			tabsPanel.data("showCallback", function()
+			tabsPanel.data("showCallback", function($tabsPanel)
 			{
+				if($tabsPanel.attr("adjust-table-when-show") != "1")
+					return;
+				
 				for(var i=0; i<po.expectedResizeDataTableElements.length; i++)
 				{
 					var dataTable = $(po.expectedResizeDataTableElements[i]).DataTable();
@@ -537,6 +545,8 @@ page_js_obj.jsp
 				var changedHeight = po.calChangedDataTableHeight();
 				if(changedHeight != null)
 					po.updateDataTableHeight(changedHeight);
+				
+				$tabsPanel.removeAttr("adjust-table-when-show");
 			});
 		}
 		
