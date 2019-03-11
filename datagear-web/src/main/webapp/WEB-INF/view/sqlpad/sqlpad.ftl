@@ -25,21 +25,11 @@ Schema schema 数据库，不允许为null
 	<div class="content ui-widget ui-widget-content">
 		<div class="content-editor">
 			<div class="content-edit-content">
-				<p>select * from project;</p>
-				<p>select * from project;</p>
-				<p>select * from project;</p>
-				<p>select * from project;</p>
-				<p>select * from project;</p>
-				<p>select * from project;</p>
-				<p>select * from project;</p>
-				<p>select * from project;</p>
+				<div id="${pageId}-sql-editor" class="sql-editor"></div>
 			</div>
 		</div>
 		<div class="content-result">
-			<p>update ok</p>
-			<p>update ok</p>
-			<p>update ok</p>
-			<p>update ok</p>
+			<div>update ok</div>
 		</div>
 	</div>
 	<div class="foot">
@@ -55,6 +45,11 @@ Schema schema 数据库，不允许为null
 (function(po)
 {
 	$.initButtons(po.element(".operation"));
+	
+	po.sqlEditor = ace.edit("${pageId}-sql-editor");
+	var SqlMode = ace.require("ace/mode/sql").Mode;
+	po.sqlEditor.session.setMode(new SqlMode());
+	po.sqlEditor.setShowPrintMargin(false);
 	
 	$.resizableStopPropagation(po.element(".content-editor"),
 	{
@@ -72,7 +67,7 @@ Schema schema 数据库，不允许为null
 			ui.element.css("height", editorHeightPercent);
 			$(".content-result", parent).css("height", resultHeightpercent);
 			
-			return false;
+			po.sqlEditor.resize();
 		}
 	});
 })

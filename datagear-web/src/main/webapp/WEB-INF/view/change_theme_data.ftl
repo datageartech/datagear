@@ -14,5 +14,10 @@
 		"selector" : "#css_common",
 		"attr" : "href",
 		"value" : "${contextPath}/static/theme/<@spring.theme code='theme' />/common.css"
+	},
+	{
+		"selector" : "#css_ace",
+		"attr" : "href",
+		"value" : "${contextPath}/static/theme/<@spring.theme code='theme' />/ace-21.02.19/ace.css"
 	}
 ]

@@ -1,0 +1,21 @@
+@CHARSET "UTF-8";
+
+/*编辑器*/
+.ace-tm{
+	background-color: inherit;
+	color: inherit;
+	font-size: inherit;
+}
+/*行号单元格*/
+.ace-tm .ace_gutter .ace_gutter-cell{
+	padding-left: 0.6em;
+	padding-right: 0.4em;
+}
+/*关键字*/
+.ace-tm .ace_storage, .ace-tm .ace_keyword{
+	font-weight: bold;
+}
+/*括弧*/
+.ace-tm .ace_paren{
+	font-weight: bold;
+}

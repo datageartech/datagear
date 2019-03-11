@@ -11,6 +11,8 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/theme/jstree-3.3.7/style.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/theme/DataTables-1.10.18/datatables.min.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/theme/jQuery-File-Upload-9.21.0/jquery.fileupload.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/theme/ace-21.02.19/ace.css" type="text/css" rel="stylesheet" />
+<link id="css_ace" href="${contextPath}/static/theme/<@spring.theme code='theme' />/ace-21.02.19/ace.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/theme/datagear-pagination.css" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/theme/common.css" type="text/css" rel="stylesheet" />
 <link id="css_common" href="${contextPath}/static/theme/<@spring.theme code='theme' />/common.css" type="text/css" rel="stylesheet" />
@@ -27,7 +29,8 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/jquery-validation-1.17.0/jquery.validate.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/jquery-validation-1.17.0/additional-methods.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/textarea-helper-0.3.1/textarea-helper.js" type="text/javascript"></script>
-<script src="${contextPath}/static/script/jquery.actual-1.0.19/jquery.actual.js" type="text/javascript"></script>
+<script src="${contextPath}/static/script/ace-21.02.19/ace.js" type="text/javascript"></script>
+<script src="${contextPath}/static/script/ace-21.02.19/mode-sql.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-pagination.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-model.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-modelcache.js" type="text/javascript"></script>

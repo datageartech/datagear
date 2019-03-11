@@ -1212,6 +1212,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	right: 0;
 	top: 1.5em;
 	bottom: 1.5em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .page-sqlpad .content .content-editor{
 	position: relative;
@@ -1227,9 +1230,17 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	position: absolute;
 	left: 0;
 	top: 0;
-	bottom: 0.3em;
+	bottom: 0.45em;
 	width: 100%;
-	overflow: auto;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	overflow: hidden;
+}
+.page-sqlpad .content .content-editor .content-edit-content .sql-editor{
+	display: inline-block;
+	width: 100%;
+	height: 100%;
 }
 .page-sqlpad .content .content-editor .ui-resizable-s{
 	bottom: 0px;
