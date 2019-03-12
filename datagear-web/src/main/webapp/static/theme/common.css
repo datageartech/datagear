@@ -1202,8 +1202,18 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	-webkit-box-sizing: border-box;
 }
 .page-sqlpad .head{
+	height: 1.5em;
+	padding: 0.25em 0;
+}
+.page-sqlpad .head button.ui-button-icon-only{
 	height: 1em;
-	padding: .25em 0;
+	width: 2.5em;
+	margin-left: 0.5em;
+	vertical-align: top;
+	border: 0px;
+}
+.page-sqlpad .head button.first{
+	margin-left: 0.1em;
 }
 .page-sqlpad .content{
 	position: absolute;

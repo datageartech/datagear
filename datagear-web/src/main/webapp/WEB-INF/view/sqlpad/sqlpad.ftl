@@ -20,12 +20,14 @@ Schema schema 数据库，不允许为null
 </#if>
 <div id="${pageId}" class="page-sqlpad">
 	<div class="head">
-		head
+		<button id="executeSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only first" title="<@spring.message code='sqlpad.executeWithShortcut' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
+		<button id="stopSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.executeWithShortcut' />"><span class="ui-button-icon ui-icon ui-icon-stop"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
+		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.executeWithShortcut' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
 	</div>
 	<div class="content ui-widget ui-widget-content">
 		<div class="content-editor">
 			<div class="content-edit-content">
-				<div id="${pageId}-sql-editor" class="sql-editor"></div>
+				<div id="${pageId}-sql-editor" class="sql-editor">select count(*) from t_order where id = 3 and name = 'jack';</div>
 			</div>
 		</div>
 		<div class="content-result">
@@ -44,12 +46,14 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
-	$.initButtons(po.element(".operation"));
+	$.initButtons(po.element(".head"));
 	
 	po.sqlEditor = ace.edit("${pageId}-sql-editor");
 	var SqlMode = ace.require("ace/mode/sql").Mode;
 	po.sqlEditor.session.setMode(new SqlMode());
 	po.sqlEditor.setShowPrintMargin(false);
+	po.sqlEditor.focus();
+	po.sqlEditor.navigateFileEnd();
 	
 	$.resizableStopPropagation(po.element(".content-editor"),
 	{
@@ -69,6 +73,30 @@ Schema schema 数据库，不允许为null
 			
 			po.sqlEditor.resize();
 		}
+	});
+	
+	po.element("#executeSqlButton").click(function()
+	{
+		var editor = po.sqlEditor;
+		
+		var sql = editor.session.getTextRange(editor.getSelectionRange());
+		if(!sql)
+			sql = editor.getValue();
+		
+		console.log(sql);
+	});
+	
+	po.element("#stopSqlButton").click(function()
+	{
+		console.log("stop sql");
+	});
+	
+	po.element("#clearSqlButton").click(function()
+	{
+		var editor = po.sqlEditor;
+		
+		editor.setValue("");
+		editor.focus();
 	});
 })
 (${pageId});
