@@ -8,15 +8,23 @@
 /*当前行*/
 .ace-tm .ace_gutter-active-line,
 .ace-tm .ace_marker-layer .ace_active-line{
-	background-color: #111;	
+	background-color: #555;	
 }
 /*关键字*/
 .ace-tm .ace_storage, .ace-tm .ace_keyword{
 	color: #eacd02;
 }
+/*函数*/
+.ace-tm .ace_support.ace_function{
+	color: #eacd02;
+}
+/*操作符*/
+.ace-tm .ace_keyword.ace_operator{
+	color: #FFB90F;
+}
 /*字符串*/
 .ace-tm .ace_string{
-	color: #999;
+	color: #ccc;
 }
 /*数字*/
 .ace-tm .ace_constant.ace_numeric{

@@ -14,9 +14,17 @@
 .ace-tm .ace_storage, .ace-tm .ace_keyword{
 	color: #0000f0;
 }
+/*函数*/
+.ace-tm .ace_support.ace_function{
+	color: #0000f0;
+}
+/*操作符*/
+.ace-tm .ace_keyword.ace_operator{
+	color: #0000a0;
+}
 /*字符串*/
 .ace-tm .ace_string{
-	color: #999;
+	color: #666;
 }
 /*数字*/
 .ace-tm .ace_constant.ace_numeric{

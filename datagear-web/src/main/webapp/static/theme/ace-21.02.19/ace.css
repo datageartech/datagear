@@ -15,6 +15,10 @@
 .ace-tm .ace_storage, .ace-tm .ace_keyword{
 	font-weight: bold;
 }
+/*函数*/
+.ace-tm .ace_support.ace_function{
+	font-weight: bold;
+}
 /*括弧*/
 .ace-tm .ace_paren{
 	font-weight: bold;
