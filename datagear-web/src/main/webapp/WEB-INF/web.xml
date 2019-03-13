@@ -35,6 +35,7 @@
 			<param-name>forceEncoding</param-name>
 			<param-value>true</param-value>
 		</init-param>
+        <async-supported>true</async-supported>
 	</filter>
 	<filter-mapping>
 		<filter-name>encodingFilter</filter-name>
@@ -49,21 +50,8 @@
 	</filter>
 	<filter-mapping>
 		<filter-name>springSecurityFilterChain</filter-name>
-		<url-pattern>/*</url-pattern>
-		<dispatcher>REQUEST</dispatcher>
+		<servlet-name>dispatcherServlet</servlet-name>
 	</filter-mapping>
-	
-	<!--
-	<filter>
-		<filter-name>userFilter</filter-name>
-		<filter-class>org.datagear.web.filter.UserFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>userFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-		<dispatcher>REQUEST</dispatcher>
-	</filter-mapping>
-	-->
 	
 	<servlet>
 		<servlet-name>dispatcherServlet</servlet-name>
@@ -97,6 +85,16 @@
 		<url-pattern>/globalSetting/*</url-pattern>
 		<url-pattern>/notification/*</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+        <servlet-name>cometd</servlet-name>
+        <servlet-class>org.cometd.server.CometdServlet</servlet-class>
+        <async-supported>true</async-supported>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>cometd</servlet-name>
+        <url-pattern>/cometd/*</url-pattern>
+    </servlet-mapping>
 	
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>

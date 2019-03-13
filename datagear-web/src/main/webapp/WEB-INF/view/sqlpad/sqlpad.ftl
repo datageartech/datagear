@@ -98,6 +98,19 @@ Schema schema 数据库，不允许为null
 		editor.setValue("");
 		editor.focus();
 	});
+	
+	var cometd = $.cometd;
+	
+	if(!$.isCometdInit)
+	{
+		$.isCometdInit = true;
+		cometd.init("${contextPath}/cometd");
+	}
+	
+	cometd.subscribe("/sqlpad", function(message)
+	{
+		$("<p />").html(message).appendTo(po.element(".content-result"));
+	});
 })
 (${pageId});
 </script>

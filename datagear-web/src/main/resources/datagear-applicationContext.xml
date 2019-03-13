@@ -331,6 +331,32 @@
 	
 	<bean id="changelogResolver" class="org.datagear.web.util.ChangelogResolver" />
 	
+	<!-- cometd配置开始 -->
+	<bean id="bayeuxServerFactory" class="org.datagear.web.util.BayeuxServerFactory">
+		<property name="options">
+			<map>
+				<entry key="logLevel" value="3" />
+				<entry key="timeout" value="15000" />
+			</map>
+		</property>
+		<property name="extensions">
+			<list>
+				<bean class="org.cometd.server.ext.AcknowledgedMessagesExtension" />
+			</list>
+		</property>
+	</bean>
+	<bean id="bayeuxServer" factory-bean="bayeuxServerFactory" factory-method="getBayeuxServer" init-method="start" destroy-method="stop" />
+	<bean class="org.springframework.web.context.support.ServletContextAttributeExporter">
+		<property name="attributes">
+			<map>
+				<entry key="org.cometd.bayeux">
+					<ref local="bayeuxServer" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+	<!-- cometd配置结束 -->
+	
 	<!-- 定时任务开始 -->
 	
 	<!-- 删除过期的BLOB文件 -->

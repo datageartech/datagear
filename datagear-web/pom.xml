@@ -147,6 +147,11 @@
 			<artifactId>freemarker</artifactId>
 			<version>2.3.28</version>
 		</dependency>
+		<dependency>
+		    <groupId>org.cometd.java</groupId>
+		    <artifactId>cometd-java-server</artifactId>
+		    <version>2.9.1</version>
+		</dependency>
 	</dependencies>
 	
 	<build>
