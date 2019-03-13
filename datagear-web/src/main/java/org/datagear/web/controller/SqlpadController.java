@@ -12,10 +12,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.bayeux.server.ServerSession;
+import org.cometd.server.BayeuxServerImpl;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
 import org.datagear.web.convert.ClassDataConverter;
+import org.datagear.web.sqlpad.SqlpadCometdService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -36,6 +38,9 @@ public class SqlpadController extends AbstractSchemaConnController
 {
 	@Autowired
 	private BayeuxServer bayeuxServer;
+	
+	@Autowired
+	private SqlpadCometdService sqlpadCometdService;
 
 	public SqlpadController()
 	{
@@ -56,6 +61,14 @@ public class SqlpadController extends AbstractSchemaConnController
 	public void setBayeuxServer(BayeuxServer bayeuxServer)
 	{
 		this.bayeuxServer = bayeuxServer;
+	}
+
+	public SqlpadCometdService getSqlpadCometdService() {
+		return sqlpadCometdService;
+	}
+
+	public void setSqlpadCometdService(SqlpadCometdService sqlpadCometdService) {
+		this.sqlpadCometdService = sqlpadCometdService;
 	}
 
 	@RequestMapping("/{schemaId}")
@@ -80,13 +93,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	{
 		String channelName = "/sqlpad";
 
-		this.bayeuxServer.createIfAbsent(channelName);
-
-		ServerChannel channel = this.bayeuxServer.getChannel(channelName);
-		Set<ServerSession> sessions = channel.getSubscribers();
-
-		for (ServerSession serverSession : sessions)
-			channel.publish(serverSession, "hello");
+		this.sqlpadCometdService.publish(channelName, "hello");
 
 		return "ok";
 	}

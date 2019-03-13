@@ -109,7 +109,11 @@ Schema schema 数据库，不允许为null
 	
 	cometd.subscribe("/sqlpad", function(message)
 	{
-		$("<p />").html(message).appendTo(po.element(".content-result"));
+		alert("1");
+	},
+	function(subscribeReply)
+	{
+		console.dir(subscribeReply);
 	});
 })
 (${pageId});
