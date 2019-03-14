@@ -30,8 +30,7 @@ Schema schema 数据库，不允许为null
 				<div id="${pageId}-sql-editor" class="sql-editor">select count(*) from t_order where id = 3 and name = 'jack';</div>
 			</div>
 		</div>
-		<div class="content-result">
-			<div>update ok</div>
+		<div id="${pageId}-sql-result" class="content-result">
 		</div>
 	</div>
 	<div class="foot">
@@ -46,6 +45,11 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.schemaId = "${schema.id}";
+	po.sqlpadChannelId = "${sqlpadChannelId}";
+	
+	po.sqlResultElement = po.element("#${pageId}-sql-result");
+	
 	$.initButtons(po.element(".head"));
 	
 	po.sqlEditor = ace.edit("${pageId}-sql-editor");
@@ -75,6 +79,46 @@ Schema schema 数据库，不允许为null
 		}
 	});
 	
+	po.executeSql = function(sql)
+	{
+		if(po.cometdSubscribed)
+		{
+			$.post("${contextPath}/sqlpad/"+po.schemaId+"/execute",
+			{
+				"sqlpadChannelId" : po.sqlpadChannelId,
+				"sql" : sql
+			});
+		}
+		else
+		{
+			var cometd = $.cometd;
+			
+			cometd.subscribe(po.sqlpadChannelId, function(message)
+			{
+				$("<p />").html(message.data).appendTo(po.sqlResultElement);
+				
+				po.sqlResultElement.scrollTop(po.sqlResultElement.prop("scrollHeight"));
+			},
+			function(subscribeReply)
+			{
+				if(subscribeReply.successful)
+				{
+					po.cometdSubscribed = true;
+					
+					$.post("${contextPath}/sqlpad/"+po.schemaId+"/execute",
+					{
+						"sqlpadChannelId" : po.sqlpadChannelId,
+						"sql" : sql
+					});
+				}
+				else
+				{
+					//TODO 处理订阅失败逻辑
+				}
+			});
+		}
+	};
+	
 	po.element("#executeSqlButton").click(function()
 	{
 		var editor = po.sqlEditor;
@@ -83,7 +127,28 @@ Schema schema 数据库，不允许为null
 		if(!sql)
 			sql = editor.getValue();
 		
-		console.log(sql);
+		if(!sql)
+			return;
+		
+		var cometd = $.cometd;
+		
+		if(!$.isCometdInit)
+		{
+			$.isCometdInit = true;
+			cometd.init("${contextPath}/cometd", function(handshakeReply)
+			{
+				if(handshakeReply.successful)
+				{
+					po.executeSql(sql);
+				}
+				else
+				{
+					//TODO 处理连接失败逻辑
+				}
+			});
+		}
+		else
+			po.executeSql(sql);
 	});
 	
 	po.element("#stopSqlButton").click(function()
@@ -97,23 +162,6 @@ Schema schema 数据库，不允许为null
 		
 		editor.setValue("");
 		editor.focus();
-	});
-	
-	var cometd = $.cometd;
-	
-	if(!$.isCometdInit)
-	{
-		$.isCometdInit = true;
-		cometd.init("${contextPath}/cometd");
-	}
-	
-	cometd.subscribe("/sqlpad", function(message)
-	{
-		alert("1");
-	},
-	function(subscribeReply)
-	{
-		console.dir(subscribeReply);
 	});
 })
 (${pageId});
