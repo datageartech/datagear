@@ -21,11 +21,11 @@ import java.util.regex.Pattern;
  */
 public class SqlScriptParser
 {
-	protected static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
 
-	protected static final String DEFAULT_DELIMITER = ";";
+	public static final String DEFAULT_DELIMITER = ";";
 
-	protected static final Pattern DELIMITER_PATTERN = Pattern
+	public static final Pattern DELIMITER_PATTERN = Pattern
 			.compile("^\\s*((--)|(//))?\\s*(//)?\\s*@DELIMITER\\s+([^\\s]+)", Pattern.CASE_INSENSITIVE);
 
 	private Reader sqlScriptReader;
@@ -34,10 +34,21 @@ public class SqlScriptParser
 	private int contextStartLine = 1;
 
 	/** SQL脚本的上下文起始行的偏移量 */
-	private int contextStartOffset = 0;
+	private int contextStartIndex = 0;
 
 	/** 语句分隔符 */
 	private String delimiter = DEFAULT_DELIMITER;
+
+	/** 解析过程：当前行号 */
+	protected int _currentLineNumber = this.contextStartLine;
+	/** 解析过程：当前SQL的起始行号（包含） */
+	protected int _currentSqlStartLine = _currentLineNumber;
+	/** 解析过程：当前SQL的起始行偏移量（包含） */
+	protected int _currentSqlStartIndex = this.contextStartIndex;
+	/** 解析过程：当前SQL的完成行号（包含） */
+	protected int _currentSqlFinishLine = _currentLineNumber;
+	/** 解析过程：当前SQL的完成行号偏移量（不包含） */
+	protected int _currentsqlEndIndex = 0;
 
 	public SqlScriptParser()
 	{
@@ -70,14 +81,24 @@ public class SqlScriptParser
 		this.contextStartLine = contextStartLine;
 	}
 
-	public int getContextStartOffset()
+	public int getContextStartIndex()
 	{
-		return contextStartOffset;
+		return contextStartIndex;
 	}
 
-	public void setContextStartOffset(int contextStartOffset)
+	public void setContextStartIndex(int contextStartIndex)
 	{
-		this.contextStartOffset = contextStartOffset;
+		this.contextStartIndex = contextStartIndex;
+	}
+
+	public String getDelimiter()
+	{
+		return delimiter;
+	}
+
+	public void setDelimiter(String delimiter)
+	{
+		this.delimiter = delimiter;
 	}
 
 	/**
@@ -104,37 +125,156 @@ public class SqlScriptParser
 		BufferedReader bufferedReader = getSqlScriptBufferedReader();
 
 		String line = null;
-		int lineNumber = this.contextStartLine;
-		StringBuilder sqlScript = new StringBuilder();
+		StringBuilder sqlBuilder = new StringBuilder();
 
 		while ((line = bufferedReader.readLine()) != null)
-		{
-			String trimmedLine = line.trim();
+			handleLine(sqlStatements, sqlBuilder, line);
 
-			// 空行
-			if (trimmedLine.isEmpty())
-			{
-				sqlScript.append(line);
-				sqlScript.append(LINE_SEPARATOR);
-			}
-			// 注释行
-			else if (isCommentLine(trimmedLine))
-			{
-				Matcher matcher = DELIMITER_PATTERN.matcher(trimmedLine);
-				if (matcher.find())
-					this.delimiter = matcher.group(5);
-
-				sqlScript.append(LINE_SEPARATOR);
-			}
-			else
-			{
-
-			}
-
-			lineNumber++;
-		}
+		addSqlStatement(sqlStatements, sqlBuilder);
 
 		return sqlStatements;
+	}
+
+	/**
+	 * 处理一行SQL内容。
+	 * 
+	 * @param sqlStatements
+	 * @param sqlBuilder
+	 * @param line
+	 */
+	protected void handleLine(List<SqlStatement> sqlStatements, StringBuilder sqlBuilder, String line)
+	{
+		boolean isSqlBuilderEmpty = isEmpty(sqlBuilder);
+
+		String trimmedLine = line.trim();
+
+		// 空行
+		if (trimmedLine.isEmpty())
+		{
+			if (!isSqlBuilderEmpty)
+			{
+				sqlBuilder.append(line);
+				sqlBuilder.append(LINE_SEPARATOR);
+			}
+		}
+		// 注释行
+		else if (isCommentLine(trimmedLine))
+		{
+			Matcher matcher = DELIMITER_PATTERN.matcher(trimmedLine);
+			if (matcher.find())
+				this.delimiter = matcher.group(5);
+
+			if (!isSqlBuilderEmpty)
+			{
+				sqlBuilder.append(LINE_SEPARATOR);
+			}
+		}
+		else
+		{
+			if (isSqlBuilderEmpty)
+				_currentSqlStartLine = _currentLineNumber;
+
+			int handleIndex = 0;
+			int lineLength = line.length();
+
+			while (handleIndex < lineLength)
+			{
+				if (isEmpty(sqlBuilder))
+					_currentSqlStartIndex = handleIndex;
+
+				int delimiterIndex = findNextDelimiterIndex(sqlBuilder, line, handleIndex);
+
+				// 没有分隔符
+				if (delimiterIndex < 0)
+				{
+					if (handleIndex == 0)
+						sqlBuilder.append(line);
+					else
+						sqlBuilder.append(line.substring(handleIndex));
+					sqlBuilder.append(LINE_SEPARATOR);
+
+					_currentSqlFinishLine = _currentLineNumber;
+					_currentsqlEndIndex = lineLength;
+
+					handleIndex = lineLength;
+				}
+				else
+				{
+					_currentSqlFinishLine = _currentLineNumber;
+					_currentsqlEndIndex = delimiterIndex + delimiter.length();
+
+					String scriptBefore = line.substring(handleIndex, delimiterIndex);
+					sqlBuilder.append(scriptBefore);
+
+					addSqlStatement(sqlStatements, sqlBuilder);
+
+					sqlBuilder.delete(0, sqlBuilder.length());
+
+					handleIndex = _currentsqlEndIndex;
+				}
+			}
+		}
+
+		_currentLineNumber++;
+	}
+
+	/**
+	 * 在SQL行中查找下一个分隔符位置，没有返回{@code -1}。
+	 * 
+	 * @param sqlBuilder
+	 * @param line
+	 * @param startIndex
+	 * @return
+	 */
+	protected int findNextDelimiterIndex(StringBuilder sqlBuilder, String line, int startIndex)
+	{
+		int delimiterIndex = -1;
+
+		if (DEFAULT_DELIMITER.equals(this.delimiter))
+		{
+			// TODO 特殊处理SQL字符串、函数、存储过程，因为它们中间可能包含';'字符
+			delimiterIndex = line.indexOf(this.delimiter, startIndex);
+		}
+		else
+		{
+			delimiterIndex = line.indexOf(this.delimiter, startIndex);
+		}
+
+		return delimiterIndex;
+	}
+
+	/**
+	 * 从{@code sqlBuilder}构建{@linkplain SqlStatement}，并添加至{@code sqlStatements}。
+	 * 
+	 * @param sqlStatements
+	 * @param sqlBuilder
+	 * @return true 已构建；false 不能构建
+	 */
+	protected boolean addSqlStatement(List<SqlStatement> sqlStatements, StringBuilder sqlBuilder)
+	{
+		String sql = sqlBuilder.toString().trim();
+		if (!sql.isEmpty() && !isAsteriskPairComment(sql))
+		{
+			SqlStatement sqlStatement = new SqlStatement(sql, _currentSqlStartLine, _currentSqlStartIndex,
+					_currentSqlFinishLine, _currentsqlEndIndex);
+
+			sqlStatements.add(sqlStatement);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * 判断字符串是否是"&#47*...*&#47"注释。
+	 * 
+	 * @param trimmedString
+	 * @return
+	 */
+	protected boolean isAsteriskPairComment(String trimmedString)
+	{
+		return trimmedString.startsWith("/*") && trimmedString.endsWith("*/");
 	}
 
 	/**
@@ -146,6 +286,17 @@ public class SqlScriptParser
 	protected boolean isCommentLine(String trimmedLine)
 	{
 		return trimmedLine.startsWith("//") || trimmedLine.startsWith("--");
+	}
+
+	/**
+	 * {@linkplain StringBuilder}是否为空。
+	 * 
+	 * @param stringBuilder
+	 * @return
+	 */
+	protected boolean isEmpty(StringBuilder stringBuilder)
+	{
+		return (stringBuilder.length() == 0);
 	}
 
 	/**
@@ -182,27 +333,27 @@ public class SqlScriptParser
 		private int startLine;
 
 		/** SQL语句起始行偏移量 */
-		private int startOffset;
+		private int startIndex;
 
-		/** SQL语句结束行 */
+		/** SQL语句结束行（包含） */
 		private int finishLine;
 
-		/** SQL语句结束行偏移量 */
-		private int finishOffset;
+		/** SQL语句结束行偏移量（不包含） */
+		private int endIndex;
 
 		public SqlStatement()
 		{
 			super();
 		}
 
-		public SqlStatement(String sql, int startLine, int startOffset, int finishLine, int finishOffset)
+		public SqlStatement(String sql, int startLine, int startIndex, int finishLine, int endIndex)
 		{
 			super();
 			this.sql = sql;
 			this.startLine = startLine;
-			this.startOffset = startOffset;
+			this.startIndex = startIndex;
 			this.finishLine = finishLine;
-			this.finishOffset = finishOffset;
+			this.endIndex = endIndex;
 		}
 
 		public String getSql()
@@ -225,14 +376,14 @@ public class SqlScriptParser
 			this.startLine = startLine;
 		}
 
-		public int getStartOffset()
+		public int getStartIndex()
 		{
-			return startOffset;
+			return startIndex;
 		}
 
-		public void setStartOffset(int startOffset)
+		public void setStartIndex(int startIndex)
 		{
-			this.startOffset = startOffset;
+			this.startIndex = startIndex;
 		}
 
 		public int getFinishLine()
@@ -245,21 +396,21 @@ public class SqlScriptParser
 			this.finishLine = finishLine;
 		}
 
-		public int getFinishOffset()
+		public int getEndIndex()
 		{
-			return finishOffset;
+			return endIndex;
 		}
 
-		public void setFinishOffset(int finishOffset)
+		public void setEndIndex(int endIndex)
 		{
-			this.finishOffset = finishOffset;
+			this.endIndex = endIndex;
 		}
 
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [sql=" + sql + ", startLine=" + startLine + ", startOffset="
-					+ startOffset + ", finishLine=" + finishLine + ", finishOffset=" + finishOffset + "]";
+			return getClass().getSimpleName() + " [sql=" + sql + ", startLine=" + startLine + ", startIndex="
+					+ startIndex + ", finishLine=" + finishLine + ", endIndex=" + endIndex + "]";
 		}
 	}
 }
