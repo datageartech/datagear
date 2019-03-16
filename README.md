@@ -21,16 +21,25 @@
 ## 依赖
 
 	Java 6+
-	
-## 构建
+	Servlet 3.0+
 
-### 编译
+## 编译
 
 	mvn clean package
 
-### 版本号升级
+## 运行
 
-1. 修改`pom.xml`文件中的`version`标签值；
+	cd datagear-webembd/target/datagear-[version]
+	
+	（Linux环境）
+	./startup.sh
+	
+	（windows环境）
+	startup.bat
+
+## 版本号升级
+
+1. 修改`pom.xml`文件中的`version`标签内的版本号；
 
 2. 执行如下maven命令：
 
