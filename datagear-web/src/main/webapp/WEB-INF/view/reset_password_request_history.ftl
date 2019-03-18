@@ -1,13 +1,13 @@
 <#include "include/import_global.ftl">
 <#include "include/html_doctype.ftl">
-<html style="height:100%;">
+<html>
 <head>
 <#include "include/html_head.ftl">
 <title><#include "include/html_title_app_name.ftl"><@spring.message code='resetPasswordRequestHistory.resetPasswordRequestHistory' /></title>
 </head>
-<body style="height:100%;">
+<body class="fill-parent">
 <#if !isAjaxRequest>
-<div style="height:99%;">
+<div class="fill-parent">
 </#if>
 <div id="${pageId}" class="page-grid page-grid-reset-password-request-history">
 	<div class="head">

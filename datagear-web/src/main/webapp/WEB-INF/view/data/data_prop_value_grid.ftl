@@ -17,7 +17,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 <#assign titleDisplayName=(titleDisplayName!'')>
 <#assign readonly=(readonly!false)>
 <#assign isAllowEditGrid=(isPrivatePropertyModel && !readonly)>
-<html style="height:100%;">
+<html>
 <head>
 <#include "../include/html_head.ftl">
 <title>
@@ -27,9 +27,9 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 	${titleDisplayName?html}
 </title>
 </head>
-<body style="height:100%;">
+<body class="fill-parent">
 <#if !isAjaxRequest>
-<div style="height:99%;">
+<div class="fill-parent">
 </#if>
 <div id="${pageId}" class="page-grid page-grid-empv">
 	<div class="head">

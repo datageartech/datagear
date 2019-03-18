@@ -1079,8 +1079,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-grid .foot.foot-edit-grid .edit-grid{
 	display: inline-block;
 	width: 50%;
-	height: 100%;
-	position: relative;
+	position: absolute;
+	bottom: 1px;
+	left: 1px;
 }
 .page-grid .foot.foot-edit-grid .edit-grid .edit-grid-switch-wrapper{
 	display: inline-block;
@@ -1104,9 +1105,6 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding-left: 3em;
 	padding-right: 3em;
 	margin-left: 2em;
-}
-.page-grid .foot.foot-edit-grid .pagination-wrapper{
-	width: 49%;
 }
 
 .page-form-buildSchemaUrl .url-preview{

@@ -11,7 +11,7 @@ boolean isMultipleSelect 是否多选，默认为false
 -->
 <#assign titleDisplayName=(titleDisplayName!'')>
 <#assign isMultipleSelect=(isMultipleSelect!false)>
-<html style="height:100%;">
+<html>
 <head>
 <#include "../include/html_head.ftl">
 <title>
@@ -20,9 +20,9 @@ boolean isMultipleSelect 是否多选，默认为false
 	${titleDisplayName?html}
 </title>
 </head>
-<body style="height:100%;">
+<body class="fill-parent">
 <#if !isAjaxRequest>
-<div style="height:99%;">
+<div class="fill-parent">
 </#if>
 <div id="${pageId}" class="page-grid page-grid-spv">
 	<div class="head">

@@ -11,7 +11,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 <#assign titleDisplayName=(titleDisplayName!'')>
 <#assign titleDisplayDesc=(titleDisplayDesc!'')>
 <#assign readonly=(readonly!false)>
-<html style="height:100%;">
+<html>
 <head>
 <#include "../include/html_head.ftl">
 <title>
@@ -29,9 +29,9 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 	<@spring.message code='bracketRight' />
 </title>
 </head>
-<body style="height:100%;">
+<body class="fill-parent">
 <#if !isAjaxRequest>
-<div style="height:99%;">
+<div class="fill-parent">
 </#if>
 <div id="${pageId}" class="page-grid page-grid-query">
 	<div class="head">

@@ -5,14 +5,14 @@ titleMessageKey 标题标签I18N关键字，不允许null
 selectonly 是否选择操作，允许为null
 -->
 <#assign selectonly=(selectonly!false)>
-<html style="height:100%;">
+<html>
 <head>
 <#include "../include/html_head.ftl">
 <title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
-<body style="height:100%;">
+<body class="fill-parent">
 <#if !isAjaxRequest>
-<div style="height:99%;">
+<div class="fill-parent">
 </#if>
 <div id="${pageId}" class="page-grid page-grid-hidden-foot page-grid-driverEntity">
 	<div class="head">
