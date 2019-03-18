@@ -1,6 +1,8 @@
 package org.datagear.web.sqlpad;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.cometd.bayeux.MarkedReference;
 import org.cometd.bayeux.server.BayeuxServer;
@@ -95,17 +97,23 @@ public class SqlpadCometdService extends AbstractService
 
 	protected static abstract class MessageData
 	{
+		protected static final String TIME_PATTERN = "HH:mm:ss";
+
 		private String type;
+
+		private Date date;
 
 		public MessageData()
 		{
 			super();
+			this.date = new Date();
 		}
 
 		public MessageData(String type)
 		{
 			super();
 			this.type = type;
+			this.date = new Date();
 		}
 
 		public String getType()
@@ -116,6 +124,21 @@ public class SqlpadCometdService extends AbstractService
 		protected void setType(String type)
 		{
 			this.type = type;
+		}
+
+		public Date getDate()
+		{
+			return date;
+		}
+
+		public void setDate(Date date)
+		{
+			this.date = date;
+		}
+
+		public String getTimeText()
+		{
+			return new SimpleDateFormat(TIME_PATTERN).format(this.date);
 		}
 	}
 

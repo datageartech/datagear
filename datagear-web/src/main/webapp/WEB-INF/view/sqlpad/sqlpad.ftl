@@ -3,7 +3,7 @@
 <#--
 Schema schema 数据库，不允许为null
 -->
-<html style="height:100%;">
+<html>
 <head>
 <#include "../include/html_head.ftl">
 <title>
@@ -14,27 +14,45 @@ Schema schema 数据库，不允许为null
 	<@spring.message code='bracketRight' />
 </title>
 </head>
-<body style="height:100%;">
+<body class="fill-parent">
 <#if !isAjaxRequest>
-<div style="height:99%;">
+<div class="fill-parent">
 </#if>
 <div id="${pageId}" class="page-sqlpad">
-	<div class="head">
+	<div class="head button-operation">
 		<button id="executeSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only first" title="<@spring.message code='sqlpad.executeWithShortcut' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
-		<button id="stopSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.executeWithShortcut' />"><span class="ui-button-icon ui-icon ui-icon-stop"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
-		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.executeWithShortcut' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
+		<button id="stopSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.stopExecution' />"><span class="ui-button-icon ui-icon ui-icon-stop"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
+		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
 	</div>
 	<div class="content ui-widget ui-widget-content">
 		<div class="content-editor">
 			<div class="content-edit-content">
-				<div id="${pageId}-sql-editor" class="sql-editor">select count(*) from t_order where id = 3 and name = 'jack';</div>
+				<div id="${pageId}-sql-editor" class="sql-editor">
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+select count(*) from t_order where id = 3 and name = 'jack';
+				</div>
 			</div>
 		</div>
 		<div id="${pageId}-sql-result" class="content-result">
+			<div class="result-head button-operation">
+				<button id="clearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
+			</div>
+			<div class="result-content ui-widget ui-widget-content"></div>
 		</div>
 	</div>
 	<div class="foot">
-		foot
 	</div>
 </div>
 <#if !isAjaxRequest>
@@ -48,7 +66,7 @@ Schema schema 数据库，不允许为null
 	po.schemaId = "${schema.id}";
 	po.sqlpadChannelId = "${sqlpadChannelId}";
 	
-	po.sqlResultElement = po.element("#${pageId}-sql-result");
+	po.sqlResultContentElement = po.element("#${pageId}-sql-result > .result-content");
 	
 	$.initButtons(po.element(".head"));
 	
@@ -96,30 +114,41 @@ Schema schema 数据库，不允许为null
 			cometd.subscribe(po.sqlpadChannelId, function(message)
 			{
 				var msgData = message.data;
-				var msgDataType = (msgData ? message.data.type : "");
-				var $content = null;
+				var msgDataType = (msgData ? msgData.type : "");
+				var $msgDiv = $("<div class='execution-message' />");
+				
+				if(msgData.timeText)
+					$("<span class='message-time' />").html("["+msgData.timeText+"] ").appendTo($msgDiv);
+				
+				var $msgContent = $("<span class='message-content' />").appendTo($msgDiv);
 				
 				if(msgDataType == "START")
 				{
-					$content = $("<div class='execution-message execution-start' />").html("<@spring.message code='sqlpad.executionStart' />");
+					$msgDiv.addClass("execution-start");
+					$msgContent.html("<@spring.message code='sqlpad.executionStart' />");
 				}
 				else if(msgDataType == "SUCCESS")
 				{
-					$content = $("<div class='execution-message execution-success' />").html("["+(msgData.sqlStatementIndex + 1)+"] " + msgData.sqlStatement.sql);
+					$msgDiv.addClass("execution-success");
+					$msgContent.html("["+(msgData.sqlStatementIndex + 1)+"] " + msgData.sqlStatement.sql);
 				}
 				else if(msgDataType == "EXCEPTION")
 				{
-					$content = $("<div class='execution-message execution-exception' />").html(msgData.content);
+					$msgDiv.addClass("execution-exception");
+					$msgContent.html(msgData.content);
 				}
 				else if(msgDataType == "FINISH")
 				{
-					$content = $("<div class='execution-message execution-finish' />").html("<@spring.message code='sqlpad.executeionFinish' />");
+					$msgDiv.addClass("execution-finish");
+					$msgContent.html("<@spring.message code='sqlpad.executeionFinish' />");
 				}
+				else
+					$msgDiv = null;
 				
-				if($content)
+				if($msgDiv)
 				{
-					$content.appendTo(po.sqlResultElement);
-					po.sqlResultElement.scrollTop(po.sqlResultElement.prop("scrollHeight"));
+					$msgDiv.appendTo(po.sqlResultContentElement);
+					po.sqlResultContentElement.scrollTop(po.sqlResultContentElement.prop("scrollHeight"));
 				}
 			},
 			function(subscribeReply)
@@ -185,6 +214,11 @@ Schema schema 数据库，不允许为null
 		
 		editor.setValue("");
 		editor.focus();
+	});
+	
+	po.element("#clearResultButton").click(function()
+	{
+		po.sqlResultContentElement.empty();
 	});
 })
 (${pageId});
