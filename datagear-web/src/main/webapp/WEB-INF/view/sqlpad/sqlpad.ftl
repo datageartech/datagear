@@ -95,9 +95,32 @@ Schema schema 数据库，不允许为null
 			
 			cometd.subscribe(po.sqlpadChannelId, function(message)
 			{
-				$("<p />").html(message.data).appendTo(po.sqlResultElement);
+				var msgData = message.data;
+				var msgDataType = (msgData ? message.data.type : "");
+				var $content = null;
 				
-				po.sqlResultElement.scrollTop(po.sqlResultElement.prop("scrollHeight"));
+				if(msgDataType == "START")
+				{
+					$content = $("<div class='execution-message execution-start' />").html("<@spring.message code='sqlpad.executionStart' />");
+				}
+				else if(msgDataType == "SUCCESS")
+				{
+					$content = $("<div class='execution-message execution-success' />").html("["+(msgData.sqlStatementIndex + 1)+"] " + msgData.sqlStatement.sql);
+				}
+				else if(msgDataType == "EXCEPTION")
+				{
+					$content = $("<div class='execution-message execution-exception' />").html(msgData.content);
+				}
+				else if(msgDataType == "FINISH")
+				{
+					$content = $("<div class='execution-message execution-finish' />").html("<@spring.message code='sqlpad.executeionFinish' />");
+				}
+				
+				if($content)
+				{
+					$content.appendTo(po.sqlResultElement);
+					po.sqlResultElement.scrollTop(po.sqlResultElement.prop("scrollHeight"));
+				}
 			},
 			function(subscribeReply)
 			{

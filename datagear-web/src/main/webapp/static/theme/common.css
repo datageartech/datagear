@@ -1229,9 +1229,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .content .content-editor{
 	position: relative;
 	width: 100%;
-	height: 70%;
+	height: 90%;
 	min-height: 10%;
-	max-height: 90%;
+	max-height: 95%;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -1240,7 +1240,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	position: absolute;
 	left: 0;
 	top: 0;
-	bottom: 0.45em;
+	bottom: 0.9em;
 	width: 100%;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
@@ -1253,7 +1253,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	height: 100%;
 }
 .page-sqlpad .content .content-editor .ui-resizable-s{
-	bottom: 0px;
+	bottom: 0.3em;
 	right: 0px;
 	width: auto;
 	height: 0.3em;
@@ -1261,12 +1261,19 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .page-sqlpad .content .content-result{
 	width: 100%;
-	height: 30%;
+	height: 10%;
 	overflow: auto;
 	border-top-width: 0px;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+}
+.page-sqlpad .content .content-result .execution-message{
+	padding-left: 0.41em;
+	margin-top: 0.2em;
+	margin-bottom: 0.1em;
+	opacity: 0.6;
+	filter: Alpha(Opacity=60);
 }
 .page-sqlpad .foot{
 	position: absolute;

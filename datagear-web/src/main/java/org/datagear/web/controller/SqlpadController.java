@@ -4,6 +4,8 @@
 
 package org.datagear.web.controller;
 
+import java.io.StringReader;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -108,7 +110,11 @@ public class SqlpadController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		new Thread(new SqlpadExecutionRunnable(sqlpadCometdService, sqlpadChannelId)).start();
+		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(sqlpadCometdService,
+				sqlpadChannelId, new StringReader(sql));
+		sqlpadExecutionRunnable.init();
+
+		new Thread(sqlpadExecutionRunnable).start();
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
 	}

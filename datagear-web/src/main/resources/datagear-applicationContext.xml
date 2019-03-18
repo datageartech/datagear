@@ -332,13 +332,16 @@
 	<bean id="changelogResolver" class="org.datagear.web.util.ChangelogResolver" />
 	
 	<!-- cometd配置开始 -->
+	<bean id="bayeuxJsonContext" class="org.cometd.server.JacksonJSONContextServer" />
+	
 	<bean id="bayeuxServerFactory" class="org.datagear.web.util.BayeuxServerFactory">
 		<property name="options">
 			<map>
 				<entry key="logLevel" value="3" />
 				<entry key="timeout" value="15000" />
+				<entry key="jsonContext" value-ref="bayeuxJsonContext" />
 			</map>
-		</property>
+		</property> 
 		<property name="extensions">
 			<list>
 				<bean class="org.cometd.server.ext.AcknowledgedMessagesExtension" />
