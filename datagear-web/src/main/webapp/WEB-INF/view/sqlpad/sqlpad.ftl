@@ -101,11 +101,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	{
 		if(po.cometdSubscribed)
 		{
-			$.post("${contextPath}/sqlpad/"+po.schemaId+"/execute",
-			{
-				"sqlpadChannelId" : po.sqlpadChannelId,
-				"sql" : sql
-			});
+			po.requestExecuteSql(sql);
 		}
 		else
 		{
@@ -113,43 +109,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			
 			cometd.subscribe(po.sqlpadChannelId, function(message)
 			{
-				var msgData = message.data;
-				var msgDataType = (msgData ? msgData.type : "");
-				var $msgDiv = $("<div class='execution-message' />");
-				
-				if(msgData.timeText)
-					$("<span class='message-time' />").html("["+msgData.timeText+"] ").appendTo($msgDiv);
-				
-				var $msgContent = $("<span class='message-content' />").appendTo($msgDiv);
-				
-				if(msgDataType == "START")
-				{
-					$msgDiv.addClass("execution-start");
-					$msgContent.html("<@spring.message code='sqlpad.executionStart' />");
-				}
-				else if(msgDataType == "SUCCESS")
-				{
-					$msgDiv.addClass("execution-success");
-					$msgContent.html("["+(msgData.sqlStatementIndex + 1)+"] " + msgData.sqlStatement.sql);
-				}
-				else if(msgDataType == "EXCEPTION")
-				{
-					$msgDiv.addClass("execution-exception");
-					$msgContent.html(msgData.content);
-				}
-				else if(msgDataType == "FINISH")
-				{
-					$msgDiv.addClass("execution-finish");
-					$msgContent.html("<@spring.message code='sqlpad.executeionFinish' />");
-				}
-				else
-					$msgDiv = null;
-				
-				if($msgDiv)
-				{
-					$msgDiv.appendTo(po.sqlResultContentElement);
-					po.sqlResultContentElement.scrollTop(po.sqlResultContentElement.prop("scrollHeight"));
-				}
+				po.handleMessage(message);
 			},
 			function(subscribeReply)
 			{
@@ -157,22 +117,72 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				{
 					po.cometdSubscribed = true;
 					
-					$.post("${contextPath}/sqlpad/"+po.schemaId+"/execute",
-					{
-						"sqlpadChannelId" : po.sqlpadChannelId,
-						"sql" : sql
-					});
-				}
-				else
-				{
-					//TODO 处理订阅失败逻辑
+					po.requestExecuteSql(sql);
 				}
 			});
 		}
 	};
 	
+	po.requestExecuteSql = function(sql)
+	{
+		$.ajax(
+		{
+			type : "POST",
+			url : "${contextPath}/sqlpad/"+po.schemaId+"/execute",
+			data : { "sqlpadChannelId" : po.sqlpadChannelId, "sql" : sql },
+			error : function()
+			{
+				po.element("#executeSqlButton").button("enable");
+			}
+		});
+	},
+	
+	po.handleMessage = function(message)
+	{
+		var msgData = message.data;
+		var msgDataType = (msgData ? msgData.type : "");
+		var $msgDiv = $("<div class='execution-message' />");
+		
+		if(msgData.timeText)
+			$("<span class='message-time' />").html("["+msgData.timeText+"] ").appendTo($msgDiv);
+		
+		var $msgContent = $("<span class='message-content' />").appendTo($msgDiv);
+		
+		if(msgDataType == "START")
+		{
+			$msgDiv.addClass("execution-start");
+			$msgContent.html("<@spring.message code='sqlpad.executionStart' />");
+		}
+		else if(msgDataType == "SUCCESS")
+		{
+			$msgDiv.addClass("execution-success");
+			$msgContent.html("["+(msgData.sqlStatementIndex + 1)+"] " + msgData.sqlStatement.sql);
+		}
+		else if(msgDataType == "EXCEPTION")
+		{
+			$msgDiv.addClass("execution-exception");
+			$msgContent.html(msgData.content);
+		}
+		else if(msgDataType == "FINISH")
+		{
+			$msgDiv.addClass("execution-finish");
+			$msgContent.html("<@spring.message code='sqlpad.executeionFinish' />");
+			
+			po.element("#executeSqlButton").button("enable");
+		}
+		else
+			$msgDiv = null;
+		
+		if($msgDiv)
+		{
+			$msgDiv.appendTo(po.sqlResultContentElement);
+			po.sqlResultContentElement.scrollTop(po.sqlResultContentElement.prop("scrollHeight"));
+		}
+	},
+	
 	po.element("#executeSqlButton").click(function()
 	{
+		var $this = $(this);
 		var editor = po.sqlEditor;
 		
 		var sql = editor.session.getTextRange(editor.getSelectionRange());
@@ -184,6 +194,8 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		
 		var cometd = $.cometd;
 		
+		$this.button("disable");
+		
 		if(!$.isCometdInit)
 		{
 			$.isCometdInit = true;
@@ -192,10 +204,6 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				if(handshakeReply.successful)
 				{
 					po.executeSql(sql);
-				}
-				else
-				{
-					//TODO 处理连接失败逻辑
 				}
 			});
 		}
