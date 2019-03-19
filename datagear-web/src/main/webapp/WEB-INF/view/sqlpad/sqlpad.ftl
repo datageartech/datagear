@@ -47,6 +47,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		</div>
 		<div id="${pageId}-sql-result" class="content-result">
 			<div class="result-head button-operation">
+				<button id="toggleResultTimeButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.hideSqlResultTime' />"><span class="ui-button-icon ui-icon ui-icon-clock"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
 				<button id="clearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
 			</div>
 			<div class="result-content ui-widget ui-widget-content"></div>
@@ -235,6 +236,22 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		
 		editor.setValue("");
 		editor.focus();
+	});
+	
+	po.element("#toggleResultTimeButton").click(function()
+	{
+		var $this = $(this);
+		
+		if($this.hasClass("ui-state-active"))
+		{
+			po.element(".result-content").removeClass("hide-message-time");
+			$(this).removeClass("ui-state-active");
+		}
+		else
+		{
+			po.element(".result-content").addClass("hide-message-time");
+			$(this).addClass("ui-state-active");
+		}
 	});
 	
 	po.element("#clearResultButton").click(function()
