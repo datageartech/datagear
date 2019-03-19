@@ -5,6 +5,7 @@
 package org.datagear.web.controller;
 
 import java.io.StringReader;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,6 +19,8 @@ import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.sqlpad.SqlpadCometdService;
 import org.datagear.web.sqlpad.SqlpadExecutionRunnable;
+import org.datagear.web.util.SqlScriptParser;
+import org.datagear.web.util.SqlScriptParser.SqlStatement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
@@ -99,7 +102,9 @@ public class SqlpadController extends AbstractSchemaConnController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> executeSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam("sqlpadChannelId") String sqlpadChannelId, @RequestParam("sql") String sql) throws Throwable
+			@RequestParam("sqlpadChannelId") String sqlpadChannelId, @RequestParam("sql") String sql,
+			@RequestParam(value = "sqlStartRow", required = false) Integer sqlStartRow,
+			@RequestParam(value = "sqlStartColumn", required = false) Integer sqlStartColumn) throws Throwable
 	{
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -110,8 +115,16 @@ public class SqlpadController extends AbstractSchemaConnController
 			}
 		}.execute();
 
+		SqlScriptParser sqlScriptParser = new SqlScriptParser(new StringReader(sql));
+		if (sqlStartRow != null)
+			sqlScriptParser.setContextStartRow(sqlStartRow);
+		if (sqlStartColumn != null)
+			sqlScriptParser.setContextStartColumn(sqlStartColumn);
+
+		List<SqlStatement> sqlStatements = sqlScriptParser.parse();
+
 		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(sqlpadCometdService,
-				sqlpadChannelId, new StringReader(sql));
+				sqlpadChannelId, sqlStatements);
 		sqlpadExecutionRunnable.init();
 
 		new Thread(sqlpadExecutionRunnable).start();

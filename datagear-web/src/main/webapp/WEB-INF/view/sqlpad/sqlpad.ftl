@@ -97,11 +97,11 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 	});
 	
-	po.executeSql = function(sql)
+	po.executeSql = function(sql, sqlStartRow, sqlStartColumn)
 	{
 		if(po.cometdSubscribed)
 		{
-			po.requestExecuteSql(sql);
+			po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn);
 		}
 		else
 		{
@@ -117,19 +117,19 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				{
 					po.cometdSubscribed = true;
 					
-					po.requestExecuteSql(sql);
+					po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn);
 				}
 			});
 		}
 	};
 	
-	po.requestExecuteSql = function(sql)
+	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn)
 	{
 		$.ajax(
 		{
 			type : "POST",
 			url : "${contextPath}/sqlpad/"+po.schemaId+"/execute",
-			data : { "sqlpadChannelId" : po.sqlpadChannelId, "sql" : sql },
+			data : { "sqlpadChannelId" : po.sqlpadChannelId, "sql" : sql, "sqlStartRow" : sqlStartRow, "sqlStartColumn" : sqlStartColumn },
 			error : function()
 			{
 				po.element("#executeSqlButton").button("enable");
@@ -155,8 +155,13 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 		else if(msgDataType == "SUCCESS")
 		{
+			var sqlStatement = msgData.sqlStatement;
+			
 			$msgDiv.addClass("execution-success");
-			$msgContent.html("["+(msgData.sqlStatementIndex + 1)+"] " + msgData.sqlStatement.sql);
+			$msgContent.html("["+(msgData.sqlStatementIndex + 1)+"] " + $.truncateIf(sqlStatement.sql, "...", 38));
+			
+			<#assign messageArgs=['"+(sqlStatement.startRow+1)+"', '"+sqlStatement.startColumn+"', '"+(sqlStatement.endRow+1)+"', '"+sqlStatement.endColumn+"'] />
+			$msgContent.attr("title", "<@spring.messageArgs code='sqlpad.executionSqlselectionRange' args=messageArgs />");
 		}
 		else if(msgDataType == "EXCEPTION")
 		{
@@ -185,9 +190,17 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		var $this = $(this);
 		var editor = po.sqlEditor;
 		
-		var sql = editor.session.getTextRange(editor.getSelectionRange());
+		var selectionRange = editor.getSelectionRange();
+		var sql = editor.session.getTextRange(selectionRange);
+		var sqlStartRow = selectionRange.start.row;
+		var sqlStartColumn = selectionRange.start.column;
+		
 		if(!sql)
+		{
 			sql = editor.getValue();
+			sqlStartRow = 0;
+			sqlStartColumn = 0;
+		}
 		
 		if(!sql)
 			return;
@@ -203,12 +216,12 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			{
 				if(handshakeReply.successful)
 				{
-					po.executeSql(sql);
+					po.executeSql(sql, sqlStartRow, sqlStartColumn);
 				}
 			});
 		}
 		else
-			po.executeSql(sql);
+			po.executeSql(sql, sqlStartRow, sqlStartColumn);
 	});
 	
 	po.element("#stopSqlButton").click(function()

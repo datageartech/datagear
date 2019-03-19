@@ -30,25 +30,25 @@ public class SqlScriptParser
 
 	private Reader sqlScriptReader;
 
-	/** SQL脚本的上下文起始行号 */
-	private int contextStartLine = 1;
+	/** SQL脚本的上下文起始行 */
+	private int contextStartRow = 0;
 
-	/** SQL脚本的上下文起始行的偏移量 */
-	private int contextStartIndex = 0;
+	/** SQL脚本的上下文起始行中的起始列 */
+	private int contextStartColumn = 0;
 
 	/** 语句分隔符 */
 	private String delimiter = DEFAULT_DELIMITER;
 
-	/** 解析过程：当前行号 */
-	protected int _currentLineNumber = this.contextStartLine;
-	/** 解析过程：当前SQL的起始行号（包含） */
-	protected int _currentSqlStartLine = _currentLineNumber;
-	/** 解析过程：当前SQL的起始行偏移量（包含） */
-	protected int _currentSqlStartIndex = this.contextStartIndex;
-	/** 解析过程：当前SQL的完成行号（包含） */
-	protected int _currentSqlFinishLine = _currentLineNumber;
-	/** 解析过程：当前SQL的完成行号偏移量（不包含） */
-	protected int _currentsqlEndIndex = 0;
+	/** 解析过程：当前行 */
+	protected int _currentRow = 0;
+	/** 解析过程：当前SQL的起始行（包含） */
+	protected int _currentSqlStartRow = 0;
+	/** 解析过程：当前SQL的起始行中的起始列（包含） */
+	protected int _currentSqlStartColumn = 0;
+	/** 解析过程：当前SQL的结束行号（包含） */
+	protected int _currentSqlEndRow = 0;
+	/** 解析过程：当前SQL的结束行中的结束列（不包含） */
+	protected int _currentsqlEndColumn = 0;
 
 	public SqlScriptParser()
 	{
@@ -71,24 +71,31 @@ public class SqlScriptParser
 		this.sqlScriptReader = sqlScriptReader;
 	}
 
-	public int getContextStartLine()
+	public int getContextStartRow()
 	{
-		return contextStartLine;
+		return contextStartRow;
 	}
 
-	public void setContextStartLine(int contextStartLine)
+	public void setContextStartRow(int contextStartRow)
 	{
-		this.contextStartLine = contextStartLine;
+		this.contextStartRow = contextStartRow;
+
+		this._currentRow = contextStartRow;
+		this._currentSqlStartRow = contextStartRow;
+		this._currentSqlEndRow = contextStartColumn;
 	}
 
-	public int getContextStartIndex()
+	public int getContextStartColumn()
 	{
-		return contextStartIndex;
+		return contextStartColumn;
 	}
 
-	public void setContextStartIndex(int contextStartIndex)
+	public void setContextStartColumn(int contextStartColumn)
 	{
-		this.contextStartIndex = contextStartIndex;
+		this.contextStartColumn = contextStartColumn;
+
+		this._currentSqlStartColumn = contextStartColumn;
+		this._currentsqlEndColumn = contextStartColumn;
 	}
 
 	public String getDelimiter()
@@ -172,7 +179,7 @@ public class SqlScriptParser
 		else
 		{
 			if (isSqlBuilderEmpty)
-				_currentSqlStartLine = _currentLineNumber;
+				_currentSqlStartRow = _currentRow;
 
 			int handleIndex = 0;
 			int lineLength = line.length();
@@ -180,7 +187,7 @@ public class SqlScriptParser
 			while (handleIndex < lineLength)
 			{
 				if (isEmpty(sqlBuilder))
-					_currentSqlStartIndex = handleIndex;
+					_currentSqlStartColumn = handleIndex;
 
 				int delimiterIndex = findNextDelimiterIndex(sqlBuilder, line, handleIndex);
 
@@ -193,15 +200,15 @@ public class SqlScriptParser
 						sqlBuilder.append(line.substring(handleIndex));
 					sqlBuilder.append(LINE_SEPARATOR);
 
-					_currentSqlFinishLine = _currentLineNumber;
-					_currentsqlEndIndex = lineLength;
+					_currentSqlEndRow = _currentRow;
+					_currentsqlEndColumn = lineLength;
 
 					handleIndex = lineLength;
 				}
 				else
 				{
-					_currentSqlFinishLine = _currentLineNumber;
-					_currentsqlEndIndex = delimiterIndex + delimiter.length();
+					_currentSqlEndRow = _currentRow;
+					_currentsqlEndColumn = delimiterIndex + delimiter.length();
 
 					String scriptBefore = line.substring(handleIndex, delimiterIndex);
 					sqlBuilder.append(scriptBefore);
@@ -210,12 +217,12 @@ public class SqlScriptParser
 
 					sqlBuilder.delete(0, sqlBuilder.length());
 
-					handleIndex = _currentsqlEndIndex;
+					handleIndex = _currentsqlEndColumn;
 				}
 			}
 		}
 
-		_currentLineNumber++;
+		_currentRow++;
 	}
 
 	/**
@@ -255,8 +262,8 @@ public class SqlScriptParser
 		String sql = sqlBuilder.toString().trim();
 		if (!sql.isEmpty() && !isAsteriskPairComment(sql))
 		{
-			SqlStatement sqlStatement = new SqlStatement(sql, _currentSqlStartLine, _currentSqlStartIndex,
-					_currentSqlFinishLine, _currentsqlEndIndex);
+			SqlStatement sqlStatement = new SqlStatement(sql, _currentSqlStartRow, _currentSqlStartColumn,
+					_currentSqlEndRow, _currentsqlEndColumn);
 
 			sqlStatements.add(sqlStatement);
 
@@ -329,31 +336,31 @@ public class SqlScriptParser
 		/** 解析的SQL语句 */
 		private String sql;
 
-		/** SQL语句起始行 */
-		private int startLine;
+		/** SQL语句起始行（包含，以0开始） */
+		private int startRow;
 
-		/** SQL语句起始行偏移量 */
-		private int startIndex;
+		/** SQL语句起始行中的起始列（包含，以0开始） */
+		private int startColumn;
 
 		/** SQL语句结束行（包含） */
-		private int finishLine;
+		private int endRow;
 
-		/** SQL语句结束行偏移量（不包含） */
-		private int endIndex;
+		/** SQL语句结束行中的结束列（不包含） */
+		private int endColumn;
 
 		public SqlStatement()
 		{
 			super();
 		}
 
-		public SqlStatement(String sql, int startLine, int startIndex, int finishLine, int endIndex)
+		public SqlStatement(String sql, int startRow, int startColumn, int endRow, int endColumn)
 		{
 			super();
 			this.sql = sql;
-			this.startLine = startLine;
-			this.startIndex = startIndex;
-			this.finishLine = finishLine;
-			this.endIndex = endIndex;
+			this.startRow = startRow;
+			this.startColumn = startColumn;
+			this.endRow = endRow;
+			this.endColumn = endColumn;
 		}
 
 		public String getSql()
@@ -366,51 +373,51 @@ public class SqlScriptParser
 			this.sql = sql;
 		}
 
-		public int getStartLine()
+		public int getStartRow()
 		{
-			return startLine;
+			return startRow;
 		}
 
-		public void setStartLine(int startLine)
+		public void setStartRow(int startRow)
 		{
-			this.startLine = startLine;
+			this.startRow = startRow;
 		}
 
-		public int getStartIndex()
+		public int getStartColumn()
 		{
-			return startIndex;
+			return startColumn;
 		}
 
-		public void setStartIndex(int startIndex)
+		public void setStartColumn(int startColumn)
 		{
-			this.startIndex = startIndex;
+			this.startColumn = startColumn;
 		}
 
-		public int getFinishLine()
+		public int getEndRow()
 		{
-			return finishLine;
+			return endRow;
 		}
 
-		public void setFinishLine(int finishLine)
+		public void setEndRow(int endRow)
 		{
-			this.finishLine = finishLine;
+			this.endRow = endRow;
 		}
 
-		public int getEndIndex()
+		public int getEndColumn()
 		{
-			return endIndex;
+			return endColumn;
 		}
 
-		public void setEndIndex(int endIndex)
+		public void setEndColumn(int endColumn)
 		{
-			this.endIndex = endIndex;
+			this.endColumn = endColumn;
 		}
 
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [sql=" + sql + ", startLine=" + startLine + ", startIndex="
-					+ startIndex + ", finishLine=" + finishLine + ", endIndex=" + endIndex + "]";
+			return getClass().getSimpleName() + " [sql=" + sql + ", startRow=" + startRow + ", startColumn="
+					+ startColumn + ", endRow=" + endRow + ", endColumn=" + endColumn + "]";
 		}
 	}
 }

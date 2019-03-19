@@ -4,12 +4,9 @@
 
 package org.datagear.web.sqlpad;
 
-import java.io.IOException;
-import java.io.Reader;
 import java.util.List;
 
 import org.cometd.bayeux.server.ServerChannel;
-import org.datagear.web.util.SqlScriptParser;
 import org.datagear.web.util.SqlScriptParser.SqlStatement;
 
 /**
@@ -24,7 +21,7 @@ public class SqlpadExecutionRunnable implements Runnable
 
 	private String sqlpadChannelId;
 
-	private Reader sqlScriptReader;
+	private List<SqlStatement> sqlStatements;
 
 	private ServerChannel _sqlpadServerChannel;
 
@@ -34,12 +31,12 @@ public class SqlpadExecutionRunnable implements Runnable
 	}
 
 	public SqlpadExecutionRunnable(SqlpadCometdService sqlpadCometdService, String sqlpadChannelId,
-			Reader sqlScriptReader)
+			List<SqlStatement> sqlStatements)
 	{
 		super();
 		this.sqlpadCometdService = sqlpadCometdService;
 		this.sqlpadChannelId = sqlpadChannelId;
-		this.sqlScriptReader = sqlScriptReader;
+		this.sqlStatements = sqlStatements;
 	}
 
 	public SqlpadCometdService getSqlpadCometdService()
@@ -62,14 +59,14 @@ public class SqlpadExecutionRunnable implements Runnable
 		this.sqlpadChannelId = sqlpadChannelId;
 	}
 
-	public Reader getSqlScriptReader()
+	public List<SqlStatement> getSqlStatements()
 	{
-		return sqlScriptReader;
+		return sqlStatements;
 	}
 
-	public void setSqlScriptReader(Reader sqlScriptReader)
+	public void setSqlStatements(List<SqlStatement> sqlStatements)
 	{
-		this.sqlScriptReader = sqlScriptReader;
+		this.sqlStatements = sqlStatements;
 	}
 
 	/**
@@ -87,22 +84,6 @@ public class SqlpadExecutionRunnable implements Runnable
 	public void run()
 	{
 		this.sqlpadCometdService.sendStartMessage(this._sqlpadServerChannel);
-
-		SqlScriptParser sqlScriptParser = new SqlScriptParser(this.sqlScriptReader);
-
-		List<SqlStatement> sqlStatements = null;
-
-		try
-		{
-			sqlStatements = sqlScriptParser.parse();
-		}
-		catch (IOException e)
-		{
-			this.sqlpadCometdService.sendParserIOExceptionMessage(this._sqlpadServerChannel, e);
-			this.sqlpadCometdService.sendFinishMessage(this._sqlpadServerChannel);
-
-			return;
-		}
 
 		try
 		{
