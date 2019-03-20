@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.ConnectionSource;
+import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.JdbcUtil;
 import org.datagear.management.domain.Schema;
@@ -92,9 +93,9 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	 * 
 	 * @param schema
 	 * @return
-	 * @throws Exception
+	 * @throws ConnectionSourceException
 	 */
-	protected Connection getSchemaConnection(Schema schema) throws Exception
+	protected Connection getSchemaConnection(Schema schema) throws ConnectionSourceException
 	{
 		Connection cn = null;
 

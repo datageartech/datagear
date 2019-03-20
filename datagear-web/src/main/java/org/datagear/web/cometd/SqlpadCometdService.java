@@ -1,6 +1,5 @@
-package org.datagear.web.sqlpad;
+package org.datagear.web.cometd;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -8,6 +7,7 @@ import org.cometd.bayeux.MarkedReference;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.server.AbstractService;
+import org.datagear.web.OperationMessage;
 import org.datagear.web.util.SqlScriptParser.SqlStatement;
 
 /**
@@ -48,14 +48,20 @@ public class SqlpadCometdService extends AbstractService
 	}
 
 	/**
-	 * 发送解析SQL时出现{@linkplain IOException}的消息。
+	 * 发送异常消息。
 	 * 
 	 * @param channel
-	 * @param e
+	 * @param t
+	 * @param content
+	 * @param trace
 	 */
-	public void sendParserIOExceptionMessage(ServerChannel channel, IOException e)
+	public void sendExceptionMessage(ServerChannel channel, Throwable t, String content, boolean trace)
 	{
-		channel.publish(getServerSession(), new ExceptionMessageData(e.getMessage()));
+		ExceptionMessageData messageData = new ExceptionMessageData(content);
+		if (trace)
+			messageData.setDetailTrace(t);
+
+		channel.publish(getServerSession(), messageData);
 	}
 
 	/**
@@ -200,6 +206,8 @@ public class SqlpadCometdService extends AbstractService
 
 		private String content;
 
+		private String detailTrace;
+
 		public ExceptionMessageData()
 		{
 			super(TYPE);
@@ -219,6 +227,21 @@ public class SqlpadCometdService extends AbstractService
 		public void setContent(String content)
 		{
 			this.content = content;
+		}
+
+		public String getDetailTrace()
+		{
+			return detailTrace;
+		}
+
+		public void setDetailTrace(String detailTrace)
+		{
+			this.detailTrace = detailTrace;
+		}
+
+		public void setDetailTrace(Throwable t)
+		{
+			this.detailTrace = OperationMessage.printThrowableTrace(t);
 		}
 	}
 

@@ -5,6 +5,7 @@
 package org.datagear.web.controller;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -455,6 +456,29 @@ public abstract class AbstractController
 		try
 		{
 			return this.messageSource.getMessage(code, args, WebUtils.getLocale(request));
+		}
+		catch (NoSuchMessageException e)
+		{
+			return "???" + code + "???";
+		}
+	}
+
+	/**
+	 * 获取I18N消息内容。
+	 * <p>
+	 * 如果找不到对应消息码的消息，则返回<code>"???[code]???"<code>（例如：{@code "???error???"}）。
+	 * </p>
+	 * 
+	 * @param locale
+	 * @param code
+	 * @param args
+	 * @return
+	 */
+	protected String getMessage(Locale locale, String code, Object... args)
+	{
+		try
+		{
+			return this.messageSource.getMessage(code, args, locale);
 		}
 		catch (NoSuchMessageException e)
 		{

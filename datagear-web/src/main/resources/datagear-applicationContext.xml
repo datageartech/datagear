@@ -351,7 +351,7 @@
 	
 	<bean id="bayeuxServer" factory-bean="bayeuxServerFactory" factory-method="getBayeuxServer" init-method="start" destroy-method="stop" />
 	
-	<bean id="sqlpadCometdService" class="org.datagear.web.sqlpad.SqlpadCometdService">
+	<bean id="sqlpadCometdService" class="org.datagear.web.cometd.SqlpadCometdService">
         <constructor-arg><ref local="bayeuxServer" /></constructor-arg>
     </bean>
 	

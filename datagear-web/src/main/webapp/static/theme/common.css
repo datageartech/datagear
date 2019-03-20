@@ -1306,6 +1306,10 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	opacity: 0.6;
 	filter: Alpha(Opacity=60);
 }
+.page-sqlpad .content .content-result .execution-message.execution-exception{
+	opacity: 0.9;
+	filter: Alpha(Opacity=90);
+}
 .page-sqlpad .content .content-result .result-content.hide-message-time .message-time{
 	display: none;
 }

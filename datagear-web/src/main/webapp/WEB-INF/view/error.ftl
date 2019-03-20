@@ -1,5 +1,6 @@
 <#include "include/import_global.ftl">
-<#if isJsonResponse??>
+<#assign isJsonResponse=(isJsonResponse!false)>
+<#if isJsonResponse>
 <@writeJson var=operationMessage />
 <#else>
 <#include "include/html_doctype.ftl">

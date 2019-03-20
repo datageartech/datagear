@@ -150,3 +150,8 @@ table.dataTable.display tbody > tr > .selected:hover {
 .main-page-head{
 	border-bottom: 1px solid #DDDDDD;
 }
+
+/*SQL工作台*/
+.page-sqlpad .content .content-result .execution-message.execution-exception .message-content{
+	color: red;
+}
