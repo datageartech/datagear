@@ -267,7 +267,7 @@ public class SqlpadController extends AbstractSchemaConnController
 					SqlStatement sqlStatement = sqlStatements.get(i);
 
 					// TODO 执行SQL
-					st.execute(sqlStatement.getSql());
+					// st.execute(sqlStatement.getSql());
 
 					this.sqlpadCometdService.sendSuccessMessage(_sqlpadServerChannel, sqlStatement, i);
 

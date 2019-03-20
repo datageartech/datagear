@@ -1210,12 +1210,8 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-sqlpad .head{
-	height: 1.5em;
-	padding: 0.25em 0;
-}
 .page-sqlpad .button-operation button.ui-button-icon-only{
-	height: 1em;
+	height: 1.2em;
 	width: 2.5em;
 	margin-left: 0.5em;
 	vertical-align: top;
@@ -1224,12 +1220,56 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .button-operation button.first{
 	margin-left: 0.1em;
 }
+.page-sqlpad .button-operation .button-divider{
+	display: inline-block;
+    width: 1px;
+    height: 1em;
+    margin-right: 1em;
+    margin-left: 1.5em;
+    border-width: 0px;
+    border-right-width: 1px;
+	opacity: 0.6;
+	filter: Alpha(Opacity=60);
+}
+.page-sqlpad .head{
+	height: 1.2em;
+	padding: 0.25em 0;
+}
+.page-sqlpad .head .more-operation-wrapper{
+	float: right;
+	width: 10%;
+	text-align: right;
+	position: relative;
+}
+.page-sqlpad .head .more-operation-wrapper #moreOperationButton{
+	width: 1.5em;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+}
+.page-sqlpad .head .more-operation-wrapper .more-operation-panel{
+	position: absolute;
+	right: 0.1em;
+	top: 1.1em;
+	z-index: 9;
+	width: 350%;
+	text-align: left;
+	padding: 0.41em 1em;
+}
+.page-sqlpad .head .more-operation-wrapper .more-operation-panel form .form-content .form-item .form-item-label{
+	width: 30%;
+}
+.page-sqlpad .head .more-operation-wrapper .more-operation-panel form .form-content .form-item .form-item-value{
+	width: auto;
+}
+.page-sqlpad .head .more-operation-wrapper .more-operation-panel .ui-checkboxradio-icon{
+	display: none;
+}
 .page-sqlpad .content{
 	position: absolute;
 	width: 100%;
 	left: 0;
 	right: 0;
-	top: 1.5em;
+	top: 1.7em;
 	bottom: 0;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
@@ -1282,9 +1322,12 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	height: 1.1em;
 	text-align: right;
 }
+.page-sqlpad .content .content-result .result-head.button-operation button.ui-button-icon-only{
+	height: 1em;
+}
 .page-sqlpad .content .content-result .result-head.button-operation{
-	opacity: 0.6;
-	filter: Alpha(Opacity=60);
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
 }
 .page-sqlpad .content .content-result .result-content{
 	position: absolute;

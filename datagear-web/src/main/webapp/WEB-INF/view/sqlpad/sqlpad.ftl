@@ -21,8 +21,37 @@ Schema schema 数据库，不允许为null
 <div id="${pageId}" class="page-sqlpad">
 	<div class="head button-operation">
 		<button id="executeSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only first" title="<@spring.message code='sqlpad.executeWithShortcut' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
-		<button id="stopSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.stopExecution' />"><span class="ui-button-icon ui-icon ui-icon-stop"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
-		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
+		<button id="commitSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.commit' />"><span class="ui-button-icon ui-icon ui-icon-check"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.commit' /></button>
+		<button id="stopSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.stopExecution' />"><span class="ui-button-icon ui-icon ui-icon-stop"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.stopExecution' /></button>
+		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearEditSql' /></button>
+		<div class="more-operation-wrapper">
+			<button id="moreOperationButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.moreOperation' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.moreOperation' /></button>
+			<div class="more-operation-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
+				<form action="#">
+					<div class="form-content">
+						<div class="form-item">
+							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlExceptionHandleMode' /></label></div>
+							<div class="form-item-value">
+								<div id="sqlExceptionHandleModeSet">
+									<input type="radio" id="${pageId}-sqlehm-0" name="sqlExceptionHandleModel" value="abort" checked="checked"><label for="${pageId}-sqlehm-0"><@spring.message code='sqlpad.sqlExceptionHandleMode.abort' /></label>
+									<input type="radio" id="${pageId}-sqlehm-1" name="sqlExceptionHandleModel" value="rollback"><label for="${pageId}-sqlehm-1"><@spring.message code='sqlpad.sqlExceptionHandleMode.rollback' /></label>
+									<input type="radio" id="${pageId}-sqlehm-2" name="sqlExceptionHandleModel" value="ignore"><label for="${pageId}-sqlehm-2"><@spring.message code='sqlpad.sqlExceptionHandleMode.ignore' /></label>
+								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlCommitMode' /></label></div>
+							<div class="form-item-value">
+								<div id="sqlCommitModeSet">
+									<input type="radio" id="${pageId}-sqlcm-0" name="sqlCommitMode" value="auto" checked="checked"><label for="${pageId}-sqlcm-0"><@spring.message code='sqlpad.sqlCommitMode.auto' /></label>
+									<input type="radio" id="${pageId}-sqlcm-1" name="sqlCommitMode" value="manual"><label for="${pageId}-sqlcm-1"><@spring.message code='sqlpad.sqlCommitMode.manual' /></label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
 	</div>
 	<div class="content ui-widget ui-widget-content">
 		<div class="content-editor">
@@ -70,6 +99,15 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.sqlResultContentElement = po.element("#${pageId}-sql-result > .result-content");
 	
 	$.initButtons(po.element(".head"));
+	po.element("#sqlExceptionHandleModeSet").buttonset();
+	po.element("#sqlCommitModeSet").buttonset();
+	po.element(".more-operation-panel").hide();
+	
+	$(document.body).bind("click", function(event)
+	{
+		if($(event.target).closest(po.element(".more-operation-wrapper")).length == 0)
+			po.element(".more-operation-panel").hide();
+	});
 	
 	po.sqlEditor = ace.edit("${pageId}-sql-editor");
 	var SqlMode = ace.require("ace/mode/sql").Mode;
@@ -238,6 +276,27 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		editor.focus();
 	});
 	
+	po.element("#moreOperationButton").click(function()
+	{
+		po.element(".more-operation-panel").toggle();
+	});
+	
+	po.updateCommitSqlButtonStatus = function(enable)
+	{
+		if(enable == undefined)
+			enable = (po.element("input[name='sqlCommitMode']").val() == "manual");
+		
+		if(enable)
+			po.element("#commitSqlButton").button("enable");
+		else
+			po.element("#commitSqlButton").button("disable");
+	};
+	
+	po.element("input[name='sqlCommitMode']").change(function()
+	{
+		po.updateCommitSqlButtonStatus($(this).val() == "manual");
+	});
+	
 	po.element("#toggleResultTimeButton").click(function()
 	{
 		var $this = $(this);
@@ -258,6 +317,8 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	{
 		po.sqlResultContentElement.empty();
 	});
+	
+	po.updateCommitSqlButtonStatus();
 })
 (${pageId});
 </script>
