@@ -1223,13 +1223,13 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .button-operation .button-divider{
 	display: inline-block;
     width: 1px;
-    height: 1em;
+    height: 1.2em;
     margin-right: 1em;
     margin-left: 1.5em;
     border-width: 0px;
     border-right-width: 1px;
-	opacity: 0.6;
-	filter: Alpha(Opacity=60);
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
 }
 .page-sqlpad .head{
 	height: 1.2em;
