@@ -22,6 +22,7 @@ Schema schema 数据库，不允许为null
 	<div class="head button-operation">
 		<button id="executeSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only first" title="<@spring.message code='sqlpad.executeWithShortcut' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
 		<button id="commitSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.commit' />"><span class="ui-button-icon ui-icon ui-icon-check"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.commit' /></button>
+		<button id="rollbackSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.rollback' />"><span class="ui-button-icon ui-icon ui-icon-arrowreturnthick-1-w"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.rollback' /></button>
 		<button id="stopSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.stopExecution' />"><span class="ui-button-icon ui-icon ui-icon-stop"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.stopExecution' /></button>
 		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearEditSql' /></button>
 		<div class="more-operation-wrapper">
@@ -30,21 +31,21 @@ Schema schema 数据库，不允许为null
 				<form action="#">
 					<div class="form-content">
 						<div class="form-item">
-							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlExceptionHandleMode' /></label></div>
+							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlCommitMode' /></label></div>
 							<div class="form-item-value">
-								<div id="sqlExceptionHandleModeSet">
-									<input type="radio" id="${pageId}-sqlehm-0" name="sqlExceptionHandleModel" value="abort" checked="checked"><label for="${pageId}-sqlehm-0"><@spring.message code='sqlpad.sqlExceptionHandleMode.abort' /></label>
-									<input type="radio" id="${pageId}-sqlehm-1" name="sqlExceptionHandleModel" value="rollback"><label for="${pageId}-sqlehm-1"><@spring.message code='sqlpad.sqlExceptionHandleMode.rollback' /></label>
-									<input type="radio" id="${pageId}-sqlehm-2" name="sqlExceptionHandleModel" value="ignore"><label for="${pageId}-sqlehm-2"><@spring.message code='sqlpad.sqlExceptionHandleMode.ignore' /></label>
+								<div id="sqlCommitModeSet">
+									<input type="radio" id="${pageId}-sqlcm-0" name="sqlCommitMode" value="auto"><label for="${pageId}-sqlcm-0"><@spring.message code='sqlpad.sqlCommitMode.auto' /></label>
+									<input type="radio" id="${pageId}-sqlcm-1" name="sqlCommitMode" value="manual"><label for="${pageId}-sqlcm-1"><@spring.message code='sqlpad.sqlCommitMode.manual' /></label>
 								</div>
 							</div>
 						</div>
 						<div class="form-item">
-							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlCommitMode' /></label></div>
+							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlExceptionHandleMode' /></label></div>
 							<div class="form-item-value">
-								<div id="sqlCommitModeSet">
-									<input type="radio" id="${pageId}-sqlcm-0" name="sqlCommitMode" value="auto" checked="checked"><label for="${pageId}-sqlcm-0"><@spring.message code='sqlpad.sqlCommitMode.auto' /></label>
-									<input type="radio" id="${pageId}-sqlcm-1" name="sqlCommitMode" value="manual"><label for="${pageId}-sqlcm-1"><@spring.message code='sqlpad.sqlCommitMode.manual' /></label>
+								<div id="sqlExceptionHandleModeSet">
+									<input type="radio" id="${pageId}-sqlehm-0" name="sqlExceptionHandleModel" value="abort" checked="checked"><label for="${pageId}-sqlehm-0"><@spring.message code='sqlpad.sqlExceptionHandleMode.abort' /></label>
+									<input type="radio" id="${pageId}-sqlehm-2" name="sqlExceptionHandleModel" value="ignore"><label for="${pageId}-sqlehm-2"><@spring.message code='sqlpad.sqlExceptionHandleMode.ignore' /></label>
+									<input type="radio" id="${pageId}-sqlehm-1" name="sqlExceptionHandleModel" value="rollback"><label for="${pageId}-sqlehm-1"><@spring.message code='sqlpad.sqlExceptionHandleMode.rollback' /></label>
 								</div>
 							</div>
 						</div>
@@ -99,8 +100,8 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.sqlResultContentElement = po.element("#${pageId}-sql-result > .result-content");
 	
 	$.initButtons(po.element(".head"));
-	po.element("#sqlExceptionHandleModeSet").buttonset();
 	po.element("#sqlCommitModeSet").buttonset();
+	po.element("#sqlExceptionHandleModeSet").buttonset();
 	po.element(".more-operation-panel").hide();
 	
 	$(document.body).bind("click", function(event)
@@ -281,20 +282,30 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		po.element(".more-operation-panel").toggle();
 	});
 	
-	po.updateCommitSqlButtonStatus = function(enable)
-	{
-		if(enable == undefined)
-			enable = (po.element("input[name='sqlCommitMode']").val() == "manual");
-		
-		if(enable)
-			po.element("#commitSqlButton").button("enable");
-		else
-			po.element("#commitSqlButton").button("disable");
-	};
-	
 	po.element("input[name='sqlCommitMode']").change(function()
 	{
-		po.updateCommitSqlButtonStatus($(this).val() == "manual");
+		var value = $(this).val();
+		
+		console.log(value);
+		
+		if(value == "manual")
+		{
+			po.element("#commitSqlButton").button("enable");
+			po.element("#rollbackSqlButton").button("enable");
+			
+			var $rollbackExceptionHandle = po.element("input[name='sqlExceptionHandleModel'][value='rollback']");
+			$rollbackExceptionHandle.attr("disabled", "disabled");
+			if($rollbackExceptionHandle.is(":checked"))
+				po.element("input[name='sqlExceptionHandleModel'][value='abort']").prop("checked", true);
+			po.element("#sqlExceptionHandleModeSet").buttonset("refresh");
+		}
+		else
+		{
+			po.element("#commitSqlButton").button("disable");
+			po.element("#rollbackSqlButton").button("disable");
+			po.element("input[name='sqlExceptionHandleModel'][value='rollback']").removeAttr("disabled");
+			po.element("#sqlExceptionHandleModeSet").buttonset("refresh");
+		}
 	});
 	
 	po.element("#toggleResultTimeButton").click(function()
@@ -318,7 +329,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		po.sqlResultContentElement.empty();
 	});
 	
-	po.updateCommitSqlButtonStatus();
+	po.element("input[name='sqlCommitMode'][value='auto']").click();
 })
 (${pageId});
 </script>
