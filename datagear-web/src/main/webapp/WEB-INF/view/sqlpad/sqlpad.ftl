@@ -36,8 +36,8 @@ Schema schema 数据库，不允许为null
 							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlCommitMode' /></label></div>
 							<div class="form-item-value">
 								<div id="sqlCommitModeSet">
-									<input type="radio" id="${pageId}-sqlcm-0" name="sqlCommitMode" value="auto"><label for="${pageId}-sqlcm-0"><@spring.message code='sqlpad.sqlCommitMode.auto' /></label>
-									<input type="radio" id="${pageId}-sqlcm-1" name="sqlCommitMode" value="manual"><label for="${pageId}-sqlcm-1"><@spring.message code='sqlpad.sqlCommitMode.manual' /></label>
+									<input type="radio" id="${pageId}-sqlcm-0" name="sqlCommitMode" value="AUTO"><label for="${pageId}-sqlcm-0"><@spring.message code='sqlpad.sqlCommitMode.auto' /></label>
+									<input type="radio" id="${pageId}-sqlcm-1" name="sqlCommitMode" value="MANUAL"><label for="${pageId}-sqlcm-1"><@spring.message code='sqlpad.sqlCommitMode.manual' /></label>
 								</div>
 							</div>
 						</div>
@@ -45,9 +45,9 @@ Schema schema 数据库，不允许为null
 							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlExceptionHandleMode' /></label></div>
 							<div class="form-item-value">
 								<div id="sqlExceptionHandleModeSet">
-									<input type="radio" id="${pageId}-sqlehm-0" name="sqlExceptionHandleModel" value="abort" checked="checked"><label for="${pageId}-sqlehm-0"><@spring.message code='sqlpad.sqlExceptionHandleMode.abort' /></label>
-									<input type="radio" id="${pageId}-sqlehm-2" name="sqlExceptionHandleModel" value="ignore"><label for="${pageId}-sqlehm-2"><@spring.message code='sqlpad.sqlExceptionHandleMode.ignore' /></label>
-									<input type="radio" id="${pageId}-sqlehm-1" name="sqlExceptionHandleModel" value="rollback"><label for="${pageId}-sqlehm-1"><@spring.message code='sqlpad.sqlExceptionHandleMode.rollback' /></label>
+									<input type="radio" id="${pageId}-sqlehm-0" name="sqlExceptionHandleMode" value="ABORT" checked="checked"><label for="${pageId}-sqlehm-0"><@spring.message code='sqlpad.sqlExceptionHandleMode.abort' /></label>
+									<input type="radio" id="${pageId}-sqlehm-2" name="sqlExceptionHandleMode" value="IGNORE"><label for="${pageId}-sqlehm-2"><@spring.message code='sqlpad.sqlExceptionHandleMode.ignore' /></label>
+									<input type="radio" id="${pageId}-sqlehm-1" name="sqlExceptionHandleMode" value="ROLLBACK"><label for="${pageId}-sqlehm-1"><@spring.message code='sqlpad.sqlExceptionHandleMode.rollback' /></label>
 								</div>
 							</div>
 						</div>
@@ -139,11 +139,11 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 	});
 	
-	po.executeSql = function(sql, sqlStartRow, sqlStartColumn)
+	po.executeSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode)
 	{
 		if(po.cometdSubscribed)
 		{
-			po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn);
+			po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
 		}
 		else
 		{
@@ -159,19 +159,27 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				{
 					po.cometdSubscribed = true;
 					
-					po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn);
+					po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
 				}
 			});
 		}
 	};
 	
-	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn)
+	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode)
 	{
 		$.ajax(
 		{
 			type : "POST",
 			url : "${contextPath}/sqlpad/"+po.schemaId+"/execute",
-			data : { "sqlpadChannelId" : po.sqlpadChannelId, "sql" : sql, "sqlStartRow" : sqlStartRow, "sqlStartColumn" : sqlStartColumn },
+			data :
+			{
+				"sqlpadChannelId" : po.sqlpadChannelId,
+				"sql" : sql,
+				"sqlStartRow" : sqlStartRow,
+				"sqlStartColumn" : sqlStartColumn,
+				"commitMode" : commitMode,
+				"exceptionHandleMode" : exceptionHandleMode
+			},
 			error : function()
 			{
 				po.element("#executeSqlButton").button("enable");
@@ -247,6 +255,9 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		if(!sql)
 			return;
 		
+		var commitMode = po.element("input[name='sqlCommitMode']:checked").val();
+		var exceptionHandleMode = po.element("input[name='sqlExceptionHandleMode']:checked").val();
+		
 		var cometd = $.cometd;
 		
 		$this.button("disable");
@@ -258,12 +269,12 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			{
 				if(handshakeReply.successful)
 				{
-					po.executeSql(sql, sqlStartRow, sqlStartColumn);
+					po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
 				}
 			});
 		}
 		else
-			po.executeSql(sql, sqlStartRow, sqlStartColumn);
+			po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
 	});
 	
 	po.element("#stopSqlButton").click(function()
@@ -290,22 +301,22 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		
 		console.log(value);
 		
-		if(value == "manual")
+		if(value == "MANUAL")
 		{
 			po.element("#commitSqlButton").button("enable");
 			po.element("#rollbackSqlButton").button("enable");
 			
-			var $rollbackExceptionHandle = po.element("input[name='sqlExceptionHandleModel'][value='rollback']");
+			var $rollbackExceptionHandle = po.element("input[name='sqlExceptionHandleMode'][value='ROLLBACK']");
 			$rollbackExceptionHandle.attr("disabled", "disabled");
 			if($rollbackExceptionHandle.is(":checked"))
-				po.element("input[name='sqlExceptionHandleModel'][value='abort']").prop("checked", true);
+				po.element("input[name='sqlExceptionHandleMode'][value='ABORT']").prop("checked", true);
 			po.element("#sqlExceptionHandleModeSet").buttonset("refresh");
 		}
 		else
 		{
 			po.element("#commitSqlButton").button("disable");
 			po.element("#rollbackSqlButton").button("disable");
-			po.element("input[name='sqlExceptionHandleModel'][value='rollback']").removeAttr("disabled");
+			po.element("input[name='sqlExceptionHandleMode'][value='ROLLBACK']").removeAttr("disabled");
 			po.element("#sqlExceptionHandleModeSet").buttonset("refresh");
 		}
 	});
@@ -331,7 +342,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		po.sqlResultContentElement.empty();
 	});
 	
-	po.element("input[name='sqlCommitMode'][value='auto']").click();
+	po.element("input[name='sqlCommitMode'][value='AUTO']").click();
 })
 (${pageId});
 </script>

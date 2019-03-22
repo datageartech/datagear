@@ -109,7 +109,9 @@ public class SqlpadController extends AbstractSchemaConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("sqlpadChannelId") String sqlpadChannelId, @RequestParam("sql") String sql,
 			@RequestParam(value = "sqlStartRow", required = false) Integer sqlStartRow,
-			@RequestParam(value = "sqlStartColumn", required = false) Integer sqlStartColumn) throws Throwable
+			@RequestParam(value = "sqlStartColumn", required = false) Integer sqlStartColumn,
+			@RequestParam(value = "commitMode", required = false) CommitMode commitMode,
+			@RequestParam(value = "exceptionHandleMode", required = false) ExceptionHandleMode exceptionHandleMode) throws Throwable
 	{
 		Schema schema = getSchemaNotNull(request, response, schemaId);
 
@@ -118,11 +120,17 @@ public class SqlpadController extends AbstractSchemaConnController
 			sqlScriptParser.setContextStartRow(sqlStartRow);
 		if (sqlStartColumn != null)
 			sqlScriptParser.setContextStartColumn(sqlStartColumn);
-
+		
+		if(commitMode == null)
+			commitMode = CommitMode.AUTO;
+		
+		if(exceptionHandleMode == null)
+			exceptionHandleMode = ExceptionHandleMode.ABORT;
+		
 		List<SqlStatement> sqlStatements = sqlScriptParser.parse();
 
 		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(schema, sqlpadCometdService,
-				sqlpadChannelId, sqlStatements, WebUtils.getLocale(request));
+				sqlpadChannelId, sqlStatements, commitMode, exceptionHandleMode, WebUtils.getLocale(request));
 		sqlpadExecutionRunnable.init();
 
 		new Thread(sqlpadExecutionRunnable).start();
@@ -157,6 +165,10 @@ public class SqlpadController extends AbstractSchemaConnController
 		private String sqlpadChannelId;
 
 		private List<SqlStatement> sqlStatements;
+		
+		private CommitMode commitMode;
+		
+		private ExceptionHandleMode exceptionHandleMode;
 
 		private Locale locale;
 
@@ -168,13 +180,15 @@ public class SqlpadController extends AbstractSchemaConnController
 		}
 
 		public SqlpadExecutionRunnable(Schema schema, SqlpadCometdService sqlpadCometdService, String sqlpadChannelId,
-				List<SqlStatement> sqlStatements, Locale locale)
+				List<SqlStatement> sqlStatements, CommitMode commitMode, ExceptionHandleMode exceptionHandleMode, Locale locale)
 		{
 			super();
 			this.schema = schema;
 			this.sqlpadCometdService = sqlpadCometdService;
 			this.sqlpadChannelId = sqlpadChannelId;
 			this.sqlStatements = sqlStatements;
+			this.commitMode = commitMode;
+			this.exceptionHandleMode = exceptionHandleMode;
 			this.locale = locale;
 		}
 
@@ -216,6 +230,22 @@ public class SqlpadController extends AbstractSchemaConnController
 		public void setSqlStatements(List<SqlStatement> sqlStatements)
 		{
 			this.sqlStatements = sqlStatements;
+		}
+
+		public CommitMode getCommitMode() {
+			return commitMode;
+		}
+
+		public void setCommitMode(CommitMode commitMode) {
+			this.commitMode = commitMode;
+		}
+
+		public ExceptionHandleMode getExceptionHandleMode() {
+			return exceptionHandleMode;
+		}
+
+		public void setExceptionHandleMode(ExceptionHandleMode exceptionHandleMode) {
+			this.exceptionHandleMode = exceptionHandleMode;
 		}
 
 		public Locale getLocale()
@@ -294,5 +324,31 @@ public class SqlpadController extends AbstractSchemaConnController
 				this.sqlpadCometdService.sendFinishMessage(this._sqlpadServerChannel);
 			}
 		}
+	}
+	
+	/**
+	 * 提交模式。
+	 * @author datagear@163.com
+	 *
+	 */
+	public static enum CommitMode
+	{
+		AUTO,
+		
+		MANUAL
+	}
+	
+	/**
+	 * 错误处理模式。
+	 * @author datagear@163.com
+	 *
+	 */
+	public static enum ExceptionHandleMode
+	{
+		ABORT,
+		
+		IGNORE,
+		
+		ROLLBACK
 	}
 }
