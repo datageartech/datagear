@@ -120,6 +120,16 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.sqlEditor.focus();
 	po.sqlEditor.navigateFileEnd();
 	
+	po.sqlEditor.commands.addCommand(
+	{
+	    name: 'executeCommand',
+	    bindKey: "Ctrl-ENTER",
+	    exec: function(editor)
+	    {
+	    	po.element("#executeSqlButton").click();
+	    }
+	});
+	
 	$.resizableStopPropagation(po.element(".content-editor"),
 	{
 		containment : "parent",
@@ -186,8 +196,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			},
 			error : function()
 			{
-				po.element("#executeSqlButton").removeAttr("execution-state");
-				$(".ui-button-icon", po.element("#executeSqlButton")).removeClass("ui-icon-pause").addClass("ui-icon-play");
+				po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "init");
 			}
 		});
 	},
@@ -253,8 +262,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			$msgDiv.addClass("execution-finish");
 			$msgContent.html("<@spring.message code='sqlpad.executeionFinish' />");
 			
-			po.element("#executeSqlButton").removeAttr("execution-state");
-			$(".ui-button-icon", po.element("#executeSqlButton")).removeClass("ui-icon-pause").addClass("ui-icon-play");
+			po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "init");
 		}
 		else
 			$msgDiv = null;
@@ -288,24 +296,39 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		});
 	};
 	
+	po.updateExecuteSqlButtonState = function($executeSqlButton, state)
+	{
+		if(state == "paused")
+		{
+			$executeSqlButton.attr("execution-state", "paused").attr("title", "<@spring.message code='sqlpad.resumeExecutionWithShortcut' />");
+			$(".ui-button-icon", $executeSqlButton).removeClass("ui-icon-pause").addClass("ui-icon-play");
+		}
+		else if(state == "executing")
+		{
+			$executeSqlButton.attr("execution-state", "executing").attr("title", "<@spring.message code='sqlpad.pauseExecutionWithShortcut' />");
+			$(".ui-button-icon", $executeSqlButton).removeClass("ui-icon-play").addClass("ui-icon-pause");
+		}
+		else if(state == "init")
+		{
+			$executeSqlButton.removeAttr("execution-state").attr("title", "<@spring.message code='sqlpad.executeWithShortcut' />");
+			$(".ui-button-icon", $executeSqlButton).removeClass("ui-icon-pause").addClass("ui-icon-play");
+		}
+	};
+	
 	po.element("#executeSqlButton").click(function()
 	{
 		var $this = $(this);
-		var $buttonIcon = $(".ui-button-icon", $this);
 		
 		var executionState = $this.attr("execution-state");
 		
 		if(executionState == "executing")
 		{
-			$this.attr("execution-state", "paused");
-			$buttonIcon.removeClass("ui-icon-play").addClass("ui-icon-pause");
-			
+			po.updateExecuteSqlButtonState($this, "paused");
 			po.sendSqlCommand("PAUSE", $this);
 		}
 		else if(executionState == "paused")
 		{
-			$this.attr("execution-state", "executing");
-			$buttonIcon.removeClass("ui-icon-pause").addClass("ui-icon-play");
+			po.updateExecuteSqlButtonState($this, "executing");
 			
 			po.sendSqlCommand("RESUME", $this);
 		}
@@ -333,7 +356,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			
 			var cometd = $.cometd;
 			
-			$this.attr("execution-state", "executing");
+			po.updateExecuteSqlButtonState($this, "executing");
 			
 			if(!$.isCometdInit)
 			{
@@ -349,29 +372,36 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			else
 				po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
 		}
+		
+		po.sqlEditor.focus();
 	});
 	
 	po.element("#stopSqlButton").click(function()
 	{
 		po.sendSqlCommand("STOP", $(this));
+		
+		po.sqlEditor.focus();
 	});
 
 	po.element("#commitSqlButton").click(function()
 	{
 		po.sendSqlCommand("COMMIT", $(this));
+		
+		po.sqlEditor.focus();
 	});
 	
 	po.element("#rollbackSqlButton").click(function()
 	{
 		po.sendSqlCommand("ROLLBACK", $(this));
+		
+		po.sqlEditor.focus();
 	});
 	
 	po.element("#clearSqlButton").click(function()
 	{
-		var editor = po.sqlEditor;
+		po.sqlEditor.setValue("");
 		
-		editor.setValue("");
-		editor.focus();
+		po.sqlEditor.focus();
 	});
 	
 	po.element("#moreOperationButton").click(function()
