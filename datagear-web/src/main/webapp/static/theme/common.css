@@ -1346,15 +1346,21 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding-left: 0.41em;
 	margin-top: 0.2em;
 	margin-bottom: 0.1em;
+}
+.page-sqlpad .content .content-result .execution-message .message-time,
+.page-sqlpad .content .content-result .execution-message .message-content{
 	opacity: 0.6;
 	filter: Alpha(Opacity=60);
 }
-.page-sqlpad .content .content-result .execution-message.execution-exception{
+.page-sqlpad .content .content-result .execution-message.execution-exception .message-content,
+.page-sqlpad .content .content-result .execution-message .message-content.message-content-highlight{
 	opacity: 0.9;
 	filter: Alpha(Opacity=90);
 }
-.page-sqlpad .content .content-result .result-content.hide-message-time .message-time{
-	display: none;
+.page-sqlpad .content .content-result .execution-message .message-content-sql .sql-value,
+.page-sqlpad .content .content-result .execution-message .message-content-sql .sql-tip
+{
+	margin-left: 0.41em;
 }
 .page-sqlpad .foot{
 	position: absolute;

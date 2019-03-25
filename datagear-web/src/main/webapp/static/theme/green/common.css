@@ -155,3 +155,6 @@ table.dataTable.display tbody > tr > .selected:hover {
 .page-sqlpad .content .content-result .execution-message.execution-exception .message-content{
 	color: red;
 }
+.page-sqlpad .content .content-result .execution-message .message-content-highlight{
+	color: #eacd02;
+}

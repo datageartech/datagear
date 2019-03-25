@@ -351,10 +351,6 @@
 	
 	<bean id="bayeuxServer" factory-bean="bayeuxServerFactory" factory-method="getBayeuxServer" init-method="start" destroy-method="stop" />
 	
-	<bean id="sqlpadCometdService" class="org.datagear.web.cometd.SqlpadCometdService">
-        <constructor-arg><ref local="bayeuxServer" /></constructor-arg>
-    </bean>
-	
 	<bean class="org.springframework.web.context.support.ServletContextAttributeExporter">
 		<property name="attributes">
 			<map>
@@ -365,6 +361,16 @@
 		</property>
 	</bean>
 	<!-- cometd配置结束 -->
+	
+	<bean id="sqlpadCometdService" class="org.datagear.web.sqlpad.SqlpadCometdService">
+        <constructor-arg><ref local="bayeuxServer" /></constructor-arg>
+    </bean>
+    
+    <bean id="sqlpadExecutionService" class="org.datagear.web.sqlpad.SqlpadExecutionService">
+    	<property name="connectionSource" ref="connectionSource" />
+    	<property name="messageSource" ref="messageSource" />
+    	<property name="sqlpadCometdService" ref="sqlpadCometdService" />
+    </bean>
 	
 	<!-- 定时任务开始 -->
 	

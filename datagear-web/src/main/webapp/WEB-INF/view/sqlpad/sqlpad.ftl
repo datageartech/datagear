@@ -79,8 +79,8 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		</div>
 		<div id="${pageId}-sql-result" class="content-result">
 			<div class="result-head button-operation">
-				<button id="toggleResultTimeButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.hideSqlResultTime' />"><span class="ui-button-icon ui-icon ui-icon-clock"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
-				<button id="clearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='execute' /></button>
+				<button id="toggleAutoClearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.keepResult' />"><span class="ui-button-icon ui-icon ui-icon-pin-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.keepResult' /></button>
+				<button id="clearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearSqlResult' /></button>
 			</div>
 			<div class="result-content ui-widget ui-widget-content"></div>
 		</div>
@@ -97,6 +97,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 (function(po)
 {
 	po.schemaId = "${schema.id}";
+	po.sqlpadId = "${sqlpadId}";
 	po.sqlpadChannelId = "${sqlpadChannelId}";
 	
 	po.sqlResultContentElement = po.element("#${pageId}-sql-result > .result-content");
@@ -167,13 +168,16 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	
 	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode)
 	{
+		if(!po.element("#toggleAutoClearResultButton").hasClass("ui-state-active"))
+			po.sqlResultContentElement.empty();
+		
 		$.ajax(
 		{
 			type : "POST",
 			url : "${contextPath}/sqlpad/"+po.schemaId+"/execute",
 			data :
 			{
-				"sqlpadChannelId" : po.sqlpadChannelId,
+				"sqlpadId" : po.sqlpadId,
 				"sql" : sql,
 				"sqlStartRow" : sqlStartRow,
 				"sqlStartColumn" : sqlStartColumn,
@@ -182,10 +186,22 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			},
 			error : function()
 			{
-				po.element("#executeSqlButton").button("enable");
+				po.element("#executeSqlButton").removeAttr("execution-state");
+				$(".ui-button-icon", po.element("#executeSqlButton")).removeClass("ui-icon-pause").addClass("ui-icon-play");
 			}
 		});
 	},
+	
+	po.appendSqlStatementMessage = function($msgContent, sqlStatement, sqlStatementIndex)
+	{
+		$msgContent.addClass("message-content-sql");
+		
+		$("<span class='sql-index'>["+(sqlStatementIndex + 1)+"]</span>").appendTo($msgContent);
+		$("<span class='sql-value' />").text($.truncateIf(sqlStatement.sql, "...", 38)).appendTo($msgContent);
+		
+		<#assign messageArgs=['"+(sqlStatement.startRow+1)+"', '"+sqlStatement.startColumn+"', '"+(sqlStatement.endRow+1)+"', '"+sqlStatement.endColumn+"'] />
+		$msgContent.attr("title", "<@spring.messageArgs code='sqlpad.executionSqlselectionRange' args=messageArgs />");
+	};
 	
 	po.handleMessage = function(message)
 	{
@@ -205,25 +221,40 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 		else if(msgDataType == "SUCCESS")
 		{
-			var sqlStatement = msgData.sqlStatement;
-			
 			$msgDiv.addClass("execution-success");
-			$msgContent.html("["+(msgData.sqlStatementIndex + 1)+"] " + $.truncateIf(sqlStatement.sql, "...", 38));
-			
-			<#assign messageArgs=['"+(sqlStatement.startRow+1)+"', '"+sqlStatement.startColumn+"', '"+(sqlStatement.endRow+1)+"', '"+sqlStatement.endColumn+"'] />
-			$msgContent.attr("title", "<@spring.messageArgs code='sqlpad.executionSqlselectionRange' args=messageArgs />");
+			po.appendSqlStatementMessage($msgContent, msgData.sqlStatement, msgData.sqlStatementIndex);
+		}
+		else if(msgDataType == "SQLEXCEPTION")
+		{
+			$msgDiv.addClass("execution-exception");
+			po.appendSqlStatementMessage($msgContent, msgData.sqlStatement, msgData.sqlStatementIndex);
+			$("<span class='sql-tip' />").html(msgData.content).appendTo($msgContent);
+		}
+		else if(msgDataType == "SQLCOMMAND")
+		{
+			$msgContent.html(msgData.content);
 		}
 		else if(msgDataType == "EXCEPTION")
 		{
 			$msgDiv.addClass("execution-exception");
 			$msgContent.html(msgData.content);
 		}
+		else if(msgDataType == "TEXT")
+		{
+			$msgDiv.addClass("execution-text");
+			
+			if(msgData.cssClass)
+				$msgContent.addClass(msgData.cssClass);
+			
+			$msgContent.html(msgData.text);
+		}
 		else if(msgDataType == "FINISH")
 		{
 			$msgDiv.addClass("execution-finish");
 			$msgContent.html("<@spring.message code='sqlpad.executeionFinish' />");
 			
-			po.element("#executeSqlButton").button("enable");
+			po.element("#executeSqlButton").removeAttr("execution-state");
+			$(".ui-button-icon", po.element("#executeSqlButton")).removeClass("ui-icon-pause").addClass("ui-icon-play");
 		}
 		else
 			$msgDiv = null;
@@ -235,51 +266,104 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 	},
 	
+	po.sendSqlCommand = function(sqlCommand, $commandButton)
+	{
+		if($commandButton != undefined)
+			$commandButton.button("disable");
+		
+		$.ajax(
+		{
+			type : "POST",
+			url : "${contextPath}/sqlpad/"+po.schemaId+"/command",
+			data :
+			{
+				"sqlpadId" : po.sqlpadId,
+				"command" : sqlCommand
+			},
+			complete : function()
+			{
+				if($commandButton != undefined)
+					$commandButton.button("enable");
+			}
+		});
+	};
+	
 	po.element("#executeSqlButton").click(function()
 	{
 		var $this = $(this);
-		var editor = po.sqlEditor;
+		var $buttonIcon = $(".ui-button-icon", $this);
 		
-		var selectionRange = editor.getSelectionRange();
-		var sql = editor.session.getTextRange(selectionRange);
-		var sqlStartRow = selectionRange.start.row;
-		var sqlStartColumn = selectionRange.start.column;
+		var executionState = $this.attr("execution-state");
 		
-		if(!sql)
+		if(executionState == "executing")
 		{
-			sql = editor.getValue();
-			sqlStartRow = 0;
-			sqlStartColumn = 0;
+			$this.attr("execution-state", "paused");
+			$buttonIcon.removeClass("ui-icon-play").addClass("ui-icon-pause");
+			
+			po.sendSqlCommand("PAUSE", $this);
 		}
-		
-		if(!sql)
-			return;
-		
-		var commitMode = po.element("input[name='sqlCommitMode']:checked").val();
-		var exceptionHandleMode = po.element("input[name='sqlExceptionHandleMode']:checked").val();
-		
-		var cometd = $.cometd;
-		
-		$this.button("disable");
-		
-		if(!$.isCometdInit)
+		else if(executionState == "paused")
 		{
-			$.isCometdInit = true;
-			cometd.init("${contextPath}/cometd", function(handshakeReply)
-			{
-				if(handshakeReply.successful)
-				{
-					po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
-				}
-			});
+			$this.attr("execution-state", "executing");
+			$buttonIcon.removeClass("ui-icon-pause").addClass("ui-icon-play");
+			
+			po.sendSqlCommand("RESUME", $this);
 		}
 		else
-			po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
+		{
+			var editor = po.sqlEditor;
+			
+			var selectionRange = editor.getSelectionRange();
+			var sql = editor.session.getTextRange(selectionRange);
+			var sqlStartRow = selectionRange.start.row;
+			var sqlStartColumn = selectionRange.start.column;
+			
+			if(!sql)
+			{
+				sql = editor.getValue();
+				sqlStartRow = 0;
+				sqlStartColumn = 0;
+			}
+			
+			if(!sql)
+				return;
+			
+			var commitMode = po.element("input[name='sqlCommitMode']:checked").val();
+			var exceptionHandleMode = po.element("input[name='sqlExceptionHandleMode']:checked").val();
+			
+			var cometd = $.cometd;
+			
+			$this.attr("execution-state", "executing");
+			
+			if(!$.isCometdInit)
+			{
+				$.isCometdInit = true;
+				cometd.init("${contextPath}/cometd", function(handshakeReply)
+				{
+					if(handshakeReply.successful)
+					{
+						po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
+					}
+				});
+			}
+			else
+				po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
+		}
 	});
 	
 	po.element("#stopSqlButton").click(function()
 	{
-		console.log("stop sql");
+		po.sendSqlCommand("STOP", $(this));
+	});
+
+	po.element("#commitSqlButton").click(function()
+	{
+		po.sendSqlCommand("COMMIT", $(this));
+	});
+	
+	po.element("#rollbackSqlButton").click(function()
+	{
+		po.sendSqlCommand("ROLLBACK", $(this));
 	});
 	
 	po.element("#clearSqlButton").click(function()
@@ -321,18 +405,16 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 	});
 	
-	po.element("#toggleResultTimeButton").click(function()
+	po.element("#toggleAutoClearResultButton").click(function()
 	{
 		var $this = $(this);
 		
 		if($this.hasClass("ui-state-active"))
 		{
-			po.element(".result-content").removeClass("hide-message-time");
 			$(this).removeClass("ui-state-active");
 		}
 		else
 		{
-			po.element(".result-content").addClass("hide-message-time");
 			$(this).addClass("ui-state-active");
 		}
 	});

@@ -1,5 +1,6 @@
-package org.datagear.web.cometd;
+package org.datagear.web.sqlpad;
 
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -8,6 +9,8 @@ import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.server.AbstractService;
 import org.datagear.web.OperationMessage;
+import org.datagear.web.sqlpad.SqlpadExecutionService.SQLExecutionStat;
+import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
 import org.datagear.web.util.SqlScriptParser.SqlStatement;
 
 /**
@@ -48,6 +51,24 @@ public class SqlpadCometdService extends AbstractService
 	}
 
 	/**
+	 * 发送执行SQL异常消息。
+	 * 
+	 * @param channel
+	 * @param sqlStatement
+	 * @param sqlStatementIndex
+	 * @param e
+	 * @param content
+	 */
+	public void sendExecuteSQLExceptionMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex,
+			SQLException e, String content)
+	{
+		SQLExceptionMessageData messageData = new SQLExceptionMessageData(sqlStatement, sqlStatementIndex, content);
+		messageData.setDetailTrace(e);
+
+		channel.publish(getServerSession(), messageData);
+	}
+
+	/**
 	 * 发送异常消息。
 	 * 
 	 * @param channel
@@ -65,6 +86,44 @@ public class SqlpadCometdService extends AbstractService
 	}
 
 	/**
+	 * 发送执行命令消息。
+	 * 
+	 * @param channel
+	 * @param sqlCommand
+	 * @param content
+	 */
+	public void sendSqlCommandMessage(ServerChannel channel, SqlCommand sqlCommand, String content)
+	{
+		channel.publish(getServerSession(), new SqlCommandMessageData(sqlCommand, content));
+	}
+
+	/**
+	 * 发送文本消息。
+	 * 
+	 * @param channel
+	 * @param text
+	 */
+	public void sendTextMessage(ServerChannel channel, String text)
+	{
+		channel.publish(getServerSession(), new TextMessageData(text));
+	}
+
+	/**
+	 * 发送文本消息。
+	 * 
+	 * @param channel
+	 * @param text
+	 * @param cssClass
+	 */
+	public void sendTextMessage(ServerChannel channel, String text, String cssClass)
+	{
+		TextMessageData textMessageData = new TextMessageData(text);
+		textMessageData.setCssClass(cssClass);
+
+		channel.publish(getServerSession(), textMessageData);
+	}
+
+	/**
 	 * 发送执行完成消息。
 	 * <p>
 	 * 无论是否出现异常，都要发送此消息。
@@ -75,6 +134,23 @@ public class SqlpadCometdService extends AbstractService
 	public void sendFinishMessage(ServerChannel channel)
 	{
 		channel.publish(getServerSession(), new FinishMessageData());
+	}
+
+	/**
+	 * 发送执行完成消息。
+	 * <p>
+	 * 无论是否出现异常，都要发送此消息。
+	 * </p>
+	 * 
+	 * @param channel
+	 * @param sqlExecutionStat
+	 */
+	public void sendFinishMessage(ServerChannel channel, SQLExecutionStat sqlExecutionStat)
+	{
+		FinishMessageData finishMessageData = new FinishMessageData();
+		finishMessageData.setSqlExecutionStat(sqlExecutionStat);
+
+		channel.publish(getServerSession(), finishMessageData);
 	}
 
 	/**
@@ -245,13 +321,150 @@ public class SqlpadCometdService extends AbstractService
 		}
 	}
 
+	protected static class SQLExceptionMessageData extends ExceptionMessageData
+	{
+		public static final String TYPE = "SQLEXCEPTION";
+
+		private SqlStatement sqlStatement;
+
+		/** SQL语句索引 */
+		private int sqlStatementIndex;
+
+		public SQLExceptionMessageData()
+		{
+			super();
+			super.setType(TYPE);
+		}
+
+		public SQLExceptionMessageData(SqlStatement sqlStatement, int sqlStatementIndex, String content)
+		{
+			super(content);
+			super.setType(TYPE);
+			this.sqlStatement = sqlStatement;
+			this.sqlStatementIndex = sqlStatementIndex;
+		}
+
+		public SqlStatement getSqlStatement()
+		{
+			return sqlStatement;
+		}
+
+		public void setSqlStatement(SqlStatement sqlStatement)
+		{
+			this.sqlStatement = sqlStatement;
+		}
+
+		public int getSqlStatementIndex()
+		{
+			return sqlStatementIndex;
+		}
+
+		public void setSqlStatementIndex(int sqlStatementIndex)
+		{
+			this.sqlStatementIndex = sqlStatementIndex;
+		}
+	}
+
+	protected static class SqlCommandMessageData extends MessageData
+	{
+		public static final String TYPE = "SQLCOMMAND";
+
+		private SqlCommand sqlCommand;
+
+		private String content;
+
+		public SqlCommandMessageData()
+		{
+			super(TYPE);
+		}
+
+		public SqlCommandMessageData(SqlCommand sqlCommand, String content)
+		{
+			super(TYPE);
+			this.sqlCommand = sqlCommand;
+			this.content = content;
+		}
+
+		public SqlCommand getSqlCommand()
+		{
+			return sqlCommand;
+		}
+
+		public void setSqlCommand(SqlCommand sqlCommand)
+		{
+			this.sqlCommand = sqlCommand;
+		}
+
+		public String getContent()
+		{
+			return content;
+		}
+
+		public void setContent(String content)
+		{
+			this.content = content;
+		}
+	}
+
+	protected static class TextMessageData extends MessageData
+	{
+		public static final String TYPE = "TEXT";
+
+		private String text;
+
+		private String cssClass;
+
+		public TextMessageData()
+		{
+			super(TYPE);
+		}
+
+		public TextMessageData(String text)
+		{
+			super(TYPE);
+			this.text = text;
+		}
+
+		public String getText()
+		{
+			return text;
+		}
+
+		public void setText(String text)
+		{
+			this.text = text;
+		}
+
+		public String getCssClass()
+		{
+			return cssClass;
+		}
+
+		public void setCssClass(String cssClass)
+		{
+			this.cssClass = cssClass;
+		}
+	}
+
 	protected static class FinishMessageData extends MessageData
 	{
 		public static final String TYPE = "FINISH";
 
+		private SQLExecutionStat sqlExecutionStat;
+
 		public FinishMessageData()
 		{
 			super(TYPE);
+		}
+
+		public SQLExecutionStat getSqlExecutionStat()
+		{
+			return sqlExecutionStat;
+		}
+
+		public void setSqlExecutionStat(SQLExecutionStat sqlExecutionStat)
+		{
+			this.sqlExecutionStat = sqlExecutionStat;
 		}
 	}
 }
