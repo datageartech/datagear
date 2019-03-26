@@ -30,7 +30,7 @@ Schema schema 数据库，不允许为null
 		<div class="more-operation-wrapper">
 			<button id="moreOperationButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.moreOperation' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.moreOperation' /></button>
 			<div class="more-operation-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
-				<form action="#">
+				<form id="moreOperationForm" method="POST" action="#">
 					<div class="form-content">
 						<div class="form-item">
 							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlCommitMode' /></label></div>
@@ -49,6 +49,13 @@ Schema schema 数据库，不允许为null
 									<input type="radio" id="${pageId}-sqlehm-2" name="sqlExceptionHandleMode" value="IGNORE"><label for="${pageId}-sqlehm-2"><@spring.message code='sqlpad.sqlExceptionHandleMode.ignore' /></label>
 									<input type="radio" id="${pageId}-sqlehm-1" name="sqlExceptionHandleMode" value="ROLLBACK"><label for="${pageId}-sqlehm-1"><@spring.message code='sqlpad.sqlExceptionHandleMode.rollback' /></label>
 								</div>
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label"><label><@spring.message code='sqlpad.overTimeThreashold' /></label></div>
+							<div class="form-item-value">
+								<input type="text" name="overTimeThreashold" value="10" class="ui-widget ui-widget-content" style="width:4em;" title="<@spring.message code='sqlpad.overTimeThreashold.desc' />" />
+								<@spring.message code='sqlpad.overTimeThreashold.unit' />
 							</div>
 						</div>
 					</div>
@@ -150,11 +157,11 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 	});
 	
-	po.executeSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode)
+	po.executeSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold)
 	{
 		if(po.cometdSubscribed)
 		{
-			po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
+			po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold);
 		}
 		else
 		{
@@ -170,13 +177,13 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				{
 					po.cometdSubscribed = true;
 					
-					po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
+					po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold);
 				}
 			});
 		}
 	};
 	
-	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode)
+	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold)
 	{
 		if(!po.element("#toggleAutoClearResultButton").hasClass("ui-state-active"))
 			po.sqlResultContentElement.empty();
@@ -192,7 +199,8 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				"sqlStartRow" : sqlStartRow,
 				"sqlStartColumn" : sqlStartColumn,
 				"commitMode" : commitMode,
-				"exceptionHandleMode" : exceptionHandleMode
+				"exceptionHandleMode" : exceptionHandleMode,
+				"overTimeThreashold" : overTimeThreashold
 			},
 			error : function()
 			{
@@ -302,8 +310,24 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 		else if(msgDataType == "SQLCOMMAND")
 		{
-			$("<span />").html(msgData.content).appendTo($msgContent);
-			po.appendSQLExecutionStatMessage($msgContent, msgData.sqlExecutionStat);
+			var appendContent = true;
+			
+			if(msgData.sqlCommand == "RESUME")
+			{
+				po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "executing");
+				appendContent = false;
+				$msgDiv = null;
+			}
+			else if(msgData.sqlCommand == "PAUSE")
+			{
+				po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "paused");
+			}
+			
+			if(appendContent)
+			{
+				$("<span />").html(msgData.content).appendTo($msgContent);
+				po.appendSQLExecutionStatMessage($msgContent, msgData.sqlExecutionStat);
+			}
 		}
 		else if(msgDataType == "EXCEPTION")
 		{
@@ -389,13 +413,10 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		
 		if(executionState == "executing")
 		{
-			po.updateExecuteSqlButtonState($this, "paused");
 			po.sendSqlCommand("PAUSE", $this);
 		}
 		else if(executionState == "paused")
 		{
-			po.updateExecuteSqlButtonState($this, "executing");
-			
 			po.sendSqlCommand("RESUME", $this);
 		}
 		else
@@ -419,6 +440,14 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			
 			var commitMode = po.element("input[name='sqlCommitMode']:checked").val();
 			var exceptionHandleMode = po.element("input[name='sqlExceptionHandleMode']:checked").val();
+			var overTimeThreashold = parseInt(po.element("input[name='overTimeThreashold']").val());
+			
+			if(isNaN(overTimeThreashold))
+				overTimeThreashold = 10;
+			else if(overTimeThreashold < 1)
+				overTimeThreashold = 1;
+			else if(overTimeThreashold > 60)
+				overTimeThreashold = 60;
 			
 			var cometd = $.cometd;
 			
@@ -431,12 +460,12 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				{
 					if(handshakeReply.successful)
 					{
-						po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
+						po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold);
 					}
 				});
 			}
 			else
-				po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode);
+				po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold);
 		}
 		
 		po.sqlEditor.focus();
@@ -519,6 +548,26 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.element("#clearResultButton").click(function()
 	{
 		po.sqlResultContentElement.empty();
+	});
+	
+	po.element("#moreOperationForm").validate(
+	{
+		rules :
+		{
+			overTimeThreashold : { required : true, integer : true, min : 1, max : 60 }
+		},
+		messages :
+		{
+			overTimeThreashold : "<@spring.message code='sqlpad.overTimeThreashold.validation' />"
+		},
+		submitHandler : function(form)
+		{
+			return false;
+		},
+		errorPlacement : function(error, element)
+		{
+			error.appendTo(element.closest(".form-item-value"));
+		}
 	});
 	
 	po.element("input[name='sqlCommitMode'][value='AUTO']").click();

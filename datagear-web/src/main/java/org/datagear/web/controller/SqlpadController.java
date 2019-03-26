@@ -98,8 +98,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			@RequestParam(value = "sqlStartRow", required = false) Integer sqlStartRow,
 			@RequestParam(value = "sqlStartColumn", required = false) Integer sqlStartColumn,
 			@RequestParam(value = "commitMode", required = false) CommitMode commitMode,
-			@RequestParam(value = "exceptionHandleMode", required = false) ExceptionHandleMode exceptionHandleMode)
-			throws Throwable
+			@RequestParam(value = "exceptionHandleMode", required = false) ExceptionHandleMode exceptionHandleMode,
+			@RequestParam(value = "overTimeThreashold", required = false) Integer overTimeThreashold) throws Throwable
 	{
 		Schema schema = getSchemaNotNull(request, response, schemaId);
 
@@ -115,10 +115,17 @@ public class SqlpadController extends AbstractSchemaConnController
 		if (exceptionHandleMode == null)
 			exceptionHandleMode = ExceptionHandleMode.ABORT;
 
+		if (overTimeThreashold == null)
+			overTimeThreashold = 10;
+		else if (overTimeThreashold < 1)
+			overTimeThreashold = 1;
+		else if (overTimeThreashold > 60)
+			overTimeThreashold = 60;
+
 		List<SqlStatement> sqlStatements = sqlScriptParser.parse();
 
 		this.sqlpadExecutionService.submit(sqlpadId, schema, sqlStatements, commitMode, exceptionHandleMode,
-				WebUtils.getLocale(request));
+				overTimeThreashold, WebUtils.getLocale(request));
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
 	}

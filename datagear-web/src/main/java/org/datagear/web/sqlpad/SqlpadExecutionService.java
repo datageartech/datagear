@@ -96,16 +96,17 @@ public class SqlpadExecutionService
 	 * @param sqlStatements
 	 * @param commitMode
 	 * @param exceptionHandleMode
+	 * @param overTimeThreashold
 	 * @param locale
 	 * @return
 	 */
 	public boolean submit(String sqlpadId, Schema schema, List<SqlStatement> sqlStatements, CommitMode commitMode,
-			ExceptionHandleMode exceptionHandleMode, Locale locale)
+			ExceptionHandleMode exceptionHandleMode, int overTimeThreashold, Locale locale)
 	{
 		String sqlpadChannelId = getSqlpadChannelId(sqlpadId);
 
 		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(schema, sqlpadId, sqlpadChannelId,
-				sqlpadCometdService, sqlStatements, commitMode, exceptionHandleMode, locale);
+				sqlpadCometdService, sqlStatements, commitMode, exceptionHandleMode, overTimeThreashold, locale);
 
 		SqlpadExecutionRunnable old = this._sqlpadExecutionRunnableMap.putIfAbsent(sqlpadId, sqlpadExecutionRunnable);
 
@@ -222,6 +223,9 @@ public class SqlpadExecutionService
 
 		private ExceptionHandleMode exceptionHandleMode;
 
+		/** 超时分钟数 */
+		private int overTimeThreashold;
+
 		private Locale locale;
 
 		/** 发送给此Runnable的SQL命令 */
@@ -236,7 +240,7 @@ public class SqlpadExecutionService
 
 		public SqlpadExecutionRunnable(Schema schema, String sqlpadId, String sqlpadChannelId,
 				SqlpadCometdService sqlpadCometdService, List<SqlStatement> sqlStatements, CommitMode commitMode,
-				ExceptionHandleMode exceptionHandleMode, Locale locale)
+				ExceptionHandleMode exceptionHandleMode, int overTimeThreashold, Locale locale)
 		{
 			super();
 			this.schema = schema;
@@ -246,6 +250,7 @@ public class SqlpadExecutionService
 			this.sqlStatements = sqlStatements;
 			this.commitMode = commitMode;
 			this.exceptionHandleMode = exceptionHandleMode;
+			this.overTimeThreashold = overTimeThreashold;
 			this.locale = locale;
 		}
 
@@ -317,6 +322,16 @@ public class SqlpadExecutionService
 		public void setExceptionHandleMode(ExceptionHandleMode exceptionHandleMode)
 		{
 			this.exceptionHandleMode = exceptionHandleMode;
+		}
+
+		public int getOverTimeThreashold()
+		{
+			return overTimeThreashold;
+		}
+
+		public void setOverTimeThreashold(int overTimeThreashold)
+		{
+			this.overTimeThreashold = overTimeThreashold;
 		}
 
 		public Locale getLocale()
@@ -469,15 +484,30 @@ public class SqlpadExecutionService
 				hasPaused = true;
 
 				if (sendMessageIfPause)
-					sendSqlCommandMessage(this.sqlCommand);
+					sendSqlCommandMessage(this.sqlCommand, this.overTimeThreashold);
 
-				// TODO 添加超时处理逻辑
-				while (SqlCommand.PAUSE.equals(this.sqlCommand))
+				long waitStartTime = System.currentTimeMillis();
+
+				while (SqlCommand.PAUSE.equals(this.sqlCommand)
+						&& (System.currentTimeMillis() - waitStartTime) <= this.overTimeThreashold * 60 * 1000)
 					sleepForSqlCommand();
+
+				// 暂停超时
+				if (SqlCommand.PAUSE.equals(this.sqlCommand))
+				{
+					this.sqlpadCometdService.sendTextMessage(this._sqlpadServerChannel,
+							getMessage(this.locale, "sqlpad.pauseOverTime"));
+
+					this.sqlCommand = SqlCommand.RESUME;
+				}
 			}
 
 			if (SqlCommand.RESUME.equals(this.sqlCommand))
-				;
+			{
+				sendSqlCommandMessage(this.sqlCommand);
+
+				this.sqlCommand = null;
+			}
 			else if (SqlCommand.STOP.equals(this.sqlCommand))
 			{
 				cn.rollback();
@@ -530,19 +560,30 @@ public class SqlpadExecutionService
 		{
 			boolean sendWatingMessage = false;
 
-			// TODO 添加超时处理逻辑
-			while (!SqlCommand.COMMIT.equals(this.sqlCommand) && !SqlCommand.ROLLBACK.equals(this.sqlCommand))
+			long waitStartTime = System.currentTimeMillis();
+
+			while (!SqlCommand.COMMIT.equals(this.sqlCommand) && !SqlCommand.ROLLBACK.equals(this.sqlCommand)
+					&& (System.currentTimeMillis() - waitStartTime) <= this.overTimeThreashold * 60 * 1000)
 			{
 				if (!sendWatingMessage)
 				{
 					this.sqlpadCometdService.sendTextMessage(this._sqlpadServerChannel,
-							getMessage(this.locale, "sqlpad.waitingForCommitOrRollback"), "message-content-highlight",
-							sqlExecutionStat);
+							getMessage(this.locale, "sqlpad.waitingForCommitOrRollback", this.overTimeThreashold),
+							"message-content-highlight", sqlExecutionStat);
 
 					sendWatingMessage = true;
 				}
 
 				sleepForSqlCommand();
+			}
+
+			// 等待超时
+			if (!SqlCommand.COMMIT.equals(this.sqlCommand) && !SqlCommand.ROLLBACK.equals(this.sqlCommand))
+			{
+				this.sqlpadCometdService.sendTextMessage(this._sqlpadServerChannel,
+						getMessage(this.locale, "sqlpad.waitOverTime"));
+
+				this.sqlCommand = (sqlExecutionStat.getExceptionCount() > 0 ? SqlCommand.ROLLBACK : SqlCommand.COMMIT);
 			}
 
 			if (SqlCommand.COMMIT.equals(this.sqlCommand))
@@ -588,13 +629,14 @@ public class SqlpadExecutionService
 		 * 发送命令已执行消息。
 		 * 
 		 * @param sqlCommand
+		 * @param messageArgs
 		 */
-		protected void sendSqlCommandMessage(SqlCommand sqlCommand)
+		protected void sendSqlCommandMessage(SqlCommand sqlCommand, Object... messageArgs)
 		{
 			String messageKey = "sqlpad.SqlCommand." + sqlCommand.toString() + ".ok";
 
 			this.sqlpadCometdService.sendSqlCommandMessage(this._sqlpadServerChannel, sqlCommand,
-					getMessage(this.locale, messageKey));
+					getMessage(this.locale, messageKey, messageArgs));
 		}
 
 		/**
