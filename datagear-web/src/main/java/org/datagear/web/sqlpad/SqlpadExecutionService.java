@@ -375,14 +375,14 @@ public class SqlpadExecutionService
 			}
 
 			int totalCount = this.sqlStatements.size();
-			int successCount = 0, exceptionCount = 0;
-			long durationMs = System.currentTimeMillis();
+			SQLExecutionStat sqlExecutionStat = new SQLExecutionStat(totalCount);
+			long startTime = System.currentTimeMillis();
 
 			try
 			{
 				for (int i = 0; i < totalCount; i++)
 				{
-					if (handleSqlCommandInExecution(cn))
+					if (handleSqlCommandInExecution(cn, true, sqlExecutionStat))
 						break;
 
 					SqlStatement sqlStatement = sqlStatements.get(i);
@@ -391,13 +391,13 @@ public class SqlpadExecutionService
 					{
 						execute(cn, st, sqlStatement.getSql());
 
-						successCount++;
+						sqlExecutionStat.increaseSuccessCount();
 
 						this.sqlpadCometdService.sendSuccessMessage(_sqlpadServerChannel, sqlStatement, i);
 					}
 					catch (SQLException e)
 					{
-						exceptionCount++;
+						sqlExecutionStat.increaseExceptionCount();
 
 						this.sqlpadCometdService.sendExecuteSQLExceptionMessage(_sqlpadServerChannel, sqlStatement, i,
 								e, getMessage(this.locale, "sqlpad.executionSQLException"));
@@ -417,13 +417,16 @@ public class SqlpadExecutionService
 				{
 					if (CommitMode.AUTO.equals(this.commitMode))
 					{
-						if (exceptionCount > 0 && ExceptionHandleMode.ROLLBACK.equals(this.exceptionHandleMode))
+						if (sqlExecutionStat.getExceptionCount() > 0
+								&& ExceptionHandleMode.ROLLBACK.equals(this.exceptionHandleMode))
 							this.sqlCommand = SqlCommand.ROLLBACK;
 						else
 							this.sqlCommand = SqlCommand.COMMIT;
 					}
 
-					waitForCommitOrRollbackCommand(cn);
+					sqlExecutionStat.setDurationMs(System.currentTimeMillis() - startTime);
+
+					waitForCommitOrRollbackCommand(cn, sqlExecutionStat);
 				}
 			}
 			catch (Throwable t)
@@ -436,10 +439,9 @@ public class SqlpadExecutionService
 				JdbcUtil.closeStatement(st);
 				JdbcUtil.closeConnection(cn);
 
-				durationMs = System.currentTimeMillis() - durationMs;
+				sqlExecutionStat.setDurationMs(System.currentTimeMillis() - startTime);
 
-				this.sqlpadCometdService.sendFinishMessage(this._sqlpadServerChannel,
-						new SQLExecutionStat(totalCount, successCount, exceptionCount, durationMs));
+				this.sqlpadCometdService.sendFinishMessage(this._sqlpadServerChannel, sqlExecutionStat);
 
 				_sqlpadExecutionRunnableMap.remove(this.sqlpadId);
 			}
@@ -449,17 +451,25 @@ public class SqlpadExecutionService
 		 * 处理执行时命令。
 		 * 
 		 * @param cn
+		 * @param sendMessageIfPause
+		 * @param sqlExecutionStat
 		 * @return true 退出执行循环；false 不退出执行循环。
 		 * @throws SQLException
 		 * @throws InterruptedException
 		 */
-		protected boolean handleSqlCommandInExecution(Connection cn) throws SQLException, InterruptedException
+		protected boolean handleSqlCommandInExecution(Connection cn, boolean sendMessageIfPause,
+				SQLExecutionStat sqlExecutionStat) throws SQLException, InterruptedException
 		{
 			boolean breakLoop = false;
 
+			boolean hasPaused = false;
+
 			if (SqlCommand.PAUSE.equals(this.sqlCommand))
 			{
-				sendSqlCommandMessage(this.sqlCommand);
+				hasPaused = true;
+
+				if (sendMessageIfPause)
+					sendSqlCommandMessage(this.sqlCommand);
 
 				// TODO 添加超时处理逻辑
 				while (SqlCommand.PAUSE.equals(this.sqlCommand))
@@ -480,14 +490,28 @@ public class SqlpadExecutionService
 				cn.commit();
 				sendSqlCommandMessage(this.sqlCommand);
 
-				this.sqlCommand = null;
+				// 提交操作不打断暂停
+				if (hasPaused)
+				{
+					this.sqlCommand = SqlCommand.PAUSE;
+					breakLoop = handleSqlCommandInExecution(cn, false, sqlExecutionStat);
+				}
+				else
+					this.sqlCommand = null;
 			}
 			else if (SqlCommand.ROLLBACK.equals(this.sqlCommand))
 			{
 				cn.rollback();
 				sendSqlCommandMessage(this.sqlCommand);
 
-				this.sqlCommand = null;
+				// 回滚操作不打断暂停
+				if (hasPaused)
+				{
+					this.sqlCommand = SqlCommand.PAUSE;
+					breakLoop = handleSqlCommandInExecution(cn, false, sqlExecutionStat);
+				}
+				else
+					this.sqlCommand = null;
 			}
 
 			return breakLoop;
@@ -497,11 +521,12 @@ public class SqlpadExecutionService
 		 * 等待执行提交或者是回滚命令。
 		 * 
 		 * @param cn
-		 * @param commitMode
+		 * @param sqlExecutionStat
 		 * @throws SQLException
 		 * @throws InterruptedException
 		 */
-		protected void waitForCommitOrRollbackCommand(Connection cn) throws SQLException, InterruptedException
+		protected void waitForCommitOrRollbackCommand(Connection cn, SQLExecutionStat sqlExecutionStat)
+				throws SQLException, InterruptedException
 		{
 			boolean sendWatingMessage = false;
 
@@ -511,7 +536,8 @@ public class SqlpadExecutionService
 				if (!sendWatingMessage)
 				{
 					this.sqlpadCometdService.sendTextMessage(this._sqlpadServerChannel,
-							getMessage(this.locale, "sqlpad.waitingForCommitOrRollback"), "message-content-highlight");
+							getMessage(this.locale, "sqlpad.waitingForCommitOrRollback"), "message-content-highlight",
+							sqlExecutionStat);
 
 					sendWatingMessage = true;
 				}
@@ -602,7 +628,7 @@ public class SqlpadExecutionService
 		private int exceptionCount = 0;
 
 		/** 执行持续毫秒数 */
-		private long durationMs = 0;
+		private long durationMs = -1;
 
 		public SQLExecutionStat()
 		{
@@ -662,6 +688,21 @@ public class SqlpadExecutionService
 		public void setDurationMs(long durationMs)
 		{
 			this.durationMs = durationMs;
+		}
+
+		public int getAbortCount()
+		{
+			return this.totalCount - this.successCount - this.exceptionCount;
+		}
+
+		public void increaseSuccessCount()
+		{
+			this.successCount += 1;
+		}
+
+		public void increaseExceptionCount()
+		{
+			this.exceptionCount += 1;
 		}
 	}
 

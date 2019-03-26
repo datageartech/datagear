@@ -98,6 +98,23 @@ public class SqlpadCometdService extends AbstractService
 	}
 
 	/**
+	 * 发送执行命令消息。
+	 * 
+	 * @param channel
+	 * @param sqlCommand
+	 * @param content
+	 * @param sqlExecutionStat
+	 */
+	public void sendSqlCommandMessage(ServerChannel channel, SqlCommand sqlCommand, String content,
+			SQLExecutionStat sqlExecutionStat)
+	{
+		SqlCommandMessageData sqlCommandMessageData = new SqlCommandMessageData(sqlCommand, content);
+		sqlCommandMessageData.setSqlExecutionStat(sqlExecutionStat);
+
+		channel.publish(getServerSession(), sqlCommandMessageData);
+	}
+
+	/**
 	 * 发送文本消息。
 	 * 
 	 * @param channel
@@ -119,6 +136,23 @@ public class SqlpadCometdService extends AbstractService
 	{
 		TextMessageData textMessageData = new TextMessageData(text);
 		textMessageData.setCssClass(cssClass);
+
+		channel.publish(getServerSession(), textMessageData);
+	}
+
+	/**
+	 * 发送文本消息。
+	 * 
+	 * @param channel
+	 * @param text
+	 * @param cssClass
+	 * @param sqlExecutionStat
+	 */
+	public void sendTextMessage(ServerChannel channel, String text, String cssClass, SQLExecutionStat sqlExecutionStat)
+	{
+		TextMessageData textMessageData = new TextMessageData(text);
+		textMessageData.setCssClass(cssClass);
+		textMessageData.setSqlExecutionStat(sqlExecutionStat);
 
 		channel.publish(getServerSession(), textMessageData);
 	}
@@ -373,6 +407,8 @@ public class SqlpadCometdService extends AbstractService
 
 		private String content;
 
+		private SQLExecutionStat sqlExecutionStat;
+
 		public SqlCommandMessageData()
 		{
 			super(TYPE);
@@ -404,6 +440,16 @@ public class SqlpadCometdService extends AbstractService
 		{
 			this.content = content;
 		}
+
+		public SQLExecutionStat getSqlExecutionStat()
+		{
+			return sqlExecutionStat;
+		}
+
+		public void setSqlExecutionStat(SQLExecutionStat sqlExecutionStat)
+		{
+			this.sqlExecutionStat = sqlExecutionStat;
+		}
 	}
 
 	protected static class TextMessageData extends MessageData
@@ -413,6 +459,8 @@ public class SqlpadCometdService extends AbstractService
 		private String text;
 
 		private String cssClass;
+
+		private SQLExecutionStat sqlExecutionStat;
 
 		public TextMessageData()
 		{
@@ -443,6 +491,16 @@ public class SqlpadCometdService extends AbstractService
 		public void setCssClass(String cssClass)
 		{
 			this.cssClass = cssClass;
+		}
+
+		public SQLExecutionStat getSqlExecutionStat()
+		{
+			return sqlExecutionStat;
+		}
+
+		public void setSqlExecutionStat(SQLExecutionStat sqlExecutionStat)
+		{
+			this.sqlExecutionStat = sqlExecutionStat;
 		}
 	}
 

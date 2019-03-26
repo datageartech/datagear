@@ -203,13 +203,71 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	
 	po.appendSqlStatementMessage = function($msgContent, sqlStatement, sqlStatementIndex)
 	{
-		$msgContent.addClass("message-content-sql");
+		if(sqlStatement == null)
+			return;
 		
 		$("<span class='sql-index'>["+(sqlStatementIndex + 1)+"]</span>").appendTo($msgContent);
-		$("<span class='sql-value' />").text($.truncateIf(sqlStatement.sql, "...", 38)).appendTo($msgContent);
+		var $sqlValue = $("<span class='sql-value' />").text($.truncateIf(sqlStatement.sql, "...", 38)).appendTo($msgContent);
 		
 		<#assign messageArgs=['"+(sqlStatement.startRow+1)+"', '"+sqlStatement.startColumn+"', '"+(sqlStatement.endRow+1)+"', '"+sqlStatement.endColumn+"'] />
-		$msgContent.attr("title", "<@spring.messageArgs code='sqlpad.executionSqlselectionRange' args=messageArgs />");
+		$sqlValue.attr("title", "<@spring.messageArgs code='sqlpad.executionSqlselectionRange' args=messageArgs />");
+	};
+	
+	po.appendSQLExecutionStatMessage = function($msgContent, sqlExecutionStat)
+	{
+		if(sqlExecutionStat == null)
+			return;
+		
+		var text = "<@spring.message code='sqlpad.sqlExecutionStat.quoteLeft' />";
+		
+		<#assign messageArgs=['"+(sqlExecutionStat.totalCount)+"', '"+sqlExecutionStat.successCount+"', '"+(sqlExecutionStat.exceptionCount)+"', '"+(sqlExecutionStat.abortCount)+"'] />
+		text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoNoDuration' args=messageArgs />";
+		
+		if(sqlExecutionStat.durationMs > 0)
+		{
+			var hours = Math.floor(sqlExecutionStat.durationMs/1000/60/60);
+			
+			if(hours > 0)
+			{
+				var minutes = Math.round(sqlExecutionStat.durationMs/1000/60 - hours*60);
+				
+				<#assign messageArgs=['"+hours+"', '"+minutes+"'] />
+				text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoSuffixDuration.H.M' args=messageArgs />";
+			}
+			else
+			{
+				var minutes = Math.floor(sqlExecutionStat.durationMs/1000/60);
+				
+				if(minutes > 0)
+				{
+					var seconds = Math.round(sqlExecutionStat.durationMs/1000 - minutes*60);
+					
+					<#assign messageArgs=['"+minutes+"', '"+seconds+"'] />
+					text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoSuffixDuration.M.S' args=messageArgs />";
+				}
+				else
+				{
+					var seconds = Math.floor(sqlExecutionStat.durationMs/1000);
+					
+					if(seconds > 0)
+					{
+						var mseconds = Math.round(sqlExecutionStat.durationMs - seconds*1000);
+						
+						<#assign messageArgs=['"+seconds+"', '"+mseconds+"'] />
+						text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoSuffixDuration.S.MS' args=messageArgs />";
+					}
+					else
+					{
+						<#assign messageArgs=['"+sqlExecutionStat.durationMs+"'] />
+						text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoSuffixDuration.MS' args=messageArgs />";
+					}
+				}
+			}
+		}
+		
+		text += "<@spring.message code='sqlpad.sqlExecutionStat.quoteRight' />";
+		
+		$("<span class='sql-stat' />").text(text).appendTo($msgContent);
 	};
 	
 	po.handleMessage = function(message)
@@ -226,27 +284,32 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		if(msgDataType == "START")
 		{
 			$msgDiv.addClass("execution-start");
-			$msgContent.html("<@spring.message code='sqlpad.executionStart' />");
+			
+			$("<span />").html("<@spring.message code='sqlpad.executionStart' />").appendTo($msgContent);
 		}
 		else if(msgDataType == "SUCCESS")
 		{
 			$msgDiv.addClass("execution-success");
+			
 			po.appendSqlStatementMessage($msgContent, msgData.sqlStatement, msgData.sqlStatementIndex);
 		}
 		else if(msgDataType == "SQLEXCEPTION")
 		{
 			$msgDiv.addClass("execution-exception");
+			
 			po.appendSqlStatementMessage($msgContent, msgData.sqlStatement, msgData.sqlStatementIndex);
 			$("<span class='sql-tip' />").html(msgData.content).appendTo($msgContent);
 		}
 		else if(msgDataType == "SQLCOMMAND")
 		{
-			$msgContent.html(msgData.content);
+			$("<span />").html(msgData.content).appendTo($msgContent);
+			po.appendSQLExecutionStatMessage($msgContent, msgData.sqlExecutionStat);
 		}
 		else if(msgDataType == "EXCEPTION")
 		{
 			$msgDiv.addClass("execution-exception");
-			$msgContent.html(msgData.content);
+			
+			$("<span />").html(msgData.content).appendTo($msgContent);
 		}
 		else if(msgDataType == "TEXT")
 		{
@@ -255,12 +318,15 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			if(msgData.cssClass)
 				$msgContent.addClass(msgData.cssClass);
 			
-			$msgContent.html(msgData.text);
+			$("<span />").html(msgData.text).appendTo($msgContent);
+			po.appendSQLExecutionStatMessage($msgContent, msgData.sqlExecutionStat);
 		}
 		else if(msgDataType == "FINISH")
 		{
 			$msgDiv.addClass("execution-finish");
-			$msgContent.html("<@spring.message code='sqlpad.executeionFinish' />");
+			
+			$("<span />").html("<@spring.message code='sqlpad.executeionFinish' />").appendTo($msgContent);
+			po.appendSQLExecutionStatMessage($msgContent, msgData.sqlExecutionStat);
 			
 			po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "init");
 		}
@@ -417,8 +483,8 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		
 		if(value == "MANUAL")
 		{
-			po.element("#commitSqlButton").button("enable");
-			po.element("#rollbackSqlButton").button("enable");
+			//po.element("#commitSqlButton").button("enable");
+			//po.element("#rollbackSqlButton").button("enable");
 			
 			var $rollbackExceptionHandle = po.element("input[name='sqlExceptionHandleMode'][value='ROLLBACK']");
 			$rollbackExceptionHandle.attr("disabled", "disabled");
@@ -428,8 +494,9 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 		else
 		{
-			po.element("#commitSqlButton").button("disable");
-			po.element("#rollbackSqlButton").button("disable");
+			//po.element("#commitSqlButton").button("disable");
+			//po.element("#rollbackSqlButton").button("disable");
+			
 			po.element("input[name='sqlExceptionHandleMode'][value='ROLLBACK']").removeAttr("disabled");
 			po.element("#sqlExceptionHandleModeSet").buttonset("refresh");
 		}
