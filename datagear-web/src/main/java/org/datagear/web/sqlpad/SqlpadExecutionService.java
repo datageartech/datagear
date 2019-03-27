@@ -140,6 +140,14 @@ public class SqlpadExecutionService
 	}
 
 	/**
+	 * 关闭。
+	 */
+	public void shutdown()
+	{
+		this._executorService.shutdown();
+	}
+
+	/**
 	 * 获取指定SQL工作台ID对应的cometd通道ID。
 	 * 
 	 * @param sqlpadId

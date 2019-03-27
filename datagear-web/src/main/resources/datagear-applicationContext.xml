@@ -366,7 +366,7 @@
         <constructor-arg><ref local="bayeuxServer" /></constructor-arg>
     </bean>
     
-    <bean id="sqlpadExecutionService" class="org.datagear.web.sqlpad.SqlpadExecutionService">
+    <bean id="sqlpadExecutionService" class="org.datagear.web.sqlpad.SqlpadExecutionService" destroy-method="shutdown">
     	<property name="connectionSource" ref="connectionSource" />
     	<property name="messageSource" ref="messageSource" />
     	<property name="sqlpadCometdService" ref="sqlpadCometdService" />
