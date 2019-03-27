@@ -406,11 +406,8 @@ public class SqlpadExecutionService
 
 					try
 					{
-						execute(cn, st, sqlStatement.getSql());
-
+						execute(cn, st, sqlStatement, i);
 						sqlExecutionStat.increaseSuccessCount();
-
-						this.sqlpadCometdService.sendSuccessMessage(_sqlpadServerChannel, sqlStatement, i);
 					}
 					catch (SQLException e)
 					{
@@ -612,11 +609,35 @@ public class SqlpadExecutionService
 		 * @param sql
 		 * @throws SQLException
 		 */
-		protected void execute(Connection cn, Statement st, String sql) throws SQLException
+		protected void execute(Connection cn, Statement st, SqlStatement sqlStatement, int sqlStatementIndex)
+				throws SQLException
 		{
-			// TODO 执行SQL
+			boolean isResultSet = st.execute(sqlStatement.getSql());
 
-			st.execute(sql);
+			// 查询操作
+			if (isResultSet)
+			{
+				// TODO 处理查询操作
+				this.sqlpadCometdService.sendExecuteSQLSuccessMessage(this._sqlpadServerChannel, sqlStatement,
+						sqlStatementIndex);
+			}
+			else
+			{
+				int updateCount = st.getUpdateCount();
+
+				// 更新操作
+				if (updateCount > -1)
+				{
+					this.sqlpadCometdService.sendExecuteSQLSuccessMessage(this._sqlpadServerChannel, sqlStatement,
+							sqlStatementIndex, updateCount);
+				}
+				// 其他操作
+				else
+				{
+					this.sqlpadCometdService.sendExecuteSQLSuccessMessage(this._sqlpadServerChannel, sqlStatement,
+							sqlStatementIndex);
+				}
+			}
 
 			try
 			{
@@ -800,5 +821,23 @@ public class SqlpadExecutionService
 
 		/** 停止 */
 		STOP
+	}
+
+	/**
+	 * SQL执行结果类型。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static enum SqlResultType
+	{
+		/** 结果集 */
+		RESULT_SET,
+
+		/** 更新数目 */
+		UPDATE_COUNT,
+
+		/** 无结果 */
+		NONE
 	}
 }

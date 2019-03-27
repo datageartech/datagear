@@ -1360,6 +1360,13 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .content .content-result .execution-message .message-content span{
 	margin-right: 0.41em;
 }
+.page-sqlpad .content .content-result .execution-message .message-content .sql-value{
+	display: inline-block;
+    width: 30%;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
 .page-sqlpad .foot{
 	position: absolute;
 	width: 100%;

@@ -215,7 +215,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			return;
 		
 		$("<span class='sql-index'>["+(sqlStatementIndex + 1)+"]</span>").appendTo($msgContent);
-		var $sqlValue = $("<span class='sql-value' />").text($.truncateIf(sqlStatement.sql, "...", 38)).appendTo($msgContent);
+		var $sqlValue = $("<span class='sql-value' />").text($.truncateIf(sqlStatement.sql, "...", 100)).appendTo($msgContent);
 		
 		<#assign messageArgs=['"+(sqlStatement.startRow+1)+"', '"+sqlStatement.startColumn+"', '"+(sqlStatement.endRow+1)+"', '"+sqlStatement.endColumn+"'] />
 		$sqlValue.attr("title", "<@spring.messageArgs code='sqlpad.executionSqlselectionRange' args=messageArgs />");
@@ -300,6 +300,19 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			$msgDiv.addClass("execution-success");
 			
 			po.appendSqlStatementMessage($msgContent, msgData.sqlStatement, msgData.sqlStatementIndex);
+			
+			if(msgData.sqlResultType = "UPDATE_COUNT")
+			{
+				<#assign messageArgs=['"+msgData.updateCount+"'] />
+				$("<span class='sql-update-count' />").text("<@spring.messageArgs code='sqlpad.affectDataRowCount' args=messageArgs />")
+						.appendTo($msgContent);
+			}
+			else if(msgData.sqlResultType = "RESULT_SET")
+			{
+				
+			}
+			else
+				;
 		}
 		else if(msgDataType == "SQLEXCEPTION")
 		{

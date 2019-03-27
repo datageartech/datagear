@@ -11,6 +11,7 @@ import org.cometd.server.AbstractService;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SQLExecutionStat;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
+import org.datagear.web.sqlpad.SqlpadExecutionService.SqlResultType;
 import org.datagear.web.util.SqlScriptParser.SqlStatement;
 
 /**
@@ -45,9 +46,28 @@ public class SqlpadCometdService extends AbstractService
 	 * @param sqlStatement
 	 * @param sqlStatementCount
 	 */
-	public void sendSuccessMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex)
+	public void sendExecuteSQLSuccessMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex)
 	{
-		channel.publish(getServerSession(), new SqlSuccessMessageData(sqlStatement, sqlStatementIndex));
+		channel.publish(getServerSession(),
+				new SqlSuccessMessageData(sqlStatement, sqlStatementIndex, SqlResultType.NONE));
+	}
+
+	/**
+	 * 发送SQL执行成功消息。
+	 * 
+	 * @param channel
+	 * @param sqlStatement
+	 * @param sqlStatementIndex
+	 * @param updateCount
+	 */
+	public void sendExecuteSQLSuccessMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex,
+			int updateCount)
+	{
+		SqlSuccessMessageData sqlSuccessMessageData = new SqlSuccessMessageData(sqlStatement, sqlStatementIndex,
+				SqlResultType.UPDATE_COUNT);
+		sqlSuccessMessageData.setUpdateCount(updateCount);
+
+		channel.publish(getServerSession(), sqlSuccessMessageData);
 	}
 
 	/**
@@ -277,16 +297,23 @@ public class SqlpadCometdService extends AbstractService
 		/** SQL语句索引 */
 		private int sqlStatementIndex;
 
+		/** SQL结果类型 */
+		private SqlResultType sqlResultType = SqlResultType.NONE;
+
+		/** 更新数目 */
+		private int updateCount = -1;
+
 		public SqlSuccessMessageData()
 		{
 			super(TYPE);
 		}
 
-		public SqlSuccessMessageData(SqlStatement sqlStatement, int sqlStatementIndex)
+		public SqlSuccessMessageData(SqlStatement sqlStatement, int sqlStatementIndex, SqlResultType sqlResultType)
 		{
 			super(TYPE);
 			this.sqlStatement = sqlStatement;
 			this.sqlStatementIndex = sqlStatementIndex;
+			this.sqlResultType = sqlResultType;
 		}
 
 		public SqlStatement getSqlStatement()
@@ -307,6 +334,26 @@ public class SqlpadCometdService extends AbstractService
 		public void setSqlStatementIndex(int sqlStatementIndex)
 		{
 			this.sqlStatementIndex = sqlStatementIndex;
+		}
+
+		public SqlResultType getSqlResultType()
+		{
+			return sqlResultType;
+		}
+
+		public void setSqlResultType(SqlResultType sqlResultType)
+		{
+			this.sqlResultType = sqlResultType;
+		}
+
+		public int getUpdateCount()
+		{
+			return updateCount;
+		}
+
+		public void setUpdateCount(int updateCount)
+		{
+			this.updateCount = updateCount;
 		}
 	}
 
