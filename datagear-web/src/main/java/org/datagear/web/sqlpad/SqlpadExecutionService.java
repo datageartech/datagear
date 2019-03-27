@@ -421,8 +421,8 @@ public class SqlpadExecutionService
 					{
 						sqlExecutionStat.increaseExceptionCount();
 
-						this.sqlpadCometdService.sendExecuteSQLExceptionMessage(_sqlpadServerChannel, sqlStatement, i,
-								e, getMessage(this.locale, "sqlpad.executionSQLException"));
+						this.sqlpadCometdService.sendSqlExceptionMessage(_sqlpadServerChannel, sqlStatement, i, e,
+								getMessage(this.locale, "sqlpad.executionSQLException", e.getMessage()));
 
 						if (ExceptionHandleMode.IGNORE.equals(this.exceptionHandleMode))
 							;
@@ -626,7 +626,7 @@ public class SqlpadExecutionService
 			if (isResultSet)
 			{
 				// TODO 处理查询操作
-				this.sqlpadCometdService.sendExecuteSQLSuccessMessage(this._sqlpadServerChannel, sqlStatement,
+				this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
 						sqlStatementIndex);
 			}
 			else
@@ -636,13 +636,13 @@ public class SqlpadExecutionService
 				// 更新操作
 				if (updateCount > -1)
 				{
-					this.sqlpadCometdService.sendExecuteSQLSuccessMessage(this._sqlpadServerChannel, sqlStatement,
+					this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
 							sqlStatementIndex, updateCount);
 				}
 				// 其他操作
 				else
 				{
-					this.sqlpadCometdService.sendExecuteSQLSuccessMessage(this._sqlpadServerChannel, sqlStatement,
+					this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
 							sqlStatementIndex);
 				}
 			}

@@ -94,6 +94,11 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	</div>
 	<div class="foot">
 	</div>
+	<div id="sqlExceptionDetailPanel" class="sql-exception-detail-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
+		<div class="sql-exception-detail-content-wrapper">
+			<div class="sql-exception-detail-content"></div>		
+		</div>
+	</div>
 </div>
 <#if !isAjaxRequest>
 </div>
@@ -113,12 +118,6 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.element("#sqlCommitModeSet").buttonset();
 	po.element("#sqlExceptionHandleModeSet").buttonset();
 	po.element(".more-operation-panel").hide();
-	
-	$(document.body).bind("click", function(event)
-	{
-		if($(event.target).closest(po.element(".more-operation-wrapper")).length == 0)
-			po.element(".more-operation-panel").hide();
-	});
 	
 	po.sqlEditor = ace.edit("${pageId}-sql-editor");
 	var SqlMode = ace.require("ace/mode/sql").Mode;
@@ -214,8 +213,8 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		if(sqlStatement == null)
 			return;
 		
-		$("<span class='sql-index'>["+(sqlStatementIndex + 1)+"]</span>").appendTo($msgContent);
-		var $sqlValue = $("<span class='sql-value' />").text($.truncateIf(sqlStatement.sql, "...", 100)).appendTo($msgContent);
+		$("<div class='sql-index'>["+(sqlStatementIndex + 1)+"]</div>").appendTo($msgContent);
+		var $sqlValue = $("<div class='sql-value' />").text($.truncateIf(sqlStatement.sql, "...", 100)).appendTo($msgContent);
 		
 		<#assign messageArgs=['"+(sqlStatement.startRow+1)+"', '"+sqlStatement.startColumn+"', '"+(sqlStatement.endRow+1)+"', '"+sqlStatement.endColumn+"'] />
 		$sqlValue.attr("title", "<@spring.messageArgs code='sqlpad.executionSqlselectionRange' args=messageArgs />");
@@ -275,7 +274,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		
 		text += "<@spring.message code='sqlpad.sqlExecutionStat.quoteRight' />";
 		
-		$("<span class='sql-stat' />").text(text).appendTo($msgContent);
+		$("<div class='sql-stat' />").text(text).appendTo($msgContent);
 	};
 	
 	po.handleMessage = function(message)
@@ -285,29 +284,29 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		var $msgDiv = $("<div class='execution-message' />");
 		
 		if(msgData.timeText)
-			$("<span class='message-time' />").html("["+msgData.timeText+"] ").appendTo($msgDiv);
+			$("<div class='message-time' />").html("["+msgData.timeText+"] ").appendTo($msgDiv);
 		
-		var $msgContent = $("<span class='message-content' />").appendTo($msgDiv);
+		var $msgContent = $("<div class='message-content' />").appendTo($msgDiv);
 		
 		if(msgDataType == "START")
 		{
 			$msgDiv.addClass("execution-start");
 			
-			$("<span />").html("<@spring.message code='sqlpad.executionStart' />").appendTo($msgContent);
+			$("<div />").html("<@spring.message code='sqlpad.executionStart' />").appendTo($msgContent);
 		}
-		else if(msgDataType == "SUCCESS")
+		else if(msgDataType == "SQLSUCCESS")
 		{
 			$msgDiv.addClass("execution-success");
 			
 			po.appendSqlStatementMessage($msgContent, msgData.sqlStatement, msgData.sqlStatementIndex);
 			
-			if(msgData.sqlResultType = "UPDATE_COUNT")
+			if(msgData.sqlResultType == "UPDATE_COUNT")
 			{
 				<#assign messageArgs=['"+msgData.updateCount+"'] />
-				$("<span class='sql-update-count' />").text("<@spring.messageArgs code='sqlpad.affectDataRowCount' args=messageArgs />")
+				$("<div class='sql-update-count' />").text("<@spring.messageArgs code='sqlpad.affectDataRowCount' args=messageArgs />")
 						.appendTo($msgContent);
 			}
-			else if(msgData.sqlResultType = "RESULT_SET")
+			else if(msgData.sqlResultType == "RESULT_SET")
 			{
 				
 			}
@@ -319,7 +318,40 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			$msgDiv.addClass("execution-exception");
 			
 			po.appendSqlStatementMessage($msgContent, msgData.sqlStatement, msgData.sqlStatementIndex);
-			$("<span class='sql-tip' />").html(msgData.content).appendTo($msgContent);
+			
+			var $seInfoSummary = $("<div class='sql-exception-summary' />").html(msgData.content).appendTo($msgContent);
+			if(msgData.detailTrace)
+			{
+				$("<div class='sql-exception-detail' />").text(msgData.detailTrace).appendTo($msgContent);
+				
+				$seInfoSummary.click(function(event)
+				{
+					var $this = $(this);
+					
+					var uid = $this.attr("uid");
+					if(!uid)
+					{
+						uid = $.uid();
+						$this.attr("uid", uid);
+					}
+					
+					var $seDetailPanel = po.element("#sqlExceptionDetailPanel");
+					var $seDetailContent = $(".sql-exception-detail-content", $seDetailPanel);
+					
+					if(!$seDetailPanel.is(":hidden") && uid == $seDetailPanel.attr("uid"))
+						$seDetailPanel.hide();
+					else
+					{
+						$seDetailPanel.attr("uid", uid);
+						
+						$seDetailContent.empty();
+						$("<pre />").text($this.next(".sql-exception-detail").text()).appendTo($seDetailContent);
+						
+						//XXX "of: $this"如果$this很长的话，$seDetailPanel定位不对
+						$seDetailPanel.show().position({ my : "center bottom", at : "center top", of : po.sqlResultContentElement});
+					}
+				});
+			}
 		}
 		else if(msgDataType == "SQLCOMMAND")
 		{
@@ -338,7 +370,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			
 			if(appendContent)
 			{
-				$("<span />").html(msgData.content).appendTo($msgContent);
+				$("<div />").html(msgData.content).appendTo($msgContent);
 				po.appendSQLExecutionStatMessage($msgContent, msgData.sqlExecutionStat);
 			}
 		}
@@ -346,7 +378,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		{
 			$msgDiv.addClass("execution-exception");
 			
-			$("<span />").html(msgData.content).appendTo($msgContent);
+			$("<div />").html(msgData.content).appendTo($msgContent);
 		}
 		else if(msgDataType == "TEXT")
 		{
@@ -355,14 +387,14 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			if(msgData.cssClass)
 				$msgContent.addClass(msgData.cssClass);
 			
-			$("<span />").html(msgData.text).appendTo($msgContent);
+			$("<div />").html(msgData.text).appendTo($msgContent);
 			po.appendSQLExecutionStatMessage($msgContent, msgData.sqlExecutionStat);
 		}
 		else if(msgDataType == "FINISH")
 		{
 			$msgDiv.addClass("execution-finish");
 			
-			$("<span />").html("<@spring.message code='sqlpad.executeionFinish' />").appendTo($msgContent);
+			$("<div />").html("<@spring.message code='sqlpad.executeionFinish' />").appendTo($msgContent);
 			po.appendSQLExecutionStatMessage($msgContent, msgData.sqlExecutionStat);
 			
 			po.updateExecuteSqlButtonState(po.element("#executeSqlButton"), "init");
@@ -579,6 +611,21 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		{
 			error.appendTo(element.closest(".form-item-value"));
 		}
+	});
+	
+	$(document.body).bind("click", function(event)
+	{
+		var $mop = po.element(".more-operation-panel");
+		if(!$mop.is(":hidden"))
+		{
+			if($(event.target).closest(po.element(".more-operation-wrapper")).length == 0)
+				$mop.hide();
+		}
+	});
+	
+	po.element("#sqlExceptionDetailPanel").mouseleave(function()
+	{
+		$(this).hide();
 	});
 	
 	po.element("input[name='sqlCommitMode'][value='AUTO']").click();

@@ -46,7 +46,7 @@ public class SqlpadCometdService extends AbstractService
 	 * @param sqlStatement
 	 * @param sqlStatementCount
 	 */
-	public void sendExecuteSQLSuccessMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex)
+	public void sendSqlSuccessMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex)
 	{
 		channel.publish(getServerSession(),
 				new SqlSuccessMessageData(sqlStatement, sqlStatementIndex, SqlResultType.NONE));
@@ -60,7 +60,7 @@ public class SqlpadCometdService extends AbstractService
 	 * @param sqlStatementIndex
 	 * @param updateCount
 	 */
-	public void sendExecuteSQLSuccessMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex,
+	public void sendSqlSuccessMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex,
 			int updateCount)
 	{
 		SqlSuccessMessageData sqlSuccessMessageData = new SqlSuccessMessageData(sqlStatement, sqlStatementIndex,
@@ -79,7 +79,7 @@ public class SqlpadCometdService extends AbstractService
 	 * @param e
 	 * @param content
 	 */
-	public void sendExecuteSQLExceptionMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex,
+	public void sendSqlExceptionMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex,
 			SQLException e, String content)
 	{
 		SQLExceptionMessageData messageData = new SQLExceptionMessageData(sqlStatement, sqlStatementIndex, content);
@@ -290,7 +290,7 @@ public class SqlpadCometdService extends AbstractService
 
 	protected static class SqlSuccessMessageData extends MessageData
 	{
-		public static final String TYPE = "SUCCESS";
+		public static final String TYPE = "SQLSUCCESS";
 
 		private SqlStatement sqlStatement;
 
