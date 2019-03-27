@@ -386,6 +386,8 @@ public class SqlpadExecutionService
 
 				this.sqlpadCometdService.sendFinishMessage(this._sqlpadServerChannel);
 
+				_sqlpadExecutionRunnableMap.remove(this.sqlpadId);
+
 				return;
 			}
 

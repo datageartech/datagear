@@ -508,8 +508,6 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	{
 		var value = $(this).val();
 		
-		console.log(value);
-		
 		if(value == "MANUAL")
 		{
 			//po.element("#commitSqlButton").button("enable");
