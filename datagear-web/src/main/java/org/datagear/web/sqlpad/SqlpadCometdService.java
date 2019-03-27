@@ -83,7 +83,6 @@ public class SqlpadCometdService extends AbstractService
 			SQLException e, String content)
 	{
 		SQLExceptionMessageData messageData = new SQLExceptionMessageData(sqlStatement, sqlStatementIndex, content);
-		messageData.setDetailTrace(e);
 
 		channel.publish(getServerSession(), messageData);
 	}

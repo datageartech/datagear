@@ -1374,7 +1374,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
     white-space: nowrap;
     vertical-align: bottom;
 }
-.page-sqlpad .content .content-result .execution-message .message-content .sql-exception-summary{
+.page-sqlpad .content .content-result .execution-message .message-content .sql-exception-summary.has-detail{
 	cursor: pointer;
 }
 .page-sqlpad .content .content-result .execution-message .message-content .sql-exception-detail{

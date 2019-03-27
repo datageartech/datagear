@@ -322,6 +322,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			var $seInfoSummary = $("<div class='sql-exception-summary' />").html(msgData.content).appendTo($msgContent);
 			if(msgData.detailTrace)
 			{
+				$seInfoSummary.addClass("has-detail");
 				$("<div class='sql-exception-detail' />").text(msgData.detailTrace).appendTo($msgContent);
 				
 				$seInfoSummary.click(function(event)
