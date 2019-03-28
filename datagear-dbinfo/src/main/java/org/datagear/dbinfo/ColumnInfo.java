@@ -33,7 +33,7 @@ public class ColumnInfo extends ResultSetSpecBean
 	/** 列大小，字符串长度或者数值总长度 */
 	private int size;
 
-	/** 小数部分的位数，如果不是小数，值为-1 */
+	/** 小数部分的位数，如果不是小数，值为0 */
 	private int decimalDigits;
 
 	/** 是否允许为null */

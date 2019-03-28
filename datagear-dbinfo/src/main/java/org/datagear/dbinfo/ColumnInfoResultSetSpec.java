@@ -40,7 +40,7 @@ public class ColumnInfoResultSetSpec extends ResultSetSpec<ColumnInfo>
 			new RsColumnSpec<Integer, Integer>("DATA_TYPE", Integer.class, true, false, "type"),
 			new RsColumnSpec<String, String>("TYPE_NAME", String.class, true, false, "typeName"),
 			new RsColumnSpec<Integer, Integer>("COLUMN_SIZE", Integer.class, false, true, 0, "size"),
-			new RsColumnSpec<Integer, Integer>("DECIMAL_DIGITS", Integer.class, false, true, 0, "decimalDigits"),
+			new RsColumnSpec<Integer, Integer>("DECIMAL_DIGITS", Integer.class, false, true, -1, "decimalDigits"),
 			new RsColumnSpec<Integer, Boolean>("NULLABLE", Integer.class, false, true, "nullable", NULLABLE_CONVERTER),
 			new RsColumnSpec<String, String>("REMARKS", String.class, false, true, "", "comment"),
 			new RsColumnSpec<String, String>("COLUMN_DEF", String.class, false, true, "defaultValue"),

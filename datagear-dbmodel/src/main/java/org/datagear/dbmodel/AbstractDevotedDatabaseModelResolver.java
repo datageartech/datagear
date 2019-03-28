@@ -5,6 +5,9 @@
 package org.datagear.dbmodel;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.datagear.dbinfo.ColumnInfo;
+import org.datagear.dbinfo.ColumnInfoResultSetSpec;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.DatabaseInfoResolverException;
 import org.datagear.dbinfo.EntireTableInfo;
@@ -23,6 +27,7 @@ import org.datagear.dbinfo.ExportedKeyInfo;
 import org.datagear.dbinfo.ImportedKeyInfo;
 import org.datagear.dbinfo.ImportedKeyRule;
 import org.datagear.dbinfo.TableInfo;
+import org.datagear.dbinfo.TableType;
 import org.datagear.model.Label;
 import org.datagear.model.MapFeature;
 import org.datagear.model.Model;
@@ -224,9 +229,6 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	{
 		String modelName = this.modelNameResolver.resolve(table);
 
-		if (localModelManager == null)
-			localModelManager = new DefaultModelManager();
-
 		Model model = doResolve(cn, globalModelManager, localModelManager, table, modelName);
 
 		Collection<Model> localModels = localModelManager.toCollection();
@@ -240,8 +242,87 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		return model;
 	}
 
+	@Override
+	public Model resolve(Connection cn, ResultSet resultSet, String modelName) throws DatabaseModelResolverException
+	{
+		EntireTableInfo entireTableInfo = buildMockEntireTableInfo(resultSet, modelName);
+
+		return doResolve(cn, new DefaultModelManager(), new DefaultModelManager(), entireTableInfo, modelName);
+	}
+
 	/**
-	 * 执行解析。
+	 * 构建{@linkplain ResultSet}的仿造{@linkplain EntireTableInfo}。
+	 * 
+	 * @param rs
+	 * @param asViewName
+	 * @return
+	 * @throws DatabaseModelResolverException
+	 */
+	protected EntireTableInfo buildMockEntireTableInfo(ResultSet rs, String asViewName)
+			throws DatabaseModelResolverException
+	{
+		EntireTableInfo entireTableInfo = new EntireTableInfo();
+
+		TableInfo tableInfo = new TableInfo();
+		tableInfo.setName(asViewName);
+		tableInfo.setType(TableType.VIEW);
+
+		entireTableInfo.setTableInfo(tableInfo);
+
+		try
+		{
+			ResultSetMetaData resultSetMetaData = rs.getMetaData();
+			int columnCount = resultSetMetaData.getColumnCount();
+			ColumnInfo[] columnInfos = new ColumnInfo[columnCount];
+
+			for (int i = 1; i <= columnCount; i++)
+			{
+				ColumnInfo columnInfo = new ColumnInfo();
+
+				String columnName = resultSetMetaData.getColumnLabel(i);
+				if (columnName == null || columnName.isEmpty())
+					columnName = resultSetMetaData.getColumnName(i);
+				columnInfo.setName(columnName);
+				columnInfo.setType(resultSetMetaData.getColumnType(i));
+				columnInfo.setTypeName(resultSetMetaData.getColumnTypeName(i));
+				columnInfo.setSize(resultSetMetaData.getPrecision(i));
+				columnInfo.setDecimalDigits(resultSetMetaData.getScale(i));
+				columnInfo.setNullable(
+						ColumnInfoResultSetSpec.NULLABLE_CONVERTER.convert(resultSetMetaData.isNullable(i)));
+				columnInfo.setAutoincrement(resultSetMetaData.isAutoIncrement(i));
+
+				columnInfos[i - 1] = columnInfo;
+			}
+
+			entireTableInfo.setColumnInfos(columnInfos);
+
+			return entireTableInfo;
+		}
+		catch (SQLException e)
+		{
+			throw new DatabaseModelResolverException(e);
+		}
+	}
+
+	/**
+	 * 根据列号查找列名称。
+	 * 
+	 * @param rsMeta
+	 * @param columnIndex
+	 * @return
+	 * @throws SQLException
+	 */
+	protected String lookupColumnName(ResultSetMetaData rsMeta, int columnIndex) throws SQLException
+	{
+		String name = rsMeta.getColumnLabel(columnIndex);
+		if (name == null || name.isEmpty())
+			name = rsMeta.getColumnName(columnIndex);
+
+		return name;
+	}
+
+	/**
+	 * 解析，如果已解析过，将直接返回它。
 	 * 
 	 * @param cn
 	 * @param globalModelManager
@@ -254,20 +335,38 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	protected Model doResolve(Connection cn, ModelManager globalModelManager, ModelManager localModelManager,
 			String table, String modelName) throws DatabaseModelResolverException
 	{
-		Model resolved = (globalModelManager == null ? null : globalModelManager.get(modelName));
-		if (resolved != null)
-			return resolved;
-		resolved = (localModelManager == null ? null : localModelManager.get(modelName));
+		Model resolved = globalModelManager.get(modelName);
 		if (resolved != null)
 			return resolved;
 
+		resolved = localModelManager.get(modelName);
+		if (resolved != null)
+			return resolved;
+
+		EntireTableInfo entireTableInfo = resolveEntireTableInfo(cn, table);
+
+		return doResolve(cn, globalModelManager, localModelManager, entireTableInfo, modelName);
+	}
+
+	/**
+	 * 解析，不管是否已解析过。
+	 * 
+	 * @param cn
+	 * @param globalModelManager
+	 * @param localModelManager
+	 * @param entireTableInfo
+	 * @param modelName
+	 * @return
+	 * @throws DatabaseModelResolverException
+	 */
+	protected Model doResolve(Connection cn, ModelManager globalModelManager, ModelManager localModelManager,
+			EntireTableInfo entireTableInfo, String modelName) throws DatabaseModelResolverException
+	{
 		ModelBuilder modelBuilder = createModelBuilder();
 		modelBuilder.init(modelName);
 
-		// 必须在解析之前加入，放至后续Property解析因循环引用而导致死循环
+		// 必须在解析之前加入，防止后续Property解析因循环引用而导致死循环
 		localModelManager.put(modelBuilder.getModel());
-
-		EntireTableInfo entireTableInfo = resolveEntireTableInfo(cn, table);
 
 		resolveModelType(cn, globalModelManager, localModelManager, modelBuilder, entireTableInfo);
 		resolveModelProperties(cn, globalModelManager, localModelManager, modelBuilder, entireTableInfo);

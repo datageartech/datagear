@@ -5,21 +5,19 @@
 package org.datagear.dbmodel;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.connection.ConnectionSensor;
+import org.datagear.connection.JdbcUtil;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.DevotedDatabaseInfoResolver;
 import org.datagear.dbinfo.GenericDatabaseInfoResolver;
 import org.datagear.dbinfo.WildcardDevotedDatabaseInfoResolver;
-import org.datagear.dbmodel.DatabasePrimitiveModelSource;
-import org.datagear.dbmodel.DevotedDatabaseModelResolver;
-import org.datagear.dbmodel.GenericDatabaseModelResolver;
-import org.datagear.dbmodel.PrimitiveModelResolver;
-import org.datagear.dbmodel.TypeMapPrimitiveModelResolver;
-import org.datagear.dbmodel.WildcardDevotedDatabaseModelResolver;
 import org.datagear.model.Model;
+import org.datagear.model.Property;
 import org.datagear.model.support.DefaultDynamicBean;
 import org.datagear.model.support.DefaultModelManager;
 import org.datagear.persistence.DialectBuilder;
@@ -107,6 +105,34 @@ public class GenericDatabaseModelResolverTest extends TestSupport
 		{
 			int deleteCount = persistenceManager.delete(cn, model, defaultDynamicBean);
 			Assert.assertTrue(deleteCount == 1);
+
+			JdbcUtil.closeConnection(cn);
+		}
+	}
+
+	@Test
+	public void resolveResultset() throws Exception
+	{
+		Connection cn = getMysqlConnection();
+
+		try
+		{
+			Statement st = cn.createStatement();
+			ResultSet rs = st.executeQuery("select 'sdf' as name, count(*) as count_ from T_ORDER");
+
+			Model model = this.genericDatabaseModelResolver.resolve(cn, rs, "test");
+			Property[] properties = model.getProperties();
+
+			Assert.assertEquals("test", model.getName());
+			Assert.assertEquals(2, properties.length);
+			Assert.assertEquals("name", properties[0].getName());
+			Assert.assertEquals(String.class, properties[0].getModel().getType());
+			Assert.assertEquals("count_", properties[1].getName());
+			Assert.assertEquals(Long.class, properties[1].getModel().getType());
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
 		}
 	}
 }

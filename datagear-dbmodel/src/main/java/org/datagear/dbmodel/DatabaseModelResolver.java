@@ -5,6 +5,7 @@
 package org.datagear.dbmodel;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 
 import org.datagear.model.Model;
 import org.datagear.model.ModelManager;
@@ -34,4 +35,15 @@ public interface DatabaseModelResolver
 	 */
 	Model resolve(Connection cn, ModelManager globalModelManager, ModelManager localModelManager, String table)
 			throws DatabaseModelResolverException;
+
+	/**
+	 * 解析指定结果集的{@linkplain Model}。
+	 * 
+	 * @param cn
+	 * @param resultSet
+	 * @param modelName
+	 * @return
+	 * @throws DatabaseModelResolverException
+	 */
+	Model resolve(Connection cn, ResultSet resultSet, String modelName) throws DatabaseModelResolverException;
 }

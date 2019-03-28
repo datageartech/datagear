@@ -5,6 +5,7 @@
 package org.datagear.dbmodel;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.List;
 
 import org.datagear.connection.ConnectionOption;
@@ -58,6 +59,14 @@ public class GenericDatabaseModelResolver implements DatabaseModelResolver
 		DatabaseModelResolver databaseModelResolver = doGetDevotedDatabaseModelResolverNotNull(cn);
 
 		return databaseModelResolver.resolve(cn, globalModelManager, localModelManager, table);
+	}
+
+	@Override
+	public Model resolve(Connection cn, ResultSet resultSet, String modelName) throws DatabaseModelResolverException
+	{
+		DatabaseModelResolver databaseModelResolver = doGetDevotedDatabaseModelResolverNotNull(cn);
+
+		return databaseModelResolver.resolve(cn, resultSet, modelName);
 	}
 
 	/**
