@@ -414,7 +414,7 @@ public class SqlpadExecutionService
 
 					try
 					{
-						execute(cn, st, sqlStatement, i);
+						execute(cn, st, sqlExecutionStat, sqlStatement, i);
 						sqlExecutionStat.increaseSuccessCount();
 					}
 					catch (SQLException e)
@@ -446,8 +446,6 @@ public class SqlpadExecutionService
 							this.sqlCommand = SqlCommand.COMMIT;
 					}
 
-					sqlExecutionStat.setDurationMs(System.currentTimeMillis() - startTime);
-
 					waitForCommitOrRollbackCommand(cn, sqlExecutionStat);
 				}
 			}
@@ -461,7 +459,7 @@ public class SqlpadExecutionService
 				JdbcUtil.closeStatement(st);
 				JdbcUtil.closeConnection(cn);
 
-				sqlExecutionStat.setDurationMs(System.currentTimeMillis() - startTime);
+				sqlExecutionStat.setTaskDuration(System.currentTimeMillis() - startTime);
 
 				this.sqlpadCometdService.sendFinishMessage(this._sqlpadServerChannel, sqlExecutionStat);
 
@@ -617,10 +615,14 @@ public class SqlpadExecutionService
 		 * @param sql
 		 * @throws SQLException
 		 */
-		protected void execute(Connection cn, Statement st, SqlStatement sqlStatement, int sqlStatementIndex)
-				throws SQLException
+		protected void execute(Connection cn, Statement st, SQLExecutionStat sqlExecutionStat,
+				SqlStatement sqlStatement, int sqlStatementIndex) throws SQLException
 		{
+			long startTime = System.currentTimeMillis();
+
 			boolean isResultSet = st.execute(sqlStatement.getSql());
+
+			sqlExecutionStat.increaseSqlDuration(System.currentTimeMillis() - startTime);
 
 			// 查询操作
 			if (isResultSet)
@@ -700,8 +702,11 @@ public class SqlpadExecutionService
 		/** 执行失败数 */
 		private int exceptionCount = 0;
 
-		/** 执行持续毫秒数 */
-		private long durationMs = -1;
+		/** SQL执行持续毫秒数，-1表示未记录 */
+		private long sqlDuration = -1;
+
+		/** 任务执行持续毫秒数，-1表示未记录 */
+		private long taskDuration = -1;
 
 		public SQLExecutionStat()
 		{
@@ -714,13 +719,13 @@ public class SqlpadExecutionService
 			this.totalCount = totalCount;
 		}
 
-		public SQLExecutionStat(int totalCount, int successCount, int exceptionCount, long durationMs)
+		public SQLExecutionStat(int totalCount, int successCount, int exceptionCount, long sqlDuration)
 		{
 			super();
 			this.totalCount = totalCount;
 			this.successCount = successCount;
 			this.exceptionCount = exceptionCount;
-			this.durationMs = durationMs;
+			this.sqlDuration = sqlDuration;
 		}
 
 		public int getTotalCount()
@@ -753,14 +758,24 @@ public class SqlpadExecutionService
 			this.exceptionCount = exceptionCount;
 		}
 
-		public long getDurationMs()
+		public long getSqlDuration()
 		{
-			return durationMs;
+			return sqlDuration;
 		}
 
-		public void setDurationMs(long durationMs)
+		public void setSqlDuration(long sqlDuration)
 		{
-			this.durationMs = durationMs;
+			this.sqlDuration = sqlDuration;
+		}
+
+		public long getTaskDuration()
+		{
+			return taskDuration;
+		}
+
+		public void setTaskDuration(long taskDuration)
+		{
+			this.taskDuration = taskDuration;
 		}
 
 		public int getAbortCount()
@@ -776,6 +791,22 @@ public class SqlpadExecutionService
 		public void increaseExceptionCount()
 		{
 			this.exceptionCount += 1;
+		}
+
+		public void increaseSqlDuration(long increment)
+		{
+			if (this.sqlDuration < 0)
+				this.sqlDuration = 0;
+
+			this.sqlDuration += increment;
+		}
+
+		public void increaseTaskDuration(long increment)
+		{
+			if (this.taskDuration < 0)
+				this.taskDuration = 0;
+
+			this.taskDuration += increment;
 		}
 	}
 

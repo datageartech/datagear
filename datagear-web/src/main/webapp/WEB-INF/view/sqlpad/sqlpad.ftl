@@ -208,6 +208,52 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		});
 	},
 	
+	po.formatDuration = function(duration)
+	{
+		var text = "";
+		
+		var hours = Math.floor(duration/1000/60/60);
+		
+		if(hours > 0)
+		{
+			var minutes = Math.round(duration/1000/60 - hours*60);
+			
+			<#assign messageArgs=['"+hours+"', '"+minutes+"'] />
+			text = "<@spring.messageArgs code='duration.H.M' args=messageArgs />";
+		}
+		else
+		{
+			var minutes = Math.floor(duration/1000/60);
+			
+			if(minutes > 0)
+			{
+				var seconds = Math.round(duration/1000 - minutes*60);
+				
+				<#assign messageArgs=['"+minutes+"', '"+seconds+"'] />
+				text = "<@spring.messageArgs code='duration.M.S' args=messageArgs />";
+			}
+			else
+			{
+				var seconds = Math.floor(duration/1000);
+				
+				if(seconds > 0)
+				{
+					var mseconds = Math.round(duration - seconds*1000);
+					
+					<#assign messageArgs=['"+seconds+"', '"+mseconds+"'] />
+					text = "<@spring.messageArgs code='duration.S.MS' args=messageArgs />";
+				}
+				else
+				{
+					<#assign messageArgs=['"+duration+"'] />
+					text = "<@spring.messageArgs code='duration.MS' args=messageArgs />";
+				}
+			}
+		}
+		
+		return text;
+	};
+	
 	po.appendSqlStatementMessage = function($msgContent, sqlStatement, sqlStatementIndex)
 	{
 		if(sqlStatement == null)
@@ -230,46 +276,16 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		<#assign messageArgs=['"+(sqlExecutionStat.totalCount)+"', '"+sqlExecutionStat.successCount+"', '"+(sqlExecutionStat.exceptionCount)+"', '"+(sqlExecutionStat.abortCount)+"'] />
 		text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoNoDuration' args=messageArgs />";
 		
-		if(sqlExecutionStat.durationMs > 0)
+		if(sqlExecutionStat.sqlDuration >= 0)
 		{
-			var hours = Math.floor(sqlExecutionStat.durationMs/1000/60/60);
-			
-			if(hours > 0)
-			{
-				var minutes = Math.round(sqlExecutionStat.durationMs/1000/60 - hours*60);
-				
-				<#assign messageArgs=['"+hours+"', '"+minutes+"'] />
-				text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoSuffixDuration.H.M' args=messageArgs />";
-			}
-			else
-			{
-				var minutes = Math.floor(sqlExecutionStat.durationMs/1000/60);
-				
-				if(minutes > 0)
-				{
-					var seconds = Math.round(sqlExecutionStat.durationMs/1000 - minutes*60);
-					
-					<#assign messageArgs=['"+minutes+"', '"+seconds+"'] />
-					text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoSuffixDuration.M.S' args=messageArgs />";
-				}
-				else
-				{
-					var seconds = Math.floor(sqlExecutionStat.durationMs/1000);
-					
-					if(seconds > 0)
-					{
-						var mseconds = Math.round(sqlExecutionStat.durationMs - seconds*1000);
-						
-						<#assign messageArgs=['"+seconds+"', '"+mseconds+"'] />
-						text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoSuffixDuration.S.MS' args=messageArgs />";
-					}
-					else
-					{
-						<#assign messageArgs=['"+sqlExecutionStat.durationMs+"'] />
-						text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoSuffixDuration.MS' args=messageArgs />";
-					}
-				}
-			}
+			<#assign messageArgs=['"+po.formatDuration(sqlExecutionStat.sqlDuration)+"'] />
+			text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoSqlDurationSuffix' args=messageArgs />";
+		}
+		
+		if(sqlExecutionStat.taskDuration >= 0)
+		{
+			<#assign messageArgs=['"+po.formatDuration(sqlExecutionStat.taskDuration)+"'] />
+			text += "<@spring.messageArgs code='sqlpad.sqlExecutionStat.infoTaskDurationSuffix' args=messageArgs />";
 		}
 		
 		text += "<@spring.message code='sqlpad.sqlExecutionStat.quoteRight' />";
