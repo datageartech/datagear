@@ -370,6 +370,7 @@
     	<property name="connectionSource" ref="connectionSource" />
     	<property name="messageSource" ref="messageSource" />
     	<property name="sqlpadCometdService" ref="sqlpadCometdService" />
+    	<property name="databaseModelResolver" ref="databaseModelResolver" />
     </bean>
 	
 	<!-- 定时任务开始 -->

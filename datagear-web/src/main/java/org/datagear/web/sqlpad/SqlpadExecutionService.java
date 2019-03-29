@@ -6,6 +6,7 @@ package org.datagear.web.sqlpad;
 
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -21,7 +22,12 @@ import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.JdbcUtil;
+import org.datagear.dbmodel.DatabaseModelResolver;
+import org.datagear.dbmodel.ModelSqlSelectService;
+import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
+import org.datagear.model.Model;
+import org.datagear.persistence.support.UUID;
 import org.datagear.web.util.SqlScriptParser.SqlStatement;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
@@ -40,6 +46,10 @@ public class SqlpadExecutionService
 
 	private SqlpadCometdService sqlpadCometdService;
 
+	private DatabaseModelResolver databaseModelResolver;
+
+	private ModelSqlSelectService modelSqlSelectService = new ModelSqlSelectService();
+
 	private ExecutorService _executorService = Executors.newCachedThreadPool();
 
 	private ConcurrentMap<String, SqlpadExecutionRunnable> _sqlpadExecutionRunnableMap = new ConcurrentHashMap<String, SqlpadExecutionRunnable>();
@@ -50,12 +60,13 @@ public class SqlpadExecutionService
 	}
 
 	public SqlpadExecutionService(ConnectionSource connectionSource, MessageSource messageSource,
-			SqlpadCometdService sqlpadCometdService)
+			SqlpadCometdService sqlpadCometdService, DatabaseModelResolver databaseModelResolver)
 	{
 		super();
 		this.connectionSource = connectionSource;
 		this.messageSource = messageSource;
 		this.sqlpadCometdService = sqlpadCometdService;
+		this.databaseModelResolver = databaseModelResolver;
 	}
 
 	public ConnectionSource getConnectionSource()
@@ -86,6 +97,26 @@ public class SqlpadExecutionService
 	public void setSqlpadCometdService(SqlpadCometdService sqlpadCometdService)
 	{
 		this.sqlpadCometdService = sqlpadCometdService;
+	}
+
+	public DatabaseModelResolver getDatabaseModelResolver()
+	{
+		return databaseModelResolver;
+	}
+
+	public void setDatabaseModelResolver(DatabaseModelResolver databaseModelResolver)
+	{
+		this.databaseModelResolver = databaseModelResolver;
+	}
+
+	public ModelSqlSelectService getModelSqlSelectService()
+	{
+		return modelSqlSelectService;
+	}
+
+	public void setModelSqlSelectService(ModelSqlSelectService modelSqlSelectService)
+	{
+		this.modelSqlSelectService = modelSqlSelectService;
 	}
 
 	/**
@@ -627,9 +658,16 @@ public class SqlpadExecutionService
 			// 查询操作
 			if (isResultSet)
 			{
-				// TODO 处理查询操作
+				ResultSet rs = st.getResultSet();
+
+				Model model = SqlpadExecutionService.this.databaseModelResolver.resolve(cn, rs, UUID.gen());
+
+				ModelSqlResult modelSqlResult = SqlpadExecutionService.this.modelSqlSelectService.select(cn,
+						sqlStatement.getSql(), rs, model, 1, 20);
+				modelSqlResult.setSql(null);
+
 				this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
-						sqlStatementIndex);
+						sqlStatementIndex, modelSqlResult);
 			}
 			else
 			{

@@ -8,6 +8,7 @@ import org.cometd.bayeux.MarkedReference;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.server.AbstractService;
+import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SQLExecutionStat;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
@@ -66,6 +67,24 @@ public class SqlpadCometdService extends AbstractService
 		SqlSuccessMessageData sqlSuccessMessageData = new SqlSuccessMessageData(sqlStatement, sqlStatementIndex,
 				SqlResultType.UPDATE_COUNT);
 		sqlSuccessMessageData.setUpdateCount(updateCount);
+
+		channel.publish(getServerSession(), sqlSuccessMessageData);
+	}
+
+	/**
+	 * 发送SQL执行成功消息。
+	 * 
+	 * @param channel
+	 * @param sqlStatement
+	 * @param sqlStatementIndex
+	 * @param modelSqlResult
+	 */
+	public void sendSqlSuccessMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex,
+			ModelSqlResult modelSqlResult)
+	{
+		SqlSuccessMessageData sqlSuccessMessageData = new SqlSuccessMessageData(sqlStatement, sqlStatementIndex,
+				SqlResultType.RESULT_SET);
+		sqlSuccessMessageData.setModelSqlResult(modelSqlResult);
 
 		channel.publish(getServerSession(), sqlSuccessMessageData);
 	}
@@ -302,6 +321,8 @@ public class SqlpadCometdService extends AbstractService
 		/** 更新数目 */
 		private int updateCount = -1;
 
+		private ModelSqlResult modelSqlResult;
+
 		public SqlSuccessMessageData()
 		{
 			super(TYPE);
@@ -353,6 +374,16 @@ public class SqlpadCometdService extends AbstractService
 		public void setUpdateCount(int updateCount)
 		{
 			this.updateCount = updateCount;
+		}
+
+		public ModelSqlResult getModelSqlResult()
+		{
+			return modelSqlResult;
+		}
+
+		public void setModelSqlResult(ModelSqlResult modelSqlResult)
+		{
+			this.modelSqlResult = modelSqlResult;
 		}
 	}
 
