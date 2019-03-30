@@ -1317,76 +1317,98 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-sqlpad .content .content-result .result-head{
-	width: 100%;
-	height: 1.1em;
-	text-align: right;
-}
-.page-sqlpad .content .content-result .result-head.button-operation button.ui-button-icon-only{
-	height: 1em;
-}
-.page-sqlpad .content .content-result .result-head.button-operation{
-	opacity: 0.7;
-	filter: Alpha(Opacity=70);
-}
-.page-sqlpad .content .content-result .result-content{
+.page-sqlpad .content .content-result .result-tabs{
 	position: absolute;
-	top: 1.1em;
-	bottom: 0px;
-	left:0px;
-	right: 0px;
-	overflow: auto;
-	border-width: 0px;
-	border-top-width: 1px;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-sqlpad .content .content-result .execution-message{
+.page-sqlpad .content .content-result .result-tabs.ui-tabs{
+	margin: 0 0;
+	padding: 0 0;
+	border-width: 0;
+}
+.page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav{
+	margin: 0 0;
+	padding: 0 0;
+	height: 1.4em;
+	background: none;
+	border-width: 0;
+	border-bottom-width: 1px;
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
+}
+.page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav li{
+	margin: 0 0.1em;
+	padding: 0 0;
+}
+.page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
+	padding: 1px 0.8em;
+}
+.page-sqlpad .content .content-result .result-operations{
+	float: right;
+	text-align: right;
+}
+.page-sqlpad .content .content-result .button-operation{
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
+}
+.page-sqlpad .content .content-result .ui-tabs-panel{
+	position: absolute;
+	top: 1.6em;
+	bottom: 0px;
+	left:0px;
+	right: 0px;
+	border-width: 0px;
+	padding: 0 0;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.page-sqlpad .content .content-result .result-message{
+	overflow: auto;
+}
+.page-sqlpad .content .content-result .result-message .execution-message{
 	padding-left: 0.41em;
 	margin-top: 0.2em;
 	margin-bottom: 0.1em;
 	white-space: nowrap;
 }
-.page-sqlpad .content .content-result .execution-message .message-time,
-.page-sqlpad .content .content-result .execution-message .message-content{
+.page-sqlpad .content .content-result .result-message .execution-message .message-time,
+.page-sqlpad .content .content-result .result-message .execution-message .message-content{
 	display: inline-block;
 	opacity: 0.7;
 	filter: Alpha(Opacity=70);
 	white-space: nowrap;
 }
-.page-sqlpad .content .content-result .execution-message .message-time{
+.page-sqlpad .content .content-result .result-message .execution-message .message-time{
 	margin-right: 0.5em;
 }
-.page-sqlpad .content .content-result .execution-message.execution-exception .message-content,
-.page-sqlpad .content .content-result .execution-message .message-content.message-content-highlight{
+.page-sqlpad .content .content-result .result-message .execution-message.execution-exception .message-content,
+.page-sqlpad .content .content-result .result-message .execution-message .message-content.message-content-highlight{
 	opacity: 0.9;
 	filter: Alpha(Opacity=90);
 }
-.page-sqlpad .content .content-result .execution-message .message-content div{
+.page-sqlpad .content .content-result .result-message .execution-message .message-content div{
 	display: inline-block;
 	margin-right: 0.41em;
 }
-.page-sqlpad .content .content-result .execution-message .message-content .sql-value{
+.page-sqlpad .content .content-result .result-message .execution-message .message-content .sql-value{
 	display: inline-block;
-    width: 30em;
+    width: 25em;
     overflow: hidden;
     white-space: nowrap;
     vertical-align: bottom;
 }
-.page-sqlpad .content .content-result .execution-message .message-content .sql-exception-summary.has-detail{
+.page-sqlpad .content .content-result .result-message .execution-message .message-content .sql-exception-summary.has-detail{
 	cursor: pointer;
 }
-.page-sqlpad .content .content-result .execution-message .message-content .sql-exception-detail{
+.page-sqlpad .content .content-result .result-message .execution-message .message-content .sql-exception-detail{
 	display: none;
-}
-.page-sqlpad .foot{
-	position: absolute;
-	width: 100%;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	height: 0;
 }
 .page-sqlpad .sql-exception-detail-panel{
 	position: absolute;
@@ -1410,4 +1432,12 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	left: 1em;
 	right: 1em;
 	overflow: auto;
+}
+.page-sqlpad .foot{
+	position: absolute;
+	width: 100%;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 0;
 }

@@ -84,12 +84,22 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				</div>
 			</div>
 		</div>
-		<div id="${pageId}-sql-result" class="content-result">
-			<div class="result-head button-operation">
+		<div class="content-result">
+			<div id="sqlResultTabs" class="result-tabs">
+				<ul>
+					<li><a href="#${pageId}-resultMessage">消息</a></li>
+					<li><a href="#${pageId}-resultMessage">消息</a></li>
+					<li><a href="#${pageId}-resultMessage">消息</a></li>
+				</ul>
+				<div id="${pageId}-resultMessage" class="result-message">
+					
+				</div>
+			</div>
+			<div class="result-operations button-operation">
 				<button id="toggleAutoClearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.keepResult' />"><span class="ui-button-icon ui-icon ui-icon-pin-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.keepResult' /></button>
 				<button id="clearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearSqlResult' /></button>
 			</div>
-			<div class="result-content ui-widget ui-widget-content"></div>
+			
 		</div>
 	</div>
 	<div class="foot">
@@ -112,7 +122,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.sqlpadId = "${sqlpadId}";
 	po.sqlpadChannelId = "${sqlpadChannelId}";
 	
-	po.sqlResultContentElement = po.element("#${pageId}-sql-result > .result-content");
+	po.resultMessageElement = po.element("#${pageId}-resultMessage");
 	
 	$.initButtons(po.element(".head"));
 	po.element("#sqlCommitModeSet").buttonset();
@@ -185,7 +195,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold)
 	{
 		if(!po.element("#toggleAutoClearResultButton").hasClass("ui-state-active"))
-			po.sqlResultContentElement.empty();
+			po.resultMessageElement.empty();
 		
 		$.ajax(
 		{
@@ -365,7 +375,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 						$("<pre />").text($this.next(".sql-exception-detail").text()).appendTo($seDetailContent);
 						
 						//XXX "of: $this"如果$this很长的话，$seDetailPanel定位不对
-						$seDetailPanel.show().position({ my : "center bottom", at : "center top", of : po.sqlResultContentElement});
+						$seDetailPanel.show().position({ my : "center bottom", at : "center top", of : po.resultMessageElement});
 					}
 				});
 			}
@@ -421,8 +431,8 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		
 		if($msgDiv)
 		{
-			$msgDiv.appendTo(po.sqlResultContentElement);
-			po.sqlResultContentElement.scrollTop(po.sqlResultContentElement.prop("scrollHeight"));
+			$msgDiv.appendTo(po.resultMessageElement);
+			po.resultMessageElement.scrollTop(po.resultMessageElement.prop("scrollHeight"));
 		}
 	},
 	
@@ -607,7 +617,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	
 	po.element("#clearResultButton").click(function()
 	{
-		po.sqlResultContentElement.empty();
+		po.resultMessageElement.empty();
 	});
 	
 	po.element("#moreOperationForm").validate(
@@ -643,6 +653,11 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.element("#sqlExceptionDetailPanel").mouseleave(function()
 	{
 		$(this).hide();
+	});
+	
+	po.element("#sqlResultTabs").tabs(
+	{
+		event: "click",
 	});
 	
 	po.element("input[name='sqlCommitMode'][value='AUTO']").click();

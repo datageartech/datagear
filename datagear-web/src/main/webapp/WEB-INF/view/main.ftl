@@ -27,7 +27,7 @@
 		var schemaId = schema.id;
 		
 		var mainTabs = po.element("#mainTabs");
-		var uiTabsNav = mainTabs.find(".ui-tabs-nav");
+		var uiTabsNav = mainTabs.find("> .ui-tabs-nav");
 		
 	    var prelia = $("> li > a[href='#"+tabId+"']", uiTabsNav);
 	    if(prelia.length > 0)
