@@ -5,6 +5,7 @@
 <#include "include/html_head.ftl">
 <title><@spring.message code='app.name' /></title>
 <#include "include/page_js_obj.ftl" >
+<#include "include/page_obj_tabs.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -12,10 +13,13 @@
 	po.isAnonymous = ${currentUser.anonymous?c};
 	po.isAdmin = ${currentUser.admin?c};
 	
+	//将在document.ready中初始化
+	po.mainTabs = null;
+	
 	po.workTabTemplate = "<li style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
 			+"<div class='tab-operation'>"			
 			+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
-			+"<div class='tab-operation-more' title='<@spring.message code='moreOperation' />'></div>"
+			+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'></div>"
 			+"</div>"
 			+"<div class='category-bar category-bar-"+'#'+"{schemaId}'></div>"
 			+"</li>";
@@ -24,96 +28,63 @@
 	{
 		tabLabel = $.truncateIf(tabLabel, "..", 20);
 		
-		var schemaId = schema.id;
+		var mainTabsNav = po.getTabsNav(po.mainTabs);
+		var tab = po.getTabsTabByTabId(po.mainTabs, mainTabsNav, tabId);
 		
-		var mainTabs = po.element("#mainTabs");
-		var uiTabsNav = mainTabs.find("> .ui-tabs-nav");
-		
-	    var prelia = $("> li > a[href='#"+tabId+"']", uiTabsNav);
-	    if(prelia.length > 0)
+	    if(tab.length > 0)
 	    {
-	    	var myidx = prelia.parent().index();
-	    	mainTabs.tabs("option", "active",  myidx);
+	    	po.mainTabs.tabs("option", "active",  tab.index());
 	    }
 	    else
 	    {
 	    	var tooltipId = $.tipInfo("<@spring.message code='loading' />", -1);
+	    	
 	    	$.ajax(
 			{
 				url : url, 
 	    		success:function(data)
 		    	{
-		    		uiTabsNav.show();
+	    			mainTabsNav.show();
 		    		
-		    		var li = $("> li > a[href='#"+tabId+"']", uiTabsNav);
-		    		var tabContentDiv = $("#"+tabId, mainTabs);
+	    			tab = po.getTabsTabByTabId(po.mainTabs, mainTabsNav, tabId);
+	    			
+		    		var tabPanel = po.getTabsTabPanelByTabId(po.mainTabs, tabId);
 		    		
 		    		//防止双击导致创建两次而引起界面错乱
-		    		if(li.length == 0)
+		    		if(tab.length == 0)
 		    		{
-		    			li = $(po.workTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, tabLabel).replace(/#\{schemaId\}/g, schemaId)).appendTo(uiTabsNav);
+		    			tab = $(po.workTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, tabLabel).replace(/#\{schemaId\}/g, schema.id)).appendTo(mainTabsNav);
 		    			
-		    			if(!li.attr("id"))
-		    				li.attr("id", $.uid("main-tab-"));
+		    			if(!tab.attr("id"))
+		    				tab.attr("id", $.uid("main-tab-"));
 		    			
-		    			li.attr("schema-id", schemaId);
-		    			li.attr("tab-url", url);
-		    			li.attr("title", tabTitle);
-		    			li.attr("tab-type", tabType);
+		    			tab.attr("schema-id", schema.id);
+		    			tab.attr("tab-url", url);
+		    			tab.attr("title", tabTitle);
+		    			tab.attr("tab-type", tabType);
 		    		}
 		    		
-		    	    if(tabContentDiv.length == 0)
-		    	    	tabContentDiv = $("<div id='" + tabId + "'></div>").appendTo(mainTabs);
+		    	    if(tabPanel.length == 0)
+		    	    	tabPanel = $("<div id='" + tabId + "'></div>").appendTo(po.mainTabs);
 		    	    
-		    	    mainTabs.tabs("refresh").tabs( "option", "active",  $("> li", uiTabsNav).length - 1);
+		    	    po.mainTabs.tabs("refresh").tabs( "option", "active",  tab.index());
 		    	    
-		    	    tabContentDiv.css("top", po.evalTabPanelTop(mainTabs));
-		    	    tabContentDiv.html(data);
+		    	    tabPanel.css("top", po.evalTabPanelTop(po.mainTabs));
+		    	    tabPanel.html(data);
 		    	    
-		    	    $(".tab-operation .ui-icon-close", li).click(function()
+		    	    $(".tab-operation .ui-icon-close", tab).click(function()
 		    	    {
-		    	    	var li = $(this).parent().parent();
-		    	    	var tabId = $("a", li).attr("href");
-		    	    	
-		    	    	$(tabId, mainTabs).remove();
-		    	    	li.remove();
-		    	    	
-		    	    	mainTabs.tabs("refresh");
-		    	    	po.refreshTabsNav(mainTabs);
-		    	    	 
-		 				if($("li", uiTabsNav).length == 0)
-		 					uiTabsNav.hide();
+		    	    	po.closeTab(po.mainTabs, mainTabsNav, $(this).parent().parent());
 		    	    });
 		    	    
-		    	    $(".tab-operation .tab-operation-more", li).click(function()
+		    	    $(".tab-operation .tabs-more-operation-button", tab).click(function()
 		    	    {
-		    	    	var li = $(this).parent().parent();
-		    	    	var tabId = $("a", li).attr("href");
+		    	    	var tab = $(this).parent().parent();
+		    	    	var tabId = po.getTabsTabId(po.mainTabs, mainTabsNav, tab);
 		    	    	
-		    	    	po.element("#tabMoreOperationMenuParent").show().css("left", "0px").css("top", "0px")
-		    	    		.position({"my" : "left top+1", "at": "right bottom", "of" : $(this), "collision": "flip flip"});
-	
-		    	    	var menuItemDisabled = {};
+		    	    	var menu = po.showTabMoreOperationMenu(po.mainTabs, mainTabsNav, tab, $(this));
 		    	    	
-		    	    	var hasPrev = (li.prev().length > 0);
-		    	    	var hasNext = (li.next().length > 0);
-		    	    	
-		    	    	menuItemDisabled[".tab-operation-close-left"] = !hasPrev;
-		    	    	menuItemDisabled[".tab-operation-close-right"] = !hasNext;
-		    	    	menuItemDisabled[".tab-operation-close-other"] = !hasPrev && !hasNext;
-		    	    	
-		    	    	var menu = po.element("#tabMoreOperationMenu");
-		    	    	
-		    	    	for(var selector in menuItemDisabled)
-		    	    	{
-		    	    		if(menuItemDisabled[selector])
-		    	    			$(selector, menu).addClass("ui-state-disabled");
-		    	    		else
-		    	    			$(selector, menu).removeClass("ui-state-disabled");
-		    	    	}
-		    	    	
-		    	    	menu.attr("tab-id", tabId)
-		    	    		.attr("schema-id", li.attr("schema-id")).attr("tab-url", li.attr("tab-url"));
+		    	    	menu.attr("schema-id", tab.attr("schema-id")).attr("tab-url", tab.attr("tab-url"));
 		    	    });
     			},
 	        	complete : function()
@@ -894,20 +865,24 @@
 			}
 		});
 		
-		po.element("#mainTabs").tabs(
+		po.mainTabs = po.element("#mainTabs");
+		
+		po.mainTabs.tabs(
 		{
 			event: "click",
 			activate: function(event, ui)
 			{
+				var $this = $(this);
 				var newTab = $(ui.newTab);
 				var newPanel = $(ui.newPanel);
+				var tabsNav = po.getTabsNav($this);
 				
-				po.refreshTabsNav($(this), newTab);
+				po.refreshTabsNavForHidden($this, tabsNav, newTab);
 				
 				var newSchemaId = newTab.attr("schema-id");
 				
-				$(".ui-tabs-nav .category-bar", this).removeClass("ui-state-active");
-				$(".ui-tabs-nav .category-bar.category-bar-"+newSchemaId, this).addClass("ui-state-active");
+				$(".category-bar", tabsNav).removeClass("ui-state-active");
+				$(".category-bar.category-bar-"+newSchemaId, tabsNav).addClass("ui-state-active");
 				
 				var panelShowCallback = newPanel.data("showCallback");
 				if(panelShowCallback)
@@ -915,231 +890,37 @@
 			}
 		});
 		
-		po.element("#mainTabs .ui-tabs-nav").hide();
+		po.getTabsNav(po.mainTabs).hide();
 		
-		po.getTabsHiddens = function(tabsNav)
-		{
-			var tabsNavHeight = tabsNav.height();
-			
-			var hiddens = [];
-			
-			$("li.ui-tabs-tab", tabsNav).each(function()
-			{
-				var li = $(this);
-				
-				if(li.is(":hidden") || li.position().top >= tabsNavHeight)
-					hiddens.push(li);
-			});
-			
-			return hiddens;
-		};
-		
-		po.refreshTabsNav = function(tabs, activeTab)
-		{
-			var tabsNav = po.element("> .ui-tabs-nav", tabs);
-			
-			if(activeTab == undefined)
-				activeTab = $("li.ui-tabs-active", tabsNav);
-			
-			$("li.ui-tabs-tab", tabsNav).show();
-			
-			if(activeTab && activeTab.length > 0)
-			{
-				//如果卡片不可见，则向前隐藏卡片，直到此卡片可见
-				
-				var tabsNavHeight = tabsNav.height();
-				
-				var activeTabPosition;
-				var prevHidden = activeTab.prev();
-				while((activeTabPosition = activeTab.position()).top >= tabsNavHeight)
-				{
-					prevHidden.hide();
-					prevHidden = prevHidden.prev();
-				}
-			}
-			
-			var showHiddenButton = $("> .tab-show-hidden", tabs);
-			
-			if(po.getTabsHiddens(tabsNav).length > 0)
-			{
-				if(showHiddenButton.length == 0)
-				{
-					showHiddenButton = $("<button class='ui-button ui-corner-all ui-widget ui-button-icon-only tab-show-hidden'><span class='ui-icon ui-icon-triangle-1-s'></span></button>").appendTo(tabs);
-					showHiddenButton.click(function()
-					{
-						var tabs = po.element("#mainTabs");
-						var tabsNav = po.element("> .ui-tabs-nav", tabs);
-						
-						var hiddens = po.getTabsHiddens(tabsNav);
-						
-						var menu = po.element("#tabMoreTabMenu");
-						menu.empty();
-						
-						for(var i=0; i<hiddens.length; i++)
-						{
-							var tab = hiddens[i];
-							
-							var mi = $("<li />").appendTo(menu);
-							mi.attr("tab-id", tab.attr("id"));
-							$("<div />").html($(".ui-tabs-anchor", tab).text()).attr("title", tab.attr("title")).appendTo(mi);
-						}
-						
-		    	    	po.element("#tabMoreTabMenuParent").show().css("left", "0px").css("top", "0px")
-		    	    		.position({"my" : "left top+1", "at": "right bottom", "of" : $(this), "collision": "flip flip"});
-		    	    	
-						menu.menu("refresh");
-					});
-				}
-				
-				showHiddenButton.show();
-			}
-			else
-				showHiddenButton.hide();
-		};
-		
-		po.element("#tabMoreOperationMenu").menu(
+		po.getTabsTabMoreOperationMenu(mainTabs).menu(
 		{
 			select: function(event, ui)
 			{
+				var $this = $(this);
 				var item = ui.item;
-				var schemaId = $(this).attr("schema-id");
-				var tabUrl = $(this).attr("tab-url");
-				var tabId = $(this).attr("tab-id");
-				
-				var mainTabs = po.element("#mainTabs");
-				var uiTabsNav = mainTabs.find("> .ui-tabs-nav");
-				var tabLink = $("a[href='"+tabId+"']", uiTabsNav);
-				var tabLi = tabLink.parent();
 				
 				if(item.hasClass("tab-operation-newwin"))
 				{
+					var tabUrl = $this.attr("tab-url");
 					window.open(tabUrl);
 				}
-				else if(item.hasClass("tab-operation-close-left"))
-				{
-					var prev;
-					while((prev = tabLi.prev()).length > 0)
-					{
-						var preTabId = $("a", prev).attr("href");
-						
-						$(preTabId, mainTabs).remove();
-						prev.remove();
-					}
-					
-					mainTabs.tabs("refresh");
-					po.refreshTabsNav(mainTabs);
-				}
-				else if(item.hasClass("tab-operation-close-right"))
-				{
-					var next;
-					while((next = tabLi.next()).length > 0)
-					{
-						var nextTabId = $("a", next).attr("href");
-						
-						$(nextTabId, mainTabs).remove();
-						next.remove();
-					}
-					
-					mainTabs.tabs("refresh");
-					po.refreshTabsNav(mainTabs);
-				}
-				else if(item.hasClass("tab-operation-close-other"))
-				{
-					$("li", uiTabsNav).each(function()
-					{
-						if(tabLi[0] == this)
-							return;
-						
-						var li = $(this);
-						
-						var tabId = $("a", li).attr("href");
-
-						$(tabId, mainTabs).remove();
-						li.remove();
-					});
-					
-					mainTabs.tabs("refresh");
-					po.refreshTabsNav(mainTabs);
-				}
-				else if(item.hasClass("tab-operation-close-all"))
-				{
-					$("li", uiTabsNav).each(function()
-					{
-						var li = $(this);
-						
-						var tabId = $("a", li).attr("href");
-
-						$(tabId, mainTabs).remove();
-						li.remove();
-					});
-					
-					mainTabs.tabs("refresh");
-					po.refreshTabsNav(mainTabs);
-				}
+				else
+					po.handleTabMoreOperationMenuSelect($this, item, po.mainTabs);
 				
-				if($("li", uiTabsNav).length == 0)
-					uiTabsNav.hide();
-				
-				po.element("#tabMoreOperationMenuParent").hide();
+				po.getTabsTabMoreOperationMenuWrapper(po.mainTabs).hide();
 			}
 		});
 		
-		po.element("#tabMoreTabMenu").menu(
+		po.getTabsMoreTabMenu(mainTabs).menu(
 		{
 			select: function(event, ui)
 			{
-				var item = ui.item;
-				var tabId = item.attr("tab-id");
-				
-				var mainTabs = po.element("#mainTabs");
-				var myIndex = po.element("> .ui-tabs-nav li[id='"+tabId+"']", mainTabs).index();
-		    	mainTabs.tabs("option", "active",  myIndex);
-				
-				po.element("#tabMoreTabMenuParent").hide();
+				po.handleTabsMoreTabMenuSelect($(this), ui.item, po.mainTabs);
+		    	po.getTabsMoreTabMenuWrapper(po.mainTabs).hide();
 			}
 		});
 		
-		$(document.body).click(function(e)
-		{
-			var target = $(e.target);
-			
-			var hide = true;
-			
-			while(target && target.length != 0)
-			{
-				if(target.hasClass("tab-operation-more") || target.hasClass("tab-more-operation-menu-parent"))
-				{
-					hide = false;
-					break;
-				}
-				
-				target = target.parent();
-			};
-			
-			if(hide)
-				po.element("#tabMoreOperationMenuParent").hide();
-		});
-
-		$(document.body).click(function(e)
-		{
-			var target = $(e.target);
-			
-			var hide = true;
-			
-			while(target && target.length != 0)
-			{
-				if(target.hasClass("tab-show-hidden") || target.hasClass("tab-more-tab-menu-parent"))
-				{
-					hide = false;
-					break;
-				}
-				
-				target = target.parent();
-			};
-			
-			if(hide)
-				po.element("#tabMoreTabMenuParent").hide();
-		});
+		po.bindTabsMenuHiddenEvent(po.mainTabs);
 		
 		//系统通知
 		$.get("${contextPath}/notification/list", function(data)
@@ -1253,20 +1034,20 @@
 		<div id="mainTabs" class="main-tabs">
 			<ul>
 			</ul>
-		</div>
-		<div id="tabMoreOperationMenuParent" class="ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow tab-more-operation-menu-parent" style="position: absolute; left:0px; top:0px; display: none;">
-			<ul id="tabMoreOperationMenu" class="tab-more-operation-menu">
-				<li class="tab-operation-close-left"><div><@spring.message code='main.closeLeft' /></div></li>
-				<li class="tab-operation-close-right"><div><@spring.message code='main.closeRight' /></div></li>
-				<li class="tab-operation-close-other"><div><@spring.message code='main.closeOther' /></div></li>
-				<li class="tab-operation-close-all"><div><@spring.message code='main.closeAll' /></div></li>
-				<li class="ui-widget-header"></li>
-				<li class="tab-operation-newwin"><div><@spring.message code='main.openInNewWindow' /></div></li>
-			</ul>
-		</div>
-		<div id="tabMoreTabMenuParent" class="ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow tab-more-tab-menu-parent" style="position: absolute; left:0px; top:0px; display: none;">
-			<ul id="tabMoreTabMenu" class="tab-more-tab-menu">
-			</ul>
+			<div class="tabs-more-operation-menu-wrapper ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow" style="position: absolute; left:0px; top:0px; display: none;">
+				<ul class="tabs-more-operation-menu">
+					<li class="tab-operation-close-left"><div><@spring.message code='main.closeLeft' /></div></li>
+					<li class="tab-operation-close-right"><div><@spring.message code='main.closeRight' /></div></li>
+					<li class="tab-operation-close-other"><div><@spring.message code='main.closeOther' /></div></li>
+					<li class="tab-operation-close-all"><div><@spring.message code='main.closeAll' /></div></li>
+					<li class="ui-widget-header"></li>
+					<li class="tab-operation-newwin"><div><@spring.message code='main.openInNewWindow' /></div></li>
+				</ul>
+			</div>
+			<div class="tabs-more-tab-menu-wrapper ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow" style="position: absolute; left:0px; top:0px; display: none;">
+				<ul class="tabs-more-tab-menu">
+				</ul>
+			</div>
 		</div>
 	</div>
 </div>

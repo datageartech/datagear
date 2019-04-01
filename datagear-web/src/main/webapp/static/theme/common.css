@@ -795,7 +795,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	overflow: hidden;
 	padding-right: 25px;
 }
-.main-page-content .main-tabs .tab-show-hidden{
+.main-page-content .main-tabs .tabs-more-tab-button{
 	position: absolute;
 	top: 1em;
 	right: 6px;
@@ -809,7 +809,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	display: inline-block;
 	width: 16px;
 }
-.main-page-content .main-tabs .tab-operation .tab-operation-more{
+.main-page-content .main-tabs .tab-operation .tabs-more-operation-button{
 	float: left;
 	text-align: center;
 	cursor: pointer;
@@ -835,16 +835,16 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
     right: 5px;
     bottom: 5px;
 }
-.main-page-content .tab-more-operation-menu.ui-menu,
-.main-page-content .tab-more-tab-menu.ui-menu{
+.main-page-content .tabs-more-operation-menu.ui-menu,
+.main-page-content .tabs-more-tab-menu.ui-menu{
 	padding: 0.2em 0.2em;
 }
-.main-page-content .tab-more-tab-menu.ui-menu{
+.main-page-content .tabs-more-tab-menu.ui-menu{
 	max-height: 30em;
 	overflow: auto;
 }
-.main-page-content .tab-more-operation-menu.ui-menu .ui-menu-item,
-.main-page-content .tab-more-tab-menu.ui-menu .ui-menu-item{
+.main-page-content .tabs-more-operation-menu.ui-menu .ui-menu-item,
+.main-page-content .tabs-more-tab-menu.ui-menu .ui-menu-item{
 	font-size: small;
 }
 
@@ -1278,7 +1278,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .content .content-editor{
 	position: relative;
 	width: 100%;
-	height: 80%;
+	height: 70%;
 	min-height: 10%;
 	max-height: 95%;
 	box-sizing: border-box;
@@ -1311,7 +1311,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .content .content-result{
 	position: relative;
 	width: 100%;
-	height: 20%;
+	height: 30%;
 	border-top-width: 0px;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
