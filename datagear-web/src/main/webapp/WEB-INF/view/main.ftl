@@ -936,7 +936,7 @@
 		
 		po.refreshTabsNav = function(tabs, activeTab)
 		{
-			var tabsNav = po.element(".ui-tabs-nav", tabs);
+			var tabsNav = po.element("> .ui-tabs-nav", tabs);
 			
 			if(activeTab == undefined)
 				activeTab = $("li.ui-tabs-active", tabsNav);
@@ -958,7 +958,7 @@
 				}
 			}
 			
-			var showHiddenButton = $(".tab-show-hidden", tabs);
+			var showHiddenButton = $("> .tab-show-hidden", tabs);
 			
 			if(po.getTabsHiddens(tabsNav).length > 0)
 			{
@@ -968,7 +968,7 @@
 					showHiddenButton.click(function()
 					{
 						var tabs = po.element("#mainTabs");
-						var tabsNav = po.element(".ui-tabs-nav", tabs);
+						var tabsNav = po.element("> .ui-tabs-nav", tabs);
 						
 						var hiddens = po.getTabsHiddens(tabsNav);
 						
@@ -1007,7 +1007,7 @@
 				var tabId = $(this).attr("tab-id");
 				
 				var mainTabs = po.element("#mainTabs");
-				var uiTabsNav = mainTabs.find(".ui-tabs-nav");
+				var uiTabsNav = mainTabs.find("> .ui-tabs-nav");
 				var tabLink = $("a[href='"+tabId+"']", uiTabsNav);
 				var tabLi = tabLink.parent();
 				
@@ -1092,7 +1092,7 @@
 				var tabId = item.attr("tab-id");
 				
 				var mainTabs = po.element("#mainTabs");
-				var myIndex = po.element(".ui-tabs-nav li[id='"+tabId+"']", mainTabs).index();
+				var myIndex = po.element("> .ui-tabs-nav li[id='"+tabId+"']", mainTabs).index();
 		    	mainTabs.tabs("option", "active",  myIndex);
 				
 				po.element("#tabMoreTabMenuParent").hide();
