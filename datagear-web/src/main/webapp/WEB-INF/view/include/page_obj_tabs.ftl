@@ -200,7 +200,7 @@ page_js_obj.jsp
 		{
 			if(showHiddenButton.length == 0)
 			{
-				showHiddenButton = $("<button class='ui-button ui-corner-all ui-widget ui-button-icon-only tabs-more-tab-button'><span class='ui-icon ui-icon-triangle-1-s'></span></button>")
+				showHiddenButton = $("<button class='tabs-more-tab-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-triangle-1-s'></span></button>")
 					.appendTo($tabs);
 				
 				showHiddenButton.click(function()

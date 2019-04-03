@@ -28,14 +28,14 @@ Schema schema 数据库，不允许为null
 		<div class="button-divider ui-widget ui-widget-content"></div>
 		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearEditSql' /></button>		
 		<div class="more-operation-wrapper">
-			<button id="moreOperationButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.moreOperation' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.moreOperation' /></button>
+			<button id="moreOperationButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.moreOperation' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.moreOperation' /></button>
 			<div class="more-operation-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
 				<form id="moreOperationForm" method="POST" action="#">
 					<div class="form-content">
 						<div class="form-item">
 							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlCommitMode' /></label></div>
 							<div class="form-item-value">
-								<div id="sqlCommitModeSet">
+								<div id="sqlCommitModeSet" class="ui-corner-all">
 									<input type="radio" id="${pageId}-sqlcm-0" name="sqlCommitMode" value="AUTO"><label for="${pageId}-sqlcm-0"><@spring.message code='sqlpad.sqlCommitMode.auto' /></label>
 									<input type="radio" id="${pageId}-sqlcm-1" name="sqlCommitMode" value="MANUAL"><label for="${pageId}-sqlcm-1"><@spring.message code='sqlpad.sqlCommitMode.manual' /></label>
 								</div>
@@ -44,10 +44,10 @@ Schema schema 数据库，不允许为null
 						<div class="form-item">
 							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlExceptionHandleMode' /></label></div>
 							<div class="form-item-value">
-								<div id="sqlExceptionHandleModeSet">
+								<div id="sqlExceptionHandleModeSet" class="ui-corner-all">
 									<input type="radio" id="${pageId}-sqlehm-0" name="sqlExceptionHandleMode" value="ABORT" checked="checked"><label for="${pageId}-sqlehm-0"><@spring.message code='sqlpad.sqlExceptionHandleMode.abort' /></label>
-									<input type="radio" id="${pageId}-sqlehm-2" name="sqlExceptionHandleMode" value="IGNORE"><label for="${pageId}-sqlehm-2"><@spring.message code='sqlpad.sqlExceptionHandleMode.ignore' /></label>
-									<input type="radio" id="${pageId}-sqlehm-1" name="sqlExceptionHandleMode" value="ROLLBACK"><label for="${pageId}-sqlehm-1"><@spring.message code='sqlpad.sqlExceptionHandleMode.rollback' /></label>
+									<input type="radio" id="${pageId}-sqlehm-1" name="sqlExceptionHandleMode" value="IGNORE"><label for="${pageId}-sqlehm-1"><@spring.message code='sqlpad.sqlExceptionHandleMode.ignore' /></label>
+									<input type="radio" id="${pageId}-sqlehm-2" name="sqlExceptionHandleMode" value="ROLLBACK"><label for="${pageId}-sqlehm-2"><@spring.message code='sqlpad.sqlExceptionHandleMode.rollback' /></label>
 								</div>
 							</div>
 						</div>
@@ -85,21 +85,21 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			</div>
 		</div>
 		<div class="content-result">
-			<div id="sqlResultTabs" class="result-tabs">
+			<div id="${pageId}-sqlResultTabs" class="result-tabs">
 				<ul>
-					<li><a href="#${pageId}-resultMessage">消息</a></li>
-					<li><a href="#${pageId}-resultMessage">消息</a></li>
 					<li><a href="#${pageId}-resultMessage">消息</a></li>
 				</ul>
 				<div id="${pageId}-resultMessage" class="result-message">
-					
+				</div>
+				<div class="tabs-more-tab-menu-wrapper ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow" style="position: absolute; left:0px; top:0px; display: none;">
+					<ul class="tabs-more-tab-menu">
+					</ul>
 				</div>
 			</div>
 			<div class="result-operations button-operation">
 				<button id="toggleAutoClearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.keepResult' />"><span class="ui-button-icon ui-icon ui-icon-pin-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.keepResult' /></button>
 				<button id="clearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearSqlResult' /></button>
 			</div>
-			
 		</div>
 	</div>
 	<div class="foot">
@@ -115,6 +115,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 </#if>
 
 <#include "../include/page_js_obj.ftl">
+<#include "../include/page_obj_tabs.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -123,11 +124,11 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.sqlpadChannelId = "${sqlpadChannelId}";
 	
 	po.resultMessageElement = po.element("#${pageId}-resultMessage");
+	po.sqlResultTabs = po.element("#${pageId}-sqlResultTabs");
 	
 	$.initButtons(po.element(".head"));
 	po.element("#sqlCommitModeSet").buttonset();
 	po.element("#sqlExceptionHandleModeSet").buttonset();
-	po.element(".more-operation-panel").hide();
 	
 	po.sqlEditor = ace.edit("${pageId}-sql-editor");
 	var SqlMode = ace.require("ace/mode/sql").Mode;
@@ -334,7 +335,9 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			}
 			else if(msgData.sqlResultType == "RESULT_SET")
 			{
+				var tabId = po.genSqlResultTabId();
 				
+				po.renderSqlResultTab(tabId);
 			}
 			else
 				;
@@ -475,6 +478,73 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			$executeSqlButton.removeAttr("execution-state").attr("title", "<@spring.message code='sqlpad.executeWithShortcut' />");
 			$(".ui-button-icon", $executeSqlButton).removeClass("ui-icon-pause").addClass("ui-icon-play");
 		}
+	};
+	
+	po.sqlResultTabTemplate = "<li style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
+		+"<div class='tab-operation'>"			
+		+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
+		+"</div>"
+		+"</li>";
+		
+	po.renderSqlResultTab = function(tabId, sql, sqlResult)
+	{
+		var tabsNav = po.getTabsNav(po.sqlResultTabs);
+		var tab = po.getTabsTabByTabId(po.sqlResultTabs, tabsNav, tabId);
+		var tabPanel = null;
+		
+		if(tab.length > 0)
+	    {
+			tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
+			tabPanel.empty();
+	    }
+	    else
+	    {
+	    	<#assign messageArgs=['"+po.getCurrentSqlResultSeq()+"'] />
+	    	var tabLabel = "<@spring.messageArgs code='sqlpad.selectResultWithIndex' args=messageArgs />";
+	    	
+	    	tab = $(po.sqlResultTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, tabLabel)).attr("id", $.uid("sqlResult-tab-"))
+	    		.appendTo(tabsNav);
+	    	
+	    	tabPanel = $("<div id='"+tabId+"' />").html(po.getCurrentSqlResultSeq()).appendTo(po.sqlResultTabs);
+	    	
+    	    $(".tab-operation .ui-icon-close", tab).click(function()
+    	    {
+    	    	po.closeTab(po.sqlResultTabs, tabsNav, $(this).parent().parent());
+    	    });
+    	    
+    	    $(".tab-operation .tabs-more-operation-button", tab).click(function()
+    	    {
+    	    	var tab = $(this).parent().parent();
+    	    	var tabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, tab);
+    	    	
+    	    	var menu = po.showTabMoreOperationMenu(po.sqlResultTabs, tabsNav, tab, $(this));
+    	    });
+	    }
+		
+	    po.sqlResultTabs.tabs("refresh").tabs( "option", "active",  tab.index());
+	};
+	
+	po.getCurrentSqlResultSeq = function()
+	{
+		if(po.currentSqlResultSeq == null)
+			po.currentSqlResultSeq = 1;
+		
+		return po.currentSqlResultSeq;
+	};
+	
+	po.getNextSqlResultSeq = function()
+	{
+		if(po.currentSqlResultSeq == null)
+			po.currentSqlResultSeq = 0;
+		
+		po.currentSqlResultSeq += 1;
+		
+		return po.currentSqlResultSeq;
+	};
+	
+	po.genSqlResultTabId = function()
+	{
+		return "${pageId}-sqlResultTabs-tab-" + po.getNextSqlResultSeq();
 	};
 	
 	po.element("#executeSqlButton").click(function()
@@ -640,7 +710,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 	});
 	
-	$(document.body).bind("click", function(event)
+	$(document.body).on("click", function(event)
 	{
 		var $mop = po.element(".more-operation-panel");
 		if(!$mop.is(":hidden"))
@@ -655,12 +725,33 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		$(this).hide();
 	});
 	
-	po.element("#sqlResultTabs").tabs(
+	po.sqlResultTabs.tabs(
 	{
 		event: "click",
+		activate: function(event, ui)
+		{
+			var $this = $(this);
+			var newTab = $(ui.newTab);
+			var newPanel = $(ui.newPanel);
+			var tabsNav = po.getTabsNav($this);
+			
+			po.refreshTabsNavForHidden($this, tabsNav, newTab);
+		}
+	});
+	
+	po.getTabsMoreTabMenu(po.sqlResultTabs).menu(
+	{
+		select: function(event, ui)
+		{
+			po.handleTabsMoreTabMenuSelect($(this), ui.item, po.sqlResultTabs);
+	    	po.getTabsMoreTabMenuWrapper(po.sqlResultTabs).hide();
+		}
 	});
 	
 	po.element("input[name='sqlCommitMode'][value='AUTO']").click();
+	po.element(".more-operation-panel").hide();
+	
+	po.bindTabsMenuHiddenEvent(po.sqlResultTabs);
 })
 (${pageId});
 </script>

@@ -242,6 +242,44 @@ form .form-foot .ui-button{
 	padding: 0.5em 0.7em;
 }
 
+/*选项卡卡片更多操作面板、和更多卡片面板*/
+.ui-tabs .tabs-more-tab-button{
+	position: absolute;
+	top: 1em;
+	right: 6px;
+	cursor: pointer;
+	width: 16px;
+    height: 16px;
+    border: none;
+    padding: 0 0;
+}
+.ui-tabs .tab-operation{
+	display: inline-block;
+	width: 16px;
+}
+.ui-tabs .tab-operation .tabs-more-operation-button{
+	float: left;
+	text-align: center;
+	cursor: pointer;
+	width: 16px;
+	height: 16px;
+}
+.ui-tabs .ui-tabs-nav .tab-operation .ui-icon{
+	cursor: pointer;
+}
+.ui-tabs .tabs-more-operation-menu.ui-menu,
+.ui-tabs .tabs-more-tab-menu.ui-menu{
+	padding: 0.2em 0.2em;
+}
+.ui-tabs .tabs-more-tab-menu.ui-menu{
+	max-height: 30em;
+	overflow: auto;
+}
+.ui-tabs .tabs-more-operation-menu.ui-menu .ui-menu-item,
+.ui-tabs .tabs-more-tab-menu.ui-menu .ui-menu-item{
+	font-size: small;
+}
+
 /*jquery.layout*/
 .ui-layout-pane{
 	border: 1px solid #c5c5c5;
@@ -795,32 +833,6 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	overflow: hidden;
 	padding-right: 25px;
 }
-.main-page-content .main-tabs .tabs-more-tab-button{
-	position: absolute;
-	top: 1em;
-	right: 6px;
-	cursor: pointer;
-	width: 16px;
-    height: 16px;
-    border: none;
-    padding: 0 0;
-}
-.main-page-content .main-tabs .tab-operation{
-	display: inline-block;
-	width: 16px;
-}
-.main-page-content .main-tabs .tab-operation .tabs-more-operation-button{
-	float: left;
-	text-align: center;
-	cursor: pointer;
-	width: 16px;
-	height: 16px;
-}
-.main-page-content .main-tabs .ui-tabs-nav .ui-tabs-anchor{
-}
-.main-page-content .main-tabs .ui-tabs-nav .ui-icon{
-	cursor: pointer;
-}
 .main-page-content .main-tabs .ui-tabs-nav .category-bar{
     position:  absolute;
     left: 0;
@@ -834,18 +846,6 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
     left: 5px;
     right: 5px;
     bottom: 5px;
-}
-.main-page-content .tabs-more-operation-menu.ui-menu,
-.main-page-content .tabs-more-tab-menu.ui-menu{
-	padding: 0.2em 0.2em;
-}
-.main-page-content .tabs-more-tab-menu.ui-menu{
-	max-height: 30em;
-	overflow: auto;
-}
-.main-page-content .tabs-more-operation-menu.ui-menu .ui-menu-item,
-.main-page-content .tabs-more-tab-menu.ui-menu .ui-menu-item{
-	font-size: small;
 }
 
 /*驱动信息管理表单页*/
@@ -1335,19 +1335,31 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav{
 	margin: 0 0;
 	padding: 0 0;
-	height: 1.4em;
+	padding-left: 0.1em;
+	padding-right: 10em;
+	overflow: hidden;
+	height: 1.5em;
 	background: none;
 	border-width: 0;
 	border-bottom-width: 1px;
 	opacity: 0.7;
 	filter: Alpha(Opacity=70);
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav li{
-	margin: 0 0.1em;
-	padding: 0 0;
 }
 .page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
-	padding: 1px 0.8em;
+	padding: 1px 1.2em 1px 0.8em;
+}
+.page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav li .tab-operation{
+	position: absolute;
+	right: 0px;
+}
+.page-sqlpad .content .content-result .result-tabs.ui-tabs .tabs-more-tab-button{
+	top: 0.25em;
+	right: 9em;
 }
 .page-sqlpad .content .content-result .result-operations{
 	float: right;
