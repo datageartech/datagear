@@ -87,9 +87,17 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		<div class="content-result">
 			<div id="${pageId}-sqlResultTabs" class="result-tabs">
 				<ul>
-					<li><a href="#${pageId}-resultMessage">消息</a></li>
+					<li class="not-closable"><a class="result-message-anchor" href="#${pageId}-resultMessage">消息</a></li>
 				</ul>
 				<div id="${pageId}-resultMessage" class="result-message">
+				</div>
+				<div class="tabs-more-operation-menu-wrapper ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow" style="position: absolute; left:0px; top:0px; display: none;">
+					<ul class="tabs-more-operation-menu">
+						<li class="tab-operation-close-left"><div><@spring.message code='main.closeLeft' /></div></li>
+						<li class="tab-operation-close-right"><div><@spring.message code='main.closeRight' /></div></li>
+						<li class="tab-operation-close-other"><div><@spring.message code='main.closeOther' /></div></li>
+						<li class="tab-operation-close-all"><div><@spring.message code='main.closeAll' /></div></li>
+					</ul>
 				</div>
 				<div class="tabs-more-tab-menu-wrapper ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow" style="position: absolute; left:0px; top:0px; display: none;">
 					<ul class="tabs-more-tab-menu">
@@ -483,6 +491,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.sqlResultTabTemplate = "<li style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
 		+"<div class='tab-operation'>"			
 		+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
+		+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'></div>"
 		+"</div>"
 		+"</li>";
 		
@@ -736,6 +745,18 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			var tabsNav = po.getTabsNav($this);
 			
 			po.refreshTabsNavForHidden($this, tabsNav, newTab);
+		}
+	});
+	
+	po.getTabsTabMoreOperationMenu(po.sqlResultTabs).menu(
+	{
+		select: function(event, ui)
+		{
+			var $this = $(this);
+			var item = ui.item;
+			
+			po.handleTabMoreOperationMenuSelect($this, item, po.sqlResultTabs);
+			po.getTabsTabMoreOperationMenuWrapper(po.sqlResultTabs).hide();
 		}
 	});
 	

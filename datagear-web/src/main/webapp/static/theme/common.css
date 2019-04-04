@@ -272,7 +272,7 @@ form .form-foot .ui-button{
 	padding: 0.2em 0.2em;
 }
 .ui-tabs .tabs-more-tab-menu.ui-menu{
-	max-height: 30em;
+	max-height: 20em;
 	overflow: auto;
 }
 .ui-tabs .tabs-more-operation-menu.ui-menu .ui-menu-item,
@@ -1351,11 +1351,22 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav li{
 }
 .page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
-	padding: 1px 1.2em 1px 0.8em;
+	padding: 1px 36px 1px 0.8em;
+}
+.page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav .ui-tabs-anchor.result-message-anchor{
+	padding-right: 0.8em;
 }
 .page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav li .tab-operation{
 	position: absolute;
 	right: 0px;
+	width: 32px;
+}
+.page-sqlpad .content .content-result .result-tabs.ui-tabs .ui-tabs-nav li .tab-operation .tabs-more-operation-button{
+	float: none;
+	display: inline-block;
+	height: 16px;
+	vertical-align: middle;
+    margin-top: -0.25em;
 }
 .page-sqlpad .content .content-result .result-tabs.ui-tabs .tabs-more-tab-button{
 	top: 0.25em;

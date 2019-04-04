@@ -83,8 +83,8 @@ page_js_obj.jsp
     	
     	var menuItemDisabled = {};
     	
-    	var hasPrev = ($tab.prev().length > 0);
-    	var hasNext = ($tab.next().length > 0);
+    	var hasPrev = ($tab.prevAll(":not(.not-closable)").length > 0);
+    	var hasNext = ($tab.nextAll(":not(.not-closable)").length > 0);
     	
     	menuItemDisabled[".tab-operation-close-left"] = !hasPrev;
     	menuItemDisabled[".tab-operation-close-right"] = !hasNext;
@@ -110,27 +110,35 @@ page_js_obj.jsp
 		
 		if($menuItem.hasClass("tab-operation-close-left"))
 		{
-			var prev;
-			while((prev = tab.prev()).length > 0)
+			tab.prevAll().each(function()
 			{
-				var preTabId = po.getTabsTabId($tabs, tabsNav, prev);
+				var prev = $(this);
 				
-				po.getTabsTabPanelByTabId($tabs, preTabId).remove();
-				prev.remove();
-			}
+				if(!prev.hasClass("not-closable"))
+				{
+					var preTabId = po.getTabsTabId($tabs, tabsNav, prev);
+					
+					po.getTabsTabPanelByTabId($tabs, preTabId).remove();
+					prev.remove();
+				}
+			});
 			
 			$tabs.tabs("refresh");
 		}
 		else if($menuItem.hasClass("tab-operation-close-right"))
 		{
-			var next;
-			while((next = tab.next()).length > 0)
+			tab.nextAll().each(function()
 			{
-				var nextTabId = po.getTabsTabId($tabs, tabsNav, next);
+				var next = $(this);
 				
-				po.getTabsTabPanelByTabId($tabs, nextTabId).remove();
-				next.remove();
-			}
+				if(!next.hasClass("not-closable"))
+				{
+					var nextTabId = po.getTabsTabId($tabs, tabsNav, next);
+					
+					po.getTabsTabPanelByTabId($tabs, nextTabId).remove();
+					next.remove();
+				}
+			});
 			
 			$tabs.tabs("refresh");
 		}
@@ -143,10 +151,13 @@ page_js_obj.jsp
 				
 				var li = $(this);
 				
-				var tabId = po.getTabsTabId($tabs, tabsNav, li);
-				
-				po.getTabsTabPanelByTabId($tabs, tabId).remove();
-				li.remove();
+				if(!li.hasClass("not-closable"))
+				{
+					var tabId = po.getTabsTabId($tabs, tabsNav, li);
+					
+					po.getTabsTabPanelByTabId($tabs, tabId).remove();
+					li.remove();
+				}
 			});
 			
 			$tabs.tabs("refresh");
@@ -157,10 +168,13 @@ page_js_obj.jsp
 			{
 				var li = $(this);
 				
-				var tabId = po.getTabsTabId($tabs, tabsNav, li);
-
-				po.getTabsTabPanelByTabId($tabs, tabId).remove();
-				li.remove();
+				if(!li.hasClass("not-closable"))
+				{
+					var tabId = po.getTabsTabId($tabs, tabsNav, li);
+	
+					po.getTabsTabPanelByTabId($tabs, tabId).remove();
+					li.remove();
+				}
 			});
 			
 			$tabs.tabs("refresh");
@@ -227,7 +241,7 @@ page_js_obj.jsp
 					}
 					
 					menuWrapper.show().css("left", "0px").css("top", "0px")
-	    	    		.position({"my" : "left top+1", "at": "right bottom", "of" : $this, "collision": "flip flip"});
+	    	    		.position({"my" : "left top+1", "at": "right bottom", "of" : $this});
 	    	    	
 					menu.menu("refresh");
 				});
