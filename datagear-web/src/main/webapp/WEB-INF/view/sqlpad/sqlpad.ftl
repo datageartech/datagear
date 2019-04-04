@@ -365,7 +365,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				if(tabId == null)
 					tabId = po.genSqlResultTabId();
 				
-				po.renderSqlResultTab(tabId, null, null, (po.executingSqlCount == 1));
+				po.renderSqlResultTab(tabId, msgData.sqlStatement.sql, msgData.modelSqlResult, (po.executingSqlCount == 1));
 			}
 			else
 				;
@@ -517,7 +517,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		+"</div>"
 		+"</li>";
 	
-	po.renderSqlResultTab = function(tabId, sql, sqlResult, active)
+	po.renderSqlResultTab = function(tabId, sql, modelSqlResult, active)
 	{
 		var tabsNav = po.getTabsNav(po.sqlResultTabs);
 		var tab = po.getTabsTabByTabId(po.sqlResultTabs, tabsNav, tabId);
@@ -527,8 +527,6 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	    {
 			tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
 			tabPanel.empty();
-			
-			tabPanel.html(po.getNextSqlResultNameSeq());
 	    }
 	    else
 	    {
@@ -539,7 +537,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	    	tab = $(po.sqlResultTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, tabLabel)).attr("id", $.uid("sqlResult-tab-"))
 	    		.appendTo(tabsNav);
 	    	
-	    	tabPanel = $("<div id='"+tabId+"' />").html(nameSeq).appendTo(po.sqlResultTabs);
+	    	tabPanel = $("<div id='"+tabId+"' />").appendTo(po.sqlResultTabs);
 	    	
     	    $(".tab-operation .ui-icon-close", tab).click(function()
     	    {
@@ -554,13 +552,49 @@ select count(*) from t_order where id = 3 and name = 'jack';
     	    	var menu = po.showTabMoreOperationMenu(po.sqlResultTabs, tabsNav, tab, $(this));
     	    });
 	    }
-		
+
 	    po.sqlResultTabs.tabs("refresh");
-	    
+		
 	    if(active)
 	    	po.sqlResultTabs.tabs( "option", "active",  tab.index());
 	    else
 	    	po.refreshTabsNavForHidden(po.sqlResultTabs, tabsNav);
+	    
+		var table = $("<table id='"+tabId+"-table' width='100%' class='hover stripe'></table>").appendTo(tabPanel);
+		po.initSqlResultDataTable(tabId, table, sql, modelSqlResult);
+	};
+	
+	po.calSqlResultTableHeight = function(tabId)
+	{
+		var tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
+		return tabPanel.height() - 50;
+	};
+	
+	po.initSqlResultDataTable = function(tabId, $table, sql, modelSqlResult)
+	{
+		var model = modelSqlResult.model;
+		var columns = $.buildDataTablesColumns(model);
+		
+		var settings =
+		{
+			"columns" : columns,
+			"data" : (modelSqlResult.datas ? modelSqlResult.datas : []),
+			"scrollX": true,
+			"autoWidth": true,
+			"scrollY" : po.calSqlResultTableHeight(tabId),
+	        "scrollCollapse": false,
+			"paging" : false,
+			"searching" : false,
+			"ordering": false,
+			"select" : { style : 'os' },
+		    "language":
+		    {
+				"emptyTable": "<@spring.message code='dataTables.noData' />",
+				"zeroRecords" : "<@spring.message code='dataTables.zeroRecords' />"
+			}
+		};
+		
+		$table.dataTable(settings);
 	};
 	
 	po.getNextSqlResultNameSeq = function()

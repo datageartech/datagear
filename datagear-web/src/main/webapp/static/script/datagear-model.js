@@ -1422,9 +1422,13 @@
 				return mappedByTarget;
 			
 			var relationMapper = this.featureRelationMapper(property);
+			
+			if(!relationMapper)
+				return undefined;
+			
 			var mapper = relationMapper.mappers[propertyModelIndex];
 			
-			return mapper.mappedBySource;
+			return (mapper ? mapper.mappedBySource : undefined);
 		},
 		
 		/**
