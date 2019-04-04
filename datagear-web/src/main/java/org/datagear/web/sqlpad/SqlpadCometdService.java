@@ -34,10 +34,11 @@ public class SqlpadCometdService extends AbstractService
 	 * 发送执行开始消息。
 	 * 
 	 * @param channel
+	 * @param sqlCount
 	 */
-	public void sendStartMessage(ServerChannel channel)
+	public void sendStartMessage(ServerChannel channel, int sqlCount)
 	{
-		channel.publish(getServerSession(), new StartMessageData());
+		channel.publish(getServerSession(), new StartMessageData(sqlCount));
 	}
 
 	/**
@@ -300,9 +301,27 @@ public class SqlpadCometdService extends AbstractService
 	{
 		public static final String TYPE = "START";
 
+		private int sqlCount = 0;
+
 		public StartMessageData()
 		{
 			super(TYPE);
+		}
+
+		public StartMessageData(int sqlCount)
+		{
+			super(TYPE);
+			this.sqlCount = sqlCount;
+		}
+
+		public int getSqlCount()
+		{
+			return sqlCount;
+		}
+
+		public void setSqlCount(int sqlCount)
+		{
+			this.sqlCount = sqlCount;
 		}
 	}
 

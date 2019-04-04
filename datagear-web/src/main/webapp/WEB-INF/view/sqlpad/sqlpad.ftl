@@ -87,7 +87,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		<div class="content-result">
 			<div id="${pageId}-sqlResultTabs" class="result-tabs">
 				<ul>
-					<li class="not-closable"><a class="result-message-anchor" href="#${pageId}-resultMessage">消息</a></li>
+					<li class="result-message-tab not-closable"><a class="result-message-anchor" href="#${pageId}-resultMessage">消息</a></li>
 				</ul>
 				<div id="${pageId}-resultMessage" class="result-message">
 				</div>
@@ -105,8 +105,10 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				</div>
 			</div>
 			<div class="result-operations button-operation">
-				<button id="toggleAutoClearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.keepResult' />"><span class="ui-button-icon ui-icon ui-icon-pin-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.keepResult' /></button>
-				<button id="clearResultButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearSqlResult' /></button>
+				<button id="toggleAutoClearResultButton" class="result-message-button ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.keepResult' />"><span class="ui-button-icon ui-icon ui-icon-pin-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.keepResult' /></button>
+				<button id="clearResultButton" class="result-message-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearSqlResult' /></button>
+				
+				<button id="lockSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.lockSqlResultTab' />"><span class="ui-button-icon ui-icon ui-icon-locked"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.lockSqlResultTab' /></button>
 			</div>
 		</div>
 	</div>
@@ -144,6 +146,9 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	po.sqlEditor.setShowPrintMargin(false);
 	po.sqlEditor.focus();
 	po.sqlEditor.navigateFileEnd();
+	
+	//当前在执行的SQL语句数
+	po.executingSqlCount = -1;
 	
 	po.sqlEditor.commands.addCommand(
 	{
@@ -325,9 +330,12 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		
 		if(msgDataType == "START")
 		{
+			po.executingSqlCount = msgData.sqlCount;
+			
 			$msgDiv.addClass("execution-start");
 			
-			$("<div />").html("<@spring.message code='sqlpad.executionStart' />").appendTo($msgContent);
+			<#assign messageArgs=['"+msgData.sqlCount+"'] />
+			$("<div />").html("<@spring.messageArgs code='sqlpad.executionStart' args=messageArgs />").appendTo($msgContent);
 		}
 		else if(msgDataType == "SQLSUCCESS")
 		{
@@ -343,9 +351,21 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			}
 			else if(msgData.sqlResultType == "RESULT_SET")
 			{
-				var tabId = po.genSqlResultTabId();
+				var tabId = null;
 				
-				po.renderSqlResultTab(tabId);
+				if(po.element("#lockSqlResultTabButton").hasClass("ui-state-active"))
+				{
+					var tabsNav = po.getTabsNav(po.sqlResultTabs);
+					var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
+					
+					if(activeTab.hasClass("sql-result-tab"))
+						tabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
+				}
+				
+				if(tabId == null)
+					tabId = po.genSqlResultTabId();
+				
+				po.renderSqlResultTab(tabId, null, null, (po.executingSqlCount == 1));
 			}
 			else
 				;
@@ -430,6 +450,8 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 		else if(msgDataType == "FINISH")
 		{
+			po.executingSqlCount = -1;
+			
 			$msgDiv.addClass("execution-finish");
 			
 			$("<div />").html("<@spring.message code='sqlpad.executeionFinish' />").appendTo($msgContent);
@@ -488,14 +510,14 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		}
 	};
 	
-	po.sqlResultTabTemplate = "<li style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
-		+"<div class='tab-operation'>"			
+	po.sqlResultTabTemplate = "<li class='sql-result-tab' style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
+		+"<div class='tab-operation'>"
 		+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
 		+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'></div>"
 		+"</div>"
 		+"</li>";
-		
-	po.renderSqlResultTab = function(tabId, sql, sqlResult)
+	
+	po.renderSqlResultTab = function(tabId, sql, sqlResult, active)
 	{
 		var tabsNav = po.getTabsNav(po.sqlResultTabs);
 		var tab = po.getTabsTabByTabId(po.sqlResultTabs, tabsNav, tabId);
@@ -505,16 +527,19 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	    {
 			tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
 			tabPanel.empty();
+			
+			tabPanel.html(po.getNextSqlResultNameSeq());
 	    }
 	    else
 	    {
-	    	<#assign messageArgs=['"+po.getCurrentSqlResultSeq()+"'] />
+	    	var nameSeq = po.getNextSqlResultNameSeq();
+	    	<#assign messageArgs=['"+nameSeq+"'] />
 	    	var tabLabel = "<@spring.messageArgs code='sqlpad.selectResultWithIndex' args=messageArgs />";
 	    	
 	    	tab = $(po.sqlResultTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, tabLabel)).attr("id", $.uid("sqlResult-tab-"))
 	    		.appendTo(tabsNav);
 	    	
-	    	tabPanel = $("<div id='"+tabId+"' />").html(po.getCurrentSqlResultSeq()).appendTo(po.sqlResultTabs);
+	    	tabPanel = $("<div id='"+tabId+"' />").html(nameSeq).appendTo(po.sqlResultTabs);
 	    	
     	    $(".tab-operation .ui-icon-close", tab).click(function()
     	    {
@@ -530,30 +555,31 @@ select count(*) from t_order where id = 3 and name = 'jack';
     	    });
 	    }
 		
-	    po.sqlResultTabs.tabs("refresh").tabs( "option", "active",  tab.index());
+	    po.sqlResultTabs.tabs("refresh");
+	    
+	    if(active)
+	    	po.sqlResultTabs.tabs( "option", "active",  tab.index());
+	    else
+	    	po.refreshTabsNavForHidden(po.sqlResultTabs, tabsNav);
 	};
 	
-	po.getCurrentSqlResultSeq = function()
+	po.getNextSqlResultNameSeq = function()
 	{
-		if(po.currentSqlResultSeq == null)
-			po.currentSqlResultSeq = 1;
+		if(po.getTabCount(po.sqlResultTabs, po.getTabsNav(po.sqlResultTabs)) == 1)
+			po.nextSqlResultNameSeq = null;
 		
-		return po.currentSqlResultSeq;
-	};
-	
-	po.getNextSqlResultSeq = function()
-	{
-		if(po.currentSqlResultSeq == null)
-			po.currentSqlResultSeq = 0;
+		var seq = (po.nextSqlResultNameSeq == null ? 1 : po.nextSqlResultNameSeq);
+		po.nextSqlResultNameSeq = seq + 1;
 		
-		po.currentSqlResultSeq += 1;
-		
-		return po.currentSqlResultSeq;
+		return seq;
 	};
 	
 	po.genSqlResultTabId = function()
 	{
-		return "${pageId}-sqlResultTabs-tab-" + po.getNextSqlResultSeq();
+		var seq = (po.nextSqlResultIdSeq == null ? 0 : po.nextSqlResultIdSeq);
+		po.nextSqlResultIdSeq = seq + 1;
+		
+		return "${pageId}-sqlResultTabs-tab-" + seq;
 	};
 	
 	po.element("#executeSqlButton").click(function()
@@ -698,6 +724,20 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	{
 		po.resultMessageElement.empty();
 	});
+
+	po.element("#lockSqlResultTabButton").click(function()
+	{
+		var $this = $(this);
+		
+		if($this.hasClass("ui-state-active"))
+		{
+			$(this).removeClass("ui-state-active");
+		}
+		else
+		{
+			$(this).addClass("ui-state-active");
+		}
+	});
 	
 	po.element("#moreOperationForm").validate(
 	{
@@ -745,6 +785,19 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			var tabsNav = po.getTabsNav($this);
 			
 			po.refreshTabsNavForHidden($this, tabsNav, newTab);
+			
+			var resultOperations = po.element(".result-operations");
+			
+			if(newTab.hasClass("sql-result-tab"))
+			{
+				$(".result-message-button", resultOperations).hide();
+				$(".sql-result-button", resultOperations).show();
+			}
+			else if(newTab.hasClass("result-message-tab"))
+			{
+				$(".sql-result-button", resultOperations).hide();
+				$(".result-message-button", resultOperations).show();
+			}
 		}
 	});
 	
@@ -771,6 +824,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	
 	po.element("input[name='sqlCommitMode'][value='AUTO']").click();
 	po.element(".more-operation-panel").hide();
+	po.element(".result-operations .sql-result-button").hide();
 	
 	po.bindTabsMenuHiddenEvent(po.sqlResultTabs);
 })

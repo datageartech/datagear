@@ -410,7 +410,7 @@ public class SqlpadExecutionService
 			Connection cn = null;
 			Statement st = null;
 
-			this.sqlpadCometdService.sendStartMessage(this._sqlpadServerChannel);
+			this.sqlpadCometdService.sendStartMessage(this._sqlpadServerChannel, this.sqlStatements.size());
 
 			try
 			{

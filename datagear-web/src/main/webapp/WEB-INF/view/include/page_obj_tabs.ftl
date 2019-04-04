@@ -12,10 +12,20 @@ page_js_obj.jsp
 		return $("> .ui-tabs-nav", $tabs);
 	};
 	
+	po.getTabCount = function($tabs, $tabsNav)
+	{
+		return $("> li.ui-tabs-tab", $tabsNav).length;
+	};
+	
 	po.getTabsTabByTabId = function($tabs, $tabsNav, tabId)
 	{
 		var $a = $("a.ui-tabs-anchor[href='#"+tabId+"']", $tabsNav);
 		return $a.parent();
+	};
+	
+	po.getActiveTab = function($tabs, $tabsNav)
+	{
+		return $("> li.ui-tabs-tab.ui-state-active", $tabsNav);
 	};
 	
 	po.getTabsTabId = function($tabs, $tabsNav, $tab)
@@ -164,7 +174,7 @@ page_js_obj.jsp
 		}
 		else if($menuItem.hasClass("tab-operation-close-all"))
 		{
-			$("li", tabsNav).each(function()
+			$("> li", tabsNav).each(function()
 			{
 				var li = $(this);
 				
