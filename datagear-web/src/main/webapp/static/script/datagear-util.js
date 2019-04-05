@@ -1163,7 +1163,7 @@
 				if(height != null)
 				{
 					var tableParent = $(dataTable.table().body()).parent().parent();
-					tableParent.css('height', height);
+					tableParent.height(height);
 				}
 				
 				if(adjustWidth)

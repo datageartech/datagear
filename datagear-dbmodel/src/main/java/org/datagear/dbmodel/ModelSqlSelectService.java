@@ -249,7 +249,7 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 			return this.datas != null && this.datas.size() >= this.fetchSize;
 		}
 
-		public int getNextFetchSize()
+		public int getNextStartRow()
 		{
 			return this.startRow + this.fetchSize;
 		}

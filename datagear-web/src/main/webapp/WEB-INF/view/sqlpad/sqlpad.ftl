@@ -357,6 +357,40 @@ delete from t_address where city = '-99999999';
 					tabId = po.genSqlResultTabId();
 				
 				po.renderSqlResultTab(tabId, msgData.sqlStatement.sql, msgData.modelSqlResult, (po.executingSqlCount == 1));
+				
+				$("<a href='javascript:void(0);' class='sql-result-link link' />")
+					.html("<@spring.message code='sqlpad.viewResult' />")
+					.attr("tab-id", tabId)
+					.data("sql", msgData.sqlStatement.sql)
+					.appendTo($msgContent)
+					.click(function()
+					{
+						var $this = $(this);
+						
+						var tabId = $this.attr("tab-id");
+						var sql = $this.data("sql");
+						
+						var tabsNav = po.getTabsNav(po.sqlResultTabs);
+						var tab  = po.getTabsTabByTabId(po.sqlResultTabs, tabsNav, tabId);
+						
+						if(tab.length == 0)
+						{
+							$.tipInfo("<@spring.message code='sqlpad.selectResultExpired' />");
+							return;
+						}
+						
+						var tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
+						var tabForm = po.element("#" + po.getSqlResultTabPanelFormId(tabId), tabPanel);
+						var tabSql = $("textarea[name='sql']", tabForm).val();
+						
+						if(sql != tabSql)
+						{
+							$.tipInfo("<@spring.message code='sqlpad.selectResultExpired' />");
+							return;
+						}
+						
+						po.sqlResultTabs.tabs( "option", "active",  tab.index());
+					});
 			}
 			else
 				;
@@ -513,6 +547,11 @@ delete from t_address where city = '-99999999';
 		return tabId + "-table";
 	};
 	
+	po.getSqlResultTabPanelFormId = function(tabId)
+	{
+		return tabId + "-form";
+	};
+	
 	po.renderSqlResultTab = function(tabId, sql, modelSqlResult, active)
 	{
 		var tabsNav = po.getTabsNav(po.sqlResultTabs);
@@ -548,7 +587,7 @@ delete from t_address where city = '-99999999';
     	    	var menu = po.showTabMoreOperationMenu(po.sqlResultTabs, tabsNav, tab, $(this));
     	    });
 	    }
-
+		
 	    po.sqlResultTabs.tabs("refresh");
 		
 	    if(active)
@@ -558,6 +597,11 @@ delete from t_address where city = '-99999999';
 	    	$.setResizeDataTableWhenShow(tabPanel);
 	    	po.refreshTabsNavForHidden(po.sqlResultTabs, tabsNav);
 	    }
+	    
+	    var form = $("<form style='display:none;' />").attr("id", po.getSqlResultTabPanelFormId(tabId)).appendTo(tabPanel);
+	    $("<textarea name='sql' />").val(sql).appendTo(form);
+	    $("<input name='startRow' />").val(modelSqlResult.nextStartRow).appendTo(form);
+	    $("<input name='fetchSize' />").val(modelSqlResult.fetchSize).appendTo(form);
 	    
 		var table = $("<table width='100%' class='hover stripe'></table>").attr("id", po.getSqlResultTabPanelTableId(tabId)).appendTo(tabPanel);
 		po.initSqlResultDataTable(tabId, table, sql, modelSqlResult);
