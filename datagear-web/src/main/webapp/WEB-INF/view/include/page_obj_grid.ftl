@@ -482,75 +482,13 @@ page_js_obj.jsp
 		return changedTableHeight;
 	};
 	
-	po.updateDataTableHeight = function(height)
-	{
-		if(height == undefined)
-			height = po.calTableHeight();
-		
-		for(var i=0; i<po.expectedResizeDataTableElements.length; i++)
-		{
-			var dataTable = $(po.expectedResizeDataTableElements[i]).DataTable();
-			var tableParent = $(dataTable.table().body()).parent().parent();
-			
-			tableParent.css('height', height);
-			
-			dataTable.fixedColumns().relayout();
-		}
-	};
-	
 	po.bindResizeDataTable = function()
 	{
-		var resizeHandler = function(event) 
-		{
-			//忽略隐藏选项卡中的表格调整，仅在选项卡显示时才调整，
-			//一是DataTables对隐藏表格的宽度计算有问题，另外，绑定太多处理函数会影响jquery.resizeable组件的效率
-			var tabsPanel = po.element().closest(".ui-tabs-panel");
-			if(tabsPanel.is(":hidden"))
+		$.bindResizeDataTableHandler(po.expectedResizeDataTableElements,
+			function()
 			{
-				tabsPanel.attr("adjust-table-when-show", "1");
-				return;
-			}
-			
-			var changedHeight = po.calChangedDataTableHeight();
-			
-			if(changedHeight != null)
-			{
-				clearTimeout(po["resizeTableTimer"]);
-				
-				po["resizeTableTimer"] = setTimeout(function()
-				{
-					po.updateDataTableHeight(changedHeight);
-				},
-				250);
-			}
-		};
-		
-		$(window).bind('resize', resizeHandler);
-		
-		//如果表格处于选项卡页中，则在选项卡显示时，调整表格大小
-		var tabsPanel = po.element().closest(".ui-tabs-panel");
-		if(tabsPanel.length > 0)
-		{
-			tabsPanel.data("showCallback", function($tabsPanel)
-			{
-				if($tabsPanel.attr("adjust-table-when-show") != "1")
-					return;
-				
-				for(var i=0; i<po.expectedResizeDataTableElements.length; i++)
-				{
-					var dataTable = $(po.expectedResizeDataTableElements[i]).DataTable();
-					dataTable.columns.adjust();
-				}
-				
-				var changedHeight = po.calChangedDataTableHeight();
-				if(changedHeight != null)
-					po.updateDataTableHeight(changedHeight);
-				
-				$tabsPanel.removeAttr("adjust-table-when-show");
+				return po.calChangedDataTableHeight();
 			});
-		}
-		
-		return resizeHandler;
 	};
 })
 (${pageId});

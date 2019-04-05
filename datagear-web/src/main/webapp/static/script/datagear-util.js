@@ -1151,6 +1151,127 @@
 			options.height = $(window).height() * 0.75;
 		},
 		
+		updateDataTableHeight : function(dataTableElements, height, adjustWidth)
+		{
+			if(height == null && adjustWidth == null)
+				return;
+			
+			for(var i=0; i<dataTableElements.length; i++)
+			{
+				var dataTable = $(dataTableElements[i]).DataTable();
+				
+				if(height != null)
+				{
+					var tableParent = $(dataTable.table().body()).parent().parent();
+					tableParent.css('height', height);
+				}
+				
+				if(adjustWidth)
+					dataTable.columns.adjust();
+				
+				if(dataTable.init().fixedColumns)
+					dataTable.fixedColumns().relayout();
+			}
+		},
+		
+		isResizeDataTableWhenShow : function($tabsPanel)
+		{
+			return ($tabsPanel.attr("resize-table-when-show") == "1");
+		},
+		
+		setResizeDataTableWhenShow : function($tabsPanel)
+		{
+			$tabsPanel.attr("resize-table-when-show", "1");
+		},
+		
+		clearResizeDataTableWhenShow : function($tabsPanel)
+		{
+			$tabsPanel.removeAttr("resize-table-when-show");
+		},
+		
+		/**
+		 * 为DataTable绑定window重设大小事件。
+		 */
+		bindResizeDataTableHandler : function(dataTableElements, calChangedDataTableHeightFunc)
+		{
+			var resizeHandler = function(event) 
+			{
+				var $dataTable0 = $(dataTableElements[0]);
+				
+				//忽略隐藏选项卡中的表格调整，仅在选项卡显示时才调整，
+				//一是DataTables对隐藏表格的宽度计算有问题，另外，绑定太多处理函数会影响jquery.resizeable组件的效率
+				
+				var tabsPanel = $dataTable0.closest(".ui-tabs-panel");
+				if(tabsPanel.is(":hidden"))
+				{
+					$.setResizeDataTableWhenShow(tabsPanel);
+					return;
+				}
+				
+				var changedHeight = calChangedDataTableHeightFunc();
+				
+				if(changedHeight != null)
+				{
+					clearTimeout($dataTable0.data("resizeTableTimer"));
+					
+					var timer = setTimeout(function()
+					{
+						$.updateDataTableHeight(dataTableElements, changedHeight);
+					},
+					250);
+					
+					$dataTable0.data("resizeTableTimer", timer);
+				}
+			};
+			
+			$(window).bind('resize', resizeHandler);
+			
+			//如果表格处于选项卡页中，则在选项卡显示时，调整表格大小
+			var tabsPanel = $(dataTableElements[0]).closest(".ui-tabs-panel");
+			if(tabsPanel.length > 0)
+			{
+				tabsPanel.data("showCallback", function($tabsPanel)
+				{
+					if(!$.isResizeDataTableWhenShow(tabsPanel))
+						return;
+					
+					var changedHeight = calChangedDataTableHeightFunc();
+					$.updateDataTableHeight(dataTableElements, changedHeight, true);
+					
+					$.clearResizeDataTableWhenShow(tabsPanel);
+				});
+			}
+			
+			return resizeHandler;
+		},
+		
+		callTabsPanelShowCallback : function($tabsPanel)
+		{
+			var panelShowCallback = $tabsPanel.data("showCallback");
+			if(panelShowCallback)
+				panelShowCallback($tabsPanel);
+			
+			var subTabs = $tabsPanel.find(".ui-tabs");
+			if(subTabs.length > 0)
+			{
+				subTabs.each(function()
+				{
+					var $this = $(this);
+					
+					var subTabsNav = $("> .ui-tabs-nav", $this);
+					var subShowTab = $("> li.ui-tabs-tab.ui-state-active", subTabsNav);
+					
+					var subTabId = $("> a.ui-tabs-anchor", subShowTab).attr("href");
+					if(subTabId.charAt(0) == "#")
+						subTabId = subTabId.substr(1);
+					
+					var subTabPanel = $("> #"+subTabId, $this);
+					
+					$.callTabsPanelShowCallback(subTabPanel);
+				});
+			}
+		},
+		
 		/**
 		 * 构建查询条件Autocomplete组件的“source”选项值。
 		 * 

@@ -1377,6 +1377,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	text-align: right;
 }
 .page-sqlpad .content .content-result .button-operation{
+    padding-right: 0.2em;
 	opacity: 0.7;
 	filter: Alpha(Opacity=70);
 }
@@ -1387,7 +1388,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	left:0px;
 	right: 0px;
 	border-width: 0px;
-	padding: 0 0;
+	padding: 0.3em 0.5em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -1396,10 +1397,8 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	overflow: auto;
 }
 .page-sqlpad .content .content-result .result-message .execution-message{
-	padding-left: 0.41em;
-	margin-top: 0.2em;
-	margin-bottom: 0.1em;
 	white-space: nowrap;
+	padding-bottom: 0.2em;
 }
 .page-sqlpad .content .content-result .result-message .execution-message .message-time,
 .page-sqlpad .content .content-result .result-message .execution-message .message-content{
@@ -1455,6 +1454,17 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	left: 1em;
 	right: 1em;
 	overflow: auto;
+}
+.page-sqlpad .sql-result-tab-panel table.dataTable thead .display-info-token{
+	font-weight: normal;
+}
+.page-sqlpad .sql-result-tab-panel table.dataTable thead th,
+.page-sqlpad .sql-result-tab-panel table.dataTable thead td{
+	padding: 5px 9px;
+	font-size: 90%;
+}
+.page-sqlpad .sql-result-tab-panel table.dataTable tbody th, table.dataTable tbody td{
+	height: 2.2em;
 }
 .page-sqlpad .foot{
 	position: absolute;

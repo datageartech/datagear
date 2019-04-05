@@ -67,20 +67,10 @@ Schema schema 数据库，不允许为null
 		<div class="content-editor">
 			<div class="content-edit-content">
 				<div id="${pageId}-sql-editor" class="sql-editor">
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
-select count(*) from t_order where id = 3 and name = 'jack';
+select * from t_account;
+select * from t_order;
+update t_account set id = 5 where id=-99999;
+delete from t_address where city = '-99999999';
 				</div>
 			</div>
 		</div>
@@ -177,6 +167,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 			$(".content-result", parent).css("height", resultHeightpercent);
 			
 			po.sqlEditor.resize();
+			po.resizeSqlResultTabPanelDataTable();
 		}
 	});
 	
@@ -516,6 +507,11 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'></div>"
 		+"</div>"
 		+"</li>";
+		
+	po.getSqlResultTabPanelTableId = function(tabId)
+	{
+		return tabId + "-table";
+	};
 	
 	po.renderSqlResultTab = function(tabId, sql, modelSqlResult, active)
 	{
@@ -537,7 +533,7 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	    	tab = $(po.sqlResultTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, tabLabel)).attr("id", $.uid("sqlResult-tab-"))
 	    		.appendTo(tabsNav);
 	    	
-	    	tabPanel = $("<div id='"+tabId+"' />").appendTo(po.sqlResultTabs);
+	    	tabPanel = $("<div id='"+tabId+"' class='sql-result-tab-panel' />").appendTo(po.sqlResultTabs);
 	    	
     	    $(".tab-operation .ui-icon-close", tab).click(function()
     	    {
@@ -558,16 +554,21 @@ select count(*) from t_order where id = 3 and name = 'jack';
 	    if(active)
 	    	po.sqlResultTabs.tabs( "option", "active",  tab.index());
 	    else
+	    {
+	    	$.setResizeDataTableWhenShow(tabPanel);
 	    	po.refreshTabsNavForHidden(po.sqlResultTabs, tabsNav);
+	    }
 	    
-		var table = $("<table id='"+tabId+"-table' width='100%' class='hover stripe'></table>").appendTo(tabPanel);
+		var table = $("<table width='100%' class='hover stripe'></table>").attr("id", po.getSqlResultTabPanelTableId(tabId)).appendTo(tabPanel);
 		po.initSqlResultDataTable(tabId, table, sql, modelSqlResult);
 	};
 	
-	po.calSqlResultTableHeight = function(tabId)
+	po.calSqlResultTableHeight = function(tabIdOrTabPanel)
 	{
-		var tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
-		return tabPanel.height() - 50;
+		if(typeof(tabIdOrTabPanel) == "string")
+			tabIdOrTabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabIdOrTabPanel);
+		
+		return tabIdOrTabPanel.height() - 35;
 	};
 	
 	po.initSqlResultDataTable = function(tabId, $table, sql, modelSqlResult)
@@ -595,6 +596,12 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		};
 		
 		$table.dataTable(settings);
+		
+		$.bindResizeDataTableHandler($table,
+				function()
+				{
+					return po.calSqlResultTableHeight(tabId);
+				});
 	};
 	
 	po.getNextSqlResultNameSeq = function()
@@ -614,6 +621,27 @@ select count(*) from t_order where id = 3 and name = 'jack';
 		po.nextSqlResultIdSeq = seq + 1;
 		
 		return "${pageId}-sqlResultTabs-tab-" + seq;
+	};
+	
+	po.resizeSqlResultTabPanelDataTable = function()
+	{
+		$(".sql-result-tab-panel", po.sqlResultTabs).each(function()
+		{
+			var $this = $(this);
+			
+			if($this.is(":hidden"))
+			{
+				$.setResizeDataTableWhenShow($this);
+			}
+			else
+			{
+				var tableId = po.getSqlResultTabPanelTableId($this.attr("id"));
+				var table = po.element("#"+tableId, $this);
+				
+				var height = po.calSqlResultTableHeight($this);
+				$.updateDataTableHeight(table, height);
+			}
+		});
 	};
 	
 	po.element("#executeSqlButton").click(function()
@@ -832,6 +860,8 @@ select count(*) from t_order where id = 3 and name = 'jack';
 				$(".sql-result-button", resultOperations).hide();
 				$(".result-message-button", resultOperations).show();
 			}
+			
+			$.callTabsPanelShowCallback(newPanel);
 		}
 	});
 	

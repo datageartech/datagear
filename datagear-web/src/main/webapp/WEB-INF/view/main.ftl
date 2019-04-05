@@ -884,9 +884,7 @@
 				$(".category-bar", tabsNav).removeClass("ui-state-active");
 				$(".category-bar.category-bar-"+newSchemaId, tabsNav).addClass("ui-state-active");
 				
-				var panelShowCallback = newPanel.data("showCallback");
-				if(panelShowCallback)
-					panelShowCallback(newPanel);
+				$.callTabsPanelShowCallback(newPanel);
 			}
 		});
 		
