@@ -128,16 +128,18 @@ public class SqlpadExecutionService
 	 * @param commitMode
 	 * @param exceptionHandleMode
 	 * @param overTimeThreashold
+	 * @param resultsetFetchSize
 	 * @param locale
 	 * @return
 	 */
 	public boolean submit(String sqlpadId, Schema schema, List<SqlStatement> sqlStatements, CommitMode commitMode,
-			ExceptionHandleMode exceptionHandleMode, int overTimeThreashold, Locale locale)
+			ExceptionHandleMode exceptionHandleMode, int overTimeThreashold, int resultsetFetchSize, Locale locale)
 	{
 		String sqlpadChannelId = getSqlpadChannelId(sqlpadId);
 
 		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(schema, sqlpadId, sqlpadChannelId,
-				sqlpadCometdService, sqlStatements, commitMode, exceptionHandleMode, overTimeThreashold, locale);
+				sqlpadCometdService, sqlStatements, commitMode, exceptionHandleMode, overTimeThreashold,
+				resultsetFetchSize, locale);
 
 		SqlpadExecutionRunnable old = this._sqlpadExecutionRunnableMap.putIfAbsent(sqlpadId, sqlpadExecutionRunnable);
 
@@ -265,6 +267,9 @@ public class SqlpadExecutionService
 		/** 超时分钟数 */
 		private int overTimeThreashold;
 
+		/** 结果集页大小 */
+		private int resultsetFetchSize;
+
 		private Locale locale;
 
 		/** 发送给此Runnable的SQL命令 */
@@ -279,7 +284,7 @@ public class SqlpadExecutionService
 
 		public SqlpadExecutionRunnable(Schema schema, String sqlpadId, String sqlpadChannelId,
 				SqlpadCometdService sqlpadCometdService, List<SqlStatement> sqlStatements, CommitMode commitMode,
-				ExceptionHandleMode exceptionHandleMode, int overTimeThreashold, Locale locale)
+				ExceptionHandleMode exceptionHandleMode, int overTimeThreashold, int resultsetFetchSize, Locale locale)
 		{
 			super();
 			this.schema = schema;
@@ -290,6 +295,7 @@ public class SqlpadExecutionService
 			this.commitMode = commitMode;
 			this.exceptionHandleMode = exceptionHandleMode;
 			this.overTimeThreashold = overTimeThreashold;
+			this.resultsetFetchSize = resultsetFetchSize;
 			this.locale = locale;
 		}
 
@@ -371,6 +377,16 @@ public class SqlpadExecutionService
 		public void setOverTimeThreashold(int overTimeThreashold)
 		{
 			this.overTimeThreashold = overTimeThreashold;
+		}
+
+		public int getResultsetFetchSize()
+		{
+			return resultsetFetchSize;
+		}
+
+		public void setResultsetFetchSize(int resultsetFetchSize)
+		{
+			this.resultsetFetchSize = resultsetFetchSize;
 		}
 
 		public Locale getLocale()
@@ -663,7 +679,7 @@ public class SqlpadExecutionService
 				Model model = SqlpadExecutionService.this.databaseModelResolver.resolve(cn, rs, UUID.gen());
 
 				ModelSqlResult modelSqlResult = SqlpadExecutionService.this.modelSqlSelectService.select(cn,
-						sqlStatement.getSql(), rs, model, 1, 20);
+						sqlStatement.getSql(), rs, model, 1, this.resultsetFetchSize);
 				modelSqlResult.setSql(null);
 
 				this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
@@ -685,14 +701,6 @@ public class SqlpadExecutionService
 					this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
 							sqlStatementIndex);
 				}
-			}
-
-			try
-			{
-				Thread.sleep(500);
-			}
-			catch (InterruptedException e)
-			{
 			}
 		}
 

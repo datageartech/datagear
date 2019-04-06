@@ -938,22 +938,36 @@
 		 */
 		setDataTableData : function(dataTable, data, notDraw)
 		{
+			$.addDataTableData(dataTable, data, 0, notDraw);
+		},
+		
+		/**
+		 * 添加表格数据
+		 */
+		addDataTableData : function(dataTable, datas, startRowIndex, notDraw)
+		{
 			var rows = dataTable.rows();
 			var removeRowIndexes = [];
 			var dataIndex = 0;
 			
-			rows.every(function(rowIndex)
+			if(startRowIndex != null)
 			{
-				if(dataIndex >= data.length)
-					removeRowIndexes.push(rowIndex);
-				else
-					this.data(data[dataIndex]);
-				
-				dataIndex++;
-			});
+				rows.every(function(rowIndex)
+				{
+					if(rowIndex < startRowIndex)
+						return;
+					
+					if(dataIndex >= datas.length)
+						removeRowIndexes.push(rowIndex);
+					else
+						this.data(datas[dataIndex]);
+					
+					dataIndex++;
+				});
+			}
 			
-			for(; dataIndex<data.length; dataIndex++)
-				var row = dataTable.row.add(data[dataIndex]);
+			for(; dataIndex<datas.length; dataIndex++)
+				var row = dataTable.row.add(datas[dataIndex]);
 			
 			dataTable.rows(removeRowIndexes).remove();
 			

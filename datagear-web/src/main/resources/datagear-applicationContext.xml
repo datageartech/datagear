@@ -332,8 +332,14 @@
 	<bean id="changelogResolver" class="org.datagear.web.util.ChangelogResolver" />
 	
 	<!-- cometd配置开始 -->
-	<bean id="bayeuxJsonContext" class="org.cometd.server.JacksonJSONContextServer" />
 	
+	<bean id="bayeuxJsonContext" class="org.cometd.server.JacksonJSONContextServer" />
+	<!--
+	<bean id="bayeuxJsonContext" class="org.datagear.web.sqlpad.FastjsonJSONContextServer">
+		<property name="serializeConfig" ref="serializeConfig" />
+		<property name="serializerFeatures" ref="serializerFeatures" />
+	</bean>
+	-->
 	<bean id="bayeuxServerFactory" class="org.datagear.web.util.BayeuxServerFactory">
 		<property name="options">
 			<map>
@@ -362,6 +368,8 @@
 	</bean>
 	<!-- cometd配置结束 -->
 	
+	<bean id="modelSqlSelectService" class="org.datagear.dbmodel.ModelSqlSelectService" />
+	
 	<bean id="sqlpadCometdService" class="org.datagear.web.sqlpad.SqlpadCometdService">
         <constructor-arg><ref local="bayeuxServer" /></constructor-arg>
     </bean>
@@ -371,6 +379,7 @@
     	<property name="messageSource" ref="messageSource" />
     	<property name="sqlpadCometdService" ref="sqlpadCometdService" />
     	<property name="databaseModelResolver" ref="databaseModelResolver" />
+    	<property name="modelSqlSelectService" ref="modelSqlSelectService" />
     </bean>
 	
 	<!-- 定时任务开始 -->

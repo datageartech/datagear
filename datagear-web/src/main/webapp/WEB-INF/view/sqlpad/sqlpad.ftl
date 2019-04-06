@@ -29,7 +29,7 @@ Schema schema 数据库，不允许为null
 		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearEditSql' /></button>		
 		<div class="more-operation-wrapper">
 			<button id="moreOperationButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.moreOperation' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.moreOperation' /></button>
-			<div class="more-operation-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
+			<div class="more-operation-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 				<form id="moreOperationForm" method="POST" action="#">
 					<div class="form-content">
 						<div class="form-item">
@@ -56,6 +56,12 @@ Schema schema 数据库，不允许为null
 							<div class="form-item-value">
 								<input type="text" name="overTimeThreashold" value="10" class="ui-widget ui-widget-content" style="width:4em;" title="<@spring.message code='sqlpad.overTimeThreashold.desc' />" />
 								<@spring.message code='sqlpad.overTimeThreashold.unit' />
+							</div>
+						</div>
+						<div class="form-item">
+							<div class="form-item-label"><label><@spring.message code='sqlpad.resultsetFetchSize' /></label></div>
+							<div class="form-item-value">
+								<input type="text" name="resultsetFetchSize" value="20" class="ui-widget ui-widget-content" style="width:4em;" title="<@spring.message code='sqlpad.resultsetFetchSize.desc' />" />
 							</div>
 						</div>
 					</div>
@@ -95,10 +101,16 @@ delete from t_address where city = '-99999999';
 				</div>
 			</div>
 			<div class="result-operations button-operation">
-				<button id="toggleAutoClearResultButton" class="result-message-button ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.keepResult' />"><span class="ui-button-icon ui-icon ui-icon-pin-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.keepResult' /></button>
-				<button id="clearResultButton" class="result-message-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearSqlResult' /></button>
-				
-				<button id="lockSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.lockSqlResultTab' />"><span class="ui-button-icon ui-icon ui-icon-locked"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.lockSqlResultTab' /></button>
+				<div class="result-message-buttons">
+					<button id="toggleAutoClearResultButton" class="result-message-button ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.keepResult' />"><span class="ui-button-icon ui-icon ui-icon-pin-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.keepResult' /></button>
+					<button id="clearSqlResultMessageButton" class="result-message-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearSqlResultMessage' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearSqlResultMessage' /></button>
+				</div>
+				<div class="sql-result-buttons">
+					<button id="moreSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
+					<button id="refreshSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
+					&nbsp;&nbsp;
+					<button id="lockSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.lockSqlResultTab' />"><span class="ui-button-icon ui-icon ui-icon-locked"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.lockSqlResultTab' /></button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -126,7 +138,7 @@ delete from t_address where city = '-99999999';
 	po.resultMessageElement = po.element("#${pageId}-resultMessage");
 	po.sqlResultTabs = po.element("#${pageId}-sqlResultTabs");
 	
-	$.initButtons(po.element(".head"));
+	$.initButtons(po.element(".head, .result-operations"));
 	po.element("#sqlCommitModeSet").buttonset();
 	po.element("#sqlExceptionHandleModeSet").buttonset();
 	
@@ -171,11 +183,11 @@ delete from t_address where city = '-99999999';
 		}
 	});
 	
-	po.executeSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold)
+	po.executeSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize)
 	{
 		if(po.cometdSubscribed)
 		{
-			po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold);
+			po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
 		}
 		else
 		{
@@ -191,13 +203,13 @@ delete from t_address where city = '-99999999';
 				{
 					po.cometdSubscribed = true;
 					
-					po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold);
+					po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
 				}
 			});
 		}
 	};
 	
-	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold)
+	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize)
 	{
 		if(!po.element("#toggleAutoClearResultButton").hasClass("ui-state-active"))
 			po.resultMessageElement.empty();
@@ -214,7 +226,8 @@ delete from t_address where city = '-99999999';
 				"sqlStartColumn" : sqlStartColumn,
 				"commitMode" : commitMode,
 				"exceptionHandleMode" : exceptionHandleMode,
-				"overTimeThreashold" : overTimeThreashold
+				"overTimeThreashold" : overTimeThreashold,
+				"resultsetFetchSize" : resultsetFetchSize
 			},
 			error : function()
 			{
@@ -541,7 +554,7 @@ delete from t_address where city = '-99999999';
 		+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'></div>"
 		+"</div>"
 		+"</li>";
-		
+	
 	po.getSqlResultTabPanelTableId = function(tabId)
 	{
 		return tabId + "-table";
@@ -598,13 +611,82 @@ delete from t_address where city = '-99999999';
 	    	po.refreshTabsNavForHidden(po.sqlResultTabs, tabsNav);
 	    }
 	    
-	    var form = $("<form style='display:none;' />").attr("id", po.getSqlResultTabPanelFormId(tabId)).appendTo(tabPanel);
-	    $("<textarea name='sql' />").val(sql).appendTo(form);
-	    $("<input name='startRow' />").val(modelSqlResult.nextStartRow).appendTo(form);
-	    $("<input name='fetchSize' />").val(modelSqlResult.fetchSize).appendTo(form);
-	    
 		var table = $("<table width='100%' class='hover stripe'></table>").attr("id", po.getSqlResultTabPanelTableId(tabId)).appendTo(tabPanel);
 		po.initSqlResultDataTable(tabId, table, sql, modelSqlResult);
+		
+		$("<div class='no-more-data-flag ui-widget ui-widget-content' />")
+			.attr("title", "<@spring.message code='sqlpad.noMoreData' />").appendTo(tabPanel);
+		
+	    var form = $("<form style='display:none;' />")
+	    	.attr("id", po.getSqlResultTabPanelFormId(tabId))
+	    	.attr("action", "${contextPath}/sqlpad/"+po.schemaId+"/select")
+	    	.attr("method", "POST")
+	    	.attr("tab-id", tabId)
+	    	.appendTo(tabPanel);
+	    
+	    $("<input name='sqlpadId' type='hidden' />").val(po.sqlpadId).appendTo(form);
+	    $("<textarea name='sql' />").val(sql).appendTo(form);
+	    $("<input name='startRow' type='hidden' />").val(modelSqlResult.nextStartRow).appendTo(form);
+	    $("<input name='fetchSize' type='hidden' />").val(modelSqlResult.fetchSize).appendTo(form);
+
+	    if(modelSqlResult.datas == null || modelSqlResult.datas.length < modelSqlResult.fetchSize)
+	    {
+	    	form.attr("no-more-data", "1");
+	    	$(".no-more-data-flag", tabPanel).show();
+	    }
+	    
+	    form.submit(function()
+	    {
+	    	var $this = $(this);
+	    	
+	    	if("1" == $this.attr("no-more-data"))
+	    	{
+	    		$.tipInfo("<@spring.message code='sqlpad.noMoreData' />");
+	    	}
+	    	else
+	    	{
+		    	po.element("#moreSqlResultTabButton").button("disable");
+		    	po.element("#refreshSqlResultTabButton").button("disable");
+		    	
+		    	$this.ajaxSubmit(
+	   			{
+	   				beforeSerialize: function($form, options)
+	   				{
+	   					var fetchSize = po.getResultsetFetchSize(po.element("#moreOperationForm"));
+	   					$("input[name='fetchSize']", $form).val(fetchSize);
+	   				},
+	   				success : function(modelSqlResult, statusText, xhr, $form)
+	   				{
+	   					$("input[name='startRow']", $form).val(modelSqlResult.nextStartRow);
+	   					
+	   					var tabId = $form.attr("tab-id");
+	   					var tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
+	   					
+	   					var dataTable = po.element("#" + po.getSqlResultTabPanelTableId(tabId), tabPanel).DataTable();
+	   					
+	   					$.addDataTableData(dataTable, modelSqlResult.datas, modelSqlResult.startRow-1);
+	   					
+	   					if(modelSqlResult.datas.length < modelSqlResult.fetchSize)
+	   					{
+	   						$form.attr("no-more-data", "1");
+	   						$(".no-more-data-flag", tabPanel).show();
+	   					}
+	   					else
+	   					{
+	   						$form.attr("no-more-data", "0");
+	   						$(".no-more-data-flag", tabPanel).hide();
+	   					}
+	   				},
+	   				complete : function()
+	   				{
+	   			    	po.element("#moreSqlResultTabButton").button("enable");
+	   			    	po.element("#refreshSqlResultTabButton").button("enable");
+	   				}
+	   			});
+	    	}
+	    	
+	    	return false;
+	    });
 	};
 	
 	po.calSqlResultTableHeight = function(tabIdOrTabPanel)
@@ -612,7 +694,17 @@ delete from t_address where city = '-99999999';
 		if(typeof(tabIdOrTabPanel) == "string")
 			tabIdOrTabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabIdOrTabPanel);
 		
-		return tabIdOrTabPanel.height() - 35;
+		return tabIdOrTabPanel.height() - 37;
+	};
+
+	po.renderRowNumberColumn = function(data, type, row, meta)
+	{
+		var row = meta.row;
+		
+		if(row.length > 0)
+			row = row[0];
+		
+		return row + 1;
 	};
 	
 	po.initSqlResultDataTable = function(tabId, $table, sql, modelSqlResult)
@@ -620,9 +712,17 @@ delete from t_address where city = '-99999999';
 		var model = modelSqlResult.model;
 		var columns = $.buildDataTablesColumns(model);
 		
+		var newColumns = [
+			{
+				title : "<@spring.message code='rowNumber' />", data : "", defaultContent: "",
+				render : po.renderRowNumberColumn, className : "column-row-number"
+			}
+		];
+		newColumns = newColumns.concat(columns);
+		
 		var settings =
 		{
-			"columns" : columns,
+			"columns" : newColumns,
 			"data" : (modelSqlResult.datas ? modelSqlResult.datas : []),
 			"scrollX": true,
 			"autoWidth": true,
@@ -688,6 +788,34 @@ delete from t_address where city = '-99999999';
 		});
 	};
 	
+	po.getOverTimeThreashold = function($form)
+	{
+		var overTimeThreashold = parseInt(po.element("input[name='overTimeThreashold']", $form).val());
+		
+		if(isNaN(overTimeThreashold))
+			overTimeThreashold = 10;
+		else if(overTimeThreashold < 1)
+			overTimeThreashold = 1;
+		else if(overTimeThreashold > 60)
+			overTimeThreashold = 60;
+		
+		return overTimeThreashold;
+	};
+	
+	po.getResultsetFetchSize = function($form)
+	{
+		var resultsetFetchSize = parseInt(po.element("input[name='resultsetFetchSize']", $form).val());
+		
+		if(isNaN(resultsetFetchSize))
+			resultsetFetchSize = 20;
+		else if(resultsetFetchSize < 1)
+			resultsetFetchSize = 1;
+		else if(resultsetFetchSize > 1000)
+			resultsetFetchSize = 1000;
+		
+		return resultsetFetchSize;
+	};
+	
 	po.element("#executeSqlButton").click(function()
 	{
 		var $this = $(this);
@@ -721,16 +849,12 @@ delete from t_address where city = '-99999999';
 			if(!sql)
 				return;
 			
-			var commitMode = po.element("input[name='sqlCommitMode']:checked").val();
-			var exceptionHandleMode = po.element("input[name='sqlExceptionHandleMode']:checked").val();
-			var overTimeThreashold = parseInt(po.element("input[name='overTimeThreashold']").val());
+			var moreOperationForm = po.element("#moreOperationForm");
 			
-			if(isNaN(overTimeThreashold))
-				overTimeThreashold = 10;
-			else if(overTimeThreashold < 1)
-				overTimeThreashold = 1;
-			else if(overTimeThreashold > 60)
-				overTimeThreashold = 60;
+			var commitMode = po.element("input[name='sqlCommitMode']:checked", moreOperationForm).val();
+			var exceptionHandleMode = po.element("input[name='sqlExceptionHandleMode']:checked", moreOperationForm).val();
+			var overTimeThreashold = po.getOverTimeThreashold(moreOperationForm);
+			var resultsetFetchSize = po.getResultsetFetchSize(moreOperationForm);
 			
 			var cometd = $.cometd;
 			
@@ -743,12 +867,12 @@ delete from t_address where city = '-99999999';
 				{
 					if(handshakeReply.successful)
 					{
-						po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold);
+						po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
 					}
 				});
 			}
 			else
-				po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold);
+				po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
 		}
 		
 		po.sqlEditor.focus();
@@ -826,9 +950,34 @@ delete from t_address where city = '-99999999';
 		}
 	});
 	
-	po.element("#clearResultButton").click(function()
+	po.element("#clearSqlResultMessageButton").click(function()
 	{
 		po.resultMessageElement.empty();
+	});
+	
+	po.element("#moreSqlResultTabButton").click(function()
+	{
+		var tabsNav = po.getTabsNav(po.sqlResultTabs);
+		var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
+		var activeTabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
+		var activeTabFormId = po.getSqlResultTabPanelFormId(activeTabId);
+		var activeTabForm = po.element("#" + activeTabFormId);
+		
+		activeTabForm.submit();
+	});
+	
+	po.element("#refreshSqlResultTabButton").click(function()
+	{
+		var tabsNav = po.getTabsNav(po.sqlResultTabs);
+		var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
+		var activeTabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
+		var activeTabFormId = po.getSqlResultTabPanelFormId(activeTabId);
+		var activeTabForm = po.element("#" + activeTabFormId);
+		
+		$("input[name='startRow']", activeTabForm).val(1);
+		activeTabForm.attr("no-more-data", "0");
+		
+		activeTabForm.submit();
 	});
 
 	po.element("#lockSqlResultTabButton").click(function()
@@ -849,11 +998,13 @@ delete from t_address where city = '-99999999';
 	{
 		rules :
 		{
-			overTimeThreashold : { required : true, integer : true, min : 1, max : 60 }
+			overTimeThreashold : { required : true, integer : true, min : 1, max : 60 },
+			resultsetFetchSize : { required : true, integer : true, min : 1, max : 1000 }
 		},
 		messages :
 		{
-			overTimeThreashold : "<@spring.message code='sqlpad.overTimeThreashold.validation' />"
+			overTimeThreashold : "<@spring.message code='sqlpad.overTimeThreashold.validation' />",
+			resultsetFetchSize : "<@spring.message code='sqlpad.resultsetFetchSize.validation' />"
 		},
 		submitHandler : function(form)
 		{
@@ -896,13 +1047,13 @@ delete from t_address where city = '-99999999';
 			
 			if(newTab.hasClass("sql-result-tab"))
 			{
-				$(".result-message-button", resultOperations).hide();
-				$(".sql-result-button", resultOperations).show();
+				$(".result-message-buttons", resultOperations).hide();
+				$(".sql-result-buttons", resultOperations).show();
 			}
 			else if(newTab.hasClass("result-message-tab"))
 			{
-				$(".sql-result-button", resultOperations).hide();
-				$(".result-message-button", resultOperations).show();
+				$(".sql-result-buttons", resultOperations).hide();
+				$(".result-message-buttons", resultOperations).show();
 			}
 			
 			$.callTabsPanelShowCallback(newPanel);
@@ -932,7 +1083,7 @@ delete from t_address where city = '-99999999';
 	
 	po.element("input[name='sqlCommitMode'][value='AUTO']").click();
 	po.element(".more-operation-panel").hide();
-	po.element(".result-operations .sql-result-button").hide();
+	po.element(".result-operations .sql-result-buttons").hide();
 	
 	po.bindTabsMenuHiddenEvent(po.sqlResultTabs);
 })

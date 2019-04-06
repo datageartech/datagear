@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
+import org.datagear.dbmodel.DatabaseModelResolver;
+import org.datagear.dbmodel.ModelSqlSelectService;
+import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
 import org.datagear.persistence.support.UUID;
@@ -43,6 +46,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/sqlpad")
 public class SqlpadController extends AbstractSchemaConnController
 {
+	public static final int DEFAULT_SQL_RESULTSET_FETCH_SIZE = 20;
+
+	@Autowired
+	private ModelSqlSelectService modelSqlSelectService;
+
+	@Autowired
+	private DatabaseModelResolver databaseModelResolver;
+
 	@Autowired
 	private SqlpadExecutionService sqlpadExecutionService;
 
@@ -52,10 +63,33 @@ public class SqlpadController extends AbstractSchemaConnController
 	}
 
 	public SqlpadController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource,
-			SqlpadExecutionService sqlpadExecutionService)
+			SchemaService schemaService, ConnectionSource connectionSource, ModelSqlSelectService modelSqlSelectService,
+			DatabaseModelResolver databaseModelResolver, SqlpadExecutionService sqlpadExecutionService)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
+		this.modelSqlSelectService = modelSqlSelectService;
+		this.databaseModelResolver = databaseModelResolver;
+		this.sqlpadExecutionService = sqlpadExecutionService;
+	}
+
+	public ModelSqlSelectService getModelSqlSelectService()
+	{
+		return modelSqlSelectService;
+	}
+
+	public void setModelSqlSelectService(ModelSqlSelectService modelSqlSelectService)
+	{
+		this.modelSqlSelectService = modelSqlSelectService;
+	}
+
+	public DatabaseModelResolver getDatabaseModelResolver()
+	{
+		return databaseModelResolver;
+	}
+
+	public void setDatabaseModelResolver(DatabaseModelResolver databaseModelResolver)
+	{
+		this.databaseModelResolver = databaseModelResolver;
 	}
 
 	public SqlpadExecutionService getSqlpadExecutionService()
@@ -99,7 +133,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			@RequestParam(value = "sqlStartColumn", required = false) Integer sqlStartColumn,
 			@RequestParam(value = "commitMode", required = false) CommitMode commitMode,
 			@RequestParam(value = "exceptionHandleMode", required = false) ExceptionHandleMode exceptionHandleMode,
-			@RequestParam(value = "overTimeThreashold", required = false) Integer overTimeThreashold) throws Throwable
+			@RequestParam(value = "overTimeThreashold", required = false) Integer overTimeThreashold,
+			@RequestParam(value = "resultsetFetchSize", required = false) Integer resultsetFetchSize) throws Throwable
 	{
 		Schema schema = getSchemaNotNull(request, response, schemaId);
 
@@ -122,10 +157,13 @@ public class SqlpadController extends AbstractSchemaConnController
 		else if (overTimeThreashold > 60)
 			overTimeThreashold = 60;
 
+		if (resultsetFetchSize == null)
+			resultsetFetchSize = DEFAULT_SQL_RESULTSET_FETCH_SIZE;
+
 		List<SqlStatement> sqlStatements = sqlScriptParser.parse();
 
 		this.sqlpadExecutionService.submit(sqlpadId, schema, sqlStatements, commitMode, exceptionHandleMode,
-				overTimeThreashold, WebUtils.getLocale(request));
+				overTimeThreashold, resultsetFetchSize, WebUtils.getLocale(request));
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
 	}
@@ -139,6 +177,50 @@ public class SqlpadController extends AbstractSchemaConnController
 		this.sqlpadExecutionService.command(sqlpadId, sqlCommand);
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
+	}
+
+	@RequestMapping(value = "/{schemaId}/select", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ModelSqlResult select(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("sql") final String sql,
+			@RequestParam(value = "startRow", required = false) Integer startRow,
+			@RequestParam(value = "fetchSize", required = false) Integer fetchSize,
+			@RequestParam(value = "returnModel", required = false) Boolean returnModel) throws Throwable
+	{
+		if (startRow == null)
+			startRow = 1;
+		if (fetchSize == null)
+			fetchSize = DEFAULT_SQL_RESULTSET_FETCH_SIZE;
+		if (returnModel == null)
+			returnModel = false;
+
+		if (fetchSize < 1)
+			fetchSize = 1;
+		if (fetchSize > 1000)
+			fetchSize = 1000;
+
+		final int startRowFinal = startRow;
+		final int fetchSizeFinal = fetchSize;
+
+		ModelSqlResult modelSqlResult = new ReturnSchemaConnExecutor<ModelSqlResult>(request, response, springModel,
+				schemaId, true)
+		{
+			@Override
+			protected ModelSqlResult execute(HttpServletRequest request, HttpServletResponse response,
+					Model springModel, Schema schema) throws Throwable
+			{
+				ModelSqlResult modelSqlResult = modelSqlSelectService.select(getConnection(), sql, startRowFinal,
+						fetchSizeFinal, databaseModelResolver);
+
+				return modelSqlResult;
+			}
+		}.execute();
+
+		if (!Boolean.TRUE.equals(returnModel))
+			modelSqlResult.setModel(null);
+
+		return modelSqlResult;
 	}
 
 	protected String generateSqlpadId(HttpServletRequest request, HttpServletResponse response)
