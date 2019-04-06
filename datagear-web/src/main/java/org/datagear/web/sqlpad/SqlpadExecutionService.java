@@ -432,7 +432,7 @@ public class SqlpadExecutionService
 			{
 				cn = getSchemaConnection(this.schema);
 				cn.setAutoCommit(false);
-				st = cn.createStatement();
+				st = createStatement(cn);
 			}
 			catch (Throwable t)
 			{
@@ -716,6 +716,11 @@ public class SqlpadExecutionService
 
 			this.sqlpadCometdService.sendSqlCommandMessage(this._sqlpadServerChannel, sqlCommand,
 					getMessage(this.locale, messageKey, messageArgs));
+		}
+
+		protected Statement createStatement(Connection cn) throws SQLException
+		{
+			return ModelSqlSelectService.createScrollableSelectStatement(cn);
 		}
 
 		/**

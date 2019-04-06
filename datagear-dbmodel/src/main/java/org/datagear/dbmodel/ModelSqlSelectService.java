@@ -51,7 +51,7 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 		ResultSet rs = null;
 		try
 		{
-			st = cn.createStatement();
+			st = createStatement(cn);
 			rs = st.executeQuery(sql);
 
 			Model model = databaseModelResolver.resolve(cn, rs, UUID.gen());
@@ -83,7 +83,7 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 		ResultSet rs = null;
 		try
 		{
-			st = cn.createStatement();
+			st = createStatement(cn);
 			rs = st.executeQuery(sql);
 
 			return select(cn, sql, rs, model, startRow, fetchSize);
@@ -154,6 +154,23 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 		modelSqlResult.setDatas(datas);
 
 		return modelSqlResult;
+	}
+
+	protected Statement createStatement(Connection cn) throws SQLException
+	{
+		return createScrollableSelectStatement(cn);
+	}
+
+	/**
+	 * 创建用于可定位查询的{@linkplain Statement}。
+	 * 
+	 * @param cn
+	 * @return
+	 * @throws SQLException
+	 */
+	public static Statement createScrollableSelectStatement(Connection cn) throws SQLException
+	{
+		return cn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 	}
 
 	/**
