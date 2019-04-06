@@ -8,7 +8,10 @@
 /*当前行*/
 .ace-tm .ace_gutter-active-line,
 .ace-tm .ace_marker-layer .ace_active-line{
-	background-color: #555;	
+	background-color: #2f2f2f;	
+}
+.ace-tm .ace_gutter-active-line{
+	font-weight: bold;
 }
 /*关键字*/
 .ace-tm .ace_storage, .ace-tm .ace_keyword{
