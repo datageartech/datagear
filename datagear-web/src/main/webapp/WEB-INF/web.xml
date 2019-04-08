@@ -50,6 +50,7 @@
 	</filter>
 	<filter-mapping>
 		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/logout</url-pattern>
 		<servlet-name>dispatcherServlet</servlet-name>
 	</filter-mapping>
 	

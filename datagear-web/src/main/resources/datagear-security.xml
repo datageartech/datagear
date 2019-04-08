@@ -66,7 +66,7 @@
 		<remember-me key="REMEMBER_ME_KEY" remember-me-parameter="autoLogin" token-validity-seconds="94608000"
 			user-service-ref="userDetailsService" />
 		
-		<logout logout-url="/logout" invalidate-session="true" />
+		<logout logout-url="/logout" invalidate-session="true" logout-success-url="/" />
 		
 	</http>
 	
