@@ -6,7 +6,7 @@ from
 	t_order
 ;
 
-//comment
+
 
 select * from t_product;delete
 
@@ -23,3 +23,21 @@ t_user
 
 
 set name = '3';
+
+--@delimiter --;
+select ; from
+t_user;
+where id = 3
+--;
+
+--@delimiter ;
+select * from a;select * from b;
+select * from c;
+
+
+--@delimiter /*d*/
+select * from a/*d*/select * from b/*d*/
+select * from c
+--
+/*d*/
+

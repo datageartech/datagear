@@ -41,7 +41,7 @@ public class SqlScriptParserTest
 		assertEquals(0, sqlStatement.getStartRow());
 		assertEquals(0, sqlStatement.getStartColumn());
 		assertEquals(0, sqlStatement.getEndRow());
-		assertEquals(script.length(), sqlStatement.getEndColumn());
+		assertEquals(script.length() - 1, sqlStatement.getEndColumn());
 	}
 
 	@Test
@@ -61,15 +61,14 @@ public class SqlScriptParserTest
 		assertEquals(0, sqlStatement.getStartRow());
 		assertEquals(0, sqlStatement.getStartColumn());
 		assertEquals(0, sqlStatement.getEndRow());
-		assertEquals(script.length(), sqlStatement.getEndColumn());
+		assertEquals(script.length() - 1, sqlStatement.getEndColumn());
 	}
 
 	@Test
 	public void parseTestDefaultDelimiterSingleLine() throws IOException
 	{
 		String script = "--start comment" + SqlScriptParser.LINE_SEPARATOR + "select * from"
-				+ SqlScriptParser.LINE_SEPARATOR + "-- center comment" + SqlScriptParser.LINE_SEPARATOR + " t_order;  "
-				+ SqlScriptParser.LINE_SEPARATOR + "//end comment";
+				+ SqlScriptParser.LINE_SEPARATOR + "-- center comment" + SqlScriptParser.LINE_SEPARATOR + " t_order;  ";
 
 		SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
@@ -79,12 +78,12 @@ public class SqlScriptParserTest
 
 		SqlStatement sqlStatement = sqlStatements.get(0);
 
-		assertEquals("select * from" + SqlScriptParser.LINE_SEPARATOR + SqlScriptParser.LINE_SEPARATOR + " t_order",
-				sqlStatement.getSql());
+		assertEquals("select * from" + SqlScriptParser.LINE_SEPARATOR + "-- center comment"
+				+ SqlScriptParser.LINE_SEPARATOR + " t_order", sqlStatement.getSql());
 		assertEquals(1, sqlStatement.getStartRow());
 		assertEquals(0, sqlStatement.getStartColumn());
 		assertEquals(3, sqlStatement.getEndRow());
-		assertEquals(9, sqlStatement.getEndColumn());
+		assertEquals(" t_order".length(), sqlStatement.getEndColumn());
 	}
 
 	@Test
@@ -105,7 +104,7 @@ public class SqlScriptParserTest
 			assertEquals(0, sqlStatement.getStartRow());
 			assertEquals(0, sqlStatement.getStartColumn());
 			assertEquals(0, sqlStatement.getEndRow());
-			assertEquals("select * from t_order;".length(), sqlStatement.getEndColumn());
+			assertEquals("select * from t_order".length(), sqlStatement.getEndColumn());
 		}
 
 		{
@@ -115,7 +114,7 @@ public class SqlScriptParserTest
 			assertEquals(0, sqlStatement.getStartRow());
 			assertEquals("select * from t_order;".length(), sqlStatement.getStartColumn());
 			assertEquals(0, sqlStatement.getEndRow());
-			assertEquals("select * from t_order;update t_product set name='5';".length(), sqlStatement.getEndColumn());
+			assertEquals("select * from t_order;update t_product set name='5'".length(), sqlStatement.getEndColumn());
 		}
 
 		{
@@ -126,7 +125,7 @@ public class SqlScriptParserTest
 			assertEquals("select * from t_order;update t_product set name='5';".length(),
 					sqlStatement.getStartColumn());
 			assertEquals(0, sqlStatement.getEndRow());
-			assertEquals(script.length(), sqlStatement.getEndColumn());
+			assertEquals(script.length() - 1, sqlStatement.getEndColumn());
 		}
 	}
 
@@ -148,7 +147,7 @@ public class SqlScriptParserTest
 			assertEquals(0, sqlStatement.getStartRow());
 			assertEquals(0, sqlStatement.getStartColumn());
 			assertEquals(0, sqlStatement.getEndRow());
-			assertEquals("  \t  select * from t_order ;".length(), sqlStatement.getEndColumn());
+			assertEquals("  \t  select * from t_order ".length(), sqlStatement.getEndColumn());
 		}
 
 		{
@@ -158,7 +157,7 @@ public class SqlScriptParserTest
 			assertEquals(0, sqlStatement.getStartRow());
 			assertEquals("  \t  select * from t_order ;".length(), sqlStatement.getStartColumn());
 			assertEquals(0, sqlStatement.getEndRow());
-			assertEquals("  \t  select * from t_order ; \t update t_product set name='5' ;".length(),
+			assertEquals("  \t  select * from t_order ; \t update t_product set name='5' ".length(),
 					sqlStatement.getEndColumn());
 		}
 
@@ -171,7 +170,7 @@ public class SqlScriptParserTest
 					sqlStatement.getStartColumn());
 			assertEquals(0, sqlStatement.getEndRow());
 			assertEquals(
-					"  \t  select * from t_order ; \t update t_product set name='5' ; \t delete from t_user;".length(),
+					"  \t  select * from t_order ; \t update t_product set name='5' ; \t delete from t_user".length(),
 					sqlStatement.getEndColumn());
 		}
 	}
@@ -197,7 +196,7 @@ public class SqlScriptParserTest
 			assertEquals(0, sqlStatement.getStartRow());
 			assertEquals(0, sqlStatement.getStartColumn());
 			assertEquals(1, sqlStatement.getEndRow());
-			assertEquals(" from t_order;".length(), sqlStatement.getEndColumn());
+			assertEquals(" from t_order".length(), sqlStatement.getEndColumn());
 		}
 
 		{
@@ -207,7 +206,7 @@ public class SqlScriptParserTest
 			assertEquals(3, sqlStatement.getStartRow());
 			assertEquals(0, sqlStatement.getStartColumn());
 			assertEquals(3, sqlStatement.getEndRow());
-			assertEquals(" \t update t_product set name='5' ;".length(), sqlStatement.getEndColumn());
+			assertEquals(" \t update t_product set name='5' ".length(), sqlStatement.getEndColumn());
 		}
 
 		{
@@ -217,7 +216,7 @@ public class SqlScriptParserTest
 			assertEquals(5, sqlStatement.getStartRow());
 			assertEquals(0, sqlStatement.getStartColumn());
 			assertEquals(5, sqlStatement.getEndRow());
-			assertEquals(" \t delete from t_user;".length(), sqlStatement.getEndColumn());
+			assertEquals(" \t delete from t_user".length(), sqlStatement.getEndColumn());
 		}
 	}
 
@@ -233,7 +232,7 @@ public class SqlScriptParserTest
 
 		List<SqlStatement> sqlStatements = parser.parse();
 
-		assertEquals(4, sqlStatements.size());
+		assertEquals(11, sqlStatements.size());
 
 		{
 			SqlStatement sqlStatement = sqlStatements.get(0);
@@ -242,8 +241,8 @@ public class SqlScriptParserTest
 					+ SqlScriptParser.LINE_SEPARATOR + "\tt_order", sqlStatement.getSql());
 			assertEquals(2, sqlStatement.getStartRow());
 			assertEquals(0, sqlStatement.getStartColumn());
-			assertEquals(6, sqlStatement.getEndRow());
-			assertEquals(1, sqlStatement.getEndColumn());
+			assertEquals(5, sqlStatement.getEndRow());
+			assertEquals("	t_order".length(), sqlStatement.getEndColumn());
 		}
 
 		{
@@ -253,7 +252,7 @@ public class SqlScriptParserTest
 			assertEquals(10, sqlStatement.getStartRow());
 			assertEquals(0, sqlStatement.getStartColumn());
 			assertEquals(10, sqlStatement.getEndRow());
-			assertEquals("select * from t_product;".length(), sqlStatement.getEndColumn());
+			assertEquals("select * from t_product".length(), sqlStatement.getEndColumn());
 		}
 
 		{
@@ -264,17 +263,91 @@ public class SqlScriptParserTest
 			assertEquals(10, sqlStatement.getStartRow());
 			assertEquals("select * from t_product;".length(), sqlStatement.getStartColumn());
 			assertEquals(13, sqlStatement.getEndRow());
-			assertEquals("	t_user;".length(), sqlStatement.getEndColumn());
+			assertEquals("	t_user".length(), sqlStatement.getEndColumn());
 		}
 
 		{
 			SqlStatement sqlStatement = sqlStatements.get(3);
 
-			assertEquals("update \r\n\r\n\r\n\r\nt_user \r\n\r\n\r\nset name = '3'", sqlStatement.getSql());
+			assertEquals("update " + SqlScriptParser.LINE_SEPARATOR + SqlScriptParser.LINE_SEPARATOR + "--comment"
+					+ SqlScriptParser.LINE_SEPARATOR + SqlScriptParser.LINE_SEPARATOR + "t_user "
+					+ SqlScriptParser.LINE_SEPARATOR + SqlScriptParser.LINE_SEPARATOR + SqlScriptParser.LINE_SEPARATOR
+					+ "set name = '3'", sqlStatement.getSql());
 			assertEquals(17, sqlStatement.getStartRow());
 			assertEquals(0, sqlStatement.getStartColumn());
 			assertEquals(24, sqlStatement.getEndRow());
-			assertEquals("set name = '3';".length(), sqlStatement.getEndColumn());
+			assertEquals("set name = '3'".length(), sqlStatement.getEndColumn());
+		}
+
+		{
+			SqlStatement sqlStatement = sqlStatements.get(4);
+
+			assertEquals("select ; from" + SqlScriptParser.LINE_SEPARATOR + "t_user;" + SqlScriptParser.LINE_SEPARATOR
+					+ "where id = 3", sqlStatement.getSql());
+			assertEquals(27, sqlStatement.getStartRow());
+			assertEquals(0, sqlStatement.getStartColumn());
+			assertEquals(29, sqlStatement.getEndRow());
+			assertEquals("where id = 3".length(), sqlStatement.getEndColumn());
+		}
+
+		{
+			SqlStatement sqlStatement = sqlStatements.get(5);
+
+			assertEquals("select * from a", sqlStatement.getSql());
+			assertEquals(33, sqlStatement.getStartRow());
+			assertEquals(0, sqlStatement.getStartColumn());
+			assertEquals(33, sqlStatement.getEndRow());
+			assertEquals("select * from a".length(), sqlStatement.getEndColumn());
+		}
+
+		{
+			SqlStatement sqlStatement = sqlStatements.get(6);
+
+			assertEquals("select * from b", sqlStatement.getSql());
+			assertEquals(33, sqlStatement.getStartRow());
+			assertEquals("select * from a;".length(), sqlStatement.getStartColumn());
+			assertEquals(33, sqlStatement.getEndRow());
+			assertEquals("select * from a;select * from b".length(), sqlStatement.getEndColumn());
+		}
+
+		{
+			SqlStatement sqlStatement = sqlStatements.get(7);
+
+			assertEquals("select * from c", sqlStatement.getSql());
+			assertEquals(34, sqlStatement.getStartRow());
+			assertEquals(0, sqlStatement.getStartColumn());
+			assertEquals(34, sqlStatement.getEndRow());
+			assertEquals("select * from c".length(), sqlStatement.getEndColumn());
+		}
+
+		{
+			SqlStatement sqlStatement = sqlStatements.get(8);
+
+			assertEquals("select * from a", sqlStatement.getSql());
+			assertEquals(38, sqlStatement.getStartRow());
+			assertEquals(0, sqlStatement.getStartColumn());
+			assertEquals(38, sqlStatement.getEndRow());
+			assertEquals("select * from a".length(), sqlStatement.getEndColumn());
+		}
+
+		{
+			SqlStatement sqlStatement = sqlStatements.get(9);
+
+			assertEquals("select * from b", sqlStatement.getSql());
+			assertEquals(38, sqlStatement.getStartRow());
+			assertEquals("select * from a/*d*/".length(), sqlStatement.getStartColumn());
+			assertEquals(38, sqlStatement.getEndRow());
+			assertEquals("select * from a/*d*/select * from b".length(), sqlStatement.getEndColumn());
+		}
+
+		{
+			SqlStatement sqlStatement = sqlStatements.get(10);
+
+			assertEquals("select * from c" + SqlScriptParser.LINE_SEPARATOR + "--", sqlStatement.getSql());
+			assertEquals(39, sqlStatement.getStartRow());
+			assertEquals(0, sqlStatement.getStartColumn());
+			assertEquals(40, sqlStatement.getEndRow());
+			assertEquals("--".length(), sqlStatement.getEndColumn());
 		}
 	}
 

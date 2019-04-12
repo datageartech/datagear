@@ -48,7 +48,7 @@ public class SqlScriptParser
 	/** 解析过程：当前SQL的结束行号（包含） */
 	protected int _currentSqlEndRow = 0;
 	/** 解析过程：当前SQL的结束行中的结束列（不包含） */
-	protected int _currentsqlEndColumn = 0;
+	protected int _currentSqlEndColumn = 0;
 
 	public SqlScriptParser()
 	{
@@ -95,7 +95,7 @@ public class SqlScriptParser
 		this.contextStartColumn = contextStartColumn;
 
 		this._currentSqlStartColumn = contextStartColumn;
-		this._currentsqlEndColumn = contextStartColumn;
+		this._currentSqlEndColumn = contextStartColumn;
 	}
 
 	public String getDelimiter()
@@ -153,6 +153,8 @@ public class SqlScriptParser
 	{
 		boolean isSqlBuilderEmpty = isEmpty(sqlBuilder);
 
+		boolean findDelimiter = true;
+
 		String trimmedLine = line.trim();
 
 		// 空行
@@ -163,20 +165,29 @@ public class SqlScriptParser
 				sqlBuilder.append(line);
 				sqlBuilder.append(LINE_SEPARATOR);
 			}
+
+			findDelimiter = false;
 		}
-		// 注释行
-		else if (isCommentLine(trimmedLine))
+
+		boolean isCommentLine = isCommentLine(trimmedLine);
+
+		if (isCommentLine)
 		{
 			Matcher matcher = DELIMITER_PATTERN.matcher(trimmedLine);
+
+			// 分隔符声明行
 			if (matcher.find())
+			{
 				this.delimiter = matcher.group(5);
 
-			if (!isSqlBuilderEmpty)
-			{
-				sqlBuilder.append(LINE_SEPARATOR);
+				if (!isSqlBuilderEmpty)
+					sqlBuilder.append(LINE_SEPARATOR);
+
+				findDelimiter = false;
 			}
 		}
-		else
+
+		if (findDelimiter)
 		{
 			if (isSqlBuilderEmpty)
 				_currentSqlStartRow = _currentRow;
@@ -186,7 +197,7 @@ public class SqlScriptParser
 
 			while (handleIndex < lineLength)
 			{
-				if (isEmpty(sqlBuilder))
+				if (isSqlBuilderEmpty)
 					_currentSqlStartColumn = handleIndex;
 
 				int delimiterIndex = findNextDelimiterIndex(sqlBuilder, line, handleIndex);
@@ -194,30 +205,38 @@ public class SqlScriptParser
 				// 没有分隔符
 				if (delimiterIndex < 0)
 				{
-					if (handleIndex == 0)
-						sqlBuilder.append(line);
+					// 忽略无用注释行
+					if (isCommentLine && isSqlBuilderEmpty)
+						;
 					else
+					{
 						sqlBuilder.append(line.substring(handleIndex));
-					sqlBuilder.append(LINE_SEPARATOR);
+						sqlBuilder.append(LINE_SEPARATOR);
 
-					_currentSqlEndRow = _currentRow;
-					_currentsqlEndColumn = lineLength;
+						_currentSqlEndRow = _currentRow;
+						_currentSqlEndColumn = lineLength;
+
+						isSqlBuilderEmpty = false;
+					}
 
 					handleIndex = lineLength;
 				}
 				else
 				{
-					_currentSqlEndRow = _currentRow;
-					_currentsqlEndColumn = delimiterIndex + delimiter.length();
+					if (delimiterIndex > 0)
+					{
+						_currentSqlEndRow = _currentRow;
+						_currentSqlEndColumn = delimiterIndex;
 
-					String scriptBefore = line.substring(handleIndex, delimiterIndex);
-					sqlBuilder.append(scriptBefore);
+						String scriptBefore = line.substring(handleIndex, delimiterIndex);
+						sqlBuilder.append(scriptBefore);
+					}
 
 					addSqlStatement(sqlStatements, sqlBuilder);
+					clear(sqlBuilder);
 
-					sqlBuilder.delete(0, sqlBuilder.length());
-
-					handleIndex = _currentsqlEndColumn;
+					isSqlBuilderEmpty = true;
+					handleIndex = delimiterIndex + this.delimiter.length();
 				}
 			}
 		}
@@ -226,7 +245,10 @@ public class SqlScriptParser
 	}
 
 	/**
-	 * 在SQL行中查找下一个分隔符位置，没有返回{@code -1}。
+	 * 在SQL行中查找下一个分隔符位置。
+	 * <p>
+	 * 返回{@code <0}表示没有分隔符。
+	 * </p>
 	 * 
 	 * @param sqlBuilder
 	 * @param line
@@ -235,19 +257,7 @@ public class SqlScriptParser
 	 */
 	protected int findNextDelimiterIndex(StringBuilder sqlBuilder, String line, int startIndex)
 	{
-		int delimiterIndex = -1;
-
-		if (DEFAULT_DELIMITER.equals(this.delimiter))
-		{
-			// TODO 特殊处理SQL字符串、函数、存储过程，因为它们中间可能包含';'字符
-			delimiterIndex = line.indexOf(this.delimiter, startIndex);
-		}
-		else
-		{
-			delimiterIndex = line.indexOf(this.delimiter, startIndex);
-		}
-
-		return delimiterIndex;
+		return line.indexOf(this.delimiter, startIndex);
 	}
 
 	/**
@@ -260,10 +270,10 @@ public class SqlScriptParser
 	protected boolean addSqlStatement(List<SqlStatement> sqlStatements, StringBuilder sqlBuilder)
 	{
 		String sql = sqlBuilder.toString().trim();
-		if (!sql.isEmpty() && !isAsteriskPairComment(sql))
+		if (!sql.isEmpty() && !isAsteriskComment(sql))
 		{
 			SqlStatement sqlStatement = new SqlStatement(sql, _currentSqlStartRow, _currentSqlStartColumn,
-					_currentSqlEndRow, _currentsqlEndColumn);
+					_currentSqlEndRow, _currentSqlEndColumn);
 
 			sqlStatements.add(sqlStatement);
 
@@ -279,7 +289,7 @@ public class SqlScriptParser
 	 * @param trimmedString
 	 * @return
 	 */
-	protected boolean isAsteriskPairComment(String trimmedString)
+	protected boolean isAsteriskComment(String trimmedString)
 	{
 		return trimmedString.startsWith("/*") && trimmedString.endsWith("*/");
 	}
@@ -292,7 +302,7 @@ public class SqlScriptParser
 	 */
 	protected boolean isCommentLine(String trimmedLine)
 	{
-		return trimmedLine.startsWith("//") || trimmedLine.startsWith("--");
+		return trimmedLine.startsWith("--") || trimmedLine.startsWith("//");
 	}
 
 	/**
@@ -304,6 +314,21 @@ public class SqlScriptParser
 	protected boolean isEmpty(StringBuilder stringBuilder)
 	{
 		return (stringBuilder.length() == 0);
+	}
+
+	/**
+	 * 清空{@linkplain StringBuilder}。
+	 * 
+	 * @param stringBuilder
+	 */
+	protected void clear(StringBuilder stringBuilder)
+	{
+		int len = stringBuilder.length();
+
+		if (len == 0)
+			return;
+
+		stringBuilder.delete(0, len);
 	}
 
 	/**
