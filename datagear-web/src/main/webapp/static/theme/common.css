@@ -1235,6 +1235,13 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	height: 1.2em;
 	padding: 0.25em 0;
 }
+.page-sqlpad .head .sql-delimiter-input{
+	width: 3.6em;
+	height: 1.0em;
+	vertical-align: top;
+	padding-left: 0.2em;
+	padding-right: 0.2em;
+}
 .page-sqlpad .head .more-operation-wrapper{
 	float: right;
 	width: 10%;

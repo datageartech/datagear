@@ -26,7 +26,11 @@ Schema schema 数据库，不允许为null
 		<button id="commitSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.commit' />"><span class="ui-button-icon ui-icon ui-icon-check"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.commit' /></button>
 		<button id="rollbackSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.rollback' />"><span class="ui-button-icon ui-icon ui-icon-arrowreturnthick-1-w"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.rollback' /></button>
 		<div class="button-divider ui-widget ui-widget-content"></div>
-		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearEditSql' /></button>		
+		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearEditSql' /></button>
+		<div class="button-divider ui-widget ui-widget-content"></div>
+		<input id="sqlDelimiterInput" type="text" class="sql-delimiter-input ui-widget ui-widget-content ui-corner-all" value=";"  title="<@spring.message code='sqlpad.sqlDelimiter' />"/>
+		<button id="insertSqlDelimiterDefineButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.insertSqlDelimiterDefine' />"><span class="ui-button-icon ui-icon ui-icon-grip-dotted-horizontal"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertSqlDelimiterDefine' /></button>
+		<button id="insertSqlDelimiterButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.insertSqlDelimiter' />"><span class="ui-button-icon ui-icon ui-icon-grip-solid-horizontal"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertSqlDelimiter' /></button>
 		<div class="more-operation-wrapper">
 			<button id="moreOperationButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.moreOperation' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.moreOperation' /></button>
 			<div class="more-operation-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
@@ -72,12 +76,7 @@ Schema schema 数据库，不允许为null
 	<div class="content ui-widget ui-widget-content">
 		<div class="content-editor">
 			<div class="content-edit-content">
-				<div id="${pageId}-sql-editor" class="sql-editor">
-select * from t_account;
-select * from t_order;
-update t_account set id = 5 where id=-99999;
-delete from t_address where city = '-99999999';
-				</div>
+				<div id="${pageId}-sql-editor" class="sql-editor"></div>
 			</div>
 		</div>
 		<div class="content-result">
@@ -902,6 +901,41 @@ delete from t_address where city = '-99999999';
 	po.element("#clearSqlButton").click(function()
 	{
 		po.sqlEditor.setValue("");
+		po.sqlEditor.focus();
+	});
+	
+	po.element("#insertSqlDelimiterDefineButton").click(function()
+	{
+		var delimiter = po.element("#sqlDelimiterInput").val();
+		
+		if(delimiter)
+		{
+			var cursor = po.sqlEditor.selection.getCursor();
+			
+			var text = "";
+			
+			if(cursor.column == 0)
+			{
+				if(cursor.row != 0)
+					text += "\n";
+			}
+			else
+				text += "\n\n";
+			
+			text += "--@DELIMITER "+delimiter+"\n";
+			
+			po.sqlEditor.insert(text);
+		}
+		
+		po.sqlEditor.focus();
+	});
+	
+	po.element("#insertSqlDelimiterButton").click(function()
+	{
+		var delimiter = po.element("#sqlDelimiterInput").val();
+		
+		if(delimiter)
+			po.sqlEditor.insert(delimiter+"\n");
 		
 		po.sqlEditor.focus();
 	});
