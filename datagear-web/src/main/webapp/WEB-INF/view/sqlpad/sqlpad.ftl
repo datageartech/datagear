@@ -141,8 +141,8 @@ Schema schema 数据库，不允许为null
 	po.element("#sqlCommitModeSet").buttonset();
 	po.element("#sqlExceptionHandleModeSet").buttonset();
 	
-	po.sqlEditor = ace.edit("${pageId}-sql-editor");
 	var SqlMode = ace.require("ace/mode/sql").Mode;
+	po.sqlEditor = ace.edit("${pageId}-sql-editor");
 	po.sqlEditor.session.setMode(new SqlMode());
 	po.sqlEditor.setShowPrintMargin(false);
 	po.sqlEditor.focus();
@@ -288,6 +288,14 @@ Schema schema 数据库，不允许为null
 		
 		$("<div class='sql-index'>["+(sqlStatementIndex + 1)+"]</div>").appendTo($msgContent);
 		var $sqlValue = $("<div class='sql-value' />").text($.truncateIf(sqlStatement.sql, "...", 100)).appendTo($msgContent);
+		
+		$sqlValue.click(function()
+		{
+			po.sqlEditor.gotoLine(sqlStatement.startRow);
+			var selection = po.sqlEditor.session.getSelection();
+			var range = new ace.Range(sqlStatement.startRow, sqlStatement.startColumn, sqlStatement.endRow, sqlStatement.endColumn);
+			selection.setSelectionRange(range, true);
+		});
 		
 		<#assign messageArgs=['"+(sqlStatement.startRow+1)+"', '"+sqlStatement.startColumn+"', '"+(sqlStatement.endRow+1)+"', '"+sqlStatement.endColumn+"'] />
 		$sqlValue.attr("title", "<@spring.messageArgs code='sqlpad.executionSqlselectionRange' args=messageArgs />");

@@ -1431,6 +1431,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
     overflow: hidden;
     white-space: nowrap;
     vertical-align: bottom;
+    cursor: pointer;
 }
 .page-sqlpad .content .content-result .result-message .execution-message .message-content .sql-exception-summary.has-detail{
 	cursor: pointer;
