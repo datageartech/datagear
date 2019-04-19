@@ -141,10 +141,25 @@ Schema schema 数据库，不允许为null
 	po.element("#sqlCommitModeSet").buttonset();
 	po.element("#sqlExceptionHandleModeSet").buttonset();
 	
+	var languageTools = ace.require("ace/ext/language_tools");
+	languageTools.setCompleters(
+	[
+		{
+			getCompletions: function(editor, session, pos, prefix, callback)
+			{
+				po.getSqlAutocompleteCompletions(editor, session, pos, prefix, callback);
+			}
+		}
+	]);
 	var SqlMode = ace.require("ace/mode/sql").Mode;
 	po.sqlEditor = ace.edit("${pageId}-sql-editor");
 	po.sqlEditor.session.setMode(new SqlMode());
 	po.sqlEditor.setShowPrintMargin(false);
+	po.sqlEditor.setOptions(
+	{
+		enableBasicAutocompletion: true,
+		enableLiveAutocompletion: true
+	});
 	po.sqlEditor.focus();
 	po.sqlEditor.navigateFileEnd();
 	
@@ -181,6 +196,28 @@ Schema schema 数据库，不允许为null
 			po.resizeSqlResultTabPanelDataTable();
 		}
 	});
+	
+	po.getSqlAutocompleteCompletions = function(editor, session, pos, prefix, callback)
+	{
+		var prevText = po.sqlEditor.session.getTextRange(new ace.Range(pos.row, 0, pos.row, pos.column - prefix.length));
+		callback(null,
+		[
+			{
+				name : "test_1",
+				value : "test_1",
+				caption: "",
+				meta: "",
+				score : 0
+			},
+			{
+				name : "test_2",
+				value : "test_2",
+				caption: "",
+				meta: "",
+				score : 0
+			}
+		]);
+	};
 	
 	po.executeSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize)
 	{

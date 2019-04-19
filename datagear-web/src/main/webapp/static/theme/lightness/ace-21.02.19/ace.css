@@ -49,3 +49,17 @@
 .ace-tm .ace_marker-layer .ace_selected-word{
 	color: white;
 }
+/*自动补全*/
+.ace_editor.ace_autocomplete{
+	border: 1px solid #dddddd;
+    color: #333333;
+}
+/*
+.ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line{
+	background-color: #0075ea;
+	color: #ffffff;
+}
+.ace_editor.ace_autocomplete .ace_text-layer > .ace_line.ace_selected{
+	color: #ffffff;
+}
+*/
