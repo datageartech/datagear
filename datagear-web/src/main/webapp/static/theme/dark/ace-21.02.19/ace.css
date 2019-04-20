@@ -8,7 +8,7 @@
 /*当前行*/
 .ace-tm .ace_gutter-active-line,
 .ace-tm .ace_marker-layer .ace_active-line{
-	background-color: #2f2f2f;	
+	background-color: #333;	
 }
 .ace-tm .ace_gutter-active-line{
 	font-weight: bold;
@@ -48,4 +48,22 @@
 /**选中文本*/
 .ace-tm .ace_marker-layer .ace_selected-word{
 	color: white;
+}
+/*自动补全*/
+.ace_editor.ace_autocomplete{
+	background: #000;
+	border: 1px solid #666666;
+    color: #eeeeee;
+    -webkit-box-shadow: 0px 0px 6px #cccccc;
+    box-shadow: 0px 0px 6px #cccccc;
+}
+.ace_editor.ace_autocomplete .ace_line-hover{
+	background: #333;
+	border: 1px solid #333;
+}
+.ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line{
+	background: #444;
+}
+.ace_editor.ace_autocomplete .ace_completion-highlight{
+	color: #f58400;
 }
