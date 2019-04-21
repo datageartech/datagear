@@ -199,24 +199,71 @@ Schema schema 数据库，不允许为null
 	
 	po.getSqlAutocompleteCompletions = function(editor, session, pos, prefix, callback)
 	{
-		var prevText = po.sqlEditor.session.getTextRange(new ace.Range(pos.row, 0, pos.row, pos.column - prefix.length));
-		callback(null,
-		[
+		var info = po.resolveSqlAutocompleteInfo(editor, session, pos, prefix);
+		
+		if(info != null)
+		{
+			var url = "${contextPath}/sqlpad/"+po.schemaId+"/";
+			var data = { "sqlpadId" : po.sqlpadId, "keyword" : prefix };
+			
+			if(info.type == "table")
+				url += "findTableNames";
+			else if(info.type == "column")
 			{
-				name : "test_1",
-				value : "test_1",
-				caption: "",
-				meta: "",
-				score : 0
-			},
-			{
-				name : "test_2",
-				value : "test_2",
-				caption: "",
-				meta: "",
-				score : 0
+				url += "findColumnNames";
+				data.table = info.table;
 			}
-		]);
+			else
+				url += "findUnknownNames";
+			
+			$.ajax(
+			{
+				type : "POST",
+				url : url,
+				data : data,
+				success : function(names)
+				{
+					var completions = [];
+					for(var i=0; i<names.length; i++)
+					{
+						completions[i] =
+						{
+							name : names[i],
+							value : names[i],
+							caption: "",
+							meta: "",
+						};
+					}
+					
+					callback(null, completions);
+				},
+				error : function(){}
+			});
+		}
+		else
+			callback(null, []);
+	};
+	
+	po.SqlAutocompleteTableRegExp = /(from|update)\s$/i;
+	po.SqlAutocompleteColumnRegExp = /(select)\s$/i;
+	
+	po.resolveSqlAutocompleteInfo = function(editor, session, pos, prefix)
+	{
+		console.log("prefix=["+prefix+"]");
+		
+		var prevText = session.getTextRange(new ace.Range(pos.row, 0, pos.row, pos.column - prefix.length));
+		
+		console.log("prevText=["+prevText+"]");
+		
+		if(!prefix)
+			return null;
+		
+		if(po.SqlAutocompleteTableRegExp.test(prevText))
+			return { "type" : "table" };
+		else if(po.SqlAutocompleteColumnRegExp.test(prevText))
+			return { "type" : "column", table : "t_order" };
+		else
+			return null;
 	};
 	
 	po.executeSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize)

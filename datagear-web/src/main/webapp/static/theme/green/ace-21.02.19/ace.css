@@ -39,7 +39,7 @@
 }
 /*鼠标指针*/
 .ace-tm .ace_cursor{
-	border-left: 1px solid #333;
+	border-left: 1px solid #eee;
 }
 /*选中区域*/
 .ace-tm .ace_marker-layer .ace_selection{

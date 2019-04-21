@@ -309,7 +309,7 @@ public class SchemaController extends AbstractSchemaModelConnController
 	 * @param tableNameKeyword
 	 * @return
 	 */
-	protected List<TableInfo> findByKeyword(TableInfo[] tableInfos, String tableNameKeyword)
+	public static List<TableInfo> findByKeyword(TableInfo[] tableInfos, String tableNameKeyword)
 	{
 		return KeywordMatcher.<TableInfo> match(tableInfos, tableNameKeyword, new KeywordMatcher.MatchValue<TableInfo>()
 		{
@@ -321,7 +321,7 @@ public class SchemaController extends AbstractSchemaModelConnController
 		});
 	}
 
-	protected static Comparator<TableInfo> TABLE_INFO_SORT_BY_NAME_COMPARATOR = new Comparator<TableInfo>()
+	public static Comparator<TableInfo> TABLE_INFO_SORT_BY_NAME_COMPARATOR = new Comparator<TableInfo>()
 	{
 		@Override
 		public int compare(TableInfo o1, TableInfo o2)

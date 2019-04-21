@@ -5,12 +5,17 @@
 package org.datagear.web.controller;
 
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
+import org.datagear.dbinfo.ColumnInfo;
+import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbmodel.DatabaseModelResolver;
 import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
@@ -23,6 +28,7 @@ import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionService.CommitMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.ExceptionHandleMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
+import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.SqlScriptParser;
 import org.datagear.web.util.SqlScriptParser.SqlStatement;
 import org.datagear.web.util.WebUtils;
@@ -57,6 +63,9 @@ public class SqlpadController extends AbstractSchemaConnController
 	@Autowired
 	private SqlpadExecutionService sqlpadExecutionService;
 
+	@Autowired
+	private DatabaseInfoResolver databaseInfoResolver;
+
 	public SqlpadController()
 	{
 		super();
@@ -64,12 +73,13 @@ public class SqlpadController extends AbstractSchemaConnController
 
 	public SqlpadController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource, ModelSqlSelectService modelSqlSelectService,
-			DatabaseModelResolver databaseModelResolver, SqlpadExecutionService sqlpadExecutionService)
+			DatabaseModelResolver databaseModelResolver, SqlpadExecutionService sqlpadExecutionService, DatabaseInfoResolver databaseInfoResolver)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
 		this.modelSqlSelectService = modelSqlSelectService;
 		this.databaseModelResolver = databaseModelResolver;
 		this.sqlpadExecutionService = sqlpadExecutionService;
+		this.databaseInfoResolver = databaseInfoResolver;
 	}
 
 	public ModelSqlSelectService getModelSqlSelectService()
@@ -100,6 +110,14 @@ public class SqlpadController extends AbstractSchemaConnController
 	public void setSqlpadExecutionService(SqlpadExecutionService sqlpadExecutionService)
 	{
 		this.sqlpadExecutionService = sqlpadExecutionService;
+	}
+
+	public DatabaseInfoResolver getDatabaseInfoResolver() {
+		return databaseInfoResolver;
+	}
+
+	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver) {
+		this.databaseInfoResolver = databaseInfoResolver;
 	}
 
 	@RequestMapping("/{schemaId}")
@@ -222,7 +240,91 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		return modelSqlResult;
 	}
+	
+	@RequestMapping(value = "/{schemaId}/findTableNames", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<String> findTableNames(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("keyword") String keyword) throws Throwable
+	{
+		TableInfo[] tableInfos = new ReturnSchemaConnExecutor<TableInfo[]>(request, response, springModel, schemaId,
+				true)
+		{
+			@Override
+			protected TableInfo[] execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema) throws Throwable
+			{
+				return getDatabaseInfoResolver().getTableInfos(getConnection());
+			}
+		}.execute();
 
+		List<TableInfo> tableInfoList = SchemaController.findByKeyword(tableInfos, keyword);
+		tableInfoList.sort(SchemaController.TABLE_INFO_SORT_BY_NAME_COMPARATOR);
+		
+		List<String> tableNames = new ArrayList<String>();
+		
+		for(TableInfo tableInfo : tableInfoList)
+			tableNames.add(tableInfo.getName());
+		
+		return tableNames;
+	}
+
+	@RequestMapping(value = "/{schemaId}/findColumnNames", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<String> findColumnNames(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("table") final String table,
+			@RequestParam("keyword") String keyword) throws Throwable
+	{
+		ColumnInfo[] columnInfos = new ReturnSchemaConnExecutor<ColumnInfo[]>(request, response, springModel, schemaId,
+				true)
+		{
+			@Override
+			protected ColumnInfo[] execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema) throws Throwable
+			{
+				return getDatabaseInfoResolver().getColumnInfos(getConnection(), table);
+			}
+		}.execute();
+
+		List<ColumnInfo> columnInfoList = findByKeyword(columnInfos, keyword);
+		columnInfoList.sort(COLUMNINFO_INFO_SORT_BY_NAME_COMPARATOR);
+		
+		List<String> columnNames = new ArrayList<String>();
+		
+		for(ColumnInfo columnInfo : columnInfoList)
+			columnNames.add(columnInfo.getName());
+		
+		return columnNames;
+	}
+
+	/**
+	 * 根据列名称关键字查询{@linkplain ColumnInfo}列表。
+	 * @param columnInfos
+	 * @param columnNameKeyword
+	 * @return
+	 */
+	public static List<ColumnInfo> findByKeyword(ColumnInfo[] columnInfos, String columnNameKeyword)
+	{
+		return KeywordMatcher.<ColumnInfo> match(columnInfos, columnNameKeyword, new KeywordMatcher.MatchValue<ColumnInfo>()
+		{
+			@Override
+			public String[] get(ColumnInfo t)
+			{
+				return new String[] { t.getName() };
+			}
+		});
+	}
+
+	public static Comparator<ColumnInfo> COLUMNINFO_INFO_SORT_BY_NAME_COMPARATOR = new Comparator<ColumnInfo>()
+	{
+		@Override
+		public int compare(ColumnInfo o1, ColumnInfo o2)
+		{
+			return o1.getName().compareTo(o2.getName());
+		}
+	};
+	
 	protected String generateSqlpadId(HttpServletRequest request, HttpServletResponse response)
 	{
 		return UUID.gen();
