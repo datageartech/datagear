@@ -1627,60 +1627,61 @@
 				return null;
 			
 			var isTable = $._resolveSqlAutocompleteTablePrevKeywords[prevLexisInfo.lexis];
-			if(prevLexisInfo.lexis == "INTO")
+			var isColumn = $._resolveSqlAutocompleteColumnPrevKeywords[prevLexisInfo.lexis];
+			var columnTableName = "t_order";
+			
+			if(isTable && isColumn)
 			{
-				
+				if(prevLexisInfo.lexis == "INTO")
+					;
 			}
 			
 			if(isTable)
 				return { "type" : "table" };
+			else if(isColumn && columnTableName)
+				return { "type" : "column", table : columnTableName };
 			else
-			{
-				var isColumn = $._resolveSqlAutocompleteColumnPrevKeywords[prevLexisInfo.lexis];
-				var forTable = "t_order";
-				
-				if(isColumn && forTable)
-					return { "type" : "column", table : forTable };
-				else
-					return null;
-			}
+				return null;
 		},
 		
 		_resolveSqlAutocompletePrevKeywords :
 		{
-			"SELECT" : 1,
-			"FROM" : 1,
-			"JOIN" : 1,
-			"WHERE" : 1,
-			"BY" : 1,
-			"INSERT" : 1,
-			"INTO" : 1,
-			"VALUES" : 1,
-			"UPDATE" : 1,
-			"SET" : 1,
-			"DELETE" : 1,
-			"DROP" : 1,
-			"ALTER" : 1,
-			"CREATE" : 1,
-			"TABLE" : 1,
-			"GRANT" : 1
+			"SELECT" : true,
+			"FROM" : true,
+			"JOIN" : true,
+			"ON" : true,
+			"WHERE" : true,
+			"BY" : true,
+			"INSERT" : true,
+			"INTO" : true,
+			"VALUES" : true,
+			"UPDATE" : true,
+			"SET" : true,
+			"DELETE" : true,
+			"DROP" : true,
+			"ALTER" : true,
+			"CREATE" : true,
+			"TABLE" : true,
+			"GRANT" : true
 		},
 		
 		_resolveSqlAutocompleteTablePrevKeywords :
 		{
-			"FROM" : 1,
-			"JOIN" : 1,
-			"INTO" : 1,
-			"UPDATE" : 1,
-			"TABLE" : 1
+			"FROM" : true,
+			"JOIN" : true,
+			"INTO" : true,
+			"UPDATE" : true,
+			"TABLE" : true
 		},
 		
 		_resolveSqlAutocompleteColumnPrevKeywords :
 		{
-			"SELECT" : 1,
-			"WHERE" : 1,
-			"BY" : 1,
-			"SET" : 1
+			"SELECT" : true,
+			"WHERE" : true,
+			"BY" : true,
+			"INTO" : true,
+			"SET" : true,
+			"ON" : true
 		},
 		
 		_resolveSqlAutocompleteFindPrevLexisInfo : function(sql, index, acceptedUpperCaseLexisMap)
