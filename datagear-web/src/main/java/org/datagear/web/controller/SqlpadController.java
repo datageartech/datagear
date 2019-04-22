@@ -6,6 +6,7 @@ package org.datagear.web.controller;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -73,7 +74,8 @@ public class SqlpadController extends AbstractSchemaConnController
 
 	public SqlpadController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource, ModelSqlSelectService modelSqlSelectService,
-			DatabaseModelResolver databaseModelResolver, SqlpadExecutionService sqlpadExecutionService, DatabaseInfoResolver databaseInfoResolver)
+			DatabaseModelResolver databaseModelResolver, SqlpadExecutionService sqlpadExecutionService,
+			DatabaseInfoResolver databaseInfoResolver)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
 		this.modelSqlSelectService = modelSqlSelectService;
@@ -112,11 +114,13 @@ public class SqlpadController extends AbstractSchemaConnController
 		this.sqlpadExecutionService = sqlpadExecutionService;
 	}
 
-	public DatabaseInfoResolver getDatabaseInfoResolver() {
+	public DatabaseInfoResolver getDatabaseInfoResolver()
+	{
 		return databaseInfoResolver;
 	}
 
-	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver) {
+	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
+	{
 		this.databaseInfoResolver = databaseInfoResolver;
 	}
 
@@ -240,12 +244,13 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		return modelSqlResult;
 	}
-	
+
 	@RequestMapping(value = "/{schemaId}/findTableNames", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<String> findTableNames(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("keyword") String keyword) throws Throwable
+			@RequestParam("sqlpadId") String sqlpadId,
+			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
 	{
 		TableInfo[] tableInfos = new ReturnSchemaConnExecutor<TableInfo[]>(request, response, springModel, schemaId,
 				true)
@@ -259,13 +264,13 @@ public class SqlpadController extends AbstractSchemaConnController
 		}.execute();
 
 		List<TableInfo> tableInfoList = SchemaController.findByKeyword(tableInfos, keyword);
-		tableInfoList.sort(SchemaController.TABLE_INFO_SORT_BY_NAME_COMPARATOR);
-		
+		Collections.sort(tableInfoList, SchemaController.TABLE_INFO_SORT_BY_NAME_COMPARATOR);
+
 		List<String> tableNames = new ArrayList<String>();
-		
-		for(TableInfo tableInfo : tableInfoList)
+
+		for (TableInfo tableInfo : tableInfoList)
 			tableNames.add(tableInfo.getName());
-		
+
 		return tableNames;
 	}
 
@@ -274,7 +279,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	public List<String> findColumnNames(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("table") final String table,
-			@RequestParam("keyword") String keyword) throws Throwable
+			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
 	{
 		ColumnInfo[] columnInfos = new ReturnSchemaConnExecutor<ColumnInfo[]>(request, response, springModel, schemaId,
 				true)
@@ -288,32 +293,34 @@ public class SqlpadController extends AbstractSchemaConnController
 		}.execute();
 
 		List<ColumnInfo> columnInfoList = findByKeyword(columnInfos, keyword);
-		columnInfoList.sort(COLUMNINFO_INFO_SORT_BY_NAME_COMPARATOR);
-		
+		Collections.sort(columnInfoList, COLUMNINFO_INFO_SORT_BY_NAME_COMPARATOR);
+
 		List<String> columnNames = new ArrayList<String>();
-		
-		for(ColumnInfo columnInfo : columnInfoList)
+
+		for (ColumnInfo columnInfo : columnInfoList)
 			columnNames.add(columnInfo.getName());
-		
+
 		return columnNames;
 	}
 
 	/**
 	 * 根据列名称关键字查询{@linkplain ColumnInfo}列表。
+	 * 
 	 * @param columnInfos
 	 * @param columnNameKeyword
 	 * @return
 	 */
 	public static List<ColumnInfo> findByKeyword(ColumnInfo[] columnInfos, String columnNameKeyword)
 	{
-		return KeywordMatcher.<ColumnInfo> match(columnInfos, columnNameKeyword, new KeywordMatcher.MatchValue<ColumnInfo>()
-		{
-			@Override
-			public String[] get(ColumnInfo t)
-			{
-				return new String[] { t.getName() };
-			}
-		});
+		return KeywordMatcher.<ColumnInfo> match(columnInfos, columnNameKeyword,
+				new KeywordMatcher.MatchValue<ColumnInfo>()
+				{
+					@Override
+					public String[] get(ColumnInfo t)
+					{
+						return new String[] { t.getName() };
+					}
+				});
 	}
 
 	public static Comparator<ColumnInfo> COLUMNINFO_INFO_SORT_BY_NAME_COMPARATOR = new Comparator<ColumnInfo>()
@@ -324,7 +331,7 @@ public class SqlpadController extends AbstractSchemaConnController
 			return o1.getName().compareTo(o2.getName());
 		}
 	};
-	
+
 	protected String generateSqlpadId(HttpServletRequest request, HttpServletResponse response)
 	{
 		return UUID.gen();

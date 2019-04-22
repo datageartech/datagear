@@ -1599,6 +1599,151 @@
 		    
 		    return true;
 		},
+		
+		/**
+		 *  解析SQL自动完成信息，用于为SQL工作台提供SQL自动完成支持。
+		 */
+		resolveSqlAutocompleteInfo : function(editor, session, pos, prefix)
+		{
+			var index = pos.column - prefix.length;
+			var prevText = session.getTextRange(new ace.Range(pos.row, 0, pos.row, index));
+			
+			var prevLexisInfo;
+			var row = pos.row;
+			var minRow = ((row - 50) > 0 ? row-50 : 0);
+			while(row >= minRow)
+			{
+				prevLexisInfo = $._resolveSqlAutocompleteFindPrevLexisInfo(prevText, index, $._resolveSqlAutocompletePrevKeywords);
+				
+				if(prevLexisInfo != null)
+					break;
+				
+				row = row - 1;
+				prevText = (row < 0 ? "" : session.getLine(row));
+				index = prevText.length - 1;
+			}
+			
+			if(prevLexisInfo == null)
+				return null;
+			
+			var isTable = $._resolveSqlAutocompleteTablePrevKeywords[prevLexisInfo.lexis];
+			if(prevLexisInfo.lexis == "INTO")
+			{
+				
+			}
+			
+			if(isTable)
+				return { "type" : "table" };
+			else
+			{
+				var isColumn = $._resolveSqlAutocompleteColumnPrevKeywords[prevLexisInfo.lexis];
+				var forTable = "t_order";
+				
+				if(isColumn && forTable)
+					return { "type" : "column", table : forTable };
+				else
+					return null;
+			}
+		},
+		
+		_resolveSqlAutocompletePrevKeywords :
+		{
+			"SELECT" : 1,
+			"FROM" : 1,
+			"JOIN" : 1,
+			"WHERE" : 1,
+			"BY" : 1,
+			"INSERT" : 1,
+			"INTO" : 1,
+			"VALUES" : 1,
+			"UPDATE" : 1,
+			"SET" : 1,
+			"DELETE" : 1,
+			"DROP" : 1,
+			"ALTER" : 1,
+			"CREATE" : 1,
+			"TABLE" : 1,
+			"GRANT" : 1
+		},
+		
+		_resolveSqlAutocompleteTablePrevKeywords :
+		{
+			"FROM" : 1,
+			"JOIN" : 1,
+			"INTO" : 1,
+			"UPDATE" : 1,
+			"TABLE" : 1
+		},
+		
+		_resolveSqlAutocompleteColumnPrevKeywords :
+		{
+			"SELECT" : 1,
+			"WHERE" : 1,
+			"BY" : 1,
+			"SET" : 1
+		},
+		
+		_resolveSqlAutocompleteFindPrevLexisInfo : function(sql, index, acceptedUpperCaseLexisMap)
+		{
+			var chars = [];
+			
+			for(var i=index; i>= 0; i--)
+			{
+				var c = sql.charAt(i);
+				
+				if(/[\s\,\;\)]/.test(c) && chars.length > 0)
+				{
+					var lexis = chars.reverse().join("");
+					chars = [];
+					
+					if(!acceptedUpperCaseLexisMap || acceptedUpperCaseLexisMap[lexis] != null)
+						return { "lexis" : lexis, startIndex : i+1 };
+				}
+				else
+					chars.push(c.toUpperCase());
+			}
+			
+			if(chars.length > 0)
+			{
+				var lexis = chars.reverse().join("");
+				
+				if(!acceptedUpperCaseLexisMap || acceptedUpperCaseLexisMap[lexis] != null)
+					return { "lexis" : lexis, startIndex : i+1, endIndex : i+1+lexis.length };
+			}
+			
+			return null;
+		},
+		
+		_resolveSqlAutocompleteFindNextLexisInfo : function(sql, startIndex, endIndex, acceptedUpperCaseLexisMap)
+		{
+			var chars = [];
+			
+			for(var i=startIndex; i < endIndex; i++)
+			{
+				var c = sql.charAt(i);
+				
+				if(/[\s\,\;\(]/.test(c) && chars.length > 0)
+				{
+					var lexis = chars.join("");
+					chars = [];
+					
+					if(!acceptedUpperCaseLexisMap || acceptedUpperCaseLexisMap[lexis] != null)
+						return { "lexis" : lexis, startIndex : i - lexis.length , endIndex : i };
+				}
+				else
+					chars.push(c.toUpperCase());
+			}
+			
+			if(chars.length > 0)
+			{
+				var lexis = chars.reverse().join("");
+				
+				if(!acceptedUpperCaseLexisMap || acceptedUpperCaseLexisMap[lexis] != null)
+					return { "lexis" : lexis, startIndex : i+1 };
+			}
+			
+			return null;
+		}
 	});
 	
 	$.fn.extend(

@@ -145,6 +145,7 @@ Schema schema 数据库，不允许为null
 	languageTools.setCompleters(
 	[
 		{
+			identifierRegexps : [/[a-zA-Z_0-9\.\$]/],
 			getCompletions: function(editor, session, pos, prefix, callback)
 			{
 				po.getSqlAutocompleteCompletions(editor, session, pos, prefix, callback);
@@ -201,10 +202,16 @@ Schema schema 数据库，不允许为null
 	{
 		var info = po.resolveSqlAutocompleteInfo(editor, session, pos, prefix);
 		
-		if(info != null)
+		if(info && info.type == "table" && po.sqlAutocompleteTableCompletions != null)
+		{
+			callback(null, po.sqlAutocompleteTableCompletions);
+			return;
+		}
+		
+		if(info)
 		{
 			var url = "${contextPath}/sqlpad/"+po.schemaId+"/";
-			var data = { "sqlpadId" : po.sqlpadId, "keyword" : prefix };
+			var data = { "sqlpadId" : po.sqlpadId, "keyword" : "" };
 			
 			if(info.type == "table")
 				url += "findTableNames";
@@ -235,6 +242,9 @@ Schema schema 数据库，不允许为null
 						};
 					}
 					
+					if(info.type == "table")
+						po.sqlAutocompleteTableCompletions = completions;
+					
 					callback(null, completions);
 				},
 				error : function(){}
@@ -244,26 +254,9 @@ Schema schema 数据库，不允许为null
 			callback(null, []);
 	};
 	
-	po.SqlAutocompleteTableRegExp = /(from|update)\s$/i;
-	po.SqlAutocompleteColumnRegExp = /(select)\s$/i;
-	
 	po.resolveSqlAutocompleteInfo = function(editor, session, pos, prefix)
 	{
-		console.log("prefix=["+prefix+"]");
-		
-		var prevText = session.getTextRange(new ace.Range(pos.row, 0, pos.row, pos.column - prefix.length));
-		
-		console.log("prevText=["+prevText+"]");
-		
-		if(!prefix)
-			return null;
-		
-		if(po.SqlAutocompleteTableRegExp.test(prevText))
-			return { "type" : "table" };
-		else if(po.SqlAutocompleteColumnRegExp.test(prevText))
-			return { "type" : "column", table : "t_order" };
-		else
-			return null;
+		return $.resolveSqlAutocompleteInfo(editor, session, pos, prefix);
 	};
 	
 	po.executeSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize)
@@ -806,7 +799,7 @@ Schema schema 数据库，不允许为null
 		var newColumns = [
 			{
 				title : "<@spring.message code='rowNumber' />", data : "", defaultContent: "",
-				render : po.renderRowNumberColumn, className : "column-row-number"
+				render : po.renderRowNumberColumn, className : "column-row-number", width : "5em"
 			}
 		];
 		newColumns = newColumns.concat(columns);

@@ -52,6 +52,7 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 		try
 		{
 			st = createStatement(cn);
+			st.setFetchSize(fetchSize);
 			rs = st.executeQuery(sql);
 
 			Model model = databaseModelResolver.resolve(cn, rs, UUID.gen());
@@ -84,6 +85,7 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 		try
 		{
 			st = createStatement(cn);
+			st.setFetchSize(fetchSize);
 			rs = st.executeQuery(sql);
 
 			return select(cn, sql, rs, model, startRow, fetchSize);
