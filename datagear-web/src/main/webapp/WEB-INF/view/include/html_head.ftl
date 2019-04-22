@@ -7,14 +7,14 @@ var contextPath="${contextPath}";
 </script>
 <link id="css_jquery_ui" href="${contextPath}/static/theme/<@spring.theme code='theme' />/jquery-ui-1.12.1/jquery-ui.css" type="text/css" rel="stylesheet" />
 <link id="css_jquery_ui_theme" href="${contextPath}/static/theme/<@spring.theme code='theme' />/jquery-ui-1.12.1/jquery-ui.theme.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/theme/jquery.layout-1.4.0/jquery.layout.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/theme/jstree-3.3.7/style.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/theme/DataTables-1.10.18/datatables.min.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/theme/jQuery-File-Upload-9.21.0/jquery.fileupload.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/theme/ace-21.02.19/ace.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/jquery.layout-1.4.0/jquery.layout.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/jstree-3.3.7/style.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/DataTables-1.10.18/datatables.min.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/jQuery-File-Upload-9.21.0/jquery.fileupload.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/ace-21.02.19/ace.css" type="text/css" rel="stylesheet" />
 <link id="css_ace" href="${contextPath}/static/theme/<@spring.theme code='theme' />/ace-21.02.19/ace.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/theme/datagear-pagination.css" type="text/css" rel="stylesheet" />
-<link href="${contextPath}/static/theme/common.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/datagear-pagination.css" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/common.css" type="text/css" rel="stylesheet" />
 <link id="css_common" href="${contextPath}/static/theme/<@spring.theme code='theme' />/common.css" type="text/css" rel="stylesheet" />
 
 <script src="${contextPath}/static/script/jquery/jquery-1.12.4.js" type="text/javascript"></script>
