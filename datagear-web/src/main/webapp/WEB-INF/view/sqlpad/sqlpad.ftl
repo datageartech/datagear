@@ -256,7 +256,17 @@ Schema schema 数据库，不允许为null
 	
 	po.resolveSqlAutocompleteInfo = function(editor, session, pos, prefix)
 	{
-		return $.resolveSqlAutocompleteInfo(editor, session, pos, prefix);
+		return $.resolveSqlAutocompleteInfo(editor, session, po.getSqlDelimiter(), pos, prefix);
+	};
+	
+	po.getSqlDelimiter = function()
+	{
+		var delimiter = po.element("#sqlDelimiterInput").val();
+		
+		if(!delimiter)
+			delimiter = ";";
+			
+		return delimiter;
 	};
 	
 	po.executeSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize)
@@ -991,7 +1001,7 @@ Schema schema 数据库，不允许为null
 	
 	po.element("#insertSqlDelimiterDefineButton").click(function()
 	{
-		var delimiter = po.element("#sqlDelimiterInput").val();
+		var delimiter = po.getSqlDelimiter();
 		
 		if(delimiter)
 		{
@@ -1017,7 +1027,7 @@ Schema schema 数据库，不允许为null
 	
 	po.element("#insertSqlDelimiterButton").click(function()
 	{
-		var delimiter = po.element("#sqlDelimiterInput").val();
+		var delimiter = po.getSqlDelimiter();
 		
 		if(delimiter)
 			po.sqlEditor.insert(delimiter+"\n");

@@ -1598,42 +1598,71 @@
 		    bStack.pop();
 		    
 		    return true;
-		},
-		
-		/**
-		 *  解析SQL自动完成信息，用于为SQL工作台提供SQL自动完成支持。
-		 */
-		resolveSqlAutocompleteInfo : function(editor, session, pos, prefix)
+		}
+	});
+	
+	//SQL工作台SQL自动补全支持函数
+	$._resolveSqlAutocompleteSqlLexisMatcherBase =
+	{
+		test : function(value)
 		{
-			var index = pos.column - prefix.length;
-			var prevText = session.getTextRange(new ace.Range(pos.row, 0, pos.row, index));
+			return this[value.toUpperCase()];
+		},
+		isLexis : function(value, lexis)
+		{
+			if(lexis == value)
+				return true;
 			
-			var prevLexisInfo;
-			var row = pos.row;
-			var minRow = ((row - 50) > 0 ? row-50 : 0);
-			while(row >= minRow)
-			{
-				prevLexisInfo = $._resolveSqlAutocompleteFindPrevLexisInfo(prevText, index, $._resolveSqlAutocompletePrevKeywords);
-				
-				if(prevLexisInfo != null)
-					break;
-				
-				row = row - 1;
-				prevText = (row < 0 ? "" : session.getLine(row));
-				index = prevText.length - 1;
-			}
+			value = value.toUpperCase();
 			
-			if(prevLexisInfo == null)
+			if(lexis == value)
+				return true;
+			
+			lexis = lexis.toUpperCase();
+			
+			return (lexis == value);
+		}
+	};
+	$.extend(
+	{
+		resolveSqlAutocompleteInfo : function(editor, session, delimiter, pos, prefix)
+		{
+			var prevIndex = pos.column - prefix.length;
+			var prevLexis = $._resolveSqlAutocompleteFindPrevLexis(editor, session, delimiter, 
+					pos.row, prevIndex, $._resolveSqlAutocompletePrevKeywords)
+			
+			if(prevLexis == null)
 				return null;
 			
-			var isTable = $._resolveSqlAutocompleteTablePrevKeywords[prevLexisInfo.lexis];
-			var isColumn = $._resolveSqlAutocompleteColumnPrevKeywords[prevLexisInfo.lexis];
-			var columnTableName = "t_order";
+			var isTable = $._resolveSqlAutocompleteTablePrevKeywords.test(prevLexis.value);
+			var isColumn = $._resolveSqlAutocompleteColumnPrevKeywords.test(prevLexis.value);
+			var columnTableName = null;
 			
 			if(isTable && isColumn)
 			{
-				if(prevLexisInfo.lexis == "INTO")
-					;
+				if($._resolveSqlAutocompleteSqlLexisMatcherBase.isLexis(prevLexis.value, "INTO"))
+				{
+					prevLexis = $._resolveSqlAutocompleteFindPrevLexis(editor, session, delimiter, 
+							pos.row, prevIndex, $.extend({ "INTO" : true, "(" : true }, $._resolveSqlAutocompleteSqlLexisMatcherBase));
+					
+					if(prevLexis && prevLexis.value == "(")
+					{
+						isTable = false;
+						
+						prevLexis = $._resolveSqlAutocompleteFindPrevLexis(editor, session, delimiter, 
+								pos.row, prevLexis.startIndex - 1);
+						
+						if(prevLexis)
+							columnTableName = prevLexis.value;
+					}
+					else
+						isColumn = false;
+				}
+			}
+			
+			if(isColumn && !columnTableName)
+			{
+				//TODO 解析表名称
 			}
 			
 			if(isTable)
@@ -1644,7 +1673,7 @@
 				return null;
 		},
 		
-		_resolveSqlAutocompletePrevKeywords :
+		_resolveSqlAutocompletePrevKeywords : $.extend(
 		{
 			"SELECT" : true,
 			"FROM" : true,
@@ -1663,18 +1692,18 @@
 			"CREATE" : true,
 			"TABLE" : true,
 			"GRANT" : true
-		},
+		}, $._resolveSqlAutocompleteSqlLexisMatcherBase),
 		
-		_resolveSqlAutocompleteTablePrevKeywords :
+		_resolveSqlAutocompleteTablePrevKeywords : $.extend(
 		{
 			"FROM" : true,
 			"JOIN" : true,
 			"INTO" : true,
 			"UPDATE" : true,
 			"TABLE" : true
-		},
+		}, $._resolveSqlAutocompleteSqlLexisMatcherBase),
 		
-		_resolveSqlAutocompleteColumnPrevKeywords :
+		_resolveSqlAutocompleteColumnPrevKeywords : $.extend(
 		{
 			"SELECT" : true,
 			"WHERE" : true,
@@ -1682,70 +1711,171 @@
 			"INTO" : true,
 			"SET" : true,
 			"ON" : true
-		},
+		}, $._resolveSqlAutocompleteSqlLexisMatcherBase),
 		
-		_resolveSqlAutocompleteFindPrevLexisInfo : function(sql, index, acceptedUpperCaseLexisMap)
+		_resolveSqlAutocompleteFindPrevLexis : function(editor, session, delimiter, row, index, sqlLexisMatcher)
 		{
-			var chars = [];
+			var initRow = row;
 			
-			for(var i=index; i>= 0; i--)
+			while(row >= 0)
 			{
-				var c = sql.charAt(i);
+				var rowText = "";
+				var startIndex = -1;
+				var endIndex = -1;
 				
-				if(/[\s\,\;\)]/.test(c) && chars.length > 0)
-				{
-					var lexis = chars.reverse().join("");
-					chars = [];
-					
-					if(!acceptedUpperCaseLexisMap || acceptedUpperCaseLexisMap[lexis] != null)
-						return { "lexis" : lexis, startIndex : i+1 };
-				}
+				if(row == initRow)
+					rowText = session.getTextRange(new ace.Range(row, 0, row, index+1));
 				else
-					chars.push(c.toUpperCase());
-			}
-			
-			if(chars.length > 0)
-			{
-				var lexis = chars.reverse().join("");
+					rowText = session.getLine(row);
 				
-				if(!acceptedUpperCaseLexisMap || acceptedUpperCaseLexisMap[lexis] != null)
-					return { "lexis" : lexis, startIndex : i+1, endIndex : i+1+lexis.length };
+				startIndex = rowText.length - 1;
+				
+				var delimiterIndex = rowText.indexOf(delimiter);
+				var encounterDelimiter = (delimiterIndex >= 0 && delimiterIndex <= startIndex);
+				
+				if(encounterDelimiter)
+					endIndex = delimiterIndex + delimiter.length - 1;
+				
+				var lexis = $._resolveSqlAutocompleteFindPrevLexisForLine(rowText, startIndex, endIndex, sqlLexisMatcher);
+				
+				if(lexis != null)
+				{
+					lexis.row = row;
+					return lexis;
+				}
+				
+				if(encounterDelimiter)
+					break;
+				
+				row--;
 			}
 			
 			return null;
 		},
 		
-		_resolveSqlAutocompleteFindNextLexisInfo : function(sql, startIndex, endIndex, acceptedUpperCaseLexisMap)
+		_resolveSqlAutocompleteFindPrevLexisForLine : function(sql, startIndex, endIndex, sqlLexisMatcher)
 		{
 			var chars = [];
 			
-			for(var i=startIndex; i < endIndex; i++)
+			for(var i=startIndex; i> endIndex; i--)
 			{
 				var c = sql.charAt(i);
 				
-				if(/[\s\,\;\(]/.test(c) && chars.length > 0)
+				if(/[\s\,\;\(\)]/.test(c))
 				{
-					var lexis = chars.join("");
-					chars = [];
+					if(chars.length > 0)
+					{
+						var lexis = chars.reverse().join("");
+						chars = [];
+						
+						if(!sqlLexisMatcher || sqlLexisMatcher.test(lexis))
+							return { "value" : lexis, startIndex : i+1, endIndex : i+1+lexis.length };
+					}
 					
-					if(!acceptedUpperCaseLexisMap || acceptedUpperCaseLexisMap[lexis] != null)
-						return { "lexis" : lexis, startIndex : i - lexis.length , endIndex : i };
+					if(c == "," || c == ";" || c == "(" || c == ")")
+					{
+						if(!sqlLexisMatcher || sqlLexisMatcher.test(c))
+							return { "value" : c, startIndex : i, endIndex : i+1 };
+					}
 				}
 				else
-					chars.push(c.toUpperCase());
+					chars.push(c);
 			}
 			
 			if(chars.length > 0)
 			{
 				var lexis = chars.reverse().join("");
 				
-				if(!acceptedUpperCaseLexisMap || acceptedUpperCaseLexisMap[lexis] != null)
-					return { "lexis" : lexis, startIndex : i+1 };
+				if(!sqlLexisMatcher || sqlLexisMatcher.test(lexis))
+					return { "value" : lexis, startIndex : endIndex+1, endIndex : endIndex+1+lexis.length };
+			}
+			
+			return null;
+		},
+		
+		_resolveSqlAutocompleteFindNextLexis : function(editor, session, delimiter, row, index, sqlLexisMatcher)
+		{
+			var initRow = row;
+			
+			var maxRows = session.getLength();
+			
+			while(row <= maxRows)
+			{
+				var rowText = "";
+				var startIndex = 0;
+				var endIndex = -1;
+				
+				if(row == initRow)
+					rowText = session.getTextRange(new ace.Range(row, index, row, session.getRowLength(row)));
+				else
+					rowText = session.getLine(row);
+				
+				endIndex = rowText.length;
+				
+				var delimiterIndex = rowText.indexOf(delimiter);
+				var encounterDelimiter = (delimiterIndex >= 0 && delimiterIndex <= endIndex);
+				
+				if(encounterDelimiter)
+					endIndex = delimiterIndex;
+				
+				var lexis = $._resolveSqlAutocompleteFindNextLexisForLine(rowText, startIndex, endIndex, sqlLexisMatcher);
+				
+				if(lexis != null)
+				{
+					lexis.row = row;
+					return lexis;
+				}
+				
+				if(encounterDelimiter)
+					break;
+				
+				row--;
+			}
+			
+			return null;
+		},
+		
+		_resolveSqlAutocompleteFindNextLexisForLine : function(sql, startIndex, endIndex, sqlLexisMatcher)
+		{
+			var chars = [];
+			
+			for(var i = startIndex; i < endIndex; i++)
+			{
+				var c = sql.charAt(i);
+				
+				if(/[\s\,\;\(\)]/.test(c))
+				{
+					if(chars.length > 0)
+					{
+						var lexis = chars.join("");
+						chars = [];
+						
+						if(!sqlLexisMatcher || sqlLexisMatcher.test(lexis))
+							return { "value" : lexis, startIndex : i - lexis.length , endIndex : i };
+					}
+					
+					if(c == "," || c == ";" || c == "(" || c == ")")
+					{
+						if(!sqlLexisMatcher || sqlLexisMatcher.test(c))
+							return { "value" : c, startIndex : i, endIndex : i+1 };
+					}
+				}
+				else
+					chars.push(c);
+			}
+			
+			if(chars.length > 0)
+			{
+				var lexis = chars.reverse().join("");
+				
+				if(!sqlLexisMatcher || sqlLexisMatcher.test(lexis))
+					return { "value" : lexis, startIndex : endIndex-lexis.length, endIndex : endIndex };
 			}
 			
 			return null;
 		}
 	});
+	
 	
 	$.fn.extend(
 	{
