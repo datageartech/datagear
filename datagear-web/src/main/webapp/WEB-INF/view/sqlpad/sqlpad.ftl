@@ -208,7 +208,7 @@ Schema schema 数据库，不允许为null
 			return;
 		}
 		
-		if(info)
+		if(info && (info.type == "table" || (info.type == "column" && info.table)))
 		{
 			var url = "${contextPath}/sqlpad/"+po.schemaId+"/";
 			var data = { "sqlpadId" : po.sqlpadId, "keyword" : "" };
@@ -256,7 +256,7 @@ Schema schema 数据库，不允许为null
 	
 	po.resolveSqlAutocompleteInfo = function(editor, session, pos, prefix)
 	{
-		return $.resolveSqlAutocompleteInfo(editor, session, po.getSqlDelimiter(), pos, prefix);
+		return $.sqlAutocomplete.resolveAutocompleteInfo(editor, session, po.getSqlDelimiter(), pos, prefix);
 	};
 	
 	po.getSqlDelimiter = function()

@@ -1602,277 +1602,619 @@
 	});
 	
 	//SQL工作台SQL自动补全支持函数
-	$._resolveSqlAutocompleteSqlLexisMatcherBase =
+	$.sqlAutocomplete = ($.sqlAutocomplete || {});
+	$.extend($.sqlAutocomplete,
 	{
-		test : function(value)
+		/**
+		 * 解析SQL自动补全信息。
+		 * 
+		 * @param editor
+		 * @param session
+		 * @param delimiter
+		 * @param pos
+		 * @param prefix
+		 * 
+		 * @return { type : "table" } 或者 { type : "column", table : "..." } 或者 null
+		 */
+		resolveAutocompleteInfo : function(editor, session, delimiter, pos, prefix)
 		{
-			return this[value.toUpperCase()];
-		},
-		isLexis : function(value, lexis)
-		{
-			if(lexis == value)
-				return true;
+			var sql = session.getLine(pos.row);
+			var myIndex = pos.column - 1;
 			
-			value = value.toUpperCase();
+			var tokens = [];
 			
-			if(lexis == value)
-				return true;
+			try
+			{
+				$.sqlAutocomplete.resolveTokens(sql, tokens);
+			}
+			catch(e)
+			{
+				tokens = [];
+			}
 			
-			lexis = lexis.toUpperCase();
-			
-			return (lexis == value);
-		}
-	};
-	$.extend(
-	{
-		resolveSqlAutocompleteInfo : function(editor, session, delimiter, pos, prefix)
-		{
-			var prevIndex = pos.column - prefix.length;
-			var prevLexis = $._resolveSqlAutocompleteFindPrevLexis(editor, session, delimiter, 
-					pos.row, prevIndex, $._resolveSqlAutocompletePrevKeywords)
-			
-			if(prevLexis == null)
+			if(tokens.length < 1)
 				return null;
 			
-			var isTable = $._resolveSqlAutocompleteTablePrevKeywords.test(prevLexis.value);
-			var isColumn = $._resolveSqlAutocompleteColumnPrevKeywords.test(prevLexis.value);
-			var columnTableName = null;
+			var token = $.sqlAutocomplete.findTokenBySqlIndex(tokens, myIndex);
+			var prevTokenKeyword = $.sqlAutocomplete.findToken(token, false, $.sqlAutocomplete.isTokenKeyword);
 			
-			if(isTable && isColumn)
+			if($.sqlAutocomplete.isTokenKeyword(prevTokenKeyword, $.sqlAutocomplete.keywordsTableInfoBehind))
 			{
-				if($._resolveSqlAutocompleteSqlLexisMatcherBase.isLexis(prevLexis.value, "INTO"))
+				return { type : "table" };
+			}
+			
+			if($.sqlAutocomplete.isTokenKeyword(prevTokenKeyword, $.sqlAutocomplete.keywordsColumnInfoBehind))
+			{
+				var info =  { type : "column" };
+				
+				//SELECT ...
+				if($.sqlAutocomplete.isTokenKeyword(prevTokenKeyword, "SELECT"))
 				{
-					prevLexis = $._resolveSqlAutocompleteFindPrevLexis(editor, session, delimiter, 
-							pos.row, prevIndex, $.extend({ "INTO" : true, "(" : true }, $._resolveSqlAutocompleteSqlLexisMatcherBase));
+					var tableToken = $.sqlAutocomplete.findToken(prevTokenKeyword, true,
+							function(token)
+							{
+								return ($.sqlAutocomplete.TOKEN_IDENTIFIER == token.type
+										&& $.sqlAutocomplete.isTokenKeyword(token.prev, "FROM"));
+							},
+							true);
 					
-					if(prevLexis && prevLexis.value == "(")
-					{
-						isTable = false;
-						
-						prevLexis = $._resolveSqlAutocompleteFindPrevLexis(editor, session, delimiter, 
-								pos.row, prevLexis.startIndex - 1);
-						
-						if(prevLexis)
-							columnTableName = prevLexis.value;
-					}
-					else
-						isColumn = false;
+					if(tableToken)
+						info.table = tableToken.value;
 				}
+				
+				return info;
 			}
 			
-			if(isColumn && !columnTableName)
+			return null;
+		},
+		
+		//SQL自动补全所涉及的关键字（必须大写）
+		keywords :
+		{
+			"SELECT" : true, "FROM" : true, "LEFT" : true, "RIGHT" : true,
+			"INNER" : true, "OUTER" : true, "JOIN" : true, "ON" : true, "WHERE" : true,
+			"ORDER" : true, "BY" : true, "GROUP" : true, "INSERT" : true, "INTO" : true,
+			"VALUES" : true, "UPDATE" : true, "SET" : true, "DELETE" : true, "DROP" : true,
+			"ALTER" : true, "TABLE" : true, "AS" : true
+		},
+		
+		//后面是表自动补全信息的关键字（必须大写）
+		keywordsTableInfoBehind :
+		{
+			"FROM" : true,
+			"JOIN" : true,
+			"UPDATE" : true,
+			"TABLE" : true
+		},
+		
+		//后面是列自动补全信息的关键字（必须大写）
+		keywordsColumnInfoBehind :
+		{
+			"SELECT" : true,
+			"WHERE" : true,
+			"BY" : true,
+			"SET" : true,
+			"ON" : true
+		},
+		
+		isKeyword : function(text, keywords)
+		{
+			if(!keywords)
+				keywords = $.sqlAutocomplete.keywords;
+			
+			if(!text)
+				return false;
+			
+			if(typeof(keywords) == "string")
+				return keywords == text.toUpperCase();
+			else
+				return keywords[text.toUpperCase()];
+		},
+		
+		TOKEN_KEYWORD : 1,
+		
+		TOKEN_STRING : 3,
+		
+		TOKEN_COMMENT_LINE : 6,
+		
+		TOKEN_COMMENT_BLOCK : 7,
+		
+		TOKEN_PUNCTUATION : 5,
+		
+		TOKEN_BRACKET_BLOCK : 4,
+		
+		TOKEN_IDENTIFIER : 99,
+		
+		/**
+		 * 查找Token。
+		 * 
+		 * @param token
+		 * @param forward true 往后查找；false，往前查找
+		 * @param predicate 断言函数，格式为：function(token){ return true || false }
+		 * @param onlySibling 可选（默认为false），是否仅在本级查找
+		 */
+		findToken : function(token, forward, predicate, onlySibling)
+		{
+			if(onlySibling == undefined)
+				onlySibling = false;
+			
+			var tmpToken = token;
+			
+			while(tmpToken)
 			{
-				//TODO 解析表名称
+				if(predicate(tmpToken))
+					return tmpToken;
+				
+				tmpToken = (forward ? tmpToken.next : tmpToken.prev);
 			}
 			
-			if(isTable)
-				return { "type" : "table" };
-			else if(isColumn && columnTableName)
-				return { "type" : "column", table : columnTableName };
+			if(!onlySibling && token && token.parent)
+				return $.sqlAutocomplete.findToken(token.parent, forward, predicate, false);
 			else
 				return null;
 		},
 		
-		_resolveSqlAutocompletePrevKeywords : $.extend(
+		/**
+		 * 查找SQL语句中指定位置的Token，如果指定位置不是Token，则返回前一个。
+		 */
+		findTokenBySqlIndex : function(tokens, sqlIndex)
 		{
-			"SELECT" : true,
-			"FROM" : true,
-			"JOIN" : true,
-			"ON" : true,
-			"WHERE" : true,
-			"BY" : true,
-			"INSERT" : true,
-			"INTO" : true,
-			"VALUES" : true,
-			"UPDATE" : true,
-			"SET" : true,
-			"DELETE" : true,
-			"DROP" : true,
-			"ALTER" : true,
-			"CREATE" : true,
-			"TABLE" : true,
-			"GRANT" : true
-		}, $._resolveSqlAutocompleteSqlLexisMatcherBase),
-		
-		_resolveSqlAutocompleteTablePrevKeywords : $.extend(
-		{
-			"FROM" : true,
-			"JOIN" : true,
-			"INTO" : true,
-			"UPDATE" : true,
-			"TABLE" : true
-		}, $._resolveSqlAutocompleteSqlLexisMatcherBase),
-		
-		_resolveSqlAutocompleteColumnPrevKeywords : $.extend(
-		{
-			"SELECT" : true,
-			"WHERE" : true,
-			"BY" : true,
-			"INTO" : true,
-			"SET" : true,
-			"ON" : true
-		}, $._resolveSqlAutocompleteSqlLexisMatcherBase),
-		
-		_resolveSqlAutocompleteFindPrevLexis : function(editor, session, delimiter, row, index, sqlLexisMatcher)
-		{
-			var initRow = row;
+			if(!tokens || tokens.length < 1)
+				return undefined;
 			
-			while(row >= 0)
+			for(var i=0; i<tokens.length; i++)
 			{
-				var rowText = "";
-				var startIndex = -1;
-				var endIndex = -1;
+				var token = tokens[i];
 				
-				if(row == initRow)
-					rowText = session.getTextRange(new ace.Range(row, 0, row, index+1));
-				else
-					rowText = session.getLine(row);
-				
-				startIndex = rowText.length - 1;
-				
-				var delimiterIndex = rowText.indexOf(delimiter);
-				var encounterDelimiter = (delimiterIndex >= 0 && delimiterIndex <= startIndex);
-				
-				if(encounterDelimiter)
-					endIndex = delimiterIndex + delimiter.length - 1;
-				
-				var lexis = $._resolveSqlAutocompleteFindPrevLexisForLine(rowText, startIndex, endIndex, sqlLexisMatcher);
-				
-				if(lexis != null)
+				//在token起始位置
+				if(token.startIndex == sqlIndex)
+					return token;
+				//在token中
+				else if(token.startIndex < sqlIndex && (!token.endIndex || sqlIndex < token.endIndex))
 				{
-					lexis.row = row;
-					return lexis;
+					if($.sqlAutocomplete.isTokenBracketBlockWithValue(token))
+					{
+						var subToken = $.sqlAutocomplete.findTokenBySqlIndex(token.value, sqlIndex);
+						
+						return (subToken || token);
+					}
+					else
+						return token;
 				}
-				
-				if(encounterDelimiter)
-					break;
-				
-				row--;
+				//在token和token.next的中间
+				else if(token.endIndex <= sqlIndex && token.next && token.next.startIndex > sqlIndex)
+				{
+					return token;
+				}
 			}
 			
 			return null;
 		},
 		
-		_resolveSqlAutocompleteFindPrevLexisForLine : function(sql, startIndex, endIndex, sqlLexisMatcher)
+		/**
+		 * 是否是括弧块，并且有子Token。
+		 */
+		isTokenBracketBlockWithValue : function(token)
 		{
+			if(!$.sqlAutocomplete.isTokenBracketBlock(token))
+				return false;
+			
+			return (token.value && token.value.length > 0);
+		},
+		
+		/**
+		 * 是否是括弧块。
+		 */
+		isTokenBracketBlock : function(token)
+		{
+			return (token && $.sqlAutocomplete.TOKEN_BRACKET_BLOCK == token.type);
+		},
+		
+		/**
+		 * 是否是关键字。
+		 * 
+		 * @param token
+		 * @param keywords 可选，指定关键字
+		 */
+		isTokenKeyword : function(token, keywords)
+		{
+			if(!token || $.sqlAutocomplete.TOKEN_KEYWORD != token.type)
+				return false;
+			
+			if(keywords == undefined)
+				return true;
+			
+			return $.sqlAutocomplete.isKeyword(token.value, keywords);
+		},
+		
+		/**
+		 * 从指定位置处解析Token数组。
+		 * 
+		 * @param sql
+		 * @param tokens 用于存储解析结果的数组
+		 * @param startIndex 可选，起始位置，默认为0
+		 * @return 解析结束位置，sql.length或者解析终止符位置
+		 */
+		resolveTokens : function(sql, tokens, startIndex)
+		{
+			if(startIndex == undefined)
+				startIndex = 0;
+			
+			for(var i=startIndex; i< sql.length;)
+			{
+				var token = $.sqlAutocomplete.resolveToken(sql, i);
+				
+				//直到结束没有任何Token
+				if(!token)
+					return sql.length;
+				
+				//Token没有结束
+				if(!token.endIndex)
+				{
+					$.sqlAutocomplete.addTokenToArray(tokens, token);
+					return sql.length;
+				}
+				
+				//既不是Token开始符、也不是关键字/标识符字符，比如')'
+				if(token.startIndex == token.endIndex)
+					return token.endIndex;
+				
+				$.sqlAutocomplete.addTokenToArray(tokens, token);
+				i = token.endIndex;
+			}
+			
+			return sql.length;
+		},
+		
+		/**
+		 * 将Token添加至数组，并建立链表关联。
+		 */
+		addTokenToArray : function(tokens, token)
+		{
+			var prev = ((tokens.length - 1) >= 0 ? tokens[tokens.length - 1] : null);
+			
+			tokens.push(token);
+			
+			if(prev)
+			{
+				prev.next = token;
+				token.prev = prev;
+			}
+		},
+		
+		/**
+		 * 从指定位置处解析一个Token并返回。
+		 * 
+		 * @param sql
+		 * @param startIndex
+		 * @param token 可选，需要继续解析的Token
+		 */
+		resolveToken : function(sql, startIndex, token)
+		{
+			if(token)
+			{
+				if(token.endIndex)
+					;
+				else if($.sqlAutocomplete.TOKEN_KEYWORD == token.type)
+				{
+					$.sqlAutocomplete.resolveTokenIdentifier(sql, startIndex, token);
+					token.type = $.sqlAutocomplete.TOKEN_KEYWORD;
+				}
+				else if($.sqlAutocomplete.TOKEN_STRING == token.type)
+				{
+					$.sqlAutocomplete.resolveTokenString(sql, startIndex, token);
+				}
+				else if($.sqlAutocomplete.TOKEN_COMMENT_LINE == token.type)
+				{
+					$.sqlAutocomplete.resolveTokenCommentLine(sql, startIndex, token);
+				}
+				else if($.sqlAutocomplete.TOKEN_COMMENT_BLOCK == token.type)
+				{
+					$.sqlAutocomplete.resolveTokenCommentBlock(sql, startIndex, token);
+				}
+				else if($.sqlAutocomplete.TOKEN_PUNCTUATION == token.type)
+				{
+					token.endIndex = startIndex;
+				}
+				else if($.sqlAutocomplete.TOKEN_BRACKET_BLOCK == token.type)
+				{
+					$.sqlAutocomplete.resolveTokenBracketBlock(sql, startIndex, token);
+				}
+				else if($.sqlAutocomplete.TOKEN_IDENTIFIER == token.type)
+				{
+					$.sqlAutocomplete.resolveTokenIdentifier(sql, startIndex, token);
+				}
+				else
+					throw new Error("unsupported");
+				
+				return token;
+			}
+			
+			for(var i = startIndex; i < sql.length;)
+			{
+				var c = sql.charAt(i);
+				var cn = (i+1) >= sql.length ? 0 : sql.charAt(i+1);
+				
+				var token = null;
+				
+				//字符串
+				if(c == '\'')
+				{
+					token = { startIndex : i };
+					$.sqlAutocomplete.resolveTokenString(sql, i+1, token);
+				}
+				//行注释
+				else if((c == '-' && cn == '-') || (c =='/' && cn == '/'))
+				{
+					token = { startIndex : i, value : (c == '-' ? "--" : "//") };
+					$.sqlAutocomplete.resolveTokenCommentLine(sql, i+2, token);
+				}
+				//块注释
+				else if(c == '/' && cn == '*')
+				{
+					token = { startIndex : i };
+					$.sqlAutocomplete.resolveTokenCommentBlock(sql, i+2, token);
+				}
+				//括弧块
+				else if(c == '(')
+				{
+					token = { startIndex : i };
+					$.sqlAutocomplete.resolveTokenBracketBlock(sql, i+1, token);
+				}
+				//标点符号
+				else if(c == ',' || c == ';')
+				{
+					token = { type : $.sqlAutocomplete.TOKEN_PUNCTUATION, startIndex : i, endIndex : i+1 };
+				}
+				//标识符
+				else if(!/\s/.test(c))
+				{
+					token = { startIndex : i };
+					$.sqlAutocomplete.resolveTokenIdentifier(sql, i, token);
+					
+					if($.sqlAutocomplete.isKeyword(token.value))
+						token.type = $.sqlAutocomplete.TOKEN_KEYWORD;
+				}
+				
+				if(token)
+					return token;
+				
+				i += 1;
+			}
+			
+			return null;
+		},
+		
+		/**
+		 * 解析字符串。
+		 * 
+		 * TOKEN_STRING 结构：
+		 * {
+		 * 		startIndex : Number, //起始位置
+		 * 		endIndex : Number, //结束位置，undefined表示未结束
+		 * 		value : String, //字符串内容
+		 * 		parent : Token, //父Token，undefined表示无父Token，否则仅可能为TOKEN_BRACKET_BLOCK
+		 * }
+		 * 
+		 * 如果没有找到字符串结束符，token.endIndex将为undefined。
+		 * 
+		 * @param sql
+		 * @param startIndex
+		 * @param token 要解析的Token，结构为：{ startIndex : Number }
+		 */
+		resolveTokenString : function(sql, startIndex, token)
+		{
+			token.type = $.sqlAutocomplete.TOKEN_STRING;
+			
+			if(!token.value)
+				token.value = "'";
+			
 			var chars = [];
 			
-			for(var i=startIndex; i> endIndex; i--)
+			for(i = startIndex; i<sql.length; i++)
 			{
 				var c = sql.charAt(i);
 				
-				if(/[\s\,\;\(\)]/.test(c))
+				chars.push(c);
+				
+				if(c == '\'')
 				{
-					if(chars.length > 0)
+					var cn = (i+1) >= sql.length ? 0 : sql.charAt(i+1);
+					
+					//转义字符
+					if(cn == '\'')
 					{
-						var lexis = chars.reverse().join("");
+						chars.push(cn);
+						i = i+1;
+					}
+					else
+					{
+						token.value = token.value + chars.join("");
+						token.endIndex = i+1;
 						chars = [];
 						
-						if(!sqlLexisMatcher || sqlLexisMatcher.test(lexis))
-							return { "value" : lexis, startIndex : i+1, endIndex : i+1+lexis.length };
+						break;
 					}
+				}
+			}
+			
+			//没有结束符
+			if(chars.length > 0)
+				token.value = token.value + chars.join("");
+		},
+		
+		/**
+		 * 解析行注释。
+		 * 结构同TOKEN_STRING。
+		 * 如果没有找到行注释结束符，token.endIndex将为undefined。
+		 * 
+		 * @param sql
+		 * @param startIndex
+		 * @param token 要解析的Token，结构为：{ startIndex : Number }
+		 */
+		resolveTokenCommentLine : function(sql, startIndex, token)
+		{
+			token.type = $.sqlAutocomplete.TOKEN_COMMENT_LINE;
+			
+			if(!token.value)
+				token.value = "--";
+			
+			var chars = [];
+			
+			for(i = startIndex; i<sql.length; i++)
+			{
+				var c = sql.charAt(i);
+				
+				if(c == '\n')
+				{
+					token.value = token.value + chars.join("");
+					token.endIndex = i;
+					chars = [];
 					
-					if(c == "," || c == ";" || c == "(" || c == ")")
+					break;
+				}
+				else
+				{
+					chars.push(c);
+				}
+			}
+			
+			//没有结束符
+			if(chars.length > 0)
+				token.value = token.value + chars.join("");
+		},
+		
+		/**
+		 * 解析块注释。
+		 * 结构同TOKEN_STRING。
+		 * 如果没有找到块注释结束符，token.endIndex将为undefined。
+		 * 
+		 * @param sql
+		 * @param startIndex
+		 * @param token 要解析的Token，结构为：{ startIndex : Number }
+		 */
+		resolveTokenCommentBlock : function(sql, startIndex, token)
+		{
+			token.type = $.sqlAutocomplete.TOKEN_COMMENT_BLOCK;
+			
+			if(!token.value)
+				token.value = "/*";
+			
+			var chars = [];
+			
+			for(i = startIndex; i<sql.length; i++)
+			{
+				var c = sql.charAt(i);
+				
+				chars.push(c);
+				
+				if(c == '*')
+				{
+					var cn = (i+1) >= sql.length ? 0 : sql.charAt(i+1);
+					
+					if(cn == '/')
 					{
-						if(!sqlLexisMatcher || sqlLexisMatcher.test(c))
-							return { "value" : c, startIndex : i, endIndex : i+1 };
+						chars.push(cn);
+						
+						token.value = token.value + chars.join("");
+						token.endIndex = i+2;
+						chars = [];
+						
+						break;
 					}
+				}
+			}
+			
+			//没有结束符
+			if(chars.length > 0)
+				token.value = token.value + chars.join("");
+		},
+		
+		/**
+		 * 解析括弧块。
+		 * 
+		 * TOKEN_STRING 结构：
+		 * {
+		 * 		startIndex : Number, //起始位置
+		 * 		endIndex : Number, //结束位置，undefined表示未结束
+		 * 		value : Token[], //子Token数组
+		 * 		parent : Token, //父Token，undefined表示无父Token，否则仅可能为TOKEN_BRACKET_BLOCK
+		 * }
+		 * 
+		 * @param sql
+		 * @param startIndex
+		 * @param token 要解析的Token，结构为：{ startIndex : Number }
+		 */
+		resolveTokenBracketBlock : function(sql, startIndex, token)
+		{
+			token.type = $.sqlAutocomplete.TOKEN_BRACKET_BLOCK;
+			
+			if(token.value && token.value.length > 0)
+			{
+				var tailToken = token.value[token.value.length - 1];
+				
+				if(!tailToken.endIndex)
+					$.sqlAutocomplete.resolveToken(sql, startIndex, tailToken);
+				
+				for(var i=0; i<token.value.length; i++)
+					token.value[i].parent = token;
+				
+				if(tailToken.endIndex && tailToken.endIndex < sql.length && sql.charAt(tailToken.endIndex) == ')')
+					token.endIndex = tailToken.endIndex + 1;
+				
+				return;
+			}
+			
+			token.value = [];
+			var endIndex = $.sqlAutocomplete.resolveTokens(sql, token.value, startIndex);
+			
+			for(var i=0; i<token.value.length; i++)
+				token.value[i].parent = token;
+			
+			if(endIndex < sql.length && sql.charAt(endIndex) == ')')
+				token.endIndex = endIndex + 1;
+		},
+		
+		/**
+		 * 解析标识符。
+		 * 结构同TOKEN_STRING，但是endIndex始终不会为undefined。
+		 * 
+		 * @param sql
+		 * @param startIndex
+		 * @param token 要解析的Token，结构为：{ startIndex : Number }
+		 */
+		resolveTokenIdentifier : function(sql, startIndex, token)
+		{
+			token.type = $.sqlAutocomplete.TOKEN_IDENTIFIER;
+			
+			if(token.value == null)
+				token.value = "";
+			
+			var chars = [];
+			
+			for(i = startIndex; i<sql.length; i++)
+			{
+				var c = sql.charAt(i);
+				
+				//结束符
+				if(/[\s\,\;\(\)]/.test(c))
+				{
+					token.value = token.value + chars.join("");
+					token.endIndex = i;
+					chars = [];
+					
+					break;
 				}
 				else
 					chars.push(c);
 			}
 			
+			//没有结束符
 			if(chars.length > 0)
 			{
-				var lexis = chars.reverse().join("");
-				
-				if(!sqlLexisMatcher || sqlLexisMatcher.test(lexis))
-					return { "value" : lexis, startIndex : endIndex+1, endIndex : endIndex+1+lexis.length };
+				token.value = token.value + chars.join("");
+				token.endIndex = sql.length;
 			}
-			
-			return null;
-		},
-		
-		_resolveSqlAutocompleteFindNextLexis : function(editor, session, delimiter, row, index, sqlLexisMatcher)
-		{
-			var initRow = row;
-			
-			var maxRows = session.getLength();
-			
-			while(row <= maxRows)
-			{
-				var rowText = "";
-				var startIndex = 0;
-				var endIndex = -1;
-				
-				if(row == initRow)
-					rowText = session.getTextRange(new ace.Range(row, index, row, session.getRowLength(row)));
-				else
-					rowText = session.getLine(row);
-				
-				endIndex = rowText.length;
-				
-				var delimiterIndex = rowText.indexOf(delimiter);
-				var encounterDelimiter = (delimiterIndex >= 0 && delimiterIndex <= endIndex);
-				
-				if(encounterDelimiter)
-					endIndex = delimiterIndex;
-				
-				var lexis = $._resolveSqlAutocompleteFindNextLexisForLine(rowText, startIndex, endIndex, sqlLexisMatcher);
-				
-				if(lexis != null)
-				{
-					lexis.row = row;
-					return lexis;
-				}
-				
-				if(encounterDelimiter)
-					break;
-				
-				row--;
-			}
-			
-			return null;
-		},
-		
-		_resolveSqlAutocompleteFindNextLexisForLine : function(sql, startIndex, endIndex, sqlLexisMatcher)
-		{
-			var chars = [];
-			
-			for(var i = startIndex; i < endIndex; i++)
-			{
-				var c = sql.charAt(i);
-				
-				if(/[\s\,\;\(\)]/.test(c))
-				{
-					if(chars.length > 0)
-					{
-						var lexis = chars.join("");
-						chars = [];
-						
-						if(!sqlLexisMatcher || sqlLexisMatcher.test(lexis))
-							return { "value" : lexis, startIndex : i - lexis.length , endIndex : i };
-					}
-					
-					if(c == "," || c == ";" || c == "(" || c == ")")
-					{
-						if(!sqlLexisMatcher || sqlLexisMatcher.test(c))
-							return { "value" : c, startIndex : i, endIndex : i+1 };
-					}
-				}
-				else
-					chars.push(c);
-			}
-			
-			if(chars.length > 0)
-			{
-				var lexis = chars.reverse().join("");
-				
-				if(!sqlLexisMatcher || sqlLexisMatcher.test(lexis))
-					return { "value" : lexis, startIndex : endIndex-lexis.length, endIndex : endIndex };
-			}
-			
-			return null;
 		}
 	});
 	
