@@ -1640,10 +1640,12 @@
 		 * 
 		 * @param tokens
 		 * @param sqlIndex
-		 * @return 	表：{ type : "table" }；
-		 * 			列：{ type : "column", table : "..." }；
-		 * 			无：{ type : "none" }；
-		 * 			未知：null
+		 * @return 	{ type : "table" } 表；
+		 * 			{ type : "column", table : "..." } 列；
+		 * 			{ type : "none" } 无；
+		 * 			{ type : "prepend" } 需要前加SQL语句才能解析
+		 * 			{ type : "append" } 需要后加SQL语句才能解析
+		 * 			
 		 */
 		resolveTokenAutocompleteInfo : function(tokens, sqlIndex)
 		{
@@ -1651,36 +1653,75 @@
 				return null;
 			
 			var token = $.sqlAutocomplete.findTokenBySqlIndex(tokens, sqlIndex);
+			var isInToken = $.sqlAutocomplete.isInToken(token, sqlIndex);
 			
 			//注释
-			if($.sqlAutocomplete.isInToken(token, sqlIndex)
-					&& ($.sqlAutocomplete.isTokenType(token, $.sqlAutocomplete.TOKEN_COMMENT_LINE)
-							|| $.sqlAutocomplete.isTokenType(token, $.sqlAutocomplete.TOKEN_COMMENT_BLOCK)))
+			if(isInToken && $.sqlAutocomplete.isTokenComment(token))
 				return { type : "none" };
 			
-			var prevTokenKeyword = $.sqlAutocomplete.findToken(token, false, $.sqlAutocomplete.isTokenKeyword);
+			var prevToken = $.sqlAutocomplete.findToken((isInToken ? token.prev : token), false,
+					$.sqlAutocomplete.isNotTokenComment, true);
 			
 			//表
-			if($.sqlAutocomplete.isTokenKeyword(prevTokenKeyword, $.sqlAutocomplete.keywordsTableInfoBehind))
+			if($.sqlAutocomplete.isTokenKeyword(prevToken, $.sqlAutocomplete.keywordsNextIsTable))
 				return { type : "table" };
 			
-			if($.sqlAutocomplete.isTokenKeyword(prevTokenKeyword, $.sqlAutocomplete.keywordsColumnInfoBehind))
+			//列
+			if($.sqlAutocomplete.isTokenKeyword(prevToken, $.sqlAutocomplete.keywordsNextIsColumn))
 			{
-				var info =  { type : "column" };
-				
-				//SELECT ...
-				if($.sqlAutocomplete.isTokenKeyword(prevTokenKeyword, "SELECT"))
+				if($.sqlAutocomplete.isTokenKeyword(prevToken, "SELECT"))
 				{
-					var tableToken = $.sqlAutocomplete.findToken(prevTokenKeyword, true,
+					var fromToken = $.sqlAutocomplete.findToken(prevToken, true,
 							function(token)
 							{
-								return ($.sqlAutocomplete.TOKEN_IDENTIFIER == token.type
-										&& $.sqlAutocomplete.isTokenKeyword(token.prev, "FROM"));
+								return $.sqlAutocomplete.isTokenKeyword(token, "FROM");
 							},
 							true);
 					
+					var tableToken = $.sqlAutocomplete.findToken(fromToken, true,
+							$.sqlAutocomplete.isTokenIndentifier,true);
+					
 					if(tableToken)
-						info.table = tableToken.value;
+						return { type : "column", table : tableToken.value };
+					else
+						return { type : "append" };
+				}
+				else if($.sqlAutocomplete.isTokenKeyword(prevToken, "WHERE")
+						|| $.sqlAutocomplete.isTokenKeyword(prevToken, "ON")
+						|| $.sqlAutocomplete.isTokenKeyword(prevToken, "BY"))
+				{
+					var fromToken = $.sqlAutocomplete.findToken(prevToken, false,
+							function(token)
+							{
+								return $.sqlAutocomplete.isTokenKeyword(token, "FROM")
+										|| $.sqlAutocomplete.isTokenKeyword(token, "UPDATE");
+							},
+							true);
+					
+					var tableToken = $.sqlAutocomplete.findToken(fromToken, true,
+							$.sqlAutocomplete.isTokenIndentifier,true);
+					
+					if(tableToken)
+						return { type : "column", table : tableToken.value };
+					else
+						return { type : "prepend" };
+				}
+				else if($.sqlAutocomplete.isTokenKeyword(prevToken, "SET"))
+				{
+					var updateToken = $.sqlAutocomplete.findToken(prevToken, false,
+							function(token)
+							{
+								return $.sqlAutocomplete.isTokenKeyword(token, "UPDATE");
+							},
+							true);
+					
+					var tableToken = $.sqlAutocomplete.findToken(updateToken, true,
+							$.sqlAutocomplete.isTokenIndentifier,true);
+					
+					if(tableToken)
+						return { type : "column", table : tableToken.value };
+					else
+						return { type : "prepend" };
 				}
 				
 				return info;
@@ -1692,31 +1733,43 @@
 		//SQL自动补全所涉及的关键字（必须大写）
 		keywords :
 		{
-			"SELECT" : true, "FROM" : true, "LEFT" : true, "RIGHT" : true,
+			"SELECT" : true, "FROM" : true, "LEFT" : true, "RIGHT" : true, "CROSS" : true, "FULL" : true,
 			"INNER" : true, "OUTER" : true, "JOIN" : true, "ON" : true, "WHERE" : true,
-			"ORDER" : true, "BY" : true, "GROUP" : true, "HAVING" : true, "INSERT" : true, "INTO" : true,
-			"VALUES" : true, "UPDATE" : true, "SET" : true, "DELETE" : true, "DROP" : true,
-			"ALTER" : true, "TABLE" : true, "ADD" : true, "RENAME" : true, "MODIFY" : true,
-			"VIEW" : true, "INDEX" : true, "PROCEDURE" : true, "TRIGGER" : true, "FUNCTION" : true
+			"ORDER" : true, "GROUP" : true, "BY" : true, "HAVING" : true, "UNION" : true,
+			"INSERT" : true, "INTO" : true, "VALUES" : true,
+			"UPDATE" : true, "SET" : true,
+			"DELETE" : true, "DROP" : true,
+			"ALTER" : true, "DROP" : true, "TABLE" : true, "ADD" : true, "RENAME" : true, "MODIFY" : true,
+			"CREATE" : true, "REPLACE" : true, "VIEW" : true, "INDEX" : true, "PROCEDURE" : true,
+			"TRIGGER" : true, "FUNCTION" : true
 		},
 		
-		//后面是表自动补全信息的关键字（必须大写）
-		keywordsTableInfoBehind :
+		//SQL语句开始关键字*（必须大写）
+		keywordsSqlStart :
+		{
+			"SELECT" : true, "INSERT" : true, "UPDATE" : true, "DELETE" : true,
+			"ALTER" : true, "DROP" : true, "CREATE" : true, "REPLACE" : true, "MERGE" : true,
+			"GRANT" : true
+		},
+		
+		//下一个Token（注释除外）必定是表名称的关键字（必须大写）
+		keywordsNextIsTable :
 		{
 			"FROM" : true,
 			"JOIN" : true,
 			"UPDATE" : true,
+			"INTO" : true,
 			"TABLE" : true
 		},
 		
-		//后面是列自动补全信息的关键字（必须大写）
-		keywordsColumnInfoBehind :
+		//下一个Token（注释除外）必定是列名称的关键字（必须大写）
+		keywordsNextIsColumn :
 		{
 			"SELECT" : true,
 			"WHERE" : true,
+			"ON" : true,
 			"BY" : true,
-			"SET" : true,
-			"ON" : true
+			"SET" : true
 		},
 		
 		isKeyword : function(text, keywords)
@@ -1826,6 +1879,31 @@
 		{
 			return (token && token.startIndex <= sqlIndex && (token.endIndex == null || sqlIndex < token.endIndex));
 		},
+
+		/**
+		 * 是否是标识符Token。
+		 */
+		isTokenIndentifier : function(token)
+		{
+			return $.sqlAutocomplete.isTokenType(token, $.sqlAutocomplete.TOKEN_IDENTIFIER);
+		},
+		
+		/**
+		 * 是否是注释Token。
+		 */
+		isTokenComment : function(token)
+		{
+			return $.sqlAutocomplete.isTokenType(token, $.sqlAutocomplete.TOKEN_COMMENT_LINE)
+					|| $.sqlAutocomplete.isTokenType(token, $.sqlAutocomplete.TOKEN_COMMENT_BLOCK);
+		},
+		
+		/**
+		 * 是否不是注释Token。
+		 */
+		isNotTokenComment : function(token)
+		{
+			return !$.sqlAutocomplete.isTokenComment(token);
+		},
 		
 		/**
 		 * 是否是括弧块，并且有子Token。
@@ -1888,7 +1966,7 @@
 		 * @param sql
 		 * @param tokens 用于存储解析结果的数组
 		 * @param startIndex 可选，起始位置，默认为0
-		 * @return 解析结束位置，sql.length或者解析终止符位置
+		 * @return 解析结束位置，sql.length 正确解析完成；<sql.length 遇到非法终止符，比如单独的右括弧、块注释结束符
 		 */
 		resolveTokens : function(sql, tokens, startIndex)
 		{
