@@ -1662,7 +1662,7 @@
 							var nextRowText = session.getLine(appendRow);
 							sql = sql + "\n" + nextRowText;
 							
-							prependRow--;
+							appendRow++;
 						}
 						else
 							break;
@@ -1701,7 +1701,12 @@
 			
 			var prevToken = token;
 			if(isInToken)
-				prevToken = (token.prev ? token.prev : token.parent);
+			{
+				prevToken = token.prev;
+				//如果没有前置Token，则向上级查找
+				if(!prevToken)
+					prevToken = token.parent;
+			}
 			
 			var prevToken = $.sqlAutocomplete.findToken(prevToken, false,
 					$.sqlAutocomplete.isNotTokenComment, false);

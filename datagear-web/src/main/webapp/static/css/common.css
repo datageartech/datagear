@@ -1284,7 +1284,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .content .content-editor{
 	position: relative;
 	width: 100%;
-	height: 60%;
+	height: 65%;
 	min-height: 10%;
 	max-height: 90%;
 	box-sizing: border-box;
@@ -1317,7 +1317,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .content .content-result{
 	position: relative;
 	width: 100%;
-	height: 40%;
+	height: 35%;
 	border-top-width: 0px;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
