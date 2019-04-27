@@ -200,12 +200,27 @@ Schema schema 数据库，不允许为null
 	
 	po.getSqlAutocompleteCompletions = function(editor, session, pos, prefix, callback)
 	{
-		var info = po.resolveSqlAutocompleteInfo(editor, session, pos, prefix);
+		var info = $.sqlAutocomplete.resolveAutocompleteInfo(editor, session, pos, prefix);
 		
-		if(info && info.type == "table" && po.sqlAutocompleteTableCompletions != null)
+		if(info && info.type == "table" && po.sqlAutocompleteTableCompletions)
 		{
 			callback(null, po.sqlAutocompleteTableCompletions);
 			return;
+		}
+		
+		var tableAlias = $.sqlAutocomplete.resolveTableAlias(prefix);
+		
+		if(info && info.type == "column" && info.table && po.sqlAutocompleteColumnCompletions)
+		{
+			var columns = po.sqlAutocompleteColumnCompletions[info.table];
+			
+			if(columns != null)
+			{
+				var completions = $.sqlAutocomplete.buildCompletions(columns, (tableAlias ? tableAlias+"." : ""));
+				
+				callback(null, completions);
+				return;
+			}
 		}
 		
 		if(info && (info.type == "table" || (info.type == "column" && info.table)))
@@ -230,20 +245,23 @@ Schema schema 数据库，不允许为null
 				data : data,
 				success : function(names)
 				{
-					var completions = [];
-					for(var i=0; i<names.length; i++)
-					{
-						completions[i] =
-						{
-							name : names[i],
-							value : names[i],
-							caption: "",
-							meta: "",
-						};
-					}
+					var completions;
 					
 					if(info.type == "table")
+					{
+						completions = $.sqlAutocomplete.buildCompletions(names);
 						po.sqlAutocompleteTableCompletions = completions;
+					}
+					else if(info.type == "column")
+					{
+						completions = $.sqlAutocomplete.buildCompletions(names, (tableAlias ? tableAlias+"." : ""));
+						
+						if(!po.sqlAutocompleteColumnCompletions)
+							po.sqlAutocompleteColumnCompletions = {};
+						
+						if(names && names.length > 0)
+							po.sqlAutocompleteColumnCompletions[info.table] = names;
+					}
 					
 					callback(null, completions);
 				},
@@ -252,11 +270,6 @@ Schema schema 数据库，不允许为null
 		}
 		else
 			callback(null, []);
-	};
-	
-	po.resolveSqlAutocompleteInfo = function(editor, session, pos, prefix)
-	{
-		return $.sqlAutocomplete.resolveAutocompleteInfo(editor, session, po.getSqlDelimiter(), pos, prefix);
 	};
 	
 	po.getSqlDelimiter = function()

@@ -1610,57 +1610,108 @@
 		 * 
 		 * @param editor
 		 * @param session
-		 * @param delimiter
 		 * @param pos
 		 * @param prefix
 		 * 
 		 * @return { type : "table" } 或者 { type : "column", table : "..." } 或者 null
 		 */
-		resolveAutocompleteInfo : function(editor, session, delimiter, pos, prefix)
+		resolveAutocompleteInfo : function(editor, session, pos, prefix)
 		{
-			var sql = session.getLine(pos.row);
-			var myIndex = pos.column - 1;
+			var autocompleteInfo = {};
+			var maxRow = session.getLength() - 1;
+			var prependRowMin = (pos.row - 50) < 0 ? 0 : (pos.row - 50);
+			var appendRowMax = (pos.row + 50) > maxRow ? maxRow : (pos.row + 50);
 			
-			var tokens = [];
+			var tableAlias = $.sqlAutocomplete.resolveTableAlias(prefix);
 			
 			try
 			{
-				$.sqlAutocomplete.resolveTokens(sql, tokens);
+				var sql = session.getLine(pos.row);
+				var myIndex = pos.column - 1;
+				
+				var prependRow = pos.row - 1, appendRow = pos.row + 1;
+				
+				//前后最大允许50行
+				while(true)
+				{
+					var tokens = [];
+					$.sqlAutocomplete.resolveTokens(sql, tokens);
+					
+					var token = $.sqlAutocomplete.findTokenBySqlIndex(tokens, myIndex);
+					var isInToken = $.sqlAutocomplete.isInToken(token, myIndex);
+					
+					autocompleteInfo = $.sqlAutocomplete.resolveTokenAutocompleteInfo(tokens, token, isInToken, tableAlias);
+					
+					if(autocompleteInfo && autocompleteInfo.type == "prepend")
+					{
+						if(prependRow >= prependRowMin)
+						{
+							var prevRowText = session.getLine(prependRow);
+							sql = prevRowText + "\n" + sql;
+							myIndex = prevRowText.length + 1 + myIndex;
+							
+							prependRow--;
+						}
+						else
+							break;
+					}
+					else if(autocompleteInfo && autocompleteInfo.type == "append")
+					{
+						if(appendRow <= appendRowMax)
+						{
+							var nextRowText = session.getLine(appendRow);
+							sql = sql + "\n" + nextRowText;
+							
+							prependRow--;
+						}
+						else
+							break;
+					}
+					else
+						break;
+				}
 			}
-			catch(e)
-			{
-				tokens = [];
-			}
+			catch(e){}
 			
-			return $.sqlAutocomplete.resolveTokenAutocompleteInfo(tokens, myIndex);
+			return autocompleteInfo;
 		},
 		
 		/**
 		 * 解析SQL自动补全信息。
 		 * 
 		 * @param tokens
-		 * @param sqlIndex
+		 * @param token
+		 * @param isInToken
+		 * @param tableAlias 如果是列自动补全信息，则指定要查找的表别名
 		 * @return 	{ type : "table" } 表；
 		 * 			{ type : "column", table : "..." } 列；
 		 * 			{ type : "none" } 无；
 		 * 			{ type : "prepend" } 需要前加SQL语句才能解析
 		 * 			{ type : "append" } 需要后加SQL语句才能解析
-		 * 			
 		 */
-		resolveTokenAutocompleteInfo : function(tokens, sqlIndex)
+		resolveTokenAutocompleteInfo : function(tokens, token, isInToken, tableAlias)
 		{
-			if(tokens.length < 1)
-				return null;
-			
-			var token = $.sqlAutocomplete.findTokenBySqlIndex(tokens, sqlIndex);
-			var isInToken = $.sqlAutocomplete.isInToken(token, sqlIndex);
-			
-			//注释
-			if(isInToken && $.sqlAutocomplete.isTokenComment(token))
+			if(tokens.length < 1 || !token)
 				return { type : "none" };
 			
-			var prevToken = $.sqlAutocomplete.findToken((isInToken ? token.prev : token), false,
-					$.sqlAutocomplete.isNotTokenComment, true);
+			//注释
+			if(isInToken &&
+					($.sqlAutocomplete.isTokenComment(token) || $.sqlAutocomplete.isTokenString(token)))
+				return { type : "none" };
+			
+			var prevToken = token;
+			if(isInToken)
+				prevToken = (token.prev ? token.prev : token.parent);
+			
+			var prevToken = $.sqlAutocomplete.findToken(prevToken, false,
+					$.sqlAutocomplete.isNotTokenComment, false);
+			
+			if(!prevToken)
+				return { type : "prepend" };
+			
+			//别名
+			if($.sqlAutocomplete.isTokenTextValue(prevToken, "AS"))
+				return { type : "none" };
 			
 			//表
 			if($.sqlAutocomplete.isTokenKeyword(prevToken, $.sqlAutocomplete.keywordsNextIsTable))
@@ -1669,6 +1720,22 @@
 			//列
 			if($.sqlAutocomplete.isTokenKeyword(prevToken, $.sqlAutocomplete.keywordsNextIsColumn))
 			{
+				var tableTokenPredicate = $.sqlAutocomplete.isTokenIndentifier;
+				if(tableAlias)
+				{
+					tableTokenPredicate = function(token)
+					{
+						if(!$.sqlAutocomplete.isTokenIndentifier(token))
+							return false;
+						
+						if($.sqlAutocomplete.isTokenTextValue(token, tableAlias)
+								|| $.sqlAutocomplete.isTokenTextValue(token.next, tableAlias))
+							return true;
+						
+						return false;
+					};
+				}
+				
 				if($.sqlAutocomplete.isTokenKeyword(prevToken, "SELECT"))
 				{
 					var fromToken = $.sqlAutocomplete.findToken(prevToken, true,
@@ -1679,7 +1746,7 @@
 							true);
 					
 					var tableToken = $.sqlAutocomplete.findToken(fromToken, true,
-							$.sqlAutocomplete.isTokenIndentifier,true);
+							tableTokenPredicate, true);
 					
 					if(tableToken)
 						return { type : "column", table : tableToken.value };
@@ -1699,7 +1766,7 @@
 							true);
 					
 					var tableToken = $.sqlAutocomplete.findToken(fromToken, true,
-							$.sqlAutocomplete.isTokenIndentifier,true);
+							tableTokenPredicate, true);
 					
 					if(tableToken)
 						return { type : "column", table : tableToken.value };
@@ -1716,21 +1783,64 @@
 							true);
 					
 					var tableToken = $.sqlAutocomplete.findToken(updateToken, true,
-							$.sqlAutocomplete.isTokenIndentifier,true);
+							tableTokenPredicate, true);
 					
 					if(tableToken)
 						return { type : "column", table : tableToken.value };
 					else
 						return { type : "prepend" };
 				}
-				
-				return info;
+			}
+			//列 INTO [table] (...)
+			else if($.sqlAutocomplete.isTokenIndentifier(prevToken)
+					&& $.sqlAutocomplete.isTokenKeyword(prevToken.prev, "INTO"))
+			{
+				return { type : "column", table : prevToken.value };
+			}
+			else
+				return $.sqlAutocomplete.resolveTokenAutocompleteInfo(tokens, prevToken, true, tableAlias);
+			
+			return { type : "none" };
+		},
+
+		/**
+		 * 解析表别名。
+		 */
+		resolveTableAlias : function(columnAccess)
+		{
+			var tableAlias = null;
+			if(columnAccess)
+			{
+				var tableAliasEndIndex = columnAccess.indexOf(".");
+				if(tableAliasEndIndex > 0)
+					tableAlias = columnAccess.substring(0, tableAliasEndIndex);
 			}
 			
-			return null;
+			return tableAlias;
 		},
 		
-		//SQL自动补全所涉及的关键字（必须大写）
+		buildCompletions : function(names, prefix)
+		{
+			var completions = [];
+			
+			if(!names)
+				return completions;
+			
+			for(var i=0; i<names.length; i++)
+			{
+				completions[i] =
+				{
+					name : (prefix ? prefix + names[i] : names[i]),
+					value : (prefix ? prefix + names[i] : names[i]),
+					caption: "",
+					meta: ""
+				};
+			}
+			
+			return completions;
+		},
+		
+		//SQL自动补全涉及的关键字（必须大写）
 		keywords :
 		{
 			"SELECT" : true, "FROM" : true, "LEFT" : true, "RIGHT" : true, "CROSS" : true, "FULL" : true,
@@ -1780,10 +1890,29 @@
 			if(!text)
 				return false;
 			
+			if($.sqlAutocomplete.maxKeywordLength == null)
+				$.sqlAutocomplete.maxKeywordLength = $.sqlAutocomplete.getMaxKeywordLength($.sqlAutocomplete.keywords);
+			
+			if(text.length > $.sqlAutocomplete.maxKeywordLength)
+				return false;
+			
 			if(typeof(keywords) == "string")
 				return keywords == text.toUpperCase();
 			else
 				return keywords[text.toUpperCase()];
+		},
+		
+		getMaxKeywordLength : function(keywords)
+		{
+			var maxLength = 0;
+			
+			for(var k in keywords)
+			{
+				if(k.length > maxLength)
+					maxLength = k.length;
+			}
+			
+			return maxLength;
 		},
 		
 		TOKEN_KEYWORD : 1,
@@ -1879,7 +2008,37 @@
 		{
 			return (token && token.startIndex <= sqlIndex && (token.endIndex == null || sqlIndex < token.endIndex));
 		},
-
+		
+		/**
+		 * 判断token.value是否是指定字符串（忽略大小写）。
+		 * 
+		 * @param token
+		 * @param textValue 可选，文本值
+		 */
+		isTokenTextValue : function(token, textValue)
+		{
+			if(!token || typeof(token.value) != "string")
+				return false;
+			
+			if(textValue == undefined)
+				return true;
+			
+			if(token.value.length != textValue.length)
+				return false;
+			
+			var upperValue = token.value.toUpperCase();
+			
+			if(upperValue == textValue)
+				return true;
+			
+			return (upperValue == textValue.toUpperCase());
+		},
+		
+		isTokenString : function(token)
+		{
+			return $.sqlAutocomplete.isTokenType(token, $.sqlAutocomplete.TOKEN_STRING);
+		},
+		
 		/**
 		 * 是否是标识符Token。
 		 */
@@ -2001,18 +2160,27 @@
 		
 		/**
 		 * 将Token添加至数组，并建立链表关联。
+		 * 
+		 * @param tokens 原数组
+		 * @param token 待追加的单个元素或者数组
 		 */
 		addTokenToArray : function(tokens, token)
 		{
 			var prev = ((tokens.length - 1) >= 0 ? tokens[tokens.length - 1] : null);
-			
-			tokens.push(token);
 			
 			if(prev)
 			{
 				prev.next = token;
 				token.prev = prev;
 			}
+			
+			if(token.length)
+			{
+				for(var i=0; i<token.length; i++)
+					$.sqlAutocomplete.addTokenToArray(tokens, token[i]);
+			}
+			else
+				tokens.push(token);
 		},
 		
 		/**
