@@ -200,7 +200,7 @@ Schema schema 数据库，不允许为null
 	
 	po.getSqlAutocompleteCompletions = function(editor, session, pos, prefix, callback)
 	{
-		var info = $.sqlAutocomplete.resolveAutocompleteInfo(editor, session, pos, prefix);
+		var info = $.sqlAutocomplete.resolveAutocompleteInfo(editor, session, pos, prefix, ";");
 		
 		if(info && info.type == "table" && po.sqlAutocompleteTableCompletions)
 		{

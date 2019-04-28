@@ -1615,7 +1615,7 @@
 		 * 
 		 * @return { type : "table" } 或者 { type : "column", table : "..." } 或者 null
 		 */
-		resolveAutocompleteInfo : function(editor, session, pos, prefix)
+		resolveAutocompleteInfo : function(editor, session, pos, prefix, delimiter)
 		{
 			var autocompleteInfo = {};
 			var maxRow = session.getLength() - 1;
@@ -1640,16 +1640,18 @@
 					var token = $.sqlAutocomplete.findTokenBySqlIndex(tokens, myIndex);
 					var isInToken = $.sqlAutocomplete.isInToken(token, myIndex);
 					
-					autocompleteInfo = $.sqlAutocomplete.resolveTokenAutocompleteInfo(tokens, token, isInToken, tableAlias);
+					autocompleteInfo = $.sqlAutocomplete.resolveTokenAutocompleteInfo(tokens, token, isInToken,
+							delimiter, tableAlias);
 					
 					if(autocompleteInfo && autocompleteInfo.type == "prepend")
 					{
 						if(prependRow >= prependRowMin)
 						{
 							var prevRowText = session.getLine(prependRow);
+							
 							sql = prevRowText + "\n" + sql;
 							myIndex = prevRowText.length + 1 + myIndex;
-							
+						
 							prependRow--;
 						}
 						else
@@ -1682,6 +1684,7 @@
 		 * @param tokens
 		 * @param token
 		 * @param isInToken
+		 * @param delimiter 语句分隔符
 		 * @param tableAlias 如果是列自动补全信息，则指定要查找的表别名
 		 * @return 	{ type : "table" } 表；
 		 * 			{ type : "column", table : "..." } 列；
@@ -1689,7 +1692,7 @@
 		 * 			{ type : "prepend" } 需要前加SQL语句才能解析
 		 * 			{ type : "append" } 需要后加SQL语句才能解析
 		 */
-		resolveTokenAutocompleteInfo : function(tokens, token, isInToken, tableAlias)
+		resolveTokenAutocompleteInfo : function(tokens, token, isInToken, delimiter, tableAlias)
 		{
 			if(tokens.length < 1 || !token)
 				return { type : "none" };
@@ -1714,6 +1717,16 @@
 			if(!prevToken)
 				return { type : "prepend" };
 			
+			var isTokenDelimiter = function(token)
+			{
+				return $.sqlAutocomplete.isTokenTextValue(prevToken, delimiter)
+						|| $.sqlAutocomplete.isTokenTextValue(prevToken, ";");
+			};
+			
+			//SQL分隔符
+			if(isTokenDelimiter(prevToken))
+				return { type : "none" };
+			
 			//别名
 			if($.sqlAutocomplete.isTokenTextValue(prevToken, "AS"))
 				return { type : "none" };
@@ -1725,36 +1738,47 @@
 			//列
 			if($.sqlAutocomplete.isTokenKeyword(prevToken, $.sqlAutocomplete.keywordsNextIsColumn))
 			{
-				var tableTokenPredicate = $.sqlAutocomplete.isTokenIndentifier;
-				if(tableAlias)
+				var tableTokenPredicate = function(token)
 				{
-					tableTokenPredicate = function(token)
-					{
-						if(!$.sqlAutocomplete.isTokenIndentifier(token))
-							return false;
-						
-						if($.sqlAutocomplete.isTokenTextValue(token, tableAlias)
-								|| $.sqlAutocomplete.isTokenTextValue(token.next, tableAlias))
-							return true;
-						
+					if(!$.sqlAutocomplete.isTokenIndentifier(token))
 						return false;
-					};
-				}
+					
+					if(isTokenDelimiter(token))
+						return false;
+					
+					if(!tableAlias)
+						return true;
+					
+					if($.sqlAutocomplete.isTokenTextValue(token, tableAlias)
+							|| $.sqlAutocomplete.isTokenTextValue(token.next, tableAlias))
+						return true;
+					
+					return false;
+				};
 				
 				if($.sqlAutocomplete.isTokenKeyword(prevToken, "SELECT"))
 				{
 					var fromToken = $.sqlAutocomplete.findToken(prevToken, true,
 							function(token)
 							{
-								return $.sqlAutocomplete.isTokenKeyword(token, "FROM");
+								return $.sqlAutocomplete.isTokenKeyword(token, "FROM")
+									|| isTokenDelimiter(token);
 							},
 							true);
+					
+					if(isTokenDelimiter(fromToken))
+						return { type : "none" };
 					
 					var tableToken = $.sqlAutocomplete.findToken(fromToken, true,
 							tableTokenPredicate, true);
 					
 					if(tableToken)
-						return { type : "column", table : tableToken.value };
+					{
+						if(isTokenDelimiter(tableToken))
+							return { type : "none" };
+						else
+							return { type : "column", table : tableToken.value };
+					}
 					else
 						return { type : "append" };
 				}
@@ -1766,15 +1790,24 @@
 							function(token)
 							{
 								return $.sqlAutocomplete.isTokenKeyword(token, "FROM")
-										|| $.sqlAutocomplete.isTokenKeyword(token, "UPDATE");
+										|| $.sqlAutocomplete.isTokenKeyword(token, "UPDATE")
+										|| isTokenDelimiter(token);
 							},
 							true);
+					
+					if(isTokenDelimiter(fromToken))
+						return { type : "none" };
 					
 					var tableToken = $.sqlAutocomplete.findToken(fromToken, true,
 							tableTokenPredicate, true);
 					
 					if(tableToken)
-						return { type : "column", table : tableToken.value };
+					{
+						if(isTokenDelimiter(tableToken))
+							return { type : "none" };
+						else
+							return { type : "column", table : tableToken.value };
+					}
 					else
 						return { type : "prepend" };
 				}
@@ -1783,15 +1816,24 @@
 					var updateToken = $.sqlAutocomplete.findToken(prevToken, false,
 							function(token)
 							{
-								return $.sqlAutocomplete.isTokenKeyword(token, "UPDATE");
+								return $.sqlAutocomplete.isTokenKeyword(token, "UPDATE")
+										|| isTokenDelimiter(token);
 							},
 							true);
+					
+					if(isTokenDelimiter(updateToken))
+						return { type : "none" };
 					
 					var tableToken = $.sqlAutocomplete.findToken(updateToken, true,
 							tableTokenPredicate, true);
 					
 					if(tableToken)
-						return { type : "column", table : tableToken.value };
+					{
+						if(isTokenDelimiter(tableToken))
+							return { type : "none" };
+						else
+							return { type : "column", table : tableToken.value };
+					}
 					else
 						return { type : "prepend" };
 				}
@@ -1803,11 +1845,11 @@
 				return { type : "column", table : prevToken.value };
 			}
 			else
-				return $.sqlAutocomplete.resolveTokenAutocompleteInfo(tokens, prevToken, true, tableAlias);
+				return $.sqlAutocomplete.resolveTokenAutocompleteInfo(tokens, prevToken, true, delimiter, tableAlias);
 			
 			return { type : "none" };
 		},
-
+		
 		/**
 		 * 解析表别名。
 		 */
@@ -1939,7 +1981,7 @@
 		 * 
 		 * @param token
 		 * @param forward true 往后查找；false，往前查找
-		 * @param predicate 断言函数，格式为：function(token){ return true || false }
+		 * @param predicate 断言函数，格式为：function(token){ return true || false || null }，true 返回此token；false 继续查找；null 返回null。
 		 * @param onlySibling 可选（默认为false），是否仅在本级查找
 		 */
 		findToken : function(token, forward, predicate, onlySibling)
@@ -1951,7 +1993,12 @@
 			
 			while(tmpToken)
 			{
-				if(predicate(tmpToken))
+				var predicateResult = predicate(tmpToken);
+				
+				if(predicateResult == null)
+					return null;
+				
+				if(predicateResult == true)
 					return tmpToken;
 				
 				tmpToken = (forward ? tmpToken.next : tmpToken.prev);
