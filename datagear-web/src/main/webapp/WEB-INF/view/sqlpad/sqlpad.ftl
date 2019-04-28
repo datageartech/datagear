@@ -462,18 +462,9 @@ Schema schema 数据库，不允许为null
 			}
 			else if(msgData.sqlResultType == "RESULT_SET")
 			{
-				var tabId = null;
+				var tabId = po.element("#lockSqlResultTabButton").attr("lock-tab-id");
 				
-				if(po.element("#lockSqlResultTabButton").hasClass("ui-state-active"))
-				{
-					var tabsNav = po.getTabsNav(po.sqlResultTabs);
-					var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
-					
-					if(activeTab.hasClass("sql-result-tab"))
-						tabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
-				}
-				
-				if(tabId == null)
+				if(!tabId)
 					tabId = po.genSqlResultTabId();
 				
 				po.renderSqlResultTab(tabId, msgData.sqlStatement.sql, msgData.modelSqlResult, (po.executingSqlCount == 1));
@@ -1121,18 +1112,29 @@ Schema schema 数据库，不允许为null
 		
 		activeTabForm.submit();
 	});
-
+	
 	po.element("#lockSqlResultTabButton").click(function()
 	{
 		var $this = $(this);
 		
+		var tabsNav = po.getTabsNav(po.sqlResultTabs);
+		
 		if($this.hasClass("ui-state-active"))
 		{
-			$(this).removeClass("ui-state-active");
+			$this.removeAttr("lock-tab-id");
+			$this.removeClass("ui-state-active");
 		}
 		else
 		{
-			$(this).addClass("ui-state-active");
+			var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
+			
+			if(activeTab.hasClass("sql-result-tab"))
+			{
+				var tabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
+				
+				$this.attr("lock-tab-id", tabId);
+				$this.addClass("ui-state-active");
+			}
 		}
 	});
 	
@@ -1191,6 +1193,14 @@ Schema schema 数据库，不允许为null
 			{
 				$(".result-message-buttons", resultOperations).hide();
 				$(".sql-result-buttons", resultOperations).show();
+				
+				var lockSqlResultTabButton = po.element("#lockSqlResultTabButton");
+				var newTabId = po.getTabsTabId($this, tabsNav, newTab);
+				
+				if(newTabId == lockSqlResultTabButton.attr("lock-tab-id"))
+					lockSqlResultTabButton.addClass("ui-state-active");
+				else
+					lockSqlResultTabButton.removeClass("ui-state-active");
 			}
 			else if(newTab.hasClass("result-message-tab"))
 			{
