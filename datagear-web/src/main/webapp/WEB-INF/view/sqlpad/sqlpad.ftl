@@ -141,8 +141,7 @@ Schema schema 数据库，不允许为null
 	po.element("#sqlCommitModeSet").buttonset();
 	po.element("#sqlExceptionHandleModeSet").buttonset();
 	
-	var languageTools = ace.require("ace/ext/language_tools");
-	languageTools.setCompleters(
+	po.sqlEditorCompleters =
 	[
 		{
 			identifierRegexps : [/[a-zA-Z_0-9\.\$]/],
@@ -151,15 +150,16 @@ Schema schema 数据库，不允许为null
 				po.getSqlAutocompleteCompletions(editor, session, pos, prefix, callback);
 			}
 		}
-	]);
+	];
+	var languageTools = ace.require("ace/ext/language_tools");
 	var SqlMode = ace.require("ace/mode/sql").Mode;
 	po.sqlEditor = ace.edit("${pageId}-sql-editor");
 	po.sqlEditor.session.setMode(new SqlMode());
 	po.sqlEditor.setShowPrintMargin(false);
 	po.sqlEditor.setOptions(
 	{
-		enableBasicAutocompletion: true,
-		enableLiveAutocompletion: true
+		enableBasicAutocompletion: po.sqlEditorCompleters,
+		enableLiveAutocompletion: po.sqlEditorCompleters
 	});
 	po.sqlEditor.focus();
 	po.sqlEditor.navigateFileEnd();
