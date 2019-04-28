@@ -127,7 +127,7 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 
 		List<Object> datas = new ArrayList<Object>();
 
-		rs.absolute(startRow - 1);
+		moveToPrevious(rs, startRow);
 
 		for (int row = startRow; row < startRow + fetchSize; row++)
 		{
@@ -156,6 +156,28 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 		modelSqlResult.setDatas(datas);
 
 		return modelSqlResult;
+	}
+	
+	/**
+	 * 将一个未移动过游标的{@linkplain ResultSet}游标移动至指定行之前。
+	 * @param rs
+	 * @param row
+	 * @throws SQLException
+	 */
+	protected void moveToPrevious(ResultSet rs, int row) throws SQLException
+	{
+		try
+		{
+			rs.absolute(row -1);
+		}
+		catch(SQLException e)
+		{
+			for(int i=1; i<row; i++)
+			{
+				if(!rs.next())
+					break;
+			}
+		}
 	}
 
 	protected Statement createStatement(Connection cn) throws SQLException
