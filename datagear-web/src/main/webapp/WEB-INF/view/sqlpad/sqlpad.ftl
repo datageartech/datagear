@@ -108,8 +108,12 @@ Schema schema 数据库，不允许为null
 					<button id="moreSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
 					<button id="refreshSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
 					&nbsp;&nbsp;
+					<button id="viewSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.viewSqlStatement' />"><span class="ui-button-icon ui-icon ui-icon-lightbulb"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.viewSqlStatement' /></button>
 					<button id="lockSqlResultTabButton" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only stated-active" title="<@spring.message code='sqlpad.lockSqlResultTab' />"><span class="ui-button-icon ui-icon ui-icon-locked"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.lockSqlResultTab' /></button>
 				</div>
+			</div>
+			<div id="viewSqlStatementPanel" class="view-sql-statement-panel ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow">
+				<textarea class="sql-content ui-widget ui-widget-content"></textarea>
 			</div>
 		</div>
 	</div>
@@ -494,7 +498,11 @@ Schema schema 数据库，不允许为null
 						var tabForm = po.element("#" + po.getSqlResultTabPanelFormId(tabId), tabPanel);
 						var tabSql = $("textarea[name='sql']", tabForm).val();
 						
-						if(sql != tabSql)
+						var sqlEquals = (sql == tabSql);
+						if(!sqlEquals)
+							sqlEquals = (sql.replace(/\s/g, "") == tabSql.replace(/\s/g, ""));
+						
+						if(!sqlEquals)
 						{
 							$.tipInfo("<@spring.message code='sqlpad.selectResultExpired' />");
 							return;
@@ -1113,6 +1121,26 @@ Schema schema 数据库，不允许为null
 		activeTabForm.submit();
 	});
 	
+	po.element("#viewSqlResultTabButton").click(function()
+	{
+		var $this = $(this);
+		
+		var tabsNav = po.getTabsNav(po.sqlResultTabs);
+		var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
+		
+		if(activeTab.hasClass("sql-result-tab"))
+		{
+			var tabId = po.getTabsTabId(po.sqlResultTabs, tabsNav, activeTab);
+			var tabFormId = po.getSqlResultTabPanelFormId(tabId);
+			var tabForm = po.element("#" + tabId);
+			var sql = $("textarea[name='sql']", tabForm).val();
+			
+			var viewSqlStatementPanel = po.element("#viewSqlStatementPanel");
+			$(".sql-content", viewSqlStatementPanel).text(sql);
+			viewSqlStatementPanel.show().position({ my : "right bottom", at : "right top-5", of : $this});
+		}
+	});
+	
 	po.element("#lockSqlResultTabButton").click(function()
 	{
 		var $this = $(this);
@@ -1162,11 +1190,20 @@ Schema schema 数据库，不允许为null
 	
 	$(document.body).on("click", function(event)
 	{
+		var $target = $(event.target);
+		
 		var $mop = po.element(".more-operation-panel");
 		if(!$mop.is(":hidden"))
 		{
-			if($(event.target).closest(po.element(".more-operation-wrapper")).length == 0)
+			if($target.closest(po.element(".more-operation-wrapper")).length == 0)
 				$mop.hide();
+		}
+		
+		var $vsp = po.element("#viewSqlStatementPanel");
+		if(!$vsp.is(":hidden"))
+		{
+			if($target.closest("#viewSqlStatementPanel, #viewSqlResultTabButton").length == 0)
+				$vsp.hide();
 		}
 	});
 	
@@ -1236,6 +1273,7 @@ Schema schema 数据库，不允许为null
 	po.element("input[name='sqlCommitMode'][value='AUTO']").click();
 	po.element(".more-operation-panel").hide();
 	po.element(".result-operations .sql-result-buttons").hide();
+	po.element("#viewSqlStatementPanel").hide();
 	
 	po.bindTabsMenuHiddenEvent(po.sqlResultTabs);
 })
