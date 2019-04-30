@@ -49,11 +49,12 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 	{
 		Statement st = null;
 		ResultSet rs = null;
+
 		try
 		{
-			st = createStatement(cn);
-			st.setFetchSize(fetchSize);
-			rs = st.executeQuery(sql);
+			StatementResultSetPair sr = getStatementResultSetPair(cn, sql, fetchSize);
+			st = sr.getStatement();
+			rs = sr.getResultSet();
 
 			Model model = databaseModelResolver.resolve(cn, rs, UUID.gen());
 
@@ -82,11 +83,12 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 	{
 		Statement st = null;
 		ResultSet rs = null;
+
 		try
 		{
-			st = createStatement(cn);
-			st.setFetchSize(fetchSize);
-			rs = st.executeQuery(sql);
+			StatementResultSetPair sr = getStatementResultSetPair(cn, sql, fetchSize);
+			st = sr.getStatement();
+			rs = sr.getResultSet();
 
 			return select(cn, sql, rs, model, startRow, fetchSize);
 		}
@@ -157,44 +159,133 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 
 		return modelSqlResult;
 	}
-	
+
 	/**
 	 * 将一个未移动过游标的{@linkplain ResultSet}游标移动至指定行之前。
+	 * 
 	 * @param rs
 	 * @param row
 	 * @throws SQLException
 	 */
 	protected void moveToPrevious(ResultSet rs, int row) throws SQLException
 	{
-		try
+		// 第一行不做任何操作，避免不必要的调用可能导致底层不支持而报错
+		if (row == 1)
+			return;
+
+		if (ResultSet.TYPE_FORWARD_ONLY == rs.getType())
+			moveToPreviousByNext(rs, row);
+		else
 		{
-			rs.absolute(row -1);
-		}
-		catch(SQLException e)
-		{
-			for(int i=1; i<row; i++)
+			try
 			{
-				if(!rs.next())
-					break;
+				rs.absolute(row - 1);
+			}
+			catch (SQLException e)
+			{
+				moveToPreviousByNext(rs, row);
 			}
 		}
 	}
 
-	protected Statement createStatement(Connection cn) throws SQLException
+	/**
+	 * 将一个未移动过游标的{@linkplain ResultSet}游标移动至指定行之前，通过{@linkplain ResultSet#next()}方式。
+	 * 
+	 * @param rs
+	 * @param row
+	 * @throws SQLException
+	 */
+	protected void moveToPreviousByNext(ResultSet rs, int row) throws SQLException
 	{
-		return createScrollableSelectStatement(cn);
+		for (int i = 1; i < row; i++)
+		{
+			if (!rs.next())
+				break;
+		}
 	}
 
 	/**
-	 * 创建用于可定位查询的{@linkplain Statement}。
+	 * 获取指定查询语句的{@linkplain StatementResultSetPair}。
 	 * 
 	 * @param cn
+	 * @param selectSql
+	 * @param fetchSize
 	 * @return
 	 * @throws SQLException
 	 */
-	public static Statement createScrollableSelectStatement(Connection cn) throws SQLException
+	protected StatementResultSetPair getStatementResultSetPair(Connection cn, String selectSql, int fetchSize)
+			throws SQLException
 	{
-		return cn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		// 某些查询SQL语句并不支持ResultSet.TYPE_SCROLL_*（比如SQLServer的聚集列存储索引），
+		// 为了兼容此种情况，这里先使用ResultSet.TYPE_SCROLL_INSENSITIVE，如果报错，再降级为ResultSet.TYPE_FORWARD_ONLY
+
+		Statement st = cn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		st.setFetchSize(fetchSize);
+
+		ResultSet rs = null;
+
+		try
+		{
+			rs = st.executeQuery(selectSql);
+
+			return new StatementResultSetPair(st, rs);
+		}
+		catch (SQLException e)
+		{
+			JdbcUtil.closeResultSet(rs);
+			JdbcUtil.closeStatement(st);
+		}
+
+		st = cn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		st.setFetchSize(fetchSize);
+		rs = st.executeQuery(selectSql);
+
+		return new StatementResultSetPair(st, rs);
+	}
+
+	/**
+	 * {@linkplain Statement}、{@linkplain ResultSet}封装类。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class StatementResultSetPair
+	{
+		private Statement statement;
+
+		private ResultSet resultSet;
+
+		public StatementResultSetPair()
+		{
+			super();
+		}
+
+		public StatementResultSetPair(Statement statement, ResultSet resultSet)
+		{
+			super();
+			this.statement = statement;
+			this.resultSet = resultSet;
+		}
+
+		public Statement getStatement()
+		{
+			return statement;
+		}
+
+		public void setStatement(Statement statement)
+		{
+			this.statement = statement;
+		}
+
+		public ResultSet getResultSet()
+		{
+			return resultSet;
+		}
+
+		public void setResultSet(ResultSet resultSet)
+		{
+			this.resultSet = resultSet;
+		}
 	}
 
 	/**

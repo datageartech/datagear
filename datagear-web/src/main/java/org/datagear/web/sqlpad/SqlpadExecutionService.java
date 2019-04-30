@@ -718,9 +718,24 @@ public class SqlpadExecutionService
 					getMessage(this.locale, messageKey, messageArgs));
 		}
 
+		/**
+		 * 创建执行SQL语句所需要的{@linkplain Statement}。
+		 * 
+		 * @param cn
+		 * @return
+		 * @throws SQLException
+		 */
 		protected Statement createStatement(Connection cn) throws SQLException
 		{
-			return ModelSqlSelectService.createScrollableSelectStatement(cn);
+			// 某些查询SQL语句并不支持ResultSet.TYPE_SCROLL_*（比如SQLServer的聚集列存储索引），
+			// 而这里调用的结果集都是从第一行开始，不会用到ResultSet.TYPE_SCROLL_*特性，
+			// 因而采用ResultSet.TYPE_FORWARD_ONLY，避免遇到上述情况而抛出异常
+			// return ModelSqlSelectService.createScrollableSelectStatement(cn);
+
+			Statement st = cn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			st.setFetchSize(this.resultsetFetchSize);
+
+			return st;
 		}
 
 		/**

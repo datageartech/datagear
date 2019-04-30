@@ -29,6 +29,8 @@ import org.datagear.web.convert.IllegalSourceValueException;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.util.WebUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -45,6 +47,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @org.springframework.web.bind.annotation.ControllerAdvice
 public class ControllerAdvice extends AbstractController
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ControllerAdvice.class);
+
 	public ControllerAdvice()
 	{
 		super();
@@ -326,6 +330,18 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(EstablishConnectionException.class),
 				exception.getCause(), true);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(Throwable.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public String handleThrowable(HttpServletRequest request, HttpServletResponse response, Throwable t)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(Throwable.class), t, false, t.getMessage());
+
+		if (LOGGER.isErrorEnabled())
+			LOGGER.error("Controller exception", t);
 
 		return getErrorView(request, response);
 	}

@@ -198,7 +198,10 @@ public class SqlScriptParser
 			while (handleIndex < lineLength)
 			{
 				if (isSqlBuilderEmpty)
+				{
+					_currentSqlStartRow = _currentRow;
 					_currentSqlStartColumn = handleIndex;
+				}
 
 				int delimiterIndex = findNextDelimiterIndex(sqlBuilder, line, handleIndex);
 
@@ -213,11 +216,11 @@ public class SqlScriptParser
 						sqlBuilder.append(line.substring(handleIndex));
 						sqlBuilder.append(LINE_SEPARATOR);
 
-						_currentSqlEndRow = _currentRow;
-						_currentSqlEndColumn = lineLength;
-
 						isSqlBuilderEmpty = false;
 					}
+
+					_currentSqlEndRow = _currentRow;
+					_currentSqlEndColumn = lineLength;
 
 					handleIndex = lineLength;
 				}
