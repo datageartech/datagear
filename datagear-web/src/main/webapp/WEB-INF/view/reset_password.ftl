@@ -47,7 +47,7 @@
 							<label><@spring.message code='resetPassword.username' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="text" value="${step.user.name?html}" class="ui-widget ui-widget-content" readonly="readonly" />
+							<input type="text" value="${(step.user.name)!''?html}" class="ui-widget ui-widget-content" readonly="readonly" />
 						</div>
 					</div>
 					<div class="form-item">
@@ -55,7 +55,7 @@
 							<label><@spring.message code='resetPassword.email' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="text" value="${step.blurryEmail?html}" class="ui-widget ui-widget-content" readonly="readonly" />
+							<input type="text" value="${(step.blurryEmail)!''?html}" class="ui-widget ui-widget-content" readonly="readonly" />
 							<button id="sendCheckCodeButton" type="button"><@spring.message code='resetPassword.sendCheckCode' /></button>
 						</div>
 					</div>
@@ -73,7 +73,7 @@
 							<label><@spring.message code='resetPassword.username' /></label>
 						</div>
 						<div class="form-item-value">
-							<input type="text" value="${step.user.name?html}" class="ui-widget ui-widget-content" readonly="readonly" />
+							<input type="text" value="${(step.user.name)!''?html}" class="ui-widget ui-widget-content" readonly="readonly" />
 						</div>
 					</div>
 					<div class="form-item">
@@ -207,10 +207,10 @@
 		}
 	});
 	
-	<#if step.step == 3 && step.skipCheckUserAdmin && step.skipReason != null && step.skipReason != "">
+	<#if step.step == 3 && step.skipCheckUserAdmin && (step.skipReason)??>
 	$(document).ready(function()
 	{
-		$.tipInfo("${step.skipReason?js_string}");
+		$.tipInfo("${(step.skipReason)?js_string}");
 	});
 	</#if>
 })
