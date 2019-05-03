@@ -15,7 +15,7 @@
 					<label><@spring.message code='globalSetting.smtpSetting.host' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="smtpSetting.host" value="${globalSetting.smtpSetting.host?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="smtpSetting.host" value="${(globalSetting.smtpSetting.host)!''?html}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -23,7 +23,7 @@
 					<label><@spring.message code='globalSetting.smtpSetting.port' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="smtpSetting.port" value="${globalSetting.smtpSetting.port?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="smtpSetting.port" value="${(globalSetting.smtpSetting.port)!''?html}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -31,7 +31,7 @@
 					<label><@spring.message code='globalSetting.smtpSetting.username' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="smtpSetting.username" value="${globalSetting.smtpSetting.username?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="smtpSetting.username" value="${(globalSetting.smtpSetting.username)!''?html}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -39,7 +39,7 @@
 					<label><@spring.message code='globalSetting.smtpSetting.password' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="password" name="smtpSetting.password" value="${globalSetting.smtpSetting.password?html}" class="ui-widget ui-widget-content" />
+					<input type="password" name="smtpSetting.password" value="${(globalSetting.smtpSetting.password)!''?html}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -59,7 +59,7 @@
 					<label><@spring.message code='globalSetting.smtpSetting.systemEmail' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="smtpSetting.systemEmail" value="${globalSetting.smtpSetting.systemEmail?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="smtpSetting.systemEmail" value="${(globalSetting.smtpSetting.systemEmail)!''?html}" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 			<div class="form-item" style="height:3em;">
