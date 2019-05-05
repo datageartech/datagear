@@ -368,7 +368,10 @@
 	</bean>
 	<!-- cometd配置结束 -->
 	
-	<bean id="modelSqlSelectService" class="org.datagear.dbmodel.ModelSqlSelectService" />
+	<bean id="modelSqlSelectService" class="org.datagear.dbmodel.ModelSqlSelectService">
+		<property name="blobFileManagerDirectory" ref="blobFileManagerDirectory" />
+		<property name="blobToFilePlaceholderName" ref="blobToFilePlaceholderName" />
+	</bean>
 	
 	<bean id="sqlpadCometdService" class="org.datagear.web.sqlpad.SqlpadCometdService">
         <constructor-arg><ref local="bayeuxServer" /></constructor-arg>
@@ -396,7 +399,7 @@
 	</bean>
 	<bean id="deleteExpiredFileJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="deleteExpiredFileJobDetail" />
-		<property name="cronExpression" value="0 0 1 * * ?" /><!-- 每天凌晨1点 -->
+		<property name="cronExpression" value="0 0 * * * ?" /><!-- 每整点 -->
 	</bean>
 	
 	<!-- 处理重置密码请求 -->
