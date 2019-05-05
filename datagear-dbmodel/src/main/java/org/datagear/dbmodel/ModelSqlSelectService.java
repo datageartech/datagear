@@ -4,6 +4,7 @@
 
 package org.datagear.dbmodel;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -17,6 +18,8 @@ import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyModel;
+import org.datagear.persistence.columnconverter.LOBConversionContext;
+import org.datagear.persistence.columnconverter.LOBConversionContext.LOBConversionSetting;
 import org.datagear.persistence.support.AbstractModelDataAccessObject;
 import org.datagear.persistence.support.UUID;
 
@@ -28,9 +31,83 @@ import org.datagear.persistence.support.UUID;
  */
 public class ModelSqlSelectService extends AbstractModelDataAccessObject
 {
+	public static final byte[] DEFAULT_BLOB_TO_BYTES_PLACEHOLDER = new byte[] { 0x00 };
+
+	/** BLOB文件存储目录 */
+	private File blobFileManagerDirectory;
+
+	/** BLOB转文件的占位符名称 */
+	private String blobToFilePlaceholderName;
+
+	/** BLOB转字节数组的占位符 */
+	private byte[] blobToBytesPlaceholder = DEFAULT_BLOB_TO_BYTES_PLACEHOLDER;
+
+	/** CLOB的取左最大长度 */
+	private int clobLeftLength = 250;
+
+	/** 完全加载大对象数据的最大行号，从1开始，小于1表示全都占位符加载 */
+	private int fullLoadingLobMaxRow = 0;
+
 	public ModelSqlSelectService()
 	{
 		super();
+	}
+
+	public ModelSqlSelectService(File blobFileManagerDirectory, String blobToFilePlaceholderName)
+	{
+		super();
+		this.blobFileManagerDirectory = blobFileManagerDirectory;
+		this.blobToFilePlaceholderName = blobToFilePlaceholderName;
+	}
+
+	public File getBlobFileManagerDirectory()
+	{
+		return blobFileManagerDirectory;
+	}
+
+	public void setBlobFileManagerDirectory(File blobFileManagerDirectory)
+	{
+		this.blobFileManagerDirectory = blobFileManagerDirectory;
+	}
+
+	public String getBlobToFilePlaceholderName()
+	{
+		return blobToFilePlaceholderName;
+	}
+
+	public void setBlobToFilePlaceholderName(String blobToFilePlaceholderName)
+	{
+		this.blobToFilePlaceholderName = blobToFilePlaceholderName;
+	}
+
+	public byte[] getBlobToBytesPlaceholder()
+	{
+		return blobToBytesPlaceholder;
+	}
+
+	public void setBlobToBytesPlaceholder(byte[] blobToBytesPlaceholder)
+	{
+		this.blobToBytesPlaceholder = blobToBytesPlaceholder;
+	}
+
+	public int getClobLeftLength()
+	{
+		return clobLeftLength;
+	}
+
+	public void setClobLeftLength(int clobLeftLength)
+	{
+		this.clobLeftLength = clobLeftLength;
+	}
+
+	public int getFullLoadingLobMaxRow()
+	{
+		return fullLoadingLobMaxRow;
+	}
+
+	public void setFullLoadingLobMaxRow(int fullLoadingLobMaxRow)
+	{
+		this.fullLoadingLobMaxRow = fullLoadingLobMaxRow;
 	}
 
 	/**
@@ -131,10 +208,24 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 
 		moveToPrevious(rs, startRow);
 
+		LOBConversionSetting contextLOBConversionSetting = LOBConversionContext.get();
+		LOBConversionSetting fullLoadingLOBConversionSetting = getFullLoadingLOBConversionSetting();
+		LOBConversionSetting placeholderLoadingLOBConversionSetting = getPlaceholderLoadingLOBConversionSetting();
+		LOBConversionSetting prevLOBConversionSetting = null;
+
 		for (int row = startRow; row < startRow + fetchSize; row++)
 		{
 			if (!rs.next())
 				break;
+
+			LOBConversionSetting myLOBConversionSetting = (row <= this.fullLoadingLobMaxRow
+					? fullLoadingLOBConversionSetting
+					: placeholderLoadingLOBConversionSetting);
+			if (prevLOBConversionSetting != myLOBConversionSetting)
+			{
+				LOBConversionContext.set(myLOBConversionSetting);
+				prevLOBConversionSetting = myLOBConversionSetting;
+			}
 
 			Object data = model.newInstance();
 
@@ -154,6 +245,8 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 
 			datas.add(data);
 		}
+
+		LOBConversionContext.set(contextLOBConversionSetting);
 
 		modelSqlResult.setDatas(datas);
 
@@ -241,6 +334,28 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 		rs = st.executeQuery(selectSql);
 
 		return new StatementResultSetPair(st, rs);
+	}
+
+	/**
+	 * 获取完全加载LOB的{@linkplain LOBConversionSetting}。
+	 * 
+	 * @return
+	 */
+	protected LOBConversionSetting getFullLoadingLOBConversionSetting()
+	{
+		return new LOBConversionSetting();
+	}
+
+	/**
+	 * 获取占位符加载LOB的{@linkplain LOBConversionSetting}。
+	 * 
+	 * @return
+	 */
+	protected LOBConversionSetting getPlaceholderLoadingLOBConversionSetting()
+	{
+		File blobToFilePlaceholder = new File(this.blobFileManagerDirectory, this.blobToFilePlaceholderName);
+
+		return new LOBConversionSetting(blobToFilePlaceholder, this.blobToBytesPlaceholder, this.clobLeftLength);
 	}
 
 	/**
