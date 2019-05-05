@@ -116,7 +116,7 @@ table.dataTable tbody tr {
 	background-color: #285c00;
 }
 table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
-	background-color: #245500;
+	background-color: #2b6300;
 }
 table.dataTable.hover tbody tr.hover,
 table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
