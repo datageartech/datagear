@@ -221,6 +221,95 @@ public class SqlScriptParserTest
 	}
 
 	@Test
+	public void parseTestDefaultDelimiterWithSnippets() throws IOException
+	{
+		{
+			String script = "select 'ab;c' from table;";
+
+			SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
+
+			List<SqlStatement> sqlStatements = parser.parse();
+
+			assertEquals(1, sqlStatements.size());
+
+			SqlStatement sqlStatement = sqlStatements.get(0);
+
+			assertEquals("select 'ab;c' from table", sqlStatement.getSql());
+			assertEquals(0, sqlStatement.getStartRow());
+			assertEquals(0, sqlStatement.getStartColumn());
+			assertEquals(0, sqlStatement.getEndRow());
+			assertEquals("select 'ab;c' from table".length(), sqlStatement.getEndColumn());
+		}
+
+		{
+			String script = "select * --ab;c" + SqlScriptParser.LINE_SEPARATOR + " from table;";
+
+			SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
+
+			List<SqlStatement> sqlStatements = parser.parse();
+
+			assertEquals(1, sqlStatements.size());
+
+			SqlStatement sqlStatement = sqlStatements.get(0);
+
+			assertEquals("select * --ab;c" + SqlScriptParser.LINE_SEPARATOR + " from table", sqlStatement.getSql());
+			assertEquals(0, sqlStatement.getStartRow());
+			assertEquals(0, sqlStatement.getStartColumn());
+			assertEquals(1, sqlStatement.getEndRow());
+			assertEquals(" from table".length(), sqlStatement.getEndColumn());
+		}
+
+		{
+			String script = "select * /*ab;c" + SqlScriptParser.LINE_SEPARATOR + " ;def*/ from table;";
+
+			SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
+
+			List<SqlStatement> sqlStatements = parser.parse();
+
+			assertEquals(1, sqlStatements.size());
+
+			SqlStatement sqlStatement = sqlStatements.get(0);
+
+			assertEquals("select * /*ab;c" + SqlScriptParser.LINE_SEPARATOR + " ;def*/ from table",
+					sqlStatement.getSql());
+			assertEquals(0, sqlStatement.getStartRow());
+			assertEquals(0, sqlStatement.getStartColumn());
+			assertEquals(1, sqlStatement.getEndRow());
+			assertEquals(" ;def*/ from table".length(), sqlStatement.getEndColumn());
+		}
+
+		{
+			String script = "select 'ab;c' from table;" + "select * --ab;c" + SqlScriptParser.LINE_SEPARATOR
+					+ " from table;" + "select * /*ab;c" + SqlScriptParser.LINE_SEPARATOR + " ;def*/ from table;";
+
+			SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
+
+			List<SqlStatement> sqlStatements = parser.parse();
+
+			assertEquals(3, sqlStatements.size());
+
+			{
+				SqlStatement sqlStatement = sqlStatements.get(0);
+
+				assertEquals("select 'ab;c' from table", sqlStatement.getSql());
+			}
+
+			{
+				SqlStatement sqlStatement = sqlStatements.get(1);
+
+				assertEquals("select * --ab;c" + SqlScriptParser.LINE_SEPARATOR + " from table", sqlStatement.getSql());
+			}
+
+			{
+				SqlStatement sqlStatement = sqlStatements.get(2);
+
+				assertEquals("select * /*ab;c" + SqlScriptParser.LINE_SEPARATOR + " ;def*/ from table",
+						sqlStatement.getSql());
+			}
+		}
+	}
+
+	@Test
 	public void parseTestScriptFile() throws IOException
 	{
 		InputStream inputStream = SqlScriptParserTest.class.getClassLoader()

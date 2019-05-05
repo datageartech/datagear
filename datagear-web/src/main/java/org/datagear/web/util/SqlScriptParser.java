@@ -10,6 +10,7 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,10 +24,20 @@ public class SqlScriptParser
 {
 	public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
 
-	public static final String DEFAULT_DELIMITER = ";";
+	public static final char DEFAULT_DELIMITER_CHAR = ';';
+
+	public static final String DEFAULT_DELIMITER = DEFAULT_DELIMITER_CHAR + "";
 
 	public static final Pattern DELIMITER_PATTERN = Pattern
 			.compile("^\\s*((--)|(//))?\\s*(//)?\\s*@DELIMITER\\s+([^\\s]+)", Pattern.CASE_INSENSITIVE);
+
+	public static final int SQL_SNIPPET_STRING = 2;
+
+	public static final int SQL_SNIPPET_COMMENT_LINE = 4;
+
+	public static final int SQL_SNIPPET_COMMENT_BLOCK = 8;
+
+	public static final int SQL_SNIPPET_NONE = 1024;
 
 	private Reader sqlScriptReader;
 
@@ -49,6 +60,8 @@ public class SqlScriptParser
 	protected int _currentSqlEndRow = 0;
 	/** 解析过程：当前SQL的结束行中的结束列（不包含） */
 	protected int _currentSqlEndColumn = 0;
+	/** 当前SQL片段 */
+	protected Stack<Integer> _currentSqlSnippets = new Stack<Integer>();
 
 	public SqlScriptParser()
 	{
@@ -260,7 +273,241 @@ public class SqlScriptParser
 	 */
 	protected int findNextDelimiterIndex(StringBuilder sqlBuilder, String line, int startIndex)
 	{
-		return line.indexOf(this.delimiter, startIndex);
+		if (DEFAULT_DELIMITER.equals(this.delimiter))
+		{
+			return findNextDelimiterIndexForDefaultDelimiter(sqlBuilder, line, startIndex);
+		}
+		else
+		{
+			return line.indexOf(this.delimiter, startIndex);
+		}
+	}
+
+	/**
+	 * 当使用默认分隔符时（{@linkplain #DEFAULT_DELIMITER}），在SQL行中查找下一个分隔符位置。
+	 * <p>
+	 * 返回{@code <0}表示没有分隔符。
+	 * </p>
+	 * 
+	 * @param sqlBuilder
+	 * @param line
+	 * @param startIndex
+	 * @return
+	 */
+	protected int findNextDelimiterIndexForDefaultDelimiter(StringBuilder sqlBuilder, String line, int startIndex)
+	{
+		int lineLength = line.length();
+
+		if (startIndex >= lineLength)
+			return -1;
+
+		int sqlSnippetType = getCurrentSqlSnippetType();
+
+		if (sqlSnippetType != SQL_SNIPPET_NONE)
+		{
+			int endIndex = -1;
+
+			if (sqlSnippetType == SQL_SNIPPET_STRING)
+				endIndex = findSqlStringEndIndex(line, startIndex);
+			else if (sqlSnippetType == SQL_SNIPPET_COMMENT_LINE)
+				endIndex = findSqlCommentLineEndIndex(line, startIndex);
+			else if (sqlSnippetType == SQL_SNIPPET_COMMENT_BLOCK)
+				endIndex = findSqlCommentBlockEndIndex(line, startIndex);
+
+			if (endIndex >= 0)
+			{
+				removeCurrentSqlSnippetType();
+
+				return findNextDelimiterIndexForDefaultDelimiter(sqlBuilder, line, endIndex);
+			}
+			else
+				return -1;
+		}
+
+		for (int i = startIndex; i < lineLength;)
+		{
+			char c = line.charAt(i);
+
+			if (c == '\'')
+			{
+				i = findSqlStringEndIndex(line, i + 1);
+
+				if (i < 0)
+				{
+					i = lineLength;
+					setCurrentSqlSnippet(SQL_SNIPPET_STRING);
+				}
+			}
+			else if (c == '-')
+			{
+				char cn = (i + 1 >= lineLength ? 0 : line.charAt(i + 1));
+
+				if (cn == '-')
+				{
+					i = findSqlCommentLineEndIndex(line, i + 2);
+
+					if (i < 0)
+					{
+						i = lineLength;
+						setCurrentSqlSnippet(SQL_SNIPPET_COMMENT_LINE);
+					}
+				}
+				else
+					i += 1;
+			}
+			else if (c == '/')
+			{
+				char cn = (i + 1 >= lineLength ? 0 : line.charAt(i + 1));
+
+				if (cn == '*')
+				{
+					i = findSqlCommentBlockEndIndex(line, i + 2);
+
+					if (i < 0)
+					{
+						i = lineLength;
+						setCurrentSqlSnippet(SQL_SNIPPET_COMMENT_BLOCK);
+					}
+				}
+				else
+					i += 1;
+			}
+			else if (c == DEFAULT_DELIMITER_CHAR)
+			{
+				return i;
+			}
+			else
+				i += 1;
+		}
+
+		return -1;
+	}
+
+	/**
+	 * 设置当前SQL片段类型。
+	 * 
+	 * @param sqlSnippet
+	 */
+	protected void setCurrentSqlSnippet(int sqlSnippet)
+	{
+		this._currentSqlSnippets.push(sqlSnippet);
+	}
+
+	/**
+	 * 获取当前SQL片段类型。
+	 * <p>
+	 * 如果没有，则返回{@linkplain #SQL_SNIPPET_NONE}。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	protected int getCurrentSqlSnippetType()
+	{
+		if (this._currentSqlSnippets.isEmpty())
+			return SQL_SNIPPET_NONE;
+
+		return this._currentSqlSnippets.peek();
+	}
+
+	/**
+	 * 移除当前SQL片段类型。
+	 * <p>
+	 * 如果没有，则返回{@linkplain #SQL_SNIPPET_NONE}。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	protected int removeCurrentSqlSnippetType()
+	{
+		if (this._currentSqlSnippets.isEmpty())
+			return SQL_SNIPPET_NONE;
+
+		return this._currentSqlSnippets.pop();
+	}
+
+	/**
+	 * 清除SQL片段类型。
+	 */
+	protected void clearCurrentSqlSnippetType()
+	{
+		this._currentSqlSnippets.clear();
+	}
+
+	/**
+	 * 查找SQL字符串结束位置（结束单引号的下一个位置）。
+	 * <p>
+	 * 返回{@code <0}表示没有结束。
+	 * </p>
+	 * 
+	 * @param line
+	 * @param startIndex
+	 * @return
+	 */
+	protected int findSqlStringEndIndex(String line, int startIndex)
+	{
+		int length = line.length();
+
+		for (int i = startIndex; i < length; i++)
+		{
+			char c = line.charAt(i);
+
+			if (c == '\'')
+			{
+				char cn = (i + 1 >= length ? 0 : line.charAt(i + 1));
+
+				if (cn == '\'')
+					i += 1;
+				else
+					return i + 1;
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * 查找SQL行注释结束位置（换行符的下一个位置）。
+	 * <p>
+	 * 返回{@code <0}表示没有结束。
+	 * </p>
+	 * 
+	 * @param line
+	 * @param startIndex
+	 * @return
+	 */
+	protected int findSqlCommentLineEndIndex(String line, int startIndex)
+	{
+		return line.length();
+	}
+
+	/**
+	 * 查找SQL块注释结束位置（“*&#47”的下一个位置）。
+	 * <p>
+	 * 返回{@code <0}表示没有结束。
+	 * </p>
+	 * 
+	 * @param line
+	 * @param startIndex
+	 * @return
+	 */
+	protected int findSqlCommentBlockEndIndex(String line, int startIndex)
+	{
+		int length = line.length();
+
+		for (int i = startIndex; i < length; i++)
+		{
+			char c = line.charAt(i);
+
+			if (c == '*')
+			{
+				char cn = (i + 1 >= length ? 0 : line.charAt(i + 1));
+
+				if (cn == '/')
+					return i + 1;
+			}
+		}
+
+		return -1;
 	}
 
 	/**
