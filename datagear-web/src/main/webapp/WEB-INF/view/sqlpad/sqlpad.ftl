@@ -98,6 +98,9 @@ Schema schema 数据库，不允许为null
 					<ul class="tabs-more-tab-menu">
 					</ul>
 				</div>
+				<div id="viewLongTextResultPanel" class="view-long-text-result-panel ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow">
+					<textarea class="long-text-content ui-widget ui-widget-content"></textarea>
+				</div>
 			</div>
 			<div class="result-operations button-operation">
 				<div class="result-message-buttons">
@@ -137,6 +140,7 @@ Schema schema 数据库，不允许为null
 	po.schemaId = "${schema.id}";
 	po.sqlpadId = "${sqlpadId}";
 	po.sqlpadChannelId = "${sqlpadChannelId}";
+	po.sqlResultFullLoadingLobMaxRow = parseInt("${sqlResultFullLoadingLobMaxRow}");
 	
 	po.resultMessageElement = po.element("#${pageId}-resultMessage");
 	po.sqlResultTabs = po.element("#${pageId}-sqlResultTabs");
@@ -813,10 +817,45 @@ Schema schema 数据库，不允许为null
 		return row + 1;
 	};
 	
+	po.viewSqlResultLongText = function(target)
+	{
+		target = $(target);
+		var value = $("span", target).text();
+		
+		var panel = po.element("#viewLongTextResultPanel");
+		$("textarea", panel).val(value);
+		panel.show().position({ my : "left bottom", at : "left top-5", of : target});
+	};
+	
 	po.initSqlResultDataTable = function(tabId, $table, sql, modelSqlResult)
 	{
 		var model = modelSqlResult.model;
-		var columns = $.buildDataTablesColumns(model);
+		var columns = $.buildDataTablesColumns(model,
+				{
+					postRender : function(data, type, rowData, meta, rowIndex, renderValue, model, property, thisColumn)
+					{
+						if(rowIndex < po.sqlResultFullLoadingLobMaxRow && data)
+						{
+							var propertyModelIndex = $.model.getPropertyModelIndexByValue(property, data);
+							
+							if($.model.isLongTextJdbcType(property, propertyModelIndex))
+							{
+								return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' class='view-sql-result-long-text-link'>"
+										+ renderValue
+										+ "<span style='display:none;'>"+$.escapeHtml(data)+"</span>" + "</a>";
+							}
+							else if($.model.isBinaryJdbcType(property, propertyModelIndex))
+							{
+								return "<a href='${contextPath}/sqlpad/"+po.schemaId+"/downloadResultField?sqlpadId="+po.sqlpadId+"&value="+encodeURIComponent(data)+"'>"
+										+ renderValue + "</a>";
+							}
+							else
+								return renderValue;
+						}
+						else
+							return renderValue;
+					}
+				});
 		
 		var newColumns = [
 			{
@@ -1136,7 +1175,7 @@ Schema schema 数据库，不允许为null
 			var sql = $("textarea[name='sql']", tabForm).val();
 			
 			var viewSqlStatementPanel = po.element("#viewSqlStatementPanel");
-			$(".sql-content", viewSqlStatementPanel).text(sql);
+			$("textarea", viewSqlStatementPanel).val(sql);
 			viewSqlStatementPanel.show().position({ my : "right bottom", at : "right top-5", of : $this});
 		}
 	});
@@ -1204,6 +1243,13 @@ Schema schema 数据库，不允许为null
 		{
 			if($target.closest("#viewSqlStatementPanel, #viewSqlResultTabButton").length == 0)
 				$vsp.hide();
+		}
+		
+		var $vltp = po.element("#viewLongTextResultPanel");
+		if(!$vltp.is(":hidden"))
+		{
+			if($target.closest("#viewLongTextResultPanel, .view-sql-result-long-text-link").length == 0)
+				$vltp.hide();
 		}
 	});
 	
@@ -1274,6 +1320,7 @@ Schema schema 数据库，不允许为null
 	po.element(".more-operation-panel").hide();
 	po.element(".result-operations .sql-result-buttons").hide();
 	po.element("#viewSqlStatementPanel").hide();
+	po.element("#viewLongTextResultPanel").hide();
 	
 	po.bindTabsMenuHiddenEvent(po.sqlResultTabs);
 })

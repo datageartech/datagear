@@ -735,7 +735,10 @@
 		 * 				ignorePropertyNames : undefined,
 		 *				
 		 * 				//可选，字符串最大显示长度
-		 * 				stringDisplayThreshold : 47
+		 * 				stringDisplayThreshold : 47,
+		 * 
+		 * 				//可选，单元格渲染后置处理函数
+		 * 				postRender : function(data, type, rowData, meta, rowIndex, renderValue, model, property, thisColumn){}
 		 * 			}
 		 * @returns {Array}
 		 */
@@ -761,24 +764,34 @@
 					title: $.model.displayInfoHtml(property, "a"),
 					data: $.escapePropertyNameForDataTables(propName),
 					propertyIndex: i,
-					stringDisplayThreshold : options.stringDisplayThreshold,
+					options : options,
 					render: function(data, type, row, meta)
 					{
 						var renderValue = "";
 						
-						var thisColumn = meta.settings.aoColumns[meta.col];
+						var _this = meta.settings.aoColumns[meta.col];
 						
-						var propertyIndex = thisColumn.propertyIndex;
+						var propertyIndex = _this.propertyIndex;
 						var property = model.properties[propertyIndex];
 						
 						renderValue = $.model.tokenProperty(property, data);
-						renderValue = $.truncateIf(renderValue, "...", thisColumn.stringDisplayThreshold);
+						renderValue = $.truncateIf(renderValue, "...", _this.options.stringDisplayThreshold);
+						renderValue = $.escapeHtml(renderValue);
 						
 						//解决当所有属性值都为null时，行渲染会很细问题
 						if(propertyIndex == 0 && renderValue == "")
 							renderValue = " ";
 						
-						return $.escapeHtml(renderValue);
+						if(_this.options.postRender)
+						{
+							var rowIndex = meta.row;
+							if(rowIndex.length)
+								rowIndex = rowIndex[0];
+							
+							return _this.options.postRender(data, type, row, meta, rowIndex, renderValue, model, property, _this);
+						}
+						else
+							return renderValue;
 					},
 					defaultContent: "",
 					orderable: !notReadable,

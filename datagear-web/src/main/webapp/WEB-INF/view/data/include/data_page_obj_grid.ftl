@@ -16,10 +16,8 @@
 		var re = true;
 		
 		var propertyModelIndex = $.model.getPropertyModelIndexByValue(property, propertyValue);
-		var jdbcType = $.model.featureJdbcTypeValue(property, propertyModelIndex);
 		
-		if(${Types_CLOB} == jdbcType || ${Types_NCLOB} == jdbcType
-				|| ${Types_LONGNVARCHAR} == jdbcType || ${Types_LONGVARCHAR} == jdbcType)
+		if($.model.isLongTextJdbcType(property, propertyModelIndex))
 			re = (propertyValue.length < po.queryLeftClobLengthOnReading);
 		
 		return re;

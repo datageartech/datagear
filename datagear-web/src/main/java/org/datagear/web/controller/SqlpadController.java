@@ -4,6 +4,10 @@
 
 package org.datagear.web.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
+import org.datagear.connection.IOUtil;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
@@ -142,6 +147,7 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		springModel.addAttribute("sqlpadId", sqlpadId);
 		springModel.addAttribute("sqlpadChannelId", sqlpadChannelId);
+		springModel.addAttribute("sqlResultFullLoadingLobMaxRow", this.modelSqlSelectService.getFullLoadingLobMaxRow());
 
 		return "/sqlpad/sqlpad";
 	}
@@ -243,6 +249,42 @@ public class SqlpadController extends AbstractSchemaConnController
 			modelSqlResult.setModel(null);
 
 		return modelSqlResult;
+	}
+
+	@RequestMapping("/{schemaId}/downloadResultField")
+	public void downloadResultField(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("value") String value) throws Throwable
+	{
+		File directory = this.modelSqlSelectService.getBlobFileManagerDirectory();
+		File blobFile = new File(directory, value);
+
+		if (!blobFile.exists())
+			throw new FileNotFoundException("BLOB");
+
+		response.setCharacterEncoding("utf-8");
+		response.setHeader("Content-Disposition", "attachment; filename=BLOB");
+
+		InputStream in = null;
+		OutputStream out = null;
+
+		try
+		{
+			in = new FileInputStream(blobFile);
+
+			out = response.getOutputStream();
+
+			byte[] buffer = new byte[1024];
+
+			int readLen = 0;
+			while ((readLen = in.read(buffer)) > 0)
+				out.write(buffer, 0, readLen);
+		}
+		finally
+		{
+			IOUtil.close(in);
+			IOUtil.close(out);
+		}
 	}
 
 	@RequestMapping(value = "/{schemaId}/findTableNames", produces = CONTENT_TYPE_JSON)

@@ -33,6 +33,8 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 {
 	public static final byte[] DEFAULT_BLOB_TO_BYTES_PLACEHOLDER = new byte[] { 0x00 };
 
+	public static final int DEFAULT_CLOB_LEFT_LEFTH = 200;
+
 	/** BLOB文件存储目录 */
 	private File blobFileManagerDirectory;
 
@@ -43,7 +45,7 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 	private byte[] blobToBytesPlaceholder = DEFAULT_BLOB_TO_BYTES_PLACEHOLDER;
 
 	/** CLOB的取左最大长度 */
-	private int clobLeftLength = 250;
+	private int clobLeftLength = DEFAULT_CLOB_LEFT_LEFTH;
 
 	/** 完全加载大对象数据的最大行号，从1开始，小于1表示全都占位符加载 */
 	private int fullLoadingLobMaxRow = 0;

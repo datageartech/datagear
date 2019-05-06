@@ -1409,6 +1409,36 @@
 		},
 		
 		/**
+		 * 属性模型是否长字符串JDBC类型。
+		 */
+		isLongTextJdbcType : function(property, propertyModelIndex)
+		{
+			var jdbcType = this.featureJdbcTypeValue(property, propertyModelIndex);
+			
+			return (
+					jdbcType == 2005 		//Types.CLOB
+					|| jdbcType == 2011		//Types.NCLOB
+					|| jdbcType == -1		//Types.LONGVARCHAR
+					|| jdbcType == -16		//Types.LONGNVARCHAR
+				);
+		},
+		
+		/**
+		 * 属性模型是否二进制JDBC类型。
+		 */
+		isBinaryJdbcType : function(property, propertyModelIndex)
+		{
+			var jdbcType = this.featureJdbcTypeValue(property, propertyModelIndex);
+			
+			return (
+					jdbcType == -2	 		//Types.BINARY
+					|| jdbcType == 2004		//Types.BLOB
+					|| jdbcType == -4		//Types.LONGVARBINARY
+					|| jdbcType == -3		//Types.VARBINARY
+				);
+		},
+		
+		/**
 		 * 查找MappedBy目标或者源属性名，如果没有，此方法将返回undefined。
 		 */
 		findMappedByWith : function(property, propertyModel)

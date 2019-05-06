@@ -371,6 +371,7 @@
 	<bean id="modelSqlSelectService" class="org.datagear.dbmodel.ModelSqlSelectService">
 		<property name="blobFileManagerDirectory" ref="blobFileManagerDirectory" />
 		<property name="blobToFilePlaceholderName" ref="blobToFilePlaceholderName" />
+		<property name="fullLoadingLobMaxRow" value="1" />
 	</bean>
 	
 	<bean id="sqlpadCometdService" class="org.datagear.web.sqlpad.SqlpadCometdService">
@@ -391,7 +392,7 @@
 	<bean id="deleteExpiredFileJob" class="org.datagear.web.scheduling.DeleteExpiredFileJob">
 		<property name="directory" ref="blobFileManagerDirectory" />
 		<property name="ignoreFileName" ref="blobToFilePlaceholderName" />
-		<property name="expireThresholdMinutes" value="1440" />
+		<property name="expireThresholdMinutes" value="60" />
 	</bean>
 	<bean id="deleteExpiredFileJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="deleteExpiredFileJob" />
@@ -399,7 +400,7 @@
 	</bean>
 	<bean id="deleteExpiredFileJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail" ref="deleteExpiredFileJobDetail" />
-		<property name="cronExpression" value="0 0 * * * ?" /><!-- 每整点 -->
+		<property name="cronExpression" value="0 0,30 * * * ?" /><!-- 每半小时 -->
 	</bean>
 	
 	<!-- 处理重置密码请求 -->
