@@ -8,7 +8,7 @@
 /*当前行*/
 .ace-tm .ace_gutter-active-line,
 .ace-tm .ace_marker-layer .ace_active-line{
-	background-color: #131313;
+	background-color: #1c1c1c;
 }
 .ace-tm .ace_gutter-active-line{
 	font-weight: bold;
