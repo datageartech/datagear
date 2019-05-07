@@ -371,7 +371,7 @@
 	<bean id="modelSqlSelectService" class="org.datagear.dbmodel.ModelSqlSelectService">
 		<property name="blobFileManagerDirectory" ref="blobFileManagerDirectory" />
 		<property name="blobToFilePlaceholderName" ref="blobToFilePlaceholderName" />
-		<property name="fullLoadingLobMaxRow" value="1" />
+		<property name="fullLoadingLobMaxRow" value="3" />
 	</bean>
 	
 	<bean id="sqlpadCometdService" class="org.datagear.web.sqlpad.SqlpadCometdService">
