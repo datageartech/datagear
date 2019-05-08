@@ -66,7 +66,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>dispatcherServlet</servlet-name>
-		<url-pattern>/index.html</url-pattern>
+		<url-pattern></url-pattern>
 		<url-pattern>/login/*</url-pattern>
 		<url-pattern>/register/*</url-pattern>
 		<url-pattern>/main/*</url-pattern>
@@ -97,18 +97,7 @@
         <url-pattern>/cometd/*</url-pattern>
     </servlet-mapping>
 	
-	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
-	</welcome-file-list>
-	
 	<error-page>
 		<location>/error</location>
 	</error-page>
-	
-	<jsp-config>
-		<jsp-property-group>
-			<url-pattern>*.jsp</url-pattern>
-			<trim-directive-whitespaces>true</trim-directive-whitespaces>
-		</jsp-property-group>
-	</jsp-config>
 </web-app>

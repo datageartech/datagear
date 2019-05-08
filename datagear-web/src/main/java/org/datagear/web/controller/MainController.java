@@ -88,22 +88,8 @@ public class MainController extends AbstractController
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping("/")
+	@RequestMapping
 	public String main(HttpServletRequest request, HttpServletResponse response, Model model)
-	{
-		return mainForIndexHtml(request, response, model);
-	}
-
-	/**
-	 * 打开主页面。
-	 * 
-	 * @param request
-	 * @param response
-	 * @param model
-	 * @return
-	 */
-	@RequestMapping("/index.html")
-	public String mainForIndexHtml(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		request.setAttribute("disableRegister", this.disableRegister);
 		request.setAttribute("currentUser", WebUtils.getUser(request, response));
