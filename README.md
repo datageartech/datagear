@@ -16,7 +16,7 @@
 
 ## 界面
 
-![界面图片](http://www.datagear.tech/static/images/main.png)
+![界面图片](http://datagear.tech/static/theme/lightness/datagear-home-screen.png)
 
 ## 依赖
 
