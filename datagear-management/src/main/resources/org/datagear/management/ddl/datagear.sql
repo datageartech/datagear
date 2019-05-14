@@ -92,3 +92,9 @@ CREATE TABLE DATAGEAR_SCHEMA
 --version[1.2.0], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
+
+
+-----------------------------------------
+--version[1.3.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
