@@ -4,10 +4,8 @@
 
 package org.datagear.persistence.features;
 
-import java.util.Map;
-
-import org.datagear.model.MapFeature;
 import org.datagear.model.PropertyFeature;
+import org.datagear.model.ValueFeature;
 import org.datagear.persistence.PersistenceFeature;
 
 /**
@@ -19,7 +17,7 @@ import org.datagear.persistence.PersistenceFeature;
  * @author datagear@163.com
  *
  */
-public class ModelOrderColumnName extends MapFeature<Integer, String> implements PropertyFeature, PersistenceFeature
+public class ModelOrderColumnName extends ValueFeature<String> implements PropertyFeature, PersistenceFeature
 {
 	public ModelOrderColumnName()
 	{
@@ -29,15 +27,5 @@ public class ModelOrderColumnName extends MapFeature<Integer, String> implements
 	public ModelOrderColumnName(String defaultValue)
 	{
 		super(defaultValue);
-	}
-
-	public ModelOrderColumnName(Map<Integer, String> mapValues)
-	{
-		super(mapValues);
-	}
-
-	public ModelOrderColumnName(String defaultValue, Map<Integer, String> mapValues)
-	{
-		super(defaultValue, mapValues);
 	}
 }

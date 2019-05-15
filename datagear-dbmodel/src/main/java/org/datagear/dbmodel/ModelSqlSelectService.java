@@ -17,7 +17,6 @@ import org.datagear.connection.JdbcUtil;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.support.MU;
-import org.datagear.model.support.PropertyModel;
 import org.datagear.persistence.columnconverter.LOBConversionContext;
 import org.datagear.persistence.columnconverter.LOBConversionContext.LOBConversionSetting;
 import org.datagear.persistence.support.AbstractModelDataAccessObject;
@@ -235,12 +234,10 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 			{
 				Property property = properties[j - 1];
 
-				if (!MU.isConcretePrimitiveProperty(property))
-					throw new IllegalArgumentException(
-							"The " + (j - 1) + "-th property must be concrete and primitive");
+				if (!MU.isPrimitiveProperty(property))
+					throw new IllegalArgumentException("The " + (j - 1) + "-th property must be primitive");
 
-				Object columnValue = toPropertyValue(cn, rs, row, j, model, property,
-						PropertyModel.valueOf(property, 0));
+				Object columnValue = toPropertyValue(cn, rs, row, j, model, property);
 
 				property.set(data, columnValue);
 			}

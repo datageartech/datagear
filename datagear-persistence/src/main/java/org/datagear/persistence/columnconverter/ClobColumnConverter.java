@@ -51,8 +51,7 @@ public class ClobColumnConverter extends AbstractLOBColumnConverter
 	}
 
 	@Override
-	public Object to(Connection cn, Model model, Property property, int propertyModelIndex, Model propertyModel,
-			Object propValue) throws ColumnConverterException
+	public Object to(Connection cn, Model model, Property property, Object propValue) throws ColumnConverterException
 	{
 		if (propValue == null)
 			return null;
@@ -86,10 +85,10 @@ public class ClobColumnConverter extends AbstractLOBColumnConverter
 	}
 
 	@Override
-	public Object from(Connection cn, ResultSet rs, int row, int colIndex, Model model, Property property,
-			int propertyModelIndex, Model propertyModel) throws ColumnConverterException
+	public Object from(Connection cn, ResultSet rs, int row, int colIndex, Model model, Property property)
+			throws ColumnConverterException
 	{
-		Class<?> targetType = MU.getType(propertyModel);
+		Class<?> targetType = MU.getType(property);
 
 		Clob clob = null;
 

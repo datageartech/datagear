@@ -12,7 +12,6 @@ import org.datagear.model.Property;
 import org.datagear.model.features.DescLabel;
 import org.datagear.model.features.NameLabel;
 import org.datagear.model.support.IllegalPropertyPathException;
-import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyPath;
 import org.datagear.model.support.PropertyPathInfo;
 import org.datagear.persistence.features.ColumnName;
@@ -167,25 +166,23 @@ public class ModelUtils
 	}
 
 	/**
-	 * 判断给定属性具体模型是否是隶属属性模型。
+	 * 判断给定属性是否是私有的。
 	 * <p>
-	 * 隶属属性模型没有独立生命周期。
+	 * 私有属性没有独立生命周期。
 	 * </p>
 	 * 
 	 * @param propertyPathInfo
 	 * @return
 	 */
-	public static boolean isPrivatePropertyModelTail(PropertyPathInfo propertyPathInfo)
+	public static boolean isPrivatePropertyTail(PropertyPathInfo propertyPathInfo)
 	{
 		if (!propertyPathInfo.hasModelTail())
 			throw new IllegalArgumentException("The tail Model of the property path ["
 					+ propertyPathInfo.getPropertyPath() + "] must not be null");
 
-		Model tailModel = propertyPathInfo.getModelTail();
-
 		Property property = propertyPathInfo.getPropertyTail();
 
-		return PMU.isPrivate(propertyPathInfo.getOwnerModelTail(), property, tailModel);
+		return PMU.isPrivate(propertyPathInfo.getOwnerModelTail(), property);
 	}
 
 	/**
@@ -249,23 +246,7 @@ public class ModelUtils
 					sb.append(displayName(property, locale));
 
 				if (i < len - 1)
-				{
-					if (MU.isConcreteProperty(property))
-						parent = property.getModel();
-					else if (MU.isAbstractedProperty(property))
-					{
-						if (!propertyPath.hasPropertyModelIndex(i))
-							throw new IllegalPropertyPathException("[" + propertyPath
-									+ "] is illegal, concrete property model name should be defined after [" + pname
-									+ "]");
-
-						Model myModel = MU.getPropertyModel(property, propertyPath.getPropertyModelIndex(i));
-
-						parent = myModel;
-					}
-					else
-						throw new UnsupportedOperationException();
-				}
+					parent = property.getModel();
 			}
 			else
 				throw new UnsupportedOperationException();

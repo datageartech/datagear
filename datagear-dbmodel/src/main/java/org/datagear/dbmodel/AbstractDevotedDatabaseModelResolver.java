@@ -29,11 +29,11 @@ import org.datagear.dbinfo.ImportedKeyRule;
 import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbinfo.TableType;
 import org.datagear.model.Label;
-import org.datagear.model.MapFeature;
 import org.datagear.model.Model;
 import org.datagear.model.ModelManager;
 import org.datagear.model.Property;
 import org.datagear.model.PropertyFeature;
+import org.datagear.model.ValueFeature;
 import org.datagear.model.features.DescLabel;
 import org.datagear.model.features.MaxLength;
 import org.datagear.model.features.NameLabel;
@@ -67,8 +67,8 @@ import org.datagear.persistence.features.PropertyKeyPropertyName;
 import org.datagear.persistence.features.PropertyKeyUpdateRule;
 import org.datagear.persistence.features.RelationPoint;
 import org.datagear.persistence.features.TableName;
-import org.datagear.persistence.mapper.RelationMapper;
-import org.datagear.persistence.mapper.RelationMapperResolver;
+import org.datagear.persistence.mapper.Mapper;
+import org.datagear.persistence.mapper.MapperResolver;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -101,7 +101,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 
 	private PropertyNameResolver propertyNameResolver = new IdentifierPropertyNameResolver();
 
-	private RelationMapperResolver relationMapperResolver = new RelationMapperResolver();
+	private MapperResolver mapperResolver = new MapperResolver();
 
 	private UnresolvableColumnHandleWay unresolvableColumnHandleWay = UnresolvableColumnHandleWay.PLACEHOLDER;
 
@@ -203,14 +203,14 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		this.propertyNameResolver = propertyNameResolver;
 	}
 
-	public RelationMapperResolver getRelationMapperResolver()
+	public MapperResolver getMapperResolver()
 	{
-		return relationMapperResolver;
+		return mapperResolver;
 	}
 
-	public void setRelationMapperResolver(RelationMapperResolver relationMapperResolver)
+	public void setMapperResolver(MapperResolver mapperResolver)
 	{
-		this.relationMapperResolver = relationMapperResolver;
+		this.mapperResolver = mapperResolver;
 	}
 
 	public int getDefaultTokenPropertyCount()
@@ -237,7 +237,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			resolveModelAndPropertyKeyPropertyNames(localModel);
 
 		for (Model localModel : localModels)
-			resolveModelRelationMappers(localModel);
+			resolveMappers(localModel);
 
 		return model;
 	}
@@ -2880,7 +2880,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	}
 
 	/**
-	 * 解析{@linkplain Model#getProperties()}的{@linkplain RelationMapper}特性。
+	 * 解析{@linkplain Model#getProperties()}的{@linkplain Mapper}特性。
 	 * <p>
 	 * 注意：此方法不能在{@linkplain #doResolve(Connection, ModelManager, ModelManager, String, String)}内部调用。
 	 * </p>
@@ -2890,7 +2890,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	 * 
 	 * @param model
 	 */
-	protected void resolveModelRelationMappers(Model model)
+	protected void resolveMappers(Model model)
 	{
 		if (MU.isPrimitiveModel(model))
 			return;
@@ -2901,10 +2901,8 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			for (int i = 0; i < properties.length; i++)
 			{
 				Property property = properties[i];
-
-				RelationMapper relationMapper = this.relationMapperResolver.resolve(model, property);
-
-				property.setFeature(RelationMapper.class, relationMapper);
+				Mapper mapper = this.mapperResolver.resolve(model, property);
+				property.setFeature(Mapper.class, mapper);
 			}
 		}
 		else
@@ -2940,14 +2938,6 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 					if (value != null)
 						modelKeyPropertyName.setValue(getPropertyNamesOfColumnNames(model, value));
 
-					Map<Integer, String[]> mapValues = modelTablePkColumnName.getMapValues();
-					if (mapValues != null)
-					{
-						for (Map.Entry<Integer, String[]> entry : mapValues.entrySet())
-							modelKeyPropertyName.setValue(entry.getKey(),
-									getPropertyNamesOfColumnNames(model, entry.getValue()));
-					}
-
 					property.setFeature(ModelKeyPropertyName.class, modelKeyPropertyName);
 				}
 
@@ -2960,18 +2950,8 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 					String[] value = propertyTablePkColumnName.getValue();
 					if (value != null)
 					{
-						Model propertyModel = MU.getPropertyModel(property, 0);
+						Model propertyModel = MU.getModel(property);
 						propertyKeyPropertyName.setValue(getPropertyNamesOfColumnNames(propertyModel, value));
-					}
-
-					Model[] propertyModels = property.getModels();
-					for (int j = 0; j < propertyModels.length; j++)
-					{
-						String[] myValue = propertyKeyPropertyName.getOriginalValue(j);
-
-						if (myValue != null)
-							propertyKeyPropertyName.setValue(j,
-									getPropertyNamesOfColumnNames(propertyModels[j], myValue));
 					}
 
 					property.setFeature(PropertyKeyPropertyName.class, propertyKeyPropertyName);
@@ -3044,17 +3024,6 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		{
 			if (columnName.equals(columnNameFeature.getValue()))
 				return true;
-
-			Map<Integer, String> columnNameMap = columnNameFeature.getMapValues();
-
-			if (columnNameMap != null)
-			{
-				for (Map.Entry<Integer, String> entry : columnNameMap.entrySet())
-				{
-					if (columnName.equals(entry.getValue()))
-						return true;
-				}
-			}
 		}
 
 		PropertyKeyColumnName propertyKeyColumnNameFeature = property.getFeature(PropertyKeyColumnName.class);
@@ -3066,44 +3035,24 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 				if (columnName.equals(myColumnName))
 					return true;
 			}
-
-			Map<Integer, String[]> columnNameMap = propertyKeyColumnNameFeature.getMapValues();
-
-			if (columnNameMap != null)
-			{
-				for (Map.Entry<Integer, String[]> entry : columnNameMap.entrySet())
-				{
-					for (String myColumnName : entry.getValue())
-					{
-						if (columnName.equals(myColumnName))
-							return true;
-					}
-				}
-			}
 		}
 
 		MappedBy mappedByFeature = property.getFeature(MappedBy.class);
 
 		if (mappedByFeature != null)
 		{
-			Model[] propertyModels = MU.getModels(property);
+			Model propertyModel = MU.getModel(property);
+			Property mappedByProperty = MU.getProperty(propertyModel, mappedByFeature.getValue());
+			ModelKeyColumnName modelKeyColumnNameFeature = mappedByProperty.getFeature(ModelKeyColumnName.class);
 
-			for (int i = 0; i < propertyModels.length; i++)
+			if (modelKeyColumnNameFeature != null)
 			{
-				Model propertyModel = propertyModels[i];
-				Property mappedByProperty = propertyModel.getProperty(mappedByFeature.getValue(i));
-				int myModelIndex = MU.getPropertyModelIndex(mappedByProperty, model);
-				ModelKeyColumnName modelKeyColumnNameFeature = mappedByProperty.getFeature(ModelKeyColumnName.class);
+				String[] columnNames = modelKeyColumnNameFeature.getValue();
 
-				if (modelKeyColumnNameFeature != null)
+				for (String myColumnName : columnNames)
 				{
-					String[] columnNames = modelKeyColumnNameFeature.getValue(myModelIndex);
-
-					for (String myColumnName : columnNames)
-					{
-						if (columnName.equals(myColumnName))
-							return true;
-					}
+					if (columnName.equals(myColumnName))
+						return true;
 				}
 			}
 		}
@@ -3604,7 +3553,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class ModelTablePkColumnName extends MapFeature<Integer, String[]>
+	protected static class ModelTablePkColumnName extends ValueFeature<String[]>
 			implements PropertyFeature, PersistenceFeature
 	{
 		public ModelTablePkColumnName()
@@ -3615,16 +3564,6 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		public ModelTablePkColumnName(String[] value)
 		{
 			super(value);
-		}
-
-		public ModelTablePkColumnName(Map<Integer, String[]> mapValues)
-		{
-			super(mapValues);
-		}
-
-		public ModelTablePkColumnName(String[] value, Map<Integer, String[]> mapValues)
-		{
-			super(value, mapValues);
 		}
 	}
 
@@ -3637,7 +3576,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class PropertyTablePkColumnName extends MapFeature<Integer, String[]>
+	protected static class PropertyTablePkColumnName extends ValueFeature<String[]>
 			implements PropertyFeature, PersistenceFeature
 	{
 		public PropertyTablePkColumnName()
@@ -3648,16 +3587,6 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		public PropertyTablePkColumnName(String[] value)
 		{
 			super(value);
-		}
-
-		public PropertyTablePkColumnName(Map<Integer, String[]> mapValues)
-		{
-			super(mapValues);
-		}
-
-		public PropertyTablePkColumnName(String[] value, Map<Integer, String[]> mapValues)
-		{
-			super(value, mapValues);
 		}
 	}
 

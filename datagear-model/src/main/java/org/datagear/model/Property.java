@@ -25,17 +25,6 @@ public interface Property extends Featured
 	String getName();
 
 	/**
-	 * 是否是<i>抽象属性</i>。
-	 * <p>
-	 * <i>抽象属性</i>有多个属性模型（由{@linkplain #getModels()}获取），<i>具体属性</i>（非
-	 * <i>抽象属性</i>）仅有一个属性模型（{@linkplain #getModel()}）。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	boolean isAbstracted();
-
-	/**
 	 * 获取<i>具体属性</i>的{@linkplain Model 模型}。
 	 * <p>
 	 * 如果{@linkplain #isArray()}或{@linkplain #isCollection()}为{@code true}
@@ -45,44 +34,6 @@ public interface Property extends Featured
 	 * @return
 	 */
 	Model getModel();
-
-	/**
-	 * 获取<i>抽象属性</i>的{@linkplain Model 模型}数组。
-	 * <p>
-	 * 如果{@linkplain #isArray()}或{@linkplain #isCollection()}为{@code true}
-	 * ，则此方法返回的是元素{@linkplain Model 模型}。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	Model[] getModels();
-
-	/**
-	 * 获取<i>抽象属性</i>的{@linkplain Model 模型}数目。
-	 * 
-	 * @return
-	 */
-	int getModelCount();
-
-	/**
-	 * 获取<i>抽象属性</i>的指定位置{@linkplain Model 模型}。
-	 * 
-	 * @param index
-	 * @return
-	 */
-	Model getModel(int index);
-
-	/**
-	 * 获取<i>抽象属性</i>的指定名称{@linkplain Model 模型}。
-	 * <p>
-	 * 注意：此方法限定<i>抽象属性</i>不能包含具有相同{@linkplain Model#getName() 名称}的
-	 * {@linkplain Model 模型}。
-	 * </p>
-	 * 
-	 * @param modelName
-	 * @return
-	 */
-	Model getModel(String modelName);
 
 	/**
 	 * 是否是数组属性。

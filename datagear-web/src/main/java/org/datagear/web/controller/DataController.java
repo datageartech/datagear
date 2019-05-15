@@ -30,7 +30,6 @@ import org.datagear.management.service.SchemaService;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.support.MU;
-import org.datagear.model.support.PropertyModel;
 import org.datagear.model.support.PropertyPath;
 import org.datagear.model.support.PropertyPathInfo;
 import org.datagear.persistence.ColumnPropertyPath;
@@ -987,8 +986,7 @@ public class DataController extends AbstractSchemaModelConnController
 				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
 
 				Object propValue = modelDataConverter.convertToPropertyValue(propertyPathInfo.getOwnerObjTail(),
-						propertyPathInfo.getOwnerModelTail(), propValueParam,
-						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
+						propertyPathInfo.getOwnerModelTail(), propValueParam, propertyPathInfo.getPropertyTail());
 
 				int count = persistenceManager.updateSinglePropValue(cn, model, data, propertyPathInfo, propValue);
 				if (count == 0)
@@ -1111,8 +1109,8 @@ public class DataController extends AbstractSchemaModelConnController
 				springModel.addAttribute("titleOperationMessageKey", "edit");
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
 						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-				springModel.addAttribute("isPrivatePropertyModel",
-						ModelUtils.isPrivatePropertyModelTail(propertyPathInfo));
+				springModel.addAttribute("isPrivateProperty",
+						ModelUtils.isPrivatePropertyTail(propertyPathInfo));
 			}
 		}.execute();
 
@@ -1196,8 +1194,8 @@ public class DataController extends AbstractSchemaModelConnController
 				springModel.addAttribute("titleOperationMessageKey", "view");
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
 						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-				springModel.addAttribute("isPrivatePropertyModel",
-						ModelUtils.isPrivatePropertyModelTail(propertyPathInfo));
+				springModel.addAttribute("isPrivateProperty",
+						ModelUtils.isPrivatePropertyTail(propertyPathInfo));
 			}
 		}.execute();
 
@@ -1277,7 +1275,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
 						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
-						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
+						propertyPathInfo.getPropertyTail());
 
 				persistenceManager.insertMultiplePropValueElement(cn, model, data, propertyPathInfo,
 						new Object[] { propValueElement });
@@ -1312,7 +1310,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
 						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
-						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
+						propertyPathInfo.getPropertyTail());
 
 				persistenceManager.insertMultiplePropValueElement(cn, dialect, model, data, propertyPathInfo,
 						propValueElement, context);
@@ -1346,8 +1344,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object[] propValueElements = PMU.toArray(modelDataConverter.convertToPropertyValue(
 						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(),
-						propValueElementsParam,
-						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail())));
+						propValueElementsParam, propertyPathInfo.getPropertyTail()));
 
 				persistenceManager.insertMultiplePropValueElement(cn, model, data, propertyPathInfo, propValueElements);
 
@@ -1441,7 +1438,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
 						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
-						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
+						propertyPathInfo.getPropertyTail());
 
 				int count = persistenceManager.updateMultiplePropValueElement(cn, model, data, propertyPathInfo,
 						propValueElement);
@@ -1485,8 +1482,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object[] propValueElements = PMU.toArray(modelDataConverter.convertToPropertyValue(
 						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(),
-						propValueElementsParam,
-						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail())));
+						propValueElementsParam, propertyPathInfo.getPropertyTail()));
 
 				int count = persistenceManager.deleteMultiplePropValueElement(cn, model, data, propertyPathInfo,
 						propValueElements);
@@ -1552,8 +1548,7 @@ public class DataController extends AbstractSchemaModelConnController
 				Model modelTail = propertyPathInfo.getModelTail();
 
 				Object updates = modelDataConverter.convertToPropertyValue(propertyPathInfo.getOwnerObjTail(),
-						propertyPathInfo.getOwnerModelTail(), updatesParam,
-						PropertyModel.valueOf(propertyPathInfo.getPropertyTail(), propertyPathInfo.getModelTail()));
+						propertyPathInfo.getOwnerModelTail(), updatesParam, propertyPathInfo.getPropertyTail());
 
 				propertyPathInfo.setValueTail(updates);
 
@@ -1816,10 +1811,9 @@ public class DataController extends AbstractSchemaModelConnController
 					PropertyPath.valueOf(propertyNames[i]), data);
 
 			Property tailProperty = propertyPathInfo.getPropertyTail();
-			PropertyModel tailPropertyModel = PropertyModel.valueOf(tailProperty, propertyPathInfo.getModelTail());
 
 			propertyValues[i] = modelDataConverter.convertToPropertyValue(data, model, propertyValueSources[i],
-					tailPropertyModel);
+					tailProperty);
 
 			properties[i] = tailProperty;
 		}

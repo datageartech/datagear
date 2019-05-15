@@ -13,9 +13,7 @@ import java.util.Map;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.features.NotReadable;
-import org.datagear.model.support.DefaultDynamicBean;
 import org.datagear.model.support.MU;
-import org.datagear.model.support.PropertyModel;
 import org.datagear.model.support.PropertyPath;
 import org.datagear.model.support.PropertyPathInfo;
 import org.datagear.persistence.collection.SizeOnlyCollection;
@@ -105,29 +103,28 @@ public class ModelDataConverter extends AbstractDataConverter
 	 * @param obj
 	 * @param model
 	 * @param propertyValueSource
-	 * @param propertyModel
+	 * @param property
 	 * @return
 	 * @throws ConverterException
 	 */
-	public Object convertToPropertyValue(Object obj, Model model, Object propertyValueSource,
-			PropertyModel propertyModel) throws ConverterException
+	public Object convertToPropertyValue(Object obj, Model model, Object propertyValueSource, Property property)
+			throws ConverterException
 	{
 		if (propertyValueSource == null)
 			return null;
 
-		Property property = propertyModel.getProperty();
-		Model pmodel = propertyModel.getModel();
+		Model propertyModel = MU.getModel(property);
 
 		Object propertyValue = null;
 
 		if (property.isArray())
-			propertyValue = convertToArray(propertyValueSource, pmodel);
+			propertyValue = convertToArray(propertyValueSource, propertyModel);
 		else if (property.isCollection())
-			propertyValue = convertToCollection(propertyValueSource, pmodel, property.getCollectionType());
+			propertyValue = convertToCollection(propertyValueSource, propertyModel, property.getCollectionType());
 		else
-			propertyValue = convert(propertyValueSource, pmodel);
+			propertyValue = convert(propertyValueSource, propertyModel);
 
-		PMU.setPropertyValueMappedByIf(pmodel, obj, propertyModel, propertyValue);
+		PMU.setPropertyValueMappedByIf(propertyModel, obj, property, propertyValue);
 
 		return propertyValue;
 	}
@@ -138,21 +135,21 @@ public class ModelDataConverter extends AbstractDataConverter
 	 * @param obj
 	 * @param model
 	 * @param propertyValueElementSource
-	 * @param propertyModel
+	 * @param property
 	 * @return
 	 * @throws ConverterException
 	 */
 	public Object convertToPropertyValueElement(Object obj, Model model, Object propertyValueElementSource,
-			PropertyModel propertyModel) throws ConverterException
+			Property property) throws ConverterException
 	{
 		if (propertyValueElementSource == null)
 			return null;
 
-		Model pmodel = propertyModel.getModel();
+		Model propertyModel = MU.getModel(property);
 
-		Object propertyValueElement = convert(propertyValueElementSource, pmodel);
+		Object propertyValueElement = convert(propertyValueElementSource, propertyModel);
 
-		PMU.setPropertyValueMappedByIf(pmodel, obj, propertyModel, propertyValueElement);
+		PMU.setPropertyValueMappedByIf(propertyModel, obj, property, propertyValueElement);
 
 		return propertyValueElement;
 	}
@@ -213,9 +210,6 @@ public class ModelDataConverter extends AbstractDataConverter
 				Map<String, Object> map = (Map<String, Object>) obj;
 
 				Object target = convertMap(namePath, map, model, refContext);
-
-				if (target instanceof DefaultDynamicBean)
-					((DefaultDynamicBean) target).setModel(model);
 
 				return target;
 			}
@@ -290,8 +284,7 @@ public class ModelDataConverter extends AbstractDataConverter
 			if (property.hasFeature(NotReadable.class))
 				continue;
 
-			PropertyModel propertyModel = getPropertyModel(property, propertyPath);
-			Model pmodel = propertyModel.getModel();
+			Model pmodel = MU.getModel(property);
 
 			String myFullPropertyPath = concatPropertyPath(namePath, propertyPath);
 
@@ -310,7 +303,7 @@ public class ModelDataConverter extends AbstractDataConverter
 				value = convertObj(myFullPropertyPath, rawValue, pmodel, refContext);
 			}
 
-			setPropertyValue(model, re, propertyModel, value);
+			setPropertyValue(model, re, property, value);
 		}
 
 		return re;
@@ -664,38 +657,15 @@ public class ModelDataConverter extends AbstractDataConverter
 	}
 
 	/**
-	 * 获取属性模型。
-	 * <p>
-	 * 如果无法获取到，将返回{@code null}。
-	 * </p>
-	 * 
-	 * @param property
-	 * @param propertyPath
-	 * @return
-	 */
-	protected PropertyModel getPropertyModel(Property property, PropertyPath propertyPath)
-	{
-		if (!property.isAbstracted())
-			return PropertyModel.valueOf(property, 0);
-		else
-		{
-			if (propertyPath.hasPropertyModelIndexHead())
-				return PropertyModel.valueOf(property, propertyPath.getPropertyModelIndexHead());
-			else
-				throw new IllegalArgumentException("The property model is not explicit");
-		}
-	}
-
-	/**
 	 * 设置属性值。
 	 * 
 	 * @param model
 	 * @param obj
-	 * @param propertyModel
+	 * @param property
 	 * @param propertyValue
 	 */
-	protected void setPropertyValue(Model model, Object obj, PropertyModel propertyModel, Object propertyValue)
+	protected void setPropertyValue(Model model, Object obj, Property property, Object propertyValue)
 	{
-		PMU.setPropertyValue(model, obj, propertyModel, propertyValue);
+		PMU.setPropertyValue(model, obj, property, propertyValue);
 	}
 }

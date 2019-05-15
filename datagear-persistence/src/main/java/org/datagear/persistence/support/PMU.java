@@ -10,7 +10,6 @@ import java.util.List;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.support.MU;
-import org.datagear.model.support.PropertyModel;
 import org.datagear.persistence.collection.SizeOnlyCollection;
 import org.datagear.persistence.features.KeyRule;
 import org.datagear.persistence.features.KeyRule.RuleType;
@@ -18,7 +17,6 @@ import org.datagear.persistence.features.MappedBy;
 import org.datagear.persistence.mapper.Mapper;
 import org.datagear.persistence.mapper.MapperUtil;
 import org.datagear.persistence.mapper.ModelTableMapper;
-import org.datagear.persistence.mapper.RelationMapper;
 
 /**
  * 持久化模型公用方法集。
@@ -29,7 +27,7 @@ import org.datagear.persistence.mapper.RelationMapper;
 public class PMU
 {
 	/**
-	 * 判断给定{@linkplain Property}的具体{@linkplain Model}是否是私有的。
+	 * 判断给定{@linkplain Property}是否是私有的。
 	 * <p>
 	 * 如果属性值没有独立的生命周期，那么它就是私有的。
 	 * </p>
@@ -39,14 +37,11 @@ public class PMU
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
 	 * @return
 	 */
-	public static boolean isPrivate(Model model, Property property, Model propertyConcreteModel)
+	public static boolean isPrivate(Model model, Property property)
 	{
-		RelationMapper relationMapper = property.getFeature(RelationMapper.class);
-		int myIndex = MU.getPropertyModelIndex(property, propertyConcreteModel);
-		Mapper mapper = relationMapper.getMappers()[myIndex];
+		Mapper mapper = property.getFeature(Mapper.class);
 
 		KeyRule keyRule = mapper.getPropertyKeyDeleteRule();
 
@@ -72,7 +67,7 @@ public class PMU
 	}
 
 	/**
-	 * 判断给定{@linkplain Property}的具体{@linkplain Model}是否是共享的。
+	 * 判断给定{@linkplain Property}是否是共享的。
 	 * <p>
 	 * 如果属性值有独立的生命周期，那么它就是共享的。
 	 * </p>
@@ -82,12 +77,11 @@ public class PMU
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
 	 * @return
 	 */
-	public static boolean isShared(Model model, Property property, Model propertyConcreteModel)
+	public static boolean isShared(Model model, Property property)
 	{
-		return !isPrivate(model, property, propertyConcreteModel);
+		return !isPrivate(model, property);
 	}
 
 	/**
@@ -101,13 +95,12 @@ public class PMU
 	 * 
 	 * @param model
 	 * @param obj
-	 * @param propertyModel
+	 * @param property
 	 * @param propertyValue
 	 */
-	public static void setPropertyValue(Model model, Object obj, PropertyModel propertyModel, Object propertyValue)
+	public static void setPropertyValue(Model model, Object obj, Property property, Object propertyValue)
 	{
-		Property property = propertyModel.getProperty();
-		Model pmodel = propertyModel.getModel();
+		Model pmodel = MU.getModel(property);
 
 		if (propertyValue == null)
 		{
@@ -124,7 +117,7 @@ public class PMU
 		{
 			property.set(obj, propertyValue);
 
-			setPropertyValueMappedByIf(model, obj, propertyModel, propertyValue);
+			setPropertyValueMappedByIf(model, obj, property, propertyValue);
 		}
 	}
 
@@ -133,23 +126,21 @@ public class PMU
 	 * 
 	 * @param model
 	 * @param obj
-	 * @param propertyModel
+	 * @param property
 	 * @param propertyValueOrElement
 	 */
-	public static boolean setPropertyValueMappedByIf(Model model, Object obj, PropertyModel propertyModel,
+	public static boolean setPropertyValueMappedByIf(Model model, Object obj, Property property,
 			Object propertyValueOrElement)
 	{
 		if (propertyValueOrElement == null)
 			return false;
 
-		Property property = propertyModel.getProperty();
-		Model pmodel = propertyModel.getModel();
+		Model pmodel = MU.getModel(property);
 
 		if (MU.isPrimitiveModel(pmodel))
 			return false;
 
-		RelationMapper relationMapper = property.getFeature(RelationMapper.class);
-		Mapper mapper = relationMapper.getMappers()[propertyModel.getIndex()];
+		Mapper mapper = property.getFeature(Mapper.class);
 
 		String mappedTarget = null;
 		if (mapper.isMappedBySource())

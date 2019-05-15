@@ -8,15 +8,16 @@ import java.sql.Connection;
 
 import org.datagear.model.Model;
 import org.datagear.model.Property;
+import org.datagear.model.support.MU;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.features.KeyRule;
 import org.datagear.persistence.mapper.JoinTableMapper;
+import org.datagear.persistence.mapper.Mapper;
+import org.datagear.persistence.mapper.MapperUtil;
 import org.datagear.persistence.mapper.ModelTableMapper;
-import org.datagear.persistence.mapper.PropertyModelMapper;
 import org.datagear.persistence.mapper.PropertyTableMapper;
-import org.datagear.persistence.mapper.RelationMapper;
 
 /**
  * 删除持久化操作。
@@ -77,17 +78,18 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param condition
 	 *            允许为{@code null}。
 	 * @param property
-	 * @param propertyModelMapper
 	 * @param propertyTableCondition
 	 *            允许为{@code null}。
 	 * @return
 	 * 
 	 */
 	public int deletePropertyTableData(Connection cn, Dialect dialect, String table, Model model, SqlBuilder condition,
-			Property property, PropertyModelMapper<?> propertyModelMapper, SqlBuilder propertyTableCondition)
+			Property property, SqlBuilder propertyTableCondition)
 	{
-		return deletePropertyTableData(cn, dialect, table, model, condition, property, propertyModelMapper,
-				propertyTableCondition, true);
+		Mapper mapper = getMapper(model, property);
+
+		return deletePropertyTableData(cn, dialect, table, model, condition, property, mapper, propertyTableCondition,
+				true);
 	}
 
 	/**
@@ -160,22 +162,14 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 			if (ignorePropertyName != null && ignorePropertyName.equals(property.getName()))
 				continue;
 
-			RelationMapper relationMapper = getRelationMapper(model, property);
+			Mapper mapper = getMapper(model, property);
 
-			PropertyModelMapper<?>[] propertyModelMappers = PropertyModelMapper.valueOf(property, relationMapper);
+			KeyRule propertyKeyDeleteRule = mapper.getPropertyKeyDeleteRule();
 
-			for (int j = 0; j < propertyModelMappers.length; j++)
-			{
-				PropertyModelMapper<?> propertyModelMapper = propertyModelMappers[j];
+			if (propertyKeyDeleteRule != null && !propertyKeyDeleteRule.isManually())
+				continue;
 
-				KeyRule propertyKeyDeleteRule = propertyModelMapper.getMapper().getPropertyKeyDeleteRule();
-
-				if (propertyKeyDeleteRule != null && !propertyKeyDeleteRule.isManually())
-					continue;
-
-				deletePropertyTableData(cn, dialect, table, model, condition, property, propertyModelMappers[j], null,
-						false);
-			}
+			deletePropertyTableData(cn, dialect, table, model, condition, property, mapper, null, false);
 		}
 	}
 
@@ -205,8 +199,8 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 			if (ignorePropertyName != null && ignorePropertyName.equals(property.getName()))
 				continue;
 
-			deletePropertyTableData(cn, dialect, table, model, condition, property, getRelationMapper(model, property),
-					null, updateModelTable);
+			deletePropertyTableData(cn, dialect, table, model, condition, property, getMapper(model, property), null,
+					updateModelTable);
 		}
 	}
 
@@ -220,7 +214,7 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param condition
 	 *            允许为{@code null}。
 	 * @param property
-	 * @param relationMapper
+	 * @param mapper
 	 * @param propertyTableCondition
 	 *            允许为{@code null}。
 	 * @param updateModelTable
@@ -229,66 +223,28 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 	 * 
 	 */
 	protected int deletePropertyTableData(Connection cn, Dialect dialect, String table, Model model,
-			SqlBuilder condition, Property property, RelationMapper relationMapper, SqlBuilder propertyTableCondition,
+			SqlBuilder condition, Property property, Mapper mapper, SqlBuilder propertyTableCondition,
 			boolean updateModelTable)
-	{
-		int deleted = 0;
-
-		PropertyModelMapper<?>[] propertyModelMappers = PropertyModelMapper.valueOf(property, relationMapper);
-
-		for (int i = 0; i < propertyModelMappers.length; i++)
-		{
-			int myDeleted = deletePropertyTableData(cn, dialect, table, model, condition, property,
-					propertyModelMappers[i], propertyTableCondition, updateModelTable);
-
-			if (myDeleted > 0)
-				deleted += myDeleted;
-		}
-
-		return deleted;
-	}
-
-	/**
-	 * 删除属性表数据。
-	 * 
-	 * @param cn
-	 * @param dialect
-	 * @param table
-	 * @param model
-	 * @param condition
-	 *            允许为{@code null}。
-	 * @param property
-	 * @param propertyModelMapper
-	 * @param propertyTableCondition
-	 *            允许为{@code null}。
-	 * @param updateModelTable
-	 *            是否更新模型表数据
-	 * @return
-	 * 
-	 */
-	protected int deletePropertyTableData(Connection cn, Dialect dialect, String table, Model model,
-			SqlBuilder condition, Property property, PropertyModelMapper<?> propertyModelMapper,
-			SqlBuilder propertyTableCondition, boolean updateModelTable)
 	{
 		int re = 0;
 
-		if (propertyModelMapper.isModelTableMapperInfo())
+		if (MapperUtil.isModelTableMapper(mapper))
 		{
-			PropertyModelMapper<ModelTableMapper> pmm = propertyModelMapper.castModelTableMapperInfo();
+			ModelTableMapper pmm = MapperUtil.castModelTableMapper(mapper);
 
 			re = deletePropertyTableDataForModelTableMapper(cn, dialect, table, model, condition, property, pmm,
 					propertyTableCondition, updateModelTable);
 		}
-		else if (propertyModelMapper.isPropertyTableMapperInfo())
+		else if (MapperUtil.isPropertyTableMapper(mapper))
 		{
-			PropertyModelMapper<PropertyTableMapper> pmm = propertyModelMapper.castPropertyTableMapperInfo();
+			PropertyTableMapper pmm = MapperUtil.castPropertyTableMapper(mapper);
 
 			re = deletePropertyTableDataForPropertyTableMapper(cn, dialect, table, model, condition, property, pmm,
 					propertyTableCondition);
 		}
-		else if (propertyModelMapper.isJoinTableMapperInfo())
+		else if (MapperUtil.isJoinTableMapper(mapper))
 		{
-			PropertyModelMapper<JoinTableMapper> pmm = propertyModelMapper.castJoinTableMapperInfo();
+			JoinTableMapper pmm = MapperUtil.castJoinTableMapper(mapper);
 
 			re = deletePropertyTableDataForJoinTableMapper(cn, dialect, table, model, condition, property, pmm,
 					propertyTableCondition);
@@ -309,7 +265,7 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param condition
 	 *            允许为{@code null}。
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param propertyTableCondition
 	 *            允许为{@code null}。
 	 * @param updateModelTable
@@ -318,35 +274,32 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 	 * 
 	 */
 	protected int deletePropertyTableDataForModelTableMapper(Connection cn, Dialect dialect, String table, Model model,
-			SqlBuilder condition, Property property, PropertyModelMapper<ModelTableMapper> propertyModelMapper,
-			SqlBuilder propertyTableCondition, boolean updateModelTable)
+			SqlBuilder condition, Property property, ModelTableMapper mapper, SqlBuilder propertyTableCondition,
+			boolean updateModelTable)
 	{
-		ModelTableMapper mapper = propertyModelMapper.getMapper();
-
 		if (mapper.isPrimitivePropertyMapper())
 		{
 			if (updateModelTable)
 				return updatePropertyValueToNullForModelTableMapper(cn, dialect, table, model, propertyTableCondition,
-						property, propertyModelMapper);
+						property, mapper);
 			else
 				return PersistenceManager.PERSISTENCE_IGNORED;
 		}
 		else
 		{
-			Model pmodel = propertyModelMapper.getModel();
+			Model pmodel = MU.getModel(property);
 
-			if (PMU.isPrivate(model, property, pmodel))
+			if (PMU.isPrivate(model, property))
 			{
 				// XXX 这里只能先删除属性实体，因为如果先删除关联表，就无法构建这个删除条件了
 				SqlBuilder pcondition = buildPropertyTableConditionForEntityModelTableMapper(dialect, table, model,
-						condition, property, propertyModelMapper, propertyTableCondition);
+						condition, property, mapper, propertyTableCondition);
 
-				int deleted = delete(cn, dialect, getTableName(pmodel), pmodel, pcondition,
-						getMappedByWith(propertyModelMapper.getMapper()));
+				int deleted = delete(cn, dialect, getTableName(pmodel), pmodel, pcondition, getMappedByWith(mapper));
 
 				if (updateModelTable)
 					updatePropertyValueToNullForModelTableMapper(cn, dialect, table, model, propertyTableCondition,
-							property, propertyModelMapper);
+							property, mapper);
 
 				return deleted;
 			}
@@ -354,7 +307,7 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 			{
 				if (updateModelTable)
 					return updatePropertyValueToNullForModelTableMapper(cn, dialect, table, model,
-							propertyTableCondition, property, propertyModelMapper);
+							propertyTableCondition, property, mapper);
 				else
 					return PersistenceManager.PERSISTENCE_IGNORED;
 			}
@@ -371,17 +324,15 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param condition
 	 *            允许为{@code null}。
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param propertyTableCondition
 	 *            允许为{@code null}。
 	 */
 	protected int deletePropertyTableDataForPropertyTableMapper(Connection cn, Dialect dialect, String table,
-			Model model, SqlBuilder condition, Property property,
-			PropertyModelMapper<PropertyTableMapper> propertyModelMapper, SqlBuilder propertyTableCondition)
+			Model model, SqlBuilder condition, Property property, PropertyTableMapper mapper,
+			SqlBuilder propertyTableCondition)
 	{
 		int count = 0;
-
-		PropertyTableMapper mapper = propertyModelMapper.getMapper();
 
 		if (mapper.isPrimitivePropertyMapper())
 		{
@@ -408,20 +359,19 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 		}
 		else
 		{
-			Model pmodel = propertyModelMapper.getModel();
+			Model pmodel = MU.getModel(property);
 
-			if (PMU.isPrivate(model, property, pmodel))
+			if (PMU.isPrivate(model, property))
 			{
 				SqlBuilder pcondition = buildPropertyTableConditionForPropertyTableMapper(dialect, table, model,
-						condition, property, propertyModelMapper, propertyTableCondition);
+						condition, property, mapper, propertyTableCondition);
 
-				count = delete(cn, dialect, getTableName(pmodel), pmodel, pcondition,
-						getMappedByWith(propertyModelMapper.getMapper()));
+				count = delete(cn, dialect, getTableName(pmodel), pmodel, pcondition, getMappedByWith(mapper));
 			}
 			else
 			{
 				count = updateModelKeyToNullForEntityPropertyTableMapper(cn, dialect, table, model, condition, property,
-						propertyModelMapper, propertyTableCondition);
+						mapper, propertyTableCondition);
 			}
 		}
 
@@ -438,30 +388,28 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param condition
 	 *            允许为{@code null}。
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param propertyTableCondition
 	 *            允许为{@code null}。
 	 * @return
 	 */
 	protected int deletePropertyTableDataForJoinTableMapper(Connection cn, Dialect dialect, String table, Model model,
-			SqlBuilder condition, Property property, PropertyModelMapper<JoinTableMapper> propertyModelMapper,
-			SqlBuilder propertyTableCondition)
+			SqlBuilder condition, Property property, JoinTableMapper mapper, SqlBuilder propertyTableCondition)
 	{
 		int count = 0;
 
-		Model propertyModel = propertyModelMapper.getModel();
-		JoinTableMapper mapper = propertyModelMapper.getMapper();
+		Model propertyModel = MU.getModel(property);
 
 		String jointable = mapper.getJoinTableName();
 		String propertyTable = getTableName(propertyModel);
 		String[] modelKeyColumnNames = toQuoteNames(dialect, mapper.getModelKeyColumnNames());
 		String[] pkeyColumnNames = toQuoteNames(dialect, mapper.getPropertyKeyColumnNames());
 
-		if (PMU.isPrivate(model, property, propertyModel))
+		if (PMU.isPrivate(model, property))
 		{
 			// XXX 这里只能先删除属性实体，因为如果先删除关联表，就无法构建这个删除条件了
 			SqlBuilder pcondition = buildPropertyTableConditionForJoinTableMapper(dialect, table, model, condition,
-					property, propertyModelMapper, propertyTableCondition);
+					property, mapper, propertyTableCondition);
 
 			delete(cn, dialect, propertyTable, propertyModel, pcondition, getMappedByWith(mapper));
 		}
@@ -507,16 +455,13 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param condition
 	 *            允许为{@code null}。
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @return
 	 * 
 	 */
 	protected int updatePropertyValueToNullForModelTableMapper(Connection cn, Dialect dialect, String table,
-			Model model, SqlBuilder condition, Property property,
-			PropertyModelMapper<ModelTableMapper> propertyModelMapper)
+			Model model, SqlBuilder condition, Property property, ModelTableMapper mapper)
 	{
-		ModelTableMapper mapper = propertyModelMapper.getMapper();
-
 		SqlBuilder sql = new SqlBuilder();
 
 		sql.sql("UPDATE ").sql(toQuoteName(dialect, table)).sql(" SET ").delimit(",");
@@ -555,19 +500,18 @@ public class DeletePersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param condition
 	 *            允许为{@code null}。
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param propertyTableCondition
 	 * @return
 	 * 
 	 */
 	protected int updateModelKeyToNullForEntityPropertyTableMapper(Connection cn, Dialect dialect, String table,
-			Model model, SqlBuilder condition, Property property,
-			PropertyModelMapper<PropertyTableMapper> propertyModelMapper, SqlBuilder propertyTableCondition)
+			Model model, SqlBuilder condition, Property property, PropertyTableMapper mapper,
+			SqlBuilder propertyTableCondition)
 	{
 		int count = 0;
 
-		Model propertyModel = propertyModelMapper.getModel();
-		PropertyTableMapper mapper = propertyModelMapper.getMapper();
+		Model propertyModel = MU.getModel(property);
 
 		String ptable = toQuoteName(dialect, getTableName(propertyModel));
 		String[] modelKeyColumnNames = toQuoteNames(dialect, mapper.getModelKeyColumnNames());

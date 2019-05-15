@@ -54,25 +54,25 @@
 			reset : function(){},
 			
 			//"readonly=false"时必须，添加单元属性值处理函数
-			addSinglePropertyValue : function(property, propertyConcreteModel){ throw new Error("TODO"); },
+			addSinglePropertyValue : function(property){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，编辑单元属性值处理函数
-			editSinglePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
+			editSinglePropertyValue : function(property, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，删除单元属性值处理函数
-			deleteSinglePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
+			deleteSinglePropertyValue : function(property, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，选择单元属性值处理函数
-			selectSinglePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
+			selectSinglePropertyValue : function(property, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=true"时必须，查看单元属性值处理函数
-			viewSinglePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
+			viewSinglePropertyValue : function(property, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，编辑多元属性值处理函数
-			editMultiplePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
+			editMultiplePropertyValue : function(property, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=true"时必须，查看多元属性值处理函数
-			viewMultiplePropertyValue : function(property, propertyConcreteModel, propertyValue){ throw new Error("TODO"); },
+			viewMultiplePropertyValue : function(property, propertyValue){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，文件属性值上传地址
 			filePropertyUploadURL : "",
@@ -94,7 +94,7 @@
 			filePropertyLabelValue : undefined,
 			
 			//"readonly=false"时必须，下载单元文件属性值处理函数
-			downloadSinglePropertyValueFile : function(property, propertyConcreteModel){ throw new Error("TODO"); },
+			downloadSinglePropertyValueFile : function(property){ throw new Error("TODO"); },
 			
 			//可选，使用文本域而非文本框的长度阀值
 			asTextareaLength : 101,
@@ -456,9 +456,6 @@
 				if(this._isIgnorePropertyName(property, i))
 					continue;
 				
-				if($.model.isAbstractedProperty(property))
-					throw new Error("TODO");
-				
 				var itemdiv = $("<div class='form-item' />").appendTo($formContent);
 				var labeldiv=$("<div class='form-item-label' />").appendTo(itemdiv);
 				var valuediv=$("<div class='form-item-value' />").appendTo(itemdiv);
@@ -628,12 +625,12 @@
 					if(_this.options.readonly)
 					{
 						_this.options.viewMultiplePropertyValue.call(_this.element, myPropertyInfo.property,
-								myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+								myPropertyInfo.propertyValue);
 					}
 					else
 					{
 						_this.options.editMultiplePropertyValue.call(_this.element, myPropertyInfo.property,
-								myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+								myPropertyInfo.propertyValue);
 					}
 				});
 			}
@@ -728,7 +725,7 @@
 					var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
 					
 	    			_this.options.downloadSinglePropertyValueFile.call(_this.element, myPropertyInfo.property,
-							myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+							myPropertyInfo.propertyValue);
 				});
 			}
 			else
@@ -822,12 +819,12 @@
 			    			
 			    			if(rawValue)
 			    				_this.options.downloadSinglePropertyValueFile.call(_this.element, myPropertyInfo.property,
-										myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+										myPropertyInfo.propertyValue);
 			    		}
 			    		else if("del" == action)
 			    		{
 			    			_this.options.deleteSinglePropertyValue.call(_this.element, myPropertyInfo.property,
-									myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+									myPropertyInfo.propertyValue);
 			    		}
 			    	}
 				});
@@ -993,7 +990,7 @@
 						var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
 						
 						_this.options.viewSinglePropertyValue.call(_this.element, myPropertyInfo.property,
-								myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+								myPropertyInfo.propertyValue);
 					});
 				}
 				
@@ -1011,7 +1008,7 @@
 						var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
 						
 						_this.options.deleteSinglePropertyValue.call(_this.element, myPropertyInfo.property,
-								myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+								myPropertyInfo.propertyValue);
 					}
 				});
 				
@@ -1020,7 +1017,7 @@
 				var moreActionSelect = $("<select />").appendTo(actionGroup);
 				
 				//私有属性
-				if($.model.isPrivatePropertyModel(model, property, property.model))
+				if($.model.isPrivateProperty(model, property))
 				{
 					buttonElement.attr("value", options.labels.edit).click(function()
 					{
@@ -1031,12 +1028,11 @@
 						if(myPropertyInfo.propertyValue != null)
 						{
 							_this.options.editSinglePropertyValue.call(_this.element, myPropertyInfo.property,
-									myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+									myPropertyInfo.propertyValue);
 						}
 						else
 						{
-							_this.options.addSinglePropertyValue.call(_this.element, myPropertyInfo.property,
-									myPropertyInfo.propertyModel);
+							_this.options.addSinglePropertyValue.call(_this.element, myPropertyInfo.property);
 						}
 					});
 				}
@@ -1049,7 +1045,7 @@
 						var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
 						
 						_this.options.selectSinglePropertyValue.call(_this.element, myPropertyInfo.property,
-								myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+								myPropertyInfo.propertyValue);
 					});
 				}
 				
@@ -1072,7 +1068,7 @@
 						if("del" == action)
 			    		{
 			    			_this.options.deleteSinglePropertyValue.call(_this.element, myPropertyInfo.property,
-			    					myPropertyInfo.propertyModel, myPropertyInfo.propertyValue);
+			    					myPropertyInfo.propertyValue);
 			    		}
 			    	}
 				});
@@ -1100,14 +1096,12 @@
 			var property = $.model.getProperty(this.options.model, propertyName);
 			var propertyWidget = this._propertyWidgets[propertyName];
 			var propertyValue = propertyWidget.getValue();
-			var propertyModel = $.model.getPropertyModelByValue(property, propertyValue);
 			
 			var propertyInfo = 
 			{
 				"property" : property,
 				"propertyWidget" : propertyWidget,
-				"propertyValue" : propertyValue,
-				"propertyModel" : propertyModel
+				"propertyValue" : propertyValue
 			};
 			
 			return propertyInfo;

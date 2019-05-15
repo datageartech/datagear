@@ -329,7 +329,7 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 	 */
 	protected boolean isValidExpressionProperty(Model model, Property property)
 	{
-		return (MU.isSingleProperty(property) && MU.isConcretePrimitiveProperty(property));
+		return MU.isSingleProperty(property);
 	}
 
 	/**

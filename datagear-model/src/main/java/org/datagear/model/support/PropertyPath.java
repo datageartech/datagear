@@ -18,20 +18,15 @@ import org.datagear.model.Property;
  * <i>属性路径</i>用于唯一定位{@linkplain Model}的{@linkplain Property} 及其数据对象属性值，格式规范如下：
  * </p>
  * <ul>
- * <li>JavaBean属性：“.<i>property-name</i><i>&lt;属性具体模型索引&gt;</i>”（开头时不包含“.”）</li>
+ * <li>JavaBean属性：“.<i>property-name</i>”（开头时不包含“.”）</li>
  * <li>集合/数组元素：“[<i>element-index</i>]”</li>
  * </ul>
- * <p>
- * “<i>&lt;属性具体模型索引&gt;</i>”是{@linkplain Property#getModels()}的特定
- * {@linkplain Model}元素的索引数值，对于{@linkplain MU#isConcreteProperty(Property)
- * 具体属性}，它并不是必须的。
- * </p>
  * <p>
  * “<i>element-index</i>”是元素索引数值。
  * </p>
  * <p>
- * 注意：如果属性路径字符串的<i>property-name</i>中包含'.'、'['、']'、'<'、'>字符，
- * 则需要先将它们转义为"\."、"\["、"\]"、"\<"、"\>"字符串（参考{@linkplain #escapePropertyName(String)}），
+ * 注意：如果属性路径字符串中包含'.'、'['、']'字符，
+ * 则需要先将它们转义为"\."、"\["、"\]"字符串（参考{@linkplain #escapePropertyName(String)}），
  * 才能保证{@linkplain #valueOf(String)}解析正确。
  * </p>
  * <p>
@@ -42,9 +37,6 @@ import org.datagear.model.Property;
  * </p>
  * <p>
  * “[0].name”
- * </p>
- * <p>
- * “product&lt;0&gt;.customers&lt;1&gt;.name”
  * </p>
  * <p>
  * 注意：{@linkplain Model}、{@linkplain Property}概念中没有Map，因此这里没有定义映射表定位规范。
@@ -62,14 +54,6 @@ public class PropertyPath implements Serializable
 	public static final char PROPERTY = '.';
 
 	public static final String PROPERTY_STRING = ".";
-
-	public static final char CONCRETE_L = '<';
-
-	public static final String CONCRETE_L_STRING = "<";
-
-	public static final char CONCRETE_R = '>';
-
-	public static final String CONCRETE_R_STRING = ">";
 
 	public static final char ELEMENT_L = '[';
 
@@ -241,111 +225,6 @@ public class PropertyPath implements Serializable
 		Segment segment = this.segments[index];
 
 		segment.setPropertyName(propertyName);
-	}
-
-	/**
-	 * 是否有开头位置的JavaBean属性模型索引。
-	 * 
-	 * @return
-	 */
-	public boolean hasPropertyModelIndexHead()
-	{
-		return hasPropertyModelIndex(0);
-	}
-
-	/**
-	 * 是否有末尾位置的JavaBean属性具体模型索引。
-	 * 
-	 * @return
-	 */
-	public boolean hasPropertyModelIndexTail()
-	{
-		return hasPropertyModelIndex(this.segments.length - 1);
-	}
-
-	/**
-	 * 是否有属性具体模型索引。
-	 * 
-	 * @param index
-	 * @return
-	 */
-	public boolean hasPropertyModelIndex(int index)
-	{
-		Segment segment = this.segments[index];
-
-		if (!segment.isProperty())
-			throw new IllegalArgumentException("The [" + index + "] segment is not JavaBean property name");
-
-		return segment.hasPropertyModelIndex();
-	}
-
-	/**
-	 * 获取开头位置的JavaBean属性具体模型索引。
-	 * 
-	 * @return
-	 */
-	public int getPropertyModelIndexHead()
-	{
-		return getPropertyModelIndex(0);
-	}
-
-	/**
-	 * 获取末尾位置的JavaBean属性具体模型索引。
-	 * 
-	 * @return
-	 */
-	public int getPropertyModelIndexTail()
-	{
-		return getPropertyModelIndex(this.segments.length - 1);
-	}
-
-	/**
-	 * 获取JavaBean属性具体模型索引。
-	 * 
-	 * @param index
-	 * @return
-	 */
-	public int getPropertyModelIndex(int index)
-	{
-		Segment segment = this.segments[index];
-
-		if (!segment.isProperty())
-			throw new IllegalArgumentException("The [" + index + "] segment is not JavaBean property name");
-
-		return segment.getPropertyModelIndex();
-	}
-
-	/**
-	 * 设置开头位置的JavaBean属性具体模型索引。
-	 * 
-	 * @param propertyModelIndex
-	 */
-	public void setPropertyModelIndexHead(int propertyModelIndex)
-	{
-		setPropertyModelIndex(0, propertyModelIndex);
-	}
-
-	/**
-	 * 设置末尾位置的JavaBean属性具体模型索引。
-	 * 
-	 * @param propertyModelIndex
-	 */
-	public void setPropertyModelIndexTail(int propertyModelIndex)
-	{
-		setPropertyModelIndex(this.segments.length - 1, propertyModelIndex);
-	}
-
-	/**
-	 * 设置指定位置的JavaBean属性具体模型索引。
-	 * 
-	 * @param index
-	 * @param propertyModelIndex
-	 */
-	public void setPropertyModelIndex(int index, int propertyModelIndex)
-	{
-		Segment segment = this.segments[index];
-
-		segment.setPropertyModelIndex(propertyModelIndex);
 	}
 
 	/**
@@ -619,7 +498,7 @@ public class PropertyPath implements Serializable
 	public static String concatPropertyName(String propertyPath, String propertyName)
 	{
 		if (propertyName == null || propertyName.isEmpty())
-			throw new IllegalArgumentException("[] must not be empty");
+			throw new IllegalArgumentException("[propertyName] must not be empty");
 
 		propertyName = escapePropertyName(propertyName);
 
@@ -627,30 +506,6 @@ public class PropertyPath implements Serializable
 			return propertyName;
 		else
 			return propertyPath + PROPERTY + propertyName;
-	}
-
-	/**
-	 * 在属性路径后面连接属性名称。
-	 * 
-	 * @param propertyPath
-	 *            属性路径，允许为{@code null}
-	 * @param propertyName
-	 *            要连接的属性名
-	 * @param propertyConcreteIndex
-	 *            要连接的属性具体模型索引
-	 * @return
-	 */
-	public static String concatPropertyName(String propertyPath, String propertyName, int propertyConcreteIndex)
-	{
-		if (propertyName == null || propertyName.isEmpty())
-			throw new IllegalArgumentException("[] must not be empty");
-
-		propertyName = escapePropertyName(propertyName);
-
-		if (propertyPath == null || propertyPath.isEmpty())
-			return propertyName + CONCRETE_L + propertyConcreteIndex + CONCRETE_R;
-		else
-			return propertyPath + PROPERTY + propertyName + CONCRETE_L + propertyConcreteIndex + CONCRETE_R;
 	}
 
 	/**
@@ -740,64 +595,6 @@ public class PropertyPath implements Serializable
 
 				i = j;
 			}
-			// 属性具体模型索引
-			else if (c == CONCRETE_L)
-			{
-				Segment property = (segmentList.isEmpty() ? null : segmentList.get(segmentList.size() - 1));
-
-				if (property == null || !property.isProperty())
-					throw new IllegalPropertyPathException(
-							"[" + propertyPath + "] is illegal, property name required before position [" + i + "]");
-
-				int j = i + 1;
-				boolean hasCloseChar = false;
-
-				for (; j < length; j++)
-				{
-					char cj = cs[j];
-
-					if (cj == ESCAPOR)
-					{
-						char cjn = ((j + 1) < length ? cs[j + 1] : 0);
-
-						if (isKeyword(cjn))
-						{
-							j = j + 1;
-							appendIgnoreBlank(cache, cjn);
-						}
-						else
-							appendIgnoreBlank(cache, cj);
-					}
-					else if (cj == CONCRETE_R)
-					{
-						hasCloseChar = true;
-						break;
-					}
-					else
-						appendIgnoreBlank(cache, cj);
-				}
-
-				if (!hasCloseChar)
-					throw new IllegalPropertyPathException(
-							"[" + propertyPath + "] is illegal, '" + CONCRETE_R + "' required at position [" + j + "]");
-
-				String indexStr = toStringWithClear(cache);
-				int index;
-
-				try
-				{
-					index = Integer.parseInt(indexStr);
-				}
-				catch (NumberFormatException e)
-				{
-					throw new IllegalPropertyPathException("[" + propertyPath + "] is illegal, [" + indexStr
-							+ "] of position [" + (i + 1) + "] is not integer");
-				}
-
-				property.setPropertyModelIndex(index);
-
-				i = j;
-			}
 			// 属性名
 			else if (c == PROPERTY || i == 0)
 			{
@@ -819,7 +616,7 @@ public class PropertyPath implements Serializable
 						else
 							appendIgnoreBlank(cache, cj);
 					}
-					else if (cj == PROPERTY || cj == ELEMENT_L || cj == CONCRETE_L)
+					else if (cj == PROPERTY || cj == ELEMENT_L)
 					{
 						j = j - 1;
 						break;
@@ -857,7 +654,7 @@ public class PropertyPath implements Serializable
 	 */
 	protected static boolean isKeyword(char c)
 	{
-		return c == PROPERTY || c == ELEMENT_L || c == ELEMENT_R || c == CONCRETE_L || c == CONCRETE_R;
+		return c == PROPERTY || c == ELEMENT_L || c == ELEMENT_R;
 	}
 
 	/**
@@ -913,9 +710,6 @@ public class PropertyPath implements Serializable
 		/** 属性名 */
 		private String propertyName = null;
 
-		/** 属性具体模型索引 */
-		private Integer propertyModelIndex = null;
-
 		/** 数值索引 */
 		private Integer elementIndex = null;
 
@@ -923,13 +717,6 @@ public class PropertyPath implements Serializable
 		{
 			super();
 			this.propertyName = propertyName;
-		}
-
-		public Segment(String propertyName, int propertyModelIndex)
-		{
-			super();
-			this.propertyName = propertyName;
-			this.propertyModelIndex = propertyModelIndex;
 		}
 
 		public Segment(int elementIndex)
@@ -957,24 +744,6 @@ public class PropertyPath implements Serializable
 			this.elementIndex = null;
 		}
 
-		public boolean hasPropertyModelIndex()
-		{
-			return this.propertyModelIndex != null;
-		}
-
-		public int getPropertyModelIndex()
-		{
-			return this.propertyModelIndex;
-		}
-
-		public void setPropertyModelIndex(int propertyModelIndex)
-		{
-			if (!isProperty())
-				throw new IllegalStateException("Not property segment");
-
-			this.propertyModelIndex = propertyModelIndex;
-		}
-
 		public boolean isElement()
 		{
 			return (this.elementIndex != null);
@@ -989,7 +758,6 @@ public class PropertyPath implements Serializable
 		{
 			this.elementIndex = elementIndex;
 			this.propertyName = null;
-			this.propertyModelIndex = null;
 		}
 
 		@Override
@@ -998,7 +766,6 @@ public class PropertyPath implements Serializable
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((elementIndex == null) ? 0 : elementIndex.hashCode());
-			result = prime * result + ((propertyModelIndex == null) ? 0 : propertyModelIndex.hashCode());
 			result = prime * result + ((propertyName == null) ? 0 : propertyName.hashCode());
 			return result;
 		}
@@ -1020,13 +787,6 @@ public class PropertyPath implements Serializable
 			}
 			else if (!elementIndex.equals(other.elementIndex))
 				return false;
-			if (propertyModelIndex == null)
-			{
-				if (other.propertyModelIndex != null)
-					return false;
-			}
-			else if (!propertyModelIndex.equals(other.propertyModelIndex))
-				return false;
 			if (propertyName == null)
 			{
 				if (other.propertyName != null)
@@ -1045,11 +805,7 @@ public class PropertyPath implements Serializable
 			else
 			{
 				String propertyName = escapePropertyName(this.propertyName);
-
-				if (hasPropertyModelIndex())
-					return propertyName + CONCRETE_L_STRING + this.propertyModelIndex + CONCRETE_R_STRING;
-				else
-					return propertyName;
+				return propertyName;
 			}
 		}
 	}

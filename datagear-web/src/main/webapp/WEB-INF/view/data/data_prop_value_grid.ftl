@@ -10,13 +10,13 @@ boolean isClientPageData 初始数据是否是客户端数据，默认为false
 String titleOperationMessageKey 标题操作标签I18N关键字，不允许null
 String titleDisplayName 页面展示名称，默认为""
 boolean readonly 是否只读操作，默认为false
-boolean isPrivatePropertyModel 是否是私有属性，不允许为null
+boolean isPrivateProperty 是否是私有属性，不允许为null
 List PropertyPathDisplayName conditionSource 可用的查询条件列表，isClientPageData为false时不允许为null
 -->
 <#assign isClientPageData=(isClientPageData!false)>
 <#assign titleDisplayName=(titleDisplayName!'')>
 <#assign readonly=(readonly!false)>
-<#assign isAllowEditGrid=(isPrivatePropertyModel && !readonly)>
+<#assign isAllowEditGrid=(isPrivateProperty && !readonly)>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -42,7 +42,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 			<#if readonly>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
-				<#if isPrivatePropertyModel>
+				<#if isPrivateProperty>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				<#else>
@@ -93,7 +93,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 	
 	$.initButtons(po.element(".operation"));
 	
-	po.buildActionOptions = function(property, propertyConcreteModel, extraRequestParams, extraPageParams)
+	po.buildActionOptions = function(property, extraRequestParams, extraPageParams)
 	{
 		var requestParams =
 		{
@@ -128,9 +128,9 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 	
 	<#if isAllowEditGrid>
 	po.editGridFormPage.dpvgSuperBuildPropertyActionOptions = po.editGridFormPage.buildPropertyActionOptions;
-	po.editGridFormPage.buildPropertyActionOptions = function(property, propertyModel, propertyValue, extraRequestParams, extraPageParams)
+	po.editGridFormPage.buildPropertyActionOptions = function(property, propertyValue, extraRequestParams, extraPageParams)
 	{
-		var actionParam = po.editGridFormPage.dpvgSuperBuildPropertyActionOptions(property, propertyModel, propertyValue, extraRequestParams,
+		var actionParam = po.editGridFormPage.dpvgSuperBuildPropertyActionOptions(property, propertyValue, extraRequestParams,
 				extraPageParams);
 		
 		if(po.editGridFormPage.dpvgData == null)
@@ -190,11 +190,11 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 	
 	po.onModel(function(model)
 	{
-		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, po.propertyPath);
+		var propertyInfo = $.model.getTailPropertyInfo(model, po.propertyPath);
 		var property = propertyInfo.property;
-		var propertyModel = propertyInfo.model;
+		var propertyModel = property.model;
 		
-		po.mappedByWith = $.model.findMappedByWith(property, propertyModel);
+		po.mappedByWith = $.model.findMappedByWith(property);
 		
 		po.dataTableAjaxParamParent = po.dataTableAjaxParam;
 		
@@ -219,7 +219,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 				
 				if(po.isClientPageData)
 				{
-					options = po.buildActionOptions(property, propertyModel,
+					options = po.buildActionOptions(property,
 							{
 								"propertyPath" : $.propertyPath.concatElementIndex(po.propertyPath, index)
 							});
@@ -233,7 +233,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 					$.model.propertyPathValue(po.data, po.propertyPath, [ row ]);
 					var propertyPath = $.propertyPath.concatElementIndex(po.propertyPath, 0);
 					
-					options = po.buildActionOptions(property, propertyModel,
+					options = po.buildActionOptions(property,
 							{
 								"propertyPath" : propertyPath
 							});
@@ -257,7 +257,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 					
 					var index = po.table().DataTable().rows().data().length;
 					
-					options = po.buildActionOptions(property, propertyModel,
+					options = po.buildActionOptions(property,
 							{
 								"propertyPath" : $.propertyPath.concatElementIndex(po.propertyPath, index)
 							},
@@ -275,7 +275,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 				{
 					url = po.url("", "addMultiplePropValueElement", "batchSet=true");
 					
-					options = po.buildActionOptions(property, propertyModel,
+					options = po.buildActionOptions(property,
 							{
 								"propertyPath" : $.propertyPath.concatElementIndex(po.propertyPath, 0)
 							},
@@ -287,7 +287,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 				po.open(url, options);
 			};
 			
-			<#if isPrivatePropertyModel>
+			<#if isPrivateProperty>
 				po.element("input[name=addButton]").click(function()
 				{
 					po.addMultiplePropValueElement();
@@ -295,7 +295,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 			<#else>
 				po.element("input[name=selectButton]").click(function()
 				{
-					var options = po.buildActionOptions(property, propertyModel, null, 
+					var options = po.buildActionOptions(property, null, 
 							{
 								"submit" : function(rows)
 								{
@@ -332,7 +332,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 					
 					if(po.isClientPageData)
 					{
-						options = po.buildActionOptions(property, propertyModel,
+						options = po.buildActionOptions(property,
 								{
 									"propertyPath" : $.propertyPath.concatElementIndex(po.propertyPath, index)
 								},
@@ -355,7 +355,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 						$.model.propertyPathValue(po.data, po.propertyPath, [ row ]);
 						var propertyPath = $.propertyPath.concatElementIndex(po.propertyPath, 0);
 						
-						options = po.buildActionOptions(property, propertyModel,
+						options = po.buildActionOptions(property,
 								{
 									"propertyPath" : propertyPath
 								});
@@ -386,7 +386,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 							}
 							else
 							{
-								var options = po.buildActionOptions(property, propertyModel, {"propValueElements" : rows}, null);
+								var options = po.buildActionOptions(property, {"propValueElements" : rows}, null);
 								
 								po.ajaxSubmitForHandleDuplication("deleteMultiplePropValueElements", options.data, "<@spring.message code='delete.continueIgnoreDuplicationTemplate' />",
 								{

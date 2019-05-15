@@ -65,12 +65,12 @@ boolean isMultipleSelect 是否多选，默认为false
 	
 	po.onModel(function(model)
 	{
-		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, po.propertyPath);
+		var propertyInfo = $.model.getTailPropertyInfo(model, po.propertyPath);
 		var property = propertyInfo.property;
-		var propertyModel = propertyInfo.model;
+		var propertyModel = property.model;
 		var propertyModelTableName = $.model.featureTableName(propertyModel);
 		
-		po.mappedByWith = $.model.findMappedByWith(property, propertyModel);
+		po.mappedByWith = $.model.findMappedByWith(property);
 
 		po.dataTableAjaxParamParent = po.dataTableAjaxParam;
 		po.dataTableAjaxParam = function()
@@ -120,7 +120,7 @@ boolean isMultipleSelect 是否多选，默认为false
 		{
 			var options =
 			{
-				"data" : { "ignorePropertyName" : $.model.findMappedByWith(property, propertyModel) },
+				"data" : { "ignorePropertyName" : $.model.findMappedByWith(property) },
 				"pageParam" :
 				{
 					"afterSave" : function(data)

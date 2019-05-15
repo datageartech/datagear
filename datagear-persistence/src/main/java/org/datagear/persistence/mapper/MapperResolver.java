@@ -37,20 +37,23 @@ import org.datagear.persistence.features.RelationPoint;
 import org.datagear.persistence.features.TableName;
 
 /**
- * 关联关系映射解析器。
+ * 映射解析器。
+ * <p>
+ * 此类使用{@linkplain org.datagear.persistence.features}包下的特性，解析构建{@linkplain Mapper}对象。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class RelationMapperResolver
+public class MapperResolver
 {
-	public RelationMapperResolver()
+	public MapperResolver()
 	{
 		super();
 	}
 
 	/**
-	 * 解析{@linkplain RelationMapper}。
+	 * 解析{@linkplain Mapper}。
 	 * <p>
 	 * 此方法不会返回{@code null}。
 	 * </p>
@@ -59,38 +62,34 @@ public class RelationMapperResolver
 	 * @param property
 	 * @return
 	 */
-	public RelationMapper resolve(Model model, Property property)
+	public Mapper resolve(Model model, Property property)
 	{
 		RelationType relationType = resolveRelationType(model, property);
 
-		RelationMapperImpl relationMapperImpl = new RelationMapperImpl();
-		relationMapperImpl.setRelationType(relationType);
+		Mapper mapper = resolveMapper(model, property, relationType);
 
-		Mapper[] mappers = resolveMappers(model, property, relationType);
-		relationMapperImpl.setMappers(mappers);
-
-		return relationMapperImpl;
+		return mapper;
 	}
 
 	/**
-	 * 解析所有{@linkplain RelationMapper}。
+	 * 解析所有{@linkplain Mapper}。
 	 * 
 	 * @param model
 	 * @return
 	 */
-	public RelationMapper[] resolveAll(Model model)
+	public Mapper[] resolveAll(Model model)
 	{
 		if (!MU.isCompositeModel(model))
 			throw new IllegalArgumentException("[model] must be composite");
 
 		Property[] properties = model.getProperties();
 
-		RelationMapper[] relationMappers = new RelationMapper[properties.length];
+		Mapper[] mappers = new Mapper[properties.length];
 
 		for (int i = 0; i < properties.length; i++)
-			relationMappers[i] = resolve(model, properties[i]);
+			mappers[i] = resolve(model, properties[i]);
 
-		return relationMappers;
+		return mappers;
 	}
 
 	/**
@@ -119,64 +118,35 @@ public class RelationMapperResolver
 	}
 
 	/**
-	 * 解析{@linkplain Mapper}数组。
-	 * 
-	 * @param model
-	 * @param property
-	 * @param relationType
-	 */
-	protected Mapper[] resolveMappers(Model model, Property property, RelationType relationType)
-	{
-		Model[] pcmodels = MU.getModels(property);
-
-		Mapper[] mappers = new Mapper[pcmodels.length];
-
-		for (int i = 0; i < pcmodels.length; i++)
-		{
-			Mapper mapper = resolveMapper(model, property, pcmodels[i], i, relationType);
-			mappers[i] = mapper;
-		}
-
-		return mappers;
-	}
-
-	/**
 	 * 解析{@linkplain Mapper}。
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param relationType
 	 * @return
 	 */
-	protected Mapper resolveMapper(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, RelationType relationType)
+	protected Mapper resolveMapper(Model model, Property property, RelationType relationType)
 	{
 		Mapper mapper = null;
 
-		Property mappedBySource = findMappedBySource(model, property, propertyConcreteModel, propertyConcreteModelIdx);
+		Property mappedBySource = findMappedBySource(model, property);
 		String mappedBySourceName = (mappedBySource == null ? null : mappedBySource.getName());
 
 		if (RelationType.ONE_TO_ONE.equals(relationType))
 		{
-			mapper = resolveOneToOneMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-					mappedBySourceName);
+			mapper = resolveOneToOneMapper(model, property, mappedBySourceName);
 		}
 		else if (RelationType.ONE_TO_MANY.equals(relationType))
 		{
-			mapper = resolveOneToManyMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-					mappedBySourceName);
+			mapper = resolveOneToManyMapper(model, property, mappedBySourceName);
 		}
 		else if (RelationType.MANY_TO_ONE.equals(relationType))
 		{
-			mapper = resolveManyToOneMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-					mappedBySourceName);
+			mapper = resolveManyToOneMapper(model, property, mappedBySourceName);
 		}
 		else if (RelationType.MANY_TO_MANY.equals(relationType))
 		{
-			mapper = resolveManyToManyMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-					mappedBySourceName);
+			mapper = resolveManyToManyMapper(model, property, mappedBySourceName);
 		}
 		else
 			throw new UnsupportedOperationException();
@@ -189,50 +159,39 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param mappedBySource
 	 * @return
 	 */
-	protected Mapper resolveOneToOneMapper(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, String mappedBySource)
+	protected Mapper resolveOneToOneMapper(Model model, Property property, String mappedBySource)
 	{
 		Mapper mapper = null;
 
 		Property mappedByTargetProperty = null;
 
 		if (mappedBySource == null)
-			mappedByTargetProperty = findMappedByTarget(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx);
+			mappedByTargetProperty = findMappedByTarget(model, property);
 
 		if (mappedByTargetProperty != null)
 		{
-			int myIdx = MU.getPropertyModelIndex(mappedByTargetProperty, model);
-
-			mapper = resolveOneToOneMapper(propertyConcreteModel, mappedByTargetProperty, model, myIdx,
-					property.getName());
-			mapper = reverseMappedByTargetMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-					RelationType.ONE_TO_ONE, mappedByTargetProperty, mapper);
+			mapper = resolveOneToOneMapper(property.getModel(), mappedByTargetProperty, property.getName());
+			mapper = reverseMappedByTargetMapper(model, property, RelationType.ONE_TO_ONE, mappedByTargetProperty,
+					mapper);
 		}
 		else
 		{
-			PointType pointType = resolveRelationPointType(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, RelationType.ONE_TO_ONE);
+			PointType pointType = resolveRelationPointType(model, property, RelationType.ONE_TO_ONE);
 
 			if (PointType.JOIN.equals(pointType))
 			{
-				mapper = resolveJoinTableMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-						RelationType.ONE_TO_ONE, mappedBySource);
+				mapper = resolveJoinTableMapper(model, property, RelationType.ONE_TO_ONE, mappedBySource);
 			}
 			else if (PointType.PROPERTY.equals(pointType))
 			{
-				mapper = resolvePropertyTableMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-						RelationType.ONE_TO_ONE, mappedBySource);
+				mapper = resolvePropertyTableMapper(model, property, RelationType.ONE_TO_ONE, mappedBySource);
 			}
 			else
 			{
-				mapper = resolveModelTableMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-						RelationType.ONE_TO_ONE, mappedBySource);
+				mapper = resolveModelTableMapper(model, property, RelationType.ONE_TO_ONE, mappedBySource);
 			}
 		}
 
@@ -244,45 +203,35 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param mappedBySource
 	 * @return
 	 */
-	protected Mapper resolveOneToManyMapper(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, String mappedBySource)
+	protected Mapper resolveOneToManyMapper(Model model, Property property, String mappedBySource)
 	{
 		Mapper mapper = null;
 
 		Property mappedByTargetProperty = null;
 
 		if (mappedBySource == null)
-			mappedByTargetProperty = findMappedByTarget(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx);
+			mappedByTargetProperty = findMappedByTarget(model, property);
 
 		if (mappedByTargetProperty != null)
 		{
-			int myIdx = MU.getPropertyModelIndex(mappedByTargetProperty, model);
-
-			mapper = resolveManyToOneMapper(propertyConcreteModel, mappedByTargetProperty, model, myIdx,
-					property.getName());
-			mapper = reverseMappedByTargetMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-					RelationType.ONE_TO_MANY, mappedByTargetProperty, mapper);
+			mapper = resolveManyToOneMapper(MU.getModel(property), mappedByTargetProperty, property.getName());
+			mapper = reverseMappedByTargetMapper(model, property, RelationType.ONE_TO_MANY, mappedByTargetProperty,
+					mapper);
 		}
 		else
 		{
-			PointType pointType = resolveRelationPointType(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, RelationType.ONE_TO_ONE);
+			PointType pointType = resolveRelationPointType(model, property, RelationType.ONE_TO_ONE);
 
 			if (PointType.JOIN.equals(pointType))
 			{
-				mapper = resolveJoinTableMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-						RelationType.ONE_TO_MANY, mappedBySource);
+				mapper = resolveJoinTableMapper(model, property, RelationType.ONE_TO_MANY, mappedBySource);
 			}
 			else
 			{
-				mapper = resolvePropertyTableMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-						RelationType.ONE_TO_MANY, mappedBySource);
+				mapper = resolvePropertyTableMapper(model, property, RelationType.ONE_TO_MANY, mappedBySource);
 			}
 		}
 
@@ -294,45 +243,35 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param mappedBySource
 	 * @return
 	 */
-	protected Mapper resolveManyToOneMapper(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, String mappedBySource)
+	protected Mapper resolveManyToOneMapper(Model model, Property property, String mappedBySource)
 	{
 		Mapper mapper = null;
 
 		Property mappedByTargetProperty = null;
 
 		if (mappedBySource == null)
-			mappedByTargetProperty = findMappedByTarget(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx);
+			mappedByTargetProperty = findMappedByTarget(model, property);
 
 		if (mappedByTargetProperty != null)
 		{
-			int myIdx = MU.getPropertyModelIndex(mappedByTargetProperty, model);
-
-			mapper = resolveOneToManyMapper(propertyConcreteModel, mappedByTargetProperty, model, myIdx,
-					property.getName());
-			mapper = reverseMappedByTargetMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-					RelationType.MANY_TO_ONE, mappedByTargetProperty, mapper);
+			mapper = resolveOneToManyMapper(MU.getModel(property), mappedByTargetProperty, property.getName());
+			mapper = reverseMappedByTargetMapper(model, property, RelationType.MANY_TO_ONE, mappedByTargetProperty,
+					mapper);
 		}
 		else
 		{
-			PointType pointType = resolveRelationPointType(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, RelationType.ONE_TO_ONE);
+			PointType pointType = resolveRelationPointType(model, property, RelationType.ONE_TO_ONE);
 
 			if (PointType.JOIN.equals(pointType))
 			{
-				mapper = resolveJoinTableMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-						RelationType.MANY_TO_ONE, mappedBySource);
+				mapper = resolveJoinTableMapper(model, property, RelationType.MANY_TO_ONE, mappedBySource);
 			}
 			else
 			{
-				mapper = resolveModelTableMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-						RelationType.MANY_TO_ONE, mappedBySource);
+				mapper = resolveModelTableMapper(model, property, RelationType.MANY_TO_ONE, mappedBySource);
 			}
 		}
 
@@ -344,35 +283,29 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param mappedBySource
 	 * @return
 	 */
-	protected Mapper resolveManyToManyMapper(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, String mappedBySource)
+	protected Mapper resolveManyToManyMapper(Model model, Property property, String mappedBySource)
 	{
 		Mapper mapper = null;
 
 		Property mappedByTargetProperty = null;
 
 		if (mappedBySource == null)
-			mappedByTargetProperty = findMappedByTarget(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx);
+			mappedByTargetProperty = findMappedByTarget(model, property);
 
 		if (mappedByTargetProperty != null)
 		{
-			int myIdx = MU.getPropertyModelIndex(mappedByTargetProperty, model);
+			Model propertyModel = MU.getModel(property);
 
-			mapper = resolveManyToManyMapper(propertyConcreteModel, mappedByTargetProperty, model, myIdx,
-					property.getName());
-			mapper = reverseMappedByTargetMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-					RelationType.MANY_TO_MANY, mappedByTargetProperty, mapper);
+			mapper = resolveManyToManyMapper(propertyModel, mappedByTargetProperty, property.getName());
+			mapper = reverseMappedByTargetMapper(model, property, RelationType.MANY_TO_MANY, mappedByTargetProperty,
+					mapper);
 		}
 		else
 		{
-			mapper = resolveJoinTableMapper(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-					RelationType.MANY_TO_MANY, mappedBySource);
+			mapper = resolveJoinTableMapper(model, property, RelationType.MANY_TO_MANY, mappedBySource);
 		}
 
 		return mapper;
@@ -383,49 +316,42 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param relationType
 	 * @param mappedBySource
 	 * @return
 	 */
-	protected ModelTableMapper resolveModelTableMapper(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, RelationType relationType, String mappedBySource)
+	protected ModelTableMapper resolveModelTableMapper(Model model, Property property, RelationType relationType,
+			String mappedBySource)
 	{
 		ModelTableMapperImpl mapperImpl = new ModelTableMapperImpl();
 
+		mapperImpl.setRelationType(relationType);
 		mapperImpl.setMappedBySource(mappedBySource);
+		mapperImpl.setPrimitivePropertyMapper(MU.isPrimitiveProperty(property));
 
-		mapperImpl.setPrimitivePropertyMapper(MU.isPrimitiveModel(propertyConcreteModel));
+		Model propertyModel = MU.getModel(property);
 
 		if (mapperImpl.isPrimitivePropertyMapper())
 		{
-			String columnName = resolvePropertyColumnName(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx);
+			String columnName = resolvePropertyColumnName(model, property);
 			mapperImpl.setPrimitiveColumnName(columnName);
 		}
 		else
 		{
-			Property[] pkeyProperties = resolvePropertyKeyProperties(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx);
-			mapperImpl.setPropertyKeyPropertyNames(MU.getPropertyNames(propertyConcreteModel, pkeyProperties));
+			Property[] pkeyProperties = resolvePropertyKeyProperties(model, property);
+			mapperImpl.setPropertyKeyPropertyNames(MU.getPropertyNames(propertyModel, pkeyProperties));
 
-			String[] pkeyColumnNames = resolvePropertyKeyColumnNames(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, pkeyProperties);
+			String[] pkeyColumnNames = resolvePropertyKeyColumnNames(model, property, pkeyProperties);
 			mapperImpl.setPropertyKeyColumnNames(pkeyColumnNames);
 
-			resolveConcreteColumnInfo(model, property, propertyConcreteModel, propertyConcreteModelIdx, mapperImpl,
-					relationType);
+			resolveConcreteColumnInfo(model, property, mapperImpl, relationType);
 
-			String morderColumnName = resolveModelOrderColumnName(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx);
+			String morderColumnName = resolveModelOrderColumnName(model, property);
 			if (morderColumnName != null)
 				mapperImpl.setModelOrderColumnName(morderColumnName);
 
-			mapperImpl.setPropertyKeyUpdateRule(resolvePropertyKeyUpdateRule(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, mappedBySource));
-			mapperImpl.setPropertyKeyDeleteRule(resolvePropertyKeyDeleteRule(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, mappedBySource));
+			mapperImpl.setPropertyKeyUpdateRule(resolvePropertyKeyUpdateRule(model, property, mappedBySource));
+			mapperImpl.setPropertyKeyDeleteRule(resolvePropertyKeyDeleteRule(model, property, mappedBySource));
 		}
 
 		return mapperImpl;
@@ -436,49 +362,39 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param relationType
 	 * @param mappedBySource
 	 * @return
 	 */
-	protected PropertyTableMapper resolvePropertyTableMapper(Model model, Property property,
-			Model propertyConcreteModel, int propertyConcreteModelIdx, RelationType relationType, String mappedBySource)
+	protected PropertyTableMapper resolvePropertyTableMapper(Model model, Property property, RelationType relationType,
+			String mappedBySource)
 	{
 		PropertyTableMapperImpl mapperImpl = new PropertyTableMapperImpl();
 
+		mapperImpl.setRelationType(relationType);
 		mapperImpl.setMappedBySource(mappedBySource);
-
-		mapperImpl.setPrimitivePropertyMapper(MU.isPrimitiveModel(propertyConcreteModel));
+		mapperImpl.setPrimitivePropertyMapper(MU.isPrimitiveProperty(property));
 
 		if (mapperImpl.isPrimitivePropertyMapper())
 		{
-			mapperImpl.setPrimitiveTableName(resolvePropertyTableName(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, relationType));
-			mapperImpl.setPrimitiveColumnName(
-					resolvePropertyColumnName(model, property, propertyConcreteModel, propertyConcreteModelIdx));
+			mapperImpl.setPrimitiveTableName(resolvePropertyTableName(model, property, relationType));
+			mapperImpl.setPrimitiveColumnName(resolvePropertyColumnName(model, property));
 		}
 
-		Property[] mkeyProperties = resolveModelKeyProperties(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx);
+		Property[] mkeyProperties = resolveModelKeyProperties(model, property);
 		mapperImpl.setModelKeyPropertyNames(MU.getPropertyNames(model, mkeyProperties));
 
-		String[] mkeyColumnNames = resolveModelKeyColumnNames(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx, mkeyProperties);
+		String[] mkeyColumnNames = resolveModelKeyColumnNames(model, property, mkeyProperties);
 		mapperImpl.setModelKeyColumnNames(mkeyColumnNames);
 
-		resolveConcreteColumnInfo(model, property, propertyConcreteModel, propertyConcreteModelIdx, mapperImpl,
-				relationType);
+		resolveConcreteColumnInfo(model, property, mapperImpl, relationType);
 
-		String porderColumnName = resolvePropertyOrderColumnName(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx);
+		String porderColumnName = resolvePropertyOrderColumnName(model, property);
 		if (porderColumnName != null)
 			mapperImpl.setPropertyOrderColumnName(porderColumnName);
 
-		mapperImpl.setPropertyKeyUpdateRule(resolvePropertyKeyUpdateRule(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx, mappedBySource));
-		mapperImpl.setPropertyKeyDeleteRule(resolvePropertyKeyDeleteRule(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx, mappedBySource));
+		mapperImpl.setPropertyKeyUpdateRule(resolvePropertyKeyUpdateRule(model, property, mappedBySource));
+		mapperImpl.setPropertyKeyDeleteRule(resolvePropertyKeyDeleteRule(model, property, mappedBySource));
 
 		return mapperImpl;
 	}
@@ -488,56 +404,47 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param relationType
 	 * @param mappedBySource
 	 * @return
 	 */
-	protected JoinTableMapper resolveJoinTableMapper(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, RelationType relationType, String mappedBySource)
+	protected JoinTableMapper resolveJoinTableMapper(Model model, Property property, RelationType relationType,
+			String mappedBySource)
 	{
 		JoinTableMapperImpl mapperImpl = new JoinTableMapperImpl();
 
+		mapperImpl.setRelationType(relationType);
 		mapperImpl.setMappedBySource(mappedBySource);
 
-		String tableName = resolveJoinTableName(model, property, propertyConcreteModel, propertyConcreteModelIdx,
-				relationType);
+		String tableName = resolveJoinTableName(model, property, relationType);
 		mapperImpl.setJoinTableName(tableName);
 
-		Property[] mkeyProperties = resolveModelKeyProperties(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx);
+		Model propertyModel = MU.getModel(property);
+
+		Property[] mkeyProperties = resolveModelKeyProperties(model, property);
 		mapperImpl.setModelKeyPropertyNames(MU.getPropertyNames(model, mkeyProperties));
 
-		String[] mkeyColumnNames = resolveModelKeyColumnNames(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx, mkeyProperties);
+		String[] mkeyColumnNames = resolveModelKeyColumnNames(model, property, mkeyProperties);
 		mapperImpl.setModelKeyColumnNames(mkeyColumnNames);
 
-		Property[] pkeyProperties = resolvePropertyKeyProperties(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx);
-		mapperImpl.setPropertyKeyPropertyNames(MU.getPropertyNames(propertyConcreteModel, pkeyProperties));
+		Property[] pkeyProperties = resolvePropertyKeyProperties(model, property);
+		mapperImpl.setPropertyKeyPropertyNames(MU.getPropertyNames(propertyModel, pkeyProperties));
 
-		String[] pkeyColumnNames = resolvePropertyKeyColumnNames(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx, pkeyProperties);
+		String[] pkeyColumnNames = resolvePropertyKeyColumnNames(model, property, pkeyProperties);
 		mapperImpl.setPropertyKeyColumnNames(pkeyColumnNames);
 
-		resolveConcreteColumnInfo(model, property, propertyConcreteModel, propertyConcreteModelIdx, mapperImpl,
-				relationType);
+		resolveConcreteColumnInfo(model, property, mapperImpl, relationType);
 
-		String porderColumnName = resolvePropertyOrderColumnName(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx);
+		String porderColumnName = resolvePropertyOrderColumnName(model, property);
 		if (porderColumnName != null)
 			mapperImpl.setPropertyOrderColumnName(porderColumnName);
 
-		String morderColumnName = resolveModelOrderColumnName(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx);
+		String morderColumnName = resolveModelOrderColumnName(model, property);
 		if (morderColumnName != null)
 			mapperImpl.setModelOrderColumnName(morderColumnName);
 
-		mapperImpl.setPropertyKeyUpdateRule(resolvePropertyKeyUpdateRule(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx, mappedBySource));
-		mapperImpl.setPropertyKeyDeleteRule(resolvePropertyKeyDeleteRule(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx, mappedBySource));
+		mapperImpl.setPropertyKeyUpdateRule(resolvePropertyKeyUpdateRule(model, property, mappedBySource));
+		mapperImpl.setPropertyKeyDeleteRule(resolvePropertyKeyDeleteRule(model, property, mappedBySource));
 
 		return mapperImpl;
 	}
@@ -550,33 +457,27 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param mapper
 	 * @param relationType
 	 */
-	protected void resolveConcreteColumnInfo(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, AbstractMapper mapper, RelationType relationType)
+	protected void resolveConcreteColumnInfo(Model model, Property property, AbstractMapper mapper,
+			RelationType relationType)
 	{
-		String mconcreteColumnName = resolveModelConcreteColumnName(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx);
+		String mconcreteColumnName = resolveModelConcreteColumnName(model, property);
 
 		if (mconcreteColumnName != null && !mconcreteColumnName.isEmpty())
 		{
-			Object pconcreteColumnValue = resolveModelConcreteColumnValue(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx);
+			Object pconcreteColumnValue = resolveModelConcreteColumnValue(model, property);
 
 			mapper.setModelConcreteColumnName(mconcreteColumnName);
 			mapper.setModelConcreteColumnValue(pconcreteColumnValue);
 		}
 
-		String pconcreteColumnName = resolvePropertyConcreteColumnName(model, property, propertyConcreteModel,
-				propertyConcreteModelIdx);
+		String pconcreteColumnName = resolvePropertyConcreteColumnName(model, property);
 
 		if (pconcreteColumnName != null && !pconcreteColumnName.isEmpty())
 		{
-			Object pconcreteColumnValue = resolvePropertyConcreteColumnValue(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx);
+			Object pconcreteColumnValue = resolvePropertyConcreteColumnValue(model, property);
 
 			mapper.setPropertyConcreteColumnName(pconcreteColumnName);
 			mapper.setPropertyConcreteColumnValue(pconcreteColumnValue);
@@ -588,46 +489,36 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param relationType
 	 * @return
 	 */
-	protected PointType resolveRelationPointType(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, RelationType relationType)
+	protected PointType resolveRelationPointType(Model model, Property property, RelationType relationType)
 	{
 		RelationPoint relationPoint = property.getFeature(RelationPoint.class);
 		if (relationPoint != null)
-			return relationPoint.getValue(propertyConcreteModelIdx);
+			return relationPoint.getValue();
+
+		Model propertyModel = MU.getModel(property);
 
 		Property mappedByProperty = null;
-		int mappedByIndex = -1;
 
 		MappedBy mappedBy = property.getFeature(MappedBy.class);
 		if (mappedBy != null)
 		{
-			String mappedByName = mappedBy.getValue(propertyConcreteModelIdx);
+			String mappedByName = mappedBy.getValue();
 
-			if (mappedByName == null)
-				throw new RelationMapperResolverException(
-						"[" + model + "] 's [" + property + "] 's " + MappedBy.class.getSimpleName() + " feature 's "
-								+ propertyConcreteModelIdx + "-th value must not be null");
-
-			mappedByProperty = propertyConcreteModel.getProperty(mappedByName);
+			mappedByProperty = propertyModel.getProperty(mappedByName);
 
 			if (mappedByProperty == null)
-				throw new RelationMapperResolverException(
-						"No property named [" + mappedByName + "] found in [" + model + "]");
-
-			mappedByIndex = MU.getPropertyModelIndex(mappedByProperty, model);
+				throw new MapperResolverException("No property named [" + mappedByName + "] found in [" + model + "]");
 		}
 
 		if (RelationType.ONE_TO_ONE.equals(relationType))
 		{
 			if (mappedByProperty != null)
 			{
-				PointType mappedPointType = resolveRelationPointType(propertyConcreteModel, mappedByProperty, model,
-						mappedByIndex, RelationType.ONE_TO_ONE);
+				PointType mappedPointType = resolveRelationPointType(propertyModel, mappedByProperty,
+						RelationType.ONE_TO_ONE);
 
 				if (PointType.MODEL.equals(mappedPointType))
 					return PointType.PROPERTY;
@@ -642,12 +533,11 @@ public class RelationMapperResolver
 				return PointType.MODEL;
 			else if (property.hasFeature(ModelKeyColumnName.class))
 				return PointType.PROPERTY;
-			else if (MU.isPrimitiveModel(propertyConcreteModel))
+			else if (MU.isPrimitiveModel(propertyModel))
 				return PointType.MODEL;
 			else
-				throw new RelationMapperResolverException(
-						"The " + PointType.class.getSimpleName() + " for [" + model + "] 's property [" + property
-								+ "] 's " + propertyConcreteModelIdx + "-th property Model resolving is ambiguous");
+				throw new MapperResolverException("The " + PointType.class.getSimpleName() + " for [" + model
+						+ "] 's property [" + property + "] resolving is ambiguous");
 		}
 		else if (RelationType.ONE_TO_MANY.equals(relationType))
 		{
@@ -673,21 +563,18 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyconcreteModel
-	 * @param propertyconcreteModelIdx
 	 * @return
 	 */
-	protected Property findMappedByTarget(Model model, Property property, Model propertyconcreteModel,
-			int propertyconcreteModelIdx)
+	protected Property findMappedByTarget(Model model, Property property)
 	{
 		MappedBy mappedBy = property.getFeature(MappedBy.class);
 
 		if (mappedBy == null)
 			return null;
 
-		String mappedByTargetName = mappedBy.getValue(propertyconcreteModelIdx);
+		String mappedByTargetName = mappedBy.getValue();
 
-		return propertyconcreteModel.getProperty(mappedByTargetName);
+		return MU.getModel(property).getProperty(mappedByTargetName);
 	}
 
 	/**
@@ -698,19 +585,16 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyconcreteModel
-	 * @param propertyconcreteModelIdx
 	 * @return
 	 */
-	protected Property findMappedBySource(Model model, Property property, Model propertyconcreteModel,
-			int propertyconcreteModelIdx)
+	protected Property findMappedBySource(Model model, Property property)
 	{
 		MappedBy mappedBy = property.getFeature(MappedBy.class);
 
 		if (mappedBy != null)
 			return null;
 
-		Property[] propertyProperties = propertyconcreteModel.getProperties();
+		Property[] propertyProperties = property.getModel().getProperties();
 
 		if (propertyProperties == null)
 			return null;
@@ -724,12 +608,7 @@ public class RelationMapperResolver
 			if (propertyMappedBy == null)
 				continue;
 
-			int myModelIdx = MU.getModelIndex(propertyProperty.getModels(), model);
-
-			if (myModelIdx < 0)
-				continue;
-
-			if (propertyName.equals(propertyMappedBy.getValue(myModelIdx)))
+			if (propertyName.equals(propertyMappedBy.getValue()))
 				return propertyProperty;
 		}
 
@@ -741,31 +620,30 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param relationType
 	 * @param mappedByTargetProperty
 	 * @param mappedByTargetMapper
 	 * @return
 	 */
-	protected Mapper reverseMappedByTargetMapper(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, RelationType relationType, Property mappedByTargetProperty,
-			Mapper mappedByTargetMapper)
+	protected Mapper reverseMappedByTargetMapper(Model model, Property property, RelationType relationType,
+			Property mappedByTargetProperty, Mapper mappedByTargetMapper)
 	{
+		Model propertyModel = MU.getModel(property);
+
 		if (mappedByTargetMapper instanceof ModelTableMapper)
 		{
 			ModelTableMapper src = (ModelTableMapper) mappedByTargetMapper;
 
 			PropertyTableMapperImpl dest = new PropertyTableMapperImpl();
 
-			dest.setPrimitivePropertyMapper(MU.isPrimitiveModel(propertyConcreteModel));
+			dest.setRelationType(relationType);
+
+			dest.setPrimitivePropertyMapper(MU.isPrimitiveModel(propertyModel));
 
 			if (dest.isPrimitivePropertyMapper())
 			{
-				dest.setPrimitiveTableName(resolvePropertyTableName(model, property, propertyConcreteModel,
-						propertyConcreteModelIdx, relationType));
-				dest.setPrimitiveColumnName(
-						resolvePropertyColumnName(model, property, propertyConcreteModel, propertyConcreteModelIdx));
+				dest.setPrimitiveTableName(resolvePropertyTableName(model, property, relationType));
+				dest.setPrimitiveColumnName(resolvePropertyColumnName(model, property));
 			}
 
 			dest.setModelKeyPropertyNames(src.getPropertyKeyPropertyNames());
@@ -776,10 +654,10 @@ public class RelationMapperResolver
 
 			dest.setMappedByTarget(mappedByTargetProperty.getName());
 
-			dest.setPropertyKeyUpdateRule(resolvePropertyKeyUpdateRule(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, mappedByTargetProperty.getName()));
-			dest.setPropertyKeyDeleteRule(resolvePropertyKeyDeleteRule(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, mappedByTargetProperty.getName()));
+			dest.setPropertyKeyUpdateRule(
+					resolvePropertyKeyUpdateRule(model, property, mappedByTargetProperty.getName()));
+			dest.setPropertyKeyDeleteRule(
+					resolvePropertyKeyDeleteRule(model, property, mappedByTargetProperty.getName()));
 
 			return dest;
 		}
@@ -789,12 +667,13 @@ public class RelationMapperResolver
 
 			ModelTableMapperImpl dest = new ModelTableMapperImpl();
 
-			dest.setPrimitivePropertyMapper(MU.isPrimitiveModel(propertyConcreteModel));
+			dest.setRelationType(relationType);
+
+			dest.setPrimitivePropertyMapper(MU.isPrimitiveModel(propertyModel));
 
 			if (dest.isPrimitivePropertyMapper())
 			{
-				dest.setPrimitiveColumnName(
-						resolvePropertyColumnName(model, property, propertyConcreteModel, propertyConcreteModelIdx));
+				dest.setPrimitiveColumnName(resolvePropertyColumnName(model, property));
 			}
 
 			dest.setPropertyKeyPropertyNames(src.getModelKeyPropertyNames());
@@ -805,10 +684,10 @@ public class RelationMapperResolver
 
 			dest.setMappedByTarget(mappedByTargetProperty.getName());
 
-			dest.setPropertyKeyUpdateRule(resolvePropertyKeyUpdateRule(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, mappedByTargetProperty.getName()));
-			dest.setPropertyKeyDeleteRule(resolvePropertyKeyDeleteRule(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, mappedByTargetProperty.getName()));
+			dest.setPropertyKeyUpdateRule(
+					resolvePropertyKeyUpdateRule(model, property, mappedByTargetProperty.getName()));
+			dest.setPropertyKeyDeleteRule(
+					resolvePropertyKeyDeleteRule(model, property, mappedByTargetProperty.getName()));
 
 			return dest;
 		}
@@ -817,6 +696,8 @@ public class RelationMapperResolver
 			JoinTableMapper src = (JoinTableMapper) mappedByTargetMapper;
 
 			JoinTableMapperImpl dest = new JoinTableMapperImpl();
+
+			dest.setRelationType(relationType);
 
 			dest.setJoinTableName(src.getJoinTableName());
 
@@ -834,13 +715,31 @@ public class RelationMapperResolver
 
 			dest.setMappedByTarget(mappedByTargetProperty.getName());
 
-			dest.setPropertyKeyUpdateRule(resolvePropertyKeyUpdateRule(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, mappedByTargetProperty.getName()));
-			dest.setPropertyKeyDeleteRule(resolvePropertyKeyDeleteRule(model, property, propertyConcreteModel,
-					propertyConcreteModelIdx, mappedByTargetProperty.getName()));
+			dest.setPropertyKeyUpdateRule(
+					resolvePropertyKeyUpdateRule(model, property, mappedByTargetProperty.getName()));
+			dest.setPropertyKeyDeleteRule(
+					resolvePropertyKeyDeleteRule(model, property, mappedByTargetProperty.getName()));
 
 			return dest;
 		}
+		else
+			throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * 反转{@linkplain RelationType}。
+	 * 
+	 * @param relationType
+	 * @return
+	 */
+	protected RelationType reverseRelationType(RelationType relationType)
+	{
+		if (RelationType.ONE_TO_ONE.equals(relationType) || RelationType.MANY_TO_MANY.equals(relationType))
+			return relationType;
+		else if (RelationType.ONE_TO_MANY.equals(relationType))
+			return RelationType.MANY_TO_ONE;
+		else if (RelationType.MANY_TO_ONE.equals(relationType))
+			return RelationType.ONE_TO_MANY;
 		else
 			throw new UnsupportedOperationException();
 	}
@@ -852,23 +751,17 @@ public class RelationMapperResolver
 	 * @param property
 	 * @return
 	 */
-	protected String resolveJoinTableName(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, RelationType relationType)
+	protected String resolveJoinTableName(Model model, Property property, RelationType relationType)
 	{
 		String tableName = null;
 
 		TableName tableNameFeature = property.getFeature(TableName.class);
 
 		if (tableNameFeature != null)
-			tableName = tableNameFeature.getValue(propertyConcreteModelIdx);
+			tableName = tableNameFeature.getValue();
 
 		if (tableName == null)
-		{
-			if (MU.isAbstractedProperty(property))
-				tableName = model.getName() + "_" + property.getName() + "_" + propertyConcreteModel.getName();
-			else
-				tableName = model.getName() + "_" + property.getName();
-		}
+			tableName = model.getName() + "_" + property.getName();
 
 		return tableName;
 	}
@@ -880,31 +773,25 @@ public class RelationMapperResolver
 	 * @param property
 	 * @return
 	 */
-	protected String resolvePropertyTableName(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, RelationType relationType)
+	protected String resolvePropertyTableName(Model model, Property property, RelationType relationType)
 	{
 		String tableName = null;
 
 		TableName tableNameFeature = property.getFeature(TableName.class);
 
 		if (tableNameFeature != null)
-			tableName = tableNameFeature.getValue(propertyConcreteModelIdx);
+			tableName = tableNameFeature.getValue();
 
 		if (tableName == null)
 		{
-			TableName ptableNameFeature = propertyConcreteModel.getFeature(TableName.class);
+			TableName ptableNameFeature = MU.getModel(property).getFeature(TableName.class);
 
 			if (ptableNameFeature != null)
 				tableName = ptableNameFeature.getValue();
 		}
 
 		if (tableName == null)
-		{
-			if (MU.isAbstractedProperty(property))
-				tableName = model.getName() + "_" + property.getName() + "_" + propertyConcreteModel.getName();
-			else
-				tableName = model.getName() + "_" + property.getName();
-		}
+			tableName = model.getName() + "_" + property.getName();
 
 		return tableName;
 	}
@@ -914,28 +801,18 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @return
 	 */
-	protected String resolvePropertyColumnName(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx)
+	protected String resolvePropertyColumnName(Model model, Property property)
 	{
 		String strColumnName = null;
 
 		ColumnName columnName = property.getFeature(ColumnName.class);
 
 		if (columnName == null)
-		{
-			if (property.isAbstracted())
-				strColumnName = property.getName() + "_" + propertyConcreteModel.getName();
-			else
-				strColumnName = property.getName();
-		}
+			strColumnName = property.getName();
 		else
-		{
-			strColumnName = columnName.getValue(propertyConcreteModelIdx);
-		}
+			strColumnName = columnName.getValue();
 
 		return strColumnName;
 	}
@@ -948,12 +825,9 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @return
 	 */
-	protected Property[] resolveModelKeyProperties(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx)
+	protected Property[] resolveModelKeyProperties(Model model, Property property)
 	{
 		Property[] keyProperties = null;
 
@@ -962,7 +836,7 @@ public class RelationMapperResolver
 		ModelKeyPropertyName modelKeyPropertyName = property.getFeature(ModelKeyPropertyName.class);
 
 		if (modelKeyPropertyName != null)
-			propertyNames = modelKeyPropertyName.getValue(propertyConcreteModelIdx);
+			propertyNames = modelKeyPropertyName.getValue();
 
 		if (propertyNames != null)
 			keyProperties = MU.getProperties(model, propertyNames);
@@ -982,20 +856,17 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param modelKeyProperties
 	 * @return
 	 */
-	protected String[] resolveModelKeyColumnNames(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, Property[] modelKeyProperties)
+	protected String[] resolveModelKeyColumnNames(Model model, Property property, Property[] modelKeyProperties)
 	{
 		String[] mkeyColumnNames = null;
 
 		ModelKeyColumnName modelKeyColumnName = property.getFeature(ModelKeyColumnName.class);
 
 		if (modelKeyColumnName != null)
-			mkeyColumnNames = modelKeyColumnName.getValue(propertyConcreteModelIdx);
+			mkeyColumnNames = modelKeyColumnName.getValue();
 
 		if (mkeyColumnNames == null)
 		{
@@ -1016,12 +887,9 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @return
 	 */
-	protected Property[] resolvePropertyKeyProperties(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx)
+	protected Property[] resolvePropertyKeyProperties(Model model, Property property)
 	{
 		Property[] keyProperties = null;
 
@@ -1030,14 +898,16 @@ public class RelationMapperResolver
 		PropertyKeyPropertyName propertyKeyPropertyName = property.getFeature(PropertyKeyPropertyName.class);
 
 		if (propertyKeyPropertyName != null)
-			propertyNames = propertyKeyPropertyName.getValue(propertyConcreteModelIdx);
+			propertyNames = propertyKeyPropertyName.getValue();
+
+		Model propertyModel = MU.getModel(property);
 
 		if (propertyNames != null)
-			keyProperties = MU.getProperties(propertyConcreteModel, propertyNames);
+			keyProperties = MU.getProperties(propertyModel, propertyNames);
 		else
-			keyProperties = propertyConcreteModel.getIdProperties();
+			keyProperties = propertyModel.getIdProperties();
 
-		checkKeyProperty(propertyConcreteModel, keyProperties);
+		checkKeyProperty(propertyModel, keyProperties);
 
 		return keyProperties;
 	}
@@ -1050,24 +920,23 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param propertyKeyProperties
 	 * @return
 	 */
-	protected String[] resolvePropertyKeyColumnNames(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, Property[] propertyKeyProperties)
+	protected String[] resolvePropertyKeyColumnNames(Model model, Property property, Property[] propertyKeyProperties)
 	{
 		String[] pknames = null;
 
 		PropertyKeyColumnName propertyKeyColumnName = property.getFeature(PropertyKeyColumnName.class);
 
 		if (propertyKeyColumnName != null)
-			pknames = propertyKeyColumnName.getValue(propertyConcreteModelIdx);
+			pknames = propertyKeyColumnName.getValue();
 
 		if (pknames == null)
 		{
-			pknames = doResolveKeyColumnNames(propertyConcreteModel, propertyKeyProperties);
+			Model propertyModel = MU.getModel(property);
+
+			pknames = doResolveKeyColumnNames(propertyModel, propertyKeyProperties);
 
 			for (int i = 0; i < pknames.length; i++)
 				pknames[i] = property.getName() + "_" + pknames[i];
@@ -1084,19 +953,16 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @return
 	 */
-	protected String resolveModelConcreteColumnName(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx)
+	protected String resolveModelConcreteColumnName(Model model, Property property)
 	{
 		String cname = null;
 
 		ModelConcreteColumnName modelConcreteColumnName = property.getFeature(ModelConcreteColumnName.class);
 
 		if (modelConcreteColumnName != null)
-			cname = modelConcreteColumnName.getValue(propertyConcreteModelIdx);
+			cname = modelConcreteColumnName.getValue();
 
 		return cname;
 	}
@@ -1109,19 +975,16 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @return
 	 */
-	protected String resolvePropertyConcreteColumnName(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx)
+	protected String resolvePropertyConcreteColumnName(Model model, Property property)
 	{
 		String cname = null;
 
 		PropertyConcreteColumnName propertyConcreteColumnName = property.getFeature(PropertyConcreteColumnName.class);
 
 		if (propertyConcreteColumnName != null)
-			cname = propertyConcreteColumnName.getValue(propertyConcreteModelIdx);
+			cname = propertyConcreteColumnName.getValue();
 
 		return cname;
 	}
@@ -1134,19 +997,16 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @return
 	 */
-	protected Object resolveModelConcreteColumnValue(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx)
+	protected Object resolveModelConcreteColumnValue(Model model, Property property)
 	{
 		Object value = null;
 
 		ModelConcreteColumnValue concreteColumnValues = property.getFeature(ModelConcreteColumnValue.class);
 
 		if (concreteColumnValues != null)
-			value = concreteColumnValues.getValue(propertyConcreteModelIdx);
+			value = concreteColumnValues.getValue();
 
 		if (value == null)
 			value = model.getName();
@@ -1162,23 +1022,20 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @return
 	 */
-	protected Object resolvePropertyConcreteColumnValue(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx)
+	protected Object resolvePropertyConcreteColumnValue(Model model, Property property)
 	{
 		Object value = null;
 
 		PropertyConcreteColumnValue concreteColumnValues = property.getFeature(PropertyConcreteColumnValue.class);
 
 		if (concreteColumnValues != null)
-			value = concreteColumnValues.getValue(propertyConcreteModelIdx);
+			value = concreteColumnValues.getValue();
 
 		if (value == null)
 		{
-			value = propertyConcreteModel.getName();
+			value = MU.getModel(property).getName();
 		}
 
 		return value;
@@ -1192,19 +1049,16 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @return
 	 */
-	protected String resolveModelOrderColumnName(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx)
+	protected String resolveModelOrderColumnName(Model model, Property property)
 	{
 		String oname = null;
 
-		ModelOrderColumnName morderColumnNames = property.getFeature(ModelOrderColumnName.class);
+		ModelOrderColumnName morderColumnName = property.getFeature(ModelOrderColumnName.class);
 
-		if (morderColumnNames != null)
-			oname = morderColumnNames.getValue(propertyConcreteModelIdx);
+		if (morderColumnName != null)
+			oname = morderColumnName.getValue();
 
 		return oname;
 	}
@@ -1217,19 +1071,16 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @return
 	 */
-	protected String resolvePropertyOrderColumnName(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx)
+	protected String resolvePropertyOrderColumnName(Model model, Property property)
 	{
 		String oname = null;
 
-		PropertyOrderColumnName morderColumnNames = property.getFeature(PropertyOrderColumnName.class);
+		PropertyOrderColumnName propertyOrderColumnName = property.getFeature(PropertyOrderColumnName.class);
 
-		if (morderColumnNames != null)
-			oname = morderColumnNames.getValue(propertyConcreteModelIdx);
+		if (propertyOrderColumnName != null)
+			oname = propertyOrderColumnName.getValue();
 
 		return oname;
 	}
@@ -1239,31 +1090,26 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param mappedBy
 	 * @return
 	 */
-	protected KeyRule resolvePropertyKeyUpdateRule(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, String mappedBy)
+	protected KeyRule resolvePropertyKeyUpdateRule(Model model, Property property, String mappedBy)
 	{
 		KeyRule keyRule = null;
 
 		PropertyKeyUpdateRule propertyKeyUpdateRule = property.getFeature(PropertyKeyUpdateRule.class);
 
 		if (propertyKeyUpdateRule != null)
-			keyRule = propertyKeyUpdateRule.getValue(propertyConcreteModelIdx);
+			keyRule = propertyKeyUpdateRule.getValue();
 
 		if (keyRule == null && !isNullOrEmpty(mappedBy))
 		{
-			Property mappedByProperty = propertyConcreteModel.getProperty(mappedBy);
-
-			int mappedbyIndex = MU.getPropertyModelIndex(mappedByProperty, model);
+			Property mappedByProperty = MU.getModel(property).getProperty(mappedBy);
 
 			ModelKeyUpdateRule modelKeyUpdateRule = mappedByProperty.getFeature(ModelKeyUpdateRule.class);
 
 			if (modelKeyUpdateRule != null)
-				keyRule = modelKeyUpdateRule.getValue(mappedbyIndex);
+				keyRule = modelKeyUpdateRule.getValue();
 		}
 
 		return keyRule;
@@ -1274,31 +1120,26 @@ public class RelationMapperResolver
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyConcreteModel
-	 * @param propertyConcreteModelIdx
 	 * @param mappedBy
 	 * @return
 	 */
-	protected KeyRule resolvePropertyKeyDeleteRule(Model model, Property property, Model propertyConcreteModel,
-			int propertyConcreteModelIdx, String mappedBy)
+	protected KeyRule resolvePropertyKeyDeleteRule(Model model, Property property, String mappedBy)
 	{
 		KeyRule keyRule = null;
 
 		PropertyKeyDeleteRule propertyKeyDeleteRule = property.getFeature(PropertyKeyDeleteRule.class);
 
 		if (propertyKeyDeleteRule != null)
-			keyRule = propertyKeyDeleteRule.getValue(propertyConcreteModelIdx);
+			keyRule = propertyKeyDeleteRule.getValue();
 
 		if (keyRule == null && !isNullOrEmpty(mappedBy))
 		{
-			Property mappedByProperty = propertyConcreteModel.getProperty(mappedBy);
-
-			int mappedbyIndex = MU.getPropertyModelIndex(mappedByProperty, model);
+			Property mappedByProperty = MU.getModel(property).getProperty(mappedBy);
 
 			ModelKeyDeleteRule modelKeyDeleteRule = mappedByProperty.getFeature(ModelKeyDeleteRule.class);
 
 			if (modelKeyDeleteRule != null)
-				keyRule = modelKeyDeleteRule.getValue(mappedbyIndex);
+				keyRule = modelKeyDeleteRule.getValue();
 		}
 
 		return keyRule;
@@ -1343,12 +1184,12 @@ public class RelationMapperResolver
 
 		if (MU.isPrimitiveModel(propertyModel))
 		{
-			String columnName = resolvePropertyColumnName(model, keyProperty, propertyModel, 0);
+			String columnName = resolvePropertyColumnName(model, keyProperty);
 			keyColumnNames = new String[] { columnName };
 		}
 		else
 		{
-			Property[] pkeyProperties = resolvePropertyKeyProperties(model, keyProperty, propertyModel, 0);
+			Property[] pkeyProperties = resolvePropertyKeyProperties(model, keyProperty);
 
 			keyColumnNames = doResolveKeyColumnNames(propertyModel, pkeyProperties);
 		}
@@ -1376,10 +1217,6 @@ public class RelationMapperResolver
 	{
 		for (Property property : properties)
 		{
-			if (property.isAbstracted())
-				throw new UnsupportedModelCharacterException(
-						"Key property [" + property.getName() + "] of abstracted is not supported");
-
 			if (property.hasFeature(ModelConcreteColumnName.class))
 				throw new UnsupportedModelCharacterException("Key property [" + property.getName() + "] of ["
 						+ ModelConcreteColumnName.class.getSimpleName() + "] is not supported");
@@ -1394,9 +1231,7 @@ public class RelationMapperResolver
 				throw new IllegalArgumentException("Key property [" + property.getName() + "] must only be ["
 						+ OneToOne.class.getSimpleName() + "] or [" + ManyToOne.class.getSimpleName() + "]");
 
-			Model propertyModel = property.getModel();
-
-			PointType pointType = resolveRelationPointType(model, property, propertyModel, 0, relationType);
+			PointType pointType = resolveRelationPointType(model, property, relationType);
 
 			if (!PointType.MODEL.equals(pointType))
 				throw new IllegalArgumentException("Key property [" + property.getName() + "] must be ["
@@ -1415,35 +1250,32 @@ public class RelationMapperResolver
 		return s == null || s.isEmpty();
 	}
 
-	protected static class RelationMapperImpl implements RelationMapper
+	protected static abstract class AbstractMapper implements Mapper
 	{
-		private Mapper[] mappers;
-
 		private RelationType relationType;
 
-		public RelationMapperImpl()
-		{
-			super();
-		}
+		private String mappedByTarget;
 
-		public RelationMapperImpl(Mapper[] mappers, RelationType relationType)
+		private String mappedBySource;
+
+		private String modelConcreteColumnName;
+
+		private Object modelConcreteColumnValue;
+
+		private String propertyConcreteColumnName;
+
+		private Object propertyConcreteColumnValue;
+
+		private KeyRule propertyKeyUpdateRule;
+
+		private KeyRule propertyKeyDeleteRule;
+
+		public AbstractMapper()
 		{
 			super();
-			this.mappers = mappers;
-			this.relationType = relationType;
 		}
 
 		@Override
-		public Mapper[] getMappers()
-		{
-			return mappers;
-		}
-
-		public void setMappers(Mapper[] mappers)
-		{
-			this.mappers = mappers;
-		}
-
 		public RelationType getRelationType()
 		{
 			return relationType;
@@ -1476,30 +1308,6 @@ public class RelationMapperResolver
 		public boolean isManyToMany()
 		{
 			return RelationType.MANY_TO_MANY.equals(this.relationType);
-		}
-	}
-
-	protected static abstract class AbstractMapper implements Mapper
-	{
-		private String mappedByTarget;
-
-		private String mappedBySource;
-
-		private String modelConcreteColumnName;
-
-		private Object modelConcreteColumnValue;
-
-		private String propertyConcreteColumnName;
-
-		private Object propertyConcreteColumnValue;
-
-		private KeyRule propertyKeyUpdateRule;
-
-		private KeyRule propertyKeyDeleteRule;
-
-		public AbstractMapper()
-		{
-			super();
 		}
 
 		@Override

@@ -171,13 +171,7 @@
 			
 			var properties = model.properties;
 			for(var i=0; i<properties.length; i++)
-			{
-				var propertyModels = properties[i].models;
-				for(var j=0; j<propertyModels.length; j++)
-				{
-					this._setCacheModelWithProperties(modelCache, propertyModels[j], myPutContext);
-				}
-			}
+				this._setCacheModelWithProperties(modelCache, properties[i].model, myPutContext);
 		}
 	});
 })

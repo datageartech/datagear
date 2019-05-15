@@ -39,14 +39,11 @@ public interface ColumnConverter extends PropertyFeature, PersistenceFeature
 	 * @param cn
 	 * @param model
 	 * @param property
-	 * @param propertyModelIndex
-	 * @param propertyModel
 	 * @param propValue
 	 * @return
 	 * @throws ColumnConverterException
 	 */
-	Object to(Connection cn, Model model, Property property, int propertyModelIndex, Model propertyModel,
-			Object propValue) throws ColumnConverterException;
+	Object to(Connection cn, Model model, Property property, Object propValue) throws ColumnConverterException;
 
 	/**
 	 * 将列值转换为属性值。
@@ -57,10 +54,9 @@ public interface ColumnConverter extends PropertyFeature, PersistenceFeature
 	 * @param colIndex
 	 * @param model
 	 * @param property
-	 * @param propertyModelIndex
-	 * @param propertyModel
 	 * @return
+	 * @throws ColumnConverterException
 	 */
-	Object from(Connection cn, ResultSet rs, int row, int colIndex, Model model, Property property,
-			int propertyModelIndex, Model propertyModel) throws ColumnConverterException;
+	Object from(Connection cn, ResultSet rs, int row, int colIndex, Model model, Property property)
+			throws ColumnConverterException;
 }

@@ -93,7 +93,7 @@ public class GenericDatabaseModelResolverTest extends TestSupport
 
 		Assert.assertEquals("T_ORDER", ((TableName) model.getFeature(TableName.class)).getValue().toUpperCase());
 
-		DefaultDynamicBean defaultDynamicBean = new DefaultDynamicBean(model);
+		DefaultDynamicBean defaultDynamicBean = new DefaultDynamicBean();
 		defaultDynamicBean.put("ID", id);
 		defaultDynamicBean.put("NAME", "ORDER-0");
 

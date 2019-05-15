@@ -22,10 +22,6 @@
 		
 		PROPERTY : ".",
 		
-		CONCRETE_L : "<",
-		
-		CONCRETE_R : ">",
-		
 		ELEMENT_L : "[",
 		
 		ELEMENT_R : "]",
@@ -99,61 +95,6 @@
 
 					i = j;
 				}
-				// 属性具体模型索引
-				else if (c == this.CONCRETE_L)
-				{
-					var property = (segmentList.length == 0 ? null : segmentList[segmentList.length - 1]);
-					
-					if (property == null || property.propertyName == undefined)
-						throw new Error("[" + propertyPath + "] is illegal, property name required before position [" + i + "]");
-
-					var j = i + 1;
-					var hasCloseChar = false;
-
-					for (; j < length; j++)
-					{
-						var cj = cs.charAt(j);
-
-						if (cj == this.ESCAPOR)
-						{
-							var cjn = ((j + 1) < length ? cs.charAt(j+1) : 0);
-
-							if (this.isKeyword(cjn))
-							{
-								j = j + 1;
-								cache = this.appendIgnoreBlank(cache, cj);
-							}
-							else
-								cache = this.appendIgnoreBlank(cache, cj);
-						}
-						else if (cj == this.CONCRETE_R)
-						{
-							hasCloseChar = true;
-							break;
-						}
-						else
-							cache = this.appendIgnoreBlank(cache, cj);
-					}
-
-					if (!hasCloseChar)
-						throw new Error("[" + propertyPath + "] is illegal, '" + this.CONCRETE_R + "' required at position [" + j + "]");
-
-					var indexStr = cache; cache="";
-					var index;
-
-					try
-					{
-						index = parseInt(indexStr);
-					}
-					catch (e)
-					{
-						throw new Error("[" + propertyPath + "] is illegal, [" + indexStr + "] of position [" + (i + 1) + "] is not integer");
-					}
-
-					property.propertyModelIndex = index;
-
-					i = j;
-				}
 				// 属性名
 				else if (c == this.PROPERTY || i == 0)
 				{
@@ -207,28 +148,13 @@
 		 * 
 		 * @param propertyPath 可选，属性路径
 		 * @param propertyName 必选，属性名
-		 * @param propertyConcreteIndex 可选，属性具体模型索引
 		 */
-		concatPropertyName : function(propertyPath, propertyName, propertyConcreteIndex)
+		concatPropertyName : function(propertyPath, propertyName)
 		{
 			if(arguments.length == 1)
 			{
-				propertyConcreteIndex = undefined;
 				propertyName = propertyPath;
 				propertyPath = undefined;
-			}
-			else if(arguments.length == 2)
-			{
-				if(typeof(propertyName) == "number")
-				{
-					propertyConcreteIndex = propertyName;
-					propertyName = propertyPath;
-					propertyPath = undefined;
-				}
-				else
-				{
-					propertyConcreteIndex = undefined;
-				}
 			}
 			
 			propertyName = this.escapePropertyName(propertyName);
@@ -239,9 +165,6 @@
 				re = propertyPath + this.PROPERTY + propertyName;
 			else
 				re = propertyName;
-			
-			if(propertyConcreteIndex != undefined)
-				re += this.CONCRETE_L + propertyConcreteIndex + this.CONCRETE_R;
 			
 			return re;
 		},
@@ -331,8 +254,6 @@
 		isKeyword : function(c)
 		{
 			return (c == this.PROPERTY
-					|| c == this.CONCRETE_L
-					|| c == this.CONCRETE_R
 					|| c == this.ELEMENT_L
 					|| c == this.ELEMENT_R);
 		},
@@ -401,7 +322,7 @@
 		{
 			return !this.isCompositeModel(model);
 		},
-
+		
 		/**
 		 * 获取指定名称的Property对象。
 		 * 
@@ -439,121 +360,27 @@
 			
 			return -1;
 		},
-		
+
 		/**
-		 * 获取指定名称/索引的模型。
-		 * 
-		 * @param models
-		 * @param modelNameOrIndex
-		 */
-		getModel : function(models, modelNameOrIndex)
-		{
-			if(typeof(modelNameOrIndex) == "number")
-			{
-				return models[modelNameOrIndex];
-			}
-			else
-			{
-				for(var i=0; i<models.length; i++)
-				{
-					if(models[i].name == modelName)
-						return models[i];
-				}
-			}
-			return null;
-		},
-		
-		/**
-		 * 获取模型索引。
-		 * 
-		 * @param models
-		 * @param model
-		 */
-		getModelIndex : function(models, model)
-		{
-			for(var i=0; i<models.length; i++)
-			{
-				if(models[i].name == model.name)
-					return i;
-			}
-			
-			return -1;
-		},
-		
-		/**
-		 * 获取属性模型数组。
-		 */
-		getPropertyModels : function(property)
-		{
-			return property.models;
-		},
-		
-		/**
-		 * 获取属性模型索引。
-		 * 
-		 * @param property
-		 * @param model
-		 */
-		getPropertyModelIndex : function(property, propertyModel)
-		{
-			var propertyModels = this.getPropertyModels(property);
-			
-			var index = this.getModelIndex(propertyModels, propertyModel);
-			
-			if(index < 0)
-				throw new Error("Not correct property model");
-			
-			return index;
-		},
-		
-		/**
-		 * 获取指定索引的属性模型。
-		 */
-		getPropertyModelByIndex : function(property, propertyModelIndex)
-		{
-			var propertyModels = this.getPropertyModels(property);
-			
-			return propertyModels[propertyModelIndex];
-		},
-		
-		/**
-		 * 获取指定属性值对应的属性模型。
-		 */
-		getPropertyModelByValue : function(property, propertyValue)
-		{
-			//TODO 处理抽象属性
-			return property.model;
-		},
-		
-		/**
-		 * 获取指定属性值对应的属性模型索引。
-		 */
-		getPropertyModelIndexByValue : function(property, propertyValue)
-		{
-			//TODO 处理抽象属性
-			return 0;
-		},
-		
-		/**
-		 * 判断属性是否是抽象属性。
+		 * 判断是否是复合属性。
 		 * 
 		 * @param property
 		 * @returns
 		 */
-		isAbstractedProperty : function(property)
+		isCompositeProperty : function(property)
 		{
-			return property.models.length > 1;
+			return this.isCompositeModel(property.model);
 		},
 		
 		/**
-		 * 判断属性是否是具体属性。
+		 * 判断是否是基本属性。
 		 * 
 		 * @param property
 		 * @returns
 		 */
-		isConcreteProperty : function(property)
+		isPrimitiveProperty : function(property)
 		{
-			return !this.isAbstractedProperty(property);
+			return !this.isCompositeProperty(property);
 		},
 		
 		/**
@@ -591,18 +418,15 @@
 		
 		/**
 		 * 判断属性是否是私有属性，私有属性无独立生命周期。
-		 * 此函数实现参考org.datagear.persistence.support.PMU.isPrivate(Model, Property, Model)。
+		 * 此函数实现参考org.datagear.persistence.support.PMU.isPrivate(Model, Property)。
 		 * 
 		 * @param model
 		 * @param property
-		 * @param propertyConcreteModel
 		 * @returns {Boolean}
 		 */
-		isPrivatePropertyModel : function(model, property, propertyConcreteModel)
+		isPrivateProperty : function(model, property, propertyConcreteModel)
 		{
-			var relationMapper = this.featureRelationMapper(property);
-			var myIndex = this.getPropertyModelIndex(property, propertyConcreteModel);
-			var mapper = relationMapper.mappers[myIndex];
+			var mapper = this.featureMapper(property);
 			
 			var keyRule = mapper.propertyKeyDeleteRule;
 
@@ -720,8 +544,7 @@
 					obj[property.name] = propertyValue;
 				else
 				{
-					var propertyModel = this.getPropertyModelByValue(property, propertyValue);
-					var mappedWithPropertyName = this.findMappedByWith(property, propertyModel);
+					var mappedWithPropertyName = this.findMappedByWith(property);
 					
 					if(mappedWithPropertyName)
 					{
@@ -919,22 +742,6 @@
 		 * @param model
 		 * @param propertyPath
 		 */
-		getTailPropertyInfoConcrete : function(model, propertyPath)
-		{
-			var propertyInfo = this.getTailPropertyInfo(model, propertyPath);
-			
-			if(!propertyInfo.model)
-				throw new Error("The tail property 's model must be set");
-			
-			return propertyInfo;
-		},
-		
-		/**
-		 * 获取结尾属性信息。
-		 * 
-		 * @param model
-		 * @param propertyPath
-		 */
 		getTailPropertyInfo : function(model, propertyPath)
 		{
 			var propertyInfo = { "parent" : parent, "property" : undefined, "model" : undefined };
@@ -961,10 +768,7 @@
 				if(propertyInfo.property == null)
 					throw new Error("No Property named ["+propName+"] found int Model ["+model.name+"]");
 				
-				if(this.isConcreteProperty(propertyInfo.property))
-					propertyInfo.model = propertyInfo.property.model;
-				else if(segment.propertyModelIndex)
-					propertyInfo.model = propertyInfo.property.models[propertyModelIndex];
+				propertyInfo.model = propertyInfo.property.model;
 				
 				parent = propertyInfo.model;
 			}
@@ -1235,10 +1039,8 @@
 				}
 				else
 				{
-					var propertyModel = this.getPropertyModelByValue(property, propertyValue);
-					
-					var ignorePropertyName = this.findMappedByWith(property, propertyModel);
-					re = this.token(propertyModel, v, ignorePropertyName);
+					var ignorePropertyName = this.findMappedByWith(property);
+					re = this.token(property.model, v, ignorePropertyName);
 				}
 			}
 			
@@ -1282,22 +1084,16 @@
 		},
 		
 		/**
-		 * 获取org.datagear.model.MapFeature的值。
+		 * 获取org.datagear.model.ValueFeature的值。
 		 * 
-		 * @param mapFeature
-		 * @param key
+		 * @param valueFeature
 		 */
-		getMapFeatureValue : function(mapFeature, key)
+		getValueFeatureValue : function(valueFeature)
 		{
-			if(!mapFeature)
+			if(!valueFeature)
 				return undefined;
 			
-			var re = (mapFeature.mapValues ? mapFeature.mapValues[key] : null);
-			
-			if(re == null || re == undefined)
-				re = mapFeature.value;
-			
-			return re;
+			return valueFeature.value;
 		},
 		
 		/**
@@ -1381,11 +1177,11 @@
 		},
 
 		/**
-		 * 获取org.datagear.model.features.MaxLength特性。
+		 * 获取org.datagear.persistence.mapper.Mapper特性。
 		 */
-		featureRelationMapper : function(property)
+		featureMapper : function(property)
 		{
-			return this.feature(property, "RelationMapper");
+			return this.feature(property, "Mapper");
 		},
 		
 		/**
@@ -1401,19 +1197,19 @@
 		/**
 		 * 获取属性模型的JDBC类型值，如果没有，则返回undefined。
 		 */
-		featureJdbcTypeValue : function(property, propertyModelIndex)
+		featureJdbcTypeValue : function(property)
 		{
 			var jdbcTypeFeature = this.feature(property, "JdbcType");
 			
-			return this.getMapFeatureValue(jdbcTypeFeature, propertyModelIndex);
+			return this.getValueFeatureValue(jdbcTypeFeature);
 		},
 		
 		/**
 		 * 属性模型是否长字符串JDBC类型。
 		 */
-		isLongTextJdbcType : function(property, propertyModelIndex)
+		isLongTextJdbcType : function(property)
 		{
-			var jdbcType = this.featureJdbcTypeValue(property, propertyModelIndex);
+			var jdbcType = this.featureJdbcTypeValue(property);
 			
 			return (
 					jdbcType == 2005 		//Types.CLOB
@@ -1426,9 +1222,9 @@
 		/**
 		 * 属性模型是否二进制JDBC类型。
 		 */
-		isBinaryJdbcType : function(property, propertyModelIndex)
+		isBinaryJdbcType : function(property)
 		{
-			var jdbcType = this.featureJdbcTypeValue(property, propertyModelIndex);
+			var jdbcType = this.featureJdbcTypeValue(property);
 			
 			return (
 					jdbcType == -2	 		//Types.BINARY
@@ -1441,22 +1237,19 @@
 		/**
 		 * 查找MappedBy目标或者源属性名，如果没有，此方法将返回undefined。
 		 */
-		findMappedByWith : function(property, propertyModel)
+		findMappedByWith : function(property)
 		{
-			var propertyModelIndex = this.getPropertyModelIndex(property, propertyModel);
-			
 			//有MappedBy特性
 			var mappedBy = this.feature(property, "MappedBy");
-			var mappedByTarget = (mappedBy ? this.getMapFeatureValue(mappedBy, propertyModelIndex) : null);
+			var mappedByTarget = (mappedBy ? mappedBy.value : null);
+			
 			if(mappedByTarget)
 				return mappedByTarget;
 			
-			var relationMapper = this.featureRelationMapper(property);
+			var mapper = this.featureMapper(property);
 			
-			if(!relationMapper)
+			if(!mapper)
 				return undefined;
-			
-			var mapper = relationMapper.mappers[propertyModelIndex];
 			
 			return (mapper ? mapper.mappedBySource : undefined);
 		},

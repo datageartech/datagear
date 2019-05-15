@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.datagear.model.Model;
-
 /**
  * 默认{@link DynamicBean}。
  * 
@@ -19,8 +17,6 @@ import org.datagear.model.Model;
  */
 public class DefaultDynamicBean implements DynamicBean
 {
-	private Model model;
-
 	private Map<String, Object> properties = new HashMap<String, Object>();
 
 	public DefaultDynamicBean()
@@ -28,16 +24,9 @@ public class DefaultDynamicBean implements DynamicBean
 		super();
 	}
 
-	public DefaultDynamicBean(Model model)
+	public DefaultDynamicBean(Map<String, Object> properties)
 	{
 		super();
-		this.model = model;
-	}
-
-	public DefaultDynamicBean(Model model, Map<String, Object> properties)
-	{
-		super();
-		this.model = model;
 		this.properties = properties;
 	}
 
@@ -111,18 +100,6 @@ public class DefaultDynamicBean implements DynamicBean
 	public Set<Entry<String, Object>> entrySet()
 	{
 		return this.properties.entrySet();
-	}
-
-	@Override
-	public void setModel(Model model)
-	{
-		this.model = model;
-	}
-
-	@Override
-	public Model getModel()
-	{
-		return this.model;
 	}
 
 	// XXX 移除了hashCode, equals, toString方法，因为如果有循环引用的属性，这几个方法会出现死循环

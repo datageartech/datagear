@@ -4,10 +4,8 @@
 
 package org.datagear.persistence.features;
 
-import java.util.Map;
-
-import org.datagear.model.MapFeature;
 import org.datagear.model.PropertyFeature;
+import org.datagear.model.ValueFeature;
 import org.datagear.persistence.PersistenceFeature;
 
 /**
@@ -20,25 +18,15 @@ import org.datagear.persistence.PersistenceFeature;
  * @author datagear@163.com
  *
  */
-public class RelationPoint extends MapFeature<Integer, PointType> implements PropertyFeature, PersistenceFeature
+public class RelationPoint extends ValueFeature<PointType> implements PropertyFeature, PersistenceFeature
 {
 	public RelationPoint()
 	{
 		super();
 	}
 
-	public RelationPoint(PointType defaultValue)
+	public RelationPoint(PointType value)
 	{
-		super(defaultValue);
-	}
-
-	public RelationPoint(Map<Integer, PointType> mapValues)
-	{
-		super(mapValues);
-	}
-
-	public RelationPoint(PointType defaultValue, Map<Integer, PointType> mapValues)
-	{
-		super(defaultValue, mapValues);
+		super(value);
 	}
 }

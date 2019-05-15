@@ -4,10 +4,8 @@
 
 package org.datagear.persistence.features;
 
-import java.util.Map;
-
-import org.datagear.model.MapFeature;
 import org.datagear.model.PropertyFeature;
+import org.datagear.model.ValueFeature;
 import org.datagear.persistence.PersistenceFeature;
 
 /**
@@ -16,8 +14,7 @@ import org.datagear.persistence.PersistenceFeature;
  * @author datagear@163.com
  *
  */
-public class PropertyKeyDeleteRule extends MapFeature<Integer, KeyRule>
-		implements PropertyFeature, PersistenceFeature
+public class PropertyKeyDeleteRule extends ValueFeature<KeyRule> implements PropertyFeature, PersistenceFeature
 {
 	public PropertyKeyDeleteRule()
 	{
@@ -27,15 +24,5 @@ public class PropertyKeyDeleteRule extends MapFeature<Integer, KeyRule>
 	public PropertyKeyDeleteRule(KeyRule value)
 	{
 		super(value);
-	}
-
-	public PropertyKeyDeleteRule(Map<Integer, KeyRule> mapValues)
-	{
-		super(mapValues);
-	}
-
-	public PropertyKeyDeleteRule(KeyRule value, Map<Integer, KeyRule> mapValues)
-	{
-		super(value, mapValues);
 	}
 }

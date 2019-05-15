@@ -4,7 +4,6 @@
 
 package org.datagear.model.support;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.datagear.model.Model;
@@ -22,7 +21,7 @@ public abstract class AbstractProperty extends AbstractFeatured implements Prope
 	private String name;
 
 	/** 属性模型 */
-	private Model[] models;
+	private Model model;
 
 	/** 是否是数组 */
 	private boolean array;
@@ -43,14 +42,7 @@ public abstract class AbstractProperty extends AbstractFeatured implements Prope
 	{
 		super();
 		this.name = name;
-		this.models = new Model[] { model };
-	}
-
-	public AbstractProperty(String name, Model[] models)
-	{
-		super();
-		this.name = name;
-		this.models = models;
+		this.model = model;
 	}
 
 	@Override
@@ -70,50 +62,9 @@ public abstract class AbstractProperty extends AbstractFeatured implements Prope
 	}
 
 	@Override
-	public boolean isAbstracted()
-	{
-		return (this.models.length > 1);
-	}
-
-	@Override
-	public int getModelCount()
-	{
-		return this.models.length;
-	}
-
-	@Override
-	public Model getModel(String modelName)
-	{
-		for (Model model : this.models)
-		{
-			if (model.getName().equals(modelName))
-				return model;
-		}
-
-		return null;
-	}
-
-	@Override
-	public Model[] getModels()
-	{
-		return this.models;
-	}
-
-	public void setModels(Model[] models)
-	{
-		this.models = models;
-	}
-
-	@Override
-	public Model getModel(int index)
-	{
-		return this.models[index];
-	}
-
-	@Override
 	public Model getModel()
 	{
-		return this.models[0];
+		return this.model;
 	}
 
 	/**
@@ -123,7 +74,7 @@ public abstract class AbstractProperty extends AbstractFeatured implements Prope
 	 */
 	public void setModel(Model model)
 	{
-		this.models = new Model[] { model };
+		this.model = model;
 	}
 
 	@Override
@@ -169,7 +120,6 @@ public abstract class AbstractProperty extends AbstractFeatured implements Prope
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", abstracted=" + isAbstracted() + ", models="
-				+ Arrays.toString(models) + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", model=" + model + "]";
 	}
 }

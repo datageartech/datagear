@@ -13,17 +13,15 @@ import org.datagear.model.Property;
 import org.datagear.model.features.NotEditable;
 import org.datagear.model.features.NotReadable;
 import org.datagear.model.support.MU;
-import org.datagear.model.support.PropertyModel;
 import org.datagear.persistence.Dialect;
-import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.features.KeyRule;
 import org.datagear.persistence.mapper.JoinTableMapper;
+import org.datagear.persistence.mapper.Mapper;
+import org.datagear.persistence.mapper.MapperUtil;
 import org.datagear.persistence.mapper.ModelTableMapper;
-import org.datagear.persistence.mapper.PropertyModelMapper;
 import org.datagear.persistence.mapper.PropertyTableMapper;
-import org.datagear.persistence.mapper.RelationMapper;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -73,6 +71,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	}
 
 	/**
+	 * 更新。
 	 * 
 	 * @param cn
 	 * @param dialect
@@ -129,7 +128,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param model
 	 * @param condition
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param updatePropertyProperties
 	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
 	 * @param originalPropertyValue
@@ -139,12 +138,11 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @return
 	 */
 	public int updatePropertyTableData(Connection cn, Dialect dialect, String table, Model model, SqlBuilder condition,
-			Property property, PropertyModelMapper<?> propertyModelMapper, Property[] updatePropertyProperties,
-			Object originalPropertyValue, Object updatePropertyValue)
+			Property property, Mapper mapper, Property[] updatePropertyProperties, Object originalPropertyValue,
+			Object updatePropertyValue)
 	{
-		return updatePropertyTableData(cn, dialect, table, model, condition, property, propertyModelMapper,
-				updatePropertyProperties, originalPropertyValue, updatePropertyValue, null, true,
-				new ExpressionEvaluationContext());
+		return updatePropertyTableData(cn, dialect, table, model, condition, property, mapper, updatePropertyProperties,
+				originalPropertyValue, updatePropertyValue, null, true, new ExpressionEvaluationContext());
 	}
 
 	/**
@@ -156,7 +154,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param model
 	 * @param condition
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param updatePropertyProperties
 	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
 	 * @param originalPropertyValue
@@ -167,13 +165,11 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @return
 	 */
 	public int updatePropertyTableData(Connection cn, Dialect dialect, String table, Model model, SqlBuilder condition,
-			Property property, PropertyModelMapper<?> propertyModelMapper, Property[] updatePropertyProperties,
-			Object originalPropertyValue, Object updatePropertyValue,
-			ExpressionEvaluationContext expressionEvaluationContext)
+			Property property, Mapper mapper, Property[] updatePropertyProperties, Object originalPropertyValue,
+			Object updatePropertyValue, ExpressionEvaluationContext expressionEvaluationContext)
 	{
-		return updatePropertyTableData(cn, dialect, table, model, condition, property, propertyModelMapper,
-				updatePropertyProperties, originalPropertyValue, updatePropertyValue, null, true,
-				expressionEvaluationContext);
+		return updatePropertyTableData(cn, dialect, table, model, condition, property, mapper, updatePropertyProperties,
+				originalPropertyValue, updatePropertyValue, null, true, expressionEvaluationContext);
 	}
 
 	/**
@@ -210,7 +206,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		if (updateProperties == null)
 			updateProperties = model.getProperties();
 
-		RelationMapper[] relationMappers = getRelationMappers(model, updateProperties);
+		Mapper[] mappers = getMappers(model, updateProperties);
 
 		Object[] originalPropertyValues = MU.getPropertyValues(model, originalObj, updateProperties);
 		Object[] updatePropertyValues = MU.getPropertyValues(model, updateObj, updateProperties);
@@ -249,9 +245,9 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			if (isUpdateIgnoreProperty(model, property, ignorePropertyName, false))
 				continue;
 
+			Mapper mapper = mappers[i];
 			Object originalPropertyValue = originalPropertyValues[i];
 			Object updatePropertyValue = updatePropertyValues[i];
-			RelationMapper relationMapper = relationMappers[i];
 
 			if (updatePropertyValue == null)
 			{
@@ -261,7 +257,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 					if (!MU.isMultipleProperty(property))
 					{
 						int myCount = deletePersistenceOperation.deletePropertyTableData(cn, dialect, table, model,
-								originalCondition, property, relationMapper, null, false);
+								originalCondition, property, mapper, null, false);
 
 						if (propertyUpdated == false && myCount > 0)
 							propertyUpdated = true;
@@ -272,9 +268,6 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			}
 			else if (MU.isMultipleProperty(property))
 			{
-				Model[] propertyModels = property.getModels();
-				PropertyModelMapper<?>[] propertyModelMappers = PropertyModelMapper.valueOf(property, relationMapper);
-
 				Object[] originalPropertyValueElements = toArray(originalPropertyValue);
 				Object[] updatePropertyValueElements = toArray(updatePropertyValue);
 
@@ -293,56 +286,42 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 					// 添加
 					else if (originalPropertyValueElement == null)
 					{
-						int myMapperIndex = MU.getModelIndex(propertyModels, updatePropertyValueElement);
-						PropertyModelMapper<?> pmm = propertyModelMappers[myMapperIndex];
-
-						KeyRule propertyKeyUpdateRule = pmm.getMapper().getPropertyKeyUpdateRule();
+						KeyRule propertyKeyUpdateRule = mapper.getPropertyKeyUpdateRule();
 
 						if (propertyKeyUpdateRule == null || propertyKeyUpdateRule.isManually())
 						{
 							myCount = insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model,
-									updateObj, property, pmm, new Object[] { updatePropertyValueElement }, null,
+									updateObj, property, mapper, new Object[] { updatePropertyValueElement }, null,
 									expressionEvaluationContext);
 						}
 						else
 						{
 							UpdateInfoForAutoKeyUpdateRule updateInfo = new UpdateInfoForAutoKeyUpdateRule(property, i,
-									pmm, myMapperIndex, originalPropertyValueElement, updatePropertyValueElement);
+									mapper, originalPropertyValueElement, updatePropertyValueElement);
 							updateInfoForAutoKeyUpdateRules.add(updateInfo);
 						}
 					}
 					// 删除
 					else if (updatePropertyValueElement == null)
 					{
-						int myMapperIndex = MU.getModelIndex(propertyModels, originalPropertyValueElement);
-						PropertyModelMapper<?> pmm = propertyModelMappers[myMapperIndex];
-
 						myCount = deletePersistenceOperation.deletePropertyTableData(cn, dialect, table, model,
-								originalCondition, property, pmm, null, false);
+								originalCondition, property, mapper, null, false);
 					}
 					// 更新
 					else
 					{
-						int myOriginalMapperIndex = MU.getModelIndex(propertyModels, originalPropertyValueElement);
-						int myUpdateMapperIndex = MU.getModelIndex(propertyModels, updatePropertyValueElement);
-
-						if (myOriginalMapperIndex != myUpdateMapperIndex)
-							throw new PersistenceException();
-
-						PropertyModelMapper<?> pmm = propertyModelMappers[myOriginalMapperIndex];
-						KeyRule propertyKeyUpdateRule = pmm.getMapper().getPropertyKeyUpdateRule();
+						KeyRule propertyKeyUpdateRule = mapper.getPropertyKeyUpdateRule();
 
 						if (propertyKeyUpdateRule == null || propertyKeyUpdateRule.isManually())
 						{
 							myCount = updatePropertyTableData(cn, dialect, table, model, originalCondition, property,
-									pmm, null, originalPropertyValueElement, updatePropertyValueElement, updateObj,
+									mapper, null, originalPropertyValueElement, updatePropertyValueElement, updateObj,
 									false, expressionEvaluationContext);
 						}
 						else
 						{
 							UpdateInfoForAutoKeyUpdateRule updateInfo = new UpdateInfoForAutoKeyUpdateRule(property, i,
-									pmm, myOriginalMapperIndex, originalPropertyValueElement,
-									updatePropertyValueElement);
+									mapper, originalPropertyValueElement, updatePropertyValueElement);
 							updateInfoForAutoKeyUpdateRules.add(updateInfo);
 						}
 					}
@@ -353,51 +332,30 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			}
 			else
 			{
-				PropertyModelMapper<?>[] propertyModelMappers = PropertyModelMapper.valueOf(property, relationMapper);
+				if (PMU.isShared(model, property))
+					continue;
 
-				int myMapperIndex = MU.getModelIndex(property.getModels(), updatePropertyValue);
+				KeyRule propertyKeyUpdateRule = mapper.getPropertyKeyUpdateRule();
 
-				for (int j = 0; j < propertyModelMappers.length; j++)
+				if (propertyKeyUpdateRule == null || propertyKeyUpdateRule.isManually())
 				{
-					PropertyModelMapper<?> pmm = propertyModelMappers[j];
-					Model propertyModel = pmm.getModel();
+					int myCount = updatePropertyTableData(cn, dialect, table, model, originalCondition, property,
+							mapper, null, originalPropertyValue, updatePropertyValue, updateObj, false,
+							expressionEvaluationContext);
 
-					if (j == myMapperIndex)
-					{
-						if (PMU.isShared(model, property, propertyModel))
-							continue;
+					if (myCount == 0)
+						myCount = insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model,
+								updateObj, property, mapper, new Object[] { updatePropertyValue }, null,
+								expressionEvaluationContext);
 
-						KeyRule propertyKeyUpdateRule = pmm.getMapper().getPropertyKeyUpdateRule();
-
-						if (propertyKeyUpdateRule == null || propertyKeyUpdateRule.isManually())
-						{
-							int myCount = updatePropertyTableData(cn, dialect, table, model, originalCondition,
-									property, pmm, null, originalPropertyValue, updatePropertyValue, updateObj, false,
-									expressionEvaluationContext);
-
-							if (myCount == 0)
-								myCount = insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model,
-										updateObj, property, pmm, new Object[] { updatePropertyValue }, null,
-										expressionEvaluationContext);
-
-							if (propertyUpdated == false && myCount > 0)
-								propertyUpdated = true;
-						}
-						else
-						{
-							UpdateInfoForAutoKeyUpdateRule updateInfo = new UpdateInfoForAutoKeyUpdateRule(property, i,
-									pmm, j, originalPropertyValue, updatePropertyValue);
-							updateInfoForAutoKeyUpdateRules.add(updateInfo);
-						}
-					}
-					else
-					{
-						int myCount = deletePersistenceOperation.deletePropertyTableData(cn, dialect, table, model,
-								originalCondition, property, pmm, null, false);
-
-						if (propertyUpdated == false && myCount > 0)
-							propertyUpdated = true;
-					}
+					if (propertyUpdated == false && myCount > 0)
+						propertyUpdated = true;
+				}
+				else
+				{
+					UpdateInfoForAutoKeyUpdateRule updateInfo = new UpdateInfoForAutoKeyUpdateRule(property, i, mapper,
+							originalPropertyValue, updatePropertyValue);
+					updateInfoForAutoKeyUpdateRules.add(updateInfo);
 				}
 			}
 		}
@@ -420,13 +378,13 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 					Object updatePropertyValue = updateInfo.getUpdatePropertyValue();
 
 					int myCount = updatePropertyTableData(cn, dialect, table, model, updateCondition,
-							updateInfo.getProperty(), updateInfo.getPropertyModelMapper(), null,
+							updateInfo.getProperty(), updateInfo.getMapper(), null,
 							updateInfo.getOriginalPropertyValue(), updatePropertyValue, null, false,
 							expressionEvaluationContext);
 
 					if (myCount == 0)
 						myCount = insertPersistenceOperation.insertPropertyTableData(cn, dialect, table, model,
-								updateObj, updateInfo.getProperty(), updateInfo.getPropertyModelMapper(),
+								updateObj, updateInfo.getProperty(), updateInfo.getMapper(),
 								new Object[] { updatePropertyValue }, null, expressionEvaluationContext);
 
 					if (propertyUpdated == false && myCount > 0)
@@ -473,8 +431,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		ModelOrderGenerator modelOrderGenerator = new ModelOrderGenerator()
 		{
 			@Override
-			public long generate(Model model, Property property,
-					PropertyModelMapper<ModelTableMapper> propertyModelMapper, Object propertyValue,
+			public long generate(Model model, Property property, ModelTableMapper mapper, Object propertyValue,
 					Object[] propertyKeyColumnValues)
 			{
 				// TODO 实现排序值生成逻辑
@@ -497,22 +454,21 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 					updatePropertyValue))
 				continue;
 
-			RelationMapper relationMapper = getRelationMapper(model, property);
-			PropertyModelMapper<?>[] propertyModelMappers = PropertyModelMapper.valueOf(property, relationMapper);
+			Mapper mapper = getMapper(model, property);
 
 			List<Object> myOriginalColumnValues = new ArrayList<Object>();
 			List<Object> myUpdateColumnValues = new ArrayList<Object>();
 
-			addColumnValues(cn, model, property, propertyModelMappers, originalPropertyValue, true, modelOrderGenerator,
-					true, myOriginalColumnValues);
-			addColumnValues(cn, model, property, propertyModelMappers, updatePropertyValue, true, modelOrderGenerator,
-					true, myUpdateColumnValues);
+			addColumnValues(cn, model, property, mapper, originalPropertyValue, true, modelOrderGenerator, true,
+					myOriginalColumnValues);
+			addColumnValues(cn, model, property, mapper, updatePropertyValue, true, modelOrderGenerator, true,
+					myUpdateColumnValues);
 
 			if (myOriginalColumnValues.equals(myUpdateColumnValues))
 				continue;
 
 			List<String> myColumnNames = new ArrayList<String>();
-			addColumnNames(model, property, propertyModelMappers, true, true, true, myColumnNames);
+			addColumnNames(model, property, mapper, true, true, true, myColumnNames);
 
 			sql.sqldSuffix(toQuoteNames(dialect, toStringArray(myColumnNames)), "=?")
 					.arg(toObjectArray(myUpdateColumnValues));
@@ -541,7 +497,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param model
 	 * @param condition
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param updatePropertyProperties
 	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
 	 * @param originalPropertyValue
@@ -556,33 +512,33 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @return
 	 */
 	protected int updatePropertyTableData(Connection cn, Dialect dialect, String table, Model model,
-			SqlBuilder condition, Property property, PropertyModelMapper<?> propertyModelMapper,
-			Property[] updatePropertyProperties, Object originalPropertyValue, Object updatePropertyValue,
-			Object keyUpdateObj, boolean updateModelTable, ExpressionEvaluationContext expressionEvaluationContext)
+			SqlBuilder condition, Property property, Mapper mapper, Property[] updatePropertyProperties,
+			Object originalPropertyValue, Object updatePropertyValue, Object keyUpdateObj, boolean updateModelTable,
+			ExpressionEvaluationContext expressionEvaluationContext)
 	{
 		int count = 0;
 
-		if (propertyModelMapper.isModelTableMapperInfo())
+		if (MapperUtil.isModelTableMapper(mapper))
 		{
-			PropertyModelMapper<ModelTableMapper> mpmm = propertyModelMapper.castModelTableMapperInfo();
+			ModelTableMapper mtm = MapperUtil.castModelTableMapper(mapper);
 
-			count = updatePropertyTableDataForModelTableMapper(cn, dialect, table, model, condition, property, mpmm,
+			count = updatePropertyTableDataForModelTableMapper(cn, dialect, table, model, condition, property, mtm,
 					updatePropertyProperties, originalPropertyValue, updatePropertyValue, updateModelTable,
 					expressionEvaluationContext);
 		}
-		else if (propertyModelMapper.isPropertyTableMapperInfo())
+		else if (MapperUtil.isPropertyTableMapper(mapper))
 		{
-			PropertyModelMapper<PropertyTableMapper> ppmm = propertyModelMapper.castPropertyTableMapperInfo();
+			PropertyTableMapper ptm = MapperUtil.castPropertyTableMapper(mapper);
 
-			count = updatePropertyTableDataForPropertyTableMapper(cn, dialect, table, model, condition, property, ppmm,
+			count = updatePropertyTableDataForPropertyTableMapper(cn, dialect, table, model, condition, property, ptm,
 					updatePropertyProperties, originalPropertyValue, updatePropertyValue, keyUpdateObj,
 					expressionEvaluationContext);
 		}
-		else if (propertyModelMapper.isJoinTableMapperInfo())
+		else if (MapperUtil.isJoinTableMapper(mapper))
 		{
-			PropertyModelMapper<JoinTableMapper> jpmm = propertyModelMapper.castJoinTableMapperInfo();
+			JoinTableMapper jtm = MapperUtil.castJoinTableMapper(mapper);
 
-			count = updatePropertyTableDataForJoinTableMapper(cn, dialect, table, model, condition, property, jpmm,
+			count = updatePropertyTableDataForJoinTableMapper(cn, dialect, table, model, condition, property, jtm,
 					updatePropertyProperties, originalPropertyValue, updatePropertyValue, keyUpdateObj,
 					expressionEvaluationContext);
 		}
@@ -602,7 +558,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param condition
 	 *            模型表查询条件，允许为{@code null}
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param updatePropertyProperties
 	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
 	 * @param originalPropertyValue
@@ -615,13 +571,11 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @return
 	 */
 	protected int updatePropertyTableDataForModelTableMapper(Connection cn, Dialect dialect, String table, Model model,
-			SqlBuilder condition, Property property, PropertyModelMapper<ModelTableMapper> propertyModelMapper,
-			Property[] updatePropertyProperties, Object originalPropertyValue, Object updatePropertyValue,
-			boolean updateModelTable, ExpressionEvaluationContext expressionEvaluationContext)
+			SqlBuilder condition, Property property, ModelTableMapper mapper, Property[] updatePropertyProperties,
+			Object originalPropertyValue, Object updatePropertyValue, boolean updateModelTable,
+			ExpressionEvaluationContext expressionEvaluationContext)
 	{
 		int count = 0;
-
-		ModelTableMapper mapper = propertyModelMapper.getMapper();
 
 		if (mapper.isPrimitivePropertyMapper())
 		{
@@ -641,13 +595,14 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		}
 		else
 		{
-			Model pmodel = propertyModelMapper.getModel();
+			Model propertyModel = MU.getModel(property);
 
-			if (PMU.isPrivate(model, property, pmodel))
+			if (PMU.isPrivate(model, property))
 			{
-				count = update(cn, dialect, table, pmodel, null,
-						buildRecordCondition(cn, dialect, pmodel, originalPropertyValue, null), originalPropertyValue,
-						updatePropertyValue, null, null, getMappedByWith(mapper), expressionEvaluationContext);
+				count = update(cn, dialect, table, propertyModel, null,
+						buildRecordCondition(cn, dialect, propertyModel, originalPropertyValue, null),
+						originalPropertyValue, updatePropertyValue, null, null, getMappedByWith(mapper),
+						expressionEvaluationContext);
 
 				if (updateModelTable)
 				{
@@ -691,7 +646,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param model
 	 * @param condition
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param updatePropertyProperties
 	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
 	 * @param originalPropertyValue
@@ -704,15 +659,13 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @return
 	 */
 	protected int updatePropertyTableDataForPropertyTableMapper(Connection cn, Dialect dialect, String table,
-			Model model, SqlBuilder condition, Property property,
-			PropertyModelMapper<PropertyTableMapper> propertyModelMapper, Property[] updatePropertyProperties,
-			Object originalPropertyValue, Object updatePropertyValue, Object keyUpdateObj,
-			ExpressionEvaluationContext expressionEvaluationContext)
+			Model model, SqlBuilder condition, Property property, PropertyTableMapper mapper,
+			Property[] updatePropertyProperties, Object originalPropertyValue, Object updatePropertyValue,
+			Object keyUpdateObj, ExpressionEvaluationContext expressionEvaluationContext)
 	{
 		int count = 0;
 
-		PropertyTableMapper mapper = propertyModelMapper.getMapper();
-		Model propertyModel = propertyModelMapper.getModel();
+		Model propertyModel = MU.getModel(property);
 
 		String[] mkeyColumnNames = null;
 		Object[] mkeyColumnValues = null;
@@ -729,7 +682,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 				: null);
 
 		SqlBuilder ptableCondition = buildPropertyTableConditionForPropertyTableMapper(dialect, table, model, condition,
-				property, propertyModelMapper, recordCondition);
+				property, mapper, recordCondition);
 
 		if (mapper.isPrimitivePropertyMapper())
 		{
@@ -756,15 +709,13 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 					if (evalUpdatePropertyValue != updatePropertyValue)
 					{
 						updatePropertyValue = evalUpdatePropertyValue;
-						Object columnValue = getColumnValue(cn, model, property, propertyModelMapper,
-								evalUpdatePropertyValue);
+						Object columnValue = getColumnValue(cn, model, property, evalUpdatePropertyValue);
 
 						sql.sqldSuffix(columnName, "=" + columnValue);
 					}
 					else
 					{
-						Object columnValue = getColumnValue(cn, model, property, propertyModelMapper,
-								updatePropertyValue);
+						Object columnValue = getColumnValue(cn, model, property, updatePropertyValue);
 						sql.sqldSuffix(columnName, "=?").arg(columnValue);
 					}
 				}
@@ -781,7 +732,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		{
 			count = update(cn, dialect, getTableName(propertyModel), propertyModel, updatePropertyProperties,
 					ptableCondition, originalPropertyValue, updatePropertyValue, mkeyColumnNames, mkeyColumnValues,
-					getMappedByWith(propertyModelMapper.getMapper()), expressionEvaluationContext);
+					getMappedByWith(mapper), expressionEvaluationContext);
 		}
 
 		return count;
@@ -796,7 +747,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param model
 	 * @param condition
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param updatePropertyProperties
 	 *            要更新属性模型的属性数组，如果为{@code null}，则全部更新。
 	 * @param originalPropertyValue
@@ -809,33 +760,33 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @return
 	 */
 	protected int updatePropertyTableDataForJoinTableMapper(Connection cn, Dialect dialect, String table, Model model,
-			SqlBuilder condition, Property property, PropertyModelMapper<JoinTableMapper> propertyModelMapper,
-			Property[] updatePropertyProperties, Object originalPropertyValue, Object updatePropertyValue,
-			Object keyUpdateObj, ExpressionEvaluationContext expressionEvaluationContext)
+			SqlBuilder condition, Property property, JoinTableMapper mapper, Property[] updatePropertyProperties,
+			Object originalPropertyValue, Object updatePropertyValue, Object keyUpdateObj,
+			ExpressionEvaluationContext expressionEvaluationContext)
 	{
 		int count = 0;
 
-		Model propertyModel = propertyModelMapper.getModel();
+		Model propertyModel = MU.getModel(property);
+		String mappedByWith = getMappedByWith(mapper);
 
 		// 如果是单元属性，则不必需要recordCondtion
 		SqlBuilder recordCondition = (MU.isMultipleProperty(property)
-				? buildRecordCondition(cn, dialect, propertyModel, originalPropertyValue,
-						getMappedByWith(propertyModelMapper.getMapper()))
+				? buildRecordCondition(cn, dialect, propertyModel, originalPropertyValue, mappedByWith)
 				: null);
 
 		SqlBuilder ptableCondition = buildPropertyTableConditionForJoinTableMapper(dialect, table, propertyModel,
-				condition, property, propertyModelMapper, recordCondition);
+				condition, property, mapper, recordCondition);
 
-		if (PMU.isPrivate(model, property, propertyModel))
+		if (PMU.isPrivate(model, property))
 		{
 			count = update(cn, dialect, getTableName(propertyModel), propertyModel, updatePropertyProperties,
-					ptableCondition, originalPropertyValue, updatePropertyValue, null, null,
-					getMappedByWith(propertyModelMapper.getMapper()), expressionEvaluationContext);
+					ptableCondition, originalPropertyValue, updatePropertyValue, null, null, mappedByWith,
+					expressionEvaluationContext);
 
 			if (keyUpdateObj != null)
 			{
 				count = updatePropertyTableDataRelationForJoinTableMapper(cn, dialect, table, propertyModel, condition,
-						property, propertyModelMapper, originalPropertyValue, updatePropertyValue, keyUpdateObj);
+						property, mapper, originalPropertyValue, updatePropertyValue, keyUpdateObj);
 			}
 		}
 		else
@@ -843,7 +794,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			if (keyUpdateObj != null)
 			{
 				count = updatePropertyTableDataRelationForJoinTableMapper(cn, dialect, table, propertyModel, condition,
-						property, propertyModelMapper, originalPropertyValue, updatePropertyValue, keyUpdateObj);
+						property, mapper, originalPropertyValue, updatePropertyValue, keyUpdateObj);
 			}
 			else
 				count = PersistenceManager.PERSISTENCE_IGNORED;
@@ -861,30 +812,29 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 	 * @param model
 	 * @param condition
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param originalPropertyValue
 	 * @param updatePropertyValue
 	 * @param keyUpdateObj
 	 * @return
 	 */
 	protected int updatePropertyTableDataRelationForJoinTableMapper(Connection cn, Dialect dialect, String table,
-			Model model, SqlBuilder condition, Property property,
-			PropertyModelMapper<JoinTableMapper> propertyModelMapper, Object originalPropertyValue,
+			Model model, SqlBuilder condition, Property property, JoinTableMapper mapper, Object originalPropertyValue,
 			Object updatePropertyValue, Object keyUpdateObj)
 	{
-		JoinTableMapper mapper = propertyModelMapper.getMapper();
+		Model propertyModel = MU.getModel(property);
 
-		SqlBuilder propertyTableCondition = buildRecordCondition(cn, dialect, propertyModelMapper.getModel(),
-				originalPropertyValue, null);
-		SqlBuilder joinTableCondtion = buildJoinTableCondition(dialect, table, model, condition, property,
-				propertyModelMapper, propertyTableCondition);
+		SqlBuilder propertyTableCondition = buildRecordCondition(cn, dialect, propertyModel, originalPropertyValue,
+				null);
+		SqlBuilder joinTableCondtion = buildJoinTableCondition(dialect, table, model, condition, property, mapper,
+				propertyTableCondition);
 
 		String joinTableName = toQuoteName(dialect, mapper.getJoinTableName());
 		String[] mkeyColumnNames = toQuoteNames(dialect, mapper.getModelKeyColumnNames());
 		String[] pkeyColumnNames = toQuoteNames(dialect, mapper.getPropertyKeyColumnNames());
 
 		Object[] updateModelKeyColumnValues = getModelKeyColumnValues(cn, mapper, model, keyUpdateObj);
-		Object[] updatePropertyKeyColumnValues = getPropertyKeyColumnValues(cn, mapper, propertyModelMapper.getModel(),
+		Object[] updatePropertyKeyColumnValues = getPropertyKeyColumnValues(cn, mapper, propertyModel,
 				updatePropertyValue);
 
 		SqlBuilder sql = SqlBuilder.valueOf();
@@ -945,16 +895,8 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 		}
 		else
 		{
-			PropertyModel originalPropertyModel = PropertyModel.valueOf(property, originalPropertyValue);
-			PropertyModel updatePropertyModel = PropertyModel.valueOf(property, updatePropertyValue);
-
-			if (originalPropertyModel.getIndex() != updatePropertyModel.getIndex())
-				return false;
-
-			Model pmodel = originalPropertyModel.getModel();
-
 			// 仅比较基本属性值，复合属性值如果存在循环引用，equals会出现死循环
-			if (MU.isPrimitiveModel(pmodel))
+			if (MU.isPrimitiveProperty(property))
 			{
 				return (originalPropertyValue.equals(updatePropertyValue));
 			}
@@ -969,9 +911,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 
 		private int propertyIndex;
 
-		private PropertyModelMapper<?> propertyModelMapper;
-
-		private int propertyModelMapperIndex;
+		private Mapper mapper;
 
 		private Object originalPropertyValue;
 
@@ -982,15 +922,13 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			super();
 		}
 
-		public UpdateInfoForAutoKeyUpdateRule(Property property, int propertyIndex,
-				PropertyModelMapper<?> propertyModelMapper, int propertyModelMapperIndex, Object originalPropertyValue,
-				Object updatePropertyValue)
+		public UpdateInfoForAutoKeyUpdateRule(Property property, int propertyIndex, Mapper mapper,
+				Object originalPropertyValue, Object updatePropertyValue)
 		{
 			super();
 			this.property = property;
 			this.propertyIndex = propertyIndex;
-			this.propertyModelMapper = propertyModelMapper;
-			this.propertyModelMapperIndex = propertyModelMapperIndex;
+			this.mapper = mapper;
 			this.originalPropertyValue = originalPropertyValue;
 			this.updatePropertyValue = updatePropertyValue;
 		}
@@ -1015,24 +953,14 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 			this.propertyIndex = propertyIndex;
 		}
 
-		public PropertyModelMapper<?> getPropertyModelMapper()
+		public Mapper getMapper()
 		{
-			return propertyModelMapper;
+			return mapper;
 		}
 
-		public void setPropertyModelMapper(PropertyModelMapper<?> propertyModelMapper)
+		public void setMapper(Mapper mapper)
 		{
-			this.propertyModelMapper = propertyModelMapper;
-		}
-
-		public int getPropertyModelMapperIndex()
-		{
-			return propertyModelMapperIndex;
-		}
-
-		public void setPropertyModelMapperIndex(int propertyModelMapperIndex)
-		{
-			this.propertyModelMapperIndex = propertyModelMapperIndex;
+			this.mapper = mapper;
 		}
 
 		public Object getOriginalPropertyValue()

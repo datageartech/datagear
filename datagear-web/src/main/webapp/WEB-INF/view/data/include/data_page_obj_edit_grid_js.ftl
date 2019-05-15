@@ -32,18 +32,18 @@ data_page_obj_edit_grid_html.ftl
 	po.currentPropertyIndexesMap = undefined;
 	
 	po.superPropertySubmitHandler = po.propertySubmitHandler;
-	po.propertySubmitHandler = function(property, propertyModel, propValue)
+	po.propertySubmitHandler = function(property, propValue)
 	{
-		po.superPropertySubmitHandler(property, propertyModel, propValue);
+		po.superPropertySubmitHandler(property, propValue);
 		
 		if(po.isSubmitWhenPropertySubmit)
 			po.form().modelform("submit");
 	};
 	
 	po.superPropertyDataTableAjaxSuccess = po.propertyDataTableAjaxSuccess;
-	po.propertyDataTableAjaxSuccess = function(property, propertyConcreteModel, propertyValue, propertyValuePagingData)
+	po.propertyDataTableAjaxSuccess = function(property, propertyValue, propertyValuePagingData)
 	{
-		po.superPropertyDataTableAjaxSuccess(property, propertyConcreteModel, propertyValue, propertyValuePagingData);
+		po.superPropertyDataTableAjaxSuccess(property, propertyValue, propertyValuePagingData);
 		
 		if(!$.model.isMultipleProperty(property))
 			return;
@@ -88,15 +88,15 @@ data_page_obj_edit_grid_html.ftl
 		}
 	}
 	
-	po.isPropertyActionClientSubmit = function(property, propertyConcreteModel)
+	po.isPropertyActionClientSubmit = function(property)
 	{
 		return true;
 	};
 	
 	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
-	po.buildPropertyActionOptions = function(property, propertyModel, propertyValue, extraRequestParams, extraPageParams)
+	po.buildPropertyActionOptions = function(property, propertyValue, extraRequestParams, extraPageParams)
 	{
-		var actionParam = po.superBuildPropertyActionOptions(property, propertyModel, propertyValue,
+		var actionParam = po.superBuildPropertyActionOptions(property, propertyValue,
 								extraRequestParams, extraPageParams);
 		
 		var singleRow = $.getDataTableRowIfSingle(po.currentCellIndexes);
@@ -143,7 +143,7 @@ data_page_obj_edit_grid_html.ftl
 		{
 			actionParam["pageParam"]["dataTableAjaxSuccess"] = function(propertyValuePagingData)
 			{
-				po.propertyDataTableAjaxSuccess(property, propertyModel, propertyValue, propertyValuePagingData);
+				po.propertyDataTableAjaxSuccess(property, propertyValue, propertyValuePagingData);
 			};
 		}
 		
@@ -731,12 +731,7 @@ data_page_obj_edit_grid_html.ftl
 			isHideFormPage = $.model.isMultipleProperty(property);
 			
 			if(!isHideFormPage)
-			{
-				var propertyValue = $.model.propertyValue(data, property.name);
-				var propertyModel = $.model.getPropertyModelByValue(property, propertyValue);
-				
-				isHideFormPage = $.model.isCompositeModel(propertyModel);
-			}
+				isHideFormPage = $.model.isCompositeProperty(property);
 		}
 		
 		po.editGridFormPage.data = data;
@@ -796,39 +791,39 @@ data_page_obj_edit_grid_html.ftl
 				return false;
 			},
 			invalidHandler : (isHideFormPage ? undefined : function(){ $formPage.show(); }),
-			addSinglePropertyValue : function(property, propertyModel)
+			addSinglePropertyValue : function(property)
 			{
-				po.editGridFormPage.addSinglePropertyValue(property, propertyModel);
+				po.editGridFormPage.addSinglePropertyValue(property);
 			},
-			editSinglePropertyValue : function(property, propertyModel, propertyValue)
+			editSinglePropertyValue : function(property, propertyValue)
 			{
-				po.editGridFormPage.editSinglePropertyValue(property, propertyModel, propertyValue);
+				po.editGridFormPage.editSinglePropertyValue(property, propertyValue);
 			},
-			deleteSinglePropertyValue : function(property, propertyModel, propertyValue)
+			deleteSinglePropertyValue : function(property, propertyValue)
 			{
-				po.editGridFormPage.deleteSinglePropertyValue(property, propertyModel, propertyValue);
+				po.editGridFormPage.deleteSinglePropertyValue(property, propertyValue);
 			},
-			selectSinglePropertyValue : function(property, propertyModel, propertyValue)
+			selectSinglePropertyValue : function(property, propertyValue)
 			{
-				po.editGridFormPage.selectSinglePropertyValue(property, propertyModel, propertyValue);
+				po.editGridFormPage.selectSinglePropertyValue(property, propertyValue);
 			},
-			viewSinglePropertyValue : function(property, propertyModel, propertyValue)
+			viewSinglePropertyValue : function(property, propertyValue)
 			{
-				po.editGridFormPage.viewSinglePropertyValue(property, propertyModel, propertyValue);
+				po.editGridFormPage.viewSinglePropertyValue(property, propertyValue);
 			},
-			editMultiplePropertyValue : function(property, propertyModel, propertyValue)
+			editMultiplePropertyValue : function(property, propertyValue)
 			{
-				po.editGridFormPage.editMultiplePropertyValue(property, propertyModel, propertyValue);
+				po.editGridFormPage.editMultiplePropertyValue(property, propertyValue);
 			},
-			viewMultiplePropertyValue : function(property, propertyModel, propertyValue)
+			viewMultiplePropertyValue : function(property, propertyValue)
 			{
-				po.editGridFormPage.viewMultiplePropertyValue(property, propertyModel, propertyValue);
+				po.editGridFormPage.viewMultiplePropertyValue(property, propertyValue);
 			},
 			filePropertyUploadURL : "${contextPath}/data/file/upload",
 			filePropertyDeleteURL : "${contextPath}/data/file/delete",
-			downloadSinglePropertyValueFile : function(property, propertyModel)
+			downloadSinglePropertyValueFile : function(property)
 			{
-				po.editGridFormPage.downloadSinglePropertyValueFile(property, propertyModel);
+				po.editGridFormPage.downloadSinglePropertyValueFile(property);
 			},
 			validationRequiredAsAdd : false,
 			labels : po.editGridFormPage.formLabels,
@@ -923,10 +918,8 @@ data_page_obj_edit_grid_html.ftl
 						var ovType = $.type(originalCellValue);
 						if((ovType == "object" || ovType == "array") && $.type(myPropertyValue) == ovType)
 						{
-							var propertyModel = $.model.getPropertyModelByValue(property, originalCellValue);
-							
 							changed = !$.deepEquals(originalCellValue, myPropertyValue, 
-											$.model.findMappedByWith(property, propertyModel));
+											$.model.findMappedByWith(property));
 						}
 					}
 				}

@@ -7,31 +7,31 @@ package org.datagear.persistence.mapper;
 import org.datagear.persistence.PersistenceException;
 
 /**
- * {@linkplain RelationMapperResolver}异常。
+ * {@linkplain MapperResolver}异常。
  * 
  * @author datagear@163.com
  *
  */
-public class RelationMapperResolverException extends PersistenceException
+public class MapperResolverException extends PersistenceException
 {
 	private static final long serialVersionUID = 1L;
 
-	public RelationMapperResolverException()
+	public MapperResolverException()
 	{
 		super();
 	}
 
-	public RelationMapperResolverException(String message)
+	public MapperResolverException(String message)
 	{
 		super(message);
 	}
 
-	public RelationMapperResolverException(Throwable cause)
+	public MapperResolverException(Throwable cause)
 	{
 		super(cause);
 	}
 
-	public RelationMapperResolverException(String message, Throwable cause)
+	public MapperResolverException(String message, Throwable cause)
 	{
 		super(message, cause);
 	}

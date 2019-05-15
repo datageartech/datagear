@@ -15,9 +15,7 @@
 		
 		var re = true;
 		
-		var propertyModelIndex = $.model.getPropertyModelIndexByValue(property, propertyValue);
-		
-		if($.model.isLongTextJdbcType(property, propertyModelIndex))
+		if($.model.isLongTextJdbcType(property))
 			re = (propertyValue.length < po.queryLeftClobLengthOnReading);
 		
 		return re;

@@ -119,22 +119,15 @@ public abstract class AbstractDbModelFactory implements DbModelFactory
 			Property[] properties = zyModel.getProperties();
 			for (Property property : properties)
 			{
-				Model[] pmodels = property.getModels();
+				Model propertyModel = MU.getModel(property);
 
-				for (int i = 0; i < pmodels.length; i++)
-				{
-					if (modelName.equals(pmodels[i].getName()))
-						pmodels[i] = model;
-				}
+				if (modelName.equals(propertyModel.getName()))
+					propertyModel = model;
 
-				// 如果不是内部数组，则需要调用set
-				if (property.getModels() != pmodels)
-				{
-					if (property instanceof AbstractProperty)
-						((AbstractProperty) property).setModels(pmodels);
-					else
-						throw new UnsupportedOperationException("Property.setModels(Model[]) is required for updating");
-				}
+				if (property instanceof AbstractProperty)
+					((AbstractProperty) property).setModel(propertyModel);
+				else
+					throw new UnsupportedOperationException("Property.setModels(Model[]) is required for updating");
 			}
 		}
 

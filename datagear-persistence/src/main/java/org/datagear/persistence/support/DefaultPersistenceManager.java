@@ -10,7 +10,6 @@ import java.util.List;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.support.MU;
-import org.datagear.model.support.PropertyModel;
 import org.datagear.model.support.PropertyPathInfo;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectSource;
@@ -20,8 +19,7 @@ import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.QueryResultMetaInfo;
 import org.datagear.persistence.SqlBuilder;
-import org.datagear.persistence.mapper.PropertyModelMapper;
-import org.datagear.persistence.mapper.RelationMapper;
+import org.datagear.persistence.mapper.Mapper;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -242,17 +240,14 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		Model ownerModel = propertyPathInfo.getOwnerModelTail();
 		Object ownerObj = propertyPathInfo.getOwnerObjTail();
 		Property property = propertyPathInfo.getPropertyTail();
-		Model propertyModel = propertyPathInfo.getModelTail();
-		RelationMapper relationMapper = getRelationMapper(ownerModel, property);
-		PropertyModelMapper<?> propertyModelMapper = PropertyModelMapper.valueOf(property, relationMapper,
-				propertyModel);
+		Mapper mapper = getMapper(ownerModel, property);
 
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
 		SqlBuilder condition = buildRecordCondition(cn, dialect, ownerModel, ownerObj, null);
 
 		return updatePersistenceOperation.updatePropertyTableData(cn, dialect, getTableName(ownerModel), model,
-				condition, property, propertyModelMapper, null, propertyPathInfo.getValueTail(), propValue);
+				condition, property, mapper, null, propertyPathInfo.getValueTail(), propValue);
 	}
 
 	@Override
@@ -308,18 +303,14 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		Object ownerObj = propertyPathInfo.getOwnerObjTail();
 		Object oldPropValueElement = propertyPathInfo.getValueTail();
 		Property property = propertyPathInfo.getPropertyTail();
-		Model propertyModel = propertyPathInfo.getModelTail();
-		RelationMapper relationMapper = getRelationMapper(ownerModel, property);
-		PropertyModelMapper<?> propertyModelMapper = PropertyModelMapper.valueOf(property, relationMapper,
-				propertyModel);
+		Mapper mapper = getMapper(ownerModel, property);
 
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
 		SqlBuilder condition = buildRecordCondition(cn, dialect, ownerModel, ownerObj, null);
 
 		return updatePersistenceOperation.updatePropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
-				condition, property, propertyModelMapper, updatePropertyProperties, oldPropValueElement,
-				propertyValueElement);
+				condition, property, mapper, updatePropertyProperties, oldPropValueElement, propertyValueElement);
 	}
 
 	@Override
@@ -342,18 +333,16 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		Object ownerObj = propertyPathInfo.getOwnerObjTail();
 		Property property = propertyPathInfo.getPropertyTail();
 		Model propertyModel = propertyPathInfo.getModelTail();
-		RelationMapper relationMapper = getRelationMapper(ownerModel, property);
-		PropertyModelMapper<?> propertyModelMapper = PropertyModelMapper.valueOf(property, relationMapper,
-				propertyModel);
+		Mapper mapper = getMapper(ownerModel, property);
 
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
 		SqlBuilder ownerRecordCondition = buildRecordCondition(cn, dialect, ownerModel, ownerObj, null);
 		SqlBuilder propertyTableCondition = buildRecordCondition(cn, dialect, propertyModel, propValueElements,
-				getMappedByWith(propertyModelMapper.getMapper()));
+				getMappedByWith(mapper));
 
 		return deletePersistenceOperation.deletePropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
-				ownerRecordCondition, property, propertyModelMapper, propertyTableCondition, true);
+				ownerRecordCondition, property, mapper, propertyTableCondition, true);
 	}
 
 	@Override
@@ -378,7 +367,7 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
 		return this.selectPersistenceOperation.getPropValueByParam(cn, dialect, getTableName(ownerModel), ownerModel,
-				ownerObj, property, PropertyModel.valueOf(property, propertyPathInfo.getModelTail()));
+				ownerObj, property);
 	}
 
 	@Override
@@ -395,8 +384,7 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
 		return this.selectPersistenceOperation.getMultiplePropValueElementByParam(cn, dialect, getTableName(ownerModel),
-				ownerModel, ownerObj, property, PropertyModel.valueOf(property, propertyPathInfo.getModelTail()),
-				propValueElementParam);
+				ownerModel, ownerObj, property, propValueElementParam);
 	}
 
 	@Override
@@ -434,8 +422,7 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
 		return this.selectPersistenceOperation.pagingQueryPropValue(cn, dialect, getTableName(ownerModel), ownerModel,
-				ownerObj, property, PropertyModel.valueOf(property, propertyPathInfo.getModelTail()), pagingQuery,
-				propertyModelQueryPattern);
+				ownerObj, property, pagingQuery, propertyModelQueryPattern);
 	}
 
 	@Override
@@ -451,8 +438,7 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
 		QueryResultMetaInfo queryResultMetaInfo = this.selectPersistenceOperation.getQueryPropValueQueryResultMetaInfo(
-				dialect, getTableName(ownerModel), ownerModel, property,
-				PropertyModel.valueOf(property, propertyPathInfo.getModelTail()), propertyModelPattern);
+				dialect, getTableName(ownerModel), ownerModel, property, propertyModelPattern);
 
 		return queryResultMetaInfo;
 	}

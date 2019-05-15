@@ -539,32 +539,8 @@ public class PropertyPathInfo
 					throw new IllegalArgumentException("The " + i + "-th property [" + pname + "] of [" + propertyPath
 							+ "] is not found in Model [" + parentModel + "]");
 
+				segmentModel = segmentProperty.getModel();
 				segmentValue = (parentObj == null ? null : segmentProperty.get(parentObj));
-
-				if (propertyPath.hasPropertyModelIndex(i))
-				{
-					int pmodelIndex = propertyPath.getPropertyModelIndex(i);
-					segmentModel = MU.getPropertyModel(segmentProperty, pmodelIndex);
-				}
-				else
-				{
-					if (MU.isConcreteProperty(segmentProperty))
-					{
-						segmentModel = segmentProperty.getModel();
-					}
-					else if (MU.isAbstractedProperty(segmentProperty))
-					{
-						if (segmentValue != null)
-							segmentModel = MU.getPropertyModel(segmentProperty, segmentValue);
-					}
-					else
-						throw new UnsupportedOperationException();
-				}
-
-				// 中间属性不允许segmentModel未确定
-				if (i < len - 1 && segmentModel == null)
-					throw new IllegalArgumentException("The " + i + "-th property [" + pname + "] of [" + propertyPath
-							+ "] 's property Model is ambiguous");
 
 				segment = Segment.propertySegment(segmentProperty, segmentModel, segmentValue);
 			}

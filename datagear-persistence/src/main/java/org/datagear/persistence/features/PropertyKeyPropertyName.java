@@ -4,10 +4,8 @@
 
 package org.datagear.persistence.features;
 
-import java.util.Map;
-
-import org.datagear.model.MapFeature;
 import org.datagear.model.PropertyFeature;
+import org.datagear.model.ValueFeature;
 import org.datagear.persistence.PersistenceFeature;
 
 /**
@@ -20,27 +18,15 @@ import org.datagear.persistence.PersistenceFeature;
  * @author datagear@163.com
  *
  */
-public class PropertyKeyPropertyName extends MapFeature<Integer, String[]>
-		implements PropertyFeature, PersistenceFeature
+public class PropertyKeyPropertyName extends ValueFeature<String[]> implements PropertyFeature, PersistenceFeature
 {
-
 	public PropertyKeyPropertyName()
 	{
 		super();
 	}
 
-	public PropertyKeyPropertyName(String[] defaultValue)
+	public PropertyKeyPropertyName(String[] value)
 	{
-		super(defaultValue);
-	}
-
-	public PropertyKeyPropertyName(Map<Integer, String[]> mapValues)
-	{
-		super(mapValues);
-	}
-
-	public PropertyKeyPropertyName(String[] defaultValue, Map<Integer, String[]> mapValues)
-	{
-		super(defaultValue, mapValues);
+		super(value);
 	}
 }

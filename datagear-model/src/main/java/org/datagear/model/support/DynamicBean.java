@@ -6,8 +6,6 @@ package org.datagear.model.support;
 
 import java.util.Map;
 
-import org.datagear.model.Model;
-
 /**
  * 动态Bean。
  * 
@@ -16,17 +14,4 @@ import org.datagear.model.Model;
  */
 public interface DynamicBean extends Map<String, Object>
 {
-	/**
-	 * 获取此动态Bean对应的{@linkplain Model 模型}。
-	 * 
-	 * @return
-	 */
-	Model getModel();
-
-	/**
-	 * 设置此动态Bean对应的{@linkplain Model 模型}。
-	 * 
-	 * @param model
-	 */
-	void setModel(Model model);
 }

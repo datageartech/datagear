@@ -31,7 +31,7 @@ public class PropertyPathTest
 	public void test()
 	{
 		{
-			String pp = "order.product<0>";
+			String pp = "order.product";
 			PropertyPath propertyPath = PropertyPath.valueOf(pp);
 
 			Assert.assertEquals(2, propertyPath.length());
@@ -41,16 +41,12 @@ public class PropertyPathTest
 
 			Assert.assertTrue(propertyPath.isProperty(1));
 			Assert.assertTrue(propertyPath.isPropertyTail());
-			Assert.assertTrue(propertyPath.hasPropertyModelIndex(1));
-			Assert.assertTrue(propertyPath.hasPropertyModelIndexTail());
-			Assert.assertEquals(0, propertyPath.getPropertyModelIndex(1));
-			Assert.assertEquals(0, propertyPath.getPropertyModelIndexTail());
 
 			Assert.assertEquals(pp, propertyPath.toString());
 		}
 
 		{
-			String pp = "[0].order.product<0>";
+			String pp = "[0].order.product";
 			PropertyPath propertyPath = PropertyPath.valueOf(pp);
 
 			Assert.assertEquals(3, propertyPath.length());
@@ -67,16 +63,12 @@ public class PropertyPathTest
 			Assert.assertTrue(propertyPath.isPropertyTail());
 			Assert.assertEquals("product", propertyPath.getPropertyName(2));
 			Assert.assertEquals("product", propertyPath.getPropertyNameTail());
-			Assert.assertTrue(propertyPath.hasPropertyModelIndex(2));
-			Assert.assertTrue(propertyPath.hasPropertyModelIndexTail());
-			Assert.assertEquals(0, propertyPath.getPropertyModelIndex(2));
-			Assert.assertEquals(0, propertyPath.getPropertyModelIndexTail());
 
 			Assert.assertEquals(pp, propertyPath.toString());
 		}
 
 		{
-			String pp = "prop\\.erty.prop\\[erty.prop\\]erty.prop\\<erty.prop\\>erty.prop\\erty";
+			String pp = "prop\\.erty.prop\\[erty.prop\\]erty.property.property.prop\\erty";
 			PropertyPath propertyPath = PropertyPath.valueOf(pp);
 
 			Assert.assertEquals(6, propertyPath.length());
@@ -87,9 +79,9 @@ public class PropertyPathTest
 
 			Assert.assertEquals("prop]erty", propertyPath.getPropertyName(2));
 
-			Assert.assertEquals("prop<erty", propertyPath.getPropertyName(3));
+			Assert.assertEquals("property", propertyPath.getPropertyName(3));
 
-			Assert.assertEquals("prop>erty", propertyPath.getPropertyName(4));
+			Assert.assertEquals("property", propertyPath.getPropertyName(4));
 
 			Assert.assertEquals("prop\\erty", propertyPath.getPropertyName(5));
 		}
@@ -101,14 +93,14 @@ public class PropertyPathTest
 		String pn = "p.r[o]p<e>rt\\y";
 		String epn = PropertyPath.escapePropertyName(pn);
 
-		Assert.assertEquals("p\\.r\\[o\\]p\\<e\\>rt\\y", epn);
+		Assert.assertEquals("p\\.r\\[o\\]p<e>rt\\y", epn);
 	}
 
 	@Test
 	public void unescapePropertyNameTest()
 	{
 		{
-			String epn = "p\\.r\\[o\\]p\\<e\\>rt\\y";
+			String epn = "p\\.r\\[o\\]p<e>rt\\y";
 			String pn = PropertyPath.unescapePropertyName(epn);
 
 			Assert.assertEquals("p.r[o]p<e>rt\\y", pn);

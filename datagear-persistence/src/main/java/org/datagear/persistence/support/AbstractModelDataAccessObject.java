@@ -17,7 +17,6 @@ import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.features.NotReadable;
 import org.datagear.model.support.MU;
-import org.datagear.model.support.PropertyModel;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.SqlBuilder;
@@ -26,10 +25,9 @@ import org.datagear.persistence.features.JdbcType;
 import org.datagear.persistence.features.TableName;
 import org.datagear.persistence.mapper.JoinTableMapper;
 import org.datagear.persistence.mapper.Mapper;
+import org.datagear.persistence.mapper.MapperUtil;
 import org.datagear.persistence.mapper.ModelTableMapper;
-import org.datagear.persistence.mapper.PropertyModelMapper;
 import org.datagear.persistence.mapper.PropertyTableMapper;
-import org.datagear.persistence.mapper.RelationMapper;
 
 /**
  * 抽象{@linkplain Model}数据访问对象。
@@ -65,7 +63,7 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	protected String[] getKeyColumnNames(Model model, Property[] properties)
 	{
 		// KEY属性不允许有模型端和属性段具体模型名，所以addModelConcreteColumn和addPropertyConcreteColumn为false，
-		// 参考RelationMapperResolver.checkKeyProperty(Model, Property...)
+		// 参考MapperResolver.checkKeyProperty(Model, Property...)
 		return getColumnNames(model, properties, false, false, false);
 	}
 
@@ -86,10 +84,9 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 
 		for (Property property : properties)
 		{
-			RelationMapper relationMapper = getRelationMapper(model, property);
-			PropertyModelMapper<?>[] propertyModelMappers = PropertyModelMapper.valueOf(property, relationMapper);
+			Mapper mapper = getMapper(model, property);
 
-			addColumnNames(model, property, propertyModelMappers, addModelConcreteColumn, addModelOrderColumn,
+			addColumnNames(model, property, mapper, addModelConcreteColumn, addModelOrderColumn,
 					addPropertyConcreteColumn, columnNames);
 		}
 
@@ -111,10 +108,9 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	{
 		List<String> columnNames = new ArrayList<String>();
 
-		RelationMapper relationMapper = getRelationMapper(model, property);
-		PropertyModelMapper<?>[] propertyModelMappers = PropertyModelMapper.valueOf(property, relationMapper);
+		Mapper mapper = getMapper(model, property);
 
-		addColumnNames(model, property, propertyModelMappers, containsModelConcreteColumn, containsModelOrderColumn,
+		addColumnNames(model, property, mapper, containsModelConcreteColumn, containsModelOrderColumn,
 				containsPropertyConcreteColumn, columnNames);
 
 		return columnNames.toArray(new String[columnNames.size()]);
@@ -128,29 +124,23 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyModelMappers
+	 * @param mapper
 	 * @param addModelConcreteColumn
 	 * @param addModelOrderColumn
 	 * @param addPropertyConcreteColumn
 	 * @param columnNames
 	 */
-	protected void addColumnNames(Model model, Property property, PropertyModelMapper<?>[] propertyModelMappers,
-			boolean addModelConcreteColumn, boolean addModelOrderColumn, boolean addPropertyConcreteColumn,
-			List<String> columnNames)
+	protected void addColumnNames(Model model, Property property, Mapper mapper, boolean addModelConcreteColumn,
+			boolean addModelOrderColumn, boolean addPropertyConcreteColumn, List<String> columnNames)
 	{
 		if (MU.isMultipleProperty(property))
 			return;
 
-		for (int i = 0; i < propertyModelMappers.length; i++)
-		{
-			PropertyModelMapper<?> pmm = propertyModelMappers[i];
+		if (!MapperUtil.isModelTableMapper(mapper))
+			return;
 
-			if (!pmm.isModelTableMapperInfo())
-				continue;
-
-			addColumnNames(model, property, pmm.castModelTableMapperInfo(), addModelConcreteColumn, addModelOrderColumn,
-					addPropertyConcreteColumn, columnNames);
-		}
+		addColumnNames(model, property, MapperUtil.castModelTableMapper(mapper), addModelConcreteColumn,
+				addModelOrderColumn, addPropertyConcreteColumn, columnNames);
 	}
 
 	/**
@@ -158,18 +148,16 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 * 
 	 * @param model
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param addModelConcreteColumn
 	 * @param addModelOrderColumn
 	 * @param addPropertyConcreteColumn
 	 * @param columnNames
 	 */
-	protected void addColumnNames(Model model, Property property,
-			PropertyModelMapper<ModelTableMapper> propertyModelMapper, boolean addModelConcreteColumn,
-			boolean addModelOrderColumn, boolean addPropertyConcreteColumn, List<String> columnNames)
+	protected void addColumnNames(Model model, Property property, ModelTableMapper mapper,
+			boolean addModelConcreteColumn, boolean addModelOrderColumn, boolean addPropertyConcreteColumn,
+			List<String> columnNames)
 	{
-		ModelTableMapper mapper = propertyModelMapper.getMapper();
-
 		if (mapper.isPrimitivePropertyMapper())
 		{
 			columnNames.add(mapper.getPrimitiveColumnName());
@@ -306,7 +294,7 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	protected Object[] getKeyColumnValues(Connection cn, Model model, Property[] keyProperties, Object[] propertyValues)
 	{
 		// KEY属性不允许有模型端和属性段具体模型名，所以addModelConcreteColumn和addPropertyConcreteColumn为false，
-		// 参考RelationMapperResolver.checkKeyProperty(Model, Property...)
+		// 参考MapperResolver.checkKeyProperty(Model, Property...)
 		return getColumnValues(cn, model, keyProperties, propertyValues, false, null, false);
 	}
 
@@ -362,12 +350,10 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 		{
 			Property property = properties[i];
 
-			RelationMapper relationMapper = getRelationMapper(model, property);
-			PropertyModelMapper<?>[] propertyModelMappers = PropertyModelMapper.valueOf(property, relationMapper);
+			Mapper mapper = getMapper(model, property);
 
-			addColumnValues(cn, model, property, propertyModelMappers,
-					(propertyValues == null ? null : propertyValues[i]), addModelConcreteColumn, modelOrderGenerator,
-					addPropertyConcreteColumn, columnValues);
+			addColumnValues(cn, model, property, mapper, (propertyValues == null ? null : propertyValues[i]),
+					addModelConcreteColumn, modelOrderGenerator, addPropertyConcreteColumn, columnValues);
 		}
 
 		return toObjectArray(columnValues);
@@ -376,13 +362,13 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	/**
 	 * 添加属性列值至列表。
 	 * <p>
-	 * 此方法的添加顺序与{@linkplain #addColumnNames(Model, Property, RelationMapper, PropertyModelMapper[], boolean, boolean, boolean, List)}一致。
+	 * 此方法的添加顺序与{@linkplain #addColumnNames(Model, Property, Mapper, boolean, boolean, boolean, List)}一致。
 	 * </p>
 	 * 
 	 * @param cn
 	 * @param model
 	 * @param property
-	 * @param propertyModelMappers
+	 * @param mapper
 	 * @param propertyValue
 	 *            允许为{@code null}
 	 * @param addModelConcreteColumn
@@ -391,66 +377,47 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 * @param addPropertyConcreteColumn
 	 * @param columnValues
 	 */
-	protected void addColumnValues(Connection cn, Model model, Property property,
-			PropertyModelMapper<?>[] propertyModelMappers, Object propertyValue, boolean addModelConcreteColumn,
-			ModelOrderGenerator modelOrderGenerator, boolean addPropertyConcreteColumn, List<Object> columnValues)
+	protected void addColumnValues(Connection cn, Model model, Property property, Mapper mapper, Object propertyValue,
+			boolean addModelConcreteColumn, ModelOrderGenerator modelOrderGenerator, boolean addPropertyConcreteColumn,
+			List<Object> columnValues)
 	{
 		if (MU.isMultipleProperty(property))
 			return;
 
-		int pmodelIndex = getPropertyModelIndex(property, propertyValue);
+		if (!MapperUtil.isModelTableMapper(mapper))
+			return;
 
-		for (int i = 0; i < propertyModelMappers.length; i++)
+		ModelTableMapper mtm = MapperUtil.castModelTableMapper(mapper);
+
+		if (mtm.isPrimitivePropertyMapper())
 		{
-			PropertyModelMapper<?> pmm = propertyModelMappers[i];
+			columnValues.add(getColumnValue(cn, model, property, propertyValue));
+		}
+		else
+		{
+			Model propertyModel = MU.getModel(property);
+			Property[] propertyKeyProperties = getPropertyKeyProperties(mtm, propertyModel);
+			Object[] propertyKeyColumnValues = getKeyColumnValues(cn, propertyModel, propertyValue,
+					propertyKeyProperties);
 
-			if (!pmm.isModelTableMapperInfo())
-				continue;
+			addArrayToList(columnValues, propertyKeyColumnValues);
 
-			PropertyModelMapper<ModelTableMapper> mpmm = pmm.castModelTableMapperInfo();
-			Model propertyModel = mpmm.getModel();
-			ModelTableMapper mapper = mpmm.getMapper();
-
-			if (mapper.isPrimitivePropertyMapper())
+			if (mapper.hasModelConcreteColumn() && addModelConcreteColumn)
 			{
-				columnValues.add(getColumnValue(cn, model, property, pmm, (i == pmodelIndex ? propertyValue : null)));
+				columnValues.add(mapper.getModelConcreteColumnValue());
 			}
-			else
+
+			if (mtm.hasModelOrderColumn() && modelOrderGenerator != null)
 			{
-				Property[] propertyKeyProperties = getPropertyKeyProperties(mapper, pmm.getModel());
-				Object[] propertyKeyColumnValues = getKeyColumnValues(cn, propertyModel,
-						(i == pmodelIndex ? propertyValue : null), propertyKeyProperties);
+				long modelOrder = modelOrderGenerator.generate(model, property, mtm, propertyValue,
+						propertyKeyColumnValues);
 
-				addArrayToList(columnValues, propertyKeyColumnValues);
+				columnValues.add(modelOrder);
+			}
 
-				if (mapper.hasModelConcreteColumn() && addModelConcreteColumn)
-				{
-					if (i == pmodelIndex)
-						columnValues.add(mapper.getModelConcreteColumnValue());
-					else
-						columnValues.add(null);
-				}
-
-				if (mapper.hasModelOrderColumn() && modelOrderGenerator != null)
-				{
-					if (i == pmodelIndex)
-					{
-						long modelOrder = modelOrderGenerator.generate(model, property, mpmm, propertyValue,
-								propertyKeyColumnValues);
-
-						columnValues.add(modelOrder);
-					}
-					else
-						columnValues.add(null);
-				}
-
-				if (mapper.hasPropertyConcreteColumn() && addPropertyConcreteColumn)
-				{
-					if (i == pmodelIndex)
-						columnValues.add(mapper.getPropertyConcreteColumnValue());
-					else
-						columnValues.add(null);
-				}
+			if (mtm.hasPropertyConcreteColumn() && addPropertyConcreteColumn)
+			{
+				columnValues.add(mapper.getPropertyConcreteColumnValue());
 			}
 		}
 	}
@@ -461,15 +428,13 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 * @param cn
 	 * @param model
 	 * @param property
-	 * @param propertyModel
 	 * @param propertyValue
 	 *            允许为{@code null}
 	 * @return
 	 */
-	protected Object getColumnValue(Connection cn, Model model, Property property, PropertyModel propertyModel,
-			Object propertyValue)
+	protected Object getColumnValue(Connection cn, Model model, Property property, Object propertyValue)
 	{
-		if (!MU.isPrimitiveModel(propertyModel.getModel()))
+		if (!MU.isPrimitiveProperty(property))
 			throw new IllegalArgumentException("[propertyModel.getModel()] must be primitive");
 
 		ColumnConverter columnConverter = property.getFeature(ColumnConverter.class);
@@ -477,8 +442,7 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 		if (columnConverter == null)
 			return propertyValue;
 		else
-			return columnConverter.to(cn, model, property, propertyModel.getIndex(), propertyModel.getModel(),
-					propertyValue);
+			return columnConverter.to(cn, model, property, propertyValue);
 	}
 
 	/**
@@ -724,45 +688,43 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	}
 
 	/**
-	 * 获取所有{@linkplain RelationMapper}。
+	 * 获取所有{@linkplain Mapper}。
 	 * 
 	 * @param model
 	 * @return
 	 */
-	protected RelationMapper[] getRelationMappers(Model model)
+	protected Mapper[] getMappers(Model model)
 	{
-		return getRelationMappers(model, model.getProperties());
+		return getMappers(model, model.getProperties());
 	}
 
 	/**
-	 * 获取{@linkplain RelationMapper}。
+	 * 获取{@linkplain Mapper}。
 	 * 
 	 * @param model
 	 * @param properties
 	 * @return
 	 */
-	protected RelationMapper[] getRelationMappers(Model model, Property[] properties)
+	protected Mapper[] getMappers(Model model, Property[] properties)
 	{
-		RelationMapper[] relationMappers = new RelationMapper[properties.length];
+		Mapper[] mappers = new Mapper[properties.length];
 
 		for (int i = 0; i < properties.length; i++)
-			relationMappers[i] = getRelationMapper(model, properties[i]);
+			mappers[i] = getMapper(model, properties[i]);
 
-		return relationMappers;
+		return mappers;
 	}
 
 	/**
-	 * 获取指定{@linkplain Property}的{@linkplain RelationMapper}。
+	 * 获取指定{@linkplain Property}的{@linkplain Mapper}。
 	 * 
 	 * @param model
 	 * @param property
 	 * @return
 	 */
-	protected RelationMapper getRelationMapper(Model model, Property property)
+	protected Mapper getMapper(Model model, Property property)
 	{
-		RelationMapper relationMapper = property.getFeature(RelationMapper.class);
-
-		return relationMapper;
+		return property.getFeature(Mapper.class);
 	}
 
 	/**
@@ -790,20 +752,18 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 * @param columnIndex
 	 * @param model
 	 * @param property
-	 * @param propertyModel
 	 * @return
 	 */
 	protected Object toPropertyValue(Connection cn, ResultSet rs, int row, int columnIndex, Model model,
-			Property property, PropertyModel propertyModel)
+			Property property)
 	{
 		ColumnConverter columnConverter = property.getFeature(ColumnConverter.class);
 
 		if (columnConverter != null)
-			return columnConverter.from(cn, rs, row, columnIndex, model, property, propertyModel.getIndex(),
-					propertyModel.getModel());
+			return columnConverter.from(cn, rs, row, columnIndex, model, property);
 		else
 		{
-			return getColumnValue(rs, row, columnIndex, MU.getType(propertyModel.getModel()));
+			return getColumnValue(rs, row, columnIndex, MU.getType(property));
 		}
 	}
 
@@ -970,17 +930,16 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 * @param condition
 	 *            模型表查询条件，允许为{@code null}。
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param propertyTableCondition
 	 *            属性表查询条件，允许为{@code null}。
 	 * @return
 	 */
 	protected SqlBuilder buildPropertyTableConditionForEntityModelTableMapper(Dialect dialect, String table,
-			Model model, SqlBuilder condition, Property property,
-			PropertyModelMapper<ModelTableMapper> propertyModelMapper, SqlBuilder propertyTableCondition)
+			Model model, SqlBuilder condition, Property property, ModelTableMapper mapper,
+			SqlBuilder propertyTableCondition)
 	{
-		ModelTableMapper mapper = propertyModelMapper.getMapper();
-		Model propertyModel = propertyModelMapper.getModel();
+		Model propertyModel = MU.getModel(property);
 
 		String[] mtableKeyColumnNames = toQuoteNames(dialect, mapper.getPropertyKeyColumnNames());
 
@@ -1024,17 +983,14 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 * @param condition
 	 *            模型表查询条件，允许为{@code null}。
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param propertyTableCondition
 	 *            属性表查询条件，允许为{@code null}。
 	 * @return
 	 */
 	protected SqlBuilder buildPropertyTableConditionForPropertyTableMapper(Dialect dialect, String table, Model model,
-			SqlBuilder condition, Property property, PropertyModelMapper<PropertyTableMapper> propertyModelMapper,
-			SqlBuilder propertyTableCondition)
+			SqlBuilder condition, Property property, PropertyTableMapper mapper, SqlBuilder propertyTableCondition)
 	{
-		PropertyTableMapper mapper = propertyModelMapper.getMapper();
-
 		// 构建模型表内的属性Key查询视图
 		SqlBuilder mtablekeyQuery = SqlBuilder.valueOf();
 
@@ -1074,17 +1030,15 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 * @param condition
 	 *            模型表查询条件，允许为{@code null}。
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param propertyTableCondition
 	 *            属性表查询条件，允许为{@code null}。
 	 * @return
 	 */
 	protected SqlBuilder buildPropertyTableConditionForJoinTableMapper(Dialect dialect, String table, Model model,
-			SqlBuilder condition, Property property, PropertyModelMapper<JoinTableMapper> propertyModelMapper,
-			SqlBuilder propertyTableCondition)
+			SqlBuilder condition, Property property, JoinTableMapper mapper, SqlBuilder propertyTableCondition)
 	{
-		JoinTableMapper mapper = propertyModelMapper.getMapper();
-		Model propertyModel = propertyModelMapper.getModel();
+		Model propertyModel = MU.getModel(property);
 
 		String jointable = toQuoteName(dialect, mapper.getJoinTableName());
 		String[] modelKeyColumnNames = toQuoteNames(dialect, mapper.getModelKeyColumnNames());
@@ -1144,17 +1098,15 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	 * @param condition
 	 *            模型表查询条件，允许为{@code null}。
 	 * @param property
-	 * @param propertyModelMapper
+	 * @param mapper
 	 * @param propertyTableCondition
 	 *            属性表查询条件，允许为{@code null}。
 	 * @return
 	 */
 	protected SqlBuilder buildJoinTableCondition(Dialect dialect, String table, Model model, SqlBuilder condition,
-			Property property, PropertyModelMapper<JoinTableMapper> propertyModelMapper,
-			SqlBuilder propertyTableCondition)
+			Property property, JoinTableMapper mapper, SqlBuilder propertyTableCondition)
 	{
-		JoinTableMapper mapper = propertyModelMapper.getMapper();
-		Model propertyModel = propertyModelMapper.getModel();
+		Model propertyModel = MU.getModel(property);
 
 		String[] modelKeyColumnNames = toQuoteNames(dialect, mapper.getModelKeyColumnNames());
 		String[] propertyKeyColumnNames = toQuoteNames(dialect, mapper.getPropertyKeyColumnNames());
@@ -1317,16 +1269,15 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 			}
 			else
 			{
-				PropertyModelMapper<?> propertyModelMapper = PropertyModelMapper.valueOf(property,
-						getRelationMapper(model, property), propertyValue);
+				Mapper mapper = getMapper(model, property);
 
-				if (propertyModelMapper.isModelTableMapperInfo())
+				if (MapperUtil.isModelTableMapper(mapper))
 				{
 					JdbcType jdbcType = property.getFeature(JdbcType.class);
 
 					if (jdbcType != null)
 					{
-						int jdbcTypeValue = jdbcType.getValue(propertyModelMapper.getIndex());
+						int jdbcTypeValue = jdbcType.getValue();
 
 						if (Types.BIGINT == jdbcTypeValue || Types.BIT == jdbcTypeValue
 								|| Types.BOOLEAN == jdbcTypeValue || Types.CHAR == jdbcTypeValue
@@ -1345,7 +1296,7 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 					}
 					else
 					{
-						if (MU.isType(propertyModelMapper.getModel(), java.io.File.class))
+						if (MU.isType(property, java.io.File.class))
 							add = false;
 						else
 							add = true;
@@ -1408,24 +1359,6 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 	}
 
 	/**
-	 * 获取指定属性值的属性模型索引。
-	 * <p>
-	 * 如果{@code propertyValue}为{@code null}，将返回{@code -1}。
-	 * </p>
-	 * 
-	 * @param property
-	 * @param propertyValue
-	 *            允许为{@code null}
-	 * @return
-	 */
-	protected int getPropertyModelIndex(Property property, Object propertyValue)
-	{
-		int index = (propertyValue == null ? -1 : PropertyModel.valueOf(property, propertyValue).getIndex());
-
-		return index;
-	}
-
-	/**
 	 * 获取模型表名称。
 	 * 
 	 * @param model
@@ -1436,37 +1369,6 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 		TableName tableName = model.getFeature(TableName.class);
 
 		return (tableName == null ? model.getName() : tableName.getValue());
-	}
-
-	/**
-	 * 将对象按照模型归类。
-	 * 
-	 * @param models
-	 * @param objs
-	 * @return
-	 */
-	protected List<IndexValue<Object>>[] sortByModel(Model[] models, Object[] objs)
-	{
-		@SuppressWarnings("unchecked")
-		List<IndexValue<Object>>[] indexValuess = new ArrayList[models.length];
-
-		for (int i = 0; i < models.length; i++)
-		{
-			List<IndexValue<Object>> indexValues = new ArrayList<IndexValue<Object>>();
-
-			if (objs != null)
-			{
-				for (int j = 0; j < objs.length; j++)
-				{
-					if (MU.isModelData(models[i], objs[j]))
-						indexValues.add(new IndexValue<Object>(j, objs[j]));
-				}
-			}
-
-			indexValuess[i] = indexValues;
-		}
-
-		return indexValuess;
 	}
 
 	/**
@@ -1620,8 +1522,7 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 					{
 						Property autoGeneratedProperty = autoGeneratedProperties.get(i - 1);
 
-						Object propValue = toPropertyValue(cn, generatedKeys, 1, i, model, autoGeneratedProperty,
-								PropertyModel.valueOf(autoGeneratedProperty, autoGeneratedProperty.getModel()));
+						Object propValue = toPropertyValue(cn, generatedKeys, 1, i, model, autoGeneratedProperty);
 
 						autoGeneratedProperty.set(generatedObj, propValue);
 					}
@@ -1657,12 +1558,12 @@ public class AbstractModelDataAccessObject extends AbstractDataAccessObject
 		 * 
 		 * @param model
 		 * @param property
-		 * @param propertyModelMapper
+		 * @param Mapper
 		 * @param propertyValue
 		 * @param propertyKeyColumnValues
 		 * @return
 		 */
-		long generate(Model model, Property property, PropertyModelMapper<ModelTableMapper> propertyModelMapper,
-				Object propertyValue, Object[] propertyKeyColumnValues);
+		long generate(Model model, Property property, ModelTableMapper Mapper, Object propertyValue,
+				Object[] propertyKeyColumnValues);
 	}
 }

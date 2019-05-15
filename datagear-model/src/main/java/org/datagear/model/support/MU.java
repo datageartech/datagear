@@ -73,6 +73,17 @@ public class MU
 	}
 
 	/**
+	 * 获取属性模型。
+	 * 
+	 * @param property
+	 * @return
+	 */
+	public static Model getModel(Property property)
+	{
+		return property.getModel();
+	}
+
+	/**
 	 * 判断给定{@linkplain Property 属性}是否是单元属性。
 	 * <p>
 	 * 单元属性的{@linkplain Property#isArray()}为{@code false}且
@@ -103,62 +114,9 @@ public class MU
 	}
 
 	/**
-	 * 判断给定{@linkplain Property 属性}是否是<i>抽象属性</i>。
-	 * 
-	 * @param model
-	 * @return
-	 */
-	public static boolean isAbstractedProperty(Property property)
-	{
-		return property.isAbstracted();
-	}
-
-	/**
-	 * 判断给定{@linkplain Property 属性}是否是<i>具体属性</i>。
-	 * 
-	 * @param model
-	 * @return
-	 */
-	public static boolean isConcreteProperty(Property property)
-	{
-		return !property.isAbstracted();
-	}
-
-	/**
-	 * 判断给定{@linkplain Property}是否是混杂的。
-	 * <p>
-	 * 混杂属性是抽象属性，并且其属性模型中即包含基本属性、又包含复合属性。
-	 * </p>
-	 * 
-	 * @param property
-	 * @return
-	 */
-	public static boolean isHibridProperty(Property property)
-	{
-		if (!isAbstractedProperty(property))
-			return false;
-
-		Model[] models = property.getModels();
-
-		int primitiveCount = 0;
-		int compositeCount = 0;
-
-		for (Model model : models)
-		{
-			if (isPrimitiveModel(model))
-				primitiveCount++;
-			else if (isCompositeModel(model))
-				compositeCount++;
-		}
-
-		return (primitiveCount > 0 && compositeCount > 0);
-	}
-
-	/**
 	 * 判断给定{@linkplain Property}是否是基本属性。
 	 * <p>
-	 * 基本属性的{@linkplain Property#getModel()}或者{@linkplain Property#getModels()}
-	 * 都是基本模型。
+	 * 基本属性的{@linkplain Property#getModel()}是基本模型。
 	 * </p>
 	 * 
 	 * @param property
@@ -166,27 +124,13 @@ public class MU
 	 */
 	public static boolean isPrimitiveProperty(Property property)
 	{
-		if (!isAbstractedProperty(property))
-			return isPrimitiveModel(property.getModel());
-
-		Model[] models = property.getModels();
-
-		int primitiveCount = 0;
-
-		for (Model model : models)
-		{
-			if (isPrimitiveModel(model))
-				primitiveCount++;
-		}
-
-		return (primitiveCount == models.length);
+		return isPrimitiveModel(property.getModel());
 	}
 
 	/**
 	 * 判断给定{@linkplain Property}是否是复合属性。
 	 * <p>
-	 * 复合属性的{@linkplain Property#getModel()}或者{@linkplain Property#getModels()}
-	 * 都是复合模型。
+	 * 复合属性的{@linkplain Property#getModel()}是复合模型。
 	 * </p>
 	 * 
 	 * @param property
@@ -194,32 +138,7 @@ public class MU
 	 */
 	public static boolean isCompositeProperty(Property property)
 	{
-		if (!isAbstractedProperty(property))
-			return isPrimitiveModel(property.getModel());
-
-		Model[] models = property.getModels();
-
-		int compositeCount = 0;
-
-		for (Model model : models)
-		{
-			if (isCompositeModel(model))
-				compositeCount++;
-		}
-
-		return (compositeCount == models.length);
-	}
-
-	/**
-	 * 判断给定{@linkplain Property}是否是具体（{@linkplain #isConcreteProperty(Property)}
-	 * ）、基本（{@linkplain #isPrimitiveProperty(Property)}）属性。
-	 * 
-	 * @param property
-	 * @return
-	 */
-	public static boolean isConcretePrimitiveProperty(Property property)
-	{
-		return isConcreteProperty(property) && isPrimitiveProperty(property);
+		return isCompositeModel(property.getModel());
 	}
 
 	/**
@@ -290,203 +209,6 @@ public class MU
 			throw new IllegalArgumentException("No property named [" + propertyName + "] found in [" + model + "]");
 
 		return property;
-	}
-
-	/**
-	 * 获取属性模型数组。
-	 * <p>
-	 * 如果属性是抽象属性，返回{@linkplain Property#getModels()}；否则，返回仅有一个
-	 * {@linkplain Property#getModel()}元素的数组。
-	 * </p>
-	 * 
-	 * @param property
-	 * @return
-	 */
-	public static Model[] getModels(Property property)
-	{
-		if (isAbstractedProperty(property))
-			return property.getModels();
-		else
-			return new Model[] { property.getModel() };
-	}
-
-	/**
-	 * 获取属性模型在{@linkplain Property#getModels()}中的索引。
-	 * 
-	 * @param property
-	 * @param propertyModel
-	 * @return
-	 */
-	public static int getPropertyModelIndex(Property property, Model propertyModel)
-	{
-		int index = getModelIndex(property.getModels(), propertyModel);
-
-		if (index < 0)
-			throw new IllegalArgumentException("No property model found for [" + propertyModel + "]");
-
-		return index;
-	}
-
-	/**
-	 * 获取属性模型在{@linkplain Property#getModels()}中的索引。
-	 * 
-	 * @param property
-	 * @param propValue
-	 * @return
-	 */
-	public static int getPropertyModelIndex(Property property, Object propValue)
-	{
-		Model[] pmodels = property.getModels();
-
-		int pmodelIndex = getModelIndex(pmodels, propValue);
-
-		if (pmodelIndex < 0)
-			throw new IllegalArgumentException("No property model found for value [" + propValue + "]");
-
-		return pmodelIndex;
-	}
-
-	/**
-	 * 获取指定索引的属性模型。
-	 * 
-	 * @param property
-	 * @param propertyModelIndex
-	 * @return
-	 */
-	public static Model getPropertyModel(Property property, int propertyModelIndex)
-	{
-		Model[] propertyModels = getModels(property);
-
-		if (propertyModelIndex < 0 || propertyModelIndex >= propertyModels.length)
-			throw new IllegalArgumentException("[propertyModelIndex] must be between [0] and ["
-					+ (propertyModels.length - 1) + "] for [" + property + "] ");
-
-		return propertyModels[propertyModelIndex];
-	}
-
-	/**
-	 * 获取指定索引的属性模型。
-	 * 
-	 * @param property
-	 * @param propertyValue
-	 * @return
-	 */
-	public static Model getPropertyModel(Property property, Object propertyValue)
-	{
-		int index = getPropertyModelIndex(property, propertyValue);
-
-		return getPropertyModel(property, index);
-	}
-
-	/**
-	 * 获取{@code model}在{@code models}数组中的索引。
-	 * <p>
-	 * 如果未找到，此方法将返回{@code -1}。
-	 * </p>
-	 * 
-	 * @param models
-	 * @param model
-	 * @return
-	 */
-	public static int getModelIndex(Model[] models, Model model)
-	{
-		for (int i = 0; i < models.length; i++)
-		{
-			if (models[i].equals(model))
-				return i;
-		}
-
-		return -1;
-	}
-
-	/**
-	 * 获取{@code modelType}在{@code models}数组中的索引。
-	 * <p>
-	 * 如果未找到，此方法将返回{@code -1}。
-	 * </p>
-	 * 
-	 * @param models
-	 * @param modelType
-	 * @return
-	 */
-	public static int getModelIndex(Model[] models, Class<?> modelType)
-	{
-		for (int i = 0; i < models.length; i++)
-		{
-			if (models[i].getType().equals(modelType))
-				return i;
-		}
-
-		return -1;
-	}
-
-	/**
-	 * 获取{@code obj}在{@linkplain models}数组中对应的模型索引。
-	 * <p>
-	 * 如果未找到，此方法将返回{@code -1}。
-	 * </p>
-	 * 
-	 * @param models
-	 * @param obj
-	 * @return
-	 */
-	public static int getModelIndex(Model[] models, Object obj)
-	{
-		if (models.length == 1)
-			return 0;
-
-		if (obj == null)
-			throw new IllegalArgumentException("[obj] must not be null");
-
-		if (obj instanceof DynamicBean)
-		{
-			Model model = ((DynamicBean) obj).getModel();
-
-			if (model == null)
-				throw new IllegalArgumentException("The " + DynamicBean.class.getSimpleName()
-						+ " [obj]'s 'getModel()' method must not return null ");
-
-			return getModelIndex(models, model);
-		}
-		else
-			return getModelIndex(models, obj.getClass());
-	}
-
-	/**
-	 * 从{@linkplain Model}数组查找指定名称的{@linkplain Model}。
-	 * 
-	 * @param models
-	 * @param modelName
-	 * @return
-	 */
-	public static Model getModel(Model[] models, String modelName)
-	{
-		for (int i = 0; i < models.length; i++)
-		{
-			if (models[i].getName().equals(modelName))
-				return models[i];
-		}
-
-		return null;
-	}
-
-	/**
-	 * 判断对象{@code obj}是否是指定模型{@code model}的数据。
-	 * 
-	 * @param model
-	 * @param obj
-	 * @return
-	 */
-	public static boolean isModelData(Model model, Object obj)
-	{
-		if (obj == null)
-			return true;
-		else if (obj instanceof DynamicBean)
-		{
-			return model.equals(((DynamicBean) obj).getModel());
-		}
-		else
-			return model.getType().equals(obj.getClass());
 	}
 
 	/**

@@ -56,9 +56,9 @@ boolean batchSet 是否开启批量执行功能，默认为false
 		po.isClientPageData = true;
 	
 	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
-	po.buildPropertyActionOptions = function(property, propertyConcreteModel, propertyValue, extraRequestParams, extraPageParams)
+	po.buildPropertyActionOptions = function(property, propertyValue, extraRequestParams, extraPageParams)
 	{
-		var actionParam = po.superBuildPropertyActionOptions(property, propertyConcreteModel, propertyValue,
+		var actionParam = po.superBuildPropertyActionOptions(property, propertyValue,
 				extraRequestParams, extraPageParams);
 		
 		if(po.isClientPageData)
@@ -81,14 +81,13 @@ boolean batchSet 是否开启批量执行功能，默认为false
 	
 	po.onModel(function(model)
 	{
-		var propertyInfo = $.model.getTailPropertyInfoConcrete(model, po.propertyPath);
+		var propertyInfo = $.model.getTailPropertyInfo(model, po.propertyPath);
 		var property = propertyInfo.property;
-		var propertyModel = propertyInfo.model;
 		
 		po.form().modelform(
 		{
-			model : propertyModel,
-			ignorePropertyNames : $.model.findMappedByWith(property, propertyModel),
+			model : property.model,
+			ignorePropertyNames : $.model.findMappedByWith(property),
 			data : $.deepClone(po.propertyValue),
 			readonly : po.readonly,
 			submit : function()
@@ -160,39 +159,39 @@ boolean batchSet 是否开启批量执行功能，默认为false
 				
 				return false;
 			},
-			addSinglePropertyValue : function(property, propertyConcreteModel)
+			addSinglePropertyValue : function(property)
 			{
-				po.addSinglePropertyValue(property, propertyConcreteModel);
+				po.addSinglePropertyValue(property);
 			},
-			editSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
+			editSinglePropertyValue : function(property, propertyValue)
 			{
-				po.editSinglePropertyValue(property, propertyConcreteModel, propertyValue);
+				po.editSinglePropertyValue(property, propertyValue);
 			},
-			deleteSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
+			deleteSinglePropertyValue : function(property, propertyValue)
 			{
-				po.deleteSinglePropertyValue(property, propertyConcreteModel, propertyValue);
+				po.deleteSinglePropertyValue(property, propertyValue);
 			},
-			selectSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
+			selectSinglePropertyValue : function(property, propertyValue)
 			{
-				po.selectSinglePropertyValue(property, propertyConcreteModel, propertyValue);
+				po.selectSinglePropertyValue(property, propertyValue);
 			},
-			viewSinglePropertyValue : function(property, propertyConcreteModel, propertyValue)
+			viewSinglePropertyValue : function(property, propertyValue)
 			{
-				po.viewSinglePropertyValue(property, propertyConcreteModel, propertyValue);
+				po.viewSinglePropertyValue(property, propertyValue);
 			},
-			editMultiplePropertyValue : function(property, propertyConcreteModel, propertyValue)
+			editMultiplePropertyValue : function(property, propertyValue)
 			{
-				po.editMultiplePropertyValue(property, propertyConcreteModel, propertyValue);
+				po.editMultiplePropertyValue(property, propertyValue);
 			},
-			viewMultiplePropertyValue : function(property, propertyConcreteModel, propertyValue)
+			viewMultiplePropertyValue : function(property, propertyValue)
 			{
-				po.viewMultiplePropertyValue(property, propertyConcreteModel, propertyValue);
+				po.viewMultiplePropertyValue(property, propertyValue);
 			},
 			filePropertyUploadURL : "${contextPath}/data/file/upload",
 			filePropertyDeleteURL : "${contextPath}/data/file/delete",
-			downloadSinglePropertyValueFile : function(property, propertyConcreteModel)
+			downloadSinglePropertyValueFile : function(property)
 			{
-				po.downloadSinglePropertyValueFile(property, propertyConcreteModel);
+				po.downloadSinglePropertyValueFile(property);
 			},
 			validationRequiredAsAdd : ("saveAdd" == po.submitAction),
 			batchSet : po.batchSet,

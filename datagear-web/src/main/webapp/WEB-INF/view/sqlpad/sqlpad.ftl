@@ -836,15 +836,13 @@ Schema schema 数据库，不允许为null
 					{
 						if(rowIndex < po.sqlResultFullLoadingLobMaxRow && data)
 						{
-							var propertyModelIndex = $.model.getPropertyModelIndexByValue(property, data);
-							
-							if($.model.isLongTextJdbcType(property, propertyModelIndex))
+							if($.model.isLongTextJdbcType(property))
 							{
 								return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' class='view-sql-result-long-text-link'>"
 										+ renderValue
 										+ "<span style='display:none;'>"+$.escapeHtml(data)+"</span>" + "</a>";
 							}
-							else if($.model.isBinaryJdbcType(property, propertyModelIndex))
+							else if($.model.isBinaryJdbcType(property))
 							{
 								return "<a href='${contextPath}/sqlpad/"+po.schemaId+"/downloadResultField?sqlpadId="+po.sqlpadId+"&value="+encodeURIComponent(data)+"'>"
 										+ renderValue + "</a>";
