@@ -697,7 +697,7 @@ public class DataController extends AbstractSchemaModelConnController
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 
 		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -709,7 +709,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
 
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 						.getQueryPropValueSourceQueryResultMetaInfo(cn, model, data, propertyPathInfo);
@@ -757,7 +757,7 @@ public class DataController extends AbstractSchemaModelConnController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 				LOBConversionContext.set(buildQueryLobConversionSetting());
 
@@ -837,7 +837,7 @@ public class DataController extends AbstractSchemaModelConnController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 				Model propertyModel = propertyPathInfo.getModelTail();
 				Object[] propertyValues = modelDataConverter.convertToArray(propertyValuesParam, propertyModel);
 
@@ -869,7 +869,7 @@ public class DataController extends AbstractSchemaModelConnController
 	{
 		final Object dataParam = getParamMap(request, "data");
 
-		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 
 		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -902,7 +902,7 @@ public class DataController extends AbstractSchemaModelConnController
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propertyValueParam = getParamMap(request, "propertyValue");
-		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
@@ -917,7 +917,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				if (propertyValueParam != null)
 				{
-					propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
+					propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
 
 					// 这里不应该使用convertToPropertyValue，因为它会添加双向关联，导致页面引用混乱，再保存时又会导致转换混乱
 					Object propertyValue = modelDataConverter.convert(propertyValueParam,
@@ -930,7 +930,7 @@ public class DataController extends AbstractSchemaModelConnController
 				if (isLoadPageData)
 				{
 					if (propertyPathInfo == null)
-						propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+						propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -983,7 +983,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 				Object propValue = modelDataConverter.convertToPropertyValue(propertyPathInfo.getOwnerObjTail(),
 						propertyPathInfo.getOwnerModelTail(), propValueParam, propertyPathInfo.getPropertyTail());
@@ -1013,7 +1013,7 @@ public class DataController extends AbstractSchemaModelConnController
 	{
 		final Object dataParam = getParamMap(request, "data");
 		final Object propertyValueParam = getParamMap(request, "propertyValue");
-		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
@@ -1030,7 +1030,7 @@ public class DataController extends AbstractSchemaModelConnController
 				if (isLoadPageData)
 				{
 					if (propertyPathInfo == null)
-						propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
+						propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -1052,7 +1052,7 @@ public class DataController extends AbstractSchemaModelConnController
 				else if (propertyValueParam != null)
 				{
 					if (propertyPathInfo == null)
-						propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+						propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 					propertyValue = modelDataConverter.convert(propertyValueParam, propertyPathInfo.getModelTail());
 				}
@@ -1093,7 +1093,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
 
 				if (isLoadPageData)
 				{
@@ -1109,8 +1109,7 @@ public class DataController extends AbstractSchemaModelConnController
 				springModel.addAttribute("titleOperationMessageKey", "edit");
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
 						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-				springModel.addAttribute("isPrivateProperty",
-						ModelUtils.isPrivatePropertyTail(propertyPathInfo));
+				springModel.addAttribute("isPrivateProperty", ModelUtils.isPrivatePropertyTail(propertyPathInfo));
 			}
 		}.execute();
 
@@ -1141,7 +1140,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 				LOBConversionContext.set(buildQueryLobConversionSetting());
 
@@ -1177,7 +1176,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Object data = modelDataConverter.convert(dataParam, model);
 
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
 
 				if (isLoadPageData)
 				{
@@ -1194,8 +1193,7 @@ public class DataController extends AbstractSchemaModelConnController
 				springModel.addAttribute("titleOperationMessageKey", "view");
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
 						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-				springModel.addAttribute("isPrivateProperty",
-						ModelUtils.isPrivatePropertyTail(propertyPathInfo));
+				springModel.addAttribute("isPrivateProperty", ModelUtils.isPrivatePropertyTail(propertyPathInfo));
 			}
 		}.execute();
 
@@ -1211,7 +1209,7 @@ public class DataController extends AbstractSchemaModelConnController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 
 		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -1271,7 +1269,7 @@ public class DataController extends AbstractSchemaModelConnController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
 						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
@@ -1306,7 +1304,7 @@ public class DataController extends AbstractSchemaModelConnController
 					Dialect dialect, String table, ExpressionEvaluationContext context) throws Throwable
 			{
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
 						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
@@ -1340,7 +1338,7 @@ public class DataController extends AbstractSchemaModelConnController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 				Object[] propValueElements = PMU.toArray(modelDataConverter.convertToPropertyValue(
 						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(),
@@ -1365,7 +1363,7 @@ public class DataController extends AbstractSchemaModelConnController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
@@ -1380,8 +1378,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				if (isLoadPageData)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj,
-							data);
+					PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -1434,7 +1431,7 @@ public class DataController extends AbstractSchemaModelConnController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
 						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
@@ -1478,7 +1475,7 @@ public class DataController extends AbstractSchemaModelConnController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 				Object[] propValueElements = PMU.toArray(modelDataConverter.convertToPropertyValue(
 						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(),
@@ -1544,7 +1541,7 @@ public class DataController extends AbstractSchemaModelConnController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 				Model modelTail = propertyPathInfo.getModelTail();
 
 				Object updates = modelDataConverter.convertToPropertyValue(propertyPathInfo.getOwnerObjTail(),
@@ -1572,8 +1569,7 @@ public class DataController extends AbstractSchemaModelConnController
 					{
 						PropertyPath myPropertyPath = PropertyPath
 								.valueOf(PropertyPath.concatElementIndex(propertyPathParam, i));
-						PropertyPathInfo myPropertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model,
-								myPropertyPath, data);
+						PropertyPathInfo myPropertyPathInfo = PropertyPathInfo.valueOf(model, myPropertyPath, data);
 
 						String[] updatePropertyNames = updatePropertyNamess[i];
 						Object[] updatePropertyValueParams = updatePropertyValueParamss[i];
@@ -1635,7 +1631,7 @@ public class DataController extends AbstractSchemaModelConnController
 			throws Throwable
 	{
 		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPathObj = ModelUtils.toPropertyPath(propertyPath);
+		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
@@ -1650,8 +1646,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				if (isLoadPageData)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPathObj,
-							data);
+					PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
 
 					LOBConversionContext.set(buildGetLobConversionSetting());
 
@@ -1696,7 +1691,7 @@ public class DataController extends AbstractSchemaModelConnController
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPath, data);
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 				List<Object> resultList = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
 
@@ -1807,8 +1802,8 @@ public class DataController extends AbstractSchemaModelConnController
 
 		for (int i = 0; i < propertyNames.length; i++)
 		{
-			PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model,
-					PropertyPath.valueOf(propertyNames[i]), data);
+			PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, PropertyPath.valueOf(propertyNames[i]),
+					data);
 
 			Property tailProperty = propertyPathInfo.getPropertyTail();
 
@@ -1842,7 +1837,7 @@ public class DataController extends AbstractSchemaModelConnController
 		// 一个属性，仅查询属性值
 		if (propertyPaths.length == 1)
 		{
-			PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPaths[0], data);
+			PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPaths[0], data);
 
 			List<Object> myPropertyValues = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
 
@@ -1864,8 +1859,7 @@ public class DataController extends AbstractSchemaModelConnController
 
 				for (int i = 0; i < propertyPaths.length; i++)
 				{
-					PropertyPathInfo propertyPathInfo = ModelUtils.toPropertyPathInfoConcrete(model, propertyPaths[i],
-							data);
+					PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPaths[i], data);
 					propertyValues[i] = propertyPathInfo.getValueTail();
 				}
 			}

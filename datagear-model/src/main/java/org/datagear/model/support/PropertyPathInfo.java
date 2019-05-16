@@ -497,9 +497,34 @@ public class PropertyPathInfo
 	 * @param propertyPath
 	 * @return
 	 */
+	public static PropertyPathInfo valueOf(Model model, String propertyPath)
+	{
+		return valueOf(model, PropertyPath.valueOf(propertyPath), null);
+	}
+
+	/**
+	 * 构建{@linkplain PropertyPathInfo}。
+	 * 
+	 * @param model
+	 * @param propertyPath
+	 * @return
+	 */
 	public static PropertyPathInfo valueOf(Model model, PropertyPath propertyPath)
 	{
 		return valueOf(model, propertyPath, null);
+	}
+
+	/**
+	 * 构建{@linkplain PropertyPathInfo}。
+	 * 
+	 * @param model
+	 * @param propertyPath
+	 * @param obj
+	 * @return
+	 */
+	public static PropertyPathInfo valueOf(Model model, String propertyPath, Object obj)
+	{
+		return valueOf(model, PropertyPath.valueOf(propertyPath), null);
 	}
 
 	/**
