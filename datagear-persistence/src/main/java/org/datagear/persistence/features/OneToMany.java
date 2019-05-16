@@ -53,16 +53,10 @@ import org.datagear.persistence.PersistenceFeature;
  * </ul>
  * <p>
  * 对于非{@linkplain MappedBy}属性，可选使用{@linkplain PropertyConcreteColumnName}
- * 在表（关联表、属性表）内定义属性端具体模型列，列值默认为{@linkplain Property#getModel()}的
+ * 在表（关联表、属性表）内定义属性端具象列，列值默认为{@linkplain Property#getModel()}的
  * {@linkplain Model#getName()}或者使用 {@linkplain PropertyConcreteColumnValue}自定义；
- * 可选使用{@linkplain ModelConcreteColumnName}在表（关联表、属性表）内定义模型端具体模型列，列值默认为
+ * 可选使用{@linkplain ModelConcreteColumnName}在表（关联表、属性表）内定义模型端具象列，列值默认为
  * {@linkplain Model#getName()}或者使用{@linkplain ModelConcreteColumnValue}自定义。
- * </p>
- * <p>
- * 如果属性是抽象属性，没有{@linkplain PropertyConcreteColumnName}列或者{@linkplain MappedBy}
- * 目标的{@linkplain ModelConcreteColumnName}
- * 列，并且具体属性值无法由程序直接判断（比如使用同一个关联表且同一个列的情况），那么属性可以使用{@linkplain ConcreteById}或者
- * {@linkplain ConcreteByProperty}自定义判断逻辑。
  * </p>
  * <p>
  * 对于非{@linkplain MappedBy}属性，可选使用{@linkplain PropertyOrderColumnName}

@@ -25,7 +25,7 @@ public interface Property extends Featured
 	String getName();
 
 	/**
-	 * 获取<i>具体属性</i>的{@linkplain Model 模型}。
+	 * 获取属性{@linkplain Model 模型}。
 	 * <p>
 	 * 如果{@linkplain #isArray()}或{@linkplain #isCollection()}为{@code true}
 	 * ，则此方法返回的是元素{@linkplain Model 模型}。
