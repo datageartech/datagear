@@ -524,7 +524,7 @@ public class PropertyPathInfo
 	 */
 	public static PropertyPathInfo valueOf(Model model, String propertyPath, Object obj)
 	{
-		return valueOf(model, PropertyPath.valueOf(propertyPath), null);
+		return valueOf(model, PropertyPath.valueOf(propertyPath), obj);
 	}
 
 	/**
@@ -533,6 +533,7 @@ public class PropertyPathInfo
 	 * @param model
 	 * @param propertyPath
 	 * @param obj
+	 *            允许为{@code null}
 	 * @return
 	 */
 	public static PropertyPathInfo valueOf(Model model, PropertyPath propertyPath, Object obj)
