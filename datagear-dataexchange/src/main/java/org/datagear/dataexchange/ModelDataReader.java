@@ -46,6 +46,12 @@ public interface ModelDataReader
 	 *            待读入的对象数组
 	 * @return 实际读取的数据条目数
 	 * @throws NoSuchElementException
+	 *             当没有可读数据时，抛出此异常
 	 */
 	int readNextDatas(Object[] datas) throws NoSuchElementException;
+
+	/**
+	 * 关闭输入流。
+	 */
+	void close();
 }
