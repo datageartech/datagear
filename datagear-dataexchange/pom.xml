@@ -19,5 +19,15 @@
 			<artifactId>datagear-model</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.datagear</groupId>
+			<artifactId>datagear-persistence</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.datagear</groupId>
+			<artifactId>datagear-dbmodel</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>

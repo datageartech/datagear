@@ -6,8 +6,6 @@ package org.datagear.dataexchange;
 
 import java.sql.Connection;
 
-import org.datagear.model.Model;
-
 /**
  * 导出端。
  * 
@@ -18,18 +16,15 @@ public abstract class Export
 {
 	private Connection connection;
 
-	private Model model;
-
 	public Export()
 	{
 		super();
 	}
 
-	public Export(Connection connection, Model model)
+	public Export(Connection connection)
 	{
 		super();
 		this.connection = connection;
-		this.model = model;
 	}
 
 	public Connection getConnection()
@@ -40,15 +35,5 @@ public abstract class Export
 	public void setConnection(Connection connection)
 	{
 		this.connection = connection;
-	}
-
-	public Model getModel()
-	{
-		return model;
-	}
-
-	public void setModel(Model model)
-	{
-		this.model = model;
 	}
 }
