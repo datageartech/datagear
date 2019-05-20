@@ -119,6 +119,12 @@ ${line.separator}
 								<!-- 替换webembd模块version.properties中的版本号 -->
 								<replaceregexp file="datagear-webembd/src/main/dist/readme.txt" encoding="UTF-8" match="数据齿轮\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="数据齿轮-v${project.version}" />
 								
+								<!-- 替换webembd模块startup.bat中的版本号 -->
+								<replaceregexp file="datagear-webembd/src/main/dist/startup.bat" encoding="UTF-8" match="datagear\-webembd\-\d+(\.\d+){1,2}(\-\w+){0,1}" replace="datagear-webembd-${project.version}" />
+								
+								<!-- 替换webembd模块startup.sh中的版本号 -->
+								<replaceregexp file="datagear-webembd/src/main/dist/startup.sh" encoding="UTF-8" match="datagear\-webembd\-\d+(\.\d+){1,2}(\-\w+){0,1}" replace="datagear-webembd-${project.version}" />
+								
 			    			</tasks>
 			    		</configuration>
 			    	</execution>
