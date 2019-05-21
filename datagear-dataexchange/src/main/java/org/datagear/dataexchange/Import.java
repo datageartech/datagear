@@ -14,6 +14,7 @@ import java.sql.Connection;
  */
 public abstract class Import
 {
+	/** 导入目标连接 */
 	private Connection connection;
 
 	/** 导入出错时是否终止 */

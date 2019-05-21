@@ -5,18 +5,19 @@
 package org.datagear.dataexchange;
 
 /**
- * {@linkplain ModelDataWriter}工厂类。
+ * 专职{@linkplain DataExporter}。
  * 
  * @author datagear@163.com
  *
+ * @param <T>
  */
-public interface ModelDataWriterFactory
+public interface DevotedDataExporter<T extends Export> extends DataExporter<T>
 {
 	/**
-	 * 获取指定{@linkplain Export}的{@linkplain ModelDataWriter}。
+	 * 是否支持指定{@linkplain Export}。
 	 * 
 	 * @param expt
 	 * @return
 	 */
-	ModelDataWriter get(Export expt);
+	boolean supports(T expt);
 }

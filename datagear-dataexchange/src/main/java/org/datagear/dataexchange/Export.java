@@ -14,6 +14,7 @@ import java.sql.Connection;
  */
 public abstract class Export
 {
+	/** 导出源连接 */
 	private Connection connection;
 
 	public Export()

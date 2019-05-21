@@ -5,18 +5,20 @@
 package org.datagear.dataexchange;
 
 /**
- * {@linkplain ModelDataReader}工厂类。
+ * 数据导入接口类。
  * 
  * @author datagear@163.com
  *
+ * @param <T>
  */
-public interface ModelDataReaderFactory
+public interface DataImporter<T extends Import>
 {
 	/**
-	 * 获取指定{@linkplain Import}的{@linkplain ModelDataReader}。
+	 * 导入。
 	 * 
 	 * @param impt
 	 * @return
+	 * @throws DataImportException
 	 */
-	ModelDataReader get(Import impt);
+	ImportResult impt(T impt) throws DataImportException;
 }

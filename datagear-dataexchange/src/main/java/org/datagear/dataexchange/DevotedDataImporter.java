@@ -5,18 +5,19 @@
 package org.datagear.dataexchange;
 
 /**
- * 模型数据导入接口类。
+ * 专职{@linkplain DataImporter}。
  * 
  * @author datagear@163.com
  *
+ * @param <T>
  */
-public interface ModelDataImporter
+public interface DevotedDataImporter<T extends Import> extends DataImporter<T>
 {
 	/**
-	 * 导入。
+	 * 是否支持指定{@linkplain Import}。
 	 * 
 	 * @param impt
 	 * @return
 	 */
-	ImportResult impt(Import impt);
+	boolean supports(T impt);
 }

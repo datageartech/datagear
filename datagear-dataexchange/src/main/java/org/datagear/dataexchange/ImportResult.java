@@ -5,7 +5,6 @@
 package org.datagear.dataexchange;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * 导入结果。
@@ -15,79 +14,28 @@ import java.util.List;
  */
 public class ImportResult
 {
-	private int total;
-
-	private int successCount;
-
-	private int failCount;
-
-	private int undealtCount;
-
-	private List<FailInfo> failInfos;
+	/** 导入耗时毫秒数 */
+	private long duration;
 
 	public ImportResult()
 	{
 		super();
 	}
 
-	public ImportResult(int total, int successCount, int failCount, int undealtCount, List<FailInfo> failInfos)
+	public ImportResult(long duration)
 	{
 		super();
-		this.total = total;
-		this.successCount = successCount;
-		this.failCount = failCount;
-		this.undealtCount = undealtCount;
-		this.failInfos = failInfos;
+		this.duration = duration;
 	}
 
-	public int getTotal()
+	public long getDuration()
 	{
-		return total;
+		return duration;
 	}
 
-	public void setTotal(int total)
+	public void setDuration(long duration)
 	{
-		this.total = total;
-	}
-
-	public int getSuccessCount()
-	{
-		return successCount;
-	}
-
-	public void setSuccessCount(int successCount)
-	{
-		this.successCount = successCount;
-	}
-
-	public int getFailCount()
-	{
-		return failCount;
-	}
-
-	public void setFailCount(int failCount)
-	{
-		this.failCount = failCount;
-	}
-
-	public int getUndealtCount()
-	{
-		return undealtCount;
-	}
-
-	public void setUndealtCount(int undealtCount)
-	{
-		this.undealtCount = undealtCount;
-	}
-
-	public List<FailInfo> getFailInfos()
-	{
-		return failInfos;
-	}
-
-	public void setFailInfos(List<FailInfo> failInfos)
-	{
-		this.failInfos = failInfos;
+		this.duration = duration;
 	}
 
 	/**
