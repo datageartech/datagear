@@ -16,18 +16,13 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.datagear</groupId>
-			<artifactId>datagear-model</artifactId>
+			<artifactId>datagear-dbinfo</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.datagear</groupId>
-			<artifactId>datagear-persistence</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.datagear</groupId>
-			<artifactId>datagear-dbmodel</artifactId>
-			<version>${project.version}</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.4</version>
 		</dependency>
 	</dependencies>
 </project>
