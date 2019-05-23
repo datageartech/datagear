@@ -7,30 +7,26 @@ package org.datagear.dataexchange.support;
 import java.io.Reader;
 import java.sql.Connection;
 
-import org.datagear.dataexchange.Import;
-
 /**
  * CSV导入。
  * 
  * @author datagear@163.com
  *
  */
-public class CsvImport extends Import
+public class CsvImport extends AbstractTextImport
 {
 	/** 要导入的表名 */
 	private String table;
-
-	/** CSV输入流 */
-	private Reader reader;
 
 	public CsvImport()
 	{
 		super();
 	}
 
-	public CsvImport(Connection connection, boolean abortOnError, String table, Reader reader)
+	public CsvImport(Connection connection, boolean abortOnError, Reader reader, DataFormat dataFormat, String table)
 	{
-		super(connection, abortOnError);
+		super(connection, abortOnError, reader, dataFormat);
+		this.table = table;
 	}
 
 	public String getTable()
@@ -41,15 +37,5 @@ public class CsvImport extends Import
 	public void setTable(String table)
 	{
 		this.table = table;
-	}
-
-	public Reader getReader()
-	{
-		return reader;
-	}
-
-	public void setReader(Reader reader)
-	{
-		this.reader = reader;
 	}
 }
