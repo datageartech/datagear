@@ -58,29 +58,38 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvImport>
 		long startTime = System.currentTimeMillis();
 
 		CSVParser csvParser = buildCSVParser(impt);
-		SetParameterContext setParameterContext = buildSetParameterContext(impt);
+		InsertContext insertContext = buildInsertContext(impt, impt.getTable());
 
 		Connection cn = impt.getConnection();
 
-		ColumnInfo[] columnInfos = null;
+		ColumnInfo[] rawColumnInfos = null;
+		ColumnInfo[] noNullColumnInfos = null;
+
 		PreparedStatement st = null;
 
 		try
 		{
 			for (CSVRecord csvRecord : csvParser)
 			{
-				if (columnInfos == null)
+				if (rawColumnInfos == null)
 				{
-					columnInfos = resolveColumnInfos(impt, csvRecord);
-					String sql = buildInsertPreparedSql(cn, impt.getTable(), columnInfos);
+					rawColumnInfos = resolveColumnInfos(impt, csvRecord);
+					noNullColumnInfos = removeNulls(rawColumnInfos);
+
+					// 没有任何列
+					if (noNullColumnInfos == null || noNullColumnInfos.length == 0)
+						throw new NoneColumnFoundException(impt.getTable());
+
+					String sql = buildInsertPreparedSql(cn, impt.getTable(), noNullColumnInfos);
 					st = cn.prepareStatement(sql);
 				}
 				else
 				{
-					String[] recordValues = resolveCSVRecordValues(impt, csvRecord);
-					setPreparedStatementParameters(impt, st, columnInfos, recordValues, setParameterContext);
+					String[] columnnValues = resolveCSVRecordValues(impt, csvRecord, rawColumnInfos, noNullColumnInfos);
 
-					st.executeUpdate();
+					setInsertPreparedColumnValues(impt, st, noNullColumnInfos, columnnValues, insertContext);
+
+					executeInsertPreparedStatement(impt, st, insertContext);
 				}
 			}
 		}
@@ -100,6 +109,10 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvImport>
 
 	/**
 	 * 从{@linkplain CSVRecord}解析列信息数组。
+	 * <p>
+	 * 当指定名称的列不存在时，如果{@code CsvImport#isIgnoreInexistentColumn()}为{@code true}，返回数组对应位置将为{@code null}，
+	 * 否则，将立刻抛出{@linkplain ColumnNotFoundException}。
+	 * </p>
 	 * 
 	 * @param impt
 	 * @param csvRecord
@@ -110,7 +123,25 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvImport>
 	{
 		String[] columnNames = resolveCSVRecordValues(impt, csvRecord);
 
-		return getColumnInfos(impt.getConnection(), impt.getTable(), columnNames, this.databaseInfoResolver);
+		return getColumnInfos(impt.getConnection(), impt.getTable(), columnNames, impt.isIgnoreInexistentColumn(),
+				this.databaseInfoResolver);
+	}
+
+	/**
+	 * 解析{@linkplain CSVRecord}值数组。
+	 * 
+	 * @param impt
+	 * @param csvRecord
+	 * @param rawColumnInfos
+	 * @param noNullColumnInfos
+	 * @return
+	 */
+	protected String[] resolveCSVRecordValues(CsvImport impt, CSVRecord csvRecord, ColumnInfo[] rawColumnInfos,
+			ColumnInfo[] noNullColumnInfos)
+	{
+		String[] values = resolveCSVRecordValues(impt, csvRecord);
+
+		return removeNullColumnInfoValues(rawColumnInfos, noNullColumnInfos, values);
 	}
 
 	/**

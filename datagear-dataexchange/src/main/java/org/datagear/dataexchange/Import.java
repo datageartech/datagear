@@ -20,12 +20,15 @@ public abstract class Import
 	/** 导入出错时是否终止 */
 	private boolean abortOnError;
 
+	/** 导入报告 */
+	private ImportReporter importReporter;
+
 	public Import()
 	{
 		super();
 	}
 
-	public Import(Connection connection, boolean abortOnError)
+	public Import(Connection connection, boolean abortOnError, ImportReporter importReporter)
 	{
 		super();
 		this.connection = connection;
@@ -50,5 +53,20 @@ public abstract class Import
 	public void setAbortOnError(boolean abortOnError)
 	{
 		this.abortOnError = abortOnError;
+	}
+
+	public boolean hasImportReporter()
+	{
+		return (this.importReporter != null);
+	}
+
+	public ImportReporter getImportReporter()
+	{
+		return importReporter;
+	}
+
+	public void setImportReporter(ImportReporter importReporter)
+	{
+		this.importReporter = importReporter;
 	}
 }

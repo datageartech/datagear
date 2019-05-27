@@ -13,7 +13,7 @@ package org.datagear.dataexchange;
  * @author datagear@163.com
  *
  */
-public class UnsupportedExportException extends DataImportException
+public class UnsupportedExportException extends DataExportException
 {
 	private static final long serialVersionUID = 1L;
 

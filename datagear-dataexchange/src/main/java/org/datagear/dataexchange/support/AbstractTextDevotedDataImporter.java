@@ -17,18 +17,22 @@ import java.sql.SQLXML;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.datagear.dataexchange.DataImportException;
 import org.datagear.dataexchange.DevotedDataImporter;
 import org.datagear.dataexchange.Import;
+import org.datagear.dataexchange.ImportReporter;
 import org.datagear.dataexchange.support.DataFormat.BinaryFormat;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 抽象文本{@linkplain DevotedDataImporter}。
@@ -39,43 +43,189 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  */
 public abstract class AbstractTextDevotedDataImporter<T extends Import> extends AbstractDevotedDataImporter<T>
 {
+	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractTextDevotedDataImporter.class);
+
 	public AbstractTextDevotedDataImporter()
 	{
 		super();
 	}
 
 	/**
-	 * 构建{@linkplain DataFormatContext}。
+	 * 构建{@linkplain InsertContext}。
 	 * 
 	 * @param impt
+	 * @param table
 	 * @return
 	 */
-	protected SetParameterContext buildSetParameterContext(AbstractTextImport impt)
+	protected InsertContext buildInsertContext(AbstractTextImport impt, String table)
 	{
-		return new SetParameterContext(impt.getDataFormat());
+		return new InsertContext(impt.getDataFormat(), table);
+	}
+
+	/**
+	 * 执行插入{@linkplain PreparedStatement}。
+	 * 
+	 * @param impt
+	 * @param st
+	 * @param insertContext
+	 * @throws InsertSqlException
+	 */
+	protected void executeInsertPreparedStatement(AbstractTextImport impt, PreparedStatement st,
+			InsertContext insertContext) throws InsertSqlException
+	{
+		try
+		{
+			st.executeUpdate();
+		}
+		catch (SQLException e)
+		{
+			InsertSqlException e1 = new InsertSqlException(insertContext.getTable(), insertContext.getDataIndex(), e);
+
+			if (impt.isAbortOnError())
+				throw e1;
+			else
+			{
+				if (impt.hasImportReporter())
+					impt.getImportReporter().report(e1);
+			}
+		}
+		finally
+		{
+			insertContext.incrementDataIndex();
+
+			insertContext.clearCloseResources();
+		}
 	}
 
 	/**
 	 * 设置插入预编译SQL语句{@linkplain PreparedStatement}参数。
+	 * <p>
+	 * 如果{@linkplain AbstractTextImport#isAbortOnError()}为{@code false}，此方法将不会抛出{@linkplain SetInsertPreparedColumnValueException}。
+	 * </p>
 	 * 
 	 * @param impt
 	 * @param st
-	 * @param parameterColumnInfos
-	 * @param parameterValues
-	 * @param setParameterContext
-	 * @throws SQLException
+	 * @param columnInfos
+	 * @param columnValues
+	 * @param insertContext
+	 * @throws SetInsertPreparedColumnValueException
 	 */
-	protected void setInsertPreparedStatementParameters(AbstractTextImport impt, PreparedStatement st,
-			ColumnInfo[] parameterColumnInfos, String[] parameterValues, SetParameterContext setParameterContext)
-			throws SQLException
+	protected void setInsertPreparedColumnValues(AbstractTextImport impt, PreparedStatement st,
+			ColumnInfo[] columnInfos, String[] columnValues, InsertContext insertContext)
+			throws SetInsertPreparedColumnValueException
 	{
-		for (int i = 0; i < parameterColumnInfos.length; i++)
-		{
-			ColumnInfo columnInfo = parameterColumnInfos[i];
-			String rawValue = (parameterValues == null || parameterValues.length - 1 < i ? null : parameterValues[i]);
+		boolean abortOnError = impt.isAbortOnError();
+		ImportReporter importReporter = (impt.hasImportReporter() ? impt.getImportReporter() : null);
+		String table = insertContext.getTable();
+		int dataIndex = insertContext.getDataIndex();
 
-			setPreparedStatementParameter(impt.getConnection(), st, i + 1, columnInfo.getType(), rawValue,
-					setParameterContext);
+		for (int i = 0; i < columnInfos.length; i++)
+		{
+			ColumnInfo columnInfo = columnInfos[i];
+			String columnName = columnInfo.getName();
+			int sqlType = columnInfo.getType();
+			int parameterIndex = i + 1;
+			String rawValue = (columnValues == null || columnValues.length - 1 < i ? null : columnValues[i]);
+
+			try
+			{
+				setPreparedStatementParameter(impt.getConnection(), st, parameterIndex, sqlType, rawValue,
+						insertContext);
+			}
+			catch (SQLException e)
+			{
+				SetInsertPreparedColumnValueException e1 = new SetInsertPreparedColumnValueException(table, dataIndex,
+						columnName, rawValue, e);
+
+				if (abortOnError)
+					throw e1;
+				else
+				{
+					setParameterNull(st, parameterIndex, sqlType);
+
+					if (importReporter != null)
+						importReporter.report(e1);
+				}
+			}
+			catch (ParseException e)
+			{
+				IllegalSourceValueException e1 = new IllegalSourceValueException(table, dataIndex, columnName, rawValue,
+						e);
+
+				if (abortOnError)
+					throw e1;
+				else
+				{
+					setParameterNull(st, parameterIndex, sqlType);
+
+					if (importReporter != null)
+						importReporter.report(e1);
+				}
+			}
+			catch (DecoderException e)
+			{
+				IllegalSourceValueException e1 = new IllegalSourceValueException(table, dataIndex, columnName, rawValue,
+						e);
+
+				if (abortOnError)
+					throw e1;
+				else
+				{
+					setParameterNull(st, parameterIndex, sqlType);
+
+					if (importReporter != null)
+						importReporter.report(e1);
+				}
+			}
+			catch (UnsupportedSqlTypeException e)
+			{
+				SetInsertPreparedColumnValueException e1 = new SetInsertPreparedColumnValueException(table, dataIndex,
+						columnName, rawValue, e);
+
+				if (abortOnError)
+					throw e1;
+				else
+				{
+					setParameterNull(st, parameterIndex, sqlType);
+
+					if (importReporter != null)
+						importReporter.report(e1);
+				}
+			}
+			catch (Exception e)
+			{
+				SetInsertPreparedColumnValueException e1 = new SetInsertPreparedColumnValueException(table, dataIndex,
+						columnName, rawValue, e);
+
+				if (abortOnError)
+					throw e1;
+				else
+				{
+					setParameterNull(st, parameterIndex, sqlType);
+
+					if (importReporter != null)
+						importReporter.report(e1);
+				}
+			}
+		}
+	}
+
+	/**
+	 * 设置{@linkplain PreparedStatement}参数{@code null}。
+	 * 
+	 * @param st
+	 * @param parameterIndex
+	 * @param sqlType
+	 */
+	protected void setParameterNull(PreparedStatement st, int parameterIndex, int sqlType)
+	{
+		try
+		{
+			st.setNull(parameterIndex, sqlType);
+		}
+		catch (SQLException e)
+		{
+			LOGGER.error("set PreparedStatement parameter null for sql type [" + sqlType + "]", e);
 		}
 	}
 
@@ -92,10 +242,14 @@ public abstract class AbstractTextDevotedDataImporter<T extends Import> extends 
 	 * @param sqlType
 	 * @param parameterValue
 	 * @param setParameterContext
-	 * @throws Exception
+	 * @throws SQLException
+	 * @throws ParseException
+	 * @throws DecoderException
+	 * @throws UnsupportedSqlTypeException
 	 */
 	protected void setPreparedStatementParameter(Connection cn, PreparedStatement st, int parameterIndex, int sqlType,
-			String parameterValue, SetParameterContext setParameterContext) throws Exception
+			String parameterValue, InsertContext setParameterContext)
+			throws SQLException, ParseException, DecoderException, UnsupportedSqlTypeException
 	{
 		if (parameterValue == null)
 		{
@@ -255,7 +409,7 @@ public abstract class AbstractTextDevotedDataImporter<T extends Import> extends 
 
 			default:
 
-				throw new DataImportException("The JDBC sql type [" + sqlType + "] is not supported");
+				throw new UnsupportedSqlTypeException(sqlType);
 		}
 	}
 
@@ -329,19 +483,87 @@ public abstract class AbstractTextDevotedDataImporter<T extends Import> extends 
 	}
 
 	/**
+	 * 移除{@code null}列信息位置对应的列值。
+	 * 
+	 * @param rawColumnInfos
+	 * @param noNullColumnInfos
+	 * @param rawColumnValues
+	 * @return
+	 */
+	protected String[] removeNullColumnInfoValues(ColumnInfo[] rawColumnInfos, ColumnInfo[] noNullColumnInfos,
+			String[] rawColumnValues)
+	{
+		if (noNullColumnInfos == rawColumnInfos || noNullColumnInfos.length == rawColumnInfos.length)
+			return rawColumnValues;
+
+		String[] newColumnValues = new String[noNullColumnInfos.length];
+
+		int index = 0;
+
+		for (int i = 0; i < rawColumnInfos.length; i++)
+		{
+			if (rawColumnInfos[i] == null)
+				continue;
+
+			newColumnValues[index++] = rawColumnValues[i];
+		}
+
+		return newColumnValues;
+	}
+
+	/**
+	 * 移除{@linkplain ColumnInfo}数组中的{@code null}元素。
+	 * <p>
+	 * 如果没有{@code null}元素，将返回原数组。
+	 * </p>
+	 * 
+	 * @param columnInfos
+	 * @return
+	 */
+	protected ColumnInfo[] removeNulls(ColumnInfo[] columnInfos)
+	{
+		boolean noNull = true;
+
+		for (ColumnInfo columnInfo : columnInfos)
+		{
+			if (columnInfo == null)
+			{
+				noNull = false;
+				break;
+			}
+		}
+
+		if (noNull)
+			return columnInfos;
+
+		List<ColumnInfo> list = new ArrayList<ColumnInfo>(columnInfos.length);
+
+		for (ColumnInfo columnInfo : columnInfos)
+		{
+			if (columnInfo != null)
+				list.add(columnInfo);
+		}
+
+		return list.toArray(new ColumnInfo[list.size()]);
+	}
+
+	/**
 	 * 获取表指定列信息数组。
 	 * <p>
-	 * 如果指定位置的列不存在，返回数组对应位置将为{@code null}。
+	 * 当指定位置的列不存在时，如果{@code nullIfInexistentColumn}为{@code true}，返回数组对应位置将为{@code null}，
+	 * 否则，将立刻抛出{@linkplain ColumnNotFoundException}。
 	 * </p>
 	 * 
 	 * @param cn
 	 * @param table
 	 * @param columnNames
+	 * @param nullIfInexistentColumn
 	 * @param databaseInfoResolver
 	 * @return
+	 * @throws ColumnNotFoundException
 	 */
 	protected ColumnInfo[] getColumnInfos(Connection cn, String table, String[] columnNames,
-			DatabaseInfoResolver databaseInfoResolver)
+			boolean nullIfInexistentColumn, DatabaseInfoResolver databaseInfoResolver) throws ColumnNotFoundException
 	{
 		ColumnInfo[] columnInfos = new ColumnInfo[columnNames.length];
 
@@ -360,6 +582,9 @@ public abstract class AbstractTextDevotedDataImporter<T extends Import> extends 
 				}
 			}
 
+			if (!nullIfInexistentColumn && columnInfo == null)
+				throw new ColumnNotFoundException(table, columnNames[i]);
+
 			columnInfos[i] = columnInfo;
 		}
 
@@ -367,23 +592,56 @@ public abstract class AbstractTextDevotedDataImporter<T extends Import> extends 
 	}
 
 	/**
-	 * 设置{@linkplain PreparedStatement}参数支持上下文。
+	 * 插入SQL语句{@linkplain PreparedStatement}参数支持上下文。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class SetParameterContext extends DataFormatContext
+	protected static class InsertContext extends DataFormatContext
 	{
 		private List<Closeable> closeResources = new LinkedList<Closeable>();
 
-		public SetParameterContext()
+		private String table;
+
+		private int dataIndex = 0;
+
+		public InsertContext()
 		{
 			super();
 		}
 
-		public SetParameterContext(DataFormat dataFormat)
+		public InsertContext(DataFormat dataFormat, String table)
 		{
 			super(dataFormat);
+			this.table = table;
+		}
+
+		public String getTable()
+		{
+			return table;
+		}
+
+		public void setTable(String table)
+		{
+			this.table = table;
+		}
+
+		public int getDataIndex()
+		{
+			return dataIndex;
+		}
+
+		public void setDataIndex(int dataIndex)
+		{
+			this.dataIndex = dataIndex;
+		}
+
+		/**
+		 * 数据索引加{@code 1}。
+		 */
+		public void incrementDataIndex()
+		{
+			this.dataIndex += 1;
 		}
 
 		/**
