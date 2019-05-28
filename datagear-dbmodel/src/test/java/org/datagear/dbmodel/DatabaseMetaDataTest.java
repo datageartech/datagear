@@ -6,7 +6,6 @@ package org.datagear.dbmodel;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -22,7 +21,7 @@ import org.junit.Test;
  * @author datagear@163.com
  *
  */
-public class DatabaseMetaDataTest extends TestSupport
+public class DatabaseMetaDataTest extends DBTestSupport
 {
 	@Before
 	public void setUp() throws Exception
@@ -37,7 +36,7 @@ public class DatabaseMetaDataTest extends TestSupport
 	@Test
 	public void getIdentifierQuoteStringTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
@@ -58,7 +57,7 @@ public class DatabaseMetaDataTest extends TestSupport
 	@Test
 	public void getCatalogsTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
@@ -77,7 +76,7 @@ public class DatabaseMetaDataTest extends TestSupport
 	@Test
 	public void getSchemasTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
@@ -96,7 +95,7 @@ public class DatabaseMetaDataTest extends TestSupport
 	@Test
 	public void getUserNameTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
@@ -118,7 +117,7 @@ public class DatabaseMetaDataTest extends TestSupport
 	@Test
 	public void getTableTypesTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
@@ -140,7 +139,7 @@ public class DatabaseMetaDataTest extends TestSupport
 		Properties props = new Properties();
 		props.setProperty("useInformationSchema", "true");
 
-		Connection cn = getMysqlConnection(props);
+		Connection cn = getConnection(props);
 
 		try
 		{
@@ -159,7 +158,7 @@ public class DatabaseMetaDataTest extends TestSupport
 	@Test
 	public void getPrimaryKeysTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
@@ -178,7 +177,7 @@ public class DatabaseMetaDataTest extends TestSupport
 	@Test
 	public void getColumnTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
@@ -197,7 +196,7 @@ public class DatabaseMetaDataTest extends TestSupport
 	@Test
 	public void getExportedKeysTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
@@ -216,7 +215,7 @@ public class DatabaseMetaDataTest extends TestSupport
 	@Test
 	public void getImportedKeysTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
@@ -235,7 +234,7 @@ public class DatabaseMetaDataTest extends TestSupport
 	@Test
 	public void getUniqueKeysTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
@@ -289,14 +288,5 @@ public class DatabaseMetaDataTest extends TestSupport
 
 		println("---" + label + "--------------------------------------------");
 		println("");
-	}
-
-	protected Connection getMysqlConnection(Properties properties) throws SQLException
-	{
-		properties.setProperty("user", "root");
-		properties.setProperty("password", "");
-
-		return DriverManager.getConnection(
-				"jdbc:mysql://127.0.0.1:3306/datagear?useUnicode=true&amp;characterEncoding=UTF-8", properties);
 	}
 }

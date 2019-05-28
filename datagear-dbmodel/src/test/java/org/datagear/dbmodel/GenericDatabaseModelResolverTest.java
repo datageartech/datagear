@@ -38,7 +38,7 @@ import org.junit.Test;
  * @author datagear@163.com
  *
  */
-public class GenericDatabaseModelResolverTest extends TestSupport
+public class GenericDatabaseModelResolverTest extends DBTestSupport
 {
 	protected ConnectionSensor connectionSensor;
 
@@ -84,7 +84,7 @@ public class GenericDatabaseModelResolverTest extends TestSupport
 	@Test
 	public void resolveTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		int id = 999999;
 
@@ -113,7 +113,7 @@ public class GenericDatabaseModelResolverTest extends TestSupport
 	@Test
 	public void resolveResultset() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{

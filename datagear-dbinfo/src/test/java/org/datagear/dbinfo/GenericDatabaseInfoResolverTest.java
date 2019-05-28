@@ -9,14 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.connection.JdbcUtil;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfo;
-import org.datagear.dbinfo.DevotedDatabaseInfoResolver;
-import org.datagear.dbinfo.ExportedKeyInfo;
-import org.datagear.dbinfo.GenericDatabaseInfoResolver;
-import org.datagear.dbinfo.ImportedKeyInfo;
-import org.datagear.dbinfo.TableInfo;
-import org.datagear.dbinfo.WildcardDevotedDatabaseInfoResolver;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,7 +20,7 @@ import org.junit.Test;
  * @author datagear@163.com
  *
  */
-public class GenericDatabaseInfoResolverTest extends DatabaseTestSupport
+public class GenericDatabaseInfoResolverTest extends DBTestSupport
 {
 	private GenericDatabaseInfoResolver genericDatabaseInfoResolver;
 
@@ -54,7 +46,7 @@ public class GenericDatabaseInfoResolverTest extends DatabaseTestSupport
 	@Test
 	public void getDatabaseInfoTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		DatabaseInfo databaseInfo = null;
 
@@ -77,7 +69,7 @@ public class GenericDatabaseInfoResolverTest extends DatabaseTestSupport
 	@Test
 	public void getTableInfosTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		TableInfo[] tableInfos = null;
 
@@ -101,7 +93,7 @@ public class GenericDatabaseInfoResolverTest extends DatabaseTestSupport
 	@Test
 	public void getTableInfoTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		TableInfo tableInfo = null;
 
@@ -122,7 +114,7 @@ public class GenericDatabaseInfoResolverTest extends DatabaseTestSupport
 	@Test
 	public void getColumnInfosTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		ColumnInfo[] columnInfos = null;
 
@@ -146,7 +138,7 @@ public class GenericDatabaseInfoResolverTest extends DatabaseTestSupport
 	@Test
 	public void getPrimaryKeyColumnNamesTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		String[] primaryKeyColumnNames = null;
 
@@ -172,7 +164,7 @@ public class GenericDatabaseInfoResolverTest extends DatabaseTestSupport
 	@Test
 	public void getImportedKeyInfosTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		ImportedKeyInfo[] importedKeyInfos = null;
 
@@ -196,7 +188,7 @@ public class GenericDatabaseInfoResolverTest extends DatabaseTestSupport
 	@Test
 	public void getExportedKeyInfosTest() throws Exception
 	{
-		Connection cn = getMysqlConnection();
+		Connection cn = getConnection();
 
 		try
 		{
