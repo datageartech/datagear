@@ -351,10 +351,19 @@ public abstract class AbstractTextDevotedDataImporter<T extends Import> extends 
 
 			case Types.TIMESTAMP:
 
-				// XXX 这种处理方式会丢失纳秒数据，待以后版本升级至jdk1.8库时采用java.time可解决
-				java.util.Date tsdv = setParameterContext.getTimestampFormatter().parse(parameterValue);
-				java.sql.Timestamp tsv = new Timestamp(tsdv.getTime());
-				st.setTimestamp(parameterIndex, tsv);
+				// 如果是默认格式，则直接使用Timestamp.valueOf，这样可以避免丢失纳秒精度
+				if (DataFormat.DEFAULT_TIMESTAMP_FORMAT.equals(dataFormat.getTimestampFormat()))
+				{
+					java.sql.Timestamp tsv = Timestamp.valueOf(parameterValue);
+					st.setTimestamp(parameterIndex, tsv);
+				}
+				else
+				{
+					// XXX 这种处理方式会丢失纳秒数据，待以后版本升级至jdk1.8库时采用java.time可解决
+					java.util.Date tsdv = setParameterContext.getTimestampFormatter().parse(parameterValue);
+					java.sql.Timestamp tsv = new Timestamp(tsdv.getTime());
+					st.setTimestamp(parameterIndex, tsv);
+				}
 				break;
 
 			case Types.CLOB:
