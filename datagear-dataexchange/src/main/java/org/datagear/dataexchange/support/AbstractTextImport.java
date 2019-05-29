@@ -11,7 +11,7 @@ import org.datagear.dataexchange.Import;
 import org.datagear.dataexchange.ImportReporter;
 
 /**
- * 抽象文本数据导入。
+ * 抽象文本{@linkplain Import}。
  * 
  * @author datagear@163.com
  *

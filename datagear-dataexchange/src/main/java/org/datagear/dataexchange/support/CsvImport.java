@@ -7,10 +7,11 @@ package org.datagear.dataexchange.support;
 import java.io.Reader;
 import java.sql.Connection;
 
+import org.datagear.dataexchange.Import;
 import org.datagear.dataexchange.ImportReporter;
 
 /**
- * CSV导入。
+ * CSV {@linkplain Import}。
  * 
  * @author datagear@163.com
  *

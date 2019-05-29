@@ -26,7 +26,6 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.datagear.dataexchange.DevotedDataImporter;
-import org.datagear.dataexchange.Import;
 import org.datagear.dataexchange.ImportReporter;
 import org.datagear.dataexchange.support.DataFormat.BinaryFormat;
 import org.datagear.dbinfo.ColumnInfo;
@@ -41,7 +40,8 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T>
  */
-public abstract class AbstractTextDevotedDataImporter<T extends Import> extends AbstractDevotedDataImporter<T>
+public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImport>
+		extends AbstractDevotedDataImporter<T>
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractTextDevotedDataImporter.class);
 
@@ -241,14 +241,14 @@ public abstract class AbstractTextDevotedDataImporter<T extends Import> extends 
 	 * @param parameterIndex
 	 * @param sqlType
 	 * @param parameterValue
-	 * @param setParameterContext
+	 * @param insertContext
 	 * @throws SQLException
 	 * @throws ParseException
 	 * @throws DecoderException
 	 * @throws UnsupportedSqlTypeException
 	 */
 	protected void setPreparedStatementParameter(Connection cn, PreparedStatement st, int parameterIndex, int sqlType,
-			String parameterValue, InsertContext setParameterContext)
+			String parameterValue, InsertContext insertContext)
 			throws SQLException, ParseException, DecoderException, UnsupportedSqlTypeException
 	{
 		if (parameterValue == null)
@@ -257,8 +257,8 @@ public abstract class AbstractTextDevotedDataImporter<T extends Import> extends 
 			return;
 		}
 
-		DataFormat dataFormat = setParameterContext.getDataFormat();
-		NumberFormat numberFormat = setParameterContext.getNumberFormatter();
+		DataFormat dataFormat = insertContext.getDataFormat();
+		NumberFormat numberFormat = insertContext.getNumberFormatter();
 
 		switch (sqlType)
 		{
@@ -337,14 +337,14 @@ public abstract class AbstractTextDevotedDataImporter<T extends Import> extends 
 
 			case Types.DATE:
 
-				java.util.Date dtv = setParameterContext.getDateFormatter().parse(parameterValue);
+				java.util.Date dtv = insertContext.getDateFormatter().parse(parameterValue);
 				java.sql.Date sdtv = new java.sql.Date(dtv.getTime());
 				st.setDate(parameterIndex, sdtv);
 				break;
 
 			case Types.TIME:
 
-				java.util.Date tdv = setParameterContext.getTimeFormatter().parse(parameterValue);
+				java.util.Date tdv = insertContext.getTimeFormatter().parse(parameterValue);
 				java.sql.Time tv = new java.sql.Time(tdv.getTime());
 				st.setTime(parameterIndex, tv);
 				break;
@@ -360,7 +360,7 @@ public abstract class AbstractTextDevotedDataImporter<T extends Import> extends 
 				else
 				{
 					// XXX 这种处理方式会丢失纳秒数据，待以后版本升级至jdk1.8库时采用java.time可解决
-					java.util.Date tsdv = setParameterContext.getTimestampFormatter().parse(parameterValue);
+					java.util.Date tsdv = insertContext.getTimestampFormatter().parse(parameterValue);
 					java.sql.Timestamp tsv = new Timestamp(tsdv.getTime());
 					st.setTimestamp(parameterIndex, tsv);
 				}
