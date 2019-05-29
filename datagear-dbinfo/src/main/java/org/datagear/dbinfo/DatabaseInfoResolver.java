@@ -5,6 +5,7 @@
 package org.datagear.dbinfo;
 
 import java.sql.Connection;
+import java.sql.ResultSetMetaData;
 
 /**
  * 数据库信息解析器。
@@ -92,6 +93,17 @@ public interface DatabaseInfoResolver
 	 * @throws DatabaseInfoResolverException
 	 */
 	ColumnInfo getRandomColumnInfo(Connection cn, String tableName) throws DatabaseInfoResolverException;
+
+	/**
+	 * 获取指定{@linkplain ResultSetMetaData}的{@linkplain ColumnInfo}。
+	 * 
+	 * @param cn
+	 * @param resultSetMetaData
+	 * @return
+	 * @throws DatabaseInfoResolverException
+	 */
+	ColumnInfo[] getColumnInfos(Connection cn, ResultSetMetaData resultSetMetaData)
+			throws DatabaseInfoResolverException;
 
 	/**
 	 * 获取指定表的主键列名称。

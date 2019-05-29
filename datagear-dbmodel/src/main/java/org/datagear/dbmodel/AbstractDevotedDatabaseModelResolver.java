@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.ColumnInfoResultSetSpec;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.DatabaseInfoResolverException;
 import org.datagear.dbinfo.EntireTableInfo;
@@ -245,7 +244,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	@Override
 	public Model resolve(Connection cn, ResultSet resultSet, String modelName) throws DatabaseModelResolverException
 	{
-		EntireTableInfo entireTableInfo = buildMockEntireTableInfo(resultSet, modelName);
+		EntireTableInfo entireTableInfo = buildMockEntireTableInfo(cn, resultSet, modelName);
 
 		return doResolve(cn, new DefaultModelManager(), new DefaultModelManager(), entireTableInfo, modelName);
 	}
@@ -253,12 +252,13 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	/**
 	 * 构建{@linkplain ResultSet}的仿造{@linkplain EntireTableInfo}。
 	 * 
+	 * @param cn
 	 * @param rs
 	 * @param asViewName
 	 * @return
 	 * @throws DatabaseModelResolverException
 	 */
-	protected EntireTableInfo buildMockEntireTableInfo(ResultSet rs, String asViewName)
+	protected EntireTableInfo buildMockEntireTableInfo(Connection cn, ResultSet rs, String asViewName)
 			throws DatabaseModelResolverException
 	{
 		EntireTableInfo entireTableInfo = new EntireTableInfo();
@@ -269,39 +269,22 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 
 		entireTableInfo.setTableInfo(tableInfo);
 
+		ResultSetMetaData resultSetMetaData = null;
+
 		try
 		{
-			ResultSetMetaData resultSetMetaData = rs.getMetaData();
-			int columnCount = resultSetMetaData.getColumnCount();
-			ColumnInfo[] columnInfos = new ColumnInfo[columnCount];
-
-			for (int i = 1; i <= columnCount; i++)
-			{
-				ColumnInfo columnInfo = new ColumnInfo();
-
-				String columnName = resultSetMetaData.getColumnLabel(i);
-				if (columnName == null || columnName.isEmpty())
-					columnName = resultSetMetaData.getColumnName(i);
-				columnInfo.setName(columnName);
-				columnInfo.setType(resultSetMetaData.getColumnType(i));
-				columnInfo.setTypeName(resultSetMetaData.getColumnTypeName(i));
-				columnInfo.setSize(resultSetMetaData.getPrecision(i));
-				columnInfo.setDecimalDigits(resultSetMetaData.getScale(i));
-				columnInfo.setNullable(
-						ColumnInfoResultSetSpec.NULLABLE_CONVERTER.convert(resultSetMetaData.isNullable(i)));
-				columnInfo.setAutoincrement(resultSetMetaData.isAutoIncrement(i));
-
-				columnInfos[i - 1] = columnInfo;
-			}
-
-			entireTableInfo.setColumnInfos(columnInfos);
-
-			return entireTableInfo;
+			resultSetMetaData = rs.getMetaData();
 		}
 		catch (SQLException e)
 		{
 			throw new DatabaseModelResolverException(e);
 		}
+
+		ColumnInfo[] columnInfos = this.databaseInfoResolver.getColumnInfos(cn, resultSetMetaData);
+
+		entireTableInfo.setColumnInfos(columnInfos);
+
+		return entireTableInfo;
 	}
 
 	/**

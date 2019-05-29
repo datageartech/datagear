@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientException;
 import java.util.ArrayList;
@@ -303,6 +304,43 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		finally
 		{
 			JdbcUtil.closeResultSet(rs);
+		}
+	}
+
+	@Override
+	public ColumnInfo[] getColumnInfos(Connection cn, ResultSetMetaData resultSetMetaData)
+			throws DatabaseInfoResolverException
+	{
+		try
+		{
+			int columnCount = resultSetMetaData.getColumnCount();
+
+			ColumnInfo[] columnInfos = new ColumnInfo[columnCount];
+
+			for (int i = 1; i <= columnCount; i++)
+			{
+				ColumnInfo columnInfo = new ColumnInfo();
+
+				String columnName = resultSetMetaData.getColumnLabel(i);
+				if (columnName == null || columnName.isEmpty())
+					columnName = resultSetMetaData.getColumnName(i);
+				columnInfo.setName(columnName);
+				columnInfo.setType(resultSetMetaData.getColumnType(i));
+				columnInfo.setTypeName(resultSetMetaData.getColumnTypeName(i));
+				columnInfo.setSize(resultSetMetaData.getPrecision(i));
+				columnInfo.setDecimalDigits(resultSetMetaData.getScale(i));
+				columnInfo.setNullable(
+						ColumnInfoResultSetSpec.NULLABLE_CONVERTER.convert(resultSetMetaData.isNullable(i)));
+				columnInfo.setAutoincrement(resultSetMetaData.isAutoIncrement(i));
+
+				columnInfos[i - 1] = columnInfo;
+			}
+
+			return columnInfos;
+		}
+		catch (SQLException e)
+		{
+			throw new DatabaseInfoResolverException(e);
 		}
 	}
 

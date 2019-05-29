@@ -5,6 +5,7 @@
 package org.datagear.dbinfo;
 
 import java.sql.Connection;
+import java.sql.ResultSetMetaData;
 import java.util.List;
 
 import org.datagear.connection.ConnectionOption;
@@ -103,6 +104,15 @@ public class GenericDatabaseInfoResolver implements DatabaseInfoResolver
 		DatabaseInfoResolver databaseInfoResolver = doGetDevotedDatabaseInfoResolverNotNull(cn);
 
 		return databaseInfoResolver.getRandomColumnInfo(cn, tableName);
+	}
+
+	@Override
+	public ColumnInfo[] getColumnInfos(Connection cn, ResultSetMetaData resultSetMetaData)
+			throws DatabaseInfoResolverException
+	{
+		DatabaseInfoResolver databaseInfoResolver = doGetDevotedDatabaseInfoResolverNotNull(cn);
+
+		return databaseInfoResolver.getColumnInfos(cn, resultSetMetaData);
 	}
 
 	@Override
