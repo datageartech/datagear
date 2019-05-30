@@ -4,12 +4,21 @@
 
 package org.datagear.dataexchange;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.datagear.connection.JdbcUtil;
+import org.datagear.dataexchange.support.CsvDataImporterTest;
+import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.dbinfo.DevotedDatabaseInfoResolver;
+import org.datagear.dbinfo.GenericDatabaseInfoResolver;
+import org.datagear.dbinfo.WildcardDevotedDatabaseInfoResolver;
 
 /**
  * 数据交换测试支持类。
@@ -19,6 +28,17 @@ import org.datagear.connection.JdbcUtil;
  */
 public abstract class DataexchangeTestSupport extends DBTestSupport
 {
+	protected DatabaseInfoResolver databaseInfoResolver;
+
+	public DataexchangeTestSupport()
+	{
+		super();
+
+		List<DevotedDatabaseInfoResolver> devotedDatabaseInfoResolver = new ArrayList<DevotedDatabaseInfoResolver>();
+		devotedDatabaseInfoResolver.add(new WildcardDevotedDatabaseInfoResolver());
+		this.databaseInfoResolver = new GenericDatabaseInfoResolver(devotedDatabaseInfoResolver);
+	}
+
 	protected void clearTable(Connection cn, String table) throws SQLException
 	{
 		Statement st = null;
@@ -58,4 +78,9 @@ public abstract class DataexchangeTestSupport extends DBTestSupport
 		}
 	}
 
+	protected InputStream getTestResourceInputStream(String resourceName) throws IOException
+	{
+		return CsvDataImporterTest.class.getClassLoader()
+				.getResourceAsStream("org/datagear/dataexchange/support/" + resourceName);
+	}
 }

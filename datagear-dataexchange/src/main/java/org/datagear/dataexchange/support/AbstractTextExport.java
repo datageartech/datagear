@@ -29,9 +29,10 @@ public abstract class AbstractTextExport extends Export
 		super();
 	}
 
-	public AbstractTextExport(Connection connection, ResultSet resultSet, Writer writer, DataFormat dataFormat)
+	public AbstractTextExport(Connection connection, ResultSet resultSet, boolean abortOnError, Writer writer,
+			DataFormat dataFormat)
 	{
-		super(connection, resultSet);
+		super(connection, resultSet, abortOnError);
 		this.writer = writer;
 		this.dataFormat = dataFormat;
 	}

@@ -390,8 +390,7 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 					st.setBlob(parameterIndex, blob);
 				}
 				else
-					throw new UnsupportedOperationException(
-							"Binary type [" + dataFormat.getBinaryFormat() + "] is not supported");
+					throw new UnsupportedOperationException();
 
 				break;
 

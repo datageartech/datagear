@@ -23,8 +23,9 @@ public class CsvExport extends AbstractTextExport
 		super();
 	}
 
-	public CsvExport(Connection connection, ResultSet resultSet, Writer writer, DataFormat dataFormat)
+	public CsvExport(Connection connection, ResultSet resultSet, boolean abortOnError, Writer writer,
+			DataFormat dataFormat)
 	{
-		super(connection, resultSet, writer, dataFormat);
+		super(connection, resultSet, abortOnError, writer, dataFormat);
 	}
 }
