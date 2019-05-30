@@ -70,6 +70,7 @@ public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextData
 
 		DataFormat dataFormat = selectContext.getDataFormat();
 		NumberFormat numberFormat = selectContext.getNumberFormatter();
+		BinaryFormat binaryFormat = dataFormat.getBinaryFormat();
 
 		switch (sqlType)
 		{
@@ -187,30 +188,36 @@ public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextData
 			case Types.BINARY:
 			case Types.VARBINARY:
 
-				byte[] binaryValue = rs.getBytes(columnIndex);
+				if (!BinaryFormat.NULL.equals(binaryFormat))
+				{
+					byte[] binaryValue = rs.getBytes(columnIndex);
 
-				if (rs.wasNull())
-					value = null;
-				else
-					value = convertToString(binaryValue, dataFormat.getBinaryFormat());
+					if (rs.wasNull())
+						value = null;
+					else
+						value = convertToString(binaryValue, binaryFormat);
+				}
 
 				break;
 
 			case Types.LONGVARBINARY:
 
-				InputStream lbValue = rs.getBinaryStream(columnIndex);
+				if (!BinaryFormat.NULL.equals(binaryFormat))
+				{
+					InputStream lbValue = rs.getBinaryStream(columnIndex);
 
-				try
-				{
-					if (!rs.wasNull())
+					try
 					{
-						byte[] bytes = readToBytes(lbValue);
-						value = convertToString(bytes, dataFormat.getBinaryFormat());
+						if (!rs.wasNull())
+						{
+							byte[] bytes = readToBytes(lbValue);
+							value = convertToString(bytes, binaryFormat);
+						}
 					}
-				}
-				finally
-				{
-					IOUtil.close(lbValue);
+					finally
+					{
+						IOUtil.close(lbValue);
+					}
 				}
 
 				break;
@@ -275,20 +282,23 @@ public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextData
 
 			case Types.BLOB:
 
-				Blob blobValue = rs.getBlob(columnIndex);
-
-				if (!rs.wasNull())
+				if (!BinaryFormat.NULL.equals(binaryFormat))
 				{
-					InputStream inputStream = blobValue.getBinaryStream();
+					Blob blobValue = rs.getBlob(columnIndex);
 
-					try
+					if (!rs.wasNull())
 					{
-						byte[] bytes = readToBytes(inputStream);
-						value = convertToString(bytes, dataFormat.getBinaryFormat());
-					}
-					finally
-					{
-						IOUtil.close(inputStream);
+						InputStream inputStream = blobValue.getBinaryStream();
+
+						try
+						{
+							byte[] bytes = readToBytes(inputStream);
+							value = convertToString(bytes, binaryFormat);
+						}
+						finally
+						{
+							IOUtil.close(inputStream);
+						}
 					}
 				}
 
@@ -381,7 +391,9 @@ public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextData
 
 		if (bytes == null)
 			;
-		if (BinaryFormat.HEX.equals(binaryFormat))
+		else if (BinaryFormat.NULL.equals(binaryFormat))
+			;
+		else if (BinaryFormat.HEX.equals(binaryFormat))
 			value = convertToHex(bytes);
 		else if (BinaryFormat.BASE64.equals(binaryFormat))
 			value = convertToBase64(bytes);

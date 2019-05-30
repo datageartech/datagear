@@ -259,6 +259,7 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextData
 
 		DataFormat dataFormat = insertContext.getDataFormat();
 		NumberFormat numberFormat = insertContext.getNumberFormatter();
+		BinaryFormat binaryFormat = dataFormat.getBinaryFormat();
 
 		switch (sqlType)
 		{
@@ -319,19 +320,22 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextData
 			case Types.VARBINARY:
 			case Types.LONGVARBINARY:
 
-				if (BinaryFormat.HEX.equals(dataFormat.getBinaryFormat()))
+				if (BinaryFormat.NULL.equals(binaryFormat))
+				{
+					st.setNull(parameterIndex, sqlType);
+				}
+				else if (BinaryFormat.HEX.equals(binaryFormat))
 				{
 					byte[] btv = convertToBytesForHex(parameterValue);
 					st.setBytes(parameterIndex, btv);
 				}
-				else if (BinaryFormat.BASE64.equals(dataFormat.getBinaryFormat()))
+				else if (BinaryFormat.BASE64.equals(binaryFormat))
 				{
 					byte[] btv = convertToBytesForBase64(parameterValue);
 					st.setBytes(parameterIndex, btv);
 				}
 				else
-					throw new UnsupportedOperationException(
-							"Binary type [" + dataFormat.getBinaryFormat() + "] is not supported");
+					throw new UnsupportedOperationException();
 
 				break;
 
@@ -375,14 +379,18 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextData
 
 			case Types.BLOB:
 
-				if (BinaryFormat.HEX.equals(dataFormat.getBinaryFormat()))
+				if (BinaryFormat.NULL.equals(binaryFormat))
+				{
+					st.setNull(parameterIndex, sqlType);
+				}
+				else if (BinaryFormat.HEX.equals(binaryFormat))
 				{
 					Blob blob = cn.createBlob();
 					byte[] btv = convertToBytesForHex(parameterValue);
 					blob.setBytes(1, btv);
 					st.setBlob(parameterIndex, blob);
 				}
-				else if (BinaryFormat.BASE64.equals(dataFormat.getBinaryFormat()))
+				else if (BinaryFormat.BASE64.equals(binaryFormat))
 				{
 					Blob blob = cn.createBlob();
 					byte[] btv = convertToBytesForBase64(parameterValue);

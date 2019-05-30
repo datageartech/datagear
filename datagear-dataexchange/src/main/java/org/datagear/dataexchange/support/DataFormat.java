@@ -140,6 +140,9 @@ public class DataFormat implements Serializable
 		BASE64,
 
 		/** Hex编码格式 */
-		HEX
+		HEX,
+
+		/** 设为NULL值 */
+		NULL
 	}
 }
