@@ -4,8 +4,8 @@
 
 package org.datagear.dataexchange.support;
 
-import org.datagear.dataexchange.DevotedDataImporter;
 import org.datagear.dataexchange.DataImport;
+import org.datagear.dataexchange.DevotedDataImporter;
 
 /**
  * 抽象{@linkplain DevotedDataImporter}。
@@ -17,7 +17,8 @@ import org.datagear.dataexchange.DataImport;
  *
  * @param <T>
  */
-public abstract class AbstractDevotedDataImporter<T extends DataImport> implements DevotedDataImporter<T>
+public abstract class AbstractDevotedDataImporter<T extends DataImport> extends DataExchangerSupport
+		implements DevotedDataImporter<T>
 {
 	public AbstractDevotedDataImporter()
 	{

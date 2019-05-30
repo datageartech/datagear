@@ -57,15 +57,19 @@ public class CsvDataExporterTest extends DataexchangeTestSupport
 	@Before
 	public void initTableData() throws Exception
 	{
-		Reader reader = IOUtil.getReader(getTestResourceInputStream("CsvDataExporterTest.csv"), "UTF-8");
 		DataFormat dataFormat = new DataFormat();
 
-		Connection cn = getConnection();
-
-		CsvDataImport impt = new CsvDataImport(cn, true, reader, dataFormat, true, TABLE_NAME);
+		Connection cn = null;
+		Reader reader = null;
 
 		try
 		{
+			cn = getConnection();
+			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataExporterTest.csv"), "UTF-8");
+
+			CsvDataImport impt = new CsvDataImport(buildSimpleDataSource(cn), true, reader, dataFormat, true,
+					TABLE_NAME);
+
 			clearTable(cn, TABLE_NAME);
 			this.csvDataImporter.impt(impt);
 		}
@@ -81,59 +85,62 @@ public class CsvDataExporterTest extends DataexchangeTestSupport
 	{
 		DataFormat dataFormat = new DataFormat();
 
-		Connection cn = getConnection();
-		Statement st = cn.createStatement();
-		ResultSet rs = st.executeQuery("select * from " + TABLE_NAME + " order by id asc");
-
 		File outFile = new File("target/CsvDataExporterTest.csv");
 
-		Writer writer = new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8");
-
-		CsvDataExport csvDataExport = new CsvDataExport(cn, true, rs, writer, dataFormat);
+		Connection cn = null;
+		Writer writer = null;
 
 		try
 		{
+			cn = getConnection();
+
+			Statement st = cn.createStatement();
+			ResultSet rs = st.executeQuery("select * from " + TABLE_NAME + " order by id asc");
+
+			writer = new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8");
+
+			CsvDataExport csvDataExport = new CsvDataExport(buildSimpleDataSource(cn), true, rs, writer, dataFormat);
+
 			this.csvDataExporter.expt(csvDataExport);
-
-			IOUtil.close(writer);
-
-			CSVParser csvParser = CSVFormat.DEFAULT.parse(new InputStreamReader(new FileInputStream(outFile), "UTF-8"));
-
-			List<CSVRecord> records = csvParser.getRecords();
-
-			assertEquals(4, records.size());
-
-			{
-				CSVRecord cr = records.get(0);
-
-				assertEquals("ID", cr.get(0));
-				assertEquals("NAME", cr.get(1));
-			}
-
-			{
-				CSVRecord cr = records.get(1);
-
-				assertEquals("1", cr.get(0));
-			}
-
-			{
-				CSVRecord cr = records.get(2);
-
-				assertEquals("2", cr.get(0));
-			}
-
-			{
-				CSVRecord cr = records.get(3);
-
-				assertEquals("3", cr.get(0));
-			}
-
-			csvParser.close();
 		}
 		finally
 		{
+			IOUtil.close(writer);
 			JdbcUtil.closeConnection(cn);
 		}
+
+		CSVParser csvParser = CSVFormat.DEFAULT.parse(new InputStreamReader(new FileInputStream(outFile), "UTF-8"));
+
+		List<CSVRecord> records = csvParser.getRecords();
+
+		assertEquals(4, records.size());
+
+		{
+			CSVRecord cr = records.get(0);
+
+			assertEquals("ID", cr.get(0));
+			assertEquals("NAME", cr.get(1));
+		}
+
+		{
+			CSVRecord cr = records.get(1);
+
+			assertEquals("1", cr.get(0));
+		}
+
+		{
+			CSVRecord cr = records.get(2);
+
+			assertEquals("2", cr.get(0));
+		}
+
+		{
+			CSVRecord cr = records.get(3);
+
+			assertEquals("3", cr.get(0));
+		}
+
+		csvParser.close();
 	}
 
 	@Override

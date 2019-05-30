@@ -5,8 +5,9 @@
 package org.datagear.dataexchange.support;
 
 import java.io.Writer;
-import java.sql.Connection;
 import java.sql.ResultSet;
+
+import javax.sql.DataSource;
 
 import org.datagear.dataexchange.DataExport;
 
@@ -29,10 +30,10 @@ public abstract class AbstractTextDataExport extends DataExport
 		super();
 	}
 
-	public AbstractTextDataExport(Connection connection, boolean abortOnError, ResultSet resultSet, Writer writer,
+	public AbstractTextDataExport(DataSource dataSource, boolean abortOnError, ResultSet resultSet, Writer writer,
 			DataFormat dataFormat)
 	{
-		super(connection, abortOnError, resultSet);
+		super(dataSource, abortOnError, resultSet);
 		this.writer = writer;
 		this.dataFormat = dataFormat;
 	}

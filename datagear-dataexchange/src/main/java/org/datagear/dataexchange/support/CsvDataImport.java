@@ -5,7 +5,8 @@
 package org.datagear.dataexchange.support;
 
 import java.io.Reader;
-import java.sql.Connection;
+
+import javax.sql.DataSource;
 
 import org.datagear.dataexchange.DataImport;
 
@@ -25,10 +26,10 @@ public class CsvDataImport extends AbstractTextDataImport
 		super();
 	}
 
-	public CsvDataImport(Connection connection, boolean abortOnError, Reader reader, DataFormat dataFormat,
+	public CsvDataImport(DataSource dataSource, boolean abortOnError, Reader reader, DataFormat dataFormat,
 			boolean ignoreInexistentColumn, String table)
 	{
-		super(connection, abortOnError, reader, dataFormat, ignoreInexistentColumn);
+		super(dataSource, abortOnError, reader, dataFormat, ignoreInexistentColumn);
 		this.table = table;
 	}
 

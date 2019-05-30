@@ -5,8 +5,9 @@
 package org.datagear.dataexchange.support;
 
 import java.io.Writer;
-import java.sql.Connection;
 import java.sql.ResultSet;
+
+import javax.sql.DataSource;
 
 import org.datagear.dataexchange.DataExport;
 
@@ -23,9 +24,9 @@ public class CsvDataExport extends AbstractTextDataExport
 		super();
 	}
 
-	public CsvDataExport(Connection connection, boolean abortOnError, ResultSet resultSet, Writer writer,
+	public CsvDataExport(DataSource dataSource, boolean abortOnError, ResultSet resultSet, Writer writer,
 			DataFormat dataFormat)
 	{
-		super(connection, abortOnError, resultSet, writer, dataFormat);
+		super(dataSource, abortOnError, resultSet, writer, dataFormat);
 	}
 }

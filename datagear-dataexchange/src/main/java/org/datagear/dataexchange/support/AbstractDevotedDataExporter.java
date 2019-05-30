@@ -9,9 +9,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import org.datagear.dataexchange.DataExport;
 import org.datagear.dataexchange.DataExportException;
 import org.datagear.dataexchange.DevotedDataExporter;
-import org.datagear.dataexchange.DataExport;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
@@ -25,7 +25,8 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  *
  * @param <T>
  */
-public abstract class AbstractDevotedDataExporter<T extends DataExport> implements DevotedDataExporter<T>
+public abstract class AbstractDevotedDataExporter<T extends DataExport> extends DataExchangerSupport
+		implements DevotedDataExporter<T>
 {
 	private DatabaseInfoResolver databaseInfoResolver;
 

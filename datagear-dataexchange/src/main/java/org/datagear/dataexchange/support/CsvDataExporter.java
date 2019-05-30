@@ -12,6 +12,7 @@ import java.sql.SQLTransientException;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.DataExportException;
 import org.datagear.dataexchange.DataExportReporter;
 import org.datagear.dataexchange.DataExportResult;
@@ -47,17 +48,19 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvDataExpo
 		boolean abortOnError = expt.isAbortOnError();
 		DataExportReporter dataExportReporter = (expt.hasDataExportReporter() ? expt.getDataExportReporter() : null);
 
-		Connection cn = expt.getConnection();
-		ResultSet rs = expt.getResultSet();
-
-		ColumnInfo[] columnInfos = getColumnInfos(cn, rs);
-		CSVPrinter csvPrinter = buildCSVPrinter(expt);
-		SelectContext selectContext = new SelectContext(expt.getDataFormat());
-
-		writeColumnInfos(csvPrinter, columnInfos);
+		Connection cn = null;
 
 		try
 		{
+			cn = expt.getDataSource().getConnection();
+
+			ResultSet rs = expt.getResultSet();
+
+			ColumnInfo[] columnInfos = getColumnInfos(cn, rs);
+			CSVPrinter csvPrinter = buildCSVPrinter(expt);
+			SelectContext selectContext = new SelectContext(expt.getDataFormat());
+
+			writeColumnInfos(csvPrinter, columnInfos);
 			int dataIndex = 0;
 
 			while (rs.next())
@@ -119,6 +122,10 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvDataExpo
 		catch (IOException e)
 		{
 			throw new DataExportException(e);
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
 		}
 
 		dataExportResult.setDuration(System.currentTimeMillis() - startTime);

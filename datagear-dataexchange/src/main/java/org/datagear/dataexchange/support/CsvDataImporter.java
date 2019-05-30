@@ -14,8 +14,8 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.DataImportException;
-import org.datagear.dataexchange.DevotedDataImporter;
 import org.datagear.dataexchange.DataImportResult;
+import org.datagear.dataexchange.DevotedDataImporter;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
@@ -60,20 +60,22 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 		CSVParser csvParser = buildCSVParser(impt);
 		InsertContext insertContext = buildInsertContext(impt, impt.getTable());
 
-		Connection cn = impt.getConnection();
-
 		ColumnInfo[] rawColumnInfos = null;
 		ColumnInfo[] noNullColumnInfos = null;
 
 		PreparedStatement st = null;
 
+		Connection cn = null;
+
 		try
 		{
+			cn = impt.getDataSource().getConnection();
+
 			for (CSVRecord csvRecord : csvParser)
 			{
 				if (rawColumnInfos == null)
 				{
-					rawColumnInfos = resolveColumnInfos(impt, csvRecord);
+					rawColumnInfos = resolveColumnInfos(impt, cn, csvRecord);
 					noNullColumnInfos = removeNulls(rawColumnInfos);
 
 					// 没有任何列
@@ -87,7 +89,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 				{
 					String[] columnnValues = resolveCSVRecordValues(impt, csvRecord, rawColumnInfos, noNullColumnInfos);
 
-					setInsertPreparedColumnValues(impt, st, noNullColumnInfos, columnnValues, insertContext);
+					setInsertPreparedColumnValues(impt, cn, st, noNullColumnInfos, columnnValues, insertContext);
 
 					executeInsertPreparedStatement(impt, st, insertContext);
 				}
@@ -100,6 +102,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 		finally
 		{
 			JdbcUtil.closeStatement(st);
+			JdbcUtil.closeConnection(cn);
 		}
 
 		dataImportResult.setDuration(System.currentTimeMillis() - startTime);
@@ -115,15 +118,17 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 	 * </p>
 	 * 
 	 * @param impt
+	 * @param cn
 	 * @param csvRecord
 	 * @return
 	 * @throws ColumnNotFoundException
 	 */
-	protected ColumnInfo[] resolveColumnInfos(CsvDataImport impt, CSVRecord csvRecord) throws ColumnNotFoundException
+	protected ColumnInfo[] resolveColumnInfos(CsvDataImport impt, Connection cn, CSVRecord csvRecord)
+			throws ColumnNotFoundException
 	{
 		String[] columnNames = resolveCSVRecordValues(impt, csvRecord);
 
-		return getColumnInfos(impt.getConnection(), impt.getTable(), columnNames, impt.isIgnoreInexistentColumn(),
+		return getColumnInfos(cn, impt.getTable(), columnNames, impt.isIgnoreInexistentColumn(),
 				this.databaseInfoResolver);
 	}
 

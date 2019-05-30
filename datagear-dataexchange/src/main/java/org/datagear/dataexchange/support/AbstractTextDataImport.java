@@ -5,7 +5,8 @@
 package org.datagear.dataexchange.support;
 
 import java.io.Reader;
-import java.sql.Connection;
+
+import javax.sql.DataSource;
 
 import org.datagear.dataexchange.DataImport;
 
@@ -31,10 +32,10 @@ public abstract class AbstractTextDataImport extends DataImport
 		super();
 	}
 
-	public AbstractTextDataImport(Connection connection, boolean abortOnError, Reader reader, DataFormat dataFormat,
+	public AbstractTextDataImport(DataSource dataSource, boolean abortOnError, Reader reader, DataFormat dataFormat,
 			boolean ignoreInexistentColumn)
 	{
-		super(connection, abortOnError);
+		super(dataSource, abortOnError);
 		this.reader = reader;
 		this.dataFormat = dataFormat;
 		this.ignoreInexistentColumn = ignoreInexistentColumn;

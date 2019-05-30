@@ -104,13 +104,14 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextData
 	 * </p>
 	 * 
 	 * @param impt
+	 * @param cn
 	 * @param st
 	 * @param columnInfos
 	 * @param columnValues
 	 * @param insertContext
 	 * @throws SetInsertPreparedColumnValueException
 	 */
-	protected void setInsertPreparedColumnValues(AbstractTextDataImport impt, PreparedStatement st,
+	protected void setInsertPreparedColumnValues(AbstractTextDataImport impt, Connection cn, PreparedStatement st,
 			ColumnInfo[] columnInfos, String[] columnValues, InsertContext insertContext)
 			throws SetInsertPreparedColumnValueException
 	{
@@ -129,8 +130,7 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextData
 
 			try
 			{
-				setPreparedStatementParameter(impt.getConnection(), st, parameterIndex, sqlType, rawValue,
-						insertContext);
+				setPreparedStatementParameter(cn, st, parameterIndex, sqlType, rawValue, insertContext);
 			}
 			catch (SQLException e)
 			{
