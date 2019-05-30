@@ -11,10 +11,10 @@ package org.datagear.dataexchange;
  *
  * @param <T>
  */
-public interface DevotedDataExporter<T extends Export> extends DataExporter<T>
+public interface DevotedDataExporter<T extends DataExport> extends DataExporter<T>
 {
 	/**
-	 * 是否支持指定{@linkplain Export}。
+	 * 是否支持指定{@linkplain DataExport}。
 	 * 
 	 * @param expt
 	 * @return

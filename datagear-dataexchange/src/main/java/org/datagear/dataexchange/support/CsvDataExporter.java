@@ -13,9 +13,9 @@ import java.sql.SQLTransientException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.datagear.dataexchange.DataExportException;
+import org.datagear.dataexchange.DataExportReporter;
+import org.datagear.dataexchange.DataExportResult;
 import org.datagear.dataexchange.DataExporter;
-import org.datagear.dataexchange.ExportReporter;
-import org.datagear.dataexchange.ExportResult;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
@@ -25,7 +25,7 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  * @author datagear@163.com
  *
  */
-public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvExport>
+public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvDataExport>
 {
 	public CsvDataExporter()
 	{
@@ -38,14 +38,14 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvExport>
 	}
 
 	@Override
-	public ExportResult expt(CsvExport expt) throws DataExportException
+	public DataExportResult expt(CsvDataExport expt) throws DataExportException
 	{
-		ExportResult exportResult = new ExportResult();
+		DataExportResult dataExportResult = new DataExportResult();
 
 		long startTime = System.currentTimeMillis();
 
 		boolean abortOnError = expt.isAbortOnError();
-		ExportReporter exportReporter = (expt.hasExportReporter() ? expt.getExportReporter() : null);
+		DataExportReporter dataExportReporter = (expt.hasDataExportReporter() ? expt.getDataExportReporter() : null);
 
 		Connection cn = expt.getConnection();
 		ResultSet rs = expt.getResultSet();
@@ -78,8 +78,8 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvExport>
 						if (abortOnError)
 							throw e1;
 
-						if (exportReporter != null)
-							exportReporter.report(e1);
+						if (dataExportReporter != null)
+							dataExportReporter.report(e1);
 					}
 					catch (IOException e)
 					{
@@ -89,8 +89,8 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvExport>
 						if (abortOnError)
 							throw e1;
 
-						if (exportReporter != null)
-							exportReporter.report(e1);
+						if (dataExportReporter != null)
+							dataExportReporter.report(e1);
 					}
 					catch (UnsupportedSqlTypeException e)
 					{
@@ -100,8 +100,8 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvExport>
 						if (abortOnError)
 							throw e1;
 
-						if (exportReporter != null)
-							exportReporter.report(e1);
+						if (dataExportReporter != null)
+							dataExportReporter.report(e1);
 					}
 
 					csvPrinter.print(value);
@@ -121,9 +121,9 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvExport>
 			throw new DataExportException(e);
 		}
 
-		exportResult.setDuration(System.currentTimeMillis() - startTime);
+		dataExportResult.setDuration(System.currentTimeMillis() - startTime);
 
-		return exportResult;
+		return dataExportResult;
 	}
 
 	/**
@@ -133,7 +133,7 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvExport>
 	 * @return
 	 * @throws DataExportException
 	 */
-	protected CSVPrinter buildCSVPrinter(CsvExport expt) throws DataExportException
+	protected CSVPrinter buildCSVPrinter(CsvDataExport expt) throws DataExportException
 	{
 		try
 		{

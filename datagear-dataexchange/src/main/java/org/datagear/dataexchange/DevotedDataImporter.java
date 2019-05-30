@@ -11,10 +11,10 @@ package org.datagear.dataexchange;
  *
  * @param <T>
  */
-public interface DevotedDataImporter<T extends Import> extends DataImporter<T>
+public interface DevotedDataImporter<T extends DataImport> extends DataImporter<T>
 {
 	/**
-	 * 是否支持指定{@linkplain Import}。
+	 * 是否支持指定{@linkplain DataImport}。
 	 * 
 	 * @param impt
 	 * @return

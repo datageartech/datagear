@@ -8,15 +8,15 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 
-import org.datagear.dataexchange.Export;
+import org.datagear.dataexchange.DataExport;
 
 /**
- * 抽象文本{@linkplain Export}。
+ * 抽象文本{@linkplain DataExport}。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractTextExport extends Export
+public abstract class AbstractTextDataExport extends DataExport
 {
 	/** 文本输出流 */
 	private Writer writer;
@@ -24,15 +24,15 @@ public abstract class AbstractTextExport extends Export
 	/** 文本数据格式 */
 	private DataFormat dataFormat;
 
-	public AbstractTextExport()
+	public AbstractTextDataExport()
 	{
 		super();
 	}
 
-	public AbstractTextExport(Connection connection, ResultSet resultSet, boolean abortOnError, Writer writer,
+	public AbstractTextDataExport(Connection connection, boolean abortOnError, ResultSet resultSet, Writer writer,
 			DataFormat dataFormat)
 	{
-		super(connection, resultSet, abortOnError);
+		super(connection, abortOnError, resultSet);
 		this.writer = writer;
 		this.dataFormat = dataFormat;
 	}

@@ -45,7 +45,7 @@ public class CsvDataImporterTest extends DataexchangeTestSupport
 
 		Connection cn = getConnection();
 
-		CsvImport impt = new CsvImport(cn, true, null, reader, dataFormat, false, TABLE_NAME);
+		CsvDataImport impt = new CsvDataImport(cn, true, reader, dataFormat, false, TABLE_NAME);
 
 		try
 		{
@@ -72,7 +72,7 @@ public class CsvDataImporterTest extends DataexchangeTestSupport
 
 		Connection cn = getConnection();
 
-		CsvImport impt = new CsvImport(cn, true, null, reader, dataFormat, true, TABLE_NAME);
+		CsvDataImport impt = new CsvDataImport(cn, true, reader, dataFormat, true, TABLE_NAME);
 
 		try
 		{
@@ -99,7 +99,7 @@ public class CsvDataImporterTest extends DataexchangeTestSupport
 
 		Connection cn = getConnection();
 
-		CsvImport impt = new CsvImport(cn, false, null, reader, dataFormat, true, TABLE_NAME);
+		CsvDataImport impt = new CsvDataImport(cn, false, reader, dataFormat, true, TABLE_NAME);
 
 		try
 		{
@@ -126,7 +126,7 @@ public class CsvDataImporterTest extends DataexchangeTestSupport
 
 		Connection cn = getConnection();
 
-		CsvImport impt = new CsvImport(cn, true, null, reader, dataFormat, true, TABLE_NAME);
+		CsvDataImport impt = new CsvDataImport(cn, true, reader, dataFormat, true, TABLE_NAME);
 
 		try
 		{

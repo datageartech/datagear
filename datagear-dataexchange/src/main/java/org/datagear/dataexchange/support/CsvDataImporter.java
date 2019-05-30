@@ -15,7 +15,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.DataImportException;
 import org.datagear.dataexchange.DevotedDataImporter;
-import org.datagear.dataexchange.ImportResult;
+import org.datagear.dataexchange.DataImportResult;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
@@ -25,7 +25,7 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  * @author datagear@163.com
  *
  */
-public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvImport>
+public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImport>
 {
 	private DatabaseInfoResolver databaseInfoResolver;
 
@@ -51,9 +51,9 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvImport>
 	}
 
 	@Override
-	public ImportResult impt(CsvImport impt) throws DataImportException
+	public DataImportResult impt(CsvDataImport impt) throws DataImportException
 	{
-		ImportResult importResult = new ImportResult();
+		DataImportResult dataImportResult = new DataImportResult();
 
 		long startTime = System.currentTimeMillis();
 
@@ -102,9 +102,9 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvImport>
 			JdbcUtil.closeStatement(st);
 		}
 
-		importResult.setDuration(System.currentTimeMillis() - startTime);
+		dataImportResult.setDuration(System.currentTimeMillis() - startTime);
 
-		return importResult;
+		return dataImportResult;
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvImport>
 	 * @return
 	 * @throws ColumnNotFoundException
 	 */
-	protected ColumnInfo[] resolveColumnInfos(CsvImport impt, CSVRecord csvRecord) throws ColumnNotFoundException
+	protected ColumnInfo[] resolveColumnInfos(CsvDataImport impt, CSVRecord csvRecord) throws ColumnNotFoundException
 	{
 		String[] columnNames = resolveCSVRecordValues(impt, csvRecord);
 
@@ -136,7 +136,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvImport>
 	 * @param noNullColumnInfos
 	 * @return
 	 */
-	protected String[] resolveCSVRecordValues(CsvImport impt, CSVRecord csvRecord, ColumnInfo[] rawColumnInfos,
+	protected String[] resolveCSVRecordValues(CsvDataImport impt, CSVRecord csvRecord, ColumnInfo[] rawColumnInfos,
 			ColumnInfo[] noNullColumnInfos)
 	{
 		String[] values = resolveCSVRecordValues(impt, csvRecord);
@@ -151,7 +151,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvImport>
 	 * @param csvRecord
 	 * @return
 	 */
-	protected String[] resolveCSVRecordValues(CsvImport impt, CSVRecord csvRecord)
+	protected String[] resolveCSVRecordValues(CsvDataImport impt, CSVRecord csvRecord)
 	{
 		int size = csvRecord.size();
 		String[] values = new String[size];
@@ -169,7 +169,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvImport>
 	 * @return
 	 * @throws DataImportException
 	 */
-	protected CSVParser buildCSVParser(CsvImport impt) throws DataImportException
+	protected CSVParser buildCSVParser(CsvDataImport impt) throws DataImportException
 	{
 		try
 		{

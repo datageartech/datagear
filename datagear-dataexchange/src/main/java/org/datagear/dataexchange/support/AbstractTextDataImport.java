@@ -7,16 +7,15 @@ package org.datagear.dataexchange.support;
 import java.io.Reader;
 import java.sql.Connection;
 
-import org.datagear.dataexchange.Import;
-import org.datagear.dataexchange.ImportReporter;
+import org.datagear.dataexchange.DataImport;
 
 /**
- * 抽象文本{@linkplain Import}。
+ * 抽象文本{@linkplain DataImport}。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractTextImport extends Import
+public abstract class AbstractTextDataImport extends DataImport
 {
 	/** 文本输入流 */
 	private Reader reader;
@@ -27,15 +26,15 @@ public abstract class AbstractTextImport extends Import
 	/** 是否忽略不存在的列 */
 	private boolean ignoreInexistentColumn;
 
-	public AbstractTextImport()
+	public AbstractTextDataImport()
 	{
 		super();
 	}
 
-	public AbstractTextImport(Connection connection, boolean abortOnError, ImportReporter importReporter, Reader reader,
-			DataFormat dataFormat, boolean ignoreInexistentColumn)
+	public AbstractTextDataImport(Connection connection, boolean abortOnError, Reader reader, DataFormat dataFormat,
+			boolean ignoreInexistentColumn)
 	{
-		super(connection, abortOnError, importReporter);
+		super(connection, abortOnError);
 		this.reader = reader;
 		this.dataFormat = dataFormat;
 		this.ignoreInexistentColumn = ignoreInexistentColumn;

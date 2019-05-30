@@ -15,13 +15,13 @@ import org.springframework.core.GenericTypeResolver;
  * 它使用{@linkplain #getDevotedDataExporters()}列表中的元素来支持导出，靠后的可用元素将优先被使用。
  * </p>
  * <p>
- * 如果没有可用的元素，{@linkplain #expt(Export)}将抛出{@linkplain UnsupportedExportException}异常。
+ * 如果没有可用的元素，{@linkplain #expt(DataExport)}将抛出{@linkplain UnsupportedExportException}异常。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class GenericDataExporter implements DataExporter<Export>
+public class GenericDataExporter implements DataExporter<DataExport>
 {
 	private List<DevotedDataExporter<?>> devotedDataExporters;
 
@@ -51,9 +51,9 @@ public class GenericDataExporter implements DataExporter<Export>
 	}
 
 	@Override
-	public ExportResult expt(Export expt) throws DataExportException
+	public DataExportResult expt(DataExport expt) throws DataExportException
 	{
-		DevotedDataExporter<Export> devotedDataExporter = findDevotedDataExporter(expt);
+		DevotedDataExporter<DataExport> devotedDataExporter = findDevotedDataExporter(expt);
 
 		if (devotedDataExporter == null)
 			throw new UnsupportedExportException();
@@ -62,7 +62,7 @@ public class GenericDataExporter implements DataExporter<Export>
 	}
 
 	/**
-	 * 查找能支持指定{@linkplain Export}的{@linkplain DevotedDataExporter}。
+	 * 查找能支持指定{@linkplain DataExport}的{@linkplain DevotedDataExporter}。
 	 * <p>
 	 * 如果没有找到，将返回{@code null}。
 	 * </p>
@@ -70,7 +70,7 @@ public class GenericDataExporter implements DataExporter<Export>
 	 * @param expt
 	 * @return
 	 */
-	public DevotedDataExporter<Export> findDevotedDataExporter(Export expt)
+	public DevotedDataExporter<DataExport> findDevotedDataExporter(DataExport expt)
 	{
 		if (this.devotedDataExporters == null)
 			return null;
@@ -88,7 +88,7 @@ public class GenericDataExporter implements DataExporter<Export>
 				continue;
 
 			@SuppressWarnings("unchecked")
-			DevotedDataExporter<Export> devotedDataExporter = (DevotedDataExporter<Export>) this.devotedDataExporters
+			DevotedDataExporter<DataExport> devotedDataExporter = (DevotedDataExporter<DataExport>) this.devotedDataExporters
 					.get(i);
 
 			if (devotedDataExporter.supports(expt))

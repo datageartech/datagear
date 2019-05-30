@@ -25,8 +25,8 @@ import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.datagear.dataexchange.DataImportReporter;
 import org.datagear.dataexchange.DevotedDataImporter;
-import org.datagear.dataexchange.ImportReporter;
 import org.datagear.dataexchange.support.DataFormat.BinaryFormat;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T>
  */
-public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImport>
+public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextDataImport>
 		extends AbstractDevotedDataImporter<T>
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractTextDevotedDataImporter.class);
@@ -57,7 +57,7 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 	 * @param table
 	 * @return
 	 */
-	protected InsertContext buildInsertContext(AbstractTextImport impt, String table)
+	protected InsertContext buildInsertContext(AbstractTextDataImport impt, String table)
 	{
 		return new InsertContext(impt.getDataFormat(), table);
 	}
@@ -70,7 +70,7 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 	 * @param insertContext
 	 * @throws InsertSqlException
 	 */
-	protected void executeInsertPreparedStatement(AbstractTextImport impt, PreparedStatement st,
+	protected void executeInsertPreparedStatement(AbstractTextDataImport impt, PreparedStatement st,
 			InsertContext insertContext) throws InsertSqlException
 	{
 		try
@@ -85,8 +85,8 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 				throw e1;
 			else
 			{
-				if (impt.hasImportReporter())
-					impt.getImportReporter().report(e1);
+				if (impt.hasDataImportReporter())
+					impt.getDataImportReporter().report(e1);
 			}
 		}
 		finally
@@ -100,7 +100,7 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 	/**
 	 * 设置插入预编译SQL语句{@linkplain PreparedStatement}参数。
 	 * <p>
-	 * 如果{@linkplain AbstractTextImport#isAbortOnError()}为{@code false}，此方法将不会抛出{@linkplain SetInsertPreparedColumnValueException}。
+	 * 如果{@linkplain AbstractTextDataImport#isAbortOnError()}为{@code false}，此方法将不会抛出{@linkplain SetInsertPreparedColumnValueException}。
 	 * </p>
 	 * 
 	 * @param impt
@@ -110,12 +110,12 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 	 * @param insertContext
 	 * @throws SetInsertPreparedColumnValueException
 	 */
-	protected void setInsertPreparedColumnValues(AbstractTextImport impt, PreparedStatement st,
+	protected void setInsertPreparedColumnValues(AbstractTextDataImport impt, PreparedStatement st,
 			ColumnInfo[] columnInfos, String[] columnValues, InsertContext insertContext)
 			throws SetInsertPreparedColumnValueException
 	{
 		boolean abortOnError = impt.isAbortOnError();
-		ImportReporter importReporter = (impt.hasImportReporter() ? impt.getImportReporter() : null);
+		DataImportReporter dataImportReporter = (impt.hasDataImportReporter() ? impt.getDataImportReporter() : null);
 		String table = insertContext.getTable();
 		int dataIndex = insertContext.getDataIndex();
 
@@ -143,8 +143,8 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 				{
 					setParameterNull(st, parameterIndex, sqlType);
 
-					if (importReporter != null)
-						importReporter.report(e1);
+					if (dataImportReporter != null)
+						dataImportReporter.report(e1);
 				}
 			}
 			catch (ParseException e)
@@ -158,8 +158,8 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 				{
 					setParameterNull(st, parameterIndex, sqlType);
 
-					if (importReporter != null)
-						importReporter.report(e1);
+					if (dataImportReporter != null)
+						dataImportReporter.report(e1);
 				}
 			}
 			catch (DecoderException e)
@@ -173,8 +173,8 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 				{
 					setParameterNull(st, parameterIndex, sqlType);
 
-					if (importReporter != null)
-						importReporter.report(e1);
+					if (dataImportReporter != null)
+						dataImportReporter.report(e1);
 				}
 			}
 			catch (UnsupportedSqlTypeException e)
@@ -188,8 +188,8 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 				{
 					setParameterNull(st, parameterIndex, sqlType);
 
-					if (importReporter != null)
-						importReporter.report(e1);
+					if (dataImportReporter != null)
+						dataImportReporter.report(e1);
 				}
 			}
 			catch (Exception e)
@@ -203,8 +203,8 @@ public abstract class AbstractTextDevotedDataImporter<T extends AbstractTextImpo
 				{
 					setParameterNull(st, parameterIndex, sqlType);
 
-					if (importReporter != null)
-						importReporter.report(e1);
+					if (dataImportReporter != null)
+						dataImportReporter.report(e1);
 				}
 			}
 		}

@@ -10,7 +10,7 @@ package org.datagear.dataexchange;
  * @author datagear@163.com
  *
  */
-public interface DataExporter<T extends Export>
+public interface DataExporter<T extends DataExport>
 {
 	/**
 	 * 导出。
@@ -19,5 +19,5 @@ public interface DataExporter<T extends Export>
 	 * @return
 	 * @throws DataExportException
 	 */
-	ExportResult expt(T expt) throws DataExportException;
+	DataExportResult expt(T expt) throws DataExportException;
 }

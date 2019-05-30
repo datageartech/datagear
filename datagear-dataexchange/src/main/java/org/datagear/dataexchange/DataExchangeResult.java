@@ -5,22 +5,22 @@
 package org.datagear.dataexchange;
 
 /**
- * 导出结果。
+ * 数据交换结果。
  * 
  * @author datagear@163.com
  *
  */
-public class ExportResult
+public abstract class DataExchangeResult
 {
-	/** 导出耗时毫秒数 */
+	/** 耗时毫秒数 */
 	private long duration;
 
-	public ExportResult()
+	public DataExchangeResult()
 	{
 		super();
 	}
 
-	public ExportResult(long duration)
+	public DataExchangeResult(long duration)
 	{
 		super();
 		this.duration = duration;

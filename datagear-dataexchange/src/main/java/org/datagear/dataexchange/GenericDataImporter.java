@@ -15,13 +15,13 @@ import org.springframework.core.GenericTypeResolver;
  * 它使用{@linkplain #getDevotedDataImporters()}列表中的元素来支持导入，靠后的可用元素将优先被使用。
  * </p>
  * <p>
- * 如果没有可用的元素，{@linkplain #impt(Import)}将抛出{@linkplain UnsupportedImportException}异常。
+ * 如果没有可用的元素，{@linkplain #impt(DataImport)}将抛出{@linkplain UnsupportedImportException}异常。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class GenericDataImporter implements DataImporter<Import>
+public class GenericDataImporter implements DataImporter<DataImport>
 {
 	private List<DevotedDataImporter<?>> devotedDataImporters;
 
@@ -51,9 +51,9 @@ public class GenericDataImporter implements DataImporter<Import>
 	}
 
 	@Override
-	public ImportResult impt(Import impt) throws DataImportException
+	public DataImportResult impt(DataImport impt) throws DataImportException
 	{
-		DevotedDataImporter<Import> devotedDataImporter = findDevotedDataImporter(impt);
+		DevotedDataImporter<DataImport> devotedDataImporter = findDevotedDataImporter(impt);
 
 		if (devotedDataImporter == null)
 			throw new UnsupportedImportException();
@@ -62,7 +62,7 @@ public class GenericDataImporter implements DataImporter<Import>
 	}
 
 	/**
-	 * 查找能支持指定{@linkplain Import}的{@linkplain DevotedDataImporter}。
+	 * 查找能支持指定{@linkplain DataImport}的{@linkplain DevotedDataImporter}。
 	 * <p>
 	 * 如果没有找到，将返回{@code null}。
 	 * </p>
@@ -70,7 +70,7 @@ public class GenericDataImporter implements DataImporter<Import>
 	 * @param impt
 	 * @return
 	 */
-	public DevotedDataImporter<Import> findDevotedDataImporter(Import impt)
+	public DevotedDataImporter<DataImport> findDevotedDataImporter(DataImport impt)
 	{
 		if (this.devotedDataImporters == null)
 			return null;
@@ -88,7 +88,7 @@ public class GenericDataImporter implements DataImporter<Import>
 				continue;
 
 			@SuppressWarnings("unchecked")
-			DevotedDataImporter<Import> devotedDataImporter = (DevotedDataImporter<Import>) this.devotedDataImporters
+			DevotedDataImporter<DataImport> devotedDataImporter = (DevotedDataImporter<DataImport>) this.devotedDataImporters
 					.get(i);
 
 			if (devotedDataImporter.supports(impt))

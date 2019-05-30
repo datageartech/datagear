@@ -11,7 +11,7 @@ package org.datagear.dataexchange;
  *
  * @param <T>
  */
-public interface DataImporter<T extends Import>
+public interface DataImporter<T extends DataImport>
 {
 	/**
 	 * 导入。
@@ -20,5 +20,5 @@ public interface DataImporter<T extends Import>
 	 * @return
 	 * @throws DataImportException
 	 */
-	ImportResult impt(T impt) throws DataImportException;
+	DataImportResult impt(T impt) throws DataImportException;
 }

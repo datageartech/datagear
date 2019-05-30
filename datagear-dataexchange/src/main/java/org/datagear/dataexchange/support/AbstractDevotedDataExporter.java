@@ -11,21 +11,21 @@ import java.sql.SQLException;
 
 import org.datagear.dataexchange.DataExportException;
 import org.datagear.dataexchange.DevotedDataExporter;
-import org.datagear.dataexchange.Export;
+import org.datagear.dataexchange.DataExport;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
 /**
  * 抽象{@linkplain DevotedDataExporter}。
  * <p>
- * 它默认实现了{@linkplain #supports(Export)}，并且始终返回{@code true}。
+ * 它默认实现了{@linkplain #supports(DataExport)}，并且始终返回{@code true}。
  * </p>
  * 
  * @author datagear@163.com
  *
  * @param <T>
  */
-public abstract class AbstractDevotedDataExporter<T extends Export> implements DevotedDataExporter<T>
+public abstract class AbstractDevotedDataExporter<T extends DataExport> implements DevotedDataExporter<T>
 {
 	private DatabaseInfoResolver databaseInfoResolver;
 

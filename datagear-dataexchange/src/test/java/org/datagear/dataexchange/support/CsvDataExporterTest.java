@@ -62,7 +62,7 @@ public class CsvDataExporterTest extends DataexchangeTestSupport
 
 		Connection cn = getConnection();
 
-		CsvImport impt = new CsvImport(cn, true, null, reader, dataFormat, true, TABLE_NAME);
+		CsvDataImport impt = new CsvDataImport(cn, true, reader, dataFormat, true, TABLE_NAME);
 
 		try
 		{
@@ -89,11 +89,11 @@ public class CsvDataExporterTest extends DataexchangeTestSupport
 
 		Writer writer = new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8");
 
-		CsvExport csvExport = new CsvExport(cn, rs, true, writer, dataFormat);
+		CsvDataExport csvDataExport = new CsvDataExport(cn, true, rs, writer, dataFormat);
 
 		try
 		{
-			this.csvDataExporter.expt(csvExport);
+			this.csvDataExporter.expt(csvDataExport);
 
 			IOUtil.close(writer);
 

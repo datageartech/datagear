@@ -10,7 +10,7 @@ package org.datagear.dataexchange;
  * @author datagear@163.com
  *
  */
-public interface ImportReporter
+public interface DataImportReporter
 {
 	/**
 	 * 报告导入异常。

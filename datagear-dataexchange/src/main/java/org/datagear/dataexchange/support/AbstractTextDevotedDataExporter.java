@@ -33,7 +33,7 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  *
  * @param <T>
  */
-public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextExport>
+public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextDataExport>
 		extends AbstractDevotedDataExporter<T>
 {
 	public AbstractTextDevotedDataExporter()

@@ -7,28 +7,25 @@ package org.datagear.dataexchange;
 import java.sql.Connection;
 
 /**
- * 导入源。
+ * 数据交换。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class Import
+public abstract class DataExchange
 {
-	/** 导入目标连接 */
+	/** 数据交换连接 */
 	private Connection connection;
 
-	/** 导入出错时是否终止 */
+	/** 出错时是否终止 */
 	private boolean abortOnError;
 
-	/** 导入报告 */
-	private ImportReporter importReporter;
-
-	public Import()
+	public DataExchange()
 	{
 		super();
 	}
 
-	public Import(Connection connection, boolean abortOnError, ImportReporter importReporter)
+	public DataExchange(Connection connection, boolean abortOnError)
 	{
 		super();
 		this.connection = connection;
@@ -53,20 +50,5 @@ public abstract class Import
 	public void setAbortOnError(boolean abortOnError)
 	{
 		this.abortOnError = abortOnError;
-	}
-
-	public boolean hasImportReporter()
-	{
-		return (this.importReporter != null);
-	}
-
-	public ImportReporter getImportReporter()
-	{
-		return importReporter;
-	}
-
-	public void setImportReporter(ImportReporter importReporter)
-	{
-		this.importReporter = importReporter;
 	}
 }
