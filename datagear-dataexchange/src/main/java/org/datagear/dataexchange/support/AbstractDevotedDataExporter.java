@@ -28,27 +28,9 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
 public abstract class AbstractDevotedDataExporter<T extends DataExport> extends DataExchangerSupport
 		implements DevotedDataExporter<T>
 {
-	private DatabaseInfoResolver databaseInfoResolver;
-
 	public AbstractDevotedDataExporter()
 	{
 		super();
-	}
-
-	public AbstractDevotedDataExporter(DatabaseInfoResolver databaseInfoResolver)
-	{
-		super();
-		this.databaseInfoResolver = databaseInfoResolver;
-	}
-
-	public DatabaseInfoResolver getDatabaseInfoResolver()
-	{
-		return databaseInfoResolver;
-	}
-
-	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
-	{
-		this.databaseInfoResolver = databaseInfoResolver;
 	}
 
 	@Override
@@ -58,20 +40,22 @@ public abstract class AbstractDevotedDataExporter<T extends DataExport> extends 
 	}
 
 	/**
-	 * 获取{@linkplain ResultSetMetaData}列信息数据。
+	 * 获取{@linkplain ResultSet}列信息。
 	 * 
 	 * @param cn
 	 * @param rs
+	 * @param databaseInfoResolver
 	 * @return
 	 * @throws DataExportException
 	 */
-	protected ColumnInfo[] getColumnInfos(Connection cn, ResultSet rs) throws DataExportException
+	protected ColumnInfo[] getColumnInfos(Connection cn, ResultSet rs, DatabaseInfoResolver databaseInfoResolver)
+			throws DataExportException
 	{
 		try
 		{
 			ResultSetMetaData resultSetMetaData = rs.getMetaData();
 
-			return this.databaseInfoResolver.getColumnInfos(cn, resultSetMetaData);
+			return databaseInfoResolver.getColumnInfos(cn, resultSetMetaData);
 		}
 		catch (SQLException e)
 		{

@@ -27,8 +27,6 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  */
 public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImport>
 {
-	private DatabaseInfoResolver databaseInfoResolver;
-
 	public CsvDataImporter()
 	{
 		super();
@@ -36,18 +34,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 
 	public CsvDataImporter(DatabaseInfoResolver databaseInfoResolver)
 	{
-		super();
-		this.databaseInfoResolver = databaseInfoResolver;
-	}
-
-	public DatabaseInfoResolver getDatabaseInfoResolver()
-	{
-		return databaseInfoResolver;
-	}
-
-	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
-	{
-		this.databaseInfoResolver = databaseInfoResolver;
+		super(databaseInfoResolver);
 	}
 
 	@Override
@@ -58,7 +45,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 		long startTime = System.currentTimeMillis();
 
 		CSVParser csvParser = buildCSVParser(impt);
-		InsertContext insertContext = buildInsertContext(impt, impt.getTable());
+		TextInsertContext textInsertContext = buildTextInsertContext(impt.getTable(), impt);
 
 		ColumnInfo[] rawColumnInfos = null;
 		ColumnInfo[] noNullColumnInfos = null;
@@ -89,9 +76,9 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 				{
 					String[] columnnValues = resolveCSVRecordValues(impt, csvRecord, rawColumnInfos, noNullColumnInfos);
 
-					setInsertPreparedColumnValues(impt, cn, st, noNullColumnInfos, columnnValues, insertContext);
+					setInsertPreparedColumnValues(impt, cn, st, noNullColumnInfos, columnnValues, textInsertContext);
 
-					executeInsertPreparedStatement(impt, st, insertContext);
+					executeNextInsert(impt, st, textInsertContext);
 				}
 			}
 		}
@@ -128,8 +115,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 	{
 		String[] columnNames = resolveCSVRecordValues(impt, csvRecord);
 
-		return getColumnInfos(cn, impt.getTable(), columnNames, impt.isIgnoreInexistentColumn(),
-				this.databaseInfoResolver);
+		return getColumnInfos(cn, impt.getTable(), columnNames, impt.isIgnoreInexistentColumn());
 	}
 
 	/**

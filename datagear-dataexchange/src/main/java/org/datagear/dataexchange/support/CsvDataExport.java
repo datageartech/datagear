@@ -5,7 +5,6 @@
 package org.datagear.dataexchange.support;
 
 import java.io.Writer;
-import java.sql.ResultSet;
 
 import javax.sql.DataSource;
 
@@ -17,16 +16,28 @@ import org.datagear.dataexchange.DataExport;
  * @author datagear@163.com
  *
  */
-public class CsvDataExport extends AbstractTextDataExport
+public class CsvDataExport extends QueryTextDataExport
 {
+	private Writer writer;
+
 	public CsvDataExport()
 	{
 		super();
 	}
 
-	public CsvDataExport(DataSource dataSource, boolean abortOnError, ResultSet resultSet, Writer writer,
-			DataFormat dataFormat)
+	public CsvDataExport(DataSource dataSource, boolean abortOnError, DataFormat dataFormat, Query query, Writer writer)
 	{
-		super(dataSource, abortOnError, resultSet, writer, dataFormat);
+		super(dataSource, abortOnError, dataFormat, query);
+		this.writer = writer;
+	}
+
+	public Writer getWriter()
+	{
+		return writer;
+	}
+
+	public void setWriter(Writer writer)
+	{
+		this.writer = writer;
 	}
 }

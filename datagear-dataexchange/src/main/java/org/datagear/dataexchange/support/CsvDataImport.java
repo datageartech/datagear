@@ -16,30 +16,30 @@ import org.datagear.dataexchange.DataImport;
  * @author datagear@163.com
  *
  */
-public class CsvDataImport extends AbstractTextDataImport
+public class CsvDataImport extends TableTextDataImport
 {
-	/** 要导入的表名 */
-	private String table;
+	/** CSV输入流 */
+	private Reader reader;
 
 	public CsvDataImport()
 	{
 		super();
 	}
 
-	public CsvDataImport(DataSource dataSource, boolean abortOnError, Reader reader, DataFormat dataFormat,
-			boolean ignoreInexistentColumn, String table)
+	public CsvDataImport(DataSource dataSource, boolean abortOnError, DataFormat dataFormat, String table,
+			boolean ignoreInexistentColumn, Reader reader)
 	{
-		super(dataSource, abortOnError, reader, dataFormat, ignoreInexistentColumn);
-		this.table = table;
+		super(dataSource, abortOnError, dataFormat, table, ignoreInexistentColumn);
+		this.reader = reader;
 	}
 
-	public String getTable()
+	public Reader getReader()
 	{
-		return table;
+		return reader;
 	}
 
-	public void setTable(String table)
+	public void setReader(Reader reader)
 	{
-		this.table = table;
+		this.reader = reader;
 	}
 }

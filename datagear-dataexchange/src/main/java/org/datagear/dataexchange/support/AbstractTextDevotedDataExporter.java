@@ -22,8 +22,10 @@ import java.text.NumberFormat;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.datagear.connection.IOUtil;
+import org.datagear.dataexchange.DataExportException;
 import org.datagear.dataexchange.DevotedDataExporter;
 import org.datagear.dataexchange.support.DataFormat.BinaryFormat;
+import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
 /**
@@ -33,9 +35,10 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  *
  * @param <T>
  */
-public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextDataExport>
-		extends AbstractDevotedDataExporter<T>
+public abstract class AbstractTextDevotedDataExporter<T extends TextDataExport> extends AbstractDevotedDataExporter<T>
 {
+	private DatabaseInfoResolver databaseInfoResolver;
+
 	public AbstractTextDevotedDataExporter()
 	{
 		super();
@@ -43,7 +46,29 @@ public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextData
 
 	public AbstractTextDevotedDataExporter(DatabaseInfoResolver databaseInfoResolver)
 	{
-		super(databaseInfoResolver);
+		super();
+		this.databaseInfoResolver = databaseInfoResolver;
+	}
+
+	public DatabaseInfoResolver getDatabaseInfoResolver()
+	{
+		return databaseInfoResolver;
+	}
+
+	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
+	{
+		this.databaseInfoResolver = databaseInfoResolver;
+	}
+
+	/**
+	 * 构建{@linkplain SelectContext}。
+	 * 
+	 * @param expt
+	 * @return
+	 */
+	protected SelectContext buildSelectContext(T expt)
+	{
+		return new SelectContext(expt.getDataFormat());
 	}
 
 	/**
@@ -53,6 +78,7 @@ public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextData
 	 * Supported by ResultSet getter Methods”表，并且使用其中的最佳方法。
 	 * </p>
 	 * 
+	 * @param expt
 	 * @param cn
 	 * @param rs
 	 * @param columnIndex
@@ -63,7 +89,7 @@ public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextData
 	 * @throws IOException
 	 * @throws UnsupportedSqlTypeException
 	 */
-	protected String getStringValue(Connection cn, ResultSet rs, int columnIndex, int sqlType,
+	protected String getStringValue(T expt, Connection cn, ResultSet rs, int columnIndex, int sqlType,
 			SelectContext selectContext) throws SQLException, IOException, UnsupportedSqlTypeException
 	{
 		String value = null;
@@ -468,6 +494,19 @@ public abstract class AbstractTextDevotedDataExporter<T extends AbstractTextData
 			return null;
 
 		return Base64.encodeBase64String(bytes);
+	}
+
+	/**
+	 * 获取{@linkplain ResultSet}列信息。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @return
+	 * @throws DataExportException
+	 */
+	protected ColumnInfo[] getColumnInfos(Connection cn, ResultSet rs) throws DataExportException
+	{
+		return super.getColumnInfos(cn, rs, this.databaseInfoResolver);
 	}
 
 	protected static class SelectContext extends DataFormatContext

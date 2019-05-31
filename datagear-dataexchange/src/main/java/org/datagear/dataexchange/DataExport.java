@@ -4,8 +4,6 @@
 
 package org.datagear.dataexchange;
 
-import java.sql.ResultSet;
-
 import javax.sql.DataSource;
 
 /**
@@ -16,9 +14,6 @@ import javax.sql.DataSource;
  */
 public abstract class DataExport extends DataExchange
 {
-	/** 导出源结果集 */
-	private ResultSet resultSet;
-
 	private DataExportReporter dataExportReporter;
 
 	public DataExport()
@@ -26,20 +21,9 @@ public abstract class DataExport extends DataExchange
 		super();
 	}
 
-	public DataExport(DataSource dataSource, boolean abortOnError, ResultSet resultSet)
+	public DataExport(DataSource dataSource, boolean abortOnError)
 	{
 		super(dataSource, abortOnError);
-		this.resultSet = resultSet;
-	}
-
-	public ResultSet getResultSet()
-	{
-		return resultSet;
-	}
-
-	public void setResultSet(ResultSet resultSet)
-	{
-		this.resultSet = resultSet;
 	}
 
 	public boolean hasDataExportReporter()

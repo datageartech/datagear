@@ -16,8 +16,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -67,8 +65,8 @@ public class CsvDataExporterTest extends DataexchangeTestSupport
 			cn = getConnection();
 			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataExporterTest.csv"), "UTF-8");
 
-			CsvDataImport impt = new CsvDataImport(buildSimpleDataSource(cn), true, reader, dataFormat, true,
-					TABLE_NAME);
+			CsvDataImport impt = new CsvDataImport(buildSimpleDataSource(cn), true, dataFormat, TABLE_NAME, true,
+					reader);
 
 			clearTable(cn, TABLE_NAME);
 			this.csvDataImporter.impt(impt);
@@ -94,12 +92,10 @@ public class CsvDataExporterTest extends DataexchangeTestSupport
 		{
 			cn = getConnection();
 
-			Statement st = cn.createStatement();
-			ResultSet rs = st.executeQuery("select * from " + TABLE_NAME + " order by id asc");
-
 			writer = new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8");
 
-			CsvDataExport csvDataExport = new CsvDataExport(buildSimpleDataSource(cn), true, rs, writer, dataFormat);
+			CsvDataExport csvDataExport = new CsvDataExport(buildSimpleDataSource(cn), true, dataFormat,
+					new TableQuery(TABLE_NAME), writer);
 
 			this.csvDataExporter.expt(csvDataExport);
 		}

@@ -48,17 +48,18 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvDataExpo
 		boolean abortOnError = expt.isAbortOnError();
 		DataExportReporter dataExportReporter = (expt.hasDataExportReporter() ? expt.getDataExportReporter() : null);
 
+		SelectContext selectContext = buildSelectContext(expt);
+
 		Connection cn = null;
 
 		try
 		{
 			cn = expt.getDataSource().getConnection();
 
-			ResultSet rs = expt.getResultSet();
+			ResultSet rs = expt.getQuery().execute(cn);
 
 			ColumnInfo[] columnInfos = getColumnInfos(cn, rs);
 			CSVPrinter csvPrinter = buildCSVPrinter(expt);
-			SelectContext selectContext = new SelectContext(expt.getDataFormat());
 
 			writeColumnInfos(csvPrinter, columnInfos);
 			int dataIndex = 0;
@@ -71,7 +72,7 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvDataExpo
 
 					try
 					{
-						value = getStringValue(cn, rs, i + 1, columnInfos[i].getType(), selectContext);
+						value = getStringValue(expt, cn, rs, i + 1, columnInfos[i].getType(), selectContext);
 					}
 					catch (SQLTransientException e)
 					{
