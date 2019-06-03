@@ -4,8 +4,6 @@
 
 package org.datagear.dataexchange;
 
-import javax.sql.DataSource;
-
 /**
  * 导入源。
  * 
@@ -22,9 +20,9 @@ public abstract class DataImport extends DataExchange
 		super();
 	}
 
-	public DataImport(DataSource dataSource, boolean abortOnError)
+	public DataImport(ConnectionFactory connectionFactory, boolean abortOnError)
 	{
-		super(dataSource, abortOnError);
+		super(connectionFactory, abortOnError);
 	}
 
 	public boolean hasDataImportReporter()

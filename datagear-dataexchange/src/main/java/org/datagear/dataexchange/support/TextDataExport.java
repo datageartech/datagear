@@ -4,8 +4,7 @@
 
 package org.datagear.dataexchange.support;
 
-import javax.sql.DataSource;
-
+import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExport;
 
 /**
@@ -24,9 +23,9 @@ public abstract class TextDataExport extends DataExport
 		super();
 	}
 
-	public TextDataExport(DataSource dataSource, boolean abortOnError, DataFormat dataFormat)
+	public TextDataExport(ConnectionFactory connectionFactory, boolean abortOnError, DataFormat dataFormat)
 	{
-		super(dataSource, abortOnError);
+		super(connectionFactory, abortOnError);
 		this.dataFormat = dataFormat;
 	}
 

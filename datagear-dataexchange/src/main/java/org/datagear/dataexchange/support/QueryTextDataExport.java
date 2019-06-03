@@ -4,7 +4,7 @@
 
 package org.datagear.dataexchange.support;
 
-import javax.sql.DataSource;
+import org.datagear.dataexchange.ConnectionFactory;
 
 /**
  * 查询{@linkplain TextDataExport}。
@@ -22,9 +22,10 @@ public class QueryTextDataExport extends TextDataExport
 		super();
 	}
 
-	public QueryTextDataExport(DataSource dataSource, boolean abortOnError, DataFormat dataFormat, Query query)
+	public QueryTextDataExport(ConnectionFactory connectionFactory, boolean abortOnError, DataFormat dataFormat,
+			Query query)
 	{
-		super(dataSource, abortOnError, dataFormat);
+		super(connectionFactory, abortOnError, dataFormat);
 		this.query = query;
 	}
 

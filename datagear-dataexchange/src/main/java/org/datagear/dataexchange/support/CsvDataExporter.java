@@ -12,7 +12,7 @@ import java.sql.SQLTransientException;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.datagear.connection.JdbcUtil;
+import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExportException;
 import org.datagear.dataexchange.DataExportReporter;
 import org.datagear.dataexchange.DataExportResult;
@@ -43,6 +43,8 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvDataExpo
 	{
 		DataExportResult dataExportResult = new DataExportResult();
 
+		ConnectionFactory connectionFactory = expt.getConnectionFactory();
+
 		long startTime = System.currentTimeMillis();
 
 		boolean abortOnError = expt.isAbortOnError();
@@ -54,7 +56,7 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvDataExpo
 
 		try
 		{
-			cn = expt.getDataSource().getConnection();
+			cn = connectionFactory.getConnection();
 
 			ResultSet rs = expt.getQuery().execute(cn);
 
@@ -126,7 +128,7 @@ public class CsvDataExporter extends AbstractTextDevotedDataExporter<CsvDataExpo
 		}
 		finally
 		{
-			JdbcUtil.closeConnection(cn);
+			reclaimConnection(connectionFactory, cn);
 		}
 
 		dataExportResult.setDuration(System.currentTimeMillis() - startTime);

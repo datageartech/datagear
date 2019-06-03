@@ -4,7 +4,7 @@
 
 package org.datagear.dataexchange.support;
 
-import javax.sql.DataSource;
+import org.datagear.dataexchange.ConnectionFactory;
 
 /**
  * 单表{@linkplain TextDataImport}。
@@ -25,10 +25,10 @@ public abstract class TableTextDataImport extends TextDataImport
 		super();
 	}
 
-	public TableTextDataImport(DataSource dataSource, boolean abortOnError, DataFormat dataFormat, String table,
-			boolean ignoreInexistentColumn)
+	public TableTextDataImport(ConnectionFactory connectionFactory, boolean abortOnError, DataFormat dataFormat,
+			String table, boolean ignoreInexistentColumn)
 	{
-		super(dataSource, abortOnError, dataFormat);
+		super(connectionFactory, abortOnError, dataFormat);
 		this.table = table;
 		this.ignoreInexistentColumn = ignoreInexistentColumn;
 	}

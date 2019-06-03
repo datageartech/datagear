@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataImport;
 import org.datagear.dataexchange.DevotedDataImporter;
 import org.datagear.dbinfo.ColumnInfo;
@@ -44,6 +45,24 @@ public abstract class AbstractDevotedDataImporter<T extends DataImport> extends 
 	public boolean supports(T impt)
 	{
 		return true;
+	}
+
+	/**
+	 * 回收数据库连接。
+	 * 
+	 * @param connectionFactory
+	 * @param cn
+	 */
+	protected void reclaimConnection(ConnectionFactory connectionFactory, Connection cn)
+	{
+		try
+		{
+			connectionFactory.reclaimConnection(cn);
+		}
+		catch (SQLException e)
+		{
+			LOGGER.error("reclaimConnection error", e);
+		}
 	}
 
 	/**

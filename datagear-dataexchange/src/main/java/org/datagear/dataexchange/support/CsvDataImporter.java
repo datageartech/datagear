@@ -13,6 +13,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.datagear.connection.JdbcUtil;
+import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataImportException;
 import org.datagear.dataexchange.DataImportResult;
 import org.datagear.dataexchange.DevotedDataImporter;
@@ -42,6 +43,8 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 	{
 		DataImportResult dataImportResult = new DataImportResult();
 
+		ConnectionFactory connectionFactory = impt.getConnectionFactory();
+
 		long startTime = System.currentTimeMillis();
 
 		CSVParser csvParser = buildCSVParser(impt);
@@ -56,7 +59,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 
 		try
 		{
-			cn = impt.getDataSource().getConnection();
+			cn = connectionFactory.getConnection();
 
 			for (CSVRecord csvRecord : csvParser)
 			{
@@ -89,7 +92,7 @@ public class CsvDataImporter extends AbstractTextDevotedDataImporter<CsvDataImpo
 		finally
 		{
 			JdbcUtil.closeStatement(st);
-			JdbcUtil.closeConnection(cn);
+			reclaimConnection(connectionFactory, cn);
 		}
 
 		dataImportResult.setDuration(System.currentTimeMillis() - startTime);

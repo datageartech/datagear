@@ -10,6 +10,7 @@ import java.sql.Connection;
 import org.datagear.connection.IOUtil;
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.DataexchangeTestSupport;
+import org.datagear.dataexchange.SimpleConnectionFactory;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,8 +51,8 @@ public class CsvDataImporterTest extends DataexchangeTestSupport
 			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataImporterTest_ignoreInexistentColumn.csv"),
 					"UTF-8");
 
-			CsvDataImport impt = new CsvDataImport(buildSimpleDataSource(cn), true, dataFormat, TABLE_NAME, false,
-					reader);
+			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), true, dataFormat, TABLE_NAME,
+					false, reader);
 
 			clearTable(cn, TABLE_NAME);
 
@@ -81,14 +82,12 @@ public class CsvDataImporterTest extends DataexchangeTestSupport
 			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataImporterTest_ignoreInexistentColumn.csv"),
 					"UTF-8");
 
-			CsvDataImport impt = new CsvDataImport(buildSimpleDataSource(cn), true, dataFormat, TABLE_NAME, true,
-					reader);
+			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), true, dataFormat, TABLE_NAME,
+					true, reader);
 
 			clearTable(cn, TABLE_NAME);
 
 			this.csvDataImporter.impt(impt);
-
-			cn = getConnection();
 
 			int count = getCount(cn, TABLE_NAME);
 
@@ -114,14 +113,12 @@ public class CsvDataImporterTest extends DataexchangeTestSupport
 			cn = getConnection();
 			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataImporterTest_abortOnError.csv"), "UTF-8");
 
-			CsvDataImport impt = new CsvDataImport(buildSimpleDataSource(cn), false, dataFormat, TABLE_NAME, true,
-					reader);
+			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), false, dataFormat,
+					TABLE_NAME, true, reader);
 
 			clearTable(cn, TABLE_NAME);
 
 			this.csvDataImporter.impt(impt);
-
-			cn = getConnection();
 
 			int count = getCount(cn, TABLE_NAME);
 
@@ -147,8 +144,8 @@ public class CsvDataImporterTest extends DataexchangeTestSupport
 			cn = getConnection();
 			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataImporterTest_abortOnError.csv"), "UTF-8");
 
-			CsvDataImport impt = new CsvDataImport(buildSimpleDataSource(cn), true, dataFormat, TABLE_NAME, true,
-					reader);
+			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), true, dataFormat, TABLE_NAME,
+					true, reader);
 
 			clearTable(cn, TABLE_NAME);
 

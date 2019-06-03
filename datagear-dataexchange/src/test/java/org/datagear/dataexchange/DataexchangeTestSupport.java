@@ -6,15 +6,12 @@ package org.datagear.dataexchange;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.DataSource;
 
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.support.CsvDataImporterTest;
@@ -85,75 +82,5 @@ public abstract class DataexchangeTestSupport extends DBTestSupport
 	{
 		return CsvDataImporterTest.class.getClassLoader()
 				.getResourceAsStream("org/datagear/dataexchange/support/" + resourceName);
-	}
-
-	protected SimpleDataSource buildSimpleDataSource(Connection cn)
-	{
-		return new SimpleDataSource(cn);
-	}
-
-	protected static class SimpleDataSource implements DataSource
-	{
-		private Connection connection;
-
-		public SimpleDataSource(Connection connection)
-		{
-			super();
-			this.connection = connection;
-		}
-
-		public void setConnection(Connection connection)
-		{
-			this.connection = connection;
-		}
-
-		@Override
-		public <T> T unwrap(Class<T> iface) throws SQLException
-		{
-			throw new UnsupportedExportException();
-		}
-
-		@Override
-		public boolean isWrapperFor(Class<?> iface) throws SQLException
-		{
-			throw new UnsupportedExportException();
-		}
-
-		@Override
-		public PrintWriter getLogWriter() throws SQLException
-		{
-			throw new UnsupportedExportException();
-		}
-
-		@Override
-		public void setLogWriter(PrintWriter out) throws SQLException
-		{
-			throw new UnsupportedExportException();
-		}
-
-		@Override
-		public void setLoginTimeout(int seconds) throws SQLException
-		{
-			throw new UnsupportedExportException();
-		}
-
-		@Override
-		public int getLoginTimeout() throws SQLException
-		{
-			throw new UnsupportedExportException();
-		}
-
-		@Override
-		public Connection getConnection() throws SQLException
-		{
-			return this.connection;
-		}
-
-		@Override
-		public Connection getConnection(String username, String password) throws SQLException
-		{
-			throw new UnsupportedExportException();
-		}
-
 	}
 }

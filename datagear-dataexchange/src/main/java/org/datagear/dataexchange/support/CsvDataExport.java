@@ -6,8 +6,7 @@ package org.datagear.dataexchange.support;
 
 import java.io.Writer;
 
-import javax.sql.DataSource;
-
+import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExport;
 
 /**
@@ -25,9 +24,10 @@ public class CsvDataExport extends QueryTextDataExport
 		super();
 	}
 
-	public CsvDataExport(DataSource dataSource, boolean abortOnError, DataFormat dataFormat, Query query, Writer writer)
+	public CsvDataExport(ConnectionFactory connectionFactory, boolean abortOnError, DataFormat dataFormat, Query query,
+			Writer writer)
 	{
-		super(dataSource, abortOnError, dataFormat, query);
+		super(connectionFactory, abortOnError, dataFormat, query);
 		this.writer = writer;
 	}
 

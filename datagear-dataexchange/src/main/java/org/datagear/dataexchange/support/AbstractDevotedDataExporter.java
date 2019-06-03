@@ -9,11 +9,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExport;
 import org.datagear.dataexchange.DataExportException;
 import org.datagear.dataexchange.DevotedDataExporter;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 抽象{@linkplain DevotedDataExporter}。
@@ -28,6 +31,8 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
 public abstract class AbstractDevotedDataExporter<T extends DataExport> extends DataExchangerSupport
 		implements DevotedDataExporter<T>
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDevotedDataExporter.class);
+
 	public AbstractDevotedDataExporter()
 	{
 		super();
@@ -37,6 +42,24 @@ public abstract class AbstractDevotedDataExporter<T extends DataExport> extends 
 	public boolean supports(T expt)
 	{
 		return true;
+	}
+
+	/**
+	 * 回收数据库连接。
+	 * 
+	 * @param connectionFactory
+	 * @param cn
+	 */
+	protected void reclaimConnection(ConnectionFactory connectionFactory, Connection cn)
+	{
+		try
+		{
+			connectionFactory.reclaimConnection(cn);
+		}
+		catch (SQLException e)
+		{
+			LOGGER.error("reclaimConnection error", e);
+		}
 	}
 
 	/**

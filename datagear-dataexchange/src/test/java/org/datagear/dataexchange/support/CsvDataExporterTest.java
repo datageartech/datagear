@@ -24,6 +24,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.datagear.connection.IOUtil;
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.DataexchangeTestSupport;
+import org.datagear.dataexchange.SimpleConnectionFactory;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -65,8 +66,8 @@ public class CsvDataExporterTest extends DataexchangeTestSupport
 			cn = getConnection();
 			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataExporterTest.csv"), "UTF-8");
 
-			CsvDataImport impt = new CsvDataImport(buildSimpleDataSource(cn), true, dataFormat, TABLE_NAME, true,
-					reader);
+			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), true, dataFormat, TABLE_NAME,
+					true, reader);
 
 			clearTable(cn, TABLE_NAME);
 			this.csvDataImporter.impt(impt);
@@ -94,7 +95,7 @@ public class CsvDataExporterTest extends DataexchangeTestSupport
 
 			writer = new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8");
 
-			CsvDataExport csvDataExport = new CsvDataExport(buildSimpleDataSource(cn), true, dataFormat,
+			CsvDataExport csvDataExport = new CsvDataExport(new SimpleConnectionFactory(cn, false), true, dataFormat,
 					new TableQuery(TABLE_NAME), writer);
 
 			this.csvDataExporter.expt(csvDataExport);
