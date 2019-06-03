@@ -10,7 +10,7 @@ package org.datagear.dataexchange.support;
  * @author datagear@163.com
  *
  */
-public class IllegalSourceValueException extends SetInsertPreparedColumnValueException
+public class IllegalSourceValueException extends SetImportColumnValueException
 {
 	private static final long serialVersionUID = 1L;
 

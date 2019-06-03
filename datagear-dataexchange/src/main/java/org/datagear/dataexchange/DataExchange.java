@@ -4,8 +4,6 @@
 
 package org.datagear.dataexchange;
 
-import javax.sql.DataSource;
-
 /**
  * 数据交换。
  * 
@@ -15,40 +13,26 @@ import javax.sql.DataSource;
 public abstract class DataExchange
 {
 	/** 数据交换数据源 */
-	private DataSource dataSource;
-
-	/** 出错时是否终止 */
-	private boolean abortOnError;
+	private ConnectionFactory connectionFactory;
 
 	public DataExchange()
 	{
 		super();
 	}
 
-	public DataExchange(DataSource dataSource, boolean abortOnError)
+	public DataExchange(ConnectionFactory connectionFactory)
 	{
 		super();
-		this.dataSource = dataSource;
-		this.abortOnError = abortOnError;
+		this.connectionFactory = connectionFactory;
 	}
 
-	public DataSource getDataSource()
+	public ConnectionFactory getConnectionFactory()
 	{
-		return dataSource;
+		return connectionFactory;
 	}
 
-	public void setDataSource(DataSource dataSource)
+	public void setConnectionFactory(ConnectionFactory connectionFactory)
 	{
-		this.dataSource = dataSource;
-	}
-
-	public boolean isAbortOnError()
-	{
-		return abortOnError;
-	}
-
-	public void setAbortOnError(boolean abortOnError)
-	{
-		this.abortOnError = abortOnError;
+		this.connectionFactory = connectionFactory;
 	}
 }

@@ -4,13 +4,15 @@
 
 package org.datagear.dataexchange.support;
 
+import org.datagear.dataexchange.DataExchangeException;
+
 /**
  * 不支持指定SQL类型异常。
  * 
  * @author datagear@163.com
  *
  */
-public class UnsupportedSqlTypeException extends Exception
+public class UnsupportedSqlTypeException extends DataExchangeException
 {
 	private static final long serialVersionUID = 1L;
 
@@ -18,7 +20,7 @@ public class UnsupportedSqlTypeException extends Exception
 
 	public UnsupportedSqlTypeException(int sqlType)
 	{
-		super("Import data of JDBC sql type [" + sqlType + "] is not supported");
+		super("JDBC sql type [" + sqlType + "] is not supported");
 		this.sqlType = sqlType;
 	}
 

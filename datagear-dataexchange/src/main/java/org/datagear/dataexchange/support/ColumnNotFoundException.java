@@ -4,7 +4,7 @@
 
 package org.datagear.dataexchange.support;
 
-import org.datagear.dataexchange.DataImportException;
+import org.datagear.dataexchange.DataExchangeException;
 
 /**
  * 在表中没有找到指定列异常。
@@ -12,7 +12,7 @@ import org.datagear.dataexchange.DataImportException;
  * @author datagear@163.com
  *
  */
-public class ColumnNotFoundException extends DataImportException
+public class ColumnNotFoundException extends DataExchangeException
 {
 	private static final long serialVersionUID = 1L;
 

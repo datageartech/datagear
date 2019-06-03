@@ -6,9 +6,11 @@ package org.datagear.dataexchange.support;
 
 import java.io.Writer;
 
-import javax.sql.DataSource;
-
-import org.datagear.dataexchange.DataExport;
+import org.datagear.dataexchange.ConnectionFactory;
+import org.datagear.dataexchange.DataFormat;
+import org.datagear.dataexchange.Query;
+import org.datagear.dataexchange.QueryTextDataExport;
+import org.datagear.dataexchange.TextDataExportResult;
 
 /**
  * CSV {@linkplain DataExport}。
@@ -20,14 +22,17 @@ public class CsvDataExport extends QueryTextDataExport
 {
 	private Writer writer;
 
+	private TextDataExportResult exportResult;
+
 	public CsvDataExport()
 	{
 		super();
 	}
 
-	public CsvDataExport(DataSource dataSource, boolean abortOnError, DataFormat dataFormat, Query query, Writer writer)
+	public CsvDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, boolean nullForUnsupportedColumn,
+			Query query, Writer writer)
 	{
-		super(dataSource, abortOnError, dataFormat, query);
+		super(connectionFactory, dataFormat, nullForUnsupportedColumn, query);
 		this.writer = writer;
 	}
 
@@ -40,4 +45,15 @@ public class CsvDataExport extends QueryTextDataExport
 	{
 		this.writer = writer;
 	}
+
+	public TextDataExportResult getExportResult()
+	{
+		return exportResult;
+	}
+
+	public void setExportResult(TextDataExportResult exportResult)
+	{
+		this.exportResult = exportResult;
+	}
+
 }
