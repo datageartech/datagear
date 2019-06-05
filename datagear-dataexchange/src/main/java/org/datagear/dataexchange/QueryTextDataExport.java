@@ -5,7 +5,7 @@
 package org.datagear.dataexchange;
 
 /**
- * 查询导出{@linkplain TextDataExchange}。
+ * 查询文本导出。
  * 
  * @author datagear@163.com
  *

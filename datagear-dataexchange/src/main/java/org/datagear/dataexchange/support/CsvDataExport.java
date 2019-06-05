@@ -13,7 +13,7 @@ import org.datagear.dataexchange.QueryTextDataExport;
 import org.datagear.dataexchange.TextDataExportResult;
 
 /**
- * CSV {@linkplain DataExport}。
+ * CSV导出。
  * 
  * @author datagear@163.com
  *

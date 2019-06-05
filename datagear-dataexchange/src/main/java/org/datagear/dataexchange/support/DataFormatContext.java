@@ -1,15 +1,16 @@
-package org.datagear.dataexchange;
 /*
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-
+package org.datagear.dataexchange.support;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+
+import org.datagear.dataexchange.DataFormat;
 
 /**
  * 数据格式上下文。

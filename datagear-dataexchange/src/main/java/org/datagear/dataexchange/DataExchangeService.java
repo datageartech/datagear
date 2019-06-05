@@ -5,7 +5,7 @@
 package org.datagear.dataexchange;
 
 /**
- * 数据交换服务接口。
+ * 数据交换服务。
  * 
  * @author datagear@163.com
  *

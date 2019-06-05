@@ -1,9 +1,8 @@
-package org.datagear.dataexchange;
 /*
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-
+package org.datagear.dataexchange;
 
 import java.io.Serializable;
 import java.util.Locale;

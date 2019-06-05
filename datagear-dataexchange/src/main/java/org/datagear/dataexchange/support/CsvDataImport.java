@@ -13,7 +13,7 @@ import org.datagear.dataexchange.TableTextDataImport;
 import org.datagear.dataexchange.TextDataImportResult;
 
 /**
- * CSV {@linkplain TableTextDataImport}。
+ * CSV导入。
  * 
  * @author datagear@163.com
  *

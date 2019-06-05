@@ -5,7 +5,7 @@
 package org.datagear.dataexchange;
 
 /**
- * JDBC操作异常处理方式。
+ * 数据交换异常处理方式。
  * 
  * @author datagear@163.com
  *

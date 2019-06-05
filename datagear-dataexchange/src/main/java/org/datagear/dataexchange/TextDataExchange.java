@@ -5,7 +5,7 @@
 package org.datagear.dataexchange;
 
 /**
- * 文本{@linkplain DataExchange}。
+ * 文本数据交换。
  * 
  * @author datagear@163.com
  *

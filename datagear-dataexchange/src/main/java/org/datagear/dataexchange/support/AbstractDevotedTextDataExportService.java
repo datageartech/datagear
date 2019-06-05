@@ -25,14 +25,12 @@ import org.apache.commons.codec.binary.Hex;
 import org.datagear.connection.IOUtil;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataFormat.BinaryFormat;
-import org.datagear.dataexchange.DataFormatContext;
-import org.datagear.dataexchange.DevotedDataExchangeService;
 import org.datagear.dataexchange.TextDataExport;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
 /**
- * 抽象文本导出{@linkplain DevotedDataExchangeService}。
+ * 抽象文本导出服务。
  * 
  * @author datagear@163.com
  *
