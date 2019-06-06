@@ -128,6 +128,16 @@
 		return (original.id != undefined && original.url != undefined);
 	};
 	
+	po.getSchemaNode = function(jstree, node)
+	{
+		if(!node)
+			return null;
+		else if(po.isSchemaNode(node))
+			return node;
+		else
+			return po.getSchemaNode(jstree, jstree.get_node(node.parent));
+	};
+	
 	po.schemaToJstreeNode = function(schema)
 	{
 		schema.text = $.escapeHtml(schema.title);
@@ -653,14 +663,8 @@
 					}
 					else
 					{
-						var selNode = selNodes[0];
-						
-						var schema = null;
-						
-						if(po.isSchemaNode(selNode))
-							schema = selNode.original;
-						else if(po.isTableNode(selNode))
-							schema = jstree.get_node(selNode.parent).original;
+						var schemaNode = po.getSchemaNode(jstree, selNodes[0]);
+						var schema = (schemaNode ? schemaNode.original : null);
 						
 						if(schema)
 						{
@@ -670,6 +674,41 @@
 							
 							po.activeWorkTab(po.genTabId(schema.id, "sqlpad"), "<@spring.message code='main.sqlpad' />", tabTitle, schema, tabUrl, "sqlpad");
 						}
+					}
+				}
+				else if($item.hasClass("schema-operation-dataimport") || $item.hasClass("schema-operation-dataexport"))
+				{
+					if(!selNodes.length || selNodes.length < 1)
+						return;
+					
+					var isImport = $item.hasClass("schema-operation-dataimport");
+					
+					var schemaNode = po.getSchemaNode(jstree, selNodes[0]);
+					var schema = (schemaNode ? schemaNode.original : null);
+					
+					if(schema)
+					{
+						var tabId = "";
+						var tabLabel = "";
+						var tabTitle = "";
+						var tabUrl = "";
+						
+						if(isImport)
+						{
+							tabId = po.genTabId(schema.id, "dataimport");
+							tabLabel = "<@spring.message code='main.dataimport' />";
+							tabTitle = "<@spring.message code='main.dataimport' /><@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
+							tabUrl = "${contextPath}/dataexchange/" + schema.id+"/import";
+						}
+						else
+						{
+							tabId = po.genTabId(schema.id, "dataexport");
+							tabLabel = "<@spring.message code='main.dataexport' />";
+							tabTitle = "<@spring.message code='main.dataexport' /><@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
+							tabUrl = "${contextPath}/dataexchange/" + schema.id+"/export";
+						}
+						
+						po.activeWorkTab(tabId, tabLabel, tabTitle, schema, tabUrl, "dataexchange");
 					}
 				}
 			}
@@ -1019,6 +1058,9 @@
 								<li class="schema-operation-reload" title="<@spring.message code='main.schemaOperationMenuReloadComment' />"><a href="javascript:void(0);"><@spring.message code='reload' /></a></li>
 								<li class="ui-widget-header"></li>
 								<li class="schema-operation-sqlpad"><a href="javascript:void(0);"><@spring.message code='main.sqlpad' /></a></li>
+								<li class="ui-widget-header"></li>
+								<li class="schema-operation-dataimport"><a href="javascript:void(0);"><@spring.message code='main.dataimport' /></a></li>
+								<li class="schema-operation-dataexport"><a href="javascript:void(0);"><@spring.message code='main.dataexport' /></a></li>
 							</ul>
 						</li>
 					</ul>
