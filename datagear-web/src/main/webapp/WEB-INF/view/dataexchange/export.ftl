@@ -32,7 +32,6 @@ Schema schema 数据库，不允许为null
 </#if>
 
 <#include "../include/page_js_obj.ftl">
-<#include "../include/page_obj_tabs.ftl" >
 <script type="text/javascript">
 (function(po)
 {
