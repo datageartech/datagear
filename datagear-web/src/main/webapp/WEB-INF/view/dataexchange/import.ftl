@@ -22,7 +22,7 @@ Schema schema 数据库，不允许为null
 	<div class="head">
 	</div>
 	<div class="content">
-		<form id="${pageId}-form" action="#" method="POST">
+		<form id="${pageId}-form" action="" method="POST">
 			<div class="form-head">
 				<@spring.message code='dataimport.selectDataType' />
 			</div>
@@ -32,7 +32,7 @@ Schema schema 数据库，不允许为null
 					<div class="form-item-value">
 						<label for="${pageId}-dataType-0"><@spring.message code='dataimport.dataType.csv' /></label>
 						<input id="${pageId}-dataType-0" type="radio" name="dataType" value="csv" />
-						<div class="input-desc">
+						<div class="input-desc minor">
 							<@spring.message code='dataimport.dataType.csv.desc' />
 						</div>
 					</div>
@@ -42,7 +42,7 @@ Schema schema 数据库，不允许为null
 					<div class="form-item-value">
 						<label for="${pageId}-dataType-1"><@spring.message code='dataimport.dataType.db' /></label>
 						<input id="${pageId}-dataType-1" type="radio" name="dataType" value="db" />
-						<div class="input-desc">
+						<div class="input-desc minor">
 							<@spring.message code='dataimport.dataType.db.desc' />
 						</div>
 					</div>
@@ -67,12 +67,27 @@ Schema schema 数据库，不允许为null
 (function(po)
 {
 	po.schemaId = "${schema.id}";
-	po.form = po.element("#${pageId}-form");
 	
 	$.initButtons(po.element());
+	
+	po.element("input[name='dataType']").change(function()
+	{
+		var dataType = $(this).val();
+		po.element("#${pageId}-form").attr("action", "${contextPath}/dataexchange/" + po.schemaId +"/import/" + dataType);
+	});
+	
 	po.element("input[type=radio]").checkboxradio({icon:true});
-	po.element("#${pageId}-dataType-0").prop("checked", true);
-	po.element("input[type=radio]").checkboxradio("refresh");
+	po.element("#${pageId}-dataType-0").click();
+	
+	<#if isAjaxRequest>
+	po.element("#${pageId}-form").ajaxForm(
+	{
+		success: function(data)
+		{
+			po.element().parent().html(data);
+		}
+	});
+	</#if>
 })
 (${pageId});
 </script>

@@ -146,6 +146,25 @@ table.dataTable.display tbody > tr > .selected:hover {
 	color: #333333;
 }
 
+/*jquery-steps*/
+.wizard > .steps .current a, .wizard > .steps .current a:hover, .wizard > .steps .current a:active,
+.wizard > .steps .done a, .wizard > .steps .done a:hover, .wizard > .steps .done a:active,
+.wizard > .actions a, .wizard > .actions a:hover, .wizard > .actions a:active{
+	border: 1px solid #94e63f;
+    background-color: #59c908;
+    color: #ffffff;
+}
+.wizard > .actions a:hover{
+	border: 1px solid #6cc510;
+	background-color: #52b607;
+}
+.wizard > .steps .disabled a, .wizard > .steps .disabled a:hover, .wizard > .steps .disabled a:active,
+.wizard > .actions .disabled a, .wizard > .actions .disabled a:hover, .wizard > .actions .disabled a:active{
+	background: none;
+	border: 1px solid #45930b;
+	color: #aaa;
+}
+
 /*主页*/
 .main-page-head{
 	border-bottom: 1px solid #45930b;

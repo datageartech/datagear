@@ -12,6 +12,10 @@ body{
 .small-text{
 	font-size:small;
 }
+.minor{
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
+}
 
 a.link,
 a.link:link,
@@ -447,6 +451,33 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	vertical-align: top;
 }
 
+/*jquery-steps*/
+.wizard > .steps a, .wizard > .steps a:hover, .wizard > .steps a:active{
+	padding: 0.6em 1em;
+	border-radius: 3px;
+}
+.wizard > .steps .done a, .wizard > .steps .done a:hover, .wizard > .steps .done a:active{
+	opacity: 0.6;
+	filter: Alpha(Opacity=60);
+}
+.wizard > .content{
+	min-height: 20em;
+	background: none;
+}
+.wizard > .content > .body{
+	padding: 0.5em 1em;
+}
+.wizard > .steps .number{
+	font-size: 1.2em;
+}
+.wizard > .actions{
+	text-align: center;
+}
+.wizard > .actions a, .wizard > .actions a:hover, .wizard > .actions a:active{
+	padding: 0.5em 2em;
+	border-radius: 3px;
+}
+
 /*编辑表格表单页面*/
 .page-edit-grid-form{
 	position: absolute;
@@ -826,7 +857,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
     bottom: 0.5em;
     left: 0.5em;
     right: 0.5em;
-    min-height: 14em;
+    min-height: 20em;
 }
 .main-page-content .main-tabs .ui-tabs-nav{
 	height: 2.3em;
@@ -846,6 +877,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
     left: 5px;
     right: 5px;
     bottom: 5px;
+    overflow: auto;
 }
 
 /*驱动信息管理表单页*/
@@ -1557,4 +1589,14 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-dataimport form .form-foot button[type='submit']{
 	padding-left: 3em;
 	padding-right: 3em;
+}
+.page-dataimport-csv .head{
+	padding: 0.5em 0.5em;
+}
+.page-dataimport-csv .wizard > .content{
+	height: 18em;
+	min-height: 18em;
+}
+.page-dataimport-csv .wizard > .content > .body{
+	padding-left: 5%;
 }

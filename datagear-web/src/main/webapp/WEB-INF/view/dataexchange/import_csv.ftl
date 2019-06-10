@@ -18,24 +18,66 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-dataimport">
+<div id="${pageId}" class="page-dataimport-csv">
 	<div class="head">
+		导入CSV数据
 	</div>
 	<div class="content">
 		<form id="${pageId}-form" action="#" method="POST">
-			<div class="steps">
-				<h3>选择数据类型</h3>
-				<section>
-					<label for="${pageId}-dataType-0">CSV</label>
-					<input id="${pageId}-dataType-0" type="radio" name="dataType" value="csv" />
-					
-					<label for="${pageId}-dataType-1">XML</label>
-					<input id="${pageId}-dataType-1" type="radio" name="dataType" value="xml" />
-				</section>
+			<div class="form-content">
+				<h3>设置数据格式</h3>
+				<div>
+					<div class="form-item">
+						<div class="form-item-label">日期格式</div>
+						<div class="form-item-value">
+							<input type="text" class="ui-widget ui-widget-content" />
+						</div>
+					</div>
+					<div class="form-item">
+						<div class="form-item-label">时间格式</div>
+						<div class="form-item-value">
+							<input type="text" class="ui-widget ui-widget-content" />
+						</div>
+					</div>
+					<div class="form-item">
+						<div class="form-item-label">时间戳格式</div>
+						<div class="form-item-value">
+							<input type="text" class="ui-widget ui-widget-content" />
+						</div>
+					</div>
+					<div class="form-item">
+						<div class="form-item-label">数值格式</div>
+						<div class="form-item-value">
+							<input type="text" class="ui-widget ui-widget-content" />
+						</div>
+					</div>
+					<div class="form-item">
+						<div class="form-item-label">忽略不存在字段</div>
+						<div class="form-item-value">
+							<input type="text" class="ui-widget ui-widget-content" />
+						</div>
+					</div>
+					<div class="form-item">
+						<div class="form-item-label">列值非法时设置为NULL</div>
+						<div class="form-item-value">
+							<input type="text" class="ui-widget ui-widget-content" />
+						</div>
+					</div>
+					<div class="form-item">
+						<div class="form-item-label">导入出错时</div>
+						<div class="form-item-value">
+							<input type="text" class="ui-widget ui-widget-content" />
+						</div>
+					</div>
+				</div>
 				<h3>上传数据</h3>
-				<section>
+				<div>
 					<input type="file">
-				</section>
+				</div>
+				<h3>导入</h3>
+				<div>
+					<input type="file">
+				</div>
 			</div>
 		</form>
 	</div>
@@ -53,13 +95,16 @@ Schema schema 数据库，不允许为null
 	po.schemaId = "${schema.id}";
 	po.form = po.element("#${pageId}-form");
 	
-	po.element("input[name=dataType]").checkboxradio({icon:true});
-	
-	po.element(".steps").steps(
+	po.element(".form-content").steps(
 	{
 		headerTag: "h3",
-		bodyTag: "section",
-		transitionEffect: "slideLeft"
+		bodyTag: "div",
+		labels:
+		{
+			previous: "<@spring.message code='wizard.previous' />",
+			next: "<@spring.message code='wizard.next' />",
+			finish: "<@spring.message code='wizard.finish' />"
+		}
 	});
 })
 (${pageId});

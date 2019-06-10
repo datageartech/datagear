@@ -54,6 +54,38 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/import";
 	}
 
+	@RequestMapping("/{schemaId}/import/csv")
+	public String imptCsv(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+			}
+		}.execute();
+
+		return "/dataexchange/import_csv";
+	}
+
+	@RequestMapping("/{schemaId}/import/db")
+	public String imptDb(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+			}
+		}.execute();
+
+		return "/dataexchange/import_db";
+	}
+
 	@RequestMapping("/{schemaId}/export")
 	public String expt(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
