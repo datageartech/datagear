@@ -1520,3 +1520,41 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	bottom: 0;
 	height: 0;
 }
+
+/*data import*/
+.page-dataimport{}
+.page-dataimport .head{
+	height: 1em;
+}
+.page-dataimport form{
+	width: 80%;
+}
+.page-dataimport form .form-head{
+	padding-top: 0.5em;
+	padding-bottom: 1em;
+	padding-left: 10%;
+}
+.page-dataimport form .form-content .form-item{
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
+}
+.page-dataimport form .form-content .form-item .form-item-label{
+	width: 30%;
+}
+.page-dataimport form .form-content .form-item .form-item-value{
+	width: 65%;
+}
+.page-dataimport form .form-content .form-item .input-desc{
+	margin-left: 1em;
+}
+.page-dataimport form .ui-checkboxradio-label{
+	width: 8em;
+	text-align: left;
+}
+.page-dataimport form .form-foot{
+	padding-top: 2em;
+}
+.page-dataimport form .form-foot button[type='submit']{
+	padding-left: 3em;
+	padding-right: 3em;
+}

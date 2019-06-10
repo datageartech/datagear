@@ -23,19 +23,35 @@ Schema schema 数据库，不允许为null
 	</div>
 	<div class="content">
 		<form id="${pageId}-form" action="#" method="POST">
-			<div class="steps">
-				<h3>选择数据类型</h3>
-				<section>
-					<label for="${pageId}-dataType-0">CSV</label>
-					<input id="${pageId}-dataType-0" type="radio" name="dataType" value="csv" />
-					
-					<label for="${pageId}-dataType-1">XML</label>
-					<input id="${pageId}-dataType-1" type="radio" name="dataType" value="xml" />
-				</section>
-				<h3>上传数据</h3>
-				<section>
-					<input type="file">
-				</section>
+			<div class="form-head">
+				<@spring.message code='dataimport.selectDataType' />
+			</div>
+			<div class="form-content">
+				<div class="form-item">
+					<div class="form-item-label">&nbsp;</div>
+					<div class="form-item-value">
+						<label for="${pageId}-dataType-0"><@spring.message code='dataimport.dataType.csv' /></label>
+						<input id="${pageId}-dataType-0" type="radio" name="dataType" value="csv" />
+						<div class="input-desc">
+							<@spring.message code='dataimport.dataType.csv.desc' />
+						</div>
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">&nbsp;</div>
+					<div class="form-item-value">
+						<label for="${pageId}-dataType-1"><@spring.message code='dataimport.dataType.db' /></label>
+						<input id="${pageId}-dataType-1" type="radio" name="dataType" value="db" />
+						<div class="input-desc">
+							<@spring.message code='dataimport.dataType.db.desc' />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="form-foot">
+				<button type="submit" class="recommended">
+					<@spring.message code='confirm' />
+				</button>
 			</div>
 		</form>
 	</div>
@@ -53,14 +69,10 @@ Schema schema 数据库，不允许为null
 	po.schemaId = "${schema.id}";
 	po.form = po.element("#${pageId}-form");
 	
-	po.element("input[name=dataType]").checkboxradio({icon:true});
-	
-	po.element(".steps").steps(
-	{
-		headerTag: "h3",
-		bodyTag: "section",
-		transitionEffect: "slideLeft"
-	});
+	$.initButtons(po.element());
+	po.element("input[type=radio]").checkboxradio({icon:true});
+	po.element("#${pageId}-dataType-0").prop("checked", true);
+	po.element("input[type=radio]").checkboxradio("refresh");
 })
 (${pageId});
 </script>
