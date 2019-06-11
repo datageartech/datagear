@@ -164,6 +164,9 @@ table.dataTable.display tbody > tr > .selected:hover {
 	border: 1px solid #c5c5c5;
 	color: #aaa;
 }
+.wizard > .content{
+	border: 1px solid #DDDDDD;
+}
 
 /*主页*/
 .main-page-head{

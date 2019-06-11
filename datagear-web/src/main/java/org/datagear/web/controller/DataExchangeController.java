@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
+import org.datagear.dataexchange.DataFormat;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
 import org.datagear.web.convert.ClassDataConverter;
@@ -66,6 +67,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 			{
 			}
 		}.execute();
+
+		DataFormat defaultDataFormat = new DataFormat();
+
+		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 
 		return "/dataexchange/import_csv";
 	}

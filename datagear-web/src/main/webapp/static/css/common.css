@@ -463,9 +463,13 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .wizard > .content{
 	min-height: 20em;
 	background: none;
+	border-radius: 3px;
 }
 .wizard > .content > .body{
 	padding: 0.5em 1em;
+}
+.wizard > .content > .body label{
+	margin-bottom: inherit;
 }
 .wizard > .steps .number{
 	font-size: 1.2em;
@@ -474,7 +478,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	text-align: center;
 }
 .wizard > .actions a, .wizard > .actions a:hover, .wizard > .actions a:active{
-	padding: 0.5em 2em;
+	padding: 0.5em 4.1em;
 	border-radius: 3px;
 }
 
@@ -1594,8 +1598,8 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding: 0.5em 0.5em;
 }
 .page-dataimport-csv .wizard > .content{
-	height: 18em;
-	min-height: 18em;
+	height: 22em;
+	min-height: 22em;
 }
 .page-dataimport-csv .wizard > .content > .body{
 	padding-left: 5%;
