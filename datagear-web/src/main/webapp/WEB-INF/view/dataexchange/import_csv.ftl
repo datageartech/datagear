@@ -18,13 +18,14 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-dataimport-csv">
+<div id="${pageId}" class="page-dataimport-text page-dataimport-csv">
 	<div class="head">
 		<@spring.message code='dataimport.importCsvData' />
 	</div>
 	<div class="content">
 		<form id="${pageId}-form" action="#" method="POST">
-			<div class="form-content">
+			<input type="hidden" name="importId" value="${importId}" />
+			<div class="form-content form-content-wizard">
 				<h3><@spring.message code='dataimport.setDataFormat' /></h3>
 				<div>
 					<div class="form-item">
@@ -102,7 +103,23 @@ Schema schema 数据库，不允许为null
 				</div>
 				<h3><@spring.message code='dataimport.uploadData' /></h3>
 				<div>
-					<input type="file">
+					<div class="form-item form-item-upload">
+						<div class="form-item-value">
+							<span class="form-item-upload-label">
+								<@spring.message code='dataimport.uploadCsvDataFile' />
+							</span>
+							<div class="fileinput-button ui-widget ui-button ui-corner-all"><@spring.message code='upload' /><input type="file"></div>
+							<div class="file-info"></div>
+						</div>
+					</div>
+					<div class="form-item form-item-table">
+						<div class="table-operation-wrapper">
+							<button type="button" class="table-delete-item-button"><@spring.message code='delete' /></button>
+						</div>
+						<div class="table-wrapper minor-dataTable">
+							<table id="${pageId}-table" width="100%" class="hover stripe"></table>
+						</div>
+					</div>
 				</div>
 				<h3><@spring.message code='dataimport.import' /></h3>
 				<div>
@@ -119,16 +136,42 @@ Schema schema 数据库，不允许为null
 </#if>
 
 <#include "../include/page_js_obj.ftl">
+<#include "../include/page_obj_grid.ftl">
 <script type="text/javascript">
 (function(po)
 {
 	po.schemaId = "${schema.id}";
+	po.importId = "${importId}";
 	po.form = po.element("#${pageId}-form");
+	po.fileUploadInfo = function(){ return this.element(".file-info"); };
+
+	$.initButtons(po.element());
+	
+	//计算表格高度
+	po.calTableHeight = function()
+	{
+		var height =  po.element(".form-content-wizard > .content").height() - po.element(".form-item-upload").outerHeight(true) - 60;
+		
+		return height;
+	};
+	
+	po.renderUploadFiles = function(fileInfos)
+	{
+		po.addRowData(fileInfos);
+	};
 	
 	po.element(".form-content").steps(
 	{
 		headerTag: "h3",
 		bodyTag: "div",
+		onStepChanged : function(event, currentIndex, priorIndex)
+		{
+			if(currentIndex == 1)
+			{
+				po.table().DataTable().columns.adjust();
+				$.updateDataTableHeight(po.table(), po.calTableHeight());
+			}
+		},
 		labels:
 		{
 			previous: "<@spring.message code='wizard.previous' />",
@@ -146,6 +189,77 @@ Schema schema 数据库，不允许为null
 	po.element("#${pageId}-ignoreInexistentColumn-0").click();
 	po.element("#${pageId}-nullForIllegalColumnValue-1").click();
 	po.element("#${pageId}-exceptionResolve-0").click();
+
+	po.element(".fileinput-button").fileupload(
+	{
+		url : "${contextPath}/dataexchange/" + po.schemaId +"/import/uploadDataFile",
+		paramName : "file",
+		success : function(serverFileInfos, textStatus, jqXHR)
+		{
+			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), true);
+			
+			po.renderUploadFiles(serverFileInfos);
+			
+			$.tipSuccess("<@spring.message code='uploadSuccess' />");
+		}
+	})
+	.bind('fileuploadadd', function (e, data)
+	{
+		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
+	})
+	.bind('fileuploadprogressall', function (e, data)
+	{
+		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
+	});
+	
+	po.element(".table-delete-item-button").click(function()
+	{
+		po.deleteSelectedRows();
+	});
+	
+	po.renderColumn = function(data, type, row, meta)
+	{
+		return $.escapeHtml($.truncateIf(data));
+	};
+	
+	po.expectedResizeDataTableElements = [po.table()[0]];
+	
+	var tableColumns = [
+		{
+			title : "name",
+			data : "name",
+			visible : false,
+			render : function(data, type, row, meta)
+			{
+				return po.renderColumn(data, type, row, meta) + "<input type='hidden' name='fileName' value='"+$.escapeHtml(data)+"' />";
+			},
+			defaultContent: ""
+		},
+		{
+			title : "<@spring.message code='dataimport.importFileName' />",
+			data : "displayName",
+			render : po.renderColumn,
+			defaultContent: ""
+		},
+		{
+			title : "<@spring.message code='dataimport.importFileSize' />",
+			data : "size",
+			render : po.renderColumn,
+			defaultContent: ""
+		},
+		{
+			title : "<@spring.message code='dataimport.importTableName' />",
+			data : "tableName",
+			render : function(data, type, row, meta)
+			{
+				return "<input type='text' name='tableName' value='"+$.escapeHtml(data)+"' class='ui-widget ui-widget-content' style='width:90%' />";
+			},
+			defaultContent: ""
+		}
+	];
+	var tableSettings = po.buildDataTableSettingsLocal(tableColumns, [], {"order": []});
+	po.initDataTable(tableSettings);
+	po.bindResizeDataTable();
 })
 (${pageId});
 </script>

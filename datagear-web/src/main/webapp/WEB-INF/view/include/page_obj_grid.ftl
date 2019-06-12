@@ -465,6 +465,14 @@ page_js_obj.jsp
 		po.table().DataTable().rows().remove();
 	};
 	
+	po.deleteSelectedRows = function()
+	{
+		var dataTable = po.table().DataTable();
+		
+		var indexes = dataTable.rows('.selected').indexes();
+		dataTable.rows(indexes).remove().draw();
+	};
+	
 	po.expectedResizeDataTableElements = [po.table()[0]];
 	
 	po.calChangedDataTableHeight = function()

@@ -450,6 +450,20 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	margin-top: 0px;
 	vertical-align: top;
 }
+.minor-dataTable table.dataTable thead .display-info-token{
+	font-weight: normal;
+}
+.minor-dataTable table.dataTable thead th,
+.minor-dataTable table.dataTable thead td{
+	padding: 5px 9px;
+	font-size: 90%;
+}
+.minor-dataTable table.dataTable tbody th, table.dataTable tbody td{
+	height: 2.2em;
+}
+.minor-dataTable table.dataTable thead th div.DataTables_sort_wrapper span{
+	right: -9px;
+}
 
 /*jquery-steps*/
 .wizard > .steps a, .wizard > .steps a:hover, .wizard > .steps a:active{
@@ -461,12 +475,18 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	filter: Alpha(Opacity=60);
 }
 .wizard > .content{
-	min-height: 20em;
+	min-height: 10em;
 	background: none;
+	margin: 0 0;
 	border-radius: 3px;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .wizard > .content > .body{
-	padding: 0.5em 1em;
+	padding: 0.5em 5%;
+	width: 90%;
+	height: 100%;
 }
 .wizard > .content > .body label{
 	margin-bottom: inherit;
@@ -1499,17 +1519,6 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	right: 1em;
 	overflow: auto;
 }
-.page-sqlpad .sql-result-tab-panel table.dataTable thead .display-info-token{
-	font-weight: normal;
-}
-.page-sqlpad .sql-result-tab-panel table.dataTable thead th,
-.page-sqlpad .sql-result-tab-panel table.dataTable thead td{
-	padding: 5px 9px;
-	font-size: 90%;
-}
-.page-sqlpad .sql-result-tab-panel table.dataTable tbody th, table.dataTable tbody td{
-	height: 2.2em;
-}
 .page-sqlpad .sql-result-tab-panel .no-more-data-flag{
 	height: 0px;
 	border-top-width: 2px;
@@ -1594,13 +1603,61 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding-left: 3em;
 	padding-right: 3em;
 }
-.page-dataimport-csv .head{
-	padding: 0.5em 0.5em;
+.page-dataimport-text{
+	position: relative;
+	width: 100%;
+	height: 100%;
+	min-height: 10em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
-.page-dataimport-csv .wizard > .content{
-	height: 22em;
-	min-height: 22em;
+.page-dataimport-text .head{
+	height: 1.5em;
+	padding: 0.25em 0;
+	padding-left: 0.5em;
 }
-.page-dataimport-csv .wizard > .content > .body{
-	padding-left: 5%;
+.page-dataimport-text > .content{
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 2em;
+	bottom: 0;
+	min-height: 30em;
+}
+.page-dataimport-text .wizard > .content{
+	position: absolute;
+	left: 0.5em;
+	right: 0.5em;
+	top: 3.5em;
+	bottom: 4em;
+	padding: 0 0;
+}
+.page-dataimport-text .wizard > .actions{
+	position: absolute;
+	width: 100%;
+	left: 0;
+	right: 0;
+	bottom: 0.2em;
+	height: 3em;
+}
+.page-dataimport-text .form-item-upload-label{
+	margin-right: 1em;
+}
+.page-dataimport-text .fileinput-button{
+	padding-left: 3em;
+	padding-right: 3em;
+}
+.page-dataimport-text .form-item-table{
+	position: relative;
+}
+.page-dataimport-text .form-item-table .table-operation-wrapper{
+	position: absolute;
+	top : -2.5em;
+	right: 0;
+}
+.page-dataimport-text .form-item-table .table-wrapper{
+}
+.page-dataimport-text .minor-dataTable table.dataTable thead th, .minor-dataTable table.dataTable thead td{
+	font-size: medium;
 }
