@@ -148,7 +148,11 @@ table.dataTable.display tbody > tr > .selected:hover {
 
 /*jquery-steps*/
 .wizard > .steps .current a, .wizard > .steps .current a:hover, .wizard > .steps .current a:active,
-.wizard > .steps .done a, .wizard > .steps .done a:hover, .wizard > .steps .done a:active,
+.wizard > .steps .done a, .wizard > .steps .done a:hover, .wizard > .steps .done a:active{
+	background-color: #489a0c;
+	border: 1px solid #70ec13;
+	color: #ffffff;
+}
 .wizard > .actions a, .wizard > .actions a:hover, .wizard > .actions a:active{
 	border: 1px solid #94e63f;
     background-color: #59c908;
@@ -162,7 +166,7 @@ table.dataTable.display tbody > tr > .selected:hover {
 .wizard > .actions .disabled a, .wizard > .actions .disabled a:hover, .wizard > .actions .disabled a:active{
 	background: none;
 	border: 1px solid #45930b;
-	color: #aaa;
+	color: #ccc;
 }
 .wizard > .content{
 	border: 1px solid #45930b;
