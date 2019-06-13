@@ -21,11 +21,13 @@ import org.datagear.dataexchange.DataFormat;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
 import org.datagear.persistence.support.UUID;
+import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.vo.FileInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -185,6 +187,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		return fileInfos;
+	}
+
+	@RequestMapping(value = "/{schemaId}/import/csv/doImport")
+	@ResponseBody
+	public ResponseEntity<OperationMessage> doImportCsv(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("importId") String importId) throws Exception
+	{
+		return buildOperationMessageSuccessEmptyResponseEntity();
 	}
 
 	@RequestMapping("/{schemaId}/export")

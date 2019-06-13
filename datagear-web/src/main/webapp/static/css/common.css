@@ -484,8 +484,8 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	-webkit-box-sizing: border-box;
 }
 .wizard > .content > .body{
-	padding: 0.5em 5%;
-	width: 90%;
+	padding: 0.5em 2%;
+	width: 96%;
 	height: 100%;
 }
 .wizard > .content > .body label{
@@ -498,7 +498,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	text-align: center;
 }
 .wizard > .actions a, .wizard > .actions a:hover, .wizard > .actions a:active{
-	padding: 0.5em 4.1em;
+	padding: 0.5em 3em;
 	border-radius: 3px;
 }
 
@@ -1641,12 +1641,27 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	bottom: 0.2em;
 	height: 3em;
 }
+.page-dataimport-text .form-item-upload,
+.page-dataimport-text .form-item-progress{
+	height: 2.8em;
+}
 .page-dataimport-text .form-item-upload-label{
 	margin-right: 1em;
 }
 .page-dataimport-text .fileinput-button{
 	padding-left: 3em;
 	padding-right: 3em;
+}
+.page-dataimport-text .form-item-progress-label{
+	margin-right: 1em;
+}
+.page-dataimport-text .form-item-progress .ui-progressbar{
+	display: inline-block;
+    width: 60%;
+    vertical-align: middle;
+}
+.page-dataimport-text .form-item-progress .progress-percent{
+	padding-left: 0.2em;
 }
 .page-dataimport-text .form-item-table{
 	position: relative;

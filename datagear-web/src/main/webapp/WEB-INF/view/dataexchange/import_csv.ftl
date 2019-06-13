@@ -101,7 +101,7 @@ Schema schema 数据库，不允许为null
 						</div>
 					</div>
 				</div>
-				<h3><@spring.message code='dataimport.uploadData' /></h3>
+				<h3><@spring.message code='dataimport.uploadAndImportData' /></h3>
 				<div>
 					<div class="form-item form-item-upload">
 						<div class="form-item-value">
@@ -112,18 +112,24 @@ Schema schema 数据库，不允许为null
 							<div class="file-info"></div>
 						</div>
 					</div>
+					<div class="form-item form-item-progress">
+						<div class="form-item-value">
+							<span class="form-item-progress-label">
+								导入进度
+							</span>
+							<div id="${pageId}-progress"></div>
+							<span id="${pageId}-progress-percent" class="progress-percent"></span>
+						</div>
+					</div>
 					<div class="form-item form-item-table">
 						<div class="table-operation-wrapper">
 							<button type="button" class="table-delete-item-button"><@spring.message code='delete' /></button>
+							<button type="button" class="table-cancel-import-button"><@spring.message code='cancel' /></button>
 						</div>
 						<div class="table-wrapper minor-dataTable">
 							<table id="${pageId}-table" width="100%" class="hover stripe"></table>
 						</div>
 					</div>
-				</div>
-				<h3><@spring.message code='dataimport.import' /></h3>
-				<div>
-					<input type="file">
 				</div>
 			</div>
 		</form>
@@ -160,6 +166,73 @@ Schema schema 数据库，不允许为null
 		po.addRowData(fileInfos);
 	};
 	
+	po.formatImportProgress = function(progress)
+	{
+		if(!progress)
+			return "<@spring.message code='dataimport.importStatus.unstart' />";
+		
+		var re = "";
+		
+		if(re.indexOf("waiting") > -1)
+			re += "<@spring.message code='dataimport.importStatus.waiting' />";
+		else if(re.indexOf("importing") > -1)
+			re += "<@spring.message code='dataimport.importStatus.importing' />";
+		else if(re.indexOf("cancel") > -1)
+			re += "<@spring.message code='dataimport.importStatus.cancel' />";
+		else if(re.indexOf("abort") > -1)
+			re += "<@spring.message code='dataimport.importStatus.abort' />";
+		else if(re.indexOf("rollback") > -1)
+			re += "<@spring.message code='dataimport.importStatus.rollback' />";
+		else if(re.indexOf("finish") > -1)
+			re += "<@spring.message code='dataimport.importStatus.finish' />";
+		
+		var leftBracketIdx = progress.indexOf("(");
+		var slashIdx = (leftBracketIdx > -1 ? progress.indexOf("/", leftBracketIdx+1) : -1);
+		var rightBracketIdx = (slashIdx > -1 ? progress.indexOf(")", slashIdx+1) : -1);
+		
+		if(slashIdx > leftBracketIdx + 1 && rightBracketIdx > slashIdx + 1)
+		{
+			var successCount = progress.substring(leftBracketIdx + 1, slashIdx);
+			var failCount = progress.substring(slashIdx + 1, rightBracketIdx);
+			
+			<#assign messageArgs=['"+re+"', '"+successCount+"', '"+failCount+"'] />
+			re = "<@spring.messageArgs code='dataimport.importProgressInfo' args=messageArgs />";
+		}
+		
+		return re;
+	}
+	
+	po.setImportProgress = function(progressNumber)
+	{
+		po.element("#${pageId}-progress").progressbar({ value: progressNumber });
+		po.element("#${pageId}-progress-percent").text(progressNumber + "%");
+	};
+	
+	po.toggleUploadAndImportStatus = function(showImport)
+	{
+		var importActionEle = po.element("#${pageId}-form .wizard .actions ul li:eq(2)");
+		if(showImport)
+		{
+			po.element(".form-item-upload").hide();
+			po.element(".table-delete-item-button").hide();
+			
+			po.element(".form-item-progress").show();
+			po.element(".table-cancel-import-button").show();
+			
+			importActionEle.addClass("ui-state-disabled");
+		}
+		else
+		{
+			po.element(".form-item-progress").hide();
+			po.element(".table-cancel-import-button").hide();
+			
+			po.element(".form-item-upload").show();
+			po.element(".table-delete-item-button").show();
+			
+			importActionEle.removeClass("ui-state-disabled");
+		}
+	};
+	
 	po.element(".form-content").steps(
 	{
 		headerTag: "h3",
@@ -172,11 +245,15 @@ Schema schema 数据库，不允许为null
 				$.updateDataTableHeight(po.table(), po.calTableHeight());
 			}
 		},
+		onFinished : function(event, currentIndex)
+		{
+			po.element("#${pageId}-form").submit();
+		},
 		labels:
 		{
 			previous: "<@spring.message code='wizard.previous' />",
 			next: "<@spring.message code='wizard.next' />",
-			finish: "<@spring.message code='wizard.finish' />"
+			finish: "<@spring.message code='import' />"
 		}
 	});
 
@@ -226,26 +303,21 @@ Schema schema 数据库，不允许为null
 	
 	var tableColumns = [
 		{
-			title : "name",
-			data : "name",
-			visible : false,
-			render : function(data, type, row, meta)
-			{
-				return po.renderColumn(data, type, row, meta) + "<input type='hidden' name='fileName' value='"+$.escapeHtml(data)+"' />";
-			},
-			defaultContent: ""
-		},
-		{
 			title : "<@spring.message code='dataimport.importFileName' />",
 			data : "displayName",
-			render : po.renderColumn,
-			defaultContent: ""
+			render : function(data, type, row, meta)
+			{
+				return po.renderColumn(data, type, row, meta) + "<input type='hidden' name='fileName' value='"+$.escapeHtml(row.name)+"' />";
+			},
+			defaultContent: "",
+			width : "35%",
 		},
 		{
 			title : "<@spring.message code='dataimport.importFileSize' />",
 			data : "size",
 			render : po.renderColumn,
-			defaultContent: ""
+			defaultContent: "",
+			width : "13%"
 		},
 		{
 			title : "<@spring.message code='dataimport.importTableName' />",
@@ -254,12 +326,35 @@ Schema schema 数据库，不允许为null
 			{
 				return "<input type='text' name='tableName' value='"+$.escapeHtml(data)+"' class='ui-widget ui-widget-content' style='width:90%' />";
 			},
-			defaultContent: ""
+			defaultContent: "",
+			width : "25%"
+		},
+		{
+			title : "<@spring.message code='dataimport.importProgress' />",
+			data : "",
+			render : function(data, type, row, meta)
+			{
+				return po.formatImportProgress(data);
+			},
+			defaultContent: "",
+			width : "27%"
 		}
 	];
 	var tableSettings = po.buildDataTableSettingsLocal(tableColumns, [], {"order": []});
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
+	
+	po.element("#${pageId}-form").ajaxForm(
+	{
+		url : "${contextPath}/dataexchange/" + po.schemaId +"/import/csv/doImport",
+		success: function(data)
+		{
+			po.toggleUploadAndImportStatus(true);
+		}
+	});
+	
+	po.toggleUploadAndImportStatus(false);
+	po.setImportProgress(0);
 })
 (${pageId});
 </script>
