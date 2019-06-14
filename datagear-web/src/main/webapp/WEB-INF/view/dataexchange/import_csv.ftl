@@ -103,7 +103,7 @@ Schema schema 数据库，不允许为null
 				</div>
 				<h3><@spring.message code='dataimport.uploadAndImportData' /></h3>
 				<div>
-					<div class="form-item form-item-upload">
+					<div class="form-item form-item-upload upload-state-aware">
 						<div class="form-item-value">
 							<span class="form-item-upload-label">
 								<@spring.message code='dataimport.uploadCsvDataFile' />
@@ -112,10 +112,10 @@ Schema schema 数据库，不允许为null
 							<div class="file-info"></div>
 						</div>
 					</div>
-					<div class="form-item form-item-progress">
+					<div class="form-item form-item-progress import-state-aware">
 						<div class="form-item-value">
 							<span class="form-item-progress-label">
-								导入进度
+								<@spring.message code='dataimport.importProgress' />
 							</span>
 							<div id="${pageId}-progress"></div>
 							<span id="${pageId}-progress-percent" class="progress-percent"></span>
@@ -123,8 +123,17 @@ Schema schema 数据库，不允许为null
 					</div>
 					<div class="form-item form-item-table">
 						<div class="table-operation-wrapper">
-							<button type="button" class="table-delete-item-button"><@spring.message code='delete' /></button>
-							<button type="button" class="table-cancel-import-button"><@spring.message code='cancel' /></button>
+							<button type="button" class="table-delete-item-button upload-state-aware"><@spring.message code='delete' /></button>
+							<button type="button" class="table-cancel-import-button import-state-aware"><@spring.message code='cancel' /></button>
+						</div>
+						<div class="file-encoding-wrapper">
+							<span class="file-encoding-label">
+								<@spring.message code='dataimport.fileEncoding' />
+							</span>
+							<select name="fileEncoding">
+								<option value="GBK">GBK</option>
+								<option value="UTF-8">UTF-8</option>
+							</select>
 						</div>
 						<div class="table-wrapper minor-dataTable">
 							<table id="${pageId}-table" width="100%" class="hover stripe"></table>
@@ -151,8 +160,6 @@ Schema schema 数据库，不允许为null
 	po.form = po.element("#${pageId}-form");
 	po.fileUploadInfo = function(){ return this.element(".file-info"); };
 
-	$.initButtons(po.element());
-	
 	//计算表格高度
 	po.calTableHeight = function()
 	{
@@ -208,28 +215,25 @@ Schema schema 数据库，不允许为null
 		po.element("#${pageId}-progress-percent").text(progressNumber + "%");
 	};
 	
-	po.toggleUploadAndImportStatus = function(showImport)
+	po.toggleUploadAndImportStatus = function(importStatus)
 	{
 		var importActionEle = po.element("#${pageId}-form .wizard .actions ul li:eq(2)");
-		if(showImport)
+		
+		if(importStatus)
 		{
-			po.element(".form-item-upload").hide();
-			po.element(".table-delete-item-button").hide();
-			
-			po.element(".form-item-progress").show();
-			po.element(".table-cancel-import-button").show();
-			
+			po.element(".upload-state-aware").hide();
+			po.element(".import-state-aware").show();
 			importActionEle.addClass("ui-state-disabled");
+			po.element("select[name='fileEncoding']").selectmenu("disable");
+			po.element(".file-encoding-label").addClass("ui-state-disabled");
 		}
 		else
 		{
-			po.element(".form-item-progress").hide();
-			po.element(".table-cancel-import-button").hide();
-			
-			po.element(".form-item-upload").show();
-			po.element(".table-delete-item-button").show();
-			
+			po.element(".upload-state-aware").show();
+			po.element(".import-state-aware").hide();
 			importActionEle.removeClass("ui-state-disabled");
+			po.element("select[name='fileEncoding']").selectmenu("enable");
+			po.element(".file-encoding-label").removeClass("ui-state-disabled");
 		}
 	};
 	
@@ -257,10 +261,12 @@ Schema schema 数据库，不允许为null
 		}
 	});
 
+	$.initButtons(po.element());
 	po.element("#${pageId}-binaryFormat").buttonset();
 	po.element("#${pageId}-ignoreInexistentColumn").buttonset();
 	po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
 	po.element("#${pageId}-exceptionResolve").buttonset();
+	po.element("select[name='fileEncoding']").selectmenu();
 	
 	po.element("input[name='dataFormat.binaryFormat'][value='${defaultDataFormat.binaryFormat}']").click();
 	po.element("#${pageId}-ignoreInexistentColumn-0").click();
@@ -291,7 +297,32 @@ Schema schema 数据库，不允许为null
 	
 	po.element(".table-delete-item-button").click(function()
 	{
-		po.deleteSelectedRows();
+		po.executeOnSelects(function(rowDatas, rowIndexes)
+		{
+			po.deleteRow(rowIndexes);
+		});
+	});
+	
+	po.element(".table-cancel-import-button").click(function()
+	{
+		po.executeOnSelects(function(rowDatas, rowIndexes)
+		{
+			for(var i=0; i<rowDatas.length; i++)
+			{
+				var importProgress = rowDatas[i].importProgress;
+				
+				if(!importProgress || importProgress.indexOf("waiting") > -1)
+				{
+					//TODO 发送取消命令
+					alert("发送取消命令");
+				}
+				else
+				{
+					if(rowDatas.length == 1)
+						$.tipInfo("<@spring.message code='dataimport.cancelImportDeniedWithReason' />");
+				}
+			}
+		});
 	});
 	
 	po.renderColumn = function(data, type, row, meta)
@@ -330,8 +361,8 @@ Schema schema 数据库，不允许为null
 			width : "25%"
 		},
 		{
-			title : "<@spring.message code='dataimport.importProgress' />",
-			data : "",
+			title : "<@spring.message code='dataimport.importProgressWithSuccessFail' />",
+			data : "importProgress",
 			render : function(data, type, row, meta)
 			{
 				return po.formatImportProgress(data);

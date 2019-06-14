@@ -1657,7 +1657,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .page-dataimport-text .form-item-progress .ui-progressbar{
 	display: inline-block;
-    width: 60%;
+    width: 40%;
     vertical-align: middle;
 }
 .page-dataimport-text .form-item-progress .progress-percent{
@@ -1675,4 +1675,15 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .page-dataimport-text .minor-dataTable table.dataTable thead th, .minor-dataTable table.dataTable thead td{
 	font-size: medium;
+}
+.page-dataimport-text .form-item-table .file-encoding-wrapper{
+	position: absolute;
+	top : -2.5em;
+	right: 10em;
+}
+.page-dataimport-text .form-item-table .file-encoding-wrapper .file-encoding-label{
+	padding-right: 1em;
+}
+.page-dataimport-text .form-item-table .file-encoding-wrapper .ui-selectmenu-button.ui-button{
+	width: 8em;
 }
