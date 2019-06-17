@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipInputStream;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.IOUtil;
 import org.datagear.dataexchange.DataFormat;
+import org.datagear.dataexchange.TextDataImportOption;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
 import org.datagear.persistence.support.UUID;
@@ -192,7 +194,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/import/csv/doImport")
 	@ResponseBody
 	public ResponseEntity<OperationMessage> doImportCsv(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("importId") String importId) throws Exception
+			@PathVariable("schemaId") String schemaId, @RequestParam("importId") String importId,
+			TextDataImportForm dataImportForm) throws Exception
 	{
 		return buildOperationMessageSuccessEmptyResponseEntity();
 	}
@@ -341,6 +344,82 @@ public class DataExchangeController extends AbstractSchemaConnController
 				return true;
 			else
 				return file.getName().toLowerCase().endsWith(".csv");
+		}
+	}
+
+	/**
+	 * 文本导入表单。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class TextDataImportForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private DataFormat dataFormat;
+
+		private TextDataImportOption importOption;
+
+		private String fileEncoding;
+
+		private String[] fileNames;
+
+		private String[] tableNames;
+
+		public TextDataImportForm()
+		{
+			super();
+		}
+
+		public DataFormat getDataFormat()
+		{
+			return dataFormat;
+		}
+
+		public void setDataFormat(DataFormat dataFormat)
+		{
+			this.dataFormat = dataFormat;
+		}
+
+		public TextDataImportOption getImportOption()
+		{
+			return importOption;
+		}
+
+		public void setImportOption(TextDataImportOption importOption)
+		{
+			this.importOption = importOption;
+		}
+
+		public String getFileEncoding()
+		{
+			return fileEncoding;
+		}
+
+		public void setFileEncoding(String fileEncoding)
+		{
+			this.fileEncoding = fileEncoding;
+		}
+
+		public String[] getFileNames()
+		{
+			return fileNames;
+		}
+
+		public void setFileNames(String[] fileNames)
+		{
+			this.fileNames = fileNames;
+		}
+
+		public String[] getTableNames()
+		{
+			return tableNames;
+		}
+
+		public void setTableNames(String[] tableNames)
+		{
+			this.tableNames = tableNames;
 		}
 	}
 }

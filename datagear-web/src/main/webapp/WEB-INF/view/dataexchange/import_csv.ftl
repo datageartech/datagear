@@ -70,9 +70,9 @@ Schema schema 数据库，不允许为null
 						<div class="form-item-value">
 							<div id="${pageId}-ignoreInexistentColumn">
 							<label for="${pageId}-ignoreInexistentColumn-0"><@spring.message code='yes' /></label>
-							<input id="${pageId}-ignoreInexistentColumn-0" type="radio" name="ignoreInexistentColumn" value="true" />
+							<input id="${pageId}-ignoreInexistentColumn-0" type="radio" name="importOption.ignoreInexistentColumn" value="true" />
 							<label for="${pageId}-ignoreInexistentColumn-1"><@spring.message code='no' /></label>
-							<input id="${pageId}-ignoreInexistentColumn-1" type="radio" name="ignoreInexistentColumn" value="false" />
+							<input id="${pageId}-ignoreInexistentColumn-1" type="radio" name="importOption.ignoreInexistentColumn" value="false" />
 							</div>
 						</div>
 					</div>
@@ -81,9 +81,9 @@ Schema schema 数据库，不允许为null
 						<div class="form-item-value">
 							<div id="${pageId}-nullForIllegalColumnValue">
 								<label for="${pageId}-nullForIllegalColumnValue-0"><@spring.message code='yes' /></label>
-								<input id="${pageId}-nullForIllegalColumnValue-0" type="radio" name="nullForIllegalColumnValue" value="true" />
+								<input id="${pageId}-nullForIllegalColumnValue-0" type="radio" name="importOption.nullForIllegalColumnValue" value="true" />
 								<label for="${pageId}-nullForIllegalColumnValue-1"><@spring.message code='no' /></label>
-								<input id="${pageId}-nullForIllegalColumnValue-1" type="radio" name="nullForIllegalColumnValue" value="false" />
+								<input id="${pageId}-nullForIllegalColumnValue-1" type="radio" name="importOption.nullForIllegalColumnValue" value="false" />
 							</div>
 						</div>
 					</div>
@@ -92,11 +92,11 @@ Schema schema 数据库，不允许为null
 						<div class="form-item-value">
 							<div id="${pageId}-exceptionResolve">
 								<label for="${pageId}-exceptionResolve-0"><@spring.message code='dataimport.exceptionResolve.ABORT' /></label>
-								<input id="${pageId}-exceptionResolve-0" type="radio" name="exceptionResolve" value="ABORT" />
+								<input id="${pageId}-exceptionResolve-0" type="radio" name="importOption.exceptionResolve" value="ABORT" />
 								<label for="${pageId}-exceptionResolve-1"><@spring.message code='dataimport.exceptionResolve.IGNORE' /></label>
-								<input id="${pageId}-exceptionResolve-1" type="radio" name="exceptionResolve" value="IGNORE" />
+								<input id="${pageId}-exceptionResolve-1" type="radio" name="importOption.exceptionResolve" value="IGNORE" />
 								<label for="${pageId}-exceptionResolve-2"><@spring.message code='dataimport.exceptionResolve.ROLLBACK' /></label>
-								<input id="${pageId}-exceptionResolve-2" type="radio" name="exceptionResolve" value="ROLLBACK" />
+								<input id="${pageId}-exceptionResolve-2" type="radio" name="importOption.exceptionResolve" value="ROLLBACK" />
 							</div>
 						</div>
 					</div>
@@ -338,7 +338,7 @@ Schema schema 数据库，不允许为null
 			data : "displayName",
 			render : function(data, type, row, meta)
 			{
-				return po.renderColumn(data, type, row, meta) + "<input type='hidden' name='fileName' value='"+$.escapeHtml(row.name)+"' />";
+				return po.renderColumn(data, type, row, meta) + "<input type='hidden' name='fileNames' value='"+$.escapeHtml(row.name)+"' />";
 			},
 			defaultContent: "",
 			width : "35%",
@@ -355,7 +355,7 @@ Schema schema 数据库，不允许为null
 			data : "tableName",
 			render : function(data, type, row, meta)
 			{
-				return "<input type='text' name='tableName' value='"+$.escapeHtml(data)+"' class='ui-widget ui-widget-content' style='width:90%' />";
+				return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' class='ui-widget ui-widget-content' style='width:90%' />";
 			},
 			defaultContent: "",
 			width : "25%"
