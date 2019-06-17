@@ -4,6 +4,8 @@
 
 package org.datagear.dataexchange;
 
+import java.util.List;
+
 /**
  * 数据交换结果。
  * 
@@ -34,5 +36,29 @@ public abstract class DataExchangeResult
 	public void setDuration(long duration)
 	{
 		this.duration = duration;
+	}
+
+	/**
+	 * 获取最大耗时。
+	 * 
+	 * @param dataImportResults
+	 * @return
+	 */
+	public long getMaxDuration(List<? extends DataExchangeResult> dataExchangeResults)
+	{
+		if (dataExchangeResults == null)
+			return 0;
+
+		long duration = 0;
+
+		for (int i = 0, len = dataExchangeResults.size(); i < len; i++)
+		{
+			long myDuration = dataExchangeResults.get(i).getDuration();
+
+			if (duration < myDuration)
+				duration = myDuration;
+		}
+
+		return duration;
 	}
 }

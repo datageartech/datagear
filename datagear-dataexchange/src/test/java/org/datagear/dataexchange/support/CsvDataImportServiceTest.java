@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 /**
- * {@linkplain CsvDataImporter}单元测试类。
+ * {@linkplain CsvDataImportService}单元测试类。
  * 
  * @author datagear@163.com
  *
@@ -51,8 +51,8 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataImporterTest_ignoreInexistentColumn.csv"),
-					"UTF-8");
+			reader = IOUtil.getReader(
+					getTestResourceInputStream("support/CsvDataImportServiceTest_ignoreInexistentColumn.csv"), "UTF-8");
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(false, ExceptionResolve.ABORT, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
@@ -83,8 +83,8 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataImporterTest_ignoreInexistentColumn.csv"),
-					"UTF-8");
+			reader = IOUtil.getReader(
+					getTestResourceInputStream("support/CsvDataImportServiceTest_ignoreInexistentColumn.csv"), "UTF-8");
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.ABORT, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
@@ -116,7 +116,8 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataImporterTest__ExceptionResolve.csv"), "UTF-8");
+			reader = IOUtil.getReader(
+					getTestResourceInputStream("support/CsvDataImportServiceTest__ExceptionResolve.csv"), "UTF-8");
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.IGNORE, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
@@ -148,7 +149,8 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataImporterTest__ExceptionResolve.csv"), "UTF-8");
+			reader = IOUtil.getReader(
+					getTestResourceInputStream("support/CsvDataImportServiceTest__ExceptionResolve.csv"), "UTF-8");
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.ABORT, false);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,

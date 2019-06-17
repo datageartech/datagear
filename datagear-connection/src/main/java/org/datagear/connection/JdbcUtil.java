@@ -177,6 +177,9 @@ public class JdbcUtil
 
 	/**
 	 * 关闭{@linkplain Connection}。
+	 * <p>
+	 * 此方法不会抛出任何{@linkplain Throwable}。
+	 * </p>
 	 * 
 	 * @param cn
 	 */
@@ -189,13 +192,16 @@ public class JdbcUtil
 		{
 			cn.close();
 		}
-		catch (Exception t)
+		catch (Throwable t)
 		{
 		}
 	}
 
 	/**
 	 * 关闭{@linkplain Statement}。
+	 * <p>
+	 * 此方法不会抛出任何{@linkplain Throwable}。
+	 * </p>
 	 * 
 	 * @param st
 	 */
@@ -208,13 +214,16 @@ public class JdbcUtil
 		{
 			st.close();
 		}
-		catch (Exception t)
+		catch (Throwable t)
 		{
 		}
 	}
 
 	/**
 	 * 关闭{@linkplain ResultSet}。
+	 * <p>
+	 * 此方法不会抛出任何{@linkplain Throwable}。
+	 * </p>
 	 * 
 	 * @param rs
 	 */
@@ -227,7 +236,7 @@ public class JdbcUtil
 		{
 			rs.close();
 		}
-		catch (Exception t)
+		catch (Throwable t)
 		{
 		}
 	}

@@ -513,6 +513,9 @@ public class IOUtil
 
 	/**
 	 * 关闭{@linkplain Closeable}。
+	 * <p>
+	 * 此方法不会抛出任何{@linkplain Throwable}。
+	 * </p>
 	 * 
 	 * @param closeable
 	 */
@@ -525,7 +528,7 @@ public class IOUtil
 		{
 			closeable.close();
 		}
-		catch (Exception e)
+		catch (Throwable t)
 		{
 		}
 	}

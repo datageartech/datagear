@@ -35,7 +35,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 /**
- * {@linkplain CsvDataExporter}单元测试类。
+ * {@linkplain CsvDataExportService}单元测试类。
  * 
  * @author datagear@163.com
  *
@@ -68,7 +68,7 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataExporterTest.csv"), "UTF-8");
+			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataExportServiceTest.csv"), "UTF-8");
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.ABORT, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
@@ -90,7 +90,7 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 	{
 		DataFormat dataFormat = new DataFormat();
 
-		File outFile = new File("target/CsvDataExporterTest.csv");
+		File outFile = new File("target/CsvDataExportServiceTest.csv");
 
 		Connection cn = null;
 		Writer writer = null;

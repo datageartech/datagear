@@ -6,12 +6,15 @@ package org.datagear.dataexchange;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.sql.DataSource;
 
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.support.CsvDataImportServiceTest;
@@ -78,9 +81,63 @@ public abstract class DataexchangeTestSupport extends DBTestSupport
 		}
 	}
 
+	protected DataSource buildTestDataSource()
+	{
+		return new DataSource()
+		{
+			@Override
+			public <T> T unwrap(Class<T> iface) throws SQLException
+			{
+				throw new UnsupportedExchangeException();
+			}
+
+			@Override
+			public boolean isWrapperFor(Class<?> iface) throws SQLException
+			{
+				throw new UnsupportedExchangeException();
+			}
+
+			@Override
+			public void setLoginTimeout(int seconds) throws SQLException
+			{
+				throw new UnsupportedExchangeException();
+			}
+
+			@Override
+			public void setLogWriter(PrintWriter out) throws SQLException
+			{
+				throw new UnsupportedExchangeException();
+			}
+
+			@Override
+			public int getLoginTimeout() throws SQLException
+			{
+				throw new UnsupportedExchangeException();
+			}
+
+			@Override
+			public PrintWriter getLogWriter() throws SQLException
+			{
+				throw new UnsupportedExchangeException();
+			}
+
+			@Override
+			public Connection getConnection(String username, String password) throws SQLException
+			{
+				throw new UnsupportedExchangeException();
+			}
+
+			@Override
+			public Connection getConnection() throws SQLException
+			{
+				return DataexchangeTestSupport.this.getConnection();
+			}
+		};
+	}
+
 	protected InputStream getTestResourceInputStream(String resourceName) throws IOException
 	{
 		return CsvDataImportServiceTest.class.getClassLoader()
-				.getResourceAsStream("org/datagear/dataexchange/support/" + resourceName);
+				.getResourceAsStream("org/datagear/dataexchange/" + resourceName);
 	}
 }

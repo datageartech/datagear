@@ -14,6 +14,9 @@ import org.datagear.dataexchange.TextDataImportResult;
 
 /**
  * CSV导入。
+ * <p>
+ * CSV导入服务类在导入完成后，应该关闭{@linkplain #getReader()}。
+ * </p>
  * 
  * @author datagear@163.com
  *

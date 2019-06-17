@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.dataexchange.support;
+package org.datagear.dataexchange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import org.datagear.dataexchange.DataExchange;
-import org.datagear.dataexchange.DataExchangeException;
-import org.datagear.dataexchange.DataExchangeResult;
-import org.datagear.dataexchange.DataExchangeService;
+import org.datagear.dataexchange.support.AbstractDevotedDataExchangeService;
 
 /**
  * 批量数据交换服务。
@@ -22,7 +19,7 @@ import org.datagear.dataexchange.DataExchangeService;
  *
  * @param <T>
  */
-public abstract class BatchDataExchangeService<G extends DataExchange, T extends BatchDataExchange<G>>
+public class BatchDataExchangeService<G extends DataExchange, T extends BatchDataExchange<G>>
 		extends AbstractDevotedDataExchangeService<T>
 {
 	private DataExchangeService<? super G> delegateDataExchangeService;
@@ -71,15 +68,6 @@ public abstract class BatchDataExchangeService<G extends DataExchange, T extends
 	}
 
 	/**
-	 * 处理数据交换{@linkplain Future}。
-	 * 
-	 * @param dataExchange
-	 * @param subDataExchanges
-	 * @param subDataExchangeFutures
-	 */
-	protected abstract void handleExchangeFutures(T dataExchange, List<G> subDataExchanges, List<Future<G>> subDataExchangeFutures);
-
-	/**
 	 * 使用线程池进行数据交换。
 	 * 
 	 * @param executorService
@@ -96,15 +84,26 @@ public abstract class BatchDataExchangeService<G extends DataExchange, T extends
 		{
 			G subDataExchange = subDataExchanges.get(i);
 
-			DataExchangeCallable<G> dataExchangeCallable = new DataExchangeCallable<G>(this.delegateDataExchangeService,
-					subDataExchange);
+			DataExchangeCallable<G> dataExchangeCallable = buildDataExchangeCallable(dataExchange, subDataExchange);
 
 			Future<G> future = executorService.submit(dataExchangeCallable);
 
 			futures.add(future);
 		}
 
-		handleExchangeFutures(dataExchange, subDataExchanges, futures);
+		dataExchange.setResults(futures);
+	}
+
+	/**
+	 * 构建{@linkplain DataExchangeCallable}。
+	 * 
+	 * @param dataExchange
+	 * @param subDataExchange
+	 * @return
+	 */
+	protected DataExchangeCallable<G> buildDataExchangeCallable(T dataExchange, G subDataExchange)
+	{
+		return new DataExchangeCallable<G>(this.delegateDataExchangeService, subDataExchange);
 	}
 
 	/**
@@ -116,30 +115,6 @@ public abstract class BatchDataExchangeService<G extends DataExchange, T extends
 	protected List<G> getSubDataExchange(T dataExchange)
 	{
 		return dataExchange.split();
-	}
-
-	/**
-	 * 获取最大耗时。
-	 * 
-	 * @param dataImportResults
-	 * @return
-	 */
-	protected long getMaxDuration(List<DataExchangeResult> dataExchangeResults)
-	{
-		if (dataExchangeResults == null)
-			return 0;
-
-		long duration = 0;
-
-		for (int i = 0, len = dataExchangeResults.size(); i < len; i++)
-		{
-			long myDuration = dataExchangeResults.get(i).getDuration();
-
-			if (duration < myDuration)
-				duration = myDuration;
-		}
-
-		return duration;
 	}
 
 	/**

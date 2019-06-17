@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.datagear.connection.IOUtil;
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchangeException;
@@ -123,6 +124,7 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 		}
 		finally
 		{
+			IOUtil.close(csvParser);
 			JdbcUtil.closeStatement(st);
 			reclaimConnection(connectionFactory, cn);
 		}
