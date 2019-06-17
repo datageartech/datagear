@@ -43,13 +43,13 @@ public class DataSourceConnectionFactory implements ConnectionFactory
 	}
 
 	@Override
-	public Connection getConnection() throws SQLException
+	public Connection get() throws SQLException
 	{
 		return this.dataSource.getConnection();
 	}
 
 	@Override
-	public void reclaimConnection(Connection cn) throws SQLException
+	public void release(Connection cn) throws SQLException
 	{
 		cn.close();
 	}

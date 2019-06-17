@@ -5,8 +5,8 @@
 package org.datagear.dataexchange;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +17,6 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.datagear.connection.JdbcUtil;
-import org.datagear.dataexchange.support.CsvDataImportServiceTest;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.DevotedDatabaseInfoResolver;
 import org.datagear.dbinfo.GenericDatabaseInfoResolver;
@@ -135,9 +134,13 @@ public abstract class DataexchangeTestSupport extends DBTestSupport
 		};
 	}
 
-	protected InputStream getTestResourceInputStream(String resourceName) throws IOException
+	protected ResourceFactory<Reader> getTestReaderResourceFactory(String resourceName) throws IOException
 	{
-		return CsvDataImportServiceTest.class.getClassLoader()
-				.getResourceAsStream("org/datagear/dataexchange/" + resourceName);
+		return ClasspathReaderResourceFactory.valueOf(getResourceClasspath(resourceName), "UTF-8");
+	}
+
+	protected String getResourceClasspath(String resourceName)
+	{
+		return "org/datagear/dataexchange/" + resourceName;
 	}
 }

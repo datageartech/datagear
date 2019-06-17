@@ -8,15 +8,13 @@ import java.io.Reader;
 
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataFormat;
+import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.TableTextDataImport;
 import org.datagear.dataexchange.TextDataImportOption;
 import org.datagear.dataexchange.TextDataImportResult;
 
 /**
  * CSV导入。
- * <p>
- * CSV导入服务类在导入完成后，应该关闭{@linkplain #getReader()}。
- * </p>
  * 
  * @author datagear@163.com
  *
@@ -24,7 +22,7 @@ import org.datagear.dataexchange.TextDataImportResult;
 public class CsvDataImport extends TableTextDataImport
 {
 	/** CSV输入流 */
-	private Reader reader;
+	private ResourceFactory<Reader> readerFactory;
 
 	/** 导入结果 */
 	private TextDataImportResult importResult;
@@ -35,20 +33,20 @@ public class CsvDataImport extends TableTextDataImport
 	}
 
 	public CsvDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataImportOption importOption,
-			String table, Reader reader)
+			String table, ResourceFactory<Reader> readerFactory)
 	{
 		super(connectionFactory, dataFormat, importOption, table);
-		this.reader = reader;
+		this.readerFactory = readerFactory;
 	}
 
-	public Reader getReader()
+	public ResourceFactory<Reader> getReaderFactory()
 	{
-		return reader;
+		return readerFactory;
 	}
 
-	public void setReader(Reader reader)
+	public void setReaderFactory(ResourceFactory<Reader> readerFactory)
 	{
-		this.reader = reader;
+		this.readerFactory = readerFactory;
 	}
 
 	public TextDataImportResult getImportResult()

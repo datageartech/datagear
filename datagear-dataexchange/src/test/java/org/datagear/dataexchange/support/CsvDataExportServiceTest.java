@@ -8,11 +8,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.sql.Connection;
@@ -23,9 +19,12 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.datagear.connection.IOUtil;
 import org.datagear.connection.JdbcUtil;
+import org.datagear.dataexchange.ClasspathReaderResourceFactory;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataexchangeTestSupport;
 import org.datagear.dataexchange.ExceptionResolve;
+import org.datagear.dataexchange.FileWriterResourceFactory;
+import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
 import org.datagear.dataexchange.TableQuery;
 import org.datagear.dataexchange.TextDataImportOption;
@@ -68,11 +67,12 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataExportServiceTest.csv"), "UTF-8");
+			ResourceFactory<Reader> readerFactory = ClasspathReaderResourceFactory
+					.valueOf(getResourceClasspath("support/CsvDataExportServiceTest.csv"), "UTF-8");
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.ABORT, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textDataImportOption, TABLE_NAME, reader);
+					textDataImportOption, TABLE_NAME, readerFactory);
 
 			clearTable(cn, TABLE_NAME);
 
@@ -99,10 +99,10 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 		{
 			cn = getConnection();
 
-			writer = new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8");
+			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(outFile, "UTF-8");
 
 			CsvDataExport csvDataExport = new CsvDataExport(new SimpleConnectionFactory(cn, false), dataFormat, true,
-					new TableQuery(TABLE_NAME), writer);
+					new TableQuery(TABLE_NAME), writerFactory);
 
 			this.csvDataExportService.exchange(csvDataExport);
 		}
@@ -144,12 +144,5 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 		}
 
 		csvParser.close();
-	}
-
-	@Override
-	protected InputStream getTestResourceInputStream(String resourceName) throws IOException
-	{
-		return CsvDataExportServiceTest.class.getClassLoader()
-				.getResourceAsStream("org/datagear/dataexchange/support/" + resourceName);
 	}
 }

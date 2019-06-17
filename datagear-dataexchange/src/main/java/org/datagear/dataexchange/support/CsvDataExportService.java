@@ -5,6 +5,7 @@
 package org.datagear.dataexchange.support;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.List;
@@ -48,18 +49,20 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 
 		TextDataExportContext exportContext = buildTextDataExportContext(dataExchange);
 
+		Writer csvWriter = null;
 		Connection cn = null;
 
 		try
 		{
-			cn = connectionFactory.getConnection();
+			csvWriter = dataExchange.getWriterFactory().get();
+			cn = connectionFactory.get();
 
 			ResultSet rs = dataExchange.getQuery().execute(cn);
 
 			List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);
 			int columnCount = columnInfos.size();
 
-			CSVPrinter csvPrinter = buildCSVPrinter(dataExchange);
+			CSVPrinter csvPrinter = buildCSVPrinter(csvWriter);
 
 			writeColumnInfos(csvPrinter, columnInfos);
 
@@ -104,7 +107,8 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 		}
 		finally
 		{
-			reclaimConnection(connectionFactory, cn);
+			releaseResource(dataExchange.getWriterFactory(), csvWriter);
+			releaseResource(connectionFactory, cn);
 		}
 
 		exportResult.setSuccessCount(successCount);
@@ -114,15 +118,15 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 	/**
 	 * 构建{@linkplain CSVPrinter}。
 	 * 
-	 * @param expt
+	 * @param writer
 	 * @return
 	 * @throws DataExportException
 	 */
-	protected CSVPrinter buildCSVPrinter(CsvDataExport expt) throws DataExchangeException
+	protected CSVPrinter buildCSVPrinter(Writer writer) throws DataExchangeException
 	{
 		try
 		{
-			return new CSVPrinter(expt.getWriter(), CSVFormat.DEFAULT);
+			return new CSVPrinter(writer, CSVFormat.DEFAULT);
 		}
 		catch (IOException e)
 		{

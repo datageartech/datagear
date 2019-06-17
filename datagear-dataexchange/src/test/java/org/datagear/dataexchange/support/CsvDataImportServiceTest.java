@@ -12,6 +12,7 @@ import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataexchangeTestSupport;
 import org.datagear.dataexchange.ExceptionResolve;
+import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
 import org.datagear.dataexchange.TextDataImportOption;
 import org.junit.Assert;
@@ -46,17 +47,16 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		DataFormat dataFormat = new DataFormat();
 
 		Connection cn = getConnection();
-		Reader reader = null;
 
 		try
 		{
 			cn = getConnection();
-			reader = IOUtil.getReader(
-					getTestResourceInputStream("support/CsvDataImportServiceTest_ignoreInexistentColumn.csv"), "UTF-8");
+			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
+					"support/CsvDataImportServiceTest_ignoreInexistentColumn.csv");
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(false, ExceptionResolve.ABORT, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textDataImportOption, TABLE_NAME, reader);
+					textDataImportOption, TABLE_NAME, readerFactory);
 
 			clearTable(cn, TABLE_NAME);
 
@@ -68,7 +68,6 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		finally
 		{
 			JdbcUtil.closeConnection(cn);
-			IOUtil.close(reader);
 		}
 	}
 
@@ -83,12 +82,13 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			reader = IOUtil.getReader(
-					getTestResourceInputStream("support/CsvDataImportServiceTest_ignoreInexistentColumn.csv"), "UTF-8");
+
+			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
+					"support/CsvDataImportServiceTest_ignoreInexistentColumn.csv");
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.ABORT, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textDataImportOption, TABLE_NAME, reader);
+					textDataImportOption, TABLE_NAME, readerFactory);
 
 			clearTable(cn, TABLE_NAME);
 
@@ -116,12 +116,13 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			reader = IOUtil.getReader(
-					getTestResourceInputStream("support/CsvDataImportServiceTest__ExceptionResolve.csv"), "UTF-8");
+
+			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
+					"support/CsvDataImportServiceTest__ExceptionResolve.csv");
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.IGNORE, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textDataImportOption, TABLE_NAME, reader);
+					textDataImportOption, TABLE_NAME, readerFactory);
 
 			clearTable(cn, TABLE_NAME);
 
@@ -149,12 +150,13 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			reader = IOUtil.getReader(
-					getTestResourceInputStream("support/CsvDataImportServiceTest__ExceptionResolve.csv"), "UTF-8");
+
+			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
+					"support/CsvDataImportServiceTest__ExceptionResolve.csv");
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.ABORT, false);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textDataImportOption, TABLE_NAME, reader);
+					textDataImportOption, TABLE_NAME, readerFactory);
 
 			clearTable(cn, TABLE_NAME);
 

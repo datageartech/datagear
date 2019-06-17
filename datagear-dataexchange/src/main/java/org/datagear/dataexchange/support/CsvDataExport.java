@@ -10,6 +10,7 @@ import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.Query;
 import org.datagear.dataexchange.QueryTextDataExport;
+import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.TextDataExportResult;
 
 /**
@@ -20,7 +21,7 @@ import org.datagear.dataexchange.TextDataExportResult;
  */
 public class CsvDataExport extends QueryTextDataExport
 {
-	private Writer writer;
+	private ResourceFactory<Writer> writerFactory;
 
 	private TextDataExportResult exportResult;
 
@@ -30,20 +31,20 @@ public class CsvDataExport extends QueryTextDataExport
 	}
 
 	public CsvDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, boolean nullForUnsupportedColumn,
-			Query query, Writer writer)
+			Query query, ResourceFactory<Writer> writerFactory)
 	{
 		super(connectionFactory, dataFormat, nullForUnsupportedColumn, query);
-		this.writer = writer;
+		this.writerFactory = writerFactory;
 	}
 
-	public Writer getWriter()
+	public ResourceFactory<Writer> getWriterFactory()
 	{
-		return writer;
+		return writerFactory;
 	}
 
-	public void setWriter(Writer writer)
+	public void setWriterFactory(ResourceFactory<Writer> writerFactory)
 	{
-		this.writer = writer;
+		this.writerFactory = writerFactory;
 	}
 
 	public TextDataExportResult getExportResult()

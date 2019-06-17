@@ -11,10 +11,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchange;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DevotedDataExchangeService;
+import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.slf4j.Logger;
@@ -80,20 +80,46 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
-	 * 回收数据库连接。
+	 * 获取资源。
 	 * 
-	 * @param connectionFactory
-	 * @param cn
+	 * @param <R>
+	 * @param resourceFactory
+	 * @return
 	 */
-	protected void reclaimConnection(ConnectionFactory connectionFactory, Connection cn)
+	protected <R> R getResource(ResourceFactory<R> resourceFactory)
 	{
 		try
 		{
-			connectionFactory.reclaimConnection(cn);
+			return resourceFactory.get();
 		}
-		catch (SQLException e)
+		catch (Exception e)
 		{
-			LOGGER.error("reclaimConnection error", e);
+			throw new DataExchangeException(e);
+		}
+	}
+
+	/**
+	 * 释放资源。
+	 * <p>
+	 * 此方法不会抛出任何{@linkplain Throwable}。
+	 * </p>
+	 * 
+	 * @param <R>
+	 * @param resourceFactory
+	 * @param resource
+	 */
+	protected <R> void releaseResource(ResourceFactory<R> resourceFactory, R resource)
+	{
+		if (resource == null)
+			return;
+
+		try
+		{
+			resourceFactory.release(resource);
+		}
+		catch (Throwable e)
+		{
+			LOGGER.error("release connection error", e);
 		}
 	}
 

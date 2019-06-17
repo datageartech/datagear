@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.datagear.connection.IOUtil;
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.support.CsvBatchDataImport;
 import org.datagear.dataexchange.support.CsvDataImport;
@@ -43,24 +42,24 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 	}
 
 	@Test
-	public void exchangeTest() throws Exception
+	public void exchangeTest() throws Throwable
 	{
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(buildTestDataSource());
 		DataFormat dataFormat = new DataFormat();
 		TextDataImportOption importOption = new TextDataImportOption(true, ExceptionResolve.ABORT, true);
-		List<Reader> csvReaders = new ArrayList<Reader>();
+		List<ResourceFactory<Reader>> csvReaderFactories = new ArrayList<ResourceFactory<Reader>>();
 		List<String> importTables = new ArrayList<String>();
 
-		csvReaders.add(IOUtil.getReader(getTestResourceInputStream("BatchDataExchangeServiceTest_1.csv"), "UTF-8"));
-		csvReaders.add(IOUtil.getReader(getTestResourceInputStream("BatchDataExchangeServiceTest_2.csv"), "UTF-8"));
+		csvReaderFactories.add(getTestReaderResourceFactory("BatchDataExchangeServiceTest_1.csv"));
+		csvReaderFactories.add(getTestReaderResourceFactory("BatchDataExchangeServiceTest_2.csv"));
 
 		importTables.add(TABLE_NAME);
 		importTables.add(TABLE_NAME);
 
 		CsvBatchDataImport csvBatchDataImport = new CsvBatchDataImport(connectionFactory, dataFormat, importOption,
-				csvReaders, importTables);
+				csvReaderFactories, importTables);
 
-		Connection cn = connectionFactory.getConnection();
+		Connection cn = connectionFactory.get();
 
 		try
 		{

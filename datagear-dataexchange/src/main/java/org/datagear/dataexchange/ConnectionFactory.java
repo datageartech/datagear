@@ -5,36 +5,13 @@
 package org.datagear.dataexchange;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
- * 数据库连接工厂。
- * <p>
- * 它负责在数据交换中获取和回收数据库连接。
- * </p>
- * <p>
- * {@linkplain DataExchangeService}实现类在使用完这里获取的数据库连接后，不应该直接调用{@linkplain Connection#close()}方法，
- * 而要调用这里的{@linkplain #reclaimConnection(Connection)}方法。
- * </p>
+ * 数据库连接资源工厂。
  * 
  * @author datagear@163.com
  *
  */
-public interface ConnectionFactory
+public interface ConnectionFactory extends ResourceFactory<Connection>
 {
-	/**
-	 * 获取数据库连接。
-	 * 
-	 * @return
-	 * @throws SQLException
-	 */
-	Connection getConnection() throws SQLException;
-
-	/**
-	 * 回收数据库连接。
-	 * 
-	 * @param cn
-	 * @throws SQLException
-	 */
-	void reclaimConnection(Connection cn) throws SQLException;
 }

@@ -5,7 +5,6 @@
 package org.datagear.dataexchange;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * 简单{@linkplain ConnectionFactory}。
@@ -15,50 +14,55 @@ import java.sql.SQLException;
  */
 public class SimpleConnectionFactory implements ConnectionFactory
 {
-	private Connection connection;
+	private Connection resource;
 
-	private boolean closeOnReclaim;
+	private boolean closeOnRelease = true;
 
 	public SimpleConnectionFactory()
 	{
 		super();
 	}
 
-	public SimpleConnectionFactory(Connection connection, boolean closeOnReclaim)
+	public SimpleConnectionFactory(Connection resource, boolean closeOnRelease)
 	{
 		super();
-		this.connection = connection;
-		this.closeOnReclaim = closeOnReclaim;
+		this.resource = resource;
+		this.closeOnRelease = closeOnRelease;
 	}
 
-	public void setConnection(Connection connection)
+	public Connection getResource() throws Exception
 	{
-		this.connection = connection;
+		return resource;
+	}
+
+	public void setResource(Connection resource)
+	{
+		this.resource = resource;
+	}
+
+	public boolean isCloseOnRelease()
+	{
+		return closeOnRelease;
+	}
+
+	public void setCloseOnRelease(boolean closeOnRelease)
+	{
+		this.closeOnRelease = closeOnRelease;
 	}
 
 	@Override
-	public Connection getConnection() throws SQLException
+	public Connection get() throws Exception
 	{
-		return this.connection;
-	}
-
-	public boolean isCloseOnReclaim()
-	{
-		return closeOnReclaim;
-	}
-
-	public void setCloseOnReclaim(boolean closeOnReclaim)
-	{
-		this.closeOnReclaim = closeOnReclaim;
+		return this.resource;
 	}
 
 	@Override
-	public void reclaimConnection(Connection cn) throws SQLException
+	public void release(Connection resource) throws Exception
 	{
-		if (this.connection != cn)
+		if (this.resource != resource)
 			throw new IllegalStateException();
 
-		if (this.closeOnReclaim && this.connection != null)
-			cn.close();
+		if (this.closeOnRelease && this.resource != null)
+			this.resource.close();
 	}
 }

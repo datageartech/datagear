@@ -4,7 +4,7 @@
 
 package org.datagear.dataexchange.support;
 
-import java.io.IOException;
+import java.io.Reader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
@@ -13,7 +13,6 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.datagear.connection.IOUtil;
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchangeException;
@@ -59,19 +58,21 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 		int successCount = 0;
 		int failCount = 0;
 
-		CSVParser csvParser = buildCSVParser(dataExchange);
 		TextDataImportContext importContext = buildTextDataImportContext(dataExchange, dataExchange.getTable());
 
 		List<ColumnInfo> rawColumnInfos = null;
 		List<ColumnInfo> noNullColumnInfos = null;
 
-		PreparedStatement st = null;
-
+		Reader csvReader = null;
 		Connection cn = null;
+		PreparedStatement st = null;
 
 		try
 		{
-			cn = connectionFactory.getConnection();
+			csvReader = getResource(dataExchange.getReaderFactory());
+			CSVParser csvParser = buildCSVParser(csvReader);
+
+			cn = connectionFactory.get();
 			cn.setAutoCommit(false);
 
 			for (CSVRecord csvRecord : csvParser)
@@ -124,9 +125,9 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 		}
 		finally
 		{
-			IOUtil.close(csvParser);
+			releaseResource(dataExchange.getReaderFactory(), csvReader);
 			JdbcUtil.closeStatement(st);
-			reclaimConnection(connectionFactory, cn);
+			releaseResource(connectionFactory, cn);
 		}
 
 		importResult.setSuccessCount(successCount);
@@ -194,17 +195,17 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 	/**
 	 * 构建{@linkplain CSVParser}。
 	 * 
-	 * @param impt
+	 * @param reader
 	 * @return
 	 * @throws DataExchangeException
 	 */
-	protected CSVParser buildCSVParser(CsvDataImport impt) throws DataExchangeException
+	protected CSVParser buildCSVParser(Reader reader) throws DataExchangeException
 	{
 		try
 		{
-			return CSVFormat.DEFAULT.parse(impt.getReader());
+			return CSVFormat.DEFAULT.parse(reader);
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			throw new DataExchangeException(e);
 		}
