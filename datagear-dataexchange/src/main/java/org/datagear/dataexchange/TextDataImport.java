@@ -12,56 +12,26 @@ package org.datagear.dataexchange;
  */
 public abstract class TextDataImport extends TextDataExchange
 {
-	/** 是否忽略不存在的列 */
-	private boolean ignoreInexistentColumn;
-
-	/** 导入出错处理方式 */
-	private ExceptionResolve exceptionResolve;
-
-	/** 当列值非法时设置为null */
-	private boolean nullForIllegalColumnValue;
+	private TextDataImportOption importOption;
 
 	public TextDataImport()
 	{
 		super();
 	}
 
-	public TextDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, boolean ignoreInexistentColumn,
-			ExceptionResolve exceptionResolve, boolean nullForIllegalColumnValue)
+	public TextDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataImportOption importOption)
 	{
 		super(connectionFactory, dataFormat);
-		this.ignoreInexistentColumn = ignoreInexistentColumn;
-		this.exceptionResolve = exceptionResolve;
-		this.nullForIllegalColumnValue = nullForIllegalColumnValue;
+		this.importOption = importOption;
 	}
 
-	public boolean isIgnoreInexistentColumn()
+	public TextDataImportOption getImportOption()
 	{
-		return ignoreInexistentColumn;
+		return importOption;
 	}
 
-	public void setIgnoreInexistentColumn(boolean ignoreInexistentColumn)
+	public void setImportOption(TextDataImportOption importOption)
 	{
-		this.ignoreInexistentColumn = ignoreInexistentColumn;
-	}
-
-	public ExceptionResolve getExceptionResolve()
-	{
-		return exceptionResolve;
-	}
-
-	public void setExceptionResolve(ExceptionResolve exceptionResolve)
-	{
-		this.exceptionResolve = exceptionResolve;
-	}
-
-	public boolean isNullForIllegalColumnValue()
-	{
-		return nullForIllegalColumnValue;
-	}
-
-	public void setNullForIllegalColumnValue(boolean nullForIllegalColumnValue)
-	{
-		this.nullForIllegalColumnValue = nullForIllegalColumnValue;
+		this.importOption = importOption;
 	}
 }

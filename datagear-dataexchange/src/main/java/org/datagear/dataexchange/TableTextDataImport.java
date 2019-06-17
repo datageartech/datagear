@@ -21,10 +21,9 @@ public abstract class TableTextDataImport extends TextDataImport
 	}
 
 	public TableTextDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat,
-			boolean ignoreInexistentColumn, ExceptionResolve exceptionResolve, boolean nullForIllegalColumnValue,
-			String table)
+			TextDataImportOption importOption, String table)
 	{
-		super(connectionFactory, dataFormat, ignoreInexistentColumn, exceptionResolve, nullForIllegalColumnValue);
+		super(connectionFactory, dataFormat, importOption);
 		this.table = table;
 	}
 

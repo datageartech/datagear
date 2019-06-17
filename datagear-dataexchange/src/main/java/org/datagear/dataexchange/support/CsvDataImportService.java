@@ -49,10 +49,10 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 		dataExchange.setImportResult(importResult);
 
 		ConnectionFactory connectionFactory = dataExchange.getConnectionFactory();
-		ExceptionResolve exceptionResolve = dataExchange.getExceptionResolve();
+		ExceptionResolve exceptionResolve = dataExchange.getImportOption().getExceptionResolve();
 
 		if (exceptionResolve == null)
-			exceptionResolve = ExceptionResolve.ABORT;
+			exceptionResolve = ExceptionResolve.ROLLBACK;
 
 		long startTime = System.currentTimeMillis();
 		int successCount = 0;
@@ -150,7 +150,7 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 	{
 		List<String> columnNames = resolveCSVRecordValues(impt, csvRecord);
 
-		return getColumnInfos(cn, impt.getTable(), columnNames, impt.isIgnoreInexistentColumn(),
+		return getColumnInfos(cn, impt.getTable(), columnNames, impt.getImportOption().isIgnoreInexistentColumn(),
 				this.databaseInfoResolver);
 	}
 

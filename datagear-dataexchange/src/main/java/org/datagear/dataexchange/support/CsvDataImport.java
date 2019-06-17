@@ -8,8 +8,8 @@ import java.io.Reader;
 
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataFormat;
-import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.TableTextDataImport;
+import org.datagear.dataexchange.TextDataImportOption;
 import org.datagear.dataexchange.TextDataImportResult;
 
 /**
@@ -31,11 +31,10 @@ public class CsvDataImport extends TableTextDataImport
 		super();
 	}
 
-	public CsvDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, boolean ignoreInexistentColumn,
-			ExceptionResolve exceptionResolve, boolean nullForIllegalColumnValue, String table, Reader reader)
+	public CsvDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataImportOption importOption,
+			String table, Reader reader)
 	{
-		super(connectionFactory, dataFormat, ignoreInexistentColumn, exceptionResolve, nullForIllegalColumnValue,
-				table);
+		super(connectionFactory, dataFormat, importOption, table);
 		this.reader = reader;
 	}
 

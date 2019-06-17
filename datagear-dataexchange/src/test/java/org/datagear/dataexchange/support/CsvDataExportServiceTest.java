@@ -28,6 +28,7 @@ import org.datagear.dataexchange.DataexchangeTestSupport;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.SimpleConnectionFactory;
 import org.datagear.dataexchange.TableQuery;
+import org.datagear.dataexchange.TextDataImportOption;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -69,8 +70,9 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 			cn = getConnection();
 			reader = IOUtil.getReader(getTestResourceInputStream("CsvDataExporterTest.csv"), "UTF-8");
 
-			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat, true,
-					ExceptionResolve.ABORT, true, TABLE_NAME, reader);
+			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.ABORT, true);
+			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
+					textDataImportOption, TABLE_NAME, reader);
 
 			clearTable(cn, TABLE_NAME);
 

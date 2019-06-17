@@ -93,7 +93,7 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 		}
 		catch (SQLException e)
 		{
-			if (ExceptionResolve.IGNORE.equals(impt.getExceptionResolve()))
+			if (ExceptionResolve.IGNORE.equals(impt.getImportOption().getExceptionResolve()))
 			{
 				// TODO report
 
@@ -143,7 +143,7 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 			}
 			catch (Exception e)
 			{
-				if (impt.isNullForIllegalColumnValue())
+				if (impt.getImportOption().isNullForIllegalColumnValue())
 				{
 					try
 					{
