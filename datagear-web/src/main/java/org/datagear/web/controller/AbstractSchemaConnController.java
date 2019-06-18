@@ -4,11 +4,13 @@
 
 package org.datagear.web.controller;
 
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 
 import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.ConnectionSource;
@@ -333,5 +335,92 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		 */
 		protected abstract void execute(HttpServletRequest request, HttpServletResponse response,
 				org.springframework.ui.Model springModel, Schema schema) throws Throwable;
+	}
+
+	/**
+	 * 模式数据源。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected class SchemaDataSource implements DataSource
+	{
+		private Schema schema;
+
+		public SchemaDataSource()
+		{
+			super();
+		}
+
+		public SchemaDataSource(Schema schema)
+		{
+			super();
+			this.schema = schema;
+		}
+
+		public Schema getSchema()
+		{
+			return schema;
+		}
+
+		public void setSchema(Schema schema)
+		{
+			this.schema = schema;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> T unwrap(Class<T> iface) throws SQLException
+		{
+			if (iface.isInstance(this))
+			{
+				return (T) this;
+			}
+
+			throw new SQLException("DataSource of type [" + getClass().getName() + "] cannot be unwrapped as ["
+					+ iface.getName() + "]");
+		}
+
+		@Override
+		public boolean isWrapperFor(Class<?> iface) throws SQLException
+		{
+			return iface.isInstance(this);
+		}
+
+		@Override
+		public PrintWriter getLogWriter() throws SQLException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setLogWriter(PrintWriter out) throws SQLException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setLoginTimeout(int seconds) throws SQLException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int getLoginTimeout() throws SQLException
+		{
+			return 0;
+		}
+
+		@Override
+		public Connection getConnection() throws SQLException
+		{
+			return getSchemaConnection(this.schema);
+		}
+
+		@Override
+		public Connection getConnection(String username, String password) throws SQLException
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 }

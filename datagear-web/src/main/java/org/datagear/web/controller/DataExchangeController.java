@@ -8,18 +8,33 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.zip.ZipInputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.IOUtil;
+import org.datagear.dataexchange.BatchDataExchange;
+import org.datagear.dataexchange.ConnectionFactory;
+import org.datagear.dataexchange.DataExchange;
+import org.datagear.dataexchange.DataExchangeService;
 import org.datagear.dataexchange.DataFormat;
+import org.datagear.dataexchange.DataSourceConnectionFactory;
+import org.datagear.dataexchange.FileReaderResourceFactory;
+import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.TextDataImportOption;
+import org.datagear.dataexchange.support.CsvBatchDataImport;
+import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
 import org.datagear.persistence.support.UUID;
@@ -48,6 +63,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/dataexchange")
 public class DataExchangeController extends AbstractSchemaConnController
 {
+	protected static final String KEY_SESSION_BatchDataExchangeFutureInfoMap = DataExchangeController.class.getName()
+			+ ".BatchDataExchangeFutureInfoMap";
+
+	@Autowired
+	private DataExchangeService<DataExchange> dataExchangeService;
+
 	@Autowired
 	@Qualifier("tempDataImportRootDirectory")
 	private File tempDataImportRootDirectory;
@@ -58,10 +79,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 	}
 
 	public DataExchangeController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, File tempDataImportRootDirectory)
+			SchemaService schemaService, ConnectionSource connectionSource,
+			DataExchangeService<DataExchange> dataExchangeService, File tempDataImportRootDirectory)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
+		this.dataExchangeService = dataExchangeService;
 		this.tempDataImportRootDirectory = tempDataImportRootDirectory;
+	}
+
+	public DataExchangeService<DataExchange> getDataExchangeService()
+	{
+		return dataExchangeService;
+	}
+
+	public void setDataExchangeService(DataExchangeService<DataExchange> dataExchangeService)
+	{
+		this.dataExchangeService = dataExchangeService;
 	}
 
 	public File getTempDataImportRootDirectory()
@@ -182,8 +215,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				IOUtil.close(importFileOut);
 			}
 
-			DataImportFileInfo fileInfo = new DataImportFileInfo(serverFileName, importFile.length(), rawFileName,
-					DataImportFileInfo.fileNameToTableName(rawFileName));
+			DataImportFileInfo fileInfo = new DataImportFileInfo(UUID.gen(), serverFileName, importFile.length(),
+					rawFileName, DataImportFileInfo.fileNameToTableName(rawFileName));
 
 			fileInfos.add(fileInfo);
 		}
@@ -197,6 +230,39 @@ public class DataExchangeController extends AbstractSchemaConnController
 			@PathVariable("schemaId") String schemaId, @RequestParam("importId") String importId,
 			TextDataImportForm dataImportForm) throws Exception
 	{
+		if (dataImportForm == null || isEmpty(dataImportForm.getDataFormat())
+				|| isEmpty(dataImportForm.getImportOption()) || isEmpty(dataImportForm.getFileEncoding())
+				|| isEmpty(dataImportForm.getFileIds()) || isEmpty(dataImportForm.getFileNames())
+				|| isEmpty(dataImportForm.getTableNames())
+				|| dataImportForm.getFileIds().length != dataImportForm.getFileNames().length
+				|| dataImportForm.getFileNames().length != dataImportForm.getTableNames().length)
+			throw new IllegalInputException();
+
+		String[] fileIds = dataImportForm.getFileIds();
+		String[] fileNames = dataImportForm.getFileNames();
+		String[] tableNames = dataImportForm.getTableNames();
+
+		File directory = getTempDataImportDirectory(importId, true);
+
+		List<ResourceFactory<Reader>> csvReaderFactories = toReaderResourceFactories(directory,
+				dataImportForm.getFileEncoding(), fileNames);
+
+		List<String> importTables = new ArrayList<String>(tableNames.length);
+		Collections.addAll(importTables, tableNames);
+
+		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+
+		CsvBatchDataImport batchDataImport = new CsvBatchDataImport(connectionFactory, dataImportForm.getDataFormat(),
+				dataImportForm.getImportOption(), csvReaderFactories, importTables);
+
+		this.dataExchangeService.exchange(batchDataImport);
+
+		BatchDataExchangeFutureInfo<CsvDataImport> batchImportFutureInfo = new BatchDataExchangeFutureInfo<CsvDataImport>(
+				importId, batchDataImport, fileIds);
+		storeBatchDataExchangeFutureInfo(request, batchImportFutureInfo);
+
 		return buildOperationMessageSuccessEmptyResponseEntity();
 	}
 
@@ -214,6 +280,94 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}.execute();
 
 		return "/dataexchange/export";
+	}
+
+	@RequestMapping(value = "/{schemaId}/cancel")
+	@ResponseBody
+	public ResponseEntity<OperationMessage> cancel(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			TextDataImportForm dataImportForm) throws Exception
+	{
+		String[] subDataExchangeIds = request.getParameterValues("subDataExchangeIds");
+
+		if (subDataExchangeIds == null)
+			throw new IllegalInputException();
+
+		BatchDataExchangeFutureInfo<?> futureInfo = retrieveBatchDataExchangeFutureInfo(request, dataExchangeId);
+
+		if (futureInfo == null)
+			throw new IllegalInputException();
+
+		boolean[] cancels = futureInfo.cancel(subDataExchangeIds);
+
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+		responseEntity.getBody().setData(cancels);
+
+		return responseEntity;
+	}
+
+	/**
+	 * 将{@linkplain BatchDataExchangeFutureInfo}存储至session中。
+	 * 
+	 * @param request
+	 * @param batchDataExchangeFutureInfo
+	 */
+	@SuppressWarnings("unchecked")
+	protected void storeBatchDataExchangeFutureInfo(HttpServletRequest request,
+			BatchDataExchangeFutureInfo<?> batchDataExchangeFutureInfo)
+	{
+		HttpSession session = request.getSession();
+
+		Map<String, BatchDataExchangeFutureInfo<?>> map = null;
+
+		synchronized (session)
+		{
+			map = (Map<String, BatchDataExchangeFutureInfo<?>>) session
+					.getAttribute(KEY_SESSION_BatchDataExchangeFutureInfoMap);
+
+			if (map == null)
+			{
+				map = new Hashtable<String, BatchDataExchangeFutureInfo<?>>();
+				session.setAttribute(KEY_SESSION_BatchDataExchangeFutureInfoMap, map);
+			}
+		}
+
+		map.put(batchDataExchangeFutureInfo.getDataExchangeId(), batchDataExchangeFutureInfo);
+	}
+
+	/**
+	 * 从session中取回{@linkplain BatchDataExchangeFutureInfo}。
+	 * 
+	 * @param request
+	 * @param dataExchangeId
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	protected BatchDataExchangeFutureInfo<?> retrieveBatchDataExchangeFutureInfo(HttpServletRequest request,
+			String dataExchangeId)
+	{
+		HttpSession session = request.getSession();
+
+		Map<String, BatchDataExchangeFutureInfo<?>> map = (Map<String, BatchDataExchangeFutureInfo<?>>) session
+				.getAttribute(KEY_SESSION_BatchDataExchangeFutureInfoMap);
+
+		if (map == null)
+			return null;
+
+		return map.get(dataExchangeId);
+	}
+
+	protected List<ResourceFactory<Reader>> toReaderResourceFactories(File directory, String charset,
+			String... fileNames)
+	{
+		List<ResourceFactory<Reader>> readerFactories = new ArrayList<ResourceFactory<Reader>>(fileNames.length);
+		for (String fileName : fileNames)
+		{
+			File file = new File(directory, fileName);
+			readerFactories.add(FileReaderResourceFactory.valueOf(file, charset));
+		}
+
+		return readerFactories;
 	}
 
 	protected void listDataImportFileInfos(File directory, FileFilter fileFilter, String parentPath,
@@ -250,7 +404,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				listDataImportFileInfos(file, fileFilter, myPath, myDisplayPath, dataImportFileInfos);
 			else
 			{
-				DataImportFileInfo fileInfo = new DataImportFileInfo(myPath, file.length(), myDisplayPath,
+				DataImportFileInfo fileInfo = new DataImportFileInfo(UUID.gen(), myPath, file.length(), myDisplayPath,
 						DataImportFileInfo.fileNameToTableName(file.getName()));
 
 				dataImportFileInfos.add(fileInfo);
@@ -280,6 +434,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
+		private String id;
+
 		/** 导入表名 */
 		private String tableName;
 
@@ -288,11 +444,22 @@ public class DataExchangeController extends AbstractSchemaConnController
 			super();
 		}
 
-		public DataImportFileInfo(String name, long bytes, String displayName, String tableName)
+		public DataImportFileInfo(String id, String name, long bytes, String displayName, String tableName)
 		{
 			super(name, bytes);
+			this.id = id;
 			super.setDisplayName(displayName);
 			this.tableName = tableName;
+		}
+
+		public String getId()
+		{
+			return id;
+		}
+
+		public void setId(String id)
+		{
+			this.id = id;
 		}
 
 		public String getTableName()
@@ -363,6 +530,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		private String fileEncoding;
 
+		private String[] fileIds;
+
 		private String[] fileNames;
 
 		private String[] tableNames;
@@ -402,6 +571,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 			this.fileEncoding = fileEncoding;
 		}
 
+		public String[] getFileIds()
+		{
+			return fileIds;
+		}
+
+		public void setFileIds(String[] fileIds)
+		{
+			this.fileIds = fileIds;
+		}
+
 		public String[] getFileNames()
 		{
 			return fileNames;
@@ -420,6 +599,106 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setTableNames(String[] tableNames)
 		{
 			this.tableNames = tableNames;
+		}
+	}
+
+	protected static class BatchDataExchangeFutureInfo<T extends DataExchange> implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String dataExchangeId;
+
+		private transient BatchDataExchange<T> batchDataExchange;
+
+		private String[] subDataExchangeIds;
+
+		private transient List<Future<T>> _subDataExchangeFutures;
+
+		public BatchDataExchangeFutureInfo()
+		{
+			super();
+		}
+
+		public BatchDataExchangeFutureInfo(String dataExchangeId, BatchDataExchange<T> batchDataExchange,
+				String[] subDataExchangeIds)
+		{
+			super();
+			this.dataExchangeId = dataExchangeId;
+			this.batchDataExchange = batchDataExchange;
+			this.subDataExchangeIds = subDataExchangeIds;
+			this._subDataExchangeFutures = batchDataExchange.getResults();
+		}
+
+		public String getDataExchangeId()
+		{
+			return dataExchangeId;
+		}
+
+		public void setDataExchangeId(String dataExchangeId)
+		{
+			this.dataExchangeId = dataExchangeId;
+		}
+
+		public BatchDataExchange<T> getBatchDataExchange()
+		{
+			return batchDataExchange;
+		}
+
+		public void setBatchDataExchange(BatchDataExchange<T> batchDataExchange)
+		{
+			this.batchDataExchange = batchDataExchange;
+			this._subDataExchangeFutures = batchDataExchange.getResults();
+		}
+
+		public String[] getSubDataExchangeIds()
+		{
+			return subDataExchangeIds;
+		}
+
+		public void setSubDataExchangeIds(String[] subDataExchangeIds)
+		{
+			this.subDataExchangeIds = subDataExchangeIds;
+		}
+
+		/**
+		 * 取消指定的子数据交换。
+		 * 
+		 * @param subDataExchangeId
+		 * @return
+		 */
+		public boolean[] cancel(String... subDataExchangeIds)
+		{
+			boolean[] cancels = new boolean[subDataExchangeIds.length];
+
+			for (int i = 0; i < subDataExchangeIds.length; i++)
+			{
+				boolean cancel = false;
+
+				int index = getSubDataExchangeIndex(subDataExchangeIds[i]);
+
+				if (index < 0)
+					cancel = false;
+				else
+					cancel = this._subDataExchangeFutures.get(index).cancel(false);
+
+				cancels[i] = cancel;
+			}
+
+			return cancels;
+		}
+
+		protected int getSubDataExchangeIndex(String subDataExchangeId)
+		{
+			if (this.subDataExchangeIds == null)
+				return -1;
+
+			for (int i = 0; i < this.subDataExchangeIds.length; i++)
+			{
+				if (this.subDataExchangeIds[i].equals(subDataExchangeId))
+					return i;
+			}
+
+			return -1;
 		}
 	}
 }

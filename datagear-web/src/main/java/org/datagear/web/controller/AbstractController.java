@@ -4,6 +4,7 @@
 
 package org.datagear.web.controller;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -526,6 +527,45 @@ public abstract class AbstractController
 		}
 
 		return operationMessage;
+	}
+
+	/**
+	 * 判断对象、字符串、数组、集合、Map是否为空。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected boolean isEmpty(Object obj)
+	{
+		if (obj == null)
+		{
+			return true;
+		}
+		else if (obj instanceof String)
+		{
+			return isEmpty((String) obj);
+		}
+		else if (obj instanceof Object[])
+		{
+			Object[] array = (Object[]) obj;
+
+			return (array.length == 0);
+		}
+		else if (obj instanceof Collection<?>)
+		{
+			@SuppressWarnings("unchecked")
+			Collection<Object> collection = (Collection<Object>) obj;
+
+			return (collection.isEmpty());
+		}
+		else if (obj instanceof Map<?, ?>)
+		{
+			Map<?, ?> map = (Map<?, ?>) obj;
+
+			return map.isEmpty();
+		}
+		else
+			return false;
 	}
 
 	/**

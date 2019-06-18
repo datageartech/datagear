@@ -180,17 +180,17 @@ Schema schema 数据库，不允许为null
 		
 		var re = "";
 		
-		if(re.indexOf("waiting") > -1)
+		if(progress.indexOf("waiting") > -1)
 			re += "<@spring.message code='dataimport.importStatus.waiting' />";
-		else if(re.indexOf("importing") > -1)
+		else if(progress.indexOf("importing") > -1)
 			re += "<@spring.message code='dataimport.importStatus.importing' />";
-		else if(re.indexOf("cancel") > -1)
+		else if(progress.indexOf("cancel") > -1)
 			re += "<@spring.message code='dataimport.importStatus.cancel' />";
-		else if(re.indexOf("abort") > -1)
+		else if(progress.indexOf("abort") > -1)
 			re += "<@spring.message code='dataimport.importStatus.abort' />";
-		else if(re.indexOf("rollback") > -1)
+		else if(progress.indexOf("rollback") > -1)
 			re += "<@spring.message code='dataimport.importStatus.rollback' />";
-		else if(re.indexOf("finish") > -1)
+		else if(progress.indexOf("finish") > -1)
 			re += "<@spring.message code='dataimport.importStatus.finish' />";
 		
 		var leftBracketIdx = progress.indexOf("(");
@@ -269,9 +269,9 @@ Schema schema 数据库，不允许为null
 	po.element("select[name='fileEncoding']").selectmenu();
 	
 	po.element("input[name='dataFormat.binaryFormat'][value='${defaultDataFormat.binaryFormat}']").click();
-	po.element("#${pageId}-ignoreInexistentColumn-0").click();
+	po.element("#${pageId}-ignoreInexistentColumn-1").click();
 	po.element("#${pageId}-nullForIllegalColumnValue-1").click();
-	po.element("#${pageId}-exceptionResolve-0").click();
+	po.element("#${pageId}-exceptionResolve-2").click();
 
 	po.element(".fileinput-button").fileupload(
 	{
@@ -330,6 +330,22 @@ Schema schema 数据库，不允许为null
 		return $.escapeHtml($.truncateIf(data));
 	};
 	
+	po.updateTableImportProgress = function(dataTable, rowIndexes, progressValue)
+	{
+		var cellIndexes = [];
+		
+		for(var i=0; i<rowIndexes.length; i++)
+		{
+			var cellIndex = { "row" : rowIndexes[i], "column" : 4 };
+			var cell = dataTable.cell(cellIndex);
+			cell.data($.isArray(progressValue) ? progressValue[i] : progressValue);
+			
+			cellIndexes[i] = cellIndex;
+		}
+		
+		dataTable.cells(cellIndexes).draw();
+	};
+	
 	po.expectedResizeDataTableElements = [po.table()[0]];
 	
 	var tableColumns = [
@@ -338,7 +354,9 @@ Schema schema 数据库，不允许为null
 			data : "displayName",
 			render : function(data, type, row, meta)
 			{
-				return po.renderColumn(data, type, row, meta) + "<input type='hidden' name='fileNames' value='"+$.escapeHtml(row.name)+"' />";
+				return po.renderColumn(data, type, row, meta)
+					+ "<input type='hidden' name='fileIds' value='"+$.escapeHtml(row.id)+"' />"
+					+ "<input type='hidden' name='fileNames' value='"+$.escapeHtml(row.name)+"' />";
 			},
 			defaultContent: "",
 			width : "35%",
@@ -381,6 +399,9 @@ Schema schema 数据库，不允许为null
 		success: function(data)
 		{
 			po.toggleUploadAndImportStatus(true);
+			
+			var dataTable = po.table().DataTable();
+			po.updateTableImportProgress(dataTable, dataTable.rows().indexes(), "waiting");
 		}
 	});
 	

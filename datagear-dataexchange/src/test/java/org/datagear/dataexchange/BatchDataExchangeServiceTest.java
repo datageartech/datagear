@@ -8,8 +8,6 @@ import java.io.Reader;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.support.CsvBatchDataImport;
@@ -35,10 +33,9 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		super();
 
 		CsvDataImportService csvDataImportService = new CsvDataImportService(databaseInfoResolver);
-		ExecutorService executorService = Executors.newCachedThreadPool();
 
 		this.batchDataExchangeService = new BatchDataExchangeService<CsvDataImport, CsvBatchDataImport>(
-				csvDataImportService, executorService);
+				csvDataImportService);
 	}
 
 	@Test

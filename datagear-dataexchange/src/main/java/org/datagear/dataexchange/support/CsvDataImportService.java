@@ -29,8 +29,6 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  */
 public class CsvDataImportService extends AbstractDevotedTextDataImportService<CsvDataImport>
 {
-	private DatabaseInfoResolver databaseInfoResolver;
-
 	public CsvDataImportService()
 	{
 		super();
@@ -38,8 +36,7 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 
 	public CsvDataImportService(DatabaseInfoResolver databaseInfoResolver)
 	{
-		super();
-		this.databaseInfoResolver = databaseInfoResolver;
+		super(databaseInfoResolver);
 	}
 
 	@Override
@@ -153,8 +150,7 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 	{
 		List<String> columnNames = resolveCSVRecordValues(impt, csvRecord);
 
-		return getColumnInfos(cn, impt.getTable(), columnNames, impt.getImportOption().isIgnoreInexistentColumn(),
-				this.databaseInfoResolver);
+		return getColumnInfos(cn, impt.getTable(), columnNames, impt.getImportOption().isIgnoreInexistentColumn());
 	}
 
 	/**

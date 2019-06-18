@@ -395,6 +395,22 @@
     	<property name="databaseModelResolver" ref="databaseModelResolver" />
     	<property name="modelSqlSelectService" ref="modelSqlSelectService" />
     </bean>
+    
+    <bean id="dataExchangeService" class="org.datagear.dataexchange.GenericDataExchangeService">
+    	<property name="devotedDataExchangeServices">
+    		<list>
+    			<bean class="org.datagear.dataexchange.support.CsvDataImportService">
+    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    			</bean>
+    			<bean class="org.datagear.dataexchange.support.CsvDataExportService">
+    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    			</bean>
+    			<bean class="org.datagear.dataexchange.BatchDataExchangeService">
+    				<property name="delegateDataExchangeService" ref="dataExchangeService" />
+    			</bean>
+    		</list>
+    	</property>
+    </bean>
 	
 	<!-- 定时任务开始 -->
 	

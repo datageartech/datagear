@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.datagear.dataexchange.support.AbstractDevotedDataExchangeService;
@@ -24,19 +25,17 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 {
 	private DataExchangeService<? super G> delegateDataExchangeService;
 
-	private ExecutorService executorService;
+	private ExecutorService executorService = Executors.newCachedThreadPool();
 
 	public BatchDataExchangeService()
 	{
 		super();
 	}
 
-	public BatchDataExchangeService(DataExchangeService<? super G> delegateDataExchangeService,
-			ExecutorService executorService)
+	public BatchDataExchangeService(DataExchangeService<? super G> delegateDataExchangeService)
 	{
 		super();
 		this.delegateDataExchangeService = delegateDataExchangeService;
-		this.executorService = executorService;
 	}
 
 	public DataExchangeService<? super G> getDelegateDataExchangeService()

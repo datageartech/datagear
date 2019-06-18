@@ -418,10 +418,11 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 	 * @param columnNames
 	 * @param nullIfColumnNotFound
 	 * @return
+	 * @throws TableNotFoundException
 	 * @throws ColumnNotFoundException
 	 */
 	protected List<ColumnInfo> getColumnInfos(Connection cn, String table, List<String> columnNames,
-			boolean nullIfColumnNotFound) throws ColumnNotFoundException
+			boolean nullIfColumnNotFound) throws TableNotFoundException, ColumnNotFoundException
 	{
 		return getColumnInfos(cn, table, columnNames, nullIfColumnNotFound, this.databaseInfoResolver);
 	}

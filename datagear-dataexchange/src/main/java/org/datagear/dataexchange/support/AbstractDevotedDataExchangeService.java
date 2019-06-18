@@ -245,16 +245,21 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param nullIfColumnNotFound
 	 * @param databaseInfoResolver
 	 * @return
+	 * @throws TableNotFoundException
 	 * @throws ColumnNotFoundException
 	 */
 	protected List<ColumnInfo> getColumnInfos(Connection cn, String table, List<String> columnNames,
-			boolean nullIfColumnNotFound, DatabaseInfoResolver databaseInfoResolver) throws ColumnNotFoundException
+			boolean nullIfColumnNotFound, DatabaseInfoResolver databaseInfoResolver)
+			throws TableNotFoundException, ColumnNotFoundException
 	{
 		int size = columnNames.size();
 
 		List<ColumnInfo> columnInfos = new ArrayList<ColumnInfo>(size);
 
 		ColumnInfo[] allColumnInfos = databaseInfoResolver.getColumnInfos(cn, table);
+
+		if (allColumnInfos == null || allColumnInfos.length == 0)
+			throw new TableNotFoundException(table);
 
 		for (int i = 0; i < size; i++)
 		{
