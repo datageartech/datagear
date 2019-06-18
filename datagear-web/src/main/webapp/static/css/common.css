@@ -1613,17 +1613,23 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	-webkit-box-sizing: border-box;
 }
 .page-dataimport-text .head{
-	height: 1.5em;
-	padding: 0.25em 0;
-	padding-left: 0.5em;
+	position: absolute;
+	left : 0.5em;
+	top : 1em;
+	z-index: 1;
 }
 .page-dataimport-text > .content{
 	position: absolute;
 	left: 0;
 	right: 0;
-	top: 2em;
+	top: 0;
 	bottom: 0;
 	min-height: 30em;
+}
+.page-dataimport-text .wizard > .steps{
+	width: 80%;
+	margin-left: 8em;
+	padding-top: 0.2em;
 }
 .page-dataimport-text .wizard > .content{
 	position: absolute;
