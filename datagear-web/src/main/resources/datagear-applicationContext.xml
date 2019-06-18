@@ -18,7 +18,7 @@
     		<list>
     			<value>/WEB-INF/config/datagear.properties</value>
     			<value>classpath:datagear.properties</value>
-    			<value>classpath:version.properties</value>
+    			<value>classpath:datagear-version.properties</value>
     		</list>
     	</property>
     	<property name="fileEncoding" value="UTF-8" />

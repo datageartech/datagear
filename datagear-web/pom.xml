@@ -165,14 +165,14 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<includes>
-					<include>version.properties</include>
+					<include>datagear-version.properties</include>
 				</includes>
 				<filtering>true</filtering>
 			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
 				<excludes>
-					<exclude>version.properties</exclude>
+					<exclude>datagear-version.properties</exclude>
 				</excludes>
 				<filtering>false</filtering>
 			</resource>
