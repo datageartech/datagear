@@ -6,14 +6,17 @@ package org.datagear.dataexchange.support;
 
 import java.io.Reader;
 import java.sql.Connection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.datagear.connection.IOUtil;
 import org.datagear.connection.JdbcUtil;
+import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataexchangeTestSupport;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
+import org.datagear.dataexchange.TextDataImportListener;
 import org.datagear.dataexchange.TextDataImportOption;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -86,9 +89,45 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
 					"support/CsvDataImportServiceTest_ignoreInexistentColumn.csv");
 
+			final AtomicInteger importCountInListener = new AtomicInteger(0);
+
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.ABORT, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					textDataImportOption, TABLE_NAME, readerFactory);
+
+			impt.setListener(new TextDataImportListener()
+			{
+				@Override
+				public void onStart()
+				{
+					println("onStart");
+				}
+
+				@Override
+				public void onFinish()
+				{
+					println("onFinish");
+				}
+
+				@Override
+				public void onException(DataExchangeException e)
+				{
+					println("onException");
+				}
+
+				@Override
+				public void onSuccess(int dataIndex)
+				{
+					println("onSuccess : " + dataIndex);
+					importCountInListener.incrementAndGet();
+				}
+
+				@Override
+				public void onFail(int dataIndex)
+				{
+					println("onFail : " + dataIndex);
+				}
+			});
 
 			clearTable(cn, TABLE_NAME);
 
@@ -97,6 +136,8 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			int count = getCount(cn, TABLE_NAME);
 
 			Assert.assertEquals(3, count);
+
+			Assert.assertEquals(3, importCountInListener.intValue());
 		}
 		finally
 		{

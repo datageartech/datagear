@@ -14,7 +14,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchangeException;
-import org.datagear.dataexchange.TextDataExportResult;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
@@ -39,13 +38,7 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 	@Override
 	public void exchange(CsvDataExport dataExchange) throws DataExchangeException
 	{
-		TextDataExportResult exportResult = new TextDataExportResult();
-		dataExchange.setExportResult(exportResult);
-
 		ConnectionFactory connectionFactory = dataExchange.getConnectionFactory();
-
-		long startTime = System.currentTimeMillis();
-		int successCount = 0;
 
 		TextDataExportContext exportContext = buildTextDataExportContext(dataExchange);
 
@@ -110,9 +103,6 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 			releaseResource(dataExchange.getWriterFactory(), csvWriter);
 			releaseResource(connectionFactory, cn);
 		}
-
-		exportResult.setSuccessCount(successCount);
-		exportResult.setDuration(System.currentTimeMillis() - startTime);
 	}
 
 	/**

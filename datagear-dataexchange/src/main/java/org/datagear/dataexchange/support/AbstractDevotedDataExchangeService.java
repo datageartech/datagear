@@ -80,13 +80,48 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
+	 * 静默回滚。
+	 * 
+	 * @param cn
+	 */
+	protected void rollbackSilently(Connection cn)
+	{
+		try
+		{
+			cn.rollback();
+		}
+		catch (Throwable t)
+		{
+			LOGGER.error("rollback connection exception", t);
+		}
+	}
+
+	/**
+	 * 静默提交。
+	 * 
+	 * @param cn
+	 */
+	protected void commitSilently(Connection cn)
+	{
+		try
+		{
+			cn.commit();
+		}
+		catch (Throwable t)
+		{
+			LOGGER.error("commit connection exception", t);
+		}
+	}
+
+	/**
 	 * 获取资源。
 	 * 
 	 * @param <R>
 	 * @param resourceFactory
 	 * @return
+	 * @throws DataExchangeException
 	 */
-	protected <R> R getResource(ResourceFactory<R> resourceFactory)
+	protected <R> R getResource(ResourceFactory<R> resourceFactory) throws DataExchangeException
 	{
 		try
 		{
@@ -121,6 +156,20 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		{
 			LOGGER.error("release connection error", e);
 		}
+	}
+
+	/**
+	 * 将异常包装为{@linkplain DataExchangeException}。
+	 * 
+	 * @param t
+	 * @return
+	 */
+	protected DataExchangeException wrapToDataExchangeException(Throwable t)
+	{
+		if (t instanceof DataExchangeException)
+			return (DataExchangeException) t;
+		else
+			throw new DataExchangeException(t);
 	}
 
 	/**

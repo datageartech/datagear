@@ -11,7 +11,6 @@ import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.Query;
 import org.datagear.dataexchange.QueryTextDataExport;
 import org.datagear.dataexchange.ResourceFactory;
-import org.datagear.dataexchange.TextDataExportResult;
 
 /**
  * CSV导出。
@@ -22,8 +21,6 @@ import org.datagear.dataexchange.TextDataExportResult;
 public class CsvDataExport extends QueryTextDataExport
 {
 	private ResourceFactory<Writer> writerFactory;
-
-	private TextDataExportResult exportResult;
 
 	public CsvDataExport()
 	{
@@ -46,15 +43,4 @@ public class CsvDataExport extends QueryTextDataExport
 	{
 		this.writerFactory = writerFactory;
 	}
-
-	public TextDataExportResult getExportResult()
-	{
-		return exportResult;
-	}
-
-	public void setExportResult(TextDataExportResult exportResult)
-	{
-		this.exportResult = exportResult;
-	}
-
 }

@@ -12,8 +12,8 @@ import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.TableTextDataImport;
+import org.datagear.dataexchange.TextDataImportListener;
 import org.datagear.dataexchange.TextDataImportOption;
-import org.datagear.dataexchange.TextDataImportResult;
 
 /**
  * CSV导入。
@@ -26,8 +26,7 @@ public class CsvDataImport extends TableTextDataImport
 	/** CSV输入流 */
 	private ResourceFactory<Reader> readerFactory;
 
-	/** 导入结果 */
-	private TextDataImportResult importResult;
+	private TextDataImportListener listener;
 
 	public CsvDataImport()
 	{
@@ -51,14 +50,19 @@ public class CsvDataImport extends TableTextDataImport
 		this.readerFactory = readerFactory;
 	}
 
-	public TextDataImportResult getImportResult()
+	public boolean hasListener()
 	{
-		return importResult;
+		return (this.listener != null);
 	}
 
-	public void setImportResult(TextDataImportResult importResult)
+	public TextDataImportListener getListener()
 	{
-		this.importResult = importResult;
+		return listener;
+	}
+
+	public void setListener(TextDataImportListener listener)
+	{
+		this.listener = listener;
 	}
 
 	/**

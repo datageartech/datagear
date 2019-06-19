@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.support.CsvDataImport;
@@ -55,8 +56,50 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		List<CsvDataImport> csvDataImports = CsvDataImport.valuesOf(connectionFactory, dataFormat, importOption, tables,
 				readerFactories);
 
+		final AtomicInteger submitSuccessCount = new AtomicInteger(0);
+
 		BatchDataExchange<CsvDataImport> csvBatchDataImport = new SimpleBatchDataExchange<CsvDataImport>(
 				connectionFactory, csvDataImports);
+		csvBatchDataImport.setListener(new BatchDataExchangeListener<CsvDataImport>()
+		{
+			@Override
+			public void onStart()
+			{
+				println("onStart");
+			}
+
+			@Override
+			public void onFinish()
+			{
+				println("onFinish");
+			}
+
+			@Override
+			public void onException(DataExchangeException e)
+			{
+				println("onException");
+			}
+
+			@Override
+			public void onSubmitSuccess(CsvDataImport subDataExchange, int subDataExchangeIndex)
+			{
+				println("onSubmitSuccess : " + subDataExchangeIndex);
+
+				submitSuccessCount.incrementAndGet();
+			}
+
+			@Override
+			public void onSubmitFail(CsvDataImport subDataExchange, int subDataExchangeIndex, Throwable cause)
+			{
+				println("onSubmitFail : " + subDataExchangeIndex);
+			}
+
+			@Override
+			public void onCancel(CsvDataImport subDataExchange, int subDataExchangeIndex)
+			{
+				println("onCancel : " + subDataExchangeIndex);
+			}
+		});
 
 		Connection cn = connectionFactory.get();
 
@@ -72,6 +115,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 
 			Assert.assertEquals(2, csvDataImports.size());
 			Assert.assertEquals(6, count);
+			Assert.assertEquals(2, submitSuccessCount.intValue());
 		}
 		finally
 		{

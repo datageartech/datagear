@@ -17,7 +17,7 @@ import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.ExceptionResolve;
-import org.datagear.dataexchange.TextDataImportResult;
+import org.datagear.dataexchange.TextDataImportListener;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
@@ -42,30 +42,29 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 	@Override
 	public void exchange(CsvDataImport dataExchange) throws DataExchangeException
 	{
-		TextDataImportResult importResult = new TextDataImportResult();
-		dataExchange.setImportResult(importResult);
+		TextDataImportListener listener = (dataExchange.hasListener() ? dataExchange.getListener() : null);
 
-		ConnectionFactory connectionFactory = dataExchange.getConnectionFactory();
-		ExceptionResolve exceptionResolve = dataExchange.getImportOption().getExceptionResolve();
-
-		if (exceptionResolve == null)
-			exceptionResolve = ExceptionResolve.ROLLBACK;
-
-		long startTime = System.currentTimeMillis();
-		int successCount = 0;
-		int failCount = 0;
-
-		TextDataImportContext importContext = buildTextDataImportContext(dataExchange, dataExchange.getTable());
-
-		List<ColumnInfo> rawColumnInfos = null;
-		List<ColumnInfo> noNullColumnInfos = null;
+		if (listener != null)
+			listener.onStart();
 
 		Reader csvReader = null;
 		Connection cn = null;
 		PreparedStatement st = null;
 
+		ExceptionResolve exceptionResolve = dataExchange.getImportOption().getExceptionResolve();
+
+		if (exceptionResolve == null)
+			exceptionResolve = ExceptionResolve.ROLLBACK;
+
+		ConnectionFactory connectionFactory = dataExchange.getConnectionFactory();
+
+		TextDataImportContext importContext = buildTextDataImportContext(dataExchange, dataExchange.getTable());
+
 		try
 		{
+			List<ColumnInfo> rawColumnInfos = null;
+			List<ColumnInfo> noNullColumnInfos = null;
+
 			csvReader = getResource(dataExchange.getReaderFactory());
 			CSVParser csvParser = buildCSVParser(csvReader);
 
@@ -95,41 +94,45 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 
 					boolean success = executeNextImport(dataExchange, st, importContext);
 
-					if (success)
-						successCount++;
-					else
-						failCount++;
+					if (listener != null)
+					{
+						if (success)
+							listener.onSuccess(importContext.getDataIndex());
+						else
+							listener.onFail(importContext.getDataIndex());
+					}
 				}
 			}
 
 			commit(cn);
 		}
-		catch (Exception e)
+		catch (Throwable t)
 		{
 			if (ExceptionResolve.ABORT.equals(exceptionResolve))
-				commit(cn);
+				commitSilently(cn);
 			else if (ExceptionResolve.ROLLBACK.equals(exceptionResolve))
-				rollback(cn);
+				rollbackSilently(cn);
 			else if (ExceptionResolve.IGNORE.equals(exceptionResolve))
-				rollback(cn);
+				commitSilently(cn);
 			else
 				;
 
-			if (e instanceof DataExchangeException)
-				throw (DataExchangeException) e;
-			else
-				throw new DataExchangeException(e);
+			DataExchangeException e = wrapToDataExchangeException(t);
+
+			if (listener != null)
+				listener.onException(e);
+
+			throw e;
 		}
 		finally
 		{
+			if (listener != null)
+				listener.onFinish();
+
 			releaseResource(dataExchange.getReaderFactory(), csvReader);
 			JdbcUtil.closeStatement(st);
 			releaseResource(connectionFactory, cn);
 		}
-
-		importResult.setSuccessCount(successCount);
-		importResult.setFailCount(failCount);
-		importResult.setDuration(System.currentTimeMillis() - startTime);
 	}
 
 	/**

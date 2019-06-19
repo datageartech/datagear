@@ -14,6 +14,9 @@ import java.util.concurrent.Future;
  * <p>
  * 在调用{@linkplain DataExchangeService#exchange(DataExchange)}后，可通过{@linkplain #getResults()}获取执行结果。
  * </p>
+ * <p>
+ * 如果{@linkplain #getResults()}某个位置的元素为{@code null}，表明对应子数据交换任务提交失败。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -21,6 +24,8 @@ import java.util.concurrent.Future;
  */
 public abstract class BatchDataExchange<T extends DataExchange> extends DataExchange
 {
+	private BatchDataExchangeListener<T> listener;
+
 	private List<Future<T>> results;
 
 	public BatchDataExchange()
@@ -31,6 +36,21 @@ public abstract class BatchDataExchange<T extends DataExchange> extends DataExch
 	public BatchDataExchange(ConnectionFactory connectionFactory)
 	{
 		super(connectionFactory);
+	}
+
+	public boolean hasListener()
+	{
+		return (this.listener != null);
+	}
+
+	public BatchDataExchangeListener<T> getListener()
+	{
+		return listener;
+	}
+
+	public void setListener(BatchDataExchangeListener<T> listener)
+	{
+		this.listener = listener;
 	}
 
 	public List<Future<T>> getResults()
@@ -59,7 +79,10 @@ public abstract class BatchDataExchange<T extends DataExchange> extends DataExch
 
 		for (Future<T> future : this.results)
 		{
-			T result = future.get();
+			T result = null;
+
+			if (future != null)
+				result = future.get();
 
 			subResults.add(result);
 		}

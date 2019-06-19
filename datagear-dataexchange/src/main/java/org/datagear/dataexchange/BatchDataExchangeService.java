@@ -7,11 +7,16 @@ package org.datagear.dataexchange;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.datagear.dataexchange.support.AbstractDevotedDataExchangeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 批量数据交换服务。
@@ -23,6 +28,8 @@ import org.datagear.dataexchange.support.AbstractDevotedDataExchangeService;
 public class BatchDataExchangeService<G extends DataExchange, T extends BatchDataExchange<G>>
 		extends AbstractDevotedDataExchangeService<T>
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BatchDataExchangeService.class);
+
 	private DataExchangeService<? super G> delegateDataExchangeService;
 
 	private ExecutorService executorService = Executors.newCachedThreadPool();
@@ -61,48 +68,120 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 	@Override
 	public void exchange(T dataExchange) throws DataExchangeException
 	{
-		List<G> subDataExchanges = getSubDataExchange(dataExchange);
+		BatchDataExchangeListener<G> listener = (dataExchange.hasListener() ? dataExchange.getListener() : null);
 
-		exchange(this.executorService, dataExchange, subDataExchanges);
+		if (listener != null)
+			listener.onStart();
+
+		List<Future<G>> results = new ArrayList<Future<G>>();
+		dataExchange.setResults(results);
+
+		try
+		{
+			List<G> subDataExchanges = getSubDataExchange(dataExchange);
+			exchange(this.executorService, dataExchange, subDataExchanges, results);
+		}
+		catch (Throwable t)
+		{
+			DataExchangeException e = wrapToDataExchangeException(t);
+
+			if (listener != null)
+				listener.onException(e);
+
+			throw e;
+		}
+		finally
+		{
+			// 没有成功提交任何子任务，那么需要在这里调用onFinish
+			if (listener != null && (results == null || results.isEmpty()))
+			{
+				listener.onFinish();
+			}
+		}
 	}
 
 	/**
-	 * 使用线程池进行数据交换。
+	 * 使用{@linkplain ExecutorService}进行数据交换。
 	 * 
 	 * @param executorService
 	 * @param dataExchange
 	 * @param subDataExchanges
+	 * @param results
 	 */
-	protected void exchange(ExecutorService executorService, T dataExchange, List<G> subDataExchanges)
+	protected void exchange(ExecutorService executorService, T dataExchange, List<G> subDataExchanges,
+			List<Future<G>> results)
 	{
+		BatchDataExchangeListener<G> listener = (dataExchange.hasListener() ? dataExchange.getListener() : null);
+
 		int size = subDataExchanges.size();
 
-		List<Future<G>> futures = new ArrayList<Future<G>>(size);
+		AtomicInteger taskSubmitSuccessCount = new AtomicInteger(0);
+		CountDownLatch submitFinishLatch = new CountDownLatch(1);
+		AtomicInteger taskFinishCount = new AtomicInteger(0);
 
-		for (int i = 0; i < size; i++)
+		try
 		{
-			G subDataExchange = subDataExchanges.get(i);
+			for (int i = 0; i < size; i++)
+			{
+				G subDataExchange = subDataExchanges.get(i);
 
-			DataExchangeCallable<G> dataExchangeCallable = buildDataExchangeCallable(dataExchange, subDataExchange);
+				SubDataExchangeFutureTask<G> futureTask = null;
+				Throwable submitFailThrowable = null;
 
-			Future<G> future = executorService.submit(dataExchangeCallable);
+				try
+				{
+					futureTask = buildSubDataExchangeFutureTask(dataExchange, subDataExchange, i,
+							taskSubmitSuccessCount, submitFinishLatch, taskFinishCount);
+					executorService.submit(futureTask);
 
-			futures.add(future);
+					taskSubmitSuccessCount.incrementAndGet();
+				}
+				catch (Throwable t)
+				{
+					submitFailThrowable = t;
+
+					LOGGER.error("submit exchange task error", t);
+				}
+
+				results.add(futureTask);
+
+				if (listener != null)
+				{
+					if (submitFailThrowable == null)
+						listener.onSubmitSuccess(subDataExchange, i);
+					else
+						listener.onSubmitFail(subDataExchange, i, submitFailThrowable);
+				}
+			}
 		}
-
-		dataExchange.setResults(futures);
+		finally
+		{
+			submitFinishLatch.countDown();
+		}
 	}
 
 	/**
-	 * 构建{@linkplain DataExchangeCallable}。
+	 * 构建{@linkplain SubDataExchangeFutureTask}。
 	 * 
 	 * @param dataExchange
 	 * @param subDataExchange
+	 * @param subDataExchangeIndex
+	 * @param taskSubmitSuccessCount
+	 * @param submitFinishLatch
+	 * @param taskFinishCount
 	 * @return
 	 */
-	protected DataExchangeCallable<G> buildDataExchangeCallable(T dataExchange, G subDataExchange)
+	protected SubDataExchangeFutureTask<G> buildSubDataExchangeFutureTask(T dataExchange, G subDataExchange,
+			int subDataExchangeIndex, AtomicInteger taskSubmitSuccessCount, CountDownLatch submitFinishLatch,
+			AtomicInteger taskFinishCount)
 	{
-		return new DataExchangeCallable<G>(this.delegateDataExchangeService, subDataExchange);
+		SubDataExchangeFutureTask<G> futureTask = new SubDataExchangeFutureTask<G>(this.delegateDataExchangeService,
+				subDataExchange, subDataExchangeIndex, taskSubmitSuccessCount, submitFinishLatch, taskFinishCount);
+
+		BatchDataExchangeListener<G> listener = (dataExchange.hasListener() ? dataExchange.getListener() : null);
+		futureTask.setListener(listener);
+
+		return futureTask;
 	}
 
 	/**
@@ -117,23 +196,140 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 	}
 
 	/**
-	 * 数据交换{@linkplain Callback}。
+	 * 子数据交换{@linkplain FutureTask}。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 * @param <T>
+	 */
+	protected static class SubDataExchangeFutureTask<T extends DataExchange> extends FutureTask<T>
+	{
+		private T subDataExchange;
+
+		private int subDataExchangeIndex;
+
+		private BatchDataExchangeListener<T> listener;
+
+		private AtomicInteger taskSubmitSuccessCount;
+
+		private CountDownLatch submitFinishLatch;
+
+		private AtomicInteger taskFinishCount;
+
+		public SubDataExchangeFutureTask(DataExchangeService<? super T> dataExchangeService, T dataExchange,
+				int dataExchangeIndex, AtomicInteger taskSubmitSuccessCount, CountDownLatch submitFinishLatch,
+				AtomicInteger taskFinishCount)
+		{
+			super(new SubDataExchangeCallable<T>(dataExchangeService, dataExchange));
+			this.subDataExchange = dataExchange;
+			this.subDataExchangeIndex = dataExchangeIndex;
+			this.taskSubmitSuccessCount = taskSubmitSuccessCount;
+			this.submitFinishLatch = submitFinishLatch;
+			this.taskFinishCount = taskFinishCount;
+		}
+
+		public T getSubDataExchange()
+		{
+			return subDataExchange;
+		}
+
+		public void setSubDataExchange(T subDataExchange)
+		{
+			this.subDataExchange = subDataExchange;
+		}
+
+		public int getSubDataExchangeIndex()
+		{
+			return subDataExchangeIndex;
+		}
+
+		public void setSubDataExchangeIndex(int subDataExchangeIndex)
+		{
+			this.subDataExchangeIndex = subDataExchangeIndex;
+		}
+
+		public BatchDataExchangeListener<T> getListener()
+		{
+			return listener;
+		}
+
+		public void setListener(BatchDataExchangeListener<T> listener)
+		{
+			this.listener = listener;
+		}
+
+		public AtomicInteger getTaskSubmitSuccessCount()
+		{
+			return taskSubmitSuccessCount;
+		}
+
+		public void setTaskSubmitSuccessCount(AtomicInteger taskSubmitSuccessCount)
+		{
+			this.taskSubmitSuccessCount = taskSubmitSuccessCount;
+		}
+
+		public CountDownLatch getSubmitFinishLatch()
+		{
+			return submitFinishLatch;
+		}
+
+		public void setSubmitFinishLatch(CountDownLatch submitFinishLatch)
+		{
+			this.submitFinishLatch = submitFinishLatch;
+		}
+
+		public AtomicInteger getTaskFinishCount()
+		{
+			return taskFinishCount;
+		}
+
+		public void setTaskFinishCount(AtomicInteger taskFinishCount)
+		{
+			this.taskFinishCount = taskFinishCount;
+		}
+
+		@Override
+		protected void done()
+		{
+			int myFinishCount = this.taskFinishCount.incrementAndGet();
+
+			if (this.listener != null)
+			{
+				if (isCancelled())
+					this.listener.onCancel(this.subDataExchange, this.subDataExchangeIndex);
+
+				try
+				{
+					this.submitFinishLatch.await();
+				}
+				catch (InterruptedException e)
+				{
+				}
+
+				if (myFinishCount == this.taskSubmitSuccessCount.get())
+					this.listener.onFinish();
+			}
+		}
+	}
+
+	/**
+	 * 子数据交换{@linkplain Callback}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class DataExchangeCallable<T extends DataExchange> implements Callable<T>
+	protected static class SubDataExchangeCallable<T extends DataExchange> implements Callable<T>
 	{
 		private DataExchangeService<? super T> dataExchangeService;
 
 		private T dataExchange;
 
-		public DataExchangeCallable()
+		public SubDataExchangeCallable()
 		{
 			super();
 		}
 
-		public DataExchangeCallable(DataExchangeService<? super T> dataExchangeService, T dataExchange)
+		public SubDataExchangeCallable(DataExchangeService<? super T> dataExchangeService, T dataExchange)
 		{
 			super();
 			this.dataExchangeService = dataExchangeService;
