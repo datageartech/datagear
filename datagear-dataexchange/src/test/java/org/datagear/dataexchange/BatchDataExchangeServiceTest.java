@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.connection.JdbcUtil;
-import org.datagear.dataexchange.support.CsvBatchDataImport;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.CsvDataImportService;
 import org.junit.Assert;
@@ -26,7 +25,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 {
 	public static final String TABLE_NAME = "T_DATA_IMPORT";
 
-	private BatchDataExchangeService<CsvDataImport, CsvBatchDataImport> batchDataExchangeService;
+	private BatchDataExchangeService<CsvDataImport, BatchDataExchange<CsvDataImport>> batchDataExchangeService;
 
 	public BatchDataExchangeServiceTest()
 	{
@@ -34,7 +33,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 
 		CsvDataImportService csvDataImportService = new CsvDataImportService(databaseInfoResolver);
 
-		this.batchDataExchangeService = new BatchDataExchangeService<CsvDataImport, CsvBatchDataImport>(
+		this.batchDataExchangeService = new BatchDataExchangeService<CsvDataImport, BatchDataExchange<CsvDataImport>>(
 				csvDataImportService);
 	}
 
@@ -44,17 +43,20 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(buildTestDataSource());
 		DataFormat dataFormat = new DataFormat();
 		TextDataImportOption importOption = new TextDataImportOption(true, ExceptionResolve.ABORT, true);
-		List<ResourceFactory<Reader>> csvReaderFactories = new ArrayList<ResourceFactory<Reader>>();
-		List<String> importTables = new ArrayList<String>();
+		List<ResourceFactory<Reader>> readerFactories = new ArrayList<ResourceFactory<Reader>>();
+		List<String> tables = new ArrayList<String>();
 
-		csvReaderFactories.add(getTestReaderResourceFactory("BatchDataExchangeServiceTest_1.csv"));
-		csvReaderFactories.add(getTestReaderResourceFactory("BatchDataExchangeServiceTest_2.csv"));
+		readerFactories.add(getTestReaderResourceFactory("BatchDataExchangeServiceTest_1.csv"));
+		readerFactories.add(getTestReaderResourceFactory("BatchDataExchangeServiceTest_2.csv"));
 
-		importTables.add(TABLE_NAME);
-		importTables.add(TABLE_NAME);
+		tables.add(TABLE_NAME);
+		tables.add(TABLE_NAME);
 
-		CsvBatchDataImport csvBatchDataImport = new CsvBatchDataImport(connectionFactory, dataFormat, importOption,
-				csvReaderFactories, importTables);
+		List<CsvDataImport> csvDataImports = CsvDataImport.valuesOf(connectionFactory, dataFormat, importOption, tables,
+				readerFactories);
+
+		BatchDataExchange<CsvDataImport> csvBatchDataImport = new SimpleBatchDataExchange<CsvDataImport>(
+				connectionFactory, csvDataImports);
 
 		Connection cn = connectionFactory.get();
 
@@ -64,7 +66,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 
 			this.batchDataExchangeService.exchange(csvBatchDataImport);
 
-			List<CsvDataImport> csvDataImports = csvBatchDataImport.getForResult();
+			csvDataImports = csvBatchDataImport.waitForResults();
 
 			int count = getCount(cn, TABLE_NAME);
 

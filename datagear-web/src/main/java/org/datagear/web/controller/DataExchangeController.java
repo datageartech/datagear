@@ -32,8 +32,8 @@ import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataSourceConnectionFactory;
 import org.datagear.dataexchange.FileReaderResourceFactory;
 import org.datagear.dataexchange.ResourceFactory;
+import org.datagear.dataexchange.SimpleBatchDataExchange;
 import org.datagear.dataexchange.TextDataImportOption;
-import org.datagear.dataexchange.support.CsvBatchDataImport;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
@@ -244,7 +244,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		File directory = getTempDataImportDirectory(importId, true);
 
-		List<ResourceFactory<Reader>> csvReaderFactories = toReaderResourceFactories(directory,
+		List<ResourceFactory<Reader>> readerFactories = toReaderResourceFactories(directory,
 				dataImportForm.getFileEncoding(), fileNames);
 
 		List<String> importTables = new ArrayList<String>(tableNames.length);
@@ -254,14 +254,17 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
-		CsvBatchDataImport batchDataImport = new CsvBatchDataImport(connectionFactory, dataImportForm.getDataFormat(),
-				dataImportForm.getImportOption(), csvReaderFactories, importTables);
+		List<CsvDataImport> csvDataImports = CsvDataImport.valuesOf(connectionFactory, dataImportForm.getDataFormat(),
+				dataImportForm.getImportOption(), importTables, readerFactories);
 
-		this.dataExchangeService.exchange(batchDataImport);
+		BatchDataExchange<CsvDataImport> batchDataExchange = new SimpleBatchDataExchange<CsvDataImport>(connectionFactory,
+				csvDataImports);
 
-		BatchDataExchangeFutureInfo<CsvDataImport> batchImportFutureInfo = new BatchDataExchangeFutureInfo<CsvDataImport>(
-				importId, batchDataImport, fileIds);
-		storeBatchDataExchangeFutureInfo(request, batchImportFutureInfo);
+		this.dataExchangeService.exchange(batchDataExchange);
+
+		BatchDataExchangeFutureInfo<CsvDataImport> futureInfo = new BatchDataExchangeFutureInfo<CsvDataImport>(
+				importId, batchDataExchange, fileIds);
+		storeBatchDataExchangeFutureInfo(request, futureInfo);
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
 	}

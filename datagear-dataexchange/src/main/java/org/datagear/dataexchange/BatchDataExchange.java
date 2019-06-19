@@ -50,7 +50,7 @@ public abstract class BatchDataExchange<T extends DataExchange> extends DataExch
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
-	public List<T> getForResult() throws InterruptedException, ExecutionException
+	public List<T> waitForResults() throws InterruptedException, ExecutionException
 	{
 		if (this.results == null)
 			throw new IllegalStateException();

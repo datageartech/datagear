@@ -5,6 +5,8 @@
 package org.datagear.dataexchange.support;
 
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataFormat;
@@ -57,5 +59,32 @@ public class CsvDataImport extends TableTextDataImport
 	public void setImportResult(TextDataImportResult importResult)
 	{
 		this.importResult = importResult;
+	}
+
+	/**
+	 * 构建{@linkplain CsvDataImport}列表。
+	 * 
+	 * @param connectionFactory
+	 * @param dataFormat
+	 * @param importOption
+	 * @param tables
+	 * @param readerFactories
+	 * @return
+	 */
+	public static List<CsvDataImport> valuesOf(ConnectionFactory connectionFactory, DataFormat dataFormat,
+			TextDataImportOption importOption, List<String> tables,
+			List<? extends ResourceFactory<Reader>> readerFactories)
+	{
+		List<CsvDataImport> csvDataImports = new ArrayList<CsvDataImport>(tables.size());
+
+		for (int i = 0; i < tables.size(); i++)
+		{
+			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataFormat, importOption, tables.get(i),
+					readerFactories.get(i));
+
+			csvDataImports.add(csvDataImport);
+		}
+
+		return csvDataImports;
 	}
 }
