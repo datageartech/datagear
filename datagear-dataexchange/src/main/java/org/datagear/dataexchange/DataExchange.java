@@ -35,4 +35,24 @@ public abstract class DataExchange
 	{
 		this.connectionFactory = connectionFactory;
 	}
+
+	/**
+	 * 是否有{@linkplain DataExchangeListener}。
+	 * 
+	 * @return
+	 */
+	public boolean hasListener()
+	{
+		return (getListener() != null);
+	}
+
+	/**
+	 * 获取{@linkplain DataExchangeListener}。
+	 * <p>
+	 * 返回{@code null}表示未设置。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public abstract DataExchangeListener getListener();
 }

@@ -42,7 +42,7 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 	@Override
 	public void exchange(CsvDataImport dataExchange) throws DataExchangeException
 	{
-		TextDataImportListener listener = (dataExchange.hasListener() ? dataExchange.getListener() : null);
+		TextDataImportListener listener = dataExchange.getListener();
 
 		if (listener != null)
 			listener.onStart();
@@ -51,17 +51,20 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 		Connection cn = null;
 		PreparedStatement st = null;
 
-		ExceptionResolve exceptionResolve = dataExchange.getImportOption().getExceptionResolve();
-
-		if (exceptionResolve == null)
-			exceptionResolve = ExceptionResolve.ROLLBACK;
-
-		ConnectionFactory connectionFactory = dataExchange.getConnectionFactory();
-
-		TextDataImportContext importContext = buildTextDataImportContext(dataExchange, dataExchange.getTable());
+		ExceptionResolve exceptionResolve = null;
+		ConnectionFactory connectionFactory = null;
 
 		try
 		{
+			exceptionResolve = dataExchange.getImportOption().getExceptionResolve();
+
+			if (exceptionResolve == null)
+				exceptionResolve = ExceptionResolve.ROLLBACK;
+
+			connectionFactory = dataExchange.getConnectionFactory();
+
+			TextDataImportContext importContext = buildTextDataImportContext(dataExchange, dataExchange.getTable());
+
 			List<ColumnInfo> rawColumnInfos = null;
 			List<ColumnInfo> noNullColumnInfos = null;
 
@@ -92,15 +95,7 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 
 					setImportColumnValues(dataExchange, cn, st, noNullColumnInfos, columnValues, importContext);
 
-					boolean success = executeNextImport(dataExchange, st, importContext);
-
-					if (listener != null)
-					{
-						if (success)
-							listener.onSuccess(importContext.getDataIndex());
-						else
-							listener.onFail(importContext.getDataIndex());
-					}
+					executeNextImport(dataExchange, st, importContext);
 				}
 			}
 

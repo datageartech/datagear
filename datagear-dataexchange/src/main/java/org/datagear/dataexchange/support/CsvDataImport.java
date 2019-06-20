@@ -50,11 +50,7 @@ public class CsvDataImport extends TableTextDataImport
 		this.readerFactory = readerFactory;
 	}
 
-	public boolean hasListener()
-	{
-		return (this.listener != null);
-	}
-
+	@Override
 	public TextDataImportListener getListener()
 	{
 		return listener;

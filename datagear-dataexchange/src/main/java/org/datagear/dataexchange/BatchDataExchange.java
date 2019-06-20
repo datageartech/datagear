@@ -38,11 +38,7 @@ public abstract class BatchDataExchange<T extends DataExchange> extends DataExch
 		super(connectionFactory);
 	}
 
-	public boolean hasListener()
-	{
-		return (this.listener != null);
-	}
-
+	@Override
 	public BatchDataExchangeListener<T> getListener()
 	{
 		return listener;
@@ -65,6 +61,9 @@ public abstract class BatchDataExchange<T extends DataExchange> extends DataExch
 
 	/**
 	 * 阻塞获取执行结果。
+	 * <p>
+	 * 如果返回列表某个位置的元素为{@code null}，表明对应子数据交换任务提交失败。
+	 * </p>
 	 * 
 	 * @return
 	 * @throws InterruptedException
@@ -91,10 +90,10 @@ public abstract class BatchDataExchange<T extends DataExchange> extends DataExch
 	}
 
 	/**
-	 * 拆分导入。
+	 * 获取分子数据交换列表。
 	 * 
 	 * @return
 	 * @throws DataExchangeException
 	 */
-	public abstract List<T> split() throws DataExchangeException;
+	public abstract List<T> getSubDataExchanges() throws DataExchangeException;
 }

@@ -169,7 +169,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		if (t instanceof DataExchangeException)
 			return (DataExchangeException) t;
 		else
-			throw new DataExchangeException(t);
+			return new DataExchangeException(t);
 	}
 
 	/**

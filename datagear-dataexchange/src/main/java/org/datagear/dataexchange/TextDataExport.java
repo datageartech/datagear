@@ -10,7 +10,7 @@ package org.datagear.dataexchange;
  * @author datagear@163.com
  *
  */
-public class TextDataExport extends TextDataExchange
+public abstract class TextDataExport extends TextDataExchange
 {
 	/** 对于不支持的列设置为null */
 	private boolean nullForUnsupportedColumn = true;
@@ -35,4 +35,7 @@ public class TextDataExport extends TextDataExchange
 	{
 		this.nullForUnsupportedColumn = nullForUnsupportedColumn;
 	}
+
+	@Override
+	public abstract DataExchangeListener getListener();
 }

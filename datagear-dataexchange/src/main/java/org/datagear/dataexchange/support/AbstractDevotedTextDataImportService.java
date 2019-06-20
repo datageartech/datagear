@@ -21,10 +21,12 @@ import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
+import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataFormat.BinaryFormat;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.TextDataImport;
+import org.datagear.dataexchange.TextDataImportListener;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
@@ -80,27 +82,35 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 	 * @param st
 	 * @param textDataImportContext
 	 * @return true 成功；false 失败
-	 * @throws SQLException
+	 * @throws DataExchangeException
 	 */
 	protected boolean executeNextImport(T impt, PreparedStatement st, TextDataImportContext textDataImportContext)
-			throws SQLException
+			throws DataExchangeException
 	{
+		TextDataImportListener listener = impt.getListener();
+
 		try
 		{
 			st.executeUpdate();
+
+			if (listener != null)
+				listener.onSuccess(textDataImportContext.getDataIndex());
 
 			return true;
 		}
 		catch (SQLException e)
 		{
+			DataExchangeException de = wrapToDataExchangeException(e);
+
 			if (ExceptionResolve.IGNORE.equals(impt.getImportOption().getExceptionResolve()))
 			{
-				// TODO report
+				if (listener != null)
+					listener.onFail(textDataImportContext.getDataIndex(), de);
 
 				return false;
 			}
 			else
-				throw e;
+				throw de;
 		}
 		finally
 		{
@@ -154,7 +164,20 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 						throw new SetImportColumnValueException(table, dataIndex, columnName, null);
 					}
 
-					// TODO report
+					TextDataImportListener listener = impt.getListener();
+					if (listener != null)
+					{
+						DataExchangeException de = null;
+
+						if ((e instanceof ParseException) || (e instanceof DecoderException))
+							de = new IllegalSourceValueException(table, dataIndex, columnName, rawValue, e);
+						else if (e instanceof UnsupportedSqlTypeException)
+							de = (UnsupportedSqlTypeException) e;
+						else
+							de = new SetImportColumnValueException(table, dataIndex, columnName, rawValue);
+
+						listener.onSetNullColumnValue(dataIndex, columnName, rawValue, de);
+					}
 				}
 				else
 				{

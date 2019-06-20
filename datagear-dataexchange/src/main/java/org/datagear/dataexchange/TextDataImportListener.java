@@ -24,5 +24,15 @@ public interface TextDataImportListener extends DataExchangeListener
 	 * 
 	 * @param dataIndex
 	 */
-	void onFail(int dataIndex);
+	void onFail(int dataIndex, DataExchangeException e);
+
+	/**
+	 * {@code rawColumnValue}非法时列值被设置为{@code null}。
+	 * 
+	 * @param dataIndex
+	 * @param columnName
+	 * @param rawColumnValue
+	 * @param e
+	 */
+	void onSetNullColumnValue(int dataIndex, String columnName, String rawColumnValue, DataExchangeException e);
 }

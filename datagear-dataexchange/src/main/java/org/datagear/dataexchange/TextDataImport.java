@@ -34,4 +34,7 @@ public abstract class TextDataImport extends TextDataExchange
 	{
 		this.importOption = importOption;
 	}
+
+	@Override
+	public abstract TextDataImportListener getListener();
 }

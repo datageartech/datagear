@@ -68,7 +68,7 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 	@Override
 	public void exchange(T dataExchange) throws DataExchangeException
 	{
-		BatchDataExchangeListener<G> listener = (dataExchange.hasListener() ? dataExchange.getListener() : null);
+		BatchDataExchangeListener<G> listener = dataExchange.getListener();
 
 		if (listener != null)
 			listener.onStart();
@@ -78,7 +78,7 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 
 		try
 		{
-			List<G> subDataExchanges = getSubDataExchange(dataExchange);
+			List<G> subDataExchanges = getSubDataExchanges(dataExchange);
 			exchange(this.executorService, dataExchange, subDataExchanges, results);
 		}
 		catch (Throwable t)
@@ -92,12 +92,37 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 		}
 		finally
 		{
-			// 没有成功提交任何子任务，那么需要在这里调用onFinish
-			if (listener != null && (results == null || results.isEmpty()))
-			{
+			// 没有任何子任务提交成功，那么需要在这里调用onFinish
+			if (listener != null && isNoneSubmitSuccess(results))
 				listener.onFinish();
+		}
+	}
+
+	/**
+	 * 是否没有任一提交成功。
+	 * 
+	 * @param results
+	 * @return
+	 */
+	protected boolean isNoneSubmitSuccess(List<Future<G>> results)
+	{
+		if (results == null)
+			return true;
+
+		boolean noneSubmitSuccess = true;
+
+		int size = results.size();
+
+		for (int i = 0; i < size; i++)
+		{
+			if (results.get(i) != null)
+			{
+				noneSubmitSuccess = false;
+				break;
 			}
 		}
+
+		return noneSubmitSuccess;
 	}
 
 	/**
@@ -111,7 +136,7 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 	protected void exchange(ExecutorService executorService, T dataExchange, List<G> subDataExchanges,
 			List<Future<G>> results)
 	{
-		BatchDataExchangeListener<G> listener = (dataExchange.hasListener() ? dataExchange.getListener() : null);
+		BatchDataExchangeListener<G> listener = dataExchange.getListener();
 
 		int size = subDataExchanges.size();
 
@@ -138,6 +163,7 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 				}
 				catch (Throwable t)
 				{
+					futureTask = null;
 					submitFailThrowable = t;
 
 					LOGGER.error("submit exchange task error", t);
@@ -178,21 +204,15 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 		SubDataExchangeFutureTask<G> futureTask = new SubDataExchangeFutureTask<G>(this.delegateDataExchangeService,
 				subDataExchange, subDataExchangeIndex, taskSubmitSuccessCount, submitFinishLatch, taskFinishCount);
 
-		BatchDataExchangeListener<G> listener = (dataExchange.hasListener() ? dataExchange.getListener() : null);
+		BatchDataExchangeListener<G> listener = dataExchange.getListener();
 		futureTask.setListener(listener);
 
 		return futureTask;
 	}
 
-	/**
-	 * 拆分。
-	 * 
-	 * @param dataExchange
-	 * @return
-	 */
-	protected List<G> getSubDataExchange(T dataExchange)
+	protected List<G> getSubDataExchanges(T dataExchange)
 	{
-		return dataExchange.split();
+		return dataExchange.getSubDataExchanges();
 	}
 
 	/**

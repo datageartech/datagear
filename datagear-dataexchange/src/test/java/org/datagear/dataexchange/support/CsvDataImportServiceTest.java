@@ -61,6 +61,8 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					textDataImportOption, TABLE_NAME, readerFactory);
 
+			impt.setListener(new MockTextDataImportListener());
+
 			clearTable(cn, TABLE_NAME);
 
 			this.thrown.expect(ColumnNotFoundException.class);
@@ -95,37 +97,13 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					textDataImportOption, TABLE_NAME, readerFactory);
 
-			impt.setListener(new TextDataImportListener()
+			impt.setListener(new MockTextDataImportListener()
 			{
-				@Override
-				public void onStart()
-				{
-					println("onStart");
-				}
-
-				@Override
-				public void onFinish()
-				{
-					println("onFinish");
-				}
-
-				@Override
-				public void onException(DataExchangeException e)
-				{
-					println("onException");
-				}
-
 				@Override
 				public void onSuccess(int dataIndex)
 				{
 					println("onSuccess : " + dataIndex);
 					importCountInListener.incrementAndGet();
-				}
-
-				@Override
-				public void onFail(int dataIndex)
-				{
-					println("onFail : " + dataIndex);
 				}
 			});
 
@@ -161,9 +139,29 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
 					"support/CsvDataImportServiceTest__ExceptionResolve.csv");
 
+			final AtomicInteger successCount = new AtomicInteger(0);
+			final AtomicInteger failCount = new AtomicInteger(0);
+
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.IGNORE, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					textDataImportOption, TABLE_NAME, readerFactory);
+
+			impt.setListener(new MockTextDataImportListener()
+			{
+				@Override
+				public void onSuccess(int dataIndex)
+				{
+					super.onSuccess(dataIndex);
+					successCount.incrementAndGet();
+				}
+
+				@Override
+				public void onFail(int dataIndex, DataExchangeException e)
+				{
+					super.onFail(dataIndex, e);
+					failCount.incrementAndGet();
+				}
+			});
 
 			clearTable(cn, TABLE_NAME);
 
@@ -172,6 +170,8 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			int count = getCount(cn, TABLE_NAME);
 
 			Assert.assertEquals(2, count);
+			Assert.assertEquals(2, successCount.intValue());
+			Assert.assertEquals(1, failCount.intValue());
 		}
 		finally
 		{
@@ -209,6 +209,46 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		{
 			JdbcUtil.closeConnection(cn);
 			IOUtil.close(reader);
+		}
+	}
+
+	protected class MockTextDataImportListener implements TextDataImportListener
+	{
+		@Override
+		public void onStart()
+		{
+			println("onStart");
+		}
+
+		@Override
+		public void onFinish()
+		{
+			println("onFinish");
+		}
+
+		@Override
+		public void onException(DataExchangeException e)
+		{
+			println("onException : " + e.getMessage());
+		}
+
+		@Override
+		public void onSuccess(int dataIndex)
+		{
+			println("onSuccess : " + dataIndex);
+		}
+
+		@Override
+		public void onFail(int dataIndex, DataExchangeException e)
+		{
+			println("onFail : " + dataIndex);
+		}
+
+		@Override
+		public void onSetNullColumnValue(int dataIndex, String columnName, String rawColumnValue,
+				DataExchangeException e)
+		{
+			println("onSetNullColumnValue : " + dataIndex + ", " + columnName);
 		}
 	}
 }

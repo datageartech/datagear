@@ -28,6 +28,7 @@ public class SimpleBatchDataExchange<T extends DataExchange> extends BatchDataEx
 		this.subDataExchanges = subDataExchanges;
 	}
 
+	@Override
 	public List<T> getSubDataExchanges()
 	{
 		return subDataExchanges;
@@ -36,11 +37,5 @@ public class SimpleBatchDataExchange<T extends DataExchange> extends BatchDataEx
 	public void setSubDataExchanges(List<T> subDataExchanges)
 	{
 		this.subDataExchanges = subDataExchanges;
-	}
-
-	@Override
-	public List<T> split() throws DataExchangeException
-	{
-		return this.subDataExchanges;
 	}
 }
