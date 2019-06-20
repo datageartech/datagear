@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.IOUtil;
 import org.datagear.dataexchange.BatchDataExchange;
@@ -39,6 +40,9 @@ import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
 import org.datagear.persistence.support.UUID;
 import org.datagear.web.OperationMessage;
+import org.datagear.web.cometd.dataexchange.CometdBatchDataExchangeListener;
+import org.datagear.web.cometd.dataexchange.CometdSubTextDataImportListener;
+import org.datagear.web.cometd.dataexchange.DataExchangeCometdService;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.vo.FileInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +77,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@Qualifier("tempDataImportRootDirectory")
 	private File tempDataImportRootDirectory;
 
+	@Autowired
+	private DataExchangeCometdService dataExchangeCometdService;
+
 	public DataExchangeController()
 	{
 		super();
@@ -80,11 +87,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	public DataExchangeController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource,
-			DataExchangeService<DataExchange> dataExchangeService, File tempDataImportRootDirectory)
+			DataExchangeService<DataExchange> dataExchangeService, File tempDataImportRootDirectory,
+			DataExchangeCometdService dataExchangeCometdService)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
 		this.dataExchangeService = dataExchangeService;
 		this.tempDataImportRootDirectory = tempDataImportRootDirectory;
+		this.dataExchangeCometdService = dataExchangeCometdService;
 	}
 
 	public DataExchangeService<DataExchange> getDataExchangeService()
@@ -105,6 +114,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public void setTempDataImportRootDirectory(File tempDataImportRootDirectory)
 	{
 		this.tempDataImportRootDirectory = tempDataImportRootDirectory;
+	}
+
+	public DataExchangeCometdService getDataExchangeCometdService()
+	{
+		return dataExchangeCometdService;
+	}
+
+	public void setDataExchangeCometdService(DataExchangeCometdService dataExchangeCometdService)
+	{
+		this.dataExchangeCometdService = dataExchangeCometdService;
 	}
 
 	@RequestMapping("/{schemaId}/import")
@@ -138,8 +157,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		DataFormat defaultDataFormat = new DataFormat();
 
+		String importId = UUID.gen();
+
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
-		springModel.addAttribute("importId", UUID.gen());
+		springModel.addAttribute("importId", importId);
+		springModel.addAttribute("importChannelId", getDataExchangeChannelId(importId));
 
 		return "/dataexchange/import_csv";
 	}
@@ -254,16 +276,33 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
+		String importChannelId = getDataExchangeChannelId(importId);
+		ServerChannel importServerChannel = this.dataExchangeCometdService.getChannelWithCreation(importChannelId);
+
 		List<CsvDataImport> csvDataImports = CsvDataImport.valuesOf(connectionFactory, dataImportForm.getDataFormat(),
 				dataImportForm.getImportOption(), importTables, readerFactories);
 
-		BatchDataExchange<CsvDataImport> batchDataExchange = new SimpleBatchDataExchange<CsvDataImport>(connectionFactory,
-				csvDataImports);
+		for (int i = 0; i < csvDataImports.size(); i++)
+		{
+			CsvDataImport csvDataImport = csvDataImports.get(i);
+
+			CometdSubTextDataImportListener listener = new CometdSubTextDataImportListener(
+					this.dataExchangeCometdService, importServerChannel, fileIds[i]);
+			csvDataImport.setListener(listener);
+		}
+
+		BatchDataExchange<CsvDataImport> batchDataExchange = new SimpleBatchDataExchange<CsvDataImport>(
+				connectionFactory, csvDataImports);
+
+		CometdBatchDataExchangeListener<CsvDataImport> listener = new CometdBatchDataExchangeListener<CsvDataImport>(
+				this.dataExchangeCometdService, importServerChannel, fileIds);
+
+		batchDataExchange.setListener(listener);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
-		BatchDataExchangeFutureInfo<CsvDataImport> futureInfo = new BatchDataExchangeFutureInfo<CsvDataImport>(
-				importId, batchDataExchange, fileIds);
+		BatchDataExchangeFutureInfo<CsvDataImport> futureInfo = new BatchDataExchangeFutureInfo<CsvDataImport>(importId,
+				batchDataExchange, fileIds);
 		storeBatchDataExchangeFutureInfo(request, futureInfo);
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
@@ -431,6 +470,17 @@ public class DataExchangeController extends AbstractSchemaConnController
 			directory.mkdirs();
 
 		return directory;
+	}
+
+	/**
+	 * 获取指定数据交换操作ID对应的cometd通道ID。
+	 * 
+	 * @param dataExchangeId
+	 * @return
+	 */
+	protected String getDataExchangeChannelId(String dataExchangeId)
+	{
+		return "/dataexchange/channel/" + dataExchangeId;
 	}
 
 	public static class DataImportFileInfo extends FileInfo

@@ -152,14 +152,18 @@ Schema schema 数据库，不允许为null
 
 <#include "../include/page_js_obj.ftl">
 <#include "../include/page_obj_grid.ftl">
+<#include "../include/page_obj_cometd.ftl">
 <script type="text/javascript">
 (function(po)
 {
 	po.schemaId = "${schema.id}";
 	po.importId = "${importId}";
+	po.importChannelId = "${importChannelId}";
 	po.form = po.element("#${pageId}-form");
 	po.fileUploadInfo = function(){ return this.element(".file-info"); };
-
+	
+	po.cometdInitIfNot();
+	
 	//计算表格高度
 	po.calTableHeight = function()
 	{
@@ -172,42 +176,6 @@ Schema schema 数据库，不允许为null
 	{
 		po.addRowData(fileInfos);
 	};
-	
-	po.formatImportProgress = function(progress)
-	{
-		if(!progress)
-			return "<@spring.message code='dataimport.importStatus.unstart' />";
-		
-		var re = "";
-		
-		if(progress.indexOf("waiting") > -1)
-			re += "<@spring.message code='dataimport.importStatus.waiting' />";
-		else if(progress.indexOf("importing") > -1)
-			re += "<@spring.message code='dataimport.importStatus.importing' />";
-		else if(progress.indexOf("cancel") > -1)
-			re += "<@spring.message code='dataimport.importStatus.cancel' />";
-		else if(progress.indexOf("abort") > -1)
-			re += "<@spring.message code='dataimport.importStatus.abort' />";
-		else if(progress.indexOf("rollback") > -1)
-			re += "<@spring.message code='dataimport.importStatus.rollback' />";
-		else if(progress.indexOf("finish") > -1)
-			re += "<@spring.message code='dataimport.importStatus.finish' />";
-		
-		var leftBracketIdx = progress.indexOf("(");
-		var slashIdx = (leftBracketIdx > -1 ? progress.indexOf("/", leftBracketIdx+1) : -1);
-		var rightBracketIdx = (slashIdx > -1 ? progress.indexOf(")", slashIdx+1) : -1);
-		
-		if(slashIdx > leftBracketIdx + 1 && rightBracketIdx > slashIdx + 1)
-		{
-			var successCount = progress.substring(leftBracketIdx + 1, slashIdx);
-			var failCount = progress.substring(slashIdx + 1, rightBracketIdx);
-			
-			<#assign messageArgs=['"+re+"', '"+successCount+"', '"+failCount+"'] />
-			re = "<@spring.messageArgs code='dataimport.importProgressInfo' args=messageArgs />";
-		}
-		
-		return re;
-	}
 	
 	po.setImportProgress = function(progressNumber)
 	{
@@ -330,20 +298,30 @@ Schema schema 数据库，不允许为null
 		return $.escapeHtml($.truncateIf(data));
 	};
 	
-	po.updateTableImportProgress = function(dataTable, rowIndexes, progressValue)
+	po.updateSubDataExchangeStatus = function(subDataExchangeId, status)
 	{
-		var cellIndexes = [];
+		var dataTable = po.table().DataTable();
 		
-		for(var i=0; i<rowIndexes.length; i++)
+		var rowIndex = -1;
+		
+		var rowDatas = dataTable.rows().data();
+		for(var i=0; i<rowDatas.length; i++)
 		{
-			var cellIndex = { "row" : rowIndexes[i], "column" : 4 };
-			var cell = dataTable.cell(cellIndex);
-			cell.data($.isArray(progressValue) ? progressValue[i] : progressValue);
-			
-			cellIndexes[i] = cellIndex;
+			if(rowDatas[i].id == subDataExchangeId)
+			{
+				rowIndex = i;
+				break;
+			}
 		}
 		
-		dataTable.cells(cellIndexes).draw();
+		if(rowIndex < 0)
+			return false;
+		
+		var cellIndex = { "row" : rowIndex, "column" : 4 };
+		var cell = dataTable.cell(cellIndex);
+		cell.data(status).draw();
+		
+		return true;
 	};
 	
 	po.expectedResizeDataTableElements = [po.table()[0]];
@@ -379,11 +357,14 @@ Schema schema 数据库，不允许为null
 			width : "25%"
 		},
 		{
-			title : "<@spring.message code='dataimport.importProgressWithSuccessFail' />",
-			data : "importProgress",
+			title : "<@spring.message code='dataimport.importStatusWithSuccessFail' />",
+			data : "status",
 			render : function(data, type, row, meta)
 			{
-				return po.formatImportProgress(data);
+				if(!data)
+					return "<@spring.message code='dataimport.importStatus.Unstart' />";
+				else
+					return data;
 			},
 			defaultContent: "",
 			width : "27%"
@@ -393,16 +374,63 @@ Schema schema 数据库，不允许为null
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
 	
-	po.element("#${pageId}-form").ajaxForm(
+	po.handleCometdMessage = function(message)
 	{
-		url : "${contextPath}/dataexchange/" + po.schemaId +"/import/csv/doImport",
-		success: function(data)
+		message = message.data;
+		var type = (message ? message.type : "");
+		
+		if("StartMessage" == type)
 		{
-			po.toggleUploadAndImportStatus(true);
 			
-			var dataTable = po.table().DataTable();
-			po.updateTableImportProgress(dataTable, dataTable.rows().indexes(), "waiting");
 		}
+		else if("SubmitSuccess" == type)
+		{
+			po.updateSubDataExchangeStatus(message.subDataExchangeId,
+					"<@spring.message code='dataimport.importStatus.SubmitSuccess' />");
+		}
+		else if("SubmitFail" == type)
+		{
+			po.updateSubDataExchangeStatus(message.subDataExchangeId,
+				"<@spring.message code='dataimport.importStatus.SubmitFail' />");
+		}
+		else if("CancelSuccess" == type)
+		{
+			po.updateSubDataExchangeStatus(message.subDataExchangeId,
+				"<@spring.message code='dataimport.importStatus.CancelSuccess' />");
+		}
+		else if("TextImportSubFinish" == type)
+		{
+			<#assign messageArgs=['"+message.successCount+"', '"+message.failCount+"'] />
+			
+			po.updateSubDataExchangeStatus(message.subDataExchangeId,
+				"<@spring.messageArgs code='dataimport.importStatus.TextImportSubFinish' args=messageArgs />");
+		}
+		else if("FinishMessage" == type)
+		{
+			po.setImportProgress(100);
+		}
+	};
+	
+	po.element("#${pageId}-form").submit(function()
+	{
+		po.cometdExecuteAfterSubscribe(po.importChannelId,
+		function()
+		{
+			po.element("#${pageId}-form").ajaxSubmit(
+			{
+				url : "${contextPath}/dataexchange/" + po.schemaId +"/import/csv/doImport",
+				success: function(data)
+				{
+					po.toggleUploadAndImportStatus(true);
+				}
+			});
+		},
+		function(message)
+		{
+			po.handleCometdMessage(message);
+		});
+		
+		return false;
 	});
 	
 	po.toggleUploadAndImportStatus(false);

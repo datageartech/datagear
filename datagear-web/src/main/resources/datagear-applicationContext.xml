@@ -412,6 +412,10 @@
     	</property>
     </bean>
 	
+	<bean id="dataExchangeCometdService" class="org.datagear.web.cometd.dataexchange.DataExchangeCometdService">
+        <constructor-arg><ref local="bayeuxServer" /></constructor-arg>
+    </bean>
+    
 	<!-- 定时任务开始 -->
 	
 	<!-- 删除过期的BLOB文件 -->
