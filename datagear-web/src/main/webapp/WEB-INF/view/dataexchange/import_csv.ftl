@@ -145,6 +145,7 @@ Schema schema 数据库，不允许为null
 		<div class="restart-wrapper">
 			<button type="button" class="restart-button"><@spring.message code='restart' /></button>
 		</div>
+		<div id="${pageId}-import-exception-tooltip" title="import tooltip" style="width:0; height:0;"></div>
 	</div>
 	<div class="foot">
 	</div>
@@ -314,6 +315,7 @@ Schema schema 数据库，不允许为null
 	{
 		po.toggleUploadAndImportStatus(false);
 		po.setImportProgress(0);
+		po.toggleRestartStatus(false);
 	});
 	
 	po.renderColumn = function(data, type, row, meta)
@@ -374,7 +376,7 @@ Schema schema 数据库，不允许为null
 			data : "tableName",
 			render : function(data, type, row, meta)
 			{
-				return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' class='ui-widget ui-widget-content' style='width:90%' />";
+				return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' class='table-name-input ui-widget ui-widget-content' style='width:90%' />";
 			},
 			defaultContent: "",
 			width : "25%"
@@ -397,6 +399,30 @@ Schema schema 数据库，不允许为null
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
 	
+	po.table().on("click", ".table-name-input", function(event)
+	{
+		//阻止行选中
+		event.stopPropagation();
+	});
+	
+	po.table().on("click", ".import-exception-tip", function(event)
+	{
+		//阻止行选中
+		event.stopPropagation();
+		var $this = $(this);
+		
+		var subDataExchangeId = $this.attr("subDataExchangeId");
+		var exception = po.subDataExchangeExceptionMessages[subDataExchangeId];
+		
+		var $tooltip = po.element("#${pageId}-import-exception-tooltip");
+		
+		try{ $tooltip.tooltip("destroy"); }catch(e){}
+		po.element("#${pageId}-import-exception-tooltip").tooltip({"classes" : { "ui-tooltip" : "ui-state-error ui-corner-all ui-widget-shadow"}});
+		$tooltip.tooltip("option", "content", exception);
+		$tooltip.tooltip("option", "position", { my: "center top", at: "center bottom+3", of: $this, collision: "flipfit" });
+		$tooltip.tooltip("open");
+	});
+	
 	po.handleCometdMessage = function(message)
 	{
 		message = message.data;
@@ -406,6 +432,8 @@ Schema schema 数据库，不允许为null
 		{
 			var dataTable = po.table().DataTable();
 			po.subDataExchangeCount = dataTable.rows().indexes().length;
+			
+			po.subDataExchangeExceptionMessages = {};
 		}
 		else if("Exception" == type)
 		{
@@ -429,10 +457,28 @@ Schema schema 数据库，不允许为null
 		}
 		else if("TextImportSubException" == type)
 		{
+			var exceptionResolve = message.exceptionResolve;
+			
+			var status = "";
+			
 			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"', '"+message.content+"'] />
 			
-			po.updateSubDataExchangeStatus(message.subDataExchangeId,
-				"<@spring.messageArgs code='dataimport.importStatus.TextImportSubException' args=messageArgs />");
+			//未进行任何实际导入操作
+			if(message.successCount == 0 && message.ignoreCount == 0)
+				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException' args=messageArgs />";
+			else if(exceptionResolve == "ABORT")
+				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException.ABORT' args=messageArgs />";
+			else if(exceptionResolve == "IGNORE")
+				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException.IGNORE' args=messageArgs />";
+			else if(exceptionResolve == "ROLLBACK")
+				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException.ROLLBACK' args=messageArgs />";
+			
+			status += "<span class='import-exception-tip ui-state-error' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
+						+"<span class='ui-icon ui-icon-info'></span></span>";
+						
+			po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.content;
+			
+			po.updateSubDataExchangeStatus(message.subDataExchangeId, status);
 		}
 		else if("TextImportSubSuccess" == type)
 		{

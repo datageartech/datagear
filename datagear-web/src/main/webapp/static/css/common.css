@@ -1699,3 +1699,10 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	bottom: 0;
 	height: 3em;
 }
+.page-dataimport-text .dataTable .import-exception-tip.ui-state-error{
+	border: none;
+    background: none;
+    cursor: pointer;
+    vertical-align: middle;
+    margin-left: 0.41em;
+}
