@@ -102,6 +102,24 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 	}
 
 	/**
+	 * 关闭。
+	 */
+	public void shutdown()
+	{
+		this.executorService.shutdown();
+	}
+
+	/**
+	 * 是否已关闭。
+	 * 
+	 * @return
+	 */
+	public boolean isShutdown()
+	{
+		return this.executorService.isShutdown();
+	}
+
+	/**
 	 * 是否没有任一提交成功。
 	 * 
 	 * @param results
