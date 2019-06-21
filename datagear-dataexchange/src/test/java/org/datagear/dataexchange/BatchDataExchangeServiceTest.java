@@ -81,6 +81,12 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 			}
 
 			@Override
+			public void onSuccess()
+			{
+				println("onSuccess");
+			}
+
+			@Override
 			public void onSubmitSuccess(CsvDataImport subDataExchange, int subDataExchangeIndex)
 			{
 				println("onSubmitSuccess : " + subDataExchangeIndex);

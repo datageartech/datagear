@@ -7,6 +7,7 @@ package org.datagear.web.cometd.dataexchange;
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.BatchDataExchangeListener;
 import org.datagear.dataexchange.DataExchange;
+import org.datagear.dataexchange.DataExchangeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +80,30 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 		sendMessage(new CancelSuccess(subDataExchangeId));
 	}
 
+	@Override
+	protected DataExchangeMessage buildStartMessage()
+	{
+		return new Start();
+	}
+
+	@Override
+	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
+	{
+		return new Exception(e.getMessage());
+	}
+
+	@Override
+	protected DataExchangeMessage buildSuccessMessage()
+	{
+		return new Success();
+	}
+
+	@Override
+	protected DataExchangeMessage buildFinishMessage(long duration)
+	{
+		return new Finish(duration);
+	}
+
 	/**
 	 * 获取子数据交换ID。
 	 * <p>
@@ -103,34 +128,88 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	}
 
 	/**
-	 * 子数据交换消息。
+	 * 数据交换开始消息。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static abstract class SuDataExchangeMessage extends DataExchangeMessage
+	public static class Start extends DataExchangeMessage
 	{
-		private String subDataExchangeId;
+		public Start()
+		{
+			super();
+		}
+	}
 
-		public SuDataExchangeMessage()
+	/**
+	 * 数据交换异常消息。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class Exception extends DataExchangeMessage
+	{
+		private String content;
+
+		public Exception()
 		{
 			super();
 		}
 
-		public SuDataExchangeMessage(String subDataExchangeId)
+		public Exception(String content)
 		{
 			super();
-			this.subDataExchangeId = subDataExchangeId;
+			this.content = content;
 		}
 
-		public String getSubDataExchangeId()
+		public String getContent()
 		{
-			return subDataExchangeId;
+			return content;
 		}
 
-		public void setSubDataExchangeId(String subDataExchangeId)
+		public void setContent(String content)
 		{
-			this.subDataExchangeId = subDataExchangeId;
+			this.content = content;
+		}
+	}
+
+	public static class Success extends DataExchangeMessage
+	{
+		public Success()
+		{
+			super();
+		}
+	}
+
+	/**
+	 * 数据交换完成消息。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class Finish extends DataExchangeMessage
+	{
+		private long duration;
+
+		public Finish()
+		{
+			super();
+		}
+
+		public Finish(long duration)
+		{
+			super();
+			this.duration = duration;
+		}
+
+		public long getDuration()
+		{
+			return duration;
+		}
+
+		public void setDuration(long duration)
+		{
+			this.duration = duration;
 		}
 	}
 
@@ -140,7 +219,7 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class SubmitSuccess extends SuDataExchangeMessage
+	public static class SubmitSuccess extends SubDataExchangeMessage
 	{
 		public SubmitSuccess()
 		{
@@ -159,7 +238,7 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class SubmitFail extends SuDataExchangeMessage
+	public static class SubmitFail extends SubDataExchangeMessage
 	{
 		public SubmitFail()
 		{
@@ -178,7 +257,7 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class CancelSuccess extends SuDataExchangeMessage
+	public static class CancelSuccess extends SubDataExchangeMessage
 	{
 		public CancelSuccess()
 		{

@@ -51,31 +51,84 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	}
 
 	@Override
-	protected DataExchangeMessage buildFinishMessage(long duration)
+	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
 	{
-		return new TextImportSubFinish(this.getSubDataExchangeId(), duration, this._successCount.intValue(),
+		return new TextImportSubException(getSubDataExchangeId(), e.getMessage(), this._successCount.intValue(),
+				this._ignoreCount.intValue());
+	}
+
+	@Override
+	protected DataExchangeMessage buildSuccessMessage()
+	{
+		return new TextImportSubSuccess(getSubDataExchangeId(), this._successCount.intValue(),
 				this._ignoreCount.intValue());
 	}
 
 	/**
-	 * 子文本导入完成。
+	 * 子文本导入异常。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class TextImportSubFinish extends SubFinish
+	public static class TextImportSubException extends SubException
 	{
 		private int successCount;
+
 		private int ignoreCount;
 
-		public TextImportSubFinish()
+		public TextImportSubException()
 		{
 			super();
 		}
 
-		public TextImportSubFinish(String subDataExchangeId, long duration, int successCount, int ignoreCount)
+		public TextImportSubException(String subDataExchangeId, String content, int successCount, int ignoreCount)
 		{
-			super(subDataExchangeId, duration);
+			super(subDataExchangeId, content);
+			this.successCount = successCount;
+			this.ignoreCount = ignoreCount;
+		}
+
+		public int getSuccessCount()
+		{
+			return successCount;
+		}
+
+		public void setSuccessCount(int successCount)
+		{
+			this.successCount = successCount;
+		}
+
+		public int getIgnoreCount()
+		{
+			return ignoreCount;
+		}
+
+		public void setIgnoreCount(int ignoreCount)
+		{
+			this.ignoreCount = ignoreCount;
+		}
+	}
+
+	/**
+	 * 子文本导入成功。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class TextImportSubSuccess extends SubSuccess
+	{
+		private int successCount;
+
+		private int ignoreCount;
+
+		public TextImportSubSuccess()
+		{
+			super();
+		}
+
+		public TextImportSubSuccess(String subDataExchangeId, int successCount, int ignoreCount)
+		{
+			super(subDataExchangeId);
 			this.successCount = successCount;
 			this.ignoreCount = ignoreCount;
 		}

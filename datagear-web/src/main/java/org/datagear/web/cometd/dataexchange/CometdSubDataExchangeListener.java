@@ -5,6 +5,7 @@
 package org.datagear.web.cometd.dataexchange;
 
 import org.cometd.bayeux.server.ServerChannel;
+import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
 
 /**
@@ -46,41 +47,21 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	}
 
 	@Override
+	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
+	{
+		return new SubException(this.subDataExchangeId, e.getMessage());
+	}
+
+	@Override
+	protected DataExchangeMessage buildSuccessMessage()
+	{
+		return new SubSuccess(this.subDataExchangeId);
+	}
+
+	@Override
 	protected DataExchangeMessage buildFinishMessage(long duration)
 	{
 		return new SubFinish(this.subDataExchangeId, duration);
-	}
-
-	/**
-	 * 子数据交换消息。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public abstract static class SubDataExchangeMessage extends DataExchangeMessage
-	{
-		private String subDataExchangeId;
-
-		public SubDataExchangeMessage()
-		{
-			super();
-		}
-
-		public SubDataExchangeMessage(String subDataExchangeId)
-		{
-			super();
-			this.subDataExchangeId = subDataExchangeId;
-		}
-
-		public String getSubDataExchangeId()
-		{
-			return subDataExchangeId;
-		}
-
-		public void setSubDataExchangeId(String subDataExchangeId)
-		{
-			this.subDataExchangeId = subDataExchangeId;
-		}
 	}
 
 	/**
@@ -89,10 +70,8 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class SubStart extends StartMessage
+	public static class SubStart extends SubDataExchangeMessage
 	{
-		private String subDataExchangeId;
-
 		public SubStart()
 		{
 			super();
@@ -100,23 +79,63 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 
 		public SubStart(String subDataExchangeId)
 		{
-			super();
-			this.subDataExchangeId = subDataExchangeId;
-		}
-
-		public String getSubDataExchangeId()
-		{
-			return subDataExchangeId;
-		}
-
-		public void setSubDataExchangeId(String subDataExchangeId)
-		{
-			this.subDataExchangeId = subDataExchangeId;
+			super(subDataExchangeId);
 		}
 	}
 
 	/**
-	 * 子数据交换开始。
+	 * 子数据交换异常。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class SubException extends SubDataExchangeMessage
+	{
+		private String content;
+
+		public SubException()
+		{
+			super();
+		}
+
+		public SubException(String subDataExchangeId, String content)
+		{
+			super(subDataExchangeId);
+			this.content = content;
+		}
+
+		public String getContent()
+		{
+			return content;
+		}
+
+		public void setContent(String content)
+		{
+			this.content = content;
+		}
+	}
+
+	/**
+	 * 子数据交换成功。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class SubSuccess extends SubDataExchangeMessage
+	{
+		public SubSuccess()
+		{
+			super();
+		}
+
+		public SubSuccess(String subDataExchangeId)
+		{
+			super(subDataExchangeId);
+		}
+	}
+
+	/**
+	 * 子数据交换完成。
 	 * 
 	 * @author datagear@163.com
 	 *

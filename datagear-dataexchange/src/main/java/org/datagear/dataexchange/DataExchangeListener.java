@@ -19,15 +19,23 @@ public interface DataExchangeListener
 
 	/**
 	 * 异常。
+	 * <p>
+	 * 数据交换异常交由此处理后，不会再向上抛出。
+	 * </p>
 	 * 
 	 * @param e
 	 */
 	void onException(DataExchangeException e);
 
 	/**
+	 * 成功。
+	 */
+	void onSuccess();
+
+	/**
 	 * 完成。
 	 * <p>
-	 * 无论是否有异常，此方法都将被调用。
+	 * 此方法将在{@linkplain #onException(DataExchangeException)}或者{@linkplain #onSuccess()}之后被调用。
 	 * </p>
 	 */
 	void onFinish();

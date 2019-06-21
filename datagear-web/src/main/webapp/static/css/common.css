@@ -1693,3 +1693,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-dataimport-text .form-item-table .file-encoding-wrapper .ui-selectmenu-button.ui-button{
 	width: 8em;
 }
+.page-dataimport-text .restart-wrapper{
+	position: absolute;
+	right: 0.5em;
+	bottom: 0;
+	height: 3em;
+}

@@ -51,8 +51,14 @@ public abstract class DataExchange
 	 * <p>
 	 * 返回{@code null}表示未设置。
 	 * </p>
+	 * <p>
+	 * 此方法默认返回{@code null}，子类可以在需要时重写。
+	 * </p>
 	 * 
 	 * @return
 	 */
-	public abstract DataExchangeListener getListener();
+	public DataExchangeListener getListener()
+	{
+		return null;
+	}
 }

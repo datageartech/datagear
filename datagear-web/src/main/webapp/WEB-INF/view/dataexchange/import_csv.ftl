@@ -142,6 +142,9 @@ Schema schema 数据库，不允许为null
 				</div>
 			</div>
 		</form>
+		<div class="restart-wrapper">
+			<button type="button" class="restart-button"><@spring.message code='restart' /></button>
+		</div>
 	</div>
 	<div class="foot">
 	</div>
@@ -202,6 +205,20 @@ Schema schema 数据库，不允许为null
 			importActionEle.removeClass("ui-state-disabled");
 			po.element("select[name='fileEncoding']").selectmenu("enable");
 			po.element(".file-encoding-label").removeClass("ui-state-disabled");
+		}
+	};
+	
+	po.toggleRestartStatus = function(enable)
+	{
+		if(enable)
+		{
+			po.element(".restart-wrapper").show();
+			po.element(".restart-button").removeClass("ui-state-disabled");
+		}
+		else
+		{
+			po.element(".restart-wrapper").hide();
+			po.element(".restart-button").addClass("ui-state-disabled");
 		}
 	};
 	
@@ -293,6 +310,12 @@ Schema schema 数据库，不允许为null
 		});
 	});
 	
+	po.element(".restart-button").click(function()
+	{
+		po.toggleUploadAndImportStatus(false);
+		po.setImportProgress(0);
+	});
+	
 	po.renderColumn = function(data, type, row, meta)
 	{
 		return $.escapeHtml($.truncateIf(data));
@@ -379,9 +402,15 @@ Schema schema 数据库，不允许为null
 		message = message.data;
 		var type = (message ? message.type : "");
 		
-		if("StartMessage" == type)
+		if("Start" == type)
 		{
-			
+			var dataTable = po.table().DataTable();
+			po.subDataExchangeCount = dataTable.rows().indexes().length;
+		}
+		else if("Exception" == type)
+		{
+			<#assign messageArgs=['"+message.content+"'] />
+			$.tipError("<@spring.messageArgs code='dataimport.importStatus.Exception' args=messageArgs />");
 		}
 		else if("SubmitSuccess" == type)
 		{
@@ -398,16 +427,33 @@ Schema schema 数据库，不允许为null
 			po.updateSubDataExchangeStatus(message.subDataExchangeId,
 				"<@spring.message code='dataimport.importStatus.CancelSuccess' />");
 		}
-		else if("TextImportSubFinish" == type)
+		else if("TextImportSubException" == type)
+		{
+			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"', '"+message.content+"'] />
+			
+			po.updateSubDataExchangeStatus(message.subDataExchangeId,
+				"<@spring.messageArgs code='dataimport.importStatus.TextImportSubException' args=messageArgs />");
+		}
+		else if("TextImportSubSuccess" == type)
 		{
 			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"'] />
 			
 			po.updateSubDataExchangeStatus(message.subDataExchangeId,
-				"<@spring.messageArgs code='dataimport.importStatus.TextImportSubFinish' args=messageArgs />");
+				"<@spring.messageArgs code='dataimport.importStatus.TextImportSubSuccess' args=messageArgs />");
 		}
-		else if("FinishMessage" == type)
+		else if("SubFinish" == type)
+		{
+			if(!po.subDataExchangeFinishCount)
+				po.subDataExchangeFinishCount = 0;
+			
+			po.subDataExchangeFinishCount += 1;
+			
+			po.setImportProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
+		}
+		else if("Finish" == type)
 		{
 			po.setImportProgress(100);
+			po.toggleRestartStatus(true);
 		}
 	};
 	
@@ -435,6 +481,7 @@ Schema schema 数据库，不允许为null
 	
 	po.toggleUploadAndImportStatus(false);
 	po.setImportProgress(0);
+	po.toggleRestartStatus(false);
 })
 (${pageId});
 </script>

@@ -98,6 +98,9 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 			}
 
 			commit(cn);
+
+			if (listener != null)
+				listener.onSuccess();
 		}
 		catch (Throwable t)
 		{
@@ -114,8 +117,8 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 
 			if (listener != null)
 				listener.onException(e);
-
-			throw e;
+			else
+				throw e;
 		}
 		finally
 		{

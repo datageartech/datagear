@@ -80,6 +80,9 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 		{
 			List<G> subDataExchanges = getSubDataExchanges(dataExchange);
 			exchange(this.executorService, dataExchange, subDataExchanges, results);
+
+			if (listener != null)
+				listener.onSuccess();
 		}
 		catch (Throwable t)
 		{
@@ -87,8 +90,8 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 
 			if (listener != null)
 				listener.onException(e);
-
-			throw e;
+			else
+				throw e;
 		}
 		finally
 		{

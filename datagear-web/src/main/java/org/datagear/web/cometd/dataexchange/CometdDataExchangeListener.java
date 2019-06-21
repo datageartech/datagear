@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * @author datagear@163.com
  *
  */
-public class CometdDataExchangeListener implements DataExchangeListener
+public abstract class CometdDataExchangeListener implements DataExchangeListener
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CometdDataExchangeListener.class);
 
@@ -64,7 +64,13 @@ public class CometdDataExchangeListener implements DataExchangeListener
 	@Override
 	public void onException(DataExchangeException e)
 	{
-		// TODO Auto-generated method stub
+		sendMessage(buildExceptionMessage(e));
+	}
+
+	@Override
+	public void onSuccess()
+	{
+		sendMessage(buildSuccessMessage());
 	}
 
 	@Override
@@ -96,10 +102,22 @@ public class CometdDataExchangeListener implements DataExchangeListener
 	 * 
 	 * @return
 	 */
-	protected DataExchangeMessage buildStartMessage()
-	{
-		return new StartMessage();
-	}
+	protected abstract DataExchangeMessage buildStartMessage();
+
+	/**
+	 * 构建异常消息。
+	 * 
+	 * @param e
+	 * @return
+	 */
+	protected abstract DataExchangeMessage buildExceptionMessage(DataExchangeException e);
+
+	/**
+	 * 构建成功消息。
+	 * 
+	 * @return
+	 */
+	protected abstract DataExchangeMessage buildSuccessMessage();
 
 	/**
 	 * 构建完成消息。
@@ -107,8 +125,5 @@ public class CometdDataExchangeListener implements DataExchangeListener
 	 * @param duration
 	 * @return
 	 */
-	protected DataExchangeMessage buildFinishMessage(long duration)
-	{
-		return new FinishMessage(duration);
-	}
+	protected abstract DataExchangeMessage buildFinishMessage(long duration);
 }

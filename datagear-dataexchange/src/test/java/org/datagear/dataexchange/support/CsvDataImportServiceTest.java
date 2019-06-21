@@ -61,8 +61,6 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					textDataImportOption, TABLE_NAME, readerFactory);
 
-			impt.setListener(new MockTextDataImportListener());
-
 			clearTable(cn, TABLE_NAME);
 
 			this.thrown.expect(ColumnNotFoundException.class);
@@ -221,15 +219,21 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		}
 
 		@Override
-		public void onFinish()
-		{
-			println("onFinish");
-		}
-
-		@Override
 		public void onException(DataExchangeException e)
 		{
 			println("onException : " + e.getMessage());
+		}
+
+		@Override
+		public void onSuccess()
+		{
+			println("onSuccess");
+		}
+
+		@Override
+		public void onFinish()
+		{
+			println("onFinish");
 		}
 
 		@Override
