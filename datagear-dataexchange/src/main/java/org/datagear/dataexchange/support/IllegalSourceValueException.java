@@ -14,26 +14,24 @@ public class IllegalSourceValueException extends SetImportColumnValueException
 {
 	private static final long serialVersionUID = 1L;
 
-	public IllegalSourceValueException(String table, int dataIndex, String columnName, Object sourceValue)
+	public IllegalSourceValueException(int dataIndex, String columnName, Object sourceValue)
 	{
-		super(table, dataIndex, columnName, sourceValue);
+		super(dataIndex, columnName, sourceValue);
 	}
 
-	public IllegalSourceValueException(String table, int dataIndex, String columnName, Object sourceValue,
-			String message)
+	public IllegalSourceValueException(int dataIndex, String columnName, Object sourceValue, String message)
 	{
-		super(table, dataIndex, columnName, sourceValue, message);
+		super(dataIndex, columnName, sourceValue, message);
 	}
 
-	public IllegalSourceValueException(String table, int dataIndex, String columnName, Object sourceValue,
+	public IllegalSourceValueException(int dataIndex, String columnName, Object sourceValue, Throwable cause)
+	{
+		super(dataIndex, columnName, sourceValue, cause);
+	}
+
+	public IllegalSourceValueException(int dataIndex, String columnName, Object sourceValue, String message,
 			Throwable cause)
 	{
-		super(table, dataIndex, columnName, sourceValue, cause);
-	}
-
-	public IllegalSourceValueException(String table, int dataIndex, String columnName, Object sourceValue,
-			String message, Throwable cause)
-	{
-		super(table, dataIndex, columnName, sourceValue, message, cause);
+		super(dataIndex, columnName, sourceValue, message, cause);
 	}
 }

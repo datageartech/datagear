@@ -67,45 +67,48 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 	 * 构建{@linkplain TextDataImportContext}。
 	 * 
 	 * @param impt
-	 * @param table
 	 * @return
 	 */
-	protected TextDataImportContext buildTextDataImportContext(T impt, String table)
+	protected TextDataImportContext buildTextDataImportContext(T impt)
 	{
-		return new TextDataImportContext(new DataFormatContext(impt.getDataFormat()), table);
+		return new TextDataImportContext(new DataFormatContext(impt.getDataFormat()));
 	}
 
 	/**
-	 * 执行下一个导入操作。
+	 * 导入下一条数据。
 	 * 
 	 * @param impt
+	 * @param cn
 	 * @param st
+	 * @param columnInfos
+	 * @param columnValues
 	 * @param textDataImportContext
-	 * @return true 成功；false 失败
+	 * @return
 	 * @throws DataExchangeException
 	 */
-	protected boolean executeNextImport(T impt, PreparedStatement st, TextDataImportContext textDataImportContext)
-			throws DataExchangeException
+	protected boolean importNextData(T impt, Connection cn, PreparedStatement st, List<ColumnInfo> columnInfos,
+			List<String> columnValues, TextDataImportContext textDataImportContext) throws DataExchangeException
 	{
 		TextDataImportListener listener = impt.getListener();
 
 		try
 		{
-			st.executeUpdate();
+			setImportColumnValues(impt, cn, st, columnInfos, columnValues, textDataImportContext);
+			executeNextImport(impt, st, textDataImportContext);
 
 			if (listener != null)
 				listener.onSuccess(textDataImportContext.getDataIndex());
 
 			return true;
 		}
-		catch (SQLException e)
+		catch (Throwable t)
 		{
-			DataExchangeException de = wrapToDataExchangeException(e);
+			DataExchangeException de = wrapToDataExchangeException(t);
 
 			if (ExceptionResolve.IGNORE.equals(impt.getImportOption().getExceptionResolve()))
 			{
 				if (listener != null)
-					listener.onFail(textDataImportContext.getDataIndex(), de);
+					listener.onIgnore(textDataImportContext.getDataIndex(), de);
 
 				return false;
 			}
@@ -116,6 +119,27 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 		{
 			textDataImportContext.incrementDataIndex();
 			textDataImportContext.clearCloseResources();
+		}
+	}
+
+	/**
+	 * 执行下一个导入操作。
+	 * 
+	 * @param impt
+	 * @param st
+	 * @param textDataImportContext
+	 * @throws ExecuteDataImportSqlException
+	 */
+	protected void executeNextImport(T impt, PreparedStatement st, TextDataImportContext textDataImportContext)
+			throws ExecuteDataImportSqlException
+	{
+		try
+		{
+			st.executeUpdate();
+		}
+		catch (SQLException e)
+		{
+			throw new ExecuteDataImportSqlException(textDataImportContext.getDataIndex(), e);
 		}
 	}
 
@@ -133,7 +157,6 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 	protected void setImportColumnValues(T impt, Connection cn, PreparedStatement st, List<ColumnInfo> columnInfos,
 			List<String> columnValues, TextDataImportContext textDataImportContext) throws SetImportColumnValueException
 	{
-		String table = textDataImportContext.getTable();
 		int dataIndex = textDataImportContext.getDataIndex();
 
 		int columnCount = columnInfos.size();
@@ -161,7 +184,7 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 					}
 					catch (SQLException e1)
 					{
-						throw new SetImportColumnValueException(table, dataIndex, columnName, null);
+						throw new SetImportColumnValueException(dataIndex, columnName, null);
 					}
 
 					TextDataImportListener listener = impt.getListener();
@@ -170,11 +193,11 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 						DataExchangeException de = null;
 
 						if ((e instanceof ParseException) || (e instanceof DecoderException))
-							de = new IllegalSourceValueException(table, dataIndex, columnName, rawValue, e);
+							de = new IllegalSourceValueException(dataIndex, columnName, rawValue, e);
 						else if (e instanceof UnsupportedSqlTypeException)
 							de = (UnsupportedSqlTypeException) e;
 						else
-							de = new SetImportColumnValueException(table, dataIndex, columnName, rawValue);
+							de = new SetImportColumnValueException(dataIndex, columnName, rawValue);
 
 						listener.onSetNullColumnValue(dataIndex, columnName, rawValue, de);
 					}
@@ -183,7 +206,7 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 				{
 					if ((e instanceof ParseException) || (e instanceof DecoderException))
 					{
-						throw new IllegalSourceValueException(table, dataIndex, columnName, rawValue, e);
+						throw new IllegalSourceValueException(dataIndex, columnName, rawValue, e);
 					}
 					else if (e instanceof UnsupportedSqlTypeException)
 					{
@@ -191,7 +214,7 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 					}
 					else
 					{
-						throw new SetImportColumnValueException(table, dataIndex, columnName, rawValue);
+						throw new SetImportColumnValueException(dataIndex, columnName, rawValue);
 					}
 				}
 			}
@@ -460,9 +483,6 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 	{
 		private DataFormatContext dataFormatContext;
 
-		/** 导入表名 */
-		private String table;
-
 		/** 导入数据索引 */
 		private int dataIndex = 0;
 
@@ -471,11 +491,10 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 			super();
 		}
 
-		public TextDataImportContext(DataFormatContext dataFormatContext, String table)
+		public TextDataImportContext(DataFormatContext dataFormatContext)
 		{
 			super();
 			this.dataFormatContext = dataFormatContext;
-			this.table = table;
 		}
 
 		public DataFormatContext getDataFormatContext()
@@ -486,16 +505,6 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 		public void setDataFormatContext(DataFormatContext dataFormatContext)
 		{
 			this.dataFormatContext = dataFormatContext;
-		}
-
-		public String getTable()
-		{
-			return table;
-		}
-
-		public void setTable(String table)
-		{
-			this.table = table;
 		}
 
 		public int getDataIndex()

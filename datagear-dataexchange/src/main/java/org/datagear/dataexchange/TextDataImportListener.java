@@ -20,11 +20,11 @@ public interface TextDataImportListener extends DataExchangeListener
 	void onSuccess(int dataIndex);
 
 	/**
-	 * 指定索引的数据导入失败。
+	 * 指定索引的数据因为异常而被忽略。
 	 * 
 	 * @param dataIndex
 	 */
-	void onFail(int dataIndex, DataExchangeException e);
+	void onIgnore(int dataIndex, DataExchangeException e);
 
 	/**
 	 * {@code rawColumnValue}非法时列值被设置为{@code null}。

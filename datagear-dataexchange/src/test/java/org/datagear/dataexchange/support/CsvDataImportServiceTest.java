@@ -140,7 +140,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 					"support/CsvDataImportServiceTest__ExceptionResolve.csv");
 
 			final AtomicInteger successCount = new AtomicInteger(0);
-			final AtomicInteger failCount = new AtomicInteger(0);
+			final AtomicInteger ignoreCount = new AtomicInteger(0);
 
 			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.IGNORE, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
@@ -156,10 +156,10 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 				}
 
 				@Override
-				public void onFail(int dataIndex, DataExchangeException e)
+				public void onIgnore(int dataIndex, DataExchangeException e)
 				{
-					super.onFail(dataIndex, e);
-					failCount.incrementAndGet();
+					super.onIgnore(dataIndex, e);
+					ignoreCount.incrementAndGet();
 				}
 			});
 
@@ -171,7 +171,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 
 			Assert.assertEquals(2, count);
 			Assert.assertEquals(2, successCount.intValue());
-			Assert.assertEquals(1, failCount.intValue());
+			Assert.assertEquals(1, ignoreCount.intValue());
 		}
 		finally
 		{
@@ -239,9 +239,9 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		}
 
 		@Override
-		public void onFail(int dataIndex, DataExchangeException e)
+		public void onIgnore(int dataIndex, DataExchangeException e)
 		{
-			println("onFail : " + dataIndex);
+			println("onIgnore : " + dataIndex);
 		}
 
 		@Override

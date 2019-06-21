@@ -63,7 +63,7 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 
 			connectionFactory = dataExchange.getConnectionFactory();
 
-			TextDataImportContext importContext = buildTextDataImportContext(dataExchange, dataExchange.getTable());
+			TextDataImportContext importContext = buildTextDataImportContext(dataExchange);
 
 			List<ColumnInfo> rawColumnInfos = null;
 			List<ColumnInfo> noNullColumnInfos = null;
@@ -93,9 +93,7 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 					List<String> columnValues = resolveCSVRecordValues(dataExchange, csvRecord, rawColumnInfos,
 							noNullColumnInfos);
 
-					setImportColumnValues(dataExchange, cn, st, noNullColumnInfos, columnValues, importContext);
-
-					executeNextImport(dataExchange, st, importContext);
+					importNextData(dataExchange, cn, st, noNullColumnInfos, columnValues, importContext);
 				}
 			}
 
@@ -103,6 +101,8 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 		}
 		catch (Throwable t)
 		{
+			DataExchangeException e = wrapToDataExchangeException(t);
+
 			if (ExceptionResolve.ABORT.equals(exceptionResolve))
 				commitSilently(cn);
 			else if (ExceptionResolve.ROLLBACK.equals(exceptionResolve))
@@ -110,9 +110,7 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 			else if (ExceptionResolve.IGNORE.equals(exceptionResolve))
 				commitSilently(cn);
 			else
-				;
-
-			DataExchangeException e = wrapToDataExchangeException(t);
+				throw new UnsupportedOperationException();
 
 			if (listener != null)
 				listener.onException(e);

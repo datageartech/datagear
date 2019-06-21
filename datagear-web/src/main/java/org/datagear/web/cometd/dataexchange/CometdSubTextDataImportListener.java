@@ -19,7 +19,7 @@ import org.datagear.dataexchange.TextDataImportListener;
 public class CometdSubTextDataImportListener extends CometdSubDataExchangeListener implements TextDataImportListener
 {
 	private AtomicInteger _successCount = new AtomicInteger(0);
-	private AtomicInteger _failCount = new AtomicInteger(0);
+	private AtomicInteger _ignoreCount = new AtomicInteger(0);
 
 	public CometdSubTextDataImportListener()
 	{
@@ -39,9 +39,9 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	}
 
 	@Override
-	public void onFail(int dataIndex, DataExchangeException e)
+	public void onIgnore(int dataIndex, DataExchangeException e)
 	{
-		_failCount.incrementAndGet();
+		_ignoreCount.incrementAndGet();
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	protected DataExchangeMessage buildFinishMessage(long duration)
 	{
 		return new TextImportSubFinish(this.getSubDataExchangeId(), duration, this._successCount.intValue(),
-				this._failCount.intValue());
+				this._ignoreCount.intValue());
 	}
 
 	/**
@@ -66,18 +66,18 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	public static class TextImportSubFinish extends SubFinish
 	{
 		private int successCount;
-		private int failCount;
+		private int ignoreCount;
 
 		public TextImportSubFinish()
 		{
 			super();
 		}
 
-		public TextImportSubFinish(String subDataExchangeId, long duration, int successCount, int failCount)
+		public TextImportSubFinish(String subDataExchangeId, long duration, int successCount, int ignoreCount)
 		{
 			super(subDataExchangeId, duration);
 			this.successCount = successCount;
-			this.failCount = failCount;
+			this.ignoreCount = ignoreCount;
 		}
 
 		public int getSuccessCount()
@@ -90,14 +90,14 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 			this.successCount = successCount;
 		}
 
-		public int getFailCount()
+		public int getIgnoreCount()
 		{
-			return failCount;
+			return ignoreCount;
 		}
 
-		public void setFailCount(int failCount)
+		public void setIgnoreCount(int ignoreCount)
 		{
-			this.failCount = failCount;
+			this.ignoreCount = ignoreCount;
 		}
 	}
 }

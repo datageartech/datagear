@@ -4,7 +4,7 @@
 
 package org.datagear.dataexchange.support;
 
-import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.TextDataImportException;
 
 /**
  * 导入数据时设置列值异常。
@@ -12,75 +12,41 @@ import org.datagear.dataexchange.DataExchangeException;
  * @author datagear@163.com
  *
  */
-public class SetImportColumnValueException extends DataExchangeException
+public class SetImportColumnValueException extends TextDataImportException
 {
 	private static final long serialVersionUID = 1L;
-
-	private String table;
-
-	private int dataIndex;
 
 	private String columnName;
 
 	private Object sourceValue;
 
-	public SetImportColumnValueException(String table, int dataIndex, String columnName, Object sourceValue)
+	public SetImportColumnValueException(int dataIndex, String columnName, Object sourceValue)
 	{
-		super();
-		this.table = table;
-		this.dataIndex = dataIndex;
+		super(dataIndex);
 		this.columnName = columnName;
 		this.sourceValue = sourceValue;
 	}
 
-	public SetImportColumnValueException(String table, int dataIndex, String columnName, Object sourceValue,
-			String message)
+	public SetImportColumnValueException(int dataIndex, String columnName, Object sourceValue, String message)
 	{
-		super(message);
-		this.table = table;
-		this.dataIndex = dataIndex;
+		super(dataIndex, message);
 		this.columnName = columnName;
 		this.sourceValue = sourceValue;
 	}
 
-	public SetImportColumnValueException(String table, int dataIndex, String columnName, Object sourceValue,
+	public SetImportColumnValueException(int dataIndex, String columnName, Object sourceValue, Throwable cause)
+	{
+		super(dataIndex, cause);
+		this.columnName = columnName;
+		this.sourceValue = sourceValue;
+	}
+
+	public SetImportColumnValueException(int dataIndex, String columnName, Object sourceValue, String message,
 			Throwable cause)
 	{
-		super(cause);
-		this.table = table;
-		this.dataIndex = dataIndex;
+		super(dataIndex, message, cause);
 		this.columnName = columnName;
 		this.sourceValue = sourceValue;
-	}
-
-	public SetImportColumnValueException(String table, int dataIndex, String columnName, Object sourceValue,
-			String message, Throwable cause)
-	{
-		super(message, cause);
-		this.table = table;
-		this.dataIndex = dataIndex;
-		this.columnName = columnName;
-		this.sourceValue = sourceValue;
-	}
-
-	public String getTable()
-	{
-		return table;
-	}
-
-	protected void setTable(String table)
-	{
-		this.table = table;
-	}
-
-	public int getDataIndex()
-	{
-		return dataIndex;
-	}
-
-	protected void setDataIndex(int dataIndex)
-	{
-		this.dataIndex = dataIndex;
 	}
 
 	public String getColumnName()
@@ -88,7 +54,7 @@ public class SetImportColumnValueException extends DataExchangeException
 		return columnName;
 	}
 
-	public void setColumnName(String columnName)
+	protected void setColumnName(String columnName)
 	{
 		this.columnName = columnName;
 	}

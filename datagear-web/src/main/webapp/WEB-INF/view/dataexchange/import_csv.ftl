@@ -400,7 +400,7 @@ Schema schema 数据库，不允许为null
 		}
 		else if("TextImportSubFinish" == type)
 		{
-			<#assign messageArgs=['"+message.successCount+"', '"+message.failCount+"'] />
+			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"'] />
 			
 			po.updateSubDataExchangeStatus(message.subDataExchangeId,
 				"<@spring.messageArgs code='dataimport.importStatus.TextImportSubFinish' args=messageArgs />");
