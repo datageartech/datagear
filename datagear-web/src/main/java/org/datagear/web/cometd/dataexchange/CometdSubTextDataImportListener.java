@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.TextDataImportListener;
 
 /**
@@ -18,6 +19,8 @@ import org.datagear.dataexchange.TextDataImportListener;
  */
 public class CometdSubTextDataImportListener extends CometdSubDataExchangeListener implements TextDataImportListener
 {
+	private ExceptionResolve exceptionResolve;
+
 	private AtomicInteger _successCount = new AtomicInteger(0);
 	private AtomicInteger _ignoreCount = new AtomicInteger(0);
 
@@ -27,9 +30,20 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	}
 
 	public CometdSubTextDataImportListener(DataExchangeCometdService dataExchangeCometdService,
-			ServerChannel dataExchangeServerChannel, String subDataExchangeId)
+			ServerChannel dataExchangeServerChannel, String subDataExchangeId, ExceptionResolve exceptionResolve)
 	{
 		super(dataExchangeCometdService, dataExchangeServerChannel, subDataExchangeId);
+		this.exceptionResolve = exceptionResolve;
+	}
+
+	public ExceptionResolve getExceptionResolve()
+	{
+		return exceptionResolve;
+	}
+
+	public void setExceptionResolve(ExceptionResolve exceptionResolve)
+	{
+		this.exceptionResolve = exceptionResolve;
 	}
 
 	@Override
@@ -53,8 +67,8 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	@Override
 	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
 	{
-		return new TextImportSubException(getSubDataExchangeId(), e.getMessage(), this._successCount.intValue(),
-				this._ignoreCount.intValue());
+		return new TextImportSubException(getSubDataExchangeId(), e.getMessage(), this.exceptionResolve,
+				this._successCount.intValue(), this._ignoreCount.intValue());
 	}
 
 	@Override
@@ -72,6 +86,8 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	 */
 	public static class TextImportSubException extends SubException
 	{
+		private ExceptionResolve exceptionResolve;
+
 		private int successCount;
 
 		private int ignoreCount;
@@ -81,11 +97,23 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 			super();
 		}
 
-		public TextImportSubException(String subDataExchangeId, String content, int successCount, int ignoreCount)
+		public TextImportSubException(String subDataExchangeId, String content, ExceptionResolve exceptionResolve,
+				int successCount, int ignoreCount)
 		{
 			super(subDataExchangeId, content);
+			this.exceptionResolve = exceptionResolve;
 			this.successCount = successCount;
 			this.ignoreCount = ignoreCount;
+		}
+
+		public ExceptionResolve getExceptionResolve()
+		{
+			return exceptionResolve;
+		}
+
+		public void setExceptionResolve(ExceptionResolve exceptionResolve)
+		{
+			this.exceptionResolve = exceptionResolve;
 		}
 
 		public int getSuccessCount()
