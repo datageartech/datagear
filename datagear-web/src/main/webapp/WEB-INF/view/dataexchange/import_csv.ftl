@@ -435,7 +435,7 @@ Schema schema 数据库，不允许为null
 	po.hideExceptionTip = function(event, tipEle)
 	{
 		po.element("#${pageId}-import-exception-tooltip").tooltip("close");
-	});
+	};
 	
 	po.handleCometdMessage = function(message)
 	{
