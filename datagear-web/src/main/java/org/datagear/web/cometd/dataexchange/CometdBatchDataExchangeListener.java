@@ -103,9 +103,9 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	}
 
 	@Override
-	protected DataExchangeMessage buildFinishMessage(long duration)
+	protected DataExchangeMessage buildFinishMessage()
 	{
-		return new Finish(duration);
+		return new Finish(evalDuration());
 	}
 
 	/**

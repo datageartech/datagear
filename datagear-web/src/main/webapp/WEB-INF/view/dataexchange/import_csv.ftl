@@ -118,7 +118,7 @@ Schema schema 数据库，不允许为null
 								<@spring.message code='dataimport.importProgress' />
 							</span>
 							<div id="${pageId}-progress"></div>
-							<span id="${pageId}-progress-percent" class="progress-percent"></span>
+							<div id="${pageId}-progress-percent" class="progress-percent"></div>
 						</div>
 					</div>
 					<div class="form-item form-item-table">
@@ -157,6 +157,7 @@ Schema schema 数据库，不允许为null
 <#include "../include/page_js_obj.ftl">
 <#include "../include/page_obj_grid.ftl">
 <#include "../include/page_obj_cometd.ftl">
+<#include "../include/page_obj_format_time.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -181,10 +182,21 @@ Schema schema 数据库，不允许为null
 		po.addRowData(fileInfos);
 	};
 	
-	po.setImportProgress = function(progressNumber)
+	po.setImportProgress = function(progressNumber, duration)
 	{
 		po.element("#${pageId}-progress").progressbar({ value: progressNumber });
-		po.element("#${pageId}-progress-percent").text(progressNumber + "%");
+		
+		var percentText = progressNumber + "%";
+		
+		if(duration != null)
+		{
+			var duration = po.formatDuration(duration);
+			
+			<#assign messageArgs=['"+progressNumber+"', '"+duration+"'] />
+			percentText = "<@spring.messageArgs code='dataimport.importProgressPercentWithDuration' args=messageArgs />";
+		}
+		
+		po.element("#${pageId}-progress-percent").text(percentText);
 	};
 	
 	po.toggleUploadAndImportStatus = function(importStatus)
@@ -406,7 +418,7 @@ Schema schema 数据库，不允许为null
 		//TODO 打开详细日志信息
 	});
 	
-	po.table().on("click", ".import-exception-tip", function(event)
+	po.table().on("click", ".import-result-icon", function(event)
 	{
 		//阻止行选中
 		event.stopPropagation();
@@ -473,9 +485,11 @@ Schema schema 数据库，不允许为null
 		{
 			var exceptionResolve = message.exceptionResolve;
 			
+			var duration = po.formatDuration(message.duration);
+			
 			var status = "";
 			
-			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"', '"+message.content+"'] />
+			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"', '"+duration+"', '"+message.content+"'] />
 			
 			//未进行任何实际导入操作
 			if(message.successCount == 0 && message.ignoreCount == 0)
@@ -487,7 +501,7 @@ Schema schema 数据库，不允许为null
 			else if(exceptionResolve == "ROLLBACK")
 				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException.ROLLBACK' args=messageArgs />";
 			
-			status += "<span class='import-exception-tip ui-state-error' onmouseover='${pageId}.showExceptionTip(event, this)'"
+			status += "<span class='import-result-icon ui-state-error' onmouseover='${pageId}.showExceptionTip(event, this)'"
 						+" onmouseout='${pageId}.hideExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
 						+"<span class='ui-icon ui-icon-info'></span></span>";
 			
@@ -497,19 +511,25 @@ Schema schema 数据库，不允许为null
 		}
 		else if("TextImportSubSuccess" == type)
 		{
+			var duration = po.formatDuration(message.duration);
+			
 			var status = "";
 			
-			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"'] />
+			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"', '"+duration+"'] />
 			
 			if(message.ignoreCount == 0)
+			{
 				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubSuccess' args=messageArgs />";
+				status += "<span class='import-result-icon'>"
+						+"<span class='ui-icon ui-icon-circle-check'></span></span>";
+			}
 			else
 			{
 				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException.IGNORE' args=messageArgs />";
-				status += "<span class='import-exception-tip ui-state-error' onmouseover='${pageId}.showExceptionTip(event, this)'"
+				status += "<span class='import-result-icon ui-state-error' onmouseover='${pageId}.showExceptionTip(event, this)'"
 						+" onmouseout='${pageId}.hideExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
 						+"<span class='ui-icon ui-icon-info'></span></span>";
-							
+				
 				po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.ignoreException;
 			}
 			
@@ -526,7 +546,7 @@ Schema schema 数据库，不允许为null
 		}
 		else if("Finish" == type)
 		{
-			po.setImportProgress(100);
+			po.setImportProgress(100, message.duration);
 			po.toggleRestartStatus(true);
 		}
 	};

@@ -72,15 +72,15 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	@Override
 	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
 	{
-		return new TextImportSubException(getSubDataExchangeId(), resolveDataExchangeExceptionI18n(e),
+		return new TextImportSubException(getSubDataExchangeId(), resolveDataExchangeExceptionI18n(e), evalDuration(),
 				this.exceptionResolve, this._successCount.intValue(), this._ignoreCount.intValue());
 	}
 
 	@Override
 	protected DataExchangeMessage buildSuccessMessage()
 	{
-		TextImportSubSuccess message = new TextImportSubSuccess(getSubDataExchangeId(), this._successCount.intValue(),
-				this._ignoreCount.intValue());
+		TextImportSubSuccess message = new TextImportSubSuccess(getSubDataExchangeId(), evalDuration(),
+				this._successCount.intValue(), this._ignoreCount.intValue());
 
 		message.setIgnoreException(this._lastIgnoreException);
 
@@ -106,10 +106,10 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 			super();
 		}
 
-		public TextImportSubException(String subDataExchangeId, String content, ExceptionResolve exceptionResolve,
-				int successCount, int ignoreCount)
+		public TextImportSubException(String subDataExchangeId, String content, long duration,
+				ExceptionResolve exceptionResolve, int successCount, int ignoreCount)
 		{
-			super(subDataExchangeId, content);
+			super(subDataExchangeId, content, duration);
 			this.exceptionResolve = exceptionResolve;
 			this.successCount = successCount;
 			this.ignoreCount = ignoreCount;
@@ -165,9 +165,9 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 			super();
 		}
 
-		public TextImportSubSuccess(String subDataExchangeId, int successCount, int ignoreCount)
+		public TextImportSubSuccess(String subDataExchangeId, long duration, int successCount, int ignoreCount)
 		{
-			super(subDataExchangeId);
+			super(subDataExchangeId, duration);
 			this.successCount = successCount;
 			this.ignoreCount = ignoreCount;
 		}

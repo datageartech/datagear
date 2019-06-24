@@ -116,8 +116,7 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 	@Override
 	public void onFinish()
 	{
-		long duration = System.currentTimeMillis() - this._startTime;
-		sendMessage(buildFinishMessage(duration));
+		sendMessage(buildFinishMessage());
 	}
 
 	/**
@@ -230,6 +229,16 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 	}
 
 	/**
+	 * 计算耗时毫秒数。
+	 * 
+	 * @return
+	 */
+	protected long evalDuration()
+	{
+		return System.currentTimeMillis() - this._startTime;
+	}
+
+	/**
 	 * 构建开始消息。
 	 * 
 	 * @return
@@ -254,8 +263,7 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 	/**
 	 * 构建完成消息。
 	 * 
-	 * @param duration
 	 * @return
 	 */
-	protected abstract DataExchangeMessage buildFinishMessage(long duration);
+	protected abstract DataExchangeMessage buildFinishMessage();
 }

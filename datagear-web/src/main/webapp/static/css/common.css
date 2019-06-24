@@ -1652,21 +1652,22 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	height: 2.8em;
 }
 .page-dataimport-text .form-item-upload-label{
-	margin-right: 1em;
+	margin-right: 0.5em;
 }
 .page-dataimport-text .fileinput-button{
 	padding-left: 3em;
 	padding-right: 3em;
 }
 .page-dataimport-text .form-item-progress-label{
-	margin-right: 1em;
+	margin-right: 0.5em;
 }
 .page-dataimport-text .form-item-progress .ui-progressbar{
 	display: inline-block;
-    width: 40%;
+    width: 35%;
     vertical-align: middle;
 }
 .page-dataimport-text .form-item-progress .progress-percent{
+	display: inline-block;
 	padding-left: 0.2em;
 }
 .page-dataimport-text .form-item-table{
@@ -1688,7 +1689,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	right: 10em;
 }
 .page-dataimport-text .form-item-table .file-encoding-wrapper .file-encoding-label{
-	padding-right: 1em;
+	padding-right: 0.5em;
 }
 .page-dataimport-text .form-item-table .file-encoding-wrapper .ui-selectmenu-button.ui-button{
 	width: 8em;
@@ -1699,10 +1700,12 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	bottom: 0;
 	height: 3em;
 }
-.page-dataimport-text .dataTable .import-exception-tip.ui-state-error{
+.page-dataimport-text .dataTable .import-result-icon{
+	margin-left: 0.2em;
+	vertical-align: middle;
 	border: none;
     background: none;
+}
+.page-dataimport-text .dataTable .import-result-icon.ui-state-error{
     cursor: pointer;
-    vertical-align: middle;
-    margin-left: 0.41em;
 }

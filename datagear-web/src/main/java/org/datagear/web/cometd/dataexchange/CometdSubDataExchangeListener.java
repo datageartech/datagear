@@ -53,19 +53,19 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	@Override
 	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
 	{
-		return new SubException(this.subDataExchangeId, resolveDataExchangeExceptionI18n(e));
+		return new SubException(this.subDataExchangeId, resolveDataExchangeExceptionI18n(e), evalDuration());
 	}
 
 	@Override
 	protected DataExchangeMessage buildSuccessMessage()
 	{
-		return new SubSuccess(this.subDataExchangeId);
+		return new SubSuccess(this.subDataExchangeId, evalDuration());
 	}
 
 	@Override
-	protected DataExchangeMessage buildFinishMessage(long duration)
+	protected DataExchangeMessage buildFinishMessage()
 	{
-		return new SubFinish(this.subDataExchangeId, duration);
+		return new SubFinish(this.subDataExchangeId);
 	}
 
 	/**
@@ -97,15 +97,18 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	{
 		private String content;
 
+		private long duration;
+
 		public SubException()
 		{
 			super();
 		}
 
-		public SubException(String subDataExchangeId, String content)
+		public SubException(String subDataExchangeId, String content, long duration)
 		{
 			super(subDataExchangeId);
 			this.content = content;
+			this.duration = duration;
 		}
 
 		public String getContent()
@@ -117,6 +120,16 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 		{
 			this.content = content;
 		}
+
+		public long getDuration()
+		{
+			return duration;
+		}
+
+		public void setDuration(long duration)
+		{
+			this.duration = duration;
+		}
 	}
 
 	/**
@@ -127,33 +140,14 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	 */
 	public static class SubSuccess extends SubDataExchangeMessage
 	{
+		private long duration;
+
 		public SubSuccess()
 		{
 			super();
 		}
 
-		public SubSuccess(String subDataExchangeId)
-		{
-			super(subDataExchangeId);
-		}
-	}
-
-	/**
-	 * 子数据交换完成。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class SubFinish extends SubDataExchangeMessage
-	{
-		private long duration;
-
-		public SubFinish()
-		{
-			super();
-		}
-
-		public SubFinish(String subDataExchangeId, long duration)
+		public SubSuccess(String subDataExchangeId, long duration)
 		{
 			super(subDataExchangeId);
 			this.duration = duration;
@@ -167,6 +161,25 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 		public void setDuration(long duration)
 		{
 			this.duration = duration;
+		}
+	}
+
+	/**
+	 * 子数据交换完成。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class SubFinish extends SubDataExchangeMessage
+	{
+		public SubFinish()
+		{
+			super();
+		}
+
+		public SubFinish(String subDataExchangeId)
+		{
+			super(subDataExchangeId);
 		}
 	}
 }
