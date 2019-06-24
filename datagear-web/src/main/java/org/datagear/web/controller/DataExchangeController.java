@@ -265,6 +265,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		String[] tableNames = dataImportForm.getTableNames();
 
 		File directory = getTempDataImportDirectory(importId, true);
+		File logDirectory = getTempDataImportLogDirectory(importId, true);
 
 		List<ResourceFactory<Reader>> readerFactories = toReaderResourceFactories(directory,
 				dataImportForm.getFileEncoding(), fileNames);
@@ -289,6 +290,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			CometdSubTextDataImportListener listener = new CometdSubTextDataImportListener(
 					this.dataExchangeCometdService, importServerChannel, getMessageSource(), getLocale(request),
 					fileIds[i], csvDataImport.getImportOption().getExceptionResolve());
+			listener.setLogFile(new File(logDirectory, fileIds[i] + ".txt"));
 			csvDataImport.setListener(listener);
 		}
 
@@ -466,6 +468,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	protected File getTempDataImportDirectory(String importId, boolean notNull)
 	{
 		File directory = new File(this.tempDataImportRootDirectory, importId);
+
+		if (notNull && !directory.exists())
+			directory.mkdirs();
+
+		return directory;
+	}
+
+	protected File getTempDataImportLogDirectory(String importId, boolean notNull)
+	{
+		File directory = new File(this.tempDataImportRootDirectory, importId + "_logs");
 
 		if (notNull && !directory.exists())
 			directory.mkdirs();

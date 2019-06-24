@@ -458,6 +458,7 @@ Schema schema 数据库，不允许为null
 		{
 			var dataTable = po.table().DataTable();
 			po.subDataExchangeCount = dataTable.rows().indexes().length;
+			po.subDataExchangeFinishCount=0;
 			
 			po.subDataExchangeExceptionMessages = {};
 		}
@@ -480,6 +481,15 @@ Schema schema 数据库，不允许为null
 		{
 			po.updateSubDataExchangeStatus(message.subDataExchangeId,
 				"<@spring.message code='dataimport.importStatus.CancelSuccess' />");
+		}
+		else if("TextImportSubImporting" == type)
+		{
+			var status = "";
+			
+			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"'] />
+			status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubImporting' args=messageArgs />";
+			
+			po.updateSubDataExchangeStatus(message.subDataExchangeId, status);
 		}
 		else if("TextImportSubException" == type)
 		{
