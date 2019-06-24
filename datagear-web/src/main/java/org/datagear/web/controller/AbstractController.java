@@ -456,12 +456,23 @@ public abstract class AbstractController
 	{
 		try
 		{
-			return this.messageSource.getMessage(code, args, WebUtils.getLocale(request));
+			return this.messageSource.getMessage(code, args, getLocale(request));
 		}
 		catch (NoSuchMessageException e)
 		{
 			return "???" + code + "???";
 		}
+	}
+
+	/**
+	 * 获取请求地区。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected Locale getLocale(HttpServletRequest request)
+	{
+		return WebUtils.getLocale(request);
 	}
 
 	/**

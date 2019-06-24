@@ -91,12 +91,12 @@ Schema schema 数据库，不允许为null
 						<div class="form-item-label"><@spring.message code='dataimport.exceptionResolve' /></div>
 						<div class="form-item-value">
 							<div id="${pageId}-exceptionResolve">
-								<label for="${pageId}-exceptionResolve-0"><@spring.message code='dataimport.exceptionResolve.ABORT' /></label>
-								<input id="${pageId}-exceptionResolve-0" type="radio" name="importOption.exceptionResolve" value="ABORT" />
-								<label for="${pageId}-exceptionResolve-1"><@spring.message code='dataimport.exceptionResolve.IGNORE' /></label>
-								<input id="${pageId}-exceptionResolve-1" type="radio" name="importOption.exceptionResolve" value="IGNORE" />
-								<label for="${pageId}-exceptionResolve-2"><@spring.message code='dataimport.exceptionResolve.ROLLBACK' /></label>
-								<input id="${pageId}-exceptionResolve-2" type="radio" name="importOption.exceptionResolve" value="ROLLBACK" />
+								<label for="${pageId}-exceptionResolve-0"><@spring.message code='dataimport.exceptionResolve.ROLLBACK' /></label>
+								<input id="${pageId}-exceptionResolve-0" type="radio" name="importOption.exceptionResolve" value="ROLLBACK" />
+								<label for="${pageId}-exceptionResolve-1"><@spring.message code='dataimport.exceptionResolve.ABORT' /></label>
+								<input id="${pageId}-exceptionResolve-1" type="radio" name="importOption.exceptionResolve" value="ABORT" />
+								<label for="${pageId}-exceptionResolve-2"><@spring.message code='dataimport.exceptionResolve.IGNORE' /></label>
+								<input id="${pageId}-exceptionResolve-2" type="radio" name="importOption.exceptionResolve" value="IGNORE" />
 							</div>
 						</div>
 					</div>
@@ -257,7 +257,7 @@ Schema schema 数据库，不允许为null
 	po.element("input[name='dataFormat.binaryFormat'][value='${defaultDataFormat.binaryFormat}']").click();
 	po.element("#${pageId}-ignoreInexistentColumn-1").click();
 	po.element("#${pageId}-nullForIllegalColumnValue-1").click();
-	po.element("#${pageId}-exceptionResolve-2").click();
+	po.element("#${pageId}-exceptionResolve-0").click();
 
 	po.element(".fileinput-button").fileupload(
 	{
@@ -506,8 +506,11 @@ Schema schema 数据库，不允许为null
 			else
 			{
 				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException.IGNORE' args=messageArgs />";
-				status += "<span class='import-exception-tip ui-state-error' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
-							+"<span class='ui-icon ui-icon-info'></span></span>";
+				status += "<span class='import-exception-tip ui-state-error' onmouseover='${pageId}.showExceptionTip(event, this)'"
+						+" onmouseout='${pageId}.hideExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
+						+"<span class='ui-icon ui-icon-info'></span></span>";
+							
+				po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.ignoreException;
 			}
 			
 			po.updateSubDataExchangeStatus(message.subDataExchangeId, status);

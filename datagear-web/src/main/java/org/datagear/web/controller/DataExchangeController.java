@@ -287,8 +287,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			CsvDataImport csvDataImport = csvDataImports.get(i);
 
 			CometdSubTextDataImportListener listener = new CometdSubTextDataImportListener(
-					this.dataExchangeCometdService, importServerChannel, fileIds[i],
-					csvDataImport.getImportOption().getExceptionResolve());
+					this.dataExchangeCometdService, importServerChannel, getMessageSource(), getLocale(request),
+					fileIds[i], csvDataImport.getImportOption().getExceptionResolve());
 			csvDataImport.setListener(listener);
 		}
 
@@ -296,7 +296,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				connectionFactory, csvDataImports);
 
 		CometdBatchDataExchangeListener<CsvDataImport> listener = new CometdBatchDataExchangeListener<CsvDataImport>(
-				this.dataExchangeCometdService, importServerChannel, fileIds);
+				this.dataExchangeCometdService, importServerChannel, getMessageSource(), getLocale(request), fileIds);
 
 		batchDataExchange.setListener(listener);
 

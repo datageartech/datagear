@@ -4,9 +4,12 @@
 
 package org.datagear.web.cometd.dataexchange;
 
+import java.util.Locale;
+
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
+import org.springframework.context.MessageSource;
 
 /**
  * 基于Cometd的子数据交换{@linkplain DataExchangeListener}。
@@ -24,9 +27,10 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	}
 
 	public CometdSubDataExchangeListener(DataExchangeCometdService dataExchangeCometdService,
-			ServerChannel dataExchangeServerChannel, String subDataExchangeId)
+			ServerChannel dataExchangeServerChannel, MessageSource messageSource, Locale locale,
+			String subDataExchangeId)
 	{
-		super(dataExchangeCometdService, dataExchangeServerChannel);
+		super(dataExchangeCometdService, dataExchangeServerChannel, messageSource, locale);
 		this.subDataExchangeId = subDataExchangeId;
 	}
 
@@ -49,7 +53,7 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	@Override
 	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
 	{
-		return new SubException(this.subDataExchangeId, e.getMessage());
+		return new SubException(this.subDataExchangeId, resolveDataExchangeExceptionI18n(e));
 	}
 
 	@Override

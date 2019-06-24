@@ -4,12 +4,15 @@
 
 package org.datagear.web.cometd.dataexchange;
 
+import java.util.Locale;
+
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.BatchDataExchangeListener;
 import org.datagear.dataexchange.DataExchange;
 import org.datagear.dataexchange.DataExchangeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 
 /**
  * 基于Cometd的{@linkplain BatchDataExchangeListener}。
@@ -31,9 +34,10 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	}
 
 	public CometdBatchDataExchangeListener(DataExchangeCometdService dataExchangeCometdService,
-			ServerChannel dataExchangeServerChannel, String[] subDataExchangeIds)
+			ServerChannel dataExchangeServerChannel, MessageSource messageSource, Locale locale,
+			String[] subDataExchangeIds)
 	{
-		super(dataExchangeCometdService, dataExchangeServerChannel);
+		super(dataExchangeCometdService, dataExchangeServerChannel, messageSource, locale);
 		this.subDataExchangeIds = subDataExchangeIds;
 	}
 
@@ -89,7 +93,7 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	@Override
 	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
 	{
-		return new Exception(e.getMessage());
+		return new Exception(resolveDataExchangeExceptionI18n(e));
 	}
 
 	@Override
