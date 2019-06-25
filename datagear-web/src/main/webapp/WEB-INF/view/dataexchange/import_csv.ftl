@@ -441,9 +441,13 @@ Schema schema 数据库，不允许为null
 		event.stopPropagation();
 		
 		var $this = $(this);
+		
+		if(!$this.hasClass("ui-state-error"))
+			return;
+		
 		var subDataExchangeId = $this.attr("subDataExchangeId");
 		var rowData = po.getSubDataExchangeRowData(subDataExchangeId);
-		var displayName = (rowData ? rowData.displayName : "");
+		var displayName = $.escapeHtml((rowData ? rowData.displayName : ""));
 		
 		<#assign messageArgs=['"+displayName+"'] />
 		
