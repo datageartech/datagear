@@ -1694,6 +1694,10 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-dataimport-text .form-item-table .file-encoding-wrapper .ui-selectmenu-button.ui-button{
 	width: 8em;
 }
+.page-dataimport-text .file-encoding-selectmenu-menu .ui-menu{
+	max-height: 20em;
+	overflow: auto;
+}
 .page-dataimport-text .restart-wrapper{
 	position: absolute;
 	right: 0.5em;

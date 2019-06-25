@@ -41,6 +41,9 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 
 	private File logFile;
 
+	/** 发送导入中消息的间隔毫秒数 */
+	private int sendImportingMessageInterval = 500;
+
 	private AtomicInteger _successCount = new AtomicInteger(0);
 	private AtomicInteger _ignoreCount = new AtomicInteger(0);
 	private volatile String _lastIgnoreException = "";
@@ -83,6 +86,16 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	public void setLogFile(File logFile)
 	{
 		this.logFile = logFile;
+	}
+
+	public int getSendImportingMessageInterval()
+	{
+		return sendImportingMessageInterval;
+	}
+
+	public void setSendImportingMessageInterval(int sendImportingMessageInterval)
+	{
+		this.sendImportingMessageInterval = sendImportingMessageInterval;
 	}
 
 	@Override
@@ -185,7 +198,7 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	protected boolean sendImportingMessage()
 	{
 		long currentTime = System.currentTimeMillis();
-		if (currentTime - this._prevSendImportingMessageTime < 200)
+		if (currentTime - this._prevSendImportingMessageTime < this.sendImportingMessageInterval)
 			return false;
 
 		this._prevSendImportingMessageTime = currentTime;

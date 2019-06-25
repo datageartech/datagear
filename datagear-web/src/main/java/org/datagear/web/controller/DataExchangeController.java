@@ -14,11 +14,13 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.zip.ZipInputStream;
 
@@ -166,6 +168,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("importId", importId);
 		springModel.addAttribute("importChannelId", getDataExchangeChannelId(importId));
+		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
 
 		return "/dataexchange/import_csv";
 	}
@@ -295,6 +299,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 					this.dataExchangeCometdService, importServerChannel, getMessageSource(), getLocale(request),
 					fileIds[i], csvDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, fileIds[i]));
+			listener.setSendImportingMessageInterval(
+					evalSendImportingMessageInterval(csvDataImports, csvDataImport, i));
 			csvDataImport.setListener(listener);
 		}
 
@@ -411,7 +417,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			TextDataImportForm dataImportForm) throws Exception
 	{
-		String[] subDataExchangeIds = request.getParameterValues("subDataExchangeIds");
+		String[] subDataExchangeIds = request.getParameterValues("subDataExchangeId");
 
 		if (subDataExchangeIds == null)
 			throw new IllegalInputException();
@@ -427,6 +433,28 @@ public class DataExchangeController extends AbstractSchemaConnController
 		responseEntity.getBody().setData(cancels);
 
 		return responseEntity;
+	}
+
+	/**
+	 * 计算导入中消息发送间隔。
+	 * <p>
+	 * 如果发送频率过快，当导入文件很多时会出现cometd卡死的情况。
+	 * </p>
+	 * 
+	 * @param csvDataImports
+	 * @param csvDataImport
+	 * @param index
+	 * @return
+	 */
+	protected int evalSendImportingMessageInterval(List<CsvDataImport> csvDataImports, CsvDataImport csvDataImport,
+			int index)
+	{
+		int interval = 500 * csvDataImports.size();
+
+		if (interval > 5000)
+			interval = 5000;
+
+		return interval;
 	}
 
 	/**
@@ -578,6 +606,29 @@ public class DataExchangeController extends AbstractSchemaConnController
 	protected String getDataExchangeChannelId(String dataExchangeId)
 	{
 		return "/dataexchange/channel/" + dataExchangeId;
+	}
+
+	/**
+	 * 获取可用字符集名称。
+	 * 
+	 * @return
+	 */
+	protected List<String> getAvailableCharsetNames()
+	{
+		List<String> charsetNames = new ArrayList<String>();
+
+		Map<String, Charset> map = Charset.availableCharsets();
+		Set<String> names = map.keySet();
+		for (String name : names)
+		{
+			// 排除未在IANA注册的字符集
+			if (name.startsWith("x-") || name.startsWith("X-"))
+				continue;
+
+			charsetNames.add(name);
+		}
+
+		return charsetNames;
 	}
 
 	public static class DataImportFileInfo extends FileInfo

@@ -131,8 +131,9 @@ Schema schema 数据库，不允许为null
 								<@spring.message code='dataimport.fileEncoding' />
 							</span>
 							<select name="fileEncoding">
-								<option value="GBK">GBK</option>
-								<option value="UTF-8">UTF-8</option>
+								<#list availableCharsetNames as item>
+								<option value="${item}" <#if item == defaultCharsetName>selected="selected"</#if>>${item}</option>
+								</#list>
 							</select>
 						</div>
 						<div class="table-wrapper minor-dataTable">
@@ -264,7 +265,7 @@ Schema schema 数据库，不允许为null
 	po.element("#${pageId}-ignoreInexistentColumn").buttonset();
 	po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
 	po.element("#${pageId}-exceptionResolve").buttonset();
-	po.element("select[name='fileEncoding']").selectmenu();
+	po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
 	
 	po.element("input[name='dataFormat.binaryFormat'][value='${defaultDataFormat.binaryFormat}']").click();
 	po.element("#${pageId}-ignoreInexistentColumn-1").click();
@@ -305,20 +306,31 @@ Schema schema 数据库，不允许为null
 	{
 		po.executeOnSelects(function(rowDatas, rowIndexes)
 		{
+			var cancelIds = [];
+			
 			for(var i=0; i<rowDatas.length; i++)
 			{
-				var importProgress = rowDatas[i].importProgress;
+				var status = rowDatas[i].status;
 				
-				if(!importProgress || importProgress.indexOf("waiting") > -1)
+				if(!status || status == "<@spring.message code='dataimport.importStatus.SubmitSuccess' />")
 				{
-					//TODO 发送取消命令
-					alert("发送取消命令");
+					var subDataExchangeId = rowDatas[i].id;
+					cancelIds.push({"name" : "subDataExchangeId", value : subDataExchangeId});
 				}
 				else
 				{
 					if(rowDatas.length == 1)
+					{
 						$.tipInfo("<@spring.message code='dataimport.cancelImportDeniedWithReason' />");
+						return;
+					}
 				}
+			}
+			
+			if(cancelIds.length > 0)
+			{
+				cancelIds.push({"name" : "dataExchangeId", "value" : po.importId});
+				$.post("${contextPath}/dataexchange/" + po.schemaId +"/cancel", cancelIds);
 			}
 		});
 	});
@@ -520,6 +532,9 @@ Schema schema 数据库，不允许为null
 		}
 		else if("CancelSuccess" == type)
 		{
+			po.subDataExchangeFinishCount += 1;
+			po.setImportProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
+			
 			po.updateSubDataExchangeStatus(message.subDataExchangeId,
 				"<@spring.message code='dataimport.importStatus.CancelSuccess' />");
 		}
@@ -588,11 +603,7 @@ Schema schema 数据库，不允许为null
 		}
 		else if("SubFinish" == type)
 		{
-			if(!po.subDataExchangeFinishCount)
-				po.subDataExchangeFinishCount = 0;
-			
 			po.subDataExchangeFinishCount += 1;
-			
 			po.setImportProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
 		}
 		else if("Finish" == type)
