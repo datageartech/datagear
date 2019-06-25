@@ -70,10 +70,10 @@
     </bean>
     <bean id="tempDriverLibraryRootDirectory" factory-bean="tempDriverLibraryRootDirectoryFactory" factory-method="getDirectory" />
     
-    <bean id="tempDataImportRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
-    	<property name="directoryName" value="${directory.temp.dataImport}" />
+    <bean id="tempDataExchangeRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
+    	<property name="directoryName" value="${directory.temp.dataExchange}" />
     </bean>
-    <bean id="tempDataImportRootDirectory" factory-bean="tempDataImportRootDirectoryFactory" factory-method="getDirectory" />
+    <bean id="tempDataExchangeRootDirectory" factory-bean="tempDataExchangeRootDirectoryFactory" factory-method="getDirectory" />
     
     <bean id="dataSource"
     		class="org.springframework.jdbc.datasource.DriverManagerDataSource">

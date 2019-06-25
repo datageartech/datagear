@@ -104,6 +104,22 @@ public class IOUtil
 	}
 
 	/**
+	 * 读取字符输入流，并写入字符输出流。
+	 * 
+	 * @param reader
+	 * @param writer
+	 * @throws IOException
+	 */
+	public static void write(Reader reader, Writer writer) throws IOException
+	{
+		char[] cache = new char[512];
+		int readLen = -1;
+
+		while ((readLen = reader.read(cache)) > -1)
+			writer.write(cache, 0, readLen);
+	}
+
+	/**
 	 * 读取输入流，并写入输出流。
 	 * 
 	 * @param in

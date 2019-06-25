@@ -31,9 +31,11 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CometdSubTextDataImportListener.class);
 
-	protected static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
 
-	protected static final String LOG_FILE_CONTENT_DIV = "----------------------------------------";
+	public static final String LOG_FILE_CHARSET = "UTF-8";
+
+	public static final String LOG_FILE_CONTENT_DIV = "----------------------------------------";
 
 	private ExceptionResolve exceptionResolve;
 
@@ -93,7 +95,7 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 			try
 			{
 				this._logWriter = new BufferedWriter(
-						new OutputStreamWriter(new FileOutputStream(this.logFile), "UTF-8"));
+						new OutputStreamWriter(new FileOutputStream(this.logFile), LOG_FILE_CHARSET));
 
 				writeStartLog();
 			}
@@ -150,8 +152,11 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	@Override
 	public void onSetNullColumnValue(int dataIndex, String columnName, String rawColumnValue, DataExchangeException e)
 	{
+		String exceptionI18n = resolveDataExchangeExceptionI18n(e);
+		this._lastIgnoreException = exceptionI18n;
+
 		if (hasLogFile())
-			writeDataLog(dataIndex, resolveDataExchangeExceptionI18n(e));
+			writeDataLog(dataIndex, exceptionI18n);
 	}
 
 	@Override

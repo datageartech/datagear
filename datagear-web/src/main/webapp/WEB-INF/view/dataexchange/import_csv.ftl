@@ -335,10 +335,19 @@ Schema schema 数据库，不允许为null
 		return $.escapeHtml($.truncateIf(data));
 	};
 	
-	po.updateSubDataExchangeStatus = function(subDataExchangeId, status)
+	po.getSubDataExchangeRowData = function(subDataExchangeId)
 	{
 		var dataTable = po.table().DataTable();
+		var rowIndex = po.getSubDataExchangeRowIndex(dataTable, subDataExchangeId);
 		
+		if(rowIndex < 0)
+			return null;
+		
+		return dataTable.row(rowIndex).data();
+	};
+	
+	po.getSubDataExchangeRowIndex = function(dataTable, subDataExchangeId)
+	{
 		var rowIndex = -1;
 		
 		var rowDatas = dataTable.rows().data();
@@ -350,6 +359,15 @@ Schema schema 数据库，不允许为null
 				break;
 			}
 		}
+		
+		return rowIndex;
+	};
+	
+	po.updateSubDataExchangeStatus = function(subDataExchangeId, status)
+	{
+		var dataTable = po.table().DataTable();
+		
+		var rowIndex = po.getSubDataExchangeRowIndex(dataTable, subDataExchangeId);
 		
 		if(rowIndex < 0)
 			return false;
@@ -415,13 +433,32 @@ Schema schema 数据库，不允许为null
 	{
 		//阻止行选中
 		event.stopPropagation();
-		//TODO 打开详细日志信息
 	});
 	
 	po.table().on("click", ".import-result-icon", function(event)
 	{
 		//阻止行选中
 		event.stopPropagation();
+		
+		var $this = $(this);
+		var subDataExchangeId = $this.attr("subDataExchangeId");
+		var rowData = po.getSubDataExchangeRowData(subDataExchangeId);
+		var displayName = (rowData ? rowData.displayName : "");
+		
+		<#assign messageArgs=['"+displayName+"'] />
+		
+		po.open("${contextPath}/dataexchange/" + po.schemaId +"/viewLog",
+		{
+			title : "<@spring.messageArgs code='dataImport.viewImportLog' args=messageArgs />",
+			data :
+			{
+				schemaId : po.schemaId,
+				dataExchangeId : po.importId,
+				subDataExchangeId : subDataExchangeId,
+				subDataExchangeDisplayName : displayName
+			},
+			height : $(window).height() * 0.75
+		});
 	});
 	
 	po.showExceptionTip = function(event, tipEle)

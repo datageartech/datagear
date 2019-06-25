@@ -1763,7 +1763,7 @@ public class DataController extends AbstractSchemaModelConnController
 	public void fileDownload(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") String fileName) throws Throwable
 	{
-		response.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding(RESPONSE_ENCODING);
 		response.setHeader("Content-Disposition", "attachment; filename=" + fileName + "");
 
 		OutputStream out = null;

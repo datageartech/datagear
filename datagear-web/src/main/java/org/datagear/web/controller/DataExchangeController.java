@@ -4,10 +4,14 @@
 
 package org.datagear.web.controller;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -74,8 +78,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	private DataExchangeService<DataExchange> dataExchangeService;
 
 	@Autowired
-	@Qualifier("tempDataImportRootDirectory")
-	private File tempDataImportRootDirectory;
+	@Qualifier("tempDataExchangeRootDirectory")
+	private File tempDataExchangeRootDirectory;
 
 	@Autowired
 	private DataExchangeCometdService dataExchangeCometdService;
@@ -87,12 +91,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	public DataExchangeController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource,
-			DataExchangeService<DataExchange> dataExchangeService, File tempDataImportRootDirectory,
+			DataExchangeService<DataExchange> dataExchangeService, File tempDataExchangeRootDirectory,
 			DataExchangeCometdService dataExchangeCometdService)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
 		this.dataExchangeService = dataExchangeService;
-		this.tempDataImportRootDirectory = tempDataImportRootDirectory;
+		this.tempDataExchangeRootDirectory = tempDataExchangeRootDirectory;
 		this.dataExchangeCometdService = dataExchangeCometdService;
 	}
 
@@ -106,14 +110,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeService = dataExchangeService;
 	}
 
-	public File getTempDataImportRootDirectory()
+	public File getTempDataExchangeRootDirectory()
 	{
-		return tempDataImportRootDirectory;
+		return tempDataExchangeRootDirectory;
 	}
 
-	public void setTempDataImportRootDirectory(File tempDataImportRootDirectory)
+	public void setTempDataExchangeRootDirectory(File tempDataExchangeRootDirectory)
 	{
-		this.tempDataImportRootDirectory = tempDataImportRootDirectory;
+		this.tempDataExchangeRootDirectory = tempDataExchangeRootDirectory;
 	}
 
 	public DataExchangeCometdService getDataExchangeCometdService()
@@ -192,7 +196,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		List<DataImportFileInfo> fileInfos = new ArrayList<DataImportFileInfo>();
 
-		File directory = getTempDataImportDirectory(importId, true);
+		File directory = getTempDataExchangeDirectory(importId, true);
 
 		String rawFileName = multipartFile.getOriginalFilename();
 		boolean isZipFile = isZipFile(rawFileName);
@@ -264,8 +268,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		String[] fileNames = dataImportForm.getFileNames();
 		String[] tableNames = dataImportForm.getTableNames();
 
-		File directory = getTempDataImportDirectory(importId, true);
-		File logDirectory = getTempDataImportLogDirectory(importId, true);
+		File directory = getTempDataExchangeDirectory(importId, true);
+		File logDirectory = getTempDataExchangeLogDirectory(importId, true);
 
 		List<ResourceFactory<Reader>> readerFactories = toReaderResourceFactories(directory,
 				dataImportForm.getFileEncoding(), fileNames);
@@ -290,7 +294,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			CometdSubTextDataImportListener listener = new CometdSubTextDataImportListener(
 					this.dataExchangeCometdService, importServerChannel, getMessageSource(), getLocale(request),
 					fileIds[i], csvDataImport.getImportOption().getExceptionResolve());
-			listener.setLogFile(new File(logDirectory, fileIds[i] + ".txt"));
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, fileIds[i]));
 			csvDataImport.setListener(listener);
 		}
 
@@ -309,6 +313,80 @@ public class DataExchangeController extends AbstractSchemaConnController
 		storeBatchDataExchangeFutureInfo(request, futureInfo);
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
+	}
+
+	/**
+	 * 查看子数据交换日志。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param schemaId
+	 * @param dataExchangeId
+	 * @param subDataExchangeId
+	 * @throws Throwable
+	 */
+	@RequestMapping(value = "/{schemaId}/viewLog")
+	public String viewLog(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("dataExchangeId") String dataExchangeId,
+			@RequestParam("subDataExchangeId") String subDataExchangeId,
+			@RequestParam("subDataExchangeDisplayName") String subDataExchangeDisplayName) throws Throwable
+	{
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+			}
+		}.execute();
+
+		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("subDataExchangeId", subDataExchangeId);
+		springModel.addAttribute("subDataExchangeDisplayName", subDataExchangeDisplayName);
+
+		return "/dataexchange/view_log";
+	}
+
+	/**
+	 * 查看子数据交换日志。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param schemaId
+	 * @param dataExchangeId
+	 * @param subDataExchangeId
+	 * @throws Throwable
+	 */
+	@RequestMapping(value = "/{schemaId}/getLogContent")
+	public void getLogContent(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@RequestParam("subDataExchangeId") String subDataExchangeId) throws Throwable
+	{
+		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
+		File logFile = getTempSubDataExchangeLogFile(logDirectory, subDataExchangeId);
+
+		if (!logFile.exists())
+			throw new IllegalInputException();
+
+		response.setCharacterEncoding(RESPONSE_ENCODING);
+		response.setContentType(CONTENT_TYPE_HTML);
+
+		PrintWriter out = response.getWriter();
+
+		Reader reader = null;
+		try
+		{
+			reader = new BufferedReader(new InputStreamReader(new FileInputStream(logFile),
+					CometdSubTextDataImportListener.LOG_FILE_CHARSET));
+
+			IOUtil.write(reader, out);
+		}
+		finally
+		{
+			IOUtil.close(reader);
+			out.flush();
+		}
 	}
 
 	@RequestMapping("/{schemaId}/export")
@@ -465,9 +543,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return fileName.toLowerCase().endsWith(".zip");
 	}
 
-	protected File getTempDataImportDirectory(String importId, boolean notNull)
+	protected File getTempDataExchangeDirectory(String dataExchangeId, boolean notNull)
 	{
-		File directory = new File(this.tempDataImportRootDirectory, importId);
+		File directory = new File(this.tempDataExchangeRootDirectory, dataExchangeId);
 
 		if (notNull && !directory.exists())
 			directory.mkdirs();
@@ -475,14 +553,20 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return directory;
 	}
 
-	protected File getTempDataImportLogDirectory(String importId, boolean notNull)
+	protected File getTempDataExchangeLogDirectory(String dataExchangeId, boolean notNull)
 	{
-		File directory = new File(this.tempDataImportRootDirectory, importId + "_logs");
+		File directory = new File(this.tempDataExchangeRootDirectory, dataExchangeId + "_logs");
 
 		if (notNull && !directory.exists())
 			directory.mkdirs();
 
 		return directory;
+	}
+
+	protected File getTempSubDataExchangeLogFile(File logDirectory, String subDataExchangeId)
+	{
+		File logFile = new File(logDirectory, "log_" + subDataExchangeId + ".txt");
+		return logFile;
 	}
 
 	/**
