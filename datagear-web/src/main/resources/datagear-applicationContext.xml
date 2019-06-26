@@ -354,10 +354,11 @@
 		<property name="options">
 			<map>
 				<entry key="logLevel" value="3" />
-				<entry key="timeout" value="15000" />
+				<entry key="timeout" value="30000" />
+				<entry key="maxInterval" value="120000" />
 				<entry key="jsonContext" value-ref="bayeuxJsonContext" />
 			</map>
-		</property> 
+		</property>
 		<property name="extensions">
 			<list>
 				<bean class="org.cometd.server.ext.AcknowledgedMessagesExtension" />
