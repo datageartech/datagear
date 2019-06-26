@@ -281,6 +281,20 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			po.toggleRestartStatus(true);
 		}
 	};
+
+	po.toggleRestartStatus = function(enable)
+	{
+		if(enable)
+		{
+			po.element(".restart-wrapper").show();
+			po.element(".restart-button").removeClass("ui-state-disabled");
+		}
+		else
+		{
+			po.element(".restart-wrapper").hide();
+			po.element(".restart-button").addClass("ui-state-disabled");
+		}
+	};
 })
 (${pageId});
 </script>

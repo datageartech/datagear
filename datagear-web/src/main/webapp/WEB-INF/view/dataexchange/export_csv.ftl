@@ -8,7 +8,7 @@ Schema schema 数据库，不允许为null
 <#include "../include/html_head.ftl">
 <title>
 	<#include "../include/html_title_app_name.ftl">
-	<@spring.message code='dataImport.dataImport' />
+	<@spring.message code='dataExport.dataExport' />
 	<@spring.message code='bracketLeft' />
 	${schema.title?html}
 	<@spring.message code='bracketRight' />
@@ -18,68 +18,35 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-dataexchange page-dataimport-text page-dataimport-csv">
+<div id="${pageId}" class="page-dataexchange page-dataexport-text page-dataexport-csv">
 	<div class="head">
-		<@spring.message code='dataImport.importCsvData' />
+		<@spring.message code='dataExport.exportCsvData' />
 	</div>
 	<div class="content">
 		<form id="${pageId}-form" action="#" method="POST">
 			<input type="hidden" name="dataExchangeId" value="${dataExchangeId}" />
 			<div class="form-content form-content-wizard">
-				<h3><@spring.message code='dataImport.setDataFormat' /></h3>
+				<h3><@spring.message code='dataExport.setDataFormat' /></h3>
 				<div>
 					<#include "include/dataExchange_form_dataFormat_html.ftl">
 					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataImport.ignoreInexistentColumn' /></div>
-						<div class="form-item-value">
-							<div id="${pageId}-ignoreInexistentColumn">
-							<label for="${pageId}-ignoreInexistentColumn-0"><@spring.message code='yes' /></label>
-							<input id="${pageId}-ignoreInexistentColumn-0" type="radio" name="importOption.ignoreInexistentColumn" value="true" />
-							<label for="${pageId}-ignoreInexistentColumn-1"><@spring.message code='no' /></label>
-							<input id="${pageId}-ignoreInexistentColumn-1" type="radio" name="importOption.ignoreInexistentColumn" value="false" />
-							</div>
-						</div>
-					</div>
-					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataImport.nullForIllegalColumnValue' /></div>
+						<div class="form-item-label"><@spring.message code='dataExport.nullForIllegalColumnValue' /></div>
 						<div class="form-item-value">
 							<div id="${pageId}-nullForIllegalColumnValue">
 								<label for="${pageId}-nullForIllegalColumnValue-0"><@spring.message code='yes' /></label>
-								<input id="${pageId}-nullForIllegalColumnValue-0" type="radio" name="importOption.nullForIllegalColumnValue" value="true" />
+								<input id="${pageId}-nullForIllegalColumnValue-0" type="radio" name="exportOption.nullForIllegalColumnValue" value="true" />
 								<label for="${pageId}-nullForIllegalColumnValue-1"><@spring.message code='no' /></label>
-								<input id="${pageId}-nullForIllegalColumnValue-1" type="radio" name="importOption.nullForIllegalColumnValue" value="false" />
-							</div>
-						</div>
-					</div>
-					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataExchange.exceptionResolve' /></div>
-						<div class="form-item-value">
-							<div id="${pageId}-exceptionResolve">
-								<label for="${pageId}-exceptionResolve-0"><@spring.message code='dataExchange.exceptionResolve.ROLLBACK' /></label>
-								<input id="${pageId}-exceptionResolve-0" type="radio" name="importOption.exceptionResolve" value="ROLLBACK" />
-								<label for="${pageId}-exceptionResolve-1"><@spring.message code='dataExchange.exceptionResolve.ABORT' /></label>
-								<input id="${pageId}-exceptionResolve-1" type="radio" name="importOption.exceptionResolve" value="ABORT" />
-								<label for="${pageId}-exceptionResolve-2"><@spring.message code='dataExchange.exceptionResolve.IGNORE' /></label>
-								<input id="${pageId}-exceptionResolve-2" type="radio" name="importOption.exceptionResolve" value="IGNORE" />
+								<input id="${pageId}-nullForIllegalColumnValue-1" type="radio" name="exportOption.nullForIllegalColumnValue" value="false" />
 							</div>
 						</div>
 					</div>
 				</div>
-				<h3><@spring.message code='dataImport.uploadAndImportData' /></h3>
+				<h3><@spring.message code='dataExport.selectAndExportData' /></h3>
 				<div>
-					<div class="form-item form-item-upload upload-state-aware">
-						<div class="form-item-value">
-							<span class="form-item-upload-label">
-								<@spring.message code='dataImport.uploadCsvDataFile' />
-							</span>
-							<div class="fileinput-button ui-widget ui-button ui-corner-all"><@spring.message code='upload' /><input type="file"></div>
-							<div class="file-info"></div>
-						</div>
-					</div>
-					<div class="form-item form-item-progress import-state-aware">
-						<div class="form-item-value">
+					<div class="form-item form-item-progress">
+						<div class="form-item-value export-state-aware">
 							<span class="form-item-progress-label">
-								<@spring.message code='dataImport.importProgress' />
+								<@spring.message code='dataExport.exportProgress' />
 							</span>
 							<div id="${pageId}-progress"></div>
 							<div id="${pageId}-progress-percent" class="progress-percent"></div>
@@ -87,8 +54,8 @@ Schema schema 数据库，不允许为null
 					</div>
 					<div class="form-item form-item-table">
 						<div class="table-operation-wrapper">
-							<button type="button" class="table-delete-item-button upload-state-aware"><@spring.message code='delete' /></button>
-							<button type="button" class="table-cancel-import-button import-state-aware"><@spring.message code='cancel' /></button>
+							<button type="button" class="table-add-item-button edit-state-aware"><@spring.message code='add' /></button>
+							<button type="button" class="table-cancel-export-button export-state-aware"><@spring.message code='cancel' /></button>
 						</div>
 						<div class="file-encoding-wrapper">
 							<span class="file-encoding-label">
@@ -131,43 +98,14 @@ Schema schema 数据库，不允许为null
 	po.subDataExchangeStatusColumnIndex = 4;
 	
 	po.form = po.element("#${pageId}-form");
-	po.fileUploadInfo = function(){ return this.element(".file-info"); };
 	
 	po.cometdInitIfNot();
 	
 	//计算表格高度
 	po.calTableHeight = function()
 	{
-		var height =  po.element(".form-content-wizard > .content").height() - po.element(".form-item-upload").outerHeight(true) - 60;
-		
+		var height =  po.element(".form-content-wizard > .content").height() - po.element(".form-item-progress").outerHeight(true) - 60;
 		return height;
-	};
-	
-	po.renderUploadFiles = function(fileInfos)
-	{
-		po.addRowData(fileInfos);
-	};
-	
-	po.toggleUploadAndImportStatus = function(importStatus)
-	{
-		var importActionEle = po.element("#${pageId}-form .wizard .actions ul li:eq(2)");
-		
-		if(importStatus)
-		{
-			po.element(".upload-state-aware").hide();
-			po.element(".import-state-aware").show();
-			importActionEle.addClass("ui-state-disabled");
-			po.element("select[name='fileEncoding']").selectmenu("disable");
-			po.element(".file-encoding-label").addClass("ui-state-disabled");
-		}
-		else
-		{
-			po.element(".upload-state-aware").show();
-			po.element(".import-state-aware").hide();
-			importActionEle.removeClass("ui-state-disabled");
-			po.element("select[name='fileEncoding']").selectmenu("enable");
-			po.element(".file-encoding-label").removeClass("ui-state-disabled");
-		}
 	};
 	
 	po.element(".form-content").steps(
@@ -190,63 +128,39 @@ Schema schema 数据库，不允许为null
 		{
 			previous: "<@spring.message code='wizard.previous' />",
 			next: "<@spring.message code='wizard.next' />",
-			finish: "<@spring.message code='import' />"
+			finish: "<@spring.message code='export' />"
 		}
 	});
 
 	$.initButtons(po.element());
 	po.element("#${pageId}-binaryFormat").buttonset();
-	po.element("#${pageId}-ignoreInexistentColumn").buttonset();
 	po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
-	po.element("#${pageId}-exceptionResolve").buttonset();
 	po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
 	
 	po.element("input[name='dataFormat.binaryFormat'][value='${defaultDataFormat.binaryFormat}']").click();
-	po.element("#${pageId}-ignoreInexistentColumn-1").click();
 	po.element("#${pageId}-nullForIllegalColumnValue-1").click();
-	po.element("#${pageId}-exceptionResolve-0").click();
 
-	po.element(".fileinput-button").fileupload(
+	po.toggleEditAndExportStatus = function(exportStatus)
 	{
-		url : "${contextPath}/dataexchange/" + po.schemaId +"/import/uploadDataFile",
-		paramName : "file",
-		success : function(serverFileInfos, textStatus, jqXHR)
+		var exportActionEle = po.element("#${pageId}-form .wizard .actions ul li:eq(2)");
+		
+		if(exportStatus)
 		{
-			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), true);
-			
-			po.renderUploadFiles(serverFileInfos);
-			
-			$.tipSuccess("<@spring.message code='uploadSuccess' />");
+			po.element(".edit-state-aware").hide();
+			po.element(".export-state-aware").show();
+			exportActionEle.addClass("ui-state-disabled");
+			po.element("select[name='fileEncoding']").selectmenu("disable");
+			po.element(".file-encoding-label").addClass("ui-state-disabled");
 		}
-	})
-	.bind('fileuploadadd', function (e, data)
-	{
-		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	})
-	.bind('fileuploadprogressall', function (e, data)
-	{
-		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	});
-	
-	po.element(".table-delete-item-button").click(function()
-	{
-		po.executeOnSelects(function(rowDatas, rowIndexes)
+		else
 		{
-			po.deleteRow(rowIndexes);
-		});
-	});
-	
-	po.element(".table-cancel-import-button").click(function()
-	{
-		po.cancelSelectedSubDataExchange();
-	});
-	
-	po.element(".restart-button").click(function()
-	{
-		po.toggleUploadAndImportStatus(false);
-		po.setDataExchangeProgress(0);
-		po.toggleRestartStatus(false);
-	});
+			po.element(".edit-state-aware").show();
+			po.element(".export-state-aware").hide();
+			exportActionEle.removeClass("ui-state-disabled");
+			po.element("select[name='fileEncoding']").selectmenu("enable");
+			po.element(".file-encoding-label").removeClass("ui-state-disabled");
+		}
+	};
 	
 	po.renderColumn = function(data, type, row, meta)
 	{
@@ -326,6 +240,13 @@ Schema schema 数据库，不允许为null
 		po.viewSubDataExchangeDetailLog(subDataExchangeId, displayName);
 	});
 	
+	po.element(".restart-button").click(function()
+	{
+		po.toggleEditAndExportStatus(false);
+		po.setDataExchangeProgress(0);
+		po.toggleRestartStatus(false);
+	});
+	
 	po.element("#${pageId}-form").submit(function()
 	{
 		po.cometdExecuteAfterSubscribe(po.dataExchangeChannelId,
@@ -333,10 +254,10 @@ Schema schema 数据库，不允许为null
 		{
 			po.element("#${pageId}-form").ajaxSubmit(
 			{
-				url : "${contextPath}/dataexchange/" + po.schemaId +"/import/csv/doImport",
+				url : "${contextPath}/dataexchange/" + po.schemaId +"/export/csv/doExport",
 				success: function(data)
 				{
-					po.toggleUploadAndImportStatus(true);
+					po.toggleEditAndExportStatus(true);
 				}
 			});
 		},
@@ -348,7 +269,7 @@ Schema schema 数据库，不允许为null
 		return false;
 	});
 	
-	po.toggleUploadAndImportStatus(false);
+	po.toggleEditAndExportStatus(false);
 	po.setDataExchangeProgress(0);
 	po.toggleRestartStatus(false);
 })
