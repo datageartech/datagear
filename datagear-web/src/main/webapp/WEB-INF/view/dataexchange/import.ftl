@@ -18,7 +18,7 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-dataimport">
+<div id="${pageId}" class="page-dataexchange-type page-dataimport-type">
 	<div class="head">
 	</div>
 	<div class="content">

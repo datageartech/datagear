@@ -418,7 +418,9 @@
 						"schema-operation-view" : true,
 						"schema-operation-refresh" : true,
 						"schema-operation-reload" : true,
-						"schema-operation-sqlpad" : true
+						"schema-operation-sqlpad" : true,
+						"schema-operation-dataimport" : true,
+						"schema-operation-dataexport" : true
 					};
 					
 					var jstree = po.element(".schema-panel-content").jstree(true);
@@ -431,6 +433,8 @@
 					{
 						disableCRUD = true;
 						menuItemEnables["schema-operation-sqlpad"] = false;
+						menuItemEnables["schema-operation-dataimport"] = false;
+						menuItemEnables["schema-operation-dataexport"] = false;
 					}
 					else
 					{

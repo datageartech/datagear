@@ -411,6 +411,32 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/export";
 	}
 
+	@RequestMapping("/{schemaId}/export/csv")
+	public String exptCsv(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+			}
+		}.execute();
+
+		DataFormat defaultDataFormat = new DataFormat();
+
+		String dataExchangeId = UUID.gen();
+
+		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
+		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+
+		return "/dataexchange/export_csv";
+	}
+
 	@RequestMapping(value = "/{schemaId}/cancel")
 	@ResponseBody
 	public ResponseEntity<OperationMessage> cancel(HttpServletRequest request, HttpServletResponse response,

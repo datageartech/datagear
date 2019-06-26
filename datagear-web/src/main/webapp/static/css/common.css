@@ -1566,40 +1566,40 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	height: 0;
 }
 
-/*data import*/
-.page-dataimport{}
-.page-dataimport .head{
+/*data exchange*/
+.page-dataexchange-type{}
+.page-dataexchange-type .head{
 	height: 1em;
 }
-.page-dataimport form{
+.page-dataexchange-type form{
 	width: 80%;
 }
-.page-dataimport form .form-head{
+.page-dataexchange-type form .form-head{
 	padding-top: 0.5em;
 	padding-bottom: 1em;
 	padding-left: 10%;
 }
-.page-dataimport form .form-content .form-item{
+.page-dataexchange-type form .form-content .form-item{
 	padding-top: 0.5em;
 	padding-bottom: 0.5em;
 }
-.page-dataimport form .form-content .form-item .form-item-label{
+.page-dataexchange-type form .form-content .form-item .form-item-label{
 	width: 30%;
 }
-.page-dataimport form .form-content .form-item .form-item-value{
+.page-dataexchange-type form .form-content .form-item .form-item-value{
 	width: 65%;
 }
-.page-dataimport form .form-content .form-item .input-desc{
+.page-dataexchange-type form .form-content .form-item .input-desc{
 	margin-left: 1em;
 }
-.page-dataimport form .ui-checkboxradio-label{
+.page-dataexchange-type form .ui-checkboxradio-label{
 	width: 8em;
 	text-align: left;
 }
-.page-dataimport form .form-foot{
+.page-dataexchange-type form .form-foot{
 	padding-top: 2em;
 }
-.page-dataimport form .form-foot button[type='submit']{
+.page-dataexchange-type form .form-foot button[type='submit']{
 	padding-left: 3em;
 	padding-right: 3em;
 }
