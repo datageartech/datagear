@@ -45,7 +45,7 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	private int sendImportingMessageInterval = 500;
 
 	private AtomicInteger _successCount = new AtomicInteger(0);
-	private AtomicInteger _ignoreCount = new AtomicInteger(0);
+	private AtomicInteger _failCount = new AtomicInteger(0);
 	private volatile String _lastIgnoreException = "";
 	private volatile Writer _logWriter;
 	private volatile long _prevSendImportingMessageTime = 0;
@@ -152,7 +152,7 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	@Override
 	public void onIgnore(int dataIndex, DataExchangeException e)
 	{
-		_ignoreCount.incrementAndGet();
+		_failCount.incrementAndGet();
 		sendImportingMessage();
 
 		String exceptionI18n = resolveDataExchangeExceptionI18n(e);
@@ -175,15 +175,15 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	@Override
 	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
 	{
-		return new TextImportSubException(getSubDataExchangeId(), resolveDataExchangeExceptionI18n(e), evalDuration(),
-				this.exceptionResolve, this._successCount.intValue(), this._ignoreCount.intValue());
+		return new SubExceptionWithCount(getSubDataExchangeId(), resolveDataExchangeExceptionI18n(e), evalDuration(),
+				this.exceptionResolve, this._successCount.intValue(), this._failCount.intValue());
 	}
 
 	@Override
 	protected DataExchangeMessage buildSuccessMessage()
 	{
-		TextImportSubSuccess message = new TextImportSubSuccess(getSubDataExchangeId(), evalDuration(),
-				this._successCount.intValue(), this._ignoreCount.intValue());
+		SubSuccessWithCount message = new SubSuccessWithCount(getSubDataExchangeId(), evalDuration(),
+				this._successCount.intValue(), this._failCount.intValue());
 
 		message.setIgnoreException(this._lastIgnoreException);
 
@@ -203,8 +203,8 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 
 		this._prevSendImportingMessageTime = currentTime;
 
-		sendMessage(new TextImportSubImporting(getSubDataExchangeId(), this._successCount.intValue(),
-				this._ignoreCount.intValue()));
+		sendMessage(new SubExchangingWithCount(getSubDataExchangeId(), this._successCount.intValue(),
+				this._failCount.intValue()));
 
 		return true;
 	}
@@ -267,167 +267,6 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 			LOGGER.error("write log error", t);
 
 			return false;
-		}
-	}
-
-	/**
-	 * 导入中。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class TextImportSubImporting extends SubDataExchangeMessage
-	{
-		private int successCount;
-
-		private int ignoreCount;
-
-		public TextImportSubImporting()
-		{
-			super();
-		}
-
-		public TextImportSubImporting(String subDataExchangeId, int successCount, int ignoreCount)
-		{
-			super(subDataExchangeId);
-			this.successCount = successCount;
-			this.ignoreCount = ignoreCount;
-		}
-
-		public int getSuccessCount()
-		{
-			return successCount;
-		}
-
-		public void setSuccessCount(int successCount)
-		{
-			this.successCount = successCount;
-		}
-
-		public int getIgnoreCount()
-		{
-			return ignoreCount;
-		}
-
-		public void setIgnoreCount(int ignoreCount)
-		{
-			this.ignoreCount = ignoreCount;
-		}
-	}
-
-	/**
-	 * 子文本导入异常。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class TextImportSubException extends SubException
-	{
-		private ExceptionResolve exceptionResolve;
-
-		private int successCount;
-
-		private int ignoreCount;
-
-		public TextImportSubException()
-		{
-			super();
-		}
-
-		public TextImportSubException(String subDataExchangeId, String content, long duration,
-				ExceptionResolve exceptionResolve, int successCount, int ignoreCount)
-		{
-			super(subDataExchangeId, content, duration);
-			this.exceptionResolve = exceptionResolve;
-			this.successCount = successCount;
-			this.ignoreCount = ignoreCount;
-		}
-
-		public ExceptionResolve getExceptionResolve()
-		{
-			return exceptionResolve;
-		}
-
-		public void setExceptionResolve(ExceptionResolve exceptionResolve)
-		{
-			this.exceptionResolve = exceptionResolve;
-		}
-
-		public int getSuccessCount()
-		{
-			return successCount;
-		}
-
-		public void setSuccessCount(int successCount)
-		{
-			this.successCount = successCount;
-		}
-
-		public int getIgnoreCount()
-		{
-			return ignoreCount;
-		}
-
-		public void setIgnoreCount(int ignoreCount)
-		{
-			this.ignoreCount = ignoreCount;
-		}
-	}
-
-	/**
-	 * 子文本导入成功。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class TextImportSubSuccess extends SubSuccess
-	{
-		private int successCount;
-
-		private int ignoreCount;
-
-		private String ignoreException;
-
-		public TextImportSubSuccess()
-		{
-			super();
-		}
-
-		public TextImportSubSuccess(String subDataExchangeId, long duration, int successCount, int ignoreCount)
-		{
-			super(subDataExchangeId, duration);
-			this.successCount = successCount;
-			this.ignoreCount = ignoreCount;
-		}
-
-		public int getSuccessCount()
-		{
-			return successCount;
-		}
-
-		public void setSuccessCount(int successCount)
-		{
-			this.successCount = successCount;
-		}
-
-		public int getIgnoreCount()
-		{
-			return ignoreCount;
-		}
-
-		public void setIgnoreCount(int ignoreCount)
-		{
-			this.ignoreCount = ignoreCount;
-		}
-
-		public String getIgnoreException()
-		{
-			return ignoreException;
-		}
-
-		public void setIgnoreException(String ignoreException)
-		{
-			this.ignoreException = ignoreException;
 		}
 	}
 }

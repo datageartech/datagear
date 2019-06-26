@@ -59,7 +59,7 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 		if (subDataExchange == null)
 			return;
 
-		sendMessage(new SubmitSuccess(subDataExchangeId));
+		sendMessage(new SubSubmitSuccess(subDataExchangeId));
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 		if (subDataExchange == null)
 			return;
 
-		sendMessage(new SubmitFail(subDataExchangeId));
+		sendMessage(new SubSubmitFail(subDataExchangeId));
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 		if (subDataExchange == null)
 			return;
 
-		sendMessage(new CancelSuccess(subDataExchangeId));
+		sendMessage(new SubCancelSuccess(subDataExchangeId));
 	}
 
 	@Override
@@ -223,14 +223,14 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class SubmitSuccess extends SubDataExchangeMessage
+	public static class SubSubmitSuccess extends SubDataExchangeMessage
 	{
-		public SubmitSuccess()
+		public SubSubmitSuccess()
 		{
 			super();
 		}
 
-		public SubmitSuccess(String subDataExchangeId)
+		public SubSubmitSuccess(String subDataExchangeId)
 		{
 			super(subDataExchangeId);
 		}
@@ -242,14 +242,14 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class SubmitFail extends SubDataExchangeMessage
+	public static class SubSubmitFail extends SubDataExchangeMessage
 	{
-		public SubmitFail()
+		public SubSubmitFail()
 		{
 			super();
 		}
 
-		public SubmitFail(String subDataExchangeId)
+		public SubSubmitFail(String subDataExchangeId)
 		{
 			super(subDataExchangeId);
 		}
@@ -261,14 +261,14 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class CancelSuccess extends SubDataExchangeMessage
+	public static class SubCancelSuccess extends SubDataExchangeMessage
 	{
-		public CancelSuccess()
+		public SubCancelSuccess()
 		{
 			super();
 		}
 
-		public CancelSuccess(String subDataExchangeId)
+		public SubCancelSuccess(String subDataExchangeId)
 		{
 			super(subDataExchangeId);
 		}

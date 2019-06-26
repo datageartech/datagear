@@ -163,11 +163,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		DataFormat defaultDataFormat = new DataFormat();
 
-		String importId = UUID.gen();
+		String dataExchangeId = UUID.gen();
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
-		springModel.addAttribute("importId", importId);
-		springModel.addAttribute("importChannelId", getDataExchangeChannelId(importId));
+		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
 
@@ -187,7 +187,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		springModel.addAttribute("importId", UUID.gen());
+		springModel.addAttribute("dataExchangeId", UUID.gen());
 
 		return "/dataexchange/import_db";
 	}
@@ -195,12 +195,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/import/uploadDataFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<DataImportFileInfo> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("importId") String importId,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam("file") MultipartFile multipartFile) throws Exception
 	{
 		List<DataImportFileInfo> fileInfos = new ArrayList<DataImportFileInfo>();
 
-		File directory = getTempDataExchangeDirectory(importId, true);
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 
 		String rawFileName = multipartFile.getOriginalFilename();
 		boolean isZipFile = isZipFile(rawFileName);
@@ -257,23 +257,23 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/import/csv/doImport")
 	@ResponseBody
 	public ResponseEntity<OperationMessage> doImportCsv(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("importId") String importId,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			TextDataImportForm dataImportForm) throws Exception
 	{
 		if (dataImportForm == null || isEmpty(dataImportForm.getDataFormat())
 				|| isEmpty(dataImportForm.getImportOption()) || isEmpty(dataImportForm.getFileEncoding())
-				|| isEmpty(dataImportForm.getFileIds()) || isEmpty(dataImportForm.getFileNames())
+				|| isEmpty(dataImportForm.getSubDataExchangeIds()) || isEmpty(dataImportForm.getFileNames())
 				|| isEmpty(dataImportForm.getTableNames())
-				|| dataImportForm.getFileIds().length != dataImportForm.getFileNames().length
+				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getFileNames().length
 				|| dataImportForm.getFileNames().length != dataImportForm.getTableNames().length)
 			throw new IllegalInputException();
 
-		String[] fileIds = dataImportForm.getFileIds();
+		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
 		String[] fileNames = dataImportForm.getFileNames();
 		String[] tableNames = dataImportForm.getTableNames();
 
-		File directory = getTempDataExchangeDirectory(importId, true);
-		File logDirectory = getTempDataExchangeLogDirectory(importId, true);
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
 		List<ResourceFactory<Reader>> readerFactories = toReaderResourceFactories(directory,
 				dataImportForm.getFileEncoding(), fileNames);
@@ -285,7 +285,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
-		String importChannelId = getDataExchangeChannelId(importId);
+		String importChannelId = getDataExchangeChannelId(dataExchangeId);
 		ServerChannel importServerChannel = this.dataExchangeCometdService.getChannelWithCreation(importChannelId);
 
 		List<CsvDataImport> csvDataImports = CsvDataImport.valuesOf(connectionFactory, dataImportForm.getDataFormat(),
@@ -297,8 +297,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 			CometdSubTextDataImportListener listener = new CometdSubTextDataImportListener(
 					this.dataExchangeCometdService, importServerChannel, getMessageSource(), getLocale(request),
-					fileIds[i], csvDataImport.getImportOption().getExceptionResolve());
-			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, fileIds[i]));
+					subDataExchangeIds[i], csvDataImport.getImportOption().getExceptionResolve());
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendImportingMessageInterval(
 					evalSendImportingMessageInterval(csvDataImports, csvDataImport, i));
 			csvDataImport.setListener(listener);
@@ -308,14 +308,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 				connectionFactory, csvDataImports);
 
 		CometdBatchDataExchangeListener<CsvDataImport> listener = new CometdBatchDataExchangeListener<CsvDataImport>(
-				this.dataExchangeCometdService, importServerChannel, getMessageSource(), getLocale(request), fileIds);
+				this.dataExchangeCometdService, importServerChannel, getMessageSource(), getLocale(request),
+				subDataExchangeIds);
 
 		batchDataExchange.setListener(listener);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
-		BatchDataExchangeFutureInfo<CsvDataImport> futureInfo = new BatchDataExchangeFutureInfo<CsvDataImport>(importId,
-				batchDataExchange, fileIds);
+		BatchDataExchangeFutureInfo<CsvDataImport> futureInfo = new BatchDataExchangeFutureInfo<CsvDataImport>(
+				dataExchangeId, batchDataExchange, subDataExchangeIds);
 		storeBatchDataExchangeFutureInfo(request, futureInfo);
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
@@ -661,7 +662,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
-		private String id;
+		private String subDataExchangeId;
 
 		/** 导入表名 */
 		private String tableName;
@@ -671,22 +672,23 @@ public class DataExchangeController extends AbstractSchemaConnController
 			super();
 		}
 
-		public DataImportFileInfo(String id, String name, long bytes, String displayName, String tableName)
+		public DataImportFileInfo(String subDataExchangeId, String name, long bytes, String displayName,
+				String tableName)
 		{
 			super(name, bytes);
-			this.id = id;
+			this.subDataExchangeId = subDataExchangeId;
 			super.setDisplayName(displayName);
 			this.tableName = tableName;
 		}
 
-		public String getId()
+		public String getSubDataExchangeId()
 		{
-			return id;
+			return subDataExchangeId;
 		}
 
-		public void setId(String id)
+		public void setSubDataExchangeId(String subDataExchangeId)
 		{
-			this.id = id;
+			this.subDataExchangeId = subDataExchangeId;
 		}
 
 		public String getTableName()
@@ -757,7 +759,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		private String fileEncoding;
 
-		private String[] fileIds;
+		private String[] subDataExchangeIds;
 
 		private String[] fileNames;
 
@@ -798,14 +800,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 			this.fileEncoding = fileEncoding;
 		}
 
-		public String[] getFileIds()
+		public String[] getSubDataExchangeIds()
 		{
-			return fileIds;
+			return subDataExchangeIds;
 		}
 
-		public void setFileIds(String[] fileIds)
+		public void setSubDataExchangeIds(String[] subDataExchangeIds)
 		{
-			this.fileIds = fileIds;
+			this.subDataExchangeIds = subDataExchangeIds;
 		}
 
 		public String[] getFileNames()

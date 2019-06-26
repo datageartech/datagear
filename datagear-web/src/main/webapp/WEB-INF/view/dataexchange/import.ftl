@@ -8,7 +8,7 @@ Schema schema 数据库，不允许为null
 <#include "../include/html_head.ftl">
 <title>
 	<#include "../include/html_title_app_name.ftl">
-	<@spring.message code='dataimport.dataimport' />
+	<@spring.message code='dataImport.dataImport' />
 	<@spring.message code='bracketLeft' />
 	${schema.title?html}
 	<@spring.message code='bracketRight' />
@@ -24,26 +24,26 @@ Schema schema 数据库，不允许为null
 	<div class="content">
 		<form id="${pageId}-form" action="" method="POST">
 			<div class="form-head">
-				<@spring.message code='dataimport.selectDataType' />
+				<@spring.message code='dataImport.selectDataType' />
 			</div>
 			<div class="form-content">
 				<div class="form-item">
 					<div class="form-item-label">&nbsp;</div>
 					<div class="form-item-value">
-						<label for="${pageId}-dataType-0"><@spring.message code='dataimport.dataType.csv' /></label>
+						<label for="${pageId}-dataType-0"><@spring.message code='dataImport.dataType.csv' /></label>
 						<input id="${pageId}-dataType-0" type="radio" name="dataType" value="csv" />
 						<div class="input-desc minor">
-							<@spring.message code='dataimport.dataType.csv.desc' />
+							<@spring.message code='dataImport.dataType.csv.desc' />
 						</div>
 					</div>
 				</div>
 				<div class="form-item">
 					<div class="form-item-label">&nbsp;</div>
 					<div class="form-item-value">
-						<label for="${pageId}-dataType-1"><@spring.message code='dataimport.dataType.db' /></label>
+						<label for="${pageId}-dataType-1"><@spring.message code='dataImport.dataType.db' /></label>
 						<input id="${pageId}-dataType-1" type="radio" name="dataType" value="db" />
 						<div class="input-desc minor">
-							<@spring.message code='dataimport.dataType.db.desc' />
+							<@spring.message code='dataImport.dataType.db.desc' />
 						</div>
 					</div>
 				</div>

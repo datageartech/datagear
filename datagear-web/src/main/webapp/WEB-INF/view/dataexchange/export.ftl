@@ -8,7 +8,7 @@ Schema schema 数据库，不允许为null
 <#include "../include/html_head.ftl">
 <title>
 	<#include "../include/html_title_app_name.ftl">
-	<@spring.message code='dataexport.dataexport' />
+	<@spring.message code='dataExport.dataExport' />
 	<@spring.message code='bracketLeft' />
 	${schema.title?html}
 	<@spring.message code='bracketRight' />
@@ -24,26 +24,26 @@ Schema schema 数据库，不允许为null
 	<div class="content">
 		<form id="${pageId}-form" action="" method="POST">
 			<div class="form-head">
-				<@spring.message code='dataexport.selectDataType' />
+				<@spring.message code='dataExport.selectDataType' />
 			</div>
 			<div class="form-content">
 				<div class="form-item">
 					<div class="form-item-label">&nbsp;</div>
 					<div class="form-item-value">
-						<label for="${pageId}-dataType-0"><@spring.message code='dataexport.dataType.csv' /></label>
+						<label for="${pageId}-dataType-0"><@spring.message code='dataExport.dataType.csv' /></label>
 						<input id="${pageId}-dataType-0" type="radio" name="dataType" value="csv" />
 						<div class="input-desc minor">
-							<@spring.message code='dataexport.dataType.csv.desc' />
+							<@spring.message code='dataExport.dataType.csv.desc' />
 						</div>
 					</div>
 				</div>
 				<div class="form-item">
 					<div class="form-item-label">&nbsp;</div>
 					<div class="form-item-value">
-						<label for="${pageId}-dataType-1"><@spring.message code='dataexport.dataType.insertSql' /></label>
+						<label for="${pageId}-dataType-1"><@spring.message code='dataExport.dataType.insertSql' /></label>
 						<input id="${pageId}-dataType-1" type="radio" name="dataType" value="insertSql" />
 						<div class="input-desc minor">
-							<@spring.message code='dataexport.dataType.insertSql.desc' />
+							<@spring.message code='dataExport.dataType.insertSql.desc' />
 						</div>
 					</div>
 				</div>

@@ -32,7 +32,7 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CometdDataExchangeListener.class);
 
-	public static final String EXCEPTION_DISPLAY_MESSAGE_KEY = "dataexchange.error.";
+	public static final String EXCEPTION_DISPLAY_MESSAGE_KEY = "dataExchange.error.";
 
 	private DataExchangeCometdService dataExchangeCometdService;
 

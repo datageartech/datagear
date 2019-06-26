@@ -8,7 +8,7 @@ Schema schema 数据库，不允许为null
 <#include "../include/html_head.ftl">
 <title>
 	<#include "../include/html_title_app_name.ftl">
-	<@spring.message code='dataimport.dataimport' />
+	<@spring.message code='dataImport.dataImport' />
 	<@spring.message code='bracketLeft' />
 	${schema.title?html}
 	<@spring.message code='bracketRight' />
@@ -18,55 +18,19 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-dataimport-text page-dataimport-csv">
+<div id="${pageId}" class="page-dataexchange page-dataimport-text page-dataimport-csv">
 	<div class="head">
-		<@spring.message code='dataimport.importCsvData' />
+		<@spring.message code='dataImport.importCsvData' />
 	</div>
 	<div class="content">
 		<form id="${pageId}-form" action="#" method="POST">
-			<input type="hidden" name="importId" value="${importId}" />
+			<input type="hidden" name="dataExchangeId" value="${dataExchangeId}" />
 			<div class="form-content form-content-wizard">
-				<h3><@spring.message code='dataimport.setDataFormat' /></h3>
+				<h3><@spring.message code='dataImport.setDataFormat' /></h3>
 				<div>
+					<#include "include/dataExchange_form_dataFormat_html.ftl">
 					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataimport.dataFormat.dateFormat' /></div>
-						<div class="form-item-value">
-							<input type="text" name="dataFormat.dateFormat" value="${defaultDataFormat.dateFormat}" class="ui-widget ui-widget-content" />
-						</div>
-					</div>
-					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataimport.dataFormat.timeFormat' /></div>
-						<div class="form-item-value">
-							<input type="text" name="dataFormat.timeFormat" value="${defaultDataFormat.timeFormat}" class="ui-widget ui-widget-content" />
-						</div>
-					</div>
-					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataimport.dataFormat.timestampFormat' /></div>
-						<div class="form-item-value">
-							<input type="text" name="dataFormat.timestampFormat" value="${defaultDataFormat.timestampFormat}" class="ui-widget ui-widget-content" />
-						</div>
-					</div>
-					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataimport.dataFormat.numberFormat' /></div>
-						<div class="form-item-value">
-							<input type="text" name="dataFormat.numberFormat" value="${defaultDataFormat.numberFormat}" class="ui-widget ui-widget-content" />
-						</div>
-					</div>
-					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataimport.dataFormat.binaryFormat' /></div>
-						<div class="form-item-value">
-							<div id="${pageId}-binaryFormat">
-								<label for="${pageId}-binaryFormat-0"><@spring.message code='dataimport.dataFormat.binaryFormat.HEX' /></label>
-								<input id="${pageId}-binaryFormat-0" type="radio" name="dataFormat.binaryFormat" value="HEX" />
-								<label for="${pageId}-binaryFormat-1"><@spring.message code='dataimport.dataFormat.binaryFormat.Base64' /></label>
-								<input id="${pageId}-binaryFormat-1" type="radio" name="dataFormat.binaryFormat" value="BASE64" />
-								<label for="${pageId}-binaryFormat-2"><@spring.message code='dataimport.dataFormat.binaryFormat.NULL' /></label>
-								<input id="${pageId}-binaryFormat-2" type="radio" name="dataFormat.binaryFormat" value="NULL" />
-							</div>
-						</div>
-					</div>
-					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataimport.ignoreInexistentColumn' /></div>
+						<div class="form-item-label"><@spring.message code='dataImport.ignoreInexistentColumn' /></div>
 						<div class="form-item-value">
 							<div id="${pageId}-ignoreInexistentColumn">
 							<label for="${pageId}-ignoreInexistentColumn-0"><@spring.message code='yes' /></label>
@@ -77,7 +41,7 @@ Schema schema 数据库，不允许为null
 						</div>
 					</div>
 					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataimport.nullForIllegalColumnValue' /></div>
+						<div class="form-item-label"><@spring.message code='dataImport.nullForIllegalColumnValue' /></div>
 						<div class="form-item-value">
 							<div id="${pageId}-nullForIllegalColumnValue">
 								<label for="${pageId}-nullForIllegalColumnValue-0"><@spring.message code='yes' /></label>
@@ -88,25 +52,25 @@ Schema schema 数据库，不允许为null
 						</div>
 					</div>
 					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataimport.exceptionResolve' /></div>
+						<div class="form-item-label"><@spring.message code='dataExchange.exceptionResolve' /></div>
 						<div class="form-item-value">
 							<div id="${pageId}-exceptionResolve">
-								<label for="${pageId}-exceptionResolve-0"><@spring.message code='dataimport.exceptionResolve.ROLLBACK' /></label>
+								<label for="${pageId}-exceptionResolve-0"><@spring.message code='dataExchange.exceptionResolve.ROLLBACK' /></label>
 								<input id="${pageId}-exceptionResolve-0" type="radio" name="importOption.exceptionResolve" value="ROLLBACK" />
-								<label for="${pageId}-exceptionResolve-1"><@spring.message code='dataimport.exceptionResolve.ABORT' /></label>
+								<label for="${pageId}-exceptionResolve-1"><@spring.message code='dataExchange.exceptionResolve.ABORT' /></label>
 								<input id="${pageId}-exceptionResolve-1" type="radio" name="importOption.exceptionResolve" value="ABORT" />
-								<label for="${pageId}-exceptionResolve-2"><@spring.message code='dataimport.exceptionResolve.IGNORE' /></label>
+								<label for="${pageId}-exceptionResolve-2"><@spring.message code='dataExchange.exceptionResolve.IGNORE' /></label>
 								<input id="${pageId}-exceptionResolve-2" type="radio" name="importOption.exceptionResolve" value="IGNORE" />
 							</div>
 						</div>
 					</div>
 				</div>
-				<h3><@spring.message code='dataimport.uploadAndImportData' /></h3>
+				<h3><@spring.message code='dataImport.uploadAndImportData' /></h3>
 				<div>
 					<div class="form-item form-item-upload upload-state-aware">
 						<div class="form-item-value">
 							<span class="form-item-upload-label">
-								<@spring.message code='dataimport.uploadCsvDataFile' />
+								<@spring.message code='dataImport.uploadCsvDataFile' />
 							</span>
 							<div class="fileinput-button ui-widget ui-button ui-corner-all"><@spring.message code='upload' /><input type="file"></div>
 							<div class="file-info"></div>
@@ -115,7 +79,7 @@ Schema schema 数据库，不允许为null
 					<div class="form-item form-item-progress import-state-aware">
 						<div class="form-item-value">
 							<span class="form-item-progress-label">
-								<@spring.message code='dataimport.importProgress' />
+								<@spring.message code='dataImport.importProgress' />
 							</span>
 							<div id="${pageId}-progress"></div>
 							<div id="${pageId}-progress-percent" class="progress-percent"></div>
@@ -128,7 +92,7 @@ Schema schema 数据库，不允许为null
 						</div>
 						<div class="file-encoding-wrapper">
 							<span class="file-encoding-label">
-								<@spring.message code='dataimport.fileEncoding' />
+								<@spring.message code='dataExchange.fileEncoding' />
 							</span>
 							<select name="fileEncoding">
 								<#list availableCharsetNames as item>
@@ -146,7 +110,7 @@ Schema schema 数据库，不允许为null
 		<div class="restart-wrapper">
 			<button type="button" class="restart-button"><@spring.message code='restart' /></button>
 		</div>
-		<div id="${pageId}-import-exception-tooltip" title="import tooltip" style="width:0; height:0;"></div>
+		<div id="${pageId}-exchange-exception-tooltip" title="import tooltip" style="width:0; height:0;"></div>
 	</div>
 	<div class="foot">
 	</div>
@@ -159,12 +123,13 @@ Schema schema 数据库，不允许为null
 <#include "../include/page_obj_grid.ftl">
 <#include "../include/page_obj_cometd.ftl">
 <#include "../include/page_obj_format_time.ftl" >
+<#include "include/dataExchange_js.ftl" >
 <script type="text/javascript">
 (function(po)
 {
-	po.schemaId = "${schema.id}";
-	po.importId = "${importId}";
-	po.importChannelId = "${importChannelId}";
+	po.dataExchangeChannelId = "${dataExchangeChannelId}";
+	po.subDataExchangeStatusColumnIndex = 4;
+	
 	po.form = po.element("#${pageId}-form");
 	po.fileUploadInfo = function(){ return this.element(".file-info"); };
 	
@@ -181,23 +146,6 @@ Schema schema 数据库，不允许为null
 	po.renderUploadFiles = function(fileInfos)
 	{
 		po.addRowData(fileInfos);
-	};
-	
-	po.setImportProgress = function(progressNumber, duration)
-	{
-		po.element("#${pageId}-progress").progressbar({ value: progressNumber });
-		
-		var percentText = progressNumber + "%";
-		
-		if(duration != null)
-		{
-			var duration = po.formatDuration(duration);
-			
-			<#assign messageArgs=['"+progressNumber+"', '"+duration+"'] />
-			percentText = "<@spring.messageArgs code='dataimport.importProgressPercentWithDuration' args=messageArgs />";
-		}
-		
-		po.element("#${pageId}-progress-percent").text(percentText);
 	};
 	
 	po.toggleUploadAndImportStatus = function(importStatus)
@@ -304,41 +252,13 @@ Schema schema 数据库，不允许为null
 	
 	po.element(".table-cancel-import-button").click(function()
 	{
-		po.executeOnSelects(function(rowDatas, rowIndexes)
-		{
-			var cancelIds = [];
-			
-			for(var i=0; i<rowDatas.length; i++)
-			{
-				var status = rowDatas[i].status;
-				
-				if(!status || status == "<@spring.message code='dataimport.importStatus.SubmitSuccess' />")
-				{
-					var subDataExchangeId = rowDatas[i].id;
-					cancelIds.push({"name" : "subDataExchangeId", value : subDataExchangeId});
-				}
-				else
-				{
-					if(rowDatas.length == 1)
-					{
-						$.tipInfo("<@spring.message code='dataimport.cancelImportDeniedWithReason' />");
-						return;
-					}
-				}
-			}
-			
-			if(cancelIds.length > 0)
-			{
-				cancelIds.push({"name" : "dataExchangeId", "value" : po.importId});
-				$.post("${contextPath}/dataexchange/" + po.schemaId +"/cancel", cancelIds);
-			}
-		});
+		po.cancelSelectedSubDataExchange();
 	});
 	
 	po.element(".restart-button").click(function()
 	{
 		po.toggleUploadAndImportStatus(false);
-		po.setImportProgress(0);
+		po.setDataExchangeProgress(0);
 		po.toggleRestartStatus(false);
 	});
 	
@@ -347,74 +267,30 @@ Schema schema 数据库，不允许为null
 		return $.escapeHtml($.truncateIf(data));
 	};
 	
-	po.getSubDataExchangeRowData = function(subDataExchangeId)
-	{
-		var dataTable = po.table().DataTable();
-		var rowIndex = po.getSubDataExchangeRowIndex(dataTable, subDataExchangeId);
-		
-		if(rowIndex < 0)
-			return null;
-		
-		return dataTable.row(rowIndex).data();
-	};
-	
-	po.getSubDataExchangeRowIndex = function(dataTable, subDataExchangeId)
-	{
-		var rowIndex = -1;
-		
-		var rowDatas = dataTable.rows().data();
-		for(var i=0; i<rowDatas.length; i++)
-		{
-			if(rowDatas[i].id == subDataExchangeId)
-			{
-				rowIndex = i;
-				break;
-			}
-		}
-		
-		return rowIndex;
-	};
-	
-	po.updateSubDataExchangeStatus = function(subDataExchangeId, status)
-	{
-		var dataTable = po.table().DataTable();
-		
-		var rowIndex = po.getSubDataExchangeRowIndex(dataTable, subDataExchangeId);
-		
-		if(rowIndex < 0)
-			return false;
-		
-		var cellIndex = { "row" : rowIndex, "column" : 4 };
-		var cell = dataTable.cell(cellIndex);
-		cell.data(status).draw();
-		
-		return true;
-	};
-	
 	po.expectedResizeDataTableElements = [po.table()[0]];
 	
 	var tableColumns = [
 		{
-			title : "<@spring.message code='dataimport.importFileName' />",
+			title : "<@spring.message code='dataImport.importFileName' />",
 			data : "displayName",
 			render : function(data, type, row, meta)
 			{
 				return po.renderColumn(data, type, row, meta)
-					+ "<input type='hidden' name='fileIds' value='"+$.escapeHtml(row.id)+"' />"
+					+ "<input type='hidden' name='subDataExchangeIds' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
 					+ "<input type='hidden' name='fileNames' value='"+$.escapeHtml(row.name)+"' />";
 			},
 			defaultContent: "",
 			width : "35%",
 		},
 		{
-			title : "<@spring.message code='dataimport.importFileSize' />",
+			title : "<@spring.message code='dataImport.importFileSize' />",
 			data : "size",
 			render : po.renderColumn,
 			defaultContent: "",
 			width : "13%"
 		},
 		{
-			title : "<@spring.message code='dataimport.importTableName' />",
+			title : "<@spring.message code='dataImport.importTableName' />",
 			data : "tableName",
 			render : function(data, type, row, meta)
 			{
@@ -424,12 +300,12 @@ Schema schema 数据库，不允许为null
 			width : "25%"
 		},
 		{
-			title : "<@spring.message code='dataimport.importStatusWithSuccessFail' />",
+			title : "<@spring.message code='dataImport.importStatusWithSuccessFail' />",
 			data : "status",
 			render : function(data, type, row, meta)
 			{
 				if(!data)
-					return "<@spring.message code='dataimport.importStatus.Unstart' />";
+					return "<@spring.message code='dataExchange.exchangeStatus.Unstart' />";
 				else
 					return data;
 			},
@@ -447,7 +323,7 @@ Schema schema 数据库，不允许为null
 		event.stopPropagation();
 	});
 	
-	po.table().on("click", ".import-result-icon", function(event)
+	po.table().on("click", ".exchange-result-icon", function(event)
 	{
 		//阻止行选中
 		event.stopPropagation();
@@ -461,161 +337,12 @@ Schema schema 数据库，不允许为null
 		var rowData = po.getSubDataExchangeRowData(subDataExchangeId);
 		var displayName = $.escapeHtml((rowData ? rowData.displayName : ""));
 		
-		<#assign messageArgs=['"+displayName+"'] />
-		
-		po.open("${contextPath}/dataexchange/" + po.schemaId +"/viewLog",
-		{
-			title : "<@spring.messageArgs code='dataImport.viewImportLog' args=messageArgs />",
-			data :
-			{
-				schemaId : po.schemaId,
-				dataExchangeId : po.importId,
-				subDataExchangeId : subDataExchangeId,
-				subDataExchangeDisplayName : displayName
-			},
-			height : $(window).height() * 0.75
-		});
+		po.viewSubDataExchangeDetailLog(subDataExchangeId, displayName);
 	});
-	
-	po.showExceptionTip = function(event, tipEle)
-	{
-		tipEle = $(tipEle);
-		
-		var subDataExchangeId = tipEle.attr("subDataExchangeId");
-		var exception = po.subDataExchangeExceptionMessages[subDataExchangeId];
-		
-		//IGNORE模式是没有exception
-		if(!exception)
-			return;
-		
-		var $tooltip = po.element("#${pageId}-import-exception-tooltip");
-		
-		try{ $tooltip.tooltip("destroy"); }catch(e){}
-		po.element("#${pageId}-import-exception-tooltip").tooltip({"classes" : { "ui-tooltip" : "import-exception-tooltip ui-state-error ui-corner-all ui-widget-shadow"}});
-		$tooltip.tooltip("option", "content", exception);
-		$tooltip.tooltip("option", "position", { my: "center top", at: "center bottom-1", of: tipEle, collision: "flipfit" });
-		$tooltip.tooltip("open");
-	};
-	
-	po.hideExceptionTip = function(event, tipEle)
-	{
-		po.element("#${pageId}-import-exception-tooltip").tooltip("close");
-	};
-	
-	po.handleCometdMessage = function(message)
-	{
-		message = message.data;
-		var type = (message ? message.type : "");
-		
-		if("Start" == type)
-		{
-			var dataTable = po.table().DataTable();
-			po.subDataExchangeCount = dataTable.rows().indexes().length;
-			po.subDataExchangeFinishCount=0;
-			
-			po.subDataExchangeExceptionMessages = {};
-		}
-		else if("Exception" == type)
-		{
-			<#assign messageArgs=['"+message.content+"'] />
-			$.tipError("<@spring.messageArgs code='dataimport.importStatus.Exception' args=messageArgs />");
-		}
-		else if("SubmitSuccess" == type)
-		{
-			po.updateSubDataExchangeStatus(message.subDataExchangeId,
-					"<@spring.message code='dataimport.importStatus.SubmitSuccess' />");
-		}
-		else if("SubmitFail" == type)
-		{
-			po.updateSubDataExchangeStatus(message.subDataExchangeId,
-				"<@spring.message code='dataimport.importStatus.SubmitFail' />");
-		}
-		else if("CancelSuccess" == type)
-		{
-			po.subDataExchangeFinishCount += 1;
-			po.setImportProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
-			
-			po.updateSubDataExchangeStatus(message.subDataExchangeId,
-				"<@spring.message code='dataimport.importStatus.CancelSuccess' />");
-		}
-		else if("TextImportSubImporting" == type)
-		{
-			var status = "";
-			
-			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"'] />
-			status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubImporting' args=messageArgs />";
-			
-			po.updateSubDataExchangeStatus(message.subDataExchangeId, status);
-		}
-		else if("TextImportSubException" == type)
-		{
-			var exceptionResolve = message.exceptionResolve;
-			
-			var duration = po.formatDuration(message.duration);
-			
-			var status = "";
-			
-			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"', '"+duration+"', '"+message.content+"'] />
-			
-			//未进行任何实际导入操作
-			if(message.successCount == 0 && message.ignoreCount == 0)
-				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException' args=messageArgs />";
-			else if(exceptionResolve == "ABORT")
-				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException.ABORT' args=messageArgs />";
-			else if(exceptionResolve == "IGNORE")
-				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException.IGNORE' args=messageArgs />";
-			else if(exceptionResolve == "ROLLBACK")
-				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException.ROLLBACK' args=messageArgs />";
-			
-			status += "<span class='import-result-icon ui-state-error' onmouseover='${pageId}.showExceptionTip(event, this)'"
-						+" onmouseout='${pageId}.hideExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
-						+"<span class='ui-icon ui-icon-info'></span></span>";
-			
-			po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.content;
-			
-			po.updateSubDataExchangeStatus(message.subDataExchangeId, status);
-		}
-		else if("TextImportSubSuccess" == type)
-		{
-			var duration = po.formatDuration(message.duration);
-			
-			var status = "";
-			
-			<#assign messageArgs=['"+message.successCount+"', '"+message.ignoreCount+"', '"+duration+"'] />
-			
-			if(message.ignoreCount == 0)
-			{
-				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubSuccess' args=messageArgs />";
-				status += "<span class='import-result-icon'>"
-						+"<span class='ui-icon ui-icon-circle-check'></span></span>";
-			}
-			else
-			{
-				status = "<@spring.messageArgs code='dataimport.importStatus.TextImportSubException.IGNORE' args=messageArgs />";
-				status += "<span class='import-result-icon ui-state-error' onmouseover='${pageId}.showExceptionTip(event, this)'"
-						+" onmouseout='${pageId}.hideExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
-						+"<span class='ui-icon ui-icon-info'></span></span>";
-				
-				po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.ignoreException;
-			}
-			
-			po.updateSubDataExchangeStatus(message.subDataExchangeId, status);
-		}
-		else if("SubFinish" == type)
-		{
-			po.subDataExchangeFinishCount += 1;
-			po.setImportProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
-		}
-		else if("Finish" == type)
-		{
-			po.setImportProgress(100, message.duration);
-			po.toggleRestartStatus(true);
-		}
-	};
 	
 	po.element("#${pageId}-form").submit(function()
 	{
-		po.cometdExecuteAfterSubscribe(po.importChannelId,
+		po.cometdExecuteAfterSubscribe(po.dataExchangeChannelId,
 		function()
 		{
 			po.element("#${pageId}-form").ajaxSubmit(
@@ -629,14 +356,14 @@ Schema schema 数据库，不允许为null
 		},
 		function(message)
 		{
-			po.handleCometdMessage(message);
+			po.handleDataExchangeCometdMessage(message);
 		});
 		
 		return false;
 	});
 	
 	po.toggleUploadAndImportStatus(false);
-	po.setImportProgress(0);
+	po.setDataExchangeProgress(0);
 	po.toggleRestartStatus(false);
 })
 (${pageId});
