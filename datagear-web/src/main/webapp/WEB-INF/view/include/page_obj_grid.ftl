@@ -473,6 +473,16 @@ page_js_obj.jsp
 		dataTable.rows(indexes).remove().draw();
 	};
 	
+	//获取表格元素的父元素
+	po.dataTableParent = function(dataTable)
+	{
+		if(!dataTable)
+			dataTable = po.table().DataTable();
+		
+		var $tableParent = $(dataTable.table().body()).parent().parent();
+		return $tableParent;
+	};
+	
 	po.expectedResizeDataTableElements = [po.table()[0]];
 	
 	po.calChangedDataTableHeight = function()

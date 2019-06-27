@@ -1658,6 +1658,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding-left: 3em;
 	padding-right: 3em;
 }
+.page-dataexchange .form-item-table-head .form-item-value .ui-button-icon-only{
+	padding: 0.4em 1em;
+}
 .page-dataexchange .form-item-progress .ui-progressbar{
 	display: inline-block;
     width: 35%;

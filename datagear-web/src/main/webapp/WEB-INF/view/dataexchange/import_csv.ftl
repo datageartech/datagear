@@ -88,7 +88,7 @@ Schema schema 数据库，不允许为null
 						</div>
 						<div class="file-encoding-wrapper">
 							<span class="file-encoding-label">
-								<@spring.message code='dataExchange.fileEncoding' />
+								<@spring.message code='dataImport.importFileEncoding' />
 							</span>
 							<select name="fileEncoding">
 								<#list availableCharsetNames as item>

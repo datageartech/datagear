@@ -45,7 +45,12 @@ Schema schema 数据库，不允许为null
 				<div>
 					<div class="form-item form-item-table-head form-item-add edit-state-aware">
 						<div class="form-item-value">
-							<button type="button" class="table-add-item-button edit-state-aware"><@spring.message code='add' /></button>
+							<div id="${pageId}-add-group">
+								<button type="button" class="table-add-item-button edit-state-aware ui-corner-left"><@spring.message code='add' /></button>
+								<select id="${pageId}-add-group-select">
+									<option value="addAll"><@spring.message code='dataExport.addAllTable' /></option>
+								</select>
+							</div>
 						</div>
 					</div>
 					<div class="form-item form-item-table-head form-item-progress export-state-aware">
@@ -62,7 +67,7 @@ Schema schema 数据库，不允许为null
 						</div>
 						<div class="file-encoding-wrapper">
 							<span class="file-encoding-label">
-								<@spring.message code='dataExchange.fileEncoding' />
+								<@spring.message code='dataExport.exportFileEncoding' />
 							</span>
 							<select name="fileEncoding">
 								<#list availableCharsetNames as item>
@@ -101,7 +106,6 @@ Schema schema 数据库，不允许为null
 	po.subDataExchangeStatusColumnIndex = 4;
 	
 	po.cometdInitIfNot();
-	
 	po.element(".form-content").steps(
 	{
 		headerTag: "h3",
@@ -126,11 +130,61 @@ Schema schema 数据库，不允许为null
 	$.initButtons(po.element());
 	po.element("#${pageId}-binaryFormat").buttonset();
 	po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
+	po.element("#${pageId}-add-group-select").selectmenu(
+	{
+		classes : {"ui-selectmenu-button": "ui-button-icon-only ui-corner-right"},
+		select : function(event, ui)
+		{
+			if(ui.item.value == "addAll")
+				po.addAllTable();
+		}
+	});
 	po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
+	po.element("#${pageId}-add-group").controlgroup();
 	
 	po.element("input[name='dataFormat.binaryFormat'][value='${defaultDataFormat.binaryFormat}']").click();
 	po.element("#${pageId}-nullForIllegalColumnValue-1").click();
-
+	
+	po.addSubDataExchange = function(query, fileName)
+	{
+		if(query == null)
+			query="";
+		if(fileName == null)
+			fileName = "";
+		
+		if(!po.nextSubDataExchangeIdSeq)
+			po.nextSubDataExchangeIdSeq = 0;
+		
+		var subDataExchangeId = po.dataExchangeId + "_" + (po.nextSubDataExchangeIdSeq++);
+		
+		po.addRowData({subDataExchangeId : subDataExchangeId, query : query, fileName : fileName, status : ""});
+	};
+	
+	po.addAllTable = function()
+	{
+		if(po._addAllTableDoing)
+			return;
+		
+		po._addAllTableDoing = true;
+		
+		$.ajax(
+		{
+			url : "${contextPath}/dataexchange/" + po.schemaId +"/getAllTableNames",
+			success : function(tableNames)
+			{
+				if(!tableNames)
+					return;
+				
+				for(var i=0; i<tableNames.length; i++)
+					po.addSubDataExchange(tableNames[i], $.toValidFileName(tableNames[i]));
+			},
+			complete : function()
+			{
+				po._addAllTableDoing = false;
+			}
+		});
+	};
+	
 	po.toggleEditAndExportStatus = function(exportStatus)
 	{
 		var exportActionEle = po.element("#${pageId}-form .wizard .actions ul li:eq(2)");
@@ -197,12 +251,11 @@ Schema schema 数据库，不允许为null
 	
 	po.element(".table-add-item-button").click(function()
 	{
-		if(!po.nextSubDataExchangeIdSeq)
-			po.nextSubDataExchangeIdSeq = 0;
+		po.addSubDataExchange();
 		
-		var subDataExchangeId = po.dataExchangeId + "_" + (po.nextSubDataExchangeIdSeq++);
-		
-		po.addRowData({subDataExchangeId : subDataExchangeId, query : "", fileName : "", status : ""});
+		//滚动到底部
+		var $dataTableParent = po.dataTableParent();
+		$dataTableParent.scrollTop($dataTableParent.prop("scrollHeight"));
 	});
 	
 	po.element(".table-delete-item-button").click(function()

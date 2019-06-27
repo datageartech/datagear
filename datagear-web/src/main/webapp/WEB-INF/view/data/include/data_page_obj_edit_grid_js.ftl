@@ -223,13 +223,6 @@ data_page_obj_edit_grid_html.ftl
 		return $editTable;
 	};
 	
-	//获取表格元素的父元素
-	po.dataTableParent = function(dataTable)
-	{
-		var $tableParent = $(dataTable.table().body()).parent().parent();
-		return $tableParent;
-	};
-	
 	po.bindEditDataTableEvents = function($table)
 	{
 		$table.DataTable()

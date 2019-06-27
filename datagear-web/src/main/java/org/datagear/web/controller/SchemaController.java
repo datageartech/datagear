@@ -297,7 +297,7 @@ public class SchemaController extends AbstractSchemaModelConnController
 	 * 
 	 * @param tableInfos
 	 */
-	protected void sortByTableName(TableInfo[] tableInfos)
+	public static void sortByTableName(TableInfo[] tableInfos)
 	{
 		Arrays.<TableInfo> sort(tableInfos, TABLE_INFO_SORT_BY_NAME_COMPARATOR);
 	}

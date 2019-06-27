@@ -1616,6 +1616,28 @@
 		    bStack.pop();
 		    
 		    return true;
+		},
+		
+		/**
+		 * 获取合法文件名称。
+		 */
+		toValidFileName : function(rawName)
+		{
+			var re = "";
+			
+			for(var i=0; i< rawName.length; i++)
+			{
+				var c = rawName.charAt(i);
+				
+				if(c == "\\" || c == "/" || c == ":" || c == "*"
+					 || c == "?" || c == "\"" || c == "'" || c == "<"
+						 || c == ">" || c == "|")
+					continue;
+				
+				re += c;
+			}
+			
+			return re;
 		}
 	});
 	

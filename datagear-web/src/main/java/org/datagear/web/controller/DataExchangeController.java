@@ -42,6 +42,9 @@ import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleBatchDataExchange;
 import org.datagear.dataexchange.TextDataImportOption;
 import org.datagear.dataexchange.support.CsvDataImport;
+import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.dbinfo.TableInfo;
+import org.datagear.dbinfo.TableType;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
 import org.datagear.persistence.support.UUID;
@@ -86,6 +89,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@Autowired
 	private DataExchangeCometdService dataExchangeCometdService;
 
+	@Autowired
+	private DatabaseInfoResolver databaseInfoResolver;
+
 	public DataExchangeController()
 	{
 		super();
@@ -94,12 +100,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public DataExchangeController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource,
 			DataExchangeService<DataExchange> dataExchangeService, File tempDataExchangeRootDirectory,
-			DataExchangeCometdService dataExchangeCometdService)
+			DataExchangeCometdService dataExchangeCometdService, DatabaseInfoResolver databaseInfoResolver)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
 		this.dataExchangeService = dataExchangeService;
 		this.tempDataExchangeRootDirectory = tempDataExchangeRootDirectory;
 		this.dataExchangeCometdService = dataExchangeCometdService;
+		this.databaseInfoResolver = databaseInfoResolver;
 	}
 
 	public DataExchangeService<DataExchange> getDataExchangeService()
@@ -130,6 +137,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public void setDataExchangeCometdService(DataExchangeCometdService dataExchangeCometdService)
 	{
 		this.dataExchangeCometdService = dataExchangeCometdService;
+	}
+
+	public DatabaseInfoResolver getDatabaseInfoResolver()
+	{
+		return databaseInfoResolver;
+	}
+
+	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
+	{
+		this.databaseInfoResolver = databaseInfoResolver;
 	}
 
 	@RequestMapping("/{schemaId}/import")
@@ -438,6 +455,29 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/export_csv";
 	}
 
+	@RequestMapping(value = "/{schemaId}/getAllTableNames", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<String> getAllTableNames(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		TableInfo[] tableInfos = new ReturnSchemaConnExecutor<TableInfo[]>(request, response, springModel, schemaId,
+				true)
+		{
+			@Override
+			protected TableInfo[] execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema) throws Throwable
+			{
+				return getDatabaseInfoResolver().getTableInfos(getConnection());
+			}
+
+		}.execute();
+
+		List<String> tableNames = excludeViewNames(tableInfos);
+		Collections.sort(tableNames);
+
+		return tableNames;
+	}
+
 	@RequestMapping(value = "/{schemaId}/cancel")
 	@ResponseBody
 	public ResponseEntity<OperationMessage> cancel(HttpServletRequest request, HttpServletResponse response,
@@ -460,6 +500,19 @@ public class DataExchangeController extends AbstractSchemaConnController
 		responseEntity.getBody().setData(cancels);
 
 		return responseEntity;
+	}
+
+	protected List<String> excludeViewNames(TableInfo[] tableInfos)
+	{
+		List<String> list = new ArrayList<String>(tableInfos.length);
+
+		for (TableInfo tableInfo : tableInfos)
+		{
+			if (TableType.TABLE.equals(tableInfo.getType()))
+				list.add(tableInfo.getName());
+		}
+
+		return list;
 	}
 
 	/**
