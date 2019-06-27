@@ -1647,11 +1647,16 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	bottom: 0.2em;
 	height: 3em;
 }
-.page-dataexchange .form-item-progress{
+.page-dataexchange .form-item-table-head{
 	height: 2.8em;
 }
-.page-dataexchange .form-item-progress-label{
+.page-dataexchange .form-item-table-head .form-item-value label{
 	margin-right: 0.5em;
+}
+.page-dataexchange .form-item-table-head .form-item-value button,
+.page-dataexchange .form-item-table-head .form-item-value .ui-button{
+	padding-left: 3em;
+	padding-right: 3em;
 }
 .page-dataexchange .form-item-progress .ui-progressbar{
 	display: inline-block;
@@ -1704,16 +1709,6 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .page-dataexchange .dataTable .exchange-result-icon.ui-state-error{
     cursor: pointer;
-}
-.page-dataimport-text .form-item-upload{
-	height: 2.8em;
-}
-.page-dataimport-text .form-item-upload-label{
-	margin-right: 0.5em;
-}
-.page-dataimport-text .fileinput-button{
-	padding-left: 3em;
-	padding-right: 3em;
 }
 .page-dataexchange-log{
 	position: relative;

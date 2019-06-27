@@ -43,18 +43,21 @@ Schema schema 数据库，不允许为null
 				</div>
 				<h3><@spring.message code='dataExport.selectAndExportData' /></h3>
 				<div>
-					<div class="form-item form-item-progress">
-						<div class="form-item-value export-state-aware">
-							<span class="form-item-progress-label">
-								<@spring.message code='dataExport.exportProgress' />
-							</span>
+					<div class="form-item form-item-table-head form-item-add edit-state-aware">
+						<div class="form-item-value">
+							<button type="button" class="table-add-item-button edit-state-aware"><@spring.message code='add' /></button>
+						</div>
+					</div>
+					<div class="form-item form-item-table-head form-item-progress export-state-aware">
+						<div class="form-item-value">
+							<label><@spring.message code='dataExport.exportProgress' /></label>
 							<div id="${pageId}-progress"></div>
 							<div id="${pageId}-progress-percent" class="progress-percent"></div>
 						</div>
 					</div>
 					<div class="form-item form-item-table">
 						<div class="table-operation-wrapper">
-							<button type="button" class="table-add-item-button edit-state-aware"><@spring.message code='add' /></button>
+							<button type="button" class="table-delete-item-button edit-state-aware"><@spring.message code='delete' /></button>
 							<button type="button" class="table-cancel-export-button export-state-aware"><@spring.message code='cancel' /></button>
 						</div>
 						<div class="file-encoding-wrapper">
@@ -97,16 +100,7 @@ Schema schema 数据库，不允许为null
 	po.dataExchangeChannelId = "${dataExchangeChannelId}";
 	po.subDataExchangeStatusColumnIndex = 4;
 	
-	po.form = po.element("#${pageId}-form");
-	
 	po.cometdInitIfNot();
-	
-	//计算表格高度
-	po.calTableHeight = function()
-	{
-		var height =  po.element(".form-content-wizard > .content").height() - po.element(".form-item-progress").outerHeight(true) - 60;
-		return height;
-	};
 	
 	po.element(".form-content").steps(
 	{
@@ -115,10 +109,7 @@ Schema schema 数据库，不允许为null
 		onStepChanged : function(event, currentIndex, priorIndex)
 		{
 			if(currentIndex == 1)
-			{
-				po.table().DataTable().columns.adjust();
-				$.updateDataTableHeight(po.table(), po.calTableHeight());
-			}
+				po.adjustDataTable();
 		},
 		onFinished : function(event, currentIndex)
 		{
@@ -162,45 +153,32 @@ Schema schema 数据库，不允许为null
 		}
 	};
 	
-	po.renderColumn = function(data, type, row, meta)
-	{
-		return $.escapeHtml($.truncateIf(data));
-	};
-	
 	po.expectedResizeDataTableElements = [po.table()[0]];
 	
 	var tableColumns = [
 		{
-			title : "<@spring.message code='dataImport.importFileName' />",
-			data : "displayName",
+			title : "<@spring.message code='dataExport.tableNameOrQueryStatement' />",
+			data : "query",
 			render : function(data, type, row, meta)
 			{
-				return po.renderColumn(data, type, row, meta)
-					+ "<input type='hidden' name='subDataExchangeIds' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
-					+ "<input type='hidden' name='fileNames' value='"+$.escapeHtml(row.name)+"' />";
+				return "<input type='hidden' name='subDataExchangeIds' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
+						+ "<input type='text' name='queries' value='"+$.escapeHtml(data)+"' class='query-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
 			},
 			defaultContent: "",
-			width : "35%",
+			width : "50%",
 		},
 		{
-			title : "<@spring.message code='dataImport.importFileSize' />",
-			data : "size",
-			render : po.renderColumn,
-			defaultContent: "",
-			width : "13%"
-		},
-		{
-			title : "<@spring.message code='dataImport.importTableName' />",
-			data : "tableName",
+			title : "<@spring.message code='dataExport.exportFileName' />",
+			data : "fileName",
 			render : function(data, type, row, meta)
 			{
-				return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' class='table-name-input ui-widget ui-widget-content' style='width:90%' />";
+				return "<input type='text' name='fileNames' value='"+$.escapeHtml(data)+"' class='file-name-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
 			},
 			defaultContent: "",
-			width : "25%"
+			width : "23%"
 		},
 		{
-			title : "<@spring.message code='dataImport.importStatusWithSuccessFail' />",
+			title : $.buildDataTablesColumnTitleWithTip("<@spring.message code='dataExport.exportProgress' />", "<@spring.message code='dataExport.exportStatusWithSuccessFail' />"),
 			data : "status",
 			render : function(data, type, row, meta)
 			{
@@ -217,7 +195,25 @@ Schema schema 数据库，不允许为null
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
 	
-	po.table().on("click", ".table-name-input", function(event)
+	po.element(".table-add-item-button").click(function()
+	{
+		if(!po.nextSubDataExchangeIdSeq)
+			po.nextSubDataExchangeIdSeq = 0;
+		
+		var subDataExchangeId = po.dataExchangeId + "_" + (po.nextSubDataExchangeIdSeq++);
+		
+		po.addRowData({subDataExchangeId : subDataExchangeId, query : "", fileName : "", status : ""});
+	});
+	
+	po.element(".table-delete-item-button").click(function()
+	{
+		po.executeOnSelects(function(rowDatas, rowIndexes)
+		{
+			po.deleteRow(rowIndexes);
+		});
+	});
+	
+	po.table().on("click", ".input-in-table", function(event)
 	{
 		//阻止行选中
 		event.stopPropagation();
@@ -235,7 +231,7 @@ Schema schema 数据库，不允许为null
 		
 		var subDataExchangeId = $this.attr("subDataExchangeId");
 		var rowData = po.getSubDataExchangeRowData(subDataExchangeId);
-		var displayName = $.escapeHtml((rowData ? rowData.displayName : ""));
+		var query = $.escapeHtml((rowData ? rowData.query : ""));
 		
 		po.viewSubDataExchangeDetailLog(subDataExchangeId, displayName);
 	});

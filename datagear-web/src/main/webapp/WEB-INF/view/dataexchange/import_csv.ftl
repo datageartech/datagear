@@ -67,20 +67,16 @@ Schema schema 数据库，不允许为null
 				</div>
 				<h3><@spring.message code='dataImport.uploadAndImportData' /></h3>
 				<div>
-					<div class="form-item form-item-upload upload-state-aware">
+					<div class="form-item form-item-table-head form-item-upload upload-state-aware">
 						<div class="form-item-value">
-							<span class="form-item-upload-label">
-								<@spring.message code='dataImport.uploadCsvDataFile' />
-							</span>
+							<label><@spring.message code='dataImport.uploadCsvDataFile' /></label>
 							<div class="fileinput-button ui-widget ui-button ui-corner-all"><@spring.message code='upload' /><input type="file"></div>
 							<div class="file-info"></div>
 						</div>
 					</div>
-					<div class="form-item form-item-progress import-state-aware">
+					<div class="form-item form-item-table-head form-item-progress import-state-aware">
 						<div class="form-item-value">
-							<span class="form-item-progress-label">
-								<@spring.message code='dataImport.importProgress' />
-							</span>
+							<label><@spring.message code='dataImport.importProgress' /></label>
 							<div id="${pageId}-progress"></div>
 							<div id="${pageId}-progress-percent" class="progress-percent"></div>
 						</div>
@@ -135,14 +131,6 @@ Schema schema 数据库，不允许为null
 	
 	po.cometdInitIfNot();
 	
-	//计算表格高度
-	po.calTableHeight = function()
-	{
-		var height =  po.element(".form-content-wizard > .content").height() - po.element(".form-item-upload").outerHeight(true) - 60;
-		
-		return height;
-	};
-	
 	po.renderUploadFiles = function(fileInfos)
 	{
 		po.addRowData(fileInfos);
@@ -177,10 +165,7 @@ Schema schema 数据库，不允许为null
 		onStepChanged : function(event, currentIndex, priorIndex)
 		{
 			if(currentIndex == 1)
-			{
-				po.table().DataTable().columns.adjust();
-				$.updateDataTableHeight(po.table(), po.calTableHeight());
-			}
+				po.adjustDataTable();
 		},
 		onFinished : function(event, currentIndex)
 		{
@@ -248,11 +233,6 @@ Schema schema 数据库，不允许为null
 		po.toggleRestartStatus(false);
 	});
 	
-	po.renderColumn = function(data, type, row, meta)
-	{
-		return $.escapeHtml($.truncateIf(data));
-	};
-	
 	po.expectedResizeDataTableElements = [po.table()[0]];
 	
 	var tableColumns = [
@@ -286,7 +266,7 @@ Schema schema 数据库，不允许为null
 			width : "25%"
 		},
 		{
-			title : "<@spring.message code='dataImport.importStatusWithSuccessFail' />",
+			title : $.buildDataTablesColumnTitleWithTip("<@spring.message code='dataImport.importProgress' />", "<@spring.message code='dataImport.importStatusWithSuccessFail' />"),
 			data : "status",
 			render : function(data, type, row, meta)
 			{

@@ -35,6 +35,23 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		return po.element("#${pageId}-exchange-exception-tooltip");
 	};
 	
+	po.calTableHeight = function()
+	{
+		var height =  po.element(".form-content-wizard > .content").height() - po.element(".form-item-table-head:not(:hidden)").outerHeight(true) - 60;
+		return height;
+	};
+	
+	po.adjustDataTable = function()
+	{
+		po.table().DataTable().columns.adjust();
+		$.updateDataTableHeight(po.table(), po.calTableHeight());
+	};
+
+	po.renderColumn = function(data, type, row, meta)
+	{
+		return $.escapeHtml($.truncateIf(data));
+	};
+	
 	po.setDataExchangeProgress = function(progressValue, duration)
 	{
 		po.getDataExchangeProgressEle().progressbar({ value: progressValue });

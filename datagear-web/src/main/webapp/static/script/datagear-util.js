@@ -725,6 +725,11 @@
 			*/
 		},
 		
+		buildDataTablesColumnTitleWithTip : function(titleName, titleTip)
+		{
+			return "<a title='"+$.escapeHtml(titleTip)+"'>"+$.escapeHtml(titleName)+"</a>";
+		},
+		
 		/**
 		 * 构建Datatables组件的“columns”选项值。
 		 * 
