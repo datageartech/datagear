@@ -171,22 +171,44 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		po.getSubDataExchangeExceptionTipEle().tooltip("close");
 	};
 	
-	po.viewSubDataExchangeDetailLog = function(subDataExchangeId, subDataExchangeDisplayName)
+	po.viewSubDataExchangeDetailLog = function(subDataExchangeId)
 	{
-		<#assign messageArgs=['"+subDataExchangeDisplayName+"'] />
-		
 		po.open("${contextPath}/dataexchange/" + po.schemaId +"/viewLog",
 		{
-			title : "<@spring.messageArgs code='dataExchange.viewLog' args=messageArgs />",
+			title : "<@spring.message code='dataExchange.viewLog' />",
 			data :
 			{
 				schemaId : po.schemaId,
 				dataExchangeId : po.dataExchangeId,
-				subDataExchangeId : subDataExchangeId,
-				subDataExchangeDisplayName : subDataExchangeDisplayName
+				subDataExchangeId : subDataExchangeId
 			},
 			height : $(window).height() * 0.75
 		});
+	};
+	
+	//更新页面状态，status：edit、exchange、finish
+	po.updateDataExchangePageStatus = function(status)
+	{
+		if(status == po.currentDataExchangePageStatus)
+			return false;
+		
+		po.element(".page-status-aware-show:not(."+status+"-status-show)").hide();
+		po.element(".page-status-aware-enable:not(."+status+"-status-enable)").addClass("ui-state-disabled");
+		
+		po.element(".page-status-aware-show."+status+"-status-show").show();
+		po.element(".page-status-aware-enable."+status+"-status-enable").removeClass("ui-state-disabled");
+		
+		if("edit" == status)
+		{
+			po.element("select[name='fileEncoding']").selectmenu("enable");
+			po.setDataExchangeProgress(0);
+		}
+		else
+			po.element("select[name='fileEncoding']").selectmenu("disable");
+		
+		po.currentDataExchangePageStatus = status;
+		
+		return true;
 	};
 	
 	po.handleDataExchangeCometdMessage = function(message)
@@ -200,6 +222,8 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			po.subDataExchangeCount = dataTable.rows().indexes().length;
 			po.subDataExchangeFinishCount=0;
 			po.subDataExchangeExceptionMessages = {};
+			
+			po.updateDataExchangePageStatus("exchange");
 		}
 		else if("Exception" == type)
 		{
@@ -208,21 +232,21 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		}
 		else if("SubSubmitSuccess" == type)
 		{
-			po.updateSubDataExchangeStatus(message.subDataExchangeId,
-					"<@spring.message code='dataExchange.exchangeStatus.SubSubmitSuccess' />");
+			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId,
+					"<@spring.message code='dataExchange.exchangeStatus.SubSubmitSuccess' />", message);
 		}
 		else if("SubSubmitFail" == type)
 		{
-			po.updateSubDataExchangeStatus(message.subDataExchangeId,
-				"<@spring.message code='dataExchange.exchangeStatus.SubSubmitFail' />");
+			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId,
+				"<@spring.message code='dataExchange.exchangeStatus.SubSubmitFail' />", message);
 		}
 		else if("SubCancelSuccess" == type)
 		{
 			po.subDataExchangeFinishCount += 1;
 			po.setDataExchangeProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
 			
-			po.updateSubDataExchangeStatus(message.subDataExchangeId,
-				"<@spring.message code='dataExchange.exchangeStatus.SubCancelSuccess' />");
+			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId,
+				"<@spring.message code='dataExchange.exchangeStatus.SubCancelSuccess' />", message);
 		}
 		else if("SubExchangingWithCount" == type)
 		{
@@ -231,7 +255,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			<#assign messageArgs=['"+message.successCount+"', '"+message.failCount+"'] />
 			status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExchangingWithCount' args=messageArgs />";
 			
-			po.updateSubDataExchangeStatus(message.subDataExchangeId, status);
+			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId, status, message);
 		}
 		else if("SubExceptionWithCount" == type)
 		{
@@ -253,13 +277,13 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			else if(exceptionResolve == "ROLLBACK")
 				status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount.ROLLBACK' args=messageArgs />";
 			
-			status += "<span class='exchange-result-icon ui-state-error' onmouseover='${pageId}.showSubExceptionTip(event, this)'"
+			status += "<span class='exchange-result-icon exchange-error-icon ui-state-error' onmouseover='${pageId}.showSubExceptionTip(event, this)'"
 						+" onmouseout='${pageId}.hideSubExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
 						+"<span class='ui-icon ui-icon-info'></span></span>";
 			
 			po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.content;
 			
-			po.updateSubDataExchangeStatus(message.subDataExchangeId, status);
+			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId, status, message);
 		}
 		else if("SubSuccessWithCount" == type)
 		{
@@ -272,20 +296,19 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			if(!message.failCount || message.failCount == 0)
 			{
 				status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubSuccessWithCount' args=messageArgs />";
-				status += "<span class='exchange-result-icon'>"
-						+"<span class='ui-icon ui-icon-circle-check'></span></span>";
+				status += "<span class='exchange-result-icon exchange-success-icon'><span class='ui-icon ui-icon-circle-check'></span></span>";
 			}
 			else
 			{
 				status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' args=messageArgs />";
-				status += "<span class='exchange-result-icon ui-state-error' onmouseover='${pageId}.showSubExceptionTip(event, this)'"
+				status += "<span class='exchange-result-icon exchange-error-icon ui-state-error' onmouseover='${pageId}.showSubExceptionTip(event, this)'"
 						+" onmouseout='${pageId}.hideSubExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
 						+"<span class='ui-icon ui-icon-info'></span></span>";
 				
 				po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.ignoreException;
 			}
 			
-			po.updateSubDataExchangeStatus(message.subDataExchangeId, status);
+			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId, status, message);
 		}
 		else if("SubFinish" == type)
 		{
@@ -295,22 +318,13 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		else if("Finish" == type)
 		{
 			po.setDataExchangeProgress(100, message.duration);
-			po.toggleRestartStatus(true);
+			po.updateDataExchangePageStatus("finish");
 		}
 	};
-
-	po.toggleRestartStatus = function(enable)
+	
+	po.updateSubDataExchangeStatusForCometdMessage = function(subDataExchangeId, status, message)
 	{
-		if(enable)
-		{
-			po.element(".restart-wrapper").show();
-			po.element(".restart-button").removeClass("ui-state-disabled");
-		}
-		else
-		{
-			po.element(".restart-wrapper").hide();
-			po.element(".restart-button").addClass("ui-state-disabled");
-		}
+		po.updateSubDataExchangeStatus(subDataExchangeId, status);
 	};
 })
 (${pageId});

@@ -56,8 +56,10 @@ public class CometdSubTextDataExportListener extends CometdSubDataExchangeListen
 	@Override
 	protected DataExchangeMessage buildExceptionMessage(DataExchangeException e)
 	{
+		int successCount = this._successCount.intValue();
+
 		return new SubExceptionWithCount(getSubDataExchangeId(), resolveDataExchangeExceptionI18n(e), evalDuration(),
-				ExceptionResolve.ABORT, this._successCount.intValue(), 1);
+				ExceptionResolve.ABORT, successCount, (successCount > 0 ? 1 : 0));
 	}
 
 	@Override

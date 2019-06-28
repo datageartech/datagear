@@ -8,8 +8,7 @@ Schema schema 数据库，不允许为null
 <#include "../include/html_head.ftl">
 <title>
 	<#include "../include/html_title_app_name.ftl">
-	<#assign messageArgs=[subDataExchangeDisplayName?html] />
-	<@spring.messageArgs code='dataexchange.viewDataExchangeLog' args=messageArgs />
+	<@spring.message code='dataExchange.viewLog' />
 	<@spring.message code='bracketLeft' />
 	${schema.title?html}
 	<@spring.message code='bracketRight' />

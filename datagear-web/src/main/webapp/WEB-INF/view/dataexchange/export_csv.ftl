@@ -43,7 +43,7 @@ Schema schema 数据库，不允许为null
 				</div>
 				<h3><@spring.message code='dataExport.selectAndExportData' /></h3>
 				<div>
-					<div class="form-item form-item-table-head form-item-add edit-state-aware">
+					<div class="form-item form-item-table-head form-item-add page-status-aware-show edit-status-show">
 						<div class="form-item-value">
 							<div id="${pageId}-add-group">
 								<button type="button" class="table-add-item-button edit-state-aware ui-corner-left"><@spring.message code='add' /></button>
@@ -53,7 +53,7 @@ Schema schema 数据库，不允许为null
 							</div>
 						</div>
 					</div>
-					<div class="form-item form-item-table-head form-item-progress export-state-aware">
+					<div class="form-item form-item-table-head form-item-progress page-status-aware-show exchange-status-show finish-status-show">
 						<div class="form-item-value">
 							<label><@spring.message code='dataExport.exportProgress' /></label>
 							<div id="${pageId}-progress"></div>
@@ -62,11 +62,12 @@ Schema schema 数据库，不允许为null
 					</div>
 					<div class="form-item form-item-table">
 						<div class="table-operation-wrapper">
-							<button type="button" class="table-delete-item-button edit-state-aware"><@spring.message code='delete' /></button>
-							<button type="button" class="table-cancel-export-button export-state-aware"><@spring.message code='cancel' /></button>
+							<button type="button" class="table-delete-item-button page-status-aware-show edit-status-show"><@spring.message code='delete' /></button>
+							<button type="button" class="table-cancel-export-button page-status-aware-show exchange-status-show"><@spring.message code='cancel' /></button>
+							<button type="button" class="table-download-all-button page-status-aware-show finish-status-show"><@spring.message code='downloadAll' /></button>
 						</div>
 						<div class="file-encoding-wrapper">
-							<span class="file-encoding-label">
+							<span class="file-encoding-label page-status-aware-enable edit-status-enable">
 								<@spring.message code='dataExport.exportFileEncoding' />
 							</span>
 							<select name="fileEncoding">
@@ -82,7 +83,7 @@ Schema schema 数据库，不允许为null
 				</div>
 			</div>
 		</form>
-		<div class="restart-wrapper">
+		<div class="restart-wrapper page-status-aware-show finish-status-show">
 			<button type="button" class="restart-button"><@spring.message code='restart' /></button>
 		</div>
 		<div id="${pageId}-exchange-exception-tooltip" title="import tooltip" style="width:0; height:0;"></div>
@@ -126,7 +127,9 @@ Schema schema 数据库，不允许为null
 			finish: "<@spring.message code='export' />"
 		}
 	});
-
+	
+	po.element("#${pageId}-form .wizard .actions ul li:eq(2)").addClass("page-status-aware-enable edit-status-enable");
+	
 	$.initButtons(po.element());
 	po.element("#${pageId}-binaryFormat").buttonset();
 	po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
@@ -185,26 +188,25 @@ Schema schema 数据库，不允许为null
 		});
 	};
 	
-	po.toggleEditAndExportStatus = function(exportStatus)
+	po.updateSubDataExchangeStatusForCometdMessageSuper = po.updateSubDataExchangeStatusForCometdMessage;
+	po.updateSubDataExchangeStatusForCometdMessage = function(subDataExchangeId, status, message)
 	{
-		var exportActionEle = po.element("#${pageId}-form .wizard .actions ul li:eq(2)");
+		var type = (message ? message.type : "");
 		
-		if(exportStatus)
+		if("SubSuccessWithCount" == type)
 		{
-			po.element(".edit-state-aware").hide();
-			po.element(".export-state-aware").show();
-			exportActionEle.addClass("ui-state-disabled");
-			po.element("select[name='fileEncoding']").selectmenu("disable");
-			po.element(".file-encoding-label").addClass("ui-state-disabled");
+			if(!message.failCount || message.failCount == 0)
+			{
+				var spanIndex = status.indexOf("<span");
+				if(spanIndex > 0)
+					status = status.substring(0, spanIndex);
+			}
+			
+			status += "<span class='exchange-result-icon exchange-download-icon' title='"+$.escapeHtml("<@spring.message code='download' />")+"' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
+				+"<span class='ui-icon ui-icon-circle-arrow-s'></span></span>";
 		}
-		else
-		{
-			po.element(".edit-state-aware").show();
-			po.element(".export-state-aware").hide();
-			exportActionEle.removeClass("ui-state-disabled");
-			po.element("select[name='fileEncoding']").selectmenu("enable");
-			po.element(".file-encoding-label").removeClass("ui-state-disabled");
-		}
+		
+		po.updateSubDataExchangeStatusForCometdMessageSuper(subDataExchangeId, status, message);
 	};
 	
 	po.expectedResizeDataTableElements = [po.table()[0]];
@@ -271,6 +273,18 @@ Schema schema 数据库，不允许为null
 		po.cancelSelectedSubDataExchange();
 	});
 	
+	po.element(".table-download-all-button").click(function()
+	{
+		po.open("${contextPath}/dataexchange/" + po.schemaId +"/export/downloadAll",
+		{
+			target : "_file",
+			data :
+			{
+				dataExchangeId : po.dataExchangeId
+			}
+		});
+	});
+	
 	po.table().on("click", ".input-in-table", function(event)
 	{
 		//阻止行选中
@@ -284,21 +298,34 @@ Schema schema 数据库，不允许为null
 		
 		var $this = $(this);
 		
-		if(!$this.hasClass("ui-state-error"))
-			return;
-		
-		var subDataExchangeId = $this.attr("subDataExchangeId");
-		var rowData = po.getSubDataExchangeRowData(subDataExchangeId);
-		var query = $.escapeHtml((rowData ? rowData.query : ""));
-		
-		po.viewSubDataExchangeDetailLog(subDataExchangeId, displayName);
+		if($this.hasClass("exchange-error-icon"))
+		{
+			var subDataExchangeId = $this.attr("subDataExchangeId");
+			po.viewSubDataExchangeDetailLog(subDataExchangeId);
+		}
+		else if($this.hasClass("exchange-download-icon"))
+		{
+			var subDataExchangeId = $this.attr("subDataExchangeId");
+			var fileName = (po.subDataExchangeFileNameMap ? po.subDataExchangeFileNameMap[subDataExchangeId] : null);
+			
+			if(fileName)
+			{
+				po.open("${contextPath}/dataexchange/" + po.schemaId +"/export/download",
+				{
+					target : "_file",
+					data :
+					{
+						dataExchangeId : po.dataExchangeId,
+						fileName : fileName
+					}
+				});
+			}
+		}
 	});
 	
 	po.element(".restart-button").click(function()
 	{
-		po.toggleEditAndExportStatus(false);
-		po.setDataExchangeProgress(0);
-		po.toggleRestartStatus(false);
+		po.updateDataExchangePageStatus("edit");
 	});
 	
 	po.element("#${pageId}-form").submit(function()
@@ -311,7 +338,8 @@ Schema schema 数据库，不允许为null
 				url : "${contextPath}/dataexchange/" + po.schemaId +"/export/csv/doExport",
 				success: function(data)
 				{
-					po.toggleEditAndExportStatus(true);
+					po.subDataExchangeFileNameMap = data.data;
+					po.updateDataExchangePageStatus("exchange");
 				}
 			});
 		},
@@ -323,9 +351,7 @@ Schema schema 数据库，不允许为null
 		return false;
 	});
 	
-	po.toggleEditAndExportStatus(false);
-	po.setDataExchangeProgress(0);
-	po.toggleRestartStatus(false);
+	po.updateDataExchangePageStatus("edit");
 })
 (${pageId});
 </script>

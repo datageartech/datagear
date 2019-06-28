@@ -193,9 +193,21 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 			message = getI18nMessage(code, e1.getSqlType());
 		}
 		else
-			message = getI18nMessage(code);
+		{
+			message = getI18nMessage(code, getRootCauseMessage(e));
+		}
 
 		return message;
+	}
+
+	protected String getRootCauseMessage(Throwable t)
+	{
+		Throwable cause = null;
+
+		while ((cause = t.getCause()) != null)
+			t = cause;
+
+		return t.getMessage();
 	}
 
 	/**

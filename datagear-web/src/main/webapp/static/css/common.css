@@ -1710,7 +1710,8 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	border: none;
     background: none;
 }
-.page-dataexchange .dataTable .exchange-result-icon.ui-state-error{
+.page-dataexchange .dataTable .exchange-result-icon.exchange-error-icon,
+.page-dataexchange .dataTable .exchange-result-icon.exchange-download-icon{
     cursor: pointer;
 }
 .page-dataexchange-log{

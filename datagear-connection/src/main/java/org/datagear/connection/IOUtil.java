@@ -187,6 +187,7 @@ public class IOUtil
 	 * @param out
 	 * @param file
 	 * @param zipEntryName
+	 *            文件的ZIP条目名，可以为{@code null}或者空字符串。
 	 * @throws IOException
 	 */
 	public static void writeFileToZipOutputStream(ZipOutputStream out, File file, String zipEntryName)
@@ -196,13 +197,26 @@ public class IOUtil
 			return;
 
 		boolean isDirectory = file.isDirectory();
+		boolean isZipEntryNameEmpty = (zipEntryName == null || zipEntryName.isEmpty());
 
-		if (isDirectory && !zipEntryName.endsWith("/"))
-			zipEntryName = zipEntryName + "/";
+		if (isDirectory)
+		{
+			if (isZipEntryNameEmpty)
+				zipEntryName = "";
+			else if (!zipEntryName.endsWith("/"))
+				zipEntryName = zipEntryName + "/";
+		}
+		else if (isZipEntryNameEmpty)
+		{
+			zipEntryName = file.getName();
+			isZipEntryNameEmpty = false;
+		}
 
-		ZipEntry zipEntry = new ZipEntry(zipEntryName);
-
-		out.putNextEntry(zipEntry);
+		if (!isZipEntryNameEmpty)
+		{
+			ZipEntry zipEntry = new ZipEntry(zipEntryName);
+			out.putNextEntry(zipEntry);
+		}
 
 		if (!isDirectory)
 		{
@@ -219,7 +233,8 @@ public class IOUtil
 			}
 		}
 
-		out.closeEntry();
+		if (!isZipEntryNameEmpty)
+			out.closeEntry();
 
 		if (isDirectory)
 		{

@@ -67,14 +67,14 @@ Schema schema 数据库，不允许为null
 				</div>
 				<h3><@spring.message code='dataImport.uploadAndImportData' /></h3>
 				<div>
-					<div class="form-item form-item-table-head form-item-upload upload-state-aware">
+					<div class="form-item form-item-table-head form-item-upload page-status-aware-show edit-status-show">
 						<div class="form-item-value">
 							<label><@spring.message code='dataImport.uploadCsvDataFile' /></label>
 							<div class="fileinput-button ui-widget ui-button ui-corner-all"><@spring.message code='upload' /><input type="file"></div>
 							<div class="file-info"></div>
 						</div>
 					</div>
-					<div class="form-item form-item-table-head form-item-progress import-state-aware">
+					<div class="form-item form-item-table-head form-item-progress page-status-aware-show exchange-status-show finish-status-show">
 						<div class="form-item-value">
 							<label><@spring.message code='dataImport.importProgress' /></label>
 							<div id="${pageId}-progress"></div>
@@ -83,11 +83,11 @@ Schema schema 数据库，不允许为null
 					</div>
 					<div class="form-item form-item-table">
 						<div class="table-operation-wrapper">
-							<button type="button" class="table-delete-item-button upload-state-aware"><@spring.message code='delete' /></button>
-							<button type="button" class="table-cancel-import-button import-state-aware"><@spring.message code='cancel' /></button>
+							<button type="button" class="table-delete-item-button page-status-aware-show edit-status-show"><@spring.message code='delete' /></button>
+							<button type="button" class="table-cancel-import-button page-status-aware-show exchange-status-show"><@spring.message code='cancel' /></button>
 						</div>
 						<div class="file-encoding-wrapper">
-							<span class="file-encoding-label">
+							<span class="file-encoding-label page-status-aware-enable edit-status-enable">
 								<@spring.message code='dataImport.importFileEncoding' />
 							</span>
 							<select name="fileEncoding">
@@ -103,7 +103,7 @@ Schema schema 数据库，不允许为null
 				</div>
 			</div>
 		</form>
-		<div class="restart-wrapper">
+		<div class="restart-wrapper page-status-aware-show finish-status-show">
 			<button type="button" class="restart-button"><@spring.message code='restart' /></button>
 		</div>
 		<div id="${pageId}-exchange-exception-tooltip" title="import tooltip" style="width:0; height:0;"></div>
@@ -136,28 +136,6 @@ Schema schema 数据库，不允许为null
 		po.addRowData(fileInfos);
 	};
 	
-	po.toggleUploadAndImportStatus = function(importStatus)
-	{
-		var importActionEle = po.element("#${pageId}-form .wizard .actions ul li:eq(2)");
-		
-		if(importStatus)
-		{
-			po.element(".upload-state-aware").hide();
-			po.element(".import-state-aware").show();
-			importActionEle.addClass("ui-state-disabled");
-			po.element("select[name='fileEncoding']").selectmenu("disable");
-			po.element(".file-encoding-label").addClass("ui-state-disabled");
-		}
-		else
-		{
-			po.element(".upload-state-aware").show();
-			po.element(".import-state-aware").hide();
-			importActionEle.removeClass("ui-state-disabled");
-			po.element("select[name='fileEncoding']").selectmenu("enable");
-			po.element(".file-encoding-label").removeClass("ui-state-disabled");
-		}
-	};
-	
 	po.element(".form-content").steps(
 	{
 		headerTag: "h3",
@@ -178,7 +156,9 @@ Schema schema 数据库，不允许为null
 			finish: "<@spring.message code='import' />"
 		}
 	});
-
+	
+	po.element("#${pageId}-form .wizard .actions ul li:eq(2)").addClass("page-status-aware-enable edit-status-enable");
+	
 	$.initButtons(po.element());
 	po.element("#${pageId}-binaryFormat").buttonset();
 	po.element("#${pageId}-ignoreInexistentColumn").buttonset();
@@ -228,9 +208,7 @@ Schema schema 数据库，不允许为null
 	
 	po.element(".restart-button").click(function()
 	{
-		po.toggleUploadAndImportStatus(false);
-		po.setDataExchangeProgress(0);
-		po.toggleRestartStatus(false);
+		po.updateDataExchangePageStatus("edit");
 	});
 	
 	po.expectedResizeDataTableElements = [po.table()[0]];
@@ -296,14 +274,11 @@ Schema schema 数据库，不允许为null
 		
 		var $this = $(this);
 		
-		if(!$this.hasClass("ui-state-error"))
-			return;
-		
-		var subDataExchangeId = $this.attr("subDataExchangeId");
-		var rowData = po.getSubDataExchangeRowData(subDataExchangeId);
-		var displayName = $.escapeHtml((rowData ? rowData.displayName : ""));
-		
-		po.viewSubDataExchangeDetailLog(subDataExchangeId, displayName);
+		if($this.hasClass("exchange-error-icon"))
+		{
+			var subDataExchangeId = $this.attr("subDataExchangeId");
+			po.viewSubDataExchangeDetailLog(subDataExchangeId);
+		}
 	});
 	
 	po.element("#${pageId}-form").submit(function()
@@ -316,7 +291,7 @@ Schema schema 数据库，不允许为null
 				url : "${contextPath}/dataexchange/" + po.schemaId +"/import/csv/doImport",
 				success: function(data)
 				{
-					po.toggleUploadAndImportStatus(true);
+					po.updateDataExchangePageStatus("exchange");
 				}
 			});
 		},
@@ -328,9 +303,7 @@ Schema schema 数据库，不允许为null
 		return false;
 	});
 	
-	po.toggleUploadAndImportStatus(false);
-	po.setDataExchangeProgress(0);
-	po.toggleRestartStatus(false);
+	po.updateDataExchangePageStatus("edit");
 })
 (${pageId});
 </script>

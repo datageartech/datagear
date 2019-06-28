@@ -18,6 +18,7 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -282,7 +284,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return fileInfos;
 	}
 
-	@RequestMapping(value = "/{schemaId}/import/csv/doImport")
+	@RequestMapping(value = "/{schemaId}/import/csv/doImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> doImportCsv(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
@@ -364,8 +366,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String viewLog(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("dataExchangeId") String dataExchangeId,
-			@RequestParam("subDataExchangeId") String subDataExchangeId,
-			@RequestParam("subDataExchangeDisplayName") String subDataExchangeDisplayName) throws Throwable
+			@RequestParam("subDataExchangeId") String subDataExchangeId) throws Throwable
 	{
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
@@ -378,7 +379,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
 		springModel.addAttribute("subDataExchangeId", subDataExchangeId);
-		springModel.addAttribute("subDataExchangeDisplayName", subDataExchangeDisplayName);
 
 		return "/dataexchange/view_log";
 	}
@@ -466,7 +466,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/export_csv";
 	}
 
-	@RequestMapping(value = "/{schemaId}/export/csv/doExport")
+	@RequestMapping(value = "/{schemaId}/export/csv/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> doExportCsv(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
@@ -490,9 +490,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		List<ResourceFactory<Writer>> writerFactories = toWriterResourceFactories(directory,
 				exportForm.getFileEncoding(), fileNames);
-
-		List<String> exportFileNames = new ArrayList<String>(fileNames.length);
-		Collections.addAll(exportFileNames, fileNames);
 
 		Schema schema = getSchemaNotNull(request, response, schemaId);
 
@@ -532,7 +529,74 @@ public class DataExchangeController extends AbstractSchemaConnController
 				dataExchangeId, batchDataExchange, subDataExchangeIds);
 		storeBatchDataExchangeFutureInfo(request, futureInfo);
 
-		return buildOperationMessageSuccessEmptyResponseEntity();
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+
+		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
+		responseEntity.getBody().setData(subDataExchangeFileNameMap);
+
+		return responseEntity;
+	}
+
+	@RequestMapping(value = "/{schemaId}/export/download")
+	@ResponseBody
+	public void exptDownload(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@RequestParam("fileName") String fileName) throws Exception
+	{
+		response.setCharacterEncoding(RESPONSE_ENCODING);
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + new String(fileName.getBytes(RESPONSE_ENCODING), "iso-8859-1") + "");
+
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+		File file = new File(directory, fileName);
+
+		OutputStream out = null;
+
+		try
+		{
+			out = response.getOutputStream();
+			IOUtil.write(file, out);
+		}
+		finally
+		{
+			IOUtil.close(out);
+		}
+	}
+
+	@RequestMapping(value = "/{schemaId}/export/downloadAll")
+	@ResponseBody
+	public void exptDownloadAll(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId)
+			throws Exception
+	{
+		String fileName = "export_csv.zip";
+
+		response.setCharacterEncoding(RESPONSE_ENCODING);
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + new String(fileName.getBytes(RESPONSE_ENCODING), "iso-8859-1") + "");
+
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+
+		ZipOutputStream out = null;
+		try
+		{
+			out = new ZipOutputStream(response.getOutputStream());
+			IOUtil.writeFileToZipOutputStream(out, directory, null);
+		}
+		finally
+		{
+			IOUtil.close(out);
+		}
+	}
+
+	protected Map<String, String> buildSubDataExchangeFileNameMap(String[] subDataExchangeIds, String[] fileNames)
+	{
+		Map<String, String> map = new HashMap<String, String>();
+
+		for (int i = 0; i < subDataExchangeIds.length; i++)
+			map.put(subDataExchangeIds[i], fileNames[i]);
+
+		return map;
 	}
 
 	protected List<Query> toQueries(String[] queries)
@@ -814,6 +878,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		File logFile = new File(logDirectory, "log_" + subDataExchangeId + ".txt");
 		return logFile;
+	}
+
+	protected File getExportFileZip(String dataExchangeId)
+	{
+		File file = new File(this.tempDataExchangeRootDirectory, dataExchangeId + ".zip");
+		return file;
 	}
 
 	/**
