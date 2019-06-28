@@ -12,28 +12,27 @@ package org.datagear.dataexchange;
  */
 public abstract class TextDataExport extends TextDataExchange
 {
-	/** 对于不支持的列设置为null */
-	private boolean nullForUnsupportedColumn = true;
+	private TextDataExportOption exportOption;
 
 	public TextDataExport()
 	{
 		super();
 	}
 
-	public TextDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, boolean nullForUnsupportedColumn)
+	public TextDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataExportOption exportOption)
 	{
 		super(connectionFactory, dataFormat);
-		this.nullForUnsupportedColumn = nullForUnsupportedColumn;
+		this.exportOption = exportOption;
 	}
 
-	public boolean isNullForUnsupportedColumn()
+	public TextDataExportOption getExportOption()
 	{
-		return nullForUnsupportedColumn;
+		return exportOption;
 	}
 
-	public void setNullForUnsupportedColumn(boolean nullForUnsupportedColumn)
+	public void setExportOption(TextDataExportOption exportOption)
 	{
-		this.nullForUnsupportedColumn = nullForUnsupportedColumn;
+		this.exportOption = exportOption;
 	}
 
 	@Override

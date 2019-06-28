@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,9 +40,15 @@ import org.datagear.dataexchange.DataExchangeService;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataSourceConnectionFactory;
 import org.datagear.dataexchange.FileReaderResourceFactory;
+import org.datagear.dataexchange.FileWriterResourceFactory;
+import org.datagear.dataexchange.Query;
 import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleBatchDataExchange;
+import org.datagear.dataexchange.SqlQuery;
+import org.datagear.dataexchange.TableQuery;
+import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dataexchange.TextDataImportOption;
+import org.datagear.dataexchange.support.CsvDataExport;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
@@ -50,6 +58,7 @@ import org.datagear.management.service.SchemaService;
 import org.datagear.persistence.support.UUID;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.cometd.dataexchange.CometdBatchDataExchangeListener;
+import org.datagear.web.cometd.dataexchange.CometdSubTextDataExportListener;
 import org.datagear.web.cometd.dataexchange.CometdSubTextDataImportListener;
 import org.datagear.web.cometd.dataexchange.DataExchangeCometdService;
 import org.datagear.web.convert.ClassDataConverter;
@@ -76,6 +85,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/dataexchange")
 public class DataExchangeController extends AbstractSchemaConnController
 {
+	public static final Pattern TABLE_NAME_QUERY_PATTERN = Pattern.compile("^\\s*\\S+\\s*$", Pattern.CASE_INSENSITIVE);
+
 	protected static final String KEY_SESSION_BatchDataExchangeFutureInfoMap = DataExchangeController.class.getName()
 			+ ".BatchDataExchangeFutureInfoMap";
 
@@ -316,7 +327,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 					this.dataExchangeCometdService, importServerChannel, getMessageSource(), getLocale(request),
 					subDataExchangeIds[i], csvDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
-			listener.setSendImportingMessageInterval(
+			listener.setSendExchangingMessageInterval(
 					evalSendImportingMessageInterval(csvDataImports, csvDataImport, i));
 			csvDataImport.setListener(listener);
 		}
@@ -455,6 +466,112 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/export_csv";
 	}
 
+	@RequestMapping(value = "/{schemaId}/export/csv/doExport")
+	@ResponseBody
+	public ResponseEntity<OperationMessage> doExportCsv(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			TextDataExportForm exportForm) throws Exception
+	{
+		if (exportForm == null || isEmpty(exportForm.getDataFormat()) || isEmpty(exportForm.getExportOption())
+				|| isEmpty(exportForm.getFileEncoding()) || isEmpty(exportForm.getSubDataExchangeIds())
+				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getFileNames())
+				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
+				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
+			throw new IllegalInputException();
+
+		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
+		String[] queries = exportForm.getQueries();
+		String[] fileNames = exportForm.getFileNames();
+
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
+
+		List<Query> queryList = toQueries(queries);
+
+		List<ResourceFactory<Writer>> writerFactories = toWriterResourceFactories(directory,
+				exportForm.getFileEncoding(), fileNames);
+
+		List<String> exportFileNames = new ArrayList<String>(fileNames.length);
+		Collections.addAll(exportFileNames, fileNames);
+
+		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+
+		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
+		ServerChannel exportServerChannel = this.dataExchangeCometdService.getChannelWithCreation(exportChannelId);
+
+		List<CsvDataExport> csvDataExports = CsvDataExport.valuesOf(connectionFactory, exportForm.getDataFormat(),
+				exportForm.getExportOption(), queryList, writerFactories);
+
+		for (int i = 0; i < csvDataExports.size(); i++)
+		{
+			CsvDataExport csvDataExport = csvDataExports.get(i);
+
+			CometdSubTextDataExportListener listener = new CometdSubTextDataExportListener(
+					this.dataExchangeCometdService, exportServerChannel, getMessageSource(), getLocale(request),
+					subDataExchangeIds[i]);
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+			listener.setSendExchangingMessageInterval(
+					evalSendExportingMessageInterval(csvDataExports, csvDataExport, i));
+			csvDataExport.setListener(listener);
+		}
+
+		BatchDataExchange<CsvDataExport> batchDataExchange = new SimpleBatchDataExchange<CsvDataExport>(
+				connectionFactory, csvDataExports);
+
+		CometdBatchDataExchangeListener<CsvDataExport> listener = new CometdBatchDataExchangeListener<CsvDataExport>(
+				this.dataExchangeCometdService, exportServerChannel, getMessageSource(), getLocale(request),
+				subDataExchangeIds);
+
+		batchDataExchange.setListener(listener);
+
+		this.dataExchangeService.exchange(batchDataExchange);
+
+		BatchDataExchangeFutureInfo<CsvDataExport> futureInfo = new BatchDataExchangeFutureInfo<CsvDataExport>(
+				dataExchangeId, batchDataExchange, subDataExchangeIds);
+		storeBatchDataExchangeFutureInfo(request, futureInfo);
+
+		return buildOperationMessageSuccessEmptyResponseEntity();
+	}
+
+	protected List<Query> toQueries(String[] queries)
+	{
+		int size = queries.length;
+
+		List<Query> list = new ArrayList<Query>(size);
+
+		for (int i = 0; i < size; i++)
+		{
+			String query = queries[i];
+
+			if (isTableNameQueryString(query))
+				list.add(new TableQuery(query));
+			else
+				list.add(new SqlQuery(query));
+		}
+
+		return list;
+	}
+
+	protected boolean isTableNameQueryString(String query)
+	{
+		return TABLE_NAME_QUERY_PATTERN.matcher(query).matches();
+	}
+
+	protected List<ResourceFactory<Writer>> toWriterResourceFactories(File directory, String charset,
+			String[] fileNames)
+	{
+		List<ResourceFactory<Writer>> writerFactories = new ArrayList<ResourceFactory<Writer>>(fileNames.length);
+		for (String fileName : fileNames)
+		{
+			File file = new File(directory, fileName);
+			writerFactories.add(FileWriterResourceFactory.valueOf(file, charset));
+		}
+
+		return writerFactories;
+	}
+
 	@RequestMapping(value = "/{schemaId}/getAllTableNames", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<String> getAllTableNames(HttpServletRequest request, HttpServletResponse response,
@@ -481,8 +598,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/cancel")
 	@ResponseBody
 	public ResponseEntity<OperationMessage> cancel(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			TextDataImportForm dataImportForm) throws Exception
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId)
+			throws Exception
 	{
 		String[] subDataExchangeIds = request.getParameterValues("subDataExchangeId");
 
@@ -513,6 +630,28 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		return list;
+	}
+
+	/**
+	 * 计算导出中消息发送间隔。
+	 * <p>
+	 * 如果发送频率过快，当导出文件很多时会出现cometd卡死的情况。
+	 * </p>
+	 * 
+	 * @param csvDataExports
+	 * @param csvDataExport
+	 * @param index
+	 * @return
+	 */
+	protected int evalSendExportingMessageInterval(List<CsvDataExport> csvDataExports, CsvDataExport csvDataExport,
+			int index)
+	{
+		int interval = 500 * csvDataExports.size();
+
+		if (interval > 5000)
+			interval = 5000;
+
+		return interval;
 	}
 
 	/**
@@ -796,31 +935,27 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	/**
-	 * 文本导入表单。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class TextDataImportForm implements Serializable
+	public static class AbstractTextDataExchangeForm implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
 		private DataFormat dataFormat;
 
-		private TextDataImportOption importOption;
-
 		private String fileEncoding;
 
 		private String[] subDataExchangeIds;
 
-		private String[] fileNames;
-
-		private String[] tableNames;
-
-		public TextDataImportForm()
+		public AbstractTextDataExchangeForm()
 		{
 			super();
+		}
+
+		public AbstractTextDataExchangeForm(DataFormat dataFormat, String fileEncoding, String[] subDataExchangeIds)
+		{
+			super();
+			this.dataFormat = dataFormat;
+			this.fileEncoding = fileEncoding;
+			this.subDataExchangeIds = subDataExchangeIds;
 		}
 
 		public DataFormat getDataFormat()
@@ -831,16 +966,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setDataFormat(DataFormat dataFormat)
 		{
 			this.dataFormat = dataFormat;
-		}
-
-		public TextDataImportOption getImportOption()
-		{
-			return importOption;
-		}
-
-		public void setImportOption(TextDataImportOption importOption)
-		{
-			this.importOption = importOption;
 		}
 
 		public String getFileEncoding()
@@ -862,6 +987,38 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			this.subDataExchangeIds = subDataExchangeIds;
 		}
+	}
+
+	/**
+	 * 文本导入表单。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class TextDataImportForm extends AbstractTextDataExchangeForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private TextDataImportOption importOption;
+
+		private String[] fileNames;
+
+		private String[] tableNames;
+
+		public TextDataImportForm()
+		{
+			super();
+		}
+
+		public TextDataImportOption getImportOption()
+		{
+			return importOption;
+		}
+
+		public void setImportOption(TextDataImportOption importOption)
+		{
+			this.importOption = importOption;
+		}
 
 		public String[] getFileNames()
 		{
@@ -881,6 +1038,58 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setTableNames(String[] tableNames)
 		{
 			this.tableNames = tableNames;
+		}
+	}
+
+	/**
+	 * 文本导出表单。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class TextDataExportForm extends AbstractTextDataExchangeForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private TextDataExportOption exportOption;
+
+		private String[] queries;
+
+		private String[] fileNames;
+
+		public TextDataExportForm()
+		{
+			super();
+		}
+
+		public TextDataExportOption getExportOption()
+		{
+			return exportOption;
+		}
+
+		public void setExportOption(TextDataExportOption exportOption)
+		{
+			this.exportOption = exportOption;
+		}
+
+		public String[] getQueries()
+		{
+			return queries;
+		}
+
+		public void setQueries(String[] queries)
+		{
+			this.queries = queries;
+		}
+
+		public String[] getFileNames()
+		{
+			return fileNames;
+		}
+
+		public void setFileNames(String[] fileNames)
+		{
+			this.fileNames = fileNames;
 		}
 	}
 

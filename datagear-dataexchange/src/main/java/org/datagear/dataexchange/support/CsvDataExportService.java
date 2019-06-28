@@ -14,6 +14,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.TextDataExportListener;
+import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
@@ -38,7 +40,14 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 	@Override
 	public void exchange(CsvDataExport dataExchange) throws DataExchangeException
 	{
+		TextDataExportListener listener = dataExchange.getListener();
+
+		if (listener != null)
+			listener.onStart();
+
 		ConnectionFactory connectionFactory = dataExchange.getConnectionFactory();
+
+		TextDataExportOption exportOption = dataExchange.getExportOption();
 
 		TextDataExportContext exportContext = buildTextDataExportContext(dataExchange);
 
@@ -71,16 +80,18 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 					{
 						value = getExportColumnValue(dataExchange, cn, rs, i + 1, columnInfo.getType(), exportContext);
 					}
-					catch (UnsupportedSqlTypeException e)
+					catch (Throwable t)
 					{
-						if (dataExchange.isNullForUnsupportedColumn())
+						if (exportOption.isNullForIllegalColumnValue())
 						{
 							value = null;
 
-							// TODO report
+							if (listener != null)
+								listener.onSetNullTextValue(exportContext.getDataIndex(), columnInfo.getName(),
+										wrapToDataExchangeException(t));
 						}
 						else
-							throw e;
+							throw t;
 					}
 
 					csvPrinter.print(value);
@@ -88,20 +99,31 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 
 				csvPrinter.println();
 
+				if (listener != null)
+					listener.onSuccess(exportContext.getDataIndex());
+
 				exportContext.incrementDataIndex();
 			}
+
+			if (listener != null)
+				listener.onSuccess();
 		}
-		catch (Exception e)
+		catch (Throwable t)
 		{
-			if (e instanceof DataExchangeException)
-				throw (DataExchangeException) e;
+			DataExchangeException e = wrapToDataExchangeException(t);
+
+			if (listener != null)
+				listener.onException(e);
 			else
-				throw new DataExchangeException(e);
+				throw e;
 		}
 		finally
 		{
 			releaseResource(dataExchange.getWriterFactory(), csvWriter);
 			releaseResource(connectionFactory, cn);
+
+			if (listener != null)
+				listener.onFinish();
 		}
 	}
 

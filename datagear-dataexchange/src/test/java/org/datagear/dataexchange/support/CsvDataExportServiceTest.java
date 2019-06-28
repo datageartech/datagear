@@ -27,6 +27,7 @@ import org.datagear.dataexchange.FileWriterResourceFactory;
 import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
 import org.datagear.dataexchange.TableQuery;
+import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dataexchange.TextDataImportOption;
 import org.junit.Before;
 import org.junit.Rule;
@@ -101,8 +102,8 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 
 			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(outFile, "UTF-8");
 
-			CsvDataExport csvDataExport = new CsvDataExport(new SimpleConnectionFactory(cn, false), dataFormat, true,
-					new TableQuery(TABLE_NAME), writerFactory);
+			CsvDataExport csvDataExport = new CsvDataExport(new SimpleConnectionFactory(cn, false), dataFormat,
+					new TextDataExportOption(true), new TableQuery(TABLE_NAME), writerFactory);
 
 			this.csvDataExportService.exchange(csvDataExport);
 		}

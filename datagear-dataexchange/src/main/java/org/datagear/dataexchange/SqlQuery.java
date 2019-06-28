@@ -6,7 +6,6 @@ package org.datagear.dataexchange;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * SQL {@linkplain Query}。
@@ -40,7 +39,7 @@ public class SqlQuery extends AbstractQuery
 	}
 
 	@Override
-	public ResultSet execute(Connection cn) throws SQLException
+	public ResultSet execute(Connection cn) throws Throwable
 	{
 		return executeQuery(cn, this.sql);
 	}

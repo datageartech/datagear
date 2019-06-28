@@ -4,9 +4,15 @@
 
 package org.datagear.web.cometd.dataexchange;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Locale;
 
 import org.cometd.bayeux.server.ServerChannel;
+import org.datagear.connection.IOUtil;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
 import org.datagear.dataexchange.ExceptionResolve;
@@ -20,7 +26,21 @@ import org.springframework.context.MessageSource;
  */
 public abstract class CometdSubDataExchangeListener extends CometdDataExchangeListener
 {
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+
+	public static final String LOG_FILE_CHARSET = "UTF-8";
+
+	public static final String LOG_FILE_CONTENT_DIV = "----------------------------------------";
+
 	private String subDataExchangeId;
+
+	private File logFile;
+
+	/** 发送交换中消息的间隔毫秒数 */
+	private int sendExchangingMessageInterval = 500;
+
+	private volatile long _prevSendExchangingMessageTime = 0;
+	private volatile Writer _logWriter;
 
 	public CometdSubDataExchangeListener()
 	{
@@ -45,6 +65,74 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 		this.subDataExchangeId = subDataExchangeId;
 	}
 
+	public boolean hasLogFile()
+	{
+		return (this.logFile != null);
+	}
+
+	public File getLogFile()
+	{
+		return logFile;
+	}
+
+	public void setLogFile(File logFile)
+	{
+		this.logFile = logFile;
+	}
+
+	public int getSendExchangingMessageInterval()
+	{
+		return sendExchangingMessageInterval;
+	}
+
+	public void setSendExchangingMessageInterval(int sendExchangingMessageInterval)
+	{
+		this.sendExchangingMessageInterval = sendExchangingMessageInterval;
+	}
+
+	@Override
+	public void onStart()
+	{
+		super.onStart();
+
+		if (hasLogFile())
+		{
+			try
+			{
+				this._logWriter = new BufferedWriter(
+						new OutputStreamWriter(new FileOutputStream(this.logFile), LOG_FILE_CHARSET));
+			}
+			catch (Throwable t)
+			{
+				this._logWriter = null;
+				LOGGER.error("create log writer error", t);
+			}
+
+			writeStartLog();
+		}
+	}
+
+	@Override
+	public void onException(DataExchangeException e)
+	{
+		super.onException(e);
+
+		if (hasLogFile())
+			writeLogLine(resolveDataExchangeExceptionI18n(e));
+	}
+
+	@Override
+	public void onFinish()
+	{
+		super.onFinish();
+
+		if (hasLogFile())
+		{
+			writeFinishLog();
+			IOUtil.close(this._logWriter);
+		}
+	}
+
 	@Override
 	protected DataExchangeMessage buildStartMessage()
 	{
@@ -67,6 +155,105 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	protected DataExchangeMessage buildFinishMessage()
 	{
 		return new SubFinish(this.subDataExchangeId);
+	}
+
+	/**
+	 * 是否可以发送数据交换中消息了。
+	 * 
+	 * @return
+	 */
+	protected boolean isTimeSendExchangingMessage()
+	{
+		long currentTime = System.currentTimeMillis();
+
+		if (currentTime - this._prevSendExchangingMessageTime < this.sendExchangingMessageInterval)
+			return false;
+
+		return true;
+	}
+
+	/**
+	 * 发送交换中消息。
+	 * 
+	 * @return
+	 */
+	protected void sendExchangingMessage(DataExchangeMessage message)
+	{
+		sendMessage(message);
+		this._prevSendExchangingMessageTime = System.currentTimeMillis();
+	}
+
+	/**
+	 * 写开始日志。
+	 * 
+	 * @param log
+	 */
+	protected void writeStartLog()
+	{
+		writeLogLine(getStartLog());
+		writeLogLine(LOG_FILE_CONTENT_DIV);
+	}
+
+	/**
+	 * 获取开始日志。
+	 * 
+	 * @return
+	 */
+	protected abstract String getStartLog();
+
+	/**
+	 * 写结束日志。
+	 * 
+	 * @param log
+	 */
+	protected void writeFinishLog()
+	{
+		writeLogLine(LOG_FILE_CONTENT_DIV);
+		writeLogLine(getFinishLog());
+	}
+
+	/**
+	 * 获取结束日志。
+	 * 
+	 * @return
+	 */
+	protected abstract String getFinishLog();
+
+	/**
+	 * 写一条数据日志。
+	 * 
+	 * @param dataIndex
+	 * @param log
+	 */
+	protected void writeDataLog(int dataIndex, String log)
+	{
+		writeLogLine("[" + (dataIndex + 1) + "] " + log);
+	}
+
+	/**
+	 * 写一行日志。
+	 * 
+	 * @param log
+	 * @return
+	 */
+	protected boolean writeLogLine(String log)
+	{
+		if (this._logWriter == null)
+			return false;
+
+		try
+		{
+			this._logWriter.write(log);
+			this._logWriter.write(LINE_SEPARATOR);
+
+			return true;
+		}
+		catch (Throwable t)
+		{
+			LOGGER.error("write log error", t);
+
+			return false;
+		}
 	}
 
 	/**

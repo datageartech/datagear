@@ -7,7 +7,6 @@ package org.datagear.dataexchange;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * 表{@linkplain Query}。
@@ -41,7 +40,7 @@ public class TableQuery extends AbstractQuery
 	}
 
 	@Override
-	public ResultSet execute(Connection cn) throws SQLException
+	public ResultSet execute(Connection cn) throws Throwable
 	{
 		DatabaseMetaData metaData = cn.getMetaData();
 

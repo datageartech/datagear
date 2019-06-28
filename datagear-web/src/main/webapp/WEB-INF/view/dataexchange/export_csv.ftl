@@ -103,7 +103,7 @@ Schema schema 数据库，不允许为null
 (function(po)
 {
 	po.dataExchangeChannelId = "${dataExchangeChannelId}";
-	po.subDataExchangeStatusColumnIndex = 4;
+	po.subDataExchangeStatusColumnIndex = 3;
 	
 	po.cometdInitIfNot();
 	po.element(".form-content").steps(
@@ -176,7 +176,7 @@ Schema schema 数据库，不允许为null
 					return;
 				
 				for(var i=0; i<tableNames.length; i++)
-					po.addSubDataExchange(tableNames[i], $.toValidFileName(tableNames[i]));
+					po.addSubDataExchange(tableNames[i], $.toValidFileName(tableNames[i])+".csv");
 			},
 			complete : function()
 			{
@@ -264,6 +264,11 @@ Schema schema 数据库，不允许为null
 		{
 			po.deleteRow(rowIndexes);
 		});
+	});
+	
+	po.element(".table-cancel-export-button").click(function()
+	{
+		po.cancelSelectedSubDataExchange();
 	});
 	
 	po.table().on("click", ".input-in-table", function(event)

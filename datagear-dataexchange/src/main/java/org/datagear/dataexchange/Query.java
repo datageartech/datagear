@@ -6,7 +6,6 @@ package org.datagear.dataexchange;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * 查询。
@@ -21,7 +20,7 @@ public interface Query
 	 * 
 	 * @param cn
 	 * @return
-	 * @throws SQLException
+	 * @throws Throwable
 	 */
-	ResultSet execute(Connection cn) throws SQLException;
+	ResultSet execute(Connection cn) throws Throwable;
 }

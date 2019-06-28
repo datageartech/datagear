@@ -21,9 +21,9 @@ public abstract class QueryTextDataExport extends TextDataExport
 	}
 
 	public QueryTextDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat,
-			boolean nullForUnsupportedColumn, Query query)
+			TextDataExportOption exportOption, Query query)
 	{
-		super(connectionFactory, dataFormat, nullForUnsupportedColumn);
+		super(connectionFactory, dataFormat, exportOption);
 		this.query = query;
 	}
 

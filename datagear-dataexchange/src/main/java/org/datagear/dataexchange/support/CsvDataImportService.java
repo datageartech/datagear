@@ -122,12 +122,12 @@ public class CsvDataImportService extends AbstractDevotedTextDataImportService<C
 		}
 		finally
 		{
-			if (listener != null)
-				listener.onFinish();
-
 			releaseResource(dataExchange.getReaderFactory(), csvReader);
 			JdbcUtil.closeStatement(st);
 			releaseResource(connectionFactory, cn);
+
+			if (listener != null)
+				listener.onFinish();
 		}
 	}
 
