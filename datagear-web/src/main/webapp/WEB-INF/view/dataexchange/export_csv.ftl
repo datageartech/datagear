@@ -155,12 +155,25 @@ Schema schema 数据库，不允许为null
 		if(fileName == null)
 			fileName = "";
 		
-		if(!po.nextSubDataExchangeIdSeq)
-			po.nextSubDataExchangeIdSeq = 0;
+		if(!$.isArray(query))
+			query = [ query ];
 		
-		var subDataExchangeId = po.dataExchangeId + "_" + (po.nextSubDataExchangeIdSeq++);
+		if(!$.isArray(fileName))
+			fileName = [ fileName ];
 		
-		po.addRowData({subDataExchangeId : subDataExchangeId, query : query, fileName : fileName, status : ""});
+		var rowDatas = [];
+		
+		for(var i=0; i< query.length; i++)
+		{
+			if(!po.nextSubDataExchangeIdSeq)
+				po.nextSubDataExchangeIdSeq = 0;
+			
+			var subDataExchangeId = po.dataExchangeId + "_" + (po.nextSubDataExchangeIdSeq++);
+			
+			rowDatas.push({subDataExchangeId : subDataExchangeId, query : query[i], fileName : fileName[i], status : ""});
+		}
+		
+		po.addRowData(rowDatas);
 	};
 	
 	po.addAllTable = function()
@@ -178,8 +191,13 @@ Schema schema 数据库，不允许为null
 				if(!tableNames)
 					return;
 				
+				var queries = tableNames;
+				var fileNames = [];
+				
 				for(var i=0; i<tableNames.length; i++)
-					po.addSubDataExchange(tableNames[i], $.toValidFileName(tableNames[i])+".csv");
+					fileNames[i] = $.toValidFileName(tableNames[i])+".csv";
+				
+				po.addSubDataExchange(queries, fileNames);
 			},
 			complete : function()
 			{
