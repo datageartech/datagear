@@ -116,7 +116,15 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	
 	po.getSubDataExchangeRowIndex = function(dataTable, subDataExchangeId)
 	{
-		var rowIndex = -1;
+		if(!po.subDataExchangeIdRowIndexMap)
+			po.subDataExchangeIdRowIndexMap = {};
+		
+		var rowIndex = po.subDataExchangeIdRowIndexMap[subDataExchangeId];
+		
+		if(rowIndex > -1)
+			return rowIndex;
+		
+		rowIndex = -1;
 		
 		var rowDatas = dataTable.rows().data();
 		for(var i=0; i<rowDatas.length; i++)
@@ -128,21 +136,57 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			}
 		}
 		
+		po.subDataExchangeIdRowIndexMap[subDataExchangeId] = rowIndex;
+		
 		return rowIndex;
 	};
 	
 	po.updateSubDataExchangeStatus = function(subDataExchangeId, status)
 	{
-		var dataTable = po.getSubDataExchangeDataTable();
+		if(!po.updateSubDataExchangeStatusCache)
+			po.updateSubDataExchangeStatusCache = {};
+
+		if(subDataExchangeId != undefined)
+			po.updateSubDataExchangeStatusCache[subDataExchangeId] = status;
 		
-		var rowIndex = po.getSubDataExchangeRowIndex(dataTable, subDataExchangeId);
+		var flush = (subDataExchangeId == undefined);
+		if(!flush)
+		{
+			var time = new Date().getTime();
+			
+			if(!po.prevFlushSubDataExchangeStatusTime)
+				po.prevFlushSubDataExchangeStatusTime = time;
+			
+			if((time - po.prevFlushSubDataExchangeStatusTime) >= 500)
+				flush = true;
+		}
 		
-		if(rowIndex < 0)
+		if(!flush)
 			return false;
 		
-		var cellIndex = { "row" : rowIndex, "column" : po.subDataExchangeStatusColumnIndex };
-		var cell = dataTable.cell(cellIndex);
-		cell.data(status).draw();
+		var dataTable = po.getSubDataExchangeDataTable();
+		
+		var cells = [];
+		
+		for(var subDataExchangeId in po.updateSubDataExchangeStatusCache)
+		{
+			var rowIndex = po.getSubDataExchangeRowIndex(dataTable, subDataExchangeId);
+			var status = po.updateSubDataExchangeStatusCache[subDataExchangeId];
+			
+			if(rowIndex < 0)
+				continue;
+			
+			var cellIndex = { "row" : rowIndex, "column" : po.subDataExchangeStatusColumnIndex };
+			var cell = dataTable.cell(cellIndex);
+			cell.data(status);
+			
+			cells.push(cellIndex);
+		}
+		
+		//统一绘制，效率更高
+		dataTable.cells(cells).draw();
+		
+		po.prevFlushSubDataExchangeStatusTime = new Date().getTime();
 		
 		return true;
 	};
@@ -222,6 +266,8 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			po.subDataExchangeCount = dataTable.rows().indexes().length;
 			po.subDataExchangeFinishCount=0;
 			po.subDataExchangeExceptionMessages = {};
+			po.subDataExchangeIdRowIndexMap = {};
+			po.updateSubDataExchangeStatusCache = {};
 			
 			po.updateDataExchangePageStatus("exchange");
 		}
@@ -317,6 +363,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		}
 		else if("Finish" == type)
 		{
+			po.updateSubDataExchangeStatus();
 			po.setDataExchangeProgress(100, message.duration);
 			po.updateDataExchangePageStatus("finish");
 		}
