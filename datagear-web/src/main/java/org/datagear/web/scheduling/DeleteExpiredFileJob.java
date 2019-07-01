@@ -6,8 +6,13 @@ package org.datagear.web.scheduling;
 
 import java.io.File;
 
+import org.datagear.connection.IOUtil;
+
 /**
  * 删除过期文件任务。
+ * <p>
+ * 此类不会删除{@linkplain #getDirectory()}。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -75,32 +80,66 @@ public class DeleteExpiredFileJob
 	 */
 	public void delete()
 	{
-		if (!this.directory.exists())
-			return;
-
-		long time = new java.util.Date().getTime() - this.expireThresholdMinutes * 1000 * 60;
-
-		File[] children = this.directory.listFiles();
-
-		for (File child : children)
+		if (this.directory.exists())
 		{
-			boolean deleted = true;
+			long time = new java.util.Date().getTime() - this.expireThresholdMinutes * 1000 * 60;
 
-			if (this.ignoreFileNames != null)
+			File[] children = this.directory.listFiles();
+
+			for (File child : children)
 			{
-				for (String ignoreFileName : this.ignoreFileNames)
+				boolean deleted = true;
+
+				if (this.ignoreFileNames != null)
 				{
-					if (child.getName().equals(ignoreFileName))
+					for (String ignoreFileName : this.ignoreFileNames)
 					{
-						deleted = false;
-						break;
+						if (child.getName().equals(ignoreFileName))
+						{
+							deleted = false;
+							break;
+						}
 					}
 				}
-			}
 
-			if (deleted && isModifiedBefore(child, time))
-				deleteFile(child);
+				if (deleted)
+					deleteFileIfModifiedBefore(child, time);
+			}
 		}
+	}
+
+	protected boolean deleteFileIfModifiedBefore(File file, long beforeTime)
+	{
+		if (!file.exists())
+			return true;
+
+		boolean delete = false;
+
+		if (isModifiedBefore(file, beforeTime))
+			delete = true;
+		else
+		{
+			if (file.isDirectory())
+			{
+				File[] children = file.listFiles();
+
+				int deleteCount = 0;
+
+				for (File child : children)
+				{
+					if (deleteFileIfModifiedBefore(child, beforeTime))
+						deleteCount++;
+				}
+
+				if (deleteCount == children.length)
+					delete = true;
+			}
+		}
+
+		if (delete)
+			IOUtil.deleteFile(file);
+
+		return delete;
 	}
 
 	protected boolean isModifiedBefore(File file, long time)
@@ -108,21 +147,5 @@ public class DeleteExpiredFileJob
 		long lastModified = file.lastModified();
 
 		return lastModified < time;
-	}
-
-	protected void deleteFile(File file)
-	{
-		if (!file.exists())
-			return;
-
-		if (file.isDirectory())
-		{
-			File[] children = file.listFiles();
-
-			for (File child : children)
-				deleteFile(child);
-		}
-
-		file.delete();
 	}
 }

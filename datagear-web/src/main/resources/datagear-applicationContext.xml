@@ -420,17 +420,17 @@
 	<!-- 定时任务开始 -->
 	
 	<!-- 删除过期的BLOB文件 -->
-	<bean id="deleteExpiredFileJob" class="org.datagear.web.scheduling.DeleteExpiredFileJob">
+	<bean id="deleteExpiredBlobJob" class="org.datagear.web.scheduling.DeleteExpiredFileJob">
 		<property name="directory" ref="blobFileManagerDirectory" />
 		<property name="ignoreFileName" ref="blobToFilePlaceholderName" />
 		<property name="expireThresholdMinutes" value="60" />
 	</bean>
-	<bean id="deleteExpiredFileJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="deleteExpiredFileJob" />
+	<bean id="deleteExpiredBlobJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="deleteExpiredBlobJob" />
 		<property name="targetMethod" value="delete" />
 	</bean>
-	<bean id="deleteExpiredFileJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<property name="jobDetail" ref="deleteExpiredFileJobDetail" />
+	<bean id="deleteExpiredBlobJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="deleteExpiredBlobJobDetail" />
 		<property name="cronExpression" value="0 0,30 * * * ?" /><!-- 每半小时 -->
 	</bean>
 	
@@ -481,7 +481,7 @@
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
 			<list>
-				<ref bean="deleteExpiredFileJobCronTrigger" />
+				<ref bean="deleteExpiredBlobJobCronTrigger" />
 				<ref bean="handleResetPasswordRequestJobCronTrigger" />
 				<ref bean="deleteExpiredResetPasswordRequestHistoryJobCronTrigger" />
 				<ref bean="deleteTempFileJobCronTrigger" />
