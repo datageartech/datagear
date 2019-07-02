@@ -134,6 +134,7 @@ Schema schema 数据库，不允许为null
 
 <#include "../include/page_js_obj.ftl">
 <#include "../include/page_obj_tabs.ftl" >
+<#include "../include/page_obj_cometd.ftl">
 <#include "../include/page_obj_format_time.ftl" >
 <script type="text/javascript">
 (function(po)
@@ -149,6 +150,8 @@ Schema schema 数据库，不允许为null
 	$.initButtons(po.element(".head, .result-operations"));
 	po.element("#sqlCommitModeSet").buttonset();
 	po.element("#sqlExceptionHandleModeSet").buttonset();
+	
+	po.cometdInitIfNot();
 	
 	po.sqlEditorCompleters =
 	[
@@ -289,32 +292,6 @@ Schema schema 数据库，不允许为null
 			delimiter = ";";
 			
 		return delimiter;
-	};
-	
-	po.executeSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize)
-	{
-		if(po.cometdSubscribed)
-		{
-			po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
-		}
-		else
-		{
-			var cometd = $.cometd;
-			
-			cometd.subscribe(po.sqlpadChannelId, function(message)
-			{
-				po.handleMessage(message);
-			},
-			function(subscribeReply)
-			{
-				if(subscribeReply.successful)
-				{
-					po.cometdSubscribed = true;
-					
-					po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
-				}
-			});
-		}
 	};
 	
 	po.requestExecuteSql = function(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize)
@@ -954,23 +931,17 @@ Schema schema 数据库，不允许为null
 			var overTimeThreashold = po.getOverTimeThreashold(moreOperationForm);
 			var resultsetFetchSize = po.getResultsetFetchSize(moreOperationForm);
 			
-			var cometd = $.cometd;
-			
 			po.updateExecuteSqlButtonState($this, "executing");
 			
-			if(!$.isCometdInit)
+			po.cometdExecuteAfterSubscribe(po.sqlpadChannelId,
+			function()
 			{
-				$.isCometdInit = true;
-				cometd.init("${contextPath}/cometd", function(handshakeReply)
-				{
-					if(handshakeReply.successful)
-					{
-						po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
-					}
-				});
-			}
-			else
-				po.executeSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
+				po.requestExecuteSql(sql, sqlStartRow, sqlStartColumn, commitMode, exceptionHandleMode, overTimeThreashold, resultsetFetchSize);
+			},
+			function(message)
+			{
+				po.handleMessage(message);
+			});
 		}
 		
 		po.sqlEditor.focus();
