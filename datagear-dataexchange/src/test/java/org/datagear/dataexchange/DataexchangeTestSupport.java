@@ -10,9 +10,11 @@ import java.io.Reader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -130,6 +132,12 @@ public abstract class DataexchangeTestSupport extends DBTestSupport
 			public Connection getConnection() throws SQLException
 			{
 				return DataexchangeTestSupport.this.getConnection();
+			}
+
+			//@Override
+			public Logger getParentLogger() throws SQLFeatureNotSupportedException
+			{
+				throw new SQLFeatureNotSupportedException();
 			}
 		};
 	}

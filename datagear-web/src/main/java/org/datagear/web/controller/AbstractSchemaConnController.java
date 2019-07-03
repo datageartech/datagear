@@ -7,6 +7,8 @@ package org.datagear.web.controller;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -421,6 +423,12 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		public Connection getConnection(String username, String password) throws SQLException
 		{
 			throw new UnsupportedOperationException();
+		}
+		
+		//@Override
+		public Logger getParentLogger() throws SQLFeatureNotSupportedException
+		{
+			throw new SQLFeatureNotSupportedException();
 		}
 	}
 }
