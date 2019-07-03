@@ -127,9 +127,8 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 
 		final AtomicInteger submitSuccessCount = new AtomicInteger(0);
 
-		BatchDataExchange batchDataImport = new SimpleBatchDataExchange(connectionFactory, subDataExchanges);
-		batchDataImport.setWaitForFinish(true);
-		batchDataImport.setListener(new BatchDataExchangeListener()
+		BatchDataExchange batchDataExchange = new SimpleBatchDataExchange(connectionFactory, subDataExchanges);
+		batchDataExchange.setListener(new BatchDataExchangeListener()
 		{
 			@Override
 			public void onStart()
@@ -182,7 +181,9 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		{
 			clearTable(cn, TABLE_NAME);
 
-			this.batchDataExchangeService.exchange(batchDataImport);
+			this.batchDataExchangeService.exchange(batchDataExchange);
+
+			batchDataExchange.getContext().waitForFinish();
 
 			int count = getCount(cn, TABLE_NAME);
 

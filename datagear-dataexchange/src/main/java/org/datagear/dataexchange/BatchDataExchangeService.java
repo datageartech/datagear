@@ -71,20 +71,18 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		if (listener != null)
 			listener.onStart();
 
-		BatchDataExchangeContext context = null;
+		BatchDataExchangeContextImpl context = null;
 
 		try
 		{
 			Set<SubDataExchange> subDataExchanges = getSubDataExchanges(dataExchange);
-			context = buildBatchDataExchangeContext(dataExchange, subDataExchanges);
+			context = buildBatchDataExchangeContextImpl(dataExchange, subDataExchanges);
+			dataExchange.setContext(context);
 
 			context.submitIndependents();
 
 			if (listener != null)
 				listener.onSuccess();
-
-			if (dataExchange.isWaitForFinish())
-				context.waitForFinish();
 		}
 		catch (Throwable t)
 		{
@@ -121,10 +119,10 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		return this.executorService.isShutdown();
 	}
 
-	protected BatchDataExchangeContext buildBatchDataExchangeContext(T dataExchange,
+	protected BatchDataExchangeContextImpl buildBatchDataExchangeContextImpl(T dataExchange,
 			Set<SubDataExchange> subDataExchanges)
 	{
-		BatchDataExchangeContext context = new BatchDataExchangeContext(subDataExchanges.size(), subDataExchanges,
+		BatchDataExchangeContextImpl context = new BatchDataExchangeContextImpl(subDataExchanges.size(), subDataExchanges,
 				this.subDataExchangeService, this.executorService);
 		context.setListener(dataExchange.getListener());
 
@@ -142,7 +140,7 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class BatchDataExchangeContext
+	protected static class BatchDataExchangeContextImpl implements BatchDataExchangeContext
 	{
 		private final int subTotal;
 		private final Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
@@ -161,7 +159,7 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 
 		private final CountDownLatch _finishCountDownLatch = new CountDownLatch(1);
 
-		public BatchDataExchangeContext(int subTotal, Set<SubDataExchange> subDataExchanges,
+		public BatchDataExchangeContextImpl(int subTotal, Set<SubDataExchange> subDataExchanges,
 				DataExchangeService<?> subDataExchangeService, ExecutorService executorService)
 		{
 			super();
@@ -201,6 +199,7 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 			this.listener = listener;
 		}
 
+		@Override
 		public void waitForFinish() throws InterruptedException
 		{
 			this._finishCountDownLatch.await();
@@ -338,6 +337,13 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 			return subsequents;
 		}
 
+		@Override
+		public boolean[] cancel(String... subDataExchangeIds)
+		{
+			// TODO
+			return null;
+		}
+
 		protected void onBatchFinish()
 		{
 			this._finishCountDownLatch.countDown();
@@ -386,13 +392,13 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 	 */
 	protected static class SubDataExchangeFutureTask extends FutureTask<SubDataExchange>
 	{
-		private BatchDataExchangeContext batchDataExchangeContext;
+		private BatchDataExchangeContextImpl batchDataExchangeContext;
 
 		private SubDataExchange subDataExchange;
 
 		private BatchDataExchangeListener listener;
 
-		public SubDataExchangeFutureTask(BatchDataExchangeContext batchDataExchangeContext,
+		public SubDataExchangeFutureTask(BatchDataExchangeContextImpl batchDataExchangeContext,
 				DataExchangeService<?> subDataExchangeService, SubDataExchange subDataExchange)
 		{
 			super(new SubDataExchangeRunnable(subDataExchangeService, subDataExchange.getDataExchange()),
@@ -401,7 +407,7 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 			this.subDataExchange = subDataExchange;
 		}
 
-		public BatchDataExchangeContext getBatchDataExchangeContext()
+		public BatchDataExchangeContextImpl getBatchDataExchangeContext()
 		{
 			return batchDataExchangeContext;
 		}

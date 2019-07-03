@@ -9,10 +9,7 @@ import java.util.Set;
 /**
  * 批量数据交换。
  * <p>
- * 在调用{@linkplain DataExchangeService#exchange(DataExchange)}后，可通过{@linkplain #getResults()}获取执行结果。
- * </p>
- * <p>
- * 如果{@linkplain #getResults()}某个位置的元素为{@code null}，表明对应子数据交换任务提交失败。
+ * 在调用{@linkplain DataExchangeService#exchange(DataExchange)}后，可通过{@linkplain #getContext()}获取执行上下文。
  * </p>
  * 
  * @author datagear@163.com
@@ -20,10 +17,9 @@ import java.util.Set;
  */
 public abstract class BatchDataExchange extends DataExchange
 {
-	/** 是否同步等待完成 */
-	private boolean waitForFinish = false;
-
 	private BatchDataExchangeListener listener;
+	
+	private BatchDataExchangeContext context;
 
 	public BatchDataExchange()
 	{
@@ -35,16 +31,6 @@ public abstract class BatchDataExchange extends DataExchange
 		super(connectionFactory);
 	}
 
-	public boolean isWaitForFinish()
-	{
-		return waitForFinish;
-	}
-
-	public void setWaitForFinish(boolean waitForFinish)
-	{
-		this.waitForFinish = waitForFinish;
-	}
-
 	@Override
 	public BatchDataExchangeListener getListener()
 	{
@@ -54,6 +40,14 @@ public abstract class BatchDataExchange extends DataExchange
 	public void setListener(BatchDataExchangeListener listener)
 	{
 		this.listener = listener;
+	}
+
+	public BatchDataExchangeContext getContext() {
+		return context;
+	}
+
+	public void setContext(BatchDataExchangeContext context) {
+		this.context = context;
 	}
 
 	/**
