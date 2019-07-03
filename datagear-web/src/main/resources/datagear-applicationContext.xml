@@ -407,7 +407,7 @@
     				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
     			</bean>
     			<bean class="org.datagear.dataexchange.BatchDataExchangeService" destroy-method="shutdown">
-    				<property name="delegateDataExchangeService" ref="dataExchangeService" />
+    				<property name="subDataExchangeService" ref="dataExchangeService" />
     			</bean>
     		</list>
     	</property>

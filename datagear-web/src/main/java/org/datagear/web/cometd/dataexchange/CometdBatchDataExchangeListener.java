@@ -8,8 +8,8 @@ import java.util.Locale;
 
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.BatchDataExchangeListener;
-import org.datagear.dataexchange.DataExchange;
 import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.SubDataExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -21,12 +21,9 @@ import org.springframework.context.MessageSource;
  *
  * @param <T>
  */
-public class CometdBatchDataExchangeListener<T extends DataExchange> extends CometdDataExchangeListener
-		implements BatchDataExchangeListener<T>
+public class CometdBatchDataExchangeListener extends CometdDataExchangeListener implements BatchDataExchangeListener
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(CometdBatchDataExchangeListener.class);
-
-	private String[] subDataExchangeIds;
 
 	public CometdBatchDataExchangeListener()
 	{
@@ -34,54 +31,27 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	}
 
 	public CometdBatchDataExchangeListener(DataExchangeCometdService dataExchangeCometdService,
-			ServerChannel dataExchangeServerChannel, MessageSource messageSource, Locale locale,
-			String[] subDataExchangeIds)
+			ServerChannel dataExchangeServerChannel, MessageSource messageSource, Locale locale)
 	{
 		super(dataExchangeCometdService, dataExchangeServerChannel, messageSource, locale);
-		this.subDataExchangeIds = subDataExchangeIds;
-	}
-
-	public String[] getSubDataExchangeIds()
-	{
-		return subDataExchangeIds;
-	}
-
-	public void setSubDataExchangeIds(String[] subDataExchangeIds)
-	{
-		this.subDataExchangeIds = subDataExchangeIds;
 	}
 
 	@Override
-	public void onSubmitSuccess(T subDataExchange, int subDataExchangeIndex)
+	public void onSubmitSuccess(SubDataExchange subDataExchange)
 	{
-		String subDataExchangeId = getSubDataExchangeId(subDataExchangeIndex);
-
-		if (subDataExchange == null)
-			return;
-
-		sendMessage(new SubSubmitSuccess(subDataExchangeId));
+		sendMessage(new SubSubmitSuccess(subDataExchange.getId()));
 	}
 
 	@Override
-	public void onSubmitFail(T subDataExchange, int subDataExchangeIndex, Throwable cause)
+	public void onSubmitFail(SubDataExchange subDataExchange, Throwable cause)
 	{
-		String subDataExchangeId = getSubDataExchangeId(subDataExchangeIndex);
-
-		if (subDataExchange == null)
-			return;
-
-		sendMessage(new SubSubmitFail(subDataExchangeId));
+		sendMessage(new SubSubmitFail(subDataExchange.getId()));
 	}
 
 	@Override
-	public void onCancel(T subDataExchange, int subDataExchangeIndex)
+	public void onCancel(SubDataExchange subDataExchange)
 	{
-		String subDataExchangeId = getSubDataExchangeId(subDataExchangeIndex);
-
-		if (subDataExchange == null)
-			return;
-
-		sendMessage(new SubCancelSuccess(subDataExchangeId));
+		sendMessage(new SubCancelSuccess(subDataExchange.getId()));
 	}
 
 	@Override
@@ -106,29 +76,6 @@ public class CometdBatchDataExchangeListener<T extends DataExchange> extends Com
 	protected DataExchangeMessage buildFinishMessage()
 	{
 		return new Finish(evalDuration());
-	}
-
-	/**
-	 * 获取子数据交换ID。
-	 * <p>
-	 * 出现任何异常将返回{@code null}。
-	 * </p>
-	 * 
-	 * @param subDataExchangeIndex
-	 * @return
-	 */
-	protected String getSubDataExchangeId(int subDataExchangeIndex)
-	{
-		try
-		{
-			return this.subDataExchangeIds[subDataExchangeIndex];
-		}
-		catch (Throwable t)
-		{
-			LOGGER.error("getSubDataExchangeId error", t);
-
-			return null;
-		}
 	}
 
 	/**
