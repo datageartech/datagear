@@ -4,13 +4,12 @@
 
 package org.datagear.dataexchange;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,12 +24,11 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T>
  */
-public class BatchDataExchangeService<G extends DataExchange, T extends BatchDataExchange<G>>
-		extends AbstractDevotedDataExchangeService<T>
+public class BatchDataExchangeService<T extends BatchDataExchange> extends AbstractDevotedDataExchangeService<T>
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BatchDataExchangeService.class);
 
-	private DataExchangeService<? super G> delegateDataExchangeService;
+	private DataExchangeService<?> subDataExchangeService;
 
 	private ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -39,20 +37,20 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 		super();
 	}
 
-	public BatchDataExchangeService(DataExchangeService<? super G> delegateDataExchangeService)
+	public BatchDataExchangeService(DataExchangeService<?> subDataExchangeService)
 	{
 		super();
-		this.delegateDataExchangeService = delegateDataExchangeService;
+		this.subDataExchangeService = subDataExchangeService;
 	}
 
-	public DataExchangeService<? super G> getDelegateDataExchangeService()
+	public DataExchangeService<?> getSubDataExchangeService()
 	{
-		return delegateDataExchangeService;
+		return subDataExchangeService;
 	}
 
-	public void setDelegateDataExchangeService(DataExchangeService<? super G> delegateDataExchangeService)
+	public void setSubDataExchangeService(DataExchangeService<?> subDataExchangeService)
 	{
-		this.delegateDataExchangeService = delegateDataExchangeService;
+		this.subDataExchangeService = subDataExchangeService;
 	}
 
 	public ExecutorService getExecutorService()
@@ -68,21 +66,25 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 	@Override
 	public void exchange(T dataExchange) throws DataExchangeException
 	{
-		BatchDataExchangeListener<G> listener = dataExchange.getListener();
+		BatchDataExchangeListener listener = dataExchange.getListener();
 
 		if (listener != null)
 			listener.onStart();
 
-		List<Future<G>> results = new ArrayList<Future<G>>();
-		dataExchange.setResults(results);
+		BatchDataExchangeContext context = null;
 
 		try
 		{
-			List<G> subDataExchanges = getSubDataExchanges(dataExchange);
-			exchange(this.executorService, dataExchange, subDataExchanges, results);
+			Set<SubDataExchange> subDataExchanges = getSubDataExchanges(dataExchange);
+			context = buildBatchDataExchangeContext(dataExchange, subDataExchanges);
+
+			context.submitIndependents();
 
 			if (listener != null)
 				listener.onSuccess();
+
+			if (dataExchange.isWaitForFinish())
+				context.waitForFinish();
 		}
 		catch (Throwable t)
 		{
@@ -96,7 +98,7 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 		finally
 		{
 			// 没有任何子任务提交成功，那么需要在这里调用onFinish
-			if (listener != null && isNoneSubmitSuccess(results))
+			if (listener != null && context.getSubSubmitSuccessCount() == 0)
 				listener.onFinish();
 		}
 	}
@@ -119,121 +121,260 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 		return this.executorService.isShutdown();
 	}
 
-	/**
-	 * 是否没有任一提交成功。
-	 * 
-	 * @param results
-	 * @return
-	 */
-	protected boolean isNoneSubmitSuccess(List<Future<G>> results)
+	protected BatchDataExchangeContext buildBatchDataExchangeContext(T dataExchange,
+			Set<SubDataExchange> subDataExchanges)
 	{
-		if (results == null)
-			return true;
+		BatchDataExchangeContext context = new BatchDataExchangeContext(subDataExchanges.size(), subDataExchanges,
+				this.subDataExchangeService, this.executorService);
+		context.setListener(dataExchange.getListener());
 
-		boolean noneSubmitSuccess = true;
-
-		int size = results.size();
-
-		for (int i = 0; i < size; i++)
-		{
-			if (results.get(i) != null)
-			{
-				noneSubmitSuccess = false;
-				break;
-			}
-		}
-
-		return noneSubmitSuccess;
+		return context;
 	}
 
-	/**
-	 * 使用{@linkplain ExecutorService}进行数据交换。
-	 * 
-	 * @param executorService
-	 * @param dataExchange
-	 * @param subDataExchanges
-	 * @param results
-	 */
-	protected void exchange(ExecutorService executorService, T dataExchange, List<G> subDataExchanges,
-			List<Future<G>> results)
-	{
-		BatchDataExchangeListener<G> listener = dataExchange.getListener();
-
-		int size = subDataExchanges.size();
-
-		AtomicInteger taskSubmitSuccessCount = new AtomicInteger(0);
-		CountDownLatch submitFinishLatch = new CountDownLatch(1);
-		AtomicInteger taskFinishCount = new AtomicInteger(0);
-
-		try
-		{
-			for (int i = 0; i < size; i++)
-			{
-				G subDataExchange = subDataExchanges.get(i);
-
-				SubDataExchangeFutureTask<G> futureTask = null;
-				Throwable submitFailThrowable = null;
-
-				try
-				{
-					futureTask = buildSubDataExchangeFutureTask(dataExchange, subDataExchange, i,
-							taskSubmitSuccessCount, submitFinishLatch, taskFinishCount);
-					executorService.submit(futureTask);
-
-					taskSubmitSuccessCount.incrementAndGet();
-				}
-				catch (Throwable t)
-				{
-					futureTask = null;
-					submitFailThrowable = t;
-
-					LOGGER.error("submit exchange task error", t);
-				}
-
-				results.add(futureTask);
-
-				if (listener != null)
-				{
-					if (submitFailThrowable == null)
-						listener.onSubmitSuccess(subDataExchange, i);
-					else
-						listener.onSubmitFail(subDataExchange, i, submitFailThrowable);
-				}
-			}
-		}
-		finally
-		{
-			submitFinishLatch.countDown();
-		}
-	}
-
-	/**
-	 * 构建{@linkplain SubDataExchangeFutureTask}。
-	 * 
-	 * @param dataExchange
-	 * @param subDataExchange
-	 * @param subDataExchangeIndex
-	 * @param taskSubmitSuccessCount
-	 * @param submitFinishLatch
-	 * @param taskFinishCount
-	 * @return
-	 */
-	protected SubDataExchangeFutureTask<G> buildSubDataExchangeFutureTask(T dataExchange, G subDataExchange,
-			int subDataExchangeIndex, AtomicInteger taskSubmitSuccessCount, CountDownLatch submitFinishLatch,
-			AtomicInteger taskFinishCount)
-	{
-		SubDataExchangeFutureTask<G> futureTask = new SubDataExchangeFutureTask<G>(this.delegateDataExchangeService,
-				subDataExchange, subDataExchangeIndex, taskSubmitSuccessCount, submitFinishLatch, taskFinishCount);
-
-		BatchDataExchangeListener<G> listener = dataExchange.getListener();
-		futureTask.setListener(listener);
-
-		return futureTask;
-	}
-
-	protected List<G> getSubDataExchanges(T dataExchange)
+	protected Set<SubDataExchange> getSubDataExchanges(T dataExchange) throws DataExchangeException
 	{
 		return dataExchange.getSubDataExchanges();
+	}
+
+	/**
+	 * 批处理数据交换上下文。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class BatchDataExchangeContext
+	{
+		private final int subTotal;
+		private final Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+		private final DataExchangeService<?> subDataExchangeService;
+		private final ExecutorService executorService;
+
+		private BatchDataExchangeListener listener;
+
+		private final AtomicInteger _subSubmitSuccessCount = new AtomicInteger(0);
+
+		private int _subSubmitFailCount = 0;
+		private int _subFinishCount = 0;
+
+		private final Object _countLock = new Object();
+		private final Object _subDataExchangesLock = new Object();
+
+		private final CountDownLatch _finishCountDownLatch = new CountDownLatch(1);
+
+		public BatchDataExchangeContext(int subTotal, Set<SubDataExchange> subDataExchanges,
+				DataExchangeService<?> subDataExchangeService, ExecutorService executorService)
+		{
+			super();
+			this.subTotal = subTotal;
+			this.subDataExchanges.addAll(subDataExchanges);
+			this.subDataExchangeService = subDataExchangeService;
+			this.executorService = executorService;
+		}
+
+		public int getSubTotal()
+		{
+			return subTotal;
+		}
+
+		public Set<SubDataExchange> getSubDataExchanges()
+		{
+			return subDataExchanges;
+		}
+
+		public DataExchangeService<?> getSubDataExchangeService()
+		{
+			return subDataExchangeService;
+		}
+
+		public ExecutorService getExecutorService()
+		{
+			return executorService;
+		}
+
+		public BatchDataExchangeListener getListener()
+		{
+			return listener;
+		}
+
+		public void setListener(BatchDataExchangeListener listener)
+		{
+			this.listener = listener;
+		}
+
+		public void waitForFinish() throws InterruptedException
+		{
+			this._finishCountDownLatch.await();
+		}
+
+		public int getSubSubmitSuccessCount()
+		{
+			return this._subSubmitSuccessCount.intValue();
+		}
+
+		public void incrementSubSubmitSuccessCount()
+		{
+			this._subSubmitSuccessCount.incrementAndGet();
+		}
+
+		public void incrementSubSubmitFailCount()
+		{
+			boolean finish = false;
+
+			synchronized (this._countLock)
+			{
+				this._subSubmitFailCount++;
+
+				if ((this._subSubmitFailCount + this._subFinishCount) == this.subTotal)
+					finish = true;
+			}
+
+			if (finish)
+				onBatchFinish();
+		}
+
+		public void incrementSubFinishCount()
+		{
+			boolean finish = false;
+
+			synchronized (this._countLock)
+			{
+				this._subFinishCount++;
+
+				if ((this._subSubmitFailCount + this._subFinishCount) == this.subTotal)
+					finish = true;
+			}
+
+			if (finish)
+				onBatchFinish();
+		}
+
+		/**
+		 * 提交没有依赖的子数据交换。
+		 */
+		public void submitIndependents()
+		{
+			Set<SubDataExchange> independents = getIndependents();
+
+			for (SubDataExchange subDataExchange : independents)
+			{
+				SubDataExchangeFutureTask task = buildSubDataExchangeFutureTask(subDataExchange);
+				submit(task);
+			}
+		}
+
+		/**
+		 * 提交所有后置子数据交换。
+		 * 
+		 * @param subDataExchange
+		 */
+		public void submitSubsequents(SubDataExchange subDataExchange)
+		{
+			Set<SubDataExchange> subsequents = getSubsequents(subDataExchange);
+
+			for (SubDataExchange subsequent : subsequents)
+			{
+				SubDataExchangeFutureTask task = buildSubDataExchangeFutureTask(subsequent);
+				submit(task);
+			}
+		}
+
+		/**
+		 * 获取没有依赖的子数据交换Set。
+		 * 
+		 * @return
+		 */
+		public Set<SubDataExchange> getIndependents()
+		{
+			Set<SubDataExchange> independents = new HashSet<SubDataExchange>();
+
+			synchronized (this._subDataExchangesLock)
+			{
+				Iterator<SubDataExchange> iterator = this.subDataExchanges.iterator();
+
+				while (iterator.hasNext())
+				{
+					SubDataExchange next = iterator.next();
+
+					if (!next.hasDependent())
+					{
+						independents.add(next);
+						iterator.remove();
+					}
+				}
+			}
+
+			return independents;
+		}
+
+		/**
+		 * 获取后置的子数据交换Set。
+		 * 
+		 * @param subDataExchange
+		 * @return
+		 */
+		public Set<SubDataExchange> getSubsequents(SubDataExchange subDataExchange)
+		{
+			Set<SubDataExchange> subsequents = new HashSet<SubDataExchange>();
+
+			synchronized (this._subDataExchangesLock)
+			{
+				Iterator<SubDataExchange> iterator = this.subDataExchanges.iterator();
+
+				while (iterator.hasNext())
+				{
+					SubDataExchange next = iterator.next();
+
+					if (!next.hasDependent())
+						continue;
+
+					if (next.getDependents().contains(subDataExchange))
+					{
+						subsequents.add(next);
+						iterator.remove();
+					}
+				}
+			}
+
+			return subsequents;
+		}
+
+		protected void onBatchFinish()
+		{
+			this._finishCountDownLatch.countDown();
+
+			if (this.listener != null)
+				this.listener.onFinish();
+		}
+
+		protected void submit(SubDataExchangeFutureTask task)
+		{
+			Throwable submitFailThrowable = null;
+			try
+			{
+				executorService.submit(task);
+				incrementSubSubmitSuccessCount();
+			}
+			catch (Throwable t)
+			{
+				submitFailThrowable = t;
+				incrementSubSubmitFailCount();
+
+				LOGGER.error("submit exchange task error", t);
+			}
+
+			if (this.listener != null)
+			{
+				if (submitFailThrowable == null)
+					listener.onSubmitSuccess(task.getSubDataExchange());
+				else
+					listener.onSubmitFail(task.getSubDataExchange(), submitFailThrowable);
+			}
+		}
+
+		protected SubDataExchangeFutureTask buildSubDataExchangeFutureTask(SubDataExchange subDataExchange)
+		{
+			return new SubDataExchangeFutureTask(this, this.subDataExchangeService, subDataExchange);
+		}
 	}
 
 	/**
@@ -243,113 +384,65 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 	 *
 	 * @param <T>
 	 */
-	protected static class SubDataExchangeFutureTask<T extends DataExchange> extends FutureTask<T>
+	protected static class SubDataExchangeFutureTask extends FutureTask<SubDataExchange>
 	{
-		private T subDataExchange;
+		private BatchDataExchangeContext batchDataExchangeContext;
 
-		private int subDataExchangeIndex;
+		private SubDataExchange subDataExchange;
 
-		private BatchDataExchangeListener<T> listener;
+		private BatchDataExchangeListener listener;
 
-		private AtomicInteger taskSubmitSuccessCount;
-
-		private CountDownLatch submitFinishLatch;
-
-		private AtomicInteger taskFinishCount;
-
-		public SubDataExchangeFutureTask(DataExchangeService<? super T> dataExchangeService, T dataExchange,
-				int dataExchangeIndex, AtomicInteger taskSubmitSuccessCount, CountDownLatch submitFinishLatch,
-				AtomicInteger taskFinishCount)
+		public SubDataExchangeFutureTask(BatchDataExchangeContext batchDataExchangeContext,
+				DataExchangeService<?> subDataExchangeService, SubDataExchange subDataExchange)
 		{
-			super(new SubDataExchangeCallable<T>(dataExchangeService, dataExchange));
-			this.subDataExchange = dataExchange;
-			this.subDataExchangeIndex = dataExchangeIndex;
-			this.taskSubmitSuccessCount = taskSubmitSuccessCount;
-			this.submitFinishLatch = submitFinishLatch;
-			this.taskFinishCount = taskFinishCount;
+			super(new SubDataExchangeRunnable(subDataExchangeService, subDataExchange.getDataExchange()),
+					subDataExchange);
+			this.batchDataExchangeContext = batchDataExchangeContext;
+			this.subDataExchange = subDataExchange;
 		}
 
-		public T getSubDataExchange()
+		public BatchDataExchangeContext getBatchDataExchangeContext()
+		{
+			return batchDataExchangeContext;
+		}
+
+		public SubDataExchange getSubDataExchange()
 		{
 			return subDataExchange;
 		}
 
-		public void setSubDataExchange(T subDataExchange)
-		{
-			this.subDataExchange = subDataExchange;
-		}
-
-		public int getSubDataExchangeIndex()
-		{
-			return subDataExchangeIndex;
-		}
-
-		public void setSubDataExchangeIndex(int subDataExchangeIndex)
-		{
-			this.subDataExchangeIndex = subDataExchangeIndex;
-		}
-
-		public BatchDataExchangeListener<T> getListener()
+		public BatchDataExchangeListener getListener()
 		{
 			return listener;
 		}
 
-		public void setListener(BatchDataExchangeListener<T> listener)
+		public void setListener(BatchDataExchangeListener listener)
 		{
 			this.listener = listener;
-		}
-
-		public AtomicInteger getTaskSubmitSuccessCount()
-		{
-			return taskSubmitSuccessCount;
-		}
-
-		public void setTaskSubmitSuccessCount(AtomicInteger taskSubmitSuccessCount)
-		{
-			this.taskSubmitSuccessCount = taskSubmitSuccessCount;
-		}
-
-		public CountDownLatch getSubmitFinishLatch()
-		{
-			return submitFinishLatch;
-		}
-
-		public void setSubmitFinishLatch(CountDownLatch submitFinishLatch)
-		{
-			this.submitFinishLatch = submitFinishLatch;
-		}
-
-		public AtomicInteger getTaskFinishCount()
-		{
-			return taskFinishCount;
-		}
-
-		public void setTaskFinishCount(AtomicInteger taskFinishCount)
-		{
-			this.taskFinishCount = taskFinishCount;
 		}
 
 		@Override
 		protected void done()
 		{
-			int myFinishCount = this.taskFinishCount.incrementAndGet();
+			boolean isCanceled = isCancelled();
 
-			if (this.listener != null)
+			if (isCanceled && this.listener != null)
 			{
-				if (isCancelled())
-					this.listener.onCancel(this.subDataExchange, this.subDataExchangeIndex);
+				this.listener.onCancel(this.subDataExchange);
 
-				try
-				{
-					this.submitFinishLatch.await();
-				}
-				catch (InterruptedException e)
-				{
-				}
+				Set<SubDataExchange> subsequents = this.batchDataExchangeContext.getSubsequents(this.subDataExchange);
 
-				if (myFinishCount == this.taskSubmitSuccessCount.get())
-					this.listener.onFinish();
+				if (subsequents != null)
+				{
+					for (SubDataExchange subsequent : subsequents)
+						this.listener.onCancel(subsequent);
+				}
 			}
+
+			this.batchDataExchangeContext.incrementSubFinishCount();
+
+			if (!isCanceled)
+				this.batchDataExchangeContext.submitSubsequents(this.subDataExchange);
 		}
 	}
 
@@ -359,50 +452,49 @@ public class BatchDataExchangeService<G extends DataExchange, T extends BatchDat
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class SubDataExchangeCallable<T extends DataExchange> implements Callable<T>
+	protected static class SubDataExchangeRunnable implements Runnable
 	{
-		private DataExchangeService<? super T> dataExchangeService;
+		private DataExchangeService<?> dataExchangeService;
 
-		private T dataExchange;
+		private DataExchange dataExchange;
 
-		public SubDataExchangeCallable()
+		public SubDataExchangeRunnable()
 		{
 			super();
 		}
 
-		public SubDataExchangeCallable(DataExchangeService<? super T> dataExchangeService, T dataExchange)
+		public SubDataExchangeRunnable(DataExchangeService<?> dataExchangeService, DataExchange dataExchange)
 		{
 			super();
 			this.dataExchangeService = dataExchangeService;
 			this.dataExchange = dataExchange;
 		}
 
-		public DataExchangeService<? super T> getDataExchangeService()
+		public DataExchangeService<?> getDataExchangeService()
 		{
 			return dataExchangeService;
 		}
 
-		public void setDataExchangeService(DataExchangeService<? super T> dataExchangeService)
+		public void setDataExchangeService(DataExchangeService<?> dataExchangeService)
 		{
 			this.dataExchangeService = dataExchangeService;
 		}
 
-		public T getDataExchange()
+		public DataExchange getDataExchange()
 		{
 			return dataExchange;
 		}
 
-		public void setDataExchange(T dataExchange)
+		public void setDataExchange(DataExchange dataExchange)
 		{
 			this.dataExchange = dataExchange;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
-		public T call() throws Exception
+		public void run()
 		{
-			this.dataExchangeService.exchange(this.dataExchange);
-
-			return this.dataExchange;
+			((DataExchangeService<DataExchange>) this.dataExchangeService).exchange(this.dataExchange);
 		}
 	}
 }

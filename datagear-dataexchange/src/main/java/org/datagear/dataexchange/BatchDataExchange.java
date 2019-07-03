@@ -4,10 +4,7 @@
 
 package org.datagear.dataexchange;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.Set;
 
 /**
  * 批量数据交换。
@@ -20,13 +17,13 @@ import java.util.concurrent.Future;
  * 
  * @author datagear@163.com
  *
- * @param <T>
  */
-public abstract class BatchDataExchange<T extends DataExchange> extends DataExchange
+public abstract class BatchDataExchange extends DataExchange
 {
-	private BatchDataExchangeListener<T> listener;
+	/** 是否同步等待完成 */
+	private boolean waitForFinish = false;
 
-	private List<Future<T>> results;
+	private BatchDataExchangeListener listener;
 
 	public BatchDataExchange()
 	{
@@ -38,62 +35,32 @@ public abstract class BatchDataExchange<T extends DataExchange> extends DataExch
 		super(connectionFactory);
 	}
 
+	public boolean isWaitForFinish()
+	{
+		return waitForFinish;
+	}
+
+	public void setWaitForFinish(boolean waitForFinish)
+	{
+		this.waitForFinish = waitForFinish;
+	}
+
 	@Override
-	public BatchDataExchangeListener<T> getListener()
+	public BatchDataExchangeListener getListener()
 	{
 		return listener;
 	}
 
-	public void setListener(BatchDataExchangeListener<T> listener)
+	public void setListener(BatchDataExchangeListener listener)
 	{
 		this.listener = listener;
 	}
 
-	public List<Future<T>> getResults()
-	{
-		return results;
-	}
-
-	public void setResults(List<Future<T>> results)
-	{
-		this.results = results;
-	}
-
 	/**
-	 * 阻塞获取执行结果。
-	 * <p>
-	 * 如果返回列表某个位置的元素为{@code null}，表明对应子数据交换任务提交失败。
-	 * </p>
-	 * 
-	 * @return
-	 * @throws InterruptedException
-	 * @throws ExecutionException
-	 */
-	public List<T> waitForResults() throws InterruptedException, ExecutionException
-	{
-		if (this.results == null)
-			throw new IllegalStateException();
-
-		List<T> subResults = new ArrayList<T>(this.results.size());
-
-		for (Future<T> future : this.results)
-		{
-			T result = null;
-
-			if (future != null)
-				result = future.get();
-
-			subResults.add(result);
-		}
-
-		return subResults;
-	}
-
-	/**
-	 * 获取分子数据交换列表。
+	 * 获取子数据交换集合。
 	 * 
 	 * @return
 	 * @throws DataExchangeException
 	 */
-	public abstract List<T> getSubDataExchanges() throws DataExchangeException;
+	public abstract Set<SubDataExchange> getSubDataExchanges() throws DataExchangeException;
 }

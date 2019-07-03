@@ -9,34 +9,30 @@ package org.datagear.dataexchange;
  * 
  * @author datagear@163.com
  *
- * @param <T>
  */
-public interface BatchDataExchangeListener<T extends DataExchange> extends DataExchangeListener
+public interface BatchDataExchangeListener extends DataExchangeListener
 {
 	/**
 	 * 子数据交换提交成功。
 	 * 
 	 * @param subDataExchange
-	 * @param subDataExchangeIndex
 	 */
-	void onSubmitSuccess(T subDataExchange, int subDataExchangeIndex);
+	void onSubmitSuccess(SubDataExchange subDataExchange);
 
 	/**
 	 * 子数据交换提交失败。
 	 * 
 	 * @param subDataExchange
-	 * @param subDataExchangeIndex
 	 * @param cause
 	 */
-	void onSubmitFail(T subDataExchange, int subDataExchangeIndex, Throwable cause);
+	void onSubmitFail(SubDataExchange subDataExchange, Throwable cause);
 
 	/**
 	 * 子数据交换取消。
 	 * 
 	 * @param subDataExchange
-	 * @param subDataExchangeIndex
 	 */
-	void onCancel(T subDataExchange, int subDataExchangeIndex);
+	void onCancel(SubDataExchange subDataExchange);
 
 	/**
 	 * 成功。

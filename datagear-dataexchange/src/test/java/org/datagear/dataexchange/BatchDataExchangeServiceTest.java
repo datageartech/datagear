@@ -4,13 +4,19 @@
 
 package org.datagear.dataexchange;
 
+import java.io.File;
 import java.io.Reader;
+import java.io.Writer;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.datagear.connection.JdbcUtil;
+import org.datagear.dataexchange.support.CsvDataExport;
+import org.datagear.dataexchange.support.CsvDataExportService;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.CsvDataImportService;
 import org.junit.Assert;
@@ -26,16 +32,21 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 {
 	public static final String TABLE_NAME = "T_DATA_IMPORT";
 
-	private BatchDataExchangeService<CsvDataImport, BatchDataExchange<CsvDataImport>> batchDataExchangeService;
+	private BatchDataExchangeService<BatchDataExchange> batchDataExchangeService;
 
 	public BatchDataExchangeServiceTest()
 	{
 		super();
 
+		GenericDataExchangeService genericDataExchangeService = new GenericDataExchangeService();
 		CsvDataImportService csvDataImportService = new CsvDataImportService(databaseInfoResolver);
+		CsvDataExportService csvDataExportService = new CsvDataExportService(databaseInfoResolver);
+		List<DevotedDataExchangeService<?>> devotedDataExchangeServices = new ArrayList<DevotedDataExchangeService<?>>();
+		devotedDataExchangeServices.add(csvDataImportService);
+		devotedDataExchangeServices.add(csvDataExportService);
+		genericDataExchangeService.setDevotedDataExchangeServices(devotedDataExchangeServices);
 
-		this.batchDataExchangeService = new BatchDataExchangeService<CsvDataImport, BatchDataExchange<CsvDataImport>>(
-				csvDataImportService);
+		this.batchDataExchangeService = new BatchDataExchangeService<BatchDataExchange>(genericDataExchangeService);
 	}
 
 	@Test
@@ -56,11 +67,69 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		List<CsvDataImport> csvDataImports = CsvDataImport.valuesOf(connectionFactory, dataFormat, importOption, tables,
 				readerFactories);
 
+		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+
+		for (int i = 0; i < csvDataImports.size(); i++)
+		{
+			SubDataExchange subDataExchange = new SubDataExchange("import-" + i, csvDataImports.get(i));
+			subDataExchanges.add(subDataExchange);
+		}
+
+		final AtomicInteger exportDataCount = new AtomicInteger(0);
+
+		{
+			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory
+					.valueOf(new File("target/BatchDataExchangeServiceTest.csv"), "UTF-8");
+			CsvDataExport csvDataExport = new CsvDataExport(connectionFactory, dataFormat,
+					new TextDataExportOption(true), new TableQuery(TABLE_NAME), writerFactory);
+			csvDataExport.setListener(new TextDataExportListener()
+			{
+				@Override
+				public void onSuccess()
+				{
+				}
+
+				@Override
+				public void onStart()
+				{
+				}
+
+				@Override
+				public void onFinish()
+				{
+				}
+
+				@Override
+				public void onException(DataExchangeException e)
+				{
+				}
+
+				@Override
+				public void onSuccess(int dataIndex)
+				{
+					exportDataCount.incrementAndGet();
+				}
+
+				@Override
+				public void onSetNullTextValue(int dataIndex, String columnName, DataExchangeException e)
+				{
+				}
+			});
+
+			SubDataExchange subDataExchange = new SubDataExchange("export-1", csvDataExport);
+
+			Set<SubDataExchange> dependents = new HashSet<SubDataExchange>();
+			dependents.addAll(subDataExchanges);
+			subDataExchange.setDependents(dependents);
+
+			subDataExchanges.add(subDataExchange);
+		}
+
 		final AtomicInteger submitSuccessCount = new AtomicInteger(0);
 
-		BatchDataExchange<CsvDataImport> csvBatchDataImport = new SimpleBatchDataExchange<CsvDataImport>(
-				connectionFactory, csvDataImports);
-		csvBatchDataImport.setListener(new BatchDataExchangeListener<CsvDataImport>()
+		BatchDataExchange batchDataImport = new SimpleBatchDataExchange(connectionFactory, subDataExchanges);
+		batchDataImport.setWaitForFinish(true);
+		batchDataImport.setListener(new BatchDataExchangeListener()
 		{
 			@Override
 			public void onStart()
@@ -87,23 +156,23 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 			}
 
 			@Override
-			public void onSubmitSuccess(CsvDataImport subDataExchange, int subDataExchangeIndex)
+			public void onSubmitSuccess(SubDataExchange subDataExchange)
 			{
-				println("onSubmitSuccess : " + subDataExchangeIndex);
+				println("onSubmitSuccess : " + subDataExchange.getId());
 
 				submitSuccessCount.incrementAndGet();
 			}
 
 			@Override
-			public void onSubmitFail(CsvDataImport subDataExchange, int subDataExchangeIndex, Throwable cause)
+			public void onSubmitFail(SubDataExchange subDataExchange, Throwable cause)
 			{
-				println("onSubmitFail : " + subDataExchangeIndex);
+				println("onSubmitFail : " + subDataExchange.getId());
 			}
 
 			@Override
-			public void onCancel(CsvDataImport subDataExchange, int subDataExchangeIndex)
+			public void onCancel(SubDataExchange subDataExchange)
 			{
-				println("onCancel : " + subDataExchangeIndex);
+				println("onCancel : " + subDataExchange.getId());
 			}
 		});
 
@@ -113,15 +182,13 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		{
 			clearTable(cn, TABLE_NAME);
 
-			this.batchDataExchangeService.exchange(csvBatchDataImport);
-
-			csvDataImports = csvBatchDataImport.waitForResults();
+			this.batchDataExchangeService.exchange(batchDataImport);
 
 			int count = getCount(cn, TABLE_NAME);
 
-			Assert.assertEquals(2, csvDataImports.size());
 			Assert.assertEquals(6, count);
-			Assert.assertEquals(2, submitSuccessCount.intValue());
+			Assert.assertEquals(3, submitSuccessCount.intValue());
+			Assert.assertEquals(6, exportDataCount.intValue());
 		}
 		finally
 		{
