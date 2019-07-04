@@ -11,6 +11,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.datagear.dataexchange.support.AbstractDevotedDataExchangeService;
@@ -542,6 +543,8 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 
 		private BatchDataExchangeListener listener;
 
+		private AtomicBoolean _run = new AtomicBoolean(false);
+
 		public SubDataExchangeFutureTask(BatchDataExchangeContextImpl batchDataExchangeContext,
 				DataExchangeService<?> subDataExchangeService, SubDataExchange subDataExchange)
 		{
@@ -572,9 +575,24 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		}
 
 		@Override
+		public boolean cancel(boolean mayInterruptIfRunning)
+		{
+			// 执行中的不允许取消
+			return super.cancel(false);
+		}
+
+		@Override
+		public void run()
+		{
+			_run.set(true);
+			super.run();
+		}
+
+		@Override
 		protected void done()
 		{
-			boolean isCanceled = isCancelled();
+			// XXX 执行中的任务，调用cancel后，isCancelled()仍会是true！？
+			boolean isCanceled = (isCancelled() && !_run.get());
 
 			int subFinishCount = 1;
 
