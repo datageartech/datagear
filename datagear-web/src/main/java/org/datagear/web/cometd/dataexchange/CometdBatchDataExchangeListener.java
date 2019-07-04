@@ -43,7 +43,7 @@ public class CometdBatchDataExchangeListener extends CometdDataExchangeListener 
 	}
 
 	@Override
-	public void onSubmitFail(SubDataExchange subDataExchange, Throwable cause)
+	public void onSubmitFail(SubDataExchange subDataExchange)
 	{
 		sendMessage(new SubSubmitFail(subDataExchange.getId()));
 	}

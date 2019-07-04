@@ -169,7 +169,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 			}
 
 			@Override
-			public void onSubmitFail(SubDataExchange subDataExchange, Throwable cause)
+			public void onSubmitFail(SubDataExchange subDataExchange)
 			{
 				println("onSubmitFail : " + subDataExchange.getId());
 			}
