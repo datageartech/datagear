@@ -78,6 +78,8 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		final AtomicInteger exportDataCount = new AtomicInteger(0);
 
 		{
+			final String subDataExchangeId = "export-1";
+
 			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory
 					.valueOf(new File("target/BatchDataExchangeServiceTest.csv"), "UTF-8");
 			CsvDataExport csvDataExport = new CsvDataExport(connectionFactory, dataFormat,
@@ -87,16 +89,19 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 				@Override
 				public void onSuccess()
 				{
+					println(subDataExchangeId + " : onSuccess");
 				}
 
 				@Override
 				public void onStart()
 				{
+					println(subDataExchangeId + " : onStart");
 				}
 
 				@Override
 				public void onFinish()
 				{
+					println(subDataExchangeId + " : onFinish");
 				}
 
 				@Override
@@ -108,6 +113,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 				public void onSuccess(int dataIndex)
 				{
 					exportDataCount.incrementAndGet();
+					println(subDataExchangeId + " : onSuccess(" + dataIndex + ")");
 				}
 
 				@Override
@@ -116,7 +122,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 				}
 			});
 
-			SubDataExchange subDataExchange = new SubDataExchange("export-1", csvDataExport);
+			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeId, csvDataExport);
 
 			Set<SubDataExchange> dependents = new HashSet<SubDataExchange>();
 			dependents.addAll(subDataExchanges);
@@ -189,11 +195,26 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 
 			Assert.assertEquals(6, count);
 			Assert.assertEquals(3, submitSuccessCount.intValue());
-			Assert.assertEquals(6, exportDataCount.intValue());
+			Assert.assertEquals(6, exportDataCount.get());
 		}
 		finally
 		{
 			JdbcUtil.closeConnection(cn);
 		}
+	}
+
+	@Override
+	protected void println()
+	{
+	}
+
+	@Override
+	protected void println(Object o)
+	{
+	}
+
+	@Override
+	protected void print(Object o)
+	{
 	}
 }

@@ -79,7 +79,7 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 			context = buildBatchDataExchangeContextImpl(dataExchange, subDataExchanges);
 			dataExchange.setContext(context);
 
-			context.submitIndependents();
+			context.submitNexts();
 
 			if (listener != null)
 				listener.onSuccess();
@@ -122,8 +122,8 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 	protected BatchDataExchangeContextImpl buildBatchDataExchangeContextImpl(T dataExchange,
 			Set<SubDataExchange> subDataExchanges)
 	{
-		BatchDataExchangeContextImpl context = new BatchDataExchangeContextImpl(subDataExchanges.size(), subDataExchanges,
-				this.subDataExchangeService, this.executorService);
+		BatchDataExchangeContextImpl context = new BatchDataExchangeContextImpl(subDataExchanges.size(),
+				subDataExchanges, this.subDataExchangeService, this.executorService);
 		context.setListener(dataExchange.getListener());
 
 		return context;
@@ -146,7 +146,6 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		private final Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
 		private final DataExchangeService<?> subDataExchangeService;
 		private final ExecutorService executorService;
-
 		private BatchDataExchangeListener listener;
 
 		private final AtomicInteger _subSubmitSuccessCount = new AtomicInteger(0);
@@ -154,7 +153,7 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		private int _subSubmitFailCount = 0;
 		private int _subFinishCount = 0;
 
-		private final Object _countLock = new Object();
+		private final Object _subCountLock = new Object();
 		private final Object _subDataExchangesLock = new Object();
 
 		private final CountDownLatch _finishCountDownLatch = new CountDownLatch(1);
@@ -210,151 +209,244 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 			return this._subSubmitSuccessCount.intValue();
 		}
 
-		public void incrementSubSubmitSuccessCount()
+		public int incrementSubSubmitSuccessCount()
 		{
-			this._subSubmitSuccessCount.incrementAndGet();
+			return this._subSubmitSuccessCount.incrementAndGet();
 		}
 
-		public void incrementSubSubmitFailCount()
+		public void addSubSubmitFailCount(int count)
 		{
 			boolean finish = false;
 
-			synchronized (this._countLock)
+			synchronized (this._subCountLock)
 			{
-				this._subSubmitFailCount++;
-
-				if ((this._subSubmitFailCount + this._subFinishCount) == this.subTotal)
-					finish = true;
+				this._subSubmitFailCount += count;
+				finish = ((this._subSubmitFailCount + this._subFinishCount) == this.subTotal);
 			}
 
 			if (finish)
-				onBatchFinish();
+			{
+				this._finishCountDownLatch.countDown();
+
+				if (this.listener != null)
+					this.listener.onFinish();
+			}
 		}
 
-		public void incrementSubFinishCount()
+		public void addSubFinishCount(int count)
 		{
 			boolean finish = false;
 
-			synchronized (this._countLock)
+			synchronized (this._subCountLock)
 			{
-				this._subFinishCount++;
-
-				if ((this._subSubmitFailCount + this._subFinishCount) == this.subTotal)
-					finish = true;
+				this._subFinishCount += count;
+				finish = ((this._subSubmitFailCount + this._subFinishCount) == this.subTotal);
 			}
 
 			if (finish)
-				onBatchFinish();
-		}
-
-		/**
-		 * 提交没有依赖的子数据交换。
-		 */
-		public void submitIndependents()
-		{
-			Set<SubDataExchange> independents = getIndependents();
-
-			for (SubDataExchange subDataExchange : independents)
 			{
-				SubDataExchangeFutureTask task = buildSubDataExchangeFutureTask(subDataExchange);
-				submit(task);
+				this._finishCountDownLatch.countDown();
+
+				if (this.listener != null)
+					this.listener.onFinish();
 			}
 		}
 
 		/**
-		 * 提交所有后置子数据交换。
-		 * 
-		 * @param subDataExchange
-		 */
-		public void submitSubsequents(SubDataExchange subDataExchange)
-		{
-			Set<SubDataExchange> subsequents = getSubsequents(subDataExchange);
-
-			for (SubDataExchange subsequent : subsequents)
-			{
-				SubDataExchangeFutureTask task = buildSubDataExchangeFutureTask(subsequent);
-				submit(task);
-			}
-		}
-
-		/**
-		 * 获取没有依赖的子数据交换Set。
+		 * 提交下一批具备执行条件的子数据交换。
+		 * <p>
+		 * 具备执行条件：无任何依赖，或者，所有依赖都已执行完成
+		 * </p>
 		 * 
 		 * @return
 		 */
-		public Set<SubDataExchange> getIndependents()
+		public Set<SubDataExchange> submitNexts()
 		{
-			Set<SubDataExchange> independents = new HashSet<SubDataExchange>();
+			Set<SubDataExchange> submits = new HashSet<SubDataExchange>();
 
 			synchronized (this._subDataExchangesLock)
 			{
-				Iterator<SubDataExchange> iterator = this.subDataExchanges.iterator();
-
-				while (iterator.hasNext())
+				for (SubDataExchange next : this.subDataExchanges)
 				{
-					SubDataExchange next = iterator.next();
+					boolean canSubmit = false;
 
 					if (!next.hasDependent())
+						canSubmit = true;
+					else
 					{
-						independents.add(next);
-						iterator.remove();
+						canSubmit = true;
+
+						Set<SubDataExchange> dependents = next.getDependents();
+						for (SubDataExchange dependent : dependents)
+						{
+							if (this.subDataExchanges.contains(dependent))
+							{
+								canSubmit = false;
+								break;
+							}
+						}
 					}
+
+					if (canSubmit)
+						submits.add(next);
 				}
+
+				for (SubDataExchange submit : submits)
+					this.subDataExchanges.remove(submit);
 			}
 
-			return independents;
+			for (SubDataExchange submit : submits)
+			{
+				SubDataExchangeFutureTask task = buildSubDataExchangeFutureTask(submit);
+				submit(task);
+			}
+
+			return submits;
 		}
 
 		/**
-		 * 获取后置的子数据交换Set。
+		 * 取消未提交的所有后置的子数据交换。
 		 * 
 		 * @param subDataExchange
 		 * @return
 		 */
-		public Set<SubDataExchange> getSubsequents(SubDataExchange subDataExchange)
+		public Set<SubDataExchange> cancelNotSubmitDescendants(SubDataExchange subDataExchange)
 		{
-			Set<SubDataExchange> subsequents = new HashSet<SubDataExchange>();
+			Set<SubDataExchange> removeds = new HashSet<SubDataExchange>();
 
 			synchronized (this._subDataExchangesLock)
 			{
-				Iterator<SubDataExchange> iterator = this.subDataExchanges.iterator();
-
-				while (iterator.hasNext())
-				{
-					SubDataExchange next = iterator.next();
-
-					if (!next.hasDependent())
-						continue;
-
-					if (next.getDependents().contains(subDataExchange))
-					{
-						subsequents.add(next);
-						iterator.remove();
-					}
-				}
+				removeDescendants(subDataExchange, removeds);
 			}
 
-			return subsequents;
+			addSubFinishCount(removeds.size());
+
+			if (this.listener != null)
+			{
+				for (SubDataExchange removed : removeds)
+					this.listener.onCancel(removed);
+			}
+
+			return removeds;
 		}
 
 		@Override
 		public boolean[] cancel(String... subDataExchangeIds)
 		{
-			// TODO
+			boolean[] canceled = new boolean[subDataExchangeIds.length];
+
+			Set<SubDataExchange> removeds = new HashSet<SubDataExchange>();
+
+			synchronized (this._subDataExchangesLock)
+			{
+				for (int i = 0; i < subDataExchangeIds.length; i++)
+				{
+					SubDataExchange subDataExchange = removeSubDataExchange(subDataExchangeIds[i]);
+
+					if (subDataExchange == null)
+					{
+						canceled[i] = false;
+						continue;
+					}
+
+					canceled[i] = true;
+					removeds.add(subDataExchange);
+					removeDescendants(subDataExchange, removeds);
+				}
+			}
+
+			addSubFinishCount(removeds.size());
+
+			for (int i = 0; i < subDataExchangeIds.length; i++)
+			{
+				if (canceled[i])
+					continue;
+
+				for (SubDataExchange removed : removeds)
+				{
+					if (removed.getId().equals(subDataExchangeIds[i]))
+						canceled[i] = true;
+				}
+			}
+
+			if (this.listener != null)
+			{
+				for (SubDataExchange removed : removeds)
+					this.listener.onCancel(removed);
+			}
+
+			return canceled;
+		}
+
+		/**
+		 * 移除指定ID且未提交的{@linkplain SubDataExchange}。
+		 * <p>
+		 * 如果未找到，将返回{@code null}。
+		 * </p>
+		 * 
+		 * @param subDataExchangeId
+		 * @return
+		 */
+		protected SubDataExchange removeSubDataExchange(String subDataExchangeId)
+		{
+			Iterator<SubDataExchange> iterator = this.subDataExchanges.iterator();
+
+			while (iterator.hasNext())
+			{
+				SubDataExchange next = iterator.next();
+
+				if (next.getId().equals(subDataExchangeId))
+				{
+					iterator.remove();
+					return next;
+				}
+			}
+
 			return null;
 		}
 
-		protected void onBatchFinish()
+		/**
+		 * 递归移除未提交的所有后置子数据交换。
+		 * 
+		 * @param subDataExchange
+		 * @param removeds
+		 */
+		protected void removeDescendants(SubDataExchange subDataExchange, Set<SubDataExchange> removeds)
 		{
-			this._finishCountDownLatch.countDown();
+			Set<SubDataExchange> myRemoveds = new HashSet<SubDataExchange>();
 
-			if (this.listener != null)
-				this.listener.onFinish();
+			Iterator<SubDataExchange> iterator = this.subDataExchanges.iterator();
+
+			while (iterator.hasNext())
+			{
+				SubDataExchange next = iterator.next();
+
+				if (!next.hasDependent())
+					continue;
+
+				if (next.getDependents().contains(subDataExchange))
+				{
+					myRemoveds.add(next);
+					iterator.remove();
+				}
+			}
+
+			removeds.addAll(myRemoveds);
+
+			for (SubDataExchange myRemoved : myRemoveds)
+				removeDescendants(myRemoved, removeds);
 		}
 
-		protected void submit(SubDataExchangeFutureTask task)
+		/**
+		 * 提交一个子数据交换任务。
+		 * 
+		 * @param task
+		 * @return true 提交成功；false 提交失败
+		 */
+		protected boolean submit(SubDataExchangeFutureTask task)
 		{
 			Throwable submitFailThrowable = null;
+
 			try
 			{
 				executorService.submit(task);
@@ -363,9 +455,9 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 			catch (Throwable t)
 			{
 				submitFailThrowable = t;
-				incrementSubSubmitFailCount();
+				addSubSubmitFailCount(1);
 
-				LOGGER.error("submit exchange task error", t);
+				LOGGER.error("submit sub exchange task error", t);
 			}
 
 			if (this.listener != null)
@@ -375,6 +467,8 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 				else
 					listener.onSubmitFail(task.getSubDataExchange(), submitFailThrowable);
 			}
+
+			return (submitFailThrowable == null);
 		}
 
 		protected SubDataExchangeFutureTask buildSubDataExchangeFutureTask(SubDataExchange subDataExchange)
@@ -432,23 +526,20 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		{
 			boolean isCanceled = isCancelled();
 
-			if (isCanceled && this.listener != null)
+			int subFinishCount = 1;
+
+			if (isCanceled)
 			{
-				this.listener.onCancel(this.subDataExchange);
+				if (this.listener != null)
+					this.listener.onCancel(this.subDataExchange);
 
-				Set<SubDataExchange> subsequents = this.batchDataExchangeContext.getSubsequents(this.subDataExchange);
-
-				if (subsequents != null)
-				{
-					for (SubDataExchange subsequent : subsequents)
-						this.listener.onCancel(subsequent);
-				}
+				this.batchDataExchangeContext.cancelNotSubmitDescendants(this.subDataExchange);
 			}
 
-			this.batchDataExchangeContext.incrementSubFinishCount();
+			this.batchDataExchangeContext.addSubFinishCount(subFinishCount);
 
 			if (!isCanceled)
-				this.batchDataExchangeContext.submitSubsequents(this.subDataExchange);
+				this.batchDataExchangeContext.submitNexts();
 		}
 	}
 
