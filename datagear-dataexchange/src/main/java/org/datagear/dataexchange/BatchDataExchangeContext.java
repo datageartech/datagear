@@ -14,12 +14,12 @@ public interface BatchDataExchangeContext
 	 * @throws InterruptedException
 	 */
 	void waitForFinish() throws InterruptedException;
-	
+
 	/**
 	 * 取消指定的子数据交换。
 	 * 
-	 * @param subDataExchangeIds
+	 * @param subDataExchangeId
 	 * @return
 	 */
-	boolean[] cancel(String... subDataExchangeIds);
+	boolean cancel(String subDataExchangeId);
 }

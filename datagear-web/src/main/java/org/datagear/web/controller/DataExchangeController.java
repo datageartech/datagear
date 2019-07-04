@@ -37,6 +37,7 @@ import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.IOUtil;
 import org.datagear.dataexchange.BatchDataExchange;
+import org.datagear.dataexchange.BatchDataExchangeContext;
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchange;
 import org.datagear.dataexchange.DataExchangeService;
@@ -648,7 +649,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		String[] subDataExchangeIds = request.getParameterValues("subDataExchangeId");
 
-		if (subDataExchangeIds == null)
+		if (isEmpty(subDataExchangeIds))
 			throw new IllegalInputException();
 
 		BatchDataExchangeInfo batchDataExchangeInfo = retrieveBatchDataExchangeInfo(request, dataExchangeId);
@@ -656,9 +657,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 		if (batchDataExchangeInfo == null)
 			throw new IllegalInputException();
 
-		// TODO 执行取消
+		BatchDataExchangeContext batchDataExchangeContext = batchDataExchangeInfo.getBatchDataExchange().getContext();
+
+		boolean[] canceled = new boolean[subDataExchangeIds.length];
+		for (int i = 0; i < subDataExchangeIds.length; i++)
+			canceled[i] = batchDataExchangeContext.cancel(subDataExchangeIds[i]);
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+		responseEntity.getBody().setData(canceled);
 
 		return responseEntity;
 	}

@@ -153,8 +153,11 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		private int _subSubmitFailCount = 0;
 		private int _subFinishCount = 0;
 
+		private final Set<SubDataExchangeFutureTask> _subSubmitFutureTasks = new HashSet<SubDataExchangeFutureTask>();
+
 		private final Object _subCountLock = new Object();
 		private final Object _subDataExchangesLock = new Object();
+		private final Object _subSubmitFutureTasksLock = new Object();
 
 		private final CountDownLatch _finishCountDownLatch = new CountDownLatch(1);
 
@@ -331,43 +334,35 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		}
 
 		@Override
-		public boolean[] cancel(String... subDataExchangeIds)
+		public boolean cancel(String subDataExchangeId)
 		{
-			boolean[] canceled = new boolean[subDataExchangeIds.length];
+			SubDataExchangeFutureTask subDataExchangeFutureTask = null;
+
+			synchronized (this._subSubmitFutureTasksLock)
+			{
+				subDataExchangeFutureTask = this.findSubDataExchangeFutureTask(this._subSubmitFutureTasks,
+						subDataExchangeId);
+			}
+
+			if (subDataExchangeFutureTask != null)
+				return subDataExchangeFutureTask.cancel(false);
 
 			Set<SubDataExchange> removeds = new HashSet<SubDataExchange>();
 
 			synchronized (this._subDataExchangesLock)
 			{
-				for (int i = 0; i < subDataExchangeIds.length; i++)
+				SubDataExchange subDataExchange = removeSubDataExchange(subDataExchangeId);
+
+				if (subDataExchange != null)
 				{
-					SubDataExchange subDataExchange = removeSubDataExchange(subDataExchangeIds[i]);
-
-					if (subDataExchange == null)
-					{
-						canceled[i] = false;
-						continue;
-					}
-
-					canceled[i] = true;
 					removeds.add(subDataExchange);
 					removeDescendants(subDataExchange, removeds);
 				}
 			}
 
-			addSubFinishCount(removeds.size());
+			int removeSize = removeds.size();
 
-			for (int i = 0; i < subDataExchangeIds.length; i++)
-			{
-				if (canceled[i])
-					continue;
-
-				for (SubDataExchange removed : removeds)
-				{
-					if (removed.getId().equals(subDataExchangeIds[i]))
-						canceled[i] = true;
-				}
-			}
+			addSubFinishCount(removeSize);
 
 			if (this.listener != null)
 			{
@@ -375,7 +370,50 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 					this.listener.onCancel(removed);
 			}
 
-			return canceled;
+			return (removeSize > 0);
+		}
+
+		/**
+		 * 查找指定ID的{@linkplain SubDataExchangeFutureTask}。
+		 * <p>
+		 * 如果未找到，将返回{@code null}。
+		 * </p>
+		 * 
+		 * @param subDataExchangeFutureTasks
+		 * @param subDataExchangeId
+		 * @return
+		 */
+		protected SubDataExchangeFutureTask findSubDataExchangeFutureTask(
+				Set<SubDataExchangeFutureTask> subDataExchangeFutureTasks, String subDataExchangeId)
+		{
+			for (SubDataExchangeFutureTask subDataExchangeFutureTask : subDataExchangeFutureTasks)
+			{
+				if (subDataExchangeFutureTask.getSubDataExchange().getId().equals(subDataExchangeId))
+					return subDataExchangeFutureTask;
+			}
+
+			return null;
+		}
+
+		/**
+		 * 查找指定ID的{@linkplain SubDataExchange}。
+		 * <p>
+		 * 如果未找到，将返回{@code null}。
+		 * </p>
+		 * 
+		 * @param subDataExchanges
+		 * @param subDataExchangeId
+		 * @return
+		 */
+		protected SubDataExchange findSubDataExchange(Set<SubDataExchange> subDataExchanges, String subDataExchangeId)
+		{
+			for (SubDataExchange subDataExchange : subDataExchanges)
+			{
+				if (subDataExchange.getId().equals(subDataExchangeId))
+					return subDataExchange;
+			}
+
+			return null;
 		}
 
 		/**
@@ -460,6 +498,14 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 				LOGGER.error("submit sub exchange task error", t);
 			}
 
+			if (submitFailThrowable == null)
+			{
+				synchronized (this._subSubmitFutureTasksLock)
+				{
+					this._subSubmitFutureTasks.add(task);
+				}
+			}
+
 			if (this.listener != null)
 			{
 				if (submitFailThrowable == null)
@@ -473,7 +519,11 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 
 		protected SubDataExchangeFutureTask buildSubDataExchangeFutureTask(SubDataExchange subDataExchange)
 		{
-			return new SubDataExchangeFutureTask(this, this.subDataExchangeService, subDataExchange);
+			SubDataExchangeFutureTask subDataExchangeFutureTask = new SubDataExchangeFutureTask(this,
+					this.subDataExchangeService, subDataExchange);
+			subDataExchangeFutureTask.setListener(this.listener);
+
+			return subDataExchangeFutureTask;
 		}
 	}
 

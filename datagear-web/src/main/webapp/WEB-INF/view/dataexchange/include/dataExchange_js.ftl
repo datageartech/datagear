@@ -79,7 +79,9 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			{
 				var status = rowDatas[i].status;
 				
-				if(status == "<@spring.message code='dataExchange.exchangeStatus.SubSubmitSuccess' />")
+				if(!status || status == ""
+						|| status == "<@spring.message code='dataExchange.exchangeStatus.Unstart' />"
+						|| status == "<@spring.message code='dataExchange.exchangeStatus.SubSubmitSuccess' />")
 				{
 					var subDataExchangeId = rowDatas[i].subDataExchangeId;
 					cancelIds.push({"name" : "subDataExchangeId", value : subDataExchangeId});
