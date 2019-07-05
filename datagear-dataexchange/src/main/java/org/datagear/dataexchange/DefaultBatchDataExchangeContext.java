@@ -203,12 +203,10 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 	/**
 	 * 子数据交换任务取消后续处理。
 	 * 
-	 * @param task
+	 * @param subDataExchange
 	 */
-	protected void forCancel(SubDataExchangeFutureTask task)
+	protected void forCancel(SubDataExchange subDataExchange)
 	{
-		SubDataExchange subDataExchange = task.getSubDataExchange();
-
 		Set<SubDataExchange> cancelleds = new HashSet<SubDataExchange>();
 
 		synchronized (this._subLock)
@@ -231,12 +229,10 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 	/**
 	 * 子数据交换任务完成后续处理。
 	 * 
-	 * @param task
+	 * @param subDataExchange
 	 */
-	protected void forFinish(SubDataExchangeFutureTask task)
+	protected void forFinish(SubDataExchange subDataExchange)
 	{
-		SubDataExchange subDataExchange = task.getSubDataExchange();
-
 		synchronized (this._subLock)
 		{
 			this._finishes.add(subDataExchange);
@@ -468,13 +464,13 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 		@Override
 		protected void done()
 		{
+			boolean run = this._run.get();
+
 			// XXX 执行中的任务，调用cancel后，isCancelled()仍会是true！！
-			boolean isCanceled = (isCancelled() && !_run.get());
+			boolean isCanceled = (isCancelled() && !run);
 
 			if (isCanceled)
-				DefaultBatchDataExchangeContext.this.forCancel(this);
-			else
-				DefaultBatchDataExchangeContext.this.forFinish(this);
+				DefaultBatchDataExchangeContext.this.forCancel(this.subDataExchange);
 		}
 	}
 
@@ -503,8 +499,15 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 		@Override
 		public void run()
 		{
-			((DataExchangeService<DataExchange>) DefaultBatchDataExchangeContext.this.subDataExchangeService)
-					.exchange(this.subDataExchange.getDataExchange());
+			try
+			{
+				((DataExchangeService<DataExchange>) DefaultBatchDataExchangeContext.this.subDataExchangeService)
+						.exchange(this.subDataExchange.getDataExchange());
+			}
+			finally
+			{
+				DefaultBatchDataExchangeContext.this.forFinish(this.subDataExchange);
+			}
 		}
 	}
 }
