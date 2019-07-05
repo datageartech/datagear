@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.dataexchange.support;
+package org.datagear.dataexchange;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,11 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.datagear.dataexchange.BatchDataExchangeContext;
-import org.datagear.dataexchange.BatchDataExchangeListener;
-import org.datagear.dataexchange.DataExchange;
-import org.datagear.dataexchange.DataExchangeService;
-import org.datagear.dataexchange.SubDataExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
