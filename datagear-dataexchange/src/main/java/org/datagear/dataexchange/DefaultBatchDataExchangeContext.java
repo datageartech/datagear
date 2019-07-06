@@ -88,11 +88,39 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 	 * 
 	 * @return
 	 */
+	@Override
 	public boolean isFinish()
 	{
 		synchronized (this._subLock)
 		{
 			return (this._submitFails.size() + this._cancelleds.size() + this._finishes.size()) >= this.subTotal;
+		}
+	}
+
+	@Override
+	public Set<SubDataExchange> getSubmitFails()
+	{
+		synchronized (this._subLock)
+		{
+			return new HashSet<SubDataExchange>(this._submitFails);
+		}
+	}
+
+	@Override
+	public Set<SubDataExchange> getCancelleds()
+	{
+		synchronized (this._subLock)
+		{
+			return new HashSet<SubDataExchange>(this._cancelleds);
+		}
+	}
+
+	@Override
+	public Set<SubDataExchange> getFinishes()
+	{
+		synchronized (this._subLock)
+		{
+			return new HashSet<SubDataExchange>(this._finishes);
 		}
 	}
 
@@ -110,7 +138,7 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 	}
 
 	@Override
-	public boolean cancel(String subDataExchangeId)
+	public void cancel(String subDataExchangeId)
 	{
 		SubDataExchangeFutureTask task = null;
 
@@ -121,7 +149,7 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 
 		if (task != null)
 		{
-			return task.cancel(false);
+			task.cancel(false);
 		}
 		else
 		{
@@ -147,8 +175,6 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 			}
 
 			postProcessIfFinish();
-
-			return (cancelleds.size() > 0);
 		}
 	}
 
@@ -170,16 +196,16 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 			{
 				boolean canSubmit = false;
 
-				if (!unsubmit.hasDependent())
+				if (!unsubmit.hasDependency())
 					canSubmit = true;
 				else
 				{
 					canSubmit = true;
 
-					Set<SubDataExchange> dependents = unsubmit.getDependents();
-					for (SubDataExchange dependent : dependents)
+					Set<SubDataExchange> dependencies = unsubmit.getDependencies();
+					for (SubDataExchange dependency : dependencies)
 					{
-						if (this._unsubmits.contains(dependent))
+						if (this._unsubmits.contains(dependency))
 						{
 							canSubmit = false;
 							break;
@@ -407,10 +433,10 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 		{
 			SubDataExchange next = iterator.next();
 
-			if (!next.hasDependent())
+			if (!next.hasDependency())
 				continue;
 
-			if (next.getDependents().contains(subDataExchange))
+			if (next.getDependencies().contains(subDataExchange))
 			{
 				myRemoveds.add(next);
 				iterator.remove();

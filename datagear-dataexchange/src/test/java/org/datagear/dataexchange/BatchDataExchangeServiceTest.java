@@ -126,7 +126,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 
 			Set<SubDataExchange> dependents = new HashSet<SubDataExchange>();
 			dependents.addAll(subDataExchanges);
-			subDataExchange.setDependents(dependents);
+			subDataExchange.setDependencies(dependents);
 
 			subDataExchanges.add(subDataExchange);
 		}

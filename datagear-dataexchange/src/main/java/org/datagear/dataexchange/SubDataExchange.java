@@ -18,7 +18,7 @@ public class SubDataExchange
 
 	private DataExchange dataExchange;
 
-	private Set<SubDataExchange> dependents;
+	private Set<SubDataExchange> dependencies;
 
 	public SubDataExchange()
 	{
@@ -52,20 +52,20 @@ public class SubDataExchange
 		this.dataExchange = dataExchange;
 	}
 
-	public boolean hasDependent()
+	public boolean hasDependency()
 	{
-		return (this.dependents != null && this.dependents.size() > 0);
+		return (this.dependencies != null && this.dependencies.size() > 0);
 	}
 
-	public Set<SubDataExchange> getDependents()
+	public Set<SubDataExchange> getDependencies()
 	{
-		return dependents;
+		return dependencies;
 	}
 
 	@SuppressWarnings("unchecked")
-	public void setDependents(Set<? extends SubDataExchange> dependents)
+	public void setDependencies(Set<? extends SubDataExchange> dependencies)
 	{
-		this.dependents = (Set<SubDataExchange>) dependents;
+		this.dependencies = (Set<SubDataExchange>) dependencies;
 	}
 
 	@Override

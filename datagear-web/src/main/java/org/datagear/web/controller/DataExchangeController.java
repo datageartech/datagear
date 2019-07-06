@@ -659,12 +659,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		BatchDataExchangeContext batchDataExchangeContext = batchDataExchangeInfo.getBatchDataExchange().getContext();
 
-		boolean[] canceled = new boolean[subDataExchangeIds.length];
 		for (int i = 0; i < subDataExchangeIds.length; i++)
-			canceled[i] = batchDataExchangeContext.cancel(subDataExchangeIds[i]);
+			batchDataExchangeContext.cancel(subDataExchangeIds[i]);
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
-		responseEntity.getBody().setData(canceled);
 
 		return responseEntity;
 	}
