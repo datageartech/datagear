@@ -172,6 +172,8 @@ public class CometdBatchDataExchangeListener extends CometdDataExchangeListener 
 	 */
 	public static class SubSubmitSuccess extends SubDataExchangeMessage
 	{
+		public static final int ORDER = 0;
+
 		public SubSubmitSuccess()
 		{
 			super();
@@ -179,7 +181,7 @@ public class CometdBatchDataExchangeListener extends CometdDataExchangeListener 
 
 		public SubSubmitSuccess(String subDataExchangeId)
 		{
-			super(subDataExchangeId);
+			super(subDataExchangeId, 0);
 		}
 	}
 
@@ -191,6 +193,8 @@ public class CometdBatchDataExchangeListener extends CometdDataExchangeListener 
 	 */
 	public static class SubSubmitFail extends SubDataExchangeMessage
 	{
+		public static final int ORDER = 0;
+
 		public SubSubmitFail()
 		{
 			super();
@@ -198,7 +202,7 @@ public class CometdBatchDataExchangeListener extends CometdDataExchangeListener 
 
 		public SubSubmitFail(String subDataExchangeId)
 		{
-			super(subDataExchangeId);
+			super(subDataExchangeId, ORDER);
 		}
 	}
 
@@ -210,6 +214,8 @@ public class CometdBatchDataExchangeListener extends CometdDataExchangeListener 
 	 */
 	public static class SubCancelSuccess extends SubDataExchangeMessage
 	{
+		public static final int ORDER = SubSubmitSuccess.ORDER + 99;
+
 		public SubCancelSuccess()
 		{
 			super();
@@ -217,7 +223,7 @@ public class CometdBatchDataExchangeListener extends CometdDataExchangeListener 
 
 		public SubCancelSuccess(String subDataExchangeId)
 		{
-			super(subDataExchangeId);
+			super(subDataExchangeId, ORDER);
 		}
 	}
 }

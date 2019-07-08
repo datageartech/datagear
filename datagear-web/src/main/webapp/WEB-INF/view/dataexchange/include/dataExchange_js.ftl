@@ -143,56 +143,6 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		return rowIndex;
 	};
 	
-	po.updateSubDataExchangeStatus = function(subDataExchangeId, status)
-	{
-		if(!po.updateSubDataExchangeStatusCache)
-			po.updateSubDataExchangeStatusCache = {};
-
-		if(subDataExchangeId != undefined)
-			po.updateSubDataExchangeStatusCache[subDataExchangeId] = status;
-		
-		var flush = (subDataExchangeId == undefined);
-		if(!flush)
-		{
-			var time = new Date().getTime();
-			
-			if(!po.prevFlushSubDataExchangeStatusTime)
-				po.prevFlushSubDataExchangeStatusTime = time;
-			
-			if((time - po.prevFlushSubDataExchangeStatusTime) >= 500)
-				flush = true;
-		}
-		
-		if(!flush)
-			return false;
-		
-		var dataTable = po.getSubDataExchangeDataTable();
-		
-		var cells = [];
-		
-		for(var subDataExchangeId in po.updateSubDataExchangeStatusCache)
-		{
-			var rowIndex = po.getSubDataExchangeRowIndex(dataTable, subDataExchangeId);
-			var status = po.updateSubDataExchangeStatusCache[subDataExchangeId];
-			
-			if(rowIndex < 0)
-				continue;
-			
-			var cellIndex = { "row" : rowIndex, "column" : po.subDataExchangeStatusColumnIndex };
-			var cell = dataTable.cell(cellIndex);
-			cell.data(status);
-			
-			cells.push(cellIndex);
-		}
-		
-		//统一绘制，效率更高
-		dataTable.cells(cells).draw();
-		
-		po.prevFlushSubDataExchangeStatusTime = new Date().getTime();
-		
-		return true;
-	};
-
 	po.showSubExceptionTip = function(event, tipEle)
 	{
 		tipEle = $(tipEle);
@@ -269,7 +219,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			po.subDataExchangeFinishCount=0;
 			po.subDataExchangeExceptionMessages = {};
 			po.subDataExchangeIdRowIndexMap = {};
-			po.updateSubDataExchangeStatusCache = {};
+			po.subDataExchangeMessageCache = {};
 			
 			po.updateDataExchangePageStatus("exchange");
 		}
@@ -278,102 +228,153 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			<#assign messageArgs=['"+message.content+"'] />
 			$.tipError("<@spring.messageArgs code='dataExchange.exchangeStatus.Exception' args=messageArgs />");
 		}
-		else if("SubSubmitSuccess" == type)
+		else if("Finish" == type)
 		{
-			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId,
-					"<@spring.message code='dataExchange.exchangeStatus.SubSubmitSuccess' />", message);
+			po.refreshSubDataExchangeStatus();
+			po.setDataExchangeProgress(100, message.duration);
+			po.updateDataExchangePageStatus("finish");
 		}
-		else if("SubSubmitFail" == type)
-		{
-			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId,
-				"<@spring.message code='dataExchange.exchangeStatus.SubSubmitFail' />", message);
-		}
-		else if("SubCancelSuccess" == type)
-		{
-			po.subDataExchangeFinishCount += 1;
-			po.setDataExchangeProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
-			
-			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId,
-				"<@spring.message code='dataExchange.exchangeStatus.SubCancelSuccess' />", message);
-		}
-		else if("SubExchangingWithCount" == type)
-		{
-			var status = "";
-			
-			<#assign messageArgs=['"+message.successCount+"', '"+message.failCount+"'] />
-			status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExchangingWithCount' args=messageArgs />";
-			
-			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId, status, message);
-		}
-		else if("SubExceptionWithCount" == type)
-		{
-			var exceptionResolve = message.exceptionResolve;
-			
-			var duration = po.formatDuration(message.duration);
-			
-			var status = "";
-			
-			<#assign messageArgs=['"+message.successCount+"', '"+message.failCount+"', '"+duration+"', '"+message.content+"'] />
-			
-			//未进行任何实际导入操作
-			if(message.successCount == 0 && message.failCount == 0)
-				status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount' args=messageArgs />";
-			else if(exceptionResolve == "ABORT")
-				status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount.ABORT' args=messageArgs />";
-			else if(exceptionResolve == "IGNORE")
-				status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' args=messageArgs />";
-			else if(exceptionResolve == "ROLLBACK")
-				status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount.ROLLBACK' args=messageArgs />";
-			
-			status += "<span class='exchange-result-icon exchange-error-icon ui-state-error' onmouseover='${pageId}.showSubExceptionTip(event, this)'"
-						+" onmouseout='${pageId}.hideSubExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
-						+"<span class='ui-icon ui-icon-info'></span></span>";
-			
-			po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.content;
-			
-			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId, status, message);
-		}
-		else if("SubSuccessWithCount" == type)
-		{
-			var duration = po.formatDuration(message.duration);
-			
-			var status = "";
-			
-			<#assign messageArgs=['"+message.successCount+"', '"+message.failCount+"', '"+duration+"'] />
-			
-			if(!message.failCount || message.failCount == 0)
-			{
-				status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubSuccessWithCount' args=messageArgs />";
-				status += "<span class='exchange-result-icon exchange-success-icon'><span class='ui-icon ui-icon-circle-check'></span></span>";
-			}
-			else
-			{
-				status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' args=messageArgs />";
-				status += "<span class='exchange-result-icon exchange-error-icon ui-state-error' onmouseover='${pageId}.showSubExceptionTip(event, this)'"
-						+" onmouseout='${pageId}.hideSubExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
-						+"<span class='ui-icon ui-icon-info'></span></span>";
-				
-				po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.ignoreException;
-			}
-			
-			po.updateSubDataExchangeStatusForCometdMessage(message.subDataExchangeId, status, message);
-		}
+		else
+			po.handleSubDataExchangeCometdMessage(message);
+	};
+	
+	po.handleSubDataExchangeCometdMessage = function(message)
+	{
+		var subDataExchangeId = message.subDataExchangeId;
+		
+		if(!subDataExchangeId)
+			return;
+		
+		var type = (message ? message.type : "");
+		
+		if("SubStart" == type)
+			;
 		else if("SubFinish" == type)
 		{
 			po.subDataExchangeFinishCount += 1;
 			po.setDataExchangeProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
 		}
-		else if("Finish" == type)
+		else
 		{
-			po.updateSubDataExchangeStatus();
-			po.setDataExchangeProgress(100, message.duration);
-			po.updateDataExchangePageStatus("finish");
+			var prevMessage = po.subDataExchangeMessageCache[subDataExchangeId];
+			
+			if(!prevMessage || message.order == null || message.order >= prevMessage.order)
+				po.subDataExchangeMessageCache[subDataExchangeId] = message;
+		}
+		
+		var refresh = false;
+		
+		var time = new Date().getTime();
+		if(!po.prevRefreshSubDataExchangeStatusTime)
+			po.prevRefreshSubDataExchangeStatusTime = time;
+		if((time - po.prevRefreshSubDataExchangeStatusTime) >= 200)
+			refresh = true;
+		
+		if(refresh)
+		{
+			po.refreshSubDataExchangeStatus();
+			po.prevRefreshSubDataExchangeStatusTime = new Date().getTime();
 		}
 	};
 	
-	po.updateSubDataExchangeStatusForCometdMessage = function(subDataExchangeId, status, message)
+	po.refreshSubDataExchangeStatus = function()
 	{
-		po.updateSubDataExchangeStatus(subDataExchangeId, status);
+		var dataTable = po.getSubDataExchangeDataTable();
+		
+		var cells = [];
+		
+		for(var subDataExchangeId in po.subDataExchangeMessageCache)
+		{
+			var rowIndex = po.getSubDataExchangeRowIndex(dataTable, subDataExchangeId);
+			
+			if(rowIndex < 0)
+				continue;
+			
+			var message = po.subDataExchangeMessageCache[subDataExchangeId];
+			var type = (message ? message.type : "");
+			var status = "";
+			
+			if("SubSubmitSuccess" == type)
+			{
+				status = "<@spring.message code='dataExchange.exchangeStatus.SubSubmitSuccess' />";
+			}
+			else if("SubSubmitFail" == type)
+			{
+				status = "<@spring.message code='dataExchange.exchangeStatus.SubSubmitFail' />";
+			}
+			else if("SubCancelSuccess" == type)
+			{
+				po.subDataExchangeFinishCount += 1;
+				po.setDataExchangeProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
+				
+				status = "<@spring.message code='dataExchange.exchangeStatus.SubCancelSuccess' />";
+			}
+			else if("SubExchangingWithCount" == type)
+			{
+				<#assign messageArgs=['"+message.successCount+"', '"+message.failCount+"'] />
+				status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExchangingWithCount' args=messageArgs />";
+			}
+			else if("SubExceptionWithCount" == type)
+			{
+				var exceptionResolve = message.exceptionResolve;
+				
+				var duration = po.formatDuration(message.duration);
+				
+				<#assign messageArgs=['"+message.successCount+"', '"+message.failCount+"', '"+duration+"', '"+message.content+"'] />
+				
+				//未进行任何实际导入操作
+				if(message.successCount == 0 && message.failCount == 0)
+					status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount' args=messageArgs />";
+				else if(exceptionResolve == "ABORT")
+					status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount.ABORT' args=messageArgs />";
+				else if(exceptionResolve == "IGNORE")
+					status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' args=messageArgs />";
+				else if(exceptionResolve == "ROLLBACK")
+					status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount.ROLLBACK' args=messageArgs />";
+				
+				status += "<span class='exchange-result-icon exchange-error-icon ui-state-error' onmouseover='${pageId}.showSubExceptionTip(event, this)'"
+							+" onmouseout='${pageId}.hideSubExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
+							+"<span class='ui-icon ui-icon-info'></span></span>";
+				
+				po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.content;
+			}
+			else if("SubSuccessWithCount" == type)
+			{
+				var duration = po.formatDuration(message.duration);
+				
+				<#assign messageArgs=['"+message.successCount+"', '"+message.failCount+"', '"+duration+"'] />
+				
+				if(!message.failCount || message.failCount == 0)
+				{
+					status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubSuccessWithCount' args=messageArgs />";
+					status += "<span class='exchange-result-icon exchange-success-icon'><span class='ui-icon ui-icon-circle-check'></span></span>";
+				}
+				else
+				{
+					status = "<@spring.messageArgs code='dataExchange.exchangeStatus.SubExceptionWithCount.IGNORE' args=messageArgs />";
+					status += "<span class='exchange-result-icon exchange-error-icon ui-state-error' onmouseover='${pageId}.showSubExceptionTip(event, this)'"
+							+" onmouseout='${pageId}.hideSubExceptionTip(event, this)' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
+							+"<span class='ui-icon ui-icon-info'></span></span>";
+					
+					po.subDataExchangeExceptionMessages[message.subDataExchangeId] = message.ignoreException;
+				}
+			}
+			
+			status = po.handleSubDataExchangeStatus(message.subDataExchangeId, status, message);
+			
+			var cellIndex = { "row" : rowIndex, "column" : po.subDataExchangeStatusColumnIndex };
+			var cell = dataTable.cell(cellIndex);
+			cell.data(status);
+			cells.push(cellIndex);
+		}
+		
+		//统一绘制，效率更高
+		dataTable.cells(cells).draw();
+	};
+	
+	po.handleSubDataExchangeStatus = function(subDataExchangeId, status, message)
+	{
+		return status;
 	};
 })
 (${pageId});

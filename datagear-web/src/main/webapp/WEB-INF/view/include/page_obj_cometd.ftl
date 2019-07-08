@@ -18,7 +18,13 @@ page_js_obj.jsp
 		{
 			window.cometdIsInit = true;
 			
-			cometd.init("${contextPath}/cometd", function(handshakeReply)
+			cometd.configure(
+			{
+				/*logLevel : "debug",*/
+				url : "${contextPath}/cometd"
+			});
+			
+			cometd.handshake(function(handshakeReply)
 			{
 				window.cometdSubscribedMap = {};
 				window.cometdConnected = false;

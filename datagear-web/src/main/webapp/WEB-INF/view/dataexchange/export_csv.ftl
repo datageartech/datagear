@@ -206,8 +206,7 @@ Schema schema 数据库，不允许为null
 		});
 	};
 	
-	po.updateSubDataExchangeStatusForCometdMessageSuper = po.updateSubDataExchangeStatusForCometdMessage;
-	po.updateSubDataExchangeStatusForCometdMessage = function(subDataExchangeId, status, message)
+	po.handleSubDataExchangeStatus = function(subDataExchangeId, status, message)
 	{
 		var type = (message ? message.type : "");
 		
@@ -224,7 +223,7 @@ Schema schema 数据库，不允许为null
 				+"<span class='ui-icon ui-icon-circle-arrow-s'></span></span>";
 		}
 		
-		po.updateSubDataExchangeStatusForCometdMessageSuper(subDataExchangeId, status, message);
+		return status;
 	};
 	
 	po.expectedResizeDataTableElements = [po.table()[0]];

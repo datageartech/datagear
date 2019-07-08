@@ -16,6 +16,7 @@ import org.datagear.connection.IOUtil;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
 import org.datagear.dataexchange.ExceptionResolve;
+import org.datagear.web.cometd.dataexchange.CometdBatchDataExchangeListener.SubSubmitSuccess;
 import org.springframework.context.MessageSource;
 
 /**
@@ -264,6 +265,8 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	 */
 	public static class SubStart extends SubDataExchangeMessage
 	{
+		public static final int ORDER = SubSubmitSuccess.ORDER + 1;
+
 		public SubStart()
 		{
 			super();
@@ -271,7 +274,7 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 
 		public SubStart(String subDataExchangeId)
 		{
-			super(subDataExchangeId);
+			super(subDataExchangeId, ORDER);
 		}
 	}
 
@@ -283,6 +286,8 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	 */
 	public static class SubException extends SubDataExchangeMessage
 	{
+		public static final int ORDER = SubStart.ORDER + 2;
+
 		private String content;
 
 		private long duration;
@@ -294,7 +299,7 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 
 		public SubException(String subDataExchangeId, String content, long duration)
 		{
-			super(subDataExchangeId);
+			super(subDataExchangeId, ORDER);
 			this.content = content;
 			this.duration = duration;
 		}
@@ -328,6 +333,8 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	 */
 	public static class SubSuccess extends SubDataExchangeMessage
 	{
+		public static final int ORDER = SubStart.ORDER + 2;
+
 		private long duration;
 
 		public SubSuccess()
@@ -337,7 +344,7 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 
 		public SubSuccess(String subDataExchangeId, long duration)
 		{
-			super(subDataExchangeId);
+			super(subDataExchangeId, ORDER);
 			this.duration = duration;
 		}
 
@@ -360,6 +367,8 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	 */
 	public static class SubFinish extends SubDataExchangeMessage
 	{
+		public static final int ORDER = SubSuccess.ORDER + 1;
+
 		public SubFinish()
 		{
 			super();
@@ -367,7 +376,7 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 
 		public SubFinish(String subDataExchangeId)
 		{
-			super(subDataExchangeId);
+			super(subDataExchangeId, ORDER);
 		}
 	}
 
@@ -379,6 +388,8 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	 */
 	public static class SubExchangingWithCount extends SubDataExchangeMessage
 	{
+		public static final int ORDER = SubStart.ORDER + 1;
+
 		private int successCount;
 
 		private int failCount;
@@ -390,7 +401,7 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 
 		public SubExchangingWithCount(String subDataExchangeId, int successCount, int failCount)
 		{
-			super(subDataExchangeId);
+			super(subDataExchangeId, ORDER);
 			this.successCount = successCount;
 			this.failCount = failCount;
 		}
