@@ -543,6 +543,32 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return responseEntity;
 	}
 
+	@RequestMapping("/{schemaId}/export/sql")
+	public String exptSql(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+			}
+		}.execute();
+
+		DataFormat defaultDataFormat = new DataFormat();
+
+		String dataExchangeId = UUID.gen();
+
+		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
+		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+
+		return "/dataexchange/export_sql";
+	}
+
 	@RequestMapping(value = "/{schemaId}/export/download")
 	@ResponseBody
 	public void exptDownload(HttpServletRequest request, HttpServletResponse response,

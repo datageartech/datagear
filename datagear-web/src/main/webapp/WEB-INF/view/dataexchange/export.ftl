@@ -40,10 +40,10 @@ Schema schema 数据库，不允许为null
 				<div class="form-item">
 					<div class="form-item-label">&nbsp;</div>
 					<div class="form-item-value">
-						<label for="${pageId}-dataType-1"><@spring.message code='dataExport.dataType.insertSql' /></label>
-						<input id="${pageId}-dataType-1" type="radio" name="dataType" value="insertSql" />
+						<label for="${pageId}-dataType-1"><@spring.message code='dataExport.dataType.sql' /></label>
+						<input id="${pageId}-dataType-1" type="radio" name="dataType" value="sql" />
 						<div class="input-desc minor">
-							<@spring.message code='dataExport.dataType.insertSql.desc' />
+							<@spring.message code='dataExport.dataType.sql.desc' />
 						</div>
 					</div>
 				</div>

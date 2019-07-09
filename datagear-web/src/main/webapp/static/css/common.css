@@ -1628,7 +1628,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .page-dataexchange .wizard > .steps{
 	width: 80%;
-	margin-left: 8em;
+	margin-left: 10em;
 	padding-top: 0.2em;
 }
 .page-dataexchange .wizard > .content{
