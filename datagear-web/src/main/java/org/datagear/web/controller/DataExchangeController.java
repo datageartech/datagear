@@ -567,17 +567,20 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> doExportSql(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			TextDataExportForm exportForm) throws Exception
+			SqlDataExportForm exportForm) throws Exception
 	{
 		if (exportForm == null || isEmpty(exportForm.getDataFormat()) || isEmpty(exportForm.getExportOption())
 				|| isEmpty(exportForm.getFileEncoding()) || isEmpty(exportForm.getSubDataExchangeIds())
-				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getFileNames())
+				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getTableNames())
+				|| isEmpty(exportForm.getFileNames())
+				|| exportForm.getSubDataExchangeIds().length != exportForm.getTableNames().length
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
 			throw new IllegalInputException();
 
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
+		String[] tableNames = exportForm.getTableNames();
 		String[] fileNames = exportForm.getFileNames();
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
@@ -602,7 +605,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 					exportForm.getFileEncoding());
 
 			SqlDataExport sqlDataExport = new SqlDataExport(connectionFactory, exportForm.getDataFormat(),
-					exportForm.getExportOption(), query, queries[i], writerFactory);
+					exportForm.getExportOption(), query, tableNames[i], writerFactory);
 
 			CometdSubTextDataExportListener listener = new CometdSubTextDataExportListener(
 					this.dataExchangeCometdService, exportServerChannel, getMessageSource(), getLocale(request),
@@ -1205,6 +1208,28 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setFileNames(String[] fileNames)
 		{
 			this.fileNames = fileNames;
+		}
+	}
+
+	public static class SqlDataExportForm extends TextDataExportForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String[] tableNames;
+
+		public SqlDataExportForm()
+		{
+			super();
+		}
+
+		public String[] getTableNames()
+		{
+			return tableNames;
+		}
+
+		public void setTableNames(String[] tableNames)
+		{
+			this.tableNames = tableNames;
 		}
 	}
 

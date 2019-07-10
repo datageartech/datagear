@@ -109,10 +109,35 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.subDataExchangeStatusColumnIndex = 4;
+	
+	po.postBuildSubDataExchange = function(subDataExchange, tableName)
+	{
+		subDataExchange.tableName = tableName;
+	};
+	
 	po.toExportFileName = function(tableName)
 	{
 		return $.toValidFileName(tableName)+".sql";
 	};
+	
+	var tmpDataExportTableColumns = po.dataExportTableColumns.slice(0, 1);
+	tmpDataExportTableColumns.push(
+	{
+		title : "<@spring.message code='dataExport.sqlExportTableName' />",
+		data : "tableName",
+		render : function(data, type, row, meta)
+		{
+			if(!data)
+				data = "";
+			
+			return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' class='table-name-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
+		},
+		defaultContent: "",
+		width : "20%"
+	});
+	tmpDataExportTableColumns[0].width = "30%";
+	po.dataExportTableColumns = tmpDataExportTableColumns.concat(po.dataExportTableColumns.slice(1));
 	
 	po.cometdInitIfNot();
 	po.initDataExportSteps();

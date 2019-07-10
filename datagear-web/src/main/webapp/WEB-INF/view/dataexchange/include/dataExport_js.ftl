@@ -13,35 +13,40 @@ dataExchange_js.ftl
 (function(po)
 {
 	po.dataExchangeChannelId = "${dataExchangeChannelId}";
-	po.subDataExchangeStatusColumnIndex = 3;
 	
-	po.addSubDataExchange = function(query, fileName)
+	po.nextSubDataExchangeId = function()
 	{
-		if(query == null)
-			query="";
-		if(fileName == null)
-			fileName = "";
+		if(!po.nextSubDataExchangeIdSeq)
+			po.nextSubDataExchangeIdSeq = 0;
 		
-		if(!$.isArray(query))
-			query = [ query ];
+		return po.dataExchangeId + "_" + (po.nextSubDataExchangeIdSeq++);
+	};
+	
+	po.addSubDataExchange = function()
+	{
+		var rowData = {subDataExchangeId : po.nextSubDataExchangeId(), query : "", fileName : "", status : ""};
+		po.postBuildSubDataExchange(rowData);
+		po.addRowData(rowData);
+	};
+	
+	po.buildSubDataExchangesForTables = function(tableNames)
+	{
+		var datas = [];
 		
-		if(!$.isArray(fileName))
-			fileName = [ fileName ];
-		
-		var rowDatas = [];
-		
-		for(var i=0; i< query.length; i++)
+		for(var i=0; i< tableNames.length; i++)
 		{
-			if(!po.nextSubDataExchangeIdSeq)
-				po.nextSubDataExchangeIdSeq = 0;
+			var data = {subDataExchangeId : po.nextSubDataExchangeId(), query : tableNames[i],
+					fileName : po.toExportFileName(tableNames[i]), status : ""};
 			
-			var subDataExchangeId = po.dataExchangeId + "_" + (po.nextSubDataExchangeIdSeq++);
+			po.postBuildSubDataExchange(data, tableNames[i]);
 			
-			rowDatas.push({subDataExchangeId : subDataExchangeId, query : query[i], fileName : fileName[i], status : ""});
+			datas.push(data);
 		}
 		
-		po.addRowData(rowDatas);
+		return datas;
 	};
+	
+	po.postBuildSubDataExchange = function(subDataExchange, tableName){};
 	
 	po.addAllTable = function()
 	{
@@ -58,13 +63,8 @@ dataExchange_js.ftl
 				if(!tableNames)
 					return;
 				
-				var queries = tableNames;
-				var fileNames = [];
-				
-				for(var i=0; i<tableNames.length; i++)
-					fileNames[i] = po.toExportFileName(tableNames[i]);
-				
-				po.addSubDataExchange(queries, fileNames);
+				var rowDatas = po.buildSubDataExchangesForTables(tableNames);
+				po.addRowData(rowDatas);
 			},
 			complete : function()
 			{
@@ -105,6 +105,9 @@ dataExchange_js.ftl
 			data : "query",
 			render : function(data, type, row, meta)
 			{
+				if(!data)
+					data = "";
+				
 				return "<input type='hidden' name='subDataExchangeIds' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
 						+ "<input type='text' name='queries' value='"+$.escapeHtml(data)+"' class='query-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
 			},
@@ -116,10 +119,13 @@ dataExchange_js.ftl
 			data : "fileName",
 			render : function(data, type, row, meta)
 			{
+				if(!data)
+					data = "";
+				
 				return "<input type='text' name='fileNames' value='"+$.escapeHtml(data)+"' class='file-name-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
 			},
 			defaultContent: "",
-			width : "23%"
+			width : "20%"
 		},
 		{
 			title : $.buildDataTablesColumnTitleWithTip("<@spring.message code='dataExport.exportProgress' />", "<@spring.message code='dataExport.exportStatusWithSuccessFail' />"),
@@ -132,7 +138,7 @@ dataExchange_js.ftl
 					return data;
 			},
 			defaultContent: "",
-			width : "27%"
+			width : "30%"
 		}
 	];
 	
