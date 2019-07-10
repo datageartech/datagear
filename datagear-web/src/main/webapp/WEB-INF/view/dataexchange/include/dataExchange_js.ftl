@@ -376,6 +376,23 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	{
 		return status;
 	};
+	
+	po.initDataExchangeActions = function()
+	{
+		po.element(".return-button").click(function()
+		{
+			var returnUrl = $(this).attr("return-url");
+			
+			if(!returnUrl)
+				return;
+			
+			<#if isAjaxRequest>
+			po.element().parent().load(returnUrl);
+			<#else>
+			window.location.href = returnUrl;
+			</#if>
+		});
+	}
 })
 (${pageId});
 </script>

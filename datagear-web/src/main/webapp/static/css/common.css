@@ -1698,6 +1698,15 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	max-height: 20em;
 	overflow: auto;
 }
+.page-dataexchange .return-wrapper{
+	position: absolute;
+	left: 0.5em;
+	bottom: 0;
+	height: 3em;
+}
+.page-dataexchange .return-wrapper button{
+	border-width: 0px;
+}
 .page-dataexchange .restart-wrapper{
 	position: absolute;
 	right: 0.5em;
