@@ -55,6 +55,7 @@ import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dataexchange.TextDataImportOption;
 import org.datagear.dataexchange.support.CsvDataExport;
 import org.datagear.dataexchange.support.CsvDataImport;
+import org.datagear.dataexchange.support.SqlDataExport;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbinfo.TableType;
@@ -333,7 +334,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 					subDataExchangeIds[i], csvDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
-					evalSendImportingMessageInterval(subDataExchangeIds.length, csvDataImport));
+					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, csvDataImport));
 			csvDataImport.setListener(listener);
 
 			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], csvDataImport);
@@ -513,7 +514,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 					subDataExchangeIds[i]);
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
 			listener.setSendExchangingMessageInterval(
-					evalSendExportingMessageInterval(subDataExchangeIds.length, csvDataExport));
+					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, csvDataExport));
 			csvDataExport.setListener(listener);
 
 			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], csvDataExport);
@@ -578,6 +579,50 @@ public class DataExchangeController extends AbstractSchemaConnController
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
 		String[] fileNames = exportForm.getFileNames();
+
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
+
+		Schema schema = getSchemaNotNull(request, response, schemaId);
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+
+		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
+		ServerChannel exportServerChannel = this.dataExchangeCometdService.getChannelWithCreation(exportChannelId);
+
+		Locale locale = getLocale(request);
+
+		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+
+		for (int i = 0; i < subDataExchangeIds.length; i++)
+		{
+			Query query = toQuery(queries[i]);
+
+			File file = new File(directory, fileNames[i]);
+			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(file,
+					exportForm.getFileEncoding());
+
+			SqlDataExport sqlDataExport = new SqlDataExport(connectionFactory, exportForm.getDataFormat(),
+					exportForm.getExportOption(), query, queries[i], writerFactory);
+
+			CometdSubTextDataExportListener listener = new CometdSubTextDataExportListener(
+					this.dataExchangeCometdService, exportServerChannel, getMessageSource(), getLocale(request),
+					subDataExchangeIds[i]);
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+			listener.setSendExchangingMessageInterval(
+					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, sqlDataExport));
+			sqlDataExport.setListener(listener);
+
+			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], sqlDataExport);
+			subDataExchanges.add(subDataExchange);
+		}
+
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
+				exportServerChannel, locale);
+
+		this.dataExchangeService.exchange(batchDataExchange);
+
+		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
+		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
 
@@ -737,36 +782,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	}
 
 	/**
-	 * 计算导出中消息发送间隔。
+	 * 计算导入/导出中消息发送间隔。
 	 * <p>
-	 * 如果发送频率过快，当导出文件很多时会出现cometd卡死的情况。
+	 * 如果发送频率过快，当数据交换很多时会出现cometd卡死的情况。
 	 * </p>
 	 * 
 	 * @param total
-	 * @param csvDataExport
+	 * @param dataExchange
 	 * @return
 	 */
-	protected int evalSendExportingMessageInterval(int total, CsvDataExport csvDataExport)
-	{
-		int interval = 500 * total;
-
-		if (interval > 5000)
-			interval = 5000;
-
-		return interval;
-	}
-
-	/**
-	 * 计算导入中消息发送间隔。
-	 * <p>
-	 * 如果发送频率过快，当导入文件很多时会出现cometd卡死的情况。
-	 * </p>
-	 * 
-	 * @param total
-	 * @param csvDataImport
-	 * @return
-	 */
-	protected int evalSendImportingMessageInterval(int total, CsvDataImport csvDataImport)
+	protected int evalSendDataExchangingMessageInterval(int total, DataExchange dataExchange)
 	{
 		int interval = 500 * total;
 

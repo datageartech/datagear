@@ -20,10 +20,9 @@ public abstract class TableTextDataImport extends TextDataImport
 		super();
 	}
 
-	public TableTextDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat,
-			TextDataImportOption importOption, String table)
+	public TableTextDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, String table)
 	{
-		super(connectionFactory, dataFormat, importOption);
+		super(connectionFactory, dataFormat);
 		this.table = table;
 	}
 

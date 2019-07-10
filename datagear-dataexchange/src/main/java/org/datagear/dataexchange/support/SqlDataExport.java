@@ -17,27 +17,29 @@ import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
 
 /**
- * CSV导出。
+ * SQL导出。
  * 
  * @author datagear@163.com
  *
  */
-public class CsvDataExport extends QueryTextDataExport
+public class SqlDataExport extends QueryTextDataExport
 {
 	private TextDataExportOption exportOption;
+	private String tableName;
 	private ResourceFactory<Writer> writerFactory;
 	private TextDataExportListener listener;
 
-	public CsvDataExport()
+	public SqlDataExport()
 	{
 		super();
 	}
 
-	public CsvDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataExportOption exportOption,
-			Query query, ResourceFactory<Writer> writerFactory)
+	public SqlDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataExportOption exportOption,
+			Query query, String tableName, ResourceFactory<Writer> writerFactory)
 	{
 		super(connectionFactory, dataFormat, query);
 		this.exportOption = exportOption;
+		this.tableName = tableName;
 		this.writerFactory = writerFactory;
 	}
 
@@ -50,6 +52,16 @@ public class CsvDataExport extends QueryTextDataExport
 	public void setExportOption(TextDataExportOption exportOption)
 	{
 		this.exportOption = exportOption;
+	}
+
+	public String getTableName()
+	{
+		return tableName;
+	}
+
+	public void setTableName(String tableName)
+	{
+		this.tableName = tableName;
 	}
 
 	public ResourceFactory<Writer> getWriterFactory()
@@ -74,31 +86,32 @@ public class CsvDataExport extends QueryTextDataExport
 	}
 
 	/**
-	 * 构建{@linkplain CsvDataExport}列表。
+	 * 构建{@linkplain SqlDataExport}列表。
 	 * 
 	 * @param connectionFactory
 	 * @param dataFormat
 	 * @param exportOption
 	 * @param queries
+	 * @param tableNames
 	 * @param writerFactories
 	 * @return
 	 */
-	public static List<CsvDataExport> valuesOf(ConnectionFactory connectionFactory, DataFormat dataFormat,
-			TextDataExportOption exportOption, List<? extends Query> queries,
+	public static List<SqlDataExport> valuesOf(ConnectionFactory connectionFactory, DataFormat dataFormat,
+			TextDataExportOption exportOption, List<? extends Query> queries, List<String> tableNames,
 			List<? extends ResourceFactory<Writer>> writerFactories)
 	{
 		int size = queries.size();
 
-		List<CsvDataExport> csvDataExports = new ArrayList<CsvDataExport>(size);
+		List<SqlDataExport> dataExports = new ArrayList<SqlDataExport>(size);
 
 		for (int i = 0; i < size; i++)
 		{
-			CsvDataExport export = new CsvDataExport(connectionFactory, dataFormat, exportOption, queries.get(i),
-					writerFactories.get(i));
+			SqlDataExport export = new SqlDataExport(connectionFactory, dataFormat, exportOption, queries.get(i),
+					tableNames.get(i), writerFactories.get(i));
 
-			csvDataExports.add(export);
+			dataExports.add(export);
 		}
 
-		return csvDataExports;
+		return dataExports;
 	}
 }

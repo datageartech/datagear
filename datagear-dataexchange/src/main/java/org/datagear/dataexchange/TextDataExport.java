@@ -12,29 +12,23 @@ package org.datagear.dataexchange;
  */
 public abstract class TextDataExport extends TextDataExchange
 {
-	private TextDataExportOption exportOption;
-
 	public TextDataExport()
 	{
 		super();
 	}
 
-	public TextDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataExportOption exportOption)
+	public TextDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat)
 	{
 		super(connectionFactory, dataFormat);
-		this.exportOption = exportOption;
 	}
 
-	public TextDataExportOption getExportOption()
-	{
-		return exportOption;
-	}
-
-	public void setExportOption(TextDataExportOption exportOption)
-	{
-		this.exportOption = exportOption;
-	}
+	/**
+	 * 获取{@linkplain TextDataExportOption}。
+	 * 
+	 * @return
+	 */
+	public abstract TextDataExportOption getExportOption();
 
 	@Override
-	public abstract DataExchangeListener getListener();
+	public abstract TextDataExportListener getListener();
 }

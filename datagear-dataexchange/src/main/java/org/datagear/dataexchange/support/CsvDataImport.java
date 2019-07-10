@@ -23,6 +23,7 @@ import org.datagear.dataexchange.TextDataImportOption;
  */
 public class CsvDataImport extends TableTextDataImport
 {
+	private TextDataImportOption importOption;
 	/** CSV输入流 */
 	private ResourceFactory<Reader> readerFactory;
 
@@ -36,8 +37,20 @@ public class CsvDataImport extends TableTextDataImport
 	public CsvDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataImportOption importOption,
 			String table, ResourceFactory<Reader> readerFactory)
 	{
-		super(connectionFactory, dataFormat, importOption, table);
+		super(connectionFactory, dataFormat, table);
+		this.importOption = importOption;
 		this.readerFactory = readerFactory;
+	}
+
+	@Override
+	public TextDataImportOption getImportOption()
+	{
+		return importOption;
+	}
+
+	public void setImportOption(TextDataImportOption importOption)
+	{
+		this.importOption = importOption;
 	}
 
 	public ResourceFactory<Reader> getReaderFactory()

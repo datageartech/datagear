@@ -12,28 +12,22 @@ package org.datagear.dataexchange;
  */
 public abstract class TextDataImport extends TextDataExchange
 {
-	private TextDataImportOption importOption;
-
 	public TextDataImport()
 	{
 		super();
 	}
 
-	public TextDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataImportOption importOption)
+	public TextDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat)
 	{
 		super(connectionFactory, dataFormat);
-		this.importOption = importOption;
 	}
 
-	public TextDataImportOption getImportOption()
-	{
-		return importOption;
-	}
-
-	public void setImportOption(TextDataImportOption importOption)
-	{
-		this.importOption = importOption;
-	}
+	/**
+	 * 获取{@linkplain TextDataImportOption}。
+	 * 
+	 * @return
+	 */
+	public abstract TextDataImportOption getImportOption();
 
 	@Override
 	public abstract TextDataImportListener getListener();
