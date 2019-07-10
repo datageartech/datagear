@@ -18,12 +18,12 @@ Schema schema 数据库，不允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-dataexchange page-dataexport-text page-dataexport-csv">
+<div id="${pageId}" class="page-dataexchange page-dataexport-text page-dataexport-sql">
 	<div class="head">
 		<@spring.message code='dataExport.exportSqlData' />
 	</div>
 	<div class="content">
-		<form id="${pageId}-form" action="#" method="POST">
+		<form id="${pageId}-form" action="${contextPath}/dataexchange/${schema.id}/export/sql/doExport" method="POST">
 			<input type="hidden" name="dataExchangeId" value="${dataExchangeId}" />
 			<div class="form-content form-content-wizard">
 				<h3><@spring.message code='dataExport.setDataFormat' /></h3>
@@ -100,274 +100,20 @@ Schema schema 数据库，不允许为null
 <#include "../include/page_obj_cometd.ftl">
 <#include "../include/page_obj_format_time.ftl" >
 <#include "include/dataExchange_js.ftl" >
+<#include "include/dataExport_js.ftl" >
 <script type="text/javascript">
 (function(po)
 {
-	po.dataExchangeChannelId = "${dataExchangeChannelId}";
-	po.subDataExchangeStatusColumnIndex = 3;
+	po.toExportFileName = function(tableName)
+	{
+		return $.toValidFileName(tableName)+".sql";
+	};
 	
 	po.cometdInitIfNot();
-	po.element(".form-content").steps(
-	{
-		headerTag: "h3",
-		bodyTag: "div",
-		onStepChanged : function(event, currentIndex, priorIndex)
-		{
-			if(currentIndex == 1)
-				po.adjustDataTable();
-		},
-		onFinished : function(event, currentIndex)
-		{
-			po.element("#${pageId}-form").submit();
-		},
-		labels:
-		{
-			previous: "<@spring.message code='wizard.previous' />",
-			next: "<@spring.message code='wizard.next' />",
-			finish: "<@spring.message code='export' />"
-		}
-	});
-	
-	po.element("#${pageId}-form .wizard .actions ul li:eq(2)").addClass("page-status-aware-enable edit-status-enable");
-	
-	$.initButtons(po.element());
-	po.element("#${pageId}-binaryFormat").buttonset();
-	po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
-	po.element("#${pageId}-add-group-select").selectmenu(
-	{
-		classes : {"ui-selectmenu-button": "ui-button-icon-only ui-corner-right"},
-		select : function(event, ui)
-		{
-			if(ui.item.value == "addAll")
-				po.addAllTable();
-		}
-	});
-	po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
-	po.element("#${pageId}-add-group").controlgroup();
-	
-	po.element("input[name='dataFormat.binaryFormat'][value='${defaultDataFormat.binaryFormat}']").click();
-	po.element("#${pageId}-nullForIllegalColumnValue-1").click();
-	
-	po.addSubDataExchange = function(query, fileName)
-	{
-		if(query == null)
-			query="";
-		if(fileName == null)
-			fileName = "";
-		
-		if(!$.isArray(query))
-			query = [ query ];
-		
-		if(!$.isArray(fileName))
-			fileName = [ fileName ];
-		
-		var rowDatas = [];
-		
-		for(var i=0; i< query.length; i++)
-		{
-			if(!po.nextSubDataExchangeIdSeq)
-				po.nextSubDataExchangeIdSeq = 0;
-			
-			var subDataExchangeId = po.dataExchangeId + "_" + (po.nextSubDataExchangeIdSeq++);
-			
-			rowDatas.push({subDataExchangeId : subDataExchangeId, query : query[i], fileName : fileName[i], status : ""});
-		}
-		
-		po.addRowData(rowDatas);
-	};
-	
-	po.addAllTable = function()
-	{
-		if(po._addAllTableDoing)
-			return;
-		
-		po._addAllTableDoing = true;
-		
-		$.ajax(
-		{
-			url : "${contextPath}/dataexchange/" + po.schemaId +"/getAllTableNames",
-			success : function(tableNames)
-			{
-				if(!tableNames)
-					return;
-				
-				var queries = tableNames;
-				var fileNames = [];
-				
-				for(var i=0; i<tableNames.length; i++)
-					fileNames[i] = $.toValidFileName(tableNames[i])+".csv";
-				
-				po.addSubDataExchange(queries, fileNames);
-			},
-			complete : function()
-			{
-				po._addAllTableDoing = false;
-			}
-		});
-	};
-	
-	po.handleSubDataExchangeStatus = function(subDataExchangeId, status, message)
-	{
-		var type = (message ? message.type : "");
-		
-		if("SubSuccessWithCount" == type)
-		{
-			if(!message.failCount || message.failCount == 0)
-			{
-				var spanIndex = status.indexOf("<span");
-				if(spanIndex > 0)
-					status = status.substring(0, spanIndex);
-			}
-			
-			status += "<span class='exchange-result-icon exchange-download-icon' title='"+$.escapeHtml("<@spring.message code='download' />")+"' subDataExchangeId='"+$.escapeHtml(message.subDataExchangeId)+"' >"
-				+"<span class='ui-icon ui-icon-circle-arrow-s'></span></span>";
-		}
-		
-		return status;
-	};
-	
-	po.expectedResizeDataTableElements = [po.table()[0]];
-	
-	var tableColumns = [
-		{
-			title : "<@spring.message code='dataExport.tableNameOrQueryStatement' />",
-			data : "query",
-			render : function(data, type, row, meta)
-			{
-				return "<input type='hidden' name='subDataExchangeIds' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
-						+ "<input type='text' name='queries' value='"+$.escapeHtml(data)+"' class='query-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
-			},
-			defaultContent: "",
-			width : "50%",
-		},
-		{
-			title : "<@spring.message code='dataExport.exportFileName' />",
-			data : "fileName",
-			render : function(data, type, row, meta)
-			{
-				return "<input type='text' name='fileNames' value='"+$.escapeHtml(data)+"' class='file-name-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
-			},
-			defaultContent: "",
-			width : "23%"
-		},
-		{
-			title : $.buildDataTablesColumnTitleWithTip("<@spring.message code='dataExport.exportProgress' />", "<@spring.message code='dataExport.exportStatusWithSuccessFail' />"),
-			data : "status",
-			render : function(data, type, row, meta)
-			{
-				if(!data)
-					return "<@spring.message code='dataExchange.exchangeStatus.Unstart' />";
-				else
-					return data;
-			},
-			defaultContent: "",
-			width : "27%"
-		}
-	];
-	var tableSettings = po.buildDataTableSettingsLocal(tableColumns, [], {"order": []});
-	po.initDataTable(tableSettings);
-	po.bindResizeDataTable();
-	
-	po.element(".table-add-item-button").click(function()
-	{
-		po.addSubDataExchange();
-		
-		//滚动到底部
-		var $dataTableParent = po.dataTableParent();
-		$dataTableParent.scrollTop($dataTableParent.prop("scrollHeight"));
-	});
-	
-	po.element(".table-delete-item-button").click(function()
-	{
-		po.executeOnSelects(function(rowDatas, rowIndexes)
-		{
-			po.deleteRow(rowIndexes);
-		});
-	});
-	
-	po.element(".table-cancel-export-button").click(function()
-	{
-		po.cancelSelectedSubDataExchange();
-	});
-	
-	po.element(".table-download-all-button").click(function()
-	{
-		po.open("${contextPath}/dataexchange/" + po.schemaId +"/export/downloadAll",
-		{
-			target : "_file",
-			data :
-			{
-				dataExchangeId : po.dataExchangeId
-			}
-		});
-	});
-	
-	po.table().on("click", ".input-in-table", function(event)
-	{
-		//阻止行选中
-		event.stopPropagation();
-	});
-	
-	po.table().on("click", ".exchange-result-icon", function(event)
-	{
-		//阻止行选中
-		event.stopPropagation();
-		
-		var $this = $(this);
-		
-		if($this.hasClass("exchange-error-icon"))
-		{
-			var subDataExchangeId = $this.attr("subDataExchangeId");
-			po.viewSubDataExchangeDetailLog(subDataExchangeId);
-		}
-		else if($this.hasClass("exchange-download-icon"))
-		{
-			var subDataExchangeId = $this.attr("subDataExchangeId");
-			var fileName = (po.subDataExchangeFileNameMap ? po.subDataExchangeFileNameMap[subDataExchangeId] : null);
-			
-			if(fileName)
-			{
-				po.open("${contextPath}/dataexchange/" + po.schemaId +"/export/download",
-				{
-					target : "_file",
-					data :
-					{
-						dataExchangeId : po.dataExchangeId,
-						fileName : fileName
-					}
-				});
-			}
-		}
-	});
-	
-	po.element(".restart-button").click(function()
-	{
-		po.updateDataExchangePageStatus("edit");
-	});
-	
-	po.element("#${pageId}-form").submit(function()
-	{
-		po.cometdExecuteAfterSubscribe(po.dataExchangeChannelId,
-		function()
-		{
-			po.element("#${pageId}-form").ajaxSubmit(
-			{
-				url : "${contextPath}/dataexchange/" + po.schemaId +"/export/csv/doExport",
-				success: function(data)
-				{
-					po.subDataExchangeFileNameMap = data.data;
-					po.updateDataExchangePageStatus("exchange");
-				}
-			});
-		},
-		function(message)
-		{
-			po.handleDataExchangeCometdMessage(message);
-		});
-		
-		return false;
-	});
-	
+	po.initDataExportSteps();
+	po.initDataExportUIs();
+	po.initDataExportDataTable();
+	po.initDataExportActions();
 	po.updateDataExchangePageStatus("edit");
 })
 (${pageId});

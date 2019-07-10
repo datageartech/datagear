@@ -342,12 +342,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			// TODO 处理依赖
 		}
 
-		BatchDataExchange batchDataExchange = new SimpleBatchDataExchange(connectionFactory, subDataExchanges);
-
-		CometdBatchDataExchangeListener listener = new CometdBatchDataExchangeListener(this.dataExchangeCometdService,
-				importServerChannel, getMessageSource(), locale);
-
-		batchDataExchange.setListener(listener);
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
+				importServerChannel, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -524,11 +520,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			subDataExchanges.add(subDataExchange);
 		}
 
-		BatchDataExchange batchDataExchange = new SimpleBatchDataExchange(connectionFactory, subDataExchanges);
-
-		CometdBatchDataExchangeListener listener = new CometdBatchDataExchangeListener(this.dataExchangeCometdService,
-				exportServerChannel, getMessageSource(), locale);
-		batchDataExchange.setListener(listener);
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
+				exportServerChannel, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
 
@@ -567,6 +560,31 @@ public class DataExchangeController extends AbstractSchemaConnController
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
 
 		return "/dataexchange/export_sql";
+	}
+
+	@RequestMapping(value = "/{schemaId}/export/sql/doExport", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> doExportSql(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			TextDataExportForm exportForm) throws Exception
+	{
+		if (exportForm == null || isEmpty(exportForm.getDataFormat()) || isEmpty(exportForm.getExportOption())
+				|| isEmpty(exportForm.getFileEncoding()) || isEmpty(exportForm.getSubDataExchangeIds())
+				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getFileNames())
+				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
+				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
+			throw new IllegalInputException();
+
+		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
+		String[] queries = exportForm.getQueries();
+		String[] fileNames = exportForm.getFileNames();
+
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+
+		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
+		responseEntity.getBody().setData(subDataExchangeFileNameMap);
+
+		return responseEntity;
 	}
 
 	@RequestMapping(value = "/{schemaId}/export/download")
@@ -619,6 +637,18 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			IOUtil.close(out);
 		}
+	}
+
+	protected BatchDataExchange buildBatchDataExchange(ConnectionFactory connectionFactory,
+			Set<SubDataExchange> subDataExchanges, ServerChannel serverChannel, Locale locale)
+	{
+		BatchDataExchange batchDataExchange = new SimpleBatchDataExchange(connectionFactory, subDataExchanges);
+
+		CometdBatchDataExchangeListener listener = new CometdBatchDataExchangeListener(this.dataExchangeCometdService,
+				serverChannel, getMessageSource(), locale);
+		batchDataExchange.setListener(listener);
+
+		return batchDataExchange;
 	}
 
 	protected Map<String, String> buildSubDataExchangeFileNameMap(String[] subDataExchangeIds, String[] fileNames)
