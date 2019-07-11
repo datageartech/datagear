@@ -10,7 +10,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import org.datagear.connection.IOUtil;
+import org.datagear.util.IOUtil;
 
 /**
  * 抽象字符输入流{@linkplain ResourceFactory}。

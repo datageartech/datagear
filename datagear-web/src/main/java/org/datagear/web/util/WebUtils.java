@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.datagear.management.domain.User;
-import org.datagear.persistence.support.UUID;
+import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.security.AuthUser;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -75,7 +75,7 @@ public class WebUtils
 
 			if (anonymousUserId == null || anonymousUserId.isEmpty())
 			{
-				anonymousUserId = UUID.gen();
+				anonymousUserId = IDUtil.uuid();
 
 				Cookie cookie = new Cookie(COOKIE_USER_ID_ANONYMOUS, anonymousUserId);
 				cookie.setPath(request.getContextPath() + "/");

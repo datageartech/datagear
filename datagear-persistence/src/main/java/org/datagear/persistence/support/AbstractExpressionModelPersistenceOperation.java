@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.datagear.connection.JdbcUtil;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.support.MU;
 import org.datagear.persistence.UnsupportedModelCharacterException;
-import org.datagear.persistence.support.ExpressionResolver.Expression;
+import org.datagear.util.JdbcUtil;
+import org.datagear.util.expression.ExpressionResolver;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
@@ -32,9 +32,9 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 {
 	private ConversionService conversionService;
 
-	private ExpressionResolver variableExpressionResolver;
+	private NameExpressionResolver variableExpressionResolver;
 
-	private ExpressionResolver sqlExpressionResolver;
+	private NameExpressionResolver sqlExpressionResolver;
 
 	private SpelExpressionParser spelExpressionParser = new SpelExpressionParser();
 
@@ -44,7 +44,7 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 	}
 
 	public AbstractExpressionModelPersistenceOperation(ConversionService conversionService,
-			ExpressionResolver variableExpressionResolver, ExpressionResolver sqlExpressionResolver)
+			NameExpressionResolver variableExpressionResolver, NameExpressionResolver sqlExpressionResolver)
 	{
 		super();
 		this.conversionService = conversionService;
@@ -67,24 +67,19 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 		return variableExpressionResolver;
 	}
 
-	public void setVariableExpressionResolver(ExpressionResolver variableExpressionResolver)
-	{
-		this.variableExpressionResolver = variableExpressionResolver;
-	}
-
-	public ExpressionResolver getSqlExpressionResolver()
+	public NameExpressionResolver getSqlExpressionResolver()
 	{
 		return sqlExpressionResolver;
 	}
 
-	public void setSqlExpressionResolver(ExpressionResolver sqlExpressionResolver)
+	public void setSqlExpressionResolver(NameExpressionResolver sqlExpressionResolver)
 	{
 		this.sqlExpressionResolver = sqlExpressionResolver;
 	}
 
-	public SpelExpressionParser getSpelExpressionParser()
+	public void setVariableExpressionResolver(NameExpressionResolver variableExpressionResolver)
 	{
-		return spelExpressionParser;
+		this.variableExpressionResolver = variableExpressionResolver;
 	}
 
 	public void setSpelExpressionParser(SpelExpressionParser spelExpressionParser)
@@ -108,7 +103,7 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 	protected Object evaluatePropertyValueIfExpression(Connection cn, Model model, Property property, Object propValue,
 			ExpressionEvaluationContext expressionEvaluationContext)
 	{
-		List<Expression> variableExpressions = this.variableExpressionResolver.resolve(propValue);
+		List<NameExpression> variableExpressions = this.variableExpressionResolver.resolveNameExpressions(propValue);
 
 		Object evaluatedPropValue = propValue;
 
@@ -122,7 +117,7 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 					expressionEvaluationContext);
 		}
 
-		List<Expression> sqlExpressions = this.sqlExpressionResolver.resolve(evaluatedPropValue);
+		List<NameExpression> sqlExpressions = this.sqlExpressionResolver.resolveNameExpressions(evaluatedPropValue);
 
 		if (sqlExpressions != null && !sqlExpressions.isEmpty())
 		{
@@ -158,14 +153,14 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 	 * @return
 	 * @throws VariableExpressionErrorException
 	 */
-	protected Object evaluateVariableExpressions(String source, List<Expression> expressions,
+	protected Object evaluateVariableExpressions(String source, List<NameExpression> expressions,
 			ExpressionEvaluationContext expressionEvaluationContext) throws VariableExpressionErrorException
 	{
 		List<Object> expressionValues = new ArrayList<Object>();
 
 		for (int i = 0, len = expressions.size(); i < len; i++)
 		{
-			Expression expression = expressions.get(i);
+			NameExpression expression = expressions.get(i);
 
 			if (expressionEvaluationContext.containsCachedValue(expression))
 			{
@@ -198,7 +193,7 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 	 * @throws SqlExpressionErrorException
 	 * @throws VariableExpressionErrorException
 	 */
-	protected Object evaluateSqlExpressions(Connection cn, String source, List<Expression> expressions,
+	protected Object evaluateSqlExpressions(Connection cn, String source, List<NameExpression> expressions,
 			ExpressionEvaluationContext expressionEvaluationContext)
 			throws SqlExpressionErrorException, VariableExpressionErrorException
 	{
@@ -206,7 +201,7 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 
 		for (int i = 0, len = expressions.size(); i < len; i++)
 		{
-			Expression expression = expressions.get(i);
+			NameExpression expression = expressions.get(i);
 
 			if (expressionEvaluationContext.containsCachedValue(expression))
 			{
@@ -237,7 +232,7 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 	 * @param cn
 	 * @throws SqlExpressionErrorException
 	 */
-	protected void evaluateAsSelectSqlExpression(Expression expression,
+	protected void evaluateAsSelectSqlExpression(NameExpression expression,
 			ExpressionEvaluationContext expressionEvaluationContext, List<Object> expressionValues, Connection cn)
 			throws SqlExpressionErrorException
 	{
@@ -278,7 +273,7 @@ public abstract class AbstractExpressionModelPersistenceOperation extends Abstra
 	 * @param expressionValues
 	 * @throws VariableExpressionErrorException
 	 */
-	protected void evaluateAsVariableExpression(Expression expression,
+	protected void evaluateAsVariableExpression(NameExpression expression,
 			ExpressionEvaluationContext expressionEvaluationContext, List<Object> expressionValues)
 			throws VariableExpressionErrorException
 	{

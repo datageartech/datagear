@@ -10,8 +10,8 @@ import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
 
-import org.datagear.connection.IOUtil;
 import org.datagear.connection.XmlDriverEntityManager;
+import org.datagear.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ServletContextAware;

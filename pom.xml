@@ -31,6 +31,7 @@
 		<module>datagear-management</module>
 		<module>datagear-web</module>
     	<module>datagear-webembd</module>
+    	<module>datagear-util</module>
 	</modules>
 
 	<dependencies>
@@ -108,10 +109,10 @@ ${line.separator}
 ${line.separator}
 </echo>
 								<!-- 替换web模块datagear-version.properties中的版本号 -->
-								<replaceregexp file="datagear-web/src/main/resources/datagear-version.properties" encoding="UTF-8" match="version=\d+(\.\d+){1,2}(\-\w+){0,1}" replace="version=${project.version}" />
+								<replaceregexp file="datagear-web/src/main/resources/datagear-version.properties" encoding="UTF-8" match="version=\d+(\.\d+){1,2}(\-\w+){0,1}" replace="version=${project.version}"/>
 								
 								<!-- 替换web模块readme.txt中的版本号 -->
-								<replaceregexp file="datagear-web/src/main/webapp/readme.txt" encoding="UTF-8" match="数据齿轮\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="数据齿轮-v${project.version}" />
+								<replaceregexp file="datagear-web/src/main/webapp/readme.txt" encoding="UTF-8" match="数据齿轮\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="数据齿轮-v${project.version}"/>
 								
 								<!-- 为web模块的changelog.txt添加版本号行 -->
 			    				<echo file="datagear-web/src/main/webapp/WEB-INF/changelog.txt" encoding="UTF-8" append="true">
@@ -123,13 +124,13 @@ ${line.separator}
 </echo>
 								
 								<!-- 替换webembd模块readme.txt中的版本号 -->
-								<replaceregexp file="datagear-webembd/src/main/dist/readme.txt" encoding="UTF-8" match="数据齿轮\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="数据齿轮-v${project.version}" />
+								<replaceregexp file="datagear-webembd/src/main/dist/readme.txt" encoding="UTF-8" match="数据齿轮\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="数据齿轮-v${project.version}"/>
 								
 								<!-- 替换webembd模块startup.bat中的版本号 -->
-								<replaceregexp file="datagear-webembd/src/main/dist/startup.bat" encoding="UTF-8" match="datagear\-webembd\-\d+(\.\d+){1,2}(\-\w+){0,1}" replace="datagear-webembd-${project.version}" />
+								<replaceregexp file="datagear-webembd/src/main/dist/startup.bat" encoding="UTF-8" match="datagear\-webembd\-\d+(\.\d+){1,2}(\-\w+){0,1}" replace="datagear-webembd-${project.version}"/>
 								
 								<!-- 替换webembd模块startup.sh中的版本号 -->
-								<replaceregexp file="datagear-webembd/src/main/dist/startup.sh" encoding="UTF-8" match="datagear\-webembd\-\d+(\.\d+){1,2}(\-\w+){0,1}" replace="datagear-webembd-${project.version}" />
+								<replaceregexp file="datagear-webembd/src/main/dist/startup.sh" encoding="UTF-8" match="datagear\-webembd\-\d+(\.\d+){1,2}(\-\w+){0,1}" replace="datagear-webembd-${project.version}"/>
 								
 			    			</tasks>
 			    		</configuration>

@@ -12,10 +12,10 @@ import java.io.Writer;
 import java.util.Locale;
 
 import org.cometd.bayeux.server.ServerChannel;
-import org.datagear.connection.IOUtil;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
 import org.datagear.dataexchange.ExceptionResolve;
+import org.datagear.util.IOUtil;
 import org.datagear.web.cometd.dataexchange.CometdBatchDataExchangeListener.SubSubmitSuccess;
 import org.springframework.context.MessageSource;
 

@@ -13,5 +13,10 @@
 	<name>datagear-connection</name>
 	
 	<dependencies>
+		<dependency>
+			<groupId>org.datagear</groupId>
+			<artifactId>datagear-util</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>

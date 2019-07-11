@@ -21,14 +21,14 @@ import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverEntity;
-import org.datagear.connection.JdbcUtil;
 import org.datagear.dbmodel.DatabaseModelResolver;
 import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
 import org.datagear.model.Model;
-import org.datagear.persistence.support.UUID;
-import org.datagear.web.util.SqlScriptParser.SqlStatement;
+import org.datagear.util.IDUtil;
+import org.datagear.util.JdbcUtil;
+import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 
@@ -676,7 +676,7 @@ public class SqlpadExecutionService
 			{
 				ResultSet rs = st.getResultSet();
 
-				Model model = SqlpadExecutionService.this.databaseModelResolver.resolve(cn, rs, UUID.gen());
+				Model model = SqlpadExecutionService.this.databaseModelResolver.resolve(cn, rs, IDUtil.uuid());
 
 				ModelSqlResult modelSqlResult = SqlpadExecutionService.this.modelSqlSelectService.select(cn,
 						sqlStatement.getSql(), rs, model, 1, this.resultsetFetchSize);

@@ -13,13 +13,13 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.TextDataImportListener;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.util.JdbcUtil;
 
 /**
  * CSV导入服务。

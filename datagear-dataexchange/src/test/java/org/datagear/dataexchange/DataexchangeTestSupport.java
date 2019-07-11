@@ -18,11 +18,11 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import org.datagear.connection.JdbcUtil;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.DevotedDatabaseInfoResolver;
 import org.datagear.dbinfo.GenericDatabaseInfoResolver;
 import org.datagear.dbinfo.WildcardDevotedDatabaseInfoResolver;
+import org.datagear.util.JdbcUtil;
 
 /**
  * 数据交换测试支持类。

@@ -13,14 +13,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.datagear.connection.JdbcUtil;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.support.MU;
 import org.datagear.persistence.columnconverter.LOBConversionContext;
 import org.datagear.persistence.columnconverter.LOBConversionContext.LOBConversionSetting;
 import org.datagear.persistence.support.AbstractModelDataAccessObject;
-import org.datagear.persistence.support.UUID;
+import org.datagear.util.IDUtil;
+import org.datagear.util.JdbcUtil;
 
 /**
  * 基于查询SQL的模型数据查询服务类。
@@ -134,7 +134,7 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 			st = sr.getStatement();
 			rs = sr.getResultSet();
 
-			Model model = databaseModelResolver.resolve(cn, rs, UUID.gen());
+			Model model = databaseModelResolver.resolve(cn, rs, IDUtil.uuid());
 
 			return select(cn, sql, rs, model, startRow, fetchSize);
 		}

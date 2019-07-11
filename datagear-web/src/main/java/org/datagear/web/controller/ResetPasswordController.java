@@ -19,7 +19,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.GlobalSettingService;
 import org.datagear.management.service.ResetPasswordRequestService;
 import org.datagear.management.service.UserService;
-import org.datagear.persistence.support.UUID;
+import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.ResetPasswordRequestConfig;
 import org.datagear.web.format.SqlTimestampFormatter;
@@ -336,7 +336,7 @@ public class ResetPasswordController extends AbstractController
 			Date currentTime = new Date();
 			SqlTimestampFormatter dateFormatter = new SqlTimestampFormatter();
 
-			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(UUID.gen(), user, password,
+			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(IDUtil.uuid(), user, password,
 					currentTime, request.getRemoteHost());
 
 			resetPasswordRequest = this.resetPasswordRequestService.addIfNone(resetPasswordRequest);

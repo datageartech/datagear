@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.support.CsvDataExport;
 import org.datagear.dataexchange.support.CsvDataExportService;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.CsvDataImportService;
+import org.datagear.util.JdbcUtil;
 import org.junit.Assert;
 import org.junit.Test;
 

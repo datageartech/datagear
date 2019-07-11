@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
-import org.datagear.connection.IOUtil;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
@@ -27,7 +26,10 @@ import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
-import org.datagear.persistence.support.UUID;
+import org.datagear.util.IDUtil;
+import org.datagear.util.IOUtil;
+import org.datagear.util.SqlScriptParser;
+import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
@@ -35,8 +37,6 @@ import org.datagear.web.sqlpad.SqlpadExecutionService.CommitMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.ExceptionHandleMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
 import org.datagear.web.util.KeywordMatcher;
-import org.datagear.web.util.SqlScriptParser;
-import org.datagear.web.util.SqlScriptParser.SqlStatement;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -376,6 +376,6 @@ public class SqlpadController extends AbstractSchemaConnController
 
 	protected String generateSqlpadId(HttpServletRequest request, HttpServletResponse response)
 	{
-		return UUID.gen();
+		return IDUtil.uuid();
 	}
 }

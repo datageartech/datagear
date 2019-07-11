@@ -22,12 +22,12 @@ import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.datagear.connection.IOUtil;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataFormat.BinaryFormat;
 import org.datagear.dataexchange.TextDataExport;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.util.IOUtil;
 
 /**
  * 抽象文本导出服务。

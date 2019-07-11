@@ -8,7 +8,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.datagear.connection.JdbcUtil;
+import org.datagear.util.JdbcUtil;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

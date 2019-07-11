@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
-import org.datagear.connection.IOUtil;
 import org.datagear.dbmodel.CachedDbModelFactory;
 import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.management.domain.Schema;
@@ -45,6 +44,9 @@ import org.datagear.persistence.support.PMU;
 import org.datagear.persistence.support.SelectOptions;
 import org.datagear.persistence.support.SqlExpressionSyntaxErrorException;
 import org.datagear.persistence.support.VariableExpressionSyntaxErrorException;
+import org.datagear.util.FileInfo;
+import org.datagear.util.FileUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.convert.ConverterException;
@@ -54,10 +56,8 @@ import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
 import org.datagear.web.format.SqlTimestampFormatter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
-import org.datagear.web.util.FileUtils;
 import org.datagear.web.util.ModelUtils;
 import org.datagear.web.util.WebUtils;
-import org.datagear.web.vo.FileInfo;
 import org.datagear.web.vo.PropertyPathDisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -1750,7 +1750,7 @@ public class DataController extends AbstractSchemaModelConnController
 	public FileInfo fileUpload(HttpServletRequest request, @RequestParam("file") MultipartFile multipartFile)
 			throws Throwable
 	{
-		File file = FileUtils.generateUniqueFile(this.blobFileManagerDirectory);
+		File file = FileUtil.generateUniqueFile(this.blobFileManagerDirectory);
 
 		multipartFile.transferTo(file);
 
@@ -1772,7 +1772,7 @@ public class DataController extends AbstractSchemaModelConnController
 		{
 			out = response.getOutputStream();
 
-			File file = IOUtil.getFile(this.blobFileManagerDirectory, fileName);
+			File file = FileUtil.getFile(this.blobFileManagerDirectory, fileName);
 			IOUtil.write(file, out);
 		}
 		finally
@@ -1786,11 +1786,11 @@ public class DataController extends AbstractSchemaModelConnController
 	public FileInfo fileDelete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") String fileName) throws Throwable
 	{
-		File file = IOUtil.getFile(this.blobFileManagerDirectory, fileName);
+		File file = FileUtil.getFile(this.blobFileManagerDirectory, fileName);
 
-		FileInfo fileInfo = FileUtils.getFileInfo(file);
+		FileInfo fileInfo = FileUtil.getFileInfo(file);
 
-		IOUtil.deleteFile(file);
+		FileUtil.deleteFile(file);
 
 		return fileInfo;
 	}

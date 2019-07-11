@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.web.util;
+package org.datagear.util;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,7 +13,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
 
-import org.datagear.web.util.SqlScriptParser.SqlStatement;
+import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.junit.Test;
 
 /**
@@ -313,7 +313,7 @@ public class SqlScriptParserTest
 	public void parseTestScriptFile() throws IOException
 	{
 		InputStream inputStream = SqlScriptParserTest.class.getClassLoader()
-				.getResourceAsStream("org/datagear/web/util/SqlScriptParserTest.sql");
+				.getResourceAsStream("org/datagear/util/SqlScriptParserTest.sql");
 
 		Reader reader = new InputStreamReader(inputStream, "UTF-8");
 

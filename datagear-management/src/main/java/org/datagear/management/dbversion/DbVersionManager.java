@@ -12,11 +12,11 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.datagear.connection.IOUtil;
-import org.datagear.connection.JdbcUtil;
-import org.datagear.management.util.AbstractVersionContentReader;
-import org.datagear.management.util.Version;
-import org.datagear.management.util.VersionContent;
+import org.datagear.util.IOUtil;
+import org.datagear.util.JdbcUtil;
+import org.datagear.util.version.AbstractVersionContentReader;
+import org.datagear.util.version.Version;
+import org.datagear.util.version.VersionContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -39,7 +39,7 @@ public class InsertPersistenceOperation extends AbstractExpressionModelPersisten
 	}
 
 	public InsertPersistenceOperation(ConversionService conversionService,
-			ExpressionResolver variableExpressionResolver, ExpressionResolver sqlExpressionResolver)
+			NameExpressionResolver variableExpressionResolver, NameExpressionResolver sqlExpressionResolver)
 	{
 		super(conversionService, variableExpressionResolver, sqlExpressionResolver);
 	}

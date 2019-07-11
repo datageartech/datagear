@@ -6,7 +6,7 @@ package org.datagear.web.scheduling;
 
 import java.io.File;
 
-import org.datagear.connection.IOUtil;
+import org.datagear.util.FileUtil;
 
 /**
  * 删除过期文件任务。
@@ -137,7 +137,7 @@ public class DeleteExpiredFileJob
 		}
 
 		if (delete)
-			IOUtil.deleteFile(file);
+			FileUtil.deleteFile(file);
 
 		return delete;
 	}

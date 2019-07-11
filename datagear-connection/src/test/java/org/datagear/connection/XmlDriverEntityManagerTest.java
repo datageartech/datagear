@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.datagear.util.IOUtil;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

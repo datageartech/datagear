@@ -13,7 +13,7 @@ package org.datagear.persistence.support;
  * @author datagear@163.com
  *
  */
-public class VariableExpressionResolver extends ExpressionResolver
+public class VariableExpressionResolver extends NameExpressionResolver
 {
 	public VariableExpressionResolver()
 	{

@@ -2,7 +2,7 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.connection;
+package org.datagear.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,72 +35,9 @@ import java.util.zip.ZipOutputStream;
  */
 public class IOUtil
 {
-	public IOUtil()
+	private IOUtil()
 	{
-		super();
-	}
-
-	/**
-	 * 获取文件对象。
-	 * 
-	 * @param file
-	 * @return
-	 */
-	public static File getFile(String file)
-	{
-		return new File(file);
-	}
-
-	/**
-	 * 获取文件对象。
-	 * 
-	 * @param directory
-	 * @param file
-	 * @return
-	 */
-	public static File getFile(File directory, String file)
-	{
-		return new File(directory, file);
-	}
-
-	/**
-	 * 删除文件。
-	 * 
-	 * @param file
-	 */
-	public static void deleteFile(File file)
-	{
-		if (!file.exists())
-			return;
-
-		if (file.isDirectory())
-		{
-			File[] children = file.listFiles();
-
-			for (File child : children)
-				deleteFile(child);
-		}
-
-		file.delete();
-	}
-
-	/**
-	 * 清空目录，保留目录本身。
-	 * 
-	 * @param directory
-	 */
-	public static void clearDirectory(File directory)
-	{
-		if (!directory.exists())
-			return;
-
-		if (directory.isDirectory())
-		{
-			File[] children = directory.listFiles();
-
-			for (File child : children)
-				deleteFile(child);
-		}
+		throw new UnsupportedOperationException();
 	}
 
 	/**

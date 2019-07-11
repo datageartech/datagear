@@ -7,10 +7,10 @@ package org.datagear.persistence.support;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.datagear.persistence.support.ExpressionResolver.Expression;
+import org.datagear.util.expression.ExpressionResolver;
 
 /**
- * {@linkplain Expression}计算上下文。
+ * {@linkplain NameExpression}计算上下文。
  * <p>
  * 为了方便支持批量添加操作，此类的实例默认会添加{@linkplain #VARIABLE_INDEX}变量并且初值为{@code 0}。
  * </p>
@@ -56,12 +56,12 @@ public class ExpressionEvaluationContext
 	}
 
 	/**
-	 * 是否包含指定{@linkplain Expression}的缓存值。
+	 * 是否包含指定{@linkplain NameExpression}的缓存值。
 	 * 
 	 * @param expression
 	 * @return
 	 */
-	public boolean containsCachedValue(Expression expression)
+	public boolean containsCachedValue(NameExpression expression)
 	{
 		String cacheKey = getCachedValueKey(expression);
 
@@ -69,12 +69,12 @@ public class ExpressionEvaluationContext
 	}
 
 	/**
-	 * 获取指定{@linkplain Expression}的缓存值。
+	 * 获取指定{@linkplain NameExpression}的缓存值。
 	 * 
 	 * @param expression
 	 * @return
 	 */
-	public Object getCachedValue(Expression expression)
+	public Object getCachedValue(NameExpression expression)
 	{
 		String cacheKey = getCachedValueKey(expression);
 
@@ -82,12 +82,12 @@ public class ExpressionEvaluationContext
 	}
 
 	/**
-	 * 将指定{@linkplain Expression}的值加入缓存。
+	 * 将指定{@linkplain NameExpression}的值加入缓存。
 	 * 
 	 * @param expression
 	 * @param value
 	 */
-	public void putCachedValue(Expression expression, Object value)
+	public void putCachedValue(NameExpression expression, Object value)
 	{
 		String cacheKey = getCachedValueKey(expression);
 
@@ -147,7 +147,7 @@ public class ExpressionEvaluationContext
 	 * 
 	 * @return
 	 */
-	protected String getCachedValueKey(Expression expression)
+	protected String getCachedValueKey(NameExpression expression)
 	{
 		return expression.getStartIdentifier() + (expression.hasName() ? expression.getName() : expression.getContent())
 				+ expression.getEndIdentifier();

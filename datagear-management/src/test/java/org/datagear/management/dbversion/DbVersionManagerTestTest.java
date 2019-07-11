@@ -7,8 +7,8 @@ package org.datagear.management.dbversion;
 import java.io.IOException;
 import java.util.List;
 
-import org.datagear.management.util.Version;
-import org.datagear.management.util.VersionContent;
+import org.datagear.util.version.Version;
+import org.datagear.util.version.VersionContent;
 import org.junit.Assert;
 import org.junit.Test;
 

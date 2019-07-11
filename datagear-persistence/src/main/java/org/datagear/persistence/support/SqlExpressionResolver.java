@@ -13,7 +13,7 @@ package org.datagear.persistence.support;
  * @author datagear@163.com
  *
  */
-public class SqlExpressionResolver extends ExpressionResolver
+public class SqlExpressionResolver extends NameExpressionResolver
 {
 	public SqlExpressionResolver()
 	{

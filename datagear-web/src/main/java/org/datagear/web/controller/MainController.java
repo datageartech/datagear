@@ -11,8 +11,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.management.util.Version;
-import org.datagear.management.util.VersionContent;
+import org.datagear.util.version.Version;
+import org.datagear.util.version.VersionContent;
 import org.datagear.web.util.ChangelogResolver;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;

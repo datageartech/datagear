@@ -8,6 +8,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.datagear.util.JdbcUtil;
+
 /**
  * SQL构建器。
  * 

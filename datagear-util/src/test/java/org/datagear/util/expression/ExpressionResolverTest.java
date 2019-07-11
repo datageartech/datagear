@@ -2,12 +2,11 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence.support;
+package org.datagear.util.expression;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.datagear.persistence.support.ExpressionResolver.Expression;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,27 +28,13 @@ public class ExpressionResolverTest
 		Assert.assertTrue(expressionResolver.isExpression("${content}ghi"));
 		Assert.assertTrue(expressionResolver.isExpression("abcdef${content}ghi"));
 
-		Assert.assertTrue(expressionResolver.isExpression("${name:content}"));
-		Assert.assertTrue(expressionResolver.isExpression("abcdef${name:content}"));
-		Assert.assertTrue(expressionResolver.isExpression("${name:content}ghi"));
-		Assert.assertTrue(expressionResolver.isExpression("abcdef${name:content}ghi"));
-
-		Assert.assertFalse(expressionResolver.isExpression("${name:}"));
-		Assert.assertFalse(expressionResolver.isExpression("abcdef${name:}ghi"));
-
-		Assert.assertFalse(expressionResolver.isExpression("${:content}"));
-		Assert.assertFalse(expressionResolver.isExpression("abcdef${:content}ghi"));
-
-		Assert.assertFalse(expressionResolver.isExpression("${name:content"));
-		Assert.assertFalse(expressionResolver.isExpression("abcdef${name:content"));
-
 		Assert.assertFalse(expressionResolver.isExpression("${}"));
 		Assert.assertFalse(expressionResolver.isExpression("abcdef${}"));
 		Assert.assertFalse(expressionResolver.isExpression("${}ghi"));
 
-		Assert.assertFalse(expressionResolver.isExpression("${:}"));
-		Assert.assertFalse(expressionResolver.isExpression("abcdef${:}"));
-		Assert.assertFalse(expressionResolver.isExpression("${:}ghi"));
+		Assert.assertFalse(expressionResolver.isExpression("${}"));
+		Assert.assertFalse(expressionResolver.isExpression("abcdef${}"));
+		Assert.assertFalse(expressionResolver.isExpression("${}ghi"));
 	}
 
 	@Test
@@ -64,108 +49,86 @@ public class ExpressionResolverTest
 
 			Expression e = expressions.get(0);
 			Assert.assertEquals("${content}", e.getExpression());
-			Assert.assertEquals(0, e.getStart());
-			Assert.assertEquals("${content}".length(), e.getEnd());
-			Assert.assertFalse(e.hasName());
+			Assert.assertEquals(0, e.getStartIndex());
+			Assert.assertEquals("${content}".length(), e.getEndIndex());
 			Assert.assertEquals("content", e.getContent());
 		}
 
 		{
-			List<Expression> expressions = expressionResolver.resolve("${name:content}");
+			List<Expression> expressions = expressionResolver.resolve("prefix${content}");
 
 			Assert.assertEquals(1, expressions.size());
 
 			Expression e = expressions.get(0);
-			Assert.assertEquals("${name:content}", e.getExpression());
-			Assert.assertEquals(0, e.getStart());
-			Assert.assertEquals("${name:content}".length(), e.getEnd());
-			Assert.assertEquals("name", e.getName());
+			Assert.assertEquals("${content}", e.getExpression());
+			Assert.assertEquals(6, e.getStartIndex());
+			Assert.assertEquals(6 + "${content}".length(), e.getEndIndex());
 			Assert.assertEquals("content", e.getContent());
 		}
 
 		{
-			List<Expression> expressions = expressionResolver.resolve("prefix${name:content}");
+			List<Expression> expressions = expressionResolver.resolve("${content}suffix");
 
 			Assert.assertEquals(1, expressions.size());
 
 			Expression e = expressions.get(0);
-			Assert.assertEquals("${name:content}", e.getExpression());
-			Assert.assertEquals(6, e.getStart());
-			Assert.assertEquals(6 + "${name:content}".length(), e.getEnd());
-			Assert.assertEquals("name", e.getName());
+			Assert.assertEquals("${content}", e.getExpression());
+			Assert.assertEquals(0, e.getStartIndex());
+			Assert.assertEquals("${content}".length(), e.getEndIndex());
 			Assert.assertEquals("content", e.getContent());
 		}
 
 		{
-			List<Expression> expressions = expressionResolver.resolve("${name:content}suffix");
+			List<Expression> expressions = expressionResolver.resolve("prefix${content}suffix");
 
 			Assert.assertEquals(1, expressions.size());
 
 			Expression e = expressions.get(0);
-			Assert.assertEquals("${name:content}", e.getExpression());
-			Assert.assertEquals(0, e.getStart());
-			Assert.assertEquals("${name:content}".length(), e.getEnd());
-			Assert.assertEquals("name", e.getName());
+			Assert.assertEquals("${content}", e.getExpression());
+			Assert.assertEquals(6, e.getStartIndex());
+			Assert.assertEquals(6 + "${content}".length(), e.getEndIndex());
 			Assert.assertEquals("content", e.getContent());
 		}
 
 		{
-			List<Expression> expressions = expressionResolver.resolve("prefix${name:content}suffix");
+			List<Expression> expressions = expressionResolver.resolve("${ content }");
 
 			Assert.assertEquals(1, expressions.size());
 
 			Expression e = expressions.get(0);
-			Assert.assertEquals("${name:content}", e.getExpression());
-			Assert.assertEquals(6, e.getStart());
-			Assert.assertEquals(6 + "${name:content}".length(), e.getEnd());
-			Assert.assertEquals("name", e.getName());
-			Assert.assertEquals("content", e.getContent());
-		}
-
-		{
-			List<Expression> expressions = expressionResolver.resolve("${ name : content }");
-
-			Assert.assertEquals(1, expressions.size());
-
-			Expression e = expressions.get(0);
-			Assert.assertEquals("${ name : content }", e.getExpression());
-			Assert.assertEquals(0, e.getStart());
-			Assert.assertEquals("${ name : content }".length(), e.getEnd());
-			Assert.assertEquals("name", e.getName());
+			Assert.assertEquals("${ content }", e.getExpression());
+			Assert.assertEquals(0, e.getStartIndex());
+			Assert.assertEquals("${ content }".length(), e.getEndIndex());
 			Assert.assertEquals("content", e.getContent());
 		}
 
 		{
 			List<Expression> expressions = expressionResolver
-					.resolve("prefix${content0}gap${name1 : content1}gap${ name2: content2 }sufix");
+					.resolve("prefix${content0}gap${content1}gap${ content2 }sufix");
 
 			Assert.assertEquals(3, expressions.size());
 
 			{
 				Expression e = expressions.get(0);
 				Assert.assertEquals("${content0}", e.getExpression());
-				Assert.assertEquals(6, e.getStart());
-				Assert.assertEquals(6 + "${content0}".length(), e.getEnd());
-				Assert.assertFalse(e.hasName());
+				Assert.assertEquals(6, e.getStartIndex());
+				Assert.assertEquals(6 + "${content0}".length(), e.getEndIndex());
 				Assert.assertEquals("content0", e.getContent());
 			}
 
 			{
 				Expression e = expressions.get(1);
-				Assert.assertEquals("${name1 : content1}", e.getExpression());
-				Assert.assertEquals("prefix${content0}gap".length(), e.getStart());
-				Assert.assertEquals("prefix${content0}gap${name1 : content1}".length(), e.getEnd());
-				Assert.assertEquals("name1", e.getName());
+				Assert.assertEquals("${content1}", e.getExpression());
+				Assert.assertEquals("prefix${content0}gap".length(), e.getStartIndex());
+				Assert.assertEquals("prefix${content0}gap${content1}".length(), e.getEndIndex());
 				Assert.assertEquals("content1", e.getContent());
 			}
 
 			{
 				Expression e = expressions.get(2);
-				Assert.assertEquals("${ name2: content2 }", e.getExpression());
-				Assert.assertEquals("prefix${content0}gap${name1 : content1}gap".length(), e.getStart());
-				Assert.assertEquals("prefix${content0}gap${name1 : content1}gap${ name2: content2 }".length(),
-						e.getEnd());
-				Assert.assertEquals("name2", e.getName());
+				Assert.assertEquals("${ content2 }", e.getExpression());
+				Assert.assertEquals("prefix${content0}gap${content1}gap".length(), e.getStartIndex());
+				Assert.assertEquals("prefix${content0}gap${content1}gap${ content2 }".length(), e.getEndIndex());
 				Assert.assertEquals("content2", e.getContent());
 			}
 		}
@@ -177,12 +140,12 @@ public class ExpressionResolverTest
 		}
 
 		{
-			List<Expression> expressions = expressionResolver.resolve("prefix${cont\\:ent\\}0}");
+			List<Expression> expressions = expressionResolver.resolve("prefix${content\\}0}");
 
 			Assert.assertEquals(1, expressions.size());
 
 			Expression e = expressions.get(0);
-			Assert.assertEquals("cont:ent}0", e.getContent());
+			Assert.assertEquals("content}0", e.getContent());
 		}
 	}
 
@@ -201,17 +164,7 @@ public class ExpressionResolverTest
 		}
 
 		{
-			String source = "${name:content}";
-			List<Expression> expressions = expressionResolver.resolve(source);
-
-			List<?> values = Arrays.asList("a");
-
-			Assert.assertEquals("a", expressionResolver.evaluate(source, expressions, values, ""));
-
-		}
-
-		{
-			String source = "prefix${name:content}";
+			String source = "prefix${content}";
 			List<Expression> expressions = expressionResolver.resolve(source);
 
 			List<?> values = Arrays.asList("a");
@@ -220,7 +173,7 @@ public class ExpressionResolverTest
 		}
 
 		{
-			String source = "${name:content}suffix";
+			String source = "${content}suffix";
 			List<Expression> expressions = expressionResolver.resolve(source);
 
 			List<?> values = Arrays.asList("a");
@@ -229,7 +182,7 @@ public class ExpressionResolverTest
 		}
 
 		{
-			String source = "prefix${name:content}suffix";
+			String source = "prefix${content}suffix";
 			List<Expression> expressions = expressionResolver.resolve(source);
 
 			List<?> values = Arrays.asList("a");
@@ -238,7 +191,7 @@ public class ExpressionResolverTest
 		}
 
 		{
-			String source = "${ name : content }";
+			String source = "${ content }";
 			List<Expression> expressions = expressionResolver.resolve(source);
 
 			List<?> values = Arrays.asList("a");
@@ -247,7 +200,7 @@ public class ExpressionResolverTest
 		}
 
 		{
-			String source = "prefix${content0}gap${name1 : content1}gap${ name2: content2 }sufix";
+			String source = "prefix${content0}gap${content1}gap${ content2 }sufix";
 			List<Expression> expressions = expressionResolver.resolve(source);
 
 			List<?> values = Arrays.asList("a", "b", "c");
@@ -256,7 +209,7 @@ public class ExpressionResolverTest
 		}
 
 		{
-			String source = "pr\\e\\${fix${name:content}suffix";
+			String source = "pr\\e\\${fix${content}suffix";
 			List<Expression> expressions = expressionResolver.resolve(source);
 
 			List<?> values = Arrays.asList("a");
@@ -277,9 +230,9 @@ public class ExpressionResolverTest
 		}
 
 		{
-			String e = expressionResolver.unescape("prefix${cont\\:ent\\}0}");
+			String e = expressionResolver.unescape("prefix${cont\\ent\\}0}");
 
-			Assert.assertEquals("prefix${cont:ent}0}", e);
+			Assert.assertEquals("prefix${cont\\ent\\}0}", e);
 		}
 
 		{

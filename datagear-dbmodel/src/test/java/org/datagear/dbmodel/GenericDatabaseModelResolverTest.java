@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.connection.ConnectionSensor;
-import org.datagear.connection.JdbcUtil;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.DevotedDatabaseInfoResolver;
 import org.datagear.dbinfo.GenericDatabaseInfoResolver;
@@ -27,6 +26,7 @@ import org.datagear.persistence.features.TableName;
 import org.datagear.persistence.support.DefaultDialectSource;
 import org.datagear.persistence.support.DefaultPersistenceManager;
 import org.datagear.persistence.support.dialect.MysqlDialectBuilder;
+import org.datagear.util.JdbcUtil;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

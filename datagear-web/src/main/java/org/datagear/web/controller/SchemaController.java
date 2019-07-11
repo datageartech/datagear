@@ -24,7 +24,7 @@ import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
-import org.datagear.persistence.support.UUID;
+import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.KeywordMatcher;
@@ -114,7 +114,7 @@ public class SchemaController extends AbstractSchemaModelConnController
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
 
-		schema.setId(UUID.gen());
+		schema.setId(IDUtil.uuid());
 		schema.setCreateTime(new Date());
 		schema.setCreateUser(WebUtils.getUser(request, response));
 

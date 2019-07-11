@@ -13,7 +13,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
 import org.datagear.persistence.PagingQuery;
-import org.datagear.persistence.support.UUID;
+import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
@@ -104,7 +104,7 @@ public class UserController extends AbstractController
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMessageCode("userNameExists"), user.getName());
 
-		user.setId(UUID.gen());
+		user.setId(IDUtil.uuid());
 
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));

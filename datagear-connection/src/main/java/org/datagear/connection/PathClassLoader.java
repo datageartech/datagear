@@ -21,6 +21,7 @@ import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.datagear.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

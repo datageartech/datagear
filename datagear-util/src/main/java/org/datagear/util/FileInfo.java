@@ -2,7 +2,7 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.web.vo;
+package org.datagear.util;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;

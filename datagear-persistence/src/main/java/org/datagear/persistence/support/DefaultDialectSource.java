@@ -14,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.datagear.connection.ConnectionOption;
-import org.datagear.connection.JdbcUtil;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
@@ -25,6 +24,7 @@ import org.datagear.persistence.DialectSource;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.UnsupportedDialectException;
+import org.datagear.util.JdbcUtil;
 
 /**
  * 默认{@linkplain DialectSource}。

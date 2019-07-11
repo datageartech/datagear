@@ -35,7 +35,6 @@ import javax.servlet.http.HttpSession;
 
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.connection.ConnectionSource;
-import org.datagear.connection.IOUtil;
 import org.datagear.dataexchange.BatchDataExchange;
 import org.datagear.dataexchange.BatchDataExchangeContext;
 import org.datagear.dataexchange.ConnectionFactory;
@@ -61,14 +60,16 @@ import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbinfo.TableType;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.service.SchemaService;
-import org.datagear.persistence.support.UUID;
+import org.datagear.util.FileInfo;
+import org.datagear.util.FileUtil;
+import org.datagear.util.IDUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.cometd.dataexchange.CometdBatchDataExchangeListener;
 import org.datagear.web.cometd.dataexchange.CometdSubTextDataExportListener;
 import org.datagear.web.cometd.dataexchange.CometdSubTextDataImportListener;
 import org.datagear.web.cometd.dataexchange.DataExchangeCometdService;
 import org.datagear.web.convert.ClassDataConverter;
-import org.datagear.web.vo.FileInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -197,7 +198,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		DataFormat defaultDataFormat = new DataFormat();
 
-		String dataExchangeId = UUID.gen();
+		String dataExchangeId = IDUtil.uuid();
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
@@ -221,7 +222,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		springModel.addAttribute("dataExchangeId", UUID.gen());
+		springModel.addAttribute("dataExchangeId", IDUtil.uuid());
 
 		return "/dataexchange/import_db";
 	}
@@ -238,12 +239,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		String rawFileName = multipartFile.getOriginalFilename();
 		boolean isZipFile = isZipFile(rawFileName);
-		String serverFileName = UUID.gen();
+		String serverFileName = IDUtil.uuid();
 
 		if (isZipFile)
 		{
-			File unzipDirectory = new File(directory, serverFileName);
-			IOUtil.deleteFile(unzipDirectory);
+			File unzipDirectory = FileUtil.getFile(directory, serverFileName);
+			FileUtil.deleteFile(unzipDirectory);
 			unzipDirectory.mkdirs();
 
 			ZipInputStream in = null;
@@ -263,7 +264,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 		else
 		{
-			File importFile = IOUtil.getFile(directory, serverFileName);
+			File importFile = FileUtil.getFile(directory, serverFileName);
 
 			InputStream in = null;
 			OutputStream importFileOut = null;
@@ -279,7 +280,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				IOUtil.close(importFileOut);
 			}
 
-			DataImportFileInfo fileInfo = new DataImportFileInfo(UUID.gen(), serverFileName, importFile.length(),
+			DataImportFileInfo fileInfo = new DataImportFileInfo(IDUtil.uuid(), serverFileName, importFile.length(),
 					rawFileName, DataImportFileInfo.fileNameToTableName(rawFileName));
 
 			fileInfos.add(fileInfo);
@@ -322,7 +323,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		for (int i = 0; i < subDataExchangeIds.length; i++)
 		{
-			File file = new File(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, fileNames[i]);
 			ResourceFactory<Reader> readerFactory = FileReaderResourceFactory.valueOf(file,
 					dataImportForm.getFileEncoding());
 
@@ -457,7 +458,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		DataFormat defaultDataFormat = new DataFormat();
 
-		String dataExchangeId = UUID.gen();
+		String dataExchangeId = IDUtil.uuid();
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
@@ -502,7 +503,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			Query query = toQuery(queries[i]);
 
-			File file = new File(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, fileNames[i]);
 			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(file,
 					exportForm.getFileEncoding());
 
@@ -552,7 +553,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		DataFormat defaultDataFormat = new DataFormat();
 
-		String dataExchangeId = UUID.gen();
+		String dataExchangeId = IDUtil.uuid();
 
 		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
 		springModel.addAttribute("dataExchangeId", dataExchangeId);
@@ -600,7 +601,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			Query query = toQuery(queries[i]);
 
-			File file = new File(directory, fileNames[i]);
+			File file = FileUtil.getFile(directory, fileNames[i]);
 			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(file,
 					exportForm.getFileEncoding());
 
@@ -646,7 +647,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 				"attachment; filename=" + new String(fileName.getBytes(RESPONSE_ENCODING), "iso-8859-1") + "");
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
-		File file = new File(directory, fileName);
+		File file = FileUtil.getFile(directory, fileName);
 
 		OutputStream out = null;
 
@@ -886,8 +887,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				listDataImportFileInfos(file, fileFilter, myPath, myDisplayPath, dataImportFileInfos);
 			else
 			{
-				DataImportFileInfo fileInfo = new DataImportFileInfo(UUID.gen(), myPath, file.length(), myDisplayPath,
-						DataImportFileInfo.fileNameToTableName(file.getName()));
+				DataImportFileInfo fileInfo = new DataImportFileInfo(IDUtil.uuid(), myPath, file.length(),
+						myDisplayPath, DataImportFileInfo.fileNameToTableName(file.getName()));
 
 				dataImportFileInfos.add(fileInfo);
 			}
@@ -904,7 +905,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	protected File getTempDataExchangeDirectory(String dataExchangeId, boolean notNull)
 	{
-		File directory = new File(this.tempDataExchangeRootDirectory, dataExchangeId);
+		File directory = FileUtil.getFile(this.tempDataExchangeRootDirectory, dataExchangeId);
 
 		if (notNull && !directory.exists())
 			directory.mkdirs();
@@ -914,7 +915,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	protected File getTempDataExchangeLogDirectory(String dataExchangeId, boolean notNull)
 	{
-		File directory = new File(this.tempDataExchangeRootDirectory, dataExchangeId + "_logs");
+		File directory = FileUtil.getFile(this.tempDataExchangeRootDirectory, dataExchangeId + "_logs");
 
 		if (notNull && !directory.exists())
 			directory.mkdirs();
@@ -924,13 +925,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	protected File getTempSubDataExchangeLogFile(File logDirectory, String subDataExchangeId)
 	{
-		File logFile = new File(logDirectory, "log_" + subDataExchangeId + ".txt");
+		File logFile = FileUtil.getFile(logDirectory, "log_" + subDataExchangeId + ".txt");
 		return logFile;
 	}
 
 	protected File getExportFileZip(String dataExchangeId)
 	{
-		File file = new File(this.tempDataExchangeRootDirectory, dataExchangeId + ".zip");
+		File file = FileUtil.getFile(this.tempDataExchangeRootDirectory, dataExchangeId + ".zip");
 		return file;
 	}
 

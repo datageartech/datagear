@@ -43,7 +43,7 @@ public class UpdatePersistenceOperation extends AbstractExpressionModelPersisten
 
 	public UpdatePersistenceOperation(InsertPersistenceOperation insertPersistenceOperation,
 			DeletePersistenceOperation deletePersistenceOperation, ConversionService conversionService,
-			ExpressionResolver variableExpressionResolver, ExpressionResolver sqlExpressionResolver)
+			NameExpressionResolver variableExpressionResolver, NameExpressionResolver sqlExpressionResolver)
 	{
 		super(conversionService, variableExpressionResolver, sqlExpressionResolver);
 		this.insertPersistenceOperation = insertPersistenceOperation;

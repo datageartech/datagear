@@ -32,7 +32,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.datagear.model.support.DefaultDynamicBean;
 import org.datagear.model.support.DynamicBean;
 import org.datagear.model.support.PropertyPath;
-import org.datagear.persistence.support.ExpressionResolver;
+import org.datagear.persistence.support.NameExpressionResolver;
 import org.datagear.persistence.support.SqlExpressionResolver;
 import org.datagear.persistence.support.VariableExpressionResolver;
 import org.springframework.core.convert.ConversionService;
@@ -69,9 +69,9 @@ public abstract class AbstractDataConverter
 
 	private ConversionService conversionService;
 
-	private ExpressionResolver variableExpressionResolver = new VariableExpressionResolver();
+	private NameExpressionResolver variableExpressionResolver = new VariableExpressionResolver();
 
-	private ExpressionResolver sqlExpressionResolver = new SqlExpressionResolver();
+	private NameExpressionResolver sqlExpressionResolver = new SqlExpressionResolver();
 
 	private Map<Class<?>, Class<?>> instanceTypeMap = new HashMap<Class<?>, Class<?>>();
 
@@ -98,22 +98,22 @@ public abstract class AbstractDataConverter
 		this.conversionService = conversionService;
 	}
 
-	public ExpressionResolver getVariableExpressionResolver()
+	public NameExpressionResolver getVariableExpressionResolver()
 	{
 		return variableExpressionResolver;
 	}
 
-	public void setVariableExpressionResolver(ExpressionResolver variableExpressionResolver)
+	public void setVariableExpressionResolver(NameExpressionResolver variableExpressionResolver)
 	{
 		this.variableExpressionResolver = variableExpressionResolver;
 	}
 
-	public ExpressionResolver getSqlExpressionResolver()
+	public NameExpressionResolver getSqlExpressionResolver()
 	{
 		return sqlExpressionResolver;
 	}
 
-	public void setSqlExpressionResolver(ExpressionResolver sqlExpressionResolver)
+	public void setSqlExpressionResolver(NameExpressionResolver sqlExpressionResolver)
 	{
 		this.sqlExpressionResolver = sqlExpressionResolver;
 	}

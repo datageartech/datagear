@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 
+import org.datagear.util.JdbcUtil;
+
 /**
  * 抽象{@linkplain DriverChecker}。
  * 

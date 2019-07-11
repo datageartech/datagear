@@ -4,7 +4,7 @@
 
 package org.datagear.persistence.support;
 
-import org.datagear.persistence.support.ExpressionResolver.Expression;
+import org.datagear.util.expression.Expression;
 
 /**
  * SQL表达式语法出错异常。

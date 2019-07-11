@@ -16,7 +16,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.connection.IOUtil;
+import org.datagear.util.FileUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -85,7 +86,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	@Value("${schemaUrlBuilderScriptFile}")
 	public void setSchemaUrlBuilderScriptFileString(String schemaUrlBuilderScriptFile)
 	{
-		this.schemaUrlBuilderScriptFile = IOUtil.getFile(schemaUrlBuilderScriptFile);
+		this.schemaUrlBuilderScriptFile = FileUtil.getFile(schemaUrlBuilderScriptFile);
 	}
 
 	@RequestMapping("/editScriptCode")

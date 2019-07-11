@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
 import org.datagear.management.service.UserService;
-import org.datagear.persistence.support.UUID;
+import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
@@ -105,7 +105,7 @@ public class RegisterController extends AbstractController
 				|| !confirmPassword.equals(user.getPassword()))
 			throw new IllegalInputException();
 
-		user.setId(UUID.gen());
+		user.setId(IDUtil.uuid());
 		user.setAdmin(false);
 		user.setAnonymous(false);
 		user.setCreateTime(new Date());

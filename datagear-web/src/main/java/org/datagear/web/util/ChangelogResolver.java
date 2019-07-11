@@ -12,10 +12,10 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 
-import org.datagear.connection.IOUtil;
-import org.datagear.management.util.AbstractVersionContentReader;
-import org.datagear.management.util.Version;
-import org.datagear.management.util.VersionContent;
+import org.datagear.util.IOUtil;
+import org.datagear.util.version.AbstractVersionContentReader;
+import org.datagear.util.version.Version;
+import org.datagear.util.version.VersionContent;
 import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.support.ServletContextResource;
 

@@ -23,6 +23,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.datagear.util.FileUtil;
+import org.datagear.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -243,7 +245,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		for (String ln : libraryName)
 		{
 			File file = new File(directory, ln);
-			IOUtil.deleteFile(file);
+			FileUtil.deleteFile(file);
 		}
 	}
 
@@ -252,7 +254,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	{
 		File directory = getDriverLibraryDirectory(driverEntity.getId(), false);
 
-		IOUtil.clearDirectory(directory);
+		FileUtil.clearDirectory(directory);
 	}
 
 	@Override
@@ -444,7 +446,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 					if (zipEntry.isDirectory())
 					{
 						if (file.exists())
-							IOUtil.clearDirectory(file);
+							FileUtil.clearDirectory(file);
 						else
 							file.mkdirs();
 					}
@@ -943,7 +945,7 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	protected void deleteDriverLibraryDirectory(String driverEntityId)
 	{
 		File file = getDriverLibraryDirectory(driverEntityId, false);
-		IOUtil.deleteFile(file);
+		FileUtil.deleteFile(file);
 	}
 
 	/**

@@ -5,7 +5,7 @@
 package org.datagear.persistence.columnconverter;
 
 import org.datagear.persistence.features.ColumnConverter;
-import org.datagear.persistence.support.UUID;
+import org.datagear.util.IDUtil;
 
 /**
  * 抽象{@linkplain ColumnConverter}。
@@ -27,6 +27,6 @@ public abstract class AbstractColumnConverter implements ColumnConverter
 	 */
 	protected String uuid()
 	{
-		return UUID.gen();
+		return IDUtil.uuid();
 	}
 }

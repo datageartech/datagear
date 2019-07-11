@@ -8,8 +8,6 @@ import java.io.Reader;
 import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.datagear.connection.IOUtil;
-import org.datagear.connection.JdbcUtil;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataexchangeTestSupport;
@@ -18,6 +16,8 @@ import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
 import org.datagear.dataexchange.TextDataImportListener;
 import org.datagear.dataexchange.TextDataImportOption;
+import org.datagear.util.IOUtil;
+import org.datagear.util.JdbcUtil;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;

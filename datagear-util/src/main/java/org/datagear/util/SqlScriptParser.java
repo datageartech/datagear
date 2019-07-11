@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.web.util;
+package org.datagear.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

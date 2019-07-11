@@ -11,9 +11,9 @@ import java.sql.Statement;
 import org.datagear.connection.AbstractDriverChecker;
 import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.DriverChecker;
-import org.datagear.connection.JdbcUtil;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
+import org.datagear.util.JdbcUtil;
 
 /**
  * 会执行测试SQL的{@linkplain DriverChecker}。

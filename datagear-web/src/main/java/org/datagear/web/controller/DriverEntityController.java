@@ -18,16 +18,16 @@ import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
 import org.datagear.connection.DriverEntityManagerException;
 import org.datagear.connection.DriverLibraryInfo;
-import org.datagear.connection.IOUtil;
 import org.datagear.connection.XmlDriverEntityManager;
 import org.datagear.dbinfo.TableInfo;
 import org.datagear.persistence.PagingQuery;
-import org.datagear.persistence.support.UUID;
+import org.datagear.util.FileInfo;
+import org.datagear.util.FileUtil;
+import org.datagear.util.IDUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
-import org.datagear.web.util.FileUtils;
 import org.datagear.web.util.KeywordMatcher;
-import org.datagear.web.vo.FileInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -109,7 +109,7 @@ public class DriverEntityController extends AbstractController
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		DriverEntity driverEntity = new DriverEntity();
-		driverEntity.setId(UUID.gen());
+		driverEntity.setId(IDUtil.uuid());
 
 		model.addAttribute("driverEntity", driverEntity);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "driverEntity.addDriverEntity");
@@ -161,7 +161,7 @@ public class DriverEntityController extends AbstractController
 	public String importDriverEntity(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model)
 	{
-		model.addAttribute("importId", UUID.gen());
+		model.addAttribute("importId", IDUtil.uuid());
 
 		return "/driverEntity/driverEntity_import";
 	}
@@ -174,9 +174,9 @@ public class DriverEntityController extends AbstractController
 	{
 		File directory = getTempImportDirectory(importId, true);
 
-		IOUtil.clearDirectory(directory);
+		FileUtil.clearDirectory(directory);
 
-		File importFile = IOUtil.getFile(directory, TEMP_IMPORT_FILE_NAME);
+		File importFile = FileUtil.getFile(directory, TEMP_IMPORT_FILE_NAME);
 
 		InputStream in = null;
 		OutputStream importFileOut = null;
@@ -220,7 +220,7 @@ public class DriverEntityController extends AbstractController
 			throws Exception
 	{
 		File directory = getTempImportDirectory(importId, false);
-		File importFile = IOUtil.getFile(directory, TEMP_IMPORT_FILE_NAME);
+		File importFile = FileUtil.getFile(directory, TEMP_IMPORT_FILE_NAME);
 
 		if (!importFile.exists())
 			throw new IllegalInputException("import file for [" + importId + "] not exists");
@@ -362,7 +362,7 @@ public class DriverEntityController extends AbstractController
 
 			multipartFile.transferTo(tempFile);
 
-			fileInfos = FileUtils.getFileInfos(directory);
+			fileInfos = FileUtil.getFileInfos(directory);
 		}
 
 		return fileInfos;
@@ -414,9 +414,9 @@ public class DriverEntityController extends AbstractController
 			File directory = getTempDriverLibraryDirectoryNotNull(id);
 			File tempFile = getTempDriverLibraryFile(directory, fileName);
 
-			IOUtil.deleteFile(tempFile);
+			FileUtil.deleteFile(tempFile);
 
-			fileInfos = FileUtils.getFileInfos(directory);
+			fileInfos = FileUtil.getFileInfos(directory);
 		}
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteSuccessResponseEntity(request);
@@ -442,7 +442,7 @@ public class DriverEntityController extends AbstractController
 		else
 		{
 			File directory = getTempDriverLibraryDirectoryNotNull(id);
-			fileInfos = FileUtils.getFileInfos(directory);
+			fileInfos = FileUtil.getFileInfos(directory);
 		}
 
 		return fileInfos;

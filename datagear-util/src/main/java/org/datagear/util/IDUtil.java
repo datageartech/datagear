@@ -2,30 +2,27 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence.support;
+package org.datagear.util;
 
 /**
- * UUID工具类。
+ * ID工具类。
  * 
  * @author datagear@163.com
  *
  */
-public class UUID
+public class IDUtil
 {
-	private UUID()
+	private IDUtil()
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	/**
 	 * 生成一个UUID字符串。
-	 * <p>
-	 * 此方法会移除{@linkplain UUID}中的所有'-'字符。
-	 * </p>
 	 * 
 	 * @return
 	 */
-	public static String gen()
+	public static String uuid()
 	{
 		char[] uuid = java.util.UUID.randomUUID().toString().toCharArray();
 		char[] chars = new char[uuid.length];
