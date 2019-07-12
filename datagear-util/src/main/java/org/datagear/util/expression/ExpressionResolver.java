@@ -9,9 +9,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 字符串表达式解析器。
+ * 字符串表达式处理器。
  * <p>
- * 它解析字符串中类似<code>"${...}"</code>、<code>"#{...}"</code>格式的表达式子串。
+ * 它解析字符串中类似<code>"${...}"</code>、<code>"#{...}"</code>格式的表达式子串，并可进行相关的求值、提取处理。
  * </p>
  * <p>
  * 默认地，它使用<code>'\'</code>作为转义字符。
@@ -165,6 +165,81 @@ public class ExpressionResolver
 		copyForUnescape(source, gapStart, source.length(), result);
 
 		return result.toString();
+	}
+
+	/**
+	 * 根据表达式模板与其包含的表达式列表，解析对应字符串值中的表达式值。
+	 * <p>
+	 * 返回列表的长度有可能小于表达式列表的长度。
+	 * </p>
+	 * 
+	 * @param template
+	 * @param expressions
+	 * @param value
+	 * @return
+	 */
+	public List<String> extract(String template, List<? extends Expression> expressions, String value)
+	{
+		int expSize = (expressions == null ? 0 : expressions.size());
+
+		if (expSize == 0)
+			return Collections.emptyList();
+
+		List<String> expValues = new ArrayList<String>(3);
+
+		int currentExpIdx = 0;
+		StringBuilder cache = new StringBuilder();
+
+		for (int i = expressions.get(0).getStartIndex(), len = value.length(); i < len;)
+		{
+			if (currentExpIdx >= expSize)
+				break;
+
+			Expression exp = expressions.get(currentExpIdx);
+			Expression nextExp = (currentExpIdx + 1 >= expSize ? null : expressions.get(currentExpIdx + 1));
+
+			String nextGapStr = null;
+
+			if (nextExp == null)
+			{
+				if (exp.getEndIndex() < template.length())
+					nextGapStr = template.substring(exp.getEndIndex());
+			}
+			else
+				nextGapStr = template.substring(exp.getEndIndex(), nextExp.getStartIndex());
+
+			String expValue;
+
+			if (nextGapStr == null || nextGapStr.isEmpty())
+			{
+				expValue = value.substring(i);
+				i = len;
+			}
+			else
+			{
+				for (; i < len;)
+				{
+					if (matchAtIndex(value, i, nextGapStr))
+					{
+						i += nextGapStr.length();
+						break;
+					}
+					else
+					{
+						cache.append(value.charAt(i));
+						i += 1;
+					}
+				}
+
+				expValue = cache.toString();
+				cache.delete(0, cache.length());
+			}
+
+			expValues.add(expValue);
+			currentExpIdx += 1;
+		}
+
+		return expValues;
 	}
 
 	/**

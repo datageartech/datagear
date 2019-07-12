@@ -241,4 +241,109 @@ public class ExpressionResolverTest
 			Assert.assertEquals("pre\\afi\\x", e);
 		}
 	}
+
+	@Test
+	public void extractTest()
+	{
+		ExpressionResolver expressionResolver = new ExpressionResolver();
+
+		{
+			String template = "${value}";
+			String value = "@@";
+
+			List<Expression> expressions = expressionResolver.resolve(template);
+
+			List<String> values = expressionResolver.extract(template, expressions, value);
+
+			Assert.assertEquals(1, values.size());
+			Assert.assertEquals("@@", values.get(0));
+		}
+
+		{
+			String template = "abc${value}";
+			String value = "abc@@";
+
+			List<Expression> expressions = expressionResolver.resolve(template);
+
+			List<String> values = expressionResolver.extract(template, expressions, value);
+
+			Assert.assertEquals(1, values.size());
+			Assert.assertEquals("@@", values.get(0));
+		}
+
+		{
+			String template = "${value}def";
+			String value = "@@def";
+
+			List<Expression> expressions = expressionResolver.resolve(template);
+
+			List<String> values = expressionResolver.extract(template, expressions, value);
+
+			Assert.assertEquals(1, values.size());
+			Assert.assertEquals("@@", values.get(0));
+		}
+
+		{
+			String template = "abc${value}def";
+			String value = "abc@@def";
+
+			List<Expression> expressions = expressionResolver.resolve(template);
+
+			List<String> values = expressionResolver.extract(template, expressions, value);
+
+			Assert.assertEquals(1, values.size());
+			Assert.assertEquals("@@", values.get(0));
+		}
+
+		{
+			String template = "abc${value1}def${value2}";
+			String value = "abc@@def!!";
+
+			List<Expression> expressions = expressionResolver.resolve(template);
+
+			List<String> values = expressionResolver.extract(template, expressions, value);
+
+			Assert.assertEquals(2, values.size());
+			Assert.assertEquals("@@", values.get(0));
+			Assert.assertEquals("!!", values.get(1));
+		}
+
+		{
+			String template = "abc${value1}def${value2}ghi";
+			String value = "abc@@def!!ghi";
+
+			List<Expression> expressions = expressionResolver.resolve(template);
+
+			List<String> values = expressionResolver.extract(template, expressions, value);
+
+			Assert.assertEquals(2, values.size());
+			Assert.assertEquals("@@", values.get(0));
+			Assert.assertEquals("!!", values.get(1));
+		}
+
+		{
+			String template = "abc${value1}def${value2}ghi";
+			String value = "abc@@def!!ggg";
+
+			List<Expression> expressions = expressionResolver.resolve(template);
+
+			List<String> values = expressionResolver.extract(template, expressions, value);
+
+			Assert.assertEquals(2, values.size());
+			Assert.assertEquals("@@", values.get(0));
+			Assert.assertEquals("!!ggg", values.get(1));
+		}
+
+		{
+			String template = "abc${value1}def${value2}ghi";
+			String value = "abcdef";
+
+			List<Expression> expressions = expressionResolver.resolve(template);
+
+			List<String> values = expressionResolver.extract(template, expressions, value);
+
+			Assert.assertEquals(1, values.size());
+			Assert.assertEquals("", values.get(0));
+		}
+	}
 }
