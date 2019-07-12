@@ -109,6 +109,8 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.subDataExchangeStatusColumnIndex = 3;
+	
 	po.toExportFileName = function(tableName)
 	{
 		return $.toValidFileName(tableName)+".csv";
