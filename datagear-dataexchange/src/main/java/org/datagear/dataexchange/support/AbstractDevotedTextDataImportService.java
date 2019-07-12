@@ -12,18 +12,12 @@ import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLXML;
-import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
 
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 import org.datagear.dataexchange.DataExchangeException;
-import org.datagear.dataexchange.DataFormat;
-import org.datagear.dataexchange.DataFormat.BinaryFormat;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.TextDataImport;
 import org.datagear.dataexchange.TextDataImportListener;
@@ -251,205 +245,155 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 		}
 
 		DataFormatContext dataFormatContext = textDataImportContext.getDataFormatContext();
-		DataFormat dataFormat = dataFormatContext.getDataFormat();
-		NumberFormat numberFormat = dataFormatContext.getNumberFormatter();
-		BinaryFormat binaryFormat = dataFormat.getBinaryFormat();
 
 		switch (sqlType)
 		{
 			case Types.CHAR:
 			case Types.VARCHAR:
 			case Types.LONGVARCHAR:
-
+			{
 				st.setString(parameterIndex, parameterValue);
 				break;
+			}
 
 			case Types.NUMERIC:
 			case Types.DECIMAL:
-
-				BigDecimal bdv = new BigDecimal(parameterValue);
-				st.setBigDecimal(parameterIndex, bdv);
+			{
+				BigDecimal value = new BigDecimal(parameterValue);
+				st.setBigDecimal(parameterIndex, value);
 				break;
+			}
 
 			case Types.BIT:
 			case Types.BOOLEAN:
-
-				boolean bv = ("true".equalsIgnoreCase(parameterValue) || "1".equals(parameterValue)
+			{
+				boolean value = ("true".equalsIgnoreCase(parameterValue) || "1".equals(parameterValue)
 						|| "on".equalsIgnoreCase(parameterValue));
-				st.setBoolean(parameterIndex, bv);
+				st.setBoolean(parameterIndex, value);
 				break;
+			}
 
 			case Types.TINYINT:
 			case Types.SMALLINT:
 			case Types.INTEGER:
-
-				numberFormat.setParseIntegerOnly(true);
-				int iv = numberFormat.parse(parameterValue).intValue();
-				st.setInt(parameterIndex, iv);
+			{
+				int value = dataFormatContext.parseInt(parameterValue);
+				st.setInt(parameterIndex, value);
 				break;
+			}
 
 			case Types.BIGINT:
-
-				numberFormat.setParseIntegerOnly(true);
-				long lv = numberFormat.parse(parameterValue).longValue();
-				st.setLong(parameterIndex, lv);
+			{
+				long value = dataFormatContext.parseLong(parameterValue);
+				st.setLong(parameterIndex, value);
 				break;
+			}
 
 			case Types.REAL:
-
-				numberFormat.setParseIntegerOnly(false);
-				float fv = numberFormat.parse(parameterValue).floatValue();
-				st.setFloat(parameterIndex, fv);
+			{
+				float value = dataFormatContext.parseFloat(parameterValue);
+				st.setFloat(parameterIndex, value);
 				break;
+			}
 
 			case Types.FLOAT:
 			case Types.DOUBLE:
-
-				numberFormat.setParseIntegerOnly(false);
-				double dv = numberFormat.parse(parameterValue).doubleValue();
-				st.setDouble(parameterIndex, dv);
+			{
+				double value = dataFormatContext.parseDouble(parameterValue);
+				st.setDouble(parameterIndex, value);
 				break;
+			}
 
 			case Types.BINARY:
 			case Types.VARBINARY:
 			case Types.LONGVARBINARY:
+			{
+				byte[] value = dataFormatContext.parseBytes(parameterValue);
 
-				if (BinaryFormat.NULL.equals(binaryFormat))
-				{
+				if (value == null)
 					st.setNull(parameterIndex, sqlType);
-				}
-				else if (BinaryFormat.HEX.equals(binaryFormat))
-				{
-					byte[] btv = convertToBytesForHex(parameterValue);
-					st.setBytes(parameterIndex, btv);
-				}
-				else if (BinaryFormat.BASE64.equals(binaryFormat))
-				{
-					byte[] btv = convertToBytesForBase64(parameterValue);
-					st.setBytes(parameterIndex, btv);
-				}
 				else
-					throw new UnsupportedOperationException();
+					st.setBytes(parameterIndex, value);
 
 				break;
+			}
 
 			case Types.DATE:
-
-				java.util.Date dtv = dataFormatContext.getDateFormatter().parse(parameterValue);
-				java.sql.Date sdtv = new java.sql.Date(dtv.getTime());
-				st.setDate(parameterIndex, sdtv);
+			{
+				java.sql.Date value = dataFormatContext.parseDate(parameterValue);
+				st.setDate(parameterIndex, value);
 				break;
+			}
 
 			case Types.TIME:
-
-				java.util.Date tdv = dataFormatContext.getTimeFormatter().parse(parameterValue);
-				java.sql.Time tv = new java.sql.Time(tdv.getTime());
-				st.setTime(parameterIndex, tv);
+			{
+				java.sql.Time value = dataFormatContext.parseTime(parameterValue);
+				st.setTime(parameterIndex, value);
 				break;
+			}
 
 			case Types.TIMESTAMP:
+			{
+				java.sql.Timestamp value = dataFormatContext.parseTimestamp(parameterValue);
+				st.setTimestamp(parameterIndex, value);
 
-				// 如果是默认格式，则直接使用Timestamp.valueOf，这样可以避免丢失纳秒精度
-				if (DataFormat.DEFAULT_TIMESTAMP_FORMAT.equals(dataFormat.getTimestampFormat()))
-				{
-					java.sql.Timestamp tsv = Timestamp.valueOf(parameterValue);
-					st.setTimestamp(parameterIndex, tsv);
-				}
-				else
-				{
-					// XXX 这种处理方式会丢失纳秒数据，待以后版本升级至jdk1.8库时采用java.time可解决
-					java.util.Date tsdv = dataFormatContext.getTimestampFormatter().parse(parameterValue);
-					java.sql.Timestamp tsv = new Timestamp(tsdv.getTime());
-					st.setTimestamp(parameterIndex, tsv);
-				}
 				break;
+			}
 
 			case Types.CLOB:
-
+			{
 				Clob clob = cn.createClob();
 				clob.setString(1, parameterValue);
 				st.setClob(parameterIndex, clob);
 				break;
+			}
 
 			case Types.BLOB:
+			{
+				byte[] value = dataFormatContext.parseBytes(parameterValue);
 
-				if (BinaryFormat.NULL.equals(binaryFormat))
+				if (value == null)
 				{
 					st.setNull(parameterIndex, sqlType);
 				}
-				else if (BinaryFormat.HEX.equals(binaryFormat))
-				{
-					Blob blob = cn.createBlob();
-					byte[] btv = convertToBytesForHex(parameterValue);
-					blob.setBytes(1, btv);
-					st.setBlob(parameterIndex, blob);
-				}
-				else if (BinaryFormat.BASE64.equals(binaryFormat))
-				{
-					Blob blob = cn.createBlob();
-					byte[] btv = convertToBytesForBase64(parameterValue);
-					blob.setBytes(1, btv);
-					st.setBlob(parameterIndex, blob);
-				}
 				else
-					throw new UnsupportedOperationException();
+				{
+					Blob blob = cn.createBlob();
+					blob.setBytes(1, value);
+					st.setBlob(parameterIndex, blob);
+				}
 
 				break;
+			}
 
 			case Types.NCHAR:
 			case Types.NVARCHAR:
 			case Types.LONGNVARCHAR:
-
+			{
 				st.setNString(parameterIndex, parameterValue);
 				break;
+			}
 
 			case Types.NCLOB:
-
+			{
 				NClob nclob = cn.createNClob();
 				nclob.setString(1, parameterValue);
 				st.setNClob(parameterIndex, nclob);
 				break;
+			}
 
 			case Types.SQLXML:
-
+			{
 				SQLXML sqlxml = cn.createSQLXML();
 				sqlxml.setString(parameterValue);
 				st.setSQLXML(parameterIndex, sqlxml);
 				break;
+			}
 
 			default:
 
 				throw new UnsupportedSqlTypeException(sqlType);
 		}
-	}
-
-	/**
-	 * 将HEX编码的字符串转换为字节数组。
-	 * 
-	 * @param value
-	 * @return
-	 * @throws DecoderException
-	 */
-	protected byte[] convertToBytesForHex(String value) throws DecoderException
-	{
-		if (value == null || value.isEmpty())
-			return null;
-
-		return Hex.decodeHex(value);
-	}
-
-	/**
-	 * 将Base64编码的字符串转换为字节数组。
-	 * 
-	 * @param value
-	 * @return
-	 */
-	protected byte[] convertToBytesForBase64(String value)
-	{
-		if (value == null || value.isEmpty())
-			return null;
-
-		return Base64.decodeBase64(value);
 	}
 
 	/**

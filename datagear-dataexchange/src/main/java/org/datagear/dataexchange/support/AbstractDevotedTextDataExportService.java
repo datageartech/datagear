@@ -17,13 +17,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Types;
-import java.text.NumberFormat;
 import java.util.List;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
-import org.datagear.dataexchange.DataFormat;
-import org.datagear.dataexchange.DataFormat.BinaryFormat;
 import org.datagear.dataexchange.TextDataExport;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
@@ -94,282 +89,279 @@ public abstract class AbstractDevotedTextDataExportService<T extends TextDataExp
 	protected String getExportColumnValue(T expt, Connection cn, ResultSet rs, int columnIndex, int sqlType,
 			TextDataExportContext textDataExportContext) throws SQLException, IOException, UnsupportedSqlTypeException
 	{
-		String value = null;
+		String valueStr = null;
 
 		DataFormatContext dataFormatContext = textDataExportContext.getDataFormatContext();
-		DataFormat dataFormat = dataFormatContext.getDataFormat();
-		NumberFormat numberFormat = dataFormatContext.getNumberFormatter();
-		BinaryFormat binaryFormat = dataFormat.getBinaryFormat();
 
 		switch (sqlType)
 		{
 			case Types.TINYINT:
-
-				int byteValue = rs.getByte(columnIndex);
+			{
+				int value = rs.getByte(columnIndex);
 
 				if (!rs.wasNull())
-					value = numberFormat.format(byteValue);
+					valueStr = dataFormatContext.formatInt(value);
 
 				break;
+			}
 
 			case Types.SMALLINT:
-
-				int shortValue = rs.getShort(columnIndex);
+			{
+				int value = rs.getShort(columnIndex);
 
 				if (!rs.wasNull())
-					value = numberFormat.format(shortValue);
+					valueStr = dataFormatContext.formatInt(value);
 
 				break;
+			}
 
 			case Types.INTEGER:
-
-				int intValue = rs.getInt(columnIndex);
+			{
+				int value = rs.getInt(columnIndex);
 
 				if (!rs.wasNull())
-					value = numberFormat.format(intValue);
+					valueStr = dataFormatContext.formatInt(value);
 
 				break;
+			}
 
 			case Types.BIGINT:
-
-				long longValue = rs.getLong(columnIndex);
+			{
+				long value = rs.getLong(columnIndex);
 
 				if (!rs.wasNull())
-					value = numberFormat.format(longValue);
+					valueStr = dataFormatContext.formatLong(value);
 
 				break;
+			}
 
 			case Types.REAL:
-
-				double floatValue = rs.getFloat(columnIndex);
+			{
+				double value = rs.getFloat(columnIndex);
 
 				if (!rs.wasNull())
-					value = numberFormat.format(floatValue);
+					valueStr = dataFormatContext.formatDouble(value);
 
 				break;
+			}
 
 			case Types.FLOAT:
 			case Types.DOUBLE:
-
-				double doubleValue = rs.getDouble(columnIndex);
+			{
+				double value = rs.getDouble(columnIndex);
 
 				if (!rs.wasNull())
-					value = numberFormat.format(doubleValue);
+					valueStr = dataFormatContext.formatDouble(value);
 
 				break;
+			}
 
 			case Types.DECIMAL:
 			case Types.NUMERIC:
-
-				BigDecimal bigDecimalValue = rs.getBigDecimal(columnIndex);
+			{
+				BigDecimal value = rs.getBigDecimal(columnIndex);
 
 				if (!rs.wasNull())
-					value = bigDecimalValue.toString();
+					valueStr = value.toString();
 
 				break;
+			}
 
 			case Types.BIT:
-
-				boolean bitValue = rs.getBoolean(columnIndex);
+			{
+				boolean value = rs.getBoolean(columnIndex);
 
 				if (!rs.wasNull())
-					value = (bitValue ? "1" : "0");
+					valueStr = (value ? "1" : "0");
 
 				break;
+			}
 
 			case Types.BOOLEAN:
-
-				boolean boolValue = rs.getBoolean(columnIndex);
+			{
+				boolean value = rs.getBoolean(columnIndex);
 
 				if (!rs.wasNull())
-					value = Boolean.toString(boolValue);
+					valueStr = Boolean.toString(value);
 
 				break;
+			}
 
 			case Types.CHAR:
 			case Types.VARCHAR:
-
-				value = rs.getString(columnIndex);
+			{
+				valueStr = rs.getString(columnIndex);
 
 				if (rs.wasNull())
-					value = null;
+					valueStr = null;
 
 				break;
+			}
 
 			case Types.LONGVARCHAR:
-
-				Reader lvValue = rs.getCharacterStream(columnIndex);
+			{
+				Reader value = rs.getCharacterStream(columnIndex);
 
 				try
 				{
 					if (rs.wasNull())
-						value = null;
+						valueStr = null;
 					else
-						value = readToString(lvValue);
+						valueStr = readToString(value);
 				}
 				finally
 				{
-					IOUtil.close(lvValue);
+					IOUtil.close(value);
 				}
 
 				break;
+			}
 
 			case Types.BINARY:
 			case Types.VARBINARY:
-
-				if (!BinaryFormat.NULL.equals(binaryFormat))
-				{
-					byte[] binaryValue = rs.getBytes(columnIndex);
-
-					if (rs.wasNull())
-						value = null;
-					else
-						value = convertToString(binaryValue, binaryFormat);
-				}
-
-				break;
-
-			case Types.LONGVARBINARY:
-
-				if (!BinaryFormat.NULL.equals(binaryFormat))
-				{
-					InputStream lbValue = rs.getBinaryStream(columnIndex);
-
-					try
-					{
-						if (!rs.wasNull())
-						{
-							byte[] bytes = readToBytes(lbValue);
-							value = convertToString(bytes, binaryFormat);
-						}
-					}
-					finally
-					{
-						IOUtil.close(lbValue);
-					}
-				}
-
-				break;
-
-			case Types.DATE:
-
-				java.sql.Date dateValue = rs.getDate(columnIndex);
-
-				if (!rs.wasNull())
-					value = dataFormatContext.getDateFormatter().format(dateValue);
-
-				break;
-
-			case Types.TIME:
-
-				java.sql.Time timeValue = rs.getTime(columnIndex);
-
-				if (!rs.wasNull())
-					value = dataFormatContext.getTimeFormatter().format(timeValue);
-
-				break;
-
-			case Types.TIMESTAMP:
-
-				java.sql.Timestamp timestampValue = rs.getTimestamp(columnIndex);
-
-				// 如果是默认格式，则直接使用Timestamp.valueOf，这样可以避免丢失纳秒精度
-				if (DataFormat.DEFAULT_TIMESTAMP_FORMAT.equals(dataFormat.getTimestampFormat()))
-				{
-					if (!rs.wasNull())
-						value = timestampValue.toString();
-				}
-				else
-				{
-					// XXX 这种处理方式会丢失纳秒数据，待以后版本升级至jdk1.8库时采用java.time可解决
-
-					if (!rs.wasNull())
-						value = dataFormatContext.getTimestampFormatter().format(timestampValue);
-				}
-
-				break;
-
-			case Types.CLOB:
-
-				Clob clobValue = rs.getClob(columnIndex);
-
-				if (!rs.wasNull())
-				{
-					Reader reader = clobValue.getCharacterStream();
-
-					try
-					{
-						value = readToString(reader);
-					}
-					finally
-					{
-						IOUtil.close(reader);
-					}
-				}
-
-				break;
-
-			case Types.BLOB:
-
-				if (!BinaryFormat.NULL.equals(binaryFormat))
-				{
-					Blob blobValue = rs.getBlob(columnIndex);
-
-					if (!rs.wasNull())
-					{
-						InputStream inputStream = blobValue.getBinaryStream();
-
-						try
-						{
-							byte[] bytes = readToBytes(inputStream);
-							value = convertToString(bytes, binaryFormat);
-						}
-						finally
-						{
-							IOUtil.close(inputStream);
-						}
-					}
-				}
-
-				break;
-
-			case Types.NCHAR:
-			case Types.NVARCHAR:
-
-				value = rs.getNString(columnIndex);
+			{
+				byte[] value = rs.getBytes(columnIndex);
 
 				if (rs.wasNull())
-					value = null;
+					valueStr = null;
+				else
+					valueStr = dataFormatContext.formatBytes(value);
 
 				break;
+			}
 
-			case Types.LONGNVARCHAR:
-
-				Reader lnvValue = rs.getNCharacterStream(columnIndex);
+			case Types.LONGVARBINARY:
+			{
+				InputStream value = rs.getBinaryStream(columnIndex);
 
 				try
 				{
 					if (!rs.wasNull())
-						value = readToString(lnvValue);
+					{
+						byte[] bytes = readToBytes(value);
+						valueStr = dataFormatContext.formatBytes(bytes);
+					}
 				}
 				finally
 				{
-					IOUtil.close(lnvValue);
+					IOUtil.close(value);
 				}
 
 				break;
+			}
+
+			case Types.DATE:
+			{
+				java.sql.Date value = rs.getDate(columnIndex);
+
+				if (!rs.wasNull())
+					valueStr = dataFormatContext.formatDate(value);
+
+				break;
+			}
+
+			case Types.TIME:
+			{
+				java.sql.Time value = rs.getTime(columnIndex);
+
+				if (!rs.wasNull())
+					valueStr = dataFormatContext.formatTime(value);
+
+				break;
+			}
+
+			case Types.TIMESTAMP:
+			{
+				java.sql.Timestamp value = rs.getTimestamp(columnIndex);
+
+				if (!rs.wasNull())
+					valueStr = dataFormatContext.formatTimestamp(value);
+
+				break;
+			}
+
+			case Types.CLOB:
+			{
+				Clob value = rs.getClob(columnIndex);
+
+				if (!rs.wasNull())
+				{
+					Reader reader = value.getCharacterStream();
+
+					try
+					{
+						valueStr = readToString(reader);
+					}
+					finally
+					{
+						IOUtil.close(reader);
+					}
+				}
+
+				break;
+			}
+
+			case Types.BLOB:
+			{
+				Blob value = rs.getBlob(columnIndex);
+
+				if (!rs.wasNull())
+				{
+					InputStream inputStream = value.getBinaryStream();
+
+					try
+					{
+						byte[] bytes = readToBytes(inputStream);
+						valueStr = dataFormatContext.formatBytes(bytes);
+					}
+					finally
+					{
+						IOUtil.close(inputStream);
+					}
+				}
+
+				break;
+			}
+
+			case Types.NCHAR:
+			case Types.NVARCHAR:
+			{
+				valueStr = rs.getNString(columnIndex);
+
+				if (rs.wasNull())
+					valueStr = null;
+
+				break;
+			}
+
+			case Types.LONGNVARCHAR:
+			{
+				Reader value = rs.getNCharacterStream(columnIndex);
+
+				try
+				{
+					if (!rs.wasNull())
+						valueStr = readToString(value);
+				}
+				finally
+				{
+					IOUtil.close(value);
+				}
+
+				break;
+			}
 
 			case Types.NCLOB:
-
-				NClob nclobValue = rs.getNClob(columnIndex);
+			{
+				NClob value = rs.getNClob(columnIndex);
 
 				if (!rs.wasNull())
 				{
-					Reader reader = nclobValue.getCharacterStream();
+					Reader reader = value.getCharacterStream();
 
 					try
 					{
-						value = readToString(reader);
+						valueStr = readToString(reader);
 					}
 					finally
 					{
@@ -378,18 +370,19 @@ public abstract class AbstractDevotedTextDataExportService<T extends TextDataExp
 				}
 
 				break;
+			}
 
 			case Types.SQLXML:
-
-				SQLXML sqlxmlValue = rs.getSQLXML(columnIndex);
+			{
+				SQLXML value = rs.getSQLXML(columnIndex);
 
 				if (!rs.wasNull())
 				{
-					Reader reader = sqlxmlValue.getCharacterStream();
+					Reader reader = value.getCharacterStream();
 
 					try
 					{
-						value = readToString(reader);
+						valueStr = readToString(reader);
 					}
 					finally
 					{
@@ -398,38 +391,15 @@ public abstract class AbstractDevotedTextDataExportService<T extends TextDataExp
 				}
 
 				break;
+			}
 
 			default:
 
 				throw new UnsupportedSqlTypeException(sqlType);
 		}
 
-		return value;
-	}
+		return valueStr;
 
-	/**
-	 * 将字节数组编码转换为字符串。
-	 * 
-	 * @param bytes
-	 * @param binaryFormat
-	 * @return
-	 */
-	protected String convertToString(byte[] bytes, BinaryFormat binaryFormat)
-	{
-		String value = null;
-
-		if (bytes == null)
-			;
-		else if (BinaryFormat.NULL.equals(binaryFormat))
-			;
-		else if (BinaryFormat.HEX.equals(binaryFormat))
-			value = convertToHex(bytes);
-		else if (BinaryFormat.BASE64.equals(binaryFormat))
-			value = convertToBase64(bytes);
-		else
-			throw new UnsupportedOperationException();
-
-		return value;
 	}
 
 	/**
@@ -469,34 +439,6 @@ public abstract class AbstractDevotedTextDataExportService<T extends TextDataExp
 			sb.append(buf, 0, count);
 
 		return sb.toString();
-	}
-
-	/**
-	 * 将字节数组转换为Hex字符串。
-	 * 
-	 * @param bytes
-	 * @return
-	 */
-	protected String convertToHex(byte[] bytes)
-	{
-		if (bytes == null)
-			return null;
-
-		return Hex.encodeHexString(bytes);
-	}
-
-	/**
-	 * 将字节数组转换为Base64字符串。
-	 * 
-	 * @param bytes
-	 * @return
-	 */
-	protected String convertToBase64(byte[] bytes)
-	{
-		if (bytes == null)
-			return null;
-
-		return Base64.encodeBase64String(bytes);
 	}
 
 	/**
