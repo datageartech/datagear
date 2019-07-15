@@ -3,7 +3,6 @@
 
 String dataExchangeId 数据交换ID
 String dataExchangeChannelId 数据交换cometd通道ID
-DataFormat defaultDataFormat 默认数据格式
 
 依赖：
 dataExchange_js.ftl

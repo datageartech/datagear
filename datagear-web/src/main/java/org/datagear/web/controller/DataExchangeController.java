@@ -209,6 +209,32 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/import_csv";
 	}
 
+	@RequestMapping("/{schemaId}/import/sql")
+	public String imptSql(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+			}
+		}.execute();
+
+		DataFormat defaultDataFormat = new DataFormat();
+
+		String dataExchangeId = IDUtil.uuid();
+
+		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
+		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+
+		return "/dataexchange/import_sql";
+	}
+
 	@RequestMapping("/{schemaId}/import/db")
 	public String imptDb(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
@@ -280,8 +306,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				IOUtil.close(importFileOut);
 			}
 
-			DataImportFileInfo fileInfo = new DataImportFileInfo(IDUtil.uuid(), serverFileName, importFile.length(),
-					rawFileName, DataImportFileInfo.fileNameToTableName(rawFileName));
+			DataImportFileInfo fileInfo = new DataImportFileInfo(serverFileName, importFile.length(), rawFileName,
+					DataImportFileInfo.fileNameToTableName(rawFileName));
 
 			fileInfos.add(fileInfo);
 		}
@@ -887,8 +913,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				listDataImportFileInfos(file, fileFilter, myPath, myDisplayPath, dataImportFileInfos);
 			else
 			{
-				DataImportFileInfo fileInfo = new DataImportFileInfo(IDUtil.uuid(), myPath, file.length(),
-						myDisplayPath, DataImportFileInfo.fileNameToTableName(file.getName()));
+				DataImportFileInfo fileInfo = new DataImportFileInfo(myPath, file.length(), myDisplayPath,
+						DataImportFileInfo.fileNameToTableName(file.getName()));
 
 				dataImportFileInfos.add(fileInfo);
 			}
@@ -973,8 +999,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
-		private String subDataExchangeId;
-
 		/** 导入表名 */
 		private String tableName;
 
@@ -983,23 +1007,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 			super();
 		}
 
-		public DataImportFileInfo(String subDataExchangeId, String name, long bytes, String displayName,
-				String tableName)
+		public DataImportFileInfo(String name, long bytes, String displayName, String tableName)
 		{
 			super(name, bytes);
-			this.subDataExchangeId = subDataExchangeId;
 			super.setDisplayName(displayName);
 			this.tableName = tableName;
-		}
-
-		public String getSubDataExchangeId()
-		{
-			return subDataExchangeId;
-		}
-
-		public void setSubDataExchangeId(String subDataExchangeId)
-		{
-			this.subDataExchangeId = subDataExchangeId;
 		}
 
 		public String getTableName()

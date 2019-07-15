@@ -20,7 +20,7 @@ Schema schema 数据库，不允许为null
 </#if>
 <div id="${pageId}" class="page-dataexchange page-dataimport-text page-dataimport-csv">
 	<div class="head">
-		<@spring.message code='dataImport.importCsvData' />
+		<@spring.message code='dataImport.importSqlData' />
 	</div>
 	<div class="content">
 		<form id="${pageId}-form" action="${contextPath}/dataexchange/${schema.id}/import/csv/doImport" method="POST">
@@ -28,29 +28,6 @@ Schema schema 数据库，不允许为null
 			<div class="form-content form-content-wizard">
 				<h3><@spring.message code='dataImport.setDataFormat' /></h3>
 				<div>
-					<#include "include/dataExchange_form_dataFormat_html.ftl">
-					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataImport.ignoreInexistentColumn' /></div>
-						<div class="form-item-value">
-							<div id="${pageId}-ignoreInexistentColumn">
-							<label for="${pageId}-ignoreInexistentColumn-0"><@spring.message code='yes' /></label>
-							<input id="${pageId}-ignoreInexistentColumn-0" type="radio" name="importOption.ignoreInexistentColumn" value="true" />
-							<label for="${pageId}-ignoreInexistentColumn-1"><@spring.message code='no' /></label>
-							<input id="${pageId}-ignoreInexistentColumn-1" type="radio" name="importOption.ignoreInexistentColumn" value="false" />
-							</div>
-						</div>
-					</div>
-					<div class="form-item">
-						<div class="form-item-label"><@spring.message code='dataImport.nullForIllegalColumnValue' /></div>
-						<div class="form-item-value">
-							<div id="${pageId}-nullForIllegalColumnValue">
-								<label for="${pageId}-nullForIllegalColumnValue-0"><@spring.message code='yes' /></label>
-								<input id="${pageId}-nullForIllegalColumnValue-0" type="radio" name="importOption.nullForIllegalColumnValue" value="true" />
-								<label for="${pageId}-nullForIllegalColumnValue-1"><@spring.message code='no' /></label>
-								<input id="${pageId}-nullForIllegalColumnValue-1" type="radio" name="importOption.nullForIllegalColumnValue" value="false" />
-							</div>
-						</div>
-					</div>
 					<div class="form-item">
 						<div class="form-item-label"><@spring.message code='dataExchange.exceptionResolve' /></div>
 						<div class="form-item-value">
@@ -129,39 +106,14 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
-	po.subDataExchangeStatusColumnIndex = 4;
+	po.subDataExchangeStatusColumnIndex = 3;
 	
 	po.form = po.element("#${pageId}-form");
-	
-	po.initDataImportCsvUIs = function()
-	{
-		po.element("#${pageId}-ignoreInexistentColumn").buttonset();
-		po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
-		
-		po.element("#${pageId}-ignoreInexistentColumn-1").click();
-		po.element("#${pageId}-nullForIllegalColumnValue-1").click();
-	};
-	
-	var tmpDataImportTableColumns = po.dataImportTableColumns.slice(0, 2);
-	tmpDataImportTableColumns.push(
-	{
-		title : "<@spring.message code='dataImport.importTableName' />",
-		data : "tableName",
-		render : function(data, type, row, meta)
-		{
-			return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' class='table-name-input ui-widget ui-widget-content' style='width:90%' />";
-		},
-		defaultContent: "",
-		width : "25%"
-	});
-	tmpDataImportTableColumns[0].width = "35%";
-	po.dataImportTableColumns = tmpDataImportTableColumns.concat(po.dataImportTableColumns.slice(2));
 	
 	po.cometdInitIfNot();
 	po.initDataImportSteps();
 	po.initDataExchangeUIs();
 	po.initDataImportUIs();
-	po.initDataImportCsvUIs();
 	po.initDataImportDataTable();
 	po.initDataExchangeActions();
 	po.initDataImportActions();
