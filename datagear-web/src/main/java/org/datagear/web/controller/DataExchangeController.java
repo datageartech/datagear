@@ -209,115 +209,18 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/import_csv";
 	}
 
-	@RequestMapping("/{schemaId}/import/sql")
-	public String imptSql(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
-	{
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
-			{
-			}
-		}.execute();
-
-		DataFormat defaultDataFormat = new DataFormat();
-
-		String dataExchangeId = IDUtil.uuid();
-
-		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
-		springModel.addAttribute("dataExchangeId", dataExchangeId);
-		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
-		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
-		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
-
-		return "/dataexchange/import_sql";
-	}
-
-	@RequestMapping("/{schemaId}/import/db")
-	public String imptDb(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
-	{
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
-			{
-			}
-		}.execute();
-
-		springModel.addAttribute("dataExchangeId", IDUtil.uuid());
-
-		return "/dataexchange/import_db";
-	}
-
-	@RequestMapping(value = "/{schemaId}/import/uploadDataFile", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/import/csv/uploadImportFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<DataImportFileInfo> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
+	public List<DataImportFileInfo> imptCsvUploadFile(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			@RequestParam("file") MultipartFile multipartFile) throws Exception
 	{
-		List<DataImportFileInfo> fileInfos = new ArrayList<DataImportFileInfo>();
-
-		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
-
-		String rawFileName = multipartFile.getOriginalFilename();
-		boolean isZipFile = isZipFile(rawFileName);
-		String serverFileName = IDUtil.uuid();
-
-		if (isZipFile)
-		{
-			File unzipDirectory = FileUtil.getFile(directory, serverFileName);
-			FileUtil.deleteFile(unzipDirectory);
-			unzipDirectory.mkdirs();
-
-			ZipInputStream in = null;
-
-			try
-			{
-				in = new ZipInputStream(multipartFile.getInputStream());
-				// TODO ZIP中存在中文名文件时解压会报错
-				IOUtil.unzip(in, unzipDirectory);
-			}
-			finally
-			{
-				IOUtil.close(in);
-			}
-
-			listDataImportFileInfos(unzipDirectory, new CsvFileFilger(), serverFileName, rawFileName, fileInfos);
-		}
-		else
-		{
-			File importFile = FileUtil.getFile(directory, serverFileName);
-
-			InputStream in = null;
-			OutputStream importFileOut = null;
-			try
-			{
-				in = multipartFile.getInputStream();
-				importFileOut = IOUtil.getOutputStream(importFile);
-				IOUtil.write(in, importFileOut);
-			}
-			finally
-			{
-				IOUtil.close(in);
-				IOUtil.close(importFileOut);
-			}
-
-			DataImportFileInfo fileInfo = new DataImportFileInfo(serverFileName, importFile.length(), rawFileName,
-					DataImportFileInfo.fileNameToTableName(rawFileName));
-
-			fileInfos.add(fileInfo);
-		}
-
-		return fileInfos;
+		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, new CsvFileFilger());
 	}
 
 	@RequestMapping(value = "/{schemaId}/import/csv/doImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> doImportCsv(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> imptCsvDoImport(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			TextDataImportForm dataImportForm) throws Exception
 	{
@@ -379,6 +282,59 @@ public class DataExchangeController extends AbstractSchemaConnController
 		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
+	}
+
+	@RequestMapping("/{schemaId}/import/sql")
+	public String imptSql(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+			}
+		}.execute();
+
+		DataFormat defaultDataFormat = new DataFormat();
+
+		String dataExchangeId = IDUtil.uuid();
+
+		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
+		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+
+		return "/dataexchange/import_sql";
+	}
+
+	@RequestMapping(value = "/{schemaId}/import/sql/uploadImportFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<DataImportFileInfo> imptSqlUploadFile(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@RequestParam("file") MultipartFile multipartFile) throws Exception
+	{
+		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, new SqlFileFilger());
+	}
+
+	@RequestMapping("/{schemaId}/import/db")
+	public String imptDb(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+			}
+		}.execute();
+
+		springModel.addAttribute("dataExchangeId", IDUtil.uuid());
+
+		return "/dataexchange/import_db";
 	}
 
 	/**
@@ -497,7 +453,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	@RequestMapping(value = "/{schemaId}/export/csv/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> doExportCsv(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> exptCsvDoExport(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			TextDataExportForm exportForm) throws Exception
 	{
@@ -592,7 +548,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	@RequestMapping(value = "/{schemaId}/export/sql/doExport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> doExportSql(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> exptSqlDoExport(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			SqlDataExportForm exportForm) throws Exception
 	{
@@ -694,7 +650,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId)
 			throws Exception
 	{
-		String fileName = "export_csv.zip";
+		String fileName = "export.zip";
 
 		response.setCharacterEncoding(RESPONSE_ENCODING);
 		response.setHeader("Content-Disposition",
@@ -712,6 +668,65 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			IOUtil.close(out);
 		}
+	}
+
+	protected List<DataImportFileInfo> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
+			String schemaId, String dataExchangeId, MultipartFile multipartFile, FileFilter fileFilter) throws Exception
+	{
+		List<DataImportFileInfo> fileInfos = new ArrayList<DataImportFileInfo>();
+
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+
+		String rawFileName = multipartFile.getOriginalFilename();
+		boolean isZipFile = isZipFile(rawFileName);
+		String serverFileName = IDUtil.uuid();
+
+		if (isZipFile)
+		{
+			File unzipDirectory = FileUtil.getFile(directory, serverFileName);
+			FileUtil.deleteFile(unzipDirectory);
+			unzipDirectory.mkdirs();
+
+			ZipInputStream in = null;
+
+			try
+			{
+				in = new ZipInputStream(multipartFile.getInputStream());
+				// TODO ZIP中存在中文名文件时解压会报错
+				IOUtil.unzip(in, unzipDirectory);
+			}
+			finally
+			{
+				IOUtil.close(in);
+			}
+
+			listDataImportFileInfos(unzipDirectory, fileFilter, serverFileName, rawFileName, fileInfos);
+		}
+		else
+		{
+			File importFile = FileUtil.getFile(directory, serverFileName);
+
+			InputStream in = null;
+			OutputStream importFileOut = null;
+			try
+			{
+				in = multipartFile.getInputStream();
+				importFileOut = IOUtil.getOutputStream(importFile);
+				IOUtil.write(in, importFileOut);
+			}
+			finally
+			{
+				IOUtil.close(in);
+				IOUtil.close(importFileOut);
+			}
+
+			DataImportFileInfo fileInfo = new DataImportFileInfo(serverFileName, importFile.length(), rawFileName,
+					DataImportFileInfo.fileNameToTableName(rawFileName));
+
+			fileInfos.add(fileInfo);
+		}
+
+		return fileInfos;
 	}
 
 	protected BatchDataExchange buildBatchDataExchange(ConnectionFactory connectionFactory,
@@ -1063,6 +1078,23 @@ public class DataExchangeController extends AbstractSchemaConnController
 				return true;
 			else
 				return file.getName().toLowerCase().endsWith(".csv");
+		}
+	}
+
+	protected static class SqlFileFilger implements FileFilter
+	{
+		public SqlFileFilger()
+		{
+			super();
+		}
+
+		@Override
+		public boolean accept(File file)
+		{
+			if (file.isDirectory())
+				return true;
+			else
+				return file.getName().toLowerCase().endsWith(".sql");
 		}
 	}
 

@@ -121,9 +121,12 @@ dataExchange_js.ftl
 	
 	po.initDataImportActions = function()
 	{
+		var $fileinputButton = po.element(".fileinput-button");
+		var uploadAction = $fileinputButton.attr("upload-action");
+		
 		po.element(".fileinput-button").fileupload(
 		{
-			url : "${contextPath}/dataexchange/" + po.schemaId +"/import/uploadDataFile",
+			url : "${contextPath}/dataexchange/" + po.schemaId +"/import/" + uploadAction,
 			paramName : "file",
 			success : function(serverFileInfos, textStatus, jqXHR)
 			{

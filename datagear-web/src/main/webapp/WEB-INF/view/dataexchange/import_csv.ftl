@@ -70,7 +70,7 @@ Schema schema 数据库，不允许为null
 					<div class="form-item form-item-table-head form-item-upload page-status-aware-show edit-status-show">
 						<div class="form-item-value">
 							<label><@spring.message code='dataImport.uploadCsvDataFile' /></label>
-							<div class="fileinput-button ui-widget ui-button ui-corner-all"><@spring.message code='upload' /><input type="file"></div>
+							<div class="fileinput-button ui-widget ui-button ui-corner-all" upload-action="csv/uploadImportFile"><@spring.message code='upload' /><input type="file"></div>
 							<div class="file-info"></div>
 						</div>
 					</div>

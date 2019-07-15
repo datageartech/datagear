@@ -23,7 +23,7 @@ Schema schema 数据库，不允许为null
 		<@spring.message code='dataImport.importSqlData' />
 	</div>
 	<div class="content">
-		<form id="${pageId}-form" action="${contextPath}/dataexchange/${schema.id}/import/csv/doImport" method="POST">
+		<form id="${pageId}-form" action="${contextPath}/dataexchange/${schema.id}/import/sql/doImport" method="POST">
 			<input type="hidden" name="dataExchangeId" value="${dataExchangeId}" />
 			<div class="form-content form-content-wizard">
 				<h3><@spring.message code='dataImport.setDataFormat' /></h3>
@@ -46,8 +46,8 @@ Schema schema 数据库，不允许为null
 				<div>
 					<div class="form-item form-item-table-head form-item-upload page-status-aware-show edit-status-show">
 						<div class="form-item-value">
-							<label><@spring.message code='dataImport.uploadCsvDataFile' /></label>
-							<div class="fileinput-button ui-widget ui-button ui-corner-all"><@spring.message code='upload' /><input type="file"></div>
+							<label><@spring.message code='dataImport.uploadSqlDataFile' /></label>
+							<div class="fileinput-button ui-widget ui-button ui-corner-all" upload-action="sql/uploadImportFile"><@spring.message code='upload' /><input type="file"></div>
 							<div class="file-info"></div>
 						</div>
 					</div>
