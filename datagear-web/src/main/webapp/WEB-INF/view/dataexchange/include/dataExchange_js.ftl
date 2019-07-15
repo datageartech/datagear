@@ -377,6 +377,16 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		return status;
 	};
 	
+	po.initDataExchangeUIs = function()
+	{
+		po.element("#${pageId}-binaryFormat").buttonset();
+		po.element(".binaryFormatSetButton").click(function()
+		{
+			po.element("input[name='dataFormat.binaryFormat']").val($(this).attr("value"));
+		});
+		$(po.element(".binaryFormatSetButton")[0]).click();
+	};
+	
 	po.initDataExchangeActions = function()
 	{
 		po.element(".return-button").click(function()

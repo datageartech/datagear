@@ -18,7 +18,8 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.datagear.dataexchange.DataFormat;
-import org.datagear.dataexchange.DataFormat.BinaryFormat;
+import org.datagear.util.expression.Expression;
+import org.datagear.util.expression.ExpressionResolver;
 
 /**
  * 数据格式上下文。
@@ -30,13 +31,18 @@ public class DataFormatContext
 {
 	private DataFormat dataFormat;
 
-	private DateFormat dateFormatter;
+	private ExpressionResolver expressionResolver = new ExpressionResolver();
 
-	private DateFormat timeFormatter;
+	private Expression _dateExpression;
+	private Expression _timeExpression;
+	private Expression _timestampExpression;
+	private Expression _numberExpression;
+	private Expression _binaryExpression;
 
-	private DateFormat timestampFormatter;
-
-	private NumberFormat numberFormatter;
+	private DateFormat _dateFormat;
+	private DateFormat _timeFormat;
+	private DateFormat _timestampFormat;
+	private NumberFormat _numberFormat;
 
 	public DataFormatContext()
 	{
@@ -58,51 +64,75 @@ public class DataFormatContext
 	{
 		this.dataFormat = dataFormat;
 
-		this.dateFormatter = new SimpleDateFormat(dataFormat.getDateFormat(), dataFormat.getLocale());
-		this.timeFormatter = new SimpleDateFormat(dataFormat.getTimeFormat(), dataFormat.getLocale());
-		this.timestampFormatter = new SimpleDateFormat(dataFormat.getTimestampFormat(), dataFormat.getLocale());
-		this.numberFormatter = new DecimalFormat(dataFormat.getNumberFormat(),
+		this._dateExpression = this.expressionResolver.resolveFirst(dataFormat.getDateFormat());
+		this._timeExpression = this.expressionResolver.resolveFirst(dataFormat.getTimeFormat());
+		this._timestampExpression = this.expressionResolver.resolveFirst(dataFormat.getTimestampFormat());
+		this._numberExpression = this.expressionResolver.resolveFirst(dataFormat.getNumberFormat());
+		this._binaryExpression = this.expressionResolver.resolveFirst(dataFormat.getBinaryFormat());
+
+		this._dateFormat = new SimpleDateFormat(getDatePattern(), dataFormat.getLocale());
+		this._timeFormat = new SimpleDateFormat(getTimePattern(), dataFormat.getLocale());
+		this._timestampFormat = new SimpleDateFormat(getTimestampPattern(), dataFormat.getLocale());
+		this._numberFormat = new DecimalFormat(getNumberPattern(),
 				DecimalFormatSymbols.getInstance(dataFormat.getLocale()));
 	}
 
-	public DateFormat getDateFormatter()
+	public ExpressionResolver getExpressionResolver()
 	{
-		return dateFormatter;
+		return expressionResolver;
 	}
 
-	public void setDateFormatter(DateFormat dateFormatter)
+	public void setExpressionResolver(ExpressionResolver expressionResolver)
 	{
-		this.dateFormatter = dateFormatter;
+		this.expressionResolver = expressionResolver;
 	}
 
-	public DateFormat getTimeFormatter()
+	public String getDatePattern()
 	{
-		return timeFormatter;
+		return (this._dateExpression == null ? this.dataFormat.getDateFormat() : this._dateExpression.getContent());
 	}
 
-	public void setTimeFormatter(DateFormat timeFormatter)
+	public String getTimePattern()
 	{
-		this.timeFormatter = timeFormatter;
+		return (this._timeExpression == null ? this.dataFormat.getTimeFormat() : this._timeExpression.getContent());
 	}
 
-	public DateFormat getTimestampFormatter()
+	public String getTimestampPattern()
 	{
-		return timestampFormatter;
+		return (this._timestampExpression == null ? this.dataFormat.getTimestampFormat()
+				: this._timestampExpression.getContent());
 	}
 
-	public void setTimestampFormatter(DateFormat timestampFormatter)
+	public String getNumberPattern()
 	{
-		this.timestampFormatter = timestampFormatter;
+		return (this._numberExpression == null ? this.dataFormat.getNumberFormat()
+				: this._numberExpression.getContent());
 	}
 
-	public NumberFormat getNumberFormatter()
+	public String getBinaryPattern()
 	{
-		return numberFormatter;
+		return (this._binaryExpression == null ? this.dataFormat.getBinaryFormat()
+				: this._binaryExpression.getContent());
 	}
 
-	public void setNumberFormatter(NumberFormat numberFormatter)
+	public DateFormat getDateFormat()
 	{
-		this.numberFormatter = numberFormatter;
+		return _dateFormat;
+	}
+
+	public DateFormat getTimeFormat()
+	{
+		return _timeFormat;
+	}
+
+	public DateFormat getTimestampFormat()
+	{
+		return _timestampFormat;
+	}
+
+	public NumberFormat getNumberFormat()
+	{
+		return _numberFormat;
 	}
 
 	/**
@@ -114,7 +144,18 @@ public class DataFormatContext
 	 */
 	public Date parseDate(String value) throws ParseException
 	{
-		java.util.Date d = this.dateFormatter.parse(value);
+		if (value == null || value.isEmpty())
+			return null;
+
+		if (this._dateExpression != null)
+		{
+			value = this.expressionResolver.extract(this.dataFormat.getDateFormat(), this._dateExpression, value);
+
+			if (value == null || value.isEmpty())
+				return null;
+		}
+
+		java.util.Date d = this._dateFormat.parse(value);
 		return new Date(d.getTime());
 	}
 
@@ -127,7 +168,18 @@ public class DataFormatContext
 	 */
 	public Time parseTime(String value) throws ParseException
 	{
-		java.util.Date d = this.timeFormatter.parse(value);
+		if (value == null || value.isEmpty())
+			return null;
+
+		if (this._timeExpression != null)
+		{
+			value = this.expressionResolver.extract(this.dataFormat.getTimeFormat(), this._timeExpression, value);
+
+			if (value == null || value.isEmpty())
+				return null;
+		}
+
+		java.util.Date d = this._timeFormat.parse(value);
 		return new Time(d.getTime());
 	}
 
@@ -140,17 +192,29 @@ public class DataFormatContext
 	 */
 	public Timestamp parseTimestamp(String value) throws ParseException
 	{
+		if (value == null || value.isEmpty())
+			return null;
+
+		if (this._timestampExpression != null)
+		{
+			value = this.expressionResolver.extract(this.dataFormat.getTimestampFormat(), this._timestampExpression,
+					value);
+
+			if (value == null || value.isEmpty())
+				return null;
+		}
+
 		Timestamp ts = null;
 
 		// 如果是默认格式，则直接使用Timestamp.valueOf，这样可以避免丢失纳秒精度
-		if (DataFormat.DEFAULT_TIMESTAMP_FORMAT.equals(this.dataFormat.getTimestampFormat()))
+		if (DataFormat.DEFAULT_TIMESTAMP_FORMAT.equals(getTimestampPattern()))
 		{
 			ts = Timestamp.valueOf(value);
 		}
 		else
 		{
 			// XXX 这种处理方式会丢失纳秒数据，待以后版本升级至jdk1.8库时采用java.time可解决
-			java.util.Date tsdv = this.timeFormatter.parse(value);
+			java.util.Date tsdv = this._timeFormat.parse(value);
 			ts = new Timestamp(tsdv.getTime());
 		}
 
@@ -158,55 +222,55 @@ public class DataFormatContext
 	}
 
 	/**
-	 * 解析{@code int}。
+	 * 解析{@code Integer}。
 	 * 
 	 * @param value
 	 * @return
 	 * @throws ParseException
 	 */
-	public int parseInt(String value) throws ParseException
+	public Integer parseInt(String value) throws ParseException
 	{
-		this.numberFormatter.setParseIntegerOnly(true);
-		return this.numberFormatter.parse(value).intValue();
+		Number number = parseNumber(value, true);
+		return (number == null ? null : number.intValue());
 	}
 
 	/**
-	 * 解析{@code long}。
+	 * 解析{@code Long}。
 	 * 
 	 * @param value
 	 * @return
 	 * @throws ParseException
 	 */
-	public long parseLong(String value) throws ParseException
+	public Long parseLong(String value) throws ParseException
 	{
-		this.numberFormatter.setParseIntegerOnly(true);
-		return this.numberFormatter.parse(value).longValue();
+		Number number = parseNumber(value, true);
+		return (number == null ? null : number.longValue());
 	}
 
 	/**
-	 * 解析{@code float}。
+	 * 解析{@code Float}。
 	 * 
 	 * @param value
 	 * @return
 	 * @throws ParseException
 	 */
-	public float parseFloat(String value) throws ParseException
+	public Float parseFloat(String value) throws ParseException
 	{
-		this.numberFormatter.setParseIntegerOnly(false);
-		return this.numberFormatter.parse(value).floatValue();
+		Number number = parseNumber(value, false);
+		return (number == null ? null : number.floatValue());
 	}
 
 	/**
-	 * 解析{@code double}。
+	 * 解析{@code Double}。
 	 * 
 	 * @param value
 	 * @return
 	 * @throws ParseException
 	 */
-	public double parseDouble(String value) throws ParseException
+	public Double parseDouble(String value) throws ParseException
 	{
-		this.numberFormatter.setParseIntegerOnly(false);
-		return this.numberFormatter.parse(value).doubleValue();
+		Number number = parseNumber(value, false);
+		return (number == null ? null : number.doubleValue());
 	}
 
 	/**
@@ -218,23 +282,29 @@ public class DataFormatContext
 	 */
 	public byte[] parseBytes(String value) throws DecoderException
 	{
+		if (value == null || value.isEmpty())
+			return null;
+
+		String binaryPattern = getBinaryPattern();
+
+		if (DataFormat.BINARY_FORMAT_NULL.equalsIgnoreCase(binaryPattern))
+			return null;
+
+		if (this._binaryExpression != null)
+			value = this.expressionResolver.extract(this.dataFormat.getBinaryFormat(), this._binaryExpression, value);
+
 		byte[] bytes = null;
 
-		BinaryFormat binaryFormat = this.dataFormat.getBinaryFormat();
-		if (BinaryFormat.NULL.equals(binaryFormat))
-		{
-			bytes = null;
-		}
-		else if (BinaryFormat.HEX.equals(binaryFormat))
+		if (DataFormat.BINARY_FORMAT_HEX.equalsIgnoreCase(binaryPattern))
 		{
 			bytes = convertToBytesForHex(value);
 		}
-		else if (BinaryFormat.BASE64.equals(binaryFormat))
+		else if (DataFormat.BINARY_FORMAT_BASE64.equalsIgnoreCase(binaryPattern))
 		{
 			bytes = convertToBytesForBase64(value);
 		}
 		else
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("'" + binaryPattern + "' binary format is not supported");
 
 		return bytes;
 	}
@@ -247,7 +317,12 @@ public class DataFormatContext
 	 */
 	public String formatDate(Date value)
 	{
-		return this.dateFormatter.format(value);
+		String sv = (value == null ? null : this._dateFormat.format(value));
+
+		if (sv != null && this._dateExpression != null)
+			sv = this.expressionResolver.evaluate(this.dataFormat.getDateFormat(), this._dateExpression, sv, "");
+
+		return sv;
 	}
 
 	/**
@@ -258,7 +333,12 @@ public class DataFormatContext
 	 */
 	public String formatTime(Time value)
 	{
-		return this.timeFormatter.format(value);
+		String sv = (value == null ? null : this._timeFormat.format(value));
+
+		if (sv != null && this._timeExpression != null)
+			sv = this.expressionResolver.evaluate(this.dataFormat.getTimeFormat(), this._timeExpression, sv, "");
+
+		return sv;
 	}
 
 	/**
@@ -269,21 +349,28 @@ public class DataFormatContext
 	 */
 	public String formatTimestamp(Timestamp value)
 	{
-		String valueStr = null;
+		String sv = null;
 
-		// 如果是默认格式，则直接使用Timestamp.valueOf，这样可以避免丢失纳秒精度
-		if (DataFormat.DEFAULT_TIMESTAMP_FORMAT.equals(dataFormat.getTimestampFormat()))
+		if (value == null)
 		{
-			valueStr = value.toString();
+		}
+		// 如果是默认格式，则直接使用Timestamp.valueOf，这样可以避免丢失纳秒精度
+		else if (DataFormat.DEFAULT_TIMESTAMP_FORMAT.equals(getTimestampPattern()))
+		{
+			sv = value.toString();
 		}
 		else
 		{
 			// XXX 这种处理方式会丢失纳秒数据，待以后版本升级至jdk1.8库时采用java.time可解决
 
-			valueStr = this.timestampFormatter.format(value);
+			sv = this._timestampFormat.format(value);
 		}
 
-		return valueStr;
+		if (sv != null && this._timestampExpression != null)
+			sv = this.expressionResolver.evaluate(this.dataFormat.getTimestampFormat(), this._timestampExpression, sv,
+					"");
+
+		return sv;
 	}
 
 	/**
@@ -292,9 +379,9 @@ public class DataFormatContext
 	 * @param value
 	 * @return
 	 */
-	public String formatInt(int value)
+	public String formatInt(Integer value)
 	{
-		return this.numberFormatter.format(value);
+		return formatNumber(value);
 	}
 
 	/**
@@ -303,9 +390,9 @@ public class DataFormatContext
 	 * @param value
 	 * @return
 	 */
-	public String formatLong(long value)
+	public String formatLong(Long value)
 	{
-		return this.numberFormatter.format(value);
+		return formatNumber(value);
 	}
 
 	/**
@@ -314,9 +401,9 @@ public class DataFormatContext
 	 * @param value
 	 * @return
 	 */
-	public String formatFloat(float value)
+	public String formatFloat(Float value)
 	{
-		return this.numberFormatter.format(value);
+		return formatNumber(value);
 	}
 
 	/**
@@ -325,9 +412,9 @@ public class DataFormatContext
 	 * @param value
 	 * @return
 	 */
-	public String formatDouble(double value)
+	public String formatDouble(Double value)
 	{
-		return this.numberFormatter.format(value);
+		return formatNumber(value);
 	}
 
 	/**
@@ -338,47 +425,65 @@ public class DataFormatContext
 	 */
 	public String formatBytes(byte[] value)
 	{
-		String str = null;
+		String binaryPattern = getBinaryPattern();
 
-		BinaryFormat binaryFormat = this.dataFormat.getBinaryFormat();
+		if (value == null || DataFormat.BINARY_FORMAT_NULL.equalsIgnoreCase(binaryPattern))
+			return null;
 
-		if (value == null)
-			;
-		else if (BinaryFormat.NULL.equals(binaryFormat))
-			;
-		else if (BinaryFormat.HEX.equals(binaryFormat))
-			str = convertToHex(value);
-		else if (BinaryFormat.BASE64.equals(binaryFormat))
-			str = convertToBase64(value);
+		String sv = null;
+
+		if (DataFormat.BINARY_FORMAT_HEX.equalsIgnoreCase(binaryPattern))
+			sv = convertToHex(value);
+		else if (DataFormat.BINARY_FORMAT_BASE64.equalsIgnoreCase(binaryPattern))
+			sv = convertToBase64(value);
 		else
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("'" + binaryPattern + "' binary format is not supported");
 
-		return str;
+		if (this._binaryExpression != null)
+			sv = this.expressionResolver.evaluate(this.dataFormat.getBinaryFormat(), this._binaryExpression, sv, "");
+
+		return sv;
 	}
 
 	/**
-	 * 将字节数组编码转换为字符串。
+	 * 解析{@linkplain Number}。
 	 * 
-	 * @param bytes
-	 * @param binaryFormat
+	 * @param value
+	 * @param integerOnly
+	 * @return
+	 * @throws ParseException
+	 */
+	protected Number parseNumber(String value, boolean integerOnly) throws ParseException
+	{
+		if (value == null || value.isEmpty())
+			return null;
+
+		if (this._numberExpression != null)
+		{
+			value = this.expressionResolver.extract(this.dataFormat.getNumberFormat(), this._numberExpression, value);
+
+			if (value == null || value.isEmpty())
+				return null;
+		}
+
+		this._numberFormat.setParseIntegerOnly(integerOnly);
+		return this._numberFormat.parse(value);
+	}
+
+	/**
+	 * 格式化{@code Number}。
+	 * 
+	 * @param value
 	 * @return
 	 */
-	protected String convertToString(byte[] bytes, BinaryFormat binaryFormat)
+	protected String formatNumber(Number value)
 	{
-		String value = null;
+		String sv = (value == null ? null : this._numberFormat.format(value));
 
-		if (bytes == null)
-			;
-		else if (BinaryFormat.NULL.equals(binaryFormat))
-			;
-		else if (BinaryFormat.HEX.equals(binaryFormat))
-			value = convertToHex(bytes);
-		else if (BinaryFormat.BASE64.equals(binaryFormat))
-			value = convertToBase64(bytes);
-		else
-			throw new UnsupportedOperationException();
+		if (sv != null && this._numberExpression != null)
+			sv = this.expressionResolver.evaluate(this.dataFormat.getNumberFormat(), this._numberExpression, sv, "");
 
-		return value;
+		return sv;
 	}
 
 	/**
@@ -420,6 +525,9 @@ public class DataFormatContext
 	{
 		if (value == null || value.isEmpty())
 			return null;
+
+		if (value.startsWith("0x") || value.startsWith("0X"))
+			value = value.substring(2);
 
 		return Hex.decodeHex(value);
 	}

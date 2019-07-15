@@ -118,6 +118,7 @@ Schema schema 数据库，不允许为null
 	
 	po.cometdInitIfNot();
 	po.initDataExportSteps();
+	po.initDataExchangeUIs();
 	po.initDataExportUIs();
 	po.initDataExportDataTable();
 	po.initDataExchangeActions();

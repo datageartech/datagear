@@ -5,6 +5,7 @@
 package org.datagear.util.expression;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +19,9 @@ import java.util.List;
  * </p>
  * <p>
  * 例如：<code>"\${"</code>表示不做表达式解析、表达式里面的<code>"\}"</code>表示<code>"}"</code>普通字符而非表达式结束标识符。
+ * </p>
+ * <p>
+ * 此类是线程安全的。
  * </p>
  * 
  * @author datagear@163.com
@@ -125,6 +129,58 @@ public class ExpressionResolver
 	}
 
 	/**
+	 * 解析第一个表达式。
+	 * <p>
+	 * 如果没有，返回{@code null}。
+	 * </p>
+	 * 
+	 * @param source
+	 * @return
+	 */
+	public Expression resolveFirst(String source)
+	{
+		if (source == null || source.isEmpty())
+			return null;
+
+		return resolveNextExpression(source, 0);
+	}
+
+	/**
+	 * 解析下一个表达式。
+	 * <p>
+	 * 如果没有，返回{@code null}。
+	 * </p>
+	 * 
+	 * @param source
+	 * @param index
+	 * @return
+	 */
+	public Expression resolveNext(String source, int index)
+	{
+		if (source == null || source.isEmpty())
+			return null;
+
+		return resolveNextExpression(source, index);
+	}
+
+	/**
+	 * 计算字符串表达式的值。
+	 * <p>
+	 * 将字符串中的表达式子串替换为目标值，并返回替换后的新字符串。
+	 * </p>
+	 * 
+	 * @param source
+	 * @param expression
+	 * @param value
+	 * @param nullValue
+	 * @return
+	 */
+	public String evaluate(String source, Expression expression, Object value, String nullValue)
+	{
+		return evaluate(source, Arrays.asList(expression), Arrays.asList(value), nullValue);
+	}
+
+	/**
 	 * 计算字符串表达式的值。
 	 * <p>
 	 * 将字符串中的表达式子串替换为目标值，并返回替换后的新字符串。
@@ -165,6 +221,27 @@ public class ExpressionResolver
 		copyForUnescape(source, gapStart, source.length(), result);
 
 		return result.toString();
+	}
+
+	/**
+	 * 根据表达式模板与其包含的表达式列表，解析对应字符串值中的表达式值。
+	 * <p>
+	 * 如果没有表达式值，返回{@code null}。
+	 * </p>
+	 * 
+	 * @param template
+	 * @param expressions
+	 * @param value
+	 * @return
+	 */
+	public String extract(String template, Expression expressions, String value)
+	{
+		List<String> re = extract(template, Arrays.asList(expressions), value);
+
+		if (re == null || re.isEmpty())
+			return null;
+
+		return re.get(0);
 	}
 
 	/**

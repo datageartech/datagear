@@ -253,6 +253,7 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 			case Types.LONGVARCHAR:
 			{
 				st.setString(parameterIndex, parameterValue);
+
 				break;
 			}
 
@@ -261,6 +262,7 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 			{
 				BigDecimal value = new BigDecimal(parameterValue);
 				st.setBigDecimal(parameterIndex, value);
+
 				break;
 			}
 
@@ -270,6 +272,7 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 				boolean value = ("true".equalsIgnoreCase(parameterValue) || "1".equals(parameterValue)
 						|| "on".equalsIgnoreCase(parameterValue));
 				st.setBoolean(parameterIndex, value);
+
 				break;
 			}
 
@@ -277,30 +280,50 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 			case Types.SMALLINT:
 			case Types.INTEGER:
 			{
-				int value = dataFormatContext.parseInt(parameterValue);
-				st.setInt(parameterIndex, value);
+				Integer value = dataFormatContext.parseInt(parameterValue);
+
+				if (value == null)
+					st.setNull(parameterIndex, sqlType);
+				else
+					st.setInt(parameterIndex, value);
+
 				break;
 			}
 
 			case Types.BIGINT:
 			{
-				long value = dataFormatContext.parseLong(parameterValue);
-				st.setLong(parameterIndex, value);
+				Long value = dataFormatContext.parseLong(parameterValue);
+
+				if (value == null)
+					st.setNull(parameterIndex, sqlType);
+				else
+					st.setLong(parameterIndex, value);
+
 				break;
 			}
 
 			case Types.REAL:
 			{
-				float value = dataFormatContext.parseFloat(parameterValue);
-				st.setFloat(parameterIndex, value);
+				Float value = dataFormatContext.parseFloat(parameterValue);
+
+				if (value == null)
+					st.setNull(parameterIndex, sqlType);
+				else
+					st.setFloat(parameterIndex, value);
+
 				break;
 			}
 
 			case Types.FLOAT:
 			case Types.DOUBLE:
 			{
-				double value = dataFormatContext.parseDouble(parameterValue);
-				st.setDouble(parameterIndex, value);
+				Double value = dataFormatContext.parseDouble(parameterValue);
+
+				if (value == null)
+					st.setNull(parameterIndex, sqlType);
+				else
+					st.setDouble(parameterIndex, value);
+
 				break;
 			}
 
@@ -321,21 +344,35 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 			case Types.DATE:
 			{
 				java.sql.Date value = dataFormatContext.parseDate(parameterValue);
-				st.setDate(parameterIndex, value);
+
+				if (value == null)
+					st.setNull(parameterIndex, sqlType);
+				else
+					st.setDate(parameterIndex, value);
+
 				break;
 			}
 
 			case Types.TIME:
 			{
 				java.sql.Time value = dataFormatContext.parseTime(parameterValue);
-				st.setTime(parameterIndex, value);
+
+				if (value == null)
+					st.setNull(parameterIndex, sqlType);
+				else
+					st.setTime(parameterIndex, value);
+
 				break;
 			}
 
 			case Types.TIMESTAMP:
 			{
 				java.sql.Timestamp value = dataFormatContext.parseTimestamp(parameterValue);
-				st.setTimestamp(parameterIndex, value);
+
+				if (value == null)
+					st.setNull(parameterIndex, sqlType);
+				else
+					st.setTimestamp(parameterIndex, value);
 
 				break;
 			}
@@ -345,6 +382,7 @@ public abstract class AbstractDevotedTextDataImportService<T extends TextDataImp
 				Clob clob = cn.createClob();
 				clob.setString(1, parameterValue);
 				st.setClob(parameterIndex, clob);
+
 				break;
 			}
 

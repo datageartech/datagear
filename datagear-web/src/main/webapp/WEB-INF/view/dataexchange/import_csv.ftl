@@ -165,17 +165,15 @@ Schema schema 数据库，不允许为null
 	po.element("#${pageId}-form .wizard .actions ul li:eq(2)").addClass("page-status-aware-enable edit-status-enable");
 	
 	$.initButtons(po.element());
-	po.element("#${pageId}-binaryFormat").buttonset();
 	po.element("#${pageId}-ignoreInexistentColumn").buttonset();
 	po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
 	po.element("#${pageId}-exceptionResolve").buttonset();
 	po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
 	
-	po.element("input[name='dataFormat.binaryFormat'][value='${defaultDataFormat.binaryFormat}']").click();
 	po.element("#${pageId}-ignoreInexistentColumn-1").click();
 	po.element("#${pageId}-nullForIllegalColumnValue-1").click();
 	po.element("#${pageId}-exceptionResolve-0").click();
-
+	
 	po.element(".fileinput-button").fileupload(
 	{
 		url : "${contextPath}/dataexchange/" + po.schemaId +"/import/uploadDataFile",
@@ -308,6 +306,7 @@ Schema schema 数据库，不允许为null
 		return false;
 	});
 	
+	po.initDataExchangeUIs();
 	po.initDataExchangeActions();
 	po.updateDataExchangePageStatus("edit");
 })

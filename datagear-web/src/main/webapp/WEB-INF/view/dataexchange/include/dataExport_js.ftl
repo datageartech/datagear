@@ -171,7 +171,6 @@ dataExchange_js.ftl
 	po.initDataExportUIs = function()
 	{
 		$.initButtons(po.element());
-		po.element("#${pageId}-binaryFormat").buttonset();
 		po.element("#${pageId}-nullForIllegalColumnValue").buttonset();
 		po.element("#${pageId}-add-group-select").selectmenu(
 		{
@@ -185,7 +184,6 @@ dataExchange_js.ftl
 		po.element("select[name='fileEncoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "file-encoding-selectmenu-menu" } });
 		po.element("#${pageId}-add-group").controlgroup();
 		
-		po.element("input[name='dataFormat.binaryFormat'][value='${defaultDataFormat.binaryFormat}']").click();
 		po.element("#${pageId}-nullForIllegalColumnValue-1").click();
 	};
 	

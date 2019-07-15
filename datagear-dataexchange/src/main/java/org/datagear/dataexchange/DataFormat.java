@@ -25,6 +25,12 @@ public class DataFormat implements Serializable
 
 	public static final String DEFAULT_NUMBER_FORMAT = "#.##";
 
+	public static final String BINARY_FORMAT_HEX = "Hex";
+
+	public static final String BINARY_FORMAT_BASE64 = "Base64";
+
+	public static final String BINARY_FORMAT_NULL = "NULL";
+
 	/** 地区 */
 	private Locale locale = Locale.getDefault();
 
@@ -41,7 +47,7 @@ public class DataFormat implements Serializable
 	private String numberFormat = DEFAULT_NUMBER_FORMAT;
 
 	/** 二进制格式 */
-	private BinaryFormat binaryFormat = BinaryFormat.HEX;
+	private String binaryFormat = BINARY_FORMAT_HEX;
 
 	public DataFormat()
 	{
@@ -49,7 +55,7 @@ public class DataFormat implements Serializable
 	}
 
 	public DataFormat(Locale locale, String dateFormat, String timeFormat, String timestampFormat, String numberFormat,
-			BinaryFormat binaryFormat)
+			String binaryFormat)
 	{
 		super();
 		this.locale = locale;
@@ -110,12 +116,12 @@ public class DataFormat implements Serializable
 		this.numberFormat = numberFormat;
 	}
 
-	public BinaryFormat getBinaryFormat()
+	public String getBinaryFormat()
 	{
 		return binaryFormat;
 	}
 
-	public void setBinaryFormat(BinaryFormat binaryFormat)
+	public void setBinaryFormat(String binaryFormat)
 	{
 		this.binaryFormat = binaryFormat;
 	}
@@ -126,23 +132,5 @@ public class DataFormat implements Serializable
 		return getClass().getSimpleName() + " [dateFormat=" + dateFormat + ", timeFormat=" + timeFormat
 				+ ", timestampFormat=" + timestampFormat + ", numberFormat=" + numberFormat + ", binaryFormat="
 				+ binaryFormat + "]";
-	}
-
-	/**
-	 * 二进制数据编码格式。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static enum BinaryFormat
-	{
-		/** Base64编码格式 */
-		BASE64,
-
-		/** Hex编码格式 */
-		HEX,
-
-		/** 设为NULL值 */
-		NULL
 	}
 }

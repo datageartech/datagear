@@ -1647,6 +1647,10 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	bottom: 0.2em;
 	height: 3em;
 }
+.page-dataexchange form .form-content .form-item.form-item-binaryFormat .form-item-value input[type=text]{
+	display:inline-block;
+	width:30%;
+}
 .page-dataexchange .form-item-table-head{
 	height: 2.8em;
 }
