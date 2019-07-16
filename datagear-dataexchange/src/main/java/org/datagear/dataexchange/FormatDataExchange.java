@@ -5,22 +5,22 @@
 package org.datagear.dataexchange;
 
 /**
- * 文本数据交换。
+ * 格式化数据交换。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class TextDataExchange extends DataExchange
+public abstract class FormatDataExchange extends DataExchange
 {
-	/** 文本数据格式 */
+	/** 数据格式 */
 	private DataFormat dataFormat;
 
-	public TextDataExchange()
+	public FormatDataExchange()
 	{
 		super();
 	}
 
-	public TextDataExchange(ConnectionFactory connectionFactory, DataFormat dataFormat)
+	public FormatDataExchange(ConnectionFactory connectionFactory, DataFormat dataFormat)
 	{
 		super(connectionFactory);
 		this.dataFormat = dataFormat;

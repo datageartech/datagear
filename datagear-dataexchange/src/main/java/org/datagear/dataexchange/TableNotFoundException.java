@@ -2,9 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.dataexchange.support;
-
-import org.datagear.dataexchange.DataExchangeException;
+package org.datagear.dataexchange;
 
 /**
  * 表未找到异常。

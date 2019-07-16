@@ -8,6 +8,8 @@ import java.io.Reader;
 
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchange;
+import org.datagear.dataexchange.DataImportListener;
+import org.datagear.dataexchange.DataImportOption;
 import org.datagear.dataexchange.ResourceFactory;
 
 /**
@@ -18,18 +20,18 @@ import org.datagear.dataexchange.ResourceFactory;
  */
 public class SqlDataImport extends DataExchange
 {
-	private SqlDataImportOption importOption;
+	private DataImportOption importOption;
 
 	private ResourceFactory<Reader> readerFactory;
 
-	private SqlDataImportListener listener;
+	private DataImportListener listener;
 
 	public SqlDataImport()
 	{
 		super();
 	}
 
-	public SqlDataImport(ConnectionFactory connectionFactory, SqlDataImportOption importOption,
+	public SqlDataImport(ConnectionFactory connectionFactory, DataImportOption importOption,
 			ResourceFactory<Reader> readerFactory)
 	{
 		super(connectionFactory);
@@ -37,12 +39,12 @@ public class SqlDataImport extends DataExchange
 		this.readerFactory = readerFactory;
 	}
 
-	public SqlDataImportOption getImportOption()
+	public DataImportOption getImportOption()
 	{
 		return importOption;
 	}
 
-	public void setImportOption(SqlDataImportOption importOption)
+	public void setImportOption(DataImportOption importOption)
 	{
 		this.importOption = importOption;
 	}
@@ -58,12 +60,12 @@ public class SqlDataImport extends DataExchange
 	}
 
 	@Override
-	public SqlDataImportListener getListener()
+	public DataImportListener getListener()
 	{
 		return listener;
 	}
 
-	public void setListener(SqlDataImportListener listener)
+	public void setListener(DataImportListener listener)
 	{
 		this.listener = listener;
 	}

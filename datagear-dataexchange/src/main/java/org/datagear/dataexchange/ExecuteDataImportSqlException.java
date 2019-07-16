@@ -2,11 +2,9 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.dataexchange.support;
+package org.datagear.dataexchange;
 
 import java.sql.SQLException;
-
-import org.datagear.dataexchange.TextDataImportException;
 
 /**
  * 执行数据导入SQL异常。
@@ -14,11 +12,11 @@ import org.datagear.dataexchange.TextDataImportException;
  * @author datagear@163.com
  *
  */
-public class ExecuteDataImportSqlException extends TextDataImportException
+public class ExecuteDataImportSqlException extends IndexDataExchangeException
 {
 	private static final long serialVersionUID = 1L;
 
-	public ExecuteDataImportSqlException(int dataIndex, SQLException cause)
+	public ExecuteDataImportSqlException(DataIndex dataIndex, SQLException cause)
 	{
 		super(dataIndex, cause);
 	}

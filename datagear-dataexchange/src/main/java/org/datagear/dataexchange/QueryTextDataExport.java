@@ -20,9 +20,10 @@ public abstract class QueryTextDataExport extends TextDataExport
 		super();
 	}
 
-	public QueryTextDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, Query query)
+	public QueryTextDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat,
+			TextDataExportOption exportOption, Query query)
 	{
-		super(connectionFactory, dataFormat);
+		super(connectionFactory, dataFormat, exportOption);
 		this.query = query;
 	}
 

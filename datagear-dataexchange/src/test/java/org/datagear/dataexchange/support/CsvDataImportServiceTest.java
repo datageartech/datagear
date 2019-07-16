@@ -8,14 +8,17 @@ import java.io.Reader;
 import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.datagear.dataexchange.ColumnNotFoundException;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataFormat;
+import org.datagear.dataexchange.DataIndex;
 import org.datagear.dataexchange.DataexchangeTestSupport;
 import org.datagear.dataexchange.ExceptionResolve;
+import org.datagear.dataexchange.IllegalImportSourceValueException;
 import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
-import org.datagear.dataexchange.TextDataImportListener;
-import org.datagear.dataexchange.TextDataImportOption;
+import org.datagear.dataexchange.TextValueDataImportListener;
+import org.datagear.dataexchange.TextValueDataImportOption;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.junit.Assert;
@@ -57,9 +60,10 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
 					"support/CsvDataImportServiceTest_ignoreInexistentColumn.csv");
 
-			TextDataImportOption textDataImportOption = new TextDataImportOption(false, ExceptionResolve.ABORT, true);
+			TextValueDataImportOption textValueDataImportOption = new TextValueDataImportOption(ExceptionResolve.ABORT,
+					false, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textDataImportOption, TABLE_NAME, readerFactory);
+					textValueDataImportOption, TABLE_NAME, readerFactory);
 
 			clearTable(cn, TABLE_NAME);
 
@@ -91,14 +95,15 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 
 			final AtomicInteger importCountInListener = new AtomicInteger(0);
 
-			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.ABORT, true);
+			TextValueDataImportOption textValueDataImportOption = new TextValueDataImportOption(ExceptionResolve.ABORT,
+					true, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textDataImportOption, TABLE_NAME, readerFactory);
+					textValueDataImportOption, TABLE_NAME, readerFactory);
 
 			impt.setListener(new MockTextDataImportListener()
 			{
 				@Override
-				public void onSuccess(int dataIndex)
+				public void onSuccess(DataIndex dataIndex)
 				{
 					println("onSuccess : " + dataIndex);
 					importCountInListener.incrementAndGet();
@@ -140,21 +145,22 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			final AtomicInteger successCount = new AtomicInteger(0);
 			final AtomicInteger ignoreCount = new AtomicInteger(0);
 
-			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.IGNORE, true);
+			TextValueDataImportOption textValueDataImportOption = new TextValueDataImportOption(ExceptionResolve.IGNORE,
+					true, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textDataImportOption, TABLE_NAME, readerFactory);
+					textValueDataImportOption, TABLE_NAME, readerFactory);
 
 			impt.setListener(new MockTextDataImportListener()
 			{
 				@Override
-				public void onSuccess(int dataIndex)
+				public void onSuccess(DataIndex dataIndex)
 				{
 					super.onSuccess(dataIndex);
 					successCount.incrementAndGet();
 				}
 
 				@Override
-				public void onIgnore(int dataIndex, DataExchangeException e)
+				public void onIgnore(DataIndex dataIndex, DataExchangeException e)
 				{
 					super.onIgnore(dataIndex, e);
 					ignoreCount.incrementAndGet();
@@ -193,13 +199,14 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
 					"support/CsvDataImportServiceTest__ExceptionResolve.csv");
 
-			TextDataImportOption textDataImportOption = new TextDataImportOption(true, ExceptionResolve.ABORT, false);
+			TextValueDataImportOption textValueDataImportOption = new TextValueDataImportOption(ExceptionResolve.ABORT,
+					true, false);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textDataImportOption, TABLE_NAME, readerFactory);
+					textValueDataImportOption, TABLE_NAME, readerFactory);
 
 			clearTable(cn, TABLE_NAME);
 
-			this.thrown.expect(IllegalSourceValueException.class);
+			this.thrown.expect(IllegalImportSourceValueException.class);
 
 			this.csvDataImportService.exchange(impt);
 		}
@@ -210,7 +217,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		}
 	}
 
-	protected class MockTextDataImportListener implements TextDataImportListener
+	protected class MockTextDataImportListener implements TextValueDataImportListener
 	{
 		@Override
 		public void onStart()
@@ -237,19 +244,19 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		}
 
 		@Override
-		public void onSuccess(int dataIndex)
+		public void onSuccess(DataIndex dataIndex)
 		{
 			println("onSuccess : " + dataIndex);
 		}
 
 		@Override
-		public void onIgnore(int dataIndex, DataExchangeException e)
+		public void onIgnore(DataIndex dataIndex, DataExchangeException e)
 		{
 			println("onIgnore : " + dataIndex);
 		}
 
 		@Override
-		public void onSetNullColumnValue(int dataIndex, String columnName, String rawColumnValue,
+		public void onSetNullColumnValue(DataIndex dataIndex, String columnName, String rawColumnValue,
 				DataExchangeException e)
 		{
 			println("onSetNullColumnValue : " + dataIndex + ", " + columnName);

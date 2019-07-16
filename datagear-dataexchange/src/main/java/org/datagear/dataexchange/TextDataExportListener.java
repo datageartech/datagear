@@ -10,15 +10,8 @@ package org.datagear.dataexchange;
  * @author datagear@163.com
  *
  */
-public interface TextDataExportListener extends DataExchangeListener
+public interface TextDataExportListener extends DataExportListener
 {
-	/**
-	 * 指定索引的数据导出成功。
-	 * 
-	 * @param dataIndex
-	 */
-	void onSuccess(int dataIndex);
-
 	/**
 	 * 读取列值出现异常时导出文本值被设置为{@code null}。
 	 * 
@@ -26,5 +19,5 @@ public interface TextDataExportListener extends DataExchangeListener
 	 * @param columnName
 	 * @param e
 	 */
-	void onSetNullTextValue(int dataIndex, String columnName, DataExchangeException e);
+	void onSetNullTextValue(DataIndex dataIndex, String columnName, DataExchangeException e);
 }

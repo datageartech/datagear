@@ -41,6 +41,7 @@ import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchange;
 import org.datagear.dataexchange.DataExchangeService;
 import org.datagear.dataexchange.DataFormat;
+import org.datagear.dataexchange.DataImportOption;
 import org.datagear.dataexchange.DataSourceConnectionFactory;
 import org.datagear.dataexchange.FileReaderResourceFactory;
 import org.datagear.dataexchange.FileWriterResourceFactory;
@@ -51,12 +52,11 @@ import org.datagear.dataexchange.SqlQuery;
 import org.datagear.dataexchange.SubDataExchange;
 import org.datagear.dataexchange.TableQuery;
 import org.datagear.dataexchange.TextDataExportOption;
-import org.datagear.dataexchange.TextDataImportOption;
+import org.datagear.dataexchange.TextValueDataImportOption;
 import org.datagear.dataexchange.support.CsvDataExport;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.SqlDataExport;
 import org.datagear.dataexchange.support.SqlDataImport;
-import org.datagear.dataexchange.support.SqlDataImportOption;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbinfo.TableType;
@@ -68,8 +68,9 @@ import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.cometd.dataexchange.CometdBatchDataExchangeListener;
+import org.datagear.web.cometd.dataexchange.CometdSubDataImportListener;
 import org.datagear.web.cometd.dataexchange.CometdSubTextDataExportListener;
-import org.datagear.web.cometd.dataexchange.CometdSubTextDataImportListener;
+import org.datagear.web.cometd.dataexchange.CometdSubTextValueDataImportListener;
 import org.datagear.web.cometd.dataexchange.DataExchangeCometdService;
 import org.datagear.web.convert.ClassDataConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -261,7 +262,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataImportForm.getDataFormat(),
 					dataImportForm.getImportOption(), tableNames[i], readerFactory);
 
-			CometdSubTextDataImportListener listener = new CometdSubTextDataImportListener(
+			CometdSubTextValueDataImportListener listener = new CometdSubTextValueDataImportListener(
 					this.dataExchangeCometdService, importServerChannel, getMessageSource(), locale,
 					subDataExchangeIds[i], csvDataImport.getImportOption().getExceptionResolve());
 			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
@@ -364,7 +365,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 			SqlDataImport sqlDataImport = new SqlDataImport(connectionFactory, dataImportForm.getImportOption(),
 					readerFactory);
 
-			// TODO 设置监听器
+			CometdSubDataImportListener listener = new CometdSubDataImportListener(this.dataExchangeCometdService,
+					importServerChannel, getMessageSource(), locale, subDataExchangeIds[i],
+					dataImportForm.getImportOption().getExceptionResolve());
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+			listener.setSendExchangingMessageInterval(
+					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, sqlDataImport));
+			sqlDataImport.setListener(listener);
 
 			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], sqlDataImport);
 			subDataExchanges.add(subDataExchange);
@@ -464,7 +471,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		try
 		{
 			reader = new BufferedReader(new InputStreamReader(new FileInputStream(logFile),
-					CometdSubTextDataImportListener.LOG_FILE_CHARSET));
+					CometdSubTextValueDataImportListener.LOG_FILE_CHARSET));
 
 			IOUtil.write(reader, out);
 		}
@@ -1228,7 +1235,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
-		private TextDataImportOption importOption;
+		private TextValueDataImportOption importOption;
 
 		private String[] fileNames;
 
@@ -1239,12 +1246,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 			super();
 		}
 
-		public TextDataImportOption getImportOption()
+		public TextValueDataImportOption getImportOption()
 		{
 			return importOption;
 		}
 
-		public void setImportOption(TextDataImportOption importOption)
+		public void setImportOption(TextValueDataImportOption importOption)
 		{
 			this.importOption = importOption;
 		}
@@ -1280,7 +1287,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		private String[] dependentNumbers;
 
-		private SqlDataImportOption importOption;
+		private DataImportOption importOption;
 
 		public SqlDataImportForm()
 		{
@@ -1317,12 +1324,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 			this.dependentNumbers = dependentNumbers;
 		}
 
-		public SqlDataImportOption getImportOption()
+		public DataImportOption getImportOption()
 		{
 			return importOption;
 		}
 
-		public void setImportOption(SqlDataImportOption importOption)
+		public void setImportOption(DataImportOption importOption)
 		{
 			this.importOption = importOption;
 		}

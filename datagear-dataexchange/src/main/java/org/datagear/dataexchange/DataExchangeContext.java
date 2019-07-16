@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.dataexchange.support;
+package org.datagear.dataexchange;
 
 import java.io.Closeable;
 import java.io.IOException;

@@ -14,6 +14,7 @@ import java.util.Locale;
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
+import org.datagear.dataexchange.DataIndex;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.util.IOUtil;
 import org.datagear.web.cometd.dataexchange.CometdBatchDataExchangeListener.SubSubmitSuccess;
@@ -226,9 +227,9 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	 * @param dataIndex
 	 * @param log
 	 */
-	protected void writeDataLog(int dataIndex, String log)
+	protected void writeDataLog(DataIndex dataIndex, String log)
 	{
-		writeLogLine("[" + (dataIndex + 1) + "] " + log);
+		writeLogLine("[" + dataIndex + "] " + log);
 	}
 
 	/**
@@ -487,7 +488,7 @@ public abstract class CometdSubDataExchangeListener extends CometdDataExchangeLi
 	}
 
 	/**
-	 * 子文本导入成功。
+	 * 子数据交换成功。
 	 * 
 	 * @author datagear@163.com
 	 *

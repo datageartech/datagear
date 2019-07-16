@@ -10,19 +10,20 @@ package org.datagear.dataexchange;
  * @author datagear@163.com
  *
  */
-public abstract class TableTextDataImport extends TextDataImport
+public abstract class TableTextValueDataImport extends TextValueDataImport
 {
 	/** 要导入的表名 */
 	private String table;
 
-	public TableTextDataImport()
+	public TableTextValueDataImport()
 	{
 		super();
 	}
 
-	public TableTextDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat, String table)
+	public TableTextValueDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat,
+			TextValueDataImportOption importOption, String table)
 	{
-		super(connectionFactory, dataFormat);
+		super(connectionFactory, dataFormat, importOption);
 		this.table = table;
 	}
 

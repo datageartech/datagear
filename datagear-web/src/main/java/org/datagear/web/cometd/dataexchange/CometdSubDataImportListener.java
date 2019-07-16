@@ -9,30 +9,31 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.DataImportListener;
+import org.datagear.dataexchange.DataIndex;
 import org.datagear.dataexchange.ExceptionResolve;
-import org.datagear.dataexchange.TextDataImportListener;
 import org.springframework.context.MessageSource;
 
 /**
- * 基于Cometd的子数据导入{@linkplain TextDataImportListener}。
+ * 基于Cometd的子数据导入{@linkplain DataImportListener}。
  * 
  * @author datagear@163.com
  *
  */
-public class CometdSubTextDataImportListener extends CometdSubDataExchangeListener implements TextDataImportListener
+public class CometdSubDataImportListener extends CometdSubDataExchangeListener implements DataImportListener
 {
 	private ExceptionResolve exceptionResolve;
 
-	private AtomicInteger _successCount = new AtomicInteger(0);
-	private AtomicInteger _failCount = new AtomicInteger(0);
-	private volatile String _lastIgnoreException = "";
+	protected final AtomicInteger _successCount = new AtomicInteger(0);
+	protected final AtomicInteger _failCount = new AtomicInteger(0);
+	protected volatile String _lastIgnoreException = "";
 
-	public CometdSubTextDataImportListener()
+	public CometdSubDataImportListener()
 	{
 		super();
 	}
 
-	public CometdSubTextDataImportListener(DataExchangeCometdService dataExchangeCometdService,
+	public CometdSubDataImportListener(DataExchangeCometdService dataExchangeCometdService,
 			ServerChannel dataExchangeServerChannel, MessageSource messageSource, Locale locale,
 			String subDataExchangeId, ExceptionResolve exceptionResolve)
 	{
@@ -51,7 +52,7 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	}
 
 	@Override
-	public void onSuccess(int dataIndex)
+	public void onSuccess(DataIndex dataIndex)
 	{
 		_successCount.incrementAndGet();
 
@@ -60,23 +61,13 @@ public class CometdSubTextDataImportListener extends CometdSubDataExchangeListen
 	}
 
 	@Override
-	public void onIgnore(int dataIndex, DataExchangeException e)
+	public void onIgnore(DataIndex dataIndex, DataExchangeException e)
 	{
 		_failCount.incrementAndGet();
 
 		if (isTimeSendExchangingMessage())
 			sendImportingMessage();
 
-		String exceptionI18n = resolveDataExchangeExceptionI18n(e);
-		this._lastIgnoreException = exceptionI18n;
-
-		if (hasLogFile())
-			writeDataLog(dataIndex, exceptionI18n);
-	}
-
-	@Override
-	public void onSetNullColumnValue(int dataIndex, String columnName, String rawColumnValue, DataExchangeException e)
-	{
 		String exceptionI18n = resolveDataExchangeExceptionI18n(e);
 		this._lastIgnoreException = exceptionI18n;
 

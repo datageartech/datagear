@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.datagear.dataexchange.support.AbstractDevotedDataExchangeService;
-
 /**
  * 批量数据交换服务。
  * 

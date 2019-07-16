@@ -6,29 +6,48 @@ package org.datagear.dataexchange;
 
 /**
  * 文本导出。
+ * <p>
+ * 导出为文本，比如：CSV、JSON、EXCEL、SQL等。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public abstract class TextDataExport extends TextDataExchange
+public abstract class TextDataExport extends FormatDataExchange
 {
+	private TextDataExportOption exportOption;
+
+	private TextDataExportListener listener;
+
 	public TextDataExport()
 	{
 		super();
 	}
 
-	public TextDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat)
+	public TextDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataExportOption exportOption)
 	{
 		super(connectionFactory, dataFormat);
+		this.exportOption = exportOption;
 	}
 
-	/**
-	 * 获取{@linkplain TextDataExportOption}。
-	 * 
-	 * @return
-	 */
-	public abstract TextDataExportOption getExportOption();
+	public TextDataExportOption getExportOption()
+	{
+		return exportOption;
+	}
+
+	public void setExportOption(TextDataExportOption exportOption)
+	{
+		this.exportOption = exportOption;
+	}
 
 	@Override
-	public abstract TextDataExportListener getListener();
+	public TextDataExportListener getListener()
+	{
+		return listener;
+	}
+
+	public void setListener(TextDataExportListener listener)
+	{
+		this.listener = listener;
+	}
 }

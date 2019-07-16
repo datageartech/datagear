@@ -5,47 +5,47 @@
 package org.datagear.dataexchange;
 
 /**
- * 指定索引的单条文本数据导入异常。
+ * 指定索引的数据交换异常。
  * 
  * @author datagear@163.com
  *
  */
-public class TextDataImportException extends DataExchangeException
+public class IndexDataExchangeException extends DataExchangeException
 {
 	private static final long serialVersionUID = 1L;
 
-	private int dataIndex;
+	private DataIndex dataIndex;
 
-	public TextDataImportException(int dataIndex)
+	public IndexDataExchangeException(DataIndex dataIndex)
 	{
 		super();
 		this.dataIndex = dataIndex;
 	}
 
-	public TextDataImportException(int dataIndex, String message)
+	public IndexDataExchangeException(DataIndex dataIndex, String message)
 	{
 		super(message);
 		this.dataIndex = dataIndex;
 	}
 
-	public TextDataImportException(int dataIndex, Throwable cause)
+	public IndexDataExchangeException(DataIndex dataIndex, Throwable cause)
 	{
 		super(cause);
 		this.dataIndex = dataIndex;
 	}
 
-	public TextDataImportException(int dataIndex, String message, Throwable cause)
+	public IndexDataExchangeException(DataIndex dataIndex, String message, Throwable cause)
 	{
 		super(message, cause);
 		this.dataIndex = dataIndex;
 	}
 
-	public int getDataIndex()
+	public DataIndex getDataIndex()
 	{
 		return dataIndex;
 	}
 
-	protected void setDataIndex(int dataIndex)
+	protected void setDataIndex(DataIndex dataIndex)
 	{
 		this.dataIndex = dataIndex;
 	}

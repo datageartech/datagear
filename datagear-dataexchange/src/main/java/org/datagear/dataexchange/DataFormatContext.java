@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.dataexchange.support;
+package org.datagear.dataexchange;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -17,7 +17,6 @@ import java.text.SimpleDateFormat;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
-import org.datagear.dataexchange.DataFormat;
 import org.datagear.util.expression.Expression;
 import org.datagear.util.expression.ExpressionResolver;
 

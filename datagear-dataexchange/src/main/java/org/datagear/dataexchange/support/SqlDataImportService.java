@@ -4,7 +4,9 @@
 
 package org.datagear.dataexchange.support;
 
+import org.datagear.dataexchange.AbstractDevotedDataExchangeService;
 import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.DataImportListener;
 
 /**
  * SQL导入服务。
@@ -22,7 +24,7 @@ public class SqlDataImportService extends AbstractDevotedDataExchangeService<Sql
 	@Override
 	public void exchange(SqlDataImport dataExchange) throws DataExchangeException
 	{
-		SqlDataImportListener listener = dataExchange.getListener();
+		DataImportListener listener = dataExchange.getListener();
 
 		if (listener != null)
 			listener.onStart();

@@ -11,8 +11,10 @@ import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.List;
 
+import org.datagear.dataexchange.AbstractDevotedTextDataExportService;
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dbinfo.ColumnInfo;
@@ -48,7 +50,7 @@ public class SqlDataExportService extends AbstractDevotedTextDataExportService<S
 
 		ConnectionFactory connectionFactory = dataExchange.getConnectionFactory();
 
-		TextDataExportContext exportContext = buildTextDataExportContext(dataExchange);
+		TextDataExportContext exportContext = createTextDataExportContext(dataExchange);
 
 		Writer writer = null;
 		Connection cn = null;
@@ -105,8 +107,12 @@ public class SqlDataExportService extends AbstractDevotedTextDataExportService<S
 		DatabaseMetaData metaData = cn.getMetaData();
 		String quote = metaData.getIdentifierQuoteString();
 
+		long row = 0;
+
 		while (rs.next())
 		{
+			exportContext.setDataIndex(RowDataIndex.valueOf(row));
+
 			out.write("INSERT INTO ");
 			out.write(quote);
 			out.write(dataExchange.getTableName());
@@ -135,7 +141,7 @@ public class SqlDataExportService extends AbstractDevotedTextDataExportService<S
 
 				try
 				{
-					value = getExportColumnValue(dataExchange, cn, rs, i + 1, columnInfo.getType(), exportContext);
+					value = getStringValue(cn, rs, i + 1, columnInfo.getType(), exportContext.getDataFormatContext());
 				}
 				catch (Throwable t)
 				{
@@ -175,7 +181,7 @@ public class SqlDataExportService extends AbstractDevotedTextDataExportService<S
 			if (listener != null)
 				listener.onSuccess(exportContext.getDataIndex());
 
-			exportContext.incrementDataIndex();
+			row++;
 		}
 	}
 

@@ -109,7 +109,7 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
-	po.subDataExchangeStatusColumnIndex = 3;
+	po.subDataExchangeStatusColumnIndex = 5;
 	
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{

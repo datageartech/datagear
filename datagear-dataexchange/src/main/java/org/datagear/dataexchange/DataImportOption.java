@@ -2,30 +2,29 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.dataexchange.support;
+package org.datagear.dataexchange;
 
 import java.io.Serializable;
 
-import org.datagear.dataexchange.ExceptionResolve;
-
 /**
- * SQL导入设置项。
+ * 数据导入设置项。
  * 
  * @author datagear@163.com
  *
  */
-public class SqlDataImportOption implements Serializable
+public class DataImportOption implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	/** 导入出错处理方式 */
 	private ExceptionResolve exceptionResolve;
 
-	public SqlDataImportOption()
+	public DataImportOption()
 	{
 		super();
 	}
 
-	public SqlDataImportOption(ExceptionResolve exceptionResolve)
+	public DataImportOption(ExceptionResolve exceptionResolve)
 	{
 		super();
 		this.exceptionResolve = exceptionResolve;
@@ -39,5 +38,11 @@ public class SqlDataImportOption implements Serializable
 	public void setExceptionResolve(ExceptionResolve exceptionResolve)
 	{
 		this.exceptionResolve = exceptionResolve;
+	}
+
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [exceptionResolve=" + exceptionResolve + "]";
 	}
 }

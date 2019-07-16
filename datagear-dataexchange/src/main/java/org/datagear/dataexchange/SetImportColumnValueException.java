@@ -2,9 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.dataexchange.support;
-
-import org.datagear.dataexchange.TextDataImportException;
+package org.datagear.dataexchange;
 
 /**
  * 导入数据时设置列值异常。
@@ -12,7 +10,7 @@ import org.datagear.dataexchange.TextDataImportException;
  * @author datagear@163.com
  *
  */
-public class SetImportColumnValueException extends TextDataImportException
+public class SetImportColumnValueException extends IndexDataExchangeException
 {
 	private static final long serialVersionUID = 1L;
 
@@ -20,28 +18,28 @@ public class SetImportColumnValueException extends TextDataImportException
 
 	private Object sourceValue;
 
-	public SetImportColumnValueException(int dataIndex, String columnName, Object sourceValue)
+	public SetImportColumnValueException(DataIndex dataIndex, String columnName, Object sourceValue)
 	{
 		super(dataIndex);
 		this.columnName = columnName;
 		this.sourceValue = sourceValue;
 	}
 
-	public SetImportColumnValueException(int dataIndex, String columnName, Object sourceValue, String message)
+	public SetImportColumnValueException(DataIndex dataIndex, String columnName, Object sourceValue, String message)
 	{
 		super(dataIndex, message);
 		this.columnName = columnName;
 		this.sourceValue = sourceValue;
 	}
 
-	public SetImportColumnValueException(int dataIndex, String columnName, Object sourceValue, Throwable cause)
+	public SetImportColumnValueException(DataIndex dataIndex, String columnName, Object sourceValue, Throwable cause)
 	{
 		super(dataIndex, cause);
 		this.columnName = columnName;
 		this.sourceValue = sourceValue;
 	}
 
-	public SetImportColumnValueException(int dataIndex, String columnName, Object sourceValue, String message,
+	public SetImportColumnValueException(DataIndex dataIndex, String columnName, Object sourceValue, String message,
 			Throwable cause)
 	{
 		super(dataIndex, message, cause);

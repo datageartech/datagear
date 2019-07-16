@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.DataIndex;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.TextDataExportListener;
 import org.springframework.context.MessageSource;
@@ -36,7 +37,7 @@ public class CometdSubTextDataExportListener extends CometdSubDataExchangeListen
 	}
 
 	@Override
-	public void onSuccess(int dataIndex)
+	public void onSuccess(DataIndex dataIndex)
 	{
 		_successCount.incrementAndGet();
 
@@ -45,7 +46,7 @@ public class CometdSubTextDataExportListener extends CometdSubDataExchangeListen
 	}
 
 	@Override
-	public void onSetNullTextValue(int dataIndex, String columnName, DataExchangeException e)
+	public void onSetNullTextValue(DataIndex dataIndex, String columnName, DataExchangeException e)
 	{
 		String exceptionI18n = resolveDataExchangeExceptionI18n(e);
 

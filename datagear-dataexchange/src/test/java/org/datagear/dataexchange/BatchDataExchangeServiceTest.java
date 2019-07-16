@@ -5,7 +5,6 @@
 package org.datagear.dataexchange;
 
 import java.io.File;
-import java.io.Reader;
 import java.io.Writer;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -54,24 +53,23 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 	{
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(buildTestDataSource());
 		DataFormat dataFormat = new DataFormat();
-		TextDataImportOption importOption = new TextDataImportOption(true, ExceptionResolve.ABORT, true);
-		List<ResourceFactory<Reader>> readerFactories = new ArrayList<ResourceFactory<Reader>>();
-		List<String> tables = new ArrayList<String>();
-
-		readerFactories.add(getTestReaderResourceFactory("BatchDataExchangeServiceTest_1.csv"));
-		readerFactories.add(getTestReaderResourceFactory("BatchDataExchangeServiceTest_2.csv"));
-
-		tables.add(TABLE_NAME);
-		tables.add(TABLE_NAME);
-
-		List<CsvDataImport> csvDataImports = CsvDataImport.valuesOf(connectionFactory, dataFormat, importOption, tables,
-				readerFactories);
+		TextValueDataImportOption importOption = new TextValueDataImportOption(ExceptionResolve.ABORT, true, true);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
 
-		for (int i = 0; i < csvDataImports.size(); i++)
 		{
-			SubDataExchange subDataExchange = new SubDataExchange("import-" + i, csvDataImports.get(i));
+			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataFormat, importOption, TABLE_NAME,
+					getTestReaderResourceFactory("BatchDataExchangeServiceTest_1.csv"));
+
+			SubDataExchange subDataExchange = new SubDataExchange("import-0", csvDataImport);
+			subDataExchanges.add(subDataExchange);
+		}
+
+		{
+			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataFormat, importOption, TABLE_NAME,
+					getTestReaderResourceFactory("BatchDataExchangeServiceTest_2.csv"));
+
+			SubDataExchange subDataExchange = new SubDataExchange("import-1", csvDataImport);
 			subDataExchanges.add(subDataExchange);
 		}
 
@@ -110,14 +108,14 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 				}
 
 				@Override
-				public void onSuccess(int dataIndex)
+				public void onSuccess(DataIndex dataIndex)
 				{
 					exportDataCount.incrementAndGet();
 					println(subDataExchangeId + " : onSuccess(" + dataIndex + ")");
 				}
 
 				@Override
-				public void onSetNullTextValue(int dataIndex, String columnName, DataExchangeException e)
+				public void onSetNullTextValue(DataIndex dataIndex, String columnName, DataExchangeException e)
 				{
 				}
 			});

@@ -12,8 +12,10 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.datagear.dataexchange.AbstractDevotedTextDataExportService;
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dbinfo.ColumnInfo;
@@ -49,7 +51,7 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 
 		TextDataExportOption exportOption = dataExchange.getExportOption();
 
-		TextDataExportContext exportContext = buildTextDataExportContext(dataExchange);
+		TextDataExportContext exportContext = createTextDataExportContext(dataExchange);
 
 		Writer csvWriter = null;
 		Connection cn = null;
@@ -68,8 +70,12 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 
 			writeColumnInfos(csvPrinter, columnInfos);
 
+			long row = 0;
+
 			while (rs.next())
 			{
+				exportContext.setDataIndex(RowDataIndex.valueOf(row));
+
 				for (int i = 0; i < columnCount; i++)
 				{
 					ColumnInfo columnInfo = columnInfos.get(i);
@@ -78,7 +84,8 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 
 					try
 					{
-						value = getExportColumnValue(dataExchange, cn, rs, i + 1, columnInfo.getType(), exportContext);
+						value = getStringValue(cn, rs, i + 1, columnInfo.getType(),
+								exportContext.getDataFormatContext());
 					}
 					catch (Throwable t)
 					{
@@ -102,7 +109,7 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 				if (listener != null)
 					listener.onSuccess(exportContext.getDataIndex());
 
-				exportContext.incrementDataIndex();
+				row++;
 			}
 
 			if (listener != null)

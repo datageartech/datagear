@@ -7,17 +7,17 @@ package org.datagear.web.cometd.dataexchange;
 import java.util.Locale;
 
 import org.cometd.bayeux.server.ServerChannel;
+import org.datagear.dataexchange.ColumnNotFoundException;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
-import org.datagear.dataexchange.TextDataImportException;
+import org.datagear.dataexchange.ExecuteDataImportSqlException;
+import org.datagear.dataexchange.IllegalImportSourceValueException;
+import org.datagear.dataexchange.IndexDataExchangeException;
+import org.datagear.dataexchange.SetImportColumnValueException;
+import org.datagear.dataexchange.TableNotFoundException;
 import org.datagear.dataexchange.UnsupportedExchangeException;
-import org.datagear.dataexchange.support.ColumnNotFoundException;
-import org.datagear.dataexchange.support.ExecuteDataImportSqlException;
-import org.datagear.dataexchange.support.IllegalSourceValueException;
-import org.datagear.dataexchange.support.SetImportColumnValueException;
+import org.datagear.dataexchange.UnsupportedSqlTypeException;
 import org.datagear.dataexchange.support.TableMismatchException;
-import org.datagear.dataexchange.support.TableNotFoundException;
-import org.datagear.dataexchange.support.UnsupportedSqlTypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -166,22 +166,22 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 		else if (e instanceof ExecuteDataImportSqlException)
 		{
 			ExecuteDataImportSqlException e1 = (ExecuteDataImportSqlException) e;
-			message = getI18nMessage(code, e1.getDataIndex() + 1, e1.getCause().getMessage());
+			message = getI18nMessage(code, e1.getDataIndex(), e1.getCause().getMessage());
 		}
-		else if (e instanceof IllegalSourceValueException)
+		else if (e instanceof IllegalImportSourceValueException)
 		{
-			IllegalSourceValueException e1 = (IllegalSourceValueException) e;
-			message = getI18nMessage(code, e1.getDataIndex() + 1, e1.getColumnName(), e1.getSourceValue());
+			IllegalImportSourceValueException e1 = (IllegalImportSourceValueException) e;
+			message = getI18nMessage(code, e1.getDataIndex(), e1.getColumnName(), e1.getSourceValue());
 		}
 		else if (e instanceof SetImportColumnValueException)
 		{
 			SetImportColumnValueException e1 = (SetImportColumnValueException) e;
-			message = getI18nMessage(code, e1.getDataIndex() + 1, e1.getColumnName(), e1.getSourceValue());
+			message = getI18nMessage(code, e1.getDataIndex(), e1.getColumnName(), e1.getSourceValue());
 		}
-		else if (e instanceof TextDataImportException)
+		else if (e instanceof IndexDataExchangeException)
 		{
-			TextDataImportException e1 = (TextDataImportException) e;
-			message = getI18nMessage(code, e1.getDataIndex() + 1);
+			IndexDataExchangeException e1 = (IndexDataExchangeException) e;
+			message = getI18nMessage(code, e1.getDataIndex());
 		}
 		else if (e instanceof UnsupportedExchangeException)
 		{
