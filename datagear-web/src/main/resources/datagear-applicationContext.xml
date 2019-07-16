@@ -406,6 +406,8 @@
     			<bean class="org.datagear.dataexchange.support.CsvDataExportService">
     				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
     			</bean>
+    			<bean class="org.datagear.dataexchange.support.SqlDataImportService">
+    			</bean>
     			<bean class="org.datagear.dataexchange.support.SqlDataExportService">
     				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
     			</bean>

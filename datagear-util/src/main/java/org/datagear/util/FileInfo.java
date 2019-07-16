@@ -118,5 +118,5 @@ public class FileInfo implements Serializable
 		return new DecimalFormat("0.0").format(value) + PRETTY_SIZE_FACTORS[count];
 	}
 
-	protected static final String[] PRETTY_SIZE_FACTORS = { "B", "KB", "MB", "GB", "TB", "PB" };
+	protected static final String[] PRETTY_SIZE_FACTORS = { "B", "K", "M", "G", "T", "P" };
 }

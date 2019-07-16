@@ -55,6 +55,8 @@ import org.datagear.dataexchange.TextDataImportOption;
 import org.datagear.dataexchange.support.CsvDataExport;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.SqlDataExport;
+import org.datagear.dataexchange.support.SqlDataImport;
+import org.datagear.dataexchange.support.SqlDataImportOption;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbinfo.TableType;
@@ -317,6 +319,70 @@ public class DataExchangeController extends AbstractSchemaConnController
 			@RequestParam("file") MultipartFile multipartFile) throws Exception
 	{
 		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, new SqlFileFilger());
+	}
+
+	@RequestMapping(value = "/{schemaId}/import/sql/doImport", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> imptSqlDoImport(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			SqlDataImportForm dataImportForm) throws Exception
+	{
+		if (dataImportForm == null || isEmpty(dataImportForm.getFileEncoding())
+				|| isEmpty(dataImportForm.getImportOption()) || isEmpty(dataImportForm.getSubDataExchangeIds())
+				|| isEmpty(dataImportForm.getNumbers()) || isEmpty(dataImportForm.getFileNames())
+				|| isEmpty(dataImportForm.getDependentNumbers())
+				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getFileNames().length
+				|| dataImportForm.getNumbers().length != dataImportForm.getFileNames().length
+				|| dataImportForm.getNumbers().length != dataImportForm.getDependentNumbers().length)
+			throw new IllegalInputException();
+
+		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
+		String[] numbers = dataImportForm.getNumbers();
+		String[] fileNames = dataImportForm.getFileNames();
+		String[] dependentNumners = dataImportForm.getDependentNumbers();
+
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
+
+		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+
+		String importChannelId = getDataExchangeChannelId(dataExchangeId);
+		ServerChannel importServerChannel = this.dataExchangeCometdService.getChannelWithCreation(importChannelId);
+
+		Locale locale = getLocale(request);
+
+		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+
+		for (int i = 0; i < subDataExchangeIds.length; i++)
+		{
+			File file = FileUtil.getFile(directory, fileNames[i]);
+			ResourceFactory<Reader> readerFactory = FileReaderResourceFactory.valueOf(file,
+					dataImportForm.getFileEncoding());
+
+			SqlDataImport sqlDataImport = new SqlDataImport(connectionFactory, dataImportForm.getImportOption(),
+					readerFactory);
+
+			// TODO 设置监听器
+
+			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], sqlDataImport);
+			subDataExchanges.add(subDataExchange);
+
+			// TODO 处理依赖
+
+			subDataExchanges.add(subDataExchange);
+		}
+
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
+				importServerChannel, locale);
+
+		this.dataExchangeService.exchange(batchDataExchange);
+
+		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
+		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+
+		return buildOperationMessageSuccessEmptyResponseEntity();
 	}
 
 	@RequestMapping("/{schemaId}/import/db")
@@ -1201,6 +1267,64 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setTableNames(String[] tableNames)
 		{
 			this.tableNames = tableNames;
+		}
+	}
+
+	public static class SqlDataImportForm extends AbstractTextDataExchangeForm implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String[] numbers;
+
+		private String[] fileNames;
+
+		private String[] dependentNumbers;
+
+		private SqlDataImportOption importOption;
+
+		public SqlDataImportForm()
+		{
+			super();
+		}
+
+		public String[] getNumbers()
+		{
+			return numbers;
+		}
+
+		public void setNumbers(String[] numbers)
+		{
+			this.numbers = numbers;
+		}
+
+		public String[] getFileNames()
+		{
+			return fileNames;
+		}
+
+		public void setFileNames(String[] fileNames)
+		{
+			this.fileNames = fileNames;
+		}
+
+		public String[] getDependentNumbers()
+		{
+			return dependentNumbers;
+		}
+
+		public void setDependentNumbers(String[] dependentNumbers)
+		{
+			this.dependentNumbers = dependentNumbers;
+		}
+
+		public SqlDataImportOption getImportOption()
+		{
+			return importOption;
+		}
+
+		public void setImportOption(SqlDataImportOption importOption)
+		{
+			this.importOption = importOption;
 		}
 	}
 

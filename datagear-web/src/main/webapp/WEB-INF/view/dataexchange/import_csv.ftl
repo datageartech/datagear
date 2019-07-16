@@ -142,8 +142,7 @@ Schema schema 数据库，不允许为null
 		po.element("#${pageId}-nullForIllegalColumnValue-1").click();
 	};
 	
-	var tmpDataImportTableColumns = po.dataImportTableColumns.slice(0, 2);
-	tmpDataImportTableColumns.push(
+	po.dataImportTableColumns.splice(2, 0,
 	{
 		title : "<@spring.message code='dataImport.importTableName' />",
 		data : "tableName",
@@ -154,8 +153,7 @@ Schema schema 数据库，不允许为null
 		defaultContent: "",
 		width : "25%"
 	});
-	tmpDataImportTableColumns[0].width = "35%";
-	po.dataImportTableColumns = tmpDataImportTableColumns.concat(po.dataImportTableColumns.slice(2));
+	po.dataImportTableColumns[0].width = "35%";
 	
 	po.cometdInitIfNot();
 	po.initDataImportSteps();

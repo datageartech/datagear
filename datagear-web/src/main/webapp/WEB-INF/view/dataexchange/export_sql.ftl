@@ -121,8 +121,7 @@ Schema schema 数据库，不允许为null
 		return $.toValidFileName(tableName)+".sql";
 	};
 	
-	var tmpDataExportTableColumns = po.dataExportTableColumns.slice(0, 1);
-	tmpDataExportTableColumns.push(
+	po.dataExportTableColumns.splice(1, 0,
 	{
 		title : "<@spring.message code='dataExport.sqlExportTableName' />",
 		data : "tableName",
@@ -136,8 +135,7 @@ Schema schema 数据库，不允许为null
 		defaultContent: "",
 		width : "20%"
 	});
-	tmpDataExportTableColumns[0].width = "30%";
-	po.dataExportTableColumns = tmpDataExportTableColumns.concat(po.dataExportTableColumns.slice(1));
+	po.dataExportTableColumns[0].width = "30%";
 	
 	po.cometdInitIfNot();
 	po.initDataExportSteps();

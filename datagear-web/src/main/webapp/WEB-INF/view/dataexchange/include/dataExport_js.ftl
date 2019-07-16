@@ -13,14 +13,6 @@ dataExchange_js.ftl
 {
 	po.dataExchangeChannelId = "${dataExchangeChannelId}";
 	
-	po.nextSubDataExchangeId = function()
-	{
-		if(!po.nextSubDataExchangeIdSeq)
-			po.nextSubDataExchangeIdSeq = 0;
-		
-		return po.dataExchangeId + "_" + (po.nextSubDataExchangeIdSeq++);
-	};
-	
 	po.addSubDataExchange = function()
 	{
 		var rowData = {subDataExchangeId : po.nextSubDataExchangeId(), query : "", fileName : "", status : ""};

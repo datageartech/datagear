@@ -35,6 +35,22 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		return po.element("#${pageId}-exchange-exception-tooltip");
 	};
 	
+	po.nextSubDataExchangeId = function()
+	{
+		if(!po.nextSubDataExchangeIdSeq)
+			po.nextSubDataExchangeIdSeq = 0;
+		
+		return po.dataExchangeId + "_" + (po.nextSubDataExchangeIdSeq++);
+	};
+	
+	po.currentSubDataExchangeId = function()
+	{
+		if(!po.nextSubDataExchangeIdSeq)
+			po.nextSubDataExchangeIdSeq = 0;
+		
+		return po.nextSubDataExchangeIdSeq;
+	};
+	
 	po.calTableHeight = function()
 	{
 		var height =  po.element(".form-content-wizard > .content").height() - po.element(".form-item-table-head:not(:hidden)").outerHeight(true) - 60;

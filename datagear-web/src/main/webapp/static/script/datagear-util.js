@@ -639,6 +639,9 @@
 		 */
 		escapeHtml : function(text)
 		{
+			if(text == null)
+				return "";
+			
 			return $.model.escapeHtml(text);
 		},
 		
