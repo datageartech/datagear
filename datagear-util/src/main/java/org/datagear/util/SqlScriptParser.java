@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -50,6 +51,10 @@ public class SqlScriptParser
 	/** 语句分隔符 */
 	private String delimiter = DEFAULT_DELIMITER;
 
+	/** 缓冲SQL输入流 */
+	private BufferedReader _bufferedSqlScriptReader;
+	private boolean _readFinish = false;
+
 	/** 解析过程：当前行 */
 	protected int _currentRow = 0;
 	/** 解析过程：当前SQL的起始行（包含） */
@@ -63,6 +68,13 @@ public class SqlScriptParser
 	/** 当前SQL片段 */
 	protected Stack<Integer> _currentSqlSnippets = new Stack<Integer>();
 
+	/** 逐个解析：当前SQL语句存储器 */
+	private StringBuilder _sqlStatementBuilder = new StringBuilder();
+	/** 逐个解析：下一行解析的SQL语句列表 */
+	private List<SqlStatement> _nextLineSqlStatements = new ArrayList<SqlStatement>(2);
+	/** 逐个解析：读取的下一行SQL语句列表索引 */
+	private int _nextLineSqlStatementsGotIndex = 0;
+
 	public SqlScriptParser()
 	{
 		super();
@@ -72,6 +84,7 @@ public class SqlScriptParser
 	{
 		super();
 		this.sqlScriptReader = sqlScriptReader;
+		this._bufferedSqlScriptReader = getSqlScriptBufferedReader();
 	}
 
 	public Reader getSqlScriptReader()
@@ -82,6 +95,7 @@ public class SqlScriptParser
 	public void setSqlScriptReader(Reader sqlScriptReader)
 	{
 		this.sqlScriptReader = sqlScriptReader;
+		this._bufferedSqlScriptReader = getSqlScriptBufferedReader();
 	}
 
 	public int getContextStartRow()
@@ -122,27 +136,16 @@ public class SqlScriptParser
 	}
 
 	/**
-	 * 解析。
+	 * 解析全部SQL语句。
 	 * 
 	 * @return
 	 * @throws IOException
 	 */
-	public List<SqlStatement> parse() throws IOException
-	{
-		return doParse();
-	}
-
-	/**
-	 * 执行解析。
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	protected List<SqlStatement> doParse() throws IOException
+	public List<SqlStatement> parseAll() throws IOException
 	{
 		List<SqlStatement> sqlStatements = new LinkedList<SqlStatement>();
 
-		BufferedReader bufferedReader = getSqlScriptBufferedReader();
+		BufferedReader bufferedReader = this._bufferedSqlScriptReader;
 
 		String line = null;
 		StringBuilder sqlBuilder = new StringBuilder();
@@ -152,7 +155,58 @@ public class SqlScriptParser
 
 		addSqlStatement(sqlStatements, sqlBuilder);
 
+		this._readFinish = true;
+
 		return sqlStatements;
+	}
+
+	/**
+	 * 解析下一个SQL语句。
+	 * <p>
+	 * 返回{@code null}表示已解析完成。
+	 * </p>
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	public SqlStatement parseNext() throws IOException
+	{
+		if (this._nextLineSqlStatementsGotIndex < this._nextLineSqlStatements.size())
+			return this._nextLineSqlStatements.get(this._nextLineSqlStatementsGotIndex++);
+
+		this._nextLineSqlStatements.clear();
+		this._nextLineSqlStatementsGotIndex = 0;
+
+		while (this._nextLineSqlStatements.size() < 1 && parseNextLine())
+			;
+
+		return (this._nextLineSqlStatements.size() > 0
+				? this._nextLineSqlStatements.get(this._nextLineSqlStatementsGotIndex++)
+				: null);
+	}
+
+	/**
+	 * 解析下一行。
+	 * 
+	 * @return {@code false} 已解析完最后一行；{@code true} 未解析完
+	 * @throws IOException
+	 */
+	protected boolean parseNextLine() throws IOException
+	{
+		if (this._readFinish)
+			return false;
+
+		String line = this._bufferedSqlScriptReader.readLine();
+
+		if (line != null)
+			handleLine(this._nextLineSqlStatements, this._sqlStatementBuilder, line);
+		else
+		{
+			this._readFinish = true;
+			addSqlStatement(this._nextLineSqlStatements, this._sqlStatementBuilder);
+		}
+
+		return !this._readFinish;
 	}
 
 	/**

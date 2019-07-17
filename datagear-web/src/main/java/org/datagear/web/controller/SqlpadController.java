@@ -188,7 +188,7 @@ public class SqlpadController extends AbstractSchemaConnController
 		if (resultsetFetchSize == null)
 			resultsetFetchSize = DEFAULT_SQL_RESULTSET_FETCH_SIZE;
 
-		List<SqlStatement> sqlStatements = sqlScriptParser.parse();
+		List<SqlStatement> sqlStatements = sqlScriptParser.parseAll();
 
 		this.sqlpadExecutionService.submit(sqlpadId, schema, sqlStatements, commitMode, exceptionHandleMode,
 				overTimeThreashold, resultsetFetchSize, WebUtils.getLocale(request));

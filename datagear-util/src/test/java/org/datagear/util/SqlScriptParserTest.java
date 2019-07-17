@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.util.SqlScriptParser.SqlStatement;
@@ -31,7 +32,7 @@ public class SqlScriptParserTest
 
 		SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
-		List<SqlStatement> sqlStatements = parser.parse();
+		List<SqlStatement> sqlStatements = parser.parseAll();
 
 		assertEquals(1, sqlStatements.size());
 
@@ -51,7 +52,7 @@ public class SqlScriptParserTest
 
 		SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
-		List<SqlStatement> sqlStatements = parser.parse();
+		List<SqlStatement> sqlStatements = parser.parseAll();
 
 		assertEquals(1, sqlStatements.size());
 
@@ -72,7 +73,7 @@ public class SqlScriptParserTest
 
 		SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
-		List<SqlStatement> sqlStatements = parser.parse();
+		List<SqlStatement> sqlStatements = parser.parseAll();
 
 		assertEquals(1, sqlStatements.size());
 
@@ -93,7 +94,7 @@ public class SqlScriptParserTest
 
 		SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
-		List<SqlStatement> sqlStatements = parser.parse();
+		List<SqlStatement> sqlStatements = parser.parseAll();
 
 		assertEquals(3, sqlStatements.size());
 
@@ -136,7 +137,7 @@ public class SqlScriptParserTest
 
 		SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
-		List<SqlStatement> sqlStatements = parser.parse();
+		List<SqlStatement> sqlStatements = parser.parseAll();
 
 		assertEquals(3, sqlStatements.size());
 
@@ -185,7 +186,7 @@ public class SqlScriptParserTest
 
 		SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
-		List<SqlStatement> sqlStatements = parser.parse();
+		List<SqlStatement> sqlStatements = parser.parseAll();
 
 		assertEquals(3, sqlStatements.size());
 
@@ -228,7 +229,7 @@ public class SqlScriptParserTest
 
 			SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
-			List<SqlStatement> sqlStatements = parser.parse();
+			List<SqlStatement> sqlStatements = parser.parseAll();
 
 			assertEquals(1, sqlStatements.size());
 
@@ -246,7 +247,7 @@ public class SqlScriptParserTest
 
 			SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
-			List<SqlStatement> sqlStatements = parser.parse();
+			List<SqlStatement> sqlStatements = parser.parseAll();
 
 			assertEquals(1, sqlStatements.size());
 
@@ -264,7 +265,7 @@ public class SqlScriptParserTest
 
 			SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
-			List<SqlStatement> sqlStatements = parser.parse();
+			List<SqlStatement> sqlStatements = parser.parseAll();
 
 			assertEquals(1, sqlStatements.size());
 
@@ -284,7 +285,7 @@ public class SqlScriptParserTest
 
 			SqlScriptParser parser = new SqlScriptParser(toStringReader(script));
 
-			List<SqlStatement> sqlStatements = parser.parse();
+			List<SqlStatement> sqlStatements = parser.parseAll();
 
 			assertEquals(3, sqlStatements.size());
 
@@ -319,8 +320,43 @@ public class SqlScriptParserTest
 
 		SqlScriptParser parser = new SqlScriptParser(reader);
 
-		List<SqlStatement> sqlStatements = parser.parse();
+		List<SqlStatement> sqlStatements = parser.parseAll();
 
+		IOUtil.close(reader);
+
+		assertForScriptFile(sqlStatements);
+	}
+
+	@Test
+	public void parseNextTest() throws Throwable
+	{
+		InputStream inputStream = SqlScriptParserTest.class.getClassLoader()
+				.getResourceAsStream("org/datagear/util/SqlScriptParserTest.sql");
+
+		Reader reader = new InputStreamReader(inputStream, "UTF-8");
+
+		SqlScriptParser parser = new SqlScriptParser(reader);
+
+		List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>(15);
+
+		SqlStatement sqlStatement = null;
+
+		while ((sqlStatement = parser.parseNext()) != null)
+			sqlStatements.add(sqlStatement);
+
+		IOUtil.close(reader);
+
+		assertForScriptFile(sqlStatements);
+	}
+
+	/**
+	 * 断言{@code org/datagear/util/SqlScriptParserTest.sql}解析结果。
+	 * 
+	 * @param sqlStatements
+	 * @throws IOException
+	 */
+	protected void assertForScriptFile(List<SqlStatement> sqlStatements) throws IOException
+	{
 		assertEquals(11, sqlStatements.size());
 
 		{
