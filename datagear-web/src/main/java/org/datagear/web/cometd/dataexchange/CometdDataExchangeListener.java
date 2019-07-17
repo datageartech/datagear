@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.ColumnNotFoundException;
+import org.datagear.dataexchange.CycleDependencyException;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
 import org.datagear.dataexchange.ExecuteDataImportSqlException;
@@ -166,17 +167,17 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 		else if (e instanceof ExecuteDataImportSqlException)
 		{
 			ExecuteDataImportSqlException e1 = (ExecuteDataImportSqlException) e;
-			message = getI18nMessage(code, e1.getDataIndex(), e1.getCause().getMessage());
+			message = getI18nMessage(code, e1.getCause().getMessage());
 		}
 		else if (e instanceof IllegalImportSourceValueException)
 		{
 			IllegalImportSourceValueException e1 = (IllegalImportSourceValueException) e;
-			message = getI18nMessage(code, e1.getDataIndex(), e1.getColumnName(), e1.getSourceValue());
+			message = getI18nMessage(code, e1.getColumnName(), e1.getSourceValue());
 		}
 		else if (e instanceof SetImportColumnValueException)
 		{
 			SetImportColumnValueException e1 = (SetImportColumnValueException) e;
-			message = getI18nMessage(code, e1.getDataIndex(), e1.getColumnName(), e1.getSourceValue());
+			message = getI18nMessage(code, e1.getColumnName(), e1.getSourceValue());
 		}
 		else if (e instanceof IndexDataExchangeException)
 		{
@@ -191,6 +192,11 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 		{
 			UnsupportedSqlTypeException e1 = (UnsupportedSqlTypeException) e;
 			message = getI18nMessage(code, e1.getSqlType());
+		}
+		else if (e instanceof CycleDependencyException)
+		{
+			CycleDependencyException e1 = (CycleDependencyException) e;
+			message = getI18nMessage(code, e1.getSubDataExchange().getName());
 		}
 		else
 		{

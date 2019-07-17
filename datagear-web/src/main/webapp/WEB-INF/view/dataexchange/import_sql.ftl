@@ -25,6 +25,7 @@ Schema schema 数据库，不允许为null
 	<div class="content">
 		<form id="${pageId}-form" action="${contextPath}/dataexchange/${schema.id}/import/sql/doImport" method="POST">
 			<input type="hidden" name="dataExchangeId" value="${dataExchangeId}" />
+			<input type="hidden" name="dependentNumberNone" value="<@spring.message code='dataImport.none' />" />
 			<div class="form-content form-content-wizard">
 				<h3><@spring.message code='dataImport.setDataFormat' /></h3>
 				<div>
@@ -114,12 +115,12 @@ Schema schema 数据库，不允许为null
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{
 		subDataExchange["number"] = po.currentSubDataExchangeId();
-		subDataExchange["dependentNumber"] = "无";
+		subDataExchange["dependentNumber"] = "<@spring.message code='dataImport.none' />";
 	};
 	
 	po.dataImportTableColumns.splice(0, 0,
 	{
-		title : "编号",
+		title : "<@spring.message code='dataImport.number' />",
 		data : "number",
 		render : function(data, type, row, meta)
 		{
@@ -131,7 +132,7 @@ Schema schema 数据库，不允许为null
 	
 	po.dataImportTableColumns.splice(3, 0,
 	{
-		title : "前置编号",
+		title : "<@spring.message code='dataImport.dependentNumber' />",
 		data : "dependentNumber",
 		render : function(data, type, row, meta)
 		{

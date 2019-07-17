@@ -198,6 +198,11 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		});
 	};
 	
+	po.isDataExchangePageStatus = function(status)
+	{
+		return (status == po.currentDataExchangePageStatus);
+	};
+	
 	//更新页面状态，status：edit、exchange、finish
 	po.updateDataExchangePageStatus = function(status)
 	{
@@ -263,14 +268,28 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 		
 		var type = (message ? message.type : "");
 		
+		var toCache = true;
+		
 		if("SubStart" == type)
-			;
+		{
+			toCache = false;
+		}
 		else if("SubFinish" == type)
 		{
 			po.subDataExchangeFinishCount += 1;
 			po.setDataExchangeProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
+			
+			toCache =false;
 		}
-		else
+		else if("SubCancelSuccess" == type)
+		{
+			po.subDataExchangeFinishCount += 1;
+			po.setDataExchangeProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
+			
+			toCache =true;
+		}
+		
+		if(toCache)
 		{
 			var prevMessage = po.subDataExchangeMessageCache[subDataExchangeId];
 			
@@ -320,9 +339,6 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 			}
 			else if("SubCancelSuccess" == type)
 			{
-				po.subDataExchangeFinishCount += 1;
-				po.setDataExchangeProgress(parseInt(po.subDataExchangeFinishCount/po.subDataExchangeCount * 100));
-				
 				status = "<@spring.message code='dataExchange.exchangeStatus.SubCancelSuccess' />";
 			}
 			else if("SubExchangingWithCount" == type)
@@ -391,6 +407,24 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	po.handleSubDataExchangeStatus = function(subDataExchangeId, status, message)
 	{
 		return status;
+	};
+	
+	po.resetAllSubDataExchangeStatus = function()
+	{
+		var dataTable = po.getSubDataExchangeDataTable();
+		var rowCount = dataTable.rows().indexes().length;
+		var cells = [];
+		
+		for(var i=0; i<rowCount; i++)
+		{
+			var cellIndex = { "row" : i, "column" : po.subDataExchangeStatusColumnIndex };
+			var cell = dataTable.cell(cellIndex);
+			cell.data("");
+			cells.push(cellIndex);
+		}
+		
+		//统一绘制，效率更高
+		dataTable.cells(cells).draw();
 	};
 	
 	po.initDataExchangeUIs = function()

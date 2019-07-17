@@ -268,6 +268,8 @@ dataExchange_js.ftl
 		
 		po.element("#${pageId}-form").submit(function()
 		{
+			po.resetAllSubDataExchangeStatus();
+			
 			po.cometdExecuteAfterSubscribe(po.dataExchangeChannelId,
 			function()
 			{
@@ -276,7 +278,9 @@ dataExchange_js.ftl
 					success: function(data)
 					{
 						po.subDataExchangeFileNameMap = data.data;
-						po.updateDataExchangePageStatus("exchange");
+						
+						if(!po.isDataExchangePageStatus("finish"))
+							po.updateDataExchangePageStatus("exchange");
 					}
 				});
 			},

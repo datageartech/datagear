@@ -65,6 +65,9 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		try
 		{
 			Set<SubDataExchange> subDataExchanges = getSubDataExchanges(dataExchange);
+
+			checkCycleDependency(subDataExchanges);
+
 			context = buildDefaultBatchDataExchangeContext(dataExchange, subDataExchanges);
 			dataExchange.setContext(context);
 
@@ -85,7 +88,7 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		finally
 		{
 			// 没有任何子任务提交成功，那么需要在这里调用onFinish
-			if (listener != null && context.getSubmitSuccessCount() == 0)
+			if (listener != null && (context == null || context.getSubmitSuccessCount() == 0))
 				listener.onFinish();
 		}
 	}
@@ -121,5 +124,47 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 	protected Set<SubDataExchange> getSubDataExchanges(T dataExchange) throws DataExchangeException
 	{
 		return dataExchange.getSubDataExchanges();
+	}
+
+	/**
+	 * 检查循环依赖。
+	 * 
+	 * @param subDataExchanges
+	 * @throws CycleDependencyException
+	 */
+	protected void checkCycleDependency(Set<SubDataExchange> subDataExchanges) throws CycleDependencyException
+	{
+		int maxDepth = subDataExchanges.size();
+
+		for (SubDataExchange subDataExchange : subDataExchanges)
+		{
+			if (isCycleDependency(subDataExchange, maxDepth))
+				throw new CycleDependencyException(subDataExchange);
+		}
+	}
+
+	protected boolean isCycleDependency(SubDataExchange subDataExchange, int maxDepth)
+	{
+		Set<SubDataExchange> dependencies = subDataExchange.getDependencies();
+
+		return isCycleDependency(subDataExchange, dependencies, maxDepth);
+	}
+
+	protected boolean isCycleDependency(SubDataExchange subDataExchange, Set<SubDataExchange> dependencies,
+			int maxDepth)
+	{
+		if (maxDepth <= 0 || dependencies == null || dependencies.isEmpty())
+			return false;
+
+		for (SubDataExchange dependency : dependencies)
+		{
+			if (subDataExchange == dependency)
+				return true;
+
+			if (isCycleDependency(subDataExchange, dependency.getDependencies(), maxDepth - 1))
+				return true;
+		}
+
+		return false;
 	}
 }

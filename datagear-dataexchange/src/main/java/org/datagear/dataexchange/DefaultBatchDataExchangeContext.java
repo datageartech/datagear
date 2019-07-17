@@ -205,7 +205,7 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 					Set<SubDataExchange> dependencies = unsubmit.getDependencies();
 					for (SubDataExchange dependency : dependencies)
 					{
-						if (this._unsubmits.contains(dependency))
+						if (!this._finishes.contains(dependency))
 						{
 							canSubmit = false;
 							break;

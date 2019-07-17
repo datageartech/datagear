@@ -326,7 +326,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptSqlDoImport(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			SqlDataImportForm dataImportForm) throws Exception
+			SqlDataImportForm dataImportForm,
+			@RequestParam(value = "dependentNumberNone", required = false) String dependentNumberNone) throws Exception
 	{
 		if (dataImportForm == null || isEmpty(dataImportForm.getFileEncoding())
 				|| isEmpty(dataImportForm.getImportOption()) || isEmpty(dataImportForm.getSubDataExchangeIds())
@@ -340,7 +341,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
 		String[] numbers = dataImportForm.getNumbers();
 		String[] fileNames = dataImportForm.getFileNames();
-		String[] dependentNumners = dataImportForm.getDependentNumbers();
+		String[] dependentNumbers = dataImportForm.getDependentNumbers();
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -354,7 +355,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		Locale locale = getLocale(request);
 
-		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
 
 		for (int i = 0; i < subDataExchangeIds.length; i++)
 		{
@@ -373,15 +374,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, sqlDataImport));
 			sqlDataImport.setListener(listener);
 
-			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], sqlDataImport);
-			subDataExchanges.add(subDataExchange);
-
-			// TODO 处理依赖
-
-			subDataExchanges.add(subDataExchange);
+			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], numbers[i], sqlDataImport);
+			subDataExchanges[i] = subDataExchange;
 		}
 
-		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
+		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers, dependentNumberNone);
+
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
+		Collections.addAll(subDataExchangeSet, subDataExchanges);
+
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
 				importServerChannel, locale);
 
 		this.dataExchangeService.exchange(batchDataExchange);
@@ -740,6 +742,56 @@ public class DataExchangeController extends AbstractSchemaConnController
 		finally
 		{
 			IOUtil.close(out);
+		}
+	}
+
+	/**
+	 * 处理{@linkplain SubDataExchange}依赖。
+	 * 
+	 * @param subDataExchanges
+	 * @param numbers
+	 * @param dependentNumbers
+	 * @param dependentNumberNone
+	 */
+	protected void resolveSubDataExchangeDependencies(SubDataExchange[] subDataExchanges, String[] numbers,
+			String[] dependentNumbers, String dependentNumberNone)
+	{
+		for (int i = 0; i < subDataExchanges.length; i++)
+		{
+			SubDataExchange subDataExchange = subDataExchanges[i];
+			String dependentNumber = dependentNumbers[i];
+
+			if (dependentNumber == null)
+				continue;
+
+			dependentNumber = dependentNumber.trim();
+
+			if (isEmpty(dependentNumber) || dependentNumber.equals(dependentNumberNone))
+				continue;
+
+			String[] myDependentNumbers = dependentNumber.split(",");
+
+			Set<SubDataExchange> myDependencies = new HashSet<SubDataExchange>();
+
+			for (int j = 0; j < myDependentNumbers.length; j++)
+			{
+				String myDependentNumber = myDependentNumbers[j].trim();
+
+				if (isEmpty(myDependentNumber))
+					continue;
+
+				for (int k = 0; k < numbers.length; k++)
+				{
+					if (numbers[k].equals(myDependentNumber))
+					{
+						myDependencies.add(subDataExchanges[k]);
+						break;
+					}
+				}
+			}
+
+			if (!myDependencies.isEmpty())
+				subDataExchange.setDependencies(myDependencies);
 		}
 	}
 

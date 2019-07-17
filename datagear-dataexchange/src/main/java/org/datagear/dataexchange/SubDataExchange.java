@@ -16,6 +16,8 @@ public class SubDataExchange
 {
 	private String id;
 
+	private String name;
+
 	private DataExchange dataExchange;
 
 	private Set<SubDataExchange> dependencies;
@@ -29,6 +31,15 @@ public class SubDataExchange
 	{
 		super();
 		this.id = id;
+		this.name = id;
+		this.dataExchange = dataExchange;
+	}
+
+	public SubDataExchange(String id, String name, DataExchange dataExchange)
+	{
+		super();
+		this.id = id;
+		this.name = name;
 		this.dataExchange = dataExchange;
 	}
 
@@ -40,6 +51,16 @@ public class SubDataExchange
 	public void setId(String id)
 	{
 		this.id = id;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	public DataExchange getDataExchange()
@@ -71,6 +92,6 @@ public class SubDataExchange
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [id=" + id + "]";
+		return getClass().getSimpleName() + " [id=" + id + ", name=" + name + "]";
 	}
 }

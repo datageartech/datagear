@@ -75,34 +75,41 @@ public abstract class AbstractDevotedTextValueDataImportService<T extends TextVa
 	{
 		TextValueDataImportListener listener = impt.getListener();
 
+		DataExchangeException exception = null;
+
 		try
 		{
 			setImportColumnValues(impt, cn, st, columnInfos, columnValues, context);
 
 			executeImportPreparedStatement(impt, st, context);
+		}
+		catch (Throwable t)
+		{
+			exception = wrapToDataExchangeException(t);
+		}
+		finally
+		{
+			context.clearCloseResources();
+		}
 
+		if (exception == null)
+		{
 			if (listener != null)
 				listener.onSuccess(context.getDataIndex());
 
 			return true;
 		}
-		catch (Throwable t)
+		else
 		{
-			DataExchangeException de = wrapToDataExchangeException(t);
-
 			if (ExceptionResolve.IGNORE.equals(impt.getImportOption().getExceptionResolve()))
 			{
 				if (listener != null)
-					listener.onIgnore(context.getDataIndex(), de);
+					listener.onIgnore(context.getDataIndex(), exception);
 
 				return false;
 			}
 			else
-				throw de;
-		}
-		finally
-		{
-			context.clearCloseResources();
+				throw exception;
 		}
 	}
 
