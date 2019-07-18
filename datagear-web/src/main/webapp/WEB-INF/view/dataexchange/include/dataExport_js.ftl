@@ -183,6 +183,9 @@ dataExchange_js.ftl
 		po.expectedResizeDataTableElements = [po.table()[0]];
 		
 		var tableSettings = po.buildDataTableSettingsLocal(po.dataExportTableColumns, [], {"order": []});
+
+		po.subDataExchangeStatusColumnIndex = tableSettings.columns.length - 1;
+		
 		po.initDataTable(tableSettings);
 		po.bindResizeDataTable();
 	};

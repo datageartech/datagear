@@ -129,10 +129,6 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
-	po.subDataExchangeStatusColumnIndex = 4;
-	
-	po.form = po.element("#${pageId}-form");
-	
 	po.initDataImportCsvUIs = function()
 	{
 		po.element("#${pageId}-ignoreInexistentColumn").buttonset();
@@ -142,7 +138,7 @@ Schema schema 数据库，不允许为null
 		po.element("#${pageId}-nullForIllegalColumnValue-1").click();
 	};
 	
-	po.dataImportTableColumns.splice(2, 0,
+	po.dataImportTableColumns.splice(3, 0,
 	{
 		title : "<@spring.message code='dataImport.importTableName' />",
 		data : "tableName",
@@ -151,9 +147,9 @@ Schema schema 数据库，不允许为null
 			return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' class='table-name-input ui-widget ui-widget-content' style='width:90%' />";
 		},
 		defaultContent: "",
-		width : "25%"
+		width : "20%"
 	});
-	po.dataImportTableColumns[0].width = "35%";
+	po.dataImportTableColumns[1].width = "25%";
 	
 	po.cometdInitIfNot();
 	po.initDataImportSteps();

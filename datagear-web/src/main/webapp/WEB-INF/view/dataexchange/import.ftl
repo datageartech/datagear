@@ -47,6 +47,7 @@ Schema schema 数据库，不允许为null
 						</div>
 					</div>
 				</div>
+				<!--
 				<div class="form-item">
 					<div class="form-item-label">&nbsp;</div>
 					<div class="form-item-value">
@@ -57,6 +58,7 @@ Schema schema 数据库，不允许为null
 						</div>
 					</div>
 				</div>
+				-->
 			</div>
 			<div class="form-foot">
 				<button type="submit" class="recommended">

@@ -21,6 +21,9 @@ dataExchange_js.ftl
 		for(var i=0; i<fileInfos.length; i++)
 		{
 			fileInfos[i].subDataExchangeId = po.nextSubDataExchangeId();
+			fileInfos[i].number = po.currentSubDataExchangeId();
+			fileInfos[i].dependentNumber = "<@spring.message code='dataImport.none' />";
+			
 			po.postBuildSubDataExchange(fileInfos[i]);
 		}
 		
@@ -31,26 +34,57 @@ dataExchange_js.ftl
 	
 	po.fileUploadInfo = function(){ return this.element(".file-info"); };
 	
+	po.renderFileNameColumn = function(fileName)
+	{
+		if(!fileName)
+			return "";
+		
+		if(fileName.length <= 10 + 3 + 20)
+			return fileName;
+		
+		return "<span title='"+$.escapeHtml(fileName)+"'>" + fileName.substr(0, 10) + "..." + fileName.substr(fileName.length - 20) +"</span>";
+	};
+	
 	po.dataImportTableColumns =
 	[
+		{
+			title : "<@spring.message code='dataImport.number' />",
+			data : "number",
+			render : function(data, type, row, meta)
+			{
+				return $.escapeHtml(data) + "<input type='hidden' name='numbers' value='"+$.escapeHtml(data)+"' class='table-number-input ui-widget ui-widget-content' style='width:90%' />";
+			},
+			defaultContent: "",
+			width : "10%"
+		},
 		{
 			title : "<@spring.message code='dataImport.importFileName' />",
 			data : "displayName",
 			render : function(data, type, row, meta)
 			{
-				return po.renderColumn(data, type, row, meta)
+				return po.renderFileNameColumn(data)
 					+ "<input type='hidden' name='subDataExchangeIds' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
 					+ "<input type='hidden' name='fileNames' value='"+$.escapeHtml(row.name)+"' />";
 			},
 			defaultContent: "",
-			width : "60%",
+			width : "45%",
 		},
 		{
 			title : "<@spring.message code='dataImport.importFileSize' />",
 			data : "size",
 			render : po.renderColumn,
 			defaultContent: "",
-			width : "13%"
+			width : "10%"
+		},
+		{
+			title : "<@spring.message code='dataImport.dependentNumber' />",
+			data : "dependentNumber",
+			render : function(data, type, row, meta)
+			{
+				return "<input type='text' name='dependentNumbers' value='"+$.escapeHtml(data)+"' class='table-number-input ui-widget ui-widget-content' style='width:90%' />";
+			},
+			defaultContent: "",
+			width : "10%"
 		},
 		{
 			title : $.buildDataTablesColumnTitleWithTip("<@spring.message code='dataImport.importProgress' />", "<@spring.message code='dataImport.importStatusWithSuccessFail' />"),
@@ -63,7 +97,7 @@ dataExchange_js.ftl
 					return data;
 			},
 			defaultContent: "",
-			width : "27%"
+			width : "25%"
 		}
 	];
 	
@@ -107,6 +141,9 @@ dataExchange_js.ftl
 		po.expectedResizeDataTableElements = [po.table()[0]];
 		
 		var tableSettings = po.buildDataTableSettingsLocal(po.dataImportTableColumns, [], {"order": []});
+		
+		po.subDataExchangeStatusColumnIndex = tableSettings.columns.length - 1;
+		
 		po.initDataTable(tableSettings);
 		po.bindResizeDataTable();
 	};

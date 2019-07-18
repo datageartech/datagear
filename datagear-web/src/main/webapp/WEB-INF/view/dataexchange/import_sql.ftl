@@ -110,40 +110,6 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
-	po.subDataExchangeStatusColumnIndex = 5;
-	
-	po.postBuildSubDataExchange = function(subDataExchange)
-	{
-		subDataExchange["number"] = po.currentSubDataExchangeId();
-		subDataExchange["dependentNumber"] = "<@spring.message code='dataImport.none' />";
-	};
-	
-	po.dataImportTableColumns.splice(0, 0,
-	{
-		title : "<@spring.message code='dataImport.number' />",
-		data : "number",
-		render : function(data, type, row, meta)
-		{
-			return $.escapeHtml(data) + "<input type='hidden' name='numbers' value='"+$.escapeHtml(data)+"' class='table-number-input ui-widget ui-widget-content' style='width:90%' />";
-		},
-		defaultContent: "",
-		width : "10%"
-	});
-	
-	po.dataImportTableColumns.splice(3, 0,
-	{
-		title : "<@spring.message code='dataImport.dependentNumber' />",
-		data : "dependentNumber",
-		render : function(data, type, row, meta)
-		{
-			return "<input type='text' name='dependentNumbers' value='"+$.escapeHtml(data)+"' class='table-number-input ui-widget ui-widget-content' style='width:90%' />";
-		},
-		defaultContent: "",
-		width : "10%"
-	});
-	
-	po.dataImportTableColumns[1].width = "40%";
-	
 	po.cometdInitIfNot();
 	po.initDataImportSteps();
 	po.initDataExchangeUIs();
