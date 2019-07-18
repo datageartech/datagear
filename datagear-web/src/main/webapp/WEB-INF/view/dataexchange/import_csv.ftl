@@ -25,6 +25,7 @@ Schema schema 数据库，不允许为null
 	<div class="content">
 		<form id="${pageId}-form" action="${contextPath}/dataexchange/${schema.id}/import/csv/doImport" method="POST">
 			<input type="hidden" name="dataExchangeId" value="${dataExchangeId}" />
+			<input type="hidden" name="dependentNumberNone" value="<@spring.message code='dataImport.dependentNumber.none' />" />
 			<div class="form-content form-content-wizard">
 				<h3><@spring.message code='dataImport.setDataFormat' /></h3>
 				<div>

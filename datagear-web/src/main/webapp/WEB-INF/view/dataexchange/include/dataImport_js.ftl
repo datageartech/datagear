@@ -22,7 +22,7 @@ dataExchange_js.ftl
 		{
 			fileInfos[i].subDataExchangeId = po.nextSubDataExchangeId();
 			fileInfos[i].number = po.currentSubDataExchangeId();
-			fileInfos[i].dependentNumber = "<@spring.message code='dataImport.none' />";
+			fileInfos[i].dependentNumber = "<@spring.message code='dataImport.dependentNumber.none' />";
 			
 			po.postBuildSubDataExchange(fileInfos[i]);
 		}
@@ -81,7 +81,7 @@ dataExchange_js.ftl
 			data : "dependentNumber",
 			render : function(data, type, row, meta)
 			{
-				return "<input type='text' name='dependentNumbers' value='"+$.escapeHtml(data)+"' class='table-number-input ui-widget ui-widget-content' style='width:90%' />";
+				return "<input type='text' name='dependentNumbers' value='"+$.escapeHtml(data)+"' class='table-dependent-number-input ui-widget ui-widget-content' style='width:90%' />";
 			},
 			defaultContent: "",
 			width : "10%"
@@ -146,6 +146,12 @@ dataExchange_js.ftl
 		
 		po.initDataTable(tableSettings);
 		po.bindResizeDataTable();
+		
+		po.table().on("click", ".table-dependent-number-input", function(event)
+		{
+			//阻止行选中
+			event.stopPropagation();
+		});
 	};
 	
 	po.initDataImportActions = function()
