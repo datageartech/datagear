@@ -16,6 +16,7 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -224,9 +225,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/import/csv/doImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptCsvDoImport(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			TextValueFileBatchDataImportForm dataImportForm,
-			@RequestParam(value = "dependentNumberNone", required = false) String dependentNumberNone) throws Exception
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("dataExchangeId") String dataExchangeId, TextValueFileBatchDataImportForm dataImportForm,
+			@RequestParam("dependentNumberAuto") final String dependentNumberAuto) throws Throwable
 	{
 		if (dataImportForm == null || isEmpty(dataImportForm.getSubDataExchangeIds())
 				|| isEmpty(dataImportForm.getFileNames()) || isEmpty(dataImportForm.getFileEncoding())
@@ -240,10 +241,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 			throw new IllegalInputException();
 
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
-		String[] numbers = dataImportForm.getNumbers();
-		String[] dependentNumbers = dataImportForm.getDependentNumbers();
+		final String[] numbers = dataImportForm.getNumbers();
+		final String[] dependentNumbers = dataImportForm.getDependentNumbers();
 		String[] fileNames = dataImportForm.getFileNames();
-		String[] tableNames = dataImportForm.getTableNames();
+		final String[] tableNames = dataImportForm.getTableNames();
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -280,7 +281,19 @@ public class DataExchangeController extends AbstractSchemaConnController
 			subDataExchanges[i] = subDataExchange;
 		}
 
-		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers, dependentNumberNone);
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+				Connection cn = getConnection();
+
+				inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers, dependentNumberAuto);
+			}
+		}.execute();
+
+		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers, "");
 
 		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
@@ -751,6 +764,52 @@ public class DataExchangeController extends AbstractSchemaConnController
 		finally
 		{
 			IOUtil.close(out);
+		}
+	}
+
+	/**
+	 * 根据表依赖关系填充依赖编号。
+	 * 
+	 * @param cn
+	 * @param numbers
+	 * @param tableNames
+	 * @param dependentNumbers
+	 * @param inflateFlag
+	 */
+	protected void inflateDependentNumbers(Connection cn, String[] numbers, String[] tableNames,
+			String[] dependentNumbers, String inflateFlag)
+	{
+		String[][] importedTables = this.databaseInfoResolver.getImportedTables(cn, tableNames);
+
+		for (int i = 0; i < dependentNumbers.length; i++)
+		{
+			if (!inflateFlag.equals(dependentNumbers[i]))
+				continue;
+
+			String[] myImportTables = importedTables[i];
+
+			if (myImportTables == null || myImportTables.length == 0)
+				dependentNumbers[i] = "";
+			else
+			{
+				StringBuilder myDependentNumber = new StringBuilder();
+
+				for (String myImportTable : myImportTables)
+				{
+					for (int j = 0; j < tableNames.length; j++)
+					{
+						if (myImportTable.equalsIgnoreCase(tableNames[j]))
+						{
+							if (myDependentNumber.length() != 0)
+								myDependentNumber.append(',');
+
+							myDependentNumber.append(numbers[j]);
+						}
+					}
+				}
+
+				dependentNumbers[i] = myDependentNumber.toString();
+			}
 		}
 	}
 

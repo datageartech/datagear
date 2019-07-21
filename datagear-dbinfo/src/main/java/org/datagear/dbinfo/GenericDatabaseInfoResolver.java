@@ -147,6 +147,14 @@ public class GenericDatabaseInfoResolver implements DatabaseInfoResolver
 		return databaseInfoResolver.getExportedKeyInfos(cn, tableName);
 	}
 
+	@Override
+	public String[][] getImportedTables(Connection cn, String[] tables) throws DatabaseInfoResolverException
+	{
+		DatabaseInfoResolver databaseInfoResolver = doGetDevotedDatabaseInfoResolverNotNull(cn);
+
+		return databaseInfoResolver.getImportedTables(cn, tables);
+	}
+
 	/**
 	 * 获取支持指定{@code url}的{@linkplain DatabaseInfoResolver}。
 	 * 

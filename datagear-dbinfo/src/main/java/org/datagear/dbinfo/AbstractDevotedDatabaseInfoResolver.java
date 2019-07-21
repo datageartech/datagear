@@ -31,6 +31,8 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	protected static final String[] TABLE_TABLE_TYPES = new String[] { TableInfoResultSetSpec.TABLE_TYPE_TABLE,
 			TableInfoResultSetSpec.TABLE_TYPE_VIEW };
 
+	protected static final String[] EMPTY_STRING_ARRAY = new String[0];
+
 	public AbstractDevotedDatabaseInfoResolver()
 	{
 		super();
@@ -167,6 +169,57 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		String schema = getSchema(cn, metaData);
 
 		return getExportedKeyInfos(cn, metaData, schema, tableName);
+	}
+
+	@Override
+	public String[][] getImportedTables(Connection cn, String[] tables) throws DatabaseInfoResolverException
+	{
+		String[][] importedTabless = new String[tables.length][];
+
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		for (int i = 0; i < tables.length; i++)
+		{
+			String[] importedTables = null;
+
+			// 处理重复表
+			for (int k = 0; i < i; k++)
+			{
+				if (tables[k].equals(tables[i]))
+				{
+					importedTables = importedTabless[k];
+					break;
+				}
+			}
+
+			if (importedTables == null)
+			{
+				ImportedKeyInfo[] importedKeyInfos = getImportedKeyInfos(cn, metaData, schema, tables[i]);
+
+				if (importedKeyInfos == null || importedKeyInfos.length == 0)
+					importedTables = EMPTY_STRING_ARRAY;
+				else
+				{
+					List<String> importedTableList = new ArrayList<String>(2);
+
+					for (int j = 0; j < importedKeyInfos.length; j++)
+					{
+						String importedTable = importedKeyInfos[j].getPkTableName();
+
+						if (!importedTableList.contains(importedTable))
+							importedTableList.add(importedTable);
+					}
+
+					importedTables = new String[importedTableList.size()];
+					importedTableList.toArray(importedTables);
+				}
+			}
+
+			importedTabless[i] = importedTables;
+		}
+
+		return importedTabless;
 	}
 
 	protected TableInfo[] getTableInfos(Connection cn, DatabaseMetaData metaData, String schema)

@@ -144,4 +144,17 @@ public interface DatabaseInfoResolver
 	 * @throws DatabaseInfoResolverException
 	 */
 	ExportedKeyInfo[] getExportedKeyInfos(Connection cn, String tableName) throws DatabaseInfoResolverException;
+
+	/**
+	 * 获取指定表的导入表（外键依赖表）。
+	 * <p>
+	 * 如果某个索引的表没有导入表，返回数组相应位置将是空数组。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param tables
+	 * @return
+	 * @throws DatabaseInfoResolverException
+	 */
+	String[][] getImportedTables(Connection cn, String[] tables) throws DatabaseInfoResolverException;
 }
