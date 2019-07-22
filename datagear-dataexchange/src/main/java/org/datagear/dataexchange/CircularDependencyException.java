@@ -10,19 +10,19 @@ package org.datagear.dataexchange;
  * @author datagear@163.com
  *
  */
-public class CycleDependencyException extends DataExchangeException
+public class CircularDependencyException extends DataExchangeException
 {
 	private static final long serialVersionUID = 1L;
 
 	private SubDataExchange subDataExchange;
 
-	public CycleDependencyException(SubDataExchange subDataExchange)
+	public CircularDependencyException(SubDataExchange subDataExchange)
 	{
 		super();
 		this.subDataExchange = subDataExchange;
 	}
 
-	public CycleDependencyException(SubDataExchange subDataExchange, String message)
+	public CircularDependencyException(SubDataExchange subDataExchange, String message)
 	{
 		super(message);
 		this.subDataExchange = subDataExchange;

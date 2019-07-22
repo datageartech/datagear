@@ -66,7 +66,7 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		{
 			Set<SubDataExchange> subDataExchanges = getSubDataExchanges(dataExchange);
 
-			checkCycleDependency(subDataExchanges);
+			checkCircularDependency(subDataExchanges);
 
 			context = buildDefaultBatchDataExchangeContext(dataExchange, subDataExchanges);
 			dataExchange.setContext(context);
@@ -130,27 +130,27 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 	 * 检查循环依赖。
 	 * 
 	 * @param subDataExchanges
-	 * @throws CycleDependencyException
+	 * @throws CircularDependencyException
 	 */
-	protected void checkCycleDependency(Set<SubDataExchange> subDataExchanges) throws CycleDependencyException
+	protected void checkCircularDependency(Set<SubDataExchange> subDataExchanges) throws CircularDependencyException
 	{
 		int maxDepth = subDataExchanges.size();
 
 		for (SubDataExchange subDataExchange : subDataExchanges)
 		{
-			if (isCycleDependency(subDataExchange, maxDepth))
-				throw new CycleDependencyException(subDataExchange);
+			if (isCircularDependency(subDataExchange, maxDepth))
+				throw new CircularDependencyException(subDataExchange);
 		}
 	}
 
-	protected boolean isCycleDependency(SubDataExchange subDataExchange, int maxDepth)
+	protected boolean isCircularDependency(SubDataExchange subDataExchange, int maxDepth)
 	{
 		Set<SubDataExchange> dependencies = subDataExchange.getDependencies();
 
-		return isCycleDependency(subDataExchange, dependencies, maxDepth);
+		return isCircularDependency(subDataExchange, dependencies, maxDepth);
 	}
 
-	protected boolean isCycleDependency(SubDataExchange subDataExchange, Set<SubDataExchange> dependencies,
+	protected boolean isCircularDependency(SubDataExchange subDataExchange, Set<SubDataExchange> dependencies,
 			int maxDepth)
 	{
 		if (maxDepth <= 0 || dependencies == null || dependencies.isEmpty())
@@ -161,7 +161,7 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 			if (subDataExchange == dependency)
 				return true;
 
-			if (isCycleDependency(subDataExchange, dependency.getDependencies(), maxDepth - 1))
+			if (isCircularDependency(subDataExchange, dependency.getDependencies(), maxDepth - 1))
 				return true;
 		}
 

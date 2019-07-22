@@ -8,7 +8,7 @@ import java.util.Locale;
 
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.dataexchange.ColumnNotFoundException;
-import org.datagear.dataexchange.CycleDependencyException;
+import org.datagear.dataexchange.CircularDependencyException;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
 import org.datagear.dataexchange.ExecuteDataImportSqlException;
@@ -193,9 +193,9 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 			UnsupportedSqlTypeException e1 = (UnsupportedSqlTypeException) e;
 			message = getI18nMessage(code, e1.getSqlType());
 		}
-		else if (e instanceof CycleDependencyException)
+		else if (e instanceof CircularDependencyException)
 		{
-			CycleDependencyException e1 = (CycleDependencyException) e;
+			CircularDependencyException e1 = (CircularDependencyException) e;
 			message = getI18nMessage(code, e1.getSubDataExchange().getName());
 		}
 		else
