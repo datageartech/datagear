@@ -13,7 +13,7 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.datagear.dataexchange.AbstractDevotedTextDataExportService;
-import org.datagear.dataexchange.ConnectionFactory;
+import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
@@ -40,97 +40,66 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 	}
 
 	@Override
-	public void exchange(CsvDataExport dataExchange) throws DataExchangeException
+	protected void exchange(CsvDataExport dataExchange, DataExchangeContext context) throws Throwable
 	{
+		TextDataExportContext exportContext = (TextDataExportContext) context;
+
 		TextDataExportListener listener = dataExchange.getListener();
-
-		if (listener != null)
-			listener.onStart();
-
-		ConnectionFactory connectionFactory = dataExchange.getConnectionFactory();
-
 		TextDataExportOption exportOption = dataExchange.getExportOption();
 
-		TextDataExportContext exportContext = createTextDataExportContext(dataExchange);
+		Writer csvWriter = getResource(dataExchange.getWriterFactory(), exportContext);
 
-		Writer csvWriter = null;
-		Connection cn = null;
+		Connection cn = exportContext.getConnection();
+		cn.setReadOnly(true);
 
-		try
+		ResultSet rs = dataExchange.getQuery().execute(cn);
+
+		List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);
+		int columnCount = columnInfos.size();
+
+		CSVPrinter csvPrinter = buildCSVPrinter(csvWriter);
+
+		writeColumnInfos(csvPrinter, columnInfos);
+
+		long row = 0;
+
+		while (rs.next())
 		{
-			csvWriter = dataExchange.getWriterFactory().get();
-			cn = connectionFactory.get();
+			exportContext.setDataIndex(RowDataIndex.valueOf(row));
 
-			ResultSet rs = dataExchange.getQuery().execute(cn);
-
-			List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);
-			int columnCount = columnInfos.size();
-
-			CSVPrinter csvPrinter = buildCSVPrinter(csvWriter);
-
-			writeColumnInfos(csvPrinter, columnInfos);
-
-			long row = 0;
-
-			while (rs.next())
+			for (int i = 0; i < columnCount; i++)
 			{
-				exportContext.setDataIndex(RowDataIndex.valueOf(row));
+				ColumnInfo columnInfo = columnInfos.get(i);
 
-				for (int i = 0; i < columnCount; i++)
+				String value = null;
+
+				try
 				{
-					ColumnInfo columnInfo = columnInfos.get(i);
-
-					String value = null;
-
-					try
+					value = getStringValue(cn, rs, i + 1, columnInfo.getType(), exportContext.getDataFormatContext());
+				}
+				catch (Throwable t)
+				{
+					if (exportOption.isNullForIllegalColumnValue())
 					{
-						value = getStringValue(cn, rs, i + 1, columnInfo.getType(),
-								exportContext.getDataFormatContext());
-					}
-					catch (Throwable t)
-					{
-						if (exportOption.isNullForIllegalColumnValue())
-						{
-							value = null;
+						value = null;
 
-							if (listener != null)
-								listener.onSetNullTextValue(exportContext.getDataIndex(), columnInfo.getName(),
-										wrapToDataExchangeException(t));
-						}
-						else
-							throw t;
+						if (listener != null)
+							listener.onSetNullTextValue(exportContext.getDataIndex(), columnInfo.getName(),
+									wrapToDataExchangeException(t));
 					}
-
-					csvPrinter.print(value);
+					else
+						throw t;
 				}
 
-				csvPrinter.println();
-
-				if (listener != null)
-					listener.onSuccess(exportContext.getDataIndex());
-
-				row++;
+				csvPrinter.print(value);
 			}
 
-			if (listener != null)
-				listener.onSuccess();
-		}
-		catch (Throwable t)
-		{
-			DataExchangeException e = wrapToDataExchangeException(t);
+			csvPrinter.println();
 
 			if (listener != null)
-				listener.onException(e);
-			else
-				throw e;
-		}
-		finally
-		{
-			releaseResource(dataExchange.getWriterFactory(), csvWriter);
-			releaseResource(connectionFactory, cn);
+				listener.onSuccess(exportContext.getDataIndex());
 
-			if (listener != null)
-				listener.onFinish();
+			row++;
 		}
 	}
 

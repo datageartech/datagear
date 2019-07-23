@@ -3,12 +3,12 @@ package org.datagear.dataexchange;
 import java.util.Set;
 
 /**
- * 批量数据交换上下文。
+ * 批量数据交换结果。
  * 
  * @author datagear@163.com
  *
  */
-public interface BatchDataExchangeContext
+public interface BatchDataExchangeResult
 {
 	/**
 	 * 等待所有子数据交换执行完成。

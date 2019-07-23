@@ -53,44 +53,32 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 	}
 
 	@Override
-	public void exchange(T dataExchange) throws DataExchangeException
+	protected void exchange(T dataExchange, DataExchangeContext context) throws Throwable
+	{
+		Set<SubDataExchange> subDataExchanges = getSubDataExchanges(dataExchange);
+
+		checkCircularDependency(subDataExchanges);
+
+		DefaultBatchDataExchangeResult result = createDefaultBatchDataExchangeContext(dataExchange, subDataExchanges);
+
+		dataExchange.setResult(result);
+
+		result.submitNexts();
+	}
+
+	@Override
+	protected void onFinish(T dataExchange, DataExchangeContext context)
 	{
 		BatchDataExchangeListener listener = dataExchange.getListener();
 
-		if (listener != null)
-			listener.onStart();
+		if (listener == null)
+			return;
 
-		DefaultBatchDataExchangeContext context = null;
+		DefaultBatchDataExchangeResult result = (DefaultBatchDataExchangeResult) dataExchange.getResult();
 
-		try
-		{
-			Set<SubDataExchange> subDataExchanges = getSubDataExchanges(dataExchange);
-
-			checkCircularDependency(subDataExchanges);
-
-			context = buildDefaultBatchDataExchangeContext(dataExchange, subDataExchanges);
-			dataExchange.setContext(context);
-
-			context.submitNexts();
-
-			if (listener != null)
-				listener.onSuccess();
-		}
-		catch (Throwable t)
-		{
-			DataExchangeException e = wrapToDataExchangeException(t);
-
-			if (listener != null)
-				listener.onException(e);
-			else
-				throw e;
-		}
-		finally
-		{
-			// 没有任何子任务提交成功，那么需要在这里调用onFinish
-			if (listener != null && (context == null || context.getSubmitSuccessCount() == 0))
-				listener.onFinish();
-		}
+		// 没有任何子任务提交成功，那么需要在这里调用onFinish
+		if (result == null || result.getSubmitSuccessCount() == 0)
+			listener.onFinish();
 	}
 
 	/**
@@ -111,10 +99,10 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		return this.executorService.isShutdown();
 	}
 
-	protected DefaultBatchDataExchangeContext buildDefaultBatchDataExchangeContext(T dataExchange,
+	protected DefaultBatchDataExchangeResult createDefaultBatchDataExchangeContext(T dataExchange,
 			Set<SubDataExchange> subDataExchanges)
 	{
-		DefaultBatchDataExchangeContext context = new DefaultBatchDataExchangeContext(subDataExchanges,
+		DefaultBatchDataExchangeResult context = new DefaultBatchDataExchangeResult(subDataExchanges,
 				this.subDataExchangeService, this.executorService);
 		context.setListener(dataExchange.getListener());
 

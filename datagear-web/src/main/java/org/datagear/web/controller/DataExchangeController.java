@@ -37,7 +37,7 @@ import javax.servlet.http.HttpSession;
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.dataexchange.BatchDataExchange;
-import org.datagear.dataexchange.BatchDataExchangeContext;
+import org.datagear.dataexchange.BatchDataExchangeResult;
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchange;
 import org.datagear.dataexchange.DataExchangeService;
@@ -996,10 +996,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		if (batchDataExchangeInfo == null)
 			throw new IllegalInputException();
 
-		BatchDataExchangeContext batchDataExchangeContext = batchDataExchangeInfo.getBatchDataExchange().getContext();
+		BatchDataExchangeResult batchDataExchangeResult = batchDataExchangeInfo.getBatchDataExchange().getResult();
 
 		for (int i = 0; i < subDataExchangeIds.length; i++)
-			batchDataExchangeContext.cancel(subDataExchangeIds[i]);
+			batchDataExchangeResult.cancel(subDataExchangeIds[i]);
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
 

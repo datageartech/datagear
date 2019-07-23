@@ -15,14 +15,11 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.datagear.dataexchange.AbstractDevotedTextValueDataImportService;
 import org.datagear.dataexchange.ColumnNotFoundException;
-import org.datagear.dataexchange.ConnectionFactory;
+import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
-import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.RowDataIndex;
-import org.datagear.dataexchange.TextValueDataImportListener;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
-import org.datagear.util.JdbcUtil;
 
 /**
  * CSV导入服务。
@@ -43,87 +40,60 @@ public class CsvDataImportService extends AbstractDevotedTextValueDataImportServ
 	}
 
 	@Override
-	public void exchange(CsvDataImport dataExchange) throws DataExchangeException
+	protected void exchange(CsvDataImport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		TextValueDataImportListener listener = dataExchange.getListener();
+		TextValueDataImportContext importContext = (TextValueDataImportContext) context;
 
-		if (listener != null)
-			listener.onStart();
+		Reader csvReader = getResource(dataExchange.getReaderFactory(), importContext);
 
-		Reader csvReader = null;
-		Connection cn = null;
+		Connection cn = context.getConnection();
+		cn.setAutoCommit(false);
 		PreparedStatement st = null;
 
-		ExceptionResolve exceptionResolve = null;
-		ConnectionFactory connectionFactory = null;
+		List<ColumnInfo> rawColumnInfos = null;
+		List<ColumnInfo> noNullColumnInfos = null;
 
-		try
+		CSVParser csvParser = buildCSVParser(csvReader);
+
+		long row = 0;
+
+		for (CSVRecord csvRecord : csvParser)
 		{
-			exceptionResolve = dataExchange.getImportOption().getExceptionResolve();
+			importContext.setDataIndex(RowDataIndex.valueOf(row));
 
-			if (exceptionResolve == null)
-				exceptionResolve = ExceptionResolve.ROLLBACK;
-
-			connectionFactory = dataExchange.getConnectionFactory();
-
-			TextValueDataImportContext importContext = createTextValueDataImportContext(dataExchange);
-
-			List<ColumnInfo> rawColumnInfos = null;
-			List<ColumnInfo> noNullColumnInfos = null;
-
-			csvReader = getResource(dataExchange.getReaderFactory());
-			CSVParser csvParser = buildCSVParser(csvReader);
-
-			cn = connectionFactory.get();
-			cn.setAutoCommit(false);
-
-			int row = 0;
-
-			for (CSVRecord csvRecord : csvParser)
+			if (rawColumnInfos == null)
 			{
-				importContext.setDataIndex(RowDataIndex.valueOf(row));
+				rawColumnInfos = resolveColumnInfos(dataExchange, cn, csvRecord);
+				noNullColumnInfos = removeNullColumnInfos(rawColumnInfos);
 
-				if (rawColumnInfos == null)
-				{
-					rawColumnInfos = resolveColumnInfos(dataExchange, cn, csvRecord);
-					noNullColumnInfos = removeNullColumnInfos(rawColumnInfos);
+				// 表不匹配
+				if (noNullColumnInfos == null || noNullColumnInfos.isEmpty())
+					throw new TableMismatchException(dataExchange.getTable());
 
-					// 表不匹配
-					if (noNullColumnInfos == null || noNullColumnInfos.isEmpty())
-						throw new TableMismatchException(dataExchange.getTable());
+				String sql = buildInsertPreparedSql(cn, dataExchange.getTable(), noNullColumnInfos);
+				st = cn.prepareStatement(sql);
+			}
+			else
+			{
+				List<String> columnValues = resolveCSVRecordValues(dataExchange, csvRecord, rawColumnInfos,
+						noNullColumnInfos);
 
-					String sql = buildInsertPreparedSql(cn, dataExchange.getTable(), noNullColumnInfos);
-					st = cn.prepareStatement(sql);
-				}
-				else
-				{
-					List<String> columnValues = resolveCSVRecordValues(dataExchange, csvRecord, rawColumnInfos,
-							noNullColumnInfos);
-
-					importData(dataExchange, cn, st, noNullColumnInfos, columnValues, importContext);
-				}
-
-				row++;
+				importData(dataExchange, cn, st, noNullColumnInfos, columnValues, importContext);
 			}
 
-			commit(cn);
+			row++;
+		}
 
-			if (listener != null)
-				listener.onSuccess();
-		}
-		catch (Throwable t)
-		{
-			handleExchangeThrowable(cn, exceptionResolve, t, listener);
-		}
-		finally
-		{
-			releaseResource(dataExchange.getReaderFactory(), csvReader);
-			JdbcUtil.closeStatement(st);
-			releaseResource(connectionFactory, cn);
+		commit(cn);
+	}
 
-			if (listener != null)
-				listener.onFinish();
-		}
+	@Override
+	protected void onException(CsvDataImport dataExchange, DataExchangeContext context, DataExchangeException e)
+			throws DataExchangeException
+	{
+		processTransactionForDataExchangeException(context, e, dataExchange.getImportOption().getExceptionResolve());
+
+		super.onException(dataExchange, context, e);
 	}
 
 	/**

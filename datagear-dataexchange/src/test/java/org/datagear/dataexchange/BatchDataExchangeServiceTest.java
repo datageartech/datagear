@@ -187,7 +187,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 
 			this.batchDataExchangeService.exchange(batchDataExchange);
 
-			batchDataExchange.getContext().waitForFinish();
+			batchDataExchange.getResult().waitForFinish();
 
 			int count = getCount(cn, TABLE_NAME);
 

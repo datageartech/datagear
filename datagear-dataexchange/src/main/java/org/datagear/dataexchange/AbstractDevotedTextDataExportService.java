@@ -45,15 +45,11 @@ public abstract class AbstractDevotedTextDataExportService<T extends TextDataExp
 		this.databaseInfoResolver = databaseInfoResolver;
 	}
 
-	/**
-	 * 创建一个{@linkplain TextDataExportContext}。
-	 * 
-	 * @param expt
-	 * @return
-	 */
-	protected TextDataExportContext createTextDataExportContext(T expt)
+	@Override
+	protected DataExchangeContext createDataExchangeContext(T dataExchange)
 	{
-		return new TextDataExportContext(new DataFormatContext(expt.getDataFormat()));
+		return new TextDataExportContext(dataExchange.getConnectionFactory(),
+				new DataFormatContext(dataExchange.getDataFormat()));
 	}
 
 	/**
@@ -86,9 +82,9 @@ public abstract class AbstractDevotedTextDataExportService<T extends TextDataExp
 			super();
 		}
 
-		public TextDataExportContext(DataFormatContext dataFormatContext)
+		public TextDataExportContext(ConnectionFactory connectionFactory, DataFormatContext dataFormatContext)
 		{
-			super();
+			super(connectionFactory);
 			this.dataFormatContext = dataFormatContext;
 		}
 

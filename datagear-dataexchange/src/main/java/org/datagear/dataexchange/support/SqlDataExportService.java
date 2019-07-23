@@ -12,8 +12,7 @@ import java.sql.Types;
 import java.util.List;
 
 import org.datagear.dataexchange.AbstractDevotedTextDataExportService;
-import org.datagear.dataexchange.ConnectionFactory;
-import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
@@ -41,50 +40,19 @@ public class SqlDataExportService extends AbstractDevotedTextDataExportService<S
 	}
 
 	@Override
-	public void exchange(SqlDataExport dataExchange) throws DataExchangeException
+	protected void exchange(SqlDataExport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		TextDataExportListener listener = dataExchange.getListener();
+		TextDataExportContext exportContext = (TextDataExportContext) context;
 
-		if (listener != null)
-			listener.onStart();
+		Writer sqlWriter = getResource(dataExchange.getWriterFactory(), exportContext);
 
-		ConnectionFactory connectionFactory = dataExchange.getConnectionFactory();
+		Connection cn = context.getConnection();
+		cn.setReadOnly(true);
 
-		TextDataExportContext exportContext = createTextDataExportContext(dataExchange);
+		ResultSet rs = dataExchange.getQuery().execute(cn);
+		List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);
 
-		Writer writer = null;
-		Connection cn = null;
-
-		try
-		{
-			writer = dataExchange.getWriterFactory().get();
-			cn = connectionFactory.get();
-
-			ResultSet rs = dataExchange.getQuery().execute(cn);
-			List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);
-
-			writeRecords(dataExchange, cn, columnInfos, rs, writer, exportContext);
-
-			if (listener != null)
-				listener.onSuccess();
-		}
-		catch (Throwable t)
-		{
-			DataExchangeException e = wrapToDataExchangeException(t);
-
-			if (listener != null)
-				listener.onException(e);
-			else
-				throw e;
-		}
-		finally
-		{
-			releaseResource(dataExchange.getWriterFactory(), writer);
-			releaseResource(connectionFactory, cn);
-
-			if (listener != null)
-				listener.onFinish();
-		}
+		writeRecords(dataExchange, cn, columnInfos, rs, sqlWriter, exportContext);
 	}
 
 	/**

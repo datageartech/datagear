@@ -47,15 +47,11 @@ public abstract class AbstractDevotedTextValueDataImportService<T extends TextVa
 		this.databaseInfoResolver = databaseInfoResolver;
 	}
 
-	/**
-	 * 创建一个{@linkplain TextValueDataImportContext}。
-	 * 
-	 * @param impt
-	 * @return
-	 */
-	protected TextValueDataImportContext createTextValueDataImportContext(T impt)
+	@Override
+	protected DataExchangeContext createDataExchangeContext(T dataExchange)
 	{
-		return new TextValueDataImportContext(new DataFormatContext(impt.getDataFormat()));
+		return new TextValueDataImportContext(dataExchange.getConnectionFactory(),
+				new DataFormatContext(dataExchange.getDataFormat()));
 	}
 
 	/**
@@ -89,7 +85,7 @@ public abstract class AbstractDevotedTextValueDataImportService<T extends TextVa
 		}
 		finally
 		{
-			context.clearCloseResources();
+			context.releaseLocalCloseables();
 		}
 
 		if (exception == null)
@@ -249,9 +245,9 @@ public abstract class AbstractDevotedTextValueDataImportService<T extends TextVa
 			super();
 		}
 
-		public TextValueDataImportContext(DataFormatContext dataFormatContext)
+		public TextValueDataImportContext(ConnectionFactory connectionFactory, DataFormatContext dataFormatContext)
 		{
-			super();
+			super(connectionFactory);
 			this.dataFormatContext = dataFormatContext;
 		}
 

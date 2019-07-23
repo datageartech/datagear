@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * 批量数据交换。
  * <p>
- * 在调用{@linkplain DataExchangeService#exchange(DataExchange)}后，可通过{@linkplain #getContext()}获取执行上下文。
+ * 在调用{@linkplain DataExchangeService#exchange(DataExchange)}后，可通过{@linkplain #getResult()}获取结果。
  * </p>
  * 
  * @author datagear@163.com
@@ -18,8 +18,8 @@ import java.util.Set;
 public abstract class BatchDataExchange extends DataExchange
 {
 	private BatchDataExchangeListener listener;
-	
-	private BatchDataExchangeContext context;
+
+	private BatchDataExchangeResult result;
 
 	public BatchDataExchange()
 	{
@@ -42,12 +42,14 @@ public abstract class BatchDataExchange extends DataExchange
 		this.listener = listener;
 	}
 
-	public BatchDataExchangeContext getContext() {
-		return context;
+	public BatchDataExchangeResult getResult()
+	{
+		return result;
 	}
 
-	public void setContext(BatchDataExchangeContext context) {
-		this.context = context;
+	public void setResult(BatchDataExchangeResult result)
+	{
+		this.result = result;
 	}
 
 	/**

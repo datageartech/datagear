@@ -53,6 +53,161 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		return true;
 	}
 
+	@Override
+	public void exchange(T dataExchange) throws DataExchangeException
+	{
+		onStart(dataExchange);
+
+		DataExchangeContext context = createDataExchangeContext(dataExchange);
+
+		try
+		{
+			Throwable throwable = null;
+
+			try
+			{
+				exchange(dataExchange, context);
+			}
+			catch (Throwable t)
+			{
+				throwable = t;
+			}
+
+			if (throwable == null)
+			{
+				onSuccess(dataExchange, context);
+			}
+			else
+			{
+				DataExchangeException e = wrapToDataExchangeException(throwable);
+
+				onException(dataExchange, context, e);
+			}
+		}
+		finally
+		{
+			context.closeConnection();
+			context.closeContextCloseables();
+
+			onFinish(dataExchange, context);
+		}
+	}
+
+	/**
+	 * 执行数据交换。
+	 * 
+	 * @param dataExchange
+	 * @param context
+	 * @throws Throwable
+	 */
+	protected abstract void exchange(T dataExchange, DataExchangeContext context) throws Throwable;
+
+	/**
+	 * 数据交换开始回调。
+	 * 
+	 * @param dataExchange
+	 */
+	protected void onStart(T dataExchange)
+	{
+		DataExchangeListener listener = dataExchange.getListener();
+
+		if (listener != null)
+			listener.onStart();
+	}
+
+	/**
+	 * 数据交换成功回调。
+	 * 
+	 * @param dataExchange
+	 * @param context
+	 */
+	protected void onSuccess(T dataExchange, DataExchangeContext context)
+	{
+		DataExchangeListener listener = dataExchange.getListener();
+
+		if (listener != null)
+			listener.onSuccess();
+	}
+
+	/**
+	 * 数据交换异常回调。
+	 * 
+	 * @param dataExchange
+	 * @param context
+	 * @param e
+	 * @throws DataExchangeException
+	 */
+	protected void onException(T dataExchange, DataExchangeContext context, DataExchangeException e)
+			throws DataExchangeException
+	{
+		DataExchangeListener listener = dataExchange.getListener();
+
+		if (listener != null)
+			listener.onException(e);
+		else
+			throw e;
+	}
+
+	/**
+	 * 数据交换完成。
+	 * 
+	 * @param dataExchange
+	 * @param context
+	 */
+	protected void onFinish(T dataExchange, DataExchangeContext context)
+	{
+		DataExchangeListener listener = dataExchange.getListener();
+
+		if (listener != null)
+			listener.onFinish();
+	}
+
+	/**
+	 * 构建{@linkplain DataExchangeContext}。
+	 * 
+	 * @param dataExchange
+	 * @return
+	 */
+	protected DataExchangeContext createDataExchangeContext(T dataExchange)
+	{
+		return new DataExchangeContext(dataExchange.getConnectionFactory());
+	}
+
+	/**
+	 * 处理数据交换异常的事务逻辑。
+	 * 
+	 * @param context
+	 * @param e
+	 * @param exceptionResolve
+	 * @throws DataExchangeException
+	 */
+	protected void processTransactionForDataExchangeException(DataExchangeContext context, DataExchangeException e,
+			ExceptionResolve exceptionResolve) throws DataExchangeException
+	{
+		Connection cn = getConnection(context);
+
+		if (ExceptionResolve.ABORT.equals(exceptionResolve))
+			commitSilently(cn);
+		else if (ExceptionResolve.ROLLBACK.equals(exceptionResolve))
+			rollbackSilently(cn);
+		else if (ExceptionResolve.IGNORE.equals(exceptionResolve))
+			commitSilently(cn);
+		else
+			throw new UnsupportedOperationException();
+	}
+
+	protected Connection getConnection(DataExchangeContext context) throws DataExchangeException
+	{
+		try
+		{
+			return context.getConnection();
+		}
+		catch (Throwable t)
+		{
+			throw wrapToDataExchangeException(t);
+		}
+	}
+
 	/**
 	 * 回滚。
 	 * 
@@ -124,76 +279,28 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
-	 * 处理数据交换异常。
-	 * 
-	 * @param cn
-	 * @param exceptionResolve
-	 * @param t
-	 * @param listener
-	 * @throws DataExchangeException
-	 */
-	protected void handleExchangeThrowable(Connection cn, ExceptionResolve exceptionResolve, Throwable t,
-			DataExchangeListener listener) throws DataExchangeException
-	{
-		DataExchangeException e = wrapToDataExchangeException(t);
-
-		if (ExceptionResolve.ABORT.equals(exceptionResolve))
-			commitSilently(cn);
-		else if (ExceptionResolve.ROLLBACK.equals(exceptionResolve))
-			rollbackSilently(cn);
-		else if (ExceptionResolve.IGNORE.equals(exceptionResolve))
-			commitSilently(cn);
-		else
-			throw new UnsupportedOperationException();
-
-		if (listener != null)
-			listener.onException(e);
-		else
-			throw e;
-	}
-
-	/**
 	 * 获取资源。
 	 * 
 	 * @param <R>
 	 * @param resourceFactory
+	 * @param dataExchangeContext
 	 * @return
 	 * @throws DataExchangeException
 	 */
-	protected <R> R getResource(ResourceFactory<R> resourceFactory) throws DataExchangeException
+	protected <R> R getResource(ResourceFactory<R> resourceFactory, DataExchangeContext dataExchangeContext)
+			throws DataExchangeException
 	{
 		try
 		{
-			return resourceFactory.get();
+			R resource = resourceFactory.get();
+
+			dataExchangeContext.addContextCloseable(resourceFactory, resource);
+
+			return resource;
 		}
 		catch (Exception e)
 		{
 			throw new DataExchangeException(e);
-		}
-	}
-
-	/**
-	 * 释放资源。
-	 * <p>
-	 * 此方法不会抛出任何{@linkplain Throwable}。
-	 * </p>
-	 * 
-	 * @param <R>
-	 * @param resourceFactory
-	 * @param resource
-	 */
-	protected <R> void releaseResource(ResourceFactory<R> resourceFactory, R resource)
-	{
-		if (resource == null)
-			return;
-
-		try
-		{
-			resourceFactory.release(resource);
-		}
-		catch (Throwable e)
-		{
-			LOGGER.error("release connection error", e);
 		}
 	}
 

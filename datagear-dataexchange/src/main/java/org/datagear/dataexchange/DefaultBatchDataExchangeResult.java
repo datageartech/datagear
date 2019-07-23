@@ -16,14 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 默认{@linkplain BatchDataExchangeContext}实现类。
+ * 默认{@linkplain BatchDataExchangeResult}实现类。
  * 
  * @author datagear@163.com
  *
  */
-public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
+public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBatchDataExchangeContext.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBatchDataExchangeResult.class);
 
 	private final int subTotal;
 	private final DataExchangeService<?> subDataExchangeService;
@@ -42,7 +42,7 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 
 	private final Object _subLock = new Object();
 
-	public DefaultBatchDataExchangeContext(Set<SubDataExchange> subDataExchanges,
+	public DefaultBatchDataExchangeResult(Set<SubDataExchange> subDataExchanges,
 			DataExchangeService<?> subDataExchangeService, ExecutorService executorService)
 	{
 		super();
@@ -496,7 +496,7 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 			boolean isCanceled = (isCancelled() && !run);
 
 			if (isCanceled)
-				DefaultBatchDataExchangeContext.this.forCancel(this.subDataExchange);
+				DefaultBatchDataExchangeResult.this.forCancel(this.subDataExchange);
 		}
 	}
 
@@ -527,12 +527,12 @@ public class DefaultBatchDataExchangeContext implements BatchDataExchangeContext
 		{
 			try
 			{
-				((DataExchangeService<DataExchange>) DefaultBatchDataExchangeContext.this.subDataExchangeService)
+				((DataExchangeService<DataExchange>) DefaultBatchDataExchangeResult.this.subDataExchangeService)
 						.exchange(this.subDataExchange.getDataExchange());
 			}
 			finally
 			{
-				DefaultBatchDataExchangeContext.this.forFinish(this.subDataExchange);
+				DefaultBatchDataExchangeResult.this.forFinish(this.subDataExchange);
 			}
 		}
 	}

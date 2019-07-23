@@ -10,12 +10,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.datagear.dataexchange.AbstractDevotedDataExchangeService;
-import org.datagear.dataexchange.ConnectionFactory;
+import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataImportListener;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.ExecuteDataImportSqlException;
-import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 
@@ -33,49 +32,18 @@ public class SqlDataImportService extends AbstractDevotedDataExchangeService<Sql
 	}
 
 	@Override
-	public void exchange(SqlDataImport dataExchange) throws DataExchangeException
+	protected void exchange(SqlDataImport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		ExceptionResolve exceptionResolve = dataExchange.getImportOption().getExceptionResolve();
-		ConnectionFactory connectionFactory = dataExchange.getConnectionFactory();
+		Reader reader = getResource(dataExchange.getReaderFactory(), context);
 
-		DataImportListener listener = dataExchange.getListener();
+		Connection cn = context.getConnection();
+		cn.setAutoCommit(false);
 
-		if (listener != null)
-			listener.onStart();
+		Statement st = cn.createStatement();
 
-		Reader reader = null;
-		Connection cn = null;
-		Statement st = null;
+		executeSqlScripts(dataExchange, cn, st, reader);
 
-		try
-		{
-			reader = getResource(dataExchange.getReaderFactory());
-
-			cn = connectionFactory.get();
-			cn.setAutoCommit(false);
-
-			st = cn.createStatement();
-
-			executeSqlScripts(dataExchange, cn, st, reader);
-
-			commit(cn);
-
-			if (listener != null)
-				listener.onSuccess();
-		}
-		catch (Throwable t)
-		{
-			handleExchangeThrowable(cn, exceptionResolve, t, listener);
-		}
-		finally
-		{
-			releaseResource(dataExchange.getReaderFactory(), reader);
-			JdbcUtil.closeStatement(st);
-			releaseResource(connectionFactory, cn);
-
-			if (listener != null)
-				listener.onFinish();
-		}
+		commit(cn);
 	}
 
 	/**
