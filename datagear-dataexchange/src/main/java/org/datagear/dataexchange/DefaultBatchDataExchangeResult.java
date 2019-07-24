@@ -98,6 +98,15 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 	}
 
 	@Override
+	public Set<SubDataExchange> getUnsubmits()
+	{
+		synchronized (this._subLock)
+		{
+			return new HashSet<SubDataExchange>(this._unsubmits);
+		}
+	}
+
+	@Override
 	public Set<SubDataExchange> getSubmitFails()
 	{
 		synchronized (this._subLock)
@@ -124,17 +133,70 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 		}
 	}
 
-	/**
-	 * 获取提交成功数。
-	 * 
-	 * @return
-	 */
+	@Override
 	public int getSubmitSuccessCount()
 	{
 		synchronized (this._subLock)
 		{
 			return this._submitSuccesses.size();
 		}
+	}
+
+	@Override
+	public Set<SubDataExchange> getSubmitSuccesses()
+	{
+		synchronized (this._subLock)
+		{
+			Set<SubDataExchange> set = new HashSet<SubDataExchange>();
+
+			for (SubDataExchangeFutureTask futureTask : this._submitSuccesses)
+			{
+				set.add(futureTask.getSubDataExchange());
+			}
+
+			return set;
+		}
+	}
+
+	@Override
+	public Set<SubDataExchange> submit()
+	{
+		Set<SubDataExchange> submits = new HashSet<SubDataExchange>();
+
+		synchronized (this._subLock)
+		{
+			for (SubDataExchange unsubmit : this._unsubmits)
+			{
+				boolean canSubmit = false;
+
+				if (!unsubmit.hasDependency())
+					canSubmit = true;
+				else
+				{
+					canSubmit = true;
+
+					Set<SubDataExchange> dependencies = unsubmit.getDependencies();
+					for (SubDataExchange dependency : dependencies)
+					{
+						if (!this._finishes.contains(dependency))
+						{
+							canSubmit = false;
+							break;
+						}
+					}
+				}
+
+				if (canSubmit)
+					submits.add(unsubmit);
+			}
+
+			for (SubDataExchange submit : submits)
+				this._unsubmits.remove(submit);
+		}
+
+		submitAll(submits);
+
+		return submits;
 	}
 
 	@Override
@@ -179,54 +241,6 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 	}
 
 	/**
-	 * 提交下一批具备执行条件的子数据交换。
-	 * <p>
-	 * 具备执行条件：无任何依赖，或者，所有依赖都已执行完成
-	 * </p>
-	 * 
-	 * @return
-	 */
-	public Set<SubDataExchange> submitNexts()
-	{
-		Set<SubDataExchange> submits = new HashSet<SubDataExchange>();
-
-		synchronized (this._subLock)
-		{
-			for (SubDataExchange unsubmit : this._unsubmits)
-			{
-				boolean canSubmit = false;
-
-				if (!unsubmit.hasDependency())
-					canSubmit = true;
-				else
-				{
-					canSubmit = true;
-
-					Set<SubDataExchange> dependencies = unsubmit.getDependencies();
-					for (SubDataExchange dependency : dependencies)
-					{
-						if (!this._finishes.contains(dependency))
-						{
-							canSubmit = false;
-							break;
-						}
-					}
-				}
-
-				if (canSubmit)
-					submits.add(unsubmit);
-			}
-
-			for (SubDataExchange submit : submits)
-				this._unsubmits.remove(submit);
-		}
-
-		submitAll(submits);
-
-		return submits;
-	}
-
-	/**
 	 * 子数据交换任务取消后续处理。
 	 * 
 	 * @param subDataExchange
@@ -266,7 +280,7 @@ public class DefaultBatchDataExchangeResult implements BatchDataExchangeResult
 
 		postProcessIfFinish();
 
-		submitNexts();
+		submit();
 	}
 
 	/**

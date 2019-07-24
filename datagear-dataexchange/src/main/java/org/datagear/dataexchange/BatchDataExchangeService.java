@@ -59,11 +59,11 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 
 		checkCircularDependency(subDataExchanges);
 
-		DefaultBatchDataExchangeResult result = createDefaultBatchDataExchangeContext(dataExchange, subDataExchanges);
+		BatchDataExchangeResult result = createBatchDataExchangeResult(dataExchange, subDataExchanges);
 
 		dataExchange.setResult(result);
 
-		result.submitNexts();
+		result.submit();
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		if (listener == null)
 			return;
 
-		DefaultBatchDataExchangeResult result = (DefaultBatchDataExchangeResult) dataExchange.getResult();
+		BatchDataExchangeResult result = dataExchange.getResult();
 
 		// 没有任何子任务提交成功，那么需要在这里调用onFinish
 		if (result == null || result.getSubmitSuccessCount() == 0)
@@ -99,14 +99,14 @@ public class BatchDataExchangeService<T extends BatchDataExchange> extends Abstr
 		return this.executorService.isShutdown();
 	}
 
-	protected DefaultBatchDataExchangeResult createDefaultBatchDataExchangeContext(T dataExchange,
+	protected BatchDataExchangeResult createBatchDataExchangeResult(T dataExchange,
 			Set<SubDataExchange> subDataExchanges)
 	{
-		DefaultBatchDataExchangeResult context = new DefaultBatchDataExchangeResult(subDataExchanges,
+		DefaultBatchDataExchangeResult result = new DefaultBatchDataExchangeResult(subDataExchanges,
 				this.subDataExchangeService, this.executorService);
-		context.setListener(dataExchange.getListener());
+		result.setListener(dataExchange.getListener());
 
-		return context;
+		return result;
 	}
 
 	protected Set<SubDataExchange> getSubDataExchanges(T dataExchange) throws DataExchangeException

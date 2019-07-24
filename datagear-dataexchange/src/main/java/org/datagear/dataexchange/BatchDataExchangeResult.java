@@ -25,6 +25,27 @@ public interface BatchDataExchangeResult
 	boolean isFinish();
 
 	/**
+	 * 获取当前还未提交的{@linkplain SubDataExchange}集合。
+	 * 
+	 * @return
+	 */
+	Set<SubDataExchange> getUnsubmits();
+
+	/**
+	 * 获取当前提交成功的{@linkplain SubDataExchange}数目。
+	 * 
+	 * @return
+	 */
+	int getSubmitSuccessCount();
+
+	/**
+	 * 获取当前提交成功的{@linkplain SubDataExchange}集合。
+	 * 
+	 * @return
+	 */
+	Set<SubDataExchange> getSubmitSuccesses();
+
+	/**
 	 * 获取当前提交失败的{@linkplain SubDataExchange}集合。
 	 * 
 	 * @return
@@ -44,6 +65,19 @@ public interface BatchDataExchangeResult
 	 * @return
 	 */
 	Set<SubDataExchange> getFinishes();
+
+	/**
+	 * 提交下一批具备执行条件的{@linkplain SubDataExchange}。
+	 * <p>
+	 * 具备执行条件：无任何依赖，或者，所有依赖都已执行完成。
+	 * </p>
+	 * <p>
+	 * 返回空集合表示当前没有具备执行条件的{@linkplain SubDataExchange}。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	Set<SubDataExchange> submit();
 
 	/**
 	 * 取消指定{@linkplain SubDataExchange}。
