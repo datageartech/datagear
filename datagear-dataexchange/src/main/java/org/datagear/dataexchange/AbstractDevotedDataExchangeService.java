@@ -142,6 +142,8 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	{
 		DataExchangeListener listener = dataExchange.getListener();
 
+		e.printStackTrace();
+
 		if (listener != null)
 			listener.onException(e);
 		else

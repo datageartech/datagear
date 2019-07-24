@@ -44,6 +44,7 @@ import org.datagear.dataexchange.DataExchangeService;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataImportOption;
 import org.datagear.dataexchange.DataSourceConnectionFactory;
+import org.datagear.dataexchange.FileOutputStreamResourceFactory;
 import org.datagear.dataexchange.FileReaderResourceFactory;
 import org.datagear.dataexchange.FileWriterResourceFactory;
 import org.datagear.dataexchange.Query;
@@ -56,6 +57,7 @@ import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dataexchange.TextValueDataImportOption;
 import org.datagear.dataexchange.support.CsvDataExport;
 import org.datagear.dataexchange.support.CsvDataImport;
+import org.datagear.dataexchange.support.ExcelDataExport;
 import org.datagear.dataexchange.support.SqlDataExport;
 import org.datagear.dataexchange.support.SqlDataImport;
 import org.datagear.dbinfo.DatabaseInfoResolver;
@@ -598,6 +600,100 @@ public class DataExchangeController extends AbstractSchemaConnController
 			csvDataExport.setListener(listener);
 
 			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], csvDataExport);
+			subDataExchanges.add(subDataExchange);
+		}
+
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
+				exportServerChannel, locale);
+
+		this.dataExchangeService.exchange(batchDataExchange);
+
+		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
+		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+
+		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
+		responseEntity.getBody().setData(subDataExchangeFileNameMap);
+
+		return responseEntity;
+	}
+
+	@RequestMapping("/{schemaId}/export/excel")
+	public String exptExcel(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+			}
+		}.execute();
+
+		DataFormat defaultDataFormat = new DataFormat();
+
+		String dataExchangeId = IDUtil.uuid();
+
+		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
+		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+
+		return "/dataexchange/export_excel";
+	}
+
+	@RequestMapping(value = "/{schemaId}/export/excel/doExport", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> exptExcelDoExport(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			TextFileBatchDataExportForm exportForm) throws Exception
+	{
+		if (exportForm == null || isEmpty(exportForm.getDataFormat()) || isEmpty(exportForm.getExportOption())
+				|| isEmpty(exportForm.getFileEncoding()) || isEmpty(exportForm.getSubDataExchangeIds())
+				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getFileNames())
+				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
+				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
+			throw new IllegalInputException();
+
+		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
+		String[] queries = exportForm.getQueries();
+		String[] fileNames = exportForm.getFileNames();
+
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
+
+		Schema schema = getSchemaNotNull(request, response, schemaId);
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+
+		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
+		ServerChannel exportServerChannel = this.dataExchangeCometdService.getChannelWithCreation(exportChannelId);
+
+		Locale locale = getLocale(request);
+
+		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+
+		for (int i = 0; i < subDataExchangeIds.length; i++)
+		{
+			Query query = toQuery(queries[i]);
+
+			File file = FileUtil.getFile(directory, fileNames[i]);
+			ResourceFactory<OutputStream> writerFactory = FileOutputStreamResourceFactory.valueOf(file);
+
+			ExcelDataExport excelDataExport = new ExcelDataExport(connectionFactory, exportForm.getDataFormat(),
+					exportForm.getExportOption(), query, writerFactory);
+
+			CometdSubTextDataExportListener listener = new CometdSubTextDataExportListener(
+					this.dataExchangeCometdService, exportServerChannel, getMessageSource(), getLocale(request),
+					subDataExchangeIds[i]);
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+			listener.setSendExchangingMessageInterval(
+					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, excelDataExport));
+			excelDataExport.setListener(listener);
+
+			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], excelDataExport);
 			subDataExchanges.add(subDataExchange);
 		}
 
