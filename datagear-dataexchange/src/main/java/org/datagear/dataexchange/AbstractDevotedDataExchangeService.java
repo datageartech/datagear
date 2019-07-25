@@ -146,8 +146,6 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	{
 		DataExchangeListener listener = dataExchange.getListener();
 
-		e.printStackTrace();
-
 		if (listener != null)
 			listener.onException(e);
 		else
@@ -192,14 +190,12 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	{
 		Connection cn = getConnection(context);
 
-		if (ExceptionResolve.ABORT.equals(exceptionResolve))
+		if (ExceptionResolve.ABORT.equals(exceptionResolve) || ExceptionResolve.IGNORE.equals(exceptionResolve))
 			commitSilently(cn);
 		else if (ExceptionResolve.ROLLBACK.equals(exceptionResolve))
 			rollbackSilently(cn);
-		else if (ExceptionResolve.IGNORE.equals(exceptionResolve))
-			commitSilently(cn);
 		else
-			throw new UnsupportedOperationException();
+			rollbackSilently(cn);
 	}
 
 	protected Connection getConnection(DataExchangeContext context) throws DataExchangeException
@@ -1018,10 +1014,10 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		{
 			Number number = (Number) value;
 
-			if (number instanceof BigDecimal || value instanceof BigInteger)
-				valueStr = number.toString();
-			else if (number instanceof Float || number instanceof Double)
+			if (number instanceof Float || number instanceof Double)
 				valueStr = dataFormatContext.formatDouble(number.doubleValue());
+			else if (number instanceof BigDecimal || value instanceof BigInteger)
+				valueStr = number.toString();
 			else
 				valueStr = dataFormatContext.formatLong(number.longValue());
 		}

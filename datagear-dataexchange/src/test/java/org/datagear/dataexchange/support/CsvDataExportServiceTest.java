@@ -91,6 +91,7 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 	public void exptTest() throws Exception
 	{
 		DataFormat dataFormat = new DataFormat();
+		dataFormat.setBinaryFormat("0x${Hex}");
 
 		File outFile = new File("target/CsvDataExportServiceTest.csv");
 
@@ -114,37 +115,34 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 			JdbcUtil.closeConnection(cn);
 		}
 
-		CSVParser csvParser = CSVFormat.DEFAULT.parse(new InputStreamReader(new FileInputStream(outFile), "UTF-8"));
+		CSVParser sourceCsvParser = CSVFormat.DEFAULT.parse(ClasspathReaderResourceFactory
+				.valueOf(getResourceClasspath("support/CsvDataExportServiceTest.csv"), "UTF-8").get());
 
-		List<CSVRecord> records = csvParser.getRecords();
+		CSVParser exportCsvParser = CSVFormat.DEFAULT
+				.parse(new InputStreamReader(new FileInputStream(outFile), "UTF-8"));
 
-		assertEquals(4, records.size());
+		List<CSVRecord> sourceRecords = sourceCsvParser.getRecords();
+		List<CSVRecord> exportRecords = exportCsvParser.getRecords();
 
+		assertEquals(sourceRecords.size(), exportRecords.size());
+
+		for (int i = 0; i < sourceRecords.size(); i++)
 		{
-			CSVRecord cr = records.get(0);
+			CSVRecord sourceRecord = sourceRecords.get(i);
+			CSVRecord exportRecord = exportRecords.get(i);
 
-			assertEquals("ID", cr.get(0));
-			assertEquals("NAME", cr.get(1));
+			assertEquals(sourceRecord.size(), exportRecord.size());
+
+			for (int j = 0; j < sourceRecord.size(); j++)
+			{
+				String sourceValue = sourceRecord.get(j);
+				String exportValue = exportRecord.get(j);
+
+				assertEquals(sourceValue, exportValue);
+			}
 		}
 
-		{
-			CSVRecord cr = records.get(1);
-
-			assertEquals("1", cr.get(0));
-		}
-
-		{
-			CSVRecord cr = records.get(2);
-
-			assertEquals("2", cr.get(0));
-		}
-
-		{
-			CSVRecord cr = records.get(3);
-
-			assertEquals("3", cr.get(0));
-		}
-
-		csvParser.close();
+		sourceCsvParser.close();
+		exportCsvParser.close();
 	}
 }
