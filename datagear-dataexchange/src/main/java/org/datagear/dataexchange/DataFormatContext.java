@@ -353,8 +353,8 @@ public class DataFormatContext
 		if (value == null)
 		{
 		}
-		// 如果是默认格式，则直接使用Timestamp.valueOf，这样可以避免丢失纳秒精度
-		else if (DataFormat.DEFAULT_TIMESTAMP_FORMAT.equals(getTimestampPattern()))
+		// 如果是默认格式且有纳秒值，则直接使用Timestamp.valueOf，这样可以避免丢失纳秒精度
+		else if (value.getNanos() > 0 && DataFormat.DEFAULT_TIMESTAMP_FORMAT.equals(getTimestampPattern()))
 		{
 			sv = value.toString();
 		}

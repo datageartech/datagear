@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
@@ -18,9 +19,12 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.DecoderException;
@@ -506,7 +510,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
-	 * 设置{@linkplain PreparedStatement}的文本数据参数，并进行必要的数据类型转换。
+	 * 设置{@linkplain PreparedStatement}的参数值，并在必要时进行数据类型转换。
 	 * <p>
 	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Java Types Mapper to
 	 * JDBC Types”表。
@@ -722,7 +726,10 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
-	 * 获取字段的的字符串值。
+	 * 获取字段值。
+	 * <p>
+	 * 对于二进制字段，此方法将返回{@code byte[]}；对于文本对象，此方法将返回{@code String}。
+	 * </p>
 	 * <p>
 	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Type Conversions
 	 * Supported by ResultSet getter Methods”表，并且使用其中的最佳方法。
@@ -732,136 +739,92 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param rs
 	 * @param columnIndex
 	 * @param sqlType
-	 * @param dataFormatContext
 	 * @return
 	 * @throws SQLException
 	 * @throws IOException
-	 * @throws UnsupportedSqlTypeException
 	 */
-	protected String getStringValue(Connection cn, ResultSet rs, int columnIndex, int sqlType,
-			DataFormatContext dataFormatContext) throws SQLException, IOException, UnsupportedSqlTypeException
+	protected Object getValue(Connection cn, ResultSet rs, int columnIndex, int sqlType)
+			throws SQLException, IOException
 	{
-		String valueStr = null;
+		Object value = null;
 
 		switch (sqlType)
 		{
 			case Types.TINYINT:
 			{
-				int value = rs.getByte(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = dataFormatContext.formatInt(value);
-
+				value = rs.getByte(columnIndex);
 				break;
 			}
 
 			case Types.SMALLINT:
 			{
-				int value = rs.getShort(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = dataFormatContext.formatInt(value);
-
+				value = rs.getShort(columnIndex);
 				break;
 			}
 
 			case Types.INTEGER:
 			{
-				int value = rs.getInt(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = dataFormatContext.formatInt(value);
-
+				value = rs.getInt(columnIndex);
 				break;
 			}
 
 			case Types.BIGINT:
 			{
-				long value = rs.getLong(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = dataFormatContext.formatLong(value);
-
+				value = rs.getLong(columnIndex);
 				break;
 			}
 
 			case Types.REAL:
 			{
-				double value = rs.getFloat(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = dataFormatContext.formatDouble(value);
-
+				value = rs.getFloat(columnIndex);
 				break;
 			}
 
 			case Types.FLOAT:
 			case Types.DOUBLE:
 			{
-				double value = rs.getDouble(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = dataFormatContext.formatDouble(value);
-
+				value = rs.getDouble(columnIndex);
 				break;
 			}
 
 			case Types.DECIMAL:
 			case Types.NUMERIC:
 			{
-				BigDecimal value = rs.getBigDecimal(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = value.toString();
-
+				value = rs.getBigDecimal(columnIndex);
 				break;
 			}
 
 			case Types.BIT:
 			{
-				boolean value = rs.getBoolean(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = (value ? "1" : "0");
-
+				value = rs.getBoolean(columnIndex);
 				break;
 			}
 
 			case Types.BOOLEAN:
 			{
-				boolean value = rs.getBoolean(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = Boolean.toString(value);
-
+				value = rs.getBoolean(columnIndex);
 				break;
 			}
 
 			case Types.CHAR:
 			case Types.VARCHAR:
 			{
-				valueStr = rs.getString(columnIndex);
-
-				if (rs.wasNull())
-					valueStr = null;
-
+				value = rs.getString(columnIndex);
 				break;
 			}
 
 			case Types.LONGVARCHAR:
 			{
-				Reader value = rs.getCharacterStream(columnIndex);
+				Reader reader = rs.getCharacterStream(columnIndex);
 
 				try
 				{
-					if (rs.wasNull())
-						valueStr = null;
-					else
-						valueStr = readToString(value);
+					if (!rs.wasNull())
+						value = readToString(reader);
 				}
 				finally
 				{
-					IOUtil.close(value);
+					IOUtil.close(reader);
 				}
 
 				break;
@@ -870,31 +833,24 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			case Types.BINARY:
 			case Types.VARBINARY:
 			{
-				byte[] value = rs.getBytes(columnIndex);
-
-				if (rs.wasNull())
-					valueStr = null;
-				else
-					valueStr = dataFormatContext.formatBytes(value);
-
+				value = rs.getBytes(columnIndex);
 				break;
 			}
 
 			case Types.LONGVARBINARY:
 			{
-				InputStream value = rs.getBinaryStream(columnIndex);
+				InputStream in = rs.getBinaryStream(columnIndex);
 
 				try
 				{
 					if (!rs.wasNull())
 					{
-						byte[] bytes = readToBytes(value);
-						valueStr = dataFormatContext.formatBytes(bytes);
+						value = readToBytes(in);
 					}
 				}
 				finally
 				{
-					IOUtil.close(value);
+					IOUtil.close(in);
 				}
 
 				break;
@@ -902,45 +858,33 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 			case Types.DATE:
 			{
-				java.sql.Date value = rs.getDate(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = dataFormatContext.formatDate(value);
-
+				value = rs.getDate(columnIndex);
 				break;
 			}
 
 			case Types.TIME:
 			{
-				java.sql.Time value = rs.getTime(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = dataFormatContext.formatTime(value);
-
+				value = rs.getTime(columnIndex);
 				break;
 			}
 
 			case Types.TIMESTAMP:
 			{
-				java.sql.Timestamp value = rs.getTimestamp(columnIndex);
-
-				if (!rs.wasNull())
-					valueStr = dataFormatContext.formatTimestamp(value);
-
+				value = rs.getTimestamp(columnIndex);
 				break;
 			}
 
 			case Types.CLOB:
 			{
-				Clob value = rs.getClob(columnIndex);
+				Clob clob = rs.getClob(columnIndex);
 
 				if (!rs.wasNull())
 				{
-					Reader reader = value.getCharacterStream();
+					Reader reader = clob.getCharacterStream();
 
 					try
 					{
-						valueStr = readToString(reader);
+						value = readToString(reader);
 					}
 					finally
 					{
@@ -953,16 +897,15 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 			case Types.BLOB:
 			{
-				Blob value = rs.getBlob(columnIndex);
+				Blob blob = rs.getBlob(columnIndex);
 
 				if (!rs.wasNull())
 				{
-					InputStream inputStream = value.getBinaryStream();
+					InputStream inputStream = blob.getBinaryStream();
 
 					try
 					{
-						byte[] bytes = readToBytes(inputStream);
-						valueStr = dataFormatContext.formatBytes(bytes);
+						value = readToBytes(inputStream);
 					}
 					finally
 					{
@@ -976,26 +919,22 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			case Types.NCHAR:
 			case Types.NVARCHAR:
 			{
-				valueStr = rs.getNString(columnIndex);
-
-				if (rs.wasNull())
-					valueStr = null;
-
+				value = rs.getNString(columnIndex);
 				break;
 			}
 
 			case Types.LONGNVARCHAR:
 			{
-				Reader value = rs.getNCharacterStream(columnIndex);
+				Reader reader = rs.getNCharacterStream(columnIndex);
 
 				try
 				{
 					if (!rs.wasNull())
-						valueStr = readToString(value);
+						value = readToString(reader);
 				}
 				finally
 				{
-					IOUtil.close(value);
+					IOUtil.close(reader);
 				}
 
 				break;
@@ -1003,15 +942,15 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 			case Types.NCLOB:
 			{
-				NClob value = rs.getNClob(columnIndex);
+				NClob nclob = rs.getNClob(columnIndex);
 
 				if (!rs.wasNull())
 				{
-					Reader reader = value.getCharacterStream();
+					Reader reader = nclob.getCharacterStream();
 
 					try
 					{
-						valueStr = readToString(reader);
+						value = readToString(reader);
 					}
 					finally
 					{
@@ -1024,15 +963,15 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 			case Types.SQLXML:
 			{
-				SQLXML value = rs.getSQLXML(columnIndex);
+				SQLXML sqlXml = rs.getSQLXML(columnIndex);
 
 				if (!rs.wasNull())
 				{
-					Reader reader = value.getCharacterStream();
+					Reader reader = sqlXml.getCharacterStream();
 
 					try
 					{
-						valueStr = readToString(reader);
+						value = readToString(reader);
 					}
 					finally
 					{
@@ -1048,8 +987,74 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 				throw new UnsupportedSqlTypeException(sqlType);
 		}
 
-		return valueStr;
+		if (rs.wasNull())
+			value = null;
 
+		return value;
+	}
+
+	/**
+	 * 获取字段的的字符串值。
+	 * 
+	 * @param cn
+	 * @param rs
+	 * @param columnIndex
+	 * @param sqlType
+	 * @param dataFormatContext
+	 * @return
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws UnsupportedSqlTypeException
+	 */
+	protected String getStringValue(Connection cn, ResultSet rs, int columnIndex, int sqlType,
+			DataFormatContext dataFormatContext) throws SQLException, IOException, UnsupportedSqlTypeException
+	{
+		Object value = getValue(cn, rs, columnIndex, sqlType);
+		String valueStr = null;
+
+		if (value == null)
+			;
+		else if (value instanceof Number)
+		{
+			Number number = (Number) value;
+
+			if (number instanceof BigDecimal || value instanceof BigInteger)
+				valueStr = number.toString();
+			else if (number instanceof Float || number instanceof Double)
+				valueStr = dataFormatContext.formatDouble(number.doubleValue());
+			else
+				valueStr = dataFormatContext.formatLong(number.longValue());
+		}
+		else if (value instanceof Date)
+		{
+			if (value instanceof java.sql.Date)
+				valueStr = dataFormatContext.formatDate((java.sql.Date) value);
+			else if (value instanceof java.sql.Time)
+				valueStr = dataFormatContext.formatTime((Time) value);
+			else if (value instanceof java.sql.Timestamp)
+				valueStr = dataFormatContext.formatTimestamp((Timestamp) value);
+			else
+				valueStr = dataFormatContext.formatDate((java.sql.Date) value);
+		}
+		else if (value instanceof String)
+		{
+			valueStr = (String) value;
+		}
+		else if (value instanceof Boolean)
+		{
+			if (Types.BIT == sqlType)
+				valueStr = Boolean.TRUE.equals(value) ? "1" : "0";
+			else
+				valueStr = value.toString();
+		}
+		else if (value instanceof byte[])
+		{
+			valueStr = dataFormatContext.formatBytes((byte[]) value);
+		}
+		else
+			valueStr = value.toString();
+
+		return valueStr;
 	}
 
 	/**
