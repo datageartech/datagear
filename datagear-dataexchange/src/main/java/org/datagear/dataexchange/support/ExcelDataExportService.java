@@ -21,6 +21,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.datagear.dataexchange.AbstractDevotedTextDataExportService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataFormatContext;
+import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dbinfo.ColumnInfo;
@@ -47,7 +48,7 @@ public class ExcelDataExportService extends AbstractDevotedTextDataExportService
 	@Override
 	protected void exchange(ExcelDataExport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		TextDataExportContext exportContext = (TextDataExportContext) context;
+		IndexFormatDataExchangeContext exportContext = castDataExchangeContext(context);
 
 		OutputStream out = getResource(dataExchange.getOutputFactory(), exportContext);
 
@@ -72,7 +73,7 @@ public class ExcelDataExportService extends AbstractDevotedTextDataExportService
 	 * @throws Throwable
 	 */
 	protected void writeRecords(ExcelDataExport dataExchange, Connection cn, List<ColumnInfo> columnInfos, ResultSet rs,
-			OutputStream out, TextDataExportContext exportContext) throws Throwable
+			OutputStream out, IndexFormatDataExchangeContext exportContext) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
 		TextDataExportOption exportOption = dataExchange.getExportOption();
@@ -153,8 +154,8 @@ public class ExcelDataExportService extends AbstractDevotedTextDataExportService
 	 * @throws Throwable
 	 */
 	protected void setCellValue(ExcelDataExport dataExchange, Connection cn, ResultSet rs, int columnIndex,
-			ColumnInfo columnInfo, TextDataExportOption exportOption, TextDataExportContext exportContext, Cell cell)
-			throws Throwable
+			ColumnInfo columnInfo, TextDataExportOption exportOption, IndexFormatDataExchangeContext exportContext,
+			Cell cell) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
 		DataFormatContext dataFormatContext = exportContext.getDataFormatContext();

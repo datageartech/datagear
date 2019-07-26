@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.datagear.dataexchange.AbstractDevotedTextDataExportService;
 import org.datagear.dataexchange.DataExchangeContext;
+import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
@@ -42,7 +43,7 @@ public class SqlDataExportService extends AbstractDevotedTextDataExportService<S
 	@Override
 	protected void exchange(SqlDataExport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		TextDataExportContext exportContext = (TextDataExportContext) context;
+		IndexFormatDataExchangeContext exportContext = castDataExchangeContext(context);
 
 		Writer sqlWriter = getResource(dataExchange.getWriterFactory(), exportContext);
 
@@ -66,7 +67,7 @@ public class SqlDataExportService extends AbstractDevotedTextDataExportService<S
 	 * @param exportContext
 	 */
 	protected void writeRecords(SqlDataExport dataExchange, Connection cn, List<ColumnInfo> columnInfos, ResultSet rs,
-			Writer out, TextDataExportContext exportContext) throws Throwable
+			Writer out, IndexFormatDataExchangeContext exportContext) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
 		TextDataExportOption exportOption = dataExchange.getExportOption();

@@ -50,8 +50,19 @@ public abstract class AbstractDevotedTextValueDataImportService<T extends TextVa
 	@Override
 	protected DataExchangeContext createDataExchangeContext(T dataExchange)
 	{
-		return new TextValueDataImportContext(dataExchange.getConnectionFactory(),
+		return new IndexFormatDataExchangeContext(dataExchange.getConnectionFactory(),
 				new DataFormatContext(dataExchange.getDataFormat()));
+	}
+
+	/**
+	 * 转换{@linkplain DataExchangeContext}类型。
+	 * 
+	 * @param context
+	 * @return
+	 */
+	protected IndexFormatDataExchangeContext castDataExchangeContext(DataExchangeContext context)
+	{
+		return (IndexFormatDataExchangeContext) context;
 	}
 
 	/**
@@ -67,7 +78,7 @@ public abstract class AbstractDevotedTextValueDataImportService<T extends TextVa
 	 * @throws DataExchangeException
 	 */
 	protected boolean importData(T impt, Connection cn, PreparedStatement st, List<ColumnInfo> columnInfos,
-			List<String> columnValues, TextValueDataImportContext context) throws DataExchangeException
+			List<String> columnValues, IndexFormatDataExchangeContext context) throws DataExchangeException
 	{
 		TextValueDataImportListener listener = impt.getListener();
 
@@ -117,7 +128,7 @@ public abstract class AbstractDevotedTextValueDataImportService<T extends TextVa
 	 * @param context
 	 * @throws ExecuteDataImportSqlException
 	 */
-	protected void executeImportPreparedStatement(T impt, PreparedStatement st, TextValueDataImportContext context)
+	protected void executeImportPreparedStatement(T impt, PreparedStatement st, IndexFormatDataExchangeContext context)
 			throws ExecuteDataImportSqlException
 	{
 		try
@@ -142,7 +153,7 @@ public abstract class AbstractDevotedTextValueDataImportService<T extends TextVa
 	 * @throws SetImportColumnValueException
 	 */
 	protected void setImportColumnValues(T impt, Connection cn, PreparedStatement st, List<ColumnInfo> columnInfos,
-			List<String> columnValues, TextValueDataImportContext context) throws SetImportColumnValueException
+			List<String> columnValues, IndexFormatDataExchangeContext context) throws SetImportColumnValueException
 	{
 		DataIndex dataIndex = context.getDataIndex();
 		int columnCount = columnInfos.size();
@@ -226,49 +237,5 @@ public abstract class AbstractDevotedTextValueDataImportService<T extends TextVa
 			boolean nullIfColumnNotFound) throws TableNotFoundException, ColumnNotFoundException
 	{
 		return getColumnInfos(cn, table, columnNames, nullIfColumnNotFound, this.databaseInfoResolver);
-	}
-
-	/**
-	 * 文本值数据导入上下文。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	protected static class TextValueDataImportContext extends DataExchangeContext
-	{
-		private DataFormatContext dataFormatContext;
-
-		private DataIndex dataIndex;
-
-		public TextValueDataImportContext()
-		{
-			super();
-		}
-
-		public TextValueDataImportContext(ConnectionFactory connectionFactory, DataFormatContext dataFormatContext)
-		{
-			super(connectionFactory);
-			this.dataFormatContext = dataFormatContext;
-		}
-
-		public DataFormatContext getDataFormatContext()
-		{
-			return dataFormatContext;
-		}
-
-		public void setDataFormatContext(DataFormatContext dataFormatContext)
-		{
-			this.dataFormatContext = dataFormatContext;
-		}
-
-		public DataIndex getDataIndex()
-		{
-			return dataIndex;
-		}
-
-		public void setDataIndex(DataIndex dataIndex)
-		{
-			this.dataIndex = dataIndex;
-		}
 	}
 }

@@ -17,6 +17,7 @@ import org.datagear.dataexchange.AbstractDevotedTextValueDataImportService;
 import org.datagear.dataexchange.ColumnNotFoundException;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
@@ -42,7 +43,7 @@ public class CsvDataImportService extends AbstractDevotedTextValueDataImportServ
 	@Override
 	protected void exchange(CsvDataImport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		TextValueDataImportContext importContext = (TextValueDataImportContext) context;
+		IndexFormatDataExchangeContext importContext = castDataExchangeContext(context);
 
 		Reader csvReader = getResource(dataExchange.getReaderFactory(), importContext);
 

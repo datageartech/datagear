@@ -15,6 +15,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.datagear.dataexchange.AbstractDevotedTextDataExportService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
+import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
@@ -42,7 +43,7 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 	@Override
 	protected void exchange(CsvDataExport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		TextDataExportContext exportContext = (TextDataExportContext) context;
+		IndexFormatDataExchangeContext exportContext = castDataExchangeContext(context);
 
 		TextDataExportListener listener = dataExchange.getListener();
 		TextDataExportOption exportOption = dataExchange.getExportOption();
