@@ -66,6 +66,7 @@ Schema schema 数据库，不允许为null
 							<button type="button" class="table-cancel-export-button page-status-aware-show exchange-status-show"><@spring.message code='cancel' /></button>
 							<button type="button" class="table-download-all-button page-status-aware-show finish-status-show"><@spring.message code='downloadAll' /></button>
 						</div>
+						<#--
 						<div class="file-encoding-wrapper">
 							<span class="file-encoding-label page-status-aware-enable edit-status-enable">
 								<@spring.message code='dataExport.exportFileEncoding' />
@@ -76,6 +77,7 @@ Schema schema 数据库，不允许为null
 								</#list>
 							</select>
 						</div>
+						-->
 						<div class="table-wrapper minor-dataTable">
 							<table id="${pageId}-table" width="100%" class="hover stripe"></table>
 						</div>

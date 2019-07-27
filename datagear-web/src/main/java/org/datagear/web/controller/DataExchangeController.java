@@ -652,8 +652,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			TextFileBatchDataExportForm exportForm) throws Exception
 	{
 		if (exportForm == null || isEmpty(exportForm.getDataFormat()) || isEmpty(exportForm.getExportOption())
-				|| isEmpty(exportForm.getFileEncoding()) || isEmpty(exportForm.getSubDataExchangeIds())
-				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getFileNames())
+				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
+				|| isEmpty(exportForm.getFileNames())
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
 			throw new IllegalInputException();
