@@ -54,7 +54,7 @@ import org.datagear.dataexchange.SqlQuery;
 import org.datagear.dataexchange.SubDataExchange;
 import org.datagear.dataexchange.TableQuery;
 import org.datagear.dataexchange.TextDataExportOption;
-import org.datagear.dataexchange.TextValueDataImportOption;
+import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.dataexchange.support.CsvDataExport;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.ExcelDataExport;
@@ -1474,7 +1474,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		private static final long serialVersionUID = 1L;
 
-		private TextValueDataImportOption importOption;
+		private ValueDataImportOption importOption;
 
 		private DataFormat dataFormat;
 
@@ -1485,12 +1485,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 			super();
 		}
 
-		public TextValueDataImportOption getImportOption()
+		public ValueDataImportOption getImportOption()
 		{
 			return importOption;
 		}
 
-		public void setImportOption(TextValueDataImportOption importOption)
+		public void setImportOption(ValueDataImportOption importOption)
 		{
 			this.importOption = importOption;
 		}

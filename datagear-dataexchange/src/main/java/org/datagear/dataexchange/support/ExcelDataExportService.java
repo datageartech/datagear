@@ -18,7 +18,7 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.datagear.dataexchange.AbstractDevotedTextDataExportService;
+import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataFormatContext;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
@@ -33,7 +33,7 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  * @author datagear@163.com
  *
  */
-public class ExcelDataExportService extends AbstractDevotedTextDataExportService<ExcelDataExport>
+public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchangeService<ExcelDataExport>
 {
 	public ExcelDataExportService()
 	{
@@ -46,9 +46,15 @@ public class ExcelDataExportService extends AbstractDevotedTextDataExportService
 	}
 
 	@Override
+	protected DataExchangeContext createDataExchangeContext(ExcelDataExport dataExchange)
+	{
+		return IndexFormatDataExchangeContext.valueOf(dataExchange);
+	}
+
+	@Override
 	protected void exchange(ExcelDataExport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		IndexFormatDataExchangeContext exportContext = castDataExchangeContext(context);
+		IndexFormatDataExchangeContext exportContext = IndexFormatDataExchangeContext.cast(context);
 
 		OutputStream out = getResource(dataExchange.getOutputFactory(), exportContext);
 

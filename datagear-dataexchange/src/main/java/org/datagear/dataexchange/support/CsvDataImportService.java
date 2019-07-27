@@ -13,12 +13,13 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.datagear.dataexchange.AbstractDevotedTextValueDataImportService;
+import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
 import org.datagear.dataexchange.ColumnNotFoundException;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
+import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
@@ -28,7 +29,7 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  * @author datagear@163.com
  *
  */
-public class CsvDataImportService extends AbstractDevotedTextValueDataImportService<CsvDataImport>
+public class CsvDataImportService extends AbstractDevotedDbInfoAwareDataExchangeService<CsvDataImport>
 {
 	public CsvDataImportService()
 	{
@@ -41,9 +42,16 @@ public class CsvDataImportService extends AbstractDevotedTextValueDataImportServ
 	}
 
 	@Override
+	protected DataExchangeContext createDataExchangeContext(CsvDataImport dataExchange)
+	{
+		return IndexFormatDataExchangeContext.valueOf(dataExchange);
+	}
+
+	@Override
 	protected void exchange(CsvDataImport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		IndexFormatDataExchangeContext importContext = castDataExchangeContext(context);
+		ValueDataImportOption importOption = dataExchange.getImportOption();
+		IndexFormatDataExchangeContext importContext = IndexFormatDataExchangeContext.cast(context);
 
 		Reader csvReader = getResource(dataExchange.getReaderFactory(), importContext);
 
@@ -79,7 +87,9 @@ public class CsvDataImportService extends AbstractDevotedTextValueDataImportServ
 				List<String> columnValues = resolveCSVRecordValues(dataExchange, csvRecord, rawColumnInfos,
 						noNullColumnInfos);
 
-				importData(dataExchange, cn, st, noNullColumnInfos, columnValues, importContext);
+				importValueData(cn, st, noNullColumnInfos, columnValues, importContext.getDataIndex(),
+						importOption.isNullForIllegalColumnValue(), importOption.getExceptionResolve(),
+						importContext.getDataFormatContext(), dataExchange.getListener());
 			}
 
 			row++;

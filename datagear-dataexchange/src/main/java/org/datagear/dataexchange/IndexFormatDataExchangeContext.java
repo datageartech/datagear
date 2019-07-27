@@ -46,4 +46,52 @@ public class IndexFormatDataExchangeContext extends DataExchangeContext
 	{
 		this.dataIndex = dataIndex;
 	}
+
+	/**
+	 * 构建{@linkplain IndexFormatDataExchangeContext}。
+	 * 
+	 * @param dataExchange
+	 * @return
+	 */
+	public static IndexFormatDataExchangeContext valueOf(FormatDataExchange dataExchange)
+	{
+		return new IndexFormatDataExchangeContext(dataExchange.getConnectionFactory(),
+				new DataFormatContext(dataExchange.getDataFormat()));
+	}
+
+	/**
+	 * 构建{@linkplain IndexFormatDataExchangeContext}。
+	 * 
+	 * @param connectionFactory
+	 * @param dataFormat
+	 * @return
+	 */
+	public static IndexFormatDataExchangeContext valueOf(ConnectionFactory connectionFactory, DataFormat dataFormat)
+	{
+		return new IndexFormatDataExchangeContext(connectionFactory, new DataFormatContext(dataFormat));
+	}
+
+	/**
+	 * 构建{@linkplain IndexFormatDataExchangeContext}。
+	 * 
+	 * @param connectionFactory
+	 * @param dataFormatContext
+	 * @return
+	 */
+	public static IndexFormatDataExchangeContext valueOf(ConnectionFactory connectionFactory,
+			DataFormatContext dataFormatContext)
+	{
+		return new IndexFormatDataExchangeContext(connectionFactory, dataFormatContext);
+	}
+
+	/**
+	 * 将{@linkplain DataExchangeContext}转换为{@linkplain IndexFormatDataExchangeContext}。
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public static IndexFormatDataExchangeContext cast(DataExchangeContext context)
+	{
+		return (IndexFormatDataExchangeContext) context;
+	}
 }

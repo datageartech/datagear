@@ -21,7 +21,7 @@ public abstract class TableTextValueDataImport extends TextValueDataImport
 	}
 
 	public TableTextValueDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat,
-			TextValueDataImportOption importOption, String table)
+			ValueDataImportOption importOption, String table)
 	{
 		super(connectionFactory, dataFormat, importOption);
 		this.table = table;

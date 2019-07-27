@@ -11,7 +11,7 @@ import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.List;
 
-import org.datagear.dataexchange.AbstractDevotedTextDataExportService;
+import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
@@ -26,7 +26,7 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  * @author datagear@163.com
  *
  */
-public class SqlDataExportService extends AbstractDevotedTextDataExportService<SqlDataExport>
+public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchangeService<SqlDataExport>
 {
 	public static final String LINE_SEPARATOR = "\r\n";
 
@@ -41,9 +41,15 @@ public class SqlDataExportService extends AbstractDevotedTextDataExportService<S
 	}
 
 	@Override
+	protected DataExchangeContext createDataExchangeContext(SqlDataExport dataExchange)
+	{
+		return IndexFormatDataExchangeContext.valueOf(dataExchange);
+	}
+
+	@Override
 	protected void exchange(SqlDataExport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		IndexFormatDataExchangeContext exportContext = castDataExchangeContext(context);
+		IndexFormatDataExchangeContext exportContext = IndexFormatDataExchangeContext.cast(context);
 
 		Writer sqlWriter = getResource(dataExchange.getWriterFactory(), exportContext);
 

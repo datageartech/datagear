@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.datagear.dataexchange.AbstractDevotedTextDataExportService;
+import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
@@ -28,7 +28,7 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  * @author datagear@163.com
  *
  */
-public class CsvDataExportService extends AbstractDevotedTextDataExportService<CsvDataExport>
+public class CsvDataExportService extends AbstractDevotedDbInfoAwareDataExchangeService<CsvDataExport>
 {
 	public CsvDataExportService()
 	{
@@ -41,9 +41,15 @@ public class CsvDataExportService extends AbstractDevotedTextDataExportService<C
 	}
 
 	@Override
+	protected DataExchangeContext createDataExchangeContext(CsvDataExport dataExchange)
+	{
+		return IndexFormatDataExchangeContext.valueOf(dataExchange);
+	}
+
+	@Override
 	protected void exchange(CsvDataExport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		IndexFormatDataExchangeContext exportContext = castDataExchangeContext(context);
+		IndexFormatDataExchangeContext exportContext = IndexFormatDataExchangeContext.cast(context);
 
 		TextDataExportListener listener = dataExchange.getListener();
 		TextDataExportOption exportOption = dataExchange.getExportOption();

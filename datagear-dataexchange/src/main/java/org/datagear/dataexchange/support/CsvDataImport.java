@@ -10,7 +10,7 @@ import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.TableTextValueDataImport;
-import org.datagear.dataexchange.TextValueDataImportOption;
+import org.datagear.dataexchange.ValueDataImportOption;
 
 /**
  * CSV导入。
@@ -28,7 +28,7 @@ public class CsvDataImport extends TableTextValueDataImport
 	}
 
 	public CsvDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat,
-			TextValueDataImportOption importOption, String table, ResourceFactory<Reader> readerFactory)
+			ValueDataImportOption importOption, String table, ResourceFactory<Reader> readerFactory)
 	{
 		super(connectionFactory, dataFormat, importOption, table);
 		this.readerFactory = readerFactory;

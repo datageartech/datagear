@@ -15,9 +15,9 @@ package org.datagear.dataexchange;
  */
 public abstract class TextValueDataImport extends FormatDataExchange
 {
-	private TextValueDataImportOption importOption;
+	private ValueDataImportOption importOption;
 
-	private TextValueDataImportListener listener;
+	private ValueDataImportListener listener;
 
 	public TextValueDataImport()
 	{
@@ -25,29 +25,29 @@ public abstract class TextValueDataImport extends FormatDataExchange
 	}
 
 	public TextValueDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat,
-			TextValueDataImportOption importOption)
+			ValueDataImportOption importOption)
 	{
 		super(connectionFactory, dataFormat);
 		this.importOption = importOption;
 	}
 
-	public TextValueDataImportOption getImportOption()
+	public ValueDataImportOption getImportOption()
 	{
 		return importOption;
 	}
 
-	public void setImportOption(TextValueDataImportOption importOption)
+	public void setImportOption(ValueDataImportOption importOption)
 	{
 		this.importOption = importOption;
 	}
 
-	public void setListener(TextValueDataImportListener listener)
+	public void setListener(ValueDataImportListener listener)
 	{
 		this.listener = listener;
 	}
 
 	@Override
-	public TextValueDataImportListener getListener()
+	public ValueDataImportListener getListener()
 	{
 		return this.listener;
 	}

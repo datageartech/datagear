@@ -53,7 +53,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 	{
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(buildTestDataSource());
 		DataFormat dataFormat = new DataFormat();
-		TextValueDataImportOption importOption = new TextValueDataImportOption(ExceptionResolve.ABORT, true, true);
+		ValueDataImportOption importOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
 
 		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
 

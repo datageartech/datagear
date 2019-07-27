@@ -17,8 +17,8 @@ import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.IllegalImportSourceValueException;
 import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
-import org.datagear.dataexchange.TextValueDataImportListener;
-import org.datagear.dataexchange.TextValueDataImportOption;
+import org.datagear.dataexchange.ValueDataImportListener;
+import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.junit.Assert;
@@ -60,10 +60,10 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
 					"support/CsvDataImportServiceTest_ignoreInexistentColumn.csv");
 
-			TextValueDataImportOption textValueDataImportOption = new TextValueDataImportOption(ExceptionResolve.ABORT,
-					false, true);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, false,
+					true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textValueDataImportOption, TABLE_NAME, readerFactory);
+					valueDataImportOption, TABLE_NAME, readerFactory);
 
 			clearTable(cn, TABLE_NAME);
 
@@ -95,10 +95,9 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 
 			final AtomicInteger importCountInListener = new AtomicInteger(0);
 
-			TextValueDataImportOption textValueDataImportOption = new TextValueDataImportOption(ExceptionResolve.ABORT,
-					true, true);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textValueDataImportOption, TABLE_NAME, readerFactory);
+					valueDataImportOption, TABLE_NAME, readerFactory);
 
 			impt.setListener(new MockTextDataImportListener()
 			{
@@ -145,10 +144,10 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			final AtomicInteger successCount = new AtomicInteger(0);
 			final AtomicInteger ignoreCount = new AtomicInteger(0);
 
-			TextValueDataImportOption textValueDataImportOption = new TextValueDataImportOption(ExceptionResolve.IGNORE,
-					true, true);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.IGNORE, true,
+					true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textValueDataImportOption, TABLE_NAME, readerFactory);
+					valueDataImportOption, TABLE_NAME, readerFactory);
 
 			impt.setListener(new MockTextDataImportListener()
 			{
@@ -199,10 +198,10 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Reader> readerFactory = getTestReaderResourceFactory(
 					"support/CsvDataImportServiceTest__ExceptionResolve.csv");
 
-			TextValueDataImportOption textValueDataImportOption = new TextValueDataImportOption(ExceptionResolve.ABORT,
-					true, false);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true,
+					false);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textValueDataImportOption, TABLE_NAME, readerFactory);
+					valueDataImportOption, TABLE_NAME, readerFactory);
 
 			clearTable(cn, TABLE_NAME);
 
@@ -217,7 +216,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		}
 	}
 
-	protected class MockTextDataImportListener implements TextValueDataImportListener
+	protected class MockTextDataImportListener implements ValueDataImportListener
 	{
 		@Override
 		public void onStart()
@@ -256,7 +255,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		}
 
 		@Override
-		public void onSetNullColumnValue(DataIndex dataIndex, String columnName, String rawColumnValue,
+		public void onSetNullColumnValue(DataIndex dataIndex, String columnName, Object columnValue,
 				DataExchangeException e)
 		{
 			println("onSetNullColumnValue : " + dataIndex + ", " + columnName);

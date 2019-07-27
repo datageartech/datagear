@@ -7,8 +7,8 @@ package org.datagear.web.cometd.dataexchange;
 import java.util.Locale;
 
 import org.cometd.bayeux.server.ServerChannel;
-import org.datagear.dataexchange.ColumnNotFoundException;
 import org.datagear.dataexchange.CircularDependencyException;
+import org.datagear.dataexchange.ColumnNotFoundException;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataExchangeListener;
 import org.datagear.dataexchange.ExecuteDataImportSqlException;
@@ -17,7 +17,6 @@ import org.datagear.dataexchange.IndexDataExchangeException;
 import org.datagear.dataexchange.SetImportColumnValueException;
 import org.datagear.dataexchange.TableNotFoundException;
 import org.datagear.dataexchange.UnsupportedExchangeException;
-import org.datagear.dataexchange.UnsupportedSqlTypeException;
 import org.datagear.dataexchange.support.TableMismatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,11 +186,6 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 		else if (e instanceof UnsupportedExchangeException)
 		{
 			message = getI18nMessage(code);
-		}
-		else if (e instanceof UnsupportedSqlTypeException)
-		{
-			UnsupportedSqlTypeException e1 = (UnsupportedSqlTypeException) e;
-			message = getI18nMessage(code, e1.getSqlType());
 		}
 		else if (e instanceof CircularDependencyException)
 		{

@@ -5,12 +5,12 @@
 package org.datagear.dataexchange;
 
 /**
- * 文本值导入设置项。
+ * 值导入设置项。
  * 
  * @author datagear@163.com
  *
  */
-public class TextValueDataImportOption extends DataImportOption
+public class ValueDataImportOption extends DataImportOption
 {
 	private static final long serialVersionUID = 1L;
 
@@ -20,12 +20,12 @@ public class TextValueDataImportOption extends DataImportOption
 	/** 当列值非法时设置为null */
 	private boolean nullForIllegalColumnValue;
 
-	public TextValueDataImportOption()
+	public ValueDataImportOption()
 	{
 		super();
 	}
 
-	public TextValueDataImportOption(ExceptionResolve exceptionResolve, boolean ignoreInexistentColumn,
+	public ValueDataImportOption(ExceptionResolve exceptionResolve, boolean ignoreInexistentColumn,
 			boolean nullForIllegalColumnValue)
 	{
 		super(exceptionResolve);

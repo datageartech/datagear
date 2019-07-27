@@ -10,43 +10,32 @@ package org.datagear.dataexchange;
  * @author datagear@163.com
  *
  */
-public class UnsupportedSqlTypeException extends DataExchangeException
+public class UnsupportedSqlTypeException extends Exception
 {
 	private static final long serialVersionUID = 1L;
 
-	private int sqlType;
+	public UnsupportedSqlTypeException()
+	{
+		super();
+	}
 
 	public UnsupportedSqlTypeException(int sqlType)
 	{
-		super("JDBC sql type [" + sqlType + "] is not supported");
-		this.sqlType = sqlType;
+		super("Sql type [" + sqlType + "] is not supported");
 	}
 
-	public UnsupportedSqlTypeException(int sqlType, String message)
+	public UnsupportedSqlTypeException(String message)
 	{
 		super(message);
-		this.sqlType = sqlType;
 	}
 
-	public UnsupportedSqlTypeException(int sqlType, Throwable cause)
+	public UnsupportedSqlTypeException(Throwable cause)
 	{
 		super(cause);
-		this.sqlType = sqlType;
 	}
 
-	public UnsupportedSqlTypeException(int sqlType, String message, Throwable cause)
+	public UnsupportedSqlTypeException(String message, Throwable cause)
 	{
 		super(message, cause);
-		this.sqlType = sqlType;
-	}
-
-	public int getSqlType()
-	{
-		return sqlType;
-	}
-
-	protected void setSqlType(int sqlType)
-	{
-		this.sqlType = sqlType;
 	}
 }

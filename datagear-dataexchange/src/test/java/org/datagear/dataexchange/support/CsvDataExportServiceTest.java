@@ -26,7 +26,7 @@ import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
 import org.datagear.dataexchange.TableQuery;
 import org.datagear.dataexchange.TextDataExportOption;
-import org.datagear.dataexchange.TextValueDataImportOption;
+import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.junit.Before;
@@ -71,10 +71,10 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Reader> readerFactory = ClasspathReaderResourceFactory
 					.valueOf(getResourceClasspath("support/CsvDataExportServiceTest.csv"), "UTF-8");
 
-			TextValueDataImportOption textValueDataImportOption = new TextValueDataImportOption(ExceptionResolve.ABORT,
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT,
 					true, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					textValueDataImportOption, TABLE_NAME, readerFactory);
+					valueDataImportOption, TABLE_NAME, readerFactory);
 
 			clearTable(cn, TABLE_NAME);
 
