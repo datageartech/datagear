@@ -411,6 +411,9 @@
     			<bean class="org.datagear.dataexchange.support.SqlDataExportService">
     				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
     			</bean>
+    			<bean class="org.datagear.dataexchange.support.ExcelDataImportService">
+    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    			</bean>
     			<bean class="org.datagear.dataexchange.support.ExcelDataExportService">
     				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
     			</bean>

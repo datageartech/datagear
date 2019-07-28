@@ -47,6 +47,16 @@ Schema schema 数据库，不允许为null
 						</div>
 					</div>
 				</div>
+				<div class="form-item">
+					<div class="form-item-label">&nbsp;</div>
+					<div class="form-item-value">
+						<label for="${pageId}-dataType-2"><@spring.message code='dataImport.dataType.excel' /></label>
+						<input id="${pageId}-dataType-2" type="radio" name="dataType" value="excel" />
+						<div class="input-desc minor">
+							<@spring.message code='dataImport.dataType.excel.desc' />
+						</div>
+					</div>
+				</div>
 				<!--
 				<div class="form-item">
 					<div class="form-item-label">&nbsp;</div>

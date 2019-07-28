@@ -44,6 +44,7 @@ import org.datagear.dataexchange.DataExchangeService;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataImportOption;
 import org.datagear.dataexchange.DataSourceConnectionFactory;
+import org.datagear.dataexchange.FileInputStreamResourceFactory;
 import org.datagear.dataexchange.FileOutputStreamResourceFactory;
 import org.datagear.dataexchange.FileReaderResourceFactory;
 import org.datagear.dataexchange.FileWriterResourceFactory;
@@ -58,6 +59,7 @@ import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.dataexchange.support.CsvDataExport;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.ExcelDataExport;
+import org.datagear.dataexchange.support.ExcelDataImport;
 import org.datagear.dataexchange.support.SqlDataExport;
 import org.datagear.dataexchange.support.SqlDataImport;
 import org.datagear.dbinfo.DatabaseInfoResolver;
@@ -403,6 +405,125 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 
 		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers, dependentNumberNone);
+
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
+		Collections.addAll(subDataExchangeSet, subDataExchanges);
+
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
+				importServerChannel, locale);
+
+		this.dataExchangeService.exchange(batchDataExchange);
+
+		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
+		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+
+		return buildOperationMessageSuccessEmptyResponseEntity();
+	}
+
+	@RequestMapping("/{schemaId}/import/excel")
+	public String imptExcel(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+			}
+		}.execute();
+
+		DataFormat defaultDataFormat = new DataFormat();
+
+		String dataExchangeId = IDUtil.uuid();
+
+		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
+
+		return "/dataexchange/import_excel";
+	}
+
+	@RequestMapping(value = "/{schemaId}/import/excel/uploadImportFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<DataImportFileInfo> imptExcelUploadFile(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@RequestParam("file") MultipartFile multipartFile) throws Exception
+	{
+		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, new ExcelFileFilger());
+	}
+
+	@RequestMapping(value = "/{schemaId}/import/excel/doImport", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> imptExcelDoImport(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("dataExchangeId") String dataExchangeId, TextValueFileBatchDataImportForm dataImportForm,
+			@RequestParam("dependentNumberAuto") final String dependentNumberAuto) throws Throwable
+	{
+		if (dataImportForm == null || isEmpty(dataImportForm.getSubDataExchangeIds())
+				|| isEmpty(dataImportForm.getFileNames()) || isEmpty(dataImportForm.getNumbers())
+				|| isEmpty(dataImportForm.getDependentNumbers()) || isEmpty(dataImportForm.getImportOption())
+				|| isEmpty(dataImportForm.getDataFormat()) || isEmpty(dataImportForm.getTableNames())
+				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getFileNames().length
+				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getNumbers().length
+				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getDependentNumbers().length
+				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getTableNames().length)
+			throw new IllegalInputException();
+
+		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
+		final String[] numbers = dataImportForm.getNumbers();
+		final String[] dependentNumbers = dataImportForm.getDependentNumbers();
+		String[] fileNames = dataImportForm.getFileNames();
+		final String[] tableNames = dataImportForm.getTableNames();
+
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
+
+		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+
+		String importChannelId = getDataExchangeChannelId(dataExchangeId);
+		ServerChannel importServerChannel = this.dataExchangeCometdService.getChannelWithCreation(importChannelId);
+
+		Locale locale = getLocale(request);
+
+		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
+
+		for (int i = 0; i < subDataExchangeIds.length; i++)
+		{
+			File file = FileUtil.getFile(directory, fileNames[i]);
+			ResourceFactory<InputStream> readerFactory = FileInputStreamResourceFactory.valueOf(file);
+
+			ExcelDataImport excelDataImport = new ExcelDataImport(connectionFactory, dataImportForm.getDataFormat(),
+					dataImportForm.getImportOption(), readerFactory);
+			excelDataImport.setUnifiedTable(tableNames[i]);
+
+			CometdSubTextValueDataImportListener listener = new CometdSubTextValueDataImportListener(
+					this.dataExchangeCometdService, importServerChannel, getMessageSource(), locale,
+					subDataExchangeIds[i], excelDataImport.getImportOption().getExceptionResolve());
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+			listener.setSendExchangingMessageInterval(
+					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, excelDataImport));
+			excelDataImport.setListener(listener);
+
+			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], numbers[i], excelDataImport);
+			subDataExchanges[i] = subDataExchange;
+		}
+
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+				Connection cn = getConnection();
+
+				inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers, dependentNumberAuto);
+			}
+		}.execute();
+
+		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers, "");
 
 		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
@@ -1384,6 +1505,24 @@ public class DataExchangeController extends AbstractSchemaConnController
 				return true;
 			else
 				return file.getName().toLowerCase().endsWith(".sql");
+		}
+	}
+
+	protected static class ExcelFileFilger implements FileFilter
+	{
+		public ExcelFileFilger()
+		{
+			super();
+		}
+
+		@Override
+		public boolean accept(File file)
+		{
+			if (file.isDirectory())
+				return true;
+
+			String fileName = file.getName().toLowerCase();
+			return (fileName.endsWith(".xlsx") || fileName.endsWith(".xls"));
 		}
 	}
 
