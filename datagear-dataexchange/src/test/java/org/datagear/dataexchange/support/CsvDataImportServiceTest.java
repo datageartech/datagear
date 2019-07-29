@@ -17,7 +17,6 @@ import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.IllegalImportSourceValueException;
 import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
-import org.datagear.dataexchange.ValueDataImportListener;
 import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
@@ -99,7 +98,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, TABLE_NAME, readerFactory);
 
-			impt.setListener(new MockTextDataImportListener()
+			impt.setListener(new MockValueDataImportListener()
 			{
 				@Override
 				public void onSuccess(DataIndex dataIndex)
@@ -149,7 +148,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, TABLE_NAME, readerFactory);
 
-			impt.setListener(new MockTextDataImportListener()
+			impt.setListener(new MockValueDataImportListener()
 			{
 				@Override
 				public void onSuccess(DataIndex dataIndex)
@@ -213,52 +212,6 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 		{
 			JdbcUtil.closeConnection(cn);
 			IOUtil.close(reader);
-		}
-	}
-
-	protected class MockTextDataImportListener implements ValueDataImportListener
-	{
-		@Override
-		public void onStart()
-		{
-			println("onStart");
-		}
-
-		@Override
-		public void onException(DataExchangeException e)
-		{
-			println("onException : " + e.getMessage());
-		}
-
-		@Override
-		public void onSuccess()
-		{
-			println("onSuccess");
-		}
-
-		@Override
-		public void onFinish()
-		{
-			println("onFinish");
-		}
-
-		@Override
-		public void onSuccess(DataIndex dataIndex)
-		{
-			println("onSuccess : " + dataIndex);
-		}
-
-		@Override
-		public void onIgnore(DataIndex dataIndex, DataExchangeException e)
-		{
-			println("onIgnore : " + dataIndex);
-		}
-
-		@Override
-		public void onSetNullColumnValue(DataIndex dataIndex, String columnName, Object columnValue,
-				DataExchangeException e)
-		{
-			println("onSetNullColumnValue : " + dataIndex + ", " + columnName);
 		}
 	}
 }

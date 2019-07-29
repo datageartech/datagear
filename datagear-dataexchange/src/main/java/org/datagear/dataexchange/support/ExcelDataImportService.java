@@ -5,11 +5,16 @@
 package org.datagear.dataexchange.support;
 
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
 import org.apache.poi.hssf.record.BOFRecord;
+import org.apache.poi.hssf.record.BlankRecord;
 import org.apache.poi.hssf.record.BoundSheetRecord;
 import org.apache.poi.hssf.record.LabelSSTRecord;
 import org.apache.poi.hssf.record.NumberRecord;
@@ -19,7 +24,9 @@ import org.apache.poi.hssf.record.SSTRecord;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
+import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
+import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
 /**
@@ -51,31 +58,93 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 	{
 		IndexFormatDataExchangeContext importContext = IndexFormatDataExchangeContext.cast(context);
 
+		Connection cn = context.getConnection();
+		cn.setAutoCommit(false);
+
 		InputStream in = getResource(dataExchange.getInputFactory(), importContext);
 		POIFSFileSystem poifs = new POIFSFileSystem(in);
-		InputStream din = poifs.createDocumentInputStream("Workbook");
-		importContext.addContextCloseable(din);
 
 		HSSFRequest req = new HSSFRequest();
-		req.addListenerForAllRecords(new XlsEventListener());
+		req.addListenerForAllRecords(new XlsEventListener(dataExchange, importContext, cn));
 
 		HSSFEventFactory factory = new HSSFEventFactory();
-		factory.processEvents(req, din);
+		factory.processWorkbookEvents(req, poifs);
+
+		commit(cn);
+	}
+
+	@Override
+	protected void onException(ExcelDataImport dataExchange, DataExchangeContext context, DataExchangeException e)
+			throws DataExchangeException
+	{
+		processTransactionForDataExchangeException(context, e, dataExchange.getImportOption().getExceptionResolve());
+
+		super.onException(dataExchange, context, e);
 	}
 
 	/**
-	 * xls格式的Excel处理器。
+	 * {@code .xls}格式的Excel处理器。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class XlsEventListener implements HSSFListener
+	protected class XlsEventListener implements HSSFListener
 	{
-		private SSTRecord sstrec;
+		private ExcelDataImport excelDataImport;
+		private IndexFormatDataExchangeContext importContext;
+		private Connection connection;
+
+		private String _sheetName;
+		private int _sheetIndex = -1;
+		private SSTRecord _sstRecord;
+		private List<String> _columnNames = new ArrayList<String>();
+		private List<Object> _columnValues = new ArrayList<Object>();
+		private int _rowIndex = 1;
+		private List<ColumnInfo> _columnInfos = null;
+		private PreparedStatement _statement;
 
 		public XlsEventListener()
 		{
 			super();
+		}
+
+		public XlsEventListener(ExcelDataImport excelDataImport, IndexFormatDataExchangeContext importContext,
+				Connection connection)
+		{
+			super();
+			this.excelDataImport = excelDataImport;
+			this.importContext = importContext;
+			this.connection = connection;
+		}
+
+		public ExcelDataImport getExcelDataImport()
+		{
+			return excelDataImport;
+		}
+
+		public void setExcelDataImport(ExcelDataImport excelDataImport)
+		{
+			this.excelDataImport = excelDataImport;
+		}
+
+		public IndexFormatDataExchangeContext getImportContext()
+		{
+			return importContext;
+		}
+
+		public void setImportContext(IndexFormatDataExchangeContext importContext)
+		{
+			this.importContext = importContext;
+		}
+
+		public Connection getConnection()
+		{
+			return connection;
+		}
+
+		public void setConnection(Connection connection)
+		{
+			this.connection = connection;
 		}
 
 		@Override
@@ -89,11 +158,10 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 
 					if (bof.getType() == BOFRecord.TYPE_WORKBOOK)
 					{
-						System.out.println("Encountered workbook");
 					}
 					else if (bof.getType() == BOFRecord.TYPE_WORKSHEET)
 					{
-						System.out.println("Encountered sheet reference");
+
 					}
 
 					break;
@@ -101,40 +169,82 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 				case BoundSheetRecord.sid:
 				{
 					BoundSheetRecord bsr = (BoundSheetRecord) record;
-					System.out.println("New sheet named: " + bsr.getSheetname());
+					this._sheetName = bsr.getSheetname();
+					this._sheetIndex++;
+
+					this._columnNames.clear();
+					this._columnValues.clear();
+					this._rowIndex = 1;
+					this._columnInfos = null;
+
 					break;
 				}
 				case RowRecord.sid:
 				{
-					RowRecord rowrec = (RowRecord) record;
-					System.out.println("Row found, first column at "
-							+ rowrec.getFirstCol() + " last column at " + rowrec.getLastCol());
+					break;
+				}
+				case BlankRecord.sid:
+				{
+					this._columnValues.add(null);
+
 					break;
 				}
 				case NumberRecord.sid:
 				{
 					NumberRecord numrec = (NumberRecord) record;
-					System.out.println("Cell found with value " + numrec.getValue()
-							+ " at row " + numrec.getRow() + " and column " + numrec.getColumn());
+					this._columnValues.add(numrec.getValue());
+
 					break;
-					// SSTRecords store a array of unique strings used in Excel.
 				}
 				case SSTRecord.sid:
 				{
-					sstrec = (SSTRecord) record;
-					for (int k = 0; k < sstrec.getNumUniqueStrings(); k++)
-					{
-						System.out.println("String table value " + k + " = " + sstrec.getString(k));
-					}
+					_sstRecord = (SSTRecord) record;
+
 					break;
 				}
 				case LabelSSTRecord.sid:
 				{
 					LabelSSTRecord lrec = (LabelSSTRecord) record;
-					System.out.println("String cell found with value "
-							+ sstrec.getString(lrec.getSSTIndex()));
+
+					String value = _sstRecord.getString(lrec.getSSTIndex()).toString();
+
+					// 列名称
+					if (lrec.getRow() == 0)
+						this._columnNames.add(value);
+					// 列值
+					else
+						this._columnValues.add(value);
+
 					break;
 				}
+			}
+
+			int columnNameSize = this._columnNames.size();
+
+			if (columnNameSize > 0 && this._columnValues.size() == columnNameSize)
+			{
+				if (this._columnInfos == null)
+				{
+					String tableName = (this.excelDataImport.hasUnifiedTable() ? this.excelDataImport.getUnifiedTable()
+							: this._sheetName);
+					this._columnInfos = ExcelDataImportService.this.getColumnInfos(this.connection, tableName,
+							this._columnNames, false);
+
+					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._columnInfos);
+					this._statement = createPreparedStatementUnchecked(this.connection, sql);
+				}
+
+				this.importContext.setDataIndex(ExcelDataIndex.valueOf(this._sheetIndex, this._rowIndex));
+
+				ExcelDataImportService.this.importValueData(this.connection, this._statement, this._columnInfos,
+						_columnValues, this.importContext.getDataIndex(),
+						this.excelDataImport.getImportOption().isNullForIllegalColumnValue(),
+						this.excelDataImport.getImportOption().getExceptionResolve(),
+						this.importContext.getDataFormatContext(), this.excelDataImport.getListener());
+
+				this._columnValues.clear();
+
+				this._rowIndex++;
 			}
 		}
 	}

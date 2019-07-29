@@ -5,6 +5,7 @@
 package org.datagear.dataexchange;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.sql.Connection;
@@ -134,7 +135,7 @@ public abstract class DataexchangeTestSupport extends DBTestSupport
 				return DataexchangeTestSupport.this.getConnection();
 			}
 
-			//@Override
+			// @Override
 			public Logger getParentLogger() throws SQLFeatureNotSupportedException
 			{
 				throw new SQLFeatureNotSupportedException();
@@ -147,8 +148,59 @@ public abstract class DataexchangeTestSupport extends DBTestSupport
 		return ClasspathReaderResourceFactory.valueOf(getResourceClasspath(resourceName), "UTF-8");
 	}
 
+	protected ResourceFactory<InputStream> getTestInputStreamResourceFactory(String resourceName) throws IOException
+	{
+		return ClasspathInputStreamResourceFactory.valueOf(getResourceClasspath(resourceName));
+	}
+
 	protected String getResourceClasspath(String resourceName)
 	{
 		return "org/datagear/dataexchange/" + resourceName;
+	}
+
+	protected class MockValueDataImportListener implements ValueDataImportListener
+	{
+		@Override
+		public void onStart()
+		{
+			println("onStart");
+		}
+
+		@Override
+		public void onException(DataExchangeException e)
+		{
+			println("onException : " + e.getMessage());
+		}
+
+		@Override
+		public void onSuccess()
+		{
+			println("onSuccess");
+		}
+
+		@Override
+		public void onFinish()
+		{
+			println("onFinish");
+		}
+
+		@Override
+		public void onSuccess(DataIndex dataIndex)
+		{
+			println("onSuccess : " + dataIndex);
+		}
+
+		@Override
+		public void onIgnore(DataIndex dataIndex, DataExchangeException e)
+		{
+			println("onIgnore : " + dataIndex);
+		}
+
+		@Override
+		public void onSetNullColumnValue(DataIndex dataIndex, String columnName, Object columnValue,
+				DataExchangeException e)
+		{
+			println("onSetNullColumnValue : " + dataIndex + ", " + columnName);
+		}
 	}
 }

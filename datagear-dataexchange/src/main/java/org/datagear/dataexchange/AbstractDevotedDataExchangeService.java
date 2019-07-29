@@ -327,6 +327,28 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param table
 	 * @param columnInfos
 	 * @return
+	 * @throws DataExchangeException
+	 */
+	protected String buildInsertPreparedSqlUnchecked(Connection cn, String table, List<ColumnInfo> columnInfos)
+			throws DataExchangeException
+	{
+		try
+		{
+			return buildInsertPreparedSql(cn, table, columnInfos);
+		}
+		catch (SQLException e)
+		{
+			throw new DataExchangeException(e);
+		}
+	}
+
+	/**
+	 * 构建插入预编译SQL语句。
+	 * 
+	 * @param cn
+	 * @param table
+	 * @param columnInfos
+	 * @return
 	 * @throws SQLException
 	 */
 	protected String buildInsertPreparedSql(Connection cn, String table, List<ColumnInfo> columnInfos)
@@ -361,6 +383,39 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		sql.append(")");
 
 		return sql.toString();
+	}
+
+	/**
+	 * 创建{@linkplain PreparedStatement}。
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @return
+	 * @throws SQLException
+	 */
+	protected PreparedStatement createPreparedStatementUnchecked(Connection cn, String sql) throws DataExchangeException
+	{
+		try
+		{
+			return cn.prepareStatement(sql);
+		}
+		catch (SQLException e)
+		{
+			throw new DataExchangeException(e);
+		}
+	}
+
+	/**
+	 * 创建{@linkplain PreparedStatement}。
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @return
+	 * @throws SQLException
+	 */
+	protected PreparedStatement createPreparedStatement(Connection cn, String sql) throws SQLException
+	{
+		return cn.prepareStatement(sql);
 	}
 
 	/**
