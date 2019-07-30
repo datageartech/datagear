@@ -43,7 +43,7 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 	}
 
 	@Test
-	public void exchangeTest() throws Throwable
+	public void exchangeTest_xls() throws Throwable
 	{
 		DataFormat dataFormat = new DataFormat();
 
@@ -77,7 +77,7 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 	}
 
 	@Test
-	public void exchangeTest_ignoreInexistentColumn() throws Throwable
+	public void exchangeTest_xls_ignoreInexistentColumn() throws Throwable
 	{
 		DataFormat dataFormat = new DataFormat();
 
@@ -89,6 +89,62 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 
 			File excelFile = getClasspathFileForTest(
 					"org/datagear/dataexchange/support/ExcelDataImportServiceTest.xls");
+
+			final AtomicInteger successCount = new AtomicInteger(0);
+			final AtomicInteger ignoreCount = new AtomicInteger(0);
+
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
+
+			ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
+					valueDataImportOption, excelFile);
+
+			impt.setListener(new MockValueDataImportListener()
+			{
+				@Override
+				public void onSuccess(DataIndex dataIndex)
+				{
+					super.onSuccess(dataIndex);
+					successCount.incrementAndGet();
+				}
+
+				@Override
+				public void onIgnore(DataIndex dataIndex, DataExchangeException e)
+				{
+					super.onIgnore(dataIndex, e);
+					ignoreCount.incrementAndGet();
+				}
+			});
+
+			clearTable(cn, TABLE_NAME_DATA_IMPORT);
+			clearTable(cn, TABLE_NAME_DATA_EXPORT);
+
+			this.excelDataImportService.exchange(impt);
+
+			int count0 = getCount(cn, TABLE_NAME_DATA_IMPORT);
+			int count1 = getCount(cn, TABLE_NAME_DATA_EXPORT);
+
+			assertEquals(5, count0);
+			assertEquals(6, count1);
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+		}
+	}
+
+	@Test
+	public void exchangeTest_xlsx_ignoreInexistentColumn() throws Throwable
+	{
+		DataFormat dataFormat = new DataFormat();
+
+		Connection cn = getConnection();
+
+		try
+		{
+			cn = getConnection();
+
+			File excelFile = getClasspathFileForTest(
+					"org/datagear/dataexchange/support/ExcelDataImportServiceTest.xlsx");
 
 			final AtomicInteger successCount = new AtomicInteger(0);
 			final AtomicInteger ignoreCount = new AtomicInteger(0);

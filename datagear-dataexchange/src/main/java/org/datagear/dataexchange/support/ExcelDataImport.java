@@ -21,7 +21,7 @@ public class ExcelDataImport extends TextValueDataImport
 {
 	private File file;
 
-	private boolean xlsx = true;
+	private boolean xls = false;
 
 	private String unifiedTable;
 
@@ -37,7 +37,7 @@ public class ExcelDataImport extends TextValueDataImport
 		this.file = file;
 
 		String fileName = this.file.getName().toLowerCase();
-		this.xlsx = (!fileName.endsWith(".xls"));
+		this.xls = fileName.endsWith(".xls");
 	}
 
 	public File getFile()
@@ -51,18 +51,18 @@ public class ExcelDataImport extends TextValueDataImport
 	}
 
 	/**
-	 * 是否是{@code .xlsx}文件。
+	 * 是否是{@code .xls}文件。
 	 * 
-	 * @return {@code true}，是{@code .xlsx}文件；{@code false} 是{@code .xls}文件。
+	 * @return {@code true}，是{@code .xls}文件；{@code false} 是{@code .xlsx}文件。
 	 */
-	public boolean isXlsx()
+	public boolean isXls()
 	{
-		return xlsx;
+		return xls;
 	}
 
-	public void setXlsx(boolean xlsx)
+	public void setXls(boolean xls)
 	{
-		this.xlsx = xlsx;
+		this.xls = xls;
 	}
 
 	/**

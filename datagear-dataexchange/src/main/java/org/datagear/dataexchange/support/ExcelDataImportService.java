@@ -4,6 +4,7 @@
 
 package org.datagear.dataexchange.support;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Types;
@@ -24,14 +25,27 @@ import org.apache.poi.hssf.record.NumberRecord;
 import org.apache.poi.hssf.record.Record;
 import org.apache.poi.hssf.record.RowRecord;
 import org.apache.poi.hssf.record.SSTRecord;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.util.SAXHelper;
+import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
+import org.apache.poi.xssf.eventusermodel.XSSFReader;
+import org.apache.poi.xssf.model.StylesTable;
 import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.util.IOUtil;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Excel导入服务。
@@ -65,14 +79,10 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 		Connection cn = context.getConnection();
 		cn.setAutoCommit(false);
 
-		POIFSFileSystem poifs = new POIFSFileSystem(dataExchange.getFile(), true);
-
-		HSSFRequest req = new HSSFRequest();
-		req.addListenerForAllRecords(
-				new MissingRecordAwareHSSFListener(new XlsEventListener(dataExchange, importContext, cn)));
-
-		HSSFEventFactory factory = new HSSFEventFactory();
-		factory.processWorkbookEvents(req, poifs);
+		if (dataExchange.isXls())
+			importXls(dataExchange, importContext, cn);
+		else
+			importXlsx(dataExchange, importContext, cn);
 
 		commit(cn);
 	}
@@ -84,6 +94,89 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 		processTransactionForDataExchangeException(context, e, dataExchange.getImportOption().getExceptionResolve());
 
 		super.onException(dataExchange, context, e);
+	}
+
+	/**
+	 * 导入{@code .xls}文件。
+	 * 
+	 * @param dataExchange
+	 * @param importContext
+	 * @param cn
+	 * @throws Throwable
+	 */
+	protected void importXls(ExcelDataImport dataExchange, IndexFormatDataExchangeContext importContext, Connection cn)
+			throws Throwable
+	{
+		POIFSFileSystem poifs = new POIFSFileSystem(dataExchange.getFile(), true);
+
+		HSSFRequest req = new HSSFRequest();
+		req.addListenerForAllRecords(
+				new MissingRecordAwareHSSFListener(new XlsEventListener(dataExchange, importContext, cn)));
+
+		HSSFEventFactory factory = new HSSFEventFactory();
+		factory.processWorkbookEvents(req, poifs);
+	}
+
+	/**
+	 * 导入{@code .xlsx}文件。
+	 * 
+	 * @param dataExchange
+	 * @param importContext
+	 * @param cn
+	 * @throws Throwable
+	 */
+	protected void importXlsx(ExcelDataImport dataExchange, IndexFormatDataExchangeContext importContext, Connection cn)
+			throws Throwable
+	{
+		OPCPackage opcPackage = OPCPackage.open(dataExchange.getFile(), PackageAccess.READ);
+		importContext.addContextCloseable(opcPackage);
+
+		ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(opcPackage);
+		XSSFReader xssfReader = new XSSFReader(opcPackage);
+		StylesTable styles = xssfReader.getStylesTable();
+
+		XSSFReader.SheetIterator iter = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
+		int index = 0;
+
+		while (iter.hasNext())
+		{
+			InputStream in = null;
+
+			try
+			{
+				in = iter.next();
+
+				String sheetName = iter.getSheetName();
+				importXlsxSheet(strings, styles, sheetName, index, in);
+			}
+			finally
+			{
+				IOUtil.close(in);
+			}
+
+			index++;
+		}
+	}
+
+	/**
+	 * 导入{@code .xlsx}单个sheet。
+	 * 
+	 * @param sharedStringsTable
+	 * @param stylesTable
+	 * @param sheetName
+	 * @param sheetIndex
+	 * @param sheetInputStream
+	 * @throws Throwable
+	 */
+	public void importXlsxSheet(ReadOnlySharedStringsTable sharedStringsTable, StylesTable stylesTable,
+			String sheetName, int sheetIndex, InputStream sheetInputStream) throws Throwable
+	{
+		InputSource sheetSource = new InputSource(sheetInputStream);
+
+		XMLReader sheetParser = SAXHelper.newXMLReader();
+		ContentHandler handler = new XlsxSheetHandler(stylesTable, sharedStringsTable, sheetName, sheetIndex);
+		sheetParser.setContentHandler(handler);
+		sheetParser.parse(sheetSource);
 	}
 
 	/**
@@ -362,6 +455,140 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 			}
 
 			return true;
+		}
+	}
+
+	protected class XlsxSheetHandler extends DefaultHandler
+	{
+		private StylesTable stylesTable;
+		private ReadOnlySharedStringsTable sharedStringsTable;
+		private String sheetName;
+		private int sheetIndex;
+
+		private int _rowIndex = 0;
+		private int _nextRowIndex = 0;
+
+		private StringBuilder _lastContents = new StringBuilder();
+		private boolean _nextIsString;
+
+		public XlsxSheetHandler()
+		{
+			super();
+		}
+
+		public XlsxSheetHandler(StylesTable stylesTable, ReadOnlySharedStringsTable sharedStringsTable,
+				String sheetName, int sheetIndex)
+		{
+			super();
+			this.stylesTable = stylesTable;
+			this.sharedStringsTable = sharedStringsTable;
+			this.sheetName = sheetName;
+			this.sheetIndex = sheetIndex;
+		}
+
+		public StylesTable getStylesTable()
+		{
+			return stylesTable;
+		}
+
+		public void setStylesTable(StylesTable stylesTable)
+		{
+			this.stylesTable = stylesTable;
+		}
+
+		public ReadOnlySharedStringsTable getSharedStringsTable()
+		{
+			return sharedStringsTable;
+		}
+
+		public void setSharedStringsTable(ReadOnlySharedStringsTable sharedStringsTable)
+		{
+			this.sharedStringsTable = sharedStringsTable;
+		}
+
+		public String getSheetName()
+		{
+			return sheetName;
+		}
+
+		public void setSheetName(String sheetName)
+		{
+			this.sheetName = sheetName;
+		}
+
+		public int getSheetIndex()
+		{
+			return sheetIndex;
+		}
+
+		public void setSheetIndex(int sheetIndex)
+		{
+			this.sheetIndex = sheetIndex;
+		}
+
+		@Override
+		public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException
+		{
+			if ("row".equals(name))
+			{
+				String rowIndexStr = attributes.getValue("r");
+				if (rowIndexStr != null)
+				{
+					this._rowIndex = Integer.parseInt(rowIndexStr) - 1;
+				}
+				else
+				{
+					this._rowIndex = this._nextRowIndex;
+				}
+			}
+			else if ("c".equals(name))
+			{
+				String cellType = attributes.getValue("t");
+				if (cellType != null && cellType.equals("s"))
+				{
+					_nextIsString = true;
+				}
+				else
+				{
+					_nextIsString = false;
+				}
+			}
+
+			if (this._lastContents.length() > 0)
+				this._lastContents.delete(0, this._lastContents.length());
+
+			System.out.println("Sheet [" + this.sheetName + "] start element :" + localName + ", " + name);
+		}
+
+		@Override
+		public void endElement(String uri, String localName, String name) throws SAXException
+		{
+			if ("row".equals(name))
+			{
+				this._nextRowIndex = this._rowIndex + 1;
+			}
+
+			if (_nextIsString)
+			{
+				int idx = Integer.parseInt(this._lastContents.toString());
+				this._lastContents.delete(0, this._lastContents.length());
+				this._lastContents.append(sharedStringsTable.getEntryAt(idx));
+
+				_nextIsString = false;
+			}
+
+			if (name.equals("v"))
+			{
+				System.out.println("[row=" + this._rowIndex + "] : " + this._lastContents);
+			}
+
+			System.out.println("Sheet [" + this.sheetName + "] end element :" + localName + ", " + name);
+		}
+
+		@Override
+		public void characters(char[] ch, int start, int length)
+		{
+			this._lastContents.append(new String(ch, start, length));
 		}
 	}
 }
