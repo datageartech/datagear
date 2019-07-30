@@ -4,7 +4,6 @@
 
 package org.datagear.dataexchange.support;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Types;
@@ -66,8 +65,7 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 		Connection cn = context.getConnection();
 		cn.setAutoCommit(false);
 
-		InputStream in = getResource(dataExchange.getInputFactory(), importContext);
-		POIFSFileSystem poifs = new POIFSFileSystem(in);
+		POIFSFileSystem poifs = new POIFSFileSystem(dataExchange.getFile(), true);
 
 		HSSFRequest req = new HSSFRequest();
 		req.addListenerForAllRecords(

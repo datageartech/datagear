@@ -44,7 +44,6 @@ import org.datagear.dataexchange.DataExchangeService;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataImportOption;
 import org.datagear.dataexchange.DataSourceConnectionFactory;
-import org.datagear.dataexchange.FileInputStreamResourceFactory;
 import org.datagear.dataexchange.FileOutputStreamResourceFactory;
 import org.datagear.dataexchange.FileReaderResourceFactory;
 import org.datagear.dataexchange.FileWriterResourceFactory;
@@ -493,10 +492,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		for (int i = 0; i < subDataExchangeIds.length; i++)
 		{
 			File file = FileUtil.getFile(directory, fileNames[i]);
-			ResourceFactory<InputStream> readerFactory = FileInputStreamResourceFactory.valueOf(file);
 
 			ExcelDataImport excelDataImport = new ExcelDataImport(connectionFactory, dataImportForm.getDataFormat(),
-					dataImportForm.getImportOption(), readerFactory);
+					dataImportForm.getImportOption(), file);
 			excelDataImport.setUnifiedTable(tableNames[i]);
 
 			CometdSubTextValueDataImportListener listener = new CometdSubTextValueDataImportListener(

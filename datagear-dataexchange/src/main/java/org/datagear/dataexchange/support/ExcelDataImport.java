@@ -4,11 +4,10 @@
 
 package org.datagear.dataexchange.support;
 
-import java.io.InputStream;
+import java.io.File;
 
 import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataFormat;
-import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.TextValueDataImport;
 import org.datagear.dataexchange.ValueDataImportOption;
 
@@ -20,7 +19,7 @@ import org.datagear.dataexchange.ValueDataImportOption;
  */
 public class ExcelDataImport extends TextValueDataImport
 {
-	private ResourceFactory<InputStream> inputFactory;
+	private File file;
 
 	private boolean xlsx = true;
 
@@ -32,20 +31,23 @@ public class ExcelDataImport extends TextValueDataImport
 	}
 
 	public ExcelDataImport(ConnectionFactory connectionFactory, DataFormat dataFormat,
-			ValueDataImportOption importOption, ResourceFactory<InputStream> inputFactory)
+			ValueDataImportOption importOption, File file)
 	{
 		super(connectionFactory, dataFormat, importOption);
-		this.inputFactory = inputFactory;
+		this.file = file;
+
+		String fileName = this.file.getName().toLowerCase();
+		this.xlsx = (!fileName.endsWith(".xls"));
 	}
 
-	public ResourceFactory<InputStream> getInputFactory()
+	public File getFile()
 	{
-		return inputFactory;
+		return file;
 	}
 
-	public void setInputFactory(ResourceFactory<InputStream> inputFactory)
+	public void setFile(File file)
 	{
-		this.inputFactory = inputFactory;
+		this.file = file;
 	}
 
 	/**

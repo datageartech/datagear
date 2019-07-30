@@ -6,7 +6,7 @@ package org.datagear.dataexchange.support;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.InputStream;
+import java.io.File;
 import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,7 +16,6 @@ import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataIndex;
 import org.datagear.dataexchange.DataexchangeTestSupport;
 import org.datagear.dataexchange.ExceptionResolve;
-import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
 import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.util.JdbcUtil;
@@ -53,14 +52,15 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			ResourceFactory<InputStream> inputFactory = getTestInputStreamResourceFactory(
-					"support/ExcelDataImportServiceTest.xls");
+
+			File excelFile = getClasspathFileForTest(
+					"org/datagear/dataexchange/support/ExcelDataImportServiceTest.xls");
 
 			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, false,
 					true);
 
 			ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					valueDataImportOption, inputFactory);
+					valueDataImportOption, excelFile);
 
 			clearTable(cn, TABLE_NAME_DATA_IMPORT);
 			clearTable(cn, TABLE_NAME_DATA_EXPORT);
@@ -86,8 +86,9 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 		try
 		{
 			cn = getConnection();
-			ResourceFactory<InputStream> inputFactory = getTestInputStreamResourceFactory(
-					"support/ExcelDataImportServiceTest.xls");
+
+			File excelFile = getClasspathFileForTest(
+					"org/datagear/dataexchange/support/ExcelDataImportServiceTest.xls");
 
 			final AtomicInteger successCount = new AtomicInteger(0);
 			final AtomicInteger ignoreCount = new AtomicInteger(0);
@@ -95,7 +96,7 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
 
 			ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
-					valueDataImportOption, inputFactory);
+					valueDataImportOption, excelFile);
 
 			impt.setListener(new MockValueDataImportListener()
 			{
@@ -129,5 +130,15 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 		{
 			JdbcUtil.closeConnection(cn);
 		}
+	}
+
+	protected File getClasspathFileForTest(String classpath)
+	{
+		if (!classpath.startsWith("/"))
+			classpath = "/" + classpath;
+
+		File file = new File("src/test/resources" + classpath);
+
+		return file;
 	}
 }
