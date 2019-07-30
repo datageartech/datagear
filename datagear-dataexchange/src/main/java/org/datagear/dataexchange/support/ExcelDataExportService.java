@@ -5,6 +5,8 @@
 package org.datagear.dataexchange.support;
 
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -14,11 +16,15 @@ import java.util.List;
 
 import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
+import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataFormatContext;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
@@ -48,13 +54,14 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 	@Override
 	protected DataExchangeContext createDataExchangeContext(ExcelDataExport dataExchange)
 	{
-		return IndexFormatDataExchangeContext.valueOf(dataExchange);
+		return new ExcelDataExportContext(dataExchange.getConnectionFactory(),
+				new DataFormatContext(dataExchange.getDataFormat()));
 	}
 
 	@Override
 	protected void exchange(ExcelDataExport dataExchange, DataExchangeContext context) throws Throwable
 	{
-		IndexFormatDataExchangeContext exportContext = IndexFormatDataExchangeContext.cast(context);
+		ExcelDataExportContext exportContext = (ExcelDataExportContext) context;
 
 		OutputStream out = getResource(dataExchange.getOutputFactory(), exportContext);
 
@@ -79,7 +86,7 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 	 * @throws Throwable
 	 */
 	protected void writeRecords(ExcelDataExport dataExchange, Connection cn, List<ColumnInfo> columnInfos, ResultSet rs,
-			OutputStream out, IndexFormatDataExchangeContext exportContext) throws Throwable
+			OutputStream out, ExcelDataExportContext exportContext) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
 		TextDataExportOption exportOption = dataExchange.getExportOption();
@@ -88,6 +95,7 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 		int maxRows = SpreadsheetVersion.EXCEL2007.getMaxRows();
 
 		SXSSFWorkbook wb = new SXSSFWorkbook(500);
+		CreationHelper creationHelper = wb.getCreationHelper();
 
 		exportContext.addContextCloseable(wb);
 
@@ -132,7 +140,8 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 
 				Cell cell = row.createCell(i);
 
-				setCellValue(dataExchange, cn, rs, i + 1, columnInfo, exportOption, exportContext, cell);
+				setCellValue(dataExchange, cn, rs, i + 1, columnInfo, exportOption, exportContext, wb, creationHelper,
+						cell);
 			}
 
 			if (listener != null)
@@ -147,7 +156,7 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 	}
 
 	/**
-	 * 将字段值设置为单元格值。
+	 * 将字段值存入单元格。
 	 * 
 	 * @param dataExchange
 	 * @param cn
@@ -156,12 +165,14 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 	 * @param columnInfo
 	 * @param exportOption
 	 * @param exportContext
+	 * @param workbook
+	 * @param creationHelper
 	 * @param cell
 	 * @throws Throwable
 	 */
 	protected void setCellValue(ExcelDataExport dataExchange, Connection cn, ResultSet rs, int columnIndex,
-			ColumnInfo columnInfo, TextDataExportOption exportOption, IndexFormatDataExchangeContext exportContext,
-			Cell cell) throws Throwable
+			ColumnInfo columnInfo, TextDataExportOption exportOption, ExcelDataExportContext exportContext,
+			SXSSFWorkbook workbook, CreationHelper creationHelper, Cell cell) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
 		DataFormatContext dataFormatContext = exportContext.getDataFormatContext();
@@ -195,25 +206,57 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 			cell.setCellType(CellType.STRING);
 			cell.setCellValue((String) value);
 		}
+		else if (value instanceof BigDecimal || value instanceof BigInteger)
+		{
+			cell.setCellType(CellType.STRING);
+			cell.setCellValue(value.toString());
+		}
 		else if (value instanceof Number)
 		{
-			cell.setCellType(CellType.NUMERIC);
-			cell.setCellValue(((Number) value).doubleValue());
+			Number number = (Number) value;
+
+			if (dataFormatContext.isPureNumberPattern())
+			{
+				cell.setCellType(CellType.NUMERIC);
+				cell.setCellValue(number.doubleValue());
+			}
+			else
+			{
+				cell.setCellType(CellType.STRING);
+				cell.setCellStyle(exportContext.getDateCellStyle(workbook, creationHelper));
+
+				if (value instanceof Double || value instanceof Float)
+					cell.setCellValue(dataFormatContext.formatDouble(number.doubleValue()));
+				else
+					cell.setCellValue(dataFormatContext.formatLong(number.longValue()));
+			}
 		}
 		else if (value instanceof Date)
 		{
-			cell.setCellType(CellType.STRING);
-			cell.setCellValue(dataFormatContext.formatDate((Date) value));
-		}
-		else if (value instanceof Timestamp)
-		{
-			cell.setCellType(CellType.STRING);
-			cell.setCellValue(dataFormatContext.formatTimestamp((Timestamp) value));
+			if (dataFormatContext.isPureDatePattern())
+			{
+				cell.setCellType(CellType.NUMERIC);
+				cell.setCellStyle(exportContext.getDateCellStyle(workbook, creationHelper));
+				cell.setCellValue((Date) value);
+			}
+			else
+			{
+				cell.setCellType(CellType.STRING);
+				cell.setCellStyle(exportContext.getDateCellStyle(workbook, creationHelper));
+				cell.setCellValue(dataFormatContext.formatDate((Date) value));
+			}
 		}
 		else if (value instanceof Time)
 		{
 			cell.setCellType(CellType.STRING);
+			cell.setCellStyle(exportContext.getTimeCellStyle(workbook, creationHelper));
 			cell.setCellValue(dataFormatContext.formatTime((Time) value));
+		}
+		else if (value instanceof Timestamp)
+		{
+			cell.setCellType(CellType.STRING);
+			cell.setCellStyle(exportContext.getTimestampCellStyle(workbook, creationHelper));
+			cell.setCellValue(dataFormatContext.formatTimestamp((Timestamp) value));
 		}
 		else if (value instanceof Boolean)
 		{
@@ -229,6 +272,72 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 		{
 			cell.setCellType(CellType.STRING);
 			cell.setCellValue(value.toString());
+		}
+	}
+
+	protected static class ExcelDataExportContext extends IndexFormatDataExchangeContext
+	{
+		private CellStyle _dateCellStyle;
+		private CellStyle _timeCellStyle;
+		private CellStyle _timestampCellStyle;
+		private CellStyle _numberCellStyle;
+
+		public ExcelDataExportContext()
+		{
+			super();
+		}
+
+		public ExcelDataExportContext(ConnectionFactory connectionFactory, DataFormatContext dataFormatContext)
+		{
+			super(connectionFactory, dataFormatContext);
+		}
+
+		public CellStyle getDateCellStyle(Workbook workbook, CreationHelper creationHelper)
+		{
+			if (this._dateCellStyle == null)
+			{
+				this._dateCellStyle = workbook.createCellStyle();
+				this._dateCellStyle.setDataFormat(
+						creationHelper.createDataFormat().getFormat(getDataFormatContext().getDatePattern()));
+			}
+
+			return this._dateCellStyle;
+		}
+
+		public CellStyle getTimeCellStyle(Workbook workbook, CreationHelper creationHelper)
+		{
+			if (this._timeCellStyle == null)
+			{
+				this._timeCellStyle = workbook.createCellStyle();
+				this._timeCellStyle.setDataFormat(
+						creationHelper.createDataFormat().getFormat(getDataFormatContext().getTimePattern()));
+			}
+
+			return this._timeCellStyle;
+		}
+
+		public CellStyle getTimestampCellStyle(Workbook workbook, CreationHelper creationHelper)
+		{
+			if (this._timestampCellStyle == null)
+			{
+				this._timestampCellStyle = workbook.createCellStyle();
+				this._timestampCellStyle.setDataFormat(
+						creationHelper.createDataFormat().getFormat(getDataFormatContext().getTimestampPattern()));
+			}
+
+			return this._timestampCellStyle;
+		}
+
+		public CellStyle getNumberCellStyle(Workbook workbook, CreationHelper creationHelper)
+		{
+			if (this._numberCellStyle == null)
+			{
+				this._numberCellStyle = workbook.createCellStyle();
+				this._numberCellStyle.setDataFormat(
+						creationHelper.createDataFormat().getFormat(getDataFormatContext().getNumberPattern()));
+			}
+
+			return this._numberCellStyle;
 		}
 	}
 }

@@ -86,14 +86,44 @@ public class DataFormatContext
 		this.expressionResolver = expressionResolver;
 	}
 
+	/**
+	 * 是否是纯日期格式，而非表达式。
+	 * 
+	 * @return
+	 */
+	public boolean isPureDatePattern()
+	{
+		return (this._dateExpression == null);
+	}
+
 	public String getDatePattern()
 	{
 		return (this._dateExpression == null ? this.dataFormat.getDateFormat() : this._dateExpression.getContent());
 	}
 
+	/**
+	 * 是否是纯时间格式，而非表达式。
+	 * 
+	 * @return
+	 */
+	public boolean isPureTimePattern()
+	{
+		return (this._timeExpression == null);
+	}
+
 	public String getTimePattern()
 	{
 		return (this._timeExpression == null ? this.dataFormat.getTimeFormat() : this._timeExpression.getContent());
+	}
+
+	/**
+	 * 是否是纯时间戳格式，而非表达式。
+	 * 
+	 * @return
+	 */
+	public boolean isPureTimestampPattern()
+	{
+		return (this._timestampExpression == null);
 	}
 
 	public String getTimestampPattern()
@@ -102,10 +132,30 @@ public class DataFormatContext
 				: this._timestampExpression.getContent());
 	}
 
+	/**
+	 * 是否是纯数值格式，而非表达式。
+	 * 
+	 * @return
+	 */
+	public boolean isPureNumberPattern()
+	{
+		return (this._numberExpression == null);
+	}
+
 	public String getNumberPattern()
 	{
 		return (this._numberExpression == null ? this.dataFormat.getNumberFormat()
 				: this._numberExpression.getContent());
+	}
+
+	/**
+	 * 是否是纯二进制格式，而非表达式。
+	 * 
+	 * @return
+	 */
+	public boolean isPureBinaryPattern()
+	{
+		return (this._binaryExpression == null);
 	}
 
 	public String getBinaryPattern()

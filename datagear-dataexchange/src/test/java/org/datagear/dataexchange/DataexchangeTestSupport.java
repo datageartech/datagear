@@ -33,6 +33,9 @@ import org.datagear.util.JdbcUtil;
  */
 public abstract class DataexchangeTestSupport extends DBTestSupport
 {
+	public static final String TABLE_NAME_DATA_IMPORT = "T_DATA_IMPORT";
+	public static final String TABLE_NAME_DATA_EXPORT = "T_DATA_EXPORT";
+
 	protected DatabaseInfoResolver databaseInfoResolver;
 
 	public DataexchangeTestSupport()

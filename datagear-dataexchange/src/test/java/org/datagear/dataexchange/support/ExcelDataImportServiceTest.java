@@ -4,10 +4,13 @@
 
 package org.datagear.dataexchange.support;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.InputStream;
 import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.datagear.dataexchange.ColumnNotFoundException;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.DataIndex;
@@ -17,7 +20,9 @@ import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.SimpleConnectionFactory;
 import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.util.JdbcUtil;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * {@linkplain ExcelDataImportService}单元测试类。
@@ -27,7 +32,8 @@ import org.junit.Test;
  */
 public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 {
-	public static final String TABLE_NAME = "T_DATA_IMPORT";
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	private ExcelDataImportService excelDataImportService;
 
@@ -50,15 +56,46 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<InputStream> inputFactory = getTestInputStreamResourceFactory(
 					"support/ExcelDataImportServiceTest.xls");
 
-			final AtomicInteger successCount = new AtomicInteger(0);
-			final AtomicInteger ignoreCount = new AtomicInteger(0);
-
 			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, false,
 					true);
 
 			ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, inputFactory);
-			impt.setUnifiedTable(TABLE_NAME);
+
+			clearTable(cn, TABLE_NAME_DATA_IMPORT);
+			clearTable(cn, TABLE_NAME_DATA_EXPORT);
+
+			this.thrown.expect(ColumnNotFoundException.class);
+
+			this.excelDataImportService.exchange(impt);
+
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+		}
+	}
+
+	@Test
+	public void exchangeTest_ignoreInexistentColumn() throws Throwable
+	{
+		DataFormat dataFormat = new DataFormat();
+
+		Connection cn = getConnection();
+
+		try
+		{
+			cn = getConnection();
+			ResourceFactory<InputStream> inputFactory = getTestInputStreamResourceFactory(
+					"support/ExcelDataImportServiceTest.xls");
+
+			final AtomicInteger successCount = new AtomicInteger(0);
+			final AtomicInteger ignoreCount = new AtomicInteger(0);
+
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
+
+			ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
+					valueDataImportOption, inputFactory);
 
 			impt.setListener(new MockValueDataImportListener()
 			{
@@ -77,9 +114,16 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 				}
 			});
 
-			clearTable(cn, TABLE_NAME);
+			clearTable(cn, TABLE_NAME_DATA_IMPORT);
+			clearTable(cn, TABLE_NAME_DATA_EXPORT);
 
 			this.excelDataImportService.exchange(impt);
+
+			int count0 = getCount(cn, TABLE_NAME_DATA_IMPORT);
+			int count1 = getCount(cn, TABLE_NAME_DATA_EXPORT);
+
+			assertEquals(5, count0);
+			assertEquals(6, count1);
 		}
 		finally
 		{
