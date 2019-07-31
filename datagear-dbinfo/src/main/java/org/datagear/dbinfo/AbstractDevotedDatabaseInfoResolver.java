@@ -181,38 +181,41 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 
 		for (int i = 0; i < tables.length; i++)
 		{
-			String[] importedTables = null;
+			String[] importedTables = EMPTY_STRING_ARRAY;
 
-			// 处理重复表
-			for (int k = 0; i < i; k++)
+			if (tables[i] != null && !tables[i].isEmpty())
 			{
-				if (tables[k].equals(tables[i]))
+				// 处理重复表
+				for (int k = 0; i < i; k++)
 				{
-					importedTables = importedTabless[k];
-					break;
-				}
-			}
-
-			if (importedTables == null)
-			{
-				ImportedKeyInfo[] importedKeyInfos = getImportedKeyInfos(cn, metaData, schema, tables[i]);
-
-				if (importedKeyInfos == null || importedKeyInfos.length == 0)
-					importedTables = EMPTY_STRING_ARRAY;
-				else
-				{
-					List<String> importedTableList = new ArrayList<String>(2);
-
-					for (int j = 0; j < importedKeyInfos.length; j++)
+					if (tables[k].equals(tables[i]))
 					{
-						String importedTable = importedKeyInfos[j].getPkTableName();
-
-						if (!importedTableList.contains(importedTable))
-							importedTableList.add(importedTable);
+						importedTables = importedTabless[k];
+						break;
 					}
+				}
 
-					importedTables = new String[importedTableList.size()];
-					importedTableList.toArray(importedTables);
+				if (importedTables == null)
+				{
+					ImportedKeyInfo[] importedKeyInfos = getImportedKeyInfos(cn, metaData, schema, tables[i]);
+
+					if (importedKeyInfos == null || importedKeyInfos.length == 0)
+						importedTables = EMPTY_STRING_ARRAY;
+					else
+					{
+						List<String> importedTableList = new ArrayList<String>(2);
+
+						for (int j = 0; j < importedKeyInfos.length; j++)
+						{
+							String importedTable = importedKeyInfos[j].getPkTableName();
+
+							if (!importedTableList.contains(importedTable))
+								importedTableList.add(importedTable);
+						}
+
+						importedTables = new String[importedTableList.size()];
+						importedTableList.toArray(importedTables);
+					}
 				}
 			}
 

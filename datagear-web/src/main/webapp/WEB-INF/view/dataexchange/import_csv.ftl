@@ -130,6 +130,8 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.dependentNumberInputPlaceholder = "<@spring.message code='dataImport.dependentNumber.none' />";
+	
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{
 		subDataExchange.dependentNumber = "<@spring.message code='dataImport.dependentNumber.auto' />";

@@ -28,9 +28,13 @@ import org.datagear.util.expression.ExpressionResolver;
  */
 public class DataFormatContext
 {
+	public static final String EXP_START_IDENTIFIER = ExpressionResolver.DEFAULT_START_IDENTIFIER_DOLLAR;
+
+	public static final String EXP_END_IDENTIFIER = ExpressionResolver.DEFAULT_END_IDENTIFIER;
+
 	private DataFormat dataFormat;
 
-	private ExpressionResolver expressionResolver = new ExpressionResolver();
+	private ExpressionResolver expressionResolver = new DataFormatExpressionResolver();
 
 	private Expression _dateExpression;
 	private Expression _timeExpression;
@@ -593,5 +597,26 @@ public class DataFormatContext
 			return null;
 
 		return Base64.decodeBase64(value);
+	}
+
+	/**
+	 * 将指定格式字符串包裹为表达式。
+	 * 
+	 * @param pattern
+	 * @return
+	 */
+	public static String wrapToExpression(String pattern)
+	{
+		return EXP_START_IDENTIFIER + pattern + EXP_END_IDENTIFIER;
+	}
+
+	public static class DataFormatExpressionResolver extends ExpressionResolver
+	{
+		public DataFormatExpressionResolver()
+		{
+			super();
+			super.setStartIdentifier(EXP_START_IDENTIFIER);
+			super.setEndIdentifier(EXP_END_IDENTIFIER);
+		}
 	}
 }

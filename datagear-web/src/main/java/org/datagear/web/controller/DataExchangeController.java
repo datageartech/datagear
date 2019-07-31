@@ -42,6 +42,7 @@ import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchange;
 import org.datagear.dataexchange.DataExchangeService;
 import org.datagear.dataexchange.DataFormat;
+import org.datagear.dataexchange.DataFormatContext;
 import org.datagear.dataexchange.DataImportOption;
 import org.datagear.dataexchange.DataSourceConnectionFactory;
 import org.datagear.dataexchange.FileOutputStreamResourceFactory;
@@ -296,7 +297,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers, "");
+		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
 
 		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
@@ -351,8 +352,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> imptSqlDoImport(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
-			SqlFileBatchDataImportForm dataImportForm,
-			@RequestParam(value = "dependentNumberNone", required = false) String dependentNumberNone) throws Exception
+			SqlFileBatchDataImportForm dataImportForm) throws Exception
 	{
 		if (dataImportForm == null || isEmpty(dataImportForm.getSubDataExchangeIds())
 				|| isEmpty(dataImportForm.getFileNames()) || isEmpty(dataImportForm.getFileEncoding())
@@ -403,7 +403,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			subDataExchanges[i] = subDataExchange;
 		}
 
-		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers, dependentNumberNone);
+		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
 
 		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
@@ -521,7 +521,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers, "");
+		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
 
 		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
@@ -846,6 +846,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}.execute();
 
 		DataFormat defaultDataFormat = new DataFormat();
+		defaultDataFormat.setDateFormat("'" + DataFormatContext.wrapToExpression(DataFormat.DEFAULT_DATE_FORMAT) + "'");
+		defaultDataFormat.setTimeFormat("'" + DataFormatContext.wrapToExpression(DataFormat.DEFAULT_TIME_FORMAT) + "'");
+		defaultDataFormat.setTimestampFormat(
+				"'" + DataFormatContext.wrapToExpression(DataFormat.DEFAULT_TIMESTAMP_FORMAT) + "'");
+		defaultDataFormat.setBinaryFormat("0x" + DataFormatContext.wrapToExpression(DataFormat.BINARY_FORMAT_HEX));
 
 		String dataExchangeId = IDUtil.uuid();
 
@@ -1034,10 +1039,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 	 * @param subDataExchanges
 	 * @param numbers
 	 * @param dependentNumbers
-	 * @param dependentNumberNone
 	 */
 	protected void resolveSubDataExchangeDependencies(SubDataExchange[] subDataExchanges, String[] numbers,
-			String[] dependentNumbers, String dependentNumberNone)
+			String[] dependentNumbers)
 	{
 		for (int i = 0; i < subDataExchanges.length; i++)
 		{
@@ -1049,7 +1053,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 			dependentNumber = dependentNumber.trim();
 
-			if (isEmpty(dependentNumber) || dependentNumber.equals(dependentNumberNone))
+			if (isEmpty(dependentNumber))
 				continue;
 
 			String[] myDependentNumbers = dependentNumber.split(",");
@@ -1112,6 +1116,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 		else
 		{
+			int extIndex = rawFileName.lastIndexOf('.');
+			if (extIndex >= 0 && extIndex < rawFileName.length() - 1)
+				serverFileName += "." + rawFileName.substring(extIndex + 1);
+
 			File importFile = FileUtil.getFile(directory, serverFileName);
 
 			InputStream in = null;

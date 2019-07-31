@@ -132,6 +132,8 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.dependentNumberInputPlaceholder = "<@spring.message code='dataImport.dependentNumber.none' />";
+	
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{
 		subDataExchange.dependentNumber = "<@spring.message code='dataImport.dependentNumber.auto' />";
@@ -152,7 +154,7 @@ Schema schema 数据库，不允许为null
 		data : "tableName",
 		render : function(data, type, row, meta)
 		{
-			return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' class='table-name-input ui-widget ui-widget-content' style='width:90%' />";
+			return "<input type='text' name='tableNames' value='"+$.escapeHtml(data)+"' placeholder='<@spring.message code='dataImport.excel.importTableInput.placeholder' />' class='table-name-input ui-widget ui-widget-content' style='width:90%' />";
 		},
 		defaultContent: "",
 		width : "20%"

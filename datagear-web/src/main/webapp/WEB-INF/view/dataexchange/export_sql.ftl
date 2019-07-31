@@ -109,6 +109,9 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.element(".binaryFormatSetButtonHex").attr("value", "0x"+"$"+"{Hex}");
+	po.element(".binaryFormatSetButtonBase64").attr("value", "'"+"$"+"{Base64}'");
+	
 	po.postBuildSubDataExchange = function(subDataExchange, tableName)
 	{
 		subDataExchange.tableName = tableName;
