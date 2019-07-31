@@ -449,6 +449,10 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 
 					this._noNullColumnInfos = removeNullColumnInfos(this._columnInfos);
 
+					// 表不匹配
+					if (this._noNullColumnInfos == null || this._noNullColumnInfos.isEmpty())
+						throw new TableMismatchException(tableName);
+
 					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._noNullColumnInfos);
 					this._statement = createPreparedStatementUnchecked(this.connection, sql);
 				}
@@ -758,6 +762,10 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 							this._columnNames, this.excelDataImport.getImportOption().isIgnoreInexistentColumn());
 
 					this._noNullColumnInfos = removeNullColumnInfos(this._columnInfos);
+
+					// 表不匹配
+					if (this._noNullColumnInfos == null || this._noNullColumnInfos.isEmpty())
+						throw new TableMismatchException(tableName);
 
 					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._noNullColumnInfos);
 					this._statement = createPreparedStatementUnchecked(this.connection, sql);
