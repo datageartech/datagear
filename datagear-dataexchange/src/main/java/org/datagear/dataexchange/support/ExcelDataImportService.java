@@ -4,6 +4,8 @@
 
 package org.datagear.dataexchange.support;
 
+import static org.apache.poi.xssf.usermodel.XSSFRelation.NS_SPREADSHEETML;
+
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -29,10 +31,12 @@ import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.util.SAXHelper;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.StylesTable;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
@@ -147,7 +151,7 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 				in = iter.next();
 
 				String sheetName = iter.getSheetName();
-				importXlsxSheet(strings, styles, sheetName, index, in);
+				importXlsxSheet(dataExchange, importContext, cn, strings, styles, sheetName, index, in);
 			}
 			finally
 			{
@@ -161,6 +165,9 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 	/**
 	 * 导入{@code .xlsx}单个sheet。
 	 * 
+	 * @param dataExchange
+	 * @param importContext
+	 * @param cn
 	 * @param sharedStringsTable
 	 * @param stylesTable
 	 * @param sheetName
@@ -168,22 +175,57 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 	 * @param sheetInputStream
 	 * @throws Throwable
 	 */
-	public void importXlsxSheet(ReadOnlySharedStringsTable sharedStringsTable, StylesTable stylesTable,
-			String sheetName, int sheetIndex, InputStream sheetInputStream) throws Throwable
+	public void importXlsxSheet(ExcelDataImport dataExchange, IndexFormatDataExchangeContext importContext,
+			Connection cn, ReadOnlySharedStringsTable sharedStringsTable, StylesTable stylesTable, String sheetName,
+			int sheetIndex, InputStream sheetInputStream) throws Throwable
 	{
 		InputSource sheetSource = new InputSource(sheetInputStream);
 
 		XMLReader sheetParser = SAXHelper.newXMLReader();
-		ContentHandler handler = new XlsxSheetHandler(stylesTable, sharedStringsTable, sheetName, sheetIndex);
+		ContentHandler handler = new XlsxSheetHandler(dataExchange, importContext, cn, stylesTable, sharedStringsTable,
+				sheetName, sheetIndex);
 		sheetParser.setContentHandler(handler);
 		sheetParser.parse(sheetSource);
 	}
 
+	protected <T> List<T> createListWithNullElements(int size)
+	{
+		List<T> list = new ArrayList<T>(size);
+
+		for (int i = 0; i < size; i++)
+			list.add(null);
+
+		return list;
+	}
+
+	protected boolean isAllElementsNull(List<? extends Object> list)
+	{
+		if (list == null)
+			return true;
+
+		for (int i = 0, len = list.size(); i < len; i++)
+		{
+			if (list.get(i) != null)
+				return false;
+		}
+
+		return true;
+	}
+
+	protected <T> void setElementWithExpand(List<? super T> list, int index, T element)
+	{
+		int expandCount = index - list.size() + 1;
+		for (int i = 0; i < expandCount; i++)
+			list.add(null);
+
+		list.set(index, element);
+	}
+
 	/**
 	 * {@code .xls}格式的Excel处理器。
-	 * 
-	 * @author datagear@163.com
-	 *
+	 * <p>
+	 * 注意：xls格式的Record记录事件顺序为：全部BoundSheetRecord -> 全部RowRecord -> 全部cell记录
+	 * </p>
 	 */
 	protected class XlsEventListener implements HSSFListener
 	{
@@ -191,11 +233,14 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 		private IndexFormatDataExchangeContext importContext;
 		private Connection connection;
 
+		// 存储所有sheet列表，因为processRecord先处理完所有BoundSheetRecord，再处理其他
 		private List<String> _sheetNames = new ArrayList<String>();
+		// 当前sheet索引
 		private int _sheetIndex = -1;
+		// 当前行索引
+		private int _rowIndex = 1;
 		private SSTRecord _sstRecord;
 		private List<String> _columnNames = null;
-		private int _rowIndex = 1;
 		private List<Object> _columnValues = null;
 		private List<ColumnInfo> _columnInfos = null;
 		private List<ColumnInfo> _noNullColumnInfos = null;
@@ -432,58 +477,103 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 				this._rowIndex++;
 			}
 		}
-
-		protected <T> List<T> createListWithNullElements(int size)
-		{
-			List<T> list = new ArrayList<T>(size);
-
-			for (int i = 0; i < size; i++)
-				list.add(null);
-
-			return list;
-		}
-
-		protected boolean isAllElementsNull(List<? extends Object> list)
-		{
-			if (list == null)
-				return true;
-
-			for (int i = 0, len = list.size(); i < len; i++)
-			{
-				if (list.get(i) != null)
-					return false;
-			}
-
-			return true;
-		}
 	}
 
+	/**
+	 * 此类参考自{@code org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler}。
+	 * <p>
+	 * 注意：xlsx格式的单元格可能有两种格式（将文件改为zip后解压缩可见）：
+	 * </p>
+	 * <p>
+	 * &lt;c&gt;&lt;v&gt;......&lt;/v&gt;&lt;/c&gt;
+	 * </p>
+	 * 或者
+	 * <p>
+	 * &lt;c&gt;&lt;is&gt;&lt;t&gt;......&lt;/t&gt;&lt;/is&gt;&lt;/c&gt;
+	 * </p>
+	 */
 	protected class XlsxSheetHandler extends DefaultHandler
 	{
+		private ExcelDataImport excelDataImport;
+		private IndexFormatDataExchangeContext importContext;
+		private Connection connection;
+
 		private StylesTable stylesTable;
 		private ReadOnlySharedStringsTable sharedStringsTable;
 		private String sheetName;
 		private int sheetIndex;
 
+		// 当前行索引
 		private int _rowIndex = 0;
+		// 备用行索引
 		private int _nextRowIndex = 0;
+		// 当前单元格索引
+		private int _cellIndex = 0;
+		// 当前单元格内容构建器
+		private StringBuilder _cellContents = new StringBuilder();
+		// 当前单元格类型
+		private XssfCellType _cellType = XssfCellType.NUMBER;
 
-		private StringBuilder _lastContents = new StringBuilder();
-		private boolean _nextIsString;
+		// 是否在单元格内容元素内
+		private boolean _inCellContentElement = false;
+		// 是否在<is>元素内
+		private boolean _inIsElement = false;
+
+		// 数据库列名称
+		private List<String> _columnNames = new ArrayList<String>();
+		// 当前行的数据库列值
+		private List<Object> _columnValues = new ArrayList<Object>();
+		private List<ColumnInfo> _columnInfos = null;
+		private List<ColumnInfo> _noNullColumnInfos = null;
+		private PreparedStatement _statement = null;
 
 		public XlsxSheetHandler()
 		{
 			super();
 		}
 
-		public XlsxSheetHandler(StylesTable stylesTable, ReadOnlySharedStringsTable sharedStringsTable,
+		public XlsxSheetHandler(ExcelDataImport excelDataImport, IndexFormatDataExchangeContext importContext,
+				Connection connection, StylesTable stylesTable, ReadOnlySharedStringsTable sharedStringsTable,
 				String sheetName, int sheetIndex)
 		{
 			super();
+			this.excelDataImport = excelDataImport;
+			this.importContext = importContext;
+			this.connection = connection;
 			this.stylesTable = stylesTable;
 			this.sharedStringsTable = sharedStringsTable;
 			this.sheetName = sheetName;
 			this.sheetIndex = sheetIndex;
+		}
+
+		public ExcelDataImport getExcelDataImport()
+		{
+			return excelDataImport;
+		}
+
+		public void setExcelDataImport(ExcelDataImport excelDataImport)
+		{
+			this.excelDataImport = excelDataImport;
+		}
+
+		public IndexFormatDataExchangeContext getImportContext()
+		{
+			return importContext;
+		}
+
+		public void setImportContext(IndexFormatDataExchangeContext importContext)
+		{
+			this.importContext = importContext;
+		}
+
+		public Connection getConnection()
+		{
+			return connection;
+		}
+
+		public void setConnection(Connection connection)
+		{
+			this.connection = connection;
 		}
 
 		public StylesTable getStylesTable()
@@ -529,66 +619,212 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 		@Override
 		public void startElement(String uri, String localName, String name, Attributes attributes) throws SAXException
 		{
-			if ("row".equals(name))
+			if (uri != null && !uri.equals(NS_SPREADSHEETML))
+				return;
+
+			if (isCellContentElement(localName))
+			{
+				_inCellContentElement = true;
+
+				if (this._cellContents.length() > 0)
+					this._cellContents.delete(0, this._cellContents.length());
+			}
+			else if ("is".equals(localName))
+			{
+				_inIsElement = true;
+			}
+			else if ("row".equals(name))
 			{
 				String rowIndexStr = attributes.getValue("r");
+
 				if (rowIndexStr != null)
-				{
 					this._rowIndex = Integer.parseInt(rowIndexStr) - 1;
-				}
 				else
-				{
 					this._rowIndex = this._nextRowIndex;
-				}
+
+				if (this._rowIndex == 0)
+					this._columnNames.clear();
+				else
+					this._columnValues.clear();
+
+				// println("start row : " + this._rowIndex + "-------------");
 			}
 			else if ("c".equals(name))
 			{
 				String cellType = attributes.getValue("t");
-				if (cellType != null && cellType.equals("s"))
-				{
-					_nextIsString = true;
-				}
+				String cellRef = attributes.getValue("r");
+
+				if ("b".equals(cellType))
+					this._cellType = XssfCellType.BOOLEAN;
+				else if ("e".equals(cellType))
+					this._cellType = XssfCellType.ERROR;
+				else if ("inlineStr".equals(cellType))
+					this._cellType = XssfCellType.INLINE_STRING;
+				else if ("s".equals(cellType))
+					this._cellType = XssfCellType.SST_STRING;
+				else if ("str".equals(cellType))
+					this._cellType = XssfCellType.FORMULA;
 				else
 				{
-					_nextIsString = false;
+					this._cellType = XssfCellType.NUMBER;
 				}
+
+				CellReference cellReference = new CellReference(cellRef);
+				this._cellIndex = cellReference.getCol();
 			}
-
-			if (this._lastContents.length() > 0)
-				this._lastContents.delete(0, this._lastContents.length());
-
-			System.out.println("Sheet [" + this.sheetName + "] start element :" + localName + ", " + name);
 		}
 
 		@Override
 		public void endElement(String uri, String localName, String name) throws SAXException
 		{
-			if ("row".equals(name))
+			if (uri != null && !uri.equals(NS_SPREADSHEETML))
+				return;
+
+			// 单元格内容
+			if (isCellContentElement(localName))
 			{
+				_inCellContentElement = false;
+
+				Object value = null;
+
+				if (XssfCellType.BOOLEAN.equals(this._cellType))
+				{
+					String content = this._cellContents.toString();
+					value = ("true".equalsIgnoreCase(content) || "1".equals(content) || "on".equalsIgnoreCase(content));
+				}
+				else if (XssfCellType.NUMBER.equals(this._cellType))
+				{
+					String content = this._cellContents.toString();
+					Double cv = (content.isEmpty() ? null : Double.parseDouble(content));
+
+					boolean isDate = false;
+
+					if (this._columnInfos != null && this._cellIndex < this._columnInfos.size())
+					{
+						ColumnInfo columnInfo = this._columnInfos.get(this._cellIndex);
+						if (columnInfo != null)
+						{
+							int sqlType = columnInfo.getType();
+
+							if (Types.DATE == sqlType || Types.TIME == sqlType || Types.TIMESTAMP == sqlType)
+								isDate = true;
+						}
+					}
+
+					if (isDate && cv != null)
+						value = DateUtil.getJavaDate(cv);
+					else
+						value = cv;
+				}
+				else if (XssfCellType.INLINE_STRING.equals(this._cellType))
+				{
+					XSSFRichTextString rtsi = new XSSFRichTextString(this._cellContents.toString());
+					value = rtsi.toString();
+				}
+				else if (XssfCellType.SST_STRING.equals(this._cellType))
+				{
+					String sstIndex = this._cellContents.toString();
+					int idx = Integer.parseInt(sstIndex);
+					XSSFRichTextString rtss = new XSSFRichTextString(sharedStringsTable.getEntryAt(idx));
+
+					value = rtss.toString();
+				}
+				else
+				{
+					int idx = Integer.parseInt(this._cellContents.toString());
+					value = sharedStringsTable.getEntryAt(idx);
+				}
+
+				if (this._rowIndex == 0)
+					setElementWithExpand(this._columnNames, this._cellIndex, value.toString());
+				else
+					setElementWithExpand(this._columnValues, this._cellIndex, value);
+
+				// println("cell [" + this._rowIndex + ", " + this._cellIndex +
+				// "] value : " + value);
+			}
+			else if ("is".equals(localName))
+			{
+				_inIsElement = false;
+			}
+			else if ("row".equals(name))
+			{
+				// 初始化列信息
+				if (this._rowIndex == 0)
+				{
+					String tableName = (this.excelDataImport.hasUnifiedTable() ? this.excelDataImport.getUnifiedTable()
+							: this.sheetName);
+					this._columnInfos = ExcelDataImportService.this.getColumnInfos(this.connection, tableName,
+							this._columnNames, this.excelDataImport.getImportOption().isIgnoreInexistentColumn());
+
+					this._noNullColumnInfos = removeNullColumnInfos(this._columnInfos);
+
+					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._noNullColumnInfos);
+					this._statement = createPreparedStatementUnchecked(this.connection, sql);
+				}
+				// 导入数据
+				else
+				{
+					// 空行
+					if (isAllElementsNull(this._columnValues))
+						;
+					else
+					{
+						List<Object> columnValues = removeNullColumnValues(this._columnInfos, this._noNullColumnInfos,
+								this._columnValues);
+
+						this.importContext.setDataIndex(ExcelDataIndex.valueOf(this.sheetIndex, this._rowIndex));
+
+						ExcelDataImportService.this.importValueData(this.connection, this._statement,
+								this._noNullColumnInfos, columnValues, this.importContext.getDataIndex(),
+								this.excelDataImport.getImportOption().isNullForIllegalColumnValue(),
+								this.excelDataImport.getImportOption().getExceptionResolve(),
+								this.importContext.getDataFormatContext(), this.excelDataImport.getListener());
+					}
+				}
+
 				this._nextRowIndex = this._rowIndex + 1;
+
+				// println("end row :" + this._rowIndex + "-------------");
 			}
-
-			if (_nextIsString)
-			{
-				int idx = Integer.parseInt(this._lastContents.toString());
-				this._lastContents.delete(0, this._lastContents.length());
-				this._lastContents.append(sharedStringsTable.getEntryAt(idx));
-
-				_nextIsString = false;
-			}
-
-			if (name.equals("v"))
-			{
-				System.out.println("[row=" + this._rowIndex + "] : " + this._lastContents);
-			}
-
-			System.out.println("Sheet [" + this.sheetName + "] end element :" + localName + ", " + name);
 		}
 
 		@Override
 		public void characters(char[] ch, int start, int length)
 		{
-			this._lastContents.append(new String(ch, start, length));
+			if (_inCellContentElement)
+				this._cellContents.append(new String(ch, start, length));
 		}
+
+		/**
+		 * 参考{@code org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.isTextTag(String)}。
+		 * 
+		 * @param name
+		 * @return
+		 */
+		protected boolean isCellContentElement(String name)
+		{
+			if ("v".equals(name))
+				return true;
+			if ("inlineStr".equals(name))
+				return true;
+			if ("t".equals(name) && _inIsElement)
+				return true;
+			else
+				return false;
+		}
+
+		// protected void println(String s)
+		// {
+		// System.out.println(s);
+		// }
+	}
+
+	/**
+	 * xlsx单元格类型，参考{@code org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.xssfDataType}。
+	 */
+	protected static enum XssfCellType
+	{
+		BOOLEAN, ERROR, FORMULA, INLINE_STRING, SST_STRING, NUMBER,
 	}
 }

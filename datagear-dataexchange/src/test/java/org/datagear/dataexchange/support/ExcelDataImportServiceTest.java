@@ -188,6 +188,73 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 		}
 	}
 
+	/**
+	 * 单元格的格式为：
+	 * <p>
+	 * &lt;c&gt;&lt;is&gt;&lt;t&gt;......&lt;/t&gt;&lt;/is&gt;&lt;/c&gt;
+	 * </p>
+	 * 而非
+	 * </p>
+	 * <p>
+	 * &lt;c&gt;&lt;v&gt;......&lt;/v&gt;&lt;/c&gt;
+	 * </p>
+	 * 
+	 * @throws Throwable
+	 */
+	@Test
+	public void exchangeTest_xlsx_inlineStr_ignoreInexistentColumn() throws Throwable
+	{
+		DataFormat dataFormat = new DataFormat();
+
+		Connection cn = getConnection();
+
+		try
+		{
+			cn = getConnection();
+
+			File excelFile = getClasspathFileForTest(
+					"org/datagear/dataexchange/support/ExcelDataImportServiceTest_inlineStr.xlsx");
+
+			final AtomicInteger successCount = new AtomicInteger(0);
+			final AtomicInteger ignoreCount = new AtomicInteger(0);
+
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
+
+			ExcelDataImport impt = new ExcelDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
+					valueDataImportOption, excelFile);
+			impt.setUnifiedTable(TABLE_NAME_DATA_IMPORT);
+
+			impt.setListener(new MockValueDataImportListener()
+			{
+				@Override
+				public void onSuccess(DataIndex dataIndex)
+				{
+					super.onSuccess(dataIndex);
+					successCount.incrementAndGet();
+				}
+
+				@Override
+				public void onIgnore(DataIndex dataIndex, DataExchangeException e)
+				{
+					super.onIgnore(dataIndex, e);
+					ignoreCount.incrementAndGet();
+				}
+			});
+
+			clearTable(cn, TABLE_NAME_DATA_IMPORT);
+
+			this.excelDataImportService.exchange(impt);
+
+			int count = getCount(cn, TABLE_NAME_DATA_IMPORT);
+
+			assertEquals(5, count);
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+		}
+	}
+
 	protected File getClasspathFileForTest(String classpath)
 	{
 		if (!classpath.startsWith("/"))
