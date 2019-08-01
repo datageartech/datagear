@@ -146,3 +146,21 @@ CREATE TABLE T_DATA_EXPORT
 	COL_CLOB TEXT,
 	PRIMARY KEY (ID)
 );
+
+/*
+truncate table t_auto_generated_keys;
+truncate table t_data_export;
+truncate table t_data_import;
+truncate table t_date;
+truncate table t_order_products;
+truncate table t_order;
+truncate table t_product_price_history;
+truncate table t_product;
+truncate table `t_peculiar_address_more_a$b[cde]f_1`;
+truncate table `t_peculiar_address_[ab]c$d_1`;
+truncate table `t_peculiar_account_[a]b$c`;
+truncate table t_address_more;
+truncate table t_address;
+truncate table t_address_type;
+truncate table t_account;
+*/

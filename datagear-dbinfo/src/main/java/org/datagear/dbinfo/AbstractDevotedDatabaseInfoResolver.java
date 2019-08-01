@@ -181,9 +181,11 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 
 		for (int i = 0; i < tables.length; i++)
 		{
-			String[] importedTables = EMPTY_STRING_ARRAY;
+			String[] importedTables = null;
 
-			if (tables[i] != null && !tables[i].isEmpty())
+			if (tables[i] == null || tables[i].isEmpty())
+				importedTables = EMPTY_STRING_ARRAY;
+			else
 			{
 				// 处理重复表
 				for (int k = 0; i < i; k++)
