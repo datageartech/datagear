@@ -358,10 +358,10 @@ form .form-foot .ui-button{
 	background-position: 0 -96px;
 }
 .jstree-default .jstree-leaf .jstree-themeicon{
-	background-position: -32px -96px;
+	background-position: -112px -112px;
 }
 .jstree-default .jstree-leaf.view-node .jstree-themeicon{
-	background-position: -112px -112px;
+	background-position: -224px -96px;
 }
 .jstree-default .jstree-leaf.next-page-node .jstree-themeicon{
 	background-position: -65px 0px;
