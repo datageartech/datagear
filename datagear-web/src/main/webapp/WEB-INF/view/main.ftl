@@ -19,7 +19,7 @@
 	po.workTabTemplate = "<li style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
 			+"<div class='tab-operation'>"			
 			+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
-			+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'></div>"
+			+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'><span class='ui-icon ui-icon-caret-1-se'></span></div>"
 			+"</div>"
 			+"<div class='category-bar category-bar-"+'#'+"{schemaId}'></div>"
 			+"</li>";

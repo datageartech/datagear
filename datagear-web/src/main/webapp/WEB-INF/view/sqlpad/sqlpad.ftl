@@ -593,7 +593,7 @@ Schema schema 数据库，不允许为null
 	po.sqlResultTabTemplate = "<li class='sql-result-tab' style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
 		+"<div class='tab-operation'>"
 		+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
-		+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'></div>"
+		+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'><span class='ui-icon ui-icon-caret-1-e'></span></div>"
 		+"</div>"
 		+"</li>";
 	
