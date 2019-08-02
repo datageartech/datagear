@@ -6,8 +6,8 @@ package org.datagear.persistence.support.dialect;
 
 import java.sql.Connection;
 
-import org.datagear.connection.PrefixURLSensor;
 import org.datagear.connection.URLSensor;
+import org.datagear.connection.support.SqlServerURLSensor;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectBuilder;
 import org.datagear.persistence.support.AbstractURLSensedDialectBuilder;
@@ -20,11 +20,9 @@ import org.datagear.persistence.support.AbstractURLSensedDialectBuilder;
  */
 public class SqlServerDialectBuilder extends AbstractURLSensedDialectBuilder
 {
-	protected static final String JDBC_PREFIX = "jdbc:sqlserver";
-
 	public SqlServerDialectBuilder()
 	{
-		super(new PrefixURLSensor(JDBC_PREFIX));
+		super(new SqlServerURLSensor());
 	}
 
 	@Override

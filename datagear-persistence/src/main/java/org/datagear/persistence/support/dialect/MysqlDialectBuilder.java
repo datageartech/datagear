@@ -6,8 +6,8 @@ package org.datagear.persistence.support.dialect;
 
 import java.sql.Connection;
 
-import org.datagear.connection.PrefixURLSensor;
 import org.datagear.connection.URLSensor;
+import org.datagear.connection.support.MySqlURLSensor;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectBuilder;
 import org.datagear.persistence.support.AbstractURLSensedDialectBuilder;
@@ -20,11 +20,9 @@ import org.datagear.persistence.support.AbstractURLSensedDialectBuilder;
  */
 public class MysqlDialectBuilder extends AbstractURLSensedDialectBuilder
 {
-	protected static final String JDBC_PREFIX = "jdbc:mysql";
-
 	public MysqlDialectBuilder()
 	{
-		super(new PrefixURLSensor(JDBC_PREFIX));
+		super(new MySqlURLSensor());
 	}
 
 	@Override

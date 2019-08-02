@@ -5,6 +5,7 @@
 package org.datagear.dbinfo;
 
 import java.sql.DatabaseMetaData;
+import java.util.List;
 
 /**
  * {@linkplain ColumnInfo}结果集规范。
@@ -50,6 +51,18 @@ public class ColumnInfoResultSetSpec extends ResultSetSpec<ColumnInfo>
 	public ColumnInfoResultSetSpec()
 	{
 		super();
+	}
+
+	@Override
+	protected void addToList(List<ColumnInfo> list, ColumnInfo bean)
+	{
+		for (ColumnInfo ele : list)
+		{
+			if (equalsWithNull(ele.getName(), bean.getName()))
+				return;
+		}
+
+		list.add(bean);
 	}
 
 	@Override

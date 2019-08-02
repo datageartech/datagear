@@ -4,6 +4,8 @@
 
 package org.datagear.dbinfo;
 
+import java.util.List;
+
 /**
  * {@linkplain TableInfo}结果集规范。
  * 
@@ -42,6 +44,18 @@ public class TableInfoResultSetSpec extends ResultSetSpec<TableInfo>
 	public TableInfoResultSetSpec()
 	{
 		super();
+	}
+
+	@Override
+	protected void addToList(List<TableInfo> list, TableInfo bean)
+	{
+		for (TableInfo ele : list)
+		{
+			if (equalsWithNull(ele.getName(), bean.getName()))
+				return;
+		}
+
+		list.add(bean);
 	}
 
 	@Override

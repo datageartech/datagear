@@ -5,6 +5,7 @@
 package org.datagear.dbinfo;
 
 import java.sql.DatabaseMetaData;
+import java.util.List;
 
 /**
  * {@linkplain ImportedKeyInfo}结果集规范。
@@ -52,6 +53,20 @@ public class ImportedKeyInfoResultSetSpec extends ResultSetSpec<ImportedKeyInfo>
 	public ImportedKeyInfoResultSetSpec()
 	{
 		super();
+	}
+
+	@Override
+	protected void addToList(List<ImportedKeyInfo> list, ImportedKeyInfo bean)
+	{
+		for (ImportedKeyInfo ele : list)
+		{
+			if (equalsWithNull(ele.getFkColumnName(), bean.getFkColumnName())
+					&& equalsWithNull(ele.getPkColumnName(), bean.getPkColumnName())
+					&& equalsWithNull(ele.getPkTableName(), bean.getPkTableName()))
+				return;
+		}
+
+		list.add(bean);
 	}
 
 	@Override

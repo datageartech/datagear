@@ -4,6 +4,8 @@
 
 package org.datagear.dbinfo;
 
+import java.util.List;
+
 /**
  * {@linkplain UniqueKeyInfo}结果集规范。
  * 
@@ -19,6 +21,18 @@ public class UniqueKeyInfoResultSetSpec extends ResultSetSpec<UniqueKeyInfo>
 	public UniqueKeyInfoResultSetSpec()
 	{
 		super();
+	}
+
+	@Override
+	protected void addToList(List<UniqueKeyInfo> list, UniqueKeyInfo bean)
+	{
+		for (UniqueKeyInfo ele : list)
+		{
+			if (equalsWithNull(ele.getColumnName(), bean.getColumnName()))
+				return;
+		}
+
+		list.add(bean);
 	}
 
 	@Override

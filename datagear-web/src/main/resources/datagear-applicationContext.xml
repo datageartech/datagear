@@ -109,6 +109,7 @@
 	<bean id="databaseInfoResolver" class="org.datagear.dbinfo.GenericDatabaseInfoResolver">
 		<property name="devotedDatabaseInfoResolvers">
 			<list>
+				<bean class="org.datagear.dbinfo.support.MySqlDevotedDatabaseInfoResolver" />
 				<bean class="org.datagear.dbinfo.WildcardDevotedDatabaseInfoResolver" />
 			</list>
 		</property>
@@ -127,6 +128,16 @@
 		<property name="driverChecker">
 			<bean class="org.datagear.web.util.SqlDriverChecker">
 				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+			</bean>
+		</property>
+		<property name="propertiesProcessor">
+			<bean class="org.datagear.connection.GenericPropertiesProcessor">
+				<property name="devotedPropertiesProcessors">
+					<list>
+						<bean class="org.datagear.connection.support.MySqlDevotedPropertiesProcessor" />
+						<bean class="org.datagear.connection.support.OracleDevotedPropertiesProcessor" />
+					</list>
+				</property>
 			</bean>
 		</property>
 	</bean>

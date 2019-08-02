@@ -4,6 +4,8 @@
 
 package org.datagear.dbinfo;
 
+import java.util.List;
+
 /**
  * {@linkplain PrimaryKeyInfo}结果集规范。
  * 
@@ -18,6 +20,18 @@ public class PrimaryKeyInfoResultSetSpec extends ResultSetSpec<PrimaryKeyInfo>
 	public PrimaryKeyInfoResultSetSpec()
 	{
 		super();
+	}
+
+	@Override
+	protected void addToList(List<PrimaryKeyInfo> list, PrimaryKeyInfo bean)
+	{
+		for (PrimaryKeyInfo ele : list)
+		{
+			if (equalsWithNull(ele.getColumnName(), bean.getColumnName()))
+				return;
+		}
+
+		list.add(bean);
 	}
 
 	@Override

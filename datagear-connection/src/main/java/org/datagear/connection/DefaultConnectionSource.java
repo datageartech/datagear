@@ -33,6 +33,8 @@ public class DefaultConnectionSource implements ConnectionSource
 
 	private DriverChecker driverChecker = new SimpleDriverChecker();
 
+	private PropertiesProcessor propertiesProcessor = null;
+
 	private ConcurrentMap<String, PreferedDriverEntityResult> urlPreferedDriverEntityMap = new ConcurrentHashMap<String, PreferedDriverEntityResult>();
 
 	private volatile long driverEntityManagerLastModified = -1;
@@ -66,6 +68,16 @@ public class DefaultConnectionSource implements ConnectionSource
 	public void setDriverChecker(DriverChecker driverChecker)
 	{
 		this.driverChecker = driverChecker;
+	}
+
+	public PropertiesProcessor getPropertiesProcessor()
+	{
+		return propertiesProcessor;
+	}
+
+	public void setPropertiesProcessor(PropertiesProcessor propertiesProcessor)
+	{
+		this.propertiesProcessor = propertiesProcessor;
 	}
 
 	@Override
@@ -302,16 +314,8 @@ public class DefaultConnectionSource implements ConnectionSource
 	protected Connection getConnection(Driver driver, ConnectionOption connectionOption)
 			throws EstablishConnectionException, ConnectionSourceException
 	{
-		Properties extraProperties = getExtraConnectionProperties(driver);
-		Properties properties = null;
-
-		if (extraProperties == null)
-			properties = connectionOption.getProperties();
-		else
-		{
-			properties = new Properties(extraProperties);
-			properties.putAll(connectionOption.getProperties());
-		}
+		Properties properties = new Properties(connectionOption.getProperties());
+		processConnectionProperties(driver, properties);
 
 		try
 		{
@@ -334,20 +338,18 @@ public class DefaultConnectionSource implements ConnectionSource
 	}
 
 	/**
-	 * 获取附加连接参数。
+	 * 加工连接参数。
 	 * <p>
 	 * 对于{@linkplain Connection}、{@linkplain DatabaseMetaData}
-	 * 中的部分接口，不同的JDBC驱动可能需要配置各自的连接参数，子类可重写此方法来实现。
-	 * </p>
-	 * <p>
-	 * 此方法默认返回{@code null}，表示没有附加连接参数。
+	 * 中的部分接口，不同的JDBC驱动可能需要配置各自的连接参数。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	protected Properties getExtraConnectionProperties(Driver driver)
+	protected void processConnectionProperties(Driver driver, Properties properties)
 	{
-		return null;
+		if (this.propertiesProcessor != null)
+			this.propertiesProcessor.process(driver, properties);
 	}
 
 	/**

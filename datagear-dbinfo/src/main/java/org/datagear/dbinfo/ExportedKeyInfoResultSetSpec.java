@@ -4,6 +4,8 @@
 
 package org.datagear.dbinfo;
 
+import java.util.List;
+
 /**
  * {@linkplain ExportedKeyInfo}结果集规范。
  * 
@@ -27,6 +29,20 @@ public class ExportedKeyInfoResultSetSpec extends ResultSetSpec<ExportedKeyInfo>
 	public ExportedKeyInfoResultSetSpec()
 	{
 		super();
+	}
+
+	@Override
+	protected void addToList(List<ExportedKeyInfo> list, ExportedKeyInfo bean)
+	{
+		for (ExportedKeyInfo ele : list)
+		{
+			if (equalsWithNull(ele.getFkColumnName(), bean.getFkColumnName())
+					&& equalsWithNull(ele.getFkTableName(), bean.getFkTableName())
+					&& equalsWithNull(ele.getPkColumnName(), bean.getPkColumnName()))
+				return;
+		}
+
+		list.add(bean);
 	}
 
 	@Override

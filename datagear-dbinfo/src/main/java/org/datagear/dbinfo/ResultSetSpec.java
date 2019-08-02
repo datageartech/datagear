@@ -94,13 +94,13 @@ public abstract class ResultSetSpec<T extends ResultSetSpecBean>
 	 * @throws ResultSetIncompatibleException
 	 * @throws SQLException
 	 */
-	protected <TT> List<TT> doRead(ResultSet rs, RsColumnSpec<?, ?>[] rsColumnSpecs, Class<TT> type, long startRow,
-			int count) throws ResultSetIncompatibleException, SQLException
+	protected List<T> doRead(ResultSet rs, RsColumnSpec<?, ?>[] rsColumnSpecs, Class<T> type, long startRow, int count)
+			throws ResultSetIncompatibleException, SQLException
 	{
 		if (startRow < 1)
 			startRow = 1;
 
-		List<TT> list = new ArrayList<TT>();
+		List<T> list = new ArrayList<T>();
 
 		ResultSetMetaData rsm = rs.getMetaData();
 		int columnCount = rsm.getColumnCount();
@@ -131,7 +131,7 @@ public abstract class ResultSetSpec<T extends ResultSetSpecBean>
 
 			if (row >= startRow)
 			{
-				TT bean = createInstance(type);
+				T bean = createInstance(type);
 				BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 
 				try
@@ -146,7 +146,7 @@ public abstract class ResultSetSpec<T extends ResultSetSpecBean>
 						beanWrapper.setPropertyValue(rsColumnSpec.getPropertyName(), propValue);
 					}
 
-					list.add(bean);
+					addToList(list, bean);
 				}
 				// 如果违反规范，则忽略此行数据，避免整个功能无法使用
 				catch (ResultSetValueNullException e)
@@ -162,6 +162,35 @@ public abstract class ResultSetSpec<T extends ResultSetSpecBean>
 		}
 
 		return list;
+	}
+
+	/**
+	 * 添加元素。
+	 * <p>
+	 * 注意：子类应该重写此方法并避免添加重复元素。
+	 * </p>
+	 * <p>
+	 * 比如：Mysql的{@code mysql-connector-java-5.1.47}驱动{@code com.mysql.jdbc.DatabaseMetaData.getImportedKeys(String, String, String)}
+	 * 在设置了连接参数{@code useInformationSchema}为{@code true}时，竟然会返回重复记录。
+	 * </p>
+	 * 
+	 * @param list
+	 * @param bean
+	 */
+	protected void addToList(List<T> list, T bean)
+	{
+		if (list.contains(bean))
+			return;
+
+		list.add(bean);
+	}
+
+	protected boolean equalsWithNull(Object s0, Object s1)
+	{
+		if (s0 == null)
+			return (s1 == null);
+		else
+			return s0.equals(s1);
 	}
 
 	/**
