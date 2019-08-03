@@ -320,10 +320,14 @@
 			west :
 			{
 				size : "18%",
-				minSize : westMinSize
+				minSize : westMinSize,
+				maxSize : "50%"
 			},
 			onresize_end : function(){ $(window).resize();/*触发page_obj_grid.jsp表格resize*/ }
 		});
+		
+		//使"#schemaOperationMenu"可以最上层展示
+		po.element(".ui-layout-west").css("z-index", 6);
 		
 		po.element("#systemSetMenu").menu(
 		{
@@ -404,7 +408,7 @@
 		
 		po.element("#schemaOperationMenu").menu(
 		{
-			position : {my:"right top", at: "right bottom-1"},
+			position : {my:"left top", at: "left bottom-1"},
 			focus : function(event, ui)
 			{
 				var $item = $(ui.item);
