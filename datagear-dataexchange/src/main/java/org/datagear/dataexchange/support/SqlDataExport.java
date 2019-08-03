@@ -29,12 +29,27 @@ public class SqlDataExport extends QueryTextDataExport
 		super();
 	}
 
-	public SqlDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, TextDataExportOption exportOption,
+	public SqlDataExport(ConnectionFactory connectionFactory, DataFormat dataFormat, SqlDataExportOption exportOption,
 			Query query, String tableName, ResourceFactory<Writer> writerFactory)
 	{
 		super(connectionFactory, dataFormat, exportOption, query);
 		this.tableName = tableName;
 		this.writerFactory = writerFactory;
+	}
+
+	@Override
+	public SqlDataExportOption getExportOption()
+	{
+		return (SqlDataExportOption) super.getExportOption();
+	}
+
+	@Override
+	public void setExportOption(TextDataExportOption exportOption)
+	{
+		if (!(exportOption instanceof SqlDataExportOption))
+			throw new IllegalArgumentException();
+
+		super.setExportOption(exportOption);
 	}
 
 	public String getTableName()

@@ -40,6 +40,17 @@ Schema schema 数据库，不允许为null
 							</div>
 						</div>
 					</div>
+					<div class="form-item">
+						<div class="form-item-label"><@spring.message code='dataExport.exportCreationSql' /></div>
+						<div class="form-item-value">
+							<div id="${pageId}-exportCreationSql">
+								<label for="${pageId}-exportCreationSql-0"><@spring.message code='yes' /></label>
+								<input id="${pageId}-exportCreationSql-0" type="radio" name="exportOption.exportCreationSql" value="true" />
+								<label for="${pageId}-exportCreationSql-1"><@spring.message code='no' /></label>
+								<input id="${pageId}-exportCreationSql-1" type="radio" name="exportOption.exportCreationSql" value="false" />
+							</div>
+						</div>
+					</div>
 				</div>
 				<h3><@spring.message code='dataExport.selectAndExportData' /></h3>
 				<div>
@@ -142,6 +153,8 @@ Schema schema 数据库，不允许为null
 	po.initDataExportSteps();
 	po.initDataExchangeUIs();
 	po.initDataExportUIs();
+	po.element("#${pageId}-exportCreationSql").buttonset();
+	po.element("#${pageId}-exportCreationSql-1").click();
 	po.initDataExportDataTable();
 	po.initDataExchangeActions();
 	po.initDataExportActions();

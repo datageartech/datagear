@@ -98,6 +98,11 @@ public class ColumnInfo extends ResultSetSpecBean
 		this.size = size;
 	}
 
+	/**
+	 * 获取小数位数，返回{@code <= 0}表示无此值。
+	 * 
+	 * @return
+	 */
 	public int getDecimalDigits()
 	{
 		return decimalDigits;

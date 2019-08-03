@@ -61,6 +61,7 @@ import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.ExcelDataExport;
 import org.datagear.dataexchange.support.ExcelDataImport;
 import org.datagear.dataexchange.support.SqlDataExport;
+import org.datagear.dataexchange.support.SqlDataExportOption;
 import org.datagear.dataexchange.support.SqlDataImport;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
@@ -1738,6 +1739,21 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public SqlFileBatchDataExportForm()
 		{
 			super();
+		}
+
+		@Override
+		public SqlDataExportOption getExportOption()
+		{
+			return (SqlDataExportOption) super.getExportOption();
+		}
+
+		@Override
+		public void setExportOption(TextDataExportOption exportOption)
+		{
+			if (!(exportOption instanceof SqlDataExportOption))
+				throw new IllegalArgumentException();
+
+			super.setExportOption(exportOption);
 		}
 
 		public String[] getTableNames()

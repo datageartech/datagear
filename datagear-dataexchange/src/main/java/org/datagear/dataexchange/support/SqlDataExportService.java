@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
@@ -16,7 +17,6 @@ import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
-import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 
@@ -76,11 +76,14 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 			Writer out, IndexFormatDataExchangeContext exportContext) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
-		TextDataExportOption exportOption = dataExchange.getExportOption();
+		SqlDataExportOption exportOption = dataExchange.getExportOption();
 		int columnCount = columnInfos.size();
 
 		DatabaseMetaData metaData = cn.getMetaData();
 		String quote = metaData.getIdentifierQuoteString();
+
+		if (exportOption.isExportCreationSql())
+			writeCreationSql(dataExchange, cn, columnInfos, rs, quote, out, exportContext);
 
 		long row = 0;
 
@@ -158,6 +161,128 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 
 			row++;
 		}
+	}
+
+	/**
+	 * 写建表语句。
+	 * 
+	 * @param dataExchange
+	 * @param cn
+	 * @param columnInfos
+	 * @param rs
+	 * @param quote
+	 * @param out
+	 * @param exportContext
+	 * @throws Throwable
+	 */
+	protected void writeCreationSql(SqlDataExport dataExchange, Connection cn, List<ColumnInfo> columnInfos,
+			ResultSet rs, String quote, Writer out, IndexFormatDataExchangeContext exportContext) throws Throwable
+	{
+		out.write("CREATE TABLE ");
+		out.write(quote);
+		out.write(dataExchange.getTableName());
+		out.write(quote);
+		out.write(LINE_SEPARATOR);
+		out.write('(');
+		out.write(LINE_SEPARATOR);
+
+		String[] primaryColumnNames = getDatabaseInfoResolver().getPrimaryKeyColumnNames(cn,
+				dataExchange.getTableName());
+		List<String> filterPkNames = filterPrimaryColumnNames(primaryColumnNames, columnInfos);
+
+		for (int i = 0, len = columnInfos.size(); i < len; i++)
+		{
+			ColumnInfo columnInfo = columnInfos.get(i);
+
+			out.write("  ");
+			out.write(quote);
+			out.write(columnInfo.getName());
+			out.write(quote);
+			out.write(' ');
+
+			out.write(columnInfo.getTypeName());
+
+			if (columnInfo.getSize() > 0)
+			{
+				out.write('(');
+				out.write(Integer.toString(columnInfo.getSize()));
+
+				if (columnInfo.getDecimalDigits() > 0)
+				{
+					out.write(',');
+					out.write(Integer.toString(columnInfo.getDecimalDigits()));
+				}
+
+				out.write(')');
+			}
+
+			if (!columnInfo.isNullable())
+				out.write(" NOT NULL");
+
+			if (i < len - 1)
+				out.write(',');
+			else if (i == len - 1 && !filterPkNames.isEmpty())
+				out.write(',');
+
+			out.write(LINE_SEPARATOR);
+		}
+
+		if (!filterPkNames.isEmpty())
+		{
+			out.write("  ");
+			out.write("PRIMARY KEY (");
+
+			for (int i = 0, len = filterPkNames.size(); i < len; i++)
+			{
+				out.write(quote);
+				out.write(filterPkNames.get(i));
+				out.write(quote);
+
+				if (i < len - 1)
+					out.write(',');
+			}
+
+			out.write(")");
+			out.write(LINE_SEPARATOR);
+		}
+
+		out.write(");");
+		out.write(LINE_SEPARATOR);
+		out.write(LINE_SEPARATOR);
+	}
+
+	/**
+	 * 过滤主键列名，仅保留在{@code columnInfos}包含的。
+	 * 
+	 * @param primaryColumnNames
+	 * @param columnInfos
+	 * @return
+	 */
+	protected List<String> filterPrimaryColumnNames(String[] primaryColumnNames, List<ColumnInfo> columnInfos)
+	{
+		List<String> names = new ArrayList<String>(3);
+
+		if (primaryColumnNames == null)
+			return names;
+
+		for (int i = 0; i < primaryColumnNames.length; i++)
+		{
+			if (columnInfos == null)
+				names.add(primaryColumnNames[i]);
+			else
+			{
+				for (ColumnInfo columnInfo : columnInfos)
+				{
+					if (columnInfo.getName().equals(primaryColumnNames[i]))
+					{
+						names.add(primaryColumnNames[i]);
+						break;
+					}
+				}
+			}
+		}
+
+		return names;
 	}
 
 	protected String escapeSqlStringValue(String value)
