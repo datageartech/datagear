@@ -3163,6 +3163,7 @@
 				;
 			else
 			{
+				/* 在firefox中，cometd连接有可能会被用户操作请求中断，导致莫名其妙地弹出错误提示，因此把此处代码禁用
 				var msg = (jqXHR.statusText || "Error");
 				
 				if(errorThrown && errorThrown.message)
@@ -3174,6 +3175,7 @@
 				}
 				
 				$.tipError(msg);
+				*/
 			}
 		}
 	};
