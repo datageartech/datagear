@@ -314,7 +314,11 @@ public class DefaultConnectionSource implements ConnectionSource
 	protected Connection getConnection(Driver driver, ConnectionOption connectionOption)
 			throws EstablishConnectionException, ConnectionSourceException
 	{
-		Properties properties = new Properties(connectionOption.getProperties());
+		Properties properties = new Properties();
+
+		if (connectionOption.getProperties() != null)
+			properties.putAll(connectionOption.getProperties());
+
 		processConnectionProperties(driver, properties);
 
 		try
