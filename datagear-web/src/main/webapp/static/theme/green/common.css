@@ -72,15 +72,14 @@ form .form-content .form-item .form-item-value textarea.error{
 
 /*jquery.layout*/
 .ui-layout-pane{
-	border: 1px solid #45930b;
+	border: 0;
 	background-color: #285c00;
-	border-top-width: 0px;
 }
 .ui-layout-resizer, .ui-layout-resizer-open-hover, .ui-layout-resizer-dragging{
 	background: #367309;
 }
 .ui-layout-toggler{
-	background-color: #285c00;
+	background-color: #418a0a;
 }
 .ui-layout-toggler-hover, .ui-layout-resizer-hover .ui-layout-toggler-hover{
 	background-color: #85ce3c;
