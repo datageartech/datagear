@@ -471,8 +471,11 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 
 /*jquery-steps*/
+.wizard > .steps > ul > li{
+	width: 35%;
+}
 .wizard > .steps a, .wizard > .steps a:hover, .wizard > .steps a:active{
-	padding: 0.6em 1em;
+	padding: 0.4em 1em;
 	border-radius: 3px;
 }
 .wizard > .steps .done a, .wizard > .steps .done a:hover, .wizard > .steps .done a:active{
@@ -1624,7 +1627,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-dataexchange .head{
 	position: absolute;
 	left : 0.5em;
-	top : 1em;
+	top : 0.8em;
 	z-index: 1;
 }
 .page-dataexchange > .content{
@@ -1644,7 +1647,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	position: absolute;
 	left: 0.5em;
 	right: 0.5em;
-	top: 3.5em;
+	top: 3.3em;
 	bottom: 4em;
 	padding: 0 0;
 }

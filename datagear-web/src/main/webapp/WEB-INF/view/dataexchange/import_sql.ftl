@@ -29,9 +29,6 @@ Schema schema 数据库，不允许为null
 				<h3><@spring.message code='dataImport.setDataFormat' /></h3>
 				<div>
 					<div class="form-item">
-						<div class="form-item-label"></div>
-					</div>
-					<div class="form-item">
 						<div class="form-item-label"><@spring.message code='dataExchange.exceptionResolve' /></div>
 						<div class="form-item-value">
 							<div id="${pageId}-exceptionResolve">
