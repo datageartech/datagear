@@ -252,7 +252,7 @@
 	{
 		var $icon = po.element("#schemaSearchSwitch > .ui-icon");
 		
-		return $icon.hasClass("ui-icon-document");
+		return $icon.hasClass("ui-icon-calculator");
 	};
 	
 	po.getSearchSchemaFormData = function()
@@ -400,10 +400,10 @@
 		{
 			var $icon = $(".ui-icon", this);
 			
-			if($icon.hasClass("ui-icon-document"))
-				$icon.removeClass("ui-icon-document").addClass("ui-icon-folder-collapsed").attr("title", "<@spring.message code='main.searchSchema' />");
+			if($icon.hasClass("ui-icon-calculator"))
+				$icon.removeClass("ui-icon-calculator").addClass("ui-icon-folder-collapsed").attr("title", "<@spring.message code='main.searchSchema' />");
 			else
-				$icon.removeClass("ui-icon-folder-collapsed").addClass("ui-icon-document").attr("title", "<@spring.message code='main.searchTable' />");
+				$icon.removeClass("ui-icon-folder-collapsed").addClass("ui-icon-calculator").attr("title", "<@spring.message code='main.searchTable' />");
 		});
 		
 		po.element("#schemaOperationMenu").menu(
@@ -1048,7 +1048,7 @@
 				<div class="schema-panel-operation">
 					<div class="ui-widget ui-widget-content ui-corner-all search">
 						<form id="schemaSearchForm" action="javascript:void(0);">
-							<div id="schemaSearchSwitch" class="schema-search-switch"><span class="ui-icon ui-icon-document search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
+							<div id="schemaSearchSwitch" class="schema-search-switch"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
 							<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" /></div>
 							<button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><@spring.message code='find' /></button>
 							<input name="pageSize" type="hidden" value="100" />
