@@ -247,7 +247,27 @@
 		//jstree的_append_json_data方法有“if(data.d){data = data.d;...}”的逻辑，可以用来适配数据
 		pagingData.d = pagingData.items;
 	};
-
+	
+	po.toDraggableNode = function(tree, node)
+	{
+		var $node = tree.get_node(node.id, true);
+		var $anchor = $(".jstree-anchor", $node);
+		
+		if($anchor.hasClass("ui-draggable"))
+			return;
+		
+		$anchor.draggable(
+		{
+			helper: "clone",
+			appendTo: ".main-page-content",
+			classes:
+			{
+				"ui-draggable" : "table-draggable",
+				"ui-draggable-dragging" : "ui-widget ui-widget-content ui-corner-all ui-widget-shadow table-draggable-helper"
+			}
+		});
+	};
+	
 	po.isSearchTable = function()
 	{
 		var $icon = po.element("#schemaSearchSwitch > .ui-icon");
@@ -327,7 +347,7 @@
 		});
 		
 		//使"#schemaOperationMenu"可以最上层展示
-		po.element(".ui-layout-west").css("z-index", 6);
+		po.element(".ui-layout-west").css("z-index", 3);
 		
 		po.element("#systemSetMenu").menu(
 		{
@@ -858,6 +878,14 @@
 				po.selectNodeAfterLoad = false;
 				
 				tree.select_node(data.node);
+			}
+		})
+		.bind("hover_node.jstree", function(event, data)
+		{
+			if($.enableTableNodeDraggable && po.isTableNode(data.node))
+			{
+				var tree = $(this).jstree(true);
+				po.toDraggableNode(tree, data.node);
 			}
 		});
 		

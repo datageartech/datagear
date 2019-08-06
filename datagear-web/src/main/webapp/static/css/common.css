@@ -819,8 +819,8 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .schema-search-switch{
 	display: inline-block;
 	float: left;
-	opacity: 0.6;
-	filter: Alpha(Opacity=60);
+	opacity: 0.4;
+	filter: Alpha(Opacity=40);
 	cursor: pointer;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .keyword-input-parent{
@@ -886,6 +886,13 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .main-page-content .schema-panel .schema-panel-content .more-table{
 	font-weight: bold;
 	font-style: italic;
+}
+.main-page-content .table-draggable-helper{
+	padding: 0.5em 1em;
+	z-index: 6;
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
+	border-style: dotted;
 }
 .main-page-content .main-tabs{
     position: absolute;

@@ -176,6 +176,30 @@ Schema schema 数据库，不允许为null
 	po.sqlEditor.focus();
 	po.sqlEditor.navigateFileEnd();
 	
+	//数据库表条目拖入自动插入SQL
+	$.enableTableNodeDraggable = true;
+	po.element("#${pageId}-sql-editor").droppable(
+	{
+		accept: ".table-draggable",
+		drop: function(event, ui)
+		{
+			var srcText = ui.draggable.text();
+			
+			if(srcText)
+			{
+				var cursor = po.sqlEditor.getCursorPosition();
+				
+				if(cursor.column == 0)
+					srcText = "SELECT * FROM " +srcText+";";
+				
+				po.sqlEditor.moveCursorToPosition(cursor);
+				po.sqlEditor.session.insert(cursor, srcText);
+				
+				po.sqlEditor.focus();
+			}
+		}
+	});
+	
 	//当前在执行的SQL语句数
 	po.executingSqlCount = -1;
 	
