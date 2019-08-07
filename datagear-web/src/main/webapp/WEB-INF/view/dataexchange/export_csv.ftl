@@ -111,6 +111,9 @@ Schema schema 数据库，不允许为null
 {
 	po.toExportFileName = function(tableName)
 	{
+		if(!tableName)
+			return "";
+		
 		return $.toValidFileName(tableName)+".csv";
 	};
 	
@@ -121,6 +124,7 @@ Schema schema 数据库，不允许为null
 	po.initDataExportDataTable();
 	po.initDataExchangeActions();
 	po.initDataExportActions();
+	po.initDataExportDroppable();
 	po.updateDataExchangePageStatus("edit");
 })
 (${pageId});

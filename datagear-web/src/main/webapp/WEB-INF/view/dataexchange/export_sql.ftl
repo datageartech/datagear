@@ -123,13 +123,16 @@ Schema schema 数据库，不允许为null
 	po.element(".binaryFormatSetButtonHex").attr("value", "0x"+"$"+"{Hex}");
 	po.element(".binaryFormatSetButtonBase64").attr("value", "'"+"$"+"{Base64}'");
 	
-	po.postBuildSubDataExchange = function(subDataExchange, tableName)
+	po.postBuildSubDataExchange = function(subDataExchange)
 	{
-		subDataExchange.tableName = tableName;
+		subDataExchange.tableName = subDataExchange.query;
 	};
 	
 	po.toExportFileName = function(tableName)
 	{
+		if(!tableName)
+			return "";
+		
 		return $.toValidFileName(tableName)+".sql";
 	};
 	
@@ -158,6 +161,7 @@ Schema schema 数据库，不允许为null
 	po.initDataExportDataTable();
 	po.initDataExchangeActions();
 	po.initDataExportActions();
+	po.initDataExportDroppable();
 	po.updateDataExchangePageStatus("edit");
 })
 (${pageId});

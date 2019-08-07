@@ -13,11 +13,18 @@ dataExchange_js.ftl
 {
 	po.dataExchangeChannelId = "${dataExchangeChannelId}";
 	
-	po.addSubDataExchange = function()
+	po.addSubDataExchange = function(tableName)
 	{
-		var rowData = {subDataExchangeId : po.nextSubDataExchangeId(), query : "", fileName : "", status : ""};
+		if(tableName == null)
+			tableName = "";
+		
+		var rowData = { subDataExchangeId : po.nextSubDataExchangeId(), query : tableName, fileName : po.toExportFileName(tableName), status : "" };
 		po.postBuildSubDataExchange(rowData);
 		po.addRowData(rowData);
+		
+		//滚动到底部
+		var $dataTableParent = po.dataTableParent();
+		$dataTableParent.scrollTop($dataTableParent.prop("scrollHeight"));
 	};
 	
 	po.buildSubDataExchangesForTables = function(tableNames)
@@ -29,7 +36,7 @@ dataExchange_js.ftl
 			var data = {subDataExchangeId : po.nextSubDataExchangeId(), query : tableNames[i],
 					fileName : po.toExportFileName(tableNames[i]), status : ""};
 			
-			po.postBuildSubDataExchange(data, tableNames[i]);
+			po.postBuildSubDataExchange(data);
 			
 			datas.push(data);
 		}
@@ -37,7 +44,7 @@ dataExchange_js.ftl
 		return datas;
 	};
 	
-	po.postBuildSubDataExchange = function(subDataExchange, tableName){};
+	po.postBuildSubDataExchange = function(subDataExchange){};
 	
 	po.addAllTable = function()
 	{
@@ -190,15 +197,37 @@ dataExchange_js.ftl
 		po.bindResizeDataTable();
 	};
 	
+	//数据库表条目拖入自动插入导出条目
+	po.initDataExportDroppable = function($dropEle)
+	{
+		if($dropEle == undefined)
+			$dropEle = po.element(".table-wrapper");
+		
+		$.enableTableNodeDraggable = true;
+		
+		$dropEle.droppable(
+		{
+			accept: ".table-draggable",
+			drop: function(event, ui)
+			{
+				if(po.isDataExchangePageStatus("edit"))
+				{
+					var srcText = ui.draggable.text();
+					
+					if(srcText)
+					{
+						po.addSubDataExchange(srcText);
+					}
+				}
+			}
+		});
+	};
+	
 	po.initDataExportActions = function()
 	{
 		po.element(".table-add-item-button").click(function()
 		{
 			po.addSubDataExchange();
-			
-			//滚动到底部
-			var $dataTableParent = po.dataTableParent();
-			$dataTableParent.scrollTop($dataTableParent.prop("scrollHeight"));
 		});
 		
 		po.element(".table-delete-item-button").click(function()
