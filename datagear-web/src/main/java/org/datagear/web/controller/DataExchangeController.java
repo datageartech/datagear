@@ -234,11 +234,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 			@RequestParam("dataExchangeId") String dataExchangeId, TextValueFileBatchDataImportForm dataImportForm,
 			@RequestParam("dependentNumberAuto") final String dependentNumberAuto) throws Throwable
 	{
-		if (dataImportForm == null || isEmpty(dataImportForm.getSubDataExchangeIds())
-				|| isEmpty(dataImportForm.getFileNames()) || isEmpty(dataImportForm.getFileEncoding())
-				|| isEmpty(dataImportForm.getNumbers()) || isEmpty(dataImportForm.getDependentNumbers())
-				|| isEmpty(dataImportForm.getImportOption()) || isEmpty(dataImportForm.getDataFormat())
-				|| isEmpty(dataImportForm.getTableNames())
+		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || dataImportForm == null
+				|| isEmpty(dataImportForm.getSubDataExchangeIds()) || isEmpty(dataImportForm.getFileNames())
+				|| isEmpty(dataImportForm.getFileEncoding()) || isEmpty(dataImportForm.getNumbers())
+				|| isEmpty(dataImportForm.getDependentNumbers()) || isEmpty(dataImportForm.getImportOption())
+				|| isEmpty(dataImportForm.getDataFormat()) || isEmpty(dataImportForm.getTableNames())
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getFileNames().length
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getNumbers().length
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getDependentNumbers().length
@@ -250,6 +250,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		final String[] dependentNumbers = dataImportForm.getDependentNumbers();
 		String[] fileNames = dataImportForm.getFileNames();
 		final String[] tableNames = dataImportForm.getTableNames();
+
+		checkNoEmptyWithElement(subDataExchangeIds);
+		checkNoEmptyWithElement(numbers);
+		checkNoEmptyWithElement(fileNames);
+		checkNoEmptyWithElement(tableNames);
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -355,10 +360,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			SqlFileBatchDataImportForm dataImportForm) throws Exception
 	{
-		if (dataImportForm == null || isEmpty(dataImportForm.getSubDataExchangeIds())
-				|| isEmpty(dataImportForm.getFileNames()) || isEmpty(dataImportForm.getFileEncoding())
-				|| isEmpty(dataImportForm.getNumbers()) || isEmpty(dataImportForm.getDependentNumbers())
-				|| isEmpty(dataImportForm.getImportOption())
+		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || dataImportForm == null
+				|| isEmpty(dataImportForm.getSubDataExchangeIds()) || isEmpty(dataImportForm.getFileNames())
+				|| isEmpty(dataImportForm.getFileEncoding()) || isEmpty(dataImportForm.getNumbers())
+				|| isEmpty(dataImportForm.getDependentNumbers()) || isEmpty(dataImportForm.getImportOption())
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getFileNames().length
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getNumbers().length
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getDependentNumbers().length)
@@ -368,6 +373,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		String[] numbers = dataImportForm.getNumbers();
 		String[] dependentNumbers = dataImportForm.getDependentNumbers();
 		String[] fileNames = dataImportForm.getFileNames();
+
+		checkNoEmptyWithElement(subDataExchangeIds);
+		checkNoEmptyWithElement(numbers);
+		checkNoEmptyWithElement(fileNames);
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -460,10 +469,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 			@RequestParam("dataExchangeId") String dataExchangeId, TextValueFileBatchDataImportForm dataImportForm,
 			@RequestParam("dependentNumberAuto") final String dependentNumberAuto) throws Throwable
 	{
-		if (dataImportForm == null || isEmpty(dataImportForm.getSubDataExchangeIds())
-				|| isEmpty(dataImportForm.getFileNames()) || isEmpty(dataImportForm.getNumbers())
-				|| isEmpty(dataImportForm.getDependentNumbers()) || isEmpty(dataImportForm.getImportOption())
-				|| isEmpty(dataImportForm.getDataFormat()) || isEmpty(dataImportForm.getTableNames())
+		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || dataImportForm == null
+				|| isEmpty(dataImportForm.getSubDataExchangeIds()) || isEmpty(dataImportForm.getFileNames())
+				|| isEmpty(dataImportForm.getNumbers()) || isEmpty(dataImportForm.getDependentNumbers())
+				|| isEmpty(dataImportForm.getImportOption()) || isEmpty(dataImportForm.getDataFormat())
+				|| isEmpty(dataImportForm.getTableNames())
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getFileNames().length
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getNumbers().length
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getDependentNumbers().length
@@ -475,6 +485,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		final String[] dependentNumbers = dataImportForm.getDependentNumbers();
 		String[] fileNames = dataImportForm.getFileNames();
 		final String[] tableNames = dataImportForm.getTableNames();
+
+		checkNoEmptyWithElement(subDataExchangeIds);
+		checkNoEmptyWithElement(numbers);
+		checkNoEmptyWithElement(fileNames);
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -676,9 +690,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			TextFileBatchDataExportForm exportForm) throws Exception
 	{
-		if (exportForm == null || isEmpty(exportForm.getDataFormat()) || isEmpty(exportForm.getExportOption())
-				|| isEmpty(exportForm.getFileEncoding()) || isEmpty(exportForm.getSubDataExchangeIds())
-				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getFileNames())
+		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || exportForm == null || isEmpty(exportForm.getDataFormat())
+				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getFileEncoding())
+				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
+				|| isEmpty(exportForm.getFileNames())
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
 			throw new IllegalInputException();
@@ -686,6 +701,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
 		String[] fileNames = exportForm.getFileNames();
+
+		checkNoEmptyWithElement(subDataExchangeIds);
+		checkNoEmptyWithElement(queries);
+		checkNoEmptyWithElement(fileNames);
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -771,9 +790,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			TextFileBatchDataExportForm exportForm) throws Exception
 	{
-		if (exportForm == null || isEmpty(exportForm.getDataFormat()) || isEmpty(exportForm.getExportOption())
-				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
-				|| isEmpty(exportForm.getFileNames())
+		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || exportForm == null || isEmpty(exportForm.getDataFormat())
+				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getSubDataExchangeIds())
+				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getFileNames())
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
 			throw new IllegalInputException();
@@ -781,6 +800,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
 		String[] fileNames = exportForm.getFileNames();
+
+		checkNoEmptyWithElement(subDataExchangeIds);
+		checkNoEmptyWithElement(queries);
+		checkNoEmptyWithElement(fileNames);
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -870,10 +893,10 @@ public class DataExchangeController extends AbstractSchemaConnController
 			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
 			SqlFileBatchDataExportForm exportForm) throws Exception
 	{
-		if (exportForm == null || isEmpty(exportForm.getDataFormat()) || isEmpty(exportForm.getExportOption())
-				|| isEmpty(exportForm.getFileEncoding()) || isEmpty(exportForm.getSubDataExchangeIds())
-				|| isEmpty(exportForm.getQueries()) || isEmpty(exportForm.getTableNames())
-				|| isEmpty(exportForm.getFileNames())
+		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || exportForm == null || isEmpty(exportForm.getDataFormat())
+				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getFileEncoding())
+				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
+				|| isEmpty(exportForm.getTableNames()) || isEmpty(exportForm.getFileNames())
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getTableNames().length
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
@@ -883,6 +906,11 @@ public class DataExchangeController extends AbstractSchemaConnController
 		String[] queries = exportForm.getQueries();
 		String[] tableNames = exportForm.getTableNames();
 		String[] fileNames = exportForm.getFileNames();
+
+		checkNoEmptyWithElement(subDataExchangeIds);
+		checkNoEmptyWithElement(queries);
+		checkNoEmptyWithElement(tableNames);
+		checkNoEmptyWithElement(fileNames);
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -1228,6 +1256,18 @@ public class DataExchangeController extends AbstractSchemaConnController
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
 
 		return responseEntity;
+	}
+
+	protected void checkNoEmptyWithElement(Object[] array) throws IllegalInputException
+	{
+		if (array == null || array.length == 0)
+			throw new IllegalInputException();
+
+		for (Object ele : array)
+		{
+			if (isEmpty(ele))
+				throw new IllegalInputException();
+		}
 	}
 
 	protected List<String> excludeViewNames(TableInfo[] tableInfos)
