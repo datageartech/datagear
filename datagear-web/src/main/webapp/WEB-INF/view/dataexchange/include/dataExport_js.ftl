@@ -245,12 +245,17 @@ dataExchange_js.ftl
 		
 		po.element(".table-download-all-button").click(function()
 		{
+			var fileName = $(this).attr("file-name");
+			if(!fileName)
+				fileName = "export.zip";
+			
 			po.open("${contextPath}/dataexchange/" + po.schemaId +"/export/downloadAll",
 			{
 				target : "_file",
 				data :
 				{
-					dataExchangeId : po.dataExchangeId
+					dataExchangeId : po.dataExchangeId,
+					fileName : fileName
 				}
 			});
 		});

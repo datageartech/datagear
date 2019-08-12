@@ -190,7 +190,7 @@ Schema schema 数据库，不允许为null
 				var cursor = po.sqlEditor.getCursorPosition();
 				
 				if(cursor.column == 0)
-					srcText = "SELECT * FROM " +srcText+";";
+					srcText = "SELECT * FROM " +srcText+";" + "\n";
 				
 				po.sqlEditor.moveCursorToPosition(cursor);
 				po.sqlEditor.session.insert(cursor, srcText);

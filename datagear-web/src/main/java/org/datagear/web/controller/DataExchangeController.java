@@ -993,14 +993,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/export/downloadAll")
 	@ResponseBody
 	public void exptDownloadAll(HttpServletRequest request, HttpServletResponse response,
-			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId)
-			throws Exception
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@RequestParam("fileName") String fileName) throws Exception
 	{
-		String fileName = "export.zip";
-
 		response.setCharacterEncoding(RESPONSE_ENCODING);
 		response.setHeader("Content-Disposition",
-				"attachment; filename=" + new String(fileName.getBytes(RESPONSE_ENCODING), "iso-8859-1") + "");
+				"attachment; filename=" + new String(fileName.getBytes(RESPONSE_ENCODING), "iso-8859-1"));
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 

@@ -64,7 +64,7 @@ Schema schema 数据库，不允许为null
 						<div class="table-operation-wrapper">
 							<button type="button" class="table-delete-item-button page-status-aware-show edit-status-show"><@spring.message code='delete' /></button>
 							<button type="button" class="table-cancel-export-button page-status-aware-show exchange-status-show"><@spring.message code='cancel' /></button>
-							<button type="button" class="table-download-all-button page-status-aware-show finish-status-show"><@spring.message code='downloadAll' /></button>
+							<button type="button" class="table-download-all-button page-status-aware-show finish-status-show" file-name="export_csv.zip"><@spring.message code='downloadAll' /></button>
 						</div>
 						<div class="file-encoding-wrapper">
 							<span class="file-encoding-label page-status-aware-enable edit-status-enable">

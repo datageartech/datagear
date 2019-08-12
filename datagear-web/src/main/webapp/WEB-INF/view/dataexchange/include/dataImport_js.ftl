@@ -19,10 +19,20 @@ dataExchange_js.ftl
 		if(!fileInfos.length)
 			return;
 		
+		if(!po.nextSubDataExchangeNumberSeq || po.nextSubDataExchangeNumberSeq < 1)
+			po.nextSubDataExchangeNumberSeq = 1;
+		else
+		{
+			var dataTable = po.getSubDataExchangeDataTable();
+			var rowCount = dataTable.rows().indexes().length;
+			if(rowCount == 0)
+				po.nextSubDataExchangeNumberSeq = 1;
+		}
+		
 		for(var i=0; i<fileInfos.length; i++)
 		{
 			fileInfos[i].subDataExchangeId = po.nextSubDataExchangeId();
-			fileInfos[i].number = po.currentSubDataExchangeId();
+			fileInfos[i].number = (po.nextSubDataExchangeNumberSeq++);
 			fileInfos[i].dependentNumber = "";
 			
 			po.postBuildSubDataExchange(fileInfos[i]);
