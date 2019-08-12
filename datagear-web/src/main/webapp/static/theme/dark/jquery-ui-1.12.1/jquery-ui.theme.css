@@ -8,7 +8,7 @@
  *
  * http://api.jqueryui.com/category/theming/
  *
- * To view and modify this theme, visit http://jqueryui.com/themeroller/?scope=&folderName=ui-darkness&bgImgOpacityHeader=25&bgImgOpacityContent=25&bgImgOpacityDefault=20&bgImgOpacityHover=40&bgImgOpacityActive=30&bgImgOpacityHighlight=80&bgImgOpacityError=40&cornerRadiusShadow=8px&offsetLeftShadow=0px&offsetTopShadow=0px&thicknessShadow=6px&opacityShadow=60&bgImgOpacityShadow=30&bgTextureShadow=flat&bgColorShadow=%23cccccc&opacityOverlay=80&bgImgOpacityOverlay=50&bgTextureOverlay=flat&bgColorOverlay=%235c5c5c&iconColorError=%23a83300&fcError=%23111111&borderColorError=%23ffb73d&bgTextureError=flat&bgColorError=%23ffc73d&iconColorHighlight=%234b8e0b&fcHighlight=%232e7db2&borderColorHighlight=%23cccccc&bgTextureHighlight=flat&bgColorHighlight=%23eeeeee&iconColorActive=%23222222&fcActive=%23ffffff&borderColorActive=%23ffaf0f&bgTextureActive=flat&bgColorActive=%23f58400&iconColorHover=%23ffffff&fcHover=%23ffffff&borderColorHover=%2359b4d4&bgTextureHover=flat&bgColorHover=%230078a3&iconColorDefault=%23cccccc&fcDefault=%23eeeeee&borderColorDefault=%23666666&bgTextureDefault=flat&bgColorDefault=%23555555&iconColorContent=%23cccccc&fcContent=%23ffffff&borderColorContent=%23666666&bgTextureContent=flat&bgColorContent=%23000000&iconColorHeader=%23ffffff&fcHeader=%23ffffff&borderColorHeader=%23333333&bgTextureHeader=flat&bgColorHeader=%23333333&cornerRadius=3px&fwDefault=normal&fsDefault=1em&ffDefault=Segoe%20UI%2CArial%2Csans-serif
+ * To view and modify this theme, visit http://jqueryui.com/themeroller/?scope=&folderName=ui-darkness&bgImgOpacityError=40&bgImgOpacityHighlight=80&bgImgOpacityActive=30&bgImgOpacityHover=40&bgImgOpacityDefault=20&bgImgOpacityContent=25&bgImgOpacityHeader=25&cornerRadiusShadow=8px&offsetLeftShadow=0px&offsetTopShadow=0px&thicknessShadow=6px&opacityShadow=60&bgImgOpacityShadow=30&bgTextureShadow=flat&bgColorShadow=%23cccccc&opacityOverlay=80&bgImgOpacityOverlay=50&bgTextureOverlay=flat&bgColorOverlay=%235c5c5c&iconColorError=%23a83300&fcError=%23111111&borderColorError=%23ffb73d&bgTextureError=flat&bgColorError=%23ffc73d&iconColorHighlight=%234b8e0b&fcHighlight=%232e7db2&borderColorHighlight=%23cccccc&bgTextureHighlight=flat&bgColorHighlight=%23eeeeee&iconColorActive=%23222222&fcActive=%23ffffff&borderColorActive=%23ffaf0f&bgTextureActive=flat&bgColorActive=%23f58400&iconColorHover=%23ffffff&fcHover=%23ffffff&borderColorHover=%2359b4d4&bgTextureHover=flat&bgColorHover=%230078a3&iconColorDefault=%23cccccc&fcDefault=%23eeeeee&borderColorDefault=%23666666&bgTextureDefault=flat&bgColorDefault=%23555555&iconColorContent=%23cccccc&fcContent=%23eeeeee&borderColorContent=%23666666&bgTextureContent=flat&bgColorContent=%23000000&iconColorHeader=%23eeeeee&fcHeader=%23eeeeee&borderColorHeader=%23333333&bgTextureHeader=flat&bgColorHeader=%23333333&cornerRadius=3px&fwDefault=normal&fsDefault=1em&ffDefault=Segoe%20UI%2CArial%2Csans-serif
  */
 
 
@@ -34,19 +34,19 @@
 .ui-widget-content {
 	border: 1px solid #666666;
 	background: #000000;
-	color: #ffffff;
+	color: #eeeeee;
 }
 .ui-widget-content a {
-	color: #ffffff;
+	color: #eeeeee;
 }
 .ui-widget-header {
 	border: 1px solid #333333;
 	background: #333333;
-	color: #ffffff;
+	color: #eeeeee;
 	font-weight: bold;
 }
 .ui-widget-header a {
-	color: #ffffff;
+	color: #eeeeee;
 }
 
 /* Interaction states
@@ -199,7 +199,7 @@ a.ui-button:active,
 	background-image: url("images/ui-icons_cccccc_256x240.png");
 }
 .ui-widget-header .ui-icon {
-	background-image: url("images/ui-icons_ffffff_256x240.png");
+	background-image: url("images/ui-icons_eeeeee_256x240.png");
 }
 .ui-state-hover .ui-icon,
 .ui-state-focus .ui-icon,
