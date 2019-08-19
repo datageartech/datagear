@@ -370,10 +370,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 
 			if (!sql.isEmpty())
 			{
-				if (sql.endsWith(";"))
-					sql = sql.substring(0, sql.length() - 1);
-
-				contents.add(sql);
+				contents.add(deleteTailSemicolon(sql));
 
 				cache.delete(0, cache.length());
 			}
@@ -395,7 +392,9 @@ public class DbVersionManager extends AbstractVersionContentReader
 			String sql = cache.toString().trim();
 
 			if (!sql.isEmpty())
-				contents.add(sql);
+			{
+				contents.add(deleteTailSemicolon(sql));
+			}
 		}
 	}
 
@@ -419,6 +418,20 @@ public class DbVersionManager extends AbstractVersionContentReader
 		String version = line.substring(start, end);
 
 		return Version.valueOf(version);
+	}
+
+	/**
+	 * 删除SQL语句末尾的分号。
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	protected String deleteTailSemicolon(String sql)
+	{
+		if (sql.endsWith(";"))
+			sql = sql.substring(0, sql.length() - 1);
+
+		return sql;
 	}
 
 	/**
