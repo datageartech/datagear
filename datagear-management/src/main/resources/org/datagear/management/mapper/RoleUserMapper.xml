@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.RoleUser">
+
+	<insert id="insert">
+		INSERT INTO DATAGEAR_ROLE_USER
+			(
+			RU_ID, RU_ROLE_ID, RU_USER_ID
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.role.id}, #{entity.user.id}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE DATAGEAR_ROLE_USER SET
+			RU_ROLE_ID = #{entity.role.id},
+			RU_USER_ID = #{entity.user.id}
+		WHERE
+			RU_ID = #{entity.id}
+			<if test="OPERATOR != null and OPERATOR.admin != true">
+			AND 1=2
+			</if>
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM DATAGEAR_ROLE_USER
+		WHERE
+			RU_ID = #{id}
+			<if test="OPERATOR != null and OPERATOR.admin != true">
+			AND 1=2
+			</if>
+	</delete>
+	
+	<select id="getById" resultType="org.datagear.management.domain.RoleUser">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="query" resultType="org.datagear.management.domain.RoleUser">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+		<include refid="common.queryOrder" />
+	</select>
+	
+	<select id="pagingQueryCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+	</select>
+	
+	<select id="pagingQuery" resultType="org.datagear.management.domain.RoleUser">
+		<include refid="common.pagingQueryHead" />
+			SELECT
+				T.*
+			FROM
+				(<include refid="queryView" />) T
+			WHERE
+				<include refid="queryCondition" />
+			<include refid="common.queryOrder" />
+		<include refid="common.pagingQueryFoot" />
+	</select>
+	
+	<sql id="queryView">
+		SELECT
+			A.RU_ID AS ${_iq_}id${_iq_},
+			A.RU_ROLE_ID AS ${_iq_}role.id${_iq_},
+			B.ROLE_NAME AS ${_iq_}role.name${_iq_},
+			B.ROLE_DISABLED AS ${_iq_}role.disabled${_iq_},
+			A.RU_USER_ID AS ${_iq_}user.id${_iq_},
+			C.USER_NAME AS ${_iq_}user.name${_iq_},
+			C.USER_REAL_NAME AS ${_iq_}user.realName${_iq_},
+			(CASE WHEN C.USER_IS_ADMIN IS NULL THEN '0' ELSE C.USER_IS_ADMIN END) AS ${_iq_}user.admin${_iq_},
+			(CASE WHEN C.USER_ID IS NULL THEN '1' ELSE '0' END) AS ${_iq_}user.anonymous${_iq_},
+			C.USER_CREATE_TIME AS ${_iq_}user.createTime${_iq_}
+		FROM
+			DATAGEAR_ROLE_USER A,
+			DATAGEAR_ROLE B,
+			DATAGEAR_USER C
+		WHERE
+			A.RU_ROLE_ID = B.ROLE_ID AND A.RU_USER_ID = C.USER_ID
+	</sql>
+	
+	<sql id="queryCondition">
+		1 = 1
+		<if test="queryKeyword != null">
+		AND
+		(
+			${_iq_}role.name${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}user.name${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}user.realName${_iq_} LIKE #{queryKeyword}
+		)
+		</if>
+		<include refid="common.queryCondition" />
+	</sql>
+</mapper>

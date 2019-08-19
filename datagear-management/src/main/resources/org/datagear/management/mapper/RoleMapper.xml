@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.Role">
+
+	<insert id="insert">
+		INSERT INTO DATAGEAR_ROLE
+			(
+			ROLE_ID, ROLE_NAME, ROLE_DISABLED
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.name}, #{entity.disabled}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE DATAGEAR_ROLE SET
+			ROLE_NAME = #{entity.name},
+			ROLE_DISABLED = #{entity.disabled}
+		WHERE
+			ROLE_ID = #{entity.id}
+			<if test="OPERATOR != null and OPERATOR.admin != true">
+			AND 1=2
+			</if>
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM DATAGEAR_ROLE
+		WHERE
+			ROLE_ID = #{id}
+			<if test="OPERATOR != null and OPERATOR.admin != true">
+			AND 1=2
+			</if>
+	</delete>
+	
+	<select id="getById" resultType="org.datagear.management.domain.Role">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="query" resultType="org.datagear.management.domain.Role">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+		<include refid="common.queryOrder" />
+	</select>
+	
+	<select id="pagingQueryCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+	</select>
+	
+	<select id="pagingQuery" resultType="org.datagear.management.domain.Role">
+		<include refid="common.pagingQueryHead" />
+			SELECT
+				T.*
+			FROM
+				(<include refid="queryView" />) T
+			WHERE
+				<include refid="queryCondition" />
+			<include refid="common.queryOrder" />
+		<include refid="common.pagingQueryFoot" />
+	</select>
+	
+	<sql id="queryView">
+		SELECT
+			A.ROLE_ID AS ${_iq_}id${_iq_},
+			A.ROLE_NAME AS ${_iq_}name${_iq_},
+			A.ROLE_DISABLED AS ${_iq_}disabled${_iq_}
+		FROM
+			DATAGEAR_ROLE A
+	</sql>
+	
+	<sql id="queryCondition">
+		1 = 1
+		<if test="queryKeyword != null">
+		AND
+		(
+			${_iq_}name${_iq_} LIKE #{queryKeyword}
+		)
+		</if>
+		<include refid="common.queryCondition" />
+	</sql>
+</mapper>
