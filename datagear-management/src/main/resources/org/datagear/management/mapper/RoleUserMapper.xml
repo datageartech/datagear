@@ -79,19 +79,23 @@
 			A.RU_ID AS ${_iq_}id${_iq_},
 			A.RU_ROLE_ID AS ${_iq_}role.id${_iq_},
 			B.ROLE_NAME AS ${_iq_}role.name${_iq_},
-			B.ROLE_DISABLED AS ${_iq_}role.disabled${_iq_},
+			B.ROLE_DESCRIPTION AS ${_iq_}role.description${_iq_},
+			B.ROLE_ENABLED AS ${_iq_}role.enabled${_iq_},
 			A.RU_USER_ID AS ${_iq_}user.id${_iq_},
 			C.USER_NAME AS ${_iq_}user.name${_iq_},
 			C.USER_REAL_NAME AS ${_iq_}user.realName${_iq_},
-			(CASE WHEN C.USER_IS_ADMIN IS NULL THEN '0' ELSE C.USER_IS_ADMIN END) AS ${_iq_}user.admin${_iq_},
-			(CASE WHEN C.USER_ID IS NULL THEN '1' ELSE '0' END) AS ${_iq_}user.anonymous${_iq_},
+			C.USER_IS_ADMIN AS ${_iq_}user.admin${_iq_},
 			C.USER_CREATE_TIME AS ${_iq_}user.createTime${_iq_}
 		FROM
-			DATAGEAR_ROLE_USER A,
-			DATAGEAR_ROLE B,
+			DATAGEAR_ROLE_USER A
+		INNER JOIN
+			DATAGEAR_ROLE B
+		ON
+			A.RU_ROLE_ID = B.ROLE_ID
+		INNER JOIN
 			DATAGEAR_USER C
-		WHERE
-			A.RU_ROLE_ID = B.ROLE_ID AND A.RU_USER_ID = C.USER_ID
+		ON
+			A.RU_USER_ID = C.USER_ID
 	</sql>
 	
 	<sql id="queryCondition">
@@ -100,6 +104,7 @@
 		AND
 		(
 			${_iq_}role.name${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}role.description${_iq_} LIKE #{queryKeyword}
 			OR ${_iq_}user.name${_iq_} LIKE #{queryKeyword}
 			OR ${_iq_}user.realName${_iq_} LIKE #{queryKeyword}
 		)

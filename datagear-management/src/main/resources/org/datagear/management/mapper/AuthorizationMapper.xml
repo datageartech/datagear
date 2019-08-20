@@ -7,12 +7,12 @@
 		INSERT INTO DATAGEAR_AUTHORIZATION
 			(
 			AUTH_ID, AUTH_SOURCE, AUTH_SOURCE_TYPE, AUTH_TARGET, AUTH_TARGET_TYPE,
-			AUTH_PERMISSION, AUTH_DISABLED, AUTH_CREATE_USER_ID
+			AUTH_PERMISSION, AUTH_ENABLED, AUTH_CREATE_USER_ID
 			)
 		VALUES
 			(
 			#{entity.id}, #{entity.source}, #{entity.sourceType}, #{entity.target}, #{entity.targetType},
-			#{entity.permission}, #{entity.disabled},#{entity.createUser.id}
+			#{entity.permission}, #{entity.enabled},#{entity.createUser.id}
 			)
 	</insert>
 	
@@ -23,7 +23,7 @@
 			AUTH_TARGET = #{entity.target},
 			AUTH_TARGET_TYPE = #{entity.targetType},
 			AUTH_PERMISSION = #{entity.permission},
-			AUTH_DISABLED = #{entity.disabled}
+			AUTH_ENABLED = #{entity.enabled}
 		WHERE
 			AUTH_ID = #{entity.id}
 			<if test="OPERATOR != null and OPERATOR.admin != true">
@@ -88,17 +88,16 @@
 			A.AUTH_TARGET AS ${_iq_}target${_iq_},
 			A.AUTH_TARGET_TYPE AS ${_iq_}targetType${_iq_},
 			A.AUTH_PERMISSION AS ${_iq_}permission${_iq_},
-			A.AUTH_DISABLED AS ${_iq_}disabled${_iq_},
+			A.AUTH_ENABLED AS ${_iq_}enabled${_iq_},
 			A.AUTH_CREATE_TIME AS ${_iq_}ceateTime${_iq_},
 			A.AUTH_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			B.USER_NAME AS ${_iq_}createUser.name${_iq_},
 			B.USER_REAL_NAME AS ${_iq_}createUser.realName${_iq_},
-			(CASE WHEN B.USER_IS_ADMIN IS NULL THEN '0' ELSE B.USER_IS_ADMIN END) AS ${_iq_}createUser.admin${_iq_},
-			(CASE WHEN B.USER_ID IS NULL THEN '1' ELSE '0' END) AS ${_iq_}createUser.anonymous${_iq_},
+			B.USER_IS_ADMIN AS ${_iq_}createUser.admin${_iq_},
 			B.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_}
 		FROM
 			DATAGEAR_AUTHORIZATION A
-		LEFT JOIN
+		INNER JOIN
 			DATAGEAR_USER B
 		ON
 			A.AUTH_CREATE_USER_ID = B.USER_ID

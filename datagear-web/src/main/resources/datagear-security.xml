@@ -41,12 +41,8 @@
 		<intercept-url pattern="/user/query" access="ROLE_ADMIN" />
 		
 		<!-- 角色管理 -->
-		<intercept-url pattern="/role/add" access="ROLE_ADMIN" />
-		<intercept-url pattern="/role/saveAdd" access="ROLE_ADMIN" />
-		<intercept-url pattern="/role/edit" access="ROLE_ADMIN" />
-		<intercept-url pattern="/role/saveEdit" access="ROLE_ADMIN" />
-		<intercept-url pattern="/role/delete" access="ROLE_ADMIN" />
-		<intercept-url pattern="/role/query" access="ROLE_ADMIN" />
+		<intercept-url pattern="/role/select" access="ROLE_USER" />
+		<intercept-url pattern="/role/**" access="ROLE_ADMIN" />
 		
 		<!-- 全局设置 -->
 		<intercept-url pattern="/globalSetting/**" access="ROLE_ADMIN" />
@@ -63,7 +59,7 @@
 		<intercept-url pattern="/notification/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
 		<intercept-url pattern="/changeThemeData/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
 		
-		<intercept-url pattern="/**" access="#{sercurityDisableAnonymous ? 'ROLE_USER, ROLE_ADMIN' : 'IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER, ROLE_ADMIN'}" />
+		<intercept-url pattern="/**" access="#{sercurityDisableAnonymous ? 'ROLE_USER' : 'IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER'}" />
 		
 		<!-- 表单登录页登录 -->
 		<form-login login-page="/login" login-processing-url="/login/doLogin"

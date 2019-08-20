@@ -29,14 +29,22 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='role.disabled' /></label>
+					<label><@spring.message code='role.description' /></label>
 				</div>
 				<div class="form-item-value">
-					<div class="roleDisabled-radios">
-					<label for="${pageId}-roleDisabledYes"><@spring.message code='yes' /></label>
-		   			<input type="radio" id="${pageId}-roleDisabledYes" name="disabled" value="1" <#if (role.disabled)!false>checked="checked"</#if> />
-					<label for="${pageId}-roleDisabledNo"><@spring.message code='no' /></label>
-		   			<input type="radio" id="${pageId}-roleDisabledNo" name="disabled" value="0" <#if !((role.disabled)!false)>checked="checked"</#if> />
+					<textarea name="description" class="ui-widget ui-widget-content">${(role.description)!''?html}</textarea>
+				</div>
+			</div>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label><@spring.message code='role.enabled' /></label>
+				</div>
+				<div class="form-item-value">
+					<div class="roleEnabled-radios">
+					<label for="${pageId}-roleEnabledYes"><@spring.message code='yes' /></label>
+		   			<input type="radio" id="${pageId}-roleEnabledYes" name="enabled" value="1" <#if (role.enabled)!false>checked="checked"</#if> />
+					<label for="${pageId}-roleEnabledNo"><@spring.message code='no' /></label>
+		   			<input type="radio" id="${pageId}-roleEnabledNo" name="enabled" value="0" <#if !((role.enabled)!false)>checked="checked"</#if> />
 		   			</div>
 				</div>
 			</div>
@@ -56,8 +64,8 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
-	po.element("input[name='disabled']").checkboxradio({icon:false});
-	po.element(".roleDisabled-radios").controlgroup();
+	po.element("input[name='enabled']").checkboxradio({icon:false});
+	po.element(".roleEnabled-radios").controlgroup();
 	
 	po.url = function(action)
 	{

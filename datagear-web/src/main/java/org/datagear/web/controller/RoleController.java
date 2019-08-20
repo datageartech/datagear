@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.Role;
+import org.datagear.management.domain.RoleUser;
+import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleService;
 import org.datagear.management.service.RoleUserService;
 import org.datagear.persistence.PagingQuery;
@@ -77,6 +79,9 @@ public class RoleController extends AbstractController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
+		Role role = new Role();
+
+		model.addAttribute("role", role);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "role.addRole");
 		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
 
@@ -178,9 +183,85 @@ public class RoleController extends AbstractController
 		return roles;
 	}
 
+	@RequestMapping(value = "/user/query")
+	public String userQuery(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestParam("id") String id)
+	{
+		Role role = this.roleService.getById(id);
+
+		if (role == null)
+			throw new RecordNotFoundException();
+
+		model.addAttribute("role", role);
+
+		return "/role/role_user_grid";
+	}
+
+	@RequestMapping(value = "/user/queryData", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<RoleUser> userQueryData(HttpServletRequest request, HttpServletResponse response) throws Exception
+	{
+		PagingQuery pagingQuery = getPagingQuery(request, null);
+
+		List<RoleUser> roleUsers = this.roleUserService.query(pagingQuery);
+
+		return roleUsers;
+	}
+
+	@RequestMapping(value = "user/saveAdd", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> userSaveAdd(HttpServletRequest request, HttpServletResponse response,
+			RoleUsersForm roleUsersForm)
+	{
+		Role role = roleUsersForm.getRole();
+		List<User> users = roleUsersForm.getUsers();
+
+		if (isEmpty(role) || isEmpty(users))
+			throw new IllegalInputException();
+
+		for (User user : users)
+		{
+			RoleUser roleUser = new RoleUser(IDUtil.uuid(), role, user);
+			this.roleUserService.add(roleUser);
+		}
+
+		return buildOperationMessageSaveSuccessResponseEntity(request);
+	}
+
 	@Override
 	protected String buildMessageCode(String code)
 	{
 		return buildMessageCode("user", code);
+	}
+
+	public static class RoleUsersForm
+	{
+		private Role role;
+		private List<User> users;
+
+		public RoleUsersForm()
+		{
+			super();
+		}
+
+		public Role getRole()
+		{
+			return role;
+		}
+
+		public void setRole(Role role)
+		{
+			this.role = role;
+		}
+
+		public List<User> getUsers()
+		{
+			return users;
+		}
+
+		public void setUsers(List<User> users)
+		{
+			this.users = users;
+		}
 	}
 }

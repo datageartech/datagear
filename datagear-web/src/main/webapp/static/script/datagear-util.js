@@ -737,6 +737,7 @@
 				visible : !hidden,
 				render: function(data, type, row, meta)
 				{
+					data = $.truncateIf(data);
 					return $.escapeHtml(data);
 				},
 				defaultContent: "",

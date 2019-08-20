@@ -26,6 +26,8 @@ selectonly 是否选择操作，允许为null
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+				<input name="editUserButton" type="button" value="<@spring.message code='role.editUser' />" />
+				<input name="editAuthorizationButton" type="button" value="<@spring.message code='role.editAuthorization' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 			</#if>
@@ -58,10 +60,29 @@ selectonly 是否选择操作，允许为null
 	};
 	
 	<#if !selectonly>
-		po.element("input[name=addButton]").click(function()
+	po.element("input[name=addButton]").click(function()
+	{
+		po.open(po.url("add"),
 		{
-			po.open(po.url("add"),
+			pageParam :
 			{
+				afterSave : function()
+				{
+					po.refresh();
+				}
+			}
+		});
+	});
+	
+	po.element("input[name=editButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
+		{
+			var data = {"id" : row.id};
+			
+			po.open(po.url("edit"),
+			{
+				data : data,
 				pageParam :
 				{
 					afterSave : function()
@@ -71,28 +92,24 @@ selectonly 是否选择操作，允许为null
 				}
 			});
 		});
-		
-		po.element("input[name=editButton]").click(function()
-		{
-			po.executeOnSelect(function(row)
-			{
-				var data = {"id" : row.id};
-				
-				po.open(po.url("edit"),
-				{
-					data : data,
-					pageParam :
-					{
-						afterSave : function()
-						{
-							po.refresh();
-						}
-					}
-				});
-			});
-		});
-	</#if>
+	});
 
+	po.element("input[name=editUserButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
+		{
+			var options =
+			{
+				data : {"id" : row.id}
+			};
+			
+			$.setGridPageHeightOption(options);
+			
+			po.open(po.url("user/query"), options);
+		});
+	});
+	</#if>
+	
 	po.element("input[name=viewButton]").click(function()
 	{
 		po.executeOnSelect(function(row)
@@ -143,8 +160,8 @@ selectonly 是否选择操作，允许为null
 		});
 	});
 	
-	var columnDisabled = $.buildDataTablesColumnSimpleOption("<@spring.message code='role.disabled' />", "disabled");
-	columnDisabled.render = function(data, type, row, meta)
+	var columnEnabled = $.buildDataTablesColumnSimpleOption("<@spring.message code='role.enabled' />", "enabled");
+	columnEnabled.render = function(data, type, row, meta)
 	{
 		if(data == true)
 			data = "<@spring.message code='yes' />";
@@ -157,7 +174,8 @@ selectonly 是否选择操作，允许为null
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='role.id' />", "id", true),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='role.name' />", "name"),
-		columnDisabled
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='role.description' />", "description"),
+		columnEnabled
 	];
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
 	po.initDataTable(tableSettings);

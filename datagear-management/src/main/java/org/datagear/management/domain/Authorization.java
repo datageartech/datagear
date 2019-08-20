@@ -53,7 +53,7 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 	private String permission;
 
 	/** 是否已禁用 */
-	private boolean disabled = false;
+	private boolean enabled = false;
 
 	/** 授权创建用户 */
 	private User createUser;
@@ -140,14 +140,14 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 		return PERMISSION_WRITE.equals(this.permission);
 	}
 
-	public boolean isDisabled()
+	public boolean isEnabled()
 	{
-		return disabled;
+		return enabled;
 	}
 
-	public void setDisabled(boolean disabled)
+	public void setEnabled(boolean enabled)
 	{
-		this.disabled = disabled;
+		this.enabled = enabled;
 	}
 
 	@Override

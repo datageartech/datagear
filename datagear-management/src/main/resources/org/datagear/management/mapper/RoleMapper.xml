@@ -6,18 +6,19 @@
 	<insert id="insert">
 		INSERT INTO DATAGEAR_ROLE
 			(
-			ROLE_ID, ROLE_NAME, ROLE_DISABLED
+			ROLE_ID, ROLE_NAME, ROLE_DESCRIPTION, ROLE_ENABLED
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.name}, #{entity.disabled}
+			#{entity.id}, #{entity.name}, #{entity.description}, #{entity.enabled}
 			)
 	</insert>
 	
 	<update id="update">
 		UPDATE DATAGEAR_ROLE SET
 			ROLE_NAME = #{entity.name},
-			ROLE_DISABLED = #{entity.disabled}
+			ROLE_DESCRIPTION = #{entity.description},
+			ROLE_ENABLED = #{entity.enabled}
 		WHERE
 			ROLE_ID = #{entity.id}
 			<if test="OPERATOR != null and OPERATOR.admin != true">
@@ -78,7 +79,8 @@
 		SELECT
 			A.ROLE_ID AS ${_iq_}id${_iq_},
 			A.ROLE_NAME AS ${_iq_}name${_iq_},
-			A.ROLE_DISABLED AS ${_iq_}disabled${_iq_}
+			A.ROLE_DESCRIPTION AS ${_iq_}description${_iq_},
+			A.ROLE_ENABLED AS ${_iq_}enabled${_iq_}
 		FROM
 			DATAGEAR_ROLE A
 	</sql>
@@ -89,6 +91,7 @@
 		AND
 		(
 			${_iq_}name${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}description${_iq_} LIKE #{queryKeyword}
 		)
 		</if>
 		<include refid="common.queryCondition" />

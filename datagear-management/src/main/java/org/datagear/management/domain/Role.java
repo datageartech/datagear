@@ -19,8 +19,11 @@ public class Role extends AbstractStringIdEntity
 	/** 名称 */
 	private String name;
 
-	/** 是否已禁用 */
-	private boolean disabled = false;
+	/** 描述 */
+	private String description;
+
+	/** 是否启用 */
+	private boolean enabled = true;
 
 	public Role()
 	{
@@ -43,13 +46,23 @@ public class Role extends AbstractStringIdEntity
 		this.name = name;
 	}
 
-	public boolean isDisabled()
+	public String getDescription()
 	{
-		return disabled;
+		return description;
 	}
 
-	public void setDisabled(boolean disabled)
+	public void setDescription(String description)
 	{
-		this.disabled = disabled;
+		this.description = description;
+	}
+
+	public boolean isEnabled()
+	{
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled)
+	{
+		this.enabled = enabled;
 	}
 }
