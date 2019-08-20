@@ -75,6 +75,7 @@
 		<url-pattern>/changelogs/*</url-pattern>
 		<url-pattern>/changeThemeData</url-pattern>
 		<url-pattern>/user/*</url-pattern>
+		<url-pattern>/role/*</url-pattern>
 		<url-pattern>/driverEntity/*</url-pattern>
 		<url-pattern>/schema/*</url-pattern>
 		<url-pattern>/schemaUrlBuilder/*</url-pattern>

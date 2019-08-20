@@ -40,6 +40,14 @@
 		<intercept-url pattern="/user/delete" access="ROLE_ADMIN" />
 		<intercept-url pattern="/user/query" access="ROLE_ADMIN" />
 		
+		<!-- 角色管理 -->
+		<intercept-url pattern="/role/add" access="ROLE_ADMIN" />
+		<intercept-url pattern="/role/saveAdd" access="ROLE_ADMIN" />
+		<intercept-url pattern="/role/edit" access="ROLE_ADMIN" />
+		<intercept-url pattern="/role/saveEdit" access="ROLE_ADMIN" />
+		<intercept-url pattern="/role/delete" access="ROLE_ADMIN" />
+		<intercept-url pattern="/role/query" access="ROLE_ADMIN" />
+		
 		<!-- 全局设置 -->
 		<intercept-url pattern="/globalSetting/**" access="ROLE_ADMIN" />
 		

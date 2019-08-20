@@ -284,6 +284,18 @@
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 	</bean>
 	
+	<bean id="roleService" class="org.datagear.management.service.impl.RoleServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="roleUserService" class="org.datagear.management.service.impl.RoleUserServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="authorizationService" class="org.datagear.management.service.impl.AuthorizationServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
 	<bean id="sqlDateFormatter" class="org.datagear.web.format.SqlDateFormatter" />
 	<bean id="sqlTimeFormatter" class="org.datagear.web.format.SqlTimeFormatter" />
 	<bean id="sqlTimestampFormatter" class="org.datagear.web.format.SqlTimestampFormatter" />

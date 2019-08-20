@@ -728,6 +728,23 @@
 			*/
 		},
 		
+		buildDataTablesColumnSimpleOption : function(title, data, hidden)
+		{
+			var option =
+			{
+				title : title,
+				data : data,
+				visible : !hidden,
+				render: function(data, type, row, meta)
+				{
+					return $.escapeHtml(data);
+				},
+				defaultContent: "",
+			};
+			
+			return option;
+		},
+		
 		buildDataTablesColumnTitleWithTip : function(titleName, titleTip)
 		{
 			return "<a title='"+$.escapeHtml(titleTip)+"'>"+$.escapeHtml(titleName)+"</a>";
