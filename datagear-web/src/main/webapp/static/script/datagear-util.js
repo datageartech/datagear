@@ -610,6 +610,40 @@
 			
 			return re;
 		},
+
+		/**
+		 * 获取对象或者对象数组的属性值参数对象，对象格式为：{ name : "...", value : "..."}
+		 * 
+		 * @param objOrArray
+		 * @param propertyName
+		 * @param paramName 可选，参数名
+		 */
+		getPropertyParamObjArray : function(objOrArray, propertyName, paramName)
+		{
+			if(!paramName)
+				paramName = propertyName;
+			
+			var re = [];
+			
+			var isArray = $.isArray(objOrArray);
+			
+			if(!isArray)
+				objOrArray = [objOrArray];
+			
+			for(var i=0; i<objOrArray.length; i++)
+			{
+				var ele = objOrArray[i];
+				
+				var pv = (ele ? ele[propertyName] : null);
+				
+				if(pv == undefined || pv == null)
+					pv = "";
+				
+				re[i] = { name : paramName, value : pv };
+			}
+			
+			return (isArray ? re : re[0]);
+		},
 		
 		/**
 		 * 如果是字符串且超过指定长度，则将其截断。

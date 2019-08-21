@@ -4,6 +4,7 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -97,6 +98,17 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 		params.put("password", newPassword);
 
 		return updateMybatis("updatePasswordById", params) > 0;
+	}
+
+	@Override
+	protected void postProcessSelectList(List<User> list)
+	{
+		if (list == null)
+			return;
+
+		// 屏蔽查询结果密码，避免安全隐患
+		for (User user : list)
+			user.setPassword(null);
 	}
 
 	@Override

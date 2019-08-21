@@ -57,6 +57,13 @@ public interface EntityService<ID, T extends Entity<ID>>
 	boolean deleteById(ID id);
 
 	/**
+	 * 删除。
+	 * 
+	 * @param ids
+	 */
+	boolean[] deleteByIds(ID[] ids);
+
+	/**
 	 * 授权删除。
 	 * <p>
 	 * 返回{@code false}表明记录已不存在或者操作用户无权限。
@@ -67,6 +74,18 @@ public interface EntityService<ID, T extends Entity<ID>>
 	 * @param id
 	 */
 	boolean deleteById(User user, ID id);
+
+	/**
+	 * 授权删除。
+	 * <p>
+	 * 返回{@code false}表明记录已不存在或者操作用户无权限。
+	 * </p>
+	 * 
+	 * @param user
+	 *            操作用户
+	 * @param ids
+	 */
+	boolean[] deleteByIds(User user, ID[] ids);
 
 	/**
 	 * 根据ID获取。

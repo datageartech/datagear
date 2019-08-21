@@ -149,8 +149,7 @@ public class RoleController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") String[] ids)
 	{
-		for (String id : ids)
-			this.roleService.deleteById(WebUtils.getUser(request, response), id);
+		this.roleService.deleteByIds(WebUtils.getUser(request, response), ids);
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
@@ -219,13 +218,27 @@ public class RoleController extends AbstractController
 		if (isEmpty(role) || isEmpty(users))
 			throw new IllegalInputException();
 
-		for (User user : users)
+		RoleUser[] roleUsers = new RoleUser[users.size()];
+
+		for (int i = 0; i < users.size(); i++)
 		{
-			RoleUser roleUser = new RoleUser(IDUtil.uuid(), role, user);
-			this.roleUserService.add(roleUser);
+			RoleUser roleUser = new RoleUser(IDUtil.uuid(), role, users.get(i));
+			roleUsers[i] = roleUser;
 		}
 
+		this.roleUserService.addIfInexistence(roleUsers);
+
 		return buildOperationMessageSaveSuccessResponseEntity(request);
+	}
+
+	@RequestMapping(value = "user/delete", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> userDelete(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("id") String[] roleUserIds)
+	{
+		this.roleUserService.deleteByIds(roleUserIds);
+
+		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
 
 	@Override

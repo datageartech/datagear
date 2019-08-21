@@ -43,6 +43,16 @@
 			T.${_iq_}id${_iq_} = #{id}
 	</select>
 	
+	<select id="getByRoleAndUser" resultType="org.datagear.management.domain.RoleUser">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			T.${_iq_}role.id${_iq_} = #{role.id}
+			AND T.${_iq_}user.id${_iq_} = #{user.id}
+	</select>
+	
 	<select id="query" resultType="org.datagear.management.domain.RoleUser">
 		SELECT
 			T.*

@@ -43,14 +43,12 @@
 				<ref bean="fastJsonHttpMessageConverter" />
 			</list>
 		</property>
+		<property name="webBindingInitializer">
+			<bean class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
+				<property name="conversionService" ref="conversionService" />
+			</bean>
+		</property>
 	</bean>
-	
-	<!--
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix" value="/WEB-INF/jsp"/>
-		<property name="suffix" value=".jsp"/>
-	</bean>
-	-->
 	
 	<bean id="writeJsonTemplateDirectiveModel" class="org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel">
 		<property name="serializeConfig" ref="serializeConfig" />

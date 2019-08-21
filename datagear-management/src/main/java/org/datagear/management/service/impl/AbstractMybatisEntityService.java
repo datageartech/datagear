@@ -65,12 +65,34 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	@Override
+	public boolean[] deleteByIds(ID[] ids)
+	{
+		boolean[] re = new boolean[ids.length];
+
+		for (int i = 0; i < ids.length; i++)
+			re[i] = deleteById(ids[i]);
+
+		return re;
+	}
+
+	@Override
 	public boolean deleteById(User user, ID id)
 	{
 		Map<String, Object> params = buildParamMap();
 		addOperatorParameter(params, user);
 
 		return deleteById(id, params);
+	}
+
+	@Override
+	public boolean[] deleteByIds(User user, ID[] ids)
+	{
+		boolean[] re = new boolean[ids.length];
+
+		for (int i = 0; i < ids.length; i++)
+			re[i] = deleteById(user, ids[i]);
+
+		return re;
 	}
 
 	/**

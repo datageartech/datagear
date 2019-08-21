@@ -173,6 +173,15 @@ page_js_obj.jsp
 			];
 		newColumns = newColumns.concat(settings.columns);
 		
+		var orderColumn = 1;
+		for(; orderColumn < newColumns.length; orderColumn++)
+		{
+			var column = newColumns[orderColumn];
+			
+			if(column.visible == null || column.visible)
+				break;
+		}
+		
 		settings = $.extend(
 		{
 			"scrollX": true,
@@ -182,7 +191,7 @@ page_js_obj.jsp
 			"paging" : false,
 			"searching" : false,
 			"select" : { style : 'os' },
-			"order": [[1, "asc"]],
+			"order": [[orderColumn, "asc"]],
 			"fixedColumns": { leftColumns: 1 },
 		    "language":
 		    {

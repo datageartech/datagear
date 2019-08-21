@@ -3,7 +3,7 @@
 <html>
 <head>
 <#include "../include/html_head.ftl">
-<title><#include "../include/html_title_app_name.ftl"><@spring.message code='role.editUser' /></title>
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='role.roleEditUser' /></title>
 </head>
 <body class="fill-parent">
 <#if !isAjaxRequest>
@@ -79,7 +79,7 @@
 			{
 				"confirm" : function()
 				{
-					var data = $.getPropertyParamString(rows, "id");
+					var data = $.getPropertyParamObjArray(rows, "id");
 					
 					$.post(po.url("delete"), data, function()
 					{

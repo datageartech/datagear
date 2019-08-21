@@ -317,6 +317,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		addQueryaram(params, query);
 
 		List<T> list = selectListMybatis(statement, params);
+		postProcessSelectList(list);
 
 		return list;
 	}
@@ -386,10 +387,23 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		params.put(PAGING_QUERY_PARAM_ROWS, pagingData.getPageSize());
 
 		List<T> list = selectListMybatis(statement, params);
+		postProcessSelectList(list);
 
 		pagingData.setItems(list);
 
 		return pagingData;
+	}
+
+	/**
+	 * 后置处理查询结果列表。
+	 * <p>
+	 * 默认为空方法，子类可以重写，已实现特定的查询结果处理逻辑。
+	 * </p>
+	 * 
+	 * @param list
+	 */
+	protected void postProcessSelectList(List<T> list)
+	{
 	}
 
 	/**
@@ -720,6 +734,19 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected Map<String, Object> buildParamMap()
 	{
 		return new HashMap<String, Object>();
+	}
+
+	/**
+	 * 构建参数映射表。
+	 * 
+	 * @return
+	 */
+	protected Map<String, Object> buildParamMapWithIdentifierQuoteParameter()
+	{
+		Map<String, Object> map = new HashMap<String, Object>();
+		addIdentifierQuoteParameter(map);
+
+		return map;
 	}
 
 	/**
