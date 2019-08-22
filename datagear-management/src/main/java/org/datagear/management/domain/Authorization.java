@@ -16,17 +16,29 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 授权源对象类型：数据源实体 */
-	public static final String SOURCE_TYPE_DATA_SOURCE_ENTITY = "ST_DS_ENTITY";
+	/** 授权资源类型：数据源实体 */
+	public static final String RESOURCE_TYPE_DATA_SOURCE_ID = "DATA_SOURCE_ID";
 
-	/** 授权源对象类型：数据源匹配模式 */
-	public static final String SOURCE_TYPE_DATA_SOURCE_PATTERN = "ST_DS_PATTERN";
+	/** 授权资源类型：数据源通配符 */
+	public static final String RESOURCE_TYPE_DATA_SOURCE_PATTERN = "DATA_SOURCE_PATTERN";
 
-	/** 授权目标类型：用户 */
-	public static final String TARGET_TYPE_USER = "USER";
+	/** 授权主体类型：用户ID */
+	public static final String PRINCIPAL_TYPE_USER_ID = "USER_ID";
 
-	/** 授权目标类型：角色 */
-	public static final String TARGET_TYPE_ROLE = "ROLE";
+	/** 授权主体类型：角色ID */
+	public static final String PRINCIPAL_TYPE_ROLE_ID = "ROLE_ID";
+
+	/** 授权主体类型：匿名用户 */
+	public static final String PRINCIPAL_TYPE_ANONYMOUS = "ANONYMOUS";
+
+	/** 授权主体类型：全部注册用户 */
+	public static final String PRINCIPAL_TYPE_ALL_REG_USER = "ALL_REG_USER";
+
+	/** 授权主体：匿名用户 */
+	public static final String PRINCIPAL_ANONYMOUS = "anonymous";
+
+	/** 授权主体：全部注册用户 */
+	public static final String PRINCIPAL_ALL_REG_USER = "all_reg_user";
 
 	/** 权限：无 */
 	public static final String PERMISSION_NONE = "NONE";
@@ -37,82 +49,88 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 	/** 权限：写 */
 	public static final String PERMISSION_WRITE = "WRITE";
 
-	/** 授权源对象 */
-	private String source;
+	/** 授权资源 */
+	private String resource;
 
-	/** 授权源对象类型 */
-	private String sourceType;
+	/** 授权资源类型 */
+	private String resourceType;
 
-	/** 授权目标 */
-	private String target;
+	/** 授权主体 */
+	private String principal;
 
-	/** 授权目标类型 */
-	private String targetType;
+	/** 授权主体类型 */
+	private String principalType;
 
 	/** 权限 */
 	private String permission;
 
-	/** 是否已禁用 */
-	private boolean enabled = false;
+	/** 是否启用 */
+	private boolean enabled = true;
 
 	/** 授权创建用户 */
 	private User createUser;
+
+	/** 授权资源名称 */
+	private String resourceName;
+
+	/** 授权主体名称 */
+	private String principalName;
 
 	public Authorization()
 	{
 		super();
 	}
 
-	public Authorization(String id, String source, String sourceType, String target, String targetType,
+	public Authorization(String resource, String resourceType, String principal, String principalType,
 			String permission, User createUser)
 	{
-		super(id);
-		this.source = source;
-		this.sourceType = sourceType;
-		this.target = target;
-		this.targetType = targetType;
+		super();
+		this.resource = resource;
+		this.resourceType = resourceType;
+		this.principal = principal;
+		this.principalType = principalType;
 		this.permission = permission;
 		this.createUser = createUser;
 	}
 
-	public String getSource()
+	public String getResource()
 	{
-		return source;
+		return resource;
 	}
 
-	public void setSource(String source)
+	public void setResource(String resource)
 	{
-		this.source = source;
+		this.resource = resource;
 	}
 
-	public String getSourceType()
+	public String getResourceType()
 	{
-		return sourceType;
+		return resourceType;
 	}
 
-	public void setSourceType(String sourceType)
+	public void setResourceType(String resourceType)
 	{
-		this.sourceType = sourceType;
+		this.resourceType = resourceType;
 	}
 
-	public String getTarget()
+	public String getPrincipal()
 	{
-		return target;
+		return principal;
 	}
 
-	public void setTarget(String target)
+	public void setPrincipal(String principal)
 	{
-		this.target = target;
+		this.principal = principal;
 	}
 
-	public String getTargetType()
+	public String getPrincipalType()
 	{
-		return targetType;
+		return principalType;
 	}
 
-	public void setTargetType(String targetType)
+	public void setPrincipalType(String principalType)
 	{
-		this.targetType = targetType;
+		this.principalType = principalType;
 	}
 
 	public String getPermission()
@@ -123,21 +141,6 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 	public void setPermission(String permission)
 	{
 		this.permission = permission;
-	}
-
-	public boolean isPermissionNone()
-	{
-		return PERMISSION_NONE.equals(this.permission);
-	}
-
-	public boolean isPermissionRead()
-	{
-		return PERMISSION_READ.equals(this.permission);
-	}
-
-	public boolean isPermissionWrite()
-	{
-		return PERMISSION_WRITE.equals(this.permission);
 	}
 
 	public boolean isEnabled()
@@ -162,10 +165,31 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 		this.createUser = createUser;
 	}
 
+	public String getResourceName()
+	{
+		return resourceName;
+	}
+
+	public void setResourceName(String resourceName)
+	{
+		this.resourceName = resourceName;
+	}
+
+	public String getPrincipalName()
+	{
+		return principalName;
+	}
+
+	public void setPrincipalName(String principalName)
+	{
+		this.principalName = principalName;
+	}
+
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [id=" + getId() + ", source=" + source + ", sourceType=" + sourceType
-				+ ", target=" + target + ", targetType=" + targetType + ", permission=" + permission + "]";
+		return getClass().getSimpleName() + " [id=" + getId() + ", resource=" + resource + ", resourceType="
+				+ resourceType + ", principal=" + principal + ", principalType=" + principalType + ", permission="
+				+ permission + ", enabled=" + enabled + "]";
 	}
 }

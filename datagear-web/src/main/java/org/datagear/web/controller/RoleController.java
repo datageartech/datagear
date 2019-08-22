@@ -198,11 +198,17 @@ public class RoleController extends AbstractController
 
 	@RequestMapping(value = "/user/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<RoleUser> userQueryData(HttpServletRequest request, HttpServletResponse response) throws Exception
+	public List<RoleUser> userQueryData(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("roleId") String roleId) throws Exception
 	{
+		Role role = this.roleService.getById(roleId);
+
+		if (role == null)
+			throw new RecordNotFoundException();
+
 		PagingQuery pagingQuery = getPagingQuery(request, null);
 
-		List<RoleUser> roleUsers = this.roleUserService.query(pagingQuery);
+		List<RoleUser> roleUsers = this.roleUserService.queryForRole(role, pagingQuery);
 
 		return roleUsers;
 	}
@@ -244,7 +250,7 @@ public class RoleController extends AbstractController
 	@Override
 	protected String buildMessageCode(String code)
 	{
-		return buildMessageCode("user", code);
+		return buildMessageCode("role", code);
 	}
 
 	public static class RoleUsersForm

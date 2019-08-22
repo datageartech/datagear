@@ -44,6 +44,9 @@
 		<intercept-url pattern="/role/select" access="ROLE_USER" />
 		<intercept-url pattern="/role/**" access="ROLE_ADMIN" />
 		
+		<!-- 权限管理 -->
+		<intercept-url pattern="/authorization/**" access="ROLE_USER" />
+		
 		<!-- 全局设置 -->
 		<intercept-url pattern="/globalSetting/**" access="ROLE_ADMIN" />
 		

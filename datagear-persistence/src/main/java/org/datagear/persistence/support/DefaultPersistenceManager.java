@@ -20,7 +20,6 @@ import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.QueryResultMetaInfo;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.mapper.Mapper;
-import org.datagear.util.expression.ExpressionResolver;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -101,7 +100,7 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		this.updatePersistenceOperation.setConversionService(conversionService);
 	}
 
-	public ExpressionResolver getVariableExpressionResolver()
+	public NameExpressionResolver getVariableExpressionResolver()
 	{
 		return variableExpressionResolver;
 	}
@@ -113,7 +112,7 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		this.updatePersistenceOperation.setVariableExpressionResolver(variableExpressionResolver);
 	}
 
-	public ExpressionResolver getSqlExpressionResolver()
+	public NameExpressionResolver getSqlExpressionResolver()
 	{
 		return sqlExpressionResolver;
 	}

@@ -27,7 +27,6 @@ selectonly 是否选择操作，允许为null
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				<input name="editUserButton" type="button" value="<@spring.message code='role.editUser' />" />
-				<input name="editAuthorizationButton" type="button" value="<@spring.message code='role.editAuthorization' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 			</#if>

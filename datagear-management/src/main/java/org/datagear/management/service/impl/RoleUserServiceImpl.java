@@ -4,6 +4,7 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -11,6 +12,7 @@ import org.datagear.management.domain.Role;
 import org.datagear.management.domain.RoleUser;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.RoleUserService;
+import org.datagear.persistence.Query;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -74,6 +76,15 @@ public class RoleUserServiceImpl extends AbstractMybatisEntityService<String, Ro
 		}
 
 		return re;
+	}
+
+	@Override
+	public List<RoleUser> queryForRole(Role role, Query query)
+	{
+		Map<String, Object> param = buildParamMap();
+		param.put("role", role);
+
+		return query("queryForRole", query, param);
 	}
 
 	@Override

@@ -393,6 +393,12 @@
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/role/query", options);
 				}
+				else if($item.hasClass("system-set-authorization-manage"))
+				{
+					var options = {};
+					$.setGridPageHeightOption(options);
+					po.open(contextPath+"/authorization/query", options);
+				}
 				else if($item.hasClass("system-set-personal-set"))
 				{
 					po.open(contextPath+"/user/personalSet");
@@ -1032,6 +1038,7 @@
 					<li class="system-set-user-manage"><a href="javascript:void(0);"><@spring.message code='main.manageUser' /></a></li>
 					<li class="system-set-user-add"><a href="javascript:void(0);"><@spring.message code='main.addUser' /></a></li>
 					<li class="system-set-rold-manage"><a href="javascript:void(0);"><@spring.message code='main.manageRole' /></a></li>
+					<li class="system-set-authorization-manage"><a href="javascript:void(0);"><@spring.message code='main.manageAuthorization' /></a></li>
 					<li class="ui-widget-header"></li>
 					</#if>
 					<li class="system-set-personal-set"><a href="javascript:void(0);"><@spring.message code='main.personalSet' /></a></li>

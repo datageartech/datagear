@@ -4,9 +4,12 @@
 
 package org.datagear.management.service;
 
+import java.util.List;
+
 import org.datagear.management.domain.Role;
 import org.datagear.management.domain.RoleUser;
 import org.datagear.management.domain.User;
+import org.datagear.persistence.Query;
 
 /**
  * {@linkplain RoleUser}业务服务接口。
@@ -41,4 +44,14 @@ public interface RoleUserService extends EntityService<String, RoleUser>
 	 * @return
 	 */
 	boolean[] addIfInexistence(RoleUser... roleUsers);
+
+	/**
+	 * 查询。
+	 * 
+	 * @param role
+	 * @param query
+	 * @return
+	 */
+	List<RoleUser> queryForRole(Role role, Query query);
+
 }

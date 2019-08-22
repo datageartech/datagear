@@ -96,7 +96,7 @@
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='user.name' />", "user.name"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='user.realName' />", "user.realName")
 	];
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData?roleId=" + po.role.id));
 	po.initDataTable(tableSettings);
 })
 (${pageId});
