@@ -3,20 +3,23 @@
 
 <mapper namespace="commonDataPermission">
 	
-	<!-- 指定用户对特定资源类型所有数据的查询视图 -->
 	<!--
-		查询参数：
+		指定用户对特定资源类型数据的查询视图
 		
+		查询参数：
 		DP_CURRENT_USER 必填，当前查询用户，类型：org.datagear.management.domain.User
 		DP_RESOURCE_TYPE 必填，授权资源类型，类型：String
 		DP_RESOURCE_SUPPORT_PATTERN 可选，是否支持模式匹配，默认为false，类型：Boolean
 		DP_RESOURCE_HAS_CREATOR 可选，资源表是否有创建用户，默认为false，类型：Boolean
 		
 		IDQV字段：
-		
 		DP_AUTH_DATA_ID 必填，数据ID，类型：字符串
 		DP_AUTH_DATA_PATTERN_SRC 选填，DP_RESOURCE_SUPPORT_PATTERN为true时必填，用于授权模式匹配的字段，类型：字符串类型
 		DP_AUTH_DATA_CREATOR_ID 选填，DP_RESOURCE_HAS_CREATOR为true时必填，资源的创建用户ID，类型：字符串类型
+		
+		结果集：
+		DATA_ID 数据ID
+		DATA_PERMISSION 当前用户对数据的权限值，参考Authorization.PERMISSION_*
 	-->
 	<sql id="dataIdPermissionQueryViewHead">
 		<choose><when test="DP_CURRENT_USER.admin == true">
@@ -47,8 +50,8 @@
 						0
 						</otherwise></choose>
 						/*优先级加权至权限值，便于通过单个MAX取得优先级最高的那个权限值*/
-						WHEN '${DP_RESOURCE_TYPE}_PATTERN' THEN (100 + PQV.AUTH_PRIORITY_PERMISSION)
-						WHEN '${DP_RESOURCE_TYPE}'         THEN (200 + PQV.AUTH_PRIORITY_PERMISSION)
+						WHEN '${DP_RESOURCE_TYPE}_PATTERN' THEN (10 + PQV.AUTH_PRIORITY_PERMISSION)
+						WHEN '${DP_RESOURCE_TYPE}'         THEN (20 + PQV.AUTH_PRIORITY_PERMISSION)
 					END
 				) AS AUTH_PRIORITY_PERMISSION
 			FROM
@@ -76,10 +79,10 @@
 		</otherwise></choose>
 	</sql>
 	
-	<!-- 指定用户对特定资源类型的权限查询视图 -->
 	<!--
-		查询参数：
+		指定用户对特定资源类型的权限查询视图
 		
+		查询参数：
 		与上述dataIdPermissionQueryViewHead一致
 	-->
 	<sql id="userOnResourceTypePermissionQueryView">
@@ -89,20 +92,23 @@
 			(
 			 	/*优先级加权至权限值，便于通过单个MAX取得优先级最高的那个权限值*/
 				CASE DG_AUTH.CREATOR_IS_ADMIN
-					WHEN 'true' THEN /*管理员授权始终高于普通用户*/
+					/*管理员授权始终高于普通用户*/
+					WHEN 'true' THEN
 						CASE DG_AUTH.AUTH_PRINCIPAL_TYPE
-							WHEN 'ALL'       THEN (10 + DG_AUTH.AUTH_PERMISSION)
-							WHEN 'ANONYMOUS' THEN (20 + DG_AUTH.AUTH_PERMISSION)
-							WHEN 'ROLE'      THEN (30 + DG_AUTH.AUTH_PERMISSION)
-							WHEN 'USER'      THEN (40 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'ALL'       THEN (500 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'ANONYMOUS' THEN (600 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'ROLE'      THEN (700 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'USER'      THEN (800 + DG_AUTH.AUTH_PERMISSION)
+							ELSE 0
 						END	
 					ELSE
 						CASE DG_AUTH.AUTH_PRINCIPAL_TYPE
-							WHEN 'ALL'       THEN (10 + DG_AUTH.AUTH_PERMISSION)
-							WHEN 'ANONYMOUS' THEN (20 + DG_AUTH.AUTH_PERMISSION)
-							WHEN 'ROLE'      THEN (30 + DG_AUTH.AUTH_PERMISSION)
-							WHEN 'USER'      THEN (40 + DG_AUTH.AUTH_PERMISSION)
-						END	
+							WHEN 'ALL'       THEN (100 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'ANONYMOUS' THEN (200 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'ROLE'      THEN (300 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'USER'      THEN (400 + DG_AUTH.AUTH_PERMISSION)
+							ELSE 0
+						END
 				END
 			) AS AUTH_PRIORITY_PERMISSION
 		FROM
