@@ -22,32 +22,32 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 	/** 授权资源类型：数据源通配符 */
 	public static final String RESOURCE_TYPE_DATA_SOURCE_PATTERN = "DATA_SOURCE_PATTERN";
 
-	/** 授权主体类型：用户ID */
-	public static final String PRINCIPAL_TYPE_USER_ID = "USER_ID";
+	/** 授权主体类型：全部用户 */
+	public static final String PRINCIPAL_TYPE_ALl = "ALL";
 
 	/** 授权主体类型：角色ID */
-	public static final String PRINCIPAL_TYPE_ROLE_ID = "ROLE_ID";
+	public static final String PRINCIPAL_TYPE_ROLE = "ROLE";
+
+	/** 授权主体类型：用户ID */
+	public static final String PRINCIPAL_TYPE_USER = "USER";
 
 	/** 授权主体类型：匿名用户 */
 	public static final String PRINCIPAL_TYPE_ANONYMOUS = "ANONYMOUS";
 
-	/** 授权主体类型：全部注册用户 */
-	public static final String PRINCIPAL_TYPE_ALL_REG_USER = "ALL_REG_USER";
-
 	/** 授权主体：匿名用户 */
 	public static final String PRINCIPAL_ANONYMOUS = "anonymous";
 
-	/** 授权主体：全部注册用户 */
-	public static final String PRINCIPAL_ALL_REG_USER = "all_reg_user";
+	/** 授权主体：全部用户 */
+	public static final String PRINCIPAL_ALL = "all";
 
 	/** 权限：无 */
-	public static final String PERMISSION_NONE = "NONE";
+	public static final int PERMISSION_NONE = 0;
 
 	/** 权限：读 */
-	public static final String PERMISSION_READ = "READ";
+	public static final int PERMISSION_READ = 1;
 
 	/** 权限：写 */
-	public static final String PERMISSION_WRITE = "WRITE";
+	public static final int PERMISSION_WRITE = 2;
 
 	/** 授权资源 */
 	private String resource;
@@ -62,7 +62,7 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 	private String principalType;
 
 	/** 权限 */
-	private String permission;
+	private int permission;
 
 	/** 是否启用 */
 	private boolean enabled = true;
@@ -81,8 +81,8 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 		super();
 	}
 
-	public Authorization(String resource, String resourceType, String principal, String principalType,
-			String permission, User createUser)
+	public Authorization(String resource, String resourceType, String principal, String principalType, int permission,
+			User createUser)
 	{
 		super();
 		this.resource = resource;
@@ -133,12 +133,12 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 		this.principalType = principalType;
 	}
 
-	public String getPermission()
+	public int getPermission()
 	{
 		return permission;
 	}
 
-	public void setPermission(String permission)
+	public void setPermission(int permission)
 	{
 		this.permission = permission;
 	}

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="commonDataPermission">
+	
+	<!-- 指定用户对特定资源类型所有数据的查询视图 -->
+	<!--
+		查询参数：
+		
+		DP_CURRENT_USER 必填，当前查询用户，类型：org.datagear.management.domain.User
+		DP_RESOURCE_TYPE 必填，授权资源类型，类型：String
+		DP_RESOURCE_SUPPORT_PATTERN 可选，是否支持模式匹配，默认为false，类型：Boolean
+		DP_RESOURCE_HAS_CREATOR 可选，资源表是否有创建用户，默认为false，类型：Boolean
+		
+		IDQV字段：
+		
+		DP_AUTH_DATA_ID 必填，数据ID，类型：字符串
+		DP_AUTH_DATA_PATTERN_SRC 选填，DP_RESOURCE_SUPPORT_PATTERN为true时必填，用于授权模式匹配的字段，类型：字符串类型
+		DP_AUTH_DATA_CREATOR_ID 选填，DP_RESOURCE_HAS_CREATOR为true时必填，资源的创建用户ID，类型：字符串类型
+	-->
+	<sql id="dataIdPermissionQueryViewHead">
+		<choose><when test="DP_CURRENT_USER.admin == true">
+		SELECT
+			IDQV.DP_AUTH_DATA_ID AS DATA_ID,
+			2 AS DATA_PERMISSION
+		FROM
+			(
+		</when><otherwise>
+		SELECT
+			IDPQV.DATA_ID,
+			MOD(MAX(DISTINCT IDPQV.AUTH_PRIORITY_PERMISSION), 10) AS DATA_PERMISSION
+		FROM
+			(
+			SELECT
+				IDQV.DP_AUTH_DATA_ID AS DATA_ID,
+				(
+					CASE PQV.AUTH_RESOURCE_TYPE
+						WHEN IS NULL THEN /*没有任何授权，是创建用户的话设为写权限，否则设为无权限*/
+						<choose><when test="DP_RESOURCE_HAS_CREATOR == true">
+						(
+							CASE
+								WHEN DP_AUTH_DATA_CREATOR_ID = '${DP_CURRENT_USER.id}' THEN 2
+								ELSE 0
+							END
+						)
+						</when><otherwise>
+						0
+						</otherwise></choose>
+						/*优先级加权至权限值，便于通过单个MAX取得优先级最高的那个权限值*/
+						WHEN '${DP_RESOURCE_TYPE}_PATTERN' THEN (100 + PQV.AUTH_PRIORITY_PERMISSION)
+						WHEN '${DP_RESOURCE_TYPE}'         THEN (200 + PQV.AUTH_PRIORITY_PERMISSION)
+					END
+				) AS AUTH_PRIORITY_PERMISSION
+			FROM
+				(
+		</otherwise></choose>
+	</sql>
+	
+	<sql id="dataIdPermissionQueryViewFoot">
+		<choose><when test="DP_CURRENT_USER.admin == true">
+			) IDQV
+		</when><otherwise>
+				) IDQV
+			LEFT JOIN
+				(
+					<include refid="commonDataPermission.userOnResourceTypePermissionQueryView" />
+				) PQV
+			ON
+				(PQV.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}' AND PQV.AUTH_RESOURCE = IDQV.DP_AUTH_DATA_ID)
+				<if test='DP_RESOURCE_SUPPORT_PATTERN != null && DP_RESOURCE_SUPPORT_PATTERN == true'>
+				OR (PQV.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}_PATTERN' AND IDQV.DP_AUTH_DATA_PATTERN_SRC LIKE PQV.AUTH_RESOURCE)
+				</if>
+			) IDPQV
+		GROUP BY
+			IDPQV.DATA_ID
+		</otherwise></choose>
+	</sql>
+	
+	<!-- 指定用户对特定资源类型的权限查询视图 -->
+	<!--
+		查询参数：
+		
+		与上述dataIdPermissionQueryViewHead一致
+	-->
+	<sql id="userOnResourceTypePermissionQueryView">
+		SELECT
+			DG_AUTH.AUTH_RESOURCE,
+			DG_AUTH.AUTH_RESOURCE_TYPE,
+			(
+			 	/*优先级加权至权限值，便于通过单个MAX取得优先级最高的那个权限值*/
+				CASE DG_AUTH.CREATOR_IS_ADMIN
+					WHEN 'true' THEN /*管理员授权始终高于普通用户*/
+						CASE DG_AUTH.AUTH_PRINCIPAL_TYPE
+							WHEN 'ALL'       THEN (10 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'ANONYMOUS' THEN (20 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'ROLE'      THEN (30 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'USER'      THEN (40 + DG_AUTH.AUTH_PERMISSION)
+						END	
+					ELSE
+						CASE DG_AUTH.AUTH_PRINCIPAL_TYPE
+							WHEN 'ALL'       THEN (10 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'ANONYMOUS' THEN (20 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'ROLE'      THEN (30 + DG_AUTH.AUTH_PERMISSION)
+							WHEN 'USER'      THEN (40 + DG_AUTH.AUTH_PERMISSION)
+						END	
+				END
+			) AS AUTH_PRIORITY_PERMISSION
+		FROM
+			(
+				SELECT
+					A.*,
+					U.CREATOR_IS_ADMIN
+				FROM
+					DATAGEAR_AUTHORIZATION A,
+					DATAGEAR_USER U
+				WHERE
+					A.AUTH_CREATE_USER_ID = U.USER_ID
+			) DG_AUTH
+		WHERE
+			DG_AUTH.AUTH_ENABLED = 'true'
+			AND
+			(
+				DG_AUTH.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}'
+				<if test='DP_RESOURCE_SUPPORT_PATTERN != null && DP_RESOURCE_SUPPORT_PATTERN == true'>
+				OR DG_AUTH.AUTH_RESOURCE_TYPE = '${DP_RESOURCE_TYPE}_PATTERN'
+				</if>
+			)
+			AND
+			(
+				DG_AUTH.AUTH_PRINCIPAL_TYPE = 'ALL'
+				<choose><when test="DP_CURRENT_USER.anonymous == true">
+				OR DG_AUTH.AUTH_PRINCIPAL_TYPE = 'ANONYMOUS'
+				</when><otherwise>
+				OR
+				(
+					DG_AUTH.AUTH_PRINCIPAL_TYPE = 'ROLE'
+					AND DG_AUTH.AUTH_PRINCIPAL IN
+					(
+						SELECT
+							RO.ROLE_ID
+						FROM
+							DATAGEAR_ROLE_USER RU
+						INNER JOIN
+							DATAGEAR_ROLE RO
+						ON
+							RU.RU_ROLE_ID = RO.ROLE_ID
+						WHERE
+							RU.RU_USER_ID = '${DP_CURRENT_USER.id}' AND RO.ROLE_ENABLED = 'true'
+					)
+				)
+				OR (DG_AUTH.AUTH_PRINCIPAL_TYPE = 'USER' AND DG_AUTH.AUTH_PRINCIPAL = '${DP_CURRENT_USER.id}')
+				</otherwise></choose>
+			)
+	</sql>
+	
+</mapper>
