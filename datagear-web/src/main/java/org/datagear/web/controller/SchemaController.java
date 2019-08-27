@@ -129,7 +129,7 @@ public class SchemaController extends AbstractSchemaModelConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		Schema schema = getSchemaService().getById(user, id);
+		Schema schema = getSchemaService().getByIdForEdit(user, id);
 
 		if (schema == null)
 			throw new RecordNotFoundException();
@@ -165,7 +165,9 @@ public class SchemaController extends AbstractSchemaModelConnController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		Schema schema = getSchemaService().getById(id);
+		User user = WebUtils.getUser(request, response);
+
+		Schema schema = getSchemaService().getById(user, id);
 
 		if (schema == null)
 			throw new RecordNotFoundException();

@@ -133,6 +133,20 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends E
 	}
 
 	@Override
+	public T getByIdForEdit(User user, ID id) throws PermissionDeniedException
+	{
+		int permission = getPermission(user, id);
+
+		if (!Authorization.canEdit(permission))
+			throw new PermissionDeniedException();
+
+		Map<String, Object> params = buildParamMap();
+		addDataPermissionParameters(params, user);
+
+		return getById(id, params);
+	}
+
+	@Override
 	public List<T> query(User user, Query query)
 	{
 		Map<String, Object> params = buildParamMap();

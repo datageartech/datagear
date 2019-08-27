@@ -108,6 +108,17 @@ public interface DataPermissionEntityService<ID, T extends Entity<ID>> extends E
 	T getById(User user, ID id) throws PermissionDeniedException;
 
 	/**
+	 * 授权根据ID获取，并用于编辑操作。
+	 * 
+	 * @param user
+	 *            操作用户
+	 * @param id
+	 * @return
+	 * @throws PermissionDeniedException
+	 */
+	T getByIdForEdit(User user, ID id) throws PermissionDeniedException;
+
+	/**
 	 * 授权查询。
 	 * 
 	 * @param user
