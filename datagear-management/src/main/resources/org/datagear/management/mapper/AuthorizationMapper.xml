@@ -26,18 +26,12 @@
 			AUTH_ENABLED = #{entity.enabled}
 		WHERE
 			AUTH_ID = #{entity.id}
-			<if test="OPERATOR != null and OPERATOR.admin != true">
-			AND AUTH_CREATE_USER_ID = #{OPERATOR.id}
-			</if>
 	</update>
 	
 	<delete id="deleteById">
 		DELETE FROM DATAGEAR_AUTHORIZATION
 		WHERE
 			AUTH_ID = #{id}
-			<if test="OPERATOR != null and OPERATOR.admin != true">
-			AND AUTH_CREATE_USER_ID = #{OPERATOR.id}
-			</if>
 	</delete>
 	
 	<select id="getById" resultType="org.datagear.management.domain.Authorization">

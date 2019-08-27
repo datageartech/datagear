@@ -18,7 +18,6 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
-import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
@@ -123,7 +122,7 @@ public class RoleController extends AbstractController
 		if (isBlank(role.getName()))
 			throw new IllegalInputException();
 
-		this.roleService.update(WebUtils.getUser(request, response), role);
+		this.roleService.update(role);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -149,7 +148,7 @@ public class RoleController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") String[] ids)
 	{
-		this.roleService.deleteByIds(WebUtils.getUser(request, response), ids);
+		this.roleService.deleteByIds(ids);
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
@@ -177,7 +176,7 @@ public class RoleController extends AbstractController
 	{
 		PagingQuery pagingQuery = getPagingQuery(request, null);
 
-		List<Role> roles = this.roleService.query(WebUtils.getUser(request, response), pagingQuery);
+		List<Role> roles = this.roleService.query(pagingQuery);
 
 		return roles;
 	}

@@ -118,12 +118,7 @@ public class UserController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		User operator = WebUtils.getUser(request, response);
-
-		User user = this.userService.getById(operator, id);
-
-		if (user == null || (!operator.isAdmin() && !operator.getId().equals(user.getId())))
-			throw new RecordNotFoundOrPermissionDeniedException();
+		User user = this.userService.getById(id);
 
 		model.addAttribute("user", user);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.editUser");
@@ -152,7 +147,7 @@ public class UserController extends AbstractController
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));
 
-		this.userService.update(WebUtils.getUser(request, response), user);
+		this.userService.update(user);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -178,19 +173,7 @@ public class UserController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") String[] ids)
 	{
-		for (String id : ids)
-		{
-			if (User.isAdminUser(id))
-			{
-				return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-						buildMessageCode("deleteAdminUserDenied"));
-			}
-		}
-
-		for (String id : ids)
-		{
-			this.userService.deleteById(WebUtils.getUser(request, response), id);
-		}
+		this.userService.deleteByIds(ids);
 
 		this.schemaService.deleteByUserId(ids);
 
@@ -225,7 +208,7 @@ public class UserController extends AbstractController
 	{
 		PagingQuery pagingQuery = getPagingQuery(request, null);
 
-		List<User> users = this.userService.query(WebUtils.getUser(request, response), pagingQuery);
+		List<User> users = this.userService.query(pagingQuery);
 
 		return users;
 	}
@@ -236,10 +219,10 @@ public class UserController extends AbstractController
 	{
 		User operator = WebUtils.getUser(request, response);
 
-		User user = this.userService.getById(operator, operator.getId());
+		User user = this.userService.getById(operator.getId());
 
 		if (user == null)
-			throw new RecordNotFoundOrPermissionDeniedException();
+			throw new RecordNotFoundException();
 
 		model.addAttribute("user", user);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "user.personalSet");

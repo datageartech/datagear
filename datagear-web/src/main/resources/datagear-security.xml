@@ -33,12 +33,9 @@
 		<intercept-url pattern="/driverEntity/deleteDriverFile" access="ROLE_ADMIN" />
 		
 		<!-- 用户管理 -->
-		<intercept-url pattern="/user/add" access="ROLE_ADMIN" />
-		<intercept-url pattern="/user/saveAdd" access="ROLE_ADMIN" />
-		<intercept-url pattern="/user/edit" access="ROLE_ADMIN" />
-		<intercept-url pattern="/user/saveEdit" access="ROLE_ADMIN" />
-		<intercept-url pattern="/user/delete" access="ROLE_ADMIN" />
-		<intercept-url pattern="/user/query" access="ROLE_ADMIN" />
+		<intercept-url pattern="/user/personalSet" access="ROLE_USER" />
+		<intercept-url pattern="/user/savePersonalSet" access="ROLE_USER" />
+		<intercept-url pattern="/user/*" access="ROLE_ADMIN" />
 		
 		<!-- 角色管理 -->
 		<intercept-url pattern="/role/select" access="ROLE_USER" />

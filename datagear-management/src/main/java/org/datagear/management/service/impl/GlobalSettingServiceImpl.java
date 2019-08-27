@@ -7,7 +7,6 @@ package org.datagear.management.service.impl;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.GlobalSetting;
 import org.datagear.management.domain.SmtpSetting;
-import org.datagear.management.domain.User;
 import org.datagear.management.service.GlobalSettingService;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -55,20 +54,6 @@ public class GlobalSettingServiceImpl extends AbstractMybatisService<GlobalSetti
 
 		if (!super.update(globalSetting))
 			super.add(globalSetting);
-	}
-
-	@Override
-	public boolean save(User user, GlobalSetting globalSetting)
-	{
-		encryptSmtpSettingPasswordIf(globalSetting);
-
-		if (!user.isAdmin())
-			return false;
-
-		if (!super.update(globalSetting))
-			super.add(globalSetting);
-
-		return true;
 	}
 
 	@Override

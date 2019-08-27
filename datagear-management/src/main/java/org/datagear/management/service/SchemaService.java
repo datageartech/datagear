@@ -12,7 +12,7 @@ import org.datagear.management.domain.Schema;
  * @author datagear@163.com
  *
  */
-public interface SchemaService extends EntityService<String, Schema>
+public interface SchemaService extends DataPermissionEntityService<String, Schema>
 {
 	/**
 	 * 更新创建用户ID。

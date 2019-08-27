@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.datagear.management.domain.User;
 import org.datagear.management.service.EntityService;
 import org.datagear.model.support.Entity;
 import org.datagear.persistence.PagingData;
@@ -17,7 +16,7 @@ import org.datagear.persistence.Query;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
- * 抽象基于Mybatis的服务类。
+ * 抽象基于Mybatis的{@linkplain EntityService}实现类。
  * 
  * @author datagear@163.com
  *
@@ -53,12 +52,6 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	@Override
-	public boolean update(User user, T entity)
-	{
-		return super.update(user, entity);
-	}
-
-	@Override
 	public boolean deleteById(ID id)
 	{
 		return deleteById(id, buildParamMap());
@@ -71,26 +64,6 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 
 		for (int i = 0; i < ids.length; i++)
 			re[i] = deleteById(ids[i]);
-
-		return re;
-	}
-
-	@Override
-	public boolean deleteById(User user, ID id)
-	{
-		Map<String, Object> params = buildParamMap();
-		addOperatorParameter(params, user);
-
-		return deleteById(id, params);
-	}
-
-	@Override
-	public boolean[] deleteByIds(User user, ID[] ids)
-	{
-		boolean[] re = new boolean[ids.length];
-
-		for (int i = 0; i < ids.length; i++)
-			re[i] = deleteById(user, ids[i]);
 
 		return re;
 	}
@@ -114,15 +87,6 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	public T getById(ID id)
 	{
 		return getById(id, buildParamMap());
-	}
-
-	@Override
-	public T getById(User user, ID id)
-	{
-		Map<String, Object> params = buildParamMap();
-		addOperatorParameter(params, user);
-
-		return getById(id, params);
 	}
 
 	/**
@@ -149,20 +113,8 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	}
 
 	@Override
-	public List<T> query(User user, Query query)
-	{
-		return super.query(user, query);
-	}
-
-	@Override
 	public PagingData<T> pagingQuery(PagingQuery pagingQuery)
 	{
 		return super.pagingQuery(pagingQuery);
-	}
-
-	@Override
-	public PagingData<T> pagingQuery(User user, PagingQuery pagingQuery)
-	{
-		return super.pagingQuery(user, pagingQuery);
 	}
 }

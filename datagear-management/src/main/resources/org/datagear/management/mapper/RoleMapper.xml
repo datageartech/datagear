@@ -21,18 +21,12 @@
 			ROLE_ENABLED = #{entity.enabled}
 		WHERE
 			ROLE_ID = #{entity.id}
-			<if test="OPERATOR != null and OPERATOR.admin != true">
-			AND 1=2
-			</if>
 	</update>
 	
 	<delete id="deleteById">
 		DELETE FROM DATAGEAR_ROLE
 		WHERE
 			ROLE_ID = #{id}
-			<if test="OPERATOR != null and OPERATOR.admin != true">
-			AND 1=2
-			</if>
 	</delete>
 	
 	<select id="getById" resultType="org.datagear.management.domain.Role">

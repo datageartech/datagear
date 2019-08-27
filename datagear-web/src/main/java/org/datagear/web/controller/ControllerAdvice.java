@@ -20,6 +20,7 @@ import org.datagear.connection.UnsupportedGetConnectionException;
 import org.datagear.dbinfo.DatabaseInfoResolverException;
 import org.datagear.dbinfo.TableNotExistsException;
 import org.datagear.dbmodel.DatabaseModelResolverException;
+import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.UnsupportedDialectException;
 import org.datagear.persistence.support.SqlExpressionErrorException;
@@ -123,17 +124,6 @@ public class ControllerAdvice extends AbstractController
 			RecordNotFoundException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(RecordNotFoundException.class), exception, false);
-
-		return getErrorView(request, response);
-	}
-
-	@ExceptionHandler(RecordNotFoundOrPermissionDeniedException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleControllerRecordNotFoundOrNoPermissionException(HttpServletRequest request,
-			HttpServletResponse response, RecordNotFoundOrPermissionDeniedException exception)
-	{
-		setOperationMessageForThrowable(request, buildMessageCode(RecordNotFoundOrPermissionDeniedException.class),
-				exception, false);
 
 		return getErrorView(request, response);
 	}
@@ -330,6 +320,16 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(EstablishConnectionException.class),
 				exception.getCause(), true);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(PermissionDeniedException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleServicePermissionDeniedException(HttpServletRequest request, HttpServletResponse response,
+			PermissionDeniedException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(PermissionDeniedException.class), exception, false);
 
 		return getErrorView(request, response);
 	}

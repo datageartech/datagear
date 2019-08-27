@@ -247,9 +247,6 @@
 	<bean id="schemaService" class="org.datagear.management.service.impl.SchemaServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 		<property name="driverEntityManager" ref='driverEntityManager' />
-		<property name="schemaCache">
-			<bean class="org.datagear.web.util.SchemaCacheImpl" />
-		</property>
 	</bean>
 	
 	<bean id="passwordEncoder" class="org.springframework.security.crypto.password.StandardPasswordEncoder" />

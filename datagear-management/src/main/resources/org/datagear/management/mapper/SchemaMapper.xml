@@ -26,9 +26,6 @@
 			DRIVER_ENTITY_ID = #{entity.driverEntity.id, jdbcType=VARCHAR}
 		WHERE
 			SCHEMA_ID = #{entity.id}
-			<if test="OPERATOR != null and OPERATOR.admin != true">
-			AND SCHEMA_CREATE_USER_ID = #{OPERATOR.id}
-			</if>
 	</update>
 	
 	<update id="updateCreateUserId">
@@ -42,9 +39,6 @@
 		DELETE FROM DATAGEAR_SCHEMA
 		WHERE
 			SCHEMA_ID = #{id}
-			<if test="OPERATOR != null and OPERATOR.admin != true">
-			AND SCHEMA_CREATE_USER_ID = #{OPERATOR.id}
-			</if>
 	</delete>
 	
 	<delete id="deleteByUserId">
@@ -60,21 +54,56 @@
 		SELECT
 			T.*
 		FROM
-			(<include refid="queryView" />) T
+			(<include refid="queryViewDataPermission" />) T
 		WHERE
-			<include refid="queryCondition" />
-			AND T.${_iq_}id${_iq_} = #{id}
+			T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="getDataIdPermissions" resultType="org.datagear.management.domain.DataIdPermission">
+		SELECT
+			T.DATA_ID as ${_iq_}dataId${_iq_},
+			T.DATA_PERMISSION as ${_iq_}permission${_iq_}
+		FROM
+			(
+				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
+				<include refid="queryView" />
+				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
+			) T
+		WHERE
+			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
 	</select>
 	
 	<select id="query" resultType="org.datagear.management.domain.Schema">
 		SELECT
 			T.*
 		FROM
-			(<include refid="queryView" />) T
+			(<include refid="queryViewDataPermission" />) T
 		WHERE
 			<include refid="queryCondition" />
 		<include refid="common.queryOrder" />
 	</select>
+	
+	<sql id="queryViewDataPermission">
+		<choose><when test="DP_CURRENT_USER == null">
+		<include refid="queryView" />
+		</when><otherwise>
+		SELECT
+			T0.*,
+			T1.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
+		FROM
+			(<include refid="queryView" />) T0
+			INNER JOIN
+			(
+				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
+				<include refid="queryView" />
+				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
+			) T1
+		ON
+			T0.${_iq_}id${_iq_} = T1.DATA_ID
+		WHERE
+			T1.DATA_PERMISSION > 0
+		</otherwise></choose>
+	</sql>
 	
 	<sql id="queryView">
 		SELECT
@@ -91,7 +120,11 @@
 			B.USER_REAL_NAME AS ${_iq_}createUser.realName${_iq_},
 			(CASE WHEN B.USER_IS_ADMIN IS NULL THEN '0' ELSE B.USER_IS_ADMIN END) AS ${_iq_}createUser.admin${_iq_},
 			(CASE WHEN B.USER_ID IS NULL THEN '1' ELSE '0' END) AS ${_iq_}createUser.anonymous${_iq_},
-			B.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_}
+			B.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_},
+			
+			A.SCHEMA_ID AS DP_AUTH_DATA_ID,
+			A.SCHEMA_URL AS DP_AUTH_DATA_PATTERN_SRC,
+			A.SCHEMA_CREATE_USER_ID AS DP_AUTH_DATA_CREATOR_ID
 		FROM
 			DATAGEAR_SCHEMA A
 		LEFT JOIN
@@ -109,9 +142,6 @@
 			OR ${_iq_}createUser.name${_iq_} LIKE #{queryKeyword}
 			OR ${_iq_}createUser.realName${_iq_} LIKE #{queryKeyword}
 		)
-		</if>
-		<if test="OPERATOR != null and OPERATOR.admin != true">
-		AND (T.${_iq_}createUser.id${_iq_} = #{OPERATOR.id} OR T.${_iq_}shared${_iq_} = 'true')
 		</if>
 		<include refid="common.queryCondition" />
 	</sql>

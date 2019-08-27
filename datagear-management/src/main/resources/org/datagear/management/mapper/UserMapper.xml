@@ -25,9 +25,6 @@
 			USER_IS_ADMIN = #{entity.admin}
 		WHERE
 			USER_ID = #{entity.id}
-			<if test="OPERATOR != null and OPERATOR.admin != true">
-			AND USER_ID = #{OPERATOR.id}
-			</if>
 	</update>
 	
 	<update id="updatePasswordById">
@@ -41,9 +38,6 @@
 		DELETE FROM DATAGEAR_USER
 		WHERE
 			USER_ID = #{id}
-			<if test="OPERATOR != null and OPERATOR.admin != true">
-			AND USER_ID = #{OPERATOR.id}
-			</if>
 	</delete>
 	
 	<select id="getById" resultType="org.datagear.management.domain.User">

@@ -11,12 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.GlobalSetting;
 import org.datagear.management.domain.SmtpSetting;
 import org.datagear.management.domain.SmtpSetting.ConnectionType;
-import org.datagear.management.domain.User;
 import org.datagear.management.service.GlobalSettingService;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.MailUtils;
-import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -91,12 +89,7 @@ public class GlobalSettingController extends AbstractController
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
 			GlobalSetting globalSetting)
 	{
-		User user = WebUtils.getUser(request, response);
-
-		boolean save = this.globalSettingService.save(user, globalSetting);
-
-		if (!save)
-			throw new RecordNotFoundOrPermissionDeniedException();
+		this.globalSettingService.save(globalSetting);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}

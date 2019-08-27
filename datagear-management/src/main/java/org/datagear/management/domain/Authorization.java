@@ -16,11 +16,11 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 授权资源类型：数据源实体 */
-	public static final String RESOURCE_TYPE_DATA_SOURCE_ID = "DATA_SOURCE_ID";
+	/** 授权资源类型：数据源 */
+	public static final String RESOURCE_TYPE_DATA_SOURCE = "DATA_SOURCE";
 
-	/** 授权资源类型：数据源通配符 */
-	public static final String RESOURCE_TYPE_DATA_SOURCE_PATTERN = "DATA_SOURCE_PATTERN";
+	/** 授权资源类型：授权 */
+	public static final String RESOURCE_TYPE_AUTHORIZATION = "DATA_SOURCE";
 
 	/** 授权主体类型：全部用户 */
 	public static final String PRINCIPAL_TYPE_ALl = "ALL";
@@ -40,14 +40,25 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 	/** 授权主体：全部用户 */
 	public static final String PRINCIPAL_ALL = "all";
 
+	/*------------------------------------------------------*/
+	/*
+	 * 注意：权限值范围必须在[0, 100)之间，因为commonDataPermissionSqls.xml会对权限值取模100。
+	 * 这里的权限值都留有间隔，便于各模块扩展自定义权限值。
+	 */
+
 	/** 权限：无 */
 	public static final int PERMISSION_NONE = 0;
 
-	/** 权限：读 */
-	public static final int PERMISSION_READ = 1;
+	/** 权限：读取 */
+	public static final int PERMISSION_READ = 20;
 
-	/** 权限：写 */
-	public static final int PERMISSION_WRITE = 2;
+	/** 权限：编辑 */
+	public static final int PERMISSION_EDIT = 40;
+
+	/** 权限：删除 */
+	public static final int PERMISSION_DELETE = 60;
+
+	/*------------------------------------------------------*/
 
 	/** 授权资源 */
 	private String resource;
@@ -191,5 +202,38 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 		return getClass().getSimpleName() + " [id=" + getId() + ", resource=" + resource + ", resourceType="
 				+ resourceType + ", principal=" + principal + ", principalType=" + principalType + ", permission="
 				+ permission + ", enabled=" + enabled + "]";
+	}
+
+	/**
+	 * 是否为可读取权限。
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean canRead(int permission)
+	{
+		return (PERMISSION_READ <= permission);
+	}
+
+	/**
+	 * 是否为可编辑权限。
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean canEdit(int permission)
+	{
+		return (PERMISSION_EDIT <= permission);
+	}
+
+	/**
+	 * 是否为可删除权限。
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean canDelete(int permission)
+	{
+		return (PERMISSION_DELETE <= permission);
 	}
 }

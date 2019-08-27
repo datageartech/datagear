@@ -15,9 +15,19 @@ import org.datagear.model.support.AbstractStringIdEntity;
  * @author datagear@163.com
  *
  */
-public class Schema extends AbstractStringIdEntity implements CreateUserEntity<String>, Cloneable
+public class Schema extends AbstractStringIdEntity
+		implements CreateUserEntity<String>, DataPermissionEntity<String>, Cloneable
 {
 	private static final long serialVersionUID = 1L;
+
+	/** 数据源内的表数据权限：读取 */
+	public static final int PERMISSION_TABLE_DATA_READ = Authorization.PERMISSION_READ + 1;
+
+	/** 数据源内的表数据权限：编辑 */
+	public static final int PERMISSION_TABLE_DATA_EDIT = Authorization.PERMISSION_READ + 2;
+
+	/** 数据源内的表数据权限：删除 */
+	public static final int PERMISSION_TABLE_DATA_DELETE = Authorization.PERMISSION_READ + 3;
 
 	/** 标题 */
 	private String title;
@@ -42,6 +52,9 @@ public class Schema extends AbstractStringIdEntity implements CreateUserEntity<S
 
 	/** 数据库驱动程序路径名 */
 	private DriverEntity driverEntity;
+
+	/** 权限 */
+	private int dataPermission = PERMISSION_NOT_LOADED;
 
 	public Schema()
 	{
@@ -159,6 +172,18 @@ public class Schema extends AbstractStringIdEntity implements CreateUserEntity<S
 		this.driverEntity = driverEntity;
 	}
 
+	@Override
+	public int getDataPermission()
+	{
+		return dataPermission;
+	}
+
+	@Override
+	public void setDataPermission(int dataPermission)
+	{
+		this.dataPermission = dataPermission;
+	}
+
 	/**
 	 * 清除密码属性值。
 	 * <p>
@@ -169,18 +194,6 @@ public class Schema extends AbstractStringIdEntity implements CreateUserEntity<S
 	public void clearPassword()
 	{
 		this.password = null;
-	}
-
-	@Override
-	public Schema clone() throws CloneNotSupportedException
-	{
-		Schema schema = new Schema(getId(), title, url, user, password);
-		schema.setCreateUser(createUser);
-		schema.setCreateTime(createTime);
-		schema.setShared(shared);
-		schema.setDriverEntity(driverEntity);
-
-		return schema;
 	}
 
 	@Override

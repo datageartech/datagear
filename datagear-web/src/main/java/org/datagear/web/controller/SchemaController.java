@@ -131,8 +131,8 @@ public class SchemaController extends AbstractSchemaModelConnController
 
 		Schema schema = getSchemaService().getById(user, id);
 
-		if (schema == null || schema.getCreateUser() == null || !user.getId().equals(schema.getCreateUser().getId()))
-			throw new RecordNotFoundOrPermissionDeniedException();
+		if (schema == null)
+			throw new RecordNotFoundException();
 
 		model.addAttribute("schema", schema);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.editSchema");
@@ -206,19 +206,6 @@ public class SchemaController extends AbstractSchemaModelConnController
 			@RequestParam(value = "keyword", required = false) String keyword)
 	{
 		User user = WebUtils.getUser(request, response);
-
-		// 管理员用户使用数据库数据功能时，也仅显示自己和公开的数据库
-		if (user.isAdmin())
-		{
-			User tmpUser = new User(user.getId());
-			tmpUser.setName(user.getName());
-			tmpUser.setPassword(user.getPassword());
-			tmpUser.setAdmin(false);
-			tmpUser.setAnonymous(false);
-			tmpUser.setCreateTime(user.getCreateTime());
-
-			user = tmpUser;
-		}
 
 		Query query = new Query();
 		query.setKeyword(keyword);

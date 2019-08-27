@@ -12,7 +12,7 @@ import org.datagear.management.domain.Authorization;
  * @author datagear@163.com
  *
  */
-public interface AuthorizationService extends EntityService<String, Authorization>
+public interface AuthorizationService extends DataPermissionEntityService<String, Authorization>
 {
 
 }

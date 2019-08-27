@@ -34,8 +34,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 {
 	public static final String DEFAULT_IDENTIFIER_QUOTE_KEY = "_iq_";
 
-	public static final String DEFAULT_OPERATOR_KEY = "OPERATOR";
-
 	/** 查询参数：关键字 */
 	public static final String QUERY_PARAM_NOT_LIKE = "queryNotLike";
 
@@ -64,8 +62,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	public static final String PAGING_QUERY_PARAM_ROWS = "pagingQueryRows";
 
 	private String identifierQuoteKey = DEFAULT_IDENTIFIER_QUOTE_KEY;
-
-	private String operatorKey = DEFAULT_OPERATOR_KEY;
 
 	private String identifierQuote = "";
 
@@ -113,16 +109,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		this.identifierQuoteKey = identifierQuoteKey;
 	}
 
-	public String getOperatorKey()
-	{
-		return operatorKey;
-	}
-
-	public void setOperatorKey(String operatorKey)
-	{
-		this.operatorKey = operatorKey;
-	}
-
 	/**
 	 * 添加。
 	 * 
@@ -165,21 +151,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	/**
 	 * 更新。
 	 * 
-	 * @param user
-	 * @param entity
-	 * @return
-	 */
-	protected boolean update(User user, T entity)
-	{
-		Map<String, Object> params = buildParamMap();
-		addOperatorParameter(params, user);
-
-		return update(entity, params);
-	}
-
-	/**
-	 * 更新。
-	 * 
 	 * @param entity
 	 * @param params
 	 * @return
@@ -208,21 +179,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	/**
 	 * 删除。
 	 * 
-	 * @param user
-	 * @param obj
-	 * @return
-	 */
-	protected boolean delete(User user, T obj)
-	{
-		Map<String, Object> params = buildParamMap();
-		addOperatorParameter(params, user);
-
-		return delete(obj, params);
-	}
-
-	/**
-	 * 删除。
-	 * 
 	 * @param id
 	 * @param params
 	 * @return
@@ -238,14 +194,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected T get(T param)
 	{
 		return get(param, buildParamMap());
-	}
-
-	protected T get(User user, T param)
-	{
-		Map<String, Object> params = buildParamMap();
-		addOperatorParameter(params, user);
-
-		return get(param, params);
 	}
 
 	/**
@@ -274,21 +222,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected List<T> query(Query query)
 	{
 		return query(query, buildParamMap());
-	}
-
-	/**
-	 * 查询。
-	 * 
-	 * @param user
-	 * @param query
-	 * @return
-	 */
-	protected List<T> query(User user, Query query)
-	{
-		Map<String, Object> params = buildParamMap();
-		addOperatorParameter(params, user);
-
-		return query(query, params);
 	}
 
 	/**
@@ -331,21 +264,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected PagingData<T> pagingQuery(PagingQuery pagingQuery)
 	{
 		return pagingQuery(pagingQuery, buildParamMap());
-	}
-
-	/**
-	 * 分页查询。
-	 * 
-	 * @param user
-	 * @param pagingQuery
-	 * @return
-	 */
-	protected PagingData<T> pagingQuery(User user, PagingQuery pagingQuery)
-	{
-		Map<String, Object> params = buildParamMap();
-		addOperatorParameter(params, user);
-
-		return pagingQuery(pagingQuery, params);
 	}
 
 	/**
@@ -643,17 +561,6 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	protected void addIdentifierQuoteParameter(Map<String, Object> params)
 	{
 		params.put(this.identifierQuoteKey, this.identifierQuote);
-	}
-
-	/**
-	 * 添加操作用户参数。
-	 * 
-	 * @param params
-	 * @param user
-	 */
-	protected void addOperatorParameter(Map<String, Object> params, User user)
-	{
-		params.put(this.operatorKey, user);
 	}
 
 	/**
