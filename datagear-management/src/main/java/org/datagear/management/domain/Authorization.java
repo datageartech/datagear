@@ -12,7 +12,8 @@ import org.datagear.model.support.AbstractStringIdEntity;
  * @author datagear@163.com
  *
  */
-public class Authorization extends AbstractStringIdEntity implements CreateUserEntity<String>
+public class Authorization extends AbstractStringIdEntity
+		implements CreateUserEntity<String>, DataPermissionEntity<String>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -20,7 +21,7 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 	public static final String RESOURCE_TYPE_DATA_SOURCE = "DATA_SOURCE";
 
 	/** 授权资源类型：授权 */
-	public static final String RESOURCE_TYPE_AUTHORIZATION = "DATA_SOURCE";
+	public static final String RESOURCE_TYPE_AUTHORIZATION = "AUTHORIZATION";
 
 	/** 授权主体类型：全部用户 */
 	public static final String PRINCIPAL_TYPE_ALl = "ALL";
@@ -34,11 +35,11 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 	/** 授权主体类型：匿名用户 */
 	public static final String PRINCIPAL_TYPE_ANONYMOUS = "ANONYMOUS";
 
-	/** 授权主体：匿名用户 */
-	public static final String PRINCIPAL_ANONYMOUS = "anonymous";
-
 	/** 授权主体：全部用户 */
 	public static final String PRINCIPAL_ALL = "all";
+
+	/** 授权主体：匿名用户 */
+	public static final String PRINCIPAL_ANONYMOUS = "anonymous";
 
 	/*------------------------------------------------------*/
 	/*
@@ -86,6 +87,9 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 
 	/** 授权主体名称 */
 	private String principalName;
+
+	/** 此记录的数据权限 */
+	private int dataPermission;
 
 	public Authorization()
 	{
@@ -194,6 +198,18 @@ public class Authorization extends AbstractStringIdEntity implements CreateUserE
 	public void setPrincipalName(String principalName)
 	{
 		this.principalName = principalName;
+	}
+
+	@Override
+	public int getDataPermission()
+	{
+		return dataPermission;
+	}
+
+	@Override
+	public void setDataPermission(int dataPermission)
+	{
+		this.dataPermission = dataPermission;
 	}
 
 	@Override

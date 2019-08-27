@@ -18,18 +18,18 @@ public class DataIdPermission implements Serializable
 
 	private String dataId;
 
-	private int permission;
+	private int dataPermission;
 
 	public DataIdPermission()
 	{
 		super();
 	}
 
-	public DataIdPermission(String dataId, int permission)
+	public DataIdPermission(String dataId, int dataPermission)
 	{
 		super();
 		this.dataId = dataId;
-		this.permission = permission;
+		this.dataPermission = dataPermission;
 	}
 
 	public String getDataId()
@@ -42,13 +42,13 @@ public class DataIdPermission implements Serializable
 		this.dataId = dataId;
 	}
 
-	public int getPermission()
+	public int getDataPermission()
 	{
-		return permission;
+		return dataPermission;
 	}
 
-	public void setPermission(int permission)
+	public void setDataPermission(int dataPermission)
 	{
-		this.permission = permission;
+		this.dataPermission = dataPermission;
 	}
 }

@@ -35,6 +35,9 @@ public interface DataPermissionEntityService<ID, T extends Entity<ID>> extends E
 	/** 数据权限参数：资源是否有创建用户，参考commonDataPermissionSqls.xml */
 	String DATA_PERMISSION_PARAM_RESOURCE_HAS_CREATOR = "DP_RESOURCE_HAS_CREATOR";
 
+	/** 数据权限参数：最小读权限值 */
+	String DATA_PERMISSION_PARAM_MIN_READ_PERMISSION = "DP_MIN_READ_PERMISSION";
+
 	/** 数据权限参数：最大权限值 */
 	String DATA_PERMISSION_PARAM_MAX_PERMISSION = "DP_MAX_PERMISSION";
 

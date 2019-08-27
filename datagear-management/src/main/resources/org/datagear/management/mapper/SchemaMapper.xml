@@ -62,11 +62,11 @@
 	<select id="getDataIdPermissions" resultType="org.datagear.management.domain.DataIdPermission">
 		SELECT
 			T.DATA_ID as ${_iq_}dataId${_iq_},
-			T.DATA_PERMISSION as ${_iq_}permission${_iq_}
+			T.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
 		FROM
 			(
 				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
-				<include refid="queryView" />
+				<include refid="queryViewDataPermissionId" />
 				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
 			) T
 		WHERE
@@ -95,14 +95,23 @@
 			INNER JOIN
 			(
 				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
-				<include refid="queryView" />
+				<include refid="queryViewDataPermissionId" />
 				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
 			) T1
 		ON
 			T0.${_iq_}id${_iq_} = T1.DATA_ID
 		WHERE
-			T1.DATA_PERMISSION > 0
+			T1.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION}
 		</otherwise></choose>
+	</sql>
+	
+	<sql id="queryViewDataPermissionId">
+		SELECT
+			A.SCHEMA_ID AS DP_AUTH_DATA_ID,
+			A.SCHEMA_URL AS DP_AUTH_DATA_PATTERN_SRC,
+			A.SCHEMA_CREATE_USER_ID AS DP_AUTH_DATA_CREATOR_ID
+		FROM
+			DATAGEAR_SCHEMA A
 	</sql>
 	
 	<sql id="queryView">
@@ -120,11 +129,7 @@
 			B.USER_REAL_NAME AS ${_iq_}createUser.realName${_iq_},
 			(CASE WHEN B.USER_IS_ADMIN IS NULL THEN '0' ELSE B.USER_IS_ADMIN END) AS ${_iq_}createUser.admin${_iq_},
 			(CASE WHEN B.USER_ID IS NULL THEN '1' ELSE '0' END) AS ${_iq_}createUser.anonymous${_iq_},
-			B.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_},
-			
-			A.SCHEMA_ID AS DP_AUTH_DATA_ID,
-			A.SCHEMA_URL AS DP_AUTH_DATA_PATTERN_SRC,
-			A.SCHEMA_CREATE_USER_ID AS DP_AUTH_DATA_CREATOR_ID
+			B.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_}
 		FROM
 			DATAGEAR_SCHEMA A
 		LEFT JOIN

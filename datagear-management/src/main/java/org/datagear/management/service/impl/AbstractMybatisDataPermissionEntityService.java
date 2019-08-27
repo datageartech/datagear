@@ -177,7 +177,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends E
 			{
 				if (myId.equals(p.getDataId()))
 				{
-					permission = p.getPermission();
+					permission = p.getDataPermission();
 					break;
 				}
 			}
@@ -212,8 +212,10 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends E
 			boolean resourceSupportPattern, boolean resourceHasCreator)
 	{
 		params.put(DATA_PERMISSION_PARAM_CURRENT_USER, user);
+		params.put(DATA_PERMISSION_PARAM_RESOURCE_TYPE, resourceType);
 		params.put(DATA_PERMISSION_PARAM_RESOURCE_SUPPORT_PATTERN, resourceSupportPattern);
 		params.put(DATA_PERMISSION_PARAM_RESOURCE_HAS_CREATOR, resourceHasCreator);
+		params.put(DATA_PERMISSION_PARAM_MIN_READ_PERMISSION, Authorization.PERMISSION_READ);
 		params.put(DATA_PERMISSION_PARAM_MAX_PERMISSION, Authorization.PERMISSION_DELETE);
 	}
 }

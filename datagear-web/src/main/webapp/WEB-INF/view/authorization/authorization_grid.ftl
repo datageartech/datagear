@@ -110,7 +110,7 @@ String authorizationSourceType 固定授权源类型，允许为null
 			{
 				"confirm" : function()
 				{
-					var data = $.getPropertyParamString(rows, "id");
+					var data = $.getPropertyParamObjArray(rows, "id");
 					
 					$.post(po.url("delete"), data, function()
 					{
@@ -135,22 +135,13 @@ String authorizationSourceType 固定授权源类型，允许为null
 	var columnPermission = $.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.permission' />", "permission");
 	columnPermission.render = function(data, type, row, meta)
 	{
-		if(data == "NONE")
-			data = "<@spring.message code='authorization.permission.NONE' />";
-		else if(data == "READ")
-			data = "<@spring.message code='authorization.permission.READ' />";
-		else if(data == "WRITE")
-			data = "<@spring.message code='authorization.permission.WRITE' />";
-		else
-			data = "";
-		
 		return data;
 	};
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.resourceName' />", "resourceName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.principalName' />", "principalName"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.resource' />", "resourceName"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.principal' />", "principalName"),
 		columnPermission,
 		columnEnabled,
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.createUser' />", "createUser.nameLabel")

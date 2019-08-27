@@ -653,6 +653,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+	padding-right: 6em;
 }
 .lightweight-menu > li > .ui-menu-item-wrapper,
 .ui-menu.lightweight-menu > li > .ui-menu-item-wrapper{
@@ -864,9 +865,6 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	width: 1.5em;
 	height: 1.5em;
     margin-top: 1px;
-}
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li > .ui-menu{
-	min-width: 14em;
 }
 .main-page-content .schema-panel .schema-panel-content{
 	position: absolute;
