@@ -8,6 +8,12 @@ readonly 是否只读操作，允许为null
 <#assign formAction=(formAction!'#')>
 <#assign readonly=(readonly!false)>
 <#assign isAdd=(formAction == 'saveAdd')>
+<#assign Authorization=statics['org.datagear.management.domain.Authorization']>
+<#assign Schema=statics['org.datagear.management.domain.Schema']>
+<#assign resourceType=((authorization.resourceType)!Authorization.RESOURCE_TYPE_DATA_SOURCE)>
+<#assign principalType=((authorization.principalType)!Authorization.PRINCIPAL_TYPE_ROLE)>
+<#assign permission=((authorization.permission)!Schema.PERMISSION_TABLE_DATA_READ)>
+<#assign enabled=(((authorization.enabled)!true)?string('true', 'false'))>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -21,6 +27,19 @@ readonly 是否只读操作，允许为null
 			<input type="hidden" name="id" value="${(authorization.id)!''?html}" />
 			<div class="form-item">
 				<div class="form-item-label">
+					<label><@spring.message code='authorization.resourceType' /></label>
+				</div>
+				<div class="form-item-value">
+					<div class="resourceType-radios">
+						<label for="${pageId}-resourceType_0"><@spring.message code='authorization.resourceType.DATA_SOURCE' /></label>
+			   			<input type="radio" id="${pageId}-resourceType_0" name="resourceType" value="${Authorization.RESOURCE_TYPE_DATA_SOURCE}" />
+						<label for="${pageId}-resourceType_1" title="<@spring.message code='authorization.resourceType.DATA_SOURCE_PATTERN.desc' />"><@spring.message code='authorization.resourceType.DATA_SOURCE_PATTERN' /></label>
+			   			<input type="radio" id="${pageId}-resourceType_1" name="resourceType" value="${Authorization.RESOURCE_TYPE_DATA_SOURCE + Authorization.PATTERN_RESOURCE_TYPE_SUFFIX}"  />
+		   			</div>
+				</div>
+			</div>
+			<div class="form-item">
+				<div class="form-item-label">
 					<label><@spring.message code='authorization.resource' /></label>
 				</div>
 				<div class="form-item-value">
@@ -29,10 +48,19 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='authorization.resourceType' /></label>
+					<label><@spring.message code='authorization.principalType' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="resourceType" value="${(authorization.resourceType)!''?html}" class="ui-widget ui-widget-content" />
+					<div class="principalType-radios">
+						<label for="${pageId}-principalType_0"><@spring.message code='authorization.principalType.USER' /></label>
+			   			<input type="radio" id="${pageId}-principalType_0" name="principalType" value="${Authorization.PRINCIPAL_TYPE_USER}" />
+						<label for="${pageId}-principalType_1"><@spring.message code='authorization.principalType.ROLE' /></label>
+			   			<input type="radio" id="${pageId}-principalType_1" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ROLE}" />
+						<label for="${pageId}-principalType_2"><@spring.message code='authorization.principalType.ANONYMOUS' /></label>
+			   			<input type="radio" id="${pageId}-principalType_2" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ANONYMOUS}" />
+						<label for="${pageId}-principalType_3"><@spring.message code='authorization.principalType.ALL' /></label>
+			   			<input type="radio" id="${pageId}-principalType_3" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ALl}" />
+		   			</div>
 				</div>
 			</div>
 			<div class="form-item">
@@ -45,18 +73,19 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='authorization.principalType' /></label>
-				</div>
-				<div class="form-item-value">
-					<input type="text" name="principalType" value="${(authorization.principalType)!''?html}" class="ui-widget ui-widget-content" />
-				</div>
-			</div>
-			<div class="form-item">
-				<div class="form-item-label">
 					<label><@spring.message code='authorization.permission' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="permission" value="${(authorization.permission)!''?html}" class="ui-widget ui-widget-content" />
+					<div class="permission-radios">
+						<label for="${pageId}-permission_0"><@spring.message code='authorization.permission.READ' /></label>
+			   			<input type="radio" id="${pageId}-permission_0" name="permission" value="${Schema.PERMISSION_TABLE_DATA_READ}" />
+						<label for="${pageId}-permission_1"><@spring.message code='authorization.permission.EDIT' /></label>
+			   			<input type="radio" id="${pageId}-permission_1" name="permission" value="${Schema.PERMISSION_TABLE_DATA_EDIT}" />
+						<label for="${pageId}-permission_2"><@spring.message code='authorization.permission.DELETE' /></label>
+			   			<input type="radio" id="${pageId}-permission_2" name="permission" value="${Schema.PERMISSION_TABLE_DATA_DELETE}" />
+						<label for="${pageId}-permission_3"><@spring.message code='authorization.permission.NONE' /></label>
+			   			<input type="radio" id="${pageId}-permission_3" name="permission" value="${Authorization.PERMISSION_NONE_START}" />
+		   			</div>
 				</div>
 			</div>
 			<div class="form-item">
@@ -64,11 +93,11 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='authorization.enabled' /></label>
 				</div>
 				<div class="form-item-value">
-					<div class="authorizationEnabled-radios">
-					<label for="${pageId}-authorizationEnabledYes"><@spring.message code='yes' /></label>
-		   			<input type="radio" id="${pageId}-authorizationEnabledYes" name="enabled" value="1" <#if (authorization.enabled)!false>checked="checked"</#if> />
-					<label for="${pageId}-authorizationEnabledNo"><@spring.message code='no' /></label>
-		   			<input type="radio" id="${pageId}-authorizationEnabledNo" name="enabled" value="0" <#if !((authorization.enabled)!false)>checked="checked"</#if> />
+					<div class="enabled-radios">
+						<label for="${pageId}-enabled_0"><@spring.message code='yes' /></label>
+			   			<input type="radio" id="${pageId}-enabled_0" name="enabled" value="true" />
+						<label for="${pageId}-enabled_1"><@spring.message code='no' /></label>
+			   			<input type="radio" id="${pageId}-enabled_1" name="enabled" value="false" />
 		   			</div>
 				</div>
 			</div>
@@ -88,8 +117,22 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
+	
+	po.element("input[name='resourceType'][value='${resourceType}']").attr("checked", "checked");
+	po.element("input[name='resourceType']").checkboxradio({icon:false});
+	po.element(".resourceType-radios").controlgroup();
+	
+	po.element("input[name='principalType'][value='${principalType}']").attr("checked", "checked");
+	po.element("input[name='principalType']").checkboxradio({icon:false});
+	po.element(".principalType-radios").controlgroup();
+	
+	po.element("input[name='permission'][value='${permission}']").attr("checked", "checked");
+	po.element("input[name='permission']").checkboxradio({icon:false});
+	po.element(".permission-radios").controlgroup();
+	
+	po.element("input[name='enabled'][value='${enabled}']").attr("checked", "checked");
 	po.element("input[name='enabled']").checkboxradio({icon:false});
-	po.element(".authorizationEnabled-radios").controlgroup();
+	po.element(".enabled-radios").controlgroup();
 	
 	po.url = function(action)
 	{

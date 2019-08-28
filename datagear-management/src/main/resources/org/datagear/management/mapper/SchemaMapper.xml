@@ -7,12 +7,12 @@
 		INSERT INTO DATAGEAR_SCHEMA
 			(
 			SCHEMA_ID, SCHEMA_TITLE, SCHEMA_URL, SCHEMA_USER, SCHEMA_PASSWORD,
-			SCHEMA_CREATE_USER_ID, SCHEMA_CREATE_TIME, SCHEMA_SHARED, DRIVER_ENTITY_ID
+			SCHEMA_CREATE_USER_ID, SCHEMA_CREATE_TIME, DRIVER_ENTITY_ID
 			)
 		VALUES
 			(
 			#{entity.id}, #{entity.title}, #{entity.url}, #{entity.user}, #{entity.password},
-			#{entity.createUser.id}, #{entity.createTime}, #{entity.shared}, #{entity.driverEntity.id, jdbcType=VARCHAR}
+			#{entity.createUser.id}, #{entity.createTime}, #{entity.driverEntity.id, jdbcType=VARCHAR}
 			)
 	</insert>
 	
@@ -22,7 +22,6 @@
 			SCHEMA_URL = #{entity.url},
 			SCHEMA_USER = #{entity.user},
 			SCHEMA_PASSWORD = #{entity.password},
-			SCHEMA_SHARED = #{entity.shared},
 			DRIVER_ENTITY_ID = #{entity.driverEntity.id, jdbcType=VARCHAR}
 		WHERE
 			SCHEMA_ID = #{entity.id}
@@ -122,7 +121,6 @@
 			A.SCHEMA_USER AS ${_iq_}user${_iq_},
 			A.SCHEMA_PASSWORD AS ${_iq_}password${_iq_},
 			A.SCHEMA_CREATE_TIME AS ${_iq_}createTime${_iq_},
-			A.SCHEMA_SHARED AS ${_iq_}shared${_iq_},
 			A.DRIVER_ENTITY_ID AS ${_iq_}driverEntity.id${_iq_},
 			A.SCHEMA_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			B.USER_NAME AS ${_iq_}createUser.name${_iq_},

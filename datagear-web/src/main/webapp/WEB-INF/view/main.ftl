@@ -6,6 +6,7 @@
 <title><@spring.message code='app.name' /></title>
 <#include "include/page_js_obj.ftl" >
 <#include "include/page_obj_tabs.ftl" >
+<#include "include/page_obj_data_permission.ftl" >
 <script type="text/javascript">
 (function(po)
 {
@@ -491,30 +492,22 @@
 						menuItemEnables["schema-operation-view"] = false;
 					}
 					
-					var diableEditAndDelete = false;
-					
-					//管理员、创建用户才能编辑和删除数据库
 					for(var i=0; i<selNodes.length; i++)
 					{
 						if(!po.isSchemaNode(selNodes[i]))
 						{
-							diableEditAndDelete = true;
+							menuItemEnables["schema-operation-edit"] = false;
+							menuItemEnables["schema-operation-delete"] = false;
 							break;
 						}
 						
 						var schema = selNodes[i].original;
 						
-						if(!po.isAdmin && schema.createUser != undefined && schema.createUser.id != po.userId)
-						{
-							diableEditAndDelete = true;
-							break;
-						}
-					}
-					
-					if(diableEditAndDelete)
-					{
-						menuItemEnables["schema-operation-edit"] = false;
-						menuItemEnables["schema-operation-delete"] = false;
+						if(!po.canEdit(schema))
+							menuItemEnables["schema-operation-edit"] = false;
+						
+						if(!po.canDelete(schema))
+							menuItemEnables["schema-operation-delete"] = false;
 					}
 					
 					//如果有选中，且全都是数据库或者全都是表，则启用刷新按钮

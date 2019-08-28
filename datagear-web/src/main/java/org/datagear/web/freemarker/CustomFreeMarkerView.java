@@ -11,6 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import org.datagear.web.util.WebUtils;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerView;
 
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.Configuration;
+
 /**
  * 自定义{@linkplain FreeMarkerView}，实现一些本系统需要的特性。
  * 
@@ -31,6 +35,12 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	/** 变量：父页面ID关键字 */
 	public static final String VAR_PARENT_PAGE_ID = WebUtils.KEY_PARENT_PAGE_ID;
 
+	/** 变量：访问Java静态变量关键字 */
+	public static final String VAR_STATICS = "statics";
+
+	private static final BeansWrapper BEANS_WRAPPER = new BeansWrapperBuilder(
+			Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build();
+
 	public CustomFreeMarkerView()
 	{
 		super();
@@ -46,5 +56,6 @@ public class CustomFreeMarkerView extends FreeMarkerView
 
 		model.put(VAR_PAGE_ID, WebUtils.generatePageId());
 		model.put(VAR_PARENT_PAGE_ID, WebUtils.getParentPageId(request));
+		model.put(VAR_STATICS, BEANS_WRAPPER.getStaticModels());
 	}
 }

@@ -60,9 +60,6 @@ public class AuthorizationController extends AbstractController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		Authorization authorization = new Authorization();
-
-		model.addAttribute("authorization", authorization);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "authorization.addAuthorization");
 		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
 

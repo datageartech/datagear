@@ -55,19 +55,6 @@ readonly 是否只读操作，允许为null
 				</div>
 			</div>
 			</#if>
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='schema.shared' /></label>
-				</div>
-				<div class="form-item-value">
-					<div class="schema-shared-radios">
-					<label for="${pageId}-schemaSharedYes"><@spring.message code='yes' /></label>
-		   			<input type="radio" id="${pageId}-schemaSharedYes" name="shared" value="1" <#if (schema.shared)!false>checked="checked"</#if> />
-					<label for="${pageId}-schemaSharedNo"><@spring.message code='no' /></label>
-		   			<input type="radio" id="${pageId}-schemaSharedNo" name="shared" value="0" <#if !((schema.shared)!false)>checked="checked"</#if> />
-		   			</div>
-				</div>
-			</div>
 			<#if !readonly>
 			<div class="form-item">
 				<div class="form-item-label">
@@ -201,9 +188,6 @@ readonly 是否只读操作，允许为null
 		}
 	});
 	</#if>
-	
-	po.element("input[name='shared']").checkboxradio({icon:false});
-	po.element(".schema-shared-radios").controlgroup();
 	
 	$.initButtons(po.element());
 	

@@ -94,7 +94,6 @@ public class SchemaController extends AbstractSchemaModelConnController
 				schema.setTitle(sourceSchema.getTitle());
 				schema.setUrl(sourceSchema.getUrl());
 				schema.setUser(sourceSchema.getUser());
-				schema.setShared(sourceSchema.isShared());
 				schema.setDriverEntity(sourceSchema.getDriverEntity());
 			}
 		}

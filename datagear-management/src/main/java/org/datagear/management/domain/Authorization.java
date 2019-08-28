@@ -23,6 +23,11 @@ public class Authorization extends AbstractStringIdEntity
 	/** 授权资源类型：授权 */
 	public static final String RESOURCE_TYPE_AUTHORIZATION = "AUTHORIZATION";
 
+	/**
+	 * 模式匹配资源类型的后缀，例如："DATA_SOURCE_PATTERN"，表示数据源资源模式匹配授权
+	 */
+	public static final String PATTERN_RESOURCE_TYPE_SUFFIX = "_PATTERN";
+
 	/** 授权主体类型：全部用户 */
 	public static final String PRINCIPAL_TYPE_ALl = "ALL";
 
@@ -43,21 +48,24 @@ public class Authorization extends AbstractStringIdEntity
 
 	/*------------------------------------------------------*/
 	/*
-	 * 注意：权限值范围必须在[0, 100)之间，因为commonDataPermissionSqls.xml会对权限值取模100。
+	 * 注意：权限值范围必须在[0, 99]之间，因为commonDataPermissionSqls.xml会对权限值取模100。
 	 * 这里的权限值都留有间隔，便于各模块扩展自定义权限值。
 	 */
 
-	/** 权限：无 */
-	public static final int PERMISSION_NONE = 0;
+	/** 权限起始值：无 */
+	public static final int PERMISSION_NONE_START = 0;
 
-	/** 权限：读取 */
-	public static final int PERMISSION_READ = 20;
+	/** 权限起始值：只读 */
+	public static final int PERMISSION_READ_START = 20;
 
-	/** 权限：编辑 */
-	public static final int PERMISSION_EDIT = 40;
+	/** 权起始值限：编辑 */
+	public static final int PERMISSION_EDIT_START = 40;
 
-	/** 权限：删除 */
-	public static final int PERMISSION_DELETE = 60;
+	/** 权限起始值：删除 */
+	public static final int PERMISSION_DELETE_START = 60;
+
+	/** 最大权限值 */
+	public static final int PERMISSION_MAX = 99;
 
 	/*------------------------------------------------------*/
 
@@ -221,35 +229,79 @@ public class Authorization extends AbstractStringIdEntity
 	}
 
 	/**
-	 * 是否为可读取权限。
+	 * 是否无权限。
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean isNone(int permission)
+	{
+		return (permission >= PERMISSION_NONE_START && permission < PERMISSION_READ_START);
+	}
+
+	/**
+	 * 是否是只读权限。
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean isRead(int permission)
+	{
+		return (permission >= PERMISSION_READ_START && permission < PERMISSION_EDIT_START);
+	}
+
+	/**
+	 * 是否是可编辑权限。
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean isEdit(int permission)
+	{
+		return (permission >= PERMISSION_EDIT_START && permission < PERMISSION_DELETE_START);
+	}
+
+	/**
+	 * 是否是可删除权限。
+	 * 
+	 * @param permission
+	 * @return
+	 */
+	public static boolean isDelete(int permission)
+	{
+		return (permission >= PERMISSION_DELETE_START);
+	}
+
+	/**
+	 * 是否可读、或者可编辑、或者可删除。
 	 * 
 	 * @param permission
 	 * @return
 	 */
 	public static boolean canRead(int permission)
 	{
-		return (PERMISSION_READ <= permission);
+		return (permission >= PERMISSION_READ_START);
 	}
 
 	/**
-	 * 是否为可编辑权限。
+	 * 是否可编辑、或者可删除。
 	 * 
 	 * @param permission
 	 * @return
 	 */
 	public static boolean canEdit(int permission)
 	{
-		return (PERMISSION_EDIT <= permission);
+		return (permission >= PERMISSION_EDIT_START);
 	}
 
 	/**
-	 * 是否为可删除权限。
+	 * 是否可删除。
 	 * 
 	 * @param permission
 	 * @return
 	 */
 	public static boolean canDelete(int permission)
 	{
-		return (PERMISSION_DELETE <= permission);
+		return (permission >= PERMISSION_DELETE_START);
 	}
 }

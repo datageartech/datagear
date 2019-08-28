@@ -142,7 +142,8 @@
 			) AS ${_iq_}resourceName${_iq_},
 			(
 				CASE A.AUTH_PRINCIPAL_TYPE
-					WHEN 'ALL' THEN 'ALL'
+					WHEN 'ALL' THEN 'all'
+					WHEN 'ANONYMOUS' THEN 'anonymous'
 					WHEN 'ROLE' THEN C.ROLE_NAME
 					WHEN 'USER' THEN
 					(
