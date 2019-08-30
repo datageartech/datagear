@@ -142,6 +142,7 @@
 		AND
 		(
 			${_iq_}title${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}url${_iq_} LIKE #{queryKeyword}
 			OR ${_iq_}createUser.name${_iq_} LIKE #{queryKeyword}
 			OR ${_iq_}createUser.realName${_iq_} LIKE #{queryKeyword}
 		)

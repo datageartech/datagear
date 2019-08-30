@@ -29,7 +29,7 @@ public class Authorization extends AbstractStringIdEntity
 	public static final String PATTERN_RESOURCE_TYPE_SUFFIX = "_PATTERN";
 
 	/** 授权主体类型：全部用户 */
-	public static final String PRINCIPAL_TYPE_ALl = "ALL";
+	public static final String PRINCIPAL_TYPE_ALL = "ALL";
 
 	/** 授权主体类型：角色ID */
 	public static final String PRINCIPAL_TYPE_ROLE = "ROLE";

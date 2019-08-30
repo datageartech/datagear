@@ -12,7 +12,7 @@ readonly 是否只读操作，允许为null
 <#assign Schema=statics['org.datagear.management.domain.Schema']>
 <#assign resourceType=((authorization.resourceType)!Authorization.RESOURCE_TYPE_DATA_SOURCE)>
 <#assign resourceTypePattern=Authorization.RESOURCE_TYPE_DATA_SOURCE + Authorization.PATTERN_RESOURCE_TYPE_SUFFIX>
-<#assign principalType=((authorization.principalType)!Authorization.PRINCIPAL_TYPE_ROLE)>
+<#assign principalType=((authorization.principalType)!Authorization.PRINCIPAL_TYPE_USER)>
 <#assign permission=((authorization.permission)!Schema.PERMISSION_TABLE_DATA_READ)>
 <#assign enabled=(((authorization.enabled)!true)?string('true', 'false'))>
 <#assign isResourceTypePattern=(resourceType != Authorization.RESOURCE_TYPE_DATA_SOURCE)>
@@ -27,6 +27,8 @@ readonly 是否只读操作，允许为null
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(authorization.id)!''?html}" />
+			<input type="hidden" name="resource" value="${(authorization.resource)!''?html}" />
+			<input type="hidden" name="principal" value="${(authorization.principal)!''?html}" />
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='authorization.resourceType' /></label>
@@ -40,16 +42,27 @@ readonly 是否只读操作，允许为null
 		   			</div>
 				</div>
 			</div>
-			<div class="form-item">
+			<div class="form-item form-item-resource-name-pattern">
 				<div class="form-item-label">
 					<label><@spring.message code='authorization.resource' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="hidden" name="resource" value="${(authorization.resource)!''?html}" />
-					
 					<input type="text" name="resourceNameForPattern" value="${(!isResourceTypePattern)?string('', (authorization.resourceName)!'')}" class="ui-widget ui-widget-content" />
+					<#if !readonly>
+					<#--占位按钮，避免切换时界面尺寸变化-->
+					<button type="button" style="visibility: hidden; padding-left: 0; padding-right: 0; width: 1px; margin-left: -3px; margin-right: 0;">&nbsp;</button>
+					</#if>
+				</div>
+			</div>
+			<div class="form-item form-item-resource-name-entity">
+				<div class="form-item-label">
+					<label><@spring.message code='authorization.resource' /></label>
+				</div>
+				<div class="form-item-value">
 					<input type="text" name="resourceNameForEntity" value="${isResourceTypePattern?string('', (authorization.resourceName)!'')}" class="ui-widget ui-widget-content" readonly="readonly" />
+					<#if !readonly>
 					<button type="button" class="resource-select-button"><@spring.message code='select' /></button>
+					</#if>
 				</div>
 			</div>
 			<div class="form-item">
@@ -59,22 +72,60 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<div class="principalType-radios">
 						<label for="${pageId}-principalType_0"><@spring.message code='authorization.principalType.USER' /></label>
-			   			<input type="radio" id="${pageId}-principalType_0" name="principalType" value="${Authorization.PRINCIPAL_TYPE_USER}" />
+			   			<input type="radio" id="${pageId}-principalType_0" name="principalType" value="${Authorization.PRINCIPAL_TYPE_USER}" for-form-item="form-item-principal-user" />
 						<label for="${pageId}-principalType_1"><@spring.message code='authorization.principalType.ROLE' /></label>
-			   			<input type="radio" id="${pageId}-principalType_1" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ROLE}" />
+			   			<input type="radio" id="${pageId}-principalType_1" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ROLE}" for-form-item="form-item-principal-role" />
 						<label for="${pageId}-principalType_2"><@spring.message code='authorization.principalType.ANONYMOUS' /></label>
-			   			<input type="radio" id="${pageId}-principalType_2" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ANONYMOUS}" />
+			   			<input type="radio" id="${pageId}-principalType_2" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ANONYMOUS}" for-form-item="form-item-principal-anonymous" />
 						<label for="${pageId}-principalType_3"><@spring.message code='authorization.principalType.ALL' /></label>
-			   			<input type="radio" id="${pageId}-principalType_3" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ALl}" />
+			   			<input type="radio" id="${pageId}-principalType_3" name="principalType" value="${Authorization.PRINCIPAL_TYPE_ALL}" for-form-item="form-item-principal-all" />
 		   			</div>
 				</div>
 			</div>
-			<div class="form-item">
+			<div class="form-item form-item-principal form-item-principal-user">
 				<div class="form-item-label">
 					<label><@spring.message code='authorization.principal' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="principal" value="${(authorization.principal)!''?html}" class="ui-widget ui-widget-content" />
+					<input type="text" name="principalNameUser" value="${(Authorization.PRINCIPAL_TYPE_USER!=principalType)?string('', (authorization.principalName)!'')}" class="ui-widget ui-widget-content" readonly="readonly" />
+					<#if !readonly>
+					<button type="button" class="principal-user-select-button"><@spring.message code='select' /></button>
+					</#if>
+				</div>
+			</div>
+			<div class="form-item form-item-principal form-item-principal-role">
+				<div class="form-item-label">
+					<label><@spring.message code='authorization.principal' /></label>
+				</div>
+				<div class="form-item-value">
+					<input type="text" name="principalNameRole" value="${(Authorization.PRINCIPAL_TYPE_ROLE!=principalType)?string('', (authorization.principalName)!'')}" class="ui-widget ui-widget-content" readonly="readonly" />
+					<#if !readonly>
+					<button type="button" class="principal-role-select-button"><@spring.message code='select' /></button>
+					</#if>
+				</div>
+			</div>
+			<div class="form-item form-item-principal form-item-principal-anonymous">
+				<div class="form-item-label">
+					<label><@spring.message code='authorization.principal' /></label>
+				</div>
+				<div class="form-item-value">
+					<input type="text" name="principalNameAnonymous" value="<@spring.message code='authorization.principalType.ANONYMOUS' />" class="ui-widget ui-widget-content" readonly="readonly" />
+					<#if !readonly>
+					<#--占位按钮，避免切换时界面尺寸变化-->
+					<button type="button" style="visibility: hidden; padding-left: 0; padding-right: 0; width: 1px; margin-left: -3px; margin-right: 0;">&nbsp;</button>
+					</#if>
+				</div>
+			</div>
+			<div class="form-item form-item-principal form-item-principal-all">
+				<div class="form-item-label">
+					<label><@spring.message code='authorization.principal' /></label>
+				</div>
+				<div class="form-item-value">
+					<input type="text" name="principalNameAll" value="<@spring.message code='authorization.principalType.ALL' />" class="ui-widget ui-widget-content" readonly="readonly" />
+					<#if !readonly>
+					<#--占位按钮，避免切换时界面尺寸变化-->
+					<button type="button" style="visibility: hidden; padding-left: 0; padding-right: 0; width: 1px; margin-left: -3px; margin-right: 0;">&nbsp;</button>
+					</#if>
 				</div>
 			</div>
 			<div class="form-item">
@@ -124,44 +175,6 @@ readonly 是否只读操作，允许为null
 {
 	$.initButtons(po.element());
 	
-	po.element("input[name='resourceType']").on("change", function()
-	{
-		var val = $(this).val();
-		
-		var $resourceNameForPattern = po.element("input[name='resourceNameForPattern']");
-		var $resourceNameForEntity = po.element("input[name='resourceNameForEntity']");
-		var $resourceSelectButton = po.element(".resource-select-button");
-		
-		if(val == '${Authorization.RESOURCE_TYPE_DATA_SOURCE}')
-		{
-			$resourceNameForPattern.hide();
-			$resourceNameForEntity.show();
-			$resourceSelectButton.css("visibility", "visible");
-		}
-		else
-		{
-			$resourceNameForPattern.show();
-			$resourceNameForEntity.hide();
-			$resourceSelectButton.css("visibility", "hidden");
-		}
-	});
-	
-	po.element("input[name='resourceType'][value='${resourceType}']").attr("checked", "checked").change();
-	po.element("input[name='resourceType']").checkboxradio({icon:false});
-	po.element(".resourceType-radios").controlgroup();
-	
-	po.element("input[name='principalType'][value='${principalType}']").attr("checked", "checked");
-	po.element("input[name='principalType']").checkboxradio({icon:false});
-	po.element(".principalType-radios").controlgroup();
-	
-	po.element("input[name='permission'][value='${permission}']").attr("checked", "checked");
-	po.element("input[name='permission']").checkboxradio({icon:false});
-	po.element(".permission-radios").controlgroup();
-	
-	po.element("input[name='enabled'][value='${enabled}']").attr("checked", "checked");
-	po.element("input[name='enabled']").checkboxradio({icon:false});
-	po.element(".enabled-radios").controlgroup();
-	
 	po.url = function(action)
 	{
 		return "${contextPath}/authorization/" + action;
@@ -209,12 +222,147 @@ readonly 是否只读操作，允许为null
 		}
 	});
 	
+	po.element(".resource-select-button").click(function()
+	{
+		var options =
+		{
+			pageParam :
+			{
+				submit : function(schema)
+				{
+					po.element("input[name='resource']").val(schema.id);
+					po.element("input[name='resourceNameForEntity']").val(schema.title);
+				}
+			}
+		};
+		
+		$.setGridPageHeightOption(options);
+		
+		po.open("${contextPath}/schema/select", options);
+	});
+	
+	po.element(".principal-user-select-button").click(function()
+	{
+		var options =
+		{
+			pageParam :
+			{
+				submit : function(user)
+				{
+					po.element("input[name='principal']").val(user.id);
+					po.element("input[name='principalNameUser']").val(user.nameLabel);
+				}
+			}
+		};
+		
+		$.setGridPageHeightOption(options);
+		
+		po.open("${contextPath}/user/select", options);
+	});
+	
+	po.element(".principal-role-select-button").click(function()
+	{
+		var options =
+		{
+			pageParam :
+			{
+				submit : function(role)
+				{
+					po.element("input[name='principal']").val(role.id);
+					po.element("input[name='principalNameRole']").val(role.name);
+				}
+			}
+		};
+		
+		$.setGridPageHeightOption(options);
+		
+		po.open("${contextPath}/role/select", options);
+	});
+	
 	po.element(".reset-button").click(function()
 	{
 		po.form()[0].reset();
 		po.element("input[name='resourceType']:checked").change();
+		po.element("input[name='principalType']:checked").change();
 	});
 	</#if>
+	
+	po.element("input[name='resourceType']").on("change", function()
+	{
+		var val = $(this).val();
+		
+		var $formItemForPattern = po.element(".form-item-resource-name-pattern");
+		var $formItemForEntity = po.element(".form-item-resource-name-entity");
+		var $resourceNameForPattern = po.element("input[name='resourceNameForPattern']");
+		var $resourceNameForEntity = po.element("input[name='resourceNameForEntity']");
+		
+		if(val == '${Authorization.RESOURCE_TYPE_DATA_SOURCE}')
+		{
+			$formItemForPattern.hide();
+			$formItemForEntity.show();
+			
+			<#if !readonly>
+			$resourceNameForPattern.rules("remove");
+			$resourceNameForEntity.rules("add",
+			{
+				"required" : true,
+				messages : {"required" : "<@spring.message code='validation.required' />"}
+			});
+			</#if>
+		}
+		else
+		{
+			$formItemForPattern.show();
+			$formItemForEntity.hide();
+			
+			<#if !readonly>
+			$resourceNameForPattern.rules("add",
+			{
+				"required" : true,
+				messages : {"required" : "<@spring.message code='validation.required' />"}
+			});
+			$resourceNameForEntity.rules("remove");
+			</#if>
+		}
+	});
+	
+	po.element("input[name='principalType']").on("change", function()
+	{
+		var $this = $(this);
+		
+		var forFormItemClass = $this.attr("for-form-item");
+		
+		po.element(".form-item-principal").hide();
+		po.element("."+forFormItemClass).show();
+		
+		<#if !readonly>
+		po.element(".form-item-principal").each(function()
+		{
+			$("input[type='text']", this).rules("remove");
+		});
+		$("input[type='text']", po.element("."+forFormItemClass)).rules("add",
+		{
+			"required" : true,
+			messages : {"required" : "<@spring.message code='validation.required' />"}
+		});
+		</#if>
+	});
+	
+	po.element("input[name='resourceType'][value='${resourceType}']").attr("checked", "checked").change();
+	po.element("input[name='resourceType']").checkboxradio({icon:false});
+	po.element(".resourceType-radios").controlgroup();
+	
+	po.element("input[name='principalType'][value='${principalType}']").attr("checked", "checked").change();
+	po.element("input[name='principalType']").checkboxradio({icon:false});
+	po.element(".principalType-radios").controlgroup();
+	
+	po.element("input[name='permission'][value='${permission}']").attr("checked", "checked");
+	po.element("input[name='permission']").checkboxradio({icon:false});
+	po.element(".permission-radios").controlgroup();
+	
+	po.element("input[name='enabled'][value='${enabled}']").attr("checked", "checked");
+	po.element("input[name='enabled']").checkboxradio({icon:false});
+	po.element(".enabled-radios").controlgroup();
 })
 (${pageId});
 </script>

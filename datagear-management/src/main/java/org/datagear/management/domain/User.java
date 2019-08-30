@@ -129,10 +129,20 @@ public class User extends AbstractStringIdEntity
 	 */
 	public String getNameLabel()
 	{
+		String nameLabel = "";
+
 		if (this.realName != null && !this.realName.isEmpty())
-			return this.realName + "(" + this.name + ")";
-		else
-			return this.name;
+			nameLabel += this.realName;
+
+		if (this.name != null && !this.name.isEmpty())
+		{
+			if (nameLabel.isEmpty())
+				nameLabel = this.name;
+			else
+				nameLabel = nameLabel + "(" + this.name + ")";
+		}
+
+		return nameLabel;
 	}
 
 	/**

@@ -201,6 +201,37 @@ public class SchemaController extends AbstractSchemaModelConnController
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
 
+	@RequestMapping(value = "/query")
+	public String query(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	{
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.manageSchema");
+
+		return "/schema/schema_grid";
+	}
+
+	@RequestMapping(value = "/select")
+	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+	{
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.selectSchema");
+		model.addAttribute(KEY_SELECTONLY, true);
+
+		return "/schema/schema_grid";
+	}
+
+	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<Schema> queryData(HttpServletRequest request, HttpServletResponse response) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		PagingQuery pagingQuery = getPagingQuery(request, null);
+
+		List<Schema> schemas = getSchemaService().query(user, pagingQuery);
+		processForUI(request, schemas);
+
+		return schemas;
+	}
+
 	@RequestMapping(value = "/list", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<Schema> list(HttpServletRequest request, HttpServletResponse response,
@@ -213,12 +244,7 @@ public class SchemaController extends AbstractSchemaModelConnController
 		query.setOrders(Order.valueOf("title", Order.ASC));
 
 		List<Schema> schemas = getSchemaService().query(user, query);
-
-		if (schemas != null)
-		{
-			for (Schema schema : schemas)
-				schema.clearPassword();
-		}
+		processForUI(request, schemas);
 
 		return schemas;
 	}
@@ -278,6 +304,31 @@ public class SchemaController extends AbstractSchemaModelConnController
 		};
 
 		return executor.execute();
+	}
+
+	/**
+	 * 处理展示。
+	 * 
+	 * @param request
+	 * @param schemas
+	 */
+	protected void processForUI(HttpServletRequest request, List<Schema> schemas)
+	{
+		if (schemas != null && !schemas.isEmpty())
+		{
+			String anonymouseUser = getMessage(request, "anonymousUser");
+
+			for (Schema schema : schemas)
+			{
+				// 清除密码，避免传输至客户端引起安全问题。
+				schema.clearPassword();
+
+				User createUser = schema.getCreateUser();
+
+				if (createUser != null && createUser.isAnonymous())
+					createUser.setRealName(anonymouseUser);
+			}
+		}
 	}
 
 	/**
