@@ -145,12 +145,17 @@
 		
 		var tempSchema = (schema.createUser && schema.createUser.anonymous);
 		
-		if(tempSchema)
-			schema.text += " <span class='ui-icon ui-icon-notice' title='<@spring.message code='main.tempSchema' />'></span>";
-		else
+		if(schema.createUser)
 		{
-			if(schema.createUser && po.userId != schema.createUser.id && schema.createUser.nameLabel)
+			if(po.userId == schema.createUser.id)
+			{
+				if(tempSchema)
+					schema.text += " <span class='ui-icon ui-icon-notice' title='<@spring.message code='main.tempSchema' />'></span>";
+			}
+			else
+			{
 				schema.text += " <span class='schema-tree-create-user-label small-text ui-state-disabled' title='<@spring.message code='main.schemaCreateUser' />'>" + $.escapeHtml(schema.createUser.nameLabel) + "</span>";
+			}
 		}
 		
 		schema.children = true;
