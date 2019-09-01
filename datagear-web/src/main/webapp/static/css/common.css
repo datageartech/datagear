@@ -384,7 +384,8 @@ table.dataTable thead th,
 table.dataTable tfoot th{
 	font-weight: normal;
 }
-table.dataTable thead .display-info-token{
+table.dataTable thead .display-info-token,
+table.dataTable thead .column-searchable{
 	font-weight: bold;
 }
 table.dataTable .column-check{

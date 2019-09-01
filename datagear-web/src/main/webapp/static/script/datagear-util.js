@@ -784,6 +784,11 @@
 		{
 			return "<a title='"+$.escapeHtml(titleTip)+"'>"+$.escapeHtml(titleName)+"</a>";
 		},
+
+		buildDataTablesColumnTitleSearchable : function(titleName)
+		{
+			return "<a class='column-searchable'>"+$.escapeHtml(titleName)+"</a>";
+		},
 		
 		/**
 		 * 构建Datatables组件的“columns”选项值。

@@ -4,12 +4,14 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
+import org.datagear.persistence.Query;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -36,6 +38,35 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 	public AuthorizationServiceImpl(SqlSessionTemplate sqlSessionTemplate)
 	{
 		super(sqlSessionTemplate);
+	}
+
+	@Override
+	protected Authorization getById(String id, Map<String, Object> params)
+	{
+		setAuthorizationQueryLabel(params);
+
+		return super.getById(id, params);
+	}
+
+	@Override
+	protected List<Authorization> query(String statement, Query query, Map<String, Object> params)
+	{
+		setAuthorizationQueryLabel(params);
+
+		return super.query(statement, query, params);
+	}
+
+	protected AuthorizationQueryLabel setAuthorizationQueryLabel(Map<String, Object> params)
+	{
+		AuthorizationQueryLabel label = ServiceContext.get()
+				.getValue(AuthorizationQueryLabel.CUSTOM_QUERY_PARAMETER_NAME);
+
+		if (label == null)
+			label = new AuthorizationQueryLabel();
+
+		params.put("querylabel", label);
+
+		return label;
 	}
 
 	@Override

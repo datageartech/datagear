@@ -329,11 +329,17 @@ readonly 是否只读操作，允许为null
 	po.element("input[name='principalType']").on("change", function()
 	{
 		var $this = $(this);
+		var value = $this.val();
 		
 		var forFormItemClass = $this.attr("for-form-item");
 		
 		po.element(".form-item-principal").hide();
 		po.element("."+forFormItemClass).show();
+		
+		if(value == "${Authorization.PRINCIPAL_TYPE_ANONYMOUS}")
+			po.element("input[name='principal']").val("${Authorization.PRINCIPAL_ANONYMOUS}");
+		else if(value == "${Authorization.PRINCIPAL_TYPE_ALL}")
+			po.element("input[name='principal']").val("${Authorization.PRINCIPAL_ALL}");
 		
 		<#if !readonly>
 		po.element(".form-item-principal").each(function()

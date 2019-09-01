@@ -27,13 +27,13 @@ public class Schema extends AbstractStringIdEntity
 	 */
 
 	/** 数据源内的表数据权限：读取 */
-	public static final int PERMISSION_TABLE_DATA_READ = Authorization.PERMISSION_READ_START + 3;
+	public static final int PERMISSION_TABLE_DATA_READ = Authorization.PERMISSION_READ_START;
 
 	/** 数据源内的表数据权限：编辑 */
-	public static final int PERMISSION_TABLE_DATA_EDIT = Authorization.PERMISSION_READ_START + 6;
+	public static final int PERMISSION_TABLE_DATA_EDIT = Authorization.PERMISSION_READ_START + 4;
 
 	/** 数据源内的表数据权限：删除 */
-	public static final int PERMISSION_TABLE_DATA_DELETE = Authorization.PERMISSION_READ_START + 9;
+	public static final int PERMISSION_TABLE_DATA_DELETE = Authorization.PERMISSION_READ_START + 8;
 
 	/*------------------------------------------------------*/
 

@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
+import org.datagear.management.service.impl.AuthorizationQueryLabel;
+import org.datagear.management.service.impl.ServiceContext;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
@@ -87,6 +89,8 @@ public class AuthorizationController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
+		setAuthorizationQueryLabel(request);
+
 		Authorization authorization = this.authorizationService.getById(id);
 
 		model.addAttribute("authorization", authorization);
@@ -114,6 +118,8 @@ public class AuthorizationController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
+		setAuthorizationQueryLabel(request);
+
 		Authorization authorization = this.authorizationService.getById(id);
 
 		if (authorization == null)
@@ -150,17 +156,29 @@ public class AuthorizationController extends AbstractController
 	{
 		PagingQuery pagingQuery = getPagingQuery(request, null);
 
+		setAuthorizationQueryLabel(request);
+
 		List<Authorization> authorizations = this.authorizationService.query(WebUtils.getUser(request, response),
 				pagingQuery);
 
 		return authorizations;
 	}
 
+	protected void setAuthorizationQueryLabel(HttpServletRequest request)
+	{
+		AuthorizationQueryLabel label = new AuthorizationQueryLabel();
+		label.setPrincipalAll(getMessage(request, "authorization.principalType.ALL"));
+		label.setPrincipalAnonymous(getMessage(request, "authorization.principalType.ANONYMOUS"));
+
+		ServiceContext.get().setValue(AuthorizationQueryLabel.CUSTOM_QUERY_PARAMETER_NAME, label);
+	}
+
 	protected void checkInput(Authorization authorization) throws IllegalInputException
 	{
 		if (isEmpty(authorization.getResource()) || isEmpty(authorization.getResourceType())
 				|| isEmpty(authorization.getPrincipal()) || isEmpty(authorization.getPrincipalType())
-				|| isEmpty(authorization.getPermission()))
+				|| authorization.getPermission() < Authorization.PERMISSION_NONE_START
+				|| authorization.getPermission() > Authorization.PERMISSION_MAX)
 			throw new IllegalInputException();
 	}
 }

@@ -142,8 +142,8 @@ String authorizationSourceType 固定授权源类型，允许为null
 	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.resource' />", "resourceName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.principal' />", "principalName"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='authorization.resource' />"), "resourceName"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='authorization.principal' />"), "principalName"),
 		columnPermission,
 		columnEnabled,
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.createUser' />", "createUser.nameLabel")
