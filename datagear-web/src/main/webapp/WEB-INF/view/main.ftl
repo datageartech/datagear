@@ -459,6 +459,7 @@
 						"schema-operation-delete" : true,
 						"schema-operation-view" : true,
 						"schema-operation-refresh" : true,
+						"schema-operation-authorize" : true,
 						"schema-operation-reload" : true,
 						"schema-operation-sqlpad" : true,
 						"schema-operation-dataimport" : true,
@@ -474,9 +475,6 @@
 					if(!selNodes.length)
 					{
 						disableCRUD = true;
-						menuItemEnables["schema-operation-sqlpad"] = false;
-						menuItemEnables["schema-operation-dataimport"] = false;
-						menuItemEnables["schema-operation-dataexport"] = false;
 					}
 					else
 					{
@@ -495,24 +493,35 @@
 						menuItemEnables["schema-operation-edit"] = false;
 						menuItemEnables["schema-operation-delete"] = false;
 						menuItemEnables["schema-operation-view"] = false;
+						menuItemEnables["schema-operation-authorize"] = false;
+						menuItemEnables["schema-operation-sqlpad"] = false;
+						menuItemEnables["schema-operation-dataimport"] = false;
+						menuItemEnables["schema-operation-dataexport"] = false;
 					}
-					
-					for(var i=0; i<selNodes.length; i++)
+					else
 					{
-						if(!po.isSchemaNode(selNodes[i]))
+						for(var i=0; i<selNodes.length; i++)
 						{
-							menuItemEnables["schema-operation-edit"] = false;
-							menuItemEnables["schema-operation-delete"] = false;
-							break;
+							if(!po.isSchemaNode(selNodes[i]))
+							{
+								menuItemEnables["schema-operation-edit"] = false;
+								menuItemEnables["schema-operation-delete"] = false;
+								break;
+							}
+							
+							var schema = selNodes[i].original;
+							
+							if(!po.canEdit(schema))
+								menuItemEnables["schema-operation-edit"] = false;
+							
+							if(!po.canDelete(schema))
+								menuItemEnables["schema-operation-delete"] = false;
+							
+							if(!po.canDelete(schema))
+								menuItemEnables["schema-operation-authorize"] = false;
+							else if(!po.isAdmin && (po.isAnonymous || po.userId != schema.createUser.id))
+								menuItemEnables["schema-operation-authorize"] = false;
 						}
-						
-						var schema = selNodes[i].original;
-						
-						if(!po.canEdit(schema))
-							menuItemEnables["schema-operation-edit"] = false;
-						
-						if(!po.canDelete(schema))
-							menuItemEnables["schema-operation-delete"] = false;
 					}
 					
 					//如果有选中，且全都是数据库或者全都是表，则启用刷新按钮
@@ -685,6 +694,25 @@
 								jstree.refresh_node(selNodes[i]);
 						}
 					}
+				}
+				else if($item.hasClass("schema-operation-authorize"))
+				{
+					if(selNodes.length != 1)
+					{
+						$.tipInfo("<@spring.message code='pleaseSelectOnlyOneRow' />");
+						return;
+					}
+					
+					var selNode = selNodes[0];
+					
+					if(!po.isSchemaNode(selNode))
+						return;
+					
+					var schemaId = selNode.original.id;
+					
+					var options = {};
+					$.setGridPageHeightOption(options);
+					po.open(contextPath+"/authorization/query?${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}="+encodeURIComponent(schemaId), options);
 				}
 				else if($item.hasClass("schema-operation-reload"))
 				{
@@ -1102,6 +1130,7 @@
 								<li class="schema-operation-delete"><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
 								<li class="schema-operation-view"><a href="javascript:void(0);"><@spring.message code='view' /></a></li>
 								<li class="schema-operation-refresh" title="<@spring.message code='main.schemaOperationMenuRefreshComment' />"><a href="javascript:void(0);"><@spring.message code='refresh' /></a></li>
+								<li class="schema-operation-authorize"><a href="javascript:void(0);"><@spring.message code='authorize' /></a></li>
 								<li class="ui-widget-header"></li>
 								<li class="schema-operation-reload" title="<@spring.message code='main.schemaOperationMenuReloadComment' />"><a href="javascript:void(0);"><@spring.message code='reload' /></a></li>
 								<li class="ui-widget-header"></li>

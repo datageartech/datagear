@@ -29,7 +29,7 @@ readonly 是否只读操作，允许为null
 			<input type="hidden" name="id" value="${(authorization.id)!''?html}" />
 			<input type="hidden" name="resource" value="${(authorization.resource)!''?html}" />
 			<input type="hidden" name="principal" value="${(authorization.principal)!''?html}" />
-			<div class="form-item">
+			<div class="form-item form-item-resourceType">
 				<div class="form-item-label">
 					<label><@spring.message code='authorization.resourceType' /></label>
 				</div>
@@ -369,6 +369,19 @@ readonly 是否只读操作，允许为null
 	po.element("input[name='enabled'][value='${enabled}']").attr("checked", "checked");
 	po.element("input[name='enabled']").checkboxradio({icon:false});
 	po.element(".enabled-radios").controlgroup();
+	
+	<#if appointResource??>
+		po.element("input[name='resourceType'][value='${Authorization.RESOURCE_TYPE_DATA_SOURCE}']").attr("checked", "checked").change();
+		po.element("input[name='resource']").val("${appointResource}");
+		po.element(".form-item-resourceType").hide();
+		po.element(".form-item-resource-name-entity").hide();
+	</#if>
+	
+	<#--编辑时禁设资源类型，因为管理员也可能编辑普通用户设置的授权，而它们不允许是通配符-->
+	<#if formAction == 'saveEdit'>
+	po.element("input[name='resourceType'][value!='${resourceType}']").attr("disabled", "disabled");
+	po.element("input[name='resourceType']").checkboxradio("refresh");
+	</#if>
 })
 (${pageId});
 </script>

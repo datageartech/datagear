@@ -41,6 +41,16 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	@Override
+	public List<Authorization> queryForAppointResource(User user, String appointResource, Query query)
+	{
+		Map<String, Object> params = buildParamMap();
+		addDataPermissionParameters(params, user);
+		params.put("appointResource", appointResource);
+
+		return query(query, params);
+	}
+
+	@Override
 	protected Authorization getById(String id, Map<String, Object> params)
 	{
 		setAuthorizationQueryLabel(params);

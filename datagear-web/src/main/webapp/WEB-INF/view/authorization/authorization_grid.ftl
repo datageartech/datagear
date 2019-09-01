@@ -45,7 +45,7 @@ String authorizationSourceType 固定授权源类型，允许为null
 <#include "../include/page_obj_searchform_js.ftl">
 <#include "../include/page_obj_grid.ftl">
 <#include "../include/page_obj_data_permission.ftl">
-<#include "../include/page_obj_data_permission__ds_table.ftl">
+<#include "../include/page_obj_data_permission_ds_table.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -58,8 +58,16 @@ String authorizationSourceType 固定授权源类型，允许为null
 	
 	po.element("input[name=addButton]").click(function()
 	{
+		var data =
+		{
+			<#if appointResource??>
+			"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}" : "${appointResource}"
+			</#if>
+		};
+		
 		po.open(po.url("add"),
 		{
+			data : data,
 			pageParam :
 			{
 				afterSave : function()
@@ -74,7 +82,13 @@ String authorizationSourceType 固定授权源类型，允许为null
 	{
 		po.executeOnSelect(function(row)
 		{
-			var data = {"id" : row.id};
+			var data =
+			{
+				<#if appointResource??>
+				"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}" : "${appointResource?js_string}",
+				</#if>
+				"id" : row.id
+			};
 			
 			po.open(po.url("edit"),
 			{
@@ -94,7 +108,13 @@ String authorizationSourceType 固定授权源类型，允许为null
 	{
 		po.executeOnSelect(function(row)
 		{
-			var data = {"id" : row.id};
+			var data =
+			{
+				<#if appointResource??>
+				"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}" : "${appointResource?js_string}",
+				</#if>
+				"id" : row.id
+			};
 			
 			po.open(po.url("view"),
 			{
@@ -148,7 +168,12 @@ String authorizationSourceType 固定授权源类型，允许为null
 		columnEnabled,
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.createUser' />", "createUser.nameLabel")
 	];
-	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("queryData"));
+	
+	var url = po.url("queryData");
+	<#if appointResource??>
+	url = po.url("queryData?${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}="+encodeURIComponent("${appointResource?js_string}"));
+	</#if>
+	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, url);
 	po.initDataTable(tableSettings);
 })
 (${pageId});

@@ -64,6 +64,11 @@
 			(<include refid="queryViewDataPermission" />) T
 		WHERE
 			<include refid="queryCondition" />
+			
+			<if test="appointResource != null">
+			AND T.${_iq_}resource${_iq_} = #{appointResource} AND T.${_iq_}resourceType${_iq_} NOT LIKE '%_PATTERN'
+			</if>
+			
 		<include refid="common.queryOrder" />
 	</select>
 	

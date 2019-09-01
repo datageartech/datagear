@@ -229,6 +229,16 @@ public class Authorization extends AbstractStringIdEntity
 	}
 
 	/**
+	 * 是否是模式匹配资源类型。
+	 * 
+	 * @return
+	 */
+	public boolean isResourceTypePattern()
+	{
+		return this.resourceType != null && this.resourceType.endsWith(PATTERN_RESOURCE_TYPE_SUFFIX);
+	}
+
+	/**
 	 * 是否无权限。
 	 * 
 	 * @param permission

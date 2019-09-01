@@ -35,10 +35,13 @@
 		<!-- 用户管理 -->
 		<intercept-url pattern="/user/personalSet" access="ROLE_USER" />
 		<intercept-url pattern="/user/savePersonalSet" access="ROLE_USER" />
+		<intercept-url pattern="/user/select" access="ROLE_USER" />
+		<intercept-url pattern="/user/queryData" access="ROLE_USER" />
 		<intercept-url pattern="/user/*" access="ROLE_ADMIN" />
 		
 		<!-- 角色管理 -->
 		<intercept-url pattern="/role/select" access="ROLE_USER" />
+		<intercept-url pattern="/role/queryData" access="ROLE_USER" />
 		<intercept-url pattern="/role/**" access="ROLE_ADMIN" />
 		
 		<!-- 权限管理 -->

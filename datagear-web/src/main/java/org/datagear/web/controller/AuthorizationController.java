@@ -35,6 +35,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/authorization")
 public class AuthorizationController extends AbstractController
 {
+	/**
+	 * 指定授权资源参数。
+	 */
+	public static final String PARAM_APPOINT_RESOURCE = "appointResource";
+
 	@Autowired
 	private AuthorizationService authorizationService;
 
@@ -60,8 +65,12 @@ public class AuthorizationController extends AbstractController
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
+		User user = WebUtils.getUser(request, response);
+
+		setAppoiontResourceAttributeIf(request, model);
+		model.addAttribute("user", user);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "authorization.addAuthorization");
 		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
 
@@ -77,6 +86,10 @@ public class AuthorizationController extends AbstractController
 
 		User user = WebUtils.getUser(request, response);
 
+		// 只有管理员才可以模式匹配授权
+		if (!user.isAdmin() && authorization.isResourceTypePattern())
+			throw new IllegalInputException();
+
 		authorization.setId(IDUtil.uuid());
 		authorization.setCreateUser(user);
 
@@ -89,11 +102,15 @@ public class AuthorizationController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
+		User user = WebUtils.getUser(request, response);
+
 		setAuthorizationQueryLabel(request);
 
 		Authorization authorization = this.authorizationService.getById(id);
 
+		setAppoiontResourceAttributeIf(request, model);
 		model.addAttribute("authorization", authorization);
+		model.addAttribute("user", user);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "authorization.editAuthorization");
 		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
 
@@ -109,7 +126,13 @@ public class AuthorizationController extends AbstractController
 			throw new IllegalInputException();
 		checkInput(authorization);
 
-		this.authorizationService.update(WebUtils.getUser(request, response), authorization);
+		User user = WebUtils.getUser(request, response);
+
+		// 只有管理员才可以模式匹配授权
+		if (!user.isAdmin() && authorization.isResourceTypePattern())
+			throw new IllegalInputException();
+
+		this.authorizationService.update(user, authorization);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -125,6 +148,7 @@ public class AuthorizationController extends AbstractController
 		if (authorization == null)
 			throw new RecordNotFoundException();
 
+		setAppoiontResourceAttributeIf(request, model);
 		model.addAttribute("authorization", authorization);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "authorization.viewAuthorization");
 		model.addAttribute(KEY_READONLY, true);
@@ -145,6 +169,7 @@ public class AuthorizationController extends AbstractController
 	@RequestMapping(value = "/query")
 	public String query(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
+		setAppoiontResourceAttributeIf(request, model);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "authorization.manageAuthorization");
 
 		return "/authorization/authorization_grid";
@@ -154,14 +179,37 @@ public class AuthorizationController extends AbstractController
 	@ResponseBody
 	public List<Authorization> queryData(HttpServletRequest request, HttpServletResponse response) throws Exception
 	{
+		User user = WebUtils.getUser(request, response);
+
+		String appointResource = getAppoiontResource(request);
+
 		PagingQuery pagingQuery = getPagingQuery(request, null);
 
 		setAuthorizationQueryLabel(request);
 
-		List<Authorization> authorizations = this.authorizationService.query(WebUtils.getUser(request, response),
-				pagingQuery);
+		List<Authorization> authorizations = null;
+
+		if (!isEmpty(appointResource))
+			authorizations = this.authorizationService.queryForAppointResource(user, appointResource, pagingQuery);
+		else
+			authorizations = this.authorizationService.query(user, pagingQuery);
 
 		return authorizations;
+	}
+
+	protected void setAppoiontResourceAttributeIf(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		String ap = getAppoiontResource(request);
+
+		if (ap != null)
+			model.addAttribute("appointResource", ap);
+
+		// TODO 校验用户是否对此资源有授权的权限
+	}
+
+	protected String getAppoiontResource(HttpServletRequest request)
+	{
+		return request.getParameter(PARAM_APPOINT_RESOURCE);
 	}
 
 	protected void setAuthorizationQueryLabel(HttpServletRequest request)
