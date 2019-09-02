@@ -7,12 +7,11 @@
 <#include "include/page_js_obj.ftl" >
 <#include "include/page_obj_tabs.ftl" >
 <#include "include/page_obj_data_permission.ftl" >
+<#include "include/page_obj_data_permission_ds_table.ftl" >
 <script type="text/javascript">
 (function(po)
 {
-	po.userId = "${currentUser.id?js_string}";
-	po.isAnonymous = ${currentUser.anonymous?c};
-	po.isAdmin = ${currentUser.admin?c};
+	po.currentUser = <@writeJson var=currentUser />;
 	
 	//将在document.ready中初始化
 	po.mainTabs = null;
@@ -147,7 +146,7 @@
 		
 		if(schema.createUser)
 		{
-			if(po.userId == schema.createUser.id)
+			if(po.currentUser.id == schema.createUser.id)
 			{
 				if(tempSchema)
 					schema.text += " <span class='ui-icon ui-icon-notice' title='<@spring.message code='main.tempSchema' />'></span>";
@@ -469,12 +468,12 @@
 					var jstree = po.element(".schema-panel-content").jstree(true);
 					var selNodes = jstree.get_selected(true);
 					
-					var disableCRUD = false;
+					var disableSchemaOperation = false;
 					
 					//未选中数据库，则禁用CRUD按钮
 					if(!selNodes.length)
 					{
-						disableCRUD = true;
+						disableSchemaOperation = true;
 					}
 					else
 					{
@@ -482,13 +481,13 @@
 						{
 							if(!po.isSchemaNode(selNodes[i]))
 							{
-								disableCRUD = true;
+								disableSchemaOperation = true;
 								break;
 							}
 						}
 					}
 					
-					if(disableCRUD)
+					if(disableSchemaOperation)
 					{
 						menuItemEnables["schema-operation-edit"] = false;
 						menuItemEnables["schema-operation-delete"] = false;
@@ -502,24 +501,15 @@
 					{
 						for(var i=0; i<selNodes.length; i++)
 						{
-							if(!po.isSchemaNode(selNodes[i]))
-							{
-								menuItemEnables["schema-operation-edit"] = false;
-								menuItemEnables["schema-operation-delete"] = false;
-								break;
-							}
-							
 							var schema = selNodes[i].original;
 							
-							if(!po.canEdit(schema))
+							if(!po.canEditSchema(schema, po.currentUser))
 								menuItemEnables["schema-operation-edit"] = false;
 							
-							if(!po.canDelete(schema))
+							if(!po.canDeleteSchema(schema, po.currentUser))
 								menuItemEnables["schema-operation-delete"] = false;
 							
-							if(!po.canDelete(schema))
-								menuItemEnables["schema-operation-authorize"] = false;
-							else if(!po.isAdmin && (po.isAnonymous || po.userId != schema.createUser.id))
+							if(!po.canAuthorizeSchema(schema, po.currentUser))
 								menuItemEnables["schema-operation-authorize"] = false;
 						}
 					}

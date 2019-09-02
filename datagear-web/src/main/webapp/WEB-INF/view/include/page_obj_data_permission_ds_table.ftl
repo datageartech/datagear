@@ -2,55 +2,70 @@
 数据源表权限JS片段。
 
 依赖：
-page_js_obj.jsp
+page_js_obj.ftl
+page_obj_data_permission.ftl
 -->
-<#assign __podpSchema=statics['org.datagear.management.domain.Schema']>
 <script type="text/javascript">
 (function(po)
 {
 	po.canReadTableData = function(schemaOrPermission)
 	{
-		if(schemaOrPermission == null)
-			return false;
-		
-		if(schemaOrPermission.dataPermission != undefined)
-			schemaOrPermission = schemaOrPermission.dataPermission;
-		
-		return ${__podpSchema.PERMISSION_TABLE_DATA_READ} <= schemaOrPermission;
+		return po.canRead(schemaOrPermission);
 	};
 	
 	po.canEditTableData = function(schemaOrPermission)
 	{
-		if(schemaOrPermission == null)
-			return false;
-		
-		if(schemaOrPermission.dataPermission != undefined)
-			schemaOrPermission = schemaOrPermission.dataPermission;
-		
-		return ${__podpSchema.PERMISSION_TABLE_DATA_EDIT} <= schemaOrPermission;
+		return po.canEdit(schemaOrPermission);
 	};
 	
 	po.canDeleteTableData = function(schemaOrPermission)
 	{
-		if(schemaOrPermission == null)
-			return false;
-		
-		if(schemaOrPermission.dataPermission != undefined)
-			schemaOrPermission = schemaOrPermission.dataPermission;
-		
-		return ${__podpSchema.PERMISSION_TABLE_DATA_DELETE} <= schemaOrPermission;
+		return po.canDelete(schemaOrPermission);
 	};
 	
-	po.toTableDataPermissionLabel = function(schemaOrPermission)
+	po.canEditSchema = function(schema, user)
 	{
-		if(po.canDeleteTableData(schemaOrPermission))
-			return "<@spring.message code='authorization.permission.DELETE' />";
-		else if(po.canEditTableData(schemaOrPermission))
-			return "<@spring.message code='authorization.permission.EDIT' />";
-		else if(po.canReadTableData(schemaOrPermission))
-			return "<@spring.message code='authorization.permission.READ' />";
-		else
-			return "<@spring.message code='authorization.permission.NONE' />";
+		if(user.admin)
+			return true;
+		
+		if(!po.canEdit(schema))
+			return false;
+		
+		if(!schema.createUser)
+			return false;
+		
+		return schema.createUser.id = user.id;
+	};
+
+	po.canDeleteSchema = function(schema, user)
+	{
+		if(user.admin)
+			return true;
+		
+		if(!po.canEdit(schema))
+			return false;
+		
+		if(!schema.createUser)
+			return false;
+		
+		return schema.createUser.id = user.id;
+	};
+	
+	po.canAuthorizeSchema = function(schema, user)
+	{
+		if(user.admin)
+			return true;
+		
+		if(user.anonymous)
+			return false;
+		
+		if(!po.canDelete(schema))
+			return false;
+		
+		if(!schema.createUser)
+			return false;
+		
+		return schema.createUser.id == user.id;
 	};
 })
 (${pageId});

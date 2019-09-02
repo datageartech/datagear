@@ -20,23 +20,6 @@ public class Schema extends AbstractStringIdEntity
 {
 	private static final long serialVersionUID = 1L;
 
-	/*------------------------------------------------------*/
-	/*
-	 * 从业务角度看，对数据源的授权不应是对其记录本身，而是它包含表中的数据。
-	 * 所以，这里扩展了Authorization.PERMISSION_READ_START权限，授予下面这些权限，都是对数据源记录本身的读权限。
-	 */
-
-	/** 数据源内的表数据权限：读取 */
-	public static final int PERMISSION_TABLE_DATA_READ = Authorization.PERMISSION_READ_START;
-
-	/** 数据源内的表数据权限：编辑 */
-	public static final int PERMISSION_TABLE_DATA_EDIT = Authorization.PERMISSION_READ_START + 4;
-
-	/** 数据源内的表数据权限：删除 */
-	public static final int PERMISSION_TABLE_DATA_DELETE = Authorization.PERMISSION_READ_START + 8;
-
-	/*------------------------------------------------------*/
-
 	/** 标题 */
 	private String title;
 
@@ -189,6 +172,71 @@ public class Schema extends AbstractStringIdEntity
 	public void clearPassword()
 	{
 		this.password = null;
+	}
+
+	public boolean canReadTableData()
+	{
+		return Authorization.canRead(this.dataPermission);
+	}
+
+	public boolean canEditTableData()
+	{
+		return Authorization.canEdit(this.dataPermission);
+	}
+
+	public boolean canDeleteTableData()
+	{
+		return Authorization.canDelete(this.dataPermission);
+	}
+
+	public boolean canRead()
+	{
+		return Authorization.canRead(this.dataPermission);
+	}
+
+	public boolean canEdit(User currentUser)
+	{
+		if (currentUser.isAdmin())
+			return true;
+
+		if (!Authorization.canEdit(this.dataPermission))
+			return false;
+
+		if (!this.hasCreateUser())
+			return false;
+
+		return currentUser.getId().equals(this.createUser.getId());
+	}
+
+	public boolean canDelete(User currentUser)
+	{
+		if (currentUser.isAdmin())
+			return true;
+
+		if (!Authorization.canRead(this.dataPermission))
+			return false;
+
+		if (!this.hasCreateUser())
+			return false;
+
+		return currentUser.getId().equals(this.createUser.getId());
+	}
+
+	public boolean canAuthorize(User currentUser)
+	{
+		if (currentUser.isAdmin())
+			return true;
+
+		if (currentUser.isAnonymous())
+			return false;
+
+		if (!Authorization.canDelete(this.dataPermission))
+			return false;
+
+		if (!this.hasCreateUser())
+			return false;
+
+		return currentUser.getId().equals(this.createUser.getId());
 	}
 
 	@Override

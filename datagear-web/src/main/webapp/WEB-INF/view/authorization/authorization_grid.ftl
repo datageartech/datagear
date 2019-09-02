@@ -45,7 +45,6 @@ String authorizationSourceType 固定授权源类型，允许为null
 <#include "../include/page_obj_searchform_js.ftl">
 <#include "../include/page_obj_grid.ftl">
 <#include "../include/page_obj_data_permission.ftl">
-<#include "../include/page_obj_data_permission_ds_table.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -157,7 +156,7 @@ String authorizationSourceType 固定授权源类型，允许为null
 	var columnPermission = $.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.permission' />", "permission");
 	columnPermission.render = function(data, type, row, meta)
 	{
-		return po.toTableDataPermissionLabel(data);
+		return po.toPermissionLabel(data);
 	};
 	
 	var tableColumns = [
