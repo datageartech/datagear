@@ -503,10 +503,13 @@
 						{
 							var schema = selNodes[i].original;
 							
-							if(!po.canEditSchema(schema, po.currentUser))
+							if(!po.canEdit(schema.dataPermission))
+							{
 								menuItemEnables["schema-operation-edit"] = false;
+								menuItemEnables["schema-operation-dataimport"] = false;
+							}
 							
-							if(!po.canDeleteSchema(schema, po.currentUser))
+							if(!po.canDelete(schema.dataPermission))
 								menuItemEnables["schema-operation-delete"] = false;
 							
 							if(!po.canAuthorizeSchema(schema, po.currentUser))

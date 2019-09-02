@@ -3,52 +3,42 @@
 
 依赖：
 page_js_obj.ftl
-page_obj_data_permission.ftl
 -->
+<#assign __podpSchema=statics['org.datagear.management.domain.Schema']>
 <script type="text/javascript">
 (function(po)
 {
 	po.canReadTableData = function(schemaOrPermission)
 	{
-		return po.canRead(schemaOrPermission);
+		if(schemaOrPermission == null)
+			return false;
+		
+		if(schemaOrPermission.dataPermission != undefined)
+			schemaOrPermission = schemaOrPermission.dataPermission;
+		
+		return ${__podpSchema.PERMISSION_TABLE_DATA_READ} <= schemaOrPermission;
 	};
 	
 	po.canEditTableData = function(schemaOrPermission)
 	{
-		return po.canEdit(schemaOrPermission);
+		if(schemaOrPermission == null)
+			return false;
+		
+		if(schemaOrPermission.dataPermission != undefined)
+			schemaOrPermission = schemaOrPermission.dataPermission;
+		
+		return ${__podpSchema.PERMISSION_TABLE_DATA_EDIT} <= schemaOrPermission;
 	};
 	
 	po.canDeleteTableData = function(schemaOrPermission)
 	{
-		return po.canDelete(schemaOrPermission);
-	};
-	
-	po.canEditSchema = function(schema, user)
-	{
-		if(user.admin)
-			return true;
-		
-		if(!po.canEdit(schema))
+		if(schemaOrPermission == null)
 			return false;
 		
-		if(!schema.createUser)
-			return false;
+		if(schemaOrPermission.dataPermission != undefined)
+			schemaOrPermission = schemaOrPermission.dataPermission;
 		
-		return schema.createUser.id = user.id;
-	};
-
-	po.canDeleteSchema = function(schema, user)
-	{
-		if(user.admin)
-			return true;
-		
-		if(!po.canEdit(schema))
-			return false;
-		
-		if(!schema.createUser)
-			return false;
-		
-		return schema.createUser.id = user.id;
+		return ${__podpSchema.PERMISSION_TABLE_DATA_DELETE} <= schemaOrPermission;
 	};
 	
 	po.canAuthorizeSchema = function(schema, user)
@@ -66,6 +56,18 @@ page_obj_data_permission.ftl
 			return false;
 		
 		return schema.createUser.id == user.id;
+	};
+	
+	po.toTableDataPermissionLabel = function(schemaOrPermission)
+	{
+		if(po.canDeleteTableData(schemaOrPermission))
+			return "<@spring.message code='authorization.permission.DELETE' />";
+		else if(po.canEditTableData(schemaOrPermission))
+			return "<@spring.message code='authorization.permission.EDIT' />";
+		else if(po.canReadTableData(schemaOrPermission))
+			return "<@spring.message code='authorization.permission.READ' />";
+		else
+			return "<@spring.message code='authorization.permission.NONE' />";
 	};
 })
 (${pageId});

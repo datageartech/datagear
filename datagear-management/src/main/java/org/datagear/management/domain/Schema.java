@@ -20,6 +20,24 @@ public class Schema extends AbstractStringIdEntity
 {
 	private static final long serialVersionUID = 1L;
 
+	/*------------------------------------------------------*/
+	/*
+	 * 从业务角度看，对数据源的授权不应是对其记录本身，而是它包含表中的数据。
+	 * 所以，这里扩展了Authorization.PERMISSION_READ_START权限， 授权时，仅支持对数据源授予下面这些权限。
+	 * 这样，即不会暴露数据源记录本身的编辑、删除权限，同时又能满足业务需求。
+	 */
+
+	/** 数据源内的表数据权限：读取 */
+	public static final int PERMISSION_TABLE_DATA_READ = Authorization.PERMISSION_READ_START;
+
+	/** 数据源内的表数据权限：编辑 */
+	public static final int PERMISSION_TABLE_DATA_EDIT = Authorization.PERMISSION_READ_START + 4;
+
+	/** 数据源内的表数据权限：删除 */
+	public static final int PERMISSION_TABLE_DATA_DELETE = Authorization.PERMISSION_READ_START + 8;
+
+	/*------------------------------------------------------*/
+
 	/** 标题 */
 	private String title;
 
@@ -174,55 +192,22 @@ public class Schema extends AbstractStringIdEntity
 		this.password = null;
 	}
 
-	public boolean canReadTableData()
+	public static boolean canReadTableData(int permission)
 	{
-		return Authorization.canRead(this.dataPermission);
+		return PERMISSION_TABLE_DATA_READ <= permission;
 	}
 
-	public boolean canEditTableData()
+	public static boolean canEditTableData(int permission)
 	{
-		return Authorization.canEdit(this.dataPermission);
+		return PERMISSION_TABLE_DATA_EDIT <= permission;
 	}
 
-	public boolean canDeleteTableData()
+	public static boolean canDeleteTableData(int permission)
 	{
-		return Authorization.canDelete(this.dataPermission);
+		return PERMISSION_TABLE_DATA_DELETE <= permission;
 	}
 
-	public boolean canRead()
-	{
-		return Authorization.canRead(this.dataPermission);
-	}
-
-	public boolean canEdit(User currentUser)
-	{
-		if (currentUser.isAdmin())
-			return true;
-
-		if (!Authorization.canEdit(this.dataPermission))
-			return false;
-
-		if (!this.hasCreateUser())
-			return false;
-
-		return currentUser.getId().equals(this.createUser.getId());
-	}
-
-	public boolean canDelete(User currentUser)
-	{
-		if (currentUser.isAdmin())
-			return true;
-
-		if (!Authorization.canRead(this.dataPermission))
-			return false;
-
-		if (!this.hasCreateUser())
-			return false;
-
-		return currentUser.getId().equals(this.createUser.getId());
-	}
-
-	public boolean canAuthorize(User currentUser)
+	public static boolean canAuthorize(Schema schema, User currentUser)
 	{
 		if (currentUser.isAdmin())
 			return true;
@@ -230,13 +215,13 @@ public class Schema extends AbstractStringIdEntity
 		if (currentUser.isAnonymous())
 			return false;
 
-		if (!Authorization.canDelete(this.dataPermission))
+		if (!Authorization.canDelete(schema.getDataPermission()))
 			return false;
 
-		if (!this.hasCreateUser())
+		if (!schema.hasCreateUser())
 			return false;
 
-		return currentUser.getId().equals(this.createUser.getId());
+		return currentUser.getId().equals(schema.createUser.getId());
 	}
 
 	@Override

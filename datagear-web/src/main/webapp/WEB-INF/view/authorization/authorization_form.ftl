@@ -13,7 +13,7 @@ readonly 是否只读操作，允许为null
 <#assign resourceType=((authorization.resourceType)!Authorization.RESOURCE_TYPE_DATA_SOURCE)>
 <#assign resourceTypePattern=Authorization.RESOURCE_TYPE_DATA_SOURCE + Authorization.PATTERN_RESOURCE_TYPE_SUFFIX>
 <#assign principalType=((authorization.principalType)!Authorization.PRINCIPAL_TYPE_USER)>
-<#assign permission=((authorization.permission)!Authorization.PERMISSION_READ_START)>
+<#assign permission=((authorization.permission)!Schema.PERMISSION_TABLE_DATA_READ)>
 <#assign enabled=(((authorization.enabled)!true)?string('true', 'false'))>
 <#assign isResourceTypePattern=(resourceType != Authorization.RESOURCE_TYPE_DATA_SOURCE)>
 <html>
@@ -134,12 +134,12 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item-value">
 					<div class="permission-radios">
-						<label for="${pageId}-permission_0" title="<@spring.message code='authorization.permission.DATA_SOURCE.READ.desc' />"><@spring.message code='authorization.permission.READ' /></label>
-			   			<input type="radio" id="${pageId}-permission_0" name="permission" value="${Authorization.PERMISSION_READ_START}" />
-						<label for="${pageId}-permission_1" title="<@spring.message code='authorization.permission.DATA_SOURCE.EDIT.desc' />"><@spring.message code='authorization.permission.EDIT' /></label>
-			   			<input type="radio" id="${pageId}-permission_1" name="permission" value="${Authorization.PERMISSION_EDIT_START}" />
-						<label for="${pageId}-permission_2" title="<@spring.message code='authorization.permission.DATA_SOURCE.DELETE.desc' />"><@spring.message code='authorization.permission.DELETE' /></label>
-			   			<input type="radio" id="${pageId}-permission_2" name="permission" value="${Authorization.PERMISSION_DELETE_START}" />
+						<label for="${pageId}-permission_0" title="<@spring.message code='authorization.permission.Schema.PERMISSION_TABLE_DATA_READ.desc' />"><@spring.message code='authorization.permission.READ' /></label>
+			   			<input type="radio" id="${pageId}-permission_0" name="permission" value="${Schema.PERMISSION_TABLE_DATA_READ}" />
+						<label for="${pageId}-permission_1" title="<@spring.message code='authorization.permission.Schema.PERMISSION_TABLE_DATA_EDIT.desc' />"><@spring.message code='authorization.permission.EDIT' /></label>
+			   			<input type="radio" id="${pageId}-permission_1" name="permission" value="${Schema.PERMISSION_TABLE_DATA_EDIT}" />
+						<label for="${pageId}-permission_2" title="<@spring.message code='authorization.permission.Schema.PERMISSION_TABLE_DATA_DELETE.desc' />"><@spring.message code='authorization.permission.DELETE' /></label>
+			   			<input type="radio" id="${pageId}-permission_2" name="permission" value="${Schema.PERMISSION_TABLE_DATA_DELETE}" />
 						<label for="${pageId}-permission_3"><@spring.message code='authorization.permission.NONE' /></label>
 			   			<input type="radio" id="${pageId}-permission_3" name="permission" value="${Authorization.PERMISSION_NONE_START}" />
 		   			</div>
