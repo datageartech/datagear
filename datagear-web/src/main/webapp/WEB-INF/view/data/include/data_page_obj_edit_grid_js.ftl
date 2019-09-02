@@ -170,6 +170,11 @@ data_page_obj_edit_grid_html.ftl
 	//是否在单元格选中时编辑单元格，键盘快速导航时通常不需要打开编辑单元格面板
 	po.editCellOnSelect = true;
 	
+	po.elementEditGridSwitch = function()
+	{
+		return po.element("#${pageId}-editGridSwitch");
+	};
+	
 	po.resetEditGridCache = function()
 	{
 		po.editGridOriginalRowDataMap = {};
@@ -1323,7 +1328,7 @@ data_page_obj_edit_grid_html.ftl
 		var methodName = (enable ? "enable" : "disable");
 		
 		po.element(".edit-grid-button").button(methodName);
-		po.element("#${pageId}-editGridSwitch").checkboxradio(methodName);
+		po.elementEditGridSwitch().checkboxradio(methodName);
 	};
 	
 	po.initEditGrid = function(model, ignorePropertyNames)
@@ -1333,7 +1338,7 @@ data_page_obj_edit_grid_html.ftl
 		
 		$.initButtons(po.element(".edit-grid-operation"));
 		
-		var $editGridSwitch = po.element("#${pageId}-editGridSwitch");
+		var $editGridSwitch = po.elementEditGridSwitch();
 		//XXX 某些浏览器在刷新页面后会记住选中状态(比如火狐)，这回导致页面逻辑出错，所以这里需要重置
 		$editGridSwitch.prop("checked", false);
 		$editGridSwitch.checkboxradio({icon : true}).change(function(event)

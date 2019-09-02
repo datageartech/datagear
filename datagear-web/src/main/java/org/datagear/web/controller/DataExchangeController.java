@@ -67,6 +67,7 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbinfo.TableType;
 import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
@@ -79,6 +80,7 @@ import org.datagear.web.cometd.dataexchange.CometdSubTextDataExportListener;
 import org.datagear.web.cometd.dataexchange.CometdSubTextValueDataImportListener;
 import org.datagear.web.cometd.dataexchange.DataExchangeCometdService;
 import org.datagear.web.convert.ClassDataConverter;
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -180,12 +182,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String impt(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -196,12 +201,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String imptCsv(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -245,6 +253,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getTableNames().length)
 			throw new IllegalInputException();
 
+		final User user = WebUtils.getUser(request, response);
+
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
 		final String[] numbers = dataImportForm.getNumbers();
 		final String[] dependentNumbers = dataImportForm.getDependentNumbers();
@@ -260,6 +270,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
 		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		checkEditTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
@@ -323,12 +335,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String imptSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -369,6 +384,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getDependentNumbers().length)
 			throw new IllegalInputException();
 
+		final User user = WebUtils.getUser(request, response);
+
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
 		String[] numbers = dataImportForm.getNumbers();
 		String[] dependentNumbers = dataImportForm.getDependentNumbers();
@@ -382,6 +399,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
 		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		checkEditTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
@@ -433,12 +452,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String imptExcel(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -480,6 +502,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| dataImportForm.getSubDataExchangeIds().length != dataImportForm.getTableNames().length)
 			throw new IllegalInputException();
 
+		final User user = WebUtils.getUser(request, response);
+
 		String[] subDataExchangeIds = dataImportForm.getSubDataExchangeIds();
 		final String[] numbers = dataImportForm.getNumbers();
 		final String[] dependentNumbers = dataImportForm.getDependentNumbers();
@@ -494,6 +518,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
 		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		checkEditTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
@@ -556,12 +582,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String imptDb(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -646,12 +675,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String expt(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -662,12 +694,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String exptCsv(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -698,6 +733,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
 			throw new IllegalInputException();
 
+		final User user = WebUtils.getUser(request, response);
+
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
 		String[] fileNames = exportForm.getFileNames();
@@ -710,6 +747,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
 		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		checkReadTableDataPermission(schema, user);
+
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
@@ -762,12 +802,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String exptExcel(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -797,6 +840,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
 			throw new IllegalInputException();
 
+		final User user = WebUtils.getUser(request, response);
+
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
 		String[] fileNames = exportForm.getFileNames();
@@ -809,6 +854,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
 		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		checkReadTableDataPermission(schema, user);
+
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
@@ -860,12 +908,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public String exptSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -902,6 +953,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
 			throw new IllegalInputException();
 
+		final User user = WebUtils.getUser(request, response);
+
 		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
 		String[] queries = exportForm.getQueries();
 		String[] tableNames = exportForm.getTableNames();
@@ -916,6 +969,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
 		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		checkReadTableDataPermission(schema, user);
+
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
 		String exportChannelId = getDataExchangeChannelId(dataExchangeId);

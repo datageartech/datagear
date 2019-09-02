@@ -25,6 +25,7 @@ import org.datagear.connection.ConnectionSource;
 import org.datagear.dbmodel.CachedDbModelFactory;
 import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
@@ -254,12 +255,16 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager.getQueryResultMetaInfo(cn, model);
@@ -284,6 +289,7 @@ public class DataController extends AbstractSchemaModelConnController
 			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final PagingQuery pagingQuery = getPagingQuery(request);
 
 		ReturnSchemaModelConnExecutor<PagingData<Object>> executor = new ReturnSchemaModelConnExecutor<PagingData<Object>>(
@@ -293,6 +299,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected PagingData<Object> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				LOBConversionContext.set(buildQueryLobConversionSetting());
@@ -313,12 +321,15 @@ public class DataController extends AbstractSchemaModelConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				springModel.addAttribute("titleOperationMessageKey", "add");
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
 						ModelUtils.displayName(model, WebUtils.getLocale(request)));
@@ -361,6 +372,7 @@ public class DataController extends AbstractSchemaModelConnController
 	protected ResponseEntity<OperationMessage> saveAddSingle(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, String schemaId, String tableName) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 
 		Object data = new ReturnSchemaModelConnExecutor<Object>(request, response, springModel, schemaId, tableName,
@@ -370,6 +382,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -402,6 +416,7 @@ public class DataController extends AbstractSchemaModelConnController
 			org.springframework.ui.Model springModel, String schemaId, String tableName, int batchCount,
 			BatchHandleErrorMode batchHandleErrorMode) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 
 		ResponseEntity<OperationMessage> batchResponseEntity = new BatchReturnExecutor(request, response, springModel,
@@ -412,6 +427,8 @@ public class DataController extends AbstractSchemaModelConnController
 					org.springframework.ui.Model springModel, Schema schema, Model model, Connection cn,
 					Dialect dialect, String table, ExpressionEvaluationContext context) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Object data = modelDataConverter.convert(dataParam, model);
 				persistenceManager.insert(cn, dialect, table, model, data, context);
 			}
@@ -425,6 +442,7 @@ public class DataController extends AbstractSchemaModelConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamObj(request, "data");
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
@@ -434,6 +452,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -473,6 +493,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object originalDataParam = getParamObj(request, "originalData");
 		final Object dataParam = getParamMap(request, "data");
 
@@ -483,6 +504,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object originalData = modelDataConverter.convert(originalDataParam, model);
@@ -511,6 +534,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamObj(request, "data");
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(
@@ -520,6 +544,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object[] datas = modelDataConverter.convertToArray(dataParam, model);
@@ -544,6 +570,7 @@ public class DataController extends AbstractSchemaModelConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamObj(request, "data");
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
@@ -553,6 +580,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -601,6 +630,7 @@ public class DataController extends AbstractSchemaModelConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object updatesParam = getParamMap(request, "updates");
 		final Object updatePropertyNamessParam = getParamMap(request, "updatePropertyNamess");
 		final Object updatePropertyValuessParam = getParamMap(request, "updatePropertyValuess");
@@ -620,6 +650,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object[] updates = modelDataConverter.convertToArray(updatesParam, model);
@@ -630,6 +662,9 @@ public class DataController extends AbstractSchemaModelConnController
 				int expectedUpdateCount = (updates == null ? 0 : updates.length);
 				int expectedAddCount = (adds == null ? 0 : adds.length);
 				int expectedDeleteCount = (deletes == null ? 0 : deletes.length);
+
+				if (expectedDeleteCount > 0)
+					checkDeleteTableDataPermission(schema, user);
 
 				int acutalUpdateCount = 0, actualAddCount = 0, actualDeleteCount = 0;
 
@@ -695,6 +730,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
@@ -705,6 +741,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -744,6 +782,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final PagingQuery pagingQuery = getPagingQuery(request);
 
@@ -754,6 +793,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected PagingData<Object> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -779,6 +820,7 @@ public class DataController extends AbstractSchemaModelConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object datasParam = getParamMap(request, "datas");
 		Object propertyNamesParam = getParamMap(request, "propertyNamess");
 		final String[][] propertyNamess = getClassDataConverter().convertToArray(propertyNamesParam, String[].class);
@@ -790,6 +832,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected Object[][] execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object[] datas = modelDataConverter.convertToArray(datasParam, model);
@@ -819,6 +863,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPathParam)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final PropertyPath propertyPath = PropertyPath.valueOf(propertyPathParam);
 		final Object propertyValuesParam = getParamMap(request, "propertyValues");
@@ -834,6 +879,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected Object[][] execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -867,6 +914,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
@@ -877,6 +925,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Object data = modelDataConverter.convert(dataParam, model);
 
 				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
@@ -900,6 +950,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final Object propertyValueParam = getParamMap(request, "propertyValue");
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
@@ -911,6 +962,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Object data = modelDataConverter.convert(dataParam, model);
 
 				PropertyPathInfo propertyPathInfo = null;
@@ -969,6 +1022,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueParam = getParamMap(request, "propertyValue");
 
@@ -979,6 +1033,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1011,6 +1067,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final Object propertyValueParam = getParamMap(request, "propertyValue");
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
@@ -1022,6 +1079,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Object data = modelDataConverter.convert(dataParam, model);
 
 				Object propertyValue = null;
@@ -1079,6 +1138,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
@@ -1089,6 +1149,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1125,6 +1187,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 
 		final PagingQuery pagingQuery = getPagingQuery(request);
@@ -1136,6 +1199,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected PagingData<Object> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1162,6 +1227,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
@@ -1172,6 +1238,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1208,6 +1276,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 
@@ -1217,6 +1286,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Object data = modelDataConverter.convert(dataParam, model);
 
 				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
@@ -1256,6 +1327,7 @@ public class DataController extends AbstractSchemaModelConnController
 			HttpServletResponse response, org.springframework.ui.Model springModel, String schemaId, String tableName,
 			final String propertyPath) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propertyValue");
 
@@ -1266,6 +1338,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected Object execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1292,6 +1366,7 @@ public class DataController extends AbstractSchemaModelConnController
 			HttpServletResponse response, org.springframework.ui.Model springModel, String schemaId, String tableName,
 			final String propertyPath, int batchCount, BatchHandleErrorMode batchHandleErrorMode) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propertyValue");
 
@@ -1303,6 +1378,8 @@ public class DataController extends AbstractSchemaModelConnController
 					org.springframework.ui.Model springModel, Schema schema, Model model, Connection cn,
 					Dialect dialect, String table, ExpressionEvaluationContext context) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Object data = modelDataConverter.convert(dataParam, model);
 				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
@@ -1325,6 +1402,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
 			@RequestParam("propertyPath") final String propertyPath) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementsParam = getParamMap(request, "propValueElements");
 
@@ -1335,6 +1413,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected Integer execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1362,6 +1442,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
@@ -1372,6 +1453,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1418,6 +1501,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementParam = getParamMap(request, "propertyValue");
 
@@ -1428,6 +1512,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1462,6 +1548,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final Object propValueElementsParam = getParamMap(request, "propValueElements");
 
@@ -1472,6 +1559,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkDeleteTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1516,6 +1605,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
 			@RequestParam("propertyPath") final String propertyPathParam) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final PropertyPath propertyPath = PropertyPath.valueOf(propertyPathParam);
 
@@ -1538,6 +1628,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkEditTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1555,6 +1647,9 @@ public class DataController extends AbstractSchemaModelConnController
 				int expectedUpdateCount = 0;
 				int expectedAddCount = (adds == null ? 0 : adds.length);
 				int expectedDeleteCount = (deletes == null ? 0 : deletes.length);
+
+				if (expectedDeleteCount > 0)
+					checkDeleteTableDataPermission(schema, user);
 
 				if (updates instanceof Object[])
 					expectedUpdateCount = ((Object[]) updates).length;
@@ -1630,6 +1725,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
@@ -1640,6 +1736,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);
@@ -1679,6 +1777,7 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 
 		Object[] propValueInfo = new ReturnSchemaModelConnExecutor<Object[]>(request, response, springModel, schemaId,
@@ -1688,6 +1787,8 @@ public class DataController extends AbstractSchemaModelConnController
 			protected Object[] execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				Connection cn = getConnection();
 
 				Object data = modelDataConverter.convert(dataParam, model);

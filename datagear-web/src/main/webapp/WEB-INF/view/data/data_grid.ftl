@@ -71,6 +71,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 <#include "include/data_page_obj_grid.ftl">
 <#if !readonly>
 <#include "include/data_page_obj_edit_grid_js.ftl">
+<#include "../include/page_obj_data_permission_ds_table.ftl">
 </#if>
 <script type="text/javascript">
 (function(po)
@@ -82,6 +83,8 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 	po.onModel(function(model)
 	{
 		<#if !readonly>
+		if(po.canEditTableData(${schema.dataPermission}))
+		{
 			po.element("input[name=addButton]").click(function()
 			{
 				po.open(po.url("", "add", "batchSet=true"), { pinTitleButton : true });
@@ -100,22 +103,15 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 					});
 				});
 			});
-		</#if>
-
-		po.element("input[name=viewButton]").click(function()
+		}
+		else
 		{
-			po.executeOnSelect(function(row)
-			{
-				var data = {"data" : row};
-				
-				po.open(po.url("view"),
-				{
-					data : data
-				});
-			});
-		});
+			po.element("input[name=addButton]").button("disable");
+			po.element("input[name=editButton]").button("disable");
+		}
 		
-		<#if !readonly>
+		if(po.canEditTableData(${schema.dataPermission}))
+		{
 			po.element("input[name=deleteButton]").click(function()
 			{
 				po.executeOnSelects(function(rows)
@@ -138,7 +134,32 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 					});
 				});
 			});
+		}
+		else
+		{
+			po.element("input[name=deleteButton]").button("disable");
+		}
 		</#if>
+		
+		if(po.canReadTableData(${schema.dataPermission}))
+		{
+			po.element("input[name=viewButton]").click(function()
+			{
+				po.executeOnSelect(function(row)
+				{
+					var data = {"data" : row};
+					
+					po.open(po.url("view"),
+					{
+						data : data
+					});
+				});
+			});
+		}
+		else
+		{
+			po.element("input[name=viewButton]").button("disable");
+		}
 		
 		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(po.conditionSource);
 		po.initConditionPanel();
@@ -147,7 +168,10 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 		po.bindResizeDataTable();
 		
 		<#if !readonly>
-		po.initEditGrid(model);
+		if(po.canEditTableData(${schema.dataPermission}))
+			po.initEditGrid(model);
+		else
+			po.elementEditGridSwitch().checkboxradio().checkboxradio("disable");
 		</#if>
 	});
 })

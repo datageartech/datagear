@@ -25,6 +25,7 @@ import org.datagear.dbmodel.DatabaseModelResolver;
 import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
@@ -133,12 +134,15 @@ public class SqlpadController extends AbstractSchemaConnController
 	public String index(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -164,7 +168,11 @@ public class SqlpadController extends AbstractSchemaConnController
 			@RequestParam(value = "overTimeThreashold", required = false) Integer overTimeThreashold,
 			@RequestParam(value = "resultsetFetchSize", required = false) Integer resultsetFetchSize) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		Schema schema = getSchemaNotNull(request, response, schemaId);
+
+		checkReadTableDataPermission(schema, user);
 
 		SqlScriptParser sqlScriptParser = new SqlScriptParser(new StringReader(sql));
 		if (sqlStartRow != null)
@@ -189,6 +197,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			resultsetFetchSize = DEFAULT_SQL_RESULTSET_FETCH_SIZE;
 
 		List<SqlStatement> sqlStatements = sqlScriptParser.parseAll();
+
+		// TODO 处理SQL语句执行权限
 
 		this.sqlpadExecutionService.submit(sqlpadId, schema, sqlStatements, commitMode, exceptionHandleMode,
 				overTimeThreashold, resultsetFetchSize, WebUtils.getLocale(request));
@@ -216,6 +226,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			@RequestParam(value = "fetchSize", required = false) Integer fetchSize,
 			@RequestParam(value = "returnModel", required = false) Boolean returnModel) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		if (startRow == null)
 			startRow = 1;
 		if (fetchSize == null)
@@ -238,6 +250,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			protected ModelSqlResult execute(HttpServletRequest request, HttpServletResponse response,
 					Model springModel, Schema schema) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				ModelSqlResult modelSqlResult = modelSqlSelectService.select(getConnection(), sql, startRowFinal,
 						fetchSizeFinal, databaseModelResolver);
 
@@ -294,6 +308,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			@RequestParam("sqlpadId") String sqlpadId,
 			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		TableInfo[] tableInfos = new ReturnSchemaConnExecutor<TableInfo[]>(request, response, springModel, schemaId,
 				true)
 		{
@@ -301,6 +317,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			protected TableInfo[] execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				return getDatabaseInfoResolver().getTableInfos(getConnection());
 			}
 		}.execute();
@@ -323,6 +341,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("table") final String table,
 			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		ColumnInfo[] columnInfos = new ReturnSchemaConnExecutor<ColumnInfo[]>(request, response, springModel, schemaId,
 				true)
 		{
@@ -330,6 +350,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			protected ColumnInfo[] execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
+				checkReadTableDataPermission(schema, user);
+
 				return getDatabaseInfoResolver().getColumnInfos(getConnection(), table);
 			}
 		}.execute();

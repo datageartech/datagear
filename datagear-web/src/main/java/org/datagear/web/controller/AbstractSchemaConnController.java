@@ -19,9 +19,12 @@ import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverEntity;
 import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.User;
+import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
 import org.datagear.util.JdbcUtil;
 import org.datagear.web.convert.ClassDataConverter;
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 
@@ -84,7 +87,9 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	protected Schema getSchemaNotNull(HttpServletRequest request, HttpServletResponse response, String schemaId)
 			throws SchemaNotFoundException
 	{
-		Schema schema = this.schemaService.getById(schemaId);
+		User user = WebUtils.getUser(request, response);
+
+		Schema schema = this.schemaService.getById(user, schemaId);
 
 		if (schema == null)
 			throw new SchemaNotFoundException(schemaId);
@@ -118,6 +123,24 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		}
 
 		return cn;
+	}
+
+	protected void checkReadTableDataPermission(Schema schema, User user)
+	{
+		if (!Schema.canReadTableData(schema.getDataPermission()))
+			throw new PermissionDeniedException();
+	}
+
+	protected void checkEditTableDataPermission(Schema schema, User user)
+	{
+		if (!Schema.canEditTableData(schema.getDataPermission()))
+			throw new PermissionDeniedException();
+	}
+
+	protected void checkDeleteTableDataPermission(Schema schema, User user)
+	{
+		if (!Schema.canDeleteTableData(schema.getDataPermission()))
+			throw new PermissionDeniedException();
 	}
 
 	/**
@@ -424,8 +447,8 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		{
 			throw new UnsupportedOperationException();
 		}
-		
-		//@Override
+
+		// @Override
 		public Logger getParentLogger() throws SQLFeatureNotSupportedException
 		{
 			throw new SQLFeatureNotSupportedException();
