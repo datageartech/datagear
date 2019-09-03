@@ -66,6 +66,16 @@ public interface DataPermissionEntityService<ID, T extends Entity<ID>> extends E
 	int[] getPermissions(User user, ID[] ids);
 
 	/**
+	 * 授权添加。
+	 * 
+	 * @param user
+	 * @param entity
+	 * @return
+	 * @throws PermissionDeniedException
+	 */
+	boolean add(User user, T entity) throws PermissionDeniedException;
+
+	/**
 	 * 授权更新。
 	 * 
 	 * @param user

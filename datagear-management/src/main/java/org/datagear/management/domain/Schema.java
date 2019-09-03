@@ -207,23 +207,6 @@ public class Schema extends AbstractStringIdEntity
 		return PERMISSION_TABLE_DATA_DELETE <= permission;
 	}
 
-	public static boolean canAuthorize(Schema schema, User currentUser)
-	{
-		if (currentUser.isAdmin())
-			return true;
-
-		if (currentUser.isAnonymous())
-			return false;
-
-		if (!Authorization.canDelete(schema.getDataPermission()))
-			return false;
-
-		if (!schema.hasCreateUser())
-			return false;
-
-		return currentUser.getId().equals(schema.createUser.getId());
-	}
-
 	@Override
 	public String toString()
 	{

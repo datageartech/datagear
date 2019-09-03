@@ -71,6 +71,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 <#include "include/data_page_obj_grid.ftl">
 <#if !readonly>
 <#include "include/data_page_obj_edit_grid_js.ftl">
+<#include "../include/page_obj_data_permission.ftl">
 <#include "../include/page_obj_data_permission_ds_table.ftl">
 </#if>
 <script type="text/javascript">
@@ -110,7 +111,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 			po.element("input[name=editButton]").button("disable");
 		}
 		
-		if(po.canEditTableData(${schema.dataPermission}))
+		if(po.canDeleteTableData(${schema.dataPermission}))
 		{
 			po.element("input[name=deleteButton]").click(function()
 			{

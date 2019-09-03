@@ -41,23 +41,6 @@ page_js_obj.ftl
 		return ${__podpSchema.PERMISSION_TABLE_DATA_DELETE} <= schemaOrPermission;
 	};
 	
-	po.canAuthorizeSchema = function(schema, user)
-	{
-		if(user.admin)
-			return true;
-		
-		if(user.anonymous)
-			return false;
-		
-		if(!po.canDelete(schema))
-			return false;
-		
-		if(!schema.createUser)
-			return false;
-		
-		return schema.createUser.id == user.id;
-	};
-	
 	po.toTableDataPermissionLabel = function(schemaOrPermission)
 	{
 		if(po.canDeleteTableData(schemaOrPermission))

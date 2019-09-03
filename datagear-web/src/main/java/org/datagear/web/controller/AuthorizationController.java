@@ -86,14 +86,10 @@ public class AuthorizationController extends AbstractController
 
 		User user = WebUtils.getUser(request, response);
 
-		// 只有管理员才可以模式匹配授权
-		if (!user.isAdmin() && authorization.isResourceTypePattern())
-			throw new IllegalInputException();
-
 		authorization.setId(IDUtil.uuid());
 		authorization.setCreateUser(user);
 
-		this.authorizationService.add(authorization);
+		this.authorizationService.add(user, authorization);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -106,7 +102,7 @@ public class AuthorizationController extends AbstractController
 
 		setAuthorizationQueryLabel(request);
 
-		Authorization authorization = this.authorizationService.getById(id);
+		Authorization authorization = this.authorizationService.getByIdForEdit(user, id);
 
 		setAppoiontResourceAttributeIf(request, model);
 		model.addAttribute("authorization", authorization);
@@ -127,10 +123,6 @@ public class AuthorizationController extends AbstractController
 		checkInput(authorization);
 
 		User user = WebUtils.getUser(request, response);
-
-		// 只有管理员才可以模式匹配授权
-		if (!user.isAdmin() && authorization.isResourceTypePattern())
-			throw new IllegalInputException();
 
 		this.authorizationService.update(user, authorization);
 

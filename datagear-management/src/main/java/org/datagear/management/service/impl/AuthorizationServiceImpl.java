@@ -11,6 +11,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
+import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.Query;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -38,6 +39,26 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 	public AuthorizationServiceImpl(SqlSessionTemplate sqlSessionTemplate)
 	{
 		super(sqlSessionTemplate);
+	}
+
+	@Override
+	public boolean add(User user, Authorization entity) throws PermissionDeniedException
+	{
+		// 只有管理员才可以模式匹配授权
+		if (!user.isAdmin() && entity.isResourceTypePattern())
+			throw new PermissionDeniedException();
+
+		return super.add(user, entity);
+	}
+
+	@Override
+	public boolean update(User user, Authorization entity) throws PermissionDeniedException
+	{
+		// 只有管理员才可以模式匹配授权
+		if (!user.isAdmin() && entity.isResourceTypePattern())
+			throw new PermissionDeniedException();
+
+		return super.update(user, entity);
 	}
 
 	@Override

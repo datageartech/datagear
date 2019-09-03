@@ -512,7 +512,7 @@
 							if(!po.canDelete(schema.dataPermission))
 								menuItemEnables["schema-operation-delete"] = false;
 							
-							if(!po.canAuthorizeSchema(schema, po.currentUser))
+							if(!po.canAuthorize(schema, po.currentUser))
 								menuItemEnables["schema-operation-authorize"] = false;
 						}
 					}
@@ -737,8 +737,11 @@
 				}
 				else if($item.hasClass("schema-operation-dataimport") || $item.hasClass("schema-operation-dataexport"))
 				{
-					if(!selNodes.length || selNodes.length < 1)
+					if(selNodes.length != 1)
+					{
+						$.tipInfo("<@spring.message code='pleaseSelectOnlyOneRow' />");
 						return;
+					}
 					
 					var isImport = $item.hasClass("schema-operation-dataimport");
 					

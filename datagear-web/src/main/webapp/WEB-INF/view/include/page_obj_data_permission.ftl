@@ -41,6 +41,23 @@ page_js_obj.jsp
 		return ${__podpAuthorization.PERMISSION_DELETE_START} <= dataOrPermission;
 	};
 	
+	po.canAuthorize = function(entity, user)
+	{
+		if(user.admin)
+			return true;
+		
+		if(user.anonymous)
+			return false;
+		
+		if(!po.canDelete(entity))
+			return false;
+		
+		if(!entity.createUser)
+			return false;
+		
+		return entity.createUser.id == user.id;
+	};
+	
 	po.toPermissionLabel = function(dataOrPermission)
 	{
 		if(po.canDelete(dataOrPermission))

@@ -314,4 +314,36 @@ public class Authorization extends AbstractStringIdEntity
 	{
 		return (permission >= PERMISSION_DELETE_START);
 	}
+
+	/**
+	 * 是否可授权。
+	 * <p>
+	 * {@code currentUser}必须是用于查询{@code entity}的用户。
+	 * </p>
+	 * 
+	 * @param entity
+	 * @param currentUser
+	 * @return
+	 */
+	public static boolean canAuthorize(DataPermissionEntity<?> entity, User currentUser)
+	{
+		if (currentUser.isAdmin())
+			return true;
+
+		if (currentUser.isAnonymous())
+			return false;
+
+		if (!Authorization.canDelete(entity.getDataPermission()))
+			return false;
+
+		if (!(entity instanceof CreateUserEntity<?>))
+			return false;
+
+		CreateUserEntity<?> createUserEntity = (CreateUserEntity<?>) entity;
+
+		if (createUserEntity.getCreateUser() == null)
+			return false;
+
+		return currentUser.getId().equals(createUserEntity.getCreateUser().getId());
+	}
 }
