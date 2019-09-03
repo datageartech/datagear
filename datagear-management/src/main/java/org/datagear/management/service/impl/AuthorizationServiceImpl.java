@@ -9,10 +9,12 @@ import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
+import org.datagear.management.domain.DataIdPermission;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.Query;
+import org.datagear.util.IDUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -59,6 +61,31 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 			throw new PermissionDeniedException();
 
 		return super.update(user, entity);
+	}
+
+	@Override
+	public boolean canSaveForPatternSource(User user, String resourceType, String patternSource)
+	{
+		if (user.isAdmin())
+			return true;
+
+		Map<String, Object> params = buildParamMap();
+		addDataPermissionParameters(params, user, resourceType, true, false);
+		params.put(DATA_PERMISSION_PARAM_UNSET_PERMISSION, Authorization.PERMISSION_MAX);
+
+		params.put("placeholderId", IDUtil.uuid());
+		params.put("patternSource", escapeForSqlStringValue(patternSource));
+
+		List<DataIdPermission> dataIdPermissions = selectListMybatis("getDataIdPermissionForPatternSource", params);
+
+		DataIdPermission dataIdPermission = (dataIdPermissions == null || dataIdPermissions.isEmpty() ? null
+				: dataIdPermissions.get(0));
+
+		// 未设置权限或者设置为允许删除权限，才可以添加
+		if (dataIdPermission == null || Authorization.canDelete(dataIdPermission.getDataPermission()))
+			return true;
+
+		return false;
 	}
 
 	@Override

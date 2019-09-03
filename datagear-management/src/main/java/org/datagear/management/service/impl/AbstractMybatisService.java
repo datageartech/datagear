@@ -657,6 +657,32 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	}
 
 	/**
+	 * 转义为SQL字符串值。
+	 * 
+	 * @param s
+	 * @return
+	 */
+	protected String escapeForSqlStringValue(String s)
+	{
+		if (s == null)
+			throw new IllegalArgumentException();
+
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0, len = s.length(); i < len; i++)
+		{
+			char c = s.charAt(i);
+
+			if (c == '\'')
+				sb.append("''");
+			else
+				sb.append(c);
+		}
+
+		return sb.toString();
+	}
+
+	/**
 	 * 获取sql语句的名字空间。
 	 * 
 	 * @return

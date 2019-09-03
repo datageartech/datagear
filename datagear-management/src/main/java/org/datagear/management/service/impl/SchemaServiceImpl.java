@@ -13,6 +13,8 @@ import org.datagear.connection.DriverEntityManager;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AuthorizationService;
+import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -32,21 +34,27 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 
 	private DriverEntityManager driverEntityManager;
 
+	private AuthorizationService authorizationService;
+
 	public SchemaServiceImpl()
 	{
 		super();
 	}
 
-	public SchemaServiceImpl(SqlSessionFactory sqlSessionFactory, DriverEntityManager driverEntityManager)
+	public SchemaServiceImpl(SqlSessionFactory sqlSessionFactory, DriverEntityManager driverEntityManager,
+			AuthorizationService authorizationService)
 	{
 		super(sqlSessionFactory);
 		this.driverEntityManager = driverEntityManager;
+		this.authorizationService = authorizationService;
 	}
 
-	public SchemaServiceImpl(SqlSessionTemplate sqlSessionTemplate, DriverEntityManager driverEntityManager)
+	public SchemaServiceImpl(SqlSessionTemplate sqlSessionTemplate, DriverEntityManager driverEntityManager,
+			AuthorizationService authorizationService)
 	{
 		super(sqlSessionTemplate);
 		this.driverEntityManager = driverEntityManager;
+		this.authorizationService = authorizationService;
 	}
 
 	public DriverEntityManager getDriverEntityManager()
@@ -57,6 +65,36 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	public void setDriverEntityManager(DriverEntityManager driverEntityManager)
 	{
 		this.driverEntityManager = driverEntityManager;
+	}
+
+	public AuthorizationService getAuthorizationService()
+	{
+		return authorizationService;
+	}
+
+	public void setAuthorizationService(AuthorizationService authorizationService)
+	{
+		this.authorizationService = authorizationService;
+	}
+
+	@Override
+	public boolean add(User user, Schema entity) throws PermissionDeniedException
+	{
+		if (!this.authorizationService.canSaveForPatternSource(user, Authorization.RESOURCE_TYPE_DATA_SOURCE,
+				entity.getUrl()))
+			throw new SaveSchemaUrlPermissionDeniedException();
+
+		return super.add(user, entity);
+	}
+
+	@Override
+	public boolean update(User user, Schema entity) throws PermissionDeniedException
+	{
+		if (!this.authorizationService.canSaveForPatternSource(user, Authorization.RESOURCE_TYPE_DATA_SOURCE,
+				entity.getUrl()))
+			throw new SaveSchemaUrlPermissionDeniedException();
+
+		return super.update(user, entity);
 	}
 
 	@Override

@@ -57,6 +57,24 @@
 			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
 	</select>
 	
+	<select id="getDataIdPermissionForPatternSource" resultType="org.datagear.management.domain.DataIdPermission">
+		SELECT
+			T.DATA_ID as ${_iq_}dataId${_iq_},
+			T.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
+		FROM
+			(
+				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
+				SELECT
+					'${placeholderId}' AS DP_AUTH_DATA_ID,
+					'${patternSource}' AS DP_AUTH_DATA_PATTERN_SRC,
+					PLACEHOLDER_TABLE.PLACEHOLDER_COL
+				FROM
+					/*Derby没有类似from dual的语法，为了兼容其它数据库，这里采用了此种方法*/
+					(SELECT COUNT(*) AS PLACEHOLDER_COL FROM DATAGEAR_VERSION) PLACEHOLDER_TABLE
+				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
+			) T
+	</select>
+	
 	<select id="query" resultType="org.datagear.management.domain.Authorization">
 		SELECT
 			T.*

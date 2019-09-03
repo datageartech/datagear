@@ -21,6 +21,7 @@ import org.datagear.dbinfo.DatabaseInfoResolverException;
 import org.datagear.dbinfo.TableNotExistsException;
 import org.datagear.dbmodel.DatabaseModelResolverException;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.management.service.impl.SaveSchemaUrlPermissionDeniedException;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.UnsupportedDialectException;
 import org.datagear.persistence.support.SqlExpressionErrorException;
@@ -320,6 +321,17 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(EstablishConnectionException.class),
 				exception.getCause(), true);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(SaveSchemaUrlPermissionDeniedException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleServicePermissionDeniedException(HttpServletRequest request, HttpServletResponse response,
+			SaveSchemaUrlPermissionDeniedException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(SaveSchemaUrlPermissionDeniedException.class),
+				exception, false);
 
 		return getErrorView(request, response);
 	}

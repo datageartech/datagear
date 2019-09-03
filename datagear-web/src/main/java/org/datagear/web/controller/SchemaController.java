@@ -110,6 +110,8 @@ public class SchemaController extends AbstractSchemaModelConnController
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			Schema schema)
 	{
+		User user = WebUtils.getUser(request, response);
+
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
 
@@ -117,7 +119,7 @@ public class SchemaController extends AbstractSchemaModelConnController
 		schema.setCreateTime(new Date());
 		schema.setCreateUser(WebUtils.getUser(request, response));
 
-		getSchemaService().add(schema);
+		getSchemaService().add(user, schema);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}

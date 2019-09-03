@@ -41,6 +41,9 @@ public interface DataPermissionEntityService<ID, T extends Entity<ID>> extends E
 	/** 数据权限参数：最大权限值 */
 	String DATA_PERMISSION_PARAM_MAX_PERMISSION = "DP_MAX_PERMISSION";
 
+	/** 数据权限参数：未设置任何权限时的默认权限值 */
+	String DATA_PERMISSION_PARAM_UNSET_PERMISSION = "DP_UNSET_PERMISSION";
+
 	/**
 	 * 获取数据权限。
 	 * <p>
