@@ -7,12 +7,18 @@ package org.datagear.management.service.impl;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.mapping.BoundSql;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlSource;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataIdPermission;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
 import org.datagear.util.IDUtil;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -50,6 +56,8 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (!user.isAdmin() && entity.isResourceTypePattern())
 			throw new PermissionDeniedException();
 
+		// TODO 校验用户是否对此资源有授权的权限
+
 		return super.add(user, entity);
 	}
 
@@ -60,18 +68,22 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (!user.isAdmin() && entity.isResourceTypePattern())
 			throw new PermissionDeniedException();
 
+		// TODO 校验用户是否对此资源有授权的权限
+
 		return super.update(user, entity);
 	}
 
 	@Override
-	public boolean canSaveForPatternSource(User user, String resourceType, String patternSource)
+	public Integer getPermissionForPatternSource(User user, String resourceType, String patternSource)
 	{
 		if (user.isAdmin())
-			return true;
+			return Authorization.PERMISSION_MAX;
+
+		int unsetPermission = -9;
 
 		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user, resourceType, true, false);
-		params.put(DATA_PERMISSION_PARAM_UNSET_PERMISSION, Authorization.PERMISSION_MAX);
+		params.put(DATA_PERMISSION_PARAM_UNSET_PERMISSION, unsetPermission);
 
 		params.put("placeholderId", IDUtil.uuid());
 		params.put("patternSource", escapeForSqlStringValue(patternSource));
@@ -81,11 +93,8 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 		DataIdPermission dataIdPermission = (dataIdPermissions == null || dataIdPermissions.isEmpty() ? null
 				: dataIdPermissions.get(0));
 
-		// 未设置权限或者设置为允许删除权限，才可以添加
-		if (dataIdPermission == null || Authorization.canDelete(dataIdPermission.getDataPermission()))
-			return true;
-
-		return false;
+		return (dataIdPermission == null || dataIdPermission.getDataPermission() == unsetPermission ? null
+				: dataIdPermission.getDataPermission());
 	}
 
 	@Override
@@ -101,7 +110,7 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 	@Override
 	protected Authorization getById(String id, Map<String, Object> params)
 	{
-		setAuthorizationQueryLabel(params);
+		setAuthorizationQueryContext(params);
 
 		return super.getById(id, params);
 	}
@@ -109,22 +118,52 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 	@Override
 	protected List<Authorization> query(String statement, Query query, Map<String, Object> params)
 	{
-		setAuthorizationQueryLabel(params);
+		setAuthorizationQueryContext(params);
 
 		return super.query(statement, query, params);
 	}
 
-	protected AuthorizationQueryLabel setAuthorizationQueryLabel(Map<String, Object> params)
+	@Override
+	protected PagingData<Authorization> pagingQuery(String statement, PagingQuery pagingQuery,
+			Map<String, Object> params)
 	{
-		AuthorizationQueryLabel label = ServiceContext.get()
-				.getValue(AuthorizationQueryLabel.CUSTOM_QUERY_PARAMETER_NAME);
+		setAuthorizationQueryContext(params);
 
-		if (label == null)
-			label = new AuthorizationQueryLabel();
+		return super.pagingQuery(statement, pagingQuery, params);
+	}
 
-		params.put("querylabel", label);
+	protected AuthorizationQueryContext setAuthorizationQueryContext(Map<String, Object> params)
+	{
+		AuthorizationQueryContext context = AuthorizationQueryContext.get();
 
-		return label;
+		params.put("queryContext", context);
+
+		// 针对特定资源的查询
+		if (context.hasResourceType())
+		{
+			params.put("resourceType", context.getResourceType());
+
+			try
+			{
+				String sqlId = Authorization.class.getName() + ".resourceNameQueryView." + context.getResourceType();
+				Configuration configuration = getSqlSession().getConfiguration();
+				MappedStatement mappedStatement = configuration.getMappedStatement(sqlId);
+
+				if (mappedStatement != null)
+				{
+					SqlSource sqlSource = mappedStatement.getSqlSource();
+					BoundSql boundSql = sqlSource.getBoundSql(new Object());
+					String resourceQueryView = boundSql.getSql();
+
+					params.put("resourceNameQueryView", resourceQueryView);
+				}
+			}
+			catch (Throwable t)
+			{
+			}
+		}
+
+		return context;
 	}
 
 	@Override

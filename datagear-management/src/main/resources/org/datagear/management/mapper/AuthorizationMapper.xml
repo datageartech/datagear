@@ -82,11 +82,6 @@
 			(<include refid="queryViewDataPermission" />) T
 		WHERE
 			<include refid="queryCondition" />
-			
-			<if test="appointResource != null">
-			AND T.${_iq_}resource${_iq_} = #{appointResource} AND T.${_iq_}resourceType${_iq_} NOT LIKE '%_PATTERN'
-			</if>
-			
 		<include refid="common.queryOrder" />
 	</select>
 	
@@ -156,17 +151,22 @@
 			A.USER_REAL_NAME AS ${_iq_}createUser.realName${_iq_},
 			A.USER_IS_ADMIN AS ${_iq_}createUser.admin${_iq_},
 			A.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_},
+			<choose><when test="resourceNameQueryView != null">
 			(
 				CASE A.AUTH_RESOURCE_TYPE
-					WHEN 'DATA_SOURCE' THEN B.SCHEMA_TITLE
-					WHEN 'DATA_SOURCE_PATTERN' THEN A.AUTH_RESOURCE
-					ELSE ''
+					WHEN '${resourceType}' THEN B.RESOURCE_NAME
+					WHEN '${resourceType}_PATTERN' THEN A.AUTH_RESOURCE
+					ELSE A.AUTH_RESOURCE
 				END
-			) AS ${_iq_}resourceName${_iq_},
+			)
+			</when><otherwise>
+			A.AUTH_RESOURCE
+			</otherwise></choose>
+			AS ${_iq_}resourceName${_iq_},
 			(
 				CASE A.AUTH_PRINCIPAL_TYPE
-					WHEN 'ALL' THEN '${querylabel.principalAll}'
-					WHEN 'ANONYMOUS' THEN '${querylabel.principalAnonymous}'
+					WHEN 'ALL' THEN '${queryContext.principalAllLabel}'
+					WHEN 'ANONYMOUS' THEN '${queryContext.principalAnonymousLabel}'
 					WHEN 'ROLE' THEN C.ROLE_NAME
 					WHEN 'USER' THEN
 					(
@@ -175,15 +175,17 @@
 							ELSE D.USER_NAME
 						END
 					)
-					ELSE ''
+					ELSE A.AUTH_PRINCIPAL
 				END
 			) AS ${_iq_}principalName${_iq_}
 		FROM
 			(<include refid="queryViewWithCreateUser" />) A
+		<if test="resourceNameQueryView != null">
 		LEFT JOIN
-			DATAGEAR_SCHEMA B
+			(${resourceNameQueryView}) B
 		ON
-			A.AUTH_RESOURCE_TYPE = 'DATA_SOURCE' AND A.AUTH_RESOURCE = B.SCHEMA_ID
+			A.AUTH_RESOURCE_TYPE = '${resourceType}' AND A.AUTH_RESOURCE = B.RESOURCE_ID
+		</if>
 		LEFT JOIN
 			DATAGEAR_ROLE C
 		ON
@@ -192,8 +194,10 @@
 			DATAGEAR_USER D
 		ON
 			A.AUTH_PRINCIPAL_TYPE = 'USER' AND A.AUTH_PRINCIPAL = D.USER_ID
+		<if test="resourceType != null">
 		WHERE
-			A.AUTH_RESOURCE_TYPE = 'DATA_SOURCE' OR AUTH_RESOURCE_TYPE = 'DATA_SOURCE_PATTERN'
+			A.AUTH_RESOURCE_TYPE = '${resourceType}' OR AUTH_RESOURCE_TYPE = '${resourceType}_PATTERN'
+		</if>
 	</sql>
 	
 	<sql id="queryViewWithCreateUser">
@@ -218,6 +222,9 @@
 		(
 			${_iq_}resourceName${_iq_} LIKE #{queryKeyword} OR ${_iq_}principalName${_iq_} LIKE #{queryKeyword}
 		)
+		</if>
+		<if test="appointResource != null">
+		AND ${_iq_}resource${_iq_} = #{appointResource} AND ${_iq_}resourceType${_iq_} NOT LIKE '%_PATTERN'
 		</if>
 		<include refid="common.queryCondition" />
 	</sql>

@@ -19,14 +19,17 @@ import org.datagear.persistence.Query;
 public interface AuthorizationService extends DataPermissionEntityService<String, Authorization>
 {
 	/**
-	 * 对于支持模式匹配授权的资源，是否有权限保存指定模式匹配源的资源。
+	 * 对于支持模式匹配授权的资源，获取指定模式匹配源的权限。
+	 * <p>
+	 * 返回{@code null}表示无对应的授权。
+	 * </p>
 	 * 
 	 * @param user
 	 * @param resourceType
 	 * @param patternSource
 	 * @return
 	 */
-	boolean canSaveForPatternSource(User user, String resourceType, String patternSource);
+	Integer getPermissionForPatternSource(User user, String resourceType, String patternSource);
 
 	/**
 	 * 查询指定资源的{@linkplain Authorization}。

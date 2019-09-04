@@ -2,11 +2,8 @@
 <#include "../include/html_doctype.ftl">
 <#--
 String titleMessageKey 标题标签I18N关键字，不允许null
-String authorizationSource 固定授权源，允许为null
-String authorizationSourceType 固定授权源类型，允许为null
 -->
-<#assign selectonly=(selectonly!false)>
-<#assign dataModel=(dataModel!"full")>
+<#assign AuthorizationController=statics['org.datagear.web.controller.AuthorizationController']>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -61,7 +58,7 @@ String authorizationSourceType 固定授权源类型，允许为null
 		var data =
 		{
 			<#if appointResource??>
-			"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}" : "${appointResource}"
+			"${AuthorizationController.PARAM_APPOINT_RESOURCE}" : "${appointResource}"
 			</#if>
 		};
 		
@@ -85,7 +82,7 @@ String authorizationSourceType 固定授权源类型，允许为null
 			var data =
 			{
 				<#if appointResource??>
-				"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}" : "${appointResource?js_string}",
+				"${AuthorizationController.PARAM_APPOINT_RESOURCE}" : "${appointResource?js_string}",
 				</#if>
 				"id" : row.id
 			};
@@ -111,7 +108,7 @@ String authorizationSourceType 固定授权源类型，允许为null
 			var data =
 			{
 				<#if appointResource??>
-				"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}" : "${appointResource?js_string}",
+				"${AuthorizationController.PARAM_APPOINT_RESOURCE}" : "${appointResource?js_string}",
 				</#if>
 				"id" : row.id
 			};
@@ -171,7 +168,7 @@ String authorizationSourceType 固定授权源类型，允许为null
 	
 	var url = po.url("queryData");
 	<#if appointResource??>
-	url = po.url("queryData?${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}="+encodeURIComponent("${appointResource?js_string}"));
+	url = po.url("queryData?${AuthorizationController.PARAM_APPOINT_RESOURCE}="+encodeURIComponent("${appointResource?js_string}"));
 	</#if>
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, url);
 	po.initDataTable(tableSettings);

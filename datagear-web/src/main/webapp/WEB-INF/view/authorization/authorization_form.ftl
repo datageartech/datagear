@@ -175,11 +175,6 @@ readonly 是否只读操作，允许为null
 {
 	$.initButtons(po.element());
 	
-	po.url = function(action)
-	{
-		return "${contextPath}/authorization/" + action;
-	};
-	
 	<#if !readonly>
 	po.form().validate(
 	{

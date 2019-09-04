@@ -80,9 +80,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	@Override
 	public boolean add(User user, Schema entity) throws PermissionDeniedException
 	{
-		if (!this.authorizationService.canSaveForPatternSource(user, Authorization.RESOURCE_TYPE_DATA_SOURCE,
-				entity.getUrl()))
-			throw new SaveSchemaUrlPermissionDeniedException();
+		checkSaveUrlPermission(user, entity.getUrl());
 
 		return super.add(user, entity);
 	}
@@ -90,9 +88,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	@Override
 	public boolean update(User user, Schema entity) throws PermissionDeniedException
 	{
-		if (!this.authorizationService.canSaveForPatternSource(user, Authorization.RESOURCE_TYPE_DATA_SOURCE,
-				entity.getUrl()))
-			throw new SaveSchemaUrlPermissionDeniedException();
+		checkSaveUrlPermission(user, entity.getUrl());
 
 		return super.update(user, entity);
 	}
@@ -157,6 +153,24 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	{
 		if (isBlank(entity.getId()) || isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
 			throw new IllegalArgumentException();
+	}
+
+	/**
+	 * 校验用户是否有权保存指定URL的{@linkplain Schema}。
+	 * 
+	 * @param user
+	 * @param url
+	 * @throws SaveSchemaUrlPermissionDeniedException
+	 */
+	protected void checkSaveUrlPermission(User user, String url) throws SaveSchemaUrlPermissionDeniedException
+	{
+		Integer permission = this.authorizationService.getPermissionForPatternSource(user,
+				Authorization.RESOURCE_TYPE_DATA_SOURCE, url);
+
+		if (permission == null || Schema.canDeleteTableData(permission))
+			return;
+
+		throw new SaveSchemaUrlPermissionDeniedException();
 	}
 
 	/**

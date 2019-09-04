@@ -12,8 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
-import org.datagear.management.service.impl.AuthorizationQueryLabel;
-import org.datagear.management.service.impl.ServiceContext;
+import org.datagear.management.service.impl.AuthorizationQueryContext;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
@@ -36,7 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class AuthorizationController extends AbstractController
 {
 	/**
-	 * 指定授权资源参数。
+	 * 指定授权资源参数，设置后，所有CRUD操作都只针对这一个资源。
 	 */
 	public static final String PARAM_APPOINT_RESOURCE = "appointResource";
 
@@ -100,7 +99,7 @@ public class AuthorizationController extends AbstractController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		setAuthorizationQueryLabel(request);
+		setAuthorizationQueryContext(request);
 
 		Authorization authorization = this.authorizationService.getByIdForEdit(user, id);
 
@@ -133,7 +132,7 @@ public class AuthorizationController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		setAuthorizationQueryLabel(request);
+		setAuthorizationQueryContext(request);
 
 		Authorization authorization = this.authorizationService.getById(id);
 
@@ -177,7 +176,7 @@ public class AuthorizationController extends AbstractController
 
 		PagingQuery pagingQuery = getPagingQuery(request, null);
 
-		setAuthorizationQueryLabel(request);
+		setAuthorizationQueryContext(request);
 
 		List<Authorization> authorizations = null;
 
@@ -195,8 +194,6 @@ public class AuthorizationController extends AbstractController
 
 		if (ap != null)
 			model.addAttribute("appointResource", ap);
-
-		// TODO 校验用户是否对此资源有授权的权限
 	}
 
 	protected String getAppoiontResource(HttpServletRequest request)
@@ -204,13 +201,14 @@ public class AuthorizationController extends AbstractController
 		return request.getParameter(PARAM_APPOINT_RESOURCE);
 	}
 
-	protected void setAuthorizationQueryLabel(HttpServletRequest request)
+	protected void setAuthorizationQueryContext(HttpServletRequest request)
 	{
-		AuthorizationQueryLabel label = new AuthorizationQueryLabel();
-		label.setPrincipalAll(getMessage(request, "authorization.principalType.ALL"));
-		label.setPrincipalAnonymous(getMessage(request, "authorization.principalType.ANONYMOUS"));
+		AuthorizationQueryContext context = new AuthorizationQueryContext();
+		context.setPrincipalAllLabel(getMessage(request, "authorization.principalType.ALL"));
+		context.setPrincipalAnonymousLabel(getMessage(request, "authorization.principalType.ANONYMOUS"));
+		context.setResourceType(Authorization.RESOURCE_TYPE_DATA_SOURCE);
 
-		ServiceContext.get().setValue(AuthorizationQueryLabel.CUSTOM_QUERY_PARAMETER_NAME, label);
+		AuthorizationQueryContext.set(context);
 	}
 
 	protected void checkInput(Authorization authorization) throws IllegalInputException
