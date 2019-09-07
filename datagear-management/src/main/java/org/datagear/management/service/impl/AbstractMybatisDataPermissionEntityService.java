@@ -12,10 +12,10 @@ import java.util.Map;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataIdPermission;
+import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.PermissionDeniedException;
-import org.datagear.model.support.Entity;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
@@ -27,7 +27,7 @@ import org.mybatis.spring.SqlSessionTemplate;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends Entity<ID>>
+public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends DataPermissionEntity<ID>>
 		extends AbstractMybatisEntityService<ID, T> implements DataPermissionEntityService<ID, T>
 {
 	public AbstractMybatisDataPermissionEntityService()

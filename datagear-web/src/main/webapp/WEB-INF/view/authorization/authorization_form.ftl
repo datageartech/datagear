@@ -10,12 +10,12 @@ readonly 是否只读操作，允许为null
 <#assign isAdd=(formAction == 'saveAdd')>
 <#assign Authorization=statics['org.datagear.management.domain.Authorization']>
 <#assign Schema=statics['org.datagear.management.domain.Schema']>
-<#assign resourceType=((authorization.resourceType)!Authorization.RESOURCE_TYPE_DATA_SOURCE)>
-<#assign resourceTypePattern=Authorization.RESOURCE_TYPE_DATA_SOURCE + Authorization.PATTERN_RESOURCE_TYPE_SUFFIX>
+<#assign resourceType=((authorization.resourceType)!Schema.AUTHORIZATION_RESOURCE_TYPE)>
+<#assign resourceTypePattern=Schema.AUTHORIZATION_RESOURCE_TYPE + Authorization.PATTERN_RESOURCE_TYPE_SUFFIX>
 <#assign principalType=((authorization.principalType)!Authorization.PRINCIPAL_TYPE_USER)>
 <#assign permission=((authorization.permission)!Schema.PERMISSION_TABLE_DATA_READ)>
 <#assign enabled=(((authorization.enabled)!true)?string('true', 'false'))>
-<#assign isResourceTypePattern=(resourceType != Authorization.RESOURCE_TYPE_DATA_SOURCE)>
+<#assign isResourceTypePattern=(resourceType != Schema.AUTHORIZATION_RESOURCE_TYPE)>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -36,7 +36,7 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<div class="resourceType-radios">
 						<label for="${pageId}-resourceType_0"><@spring.message code='authorization.resourceType.DATA_SOURCE' /></label>
-			   			<input type="radio" id="${pageId}-resourceType_0" name="resourceType" value="${Authorization.RESOURCE_TYPE_DATA_SOURCE}" />
+			   			<input type="radio" id="${pageId}-resourceType_0" name="resourceType" value="${Schema.AUTHORIZATION_RESOURCE_TYPE}" />
 						<label for="${pageId}-resourceType_1" title="<@spring.message code='authorization.resourceType.DATA_SOURCE_PATTERN.desc' />"><@spring.message code='authorization.resourceType.DATA_SOURCE_PATTERN' /></label>
 			   			<input type="radio" id="${pageId}-resourceType_1" name="resourceType" value="${resourceTypePattern}"  />
 		   			</div>
@@ -291,7 +291,7 @@ readonly 是否只读操作，允许为null
 		var $resourceNameForPattern = po.element("input[name='resourceNameForPattern']");
 		var $resourceNameForEntity = po.element("input[name='resourceNameForEntity']");
 		
-		if(val == '${Authorization.RESOURCE_TYPE_DATA_SOURCE}')
+		if(val == '${Schema.AUTHORIZATION_RESOURCE_TYPE}')
 		{
 			$formItemForPattern.hide();
 			$formItemForEntity.show();
@@ -366,7 +366,7 @@ readonly 是否只读操作，允许为null
 	po.element(".enabled-radios").controlgroup();
 	
 	<#if appointResource??>
-		po.element("input[name='resourceType'][value='${Authorization.RESOURCE_TYPE_DATA_SOURCE}']").attr("checked", "checked").change();
+		po.element("input[name='resourceType'][value='${Schema.AUTHORIZATION_RESOURCE_TYPE}']").attr("checked", "checked").change();
 		po.element("input[name='resource']").val("${appointResource}");
 		po.element(".form-item-resourceType").hide();
 		po.element(".form-item-resource-name-entity").hide();

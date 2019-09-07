@@ -10,7 +10,6 @@ import java.util.Map;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.connection.DriverEntity;
 import org.datagear.connection.DriverEntityManager;
-import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
@@ -78,6 +77,12 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
+	public String getResourceType()
+	{
+		return Schema.AUTHORIZATION_RESOURCE_TYPE;
+	}
+
+	@Override
 	public boolean add(User user, Schema entity) throws PermissionDeniedException
 	{
 		checkSaveUrlPermission(user, entity.getUrl());
@@ -91,6 +96,12 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 		checkSaveUrlPermission(user, entity.getUrl());
 
 		return super.update(user, entity);
+	}
+
+	@Override
+	public Schema getByStringId(User user, String id) throws PermissionDeniedException
+	{
+		return super.getById(user, id);
 	}
 
 	@Override
@@ -164,8 +175,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	 */
 	protected void checkSaveUrlPermission(User user, String url) throws SaveSchemaUrlPermissionDeniedException
 	{
-		Integer permission = this.authorizationService.getPermissionForPatternSource(user,
-				Authorization.RESOURCE_TYPE_DATA_SOURCE, url);
+		Integer permission = this.authorizationService.getPermissionForPatternSource(user, getResourceType(), url);
 
 		if (permission == null || Schema.canDeleteTableData(permission))
 			return;
@@ -193,7 +203,7 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
-		addDataPermissionParameters(params, user, Authorization.RESOURCE_TYPE_DATA_SOURCE, true, true);
+		addDataPermissionParameters(params, user, getResourceType(), true, true);
 	}
 
 	@Override

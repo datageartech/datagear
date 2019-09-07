@@ -292,6 +292,11 @@
 	
 	<bean id="authorizationService" class="org.datagear.management.service.impl.AuthorizationServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<property name="resourceServices">
+			<list>
+				<ref bean="schemaService" />
+			</list>
+		</property>
 	</bean>
 	
 	<bean id="sqlDateFormatter" class="org.datagear.web.format.SqlDateFormatter" />

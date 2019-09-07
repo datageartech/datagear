@@ -20,6 +20,9 @@ public class Schema extends AbstractStringIdEntity
 {
 	private static final long serialVersionUID = 1L;
 
+	/** 授权资源类型 */
+	public static final String AUTHORIZATION_RESOURCE_TYPE = "DATA_SOURCE";
+
 	/*------------------------------------------------------*/
 	/*
 	 * 从业务角度看，对数据源的授权不应是对其记录本身，而是它包含表中的数据。

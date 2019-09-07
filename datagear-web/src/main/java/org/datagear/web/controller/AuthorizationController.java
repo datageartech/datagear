@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.Authorization;
+import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.impl.AuthorizationQueryContext;
@@ -132,9 +133,11 @@ public class AuthorizationController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
+		User user = WebUtils.getUser(request, response);
+
 		setAuthorizationQueryContext(request);
 
-		Authorization authorization = this.authorizationService.getById(id);
+		Authorization authorization = this.authorizationService.getById(user, id);
 
 		if (authorization == null)
 			throw new RecordNotFoundException();
@@ -206,7 +209,7 @@ public class AuthorizationController extends AbstractController
 		AuthorizationQueryContext context = new AuthorizationQueryContext();
 		context.setPrincipalAllLabel(getMessage(request, "authorization.principalType.ALL"));
 		context.setPrincipalAnonymousLabel(getMessage(request, "authorization.principalType.ANONYMOUS"));
-		context.setResourceType(Authorization.RESOURCE_TYPE_DATA_SOURCE);
+		context.setResourceType(Schema.AUTHORIZATION_RESOURCE_TYPE);
 
 		AuthorizationQueryContext.set(context);
 	}

@@ -7,8 +7,8 @@ package org.datagear.management.service;
 import java.util.List;
 
 import org.datagear.management.domain.Authorization;
+import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.User;
-import org.datagear.model.support.Entity;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
@@ -21,7 +21,7 @@ import org.datagear.persistence.Query;
  * @param <ID>
  * @param <T>
  */
-public interface DataPermissionEntityService<ID, T extends Entity<ID>> extends EntityService<ID, T>
+public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<ID>> extends EntityService<ID, T>
 {
 	/** 数据权限参数：当前用户，参考commonDataPermissionSqls.xml */
 	String DATA_PERMISSION_PARAM_CURRENT_USER = "DP_CURRENT_USER";
@@ -43,6 +43,13 @@ public interface DataPermissionEntityService<ID, T extends Entity<ID>> extends E
 
 	/** 数据权限参数：未设置任何权限时的默认权限值 */
 	String DATA_PERMISSION_PARAM_UNSET_PERMISSION = "DP_UNSET_PERMISSION";
+
+	/**
+	 * 获取数据权限资源类型。
+	 * 
+	 * @return
+	 */
+	String getResourceType();
 
 	/**
 	 * 获取数据权限。
@@ -119,6 +126,16 @@ public interface DataPermissionEntityService<ID, T extends Entity<ID>> extends E
 	 * @throws PermissionDeniedException
 	 */
 	T getById(User user, ID id) throws PermissionDeniedException;
+
+	/**
+	 * 授权根据ID获取。
+	 * 
+	 * @param user
+	 * @param id
+	 * @return
+	 * @throws PermissionDeniedException
+	 */
+	T getByStringId(User user, String id) throws PermissionDeniedException;
 
 	/**
 	 * 授权根据ID获取，并用于编辑操作。

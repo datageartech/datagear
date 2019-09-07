@@ -14,8 +14,10 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataIdPermission;
+import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
+import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -34,43 +36,61 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 {
 	protected static final String SQL_NAMESPACE = Authorization.class.getName();
 
+	private List<? extends DataPermissionEntityService<?, ?>> resourceServices;
+
 	public AuthorizationServiceImpl()
 	{
 		super();
 	}
 
-	public AuthorizationServiceImpl(SqlSessionFactory sqlSessionFactory)
+	public AuthorizationServiceImpl(SqlSessionFactory sqlSessionFactory,
+			List<? extends DataPermissionEntityService<?, ?>> resourceServices)
 	{
 		super(sqlSessionFactory);
+		this.resourceServices = resourceServices;
 	}
 
-	public AuthorizationServiceImpl(SqlSessionTemplate sqlSessionTemplate)
+	public AuthorizationServiceImpl(SqlSessionTemplate sqlSessionTemplate,
+			List<? extends DataPermissionEntityService<?, ?>> resourceServices)
 	{
 		super(sqlSessionTemplate);
+		this.resourceServices = resourceServices;
+	}
+
+	public List<? extends DataPermissionEntityService<?, ?>> getResourceServices()
+	{
+		return resourceServices;
+	}
+
+	public void setResourceServices(List<? extends DataPermissionEntityService<?, ?>> resourceServices)
+	{
+		this.resourceServices = resourceServices;
+	}
+
+	@Override
+	public String getResourceType()
+	{
+		return Authorization.AUTHORIZATION_RESOURCE_TYPE;
 	}
 
 	@Override
 	public boolean add(User user, Authorization entity) throws PermissionDeniedException
 	{
-		// 只有管理员才可以模式匹配授权
-		if (!user.isAdmin() && entity.isResourceTypePattern())
-			throw new PermissionDeniedException();
-
-		// TODO 校验用户是否对此资源有授权的权限
-
+		checkCanSaveAuthorization(user, entity);
 		return super.add(user, entity);
 	}
 
 	@Override
 	public boolean update(User user, Authorization entity) throws PermissionDeniedException
 	{
-		// 只有管理员才可以模式匹配授权
-		if (!user.isAdmin() && entity.isResourceTypePattern())
-			throw new PermissionDeniedException();
-
-		// TODO 校验用户是否对此资源有授权的权限
-
+		checkCanSaveAuthorization(user, entity);
 		return super.update(user, entity);
+	}
+
+	@Override
+	public Authorization getByStringId(User user, String id) throws PermissionDeniedException
+	{
+		return super.getById(user, id);
 	}
 
 	@Override
@@ -132,6 +152,55 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 		return super.pagingQuery(statement, pagingQuery, params);
 	}
 
+	/**
+	 * 检查用户是否可以保存授权。
+	 * 
+	 * @param user
+	 * @param authorization
+	 */
+	protected void checkCanSaveAuthorization(User user, Authorization authorization)
+	{
+		if (user.isAdmin())
+			return;
+
+		// 只有管理员才可以模式匹配授权
+		if (authorization.isResourceTypePattern())
+			throw new PermissionDeniedException();
+
+		// 检查用户是否有对应资源的授权权限
+
+		String resourceId = authorization.getResource();
+		String resourceType = authorization.getResourceType();
+
+		if (isEmpty(resourceId) || isEmpty(resourceType))
+			throw new IllegalArgumentException();
+
+		DataPermissionEntityService<?, ?> resourceService = null;
+
+		if (this.resourceServices != null)
+		{
+			for (DataPermissionEntityService<?, ?> rs : this.resourceServices)
+			{
+				if (resourceType.equals(rs.getResourceType()))
+				{
+					resourceService = rs;
+					break;
+				}
+			}
+		}
+
+		if (resourceService == null)
+			throw new PermissionDeniedException();
+
+		DataPermissionEntity<?> resourceEntity = resourceService.getByStringId(user, resourceId);
+
+		if (resourceEntity == null)
+			throw new PermissionDeniedException();
+
+		if (!Authorization.canAuthorize(resourceEntity, user))
+			throw new PermissionDeniedException();
+	}
+
 	protected AuthorizationQueryContext setAuthorizationQueryContext(Map<String, Object> params)
 	{
 		AuthorizationQueryContext context = AuthorizationQueryContext.get();
@@ -169,7 +238,7 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
-		addDataPermissionParameters(params, user, Authorization.RESOURCE_TYPE_AUTHORIZATION, false, true);
+		addDataPermissionParameters(params, user, getResourceType(), false, true);
 	}
 
 	@Override

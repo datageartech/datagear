@@ -633,6 +633,11 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		return false;
 	}
 
+	protected boolean isEmpty(String s)
+	{
+		return (s == null || s.isEmpty());
+	}
+
 	/**
 	 * 构建参数映射表。
 	 * 

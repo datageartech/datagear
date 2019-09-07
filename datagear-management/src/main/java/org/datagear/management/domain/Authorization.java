@@ -17,11 +17,8 @@ public class Authorization extends AbstractStringIdEntity
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 授权资源类型：数据源 */
-	public static final String RESOURCE_TYPE_DATA_SOURCE = "DATA_SOURCE";
-
-	/** 授权资源类型：授权 */
-	public static final String RESOURCE_TYPE_AUTHORIZATION = "AUTHORIZATION";
+	/** 授权资源类型 */
+	public static final String AUTHORIZATION_RESOURCE_TYPE = "AUTHORIZATION";
 
 	/**
 	 * 模式匹配资源类型的后缀，例如："DATA_SOURCE_PATTERN"，表示数据源资源模式匹配授权

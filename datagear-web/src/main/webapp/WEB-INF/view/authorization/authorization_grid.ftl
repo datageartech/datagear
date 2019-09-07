@@ -172,6 +172,7 @@ String titleMessageKey 标题标签I18N关键字，不允许null
 	</#if>
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, url);
 	po.initDataTable(tableSettings);
+	po.bindResizeDataTable();
 })
 (${pageId});
 </script>
