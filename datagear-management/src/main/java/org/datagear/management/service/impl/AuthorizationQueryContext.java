@@ -26,6 +26,9 @@ public class AuthorizationQueryContext implements Serializable
 	/** 结果集中的全部匿名用户标签 */
 	private String principalAnonymousLabel = Authorization.PRINCIPAL_ANONYMOUS;
 
+	/** 权限值标签 */
+	private EnumValueLabel<Integer>[] permissionLabels;
+
 	/** 指定查询资源类型 */
 	private String resourceType = null;
 
@@ -52,6 +55,21 @@ public class AuthorizationQueryContext implements Serializable
 	public void setPrincipalAnonymousLabel(String principalAnonymousLabel)
 	{
 		this.principalAnonymousLabel = principalAnonymousLabel;
+	}
+
+	public boolean hasPermissionLabels()
+	{
+		return (this.permissionLabels != null && this.permissionLabels.length > 0);
+	}
+
+	public EnumValueLabel<Integer>[] getPermissionLabels()
+	{
+		return permissionLabels;
+	}
+
+	public void setPermissionLabels(EnumValueLabel<Integer>[] permissionLabels)
+	{
+		this.permissionLabels = permissionLabels;
 	}
 
 	public boolean hasResourceType()

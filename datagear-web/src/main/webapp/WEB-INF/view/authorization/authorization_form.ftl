@@ -2,6 +2,7 @@
 <#include "../include/html_doctype.ftl">
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
+ResourceMeta resourceMeta 资源元信息，不允许null
 formAction 表单提交action，允许为null
 readonly 是否只读操作，允许为null
 -->
@@ -9,42 +10,47 @@ readonly 是否只读操作，允许为null
 <#assign readonly=(readonly!false)>
 <#assign isAdd=(formAction == 'saveAdd')>
 <#assign Authorization=statics['org.datagear.management.domain.Authorization']>
-<#assign Schema=statics['org.datagear.management.domain.Schema']>
-<#assign resourceType=((authorization.resourceType)!Schema.AUTHORIZATION_RESOURCE_TYPE)>
-<#assign resourceTypePattern=Schema.AUTHORIZATION_RESOURCE_TYPE + Authorization.PATTERN_RESOURCE_TYPE_SUFFIX>
+<#assign resourceTypePattern=resourceMeta.resourceType + Authorization.PATTERN_RESOURCE_TYPE_SUFFIX>
+
+<#assign resourceType=((authorization.resourceType)!resourceMeta.resourceType)>
 <#assign principalType=((authorization.principalType)!Authorization.PRINCIPAL_TYPE_USER)>
-<#assign permission=((authorization.permission)!Schema.PERMISSION_TABLE_DATA_READ)>
+<#assign permission=((authorization.permission)!resourceMeta.permissionMetas[0].permission)>
 <#assign enabled=(((authorization.enabled)!true)?string('true', 'false'))>
-<#assign isResourceTypePattern=(resourceType != Schema.AUTHORIZATION_RESOURCE_TYPE)>
+<#assign isResourceTypePattern=(resourceType == resourceTypePattern)>
 <html>
 <head>
 <#include "../include/html_head.ftl">
-<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /> - <@spring.message code='${resourceMeta.resouceTypeLabelKey}' /></title>
 </head>
 <body>
 <div id="${pageId}" class="page-form page-form-authorization">
-	<form id="${pageId}-form" action="${contextPath}/authorization/${formAction}" method="POST">
+	<form id="${pageId}-form" action="${contextPath}/authorization/${resourceMeta.resourceType}/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(authorization.id)!''?html}" />
 			<input type="hidden" name="resource" value="${(authorization.resource)!''?html}" />
 			<input type="hidden" name="principal" value="${(authorization.principal)!''?html}" />
+			<#if resourceMeta.supportPattern>
 			<div class="form-item form-item-resourceType">
 				<div class="form-item-label">
-					<label><@spring.message code='authorization.resourceType' /></label>
+					<label>&nbsp;</label>
 				</div>
 				<div class="form-item-value">
 					<div class="resourceType-radios">
-						<label for="${pageId}-resourceType_0"><@spring.message code='authorization.resourceType.DATA_SOURCE' /></label>
-			   			<input type="radio" id="${pageId}-resourceType_0" name="resourceType" value="${Schema.AUTHORIZATION_RESOURCE_TYPE}" />
-						<label for="${pageId}-resourceType_1" title="<@spring.message code='authorization.resourceType.DATA_SOURCE_PATTERN.desc' />"><@spring.message code='authorization.resourceType.DATA_SOURCE_PATTERN' /></label>
+						<label for="${pageId}-resourceType_0" title="<@spring.message code='${resourceMeta.selectResourceLabelDescKey}' />">
+							<@spring.message code='${resourceMeta.selectResourceLabelKey}' />
+						</label>
+			   			<input type="radio" id="${pageId}-resourceType_0" name="resourceType" value="${resourceMeta.resourceType}" />
+						<label for="${pageId}-resourceType_1" title="<@spring.message code='${resourceMeta.fillPatternLabelDescKey}' />">
+							<@spring.message code='${resourceMeta.fillPatternLabelKey}' />
+						</label>
 			   			<input type="radio" id="${pageId}-resourceType_1" name="resourceType" value="${resourceTypePattern}"  />
 		   			</div>
 				</div>
 			</div>
 			<div class="form-item form-item-resource-name-pattern">
 				<div class="form-item-label">
-					<label><@spring.message code='authorization.resource' /></label>
+					<label><@spring.message code='${resourceMeta.resouceTypeLabelKey}' /></label>
 				</div>
 				<div class="form-item-value">
 					<input type="text" name="resourceNameForPattern" value="${(!isResourceTypePattern)?string('', (authorization.resourceName)!'')}" class="ui-widget ui-widget-content" />
@@ -54,9 +60,12 @@ readonly 是否只读操作，允许为null
 					</#if>
 				</div>
 			</div>
+			<#else>
+			<input type="hidden" name="resourceType" value="${resourceType}" />
+			</#if>
 			<div class="form-item form-item-resource-name-entity">
 				<div class="form-item-label">
-					<label><@spring.message code='authorization.resource' /></label>
+					<label><@spring.message code='${resourceMeta.resouceTypeLabelKey}' /></label>
 				</div>
 				<div class="form-item-value">
 					<input type="text" name="resourceNameForEntity" value="${isResourceTypePattern?string('', (authorization.resourceName)!'')}" class="ui-widget ui-widget-content" readonly="readonly" />
@@ -134,14 +143,12 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item-value">
 					<div class="permission-radios">
-						<label for="${pageId}-permission_0" title="<@spring.message code='authorization.permission.Schema.PERMISSION_TABLE_DATA_READ.desc' />"><@spring.message code='authorization.permission.READ' /></label>
-			   			<input type="radio" id="${pageId}-permission_0" name="permission" value="${Schema.PERMISSION_TABLE_DATA_READ}" />
-						<label for="${pageId}-permission_1" title="<@spring.message code='authorization.permission.Schema.PERMISSION_TABLE_DATA_EDIT.desc' />"><@spring.message code='authorization.permission.EDIT' /></label>
-			   			<input type="radio" id="${pageId}-permission_1" name="permission" value="${Schema.PERMISSION_TABLE_DATA_EDIT}" />
-						<label for="${pageId}-permission_2" title="<@spring.message code='authorization.permission.Schema.PERMISSION_TABLE_DATA_DELETE.desc' />"><@spring.message code='authorization.permission.DELETE' /></label>
-			   			<input type="radio" id="${pageId}-permission_2" name="permission" value="${Schema.PERMISSION_TABLE_DATA_DELETE}" />
-						<label for="${pageId}-permission_3"><@spring.message code='authorization.permission.NONE' /></label>
-			   			<input type="radio" id="${pageId}-permission_3" name="permission" value="${Authorization.PERMISSION_NONE_START}" />
+						<#list resourceMeta.permissionMetas as pm>
+						<label for="${pageId}-permission_${pm?counter}" title="<@spring.message code='${pm.permissionLabelDescKey}' />">
+							<@spring.message code='${pm.permissionLabelKey}' />
+						</label>
+			   			<input type="radio" id="${pageId}-permission_${pm?counter}" name="permission" value="${pm.permission}" />
+						</#list>
 		   			</div>
 				</div>
 			</div>
@@ -196,9 +203,11 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
+			<#if resourceMeta.supportPattern>
 			var resourceType = po.element("input[name='resourceType']:checked").val();
 			if(resourceType == '${resourceTypePattern}')
 				po.element("input[name='resource']").val(po.element("input[name='resourceNameForPattern']").val());
+			</#if>
 			
 			$(form).ajaxSubmit(
 			{
@@ -223,17 +232,17 @@ readonly 是否只读操作，允许为null
 		{
 			pageParam :
 			{
-				submit : function(schema)
+				submit : function(res)
 				{
-					po.element("input[name='resource']").val(schema.id);
-					po.element("input[name='resourceNameForEntity']").val(schema.title);
+					po.element("input[name='resource']").val(res.${resourceMeta.selectResourceIdField});
+					po.element("input[name='resourceNameForEntity']").val(res.${resourceMeta.selectResourceNameField});
 				}
 			}
 		};
 		
 		$.setGridPageHeightOption(options);
 		
-		po.open("${contextPath}/schema/select", options);
+		po.open("${contextPath}${resourceMeta.selectResourceURL}", options);
 	});
 	
 	po.element(".principal-user-select-button").click(function()
@@ -282,6 +291,7 @@ readonly 是否只读操作，允许为null
 	});
 	</#if>
 	
+	<#if resourceMeta.supportPattern>
 	po.element("input[name='resourceType']").on("change", function()
 	{
 		var val = $(this).val();
@@ -291,7 +301,7 @@ readonly 是否只读操作，允许为null
 		var $resourceNameForPattern = po.element("input[name='resourceNameForPattern']");
 		var $resourceNameForEntity = po.element("input[name='resourceNameForEntity']");
 		
-		if(val == '${Schema.AUTHORIZATION_RESOURCE_TYPE}')
+		if(val == '${resourceMeta.resourceType}')
 		{
 			$formItemForPattern.hide();
 			$formItemForEntity.show();
@@ -320,6 +330,15 @@ readonly 是否只读操作，允许为null
 			</#if>
 		}
 	});
+	<#else>
+		<#if !readonly>
+			po.element("input[name='resourceNameForEntity']").rules("add",
+			{
+				"required" : true,
+				messages : {"required" : "<@spring.message code='validation.required' />"}
+			});
+		</#if>
+	</#if>
 	
 	po.element("input[name='principalType']").on("change", function()
 	{
@@ -349,9 +368,11 @@ readonly 是否只读操作，允许为null
 		</#if>
 	});
 	
-	po.element("input[name='resourceType'][value='${resourceType}']").attr("checked", "checked").change();
-	po.element("input[name='resourceType']").checkboxradio({icon:false});
-	po.element(".resourceType-radios").controlgroup();
+	<#if resourceMeta.supportPattern>
+		po.element("input[name='resourceType'][value='${resourceType}']").attr("checked", "checked").change();
+		po.element("input[name='resourceType']").checkboxradio({icon:false});
+		po.element(".resourceType-radios").controlgroup();
+	</#if>
 	
 	po.element("input[name='principalType'][value='${principalType}']").attr("checked", "checked").change();
 	po.element("input[name='principalType']").checkboxradio({icon:false});
@@ -366,16 +387,20 @@ readonly 是否只读操作，允许为null
 	po.element(".enabled-radios").controlgroup();
 	
 	<#if appointResource??>
-		po.element("input[name='resourceType'][value='${Schema.AUTHORIZATION_RESOURCE_TYPE}']").attr("checked", "checked").change();
+		<#if resourceMeta.supportPattern>
+			po.element("input[name='resourceType'][value='${resourceMeta.resourceType}']").attr("checked", "checked").change();
+			po.element(".form-item-resourceType").hide();
+		</#if>
 		po.element("input[name='resource']").val("${appointResource}");
-		po.element(".form-item-resourceType").hide();
 		po.element(".form-item-resource-name-entity").hide();
 	</#if>
 	
 	<#--编辑时禁设资源类型，因为管理员也可能编辑普通用户设置的授权，而它们不允许是通配符-->
 	<#if formAction == 'saveEdit'>
-	po.element("input[name='resourceType'][value!='${resourceType}']").attr("disabled", "disabled");
-	po.element("input[name='resourceType']").checkboxradio("refresh");
+		<#if resourceMeta.supportPattern>
+			po.element("input[name='resourceType'][value!='${resourceType}']").attr("disabled", "disabled");
+			po.element("input[name='resourceType']").checkboxradio("refresh");
+		</#if>
 	</#if>
 })
 (${pageId});

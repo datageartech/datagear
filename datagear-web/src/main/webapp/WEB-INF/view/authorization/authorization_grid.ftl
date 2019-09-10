@@ -2,12 +2,13 @@
 <#include "../include/html_doctype.ftl">
 <#--
 String titleMessageKey 标题标签I18N关键字，不允许null
+ResourceMeta resourceMeta 资源元信息，不允许null
 -->
 <#assign AuthorizationController=statics['org.datagear.web.controller.AuthorizationController']>
 <html>
 <head>
 <#include "../include/html_head.ftl">
-<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /> - <@spring.message code='${resourceMeta.resouceTypeLabelKey}' /></title>
 </head>
 <body class="fill-parent">
 <#if !isAjaxRequest>
@@ -42,7 +43,6 @@ String titleMessageKey 标题标签I18N关键字，不允许null
 <#include "../include/page_obj_searchform_js.ftl">
 <#include "../include/page_obj_grid.ftl">
 <#include "../include/page_obj_data_permission.ftl">
-<#include "../include/page_obj_data_permission_ds_table.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -50,7 +50,7 @@ String titleMessageKey 标题标签I18N关键字，不允许null
 	
 	po.url = function(action)
 	{
-		return "${contextPath}/authorization/" + action;
+		return "${contextPath}/authorization/${resourceMeta.resourceType}/" + action;
 	};
 	
 	po.element("input[name=addButton]").click(function()
@@ -151,17 +151,11 @@ String titleMessageKey 标题标签I18N关键字，不允许null
 		return data;
 	};
 	
-	var columnPermission = $.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.permission' />", "permission");
-	columnPermission.render = function(data, type, row, meta)
-	{
-		return po.toTableDataPermissionLabel(data);
-	};
-	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='authorization.resource' />"), "resourceName"),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='authorization.principal' />"), "principalName"),
-		columnPermission,
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.permission' />", "permissionLabel"),
 		columnEnabled,
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.createUser' />", "createUser.nameLabel")
 	];

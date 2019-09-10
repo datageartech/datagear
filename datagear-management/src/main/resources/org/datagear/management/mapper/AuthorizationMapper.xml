@@ -177,7 +177,20 @@
 					)
 					ELSE A.AUTH_PRINCIPAL
 				END
-			) AS ${_iq_}principalName${_iq_}
+			) AS ${_iq_}principalName${_iq_},
+			<choose><when test="queryContext.permissionLabels != null">
+			(
+				CASE A.AUTH_PERMISSION
+					<foreach collection="queryContext.permissionLabels" item="item">
+					WHEN ${item.value} THEN '${item.label}'
+					</foreach>
+					ELSE ''
+				END
+			)
+			</when><otherwise>
+			A.AUTH_PERMISSION
+			</otherwise></choose>
+			 AS ${_iq_}permissionLabel${_iq_}
 		FROM
 			(<include refid="queryViewWithCreateUser" />) A
 		<if test="resourceNameQueryView != null">

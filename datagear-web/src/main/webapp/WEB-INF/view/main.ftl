@@ -402,7 +402,7 @@
 				{
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/authorization/query", options);
+					po.open(contextPath+"/authorization/${statics['org.datagear.management.domain.Schema'].AUTHORIZATION_RESOURCE_TYPE}/query", options);
 				}
 				else if($item.hasClass("system-set-personal-set"))
 				{
@@ -705,7 +705,7 @@
 					
 					var options = {};
 					$.setGridPageHeightOption(options);
-					po.open(contextPath+"/authorization/query?${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}="+encodeURIComponent(schemaId), options);
+					po.open(contextPath+"/authorization/${statics['org.datagear.management.domain.Schema'].AUTHORIZATION_RESOURCE_TYPE}/query?${statics['org.datagear.web.controller.AuthorizationController'].PARAM_APPOINT_RESOURCE}="+encodeURIComponent(schemaId), options);
 				}
 				else if($item.hasClass("schema-operation-reload"))
 				{

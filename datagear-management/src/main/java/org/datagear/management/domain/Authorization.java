@@ -93,6 +93,9 @@ public class Authorization extends AbstractStringIdEntity
 	/** 授权主体名称 */
 	private String principalName;
 
+	/** 权限标签 */
+	private String permissionLabel;
+
 	/** 此记录的数据权限 */
 	private int dataPermission;
 
@@ -203,6 +206,16 @@ public class Authorization extends AbstractStringIdEntity
 	public void setPrincipalName(String principalName)
 	{
 		this.principalName = principalName;
+	}
+
+	public String getPermissionLabel()
+	{
+		return permissionLabel;
+	}
+
+	public void setPermissionLabel(String permissionLabel)
+	{
+		this.permissionLabel = permissionLabel;
 	}
 
 	@Override
