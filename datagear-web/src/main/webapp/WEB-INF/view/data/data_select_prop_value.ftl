@@ -53,6 +53,8 @@ boolean isMultipleSelect 是否多选，默认为false
 <#include "include/data_page_obj_searchform_js.ftl">
 <#include "../include/page_obj_pagination.ftl">
 <#include "include/data_page_obj_grid.ftl">
+<#include "../include/page_obj_data_permission.ftl">
+<#include "../include/page_obj_data_permission_ds_table.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -62,6 +64,15 @@ boolean isMultipleSelect 是否多选，默认为false
 	po.conditionSource = $.unref(<@writeJson var=conditionSource />);
 	
 	$.initButtons(po.element(".operation"));
+	
+	if(!po.canEditTableData(${schema.dataPermission}))
+	{
+		po.element("input[name=addButton]").attr("disabled", "disabled").hide();
+		po.element("input[name=editButton]").attr("disabled", "disabled").hide();
+	}
+	
+	if(!po.canReadTableData(${schema.dataPermission}))
+		po.element("input[name=viewButton]").attr("disabled", "disabled").hide();
 	
 	po.onModel(function(model)
 	{

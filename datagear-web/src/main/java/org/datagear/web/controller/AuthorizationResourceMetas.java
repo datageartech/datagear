@@ -13,6 +13,9 @@ import org.datagear.management.domain.Schema;
 
 /**
  * 授权资源元信息。
+ * <p>
+ * {@linkplain AuthorizationController}使用此类提供的元信息绘制授权页面。
+ * </p>
  * 
  * @author datagear@163.com
  *

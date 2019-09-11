@@ -78,6 +78,8 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 <#if isAllowEditGrid>
 <#include "include/data_page_obj_edit_grid_js.ftl">
 </#if>
+<#include "../include/page_obj_data_permission.ftl">
+<#include "../include/page_obj_data_permission_ds_table.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -92,6 +94,18 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，isCli
 	</#if>
 	
 	$.initButtons(po.element(".operation"));
+	
+	if(!po.canEditTableData(${schema.dataPermission}))
+	{
+		po.element("input[name=addButton]").attr("disabled", "disabled").hide();
+		po.element("input[name=editButton]").attr("disabled", "disabled").hide();
+	}
+	
+	if(!po.canDeleteTableData(${schema.dataPermission}))
+		po.element("input[name=deleteButton]").attr("disabled", "disabled").hide();
+	
+	if(!po.canReadTableData(${schema.dataPermission}))
+		po.element("input[name=viewButton]").attr("disabled", "disabled").hide();
 	
 	po.buildActionOptions = function(property, extraRequestParams, extraPageParams)
 	{

@@ -71,9 +71,9 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 <#include "include/data_page_obj_grid.ftl">
 <#if !readonly>
 <#include "include/data_page_obj_edit_grid_js.ftl">
+</#if>
 <#include "../include/page_obj_data_permission.ftl">
 <#include "../include/page_obj_data_permission_ds_table.ftl">
-</#if>
 <script type="text/javascript">
 (function(po)
 {
@@ -81,86 +81,76 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 	
 	$.initButtons(po.element(".operation"));
 	
+	if(!po.canEditTableData(${schema.dataPermission}))
+	{
+		po.element("input[name=addButton]").attr("disabled", "disabled").hide();
+		po.element("input[name=editButton]").attr("disabled", "disabled").hide();
+	}
+	
+	if(!po.canDeleteTableData(${schema.dataPermission}))
+		po.element("input[name=deleteButton]").attr("disabled", "disabled").hide();
+	
+	if(!po.canReadTableData(${schema.dataPermission}))
+		po.element("input[name=viewButton]").attr("disabled", "disabled").hide();
+	
 	po.onModel(function(model)
 	{
 		<#if !readonly>
-		if(po.canEditTableData(${schema.dataPermission}))
+		po.element("input[name=addButton]").click(function()
 		{
-			po.element("input[name=addButton]").click(function()
-			{
-				po.open(po.url("", "add", "batchSet=true"), { pinTitleButton : true });
-			});
-			
-			po.element("input[name=editButton]").click(function()
-			{
-				po.executeOnSelect(function(row)
-				{
-					var data = {"data" : row};
-					
-					po.open(po.url("edit"),
-					{
-						data : data,
-						pinTitleButton : true
-					});
-				});
-			});
-		}
-		else
-		{
-			po.element("input[name=addButton]").button("disable");
-			po.element("input[name=editButton]").button("disable");
-		}
+			po.open(po.url("", "add", "batchSet=true"), { pinTitleButton : true });
+		});
 		
-		if(po.canDeleteTableData(${schema.dataPermission}))
+		po.element("input[name=editButton]").click(function()
 		{
-			po.element("input[name=deleteButton]").click(function()
+			po.executeOnSelect(function(row)
 			{
-				po.executeOnSelects(function(rows)
+				var data = {"data" : row};
+				
+				po.open(po.url("edit"),
 				{
-					<#assign messageArgs=['"+rows.length+"'] />
-					po.confirm("<@spring.messageArgs code='data.confirmDelete' args=messageArgs />",
-					{
-						"confirm" : function()
-						{
-							var data = {"data" : rows};
-							
-							po.ajaxSubmitForHandleDuplication("delete", data, "<@spring.message code='delete.continueIgnoreDuplicationTemplate' />",
-							{
-								"success" : function()
-								{
-									po.refresh();
-								}
-							});
-						}
-					});
+					data : data,
+					pinTitleButton : true
 				});
 			});
-		}
-		else
+		});
+		
+		po.element("input[name=deleteButton]").click(function()
 		{
-			po.element("input[name=deleteButton]").button("disable");
-		}
+			po.executeOnSelects(function(rows)
+			{
+				<#assign messageArgs=['"+rows.length+"'] />
+				po.confirm("<@spring.messageArgs code='data.confirmDelete' args=messageArgs />",
+				{
+					"confirm" : function()
+					{
+						var data = {"data" : rows};
+						
+						po.ajaxSubmitForHandleDuplication("delete", data, "<@spring.message code='delete.continueIgnoreDuplicationTemplate' />",
+						{
+							"success" : function()
+							{
+								po.refresh();
+							}
+						});
+					}
+				});
+			});
+		});
 		</#if>
 		
-		if(po.canReadTableData(${schema.dataPermission}))
+		po.element("input[name=viewButton]").click(function()
 		{
-			po.element("input[name=viewButton]").click(function()
+			po.executeOnSelect(function(row)
 			{
-				po.executeOnSelect(function(row)
+				var data = {"data" : row};
+				
+				po.open(po.url("view"),
 				{
-					var data = {"data" : row};
-					
-					po.open(po.url("view"),
-					{
-						data : data
-					});
+					data : data
 				});
 			});
-		}
-		else
-		{
-			po.element("input[name=viewButton]").button("disable");
-		}
+		});
 		
 		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(po.conditionSource);
 		po.initConditionPanel();

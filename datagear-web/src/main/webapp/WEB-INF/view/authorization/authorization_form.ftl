@@ -33,7 +33,7 @@ readonly 是否只读操作，允许为null
 			<#if resourceMeta.supportPattern>
 			<div class="form-item form-item-resourceType">
 				<div class="form-item-label">
-					<label>&nbsp;</label>
+					<label><@spring.message code='authorization.resourceType' /></label>
 				</div>
 				<div class="form-item-value">
 					<div class="resourceType-radios">
