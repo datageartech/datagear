@@ -503,14 +503,18 @@
 						{
 							var schema = selNodes[i].original;
 							
-							if(!po.canEdit(schema.dataPermission))
-							{
+							if(!po.canEdit(schema))
 								menuItemEnables["schema-operation-edit"] = false;
-								menuItemEnables["schema-operation-dataimport"] = false;
+							
+							if(!po.canDelete(schema))
+							{
+								menuItemEnables["schema-operation-delete"] = false;
 							}
 							
-							if(!po.canDelete(schema.dataPermission))
-								menuItemEnables["schema-operation-delete"] = false;
+							if(!po.canDeleteTableData(schema))
+							{
+								menuItemEnables["schema-operation-dataimport"] = false;
+							}
 							
 							if(!po.canAuthorize(schema, po.currentUser))
 								menuItemEnables["schema-operation-authorize"] = false;

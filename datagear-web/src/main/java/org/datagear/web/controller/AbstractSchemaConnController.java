@@ -76,16 +76,37 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	}
 
 	/**
-	 * 根据ID查找{@linkplain Schema}。
+	 * 获取指定用户有读权限的{@linkplain Schema}。
+	 * 
+	 * @param user
+	 * @param schemaId
+	 * @return
+	 * @throws PermissionDeniedException
+	 * @throws SchemaNotFoundException
+	 */
+	protected Schema getSchemaForUserNotNull(User user, String schemaId)
+			throws PermissionDeniedException, SchemaNotFoundException
+	{
+		Schema schema = this.schemaService.getById(user, schemaId);
+
+		if (schema == null)
+			throw new SchemaNotFoundException(schemaId);
+
+		return schema;
+	}
+
+	/**
+	 * 获取当前用户有读权限的{@linkplain Schema}。
 	 * 
 	 * @param request
 	 * @param response
 	 * @param schemaId
 	 * @return
+	 * @throws PermissionDeniedException
 	 * @throws SchemaNotFoundException
 	 */
-	protected Schema getSchemaNotNull(HttpServletRequest request, HttpServletResponse response, String schemaId)
-			throws SchemaNotFoundException
+	protected Schema getSchemaForUserNotNull(HttpServletRequest request, HttpServletResponse response, String schemaId)
+			throws PermissionDeniedException, SchemaNotFoundException
 	{
 		User user = WebUtils.getUser(request, response);
 
@@ -193,7 +214,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 		protected void doExecute() throws Throwable
 		{
-			this._schema = getSchemaNotNull(request, response, schemaId);
+			this._schema = getSchemaForUserNotNull(request, response, schemaId);
 
 			springModel.addAttribute("schema", this._schema);
 

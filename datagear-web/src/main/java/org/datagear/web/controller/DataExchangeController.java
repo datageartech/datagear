@@ -190,7 +190,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -209,7 +209,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -269,9 +269,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaNotNull(request, response, schemaId);
+		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
-		checkEditTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
@@ -343,7 +343,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -398,9 +398,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaNotNull(request, response, schemaId);
+		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
-		checkEditTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
@@ -460,7 +460,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -517,9 +517,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaNotNull(request, response, schemaId);
+		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
-		checkEditTableDataPermission(schema, user);
+		checkDeleteTableDataPermission(schema, user);
 
 		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
 
@@ -590,7 +590,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
 					Schema schema) throws Throwable
 			{
-				checkEditTableDataPermission(schema, user);
+				checkDeleteTableDataPermission(schema, user);
 			}
 		}.execute();
 
@@ -746,7 +746,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaNotNull(request, response, schemaId);
+		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkReadTableDataPermission(schema, user);
 
@@ -853,7 +853,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaNotNull(request, response, schemaId);
+		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkReadTableDataPermission(schema, user);
 
@@ -968,7 +968,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
 
-		Schema schema = getSchemaNotNull(request, response, schemaId);
+		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkReadTableDataPermission(schema, user);
 

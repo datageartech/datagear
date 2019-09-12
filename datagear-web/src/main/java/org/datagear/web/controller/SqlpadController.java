@@ -170,7 +170,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	{
 		final User user = WebUtils.getUser(request, response);
 
-		Schema schema = getSchemaNotNull(request, response, schemaId);
+		Schema schema = getSchemaForUserNotNull(user, schemaId);
 
 		checkReadTableDataPermission(schema, user);
 
