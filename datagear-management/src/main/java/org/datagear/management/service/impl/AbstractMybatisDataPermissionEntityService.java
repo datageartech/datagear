@@ -119,7 +119,12 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		boolean[] re = new boolean[ids.length];
 
 		for (int i = 0; i < ids.length; i++)
-			re[i] = deleteById(user, ids[i]);
+		{
+			Map<String, Object> params = buildParamMap();
+			addDataPermissionParameters(params, user);
+
+			re[i] = deleteById(ids[i], params);
+		}
 
 		return re;
 	}

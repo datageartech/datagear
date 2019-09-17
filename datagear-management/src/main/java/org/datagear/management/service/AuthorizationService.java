@@ -19,6 +19,15 @@ import org.datagear.persistence.Query;
 public interface AuthorizationService extends DataPermissionEntityService<String, Authorization>
 {
 	/**
+	 * 删除资源授权。
+	 * 
+	 * @param resourceType
+	 * @param resources
+	 * @return
+	 */
+	int deleteByResource(String resourceType, String... resources);
+
+	/**
 	 * 对于支持模式匹配授权的资源，获取指定模式匹配源的权限。
 	 * <p>
 	 * 返回{@code null}表示无对应的授权。

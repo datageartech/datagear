@@ -115,6 +115,17 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
+	protected boolean deleteById(String id, Map<String, Object> params)
+	{
+		boolean deleted = super.deleteById(id, params);
+
+		if (deleted)
+			this.authorizationService.deleteByResource(Schema.AUTHORIZATION_RESOURCE_TYPE, id);
+
+		return deleted;
+	}
+
+	@Override
 	protected List<Schema> query(String statement, Query query, Map<String, Object> params)
 	{
 		List<Schema> schemas = super.query(statement, query, params);

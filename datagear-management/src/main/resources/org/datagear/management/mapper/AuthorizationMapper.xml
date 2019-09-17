@@ -34,6 +34,16 @@
 			AUTH_ID = #{id}
 	</delete>
 	
+	<delete id="deleteByResource">
+		DELETE FROM DATAGEAR_AUTHORIZATION
+		WHERE
+			AUTH_RESOURCE_TYPE = #{resourceType}
+			AND
+			(
+				<foreach item="item" collection="resources" separator=" OR ">AUTH_RESOURCE = #{item}</foreach>
+			)
+	</delete>
+	
 	<select id="getById" resultType="org.datagear.management.domain.Authorization">
 		SELECT
 			T.*

@@ -94,6 +94,16 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	@Override
+	public int deleteByResource(String resourceType, String... resources)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("resourceType", resourceType);
+		params.put("resources", resources);
+
+		return updateMybatis("deleteByResource", params);
+	}
+
+	@Override
 	public Integer getPermissionForPatternSource(User user, String resourceType, String patternSource)
 	{
 		if (user.isAdmin())
