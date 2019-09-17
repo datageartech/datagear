@@ -25,6 +25,7 @@ import org.datagear.dbmodel.DatabaseModelResolver;
 import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.User;
 import org.datagear.model.Model;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
@@ -49,6 +50,8 @@ public class SqlpadExecutionService
 	private DatabaseModelResolver databaseModelResolver;
 
 	private ModelSqlSelectService modelSqlSelectService = new ModelSqlSelectService();
+
+	private SqlPermissionChecker sqlPermissionChecker = new SqlPermissionChecker();
 
 	private ExecutorService _executorService = Executors.newCachedThreadPool();
 
@@ -119,11 +122,22 @@ public class SqlpadExecutionService
 		this.modelSqlSelectService = modelSqlSelectService;
 	}
 
+	public SqlPermissionChecker getSqlPermissionChecker()
+	{
+		return sqlPermissionChecker;
+	}
+
+	public void setSqlPermissionChecker(SqlPermissionChecker sqlPermissionChecker)
+	{
+		this.sqlPermissionChecker = sqlPermissionChecker;
+	}
+
 	/**
 	 * 提交SQL执行。
 	 * 
-	 * @param sqlpadId
+	 * @param user
 	 * @param schema
+	 * @param sqlpadId
 	 * @param sqlStatements
 	 * @param commitMode
 	 * @param exceptionHandleMode
@@ -132,14 +146,15 @@ public class SqlpadExecutionService
 	 * @param locale
 	 * @return
 	 */
-	public boolean submit(String sqlpadId, Schema schema, List<SqlStatement> sqlStatements, CommitMode commitMode,
-			ExceptionHandleMode exceptionHandleMode, int overTimeThreashold, int resultsetFetchSize, Locale locale)
+	public boolean submit(User user, Schema schema, String sqlpadId, List<SqlStatement> sqlStatements,
+			CommitMode commitMode, ExceptionHandleMode exceptionHandleMode, int overTimeThreashold,
+			int resultsetFetchSize, Locale locale)
 	{
 		String sqlpadChannelId = getSqlpadChannelId(sqlpadId);
 
-		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(schema, sqlpadId, sqlpadChannelId,
-				sqlpadCometdService, sqlStatements, commitMode, exceptionHandleMode, overTimeThreashold,
-				resultsetFetchSize, locale);
+		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(user, schema, sqlpadId,
+				sqlpadChannelId, sqlpadCometdService, sqlStatements, commitMode, exceptionHandleMode,
+				overTimeThreashold, resultsetFetchSize, locale);
 
 		SqlpadExecutionRunnable old = this._sqlpadExecutionRunnableMap.putIfAbsent(sqlpadId, sqlpadExecutionRunnable);
 
@@ -250,6 +265,8 @@ public class SqlpadExecutionService
 	 */
 	protected class SqlpadExecutionRunnable implements Runnable
 	{
+		private User user;
+
 		private Schema schema;
 
 		private String sqlpadId;
@@ -282,11 +299,12 @@ public class SqlpadExecutionService
 			super();
 		}
 
-		public SqlpadExecutionRunnable(Schema schema, String sqlpadId, String sqlpadChannelId,
+		public SqlpadExecutionRunnable(User user, Schema schema, String sqlpadId, String sqlpadChannelId,
 				SqlpadCometdService sqlpadCometdService, List<SqlStatement> sqlStatements, CommitMode commitMode,
 				ExceptionHandleMode exceptionHandleMode, int overTimeThreashold, int resultsetFetchSize, Locale locale)
 		{
 			super();
+			this.user = user;
 			this.schema = schema;
 			this.sqlpadId = sqlpadId;
 			this.sqlpadChannelId = sqlpadChannelId;
@@ -297,6 +315,16 @@ public class SqlpadExecutionService
 			this.overTimeThreashold = overTimeThreashold;
 			this.resultsetFetchSize = resultsetFetchSize;
 			this.locale = locale;
+		}
+
+		public User getUser()
+		{
+			return user;
+		}
+
+		public void setUser(User user)
+		{
+			this.user = user;
 		}
 
 		public Schema getSchema()
@@ -459,23 +487,33 @@ public class SqlpadExecutionService
 
 					SqlStatement sqlStatement = sqlStatements.get(i);
 
-					try
+					if (!SqlpadExecutionService.this.sqlPermissionChecker.hasPermission(user, schema, sqlStatement))
 					{
-						execute(cn, st, sqlExecutionStat, sqlStatement, i);
-						sqlExecutionStat.increaseSuccessCount();
-					}
-					catch (SQLException e)
-					{
+						this.sqlpadCometdService.sendSqlExceptionMessage(_sqlpadServerChannel, sqlStatement, i,
+								getMessage(this.locale, "sqlpad.executionSQLPermissionDenied"));
+
 						sqlExecutionStat.increaseExceptionCount();
-
-						this.sqlpadCometdService.sendSqlExceptionMessage(_sqlpadServerChannel, sqlStatement, i, e,
-								getMessage(this.locale, "sqlpad.executionSQLException", e.getMessage()));
-
-						if (ExceptionHandleMode.IGNORE.equals(this.exceptionHandleMode))
-							;
-						else
+					}
+					else
+					{
+						try
 						{
-							break;
+							execute(cn, st, sqlExecutionStat, sqlStatement, i);
+							sqlExecutionStat.increaseSuccessCount();
+						}
+						catch (SQLException e)
+						{
+							sqlExecutionStat.increaseExceptionCount();
+
+							this.sqlpadCometdService.sendSqlExceptionMessage(_sqlpadServerChannel, sqlStatement, i, e,
+									getMessage(this.locale, "sqlpad.executionSQLException", e.getMessage()));
+
+							if (ExceptionHandleMode.IGNORE.equals(this.exceptionHandleMode))
+								;
+							else
+							{
+								break;
+							}
 						}
 					}
 				}

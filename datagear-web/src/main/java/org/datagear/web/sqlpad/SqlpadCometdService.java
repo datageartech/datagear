@@ -91,7 +91,7 @@ public class SqlpadCometdService extends AbstractService
 	}
 
 	/**
-	 * 发送执行SQL异常消息。
+	 * 发送SQL异常消息。
 	 * 
 	 * @param channel
 	 * @param sqlStatement
@@ -101,6 +101,22 @@ public class SqlpadCometdService extends AbstractService
 	 */
 	public void sendSqlExceptionMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex,
 			SQLException e, String content)
+	{
+		SQLExceptionMessageData messageData = new SQLExceptionMessageData(sqlStatement, sqlStatementIndex, content);
+
+		channel.publish(getServerSession(), messageData);
+	}
+
+	/**
+	 * 发送SQL异常消息。
+	 * 
+	 * @param channel
+	 * @param sqlStatement
+	 * @param sqlStatementIndex
+	 * @param content
+	 */
+	public void sendSqlExceptionMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex,
+			String content)
 	{
 		SQLExceptionMessageData messageData = new SQLExceptionMessageData(sqlStatement, sqlStatementIndex, content);
 
@@ -121,6 +137,18 @@ public class SqlpadCometdService extends AbstractService
 		if (trace)
 			messageData.setDetailTrace(t);
 
+		channel.publish(getServerSession(), messageData);
+	}
+
+	/**
+	 * 发送异常消息。
+	 * 
+	 * @param channel
+	 * @param content
+	 */
+	public void sendExceptionMessage(ServerChannel channel, String content)
+	{
+		ExceptionMessageData messageData = new ExceptionMessageData(content);
 		channel.publish(getServerSession(), messageData);
 	}
 

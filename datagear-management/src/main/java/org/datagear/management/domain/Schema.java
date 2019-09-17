@@ -195,19 +195,34 @@ public class Schema extends AbstractStringIdEntity
 		this.password = null;
 	}
 
+	public static boolean isReadTableDataPermission(int permission)
+	{
+		return permission >= PERMISSION_TABLE_DATA_READ && permission < PERMISSION_TABLE_DATA_EDIT;
+	}
+
+	public static boolean isEditTableDataPermission(int permission)
+	{
+		return permission >= PERMISSION_TABLE_DATA_EDIT && permission < PERMISSION_TABLE_DATA_DELETE;
+	}
+
+	public static boolean isDeleteTableDataPermission(int permission)
+	{
+		return permission >= PERMISSION_TABLE_DATA_DELETE;
+	}
+
 	public static boolean canReadTableData(int permission)
 	{
-		return PERMISSION_TABLE_DATA_READ <= permission;
+		return permission >= PERMISSION_TABLE_DATA_READ;
 	}
 
 	public static boolean canEditTableData(int permission)
 	{
-		return PERMISSION_TABLE_DATA_EDIT <= permission;
+		return permission >= PERMISSION_TABLE_DATA_EDIT;
 	}
 
 	public static boolean canDeleteTableData(int permission)
 	{
-		return PERMISSION_TABLE_DATA_DELETE <= permission;
+		return permission >= PERMISSION_TABLE_DATA_DELETE;
 	}
 
 	@Override

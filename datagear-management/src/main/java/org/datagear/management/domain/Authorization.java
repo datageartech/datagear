@@ -97,7 +97,7 @@ public class Authorization extends AbstractStringIdEntity
 	private String permissionLabel;
 
 	/** 此记录的数据权限 */
-	private int dataPermission;
+	private int dataPermission = PERMISSION_NOT_LOADED;
 
 	public Authorization()
 	{

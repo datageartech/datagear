@@ -198,9 +198,7 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		List<SqlStatement> sqlStatements = sqlScriptParser.parseAll();
 
-		// TODO 处理SQL语句执行权限
-
-		this.sqlpadExecutionService.submit(sqlpadId, schema, sqlStatements, commitMode, exceptionHandleMode,
+		this.sqlpadExecutionService.submit(user, schema, sqlpadId, sqlStatements, commitMode, exceptionHandleMode,
 				overTimeThreashold, resultsetFetchSize, WebUtils.getLocale(request));
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
