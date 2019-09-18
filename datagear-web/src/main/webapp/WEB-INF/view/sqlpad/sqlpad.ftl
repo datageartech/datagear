@@ -31,6 +31,8 @@ Schema schema 数据库，不允许为null
 		<input id="sqlDelimiterInput" type="text" class="sql-delimiter-input ui-widget ui-widget-content ui-corner-all" value=";"  title="<@spring.message code='sqlpad.sqlDelimiter' />"/>
 		<button id="insertSqlDelimiterDefineButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.insertSqlDelimiterDefine' />"><span class="ui-button-icon ui-icon ui-icon-grip-dotted-horizontal"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertSqlDelimiterDefine' /></button>
 		<button id="insertSqlDelimiterButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.insertSqlDelimiter' />"><span class="ui-button-icon ui-icon ui-icon-grip-solid-horizontal"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertSqlDelimiter' /></button>
+		<div class="button-divider ui-widget ui-widget-content"></div>
+		<button id="viewSqlHistoryButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.viewSqlHistory' />"><span class="ui-button-icon ui-icon ui-icon-clock"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.viewSqlHistory' /></button>
 		<div class="more-operation-wrapper">
 			<button id="moreOperationButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.moreOperation' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.moreOperation' /></button>
 			<div class="more-operation-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">

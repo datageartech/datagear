@@ -1322,7 +1322,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	text-align: right;
 	position: relative;
 }
-.page-sqlpad .head .more-operation-wrapper #moreOperationButton{
+.page-sqlpad .head .more-operation-wrapper > button.ui-button{
 	width: 1.5em;
 	padding-left: 0.5em;
 	padding-right: 0.5em;
