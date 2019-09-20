@@ -4,7 +4,6 @@
 
 package org.datagear.web.controller;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -16,6 +15,7 @@ import org.datagear.persistence.Order;
 import org.datagear.persistence.Paging;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceManager;
+import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
@@ -552,35 +552,7 @@ public abstract class AbstractController
 	 */
 	protected boolean isEmpty(Object obj)
 	{
-		if (obj == null)
-		{
-			return true;
-		}
-		else if (obj instanceof String)
-		{
-			return isEmpty((String) obj);
-		}
-		else if (obj instanceof Object[])
-		{
-			Object[] array = (Object[]) obj;
-
-			return (array.length == 0);
-		}
-		else if (obj instanceof Collection<?>)
-		{
-			@SuppressWarnings("unchecked")
-			Collection<Object> collection = (Collection<Object>) obj;
-
-			return (collection.isEmpty());
-		}
-		else if (obj instanceof Map<?, ?>)
-		{
-			Map<?, ?> map = (Map<?, ?>) obj;
-
-			return map.isEmpty();
-		}
-		else
-			return false;
+		return StringUtil.isEmpty(obj);
 	}
 
 	/**
@@ -591,7 +563,7 @@ public abstract class AbstractController
 	 */
 	protected boolean isEmpty(String s)
 	{
-		return (s == null || s.isEmpty());
+		return StringUtil.isEmpty(s);
 	}
 
 	/**
@@ -602,15 +574,6 @@ public abstract class AbstractController
 	 */
 	protected boolean isBlank(String s)
 	{
-		if (s == null)
-			return true;
-
-		if (s.isEmpty())
-			return true;
-
-		if (s.trim().isEmpty())
-			return true;
-
-		return false;
+		return StringUtil.isBlank(s);
 	}
 }

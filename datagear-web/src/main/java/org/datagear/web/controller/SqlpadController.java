@@ -27,6 +27,7 @@ import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
+import org.datagear.management.service.SqlHistoryService;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.SqlScriptParser;
@@ -73,6 +74,9 @@ public class SqlpadController extends AbstractSchemaConnController
 	@Autowired
 	private DatabaseInfoResolver databaseInfoResolver;
 
+	@Autowired
+	private SqlHistoryService sqlHistoryService;
+
 	public SqlpadController()
 	{
 		super();
@@ -81,13 +85,14 @@ public class SqlpadController extends AbstractSchemaConnController
 	public SqlpadController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource, ModelSqlSelectService modelSqlSelectService,
 			DatabaseModelResolver databaseModelResolver, SqlpadExecutionService sqlpadExecutionService,
-			DatabaseInfoResolver databaseInfoResolver)
+			DatabaseInfoResolver databaseInfoResolver, SqlHistoryService sqlHistoryService)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
 		this.modelSqlSelectService = modelSqlSelectService;
 		this.databaseModelResolver = databaseModelResolver;
 		this.sqlpadExecutionService = sqlpadExecutionService;
 		this.databaseInfoResolver = databaseInfoResolver;
+		this.sqlHistoryService = sqlHistoryService;
 	}
 
 	public ModelSqlSelectService getModelSqlSelectService()
@@ -128,6 +133,16 @@ public class SqlpadController extends AbstractSchemaConnController
 	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
 	{
 		this.databaseInfoResolver = databaseInfoResolver;
+	}
+
+	public SqlHistoryService getSqlHistoryService()
+	{
+		return sqlHistoryService;
+	}
+
+	public void setSqlHistoryService(SqlHistoryService sqlHistoryService)
+	{
+		this.sqlHistoryService = sqlHistoryService;
 	}
 
 	@RequestMapping("/{schemaId}")

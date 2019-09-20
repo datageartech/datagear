@@ -1316,32 +1316,58 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding-left: 0.2em;
 	padding-right: 0.2em;
 }
-.page-sqlpad .head .more-operation-wrapper{
+.page-sqlpad .head .view-sql-history-wrapper{
 	float: right;
-	width: 10%;
+	width: 5%;
 	text-align: right;
 	position: relative;
 }
-.page-sqlpad .head .more-operation-wrapper > button.ui-button{
+.page-sqlpad .head .view-sql-history-wrapper .view-sql-history-panel{
+	position: absolute;
+	right: 0.1em;
+	top: 1.2em;
+	width: 800%;
+	min-height: 3em;
+	text-align: left;
+	padding: 0.41em 1em;
+}
+.page-sqlpad .head .view-sql-history-wrapper .view-sql-history-panel .sql-history-list{
+	overflow-y: auto;
+}
+.page-sqlpad .head .view-sql-history-wrapper .view-sql-history-panel .sql-history-list .sql-item{
+	padding: 0.2em 0.2em;
+	font-size: 0.9em;
+}
+.page-sqlpad .head .view-sql-history-wrapper .view-sql-history-panel .sql-history-foot{
+	padding-top: 0.3em;
+	text-align: right;
+}
+.page-sqlpad .head .setting-wrapper{
+	float: right;
+	width: 5%;
+	text-align: right;
+	position: relative;
+}
+.page-sqlpad .head .setting-wrapper > button.ui-button{
 	width: 1.5em;
 	padding-left: 0.5em;
 	padding-right: 0.5em;
 }
-.page-sqlpad .head .more-operation-wrapper .more-operation-panel{
+.page-sqlpad .head .setting-wrapper .setting-panel{
 	position: absolute;
 	right: 0.1em;
-	top: 1.1em;
-	width: 450%;
+	top: 1.2em;
+	width: 900%;
 	text-align: left;
 	padding: 0.41em 1em;
 }
-.page-sqlpad .head .more-operation-wrapper .more-operation-panel form .form-content .form-item .form-item-label{
+.page-sqlpad .head .setting-wrapper .setting-panel form .form-content .form-item .form-item-label{
 	width: 35%;
 }
-.page-sqlpad .head .more-operation-wrapper .more-operation-panel form .form-content .form-item .form-item-value{
+.page-sqlpad .head .setting-wrapper .setting-panel form .form-content .form-item .form-item-value{
 	width: auto;
 }
-.page-sqlpad .head .more-operation-wrapper .more-operation-panel .ui-checkboxradio-icon{
+.page-sqlpad .head .setting-wrapper .setting-panel .ui-checkboxradio-icon{
 	display: none;
 }
 .page-sqlpad .content{

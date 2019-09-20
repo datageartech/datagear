@@ -21,6 +21,7 @@ import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
+import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.support.SqlSessionDaoSupport;
 
@@ -391,7 +392,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 				if (orderSql.length() > 0)
 					orderSql.append(", ");
 
-				orderSql.append(this.identifierQuote + order.getName() + this.identifierQuote);
+				orderSql.append(toQuoteIdentifier(order.getName()));
 				orderSql.append(" ");
 
 				if ("DESC".equalsIgnoreCase(order.getType()))
@@ -564,6 +565,17 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	}
 
 	/**
+	 * 为标识符添加引用符。
+	 * 
+	 * @param s
+	 * @return
+	 */
+	protected String toQuoteIdentifier(String s)
+	{
+		return this.identifierQuote + s + this.identifierQuote;
+	}
+
+	/**
 	 * 获取数据库标识引用符。
 	 * <p>
 	 * 如果数据库不可用，将返回{@linkplain #CONNECTION_NOT_AVALIABLE}。
@@ -574,7 +586,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 */
 	protected String getIdentifierQuote(DataSource dataSource)
 	{
-		String identifierQuote = "";
+		String identifierQuote = " ";
 
 		Connection cn = null;
 
@@ -614,28 +626,36 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	}
 
 	/**
+	 * 判断对象、字符串、数组、集合、Map是否为空。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected boolean isEmpty(Object obj)
+	{
+		return StringUtil.isEmpty(obj);
+	}
+
+	/**
 	 * 字符串是否为空。
+	 * 
+	 * @param s
+	 * @return
+	 */
+	protected boolean isEmpty(String s)
+	{
+		return StringUtil.isEmpty(s);
+	}
+
+	/**
+	 * 字符串是否为空格串。
 	 * 
 	 * @param s
 	 * @return
 	 */
 	protected boolean isBlank(String s)
 	{
-		if (s == null)
-			return true;
-
-		if (s.isEmpty())
-			return true;
-
-		if (s.trim().isEmpty())
-			return true;
-
-		return false;
-	}
-
-	protected boolean isEmpty(String s)
-	{
-		return (s == null || s.isEmpty());
+		return StringUtil.isBlank(s);
 	}
 
 	/**

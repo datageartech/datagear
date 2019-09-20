@@ -31,12 +31,10 @@ Schema schema 数据库，不允许为null
 		<input id="sqlDelimiterInput" type="text" class="sql-delimiter-input ui-widget ui-widget-content ui-corner-all" value=";"  title="<@spring.message code='sqlpad.sqlDelimiter' />"/>
 		<button id="insertSqlDelimiterDefineButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.insertSqlDelimiterDefine' />"><span class="ui-button-icon ui-icon ui-icon-grip-dotted-horizontal"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertSqlDelimiterDefine' /></button>
 		<button id="insertSqlDelimiterButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.insertSqlDelimiter' />"><span class="ui-button-icon ui-icon ui-icon-grip-solid-horizontal"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertSqlDelimiter' /></button>
-		<div class="button-divider ui-widget ui-widget-content"></div>
-		<button id="viewSqlHistoryButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.viewSqlHistory' />"><span class="ui-button-icon ui-icon ui-icon-clock"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.viewSqlHistory' /></button>
-		<div class="more-operation-wrapper">
-			<button id="moreOperationButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.moreOperation' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.moreOperation' /></button>
-			<div class="more-operation-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-				<form id="moreOperationForm" method="POST" action="#">
+		<div class="setting-wrapper">
+			<button id="settingButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.moreOperation' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.moreOperation' /></button>
+			<div class="setting-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+				<form id="settingForm" method="POST" action="#">
 					<div class="form-content">
 						<div class="form-item">
 							<div class="form-item-label"><label><@spring.message code='sqlpad.sqlCommitMode' /></label></div>
@@ -72,6 +70,46 @@ Schema schema 数据库，不允许为null
 						</div>
 					</div>
 				</form>
+			</div>
+		</div>
+		<div class="view-sql-history-wrapper">
+			<button id="viewSqlHistoryButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.viewSqlHistory' />"><span class="ui-button-icon ui-icon ui-icon-clock"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.viewSqlHistory' /></button>
+			<div class="view-sql-history-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+				<form id="viewSqlHistorySearchForm" method="POST" action="#">
+					<div class="form-content">
+						<div class="form-item">
+							<div class="form-item-value">
+								<input type="text" name="keyword" value="" class="ui-widget ui-widget-content" maxlength="50" />
+								<button type="submit"><@spring.message code='query' /></button>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div class="sql-history-list ui-widget ui-widget-content">
+					<div class="sql-item">
+						<div class="sql-date">09-19 16:24:10</div>
+						<div class="sql-content">SELECT * FROM t_auto_generated_keys where id = 1 and name = '2'</div>
+					</div>
+					<div class="sql-item">
+						<div class="sql-date">09-19 16:24:10</div>
+						<div class="sql-content">SELECT * FROM t_auto_generated_keys where id = 1 and name = '2'</div>
+					</div>
+					<div class="sql-item">
+						<div class="sql-date">09-19 16:24:10</div>
+						<div class="sql-content">SELECT * FROM t_auto_generated_keys where id = 1 and name = '2'</div>
+					</div>
+					<div class="sql-item">
+						<div class="sql-date">09-19 16:24:10</div>
+						<div class="sql-content">SELECT * FROM t_auto_generated_keys;</div>
+					</div>
+					<div class="sql-item">
+						<div class="sql-date">09-19 16:24:10</div>
+						<div class="sql-content">SELECT * FROM t_auto_generated_keys;</div>
+					</div>
+				</div>
+				<div class="sql-history-foot">
+					<button id="sqlHistoryLoadMoreButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='loadMore' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='loadMore' /></button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -720,7 +758,7 @@ Schema schema 数据库，不允许为null
 	   			{
 	   				beforeSerialize: function($form, options)
 	   				{
-	   					var fetchSize = po.getResultsetFetchSize(po.element("#moreOperationForm"));
+	   					var fetchSize = po.getResultsetFetchSize(po.element("#settingForm"));
 	   					$("input[name='fetchSize']", $form).val(fetchSize);
 	   				},
 	   				success : function(modelSqlResult, statusText, xhr, $form)
@@ -950,12 +988,12 @@ Schema schema 数据库，不允许为null
 			if(!sql)
 				return;
 			
-			var moreOperationForm = po.element("#moreOperationForm");
+			var settingForm = po.element("#settingForm");
 			
-			var commitMode = po.element("input[name='sqlCommitMode']:checked", moreOperationForm).val();
-			var exceptionHandleMode = po.element("input[name='sqlExceptionHandleMode']:checked", moreOperationForm).val();
-			var overTimeThreashold = po.getOverTimeThreashold(moreOperationForm);
-			var resultsetFetchSize = po.getResultsetFetchSize(moreOperationForm);
+			var commitMode = po.element("input[name='sqlCommitMode']:checked", settingForm).val();
+			var exceptionHandleMode = po.element("input[name='sqlExceptionHandleMode']:checked", settingForm).val();
+			var overTimeThreashold = po.getOverTimeThreashold(settingForm);
+			var resultsetFetchSize = po.getResultsetFetchSize(settingForm);
 			
 			po.updateExecuteSqlButtonState($this, "executing");
 			
@@ -1036,9 +1074,26 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.focus();
 	});
 	
-	po.element("#moreOperationButton").click(function()
+	po.element("#viewSqlHistoryButton").click(function()
 	{
-		po.element(".more-operation-panel").toggle();
+		var $vhp = po.element(".view-sql-history-panel");
+		
+		if(!$vhp.is(":hidden"))
+		{
+			$vhp.hide();
+			return;
+		}
+		else
+		{
+			var $shl = po.element(".sql-history-list");
+			$shl.height(po.element().height()/2.5);
+			$vhp.show();
+		}
+	});
+	
+	po.element("#settingButton").click(function()
+	{
+		po.element(".setting-panel").toggle();
 	});
 	
 	po.element("input[name='sqlCommitMode']").change(function()
@@ -1114,6 +1169,14 @@ Schema schema 数据库，不允许为null
 	{
 		var $this = $(this);
 		
+		var viewSqlStatementPanel = po.element("#viewSqlStatementPanel");
+		
+		if(!viewSqlStatementPanel.is(":hidden"))
+		{
+			viewSqlStatementPanel.hide();
+			return;
+		}
+		
 		var tabsNav = po.getTabsNav(po.sqlResultTabs);
 		var activeTab = po.getActiveTab(po.sqlResultTabs, tabsNav);
 		
@@ -1124,7 +1187,6 @@ Schema schema 数据库，不允许为null
 			var tabForm = po.element("#" + tabId);
 			var sql = $("textarea[name='sql']", tabForm).val();
 			
-			var viewSqlStatementPanel = po.element("#viewSqlStatementPanel");
 			$("textarea", viewSqlStatementPanel).val(sql);
 			viewSqlStatementPanel.show().position({ my : "right bottom", at : "right top-5", of : $this});
 		}
@@ -1155,7 +1217,7 @@ Schema schema 数据库，不允许为null
 		}
 	});
 	
-	po.element("#moreOperationForm").validate(
+	po.element("#settingForm").validate(
 	{
 		rules :
 		{
@@ -1180,12 +1242,19 @@ Schema schema 数据库，不允许为null
 	$(document.body).on("click", function(event)
 	{
 		var $target = $(event.target);
-		
-		var $mop = po.element(".more-operation-panel");
-		if(!$mop.is(":hidden"))
+
+		var $vhp = po.element(".view-sql-history-panel");
+		if(!$vhp.is(":hidden"))
 		{
-			if($target.closest(po.element(".more-operation-wrapper")).length == 0)
-				$mop.hide();
+			if($target.closest(po.element(".view-sql-history-wrapper")).length == 0)
+				$vhp.hide();
+		}
+		
+		var $sp = po.element(".setting-panel");
+		if(!$sp.is(":hidden"))
+		{
+			if($target.closest(po.element(".setting-wrapper")).length == 0)
+				$sp.hide();
 		}
 		
 		var $vsp = po.element("#viewSqlStatementPanel");
@@ -1267,7 +1336,8 @@ Schema schema 数据库，不允许为null
 	});
 	
 	po.element("input[name='sqlCommitMode'][value='AUTO']").click();
-	po.element(".more-operation-panel").hide();
+	po.element(".view-sql-history-panel").hide();
+	po.element(".setting-panel").hide();
 	po.element(".result-operations .sql-result-buttons").hide();
 	po.element("#viewSqlStatementPanel").hide();
 	po.element("#viewLongTextResultPanel").hide();

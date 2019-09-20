@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.SqlHistory">
+
+	<insert id="insert">
+		INSERT INTO DATAGEAR_SQL_HISTORY
+			(
+			SQLHIS_ID, SQLHIS_SQL, SQLHIS_USER_ID
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.sql}, #{entity.userId}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE DATAGEAR_SQL_HISTORY SET
+			SQLHIS_SQL = #{entity.sql},
+			SQLHIS_USER_ID = #{entity.userId}
+		WHERE
+			SQLHIS_ID = #{entity.id}
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM DATAGEAR_SQL_HISTORY
+		WHERE
+			SQLHIS_ID = #{id}
+	</delete>
+	
+	<select id="getById" resultType="org.datagear.management.domain.SqlHistory">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="query" resultType="org.datagear.management.domain.SqlHistory">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+		<include refid="common.queryOrder" />
+	</select>
+	
+	<select id="pagingQueryCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(<include refid="queryView" />) T
+		WHERE
+			<include refid="queryCondition" />
+	</select>
+	
+	<select id="pagingQuery" resultType="org.datagear.management.domain.SqlHistory">
+		<include refid="common.pagingQueryHead" />
+			SELECT
+				T.*
+			FROM
+				(<include refid="queryView" />) T
+			WHERE
+				<include refid="queryCondition" />
+			<include refid="common.queryOrder" />
+		<include refid="common.pagingQueryFoot" />
+	</select>
+	
+	<sql id="queryView">
+		SELECT
+			A.SQLHIS_ID AS ${_iq_}id${_iq_},
+			A.SQLHIS_SQL AS ${_iq_}sql${_iq_},
+			A.SQLHIS_USER_ID AS ${_iq_}userId${_iq_},
+			A.SQLHIS_CREATE_TIME AS ${_iq_}createTime${_iq_}
+		FROM
+			DATAGEAR_SQL_HISTORY A
+	</sql>
+	
+	<sql id="queryCondition">
+		1 = 1
+		<if test="userId != null">
+		AND ${_iq_}userId${_iq_} = #{userId}
+		</if>
+		<if test="queryKeyword != null">
+		AND ${_iq_}sql${_iq_} LIKE #{queryKeyword}
+		</if>
+		<include refid="common.queryCondition" />
+	</sql>
+</mapper>

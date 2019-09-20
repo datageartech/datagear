@@ -299,6 +299,10 @@
 		</property>
 	</bean>
 	
+	<bean id="sqlHistoryService" class="org.datagear.management.service.impl.SqlHistoryServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
 	<bean id="sqlDateFormatter" class="org.datagear.web.format.SqlDateFormatter" />
 	<bean id="sqlTimeFormatter" class="org.datagear.web.format.SqlTimeFormatter" />
 	<bean id="sqlTimestampFormatter" class="org.datagear.web.format.SqlTimestampFormatter" />
