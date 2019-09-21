@@ -32,7 +32,7 @@ Schema schema 数据库，不允许为null
 		<button id="insertSqlDelimiterDefineButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.insertSqlDelimiterDefine' />"><span class="ui-button-icon ui-icon ui-icon-grip-dotted-horizontal"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertSqlDelimiterDefine' /></button>
 		<button id="insertSqlDelimiterButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.insertSqlDelimiter' />"><span class="ui-button-icon ui-icon ui-icon-grip-solid-horizontal"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertSqlDelimiter' /></button>
 		<div class="setting-wrapper">
-			<button id="settingButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.moreOperation' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.moreOperation' /></button>
+			<button id="settingButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.setting' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.setting' /></button>
 			<div class="setting-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 				<form id="settingForm" method="POST" action="#">
 					<div class="form-content">
@@ -75,40 +75,29 @@ Schema schema 数据库，不允许为null
 		<div class="view-sql-history-wrapper">
 			<button id="viewSqlHistoryButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.viewSqlHistory' />"><span class="ui-button-icon ui-icon ui-icon-clock"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.viewSqlHistory' /></button>
 			<div class="view-sql-history-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-				<form id="viewSqlHistorySearchForm" method="POST" action="#">
-					<div class="form-content">
-						<div class="form-item">
-							<div class="form-item-value">
-								<input type="text" name="keyword" value="" class="ui-widget ui-widget-content" maxlength="50" />
-								<button type="submit"><@spring.message code='query' /></button>
+				<div class="sql-history-head">
+					<form id="viewSqlHistorySearchForm" method="POST" action="${contextPath}/sqlpad/${schema.id}/sqlHistoryData" class="sql-history-search-form">
+						<input type="hidden" name="page" value="1" />
+						<input type="hidden" name="pageSize" value="20" />
+						<div class="form-content">
+							<div class="form-item">
+								<div class="form-item-value">
+									<input type="text" name="keyword" value="" class="ui-widget ui-widget-content" maxlength="50" />
+									<button type="submit"><@spring.message code='query' /></button>
+								</div>
 							</div>
 						</div>
+					</form>
+					<div class="sql-history-operation">
+						<button id="insertSqlHistoryToEditorButton" title="<@spring.message code='sqlpad.insertSqlHistoryToEditor' />"><@spring.message code='insert' /></button>
+						<button id="copySqlHistoryToClipbordButton"  title="<@spring.message code='sqlpad.copySqlHistoryToClipbord' />"><@spring.message code='copy' /></button>
 					</div>
-				</form>
+				</div>
 				<div class="sql-history-list ui-widget ui-widget-content">
-					<div class="sql-item">
-						<div class="sql-date">09-19 16:24:10</div>
-						<div class="sql-content">SELECT * FROM t_auto_generated_keys where id = 1 and name = '2'</div>
-					</div>
-					<div class="sql-item">
-						<div class="sql-date">09-19 16:24:10</div>
-						<div class="sql-content">SELECT * FROM t_auto_generated_keys where id = 1 and name = '2'</div>
-					</div>
-					<div class="sql-item">
-						<div class="sql-date">09-19 16:24:10</div>
-						<div class="sql-content">SELECT * FROM t_auto_generated_keys where id = 1 and name = '2'</div>
-					</div>
-					<div class="sql-item">
-						<div class="sql-date">09-19 16:24:10</div>
-						<div class="sql-content">SELECT * FROM t_auto_generated_keys;</div>
-					</div>
-					<div class="sql-item">
-						<div class="sql-date">09-19 16:24:10</div>
-						<div class="sql-content">SELECT * FROM t_auto_generated_keys;</div>
-					</div>
 				</div>
 				<div class="sql-history-foot">
 					<button id="sqlHistoryLoadMoreButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='loadMore' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='loadMore' /></button>
+					<button id="sqlHistoryRefreshButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='refresh' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='refresh' /></button>
 				</div>
 			</div>
 		</div>
@@ -1074,6 +1063,120 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.focus();
 	});
 	
+	po.element("#viewSqlHistorySearchForm").ajaxForm(
+	{
+		success : function(pagingData, statusText, xhr, $form)
+		{
+			var sqlHistories = pagingData.items;
+			
+			if(pagingData.page >= pagingData.pages)
+				po.element("#sqlHistoryLoadMoreButton").button("disable");
+			else
+				po.element("#sqlHistoryLoadMoreButton").button("enable");
+			
+			var retainData = ($form.attr("retain-data") != null);
+			if(retainData)
+				$form.removeAttr("retain-data");
+			
+			var $hl = po.element(".sql-history-list");
+			
+			if(!retainData)
+				$hl.empty();
+			
+			for(var i=0; i<sqlHistories.length; i++)
+			{
+				var sqlHistory = sqlHistories[i];
+				
+				if(i > 0 || pagingData.page > 1)
+					$("<div class='sql-item-separator ui-widget ui-widget-content' />").appendTo($hl);
+				
+				var $item = $("<div class='sql-item' />").appendTo($hl);
+				$("<div class='sql-date' />").text(sqlHistory.createTime).appendTo($item);
+				$("<div class='sql-content' />").text(sqlHistory.sql).appendTo($item);
+			}
+			
+			$hl.selectable("refresh");
+		}
+	});
+	
+	po.element(".sql-history-list").selectable({ filter : ".sql-item",  classes : { "ui-selected" : "ui-state-active" } });
+	
+	po.getSelectedSqlHistories = function()
+	{
+		var $selectedSql = po.element(".sql-history-list .sql-item.ui-selected");
+		
+		if($selectedSql.length == 0)
+			return null;
+		
+		var delimiter = po.getSqlDelimiter();
+		
+		var sql = "";
+		
+		$selectedSql.each(function()
+		{
+			var mySql = $(".sql-content", this).text();
+			sql += mySql + delimiter + "\n";
+		});
+		
+		return sql;
+	};
+	
+	po.element("#insertSqlHistoryToEditorButton").click(function()
+	{
+		var sql = po.getSelectedSqlHistories();
+		
+		if(!sql)
+			return;
+		
+		var cursor = po.sqlEditor.getCursorPosition();
+		
+		po.sqlEditor.moveCursorToPosition(cursor);
+		po.sqlEditor.session.insert(cursor, sql);
+		
+		po.sqlEditor.focus();
+	});
+	
+	var clipboard = new ClipboardJS(po.element("#copySqlHistoryToClipbordButton")[0],
+	{
+		text: function(trigger)
+		{
+			var sql = po.getSelectedSqlHistories();
+			
+			if(!sql)
+				sql = "";
+			
+			return sql;
+		}
+	});
+	clipboard.on('success', function(e)
+	{
+		$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
+	});
+	
+	po.element("#sqlHistoryLoadMoreButton").click(function()
+	{
+		var $form = po.element("#viewSqlHistorySearchForm");
+		var $page = po.element("input[name='page']", $form);
+		
+		var page = parseInt($page.val());
+		if(!page)
+			page = 1;
+		page += 1;
+		
+		$page.val(page);
+		
+		$form.attr("retain-data", "1");
+		$form.submit();
+	});
+	
+	po.element("#sqlHistoryRefreshButton").click(function()
+	{
+		var $form = po.element("#viewSqlHistorySearchForm");
+		po.element("input[name='page']", $form).val("1");
+		
+		$form.submit();
+	});
+	
 	po.element("#viewSqlHistoryButton").click(function()
 	{
 		var $vhp = po.element(".view-sql-history-panel");
@@ -1088,6 +1191,10 @@ Schema schema 数据库，不允许为null
 			var $shl = po.element(".sql-history-list");
 			$shl.height(po.element().height()/2.5);
 			$vhp.show();
+			
+			var $hl = po.element(".sql-history-list");
+			if($hl.children().length == 0)
+				po.element("#viewSqlHistorySearchForm").submit();
 		}
 	});
 	

@@ -9,6 +9,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +27,7 @@ import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.SqlHistoryService;
 import org.datagear.model.Model;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
@@ -49,6 +51,8 @@ public class SqlpadExecutionService
 
 	private DatabaseModelResolver databaseModelResolver;
 
+	private SqlHistoryService sqlHistoryService;
+
 	private ModelSqlSelectService modelSqlSelectService = new ModelSqlSelectService();
 
 	private SqlPermissionChecker sqlPermissionChecker = new SqlPermissionChecker();
@@ -63,13 +67,15 @@ public class SqlpadExecutionService
 	}
 
 	public SqlpadExecutionService(ConnectionSource connectionSource, MessageSource messageSource,
-			SqlpadCometdService sqlpadCometdService, DatabaseModelResolver databaseModelResolver)
+			SqlpadCometdService sqlpadCometdService, DatabaseModelResolver databaseModelResolver,
+			SqlHistoryService sqlHistoryService)
 	{
 		super();
 		this.connectionSource = connectionSource;
 		this.messageSource = messageSource;
 		this.sqlpadCometdService = sqlpadCometdService;
 		this.databaseModelResolver = databaseModelResolver;
+		this.sqlHistoryService = sqlHistoryService;
 	}
 
 	public ConnectionSource getConnectionSource()
@@ -110,6 +116,16 @@ public class SqlpadExecutionService
 	public void setDatabaseModelResolver(DatabaseModelResolver databaseModelResolver)
 	{
 		this.databaseModelResolver = databaseModelResolver;
+	}
+
+	public SqlHistoryService getSqlHistoryService()
+	{
+		return sqlHistoryService;
+	}
+
+	public void setSqlHistoryService(SqlHistoryService sqlHistoryService)
+	{
+		this.sqlHistoryService = sqlHistoryService;
 	}
 
 	public ModelSqlSelectService getModelSqlSelectService()
@@ -478,6 +494,8 @@ public class SqlpadExecutionService
 			SQLExecutionStat sqlExecutionStat = new SQLExecutionStat(totalCount);
 			long startTime = System.currentTimeMillis();
 
+			List<String> sqlHistories = new ArrayList<String>();
+
 			try
 			{
 				for (int i = 0; i < totalCount; i++)
@@ -500,6 +518,8 @@ public class SqlpadExecutionService
 						{
 							execute(cn, st, sqlExecutionStat, sqlStatement, i);
 							sqlExecutionStat.increaseSuccessCount();
+
+							sqlHistories.add(sqlStatement.getSql());
 						}
 						catch (SQLException e)
 						{
@@ -550,6 +570,10 @@ public class SqlpadExecutionService
 
 				_sqlpadExecutionRunnableMap.remove(this.sqlpadId);
 			}
+
+			if (!sqlHistories.isEmpty())
+				SqlpadExecutionService.this.sqlHistoryService.addForRemain(this.schema.getId(), this.user.getId(),
+						sqlHistories);
 		}
 
 		/**

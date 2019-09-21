@@ -21,6 +21,9 @@ public class SqlHistory extends AbstractStringIdEntity
 	/** SQL语句 */
 	private String sql;
 
+	/** 数据源ID */
+	private String schemaId;
+
 	/** 用户ID */
 	private String userId;
 
@@ -32,10 +35,11 @@ public class SqlHistory extends AbstractStringIdEntity
 		super();
 	}
 
-	public SqlHistory(String id, String sql, String userId)
+	public SqlHistory(String id, String sql, String schemaId, String userId)
 	{
 		super(id);
 		this.sql = sql;
+		this.schemaId = schemaId;
 		this.userId = userId;
 	}
 
@@ -47,6 +51,16 @@ public class SqlHistory extends AbstractStringIdEntity
 	public void setSql(String sql)
 	{
 		this.sql = sql;
+	}
+
+	public String getSchemaId()
+	{
+		return schemaId;
+	}
+
+	public void setSchemaId(String schemaId)
+	{
+		this.schemaId = schemaId;
 	}
 
 	public String getUserId()

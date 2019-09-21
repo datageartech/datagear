@@ -25,9 +25,12 @@ import org.datagear.dbmodel.DatabaseModelResolver;
 import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.SqlHistory;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlHistoryService;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.SqlScriptParser;
@@ -378,6 +381,18 @@ public class SqlpadController extends AbstractSchemaConnController
 			columnNames.add(columnInfo.getName());
 
 		return columnNames;
+	}
+
+	@RequestMapping(value = "/{schemaId}/sqlHistoryData", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public PagingData<SqlHistory> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		final User user = WebUtils.getUser(request, response);
+
+		PagingQuery pagingQuery = getPagingQuery(request, null);
+
+		return this.sqlHistoryService.pagingQueryByUserId(schemaId, user.getId(), pagingQuery);
 	}
 
 	/**

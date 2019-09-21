@@ -6,17 +6,18 @@
 	<insert id="insert">
 		INSERT INTO DATAGEAR_SQL_HISTORY
 			(
-			SQLHIS_ID, SQLHIS_SQL, SQLHIS_USER_ID
+			SQLHIS_ID, SQLHIS_SQL, SQLHIS_SCHEMA_ID, SQLHIS_USER_ID
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.sql}, #{entity.userId}
+			#{entity.id}, #{entity.sql}, #{entity.schemaId}, #{entity.userId}
 			)
 	</insert>
 	
 	<update id="update">
 		UPDATE DATAGEAR_SQL_HISTORY SET
 			SQLHIS_SQL = #{entity.sql},
+			SQLHIS_SCHEMA_ID = #{entity.schemaId},
 			SQLHIS_USER_ID = #{entity.userId}
 		WHERE
 			SQLHIS_ID = #{entity.id}
@@ -26,6 +27,24 @@
 		DELETE FROM DATAGEAR_SQL_HISTORY
 		WHERE
 			SQLHIS_ID = #{id}
+	</delete>
+	
+	<delete id="deleteExpired">
+		DELETE FROM DATAGEAR_SQL_HISTORY
+		WHERE
+			SQLHIS_SCHEMA_ID = #{schemaId} AND SQLHIS_USER_ID = #{userId} AND SQLHIS_ID NOT IN
+			(
+				<include refid="common.pagingQueryHead" />
+					SELECT
+						T.SQLHIS_ID
+					FROM
+						DATAGEAR_SQL_HISTORY T
+					WHERE
+						SQLHIS_SCHEMA_ID = #{schemaId} AND SQLHIS_USER_ID = #{userId}
+					ORDER BY
+						SQLHIS_CREATE_TIME DESC
+				<include refid="common.pagingQueryFoot" />
+			)
 	</delete>
 	
 	<select id="getById" resultType="org.datagear.management.domain.SqlHistory">
@@ -72,6 +91,7 @@
 		SELECT
 			A.SQLHIS_ID AS ${_iq_}id${_iq_},
 			A.SQLHIS_SQL AS ${_iq_}sql${_iq_},
+			A.SQLHIS_SCHEMA_ID AS ${_iq_}schemaId${_iq_},
 			A.SQLHIS_USER_ID AS ${_iq_}userId${_iq_},
 			A.SQLHIS_CREATE_TIME AS ${_iq_}createTime${_iq_}
 		FROM
@@ -80,6 +100,9 @@
 	
 	<sql id="queryCondition">
 		1 = 1
+		<if test="schemaId != null">
+		AND ${_iq_}schemaId${_iq_} = #{schemaId}
+		</if>
 		<if test="userId != null">
 		AND ${_iq_}userId${_iq_} = #{userId}
 		</if>

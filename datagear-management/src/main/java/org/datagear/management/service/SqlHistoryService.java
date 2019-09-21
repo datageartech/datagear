@@ -4,6 +4,8 @@
 
 package org.datagear.management.service;
 
+import java.util.List;
+
 import org.datagear.management.domain.SqlHistory;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -17,11 +19,21 @@ import org.datagear.persistence.PagingQuery;
 public interface SqlHistoryService extends EntityService<String, SqlHistory>
 {
 	/**
+	 * 添加{@linkplain SqlHistory}，并删除过期历史。
+	 * 
+	 * @param schemaId
+	 * @param userId
+	 * @param sqls
+	 */
+	void addForRemain(String schemaId, String userId, List<String> sqls);
+
+	/**
 	 * 分页查询。
 	 * 
-	 * @param user
+	 * @param schemaId
+	 * @param userId
 	 * @param pagingQuery
 	 * @return
 	 */
-	PagingData<SqlHistory> pagingQueryByUserId(String userId, PagingQuery pagingQuery);
+	PagingData<SqlHistory> pagingQueryByUserId(String schemaId, String userId, PagingQuery pagingQuery);
 }

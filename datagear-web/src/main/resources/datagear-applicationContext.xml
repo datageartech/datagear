@@ -424,6 +424,7 @@
     	<property name="messageSource" ref="messageSource" />
     	<property name="sqlpadCometdService" ref="sqlpadCometdService" />
     	<property name="databaseModelResolver" ref="databaseModelResolver" />
+    	<property name="sqlHistoryService" ref="sqlHistoryService" />
     	<property name="modelSqlSelectService" ref="modelSqlSelectService" />
     </bean>
     

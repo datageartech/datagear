@@ -297,13 +297,8 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		PagingData<T> pagingData = new PagingData<T>(pagingQuery.getPage(), total, pagingQuery.getPageSize());
 
 		int startIndex = pagingData.getStartIndex();
-		int endIndex = pagingData.getEndIndex();
 
-		params.put(PAGING_QUERY_PARAM_START_INDEX, startIndex);
-		params.put(PAGING_QUERY_PARAM_START_ROW, startIndex + 1);
-		params.put(PAGING_QUERY_PARAM_END_INDEX, endIndex);
-		params.put(PAGING_QUERY_PARAM_END_ROW, endIndex + 1);
-		params.put(PAGING_QUERY_PARAM_ROWS, pagingData.getPageSize());
+		addPagingQueryParams(params, startIndex, pagingData.getPageSize());
 
 		List<T> list = selectListMybatis(statement, params);
 		postProcessSelectList(list);
@@ -311,6 +306,24 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		pagingData.setItems(list);
 
 		return pagingData;
+	}
+
+	/**
+	 * 添加分页查询参数。
+	 * 
+	 * @param params
+	 * @param pageIndex
+	 *            页起始索引，以{@code 0}开始
+	 * @param pageSize
+	 *            页大小
+	 */
+	protected void addPagingQueryParams(Map<String, Object> params, int pageIndex, int pageSize)
+	{
+		params.put(PAGING_QUERY_PARAM_START_INDEX, pageIndex);
+		params.put(PAGING_QUERY_PARAM_START_ROW, pageIndex + 1);
+		params.put(PAGING_QUERY_PARAM_END_INDEX, pageIndex + pageSize);
+		params.put(PAGING_QUERY_PARAM_END_ROW, pageIndex + pageSize + 1);
+		params.put(PAGING_QUERY_PARAM_ROWS, pageSize);
 	}
 
 	/**

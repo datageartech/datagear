@@ -4,6 +4,7 @@
 
 package org.datagear.management.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -11,6 +12,7 @@ import org.datagear.management.domain.SqlHistory;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.util.IDUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -21,6 +23,9 @@ import org.mybatis.spring.SqlSessionTemplate;
  */
 public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, SqlHistory> implements SqlHistoryService
 {
+	/** 默认最多保留SQL历史个数 */
+	public static final int HISTORY_REMAIN = 200;
+
 	protected static final String SQL_NAMESPACE = SqlHistory.class.getName();
 
 	public SqlHistoryServiceImpl()
@@ -39,15 +44,37 @@ public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, 
 	}
 
 	@Override
-	public PagingData<SqlHistory> pagingQueryByUserId(String userId, PagingQuery pagingQuery)
+	public void addForRemain(String schemaId, String userId, List<String> sqls)
+	{
+		for (int i = 0, len = sqls.size(); i < len; i++)
+		{
+			SqlHistory sqlHistory = new SqlHistory(IDUtil.uuid(), sqls.get(i), schemaId, userId);
+			add(sqlHistory);
+		}
+
+		deleteExpired(schemaId, userId, HISTORY_REMAIN);
+	}
+
+	@Override
+	public PagingData<SqlHistory> pagingQueryByUserId(String schemaId, String userId, PagingQuery pagingQuery)
 	{
 		Map<String, Object> params = buildParamMap();
+		params.put("schemaId", schemaId);
 		params.put("userId", userId);
 
 		if (isEmpty(pagingQuery.getOrders()))
 			addOrderCreateTimeDesc(params);
 
 		return pagingQuery(pagingQuery, params);
+	}
+
+	protected int deleteExpired(String schemaId, String userId, int maximum)
+	{
+		Map<String, Object> param = buildParamMap();
+		param.put("schemaId", schemaId);
+		param.put("userId", userId);
+		addPagingQueryParams(param, 0, HISTORY_REMAIN);
+		return deleteMybatis("deleteExpired", param);
 	}
 
 	protected void addOrderCreateTimeDesc(Map<String, Object> params)
