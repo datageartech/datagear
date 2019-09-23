@@ -179,6 +179,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	public ResponseEntity<OperationMessage> executeSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("sql") String sql,
+			@RequestParam(value = "sqlDelimiter", required = false) String sqlDelimiter,
 			@RequestParam(value = "sqlStartRow", required = false) Integer sqlStartRow,
 			@RequestParam(value = "sqlStartColumn", required = false) Integer sqlStartColumn,
 			@RequestParam(value = "commitMode", required = false) CommitMode commitMode,
@@ -193,6 +194,8 @@ public class SqlpadController extends AbstractSchemaConnController
 		checkReadTableDataPermission(schema, user);
 
 		SqlScriptParser sqlScriptParser = new SqlScriptParser(new StringReader(sql));
+		if (!isEmpty(sqlDelimiter))
+			sqlScriptParser.setDelimiter(sqlDelimiter);
 		if (sqlStartRow != null)
 			sqlScriptParser.setContextStartRow(sqlStartRow);
 		if (sqlStartColumn != null)

@@ -230,7 +230,8 @@ Schema schema 数据库，不允许为null
 			
 			if(dropText)
 			{
-				dropText += ";" + "\n";
+				var delimiter = po.getSqlDelimiter();
+				dropText += delimiter + "\n";
 				
 				po.sqlEditor.moveCursorToPosition(cursor);
 				po.sqlEditor.session.insert(cursor, dropText);
@@ -371,6 +372,7 @@ Schema schema 数据库，不允许为null
 			{
 				"sqlpadId" : po.sqlpadId,
 				"sql" : sql,
+				"sqlDelimiter" : po.getSqlDelimiter(),
 				"sqlStartRow" : sqlStartRow,
 				"sqlStartColumn" : sqlStartColumn,
 				"commitMode" : commitMode,
