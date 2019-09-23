@@ -205,24 +205,35 @@ Schema schema 数据库，不允许为null
 	po.sqlEditor.focus();
 	po.sqlEditor.navigateFileEnd();
 	
-	//数据库表条目拖入自动插入SQL
+	//数据库表条目、SQL历史拖入自动插入SQL
 	$.enableTableNodeDraggable = true;
 	po.element("#${pageId}-sql-editor").droppable(
 	{
-		accept: ".table-draggable",
+		accept: ".table-draggable, .sql-draggable",
 		drop: function(event, ui)
 		{
-			var srcText = ui.draggable.text();
+			var draggable = ui.draggable;
+			var dropText = "";
+			var cursor = po.sqlEditor.getCursorPosition();
 			
-			if(srcText)
+			if(draggable.hasClass("table-draggable"))
 			{
-				var cursor = po.sqlEditor.getCursorPosition();
+				dropText = ui.draggable.text();
 				
 				if(cursor.column == 0)
-					srcText = "SELECT * FROM " +srcText+";" + "\n";
+					dropText = "SELECT * FROM " +dropText;
+			}
+			else if(draggable.hasClass("sql-draggable"))
+			{
+				dropText = $(".sql-content", draggable).text();
+			}
+			
+			if(dropText)
+			{
+				dropText += ";" + "\n";
 				
 				po.sqlEditor.moveCursorToPosition(cursor);
-				po.sqlEditor.session.insert(cursor, srcText);
+				po.sqlEditor.session.insert(cursor, dropText);
 				
 				po.sqlEditor.focus();
 			}
@@ -1093,17 +1104,37 @@ Schema schema 数据库，不允许为null
 				var $item = $("<div class='sql-item' />").appendTo($hl);
 				$("<div class='sql-date' />").text(sqlHistory.createTime).appendTo($item);
 				$("<div class='sql-content' />").text(sqlHistory.sql).appendTo($item);
+				
+				$item.draggable(
+				{
+					helper: "clone",
+					distance: 50,
+					classes:
+					{
+						"ui-draggable" : "sql-draggable",
+						"ui-draggable-dragging" : "ui-widget ui-widget-content ui-corner-all ui-widget-shadow sql-draggable-helper ui-front"
+					}
+				});
 			}
-			
-			$hl.selectable("refresh");
 		}
 	});
 	
-	po.element(".sql-history-list").selectable({ filter : ".sql-item",  classes : { "ui-selected" : "ui-state-active" } });
+	po.element(".sql-history-list").on("click", ".sql-item", function()
+	{
+		var $this = $(this);
+		
+		if($this.hasClass("ui-state-active"))
+			$this.removeClass("ui-state-active");
+		else
+		{
+			po.element(".sql-history-list .sql-item.ui-state-active").removeClass("ui-state-active");
+			$this.addClass("ui-state-active");
+		}
+	});
 	
 	po.getSelectedSqlHistories = function()
 	{
-		var $selectedSql = po.element(".sql-history-list .sql-item.ui-selected");
+		var $selectedSql = po.element(".sql-history-list .sql-item.ui-state-active");
 		
 		if($selectedSql.length == 0)
 			return null;
