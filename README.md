@@ -39,7 +39,12 @@ SQL工作台
 
 ## 编译
 
+	（执行单元测试编译，需要预先配置单元测试环境）
 	mvn clean package
+
+
+	（不执行单元测试编译，无需预先配置单元测试环境）
+	mvn clean package -DskipTests
 
 ## 运行
 
