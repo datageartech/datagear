@@ -6,6 +6,8 @@ package org.datagear.dataexchange;
 
 import java.sql.Connection;
 
+import org.datagear.util.JdbcUtil;
+
 /**
  * 简单{@linkplain ConnectionFactory}。
  * 
@@ -63,6 +65,6 @@ public class SimpleConnectionFactory implements ConnectionFactory
 			throw new IllegalStateException();
 
 		if (this.closeOnRelease && this.resource != null)
-			this.resource.close();
+			JdbcUtil.closeConnection(this.resource);
 	}
 }

@@ -124,16 +124,16 @@ public class DefaultDialectSource implements DialectSource
 	{
 		try
 		{
-			DatabaseMetaData databaseMetaData = cn.getMetaData();
+			String cacheKey = getDialectCacheKey(cn);
 
-			String cnUrl = databaseMetaData.getURL();
-
-			DialectBuilder cached = this.dialectBuilderCache.get(cnUrl);
+			DialectBuilder cached = this.dialectBuilderCache.get(cacheKey);
 
 			if (cached != null)
 				return cached.build(cn);
 			else
 			{
+				DatabaseMetaData databaseMetaData = cn.getMetaData();
+
 				CombinedDialectBuilder combinedDialectBuilder = new CombinedDialectBuilder();
 
 				if (this.dialectBuilders != null)
@@ -170,7 +170,7 @@ public class DefaultDialectSource implements DialectSource
 					}
 				}
 
-				this.dialectBuilderCache.putIfAbsent(cnUrl, combinedDialectBuilder);
+				this.dialectBuilderCache.putIfAbsent(cacheKey, combinedDialectBuilder);
 
 				return combinedDialectBuilder.build(cn);
 			}
@@ -179,6 +179,16 @@ public class DefaultDialectSource implements DialectSource
 		{
 			throw new DialectException(e);
 		}
+	}
+
+	protected String getDialectCacheKey(Connection cn) throws SQLException
+	{
+		String key = JdbcUtil.getURLIfSupports(cn);
+
+		if (key == null)
+			key = cn.getClass().getName();
+
+		return key;
 	}
 
 	/**

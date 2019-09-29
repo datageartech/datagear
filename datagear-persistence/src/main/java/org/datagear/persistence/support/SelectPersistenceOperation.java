@@ -70,6 +70,9 @@ import org.datagear.persistence.mapper.PropertyTableMapper;
  */
 public class SelectPersistenceOperation extends AbstractModelPersistenceOperation
 {
+	/** 列别名前缀 */
+	public static final String COLUMN_ALIAS_PREFIX = "DATAGEARCOLALIAS_";
+
 	private SelectOptions selectOptions;
 
 	private Map<Class<?>, Class<?>> collectionInstanceTypeMap = new HashMap<Class<?>, Class<?>>();
@@ -1061,7 +1064,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			if (appendModelTableMapperPrimitiveValueProperty)
 			{
 				String columnNameQuote = toQuoteName(dialect, mapper.getPrimitiveColumnName());
-				String columnAlias = getPropertyColumnAlias(modelColumnAliasPrefix, property, propertyIndex, null);
+				String columnAlias = toPropertyPathColumnAlias(modelColumnAliasPrefix, property, propertyIndex);
 				String columnAliasQuote = toQuoteName(dialect, columnAlias);
 
 				if (selectSql != null)
@@ -1088,8 +1091,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 						getKeyColumnNames(propertyModel, getPropertyKeyProperties(mapper, propertyModel)));
 				String ptableAliasQuote = toQuoteName(dialect, tableAliasGenerator.next());
 
-				String myColumnAliasPrefix = getPropertyColumnAlias(modelColumnAliasPrefix, property, propertyIndex,
-						PropertyPath.PROPERTY_STRING);
+				String myColumnAliasPrefix = toPropertyPathColumnAlias(modelColumnAliasPrefix, property, propertyIndex);
 
 				String myModelPropertyPath = getPropertyPath(model, property, modelPropertyPath);
 
@@ -1171,8 +1173,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		String ptableNameQuote = toQuoteName(dialect,
 				mapper.isPrimitivePropertyMapper() ? mapper.getPrimitiveTableName() : getTableName(propertyModel));
 		String ptableAliasQuote = toQuoteName(dialect, tableAliasGenerator.next());
-		String myColumnAliasPrefix = getPropertyColumnAlias(modelColumnAliasPrefix, property, propertyIndex,
-				PropertyPath.PROPERTY_STRING);
+		String myColumnAliasPrefix = toPropertyPathColumnAlias(modelColumnAliasPrefix, property, propertyIndex);
 
 		String myModelPropertyPath = getPropertyPath(model, property, modelPropertyPath);
 
@@ -1184,7 +1185,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		if (onlyCount)
 		{
-			String sizeAlias = myColumnAliasPrefix + SizeOnlyCollection.SIZE_PROPERTY_NAME;
+			String sizeAlias = toPropertyPathColumnAlias(myColumnAliasPrefix, SizeOnlyCollection.SIZE_PROPERTY_NAME);
 			String sizeQuoteAlias = toQuoteName(dialect, sizeAlias);
 
 			if (selectSql != null)
@@ -1291,8 +1292,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		String jointableNameQuote = toQuoteName(dialect, mapper.getJoinTableName());
 		String jointableAliasQuote = toQuoteName(dialect, tableAliasGenerator.next());
 
-		String myColumnAliasPrefix = getPropertyColumnAlias(modelColumnAliasPrefix, property, propertyIndex,
-				PropertyPath.PROPERTY_STRING);
+		String myColumnAliasPrefix = toPropertyPathColumnAlias(modelColumnAliasPrefix, property, propertyIndex);
 
 		String myModelPropertyPath = getPropertyPath(model, property, modelPropertyPath);
 
@@ -1304,7 +1304,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		if (onlyCount)
 		{
-			String sizeAlias = myColumnAliasPrefix + SizeOnlyCollection.SIZE_PROPERTY_NAME;
+			String sizeAlias = toPropertyPathColumnAlias(myColumnAliasPrefix, SizeOnlyCollection.SIZE_PROPERTY_NAME);
 			String sizeQuoteAlias = toQuoteName(dialect, sizeAlias);
 
 			if (selectSql != null)
@@ -1401,31 +1401,65 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	}
 
 	/**
-	 * 获取属性列别名。
-	 * <p>
-	 * 此方法返回“propertyIndex”格式的别名；
-	 * </p>
-	 * <p>
-	 * 如果采用属性名作为别名，对于嵌套层级多的属性，会导致别名超过某些数据库的别名长度限制（比如Oracle仅允许30个字符长度）而引起异常，所以这里采用属性索引作为别名。
-	 * </p>
+	 * 转换为属性路径列别名。
 	 * 
-	 * @param prefix
+	 * @param parentPath
 	 * @param property
 	 * @param propertyIndex
-	 * @param suffix
 	 * @return
 	 */
-	protected String getPropertyColumnAlias(String prefix, Property property, int propertyIndex, String suffix)
+	protected String toPropertyPathColumnAlias(String parentPath, Property property, int propertyIndex)
 	{
-		String alias = Integer.toString(propertyIndex);
+		// 列别名必须带有合法字母前缀，因为某些驱动没有标识符引用符，如果仅使用数字索引作为，将会报错
+		if (parentPath == null || parentPath.isEmpty())
+			parentPath = COLUMN_ALIAS_PREFIX;
+		else
+			parentPath = parentPath + "_";
 
-		if (prefix != null)
-			alias = prefix + alias;
+		// 采用属性名的话，嵌套层级多时可能会导致别名超长，所以这里采用索引
+		return parentPath + propertyIndex;
+	}
 
-		if (suffix != null)
-			alias = alias + suffix;
+	/**
+	 * 转换为属性路径列别名。
+	 * 
+	 * @param parentPath
+	 * @param name
+	 * @return
+	 */
+	protected String toPropertyPathColumnAlias(String parentPath, String name)
+	{
+		// 列别名必须带有合法字母前缀，因为某些驱动没有标识符引用符，如果仅使用数字索引作为，将会报错
+		if (parentPath == null || parentPath.isEmpty())
+			parentPath = COLUMN_ALIAS_PREFIX;
+		else
+			parentPath = parentPath + "_";
 
-		return alias;
+		return parentPath + name;
+	}
+
+	/**
+	 * 由属性路径列别名转换为{@linkplain PropertyPath}。
+	 * 
+	 * @param alias
+	 * @param deletePrefix
+	 *            删除的前缀，允许为{@code null}
+	 * @return
+	 */
+	protected PropertyPath fromPropertyPathColumnAlias(String alias, String deletePrefix)
+	{
+		if (deletePrefix == null || deletePrefix.isEmpty())
+			deletePrefix = COLUMN_ALIAS_PREFIX;
+
+		// 某些驱动可能会在列别名前加限定符、不区分大小写，比如Hive jdbc，因此这里采用查找位置的方式而非startsWith
+		int prefixIndex = alias.toUpperCase().indexOf(deletePrefix.toUpperCase());
+
+		if (prefixIndex >= 0)
+			alias = alias.substring(prefixIndex + deletePrefix.length());
+
+		alias = alias.replace("_", PropertyPath.PROPERTY_STRING);
+
+		return PropertyPath.valueOf(alias);
 	}
 
 	/**
@@ -1961,13 +1995,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			{
 				String colName = lookupColumnName(rsMeta, i);
 
-				if (deletedColumnNamePrefix != null && !deletedColumnNamePrefix.isEmpty())
-				{
-					if (colName.startsWith(deletedColumnNamePrefix))
-						colName = colName.substring(deletedColumnNamePrefix.length());
-				}
-
-				PropertyPath propPath = PropertyPath.valueOf(colName);
+				PropertyPath propPath = fromPropertyPathColumnAlias(colName, deletedColumnNamePrefix);
 
 				Map<PropertyPath, Object> parent = map;
 
@@ -2052,7 +2080,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		@Override
 		public Object mapRow(ResultSet rs, int row)
 		{
-			Map<PropertyPath, Object> propertyColIndexMap = extractPropertyColIndexMap(rs, row, null);
+			Map<PropertyPath, Object> propertyColIndexMap = extractPropertyColIndexMap(rs, row, COLUMN_ALIAS_PREFIX);
 
 			try
 			{
@@ -2128,7 +2156,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			}
 			else
 			{
-				String deletedColumnNamePrefix = getPropertyColumnAlias("", this.property, this.propertyIndex, ".");
+				String deletedColumnNamePrefix = toPropertyPathColumnAlias(null, this.property, this.propertyIndex);
 
 				Map<PropertyPath, Object> propertyColIndexMap = extractPropertyColIndexMap(rs, row,
 						deletedColumnNamePrefix);

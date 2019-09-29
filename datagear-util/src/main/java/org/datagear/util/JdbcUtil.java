@@ -7,6 +7,7 @@ package org.datagear.util;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -358,6 +359,110 @@ public class JdbcUtil
 		}
 		catch (Throwable t)
 		{
+		}
+	}
+
+	/**
+	 * 提交。
+	 * 
+	 * @param cn
+	 * @return {@code true} 提交成功；{@code false} 不支持
+	 * @throws SQLException
+	 */
+	public static boolean commitIfSupports(Connection cn) throws SQLException
+	{
+		DatabaseMetaData metaData = cn.getMetaData();
+
+		if (!metaData.supportsTransactions())
+			return false;
+
+		cn.commit();
+
+		return true;
+	}
+
+	/**
+	 * 回滚。
+	 * 
+	 * @param cn
+	 * @return {@code true} 回滚成功；{@code false} 不支持
+	 * @throws SQLException
+	 */
+	public static boolean rollbackIfSupports(Connection cn) throws SQLException
+	{
+		DatabaseMetaData metaData = cn.getMetaData();
+
+		if (!metaData.supportsTransactions())
+			return false;
+
+		cn.rollback();
+
+		return true;
+	}
+
+	/**
+	 * 设置为只读。
+	 * 
+	 * @param cn
+	 * @param readonly
+	 * @return {@code true} 设置成功；{@code false} 不支持
+	 */
+	public static boolean setReadonlyIfSupports(Connection cn, boolean readonly)
+	{
+		try
+		{
+			cn.setReadOnly(readonly);
+
+			return true;
+		}
+		// 某些驱动程序可能不支持此方法而抛出异常，比如Hive jdbc
+		catch (SQLException e)
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * 设置是否自动提交。
+	 * 
+	 * @param cn
+	 * @param autoCommit
+	 * @return {@code true} 设置成功；{@code false} 不支持
+	 */
+	public static boolean setAutoCommitIfSupports(Connection cn, boolean autoCommit)
+	{
+		try
+		{
+			cn.setAutoCommit(autoCommit);
+
+			return true;
+		}
+		// 避免有驱动程序不支持此方法而抛出异常
+		catch (SQLException e)
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * 获取连接URL。
+	 * 
+	 * @param cn
+	 * @return 连接URL；{@code null} 不支持时
+	 * @throws SQLException
+	 */
+	public static String getURLIfSupports(Connection cn) throws SQLException
+	{
+		DatabaseMetaData metaData = cn.getMetaData();
+
+		try
+		{
+			return metaData.getURL();
+		}
+		// 避免有驱动程序不支持此方法而抛出异常
+		catch (Throwable t)
+		{
+			return null;
 		}
 	}
 }

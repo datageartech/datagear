@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.datagear.connection.ConnectionSource;
+import org.datagear.util.JdbcUtil;
 
 /**
  * 数据源{@linkplain ConnectionSource}。
@@ -51,6 +52,6 @@ public class DataSourceConnectionFactory implements ConnectionFactory
 	@Override
 	public void release(Connection cn) throws SQLException
 	{
-		cn.close();
+		JdbcUtil.closeConnection(cn);
 	}
 }

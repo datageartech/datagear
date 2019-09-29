@@ -243,8 +243,8 @@ public abstract class AbstractSchemaConnController extends AbstractController
 			if (this._cn == null)
 			{
 				this._cn = getSchemaConnection(this._schema);
-				this._cn.setAutoCommit(false);
-				this._cn.setReadOnly(this.readonly);
+				JdbcUtil.setAutoCommitIfSupports(this._cn, false);
+				JdbcUtil.setReadonlyIfSupports(this._cn, this.readonly);
 			}
 
 			return this._cn;
@@ -255,7 +255,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 			if (this._cn == null)
 				return;
 
-			this._cn.commit();
+			JdbcUtil.commitIfSupports(this._cn);
 		}
 
 		protected void rollbackConnection() throws SQLException
@@ -263,7 +263,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 			if (this._cn == null)
 				return;
 
-			this._cn.rollback();
+			JdbcUtil.rollbackIfSupports(this._cn);
 		}
 
 		/**

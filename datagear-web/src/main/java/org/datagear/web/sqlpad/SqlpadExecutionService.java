@@ -475,7 +475,7 @@ public class SqlpadExecutionService
 			try
 			{
 				cn = getSchemaConnection(this.schema);
-				cn.setAutoCommit(false);
+				JdbcUtil.setAutoCommitIfSupports(cn, false);
 				st = createStatement(cn);
 			}
 			catch (Throwable t)
@@ -702,14 +702,14 @@ public class SqlpadExecutionService
 
 			if (SqlCommand.COMMIT.equals(this.sqlCommand))
 			{
-				cn.commit();
+				JdbcUtil.commitIfSupports(cn);
 				sendSqlCommandMessage(this.sqlCommand);
 
 				this.sqlCommand = null;
 			}
 			else if (SqlCommand.ROLLBACK.equals(this.sqlCommand))
 			{
-				cn.rollback();
+				JdbcUtil.rollbackIfSupports(cn);
 				sendSqlCommandMessage(this.sqlCommand);
 
 				this.sqlCommand = null;
