@@ -292,8 +292,12 @@ public abstract class AbstractController
 	{
 		if (saveCount > 0)
 			return buildOperationMessageSuccessResponseEntity(request, "saveSuccess.withCount", saveCount);
-		else if (saveCount == 0)
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, "saveFail.zeroCount");
+
+		// XXX JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑
+		// else if (saveCount == 0)
+		// return buildOperationMessageFailResponseEntity(request,
+		// HttpStatus.BAD_REQUEST, "saveFail.zeroCount");
+
 		else if (saveCount == PersistenceManager.PERSISTENCE_UNCHANGED)
 			return buildOperationMessageSuccessResponseEntity(request, "saveSuccess.noChange", saveCount);
 		else
@@ -324,8 +328,12 @@ public abstract class AbstractController
 	{
 		if (deleteCount > 0)
 			return buildOperationMessageSuccessResponseEntity(request, "deleteSuccess.withCount", deleteCount);
-		else if (deleteCount == 0)
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST, "deleteFail.zeroCount");
+
+		// XXX JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑
+		// else if (deleteCount == 0)
+		// return buildOperationMessageFailResponseEntity(request,
+		// HttpStatus.BAD_REQUEST, "deleteFail.zeroCount");
+
 		else
 			return buildOperationMessageSuccessResponseEntity(request, "deleteSuccess");
 	}
