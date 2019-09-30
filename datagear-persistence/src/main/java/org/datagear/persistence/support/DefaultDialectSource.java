@@ -266,12 +266,7 @@ public class DefaultDialectSource implements DialectSource
 		try
 		{
 			pst = cn.prepareStatement(query.getSqlString());
-
-			Object[] args = query.getArgsArray();
-			int[] argTypes = query.getArgTypesArray();
-
-			for (int i = 0; i < args.length; i++)
-				pst.setObject(i + 1, args[i], argTypes[i]);
+			query.setParamValues(cn, pst);
 
 			rs = pst.executeQuery();
 		}

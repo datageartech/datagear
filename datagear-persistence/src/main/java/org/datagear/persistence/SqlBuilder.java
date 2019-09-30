@@ -5,6 +5,9 @@
 package org.datagear.persistence;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -522,6 +525,19 @@ public class SqlBuilder implements Serializable
 	public int sqlLength()
 	{
 		return this.sql.length();
+	}
+
+	/**
+	 * 设置{@linkplain PreparedStatement}参数。
+	 * 
+	 * @param cn
+	 * @param pst
+	 * @throws SQLException
+	 */
+	public void setParamValues(Connection cn, PreparedStatement pst) throws SQLException
+	{
+		for (int i = 0, len = this.args.size(); i < len; i++)
+			JdbcUtil.setParamValue(cn, pst, i + 1, this.argTypes.get(i), this.args.get(i));
 	}
 
 	protected void setSql(StringBuilder sql)

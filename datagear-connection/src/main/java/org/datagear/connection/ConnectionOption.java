@@ -6,9 +6,10 @@ package org.datagear.connection;
 
 import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Properties;
+
+import org.datagear.util.JdbcUtil;
 
 /**
  * JDBC连接选项。
@@ -208,16 +209,8 @@ public class ConnectionOption implements Serializable
 	{
 		ConnectionOption connectionOption = new ConnectionOption();
 
-		try
-		{
-			DatabaseMetaData dbm = cn.getMetaData();
-
-			connectionOption.setUrl(dbm.getURL());
-			connectionOption.setUser(dbm.getUserName());
-		}
-		catch (SQLException e)
-		{
-		}
+		connectionOption.setUrl(JdbcUtil.getURLIfSupports(cn));
+		connectionOption.setUser(JdbcUtil.getUserNameIfSupports(cn));
 
 		return connectionOption;
 	}

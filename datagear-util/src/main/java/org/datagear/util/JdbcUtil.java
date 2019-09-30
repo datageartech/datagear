@@ -6,10 +6,15 @@ package org.datagear.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.NClob;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Types;
 
@@ -24,6 +29,334 @@ public class JdbcUtil
 	private JdbcUtil()
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * 设置{@linkplain PreparedStatement}的参数值，并在必要时进行数据类型转换。
+	 * <p>
+	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Java Types Mapper to
+	 * JDBC Types”表。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param st
+	 * @param paramIndex
+	 * @param sqlType
+	 * @param paramValue
+	 * @throws SQLException
+	 * @throws UnsupportedOperationException
+	 */
+	public static void setParamValue(Connection cn, PreparedStatement st, int paramIndex, int sqlType,
+			Object paramValue) throws SQLException, UnsupportedOperationException
+	{
+		if (paramValue == null)
+		{
+			st.setNull(paramIndex, sqlType);
+			return;
+		}
+
+		switch (sqlType)
+		{
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			{
+				String value = null;
+
+				if (paramValue instanceof String)
+					value = (String) paramValue;
+				else
+					value = paramValue.toString();
+
+				st.setString(paramIndex, value);
+
+				break;
+			}
+
+			case Types.NUMERIC:
+			case Types.DECIMAL:
+			{
+				BigDecimal value = null;
+
+				if (paramValue instanceof BigDecimal)
+					value = (BigDecimal) paramValue;
+				else if (paramValue instanceof BigInteger)
+					value = new BigDecimal((BigInteger) paramValue);
+				else if (paramValue instanceof Number)
+					value = new BigDecimal(((Number) paramValue).doubleValue());
+				else if (paramValue instanceof String)
+					value = new BigDecimal((String) paramValue);
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setBigDecimal(paramIndex, value);
+
+				break;
+			}
+
+			case Types.BIT:
+			case Types.BOOLEAN:
+			{
+				boolean value = false;
+
+				if (paramValue instanceof Boolean)
+					value = (Boolean) paramValue;
+				else if (paramValue instanceof String)
+				{
+					String str = (String) paramValue;
+					value = ("true".equalsIgnoreCase(str) || "1".equals(str) || "on".equalsIgnoreCase(str));
+				}
+				else if (paramValue instanceof Number)
+					value = (((Number) paramValue).intValue() > 0);
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setBoolean(paramIndex, value);
+
+				break;
+			}
+
+			case Types.TINYINT:
+			case Types.SMALLINT:
+			case Types.INTEGER:
+			{
+				Integer value = null;
+
+				if (paramValue instanceof Integer)
+					value = (Integer) paramValue;
+				else if (paramValue instanceof Number)
+					value = ((Number) paramValue).intValue();
+				else if (paramValue instanceof String)
+					value = Integer.parseInt((String) paramValue);
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setInt(paramIndex, value);
+
+				break;
+			}
+
+			case Types.BIGINT:
+			{
+				Long value = null;
+
+				if (paramValue instanceof Long)
+					value = (Long) paramValue;
+				else if (paramValue instanceof Number)
+					value = ((Number) paramValue).longValue();
+				else if (paramValue instanceof String)
+					value = Long.parseLong((String) paramValue);
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setLong(paramIndex, value);
+
+				break;
+			}
+
+			case Types.REAL:
+			{
+				Float value = null;
+
+				if (paramValue instanceof Float)
+					value = (Float) paramValue;
+				else if (paramValue instanceof Number)
+					value = ((Number) paramValue).floatValue();
+				else if (paramValue instanceof String)
+					value = Float.parseFloat((String) paramValue);
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setFloat(paramIndex, value);
+
+				break;
+			}
+
+			case Types.FLOAT:
+			case Types.DOUBLE:
+			{
+				Double value = null;
+
+				if (paramValue instanceof Double)
+					value = (Double) paramValue;
+				else if (paramValue instanceof Number)
+					value = ((Number) paramValue).doubleValue();
+				else if (paramValue instanceof String)
+					value = Double.parseDouble((String) paramValue);
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setDouble(paramIndex, value);
+
+				break;
+			}
+
+			case Types.BINARY:
+			case Types.VARBINARY:
+			case Types.LONGVARBINARY:
+			{
+				byte[] value = null;
+
+				if (paramValue instanceof byte[])
+					value = (byte[]) paramValue;
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setBytes(paramIndex, value);
+
+				break;
+			}
+
+			case Types.DATE:
+			{
+				java.sql.Date value = null;
+
+				if (paramValue instanceof java.sql.Date)
+					value = (java.sql.Date) paramValue;
+				else if (paramValue instanceof java.util.Date)
+					value = new java.sql.Date(((java.util.Date) paramValue).getTime());
+				else if (paramValue instanceof Number)
+					value = new java.sql.Date(((Number) paramValue).longValue());
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setDate(paramIndex, value);
+
+				break;
+			}
+
+			case Types.TIME:
+			{
+				java.sql.Time value = null;
+
+				if (paramValue instanceof java.sql.Time)
+					value = (java.sql.Time) paramValue;
+				else if (paramValue instanceof java.util.Date)
+					value = new java.sql.Time(((java.util.Date) paramValue).getTime());
+				else if (paramValue instanceof Number)
+					value = new java.sql.Time(((Number) paramValue).longValue());
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setTime(paramIndex, value);
+
+				break;
+			}
+
+			case Types.TIMESTAMP:
+			{
+				java.sql.Timestamp value = null;
+
+				if (paramValue instanceof java.sql.Timestamp)
+					value = (java.sql.Timestamp) paramValue;
+				else if (paramValue instanceof java.util.Date)
+					value = new java.sql.Timestamp(((java.util.Date) paramValue).getTime());
+				else if (paramValue instanceof Number)
+					value = new java.sql.Timestamp(((Number) paramValue).longValue());
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setTimestamp(paramIndex, value);
+
+				break;
+			}
+
+			case Types.CLOB:
+			{
+				String value = null;
+
+				if (paramValue instanceof String)
+					value = (String) paramValue;
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				Clob clob = cn.createClob();
+				clob.setString(1, value);
+				st.setClob(paramIndex, clob);
+
+				break;
+			}
+
+			case Types.BLOB:
+			{
+				byte[] value = null;
+
+				if (paramValue instanceof byte[])
+					value = (byte[]) paramValue;
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				Blob blob = cn.createBlob();
+				blob.setBytes(1, value);
+				st.setBlob(paramIndex, blob);
+
+				break;
+			}
+
+			case Types.NCHAR:
+			case Types.NVARCHAR:
+			case Types.LONGNVARCHAR:
+			{
+				String value = null;
+
+				if (paramValue instanceof String)
+					value = (String) paramValue;
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				st.setNString(paramIndex, value);
+				break;
+			}
+
+			case Types.NCLOB:
+			{
+				String value = null;
+
+				if (paramValue instanceof String)
+					value = (String) paramValue;
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				NClob nclob = cn.createNClob();
+				nclob.setString(1, value);
+				st.setNClob(paramIndex, nclob);
+				break;
+			}
+
+			case Types.SQLXML:
+			{
+				String value = null;
+
+				if (paramValue instanceof String)
+					value = (String) paramValue;
+				else
+					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
+							+ paramValue.getClass().getName() + "] is not supported");
+
+				SQLXML sqlxml = cn.createSQLXML();
+				sqlxml.setString(value);
+				st.setSQLXML(paramIndex, sqlxml);
+				break;
+			}
+
+			default:
+
+				throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value is not supported");
+		}
 	}
 
 	/**
@@ -174,8 +507,8 @@ public class JdbcUtil
 			return rs.getObject(columnIndex);
 		}
 		else
-			throw new UnsupportedOperationException("Getting [" + ResultSet.class.getName() + "] column value of type ["
-					+ targetType.getName() + "] is not supported");
+			throw new UnsupportedOperationException("Getting [" + ResultSet.class.getName()
+					+ "] column value for type [" + targetType.getName() + "] is not supported");
 	}
 
 	/**
@@ -449,15 +782,33 @@ public class JdbcUtil
 	 * 
 	 * @param cn
 	 * @return 连接URL；{@code null} 不支持时
-	 * @throws SQLException
 	 */
-	public static String getURLIfSupports(Connection cn) throws SQLException
+	public static String getURLIfSupports(Connection cn)
 	{
-		DatabaseMetaData metaData = cn.getMetaData();
-
 		try
 		{
+			DatabaseMetaData metaData = cn.getMetaData();
 			return metaData.getURL();
+		}
+		// 避免有驱动程序不支持此方法而抛出异常
+		catch (Throwable t)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * 获取连接用户名。
+	 * 
+	 * @param cn
+	 * @return 连接用户名；{@code null} 不支持时
+	 */
+	public static String getUserNameIfSupports(Connection cn)
+	{
+		try
+		{
+			DatabaseMetaData metaData = cn.getMetaData();
+			return metaData.getUserName();
 		}
 		// 避免有驱动程序不支持此方法而抛出异常
 		catch (Throwable t)

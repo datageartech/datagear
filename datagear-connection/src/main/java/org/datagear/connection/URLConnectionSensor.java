@@ -7,6 +7,8 @@ package org.datagear.connection;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.datagear.util.JdbcUtil;
+
 /**
  * 使用URL进行判断的{@linkplain ConnectionSensor}。
  * 
@@ -57,17 +59,6 @@ public class URLConnectionSensor implements ConnectionSensor
 	 */
 	protected String getURL(Connection cn)
 	{
-		String url = null;
-
-		try
-		{
-			url = cn.getMetaData().getURL();
-		}
-		catch (SQLException e)
-		{
-
-		}
-
-		return url;
+		return JdbcUtil.getURLIfSupports(cn);
 	}
 }

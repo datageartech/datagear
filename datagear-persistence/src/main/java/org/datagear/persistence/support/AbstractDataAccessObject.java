@@ -98,14 +98,7 @@ public abstract class AbstractDataAccessObject
 		try
 		{
 			pst = cn.prepareStatement(sql.getSqlString());
-
-			Object[] args = sql.getArgsArray();
-			int[] argTypes = sql.getArgTypesArray();
-
-			for (int i = 0; i < args.length; i++)
-			{
-				pst.setObject(i + 1, args[i], argTypes[i]);
-			}
+			sql.setParamValues(cn, pst);
 
 			return pst.executeUpdate();
 		}
@@ -137,14 +130,7 @@ public abstract class AbstractDataAccessObject
 		try
 		{
 			pst = cn.prepareStatement(sql.getSqlString(), generatedKeyColumnNames);
-
-			Object[] args = sql.getArgsArray();
-			int[] argTypes = sql.getArgTypesArray();
-
-			for (int i = 0; i < args.length; i++)
-			{
-				pst.setObject(i + 1, args[i], argTypes[i]);
-			}
+			sql.setParamValues(cn, pst);
 
 			int updateCount = pst.executeUpdate();
 			ResultSet generatedKeys = pst.getGeneratedKeys();
@@ -206,13 +192,7 @@ public abstract class AbstractDataAccessObject
 			else
 				pst = cn.prepareStatement(query.getSqlString());
 
-			Object[] args = query.getArgsArray();
-			int[] argTypes = query.getArgTypesArray();
-
-			for (int i = 0; i < args.length; i++)
-			{
-				pst.setObject(i + 1, args[i], argTypes[i]);
-			}
+			query.setParamValues(cn, pst);
 
 			rs = pst.executeQuery();
 
@@ -267,14 +247,7 @@ public abstract class AbstractDataAccessObject
 			long count = 0;
 
 			pst = cn.prepareStatement(query.getSqlString());
-
-			Object[] args = query.getArgsArray();
-			int[] argTypes = query.getArgTypesArray();
-
-			for (int i = 0; i < args.length; i++)
-			{
-				pst.setObject(i + 1, args[i], argTypes[i]);
-			}
+			query.setParamValues(cn, pst);
 
 			rs = pst.executeQuery();
 
