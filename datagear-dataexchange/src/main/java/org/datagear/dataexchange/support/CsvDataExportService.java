@@ -21,6 +21,7 @@ import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.util.JdbcUtil;
 
 /**
  * CSV导出服务。
@@ -57,7 +58,7 @@ public class CsvDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 		Writer csvWriter = getResource(dataExchange.getWriterFactory(), exportContext);
 
 		Connection cn = exportContext.getConnection();
-		cn.setReadOnly(true);
+		JdbcUtil.setReadonlyIfSupports(cn, true);
 
 		ResultSet rs = dataExchange.getQuery().execute(cn);
 

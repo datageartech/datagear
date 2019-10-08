@@ -19,6 +19,7 @@ import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.util.JdbcUtil;
 
 /**
  * SQL导出服务。
@@ -54,7 +55,7 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 		Writer sqlWriter = getResource(dataExchange.getWriterFactory(), exportContext);
 
 		Connection cn = context.getConnection();
-		cn.setReadOnly(true);
+		JdbcUtil.setReadonlyIfSupports(cn, true);
 
 		ResultSet rs = dataExchange.getQuery().execute(cn);
 		List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);

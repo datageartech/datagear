@@ -44,6 +44,7 @@ import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.util.IOUtil;
+import org.datagear.util.JdbcUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -81,7 +82,7 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 		IndexFormatDataExchangeContext importContext = IndexFormatDataExchangeContext.cast(context);
 
 		Connection cn = context.getConnection();
-		cn.setAutoCommit(false);
+		JdbcUtil.setAutoCommitIfSupports(cn, false);
 
 		if (dataExchange.isXls())
 			importXls(dataExchange, importContext, cn);

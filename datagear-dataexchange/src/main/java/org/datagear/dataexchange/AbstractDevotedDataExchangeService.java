@@ -31,6 +31,7 @@ import org.apache.commons.codec.DecoderException;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.util.IOUtil;
+import org.datagear.util.JdbcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,24 +212,6 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
-	 * 回滚。
-	 * 
-	 * @param cn
-	 * @throws DataExchangeException
-	 */
-	protected void rollback(Connection cn) throws DataExchangeException
-	{
-		try
-		{
-			cn.rollback();
-		}
-		catch (SQLException e)
-		{
-			throw new DataExchangeException(e);
-		}
-	}
-
-	/**
 	 * 提交。
 	 * 
 	 * @param cn
@@ -238,7 +221,25 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	{
 		try
 		{
-			cn.commit();
+			JdbcUtil.commitIfSupports(cn);
+		}
+		catch (SQLException e)
+		{
+			throw new DataExchangeException(e);
+		}
+	}
+
+	/**
+	 * 回滚。
+	 * 
+	 * @param cn
+	 * @throws DataExchangeException
+	 */
+	protected void rollback(Connection cn) throws DataExchangeException
+	{
+		try
+		{
+			JdbcUtil.rollbackIfSupports(cn);
 		}
 		catch (SQLException e)
 		{
@@ -255,7 +256,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	{
 		try
 		{
-			cn.rollback();
+			JdbcUtil.rollbackIfSupports(cn);
 		}
 		catch (Throwable t)
 		{
@@ -272,7 +273,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	{
 		try
 		{
-			cn.commit();
+			JdbcUtil.commitIfSupports(cn);
 		}
 		catch (Throwable t)
 		{

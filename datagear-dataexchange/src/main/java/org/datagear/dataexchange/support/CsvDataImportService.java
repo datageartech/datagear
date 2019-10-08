@@ -22,6 +22,7 @@ import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.ValueDataImportOption;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.util.JdbcUtil;
 
 /**
  * CSV导入服务。
@@ -56,7 +57,7 @@ public class CsvDataImportService extends AbstractDevotedDbInfoAwareDataExchange
 		Reader csvReader = getResource(dataExchange.getReaderFactory(), importContext);
 
 		Connection cn = context.getConnection();
-		cn.setAutoCommit(false);
+		JdbcUtil.setAutoCommitIfSupports(cn, false);
 		PreparedStatement st = null;
 
 		List<ColumnInfo> rawColumnInfos = null;

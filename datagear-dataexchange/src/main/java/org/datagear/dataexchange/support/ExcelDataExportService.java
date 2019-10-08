@@ -32,6 +32,7 @@ import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.util.JdbcUtil;
 
 /**
  * Excel导出服务。
@@ -66,7 +67,7 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 		OutputStream out = getResource(dataExchange.getOutputFactory(), exportContext);
 
 		Connection cn = context.getConnection();
-		cn.setReadOnly(true);
+		JdbcUtil.setReadonlyIfSupports(cn, true);
 
 		ResultSet rs = dataExchange.getQuery().execute(cn);
 		List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);

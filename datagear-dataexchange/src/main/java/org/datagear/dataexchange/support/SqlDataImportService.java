@@ -15,6 +15,7 @@ import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataImportListener;
 import org.datagear.dataexchange.ExceptionResolve;
 import org.datagear.dataexchange.ExecuteDataImportSqlException;
+import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 
@@ -37,7 +38,7 @@ public class SqlDataImportService extends AbstractDevotedDataExchangeService<Sql
 		Reader reader = getResource(dataExchange.getReaderFactory(), context);
 
 		Connection cn = context.getConnection();
-		cn.setAutoCommit(false);
+		JdbcUtil.setAutoCommitIfSupports(cn, false);
 
 		Statement st = cn.createStatement();
 
