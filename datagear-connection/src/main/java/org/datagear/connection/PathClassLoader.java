@@ -35,8 +35,12 @@ import org.slf4j.LoggerFactory;
  * </p>
  * 
  * @author datagear@163.com
- *
+ * @deprecated 此类虽然支持JAR文件资源使用后可释放，但是存在很多类加载问题，
+ *             比如{@code SomeClass.class.getProtectionDomain().getCodeSource().getLocation()}返回的是{@code null}，
+ *             而导致JDBC类加载失败（Elasticsearch JDBC
+ *             org.elasticsearch.xpack.sql.client.Version），已被{@linkplain PathDriverClassLoader}类取代。
  */
+@Deprecated
 public class PathClassLoader extends ClassLoader implements Closeable
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PathClassLoader.class);
@@ -547,9 +551,10 @@ public class PathClassLoader extends ClassLoader implements Closeable
 			File file = new File(this.path, resourcePath);
 
 			if (file.exists())
+			{
 				resourceInfos.add(new ResourceHolder(resourcePath, file));
-
-			return resourceInfos;
+				return resourceInfos;
+			}
 		}
 
 		List<JarFileHolder> jarFileHolders = getJarFileHolders();

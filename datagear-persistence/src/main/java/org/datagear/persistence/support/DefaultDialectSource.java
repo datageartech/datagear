@@ -25,6 +25,7 @@ import org.datagear.persistence.Order;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.UnsupportedDialectException;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.JdbcUtil.QueryResultSet;
 
 /**
  * 默认{@linkplain DialectSource}。
@@ -265,10 +266,11 @@ public class DefaultDialectSource implements DialectSource
 
 		try
 		{
-			pst = cn.prepareStatement(query.getSqlString());
-			query.setParamValues(cn, pst);
+			QueryResultSet queryResultSet = JdbcUtil.executeQuery(cn, query.getSqlString(), query.getArgTypes(),
+					query.getArgs());
 
-			rs = pst.executeQuery();
+			pst = queryResultSet.getPreparedStatement();
+			rs = queryResultSet.getResultSet();
 		}
 		finally
 		{

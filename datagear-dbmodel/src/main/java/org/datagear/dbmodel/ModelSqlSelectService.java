@@ -21,6 +21,7 @@ import org.datagear.persistence.columnconverter.LOBConversionContext.LOBConversi
 import org.datagear.persistence.support.AbstractModelDataAccessObject;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.JdbcUtil.QueryResultSet;
 
 /**
  * 基于查询SQL的模型数据查询服务类。
@@ -130,9 +131,9 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 
 		try
 		{
-			StatementResultSetPair sr = getStatementResultSetPair(cn, sql, fetchSize);
-			st = sr.getStatement();
-			rs = sr.getResultSet();
+			QueryResultSet queryResultSet = JdbcUtil.executeQuery(cn, sql, fetchSize);
+			st = queryResultSet.getStatement();
+			rs = queryResultSet.getResultSet();
 
 			Model model = databaseModelResolver.resolve(cn, rs, IDUtil.uuid());
 
@@ -164,9 +165,9 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 
 		try
 		{
-			StatementResultSetPair sr = getStatementResultSetPair(cn, sql, fetchSize);
-			st = sr.getStatement();
-			rs = sr.getResultSet();
+			QueryResultSet queryResultSet = JdbcUtil.executeQuery(cn, sql, fetchSize);
+			st = queryResultSet.getStatement();
+			rs = queryResultSet.getResultSet();
 
 			return select(cn, sql, rs, model, startRow, fetchSize);
 		}
@@ -207,7 +208,7 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 
 		List<Object> datas = new ArrayList<Object>();
 
-		moveToPrevious(rs, startRow);
+		JdbcUtil.moveToBeforeRow(rs, startRow);
 
 		LOBConversionSetting contextLOBConversionSetting = LOBConversionContext.get();
 		LOBConversionSetting fullLoadingLOBConversionSetting = getFullLoadingLOBConversionSetting();
@@ -253,89 +254,6 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 	}
 
 	/**
-	 * 将一个未移动过游标的{@linkplain ResultSet}游标移动至指定行之前。
-	 * 
-	 * @param rs
-	 * @param row
-	 * @throws SQLException
-	 */
-	protected void moveToPrevious(ResultSet rs, int row) throws SQLException
-	{
-		// 第一行不做任何操作，避免不必要的调用可能导致底层不支持而报错
-		if (row == 1)
-			return;
-
-		if (ResultSet.TYPE_FORWARD_ONLY == rs.getType())
-			moveToPreviousByNext(rs, row);
-		else
-		{
-			try
-			{
-				rs.absolute(row - 1);
-			}
-			catch (SQLException e)
-			{
-				moveToPreviousByNext(rs, row);
-			}
-		}
-	}
-
-	/**
-	 * 将一个未移动过游标的{@linkplain ResultSet}游标移动至指定行之前，通过{@linkplain ResultSet#next()}方式。
-	 * 
-	 * @param rs
-	 * @param row
-	 * @throws SQLException
-	 */
-	protected void moveToPreviousByNext(ResultSet rs, int row) throws SQLException
-	{
-		for (int i = 1; i < row; i++)
-		{
-			if (!rs.next())
-				break;
-		}
-	}
-
-	/**
-	 * 获取指定查询语句的{@linkplain StatementResultSetPair}。
-	 * 
-	 * @param cn
-	 * @param selectSql
-	 * @param fetchSize
-	 * @return
-	 * @throws SQLException
-	 */
-	protected StatementResultSetPair getStatementResultSetPair(Connection cn, String selectSql, int fetchSize)
-			throws SQLException
-	{
-		// 某些查询SQL语句并不支持ResultSet.TYPE_SCROLL_*（比如SQLServer的聚集列存储索引），
-		// 为了兼容此种情况，这里先使用ResultSet.TYPE_SCROLL_INSENSITIVE，如果报错，再降级为ResultSet.TYPE_FORWARD_ONLY
-
-		Statement st = cn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-		st.setFetchSize(fetchSize);
-
-		ResultSet rs = null;
-
-		try
-		{
-			rs = st.executeQuery(selectSql);
-
-			return new StatementResultSetPair(st, rs);
-		}
-		catch (SQLException e)
-		{
-			JdbcUtil.closeResultSet(rs);
-			JdbcUtil.closeStatement(st);
-		}
-
-		st = cn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-		st.setFetchSize(fetchSize);
-		rs = st.executeQuery(selectSql);
-
-		return new StatementResultSetPair(st, rs);
-	}
-
-	/**
 	 * 获取完全加载LOB的{@linkplain LOBConversionSetting}。
 	 * 
 	 * @return
@@ -355,51 +273,6 @@ public class ModelSqlSelectService extends AbstractModelDataAccessObject
 		File blobToFilePlaceholder = new File(this.blobFileManagerDirectory, this.blobToFilePlaceholderName);
 
 		return new LOBConversionSetting(blobToFilePlaceholder, this.blobToBytesPlaceholder, this.clobLeftLength);
-	}
-
-	/**
-	 * {@linkplain Statement}、{@linkplain ResultSet}封装类。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	protected static class StatementResultSetPair
-	{
-		private Statement statement;
-
-		private ResultSet resultSet;
-
-		public StatementResultSetPair()
-		{
-			super();
-		}
-
-		public StatementResultSetPair(Statement statement, ResultSet resultSet)
-		{
-			super();
-			this.statement = statement;
-			this.resultSet = resultSet;
-		}
-
-		public Statement getStatement()
-		{
-			return statement;
-		}
-
-		public void setStatement(Statement statement)
-		{
-			this.statement = statement;
-		}
-
-		public ResultSet getResultSet()
-		{
-			return resultSet;
-		}
-
-		public void setResultSet(ResultSet resultSet)
-		{
-			this.resultSet = resultSet;
-		}
 	}
 
 	/**

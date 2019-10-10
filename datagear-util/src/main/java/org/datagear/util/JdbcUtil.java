@@ -14,9 +14,11 @@ import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.List;
 
 /**
  * JDBC工具支持类。
@@ -814,6 +816,253 @@ public class JdbcUtil
 		catch (Throwable t)
 		{
 			return null;
+		}
+	}
+
+	/**
+	 * 将一个未移动过游标的{@linkplain ResultSet}游标移动至指定行之前。
+	 * 
+	 * @param rs
+	 * @param row
+	 * @throws SQLException
+	 */
+	public static void moveToBeforeRow(ResultSet rs, int row) throws SQLException
+	{
+		// 第一行不做任何操作，避免不必要的调用可能导致底层不支持而报错
+		if (row == 1)
+			return;
+
+		try
+		{
+			rs.absolute(row - 1);
+		}
+		catch (SQLException e)
+		{
+			// 某些驱动程序不支持absolute，那么转为next方式
+			for (int i = 1; i < row; i++)
+			{
+				if (!rs.next())
+					break;
+			}
+		}
+	}
+
+	/**
+	 * 创建用于执行查询语句的{@linkplain Statement}。
+	 * 
+	 * @param cn
+	 * @return
+	 * @throws SQLException
+	 */
+	public static Statement createQueryStatement(Connection cn) throws SQLException
+	{
+		try
+		{
+			return cn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		}
+		catch (SQLFeatureNotSupportedException e)
+		{
+			// 驱动程序不支持TYPE_SCROLL_INSENSITIVE
+			return cn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		}
+	}
+
+	/**
+	 * 创建用于执行查询语句的{@linkplain PreparedStatement}。
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @return
+	 * @throws SQLException
+	 */
+	public static PreparedStatement createQueryPreparedStatement(Connection cn, String sql) throws SQLException
+	{
+		try
+		{
+			return cn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+		}
+		catch (SQLFeatureNotSupportedException e)
+		{
+			// 驱动程序不支持TYPE_SCROLL_INSENSITIVE时
+			return cn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		}
+	}
+
+	/**
+	 * 执行查询。
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @return
+	 * @throws SQLException
+	 */
+	public static QueryResultSet executeQuery(Connection cn, String sql) throws SQLException
+	{
+		return executeQuery(cn, sql, null);
+	}
+
+	/**
+	 * 执行查询。
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @param fetchSize
+	 * @return
+	 * @throws SQLException
+	 */
+	public static QueryResultSet executeQuery(Connection cn, String sql, Integer fetchSize) throws SQLException
+	{
+		Statement st = createQueryStatement(cn);
+		ResultSet rs = null;
+
+		try
+		{
+			rs = st.executeQuery(sql);
+			return new QueryResultSet(st, rs);
+		}
+		catch (SQLException e)
+		{
+			if (ResultSet.TYPE_FORWARD_ONLY == st.getResultSetType())
+				throw e;
+			else
+			{
+				JdbcUtil.closeResultSet(rs);
+				JdbcUtil.closeStatement(st);
+			}
+		}
+
+		// 可能是查询SQL语句不支持ResultSet.TYPE_SCROLL_*（比如SQLServer的聚集列存储索引），
+		// 因此，这里再降级为ResultSet.TYPE_FORWARD_ONLY执行查询
+		// TODO 如果是SQL语法错误，则不应再降级执行
+
+		st = cn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+		if (fetchSize != null && fetchSize >= 0)
+			st.setFetchSize(fetchSize);
+
+		rs = st.executeQuery(sql);
+
+		return new QueryResultSet(st, rs);
+	}
+
+	/**
+	 * 执行查询。
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @param paramTypes
+	 * @param params
+	 * @return
+	 * @throws SQLException
+	 */
+	public static QueryResultSet executeQuery(Connection cn, String sql, List<Integer> paramTypes, List<?> params)
+			throws SQLException
+	{
+		return executeQuery(cn, sql, null, paramTypes, params);
+	}
+
+	/**
+	 * 执行查询。
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @param fetchSize
+	 * @param paramTypes
+	 * @param params
+	 * @return
+	 * @throws SQLException
+	 */
+	public static QueryResultSet executeQuery(Connection cn, String sql, Integer fetchSize, List<Integer> paramTypes,
+			List<?> params) throws SQLException
+	{
+		PreparedStatement pst = createQueryPreparedStatement(cn, sql);
+		ResultSet rs = null;
+
+		for (int i = 0, len = params.size(); i < len; i++)
+			setParamValue(cn, pst, i + 1, paramTypes.get(i), params.get(i));
+
+		try
+		{
+			rs = pst.executeQuery();
+			return new QueryResultSet(pst, rs);
+		}
+		catch (SQLException e)
+		{
+			if (ResultSet.TYPE_FORWARD_ONLY == pst.getResultSetType())
+				throw e;
+			else
+			{
+				JdbcUtil.closeResultSet(rs);
+				JdbcUtil.closeStatement(pst);
+			}
+		}
+
+		// 可能是查询SQL语句不支持ResultSet.TYPE_SCROLL_*（比如SQLServer的聚集列存储索引），
+		// 因此，这里再降级为ResultSet.TYPE_FORWARD_ONLY执行查询
+		// TODO 如果是SQL语法错误，则不应再降级执行
+
+		pst = cn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+
+		if (fetchSize != null && fetchSize >= 0)
+			pst.setFetchSize(fetchSize);
+
+		rs = pst.executeQuery();
+
+		return new QueryResultSet(pst, rs);
+	}
+
+	/**
+	 * SQL查询结果集。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class QueryResultSet
+	{
+		private Statement statement;
+
+		private ResultSet resultSet;
+
+		public QueryResultSet()
+		{
+			super();
+		}
+
+		public QueryResultSet(Statement statement, ResultSet resultSet)
+		{
+			super();
+			this.statement = statement;
+			this.resultSet = resultSet;
+		}
+
+		public Statement getStatement()
+		{
+			return statement;
+		}
+
+		public void setStatement(Statement statement)
+		{
+			this.statement = statement;
+		}
+
+		public ResultSet getResultSet()
+		{
+			return resultSet;
+		}
+
+		public void setResultSet(ResultSet resultSet)
+		{
+			this.resultSet = resultSet;
+		}
+
+		public boolean isPreparedStatement()
+		{
+			return (this.statement instanceof PreparedStatement);
+		}
+
+		public PreparedStatement getPreparedStatement()
+		{
+			return (PreparedStatement) this.statement;
 		}
 	}
 }

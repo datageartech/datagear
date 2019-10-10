@@ -1455,11 +1455,15 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		int prefixIndex = alias.toUpperCase().indexOf(deletePrefix.toUpperCase());
 
 		if (prefixIndex >= 0)
+		{
 			alias = alias.substring(prefixIndex + deletePrefix.length());
+			alias = alias.replace("_", PropertyPath.PROPERTY_STRING);
 
-		alias = alias.replace("_", PropertyPath.PROPERTY_STRING);
+			return PropertyPath.valueOf(alias);
+		}
 
-		return PropertyPath.valueOf(alias);
+		// 不是属性别名
+		return null;
 	}
 
 	/**
@@ -1996,6 +2000,9 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				String colName = lookupColumnName(rsMeta, i);
 
 				PropertyPath propPath = fromPropertyPathColumnAlias(colName, deletedColumnNamePrefix);
+
+				if (propPath == null)
+					continue;
 
 				Map<PropertyPath, Object> parent = map;
 

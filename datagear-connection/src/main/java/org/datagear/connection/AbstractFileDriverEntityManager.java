@@ -16,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.sql.Driver;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -234,27 +235,36 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 	}
 
 	@Override
-	public synchronized void deleteDriverLibrary(DriverEntity driverEntity, String... libraryName)
+	public synchronized boolean[] deleteDriverLibrary(DriverEntity driverEntity, String... libraryName)
 			throws DriverEntityManagerException
 	{
 		File directory = getDriverLibraryDirectory(driverEntity.getId(), false);
 
-		if (!directory.exists())
-			return;
+		boolean[] deleted = new boolean[libraryName.length];
 
-		for (String ln : libraryName)
+		if (!directory.exists())
 		{
-			File file = new File(directory, ln);
-			FileUtil.deleteFile(file);
+			Arrays.fill(deleted, true);
+			return deleted;
 		}
+
+		for (int i = 0; i < libraryName.length; i++)
+		{
+			String ln = libraryName[i];
+			File file = new File(directory, ln);
+
+			deleted[i] = FileUtil.deleteFile(file);
+		}
+
+		return deleted;
 	}
 
 	@Override
-	public void deleteDriverLibrary(DriverEntity driverEntity) throws DriverEntityManagerException
+	public boolean deleteDriverLibrary(DriverEntity driverEntity) throws DriverEntityManagerException
 	{
 		File directory = getDriverLibraryDirectory(driverEntity.getId(), false);
 
-		FileUtil.clearDirectory(directory);
+		return FileUtil.clearDirectory(directory);
 	}
 
 	@Override

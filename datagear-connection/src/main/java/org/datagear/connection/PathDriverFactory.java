@@ -28,7 +28,7 @@ public class PathDriverFactory
 	/** 驱动程序库路径 */
 	private File path;
 
-	private PathClassLoader pathClassLoader;
+	private PathDriverClassLoader pathDriverClassLoader;
 
 	private Object driverTool;
 
@@ -55,14 +55,14 @@ public class PathDriverFactory
 	 */
 	public synchronized void init() throws PathDriverFactoryException
 	{
-		if (this.pathClassLoader != null)
+		if (this.pathDriverClassLoader != null)
 			return;
 
-		this.pathClassLoader = initPathClassLoader(this.path);
+		this.pathDriverClassLoader = initPathClassLoader(this.path);
 
 		try
 		{
-			Class<?> driverToolClass = this.pathClassLoader.loadClass(DriverTool.class.getName());
+			Class<?> driverToolClass = this.pathDriverClassLoader.loadClass(DriverTool.class.getName());
 			this.driverTool = driverToolClass.newInstance();
 		}
 		catch (ClassNotFoundException e)
@@ -92,7 +92,6 @@ public class PathDriverFactory
 		}
 		finally
 		{
-			this.pathClassLoader.close();
 		}
 	}
 
@@ -102,16 +101,11 @@ public class PathDriverFactory
 	 * @param path
 	 * @return
 	 */
-	protected PathClassLoader initPathClassLoader(File path)
+	protected PathDriverClassLoader initPathClassLoader(File path)
 	{
-		PathClassLoader pathClassLoader = new PathClassLoader(path);
+		PathDriverClassLoader classLoader = new PathDriverClassLoader(path);
 
-		pathClassLoader.setOutsideForceLoads(DriverTool.class.getName());
-		// 系统设计为允许随时编辑驱动程序库，为了满足此要求，只能牺牲类加载效率
-		pathClassLoader.setHoldJarFile(false);
-		pathClassLoader.init();
-
-		return pathClassLoader;
+		return classLoader;
 	}
 
 	/**
@@ -135,7 +129,7 @@ public class PathDriverFactory
 	{
 		try
 		{
-			Class.forName(driverClassName, true, this.pathClassLoader);
+			Class.forName(driverClassName, true, this.pathDriverClassLoader);
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -156,8 +150,8 @@ public class PathDriverFactory
 					.invoke(this.driverTool, driverClassName);
 
 			if (driver == null)
-				throw new PathDriverFactoryException("No Driver named [" + driverClassName + "] can be found in ["
-						+ this.pathClassLoader.getPath() + "]");
+				throw new PathDriverFactoryException(
+						"No Driver named [" + driverClassName + "] can be found in [" + this.path + "]");
 
 			if (LOGGER.isDebugEnabled())
 				LOGGER.debug("Got JDBC driver [" + driverClassName + "] in path [" + this.path + "]");
@@ -224,9 +218,9 @@ public class PathDriverFactory
 		}
 	}
 
-	protected PathClassLoader getPathClassLoader()
+	protected PathDriverClassLoader getPathDriverClassLoader()
 	{
-		return pathClassLoader;
+		return this.pathDriverClassLoader;
 	}
 
 	/**

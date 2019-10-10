@@ -398,29 +398,45 @@ public class DriverEntityController extends AbstractController
 	public ResponseEntity<OperationMessage> deleteDriverFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") String id, @RequestParam("file") String fileName) throws Exception
 	{
-		FileInfo[] fileInfos;
+		boolean deleted = false;
+		FileInfo[] fileInfos = null;
 
 		DriverEntity driverEntity = this.driverEntityManager.get(id);
 
 		if (driverEntity != null)
 		{
-			this.driverEntityManager.deleteDriverLibrary(driverEntity, fileName);
+			deleted = this.driverEntityManager.deleteDriverLibrary(driverEntity, fileName)[0];
 
-			List<DriverLibraryInfo> driverLibraryInfos = this.driverEntityManager.getDriverLibraryInfos(driverEntity);
-			fileInfos = toFileInfos(driverLibraryInfos);
+			if (deleted)
+			{
+				List<DriverLibraryInfo> driverLibraryInfos = this.driverEntityManager
+						.getDriverLibraryInfos(driverEntity);
+				fileInfos = toFileInfos(driverLibraryInfos);
+			}
 		}
 		else
 		{
 			File directory = getTempDriverLibraryDirectoryNotNull(id);
 			File tempFile = getTempDriverLibraryFile(directory, fileName);
 
-			FileUtil.deleteFile(tempFile);
+			deleted = FileUtil.deleteFile(tempFile);
 
-			fileInfos = FileUtil.getFileInfos(directory);
+			if (deleted)
+				fileInfos = FileUtil.getFileInfos(directory);
 		}
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteSuccessResponseEntity(request);
-		responseEntity.getBody().setData(fileInfos);
+		ResponseEntity<OperationMessage> responseEntity = null;
+
+		if (!deleted)
+		{
+			responseEntity = buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					buildMessageCode("deleteDriverFileFail"));
+		}
+		else
+		{
+			responseEntity = buildOperationMessageDeleteSuccessResponseEntity(request);
+			responseEntity.getBody().setData(fileInfos);
+		}
 
 		return responseEntity;
 	}

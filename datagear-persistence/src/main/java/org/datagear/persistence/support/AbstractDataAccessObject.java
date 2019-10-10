@@ -16,6 +16,7 @@ import java.util.List;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.JdbcUtil.QueryResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,23 +182,19 @@ public abstract class AbstractDataAccessObject
 
 		List<Object> resultList = new ArrayList<Object>();
 
-		PreparedStatement pst = null;
+		Statement st = null;
 		ResultSet rs = null;
 
 		try
 		{
-			if (count >= 0)
-				pst = cn.prepareStatement(query.getSqlString(), ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY);
-			else
-				pst = cn.prepareStatement(query.getSqlString());
+			QueryResultSet queryResultSet = JdbcUtil.executeQuery(cn, query.getSqlString(), query.getArgTypes(),
+					query.getArgs());
 
-			query.setParamValues(cn, pst);
-
-			rs = pst.executeQuery();
+			st = queryResultSet.getStatement();
+			rs = queryResultSet.getResultSet();
 
 			if (count >= 0 && startRow > 1)
-				rs.absolute(startRow - 1);
+				JdbcUtil.moveToBeforeRow(rs, startRow - 1);
 
 			int endRow = (count >= 0 ? startRow + count : -1);
 
@@ -223,7 +220,7 @@ public abstract class AbstractDataAccessObject
 		finally
 		{
 			JdbcUtil.closeResultSet(rs);
-			JdbcUtil.closeStatement(pst);
+			JdbcUtil.closeStatement(st);
 		}
 	}
 
@@ -239,17 +236,18 @@ public abstract class AbstractDataAccessObject
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug(query.toString());
 
-		PreparedStatement pst = null;
+		Statement st = null;
 		ResultSet rs = null;
 
 		try
 		{
 			long count = 0;
 
-			pst = cn.prepareStatement(query.getSqlString());
-			query.setParamValues(cn, pst);
+			QueryResultSet queryResultSet = JdbcUtil.executeQuery(cn, query.getSqlString(), query.getArgTypes(),
+					query.getArgs());
 
-			rs = pst.executeQuery();
+			st = queryResultSet.getStatement();
+			rs = queryResultSet.getResultSet();
 
 			if (rs.next())
 				count = rs.getInt(1);
@@ -263,7 +261,7 @@ public abstract class AbstractDataAccessObject
 		finally
 		{
 			JdbcUtil.closeResultSet(rs);
-			JdbcUtil.closeStatement(pst);
+			JdbcUtil.closeStatement(st);
 		}
 	}
 

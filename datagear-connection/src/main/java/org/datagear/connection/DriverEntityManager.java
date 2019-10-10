@@ -86,17 +86,19 @@ public interface DriverEntityManager
 	 * 
 	 * @param driverEntity
 	 * @param libraryName
+	 * @return
 	 * @throws DriverEntityManagerException
 	 */
-	void deleteDriverLibrary(DriverEntity driverEntity, String... libraryName) throws DriverEntityManagerException;
+	boolean[] deleteDriverLibrary(DriverEntity driverEntity, String... libraryName) throws DriverEntityManagerException;
 
 	/**
 	 * 删除驱动程序所有库。
 	 * 
 	 * @param driverEntity
+	 * @return
 	 * @throws DriverEntityManagerException
 	 */
-	void deleteDriverLibrary(DriverEntity driverEntity) throws DriverEntityManagerException;
+	boolean deleteDriverLibrary(DriverEntity driverEntity) throws DriverEntityManagerException;
 
 	/**
 	 * 获取驱动程序库输出流。

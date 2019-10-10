@@ -5,6 +5,8 @@
 package org.datagear.util;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * 文件工具类。
@@ -46,11 +48,12 @@ public class FileUtil
 	 * 删除文件。
 	 * 
 	 * @param file
+	 * @return
 	 */
-	public static void deleteFile(File file)
+	public static boolean deleteFile(File file)
 	{
 		if (!file.exists())
-			return;
+			return true;
 
 		if (file.isDirectory())
 		{
@@ -60,26 +63,36 @@ public class FileUtil
 				deleteFile(child);
 		}
 
-		file.delete();
+		return file.delete();
 	}
 
 	/**
 	 * 清空目录，保留目录本身。
 	 * 
 	 * @param directory
+	 * @return
 	 */
-	public static void clearDirectory(File directory)
+	public static boolean clearDirectory(File directory)
 	{
 		if (!directory.exists())
-			return;
+			return true;
+
+		boolean clear = true;
 
 		if (directory.isDirectory())
 		{
 			File[] children = directory.listFiles();
 
 			for (File child : children)
-				deleteFile(child);
+			{
+				boolean deleted = deleteFile(child);
+
+				if (!deleted && clear)
+					clear = false;
+			}
 		}
+
+		return clear;
 	}
 
 	/**
@@ -158,5 +171,24 @@ public class FileUtil
 			fileInfos[i] = getFileInfo(files[i]);
 
 		return fileInfos;
+	}
+
+	/**
+	 * 获取{@linkplain File}的{@linkplain URL}。
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public static URL toURL(File file) throws IllegalArgumentException
+	{
+		try
+		{
+			return file.toURI().toURL();
+		}
+		catch (MalformedURLException e)
+		{
+			throw new IllegalArgumentException("Illegal [" + file.toString() + "] to URL");
+		}
 	}
 }
