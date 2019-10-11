@@ -831,7 +831,12 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			if (isEmptySqlBuilder(tableFieldCondition))
 				fromSql.sql(tableNameQuote);
 			else
-				fromSql.sql("(SELECT * FROM ").sql(tableNameQuote).sql(" WHERE ").sql(tableFieldCondition).sql(")");
+			{
+				// 这里使用显示列名查询SQL语句，避免“SELECT *
+				// FROM”结果集列名与model不一致的情况（比如：Elasticsearch JDBC）
+				String explicitColSelect = buildExplicitColumnSelectSql(dialect, model, tableNameQuote);
+				fromSql.sql("(").sql(explicitColSelect).sql(" WHERE ").sql(tableFieldCondition).sql(")");
+			}
 
 			fromSql.sql(" ").sql(tableAliasQuote);
 		}
@@ -1543,6 +1548,73 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		}
 
 		return str;
+	}
+
+	/**
+	 * 构建显示指定列名的表SELECT查询语句。
+	 * 
+	 * @param dialect
+	 * @param model
+	 * @param tableNameQuote
+	 * @return
+	 */
+	protected String buildExplicitColumnSelectSql(Dialect dialect, Model model, String tableNameQuote)
+	{
+		StringBuilder sql = new StringBuilder();
+
+		sql.append("SELECT ");
+
+		Property[] properties = model.getProperties();
+		int appendCount = 0;
+
+		for (int i = 0; i < properties.length; i++)
+		{
+			Property property = properties[i];
+
+			if (property.hasFeature(NotReadable.class))
+				continue;
+
+			Mapper mapper = getMapper(model, property);
+
+			if (MapperUtil.isModelTableMapper(mapper))
+			{
+				ModelTableMapper mtm = MapperUtil.castModelTableMapper(mapper);
+
+				if (mtm.isPrimitivePropertyMapper())
+				{
+					String columnNameQuote = toQuoteName(dialect, mtm.getPrimitiveColumnName());
+
+					if (appendCount > 0)
+						sql.append(", ");
+					else
+						sql.append(" ");
+
+					sql.append(columnNameQuote);
+
+					appendCount++;
+				}
+				else
+				{
+					String[] pkeyColumnNamesQuote = toQuoteNames(dialect, mtm.getPropertyKeyColumnNames());
+
+					for (int j = 0; j < pkeyColumnNamesQuote.length; j++)
+					{
+						if (appendCount > 0)
+							sql.append(", ");
+						else
+							sql.append(" ");
+
+						sql.append(pkeyColumnNamesQuote[j]);
+					}
+
+					appendCount += pkeyColumnNamesQuote.length;
+				}
+			}
+		}
+
+		sql.append(" FROM ").append(tableNameQuote);
+
+		return sql.toString();
 	}
 
 	/**

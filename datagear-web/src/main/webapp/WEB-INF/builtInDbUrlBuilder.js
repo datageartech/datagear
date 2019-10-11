@@ -57,4 +57,24 @@
 		port : 5000,
 		name : ""
 	}
+},
+{
+	dbType : "Hive",
+	template : "jdbc:hive2://{host}:{port}/{name}",
+	defaultValue :
+	{
+		host : "",
+		port : 10000,
+		name : "default"
+	}
+},
+{
+	dbType : "Elasticsearch",
+	template : "jdbc:es://http://{host}:{port}",
+	defaultValue :
+	{
+		host : "",
+		port : 9200,
+		name : ""
+	}
 }
