@@ -736,12 +736,24 @@ public class JdbcUtil
 	}
 
 	/**
+	 * 是否只读。
+	 * 
+	 * @param cn
+	 * @return
+	 */
+	public static boolean isReadonly(Connection cn) throws SQLException
+	{
+		return cn.isReadOnly();
+	}
+
+	/**
 	 * 设置为只读。
 	 * 
 	 * @param cn
 	 * @param readonly
 	 * @return {@code true} 设置成功；{@code false} 不支持
 	 */
+	@JDBCCompatiblity("某些驱动程序可能不支持此方法而抛出异常，比如Hive jdbc")
 	public static boolean setReadonlyIfSupports(Connection cn, boolean readonly)
 	{
 		try
@@ -750,7 +762,6 @@ public class JdbcUtil
 
 			return true;
 		}
-		// 某些驱动程序可能不支持此方法而抛出异常，比如Hive jdbc
 		catch (SQLException e)
 		{
 			return false;
@@ -764,6 +775,7 @@ public class JdbcUtil
 	 * @param autoCommit
 	 * @return {@code true} 设置成功；{@code false} 不支持
 	 */
+	@JDBCCompatiblity("避免有驱动程序不支持此方法而抛出异常")
 	public static boolean setAutoCommitIfSupports(Connection cn, boolean autoCommit)
 	{
 		try
@@ -785,6 +797,7 @@ public class JdbcUtil
 	 * @param cn
 	 * @return 连接URL；{@code null} 不支持时
 	 */
+	@JDBCCompatiblity("避免有驱动程序不支持此方法而抛出异常")
 	public static String getURLIfSupports(Connection cn)
 	{
 		try
@@ -792,7 +805,6 @@ public class JdbcUtil
 			DatabaseMetaData metaData = cn.getMetaData();
 			return metaData.getURL();
 		}
-		// 避免有驱动程序不支持此方法而抛出异常
 		catch (Throwable t)
 		{
 			return null;
@@ -805,6 +817,7 @@ public class JdbcUtil
 	 * @param cn
 	 * @return 连接用户名；{@code null} 不支持时
 	 */
+	@JDBCCompatiblity("避免有驱动程序不支持此方法而抛出异常")
 	public static String getUserNameIfSupports(Connection cn)
 	{
 		try
@@ -812,7 +825,6 @@ public class JdbcUtil
 			DatabaseMetaData metaData = cn.getMetaData();
 			return metaData.getUserName();
 		}
-		// 避免有驱动程序不支持此方法而抛出异常
 		catch (Throwable t)
 		{
 			return null;
@@ -826,6 +838,7 @@ public class JdbcUtil
 	 * @param row
 	 * @throws SQLException
 	 */
+	@JDBCCompatiblity("避免有驱动程序不支持absolute而抛出异常")
 	public static void moveToBeforeRow(ResultSet rs, int row) throws SQLException
 	{
 		// 第一行不做任何操作，避免不必要的调用可能导致底层不支持而报错
@@ -838,7 +851,6 @@ public class JdbcUtil
 		}
 		catch (SQLException e)
 		{
-			// 某些驱动程序不支持absolute，那么转为next方式
 			for (int i = 1; i < row; i++)
 			{
 				if (!rs.next())
@@ -854,6 +866,7 @@ public class JdbcUtil
 	 * @return
 	 * @throws SQLException
 	 */
+	@JDBCCompatiblity("避免有驱动程序不支持TYPE_SCROLL_INSENSITIVE而抛出异常")
 	public static Statement createQueryStatement(Connection cn) throws SQLException
 	{
 		try
@@ -862,7 +875,6 @@ public class JdbcUtil
 		}
 		catch (SQLFeatureNotSupportedException e)
 		{
-			// 驱动程序不支持TYPE_SCROLL_INSENSITIVE
 			return cn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 		}
 	}
@@ -875,6 +887,7 @@ public class JdbcUtil
 	 * @return
 	 * @throws SQLException
 	 */
+	@JDBCCompatiblity("避免有驱动程序不支持TYPE_SCROLL_INSENSITIVE而抛出异常")
 	public static PreparedStatement createQueryPreparedStatement(Connection cn, String sql) throws SQLException
 	{
 		try
@@ -931,9 +944,10 @@ public class JdbcUtil
 			}
 		}
 
-		// 可能是查询SQL语句不支持ResultSet.TYPE_SCROLL_*（比如SQLServer的聚集列存储索引），
-		// 因此，这里再降级为ResultSet.TYPE_FORWARD_ONLY执行查询
+		@JDBCCompatiblity("可能是查询SQL语句不支持ResultSet.TYPE_SCROLL_*（比如SQLServer的聚集列存储索引），"
+				+ "因此，这里再降级为ResultSet.TYPE_FORWARD_ONLY再执行查询")
 		// TODO 如果是SQL语法错误，则不应再降级执行
+		QueryResultSet queryResultSet = null;
 
 		st = cn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
@@ -942,7 +956,9 @@ public class JdbcUtil
 
 		rs = st.executeQuery(sql);
 
-		return new QueryResultSet(st, rs);
+		queryResultSet = new QueryResultSet(st, rs);
+
+		return queryResultSet;
 	}
 
 	/**
@@ -997,9 +1013,10 @@ public class JdbcUtil
 			}
 		}
 
-		// 可能是查询SQL语句不支持ResultSet.TYPE_SCROLL_*（比如SQLServer的聚集列存储索引），
-		// 因此，这里再降级为ResultSet.TYPE_FORWARD_ONLY执行查询
+		@JDBCCompatiblity("可能是查询SQL语句不支持ResultSet.TYPE_SCROLL_*（比如SQLServer的聚集列存储索引），"
+				+ "因此，这里再降级为ResultSet.TYPE_FORWARD_ONLY再执行查询")
 		// TODO 如果是SQL语法错误，则不应再降级执行
+		QueryResultSet queryResultSet = null;
 
 		pst = cn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
@@ -1008,7 +1025,9 @@ public class JdbcUtil
 
 		rs = pst.executeQuery();
 
-		return new QueryResultSet(pst, rs);
+		queryResultSet = new QueryResultSet(pst, rs);
+
+		return queryResultSet;
 	}
 
 	/**

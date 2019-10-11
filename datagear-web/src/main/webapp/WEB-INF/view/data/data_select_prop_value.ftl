@@ -7,9 +7,11 @@ Object data 初始数据，允许null
 String propertyPath 属性名称，不允许null
 String titleDisplayName 页面展示名称，默认为""
 List PropertyPathDisplayName conditionSource 可用的查询条件列表，不允许为null
+boolean readonly 是否只读操作，默认为false
 boolean isMultipleSelect 是否多选，默认为false
 -->
 <#assign titleDisplayName=(titleDisplayName!'')>
+<#assign readonly=(readonly!false)>
 <#assign isMultipleSelect=(isMultipleSelect!false)>
 <html>
 <head>
@@ -31,8 +33,11 @@ boolean isMultipleSelect 是否多选，默认为false
 		</div>
 		<div class="operation">
 			<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
+			
+			<#if !readonly>
 			<input name="addButton" type="button" value="<@spring.message code='add' />" />
 			<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+			</#if>
 			<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 		</div>
 	</div>
@@ -127,6 +132,7 @@ boolean isMultipleSelect 是否多选，默认为false
 			}
 		});
 		
+		<#if !readonly>
 		po.element("input[name=addButton]").click(function()
 		{
 			var options =
@@ -163,6 +169,7 @@ boolean isMultipleSelect 是否多选，默认为false
 				});
 			});
 		});
+		</#if>
 		
 		po.element("input[name=viewButton]").click(function()
 		{

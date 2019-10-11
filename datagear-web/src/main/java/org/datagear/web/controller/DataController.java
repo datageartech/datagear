@@ -29,6 +29,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
+import org.datagear.model.features.NotEditable;
 import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyPath;
 import org.datagear.model.support.PropertyPathInfo;
@@ -275,10 +276,10 @@ public class DataController extends AbstractSchemaModelConnController
 						ModelUtils.displayName(model, WebUtils.getLocale(request)));
 				springModel.addAttribute(KEY_TITLE_DISPLAY_DESC,
 						ModelUtils.displayDesc(model, WebUtils.getLocale(request)));
+
+				setGridPageAttributes(request, response, springModel, schema, model);
 			}
 		}.execute();
-
-		setGridPageAttributes(request, springModel);
 
 		return "/data/data_grid";
 	}
@@ -767,10 +768,10 @@ public class DataController extends AbstractSchemaModelConnController
 
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
 						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
+
+				setGridPageAttributes(request, response, springModel, schema, model);
 			}
 		}.execute();
-
-		setGridPageAttributes(request, springModel);
 
 		return "/data/data_select_prop_value";
 	}
@@ -1172,10 +1173,10 @@ public class DataController extends AbstractSchemaModelConnController
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
 						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
 				springModel.addAttribute("isPrivateProperty", ModelUtils.isPrivatePropertyTail(propertyPathInfo));
+
+				setGridPageAttributes(request, response, springModel, schema, model);
 			}
 		}.execute();
-
-		setGridPageAttributes(request, springModel);
 
 		return "/data/data_prop_value_grid";
 	}
@@ -1262,10 +1263,10 @@ public class DataController extends AbstractSchemaModelConnController
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
 						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
 				springModel.addAttribute("isPrivateProperty", ModelUtils.isPrivatePropertyTail(propertyPathInfo));
+
+				setGridPageAttributes(request, response, springModel, schema, model);
 			}
 		}.execute();
-
-		setGridPageAttributes(request, springModel);
 
 		return "/data/data_prop_value_grid";
 	}
@@ -2111,9 +2112,13 @@ public class DataController extends AbstractSchemaModelConnController
 	 * @param request
 	 * @param springModel
 	 */
-	protected void setGridPageAttributes(HttpServletRequest request, org.springframework.ui.Model springModel)
+	protected void setGridPageAttributes(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, Schema schema, Model model)
 	{
 		springModel.addAttribute("queryLeftClobLengthOnReading", this.queryLeftClobLengthOnReading);
+
+		if (model.hasFeature(NotEditable.class))
+			springModel.addAttribute("readonly", true);
 
 		// 编辑表格需要表单属性
 		setFormPageAttributes(request, springModel);

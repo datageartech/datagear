@@ -5,6 +5,7 @@
 package org.datagear.dbmodel;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -68,6 +69,8 @@ import org.datagear.persistence.features.RelationPoint;
 import org.datagear.persistence.features.TableName;
 import org.datagear.persistence.mapper.Mapper;
 import org.datagear.persistence.mapper.MapperResolver;
+import org.datagear.util.JDBCCompatiblity;
+import org.datagear.util.JdbcUtil;
 import org.springframework.core.convert.ConversionService;
 
 /**
@@ -226,6 +229,20 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	public Model resolve(Connection cn, ModelManager globalModelManager, ModelManager localModelManager, String table)
 			throws DatabaseModelResolverException
 	{
+		@JDBCCompatiblity("如果cn为readonly，某些驱动程序的DatabaseMetaData.isReadOnly()也将为true（比如：Postgresql JDBC 42.2.5），"
+				+ "这会导致解析Model的NotEditable不正确，因此这里设为false，以保证解析正确")
+		boolean readonly = false;
+		try
+		{
+			readonly = cn.isReadOnly();
+		}
+		catch (SQLException e)
+		{
+			readonly = true;
+		}
+		if (readonly)
+			JdbcUtil.setReadonlyIfSupports(cn, false);
+
 		String modelName = this.modelNameResolver.resolve(table);
 
 		Model model = doResolve(cn, globalModelManager, localModelManager, table, modelName);
@@ -2196,6 +2213,7 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	{
 		resolveModelFeatureTableName(cn, globalModelManager, localModelManager, modelBuilder, entireTableInfo);
 		resolveModelFeatureDescLabel(cn, globalModelManager, localModelManager, modelBuilder, entireTableInfo);
+		resolveModelFeatureNotEditable(cn, globalModelManager, localModelManager, modelBuilder, entireTableInfo);
 	}
 
 	/**
@@ -2235,6 +2253,36 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 
 		if (comment != null && !comment.isEmpty())
 			addDescLabelFeature(modelBuilder, new Label(comment));
+	}
+
+	/**
+	 * 解析{@linkplain Model}的{@linkplain NotEditable}特性。
+	 * 
+	 * @param cn
+	 * @param globalModelManager
+	 * @param localModelManager
+	 * @param modelBuilder
+	 * @param entireTableInfo
+	 * @throws DatabaseModelResolverException
+	 * 
+	 */
+	protected void resolveModelFeatureNotEditable(Connection cn, ModelManager globalModelManager,
+			ModelManager localModelManager, ModelBuilder modelBuilder, EntireTableInfo entireTableInfo)
+			throws DatabaseModelResolverException
+	{
+		boolean notEditable = false;
+
+		try
+		{
+			DatabaseMetaData metaData = cn.getMetaData();
+			notEditable = metaData.isReadOnly();
+		}
+		catch (SQLException e)
+		{
+		}
+
+		if (notEditable)
+			modelBuilder.addFeature(NotEditable.class);
 	}
 
 	/**

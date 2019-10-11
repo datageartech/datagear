@@ -4,6 +4,7 @@
 
 package org.datagear.model.features;
 
+import org.datagear.model.ModelFeature;
 import org.datagear.model.PropertyFeature;
 
 /**
@@ -12,7 +13,7 @@ import org.datagear.model.PropertyFeature;
  * @author datagear@163.com
  *
  */
-public interface NotEditable extends PropertyFeature
+public interface NotEditable extends ModelFeature, PropertyFeature
 {
 
 }
