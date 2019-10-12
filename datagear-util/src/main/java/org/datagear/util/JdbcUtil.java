@@ -48,6 +48,7 @@ public class JdbcUtil
 	 * @throws SQLException
 	 * @throws UnsupportedOperationException
 	 */
+	@JDBCCompatiblity("某些驱动程序不支持PreparedStatement.setObject方法（比如：Hive JDBC），所以这里没有使用")
 	public static void setParamValue(Connection cn, PreparedStatement st, int paramIndex, int sqlType,
 			Object paramValue) throws SQLException, UnsupportedOperationException
 	{
@@ -275,16 +276,23 @@ public class JdbcUtil
 
 			case Types.CLOB:
 			{
-				String value = null;
+				Clob clob = null;
 
-				if (paramValue instanceof String)
-					value = (String) paramValue;
+				if (paramValue instanceof Clob)
+				{
+					clob = (Clob) paramValue;
+				}
+				else if (paramValue instanceof String)
+				{
+					String str = (String) paramValue;
+
+					clob = cn.createClob();
+					clob.setString(1, str);
+				}
 				else
 					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
 							+ paramValue.getClass().getName() + "] is not supported");
 
-				Clob clob = cn.createClob();
-				clob.setString(1, value);
 				st.setClob(paramIndex, clob);
 
 				break;
@@ -292,16 +300,22 @@ public class JdbcUtil
 
 			case Types.BLOB:
 			{
-				byte[] value = null;
+				Blob blob = null;
 
-				if (paramValue instanceof byte[])
-					value = (byte[]) paramValue;
+				if (paramValue instanceof Blob)
+				{
+					blob = (Blob) paramValue;
+				}
+				else if (paramValue instanceof byte[])
+				{
+					byte[] bytes = (byte[]) paramValue;
+					blob = cn.createBlob();
+					blob.setBytes(1, bytes);
+				}
 				else
 					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
 							+ paramValue.getClass().getName() + "] is not supported");
 
-				Blob blob = cn.createBlob();
-				blob.setBytes(1, value);
 				st.setBlob(paramIndex, blob);
 
 				break;
@@ -325,32 +339,44 @@ public class JdbcUtil
 
 			case Types.NCLOB:
 			{
-				String value = null;
+				NClob nclob = null;
 
-				if (paramValue instanceof String)
-					value = (String) paramValue;
+				if (paramValue instanceof NClob)
+				{
+					nclob = (NClob) paramValue;
+				}
+				else if (paramValue instanceof String)
+				{
+					String str = (String) paramValue;
+					nclob = cn.createNClob();
+					nclob.setString(1, str);
+				}
 				else
 					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
 							+ paramValue.getClass().getName() + "] is not supported");
 
-				NClob nclob = cn.createNClob();
-				nclob.setString(1, value);
 				st.setNClob(paramIndex, nclob);
 				break;
 			}
 
 			case Types.SQLXML:
 			{
-				String value = null;
+				SQLXML sqlxml = null;
 
+				if (paramValue instanceof SQLXML)
+				{
+					sqlxml = (SQLXML) paramValue;
+				}
 				if (paramValue instanceof String)
-					value = (String) paramValue;
+				{
+					String str = (String) paramValue;
+					sqlxml = cn.createSQLXML();
+					sqlxml.setString(str);
+				}
 				else
 					throw new UnsupportedOperationException("Set JDBC [" + sqlType + "] type value for type ["
 							+ paramValue.getClass().getName() + "] is not supported");
 
-				SQLXML sqlxml = cn.createSQLXML();
-				sqlxml.setString(value);
 				st.setSQLXML(paramIndex, sqlxml);
 				break;
 			}
@@ -1020,6 +1046,9 @@ public class JdbcUtil
 
 		pst = cn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
+		for (int i = 0, len = params.size(); i < len; i++)
+			setParamValue(cn, pst, i + 1, paramTypes.get(i), params.get(i));
+
 		if (fetchSize != null && fetchSize >= 0)
 			pst.setFetchSize(fetchSize);
 
@@ -1028,6 +1057,39 @@ public class JdbcUtil
 		queryResultSet = new QueryResultSet(pst, rs);
 
 		return queryResultSet;
+	}
+
+	/**
+	 * 指定SQL类型的列是否是可排序列。
+	 * 
+	 * @param sqlType
+	 * @return
+	 */
+	@JDBCCompatiblity("某些驱动程序对有些类型不支持排序（比如Oracle对于BLOB类型）")
+	public static boolean isSortableSqlType(int sqlType)
+	{
+		if (Types.BIGINT == sqlType || Types.BIT == sqlType || Types.BOOLEAN == sqlType || Types.CHAR == sqlType
+				|| Types.CLOB == sqlType || Types.DATE == sqlType || Types.DECIMAL == sqlType || Types.DOUBLE == sqlType
+				|| Types.FLOAT == sqlType || Types.INTEGER == sqlType || Types.LONGNVARCHAR == sqlType
+				|| Types.LONGVARCHAR == sqlType || Types.NCHAR == sqlType || Types.NCLOB == sqlType
+				|| Types.NUMERIC == sqlType || Types.NVARCHAR == sqlType || Types.REAL == sqlType
+				|| Types.SMALLINT == sqlType || Types.SQLXML == sqlType || Types.TIME == sqlType
+				|| Types.TIMESTAMP == sqlType || Types.TINYINT == sqlType || Types.VARCHAR == sqlType)
+			return true;
+
+		return false;
+	}
+
+	/**
+	 * 指定SQL类型的列是否是可搜索列。
+	 * 
+	 * @param sqlType
+	 * @return
+	 */
+	@JDBCCompatiblity("某些驱动程序对有些类型不支持搜索（比如Oracle对于BLOB类型）")
+	public static boolean isSearchableSqlType(int sqlType)
+	{
+		return isSortableSqlType(sqlType);
 	}
 
 	/**

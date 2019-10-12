@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.AbstractSequentialList;
@@ -52,6 +53,7 @@ import org.datagear.persistence.Query;
 import org.datagear.persistence.QueryResultMetaInfo;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.collection.SizeOnlyCollection;
+import org.datagear.persistence.features.JdbcType;
 import org.datagear.persistence.features.ManyToMany;
 import org.datagear.persistence.features.ManyToOne;
 import org.datagear.persistence.features.OneToMany;
@@ -61,6 +63,9 @@ import org.datagear.persistence.mapper.Mapper;
 import org.datagear.persistence.mapper.MapperUtil;
 import org.datagear.persistence.mapper.ModelTableMapper;
 import org.datagear.persistence.mapper.PropertyTableMapper;
+import org.datagear.util.JDBCCompatiblity;
+import org.datagear.util.JdbcUtil;
+import org.datagear.util.StringUtil;
 
 /**
  * 查询持久化操作。
@@ -298,7 +303,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		SqlBuilder condition = buildQueryCondition(pagingQuery, selectColumnPropertyPaths);
 
-		Order[] orders = buildQueryOrders(pagingQuery, selectColumnPropertyPaths);
+		Order[] orders = buildQueryOrders(model, pagingQuery, selectColumnPropertyPaths);
 
 		long total = queryCount(cn, queryView, condition);
 
@@ -363,7 +368,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		SqlBuilder condition = buildQueryCondition(pagingQuery, selectColumnPropertyPaths);
 
-		Order[] orders = buildQueryOrders(pagingQuery, selectColumnPropertyPaths);
+		Order[] orders = buildQueryOrders(MU.getModel(property), pagingQuery, selectColumnPropertyPaths);
 
 		long total = queryCount(cn, queryView, condition);
 
@@ -563,9 +568,9 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			propertyPath = propertyPath.substring(myPropertyPathPrefix.length());
 
-			propertyModelColumnPropertyPaths.add(
-					new ColumnPropertyPath(columnPropertyPath.getColumnName(), columnPropertyPath.getQuoteColumnName(),
-							columnPropertyPath.isToken(), columnPropertyPath.isSizeColumn(), propertyPath));
+			propertyModelColumnPropertyPaths.add(new ColumnPropertyPath(columnPropertyPath.getColumnName(),
+					columnPropertyPath.getColumnNameQuote(), columnPropertyPath.getColumnSqlType(),
+					columnPropertyPath.isToken(), columnPropertyPath.isSizeColumn(), propertyPath));
 		}
 
 		return propertyModelColumnPropertyPaths;
@@ -634,7 +639,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			SqlBuilder propValueQuery = SqlBuilder.valueOf().sql("SELECT ").delimit(",");
 
 			for (ColumnPropertyPath columnPropertyPath : selectColumnPropertyPaths)
-				propValueQuery.sqld(columnPropertyPath.getQuoteColumnName());
+				propValueQuery.sqld(columnPropertyPath.getColumnNameQuote());
 
 			propValueQuery.sql(" FROM (").sql(query).sql(") ").sql(tableAliasQuote);
 
@@ -832,8 +837,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				fromSql.sql(tableNameQuote);
 			else
 			{
-				// 这里使用显示列名查询SQL语句，避免“SELECT *
-				// FROM”结果集列名与model不一致的情况（比如：Elasticsearch JDBC）
+				@JDBCCompatiblity("这里使用显示列名查询SQL语句，避免“SELECT * FROM”结果集列与model不一致的情况（比如：Elasticsearch JDBC）")
 				String explicitColSelect = buildExplicitColumnSelectSql(dialect, model, tableNameQuote);
 				fromSql.sql("(").sql(explicitColSelect).sql(" WHERE ").sql(tableFieldCondition).sql(")");
 			}
@@ -1071,6 +1075,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				String columnNameQuote = toQuoteName(dialect, mapper.getPrimitiveColumnName());
 				String columnAlias = toPropertyPathColumnAlias(modelColumnAliasPrefix, property, propertyIndex);
 				String columnAliasQuote = toQuoteName(dialect, columnAlias);
+				JdbcType jdbcType = property.getFeature(JdbcType.class);
 
 				if (selectSql != null)
 					selectSql.sqld(modelTableAliasQuote + "." + columnNameQuote + " AS " + columnAliasQuote);
@@ -1078,7 +1083,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				if (selectColumnPropertyPaths != null)
 				{
 					ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(columnAlias, columnAliasQuote,
-							asTokenProperty, false, getPropertyPath(model, property, modelPropertyPath));
+							jdbcType.getValue(), asTokenProperty, false,
+							getPropertyPath(model, property, modelPropertyPath));
 					selectColumnPropertyPaths.add(columnPropertyPath);
 				}
 
@@ -1199,7 +1205,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			if (selectColumnPropertyPaths != null)
 			{
-				ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(sizeAlias, sizeQuoteAlias,
+				ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(sizeAlias, sizeQuoteAlias, Types.BIGINT,
 						asTokenProperty, true,
 						PropertyPath.concatPropertyName(myModelPropertyPath, SizeOnlyCollection.SIZE_PROPERTY_NAME));
 				selectColumnPropertyPaths.add(columnPropertyPath);
@@ -1318,7 +1324,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			if (selectColumnPropertyPaths != null)
 			{
-				ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(sizeAlias, sizeQuoteAlias,
+				ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(sizeAlias, sizeQuoteAlias, Types.BIGINT,
 						asTokenProperty, true,
 						PropertyPath.concatPropertyName(myModelPropertyPath, SizeOnlyCollection.SIZE_PROPERTY_NAME));
 				selectColumnPropertyPaths.add(columnPropertyPath);
@@ -1541,7 +1547,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		for (ColumnPropertyPath columnPropertyPath : myColumnPropertyPaths)
 		{
 			String pp = columnPropertyPath.getPropertyPath();
-			String qcn = columnPropertyPath.getQuoteColumnName();
+			String qcn = columnPropertyPath.getColumnNameQuote();
 
 			str = Pattern.compile(pp, Pattern.LITERAL | Pattern.CASE_INSENSITIVE).matcher(str)
 					.replaceAll(Matcher.quoteReplacement(qcn));
@@ -1654,10 +1660,14 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				if (!columnPropertyPath.isToken())
 					continue;
 
+				int sqlType = columnPropertyPath.getColumnSqlType();
+				if (!JdbcUtil.isSearchableSqlType(sqlType))
+					continue;
+
 				if (appendCount > 0)
 					keywordCondition.sql(andSql);
 
-				keywordCondition.sql(columnPropertyPath.getQuoteColumnName() + likeSql + "?", keyword);
+				keywordCondition.sql(columnPropertyPath.getColumnNameQuote() + likeSql + "?", keyword);
 
 				appendCount++;
 			}
@@ -1691,11 +1701,12 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	/**
 	 * 由{@linkplain Query}构建{@linkplain Order}数组。
 	 * 
+	 * @param model
 	 * @param query
 	 * @param selectColumnPropertyPaths
 	 * @return
 	 */
-	protected Order[] buildQueryOrders(Query query, List<ColumnPropertyPath> selectColumnPropertyPaths)
+	protected Order[] buildQueryOrders(Model model, Query query, List<ColumnPropertyPath> selectColumnPropertyPaths)
 	{
 		if (!query.hasOrder())
 			return null;
@@ -1711,7 +1722,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			String orderName = order.getName();
 			String orderType = order.getType();
 
-			if (orderName == null)
+			if (StringUtil.isEmpty(orderName))
 				continue;
 
 			int orderNameLength = orderName.length();
@@ -1722,6 +1733,11 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			for (ColumnPropertyPath columnPropertyPath : selectColumnPropertyPaths)
 			{
+				int sqlType = columnPropertyPath.getColumnSqlType();
+
+				if (!JdbcUtil.isSortableSqlType(sqlType))
+					continue;
+
 				String propertyPath = columnPropertyPath.getPropertyPath();
 
 				if (propertyPath.startsWith(orderName))
@@ -1753,7 +1769,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			if (exactlyMatched != null)
 			{
-				re.add(Order.valueOf(exactlyMatched.getQuoteColumnName(), orderType));
+				re.add(Order.valueOf(exactlyMatched.getColumnNameQuote(), orderType));
 			}
 			else if (startsWiths != null)
 			{
@@ -1765,11 +1781,11 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 					if (startsWithsHasToken)
 					{
 						if (startsWith.isToken())
-							re.add(Order.valueOf(startsWith.getQuoteColumnName(), orderType));
+							re.add(Order.valueOf(startsWith.getColumnNameQuote(), orderType));
 					}
 					else
 					{
-						re.add(Order.valueOf(startsWith.getQuoteColumnName(), orderType));
+						re.add(Order.valueOf(startsWith.getColumnNameQuote(), orderType));
 					}
 
 					// 无论是否Token属性，都仅取前三个，避免过多排序项影响性能

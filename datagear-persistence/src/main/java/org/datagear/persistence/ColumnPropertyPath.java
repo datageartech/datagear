@@ -20,7 +20,10 @@ public class ColumnPropertyPath implements Serializable
 	private String columnName;
 
 	/** 添加数据库标识符引用的列名称 */
-	private String quoteColumnName;
+	private String columnNameQuote;
+
+	/** 列SQL类型 */
+	private int columnSqlType;
 
 	/** 是否Token列 */
 	private boolean token;
@@ -36,12 +39,13 @@ public class ColumnPropertyPath implements Serializable
 		super();
 	}
 
-	public ColumnPropertyPath(String columnName, String quoteColumnName, boolean token, boolean sizeColumn,
-			String propertyPath)
+	public ColumnPropertyPath(String columnName, String columnNameQuote, int columnSqlType, boolean token,
+			boolean sizeColumn, String propertyPath)
 	{
 		super();
 		this.columnName = columnName;
-		this.quoteColumnName = quoteColumnName;
+		this.columnNameQuote = columnNameQuote;
+		this.columnSqlType = columnSqlType;
 		this.token = token;
 		this.sizeColumn = sizeColumn;
 		this.propertyPath = propertyPath;
@@ -57,14 +61,24 @@ public class ColumnPropertyPath implements Serializable
 		this.columnName = columnName;
 	}
 
-	public String getQuoteColumnName()
+	public String getColumnNameQuote()
 	{
-		return quoteColumnName;
+		return columnNameQuote;
 	}
 
-	public void setQuoteColumnName(String quoteColumnName)
+	public void setColumnNameQuote(String columnNameQuote)
 	{
-		this.quoteColumnName = quoteColumnName;
+		this.columnNameQuote = columnNameQuote;
+	}
+
+	public int getColumnSqlType()
+	{
+		return columnSqlType;
+	}
+
+	public void setColumnSqlType(int columnSqlType)
+	{
+		this.columnSqlType = columnSqlType;
 	}
 
 	public boolean isToken()
@@ -100,8 +114,8 @@ public class ColumnPropertyPath implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [columnName=" + columnName + ", quoteColumnName=" + quoteColumnName
-				+ ", token=" + token + ", sizeColumn=" + sizeColumn + ", propertyPath=" + propertyPath + "]";
+		return getClass().getSimpleName() + " [columnName=" + columnName + ", columnNameQuote=" + columnNameQuote
+				+ ", columnSqlType=" + columnSqlType + ", token=" + token + ", sizeColumn=" + sizeColumn
+				+ ", propertyPath=" + propertyPath + "]";
 	}
-
 }
