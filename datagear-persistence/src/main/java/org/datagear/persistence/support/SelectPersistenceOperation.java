@@ -837,7 +837,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				fromSql.sql(tableNameQuote);
 			else
 			{
-				@JDBCCompatiblity("这里使用显示列名查询SQL语句，避免“SELECT * FROM”结果集列与model不一致的情况（比如：Elasticsearch JDBC）")
+				@JDBCCompatiblity("这里使用显示列名查询SQL语句，避免仅使用“SELECT * FROM”结果集列与model不一致的情况（比如：Elasticsearch JDBC）")
 				String explicitColSelect = buildExplicitColumnSelectSql(dialect, model, tableNameQuote);
 				fromSql.sql("(").sql(explicitColSelect).sql(" WHERE ").sql(tableFieldCondition).sql(")");
 			}
