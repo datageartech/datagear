@@ -157,4 +157,16 @@ public interface DatabaseInfoResolver
 	 * @throws DatabaseInfoResolverException
 	 */
 	String[][] getImportedTables(Connection cn, String[] tables) throws DatabaseInfoResolverException;
+
+	/**
+	 * 获取{@linkplain SqlTypeInfo}。
+	 * <p>
+	 * 如果无法获取，将返回空数组。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @return
+	 * @throws DatabaseInfoResolverException
+	 */
+	SqlTypeInfo[] getSqlTypeInfos(Connection cn) throws DatabaseInfoResolverException;
 }

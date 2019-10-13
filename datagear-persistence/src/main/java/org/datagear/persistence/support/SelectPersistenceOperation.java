@@ -37,12 +37,14 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.datagear.dbinfo.SqlTypeInfo.SearchableType;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.features.NotReadable;
 import org.datagear.model.features.Token;
 import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyPath;
+import org.datagear.model.support.PropertyPathInfo;
 import org.datagear.persistence.ColumnPropertyPath;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.Order;
@@ -301,9 +303,9 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		SqlBuilder queryView = buildQueryViewForModel(dialect, table, null, selectColumnPropertyPaths, model);
 
-		SqlBuilder condition = buildQueryCondition(pagingQuery, selectColumnPropertyPaths);
+		SqlBuilder condition = buildQueryCondition(dialect, model, pagingQuery, selectColumnPropertyPaths);
 
-		Order[] orders = buildQueryOrders(model, pagingQuery, selectColumnPropertyPaths);
+		Order[] orders = buildQueryOrders(dialect, model, pagingQuery, selectColumnPropertyPaths);
 
 		long total = queryCount(cn, queryView, condition);
 
@@ -366,9 +368,9 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		if (propertyModelQueryPattern)
 			selectColumnPropertyPaths = toPropertyColumnPropertyPaths(selectColumnPropertyPaths, model, property);
 
-		SqlBuilder condition = buildQueryCondition(pagingQuery, selectColumnPropertyPaths);
+		SqlBuilder condition = buildQueryCondition(dialect, model, pagingQuery, selectColumnPropertyPaths);
 
-		Order[] orders = buildQueryOrders(MU.getModel(property), pagingQuery, selectColumnPropertyPaths);
+		Order[] orders = buildQueryOrders(dialect, model, pagingQuery, selectColumnPropertyPaths);
 
 		long total = queryCount(cn, queryView, condition);
 
@@ -1626,11 +1628,14 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	/**
 	 * 由{@linkplain Query}构建查询条件SQL。
 	 * 
+	 * @param dialect
+	 * @param model
 	 * @param query
 	 * @param selectColumnPropertyPaths
 	 * @return
 	 */
-	protected SqlBuilder buildQueryCondition(Query query, List<ColumnPropertyPath> selectColumnPropertyPaths)
+	protected SqlBuilder buildQueryCondition(Dialect dialect, Model model, Query query,
+			List<ColumnPropertyPath> selectColumnPropertyPaths)
 	{
 		if (!query.hasKeyword() && !query.hasCondition())
 			return null;
@@ -1646,10 +1651,9 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		{
 			SqlBuilder keywordCondition = SqlBuilder.valueOf();
 
-			String keyword = wrapLikeKeyword(query.getKeyword());
-
 			String andSql = (query.isNotLike() ? " AND " : " OR ");
 			String likeSql = (query.isNotLike() ? " NOT LIKE " : " LIKE ");
+			String equalSql = (query.isNotLike() ? " != " : " = ");
 
 			if (hasCondition)
 				keywordCondition.sql("(");
@@ -1660,16 +1664,57 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				if (!columnPropertyPath.isToken())
 					continue;
 
-				int sqlType = columnPropertyPath.getColumnSqlType();
-				if (!JdbcUtil.isSearchableSqlType(sqlType))
-					continue;
+				String myOperator = null;
+				Object myKeyword = null;
 
-				if (appendCount > 0)
-					keywordCondition.sql(andSql);
+				PropertyPath propertyPath = PropertyPath.valueOf(columnPropertyPath.getPropertyPath());
+				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath);
+				Property tailProperty = propertyPathInfo.getPropertyTail();
 
-				keywordCondition.sql(columnPropertyPath.getColumnNameQuote() + likeSql + "?", keyword);
+				@JDBCCompatiblity("很多驱动程序的值为SearchableType.ALL但实际并不支持LIKE语法（比如：PostgreSQL JDBC 42.2.5），"
+						+ "这里为了兼容，暂时采用else中的逻辑")
+				SearchableType searchableType = null;
+				// Searchable searchable =
+				// tailProperty.getFeature(Searchable.class);
+				// searchableType = (searchable == null ? null :
+				// searchable.getValue());
 
-				appendCount++;
+				if (SearchableType.NO.equals(searchableType))
+					;
+				else if (SearchableType.ONLY_LIKE.equals(searchableType) || SearchableType.ALL.equals(searchableType))
+				{
+					myOperator = likeSql;
+					myKeyword = wrapLikeKeyword(query.getKeyword());
+				}
+				else
+				{
+					// SearchableType.EXPCEPT_LIKE、或者无SearchableType
+
+					int sqlType = ((JdbcType) tailProperty.getFeature(JdbcType.class)).getValue();
+					Number number = JdbcUtil.parseToNumber(query.getKeyword(), sqlType);
+
+					if (number != null)
+					{
+						myOperator = equalSql;
+						myKeyword = number;
+					}
+					else if (Types.CHAR == sqlType || Types.VARCHAR == sqlType || Types.NCHAR == sqlType
+							|| Types.NVARCHAR == sqlType)
+					{
+						myOperator = likeSql;
+						myKeyword = wrapLikeKeyword(query.getKeyword());
+					}
+				}
+
+				if (myOperator != null && myKeyword != null)
+				{
+					if (appendCount > 0)
+						keywordCondition.sql(andSql);
+
+					keywordCondition.sql(columnPropertyPath.getColumnNameQuote() + myOperator + "?", myKeyword);
+
+					appendCount++;
+				}
 			}
 
 			if (hasCondition)
@@ -1701,12 +1746,14 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	/**
 	 * 由{@linkplain Query}构建{@linkplain Order}数组。
 	 * 
+	 * @param dialect
 	 * @param model
 	 * @param query
 	 * @param selectColumnPropertyPaths
 	 * @return
 	 */
-	protected Order[] buildQueryOrders(Model model, Query query, List<ColumnPropertyPath> selectColumnPropertyPaths)
+	protected Order[] buildQueryOrders(Dialect dialect, Model model, Query query,
+			List<ColumnPropertyPath> selectColumnPropertyPaths)
 	{
 		if (!query.hasOrder())
 			return null;
@@ -1735,7 +1782,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			{
 				int sqlType = columnPropertyPath.getColumnSqlType();
 
-				if (!JdbcUtil.isSortableSqlType(sqlType))
+				if (!dialect.isSortable(sqlType))
 					continue;
 
 				String propertyPath = columnPropertyPath.getPropertyPath();

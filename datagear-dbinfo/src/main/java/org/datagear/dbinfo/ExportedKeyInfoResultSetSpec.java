@@ -6,6 +6,8 @@ package org.datagear.dbinfo;
 
 import java.util.List;
 
+import org.datagear.util.JDBCCompatiblity;
+
 /**
  * {@linkplain ExportedKeyInfo}结果集规范。
  * 
@@ -32,6 +34,7 @@ public class ExportedKeyInfoResultSetSpec extends ResultSetSpec<ExportedKeyInfo>
 	}
 
 	@Override
+	@JDBCCompatiblity("避免某些驱动程序的结果集出现重复项")
 	protected void addToList(List<ExportedKeyInfo> list, ExportedKeyInfo bean)
 	{
 		for (ExportedKeyInfo ele : list)

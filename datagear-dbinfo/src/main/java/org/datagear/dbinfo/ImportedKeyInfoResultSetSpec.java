@@ -7,6 +7,8 @@ package org.datagear.dbinfo;
 import java.sql.DatabaseMetaData;
 import java.util.List;
 
+import org.datagear.util.JDBCCompatiblity;
+
 /**
  * {@linkplain ImportedKeyInfo}结果集规范。
  * 
@@ -56,6 +58,7 @@ public class ImportedKeyInfoResultSetSpec extends ResultSetSpec<ImportedKeyInfo>
 	}
 
 	@Override
+	@JDBCCompatiblity("避免某些驱动程序的结果集出现重复项（Mysql JDBC 5.1.47的getImportedKeys在设置了连接参数useInformationSchema为true时，会返回重复记录）")
 	protected void addToList(List<ImportedKeyInfo> list, ImportedKeyInfo bean)
 	{
 		for (ImportedKeyInfo ele : list)

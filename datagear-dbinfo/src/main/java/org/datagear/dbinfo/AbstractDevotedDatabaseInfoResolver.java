@@ -227,6 +227,34 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 		return importedTabless;
 	}
 
+	@Override
+	public SqlTypeInfo[] getSqlTypeInfos(Connection cn) throws DatabaseInfoResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		ResultSet rs = null;
+
+		try
+		{
+			rs = this.getSqlTypeInfoResultSet(cn, metaData);
+
+			List<SqlTypeInfo> sqlTypeInfos = getSqlTypeInfoResultSetSpec().read(rs);
+
+			SqlTypeInfo[] array = sqlTypeInfos.toArray(new SqlTypeInfo[sqlTypeInfos.size()]);
+
+			postProcessSqlTypeInfo(array);
+
+			return array;
+		}
+		catch (SQLException e)
+		{
+			throw new DatabaseInfoResolverException(e);
+		}
+		finally
+		{
+			JdbcUtil.closeResultSet(rs);
+		}
+	}
+
 	protected TableInfo[] getTableInfos(Connection cn, DatabaseMetaData metaData, String schema)
 			throws DatabaseInfoResolverException
 	{
@@ -673,6 +701,19 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	}
 
 	/**
+	 * 构建{@linkplain SqlTypeInfo}结果集。
+	 * 
+	 * @param cn
+	 * @param databaseMetaData
+	 * @return
+	 * @throws SQLException
+	 */
+	protected ResultSet getSqlTypeInfoResultSet(Connection cn, DatabaseMetaData databaseMetaData) throws SQLException
+	{
+		return databaseMetaData.getTypeInfo();
+	}
+
+	/**
 	 * 获取{@linkplain TableInfo}的{@linkplain ResultSetSpec}。
 	 * 
 	 * @return
@@ -733,6 +774,16 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	}
 
 	/**
+	 * 获取{@linkplain SqlTypeInfo}的{@linkplain ResultSetSpec}。
+	 * 
+	 * @return
+	 */
+	protected ResultSetSpec<SqlTypeInfo> getSqlTypeInfoResultSetSpec()
+	{
+		return new SqlTypeInfoResultSetSpec();
+	}
+
+	/**
 	 * 获取表类型数组。
 	 * 
 	 * @return
@@ -775,6 +826,18 @@ public abstract class AbstractDevotedDatabaseInfoResolver implements DevotedData
 	 * @param importedKeyInfos
 	 */
 	protected void postProcessImportedKeyInfo(ImportedKeyInfo[] importedKeyInfos)
+	{
+	}
+
+	/**
+	 * 后置处理{@link SqlTypeInfo}。
+	 * <p>
+	 * 子类可以重写此方法对{@linkplain SqlTypeInfo}进行特殊后置处理。
+	 * </p>
+	 * 
+	 * @param sqlTypeInfos
+	 */
+	protected void postProcessSqlTypeInfo(SqlTypeInfo[] sqlTypeInfos)
 	{
 	}
 

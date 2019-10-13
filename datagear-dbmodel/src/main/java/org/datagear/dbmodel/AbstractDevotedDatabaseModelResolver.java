@@ -26,6 +26,7 @@ import org.datagear.dbinfo.EntireTableInfo;
 import org.datagear.dbinfo.ExportedKeyInfo;
 import org.datagear.dbinfo.ImportedKeyInfo;
 import org.datagear.dbinfo.ImportedKeyRule;
+import org.datagear.dbinfo.SqlTypeInfo;
 import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbinfo.TableType;
 import org.datagear.model.Label;
@@ -66,6 +67,7 @@ import org.datagear.persistence.features.PropertyKeyDeleteRule;
 import org.datagear.persistence.features.PropertyKeyPropertyName;
 import org.datagear.persistence.features.PropertyKeyUpdateRule;
 import org.datagear.persistence.features.RelationPoint;
+import org.datagear.persistence.features.Searchable;
 import org.datagear.persistence.features.TableName;
 import org.datagear.persistence.mapper.Mapper;
 import org.datagear.persistence.mapper.MapperResolver;
@@ -362,7 +364,11 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	protected Model doResolve(Connection cn, ModelManager globalModelManager, ModelManager localModelManager,
 			EntireTableInfo entireTableInfo, String modelName) throws DatabaseModelResolverException
 	{
-		ModelBuilder modelBuilder = createModelBuilder();
+		SqlTypeInfo[] sqlTypeInfos = resolveSqlTypeInfos(cn);
+		ModelBuildContext buildContext = new ModelBuildContext();
+		buildContext.setSqlTypeInfos(sqlTypeInfos);
+
+		ModelBuilder modelBuilder = createModelBuilder(buildContext);
 		modelBuilder.init(modelName);
 
 		// 必须在解析之前加入，防止后续Property解析因循环引用而导致死循环
@@ -2000,6 +2006,8 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 				propertyBuilder, entireTableInfo, columnInfo, columnIndex);
 		resolvePrimitivePropertyFeatureDescLabel(cn, globalModelManager, localModelManager, modelBuilder,
 				propertyBuilder, entireTableInfo, columnInfo, columnIndex);
+		resolvePrimitivePropertyFeatureSearchable(cn, globalModelManager, localModelManager, modelBuilder,
+				propertyBuilder, entireTableInfo, columnInfo, columnIndex);
 		resolvePrimitivePropertyFeatureToken(cn, globalModelManager, localModelManager, modelBuilder, propertyBuilder,
 				entireTableInfo, columnInfo, columnIndex);
 		resolvePrimitivePropertyFeatureColumnConverter(cn, globalModelManager, localModelManager, modelBuilder,
@@ -2123,6 +2131,37 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 
 		if (comment != null && !comment.isEmpty())
 			addDescLabelFeature(propertyBuilder, new Label(comment));
+	}
+
+	/**
+	 * 解析基本{@linkplain Property}的{@linkplain Searchable}。
+	 * 
+	 * @param cn
+	 * @param globalModelManager
+	 * @param localModelManager
+	 * @param modelBuilder
+	 * @param propertyBuilder
+	 * @param entireTableInfo
+	 * @param columnInfo
+	 * @param columnIndex
+	 * @throws DatabaseModelResolverException
+	 * 
+	 */
+	protected void resolvePrimitivePropertyFeatureSearchable(Connection cn, ModelManager globalModelManager,
+			ModelManager localModelManager, ModelBuilder modelBuilder, PropertyBuilder propertyBuilder,
+			EntireTableInfo entireTableInfo, ColumnInfo columnInfo, int columnIndex)
+			throws DatabaseModelResolverException
+	{
+		ModelBuildContext buildContext = modelBuilder.getBuildContext();
+
+		if (!buildContext.hasSqlTypeInfo())
+			return;
+
+		JdbcType jdbcType = propertyBuilder.getFeature(JdbcType.class);
+		SqlTypeInfo sqlTypeInfo = SqlTypeInfo.findByType(buildContext.getSqlTypeInfos(), jdbcType.getValue());
+
+		if (sqlTypeInfo != null)
+			propertyBuilder.addFeature(Searchable.class, new Searchable(sqlTypeInfo.getSearchableType()));
 	}
 
 	/**
@@ -2383,6 +2422,27 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	protected EntireTableInfo resolveEntireTableInfo(Connection cn, String table) throws DatabaseInfoResolverException
 	{
 		return this.databaseInfoResolver.getEntireTableInfo(cn, table);
+	}
+
+	/**
+	 * 解析{@linkplain SqlTypeInfo}。
+	 * <p>
+	 * 出现解析异常将返回空数组。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @return
+	 */
+	protected SqlTypeInfo[] resolveSqlTypeInfos(Connection cn)
+	{
+		try
+		{
+			return this.databaseInfoResolver.getSqlTypeInfos(cn);
+		}
+		catch (DatabaseInfoResolverException e)
+		{
+			return new SqlTypeInfo[0];
+		}
 	}
 
 	/**
@@ -3094,11 +3154,12 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	/**
 	 * 创建{@linkplain ModelBuilder}。
 	 * 
+	 * @param buildContext
 	 * @return
 	 */
-	protected ModelBuilder createModelBuilder()
+	protected ModelBuilder createModelBuilder(ModelBuildContext buildContext)
 	{
-		return new ModelBuilder();
+		return new ModelBuilder(buildContext);
 	}
 
 	/**
@@ -3198,6 +3259,43 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 
 			this.features.put(key, true);
 		}
+
+		@SuppressWarnings("unchecked")
+		public <F> F getFeature(Object key)
+		{
+			return (this.features == null ? null : (F) this.features.get(key));
+		}
+	}
+
+	/**
+	 * {@linkplain Model}构建上下文。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class ModelBuildContext
+	{
+		private SqlTypeInfo[] sqlTypeInfos;
+
+		public ModelBuildContext()
+		{
+			super();
+		}
+
+		public boolean hasSqlTypeInfo()
+		{
+			return (this.sqlTypeInfos != null && this.sqlTypeInfos.length > 0);
+		}
+
+		public SqlTypeInfo[] getSqlTypeInfos()
+		{
+			return sqlTypeInfos;
+		}
+
+		public void setSqlTypeInfos(SqlTypeInfo[] sqlTypeInfos)
+		{
+			this.sqlTypeInfos = sqlTypeInfos;
+		}
 	}
 
 	/**
@@ -3208,6 +3306,8 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 	 */
 	protected static class ModelBuilder extends AbstractFeaturedBuilder implements PropertyNameContext
 	{
+		private ModelBuildContext buildContext;
+
 		private DefaultModel model;
 
 		private Class<?> type;
@@ -3221,6 +3321,12 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 		public ModelBuilder()
 		{
 			super();
+		}
+
+		public ModelBuilder(ModelBuildContext buildContext)
+		{
+			super();
+			this.buildContext = buildContext;
 		}
 
 		public void init(String name)
@@ -3239,6 +3345,16 @@ public abstract class AbstractDevotedDatabaseModelResolver implements DevotedDat
 			this.model.setIdProperties(getIdPropertyArray());
 			this.model.setUniqueProperties(getUniquePropertyArray());
 			this.model.setFeatures(this.features);
+		}
+
+		public ModelBuildContext getBuildContext()
+		{
+			return buildContext;
+		}
+
+		public void setBuildContext(ModelBuildContext buildContext)
+		{
+			this.buildContext = buildContext;
 		}
 
 		public Model getModel()

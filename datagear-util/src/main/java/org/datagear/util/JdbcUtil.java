@@ -554,6 +554,75 @@ public class JdbcUtil
 	}
 
 	/**
+	 * 将字符串转换为指定SQL类型的数值。
+	 * <p>
+	 * 如果{@code str}不合法、或者{@code sqlType}不是数值类型，将返回{@code null}。
+	 * </p>
+	 * 
+	 * @param sqlType
+	 * @return
+	 */
+	public static Number parseToNumber(String str, int sqlType)
+	{
+		BigDecimal number = null;
+
+		switch (sqlType)
+		{
+			case Types.NUMERIC:
+			case Types.DECIMAL:
+			{
+				return toBigDecimal(str);
+			}
+			case Types.TINYINT:
+			case Types.SMALLINT:
+			case Types.INTEGER:
+			{
+				number = toBigDecimal(str);
+				return (number == null ? null : number.intValue());
+			}
+			case Types.BIGINT:
+			{
+				number = toBigDecimal(str);
+				return (number == null ? null : number.longValue());
+			}
+			case Types.REAL:
+			case Types.FLOAT:
+			{
+				number = toBigDecimal(str);
+				return (number == null ? null : number.floatValue());
+			}
+			case Types.DOUBLE:
+			{
+				number = toBigDecimal(str);
+				return (number == null ? null : number.doubleValue());
+			}
+			default:
+				return null;
+		}
+	}
+
+	/**
+	 * 转换为{@code BigDecimal}。
+	 * <p>
+	 * 如果不合法，将返回{@code null}。
+	 * </p>
+	 * 
+	 * @param str
+	 * @return
+	 */
+	protected static BigDecimal toBigDecimal(String str)
+	{
+		try
+		{
+			return new BigDecimal(str);
+		}
+		catch (Throwable t)
+		{
+			return null;
+		}
+	}
+
+	/**
 	 * 获取指定类的JDBC类型。
 	 * 
 	 * @param clazz
@@ -1057,39 +1126,6 @@ public class JdbcUtil
 		queryResultSet = new QueryResultSet(pst, rs);
 
 		return queryResultSet;
-	}
-
-	/**
-	 * 指定SQL类型的列是否是可排序列。
-	 * 
-	 * @param sqlType
-	 * @return
-	 */
-	@JDBCCompatiblity("某些驱动程序对有些类型不支持排序（比如Oracle对于BLOB类型）")
-	public static boolean isSortableSqlType(int sqlType)
-	{
-		if (Types.BIGINT == sqlType || Types.BIT == sqlType || Types.BOOLEAN == sqlType || Types.CHAR == sqlType
-				|| Types.CLOB == sqlType || Types.DATE == sqlType || Types.DECIMAL == sqlType || Types.DOUBLE == sqlType
-				|| Types.FLOAT == sqlType || Types.INTEGER == sqlType || Types.LONGNVARCHAR == sqlType
-				|| Types.LONGVARCHAR == sqlType || Types.NCHAR == sqlType || Types.NCLOB == sqlType
-				|| Types.NUMERIC == sqlType || Types.NVARCHAR == sqlType || Types.REAL == sqlType
-				|| Types.SMALLINT == sqlType || Types.SQLXML == sqlType || Types.TIME == sqlType
-				|| Types.TIMESTAMP == sqlType || Types.TINYINT == sqlType || Types.VARCHAR == sqlType)
-			return true;
-
-		return false;
-	}
-
-	/**
-	 * 指定SQL类型的列是否是可搜索列。
-	 * 
-	 * @param sqlType
-	 * @return
-	 */
-	@JDBCCompatiblity("某些驱动程序对有些类型不支持搜索（比如Oracle对于BLOB类型）")
-	public static boolean isSearchableSqlType(int sqlType)
-	{
-		return isSortableSqlType(sqlType);
 	}
 
 	/**

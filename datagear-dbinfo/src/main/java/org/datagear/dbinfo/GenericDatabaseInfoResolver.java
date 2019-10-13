@@ -155,6 +155,14 @@ public class GenericDatabaseInfoResolver implements DatabaseInfoResolver
 		return databaseInfoResolver.getImportedTables(cn, tables);
 	}
 
+	@Override
+	public SqlTypeInfo[] getSqlTypeInfos(Connection cn) throws DatabaseInfoResolverException
+	{
+		DatabaseInfoResolver databaseInfoResolver = doGetDevotedDatabaseInfoResolverNotNull(cn);
+
+		return databaseInfoResolver.getSqlTypeInfos(cn);
+	}
+
 	/**
 	 * 获取支持指定{@code url}的{@linkplain DatabaseInfoResolver}。
 	 * 

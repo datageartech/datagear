@@ -4,9 +4,12 @@
 
 package org.datagear.persistence.support;
 
+import java.sql.Types;
+
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.SqlBuilder;
+import org.datagear.util.JDBCCompatiblity;
 
 /**
  * 抽象{@linkplain Dialect}。
@@ -45,6 +48,21 @@ public abstract class AbstractDialect implements Dialect
 	public String quote(String name)
 	{
 		return this.identifierQuote + name + this.identifierQuote;
+	}
+
+	@Override
+	@JDBCCompatiblity("某些驱动程序对有些类型不支持排序（比如Oracle对于BLOB类型）")
+	public boolean isSortable(int sqlType)
+	{
+		if (Types.BIGINT == sqlType || Types.BIT == sqlType || Types.BOOLEAN == sqlType || Types.CHAR == sqlType
+				|| Types.DATE == sqlType || Types.DECIMAL == sqlType || Types.DOUBLE == sqlType
+				|| Types.FLOAT == sqlType || Types.INTEGER == sqlType || Types.NCHAR == sqlType
+				|| Types.NUMERIC == sqlType || Types.NVARCHAR == sqlType || Types.REAL == sqlType
+				|| Types.SMALLINT == sqlType || Types.TIME == sqlType || Types.TIMESTAMP == sqlType
+				|| Types.TINYINT == sqlType || Types.VARCHAR == sqlType)
+			return true;
+
+		return false;
 	}
 
 	/**

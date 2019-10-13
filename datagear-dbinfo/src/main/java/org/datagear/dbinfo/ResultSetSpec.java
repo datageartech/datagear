@@ -169,10 +169,6 @@ public abstract class ResultSetSpec<T extends ResultSetSpecBean>
 	 * <p>
 	 * 注意：子类应该重写此方法并避免添加重复元素。
 	 * </p>
-	 * <p>
-	 * 比如：Mysql的{@code mysql-connector-java-5.1.47}驱动{@code com.mysql.jdbc.DatabaseMetaData.getImportedKeys(String, String, String)}
-	 * 在设置了连接参数{@code useInformationSchema}为{@code true}时，竟然会返回重复记录。
-	 * </p>
 	 * 
 	 * @param list
 	 * @param bean

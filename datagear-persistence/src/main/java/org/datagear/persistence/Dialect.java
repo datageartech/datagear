@@ -61,4 +61,12 @@ public interface Dialect
 	 * @return
 	 */
 	SqlBuilder toPagingSql(SqlBuilder queryView, SqlBuilder condition, Order[] orders, long startRow, int count);
+
+	/**
+	 * 给定SQL类型的列是否是可排序的。
+	 * 
+	 * @param sqlType
+	 * @return
+	 */
+	boolean isSortable(int sqlType);
 }

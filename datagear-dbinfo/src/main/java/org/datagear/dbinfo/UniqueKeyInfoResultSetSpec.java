@@ -6,6 +6,8 @@ package org.datagear.dbinfo;
 
 import java.util.List;
 
+import org.datagear.util.JDBCCompatiblity;
+
 /**
  * {@linkplain UniqueKeyInfo}结果集规范。
  * 
@@ -24,6 +26,7 @@ public class UniqueKeyInfoResultSetSpec extends ResultSetSpec<UniqueKeyInfo>
 	}
 
 	@Override
+	@JDBCCompatiblity("避免某些驱动程序的结果集出现重复项")
 	protected void addToList(List<UniqueKeyInfo> list, UniqueKeyInfo bean)
 	{
 		for (UniqueKeyInfo ele : list)
