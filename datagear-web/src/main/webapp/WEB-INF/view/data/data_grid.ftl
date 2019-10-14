@@ -162,7 +162,10 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 		if(po.canEditTableData(${schema.dataPermission}))
 			po.initEditGrid(model);
 		else
+		{
 			po.elementEditGridSwitch().checkboxradio().checkboxradio("disable");
+			po.elementEditGridSwitchWrapper().hide();
+		}
 		</#if>
 	});
 })

@@ -175,6 +175,11 @@ data_page_obj_edit_grid_html.ftl
 		return po.element("#${pageId}-editGridSwitch");
 	};
 	
+	po.elementEditGridSwitchWrapper = function()
+	{
+		return po.element(".edit-grid-switch-wrapper");
+	};
+	
 	po.resetEditGridCache = function()
 	{
 		po.editGridOriginalRowDataMap = {};
