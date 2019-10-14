@@ -254,7 +254,7 @@ public class PathDriverClassLoader extends URLClassLoader
 	{
 		ClassLoader parent = getParent();
 		if (parent == null)
-			parent = PathClassLoader.class.getClassLoader();
+			parent = PathDriverClassLoader.class.getClassLoader();
 
 		return parent;
 	}
@@ -282,6 +282,8 @@ public class PathDriverClassLoader extends URLClassLoader
 			File[] children = path.listFiles();
 
 			List<URL> urls = new ArrayList<URL>();
+
+			urls.add(FileUtil.toURL(path));
 
 			for (int i = 0; i < children.length; i++)
 			{

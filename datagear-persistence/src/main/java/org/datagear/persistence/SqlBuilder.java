@@ -601,4 +601,15 @@ public class SqlBuilder implements Serializable
 	{
 		return new SqlBuilder(sql);
 	}
+
+	/**
+	 * 指定{@linkplain SqlBuilder}是否为{@code null}、{@linkplain #isEmpty()}。
+	 * 
+	 * @param sqlBuilder
+	 * @return
+	 */
+	public static boolean isEmpty(SqlBuilder sqlBuilder)
+	{
+		return (sqlBuilder == null || sqlBuilder.isEmpty());
+	}
 }

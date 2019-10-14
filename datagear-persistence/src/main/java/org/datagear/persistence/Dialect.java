@@ -5,6 +5,9 @@
 package org.datagear.persistence;
 
 import java.sql.ResultSet;
+import java.util.List;
+
+import org.datagear.model.Model;
 
 /**
  * 数据库方言。
@@ -61,6 +64,22 @@ public interface Dialect
 	 * @return
 	 */
 	SqlBuilder toPagingSql(SqlBuilder queryView, SqlBuilder condition, Order[] orders, long startRow, int count);
+
+	/**
+	 * 构建关键字SQL查询条件。
+	 * <p>
+	 * 返回{@code null}、或者空{@linkplain SqlBuilder}表示无关键字SQL查询条件。
+	 * </p>
+	 * 
+	 * @param model
+	 * @param query
+	 *            此次查询
+	 * @param queryColumnPropertyPaths
+	 *            此次查询的结果集{@linkplain ColumnPropertyPath}列表
+	 * @return
+	 */
+	SqlBuilder toKeywordQueryCondition(Model model, Query query,
+			List<? extends ColumnPropertyPath> queryColumnPropertyPaths);
 
 	/**
 	 * 给定SQL类型的列是否是可排序的。

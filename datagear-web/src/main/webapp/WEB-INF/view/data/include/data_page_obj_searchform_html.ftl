@@ -3,7 +3,7 @@
 -->
 <form id="${pageId}-searchForm" class="search-form" action="#" tabindex="0">
 	<div class="ui-widget ui-widget-content keyword-widget">
-	<span class="ui-icon like-switch-icon ui-icon-radio-off" title="<@spring.message code='data.likeTitle' />"></span><div class="keyword-input-parent"><input name="keyword" type="text" class="ui-widget ui-widget-content keyword-input" tabindex="2" /></div>
+	<span class="ui-icon like-switch-icon ui-icon-radio-off" title="<@spring.message code='data.likeTitle' />"></span><div class="keyword-input-parent"><input name="keyword" type="text" class="ui-widget ui-widget-content keyword-input" tabindex="2" title="<@spring.message code='data.keywordTitle' />" /></div>
 	<input type="hidden" name="notLike" value="" />
 	</div>
 	<div class="search-condition-icon-parent" title="<@spring.message code='data.conditionPanelWithShortcut' />">
@@ -17,7 +17,7 @@
 				<span class="ui-icon ui-icon-arrowthickstop-1-n condition-panel-resetpos-icon" title="<@spring.message code='restoration' />"></span>
 			</div>
 			<div class="condition-parent">
-				<textarea name="condition" tabindex="5" class="ui-widget ui-widget-content"></textarea>
+				<textarea name="condition" tabindex="5" class="ui-widget ui-widget-content" title="<@spring.message code='data.conditionTitle' />"></textarea>
 			</div>
 			<div class="condition-action">
 				<span class="ui-icon ui-icon-trash condition-panel-clear-icon" title="<@spring.message code='data.clearWithShortcut' />"></span>

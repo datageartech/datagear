@@ -37,14 +37,12 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.datagear.dbinfo.SqlTypeInfo.SearchableType;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.features.NotReadable;
 import org.datagear.model.features.Token;
 import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyPath;
-import org.datagear.model.support.PropertyPathInfo;
 import org.datagear.persistence.ColumnPropertyPath;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.Order;
@@ -66,7 +64,6 @@ import org.datagear.persistence.mapper.MapperUtil;
 import org.datagear.persistence.mapper.ModelTableMapper;
 import org.datagear.persistence.mapper.PropertyTableMapper;
 import org.datagear.util.JDBCCompatiblity;
-import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
 
 /**
@@ -78,7 +75,7 @@ import org.datagear.util.StringUtil;
 public class SelectPersistenceOperation extends AbstractModelPersistenceOperation
 {
 	/** 列别名前缀 */
-	public static final String COLUMN_ALIAS_PREFIX = "DATAGEARCOLALIAS_";
+	public static final String COLUMN_ALIAS_PREFIX = "DATAGEAR_COL_ALS_";
 
 	private SelectOptions selectOptions;
 
@@ -417,7 +414,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	{
 		SqlBuilder query = SqlBuilder.valueOf().sql("SELECT COUNT(*) FROM (").sql(queryView).sql(") A");
 
-		if (!isEmptySqlBuilder(condition))
+		if (!SqlBuilder.isEmpty(condition))
 			query.sql(" WHERE ").sql(condition);
 
 		long re = executeCountQuery(cn, query);
@@ -703,16 +700,16 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		SqlBuilder orderSql = Order.toOrderSql(orders);
 
-		if (isEmptySqlBuilder(condition) && isEmptySqlBuilder(orderSql))
+		if (SqlBuilder.isEmpty(condition) && SqlBuilder.isEmpty(orderSql))
 			query = queryView;
 		else
 		{
 			query = SqlBuilder.valueOf().sql("SELECT * FROM (").sql(queryView).sql(") T");
 
-			if (!isEmptySqlBuilder(condition))
+			if (!SqlBuilder.isEmpty(condition))
 				query.sql(" WHERE ").sql(condition);
 
-			if (!isEmptySqlBuilder(orderSql))
+			if (!SqlBuilder.isEmpty(orderSql))
 				query.sql(" ORDER BY ").sql(orderSql);
 
 			return query;
@@ -835,7 +832,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		if (fromSql != null)
 		{
-			if (isEmptySqlBuilder(tableFieldCondition))
+			if (SqlBuilder.isEmpty(tableFieldCondition))
 				fromSql.sql(tableNameQuote);
 			else
 			{
@@ -1511,11 +1508,6 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		return (property.hasFeature(Token.class));
 	}
 
-	protected boolean isEmptySqlBuilder(SqlBuilder sqlBuilder)
-	{
-		return sqlBuilder == null || sqlBuilder.isEmpty();
-	}
-
 	/**
 	 * 将给定字符串中的{@linkplain ColumnPropertyPath#getPropertyPath()}替换为{@linkplain ColumnPropertyPath#getColumnName()}。
 	 * 
@@ -1641,106 +1633,27 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			return null;
 
 		String conditionStr = (query.hasCondition() ? query.getCondition().trim() : null);
-		boolean hasCondition = !(conditionStr == null || conditionStr.isEmpty());
+		boolean hasCondition = !StringUtil.isEmpty(conditionStr);
 
-		SqlBuilder queryCondition = SqlBuilder.valueOf();
+		SqlBuilder keywordCondition = dialect.toKeywordQueryCondition(model, query, selectColumnPropertyPaths);
 
-		boolean hasKeywordCondition = false;
-
-		if (query.hasKeyword())
+		if (!hasCondition)
 		{
-			SqlBuilder keywordCondition = SqlBuilder.valueOf();
-
-			String andSql = (query.isNotLike() ? " AND " : " OR ");
-			String likeSql = (query.isNotLike() ? " NOT LIKE " : " LIKE ");
-			String equalSql = (query.isNotLike() ? " != " : " = ");
-
-			if (hasCondition)
-				keywordCondition.sql("(");
-
-			int appendCount = 0;
-			for (ColumnPropertyPath columnPropertyPath : selectColumnPropertyPaths)
-			{
-				if (!columnPropertyPath.isToken())
-					continue;
-
-				String myOperator = null;
-				Object myKeyword = null;
-
-				PropertyPath propertyPath = PropertyPath.valueOf(columnPropertyPath.getPropertyPath());
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath);
-				Property tailProperty = propertyPathInfo.getPropertyTail();
-
-				@JDBCCompatiblity("很多驱动程序的值为SearchableType.ALL但实际并不支持LIKE语法（比如：PostgreSQL JDBC 42.2.5），"
-						+ "这里为了兼容，暂时采用else中的逻辑")
-				SearchableType searchableType = null;
-				// Searchable searchable =
-				// tailProperty.getFeature(Searchable.class);
-				// searchableType = (searchable == null ? null :
-				// searchable.getValue());
-
-				if (SearchableType.NO.equals(searchableType))
-					;
-				else if (SearchableType.ONLY_LIKE.equals(searchableType) || SearchableType.ALL.equals(searchableType))
-				{
-					myOperator = likeSql;
-					myKeyword = wrapLikeKeyword(query.getKeyword());
-				}
-				else
-				{
-					// SearchableType.EXPCEPT_LIKE、或者无SearchableType
-
-					int sqlType = ((JdbcType) tailProperty.getFeature(JdbcType.class)).getValue();
-					Number number = JdbcUtil.parseToNumber(query.getKeyword(), sqlType);
-
-					if (number != null)
-					{
-						myOperator = equalSql;
-						myKeyword = number;
-					}
-					else if (Types.CHAR == sqlType || Types.VARCHAR == sqlType || Types.NCHAR == sqlType
-							|| Types.NVARCHAR == sqlType)
-					{
-						myOperator = likeSql;
-						myKeyword = wrapLikeKeyword(query.getKeyword());
-					}
-				}
-
-				if (myOperator != null && myKeyword != null)
-				{
-					if (appendCount > 0)
-						keywordCondition.sql(andSql);
-
-					keywordCondition.sql(columnPropertyPath.getColumnNameQuote() + myOperator + "?", myKeyword);
-
-					appendCount++;
-				}
-			}
-
-			if (hasCondition)
-				keywordCondition.sql(")");
-
-			if (appendCount > 0)
-			{
-				hasKeywordCondition = true;
-				queryCondition.sql(keywordCondition);
-			}
+			return keywordCondition;
 		}
-
-		if (hasCondition)
+		else
 		{
+			SqlBuilder queryCondition = SqlBuilder.valueOf();
+
 			conditionStr = replacePropertyPathToQuoteColumnName(selectColumnPropertyPaths, conditionStr);
 
-			if (hasKeywordCondition)
-				queryCondition.sql(" AND (");
+			if (SqlBuilder.isEmpty(keywordCondition))
+				queryCondition.sql(conditionStr);
+			else
+				queryCondition.sql("(").sql(conditionStr).sql(")").sql(" AND (").sql(keywordCondition).sql(")");
 
-			queryCondition.sql(conditionStr);
-
-			if (hasKeywordCondition)
-				queryCondition.sql(")");
+			return queryCondition;
 		}
-
-		return queryCondition;
 	}
 
 	/**
@@ -1843,25 +1756,6 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		}
 
 		return re.toArray(new Order[re.size()]);
-	}
-
-	/**
-	 * 包裹Like关键字。
-	 * 
-	 * @param keyword
-	 * @return
-	 */
-	protected String wrapLikeKeyword(String keyword)
-	{
-		if (keyword == null || keyword.isEmpty())
-			return keyword;
-
-		char first = keyword.charAt(0), last = keyword.charAt(keyword.length() - 1);
-
-		if (first != '%' && first != '_' && last != '%' && last != '_')
-			return "%" + keyword + "%";
-
-		return keyword;
 	}
 
 	/**
