@@ -750,7 +750,10 @@ public class SqlpadExecutionService
 		{
 			long startTime = System.currentTimeMillis();
 
-			String sql = sqlpadFileDirectory.replaceNameToAbsolutePath(sqlStatement.getSql());
+			// 禁用插入文件功能，因为没有应用场景
+			// String sql =
+			// sqlpadFileDirectory.replaceNameToAbsolutePath(sqlStatement.getSql());
+			String sql = sqlStatement.getSql();
 
 			boolean isResultSet = st.execute(sql);
 
