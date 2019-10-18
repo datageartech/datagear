@@ -45,6 +45,45 @@ public class FileUtil
 	}
 
 	/**
+	 * 获取目录对象。
+	 * <p>
+	 * 如果目录不存在，则创建。
+	 * </p>
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static File getDirectory(String file)
+	{
+		File directory = new File(file);
+
+		if (!directory.exists())
+			directory.mkdirs();
+
+		return directory;
+	}
+
+	/**
+	 * 获取指定目录下的子目录。
+	 * <p>
+	 * 如果子目录不存在，则创建。
+	 * </p>
+	 * 
+	 * @param parent
+	 * @param file
+	 * @return
+	 */
+	public static File getDirectory(File parent, String file)
+	{
+		File directory = new File(parent, file);
+
+		if (!directory.exists())
+			directory.mkdirs();
+
+		return directory;
+	}
+
+	/**
 	 * 删除文件。
 	 * 
 	 * @param file
@@ -104,6 +143,20 @@ public class FileUtil
 	public static File generateUniqueFile(File parent)
 	{
 		return new File(parent, IDUtil.uuid());
+	}
+
+	/**
+	 * 在指定目录下生成一个文件。
+	 * 
+	 * @param parent
+	 * @param extension
+	 *            为{@code null}时不生成后缀
+	 * @return
+	 */
+	public static File generateUniqueFile(File parent, String extension)
+	{
+		String name = (StringUtil.isEmpty(extension) ? IDUtil.uuid() : IDUtil.uuid() + "." + extension);
+		return new File(parent, name);
 	}
 
 	/**
@@ -190,5 +243,46 @@ public class FileUtil
 		{
 			throw new IllegalArgumentException("Illegal [" + file.toString() + "] to URL");
 		}
+	}
+
+	/**
+	 * 获取文件名后缀。
+	 * <p>
+	 * 如果文件名没有后缀，将返回{@code null}
+	 * </p>
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public static String getExtension(File file)
+	{
+		if (file.isDirectory())
+			throw new IllegalArgumentException("[file] must not be directory");
+
+		String name = file.getName();
+
+		return getExtension(name);
+	}
+
+	/**
+	 * 获取文件名后缀。
+	 * <p>
+	 * 如果文件名没有后缀，将返回{@code null}
+	 * </p>
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public static String getExtension(String fileName)
+	{
+		if (fileName == null)
+			return null;
+
+		int dotIdx = fileName.lastIndexOf('.');
+
+		if (dotIdx > 0 && dotIdx < fileName.length() - 1)
+			return fileName.substring(dotIdx + 1);
+		else
+			return null;
 	}
 }

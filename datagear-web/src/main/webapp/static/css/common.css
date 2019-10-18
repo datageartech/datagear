@@ -40,6 +40,27 @@ a.link:hover{
 	-webkit-box-sizing: border-box;
 }
 
+/*上传文件信息*/
+.upload-file-info{
+	display: inline-block;
+	margin-left: 0.5em;
+}
+.upload-file-info .upload-percent{
+	display: inline-block;
+	margin-right: 0.5em;
+}
+.upload-file-info .file-name{
+	display: inline-block;
+}
+.upload-file-info .file-size{
+	display: inline-block;
+	margin-left: 0.3em;
+}
+.upload-file-info .file-delete{
+	margin-left: 0.5em;
+	cursor: pointer;
+}
+
 /*表单*/
 form{}
 form .form-head{}
@@ -97,25 +118,6 @@ form .form-content .form-item .form-item-value textarea{
 	height: 5em;
 }
 form .form-content .form-item .form-item-value .file-input-show{/*文件展示文本*/
-}
-form .form-content .form-item .form-item-value .file-info{/*展示上传文件信息元素*/
-	display: inline-block;
-	margin-left: 0.5em;
-}
-form .form-content .form-item .form-item-value .file-info .upload-percent{
-	display: inline-block;
-	margin-right: 0.5em;
-}
-form .form-content .form-item .form-item-value .file-info .file-name{
-	display: inline-block;
-}
-form .form-content .form-item .form-item-value .file-info .file-size{
-	display: inline-block;
-	margin-left: 0.3em;
-}
-form .form-content .form-item .form-item-value .file-info .file-delete{
-	margin-left: 0.5em;
-	cursor: pointer;
 }
 form .form-content .form-item label.error{
 	color: red;
@@ -1284,22 +1286,28 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-sqlpad .button-operation button.ui-button-icon-only{
+.page-sqlpad .button-operation button.ui-button-icon-only,
+.page-sqlpad .button-operation .ui-button.ui-button-icon-only{
 	height: 1.2em;
 	width: 2.5em;
-	margin-left: 0.5em;
 	vertical-align: top;
 	border: 0px;
 }
-.page-sqlpad .button-operation button.first{
+.page-sqlpad .button-operation > .item,
+.page-sqlpad .button-operation > button,
+.page-sqlpad .button-operation > input,
+.page-sqlpad .button-operation > .ui-button-icon-only{
+	margin-left: 0.5em;
+}
+.page-sqlpad .button-operation .first{
 	margin-left: 0.1em;
 }
 .page-sqlpad .button-operation .button-divider{
 	display: inline-block;
     width: 1px;
     height: 1.2em;
-    margin-right: 1em;
-    margin-left: 1.5em;
+    margin-right: 0.5em;
+    margin-left: 1em;
     border-width: 0px;
     border-right-width: 1px;
 	opacity: 0.8;
@@ -1308,6 +1316,22 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .head{
 	height: 1.2em;
 	padding: 0.25em 0;
+}
+.page-sqlpad .head .insert-file-wrapper{
+	display: inline-block;
+	position: relative;
+	vertical-align: top;
+}
+.page-sqlpad .head .insert-file-wrapper .upload-file-info{
+	position: absolute;
+	top: 1.3em;
+	left: 0;
+	width: 800%;
+	min-width: 20em;
+	height: 1.5em;
+	margin-left: 0;
+	padding: 0.3em 0.3em;
+	padding-left: 0.5em;
 }
 .page-sqlpad .head .sql-delimiter-input{
 	width: 3.6em;

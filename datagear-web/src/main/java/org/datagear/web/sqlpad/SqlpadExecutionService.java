@@ -4,6 +4,7 @@
 
 package org.datagear.web.sqlpad;
 
+import java.io.File;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -32,6 +33,7 @@ import org.datagear.model.Model;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser.SqlStatement;
+import org.datagear.web.controller.SqlpadController.SqlpadFileDirectory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 
@@ -154,6 +156,7 @@ public class SqlpadExecutionService
 	 * @param user
 	 * @param schema
 	 * @param sqlpadId
+	 * @param sqlpadFileDirectory
 	 * @param sqlStatements
 	 * @param commitMode
 	 * @param exceptionHandleMode
@@ -162,15 +165,15 @@ public class SqlpadExecutionService
 	 * @param locale
 	 * @return
 	 */
-	public boolean submit(User user, Schema schema, String sqlpadId, List<SqlStatement> sqlStatements,
-			CommitMode commitMode, ExceptionHandleMode exceptionHandleMode, int overTimeThreashold,
-			int resultsetFetchSize, Locale locale)
+	public boolean submit(User user, Schema schema, String sqlpadId, File sqlpadFileDirectory,
+			List<SqlStatement> sqlStatements, CommitMode commitMode, ExceptionHandleMode exceptionHandleMode,
+			int overTimeThreashold, int resultsetFetchSize, Locale locale)
 	{
 		String sqlpadChannelId = getSqlpadChannelId(sqlpadId);
 
 		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(user, schema, sqlpadId,
-				sqlpadChannelId, sqlpadCometdService, sqlStatements, commitMode, exceptionHandleMode,
-				overTimeThreashold, resultsetFetchSize, locale);
+				sqlpadFileDirectory, sqlpadChannelId, sqlpadCometdService, sqlStatements, commitMode,
+				exceptionHandleMode, overTimeThreashold, resultsetFetchSize, locale);
 
 		SqlpadExecutionRunnable old = this._sqlpadExecutionRunnableMap.putIfAbsent(sqlpadId, sqlpadExecutionRunnable);
 
@@ -287,6 +290,8 @@ public class SqlpadExecutionService
 
 		private String sqlpadId;
 
+		private File sqlpadFileDirectory;
+
 		private String sqlpadChannelId;
 
 		private SqlpadCometdService sqlpadCometdService;
@@ -315,14 +320,16 @@ public class SqlpadExecutionService
 			super();
 		}
 
-		public SqlpadExecutionRunnable(User user, Schema schema, String sqlpadId, String sqlpadChannelId,
-				SqlpadCometdService sqlpadCometdService, List<SqlStatement> sqlStatements, CommitMode commitMode,
-				ExceptionHandleMode exceptionHandleMode, int overTimeThreashold, int resultsetFetchSize, Locale locale)
+		public SqlpadExecutionRunnable(User user, Schema schema, String sqlpadId, File sqlpadFileDirectory,
+				String sqlpadChannelId, SqlpadCometdService sqlpadCometdService, List<SqlStatement> sqlStatements,
+				CommitMode commitMode, ExceptionHandleMode exceptionHandleMode, int overTimeThreashold,
+				int resultsetFetchSize, Locale locale)
 		{
 			super();
 			this.user = user;
 			this.schema = schema;
 			this.sqlpadId = sqlpadId;
+			this.sqlpadFileDirectory = sqlpadFileDirectory;
 			this.sqlpadChannelId = sqlpadChannelId;
 			this.sqlpadCometdService = sqlpadCometdService;
 			this.sqlStatements = sqlStatements;
@@ -361,6 +368,16 @@ public class SqlpadExecutionService
 		public void setSqlpadId(String sqlpadId)
 		{
 			this.sqlpadId = sqlpadId;
+		}
+
+		public File getSqlpadFileDirectory()
+		{
+			return sqlpadFileDirectory;
+		}
+
+		public void setSqlpadFileDirectory(File sqlpadFileDirectory)
+		{
+			this.sqlpadFileDirectory = sqlpadFileDirectory;
 		}
 
 		public String getSqlpadChannelId()
@@ -490,9 +507,10 @@ public class SqlpadExecutionService
 				return;
 			}
 
+			long startTime = System.currentTimeMillis();
 			int totalCount = this.sqlStatements.size();
 			SQLExecutionStat sqlExecutionStat = new SQLExecutionStat(totalCount);
-			long startTime = System.currentTimeMillis();
+			SqlpadFileDirectory sqlpadFileDirectory = SqlpadFileDirectory.valueOf(this.sqlpadFileDirectory);
 
 			List<String> sqlHistories = new ArrayList<String>();
 
@@ -516,7 +534,7 @@ public class SqlpadExecutionService
 					{
 						try
 						{
-							execute(cn, st, sqlExecutionStat, sqlStatement, i);
+							execute(sqlExecutionStat, sqlpadFileDirectory, cn, st, sqlStatement, i);
 							sqlExecutionStat.increaseSuccessCount();
 
 							sqlHistories.add(sqlStatement.getSql());
@@ -719,17 +737,22 @@ public class SqlpadExecutionService
 		/**
 		 * 执行SQL，出现异常时应该抛出{@linkplain SQLException}。
 		 * 
+		 * @param sqlExecutionStat
+		 * @param sqlpadFileDirectory
 		 * @param cn
 		 * @param st
-		 * @param sql
+		 * @param sqlStatement
+		 * @param sqlStatementIndex
 		 * @throws SQLException
 		 */
-		protected void execute(Connection cn, Statement st, SQLExecutionStat sqlExecutionStat,
-				SqlStatement sqlStatement, int sqlStatementIndex) throws SQLException
+		protected void execute(SQLExecutionStat sqlExecutionStat, SqlpadFileDirectory sqlpadFileDirectory,
+				Connection cn, Statement st, SqlStatement sqlStatement, int sqlStatementIndex) throws SQLException
 		{
 			long startTime = System.currentTimeMillis();
 
-			boolean isResultSet = st.execute(sqlStatement.getSql());
+			String sql = sqlpadFileDirectory.replaceNameToAbsolutePath(sqlStatement.getSql());
+
+			boolean isResultSet = st.execute(sql);
 
 			sqlExecutionStat.increaseSqlDuration(System.currentTimeMillis() - startTime);
 
@@ -740,8 +763,8 @@ public class SqlpadExecutionService
 
 				Model model = SqlpadExecutionService.this.databaseModelResolver.resolve(cn, rs, IDUtil.uuid());
 
-				ModelSqlResult modelSqlResult = SqlpadExecutionService.this.modelSqlSelectService.select(cn,
-						sqlStatement.getSql(), rs, model, 1, this.resultsetFetchSize);
+				ModelSqlResult modelSqlResult = SqlpadExecutionService.this.modelSqlSelectService.select(cn, sql, rs,
+						model, 1, this.resultsetFetchSize);
 				modelSqlResult.setSql(null);
 
 				this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,

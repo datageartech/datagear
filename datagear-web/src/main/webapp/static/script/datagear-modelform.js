@@ -749,7 +749,7 @@
 				
 				fileInput=$("<input type='file' />").appendTo(fileUploadButton);
 				
-				var fileInfoDiv = $("<div class='file-info' />").appendTo(valuediv);
+				var fileInfoDiv = $("<div class='upload-file-info' />").appendTo(valuediv);
 				
 				fileInput.fileupload(
 				{

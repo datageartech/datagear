@@ -48,7 +48,7 @@ Schema schema 数据库，不允许为null
 						<div class="form-item-value">
 							<label><@spring.message code='dataImport.uploadSqlDataFile' /></label>
 							<div class="fileinput-button ui-widget ui-button ui-corner-all" upload-action="sql/uploadImportFile" title="<@spring.message code='dataImport.uploadSqlDataFile.desc' />"><@spring.message code='add' /><input type="file"></div>
-							<div class="file-info"></div>
+							<div class="upload-file-info"></div>
 						</div>
 					</div>
 					<div class="form-item form-item-table-head form-item-progress page-status-aware-show exchange-status-show finish-status-show">

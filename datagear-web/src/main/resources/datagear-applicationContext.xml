@@ -75,6 +75,11 @@
     </bean>
     <bean id="tempDataExchangeRootDirectory" factory-bean="tempDataExchangeRootDirectoryFactory" factory-method="getDirectory" />
     
+    <bean id="tempSqlpadRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
+    	<property name="directoryName" value="${directory.temp.sqlpad}" />
+    </bean>
+    <bean id="tempSqlpadRootDirectory" factory-bean="tempSqlpadRootDirectoryFactory" factory-method="getDirectory" />
+    
     <bean id="dataSource"
     		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName">
@@ -509,7 +514,7 @@
 	<!-- 删除临时文件 -->
 	<bean id="deleteTempFileJob" class="org.datagear.web.scheduling.DeleteExpiredFileJob">
 		<property name="directory" ref="tempDirectory" />
-		<property name="expireThresholdMinutes" value="600" />
+		<property name="expireThresholdMinutes" value="1440" />
 	</bean>
 	<bean id="deleteTempFileJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="deleteTempFileJob" />

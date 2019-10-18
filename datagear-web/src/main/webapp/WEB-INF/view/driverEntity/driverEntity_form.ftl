@@ -52,7 +52,7 @@ readonly 是否只读操作，允许为null
 					<#if !readonly>
 					<div class="driver-upload-parent">
 						<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
-						<div class="file-info"></div>
+						<div class="upload-file-info"></div>
 					</div>
 					</#if>
 				</div>
@@ -75,7 +75,7 @@ readonly 是否只读操作，允许为null
 	$.initButtons(po.element());
 	
 	po.driverFiles = function(){ return this.element(".driver-files"); };
-	po.fileUploadInfo = function(){ return this.element(".file-info"); };
+	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
 	
 	po.url = function(action)
 	{

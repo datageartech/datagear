@@ -43,7 +43,7 @@ dataExchange_js.ftl
 	
 	po.postBuildSubDataExchange = function(subDataExchange){};
 	
-	po.fileUploadInfo = function(){ return this.element(".file-info"); };
+	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
 	
 	po.renderFileNameColumn = function(fileName)
 	{

@@ -26,11 +26,15 @@ Schema schema 数据库，不允许为null
 		<button id="commitSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.commit' />"><span class="ui-button-icon ui-icon ui-icon-check"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.commit' /></button>
 		<button id="rollbackSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.rollback' />"><span class="ui-button-icon ui-icon ui-icon-arrowreturnthick-1-w"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.rollback' /></button>
 		<div class="button-divider ui-widget ui-widget-content"></div>
-		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearEditSql' /></button>
-		<div class="button-divider ui-widget ui-widget-content"></div>
+		<div class="insert-file-wrapper item">
+			<div id="insertFileButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only fileinput-button" title="<@spring.message code='sqlpad.insertFile' />"><span class="ui-button-icon ui-icon ui-icon ui-icon-document"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertFile' /><input type="file"></div>
+			<div class="insert-file-info ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front upload-file-info"></div>
+		</div>
 		<input id="sqlDelimiterInput" type="text" class="sql-delimiter-input ui-widget ui-widget-content ui-corner-all" value=";"  title="<@spring.message code='sqlpad.sqlDelimiter' />"/>
 		<button id="insertSqlDelimiterDefineButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.insertSqlDelimiterDefine' />"><span class="ui-button-icon ui-icon ui-icon-grip-dotted-horizontal"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertSqlDelimiterDefine' /></button>
 		<button id="insertSqlDelimiterButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.insertSqlDelimiter' />"><span class="ui-button-icon ui-icon ui-icon-grip-solid-horizontal"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.insertSqlDelimiter' /></button>
+		<div class="button-divider ui-widget ui-widget-content"></div>
+		<button id="clearSqlButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.clearEditSql' />"><span class="ui-button-icon ui-icon ui-icon-trash"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.clearEditSql' /></button>
 		<div class="setting-wrapper">
 			<button id="settingButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.setting' />"><span class="ui-button-icon ui-icon ui-icon-caret-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.setting' /></button>
 			<div class="setting-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
@@ -165,6 +169,8 @@ Schema schema 数据库，不允许为null
 <#include "../include/page_obj_tabs.ftl" >
 <#include "../include/page_obj_cometd.ftl">
 <#include "../include/page_obj_format_time.ftl" >
+<#include "../include/page_obj_data_permission.ftl">
+<#include "../include/page_obj_data_permission_ds_table.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -1039,6 +1045,40 @@ Schema schema 数据库，不允许为null
 		po.sqlEditor.setValue("");
 		po.sqlEditor.focus();
 	});
+	
+	po.element(".insert-file-info").hide();
+	if(!po.canDeleteTableData(${schema.dataPermission}))
+		po.element(".insert-file-wrapper").attr("disabled", "disabled").hide();
+	else
+	{
+		po.element("#insertFileButton").fileupload(
+		{
+			url : "${contextPath}/sqlpad/"+po.schemaId+"/uploadInsertFile?sqlpadId=" + po.sqlpadId,
+			paramName : "file",
+			success : function(serverFileInfo, textStatus, jqXHR)
+			{
+				$.fileuploadsuccessHandlerForUploadInfo(po.element(".insert-file-info"), true);
+				po.element(".insert-file-info").hide();
+				
+				var fileName = serverFileInfo.name;
+				
+				po.sqlEditor.insert(fileName);
+			},
+			error : function()
+			{
+				po.element(".insert-file-info").hide();
+			}
+		})
+		.bind('fileuploadadd', function (e, data)
+		{
+			po.element(".insert-file-info").show().position({ my : "left top", at : "left bottom"})
+			$.fileuploadaddHandlerForUploadInfo(e, data, po.element(".insert-file-info"));
+		})
+		.bind('fileuploadprogressall', function (e, data)
+		{
+			$.fileuploadprogressallHandlerForUploadInfo(e, data, po.element(".insert-file-info"));
+		});
+	}
 	
 	po.element("#insertSqlDelimiterDefineButton").click(function()
 	{

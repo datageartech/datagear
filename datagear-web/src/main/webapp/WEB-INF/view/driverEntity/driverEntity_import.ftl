@@ -18,7 +18,7 @@
 				<div class="form-item-value">
 					<div class="driver-import-parent">
 						<div class="fileinput-button"><@spring.message code='select' /><input type="file" accept=".zip" class="ignore"></div>
-						<div class="file-info"></div>
+						<div class="upload-file-info"></div>
 					</div>
 				</div>
 			</div>
@@ -46,7 +46,7 @@
 	
 	po.driverEntityInfos = function(){ return this.element(".driver-entity-infos"); };
 
-	po.fileUploadInfo = function(){ return this.element(".file-info"); };
+	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
 	
 	po.url = function(action)
 	{

@@ -12,7 +12,9 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,10 +33,13 @@ import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.util.FileInfo;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
+import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
@@ -44,6 +49,7 @@ import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -52,6 +58,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * SQL工作台控制器。
@@ -80,6 +87,10 @@ public class SqlpadController extends AbstractSchemaConnController
 	@Autowired
 	private SqlHistoryService sqlHistoryService;
 
+	@Autowired
+	@Qualifier("tempSqlpadRootDirectory")
+	private File tempSqlpadRootDirectory;
+
 	public SqlpadController()
 	{
 		super();
@@ -88,7 +99,8 @@ public class SqlpadController extends AbstractSchemaConnController
 	public SqlpadController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource, ModelSqlSelectService modelSqlSelectService,
 			DatabaseModelResolver databaseModelResolver, SqlpadExecutionService sqlpadExecutionService,
-			DatabaseInfoResolver databaseInfoResolver, SqlHistoryService sqlHistoryService)
+			DatabaseInfoResolver databaseInfoResolver, SqlHistoryService sqlHistoryService,
+			File tempSqlpadRootDirectory)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
 		this.modelSqlSelectService = modelSqlSelectService;
@@ -96,6 +108,7 @@ public class SqlpadController extends AbstractSchemaConnController
 		this.sqlpadExecutionService = sqlpadExecutionService;
 		this.databaseInfoResolver = databaseInfoResolver;
 		this.sqlHistoryService = sqlHistoryService;
+		this.tempSqlpadRootDirectory = tempSqlpadRootDirectory;
 	}
 
 	public ModelSqlSelectService getModelSqlSelectService()
@@ -146,6 +159,16 @@ public class SqlpadController extends AbstractSchemaConnController
 	public void setSqlHistoryService(SqlHistoryService sqlHistoryService)
 	{
 		this.sqlHistoryService = sqlHistoryService;
+	}
+
+	public File getTempSqlpadRootDirectory()
+	{
+		return tempSqlpadRootDirectory;
+	}
+
+	public void setTempSqlpadRootDirectory(File tempSqlpadRootDirectory)
+	{
+		this.tempSqlpadRootDirectory = tempSqlpadRootDirectory;
 	}
 
 	@RequestMapping("/{schemaId}")
@@ -219,8 +242,9 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		List<SqlStatement> sqlStatements = sqlScriptParser.parseAll();
 
-		this.sqlpadExecutionService.submit(user, schema, sqlpadId, sqlStatements, commitMode, exceptionHandleMode,
-				overTimeThreashold, resultsetFetchSize, WebUtils.getLocale(request));
+		this.sqlpadExecutionService.submit(user, schema, sqlpadId,
+				FileUtil.getDirectory(this.tempSqlpadRootDirectory, sqlpadId), sqlStatements, commitMode,
+				exceptionHandleMode, overTimeThreashold, resultsetFetchSize, WebUtils.getLocale(request));
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
 	}
@@ -398,6 +422,28 @@ public class SqlpadController extends AbstractSchemaConnController
 		return this.sqlHistoryService.pagingQueryByUserId(schemaId, user.getId(), pagingQuery);
 	}
 
+	@RequestMapping(value = "/{schemaId}/uploadInsertFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public FileInfo fileUpload(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("file") MultipartFile multipartFile)
+			throws Throwable
+	{
+		final User user = WebUtils.getUser(request, response);
+
+		Schema schema = getSchemaForUserNotNull(user, schemaId);
+
+		checkDeleteTableDataPermission(schema, user);
+
+		SqlpadFileDirectory directory = SqlpadFileDirectory.valueOf(this.tempSqlpadRootDirectory, sqlpadId);
+		File file = directory.createFileFor(multipartFile.getOriginalFilename());
+		multipartFile.transferTo(file);
+
+		FileInfo fileInfo = new FileInfo(file.getName(), file.length());
+
+		return fileInfo;
+	}
+
 	/**
 	 * 根据列名称关键字查询{@linkplain ColumnInfo}列表。
 	 * 
@@ -430,5 +476,214 @@ public class SqlpadController extends AbstractSchemaConnController
 	protected String generateSqlpadId(HttpServletRequest request, HttpServletResponse response)
 	{
 		return IDUtil.uuid();
+	}
+
+	/**
+	 * SQL工作台文件目录。
+	 * <p>
+	 * 此类非线程安全。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class SqlpadFileDirectory
+	{
+		public static final String NAME_PREFIX = "SQLPAD";
+
+		private File directory;
+
+		private Map<String, String> _absolutePathMap = null;
+
+		public SqlpadFileDirectory(File directory)
+		{
+			super();
+			this.directory = directory;
+		}
+
+		public File getDirectory()
+		{
+			return directory;
+		}
+
+		public void setDirectory(File directory)
+		{
+			this.directory = directory;
+		}
+
+		/**
+		 * 将字符串中的文件名替换为绝对路径。
+		 * 
+		 * @param str
+		 * @return
+		 */
+		public String replaceNameToAbsolutePath(String str)
+		{
+			Map<String, String> absolutePathMap = getAbsolutePathMap();
+
+			if (absolutePathMap == null || absolutePathMap.isEmpty())
+				return str;
+
+			String re = str;
+			int index = 0;
+
+			while ((index = re.indexOf(NAME_PREFIX, index)) >= 0)
+			{
+				int length = re.length();
+				int myStart = index + NAME_PREFIX.length();
+				int nextIndex = myStart;
+
+				if (myStart >= length)
+					break;
+
+				char tailLenLenChar = re.substring(myStart, myStart + 1).charAt(0);
+
+				if (tailLenLenChar > '1' && tailLenLenChar < '9')
+				{
+					int tailLenLen = Integer.parseInt(Character.toString(tailLenLenChar));
+					myStart += 1;
+
+					if (myStart + tailLenLen <= length)
+					{
+						String tailLenStr = re.substring(myStart, myStart + tailLenLen);
+
+						int fileNameEndIdx = -1;
+
+						try
+						{
+							fileNameEndIdx = myStart + tailLenLen + Integer.parseInt(tailLenStr);
+						}
+						catch (Throwable t)
+						{
+						}
+
+						if (fileNameEndIdx > -1)
+						{
+							if (fileNameEndIdx <= length)
+							{
+								String fileName = re.substring(index, fileNameEndIdx);
+								String absolutePath = absolutePathMap.get(fileName);
+
+								if (!StringUtil.isEmpty(absolutePath))
+								{
+									StringBuilder sb = new StringBuilder();
+
+									if (index > 0)
+										sb.append(re.substring(0, index));
+
+									sb.append(absolutePath);
+
+									nextIndex = sb.length();
+
+									if (fileNameEndIdx < length)
+										sb.append(re.substring(fileNameEndIdx));
+
+									re = sb.toString();
+								}
+							}
+						}
+					}
+				}
+
+				index = nextIndex;
+			}
+
+			return re;
+		}
+
+		public Map<String, String> getAbsolutePathMap()
+		{
+			if (this._absolutePathMap == null)
+			{
+				this._absolutePathMap = new HashMap<String, String>();
+
+				File[] children = this.directory.listFiles();
+
+				for (File child : children)
+				{
+					if (child.isDirectory())
+						continue;
+
+					String key = child.getName();
+					String value = child.getAbsolutePath();
+
+					this._absolutePathMap.put(key, value);
+				}
+			}
+
+			return this._absolutePathMap;
+		}
+
+		/**
+		 * 是否包含指定名称的文件。
+		 * 
+		 * @param name
+		 * @return
+		 */
+		public boolean containsFile(String name)
+		{
+			File[] children = this.directory.listFiles();
+
+			for (File child : children)
+			{
+				if (child.getName().equals(name))
+					return true;
+			}
+
+			return false;
+		}
+
+		/**
+		 * 获取指定名称文件的绝对路径。
+		 * <p>
+		 * 如果文件不存在，将返回{@code null}。
+		 * </p>
+		 * 
+		 * @param name
+		 * @return
+		 */
+		public String getAbsolutePath(String name)
+		{
+			File[] children = this.directory.listFiles();
+
+			for (File child : children)
+			{
+				if (child.getName().equals(name))
+					return child.getAbsolutePath();
+			}
+
+			return null;
+		}
+
+		public File createFileFor(String rawFileName)
+		{
+			if (this._absolutePathMap != null)
+				this._absolutePathMap = null;
+
+			String ext = FileUtil.getExtension(rawFileName);
+
+			String tail = IDUtil.uuid();
+
+			if (!StringUtil.isEmpty(ext))
+				tail = tail + "." + ext;
+
+			String tailLen = Integer.toString(tail.length());
+
+			// NAME_PREFIX<一个数字表明后面几个字符是尾段长度><尾段长度><尾段>
+			String fileName = NAME_PREFIX + tailLen.length() + tailLen + tail;
+
+			return FileUtil.getFile(this.directory, fileName);
+		}
+
+		public static SqlpadFileDirectory valueOf(File directory)
+		{
+			return new SqlpadFileDirectory(directory);
+		}
+
+		public static SqlpadFileDirectory valueOf(File parent, String sqlpadId)
+		{
+			File directory = FileUtil.getDirectory(parent, sqlpadId);
+			return new SqlpadFileDirectory(directory);
+		}
 	}
 }
