@@ -313,7 +313,7 @@
 	<bean id="sqlTimestampFormatter" class="org.datagear.web.format.SqlTimestampFormatter" />
 	<bean id="dateFormatter" class="org.datagear.web.format.DateFormatter" />
     
-    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+    <bean id="conversionService" class="org.datagear.web.convert.CustomFormattingConversionServiceFactoryBean">
     	<property name="converters">
     		<set>
     			<bean class="org.datagear.web.convert.StringToFileConverter">
