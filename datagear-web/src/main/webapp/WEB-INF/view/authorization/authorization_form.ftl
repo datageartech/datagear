@@ -301,6 +301,13 @@ readonly 是否只读操作，允许为null
 		var $resourceNameForPattern = po.element("input[name='resourceNameForPattern']");
 		var $resourceNameForEntity = po.element("input[name='resourceNameForEntity']");
 		
+		if("${appointResource!''?js_string}" != "")
+		{
+			$formItemForPattern.hide();
+			$formItemForEntity.hide();
+			return;
+		}
+		
 		if(val == '${resourceMeta.resourceType}')
 		{
 			$formItemForPattern.hide();
@@ -392,7 +399,6 @@ readonly 是否只读操作，允许为null
 			po.element(".form-item-resourceType").hide();
 		</#if>
 		po.element("input[name='resource']").val("${appointResource}");
-		po.element(".form-item-resource-name-entity").hide();
 	</#if>
 	
 	<#--编辑时禁设资源类型，因为管理员也可能编辑普通用户设置的授权，而它们不允许是通配符-->
