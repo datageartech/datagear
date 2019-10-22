@@ -156,12 +156,12 @@ public class DefaultDialectSource implements DialectSource
 							}
 
 							// 试探能够成功的分页实现
-							if (dialect != null && combinedDialectBuilder.getToPagingSqlDialectBuilder() == null)
+							if (dialect != null && combinedDialectBuilder.getToPagingQuerySqlDialectBuilder() == null)
 							{
 								try
 								{
 									if (testDialectToPagingSql(cn, databaseMetaData, testInfo, dialect))
-										combinedDialectBuilder.setToPagingSqlDialectBuilder(dialectBuilder);
+										combinedDialectBuilder.setToPagingQuerySqlDialectBuilder(dialectBuilder);
 								}
 								catch (Exception e)
 								{
@@ -237,15 +237,12 @@ public class DefaultDialectSource implements DialectSource
 		String tableQuote = identifierQuote + testInfo.getTableName() + identifierQuote;
 		String columnName = identifierQuote + testInfo.getOrderColumnName() + identifierQuote;
 
-		SqlBuilder queryView = SqlBuilder.valueOf();
-		queryView.sql("SELECT * FROM ").sql(tableQuote);
-
-		SqlBuilder condition = SqlBuilder.valueOf();
-		condition.sql(" 1=1 ");
+		SqlBuilder query = SqlBuilder.valueOf();
+		query.sql("SELECT * FROM ").sql(tableQuote);
 
 		Order[] orders = Order.asArray(Order.valueOf(columnName, Order.ASC));
 
-		SqlBuilder pagingQuerySql = dialect.toPagingSql(queryView, condition, orders, 1, 5);
+		SqlBuilder pagingQuerySql = dialect.toPagingQuerySql(query, orders, 1, 5);
 
 		executeQuery(cn, pagingQuerySql);
 
@@ -320,7 +317,7 @@ public class DefaultDialectSource implements DialectSource
 
 	protected static class CombinedDialect extends AbstractDialect
 	{
-		private Dialect toPagingSqlDialect;
+		private Dialect toPagingQuerySqlDialect;
 
 		public CombinedDialect()
 		{
@@ -332,50 +329,49 @@ public class DefaultDialectSource implements DialectSource
 			super(identifierQuote);
 		}
 
-		public Dialect getToPagingSqlDialect()
+		public Dialect getToPagingQuerySqlDialect()
 		{
-			return toPagingSqlDialect;
+			return toPagingQuerySqlDialect;
 		}
 
-		public void setToPagingSqlDialect(Dialect toPagingSqlDialect)
+		public void setToPagingQuerySqlDialect(Dialect toPagingQuerySqlDialect)
 		{
-			this.toPagingSqlDialect = toPagingSqlDialect;
+			this.toPagingQuerySqlDialect = toPagingQuerySqlDialect;
 		}
 
 		@Override
 		public boolean supportsPagingSql()
 		{
-			return (this.toPagingSqlDialect != null);
+			return (this.toPagingQuerySqlDialect != null);
 		}
 
 		@Override
-		public SqlBuilder toPagingSql(SqlBuilder queryView, SqlBuilder condition, Order[] orders, long startRow,
-				int count)
+		public SqlBuilder toPagingQuerySql(SqlBuilder query, Order[] orders, long startRow, int count)
 		{
-			if (this.toPagingSqlDialect == null)
+			if (this.toPagingQuerySqlDialect == null)
 				return null;
 
-			return this.toPagingSqlDialect.toPagingSql(queryView, condition, orders, startRow, count);
+			return this.toPagingQuerySqlDialect.toPagingQuerySql(query, orders, startRow, count);
 		}
 	}
 
 	protected static class CombinedDialectBuilder extends AbstractDialectBuilder
 	{
-		private DialectBuilder toPagingSqlDialectBuilder;
+		private DialectBuilder toPagingQuerySqlDialectBuilder;
 
 		public CombinedDialectBuilder()
 		{
 			super();
 		}
 
-		public DialectBuilder getToPagingSqlDialectBuilder()
+		public DialectBuilder getToPagingQuerySqlDialectBuilder()
 		{
-			return toPagingSqlDialectBuilder;
+			return toPagingQuerySqlDialectBuilder;
 		}
 
-		public void setToPagingSqlDialectBuilder(DialectBuilder toPagingSqlDialectBuilder)
+		public void setToPagingQuerySqlDialectBuilder(DialectBuilder toPagingQuerySqlDialectBuilder)
 		{
-			this.toPagingSqlDialectBuilder = toPagingSqlDialectBuilder;
+			this.toPagingQuerySqlDialectBuilder = toPagingQuerySqlDialectBuilder;
 		}
 
 		@Override
@@ -385,8 +381,8 @@ public class DefaultDialectSource implements DialectSource
 
 			dialect.setIdentifierQuote(getIdentifierQuote(cn));
 
-			if (this.toPagingSqlDialectBuilder != null)
-				dialect.setToPagingSqlDialect(this.toPagingSqlDialectBuilder.build(cn));
+			if (this.toPagingQuerySqlDialectBuilder != null)
+				dialect.setToPagingQuerySqlDialect(this.toPagingQuerySqlDialectBuilder.build(cn));
 
 			return dialect;
 		}

@@ -302,8 +302,8 @@ public interface PersistenceManager
 	 * @param obj
 	 * @param propertyPathInfo
 	 * @param propertyModelPattern
-	 *            是否采用属性模型方式，如果为{@code true}，返回{@linkplain QueryResultMetaInfo#getColumnPropertyPaths()}列表中仅包含此属性模型的{@linkplain ColumnPropertyPath}，
-	 *            且{@linkplain ColumnPropertyPath#getPropertyPath()}将被截取至属性模型级的属性路径。
+	 *            是否采用属性模型方式，如果为{@code true}，返回{@linkplain QueryResultMetaInfo#getQueryColumnMetaInfos()}列表中仅包含此属性模型的{@linkplain QueryColumnMetaInfo}，
+	 *            且{@linkplain QueryColumnMetaInfo#getPropertyPath()}将被截取至属性模型级的属性路径。
 	 * @return
 	 * @throws PersistenceException
 	 */

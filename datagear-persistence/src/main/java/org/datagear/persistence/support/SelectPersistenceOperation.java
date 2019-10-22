@@ -43,13 +43,13 @@ import org.datagear.model.features.NotReadable;
 import org.datagear.model.features.Token;
 import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyPath;
-import org.datagear.persistence.ColumnPropertyPath;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.Query;
+import org.datagear.persistence.QueryColumnMetaInfo;
 import org.datagear.persistence.QueryResultMetaInfo;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.collection.SizeOnlyCollection;
@@ -296,15 +296,22 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	public PagingData<Object> pagingQuery(Connection cn, Dialect dialect, String table, Model model,
 			PagingQuery pagingQuery)
 	{
-		List<ColumnPropertyPath> selectColumnPropertyPaths = new ArrayList<ColumnPropertyPath>();
+		List<QueryColumnMetaInfo> queryColumnMetaInfos = new ArrayList<QueryColumnMetaInfo>();
 
-		SqlBuilder queryView = buildQueryViewForModel(dialect, table, null, selectColumnPropertyPaths, model);
+		@JDBCCompatiblity("某些驱动程序在执行类似“select * from (select column_0 as c_0 from table) T where c_0 =1”时，“c_0=1”不起作用，"
+				+ "但可以支持“select * from (select column_0 as c_0 from table where column_0 =1) T”（比如Elasticsearch JDBC 7.4.0），"
+				+ "为了兼容，这里把查询条件都移到内层了，并把条件中的列名都改为使用QueryColumnMetaInfo.columnPath")
+		SqlBuilder queryView = buildQueryViewForModel(dialect, table, null, queryColumnMetaInfos, model);
+		SqlBuilder condition = buildQueryCondition(dialect, model, pagingQuery, queryColumnMetaInfos);
+		if (!SqlBuilder.isEmpty(condition))
+		{
+			queryView.sql(" WHERE ");
+			queryView.sql(condition);
+		}
 
-		SqlBuilder condition = buildQueryCondition(dialect, model, pagingQuery, selectColumnPropertyPaths);
+		Order[] orders = buildQueryOrders(dialect, model, pagingQuery, queryColumnMetaInfos);
 
-		Order[] orders = buildQueryOrders(dialect, model, pagingQuery, selectColumnPropertyPaths);
-
-		long total = queryCount(cn, queryView, condition);
+		long total = queryCount(cn, queryView);
 
 		PagingData<Object> pagingData = new PagingData<Object>(pagingQuery.getPage(), total, pagingQuery.getPageSize());
 
@@ -316,7 +323,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		// 数据库分页
 		if (dialect.supportsPagingSql())
 		{
-			query = dialect.toPagingSql(queryView, condition, orders, startRow, count);
+			query = dialect.toPagingQuerySql(queryView, orders, startRow, count);
 
 			if (query != null)
 			{
@@ -327,7 +334,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		// 内存分页
 		if (query == null)
-			query = buildQuery(dialect, queryView, condition, orders);
+			query = buildQuery(dialect, queryView, orders);
 
 		List<Object> list = query(cn, query, model, startRow, count);
 
@@ -357,19 +364,23 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		Mapper mapper = getMapper(model, property);
 
 		SqlBuilder modelTableFieldCondition = buildRecordCondition(cn, dialect, model, obj, null);
-		List<ColumnPropertyPath> selectColumnPropertyPaths = new ArrayList<ColumnPropertyPath>();
+		List<QueryColumnMetaInfo> queryColumnMetaInfos = new ArrayList<QueryColumnMetaInfo>();
 
-		SqlBuilder queryView = buildQueryViewForProperty(dialect, table, modelTableFieldCondition,
-				selectColumnPropertyPaths, model, property, mapper, null);
-
+		@JDBCCompatiblity("与pagingQuery方法问题相同")
+		SqlBuilder queryView = buildQueryViewForProperty(dialect, table, modelTableFieldCondition, queryColumnMetaInfos,
+				model, property, mapper, null);
 		if (propertyModelQueryPattern)
-			selectColumnPropertyPaths = toPropertyColumnPropertyPaths(selectColumnPropertyPaths, model, property);
+			queryColumnMetaInfos = toPropertyQueryColumnMetaInfos(queryColumnMetaInfos, model, property);
+		SqlBuilder condition = buildQueryCondition(dialect, model, pagingQuery, queryColumnMetaInfos);
+		if (!SqlBuilder.isEmpty(condition))
+		{
+			queryView.sql(" WHERE ");
+			queryView.sql(condition);
+		}
 
-		SqlBuilder condition = buildQueryCondition(dialect, model, pagingQuery, selectColumnPropertyPaths);
+		Order[] orders = buildQueryOrders(dialect, model, pagingQuery, queryColumnMetaInfos);
 
-		Order[] orders = buildQueryOrders(dialect, model, pagingQuery, selectColumnPropertyPaths);
-
-		long total = queryCount(cn, queryView, condition);
+		long total = queryCount(cn, queryView);
 
 		PagingData<Object> pagingData = new PagingData<Object>(pagingQuery.getPage(), total, pagingQuery.getPageSize());
 
@@ -381,7 +392,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		// 数据库分页
 		if (dialect.supportsPagingSql())
 		{
-			query = dialect.toPagingSql(queryView, condition, orders, startRow, count);
+			query = dialect.toPagingQuerySql(queryView, orders, startRow, count);
 
 			if (query != null)
 			{
@@ -392,7 +403,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		// 内存分页
 		if (query == null)
-			query = buildQuery(dialect, queryView, condition, orders);
+			query = buildQuery(dialect, queryView, orders);
 
 		List<Object> list = queryPropValue(cn, dialect, table, query, model, property, mapper, startRow, count);
 
@@ -404,20 +415,15 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	/**
 	 * 查询数量。
 	 * 
-	 * @param queryView
-	 * @param condition
-	 *            允许为{@code null}。
+	 * @param query
 	 * @return
 	 * 
 	 */
-	public long queryCount(Connection cn, SqlBuilder queryView, SqlBuilder condition)
+	public long queryCount(Connection cn, SqlBuilder query)
 	{
-		SqlBuilder query = SqlBuilder.valueOf().sql("SELECT COUNT(*) FROM (").sql(queryView).sql(") A");
+		SqlBuilder countQuery = SqlBuilder.valueOf().sql("SELECT COUNT(*) FROM (").sql(query).sql(") T");
 
-		if (!SqlBuilder.isEmpty(condition))
-			query.sql(" WHERE ").sql(condition);
-
-		long re = executeCountQuery(cn, query);
+		long re = executeCountQuery(cn, countQuery);
 
 		return re;
 	}
@@ -467,20 +473,20 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 */
 	public QueryResultMetaInfo getQueryResultMetaInfo(Dialect dialect, String table, Model model)
 	{
-		List<ColumnPropertyPath> selectColumnPropertyPaths = new ArrayList<ColumnPropertyPath>();
+		List<QueryColumnMetaInfo> queryColumnMetaInfos = new ArrayList<QueryColumnMetaInfo>();
 
 		TableAliasGenerator tableAliasGenerator = new SequentialTableAliasGenerator();
 
 		String tableNameQuote = toQuoteName(dialect, table);
 		String tableAliasQuote = toQuoteName(dialect, tableAliasGenerator.next());
 
-		appendModelQueryView(dialect, model, null, null, selectColumnPropertyPaths, null, true, tableNameQuote,
+		appendModelQueryView(dialect, model, null, null, queryColumnMetaInfos, null, true, tableNameQuote,
 				tableAliasQuote, null, null, tableAliasGenerator);
 		// 查询模型数据使用“LEFT JOIN”，因为有属性值为null的情况。
-		appendPropertyQueryView(dialect, model, null, null, selectColumnPropertyPaths, null, true, tableAliasQuote,
-				null, tableAliasGenerator, null, " LEFT JOIN ", true, this.selectOptions.getMaxQueryDepth());
+		appendPropertyQueryView(dialect, model, null, null, queryColumnMetaInfos, null, true, tableAliasQuote, null,
+				tableAliasGenerator, null, " LEFT JOIN ", true, this.selectOptions.getMaxQueryDepth());
 
-		return new QueryResultMetaInfo(model, selectColumnPropertyPaths);
+		return new QueryResultMetaInfo(model, queryColumnMetaInfos);
 	}
 
 	/**
@@ -491,8 +497,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param model
 	 * @param property
 	 * @param propertyModelPattern
-	 *            是否采用属性模型方式，如果为{@code true}，返回{@linkplain QueryResultMetaInfo#getColumnPropertyPaths()}列表中仅包含此属性模型的{@linkplain ColumnPropertyPath}，
-	 *            且{@linkplain ColumnPropertyPath#getPropertyPath()}将被截取。
+	 *            是否采用属性模型方式，如果为{@code true}，返回{@linkplain QueryResultMetaInfo#getQueryColumnMetaInfos()}列表中仅包含此属性模型的{@linkplain QueryColumnMetaInfo}，
+	 *            且{@linkplain QueryColumnMetaInfo#getPropertyPath()}将被截取。
 	 * @return
 	 */
 	public QueryResultMetaInfo getQueryPropValueQueryResultMetaInfo(Dialect dialect, String table, Model model,
@@ -500,25 +506,24 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	{
 		Mapper mapper = getMapper(model, property);
 
-		List<ColumnPropertyPath> selectColumnPropertyPaths = new ArrayList<ColumnPropertyPath>();
+		List<QueryColumnMetaInfo> queryColumnMetaInfos = new ArrayList<QueryColumnMetaInfo>();
 
 		TableAliasGenerator tableAliasGenerator = new SequentialTableAliasGenerator();
 
 		String tableNameQuote = toQuoteName(dialect, table);
 		String tableAliasQuote = toQuoteName(dialect, tableAliasGenerator.next());
 
-		appendModelQueryView(dialect, model, null, null, selectColumnPropertyPaths, null, false, tableNameQuote,
+		appendModelQueryView(dialect, model, null, null, queryColumnMetaInfos, null, false, tableNameQuote,
 				tableAliasQuote, null, null, tableAliasGenerator);
-		appendPropertyQueryView(dialect, model, null, null, selectColumnPropertyPaths, null, false, tableAliasQuote,
-				null, tableAliasGenerator, property.getName(), " LEFT JOIN ", true,
-				this.selectOptions.getMaxQueryDepth());
+		appendPropertyQueryView(dialect, model, null, null, queryColumnMetaInfos, null, false, tableAliasQuote, null,
+				tableAliasGenerator, property.getName(), " LEFT JOIN ", true, this.selectOptions.getMaxQueryDepth());
 
 		// 查询属性数据使用“INNER JOIN”，因为要排除属性值为null的情况。
-		appendPropertyQueryView(dialect, model, null, null, selectColumnPropertyPaths, null, true, tableAliasQuote,
-				null, property, MU.getPropertyIndex(model, property), mapper, tableAliasGenerator, null, " INNER JOIN ",
+		appendPropertyQueryView(dialect, model, null, null, queryColumnMetaInfos, null, true, tableAliasQuote, null,
+				property, MU.getPropertyIndex(model, property), mapper, tableAliasGenerator, null, " INNER JOIN ",
 				false, true, false, this.selectOptions.getMaxQueryDepth());
 
-		QueryResultMetaInfo queryResultMetaInfo = new QueryResultMetaInfo(model, selectColumnPropertyPaths);
+		QueryResultMetaInfo queryResultMetaInfo = new QueryResultMetaInfo(model, queryColumnMetaInfos);
 
 		if (propertyModelPattern)
 			queryResultMetaInfo = toPropertyQueryResultMetaInfo(queryResultMetaInfo, model, property);
@@ -537,42 +542,42 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	protected QueryResultMetaInfo toPropertyQueryResultMetaInfo(QueryResultMetaInfo queryResultMetaInfo, Model model,
 			Property property)
 	{
-		List<ColumnPropertyPath> propertyModelColumnPropertyPaths = toPropertyColumnPropertyPaths(
-				queryResultMetaInfo.getColumnPropertyPaths(), model, property);
+		List<QueryColumnMetaInfo> propertyModelQueryColumnMetaInfos = toPropertyQueryColumnMetaInfos(
+				queryResultMetaInfo.getQueryColumnMetaInfos(), model, property);
 
-		return new QueryResultMetaInfo(MU.getModel(property), propertyModelColumnPropertyPaths);
+		return new QueryResultMetaInfo(MU.getModel(property), propertyModelQueryColumnMetaInfos);
 	}
 
 	/**
-	 * 将模型对应的{@linkplain ColumnPropertyPath}列表转换为属性对应的{@linkplain ColumnPropertyPath}列表。
+	 * 将模型对应的{@linkplain QueryColumnMetaInfo}列表转换为属性对应的{@linkplain QueryColumnMetaInfo}列表。
 	 * 
-	 * @param modelColumnPropertyPaths
+	 * @param modelQueryColumnMetaInfos
 	 * @param model
 	 * @param property
 	 * @return
 	 */
-	protected List<ColumnPropertyPath> toPropertyColumnPropertyPaths(List<ColumnPropertyPath> modelColumnPropertyPaths,
-			Model model, Property property)
+	protected List<QueryColumnMetaInfo> toPropertyQueryColumnMetaInfos(
+			List<QueryColumnMetaInfo> modelQueryColumnMetaInfos, Model model, Property property)
 	{
-		List<ColumnPropertyPath> propertyModelColumnPropertyPaths = new ArrayList<ColumnPropertyPath>();
+		List<QueryColumnMetaInfo> propertyModelQueryColumnMetaInfos = new ArrayList<QueryColumnMetaInfo>();
 
 		String myPropertyPathPrefix = getPropertyPath(model, property, null) + PropertyPath.PROPERTY_STRING;
 
-		for (ColumnPropertyPath columnPropertyPath : modelColumnPropertyPaths)
+		for (QueryColumnMetaInfo queryColumnMetaInfo : modelQueryColumnMetaInfos)
 		{
-			String propertyPath = columnPropertyPath.getPropertyPath();
+			String propertyPath = queryColumnMetaInfo.getPropertyPath();
 
 			if (!propertyPath.startsWith(myPropertyPathPrefix))
 				continue;
 
 			propertyPath = propertyPath.substring(myPropertyPathPrefix.length());
 
-			propertyModelColumnPropertyPaths.add(new ColumnPropertyPath(columnPropertyPath.getColumnName(),
-					columnPropertyPath.getColumnNameQuote(), columnPropertyPath.getColumnSqlType(),
-					columnPropertyPath.isToken(), columnPropertyPath.isSizeColumn(), propertyPath));
+			propertyModelQueryColumnMetaInfos.add(new QueryColumnMetaInfo(queryColumnMetaInfo.getColumnPath(),
+					queryColumnMetaInfo.getColumnAlias(), queryColumnMetaInfo.getColumnSqlType(),
+					queryColumnMetaInfo.isToken(), queryColumnMetaInfo.isSizeColumn(), propertyPath));
 		}
 
-		return propertyModelColumnPropertyPaths;
+		return propertyModelQueryColumnMetaInfos;
 	}
 
 	/**
@@ -629,16 +634,16 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			String tableAliasQuote = toQuoteName(dialect, tableAliasGenerator.next());
 
-			List<ColumnPropertyPath> selectColumnPropertyPaths = new ArrayList<ColumnPropertyPath>();
+			List<QueryColumnMetaInfo> queryColumnMetaInfos = new ArrayList<QueryColumnMetaInfo>();
 
-			appendPropertyQueryView(dialect, model, null, null, selectColumnPropertyPaths, null, true, tableAliasQuote,
-					null, property, propertyIndex, mapper, tableAliasGenerator, null, "", true, true, false,
+			appendPropertyQueryView(dialect, model, null, null, queryColumnMetaInfos, null, true, tableAliasQuote, null,
+					property, propertyIndex, mapper, tableAliasGenerator, null, "", true, true, false,
 					this.selectOptions.getMaxQueryDepth());
 
 			SqlBuilder propValueQuery = SqlBuilder.valueOf().sql("SELECT ").delimit(",");
 
-			for (ColumnPropertyPath columnPropertyPath : selectColumnPropertyPaths)
-				propValueQuery.sqld(columnPropertyPath.getColumnNameQuote());
+			for (QueryColumnMetaInfo queryColumnMetaInfo : queryColumnMetaInfos)
+				propValueQuery.sqld(toQuoteName(dialect, queryColumnMetaInfo.getColumnAlias()));
 
 			propValueQuery.sql(" FROM (").sql(query).sql(") ").sql(tableAliasQuote);
 
@@ -690,24 +695,20 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * 
 	 * @param dialect
 	 * @param queryView
-	 * @param condition
 	 * @param orders
 	 * @return
 	 */
-	protected SqlBuilder buildQuery(Dialect dialect, SqlBuilder queryView, SqlBuilder condition, Order[] orders)
+	protected SqlBuilder buildQuery(Dialect dialect, SqlBuilder queryView, Order[] orders)
 	{
 		SqlBuilder query;
 
 		SqlBuilder orderSql = Order.toOrderSql(orders);
 
-		if (SqlBuilder.isEmpty(condition) && SqlBuilder.isEmpty(orderSql))
+		if (SqlBuilder.isEmpty(orderSql))
 			query = queryView;
 		else
 		{
 			query = SqlBuilder.valueOf().sql("SELECT * FROM (").sql(queryView).sql(") T");
-
-			if (!SqlBuilder.isEmpty(condition))
-				query.sql(" WHERE ").sql(condition);
 
 			if (!SqlBuilder.isEmpty(orderSql))
 				query.sql(" ORDER BY ").sql(orderSql);
@@ -725,13 +726,13 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param table
 	 * @param modelTableFieldCondition
 	 *            模型表字段级查询条件，允许为{@code null}
-	 * @param selectColumnPropertyPaths
+	 * @param queryColumnMetaInfos
 	 *            允许为{@code null}，写入SELECT结果集列别名信息的列表
 	 * @param model
 	 * @return
 	 */
 	protected SqlBuilder buildQueryViewForModel(Dialect dialect, String table, SqlBuilder modelTableFieldCondition,
-			List<ColumnPropertyPath> selectColumnPropertyPaths, Model model)
+			List<QueryColumnMetaInfo> queryColumnMetaInfos, Model model)
 	{
 		SqlBuilder selectSql = SqlBuilder.valueOf().sql("SELECT ").delimit(",");
 		SqlBuilder fromSql = SqlBuilder.valueOf().sql(" FROM ");
@@ -741,12 +742,11 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		String tableNameQuote = toQuoteName(dialect, table);
 		String tableAliasQuote = toQuoteName(dialect, tableAliasGenerator.next());
 
-		appendModelQueryView(dialect, model, selectSql, fromSql, selectColumnPropertyPaths, null, true, tableNameQuote,
+		appendModelQueryView(dialect, model, selectSql, fromSql, queryColumnMetaInfos, null, true, tableNameQuote,
 				tableAliasQuote, modelTableFieldCondition, null, tableAliasGenerator);
 		// 查询模型数据使用“LEFT JOIN”，因为有属性值为null的情况。
-		appendPropertyQueryView(dialect, model, selectSql, fromSql, selectColumnPropertyPaths, null, true,
-				tableAliasQuote, null, tableAliasGenerator, null, " LEFT JOIN ", true,
-				this.selectOptions.getMaxQueryDepth());
+		appendPropertyQueryView(dialect, model, selectSql, fromSql, queryColumnMetaInfos, null, true, tableAliasQuote,
+				null, tableAliasGenerator, null, " LEFT JOIN ", true, this.selectOptions.getMaxQueryDepth());
 
 		selectSql.sql(fromSql);
 
@@ -760,7 +760,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param table
 	 * @param modelTableFieldCondition
 	 *            模型表字段级查询条件，允许为{@code null}
-	 * @param selectColumnPropertyPaths
+	 * @param queryColumnMetaInfos
 	 *            允许为{@code null}，写入SELECT结果集列别名信息的列表
 	 * @param model
 	 * @param property
@@ -770,7 +770,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @return
 	 */
 	protected SqlBuilder buildQueryViewForProperty(Dialect dialect, String table, SqlBuilder modelTableFieldCondition,
-			List<ColumnPropertyPath> selectColumnPropertyPaths, Model model, Property property, Mapper mapper,
+			List<QueryColumnMetaInfo> queryColumnMetaInfos, Model model, Property property, Mapper mapper,
 			SqlBuilder propertyTableFieldCondition)
 	{
 		SqlBuilder selectSql = SqlBuilder.valueOf().sql("SELECT ").delimit(",");
@@ -781,15 +781,15 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		String tableNameQuote = toQuoteName(dialect, table);
 		String tableAliasQuote = toQuoteName(dialect, tableAliasGenerator.next());
 
-		appendModelQueryView(dialect, model, selectSql, fromSql, selectColumnPropertyPaths, null, false, tableNameQuote,
+		appendModelQueryView(dialect, model, selectSql, fromSql, queryColumnMetaInfos, null, false, tableNameQuote,
 				tableAliasQuote, modelTableFieldCondition, null, tableAliasGenerator);
-		appendPropertyQueryView(dialect, model, selectSql, fromSql, selectColumnPropertyPaths, null, false,
-				tableAliasQuote, null, tableAliasGenerator, property.getName(), " LEFT JOIN ", true,
+		appendPropertyQueryView(dialect, model, selectSql, fromSql, queryColumnMetaInfos, null, false, tableAliasQuote,
+				null, tableAliasGenerator, property.getName(), " LEFT JOIN ", true,
 				this.selectOptions.getMaxQueryDepth());
 
 		// 查询属性数据使用“INNER JOIN”，因为要排除属性值为null的情况。
-		appendPropertyQueryView(dialect, model, selectSql, fromSql, selectColumnPropertyPaths, null, true,
-				tableAliasQuote, null, property, MU.getPropertyIndex(model, property), mapper, tableAliasGenerator,
+		appendPropertyQueryView(dialect, model, selectSql, fromSql, queryColumnMetaInfos, null, true, tableAliasQuote,
+				null, property, MU.getPropertyIndex(model, property), mapper, tableAliasGenerator,
 				propertyTableFieldCondition, " INNER JOIN ", false, true, false, this.selectOptions.getMaxQueryDepth());
 
 		selectSql.sql(fromSql);
@@ -808,7 +808,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            允许为{@code null}，如果为{@code null}，则不写入SELECT语句
 	 * @param fromSql
 	 *            允许为{@code null}，如果为{@code null}，则不写入FROM语句
-	 * @param selectColumnPropertyPaths
+	 * @param queryColumnMetaInfos
 	 *            允许为{@code null}，写入SELECT结果集列别名信息的列表
 	 * @param modelPropertyPath
 	 *            允许为{@code null}，模型所处的上下文属性路径
@@ -823,7 +823,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param tableAliasGenerator
 	 */
 	protected void appendModelQueryView(Dialect dialect, Model model, SqlBuilder selectSql, SqlBuilder fromSql,
-			List<ColumnPropertyPath> selectColumnPropertyPaths, String modelPropertyPath, boolean asToken,
+			List<QueryColumnMetaInfo> queryColumnMetaInfos, String modelPropertyPath, boolean asToken,
 			String tableNameQuote, String tableAliasQuote, SqlBuilder tableFieldCondition, String columnAliasPrefix,
 			TableAliasGenerator tableAliasGenerator)
 	{
@@ -858,10 +858,9 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			{
 				ModelTableMapper mtm = MapperUtil.castModelTableMapper(mapper);
 
-				appendPropertyQueryViewForModelTableMapper(dialect, model, selectSql, fromSql,
-						selectColumnPropertyPaths, modelPropertyPath, isAsTokenProperty(asToken, model, property),
-						tableAliasQuote, columnAliasPrefix, property, i, mtm, tableAliasGenerator, null, " INNER JOIN ",
-						true, false, 1);
+				appendPropertyQueryViewForModelTableMapper(dialect, model, selectSql, fromSql, queryColumnMetaInfos,
+						modelPropertyPath, isAsTokenProperty(asToken, model, property), tableAliasQuote,
+						columnAliasPrefix, property, i, mtm, tableAliasGenerator, null, " INNER JOIN ", true, false, 1);
 			}
 		}
 	}
@@ -877,7 +876,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            允许为{@code null}，如果为{@code null}，则不写入SELECT语句
 	 * @param fromSql
 	 *            允许为{@code null}，如果为{@code null}，则不写入FROM语句
-	 * @param selectColumnPropertyPaths
+	 * @param queryColumnMetaInfos
 	 *            允许为{@code null}，写入SELECT结果集列别名信息的列表
 	 * @param modelPropertyPath
 	 *            允许为{@code null}，模型所处的上下文属性路径
@@ -894,7 +893,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param queryDepth
 	 */
 	protected void appendPropertyQueryView(Dialect dialect, Model model, SqlBuilder selectSql, SqlBuilder fromSql,
-			List<ColumnPropertyPath> selectColumnPropertyPaths, String modelPropertyPath, boolean asTokenModel,
+			List<QueryColumnMetaInfo> queryColumnMetaInfos, String modelPropertyPath, boolean asTokenModel,
 			String modelTableAliasQuote, String modelColumnAliasPrefix, TableAliasGenerator tableAliasGenerator,
 			String ignorePropertyName, String joinTypeSql, boolean appendCountForMultipleProperty, int queryDepth)
 	{
@@ -919,17 +918,16 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			if (mapper.isOneToOne() || mapper.isManyToOne())
 			{
-				appendPropertyQueryView(dialect, model, selectSql, fromSql, selectColumnPropertyPaths,
-						modelPropertyPath, isAsTokenProperty(asTokenModel, model, property), modelTableAliasQuote,
-						modelColumnAliasPrefix, property, i, mapper, tableAliasGenerator, null, joinTypeSql, false,
-						true, true, queryDepth);
+				appendPropertyQueryView(dialect, model, selectSql, fromSql, queryColumnMetaInfos, modelPropertyPath,
+						isAsTokenProperty(asTokenModel, model, property), modelTableAliasQuote, modelColumnAliasPrefix,
+						property, i, mapper, tableAliasGenerator, null, joinTypeSql, false, true, true, queryDepth);
 			}
 			else if (mapper.isOneToMany() || mapper.isManyToMany())
 			{
 				if (appendCountForMultipleProperty)
 				{
-					appendPropertyQueryView(dialect, model, selectSql, fromSql, selectColumnPropertyPaths,
-							modelPropertyPath, isAsTokenProperty(asTokenModel, model, property), modelTableAliasQuote,
+					appendPropertyQueryView(dialect, model, selectSql, fromSql, queryColumnMetaInfos, modelPropertyPath,
+							isAsTokenProperty(asTokenModel, model, property), modelTableAliasQuote,
 							modelColumnAliasPrefix, property, i, mapper, tableAliasGenerator, null, joinTypeSql, false,
 							true, true, queryDepth);
 				}
@@ -948,7 +946,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            允许为{@code null}，如果为{@code null}，则不写入SELECT语句
 	 * @param fromSql
 	 *            允许为{@code null}，如果为{@code null}，则不写入FROM语句
-	 * @param selectColumnPropertyPaths
+	 * @param queryColumnMetaInfos
 	 *            允许为{@code null}，写入SELECT结果集列别名信息的列表
 	 * @param modelPropertyPath
 	 *            允许为{@code null}，模型所处的上下文属性路径
@@ -971,7 +969,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @return
 	 */
 	protected boolean appendPropertyQueryView(Dialect dialect, Model model, SqlBuilder selectSql, SqlBuilder fromSql,
-			List<ColumnPropertyPath> selectColumnPropertyPaths, String modelPropertyPath, boolean asTokenProperty,
+			List<QueryColumnMetaInfo> queryColumnMetaInfos, String modelPropertyPath, boolean asTokenProperty,
 			String modelTableAliasQuote, String modelColumnAliasPrefix, Property property, int propertyIndex,
 			Mapper mapper, TableAliasGenerator tableAliasGenerator, SqlBuilder propertyTableFieldCondition,
 			String joinTypeSql, boolean appendModelTableMapperPrimitiveValueProperty,
@@ -989,17 +987,16 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		{
 			ModelTableMapper mtm = MapperUtil.castModelTableMapper(mapper);
 
-			return appendPropertyQueryViewForModelTableMapper(dialect, model, selectSql, fromSql,
-					selectColumnPropertyPaths, modelPropertyPath, asTokenProperty, modelTableAliasQuote,
-					modelColumnAliasPrefix, property, propertyIndex, mtm, tableAliasGenerator,
-					propertyTableFieldCondition, joinTypeSql, appendModelTableMapperPrimitiveValueProperty,
-					appendModelTableMapperEntityProperty, queryDepth);
+			return appendPropertyQueryViewForModelTableMapper(dialect, model, selectSql, fromSql, queryColumnMetaInfos,
+					modelPropertyPath, asTokenProperty, modelTableAliasQuote, modelColumnAliasPrefix, property,
+					propertyIndex, mtm, tableAliasGenerator, propertyTableFieldCondition, joinTypeSql,
+					appendModelTableMapperPrimitiveValueProperty, appendModelTableMapperEntityProperty, queryDepth);
 		}
 		else if (MapperUtil.isPropertyTableMapper(mapper))
 		{
 			PropertyTableMapper ptm = MapperUtil.castPropertyTableMapper(mapper);
 
-			appendPropertyQueryViewForPropertyTableMapper(dialect, model, selectSql, fromSql, selectColumnPropertyPaths,
+			appendPropertyQueryViewForPropertyTableMapper(dialect, model, selectSql, fromSql, queryColumnMetaInfos,
 					modelPropertyPath, asTokenProperty, modelTableAliasQuote, modelColumnAliasPrefix, property,
 					propertyIndex, ptm, tableAliasGenerator, propertyTableFieldCondition, joinTypeSql,
 					onlyCountForMultipleProperty, queryDepth);
@@ -1010,7 +1007,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		{
 			JoinTableMapper jtm = MapperUtil.castJoinTableMapper(mapper);
 
-			appendPropertyQueryViewForJoinTableMapper(dialect, model, selectSql, fromSql, selectColumnPropertyPaths,
+			appendPropertyQueryViewForJoinTableMapper(dialect, model, selectSql, fromSql, queryColumnMetaInfos,
 					modelPropertyPath, asTokenProperty, modelTableAliasQuote, modelColumnAliasPrefix, property,
 					propertyIndex, jtm, tableAliasGenerator, propertyTableFieldCondition, joinTypeSql,
 					onlyCountForMultipleProperty, queryDepth);
@@ -1032,7 +1029,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            允许为{@code null}，如果为{@code null}，则不写入SELECT语句
 	 * @param fromSql
 	 *            允许为{@code null}，如果为{@code null}，则不写入FROM语句
-	 * @param selectColumnPropertyPaths
+	 * @param queryColumnMetaInfos
 	 *            允许为{@code null}，写入SELECT结果集列别名信息的列表
 	 * @param modelPropertyPath
 	 *            允许为{@code null}，模型所处的上下文属性路径
@@ -1053,7 +1050,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @return
 	 */
 	protected boolean appendPropertyQueryViewForModelTableMapper(Dialect dialect, Model model, SqlBuilder selectSql,
-			SqlBuilder fromSql, List<ColumnPropertyPath> selectColumnPropertyPaths, String modelPropertyPath,
+			SqlBuilder fromSql, List<QueryColumnMetaInfo> queryColumnMetaInfos, String modelPropertyPath,
 			boolean asTokenProperty, String modelTableAliasQuote, String modelColumnAliasPrefix, Property property,
 			int propertyIndex, ModelTableMapper mapper, TableAliasGenerator tableAliasGenerator,
 			SqlBuilder propertyTableFieldCondition, String joinTypeSql,
@@ -1071,20 +1068,19 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		{
 			if (appendModelTableMapperPrimitiveValueProperty)
 			{
-				String columnNameQuote = toQuoteName(dialect, mapper.getPrimitiveColumnName());
+				String columnPath = modelTableAliasQuote + "." + toQuoteName(dialect, mapper.getPrimitiveColumnName());
 				String columnAlias = toPropertyPathColumnAlias(modelColumnAliasPrefix, property, propertyIndex);
-				String columnAliasQuote = toQuoteName(dialect, columnAlias);
 				JdbcType jdbcType = property.getFeature(JdbcType.class);
 
 				if (selectSql != null)
-					selectSql.sqld(modelTableAliasQuote + "." + columnNameQuote + " AS " + columnAliasQuote);
+					selectSql.sqld(columnPath + " AS " + toQuoteName(dialect, columnAlias));
 
-				if (selectColumnPropertyPaths != null)
+				if (queryColumnMetaInfos != null)
 				{
-					ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(columnAlias, columnAliasQuote,
+					QueryColumnMetaInfo queryColumnMetaInfo = new QueryColumnMetaInfo(columnPath, columnAlias,
 							jdbcType.getValue(), asTokenProperty, false,
 							getPropertyPath(model, property, modelPropertyPath));
-					selectColumnPropertyPaths.add(columnPropertyPath);
+					queryColumnMetaInfos.add(queryColumnMetaInfo);
 				}
 
 				appended = true;
@@ -1108,7 +1104,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				if (fromSql != null)
 					fromSql.sql(joinTypeSql);
 
-				appendModelQueryView(dialect, propertyModel, selectSql, fromSql, selectColumnPropertyPaths,
+				appendModelQueryView(dialect, propertyModel, selectSql, fromSql, queryColumnMetaInfos,
 						myModelPropertyPath, asTokenProperty, ptableNameQuote, ptableAliasQuote,
 						propertyTableFieldCondition, myColumnAliasPrefix, tableAliasGenerator);
 
@@ -1127,7 +1123,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 				}
 
 				// 属性的属性查询要使用LEFT JOIN，因为可能有NULL属性值
-				appendPropertyQueryView(dialect, propertyModel, selectSql, fromSql, selectColumnPropertyPaths,
+				appendPropertyQueryView(dialect, propertyModel, selectSql, fromSql, queryColumnMetaInfos,
 						myModelPropertyPath, asTokenProperty, ptableAliasQuote, myColumnAliasPrefix,
 						tableAliasGenerator, getMappedByWith(mapper), " LEFT JOIN ", true, queryDepth - 1);
 
@@ -1146,7 +1142,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            允许为{@code null}，如果为{@code null}，则不写入SELECT语句
 	 * @param fromSql
 	 *            允许为{@code null}，如果为{@code null}，则不写入FROM语句
-	 * @param selectColumnPropertyPaths
+	 * @param queryColumnMetaInfos
 	 *            允许为{@code null}，写入SELECT结果集列别名信息的列表
 	 * @param modelPropertyPath
 	 *            允许为{@code null}，模型所处的上下文属性路径
@@ -1165,7 +1161,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param queryDepth
 	 */
 	protected void appendPropertyQueryViewForPropertyTableMapper(Dialect dialect, Model model, SqlBuilder selectSql,
-			SqlBuilder fromSql, List<ColumnPropertyPath> selectColumnPropertyPaths, String modelPropertyPath,
+			SqlBuilder fromSql, List<QueryColumnMetaInfo> queryColumnMetaInfos, String modelPropertyPath,
 			boolean asTokenProperty, String modelTableAliasQuote, String modelColumnAliasPrefix, Property property,
 			int propertyIndex, PropertyTableMapper mapper, TableAliasGenerator tableAliasGenerator,
 			SqlBuilder propertyTableFieldCondition, String joinTypeSql, boolean onlyCountForMultipleProperty,
@@ -1195,26 +1191,27 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		if (onlyCount)
 		{
-			String sizeAlias = toPropertyPathColumnAlias(myColumnAliasPrefix, SizeOnlyCollection.SIZE_PROPERTY_NAME);
-			String sizeQuoteAlias = toQuoteName(dialect, sizeAlias);
+			String columnAlias = toPropertyPathColumnAlias(myColumnAliasPrefix, SizeOnlyCollection.SIZE_PROPERTY_NAME);
+			String columnAliasQuote = toQuoteName(dialect, columnAlias);
+			String columnPath = ptableAliasQuote + "." + columnAliasQuote;
 
 			if (selectSql != null)
-				selectSql.sqld("(CASE WHEN " + ptableAliasQuote + "." + sizeQuoteAlias + " IS NOT NULL THEN "
-						+ ptableAliasQuote + "." + sizeQuoteAlias + " ELSE 0 END) AS " + sizeQuoteAlias);
+				selectSql.sqld("(CASE WHEN " + columnPath + " IS NOT NULL THEN " + columnPath + " ELSE 0 END) AS "
+						+ columnAliasQuote);
 
-			if (selectColumnPropertyPaths != null)
+			if (queryColumnMetaInfos != null)
 			{
-				ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(sizeAlias, sizeQuoteAlias, Types.BIGINT,
+				QueryColumnMetaInfo queryColumnMetaInfo = new QueryColumnMetaInfo(columnPath, columnAlias, Types.BIGINT,
 						asTokenProperty, true,
 						PropertyPath.concatPropertyName(myModelPropertyPath, SizeOnlyCollection.SIZE_PROPERTY_NAME));
-				selectColumnPropertyPaths.add(columnPropertyPath);
+				queryColumnMetaInfos.add(queryColumnMetaInfo);
 			}
 
 			if (fromSql != null)
 			{
 				fromSql.sql(" (SELECT ").delimit(", ");
 
-				fromSql.sqld(" COUNT(*) AS " + sizeQuoteAlias);
+				fromSql.sqld(" COUNT(*) AS " + columnAliasQuote);
 
 				for (int i = 0; i < ptableMkeyColumnNamesQuote.length; i++)
 					fromSql.sqld(ptableMkeyColumnNamesQuote[i]);
@@ -1231,9 +1228,9 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		}
 		else
 		{
-			appendModelQueryView(dialect, propertyModel, selectSql, fromSql, selectColumnPropertyPaths,
-					myModelPropertyPath, asTokenProperty, ptableNameQuote, ptableAliasQuote,
-					propertyTableFieldCondition, myColumnAliasPrefix, tableAliasGenerator);
+			appendModelQueryView(dialect, propertyModel, selectSql, fromSql, queryColumnMetaInfos, myModelPropertyPath,
+					asTokenProperty, ptableNameQuote, ptableAliasQuote, propertyTableFieldCondition,
+					myColumnAliasPrefix, tableAliasGenerator);
 		}
 
 		if (fromSql != null)
@@ -1252,7 +1249,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		if (!onlyCount)
 		{
 			// 属性的属性查询要使用LEFT JOIN，因为可能有NULL属性值
-			appendPropertyQueryView(dialect, propertyModel, selectSql, fromSql, selectColumnPropertyPaths,
+			appendPropertyQueryView(dialect, propertyModel, selectSql, fromSql, queryColumnMetaInfos,
 					myModelPropertyPath, asTokenProperty, ptableAliasQuote, myColumnAliasPrefix, tableAliasGenerator,
 					getMappedByWith(mapper), " LEFT JOIN ", true, queryDepth - 1);
 		}
@@ -1266,7 +1263,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 *            允许为{@code null}，如果为{@code null}，则不写入SELECT语句
 	 * @param fromSql
 	 *            允许为{@code null}，如果为{@code null}，则不写入FROM语句
-	 * @param selectColumnPropertyPaths
+	 * @param queryColumnMetaInfos
 	 *            允许为{@code null}，写入SELECT结果集列别名信息的列表
 	 * @param modelPropertyPath
 	 *            允许为{@code null}，模型所处的上下文属性路径
@@ -1285,7 +1282,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param queryDepth
 	 */
 	protected void appendPropertyQueryViewForJoinTableMapper(Dialect dialect, Model model, SqlBuilder selectSql,
-			SqlBuilder fromSql, List<ColumnPropertyPath> selectColumnPropertyPaths, String modelPropertyPath,
+			SqlBuilder fromSql, List<QueryColumnMetaInfo> queryColumnMetaInfos, String modelPropertyPath,
 			boolean asTokenProperty, String modelTableAliasQuote, String modelColumnAliasPrefix, Property property,
 			int propertyIndex, JoinTableMapper mapper, TableAliasGenerator tableAliasGenerator,
 			SqlBuilder propertyTableFieldCondition, String joinTypeSql, boolean onlyCountForMultipleProperty,
@@ -1314,26 +1311,27 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 		if (onlyCount)
 		{
-			String sizeAlias = toPropertyPathColumnAlias(myColumnAliasPrefix, SizeOnlyCollection.SIZE_PROPERTY_NAME);
-			String sizeQuoteAlias = toQuoteName(dialect, sizeAlias);
+			String columnAlias = toPropertyPathColumnAlias(myColumnAliasPrefix, SizeOnlyCollection.SIZE_PROPERTY_NAME);
+			String columnAliasQuote = toQuoteName(dialect, columnAlias);
+			String columnPath = jointableAliasQuote + "." + columnAliasQuote;
 
 			if (selectSql != null)
-				selectSql.sqld("(CASE WHEN " + jointableAliasQuote + "." + sizeQuoteAlias + " IS NOT NULL THEN "
-						+ jointableAliasQuote + "." + sizeQuoteAlias + " ELSE 0 END) AS " + sizeQuoteAlias);
+				selectSql.sqld("(CASE WHEN " + columnPath + " IS NOT NULL THEN " + columnPath + " ELSE 0 END) AS "
+						+ columnAliasQuote);
 
-			if (selectColumnPropertyPaths != null)
+			if (queryColumnMetaInfos != null)
 			{
-				ColumnPropertyPath columnPropertyPath = new ColumnPropertyPath(sizeAlias, sizeQuoteAlias, Types.BIGINT,
+				QueryColumnMetaInfo queryColumnMetaInfo = new QueryColumnMetaInfo(columnPath, columnAlias, Types.BIGINT,
 						asTokenProperty, true,
 						PropertyPath.concatPropertyName(myModelPropertyPath, SizeOnlyCollection.SIZE_PROPERTY_NAME));
-				selectColumnPropertyPaths.add(columnPropertyPath);
+				queryColumnMetaInfos.add(queryColumnMetaInfo);
 			}
 
 			if (fromSql != null)
 			{
 				fromSql.sql(" (SELECT ").delimit(", ");
 
-				fromSql.sqld(" COUNT(*) AS " + sizeQuoteAlias);
+				fromSql.sqld(" COUNT(*) AS " + columnAliasQuote);
 
 				for (int i = 0; i < mkeyColumnNamesQuote.length; i++)
 					fromSql.sqld(mkeyColumnNamesQuote[i]);
@@ -1381,9 +1379,9 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			if (fromSql != null)
 				fromSql.sql(joinTypeSql);
 
-			appendModelQueryView(dialect, propertyModel, selectSql, fromSql, selectColumnPropertyPaths,
-					myModelPropertyPath, asTokenProperty, ptableNameQuote, ptableAliasQuote,
-					propertyTableFieldCondition, myColumnAliasPrefix, tableAliasGenerator);
+			appendModelQueryView(dialect, propertyModel, selectSql, fromSql, queryColumnMetaInfos, myModelPropertyPath,
+					asTokenProperty, ptableNameQuote, ptableAliasQuote, propertyTableFieldCondition,
+					myColumnAliasPrefix, tableAliasGenerator);
 
 			if (fromSql != null)
 			{
@@ -1404,7 +1402,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			}
 
 			// 属性的属性查询要使用LEFT JOIN，因为可能有NULL属性值
-			appendPropertyQueryView(dialect, propertyModel, selectSql, fromSql, selectColumnPropertyPaths,
+			appendPropertyQueryView(dialect, propertyModel, selectSql, fromSql, queryColumnMetaInfos,
 					myModelPropertyPath, asTokenProperty, ptableAliasQuote, myColumnAliasPrefix, tableAliasGenerator,
 					getMappedByWith(mapper), " LEFT JOIN ", true, queryDepth - 1);
 		}
@@ -1509,24 +1507,26 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	}
 
 	/**
-	 * 将给定字符串中的{@linkplain ColumnPropertyPath#getPropertyPath()}替换为{@linkplain ColumnPropertyPath#getColumnName()}。
+	 * 将给定字符串中的{@linkplain QueryColumnMetaInfo#getPropertyPath()}替换为{@linkplain QueryColumnMetaInfo#getColumnPath()}。
 	 * 
-	 * @param columnPropertyPaths
+	 * @param dialect
+	 * @param queryColumnMetaInfos
 	 * @param str
 	 * @return
 	 */
-	protected String replacePropertyPathToQuoteColumnName(List<ColumnPropertyPath> columnPropertyPaths, String str)
+	protected String replacePropertyPathToColumnPath(Dialect dialect, List<QueryColumnMetaInfo> queryColumnMetaInfos,
+			String str)
 	{
 		if (str == null || str.isEmpty())
 			return str;
 
-		List<ColumnPropertyPath> myColumnPropertyPaths = new ArrayList<ColumnPropertyPath>(columnPropertyPaths);
+		List<QueryColumnMetaInfo> myQueryColumnMetaInfos = new ArrayList<QueryColumnMetaInfo>(queryColumnMetaInfos);
 
 		// 优先替换更长的属性路径，避免长路径名里包含短路径名时导致替换错乱
-		Collections.sort(myColumnPropertyPaths, new Comparator<ColumnPropertyPath>()
+		Collections.sort(myQueryColumnMetaInfos, new Comparator<QueryColumnMetaInfo>()
 		{
 			@Override
-			public int compare(ColumnPropertyPath o1, ColumnPropertyPath o2)
+			public int compare(QueryColumnMetaInfo o1, QueryColumnMetaInfo o2)
 			{
 				String o1PropertyPath = o1.getPropertyPath();
 				String o2PropertyPath = o2.getPropertyPath();
@@ -1538,13 +1538,12 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 			}
 		});
 
-		for (ColumnPropertyPath columnPropertyPath : myColumnPropertyPaths)
+		for (QueryColumnMetaInfo queryColumnMetaInfo : myQueryColumnMetaInfos)
 		{
-			String pp = columnPropertyPath.getPropertyPath();
-			String qcn = columnPropertyPath.getColumnNameQuote();
+			String pp = queryColumnMetaInfo.getPropertyPath();
 
 			str = Pattern.compile(pp, Pattern.LITERAL | Pattern.CASE_INSENSITIVE).matcher(str)
-					.replaceAll(Matcher.quoteReplacement(qcn));
+					.replaceAll(Matcher.quoteReplacement(queryColumnMetaInfo.getColumnPath()));
 		}
 
 		return str;
@@ -1619,15 +1618,18 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 	/**
 	 * 由{@linkplain Query}构建查询条件SQL。
+	 * <p>
+	 * 如果没有任何查询条件，返回{@code null}。
+	 * </p>
 	 * 
 	 * @param dialect
 	 * @param model
 	 * @param query
-	 * @param selectColumnPropertyPaths
+	 * @param queryColumnMetaInfos
 	 * @return
 	 */
 	protected SqlBuilder buildQueryCondition(Dialect dialect, Model model, Query query,
-			List<ColumnPropertyPath> selectColumnPropertyPaths)
+			List<QueryColumnMetaInfo> queryColumnMetaInfos)
 	{
 		if (!query.hasKeyword() && !query.hasCondition())
 			return null;
@@ -1635,7 +1637,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		String conditionStr = (query.hasCondition() ? query.getCondition().trim() : null);
 		boolean hasCondition = !StringUtil.isEmpty(conditionStr);
 
-		SqlBuilder keywordCondition = dialect.toKeywordQueryCondition(model, query, selectColumnPropertyPaths);
+		SqlBuilder keywordCondition = dialect.toKeywordQueryCondition(model, query, queryColumnMetaInfos);
 
 		if (!hasCondition)
 		{
@@ -1645,7 +1647,7 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		{
 			SqlBuilder queryCondition = SqlBuilder.valueOf();
 
-			conditionStr = replacePropertyPathToQuoteColumnName(selectColumnPropertyPaths, conditionStr);
+			conditionStr = replacePropertyPathToColumnPath(dialect, queryColumnMetaInfos, conditionStr);
 
 			if (SqlBuilder.isEmpty(keywordCondition))
 				queryCondition.sql(conditionStr);
@@ -1662,11 +1664,11 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	 * @param dialect
 	 * @param model
 	 * @param query
-	 * @param selectColumnPropertyPaths
+	 * @param queryColumnMetaInfos
 	 * @return
 	 */
 	protected Order[] buildQueryOrders(Dialect dialect, Model model, Query query,
-			List<ColumnPropertyPath> selectColumnPropertyPaths)
+			List<QueryColumnMetaInfo> queryColumnMetaInfos)
 	{
 		if (!query.hasOrder())
 			return null;
@@ -1687,25 +1689,25 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			int orderNameLength = orderName.length();
 
-			ColumnPropertyPath exactlyMatched = null;
-			List<ColumnPropertyPath> startsWiths = null;
+			QueryColumnMetaInfo exactlyMatched = null;
+			List<QueryColumnMetaInfo> startsWiths = null;
 			boolean startsWithsHasToken = false;
 
-			for (ColumnPropertyPath columnPropertyPath : selectColumnPropertyPaths)
+			for (QueryColumnMetaInfo queryColumnMetaInfo : queryColumnMetaInfos)
 			{
-				int sqlType = columnPropertyPath.getColumnSqlType();
+				int sqlType = queryColumnMetaInfo.getColumnSqlType();
 
 				if (!dialect.isSortable(sqlType))
 					continue;
 
-				String propertyPath = columnPropertyPath.getPropertyPath();
+				String propertyPath = queryColumnMetaInfo.getPropertyPath();
 
 				if (propertyPath.startsWith(orderName))
 				{
 					// 基本属性
 					if (propertyPath.length() == orderNameLength)
 					{
-						exactlyMatched = columnPropertyPath;
+						exactlyMatched = queryColumnMetaInfo;
 						break;
 					}
 					else
@@ -1716,11 +1718,11 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 						if (c == PropertyPath.PROPERTY)
 						{
 							if (startsWiths == null)
-								startsWiths = new ArrayList<ColumnPropertyPath>();
+								startsWiths = new ArrayList<QueryColumnMetaInfo>();
 
-							startsWiths.add(columnPropertyPath);
+							startsWiths.add(queryColumnMetaInfo);
 
-							if (!startsWithsHasToken && columnPropertyPath.isToken())
+							if (!startsWithsHasToken && queryColumnMetaInfo.isToken())
 								startsWithsHasToken = true;
 						}
 					}
@@ -1729,23 +1731,23 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			if (exactlyMatched != null)
 			{
-				re.add(Order.valueOf(exactlyMatched.getColumnNameQuote(), orderType));
+				re.add(Order.valueOf(toQuoteName(dialect, exactlyMatched.getColumnAlias()), orderType));
 			}
 			else if (startsWiths != null)
 			{
 				for (int j = 0; j < startsWiths.size(); j++)
 				{
-					ColumnPropertyPath startsWith = startsWiths.get(j);
+					QueryColumnMetaInfo startsWith = startsWiths.get(j);
 
 					// 优先取Token属性
 					if (startsWithsHasToken)
 					{
 						if (startsWith.isToken())
-							re.add(Order.valueOf(startsWith.getColumnNameQuote(), orderType));
+							re.add(Order.valueOf(dialect.getPagingQueryOrderName(startsWith), orderType));
 					}
 					else
 					{
-						re.add(Order.valueOf(startsWith.getColumnNameQuote(), orderType));
+						re.add(Order.valueOf(dialect.getPagingQueryOrderName(startsWith), orderType));
 					}
 
 					// 无论是否Token属性，都仅取前三个，避免过多排序项影响性能

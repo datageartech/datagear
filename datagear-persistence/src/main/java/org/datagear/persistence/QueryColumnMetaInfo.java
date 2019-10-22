@@ -7,20 +7,20 @@ package org.datagear.persistence;
 import java.io.Serializable;
 
 /**
- * 列对应的属性路径。
+ * 查询结果列元信息。
  * 
  * @author datagear@163.com
  *
  */
-public class ColumnPropertyPath implements Serializable
+public class QueryColumnMetaInfo implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 列名称 */
-	private String columnName;
+	/** 列路径，比如："T0"."COLUMN_0" */
+	private String columnPath;
 
-	/** 添加数据库标识符引用的列名称 */
-	private String columnNameQuote;
+	/** 列别名 */
+	private String columnAlias;
 
 	/** 列SQL类型 */
 	private int columnSqlType;
@@ -34,41 +34,41 @@ public class ColumnPropertyPath implements Serializable
 	/** 属性路径 */
 	private String propertyPath;
 
-	public ColumnPropertyPath()
+	public QueryColumnMetaInfo()
 	{
 		super();
 	}
 
-	public ColumnPropertyPath(String columnName, String columnNameQuote, int columnSqlType, boolean token,
+	public QueryColumnMetaInfo(String columnPath, String columnAlias, int columnSqlType, boolean token,
 			boolean sizeColumn, String propertyPath)
 	{
 		super();
-		this.columnName = columnName;
-		this.columnNameQuote = columnNameQuote;
+		this.columnPath = columnPath;
+		this.columnAlias = columnAlias;
 		this.columnSqlType = columnSqlType;
 		this.token = token;
 		this.sizeColumn = sizeColumn;
 		this.propertyPath = propertyPath;
 	}
 
-	public String getColumnName()
+	public String getColumnPath()
 	{
-		return columnName;
+		return columnPath;
 	}
 
-	public void setColumnName(String columnName)
+	public void setColumnPath(String columnPath)
 	{
-		this.columnName = columnName;
+		this.columnPath = columnPath;
 	}
 
-	public String getColumnNameQuote()
+	public String getColumnAlias()
 	{
-		return columnNameQuote;
+		return columnAlias;
 	}
 
-	public void setColumnNameQuote(String columnNameQuote)
+	public void setColumnAlias(String columnAlias)
 	{
-		this.columnNameQuote = columnNameQuote;
+		this.columnAlias = columnAlias;
 	}
 
 	public int getColumnSqlType()
@@ -114,7 +114,7 @@ public class ColumnPropertyPath implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [columnName=" + columnName + ", columnNameQuote=" + columnNameQuote
+		return getClass().getSimpleName() + "[columnPath=" + columnPath + ", columnAlias=" + columnAlias
 				+ ", columnSqlType=" + columnSqlType + ", token=" + token + ", sizeColumn=" + sizeColumn
 				+ ", propertyPath=" + propertyPath + "]";
 	}

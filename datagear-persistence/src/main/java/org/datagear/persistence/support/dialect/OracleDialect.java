@@ -33,7 +33,7 @@ public class OracleDialect extends AbstractDialect
 	}
 
 	@Override
-	public SqlBuilder toPagingSql(SqlBuilder queryView, SqlBuilder condition, Order[] orders, long startRow, int count)
+	public SqlBuilder toPagingQuerySql(SqlBuilder query, Order[] orders, long startRow, int count)
 	{
 		SqlBuilder sql = SqlBuilder.valueOf();
 
@@ -41,21 +41,15 @@ public class OracleDialect extends AbstractDialect
 
 		sql.sql("SELECT T2.* FROM (SELECT T1.*, ROWNUM AS ROWNUM_____ FROM (");
 
-		if (isEmptySql(condition) && isEmptySql(orderSql))
+		if (isEmptySql(orderSql))
 		{
-			sql.sql(queryView);
+			sql.sql(query);
 		}
 		else
 		{
 			sql.sql("SELECT * FROM (");
-			sql.sql(queryView);
+			sql.sql(query);
 			sql.sql(") T0 ");
-
-			if (!isEmptySql(condition))
-			{
-				sql.sql(" WHERE ");
-				sql.sql(condition);
-			}
 
 			if (!isEmptySql(orderSql))
 			{

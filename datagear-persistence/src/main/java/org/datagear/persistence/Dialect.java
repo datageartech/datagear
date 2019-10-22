@@ -48,13 +48,11 @@ public interface Dialect
 	/**
 	 * 构建分页查询SQL。
 	 * <p>
-	 * 如果由于参数不合法等原因无法构建分页查询SQL，则返回{@code null}。
+	 * 如果由于参数不合法等原因无法构建分页查询SQL，返回{@code null}。
 	 * </p>
 	 * 
-	 * @param queryView
-	 *            查询视图SQL
-	 * @param condition
-	 *            查询条件SQL，允许为{@code null}
+	 * @param query
+	 *            查询SQL
 	 * @param orders
 	 *            排序集，允许为{@code null}或者空数组
 	 * @param startRow
@@ -63,10 +61,13 @@ public interface Dialect
 	 *            查询记录数
 	 * @return
 	 */
-	SqlBuilder toPagingSql(SqlBuilder queryView, SqlBuilder condition, Order[] orders, long startRow, int count);
+	SqlBuilder toPagingQuerySql(SqlBuilder query, Order[] orders, long startRow, int count);
 
 	/**
 	 * 构建关键字SQL查询条件。
+	 * <p>
+	 * SQL查询条件应该使用{@linkplain QueryColumnMetaInfo#getColumnPath()}作为列引用。
+	 * </p>
 	 * <p>
 	 * 返回{@code null}、或者空{@linkplain SqlBuilder}表示无关键字SQL查询条件。
 	 * </p>
@@ -74,12 +75,12 @@ public interface Dialect
 	 * @param model
 	 * @param query
 	 *            此次查询
-	 * @param queryColumnPropertyPaths
-	 *            此次查询的结果集{@linkplain ColumnPropertyPath}列表
+	 * @param queryColumnMetaInfos
+	 *            此次查询的结果集{@linkplain QueryColumnMetaInfo}列表
 	 * @return
 	 */
 	SqlBuilder toKeywordQueryCondition(Model model, Query query,
-			List<? extends ColumnPropertyPath> queryColumnPropertyPaths);
+			List<? extends QueryColumnMetaInfo> queryColumnMetaInfos);
 
 	/**
 	 * 给定SQL类型的列是否是可排序的。
@@ -88,4 +89,16 @@ public interface Dialect
 	 * @return
 	 */
 	boolean isSortable(int sqlType);
+
+	/**
+	 * 获取用于{@linkplain #toPagingQuerySql(SqlBuilder, Order[], long, int)}的排序名。
+	 * <p>
+	 * 如果{@linkplain #toPagingQuerySql(SqlBuilder, Order[], long, int)}内部包裹初始的查询SQL，
+	 * 那么只能使用{@linkplain QueryColumnMetaInfo#getColumnAlias()}作为排序名。
+	 * </p>
+	 * 
+	 * @param queryColumnMetaInfo
+	 * @return
+	 */
+	String getPagingQueryOrderName(QueryColumnMetaInfo queryColumnMetaInfo);
 }

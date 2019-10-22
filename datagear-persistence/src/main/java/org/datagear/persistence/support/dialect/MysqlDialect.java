@@ -33,33 +33,23 @@ public class MysqlDialect extends AbstractDialect
 	}
 
 	@Override
-	public SqlBuilder toPagingSql(SqlBuilder queryView, SqlBuilder condition, Order[] orders, long startRow, int count)
+	public SqlBuilder toPagingQuerySql(SqlBuilder query, Order[] orders, long startRow, int count)
 	{
 		SqlBuilder sql = SqlBuilder.valueOf();
 
 		SqlBuilder orderSql = toOrderSql(orders);
 
-		if (isEmptySql(condition) && isEmptySql(orderSql))
+		if (isEmptySql(orderSql))
 		{
-			sql.sql(queryView);
+			sql.sql(query);
 		}
 		else
 		{
 			sql.sql("SELECT * FROM (");
-			sql.sql(queryView);
-			sql.sql(") t ");
-
-			if (!isEmptySql(condition))
-			{
-				sql.sql(" WHERE ");
-				sql.sql(condition);
-			}
-
-			if (!isEmptySql(orderSql))
-			{
-				sql.sql(" ORDER BY ");
-				sql.sql(orderSql);
-			}
+			sql.sql(query);
+			sql.sql(") T ");
+			sql.sql(" ORDER BY ");
+			sql.sql(orderSql);
 		}
 
 		sql.sql(" LIMIT " + (startRow - 1) + ", " + count);

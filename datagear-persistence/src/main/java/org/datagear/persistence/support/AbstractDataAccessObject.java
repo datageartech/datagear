@@ -194,7 +194,7 @@ public abstract class AbstractDataAccessObject
 			rs = queryResultSet.getResultSet();
 
 			if (count >= 0 && startRow > 1)
-				JdbcUtil.moveToBeforeRow(rs, startRow - 1);
+				JdbcUtil.moveToBeforeRow(rs, startRow);
 
 			int endRow = (count >= 0 ? startRow + count : -1);
 

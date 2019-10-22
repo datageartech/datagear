@@ -33,7 +33,7 @@ import org.datagear.model.features.NotEditable;
 import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyPath;
 import org.datagear.model.support.PropertyPathInfo;
-import org.datagear.persistence.ColumnPropertyPath;
+import org.datagear.persistence.QueryColumnMetaInfo;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -2008,12 +2008,12 @@ public class DataController extends AbstractSchemaModelConnController
 	{
 		List<PropertyPathDisplayName> propertyPathDisplayNames = new ArrayList<PropertyPathDisplayName>();
 
-		List<ColumnPropertyPath> columnPropertyPaths = queryResultMetaInfo.getColumnPropertyPaths();
-		for (ColumnPropertyPath columnPropertyPath : columnPropertyPaths)
+		List<QueryColumnMetaInfo> queryColumnMetaInfos = queryResultMetaInfo.getQueryColumnMetaInfos();
+		for (QueryColumnMetaInfo queryColumnMetaInfo : queryColumnMetaInfos)
 		{
 			PropertyPathDisplayName propertyPathDisplayName = new PropertyPathDisplayName();
 
-			String propertyPath = columnPropertyPath.getPropertyPath();
+			String propertyPath = queryColumnMetaInfo.getPropertyPath();
 
 			propertyPathDisplayName.setPropertyPath(propertyPath);
 			propertyPathDisplayName.setDisplayName(ModelUtils.displayName(queryResultMetaInfo.getModel(),

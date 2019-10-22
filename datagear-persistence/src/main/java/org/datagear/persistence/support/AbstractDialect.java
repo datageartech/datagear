@@ -9,10 +9,10 @@ import java.util.List;
 
 import org.datagear.dbinfo.SqlTypeInfo.SearchableType;
 import org.datagear.model.Model;
-import org.datagear.persistence.ColumnPropertyPath;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Query;
+import org.datagear.persistence.QueryColumnMetaInfo;
 import org.datagear.persistence.SqlBuilder;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcUtil;
@@ -58,7 +58,7 @@ public abstract class AbstractDialect implements Dialect
 
 	@Override
 	public SqlBuilder toKeywordQueryCondition(Model model, Query query,
-			List<? extends ColumnPropertyPath> queryColumnPropertyPaths)
+			List<? extends QueryColumnMetaInfo> queryColumnMetaInfos)
 	{
 		SqlBuilder keywordCondition = SqlBuilder.valueOf();
 
@@ -69,12 +69,12 @@ public abstract class AbstractDialect implements Dialect
 		String likeOpt = (query.isNotLike() ? " NOT LIKE " : " LIKE ");
 		String equalOpt = (query.isNotLike() ? " != " : " = ");
 
-		for (ColumnPropertyPath columnPropertyPath : queryColumnPropertyPaths)
+		for (QueryColumnMetaInfo queryColumnMetaInfo : queryColumnMetaInfos)
 		{
-			if (!columnPropertyPath.isToken())
+			if (!queryColumnMetaInfo.isToken())
 				continue;
 
-			int sqlType = columnPropertyPath.getColumnSqlType();
+			int sqlType = queryColumnMetaInfo.getColumnSqlType();
 
 			@JDBCCompatiblity("很多驱动程序的值为SearchableType.ALL但实际并不支持LIKE语法（比如：PostgreSQL JDBC 42.2.5），"
 					+ "这里为了兼容，不采用SearchableType逻辑")
@@ -82,7 +82,7 @@ public abstract class AbstractDialect implements Dialect
 			String myOperator = null;
 			Object myKeyword = null;
 			// PropertyPath propertyPath =
-			// PropertyPath.valueOf(columnPropertyPath.getPropertyPath());
+			// PropertyPath.valueOf(queryColumnMetaInfo.getPropertyPath());
 			// PropertyPathInfo propertyPathInfo =
 			// PropertyPathInfo.valueOf(model, propertyPath);
 			// Property tailProperty = propertyPathInfo.getPropertyTail();
@@ -124,7 +124,7 @@ public abstract class AbstractDialect implements Dialect
 				if (!keywordCondition.isEmpty())
 					keywordCondition.sql(joinOpt);
 
-				keywordCondition.sql(columnPropertyPath.getColumnNameQuote() + myOperator + "?", myKeyword);
+				keywordCondition.sql(queryColumnMetaInfo.getColumnPath() + myOperator + "?", myKeyword);
 			}
 		}
 
@@ -144,6 +144,12 @@ public abstract class AbstractDialect implements Dialect
 			return true;
 
 		return false;
+	}
+
+	@Override
+	public String getPagingQueryOrderName(QueryColumnMetaInfo queryColumnMetaInfo)
+	{
+		return quote(queryColumnMetaInfo.getColumnAlias());
 	}
 
 	/**

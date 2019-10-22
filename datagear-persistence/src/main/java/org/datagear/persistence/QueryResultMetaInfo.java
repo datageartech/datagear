@@ -9,7 +9,7 @@ import java.util.List;
 import org.datagear.model.Model;
 
 /**
- * 查询结果集元信息。
+ * 查询结果元信息。
  * 
  * @author datagear@163.com
  *
@@ -20,18 +20,18 @@ public class QueryResultMetaInfo
 	private Model model;
 
 	/** 列结果集属性路径列表 */
-	private List<ColumnPropertyPath> columnPropertyPaths;
+	private List<QueryColumnMetaInfo> queryColumnMetaInfos;
 
 	public QueryResultMetaInfo()
 	{
 		super();
 	}
 
-	public QueryResultMetaInfo(Model model, List<ColumnPropertyPath> columnPropertyPaths)
+	public QueryResultMetaInfo(Model model, List<QueryColumnMetaInfo> queryColumnMetaInfos)
 	{
 		super();
 		this.model = model;
-		this.columnPropertyPaths = columnPropertyPaths;
+		this.queryColumnMetaInfos = queryColumnMetaInfos;
 	}
 
 	public Model getModel()
@@ -44,19 +44,19 @@ public class QueryResultMetaInfo
 		this.model = model;
 	}
 
-	public List<ColumnPropertyPath> getColumnPropertyPaths()
+	public List<QueryColumnMetaInfo> getQueryColumnMetaInfos()
 	{
-		return columnPropertyPaths;
+		return queryColumnMetaInfos;
 	}
 
-	public void setColumnPropertyPaths(List<ColumnPropertyPath> columnPropertyPaths)
+	public void setQueryColumnMetaInfos(List<QueryColumnMetaInfo> queryColumnMetaInfos)
 	{
-		this.columnPropertyPaths = columnPropertyPaths;
+		this.queryColumnMetaInfos = queryColumnMetaInfos;
 	}
 
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [model=" + model + ", columnPropertyPaths=" + columnPropertyPaths + "]";
+		return getClass().getSimpleName() + " [model=" + model + ", queryColumnMetaInfos=" + queryColumnMetaInfos + "]";
 	}
 }
