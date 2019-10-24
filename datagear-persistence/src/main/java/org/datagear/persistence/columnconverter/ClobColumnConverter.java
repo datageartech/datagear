@@ -96,7 +96,14 @@ public class ClobColumnConverter extends AbstractLOBColumnConverter
 		{
 			clob = rs.getClob(colIndex);
 
-			if (String.class.equals(targetType))
+			if (rs.wasNull())
+				clob = null;
+
+			if (clob == null)
+			{
+				return null;
+			}
+			else if (String.class.equals(targetType))
 			{
 				return convertClobColumnValueToString(clob);
 			}
@@ -116,7 +123,8 @@ public class ClobColumnConverter extends AbstractLOBColumnConverter
 		{
 			try
 			{
-				clob.free();
+				if (clob != null)
+					clob.free();
 			}
 			catch (SQLException e)
 			{

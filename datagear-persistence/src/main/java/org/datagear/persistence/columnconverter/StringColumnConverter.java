@@ -98,7 +98,14 @@ public class StringColumnConverter extends AbstractLOBColumnConverter
 		{
 			columnValue = rs.getString(colIndex);
 
-			if (String.class.equals(targetType))
+			if (rs.wasNull())
+				columnValue = null;
+
+			if (columnValue == null)
+			{
+				return null;
+			}
+			else if (String.class.equals(targetType))
 			{
 				return convertStringColumnValueToString(columnValue);
 			}

@@ -85,7 +85,14 @@ public class BytesColumnConverter extends AbstractLOBColumnConverter
 		{
 			bytes = rs.getBytes(colIndex);
 
-			if (byte[].class.equals(targetType))
+			if (rs.wasNull())
+				bytes = null;
+
+			if (bytes == null)
+			{
+				return null;
+			}
+			else if (byte[].class.equals(targetType))
 			{
 				return convertBytesColumnValueToBytes(bytes);
 			}

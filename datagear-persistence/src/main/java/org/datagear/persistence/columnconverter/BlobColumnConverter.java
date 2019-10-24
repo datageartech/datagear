@@ -85,7 +85,14 @@ public class BlobColumnConverter extends AbstractLOBColumnConverter
 		{
 			blob = rs.getBlob(colIndex);
 
-			if (byte[].class.equals(targetType))
+			if (rs.wasNull())
+				blob = null;
+
+			if (blob == null)
+			{
+				return null;
+			}
+			else if (byte[].class.equals(targetType))
 			{
 				return convertBlobColumnValueToBytes(blob);
 			}
@@ -105,7 +112,8 @@ public class BlobColumnConverter extends AbstractLOBColumnConverter
 		{
 			try
 			{
-				blob.free();
+				if (blob != null)
+					blob.free();
 			}
 			catch (SQLException e)
 			{
