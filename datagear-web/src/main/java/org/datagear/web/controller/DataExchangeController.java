@@ -60,6 +60,9 @@ import org.datagear.dataexchange.support.CsvDataExport;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.ExcelDataExport;
 import org.datagear.dataexchange.support.ExcelDataImport;
+import org.datagear.dataexchange.support.JsonDataExport;
+import org.datagear.dataexchange.support.JsonDataExportOption;
+import org.datagear.dataexchange.support.JsonDataFormat;
 import org.datagear.dataexchange.support.SqlDataExport;
 import org.datagear.dataexchange.support.SqlDataExportOption;
 import org.datagear.dataexchange.support.SqlDataImport;
@@ -1020,6 +1023,125 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return responseEntity;
 	}
 
+	@RequestMapping("/{schemaId}/export/json")
+	public String exptJson(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		final User user = WebUtils.getUser(request, response);
+
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+				checkReadTableDataPermission(schema, user);
+			}
+		}.execute();
+
+		DataFormat defaultDataFormat = new DataFormat();
+		defaultDataFormat.setBinaryFormat("0x" + DataFormatContext.wrapToExpression(DataFormat.BINARY_FORMAT_HEX));
+
+		String dataExchangeId = IDUtil.uuid();
+
+		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
+		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+
+		return "/dataexchange/export_json";
+	}
+
+	@RequestMapping(value = "/{schemaId}/export/json/doExport", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> exptJsonDoExport(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			JsonFileBatchDataExportForm exportForm) throws Exception
+	{
+		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || exportForm == null || isEmpty(exportForm.getDataFormat())
+				|| isEmpty(exportForm.getExportOption()) || isEmpty(exportForm.getFileEncoding())
+				|| isEmpty(exportForm.getSubDataExchangeIds()) || isEmpty(exportForm.getQueries())
+				|| isEmpty(exportForm.getFileNames())
+				|| exportForm.getSubDataExchangeIds().length != exportForm.getQueries().length
+				|| exportForm.getSubDataExchangeIds().length != exportForm.getFileNames().length)
+			throw new IllegalInputException();
+
+		JsonDataExportOption exportOption = exportForm.getExportOption();
+
+		if (JsonDataFormat.TABLE_OBJECT.equals(exportOption.getJsonDataFormat()))
+		{
+			if (isEmpty(exportForm.getTableNames())
+					|| exportForm.getSubDataExchangeIds().length != exportForm.getTableNames().length)
+				throw new IllegalInputException();
+		}
+
+		final User user = WebUtils.getUser(request, response);
+
+		String[] subDataExchangeIds = exportForm.getSubDataExchangeIds();
+		String[] queries = exportForm.getQueries();
+		String[] tableNames = exportForm.getTableNames();
+		String[] fileNames = exportForm.getFileNames();
+
+		checkNoEmptyWithElement(subDataExchangeIds);
+		checkNoEmptyWithElement(queries);
+		checkNoEmptyWithElement(fileNames);
+
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
+
+		Schema schema = getSchemaForUserNotNull(user, schemaId);
+
+		checkReadTableDataPermission(schema, user);
+
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+
+		String exportChannelId = getDataExchangeChannelId(dataExchangeId);
+		ServerChannel exportServerChannel = this.dataExchangeCometdService.getChannelWithCreation(exportChannelId);
+
+		Locale locale = getLocale(request);
+
+		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+
+		for (int i = 0; i < subDataExchangeIds.length; i++)
+		{
+			Query query = toQuery(queries[i]);
+
+			File file = FileUtil.getFile(directory, fileNames[i]);
+			ResourceFactory<Writer> writerFactory = FileWriterResourceFactory.valueOf(file,
+					exportForm.getFileEncoding());
+
+			JsonDataExport csvDataExport = new JsonDataExport(connectionFactory, exportForm.getDataFormat(),
+					exportOption, query, writerFactory, (tableNames == null ? null : tableNames[i]));
+
+			CometdSubTextDataExportListener listener = new CometdSubTextDataExportListener(
+					this.dataExchangeCometdService, exportServerChannel, getMessageSource(), getLocale(request),
+					subDataExchangeIds[i]);
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+			listener.setSendExchangingMessageInterval(
+					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, csvDataExport));
+			csvDataExport.setListener(listener);
+
+			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], csvDataExport);
+			subDataExchanges.add(subDataExchange);
+		}
+
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchanges,
+				exportServerChannel, locale);
+
+		this.dataExchangeService.exchange(batchDataExchange);
+
+		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
+		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+
+		Map<String, String> subDataExchangeFileNameMap = buildSubDataExchangeFileNameMap(subDataExchangeIds, fileNames);
+		responseEntity.getBody().setData(subDataExchangeFileNameMap);
+
+		return responseEntity;
+	}
+
 	@RequestMapping(value = "/{schemaId}/export/download")
 	@ResponseBody
 	public void exptDownload(HttpServletRequest request, HttpServletResponse response,
@@ -1845,6 +1967,43 @@ public class DataExchangeController extends AbstractSchemaConnController
 		public void setExportOption(TextDataExportOption exportOption)
 		{
 			if (!(exportOption instanceof SqlDataExportOption))
+				throw new IllegalArgumentException();
+
+			super.setExportOption(exportOption);
+		}
+
+		public String[] getTableNames()
+		{
+			return tableNames;
+		}
+
+		public void setTableNames(String[] tableNames)
+		{
+			this.tableNames = tableNames;
+		}
+	}
+
+	public static class JsonFileBatchDataExportForm extends TextFileBatchDataExportForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String[] tableNames;
+
+		public JsonFileBatchDataExportForm()
+		{
+			super();
+		}
+
+		@Override
+		public JsonDataExportOption getExportOption()
+		{
+			return (JsonDataExportOption) super.getExportOption();
+		}
+
+		@Override
+		public void setExportOption(TextDataExportOption exportOption)
+		{
+			if (!(exportOption instanceof JsonDataExportOption))
 				throw new IllegalArgumentException();
 
 			super.setExportOption(exportOption);

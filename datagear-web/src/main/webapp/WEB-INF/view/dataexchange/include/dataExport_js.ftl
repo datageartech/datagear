@@ -140,6 +140,12 @@ dataExchange_js.ftl
 		}
 	];
 	
+	po.onStepChanged = function(event, currentIndex, priorIndex)
+	{
+		if(currentIndex == 1)
+			po.adjustDataTable();
+	};
+	
 	po.initDataExportSteps = function()
 	{
 		po.element(".form-content").steps(
@@ -148,8 +154,7 @@ dataExchange_js.ftl
 			bodyTag: "div",
 			onStepChanged : function(event, currentIndex, priorIndex)
 			{
-				if(currentIndex == 1)
-					po.adjustDataTable();
+				po.onStepChanged(event, currentIndex, priorIndex);
 			},
 			onFinished : function(event, currentIndex)
 			{
