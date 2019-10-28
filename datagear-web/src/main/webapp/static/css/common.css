@@ -1343,8 +1343,14 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .head .view-sql-history-wrapper{
 	float: right;
 	width: 5%;
+	min-width: 3em;
 	text-align: right;
 	position: relative;
+}
+.page-sqlpad .head .view-sql-history-wrapper > button.ui-button{
+	width: 1.5em;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
 }
 .page-sqlpad .head .view-sql-history-wrapper .view-sql-history-panel{
 	position: absolute;
@@ -1419,6 +1425,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-sqlpad .head .setting-wrapper{
 	float: right;
 	width: 5%;
+	min-width: 3em;
 	text-align: right;
 	position: relative;
 }
