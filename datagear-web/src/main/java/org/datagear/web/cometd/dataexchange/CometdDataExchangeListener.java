@@ -17,6 +17,7 @@ import org.datagear.dataexchange.IndexDataExchangeException;
 import org.datagear.dataexchange.SetImportColumnValueException;
 import org.datagear.dataexchange.TableNotFoundException;
 import org.datagear.dataexchange.UnsupportedExchangeException;
+import org.datagear.dataexchange.support.IllegalJsonDataFormatException;
 import org.datagear.dataexchange.support.TableMismatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -191,6 +192,11 @@ public abstract class CometdDataExchangeListener implements DataExchangeListener
 		{
 			CircularDependencyException e1 = (CircularDependencyException) e;
 			message = getI18nMessage(code, e1.getSubDataExchange().getName());
+		}
+		else if (e instanceof IllegalJsonDataFormatException)
+		{
+			IllegalJsonDataFormatException e1 = (IllegalJsonDataFormatException) e;
+			message = getI18nMessage(code, e1.getMessage());
 		}
 		else
 		{

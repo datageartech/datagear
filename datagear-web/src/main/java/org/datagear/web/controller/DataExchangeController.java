@@ -63,6 +63,8 @@ import org.datagear.dataexchange.support.ExcelDataImport;
 import org.datagear.dataexchange.support.JsonDataExport;
 import org.datagear.dataexchange.support.JsonDataExportOption;
 import org.datagear.dataexchange.support.JsonDataFormat;
+import org.datagear.dataexchange.support.JsonDataImport;
+import org.datagear.dataexchange.support.JsonDataImportOption;
 import org.datagear.dataexchange.support.SqlDataExport;
 import org.datagear.dataexchange.support.SqlDataExportOption;
 import org.datagear.dataexchange.support.SqlDataImport;
@@ -434,6 +436,150 @@ public class DataExchangeController extends AbstractSchemaConnController
 			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], numbers[i], sqlDataImport);
 			subDataExchanges[i] = subDataExchange;
 		}
+
+		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
+
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
+		Collections.addAll(subDataExchangeSet, subDataExchanges);
+
+		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
+				importServerChannel, locale);
+
+		this.dataExchangeService.exchange(batchDataExchange);
+
+		BatchDataExchangeInfo batchDataExchangeInfo = new BatchDataExchangeInfo(dataExchangeId, batchDataExchange);
+		storeBatchDataExchangeInfo(request, batchDataExchangeInfo);
+
+		return buildOperationMessageSuccessEmptyResponseEntity();
+	}
+
+	@RequestMapping("/{schemaId}/import/json")
+	public String imptJson(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+	{
+		final User user = WebUtils.getUser(request, response);
+
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+				checkDeleteTableDataPermission(schema, user);
+			}
+		}.execute();
+
+		DataFormat defaultDataFormat = new DataFormat();
+		defaultDataFormat.setBinaryFormat("0x" + DataFormatContext.wrapToExpression(DataFormat.BINARY_FORMAT_HEX));
+
+		String dataExchangeId = IDUtil.uuid();
+
+		springModel.addAttribute("defaultDataFormat", defaultDataFormat);
+		springModel.addAttribute("dataExchangeId", dataExchangeId);
+		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
+		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+
+		return "/dataexchange/import_json";
+	}
+
+	@RequestMapping(value = "/{schemaId}/import/json/uploadImportFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<DataImportFileInfo> imptJsonUploadFile(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable("schemaId") String schemaId, @RequestParam("dataExchangeId") String dataExchangeId,
+			@RequestParam("file") MultipartFile multipartFile) throws Exception
+	{
+		return uploadImportFile(request, response, schemaId, dataExchangeId, multipartFile, new JsonFileFilger());
+	}
+
+	@RequestMapping(value = "/{schemaId}/import/json/doImport", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> imptJsonDoImport(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestParam("dataExchangeId") String dataExchangeId, JsonFileBatchDataImportForm importForm,
+			@RequestParam("dependentNumberAuto") final String dependentNumberAuto) throws Throwable
+	{
+		if (isEmpty(schemaId) || isEmpty(dataExchangeId) || importForm == null
+				|| isEmpty(importForm.getSubDataExchangeIds()) || isEmpty(importForm.getFileNames())
+				|| isEmpty(importForm.getFileEncoding()) || isEmpty(importForm.getNumbers())
+				|| isEmpty(importForm.getDependentNumbers()) || isEmpty(importForm.getImportOption())
+				|| isEmpty(importForm.getDataFormat())
+				|| importForm.getSubDataExchangeIds().length != importForm.getFileNames().length
+				|| importForm.getSubDataExchangeIds().length != importForm.getNumbers().length
+				|| importForm.getSubDataExchangeIds().length != importForm.getDependentNumbers().length)
+			throw new IllegalInputException();
+
+		JsonDataImportOption importOption = importForm.getImportOption();
+
+		if (JsonDataFormat.ROW_ARRAY.equals(importOption.getJsonDataFormat()))
+		{
+			if (isEmpty(importForm.getTableNames())
+					|| importForm.getSubDataExchangeIds().length != importForm.getTableNames().length)
+				throw new IllegalInputException();
+
+			checkNoEmptyWithElement(importForm.getTableNames());
+		}
+
+		final User user = WebUtils.getUser(request, response);
+
+		String[] subDataExchangeIds = importForm.getSubDataExchangeIds();
+		final String[] numbers = importForm.getNumbers();
+		final String[] dependentNumbers = importForm.getDependentNumbers();
+		String[] fileNames = importForm.getFileNames();
+		final String[] tableNames = importForm.getTableNames();
+
+		checkNoEmptyWithElement(subDataExchangeIds);
+		checkNoEmptyWithElement(numbers);
+		checkNoEmptyWithElement(fileNames);
+
+		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
+		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
+
+		Schema schema = getSchemaForUserNotNull(user, schemaId);
+
+		checkDeleteTableDataPermission(schema, user);
+
+		ConnectionFactory connectionFactory = new DataSourceConnectionFactory(new SchemaDataSource(schema));
+
+		String importChannelId = getDataExchangeChannelId(dataExchangeId);
+		ServerChannel importServerChannel = this.dataExchangeCometdService.getChannelWithCreation(importChannelId);
+
+		Locale locale = getLocale(request);
+
+		SubDataExchange[] subDataExchanges = new SubDataExchange[subDataExchangeIds.length];
+
+		for (int i = 0; i < subDataExchangeIds.length; i++)
+		{
+			File file = FileUtil.getFile(directory, fileNames[i]);
+			ResourceFactory<Reader> readerFactory = FileReaderResourceFactory.valueOf(file,
+					importForm.getFileEncoding());
+
+			JsonDataImport jsonDataImport = new JsonDataImport(connectionFactory, importForm.getDataFormat(),
+					importForm.getImportOption(), (tableNames == null ? null : tableNames[i]), readerFactory);
+
+			CometdSubTextValueDataImportListener listener = new CometdSubTextValueDataImportListener(
+					this.dataExchangeCometdService, importServerChannel, getMessageSource(), locale,
+					subDataExchangeIds[i], jsonDataImport.getImportOption().getExceptionResolve());
+			listener.setLogFile(getTempSubDataExchangeLogFile(logDirectory, subDataExchangeIds[i]));
+			listener.setSendExchangingMessageInterval(
+					evalSendDataExchangingMessageInterval(subDataExchangeIds.length, jsonDataImport));
+			jsonDataImport.setListener(listener);
+
+			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeIds[i], numbers[i], jsonDataImport);
+			subDataExchanges[i] = subDataExchange;
+		}
+
+		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		{
+			@Override
+			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema) throws Throwable
+			{
+				Connection cn = getConnection();
+
+				inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers, dependentNumberAuto);
+			}
+		}.execute();
 
 		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
 
@@ -1074,6 +1220,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 			if (isEmpty(exportForm.getTableNames())
 					|| exportForm.getSubDataExchangeIds().length != exportForm.getTableNames().length)
 				throw new IllegalInputException();
+
+			checkNoEmptyWithElement(exportForm.getTableNames());
 		}
 
 		final User user = WebUtils.getUser(request, response);
@@ -1204,6 +1352,9 @@ public class DataExchangeController extends AbstractSchemaConnController
 	protected void inflateDependentNumbers(Connection cn, String[] numbers, String[] tableNames,
 			String[] dependentNumbers, String inflateFlag)
 	{
+		if (tableNames == null || tableNames.length == 0)
+			return;
+
 		String[][] importedTables = this.databaseInfoResolver.getImportedTables(cn, tableNames);
 
 		for (int i = 0; i < dependentNumbers.length; i++)
@@ -1731,6 +1882,27 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
+	protected static class JsonFileFilger implements FileFilter
+	{
+		public JsonFileFilger()
+		{
+			super();
+		}
+
+		@Override
+		public boolean accept(File file)
+		{
+			if (file.isDirectory())
+				return true;
+			else
+			{
+				String lowName = file.getName().toLowerCase();
+
+				return lowName.endsWith(".json") || lowName.endsWith(".txt");
+			}
+		}
+	}
+
 	protected static class ExcelFileFilger implements FileFilter
 	{
 		public ExcelFileFilger()
@@ -1876,6 +2048,27 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			this.tableNames = tableNames;
 		}
+	}
+
+	public static class JsonFileBatchDataImportForm extends TextValueFileBatchDataImportForm
+	{
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public JsonDataImportOption getImportOption()
+		{
+			return (JsonDataImportOption) super.getImportOption();
+		}
+
+		@Override
+		public void setImportOption(ValueDataImportOption importOption)
+		{
+			if (!(importOption instanceof JsonDataImportOption))
+				throw new IllegalArgumentException();
+
+			super.setImportOption(importOption);
+		}
+
 	}
 
 	public static class SqlFileBatchDataImportForm extends AbstractFileBatchDataImportForm implements Serializable

@@ -453,6 +453,9 @@
     			<bean class="org.datagear.dataexchange.support.ExcelDataExportService">
     				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
     			</bean>
+    			<bean class="org.datagear.dataexchange.support.JsonDataImportService">
+    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    			</bean>
     			<bean class="org.datagear.dataexchange.support.JsonDataExportService">
     				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
     			</bean>

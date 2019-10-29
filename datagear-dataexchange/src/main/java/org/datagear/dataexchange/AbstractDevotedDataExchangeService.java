@@ -24,6 +24,8 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -486,6 +488,26 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
+	 * 获取表所有咧信息。
+	 * 
+	 * @param cn
+	 * @param table
+	 * @param databaseInfoResolver
+	 * @return
+	 * @throws TableNotFoundException
+	 */
+	protected List<ColumnInfo> getColumnInfos(Connection cn, String table, DatabaseInfoResolver databaseInfoResolver)
+			throws TableNotFoundException
+	{
+		ColumnInfo[] allColumnInfos = databaseInfoResolver.getColumnInfos(cn, table);
+
+		if (allColumnInfos == null || allColumnInfos.length == 0)
+			throw new TableNotFoundException(table);
+
+		return Arrays.asList(allColumnInfos);
+	}
+
+	/**
 	 * 获取表指定列信息列表。
 	 * <p>
 	 * 当指定位置的列不存在时，如果{@code nullIfColumnNotFound}为{@code true}，返回列表对应位置将为{@code null}，
@@ -559,6 +581,27 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 			list.add(columnInfo);
 
 		return list;
+	}
+
+	/**
+	 * 查找指定名称的列信息。
+	 * <p>
+	 * 没找到将返回{@code null}。
+	 * </p>
+	 * 
+	 * @param columnInfos
+	 * @param name
+	 * @return
+	 */
+	protected ColumnInfo findColumnInfo(Collection<? extends ColumnInfo> columnInfos, String name)
+	{
+		for (ColumnInfo columnInfo : columnInfos)
+		{
+			if (columnInfo.getName().equals(name))
+				return columnInfo;
+		}
+
+		return null;
 	}
 
 	/**

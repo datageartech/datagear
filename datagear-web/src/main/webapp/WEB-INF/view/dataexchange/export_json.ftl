@@ -44,9 +44,9 @@ Schema schema 数据库，不允许为null
 						<div class="form-item-label"><@spring.message code='dataExport.exportFileFormat' /></div>
 						<div class="form-item-value">
 							<div id="${pageId}-exportFileFormat">
-								<label for="${pageId}-exportFileFormat-0" title="<@spring.message code='dataExport.exportFileFormat.json.TABLE_OBJECT.desc' />"><@spring.message code='dataExport.exportFileFormat.json.TABLE_OBJECT' /></label>
+								<label for="${pageId}-exportFileFormat-0" title="<@spring.message code='dataExchange.JsonDataFormat.TABLE_OBJECT.desc' />"><@spring.message code='dataExchange.JsonDataFormat.TABLE_OBJECT' /></label>
 								<input id="${pageId}-exportFileFormat-0" type="radio" name="exportOption.jsonDataFormat" value="TABLE_OBJECT" />
-								<label for="${pageId}-exportFileFormat-1" title="<@spring.message code='dataExport.exportFileFormat.json.ROW_ARRAY.desc' />"><@spring.message code='dataExport.exportFileFormat.json.ROW_ARRAY' /></label>
+								<label for="${pageId}-exportFileFormat-1" title="<@spring.message code='dataExchange.JsonDataFormat.ROW_ARRAY.desc' />"><@spring.message code='dataExchange.JsonDataFormat.ROW_ARRAY' /></label>
 								<input id="${pageId}-exportFileFormat-1" type="radio" name="exportOption.jsonDataFormat" value="ROW_ARRAY" />
 							</div>
 						</div>

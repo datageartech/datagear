@@ -59,6 +59,19 @@ public abstract class AbstractDevotedDbInfoAwareDataExchangeService<T extends Da
 	}
 
 	/**
+	 * 获取表所有列信息。
+	 * 
+	 * @param cn
+	 * @param table
+	 * @return
+	 * @throws TableNotFoundException
+	 */
+	protected List<ColumnInfo> getColumnInfos(Connection cn, String table) throws TableNotFoundException
+	{
+		return super.getColumnInfos(cn, table, this.databaseInfoResolver);
+	}
+
+	/**
 	 * 获取表指定列信息列表。
 	 * <p>
 	 * 当指定位置的列不存在时，如果{@code nullIfColumnNotFound}为{@code true}，返回列表对应位置将为{@code null}，
