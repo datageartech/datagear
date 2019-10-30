@@ -146,7 +146,12 @@ Schema schema 数据库，不允许为null
 	
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{
-		subDataExchange.dependentNumber = "<@spring.message code='dataImport.dependentNumber.auto' />";
+		var isRowArray = po.element("input[name='importOption.jsonDataFormat']:checked").val() != "TABLE_OBJECT";
+		
+		if(isRowArray)
+			subDataExchange.dependentNumber = "<@spring.message code='dataImport.dependentNumber.auto' />";
+		else
+			subDataExchange.dependentNumber = "<@spring.message code='dataImport.dependentNumber.none' />";
 	};
 	
 	po.initDataImportJsonUIs = function()
@@ -165,6 +170,22 @@ Schema schema 数据库，不允许为null
 		{
 			var visible = po.element("input[name='importOption.jsonDataFormat']:checked").val() != "TABLE_OBJECT";
 			po.getSubDataExchangeDataTable().column(4).visible(visible, false);
+			
+			po.element("input[name='dependentNumbers']").each(function()
+			{
+				var $this = $(this);
+				
+				var val = $this.val();
+				
+				if(visible && val == "<@spring.message code='dataImport.dependentNumber.none' />")
+				{
+					$this.val("<@spring.message code='dataImport.dependentNumber.auto' />");
+				}
+				else if(!visible && val == "<@spring.message code='dataImport.dependentNumber.auto' />")
+				{
+					$this.val("<@spring.message code='dataImport.dependentNumber.none' />");
+				}	
+			});
 		}
 		
 		po.onStepChangedSuper(event, currentIndex, priorIndex);
@@ -181,7 +202,7 @@ Schema schema 数据库，不允许为null
 		defaultContent: "",
 		width : "20%"
 	});
-	po.dataImportTableColumns[1].width = "25%";
+	po.dataImportTableColumns[2].width = "auto";
 	
 	po.cometdInitIfNot();
 	po.initDataImportSteps();

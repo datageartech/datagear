@@ -516,8 +516,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 			if (isEmpty(importForm.getTableNames())
 					|| importForm.getSubDataExchangeIds().length != importForm.getTableNames().length)
 				throw new IllegalInputException();
-
-			checkNoEmptyWithElement(importForm.getTableNames());
 		}
 
 		final User user = WebUtils.getUser(request, response);
@@ -531,6 +529,8 @@ public class DataExchangeController extends AbstractSchemaConnController
 		checkNoEmptyWithElement(subDataExchangeIds);
 		checkNoEmptyWithElement(numbers);
 		checkNoEmptyWithElement(fileNames);
+		if (JsonDataFormat.ROW_ARRAY.equals(importOption.getJsonDataFormat()))
+			checkNoEmptyWithElement(importForm.getTableNames());
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 		File logDirectory = getTempDataExchangeLogDirectory(dataExchangeId, true);
@@ -569,17 +569,20 @@ public class DataExchangeController extends AbstractSchemaConnController
 			subDataExchanges[i] = subDataExchange;
 		}
 
-		new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
+		if (JsonDataFormat.ROW_ARRAY.equals(importOption.getJsonDataFormat()))
 		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema) throws Throwable
+			new VoidSchemaConnExecutor(request, response, springModel, schemaId, true)
 			{
-				Connection cn = getConnection();
+				@Override
+				protected void execute(HttpServletRequest request, HttpServletResponse response, Model springModel,
+						Schema schema) throws Throwable
+				{
+					Connection cn = getConnection();
 
-				inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers, dependentNumberAuto);
-			}
-		}.execute();
+					inflateDependentNumbers(cn, numbers, tableNames, dependentNumbers, dependentNumberAuto);
+				}
+			}.execute();
+		}
 
 		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
 
