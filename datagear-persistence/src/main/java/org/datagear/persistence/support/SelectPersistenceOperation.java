@@ -17,8 +17,6 @@ import java.util.AbstractSequentialList;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,8 +32,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.datagear.model.Model;
 import org.datagear.model.Property;
@@ -1507,49 +1503,6 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	}
 
 	/**
-	 * 将给定字符串中的{@linkplain QueryColumnMetaInfo#getPropertyPath()}替换为{@linkplain QueryColumnMetaInfo#getColumnPath()}。
-	 * 
-	 * @param dialect
-	 * @param queryColumnMetaInfos
-	 * @param str
-	 * @return
-	 */
-	protected String replacePropertyPathToColumnPath(Dialect dialect, List<QueryColumnMetaInfo> queryColumnMetaInfos,
-			String str)
-	{
-		if (str == null || str.isEmpty())
-			return str;
-
-		List<QueryColumnMetaInfo> myQueryColumnMetaInfos = new ArrayList<QueryColumnMetaInfo>(queryColumnMetaInfos);
-
-		// 优先替换更长的属性路径，避免长路径名里包含短路径名时导致替换错乱
-		Collections.sort(myQueryColumnMetaInfos, new Comparator<QueryColumnMetaInfo>()
-		{
-			@Override
-			public int compare(QueryColumnMetaInfo o1, QueryColumnMetaInfo o2)
-			{
-				String o1PropertyPath = o1.getPropertyPath();
-				String o2PropertyPath = o2.getPropertyPath();
-
-				if (o1PropertyPath.length() > o2PropertyPath.length())
-					return -1;
-				else
-					return 1;
-			}
-		});
-
-		for (QueryColumnMetaInfo queryColumnMetaInfo : myQueryColumnMetaInfos)
-		{
-			String pp = queryColumnMetaInfo.getPropertyPath();
-
-			str = Pattern.compile(pp, Pattern.LITERAL | Pattern.CASE_INSENSITIVE).matcher(str)
-					.replaceAll(Matcher.quoteReplacement(queryColumnMetaInfo.getColumnPath()));
-		}
-
-		return str;
-	}
-
-	/**
 	 * 构建显示指定列名的表SELECT查询语句。
 	 * 
 	 * @param dialect
@@ -1656,6 +1609,93 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 
 			return queryCondition;
 		}
+	}
+
+	/**
+	 * 将给定查询条件字符串中的{@linkplain QueryColumnMetaInfo#getPropertyPath()}替换为{@linkplain QueryColumnMetaInfo#getColumnPath()}。
+	 * 
+	 * @param dialect
+	 * @param queryColumnMetaInfos
+	 * @param condition
+	 * @return
+	 */
+	protected String replacePropertyPathToColumnPath(Dialect dialect, List<QueryColumnMetaInfo> queryColumnMetaInfos,
+			String condition)
+	{
+		if (condition == null || condition.isEmpty())
+			return condition;
+
+		StringBuilder cb = new StringBuilder(condition.length());
+
+		StringBuilder token = new StringBuilder();
+		for (int i = 0, len = condition.length(); i <= len; i++)
+		{
+			char c = (i == len ? 0 : condition.charAt(i));
+
+			if (i == len || Character.isWhitespace(c) || c == '=' || c == '>' || c == '<' || c == '!' || c == '('
+					|| c == ')' || c == ',')
+			{
+				String replaceStr = null;
+				boolean hasToken = (token.length() > 0);
+
+				if (hasToken)
+				{
+					String tokenStr = token.toString();
+
+					for (QueryColumnMetaInfo queryColumnMetaInfo : queryColumnMetaInfos)
+					{
+						if (tokenStr.equalsIgnoreCase(queryColumnMetaInfo.getPropertyPath()))
+						{
+							replaceStr = queryColumnMetaInfo.getColumnPath();
+							break;
+						}
+					}
+
+					if (replaceStr != null)
+						cb.append(replaceStr);
+					else
+						cb.append(tokenStr);
+
+					token.delete(0, token.length());
+
+					if (i != len)
+						cb.append(c);
+				}
+				else
+				{
+					if (i != len)
+						cb.append(c);
+				}
+			}
+			// SQL字符串
+			else if (c == '\'')
+			{
+				cb.append(c);
+
+				for (i = i + 1; i < len; i++)
+				{
+					c = condition.charAt(i);
+					char cn = (i + 1 >= len ? 0 : condition.charAt(i + 1));
+
+					cb.append(c);
+
+					if (c == '\'')
+					{
+						if (cn == '\'')
+						{
+							cb.append(cn);
+							i += 1;
+						}
+						else
+							break;
+					}
+				}
+			}
+			else
+				token.append(c);
+		}
+
+		return cb.toString();
 	}
 
 	/**
