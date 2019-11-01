@@ -33,16 +33,17 @@ import org.datagear.model.features.NotEditable;
 import org.datagear.model.support.MU;
 import org.datagear.model.support.PropertyPath;
 import org.datagear.model.support.PropertyPathInfo;
-import org.datagear.persistence.QueryColumnMetaInfo;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceManager;
+import org.datagear.persistence.QueryColumnMetaInfo;
 import org.datagear.persistence.QueryResultMetaInfo;
 import org.datagear.persistence.columnconverter.LOBConversionContext;
 import org.datagear.persistence.columnconverter.LOBConversionContext.LOBConversionSetting;
 import org.datagear.persistence.support.ExpressionEvaluationContext;
 import org.datagear.persistence.support.PMU;
+import org.datagear.persistence.support.PMU.IdentifierReplaceSource;
 import org.datagear.persistence.support.SelectOptions;
 import org.datagear.persistence.support.SqlExpressionSyntaxErrorException;
 import org.datagear.persistence.support.VariableExpressionSyntaxErrorException;
@@ -268,10 +269,11 @@ public class DataController extends AbstractSchemaModelConnController
 
 				Connection cn = getConnection();
 
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager.getQueryResultMetaInfo(cn, model);
 
-				springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel
-						.toWriteJsonTemplateModel(getPropertyPathDisplayNames(request, queryResultMetaInfo)));
+				springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(
+						getPropertyPathDisplayNames(request, queryResultMetaInfo, true, dialect)));
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
 						ModelUtils.displayName(model, WebUtils.getLocale(request)));
 				springModel.addAttribute(KEY_TITLE_DISPLAY_DESC,
@@ -306,6 +308,19 @@ public class DataController extends AbstractSchemaModelConnController
 
 				LOBConversionContext.set(buildQueryLobConversionSetting());
 
+				if (pagingQuery.hasCondition())
+				{
+					Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
+					QueryResultMetaInfo queryResultMetaInfo = persistenceManager.getQueryResultMetaInfo(cn, model);
+					List<PropertyPathDisplayName> propertyPathDisplayNames = getPropertyPathDisplayNames(request,
+							queryResultMetaInfo, false, dialect);
+
+					String condition = PMU.replaceIdentifier(dialect, pagingQuery.getCondition(),
+							new PropertyPathIdentifierReplaceSource(propertyPathDisplayNames), true);
+
+					pagingQuery.setCondition(condition);
+				}
+
 				PagingData<Object> pagingData = persistenceManager.query(cn, model, pagingQuery);
 
 				LOBConversionContext.remove();
@@ -315,6 +330,47 @@ public class DataController extends AbstractSchemaModelConnController
 		};
 
 		return executor.execute();
+	}
+
+	protected static class PropertyPathIdentifierReplaceSource implements IdentifierReplaceSource
+	{
+		private List<PropertyPathDisplayName> propertyPathDisplayNames;
+
+		public PropertyPathIdentifierReplaceSource()
+		{
+			super();
+		}
+
+		public PropertyPathIdentifierReplaceSource(List<PropertyPathDisplayName> propertyPathDisplayNames)
+		{
+			super();
+			this.propertyPathDisplayNames = propertyPathDisplayNames;
+		}
+
+		public List<PropertyPathDisplayName> getPropertyPathDisplayNames()
+		{
+			return propertyPathDisplayNames;
+		}
+
+		public void setPropertyPathDisplayNames(List<PropertyPathDisplayName> propertyPathDisplayNames)
+		{
+			this.propertyPathDisplayNames = propertyPathDisplayNames;
+		}
+
+		@Override
+		public String replace(String identifier)
+		{
+			if (this.propertyPathDisplayNames == null)
+				return null;
+
+			for (PropertyPathDisplayName propertyPathDisplayName : this.propertyPathDisplayNames)
+			{
+				if (identifier.equalsIgnoreCase(propertyPathDisplayName.getDisplayName()))
+					return propertyPathDisplayName.getPropertyPath();
+			}
+
+			return null;
+		}
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/add")
@@ -750,13 +806,14 @@ public class DataController extends AbstractSchemaModelConnController
 
 				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
 
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
 				QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 						.getQueryPropValueSourceQueryResultMetaInfo(cn, model, data, propertyPathInfo);
 
 				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
 				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel
-						.toWriteJsonTemplateModel(getPropertyPathDisplayNames(request, queryResultMetaInfo)));
+				springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(
+						getPropertyPathDisplayNames(request, queryResultMetaInfo, true, dialect)));
 
 				boolean isMultipleSelect = false;
 				if (request.getParameter("multiple") != null)
@@ -802,6 +859,20 @@ public class DataController extends AbstractSchemaModelConnController
 				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
 
 				LOBConversionContext.set(buildQueryLobConversionSetting());
+
+				if (pagingQuery.hasCondition())
+				{
+					Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
+					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
+							.getQueryPropValueSourceQueryResultMetaInfo(cn, model, data, propertyPathInfo);
+					List<PropertyPathDisplayName> propertyPathDisplayNames = getPropertyPathDisplayNames(request,
+							queryResultMetaInfo, false, dialect);
+
+					String condition = PMU.replaceIdentifier(dialect, pagingQuery.getCondition(),
+							new PropertyPathIdentifierReplaceSource(propertyPathDisplayNames), true);
+
+					pagingQuery.setCondition(condition);
+				}
 
 				PagingData<Object> pagingData = persistenceManager.queryPropValueSource(cn, model, data,
 						propertyPathInfo, pagingQuery);
@@ -1160,11 +1231,13 @@ public class DataController extends AbstractSchemaModelConnController
 
 				if (isLoadPageData)
 				{
+					Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
 					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 							.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
 
-					springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel
-							.toWriteJsonTemplateModel(getPropertyPathDisplayNames(request, queryResultMetaInfo)));
+					springModel.addAttribute(KEY_CONDITION_SOURCE,
+							WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(
+									getPropertyPathDisplayNames(request, queryResultMetaInfo, true, dialect)));
 				}
 
 				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
@@ -1210,6 +1283,20 @@ public class DataController extends AbstractSchemaModelConnController
 
 				LOBConversionContext.set(buildQueryLobConversionSetting());
 
+				if (pagingQuery.hasCondition())
+				{
+					Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
+					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
+							.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
+					List<PropertyPathDisplayName> propertyPathDisplayNames = getPropertyPathDisplayNames(request,
+							queryResultMetaInfo, false, dialect);
+
+					String condition = PMU.replaceIdentifier(dialect, pagingQuery.getCondition(),
+							new PropertyPathIdentifierReplaceSource(propertyPathDisplayNames), true);
+
+					pagingQuery.setCondition(condition);
+				}
+
 				PagingData<Object> pagingData = persistenceManager.queryMultiplePropValue(cn, model, data,
 						propertyPathInfo, pagingQuery, true);
 
@@ -1249,11 +1336,13 @@ public class DataController extends AbstractSchemaModelConnController
 
 				if (isLoadPageData)
 				{
+					Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
 					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
 							.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
 
-					springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel
-							.toWriteJsonTemplateModel(getPropertyPathDisplayNames(request, queryResultMetaInfo)));
+					springModel.addAttribute(KEY_CONDITION_SOURCE,
+							WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(
+									getPropertyPathDisplayNames(request, queryResultMetaInfo, true, dialect)));
 				}
 
 				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
@@ -2001,10 +2090,12 @@ public class DataController extends AbstractSchemaModelConnController
 	 * 
 	 * @param request
 	 * @param queryResultMetaInfo
+	 * @param quote
+	 * @param dialect
 	 * @return
 	 */
 	protected List<PropertyPathDisplayName> getPropertyPathDisplayNames(HttpServletRequest request,
-			QueryResultMetaInfo queryResultMetaInfo)
+			QueryResultMetaInfo queryResultMetaInfo, boolean quote, Dialect dialect)
 	{
 		List<PropertyPathDisplayName> propertyPathDisplayNames = new ArrayList<PropertyPathDisplayName>();
 
@@ -2014,10 +2105,14 @@ public class DataController extends AbstractSchemaModelConnController
 			PropertyPathDisplayName propertyPathDisplayName = new PropertyPathDisplayName();
 
 			String propertyPath = queryColumnMetaInfo.getPropertyPath();
+			String displayName = ModelUtils.displayName(queryResultMetaInfo.getModel(),
+					PropertyPath.valueOf(propertyPath), WebUtils.getLocale(request), ".", false);
+
+			if (quote)
+				displayName = dialect.quote(displayName);
 
 			propertyPathDisplayName.setPropertyPath(propertyPath);
-			propertyPathDisplayName.setDisplayName(ModelUtils.displayName(queryResultMetaInfo.getModel(),
-					PropertyPath.valueOf(propertyPath), WebUtils.getLocale(request), ".", false));
+			propertyPathDisplayName.setDisplayName(displayName);
 
 			propertyPathDisplayNames.add(propertyPathDisplayName);
 		}

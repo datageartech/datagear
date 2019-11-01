@@ -1387,41 +1387,6 @@
 		},
 		
 		/**
-		 * 将展示名称查询条件字符串转换为属性路径查询条件字符串。
-		 * 
-		 * @param conditionSource 条件自动完成源数组，元素必须有"propertyPath"属性。
-		 * @param condition 展示名称查询条件字符串
-		 */
-		convertToPropertyPathCondtion : function(conditionSource, condition)
-		{
-			if(!condition)
-				return condition;
-			
-			var conditionSourceNew = [];
-			conditionSourceNew = conditionSourceNew.concat(conditionSource);
-			conditionSourceNew.sort(function(s0, s1)
-			{
-				if(s0.value.length > s1.value.length)
-					return -1;
-				else if(s0.value.length == s1.value.length)
-					return 0;
-				else
-					return 1;
-			});
-			
-			var re = condition;
-			
-			for(var i=0; i<conditionSourceNew.length; i++)
-			{
-				var cc = conditionSourceNew[i];
-				
-				re = re.replace(cc.value, cc.propertyPath);
-			}
-			
-			return re;
-		},
-		
-		/**
 		 * 调用指定对象的指定函数。
 		 * @param obj
 		 * @param functionName 函数名称

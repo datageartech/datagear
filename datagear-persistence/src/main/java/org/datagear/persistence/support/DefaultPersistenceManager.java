@@ -467,7 +467,7 @@ public class DefaultPersistenceManager extends AbstractModelDataAccessObject imp
 		Dialect dialect = this.dialectSource.getDialect(cn);
 
 		QueryResultMetaInfo queryResultMetaInfo = this.selectPersistenceOperation.getQueryResultMetaInfo(dialect,
-				getTableName(pmodel), model);
+				getTableName(pmodel), pmodel);
 
 		return queryResultMetaInfo;
 	}

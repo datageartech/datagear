@@ -59,6 +59,7 @@ import org.datagear.persistence.mapper.Mapper;
 import org.datagear.persistence.mapper.MapperUtil;
 import org.datagear.persistence.mapper.ModelTableMapper;
 import org.datagear.persistence.mapper.PropertyTableMapper;
+import org.datagear.persistence.support.PMU.IdentifierReplaceSource;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
 
@@ -1622,80 +1623,8 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 	protected String replacePropertyPathToColumnPath(Dialect dialect, List<QueryColumnMetaInfo> queryColumnMetaInfos,
 			String condition)
 	{
-		if (condition == null || condition.isEmpty())
-			return condition;
-
-		StringBuilder cb = new StringBuilder(condition.length());
-
-		StringBuilder token = new StringBuilder();
-		for (int i = 0, len = condition.length(); i <= len; i++)
-		{
-			char c = (i == len ? 0 : condition.charAt(i));
-
-			if (i == len || Character.isWhitespace(c) || c == '=' || c == '>' || c == '<' || c == '!' || c == '('
-					|| c == ')' || c == ',')
-			{
-				String replaceStr = null;
-				boolean hasToken = (token.length() > 0);
-
-				if (hasToken)
-				{
-					String tokenStr = token.toString();
-
-					for (QueryColumnMetaInfo queryColumnMetaInfo : queryColumnMetaInfos)
-					{
-						if (tokenStr.equalsIgnoreCase(queryColumnMetaInfo.getPropertyPath()))
-						{
-							replaceStr = queryColumnMetaInfo.getColumnPath();
-							break;
-						}
-					}
-
-					if (replaceStr != null)
-						cb.append(replaceStr);
-					else
-						cb.append(tokenStr);
-
-					token.delete(0, token.length());
-
-					if (i != len)
-						cb.append(c);
-				}
-				else
-				{
-					if (i != len)
-						cb.append(c);
-				}
-			}
-			// SQL字符串
-			else if (c == '\'')
-			{
-				cb.append(c);
-
-				for (i = i + 1; i < len; i++)
-				{
-					c = condition.charAt(i);
-					char cn = (i + 1 >= len ? 0 : condition.charAt(i + 1));
-
-					cb.append(c);
-
-					if (c == '\'')
-					{
-						if (cn == '\'')
-						{
-							cb.append(cn);
-							i += 1;
-						}
-						else
-							break;
-					}
-				}
-			}
-			else
-				token.append(c);
-		}
-
-		return cb.toString();
+		return PMU.replaceIdentifier(dialect, condition, new ColumnPathIdentifierReplaceSource(queryColumnMetaInfos),
+				false);
 	}
 
 	/**
@@ -2339,6 +2268,47 @@ public class SelectPersistenceOperation extends AbstractModelPersistenceOperatio
 		public String next()
 		{
 			return this.alias;
+		}
+	}
+
+	protected static class ColumnPathIdentifierReplaceSource implements IdentifierReplaceSource
+	{
+		private List<QueryColumnMetaInfo> queryColumnMetaInfos;
+
+		public ColumnPathIdentifierReplaceSource()
+		{
+			super();
+		}
+
+		public ColumnPathIdentifierReplaceSource(List<QueryColumnMetaInfo> queryColumnMetaInfos)
+		{
+			super();
+			this.queryColumnMetaInfos = queryColumnMetaInfos;
+		}
+
+		public List<QueryColumnMetaInfo> getQueryColumnMetaInfos()
+		{
+			return queryColumnMetaInfos;
+		}
+
+		public void setQueryColumnMetaInfos(List<QueryColumnMetaInfo> queryColumnMetaInfos)
+		{
+			this.queryColumnMetaInfos = queryColumnMetaInfos;
+		}
+
+		@Override
+		public String replace(String identifier)
+		{
+			if (this.queryColumnMetaInfos == null)
+				return null;
+
+			for (QueryColumnMetaInfo queryColumnMetaInfo : queryColumnMetaInfos)
+			{
+				if (identifier.equalsIgnoreCase(queryColumnMetaInfo.getPropertyPath()))
+					return queryColumnMetaInfo.getColumnPath();
+			}
+
+			return null;
 		}
 	}
 }

@@ -49,7 +49,7 @@ po.conditionAutocompleteSource = undefined;
 		{
 			"keyword" : $.trim(po.keywordInput().val()),
 			"notLike" : $.trim(po.notLikeInput().val()),
-			"condition" : $.convertToPropertyPathCondtion(po.conditionAutocompleteSource, nameLableCondition)
+			"condition" : nameLableCondition
 		};
 		
 		return param;

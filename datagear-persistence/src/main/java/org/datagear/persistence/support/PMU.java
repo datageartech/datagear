@@ -5,11 +5,14 @@
 package org.datagear.persistence.support;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.model.support.MU;
+import org.datagear.persistence.Dialect;
 import org.datagear.persistence.collection.SizeOnlyCollection;
 import org.datagear.persistence.features.KeyRule;
 import org.datagear.persistence.features.KeyRule.RuleType;
@@ -223,5 +226,161 @@ public class PMU
 		}
 		else
 			return new Object[] { obj };
+	}
+
+	/**
+	 * 替换SQL查询条件（WHERE之后的SQL片段）中的标识符。
+	 * 
+	 * @param dialect
+	 * @param condition
+	 * @param source
+	 * @param keepIdentifierQuote
+	 * @return
+	 */
+	public static String replaceIdentifier(Dialect dialect, String condition, IdentifierReplaceSource source,
+			boolean keepIdentifierQuote)
+	{
+		if (condition == null || condition.isEmpty())
+			return condition;
+
+		String iq = dialect.getIdentifierQuote();
+		StringBuilder cb = new StringBuilder(condition.length());
+
+		StringBuilder token = new StringBuilder();
+		for (int i = 0, len = condition.length(); i < len; i++)
+		{
+			char c = condition.charAt(i);
+
+			if (Character.isWhitespace(c) || c == '=' || c == '>' || c == '<' || c == '!' || c == '(' || c == ')'
+					|| c == ',')
+			{
+				String replaceStr = null;
+				boolean hasToken = (token.length() > 0);
+
+				if (hasToken)
+				{
+					String tokenStr = token.toString();
+
+					if (!isConditionKeyword(tokenStr))
+						replaceStr = source.replace(dialect.unquote(tokenStr));
+
+					if (replaceStr != null)
+					{
+						if (keepIdentifierQuote && dialect.isQuoted(tokenStr))
+							replaceStr = dialect.quote(replaceStr);
+
+						cb.append(replaceStr);
+					}
+					else
+						cb.append(tokenStr);
+
+					token.delete(0, token.length());
+
+					cb.append(c);
+				}
+				else
+					cb.append(c);
+			}
+			// SQL字符串
+			else if (c == '\'')
+			{
+				cb.append(c);
+
+				for (i = i + 1; i < len; i++)
+				{
+					c = condition.charAt(i);
+					char cn = (i + 1 >= len ? 0 : condition.charAt(i + 1));
+
+					cb.append(c);
+
+					if (c == '\'')
+					{
+						if (cn == '\'')
+						{
+							cb.append(cn);
+							i += 1;
+						}
+						else
+							break;
+					}
+				}
+			}
+			// 标识符引用
+			else if (condition.indexOf(iq, i) == i)
+			{
+				int endIdx = condition.indexOf(iq, i + 1);
+				if (endIdx < i + 1)
+					endIdx = len;
+				else
+					endIdx = endIdx + iq.length();
+
+				token.append(condition.subSequence(i, endIdx));
+				i = endIdx - 1;
+			}
+			else
+				token.append(c);
+		}
+
+		if (token.length() > 0)
+		{
+			String tokenStr = token.toString();
+			String replaceStr = null;
+
+			if (!isConditionKeyword(tokenStr))
+				replaceStr = source.replace(dialect.unquote(tokenStr));
+
+			if (replaceStr != null)
+			{
+				if (keepIdentifierQuote && dialect.isQuoted(tokenStr))
+					replaceStr = dialect.quote(replaceStr);
+
+				cb.append(replaceStr);
+			}
+			else
+				cb.append(tokenStr);
+		}
+
+		return cb.toString();
+	}
+
+	protected static boolean isConditionKeyword(String s)
+	{
+		if (s == null || s.isEmpty())
+			return false;
+
+		return CONDITION_KEYWORDS.contains(s.toUpperCase());
+	}
+
+	private static final Set<String> CONDITION_KEYWORDS = new HashSet<String>();
+	static
+	{
+		CONDITION_KEYWORDS.add("AND");
+		CONDITION_KEYWORDS.add("OR");
+		CONDITION_KEYWORDS.add("LIKE");
+		CONDITION_KEYWORDS.add("NOT");
+		CONDITION_KEYWORDS.add("BETWEEN");
+		CONDITION_KEYWORDS.add("IN");
+		CONDITION_KEYWORDS.add("IS");
+		CONDITION_KEYWORDS.add("NULL");
+	}
+
+	/**
+	 * 标识符替换源。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static interface IdentifierReplaceSource
+	{
+		/**
+		 * 替换标识符。
+		 * <p>
+		 * 如果没有可替换，返回{@code null}。
+		 * </p>
+		 * 
+		 * @param identifier
+		 * @return
+		 */
+		String replace(String identifier);
 	}
 }

@@ -57,6 +57,23 @@ public abstract class AbstractDialect implements Dialect
 	}
 
 	@Override
+	public boolean isQuoted(String name)
+	{
+		return (name.length() > this.identifierQuote.length() * 2 && name.startsWith(this.identifierQuote)
+				&& name.endsWith(this.identifierQuote));
+	}
+
+	@Override
+	public String unquote(String name)
+	{
+		if (!isQuoted(name))
+			return name;
+
+		int iqLen = this.identifierQuote.length();
+		return name.substring(iqLen, name.length() - iqLen);
+	}
+
+	@Override
 	public SqlBuilder toKeywordQueryCondition(Model model, Query query,
 			List<? extends QueryColumnMetaInfo> queryColumnMetaInfos)
 	{

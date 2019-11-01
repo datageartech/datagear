@@ -26,6 +26,25 @@ public interface Dialect
 	String quote(String name);
 
 	/**
+	 * 给定名字是否已添加标识符引用符号。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	boolean isQuoted(String name);
+
+	/**
+	 * 移除给定名字的标识符引用符号。
+	 * <p>
+	 * 如果没有，则返回原名字。
+	 * </p>
+	 * 
+	 * @param name
+	 * @return
+	 */
+	String unquote(String name);
+
+	/**
 	 * 获取标识符引用符号。
 	 * <p>
 	 * 数据库中，对于包含某些特殊字符（比如：'.'）的标识符，通常需要在两侧添加引用符号，否则会出现语法错误。
