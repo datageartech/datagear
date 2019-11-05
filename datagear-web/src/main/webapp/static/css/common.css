@@ -1038,6 +1038,8 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	margin-left: 0.1em;
 	padding: 2px 2px;
 	position: relative;
+	opacity: 0.8;
+	filter: Alpha(Opacity=80);
 }
 .search-form .condition-panel-parent .condition-panel .condition-panel-title-bar{
 	text-align: right;
