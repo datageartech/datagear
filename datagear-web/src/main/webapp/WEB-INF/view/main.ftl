@@ -348,7 +348,13 @@
 				minSize : westMinSize,
 				maxSize : "50%"
 			},
-			onresize_end : function(){ $(window).resize();/*触发page_obj_grid.jsp表格resize*/ }
+			onresize_end : function()
+			{
+				//使"#schemaOperationMenu"可以最上层展示
+				po.element(".ui-layout-west").css("z-index", 3);
+				
+				$(window).resize();/*触发page_obj_grid.jsp表格resize*/
+			}
 		});
 		
 		//使"#schemaOperationMenu"可以最上层展示
