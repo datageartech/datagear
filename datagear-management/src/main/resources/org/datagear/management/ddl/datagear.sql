@@ -157,3 +157,9 @@ CREATE TABLE DATAGEAR_SQL_HISTORY
 );
 
 ALTER TABLE DATAGEAR_SQL_HISTORY ADD FOREIGN KEY (SQLHIS_SCHEMA_ID) REFERENCES DATAGEAR_SCHEMA (SCHEMA_ID) ON DELETE CASCADE;
+
+
+-----------------------------------------
+--version[1.5.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
