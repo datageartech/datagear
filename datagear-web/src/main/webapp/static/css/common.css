@@ -773,37 +773,61 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	right: 0px;
 	bottom: 0px;
 }
-.main-page-content .schema-panel{
-	display: inline-block;
-	width: 100%;
-	height: 100%;
-	border: none;
+.main-page-content .main-nav{
+	position: absolute;
+	top: 0;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+}
+.main-page-content .main-nav.ui-widget.ui-widget-content{
+	border-width: 0px;
+}
+.main-page-content .main-nav.ui-tabs .ui-tabs-nav li{
+	border-width: 0px;
+}
+.main-page-content .main-nav.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
+	padding: 0.3em 1em;
+}
+.main-page-content .main-nav.ui-tabs .ui-tabs-panel{
+	padding: 0px 0px;
+	margin: 0px 0px;
+	position: absolute;
+	left: 0.2em;
+	right: 0.1em;
+	top: 2.4em;
+	bottom: 0px;
+	border-width: 0px;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.main-page-content .main-nav .ui-tabs-nav{
+	padding: 0px 0px;
+}
+.main-page-content .main-nav .ui-tabs-nav.ui-widget-header{
+	background: none;
+	border-width: 0px;
+	border-bottom-width: 1px;
+	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;
 }
 .main-page-content .schema-panel .schema-panel-head{
 	display: inline-block;
 	width: 100%;
 	min-width: 15em;
-	height: 2.5em;
+	height: 2.2em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	padding-top: 0.3em;
 }
-.main-page-content .schema-panel .schema-panel-head .schema-panel-title{
-	display: inline-block;
-	width: 30%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-    white-space: nowrap;
-}
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation{
 	display: inline-block;
-	width: 68%;
-	float: right;
+	width: 100%;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
@@ -813,8 +837,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search{
 	position: absolute;
-	left: 0;
-	right: 4em;
+	left: 0px;
+	right: 4.5em;
+	max-width: 14em;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search form{
 	position: relative;
@@ -866,12 +891,11 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li > .ui-menu-item-wrapper{
 	width: 1.5em;
 	height: 1.5em;
-    margin-top: 1px;
 }
 .main-page-content .schema-panel .schema-panel-content{
 	position: absolute;
     display: block;
-    top: 2.5em;
+    top: 2.2em;
     bottom: 0em;
     left: 0em;
     right: 0em;

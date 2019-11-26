@@ -108,7 +108,7 @@
 			var nextNumber = (po.genTabIdNextNumber != undefined 
 					? (po.genTabIdNextNumber = po.genTabIdNextNumber + 1) : (po.genTabIdNextNumber = 0));
 			
-			value = "mainTabs-" + nextNumber;
+			value = "${pageId}-mainTabs-tab-" + nextNumber;
 			map[key] = value;
 		}
 		
@@ -438,6 +438,8 @@
 				}
 			}
 		});
+		
+		po.element("#${pageId}-nav").tabs();
 
 		po.element("#schemaSearchSwitch").click(function()
 		{
@@ -665,8 +667,7 @@
 				        		{
 					        		var tabId = po.genTabId(schemaId, tableName);
 					        		
-					        		var mainTabs = po.element("#mainTabs");
-					        		var uiTabsNav = mainTabs.find(".ui-tabs-nav");
+					        		var uiTabsNav = po.mainTabs.find(".ui-tabs-nav");
 					        		
 					        	    var prelia = $("> li > a[href='#"+tabId+"']", uiTabsNav);
 					        	    if(prelia.length > 0)
@@ -675,10 +676,10 @@
 					        	    	{
 					        	    	    uiTabsNav.show();
 					        	    	    
-					        	    	    $("#"+tabId, mainTabs).html(data);
+					        	    	    $("#"+tabId, po.mainTabs).html(data);
 					        	    	    
 						        	    	var myidx = prelia.parent().index();
-						        	    	mainTabs.tabs("option", "active",  myidx);
+						        	    	po.mainTabs.tabs("option", "active",  myidx);
 					        	    	 });
 					        	    }
 				        		},
@@ -984,7 +985,7 @@
 			}
 		});
 		
-		po.mainTabs = po.element("#mainTabs");
+		po.mainTabs = po.element("#${pageId}-mainTabs");
 		
 		po.mainTabs.tabs(
 		{
@@ -1009,7 +1010,7 @@
 		
 		po.getTabsNav(po.mainTabs).hide();
 		
-		po.getTabsTabMoreOperationMenu(mainTabs).menu(
+		po.getTabsTabMoreOperationMenu(po.mainTabs).menu(
 		{
 			select: function(event, ui)
 			{
@@ -1028,7 +1029,7 @@
 			}
 		});
 		
-		po.getTabsMoreTabMenu(mainTabs).menu(
+		po.getTabsMoreTabMenu(po.mainTabs).menu(
 		{
 			select: function(event, ui)
 			{
@@ -1116,45 +1117,56 @@
 </div>
 <div class="main-page-content">
 	<div class="ui-layout-west">
-		<div class="ui-widget ui-widget-content schema-panel">
-			<div class="schema-panel-head">
-				<div class="schema-panel-title"><@spring.message code='main.schema' /></div>
-				<div class="schema-panel-operation">
-					<div class="ui-widget ui-widget-content ui-corner-all search">
-						<form id="schemaSearchForm" action="javascript:void(0);">
-							<div id="schemaSearchSwitch" class="schema-search-switch"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
-							<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" /></div>
-							<button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><@spring.message code='find' /></button>
-							<input name="pageSize" type="hidden" value="100" />
-						</form>
+		<div id="${pageId}-nav" class="main-nav">
+			<ul>
+				<li><a href="#${pageId}-nav-dataSource"><@spring.message code='main.dataSource' /></a></li>
+				<li><a href="#${pageId}-nav-dataAnalysis"><@spring.message code='main.dataAnalysis' /></a></li>
+			</ul>
+			<div id="${pageId}-nav-dataSource" class="ui-widget ui-widget-content schema-panel">
+				<div class="schema-panel-head">
+					<div class="schema-panel-operation">
+						<div class="ui-widget ui-widget-content ui-corner-all search">
+							<form id="schemaSearchForm" action="javascript:void(0);">
+								<div id="schemaSearchSwitch" class="schema-search-switch"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
+								<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" /></div>
+								<button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><@spring.message code='find' /></button>
+								<input name="pageSize" type="hidden" value="100" />
+							</form>
+						</div>
+						<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+						<ul id="schemaOperationMenu" class="lightweight-menu">
+							<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
+								<ul class="ui-widget-shadow">
+									<li class="schema-operation-edit"><a href="javascript:void(0);"><@spring.message code='edit' /></a></li>
+									<li class="schema-operation-delete"><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
+									<li class="schema-operation-view"><a href="javascript:void(0);"><@spring.message code='view' /></a></li>
+									<li class="schema-operation-refresh" title="<@spring.message code='main.schemaOperationMenuRefreshComment' />"><a href="javascript:void(0);"><@spring.message code='refresh' /></a></li>
+									<li class="schema-operation-authorize"><a href="javascript:void(0);"><@spring.message code='authorize' /></a></li>
+									<li class="ui-widget-header"></li>
+									<li class="schema-operation-reload" title="<@spring.message code='main.schemaOperationMenuReloadComment' />"><a href="javascript:void(0);"><@spring.message code='reload' /></a></li>
+									<li class="ui-widget-header"></li>
+									<li class="schema-operation-sqlpad"><a href="javascript:void(0);"><@spring.message code='main.sqlpad' /></a></li>
+									<li class="ui-widget-header"></li>
+									<li class="schema-operation-dataimport"><a href="javascript:void(0);"><@spring.message code='main.dataimport' /></a></li>
+									<li class="schema-operation-dataexport"><a href="javascript:void(0);"><@spring.message code='main.dataexport' /></a></li>
+								</ul>
+							</li>
+						</ul>
 					</div>
-					<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
-					<ul id="schemaOperationMenu" class="lightweight-menu">
-						<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
-							<ul class="ui-widget-shadow">
-								<li class="schema-operation-edit"><a href="javascript:void(0);"><@spring.message code='edit' /></a></li>
-								<li class="schema-operation-delete"><a href="javascript:void(0);"><@spring.message code='delete' /></a></li>
-								<li class="schema-operation-view"><a href="javascript:void(0);"><@spring.message code='view' /></a></li>
-								<li class="schema-operation-refresh" title="<@spring.message code='main.schemaOperationMenuRefreshComment' />"><a href="javascript:void(0);"><@spring.message code='refresh' /></a></li>
-								<li class="schema-operation-authorize"><a href="javascript:void(0);"><@spring.message code='authorize' /></a></li>
-								<li class="ui-widget-header"></li>
-								<li class="schema-operation-reload" title="<@spring.message code='main.schemaOperationMenuReloadComment' />"><a href="javascript:void(0);"><@spring.message code='reload' /></a></li>
-								<li class="ui-widget-header"></li>
-								<li class="schema-operation-sqlpad"><a href="javascript:void(0);"><@spring.message code='main.sqlpad' /></a></li>
-								<li class="ui-widget-header"></li>
-								<li class="schema-operation-dataimport"><a href="javascript:void(0);"><@spring.message code='main.dataimport' /></a></li>
-								<li class="schema-operation-dataexport"><a href="javascript:void(0);"><@spring.message code='main.dataexport' /></a></li>
-							</ul>
-						</li>
-					</ul>
+				</div>
+				<div class="schema-panel-content">
 				</div>
 			</div>
-			<div class="schema-panel-content">
+			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
+				<ul>
+					<li>图表</li>
+					<li>看板</li>
+				</ul>
 			</div>
 		</div>
 	</div>
 	<div class="ui-layout-center">
-		<div id="mainTabs" class="main-tabs">
+		<div id="${pageId}-mainTabs" class="main-tabs">
 			<ul>
 			</ul>
 			<div class="tabs-more-operation-menu-wrapper ui-widget ui-front ui-widget-content ui-corner-all ui-widget-shadow" style="position: absolute; left:0px; top:0px; display: none;">
