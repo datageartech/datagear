@@ -346,6 +346,7 @@ form .form-foot .ui-button{
  }
 .jstree-default .jstree-anchor > .jstree-icon{
 	margin-left: 0;
+	margin-right: 4.1px;
 }
 .jstree-default > .jstree-no-dots .jstree-closed > .jstree-ocl{
 	background-position: -32px -16px;
@@ -355,15 +356,6 @@ form .form-foot .ui-button{
 }
 .jstree-default > .jstree-no-dots .jstree-loading > .jstree-ocl{
 	background-position: -176px -64px;
-}
-.jstree-default .jstree-themeicon{
-	background-position: 0 -96px;
-}
-.jstree-default .jstree-leaf .jstree-themeicon{
-	background-position: -112px -112px;
-}
-.jstree-default .jstree-leaf.view-node .jstree-themeicon{
-	background-position: -64px -96px;
 }
 .jstree-default .jstree-leaf.next-page-node .jstree-themeicon{
 	background-position: -65px 0px;
@@ -906,10 +898,47 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	overflow-x: auto;
 	overflow-y: auto;
 }
+/*主页数据源jstree自定义图标*/
+.main-page-content .schema-panel .schema-panel-content.jstree-default .jstree-themeicon{
+	background-position: 0 -96px;
+}
+.main-page-content .schema-panel .schema-panel-content.jstree-default .jstree-leaf .jstree-themeicon{
+	background-position: -112px -112px;
+}
+.main-page-content .schema-panel .schema-panel-content.jstree-default .jstree-leaf.view-node .jstree-themeicon{
+	background-position: -64px -96px;
+}
 /*树结构中的更多表节点*/
 .main-page-content .schema-panel .schema-panel-content .more-table{
 	font-weight: bold;
 	font-style: italic;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-content{
+	position: absolute;
+    display: block;
+    top: 0em;
+    bottom: 0em;
+    left: 0em;
+    right: 0em;
+    padding-top: 0.2em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	overflow-x: auto;
+	overflow-y: auto;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-content.jstree-default .jstree-anchor{
+	margin-left: 0.5em;
+	min-width: 90%;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-content.jstree-default .item-dataset .jstree-themeicon{
+	background-position: -112px -112px;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-content.jstree-default .item-chart .jstree-themeicon{
+	background-position: -208px -128px;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-content.jstree-default .item-dashboard .jstree-themeicon{
+	    background-position: -192px -128px;
 }
 .main-page-content .table-draggable-helper{
 	padding: 0.5em 1em;

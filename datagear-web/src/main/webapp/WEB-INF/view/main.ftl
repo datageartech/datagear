@@ -17,14 +17,21 @@
 	po.mainTabs = null;
 	
 	po.workTabTemplate = "<li style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
-			+"<div class='tab-operation'>"			
+			+"<div class='tab-operation'>"
+			+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
+			+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'><span class='ui-icon ui-icon-caret-1-se'></span></div>"
+			+"</div>"
+			+"</li>";
+
+	po.workTabTemplateWithSchema = "<li style='vertical-align:middle;'><a href='"+'#'+"{href}'>"+'#'+"{label}</a>"
+			+"<div class='tab-operation'>"
 			+"<span class='ui-icon ui-icon-close' title='<@spring.message code='close' />'>close</span>"
 			+"<div class='tabs-more-operation-button' title='<@spring.message code='moreOperation' />'><span class='ui-icon ui-icon-caret-1-se'></span></div>"
 			+"</div>"
 			+"<div class='category-bar category-bar-"+'#'+"{schemaId}'></div>"
 			+"</li>";
-	
-	po.activeWorkTab = function(tabId, tabLabel, tabTitle, schema, url, tabType)
+			
+	po.activeWorkTab = function(tabId, tabLabel, tabTitle, url, schema)
 	{
 		tabLabel = $.truncateIf(tabLabel, "..", 20);
 		
@@ -53,15 +60,22 @@
 		    		//防止双击导致创建两次而引起界面错乱
 		    		if(tab.length == 0)
 		    		{
-		    			tab = $(po.workTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, tabLabel).replace(/#\{schemaId\}/g, schema.id)).appendTo(mainTabsNav);
+		    			if(schema != null)
+		    			{
+		    				tab = $(po.workTabTemplateWithSchema.replace( /#\{href\}/g, "#" + tabId)
+			    					.replace(/#\{label\}/g, tabLabel).replace(/#\{schemaId\}/g, schema.id))
+			    					.appendTo(mainTabsNav);
+			    			tab.attr("schema-id", schema.id);
+		    			}
+		    			else
+			    			tab = $(po.workTabTemplate.replace( /#\{href\}/g, "#" + tabId).replace(/#\{label\}/g, tabLabel))
+			    					.appendTo(mainTabsNav);
 		    			
 		    			if(!tab.attr("id"))
-		    				tab.attr("id", $.uid("main-tab-"));
+		    				tab.attr("id", $.uid("${pageId}-mainTabs-li-"));
 		    			
-		    			tab.attr("schema-id", schema.id);
 		    			tab.attr("tab-url", url);
 		    			tab.attr("title", tabTitle);
-		    			tab.attr("tab-type", tabType);
 		    		}
 		    		
 		    	    if(tabPanel.length == 0)
@@ -84,7 +98,8 @@
 		    	    	
 		    	    	var menu = po.showTabMoreOperationMenu(po.mainTabs, mainTabsNav, tab, $(this));
 		    	    	
-		    	    	menu.attr("schema-id", tab.attr("schema-id")).attr("tab-url", tab.attr("tab-url"));
+		    	    	menu.attr("tab-url", tab.attr("tab-url"))
+		    	    		.attr("schema-id", tab.attr("schema-id"));
 		    	    });
     			},
 	        	complete : function()
@@ -95,12 +110,12 @@
 	    }
 	};
 	
-	po.genTabId = function(schemaId, tableName)
+	po.toMainTabId = function(name)
 	{
 		var map = (po.genTabIdMap || (po.genTabIdMap = {}));
 		
-		//不能直接使用这个key作为元素ID，因为tableName中可能存在与jquery冲突的字符，比如'$'
-		var key = schemaId +"_" + tableName;
+		//不直接使用name作为元素ID，因为name中可能存在与jquery冲突的字符，比如'$'
+		var key = name;
 		var value = map[key];
 		
 		if(value == undefined)
@@ -114,7 +129,12 @@
 		
 		return value;
 	};
-
+	
+	po.toMainTabIdForSchemaName = function(schemaId, tableName)
+	{
+		return po.toMainTabId(schemaId +"_" + tableName);
+	};
+	
 	po.isSchemaNode = function(node)
 	{
 		if(!node)
@@ -346,7 +366,7 @@
 			{
 				size : "18%",
 				minSize : westMinSize,
-				maxSize : "50%"
+				maxSize : "40%"
 			},
 			onresize_end : function()
 			{
@@ -665,7 +685,7 @@
 				        		},
 				        		success :  function(model)
 				        		{
-					        		var tabId = po.genTabId(schemaId, tableName);
+					        		var tabId = po.toMainTabIdForSchemaName(schemaId, tableName);
 					        		
 					        		var uiTabsNav = po.mainTabs.find(".ui-tabs-nav");
 					        		
@@ -742,7 +762,7 @@
 			    			
 							var tabUrl = "${contextPath}/sqlpad/" + schema.id;
 							
-							po.activeWorkTab(po.genTabId(schema.id, "sqlpad"), "<@spring.message code='main.sqlpad' />", tabTitle, schema, tabUrl, "sqlpad");
+							po.activeWorkTab(po.toMainTabIdForSchemaName(schema.id, "sqlpad"), "<@spring.message code='main.sqlpad' />", tabTitle, tabUrl, schema);
 						}
 					}
 				}
@@ -768,20 +788,20 @@
 						
 						if(isImport)
 						{
-							tabId = po.genTabId(schema.id, "dataimport");
+							tabId = po.toMainTabIdForSchemaName(schema.id, "dataimport");
 							tabLabel = "<@spring.message code='main.dataimport' />";
 							tabTitle = "<@spring.message code='main.dataimport' /><@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
 							tabUrl = "${contextPath}/dataexchange/" + schema.id+"/import";
 						}
 						else
 						{
-							tabId = po.genTabId(schema.id, "dataexport");
+							tabId = po.toMainTabIdForSchemaName(schema.id, "dataexport");
 							tabLabel = "<@spring.message code='main.dataexport' />";
 							tabTitle = "<@spring.message code='main.dataexport' /><@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
 							tabUrl = "${contextPath}/dataexchange/" + schema.id+"/export";
 						}
 						
-						po.activeWorkTab(tabId, tabLabel, tabTitle, schema, tabUrl, "dataexchange");
+						po.activeWorkTab(tabId, tabLabel, tabTitle, tabUrl, schema);
 					}
 				}
 			}
@@ -872,7 +892,7 @@
     			
 				var tabUrl = contextPath + $.toPath("data", schema.id, tableInfo.name, "query");
 				
-				po.activeWorkTab(po.genTabId(schema.id, tableInfo.name), data.node.text, tabTitle, schema, tabUrl, "table");
+				po.activeWorkTab(po.toMainTabIdForSchemaName(schema.id, tableInfo.name), data.node.text, tabTitle, tabUrl, schema);
 			}
 			else if(po.isNextPageNode(data.node))
 			{
@@ -932,6 +952,42 @@
 				var tree = $(this).jstree(true);
 				po.toDraggableNode(tree, data.node);
 			}
+		});
+		
+		po.element(".dataAnalysis-panel-content").jstree
+		(
+			{
+				"core" :
+				{
+					"themes" : {"dots": false, icons: true},
+					"check_callback" : true
+				}
+			}
+		)
+		.bind("select_node.jstree", function(e, data)
+		{
+			var tree = $(this).jstree(true);
+			
+			var $node = tree.get_node(data.node, true);
+			
+			var tabId = "dataAnalysis-";
+			var tabName = $node.text();
+			var tabUrl = "${contextPath}/about";
+			
+			if($node.hasClass("item-dataset"))
+			{
+				tabId += "dataset";
+			}
+			else if($node.hasClass("item-chart"))
+			{
+				tabId += "chart";
+			}
+			else if($node.hasClass("item-dashboard"))
+			{
+				tabId += "dashboard";
+			}
+			
+			po.activeWorkTab(po.toMainTabId(tabId), tabName, "", tabUrl);
 		});
 		
 		po.element("#schemaSearchForm").submit(function()
@@ -999,10 +1055,11 @@
 				
 				po.refreshTabsNavForHidden($this, tabsNav, newTab);
 				
-				var newSchemaId = newTab.attr("schema-id");
-				
 				$(".category-bar", tabsNav).removeClass("ui-state-active");
-				$(".category-bar.category-bar-"+newSchemaId, tabsNav).addClass("ui-state-active");
+				
+				var newSchemaId = newTab.attr("schema-id");
+				if(newSchemaId)
+					$(".category-bar.category-bar-"+newSchemaId, tabsNav).addClass("ui-state-active");
 				
 				$.callTabsPanelShowCallback(newPanel);
 			}
@@ -1158,10 +1215,13 @@
 				</div>
 			</div>
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
-				<ul>
-					<li>图表</li>
-					<li>看板</li>
-				</ul>
+				<div class="dataAnalysis-panel-content">
+					<ul>
+						<li class="item-dataset">数据集</li>
+						<li class="item-chart">图表</li>
+						<li class="item-dashboard">看板</li>
+					</ul>
+				</div>
 			</div>
 		</div>
 	</div>
