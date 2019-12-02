@@ -33,6 +33,7 @@
 		<module>datagear-web</module>
     	<module>datagear-webembd</module>
     	<module>datagear-util</module>
+		<module>datagear-analysis</module>
 	</modules>
 
 	<dependencies>
