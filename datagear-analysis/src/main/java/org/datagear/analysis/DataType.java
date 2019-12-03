@@ -8,12 +8,12 @@
 package org.datagear.analysis;
 
 /**
- * 图表可设置属性类型。
+ * 数据类型。
  * 
  * @author datagear@163.com
  *
  */
-public enum PropertyType
+public enum DataType
 {
 	/** 字符串 */
 	STRING,
@@ -26,4 +26,13 @@ public enum PropertyType
 
 	/** 小数 */
 	DECIMAL,
+
+	/** 日期 */
+	DATE,
+
+	/** 时间 */
+	TIME,
+
+	/** 时间戳 */
+	TIMESTAMP
 }

@@ -15,21 +15,24 @@ package org.datagear.analysis;
  */
 public class ColumnMeta
 {
+	/** 名称 */
 	private String name;
 
-	private String type;
+	/** 数据类型 */
+	private DataType dataType;
 
+	/** 展示标签 */
 	private String label;
 
 	public ColumnMeta()
 	{
 	}
 
-	public ColumnMeta(String name, String type)
+	public ColumnMeta(String name, DataType dataType)
 	{
 		super();
 		this.name = name;
-		this.type = type;
+		this.dataType = dataType;
 	}
 
 	public String getName()
@@ -42,14 +45,19 @@ public class ColumnMeta
 		this.name = name;
 	}
 
-	public String getType()
+	public DataType getDataType()
 	{
-		return type;
+		return dataType;
 	}
 
-	public void setType(String type)
+	public void setDataType(DataType dataType)
 	{
-		this.type = type;
+		this.dataType = dataType;
+	}
+
+	public boolean hasLabel()
+	{
+		return (this.label != null && !this.label.isEmpty());
 	}
 
 	public String getLabel()
@@ -65,6 +73,6 @@ public class ColumnMeta
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", type=" + type + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", dataType=" + dataType + "]";
 	}
 }

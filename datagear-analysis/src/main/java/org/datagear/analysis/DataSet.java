@@ -15,9 +15,17 @@ import java.util.Map;
  */
 public interface DataSet
 {
-	String getName();
-
+	/**
+	 * 获取{@linkplain DataSetMeta}。
+	 * 
+	 * @return
+	 */
 	DataSetMeta getMeta();
 
+	/**
+	 * 获取数据。
+	 * 
+	 * @return
+	 */
 	List<? extends Map<String, ?>> getDatas();
 }

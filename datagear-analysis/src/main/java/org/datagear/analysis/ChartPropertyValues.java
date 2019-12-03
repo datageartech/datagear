@@ -2,33 +2,36 @@
  * Copyright (c) 2018 datagear.tech. All Rights Reserved.
  */
 
-/**
- * 
- */
 package org.datagear.analysis;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
- * 图表设置项集。
+ * 图表属性值集合。
+ * <p>
+ * 此类用于表示用户对{@linkplain ChartPlugin#getChartProperties()}的输入集。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class ChartOptions
+public class ChartPropertyValues
 {
-	@SuppressWarnings("unchecked")
-	private Map<String, ?> options = Collections.EMPTY_MAP;
+	private Map<String, ?> options;
 
-	public ChartOptions()
+	public ChartPropertyValues()
 	{
 	}
 
-	public ChartOptions(Map<String, ?> options)
+	public ChartPropertyValues(Map<String, ?> options)
 	{
 		super();
 		this.options = options;
+	}
+
+	public boolean hasOption()
+	{
+		return (this.options != null && !this.options.isEmpty());
 	}
 
 	public Map<String, ?> getOptions()

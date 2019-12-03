@@ -4,29 +4,39 @@
 
 package org.datagear.analysis;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.datagear.analysis.constraint.Constraint;
+import org.datagear.util.i18n.Label;
 
 /**
- * 图表可设置属性。
+ * 图表属性。
+ * <p>
+ * 此类表示可由用户在界面输入设置的图表属性。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
 public class ChartProperty
 {
+	/** 名称 */
 	private String name;
 
+	/** 类型 */
 	private PropertyType type;
 
-	private String label;
+	/** 名称标签 */
+	private Label nameLabel;
 
+	/** 描述标签 */
+	private Label descLabel;
+
+	/** 默认值 */
 	private Object defaultValue;
 
-	@SuppressWarnings("unchecked")
-	private List<Constraint> constraints = Collections.EMPTY_LIST;
+	/** 约束 */
+	private List<Constraint> constraints;
 
 	public ChartProperty()
 	{
@@ -59,14 +69,39 @@ public class ChartProperty
 		this.type = type;
 	}
 
-	public String getLabel()
+	public boolean hasNameLabel()
 	{
-		return label;
+		return (this.nameLabel != null);
 	}
 
-	public void setLabel(String label)
+	public Label getNameLabel()
 	{
-		this.label = label;
+		return nameLabel;
+	}
+
+	public void setNameLabel(Label nameLabel)
+	{
+		this.nameLabel = nameLabel;
+	}
+
+	public boolean hasDescLabel()
+	{
+		return (this.descLabel != null);
+	}
+
+	public Label getDescLabel()
+	{
+		return descLabel;
+	}
+
+	public void setDescLabel(Label descLabel)
+	{
+		this.descLabel = descLabel;
+	}
+
+	public boolean hasDefaultValue()
+	{
+		return (this.defaultValue != null);
 	}
 
 	public Object getDefaultValue()
@@ -77,6 +112,11 @@ public class ChartProperty
 	public void setDefaultValue(Object defaultValue)
 	{
 		this.defaultValue = defaultValue;
+	}
+
+	public boolean hasConstraint()
+	{
+		return (this.constraints != null && !this.constraints.isEmpty());
 	}
 
 	public List<Constraint> getConstraints()

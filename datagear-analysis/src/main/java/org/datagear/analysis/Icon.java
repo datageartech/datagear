@@ -7,25 +7,27 @@
  */
 package org.datagear.analysis;
 
+import java.io.InputStream;
+
 /**
- * 图表。
+ * 图标。
  * 
  * @author datagear@163.com
  *
  */
-public interface Chart
+public interface Icon
 {
 	/**
-	 * 获取{@linkplain ChartPropertyValues}。
+	 * 获取图标输入流。
 	 * 
 	 * @return
 	 */
-	ChartPropertyValues getChartOptions();
+	InputStream getInputStream();
 
 	/**
-	 * 获取{@linkplain DataSetFactory}。
+	 * 获取图标扩展名（比如：{@code png、jpeg}）
 	 * 
 	 * @return
 	 */
-	DataSetFactory[] getDataSetFactories();
+	String getExtension();
 }
