@@ -5,6 +5,7 @@
 /**
  * 
  */
+
 package org.datagear.analysis;
 
 import java.util.Map;
@@ -18,33 +19,15 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class DataSetParamValues
+public class DataSetParamValues extends ValueMap
 {
-	private Map<String, ?> values;
-
 	public DataSetParamValues()
 	{
+		super();
 	}
 
 	public DataSetParamValues(Map<String, ?> values)
 	{
-		super();
-		this.values = values;
-	}
-
-	public Map<String, ?> getValues()
-	{
-		return values;
-	}
-
-	public void setValues(Map<String, ?> values)
-	{
-		this.values = values;
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> T getValue(String name)
-	{
-		return (T) (this.values == null ? null : this.values.get(name));
+		super(values);
 	}
 }

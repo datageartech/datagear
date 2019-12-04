@@ -5,9 +5,8 @@
 /**
  * 
  */
-package org.datagear.analysis;
 
-import java.util.List;
+package org.datagear.analysis;
 
 import org.datagear.util.i18n.Label;
 
@@ -16,16 +15,10 @@ import org.datagear.util.i18n.Label;
  * 
  * @author datagear@163.com
  *
+ * @param <T>
  */
-public interface ChartPlugin
+public interface ChartPlugin<T extends RenderContext> extends Identifiable
 {
-	/**
-	 * 获取名称。
-	 * 
-	 * @return
-	 */
-	String getName();
-
 	/**
 	 * 获取名称标签。
 	 * <p>
@@ -68,31 +61,22 @@ public interface ChartPlugin
 	Icon getIcon(String theme);
 
 	/**
-	 * 获取{@linkplain ChartProperty}列表。
+	 * 获取{@linkplain ChartProperties}。
 	 * <p>
-	 * 返回{@code null}或者空列表表示没有。
+	 * 返回{@code null}表示没有。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	List<ChartProperty> getChartProperties();
+	ChartProperties getChartProperties();
 
 	/**
-	 * 是否支持在指定类型{@linkplain ChartRenderContext}中绘制图表。
+	 * 渲染{@linkplain Chart}。
 	 * 
-	 * @param chartContextType
+	 * @param renderContext
+	 * @param chartConfig
 	 * @return
+	 * @throws RenderException
 	 */
-	boolean supports(Class<? extends ChartRenderContext> chartRenderContextType);
-
-	/**
-	 * 绘制图表。
-	 * 
-	 * @param chartRenderContext
-	 * @param chartPropertyValues
-	 * @param dataSetFactories
-	 * @return
-	 */
-	Chart renderChart(ChartRenderContext chartRenderContext, ChartPropertyValues chartPropertyValues,
-			DataSetFactory... dataSetFactories);
+	Chart renderChart(T renderContext, ChartConfig chartConfig) throws RenderException;
 }

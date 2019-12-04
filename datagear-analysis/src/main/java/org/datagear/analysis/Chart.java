@@ -5,6 +5,7 @@
 /**
  * 
  */
+
 package org.datagear.analysis;
 
 /**
@@ -13,19 +14,26 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public interface Chart
+public interface Chart extends Identifiable
 {
 	/**
-	 * 获取{@linkplain ChartPropertyValues}。
+	 * 获取渲染此图表的{@linkplain ChartPlugin}。
 	 * 
 	 * @return
 	 */
-	ChartPropertyValues getChartOptions();
+	<T extends RenderContext> ChartPlugin<T> getChartPlugin();
 
 	/**
-	 * 获取{@linkplain DataSetFactory}。
+	 * 获取{@linkplain RenderContext}。
 	 * 
 	 * @return
 	 */
-	DataSetFactory[] getDataSetFactories();
+	RenderContext getRenderContext();
+
+	/**
+	 * 获取{@linkplain ChartConfig}。
+	 * 
+	 * @return
+	 */
+	ChartConfig getChartConfig();
 }

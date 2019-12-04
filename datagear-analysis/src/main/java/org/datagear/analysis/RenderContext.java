@@ -5,17 +5,21 @@
 /**
  * 
  */
+
 package org.datagear.analysis;
 
 import java.util.Map;
 
 /**
- * 图表渲染上下文。
+ * 渲染上下文。
+ * <p>
+ * 此类用于定义图表、看板UI渲染上下文。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public interface ChartRenderContext
+public interface RenderContext
 {
 	/**
 	 * 获取属性。

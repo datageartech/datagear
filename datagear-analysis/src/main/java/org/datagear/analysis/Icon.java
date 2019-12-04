@@ -5,6 +5,7 @@
 /**
  * 
  */
+
 package org.datagear.analysis;
 
 import java.io.InputStream;

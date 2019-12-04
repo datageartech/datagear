@@ -2,12 +2,7 @@
  * Copyright (c) 2018 datagear.tech. All Rights Reserved.
  */
 
-/**
- * 
- */
 package org.datagear.analysis;
-
-import java.util.List;
 
 /**
  * 数据集工厂。
@@ -15,17 +10,17 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public interface DataSetFactory
+public interface DataSetFactory extends Identifiable
 {
 	/**
-	 * 获取{@linkplain DataSetParam}列表。
+	 * 获取{@linkplain DataSetParams}。
 	 * <p>
-	 * 返回{@code null}或者空列表表示没有。
+	 * 返回{@code null}表示没有。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	List<DataSetParam> getDataSetParams();
+	DataSetParams getDataSetParams();
 
 	/**
 	 * 获取{@linkplain DataSet}。

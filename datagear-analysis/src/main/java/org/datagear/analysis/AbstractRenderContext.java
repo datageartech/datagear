@@ -8,16 +8,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 抽象{@linkplain ChartRenderContext}。
+ * 抽象{@linkplain RenderContext}。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractChartRenderContext implements ChartRenderContext
+public abstract class AbstractRenderContext implements RenderContext
 {
 	private Map<String, Object> attributes = new HashMap<String, Object>();
 
-	public AbstractChartRenderContext()
+	public AbstractRenderContext()
 	{
 	}
 

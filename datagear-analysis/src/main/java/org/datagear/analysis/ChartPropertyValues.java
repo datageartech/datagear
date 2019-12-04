@@ -15,44 +15,15 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class ChartPropertyValues
+public class ChartPropertyValues extends ValueMap
 {
-	private Map<String, ?> options;
-
 	public ChartPropertyValues()
 	{
-	}
-
-	public ChartPropertyValues(Map<String, ?> options)
-	{
 		super();
-		this.options = options;
 	}
 
-	public boolean hasOption()
+	public ChartPropertyValues(Map<String, ?> values)
 	{
-		return (this.options != null && !this.options.isEmpty());
-	}
-
-	public Map<String, ?> getOptions()
-	{
-		return options;
-	}
-
-	public void setOptions(Map<String, ?> options)
-	{
-		this.options = options;
-	}
-
-	@SuppressWarnings("unchecked")
-	public <T> T getOption(String name)
-	{
-		return (T) (this.options == null ? null : this.options.get(name));
-	}
-
-	@Override
-	public String toString()
-	{
-		return getClass().getSimpleName() + " [options=" + options + "]";
+		super(values);
 	}
 }
