@@ -1,10 +1,6 @@
 /*
  * Copyright (c) 2018 datagear.tech. All Rights Reserved.
  */
-
-/**
- * 
- */
 package org.datagear.analysis;
 
 import java.util.List;
@@ -18,14 +14,30 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public interface DashboardTemplate<T extends RenderContext> extends Identifiable
+public abstract class DashboardTemplate<T extends RenderContext> extends AbstractIdentifiable
 {
-	/**
-	 * 获取看板的{@linkplain ChartTemplate}列表。
-	 * 
-	 * @return
-	 */
-	List<ChartTemplate<T>> getChartTemplates();
+	private List<ChartTemplate<T>> chartTemplates;
+
+	public DashboardTemplate()
+	{
+		super();
+	}
+
+	public DashboardTemplate(String id, List<ChartTemplate<T>> chartTemplates)
+	{
+		super(id);
+		this.chartTemplates = chartTemplates;
+	}
+
+	public List<ChartTemplate<T>> getChartTemplates()
+	{
+		return chartTemplates;
+	}
+
+	public void setChartTemplates(List<ChartTemplate<T>> chartTemplates)
+	{
+		this.chartTemplates = chartTemplates;
+	}
 
 	/**
 	 * 渲染{@linkplain Dashboard}。
@@ -34,5 +46,5 @@ public interface DashboardTemplate<T extends RenderContext> extends Identifiable
 	 * @return
 	 * @throws RenderException
 	 */
-	Dashboard render(T renderContext) throws RenderException;
+	public abstract Dashboard render(T renderContext) throws RenderException;
 }

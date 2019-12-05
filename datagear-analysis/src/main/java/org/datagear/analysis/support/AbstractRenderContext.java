@@ -2,10 +2,12 @@
  * Copyright (c) 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.analysis;
+package org.datagear.analysis.support;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.datagear.analysis.RenderContext;
 
 /**
  * 抽象{@linkplain RenderContext}。

@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.analysis.html;
+package org.datagear.analysis.support.html;
 
 import java.io.Writer;
 

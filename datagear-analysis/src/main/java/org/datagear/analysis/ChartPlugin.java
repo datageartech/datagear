@@ -21,9 +21,6 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 {
 	/**
 	 * 获取名称标签。
-	 * <p>
-	 * 返回{@code null}表示无名称标签。
-	 * </p>
 	 * 
 	 * @return
 	 */
@@ -50,15 +47,15 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	Label getManualLabel();
 
 	/**
-	 * 获取图标。
+	 * 获取指定风格的图标。
 	 * <p>
 	 * 返回{@code null}表示无图标。
 	 * </p>
 	 * 
-	 * @param theme
+	 * @param renderStyle
 	 * @return
 	 */
-	Icon getIcon(String theme);
+	Icon getIcon(RenderStyle renderStyle);
 
 	/**
 	 * 获取{@linkplain ChartProperties}。
@@ -74,9 +71,11 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	 * 渲染{@linkplain Chart}。
 	 * 
 	 * @param renderContext
-	 * @param chartConfig
+	 * @param chartPropertyValues
+	 * @param dataSetFactories
 	 * @return
 	 * @throws RenderException
 	 */
-	Chart renderChart(T renderContext, ChartConfig chartConfig) throws RenderException;
+	Chart renderChart(T renderContext, ChartPropertyValues chartPropertyValues, DataSetFactory... dataSetFactories)
+			throws RenderException;
 }

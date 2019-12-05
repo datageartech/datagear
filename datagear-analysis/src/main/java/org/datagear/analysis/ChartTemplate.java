@@ -16,11 +16,13 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public class ChartTemplate<T extends RenderContext> extends ChartConfig implements Identifiable
+public class ChartTemplate<T extends RenderContext> extends AbstractIdentifiable
 {
-	private String id;
-
 	private ChartPlugin<T> chartPlugin;
+
+	private ChartPropertyValues chartPropertyValues;
+
+	private DataSetFactory[] dataSetFactories;
 
 	public ChartTemplate()
 	{
@@ -30,20 +32,10 @@ public class ChartTemplate<T extends RenderContext> extends ChartConfig implemen
 	public ChartTemplate(String id, ChartPlugin<T> chartPlugin, ChartPropertyValues chartPropertyValues,
 			DataSetFactory... dataSetFactories)
 	{
-		super(chartPropertyValues, dataSetFactories);
-		this.id = id;
+		super(id);
 		this.chartPlugin = chartPlugin;
-	}
-
-	@Override
-	public String getId()
-	{
-		return id;
-	}
-
-	public void setId(String id)
-	{
-		this.id = id;
+		this.chartPropertyValues = chartPropertyValues;
+		this.dataSetFactories = dataSetFactories;
 	}
 
 	public ChartPlugin<T> getChartPlugin()
@@ -56,6 +48,26 @@ public class ChartTemplate<T extends RenderContext> extends ChartConfig implemen
 		this.chartPlugin = chartPlugin;
 	}
 
+	public ChartPropertyValues getChartPropertyValues()
+	{
+		return chartPropertyValues;
+	}
+
+	public void setChartPropertyValues(ChartPropertyValues chartPropertyValues)
+	{
+		this.chartPropertyValues = chartPropertyValues;
+	}
+
+	public DataSetFactory[] getDataSetFactories()
+	{
+		return dataSetFactories;
+	}
+
+	public void setDataSetFactories(DataSetFactory... dataSetFactories)
+	{
+		this.dataSetFactories = dataSetFactories;
+	}
+
 	/**
 	 * 渲染{@linkplain Chart}。
 	 * 
@@ -65,6 +77,6 @@ public class ChartTemplate<T extends RenderContext> extends ChartConfig implemen
 	 */
 	public Chart render(T renderContext) throws RenderException
 	{
-		return this.chartPlugin.renderChart(renderContext, this);
+		return this.chartPlugin.renderChart(renderContext, this.chartPropertyValues, this.dataSetFactories);
 	}
 }

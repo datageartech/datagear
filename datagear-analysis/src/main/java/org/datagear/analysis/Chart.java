@@ -21,7 +21,7 @@ public interface Chart extends Identifiable
 	 * 
 	 * @return
 	 */
-	<T extends RenderContext> ChartPlugin<T> getChartPlugin();
+	ChartPlugin<?> getChartPlugin();
 
 	/**
 	 * 获取{@linkplain RenderContext}。
@@ -31,9 +31,16 @@ public interface Chart extends Identifiable
 	RenderContext getRenderContext();
 
 	/**
-	 * 获取{@linkplain ChartConfig}。
+	 * 获取{@linkplain ChartPropertyValues}。
 	 * 
 	 * @return
 	 */
-	ChartConfig getChartConfig();
+	ChartPropertyValues getChartPropertyValues();
+
+	/**
+	 * 获取{@linkplain DataSetFactory}。
+	 * 
+	 * @return
+	 */
+	DataSetFactory[] getDataSetFactories();
 }

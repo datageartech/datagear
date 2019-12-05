@@ -20,6 +20,7 @@
 		<slf4j-log4j12.version>1.7.9</slf4j-log4j12.version>
 		<log4j.version>1.2.17</log4j.version>
 		<javax.json.version>1.0.4</javax.json.version>
+		<guava.version>19.0</guava.version>
 	</properties>
 	
 	<modules>
