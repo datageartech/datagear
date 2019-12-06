@@ -13,6 +13,7 @@ import java.util.List;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.RenderContext;
+import org.springframework.core.GenericTypeResolver;
 
 /**
  * 抽象{@linkplain ChartPluginManager}。
@@ -130,11 +131,31 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 
 		for (ChartPlugin<?> chartPlugin : chartPlugins)
 		{
-			// TODO 解析参数类型
-			renderContextTypes.add(RenderContext.class);
+			Class<? extends RenderContext> renderContextType = resolveChartPluginRenderContextType(
+					chartPlugin.getClass());
+
+			renderContextTypes.add(renderContextType);
 		}
 
 		return renderContextTypes;
+	}
+
+	/**
+	 * 解析指定{@linkplain ChartPlugin}类所支持的{@linkplain RenderContext}类型。
+	 * 
+	 * @param chartPluginType
+	 * @return
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	protected Class<? extends RenderContext> resolveChartPluginRenderContextType(
+			Class<? extends ChartPlugin> chartPluginType)
+	{
+		Class<?> renderContextType = GenericTypeResolver.resolveTypeArgument(chartPluginType, ChartPlugin.class);
+
+		if (renderContextType == null)
+			renderContextType = RenderContext.class;
+
+		return (Class<? extends RenderContext>) renderContextType;
 	}
 
 	/**

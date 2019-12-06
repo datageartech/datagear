@@ -105,7 +105,7 @@
 		<dependency>
 		  <groupId>com.alibaba</groupId>
 		  <artifactId>fastjson</artifactId>
-		  <version>1.2.35</version>
+		  <version>${fastjson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>

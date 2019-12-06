@@ -8,6 +8,7 @@
 
 package org.datagear.analysis;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -22,13 +23,7 @@ public interface Icon
 	 * 获取图标输入流。
 	 * 
 	 * @return
+	 * @throws IOException
 	 */
-	InputStream getInputStream();
-
-	/**
-	 * 获取图标扩展名（比如：{@code png、jpeg}）
-	 * 
-	 * @return
-	 */
-	String getExtension();
+	InputStream getInputStream() throws IOException;
 }

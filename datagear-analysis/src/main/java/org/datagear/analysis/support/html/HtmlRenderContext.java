@@ -21,5 +21,12 @@ public interface HtmlRenderContext extends RenderContext
 	 * 
 	 * @return
 	 */
-	public Writer getOut();
+	Writer getWriter();
+
+	/**
+	 * 输出流是否已关闭。
+	 * 
+	 * @return
+	 */
+	boolean isWriterClosed();
 }
