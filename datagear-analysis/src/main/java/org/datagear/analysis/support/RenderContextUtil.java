@@ -7,6 +7,8 @@
  */
 package org.datagear.analysis.support;
 
+import java.util.Locale;
+
 import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderStyle;
@@ -22,6 +24,8 @@ public class RenderContextUtil
 	public static final String ATTR_RENDER_STYPE = RenderStyle.class.getName();
 
 	public static final String ATTR_CHART_THEME = ChartTheme.class.getName();
+
+	public static final String ATTR_LOCALE = Locale.class.getName();
 
 	/**
 	 * 获取{@linkplain RenderStyle}，没有则返回{@code null}。
@@ -65,5 +69,27 @@ public class RenderContextUtil
 	public static void setChartTheme(RenderContext renderContext, ChartTheme chartTheme)
 	{
 		renderContext.setAttribute(ATTR_RENDER_STYPE, chartTheme);
+	}
+
+	/**
+	 * 获取{@linkplain Locale}，没有则返回{@code null}。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public static Locale getLocale(RenderContext renderContext)
+	{
+		return renderContext.getAttribute(ATTR_LOCALE);
+	}
+
+	/**
+	 * 设置{@linkplain Locale}。
+	 * 
+	 * @param renderContext
+	 * @param locale
+	 */
+	public static void setLocale(RenderContext renderContext, Locale locale)
+	{
+		renderContext.setAttribute(ATTR_LOCALE, locale);
 	}
 }
