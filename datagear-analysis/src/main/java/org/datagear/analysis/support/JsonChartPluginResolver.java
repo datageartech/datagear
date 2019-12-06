@@ -13,6 +13,23 @@ import java.util.Map;
 import org.datagear.analysis.ChartPlugin;
 
 /**
+ * JSON {@linkplain ChartPlugin}解析器。
+ * <p>
+ * 此类从JSON解析{@linkplain ChartPlugin}对象的属性：
+ * </p>
+ * <p>
+ * <code>
+ * {<br/>
+ * 	id : "...",<br/>
+ * 	nameLabel : { value : "...", localeValues : { "zh" : "...", "en" : "..." }},<br/>
+ * 	descLabel : { ... },<br/>
+ * 	manualLabel : { ... },<br/>
+ * 	icons : { "LIGHTNESS" : { location : "classpath:/.../.../icon.png" }, "DARK" : { location : "file:/.../.../icon.png" } },<br/>
+ * 	chartProperties :  [ { ... }, ... ]<br/>
+ * }
+ * </code>
+ * </p>
+ * 
  * @author datagear@163.com
  *
  */
