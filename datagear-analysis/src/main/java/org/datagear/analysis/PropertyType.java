@@ -22,9 +22,6 @@ public enum PropertyType
 	/** 布尔值 */
 	BOOLEAN,
 
-	/** 整数 */
-	INTEGER,
-
-	/** 小数 */
-	DECIMAL,
+	/** 数值 */
+	NUMBER
 }

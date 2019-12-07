@@ -66,6 +66,23 @@ public class ChartProperties
 		return null;
 	}
 
+	/**
+	 * 获取指定索引的{@linkplain ChartProperty}，未找到则返回{@code null}。
+	 * 
+	 * @param index
+	 * @return
+	 */
+	public ChartProperty getByIndex(int index)
+	{
+		if (this.properties == null)
+			return null;
+
+		if (index < 0 || index > this.properties.size())
+			return null;
+
+		return this.properties.get(index);
+	}
+
 	@Override
 	public String toString()
 	{

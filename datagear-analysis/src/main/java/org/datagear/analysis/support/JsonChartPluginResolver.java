@@ -7,14 +7,21 @@
  */
 package org.datagear.analysis.support;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartProperties;
+import org.datagear.analysis.ChartProperty;
 import org.datagear.analysis.Icon;
+import org.datagear.analysis.PropertyType;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.util.i18n.Label;
 
@@ -61,11 +68,35 @@ public class JsonChartPluginResolver
 
 	public static final String LOCATION_ICON_LOCATION = "location";
 
+	public static final String CHART_PROPERTY_NAME = "name";
+
+	public static final String CHART_PROPERTY_TYPE = "type";
+
+	public static final String CHART_PROPERTY_NAME_LABEL = "nameLabel";
+
+	public static final String CHART_PROPERTY_DESC_LABEL = "descLabel";
+
+	public static final String CHART_PROPERTY_DEFAULT_VALUE = "defaultValue";
+
+	public static final String CHART_PROPERTY_CONSTRAINTS = "constraints";
+
+	private PropertyTypeValueConverter propertyTypeValueConverter = new PropertyTypeValueConverter();
+
 	private ConcurrentMap<String, Locale> _localeCache = new ConcurrentHashMap<String, Locale>();
 
 	public JsonChartPluginResolver()
 	{
 		super();
+	}
+
+	public PropertyTypeValueConverter getPropertyTypeValueConverter()
+	{
+		return propertyTypeValueConverter;
+	}
+
+	public void setPropertyTypeValueConverter(PropertyTypeValueConverter propertyTypeValueConverter)
+	{
+		this.propertyTypeValueConverter = propertyTypeValueConverter;
 	}
 
 	/**
@@ -88,6 +119,7 @@ public class JsonChartPluginResolver
 		properties.put(CHART_PLUGIN_DESC_LABEL, convertToLabel(map.get(CHART_PLUGIN_DESC_LABEL)));
 		properties.put(CHART_PLUGIN_MANUAL_LABEL, convertToLabel(map.get(CHART_PLUGIN_MANUAL_LABEL)));
 		properties.put(CHART_PLUGIN_ICONS, convertToIcons(map.get(CHART_PLUGIN_ICONS)));
+		properties.put(CHART_PLUGIN_CHART_PROPERTIES, convertToChartProperties(map.get(CHART_PLUGIN_CHART_PROPERTIES)));
 
 		return properties;
 	}
@@ -106,6 +138,7 @@ public class JsonChartPluginResolver
 		chartPlugin.setDescLabel((Label) properties.get(CHART_PLUGIN_DESC_LABEL));
 		chartPlugin.setManualLabel((Label) properties.get(CHART_PLUGIN_MANUAL_LABEL));
 		chartPlugin.setIcons((Map<RenderStyle, Icon>) properties.get(CHART_PLUGIN_ICONS));
+		chartPlugin.setChartProperties((ChartProperties) properties.get(CHART_PLUGIN_CHART_PROPERTIES));
 	}
 
 	/**
@@ -122,14 +155,17 @@ public class JsonChartPluginResolver
 			return (Label) obj;
 		else if (obj instanceof String)
 		{
-			return new Label((String) obj);
+			Label label = createLabel();
+			label.setValue((String) obj);
+
+			return label;
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			Label label = new Label();
+			Label label = createLabel();
 			label.setValue((String) map.get(LABEL_VALUE));
 
 			Object localeValuesObj = map.get(LABEL_LOCALE_VALUES);
@@ -219,7 +255,10 @@ public class JsonChartPluginResolver
 			return (Icon) obj;
 		else if (obj instanceof String)
 		{
-			return new LocationIcon((String) obj);
+			LocationIcon icon = createLocationIcon();
+			icon.setLocation((String) obj);
+
+			return icon;
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
@@ -231,7 +270,10 @@ public class JsonChartPluginResolver
 			if (location == null)
 				return null;
 
-			return new LocationIcon(location);
+			LocationIcon icon = createLocationIcon();
+			icon.setLocation(location);
+
+			return icon;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName()
@@ -246,25 +288,174 @@ public class JsonChartPluginResolver
 	 */
 	protected RenderStyle convertToRenderStyle(Object obj)
 	{
+		return convertToEnum(obj, RenderStyle.class);
+	}
+
+	/**
+	 * 将对象转换为{@linkplain ChartProperties}。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected ChartProperties convertToChartProperties(Object obj)
+	{
 		if (obj == null)
 			return null;
-		else if (obj instanceof RenderStyle)
-			return (RenderStyle) obj;
+		else if (obj instanceof ChartProperties)
+			return (ChartProperties) obj;
+		else if (obj instanceof Object[])
+		{
+			Object[] array = (Object[]) obj;
+
+			List<ChartProperty> list = new ArrayList<ChartProperty>(array.length);
+
+			for (Object ele : array)
+			{
+				ChartProperty chartProperty = convertToChartProperty(ele);
+
+				if (chartProperty != null)
+					list.add(chartProperty);
+			}
+
+			if (list.isEmpty())
+				return null;
+
+			ChartProperties chartProperties = createChartProperties();
+			chartProperties.setProperties(list);
+
+			return chartProperties;
+		}
+		else if (obj instanceof Collection<?>)
+		{
+			Collection<?> collection = (Collection<?>) obj;
+			Object[] array = new Object[collection.size()];
+			collection.toArray(array);
+
+			return convertToChartProperties(array);
+		}
+		else
+		{
+			Object[] array = new Object[] { obj };
+
+			return convertToChartProperties(array);
+		}
+	}
+
+	/**
+	 * 将对象转换为{@linkplain ChartProperty}。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected ChartProperty convertToChartProperty(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof ChartProperty)
+			return (ChartProperty) obj;
+		else if (obj instanceof Map<?, ?>)
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, ?> map = (Map<String, String>) obj;
+
+			String name = (String) map.get(CHART_PROPERTY_NAME);
+			if (name == null || name.isEmpty())
+				return null;
+
+			ChartProperty chartProperty = createChartProperty();
+			chartProperty.setName(name);
+
+			PropertyType type = convertToPropertyType(map.get(CHART_PROPERTY_TYPE));
+			if (type == null)
+				type = PropertyType.STRING;
+
+			chartProperty.setType(type);
+			chartProperty.setNameLabel(convertToLabel(map.get(CHART_PROPERTY_NAME_LABEL)));
+			chartProperty.setDescLabel(convertToLabel(map.get(CHART_PROPERTY_DESC_LABEL)));
+			chartProperty.setDefaultValue(convertToPropertyTypeValue(type, map.get(CHART_PROPERTY_DEFAULT_VALUE)));
+
+			// TODO 解析constraints属性
+
+			return chartProperty;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName()
+					+ "] to [" + ChartProperty.class.getName() + "] is not supported");
+	}
+	
+	/**
+	 * 将对象转换为{@linkplain PropertyType}。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected PropertyType convertToPropertyType(Object obj)
+	{
+		return convertToEnum(obj, PropertyType.class);
+	}
+	
+	/**
+	 * 将对象转换为{@linkplain PropertyType}所描述类型的值。
+	 * 
+	 * @param propertyType
+	 * @param obj
+	 * @return
+	 */
+	protected Object convertToPropertyTypeValue(PropertyType propertyType, Object obj)
+	{
+		return this.propertyTypeValueConverter.convert(propertyType, obj);
+	}
+
+	/**
+	 * 将对象转换为指定枚举类型的对象。
+	 * 
+	 * @param obj
+	 * @param enumType
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T extends Enum<T>> T convertToEnum(Object obj, Class<T> enumType)
+	{
+		if (obj == null)
+			return null;
+		else if (enumType.isAssignableFrom(obj.getClass()))
+			return (T) obj;
 		else if (obj instanceof String)
 		{
-			String strRenderStyle = (String)obj;
-			RenderStyle[] renderStyles = RenderStyle.values();
-			
-			for(RenderStyle renderStyle : renderStyles)
+			String strVal = (String) obj;
+
+			EnumSet<T> enumSet = EnumSet.allOf(enumType);
+
+			for (T e : enumSet)
 			{
-				if (renderStyle.name().equalsIgnoreCase(strRenderStyle))
-					return renderStyle;
+				if (e.name().equalsIgnoreCase(strVal))
+					return e;
 			}
 
 			return null;
 		}
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName()
-					+ "] to [" + Icon.class.getName() + "] is not supported");
+					+ "] to [" + enumType.getName() + "] is not supported");
+	}
+
+	protected Label createLabel()
+	{
+		return new Label();
+	}
+
+	protected LocationIcon createLocationIcon()
+	{
+		return new LocationIcon();
+	}
+
+	protected ChartProperties createChartProperties()
+	{
+		return new ChartProperties();
+	}
+
+	protected ChartProperty createChartProperty()
+	{
+		return new ChartProperty();
 	}
 }
