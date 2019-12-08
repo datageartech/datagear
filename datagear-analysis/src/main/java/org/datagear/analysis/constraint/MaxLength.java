@@ -8,19 +8,19 @@
 package org.datagear.analysis.constraint;
 
 /**
- * 约束-必填。
+ * 约束-最大长度。
  * 
  * @author datagear@163.com
  *
  */
-public class Required extends AbstractValueConstraint<Boolean>
+public class MaxLength extends AbstractValueConstraint<Integer>
 {
-	public Required()
+	public MaxLength()
 	{
 		super();
 	}
 
-	public Required(boolean value)
+	public MaxLength(int value)
 	{
 		super(value);
 	}

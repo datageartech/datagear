@@ -95,4 +95,27 @@ public class Label implements Serializable
 	{
 		this.localeValues = localeValues;
 	}
+
+	/**
+	 * 字符串转换为{@linkplain Locale}。
+	 * 
+	 * @param locale
+	 * @return
+	 */
+	public static Locale toLocale(String locale)
+	{
+		if (locale == null)
+			return null;
+
+		String[] strs = locale.split("_");
+
+		if (strs.length == 0)
+			return null;
+		else if (strs.length == 1)
+			return new Locale(strs[0]);
+		else if (strs.length == 2)
+			return new Locale(strs[0], strs[1]);
+		else
+			return new Locale(strs[0], strs[1], strs[2]);
+	}
 }

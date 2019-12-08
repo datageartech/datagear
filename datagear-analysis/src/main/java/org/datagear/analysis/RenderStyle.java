@@ -13,7 +13,7 @@ package org.datagear.analysis;
 public enum RenderStyle
 {
 	/** 浅色风格 */
-	LIGHTNESS,
+	LIGHT,
 
 	/** 暗色风格 */
 	DARK

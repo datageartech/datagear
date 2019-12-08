@@ -8,19 +8,19 @@
 package org.datagear.analysis.constraint;
 
 /**
- * 约束-必填。
+ * 约束-最小值。
  * 
  * @author datagear@163.com
  *
  */
-public class Required extends AbstractValueConstraint<Boolean>
+public class Min extends AbstractValueConstraint<Number>
 {
-	public Required()
+	public Min()
 	{
 		super();
 	}
 
-	public Required(boolean value)
+	public Min(Number value)
 	{
 		super(value);
 	}

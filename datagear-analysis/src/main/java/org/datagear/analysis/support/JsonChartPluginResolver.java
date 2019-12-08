@@ -7,13 +7,19 @@
  */
 package org.datagear.analysis.support;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -23,6 +29,13 @@ import org.datagear.analysis.ChartProperty;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.PropertyType;
 import org.datagear.analysis.RenderStyle;
+import org.datagear.analysis.constraint.Constraint;
+import org.datagear.analysis.constraint.Max;
+import org.datagear.analysis.constraint.MaxLength;
+import org.datagear.analysis.constraint.Min;
+import org.datagear.analysis.constraint.MinLength;
+import org.datagear.analysis.constraint.Required;
+import org.datagear.util.IOUtil;
 import org.datagear.util.i18n.Label;
 
 import com.alibaba.fastjson.JSON;
@@ -100,7 +113,7 @@ public class JsonChartPluginResolver
 	}
 
 	/**
-	 * 从JSON输入流解析{@linkplain ChartPlugin}。
+	 * 从JSON字符串解析{@linkplain ChartPlugin}。
 	 * <p>
 	 * 它会进行类型转换。
 	 * </p>
@@ -125,13 +138,58 @@ public class JsonChartPluginResolver
 	}
 
 	/**
+	 * 从JSON输入流解析{@linkplain ChartPlugin}。
+	 * 
+	 * @param jsonReader
+	 * @return
+	 * @throws IOException
+	 */
+	public Map<String, Object> resolveChartPluginProperties(Reader jsonReader) throws IOException
+	{
+		String json = null;
+
+		StringWriter writer = null;
+		try
+		{
+			writer = new StringWriter();
+			IOUtil.write(jsonReader, writer);
+		}
+		finally
+		{
+			IOUtil.close(writer);
+		}
+
+		if (writer != null)
+			json = writer.toString();
+
+		if (json == null || json.isEmpty())
+			return new HashMap<String, Object>();
+
+		return resolveChartPluginProperties(json);
+	}
+
+	/**
+	 * 从JSON输入流解析{@linkplain ChartPlugin}。
+	 * 
+	 * @param in
+	 * @param encoding
+	 * @return
+	 * @throws IOException
+	 */
+	public Map<String, Object> resolveChartPluginProperties(InputStream in, String encoding) throws IOException
+	{
+		Reader reader = IOUtil.getReader(in, encoding);
+		return resolveChartPluginProperties(reader);
+	}
+
+	/**
 	 * 将映射表中的对应属性值设置到{@linkplain AbstractChartPlugin}中。
 	 * 
-	 * @param properties
 	 * @param chartPlugin
+	 * @param properties
 	 */
 	@SuppressWarnings("unchecked")
-	public void setToChartPlugin(Map<String, ?> properties, AbstractChartPlugin<?> chartPlugin)
+	public void setChartPluginProperties(AbstractChartPlugin<?> chartPlugin, Map<String, ?> properties)
 	{
 		chartPlugin.setId((String) properties.get(CHART_PLUGIN_ID));
 		chartPlugin.setNameLabel((Label) properties.get(CHART_PLUGIN_NAME_LABEL));
@@ -181,7 +239,7 @@ public class JsonChartPluginResolver
 					Locale locale = this._localeCache.get(entry.getKey());
 					if (locale == null)
 					{
-						locale = Locale.forLanguageTag(entry.getKey());
+						locale = stringToLocale(entry.getKey());
 						this._localeCache.putIfAbsent(entry.getKey(), locale);
 					}
 
@@ -194,8 +252,8 @@ public class JsonChartPluginResolver
 			return label;
 		}
 		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName()
-					+ "] to [" + Label.class.getName() + "] is not supported");
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ Label.class.getName() + "] is not supported");
 	}
 
 	/**
@@ -211,7 +269,7 @@ public class JsonChartPluginResolver
 		else if (obj instanceof String)
 		{
 			Map<RenderStyle, Icon> icons = new HashMap<RenderStyle, Icon>();
-			icons.put(RenderStyle.LIGHTNESS, convertToIcon(obj));
+			icons.put(RenderStyle.LIGHT, convertToIcon(obj));
 
 			return icons;
 		}
@@ -237,8 +295,8 @@ public class JsonChartPluginResolver
 			return icons;
 		}
 		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName()
-					+ "] to [" + Icon.class.getName() + "] map is not supported");
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ Icon.class.getName() + "] map is not supported");
 	}
 
 	/**
@@ -276,8 +334,8 @@ public class JsonChartPluginResolver
 			return icon;
 		}
 		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName()
-					+ "] to [" + Icon.class.getName() + "] is not supported");
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ Icon.class.getName() + "] is not supported");
 	}
 
 	/**
@@ -373,16 +431,15 @@ public class JsonChartPluginResolver
 			chartProperty.setNameLabel(convertToLabel(map.get(CHART_PROPERTY_NAME_LABEL)));
 			chartProperty.setDescLabel(convertToLabel(map.get(CHART_PROPERTY_DESC_LABEL)));
 			chartProperty.setDefaultValue(convertToPropertyTypeValue(type, map.get(CHART_PROPERTY_DEFAULT_VALUE)));
-
-			// TODO 解析constraints属性
+			chartProperty.setConstraints(convertToConstraints(map.get(CHART_PROPERTY_CONSTRAINTS)));
 
 			return chartProperty;
 		}
 		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName()
-					+ "] to [" + ChartProperty.class.getName() + "] is not supported");
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ ChartProperty.class.getName() + "] is not supported");
 	}
-	
+
 	/**
 	 * 将对象转换为{@linkplain PropertyType}。
 	 * 
@@ -393,7 +450,7 @@ public class JsonChartPluginResolver
 	{
 		return convertToEnum(obj, PropertyType.class);
 	}
-	
+
 	/**
 	 * 将对象转换为{@linkplain PropertyType}所描述类型的值。
 	 * 
@@ -404,6 +461,78 @@ public class JsonChartPluginResolver
 	protected Object convertToPropertyTypeValue(PropertyType propertyType, Object obj)
 	{
 		return this.propertyTypeValueConverter.convert(propertyType, obj);
+	}
+
+	/**
+	 * 将对象转换为{@linkplain Constraint}集合。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected Set<Constraint> convertToConstraints(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof Map<?, ?>)
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, ?> map = (Map<String, ?>) obj;
+
+			Set<Constraint> constraints = new HashSet<Constraint>();
+
+			for (Map.Entry<String, ?> entry : map.entrySet())
+			{
+				Constraint constraint = convertToConstraint(entry.getKey(), entry.getValue());
+
+				if (constraint != null)
+					constraints.add(constraint);
+			}
+
+			return constraints;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ Constraint.class.getName() + "] set is not supported");
+	}
+
+	/**
+	 * 将对象转换为{@linkplain Constraint}，不支持则返回{@code null}。
+	 * 
+	 * @param name
+	 * @param value
+	 * @return
+	 */
+	protected Constraint convertToConstraint(String name, Object value)
+	{
+		if (value == null)
+			return null;
+		else if (Max.class.getSimpleName().equalsIgnoreCase(name))
+		{
+			Number v = (Number) this.propertyTypeValueConverter.convert(PropertyType.NUMBER, value);
+			return new Max(v);
+		}
+		else if (MaxLength.class.getSimpleName().equalsIgnoreCase(name))
+		{
+			Number v = (Number) this.propertyTypeValueConverter.convert(PropertyType.NUMBER, value);
+			return new MaxLength(v.intValue());
+		}
+		else if (Min.class.getSimpleName().equalsIgnoreCase(name))
+		{
+			Number v = (Number) this.propertyTypeValueConverter.convert(PropertyType.NUMBER, value);
+			return new Min(v);
+		}
+		else if (MinLength.class.getSimpleName().equalsIgnoreCase(name))
+		{
+			Number v = (Number) this.propertyTypeValueConverter.convert(PropertyType.NUMBER, value);
+			return new MinLength(v.intValue());
+		}
+		else if (Required.class.getSimpleName().equalsIgnoreCase(name))
+		{
+			Boolean v = (Boolean) this.propertyTypeValueConverter.convert(PropertyType.BOOLEAN, value);
+			return new Required(v);
+		}
+		else
+			return null;
 	}
 
 	/**
@@ -435,8 +564,19 @@ public class JsonChartPluginResolver
 			return null;
 		}
 		else
-			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName()
-					+ "] to [" + enumType.getName() + "] is not supported");
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ enumType.getName() + "] is not supported");
+	}
+
+	/**
+	 * 字符串转换为{@linkplain Locale}。
+	 * 
+	 * @param str
+	 * @return
+	 */
+	protected Locale stringToLocale(String str)
+	{
+		return Label.toLocale(str);
 	}
 
 	protected Label createLabel()

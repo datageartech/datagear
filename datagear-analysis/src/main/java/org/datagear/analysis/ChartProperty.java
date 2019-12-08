@@ -4,7 +4,7 @@
 
 package org.datagear.analysis;
 
-import java.util.List;
+import java.util.Set;
 
 import org.datagear.analysis.constraint.Constraint;
 import org.datagear.util.i18n.Label;
@@ -36,7 +36,7 @@ public class ChartProperty
 	private Object defaultValue;
 
 	/** 约束 */
-	private List<Constraint> constraints;
+	private Set<Constraint> constraints;
 
 	public ChartProperty()
 	{
@@ -119,12 +119,12 @@ public class ChartProperty
 		return (this.constraints != null && !this.constraints.isEmpty());
 	}
 
-	public List<Constraint> getConstraints()
+	public Set<Constraint> getConstraints()
 	{
 		return constraints;
 	}
 
-	public void setConstraints(List<Constraint> constraints)
+	public void setConstraints(Set<Constraint> constraints)
 	{
 		this.constraints = constraints;
 	}

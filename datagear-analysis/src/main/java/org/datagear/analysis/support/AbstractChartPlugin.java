@@ -94,8 +94,8 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 	{
 		Icon icon = (this.icons == null ? null : this.icons.get(renderStyle));
 
-		if (icon == null && !RenderStyle.LIGHTNESS.equals(renderStyle))
-			icon = getIcon(RenderStyle.LIGHTNESS);
+		if (icon == null && !RenderStyle.LIGHT.equals(renderStyle))
+			icon = getIcon(RenderStyle.LIGHT);
 
 		return icon;
 	}

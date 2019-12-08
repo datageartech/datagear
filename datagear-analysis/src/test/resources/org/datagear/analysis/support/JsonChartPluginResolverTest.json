@@ -1,0 +1,102 @@
+{
+	id : 'pie-chart',
+	nameLabel :
+	{
+		value : '饼图',
+		localeValues :
+		{
+			'en' : 'pie chart',
+			'zh' : '饼图中文'
+		}
+	},
+	descLabel :
+	{
+		value : '饼图描述',
+		localeValues :
+		{
+			'en' : 'pie chart desc',
+			'zh' : '饼图描述中文'
+		}
+	},
+	manualLabel :
+	{
+		value : '饼图指南',
+		localeValues :
+		{
+			'en' : 'pie chart manual',
+			'zh' : '饼图指南中文'
+		}
+	},
+	icons :
+	{
+		'LIGHT' :
+		{
+			'location' : 'icon-0.png'
+		},
+		'DARK' :
+		{
+			'location' : 'icon-1.png'
+		}
+	},
+	chartProperties :
+	[
+  		{
+			name : 'title',
+			type : 'STRING',
+			nameLabel :
+			{
+				value : '标题',
+				localeValues :
+				{
+					'en' : 'title',
+					'zh' : '标题中文'
+				}
+			},
+			descLabel :
+			{
+				value : '标题描述',
+				localeValues :
+				{
+					'en' : 'title desc',
+					'zh' : '标题描述中文'
+				}
+			},
+			defaultValue : 'pie chart',
+			constraints :
+			{
+				required : true,
+				maxlength : 20,
+				minlength : 10
+			}
+		},
+		{
+			name : 'interval',
+			type : 'NUMBER',
+			nameLabel :
+			{
+				value : '间隔',
+				localeValues :
+				{
+					'en' : 'interval',
+					'zh' : '间隔中文'
+				}
+			},
+  			descLabel :
+  			{
+  				value : '间隔描述',
+  				localeValues :
+  				{
+  					'en' : 'interval desc',
+  					'zh' : '间隔描述中文'
+  				}
+  			},
+  			defaultValue : '5',
+  			constraints :
+  			{
+  				required : false,
+  				max : 30,
+  				min : 5
+  			}
+		}
+	]
+}

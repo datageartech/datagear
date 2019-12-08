@@ -8,15 +8,15 @@
 package org.datagear.analysis;
 
 /**
- * 图表模板。
+ * 图表部件。
  * <p>
- * 它可在{@linkplain RenderContext}中绘制自己所描述的{@linkplain Chart}。
+ * 它可在{@linkplain RenderContext}中渲染自己所描述的{@linkplain Chart}。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class ChartTemplate<T extends RenderContext> extends AbstractIdentifiable
+public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 {
 	private ChartPlugin<T> chartPlugin;
 
@@ -24,12 +24,12 @@ public class ChartTemplate<T extends RenderContext> extends AbstractIdentifiable
 
 	private DataSetFactory[] dataSetFactories;
 
-	public ChartTemplate()
+	public ChartWidget()
 	{
 		super();
 	}
 
-	public ChartTemplate(String id, ChartPlugin<T> chartPlugin, ChartPropertyValues chartPropertyValues,
+	public ChartWidget(String id, ChartPlugin<T> chartPlugin, ChartPropertyValues chartPropertyValues,
 			DataSetFactory... dataSetFactories)
 	{
 		super(id);
