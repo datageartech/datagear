@@ -15,15 +15,15 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class ChartPropertyValues extends ValueMap
+public class ChartPropertyValues extends AbstractDelegatedMap<String, Object>
 {
 	public ChartPropertyValues()
 	{
 		super();
 	}
 
-	public ChartPropertyValues(Map<String, ?> values)
+	public ChartPropertyValues(Map<String, Object> chartPropertyValues)
 	{
-		super(values);
+		super(chartPropertyValues);
 	}
 }

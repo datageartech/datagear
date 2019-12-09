@@ -230,7 +230,7 @@ public class IOUtil
 	 * @throws FileNotFoundException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static Reader getReader(File file, String encoding)
+	public static BufferedReader getReader(File file, String encoding)
 			throws FileNotFoundException, UnsupportedEncodingException
 	{
 		return getReader(getInputStream(file), encoding);
@@ -244,7 +244,7 @@ public class IOUtil
 	 * @throws FileNotFoundException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static Reader getReader(File file) throws FileNotFoundException, UnsupportedEncodingException
+	public static BufferedReader getReader(File file) throws FileNotFoundException, UnsupportedEncodingException
 	{
 		return getReader(getInputStream(file), Charset.defaultCharset().name());
 	}
@@ -257,7 +257,7 @@ public class IOUtil
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static Reader getReader(InputStream in, String encoding) throws UnsupportedEncodingException
+	public static BufferedReader getReader(InputStream in, String encoding) throws UnsupportedEncodingException
 	{
 		return new BufferedReader(new InputStreamReader(in, encoding));
 	}
@@ -271,7 +271,7 @@ public class IOUtil
 	 * @throws FileNotFoundException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static Writer getWriter(File file, String encoding)
+	public static BufferedWriter getWriter(File file, String encoding)
 			throws FileNotFoundException, UnsupportedEncodingException
 	{
 		return getWriter(getOutputStream(file), encoding);
@@ -285,7 +285,7 @@ public class IOUtil
 	 * @throws FileNotFoundException
 	 * @throws UnsupportedEncodingException
 	 */
-	public static Writer getWriter(File file) throws FileNotFoundException, UnsupportedEncodingException
+	public static BufferedWriter getWriter(File file) throws FileNotFoundException, UnsupportedEncodingException
 	{
 		return getWriter(getOutputStream(file), Charset.defaultCharset().name());
 	}
@@ -298,7 +298,7 @@ public class IOUtil
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static Writer getWriter(OutputStream out, String encoding) throws UnsupportedEncodingException
+	public static BufferedWriter getWriter(OutputStream out, String encoding) throws UnsupportedEncodingException
 	{
 		return new BufferedWriter(new OutputStreamWriter(out, encoding));
 	}

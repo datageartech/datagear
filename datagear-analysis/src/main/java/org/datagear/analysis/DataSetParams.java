@@ -16,33 +16,16 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public class DataSetParams
+public class DataSetParams extends AbstractDelegatedList<DataSetParam>
 {
-	private List<DataSetParam> params;
-
 	public DataSetParams()
 	{
-	}
-
-	public DataSetParams(List<DataSetParam> params)
-	{
 		super();
-		this.params = params;
 	}
 
-	public boolean hasParam()
+	public DataSetParams(List<DataSetParam> dataSetParams)
 	{
-		return (this.params != null && !this.params.isEmpty());
-	}
-
-	public List<DataSetParam> getParams()
-	{
-		return params;
-	}
-
-	public void setParams(List<DataSetParam> params)
-	{
-		this.params = params;
+		super(dataSetParams);
 	}
 
 	/**
@@ -53,13 +36,12 @@ public class DataSetParams
 	 */
 	public DataSetParam getByName(String name)
 	{
-		if (this.params == null)
-			return null;
-
-		for (DataSetParam param : this.params)
+		for (int i = 0, len = this.size(); i < len; i++)
 		{
-			if (param.getName().equals(name))
-				return param;
+			DataSetParam dataSetParam = get(i);
+
+			if (dataSetParam.getName().equals(name))
+				return dataSetParam;
 		}
 
 		return null;

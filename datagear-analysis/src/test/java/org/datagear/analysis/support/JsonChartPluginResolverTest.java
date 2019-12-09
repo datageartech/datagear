@@ -81,7 +81,7 @@ public class JsonChartPluginResolverTest
 					.get(JsonChartPluginResolver.CHART_PLUGIN_CHART_PROPERTIES);
 
 			{
-				ChartProperty chartProperty = chartProperties.getByIndex(0);
+				ChartProperty chartProperty = chartProperties.get(0);
 
 				Assert.assertEquals("title", chartProperty.getName());
 				Assert.assertEquals(PropertyType.STRING, chartProperty.getType());
@@ -107,7 +107,7 @@ public class JsonChartPluginResolverTest
 			}
 
 			{
-				ChartProperty chartProperty = chartProperties.getByIndex(1);
+				ChartProperty chartProperty = chartProperties.get(1);
 
 				Assert.assertEquals("interval", chartProperty.getName());
 				Assert.assertEquals(PropertyType.NUMBER, chartProperty.getType());

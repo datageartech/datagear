@@ -19,15 +19,15 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class DataSetParamValues extends ValueMap
+public class DataSetParamValues extends AbstractDelegatedMap<String, Object>
 {
 	public DataSetParamValues()
 	{
 		super();
 	}
 
-	public DataSetParamValues(Map<String, ?> values)
+	public DataSetParamValues(Map<String, Object> dataSetParamValues)
 	{
-		super(values);
+		super(dataSetParamValues);
 	}
 }

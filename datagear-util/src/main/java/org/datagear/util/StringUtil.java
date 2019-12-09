@@ -93,4 +93,30 @@ public class StringUtil
 		else
 			return false;
 	}
+
+	/**
+	 * 将字符串第一个字符转为小写。
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String firstLowerCase(String s)
+	{
+		if (s == null || s.isEmpty())
+			return s;
+
+		StringBuilder sb = new StringBuilder(s.length());
+
+		for (int i = 0; i < s.length(); i++)
+		{
+			char c = s.charAt(i);
+
+			if (i == 0)
+				sb.append(Character.toLowerCase(c));
+			else
+				sb.append(c);
+		}
+
+		return sb.toString();
+	}
 }

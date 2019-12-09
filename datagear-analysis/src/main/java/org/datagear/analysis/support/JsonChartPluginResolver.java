@@ -11,12 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -365,21 +363,18 @@ public class JsonChartPluginResolver
 		{
 			Object[] array = (Object[]) obj;
 
-			List<ChartProperty> list = new ArrayList<ChartProperty>(array.length);
+			ChartProperties chartProperties = createChartProperties();
 
 			for (Object ele : array)
 			{
 				ChartProperty chartProperty = convertToChartProperty(ele);
 
 				if (chartProperty != null)
-					list.add(chartProperty);
+					chartProperties.add(chartProperty);
 			}
 
-			if (list.isEmpty())
+			if (chartProperties.isEmpty())
 				return null;
-
-			ChartProperties chartProperties = createChartProperties();
-			chartProperties.setProperties(list);
 
 			return chartProperties;
 		}

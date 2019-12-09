@@ -16,34 +16,16 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public class ChartProperties
+public class ChartProperties extends AbstractDelegatedList<ChartProperty>
 {
-	private List<ChartProperty> properties;
-
 	public ChartProperties()
 	{
 		super();
 	}
 
-	public ChartProperties(List<ChartProperty> properties)
+	public ChartProperties(List<ChartProperty> chartProperties)
 	{
-		super();
-		this.properties = properties;
-	}
-
-	public boolean hasProperty()
-	{
-		return (this.properties != null && !this.properties.isEmpty());
-	}
-
-	public List<ChartProperty> getProperties()
-	{
-		return properties;
-	}
-
-	public void setProperties(List<ChartProperty> properties)
-	{
-		this.properties = properties;
+		super(chartProperties);
 	}
 
 	/**
@@ -54,38 +36,14 @@ public class ChartProperties
 	 */
 	public ChartProperty getByName(String name)
 	{
-		if (this.properties == null)
-			return null;
-
-		for (ChartProperty property : this.properties)
+		for (int i = 0, len = this.size(); i < len; i++)
 		{
-			if (property.getName().equals(name))
-				return property;
+			ChartProperty chartProperty = get(i);
+
+			if (chartProperty.getName().equals(name))
+				return chartProperty;
 		}
 
 		return null;
-	}
-
-	/**
-	 * 获取指定索引的{@linkplain ChartProperty}，未找到则返回{@code null}。
-	 * 
-	 * @param index
-	 * @return
-	 */
-	public ChartProperty getByIndex(int index)
-	{
-		if (this.properties == null)
-			return null;
-
-		if (index < 0 || index > this.properties.size())
-			return null;
-
-		return this.properties.get(index);
-	}
-
-	@Override
-	public String toString()
-	{
-		return getClass().getSimpleName() + " [properties=" + properties + "]";
 	}
 }

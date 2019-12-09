@@ -39,6 +39,15 @@ public interface RenderContext
 	void setAttribute(String name, Object value);
 
 	/**
+	 * 移除属性。
+	 * 
+	 * @param <T>
+	 * @param name
+	 * @return 已移除的属性值或者{@code null}
+	 */
+	<T> T removeAttribute(String name);
+
+	/**
 	 * 是否有指定属性。
 	 * 
 	 * @param name
