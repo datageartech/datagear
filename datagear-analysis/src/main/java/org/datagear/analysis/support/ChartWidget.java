@@ -2,10 +2,15 @@
  * Copyright (c) 2018 datagear.tech. All Rights Reserved.
  */
 
-/**
- * 
- */
-package org.datagear.analysis;
+package org.datagear.analysis.support;
+
+import org.datagear.analysis.AbstractIdentifiable;
+import org.datagear.analysis.Chart;
+import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPropertyValues;
+import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.RenderException;
 
 /**
  * 图表部件。
