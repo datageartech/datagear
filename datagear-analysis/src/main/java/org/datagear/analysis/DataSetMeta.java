@@ -26,10 +26,11 @@ public class DataSetMeta
 	{
 	}
 
-	public DataSetMeta(List<ColumnMeta> columnMetas)
+	@SuppressWarnings("unchecked")
+	public DataSetMeta(List<? extends ColumnMeta> columnMetas)
 	{
 		super();
-		this.columnMetas = columnMetas;
+		this.columnMetas = (List<ColumnMeta>) columnMetas;
 	}
 
 	public List<ColumnMeta> getColumnMetas()
@@ -37,9 +38,10 @@ public class DataSetMeta
 		return columnMetas;
 	}
 
-	public void setColumnMetas(List<ColumnMeta> columnMetas)
+	@SuppressWarnings("unchecked")
+	public void setColumnMetas(List<? extends ColumnMeta> columnMetas)
 	{
-		this.columnMetas = columnMetas;
+		this.columnMetas = (List<ColumnMeta>) columnMetas;
 	}
 
 	@Override

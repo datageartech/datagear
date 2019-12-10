@@ -100,18 +100,18 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends RenderContext> List<ChartPlugin<? super T>> getAllByRenderContextType(
+	protected <T extends RenderContext> List<ChartPlugin<T>> getAllByRenderContextType(
 			List<? extends ChartPlugin<?>> chartPlugins, List<Class<? extends RenderContext>> supportTypes,
-			Class<T> renderContextType)
+			Class<? extends T> renderContextType)
 	{
-		List<ChartPlugin<? super T>> reChartPlugins = new ArrayList<ChartPlugin<? super T>>();
+		List<ChartPlugin<T>> reChartPlugins = new ArrayList<ChartPlugin<T>>();
 
 		for (int i = 0, len = chartPlugins.size(); i < len; i++)
 		{
 			Class<? extends RenderContext> supportType = supportTypes.get(i);
 
 			if (supportType.isAssignableFrom(renderContextType))
-				reChartPlugins.add((ChartPlugin<? super T>) chartPlugins.get(i));
+				reChartPlugins.add((ChartPlugin<T>) chartPlugins.get(i));
 		}
 
 		return reChartPlugins;

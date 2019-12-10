@@ -27,5 +27,5 @@ public interface DataSet
 	 * 
 	 * @return
 	 */
-	List<? extends Map<String, ?>> getDatas();
+	List<Map<String, ?>> getDatas();
 }

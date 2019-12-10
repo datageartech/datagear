@@ -75,7 +75,7 @@ public class SimpleChartPluginManager extends AbstractChartPluginManager impleme
 	}
 
 	@Override
-	public <T extends RenderContext> List<ChartPlugin<? super T>> getAll(Class<T> renderContextType)
+	public <T extends RenderContext> List<ChartPlugin<T>> getAll(Class<? extends T> renderContextType)
 	{
 		if (this._supportRenderContextTypes == null)
 			this._supportRenderContextTypes = resolveChartPluginRenderContextTypes(this.chartPlugins);

@@ -22,8 +22,9 @@ public class ChartPropertyValues extends AbstractDelegatedMap<String, Object>
 		super();
 	}
 
-	public ChartPropertyValues(Map<String, Object> chartPropertyValues)
+	@SuppressWarnings("unchecked")
+	public ChartPropertyValues(Map<String, ?> chartPropertyValues)
 	{
-		super(chartPropertyValues);
+		super((Map<String, Object>) chartPropertyValues);
 	}
 }

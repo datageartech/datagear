@@ -43,7 +43,7 @@ public interface ChartPluginManager
 	 * @param renderContextType
 	 * @return
 	 */
-	<T extends RenderContext> List<ChartPlugin<? super T>> getAll(Class<T> renderContextType);
+	<T extends RenderContext> List<ChartPlugin<T>> getAll(Class<? extends T> renderContextType);
 
 	/**
 	 * 获取所有{@linkplain ChartPlugin}。

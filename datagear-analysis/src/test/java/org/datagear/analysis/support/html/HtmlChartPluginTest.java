@@ -85,7 +85,7 @@ public class HtmlChartPluginTest
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = new HtmlChartPlugin<HtmlRenderContext>();
 		jsonChartPluginResolver.setChartPluginProperties(htmlChartPlugin, properties);
 
-		htmlChartPlugin.setChartScriptContent(
+		htmlChartPlugin.setScriptContent(
 				LocationResource.toClasspathLocation("org/datagear/analysis/support/html/HtmlChartPlugin.chart.js"));
 
 		return htmlChartPlugin;

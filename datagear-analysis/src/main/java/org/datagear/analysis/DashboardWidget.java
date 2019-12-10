@@ -23,10 +23,11 @@ public abstract class DashboardWidget<T extends RenderContext> extends AbstractI
 		super();
 	}
 
-	public DashboardWidget(String id, List<ChartWidget<T>> chartWidgets)
+	@SuppressWarnings("unchecked")
+	public DashboardWidget(String id, List<? extends ChartWidget<T>> chartWidgets)
 	{
 		super(id);
-		this.chartWidgets = chartWidgets;
+		this.chartWidgets = (List<ChartWidget<T>>) chartWidgets;
 	}
 
 	public List<ChartWidget<T>> getChartWidgets()
@@ -34,9 +35,10 @@ public abstract class DashboardWidget<T extends RenderContext> extends AbstractI
 		return chartWidgets;
 	}
 
-	public void setChartWidgets(List<ChartWidget<T>> chartWidgets)
+	@SuppressWarnings("unchecked")
+	public void setChartWidgets(List<? extends ChartWidget<T>> chartWidgets)
 	{
-		this.chartWidgets = chartWidgets;
+		this.chartWidgets = (List<ChartWidget<T>>) chartWidgets;
 	}
 
 	/**

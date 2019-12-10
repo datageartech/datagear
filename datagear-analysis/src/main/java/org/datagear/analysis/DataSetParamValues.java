@@ -26,8 +26,9 @@ public class DataSetParamValues extends AbstractDelegatedMap<String, Object>
 		super();
 	}
 
-	public DataSetParamValues(Map<String, Object> dataSetParamValues)
+	@SuppressWarnings("unchecked")
+	public DataSetParamValues(Map<String, ?> dataSetParamValues)
 	{
-		super(dataSetParamValues);
+		super((Map<String, Object>) dataSetParamValues);
 	}
 }

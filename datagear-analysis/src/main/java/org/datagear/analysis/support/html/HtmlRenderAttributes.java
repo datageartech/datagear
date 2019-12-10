@@ -40,6 +40,8 @@ public class HtmlRenderAttributes
 
 	public static final String CHART_NOT_RENDER_SCRIPT_TAG = "chartNotRenderScriptTag";
 
+	public static final String CHART_SCRIPT_NOT_INVOKE_RENDER = "chartScriptNotInvokeRender";
+
 	/**
 	 * 获取{@linkplain RenderStyle}，没有则返回{@code null}。
 	 * 
@@ -279,6 +281,41 @@ public class HtmlRenderAttributes
 	public static Boolean removeChartNotRenderScriptTag(RenderContext renderContext)
 	{
 		return renderContext.removeAttribute(CHART_NOT_RENDER_SCRIPT_TAG);
+	}
+
+	/**
+	 * 获取图表脚本是否不调用渲染函数。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public static boolean getChartScriptNotInvokeRender(RenderContext renderContext)
+	{
+		Boolean re = renderContext.getAttribute(CHART_SCRIPT_NOT_INVOKE_RENDER);
+
+		return (re == null ? false : re.booleanValue());
+	}
+
+	/**
+	 * 设置图表脚本是否不调用渲染函数。
+	 * 
+	 * @param renderContext
+	 * @param chartInScriptContext
+	 */
+	public static void setChartScriptNotInvokeRender(RenderContext renderContext, boolean chartInScriptContext)
+	{
+		renderContext.setAttribute(CHART_SCRIPT_NOT_INVOKE_RENDER, chartInScriptContext);
+	}
+
+	/**
+	 * 移除图表脚本是否不调用渲染函数。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public static Boolean removeChartScriptNotInvokeRender(RenderContext renderContext)
+	{
+		return renderContext.removeAttribute(CHART_SCRIPT_NOT_INVOKE_RENDER);
 	}
 
 	/**

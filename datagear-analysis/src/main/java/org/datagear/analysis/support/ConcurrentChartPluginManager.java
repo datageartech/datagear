@@ -102,7 +102,7 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager imp
 	}
 
 	@Override
-	public <T extends RenderContext> List<ChartPlugin<? super T>> getAll(Class<T> renderContextType)
+	public <T extends RenderContext> List<ChartPlugin<T>> getAll(Class<? extends T> renderContextType)
 	{
 		ReadLock readLock = this._lock.readLock();
 

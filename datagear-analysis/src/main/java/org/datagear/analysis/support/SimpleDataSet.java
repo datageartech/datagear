@@ -23,18 +23,19 @@ public class SimpleDataSet implements DataSet
 {
 	private DataSetMeta meta;
 
-	private List<? extends Map<String, ?>> datas;
+	private List<Map<String, ?>> datas;
 
 	public SimpleDataSet()
 	{
 		super();
 	}
 
+	@SuppressWarnings("unchecked")
 	public SimpleDataSet(DataSetMeta meta, List<? extends Map<String, ?>> datas)
 	{
 		super();
 		this.meta = meta;
-		this.datas = datas;
+		this.datas = (List<Map<String, ?>>) datas;
 	}
 
 	@Override
@@ -49,13 +50,14 @@ public class SimpleDataSet implements DataSet
 	}
 
 	@Override
-	public List<? extends Map<String, ?>> getDatas()
+	public List<Map<String, ?>> getDatas()
 	{
 		return datas;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setDatas(List<? extends Map<String, ?>> datas)
 	{
-		this.datas = datas;
+		this.datas = (List<Map<String, ?>>) datas;
 	}
 }

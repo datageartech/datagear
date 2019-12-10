@@ -23,9 +23,10 @@ public class DataSetParams extends AbstractDelegatedList<DataSetParam>
 		super();
 	}
 
-	public DataSetParams(List<DataSetParam> dataSetParams)
+	@SuppressWarnings("unchecked")
+	public DataSetParams(List<? extends DataSetParam> dataSetParams)
 	{
-		super(dataSetParams);
+		super((List<DataSetParam>) dataSetParams);
 	}
 
 	/**

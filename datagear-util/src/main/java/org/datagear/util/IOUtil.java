@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -38,6 +39,50 @@ public class IOUtil
 	private IOUtil()
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	/**
+	 * 从输入流读字符串。
+	 * 
+	 * @param in
+	 * @param encoding
+	 * @param closeIn
+	 * @return
+	 * @throws IOException
+	 */
+	public static String readString(InputStream in, String encoding, boolean closeIn) throws IOException
+	{
+		Reader reader = getReader(in, encoding);
+
+		return readString(reader, encoding, closeIn);
+	}
+
+	/**
+	 * 从输入流读字符串。
+	 * 
+	 * @param in
+	 * @param encoding
+	 * @param closeIn
+	 * @return
+	 * @throws IOException
+	 */
+	public static String readString(Reader in, String encoding, boolean closeIn) throws IOException
+	{
+		StringWriter out = new StringWriter();
+
+		try
+		{
+			write(in, out);
+		}
+		finally
+		{
+			if (closeIn)
+				close(in);
+
+			close(out);
+		}
+
+		return out.toString();
 	}
 
 	/**

@@ -23,9 +23,10 @@ public class ChartProperties extends AbstractDelegatedList<ChartProperty>
 		super();
 	}
 
-	public ChartProperties(List<ChartProperty> chartProperties)
+	@SuppressWarnings("unchecked")
+	public ChartProperties(List<? extends ChartProperty> chartProperties)
 	{
-		super(chartProperties);
+		super((List<ChartProperty>) chartProperties);
 	}
 
 	/**
