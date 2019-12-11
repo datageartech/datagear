@@ -28,9 +28,9 @@ public class HtmlTemplateDashboardWidget<T extends HtmlRenderContext> extends Te
 		super();
 	}
 
-	public HtmlTemplateDashboardWidget(String id, String template, ChartWidgetSource chartWidgetSource)
+	public HtmlTemplateDashboardWidget(String id, String name, String template, ChartWidgetSource chartWidgetSource)
 	{
-		super(id, template);
+		super(id, name, template);
 		this.chartWidgetSource = chartWidgetSource;
 	}
 
