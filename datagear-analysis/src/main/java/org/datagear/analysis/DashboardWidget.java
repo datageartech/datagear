@@ -13,32 +13,8 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public abstract class DashboardWidget<T extends RenderContext> extends AbstractIdentifiable
+public interface DashboardWidget<T extends RenderContext> extends Identifiable
 {
-	/** 名称 */
-	private String name;
-
-	public DashboardWidget()
-	{
-		super();
-	}
-
-	public DashboardWidget(String id, String name)
-	{
-		super(id);
-		this.name = name;
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-
 	/**
 	 * 渲染{@linkplain Dashboard}。
 	 * 

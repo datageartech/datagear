@@ -29,5 +29,10 @@
 		  <artifactId>fastjson</artifactId>
 		  <version>${fastjson.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>${freemarker.version}</version>
+		</dependency>
 	</dependencies>
 </project>

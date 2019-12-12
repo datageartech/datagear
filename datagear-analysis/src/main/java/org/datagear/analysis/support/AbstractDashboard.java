@@ -12,6 +12,7 @@ import java.util.List;
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.Dashboard;
+import org.datagear.analysis.DashboardWidget;
 import org.datagear.analysis.RenderContext;
 
 /**
@@ -22,6 +23,8 @@ import org.datagear.analysis.RenderContext;
  */
 public abstract class AbstractDashboard extends AbstractIdentifiable implements Dashboard
 {
+	private DashboardWidget<?> dashboardWidget;
+
 	private RenderContext renderContext;
 
 	private List<Chart> charts;
@@ -31,17 +34,31 @@ public abstract class AbstractDashboard extends AbstractIdentifiable implements 
 		super();
 	}
 
-	public AbstractDashboard(String id, RenderContext renderContext, List<Chart> charts)
+	@SuppressWarnings("unchecked")
+	public AbstractDashboard(String id, DashboardWidget<?> dashboardWidget, RenderContext renderContext,
+			List<? extends Chart> charts)
 	{
 		super(id);
+		this.dashboardWidget = dashboardWidget;
 		this.renderContext = renderContext;
-		this.charts = charts;
+		this.charts = (List<Chart>) charts;
+	}
+
+	@Override
+	public DashboardWidget<?> getDashboardWidget()
+	{
+		return dashboardWidget;
+	}
+
+	public void setDashboardWidget(DashboardWidget<?> dashboardWidget)
+	{
+		this.dashboardWidget = dashboardWidget;
 	}
 
 	@Override
 	public RenderContext getRenderContext()
 	{
-		return renderContext;
+		return this.renderContext;
 	}
 
 	public void setRenderContext(RenderContext renderContext)
@@ -55,9 +72,10 @@ public abstract class AbstractDashboard extends AbstractIdentifiable implements 
 		return charts;
 	}
 
-	public void setCharts(List<Chart> charts)
+	@SuppressWarnings("unchecked")
+	public void setCharts(List<? extends Chart> charts)
 	{
-		this.charts = charts;
+		this.charts = (List<Chart>) charts;
 	}
 
 	@Override

@@ -18,6 +18,13 @@ import java.util.List;
 public interface Dashboard extends Identifiable
 {
 	/**
+	 * 获取{@linkplain DashboardWidget}。
+	 * 
+	 * @return
+	 */
+	DashboardWidget<?> getDashboardWidget();
+
+	/**
 	 * 获取{@linkplain RenderContext}。
 	 * 
 	 * @return

@@ -27,7 +27,7 @@ import org.junit.Test;
  */
 public class HtmlChartPluginTest
 {
-	private JsonChartPluginResolver jsonChartPluginResolver = new JsonChartPluginResolver();
+	private static JsonChartPluginResolver jsonChartPluginResolver = new JsonChartPluginResolver();
 
 	public HtmlChartPluginTest() throws Throwable
 	{
@@ -37,6 +37,8 @@ public class HtmlChartPluginTest
 	@Test
 	public void renderChartTest() throws Throwable
 	{
+		HtmlRenderAttributes.resetGenerateSequence();
+
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = createHtmlChartPlugin();
 
 		StringWriter stringWriter = new StringWriter();
@@ -58,11 +60,15 @@ public class HtmlChartPluginTest
 		Assert.assertTrue(html
 				.contains("<div id=\"" + HtmlRenderAttributes.generateChartElementId(2) + "\" class=\"chart\"></div>"));
 		Assert.assertTrue(html.contains("(" + HtmlRenderAttributes.generateChartVarName(2) + ");"));
+
+		System.out.println(html);
 	}
 
 	@Test
 	public void renderChartTest_setChartRenderContextVarName() throws Throwable
 	{
+		HtmlRenderAttributes.resetGenerateSequence();
+
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = createHtmlChartPlugin();
 
 		StringWriter stringWriter = new StringWriter();
@@ -74,11 +80,13 @@ public class HtmlChartPluginTest
 		String html = stringWriter.toString();
 
 		Assert.assertTrue(html.contains("\"renderContext\":chartRenderContext"));
+
+		System.out.println(html);
 	}
 
-	protected HtmlChartPlugin<HtmlRenderContext> createHtmlChartPlugin() throws Exception
+	public static HtmlChartPlugin<HtmlRenderContext> createHtmlChartPlugin() throws Exception
 	{
-		InputStream jsonInputStream = getClass().getClassLoader()
+		InputStream jsonInputStream = HtmlChartPluginTest.class.getClassLoader()
 				.getResourceAsStream("org/datagear/analysis/support/html/HtmlChartPlugin.config.json");
 		Map<String, Object> properties = jsonChartPluginResolver.resolveChartPluginProperties(jsonInputStream, "UTF-8");
 

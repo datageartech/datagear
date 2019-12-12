@@ -10,7 +10,6 @@ package org.datagear.analysis.support.html;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartPropertyValues;
@@ -140,10 +139,6 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 
 	private HtmlChartScriptObjectWriter htmlChartScriptObjectWriter = new HtmlChartScriptObjectWriter();
 
-	private AtomicInteger chartElementIdSequence = new AtomicInteger(1);
-
-	private AtomicInteger chartVarNameSequence = new AtomicInteger(1);
-
 	public HtmlChartPlugin()
 	{
 		super();
@@ -249,26 +244,6 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		this.htmlChartScriptObjectWriter = htmlChartScriptObjectWriter;
 	}
 
-	public AtomicInteger getChartElementIdSequence()
-	{
-		return chartElementIdSequence;
-	}
-
-	public void setChartElementIdSequence(AtomicInteger chartElementIdSequence)
-	{
-		this.chartElementIdSequence = chartElementIdSequence;
-	}
-
-	public AtomicInteger getChartVarNameSequence()
-	{
-		return chartVarNameSequence;
-	}
-
-	public void setChartVarNameSequence(AtomicInteger chartVarNameSequence)
-	{
-		this.chartVarNameSequence = chartVarNameSequence;
-	}
-
 	@Override
 	public Chart renderChart(T renderContext, ChartPropertyValues chartPropertyValues,
 			DataSetFactory... dataSetFactories) throws RenderException
@@ -284,14 +259,14 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		else
 		{
 			if (StringUtil.isEmpty(chartElementId))
-				chartElementId = HtmlRenderAttributes.generateChartElementId(chartElementIdSequence.getAndIncrement());
+				chartElementId = HtmlRenderAttributes.generateChartElementId();
 
 			writeChartElement(renderContext, chartElementId);
 		}
 
 		String chartVarName = HtmlRenderAttributes.getChartVarName(renderContext);
 		if (StringUtil.isEmpty(chartVarName))
-			chartVarName = HtmlRenderAttributes.generateChartVarName(chartVarNameSequence.getAndIncrement());
+			chartVarName = HtmlRenderAttributes.generateChartVarName();
 
 		HtmlChart chart = new HtmlChart(IDUtil.uuid(), this, renderContext, chartPropertyValues, dataSetFactories,
 				chartElementId, chartVarName);

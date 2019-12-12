@@ -22,6 +22,7 @@
 		<javax.json.version>1.0.4</javax.json.version>
 		<guava.version>19.0</guava.version>
 		<fastjson.version>1.2.35</fastjson.version>
+		<freemarker.version>2.3.28</freemarker.version>
 	</properties>
 	
 	<modules>

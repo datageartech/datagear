@@ -23,8 +23,6 @@ import org.datagear.analysis.RenderException;
  */
 public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 {
-	private String name;
-
 	private ChartPlugin<T> chartPlugin;
 
 	private ChartPropertyValues chartPropertyValues;
@@ -36,24 +34,13 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 		super();
 	}
 
-	public ChartWidget(String id, String name, ChartPlugin<T> chartPlugin, ChartPropertyValues chartPropertyValues,
+	public ChartWidget(String id, ChartPlugin<T> chartPlugin, ChartPropertyValues chartPropertyValues,
 			DataSetFactory... dataSetFactories)
 	{
 		super(id);
-		this.name = name;
 		this.chartPlugin = chartPlugin;
 		this.chartPropertyValues = chartPropertyValues;
 		this.dataSetFactories = dataSetFactories;
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
 	}
 
 	public ChartPlugin<T> getChartPlugin()

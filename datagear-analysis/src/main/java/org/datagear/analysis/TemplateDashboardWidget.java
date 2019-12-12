@@ -12,7 +12,8 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public abstract class TemplateDashboardWidget<T extends RenderContext> extends DashboardWidget<T>
+public abstract class TemplateDashboardWidget<T extends RenderContext> extends AbstractIdentifiable
+		implements DashboardWidget<T>
 {
 	private String template;
 
@@ -21,9 +22,9 @@ public abstract class TemplateDashboardWidget<T extends RenderContext> extends D
 		super();
 	}
 
-	public TemplateDashboardWidget(String id, String name, String template)
+	public TemplateDashboardWidget(String id, String template)
 	{
-		super(id, name);
+		super(id);
 		this.template = template;
 	}
 

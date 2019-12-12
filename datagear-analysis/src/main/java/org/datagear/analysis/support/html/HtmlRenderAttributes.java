@@ -8,6 +8,7 @@
 package org.datagear.analysis.support.html;
 
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartTheme;
@@ -41,6 +42,12 @@ public class HtmlRenderAttributes
 	public static final String CHART_NOT_RENDER_SCRIPT_TAG = "chartNotRenderScriptTag";
 
 	public static final String CHART_SCRIPT_NOT_INVOKE_RENDER = "chartScriptNotInvokeRender";
+
+	protected static final AtomicInteger CHART_ELEMENT_ID_SEQUENCE = new AtomicInteger(1);
+
+	protected static final AtomicInteger CHART_VAR_NAME_SEQUENCE = new AtomicInteger(1);
+
+	protected static final AtomicInteger DASHBOARD_VAR_NAME_SEQUENCE = new AtomicInteger(1);
 
 	/**
 	 * 获取{@linkplain RenderStyle}，没有则返回{@code null}。
@@ -265,11 +272,11 @@ public class HtmlRenderAttributes
 	 * 设置图表脚本是否不渲染{@code <script>}标签。
 	 * 
 	 * @param renderContext
-	 * @param chartInScriptContext
+	 * @param chartNotRenderScriptTag
 	 */
-	public static void setChartNotRenderScriptTag(RenderContext renderContext, boolean chartInScriptContext)
+	public static void setChartNotRenderScriptTag(RenderContext renderContext, boolean chartNotRenderScriptTag)
 	{
-		renderContext.setAttribute(CHART_NOT_RENDER_SCRIPT_TAG, chartInScriptContext);
+		renderContext.setAttribute(CHART_NOT_RENDER_SCRIPT_TAG, chartNotRenderScriptTag);
 	}
 
 	/**
@@ -300,11 +307,11 @@ public class HtmlRenderAttributes
 	 * 设置图表脚本是否不调用渲染函数。
 	 * 
 	 * @param renderContext
-	 * @param chartInScriptContext
+	 * @param chartScriptNotInvokeRender
 	 */
-	public static void setChartScriptNotInvokeRender(RenderContext renderContext, boolean chartInScriptContext)
+	public static void setChartScriptNotInvokeRender(RenderContext renderContext, boolean chartScriptNotInvokeRender)
 	{
-		renderContext.setAttribute(CHART_SCRIPT_NOT_INVOKE_RENDER, chartInScriptContext);
+		renderContext.setAttribute(CHART_SCRIPT_NOT_INVOKE_RENDER, chartScriptNotInvokeRender);
 	}
 
 	/**
@@ -321,6 +328,16 @@ public class HtmlRenderAttributes
 	/**
 	 * 生成图表HTML元素ID。
 	 * 
+	 * @return
+	 */
+	public static String generateChartElementId()
+	{
+		return generateChartElementId(CHART_ELEMENT_ID_SEQUENCE.getAndIncrement());
+	}
+
+	/**
+	 * 生成图表HTML元素ID。
+	 * 
 	 * @param seq
 	 * @return
 	 */
@@ -330,7 +347,17 @@ public class HtmlRenderAttributes
 	}
 
 	/**
-	 * 生成图表变量名
+	 * 生成图表变量名。
+	 * 
+	 * @return
+	 */
+	public static String generateChartVarName()
+	{
+		return generateChartVarName(CHART_VAR_NAME_SEQUENCE.getAndIncrement());
+	}
+
+	/**
+	 * 生成图表变量名。
 	 * 
 	 * @param seq
 	 * @return
@@ -338,5 +365,36 @@ public class HtmlRenderAttributes
 	public static String generateChartVarName(int seq)
 	{
 		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Chart_" + seq;
+	}
+
+	/**
+	 * 生成看板变量名。
+	 * 
+	 * @return
+	 */
+	public static String generateDashboardVarName()
+	{
+		return generateDashboardVarName(DASHBOARD_VAR_NAME_SEQUENCE.getAndIncrement());
+	}
+
+	/**
+	 * 生成看板变量名。
+	 * 
+	 * @param seq
+	 * @return
+	 */
+	public static String generateDashboardVarName(int seq)
+	{
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Dashboard_" + seq;
+	}
+
+	/**
+	 * 重置生成序列。
+	 */
+	public static void resetGenerateSequence()
+	{
+		CHART_ELEMENT_ID_SEQUENCE.set(1);
+		CHART_VAR_NAME_SEQUENCE.set(1);
+		DASHBOARD_VAR_NAME_SEQUENCE.set(1);
 	}
 }
