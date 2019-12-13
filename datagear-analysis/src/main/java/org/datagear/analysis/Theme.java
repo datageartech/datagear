@@ -28,6 +28,9 @@ public class Theme implements Serializable
 	/** 边框颜色 */
 	private String borderColor;
 
+	/** 边框宽度 */
+	private String borderWidth = "1px";
+
 	public Theme()
 	{
 		super();
@@ -71,10 +74,20 @@ public class Theme implements Serializable
 		this.borderColor = borderColor;
 	}
 
+	public String getBorderWidth()
+	{
+		return borderWidth;
+	}
+
+	public void setBorderWidth(String borderWidth)
+	{
+		this.borderWidth = borderWidth;
+	}
+
 	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [backgroundColor=" + backgroundColor + ", foregroundColor="
-				+ foregroundColor + ", borderColor=" + borderColor + "]";
+				+ foregroundColor + ", borderColor=" + borderColor + ", borderWidth=" + borderWidth + "]";
 	}
 }

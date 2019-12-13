@@ -2,6 +2,13 @@
 <html>
 <head>
 <@import />
+<style type="text/css">
+.chart-wrapper{
+    width: 30%;
+    height: 300px;
+    display: inline-block;
+}
+</style>
 <script type="text/javascript" src="<@resource name='customResource.js' />"></script>
 <@dashboard />
 </head>

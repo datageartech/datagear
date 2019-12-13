@@ -23,7 +23,7 @@ import org.datagear.analysis.RenderContext;
  */
 public abstract class AbstractDashboard extends AbstractIdentifiable implements Dashboard
 {
-	private DashboardWidget<?> dashboardWidget;
+	private DashboardWidget<?> widget;
 
 	private RenderContext renderContext;
 
@@ -35,24 +35,24 @@ public abstract class AbstractDashboard extends AbstractIdentifiable implements 
 	}
 
 	@SuppressWarnings("unchecked")
-	public AbstractDashboard(String id, DashboardWidget<?> dashboardWidget, RenderContext renderContext,
+	public AbstractDashboard(String id, DashboardWidget<?> widget, RenderContext renderContext,
 			List<? extends Chart> charts)
 	{
 		super(id);
-		this.dashboardWidget = dashboardWidget;
+		this.widget = widget;
 		this.renderContext = renderContext;
 		this.charts = (List<Chart>) charts;
 	}
 
 	@Override
-	public DashboardWidget<?> getDashboardWidget()
+	public DashboardWidget<?> getWidget()
 	{
-		return dashboardWidget;
+		return widget;
 	}
 
-	public void setDashboardWidget(DashboardWidget<?> dashboardWidget)
+	public void setWidget(DashboardWidget<?> widget)
 	{
-		this.dashboardWidget = dashboardWidget;
+		this.widget = widget;
 	}
 
 	@Override

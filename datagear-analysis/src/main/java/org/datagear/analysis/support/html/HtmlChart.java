@@ -21,9 +21,9 @@ import org.datagear.analysis.support.AbstractChart;
  */
 public class HtmlChart extends AbstractChart
 {
-	private String chartElementId;
+	private String elementId;
 
-	private String chartVarName;
+	private String varName;
 
 	public HtmlChart()
 	{
@@ -31,31 +31,31 @@ public class HtmlChart extends AbstractChart
 	}
 
 	public HtmlChart(String id, ChartPlugin<?> chartPlugin, RenderContext renderContext,
-			ChartPropertyValues chartPropertyValues, DataSetFactory[] dataSetFactories, String chartElementId,
-			String chartVarName)
+			ChartPropertyValues chartPropertyValues, DataSetFactory[] dataSetFactories, String elementId,
+			String varName)
 	{
 		super(id, chartPlugin, renderContext, chartPropertyValues, dataSetFactories);
-		this.chartElementId = chartElementId;
-		this.chartVarName = chartVarName;
+		this.elementId = elementId;
+		this.varName = varName;
 	}
 
-	public String getChartElementId()
+	public String getElementId()
 	{
-		return chartElementId;
+		return elementId;
 	}
 
-	public void setChartElementId(String chartElementId)
+	public void setElementId(String elementId)
 	{
-		this.chartElementId = chartElementId;
+		this.elementId = elementId;
 	}
 
-	public String getChartVarName()
+	public String getVarName()
 	{
-		return chartVarName;
+		return varName;
 	}
 
-	public void setChartVarName(String chartVarName)
+	public void setVarName(String varName)
 	{
-		this.chartVarName = chartVarName;
+		this.varName = varName;
 	}
 }

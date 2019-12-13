@@ -14,10 +14,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.datagear.analysis.Chart;
+import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.Dashboard;
+import org.datagear.analysis.DashboardTheme;
+import org.datagear.analysis.DashboardThemeSource;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
+import org.datagear.analysis.RenderStyle;
+import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
+import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.TemplateDashboardWidgetResManager;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
@@ -56,6 +63,10 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 
 	public static final String DIRECTIVE_CHART = "chart";
 
+	public static final String DASHBOARD_ELEMENT_STYLE_NAME = "dashboard";
+
+	public static final String CHART_ELEMENT_WRAPPER_STYLE_NAME = "chart-wrapper";
+
 	protected static final String KEY_HTML_DASHBOARD_RENDER_DATA_MODEL = HtmlDashboardRenderDataModel.class
 			.getSimpleName();
 
@@ -69,12 +80,16 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 
 	private ChartWidgetSource chartWidgetSource;
 
+	private DashboardThemeSource dashboardThemeSource = new SimpleDashboardThemeSource();
+
 	private String templateEncoding = "UTF-8";
 
 	private String writerEncoding = "UTF-8";
 
 	/** 换行符 */
 	private String newLine = "\r\n";
+
+	private boolean ignoreDashboardStyleBorderWidth = true;
 
 	private Configuration _configuration;
 
@@ -134,6 +149,16 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 		this.chartWidgetSource = chartWidgetSource;
 	}
 
+	public DashboardThemeSource getDashboardThemeSource()
+	{
+		return dashboardThemeSource;
+	}
+
+	public void setDashboardThemeSource(DashboardThemeSource dashboardThemeSource)
+	{
+		this.dashboardThemeSource = dashboardThemeSource;
+	}
+
 	public String getTemplateEncoding()
 	{
 		return templateEncoding;
@@ -162,6 +187,16 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 	public void setNewLine(String newLine)
 	{
 		this.newLine = newLine;
+	}
+
+	public boolean isIgnoreDashboardStyleBorderWidth()
+	{
+		return ignoreDashboardStyleBorderWidth;
+	}
+
+	public void setIgnoreDashboardStyleBorderWidth(boolean ignoreDashboardStyleBorderWidth)
+	{
+		this.ignoreDashboardStyleBorderWidth = ignoreDashboardStyleBorderWidth;
 	}
 
 	/**
@@ -196,12 +231,14 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 	 */
 	public Dashboard render(T renderContext, HtmlFreemarkerDashboardWidget<T> dashboardWidget) throws RenderException
 	{
+		inflateThemes(renderContext);
+
 		Template template = getTemplate(dashboardWidget);
 
 		HtmlDashboard dashboard = new HtmlDashboard();
 
 		dashboard.setId(IDUtil.uuid());
-		dashboard.setDashboardWidget(dashboardWidget);
+		dashboard.setWidget(dashboardWidget);
 		dashboard.setRenderContext(renderContext);
 		dashboard.setCharts(new ArrayList<Chart>());
 
@@ -217,6 +254,32 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 		}
 
 		return dashboard;
+	}
+
+	protected void inflateThemes(HtmlRenderContext renderContext)
+	{
+		DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
+
+		if (dashboardTheme == null)
+		{
+			RenderStyle renderStyle = HtmlRenderAttributes.getRenderStyle(renderContext);
+
+			if (renderStyle != null)
+				dashboardTheme = this.dashboardThemeSource.getDashboardTheme(renderStyle);
+
+			if (dashboardTheme == null)
+				dashboardTheme = SimpleDashboardThemeSource.THEME_LIGHT;
+
+			HtmlRenderAttributes.setDashboardTheme(renderContext, dashboardTheme);
+		}
+
+		ChartTheme chartTheme = HtmlRenderAttributes.getChartTheme(renderContext);
+
+		if (chartTheme == null)
+		{
+			chartTheme = dashboardTheme.getChartTheme();
+			HtmlRenderAttributes.setChartTheme(renderContext, chartTheme);
+		}
 	}
 
 	/**
@@ -402,11 +465,119 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 				throws TemplateException, IOException
 		{
+			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
+			HtmlRenderContext renderContext = dataModel.getHtmlDashboard().getRenderContext();
+
 			Writer out = env.getOut();
 
 			out.write("<meta charset=\"" + getWriterEncoding() + "\">");
 			writeNewLine(out);
 			out.write(getImportContent());
+			writeNewLine(out);
+
+			DashboardTheme dashboardTheme = getDashboardTheme(renderContext);
+			writeDashboardTheme(out, dashboardTheme);
+		}
+
+		protected DashboardTheme getDashboardTheme(RenderContext renderContext)
+		{
+			DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
+			return dashboardTheme;
+		}
+
+		protected void writeDashboardTheme(Writer out, DashboardTheme dashboardTheme) throws IOException
+		{
+			ChartTheme chartTheme = (dashboardTheme == null ? null : dashboardTheme.getChartTheme());
+
+			out.write("<style type=\"text/css\">");
+			writeNewLine(out);
+			out.write("body{");
+			writeNewLine(out);
+			out.write("    padding: 0px 0px;");
+			writeNewLine(out);
+			out.write("    margin: 0px 0px;");
+			writeNewLine(out);
+			if (dashboardTheme != null)
+			{
+				out.write("    background-color: " + dashboardTheme.getBackgroundColor() + ";");
+				writeNewLine(out);
+			}
+			out.write("}");
+			writeNewLine(out);
+			out.write("." + DASHBOARD_ELEMENT_STYLE_NAME + "{");
+			writeNewLine(out);
+			writeThemeCssAttrs(out, dashboardTheme);
+			writeBorderBoxCssAttrs(out);
+			if (isIgnoreDashboardStyleBorderWidth())
+			{
+				out.write("    border-width: 0px;");
+				writeNewLine(out);
+			}
+			out.write("}");
+			writeNewLine(out);
+
+			out.write("." + CHART_ELEMENT_WRAPPER_STYLE_NAME + "{");
+			writeNewLine(out);
+			out.write("    position: relative;");
+			writeNewLine(out);
+			writeThemeCssAttrs(out, chartTheme);
+			writeBorderBoxCssAttrs(out);
+			out.write("}");
+			writeNewLine(out);
+
+			out.write("." + HtmlChartPlugin.BUILTIN_CHART_ELEMENT_STYLE_NAME + "{");
+			writeNewLine(out);
+			writeFillParentCssAttrs(out);
+			writeBorderBoxCssAttrs(out);
+			out.write("}");
+			writeNewLine(out);
+
+			out.write("</style>");
+			writeNewLine(out);
+		}
+
+		protected void writeThemeCssAttrs(Writer out, Theme theme) throws IOException
+		{
+			if (theme != null)
+			{
+				String borderWidth = theme.getBorderWidth();
+				if (borderWidth == null)
+					borderWidth = "0";
+
+				out.write("    color: " + theme.getForegroundColor() + ";");
+				writeNewLine(out);
+				out.write("    background-color: " + theme.getBackgroundColor() + ";");
+				writeNewLine(out);
+				out.write("    border-color: " + theme.getBorderColor() + ";");
+				writeNewLine(out);
+				out.write("    border-width: " + theme.getBorderWidth() + ";");
+				writeNewLine(out);
+				out.write("    border-style: solid;");
+				writeNewLine(out);
+			}
+		}
+
+		protected void writeFillParentCssAttrs(Writer out) throws IOException
+		{
+			out.write("    position: absolute;");
+			writeNewLine(out);
+			out.write("    top: 0px;");
+			writeNewLine(out);
+			out.write("    bottom: 0px;");
+			writeNewLine(out);
+			out.write("    left: 0px;");
+			writeNewLine(out);
+			out.write("    right: 0px;");
+			writeNewLine(out);
+		}
+
+		protected void writeBorderBoxCssAttrs(Writer out) throws IOException
+		{
+			out.write("    box-sizing: border-box;");
+			writeNewLine(out);
+			out.write("    -moz-box-sizing: border-box;");
+			writeNewLine(out);
+			out.write("    -webkit-box-sizing: border-box;");
 			writeNewLine(out);
 		}
 	}
@@ -436,7 +607,7 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			if (StringUtil.isEmpty(resName))
 				throw new TemplateException("The [name] attribute must be set", env);
 
-			String widgetId = dataModel.getHtmlDashboard().getDashboardWidget().getId();
+			String widgetId = dataModel.getHtmlDashboard().getWidget().getId();
 
 			String resURL = IOUtil.concatPath(widgetId, resName, "/");
 			resURL = IOUtil.concatPath(getResourceRootURL(), resURL, "/");
@@ -471,7 +642,7 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			if (StringUtil.isEmpty(varName))
 				varName = HtmlRenderAttributes.generateDashboardVarName();
 
-			dataModel.getHtmlDashboard().setDashboardVarName(varName);
+			dataModel.getHtmlDashboard().setVarName(varName);
 
 			Writer out = env.getOut();
 
@@ -554,7 +725,7 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
 			HtmlDashboard htmlDashboard = dataModel.getHtmlDashboard();
-			String dashboardVarName = htmlDashboard.getDashboardVarName();
+			String dashboardVarName = htmlDashboard.getVarName();
 			HtmlRenderContext renderContext = htmlDashboard.getRenderContext();
 			HtmlChartWidget<T> chartWidget = getHtmlChartWidget(widget);
 

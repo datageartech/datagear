@@ -22,7 +22,7 @@ public interface Dashboard extends Identifiable
 	 * 
 	 * @return
 	 */
-	DashboardWidget<?> getDashboardWidget();
+	DashboardWidget<?> getWidget();
 
 	/**
 	 * 获取{@linkplain RenderContext}。

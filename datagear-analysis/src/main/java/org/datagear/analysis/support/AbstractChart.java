@@ -22,11 +22,11 @@ import org.datagear.analysis.RenderContext;
  */
 public abstract class AbstractChart extends AbstractIdentifiable implements Chart
 {
-	private ChartPlugin<?> chartPlugin;
+	private ChartPlugin<?> plugin;
 
 	public RenderContext renderContext;
 
-	private ChartPropertyValues chartPropertyValues;
+	private ChartPropertyValues propertyValues;
 
 	private DataSetFactory[] dataSetFactories;
 
@@ -35,25 +35,25 @@ public abstract class AbstractChart extends AbstractIdentifiable implements Char
 		super();
 	}
 
-	public AbstractChart(String id, ChartPlugin<?> chartPlugin, RenderContext renderContext,
-			ChartPropertyValues chartPropertyValues, DataSetFactory[] dataSetFactories)
+	public AbstractChart(String id, ChartPlugin<?> plugin, RenderContext renderContext,
+			ChartPropertyValues propertyValues, DataSetFactory[] dataSetFactories)
 	{
 		super(id);
-		this.chartPlugin = chartPlugin;
+		this.plugin = plugin;
 		this.renderContext = renderContext;
-		this.chartPropertyValues = chartPropertyValues;
+		this.propertyValues = propertyValues;
 		this.dataSetFactories = dataSetFactories;
 	}
 
 	@Override
-	public ChartPlugin<?> getChartPlugin()
+	public ChartPlugin<?> getPlugin()
 	{
-		return chartPlugin;
+		return plugin;
 	}
 
-	public void setChartPlugin(ChartPlugin<?> chartPlugin)
+	public void setPlugin(ChartPlugin<?> plugin)
 	{
-		this.chartPlugin = chartPlugin;
+		this.plugin = plugin;
 	}
 
 	@Override
@@ -68,14 +68,14 @@ public abstract class AbstractChart extends AbstractIdentifiable implements Char
 	}
 
 	@Override
-	public ChartPropertyValues getChartPropertyValues()
+	public ChartPropertyValues getPropertyValues()
 	{
-		return chartPropertyValues;
+		return propertyValues;
 	}
 
-	public void setChartPropertyValues(ChartPropertyValues chartPropertyValues)
+	public void setPropertyValues(ChartPropertyValues propertyValues)
 	{
-		this.chartPropertyValues = chartPropertyValues;
+		this.propertyValues = propertyValues;
 	}
 
 	@Override

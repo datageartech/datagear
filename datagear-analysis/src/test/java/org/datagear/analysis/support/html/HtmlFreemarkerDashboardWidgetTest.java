@@ -11,6 +11,7 @@ import java.io.StringWriter;
 
 import org.datagear.analysis.ChartPropertyValues;
 import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
 import org.datagear.analysis.support.TemplateDashboardWidgetResManager;
 import org.junit.Assert;
@@ -36,7 +37,7 @@ public class HtmlFreemarkerDashboardWidgetTest
 				chartPlugin, new ChartPropertyValues(), (DataSetFactory[]) null);
 
 		TemplateDashboardWidgetResManager resManager = new TemplateDashboardWidgetResManager(
-				"src/test/resources/org/datagear/analysis/support/html/HtmlFreemarkerDashboardWidgetTest");
+				"src/test/resources/org/datagear/analysis/support/html/htmlFreemarkerDashboardWidgets");
 
 		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);
 
@@ -56,7 +57,7 @@ public class HtmlFreemarkerDashboardWidgetTest
 	{
 		StringWriter stringWriter = new StringWriter();
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(stringWriter);
-
+		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
 		this.dashboardWidget.render(renderContext);
 
 		String html = stringWriter.toString();

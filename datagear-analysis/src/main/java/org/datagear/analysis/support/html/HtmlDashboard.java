@@ -21,7 +21,7 @@ import org.datagear.analysis.support.AbstractDashboard;
  */
 public class HtmlDashboard extends AbstractDashboard
 {
-	private String dashboardVarName;
+	private String varName;
 
 	public HtmlDashboard()
 	{
@@ -29,10 +29,10 @@ public class HtmlDashboard extends AbstractDashboard
 	}
 
 	public HtmlDashboard(String id, DashboardWidget<?> dashboardWidget, HtmlRenderContext renderContext,
-			List<Chart> charts, String dashboardVarName)
+			List<Chart> charts, String varName)
 	{
 		super(id, dashboardWidget, renderContext, charts);
-		this.dashboardVarName = dashboardVarName;
+		this.varName = varName;
 	}
 
 	@Override
@@ -41,13 +41,13 @@ public class HtmlDashboard extends AbstractDashboard
 		return (HtmlRenderContext) super.getRenderContext();
 	}
 
-	public String getDashboardVarName()
+	public String getVarName()
 	{
-		return dashboardVarName;
+		return varName;
 	}
 
-	public void setDashboardVarName(String dashboardVarName)
+	public void setVarName(String varName)
 	{
-		this.dashboardVarName = dashboardVarName;
+		this.varName = varName;
 	}
 }

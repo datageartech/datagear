@@ -116,6 +116,9 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	/** 默认图表脚本对象的渲染函数名 */
 	public static final String DEFAULT_SCRIPT_RENDER_FUNCTION_NAME = "render";
 
+	/** 内置图表元素样式名，所有图标元素都要加此样式名 */
+	public static final String BUILTIN_CHART_ELEMENT_STYLE_NAME = "chart";
+
 	/** 图表脚本内容 */
 	private String scriptContent;
 
@@ -129,7 +132,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	private String elementTagName = "div";
 
 	/** 图表HTML元素CSS样式名 */
-	private String elementStyleName = "chart";
+	private String elementStyleName = "";
 
 	/** 图表脚本内容资源文件的编码 */
 	private String scriptContentEncoding = "UTF-8";
@@ -296,8 +299,9 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 
 		try
 		{
-			writer.write("<" + this.elementTagName + " id=\"" + chartElementId + "\" class=\"" + this.elementStyleName
-					+ "\">");
+			writer.write("<" + this.elementTagName + " id=\"" + chartElementId + "\" class=\""
+					+ BUILTIN_CHART_ELEMENT_STYLE_NAME
+					+ (StringUtil.isEmpty(this.elementStyleName) ? "" : " " + this.elementStyleName) + "\">");
 			writer.write("</" + this.elementTagName + ">");
 			writer.write(this.newLine);
 		}
@@ -327,7 +331,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		}
 
 		out.write("var ");
-		out.write(chart.getChartVarName());
+		out.write(chart.getVarName());
 		out.write("=");
 		out.write(this.newLine);
 		writeChartScriptObject(renderContext, chart);
@@ -338,7 +342,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 
 		if (!HtmlRenderAttributes.getChartScriptNotInvokeRender(renderContext))
 		{
-			out.write(chart.getChartVarName() + "." + this.scriptRenderFunctionName + "();");
+			out.write(chart.getVarName() + "." + this.scriptRenderFunctionName + "();");
 			out.write(this.newLine);
 		}
 
@@ -372,7 +376,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	protected void writeChartScriptContent(T renderContext, HtmlChart chart) throws IOException
 	{
 		Writer out = renderContext.getWriter();
-		String chartVarName = chart.getChartVarName();
+		String chartVarName = chart.getVarName();
 
 		if (LocationResource.isFileLocation(this.scriptContent)
 				|| LocationResource.isClasspathLocation(this.scriptContent))

@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartTheme;
+import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.util.Global;
@@ -26,6 +27,8 @@ import org.datagear.util.StringUtil;
 public class HtmlRenderAttributes
 {
 	public static final String RENDER_STYPE = "renderStyle";
+
+	public static final String DASHBOARD_THEME = "dashboardTheme";
 
 	public static final String CHART_THEME = "chartTheme";
 
@@ -72,6 +75,48 @@ public class HtmlRenderAttributes
 	}
 
 	/**
+	 * 移除{@linkplain RenderStyle}。
+	 * 
+	 * @param renderContext
+	 */
+	public static void removeRenderStyle(RenderContext renderContext)
+	{
+		renderContext.removeAttribute(RENDER_STYPE);
+	}
+
+	/**
+	 * 获取{@linkplain DashboardTheme}，没有则返回{@code null}。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public static DashboardTheme getDashboardTheme(RenderContext renderContext)
+	{
+		return renderContext.getAttribute(DASHBOARD_THEME);
+	}
+
+	/**
+	 * 设置{@linkplain DashboardTheme}。
+	 * 
+	 * @param renderContext
+	 * @param dashboardTheme
+	 */
+	public static void setDashboardTheme(RenderContext renderContext, DashboardTheme dashboardTheme)
+	{
+		renderContext.setAttribute(DASHBOARD_THEME, dashboardTheme);
+	}
+
+	/**
+	 * 移除{@linkplain DashboardTheme}。
+	 * 
+	 * @param renderContext
+	 */
+	public static void removeDashboardTheme(RenderContext renderContext)
+	{
+		renderContext.removeAttribute(DASHBOARD_THEME);
+	}
+
+	/**
 	 * 获取{@linkplain ChartTheme}，没有则返回{@code null}。
 	 * 
 	 * @param renderContext
@@ -79,7 +124,7 @@ public class HtmlRenderAttributes
 	 */
 	public static ChartTheme getChartTheme(RenderContext renderContext)
 	{
-		return renderContext.getAttribute(RENDER_STYPE);
+		return renderContext.getAttribute(CHART_THEME);
 	}
 
 	/**
@@ -91,6 +136,16 @@ public class HtmlRenderAttributes
 	public static void setChartTheme(RenderContext renderContext, ChartTheme chartTheme)
 	{
 		renderContext.setAttribute(CHART_THEME, chartTheme);
+	}
+
+	/**
+	 * 移除{@linkplain ChartTheme}。
+	 * 
+	 * @param renderContext
+	 */
+	public static void removeChartTheme(RenderContext renderContext)
+	{
+		renderContext.removeAttribute(CHART_THEME);
 	}
 
 	/**
@@ -113,6 +168,16 @@ public class HtmlRenderAttributes
 	public static void setLocale(RenderContext renderContext, Locale locale)
 	{
 		renderContext.setAttribute(LOCALE, locale);
+	}
+
+	/**
+	 * 移除{@linkplain Locale}。
+	 * 
+	 * @param renderContext
+	 */
+	public static void removeLocale(RenderContext renderContext)
+	{
+		renderContext.removeAttribute(LOCALE);
 	}
 
 	/**

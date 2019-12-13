@@ -150,12 +150,12 @@ public class HtmlChartScriptObjectWriter
 
 		public JsonHtmlChart(HtmlChart htmlChart, String chartRenderContextVarName)
 		{
-			super(htmlChart.getId(), new IdChartPlugin(htmlChart.getChartPlugin()),
+			super(htmlChart.getId(), new IdChartPlugin(htmlChart.getPlugin()),
 					(StringUtil.isEmpty(chartRenderContextVarName)
 							? new AttributesRenderContext(htmlChart.getRenderContext())
 							: new RefRenderContext(chartRenderContextVarName)),
-					htmlChart.getChartPropertyValues(), htmlChart.getDataSetFactories(), htmlChart.getChartElementId(),
-					htmlChart.getChartVarName());
+					htmlChart.getPropertyValues(), htmlChart.getDataSetFactories(), htmlChart.getElementId(),
+					htmlChart.getVarName());
 		}
 	}
 
