@@ -58,10 +58,11 @@ public class HtmlFreemarkerDashboardWidgetTest
 		StringWriter stringWriter = new StringWriter();
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(stringWriter);
 		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
-		this.dashboardWidget.render(renderContext);
+		HtmlDashboard dashboard = this.dashboardWidget.render(renderContext);
 
 		String html = stringWriter.toString();
 
+		Assert.assertEquals(4, dashboard.getCharts().size());
 		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateDashboardVarName(1)));
 		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(1)));
 		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(2)));

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.Chart;
@@ -81,6 +82,8 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 	private ChartWidgetSource chartWidgetSource;
 
 	private DashboardThemeSource dashboardThemeSource = new SimpleDashboardThemeSource();
+
+	private HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter = new HtmlDashboardScriptObjectWriter();
 
 	private String templateEncoding = "UTF-8";
 
@@ -159,6 +162,16 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 		this.dashboardThemeSource = dashboardThemeSource;
 	}
 
+	public HtmlDashboardScriptObjectWriter getHtmlDashboardScriptObjectWriter()
+	{
+		return htmlDashboardScriptObjectWriter;
+	}
+
+	public void setHtmlDashboardScriptObjectWriter(HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter)
+	{
+		this.htmlDashboardScriptObjectWriter = htmlDashboardScriptObjectWriter;
+	}
+
 	public String getTemplateEncoding()
 	{
 		return templateEncoding;
@@ -229,7 +242,8 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 	 * @return
 	 * @throws RenderException
 	 */
-	public Dashboard render(T renderContext, HtmlFreemarkerDashboardWidget<T> dashboardWidget) throws RenderException
+	public HtmlDashboard render(T renderContext, HtmlFreemarkerDashboardWidget<T> dashboardWidget)
+			throws RenderException
 	{
 		inflateThemes(renderContext);
 
@@ -258,14 +272,19 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 
 	protected void inflateThemes(HtmlRenderContext renderContext)
 	{
+		RenderStyle renderStyle = HtmlRenderAttributes.getRenderStyle(renderContext);
+
+		if (renderStyle == null)
+		{
+			renderStyle = RenderStyle.LIGHT;
+			HtmlRenderAttributes.setRenderStyle(renderContext, renderStyle);
+		}
+
 		DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
 
 		if (dashboardTheme == null)
 		{
-			RenderStyle renderStyle = HtmlRenderAttributes.getRenderStyle(renderContext);
-
-			if (renderStyle != null)
-				dashboardTheme = this.dashboardThemeSource.getDashboardTheme(renderStyle);
+			dashboardTheme = this.dashboardThemeSource.getDashboardTheme(renderStyle);
 
 			if (dashboardTheme == null)
 				dashboardTheme = SimpleDashboardThemeSource.THEME_LIGHT;
@@ -638,6 +657,7 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			String listener = getStringParamValue(params, "listener");
 
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
+			HtmlRenderContext renderContext = dataModel.getHtmlDashboard().getRenderContext();
 
 			if (StringUtil.isEmpty(varName))
 				varName = HtmlRenderAttributes.generateDashboardVarName();
@@ -655,9 +675,6 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			writeNewLine(out);
 			writeHtmlDashboardScriptObject(out, dataModel.getHtmlDashboard());
 			out.write(";");
-			writeNewLine(out);
-
-			out.write(varName + ".charts=[];");
 			writeNewLine(out);
 
 			out.write(varName
@@ -684,11 +701,13 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 
 			writeScriptEndTag(out);
 			writeNewLine(out);
+
+			HtmlRenderAttributes.setChartRenderContextVarName(renderContext, varName + ".renderContext");
 		}
 
 		protected void writeHtmlDashboardScriptObject(Writer out, HtmlDashboard dashboard) throws IOException
 		{
-			out.write("{}");
+			getHtmlDashboardScriptObjectWriter().write(out, dashboard);
 		}
 	}
 
@@ -734,7 +753,7 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			HtmlRenderAttributes.setChartVarName(renderContext, var);
 			HtmlRenderAttributes.setChartElementId(renderContext, elementId);
 
-			chartWidget.render((T) renderContext);
+			Chart chart = chartWidget.render((T) renderContext);
 
 			Writer out = env.getOut();
 
@@ -744,6 +763,15 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			writeNewLine(out);
 			writeScriptEndTag(out);
 			writeNewLine(out);
+
+			List<Chart> charts = htmlDashboard.getCharts();
+			if (charts == null)
+			{
+				charts = new ArrayList<Chart>();
+				htmlDashboard.setCharts(charts);
+			}
+
+			charts.add(chart);
 		}
 
 		/**

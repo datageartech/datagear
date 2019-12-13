@@ -4,7 +4,6 @@
 
 package org.datagear.analysis.support.html;
 
-import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.TemplateDashboardWidget;
 
@@ -43,7 +42,7 @@ public class HtmlFreemarkerDashboardWidget<T extends HtmlRenderContext> extends 
 	}
 
 	@Override
-	public Dashboard render(T renderContext) throws RenderException
+	public HtmlDashboard render(T renderContext) throws RenderException
 	{
 		return this.renderer.render(renderContext, this);
 	}

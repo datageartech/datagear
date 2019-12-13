@@ -302,11 +302,11 @@ public class HtmlRenderAttributes
 	 * 设置图表{@linkplain Chart#getRenderContext()}JS变量名。
 	 * 
 	 * @param renderContext
-	 * @param chartVarName
+	 * @param renderContextVarName
 	 */
-	public static void setChartRenderContextVarName(RenderContext renderContext, String chartVarName)
+	public static void setChartRenderContextVarName(RenderContext renderContext, String renderContextVarName)
 	{
-		renderContext.setAttribute(CHART_RENDER_CONTEXT_VAR_NAME, chartVarName);
+		renderContext.setAttribute(CHART_RENDER_CONTEXT_VAR_NAME, renderContextVarName);
 	}
 
 	/**
