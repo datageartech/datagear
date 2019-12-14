@@ -68,7 +68,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	 * 仅用于JSON输出的{@linkplain HtmlChart}。
 	 * <p>
 	 * 为了支持{@linkplain HtmlRenderAttributes#setChartRenderContextVarName(RenderContext, String)}特性，
-	 * 它会使用{@linkplain RefRenderContext}代替真正的{@linkplain HtmlChart#getRenderContext()}，
+	 * 它会使用{@linkplain RefHtmlRenderContext}代替真正的{@linkplain HtmlChart#getRenderContext()}，
 	 * 然后在输出时特殊处理。
 	 * </p>
 	 * 
@@ -91,8 +91,8 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		{
 			super(htmlChart.getId(), new IdChartPlugin(htmlChart.getPlugin()),
 					(StringUtil.isEmpty(chartRenderContextVarName)
-							? new AttributesRenderContext(htmlChart.getRenderContext())
-							: new RefRenderContext(chartRenderContextVarName)),
+							? new AttributesHtmlRenderContext(htmlChart.getRenderContext())
+							: new RefHtmlRenderContext(chartRenderContextVarName)),
 					htmlChart.getPropertyValues(), htmlChart.getDataSetFactories(), htmlChart.getElementId(),
 					htmlChart.getVarName());
 		}

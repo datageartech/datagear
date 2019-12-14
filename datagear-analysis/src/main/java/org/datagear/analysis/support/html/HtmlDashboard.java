@@ -10,6 +10,7 @@ package org.datagear.analysis.support.html;
 import java.util.List;
 
 import org.datagear.analysis.DashboardWidget;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.AbstractDashboard;
 
 /**
@@ -45,6 +46,15 @@ public class HtmlDashboard extends AbstractDashboard
 	public HtmlRenderContext getRenderContext()
 	{
 		return (HtmlRenderContext) super.getRenderContext();
+	}
+
+	@Override
+	public void setRenderContext(RenderContext renderContext)
+	{
+		if (!(renderContext instanceof HtmlRenderContext))
+			throw new IllegalArgumentException();
+
+		super.setRenderContext(renderContext);
 	}
 
 	public String getVarName()

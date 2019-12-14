@@ -30,13 +30,28 @@ public class HtmlChart extends AbstractChart
 		super();
 	}
 
-	public HtmlChart(String id, ChartPlugin<?> chartPlugin, RenderContext renderContext,
+	public HtmlChart(String id, ChartPlugin<?> chartPlugin, HtmlRenderContext renderContext,
 			ChartPropertyValues chartPropertyValues, DataSetFactory[] dataSetFactories, String elementId,
 			String varName)
 	{
 		super(id, chartPlugin, renderContext, chartPropertyValues, dataSetFactories);
 		this.elementId = elementId;
 		this.varName = varName;
+	}
+
+	@Override
+	public HtmlRenderContext getRenderContext()
+	{
+		return (HtmlRenderContext) super.getRenderContext();
+	}
+
+	@Override
+	public void setRenderContext(RenderContext renderContext)
+	{
+		if (!(renderContext instanceof HtmlRenderContext))
+			throw new IllegalArgumentException();
+
+		super.setRenderContext(renderContext);
 	}
 
 	public String getElementId()

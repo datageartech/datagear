@@ -59,7 +59,7 @@ public abstract class AbstractHtmlScriptObjectWriter
 	{
 		RefRenderContextSerializer refRenderContextSerializer = new RefRenderContextSerializer();
 
-		serializeConfig.put(RefRenderContext.class, refRenderContextSerializer);
+		serializeConfig.put(RefHtmlRenderContext.class, refRenderContextSerializer);
 	}
 
 	/**
@@ -85,7 +85,7 @@ public abstract class AbstractHtmlScriptObjectWriter
 	public void writeRenderContext(Writer out, RenderContext renderContext, boolean onlyAttributes) throws IOException
 	{
 		if (onlyAttributes)
-			renderContext = new AttributesRenderContext(renderContext);
+			renderContext = new AttributesHtmlRenderContext(renderContext);
 
 		writeScriptObject(out, renderContext);
 	}
@@ -113,14 +113,14 @@ public abstract class AbstractHtmlScriptObjectWriter
 	}
 
 	/**
-	 * 空的{@linkplain RenderContext}。
+	 * 空的{@linkplain HtmlRenderContext}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class EmptyRenderContext extends AbstractRenderContext implements HtmlRenderContext
+	protected static class EmptyHtmlRenderContext extends AbstractRenderContext implements HtmlRenderContext
 	{
-		public EmptyRenderContext()
+		public EmptyHtmlRenderContext()
 		{
 			super();
 			super.setAttributes(null);
@@ -164,7 +164,7 @@ public abstract class AbstractHtmlScriptObjectWriter
 	}
 
 	/**
-	 * 仅带有{@linkplain RenderContext#getAttributes()}的{@linkplain RenderContext}。
+	 * 仅带有{@linkplain RenderContext#getAttributes()}的{@linkplain HtmlRenderContext}。
 	 * <p>
 	 * 此类仅用于脚本输出。
 	 * </p>
@@ -172,9 +172,9 @@ public abstract class AbstractHtmlScriptObjectWriter
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class AttributesRenderContext extends AbstractRenderContext implements HtmlRenderContext
+	protected static class AttributesHtmlRenderContext extends AbstractRenderContext implements HtmlRenderContext
 	{
-		public AttributesRenderContext(RenderContext renderContext)
+		public AttributesHtmlRenderContext(RenderContext renderContext)
 		{
 			super(renderContext.getAttributes());
 		}
@@ -217,7 +217,7 @@ public abstract class AbstractHtmlScriptObjectWriter
 	}
 
 	/**
-	 * 引用名{@linkplain RenderContext}。
+	 * 引用名{@linkplain HtmlRenderContext}。
 	 * <p>
 	 * 此类仅用于脚本输出。
 	 * </p>
@@ -225,16 +225,16 @@ public abstract class AbstractHtmlScriptObjectWriter
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class RefRenderContext implements RenderContext
+	protected static class RefHtmlRenderContext implements HtmlRenderContext
 	{
 		private String refName;
 
-		public RefRenderContext()
+		public RefHtmlRenderContext()
 		{
 			super();
 		}
 
-		public RefRenderContext(String refName)
+		public RefHtmlRenderContext(String refName)
 		{
 			super();
 			this.refName = refName;
@@ -279,6 +279,18 @@ public abstract class AbstractHtmlScriptObjectWriter
 		{
 			return null;
 		}
+
+		@Override
+		public Writer getWriter()
+		{
+			return null;
+		}
+
+		@Override
+		public int nextSequence()
+		{
+			return 0;
+		}
 	}
 
 	protected static class RefRenderContextSerializer implements ObjectSerializer
@@ -291,8 +303,8 @@ public abstract class AbstractHtmlScriptObjectWriter
 
 			if (object != null)
 			{
-				RefRenderContext refRenderContext = (RefRenderContext) object;
-				refName = refRenderContext.getRefName();
+				RefHtmlRenderContext refHtmlRenderContext = (RefHtmlRenderContext) object;
+				refName = refHtmlRenderContext.getRefName();
 			}
 
 			serializer.getWriter().append(refName);

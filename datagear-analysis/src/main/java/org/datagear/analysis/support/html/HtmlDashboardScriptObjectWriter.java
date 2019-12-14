@@ -75,8 +75,8 @@ public class HtmlDashboardScriptObjectWriter extends AbstractHtmlScriptObjectWri
 		public JsonHtmlDashboard(HtmlDashboard dashboard, boolean renderContextEmpty)
 		{
 			super(dashboard.getId(), new IdDashboardWidget(dashboard.getWidget()),
-					(renderContextEmpty ? new EmptyRenderContext()
-							: new AttributesRenderContext(dashboard.getRenderContext())),
+					(renderContextEmpty ? new EmptyHtmlRenderContext()
+							: new AttributesHtmlRenderContext(dashboard.getRenderContext())),
 					Collections.EMPTY_LIST, dashboard.getVarName());
 		}
 	}
