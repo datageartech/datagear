@@ -8,7 +8,7 @@
 package org.datagear.analysis.support.html;
 
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartTheme;
@@ -46,11 +46,13 @@ public class HtmlRenderAttributes
 
 	public static final String CHART_SCRIPT_NOT_INVOKE_RENDER = "chartScriptNotInvokeRender";
 
-	protected static final AtomicInteger CHART_ELEMENT_ID_SEQUENCE = new AtomicInteger(1);
+	protected static final AtomicLong CHART_ELEMENT_ID_SEQUENCE = new AtomicLong(1);
 
-	protected static final AtomicInteger CHART_VAR_NAME_SEQUENCE = new AtomicInteger(1);
+	protected static final AtomicLong CHART_VAR_NAME_SEQUENCE = new AtomicLong(1);
 
-	protected static final AtomicInteger DASHBOARD_VAR_NAME_SEQUENCE = new AtomicInteger(1);
+	protected static final AtomicLong DASHBOARD_VAR_NAME_SEQUENCE = new AtomicLong(1);
+
+	protected static AtomicLong RENDER_CONTEXT_VAR_NAME_SEQUENCE = new AtomicLong(1);
 
 	/**
 	 * 获取{@linkplain RenderStyle}，没有则返回{@code null}。
@@ -143,9 +145,9 @@ public class HtmlRenderAttributes
 	 * 
 	 * @param renderContext
 	 */
-	public static void removeChartTheme(RenderContext renderContext)
+	public static ChartTheme removeChartTheme(RenderContext renderContext)
 	{
-		renderContext.removeAttribute(CHART_THEME);
+		return renderContext.removeAttribute(CHART_THEME);
 	}
 
 	/**
@@ -175,9 +177,9 @@ public class HtmlRenderAttributes
 	 * 
 	 * @param renderContext
 	 */
-	public static void removeLocale(RenderContext renderContext)
+	public static Locale removeLocale(RenderContext renderContext)
 	{
-		renderContext.removeAttribute(LOCALE);
+		return renderContext.removeAttribute(LOCALE);
 	}
 
 	/**
@@ -391,13 +393,20 @@ public class HtmlRenderAttributes
 	}
 
 	/**
-	 * 生成图表HTML元素ID。
+	 * 获取下一个序列。
+	 * <p>
+	 * 如果{@code sequence > 0}，直接返回它，否则，新生成一个并返回。
+	 * </p>
 	 * 
+	 * @param renderContext
 	 * @return
 	 */
-	public static String generateChartElementId()
+	public static int getNextSequenceIfNot(HtmlRenderContext renderContext, int sequence)
 	{
-		return generateChartElementId(CHART_ELEMENT_ID_SEQUENCE.getAndIncrement());
+		if (sequence > 0)
+			return sequence;
+
+		return renderContext.nextSequence();
 	}
 
 	/**
@@ -414,32 +423,12 @@ public class HtmlRenderAttributes
 	/**
 	 * 生成图表变量名。
 	 * 
-	 * @return
-	 */
-	public static String generateChartVarName()
-	{
-		return generateChartVarName(CHART_VAR_NAME_SEQUENCE.getAndIncrement());
-	}
-
-	/**
-	 * 生成图表变量名。
-	 * 
 	 * @param seq
 	 * @return
 	 */
 	public static String generateChartVarName(int seq)
 	{
 		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Chart_" + seq;
-	}
-
-	/**
-	 * 生成看板变量名。
-	 * 
-	 * @return
-	 */
-	public static String generateDashboardVarName()
-	{
-		return generateDashboardVarName(DASHBOARD_VAR_NAME_SEQUENCE.getAndIncrement());
 	}
 
 	/**
@@ -454,6 +443,17 @@ public class HtmlRenderAttributes
 	}
 
 	/**
+	 * 生成{@linkplain RenderContext}变量名。
+	 * 
+	 * @param seq
+	 * @return
+	 */
+	public static String generateRenderContextVarName(int seq)
+	{
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderContext_" + seq;
+	}
+
+	/**
 	 * 重置生成序列。
 	 */
 	public static void resetGenerateSequence()
@@ -461,5 +461,6 @@ public class HtmlRenderAttributes
 		CHART_ELEMENT_ID_SEQUENCE.set(1);
 		CHART_VAR_NAME_SEQUENCE.set(1);
 		DASHBOARD_VAR_NAME_SEQUENCE.set(1);
+		RENDER_CONTEXT_VAR_NAME_SEQUENCE.set(1);
 	}
 }

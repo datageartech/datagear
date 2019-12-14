@@ -47,7 +47,48 @@ import freemarker.template.TemplateScalarModel;
 /**
  * {@linkplain HtmlFreemarkerDashboardWidget}渲染器。
  * <p>
+ * 此类可渲染由{@linkplain TemplateDashboardWidgetResManager}管理模板的{@linkplain HtmlFreemarkerDashboardWidget}，
+ * 其中{@linkplain HtmlFreemarkerDashboardWidget#getTemplate()}应为{@linkplain TemplateDashboardWidgetResManager#getFolderName()}中的模板文件名。
+ * </p>
+ * <p>
  * 此类需要手动调用{@linkplain #init()}方法进行初始化。
+ * </p>
+ * <p>
+ * 支持的模板格式如下：
+ * </p>
+ * <code>
+ * <pre>
+ * ...
+ * &lt;@import /&gt;
+ * ...
+ * &lt;@theme /&gt;
+ * ...
+ * &lt;@resource name='...' /&gt;
+ * &lt;@dashboard var="..." listener="..."&gt;
+ *   ...
+ *   <@chart widget="..." var="..." elementId="..." /&gt;
+ *   ...
+ *   <@chart widget="..." var="..." elementId="..." /&gt;
+ *   ...
+ * &lt;/@dashboard&gt;
+ * </pre>
+ * </code>
+ * <p>
+ * &lt;@import /&gt;：引入内置JS、CSS等HTML资源。
+ * </p>
+ * <p>
+ * &lt;@theme /&gt;：引入内置CSS主题样式。
+ * </p>
+ * <p>
+ * &lt;@resource
+ * /&gt;：引入自定义资源，“name”为存储在{@linkplain TemplateDashboardWidgetResManager#getResFolderName()}中的文件名。
+ * </p>
+ * <p>
+ * &lt;@dashboard&gt;：定义看板，“var”自定义看板JS变量名，可不填；“listener”自定义看板JS监听器，可不填。
+ * </p>
+ * <p>
+ * &lt;@chart
+ * /&gt;：定义图表，“widget”为{@linkplain HtmlChartWidget#getId()}，必填；“var”自定义图表JS变量名，可不填；“elementId”自定义图表HTML元素ID，可不填。
  * </p>
  * 
  * @author datagear@163.com
@@ -57,6 +98,8 @@ import freemarker.template.TemplateScalarModel;
 public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 {
 	public static final String DIRECTIVE_IMPORT = "import";
+
+	public static final String DIRECTIVE_THEME = "theme";
 
 	public static final String DIRECTIVE_RESOURCE = "resource";
 
@@ -227,6 +270,7 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 		cfg.setWrapUncheckedExceptions(true);
 
 		cfg.setSharedVariable(DIRECTIVE_IMPORT, new ImportTemplateDirectiveModel());
+		cfg.setSharedVariable(DIRECTIVE_THEME, new ThemeTemplateDirectiveModel());
 		cfg.setSharedVariable(DIRECTIVE_RESOURCE, new ResourceTemplateDirectiveModel());
 		cfg.setSharedVariable(DIRECTIVE_DASHBOARD, new DashboardTemplateDirectiveModel());
 		cfg.setSharedVariable(DIRECTIVE_CHART, new ChartTemplateDirectiveModel());
@@ -484,15 +528,37 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 				throws TemplateException, IOException
 		{
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-			HtmlRenderContext renderContext = dataModel.getHtmlDashboard().getRenderContext();
-
 			Writer out = env.getOut();
 
 			out.write("<meta charset=\"" + getWriterEncoding() + "\">");
 			writeNewLine(out);
 			out.write(getImportContent());
 			writeNewLine(out);
+		}
+	}
+
+	/**
+	 * “@theme”指令。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected class ThemeTemplateDirectiveModel extends AbstractTemplateDirectiveModel
+	{
+		public ThemeTemplateDirectiveModel()
+		{
+			super();
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+				throws TemplateException, IOException
+		{
+			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
+			HtmlRenderContext renderContext = dataModel.getHtmlDashboard().getRenderContext();
+
+			Writer out = env.getOut();
 
 			DashboardTheme dashboardTheme = getDashboardTheme(renderContext);
 			writeDashboardTheme(out, dashboardTheme);
@@ -519,6 +585,8 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			if (dashboardTheme != null)
 			{
 				out.write("    background-color: " + dashboardTheme.getBackgroundColor() + ";");
+				writeNewLine(out);
+				out.write("    color: " + dashboardTheme.getForegroundColor() + ";");
 				writeNewLine(out);
 			}
 			out.write("}");
@@ -657,12 +725,17 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			String listener = getStringParamValue(params, "listener");
 
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-			HtmlRenderContext renderContext = dataModel.getHtmlDashboard().getRenderContext();
+			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
+			HtmlRenderContext renderContext = dashboard.getRenderContext();
+			int nextSequence = -1;
 
 			if (StringUtil.isEmpty(varName))
-				varName = HtmlRenderAttributes.generateDashboardVarName();
+			{
+				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
+				varName = HtmlRenderAttributes.generateDashboardVarName(nextSequence);
+			}
 
-			dataModel.getHtmlDashboard().setVarName(varName);
+			dashboard.setVarName(varName);
 
 			Writer out = env.getOut();
 
@@ -673,9 +746,42 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			out.write(varName);
 			out.write("=");
 			writeNewLine(out);
-			writeHtmlDashboardScriptObject(out, dataModel.getHtmlDashboard());
+			writeHtmlDashboardScriptObject(out, dashboard, true);
 			out.write(";");
 			writeNewLine(out);
+
+			writeScriptEndTag(out);
+			writeNewLine(out);
+
+			HtmlRenderAttributes.setChartRenderContextVarName(renderContext, varName + ".renderContext");
+
+			if (body != null)
+				body.render(out);
+
+			writeScriptStartTag(out);
+			writeNewLine(out);
+
+			String tmpRenderContextVar = HtmlRenderAttributes.generateRenderContextVarName(nextSequence);
+
+			out.write("var ");
+			out.write(tmpRenderContextVar);
+			out.write("=");
+			writeNewLine(out);
+			writeRenderContextScriptObject(out, renderContext);
+			out.write(";");
+			writeNewLine(out);
+			out.write(varName + ".renderContext.attributes = " + tmpRenderContextVar + ".attributes;");
+			writeNewLine(out);
+
+			List<? extends HtmlChart> charts = dashboard.getCharts();
+			if (charts != null)
+			{
+				for (HtmlChart chart : charts)
+				{
+					out.write(varName + ".charts.push(" + chart.getVarName() + ");");
+					writeNewLine(out);
+				}
+			}
 
 			out.write(varName
 					+ ".render = function(){ for(var i=0; i<this.charts.length; i++){ this.charts[i].render(); } };");
@@ -687,27 +793,40 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			{
 				out.write(varName + ".listener = window[\"" + listener + "\"];");
 				writeNewLine(out);
+
+				out.write("if(" + varName + ".listener && " + varName + ".listener.beforeRender)");
+				writeNewLine(out);
+				out.write("  " + varName + ".listener.beforeRender(" + varName + "); ");
+				writeNewLine(out);
 			}
-			out.write("  if(" + varName + ".listener && " + varName + ".listener.beforeRender) " + varName
-					+ ".listener.beforeRender(" + varName + "); ");
-			writeNewLine(out);
+
 			out.write("  " + varName + ".render();");
 			writeNewLine(out);
-			out.write("  if(" + varName + ".listener && " + varName + ".listener.afterRender) " + varName
-					+ ".listener.afterRender(" + varName + "); ");
-			writeNewLine(out);
+
+			if (!StringUtil.isEmpty(listener))
+			{
+				out.write("if(" + varName + ".listener && " + varName + ".listener.afterRender)");
+				writeNewLine(out);
+				out.write("  " + varName + ".listener.afterRender(" + varName + "); ");
+				writeNewLine(out);
+			}
+
 			out.write("};");
 			writeNewLine(out);
 
 			writeScriptEndTag(out);
 			writeNewLine(out);
-
-			HtmlRenderAttributes.setChartRenderContextVarName(renderContext, varName + ".renderContext");
 		}
 
-		protected void writeHtmlDashboardScriptObject(Writer out, HtmlDashboard dashboard) throws IOException
+		protected void writeHtmlDashboardScriptObject(Writer out, HtmlDashboard dashboard, boolean renderContextEmpty)
+				throws IOException
 		{
-			getHtmlDashboardScriptObjectWriter().write(out, dashboard);
+			getHtmlDashboardScriptObjectWriter().write(out, dashboard, renderContextEmpty);
+		}
+
+		protected void writeRenderContextScriptObject(Writer out, RenderContext renderContext) throws IOException
+		{
+			getHtmlDashboardScriptObjectWriter().writeRenderContext(out, renderContext, true);
 		}
 	}
 
@@ -736,16 +855,23 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			if (StringUtil.isEmpty(widget))
 				throw new TemplateException("The [widget] attribute must be set", env);
 
-			if (StringUtil.isEmpty(var))
-				var = HtmlRenderAttributes.generateChartVarName();
-
-			if (StringUtil.isEmpty(elementId))
-				elementId = HtmlRenderAttributes.generateChartElementId();
-
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
 			HtmlDashboard htmlDashboard = dataModel.getHtmlDashboard();
-			String dashboardVarName = htmlDashboard.getVarName();
 			HtmlRenderContext renderContext = htmlDashboard.getRenderContext();
+			int nextSequence = -1;
+
+			if (StringUtil.isEmpty(var))
+			{
+				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
+				var = HtmlRenderAttributes.generateChartVarName(nextSequence);
+			}
+
+			if (StringUtil.isEmpty(elementId))
+			{
+				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
+				elementId = HtmlRenderAttributes.generateChartElementId(nextSequence);
+			}
+
 			HtmlChartWidget<T> chartWidget = getHtmlChartWidget(widget);
 
 			HtmlRenderAttributes.setChartNotRenderScriptTag(renderContext, false);
@@ -753,21 +879,12 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			HtmlRenderAttributes.setChartVarName(renderContext, var);
 			HtmlRenderAttributes.setChartElementId(renderContext, elementId);
 
-			Chart chart = chartWidget.render((T) renderContext);
+			HtmlChart chart = chartWidget.render((T) renderContext);
 
-			Writer out = env.getOut();
-
-			writeScriptStartTag(out);
-			writeNewLine(out);
-			out.write(dashboardVarName + ".charts.push(" + var + ");");
-			writeNewLine(out);
-			writeScriptEndTag(out);
-			writeNewLine(out);
-
-			List<Chart> charts = htmlDashboard.getCharts();
+			List<HtmlChart> charts = (List<HtmlChart>) htmlDashboard.getCharts();
 			if (charts == null)
 			{
-				charts = new ArrayList<Chart>();
+				charts = new ArrayList<HtmlChart>();
 				htmlDashboard.setCharts(charts);
 			}
 

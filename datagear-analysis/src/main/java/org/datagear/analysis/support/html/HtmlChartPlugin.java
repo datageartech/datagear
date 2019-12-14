@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartPropertyValues;
 import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.RenderContext;
@@ -248,11 +247,12 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	}
 
 	@Override
-	public Chart renderChart(T renderContext, ChartPropertyValues chartPropertyValues,
+	public HtmlChart renderChart(T renderContext, ChartPropertyValues chartPropertyValues,
 			DataSetFactory... dataSetFactories) throws RenderException
 	{
 		boolean notRenderElement = HtmlRenderAttributes.getChartNotRenderElement(renderContext);
 		String chartElementId = HtmlRenderAttributes.getChartElementId(renderContext);
+		int nextSequence = -1;
 
 		if (notRenderElement)
 		{
@@ -262,14 +262,20 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		else
 		{
 			if (StringUtil.isEmpty(chartElementId))
-				chartElementId = HtmlRenderAttributes.generateChartElementId();
+			{
+				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
+				chartElementId = HtmlRenderAttributes.generateChartElementId(nextSequence);
+			}
 
 			writeChartElement(renderContext, chartElementId);
 		}
 
 		String chartVarName = HtmlRenderAttributes.getChartVarName(renderContext);
 		if (StringUtil.isEmpty(chartVarName))
-			chartVarName = HtmlRenderAttributes.generateChartVarName();
+		{
+			nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
+			chartVarName = HtmlRenderAttributes.generateChartVarName(nextSequence);
+		}
 
 		HtmlChart chart = new HtmlChart(IDUtil.uuid(), this, renderContext, chartPropertyValues, dataSetFactories,
 				chartElementId, chartVarName);

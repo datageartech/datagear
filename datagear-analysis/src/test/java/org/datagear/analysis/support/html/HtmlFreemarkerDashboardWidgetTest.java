@@ -62,12 +62,14 @@ public class HtmlFreemarkerDashboardWidgetTest
 
 		String html = stringWriter.toString();
 
-		Assert.assertEquals(4, dashboard.getCharts().size());
+		Assert.assertEquals(6, dashboard.getCharts().size());
 		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateDashboardVarName(1)));
-		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(1)));
 		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(2)));
 		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(3)));
 		Assert.assertTrue(html.contains("chart01"));
+		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(4)));
+		Assert.assertTrue(html.contains("chart02"));
+		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(6)));
 
 		System.out.println(stringWriter.toString());
 	}

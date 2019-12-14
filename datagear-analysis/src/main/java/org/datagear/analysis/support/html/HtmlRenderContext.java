@@ -22,4 +22,14 @@ public interface HtmlRenderContext extends RenderContext
 	 * @return
 	 */
 	Writer getWriter();
+
+	/**
+	 * 生成下一个序号。
+	 * <p>
+	 * 此方法为生成HTML页面元素ID、变量名提供支持。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	int nextSequence();
 }

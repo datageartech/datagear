@@ -10,6 +10,7 @@ package org.datagear.analysis.support.html;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPropertyValues;
 import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
 
 /**
@@ -46,4 +47,9 @@ public class HtmlChartWidget<T extends HtmlRenderContext> extends ChartWidget<T>
 		super.setChartPlugin(chartPlugin);
 	}
 
+	@Override
+	public HtmlChart render(T renderContext) throws RenderException
+	{
+		return (HtmlChart) super.render(renderContext);
+	}
 }

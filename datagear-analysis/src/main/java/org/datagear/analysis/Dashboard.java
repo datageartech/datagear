@@ -36,7 +36,7 @@ public interface Dashboard extends Identifiable
 	 * 
 	 * @return
 	 */
-	List<Chart> getCharts();
+	List<? extends Chart> getCharts();
 
 	/**
 	 * 获取指定ID的{@linkplain Chart}。

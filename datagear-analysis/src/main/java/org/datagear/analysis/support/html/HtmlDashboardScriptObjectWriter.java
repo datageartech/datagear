@@ -39,7 +39,21 @@ public class HtmlDashboardScriptObjectWriter extends AbstractHtmlScriptObjectWri
 	 */
 	public void write(Writer out, HtmlDashboard dashboard) throws IOException
 	{
-		JsonHtmlDashboard jsonHtmlDashboard = new JsonHtmlDashboard(dashboard);
+		write(out, dashboard, false);
+	}
+
+	/**
+	 * 将{@linkplain HtmlDashboard}以脚本对象格式（“<code>{...}</code>”）写入输出流。
+	 * 
+	 * @param out
+	 * @param dashboard
+	 * @param renderContextEmpty
+	 *            {@linkplain HtmlDashboard#getRenderContext()}是否只输出空对象。
+	 * @throws IOException
+	 */
+	public void write(Writer out, HtmlDashboard dashboard, boolean renderContextEmpty) throws IOException
+	{
+		JsonHtmlDashboard jsonHtmlDashboard = new JsonHtmlDashboard(dashboard, renderContextEmpty);
 
 		writeScriptObject(out, jsonHtmlDashboard);
 	}
@@ -58,11 +72,12 @@ public class HtmlDashboardScriptObjectWriter extends AbstractHtmlScriptObjectWri
 		}
 
 		@SuppressWarnings("unchecked")
-		public JsonHtmlDashboard(HtmlDashboard dashboard)
+		public JsonHtmlDashboard(HtmlDashboard dashboard, boolean renderContextEmpty)
 		{
 			super(dashboard.getId(), new IdDashboardWidget(dashboard.getWidget()),
-					new AttributesRenderContext(dashboard.getRenderContext()), Collections.EMPTY_LIST,
-					dashboard.getVarName());
+					(renderContextEmpty ? new EmptyRenderContext()
+							: new AttributesRenderContext(dashboard.getRenderContext())),
+					Collections.EMPTY_LIST, dashboard.getVarName());
 		}
 	}
 

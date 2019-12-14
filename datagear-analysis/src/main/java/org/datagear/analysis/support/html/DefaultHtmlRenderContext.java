@@ -21,6 +21,8 @@ public class DefaultHtmlRenderContext extends AbstractRenderContext implements H
 {
 	private Writer writer;
 
+	private int sequence = 1;
+
 	public DefaultHtmlRenderContext()
 	{
 		super();
@@ -41,5 +43,11 @@ public class DefaultHtmlRenderContext extends AbstractRenderContext implements H
 	public void setWriter(Writer writer)
 	{
 		this.writer = writer;
+	}
+
+	@Override
+	public int nextSequence()
+	{
+		return this.sequence++;
 	}
 }

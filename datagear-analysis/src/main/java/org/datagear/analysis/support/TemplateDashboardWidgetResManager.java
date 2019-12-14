@@ -16,8 +16,10 @@ import org.datagear.util.IOUtil;
  */
 public class TemplateDashboardWidgetResManager extends DashboardWidgetResManager
 {
+	/** 存储模板文件的文件夹名 */
 	private String folderName = "template";
 
+	/** 存储其他资源文件的文件夹名称 */
 	private String resFolderName = "resource";
 
 	public TemplateDashboardWidgetResManager()

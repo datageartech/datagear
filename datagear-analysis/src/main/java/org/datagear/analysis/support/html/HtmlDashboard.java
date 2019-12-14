@@ -9,7 +9,6 @@ package org.datagear.analysis.support.html;
 
 import java.util.List;
 
-import org.datagear.analysis.Chart;
 import org.datagear.analysis.DashboardWidget;
 import org.datagear.analysis.support.AbstractDashboard;
 
@@ -29,10 +28,17 @@ public class HtmlDashboard extends AbstractDashboard
 	}
 
 	public HtmlDashboard(String id, DashboardWidget<?> dashboardWidget, HtmlRenderContext renderContext,
-			List<Chart> charts, String varName)
+			List<? extends HtmlChart> charts, String varName)
 	{
 		super(id, dashboardWidget, renderContext, charts);
 		this.varName = varName;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<? extends HtmlChart> getCharts()
+	{
+		return (List<? extends HtmlChart>) super.getCharts();
 	}
 
 	@Override

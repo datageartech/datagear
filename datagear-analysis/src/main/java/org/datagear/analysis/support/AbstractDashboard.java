@@ -67,7 +67,7 @@ public abstract class AbstractDashboard extends AbstractIdentifiable implements 
 	}
 
 	@Override
-	public List<Chart> getCharts()
+	public List<? extends Chart> getCharts()
 	{
 		return charts;
 	}
