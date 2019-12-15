@@ -24,7 +24,19 @@ var myListener =
 	{
 		var element = document.getElementById("listener");
 		
-		element.innerHTML = element.innerHTML + "<div>afterRender</div>";
+		element.innerHTML += "<div>afterRender</div>";
+	},
+	beforeUpdate : function(dashboard)
+	{
+		var element = document.getElementById("listener");
+		
+		element.innerHTML += "<div>beforeUpdate</div>";
+	},
+	afterUpdate : function(dashboard)
+	{
+		var element = document.getElementById("listener");
+		
+		element.innerHTML += "<div>afterUpdate</div>";
 	}
 };
 </script>

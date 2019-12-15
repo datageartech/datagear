@@ -37,8 +37,6 @@ public class HtmlChartPluginTest
 	@Test
 	public void renderChartTest() throws Throwable
 	{
-		HtmlRenderAttributes.resetGenerateSequence();
-
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = createHtmlChartPlugin();
 
 		StringWriter stringWriter = new StringWriter();
@@ -67,8 +65,6 @@ public class HtmlChartPluginTest
 	@Test
 	public void renderChartTest_setChartRenderContextVarName() throws Throwable
 	{
-		HtmlRenderAttributes.resetGenerateSequence();
-
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = createHtmlChartPlugin();
 
 		StringWriter stringWriter = new StringWriter();

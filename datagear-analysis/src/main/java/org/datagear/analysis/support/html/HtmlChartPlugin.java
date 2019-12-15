@@ -51,11 +51,11 @@ import org.datagear.util.i18n.Label;
  * var [图表变量名]=
  * {
  * 	id : "...",
- * 	chartElementId : "[图表HTML元素ID]",
- * 	chartVarName : "[图表变量名]",
- * 	chartPlugin : "插件ID",
+ * 	elementId : "[图表HTML元素ID]",
+ * 	varName : "[图表变量名]",
+ * 	plugin : "插件ID",
  * 	renderContext : { attributes : {...} },
- * 	chartPropertyValues : {...},
+ * 	propertyValues : {...},
  * 	dataSetFactories : [{...}, ...]
  * };
  * [图表脚本内容]
@@ -86,7 +86,7 @@ import org.datagear.util.i18n.Label;
  * (function(chart)
  * {
  * 	chart.render = function(){ ... };
- * 	chart.updateData = function(dataSets){ ... };
+ * 	chart.update = function(dataSets){ ... };
  * })
  * ($CHART);
  * </pre>
@@ -97,7 +97,7 @@ import org.datagear.util.i18n.Label;
  * <code>
  * <pre>
  * $CHART.render = function(){ ... };
- * $CHART.updateData = function(dataSets){ ... };
+ * $CHART.update = function(dataSets){ ... };
  * </pre>
  * </code>
  * <p>

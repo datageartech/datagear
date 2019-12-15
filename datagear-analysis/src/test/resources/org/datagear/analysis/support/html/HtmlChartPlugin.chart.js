@@ -18,6 +18,11 @@
 		element.innerHTML = innerHtml;
 	};
 	
-	chart.updateData = function(dataSets){ alert("updateData"); };
+	chart.update = function(dataSets)
+	{
+		var element = document.getElementById(this.elementId);
+		
+		element.innerHTML += "<div>update</div>";
+	};
 })
 ($CHART);

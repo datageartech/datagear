@@ -8,7 +8,6 @@
 package org.datagear.analysis.support.html;
 
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartTheme;
@@ -45,14 +44,6 @@ public class HtmlRenderAttributes
 	public static final String CHART_NOT_RENDER_SCRIPT_TAG = "chartNotRenderScriptTag";
 
 	public static final String CHART_SCRIPT_NOT_INVOKE_RENDER = "chartScriptNotInvokeRender";
-
-	protected static final AtomicLong CHART_ELEMENT_ID_SEQUENCE = new AtomicLong(1);
-
-	protected static final AtomicLong CHART_VAR_NAME_SEQUENCE = new AtomicLong(1);
-
-	protected static final AtomicLong DASHBOARD_VAR_NAME_SEQUENCE = new AtomicLong(1);
-
-	protected static AtomicLong RENDER_CONTEXT_VAR_NAME_SEQUENCE = new AtomicLong(1);
 
 	/**
 	 * 获取{@linkplain RenderStyle}，没有则返回{@code null}。
@@ -417,7 +408,7 @@ public class HtmlRenderAttributes
 	 */
 	public static String generateChartElementId(int seq)
 	{
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "ChartElement_" + seq;
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "ChartElement" + seq;
 	}
 
 	/**
@@ -428,7 +419,7 @@ public class HtmlRenderAttributes
 	 */
 	public static String generateChartVarName(int seq)
 	{
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Chart_" + seq;
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Chart" + seq;
 	}
 
 	/**
@@ -439,7 +430,7 @@ public class HtmlRenderAttributes
 	 */
 	public static String generateDashboardVarName(int seq)
 	{
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Dashboard_" + seq;
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Dashboard" + seq;
 	}
 
 	/**
@@ -450,17 +441,6 @@ public class HtmlRenderAttributes
 	 */
 	public static String generateRenderContextVarName(int seq)
 	{
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderContext_" + seq;
-	}
-
-	/**
-	 * 重置生成序列。
-	 */
-	public static void resetGenerateSequence()
-	{
-		CHART_ELEMENT_ID_SEQUENCE.set(1);
-		CHART_VAR_NAME_SEQUENCE.set(1);
-		DASHBOARD_VAR_NAME_SEQUENCE.set(1);
-		RENDER_CONTEXT_VAR_NAME_SEQUENCE.set(1);
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderContext" + seq;
 	}
 }

@@ -723,6 +723,7 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 		{
 			String varName = getStringParamValue(params, "var");
 			String listener = getStringParamValue(params, "listener");
+			boolean hasListener = !StringUtil.isEmpty(listener);
 
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
 			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
@@ -763,6 +764,13 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 
 			String tmpRenderContextVar = HtmlRenderAttributes.generateRenderContextVarName(nextSequence);
 
+			// 移除内部设置的属性
+			HtmlRenderAttributes.removeChartRenderContextVarName(renderContext);
+			HtmlRenderAttributes.removeChartNotRenderScriptTag(renderContext);
+			HtmlRenderAttributes.removeChartScriptNotInvokeRender(renderContext);
+			HtmlRenderAttributes.removeChartVarName(renderContext);
+			HtmlRenderAttributes.removeChartElementId(renderContext);
+
 			out.write("var ");
 			out.write(tmpRenderContextVar);
 			out.write("=");
@@ -784,30 +792,65 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 			}
 
 			out.write(varName
-					+ ".render = function(){ for(var i=0; i<this.charts.length; i++){ this.charts[i].render(); } };");
+					+ ".render = function(){");
+			writeNewLine(out);
+			out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i].render(); }");
+			writeNewLine(out);
+			out.write("};");
 			writeNewLine(out);
 
-			out.write("window.onload = function(){");
+			out.write(varName
+					+ ".update = function(){");
 			writeNewLine(out);
-			if (!StringUtil.isEmpty(listener))
+			out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i].update(); }");
+			writeNewLine(out);
+			out.write("};");
+			writeNewLine(out);
+
+			if (hasListener)
 			{
 				out.write(varName + ".listener = window[\"" + listener + "\"];");
 				writeNewLine(out);
+			}
 
+			out.write("window.onload = function(){");
+			writeNewLine(out);
+
+			if (hasListener)
+			{
 				out.write("if(" + varName + ".listener && " + varName + ".listener.beforeRender)");
 				writeNewLine(out);
 				out.write("  " + varName + ".listener.beforeRender(" + varName + "); ");
 				writeNewLine(out);
 			}
 
-			out.write("  " + varName + ".render();");
+			out.write(varName + ".render();");
 			writeNewLine(out);
 
-			if (!StringUtil.isEmpty(listener))
+			if (hasListener)
 			{
 				out.write("if(" + varName + ".listener && " + varName + ".listener.afterRender)");
 				writeNewLine(out);
 				out.write("  " + varName + ".listener.afterRender(" + varName + "); ");
+				writeNewLine(out);
+			}
+
+			if (hasListener)
+			{
+				out.write("if(" + varName + ".listener && " + varName + ".listener.beforeUpdate)");
+				writeNewLine(out);
+				out.write("  " + varName + ".listener.beforeUpdate(" + varName + "); ");
+				writeNewLine(out);
+			}
+
+			out.write(varName + ".update();");
+			writeNewLine(out);
+
+			if (hasListener)
+			{
+				out.write("if(" + varName + ".listener && " + varName + ".listener.afterUpdate)");
+				writeNewLine(out);
+				out.write("  " + varName + ".listener.afterUpdate(" + varName + "); ");
 				writeNewLine(out);
 			}
 
