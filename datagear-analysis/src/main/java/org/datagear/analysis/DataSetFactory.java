@@ -27,6 +27,7 @@ public interface DataSetFactory extends Identifiable
 	 * 
 	 * @param dataSetParamValues
 	 * @return
+	 * @throws DataSetException
 	 */
-	DataSet getDataSet(DataSetParamValues dataSetParamValues);
+	DataSet getDataSet(DataSetParamValues dataSetParamValues) throws DataSetException;
 }

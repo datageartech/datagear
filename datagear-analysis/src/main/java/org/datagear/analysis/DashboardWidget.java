@@ -22,5 +22,5 @@ public interface DashboardWidget<T extends RenderContext> extends Identifiable
 	 * @return
 	 * @throws RenderException
 	 */
-	public abstract Dashboard render(T renderContext) throws RenderException;
+	Dashboard render(T renderContext) throws RenderException;
 }

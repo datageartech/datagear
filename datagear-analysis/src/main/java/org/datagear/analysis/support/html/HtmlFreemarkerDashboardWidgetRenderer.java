@@ -383,10 +383,10 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 	 * @param id
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected HtmlChartWidget<T> getHtmlChartWidget(String id)
 	{
-		return (HtmlChartWidget<T>) this.chartWidgetSource.getChartWidget(id);
+		return (HtmlChartWidget<T>) ((ChartWidget) this.chartWidgetSource.getChartWidget(id));
 	}
 
 	protected Object buildHtmlDashboardRenderDataModel(HtmlDashboardRenderDataModel dataModel)
@@ -791,16 +791,14 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 				}
 			}
 
-			out.write(varName
-					+ ".render = function(){");
+			out.write(varName + ".render = function(){");
 			writeNewLine(out);
 			out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i].render(); }");
 			writeNewLine(out);
 			out.write("};");
 			writeNewLine(out);
 
-			out.write(varName
-					+ ".update = function(){");
+			out.write(varName + ".update = function(){");
 			writeNewLine(out);
 			out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i].update(); }");
 			writeNewLine(out);
