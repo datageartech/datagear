@@ -2,14 +2,13 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.dataexchange;
+package org.datagear.util.resource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.datagear.connection.ConnectionSource;
 import org.datagear.util.JdbcUtil;
 
 /**

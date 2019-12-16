@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.dataexchange;
+package org.datagear.util.resource;
 
 import java.io.File;
 import java.io.FileInputStream;

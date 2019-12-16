@@ -6,12 +6,12 @@ package org.datagear.dataexchange.support;
 
 import java.io.Writer;
 
-import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.Query;
 import org.datagear.dataexchange.QueryTextDataExport;
-import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.TextDataExportOption;
+import org.datagear.util.resource.ConnectionFactory;
+import org.datagear.util.resource.ResourceFactory;
 
 /**
  * JSON导出。

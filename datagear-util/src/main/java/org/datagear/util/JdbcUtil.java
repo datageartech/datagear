@@ -1181,5 +1181,14 @@ public class JdbcUtil
 		{
 			return (PreparedStatement) this.statement;
 		}
+
+		/**
+		 * 关闭。
+		 */
+		public void close()
+		{
+			closeResultSet(this.resultSet);
+			closeStatement(this.statement);
+		}
 	}
 }

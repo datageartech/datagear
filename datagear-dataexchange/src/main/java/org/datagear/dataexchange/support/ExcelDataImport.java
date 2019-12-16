@@ -6,10 +6,10 @@ package org.datagear.dataexchange.support;
 
 import java.io.File;
 
-import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataFormat;
 import org.datagear.dataexchange.TextValueDataImport;
 import org.datagear.dataexchange.ValueDataImportOption;
+import org.datagear.util.resource.ConnectionFactory;
 
 /**
  * Excel导入。

@@ -6,6 +6,8 @@ package org.datagear.dataexchange;
 
 import java.util.Set;
 
+import org.datagear.util.resource.ConnectionFactory;
+
 /**
  * 批量数据交换。
  * <p>

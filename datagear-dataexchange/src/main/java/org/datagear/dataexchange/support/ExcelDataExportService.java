@@ -24,7 +24,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
-import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataFormatContext;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
@@ -33,6 +32,7 @@ import org.datagear.dataexchange.TextDataExportOption;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.resource.ConnectionFactory;
 
 /**
  * Excel导出服务。

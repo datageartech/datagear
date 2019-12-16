@@ -24,6 +24,9 @@ import org.datagear.dbinfo.DevotedDatabaseInfoResolver;
 import org.datagear.dbinfo.GenericDatabaseInfoResolver;
 import org.datagear.dbinfo.WildcardDevotedDatabaseInfoResolver;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.resource.ClasspathInputStreamResourceFactory;
+import org.datagear.util.resource.ClasspathReaderResourceFactory;
+import org.datagear.util.resource.ResourceFactory;
 
 /**
  * 数据交换测试支持类。

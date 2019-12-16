@@ -4,6 +4,8 @@
 
 package org.datagear.dataexchange;
 
+import org.datagear.util.resource.ConnectionFactory;
+
 /**
  * 带当前数据索引信息和格式化上下文的{@linkplain DataExchangeContext}。
  * 

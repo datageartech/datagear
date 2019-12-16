@@ -6,11 +6,11 @@ package org.datagear.dataexchange.support;
 
 import java.io.Reader;
 
-import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataFormat;
-import org.datagear.dataexchange.ResourceFactory;
 import org.datagear.dataexchange.TableTextValueDataImport;
 import org.datagear.dataexchange.ValueDataImportOption;
+import org.datagear.util.resource.ConnectionFactory;
+import org.datagear.util.resource.ResourceFactory;
 
 /**
  * JSON导入。

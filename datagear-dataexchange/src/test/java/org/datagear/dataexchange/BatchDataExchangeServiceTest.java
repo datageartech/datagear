@@ -18,6 +18,10 @@ import org.datagear.dataexchange.support.CsvDataExportService;
 import org.datagear.dataexchange.support.CsvDataImport;
 import org.datagear.dataexchange.support.CsvDataImportService;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.resource.ConnectionFactory;
+import org.datagear.util.resource.DataSourceConnectionFactory;
+import org.datagear.util.resource.FileWriterResourceFactory;
+import org.datagear.util.resource.ResourceFactory;
 import org.junit.Assert;
 import org.junit.Test;
 

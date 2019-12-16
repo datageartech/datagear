@@ -4,6 +4,8 @@
 
 package org.datagear.dataexchange;
 
+import org.datagear.util.resource.ConnectionFactory;
+
 /**
  * 查询文本导出。
  * 

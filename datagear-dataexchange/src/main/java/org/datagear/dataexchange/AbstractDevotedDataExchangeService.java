@@ -34,6 +34,7 @@ import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.resource.ResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

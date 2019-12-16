@@ -6,11 +6,11 @@ package org.datagear.dataexchange.support;
 
 import java.io.Reader;
 
-import org.datagear.dataexchange.ConnectionFactory;
 import org.datagear.dataexchange.DataExchange;
 import org.datagear.dataexchange.DataImportListener;
 import org.datagear.dataexchange.DataImportOption;
-import org.datagear.dataexchange.ResourceFactory;
+import org.datagear.util.resource.ConnectionFactory;
+import org.datagear.util.resource.ResourceFactory;
 
 /**
  * SQL数据导入。

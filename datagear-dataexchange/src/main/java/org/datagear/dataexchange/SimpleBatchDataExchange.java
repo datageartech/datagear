@@ -6,6 +6,8 @@ package org.datagear.dataexchange;
 
 import java.util.Set;
 
+import org.datagear.util.resource.ConnectionFactory;
+
 /**
  * 简单{@linkplain BatchDataExchange}。
  * 
