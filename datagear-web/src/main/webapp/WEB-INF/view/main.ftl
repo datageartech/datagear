@@ -972,11 +972,12 @@
 			
 			var tabId = "dataAnalysis-";
 			var tabName = $node.text();
-			var tabUrl = "${contextPath}/about";
+			var tabUrl = "${contextPath}/analysis/";
 			
 			if($node.hasClass("item-dataset"))
 			{
 				tabId += "dataset";
+				tabUrl += "dataSet/pagingQuery";
 			}
 			else if($node.hasClass("item-chart"))
 			{

@@ -304,6 +304,13 @@
 		</property>
 	</bean>
 	
+	<bean id="sqlDataSetFactoryEntityService" class="org.datagear.management.service.impl.SqlDataSetFactoryEntityServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<property name="connectionSource" ref="connectionSource" />
+		<property name="schemaService" ref="schemaService" />
+		<property name="authorizationService" ref="authorizationService" />
+	</bean>
+	
 	<bean id="sqlHistoryService" class="org.datagear.management.service.impl.SqlHistoryServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 	</bean>

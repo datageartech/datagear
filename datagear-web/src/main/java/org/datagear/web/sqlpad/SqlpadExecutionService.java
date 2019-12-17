@@ -19,16 +19,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.cometd.bayeux.server.ServerChannel;
-import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
-import org.datagear.connection.DriverEntity;
 import org.datagear.dbmodel.DatabaseModelResolver;
 import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SqlHistoryService;
+import org.datagear.management.util.SchemaConnectionSupport;
 import org.datagear.model.Model;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
@@ -58,6 +57,8 @@ public class SqlpadExecutionService
 	private ModelSqlSelectService modelSqlSelectService = new ModelSqlSelectService();
 
 	private SqlPermissionChecker sqlPermissionChecker = new SqlPermissionChecker();
+
+	private SchemaConnectionSupport schemaConnectionSupport = new SchemaConnectionSupport();
 
 	private ExecutorService _executorService = Executors.newCachedThreadPool();
 
@@ -150,6 +151,16 @@ public class SqlpadExecutionService
 		this.sqlPermissionChecker = sqlPermissionChecker;
 	}
 
+	public SchemaConnectionSupport getSchemaConnectionSupport()
+	{
+		return schemaConnectionSupport;
+	}
+
+	public void setSchemaConnectionSupport(SchemaConnectionSupport schemaConnectionSupport)
+	{
+		this.schemaConnectionSupport = schemaConnectionSupport;
+	}
+
 	/**
 	 * 提交SQL执行。
 	 * 
@@ -234,23 +245,7 @@ public class SqlpadExecutionService
 	 */
 	protected Connection getSchemaConnection(Schema schema) throws ConnectionSourceException
 	{
-		Connection cn = null;
-
-		ConnectionOption connectionOption = ConnectionOption.valueOf(schema.getUrl(), schema.getUser(),
-				schema.getPassword());
-
-		if (schema.hasDriverEntity())
-		{
-			DriverEntity driverEntity = schema.getDriverEntity();
-
-			cn = this.connectionSource.getConnection(driverEntity, connectionOption);
-		}
-		else
-		{
-			cn = this.connectionSource.getConnection(connectionOption);
-		}
-
-		return cn;
+		return this.schemaConnectionSupport.getSchemaConnection(this.connectionSource, schema);
 	}
 
 	/**

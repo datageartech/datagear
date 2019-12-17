@@ -46,6 +46,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.datagear</groupId>
+			<artifactId>datagear-analysis</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.datagear</groupId>
 			<artifactId>datagear-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>

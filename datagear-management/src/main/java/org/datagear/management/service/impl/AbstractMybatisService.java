@@ -210,6 +210,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		params.put("param", param);
 
 		T entity = selectOneMybatis("get", params);
+		postProcessSelect(entity);
 
 		return entity;
 	}
@@ -251,7 +252,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		addQueryaram(params, query);
 
 		List<T> list = selectListMybatis(statement, params);
-		postProcessSelectList(list);
+		postProcessSelects(list);
 
 		return list;
 	}
@@ -301,7 +302,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		addPagingQueryParams(params, startIndex, pagingData.getPageSize());
 
 		List<T> list = selectListMybatis(statement, params);
-		postProcessSelectList(list);
+		postProcessSelects(list);
 
 		pagingData.setItems(list);
 
@@ -328,14 +329,29 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	/**
 	 * 后置处理查询结果列表。
+	 * 
+	 * @param list
+	 */
+	protected void postProcessSelects(List<T> list)
+	{
+		if (list == null)
+			return;
+
+		for (T e : list)
+			postProcessSelect(e);
+	}
+
+	/**
+	 * 后置处理读取结果。
 	 * <p>
 	 * 默认为空方法，子类可以重写，已实现特定的查询结果处理逻辑。
 	 * </p>
 	 * 
-	 * @param list
+	 * @param obj
 	 */
-	protected void postProcessSelectList(List<T> list)
+	protected void postProcessSelect(T obj)
 	{
+
 	}
 
 	/**

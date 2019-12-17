@@ -14,14 +14,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
-import org.datagear.connection.DriverEntity;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
+import org.datagear.management.util.SchemaConnectionSupport;
 import org.datagear.util.JdbcUtil;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
@@ -41,6 +40,8 @@ public abstract class AbstractSchemaConnController extends AbstractController
 
 	@Autowired
 	private ConnectionSource connectionSource;
+
+	private SchemaConnectionSupport schemaConnectionSupport = new SchemaConnectionSupport();
 
 	public AbstractSchemaConnController()
 	{
@@ -73,6 +74,16 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	public void setConnectionSource(ConnectionSource connectionSource)
 	{
 		this.connectionSource = connectionSource;
+	}
+
+	public SchemaConnectionSupport getSchemaConnectionSupport()
+	{
+		return schemaConnectionSupport;
+	}
+
+	public void setSchemaConnectionSupport(SchemaConnectionSupport schemaConnectionSupport)
+	{
+		this.schemaConnectionSupport = schemaConnectionSupport;
 	}
 
 	/**
@@ -127,23 +138,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	 */
 	protected Connection getSchemaConnection(Schema schema) throws ConnectionSourceException
 	{
-		Connection cn = null;
-
-		ConnectionOption connectionOption = ConnectionOption.valueOf(schema.getUrl(), schema.getUser(),
-				schema.getPassword());
-
-		if (schema.hasDriverEntity())
-		{
-			DriverEntity driverEntity = schema.getDriverEntity();
-
-			cn = this.connectionSource.getConnection(driverEntity, connectionOption);
-		}
-		else
-		{
-			cn = this.connectionSource.getConnection(connectionOption);
-		}
-
-		return cn;
+		return this.schemaConnectionSupport.getSchemaConnection(this.connectionSource, schema);
 	}
 
 	protected void checkReadTableDataPermission(Schema schema, User user)

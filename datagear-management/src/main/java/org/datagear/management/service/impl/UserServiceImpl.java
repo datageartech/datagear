@@ -101,7 +101,7 @@ public class UserServiceImpl extends AbstractMybatisEntityService<String, User> 
 	}
 
 	@Override
-	protected void postProcessSelectList(List<User> list)
+	protected void postProcessSelects(List<User> list)
 	{
 		if (list == null)
 			return;

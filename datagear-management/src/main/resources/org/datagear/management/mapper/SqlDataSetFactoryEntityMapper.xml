@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.SqlDataSetFactoryEntity">
+
+	<insert id="insert">
+		INSERT INTO DATAGEAR_SQL_DATA_SET_FACTORY
+			(
+			DSF_ID, DSF_NAME, DSF_SCHEMA_ID, DSF_SQL, DSF_CREATE_USER_ID,
+			DSF_CREATE_TIME
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.name}, #{entity.connectionFactory.schema.id}, #{entity.sql}, #{entity.createUser.id},
+			#{entity.createTime}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE DATAGEAR_SQL_DATA_SET_FACTORY SET
+			DSF_NAME = #{entity.name},
+			DSF_SCHEMA_ID = #{entity.connectionFactory.schema.id},
+			DSF_SQL = #{entity.sql}
+		WHERE
+			DSF_ID = #{entity.id}
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM DATAGEAR_SQL_DATA_SET_FACTORY
+		WHERE
+			DSF_ID = #{id}
+	</delete>
+	
+	<select id="getById" resultType="org.datagear.management.domain.SqlDataSetFactoryEntity">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryViewDataPermission" />) T
+		WHERE
+			T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="getDataIdPermissions" resultType="org.datagear.management.domain.DataIdPermission">
+		SELECT
+			T.DATA_ID as ${_iq_}dataId${_iq_},
+			T.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
+		FROM
+			(
+				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
+				<include refid="queryViewDataPermissionId" />
+				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
+			) T
+		WHERE
+			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
+	</select>
+	
+	<select id="query" resultType="org.datagear.management.domain.SqlDataSetFactoryEntity">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryViewDataPermission" />) T
+		WHERE
+			<include refid="queryCondition" />
+		<include refid="common.queryOrder" />
+	</select>
+	
+	<select id="pagingQueryCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(<include refid="queryViewDataPermission" />) T
+		WHERE
+			<include refid="queryCondition" />
+	</select>
+	
+	<select id="pagingQuery" resultType="org.datagear.management.domain.SqlDataSetFactoryEntity">
+		<include refid="common.pagingQueryHead" />
+			SELECT
+				T.*
+			FROM
+				(<include refid="queryViewDataPermission" />) T
+			WHERE
+				<include refid="queryCondition" />
+			<include refid="common.queryOrder" />
+		<include refid="common.pagingQueryFoot" />
+	</select>
+	
+	<sql id="queryViewDataPermission">
+		<choose><when test="DP_CURRENT_USER == null">
+		<include refid="queryView" />
+		</when><otherwise>
+		SELECT
+			T0.*,
+			T1.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
+		FROM
+			(<include refid="queryView" />) T0
+			INNER JOIN
+			(
+				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
+				<include refid="queryViewDataPermissionId" />
+				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
+			) T1
+		ON
+			T0.${_iq_}id${_iq_} = T1.DATA_ID
+		WHERE
+			T1.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION}
+		</otherwise></choose>
+	</sql>
+	
+	<sql id="queryViewDataPermissionId">
+		SELECT
+			A.DSF_ID AS DP_AUTH_DATA_ID,
+			A.DSF_CREATE_USER_ID AS DP_AUTH_DATA_CREATOR_ID
+		FROM
+			DATAGEAR_SQL_DATA_SET_FACTORY A
+	</sql>
+	
+	<sql id="queryView">
+		SELECT
+			A.DSF_ID AS ${_iq_}id${_iq_},
+			A.DSF_NAME AS ${_iq_}name${_iq_},
+			B.SCHEMA_ID AS ${_iq_}connectionFactory.schema.id${_iq_},
+			B.SCHEMA_TITLE AS ${_iq_}connectionFactory.schema.title${_iq_},
+			A.DSF_SQL AS ${_iq_}sql${_iq_},
+			<include refid="common.fieldsForCreateUser"></include>
+			A.DSF_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
+			A.DSF_CREATE_TIME AS ${_iq_}createTime${_iq_}
+		FROM
+			DATAGEAR_SQL_DATA_SET_FACTORY A
+		INNER JOIN
+			DATAGEAR_SCHEMA B
+		ON
+			A.DSF_SCHEMA_ID = B.SCHEMA_ID
+		LEFT JOIN
+			DATAGEAR_USER USR
+		ON
+			A.DSF_CREATE_USER_ID = USR.USER_ID
+	</sql>
+	
+	<sql id="queryCondition">
+		1 = 1
+		<if test="queryKeyword != null">
+		AND
+		(
+			${_iq_}name${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}connectionFactory.schema.title${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}createUser.name${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}createUser.realName${_iq_} LIKE #{queryKeyword}
+		)
+		</if>
+		<include refid="common.queryCondition" />
+	</sql>
+</mapper>
