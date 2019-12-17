@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetExportValues;
 import org.datagear.analysis.DataSetMeta;
 
 /**
@@ -24,6 +25,8 @@ public class SimpleDataSet implements DataSet
 	private DataSetMeta meta;
 
 	private List<Map<String, ?>> datas;
+
+	private DataSetExportValues exportValues;
 
 	public SimpleDataSet()
 	{
@@ -60,4 +63,21 @@ public class SimpleDataSet implements DataSet
 	{
 		this.datas = (List<Map<String, ?>>) datas;
 	}
+
+	public boolean hasExportValue()
+	{
+		return (this.exportValues != null && !this.exportValues.isEmpty());
+	}
+
+	@Override
+	public DataSetExportValues getExportValues()
+	{
+		return exportValues;
+	}
+
+	public void setExportValues(DataSetExportValues exportValues)
+	{
+		this.exportValues = exportValues;
+	}
+
 }

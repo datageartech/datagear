@@ -9,9 +9,15 @@ package org.datagear.analysis.support;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
+import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetExport;
+import org.datagear.analysis.DataSetExportValues;
+import org.datagear.analysis.DataSetExports;
 import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.DataSetMeta;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetParams;
 
@@ -23,28 +29,75 @@ import org.datagear.analysis.DataSetParams;
  */
 public abstract class AbstractDataSetFactory extends AbstractIdentifiable implements DataSetFactory
 {
-	private DataSetParams dataSetParams;
+	private DataSetParams params;
+
+	private DataSetExports exports;
 
 	public AbstractDataSetFactory()
 	{
 		super();
 	}
 
-	public AbstractDataSetFactory(String id, DataSetParams dataSetParams)
+	public AbstractDataSetFactory(String id, DataSetParams params)
 	{
 		super(id);
-		this.dataSetParams = dataSetParams;
+		this.params = params;
+	}
+
+	public boolean hasParam()
+	{
+		return (this.params != null && !this.params.isEmpty());
 	}
 
 	@Override
-	public DataSetParams getDataSetParams()
+	public DataSetParams getParams()
 	{
-		return dataSetParams;
+		return params;
 	}
 
-	public void setDataSetParams(DataSetParams dataSetParams)
+	public void setParams(DataSetParams params)
 	{
-		this.dataSetParams = dataSetParams;
+		this.params = params;
+	}
+
+	public boolean hasExport()
+	{
+		return (this.exports != null && !this.exports.isEmpty());
+	}
+
+	@Override
+	public DataSetExports getExports()
+	{
+		return exports;
+	}
+
+	public void setExports(DataSetExports exports)
+	{
+		this.exports = exports;
+	}
+
+	/**
+	 * 获取输出值集。
+	 * 
+	 * @param meta
+	 * @param datas
+	 * @return
+	 * @throws DataSetException
+	 */
+	protected DataSetExportValues getExportValues(DataSetMeta meta, List<Map<String, ?>> datas) throws DataSetException
+	{
+		if (!hasExport())
+			return null;
+
+		DataSetExportValues exportValues = new DataSetExportValues();
+
+		for (DataSetExport expt : this.exports)
+		{
+			Object value = expt.getExportValue(meta, datas);
+			exportValues.put(expt.getName(), value);
+		}
+
+		return exportValues;
 	}
 
 	/**
@@ -54,7 +107,7 @@ public abstract class AbstractDataSetFactory extends AbstractIdentifiable implem
 	 * @return
 	 * @throws DataSetParamNotFountException
 	 */
-	protected List<DataSetParam> getDataSetParam(List<String> names) throws DataSetParamNotFountException
+	protected List<DataSetParam> getDataSetParamsNotNull(List<String> names) throws DataSetParamNotFountException
 	{
 		List<DataSetParam> dataSetParams = new ArrayList<DataSetParam>(names.size());
 
@@ -90,7 +143,7 @@ public abstract class AbstractDataSetFactory extends AbstractIdentifiable implem
 	{
 		DataSetParam dataSetParam = null;
 
-		DataSetParams dataSetParams = getDataSetParams();
+		DataSetParams dataSetParams = getParams();
 
 		if (dataSetParams != null)
 			dataSetParam = dataSetParams.getByName(name);

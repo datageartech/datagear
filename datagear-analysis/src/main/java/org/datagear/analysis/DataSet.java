@@ -28,4 +28,11 @@ public interface DataSet
 	 * @return
 	 */
 	List<Map<String, ?>> getDatas();
+
+	/**
+	 * 获取输出项值集合，返回{@code null}或空表示没有输出项值。
+	 * 
+	 * @return
+	 */
+	DataSetExportValues getExportValues();
 }

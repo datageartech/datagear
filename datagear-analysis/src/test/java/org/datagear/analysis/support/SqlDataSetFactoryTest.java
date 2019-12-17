@@ -37,6 +37,7 @@ public class SqlDataSetFactoryTest extends DBTestSupport
 	{
 		Connection cn = null;
 
+		String[] columnLabels = { "标识", "名称" };
 		long recordId = 999999999;
 		String recordName = SqlDataSetFactory.class.getSimpleName();
 
@@ -67,6 +68,7 @@ public class SqlDataSetFactoryTest extends DBTestSupport
 			dataSetParams.add(new DataSetParam("name", DataType.STRING, true));
 
 			SqlDataSetFactory sqlDataSetFactory = new SqlDataSetFactory("1", dataSetParams, connectionFactory, sql);
+			sqlDataSetFactory.setColumnLabels(columnLabels);
 
 			DataSetParamValues dataSetParamValues = new DataSetParamValues();
 			dataSetParamValues.put("id", recordId);
@@ -84,6 +86,7 @@ public class SqlDataSetFactoryTest extends DBTestSupport
 
 				Assert.assertEquals("ID", columnMeta.getName());
 				Assert.assertEquals(DataType.INTEGER, columnMeta.getDataType());
+				Assert.assertEquals(columnLabels[0], columnMeta.getLabel());
 			}
 
 			{
@@ -91,6 +94,7 @@ public class SqlDataSetFactoryTest extends DBTestSupport
 
 				Assert.assertEquals("NAME", columnMeta.getName());
 				Assert.assertEquals(DataType.STRING, columnMeta.getDataType());
+				Assert.assertEquals(columnLabels[1], columnMeta.getLabel());
 			}
 
 			List<Map<String, ?>> datas = dataSet.getDatas();

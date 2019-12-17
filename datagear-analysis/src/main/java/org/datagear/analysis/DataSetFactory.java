@@ -20,7 +20,17 @@ public interface DataSetFactory extends Identifiable
 	 * 
 	 * @return
 	 */
-	DataSetParams getDataSetParams();
+	DataSetParams getParams();
+
+	/**
+	 * 获取{@linkplain DataSetExports}。
+	 * <p>
+	 * 返回{@code null}表示没有。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	DataSetExports getExports();
 
 	/**
 	 * 获取{@linkplain DataSet}。

@@ -44,7 +44,7 @@ var myListener =
 <body>
 	<@dashboard listener="myListener">
 	<div class="dashboard" role="dashboard">
-		<h1>Hello dashbaord!</h1>
+		<h1>Hello dashboard!</h1>
 		<div class="chart-wrapper">
 			<@chart widget="chart-widget-01" />
 		</div>

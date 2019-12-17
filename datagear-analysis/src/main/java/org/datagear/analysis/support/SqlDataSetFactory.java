@@ -24,6 +24,7 @@ import java.util.Map;
 import org.datagear.analysis.ColumnMeta;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetExportValues;
 import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.DataSetMeta;
 import org.datagear.analysis.DataSetParam;
@@ -38,7 +39,7 @@ import org.datagear.util.resource.ConnectionFactory;
 /**
  * SQL {@linkplain DataSetFactory}。
  * <p>
- * 它的{@linkplain #setSql(String)}中可以包含<code>${parameter}</code>格式的参数（<code>parameter</code>必须是在{@linkplain #getDataSetParams()}中预定义的），
+ * 它的{@linkplain #setSql(String)}中可以包含<code>${parameter}</code>格式的参数（<code>parameter</code>必须是在{@linkplain #getParams()}中预定义的），
  * 在{@linkplain #getDataSet(DataSetParamValues)}中会被替换为具体的参数值。
  * </p>
  * 
@@ -52,6 +53,8 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	private ConnectionFactory connectionFactory;
 
 	private String sql;
+
+	private String[] columnLabels;
 
 	public SqlDataSetFactory()
 	{
@@ -83,6 +86,16 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	public void setSql(String sql)
 	{
 		this.sql = sql;
+	}
+
+	public String[] getColumnLabels()
+	{
+		return columnLabels;
+	}
+
+	public void setColumnLabels(String[] columnLabels)
+	{
+		this.columnLabels = columnLabels;
 	}
 
 	@Override
@@ -130,7 +143,8 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 		ParameterSql parameterSql = resolveParameterSql(sql);
 
 		sql = parameterSql.getSql();
-		List<DataSetParam> dataSetParams = (parameterSql.hasParameter() ? getDataSetParam(parameterSql.getParameters())
+		List<DataSetParam> dataSetParams = (parameterSql.hasParameter()
+				? getDataSetParamsNotNull(parameterSql.getParameters())
 				: null);
 
 		Statement st = null;
@@ -324,8 +338,12 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	{
 		DataSetMeta dataSetMeta = resolveDataSetMeta(cn, rs);
 		List<Map<String, ?>> datas = resolveDatas(cn, rs, dataSetMeta);
+		DataSetExportValues exportValues = getExportValues(dataSetMeta, datas);
 
-		return new SimpleDataSet(dataSetMeta, datas);
+		SimpleDataSet dataSet = new SimpleDataSet(dataSetMeta, datas);
+		dataSet.setExportValues(exportValues);
+
+		return dataSet;
 	}
 
 	/**
@@ -578,10 +596,27 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 
 			DataType dataType = toDataType(metaData, i);
 
-			columnMetas.add(new ColumnMeta(columnName, dataType));
+			ColumnMeta columnMeta = new ColumnMeta(columnName, dataType);
+			columnMeta.setLabel(getColumnLabel(i - 1));
+
+			columnMetas.add(columnMeta);
 		}
 
 		return new DataSetMeta(columnMetas);
+	}
+
+	/**
+	 * 获取列标签，没有则返回{@code null}。
+	 * 
+	 * @param index
+	 * @return
+	 */
+	protected String getColumnLabel(int index)
+	{
+		if (this.columnLabels == null || index >= this.columnLabels.length)
+			return null;
+
+		return this.columnLabels[index];
 	}
 
 	/**
