@@ -29,14 +29,8 @@
 	},
 	icons :
 	{
-		'LIGHT' :
-		{
-			'location' : 'icon-0.png'
-		},
-		'DARK' :
-		{
-			'location' : 'icon-1.png'
-		}
+		'LIGHT' :  'icon-0.png',
+		'DARK' :  'icon-1.png'
 	},
 	chartProperties :
 	[

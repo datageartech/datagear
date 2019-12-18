@@ -39,7 +39,7 @@ import org.datagear.util.i18n.Label;
 import com.alibaba.fastjson.JSON;
 
 /**
- * JSON {@linkplain ChartPlugin}解析器。
+ * JSON {@linkplain ChartPlugin}属性解析器。
  * <p>
  * 此类从JSON解析{@linkplain ChartPlugin}对象的属性：
  * </p>
@@ -50,16 +50,19 @@ import com.alibaba.fastjson.JSON;
  * 	nameLabel : { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
  * 	descLabel : { ... },
  * 	manualLabel : { ... },
- * 	icons : { "LIGHTNESS" : { location : "classpath:/.../.../icon.png" }, "DARK" : { location : "file:/.../.../icon.png" } },
+ * 	icons : { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
  * 	chartProperties :  [ { ... }, ... ]
  * }
  * </pre>
  * </code>
+ * <p>
+ * 此类是线程安全的。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class JsonChartPluginResolver
+public class JsonChartPluginPropertiesResolver
 {
 	public static final String CHART_PLUGIN_ID = "id";
 
@@ -95,7 +98,7 @@ public class JsonChartPluginResolver
 
 	private ConcurrentMap<String, Locale> _localeCache = new ConcurrentHashMap<String, Locale>();
 
-	public JsonChartPluginResolver()
+	public JsonChartPluginPropertiesResolver()
 	{
 		super();
 	}
@@ -113,7 +116,7 @@ public class JsonChartPluginResolver
 	/**
 	 * 从JSON字符串解析{@linkplain ChartPlugin}。
 	 * <p>
-	 * 它会进行类型转换。
+	 * 它会进行必要的类型转换。
 	 * </p>
 	 * 
 	 * @param json

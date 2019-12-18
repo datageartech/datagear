@@ -16,7 +16,7 @@ import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.Theme;
-import org.datagear.analysis.support.JsonChartPluginResolver;
+import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 import org.datagear.analysis.support.LocationResource;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,7 +27,7 @@ import org.junit.Test;
  */
 public class HtmlChartPluginTest
 {
-	private static JsonChartPluginResolver jsonChartPluginResolver = new JsonChartPluginResolver();
+	private static JsonChartPluginPropertiesResolver jsonChartPluginPropertiesResolver = new JsonChartPluginPropertiesResolver();
 
 	public HtmlChartPluginTest() throws Throwable
 	{
@@ -84,10 +84,10 @@ public class HtmlChartPluginTest
 	{
 		InputStream jsonInputStream = HtmlChartPluginTest.class.getClassLoader()
 				.getResourceAsStream("org/datagear/analysis/support/html/HtmlChartPlugin.config.json");
-		Map<String, Object> properties = jsonChartPluginResolver.resolveChartPluginProperties(jsonInputStream, "UTF-8");
+		Map<String, Object> properties = jsonChartPluginPropertiesResolver.resolveChartPluginProperties(jsonInputStream, "UTF-8");
 
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = new HtmlChartPlugin<HtmlRenderContext>();
-		jsonChartPluginResolver.setChartPluginProperties(htmlChartPlugin, properties);
+		jsonChartPluginPropertiesResolver.setChartPluginProperties(htmlChartPlugin, properties);
 
 		htmlChartPlugin.setScriptContent(
 				LocationResource.toClasspathLocation("org/datagear/analysis/support/html/HtmlChartPlugin.chart.js"));

@@ -54,19 +54,18 @@ public class IOUtil
 	{
 		Reader reader = getReader(in, encoding);
 
-		return readString(reader, encoding, closeIn);
+		return readString(reader, closeIn);
 	}
 
 	/**
 	 * 从输入流读字符串。
 	 * 
 	 * @param in
-	 * @param encoding
 	 * @param closeIn
 	 * @return
 	 * @throws IOException
 	 */
-	public static String readString(Reader in, String encoding, boolean closeIn) throws IOException
+	public static String readString(Reader in, boolean closeIn) throws IOException
 	{
 		StringWriter out = new StringWriter();
 
@@ -83,6 +82,35 @@ public class IOUtil
 		}
 
 		return out.toString();
+	}
+
+	/**
+	 * 从输入流读字节数组。
+	 * 
+	 * @param in
+	 * @param closeIn
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] readBytes(InputStream in, boolean closeIn) throws IOException
+	{
+		ByteArrayOutputStream out = null;
+
+		try
+		{
+			out = new ByteArrayOutputStream();
+
+			write(in, out);
+		}
+		finally
+		{
+			if (closeIn)
+				close(in);
+
+			close(out);
+		}
+
+		return out.toByteArray();
 	}
 
 	/**

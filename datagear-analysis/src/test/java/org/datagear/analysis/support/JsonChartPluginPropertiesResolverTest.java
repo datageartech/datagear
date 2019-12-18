@@ -26,43 +26,43 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * {@linkplain JsonChartPluginResolver}单元测试类。
+ * {@linkplain JsonChartPluginPropertiesResolver}单元测试类。
  * 
  * @author datagear@163.com
  *
  */
-public class JsonChartPluginResolverTest
+public class JsonChartPluginPropertiesResolverTest
 {
-	private JsonChartPluginResolver jsonChartPluginResolver = new JsonChartPluginResolver();
+	private JsonChartPluginPropertiesResolver jsonChartPluginPropertiesResolver = new JsonChartPluginPropertiesResolver();
 
 	@Test
 	public void resolveChartPluginPropertiesTest() throws IOException
 	{
 		{
 			InputStream jsonInputStream = getClass().getClassLoader()
-					.getResourceAsStream("org/datagear/analysis/support/JsonChartPluginResolverTest.json");
+					.getResourceAsStream("org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest.json");
 
-			Map<String, Object> properties = jsonChartPluginResolver.resolveChartPluginProperties(jsonInputStream,
-					"UTF-8");
+			Map<String, Object> properties = jsonChartPluginPropertiesResolver
+					.resolveChartPluginProperties(jsonInputStream, "UTF-8");
 
-			Assert.assertEquals("pie-chart", properties.get(JsonChartPluginResolver.CHART_PLUGIN_ID));
+			Assert.assertEquals("pie-chart", properties.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_ID));
 
 			{
-				Label nameLabel = (Label) properties.get(JsonChartPluginResolver.CHART_PLUGIN_NAME_LABEL);
+				Label nameLabel = (Label) properties.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_NAME_LABEL);
 				Assert.assertEquals("饼图", nameLabel.getValue());
 				Assert.assertEquals("pie chart", nameLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("饼图中文", nameLabel.getValue(Label.toLocale("zh")));
 			}
 
 			{
-				Label descLabel = (Label) properties.get(JsonChartPluginResolver.CHART_PLUGIN_DESC_LABEL);
+				Label descLabel = (Label) properties.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_DESC_LABEL);
 				Assert.assertEquals("饼图描述", descLabel.getValue());
 				Assert.assertEquals("pie chart desc", descLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("饼图描述中文", descLabel.getValue(Label.toLocale("zh")));
 			}
 
 			{
-				Label manualLabel = (Label) properties.get(JsonChartPluginResolver.CHART_PLUGIN_MANUAL_LABEL);
+				Label manualLabel = (Label) properties.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_MANUAL_LABEL);
 				Assert.assertEquals("饼图指南", manualLabel.getValue());
 				Assert.assertEquals("pie chart manual", manualLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("饼图指南中文", manualLabel.getValue(Label.toLocale("zh")));
@@ -71,14 +71,14 @@ public class JsonChartPluginResolverTest
 			{
 				@SuppressWarnings("unchecked")
 				Map<RenderStyle, LocationIcon> icons = (Map<RenderStyle, LocationIcon>) properties
-						.get(JsonChartPluginResolver.CHART_PLUGIN_ICONS);
+						.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_ICONS);
 
 				Assert.assertEquals("icon-0.png", icons.get(RenderStyle.LIGHT).getLocation());
 				Assert.assertEquals("icon-1.png", icons.get(RenderStyle.DARK).getLocation());
 			}
 
 			ChartProperties chartProperties = (ChartProperties) properties
-					.get(JsonChartPluginResolver.CHART_PLUGIN_CHART_PROPERTIES);
+					.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_CHART_PROPERTIES);
 
 			{
 				ChartProperty chartProperty = chartProperties.get(0);
@@ -138,13 +138,14 @@ public class JsonChartPluginResolverTest
 	public void setChartPluginPropertiesTest() throws IOException
 	{
 		InputStream jsonInputStream = getClass().getClassLoader()
-				.getResourceAsStream("org/datagear/analysis/support/JsonChartPluginResolverTest.json");
+				.getResourceAsStream("org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest.json");
 
-		Map<String, Object> properties = jsonChartPluginResolver.resolveChartPluginProperties(jsonInputStream, "UTF-8");
+		Map<String, Object> properties = jsonChartPluginPropertiesResolver.resolveChartPluginProperties(jsonInputStream,
+				"UTF-8");
 
 		TestChartPlugin chartPlugin = new TestChartPlugin();
 
-		this.jsonChartPluginResolver.setChartPluginProperties(chartPlugin, properties);
+		this.jsonChartPluginPropertiesResolver.setChartPluginProperties(chartPlugin, properties);
 
 		Assert.assertNotNull(chartPlugin.getId());
 
