@@ -44,6 +44,26 @@ public class DataSetMeta
 		this.columnMetas = (List<ColumnMeta>) columnMetas;
 	}
 
+	/**
+	 * 获取指定名称的{@linkplain ColumnMeta}。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public ColumnMeta getColumnMeta(String name)
+	{
+		if (this.columnMetas == null)
+			return null;
+
+		for (ColumnMeta meta : this.columnMetas)
+		{
+			if (meta.getName().equals(name))
+				return meta;
+		}
+
+		return null;
+	}
+
 	@Override
 	public String toString()
 	{

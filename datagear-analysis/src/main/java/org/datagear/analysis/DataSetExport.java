@@ -35,6 +35,13 @@ public abstract class DataSetExport implements Serializable
 		super();
 	}
 
+	public DataSetExport(String name, DataType type)
+	{
+		super();
+		this.name = name;
+		this.type = type;
+	}
+
 	public String getName()
 	{
 		return name;

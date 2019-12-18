@@ -220,7 +220,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	{
 		DataType dataType = dataSetParam.getType();
 
-		if (DataType.STRING.equals(dataType))
+		if (DataType.isString(dataType))
 		{
 			String value = null;
 
@@ -237,7 +237,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 			else
 				pst.setString(parameterIndex, value);
 		}
-		else if (DataType.BOOLEAN.equals(dataType))
+		else if (DataType.isBoolean(dataType))
 		{
 			boolean value = false;
 
@@ -254,7 +254,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 			else
 				pst.setBoolean(parameterIndex, value);
 		}
-		else if (DataType.INTEGER.equals(dataType))
+		else if (DataType.isInteger(dataType))
 		{
 			if (paramValue == null)
 				pst.setNull(parameterIndex, Types.INTEGER);
@@ -268,10 +268,10 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 				throw new DataSetException("Type [" + paramValue.getClass().getName() + "] for [" + DataType.INTEGER
 						+ "] is not supported");
 		}
-		else if (DataType.DECIMAL.equals(dataType))
+		else if (DataType.isDecimal(dataType))
 		{
 			if (paramValue == null)
-				pst.setNull(parameterIndex, Types.DOUBLE);
+				pst.setNull(parameterIndex, Types.DECIMAL);
 			else if (paramValue instanceof BigDecimal)
 				pst.setBigDecimal(parameterIndex, (BigDecimal) paramValue);
 			else if (paramValue instanceof BigInteger)
@@ -286,7 +286,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 				throw new DataSetException("Type [" + paramValue.getClass().getName() + "] for [" + DataType.DECIMAL
 						+ "] is not supported");
 		}
-		else if (DataType.DATE.equals(dataType))
+		else if (DataType.isDate(dataType))
 		{
 			if (paramValue == null)
 				pst.setNull(parameterIndex, Types.DATE);
@@ -298,7 +298,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 				throw new DataSetException(
 						"Type [" + paramValue.getClass().getName() + "] for [" + DataType.DATE + "] is not supported");
 		}
-		else if (DataType.TIME.equals(dataType))
+		else if (DataType.isTime(dataType))
 		{
 			if (paramValue == null)
 				pst.setNull(parameterIndex, Types.TIME);
@@ -310,7 +310,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 				throw new DataSetException(
 						"Type [" + paramValue.getClass().getName() + "] for [" + DataType.TIME + "] is not supported");
 		}
-		else if (DataType.TIMESTAMP.equals(dataType))
+		else if (DataType.isTimestamp(dataType))
 		{
 			if (paramValue == null)
 				pst.setNull(parameterIndex, Types.TIMESTAMP);
@@ -398,7 +398,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	{
 		Object value = null;
 
-		if (DataType.STRING.equals(dataType))
+		if (DataType.isString(dataType))
 		{
 			switch (sqlType)
 			{
@@ -415,7 +415,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 					throw new UnsupportedSqlTypeException(sqlType);
 			}
 		}
-		else if (DataType.BOOLEAN.equals(dataType))
+		else if (DataType.isBoolean(dataType))
 		{
 			switch (sqlType)
 			{
@@ -439,7 +439,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 					throw new UnsupportedSqlTypeException(sqlType);
 			}
 		}
-		else if (DataType.INTEGER.equals(dataType))
+		else if (DataType.isInteger(dataType))
 		{
 			switch (sqlType)
 			{
@@ -482,7 +482,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 					throw new UnsupportedSqlTypeException(sqlType);
 			}
 		}
-		else if (DataType.DECIMAL.equals(dataType))
+		else if (DataType.isDecimal(dataType))
 		{
 			switch (sqlType)
 			{
@@ -525,7 +525,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 					throw new UnsupportedSqlTypeException(sqlType);
 			}
 		}
-		else if (DataType.DATE.equals(dataType))
+		else if (DataType.isDate(dataType))
 		{
 			switch (sqlType)
 			{
@@ -539,7 +539,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 					throw new UnsupportedSqlTypeException(sqlType);
 			}
 		}
-		else if (DataType.TIME.equals(dataType))
+		else if (DataType.isTime(dataType))
 		{
 			switch (sqlType)
 			{
@@ -553,7 +553,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 					throw new UnsupportedSqlTypeException(sqlType);
 			}
 		}
-		else if (DataType.TIMESTAMP.equals(dataType))
+		else if (DataType.isTimestamp(dataType))
 		{
 			switch (sqlType)
 			{
