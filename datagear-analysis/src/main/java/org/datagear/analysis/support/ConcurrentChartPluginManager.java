@@ -127,7 +127,10 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager imp
 		{
 			readLock.lock();
 
-			return new ArrayList<ChartPlugin<?>>(this.chartPlugins);
+			List<ChartPlugin<?>> re = new ArrayList<ChartPlugin<?>>(this.chartPlugins);
+			sortChartPlugins(re);
+
+			return re;
 		}
 		finally
 		{

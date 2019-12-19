@@ -68,6 +68,16 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	ChartProperties getChartProperties();
 
 	/**
+	 * 获取排序值。
+	 * <p>
+	 * {@linkplain ChartPluginManager#getAll()}、和{@linkplain ChartPluginManager#getAll(Class)}使用此值进行排序，越小越靠前。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	int getOrder();
+
+	/**
 	 * 渲染{@linkplain Chart}。
 	 * 
 	 * @param renderContext

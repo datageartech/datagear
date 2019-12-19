@@ -27,8 +27,8 @@ import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.TemplateDashboardWidgetResManager;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
-import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
 import freemarker.core.Environment;
@@ -696,8 +696,8 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 
 			String widgetId = dataModel.getHtmlDashboard().getWidget().getId();
 
-			String resURL = IOUtil.concatPath(widgetId, resName, "/");
-			resURL = IOUtil.concatPath(getResourceRootURL(), resURL, "/");
+			String resURL = FileUtil.concatPath(widgetId, resName, "/");
+			resURL = FileUtil.concatPath(getResourceRootURL(), resURL, "/");
 
 			env.getOut().write(resURL);
 		}

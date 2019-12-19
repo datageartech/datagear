@@ -3,7 +3,7 @@ package org.datagear.analysis.support;
 import java.io.File;
 
 import org.datagear.analysis.DashboardWidget;
-import org.datagear.util.IOUtil;
+import org.datagear.util.FileUtil;
 
 /**
  * 模板{@linkplain DashboardWidgetResManager}。
@@ -66,7 +66,7 @@ public class TemplateDashboardWidgetResManager extends DashboardWidgetResManager
 	 */
 	public String getTemplateRelativePath(String id, String templateName)
 	{
-		String path = IOUtil.concatPath(this.folderName, templateName, PATH_SEPARATOR);
+		String path = FileUtil.concatPath(this.folderName, templateName);
 		return getRelativePath(id, path);
 	}
 
@@ -79,7 +79,7 @@ public class TemplateDashboardWidgetResManager extends DashboardWidgetResManager
 	 */
 	public File getResFile(String id, String fileName)
 	{
-		String path = IOUtil.concatPath(this.resFolderName, fileName, PATH_SEPARATOR);
+		String path = FileUtil.concatPath(this.resFolderName, fileName);
 		return getFile(id, path);
 	}
 }

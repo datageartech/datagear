@@ -3,7 +3,7 @@ package org.datagear.analysis.support;
 import java.io.File;
 
 import org.datagear.analysis.DashboardWidget;
-import org.datagear.util.IOUtil;
+import org.datagear.util.FileUtil;
 
 /**
  * {@linkplain DashboardWidget}文件资源管理器。
@@ -16,8 +16,6 @@ import org.datagear.util.IOUtil;
  */
 public class DashboardWidgetResManager
 {
-	protected static final String PATH_SEPARATOR = File.separator;
-
 	private File rootDirectory;
 
 	public DashboardWidgetResManager()
@@ -34,10 +32,7 @@ public class DashboardWidgetResManager
 	public DashboardWidgetResManager(String rootDirectory)
 	{
 		super();
-		this.rootDirectory = new File(IOUtil.trimPath(rootDirectory, PATH_SEPARATOR));
-
-		if (!this.rootDirectory.exists())
-			this.rootDirectory.mkdirs();
+		this.rootDirectory = FileUtil.getDirectory(FileUtil.trimPath(rootDirectory));
 	}
 
 	public File getRootDirectory()
@@ -62,8 +57,7 @@ public class DashboardWidgetResManager
 	 */
 	public String getRelativePath(String id, String subPath)
 	{
-		String path = IOUtil.concatPath(id, subPath, PATH_SEPARATOR);
-		checkBackwardPath(path);
+		String path = FileUtil.concatPath(id, subPath);
 
 		return path;
 	}
@@ -80,30 +74,27 @@ public class DashboardWidgetResManager
 	 */
 	public File getFile(String id, String subPath)
 	{
-		if (IOUtil.trimPath(subPath, PATH_SEPARATOR).endsWith(PATH_SEPARATOR))
+		if (FileUtil.trimPath(subPath).endsWith(FileUtil.PATH_SEPARATOR))
 			return getDirectory(id, subPath);
 
 		String path = getRelativePath(id, subPath);
 
-		int sidx = path.lastIndexOf(PATH_SEPARATOR);
+		int sidx = path.lastIndexOf(FileUtil.PATH_SEPARATOR);
 
 		if (sidx < 0)
-			return new File(this.rootDirectory, path);
+			return FileUtil.getFile(this.rootDirectory, path);
 		else
 		{
 			String parent = path.substring(0, sidx);
 
 			if (!parent.isEmpty())
 			{
-				File parentDirectory = new File(this.rootDirectory, parent);
+				File parentDirectory = FileUtil.getDirectory(this.rootDirectory, parent);
 
-				if (!parentDirectory.exists())
-					parentDirectory.mkdirs();
-
-				return new File(parentDirectory, path.substring(sidx + 1));
+				return FileUtil.getFile(parentDirectory, path.substring(sidx + 1));
 			}
 			else
-				return new File(this.rootDirectory, path);
+				return FileUtil.getFile(this.rootDirectory, path);
 		}
 	}
 
@@ -121,27 +112,8 @@ public class DashboardWidgetResManager
 	{
 		String path = getRelativePath(id, subPath);
 
-		File file = new File(this.rootDirectory, path);
-
-		if (!file.exists())
-			file.mkdirs();
+		File file = FileUtil.getDirectory(this.rootDirectory, path);
 
 		return file;
-	}
-
-	protected void checkBackwardPath(String path)
-	{
-		if (containsBackwardPath(path))
-			throw new IllegalArgumentException("[.." + PATH_SEPARATOR + "] is not allowed in path [" + path + "]");
-	}
-
-	protected boolean containsBackwardPath(String path)
-	{
-		if (path == null)
-			return false;
-
-		path = IOUtil.trimPath(path, PATH_SEPARATOR);
-
-		return (path.indexOf(".." + PATH_SEPARATOR) > -1 || path.indexOf(PATH_SEPARATOR + "..") > -1);
 	}
 }

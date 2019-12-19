@@ -16,6 +16,8 @@ import java.net.URL;
  */
 public class FileUtil
 {
+	public static final String PATH_SEPARATOR = File.separator;
+
 	private FileUtil()
 	{
 		throw new UnsupportedOperationException();
@@ -41,6 +43,8 @@ public class FileUtil
 	 */
 	public static File getFile(File parent, String file)
 	{
+		checkBackwardPath(file);
+
 		return new File(parent, file);
 	}
 
@@ -75,6 +79,8 @@ public class FileUtil
 	 */
 	public static File getDirectory(File parent, String file)
 	{
+		checkBackwardPath(file);
+
 		File directory = new File(parent, file);
 
 		if (!directory.exists())
@@ -155,6 +161,8 @@ public class FileUtil
 	 */
 	public static File generateUniqueFile(File parent, String extension)
 	{
+		checkBackwardPath(extension);
+
 		String name = (StringUtil.isEmpty(extension) ? IDUtil.uuid() : IDUtil.uuid() + "." + extension);
 		return new File(parent, name);
 	}
@@ -284,5 +292,137 @@ public class FileUtil
 			return fileName.substring(dotIdx + 1);
 		else
 			return null;
+	}
+
+	/**
+	 * 连接路径。
+	 * 
+	 * @param parent
+	 * @param child
+	 * @return
+	 */
+	public static String concatPath(String parent, String child)
+	{
+		return concatPath(parent, child, PATH_SEPARATOR);
+	}
+
+	/**
+	 * 连接路径。
+	 * 
+	 * @param parent
+	 * @param child
+	 * @param separator
+	 * @return
+	 */
+	public static String concatPath(String parent, String child, String separator)
+	{
+		checkBackwardPath(parent);
+		checkBackwardPath(child);
+
+		parent = trimPath(parent, separator);
+		child = trimPath(child, separator);
+
+		boolean parentEndsWith = parent.endsWith(separator);
+		boolean childStartsWith = child.startsWith(separator);
+
+		if (parentEndsWith && childStartsWith)
+			return parent + child.substring(separator.length());
+		else if (parentEndsWith || childStartsWith)
+			return parent + child;
+		else
+			return parent + separator + child;
+	}
+
+	/**
+	 * 整理路径。
+	 * <p>
+	 * 此方法将路径中的{@code "/"}、{@code "\"}统一替换为指定的{@linkplain #PATH_SEPARATOR}。
+	 * </p>
+	 * 
+	 * @param path
+	 * @param separator
+	 * @return
+	 */
+	public static String trimPath(String path)
+	{
+		return trimPath(path, PATH_SEPARATOR);
+	}
+
+	/**
+	 * 整理路径。
+	 * <p>
+	 * 此方法将路径中的{@code "/"}、{@code "\"}统一替换为指定的{@code separator}。
+	 * </p>
+	 * 
+	 * @param path
+	 * @param separator
+	 * @return
+	 */
+	public static String trimPath(String path, String separator)
+	{
+		if (path == null)
+			return null;
+
+		if (separator.equals("\\"))
+			return path.replace("/", separator);
+		else
+			return path.replace("\\", separator);
+	}
+
+	/**
+	 * 删除开头的路径分隔符。
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public static String deletePathSeparatorHead(String path)
+	{
+		return deletePathSeparatorHead(path, PATH_SEPARATOR);
+	}
+
+	/**
+	 * 删除开头的路径分隔符。
+	 * 
+	 * @param path
+	 * @param separator
+	 * @return
+	 */
+	public static String deletePathSeparatorHead(String path, String separator)
+	{
+		if (path == null)
+			return null;
+
+		if (path.indexOf(separator) == 0)
+			path = path.substring(separator.length());
+
+		return path;
+	}
+
+	/**
+	 * 是否包含上行路径（{@code ../}、{@code ..\}）。
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public static boolean containsBackwardPath(String path)
+	{
+		if (path == null)
+			return false;
+
+		path = trimPath(path);
+
+		return (path.indexOf(".." + PATH_SEPARATOR) > -1 || path.indexOf(PATH_SEPARATOR + "..") > -1);
+	}
+
+	/**
+	 * 确保{@code path}中不包含上行路径。
+	 * 
+	 * @param path
+	 * @throws IllegalArgumentException
+	 */
+	public static void checkBackwardPath(String path) throws IllegalArgumentException
+	{
+		if (containsBackwardPath(path))
+			throw new IllegalArgumentException("[../] and [..\\] is not allowed in path [" + path + "]");
 	}
 }

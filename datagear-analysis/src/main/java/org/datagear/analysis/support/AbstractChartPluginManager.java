@@ -8,6 +8,8 @@
 package org.datagear.analysis.support;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.datagear.analysis.ChartPlugin;
@@ -92,6 +94,9 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 
 	/**
 	 * 获取支持指定类型{@linkplain RenderContext}的所有{@linkplain ChartPlugin}。
+	 * <p>
+	 * 返回列表已使用{@linkplain #sortChartPlugins(List)}排序。
+	 * </p>
 	 * 
 	 * @param <T>
 	 * @param chartPlugins
@@ -113,6 +118,8 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 			if (supportType.isAssignableFrom(renderContextType))
 				reChartPlugins.add((ChartPlugin<T>) chartPlugins.get(i));
 		}
+
+		sortChartPlugins(reChartPlugins);
 
 		return reChartPlugins;
 	}
@@ -179,5 +186,27 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 		}
 
 		return -1;
+	}
+
+	protected void sortChartPlugins(List<? extends ChartPlugin<?>> chartPlugins)
+	{
+		sort(chartPlugins);
+	}
+
+	/**
+	 * 按照{@linkplain ChartPlugin#getOrder()}进行排序，越小越靠前。
+	 * 
+	 * @param chartPlugins
+	 */
+	public static void sort(List<? extends ChartPlugin<?>> chartPlugins)
+	{
+		Collections.sort(chartPlugins, new Comparator<ChartPlugin<?>>()
+		{
+			@Override
+			public int compare(ChartPlugin<?> o1, ChartPlugin<?> o2)
+			{
+				return Integer.valueOf(o1.getOrder()).compareTo(o2.getOrder());
+			}
+		});
 	}
 }

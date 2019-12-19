@@ -36,6 +36,8 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 
 	private ChartProperties chartProperties;
 
+	private int order = 0;
+
 	public AbstractChartPlugin()
 	{
 	}
@@ -110,4 +112,16 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 	{
 		this.chartProperties = chartProperties;
 	}
+
+	@Override
+	public int getOrder()
+	{
+		return order;
+	}
+
+	public void setOrder(int order)
+	{
+		this.order = order;
+	}
+
 }

@@ -51,7 +51,8 @@ import com.alibaba.fastjson.JSON;
  * 	descLabel : { ... },
  * 	manualLabel : { ... },
  * 	icons : { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
- * 	chartProperties :  [ { ... }, ... ]
+ * 	chartProperties :  [ { ... }, ... ],
+ * 	order: 1
  * }
  * </pre>
  * </code>
@@ -75,6 +76,8 @@ public class JsonChartPluginPropertiesResolver
 	public static final String CHART_PLUGIN_ICONS = "icons";
 
 	public static final String CHART_PLUGIN_CHART_PROPERTIES = "chartProperties";
+
+	public static final String CHART_PLUGIN_ORDER = "order";
 
 	public static final String LABEL_VALUE = "value";
 
@@ -198,6 +201,25 @@ public class JsonChartPluginPropertiesResolver
 		chartPlugin.setManualLabel((Label) properties.get(CHART_PLUGIN_MANUAL_LABEL));
 		chartPlugin.setIcons((Map<RenderStyle, Icon>) properties.get(CHART_PLUGIN_ICONS));
 		chartPlugin.setChartProperties((ChartProperties) properties.get(CHART_PLUGIN_CHART_PROPERTIES));
+
+		Integer order = null;
+
+		Object orderObj = properties.get(CHART_PLUGIN_ORDER);
+		if (orderObj instanceof Number)
+			order = ((Number) orderObj).intValue();
+		else if (orderObj instanceof String)
+		{
+			try
+			{
+				order = Integer.parseInt((String) orderObj);
+			}
+			catch (Exception e)
+			{
+			}
+		}
+
+		if (order != null)
+			chartPlugin.setOrder(order);
 	}
 
 	/**

@@ -10,10 +10,12 @@ package org.datagear.analysis.support.html;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.datagear.analysis.Icon;
@@ -21,6 +23,7 @@ import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.BytesIcon;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 import org.datagear.analysis.support.LocationIcon;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
@@ -247,15 +250,9 @@ public class HtmlChartPluginLoader
 			if (StringUtil.isEmpty(subPath))
 				return null;
 
-			File iconFile = new File(directory, subPath);
+			File iconFile = FileUtil.getFile(directory, subPath);
 
-			if (!iconFile.exists())
-				return null;
-
-			InputStream in = IOUtil.getInputStream(iconFile);
-			byte[] bytes = IOUtil.readBytes(in, true);
-
-			return new BytesIcon(bytes);
+			return readBytesIcon(iconFile);
 		}
 		else
 			return null;
@@ -268,12 +265,17 @@ public class HtmlChartPluginLoader
 		try
 		{
 			in = IOUtil.getZipInputStream(zip);
-
-			return loadSingleForZip(in);
 		}
 		catch (Exception e)
 		{
+			IOUtil.close(in);
+
 			throw new HtmlChartPluginLoadException(e);
+		}
+
+		try
+		{
+			return loadSingleForZip(in);
 		}
 		finally
 		{
@@ -283,8 +285,134 @@ public class HtmlChartPluginLoader
 
 	protected HtmlChartPlugin<?> loadSingleForZip(ZipInputStream in) throws HtmlChartPluginLoadException
 	{
-		// TODO
-		return null;
+		ZipEntry zipEntry = null;
+
+		HtmlChartPlugin<?> plugin = null;
+		Map<String, Object> properties = null;
+		String scriptContent = null;
+
+		Map<String, File> resourceFiles = new HashMap<String, File>();
+
+		try
+		{
+			while ((zipEntry = in.getNextEntry()) != null)
+			{
+				String name = zipEntry.getName();
+
+				if (zipEntry.isDirectory())
+					;
+				else if (name.equals(NAME_PROPERTIES))
+				{
+					properties = this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(in, this.encoding);
+				}
+				else if (name.equals(NAME_CHART))
+				{
+					scriptContent = readScriptContent(in, false);
+				}
+				else
+				{
+					File tmpFile = File.createTempFile(HtmlChartPluginLoader.class.getSimpleName(), ".tmp");
+					IOUtil.write(in, tmpFile);
+					resourceFiles.put(name, tmpFile);
+				}
+
+				in.closeEntry();
+			}
+
+			if (properties != null && !StringUtil.isEmpty(scriptContent))
+			{
+				plugin = createHtmlChartPlugin();
+				this.jsonChartPluginPropertiesResolver.setChartPluginProperties(plugin, properties);
+				plugin.setScriptContent(scriptContent);
+				plugin.setIcons(toBytesIconsForFileMap(resourceFiles, plugin.getIcons()));
+			}
+
+			// 清除临时文件
+			if (!resourceFiles.isEmpty())
+			{
+				Collection<File> tmpFiles = resourceFiles.values();
+				for (File tmpFile : tmpFiles)
+					FileUtil.deleteFile(tmpFile);
+			}
+		}
+		catch (IOException e)
+		{
+			throw new HtmlChartPluginLoadException(e);
+		}
+
+		return plugin;
+	}
+
+	protected Map<RenderStyle, Icon> toBytesIconsForFileMap(Map<String, File> fileMap, Map<RenderStyle, Icon> icons)
+			throws IOException
+	{
+		if (icons == null || icons.isEmpty())
+			return icons;
+
+		Map<RenderStyle, Icon> bytesIcons = new HashMap<RenderStyle, Icon>();
+
+		for (Map.Entry<RenderStyle, Icon> entry : icons.entrySet())
+		{
+			Icon icon = entry.getValue();
+
+			BytesIcon bytesIcon = toBytesIconForFileMap(fileMap, icon);
+
+			if (bytesIcon != null)
+				bytesIcons.put(entry.getKey(), bytesIcon);
+		}
+
+		return bytesIcons;
+	}
+
+	protected BytesIcon toBytesIconForFileMap(Map<String, File> fileMap, Icon icon) throws IOException
+	{
+		if (icon instanceof LocationIcon)
+		{
+			String iconPath = ((LocationIcon) icon).getLocation();
+
+			if (StringUtil.isEmpty(iconPath))
+				return null;
+
+			File iconFile = fileMap.get(iconPath);
+
+			if (iconFile == null)
+			{
+				iconPath = FileUtil.deletePathSeparatorHead(FileUtil.trimPath(iconPath));
+
+				for (Map.Entry<String, File> entry : fileMap.entrySet())
+				{
+					String name = FileUtil.deletePathSeparatorHead(FileUtil.trimPath(entry.getKey()));
+
+					if (iconPath.equals(name))
+					{
+						iconFile = entry.getValue();
+						break;
+					}
+				}
+			}
+
+			return readBytesIcon(iconFile);
+		}
+		else
+			return null;
+	}
+
+	/**
+	 * 从文件读取{@linkplain BytesIcon}，文件不存在则返回{@code null}。
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	protected BytesIcon readBytesIcon(File file) throws IOException
+	{
+		if (file == null || !file.exists())
+			return null;
+
+		InputStream in = IOUtil.getInputStream(file);
+		byte[] bytes = IOUtil.readBytes(in, true);
+
+		return new BytesIcon(bytes);
 	}
 
 	/**

@@ -592,49 +592,4 @@ public class IOUtil
 		{
 		}
 	}
-
-	/**
-	 * 连接路径。
-	 * 
-	 * @param parent
-	 * @param child
-	 * @param separator
-	 * @return
-	 */
-	public static String concatPath(String parent, String child, String separator)
-	{
-		parent = trimPath(parent, separator);
-		child = trimPath(child, separator);
-
-		boolean parentEndsWith = parent.endsWith(separator);
-		boolean childStartsWith = child.startsWith(separator);
-
-		if (parentEndsWith && childStartsWith)
-			return parent + child.substring(separator.length());
-		else if (parentEndsWith || childStartsWith)
-			return parent + child;
-		else
-			return parent + separator + child;
-	}
-
-	/**
-	 * 整理路径。
-	 * <p>
-	 * 此方法将路径中的{@code "/"}、{@code "\"}统一替换为指定的{@code separator}。
-	 * </p>
-	 * 
-	 * @param path
-	 * @param separator
-	 * @return
-	 */
-	public static String trimPath(String path, String separator)
-	{
-		if (path == null)
-			return null;
-
-		if (separator.equals("\\"))
-			return path.replace("/", separator);
-		else
-			return path.replace("\\", separator);
-	}
 }

@@ -86,6 +86,9 @@ public class SimpleChartPluginManager extends AbstractChartPluginManager impleme
 	@Override
 	public List<ChartPlugin<?>> getAll()
 	{
-		return new ArrayList<ChartPlugin<?>>(this.chartPlugins);
+		List<ChartPlugin<?>> re = new ArrayList<ChartPlugin<?>>(this.chartPlugins);
+		sortChartPlugins(re);
+
+		return re;
 	}
 }

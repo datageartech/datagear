@@ -39,6 +39,9 @@ public interface ChartPluginManager
 
 	/**
 	 * 获取支持指定类型{@linkplain RenderContext}的所有{@linkplain ChartPlugin}。
+	 * <p>
+	 * 返回结果将根据{@linkplain ChartPlugin#getOrder()}进行排序，越小越靠前。
+	 * </p>
 	 * 
 	 * @param renderContextType
 	 * @return
@@ -47,6 +50,9 @@ public interface ChartPluginManager
 
 	/**
 	 * 获取所有{@linkplain ChartPlugin}。
+	 * <p>
+	 * 返回结果将根据{@linkplain ChartPlugin#getOrder()}进行排序，越小越靠前。
+	 * </p>
 	 * 
 	 * @return
 	 */

@@ -141,6 +141,12 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		}
 
 		@Override
+		public int getOrder()
+		{
+			return 0;
+		}
+
+		@Override
 		public Chart renderChart(RenderContext renderContext, ChartPropertyValues chartPropertyValues,
 				DataSetFactory... dataSetFactories) throws RenderException
 		{
