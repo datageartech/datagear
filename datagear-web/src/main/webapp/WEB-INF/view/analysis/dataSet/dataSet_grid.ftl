@@ -1,24 +1,34 @@
 <#include "../../include/import_global.ftl">
 <#include "../../include/html_doctype.ftl">
+<#--
+titleMessageKey 标题标签I18N关键字，不允许null
+selectonly 是否选择操作，允许为null
+-->
+<#assign selectonly=(selectonly!false)>
 <html>
 <head>
 <#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl"><@spring.message code='dataSet.dataSet' /></title>
+<title><#include "../../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
 <body class="fill-parent">
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-grid page-grid-data-set">
+<div id="${pageId}" class="page-grid page-grid-dataSet">
 	<div class="head">
 		<div class="search">
 			<#include "../../include/page_obj_searchform.html.ftl">
 		</div>
 		<div class="operation">
-			<input name="addButton" type="button" value="<@spring.message code='add' />" />
-			<input name="editButton" type="button" value="<@spring.message code='edit' />" />
-			<input name="viewButton" type="button" value="<@spring.message code='view' />" />
-			<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+			<#if selectonly>
+				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
+				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+			<#else>
+				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+			</#if>
 		</div>
 	</div>
 	<div class="content">
@@ -47,35 +57,107 @@
 	{
 		return "${contextPath}/analysis/dataSet/" + action;
 	};
-	
-	po.buildTableColumValueOption = function(title, data)
+
+	<#if !selectonly>
+	po.element("input[name=addButton]").click(function()
 	{
-		var option =
+		po.open(po.url("add"),
 		{
-			title : title,
-			data : data,
-			render: function(data, type, row, meta)
+			pageParam :
 			{
-				return data;
-			},
-			defaultContent: "",
-		};
-		
-		return option;
-	};
+				afterSave : function()
+				{
+					po.refresh();
+				}
+			}
+		});
+	});
+	
+	po.element("input[name=editButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
+		{
+			var data = {"id" : row.id};
+			
+			po.open(po.url("edit"),
+			{
+				data : data,
+				pageParam :
+				{
+					afterSave : function()
+					{
+						po.refresh();
+					}
+				}
+			});
+		});
+	});
+	</#if>
+	
+	po.element("input[name=viewButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
+		{
+			var data = {"id" : row.id};
+			
+			po.open(po.url("view"),
+			{
+				data : data
+			});
+		});
+	});
+	
+	<#if !selectonly>
+		po.element("input[name=deleteButton]").click(
+		function()
+		{
+			po.executeOnSelects(function(rows)
+			{
+				po.confirm("<@spring.message code='confirmDelete' />",
+				{
+					"confirm" : function()
+					{
+						var data = $.getPropertyParamString(rows, "id");
+						
+						$.post(po.url("delete"), data, function()
+						{
+							po.refresh();
+						});
+					}
+				});
+			});
+		});
+	</#if>
+	
+	<#if selectonly>
+	po.element("input[name=confirmButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
+		{
+			var close = po.pageParamCall("submit", row);
+			
+			//单选默认关闭
+			if(close == undefined)
+				close = true;
+			
+			if(close)
+				po.close();
+		});
+	});
+	</#if>
 	
 	var tableColumns = [
-		po.buildTableColumValueOption("<@spring.message code='dataSet.name' />", "name"),
-		po.buildTableColumValueOption("<@spring.message code='dataSet.dataSource' />", "connectionFactory.schema.title"),
-		po.buildTableColumValueOption("<@spring.message code='dataSet.sql' />", "sql"),
-		po.buildTableColumValueOption("<@spring.message code='dataSet.createUser' />", "createUser.realName"),
-		po.buildTableColumValueOption("<@spring.message code='dataSet.createTime' />", "createTime"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.name' />"), "name"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.dataSource' />"), "connectionFactory.schema.title"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.sql' />", "sql"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.createUser' />"), "createUser.realName"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createTime' />", "createUser.createTime")
 	];
 	
 	po.initPagination();
 	
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
-	tableSettings.order=[[1,"desc"]];
 	po.initDataTable(tableSettings);
 })
 (${pageId});

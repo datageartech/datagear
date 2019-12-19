@@ -68,6 +68,16 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 		super.setConnectionFactory(connectionFactory);
 	}
 
+	public SchemaConnectionFactory getSchemaConnectionFactory()
+	{
+		return getConnectionFactory();
+	}
+
+	public void setSchemaConnectionFactory(SchemaConnectionFactory schemaConnectionFactory)
+	{
+		setConnectionFactory(schemaConnectionFactory);
+	}
+
 	public String getName()
 	{
 		return name;

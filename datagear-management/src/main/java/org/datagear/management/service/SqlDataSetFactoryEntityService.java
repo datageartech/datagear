@@ -15,7 +15,7 @@ import org.datagear.management.domain.SqlDataSetFactoryEntity;
  * @author datagear@163.com
  *
  */
-public interface SqlDataSetFactoryEntityService extends EntityService<String, SqlDataSetFactoryEntity>
+public interface SqlDataSetFactoryEntityService extends DataPermissionEntityService<String, SqlDataSetFactoryEntity>
 {
 
 }

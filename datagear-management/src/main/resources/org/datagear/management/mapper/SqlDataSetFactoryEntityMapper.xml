@@ -11,7 +11,7 @@
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.name}, #{entity.connectionFactory.schema.id}, #{entity.sql}, #{entity.createUser.id},
+			#{entity.id}, #{entity.name}, #{entity.schemaConnectionFactory.schema.id}, #{entity.sql}, #{entity.createUser.id},
 			#{entity.createTime}
 			)
 	</insert>
@@ -19,7 +19,7 @@
 	<update id="update">
 		UPDATE DATAGEAR_SQL_DATA_SET_FACTORY SET
 			DSF_NAME = #{entity.name},
-			DSF_SCHEMA_ID = #{entity.connectionFactory.schema.id},
+			DSF_SCHEMA_ID = #{entity.schemaConnectionFactory.schema.id},
 			DSF_SQL = #{entity.sql}
 		WHERE
 			DSF_ID = #{entity.id}
@@ -119,8 +119,8 @@
 		SELECT
 			A.DSF_ID AS ${_iq_}id${_iq_},
 			A.DSF_NAME AS ${_iq_}name${_iq_},
-			B.SCHEMA_ID AS ${_iq_}connectionFactory.schema.id${_iq_},
-			B.SCHEMA_TITLE AS ${_iq_}connectionFactory.schema.title${_iq_},
+			B.SCHEMA_ID AS ${_iq_}schemaConnectionFactory.schema.id${_iq_},
+			B.SCHEMA_TITLE AS ${_iq_}schemaConnectionFactory.schema.title${_iq_},
 			A.DSF_SQL AS ${_iq_}sql${_iq_},
 			<include refid="common.fieldsForCreateUser"></include>
 			A.DSF_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
@@ -143,7 +143,7 @@
 		AND
 		(
 			${_iq_}name${_iq_} LIKE #{queryKeyword}
-			OR ${_iq_}connectionFactory.schema.title${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}schemaConnectionFactory.schema.title${_iq_} LIKE #{queryKeyword}
 			OR ${_iq_}createUser.name${_iq_} LIKE #{queryKeyword}
 			OR ${_iq_}createUser.realName${_iq_} LIKE #{queryKeyword}
 		)
