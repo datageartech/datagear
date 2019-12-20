@@ -8,7 +8,6 @@
 package org.datagear.analysis.support.html;
 
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.ChartPropertyValues;
 import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
@@ -26,10 +25,9 @@ public class HtmlChartWidget<T extends HtmlRenderContext> extends ChartWidget<T>
 		super();
 	}
 
-	public HtmlChartWidget(String id, HtmlChartPlugin<T> chartPlugin, ChartPropertyValues chartPropertyValues,
-			DataSetFactory... dataSetFactories)
+	public HtmlChartWidget(String id, HtmlChartPlugin<T> chartPlugin, DataSetFactory... dataSetFactories)
 	{
-		super(id, chartPlugin, chartPropertyValues, dataSetFactories);
+		super(id, chartPlugin, dataSetFactories);
 	}
 
 	@Override
@@ -41,7 +39,7 @@ public class HtmlChartWidget<T extends HtmlRenderContext> extends ChartWidget<T>
 	@Override
 	public void setChartPlugin(ChartPlugin<T> chartPlugin)
 	{
-		if (!(chartPlugin instanceof HtmlChartPlugin<?>))
+		if (chartPlugin != null && !(chartPlugin instanceof HtmlChartPlugin<?>))
 			throw new IllegalArgumentException();
 
 		super.setChartPlugin(chartPlugin);

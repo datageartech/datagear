@@ -9,7 +9,6 @@ package org.datagear.management.domain;
 
 import java.util.Date;
 
-import org.datagear.analysis.DataSetParams;
 import org.datagear.analysis.support.SqlDataSetFactory;
 import org.datagear.util.resource.ConnectionFactory;
 
@@ -25,7 +24,7 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 	private static final long serialVersionUID = 1L;
 
 	/** 授权资源类型 */
-	public static final String AUTHORIZATION_RESOURCE_TYPE = "SqlDataSetFactoryEntity";
+	public static final String AUTHORIZATION_RESOURCE_TYPE = "DataSet";
 
 	/** 名称 */
 	private String name;
@@ -45,10 +44,10 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 		this.createTime = new Date();
 	}
 
-	public SqlDataSetFactoryEntity(String id, DataSetParams dataSetParams, SchemaConnectionFactory connectionFactory,
-			String sql, String name, User createUser)
+	public SqlDataSetFactoryEntity(String id, SchemaConnectionFactory connectionFactory, String sql, String name,
+			User createUser)
 	{
-		super(id, dataSetParams, connectionFactory, sql);
+		super(id, connectionFactory, sql);
 		this.name = name;
 		this.createTime = new Date();
 	}
@@ -62,7 +61,7 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 	@Override
 	public void setConnectionFactory(ConnectionFactory connectionFactory)
 	{
-		if (!(connectionFactory instanceof SchemaConnectionFactory))
+		if (connectionFactory != null && !(connectionFactory instanceof SchemaConnectionFactory))
 			throw new IllegalArgumentException();
 
 		super.setConnectionFactory(connectionFactory);

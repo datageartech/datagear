@@ -29,7 +29,6 @@ import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.DataSetMeta;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetParamValues;
-import org.datagear.analysis.DataSetParams;
 import org.datagear.analysis.DataType;
 import org.datagear.analysis.support.ParameterSqlResolver.ParameterSql;
 import org.datagear.util.JdbcUtil;
@@ -61,9 +60,9 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 		super();
 	}
 
-	public SqlDataSetFactory(String id, DataSetParams dataSetParams, ConnectionFactory connectionFactory, String sql)
+	public SqlDataSetFactory(String id, ConnectionFactory connectionFactory, String sql)
 	{
-		super(id, dataSetParams);
+		super(id);
 		this.connectionFactory = connectionFactory;
 		this.sql = sql;
 	}

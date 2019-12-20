@@ -51,7 +51,7 @@ public class HtmlDashboard extends AbstractDashboard
 	@Override
 	public void setRenderContext(RenderContext renderContext)
 	{
-		if (!(renderContext instanceof HtmlRenderContext))
+		if (renderContext != null && !(renderContext instanceof HtmlRenderContext))
 			throw new IllegalArgumentException();
 
 		super.setRenderContext(renderContext);

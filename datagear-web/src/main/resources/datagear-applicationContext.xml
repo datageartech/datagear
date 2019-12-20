@@ -80,6 +80,11 @@
     </bean>
     <bean id="tempSqlpadRootDirectory" factory-bean="tempSqlpadRootDirectoryFactory" factory-method="getDirectory" />
     
+    <bean id="chartPluginRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
+    	<property name="directoryName" value="${directory.chartPlugin}" />
+    </bean>
+    <bean id="chartPluginRootDirectory" factory-bean="chartPluginRootDirectoryFactory" factory-method="getDirectory" />
+        
     <bean id="dataSource"
     		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
 		<property name="driverClassName">
@@ -308,6 +313,20 @@
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 		<property name="connectionSource" ref="connectionSource" />
 		<property name="schemaService" ref="schemaService" />
+		<property name="authorizationService" ref="authorizationService" />
+	</bean>
+	
+	<bean id="chartPluginManager" class="org.datagear.analysis.support.ConcurrentChartPluginManager" />
+	
+	<bean class="org.datagear.analysis.support.html.LoadHtmlChartPluginBean" init-method="load">
+		<property name="directory" ref="chartPluginRootDirectory" />
+		<property name="chartPluginManager" ref="chartPluginManager" />
+	</bean>
+	
+	<bean id="htmlChartWidgetEntityService" class="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<property name="chartPluginManager" ref="chartPluginManager" />
+		<property name="sqlDataSetFactoryEntityService" ref="sqlDataSetFactoryEntityService" />
 		<property name="authorizationService" ref="authorizationService" />
 	</bean>
 	

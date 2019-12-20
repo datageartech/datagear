@@ -93,6 +93,15 @@ public class SqlDataSetFactoryEntityServiceImpl
 	}
 
 	@Override
+	public List<SqlDataSetFactoryEntity> findByHtmlChartWidgetEntityId(String id)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("htmlChartWidgetEntityId", id);
+
+		return super.query("findByHtmlChartWidgetEntityId", params);
+	}
+
+	@Override
 	public String getResourceType()
 	{
 		return SqlDataSetFactoryEntity.AUTHORIZATION_RESOURCE_TYPE;

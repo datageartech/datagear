@@ -44,14 +44,14 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 
 		if (oldIndex < 0)
 		{
-			((List<ChartPlugin<?>>) chartPlugin).add(chartPlugin);
+			((List<ChartPlugin<?>>) chartPlugins).add(chartPlugin);
 
 			return null;
 		}
 		else
 		{
 			ChartPlugin<?> old = chartPlugins.get(oldIndex);
-			((List<ChartPlugin<?>>) chartPlugin).set(oldIndex, chartPlugin);
+			((List<ChartPlugin<?>>) chartPlugins).set(oldIndex, chartPlugin);
 
 			return old;
 		}

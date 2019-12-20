@@ -2190,18 +2190,6 @@ public class DataController extends AbstractSchemaModelConnController
 	}
 
 	/**
-	 * 获取{@linkplain PagingQuery}。
-	 * 
-	 * @param request
-	 * @return
-	 * @throws Throwable
-	 */
-	protected PagingQuery getPagingQuery(HttpServletRequest request) throws Throwable
-	{
-		return super.getPagingQuery(request, WebUtils.COOKIE_PAGINATION_SIZE);
-	}
-
-	/**
 	 * 设置表格页面属性。
 	 * 
 	 * @param request

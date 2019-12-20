@@ -91,6 +91,18 @@ public abstract class AbstractController
 	 * 获取{@linkplain PagingQuery}。
 	 * 
 	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	protected PagingQuery getPagingQuery(HttpServletRequest request) throws Exception
+	{
+		return getPagingQuery(request, WebUtils.COOKIE_PAGINATION_SIZE);
+	}
+
+	/**
+	 * 获取{@linkplain PagingQuery}。
+	 * 
+	 * @param request
 	 * @param cookiePaginationSize
 	 *            允许为{@code null}
 	 * @return

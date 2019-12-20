@@ -34,12 +34,10 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 		super();
 	}
 
-	public ChartWidget(String id, ChartPlugin<T> chartPlugin, ChartPropertyValues chartPropertyValues,
-			DataSetFactory... dataSetFactories)
+	public ChartWidget(String id, ChartPlugin<T> chartPlugin, DataSetFactory... dataSetFactories)
 	{
 		super(id);
 		this.chartPlugin = chartPlugin;
-		this.chartPropertyValues = chartPropertyValues;
 		this.dataSetFactories = dataSetFactories;
 	}
 
@@ -68,7 +66,7 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 		return dataSetFactories;
 	}
 
-	public void setDataSetFactories(DataSetFactory... dataSetFactories)
+	public void setDataSetFactories(DataSetFactory[] dataSetFactories)
 	{
 		this.dataSetFactories = dataSetFactories;
 	}

@@ -5,7 +5,6 @@ titleMessageKey 标题标签I18N关键字，不允许null
 selectonly 是否选择操作，允许为null
 -->
 <#assign selectonly=(selectonly!false)>
-<#assign isMultipleSelect=(isMultipleSelect!false)>
 <html>
 <head>
 <#include "../../include/html_head.ftl">
@@ -15,7 +14,7 @@ selectonly 是否选择操作，允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
-<div id="${pageId}" class="page-grid page-grid-dataSet">
+<div id="${pageId}" class="page-grid page-grid-chart">
 	<div class="head">
 		<div class="search">
 			<#include "../../include/page_obj_searchform.html.ftl">
@@ -56,7 +55,7 @@ selectonly 是否选择操作，允许为null
 	
 	po.url = function(action)
 	{
-		return "${contextPath}/analysis/dataSet/" + action;
+		return "${contextPath}/analysis/chart/" + action;
 	};
 
 	<#if !selectonly>
@@ -133,19 +132,6 @@ selectonly 是否选择操作，允许为null
 	<#if selectonly>
 	po.element("input[name=confirmButton]").click(function()
 	{
-		<#if isMultipleSelect>
-		po.executeOnSelects(function(rows)
-		{
-			var close = po.pageParamCall("submit", rows);
-			
-			//单选默认关闭
-			if(close == undefined)
-				close = true;
-			
-			if(close)
-				po.close();
-		});
-		<#else>
 		po.executeOnSelect(function(row)
 		{
 			var close = po.pageParamCall("submit", row);
@@ -157,17 +143,15 @@ selectonly 是否选择操作，允许为null
 			if(close)
 				po.close();
 		});
-		</#if>
 	});
 	</#if>
 	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.name' />"), "name"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.dataSource' />"), "connectionFactory.schema.title"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.sql' />", "sql"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.createUser' />"), "createUser.realName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createTime' />", "createUser.createTime")
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.name' />"), "name"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", "htmlChartPlugin.id"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.createUser' />"), "createUser.realName"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createTime' />", "createUser.createTime")
 	];
 	
 	po.initPagination();

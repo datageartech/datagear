@@ -982,10 +982,12 @@
 			else if($node.hasClass("item-chart"))
 			{
 				tabId += "chart";
+				tabUrl += "chart/pagingQuery";
 			}
 			else if($node.hasClass("item-dashboard"))
 			{
 				tabId += "dashboard";
+				tabUrl += "dashboard/pagingQuery";
 			}
 			
 			po.activeWorkTab(po.toMainTabId(tabId), tabName, "", tabUrl);

@@ -38,10 +38,9 @@ public abstract class AbstractDataSetFactory extends AbstractIdentifiable implem
 		super();
 	}
 
-	public AbstractDataSetFactory(String id, DataSetParams params)
+	public AbstractDataSetFactory(String id)
 	{
 		super(id);
-		this.params = params;
 	}
 
 	public boolean hasParam()

@@ -67,7 +67,8 @@ public class SqlDataSetFactoryTest extends DBTestSupport
 			dataSetParams.add(new DataSetParam("id", DataType.INTEGER, true));
 			dataSetParams.add(new DataSetParam("name", DataType.STRING, true));
 
-			SqlDataSetFactory sqlDataSetFactory = new SqlDataSetFactory("1", dataSetParams, connectionFactory, sql);
+			SqlDataSetFactory sqlDataSetFactory = new SqlDataSetFactory("1", connectionFactory, sql);
+			sqlDataSetFactory.setParams(dataSetParams);
 			sqlDataSetFactory.setColumnLabels(columnLabels);
 
 			DataSetParamValues dataSetParamValues = new DataSetParamValues();

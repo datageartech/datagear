@@ -258,6 +258,23 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	}
 
 	/**
+	 * 查询。
+	 * 
+	 * @param statement
+	 * @param params
+	 * @return
+	 */
+	protected List<T> query(String statement, Map<String, Object> params)
+	{
+		addIdentifierQuoteParameter(params);
+
+		List<T> list = selectListMybatis(statement, params);
+		postProcessSelects(list);
+
+		return list;
+	}
+
+	/**
 	 * 分页查询。
 	 * 
 	 * @param pagingQuery
@@ -329,6 +346,9 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 	/**
 	 * 后置处理查询结果列表。
+	 * <p>
+	 * 次方法对每一个元素调用{@linkplain #postProcessSelect(Object)}。
+	 * </p>
 	 * 
 	 * @param list
 	 */

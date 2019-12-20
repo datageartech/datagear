@@ -7,6 +7,9 @@
  */
 package org.datagear.management.service;
 
+import java.util.List;
+
+import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.SqlDataSetFactoryEntity;
 
 /**
@@ -17,5 +20,11 @@ import org.datagear.management.domain.SqlDataSetFactoryEntity;
  */
 public interface SqlDataSetFactoryEntityService extends DataPermissionEntityService<String, SqlDataSetFactoryEntity>
 {
-
+	/**
+	 * 查找{@linkplain HtmlChartWidgetEntity#getId()}关联的所有{@linkplain SqlDataSetFactoryEntity}。
+	 * 
+	 * @param id
+	 * @return
+	 */
+	List<SqlDataSetFactoryEntity> findByHtmlChartWidgetEntityId(String id);
 }

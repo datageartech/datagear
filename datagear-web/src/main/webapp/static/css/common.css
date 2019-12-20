@@ -1922,3 +1922,53 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding-left: 0.5em;
 	padding-right: 0.5em;
 }
+
+.page-form-chart .chart-plugin-list{
+	margin: 0 0;
+	padding:  0 0;
+}
+.page-form-chart .chart-plugin-list > li{
+	margin: 5px;
+	position: relative;
+	padding: 2px 2px;
+	cursor: pointer;
+	float: left;
+	list-style: none;
+}
+.page-form-chart .chart-plugin-list > li:first-child{
+	margin-left: 0px;
+}
+.page-form-chart .chart-plugin-list > li a{
+	display: inline-block;
+	margin: 5px 5px;
+	height: 20px;
+}
+.page-form-chart .chart-plugin-list > li a.plugin-icon{
+	width: 20px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+.page-form-chart .chart-plugin-list > li a.plugin-name{
+	margin: 5px 0.8em;
+}
+.page-form-chart .data-set-wrapper{
+	display: inline-block;
+	width: 50%;
+	height: 10em;
+	padding: 0.3em 0.2em;
+	overflow: auto;
+}
+.page-form-chart .data-set-wrapper .data-set-item{
+	padding: 0.3em 0.3em;
+	margin-top: 0.3em;
+}
+.page-form-chart .data-set-wrapper .data-set-item:first-child{
+	margin-top: 0;
+}
+.page-form-chart .data-set-wrapper .data-set-item .delete-icon{
+	float: right;
+	cursor: pointer;
+}
+.page-form-chart .add-data-set-button{
+	vertical-align: top;
+}
