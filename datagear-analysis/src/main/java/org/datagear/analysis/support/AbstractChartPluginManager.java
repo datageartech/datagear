@@ -10,7 +10,9 @@ package org.datagear.analysis.support;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
@@ -25,99 +27,120 @@ import org.springframework.core.GenericTypeResolver;
  */
 public abstract class AbstractChartPluginManager implements ChartPluginManager
 {
+	private Map<String, ChartPlugin<?>> chartPluginMap = new HashMap<String, ChartPlugin<?>>();
+
+	private Map<String, Class<?>> renderContextTypeMap = new HashMap<String, Class<?>>();
+
 	public AbstractChartPluginManager()
 	{
 		super();
 	}
 
-	/**
-	 * 添加或者替换{@linkplain ChartPlugin}。
-	 * 
-	 * @param chartPlugins
-	 * @param chartPlugin
-	 * @return 添加时返回{@code null}，替换时返回旧对象
-	 */
-	@SuppressWarnings("unchecked")
-	protected ChartPlugin<?> addOrReplace(List<? extends ChartPlugin<?>> chartPlugins, ChartPlugin<?> chartPlugin)
+	protected Map<String, ? extends ChartPlugin<?>> getChartPluginMap()
 	{
-		int oldIndex = getIndexById(chartPlugins, chartPlugin.getId());
+		return chartPluginMap;
+	}
 
-		if (oldIndex < 0)
-		{
-			((List<ChartPlugin<?>>) chartPlugins).add(chartPlugin);
+	@SuppressWarnings("unchecked")
+	protected void setChartPluginMap(Map<String, ? extends ChartPlugin<?>> chartPluginMap)
+	{
+		this.chartPluginMap = (Map<String, ChartPlugin<?>>) chartPluginMap;
+	}
 
-			return null;
-		}
-		else
-		{
-			ChartPlugin<?> old = chartPlugins.get(oldIndex);
-			((List<ChartPlugin<?>>) chartPlugins).set(oldIndex, chartPlugin);
+	protected Map<String, Class<?>> getRenderContextTypeMap()
+	{
+		return renderContextTypeMap;
+	}
 
-			return old;
-		}
+	protected void setRenderContextTypeMap(Map<String, Class<?>> renderContextTypeMap)
+	{
+		this.renderContextTypeMap = renderContextTypeMap;
+	}
+
+	/**
+	 * 注册一个{@linkplain ChartPlugin}。
+	 * 
+	 * @param chartPlugin
+	 */
+	protected void registerChartPlugin(ChartPlugin<?> chartPlugin)
+	{
+		this.chartPluginMap.put(chartPlugin.getId(), chartPlugin);
+
+		this.renderContextTypeMap.put(chartPlugin.getId(),
+				resolveChartPluginRenderContextType(chartPlugin.getClass()));
 	}
 
 	/**
 	 * 移除{@linkplain ChartPlugin}。
 	 * 
-	 * @param chartPlugins
 	 * @param id
-	 * @return
 	 */
-	protected ChartPlugin<?> removeById(List<? extends ChartPlugin<?>> chartPlugins, String id)
+	protected ChartPlugin<?> removeChartPlugin(String id)
 	{
-		int index = getIndexById(chartPlugins, id);
-
-		if (index < 0)
-			return null;
-
-		return chartPlugins.remove(index);
+		this.renderContextTypeMap.remove(id);
+		return this.chartPluginMap.remove(id);
 	}
 
 	/**
-	 * 获取{@linkplain ChartPlugin}，没有则返回{@code null}。
+	 * 移除所有{@linkplain ChartPlugin}。
+	 */
+	protected void removeAllChartPlugins()
+	{
+		this.chartPluginMap.clear();
+		this.renderContextTypeMap.clear();
+	}
+
+	/**
+	 * 获取指定ID的{@linkplain ChartPlugin}。
 	 * 
-	 * @param chartPlugins
 	 * @param id
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends RenderContext> ChartPlugin<T> getById(List<? extends ChartPlugin<?>> chartPlugins, String id)
+	protected <T extends RenderContext> ChartPlugin<T> getChartPlugin(String id)
 	{
-		int index = getIndexById(chartPlugins, id);
-
-		if (index < 0)
-			return null;
-
-		return (ChartPlugin<T>) chartPlugins.get(index);
+		return (ChartPlugin<T>) this.chartPluginMap.get(id);
 	}
 
 	/**
-	 * 获取支持指定类型{@linkplain RenderContext}的所有{@linkplain ChartPlugin}。
+	 * 查找支持指定类型{@linkplain RenderContext}的所有{@linkplain ChartPlugin}。
 	 * <p>
 	 * 返回列表已使用{@linkplain #sortChartPlugins(List)}排序。
 	 * </p>
 	 * 
-	 * @param <T>
-	 * @param chartPlugins
-	 * @param supportTypes
 	 * @param renderContextType
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends RenderContext> List<ChartPlugin<T>> getAllByRenderContextType(
-			List<? extends ChartPlugin<?>> chartPlugins, List<Class<? extends RenderContext>> supportTypes,
+	protected <T extends RenderContext> List<ChartPlugin<T>> findChartPlugins(
 			Class<? extends T> renderContextType)
 	{
 		List<ChartPlugin<T>> reChartPlugins = new ArrayList<ChartPlugin<T>>();
 
-		for (int i = 0, len = chartPlugins.size(); i < len; i++)
+		for (Map.Entry<String, Class<?>> entry : this.renderContextTypeMap.entrySet())
 		{
-			Class<? extends RenderContext> supportType = supportTypes.get(i);
-
-			if (supportType.isAssignableFrom(renderContextType))
-				reChartPlugins.add((ChartPlugin<T>) chartPlugins.get(i));
+			if (entry.getValue().isAssignableFrom(renderContextType))
+				reChartPlugins.add((ChartPlugin<T>) this.chartPluginMap.get(entry.getKey()));
 		}
+
+		sortChartPlugins(reChartPlugins);
+
+		return reChartPlugins;
+	}
+
+	/**
+	 * 获取所有{@linkplain ChartPlugin}。
+	 * <p>
+	 * 返回列表已使用{@linkplain #sortChartPlugins(List)}排序。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	protected List<ChartPlugin<?>> getAllChartPlugins()
+	{
+		List<ChartPlugin<?>> reChartPlugins = new ArrayList<ChartPlugin<?>>();
+
+		reChartPlugins.addAll(this.chartPluginMap.values());
 
 		sortChartPlugins(reChartPlugins);
 
@@ -163,29 +186,6 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 			renderContextType = RenderContext.class;
 
 		return (Class<? extends RenderContext>) renderContextType;
-	}
-
-	/**
-	 * 查找指定ID的{@linkplain ChartPlugin}位置，没有则返回{@code -1}。
-	 * 
-	 * @param chartPlugins
-	 * @param id
-	 * @return
-	 */
-	protected int getIndexById(List<? extends ChartPlugin<?>> chartPlugins, String id)
-	{
-		if (chartPlugins == null)
-			return -1;
-
-		for (int i = 0, len = chartPlugins.size(); i < len; i++)
-		{
-			ChartPlugin<?> chartPlugin = chartPlugins.get(i);
-
-			if (chartPlugin.getId().equals(id))
-				return i;
-		}
-
-		return -1;
 	}
 
 	protected void sortChartPlugins(List<? extends ChartPlugin<?>> chartPlugins)

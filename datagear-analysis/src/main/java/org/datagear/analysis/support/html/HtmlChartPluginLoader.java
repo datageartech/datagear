@@ -133,6 +133,27 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
+	 * 从指定文件加载单个{@linkplain HtmlChartPlugin}，如果文件结构不合法，将返回{@code null}。
+	 * 
+	 * @param file
+	 * @return
+	 * @throws HtmlChartPluginLoadException
+	 */
+	public HtmlChartPlugin<?> loadFile(File file) throws HtmlChartPluginLoadException
+	{
+		HtmlChartPlugin<?> plugin = null;
+
+		if (file.isDirectory())
+			plugin = loadSingleForDirectory(file);
+		else if (file.getName().toLowerCase().endsWith(".zip"))
+			plugin = loadSingleForZip(file);
+		else
+			plugin = loadFileExt(file);
+
+		return plugin;
+	}
+
+	/**
 	 * 从指定目录加载多个{@linkplain HtmlChartPlugin}，没有，则返回空集合。
 	 * <p>
 	 * 目录中的每个子文件夹、ZIP文件将被认为是单个{@linkplain HtmlChartPlugin}进行加载。
@@ -157,20 +178,6 @@ public class HtmlChartPluginLoader
 		}
 
 		return plugins;
-	}
-
-	protected HtmlChartPlugin<?> loadFile(File file) throws HtmlChartPluginLoadException
-	{
-		HtmlChartPlugin<?> plugin = null;
-
-		if (file.isDirectory())
-			plugin = loadSingleForDirectory(file);
-		else if (file.getName().toLowerCase().endsWith(".zip"))
-			plugin = loadSingleForZip(file);
-		else
-			plugin = loadFileExt(file);
-
-		return plugin;
 	}
 
 	protected HtmlChartPlugin<?> loadFileExt(File file) throws HtmlChartPluginLoadException

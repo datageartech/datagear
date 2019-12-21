@@ -316,11 +316,8 @@
 		<property name="authorizationService" ref="authorizationService" />
 	</bean>
 	
-	<bean id="chartPluginManager" class="org.datagear.analysis.support.ConcurrentChartPluginManager" />
-	
-	<bean class="org.datagear.analysis.support.html.LoadHtmlChartPluginBean" init-method="load">
+	<bean id="chartPluginManager" class="org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager" init-method="init">
 		<property name="directory" ref="chartPluginRootDirectory" />
-		<property name="chartPluginManager" ref="chartPluginManager" />
 	</bean>
 	
 	<bean id="htmlChartWidgetEntityService" class="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl">
