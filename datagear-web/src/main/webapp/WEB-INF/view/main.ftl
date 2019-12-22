@@ -344,6 +344,171 @@
 		$tree.jstree(true).refresh(true);
 	};
 	
+	po.initSchemaPanelContent = function($element)
+	{
+		$element.jstree
+		(
+			{
+				"core" :
+				{
+					"data" :
+					{
+						"type" : "POST",
+						"url" : function(node)
+						{
+							//根节点
+							if(node.id == "#")
+								return contextPath+"/schema/list";
+							else if(po.isSchemaNode(node))
+							{
+								return contextPath + $.toPath("schema", node.id, "pagingQueryTable");
+							}
+						},
+						"data" : function(node)
+						{
+							if(node.id == "#")
+								return po.getSearchSchemaFormDataForSchema();
+							else if(po.isSchemaNode(node))
+								return po.getSearchSchemaFormDataForTable();
+						},
+						"success" : function(data, textStatus, jqXHR)
+						{
+							var url = this.url;
+							
+							if(url.indexOf("/schema/list") > -1)
+								po.schemaToJstreeNodes(data);
+							else if(url.indexOf("/pagingQueryTable") > -1)
+							{
+								po.toJstreeNodePagingData(data);
+							}
+						}
+					},
+					"themes" : {"dots": false, icons: true},
+					"check_callback" : true
+				}
+			}
+		)
+		.bind("select_node.jstree", function(e, data)
+		{
+			var tree = $(this).jstree(true);
+			
+			if(po.isTableNode(data.node))
+			{
+				var schema = tree.get_node(data.node.parent).original;
+				var tableInfo = data.node.original;
+				
+	        	var tabTitle = (po.isTableView(tableInfo) ? "<@spring.message code='main.tableType.view' />" : "<@spring.message code='main.tableType.table' />") + "<@spring.message code='colon' />" + tableInfo.name;
+				if(tableInfo.comment)
+					tabTitle += "<@spring.message code='bracketLeft' />" + tableInfo.comment + "<@spring.message code='bracketRight' />";
+				tabTitle += "<@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
+    			
+				var tabUrl = contextPath + $.toPath("data", schema.id, tableInfo.name, "query");
+				
+				po.activeWorkTab(po.toMainTabIdForSchemaName(schema.id, tableInfo.name), data.node.text, tabTitle, tabUrl, schema);
+			}
+			else if(po.isNextPageNode(data.node))
+			{
+				if(!data.node.state.loadingNextPage)
+				{
+					data.node.state.loadingNextPage = true;
+					
+					var schemaNode = tree.get_node(data.node.parent);
+					
+					var schemaId = schemaNode.id;
+					
+					var $moreTableNode = tree.get_node(data.node, true);
+					$(".more-table", $moreTableNode).html("<@spring.message code='main.loadingTable' />");
+					
+					var param = po.getSearchSchemaFormDataForTable();
+					param = $.extend({}, data.node.original.nextPageInfo, param);
+					
+					$.ajax(contextPath+$.toPath("schema", schemaId, "pagingQueryTable"),
+					{
+						data : param,
+						success : function(pagingData)
+						{
+							tree.delete_node(data.node);
+							po.toJstreeNodePagingData(pagingData);
+							
+							var nodes = pagingData.items;
+							
+							for(var i=0; i<nodes.length; i++)
+							{
+								tree.create_node(schemaNode, nodes[i]);
+							}
+						},
+						error : function(XMLHttpResponse, textStatus, errorThrown)
+						{
+							data.node.state.loadingNextPage = false;
+							$(".more-table", $moreTableNode).html("<@spring.message code='main.moreTable' />");
+						}
+					});
+				}
+			}
+		})
+		.bind("load_node.jstree", function(e, data)
+		{
+			var tree = $(this).jstree(true);
+			
+			if(po.selectNodeAfterLoad)
+			{
+				po.selectNodeAfterLoad = false;
+				
+				tree.select_node(data.node);
+			}
+		})
+		.bind("hover_node.jstree", function(event, data)
+		{
+			if($.enableTableNodeDraggable && po.isTableNode(data.node))
+			{
+				var tree = $(this).jstree(true);
+				po.toDraggableNode(tree, data.node);
+			}
+		});
+	};
+	
+	po.initDataAnalysisPanelContent = function($element)
+	{
+		$element.jstree
+		(
+			{
+				"core" :
+				{
+					"themes" : {"dots": false, icons: true},
+					"check_callback" : true
+				}
+			}
+		)
+		.bind("select_node.jstree", function(e, data)
+		{
+			var tree = $(this).jstree(true);
+			
+			var $node = tree.get_node(data.node, true);
+			
+			var tabId = "dataAnalysis-";
+			var tabName = $node.text();
+			var tabUrl = "${contextPath}/analysis/";
+			
+			if($node.hasClass("item-dataset"))
+			{
+				tabId += "dataset";
+				tabUrl += "dataSet/pagingQuery";
+			}
+			else if($node.hasClass("item-chart"))
+			{
+				tabId += "chart";
+				tabUrl += "chart/pagingQuery";
+			}
+			else if($node.hasClass("item-dashboard"))
+			{
+				tabId += "dashboard";
+				tabUrl += "dashboard/pagingQuery";
+			}
+			
+			po.activeWorkTab(po.toMainTabId(tabId), tabName, "", tabUrl);
+		});
+	};
+	
 	$(document).ready(function()
 	{
 		var westMinSize = po.element(".schema-panel-head").css("min-width");
@@ -459,7 +624,42 @@
 			}
 		});
 		
-		po.element("#${pageId}-nav").tabs();
+		po.element("#${pageId}-nav").tabs(
+		{
+			event: "click",
+			active: false,
+			collapsible: true,
+			activate: function(event, ui)
+			{
+				var $this = $(this);
+				var newTab = $(ui.newTab);
+				var newPanel = $(ui.newPanel);
+				
+				if(newPanel.hasClass("schema-panel"))
+				{
+					var $element = po.element(".schema-panel-content");
+					
+					if(!$element.hasClass("jstree"))
+						po.initSchemaPanelContent($element);
+				}
+				else if(newPanel.hasClass("dataAnalysis-panel"))
+				{
+					var $element = po.element(".dataAnalysis-panel-content");
+					
+					if(!$element.hasClass("jstree"))
+						po.initDataAnalysisPanelContent($element);
+				}
+				
+				var newTabIndex = newTab.index();
+				$.cookie("mainNavActiveTabIndex", newTabIndex);
+			}
+		});
+		
+		var mainNavActiveTabIndex = $.cookie("mainNavActiveTabIndex");
+		if(!mainNavActiveTabIndex)
+			mainNavActiveTabIndex = "0";
+		mainNavActiveTabIndex = parseInt(mainNavActiveTabIndex);
+		po.element("#${pageId}-nav").tabs("option", "active", mainNavActiveTabIndex).tabs("option", "collapsible", false);
 
 		po.element("#schemaSearchSwitch").click(function()
 		{
@@ -832,165 +1032,6 @@
 					}
 				}
 			});
-		});
-		
-		po.element(".schema-panel-content").jstree
-		(
-			{
-				"core" :
-				{
-					"data" :
-					{
-						"type" : "POST",
-						"url" : function(node)
-						{
-							//根节点
-							if(node.id == "#")
-								return contextPath+"/schema/list";
-							else if(po.isSchemaNode(node))
-							{
-								return contextPath + $.toPath("schema", node.id, "pagingQueryTable");
-							}
-						},
-						"data" : function(node)
-						{
-							if(node.id == "#")
-								return po.getSearchSchemaFormDataForSchema();
-							else if(po.isSchemaNode(node))
-								return po.getSearchSchemaFormDataForTable();
-						},
-						"success" : function(data, textStatus, jqXHR)
-						{
-							var url = this.url;
-							
-							if(url.indexOf("/schema/list") > -1)
-								po.schemaToJstreeNodes(data);
-							else if(url.indexOf("/pagingQueryTable") > -1)
-							{
-								po.toJstreeNodePagingData(data);
-							}
-						}
-					},
-					"themes" : {"dots": false, icons: true},
-					"check_callback" : true
-				}
-			}
-		)
-		.bind("select_node.jstree", function(e, data)
-		{
-			var tree = $(this).jstree(true);
-			
-			if(po.isTableNode(data.node))
-			{
-				var schema = tree.get_node(data.node.parent).original;
-				var tableInfo = data.node.original;
-				
-	        	var tabTitle = (po.isTableView(tableInfo) ? "<@spring.message code='main.tableType.view' />" : "<@spring.message code='main.tableType.table' />") + "<@spring.message code='colon' />" + tableInfo.name;
-				if(tableInfo.comment)
-					tabTitle += "<@spring.message code='bracketLeft' />" + tableInfo.comment + "<@spring.message code='bracketRight' />";
-				tabTitle += "<@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
-    			
-				var tabUrl = contextPath + $.toPath("data", schema.id, tableInfo.name, "query");
-				
-				po.activeWorkTab(po.toMainTabIdForSchemaName(schema.id, tableInfo.name), data.node.text, tabTitle, tabUrl, schema);
-			}
-			else if(po.isNextPageNode(data.node))
-			{
-				if(!data.node.state.loadingNextPage)
-				{
-					data.node.state.loadingNextPage = true;
-					
-					var schemaNode = tree.get_node(data.node.parent);
-					
-					var schemaId = schemaNode.id;
-					
-					var $moreTableNode = tree.get_node(data.node, true);
-					$(".more-table", $moreTableNode).html("<@spring.message code='main.loadingTable' />");
-					
-					var param = po.getSearchSchemaFormDataForTable();
-					param = $.extend({}, data.node.original.nextPageInfo, param);
-					
-					$.ajax(contextPath+$.toPath("schema", schemaId, "pagingQueryTable"),
-					{
-						data : param,
-						success : function(pagingData)
-						{
-							tree.delete_node(data.node);
-							po.toJstreeNodePagingData(pagingData);
-							
-							var nodes = pagingData.items;
-							
-							for(var i=0; i<nodes.length; i++)
-							{
-								tree.create_node(schemaNode, nodes[i]);
-							}
-						},
-						error : function(XMLHttpResponse, textStatus, errorThrown)
-						{
-							data.node.state.loadingNextPage = false;
-							$(".more-table", $moreTableNode).html("<@spring.message code='main.moreTable' />");
-						}
-					});
-				}
-			}
-		})
-		.bind("load_node.jstree", function(e, data)
-		{
-			var tree = $(this).jstree(true);
-			
-			if(po.selectNodeAfterLoad)
-			{
-				po.selectNodeAfterLoad = false;
-				
-				tree.select_node(data.node);
-			}
-		})
-		.bind("hover_node.jstree", function(event, data)
-		{
-			if($.enableTableNodeDraggable && po.isTableNode(data.node))
-			{
-				var tree = $(this).jstree(true);
-				po.toDraggableNode(tree, data.node);
-			}
-		});
-		
-		po.element(".dataAnalysis-panel-content").jstree
-		(
-			{
-				"core" :
-				{
-					"themes" : {"dots": false, icons: true},
-					"check_callback" : true
-				}
-			}
-		)
-		.bind("select_node.jstree", function(e, data)
-		{
-			var tree = $(this).jstree(true);
-			
-			var $node = tree.get_node(data.node, true);
-			
-			var tabId = "dataAnalysis-";
-			var tabName = $node.text();
-			var tabUrl = "${contextPath}/analysis/";
-			
-			if($node.hasClass("item-dataset"))
-			{
-				tabId += "dataset";
-				tabUrl += "dataSet/pagingQuery";
-			}
-			else if($node.hasClass("item-chart"))
-			{
-				tabId += "chart";
-				tabUrl += "chart/pagingQuery";
-			}
-			else if($node.hasClass("item-dashboard"))
-			{
-				tabId += "dashboard";
-				tabUrl += "dashboard/pagingQuery";
-			}
-			
-			po.activeWorkTab(po.toMainTabId(tabId), tabName, "", tabUrl);
 		});
 		
 		po.element("#schemaSearchForm").submit(function()
