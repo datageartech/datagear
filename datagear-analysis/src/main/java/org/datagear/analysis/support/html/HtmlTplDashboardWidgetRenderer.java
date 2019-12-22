@@ -7,7 +7,9 @@
  */
 package org.datagear.analysis.support.html;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +31,9 @@ import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.TemplateDashboardWidgetResManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.i18n.Label;
 
 import freemarker.core.Environment;
 import freemarker.ext.util.WrapperTemplateModel;
@@ -111,14 +115,23 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 
 	public static final String CHART_ELEMENT_WRAPPER_STYLE_NAME = "chart-wrapper";
 
+	public static final String DEFAULT_IMPORT_CONTEXT_PATH_PLACE_HOLDER = "$CONTEXTPATH";
+
 	protected static final String KEY_HTML_DASHBOARD_RENDER_DATA_MODEL = HtmlDashboardRenderDataModel.class
 			.getSimpleName();
+
+	protected static final String CHART_PLUGIN_FOR_NOT_FOUND_SCRIPT = "(function(chart){"
+			+ "chart.render=function(){ document.getElementById(this.elementId).innerHTML='Not Found'; };"
+			+ "chart.update = function(){};" + "})($CHART);";
 
 	/** "@import"指令的输出内容 */
 	private String importContent;
 
+	/** "@import"指令的输出内容需要替换的上下文路径占位符 */
+	private String importContentContextPathPlaceholder = DEFAULT_IMPORT_CONTEXT_PATH_PLACE_HOLDER;
+
 	/** "@resource"指令的加载资根URL */
-	private String resourceRootURL;
+	private String resourceParentURL;
 
 	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
 
@@ -127,6 +140,10 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	private DashboardThemeSource dashboardThemeSource = new SimpleDashboardThemeSource();
 
 	private HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter = new HtmlDashboardScriptObjectWriter();
+
+	private HtmlChartWidget<HtmlRenderContext> htmlChartWidgetForNotFound = new HtmlChartWidget<HtmlRenderContext>(
+			"htmlChartWidgetForNotFound", new HtmlChartPlugin<HtmlRenderContext>("htmlChartPluginForNotFound",
+					new Label("htmlChartPluginForNotFound"), CHART_PLUGIN_FOR_NOT_FOUND_SCRIPT));
 
 	private String templateEncoding = "UTF-8";
 
@@ -149,7 +166,7 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	{
 		super();
 		this.importContent = importContent;
-		this.resourceRootURL = resourceRootURL;
+		this.resourceParentURL = resourceRootURL;
 		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
 		this.chartWidgetSource = chartWidgetSource;
 	}
@@ -164,14 +181,24 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		this.importContent = importContent;
 	}
 
-	public String getResourceRootURL()
+	public String getImportContentContextPathPlaceholder()
 	{
-		return resourceRootURL;
+		return importContentContextPathPlaceholder;
 	}
 
-	public void setResourceRootURL(String resourceRootURL)
+	public void setImportContentContextPathPlaceholder(String importContentContextPathPlaceholder)
 	{
-		this.resourceRootURL = resourceRootURL;
+		this.importContentContextPathPlaceholder = importContentContextPathPlaceholder;
+	}
+
+	public String getResourceParentURL()
+	{
+		return resourceParentURL;
+	}
+
+	public void setResourceParentURL(String resourceParentURL)
+	{
+		this.resourceParentURL = resourceParentURL;
 	}
 
 	public TemplateDashboardWidgetResManager getTemplateDashboardWidgetResManager()
@@ -286,8 +313,7 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	 * @return
 	 * @throws RenderException
 	 */
-	public HtmlDashboard render(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget)
-			throws RenderException
+	public HtmlDashboard render(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget) throws RenderException
 	{
 		inflateThemes(renderContext);
 
@@ -300,7 +326,8 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		dashboard.setRenderContext(renderContext);
 		dashboard.setCharts(new ArrayList<Chart>());
 
-		HtmlDashboardRenderDataModel dataModel = new HtmlDashboardRenderDataModel(dashboard);
+		HtmlDashboardRenderDataModel dataModel = new HtmlDashboardRenderDataModel(dashboard,
+				renderContext.getContextPath());
 
 		try
 		{
@@ -312,6 +339,64 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		}
 
 		return dashboard;
+	}
+
+	/**
+	 * 读取指定{@linkplain HtmlTplDashboardWidget}的模板内容。
+	 * 
+	 * @param dashboardWidget
+	 * @return
+	 * @throws IOException
+	 */
+	public String readTemplateContent(HtmlTplDashboardWidget<T> dashboardWidget) throws IOException
+	{
+		File templateFile = this.templateDashboardWidgetResManager.getTemplateFile(dashboardWidget.getId(),
+				dashboardWidget.getTemplate());
+
+		if (!templateFile.exists())
+			return "";
+
+		String templateContent = "";
+
+		Reader reader = null;
+
+		try
+		{
+			reader = IOUtil.getReader(templateFile, this.templateEncoding);
+			templateContent = IOUtil.readString(reader, false);
+		}
+		finally
+		{
+			IOUtil.close(reader);
+		}
+
+		return templateContent;
+	}
+
+	/**
+	 * 保存指定指定{@linkplain HtmlTplDashboardWidget}的模板内容。
+	 * 
+	 * @param dashboardWidget
+	 * @param templateContent
+	 * @throws IOException
+	 */
+	public void saveTemplateContent(HtmlTplDashboardWidget<T> dashboardWidget, String templateContent)
+			throws IOException
+	{
+		File templateFile = this.templateDashboardWidgetResManager.getTemplateFile(dashboardWidget.getId(),
+				dashboardWidget.getTemplate());
+
+		Writer writer = null;
+
+		try
+		{
+			writer = IOUtil.getWriter(templateFile, this.templateEncoding);
+			writer.write(templateContent);
+		}
+		finally
+		{
+			IOUtil.close(writer);
+		}
 	}
 
 	protected void inflateThemes(HtmlRenderContext renderContext)
@@ -378,15 +463,22 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	}
 
 	/**
-	 * 获取指定ID的{@linkplain ChartWidget}。
+	 * 获取用于渲染指定ID图表的{@linkplain ChartWidget}。
+	 * <p>
+	 * 此方法不会返回{@code null}，如果找不到指定ID的{@linkplain ChartWidget}，它将返回。
+	 * </p>
 	 * 
 	 * @param id
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected HtmlChartWidget<T> getHtmlChartWidget(String id)
+	protected HtmlChartWidget<T> getHtmlChartWidgetForRender(String id)
 	{
-		return (HtmlChartWidget<T>) ((ChartWidget) this.chartWidgetSource.getChartWidget(id));
+		ChartWidget chartWidget = this.chartWidgetSource.getChartWidget(id);
+		if (chartWidget == null)
+			chartWidget = this.htmlChartWidgetForNotFound;
+
+		return (HtmlChartWidget<T>) chartWidget;
 	}
 
 	protected Object buildHtmlDashboardRenderDataModel(HtmlDashboardRenderDataModel dataModel)
@@ -409,6 +501,21 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	}
 
 	/**
+	 * 替换字符串中的上下文占位符为真实的上下文。
+	 * 
+	 * @param str
+	 * @param contextPath
+	 * @return
+	 */
+	protected String replaceContextPathPlaceholder(String str, String contextPath)
+	{
+		if (StringUtil.isEmpty(str))
+			return str;
+
+		return str.replace(getImportContentContextPathPlaceholder(), contextPath);
+	}
+
+	/**
 	 * HTML看板渲染数据模型。
 	 * 
 	 * @author datagear@163.com
@@ -418,15 +525,18 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	{
 		private HtmlDashboard htmlDashboard;
 
+		private String contextPath = "";
+
 		public HtmlDashboardRenderDataModel()
 		{
 			super();
 		}
 
-		public HtmlDashboardRenderDataModel(HtmlDashboard htmlDashboard)
+		public HtmlDashboardRenderDataModel(HtmlDashboard htmlDashboard, String contextPath)
 		{
 			super();
 			this.htmlDashboard = htmlDashboard;
+			this.contextPath = contextPath;
 		}
 
 		public HtmlDashboard getHtmlDashboard()
@@ -437,6 +547,16 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		public void setHtmlDashboard(HtmlDashboard htmlDashboard)
 		{
 			this.htmlDashboard = htmlDashboard;
+		}
+
+		public String getContextPath()
+		{
+			return contextPath;
+		}
+
+		public void setContextPath(String contextPath)
+		{
+			this.contextPath = contextPath;
 		}
 
 		@Override
@@ -528,12 +648,23 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 				throws TemplateException, IOException
 		{
+			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
+
 			Writer out = env.getOut();
 
+			String importContent = getImportContent();
+			if (importContent == null)
+				importContent = "";
+
 			out.write("<meta charset=\"" + getWriterEncoding() + "\">");
-			writeNewLine(out);
-			out.write(getImportContent());
-			writeNewLine(out);
+
+			if (!StringUtil.isEmpty(importContent))
+			{
+				importContent = replaceContextPathPlaceholder(importContent, dataModel.getContextPath());
+				writeNewLine(out);
+				out.write(importContent);
+				writeNewLine(out);
+			}
 		}
 	}
 
@@ -689,15 +820,18 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		{
 			String resName = getStringParamValue(params, "name");
 
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-
 			if (StringUtil.isEmpty(resName))
 				throw new TemplateException("The [name] attribute must be set", env);
+
+			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
+
+			String resourceParentURL = replaceContextPathPlaceholder(getResourceParentURL(),
+					dataModel.getContextPath());
 
 			String widgetId = dataModel.getHtmlDashboard().getWidget().getId();
 
 			String resURL = FileUtil.concatPath(widgetId, resName, "/");
-			resURL = FileUtil.concatPath(getResourceRootURL(), resURL, "/");
+			resURL = FileUtil.concatPath(resourceParentURL, resURL, "/");
 
 			env.getOut().write(resURL);
 		}
@@ -913,7 +1047,7 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 				elementId = HtmlRenderAttributes.generateChartElementId(nextSequence);
 			}
 
-			HtmlChartWidget<T> chartWidget = getHtmlChartWidget(widget);
+			HtmlChartWidget<T> chartWidget = getHtmlChartWidgetForRender(widget);
 
 			HtmlRenderAttributes.setChartNotRenderScriptTag(renderContext, false);
 			HtmlRenderAttributes.setChartScriptNotInvokeRender(renderContext, true);

@@ -151,6 +151,12 @@ public abstract class AbstractHtmlScriptObjectWriter
 		}
 
 		@Override
+		public String getContextPath()
+		{
+			return "";
+		}
+
+		@Override
 		public Writer getWriter()
 		{
 			return null;
@@ -201,6 +207,12 @@ public abstract class AbstractHtmlScriptObjectWriter
 		public boolean hasAttribute(String name)
 		{
 			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getContextPath()
+		{
+			return "";
 		}
 
 		@Override
@@ -278,6 +290,12 @@ public abstract class AbstractHtmlScriptObjectWriter
 		public Map<String, ?> getAttributes()
 		{
 			return null;
+		}
+
+		@Override
+		public String getContextPath()
+		{
+			return "";
 		}
 
 		@Override

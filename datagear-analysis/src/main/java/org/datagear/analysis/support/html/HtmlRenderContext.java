@@ -17,6 +17,13 @@ import org.datagear.analysis.RenderContext;
 public interface HtmlRenderContext extends RenderContext
 {
 	/**
+	 * 获取HTML的上下文路径，返回空字符串（{@code ""}）表示无上下文路径。
+	 * 
+	 * @return
+	 */
+	String getContextPath();
+
+	/**
 	 * 获取渲染输出流。
 	 * 
 	 * @return

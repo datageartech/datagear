@@ -71,6 +71,19 @@ public class TemplateDashboardWidgetResManager extends DashboardWidgetResManager
 	}
 
 	/**
+	 * 获取模板文件。
+	 * 
+	 * @param id
+	 * @param templateName
+	 * @return
+	 */
+	public File getTemplateFile(String id, String templateName)
+	{
+		String path = FileUtil.concatPath(this.folderName, templateName);
+		return getFile(id, path);
+	}
+
+	/**
 	 * 获取资源文件。
 	 * 
 	 * @param id

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.analysis.support.SqlDataSetFactory;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetFactoryEntity;
@@ -93,12 +94,34 @@ public class SqlDataSetFactoryEntityServiceImpl
 	}
 
 	@Override
-	public List<SqlDataSetFactoryEntity> findByHtmlChartWidgetEntityId(String id)
+	public SqlDataSetFactory getSqlDataSetFactory(String id)
 	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
-		params.put("htmlChartWidgetEntityId", id);
+		return getById(id);
+	}
 
-		return super.query("findByHtmlChartWidgetEntityId", params);
+	@Override
+	public SqlDataSetFactoryEntity[] getSqlDataSetFactoryEntities(String htmlChartWidgetEntityId)
+	{
+		List<SqlDataSetFactoryEntity> list = getSqlDataSetFactoryEntityList(htmlChartWidgetEntityId);
+
+		SqlDataSetFactoryEntity[] array = new SqlDataSetFactoryEntity[list == null ? 0 : list.size()];
+
+		list.toArray(array);
+
+		return array;
+	}
+
+	@Override
+	public SqlDataSetFactory[] getSqlDataSetFactories(String chartWidgetId)
+	{
+		List<SqlDataSetFactoryEntity> list = getSqlDataSetFactoryEntityList(chartWidgetId);
+		for (SqlDataSetFactoryEntity entry : list)
+			postProcessSelect(entry);
+
+		SqlDataSetFactory[] array = new SqlDataSetFactory[list.size()];
+		list.toArray(array);
+
+		return array;
 	}
 
 	@Override
@@ -111,6 +134,16 @@ public class SqlDataSetFactoryEntityServiceImpl
 	public SqlDataSetFactoryEntity getByStringId(User user, String id) throws PermissionDeniedException
 	{
 		return super.getById(user, id);
+	}
+
+	public List<SqlDataSetFactoryEntity> getSqlDataSetFactoryEntityList(String htmlChartWidgetEntityId)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("htmlChartWidgetEntityId", htmlChartWidgetEntityId);
+
+		List<SqlDataSetFactoryEntity> list = super.query("findByHtmlChartWidgetEntityId", params);
+
+		return list;
 	}
 
 	@Override

@@ -94,13 +94,13 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
-			"schemaConnectionFactory.schema.id" : "required",
+			"schemaConnectionFactory.schema.title" : "required",
 			"sql" : "required",
 		},
 		messages :
 		{
 			"name" : "<@spring.message code='validation.required' />",
-			"schemaConnectionFactory.schema.id" : "<@spring.message code='validation.required' />",
+			"schemaConnectionFactory.schema.title" : "<@spring.message code='validation.required' />",
 			"sql" : "<@spring.message code='validation.required' />"
 		},
 		submitHandler : function(form)

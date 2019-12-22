@@ -7,6 +7,7 @@
  */
 package org.datagear.management.service;
 
+import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 
 /**
@@ -15,7 +16,8 @@ import org.datagear.management.domain.HtmlChartWidgetEntity;
  * @author datagear@163.com
  *
  */
-public interface HtmlChartWidgetEntityService extends DataPermissionEntityService<String, HtmlChartWidgetEntity>
+public interface HtmlChartWidgetEntityService
+		extends DataPermissionEntityService<String, HtmlChartWidgetEntity>, ChartWidgetSource
 {
 
 }

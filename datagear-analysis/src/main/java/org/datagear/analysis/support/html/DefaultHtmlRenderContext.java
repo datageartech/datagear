@@ -19,6 +19,8 @@ import org.datagear.analysis.support.AbstractRenderContext;
  */
 public class DefaultHtmlRenderContext extends AbstractRenderContext implements HtmlRenderContext
 {
+	private String contextPath;
+
 	private Writer writer;
 
 	private int sequence = 1;
@@ -32,6 +34,17 @@ public class DefaultHtmlRenderContext extends AbstractRenderContext implements H
 	{
 		super();
 		this.writer = writer;
+	}
+
+	@Override
+	public String getContextPath()
+	{
+		return contextPath;
+	}
+
+	public void setContextPath(String contextPath)
+	{
+		this.contextPath = contextPath;
 	}
 
 	@Override

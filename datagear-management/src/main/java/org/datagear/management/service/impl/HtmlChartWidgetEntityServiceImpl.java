@@ -14,6 +14,9 @@ import java.util.Map;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.support.ChartWidget;
+import org.datagear.analysis.support.SqlDataSetFactory;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
@@ -97,6 +100,25 @@ public class HtmlChartWidgetEntityServiceImpl
 		this.authorizationService = authorizationService;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends RenderContext> ChartWidget<T> getChartWidget(String id)
+	{
+		HtmlChartWidgetEntity entity = getById(id);
+
+		if (entity == null)
+			return null;
+
+		setHtmlChartPlugin(entity);
+
+		SqlDataSetFactory[] sqlDataSetFactories = this.sqlDataSetFactoryEntityService
+				.getSqlDataSetFactories(entity.getId());
+
+		entity.setDataSetFactories(sqlDataSetFactories);
+
+		return (ChartWidget<T>) entity;
+	}
+
 	@Override
 	public String getResourceType()
 	{
@@ -158,17 +180,27 @@ public class HtmlChartWidgetEntityServiceImpl
 	@Override
 	protected void postProcessSelects(List<HtmlChartWidgetEntity> list)
 	{
-		// XXX 查询操作仅用于展示，不必完全加载
+		// 查询操作仅用于展示，不必完全加载
 		// super.postProcessSelects(list);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected void postProcessSelect(HtmlChartWidgetEntity obj)
 	{
 		if (obj == null)
 			return;
 
+		setHtmlChartPlugin(obj);
+
+		SqlDataSetFactoryEntity[] sqlDataSetFactories = this.sqlDataSetFactoryEntityService
+				.getSqlDataSetFactoryEntities(obj.getId());
+
+		obj.setSqlDataSetFactoryEntities(sqlDataSetFactories);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected void setHtmlChartPlugin(HtmlChartWidgetEntity obj)
+	{
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = obj.getHtmlChartPlugin();
 
 		if (htmlChartPlugin != null)
@@ -179,16 +211,6 @@ public class HtmlChartWidgetEntityServiceImpl
 			obj.setHtmlChartPlugin(htmlChartPlugin);
 		}
 
-		List<SqlDataSetFactoryEntity> sqlDataSetFactories = this.sqlDataSetFactoryEntityService
-				.findByHtmlChartWidgetEntityId(obj.getId());
-
-		if (sqlDataSetFactories != null)
-		{
-			SqlDataSetFactoryEntity[] sqlDataSetFactoryAry = new SqlDataSetFactoryEntity[sqlDataSetFactories.size()];
-			sqlDataSetFactories.toArray(sqlDataSetFactoryAry);
-
-			obj.setSqlDataSetFactoryEntities(sqlDataSetFactoryAry);
-		}
 	}
 
 	@Override

@@ -116,4 +116,15 @@ public class DashboardWidgetResManager
 
 		return file;
 	}
+
+	/**
+	 * 删除指定ID的所有资源。
+	 * 
+	 * @param id
+	 */
+	public void delete(String id)
+	{
+		File directory = FileUtil.getDirectory(this.rootDirectory, id);
+		FileUtil.deleteFile(directory);
+	}
 }

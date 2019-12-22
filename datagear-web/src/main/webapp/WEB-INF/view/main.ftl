@@ -1261,9 +1261,9 @@
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
 				<div class="dataAnalysis-panel-content">
 					<ul>
-						<li class="item-dataset">数据集</li>
-						<li class="item-chart">图表</li>
-						<li class="item-dashboard">看板</li>
+						<li class="item-dataset"><@spring.message code='main.dataAnalysis.dataSet' /></li>
+						<li class="item-chart"><@spring.message code='main.dataAnalysis.chart' /></li>
+						<li class="item-dashboard"><@spring.message code='main.dataAnalysis.dashboard' /></li>
 					</ul>
 				</div>
 			</div>

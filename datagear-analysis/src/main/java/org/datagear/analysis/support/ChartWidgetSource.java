@@ -15,7 +15,7 @@ import org.datagear.analysis.RenderContext;
 public interface ChartWidgetSource
 {
 	/**
-	 * 获取指定ID的{@linkplain ChartWidget}。
+	 * 获取指定ID的{@linkplain ChartWidget}，没有则返回{@code null}。
 	 * 
 	 * @param id
 	 * @return
