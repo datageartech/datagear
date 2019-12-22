@@ -66,7 +66,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>dispatcherServlet</servlet-name>
-		<url-pattern></url-pattern>
+		<url-pattern>/index.html</url-pattern>
 		<url-pattern>/login/*</url-pattern>
 		<url-pattern>/register/*</url-pattern>
 		<url-pattern>/main/*</url-pattern>
@@ -100,7 +100,11 @@
         <servlet-name>cometd</servlet-name>
         <url-pattern>/cometd/*</url-pattern>
     </servlet-mapping>
-	
+    
+    <welcome-file-list>
+    	<welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+    
 	<error-page>
 		<location>/error</location>
 	</error-page>
