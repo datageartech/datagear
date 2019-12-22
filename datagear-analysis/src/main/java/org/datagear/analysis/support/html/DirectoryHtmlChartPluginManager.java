@@ -212,6 +212,8 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		WriteLock writeLock = this.lock.writeLock();
 		try
 		{
+			writeLock.lock();
+
 			for (File unload : unloads)
 			{
 				ChartPlugin<?> plugin = this.htmlChartPluginLoader.loadFile(unload);
