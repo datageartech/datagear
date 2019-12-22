@@ -17,16 +17,16 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * {@linkplain HtmlFreemarkerDashboardWidget}单元测试类。
+ * {@linkplain HtmlTplDashboardWidget}单元测试类。
  * 
  * @author datagear@163.com
  *
  */
-public class HtmlFreemarkerDashboardWidgetTest
+public class HtmlTplDashboardWidgetTest
 {
-	private HtmlFreemarkerDashboardWidget<HtmlRenderContext> dashboardWidget;
+	private HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget;
 
-	public HtmlFreemarkerDashboardWidgetTest() throws Exception
+	public HtmlTplDashboardWidgetTest() throws Exception
 	{
 		super();
 
@@ -36,16 +36,16 @@ public class HtmlFreemarkerDashboardWidgetTest
 				chartPlugin, (DataSetFactory[]) null);
 
 		TemplateDashboardWidgetResManager resManager = new TemplateDashboardWidgetResManager(
-				"src/test/resources/org/datagear/analysis/support/html/htmlFreemarkerDashboardWidgets");
+				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets");
 
 		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);
 
-		HtmlFreemarkerDashboardWidgetRenderer<HtmlRenderContext> renderer = new HtmlFreemarkerDashboardWidgetRenderer<HtmlRenderContext>(
+		HtmlTplDashboardWidgetRenderer<HtmlRenderContext> renderer = new HtmlTplDashboardWidgetRenderer<HtmlRenderContext>(
 				"<script type='text/javascript' src='static/js/jquery.js'></script>", "/analysis/resource", resManager,
 				chartWidgetSource);
 		renderer.init();
 
-		HtmlFreemarkerDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlFreemarkerDashboardWidget<HtmlRenderContext>(
+		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(
 				"widget01", "dashboard.ftl", renderer);
 
 		this.dashboardWidget = dashboardWidget;

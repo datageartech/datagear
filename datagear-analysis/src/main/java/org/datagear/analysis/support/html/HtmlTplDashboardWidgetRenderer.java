@@ -45,10 +45,10 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 
 /**
- * {@linkplain HtmlFreemarkerDashboardWidget}渲染器。
+ * {@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 此类可渲染由{@linkplain TemplateDashboardWidgetResManager}管理模板的{@linkplain HtmlFreemarkerDashboardWidget}，
- * 其中{@linkplain HtmlFreemarkerDashboardWidget#getTemplate()}应为{@linkplain TemplateDashboardWidgetResManager#getFolderName()}中的模板文件名。
+ * 此类可渲染由{@linkplain TemplateDashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
+ * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}应为{@linkplain TemplateDashboardWidgetResManager#getFolderName()}中的模板文件名。
  * </p>
  * <p>
  * 此类需要手动调用{@linkplain #init()}方法进行初始化。
@@ -95,7 +95,7 @@ import freemarker.template.TemplateScalarModel;
  *
  * @param <T>
  */
-public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
+public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 {
 	public static final String DIRECTIVE_IMPORT = "import";
 
@@ -139,12 +139,12 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 
 	private Configuration _configuration;
 
-	public HtmlFreemarkerDashboardWidgetRenderer()
+	public HtmlTplDashboardWidgetRenderer()
 	{
 		super();
 	}
 
-	public HtmlFreemarkerDashboardWidgetRenderer(String importContent, String resourceRootURL,
+	public HtmlTplDashboardWidgetRenderer(String importContent, String resourceRootURL,
 			TemplateDashboardWidgetResManager templateDashboardWidgetResManager, ChartWidgetSource chartWidgetSource)
 	{
 		super();
@@ -286,7 +286,7 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 	 * @return
 	 * @throws RenderException
 	 */
-	public HtmlDashboard render(T renderContext, HtmlFreemarkerDashboardWidget<T> dashboardWidget)
+	public HtmlDashboard render(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget)
 			throws RenderException
 	{
 		inflateThemes(renderContext);
@@ -346,13 +346,13 @@ public class HtmlFreemarkerDashboardWidgetRenderer<T extends HtmlRenderContext>
 	}
 
 	/**
-	 * 获取{@linkplain HtmlFreemarkerDashboardWidget#getId()}的指定模板对象。
+	 * 获取{@linkplain HtmlTplDashboardWidget#getId()}的指定模板对象。
 	 * 
 	 * @param dashboardWidget
 	 * @return
 	 * @throws RenderException
 	 */
-	protected Template getTemplate(HtmlFreemarkerDashboardWidget<T> dashboardWidget) throws RenderException
+	protected Template getTemplate(HtmlTplDashboardWidget<T> dashboardWidget) throws RenderException
 	{
 		String path = this.templateDashboardWidgetResManager.getTemplateRelativePath(dashboardWidget.getId(),
 				dashboardWidget.getTemplate());

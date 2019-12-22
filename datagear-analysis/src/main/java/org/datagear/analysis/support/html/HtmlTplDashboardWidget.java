@@ -16,27 +16,27 @@ import org.datagear.analysis.TemplateDashboardWidget;
  * @author datagear@163.com
  *
  */
-public class HtmlFreemarkerDashboardWidget<T extends HtmlRenderContext> extends TemplateDashboardWidget<T>
+public class HtmlTplDashboardWidget<T extends HtmlRenderContext> extends TemplateDashboardWidget<T>
 {
-	private HtmlFreemarkerDashboardWidgetRenderer<T> renderer;
+	private HtmlTplDashboardWidgetRenderer<T> renderer;
 
-	public HtmlFreemarkerDashboardWidget()
+	public HtmlTplDashboardWidget()
 	{
 		super();
 	}
 
-	public HtmlFreemarkerDashboardWidget(String id, String template, HtmlFreemarkerDashboardWidgetRenderer<T> renderer)
+	public HtmlTplDashboardWidget(String id, String template, HtmlTplDashboardWidgetRenderer<T> renderer)
 	{
 		super(id, template);
 		this.renderer = renderer;
 	}
 
-	public HtmlFreemarkerDashboardWidgetRenderer<T> getRenderer()
+	public HtmlTplDashboardWidgetRenderer<T> getRenderer()
 	{
 		return renderer;
 	}
 
-	public void setRenderer(HtmlFreemarkerDashboardWidgetRenderer<T> renderer)
+	public void setRenderer(HtmlTplDashboardWidgetRenderer<T> renderer)
 	{
 		this.renderer = renderer;
 	}
