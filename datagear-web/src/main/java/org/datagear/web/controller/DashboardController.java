@@ -10,8 +10,10 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
+import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
@@ -20,6 +22,7 @@ import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,16 +102,19 @@ public class DashboardController extends AbstractController
 			HtmlTplDashboardWidgetEntity dashboard, @RequestParam("templateContent") String templateContent)
 			throws Exception
 	{
+		User user = WebUtils.getUser(request, response);
+
 		dashboard.setTemplate(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATE);
 
 		checkSaveEntity(dashboard);
 
 		dashboard.setId(IDUtil.uuid());
-		dashboard.setCreateUser(WebUtils.getUser(request, response));
+		dashboard.setCreateUser(user);
 
-		this.htmlTplDashboardWidgetEntityService.add(dashboard);
+		boolean add = this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 
-		saveTemplateContent(dashboard, templateContent);
+		if (add)
+			saveTemplateContent(dashboard, templateContent);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -117,7 +123,12 @@ public class DashboardController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(id);
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
 
 		model.addAttribute("dashboard", dashboard);
 		readAndSetTemplateContent(dashboard, model);
@@ -133,13 +144,16 @@ public class DashboardController extends AbstractController
 			HtmlTplDashboardWidgetEntity dashboard, @RequestParam("templateContent") String templateContent)
 			throws Exception
 	{
+		User user = WebUtils.getUser(request, response);
+
 		dashboard.setTemplate(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATE);
 
 		checkSaveEntity(dashboard);
 
-		this.htmlTplDashboardWidgetEntityService.update(dashboard);
+		boolean updated = this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
 
-		saveTemplateContent(dashboard, templateContent);
+		if (updated)
+			saveTemplateContent(dashboard, templateContent);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -148,7 +162,9 @@ public class DashboardController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id) throws Exception
 	{
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(id);
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
 
 		if (dashboard == null)
 			throw new RecordNotFoundException();
@@ -166,7 +182,13 @@ public class DashboardController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") String[] ids)
 	{
-		this.htmlTplDashboardWidgetEntityService.deleteByIds(ids);
+		User user = WebUtils.getUser(request, response);
+
+		for (int i = 0; i < ids.length; i++)
+		{
+			String id = ids[i];
+			this.htmlTplDashboardWidgetEntityService.deleteById(user, id);
+		}
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
@@ -207,8 +229,13 @@ public class DashboardController extends AbstractController
 	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("id") String id) throws Exception
 	{
+		User user = WebUtils.getUser(request, response);
+
 		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidget(id);
+				.getHtmlTplDashboardWidget(user, id);
+
+		if (dashboardWidget == null)
+			throw new RecordNotFoundException();
 
 		response.setCharacterEncoding(
 				this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer().getWriterEncoding());
@@ -217,8 +244,24 @@ public class DashboardController extends AbstractController
 
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(out);
 		renderContext.setContextPath(request.getContextPath());
+		HtmlRenderAttributes.setRenderStyle(renderContext, resolveRenderStyle(request));
 
 		dashboardWidget.render(renderContext);
+	}
+
+	protected RenderStyle resolveRenderStyle(HttpServletRequest request) throws Exception
+	{
+		String theme = WebUtils.getTheme(request);
+
+		if (StringUtil.isEmpty(theme))
+			return RenderStyle.LIGHT;
+
+		theme = theme.toLowerCase();
+
+		if (theme.indexOf("dark") > -1)
+			return RenderStyle.DARK;
+
+		return RenderStyle.LIGHT;
 	}
 
 	protected void checkSaveEntity(HtmlTplDashboardWidgetEntity dashboard)

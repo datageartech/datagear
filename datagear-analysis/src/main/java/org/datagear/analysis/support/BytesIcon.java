@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.datagear.analysis.Icon;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 
 /**
@@ -24,16 +25,33 @@ import org.datagear.util.IOUtil;
  */
 public class BytesIcon implements Icon
 {
+	private String type;
+
 	private byte[] bytes;
+
+	private long lastModified;
 
 	public BytesIcon()
 	{
 	}
 
-	public BytesIcon(byte[] bytes)
+	public BytesIcon(String type, byte[] bytes, long lastModified)
 	{
 		super();
+		this.type = type;
 		this.bytes = bytes;
+		this.lastModified = lastModified;
+	}
+
+	@Override
+	public String getType()
+	{
+		return type;
+	}
+
+	public void setType(String type)
+	{
+		this.type = type;
 	}
 
 	public byte[] getBytes()
@@ -47,6 +65,17 @@ public class BytesIcon implements Icon
 	}
 
 	@Override
+	public long getLastModified()
+	{
+		return lastModified;
+	}
+
+	public void setLastModified(long lastModified)
+	{
+		this.lastModified = lastModified;
+	}
+
+	@Override
 	public InputStream getInputStream() throws IOException
 	{
 		return new ByteArrayInputStream(this.bytes);
@@ -56,11 +85,12 @@ public class BytesIcon implements Icon
 	 * 构建{@linkplain BytesIcon}。
 	 * 
 	 * @param bytes
+	 * @param lastModified
 	 * @return
 	 */
-	public static BytesIcon valueOf(byte[] bytes)
+	public static BytesIcon valueOf(String type, byte[] bytes, long lastModified)
 	{
-		return new BytesIcon(bytes);
+		return new BytesIcon(type, bytes, lastModified);
 	}
 
 	/**
@@ -71,6 +101,19 @@ public class BytesIcon implements Icon
 	 * @throws IOException
 	 */
 	public static BytesIcon valueOf(File file) throws IOException
+	{
+		return valueOf(FileUtil.getExtension(file), file);
+	}
+
+	/**
+	 * 构建{@linkplain BytesIcon}。
+	 * 
+	 * @param type
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public static BytesIcon valueOf(String type, File file) throws IOException
 	{
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -83,7 +126,7 @@ public class BytesIcon implements Icon
 			IOUtil.close(out);
 		}
 
-		return new BytesIcon(out.toByteArray());
+		return new BytesIcon(type, out.toByteArray(), file.lastModified());
 	}
 
 	/**
@@ -92,24 +135,28 @@ public class BytesIcon implements Icon
 	 * 它不会关闭{@code in}输入流。
 	 * </p>
 	 * 
+	 * @param type
 	 * @param in
+	 * @param lastModified
 	 * @return
 	 * @throws IOException
 	 */
-	public static BytesIcon valueOf(InputStream in) throws IOException
+	public static BytesIcon valueOf(String type, InputStream in, long lastModified) throws IOException
 	{
-		return valueOf(in, false);
+		return valueOf(type, in, lastModified, false);
 	}
 
 	/**
 	 * 构建{@linkplain BytesIcon}。
 	 * 
+	 * @param type
 	 * @param in
+	 * @param lastModified
 	 * @param closeIn
 	 * @return
 	 * @throws IOException
 	 */
-	public static BytesIcon valueOf(InputStream in, boolean closeIn) throws IOException
+	public static BytesIcon valueOf(String type, InputStream in, long lastModified, boolean closeIn) throws IOException
 	{
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -125,6 +172,6 @@ public class BytesIcon implements Icon
 			IOUtil.close(out);
 		}
 
-		return new BytesIcon(out.toByteArray());
+		return new BytesIcon(type, out.toByteArray(), lastModified);
 	}
 }

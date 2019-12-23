@@ -86,9 +86,9 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	}
 
 	@Override
-	public HtmlTplDashboardWidget<HtmlRenderContext> getHtmlTplDashboardWidget(String id)
+	public HtmlTplDashboardWidget<HtmlRenderContext> getHtmlTplDashboardWidget(User user, String id)
 	{
-		return getById(id);
+		return getById(user, id);
 	}
 
 	@Override

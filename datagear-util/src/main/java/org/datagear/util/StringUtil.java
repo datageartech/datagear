@@ -119,4 +119,72 @@ public class StringUtil
 
 		return sb.toString();
 	}
+
+	/**
+	 * 转义HTML字符串。
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String escapeHtml(String s)
+	{
+		if (s == null || s.isEmpty())
+			return s;
+
+		StringBuilder sb = new StringBuilder();
+
+		char[] cs = s.toCharArray();
+
+		for (char c : cs)
+		{
+			if (c == '<')
+				sb.append("&lt;");
+			else if (c == '>')
+				sb.append("&gt;");
+			else if (c == '&')
+				sb.append("&amp;");
+			else if (c == '"')
+				sb.append("&quot;");
+			else
+				sb.append(c);
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * 转换为JavaScript语法的字符串。
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String escapeJavaScriptStringValue(String s)
+	{
+		if (s == null)
+			return "";
+
+		StringBuilder sb = new StringBuilder();
+
+		char[] cs = s.toCharArray();
+
+		for (char c : cs)
+		{
+			if (c == '\\')
+				sb.append("\\\\");
+			else if (c == '\'')
+				sb.append("\\\'");
+			else if (c == '"')
+				sb.append("\\\"");
+			else if (c == '\t')
+				sb.append("\\\t");
+			else if (c == '\n')
+				sb.append("\\\n");
+			else if (c == '\r')
+				sb.append("\\\r");
+			else
+				sb.append(c);
+		}
+
+		return sb.toString();
+	}
 }

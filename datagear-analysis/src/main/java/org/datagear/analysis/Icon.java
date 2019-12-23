@@ -20,10 +20,24 @@ import java.io.InputStream;
 public interface Icon
 {
 	/**
+	 * 获取图标类型：{@code png}、{@code jpeg}等，未知则返回空字符串。
+	 * 
+	 * @return
+	 */
+	String getType();
+
+	/**
 	 * 获取图标输入流。
 	 * 
 	 * @return
 	 * @throws IOException
 	 */
 	InputStream getInputStream() throws IOException;
+
+	/**
+	 * 获取上次修改时间。
+	 * 
+	 * @return
+	 */
+	long getLastModified();
 }

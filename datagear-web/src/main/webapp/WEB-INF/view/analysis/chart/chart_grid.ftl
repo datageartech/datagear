@@ -147,7 +147,7 @@ selectonly 是否选择操作，允许为null
 	</#if>
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id"),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.name' />"), "name"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", "htmlChartPlugin.id"),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.createUser' />"), "createUser.realName"),

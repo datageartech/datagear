@@ -32,7 +32,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dashboard.template' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="templateContent">${templateContent!''?html}</textarea>
+					<textarea name="templateContent" class="ui-widget ui-widget-content">${templateContent!''?html}</textarea>
 				</div>
 			</div>
 		</div>

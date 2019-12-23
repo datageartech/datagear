@@ -15,11 +15,15 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartProperties;
 import org.datagear.analysis.ChartPropertyValues;
+import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.DataSetParamValues;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
+import org.datagear.analysis.support.AbstractDataSetFactory;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 
@@ -77,11 +81,6 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	 */
 	protected static class JsonHtmlChart extends HtmlChart
 	{
-		public JsonHtmlChart()
-		{
-			super();
-		}
-
 		public JsonHtmlChart(HtmlChart htmlChart)
 		{
 			this(htmlChart, null);
@@ -93,18 +92,13 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 					(StringUtil.isEmpty(chartRenderContextVarName)
 							? new AttributesHtmlRenderContext(htmlChart.getRenderContext())
 							: new RefHtmlRenderContext(chartRenderContextVarName)),
-					htmlChart.getPropertyValues(), htmlChart.getDataSetFactories(), htmlChart.getElementId(),
-					htmlChart.getVarName());
+					htmlChart.getPropertyValues(), JsonDataSetFactory.valuesOf(htmlChart.getDataSetFactories()),
+					htmlChart.getElementId(), htmlChart.getVarName());
 		}
 	}
 
 	protected static class IdChartPlugin extends AbstractIdentifiable implements ChartPlugin<RenderContext>
 	{
-		public IdChartPlugin()
-		{
-			super();
-		}
-
 		public IdChartPlugin(ChartPlugin<?> chartPlugin)
 		{
 			super(chartPlugin.getId());
@@ -151,6 +145,35 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 				DataSetFactory... dataSetFactories) throws RenderException
 		{
 			throw new UnsupportedOperationException();
+		}
+	}
+
+	protected static class JsonDataSetFactory extends AbstractDataSetFactory
+	{
+		public JsonDataSetFactory(DataSetFactory dataSetFactory)
+		{
+			super(dataSetFactory.getId());
+			setParams(dataSetFactory.getParams());
+			setExports(dataSetFactory.getExports());
+		}
+
+		@Override
+		public DataSet getDataSet(DataSetParamValues dataSetParamValues) throws DataSetException
+		{
+			return null;
+		}
+
+		public static JsonDataSetFactory[] valuesOf(DataSetFactory[] dataSetFactories)
+		{
+			if (dataSetFactories == null)
+				return null;
+
+			JsonDataSetFactory[] jsonDataSetFactories = new JsonDataSetFactory[dataSetFactories.length];
+
+			for (int i = 0; i < dataSetFactories.length; i++)
+				jsonDataSetFactories[i] = new JsonDataSetFactory(dataSetFactories[i]);
+
+			return jsonDataSetFactories;
 		}
 	}
 }

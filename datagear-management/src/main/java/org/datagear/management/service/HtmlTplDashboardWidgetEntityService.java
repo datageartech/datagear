@@ -11,6 +11,7 @@ import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
+import org.datagear.management.domain.User;
 
 /**
  * {@linkplain HtmlTplDashboardWidgetEntity}业务服务接口。
@@ -31,8 +32,9 @@ public interface HtmlTplDashboardWidgetEntityService
 	/**
 	 * 获取可用于执行分析的{@linkplain HtmlTplDashboardWidget}。
 	 * 
+	 * @param user
 	 * @param id
 	 * @return
 	 */
-	HtmlTplDashboardWidget<HtmlRenderContext> getHtmlTplDashboardWidget(String id);
+	HtmlTplDashboardWidget<HtmlRenderContext> getHtmlTplDashboardWidget(User user, String id);
 }

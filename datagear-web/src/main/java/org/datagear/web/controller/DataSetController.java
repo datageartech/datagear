@@ -73,12 +73,14 @@ public class DataSetController extends AbstractController
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			SqlDataSetFactoryEntity dataSet)
 	{
+		User user = WebUtils.getUser(request, response);
+
 		checkSaveEntity(dataSet);
 
 		dataSet.setId(IDUtil.uuid());
-		dataSet.setCreateUser(WebUtils.getUser(request, response));
+		dataSet.setCreateUser(user);
 
-		this.sqlDataSetFactoryEntityService.add(dataSet);
+		this.sqlDataSetFactoryEntityService.add(user, dataSet);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -87,7 +89,12 @@ public class DataSetController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		SqlDataSetFactoryEntity dataSet = this.sqlDataSetFactoryEntityService.getById(id);
+		User user = WebUtils.getUser(request, response);
+
+		SqlDataSetFactoryEntity dataSet = this.sqlDataSetFactoryEntityService.getByIdForEdit(user, id);
+
+		if (dataSet == null)
+			throw new RecordNotFoundException();
 
 		model.addAttribute("dataSet", dataSet);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.editDataSet");
@@ -101,9 +108,11 @@ public class DataSetController extends AbstractController
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			SqlDataSetFactoryEntity dataSet)
 	{
+		User user = WebUtils.getUser(request, response);
+
 		checkSaveEntity(dataSet);
 
-		this.sqlDataSetFactoryEntityService.update(dataSet);
+		this.sqlDataSetFactoryEntityService.update(user, dataSet);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -112,7 +121,9 @@ public class DataSetController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		SqlDataSetFactoryEntity dataSet = this.sqlDataSetFactoryEntityService.getById(id);
+		User user = WebUtils.getUser(request, response);
+
+		SqlDataSetFactoryEntity dataSet = this.sqlDataSetFactoryEntityService.getById(user, id);
 
 		if (dataSet == null)
 			throw new RecordNotFoundException();
@@ -129,7 +140,13 @@ public class DataSetController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") String[] ids)
 	{
-		this.sqlDataSetFactoryEntityService.deleteByIds(ids);
+		User user = WebUtils.getUser(request, response);
+
+		for (int i = 0; i < ids.length; i++)
+		{
+			String id = ids[i];
+			this.sqlDataSetFactoryEntityService.deleteById(user, id);
+		}
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}

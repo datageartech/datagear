@@ -73,10 +73,7 @@ public class LocationResource implements Serializable
 	{
 		if (location.startsWith(PREFIX_FILE))
 		{
-			location = location.substring(PREFIX_FILE.length());
-
-			File file = new File(location);
-
+			File file = getLocationFile(location);
 			return new FileInputStream(file);
 		}
 		else if (location.startsWith(PREFIX_CLASSPATH))
@@ -87,6 +84,15 @@ public class LocationResource implements Serializable
 		}
 		else
 			throw new UnsupportedOperationException("Location [" + location + "] is not supported");
+	}
+
+	protected File getLocationFile(String fileLocation)
+	{
+		location = location.substring(PREFIX_FILE.length());
+
+		File file = new File(location);
+
+		return file;
 	}
 
 	/**

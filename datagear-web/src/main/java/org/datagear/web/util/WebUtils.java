@@ -19,6 +19,8 @@ import org.datagear.web.security.AuthUser;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.servlet.ThemeResolver;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
  * Web工具集。
@@ -180,71 +182,32 @@ public class WebUtils
 	}
 
 	/**
-	 * 转义HTML字符串。
+	 * 获取当前主题。
 	 * 
-	 * @param s
+	 * @param request
 	 * @return
+	 * @throws IllegalStateException
 	 */
-	public static String escapeHtml(String s)
+	public static String getTheme(HttpServletRequest request) throws IllegalStateException
 	{
-		if (s == null || s.isEmpty())
-			return s;
-
-		StringBuilder sb = new StringBuilder();
-
-		char[] cs = s.toCharArray();
-
-		for (char c : cs)
-		{
-			if (c == '<')
-				sb.append("&lt;");
-			else if (c == '>')
-				sb.append("&gt;");
-			else if (c == '&')
-				sb.append("&amp;");
-			else if (c == '"')
-				sb.append("&quot;");
-			else
-				sb.append(c);
-		}
-
-		return sb.toString();
+		return getThemeResolver(request).resolveThemeName(request);
 	}
 
 	/**
-	 * 转换为JavaScript语法的字符串。
+	 * 获取当前{@linkplain ThemeResolver}，没有则抛出{@linkplain IllegalStateException}异常。
 	 * 
-	 * @param s
+	 * @param request
 	 * @return
+	 * @throws IllegalStateException
 	 */
-	public static String escapeJavaScriptStringValue(String s)
+	public static ThemeResolver getThemeResolver(HttpServletRequest request) throws IllegalStateException
 	{
-		if (s == null)
-			return "";
+		ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(request);
 
-		StringBuilder sb = new StringBuilder();
+		if (themeResolver == null)
+			throw new IllegalStateException("No ThemeResolver found: not in a DispatcherServlet request?");
 
-		char[] cs = s.toCharArray();
-
-		for (char c : cs)
-		{
-			if (c == '\\')
-				sb.append("\\\\");
-			else if (c == '\'')
-				sb.append("\\\'");
-			else if (c == '"')
-				sb.append("\\\"");
-			else if (c == '\t')
-				sb.append("\\\t");
-			else if (c == '\n')
-				sb.append("\\\n");
-			else if (c == '\r')
-				sb.append("\\\r");
-			else
-				sb.append(c);
-		}
-
-		return sb.toString();
+		return themeResolver;
 	}
 
 	/**

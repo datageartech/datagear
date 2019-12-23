@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.ThemeResolver;
-import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 
 /**
@@ -52,11 +51,8 @@ public class EnumThemeChangeInterceptor extends ThemeChangeInterceptor
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException
 	{
-		ThemeResolver themeResolver = RequestContextUtils.getThemeResolver(request);
-		if (themeResolver == null)
-		{
-			throw new IllegalStateException("No ThemeResolver found: not in a DispatcherServlet request?");
-		}
+		ThemeResolver themeResolver = WebUtils.getThemeResolver(request);
+
 		String newTheme = request.getParameter(getParamName());
 		if (newTheme != null)
 		{

@@ -112,7 +112,7 @@ selectonly 是否选择操作，允许为null
 	{
 		po.executeOnSelect(function(row)
 		{
-			po.open(po.url("show/"+row.id),{ target : "_blank"});
+			window.open(po.url("show/"+row.id), row.id);
 		});
 	});
 	

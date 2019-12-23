@@ -318,7 +318,8 @@ public class HtmlChartPluginLoader
 				}
 				else
 				{
-					File tmpFile = File.createTempFile(HtmlChartPluginLoader.class.getSimpleName(), ".tmp");
+					File tmpFile = File.createTempFile(HtmlChartPluginLoader.class.getSimpleName(),
+							"." + FileUtil.getExtension(name));
 					IOUtil.write(in, tmpFile);
 					resourceFiles.put(name, tmpFile);
 				}
@@ -416,10 +417,14 @@ public class HtmlChartPluginLoader
 		if (file == null || !file.exists())
 			return null;
 
+		String type = FileUtil.getExtension(file);
+		if (type == null)
+			type = "";
+
 		InputStream in = IOUtil.getInputStream(file);
 		byte[] bytes = IOUtil.readBytes(in, true);
 
-		return new BytesIcon(bytes);
+		return BytesIcon.valueOf(type, bytes, file.lastModified());
 	}
 
 	/**

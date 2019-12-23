@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.WebRequest;
 
 /**
  * 数据集控制器。
@@ -112,13 +113,15 @@ public class ChartController extends AbstractController
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			HtmlChartWidgetEntity chart)
 	{
+		User user = WebUtils.getUser(request, response);
+
 		checkSaveEntity(chart);
 
 		chart.setId(IDUtil.uuid());
-		chart.setCreateUser(WebUtils.getUser(request, response));
+		chart.setCreateUser(user);
 		chart.setSqlDataSetFactoryEntities(getSqlDataSetFactoryEntityParams(request));
 
-		this.htmlChartWidgetEntityService.add(chart);
+		this.htmlChartWidgetEntityService.add(user, chart);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -127,7 +130,12 @@ public class ChartController extends AbstractController
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(id);
+		User user = WebUtils.getUser(request, response);
+
+		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getByIdForEdit(user, id);
+
+		if (chart == null)
+			throw new RecordNotFoundException();
 
 		List<HtmlChartPluginInfo> pluginInfos = getAllHtmlChartPluginInfos(request);
 
@@ -144,11 +152,13 @@ public class ChartController extends AbstractController
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			HtmlChartWidgetEntity chart)
 	{
+		User user = WebUtils.getUser(request, response);
+
 		checkSaveEntity(chart);
 
 		chart.setSqlDataSetFactoryEntities(getSqlDataSetFactoryEntityParams(request));
 
-		this.htmlChartWidgetEntityService.update(chart);
+		this.htmlChartWidgetEntityService.update(user, chart);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -157,7 +167,9 @@ public class ChartController extends AbstractController
 	public String view(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
 	{
-		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(id);
+		User user = WebUtils.getUser(request, response);
+
+		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
 
 		if (chart == null)
 			throw new RecordNotFoundException();
@@ -177,7 +189,13 @@ public class ChartController extends AbstractController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("id") String[] ids)
 	{
-		this.htmlChartWidgetEntityService.deleteByIds(ids);
+		User user = WebUtils.getUser(request, response);
+
+		for (int i = 0; i < ids.length; i++)
+		{
+			String id = ids[i];
+			this.htmlChartWidgetEntityService.deleteById(user, id);
+		}
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
 	}
@@ -214,7 +232,7 @@ public class ChartController extends AbstractController
 	}
 
 	@RequestMapping(value = "/pluginicon/{pluginId}", produces = CONTENT_TYPE_JSON)
-	public void getPluginIcon(HttpServletRequest request, HttpServletResponse response,
+	public void getPluginIcon(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			@PathVariable("pluginId") String pluginId) throws Exception
 	{
 		ChartPlugin<?> chartPlugin = this.chartPluginManager.get(pluginId);
@@ -228,7 +246,11 @@ public class ChartController extends AbstractController
 		if (icon == null)
 			throw new FileNotFoundException();
 
-		response.setContentType("image/png");
+		long lastModified = icon.getLastModified();
+		if (webRequest.checkNotModified(lastModified))
+			return;
+
+		response.setContentType("image/" + icon.getType());
 
 		OutputStream out = response.getOutputStream();
 		InputStream iconIn = null;

@@ -30,10 +30,10 @@ import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.TemplateDashboardWidgetResManager;
 import org.datagear.util.FileUtil;
+import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
-import org.datagear.util.i18n.Label;
 
 import freemarker.core.Environment;
 import freemarker.ext.util.WrapperTemplateModel;
@@ -120,9 +120,8 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	protected static final String KEY_HTML_DASHBOARD_RENDER_DATA_MODEL = HtmlDashboardRenderDataModel.class
 			.getSimpleName();
 
-	protected static final String CHART_PLUGIN_FOR_NOT_FOUND_SCRIPT = "(function(chart){"
-			+ "chart.render=function(){ document.getElementById(this.elementId).innerHTML='Not Found'; };"
-			+ "chart.update = function(){};" + "})($CHART);";
+	protected static final String RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT = StringUtil
+			.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderValueForNotFound";
 
 	/** "@import"指令的输出内容 */
 	private String importContent;
@@ -142,8 +141,10 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	private HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter = new HtmlDashboardScriptObjectWriter();
 
 	private HtmlChartWidget<HtmlRenderContext> htmlChartWidgetForNotFound = new HtmlChartWidget<HtmlRenderContext>(
-			"htmlChartWidgetForNotFound", new HtmlChartPlugin<HtmlRenderContext>("htmlChartPluginForNotFound",
-					new Label("htmlChartPluginForNotFound"), CHART_PLUGIN_FOR_NOT_FOUND_SCRIPT));
+			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartWidgetForNotFound",
+			new ValueHtmlChartPlugin<HtmlRenderContext>(
+					StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForNotFound",
+					RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT));
 
 	private String templateEncoding = "UTF-8";
 
@@ -240,6 +241,16 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	public void setHtmlDashboardScriptObjectWriter(HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter)
 	{
 		this.htmlDashboardScriptObjectWriter = htmlDashboardScriptObjectWriter;
+	}
+
+	public HtmlChartWidget<HtmlRenderContext> getHtmlChartWidgetForNotFound()
+	{
+		return htmlChartWidgetForNotFound;
+	}
+
+	public void setHtmlChartWidgetForNotFound(HtmlChartWidget<HtmlRenderContext> htmlChartWidgetForNotFound)
+	{
+		this.htmlChartWidgetForNotFound = htmlChartWidgetForNotFound;
 	}
 
 	public String getTemplateEncoding()
@@ -468,17 +479,23 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	 * 此方法不会返回{@code null}，如果找不到指定ID的{@linkplain ChartWidget}，它将返回。
 	 * </p>
 	 * 
+	 * @param renderContext
 	 * @param id
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected HtmlChartWidget<T> getHtmlChartWidgetForRender(String id)
+	protected HtmlChartWidget<HtmlRenderContext> getHtmlChartWidgetForRender(HtmlRenderContext renderContext, String id)
 	{
-		ChartWidget chartWidget = this.chartWidgetSource.getChartWidget(id);
-		if (chartWidget == null)
-			chartWidget = this.htmlChartWidgetForNotFound;
+		ChartWidget chartWidget = (StringUtil.isEmpty(id) ? null : this.chartWidgetSource.getChartWidget(id));
 
-		return (HtmlChartWidget<T>) chartWidget;
+		if (chartWidget == null)
+		{
+			chartWidget = this.htmlChartWidgetForNotFound;
+			renderContext.setAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT,
+					"Chart '" + (id == null ? "" : id) + "' Not Found");
+		}
+
+		return (HtmlChartWidget<HtmlRenderContext>) chartWidget;
 	}
 
 	protected Object buildHtmlDashboardRenderDataModel(HtmlDashboardRenderDataModel dataModel)
@@ -905,6 +922,8 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 			HtmlRenderAttributes.removeChartVarName(renderContext);
 			HtmlRenderAttributes.removeChartElementId(renderContext);
 
+			renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
+
 			out.write("var ");
 			out.write(tmpRenderContextVar);
 			out.write("=");
@@ -1027,13 +1046,12 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 			String var = getStringParamValue(params, "var");
 			String elementId = getStringParamValue(params, "elementId");
 
-			if (StringUtil.isEmpty(widget))
-				throw new TemplateException("The [widget] attribute must be set", env);
-
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
 			HtmlDashboard htmlDashboard = dataModel.getHtmlDashboard();
 			HtmlRenderContext renderContext = htmlDashboard.getRenderContext();
 			int nextSequence = -1;
+
+			HtmlChartWidget<HtmlRenderContext> chartWidget = getHtmlChartWidgetForRender(renderContext, widget);
 
 			if (StringUtil.isEmpty(var))
 			{
@@ -1047,14 +1065,12 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 				elementId = HtmlRenderAttributes.generateChartElementId(nextSequence);
 			}
 
-			HtmlChartWidget<T> chartWidget = getHtmlChartWidgetForRender(widget);
-
 			HtmlRenderAttributes.setChartNotRenderScriptTag(renderContext, false);
 			HtmlRenderAttributes.setChartScriptNotInvokeRender(renderContext, true);
 			HtmlRenderAttributes.setChartVarName(renderContext, var);
 			HtmlRenderAttributes.setChartElementId(renderContext, elementId);
 
-			HtmlChart chart = chartWidget.render((T) renderContext);
+			HtmlChart chart = chartWidget.render(renderContext);
 
 			List<HtmlChart> charts = (List<HtmlChart>) htmlDashboard.getCharts();
 			if (charts == null)

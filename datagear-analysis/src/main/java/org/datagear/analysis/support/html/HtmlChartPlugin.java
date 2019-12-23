@@ -309,7 +309,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 					+ BUILTIN_CHART_ELEMENT_STYLE_NAME
 					+ (StringUtil.isEmpty(this.elementStyleName) ? "" : " " + this.elementStyleName) + "\">");
 			writer.write("</" + this.elementTagName + ">");
-			writer.write(this.newLine);
+			writeNewLine(writer);
 		}
 		catch (IOException e)
 		{
@@ -333,29 +333,29 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		if (!inScriptContext)
 		{
 			writeScriptStartTag(renderContext);
-			out.write(this.newLine);
+			writeNewLine(out);
 		}
 
 		out.write("var ");
 		out.write(chart.getVarName());
 		out.write("=");
-		out.write(this.newLine);
+		writeNewLine(out);
 		writeChartScriptObject(renderContext, chart);
 		out.write(";");
-		out.write(this.newLine);
+		writeNewLine(out);
 		writeChartScriptContent(renderContext, chart);
-		out.write(this.newLine);
+		writeNewLine(out);
 
 		if (!HtmlRenderAttributes.getChartScriptNotInvokeRender(renderContext))
 		{
 			out.write(chart.getVarName() + "." + this.scriptRenderFunctionName + "();");
-			out.write(this.newLine);
+			writeNewLine(out);
 		}
 
 		if (!inScriptContext)
 		{
 			writeScriptEndTag(renderContext);
-			out.write(this.newLine);
+			writeNewLine(out);
 		}
 	}
 
@@ -396,7 +396,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 				while ((line = reader.readLine()) != null)
 				{
 					out.write(replaceChartRefPlaceholder(line, chartVarName));
-					out.write(this.newLine);
+					writeNewLine(out);
 				}
 			}
 			finally
@@ -430,6 +430,17 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	protected void writeScriptEndTag(T renderContext) throws IOException
 	{
 		renderContext.getWriter().write("</script>");
+	}
+
+	/**
+	 * 写换行符。
+	 * 
+	 * @param out
+	 * @throws IOException
+	 */
+	protected void writeNewLine(Writer out) throws IOException
+	{
+		out.write(getNewLine());
 	}
 
 	/**

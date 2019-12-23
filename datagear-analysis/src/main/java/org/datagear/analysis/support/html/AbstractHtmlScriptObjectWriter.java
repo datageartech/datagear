@@ -113,17 +113,31 @@ public abstract class AbstractHtmlScriptObjectWriter
 	}
 
 	/**
-	 * 空的{@linkplain HtmlRenderContext}。
+	 * 仅有{@linkplain #getContextPath()}的{@linkplain HtmlRenderContext}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class EmptyHtmlRenderContext extends AbstractRenderContext implements HtmlRenderContext
+	protected static class OnlyContextPathHtmlRenderContext extends AbstractRenderContext implements HtmlRenderContext
 	{
-		public EmptyHtmlRenderContext()
+		private String contextPath;
+
+		public OnlyContextPathHtmlRenderContext(HtmlRenderContext renderContext)
 		{
 			super();
 			super.setAttributes(null);
+			this.contextPath = renderContext.getContextPath();
+		}
+
+		@Override
+		public String getContextPath()
+		{
+			return contextPath;
+		}
+
+		public void setContextPath(String contextPath)
+		{
+			this.contextPath = contextPath;
 		}
 
 		@Override
@@ -148,12 +162,6 @@ public abstract class AbstractHtmlScriptObjectWriter
 		public boolean hasAttribute(String name)
 		{
 			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public String getContextPath()
-		{
-			return "";
 		}
 
 		@Override
@@ -212,7 +220,7 @@ public abstract class AbstractHtmlScriptObjectWriter
 		@Override
 		public String getContextPath()
 		{
-			return "";
+			return null;
 		}
 
 		@Override
@@ -295,7 +303,7 @@ public abstract class AbstractHtmlScriptObjectWriter
 		@Override
 		public String getContextPath()
 		{
-			return "";
+			return null;
 		}
 
 		@Override

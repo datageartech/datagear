@@ -118,7 +118,7 @@ public class SqlDataSetFactoryEntityServiceImpl
 		for (SqlDataSetFactoryEntity entry : list)
 			postProcessSelect(entry);
 
-		SqlDataSetFactory[] array = new SqlDataSetFactory[list.size()];
+		SqlDataSetFactoryEntity[] array = new SqlDataSetFactoryEntity[list.size()];
 		list.toArray(array);
 
 		return array;
