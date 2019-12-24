@@ -264,7 +264,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		DashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidgetRenderer().getDashboardWidgetResManager();
 
-		File resFile = resManager.getFile(id, resPath);
+		File resFile = resManager.getFile(id, resPath, false);
 
 		if (!resFile.exists())
 			throw new FileNotFoundException(resPath);

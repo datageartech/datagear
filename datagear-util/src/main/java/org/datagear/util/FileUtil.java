@@ -51,7 +51,7 @@ public class FileUtil
 	/**
 	 * 获取目录对象。
 	 * <p>
-	 * 如果目录不存在，则创建。
+	 * 如果目录不存在，此方法会自动创建。
 	 * </p>
 	 * 
 	 * @param file
@@ -59,9 +59,22 @@ public class FileUtil
 	 */
 	public static File getDirectory(String file)
 	{
+		return getDirectory(file, true);
+	}
+
+	/**
+	 * 获取目录对象。
+	 * 
+	 * @param file
+	 * @param create
+	 *            是否自动创建
+	 * @return
+	 */
+	public static File getDirectory(String file, boolean create)
+	{
 		File directory = new File(file);
 
-		if (!directory.exists())
+		if (create && !directory.exists())
 			directory.mkdirs();
 
 		return directory;
@@ -70,7 +83,7 @@ public class FileUtil
 	/**
 	 * 获取指定目录下的子目录。
 	 * <p>
-	 * 如果子目录不存在，则创建。
+	 * 如果目录不存在，此方法会自动创建。
 	 * </p>
 	 * 
 	 * @param parent
@@ -79,11 +92,25 @@ public class FileUtil
 	 */
 	public static File getDirectory(File parent, String file)
 	{
+		return getDirectory(parent, file, true);
+	}
+
+	/**
+	 * 获取指定目录下的子目录。
+	 * 
+	 * @param parent
+	 * @param file
+	 * @param create
+	 *            是否自动创建
+	 * @return
+	 */
+	public static File getDirectory(File parent, String file, boolean create)
+	{
 		checkBackwardPath(file);
 
 		File directory = new File(parent, file);
 
-		if (!directory.exists())
+		if (create && !directory.exists())
 			directory.mkdirs();
 
 		return directory;

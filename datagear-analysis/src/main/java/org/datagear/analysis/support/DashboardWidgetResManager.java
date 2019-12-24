@@ -74,8 +74,22 @@ public class DashboardWidgetResManager
 	 */
 	public File getFile(String id, String subPath)
 	{
+		return getFile(id, subPath, true);
+	}
+
+	/**
+	 * 获取文件。
+	 * 
+	 * @param id
+	 * @param subPath
+	 * @param create
+	 *            是否自动创建目录
+	 * @return
+	 */
+	public File getFile(String id, String subPath, boolean create)
+	{
 		if (FileUtil.trimPath(subPath).endsWith(FileUtil.PATH_SEPARATOR))
-			return getDirectory(id, subPath);
+			return getDirectory(id, subPath, create);
 
 		String path = getRelativePath(id, subPath);
 
@@ -87,7 +101,7 @@ public class DashboardWidgetResManager
 		{
 			String parent = path.substring(0, sidx);
 
-			if (!parent.isEmpty())
+			if (create && !parent.isEmpty())
 			{
 				File parentDirectory = FileUtil.getDirectory(this.rootDirectory, parent);
 
@@ -110,9 +124,23 @@ public class DashboardWidgetResManager
 	 */
 	public File getDirectory(String id, String subPath)
 	{
+		return getDirectory(id, subPath, true);
+	}
+
+	/**
+	 * 获取目录。
+	 * 
+	 * @param id
+	 * @param subPath
+	 * @param create
+	 *            是否自动创建目录
+	 * @return
+	 */
+	public File getDirectory(String id, String subPath, boolean create)
+	{
 		String path = getRelativePath(id, subPath);
 
-		File file = FileUtil.getDirectory(this.rootDirectory, path);
+		File file = FileUtil.getDirectory(this.rootDirectory, path, create);
 
 		return file;
 	}
