@@ -4,14 +4,15 @@
 
 package org.datagear.web.controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.RenderStyle;
-import org.datagear.analysis.support.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
@@ -22,7 +23,7 @@ import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
-import org.datagear.util.StringUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.WebRequest;
 
 /**
  * 看板控制器。
@@ -41,25 +43,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping("/analysis/dashboard")
-public class DashboardController extends AbstractController
+public class DashboardController extends AbstractDataAnalysisController
 {
 	@Autowired
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
-
-	@Autowired
-	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
 
 	public DashboardController()
 	{
 		super();
 	}
 
-	public DashboardController(HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService,
-			TemplateDashboardWidgetResManager templateDashboardWidgetResManager)
+	public DashboardController(HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService)
 	{
 		super();
 		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
-		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
 	}
 
 	public HtmlTplDashboardWidgetEntityService getHtmlTplDashboardWidgetEntityService()
@@ -71,17 +68,6 @@ public class DashboardController extends AbstractController
 			HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService)
 	{
 		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
-	}
-
-	public TemplateDashboardWidgetResManager getTemplateDashboardWidgetResManager()
-	{
-		return templateDashboardWidgetResManager;
-	}
-
-	public void setTemplateDashboardWidgetResManager(
-			TemplateDashboardWidgetResManager templateDashboardWidgetResManager)
-	{
-		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
 	}
 
 	@RequestMapping("/add")
@@ -225,7 +211,16 @@ public class DashboardController extends AbstractController
 		return pagingData;
 	}
 
-	@RequestMapping("/show/{id}")
+	/**
+	 * 展示看板。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	@RequestMapping({ "/show/{id}/", "/show/{id}/index" })
 	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("id") String id) throws Exception
 	{
@@ -249,19 +244,38 @@ public class DashboardController extends AbstractController
 		dashboardWidget.render(renderContext);
 	}
 
-	protected RenderStyle resolveRenderStyle(HttpServletRequest request) throws Exception
+	/**
+	 * 从看板目录中加载看板资源。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param webRequest
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	@RequestMapping("/show/{id}/**/*")
+	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
+			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
 	{
-		String theme = WebUtils.getTheme(request);
+		String pathInfo = request.getPathInfo();
+		String resPath = pathInfo.substring(pathInfo.indexOf(id) + id.length() + 1);
 
-		if (StringUtil.isEmpty(theme))
-			return RenderStyle.LIGHT;
+		DashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getDashboardWidgetResManager();
 
-		theme = theme.toLowerCase();
+		File resFile = resManager.getFile(id, resPath);
 
-		if (theme.indexOf("dark") > -1)
-			return RenderStyle.DARK;
+		if (!resFile.exists())
+			throw new FileNotFoundException(resPath);
 
-		return RenderStyle.LIGHT;
+		long lastModified = resFile.lastModified();
+		if (webRequest.checkNotModified(lastModified))
+			return;
+
+		OutputStream out = response.getOutputStream();
+
+		IOUtil.write(resFile, out);
 	}
 
 	protected void checkSaveEntity(HtmlTplDashboardWidgetEntity dashboard)

@@ -332,14 +332,13 @@
 		<property name="authorizationService" ref="authorizationService" />
 	</bean>
 	
-	<bean id="templateDashboardWidgetResManager" class="org.datagear.analysis.support.TemplateDashboardWidgetResManager">
+	<bean id="dashboardWidgetResManager" class="org.datagear.analysis.support.DashboardWidgetResManager">
 		<property name="rootDirectory" ref="dashboardRootDirectory" />
 	</bean>
 	
 	<bean id="htmlTplDashboardWidgetRenderer" class="org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer" init-method="init">
 		<property name="importContent" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.js' &gt;&lt;/script&gt;" />
-		<property name="resourceParentURL" value="$CONTEXTPATH/analysis/dashboard/resource" />
-		<property name="templateDashboardWidgetResManager" ref="templateDashboardWidgetResManager" />
+		<property name="dashboardWidgetResManager" ref="dashboardWidgetResManager" />
 		<property name="chartWidgetSource" ref="htmlChartWidgetEntityService" />
 	</bean>
 	

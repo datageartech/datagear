@@ -49,7 +49,7 @@ import org.springframework.web.context.request.WebRequest;
  */
 @Controller
 @RequestMapping("/analysis/chart")
-public class ChartController extends AbstractController
+public class ChartController extends AbstractDataAnalysisController
 {
 	@Autowired
 	private HtmlChartWidgetEntityService htmlChartWidgetEntityService;
@@ -240,7 +240,7 @@ public class ChartController extends AbstractController
 		if (chartPlugin == null)
 			throw new FileNotFoundException();
 
-		RenderStyle renderStyle = getRenderStyle(request);
+		RenderStyle renderStyle = resolveRenderStyle(request);
 		Icon icon = chartPlugin.getIcon(renderStyle);
 
 		if (icon == null)
@@ -304,7 +304,7 @@ public class ChartController extends AbstractController
 		if (plugins != null)
 		{
 			Locale locale = WebUtils.getLocale(request);
-			RenderStyle renderStyle = getRenderStyle(request);
+			RenderStyle renderStyle = resolveRenderStyle(request);
 
 			for (ChartPlugin<HtmlRenderContext> plugin : plugins)
 			{
@@ -334,11 +334,6 @@ public class ChartController extends AbstractController
 		}
 
 		return pluginInfos;
-	}
-
-	protected RenderStyle getRenderStyle(HttpServletRequest request)
-	{
-		return RenderStyle.LIGHT;
 	}
 
 	public static class HtmlChartPluginInfo implements Serializable

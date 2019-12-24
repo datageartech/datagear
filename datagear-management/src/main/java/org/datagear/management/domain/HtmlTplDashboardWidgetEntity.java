@@ -24,7 +24,7 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRen
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final String DEFAULT_TEMPLATE = "dashboard.ftl";
+	public static final String DEFAULT_TEMPLATE = "index.html";
 
 	/** 授权资源类型 */
 	public static final String AUTHORIZATION_RESOURCE_TYPE = "Dashboard";

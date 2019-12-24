@@ -11,8 +11,8 @@ import java.io.StringWriter;
 
 import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.RenderStyle;
+import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
-import org.datagear.analysis.support.TemplateDashboardWidgetResManager;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,18 +35,17 @@ public class HtmlTplDashboardWidgetTest
 		HtmlChartWidget<HtmlRenderContext> htmlChartWidget = new HtmlChartWidget<HtmlRenderContext>("chart-widget-01",
 				chartPlugin, (DataSetFactory[]) null);
 
-		TemplateDashboardWidgetResManager resManager = new TemplateDashboardWidgetResManager(
+		DashboardWidgetResManager resManager = new DashboardWidgetResManager(
 				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets");
 
 		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);
 
 		HtmlTplDashboardWidgetRenderer<HtmlRenderContext> renderer = new HtmlTplDashboardWidgetRenderer<HtmlRenderContext>(
-				"<script type='text/javascript' src='static/js/jquery.js'></script>", "/analysis/resource", resManager,
-				chartWidgetSource);
+				"<script type='text/javascript' src='static/js/jquery.js'></script>", resManager, chartWidgetSource);
 		renderer.init();
 
 		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(
-				"widget01", "dashboard.ftl", renderer);
+				"widget01", "index.html", renderer);
 
 		this.dashboardWidget = dashboardWidget;
 	}

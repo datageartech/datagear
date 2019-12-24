@@ -18,7 +18,8 @@
 	
 	<update id="update">
 		UPDATE DATAGEAR_HTML_DASHBOARD SET
-			HD_NAME = #{entity.name}
+			HD_NAME = #{entity.name},
+			HD_TEMPLATE = #{entity.template}
 		WHERE
 			HD_ID = #{entity.id}
 	</update>

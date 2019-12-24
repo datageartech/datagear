@@ -27,9 +27,8 @@ import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
+import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
-import org.datagear.analysis.support.TemplateDashboardWidgetResManager;
-import org.datagear.util.FileUtil;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
@@ -51,8 +50,8 @@ import freemarker.template.TemplateScalarModel;
 /**
  * {@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 此类可渲染由{@linkplain TemplateDashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
- * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}应为{@linkplain TemplateDashboardWidgetResManager#getFolderName()}中的模板文件名。
+ * 此类可渲染由{@linkplain DashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
+ * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}应该是可以通过{@linkplain DashboardWidgetResManager#getFile(String, String)}找到的模板文件名。
  * </p>
  * <p>
  * 此类需要手动调用{@linkplain #init()}方法进行初始化。
@@ -67,7 +66,6 @@ import freemarker.template.TemplateScalarModel;
  * ...
  * &lt;@theme /&gt;
  * ...
- * &lt;@resource name='...' /&gt;
  * &lt;@dashboard var="..." listener="..."&gt;
  *   ...
  *   <@chart widget="..." var="..." elementId="..." /&gt;
@@ -82,10 +80,6 @@ import freemarker.template.TemplateScalarModel;
  * </p>
  * <p>
  * &lt;@theme /&gt;：引入内置CSS主题样式。
- * </p>
- * <p>
- * &lt;@resource
- * /&gt;：引入自定义资源，“name”为存储在{@linkplain TemplateDashboardWidgetResManager#getResFolderName()}中的文件名。
  * </p>
  * <p>
  * &lt;@dashboard&gt;：定义看板，“var”自定义看板JS变量名，可不填；“listener”自定义看板JS监听器，可不填。
@@ -104,8 +98,6 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	public static final String DIRECTIVE_IMPORT = "import";
 
 	public static final String DIRECTIVE_THEME = "theme";
-
-	public static final String DIRECTIVE_RESOURCE = "resource";
 
 	public static final String DIRECTIVE_DASHBOARD = "dashboard";
 
@@ -129,10 +121,7 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	/** "@import"指令的输出内容需要替换的上下文路径占位符 */
 	private String importContentContextPathPlaceholder = DEFAULT_IMPORT_CONTEXT_PATH_PLACE_HOLDER;
 
-	/** "@resource"指令的加载资根URL */
-	private String resourceParentURL;
-
-	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
+	private DashboardWidgetResManager dashboardWidgetResManager;
 
 	private ChartWidgetSource chartWidgetSource;
 
@@ -162,13 +151,12 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		super();
 	}
 
-	public HtmlTplDashboardWidgetRenderer(String importContent, String resourceRootURL,
-			TemplateDashboardWidgetResManager templateDashboardWidgetResManager, ChartWidgetSource chartWidgetSource)
+	public HtmlTplDashboardWidgetRenderer(String importContent, DashboardWidgetResManager dashboardWidgetResManager,
+			ChartWidgetSource chartWidgetSource)
 	{
 		super();
 		this.importContent = importContent;
-		this.resourceParentURL = resourceRootURL;
-		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
+		this.dashboardWidgetResManager = dashboardWidgetResManager;
 		this.chartWidgetSource = chartWidgetSource;
 	}
 
@@ -192,25 +180,14 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		this.importContentContextPathPlaceholder = importContentContextPathPlaceholder;
 	}
 
-	public String getResourceParentURL()
+	public DashboardWidgetResManager getDashboardWidgetResManager()
 	{
-		return resourceParentURL;
+		return dashboardWidgetResManager;
 	}
 
-	public void setResourceParentURL(String resourceParentURL)
+	public void setDashboardWidgetResManager(DashboardWidgetResManager dashboardWidgetResManager)
 	{
-		this.resourceParentURL = resourceParentURL;
-	}
-
-	public TemplateDashboardWidgetResManager getTemplateDashboardWidgetResManager()
-	{
-		return templateDashboardWidgetResManager;
-	}
-
-	public void setTemplateDashboardWidgetResManager(
-			TemplateDashboardWidgetResManager templateDashboardWidgetResManager)
-	{
-		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
+		this.dashboardWidgetResManager = dashboardWidgetResManager;
 	}
 
 	public ChartWidgetSource getChartWidgetSource()
@@ -301,7 +278,7 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	public void init() throws IOException
 	{
 		Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
-		cfg.setDirectoryForTemplateLoading(this.templateDashboardWidgetResManager.getRootDirectory());
+		cfg.setDirectoryForTemplateLoading(this.dashboardWidgetResManager.getRootDirectory());
 		cfg.setDefaultEncoding(this.templateEncoding);
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 		cfg.setLogTemplateExceptions(false);
@@ -309,7 +286,6 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 
 		cfg.setSharedVariable(DIRECTIVE_IMPORT, new ImportTemplateDirectiveModel());
 		cfg.setSharedVariable(DIRECTIVE_THEME, new ThemeTemplateDirectiveModel());
-		cfg.setSharedVariable(DIRECTIVE_RESOURCE, new ResourceTemplateDirectiveModel());
 		cfg.setSharedVariable(DIRECTIVE_DASHBOARD, new DashboardTemplateDirectiveModel());
 		cfg.setSharedVariable(DIRECTIVE_CHART, new ChartTemplateDirectiveModel());
 
@@ -361,7 +337,7 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	 */
 	public String readTemplateContent(HtmlTplDashboardWidget<T> dashboardWidget) throws IOException
 	{
-		File templateFile = this.templateDashboardWidgetResManager.getTemplateFile(dashboardWidget.getId(),
+		File templateFile = this.dashboardWidgetResManager.getFile(dashboardWidget.getId(),
 				dashboardWidget.getTemplate());
 
 		if (!templateFile.exists())
@@ -394,7 +370,7 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	public void saveTemplateContent(HtmlTplDashboardWidget<T> dashboardWidget, String templateContent)
 			throws IOException
 	{
-		File templateFile = this.templateDashboardWidgetResManager.getTemplateFile(dashboardWidget.getId(),
+		File templateFile = this.dashboardWidgetResManager.getFile(dashboardWidget.getId(),
 				dashboardWidget.getTemplate());
 
 		Writer writer = null;
@@ -450,7 +426,7 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	 */
 	protected Template getTemplate(HtmlTplDashboardWidget<T> dashboardWidget) throws RenderException
 	{
-		String path = this.templateDashboardWidgetResManager.getTemplateRelativePath(dashboardWidget.getId(),
+		String path = this.dashboardWidgetResManager.getRelativePath(dashboardWidget.getId(),
 				dashboardWidget.getTemplate());
 
 		try
@@ -528,6 +504,9 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	{
 		if (StringUtil.isEmpty(str))
 			return str;
+
+		if (contextPath == null)
+			contextPath = "";
 
 		return str.replace(getImportContentContextPathPlaceholder(), contextPath);
 	}
@@ -814,43 +793,6 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 			writeNewLine(out);
 			out.write("    -webkit-box-sizing: border-box;");
 			writeNewLine(out);
-		}
-	}
-
-	/**
-	 * “@resource”指令。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	protected class ResourceTemplateDirectiveModel extends AbstractTemplateDirectiveModel
-	{
-		public ResourceTemplateDirectiveModel()
-		{
-			super();
-		}
-
-		@SuppressWarnings("rawtypes")
-		@Override
-		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-				throws TemplateException, IOException
-		{
-			String resName = getStringParamValue(params, "name");
-
-			if (StringUtil.isEmpty(resName))
-				throw new TemplateException("The [name] attribute must be set", env);
-
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-
-			String resourceParentURL = replaceContextPathPlaceholder(getResourceParentURL(),
-					dataModel.getContextPath());
-
-			String widgetId = dataModel.getHtmlDashboard().getWidget().getId();
-
-			String resURL = FileUtil.concatPath(widgetId, resName, "/");
-			resURL = FileUtil.concatPath(resourceParentURL, resURL, "/");
-
-			env.getOut().write(resURL);
 		}
 	}
 
