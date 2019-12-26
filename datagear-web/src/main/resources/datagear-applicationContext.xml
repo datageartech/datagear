@@ -336,8 +336,15 @@
 		<property name="rootDirectory" ref="dashboardRootDirectory" />
 	</bean>
 	
-	<bean id="htmlTplDashboardWidgetRenderer" class="org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer" init-method="init">
-		<property name="importContent" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.js' &gt;&lt;/script&gt;" />
+	<bean id="htmlTplDashboardWidgetRenderer" class="org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer">
+		<property name="htmlDashboardImports">
+			<list>
+				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
+					<property name="name" value="jquery" />
+					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.js' &gt;&lt;/script&gt;" />
+				</bean>
+			</list>
+		</property>
 		<property name="dashboardWidgetResManager" ref="dashboardWidgetResManager" />
 		<property name="chartWidgetSource" ref="htmlChartWidgetEntityService" />
 	</bean>

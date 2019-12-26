@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartTheme;
@@ -24,90 +22,26 @@ import org.datagear.analysis.DashboardThemeSource;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
-import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetFmkRenderer.HtmlDashboardRenderDataModel;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
-import freemarker.core.Environment;
-import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateDirectiveBody;
-import freemarker.template.TemplateDirectiveModel;
-import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import freemarker.template.TemplateHashModel;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateScalarModel;
-
 /**
- * {@linkplain HtmlTplDashboardWidget}渲染器。
- * <p>
- * 此类可渲染由{@linkplain DashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
- * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}应该是可以通过{@linkplain DashboardWidgetResManager#getFile(String, String)}找到的模板文件名。
- * </p>
- * <p>
- * 此类需要手动调用{@linkplain #init()}方法进行初始化。
- * </p>
- * <p>
- * 支持的模板格式如下：
- * </p>
- * <code>
- * <pre>
- * ...
- * &lt;@import /&gt;
- * ...
- * &lt;@theme /&gt;
- * ...
- * &lt;@dashboard var="..." listener="..."&gt;
- *   ...
- *   <@chart widget="..." var="..." elementId="..." /&gt;
- *   ...
- *   <@chart widget="..." var="..." elementId="..." /&gt;
- *   ...
- * &lt;/@dashboard&gt;
- * </pre>
- * </code>
- * <p>
- * &lt;@import /&gt;：引入内置JS、CSS等HTML资源。
- * </p>
- * <p>
- * &lt;@theme /&gt;：引入内置CSS主题样式。
- * </p>
- * <p>
- * &lt;@dashboard&gt;：定义看板，“var”自定义看板JS变量名，可不填；“listener”自定义看板JS监听器，可不填。
- * </p>
- * <p>
- * &lt;@chart
- * /&gt;：定义图表，“widget”为{@linkplain HtmlChartWidget#getId()}，必填；“var”自定义图表JS变量名，可不填；“elementId”自定义图表HTML元素ID，可不填。
- * </p>
+ * 抽象{@linkplain HtmlTplDashboardWidget}渲染器。
  * 
  * @author datagear@163.com
  *
  * @param <T>
  */
-public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
+public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 {
-	public static final String DIRECTIVE_IMPORT = "import";
-
-	public static final String DIRECTIVE_THEME = "theme";
-
-	public static final String DIRECTIVE_DASHBOARD = "dashboard";
-
-	public static final String DIRECTIVE_CHART = "chart";
-
-	public static final String DASHBOARD_ELEMENT_STYLE_NAME = "dashboard";
-
-	public static final String CHART_ELEMENT_WRAPPER_STYLE_NAME = "chart-wrapper";
-
-	public static final String DEFAULT_IMPORT_CONTEXT_PATH_PLACE_HOLDER = "$CONTEXTPATH";
+	public static final String DEFAULT_CONTEXT_PATH_PLACE_HOLDER = "$CONTEXTPATH";
 
 	protected static final String KEY_HTML_DASHBOARD_RENDER_DATA_MODEL = HtmlDashboardRenderDataModel.class
 			.getSimpleName();
@@ -115,11 +49,11 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	protected static final String RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT = StringUtil
 			.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderValueForNotFound";
 
-	/** "@import"指令的输出内容 */
-	private String importContent;
+	/** 内置导入内容 */
+	private List<HtmlDashboardImport> htmlDashboardImports;
 
-	/** "@import"指令的输出内容需要替换的上下文路径占位符 */
-	private String importContentContextPathPlaceholder = DEFAULT_IMPORT_CONTEXT_PATH_PLACE_HOLDER;
+	/** 上下文路径占位符 */
+	private String contextPathPlaceholder = DEFAULT_CONTEXT_PATH_PLACE_HOLDER;
 
 	private DashboardWidgetResManager dashboardWidgetResManager;
 
@@ -142,42 +76,37 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	/** 换行符 */
 	private String newLine = "\r\n";
 
-	private boolean ignoreDashboardStyleBorderWidth = true;
-
-	private Configuration _configuration;
-
 	public HtmlTplDashboardWidgetRenderer()
 	{
 		super();
 	}
 
-	public HtmlTplDashboardWidgetRenderer(String importContent, DashboardWidgetResManager dashboardWidgetResManager,
+	public HtmlTplDashboardWidgetRenderer(DashboardWidgetResManager dashboardWidgetResManager,
 			ChartWidgetSource chartWidgetSource)
 	{
 		super();
-		this.importContent = importContent;
 		this.dashboardWidgetResManager = dashboardWidgetResManager;
 		this.chartWidgetSource = chartWidgetSource;
 	}
 
-	public String getImportContent()
+	public List<HtmlDashboardImport> getHtmlDashboardImports()
 	{
-		return importContent;
+		return htmlDashboardImports;
 	}
 
-	public void setImportContent(String importContent)
+	public void setHtmlDashboardImports(List<HtmlDashboardImport> htmlDashboardImports)
 	{
-		this.importContent = importContent;
+		this.htmlDashboardImports = htmlDashboardImports;
 	}
 
-	public String getImportContentContextPathPlaceholder()
+	public String getContextPathPlaceholder()
 	{
-		return importContentContextPathPlaceholder;
+		return contextPathPlaceholder;
 	}
 
-	public void setImportContentContextPathPlaceholder(String importContentContextPathPlaceholder)
+	public void setContextPathPlaceholder(String contextPathPlaceholder)
 	{
-		this.importContentContextPathPlaceholder = importContentContextPathPlaceholder;
+		this.contextPathPlaceholder = contextPathPlaceholder;
 	}
 
 	public DashboardWidgetResManager getDashboardWidgetResManager()
@@ -260,38 +189,6 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		this.newLine = newLine;
 	}
 
-	public boolean isIgnoreDashboardStyleBorderWidth()
-	{
-		return ignoreDashboardStyleBorderWidth;
-	}
-
-	public void setIgnoreDashboardStyleBorderWidth(boolean ignoreDashboardStyleBorderWidth)
-	{
-		this.ignoreDashboardStyleBorderWidth = ignoreDashboardStyleBorderWidth;
-	}
-
-	/**
-	 * 初始化。
-	 * 
-	 * @throws IOException
-	 */
-	public void init() throws IOException
-	{
-		Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
-		cfg.setDirectoryForTemplateLoading(this.dashboardWidgetResManager.getRootDirectory());
-		cfg.setDefaultEncoding(this.templateEncoding);
-		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-		cfg.setLogTemplateExceptions(false);
-		cfg.setWrapUncheckedExceptions(true);
-
-		cfg.setSharedVariable(DIRECTIVE_IMPORT, new ImportTemplateDirectiveModel());
-		cfg.setSharedVariable(DIRECTIVE_THEME, new ThemeTemplateDirectiveModel());
-		cfg.setSharedVariable(DIRECTIVE_DASHBOARD, new DashboardTemplateDirectiveModel());
-		cfg.setSharedVariable(DIRECTIVE_CHART, new ChartTemplateDirectiveModel());
-
-		setConfiguration(cfg);
-	}
-
 	/**
 	 * 渲染{@linkplain Dashboard}。
 	 * 
@@ -304,21 +201,15 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	{
 		inflateThemes(renderContext);
 
-		Template template = getTemplate(dashboardWidget);
-
-		HtmlDashboard dashboard = new HtmlDashboard();
-
-		dashboard.setId(IDUtil.uuid());
-		dashboard.setWidget(dashboardWidget);
-		dashboard.setRenderContext(renderContext);
-		dashboard.setCharts(new ArrayList<Chart>());
-
-		HtmlDashboardRenderDataModel dataModel = new HtmlDashboardRenderDataModel(dashboard,
-				renderContext.getContextPath());
+		HtmlDashboard dashboard = createHtmlDashboard(renderContext, dashboardWidget);
 
 		try
 		{
-			template.process(buildHtmlDashboardRenderDataModel(dataModel), renderContext.getWriter());
+			renderHtmlDashboard(renderContext, dashboard);
+		}
+		catch (RenderException e)
+		{
+			throw e;
 		}
 		catch (Throwable t)
 		{
@@ -386,6 +277,52 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		}
 	}
 
+	/**
+	 * 创建{@linkplain HtmlDashboard}。
+	 * 
+	 * @param renderContext
+	 * @param dashboardWidget
+	 * @return
+	 */
+	protected HtmlDashboard createHtmlDashboard(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget)
+	{
+		HtmlDashboard dashboard = new HtmlDashboard();
+
+		dashboard.setId(IDUtil.uuid());
+		dashboard.setWidget(dashboardWidget);
+		dashboard.setRenderContext(renderContext);
+		dashboard.setCharts(new ArrayList<Chart>());
+
+		return dashboard;
+	}
+
+	/**
+	 * 渲染{@linkplain Dashboard}。
+	 * 
+	 * @param renderContext
+	 * @param dashboard
+	 * @throws Exception
+	 */
+	protected abstract void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Exception;
+
+	/**
+	 * 获取{@linkplain HtmlTplDashboardWidget#getId()}的指定模板对象。
+	 * 
+	 * @param dashboardWidget
+	 * @return
+	 * @throws Exception
+	 */
+	protected Reader getTemplateReader(HtmlTplDashboardWidget<?> dashboardWidget) throws Exception
+	{
+		File templateFile = this.dashboardWidgetResManager.getFile(dashboardWidget.getId(),
+				dashboardWidget.getTemplate());
+
+		if (!templateFile.exists())
+			throw new RenderException("Dashboard template file not found");
+
+		return IOUtil.getReader(templateFile, getTemplateEncoding());
+	}
+
 	protected void inflateThemes(HtmlRenderContext renderContext)
 	{
 		RenderStyle renderStyle = HtmlRenderAttributes.getRenderStyle(renderContext);
@@ -418,38 +355,6 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 	}
 
 	/**
-	 * 获取{@linkplain HtmlTplDashboardWidget#getId()}的指定模板对象。
-	 * 
-	 * @param dashboardWidget
-	 * @return
-	 * @throws RenderException
-	 */
-	protected Template getTemplate(HtmlTplDashboardWidget<T> dashboardWidget) throws RenderException
-	{
-		String path = this.dashboardWidgetResManager.getRelativePath(dashboardWidget.getId(),
-				dashboardWidget.getTemplate());
-
-		try
-		{
-			return getConfiguration().getTemplate(path);
-		}
-		catch (Throwable t)
-		{
-			throw new RenderException(t);
-		}
-	}
-
-	protected Configuration getConfiguration()
-	{
-		return _configuration;
-	}
-
-	protected void setConfiguration(Configuration _configuration)
-	{
-		this._configuration = _configuration;
-	}
-
-	/**
 	 * 获取用于渲染指定ID图表的{@linkplain ChartWidget}。
 	 * <p>
 	 * 此方法不会返回{@code null}，如果找不到指定ID的{@linkplain ChartWidget}，它将返回。
@@ -474,23 +379,47 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		return (HtmlChartWidget<HtmlRenderContext>) chartWidget;
 	}
 
-	protected Object buildHtmlDashboardRenderDataModel(HtmlDashboardRenderDataModel dataModel)
+	protected void writeHtmlDashboardScriptObject(Writer out, HtmlDashboard dashboard, boolean renderContextEmpty)
+			throws IOException
 	{
-		Map<String, Object> map = new HashMap<String, Object>();
-
-		map.put(KEY_HTML_DASHBOARD_RENDER_DATA_MODEL, dataModel);
-
-		return map;
+		getHtmlDashboardScriptObjectWriter().write(out, dashboard, renderContextEmpty);
 	}
 
-	protected HtmlDashboardRenderDataModel getHtmlDashboardRenderDataModel(Environment env)
-			throws TemplateModelException
+	protected void writeRenderContextScriptObject(Writer out, RenderContext renderContext) throws IOException
 	{
-		TemplateHashModel templateHashModel = env.getDataModel();
-		HtmlDashboardRenderDataModel dataModel = (HtmlDashboardRenderDataModel) templateHashModel
-				.get(KEY_HTML_DASHBOARD_RENDER_DATA_MODEL);
+		getHtmlDashboardScriptObjectWriter().writeRenderContext(out, renderContext, true);
+	}
 
-		return dataModel;
+	/**
+	 * 写看板导入项。
+	 * 
+	 * @param renderContext
+	 * @param dashboard
+	 * @param importExclude
+	 * @throws IOException
+	 */
+	protected void writeDashboardImport(HtmlRenderContext renderContext, HtmlDashboard dashboard, String importExclude)
+			throws IOException
+	{
+		if (this.htmlDashboardImports == null || this.htmlDashboardImports.isEmpty())
+			return;
+
+		Writer out = renderContext.getWriter();
+
+		List<String> excludes = StringUtil.splitWithTrim(importExclude, ",");
+
+		for (HtmlDashboardImport impt : this.htmlDashboardImports)
+		{
+			String name = impt.getName();
+
+			if (excludes.contains(name))
+				continue;
+
+			String content = replaceContextPathPlaceholder(impt.getContent(), renderContext.getContextPath());
+
+			writeNewLine(out);
+			out.write(content);
+		}
 	}
 
 	/**
@@ -508,556 +437,39 @@ public class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
 		if (contextPath == null)
 			contextPath = "";
 
-		return str.replace(getImportContentContextPathPlaceholder(), contextPath);
+		return str.replace(getContextPathPlaceholder(), contextPath);
 	}
 
 	/**
-	 * HTML看板渲染数据模型。
+	 * 写脚本开始标签。
 	 * 
-	 * @author datagear@163.com
-	 *
+	 * @param out
+	 * @throws IOException
 	 */
-	protected static class HtmlDashboardRenderDataModel implements WrapperTemplateModel
+	protected void writeScriptStartTag(Writer out) throws IOException
 	{
-		private HtmlDashboard htmlDashboard;
-
-		private String contextPath = "";
-
-		public HtmlDashboardRenderDataModel()
-		{
-			super();
-		}
-
-		public HtmlDashboardRenderDataModel(HtmlDashboard htmlDashboard, String contextPath)
-		{
-			super();
-			this.htmlDashboard = htmlDashboard;
-			this.contextPath = contextPath;
-		}
-
-		public HtmlDashboard getHtmlDashboard()
-		{
-			return htmlDashboard;
-		}
-
-		public void setHtmlDashboard(HtmlDashboard htmlDashboard)
-		{
-			this.htmlDashboard = htmlDashboard;
-		}
-
-		public String getContextPath()
-		{
-			return contextPath;
-		}
-
-		public void setContextPath(String contextPath)
-		{
-			this.contextPath = contextPath;
-		}
-
-		@Override
-		public Object getWrappedObject()
-		{
-			return this.htmlDashboard;
-		}
-	}
-
-	protected abstract class AbstractTemplateDirectiveModel implements TemplateDirectiveModel
-	{
-		public AbstractTemplateDirectiveModel()
-		{
-			super();
-		}
-
-		/**
-		 * 获取字符串参数值。
-		 * 
-		 * @param params
-		 * @param key
-		 * @return
-		 * @throws TemplateModelException
-		 */
-		protected String getStringParamValue(Map<?, ?> params, String key) throws TemplateModelException
-		{
-			Object value = params.get(key);
-
-			if (value == null)
-				return null;
-			else if (value instanceof String)
-				return (String) value;
-			else if (value instanceof TemplateScalarModel)
-				return ((TemplateScalarModel) value).getAsString();
-			else
-				throw new TemplateModelException(
-						"Can not get string from [" + value.getClass().getName() + "] instance");
-		}
-
-		/**
-		 * 写脚本开始标签。
-		 * 
-		 * @param out
-		 * @throws IOException
-		 */
-		protected void writeScriptStartTag(Writer out) throws IOException
-		{
-			out.write("<script type=\"text/javascript\">");
-		}
-
-		/**
-		 * 写脚本结束标签。
-		 * 
-		 * @param out
-		 * @throws IOException
-		 */
-		protected void writeScriptEndTag(Writer out) throws IOException
-		{
-			out.write("</script>");
-		}
-
-		/**
-		 * 写换行符。
-		 * 
-		 * @param out
-		 * @throws IOException
-		 */
-		protected void writeNewLine(Writer out) throws IOException
-		{
-			out.write(getNewLine());
-		}
+		out.write("<script type=\"text/javascript\">");
 	}
 
 	/**
-	 * “@import”指令。
+	 * 写脚本结束标签。
 	 * 
-	 * @author datagear@163.com
-	 *
+	 * @param out
+	 * @throws IOException
 	 */
-	protected class ImportTemplateDirectiveModel extends AbstractTemplateDirectiveModel
+	protected void writeScriptEndTag(Writer out) throws IOException
 	{
-		public ImportTemplateDirectiveModel()
-		{
-			super();
-		}
-
-		@SuppressWarnings("rawtypes")
-		@Override
-		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-				throws TemplateException, IOException
-		{
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-
-			Writer out = env.getOut();
-
-			String importContent = getImportContent();
-			if (importContent == null)
-				importContent = "";
-
-			out.write("<meta charset=\"" + getWriterEncoding() + "\">");
-
-			if (!StringUtil.isEmpty(importContent))
-			{
-				importContent = replaceContextPathPlaceholder(importContent, dataModel.getContextPath());
-				writeNewLine(out);
-				out.write(importContent);
-				writeNewLine(out);
-			}
-		}
+		out.write("</script>");
 	}
 
 	/**
-	 * “@theme”指令。
+	 * 写换行符。
 	 * 
-	 * @author datagear@163.com
-	 *
+	 * @param out
+	 * @throws IOException
 	 */
-	protected class ThemeTemplateDirectiveModel extends AbstractTemplateDirectiveModel
+	protected void writeNewLine(Writer out) throws IOException
 	{
-		public ThemeTemplateDirectiveModel()
-		{
-			super();
-		}
-
-		@SuppressWarnings("rawtypes")
-		@Override
-		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-				throws TemplateException, IOException
-		{
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-			HtmlRenderContext renderContext = dataModel.getHtmlDashboard().getRenderContext();
-
-			Writer out = env.getOut();
-
-			DashboardTheme dashboardTheme = getDashboardTheme(renderContext);
-			writeDashboardTheme(out, dashboardTheme);
-		}
-
-		protected DashboardTheme getDashboardTheme(RenderContext renderContext)
-		{
-			DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
-			return dashboardTheme;
-		}
-
-		protected void writeDashboardTheme(Writer out, DashboardTheme dashboardTheme) throws IOException
-		{
-			ChartTheme chartTheme = (dashboardTheme == null ? null : dashboardTheme.getChartTheme());
-
-			out.write("<style type=\"text/css\">");
-			writeNewLine(out);
-			out.write("body{");
-			writeNewLine(out);
-			out.write("    padding: 0px 0px;");
-			writeNewLine(out);
-			out.write("    margin: 0px 0px;");
-			writeNewLine(out);
-			if (dashboardTheme != null)
-			{
-				out.write("    background-color: " + dashboardTheme.getBackgroundColor() + ";");
-				writeNewLine(out);
-				out.write("    color: " + dashboardTheme.getForegroundColor() + ";");
-				writeNewLine(out);
-			}
-			out.write("}");
-			writeNewLine(out);
-			out.write("." + DASHBOARD_ELEMENT_STYLE_NAME + "{");
-			writeNewLine(out);
-			writeThemeCssAttrs(out, dashboardTheme);
-			writeBorderBoxCssAttrs(out);
-			if (isIgnoreDashboardStyleBorderWidth())
-			{
-				out.write("    border-width: 0px;");
-				writeNewLine(out);
-			}
-			out.write("}");
-			writeNewLine(out);
-
-			out.write("." + CHART_ELEMENT_WRAPPER_STYLE_NAME + "{");
-			writeNewLine(out);
-			out.write("    position: relative;");
-			writeNewLine(out);
-			writeThemeCssAttrs(out, chartTheme);
-			writeBorderBoxCssAttrs(out);
-			out.write("}");
-			writeNewLine(out);
-
-			out.write("." + HtmlChartPlugin.BUILTIN_CHART_ELEMENT_STYLE_NAME + "{");
-			writeNewLine(out);
-			writeFillParentCssAttrs(out);
-			writeBorderBoxCssAttrs(out);
-			out.write("}");
-			writeNewLine(out);
-
-			out.write("</style>");
-			writeNewLine(out);
-		}
-
-		protected void writeThemeCssAttrs(Writer out, Theme theme) throws IOException
-		{
-			if (theme != null)
-			{
-				String borderWidth = theme.getBorderWidth();
-				if (borderWidth == null)
-					borderWidth = "0";
-
-				out.write("    color: " + theme.getForegroundColor() + ";");
-				writeNewLine(out);
-				out.write("    background-color: " + theme.getBackgroundColor() + ";");
-				writeNewLine(out);
-				out.write("    border-color: " + theme.getBorderColor() + ";");
-				writeNewLine(out);
-				out.write("    border-width: " + theme.getBorderWidth() + ";");
-				writeNewLine(out);
-				out.write("    border-style: solid;");
-				writeNewLine(out);
-			}
-		}
-
-		protected void writeFillParentCssAttrs(Writer out) throws IOException
-		{
-			out.write("    position: absolute;");
-			writeNewLine(out);
-			out.write("    top: 0px;");
-			writeNewLine(out);
-			out.write("    bottom: 0px;");
-			writeNewLine(out);
-			out.write("    left: 0px;");
-			writeNewLine(out);
-			out.write("    right: 0px;");
-			writeNewLine(out);
-		}
-
-		protected void writeBorderBoxCssAttrs(Writer out) throws IOException
-		{
-			out.write("    box-sizing: border-box;");
-			writeNewLine(out);
-			out.write("    -moz-box-sizing: border-box;");
-			writeNewLine(out);
-			out.write("    -webkit-box-sizing: border-box;");
-			writeNewLine(out);
-		}
-	}
-
-	/**
-	 * “@dashboard”指令。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	protected class DashboardTemplateDirectiveModel extends AbstractTemplateDirectiveModel
-	{
-		public DashboardTemplateDirectiveModel()
-		{
-			super();
-		}
-
-		@SuppressWarnings("rawtypes")
-		@Override
-		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-				throws TemplateException, IOException
-		{
-			String varName = getStringParamValue(params, "var");
-			String listener = getStringParamValue(params, "listener");
-			boolean hasListener = !StringUtil.isEmpty(listener);
-
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
-			HtmlRenderContext renderContext = dashboard.getRenderContext();
-			int nextSequence = -1;
-
-			if (StringUtil.isEmpty(varName))
-			{
-				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
-				varName = HtmlRenderAttributes.generateDashboardVarName(nextSequence);
-			}
-
-			dashboard.setVarName(varName);
-
-			Writer out = env.getOut();
-
-			writeScriptStartTag(out);
-			writeNewLine(out);
-
-			out.write("var ");
-			out.write(varName);
-			out.write("=");
-			writeNewLine(out);
-			writeHtmlDashboardScriptObject(out, dashboard, true);
-			out.write(";");
-			writeNewLine(out);
-
-			writeScriptEndTag(out);
-			writeNewLine(out);
-
-			HtmlRenderAttributes.setChartRenderContextVarName(renderContext, varName + ".renderContext");
-
-			if (body != null)
-				body.render(out);
-
-			writeScriptStartTag(out);
-			writeNewLine(out);
-
-			String tmpRenderContextVar = HtmlRenderAttributes.generateRenderContextVarName(nextSequence);
-
-			// 移除内部设置的属性
-			HtmlRenderAttributes.removeChartRenderContextVarName(renderContext);
-			HtmlRenderAttributes.removeChartNotRenderScriptTag(renderContext);
-			HtmlRenderAttributes.removeChartScriptNotInvokeRender(renderContext);
-			HtmlRenderAttributes.removeChartVarName(renderContext);
-			HtmlRenderAttributes.removeChartElementId(renderContext);
-
-			renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
-
-			out.write("var ");
-			out.write(tmpRenderContextVar);
-			out.write("=");
-			writeNewLine(out);
-			writeRenderContextScriptObject(out, renderContext);
-			out.write(";");
-			writeNewLine(out);
-			out.write(varName + ".renderContext.attributes = " + tmpRenderContextVar + ".attributes;");
-			writeNewLine(out);
-
-			List<? extends HtmlChart> charts = dashboard.getCharts();
-			if (charts != null)
-			{
-				for (HtmlChart chart : charts)
-				{
-					out.write(varName + ".charts.push(" + chart.getVarName() + ");");
-					writeNewLine(out);
-				}
-			}
-
-			out.write(varName + ".render = function(){");
-			writeNewLine(out);
-			out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i].render(); }");
-			writeNewLine(out);
-			out.write("};");
-			writeNewLine(out);
-
-			out.write(varName + ".update = function(){");
-			writeNewLine(out);
-			out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i].update(); }");
-			writeNewLine(out);
-			out.write("};");
-			writeNewLine(out);
-
-			if (hasListener)
-			{
-				out.write(varName + ".listener = window[\"" + listener + "\"];");
-				writeNewLine(out);
-			}
-
-			out.write("window.onload = function(){");
-			writeNewLine(out);
-
-			if (hasListener)
-			{
-				out.write("if(" + varName + ".listener && " + varName + ".listener.beforeRender)");
-				writeNewLine(out);
-				out.write("  " + varName + ".listener.beforeRender(" + varName + "); ");
-				writeNewLine(out);
-			}
-
-			out.write(varName + ".render();");
-			writeNewLine(out);
-
-			if (hasListener)
-			{
-				out.write("if(" + varName + ".listener && " + varName + ".listener.afterRender)");
-				writeNewLine(out);
-				out.write("  " + varName + ".listener.afterRender(" + varName + "); ");
-				writeNewLine(out);
-			}
-
-			if (hasListener)
-			{
-				out.write("if(" + varName + ".listener && " + varName + ".listener.beforeUpdate)");
-				writeNewLine(out);
-				out.write("  " + varName + ".listener.beforeUpdate(" + varName + "); ");
-				writeNewLine(out);
-			}
-
-			out.write(varName + ".update();");
-			writeNewLine(out);
-
-			if (hasListener)
-			{
-				out.write("if(" + varName + ".listener && " + varName + ".listener.afterUpdate)");
-				writeNewLine(out);
-				out.write("  " + varName + ".listener.afterUpdate(" + varName + "); ");
-				writeNewLine(out);
-			}
-
-			out.write("};");
-			writeNewLine(out);
-
-			writeScriptEndTag(out);
-			writeNewLine(out);
-		}
-
-		protected void writeHtmlDashboardScriptObject(Writer out, HtmlDashboard dashboard, boolean renderContextEmpty)
-				throws IOException
-		{
-			getHtmlDashboardScriptObjectWriter().write(out, dashboard, renderContextEmpty);
-		}
-
-		protected void writeRenderContextScriptObject(Writer out, RenderContext renderContext) throws IOException
-		{
-			getHtmlDashboardScriptObjectWriter().writeRenderContext(out, renderContext, true);
-		}
-	}
-
-	/**
-	 * “@chart”指令。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	protected class ChartTemplateDirectiveModel extends AbstractTemplateDirectiveModel
-	{
-		public ChartTemplateDirectiveModel()
-		{
-			super();
-		}
-
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		@Override
-		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-				throws TemplateException, IOException
-		{
-			String widget = getStringParamValue(params, "widget");
-			String var = getStringParamValue(params, "var");
-			String elementId = getStringParamValue(params, "elementId");
-
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-			HtmlDashboard htmlDashboard = dataModel.getHtmlDashboard();
-			HtmlRenderContext renderContext = htmlDashboard.getRenderContext();
-			int nextSequence = -1;
-
-			HtmlChartWidget<HtmlRenderContext> chartWidget = getHtmlChartWidgetForRender(renderContext, widget);
-
-			if (StringUtil.isEmpty(var))
-			{
-				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
-				var = HtmlRenderAttributes.generateChartVarName(nextSequence);
-			}
-
-			if (StringUtil.isEmpty(elementId))
-			{
-				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
-				elementId = HtmlRenderAttributes.generateChartElementId(nextSequence);
-			}
-
-			HtmlRenderAttributes.setChartNotRenderScriptTag(renderContext, false);
-			HtmlRenderAttributes.setChartScriptNotInvokeRender(renderContext, true);
-			HtmlRenderAttributes.setChartVarName(renderContext, var);
-			HtmlRenderAttributes.setChartElementId(renderContext, elementId);
-
-			HtmlChart chart = chartWidget.render(renderContext);
-
-			List<HtmlChart> charts = (List<HtmlChart>) htmlDashboard.getCharts();
-			if (charts == null)
-			{
-				charts = new ArrayList<HtmlChart>();
-				htmlDashboard.setCharts(charts);
-			}
-
-			charts.add(chart);
-		}
-
-		/**
-		 * 写脚本开始标签。
-		 * 
-		 * @param out
-		 * @throws IOException
-		 */
-		@Override
-		protected void writeScriptStartTag(Writer out) throws IOException
-		{
-			out.write("<script type=\"text/javascript\">");
-		}
-
-		/**
-		 * 写脚本结束标签。
-		 * 
-		 * @param out
-		 * @throws IOException
-		 */
-		@Override
-		protected void writeScriptEndTag(Writer out) throws IOException
-		{
-			out.write("</script>");
-		}
-
-		/**
-		 * 写换行符。
-		 * 
-		 * @param out
-		 * @throws IOException
-		 */
-		@Override
-		protected void writeNewLine(Writer out) throws IOException
-		{
-			out.write(getNewLine());
-		}
+		out.write(getNewLine());
 	}
 }

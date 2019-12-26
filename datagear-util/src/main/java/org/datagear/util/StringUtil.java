@@ -7,7 +7,10 @@
  */
 package org.datagear.util;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -186,5 +189,29 @@ public class StringUtil
 		}
 
 		return sb.toString();
+	}
+
+	/**
+	 * 拆分字符串，并删除元素两边的空格。
+	 * <p>
+	 * 如果{@code s}为{@code null}，返回空列表。
+	 * </p>
+	 * 
+	 * @param str
+	 * @param splitter
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<String> splitWithTrim(String str, String splitter)
+	{
+		if (str == null)
+			return Collections.EMPTY_LIST;
+
+		String[] strs = str.split(splitter);
+
+		for (int i = 0; i < strs.length; i++)
+			strs[i] = strs[i].trim();
+
+		return Arrays.asList(strs);
 	}
 }

@@ -17,16 +17,16 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * {@linkplain HtmlTplDashboardWidget}单元测试类。
+ * {@linkplain HtmlTplDashboardWidgetFmkRenderer}单元测试类。
  * 
  * @author datagear@163.com
  *
  */
-public class HtmlTplDashboardWidgetTest
+public class HtmlTplDashboardWidgetFmkRendererTest
 {
-	private HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget;
+	private HtmlTplDashboardWidgetFmkRenderer<HtmlRenderContext> renderer;
 
-	public HtmlTplDashboardWidgetTest() throws Exception
+	public HtmlTplDashboardWidgetFmkRendererTest() throws Exception
 	{
 		super();
 
@@ -36,27 +36,24 @@ public class HtmlTplDashboardWidgetTest
 				chartPlugin, (DataSetFactory[]) null);
 
 		DashboardWidgetResManager resManager = new DashboardWidgetResManager(
-				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets");
+				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/freemarker");
 
 		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);
 
-		HtmlTplDashboardWidgetRenderer<HtmlRenderContext> renderer = new HtmlTplDashboardWidgetRenderer<HtmlRenderContext>(
-				"<script type='text/javascript' src='static/js/jquery.js'></script>", resManager, chartWidgetSource);
-		renderer.init();
-
-		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(
-				"widget01", "index.html", renderer);
-
-		this.dashboardWidget = dashboardWidget;
+		this.renderer = new HtmlTplDashboardWidgetFmkRenderer<HtmlRenderContext>(resManager, chartWidgetSource);
+		this.renderer.init();
 	}
 
 	@Test
 	public void renderTest()
 	{
+		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(
+				"widget01", "index.html", this.renderer);
+
 		StringWriter stringWriter = new StringWriter();
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(stringWriter);
 		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
-		HtmlDashboard dashboard = this.dashboardWidget.render(renderContext);
+		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
 
 		String html = stringWriter.toString();
 

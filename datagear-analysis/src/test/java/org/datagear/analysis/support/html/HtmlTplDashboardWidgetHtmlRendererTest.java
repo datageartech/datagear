@@ -1,0 +1,310 @@
+/*
+ * Copyright (c) 2018 datagear.tech. All Rights Reserved.
+ */
+
+/**
+ * 
+ */
+package org.datagear.analysis.support.html;
+
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.RenderStyle;
+import org.datagear.analysis.support.DashboardWidgetResManager;
+import org.datagear.analysis.support.SimpleChartWidgetSource;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.ChartInfo;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DashboardInfo;
+import org.datagear.util.IOUtil;
+import org.junit.Assert;
+import org.junit.Test;
+
+/**
+ * {@linkplain HtmlTplDashboardWidgetHtmlRenderer}单元测试类。
+ * 
+ * @author datagear@163.com
+ *
+ */
+public class HtmlTplDashboardWidgetHtmlRendererTest
+{
+	private HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> renderer;
+
+	protected static final String IMPORT_CONTENT_JQUERY = "<script type=\"text/javascript\" src=\"jquery.js\"></script>";
+
+	protected static final String IMPORT_CONTENT_UTIL = "<script type=\"text/javascript\" src=\"util.js\"></script>";
+
+	protected static final String IMPORT_CONTENT_THEME = "<link rel=\"stylesheet\" type=\"text/css\" href=\"theme.css\">";
+
+	protected static final String IMPORT_CONTENT_STYLE = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\">";
+
+	public HtmlTplDashboardWidgetHtmlRendererTest() throws Exception
+	{
+		super();
+
+		HtmlChartPlugin<HtmlRenderContext> chartPlugin = HtmlChartPluginTest.createHtmlChartPlugin();
+
+		HtmlChartWidget<HtmlRenderContext> htmlChartWidget = new HtmlChartWidget<HtmlRenderContext>("chart-widget-01",
+				chartPlugin, (DataSetFactory[]) null);
+
+		DashboardWidgetResManager resManager = new DashboardWidgetResManager(
+				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/html");
+
+		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);
+
+		List<HtmlDashboardImport> htmlDashboardImports = new ArrayList<HtmlDashboardImport>();
+		htmlDashboardImports.add(new HtmlDashboardImport("jquery", IMPORT_CONTENT_JQUERY));
+		htmlDashboardImports.add(new HtmlDashboardImport("util", IMPORT_CONTENT_UTIL));
+		htmlDashboardImports.add(new HtmlDashboardImport("theme", IMPORT_CONTENT_THEME));
+		htmlDashboardImports.add(new HtmlDashboardImport("style", IMPORT_CONTENT_STYLE));
+
+		this.renderer = new HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext>(resManager, chartWidgetSource);
+		this.renderer.setHtmlDashboardImports(htmlDashboardImports);
+	}
+
+	@Test
+	public void renderHtmlDashboardTest() throws Exception
+	{
+		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = createHtmlTplDashboardWidget();
+
+		// 看板属性，双引号
+		{
+			String template = "<html dg-dashboard-var=\"myDashboard\" dg-dashboard-listener=\"myListener\" "
+					+ " dg-dashboard-import-exclude=\"jquery\"><head></head><body></body></html>";
+
+			StringWriter out = new StringWriter();
+			DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(out);
+
+			HtmlDashboard dashboard = this.renderer.createHtmlDashboard(renderContext, dashboardWidget);
+
+			DashboardInfo dashboardInfo = this.renderer.renderHtmlDashboard(renderContext, dashboard,
+					IOUtil.getReader(template));
+
+			String html = out.toString();
+
+			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
+			Assert.assertEquals("myListener", dashboardInfo.getListenerVar());
+			Assert.assertEquals("jquery", dashboardInfo.getImportExclude());
+			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
+			Assert.assertTrue(html.contains("var myDashboard"));
+			Assert.assertTrue(html.contains("myDashboard.listener = window[\"myListener\"];"));
+		}
+
+		// 看板属性，无引号
+		{
+			String template = "<html dg-dashboard-var=myDashboard dg-dashboard-listener=myListener "
+					+ " dg-dashboard-import-exclude=jquery><head></head><body></body></html>";
+
+			StringWriter out = new StringWriter();
+			DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(out);
+
+			HtmlDashboard dashboard = this.renderer.createHtmlDashboard(renderContext, dashboardWidget);
+
+			DashboardInfo dashboardInfo = this.renderer.renderHtmlDashboard(renderContext, dashboard,
+					IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
+			Assert.assertEquals("myListener", dashboardInfo.getListenerVar());
+			Assert.assertEquals("jquery", dashboardInfo.getImportExclude());
+			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
+			Assert.assertTrue(html.contains("var myDashboard"));
+			Assert.assertTrue(html.contains("myDashboard.listener = window[\"myListener\"];"));
+		}
+
+		// 看板属性，单引号
+		{
+			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-listener='myListener' "
+					+ " dg-dashboard-import-exclude='jquery'><head></head><body></body></html>";
+
+			StringWriter out = new StringWriter();
+			DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(out);
+
+			HtmlDashboard dashboard = this.renderer.createHtmlDashboard(renderContext, dashboardWidget);
+
+			DashboardInfo dashboardInfo = this.renderer.renderHtmlDashboard(renderContext, dashboard,
+					IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
+			Assert.assertEquals("myListener", dashboardInfo.getListenerVar());
+			Assert.assertEquals("jquery", dashboardInfo.getImportExclude());
+			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
+			Assert.assertTrue(html.contains("var myDashboard"));
+			Assert.assertTrue(html.contains("myDashboard.listener = window[\"myListener\"];"));
+		}
+
+		// 看板属性，多个导入排除值
+		{
+			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-listener='myListener' "
+					+ " dg-dashboard-import-exclude='jquery,theme, style '><head></head><body></body></html>";
+
+			StringWriter out = new StringWriter();
+			DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(out);
+
+			HtmlDashboard dashboard = this.renderer.createHtmlDashboard(renderContext, dashboardWidget);
+
+			DashboardInfo dashboardInfo = this.renderer.renderHtmlDashboard(renderContext, dashboard,
+					IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
+			Assert.assertEquals("myListener", dashboardInfo.getListenerVar());
+			Assert.assertEquals("jquery,theme, style", dashboardInfo.getImportExclude());
+			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
+			Assert.assertFalse(html.contains(IMPORT_CONTENT_THEME));
+			Assert.assertFalse(html.contains(IMPORT_CONTENT_STYLE));
+			Assert.assertTrue(html.contains("var myDashboard"));
+			Assert.assertTrue(html.contains("myDashboard.listener = window[\"myListener\"];"));
+		}
+
+		// 看板属性，默认
+		{
+			String template = "<html><head></head><body></body></html>";
+
+			StringWriter out = new StringWriter();
+			DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(out);
+
+			HtmlDashboard dashboard = this.renderer.createHtmlDashboard(renderContext, dashboardWidget);
+
+			DashboardInfo dashboardInfo = this.renderer.renderHtmlDashboard(renderContext, dashboard,
+					IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertNull(dashboardInfo.getDashboardVar());
+			Assert.assertNull(dashboardInfo.getListenerVar());
+			Assert.assertNull(dashboardInfo.getImportExclude());
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_JQUERY));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
+			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
+			Assert.assertTrue(html.contains("var dataGearDashboard1"));
+			Assert.assertFalse(html.contains("dataGearDashboard1.listener = window[\""));
+		}
+
+		// 图表属性
+		{
+			String template = "<html><head></head><body>" + "\r\n"
+					+ "<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\" dg-chart-var=\"chartvar_1\"></div>"
+					+ "\r\n" + "<div id='element_2' dg-chart-widget='chartwidget_2' dg-chart-var='chartvar_2'></div>"
+					+ "\r\n" + "<div id=element_3 dg-chart-widget=chartwidget_3 dg-chart-var=chartvar_3></div>" + "\r\n"
+					+ "<div sdf abc def 12345677788 // >"
+					//
+					+ "\r\n"
+					+ "<div   id=element_4    dg-chart-widget=chartwidget_4    dg-chart-var=chartvar_4   ></div>"
+					+ "\r\n"
+					+ "<div   id  =  element_5    dg-chart-widget=  chartwidget_5    dg-chart-var  =chartvar_5/>"
+					+ "\r\n" + "<div   id=element_6    dg-chart-widget=chartwidget_6    dg-chart-var=chartvar_6  />"
+					+ "\r\n" + "<div   id=element_7    dg-chart-widget=chartwidget_7    dg-chart-var=chartvar_7  /  >"
+					+ "\r\n" + "<div     dg-chart-widget=chartwidget_8    /  >"
+					//
+					+ "\r\n" + "<div     dg-chart-widget=chartwidget_9/>"
+					//
+					+ "\r\n" + "<div     dg-chart-widget=/>"
+					//
+					+ "\r\n" + "<div     dg-chart-widget=  />"
+					//
+					+ "\r\n" + "</body></html>";
+
+			StringWriter out = new StringWriter();
+			DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(out);
+
+			HtmlDashboard dashboard = this.renderer.createHtmlDashboard(renderContext, dashboardWidget);
+
+			DashboardInfo dashboardInfo = this.renderer.renderHtmlDashboard(renderContext, dashboard,
+					IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			List<ChartInfo> chartInfos = dashboardInfo.getChartInfos();
+			Assert.assertEquals(9, chartInfos.size());
+
+			for (int i = 0; i < 7; i++)
+			{
+				ChartInfo chartInfo = chartInfos.get(i);
+				Assert.assertEquals("element_" + (i + 1), chartInfo.getElementId());
+				Assert.assertEquals("chartwidget_" + (i + 1), chartInfo.getWidgetId());
+				Assert.assertEquals("chartvar_" + (i + 1), chartInfo.getChartVar());
+			}
+
+			Assert.assertTrue(html.contains("<html><head>"));
+			Assert.assertTrue(html.contains("</head><body>"));
+			Assert.assertTrue(html.contains(
+					"<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\" dg-chart-var=\"chartvar_1\"></div>"));
+			Assert.assertTrue(html
+					.contains("<div id='element_2' dg-chart-widget='chartwidget_2' dg-chart-var='chartvar_2'></div>"));
+			Assert.assertTrue(
+					html.contains("<div id=element_3 dg-chart-widget=chartwidget_3 dg-chart-var=chartvar_3></div>"));
+			Assert.assertTrue(html.contains("<div sdf abc def 12345677788 // >"));
+			Assert.assertTrue(html.contains(
+					"<div   id=element_4    dg-chart-widget=chartwidget_4    dg-chart-var=chartvar_4   ></div>"));
+			Assert.assertTrue(html.contains(
+					"<div   id  =  element_5    dg-chart-widget=  chartwidget_5    dg-chart-var  =chartvar_5/>"));
+			Assert.assertTrue(html
+					.contains("<div   id=element_6    dg-chart-widget=chartwidget_6    dg-chart-var=chartvar_6  />"));
+			Assert.assertTrue(html
+					.contains("<div   id=element_7    dg-chart-widget=chartwidget_7    dg-chart-var=chartvar_7  /  >"));
+			Assert.assertTrue(
+					html.contains("<div     dg-chart-widget=chartwidget_8 id=\"dataGearChartElement1\"     /  >"));
+			Assert.assertTrue(html.contains("<div     dg-chart-widget=chartwidget_9 id=\"dataGearChartElement2\" />"));
+			Assert.assertTrue(html.contains("<div     dg-chart-widget=/>"));
+			Assert.assertTrue(html.contains("<div     dg-chart-widget=  />"));
+			Assert.assertTrue(html.contains("</body></html>"));
+
+			for (int i = 0; i < 7; i++)
+				Assert.assertTrue(html.contains("var chartvar_" + (i + 1)));
+			Assert.assertTrue(html.contains("var dataGearChart4"));
+			Assert.assertTrue(html.contains("var dataGearChart5"));
+		}
+	}
+
+	@Test
+	public void renderTest() throws Exception
+	{
+		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = createHtmlTplDashboardWidget();
+
+		StringWriter out = new StringWriter();
+		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(out);
+		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
+		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
+
+		getHtmlWithPrint(out);
+
+		Assert.assertEquals(6, dashboard.getCharts().size());
+	}
+
+	protected HtmlTplDashboardWidget<HtmlRenderContext> createHtmlTplDashboardWidget()
+	{
+		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(
+				"widget01", "index.html", this.renderer);
+
+		return dashboardWidget;
+	}
+
+	protected String getHtmlWithPrint(StringWriter out)
+	{
+		String html = out.toString();
+
+		System.out.println(html);
+		System.out.println("");
+		System.out.println("-----------------------");
+		System.out.println("");
+
+		return html;
+	}
+}

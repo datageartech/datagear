@@ -14,29 +14,16 @@
 <script type="text/javascript">
 var myListener =
 {
-	beforeRender : function(dashboard)
+	onRender : function(dashboard)
 	{
 		var element = document.getElementById("listener");
-		
-		element.innerHTML = "<div>beforeRender</div>";
+		element.innerHTML += "<div>onRender</div>";
 	},
-	afterRender : function(dashboard)
+	
+	onUpdate : function(dashboard)
 	{
 		var element = document.getElementById("listener");
-		
-		element.innerHTML += "<div>afterRender</div>";
-	},
-	beforeUpdate : function(dashboard)
-	{
-		var element = document.getElementById("listener");
-		
-		element.innerHTML += "<div>beforeUpdate</div>";
-	},
-	afterUpdate : function(dashboard)
-	{
-		var element = document.getElementById("listener");
-		
-		element.innerHTML += "<div>afterUpdate</div>";
+		element.innerHTML += "<div>onUpdate</div>";
 	}
 };
 </script>

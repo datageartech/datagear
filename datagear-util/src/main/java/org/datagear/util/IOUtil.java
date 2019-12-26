@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -333,6 +334,17 @@ public class IOUtil
 	public static BufferedReader getReader(InputStream in, String encoding) throws UnsupportedEncodingException
 	{
 		return new BufferedReader(new InputStreamReader(in, encoding));
+	}
+
+	/**
+	 * 获取输入流。
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static StringReader getReader(String s)
+	{
+		return new StringReader(s);
 	}
 
 	/**

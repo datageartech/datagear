@@ -11,7 +11,7 @@ import java.util.Date;
 
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetFmkRenderer;
 
 /**
  * {@linkplain HtmlTplDashboardWidget}实体。
@@ -48,7 +48,7 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRen
 	}
 
 	public HtmlTplDashboardWidgetEntity(String id, String template,
-			HtmlTplDashboardWidgetRenderer<HtmlRenderContext> renderer, String name, User createUser)
+			HtmlTplDashboardWidgetFmkRenderer<HtmlRenderContext> renderer, String name, User createUser)
 	{
 		super(id, template, renderer);
 		this.name = name;
