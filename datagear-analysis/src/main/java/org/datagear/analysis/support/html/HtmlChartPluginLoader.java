@@ -210,7 +210,7 @@ public class HtmlChartPluginLoader
 			plugin = createHtmlChartPlugin();
 
 			this.jsonChartPluginPropertiesResolver.setChartPluginProperties(plugin, properties);
-			plugin.setScriptContent(scriptContent);
+			plugin.setScriptContent(new StringScriptContent(scriptContent));
 
 			plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
 		}
@@ -331,7 +331,7 @@ public class HtmlChartPluginLoader
 			{
 				plugin = createHtmlChartPlugin();
 				this.jsonChartPluginPropertiesResolver.setChartPluginProperties(plugin, properties);
-				plugin.setScriptContent(scriptContent);
+				plugin.setScriptContent(new StringScriptContent(scriptContent));
 				plugin.setIcons(toBytesIconsForFileMap(resourceFiles, plugin.getIcons()));
 			}
 

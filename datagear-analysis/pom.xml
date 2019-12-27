@@ -33,6 +33,7 @@
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
 			<version>${freemarker.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

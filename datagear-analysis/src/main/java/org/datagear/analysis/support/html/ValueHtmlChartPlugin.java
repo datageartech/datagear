@@ -33,7 +33,7 @@ public class ValueHtmlChartPlugin<T extends HtmlRenderContext> extends HtmlChart
 
 	public ValueHtmlChartPlugin(String id, String valueAttributeName)
 	{
-		super(id, new Label("ValueHtmlChartPlugin"), "");
+		super(id, new Label("ValueHtmlChartPlugin"), new StringScriptContent(""));
 		this.valueAttributeName = valueAttributeName;
 	}
 
@@ -69,11 +69,11 @@ public class ValueHtmlChartPlugin<T extends HtmlRenderContext> extends HtmlChart
 		writeNewLine(out);
 		out.write("{");
 		writeNewLine(out);
-		out.write(
-				"  chart.render = function(){ var element = document.getElementById(this.elementId); element.innerHTML=\""
-						+ value + "\"; };");
+		out.write("  chart." + SCRIPT_RENDER_FUNCTION_NAME
+				+ " = function(){ var element = document.getElementById(this.elementId); element.innerHTML=\"" + value
+				+ "\"; };");
 		writeNewLine(out);
-		out.write("  chart.update = function(){};");
+		out.write("  chart." + SCRIPT_UPDATE_FUNCTION_NAME + " = function(){};");
 		writeNewLine(out);
 		out.write("})");
 		writeNewLine(out);

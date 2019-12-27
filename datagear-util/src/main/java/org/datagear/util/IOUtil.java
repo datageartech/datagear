@@ -300,6 +300,7 @@ public class IOUtil
 	 * 
 	 * @param file
 	 * @param encoding
+	 *            允许为{@code null}
 	 * @return
 	 * @throws FileNotFoundException
 	 * @throws UnsupportedEncodingException
@@ -320,7 +321,7 @@ public class IOUtil
 	 */
 	public static BufferedReader getReader(File file) throws FileNotFoundException, UnsupportedEncodingException
 	{
-		return getReader(getInputStream(file), Charset.defaultCharset().name());
+		return getReader(getInputStream(file), null);
 	}
 
 	/**
@@ -328,12 +329,16 @@ public class IOUtil
 	 * 
 	 * @param in
 	 * @param encoding
+	 *            允许为{@code null}
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
 	public static BufferedReader getReader(InputStream in, String encoding) throws UnsupportedEncodingException
 	{
-		return new BufferedReader(new InputStreamReader(in, encoding));
+		if (StringUtil.isEmpty(encoding))
+			return new BufferedReader(new InputStreamReader(in));
+		else
+			return new BufferedReader(new InputStreamReader(in, encoding));
 	}
 
 	/**

@@ -33,10 +33,9 @@ public class ChartTheme extends Theme implements Serializable
 	{
 	}
 
-	public ChartTheme(String backgroundColor, String foregroundColor, String borderColor, String[] graphColors,
-			Theme tooltipTheme)
+	public ChartTheme(String backgroundColor, String foregroundColor, String[] graphColors, Theme tooltipTheme)
 	{
-		super(backgroundColor, foregroundColor, borderColor);
+		super(backgroundColor, foregroundColor);
 		this.graphColors = graphColors;
 		this.tooltipTheme = tooltipTheme;
 	}

@@ -14,11 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.ChartTheme;
-import org.datagear.analysis.DashboardTheme;
-import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.RenderException;
-import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.util.StringUtil;
@@ -92,9 +87,10 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 
 	public static final String DIRECTIVE_CHART = "chart";
 
-	public static final String DASHBOARD_ELEMENT_STYLE_NAME = "dashboard";
+	protected static final String KEY_HTML_DASHBOARD_RENDER_DATA_MODEL = HtmlDashboardRenderDataModel.class
+			.getSimpleName();
 
-	public static final String CHART_ELEMENT_WRAPPER_STYLE_NAME = "chart-wrapper";
+	private String defaultTemplateEncoding = "UTF-8";
 
 	private boolean ignoreDashboardStyleBorderWidth = true;
 
@@ -109,6 +105,16 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			ChartWidgetSource chartWidgetSource)
 	{
 		super(dashboardWidgetResManager, chartWidgetSource);
+	}
+
+	public String getDefaultTemplateEncoding()
+	{
+		return defaultTemplateEncoding;
+	}
+
+	public void setDefaultTemplateEncoding(String defaultTemplateEncoding)
+	{
+		this.defaultTemplateEncoding = defaultTemplateEncoding;
 	}
 
 	public boolean isIgnoreDashboardStyleBorderWidth()
@@ -130,7 +136,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 	{
 		Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
 		cfg.setDirectoryForTemplateLoading(getDashboardWidgetResManager().getRootDirectory());
-		cfg.setDefaultEncoding(getTemplateEncoding());
+		cfg.setDefaultEncoding(this.defaultTemplateEncoding);
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 		cfg.setLogTemplateExceptions(false);
 		cfg.setWrapUncheckedExceptions(true);
@@ -144,21 +150,14 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 	}
 
 	@Override
-	protected void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Exception
+	protected void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Throwable
 	{
 		HtmlDashboardRenderDataModel dataModel = new HtmlDashboardRenderDataModel(dashboard,
 				renderContext.getContextPath());
 
 		Template template = getTemplate((HtmlTplDashboardWidget<?>) dashboard.getWidget());
 
-		try
-		{
-			template.process(buildHtmlDashboardRenderDataModel(dataModel), renderContext.getWriter());
-		}
-		catch (Throwable t)
-		{
-			throw new RenderException(t);
-		}
+		template.process(buildHtmlDashboardRenderDataModel(dataModel), renderContext.getWriter());
 	}
 
 	/**
@@ -166,21 +165,14 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 	 * 
 	 * @param dashboardWidget
 	 * @return
-	 * @throws RenderException
+	 * @throws Exception
 	 */
-	protected Template getTemplate(HtmlTplDashboardWidget<?> dashboardWidget) throws RenderException
+	protected Template getTemplate(HtmlTplDashboardWidget<?> dashboardWidget) throws Exception
 	{
 		String path = getDashboardWidgetResManager().getRelativePath(dashboardWidget.getId(),
 				dashboardWidget.getTemplate());
 
-		try
-		{
-			return getConfiguration().getTemplate(path);
-		}
-		catch (Throwable t)
-		{
-			throw new RenderException(t);
-		}
+		return getConfiguration().getTemplate(path);
 	}
 
 	protected Configuration getConfiguration()
@@ -316,10 +308,6 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
 			HtmlRenderContext renderContext = dashboard.getRenderContext();
 
-			Writer out = env.getOut();
-
-			out.write("<meta charset=\"" + getWriterEncoding() + "\">");
-
 			writeDashboardImport(renderContext, dashboard, "");
 		}
 	}
@@ -343,116 +331,12 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 				throws TemplateException, IOException
 		{
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-			HtmlRenderContext renderContext = dataModel.getHtmlDashboard().getRenderContext();
+			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
+			HtmlRenderContext renderContext = dashboard.getRenderContext();
 
 			Writer out = env.getOut();
 
-			DashboardTheme dashboardTheme = getDashboardTheme(renderContext);
-			writeDashboardTheme(out, dashboardTheme);
-		}
-
-		protected DashboardTheme getDashboardTheme(RenderContext renderContext)
-		{
-			DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
-			return dashboardTheme;
-		}
-
-		protected void writeDashboardTheme(Writer out, DashboardTheme dashboardTheme) throws IOException
-		{
-			ChartTheme chartTheme = (dashboardTheme == null ? null : dashboardTheme.getChartTheme());
-
-			out.write("<style type=\"text/css\">");
-			writeNewLine(out);
-			out.write("body{");
-			writeNewLine(out);
-			out.write("    padding: 0px 0px;");
-			writeNewLine(out);
-			out.write("    margin: 0px 0px;");
-			writeNewLine(out);
-			if (dashboardTheme != null)
-			{
-				out.write("    background-color: " + dashboardTheme.getBackgroundColor() + ";");
-				writeNewLine(out);
-				out.write("    color: " + dashboardTheme.getForegroundColor() + ";");
-				writeNewLine(out);
-			}
-			out.write("}");
-			writeNewLine(out);
-			out.write("." + DASHBOARD_ELEMENT_STYLE_NAME + "{");
-			writeNewLine(out);
-			writeThemeCssAttrs(out, dashboardTheme);
-			writeBorderBoxCssAttrs(out);
-			if (isIgnoreDashboardStyleBorderWidth())
-			{
-				out.write("    border-width: 0px;");
-				writeNewLine(out);
-			}
-			out.write("}");
-			writeNewLine(out);
-
-			out.write("." + CHART_ELEMENT_WRAPPER_STYLE_NAME + "{");
-			writeNewLine(out);
-			out.write("    position: relative;");
-			writeNewLine(out);
-			writeThemeCssAttrs(out, chartTheme);
-			writeBorderBoxCssAttrs(out);
-			out.write("}");
-			writeNewLine(out);
-
-			out.write("." + HtmlChartPlugin.BUILTIN_CHART_ELEMENT_STYLE_NAME + "{");
-			writeNewLine(out);
-			writeFillParentCssAttrs(out);
-			writeBorderBoxCssAttrs(out);
-			out.write("}");
-			writeNewLine(out);
-
-			out.write("</style>");
-			writeNewLine(out);
-		}
-
-		protected void writeThemeCssAttrs(Writer out, Theme theme) throws IOException
-		{
-			if (theme != null)
-			{
-				String borderWidth = theme.getBorderWidth();
-				if (borderWidth == null)
-					borderWidth = "0";
-
-				out.write("    color: " + theme.getForegroundColor() + ";");
-				writeNewLine(out);
-				out.write("    background-color: " + theme.getBackgroundColor() + ";");
-				writeNewLine(out);
-				out.write("    border-color: " + theme.getBorderColor() + ";");
-				writeNewLine(out);
-				out.write("    border-width: " + theme.getBorderWidth() + ";");
-				writeNewLine(out);
-				out.write("    border-style: solid;");
-				writeNewLine(out);
-			}
-		}
-
-		protected void writeFillParentCssAttrs(Writer out) throws IOException
-		{
-			out.write("    position: absolute;");
-			writeNewLine(out);
-			out.write("    top: 0px;");
-			writeNewLine(out);
-			out.write("    bottom: 0px;");
-			writeNewLine(out);
-			out.write("    left: 0px;");
-			writeNewLine(out);
-			out.write("    right: 0px;");
-			writeNewLine(out);
-		}
-
-		protected void writeBorderBoxCssAttrs(Writer out) throws IOException
-		{
-			out.write("    box-sizing: border-box;");
-			writeNewLine(out);
-			out.write("    -moz-box-sizing: border-box;");
-			writeNewLine(out);
-			out.write("    -webkit-box-sizing: border-box;");
-			writeNewLine(out);
+			writeDashboardThemeStyle(renderContext, dashboard, out);
 		}
 	}
 
@@ -474,40 +358,33 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 				throws TemplateException, IOException
 		{
-			String varName = getStringParamValue(params, "var");
-			String listener = getStringParamValue(params, "listener");
-			boolean hasListener = !StringUtil.isEmpty(listener);
+			String dashboardVar = getStringParamValue(params, "var");
+			String listenerVar = getStringParamValue(params, "listener");
 
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
 			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
 			HtmlRenderContext renderContext = dashboard.getRenderContext();
 			int nextSequence = -1;
 
-			if (StringUtil.isEmpty(varName))
+			if (StringUtil.isEmpty(dashboardVar))
 			{
 				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
-				varName = HtmlRenderAttributes.generateDashboardVarName(nextSequence);
+				dashboardVar = HtmlRenderAttributes.generateDashboardVarName(nextSequence);
 			}
 
-			dashboard.setVarName(varName);
+			dashboard.setVarName(dashboardVar);
 
 			Writer out = env.getOut();
 
 			writeScriptStartTag(out);
 			writeNewLine(out);
 
-			out.write("var ");
-			out.write(varName);
-			out.write("=");
-			writeNewLine(out);
-			writeHtmlDashboardScriptObject(out, dashboard, true);
-			out.write(";");
-			writeNewLine(out);
+			writeHtmlDashboardJSVar(out, dashboard, true);
 
 			writeScriptEndTag(out);
 			writeNewLine(out);
 
-			HtmlRenderAttributes.setChartRenderContextVarName(renderContext, varName + ".renderContext");
+			HtmlRenderAttributes.setChartRenderContextVarName(renderContext, dashboardVar + ".renderContext");
 
 			if (body != null)
 				body.render(out);
@@ -523,100 +400,12 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			HtmlRenderAttributes.removeChartScriptNotInvokeRender(renderContext);
 			HtmlRenderAttributes.removeChartVarName(renderContext);
 			HtmlRenderAttributes.removeChartElementId(renderContext);
-
 			renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
 
-			out.write("var ");
-			out.write(tmpRenderContextVar);
-			out.write("=");
-			writeNewLine(out);
-			writeRenderContextScriptObject(out, renderContext);
-			out.write(";");
-			writeNewLine(out);
-			out.write(varName + ".renderContext.attributes = " + tmpRenderContextVar + ".attributes;");
-			writeNewLine(out);
-
-			List<? extends HtmlChart> charts = dashboard.getCharts();
-			if (charts != null)
-			{
-				for (HtmlChart chart : charts)
-				{
-					out.write(varName + ".charts.push(" + chart.getVarName() + ");");
-					writeNewLine(out);
-				}
-			}
-
-			out.write(varName + ".render = function(){");
-			writeNewLine(out);
-			out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i].render(); }");
-			writeNewLine(out);
-			out.write("};");
-			writeNewLine(out);
-
-			out.write(varName + ".update = function(){");
-			writeNewLine(out);
-			out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i].update(); }");
-			writeNewLine(out);
-			out.write("};");
-			writeNewLine(out);
-
-			if (hasListener)
-			{
-				out.write(varName + ".listener = window[\"" + listener + "\"];");
-				writeNewLine(out);
-			}
-
-			out.write("window.onload = function(){");
-			writeNewLine(out);
-
-			out.write("var doRender = true;");
-			writeNewLine(out);
-
-			if (hasListener)
-			{
-				out.write("if(" + varName + ".listener && " + varName + ".listener.onRender)");
-				writeNewLine(out);
-				out.write("  doRender=" + varName + ".listener.onRender(" + varName + "); ");
-				writeNewLine(out);
-			}
-
-			out.write("if(doRender != false)");
-			writeNewLine(out);
-			out.write("  " + varName + ".render();");
-			writeNewLine(out);
-
-			out.write("var doUpdate = true;");
-			writeNewLine(out);
-
-			if (hasListener)
-			{
-				out.write("if(" + varName + ".listener && " + varName + ".listener.onUpdate)");
-				writeNewLine(out);
-				out.write("  doUpdate=" + varName + ".listener.onUpdate(" + varName + "); ");
-				writeNewLine(out);
-			}
-
-			out.write("if(doUpdate != false)");
-			writeNewLine(out);
-			out.write("  " + varName + ".update();");
-			writeNewLine(out);
-
-			out.write("};");
-			writeNewLine(out);
+			writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar, listenerVar);
 
 			writeScriptEndTag(out);
 			writeNewLine(out);
-		}
-
-		protected void writeHtmlDashboardScriptObject(Writer out, HtmlDashboard dashboard, boolean renderContextEmpty)
-				throws IOException
-		{
-			getHtmlDashboardScriptObjectWriter().write(out, dashboard, renderContextEmpty);
-		}
-
-		protected void writeRenderContextScriptObject(Writer out, RenderContext renderContext) throws IOException
-		{
-			getHtmlDashboardScriptObjectWriter().writeRenderContext(out, renderContext, true);
 		}
 	}
 

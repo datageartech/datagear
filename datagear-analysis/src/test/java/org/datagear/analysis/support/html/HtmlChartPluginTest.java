@@ -42,8 +42,8 @@ public class HtmlChartPluginTest
 		StringWriter stringWriter = new StringWriter();
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(stringWriter);
 		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
-		HtmlRenderAttributes.setChartTheme(renderContext, new ChartTheme("dark", "white", "gray",
-				new String[] { "red", "green" }, new Theme("dark", "white", "gray")));
+		HtmlRenderAttributes.setChartTheme(renderContext,
+				new ChartTheme("dark", "white", new String[] { "red", "green" }, new Theme("dark", "white")));
 		HtmlRenderAttributes.setLocale(renderContext, Locale.getDefault());
 
 		htmlChartPlugin.renderChart(renderContext, null, (DataSetFactory[]) null);
@@ -84,13 +84,14 @@ public class HtmlChartPluginTest
 	{
 		InputStream jsonInputStream = HtmlChartPluginTest.class.getClassLoader()
 				.getResourceAsStream("org/datagear/analysis/support/html/HtmlChartPlugin.config.json");
-		Map<String, Object> properties = jsonChartPluginPropertiesResolver.resolveChartPluginProperties(jsonInputStream, "UTF-8");
+		Map<String, Object> properties = jsonChartPluginPropertiesResolver.resolveChartPluginProperties(jsonInputStream,
+				"UTF-8");
 
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = new HtmlChartPlugin<HtmlRenderContext>();
 		jsonChartPluginPropertiesResolver.setChartPluginProperties(htmlChartPlugin, properties);
 
-		htmlChartPlugin.setScriptContent(
-				LocationResource.toClasspathLocation("org/datagear/analysis/support/html/HtmlChartPlugin.chart.js"));
+		htmlChartPlugin.setScriptContent(new LocationScriptContent(
+				LocationResource.toClasspathLocation("org/datagear/analysis/support/html/HtmlChartPlugin.chart.js")));
 
 		return htmlChartPlugin;
 	}

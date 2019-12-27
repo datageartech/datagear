@@ -186,10 +186,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	}
 
 	@Override
-	protected void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Exception
+	protected void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Throwable
 	{
 		HtmlTplDashboardWidget<?> dashboardWidget = (HtmlTplDashboardWidget<?>) dashboard.getWidget();
-		Reader in = getTemplateReader(dashboardWidget);
+		Reader in = getTemplateReaderNotNull(dashboardWidget);
 
 		renderHtmlDashboard(renderContext, dashboard, in);
 	}
@@ -286,7 +286,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 						for (;;)
 						{
 							last = resolveTagAttr(in, last, cache, nameCache, valueCache);
-							if (last == '>' || last < 0)
+							if (isTagEnd(last))
 								break;
 						}
 
@@ -338,34 +338,27 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	protected void writeHtmlDashboardScript(T renderContext, HtmlDashboard dashboard, DashboardInfo dashboardInfo)
 			throws IOException
 	{
-		String varName = dashboardInfo.getDashboardVar();
-		String listener = dashboardInfo.getListenerVar();
-		boolean hasListener = !StringUtil.isEmpty(listener);
+		String dashboardVar = dashboardInfo.getDashboardVar();
+		String listenerVar = dashboardInfo.getListenerVar();
 
 		int nextSequence = -1;
 
-		if (StringUtil.isEmpty(varName))
+		if (StringUtil.isEmpty(dashboardVar))
 		{
 			nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
-			varName = HtmlRenderAttributes.generateDashboardVarName(nextSequence);
+			dashboardVar = HtmlRenderAttributes.generateDashboardVarName(nextSequence);
 		}
 
-		dashboard.setVarName(varName);
+		dashboard.setVarName(dashboardVar);
 
 		Writer out = renderContext.getWriter();
 
 		writeScriptStartTag(out);
 		writeNewLine(out);
 
-		out.write("var ");
-		out.write(varName);
-		out.write("=");
-		writeNewLine(out);
-		writeHtmlDashboardScriptObject(out, dashboard, true);
-		out.write(";");
-		writeNewLine(out);
+		writeHtmlDashboardJSVar(out, dashboard, true);
 
-		HtmlRenderAttributes.setChartRenderContextVarName(renderContext, varName + ".renderContext");
+		HtmlRenderAttributes.setChartRenderContextVarName(renderContext, dashboardVar + ".renderContext");
 
 		List<ChartInfo> chartInfos = dashboardInfo.getChartInfos();
 		if (chartInfos != null)
@@ -385,83 +378,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		HtmlRenderAttributes.removeChartElementId(renderContext);
 		renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
 
-		out.write("var ");
-		out.write(tmpRenderContextVar);
-		out.write("=");
-		writeNewLine(out);
-		writeRenderContextScriptObject(out, renderContext);
-		out.write(";");
-		writeNewLine(out);
-		out.write(varName + ".renderContext.attributes = " + tmpRenderContextVar + ".attributes;");
-		writeNewLine(out);
-
-		List<? extends HtmlChart> charts = dashboard.getCharts();
-		if (charts != null)
-		{
-			for (HtmlChart chart : charts)
-			{
-				out.write(varName + ".charts.push(" + chart.getVarName() + ");");
-				writeNewLine(out);
-			}
-		}
-
-		out.write(varName + ".render = function(){");
-		writeNewLine(out);
-		out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i].render(); }");
-		writeNewLine(out);
-		out.write("};");
-		writeNewLine(out);
-
-		out.write(varName + ".update = function(){");
-		writeNewLine(out);
-		out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i].update(); }");
-		writeNewLine(out);
-		out.write("};");
-		writeNewLine(out);
-
-		if (hasListener)
-		{
-			out.write(varName + ".listener = window[\"" + listener + "\"];");
-			writeNewLine(out);
-		}
-
-		out.write("window.onload = function(){");
-		writeNewLine(out);
-
-		out.write("var doRender = true;");
-		writeNewLine(out);
-
-		if (hasListener)
-		{
-			out.write("if(" + varName + ".listener && " + varName + ".listener.onRender)");
-			writeNewLine(out);
-			out.write("  doRender=" + varName + ".listener.onRender(" + varName + "); ");
-			writeNewLine(out);
-		}
-
-		out.write("if(doRender != false)");
-		writeNewLine(out);
-		out.write("  " + varName + ".render();");
-		writeNewLine(out);
-
-		out.write("var doUpdate = true;");
-		writeNewLine(out);
-
-		if (hasListener)
-		{
-			out.write("if(" + varName + ".listener && " + varName + ".listener.onUpdate)");
-			writeNewLine(out);
-			out.write("  doUpdate=" + varName + ".listener.onUpdate(" + varName + "); ");
-			writeNewLine(out);
-		}
-
-		out.write("if(doUpdate != false)");
-		writeNewLine(out);
-		out.write("  " + varName + ".update();");
-		writeNewLine(out);
-
-		out.write("};");
-		writeNewLine(out);
+		writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar, listenerVar);
 
 		writeScriptEndTag(out);
 		writeNewLine(out);
@@ -552,7 +469,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			clear(attrName);
 			clear(attrValue);
 
-			if (last == '>' || last < 0)
+			if (isTagEnd(last))
 				break;
 		}
 
@@ -610,7 +527,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			clear(attrName);
 			clear(attrValue);
 
-			if (last == '>' || last < 0)
+			if (isTagEnd(last))
 				break;
 		}
 
@@ -709,7 +626,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			StringBuilder attrValue) throws IOException
 	{
 		// 上一个字符是标签结束字符
-		if (last == '>' || last < 0)
+		if (isTagEnd(last))
 			return last;
 
 		// 上一个字符是此属性名的第一个字符
@@ -812,12 +729,23 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		if (Character.isWhitespace(last))
 			last = skipWhitespace(in, cache);
 
-		if (last == '>' || last < 0)
+		if (isTagEnd(last))
 			;
 		else
 			clear(tagName);
 
 		return last;
+	}
+
+	/**
+	 * 给定字符是否是标签结束符。
+	 * 
+	 * @param c
+	 * @return
+	 */
+	protected boolean isTagEnd(int c)
+	{
+		return (c == '>' || c < 0);
 	}
 
 	/**

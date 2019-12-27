@@ -25,23 +25,22 @@ public class Theme implements Serializable
 	/** 前景色 */
 	private String foregroundColor;
 
+	/** 边框宽度 */
+	private String borderWidth = "0";
+
 	/** 边框颜色 */
 	private String borderColor;
-
-	/** 边框宽度 */
-	private String borderWidth = "1px";
 
 	public Theme()
 	{
 		super();
 	}
 
-	public Theme(String backgroundColor, String foregroundColor, String borderColor)
+	public Theme(String backgroundColor, String foregroundColor)
 	{
 		super();
 		this.backgroundColor = backgroundColor;
 		this.foregroundColor = foregroundColor;
-		this.borderColor = borderColor;
 	}
 
 	public String getBackgroundColor()
@@ -88,6 +87,6 @@ public class Theme implements Serializable
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [backgroundColor=" + backgroundColor + ", foregroundColor="
-				+ foregroundColor + ", borderColor=" + borderColor + ", borderWidth=" + borderWidth + "]";
+				+ foregroundColor + ", borderWidth=" + borderWidth + ", borderColor=" + borderColor + "]";
 	}
 }

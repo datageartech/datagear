@@ -9,6 +9,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
 
 import org.datagear.analysis.ChartPropertyValues;
@@ -16,7 +17,6 @@ import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.AbstractChartPlugin;
-import org.datagear.analysis.support.LocationResource;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -113,28 +113,25 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	public static final String DEFAULT_SCRIPT_CHART_REF_PLACEHOLDER = "$CHART";
 
 	/** 默认图表脚本对象的渲染函数名 */
-	public static final String DEFAULT_SCRIPT_RENDER_FUNCTION_NAME = "render";
+	public static final String SCRIPT_RENDER_FUNCTION_NAME = "render";
+
+	/** 默认图表脚本对象的渲染函数名 */
+	public static final String SCRIPT_UPDATE_FUNCTION_NAME = "update";
 
 	/** 内置图表元素样式名，所有图标元素都要加此样式名 */
 	public static final String BUILTIN_CHART_ELEMENT_STYLE_NAME = "chart";
 
 	/** 图表脚本内容 */
-	private String scriptContent;
+	private ScriptContent scriptContent;
 
 	/** {@linkplain #scriptContent}中的图表对象引用占位符，在输出时，占位符会被替换为具体的图表对象名 */
 	private String scriptChartRefPlaceholder = DEFAULT_SCRIPT_CHART_REF_PLACEHOLDER;
-
-	/** 图表脚本对象的渲染函数名 */
-	private String scriptRenderFunctionName = DEFAULT_SCRIPT_RENDER_FUNCTION_NAME;
 
 	/** 图表HTML元素标签名 */
 	private String elementTagName = "div";
 
 	/** 图表HTML元素CSS样式名 */
 	private String elementStyleName = "";
-
-	/** 图表脚本内容资源文件的编码 */
-	private String scriptContentEncoding = "UTF-8";
 
 	/** 图表脚本换行符 */
 	private String newLine = "\r\n";
@@ -146,32 +143,18 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		super();
 	}
 
-	public HtmlChartPlugin(String id, Label nameLabel, String scriptContent)
+	public HtmlChartPlugin(String id, Label nameLabel, ScriptContent scriptContent)
 	{
 		super(id, nameLabel);
 		this.scriptContent = scriptContent;
 	}
 
-	public String getScriptContent()
+	public ScriptContent getScriptContent()
 	{
 		return scriptContent;
 	}
 
-	/**
-	 * 设置图表脚本内容。
-	 * <p>
-	 * {@code "classpath:..."}：表示类路径资源脚本内容；
-	 * </p>
-	 * <p>
-	 * {@code "file:..."}：表示文件路径资源脚本内容；
-	 * </p>
-	 * <p>
-	 * 其他：表示直接是脚本内容。
-	 * </p>
-	 * 
-	 * @param chartScriptContent
-	 */
-	public void setScriptContent(String scriptContent)
+	public void setScriptContent(ScriptContent scriptContent)
 	{
 		this.scriptContent = scriptContent;
 	}
@@ -184,16 +167,6 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	public void setScriptChartRefPlaceholder(String scriptChartRefPlaceholder)
 	{
 		this.scriptChartRefPlaceholder = scriptChartRefPlaceholder;
-	}
-
-	public String getScriptRenderFunctionName()
-	{
-		return scriptRenderFunctionName;
-	}
-
-	public void setScriptRenderFunctionName(String scriptRenderFunctionName)
-	{
-		this.scriptRenderFunctionName = scriptRenderFunctionName;
 	}
 
 	public String getElementTagName()
@@ -214,16 +187,6 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	public void setElementStyleName(String elementStyleName)
 	{
 		this.elementStyleName = elementStyleName;
-	}
-
-	public String getScriptContentEncoding()
-	{
-		return scriptContentEncoding;
-	}
-
-	public void setScriptContentEncoding(String scriptContentEncoding)
-	{
-		this.scriptContentEncoding = scriptContentEncoding;
 	}
 
 	public String getNewLine()
@@ -348,7 +311,9 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 
 		if (!HtmlRenderAttributes.getChartScriptNotInvokeRender(renderContext))
 		{
-			out.write(chart.getVarName() + "." + this.scriptRenderFunctionName + "();");
+			out.write(chart.getVarName() + "." + SCRIPT_RENDER_FUNCTION_NAME + "();");
+			writeNewLine(out);
+			out.write(chart.getVarName() + "." + SCRIPT_UPDATE_FUNCTION_NAME + "();");
 			writeNewLine(out);
 		}
 
@@ -384,29 +349,22 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		Writer out = renderContext.getWriter();
 		String chartVarName = chart.getVarName();
 
-		if (LocationResource.isFileLocation(this.scriptContent)
-				|| LocationResource.isClasspathLocation(this.scriptContent))
-		{
-			LocationResource resource = new LocationResource(this.scriptContent);
-			BufferedReader reader = IOUtil.getReader(resource.getInputStream(), this.scriptContentEncoding);
+		Reader reader = this.scriptContent.getReader();
+		BufferedReader bufferedReader = (reader instanceof BufferedReader ? (BufferedReader) reader
+				: new BufferedReader(reader));
 
-			try
+		try
+		{
+			String line = null;
+			while ((line = bufferedReader.readLine()) != null)
 			{
-				String line = null;
-				while ((line = reader.readLine()) != null)
-				{
-					out.write(replaceChartRefPlaceholder(line, chartVarName));
-					writeNewLine(out);
-				}
-			}
-			finally
-			{
-				IOUtil.close(reader);
+				out.write(replaceChartRefPlaceholder(line, chartVarName));
+				writeNewLine(out);
 			}
 		}
-		else
+		finally
 		{
-			out.write(replaceChartRefPlaceholder(this.scriptContent, chartVarName));
+			IOUtil.close(reader);
 		}
 	}
 

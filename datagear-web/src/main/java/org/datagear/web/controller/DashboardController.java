@@ -232,9 +232,6 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (dashboardWidget == null)
 			throw new RecordNotFoundException();
 
-		response.setCharacterEncoding(
-				this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer().getWriterEncoding());
-
 		Writer out = response.getWriter();
 
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(out);
