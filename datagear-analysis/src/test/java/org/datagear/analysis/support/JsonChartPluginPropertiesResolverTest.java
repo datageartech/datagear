@@ -154,6 +154,7 @@ public class JsonChartPluginPropertiesResolverTest
 		Assert.assertNotNull(chartPlugin.getManualLabel());
 		Assert.assertNotNull(chartPlugin.getIcons());
 		Assert.assertNotNull(chartPlugin.getChartProperties());
+		Assert.assertEquals("0.1.0", chartPlugin.getVersion());
 		Assert.assertEquals(2, chartPlugin.getOrder());
 	}
 

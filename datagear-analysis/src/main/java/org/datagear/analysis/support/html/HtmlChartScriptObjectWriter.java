@@ -135,6 +135,12 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		}
 
 		@Override
+		public String getVersion()
+		{
+			return null;
+		}
+
+		@Override
 		public int getOrder()
 		{
 			return 0;

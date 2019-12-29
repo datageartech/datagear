@@ -55,6 +55,9 @@ import org.datagear.util.StringUtil;
  * </p>
  * <code>chart.js</code>用于定义{@linkplain HtmlChartPlugin}的图表渲染逻辑。
  * </p>
+ * <p>
+ * 默认地，上述两个文件都应该为<code>UTF-8</code>编码。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -94,6 +97,93 @@ public class HtmlChartPluginLoader
 	public void setEncoding(String encoding)
 	{
 		this.encoding = encoding;
+	}
+
+	/**
+	 * 给定目录是否是合法的{@linkplain HtmlChartPlugin}目录。
+	 * 
+	 * @param directory
+	 * @return
+	 */
+	public boolean isHtmlChartPluginDirectory(File directory)
+	{
+		if (!directory.exists())
+			return false;
+
+		File propFile = new File(directory, NAME_PROPERTIES);
+		File chartFile = new File(directory, NAME_CHART);
+
+		return (propFile.exists() && chartFile.exists());
+	}
+
+	/**
+	 * 给定ZIP是否是合法的{@linkplain HtmlChartPlugin} ZIP。
+	 * 
+	 * @param file
+	 * @return
+	 * @throws HtmlChartPluginLoadException
+	 */
+	public boolean isHtmlChartPluginZip(File file) throws HtmlChartPluginLoadException
+	{
+		if (!file.exists() || !isZipFile(file))
+			return false;
+
+		ZipInputStream in = null;
+
+		try
+		{
+			in = IOUtil.getZipInputStream(file);
+			return isHtmlChartPluginZip(in);
+		}
+		catch(IOException e)
+		{
+			throw new HtmlChartPluginLoadException(e);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
+	}
+
+	/**
+	 * 给定ZIP是否是合法的{@linkplain HtmlChartPlugin} ZIP。
+	 * 
+	 * @param in
+	 * @return
+	 * @throws HtmlChartPluginLoadException
+	 */
+	public boolean isHtmlChartPluginZip(ZipInputStream in) throws HtmlChartPluginLoadException
+	{
+		ZipEntry zipEntry = null;
+
+		int yes = 0;
+
+		try
+		{
+			while ((zipEntry = in.getNextEntry()) != null)
+			{
+				String name = zipEntry.getName();
+
+				if (zipEntry.isDirectory())
+					;
+				else if (name.equals(NAME_PROPERTIES))
+				{
+					yes += 1;
+				}
+				else if (name.equals(NAME_CHART))
+				{
+					yes += 1;
+				}
+
+				in.closeEntry();
+			}
+		}
+		catch(IOException e)
+		{
+			throw new HtmlChartPluginLoadException(e);
+		}
+
+		return (yes >= 2);
 	}
 
 	/**
@@ -145,7 +235,7 @@ public class HtmlChartPluginLoader
 
 		if (file.isDirectory())
 			plugin = loadSingleForDirectory(file);
-		else if (file.getName().toLowerCase().endsWith(".zip"))
+		else if (isZipFile(file))
 			plugin = loadSingleForZip(file);
 		else
 			plugin = loadFileExt(file);
@@ -438,6 +528,13 @@ public class HtmlChartPluginLoader
 	protected String readScriptContent(InputStream in, boolean close) throws IOException
 	{
 		return IOUtil.readString(in, this.encoding, close);
+	}
+
+	protected boolean isZipFile(File file)
+	{
+		String fileName = file.getName().toLowerCase();
+
+		return fileName.endsWith(".zip");
 	}
 
 	protected HtmlChartPlugin<?> createHtmlChartPlugin()

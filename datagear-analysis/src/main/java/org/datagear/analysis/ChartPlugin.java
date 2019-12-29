@@ -68,16 +68,6 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	ChartProperties getChartProperties();
 
 	/**
-	 * 获取排序值。
-	 * <p>
-	 * {@linkplain ChartPluginManager#getAll()}、和{@linkplain ChartPluginManager#getAll(Class)}使用此值进行排序，越小越靠前。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	int getOrder();
-
-	/**
 	 * 渲染{@linkplain Chart}。
 	 * 
 	 * @param renderContext
@@ -88,4 +78,27 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	 */
 	Chart renderChart(T renderContext, ChartPropertyValues chartPropertyValues, DataSetFactory... dataSetFactories)
 			throws RenderException;
+
+	/**
+	 * 获取版本号。
+	 * <p>
+	 * 版本号格式应为：<code>[主版本号].[次版本号].[修订版本号]</code>。
+	 * </p>
+	 * <p>
+	 * 返回{@code null}或空字符串表示无版本号标识。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	String getVersion();
+
+	/**
+	 * 获取排序值。
+	 * <p>
+	 * {@linkplain ChartPluginManager#getAll()}、和{@linkplain ChartPluginManager#getAll(Class)}使用此值进行排序，越小越靠前。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	int getOrder();
 }

@@ -570,6 +570,45 @@ public class IOUtil
 	}
 
 	/**
+	 * 拷贝文件。
+	 * 
+	 * @param src
+	 * @param dest
+	 * @throws IOException
+	 */
+	public static void copy(File src, File dest) throws IOException
+	{
+		if (src.isDirectory())
+		{
+			if (!dest.exists())
+				dest.mkdirs();
+			else if (!dest.isDirectory())
+				throw new IllegalArgumentException("[dest] must be directory");
+
+			File[] children = src.listFiles();
+			if (children != null)
+			{
+				for (File child : children)
+					copy(child, new File(dest, child.getName()));
+			}
+		}
+		else
+		{
+			OutputStream out = null;
+
+			try
+			{
+				out = IOUtil.getOutputStream(dest);
+				IOUtil.write(src, out);
+			}
+			finally
+			{
+				IOUtil.close(out);
+			}
+		}
+	}
+
+	/**
 	 * 关闭{@linkplain Closeable}。
 	 * <p>
 	 * 此方法不会抛出任何{@linkplain Throwable}。

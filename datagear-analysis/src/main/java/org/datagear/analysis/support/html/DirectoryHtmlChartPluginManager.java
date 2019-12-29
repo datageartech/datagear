@@ -1,6 +1,7 @@
 package org.datagear.analysis.support.html;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,11 +17,12 @@ import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.ConcurrentChartPluginManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
+import org.datagear.util.IOUtil;
 
 /**
  * 基于文件目录的{@linkplain ChartPluginManager}。
  * <p>
- * 此类管理指定目录下的{@linkplain HtmlChartPlugin}，并会在文件修改时及时刷新。
+ * 此类管理指定目录下符合{@linkplain HtmlChartPluginLoader}规范的{@linkplain HtmlChartPlugin}，并会在文件修改时及时刷新。
  * </p>
  * <p>
  * 此类是线程安全的。
@@ -105,16 +107,106 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		this.checkForReload();
 	}
 
-	@Override
-	public void register(ChartPlugin<?> chartPlugin)
+	/**
+	 * 上传指定文件所表示的{@linkplain HtmlChartPlugin}。
+	 * <p>
+	 * 文件可以是单个{@linkplain HtmlChartPlugin}目录，可以是包含多个{@linkplain HtmlChartPlugin}的上级目录，
+	 * 可以是单个{@linkplain HtmlChartPlugin}的ZIP，可以是包含多个{@linkplain HtmlChartPlugin}的ZIP。
+	 * </p>
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public Set<HtmlChartPlugin<?>> upload(File file) throws IOException
 	{
-		super.register(chartPlugin);
+		Set<HtmlChartPlugin<?>> ids = new HashSet<HtmlChartPlugin<?>>();
+
+		WriteLock writeLock = lock.writeLock();
+
+		try
+		{
+			writeLock.lock();
+
+			upload(file, ids, 0);
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
+
+		return ids;
 	}
 
-	@Override
-	public ChartPlugin<?> remove(String id)
+	protected void upload(File file, Set<HtmlChartPlugin<?>> ids, int depth) throws IOException
 	{
-		return super.remove(id);
+		if(depth > 1 || !file.exists())
+			return;
+		
+		if(file.isDirectory())
+		{
+			if (this.htmlChartPluginLoader.isHtmlChartPluginDirectory(file))
+			{
+				String name = generateUniquePluginFileName(file.getName());
+				File pluginFile = FileUtil.getFile(this.directory, name);
+				IOUtil.copy(file, pluginFile);
+			}
+			else
+			{
+				File[] children = file.listFiles();
+				if (children != null)
+				{
+					for (File child : children)
+						upload(child, ids, depth + 1);
+				}
+			}
+		}
+		else if (this.htmlChartPluginLoader.isHtmlChartPluginZip(file))
+		{
+			String name = generateUniquePluginFileName(file.getName());
+			File pluginFile = FileUtil.getFile(this.directory, name);
+			IOUtil.copy(file, pluginFile);
+		}
+		else if (file.getName().toLowerCase().endsWith(".zip"))
+		{
+			File tmpDirectory = File.createTempFile("dghtmlchartplugin", null);
+			tmpDirectory.mkdir();
+
+			IOUtil.unzip(IOUtil.getZipInputStream(file), tmpDirectory);
+
+			upload(tmpDirectory, ids, depth + 1);
+		}
+	}
+
+	/**
+	 * 生成{@linkplain #directory}目录下的唯一插件文件名。
+	 * 
+	 * @param originName
+	 * @return
+	 */
+	protected String generateUniquePluginFileName(String originName)
+	{
+		String prefix = originName;
+		String ext = "";
+
+		int eidx = originName.lastIndexOf('.');
+		if (eidx >= 0)
+		{
+			prefix = originName.substring(0, eidx);
+			ext = originName.substring(eidx);
+		}
+
+		String name = prefix + ext;
+		for (int i = 1;; i++)
+		{
+			File file = FileUtil.getFile(this.directory, name);
+			if (!file.exists())
+				break;
+			
+			name = prefix + "_" + i + ext;
+		}
+
+		return name;
 	}
 
 	@Override
@@ -161,6 +253,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		Collection<PluginFileInfo> pluginFileInfos = this.chartPluginFileInfoMap.values();
 		for (PluginFileInfo fileInfo : pluginFileInfos)
 			FileUtil.deleteFile(fileInfo.getFile());
+		this.chartPluginFileInfoMap.clear();
 	}
 
 	protected void checkForReload()

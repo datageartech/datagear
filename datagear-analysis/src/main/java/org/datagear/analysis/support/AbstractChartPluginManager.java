@@ -17,6 +17,8 @@ import java.util.Map;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.RenderContext;
+import org.datagear.util.StringUtil;
+import org.datagear.util.version.Version;
 import org.springframework.core.GenericTypeResolver;
 
 /**
@@ -59,15 +61,29 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 
 	/**
 	 * 注册一个{@linkplain ChartPlugin}。
+	 * <p>
+	 * 如果已存在一个更高版本的，则注册失败，返回{@code false}。
+	 * </p>
 	 * 
 	 * @param chartPlugin
+	 * @return
 	 */
-	protected void registerChartPlugin(ChartPlugin<?> chartPlugin)
+	protected boolean registerChartPlugin(ChartPlugin<?> chartPlugin)
 	{
-		this.chartPluginMap.put(chartPlugin.getId(), chartPlugin);
+		boolean put = true;
 
-		this.renderContextTypeMap.put(chartPlugin.getId(),
-				resolveChartPluginRenderContextType(chartPlugin.getClass()));
+		ChartPlugin<?> prev = this.chartPluginMap.get(chartPlugin.getId());
+		if (prev != null)
+			put = canReplaceForSameId(chartPlugin, prev);
+
+		if (put)
+		{
+			this.chartPluginMap.put(chartPlugin.getId(), chartPlugin);
+			this.renderContextTypeMap.put(chartPlugin.getId(),
+					resolveChartPluginRenderContextType(chartPlugin.getClass()));
+		}
+
+		return put;
 	}
 
 	/**
@@ -208,5 +224,42 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 				return Integer.valueOf(o1.getOrder()).compareTo(o2.getOrder());
 			}
 		});
+	}
+
+	protected boolean canReplaceForSameId(ChartPlugin<?> my, ChartPlugin<?> old)
+	{
+		boolean replace = false;
+
+		Version myVersion = null;
+		Version oldVersion = null;
+		
+		if(!StringUtil.isEmpty(my.getVersion()))
+		{
+			try
+			{
+				myVersion = Version.valueOf(my.getVersion());
+			}
+			catch(Exception e) {}
+		}
+
+		if(!StringUtil.isEmpty(old.getVersion()))
+		{
+			try
+			{
+				oldVersion = Version.valueOf(old.getVersion());
+			}
+			catch(Exception e) {}
+		}
+
+		if (StringUtil.isEmpty(oldVersion) && StringUtil.isEmpty(myVersion))
+			replace = true;
+		else if (StringUtil.isEmpty(oldVersion))
+			replace = true;
+		else if (StringUtil.isEmpty(myVersion))
+			replace = false;
+		else
+			replace = myVersion.isHigherThan(oldVersion);
+
+		return replace;
 	}
 }

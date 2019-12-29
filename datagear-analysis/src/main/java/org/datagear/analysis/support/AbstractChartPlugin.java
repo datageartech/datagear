@@ -36,6 +36,8 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 
 	private ChartProperties chartProperties;
 
+	private String version;
+
 	private int order = 0;
 
 	public AbstractChartPlugin()
@@ -111,6 +113,17 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 	public void setChartProperties(ChartProperties chartProperties)
 	{
 		this.chartProperties = chartProperties;
+	}
+
+	@Override
+	public String getVersion()
+	{
+		return version;
+	}
+
+	public void setVersion(String version)
+	{
+		this.version = version;
 	}
 
 	@Override
