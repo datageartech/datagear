@@ -140,10 +140,10 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 	protected void upload(File file, Set<HtmlChartPlugin<?>> ids, int depth) throws IOException
 	{
-		if(depth > 1 || !file.exists())
+		if (depth > 1 || !file.exists())
 			return;
-		
-		if(file.isDirectory())
+
+		if (file.isDirectory())
 		{
 			if (this.htmlChartPluginLoader.isHtmlChartPluginDirectory(file))
 			{
@@ -169,12 +169,13 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		}
 		else if (file.getName().toLowerCase().endsWith(".zip"))
 		{
-			File tmpDirectory = File.createTempFile("dghtmlchartplugin", null);
-			tmpDirectory.mkdir();
+			File tmpDirectory = FileUtil.createTempDirectory("dgcp");
 
 			IOUtil.unzip(IOUtil.getZipInputStream(file), tmpDirectory);
 
 			upload(tmpDirectory, ids, depth + 1);
+
+			FileUtil.deleteFile(tmpDirectory);
 		}
 	}
 
@@ -202,7 +203,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			File file = FileUtil.getFile(this.directory, name);
 			if (!file.exists())
 				break;
-			
+
 			name = prefix + "_" + i + ext;
 		}
 

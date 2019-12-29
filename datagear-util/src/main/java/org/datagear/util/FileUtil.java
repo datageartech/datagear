@@ -5,6 +5,7 @@
 package org.datagear.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -451,5 +452,25 @@ public class FileUtil
 	{
 		if (containsBackwardPath(path))
 			throw new IllegalArgumentException("[../] and [..\\] is not allowed in path [" + path + "]");
+	}
+
+	/**
+	 * 创建临时文件夹。
+	 * 
+	 * @param prefix
+	 * @return
+	 * @throws IOException
+	 */
+	public static File createTempDirectory(String prefix) throws IOException
+	{
+		File tmp = File.createTempFile(prefix, null);
+
+		if (!tmp.delete())
+			throw new IOException("Could not create temp directory for prefix '" + prefix + "'");
+
+		if (!tmp.mkdir())
+			throw new IOException("Could not create temp directory for prefix '" + prefix + "'");
+
+		return tmp;
 	}
 }

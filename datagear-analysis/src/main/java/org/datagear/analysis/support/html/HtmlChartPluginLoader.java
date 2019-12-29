@@ -10,7 +10,6 @@ package org.datagear.analysis.support.html;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -135,7 +134,7 @@ public class HtmlChartPluginLoader
 			in = IOUtil.getZipInputStream(file);
 			return isHtmlChartPluginZip(in);
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
 			throw new HtmlChartPluginLoadException(e);
 		}
@@ -178,7 +177,7 @@ public class HtmlChartPluginLoader
 				in.closeEntry();
 			}
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
 			throw new HtmlChartPluginLoadException(e);
 		}
@@ -317,6 +316,51 @@ public class HtmlChartPluginLoader
 		return plugin;
 	}
 
+	protected HtmlChartPlugin<?> loadSingleForZip(File zip) throws HtmlChartPluginLoadException
+	{
+		ZipInputStream in = null;
+
+		try
+		{
+			in = IOUtil.getZipInputStream(zip);
+		}
+		catch (Exception e)
+		{
+			IOUtil.close(in);
+
+			throw new HtmlChartPluginLoadException(e);
+		}
+
+		try
+		{
+			return loadSingleForZip(in);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
+	}
+
+	protected HtmlChartPlugin<?> loadSingleForZip(ZipInputStream in) throws HtmlChartPluginLoadException
+	{
+		try
+		{
+			File tmpDirectory = FileUtil.createTempDirectory("dgcpl");
+
+			IOUtil.unzip(in, tmpDirectory);
+
+			HtmlChartPlugin<?> chartPlugin = loadSingleForDirectory(tmpDirectory);
+
+			FileUtil.deleteFile(tmpDirectory);
+
+			return chartPlugin;
+		}
+		catch (IOException e)
+		{
+			throw new HtmlChartPluginLoadException(e);
+		}
+	}
+
 	protected Map<RenderStyle, Icon> toBytesIconsInDirectory(File directory, Map<RenderStyle, Icon> icons)
 			throws IOException
 	{
@@ -348,146 +392,6 @@ public class HtmlChartPluginLoader
 				return null;
 
 			File iconFile = FileUtil.getFile(directory, subPath);
-
-			return readBytesIcon(iconFile);
-		}
-		else
-			return null;
-	}
-
-	protected HtmlChartPlugin<?> loadSingleForZip(File zip) throws HtmlChartPluginLoadException
-	{
-		ZipInputStream in = null;
-
-		try
-		{
-			in = IOUtil.getZipInputStream(zip);
-		}
-		catch (Exception e)
-		{
-			IOUtil.close(in);
-
-			throw new HtmlChartPluginLoadException(e);
-		}
-
-		try
-		{
-			return loadSingleForZip(in);
-		}
-		finally
-		{
-			IOUtil.close(in);
-		}
-	}
-
-	protected HtmlChartPlugin<?> loadSingleForZip(ZipInputStream in) throws HtmlChartPluginLoadException
-	{
-		ZipEntry zipEntry = null;
-
-		HtmlChartPlugin<?> plugin = null;
-		Map<String, Object> properties = null;
-		String scriptContent = null;
-
-		Map<String, File> resourceFiles = new HashMap<String, File>();
-
-		try
-		{
-			while ((zipEntry = in.getNextEntry()) != null)
-			{
-				String name = zipEntry.getName();
-
-				if (zipEntry.isDirectory())
-					;
-				else if (name.equals(NAME_PROPERTIES))
-				{
-					properties = this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(in, this.encoding);
-				}
-				else if (name.equals(NAME_CHART))
-				{
-					scriptContent = readScriptContent(in, false);
-				}
-				else
-				{
-					File tmpFile = File.createTempFile(HtmlChartPluginLoader.class.getSimpleName(),
-							"." + FileUtil.getExtension(name));
-					IOUtil.write(in, tmpFile);
-					resourceFiles.put(name, tmpFile);
-				}
-
-				in.closeEntry();
-			}
-
-			if (properties != null && !StringUtil.isEmpty(scriptContent))
-			{
-				plugin = createHtmlChartPlugin();
-				this.jsonChartPluginPropertiesResolver.setChartPluginProperties(plugin, properties);
-				plugin.setScriptContent(new StringScriptContent(scriptContent));
-				plugin.setIcons(toBytesIconsForFileMap(resourceFiles, plugin.getIcons()));
-			}
-
-			// 清除临时文件
-			if (!resourceFiles.isEmpty())
-			{
-				Collection<File> tmpFiles = resourceFiles.values();
-				for (File tmpFile : tmpFiles)
-					FileUtil.deleteFile(tmpFile);
-			}
-		}
-		catch (IOException e)
-		{
-			throw new HtmlChartPluginLoadException(e);
-		}
-
-		return plugin;
-	}
-
-	protected Map<RenderStyle, Icon> toBytesIconsForFileMap(Map<String, File> fileMap, Map<RenderStyle, Icon> icons)
-			throws IOException
-	{
-		if (icons == null || icons.isEmpty())
-			return icons;
-
-		Map<RenderStyle, Icon> bytesIcons = new HashMap<RenderStyle, Icon>();
-
-		for (Map.Entry<RenderStyle, Icon> entry : icons.entrySet())
-		{
-			Icon icon = entry.getValue();
-
-			BytesIcon bytesIcon = toBytesIconForFileMap(fileMap, icon);
-
-			if (bytesIcon != null)
-				bytesIcons.put(entry.getKey(), bytesIcon);
-		}
-
-		return bytesIcons;
-	}
-
-	protected BytesIcon toBytesIconForFileMap(Map<String, File> fileMap, Icon icon) throws IOException
-	{
-		if (icon instanceof LocationIcon)
-		{
-			String iconPath = ((LocationIcon) icon).getLocation();
-
-			if (StringUtil.isEmpty(iconPath))
-				return null;
-
-			File iconFile = fileMap.get(iconPath);
-
-			if (iconFile == null)
-			{
-				iconPath = FileUtil.deletePathSeparatorHead(FileUtil.trimPath(iconPath));
-
-				for (Map.Entry<String, File> entry : fileMap.entrySet())
-				{
-					String name = FileUtil.deletePathSeparatorHead(FileUtil.trimPath(entry.getKey()));
-
-					if (iconPath.equals(name))
-					{
-						iconFile = entry.getValue();
-						break;
-					}
-				}
-			}
 
 			return readBytesIcon(iconFile);
 		}
@@ -532,9 +436,7 @@ public class HtmlChartPluginLoader
 
 	protected boolean isZipFile(File file)
 	{
-		String fileName = file.getName().toLowerCase();
-
-		return fileName.endsWith(".zip");
+		return file.getName().toLowerCase().endsWith(".zip");
 	}
 
 	protected HtmlChartPlugin<?> createHtmlChartPlugin()
