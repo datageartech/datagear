@@ -52,13 +52,13 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	}
 
 	@Override
-	public ChartPlugin<?> remove(String id)
+	public ChartPlugin<?>[] remove(String... ids)
 	{
 		WriteLock writeLock = this.lock.writeLock();
 
 		try
 		{
-			return removeChartPlugin(id);
+			return removeChartPlugins(ids);
 		}
 		finally
 		{

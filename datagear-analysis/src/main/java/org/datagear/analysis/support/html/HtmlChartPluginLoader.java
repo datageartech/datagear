@@ -345,7 +345,7 @@ public class HtmlChartPluginLoader
 	{
 		try
 		{
-			File tmpDirectory = FileUtil.createTempDirectory("dgcpl");
+			File tmpDirectory = FileUtil.createTempDirectory();
 
 			IOUtil.unzip(in, tmpDirectory);
 

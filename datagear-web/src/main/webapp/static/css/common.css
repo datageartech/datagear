@@ -1972,3 +1972,36 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-chart .add-data-set-button{
 	vertical-align: top;
 }
+
+.page-grid-chartPlugin{
+}
+.page-grid-chartPlugin a.plugin-icon{
+	display: inline-block;
+	width: 20px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+.page-form-uploadChartPlugin .chart-plugin-infos{
+	display: inline-block;
+	height: 8em;
+	overflow: auto;
+	padding: 3px 2px;
+}
+.page-form-uploadChartPlugin .chart-plugin-infos .chart-plugin-item{
+	margin-bottom: 5px;
+	padding: 4px 2px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.page-form-uploadChartPlugin .chart-plugin-infos .chart-plugin-item a.plugin-icon{
+	display: inline-block;
+	width: 20px;
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+}
+.page-form-uploadChartPlugin .chart-plugin-infos .chart-plugin-item .name{
+	margin-left: 0.5em;
+}
+.page-form-uploadChartPlugin .chart-plugin-infos .chart-plugin-item .version{
+	margin-left: 0.3em;
+}

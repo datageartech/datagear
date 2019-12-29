@@ -55,6 +55,10 @@
 		<intercept-url pattern="/schemaUrlBuilder/saveScriptCode" access="ROLE_ADMIN" />
 		<intercept-url pattern="/schemaUrlBuilder/previewScriptCode" access="ROLE_ADMIN" />
 		
+		<!-- 图表插件管理 -->
+		<intercept-url pattern="/analysis/chartPlugin/icon/*" access="ROLE_USER, IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="/analysis/chartPlugin/**" access="ROLE_ADMIN" />
+		
 		<intercept-url pattern="/login/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<intercept-url pattern="/register/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<intercept-url pattern="/resetPassword/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />

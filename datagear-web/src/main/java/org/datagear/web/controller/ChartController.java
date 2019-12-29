@@ -4,21 +4,12 @@
 
 package org.datagear.web.controller;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
-import org.datagear.analysis.Icon;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
@@ -28,28 +19,24 @@ import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
-import org.datagear.util.IOUtil;
-import org.datagear.util.i18n.Label;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.context.request.WebRequest;
 
 /**
- * 数据集控制器。
+ * 图表控制器。
  * 
  * @author datagear@163.com
  *
  */
 @Controller
 @RequestMapping("/analysis/chart")
-public class ChartController extends AbstractDataAnalysisController
+public class ChartController extends AbstractChartPluginAwareController
 {
 	@Autowired
 	private HtmlChartWidgetEntityService htmlChartWidgetEntityService;
@@ -95,10 +82,14 @@ public class ChartController extends AbstractDataAnalysisController
 	{
 		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
 
-		List<HtmlChartPluginInfo> pluginInfos = getAllHtmlChartPluginInfos(request);
+		List<HtmlChartPluginInfo> pluginInfos = findHtmlChartPluginInfos(request, null);
 
 		if (pluginInfos.size() > 0)
-			chart.setChartPlugin(pluginInfos.get(0).getChartPlugin());
+		{
+			String defaultChartPluginId = pluginInfos.get(0).getId();
+			chart.setHtmlChartPlugin((HtmlChartPlugin<HtmlRenderContext>) this.chartPluginManager
+					.<HtmlRenderContext> get(defaultChartPluginId));
+		}
 
 		model.addAttribute("chart", chart);
 		model.addAttribute("pluginInfos", pluginInfos);
@@ -137,7 +128,7 @@ public class ChartController extends AbstractDataAnalysisController
 		if (chart == null)
 			throw new RecordNotFoundException();
 
-		List<HtmlChartPluginInfo> pluginInfos = getAllHtmlChartPluginInfos(request);
+		List<HtmlChartPluginInfo> pluginInfos = findHtmlChartPluginInfos(request, null);
 
 		model.addAttribute("chart", chart);
 		model.addAttribute("pluginInfos", pluginInfos);
@@ -174,7 +165,7 @@ public class ChartController extends AbstractDataAnalysisController
 		if (chart == null)
 			throw new RecordNotFoundException();
 
-		List<HtmlChartPluginInfo> pluginInfos = getAllHtmlChartPluginInfos(request);
+		List<HtmlChartPluginInfo> pluginInfos = findHtmlChartPluginInfos(request, null);
 
 		model.addAttribute("chart", chart);
 		model.addAttribute("pluginInfos", pluginInfos);
@@ -231,41 +222,6 @@ public class ChartController extends AbstractDataAnalysisController
 		return pagingData;
 	}
 
-	@RequestMapping(value = "/pluginicon/{pluginId}", produces = CONTENT_TYPE_JSON)
-	public void getPluginIcon(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
-			@PathVariable("pluginId") String pluginId) throws Exception
-	{
-		ChartPlugin<?> chartPlugin = this.chartPluginManager.get(pluginId);
-
-		if (chartPlugin == null)
-			throw new FileNotFoundException();
-
-		RenderStyle renderStyle = resolveRenderStyle(request);
-		Icon icon = chartPlugin.getIcon(renderStyle);
-
-		if (icon == null)
-			throw new FileNotFoundException();
-
-		long lastModified = icon.getLastModified();
-		if (webRequest.checkNotModified(lastModified))
-			return;
-
-		response.setContentType("image/" + icon.getType());
-
-		OutputStream out = response.getOutputStream();
-		InputStream iconIn = null;
-
-		try
-		{
-			iconIn = icon.getInputStream();
-			IOUtil.write(iconIn, out);
-		}
-		finally
-		{
-			IOUtil.close(iconIn);
-		}
-	}
-
 	protected SqlDataSetFactoryEntity[] getSqlDataSetFactoryEntityParams(HttpServletRequest request)
 	{
 		String[] dataSetIds = request.getParameterValues("dataSetId");
@@ -293,124 +249,5 @@ public class ChartController extends AbstractDataAnalysisController
 
 		if (isEmpty(chart.getChartPlugin()))
 			throw new IllegalInputException();
-	}
-
-	protected List<HtmlChartPluginInfo> getAllHtmlChartPluginInfos(HttpServletRequest request)
-	{
-		List<HtmlChartPluginInfo> pluginInfos = new ArrayList<HtmlChartPluginInfo>();
-
-		List<ChartPlugin<HtmlRenderContext>> plugins = this.chartPluginManager.getAll(HtmlRenderContext.class);
-
-		if (plugins != null)
-		{
-			Locale locale = WebUtils.getLocale(request);
-			RenderStyle renderStyle = resolveRenderStyle(request);
-
-			for (ChartPlugin<HtmlRenderContext> plugin : plugins)
-			{
-				if (plugin instanceof HtmlChartPlugin<?>)
-				{
-					HtmlChartPluginInfo pluginInfo = new HtmlChartPluginInfo();
-					pluginInfo.setChartPlugin((HtmlChartPlugin<HtmlRenderContext>) plugin);
-
-					Label nameLabel = plugin.getNameLabel();
-					if (nameLabel != null)
-						pluginInfo.setName(nameLabel.getValue(locale));
-
-					Label descLabel = plugin.getDescLabel();
-					if (descLabel != null)
-						pluginInfo.setDesc(descLabel.getValue(locale));
-
-					Label manualLabel = plugin.getManualLabel();
-					if (manualLabel != null)
-						pluginInfo.setManual(manualLabel.getValue(locale));
-
-					Icon icon = plugin.getIcon(renderStyle);
-					pluginInfo.setHasIcon(icon != null);
-
-					pluginInfos.add(pluginInfo);
-				}
-			}
-		}
-
-		return pluginInfos;
-	}
-
-	public static class HtmlChartPluginInfo implements Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		private HtmlChartPlugin<HtmlRenderContext> chartPlugin;
-		private String name;
-		private String desc;
-		private String manual;
-		private boolean hasIcon;
-
-		public HtmlChartPluginInfo()
-		{
-			super();
-		}
-
-		public HtmlChartPluginInfo(HtmlChartPlugin<HtmlRenderContext> chartPlugin, String name)
-		{
-			super();
-			this.chartPlugin = chartPlugin;
-			this.name = name;
-		}
-
-		public HtmlChartPlugin<HtmlRenderContext> getChartPlugin()
-		{
-			return chartPlugin;
-		}
-
-		public void setChartPlugin(HtmlChartPlugin<HtmlRenderContext> chartPlugin)
-		{
-			this.chartPlugin = chartPlugin;
-		}
-
-		public String getId()
-		{
-			return this.chartPlugin.getId();
-		}
-
-		public String getName()
-		{
-			return name;
-		}
-
-		public void setName(String name)
-		{
-			this.name = name;
-		}
-
-		public String getDesc()
-		{
-			return desc;
-		}
-
-		public void setDesc(String desc)
-		{
-			this.desc = desc;
-		}
-
-		public String getManual()
-		{
-			return manual;
-		}
-
-		public void setManual(String manual)
-		{
-			this.manual = manual;
-		}
-
-		public boolean isHasIcon()
-		{
-			return hasIcon;
-		}
-
-		public void setHasIcon(boolean hasIcon)
-		{
-			this.hasIcon = hasIcon;
-		}
 	}
 }

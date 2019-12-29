@@ -323,6 +323,21 @@ public class FileUtil
 	}
 
 	/**
+	 * 是否为指定后缀的文件名。
+	 * 
+	 * @param fileName
+	 * @param extension
+	 * @return
+	 */
+	public static boolean isExtension(String fileName, String extension)
+	{
+		if (StringUtil.isEmpty(fileName))
+			return false;
+
+		return fileName.toLowerCase().endsWith(extension.toLowerCase());
+	}
+
+	/**
 	 * 连接路径。
 	 * 
 	 * @param parent
@@ -457,12 +472,13 @@ public class FileUtil
 	/**
 	 * 创建临时文件夹。
 	 * 
-	 * @param prefix
 	 * @return
 	 * @throws IOException
 	 */
-	public static File createTempDirectory(String prefix) throws IOException
+	public static File createTempDirectory() throws IOException
 	{
+		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_DIR";
+
 		File tmp = File.createTempFile(prefix, null);
 
 		if (!tmp.delete())
@@ -472,5 +488,30 @@ public class FileUtil
 			throw new IOException("Could not create temp directory for prefix '" + prefix + "'");
 
 		return tmp;
+	}
+
+	/**
+	 * 创建临时文件。
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	public static File createTempFile() throws IOException
+	{
+		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_FILE";
+		return File.createTempFile(prefix, null);
+	}
+
+	/**
+	 * 创建临时文件。
+	 * 
+	 * @param extension
+	 * @return
+	 * @throws IOException
+	 */
+	public static File createTempFile(String extension) throws IOException
+	{
+		String prefix = Global.PRODUCT_NAME_EN.toUpperCase() + "_TMP_FILE";
+		return File.createTempFile(prefix, extension);
 	}
 }

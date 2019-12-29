@@ -91,6 +91,21 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * 
 	 * @param id
 	 */
+	protected ChartPlugin<?>[] removeChartPlugins(String[] ids)
+	{
+		ChartPlugin<?>[] removed = new ChartPlugin<?>[ids.length];
+
+		for (int i = 0; i < ids.length; i++)
+			removed[i] = removeChartPlugin(ids[i]);
+
+		return removed;
+	}
+
+	/**
+	 * 移除{@linkplain ChartPlugin}。
+	 * 
+	 * @param id
+	 */
 	protected ChartPlugin<?> removeChartPlugin(String id)
 	{
 		this.renderContextTypeMap.remove(id);
@@ -128,8 +143,7 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends RenderContext> List<ChartPlugin<T>> findChartPlugins(
-			Class<? extends T> renderContextType)
+	protected <T extends RenderContext> List<ChartPlugin<T>> findChartPlugins(Class<? extends T> renderContextType)
 	{
 		List<ChartPlugin<T>> reChartPlugins = new ArrayList<ChartPlugin<T>>();
 
@@ -232,23 +246,27 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 
 		Version myVersion = null;
 		Version oldVersion = null;
-		
-		if(!StringUtil.isEmpty(my.getVersion()))
+
+		if (!StringUtil.isEmpty(my.getVersion()))
 		{
 			try
 			{
 				myVersion = Version.valueOf(my.getVersion());
 			}
-			catch(Exception e) {}
+			catch (Exception e)
+			{
+			}
 		}
 
-		if(!StringUtil.isEmpty(old.getVersion()))
+		if (!StringUtil.isEmpty(old.getVersion()))
 		{
 			try
 			{
 				oldVersion = Version.valueOf(old.getVersion());
 			}
-			catch(Exception e) {}
+			catch (Exception e)
+			{
+			}
 		}
 
 		if (StringUtil.isEmpty(oldVersion) && StringUtil.isEmpty(myVersion))
@@ -258,7 +276,7 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 		else if (StringUtil.isEmpty(myVersion))
 			replace = false;
 		else
-			replace = myVersion.isHigherThan(oldVersion);
+			replace = !myVersion.isLowerThan(oldVersion);
 
 		return replace;
 	}

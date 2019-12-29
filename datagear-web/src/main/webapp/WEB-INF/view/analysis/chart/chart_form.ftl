@@ -36,7 +36,7 @@ readonly 是否只读操作，允许为null
 					<#list pluginInfos as pi>
 						<li class="ui-state-default ui-corner-all" chart-plugin-id="${pi.id?html}" title="${pi.name?html}">
 							<#if pi.hasIcon>
-							<a class="plugin-icon" style="background-image: url(${contextPath}/analysis/chart/pluginicon/${pi.id?html})">&nbsp;</a>
+							<a class="plugin-icon" style="background-image: url(${contextPath}/${pi.iconUrl})">&nbsp;</a>
 							<#else>
 							<a class="plugin-name">${pi.name?html}</a>
 							</#if>

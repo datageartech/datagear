@@ -574,9 +574,10 @@ public class IOUtil
 	 * 
 	 * @param src
 	 * @param dest
+	 * @param srcAsSubDirectory
 	 * @throws IOException
 	 */
-	public static void copy(File src, File dest) throws IOException
+	public static void copy(File src, File dest, boolean srcAsSubDirectory) throws IOException
 	{
 		if (src.isDirectory())
 		{
@@ -585,25 +586,37 @@ public class IOUtil
 			else if (!dest.isDirectory())
 				throw new IllegalArgumentException("[dest] must be directory");
 
+			File targetDirectory = dest;
+			if (srcAsSubDirectory)
+				targetDirectory = FileUtil.getDirectory(dest, src.getName());
+
 			File[] children = src.listFiles();
 			if (children != null)
 			{
 				for (File child : children)
-					copy(child, new File(dest, child.getName()));
+					copy(child, new File(targetDirectory, child.getName()), false);
 			}
 		}
 		else
 		{
-			OutputStream out = null;
-
-			try
+			if (dest.isDirectory())
 			{
-				out = IOUtil.getOutputStream(dest);
-				IOUtil.write(src, out);
+				File destFile = FileUtil.getFile(dest, src.getName());
+				copy(src, destFile, false);
 			}
-			finally
+			else
 			{
-				IOUtil.close(out);
+				OutputStream out = null;
+
+				try
+				{
+					out = IOUtil.getOutputStream(dest);
+					IOUtil.write(src, out);
+				}
+				finally
+				{
+					IOUtil.close(out);
+				}
 			}
 		}
 	}

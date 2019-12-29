@@ -595,6 +595,16 @@
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/authorization/${statics['org.datagear.management.domain.Schema'].AUTHORIZATION_RESOURCE_TYPE}/query", options);
 				}
+				else if($item.hasClass("system-set-chartPlugin-manage"))
+				{
+					var options = {};
+					$.setGridPageHeightOption(options);
+					po.open(contextPath+"/analysis/chartPlugin/query", options);
+				}
+				else if($item.hasClass("system-set-chartPlugin-upload"))
+				{
+					po.open(contextPath+"/analysis/chartPlugin/upload");
+				}
 				else if($item.hasClass("system-set-personal-set"))
 				{
 					po.open(contextPath+"/user/personalSet");
@@ -1173,6 +1183,9 @@
 					<li class="system-set-user-add"><a href="javascript:void(0);"><@spring.message code='main.addUser' /></a></li>
 					<li class="system-set-rold-manage"><a href="javascript:void(0);"><@spring.message code='main.manageRole' /></a></li>
 					<li class="system-set-authorization-manage"><a href="javascript:void(0);"><@spring.message code='main.manageAuthorization' /></a></li>
+					<li class="ui-widget-header"></li>
+					<li class="system-set-chartPlugin-manage"><a href="javascript:void(0);"><@spring.message code='main.manageChartPlugin' /></a></li>
+					<li class="system-set-chartPlugin-upload"><a href="javascript:void(0);"><@spring.message code='main.uploadChartPlugin' /></a></li>
 					<li class="ui-widget-header"></li>
 					</#if>
 					<li class="system-set-personal-set"><a href="javascript:void(0);"><@spring.message code='main.personalSet' /></a></li>

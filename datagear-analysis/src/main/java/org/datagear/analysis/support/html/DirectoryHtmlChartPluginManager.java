@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+import java.util.zip.ZipOutputStream;
 
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
@@ -138,7 +139,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		return ids;
 	}
 
-	protected void upload(File file, Set<HtmlChartPlugin<?>> ids, int depth) throws IOException
+	protected void upload(File file, Set<HtmlChartPlugin<?>> plugins, int depth) throws IOException
 	{
 		if (depth > 1 || !file.exists())
 			return;
@@ -149,7 +150,11 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			{
 				String name = generateUniquePluginFileName(file.getName());
 				File pluginFile = FileUtil.getFile(this.directory, name);
-				IOUtil.copy(file, pluginFile);
+				IOUtil.copy(file, pluginFile, false);
+
+				HtmlChartPlugin<?> plugin = loadAndRegister(pluginFile);
+				if (plugin != null)
+					plugins.add(plugin);
 			}
 			else
 			{
@@ -157,7 +162,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 				if (children != null)
 				{
 					for (File child : children)
-						upload(child, ids, depth + 1);
+						upload(child, plugins, depth + 1);
 				}
 			}
 		}
@@ -165,15 +170,19 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		{
 			String name = generateUniquePluginFileName(file.getName());
 			File pluginFile = FileUtil.getFile(this.directory, name);
-			IOUtil.copy(file, pluginFile);
+			IOUtil.copy(file, pluginFile, false);
+
+			HtmlChartPlugin<?> plugin = loadAndRegister(pluginFile);
+			if (plugin != null)
+				plugins.add(plugin);
 		}
 		else if (file.getName().toLowerCase().endsWith(".zip"))
 		{
-			File tmpDirectory = FileUtil.createTempDirectory("dgcp");
+			File tmpDirectory = FileUtil.createTempDirectory();
 
 			IOUtil.unzip(IOUtil.getZipInputStream(file), tmpDirectory);
 
-			upload(tmpDirectory, ids, depth + 1);
+			upload(tmpDirectory, plugins, depth + 1);
 
 			FileUtil.deleteFile(tmpDirectory);
 		}
@@ -208,6 +217,35 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		}
 
 		return name;
+	}
+
+	/**
+	 * 下载指定ID的{@linkplain ChartPlugin}。
+	 * 
+	 * @throws IOException
+	 */
+	public void download(ZipOutputStream out, String... ids) throws IOException
+	{
+		ReadLock readLock = this.lock.readLock();
+
+		try
+		{
+			readLock.lock();
+
+			File tmpDirectory = FileUtil.createTempDirectory();
+
+			for (String id : ids)
+			{
+				PluginFileInfo pluginFileInfo = this.chartPluginFileInfoMap.get(id);
+				IOUtil.copy(pluginFileInfo.getFile(), tmpDirectory, true);
+			}
+
+			IOUtil.writeFileToZipOutputStream(out, tmpDirectory, "");
+		}
+		finally
+		{
+			readLock.unlock();
+		}
 	}
 
 	@Override
@@ -312,25 +350,41 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			{
 				ChartPlugin<?> plugin = this.htmlChartPluginLoader.loadFile(unload);
 
+				String pluginId = (plugin == null ? IDUtil.uuid() : plugin.getId());
+
 				// 无论是否加载成功，都应该存入PluginFileInfo，避免每次checkForReload()时都会将其当做是未加载的
-				this.chartPluginFileInfoMap.put(IDUtil.uuid(), new PluginFileInfo(unload));
+				this.chartPluginFileInfoMap.put(pluginId, new PluginFileInfo(unload));
 
 				if (plugin != null)
 					registerChartPlugin(plugin);
 			}
 
 			for (PluginFileInfo reload : reloads)
-			{
-				ChartPlugin<?> plugin = this.htmlChartPluginLoader.loadFile(reload.getFile());
-
-				if (plugin != null)
-					registerChartPlugin(plugin);
-			}
+				loadAndRegister(reload.getFile());
 		}
 		finally
 		{
 			writeLock.unlock();
 		}
+	}
+
+	/**
+	 * 加载并注册插件，如果注册失败，将返回{@code null}。
+	 * 
+	 * @param pluginFile
+	 * @return
+	 */
+	protected HtmlChartPlugin<?> loadAndRegister(File pluginFile)
+	{
+		HtmlChartPlugin<?> plugin = this.htmlChartPluginLoader.loadFile(pluginFile);
+
+		if (plugin != null)
+		{
+			boolean reg = registerChartPlugin(plugin);
+			return (reg ? plugin : null);
+		}
+		else
+			return plugin;
 	}
 
 	protected static class PluginFileInfo

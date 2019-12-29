@@ -321,13 +321,13 @@
 		<property name="authorizationService" ref="authorizationService" />
 	</bean>
 	
-	<bean id="chartPluginManager" class="org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager" init-method="init">
+	<bean id="directoryHtmlChartPluginManager" class="org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager" init-method="init">
 		<property name="directory" ref="chartPluginRootDirectory" />
 	</bean>
 	
 	<bean id="htmlChartWidgetEntityService" class="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
-		<property name="chartPluginManager" ref="chartPluginManager" />
+		<property name="chartPluginManager" ref="directoryHtmlChartPluginManager" />
 		<property name="sqlDataSetFactoryEntityService" ref="sqlDataSetFactoryEntityService" />
 		<property name="authorizationService" ref="authorizationService" />
 	</bean>

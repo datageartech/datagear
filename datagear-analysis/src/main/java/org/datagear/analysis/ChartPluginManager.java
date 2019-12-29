@@ -24,10 +24,10 @@ public interface ChartPluginManager
 	/**
 	 * 移除指定ID的{@linkplain ChartPlugin}。
 	 * 
-	 * @param id
+	 * @param ids
 	 * @return 被移除的{@linkplain ChartPlugin}或者{@code null}。
 	 */
-	ChartPlugin<?> remove(String id);
+	ChartPlugin<?>[] remove(String... ids);
 
 	/**
 	 * 获取指定ID的{@linkplain ChartPlugin}。

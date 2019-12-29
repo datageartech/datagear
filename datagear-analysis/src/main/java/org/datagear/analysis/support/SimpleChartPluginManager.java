@@ -36,9 +36,9 @@ public class SimpleChartPluginManager extends AbstractChartPluginManager
 	}
 
 	@Override
-	public ChartPlugin<?> remove(String id)
+	public ChartPlugin<?>[] remove(String... ids)
 	{
-		return removeChartPlugin(id);
+		return removeChartPlugins(ids);
 	}
 
 	@Override
