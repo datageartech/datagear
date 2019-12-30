@@ -98,7 +98,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		if (StringUtil.isEmpty(zipFileName))
 			zipFileName = "plugin.zip";
 
-		if (!FileUtil.isExtension(zipFileName, ".zip"))
+		if (!FileUtil.isExtension(zipFileName, "zip"))
 			zipFileName += ".zip";
 
 		File zipFile = FileUtil.getFile(tmpDirectory, zipFileName);
@@ -180,9 +180,9 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		File tmpFile = FileUtil.getFile(this.tempDirectory, pluginFileName);
 
-		getDirectoryHtmlChartPluginManager().upload(tmpFile);
+		Set<HtmlChartPlugin<?>> uploads = getDirectoryHtmlChartPluginManager().upload(tmpFile);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return buildOperationMessageSuccessResponseEntity(request, "chartPlugin.upload.finish", uploads.size());
 	}
 
 	@RequestMapping("/download")

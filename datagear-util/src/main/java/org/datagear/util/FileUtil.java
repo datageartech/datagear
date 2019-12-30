@@ -327,6 +327,7 @@ public class FileUtil
 	 * 
 	 * @param fileName
 	 * @param extension
+	 *            扩展名，可以带“.”前缀，也可不带
 	 * @return
 	 */
 	public static boolean isExtension(String fileName, String extension)
@@ -334,7 +335,23 @@ public class FileUtil
 		if (StringUtil.isEmpty(fileName))
 			return false;
 
+		if (!extension.startsWith("."))
+			extension = "." + extension;
+
 		return fileName.toLowerCase().endsWith(extension.toLowerCase());
+	}
+
+	/**
+	 * 是否为指定后缀的文件名。
+	 * 
+	 * @param file
+	 * @param extension
+	 *            扩展名，可以带“.”前缀，也可不带
+	 * @return
+	 */
+	public static boolean isExtension(File file, String extension)
+	{
+		return isExtension(file.getName(), extension);
 	}
 
 	/**

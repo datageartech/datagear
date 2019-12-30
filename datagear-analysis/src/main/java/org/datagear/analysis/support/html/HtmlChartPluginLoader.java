@@ -436,7 +436,7 @@ public class HtmlChartPluginLoader
 
 	protected boolean isZipFile(File file)
 	{
-		return file.getName().toLowerCase().endsWith(".zip");
+		return FileUtil.isExtension(file, "zip");
 	}
 
 	protected HtmlChartPlugin<?> createHtmlChartPlugin()

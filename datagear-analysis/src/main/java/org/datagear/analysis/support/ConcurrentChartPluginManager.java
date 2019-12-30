@@ -58,6 +58,8 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 
 		try
 		{
+			writeLock.lock();
+
 			return removeChartPlugins(ids);
 		}
 		finally

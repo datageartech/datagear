@@ -73,12 +73,13 @@ selectonly 是否选择操作，允许为null
 	
 	po.element("input[name=downloadButton]").click(function()
 	{
-		var selectedDatas = po.getSelectedData();
-		var param = $.getPropertyParamString(selectedDatas, "id");
-		
-		var options = {target : "_file"};
-		
-		po.open(po.url("download?"+param), options);
+		po.executeOnSelects(function(rows)
+		{
+			var param = $.getPropertyParamString(rows, "id");
+			var options = {target : "_file"};
+			
+			po.open(po.url("download?"+param), options);
+		});
 	});
 	
 	po.element("input[name=deleteButton]").click(

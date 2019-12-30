@@ -70,6 +70,8 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 */
 	protected boolean registerChartPlugin(ChartPlugin<?> chartPlugin)
 	{
+		checkLegalChartPlugin(chartPlugin);
+
 		boolean put = true;
 
 		ChartPlugin<?> prev = this.chartPluginMap.get(chartPlugin.getId());
@@ -279,5 +281,37 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 			replace = !myVersion.isLowerThan(oldVersion);
 
 		return replace;
+	}
+
+	/**
+	 * 检查{@linkplain ChartPlugin}是否合法，如果不合法，将抛出{@linkplain IllegalArgumentException}。
+	 * 
+	 * @param chartPlugin
+	 * @throws IllegalArgumentException
+	 */
+	protected void checkLegalChartPlugin(ChartPlugin<?> chartPlugin) throws IllegalArgumentException
+	{
+		if (!isLegalChartPlugin(chartPlugin))
+			throw new IllegalArgumentException("[" + chartPlugin + "] is illegal");
+	}
+
+	/**
+	 * 是否合法的{@linkplain ChartPlugin}。
+	 * 
+	 * @param chartPlugin
+	 * @return
+	 */
+	protected boolean isLegalChartPlugin(ChartPlugin<?> chartPlugin)
+	{
+		if (chartPlugin == null)
+			return false;
+
+		if (StringUtil.isEmpty(chartPlugin.getId()))
+			return false;
+
+		if (chartPlugin.getNameLabel() == null)
+			return false;
+
+		return true;
 	}
 }
