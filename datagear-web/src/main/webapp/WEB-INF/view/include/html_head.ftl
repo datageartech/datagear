@@ -33,6 +33,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/textarea-helper-0.3.1/textarea-helper.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/ace.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/mode-sql.js" type="text/javascript"></script>
+<script src="${contextPath}/static/script/ace-21.02.19/mode-html.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/ext-language_tools.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/cometd-2.9.1/cometd.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/cometd-2.9.1/AckExtension.js" type="text/javascript"></script>

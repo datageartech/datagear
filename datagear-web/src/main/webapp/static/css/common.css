@@ -2005,3 +2005,12 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-uploadChartPlugin .chart-plugin-infos .chart-plugin-item .version{
 	margin-left: 0.3em;
 }
+.page-form-dashboard .template-editor-wrapper{
+	width:80%;
+	min-height:10em;
+	display: inline-block;
+}
+.page-form-dashboard .template-editor-wrapper .template-editor{
+	width:100%;
+	height:100%;
+}

@@ -32,7 +32,10 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dashboard.template' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="templateContent" class="ui-widget ui-widget-content">${templateContent!''?html}</textarea>
+					<textarea name="templateContent" class="ui-widget ui-widget-content" style="display: none;">${templateContent!''?html}</textarea>
+					<div class="ui-widget ui-widget-content template-editor-wrapper">
+						<div id="${pageId}-template-editor" class="template-editor"></div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -51,19 +54,55 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
+	po.element(".template-editor-wrapper").height($(window).height()/5*3);
 
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/dashboard/" + action;
 	};
 	
+	po.templateEditorCompleters =
+	[
+		{
+			identifierRegexps : [/[a-zA-Z_0-9\.\$]/],
+			getCompletions: function(editor, session, pos, prefix, callback)
+			{
+				return [];
+			}
+		}
+	];
+	var languageTools = ace.require("ace/ext/language_tools");
+	var HtmlMode = ace.require("ace/mode/html").Mode;
+	po.templateEditor = ace.edit("${pageId}-template-editor");
+	po.templateEditor.session.setMode(new HtmlMode());
+	po.templateEditor.setShowPrintMargin(false);
+	po.templateEditor.setOptions(
+	{
+		enableBasicAutocompletion: po.templateEditorCompleters,
+		enableLiveAutocompletion: po.templateEditorCompleters
+	});
+	po.templateEditor.focus();
+	var cursor = po.templateEditor.getCursorPosition();
+	po.templateEditor.moveCursorToPosition(cursor);
+	po.templateEditor.session.insert(cursor, po.element("textarea[name='templateContent']").val());
+	<#if readonly>
+	po.templateEditor.setReadOnly(true);
+	</#if>
+	
 	<#if !readonly>
+	$.validator.addMethod("dashboardTemplateContent", function(value, element)
+	{
+		var html = po.templateEditor.getValue();
+		return html.length > 0;
+	});
+	
 	po.form().validate(
 	{
+		ignore : "",
 		rules :
 		{
 			"name" : "required",
-			"templateContent" : "required"
+			"templateContent" : "dashboardTemplateContent"
 		},
 		messages :
 		{
@@ -72,6 +111,8 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
+			po.element("textarea[name='templateContent']").val(po.templateEditor.getValue());
+			
 			$(form).ajaxSubmit(
 			{
 				success : function()

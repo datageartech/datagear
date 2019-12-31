@@ -67,3 +67,15 @@
 .ace_editor.ace_autocomplete .ace_completion-highlight{
 	color: #007fff;
 }
+/*HTML标签*/
+.ace-tm .ace_meta.ace_tag{
+	
+}
+/*函数名*/
+.ace-tm .ace_entity.ace_name.ace_function{
+	
+}
+/*属性名*/
+.ace-tm .ace_attribute-name{
+	color: #9b9b00;
+}
