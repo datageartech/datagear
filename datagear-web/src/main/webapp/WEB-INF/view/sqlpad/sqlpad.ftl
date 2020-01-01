@@ -173,6 +173,7 @@ Schema schema 数据库，不允许为null
 <#include "../include/page_obj_format_time.ftl" >
 <#include "../include/page_obj_data_permission.ftl">
 <#include "../include/page_obj_data_permission_ds_table.ftl">
+<#include "../include/page_obj_sqlEditor.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -190,26 +191,8 @@ Schema schema 数据库，不允许为null
 	
 	po.cometdInitIfNot();
 	
-	po.sqlEditorCompleters =
-	[
-		{
-			identifierRegexps : [/[a-zA-Z_0-9\.\$]/],
-			getCompletions: function(editor, session, pos, prefix, callback)
-			{
-				po.getSqlAutocompleteCompletions(editor, session, pos, prefix, callback);
-			}
-		}
-	];
-	var languageTools = ace.require("ace/ext/language_tools");
-	var SqlMode = ace.require("ace/mode/sql").Mode;
-	po.sqlEditor = ace.edit("${pageId}-sql-editor");
-	po.sqlEditor.session.setMode(new SqlMode());
-	po.sqlEditor.setShowPrintMargin(false);
-	po.sqlEditor.setOptions(
-	{
-		enableBasicAutocompletion: po.sqlEditorCompleters,
-		enableLiveAutocompletion: po.sqlEditorCompleters
-	});
+	po.getSqlEditorSchemaId = function(){ return po.schemaId; };
+	po.initSqlEditor();
 	po.sqlEditor.focus();
 	po.sqlEditor.navigateFileEnd();
 	
@@ -282,80 +265,6 @@ Schema schema 数据库，不允许为null
 			po.resizeSqlResultTabPanelDataTable();
 		}
 	});
-	
-	po.getSqlAutocompleteCompletions = function(editor, session, pos, prefix, callback)
-	{
-		var info = $.sqlAutocomplete.resolveAutocompleteInfo(editor, session, pos, prefix, ";");
-		
-		if(info && info.type == "table" && po.sqlAutocompleteTableCompletions)
-		{
-			callback(null, po.sqlAutocompleteTableCompletions);
-			return;
-		}
-		
-		var tableAlias = $.sqlAutocomplete.resolveTableAlias(prefix);
-		
-		if(info && info.type == "column" && info.table && po.sqlAutocompleteColumnCompletions)
-		{
-			var columns = po.sqlAutocompleteColumnCompletions[info.table];
-			
-			if(columns != null)
-			{
-				var completions = $.sqlAutocomplete.buildCompletions(columns, (tableAlias ? tableAlias+"." : ""));
-				
-				callback(null, completions);
-				return;
-			}
-		}
-		
-		if(info && (info.type == "table" || (info.type == "column" && info.table)))
-		{
-			var url = "${contextPath}/sqlpad/"+po.schemaId+"/";
-			var data = { "sqlpadId" : po.sqlpadId, "keyword" : "" };
-			
-			if(info.type == "table")
-				url += "findTableNames";
-			else if(info.type == "column")
-			{
-				url += "findColumnNames";
-				data.table = info.table;
-			}
-			else
-				url += "findUnknownNames";
-			
-			$.ajax(
-			{
-				type : "POST",
-				url : url,
-				data : data,
-				success : function(names)
-				{
-					var completions;
-					
-					if(info.type == "table")
-					{
-						completions = $.sqlAutocomplete.buildCompletions(names);
-						po.sqlAutocompleteTableCompletions = completions;
-					}
-					else if(info.type == "column")
-					{
-						completions = $.sqlAutocomplete.buildCompletions(names, (tableAlias ? tableAlias+"." : ""));
-						
-						if(!po.sqlAutocompleteColumnCompletions)
-							po.sqlAutocompleteColumnCompletions = {};
-						
-						if(names && names.length > 0)
-							po.sqlAutocompleteColumnCompletions[info.table] = names;
-					}
-					
-					callback(null, completions);
-				},
-				error : function(){}
-			});
-		}
-		else
-			callback(null, []);
-	};
 	
 	po.getSqlDelimiter = function()
 	{

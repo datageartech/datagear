@@ -89,6 +89,7 @@
 		<url-pattern>/globalSetting/*</url-pattern>
 		<url-pattern>/notification/*</url-pattern>
 		<url-pattern>/analysis/*</url-pattern>
+		<url-pattern>/sqlEditor/*</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>

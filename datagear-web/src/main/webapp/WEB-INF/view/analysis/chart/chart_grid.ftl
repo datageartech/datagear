@@ -158,6 +158,7 @@ selectonly 是否选择操作，允许为null
 	
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
 	po.initDataTable(tableSettings);
+	po.bindResizeDataTable();
 })
 (${pageId});
 </script>

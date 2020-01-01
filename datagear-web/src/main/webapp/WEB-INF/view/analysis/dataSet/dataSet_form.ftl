@@ -44,7 +44,10 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSet.sql' /></label>
 				</div>
 				<div class="form-item-value">
-					<textarea name="sql" class="ui-widget ui-widget-content">${(dataSet.sql)!''?html}</textarea>
+					<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
+					<div class="sql-editor-wrapper ui-widget ui-widget-content">
+						<div id="${pageId}-sql-editor" class="sql-editor"></div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -59,15 +62,22 @@ readonly 是否只读操作，允许为null
 </div>
 <#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
+<#include "../../include/page_obj_sqlEditor.ftl">
 <script type="text/javascript">
 (function(po)
 {
 	$.initButtons(po.element());
+	po.element(".sql-editor-wrapper").height($(window).height()/5*2);
 	
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/dataSet/" + action;
 	};
+	
+	po.getSqlEditorSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };
+	po.initSqlEditor();
+	var cursor = po.sqlEditor.getCursorPosition();
+	po.sqlEditor.session.insert(cursor, po.element("textarea[name='sql']").val());
 	
 	<#if !readonly>
 	po.element(".select-schema-button").click(function()
@@ -89,13 +99,20 @@ readonly 是否只读操作，允许为null
 		po.open("${contextPath}/schema/select", options);
 	});
 	
+	$.validator.addMethod("dataSetSqlRequired", function(value, element)
+	{
+		var sql = po.sqlEditor.getValue();
+		return sql.length > 0;
+	});
+	
 	po.form().validate(
 	{
+		ignore : "",
 		rules :
 		{
 			"name" : "required",
 			"schemaConnectionFactory.schema.title" : "required",
-			"sql" : "required",
+			"sql" : "dataSetSqlRequired",
 		},
 		messages :
 		{
@@ -105,6 +122,8 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
+			po.element("textarea[name='sql']").val(po.sqlEditor.getValue());
+			
 			$(form).ajaxSubmit(
 			{
 				success : function()
