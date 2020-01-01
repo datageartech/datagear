@@ -661,7 +661,7 @@
 				}
 				
 				var newTabIndex = newTab.index();
-				$.cookie("mainNavActiveTabIndex", newTabIndex);
+				$.cookie("mainNavActiveTabIndex", newTabIndex, {expires : 365*5, path : "${contextPath}/"});
 			}
 		});
 		
