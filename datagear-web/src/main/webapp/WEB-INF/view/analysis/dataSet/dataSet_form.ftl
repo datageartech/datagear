@@ -43,11 +43,25 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-label">
 					<label><@spring.message code='dataSet.sql' /></label>
 				</div>
-				<div class="form-item-value">
+				<div class="form-item-value form-item-value-sql">
 					<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
 					<div class="sql-editor-wrapper ui-widget ui-widget-content">
 						<div id="${pageId}-sql-editor" class="sql-editor"></div>
 					</div>
+					<#if !readonly>
+					<div class="sql-preview-wrapper">
+						<div class="operation">
+							<button type="button" class="sql-preview-button"><@spring.message code='preview' /></button>
+							<div class="operation-result">
+								<button type="button" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
+								<button type="button" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
+							</div>
+						</div>
+						<div class="sql-result-table-wrapper">
+							<table id="${pageId}-sql-table" width='100%' class='hover stripe'></table>
+						</div>
+					</div>
+					</#if>
 				</div>
 			</div>
 		</div>
@@ -67,7 +81,10 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
-	po.element(".sql-editor-wrapper").height($(window).height()/5*2);
+	var sqlEditorHeight = $(window).height()/5*2;
+	po.element(".sql-editor-wrapper").height(sqlEditorHeight);
+	po.element(".sql-preview-wrapper").height(sqlEditorHeight);
+	po.element(".form-item-value-sql").height(sqlEditorHeight + 25);
 	
 	po.url = function(action)
 	{
@@ -78,6 +95,9 @@ readonly 是否只读操作，允许为null
 	po.initSqlEditor();
 	var cursor = po.sqlEditor.getCursorPosition();
 	po.sqlEditor.session.insert(cursor, po.element("textarea[name='sql']").val());
+	<#if readonly>
+	po.sqlEditor.setReadOnly(true);
+	</#if>
 	
 	<#if !readonly>
 	po.element(".select-schema-button").click(function()
@@ -97,6 +117,15 @@ readonly 是否只读操作，允许为null
 		$.setGridPageHeightOption(options);
 		
 		po.open("${contextPath}/schema/select", options);
+	});
+	
+	po.element(".sql-preview-button").click(function()
+	{
+		var sql = po.sqlEditor.getValue();
+		if(!sql)
+			return;
+		
+		po.element(".operation-result").show();
 	});
 	
 	$.validator.addMethod("dataSetSqlRequired", function(value, element)
