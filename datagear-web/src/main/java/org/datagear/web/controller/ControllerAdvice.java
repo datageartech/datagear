@@ -172,6 +172,17 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@ExceptionHandler(UserSQLException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleControllerUserSQLException(HttpServletRequest request, HttpServletResponse response,
+			UserSQLException exception)
+	{
+		String message = (exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage());
+		setOperationMessageForThrowable(request, buildMessageCode(UserSQLException.class), exception, false, message);
+
+		return getErrorView(request, response);
+	}
+
 	@ExceptionHandler(VariableExpressionErrorException.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String handlePersistenceVariableExpressionErrorException(HttpServletRequest request,

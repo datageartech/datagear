@@ -1337,6 +1337,11 @@
 			return resizeHandler;
 		},
 		
+		isDatatTable : function($table)
+		{
+			return $table.hasClass("dataTable");
+		},
+		
 		callTabsPanelShowCallback : function($tabsPanel)
 		{
 			var panelShowCallback = $tabsPanel.data("showCallback");

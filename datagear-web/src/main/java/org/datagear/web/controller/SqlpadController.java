@@ -9,8 +9,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.dbinfo.ColumnInfo;
 import org.datagear.dbinfo.DatabaseInfoResolver;
-import org.datagear.dbinfo.TableInfo;
 import org.datagear.dbmodel.DatabaseModelResolver;
 import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
@@ -342,72 +339,6 @@ public class SqlpadController extends AbstractSchemaConnController
 			IOUtil.close(in);
 			IOUtil.close(out);
 		}
-	}
-
-	@RequestMapping(value = "/{schemaId}/findTableNames", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public List<String> findTableNames(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam("sqlpadId") String sqlpadId,
-			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-
-		TableInfo[] tableInfos = new ReturnSchemaConnExecutor<TableInfo[]>(request, response, springModel, schemaId,
-				true)
-		{
-			@Override
-			protected TableInfo[] execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
-
-				return getDatabaseInfoResolver().getTableInfos(getConnection());
-			}
-		}.execute();
-
-		List<TableInfo> tableInfoList = SchemaController.findByKeyword(tableInfos, keyword);
-		Collections.sort(tableInfoList, SchemaController.TABLE_INFO_SORT_BY_NAME_COMPARATOR);
-
-		List<String> tableNames = new ArrayList<String>();
-
-		for (TableInfo tableInfo : tableInfoList)
-			tableNames.add(tableInfo.getName());
-
-		return tableNames;
-	}
-
-	@RequestMapping(value = "/{schemaId}/findColumnNames", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public List<String> findColumnNames(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("table") final String table,
-			@RequestParam(value = "keyword", required = false) String keyword) throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-
-		ColumnInfo[] columnInfos = new ReturnSchemaConnExecutor<ColumnInfo[]>(request, response, springModel, schemaId,
-				true)
-		{
-			@Override
-			protected ColumnInfo[] execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
-
-				return getDatabaseInfoResolver().getColumnInfos(getConnection(), table);
-			}
-		}.execute();
-
-		List<ColumnInfo> columnInfoList = findByKeyword(columnInfos, keyword);
-		Collections.sort(columnInfoList, COLUMNINFO_INFO_SORT_BY_NAME_COMPARATOR);
-
-		List<String> columnNames = new ArrayList<String>();
-
-		for (ColumnInfo columnInfo : columnInfoList)
-			columnNames.add(columnInfo.getName());
-
-		return columnNames;
 	}
 
 	@RequestMapping(value = "/{schemaId}/sqlHistoryData", produces = CONTENT_TYPE_JSON)

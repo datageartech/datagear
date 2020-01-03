@@ -51,14 +51,15 @@ readonly 是否只读操作，允许为null
 					<#if !readonly>
 					<div class="sql-preview-wrapper">
 						<div class="operation">
-							<button type="button" class="sql-preview-button"><@spring.message code='preview' /></button>
+							<button type="button" class="sql-preview-button" title="<@spring.message code='dataSet.sqlPreviewButtonTip' />"><@spring.message code='preview' /></button>
 							<div class="operation-result">
-								<button type="button" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
-								<button type="button" class="sql-result-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
+								<button type="button" class="sql-result-more-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
+								<button type="button" class="sql-result-refresh-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
 							</div>
 						</div>
-						<div class="sql-result-table-wrapper">
-							<table id="${pageId}-sql-table" width='100%' class='hover stripe'></table>
+						<div class="sql-result-table-wrapper minor-dataTable">
+							<table id="${pageId}-sql-table" width='100%' height="100%" class='hover stripe'></table>
+							<div class='no-more-data-flag ui-widget ui-widget-content' title="<@spring.message code='dataSet.noMoreData' />"></div>
 						</div>
 					</div>
 					</#if>
@@ -95,6 +96,15 @@ readonly 是否只读操作，允许为null
 	po.initSqlEditor();
 	var cursor = po.sqlEditor.getCursorPosition();
 	po.sqlEditor.session.insert(cursor, po.element("textarea[name='sql']").val());
+	po.sqlEditor.commands.addCommand(
+	{
+	    name: 'sqlPreviewCommand',
+	    bindKey: "Ctrl-ENTER",
+	    exec: function(editor)
+	    {
+	    	po.element(".sql-preview-button").click();
+	    }
+	});
 	<#if readonly>
 	po.sqlEditor.setReadOnly(true);
 	</#if>
@@ -119,14 +129,161 @@ readonly 是否只读操作，允许为null
 		po.open("${contextPath}/schema/select", options);
 	});
 	
+	po.sqlTableElement = function()
+	{
+		return po.element("#${pageId}-sql-table");
+	};
+	
+	po.sqlPreviewOptions =
+	{
+		sql : "",
+		startRow : 1
+	};
+	
 	po.element(".sql-preview-button").click(function()
 	{
 		var sql = po.sqlEditor.getValue();
 		if(!sql)
 			return;
 		
-		po.element(".operation-result").show();
+		po.element(".operation-result").hide();
+		
+		var table = po.sqlTableElement();
+		if($.isDatatTable(table))
+		{
+			table.DataTable().destroy();
+			table.empty();
+		}
+		
+		po.sqlPreviewOptions.schemaId = po.element("input[name='schemaConnectionFactory.schema.id']").val();
+		po.sqlPreviewOptions.sql = po.sqlEditor.getValue();
+		po.sqlPreviewOptions.startRow = 1;
+		po.sqlPreview();
 	});
+	
+	po.element(".sql-result-more-button").click(function()
+	{
+		if(po.sqlPreviewOptions.noMoreData)
+			return;
+		
+		po.sqlPreviewOptions.startRow = po.sqlPreviewOptions.nextStartRow;
+		po.sqlPreview();
+	});
+
+	po.element(".sql-result-refresh-button").click(function()
+	{
+		po.sqlPreviewOptions.startRow = 1;
+		po.sqlPreview();
+	});
+	
+	po.renderRowNumberColumn = function(data, type, row, meta)
+	{
+		var row = meta.row;
+		
+		if(row.length > 0)
+			row = row[0];
+		
+		return row + 1;
+	};
+	
+	po.calSqlResultTableHeight = function()
+	{
+		return po.element(".sql-result-table-wrapper").height() - 30;
+	};
+	
+	po.sqlPreview = function()
+	{
+		if(!po.sqlPreviewOptions.schemaId || !po.sqlPreviewOptions.sql)
+			return;
+		
+		po.element(".sql-preview-button").button("disable");
+		po.element(".sql-result-more-button").button("disable");
+		po.element(".sql-result-refresh-button").button("disable");
+		
+		var table = po.sqlTableElement();
+		var returnModel = !$.isDatatTable(table);
+		var initDataTable = returnModel;
+		
+		var data =
+		{
+			"sql" : po.sqlPreviewOptions.sql,
+			"startRow" : po.sqlPreviewOptions.startRow,
+			"returnModel" : returnModel
+		};
+		
+		$.ajax(
+		{
+			type : "POST",
+			url : po.url("sqlPreview/" + po.sqlPreviewOptions.schemaId),
+			data : data,
+			success : function(modelSqlResult)
+			{
+				po.sqlPreviewOptions.startRow = modelSqlResult.startRow;
+				po.sqlPreviewOptions.nextStartRow = modelSqlResult.nextStartRow;
+				po.sqlPreviewOptions.fetchSize = modelSqlResult.fetchSize;
+				
+				if(initDataTable)
+				{
+					var model = modelSqlResult.model;
+					var columns = $.buildDataTablesColumns(model);
+					
+					var newColumns = [
+						{
+							title : "<@spring.message code='rowNumber' />", data : "", defaultContent: "",
+							render : po.renderRowNumberColumn, className : "column-row-number", width : "5em"
+						}
+					];
+					newColumns = newColumns.concat(columns);
+					
+					var settings =
+					{
+						"columns" : newColumns,
+						"data" : (modelSqlResult.datas ? modelSqlResult.datas : []),
+						"scrollX": true,
+						"scrollY" : po.calSqlResultTableHeight(),
+						"autoWidth": true,
+				        "scrollCollapse": true,
+						"paging" : false,
+						"searching" : false,
+						"ordering": false,
+						"select" : { style : 'os' },
+					    "language":
+					    {
+							"emptyTable": "<@spring.message code='dataTables.noData' />",
+							"zeroRecords" : "<@spring.message code='dataTables.zeroRecords' />"
+						}
+					};
+					
+					table.dataTable(settings);
+				}
+				else
+				{
+					var dataTable = table.DataTable();
+					$.addDataTableData(dataTable, modelSqlResult.datas, modelSqlResult.startRow-1);
+				}
+				
+				if(modelSqlResult.datas.length < modelSqlResult.fetchSize)
+				{
+					po.sqlPreviewOptions.noMoreData = true;
+					po.element(".no-more-data-flag").show();
+				}
+				else
+				{
+					po.sqlPreviewOptions.noMoreData = false;
+					po.element(".no-more-data-flag").hide();
+				}
+				
+				po.element(".operation-result").show();
+				po.sqlEditor.focus();
+			},
+			complete : function()
+			{
+				po.element(".sql-preview-button").button("enable");
+				po.element(".sql-result-more-button").button("enable");
+				po.element(".sql-result-refresh-button").button("enable");
+			}
+		});
+	};
 	
 	$.validator.addMethod("dataSetSqlRequired", function(value, element)
 	{

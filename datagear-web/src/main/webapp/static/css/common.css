@@ -1964,6 +1964,15 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	top: 2.5em;
 	bottom: 0px;
 }
+.page-form-dataSet .sql-preview-wrapper .sql-result-table-wrapper .no-more-data-flag{
+	position: absolute;
+	bottom: 0px;
+	width: 100%;
+	height: 0px;
+	border-top-width: 2px;
+	border-bottom-width: 2px;
+	display: none;
+}
 .page-form-dataSet .form-item-value-sql .error{
 	display: block;
 }
