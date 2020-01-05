@@ -6,13 +6,13 @@
 	<insert id="insert">
 		INSERT INTO DATAGEAR_SQL_DATA_SET_FACTORY
 			(
-			DSF_ID, DSF_NAME, DSF_SCHEMA_ID, DSF_SQL, DSF_CREATE_USER_ID,
-			DSF_CREATE_TIME
+			DSF_ID, DSF_NAME, DSF_SCHEMA_ID, DSF_SQL, DSF_DC_TEXT,
+			DSF_CL_TEXT, DSF_CREATE_USER_ID, DSF_CREATE_TIME
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.name}, #{entity.schemaConnectionFactory.schema.id}, #{entity.sql}, #{entity.createUser.id},
-			#{entity.createTime}
+			#{entity.id}, #{entity.name}, #{entity.schemaConnectionFactory.schema.id}, #{entity.sql}, #{entity.dataCategoriesText},
+			#{entity.columnLabelsText, jdbcType=VARCHAR}, #{entity.createUser.id}, #{entity.createTime}
 			)
 	</insert>
 	
@@ -20,7 +20,9 @@
 		UPDATE DATAGEAR_SQL_DATA_SET_FACTORY SET
 			DSF_NAME = #{entity.name},
 			DSF_SCHEMA_ID = #{entity.schemaConnectionFactory.schema.id},
-			DSF_SQL = #{entity.sql}
+			DSF_SQL = #{entity.sql},
+			DSF_DC_TEXT = #{entity.dataCategoriesText},
+			DSF_CL_TEXT = #{entity.columnLabelsText, jdbcType=VARCHAR}
 		WHERE
 			DSF_ID = #{entity.id}
 	</update>
@@ -137,6 +139,8 @@
 			B.SCHEMA_ID AS ${_iq_}schemaConnectionFactory.schema.id${_iq_},
 			B.SCHEMA_TITLE AS ${_iq_}schemaConnectionFactory.schema.title${_iq_},
 			A.DSF_SQL AS ${_iq_}sql${_iq_},
+			A.DSF_DC_TEXT AS ${_iq_}dataCategoriesText${_iq_},
+			A.DSF_CL_TEXT AS ${_iq_}columnLabelsText${_iq_},
 			<include refid="common.fieldsForCreateUser" />,
 			A.DSF_CREATE_TIME AS ${_iq_}createTime${_iq_}
 		FROM

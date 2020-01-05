@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.ColumnMeta;
+import org.datagear.analysis.DataCategory;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetExportValues;
@@ -53,6 +54,8 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 
 	private String sql;
 
+	private DataCategory[] dataCategories;
+
 	private String[] columnLabels;
 
 	public SqlDataSetFactory()
@@ -60,11 +63,12 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 		super();
 	}
 
-	public SqlDataSetFactory(String id, ConnectionFactory connectionFactory, String sql)
+	public SqlDataSetFactory(String id, ConnectionFactory connectionFactory, String sql, DataCategory[] dataCategories)
 	{
 		super(id);
 		this.connectionFactory = connectionFactory;
 		this.sql = sql;
+		this.dataCategories = dataCategories;
 	}
 
 	public ConnectionFactory getConnectionFactory()
@@ -85,6 +89,16 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	public void setSql(String sql)
 	{
 		this.sql = sql;
+	}
+
+	public DataCategory[] getDataCategories()
+	{
+		return dataCategories;
+	}
+
+	public void setDataCategories(DataCategory[] dataCategories)
+	{
+		this.dataCategories = dataCategories;
 	}
 
 	public String[] getColumnLabels()
@@ -595,8 +609,11 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 
 			DataType dataType = toDataType(metaData, i);
 
-			ColumnMeta columnMeta = new ColumnMeta(columnName, dataType);
-			columnMeta.setLabel(getColumnLabel(i - 1));
+			ColumnMeta columnMeta = createColumnMeta();
+			columnMeta.setName(columnName);
+			columnMeta.setDataType(dataType);
+			setDataCategory(columnMeta, i);
+			setColumnLabel(columnMeta, i);
 
 			columnMetas.add(columnMeta);
 		}
@@ -604,18 +621,20 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 		return new DataSetMeta(columnMetas);
 	}
 
-	/**
-	 * 获取列标签，没有则返回{@code null}。
-	 * 
-	 * @param index
-	 * @return
-	 */
-	protected String getColumnLabel(int index)
+	protected void setDataCategory(ColumnMeta columnMeta, int column)
 	{
-		if (this.columnLabels == null || index >= this.columnLabels.length)
-			return null;
+		if (this.dataCategories == null || (column - 1) >= this.dataCategories.length)
+			throw new DataSetException("The data category must be set for column [" + column + "]");
 
-		return this.columnLabels[index];
+		columnMeta.setDataCategory(this.dataCategories[column - 1]);
+	}
+
+	protected void setColumnLabel(ColumnMeta columnMeta, int column)
+	{
+		if (this.columnLabels == null || (column - 1) >= this.columnLabels.length)
+			return;
+
+		columnMeta.setLabel(this.columnLabels[column - 1]);
 	}
 
 	/**
@@ -699,5 +718,10 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	protected ParameterSql resolveParameterSql(String sql)
 	{
 		return PARAMETER_SQL_RESOLVER.resolve(sql);
+	}
+
+	protected ColumnMeta createColumnMeta()
+	{
+		return new ColumnMeta();
 	}
 }

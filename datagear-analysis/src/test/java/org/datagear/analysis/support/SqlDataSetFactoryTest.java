@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.ColumnMeta;
+import org.datagear.analysis.DataCategory;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetMeta;
 import org.datagear.analysis.DataSetParam;
@@ -67,7 +68,8 @@ public class SqlDataSetFactoryTest extends DBTestSupport
 			dataSetParams.add(new DataSetParam("id", DataType.INTEGER, true));
 			dataSetParams.add(new DataSetParam("name", DataType.STRING, true));
 
-			SqlDataSetFactory sqlDataSetFactory = new SqlDataSetFactory("1", connectionFactory, sql);
+			SqlDataSetFactory sqlDataSetFactory = new SqlDataSetFactory("1", connectionFactory, sql,
+					new DataCategory[] { DataCategory.DIMENSION, DataCategory.SCALAR });
 			sqlDataSetFactory.setParams(dataSetParams);
 			sqlDataSetFactory.setColumnLabels(columnLabels);
 
@@ -87,6 +89,7 @@ public class SqlDataSetFactoryTest extends DBTestSupport
 
 				Assert.assertEquals("ID", columnMeta.getName());
 				Assert.assertEquals(DataType.INTEGER, columnMeta.getDataType());
+				Assert.assertEquals(DataCategory.DIMENSION, columnMeta.getDataCategory());
 				Assert.assertEquals(columnLabels[0], columnMeta.getLabel());
 			}
 
@@ -95,6 +98,7 @@ public class SqlDataSetFactoryTest extends DBTestSupport
 
 				Assert.assertEquals("NAME", columnMeta.getName());
 				Assert.assertEquals(DataType.STRING, columnMeta.getDataType());
+				Assert.assertEquals(DataCategory.SCALAR, columnMeta.getDataCategory());
 				Assert.assertEquals(columnLabels[1], columnMeta.getLabel());
 			}
 

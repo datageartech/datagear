@@ -22,6 +22,9 @@ public class ColumnMeta
 	/** 数据类型 */
 	private DataType dataType;
 
+	/** 数据类别 */
+	private DataCategory dataCategory;
+
 	/** 展示标签 */
 	private String label;
 
@@ -29,11 +32,12 @@ public class ColumnMeta
 	{
 	}
 
-	public ColumnMeta(String name, DataType dataType)
+	public ColumnMeta(String name, DataType dataType, DataCategory dataCategory)
 	{
 		super();
 		this.name = name;
 		this.dataType = dataType;
+		this.dataCategory = dataCategory;
 	}
 
 	public String getName()
@@ -56,6 +60,16 @@ public class ColumnMeta
 		this.dataType = dataType;
 	}
 
+	public DataCategory getDataCategory()
+	{
+		return dataCategory;
+	}
+
+	public void setDataCategory(DataCategory dataCategory)
+	{
+		this.dataCategory = dataCategory;
+	}
+
 	public boolean hasLabel()
 	{
 		return (this.label != null && !this.label.isEmpty());
@@ -74,6 +88,7 @@ public class ColumnMeta
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", dataType=" + dataType + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", dataType=" + dataType + ", dataCategory="
+				+ dataCategory + ", label=" + label + "]";
 	}
 }

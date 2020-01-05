@@ -65,6 +65,23 @@ readonly 是否只读操作，允许为null
 					</#if>
 				</div>
 			</div>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label><@spring.message code='dataSet.dataCategories' /></label>
+				</div>
+				<div class="form-item-value">
+					<input type="hidden" name="dataCategoriesText" value="${(dataSet.dataCategoriesText)!''?html}" />
+					<input type="text" name="dataCategoriesTextLabel" class="ui-widget ui-widget-content" value="" placeholder="<@spring.message code='dataSet.dataCategoriesSplitByComma' />" />
+				</div>
+			</div>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label><@spring.message code='dataSet.columnLabels' /></label>
+				</div>
+				<div class="form-item-value">
+					<input type="text" name="columnLabelsText" class="ui-widget ui-widget-content" value="${(dataSet.columnLabelsText)!''?html}" placeholder="<@spring.message code='dataSet.columnLabelsSplitByComma' />" />
+				</div>
+			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">
 			<#if !readonly>
@@ -82,7 +99,7 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
-	var sqlEditorHeight = $(window).height()/5*2;
+	var sqlEditorHeight = $(window).height()/10*3;
 	po.element(".sql-editor-wrapper").height(sqlEditorHeight);
 	po.element(".sql-preview-wrapper").height(sqlEditorHeight);
 	po.element(".form-item-value-sql").height(sqlEditorHeight + 25);
@@ -108,6 +125,48 @@ readonly 是否只读操作，允许为null
 	<#if readonly>
 	po.sqlEditor.setReadOnly(true);
 	</#if>
+	
+	po.dataCategoriesLabels = ["<@spring.message code='dataSet.DataCategory.DIMENSION' />", "<@spring.message code='dataSet.DataCategory.SCALAR' />"];
+	po.dataCategoriesValues = ["DIMENSION", "SCALAR"];
+	
+	po.splitByComma = function(val)
+	{
+		return val.split(/,\s*/);
+	};
+	
+	po.convertCommaText = function(srcAry, destAry, srcText)
+	{
+		if(!srcText)
+			return "";
+		
+		var destText = "";
+		var srcs = po.splitByComma(srcText);
+		for(var i=0; i<srcs.length; i++)
+		{
+			var srcIdx = -1;
+			for(var j=0; j<srcAry.length; j++)
+			{
+				if(srcAry[j] == srcs[i])
+				{
+					srcIdx = j;
+					break;
+				}
+			}
+			
+			if(srcIdx> -1)
+			{
+				if(destText != "")
+					destText += ", ";
+				destText += destAry[srcIdx];
+			}
+		}
+		
+		return destText;
+	};
+	
+	var dataCategoriesText = po.element("input[name='dataCategoriesText']").val();
+	po.element("input[name='dataCategoriesTextLabel']").attr("value",
+			po.convertCommaText(po.dataCategoriesValues, po.dataCategoriesLabels, dataCategoriesText));
 	
 	<#if !readonly>
 	po.element(".select-schema-button").click(function()
@@ -230,7 +289,7 @@ readonly 是否只读操作，允许为null
 					var newColumns = [
 						{
 							title : "<@spring.message code='rowNumber' />", data : "", defaultContent: "",
-							render : po.renderRowNumberColumn, className : "column-row-number", width : "5em"
+							render : po.renderRowNumberColumn, className : "column-row-number", width : "3em"
 						}
 					];
 					newColumns = newColumns.concat(columns);
@@ -285,6 +344,42 @@ readonly 是否只读操作，允许为null
 		});
 	};
 	
+	po.extractLastDataCategoryText = function(term)
+	{
+		return po.splitByComma(term).pop();
+	};
+	
+	po.element("input[name='dataCategoriesTextLabel']")
+	.on("keydown", function()
+	{
+		if (event.keyCode === $.ui.keyCode.TAB && $(this).autocomplete( "instance" ).menu.active)
+			event.preventDefault();
+	})
+	.on("focus", function()
+	{
+		$(this).autocomplete("search", "");
+	})
+	.autocomplete(
+	{
+		minLength: 0,
+		source: function(request,response)
+		{
+			response($.ui.autocomplete.filter(po.dataCategoriesLabels, po.extractLastDataCategoryText(request.term)));
+		},
+		focus: function()
+		{
+			return false;
+		},
+		select: function(event, ui)
+		{
+			var terms = po.splitByComma(this.value);
+			terms.pop();
+			terms.push(ui.item.value);
+			this.value = terms;
+			return false;
+		}
+	});
+	
 	$.validator.addMethod("dataSetSqlRequired", function(value, element)
 	{
 		var sql = po.sqlEditor.getValue();
@@ -299,16 +394,22 @@ readonly 是否只读操作，允许为null
 			"name" : "required",
 			"schemaConnectionFactory.schema.title" : "required",
 			"sql" : "dataSetSqlRequired",
+			"dataCategoriesTextLabel" : "required"
 		},
 		messages :
 		{
 			"name" : "<@spring.message code='validation.required' />",
 			"schemaConnectionFactory.schema.title" : "<@spring.message code='validation.required' />",
-			"sql" : "<@spring.message code='validation.required' />"
+			"sql" : "<@spring.message code='validation.required' />",
+			"dataCategoriesTextLabel" : "<@spring.message code='validation.required' />"
 		},
 		submitHandler : function(form)
 		{
 			po.element("textarea[name='sql']").val(po.sqlEditor.getValue());
+			
+			var dataCategoriesTextLabel = po.element("input[name='dataCategoriesTextLabel']").val();
+			po.element("input[name='dataCategoriesText']").val(
+					po.convertCommaText(po.dataCategoriesLabels, po.dataCategoriesValues, dataCategoriesTextLabel));
 			
 			$(form).ajaxSubmit(
 			{
