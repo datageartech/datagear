@@ -1,20 +1,14 @@
 <!doctype html>
-<html dg-dashboard-var="myDashboard" dg-dashboard-listener="myListener" dg-dashboard-import-exclude="jquery,theme">
+<html dg-dashboard-var="myDashboard" dg-dashboard-renderer="myRenderer" dg-dashboard-import-exclude="jquery,theme">
 <head>
 <title>看板</title>
 <script type="text/javascript">
-var myListener =
+var myRenderer =
 {
-	onRender : function(dashboard)
+	render : function(dashboard)
 	{
-		var element = document.getElementById("listener");
-		element.innerHTML += "<div>onRender</div>";
-	},
-	
-	onUpdate : function(dashboard)
-	{
-		var element = document.getElementById("listener");
-		element.innerHTML += "<div>onUpdate</div>";
+		var element = document.getElementById("renderer");
+		element.innerHTML += "<div>render</div>";
 	}
 };
 </script>
@@ -32,6 +26,6 @@ var myListener =
 	
 	<div class="dg-chart" dg-chart-widget="chart-widget-01" dg-chart-var="chartvar_02"></div>
 	
-	<div id="listener"></div>
+	<div id="renderer"></div>
 </body>
 </html>

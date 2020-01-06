@@ -17,11 +17,11 @@ import org.datagear.analysis.RenderContext;
 public interface HtmlRenderContext extends RenderContext
 {
 	/**
-	 * 获取HTML的上下文路径，返回空字符串（{@code ""}）表示无上下文路径。
+	 * 获取{@linkplain WebContext}。
 	 * 
 	 * @return
 	 */
-	String getContextPath();
+	WebContext getWebContext();
 
 	/**
 	 * 获取渲染输出流。
@@ -39,4 +39,88 @@ public interface HtmlRenderContext extends RenderContext
 	 * @return
 	 */
 	int nextSequence();
+
+	/**
+	 * Web上下文信息。
+	 * <p>
+	 * 这些信息可以输出值客户端，提供看板交互支持。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	class WebContext
+	{
+		/** 上下文路径 */
+		private String contextPath;
+
+		/** 更新看板数据的URL */
+		private String updateDashboardURL;
+
+		/** 更新看板数据的的看板ID参数名 */
+		private String dashboardIdParam = "dashboardId";
+
+		/** 更新看板数据的图表集参数名 */
+		private String chartsIdParam = "chartsId";
+
+		public WebContext()
+		{
+			super();
+		}
+
+		public WebContext(String contextPath, String updateDashboardURL)
+		{
+			super();
+			this.contextPath = contextPath;
+			this.updateDashboardURL = updateDashboardURL;
+		}
+
+		public String getContextPath()
+		{
+			return contextPath;
+		}
+
+		public void setContextPath(String contextPath)
+		{
+			this.contextPath = contextPath;
+		}
+
+		public String getUpdateDashboardURL()
+		{
+			return updateDashboardURL;
+		}
+
+		public void setUpdateDashboardURL(String updateDashboardURL)
+		{
+			this.updateDashboardURL = updateDashboardURL;
+		}
+
+		public String getDashboardIdParam()
+		{
+			return dashboardIdParam;
+		}
+
+		public void setDashboardIdParam(String dashboardIdParam)
+		{
+			this.dashboardIdParam = dashboardIdParam;
+		}
+
+		public String getChartsIdParam()
+		{
+			return chartsIdParam;
+		}
+
+		public void setChartsIdParam(String chartsIdParam)
+		{
+			this.chartsIdParam = chartsIdParam;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [contextPath=" + contextPath + ", updateDashboardURL="
+					+ updateDashboardURL + ", dashboardIdParam=" + dashboardIdParam + ", chartsIdParam=" + chartsIdParam
+					+ "]";
+		}
+	}
 }

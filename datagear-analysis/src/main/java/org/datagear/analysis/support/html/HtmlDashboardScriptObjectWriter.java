@@ -47,13 +47,13 @@ public class HtmlDashboardScriptObjectWriter extends AbstractHtmlScriptObjectWri
 	 * 
 	 * @param out
 	 * @param dashboard
-	 * @param renderContextEmpty
-	 *            {@linkplain HtmlDashboard#getRenderContext()}是否只输出空对象。
+	 * @param renderContextNoAttrs
+	 *            {@linkplain HtmlDashboard#getRenderContext()}是否不输出{@linkplain HtmlRenderContext#getAttributes()}。
 	 * @throws IOException
 	 */
-	public void write(Writer out, HtmlDashboard dashboard, boolean renderContextEmpty) throws IOException
+	public void write(Writer out, HtmlDashboard dashboard, boolean renderContextNoAttrs) throws IOException
 	{
-		JsonHtmlDashboard jsonHtmlDashboard = new JsonHtmlDashboard(dashboard, renderContextEmpty);
+		JsonHtmlDashboard jsonHtmlDashboard = new JsonHtmlDashboard(dashboard, renderContextNoAttrs);
 
 		writeScriptObject(out, jsonHtmlDashboard);
 	}
@@ -72,10 +72,10 @@ public class HtmlDashboardScriptObjectWriter extends AbstractHtmlScriptObjectWri
 		}
 
 		@SuppressWarnings("unchecked")
-		public JsonHtmlDashboard(HtmlDashboard dashboard, boolean renderContextEmpty)
+		public JsonHtmlDashboard(HtmlDashboard dashboard, boolean renderContextNoAttrs)
 		{
 			super(dashboard.getId(), new IdDashboardWidget(dashboard.getWidget()),
-					(renderContextEmpty ? new OnlyContextPathHtmlRenderContext(dashboard.getRenderContext())
+					(renderContextNoAttrs ? new NoAttributesHtmlRenderContext(dashboard.getRenderContext())
 							: new AttributesHtmlRenderContext(dashboard.getRenderContext())),
 					Collections.EMPTY_LIST, dashboard.getVarName());
 		}

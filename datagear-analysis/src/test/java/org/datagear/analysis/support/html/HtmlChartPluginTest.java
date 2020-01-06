@@ -18,6 +18,7 @@ import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 import org.datagear.analysis.support.LocationResource;
+import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -40,7 +41,7 @@ public class HtmlChartPluginTest
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = createHtmlChartPlugin();
 
 		StringWriter stringWriter = new StringWriter();
-		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(stringWriter);
+		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), stringWriter);
 		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
 		HtmlRenderAttributes.setChartTheme(renderContext,
 				new ChartTheme("dark", "white", new String[] { "red", "green" }, new Theme("dark", "white")));
@@ -68,7 +69,7 @@ public class HtmlChartPluginTest
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = createHtmlChartPlugin();
 
 		StringWriter stringWriter = new StringWriter();
-		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(stringWriter);
+		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), stringWriter);
 		HtmlRenderAttributes.setChartRenderContextVarName(renderContext, "chartRenderContext");
 
 		htmlChartPlugin.renderChart(renderContext, null, (DataSetFactory[]) null);

@@ -153,7 +153,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 	protected void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Throwable
 	{
 		HtmlDashboardRenderDataModel dataModel = new HtmlDashboardRenderDataModel(dashboard,
-				renderContext.getContextPath());
+				renderContext.getWebContext().getContextPath());
 
 		Template template = getTemplate((HtmlTplDashboardWidget<?>) dashboard.getWidget());
 

@@ -343,6 +343,10 @@
 					<property name="name" value="jquery" />
 					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.js' &gt;&lt;/script&gt;" />
 				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
+					<property name="name" value="renderer" />
+					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/datagear-dashboard-renderer.js' &gt;&lt;/script&gt;" />
+				</bean>
 			</list>
 		</property>
 		<property name="dashboardWidgetResManager" ref="dashboardWidgetResManager" />

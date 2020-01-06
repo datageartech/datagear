@@ -13,6 +13,7 @@ import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
+import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -51,7 +52,7 @@ public class HtmlTplDashboardWidgetFmkRendererTest
 				"widget01", "index.html", this.renderer);
 
 		StringWriter stringWriter = new StringWriter();
-		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(stringWriter);
+		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), stringWriter);
 		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
 		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
 

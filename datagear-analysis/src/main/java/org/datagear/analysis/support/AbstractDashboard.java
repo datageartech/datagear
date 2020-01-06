@@ -7,12 +7,18 @@
  */
 package org.datagear.analysis.support;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardWidget;
+import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.DataSetParamValues;
 import org.datagear.analysis.RenderContext;
 
 /**
@@ -91,5 +97,40 @@ public abstract class AbstractDashboard extends AbstractIdentifiable implements 
 		}
 
 		return null;
+	}
+
+	/**
+	 * 获取此看板的所有数据集。
+	 * 
+	 * @param dataSetParamValues
+	 * @return
+	 * @throws DataSetException
+	 */
+	public Map<String, DataSet[]> getDataSets(DataSetParamValues dataSetParamValues) throws DataSetException
+	{
+		Map<String, DataSet[]> dataSetsMap = new HashMap<String, DataSet[]>();
+
+		if (this.charts == null || this.charts.isEmpty())
+			return dataSetsMap;
+
+		for (Chart chart : this.charts)
+		{
+			DataSetFactory[] dataSetFactories = chart.getDataSetFactories();
+
+			if (dataSetFactories == null || dataSetFactories.length == 0)
+				continue;
+
+			DataSet[] dataSets = new DataSet[dataSetFactories.length];
+
+			for (int i = 0; i < dataSetFactories.length; i++)
+			{
+				DataSet dataSet = dataSetFactories[i].getDataSet(dataSetParamValues);
+				dataSets[i] = dataSet;
+			}
+
+			dataSetsMap.put(chart.getId(), dataSets);
+		}
+
+		return dataSetsMap;
 	}
 }

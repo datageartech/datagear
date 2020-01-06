@@ -19,7 +19,7 @@ import org.datagear.analysis.support.AbstractRenderContext;
  */
 public class DefaultHtmlRenderContext extends AbstractRenderContext implements HtmlRenderContext
 {
-	private String contextPath;
+	private WebContext webContext;
 
 	private Writer writer;
 
@@ -30,21 +30,22 @@ public class DefaultHtmlRenderContext extends AbstractRenderContext implements H
 		super();
 	}
 
-	public DefaultHtmlRenderContext(Writer writer)
+	public DefaultHtmlRenderContext(WebContext webContext, Writer writer)
 	{
 		super();
+		this.webContext = webContext;
 		this.writer = writer;
 	}
 
 	@Override
-	public String getContextPath()
+	public WebContext getWebContext()
 	{
-		return contextPath;
+		return webContext;
 	}
 
-	public void setContextPath(String contextPath)
+	public void setWebContext(WebContext webContext)
 	{
-		this.contextPath = contextPath;
+		this.webContext = webContext;
 	}
 
 	@Override

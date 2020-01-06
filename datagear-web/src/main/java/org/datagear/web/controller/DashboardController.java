@@ -7,15 +7,23 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetParamValues;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
+import org.datagear.analysis.support.html.HtmlDashboard;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
+import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
@@ -24,6 +32,7 @@ import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -234,11 +243,13 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		Writer out = response.getWriter();
 
-		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(out);
-		renderContext.setContextPath(request.getContextPath());
+		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(createWebContext(request), out);
 		HtmlRenderAttributes.setRenderStyle(renderContext, resolveRenderStyle(request));
 
-		dashboardWidget.render(renderContext);
+		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
+
+		SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
+		dashboardManager.put(dashboard);
 	}
 
 	/**
@@ -275,6 +286,64 @@ public class DashboardController extends AbstractDataAnalysisController
 		IOUtil.write(resFile, out);
 	}
 
+	/**
+	 * 看板数据。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, DataSet[]> showData(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model) throws Exception
+	{
+		WebContext webContext = createWebContext(request);
+		String dashboardId = request.getParameter(webContext.getDashboardIdParam());
+		String[] chartsId = request.getParameterValues(webContext.getChartsIdParam());
+
+		if (StringUtil.isEmpty(dashboardId))
+			throw new IllegalInputException();
+
+		SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
+
+		HtmlDashboard dashboard = dashboardManager.get(dashboardId);
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
+
+		DataSetParamValues paramValues = new DataSetParamValues();
+
+		return dashboard.getDataSets(paramValues);
+	}
+
+	protected SessionHtmlDashboardManager getSessionHtmlDashboardManagerNotNull(HttpServletRequest request)
+	{
+		HttpSession session = request.getSession();
+
+		SessionHtmlDashboardManager dashboardManager = (SessionHtmlDashboardManager) session
+				.getAttribute(SessionHtmlDashboardManager.class.getName());
+
+		synchronized (session)
+		{
+			if (dashboardManager == null)
+			{
+				dashboardManager = new SessionHtmlDashboardManager();
+				session.setAttribute(SessionHtmlDashboardManager.class.getName(), dashboardManager);
+			}
+		}
+
+		return dashboardManager;
+	}
+
+	protected WebContext createWebContext(HttpServletRequest request)
+	{
+		String contextPath = request.getContextPath();
+		return new WebContext(contextPath, contextPath + "/analysis/dashboard/showData");
+	}
+
 	protected void checkSaveEntity(HtmlTplDashboardWidgetEntity dashboard)
 	{
 		if (isBlank(dashboard.getName()))
@@ -300,5 +369,27 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer().saveTemplateContent(dashboard,
 				templateContent);
+	}
+
+	protected static class SessionHtmlDashboardManager implements Serializable
+	{
+		private static final long serialVersionUID = 1L;
+
+		private transient Map<String, HtmlDashboard> htmlDashboards = new HashMap<String, HtmlDashboard>();
+
+		public SessionHtmlDashboardManager()
+		{
+			super();
+		}
+
+		public synchronized HtmlDashboard get(String htmlDashboardId)
+		{
+			return this.htmlDashboards.get(htmlDashboardId);
+		}
+
+		public synchronized void put(HtmlDashboard dashboard)
+		{
+			this.htmlDashboards.put(dashboard.getId(), dashboard);
+		}
 	}
 }

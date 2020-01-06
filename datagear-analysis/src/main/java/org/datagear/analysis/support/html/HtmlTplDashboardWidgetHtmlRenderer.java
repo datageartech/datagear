@@ -30,7 +30,7 @@ import org.datagear.util.StringUtil;
  * <code>
  * <pre>
  * ...
- * &lt;html dg-dashboard-var="..." dg-dashboard-listener="..." dg-dashboard-import-exclude="..."&gt;
+ * &lt;html dg-dashboard-var="..." dg-dashboard-renderer="..." dg-dashboard-import-exclude="..."&gt;
  * ...
  * &lt;head&gt;
  * ...
@@ -48,7 +48,7 @@ import org.datagear.util.StringUtil;
  * <code>html dg-dashboard-var</code>：选填，定义看板JS对象的变量名
  * </p>
  * <p>
- * <code>html dg-dashboard-listener</code>：选填，定义看板监听器JS对象的变量名
+ * <code>html dg-dashboard-renderer</code>：选填，定义看板渲染器JS对象的变量名
  * </p>
  * <p>
  * <code>html dg-dashboard-import-exclude</code>：选填，定义看板网页不加载的内置库，多个以“,”隔开
@@ -75,7 +75,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_VAR = "dg-dashboard-var";
 
-	public static final String DEFAULT_ATTR_NAME_DASHBOARD_LISTENER = "dg-dashboard-listener";
+	public static final String DEFAULT_ATTR_NAME_DASHBOARD_RENDERER = "dg-dashboard-renderer";
 
 	public static final String DEFAULT_ATTR_NAME_DASHBOARD_IMPORT_EXCLUDE = "dg-dashboard-import-exclude";
 
@@ -89,8 +89,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	/** 属性名：看板JS变量名 */
 	private String attrNameDashboardVar = DEFAULT_ATTR_NAME_DASHBOARD_VAR;
 
-	/** 属性名：看板监听器JS变量名 */
-	private String attrNameDashboardListener = DEFAULT_ATTR_NAME_DASHBOARD_LISTENER;
+	/** 属性名：看板渲染器JS变量名 */
+	private String attrNameDashboardRenderer = DEFAULT_ATTR_NAME_DASHBOARD_RENDERER;
 
 	/** 属性名：不导入内置库的 */
 	private String attrNameDashboardImportExclude = DEFAULT_ATTR_NAME_DASHBOARD_IMPORT_EXCLUDE;
@@ -135,14 +135,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		this.attrNameDashboardVar = attrNameDashboardVar;
 	}
 
-	public String getAttrNameDashboardListener()
+	public String getAttrNameDashboardRenderer()
 	{
-		return attrNameDashboardListener;
+		return attrNameDashboardRenderer;
 	}
 
-	public void setAttrNameDashboardListener(String attrNameDashboardListener)
+	public void setAttrNameDashboardRenderer(String attrNameDashboardRenderer)
 	{
-		this.attrNameDashboardListener = attrNameDashboardListener;
+		this.attrNameDashboardRenderer = attrNameDashboardRenderer;
 	}
 
 	public String getAttrNameDashboardImportExclude()
@@ -339,7 +339,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			throws IOException
 	{
 		String dashboardVar = dashboardInfo.getDashboardVar();
-		String listenerVar = dashboardInfo.getListenerVar();
 
 		int nextSequence = -1;
 
@@ -378,7 +377,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		HtmlRenderAttributes.removeChartElementId(renderContext);
 		renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
 
-		writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar, listenerVar);
+		writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar, dashboardInfo.getRendererVar());
 
 		writeScriptEndTag(out);
 		writeNewLine(out);
@@ -457,9 +456,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			{
 				dashboardInfo.setDashboardVar(attrValue.toString().trim());
 			}
-			else if (this.attrNameDashboardListener.equalsIgnoreCase(attrNameStr))
+			else if (this.attrNameDashboardRenderer.equalsIgnoreCase(attrNameStr))
 			{
-				dashboardInfo.setListenerVar(attrValue.toString().trim());
+				dashboardInfo.setRendererVar(attrValue.toString().trim());
 			}
 			else if (this.attrNameDashboardImportExclude.equalsIgnoreCase(attrNameStr))
 			{
@@ -833,8 +832,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	{
 		/** 看板变量名称 */
 		private String dashboardVar;
-		/** 看板监听器名称 */
-		private String listenerVar;
+		/** 看板渲染器名称 */
+		private String rendererVar;
 		/** 内置导入排除项 */
 		private String importExclude;
 		/** 图表信息 */
@@ -861,14 +860,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			this.dashboardVar = dashboardVar;
 		}
 
-		public String getListenerVar()
+		public String getRendererVar()
 		{
-			return listenerVar;
+			return rendererVar;
 		}
 
-		public void setListenerVar(String listenerVar)
+		public void setRendererVar(String rendererVar)
 		{
-			this.listenerVar = listenerVar;
+			this.rendererVar = rendererVar;
 		}
 
 		public String getImportExclude()
@@ -894,7 +893,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [dashboardVar=" + dashboardVar + ", listenerVar=" + listenerVar
+			return getClass().getSimpleName() + " [dashboardVar=" + dashboardVar + ", rendererVar=" + rendererVar
 					+ ", importExclude=" + importExclude + ", chartInfos=" + chartInfos + "]";
 		}
 	}

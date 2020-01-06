@@ -113,31 +113,31 @@ public abstract class AbstractHtmlScriptObjectWriter
 	}
 
 	/**
-	 * 仅有{@linkplain #getContextPath()}的{@linkplain HtmlRenderContext}。
+	 * {@linkplain HtmlRenderContext#getAttributes()}为空的{@linkplain HtmlRenderContext}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class OnlyContextPathHtmlRenderContext extends AbstractRenderContext implements HtmlRenderContext
+	protected static class NoAttributesHtmlRenderContext extends AbstractRenderContext implements HtmlRenderContext
 	{
-		private String contextPath;
+		private WebContext webContext;
 
-		public OnlyContextPathHtmlRenderContext(HtmlRenderContext renderContext)
+		public NoAttributesHtmlRenderContext(HtmlRenderContext renderContext)
 		{
 			super();
 			super.setAttributes(null);
-			this.contextPath = renderContext.getContextPath();
+			this.webContext = renderContext.getWebContext();
 		}
 
 		@Override
-		public String getContextPath()
+		public WebContext getWebContext()
 		{
-			return contextPath;
+			return webContext;
 		}
 
-		public void setContextPath(String contextPath)
+		public void setWebContext(WebContext webContext)
 		{
-			this.contextPath = contextPath;
+			this.webContext = webContext;
 		}
 
 		@Override
@@ -194,6 +194,12 @@ public abstract class AbstractHtmlScriptObjectWriter
 		}
 
 		@Override
+		public WebContext getWebContext()
+		{
+			return null;
+		}
+
+		@Override
 		public <T> T getAttribute(String name)
 		{
 			throw new UnsupportedOperationException();
@@ -215,12 +221,6 @@ public abstract class AbstractHtmlScriptObjectWriter
 		public boolean hasAttribute(String name)
 		{
 			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public String getContextPath()
-		{
-			return null;
 		}
 
 		@Override
@@ -301,7 +301,7 @@ public abstract class AbstractHtmlScriptObjectWriter
 		}
 
 		@Override
-		public String getContextPath()
+		public WebContext getWebContext()
 		{
 			return null;
 		}

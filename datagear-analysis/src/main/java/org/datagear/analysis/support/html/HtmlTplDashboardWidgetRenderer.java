@@ -35,6 +35,14 @@ import org.datagear.util.StringUtil;
 
 /**
  * 抽象{@linkplain HtmlTplDashboardWidget}渲染器。
+ * <p>
+ * 它的{@linkplain #getHtmlDashboardImports()}的{@linkplain HtmlDashboardImport#getContent()}可以包含{@linkplain #getContextPathPlaceholder()}占位符，
+ * 在渲染时，占位符会被替换为实际的{@linkplain HtmlRenderContext#getContextPath()}。
+ * </p>
+ * <p>
+ * 它的{@linkplain #getExtDashboardInitScript()}可以包含{@linkplain #getDashboardVarPlaceholder()}占位符，
+ * 在渲染时，占位符会被替换为实际的{@linkplain HtmlDashboard#getVarName()}。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -44,6 +52,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 {
 	public static final String DEFAULT_CONTEXT_PATH_PLACE_HOLDER = "$CONTEXTPATH";
 
+	public static final String DEFAULT_DASHBOARD_VAR_PLACE_HOLDER = "$DASHBOARD";
+
+	public static final String DEFAULT_DASHBOARD_RENDERER_VAR = "dashboardRenderer";
+
 	public static final String DEFAULT_THEME_IMPORT_NAME = "dg-theme";
 
 	public static final String DEFAULT_DASHBOARD_STYLE_NAME = "dg-dashboard";
@@ -52,12 +64,6 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	protected static final String RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT = StringUtil
 			.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderValueForNotFound";
-
-	/** 内置导入内容 */
-	private List<HtmlDashboardImport> htmlDashboardImports;
-
-	/** 上下文路径占位符 */
-	private String contextPathPlaceholder = DEFAULT_CONTEXT_PATH_PLACE_HOLDER;
 
 	private DashboardWidgetResManager dashboardWidgetResManager;
 
@@ -73,6 +79,25 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 					StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForNotFound",
 					RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT));
 
+	/** 内置导入内容 */
+	private List<HtmlDashboardImport> htmlDashboardImports;
+
+	/** 上下文路径占位符 */
+	private String contextPathPlaceholder = DEFAULT_CONTEXT_PATH_PLACE_HOLDER;
+
+	/** 扩展看板初始化脚本 */
+	private String extDashboardInitScript;
+
+	/** 看板变量占位符 */
+	private String dashboardVarPlaceholder = DEFAULT_DASHBOARD_VAR_PLACE_HOLDER;
+
+	/** 默认JS看板渲染器变量名 */
+	private String defaultDashboardRendererVar = DEFAULT_DASHBOARD_RENDERER_VAR;
+
+	/** JS看板渲染器的渲染函数名 */
+	private String dashboardRendererRenderFunctionName = "render";
+
+	/** 主题导入名 */
 	private String themeImportName = DEFAULT_THEME_IMPORT_NAME;
 
 	/** 主题中的看板样式名 */
@@ -95,26 +120,6 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		super();
 		this.dashboardWidgetResManager = dashboardWidgetResManager;
 		this.chartWidgetSource = chartWidgetSource;
-	}
-
-	public List<HtmlDashboardImport> getHtmlDashboardImports()
-	{
-		return htmlDashboardImports;
-	}
-
-	public void setHtmlDashboardImports(List<HtmlDashboardImport> htmlDashboardImports)
-	{
-		this.htmlDashboardImports = htmlDashboardImports;
-	}
-
-	public String getContextPathPlaceholder()
-	{
-		return contextPathPlaceholder;
-	}
-
-	public void setContextPathPlaceholder(String contextPathPlaceholder)
-	{
-		this.contextPathPlaceholder = contextPathPlaceholder;
 	}
 
 	public DashboardWidgetResManager getDashboardWidgetResManager()
@@ -165,6 +170,66 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	public void setHtmlChartWidgetForNotFound(HtmlChartWidget<HtmlRenderContext> htmlChartWidgetForNotFound)
 	{
 		this.htmlChartWidgetForNotFound = htmlChartWidgetForNotFound;
+	}
+
+	public List<HtmlDashboardImport> getHtmlDashboardImports()
+	{
+		return htmlDashboardImports;
+	}
+
+	public void setHtmlDashboardImports(List<HtmlDashboardImport> htmlDashboardImports)
+	{
+		this.htmlDashboardImports = htmlDashboardImports;
+	}
+
+	public String getContextPathPlaceholder()
+	{
+		return contextPathPlaceholder;
+	}
+
+	public void setContextPathPlaceholder(String contextPathPlaceholder)
+	{
+		this.contextPathPlaceholder = contextPathPlaceholder;
+	}
+
+	public String getExtDashboardInitScript()
+	{
+		return extDashboardInitScript;
+	}
+
+	public void setExtDashboardInitScript(String extDashboardInitScript)
+	{
+		this.extDashboardInitScript = extDashboardInitScript;
+	}
+
+	public String getDashboardVarPlaceholder()
+	{
+		return dashboardVarPlaceholder;
+	}
+
+	public void setDashboardVarPlaceholder(String dashboardVarPlaceholder)
+	{
+		this.dashboardVarPlaceholder = dashboardVarPlaceholder;
+	}
+
+	public String getDefaultDashboardRendererVar()
+	{
+		return defaultDashboardRendererVar;
+	}
+
+	public void setDefaultDashboardRendererVar(String defaultDashboardRendererVar)
+	{
+		this.defaultDashboardRendererVar = defaultDashboardRendererVar;
+	}
+
+	public String getDashboardRendererRenderFunctionName()
+	{
+		return dashboardRendererRenderFunctionName;
+	}
+
+	public void setDashboardRendererRenderFunctionName(String dashboardRendererRenderFunctionName)
+	{
+		this.dashboardRendererRenderFunctionName = dashboardRendererRenderFunctionName;
 	}
 
 	public String getThemeImportName()
@@ -409,17 +474,17 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 
 	 * @param out
 	 * @param dashboard
-	 * @param renderContextEmpty
+	 * @param renderContextNoAttrs
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSVar(Writer out, HtmlDashboard dashboard, boolean renderContextEmpty)
+	protected void writeHtmlDashboardJSVar(Writer out, HtmlDashboard dashboard, boolean renderContextNoAttrs)
 			throws IOException
 	{
 		out.write("var ");
 		out.write(dashboard.getVarName());
 		out.write("=");
 		writeNewLine(out);
-		writeHtmlDashboardJSObject(out, dashboard, renderContextEmpty);
+		writeHtmlDashboardJSObject(out, dashboard, renderContextNoAttrs);
 		out.write(";");
 		writeNewLine(out);
 	}
@@ -436,10 +501,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * dashboard.render = function(){ ... };
 	 * dashboard.update = function(){ ... };
 	 * window.onload = function(){
-	 * ...
-	 * dashboard.render();
-	 * ...
-	 * dashboard.update();
+	 * dashboardRenderer.render();
 	 * ...
 	 * };
 	 * </pre>
@@ -449,15 +511,18 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param out
 	 * @param dashboard
 	 * @param renderContextVar
-	 * @param listenerVar
+	 * @param dashboardRendererVar
 	 *            允许为{@code null}
 	 * @throws IOException
 	 */
 	protected void writeHtmlDashboardJSInit(Writer out, HtmlDashboard dashboard, String renderContextVar,
-			String listenerVar) throws IOException
+			String dashboardRendererVar) throws IOException
 	{
 		String varName = dashboard.getVarName();
-		boolean hasListener = !StringUtil.isEmpty(listenerVar);
+
+		if (StringUtil.isEmpty(dashboardRendererVar))
+			dashboardRendererVar = this.defaultDashboardRendererVar;
+
 		HtmlRenderContext renderContext = dashboard.getRenderContext();
 
 		out.write("var ");
@@ -480,61 +545,16 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			}
 		}
 
-		out.write(varName + "." + HtmlChartPlugin.SCRIPT_RENDER_FUNCTION_NAME + " = function(){");
-		writeNewLine(out);
-		out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i]."
-				+ HtmlChartPlugin.SCRIPT_RENDER_FUNCTION_NAME + "(); }");
-		writeNewLine(out);
-		out.write("};");
-		writeNewLine(out);
-
-		out.write(varName + "." + HtmlChartPlugin.SCRIPT_UPDATE_FUNCTION_NAME + " = function(){");
-		writeNewLine(out);
-		out.write(" for(var i=0; i<this.charts.length; i++){ this.charts[i]."
-				+ HtmlChartPlugin.SCRIPT_UPDATE_FUNCTION_NAME + "(); }");
-		writeNewLine(out);
-		out.write("};");
-		writeNewLine(out);
-
-		if (hasListener)
+		if (!StringUtil.isEmpty(this.extDashboardInitScript))
 		{
-			out.write(varName + ".listener = window[\"" + listenerVar + "\"];");
+			out.write(replaceDashboardVarPlaceholder(this.extDashboardInitScript, varName));
 			writeNewLine(out);
 		}
 
 		out.write("window.onload = function(){");
 		writeNewLine(out);
 
-		out.write("var doRender = true;");
-		writeNewLine(out);
-
-		if (hasListener)
-		{
-			out.write("if(" + varName + ".listener && " + varName + ".listener.onRender)");
-			writeNewLine(out);
-			out.write("  doRender=" + varName + ".listener.onRender(" + varName + "); ");
-			writeNewLine(out);
-		}
-
-		out.write("if(doRender != false)");
-		writeNewLine(out);
-		out.write("  " + varName + "." + HtmlChartPlugin.SCRIPT_RENDER_FUNCTION_NAME + "();");
-		writeNewLine(out);
-
-		out.write("var doUpdate = true;");
-		writeNewLine(out);
-
-		if (hasListener)
-		{
-			out.write("if(" + varName + ".listener && " + varName + ".listener.onUpdate)");
-			writeNewLine(out);
-			out.write("  doUpdate=" + varName + ".listener.onUpdate(" + varName + "); ");
-			writeNewLine(out);
-		}
-
-		out.write("if(doUpdate != false)");
-		writeNewLine(out);
-		out.write("  " + varName + "." + HtmlChartPlugin.SCRIPT_UPDATE_FUNCTION_NAME + "();");
+		out.write(dashboardRendererVar + "." + this.dashboardRendererRenderFunctionName + "(" + varName + ");");
 		writeNewLine(out);
 
 		out.write("};");
@@ -549,13 +569,13 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 
 	 * @param out
 	 * @param dashboard
-	 * @param renderContextEmpty
+	 * @param renderContextNoAttrs
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSObject(Writer out, HtmlDashboard dashboard, boolean renderContextEmpty)
+	protected void writeHtmlDashboardJSObject(Writer out, HtmlDashboard dashboard, boolean renderContextNoAttrs)
 			throws IOException
 	{
-		getHtmlDashboardScriptObjectWriter().write(out, dashboard, renderContextEmpty);
+		getHtmlDashboardScriptObjectWriter().write(out, dashboard, renderContextNoAttrs);
 	}
 
 	/**
@@ -597,7 +617,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 				if (excludes.contains(name))
 					continue;
 
-				String content = replaceContextPathPlaceholder(impt.getContent(), renderContext.getContextPath());
+				String content = replaceContextPathPlaceholder(impt.getContent(),
+						renderContext.getWebContext().getContextPath());
 
 				writeNewLine(out);
 				out.write(content);
@@ -727,6 +748,21 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			contextPath = "";
 
 		return str.replace(getContextPathPlaceholder(), contextPath);
+	}
+
+	/**
+	 * 替换字符串中的看板变量名占位符为真实的看板变量名。
+	 * 
+	 * @param str
+	 * @param dashboardVar
+	 * @return
+	 */
+	protected String replaceDashboardVarPlaceholder(String str, String dashboardVar)
+	{
+		if (StringUtil.isEmpty(str))
+			return str;
+
+		return str.replace(getDashboardVarPlaceholder(), dashboardVar);
 	}
 
 	/**
