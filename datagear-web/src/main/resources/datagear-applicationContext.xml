@@ -337,7 +337,7 @@
 	</bean>
 	
 	<bean id="htmlTplDashboardWidgetRenderer" class="org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer">
-		<property name="htmlDashboardImports">
+		<property name="dashboardImports">
 			<list>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="jquery" />

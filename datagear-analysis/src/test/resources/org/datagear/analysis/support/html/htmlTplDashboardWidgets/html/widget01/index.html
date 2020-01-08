@@ -1,14 +1,14 @@
 <!doctype html>
-<html dg-dashboard-var="myDashboard" dg-dashboard-renderer="myRenderer" dg-dashboard-import-exclude="jquery,theme">
+<html>
 <head>
 <title>看板</title>
 <script type="text/javascript">
-var myRenderer =
+var dashboardRenderer =
 {
 	render : function(dashboard)
 	{
-		var element = document.getElementById("renderer");
-		element.innerHTML += "<div>render</div>";
+		for(var i=0; i<dashboard.charts.length; i++)
+			dashboard.charts[i].render();
 	}
 };
 </script>
@@ -16,7 +16,7 @@ var myRenderer =
 <body class="dg-dashboard">
 	<div class="dg-chart" dg-chart-widget="chart-widget-01"></div>
 	
-	<div id="element_1" class="dg-chart" dg-chart-widget="chart-widget-01" dg-chart-var="chartvar_01"  ></div>
+	<div id="element_1" class="dg-chart" dg-chart-widget="chart-widget-01"  ></div>
 	
 	<div class="dg-chart" dg-chart-widget="chart-widget-03"></div>
 	
@@ -24,8 +24,6 @@ var myRenderer =
 	
 	<div  class="dg-chart"  dg-chart-widget="chart-widget-05"></div>
 	
-	<div class="dg-chart" dg-chart-widget="chart-widget-01" dg-chart-var="chartvar_02"></div>
-	
-	<div id="renderer"></div>
+	<div class="dg-chart" dg-chart-widget="chart-widget-01"></div>
 </body>
 </html>

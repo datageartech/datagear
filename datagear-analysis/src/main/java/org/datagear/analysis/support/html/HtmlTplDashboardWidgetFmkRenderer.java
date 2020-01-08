@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.datagear.analysis.Chart;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.util.StringUtil;
@@ -50,7 +51,7 @@ import freemarker.template.TemplateScalarModel;
  * ...
  * &lt;@theme /&gt;
  * ...
- * &lt;@dashboard var="..." listener="..."&gt;
+ * &lt;@dashboard var="..." renderer="..."&gt;
  *   ...
  *   <@chart widget="..." var="..." elementId="..." /&gt;
  *   ...
@@ -66,7 +67,7 @@ import freemarker.template.TemplateScalarModel;
  * &lt;@theme /&gt;：引入内置CSS主题样式。
  * </p>
  * <p>
- * &lt;@dashboard&gt;：定义看板，“var”自定义看板JS变量名，可不填；“listener”自定义看板JS监听器，可不填。
+ * &lt;@dashboard&gt;：定义看板，“var”自定义看板JS变量名，可不填；“renderer”自定义看板渲染器JS变量，可不填，默认为{@linkplain HtmlTplDashboardWidgetRenderer#getDefaultDashboardRendererVar()}。
  * </p>
  * <p>
  * &lt;@chart
@@ -359,7 +360,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 				throws TemplateException, IOException
 		{
 			String dashboardVar = getStringParamValue(params, "var");
-			String listenerVar = getStringParamValue(params, "listener");
+			String rendererVar = getStringParamValue(params, "renderer");
 
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
 			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
@@ -402,7 +403,8 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			HtmlRenderAttributes.removeChartElementId(renderContext);
 			renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
 
-			writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar, listenerVar);
+			writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar);
+			writeHtmlDashboardJSRender(out, dashboard, rendererVar);
 
 			writeScriptEndTag(out);
 			writeNewLine(out);
@@ -422,7 +424,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			super();
 		}
 
-		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@SuppressWarnings("rawtypes")
 		@Override
 		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 				throws TemplateException, IOException
@@ -457,10 +459,10 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 
 			HtmlChart chart = chartWidget.render(renderContext);
 
-			List<HtmlChart> charts = (List<HtmlChart>) htmlDashboard.getCharts();
+			List<Chart> charts = htmlDashboard.getCharts();
 			if (charts == null)
 			{
-				charts = new ArrayList<HtmlChart>();
+				charts = new ArrayList<Chart>();
 				htmlDashboard.setCharts(charts);
 			}
 

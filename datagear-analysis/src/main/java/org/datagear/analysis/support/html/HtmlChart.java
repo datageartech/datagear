@@ -7,11 +7,11 @@
  */
 package org.datagear.analysis.support.html;
 
+import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPropertyValues;
 import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.support.AbstractChart;
 
 /**
  * HTML图表。
@@ -19,22 +19,25 @@ import org.datagear.analysis.support.AbstractChart;
  * @author datagear@163.com
  *
  */
-public class HtmlChart extends AbstractChart
+public class HtmlChart extends Chart
 {
 	private String elementId;
 
 	private String varName;
+
+	/** 更新间隔毫秒数 */
+	private int updateInterval = -1;
 
 	public HtmlChart()
 	{
 		super();
 	}
 
-	public HtmlChart(String id, ChartPlugin<?> chartPlugin, HtmlRenderContext renderContext,
+	public HtmlChart(String id, HtmlRenderContext renderContext, ChartPlugin<?> chartPlugin,
 			ChartPropertyValues chartPropertyValues, DataSetFactory[] dataSetFactories, String elementId,
 			String varName)
 	{
-		super(id, chartPlugin, renderContext, chartPropertyValues, dataSetFactories);
+		super(id, renderContext, chartPlugin, chartPropertyValues, dataSetFactories);
 		this.elementId = elementId;
 		this.varName = varName;
 	}
@@ -72,5 +75,20 @@ public class HtmlChart extends AbstractChart
 	public void setVarName(String varName)
 	{
 		this.varName = varName;
+	}
+
+	/**
+	 * 获取图表更新间隔毫秒数。
+	 * 
+	 * @return {@code <0}：不间隔更新；0 ：实时更新；{@code >0}：间隔更新毫秒数
+	 */
+	public int getUpdateInterval()
+	{
+		return updateInterval;
+	}
+
+	public void setUpdateInterval(int updateInterval)
+	{
+		this.updateInterval = updateInterval;
 	}
 }

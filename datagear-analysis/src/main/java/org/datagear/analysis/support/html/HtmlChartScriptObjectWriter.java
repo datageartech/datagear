@@ -88,12 +88,14 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 
 		public JsonHtmlChart(HtmlChart htmlChart, String chartRenderContextVarName)
 		{
-			super(htmlChart.getId(), new IdChartPlugin(htmlChart.getPlugin()),
+			super(htmlChart.getId(),
 					(StringUtil.isEmpty(chartRenderContextVarName)
 							? new AttributesHtmlRenderContext(htmlChart.getRenderContext())
 							: new RefHtmlRenderContext(chartRenderContextVarName)),
-					htmlChart.getPropertyValues(), JsonDataSetFactory.valuesOf(htmlChart.getDataSetFactories()),
-					htmlChart.getElementId(), htmlChart.getVarName());
+					new IdChartPlugin(htmlChart.getPlugin()), htmlChart.getPropertyValues(),
+					JsonDataSetFactory.valuesOf(htmlChart.getDataSetFactories()), htmlChart.getElementId(),
+					htmlChart.getVarName());
+			setUpdateInterval(htmlChart.getUpdateInterval());
 		}
 	}
 

@@ -9,9 +9,10 @@ package org.datagear.analysis.support.html;
 
 import java.util.List;
 
+import org.datagear.analysis.Chart;
+import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardWidget;
 import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.support.AbstractDashboard;
 
 /**
  * HTML看板。
@@ -19,7 +20,7 @@ import org.datagear.analysis.support.AbstractDashboard;
  * @author datagear@163.com
  *
  */
-public class HtmlDashboard extends AbstractDashboard
+public class HtmlDashboard extends Dashboard
 {
 	private String varName;
 
@@ -28,18 +29,10 @@ public class HtmlDashboard extends AbstractDashboard
 		super();
 	}
 
-	public HtmlDashboard(String id, DashboardWidget<?> dashboardWidget, HtmlRenderContext renderContext,
-			List<? extends HtmlChart> charts, String varName)
+	public HtmlDashboard(String id, HtmlRenderContext renderContext, DashboardWidget<?> dashboardWidget, String varName)
 	{
-		super(id, dashboardWidget, renderContext, charts);
+		super(id, renderContext, dashboardWidget);
 		this.varName = varName;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<? extends HtmlChart> getCharts()
-	{
-		return (List<? extends HtmlChart>) super.getCharts();
 	}
 
 	@Override
@@ -55,6 +48,20 @@ public class HtmlDashboard extends AbstractDashboard
 			throw new IllegalArgumentException();
 
 		super.setRenderContext(renderContext);
+	}
+
+	@Override
+	public List<Chart> getCharts()
+	{
+		// TODO Auto-generated method stub
+		return super.getCharts();
+	}
+
+	@Override
+	public void setCharts(List<Chart> charts)
+	{
+		// TODO Auto-generated method stub
+		super.setCharts(charts);
 	}
 
 	public String getVarName()

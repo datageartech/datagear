@@ -74,10 +74,12 @@ public class HtmlDashboardScriptObjectWriter extends AbstractHtmlScriptObjectWri
 		@SuppressWarnings("unchecked")
 		public JsonHtmlDashboard(HtmlDashboard dashboard, boolean renderContextNoAttrs)
 		{
-			super(dashboard.getId(), new IdDashboardWidget(dashboard.getWidget()),
+			super(dashboard.getId(),
 					(renderContextNoAttrs ? new NoAttributesHtmlRenderContext(dashboard.getRenderContext())
 							: new AttributesHtmlRenderContext(dashboard.getRenderContext())),
-					Collections.EMPTY_LIST, dashboard.getVarName());
+					new IdDashboardWidget(dashboard.getWidget()), dashboard.getVarName());
+
+			super.setCharts(Collections.EMPTY_LIST);
 		}
 	}
 

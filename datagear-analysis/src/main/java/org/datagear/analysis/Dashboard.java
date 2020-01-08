@@ -7,7 +7,9 @@
  */
 package org.datagear.analysis;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 看板。
@@ -15,34 +17,112 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public interface Dashboard extends Identifiable
+public class Dashboard extends AbstractIdentifiable
 {
-	/**
-	 * 获取{@linkplain DashboardWidget}。
-	 * 
-	 * @return
-	 */
-	DashboardWidget<?> getWidget();
+	private RenderContext renderContext;
+
+	private DashboardWidget<?> widget;
+
+	private List<Chart> charts;
+
+	public Dashboard()
+	{
+		super();
+	}
+
+	public Dashboard(String id, RenderContext renderContext, DashboardWidget<?> widget)
+	{
+		super(id);
+		this.renderContext = renderContext;
+		this.widget = widget;
+	}
+
+	public RenderContext getRenderContext()
+	{
+		return renderContext;
+	}
+
+	public void setRenderContext(RenderContext renderContext)
+	{
+		this.renderContext = renderContext;
+	}
+
+	public DashboardWidget<?> getWidget()
+	{
+		return widget;
+	}
+
+	public void setWidget(DashboardWidget<?> widget)
+	{
+		this.widget = widget;
+	}
 
 	/**
-	 * 获取{@linkplain RenderContext}。
+	 * 是否包含图表。
 	 * 
 	 * @return
 	 */
-	RenderContext getRenderContext();
+	public boolean hasChart()
+	{
+		return (this.charts == null || this.charts.isEmpty());
+	}
+
+	public List<Chart> getCharts()
+	{
+		return charts;
+	}
+
+	public void setCharts(List<Chart> charts)
+	{
+		this.charts = charts;
+	}
+
+	public Chart getChart(String id)
+	{
+		if (this.charts == null)
+			return null;
+
+		for (Chart chart : this.charts)
+		{
+			if (chart.getId().equals(id))
+				return chart;
+		}
+
+		return null;
+	}
 
 	/**
-	 * 获取{@linkplain Chart}列表。
+	 * 获取此看板的所有数据集。
 	 * 
+	 * @param dataSetParamValues
 	 * @return
+	 * @throws DataSetException
 	 */
-	List<? extends Chart> getCharts();
+	public Map<String, DataSet[]> getDataSets(DataSetParamValues dataSetParamValues) throws DataSetException
+	{
+		Map<String, DataSet[]> dataSetsMap = new HashMap<String, DataSet[]>();
 
-	/**
-	 * 获取指定ID的{@linkplain Chart}。
-	 * 
-	 * @param id
-	 * @return
-	 */
-	Chart getChart(String id);
+		if (this.charts == null || this.charts.isEmpty())
+			return dataSetsMap;
+
+		for (Chart chart : this.charts)
+		{
+			DataSetFactory[] dataSetFactories = chart.getDataSetFactories();
+
+			if (dataSetFactories == null || dataSetFactories.length == 0)
+				continue;
+
+			DataSet[] dataSets = new DataSet[dataSetFactories.length];
+
+			for (int i = 0; i < dataSetFactories.length; i++)
+			{
+				DataSet dataSet = dataSetFactories[i].getDataSet(dataSetParamValues);
+				dataSets[i] = dataSet;
+			}
+
+			dataSetsMap.put(chart.getId(), dataSets);
+		}
+
+		return dataSetsMap;
+	}
 }

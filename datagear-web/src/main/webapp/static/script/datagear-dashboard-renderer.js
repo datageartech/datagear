@@ -41,13 +41,7 @@
 	{
 		var webContext = dashboard.renderContext.webContext;
 		
-		var data = webContext.dashboardIdParam + "=" + dashboard.id;
-		
-		if(chartIds && chartIds.length)
-		{
-			for(var i=0; i<chartIds.length; i++)
-				data += "&" + webContext.chartsIdParam +"=" + chartIds[i];
-		}
+		var data = this.buildUpdateDashboardAjaxData(dashboard, chartIds);
 		
 		var renderer = this;
 		
@@ -58,7 +52,7 @@
 			{
 				for(var chartId in dataSetsMap)
 				{
-					var chart = renderer.getChartById(dashboard, chartId);
+					var chart = renderer.getChart(dashboard, chartId);
 					
 					if(!chart)
 						continue;
@@ -81,22 +75,51 @@
 		});
 	};
 	
-	renderer.getChartById = function(dashboard, chartId)
+	/**
+	 * 获取图表。
+	 * 
+	 * @param dashboard
+	 * @param chartInfo 图表信息：图表元素ID、图表ID
+	 */
+	renderer.getChart = function(dashboard, chartInfo)
 	{
-		var index = this.getChartIndexById(dashboard, chartId);
+		var index = this.getChartIndex(dashboard, chartInfo);
 		
 		return (index < 0 ? null : dashboard.charts[index]);
 	};
 	
-	renderer.getChartIndexById = function(dashboard, chartId)
+	/**
+	 * 获取图表索引号。
+	 * 
+	 * @param dashboard
+	 * @param chartInfo 图表信息：图表对象、图表元素ID、图表ID
+	 */
+	renderer.getChartIndex = function(dashboard, chartInfo)
 	{
 		for(var i=0; i<dashboard.charts.length; i++)
 		{
-			if(dashboard.charts[i].id == chartId)
+			if(dashboard.charts[i] === chartInfo
+					|| dashboard.charts[i].elementId === chartInfo
+					|| dashboard.charts[i].id === chartInfo)
 				return i;
 		}
 		
 		return -1;
-	}
+	};
+	
+	renderer.buildUpdateDashboardAjaxData = function(dashboard, chartIds)
+	{
+		var webContext = dashboard.renderContext.webContext;
+		
+		var data = webContext.dashboardIdParam + "=" + encodeURIComponent(dashboard.id);
+		
+		if(chartIds && chartIds.length)
+		{
+			for(var i=0; i<chartIds.length; i++)
+				data += "&" + webContext.chartsIdParam +"=" + encodeURIComponent(chartIds[i]);
+		}
+		
+		return data;
+	};
 })
 (window);

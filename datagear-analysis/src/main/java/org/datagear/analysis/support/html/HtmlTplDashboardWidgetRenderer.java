@@ -20,7 +20,6 @@ import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DashboardThemeSource;
-import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.Theme;
@@ -36,11 +35,38 @@ import org.datagear.util.StringUtil;
 /**
  * 抽象{@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 它的{@linkplain #getHtmlDashboardImports()}的{@linkplain HtmlDashboardImport#getContent()}可以包含{@linkplain #getContextPathPlaceholder()}占位符，
+ * 此类的{@linkplain #writeHtmlDashboardJSRender(Writer, HtmlDashboard, String)}方法的JS看板渲染逻辑为：
+ * </p>
+ * <code>
+ * <pre>
+ * window.onload = function(){
+ *   dashboardRenderer.render(dashboard);
+ * };
+ * </pre>
+ * </code>
+ * <p>
+ * 因此，看板页面应该定义如下JS看板渲染器对象：
+ * </p>
+ * <code>
+ * <pre>
+ * var dashboardRenderer =
+ * {
+ *   render : function(dashboard)
+ *   {
+ *     ...
+ *   }
+ * };
+ * </pre>
+ * </code>
+ * <p>
+ * 子类在调用此方法时可以传入自定义JS看板渲染器对象的变量名，默认为{@linkplain #getDefaultDashboardRendererVar()}。
+ * </p>
+ * <p>
+ * 此类的{@linkplain #getHtmlDashboardImports()}的{@linkplain HtmlDashboardImport#getContent()}可以包含{@linkplain #getContextPathPlaceholder()}占位符，
  * 在渲染时，占位符会被替换为实际的{@linkplain HtmlRenderContext#getContextPath()}。
  * </p>
  * <p>
- * 它的{@linkplain #getExtDashboardInitScript()}可以包含{@linkplain #getDashboardVarPlaceholder()}占位符，
+ * 此类的{@linkplain #getExtDashboardInitScript()}可以包含{@linkplain #getDashboardVarPlaceholder()}占位符，
  * 在渲染时，占位符会被替换为实际的{@linkplain HtmlDashboard#getVarName()}。
  * </p>
  * 
@@ -80,7 +106,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 					RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT));
 
 	/** 内置导入内容 */
-	private List<HtmlDashboardImport> htmlDashboardImports;
+	private List<HtmlDashboardImport> dashboardImports;
 
 	/** 上下文路径占位符 */
 	private String contextPathPlaceholder = DEFAULT_CONTEXT_PATH_PLACE_HOLDER;
@@ -172,14 +198,14 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		this.htmlChartWidgetForNotFound = htmlChartWidgetForNotFound;
 	}
 
-	public List<HtmlDashboardImport> getHtmlDashboardImports()
+	public List<HtmlDashboardImport> getDashboardImports()
 	{
-		return htmlDashboardImports;
+		return dashboardImports;
 	}
 
-	public void setHtmlDashboardImports(List<HtmlDashboardImport> htmlDashboardImports)
+	public void setDashboardImports(List<HtmlDashboardImport> dashboardImports)
 	{
-		this.htmlDashboardImports = htmlDashboardImports;
+		this.dashboardImports = dashboardImports;
 	}
 
 	public String getContextPathPlaceholder()
@@ -480,11 +506,16 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	protected void writeHtmlDashboardJSVar(Writer out, HtmlDashboard dashboard, boolean renderContextNoAttrs)
 			throws IOException
 	{
+		String varName = dashboard.getVarName();
+
+		if (StringUtil.isEmpty(varName))
+			throw new IllegalArgumentException();
+
 		out.write("var ");
-		out.write(dashboard.getVarName());
+		out.write(varName);
 		out.write("=");
 		writeNewLine(out);
-		writeHtmlDashboardJSObject(out, dashboard, renderContextNoAttrs);
+		getHtmlDashboardScriptObjectWriter().write(out, dashboard, renderContextNoAttrs);
 		out.write(";");
 		writeNewLine(out);
 	}
@@ -497,11 +528,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * var renderContext = {...};
 	 * dashboard.renderContext.attributes = renderContext.attributes;
 	 * ...
-	 * ...
-	 * dashboard.render = function(){ ... };
-	 * dashboard.update = function(){ ... };
-	 * window.onload = function(){
-	 * dashboardRenderer.render();
+	 * dashboard.charts.push(...);
 	 * ...
 	 * };
 	 * </pre>
@@ -511,17 +538,15 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param out
 	 * @param dashboard
 	 * @param renderContextVar
-	 * @param dashboardRendererVar
-	 *            允许为{@code null}
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSInit(Writer out, HtmlDashboard dashboard, String renderContextVar,
-			String dashboardRendererVar) throws IOException
+	protected void writeHtmlDashboardJSInit(Writer out, HtmlDashboard dashboard, String renderContextVar)
+			throws IOException
 	{
 		String varName = dashboard.getVarName();
 
-		if (StringUtil.isEmpty(dashboardRendererVar))
-			dashboardRendererVar = this.defaultDashboardRendererVar;
+		if (StringUtil.isEmpty(varName))
+			throw new IllegalArgumentException();
 
 		HtmlRenderContext renderContext = dashboard.getRenderContext();
 
@@ -529,18 +554,21 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		out.write(renderContextVar);
 		out.write("=");
 		writeNewLine(out);
-		writeRenderContextJSObject(out, renderContext);
+		getHtmlDashboardScriptObjectWriter().writeRenderContext(out, renderContext, true);
 		out.write(";");
 		writeNewLine(out);
 		out.write(varName + ".renderContext.attributes = " + renderContextVar + ".attributes;");
 		writeNewLine(out);
 
-		List<? extends HtmlChart> charts = dashboard.getCharts();
+		List<Chart> charts = dashboard.getCharts();
 		if (charts != null)
 		{
-			for (HtmlChart chart : charts)
+			for (Chart chart : charts)
 			{
-				out.write(varName + ".charts.push(" + chart.getVarName() + ");");
+				if (!(chart instanceof HtmlChart))
+					continue;
+
+				out.write(varName + ".charts.push(" + ((HtmlChart) chart).getVarName() + ");");
 				writeNewLine(out);
 			}
 		}
@@ -550,47 +578,45 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			out.write(replaceDashboardVarPlaceholder(this.extDashboardInitScript, varName));
 			writeNewLine(out);
 		}
-
-		out.write("window.onload = function(){");
-		writeNewLine(out);
-
-		out.write(dashboardRendererVar + "." + this.dashboardRendererRenderFunctionName + "(" + varName + ");");
-		writeNewLine(out);
-
-		out.write("};");
-		writeNewLine(out);
 	}
 
 	/**
-	 * 写{@linkplain HtmlDashboard} JS对象：
+	 * 写{@linkplain HtmlDashboard} JS渲染代码：
 	 * <p>
-	 * <code>{...}</code>
+	 * <code>
+	 * <pre>
+	 * window.onload = function(){
+	 * dashboardRenderer.render();
+	 * };
+	 * </pre>
+	 * </code>
 	 * </p>
 	 * 
 	 * @param out
 	 * @param dashboard
-	 * @param renderContextNoAttrs
+	 * @param dashboardRendererVar
+	 *            如果为{@code null}，则使用{@linkplain #getDefaultDashboardRendererVar()}
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSObject(Writer out, HtmlDashboard dashboard, boolean renderContextNoAttrs)
+	protected void writeHtmlDashboardJSRender(Writer out, HtmlDashboard dashboard, String dashboardRendererVar)
 			throws IOException
 	{
-		getHtmlDashboardScriptObjectWriter().write(out, dashboard, renderContextNoAttrs);
-	}
+		String varName = dashboard.getVarName();
 
-	/**
-	 * 写{@linkplain RenderContext} JS对象：
-	 * <p>
-	 * <code>{...}</code>
-	 * </p>
-	 * 
-	 * @param out
-	 * @param renderContext
-	 * @throws IOException
-	 */
-	protected void writeRenderContextJSObject(Writer out, RenderContext renderContext) throws IOException
-	{
-		getHtmlDashboardScriptObjectWriter().writeRenderContext(out, renderContext, true);
+		if (StringUtil.isEmpty(varName))
+			throw new IllegalArgumentException();
+
+		if (StringUtil.isEmpty(dashboardRendererVar))
+			dashboardRendererVar = this.defaultDashboardRendererVar;
+
+		out.write("window.onload = function(){");
+		writeNewLine(out);
+
+		out.write("  " + dashboardRendererVar + "." + this.dashboardRendererRenderFunctionName + "(" + varName + ");");
+		writeNewLine(out);
+
+		out.write("};");
+		writeNewLine(out);
 	}
 
 	/**
@@ -608,9 +634,9 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 		List<String> excludes = StringUtil.splitWithTrim(importExclude, ",");
 
-		if (this.htmlDashboardImports != null)
+		if (this.dashboardImports != null)
 		{
-			for (HtmlDashboardImport impt : this.htmlDashboardImports)
+			for (HtmlDashboardImport impt : this.dashboardImports)
 			{
 				String name = impt.getName();
 

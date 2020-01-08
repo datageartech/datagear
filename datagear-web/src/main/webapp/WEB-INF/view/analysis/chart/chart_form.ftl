@@ -69,6 +69,14 @@ readonly 是否只读操作，允许为null
 					</#if>
 				</div>
 			</div>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label><@spring.message code='chart.updateInterval' /></label>
+				</div>
+				<div class="form-item-value">
+					<input type="text" name="updateInterval" value="${(chart.updateInterval)!'-1'?html}" class="ui-widget ui-widget-content" />
+				</div>
+			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">
 			<#if !readonly>

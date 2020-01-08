@@ -20,6 +20,9 @@ import org.datagear.analysis.support.ChartWidget;
  */
 public class HtmlChartWidget<T extends HtmlRenderContext> extends ChartWidget<T>
 {
+	/** 更新间隔毫秒数 */
+	private int updateInterval = -1;
+
 	public HtmlChartWidget()
 	{
 		super();
@@ -48,6 +51,25 @@ public class HtmlChartWidget<T extends HtmlRenderContext> extends ChartWidget<T>
 	@Override
 	public HtmlChart render(T renderContext) throws RenderException
 	{
-		return (HtmlChart) super.render(renderContext);
+		HtmlRenderAttributes.setChartUpdateInterval(renderContext, this.updateInterval);
+		HtmlChart chart = (HtmlChart) super.render(renderContext);
+		HtmlRenderAttributes.removeChartUpdateInterval(renderContext);
+
+		return chart;
+	}
+
+	/**
+	 * 获取图表更新间隔毫秒数。
+	 * 
+	 * @return {@code <0}：不间隔更新；0 ：实时更新；{@code >0}：间隔更新毫秒数
+	 */
+	public int getUpdateInterval()
+	{
+		return updateInterval;
+	}
+
+	public void setUpdateInterval(int updateInterval)
+	{
+		this.updateInterval = updateInterval;
 	}
 }

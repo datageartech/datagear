@@ -13,6 +13,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.datagear.analysis.Chart;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DashboardWidgetResManager;
@@ -30,7 +31,7 @@ import org.datagear.util.StringUtil;
  * <code>
  * <pre>
  * ...
- * &lt;html dg-dashboard-var="..." dg-dashboard-renderer="..." dg-dashboard-import-exclude="..."&gt;
+ * &lt;html dg-dashboard-renderer="..." dg-dashboard-var="..." dg-dashboard-import-exclude="..."&gt;
  * ...
  * &lt;head&gt;
  * ...
@@ -38,29 +39,26 @@ import org.datagear.util.StringUtil;
  * ...
  * &lt;body&gt;
  * ...
- * &lt;div id="..." dg-chart-widget="..." dg-chart-var="..."&gt;&lt;/div&gt;
+ * &lt;div id="..." dg-chart-widget="..."&gt;&lt;/div&gt;
  * ...
  * &lt;/body&gt;
  * &lt;/html&gt;
  * </pre>
  * </code>
  * <p>
- * <code>html dg-dashboard-var</code>：选填，定义看板JS对象的变量名
+ * <code>html dg-dashboard-renderer</code>：选填，定义看板渲染器JS对象的变量名，默认为{@linkplain HtmlTplDashboardWidgetRenderer#getDefaultDashboardRendererVar()}
  * </p>
  * <p>
- * <code>html dg-dashboard-renderer</code>：选填，定义看板渲染器JS对象的变量名
+ * <code>html dg-dashboard-var</code>：选填，定义看板JS对象的变量名，默认为{@linkplain #getDefaultDashboardVar()}
  * </p>
  * <p>
- * <code>html dg-dashboard-import-exclude</code>：选填，定义看板网页不加载的内置库，多个以“,”隔开
+ * <code>html dg-dashboard-import-exclude</code>：选填，定义看板网页不加载的内置库（{@linkplain HtmlTplDashboardWidgetRenderer#getDashboardImports()}），多个以“,”隔开
  * </p>
  * <p>
  * <code>div id</code>：选填，定义图表元素ID，如果不填，则会自动生成一个
  * </p>
  * <p>
  * <code>div dg-chart-widget</code>：必填，定义图表部件ID（{@linkplain HtmlChartWidget#getId()}）
- * </p>
- * <p>
- * <code>div dg-chart-var</code>：选填，定义图表JS对象的变量名
  * </p>
  * 
  * @author datagear@163.com
@@ -81,7 +79,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 
 	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = "dg-chart-widget";
 
-	public static final String DEFAULT_ATTR_NAME_CHART_VAR = "dg-chart-var";
+	public static final String DEFAULT_DASHBOARD_VAR = "dashboard";
 
 	/** 看板设置标签名 */
 	private String dashboardSetTagName = DEFAULT_DASHBOARD_SET_TAG_NAME;
@@ -101,8 +99,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	/** 属性名：图表部件ID */
 	private String attrNameChartWidget = DEFAULT_ATTR_NAME_CHART_WIDGET;
 
-	/** 属性名：图表JS变量名 */
-	private String attrNameChartVar = DEFAULT_ATTR_NAME_CHART_VAR;
+	/** 默认看板变量名 */
+	private String defaultDashboardVar = DEFAULT_DASHBOARD_VAR;
 
 	public HtmlTplDashboardWidgetHtmlRenderer()
 	{
@@ -175,14 +173,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		this.attrNameChartWidget = attrNameChartWidget;
 	}
 
-	public String getAttrNameChartVar()
+	public String getDefaultDashboardVar()
 	{
-		return attrNameChartVar;
+		return defaultDashboardVar;
 	}
 
-	public void setAttrNameChartVar(String attrNameChartVar)
+	public void setDefaultDashboardVar(String defaultDashboardVar)
 	{
-		this.attrNameChartVar = attrNameChartVar;
+		this.defaultDashboardVar = defaultDashboardVar;
 	}
 
 	@Override
@@ -339,14 +337,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			throws IOException
 	{
 		String dashboardVar = dashboardInfo.getDashboardVar();
-
-		int nextSequence = -1;
-
 		if (StringUtil.isEmpty(dashboardVar))
-		{
-			nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
-			dashboardVar = HtmlRenderAttributes.generateDashboardVarName(nextSequence);
-		}
+			dashboardVar = this.defaultDashboardVar;
 
 		dashboard.setVarName(dashboardVar);
 
@@ -356,6 +348,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		writeNewLine(out);
 
 		writeHtmlDashboardJSVar(out, dashboard, true);
+
+		out.write("(function(){");
+		writeNewLine(out);
 
 		HtmlRenderAttributes.setChartRenderContextVarName(renderContext, dashboardVar + ".renderContext");
 
@@ -367,7 +362,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		}
 
 		String tmpRenderContextVar = HtmlRenderAttributes
-				.generateRenderContextVarName(HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence));
+				.generateRenderContextVarName(HtmlRenderAttributes.getNextSequenceIfNot(renderContext, -1));
 
 		// 移除内部设置的属性
 		HtmlRenderAttributes.removeChartRenderContextVarName(renderContext);
@@ -377,7 +372,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		HtmlRenderAttributes.removeChartElementId(renderContext);
 		renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
 
-		writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar, dashboardInfo.getRendererVar());
+		writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar);
+
+		out.write("})();");
+		writeNewLine(out);
+
+		writeHtmlDashboardJSRender(out, dashboard, dashboardInfo.getRendererVar());
 
 		writeScriptEndTag(out);
 		writeNewLine(out);
@@ -396,8 +396,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			ChartInfo chartInfo) throws IOException
 	{
 		String widget = chartInfo.getWidgetId();
-		String var = chartInfo.getChartVar();
 		String elementId = chartInfo.getElementId();
+		String var = null;
 
 		if (StringUtil.isEmpty(elementId))
 			throw new RenderException("The 'id' attribute must be set for chart element");
@@ -420,11 +420,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 
 		HtmlChart chart = chartWidget.render(renderContext);
 
-		@SuppressWarnings("unchecked")
-		List<HtmlChart> charts = (List<HtmlChart>) dashboard.getCharts();
+		List<Chart> charts = dashboard.getCharts();
 		if (charts == null)
 		{
-			charts = new ArrayList<HtmlChart>();
+			charts = new ArrayList<Chart>();
 			dashboard.setCharts(charts);
 		}
 
@@ -501,14 +500,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 
 			String attrNameStr = attrName.toString();
 
-			if (this.attrNameChartVar.equalsIgnoreCase(attrNameStr))
-			{
-				if (chartInfo == null)
-					chartInfo = new ChartInfo();
-
-				chartInfo.setChartVar(attrValue.toString().trim());
-			}
-			else if (this.attrNameChartWidget.equalsIgnoreCase(attrNameStr))
+			if (this.attrNameChartWidget.equalsIgnoreCase(attrNameStr))
 			{
 				if (chartInfo == null)
 					chartInfo = new ChartInfo();
@@ -900,8 +892,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 
 	protected static class ChartInfo
 	{
-		/** 图表变量名 */
-		private String chartVar;
 		/** 图表部件ID */
 		private String widgetId;
 		/** 图标元素ID */
@@ -912,22 +902,11 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			super();
 		}
 
-		public ChartInfo(String chartVar, String widgetId, String elementId)
+		public ChartInfo(String widgetId, String elementId)
 		{
 			super();
-			this.chartVar = chartVar;
 			this.widgetId = widgetId;
 			this.elementId = elementId;
-		}
-
-		public String getChartVar()
-		{
-			return chartVar;
-		}
-
-		public void setChartVar(String chartVar)
-		{
-			this.chartVar = chartVar;
 		}
 
 		public String getWidgetId()
@@ -953,8 +932,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [chartVar=" + chartVar + ", widgetId=" + widgetId + ", elementId="
-					+ elementId + "]";
+			return getClass().getSimpleName() + " [widgetId=" + widgetId + ", elementId=" + elementId + "]";
 		}
 	}
 }

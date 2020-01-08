@@ -6,12 +6,12 @@
 	<insert id="insert">
 		INSERT INTO DATAGEAR_HTML_CHART_WIDGET
 			(
-			HCW_ID, HCW_NAME, HCW_PLUGIN_ID, HCW_CREATE_USER_ID,
+			HCW_ID, HCW_NAME, HCW_PLUGIN_ID, HCW_UPDATE_INTERVAL, HCW_CREATE_USER_ID,
 			HCW_CREATE_TIME
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.name}, #{entity.htmlChartPlugin.id}, #{entity.createUser.id},
+			#{entity.id}, #{entity.name}, #{entity.htmlChartPlugin.id}, #{entity.updateInterval}, #{entity.createUser.id},
 			#{entity.createTime}
 			)
 	</insert>
@@ -19,7 +19,8 @@
 	<update id="update">
 		UPDATE DATAGEAR_HTML_CHART_WIDGET SET
 			HCW_NAME = #{entity.name},
-			HCW_PLUGIN_ID = #{entity.htmlChartPlugin.id}
+			HCW_PLUGIN_ID = #{entity.htmlChartPlugin.id},
+			HCW_UPDATE_INTERVAL = #{entity.updateInterval}
 		WHERE
 			HCW_ID = #{entity.id}
 	</update>
@@ -136,6 +137,7 @@
 			A.HCW_ID AS ${_iq_}id${_iq_},
 			A.HCW_NAME AS ${_iq_}name${_iq_},
 			A.HCW_PLUGIN_ID AS ${_iq_}htmlChartPlugin.id${_iq_},
+			A.HCW_UPDATE_INTERVAL AS ${_iq_}updateInterval${_iq_},
 			<include refid="common.fieldsForCreateUser" />,
 			A.HCW_CREATE_TIME AS ${_iq_}createTime${_iq_}
 		FROM

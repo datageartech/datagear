@@ -45,6 +45,8 @@ public class HtmlRenderAttributes
 
 	public static final String CHART_SCRIPT_NOT_INVOKE_RENDER = "chartScriptNotInvokeRender";
 
+	public static final String CHART_UPDATE_INTERVAL = "chartUpdateInterval";
+
 	/**
 	 * 获取{@linkplain RenderStyle}，没有则返回{@code null}。
 	 * 
@@ -381,6 +383,39 @@ public class HtmlRenderAttributes
 	public static Boolean removeChartScriptNotInvokeRender(RenderContext renderContext)
 	{
 		return renderContext.removeAttribute(CHART_SCRIPT_NOT_INVOKE_RENDER);
+	}
+
+	/**
+	 * 获取图表更新间隔，没有则返回{@code null}。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public static Integer getChartUpdateInterval(RenderContext renderContext)
+	{
+		return renderContext.getAttribute(CHART_UPDATE_INTERVAL);
+	}
+
+	/**
+	 * 设置图表更新间隔。
+	 * 
+	 * @param renderContext
+	 * @param chartUpdateInterval
+	 */
+	public static void setChartUpdateInterval(RenderContext renderContext, int chartUpdateInterval)
+	{
+		renderContext.setAttribute(CHART_UPDATE_INTERVAL, chartUpdateInterval);
+	}
+
+	/**
+	 * 移除图表更新间隔。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public static Integer removeChartUpdateInterval(RenderContext renderContext)
+	{
+		return renderContext.removeAttribute(CHART_UPDATE_INTERVAL);
 	}
 
 	/**

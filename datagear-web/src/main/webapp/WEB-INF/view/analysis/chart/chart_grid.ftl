@@ -150,6 +150,7 @@ selectonly 是否选择操作，允许为null
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id"),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.name' />"), "name"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", "htmlChartPlugin.id"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.updateInterval' />", "updateInterval"),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.createUser' />"), "createUser.realName"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createTime' />", "createUser.createTime")
 	];

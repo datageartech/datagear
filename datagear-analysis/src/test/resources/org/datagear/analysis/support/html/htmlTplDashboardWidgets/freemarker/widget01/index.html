@@ -13,24 +13,18 @@
 </style>
 <script type="text/javascript" src="customResource.js"></script>
 <script type="text/javascript">
-var myListener =
+var dashboardRenderer =
 {
-	onRender : function(dashboard)
+	render : function(dashboard)
 	{
-		var element = document.getElementById("listener");
-		element.innerHTML += "<div>onRender</div>";
-	},
-	
-	onUpdate : function(dashboard)
-	{
-		var element = document.getElementById("listener");
-		element.innerHTML += "<div>onUpdate</div>";
+		for(var i=0; i<dashboard.charts.length; i++)
+			dashboard.charts[i].render();
 	}
 };
 </script>
 </head>
 <body>
-	<@dashboard listener="myListener">
+	<@dashboard>
 	<div class="dashboard" role="dashboard">
 		<h1>Hello dashboard!</h1>
 		<div class="chart-wrapper">
@@ -53,6 +47,5 @@ var myListener =
 		</div>
 	</div>
 	</@dashboard>
-	<div id="listener"></div>
 </body>
 </html>

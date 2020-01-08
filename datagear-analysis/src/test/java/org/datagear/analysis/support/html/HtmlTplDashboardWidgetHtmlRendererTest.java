@@ -54,14 +54,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);
 
-		List<HtmlDashboardImport> htmlDashboardImports = new ArrayList<HtmlDashboardImport>();
-		htmlDashboardImports.add(new HtmlDashboardImport("jquery", IMPORT_CONTENT_JQUERY));
-		htmlDashboardImports.add(new HtmlDashboardImport("util", IMPORT_CONTENT_UTIL));
-		htmlDashboardImports.add(new HtmlDashboardImport("theme", IMPORT_CONTENT_THEME));
-		htmlDashboardImports.add(new HtmlDashboardImport("style", IMPORT_CONTENT_STYLE));
+		List<HtmlDashboardImport> dashboardImports = new ArrayList<HtmlDashboardImport>();
+		dashboardImports.add(new HtmlDashboardImport("jquery", IMPORT_CONTENT_JQUERY));
+		dashboardImports.add(new HtmlDashboardImport("util", IMPORT_CONTENT_UTIL));
+		dashboardImports.add(new HtmlDashboardImport("theme", IMPORT_CONTENT_THEME));
+		dashboardImports.add(new HtmlDashboardImport("style", IMPORT_CONTENT_STYLE));
 
 		this.renderer = new HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext>(resManager, chartWidgetSource);
-		this.renderer.setHtmlDashboardImports(htmlDashboardImports);
+		this.renderer.setDashboardImports(dashboardImports);
 	}
 
 	@Test
@@ -194,25 +194,23 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
-			Assert.assertTrue(html.contains("var dataGearDashboard1"));
-			Assert.assertTrue(html.contains("dashboardRenderer.render(dataGearDashboard1);"));
+			Assert.assertTrue(html.contains("var dashboard"));
+			Assert.assertTrue(html.contains("dashboardRenderer.render(dashboard);"));
 		}
 
 		// 图表属性
 		{
 			String template = "<html><head></head><body>" + "\r\n"
-					+ "<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\" dg-chart-var=\"chartvar_1\"></div>"
-					+ "\r\n" + "<div id='element_2' dg-chart-widget='chartwidget_2' dg-chart-var='chartvar_2'></div>"
-					+ "\r\n" + "<div id=element_3 dg-chart-widget=chartwidget_3 dg-chart-var=chartvar_3></div>" + "\r\n"
+					+ "<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\"></div>" + "\r\n"
+					+ "<div id='element_2' dg-chart-widget='chartwidget_2'></div>" + "\r\n"
+					+ "<div id=element_3 dg-chart-widget=chartwidget_3></div>" + "\r\n"
 					+ "<div sdf abc def 12345677788 // >"
 					//
-					+ "\r\n"
-					+ "<div   id=element_4    dg-chart-widget=chartwidget_4    dg-chart-var=chartvar_4   ></div>"
-					+ "\r\n"
-					+ "<div   id  =  element_5    dg-chart-widget=  chartwidget_5    dg-chart-var  =chartvar_5/>"
-					+ "\r\n" + "<div   id=element_6    dg-chart-widget=chartwidget_6    dg-chart-var=chartvar_6  />"
-					+ "\r\n" + "<div   id=element_7    dg-chart-widget=chartwidget_7    dg-chart-var=chartvar_7  /  >"
-					+ "\r\n" + "<div     dg-chart-widget=chartwidget_8    /  >"
+					+ "\r\n" + "<div   id=element_4    dg-chart-widget=chartwidget_4    ></div>" + "\r\n"
+					+ "<div   id  =  element_5    dg-chart-widget=  chartwidget_5/>" + "\r\n"
+					+ "<div   id=element_6    dg-chart-widget=chartwidget_6  />" + "\r\n"
+					+ "<div   id=element_7    dg-chart-widget=chartwidget_7  /  >" + "\r\n"
+					+ "<div     dg-chart-widget=chartwidget_8    /  >"
 					//
 					+ "\r\n" + "<div     dg-chart-widget=chartwidget_9/>"
 					//
@@ -240,26 +238,18 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 				ChartInfo chartInfo = chartInfos.get(i);
 				Assert.assertEquals("element_" + (i + 1), chartInfo.getElementId());
 				Assert.assertEquals("chartwidget_" + (i + 1), chartInfo.getWidgetId());
-				Assert.assertEquals("chartvar_" + (i + 1), chartInfo.getChartVar());
 			}
 
 			Assert.assertTrue(html.contains("<html><head>"));
 			Assert.assertTrue(html.contains("</head><body>"));
-			Assert.assertTrue(html.contains(
-					"<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\" dg-chart-var=\"chartvar_1\"></div>"));
-			Assert.assertTrue(html
-					.contains("<div id='element_2' dg-chart-widget='chartwidget_2' dg-chart-var='chartvar_2'></div>"));
-			Assert.assertTrue(
-					html.contains("<div id=element_3 dg-chart-widget=chartwidget_3 dg-chart-var=chartvar_3></div>"));
+			Assert.assertTrue(html.contains("<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\"></div>"));
+			Assert.assertTrue(html.contains("<div id='element_2' dg-chart-widget='chartwidget_2'></div>"));
+			Assert.assertTrue(html.contains("<div id=element_3 dg-chart-widget=chartwidget_3></div>"));
 			Assert.assertTrue(html.contains("<div sdf abc def 12345677788 // >"));
-			Assert.assertTrue(html.contains(
-					"<div   id=element_4    dg-chart-widget=chartwidget_4    dg-chart-var=chartvar_4   ></div>"));
-			Assert.assertTrue(html.contains(
-					"<div   id  =  element_5    dg-chart-widget=  chartwidget_5    dg-chart-var  =chartvar_5/>"));
-			Assert.assertTrue(html
-					.contains("<div   id=element_6    dg-chart-widget=chartwidget_6    dg-chart-var=chartvar_6  />"));
-			Assert.assertTrue(html
-					.contains("<div   id=element_7    dg-chart-widget=chartwidget_7    dg-chart-var=chartvar_7  /  >"));
+			Assert.assertTrue(html.contains("<div   id=element_4    dg-chart-widget=chartwidget_4    ></div>"));
+			Assert.assertTrue(html.contains("<div   id  =  element_5    dg-chart-widget=  chartwidget_5/>"));
+			Assert.assertTrue(html.contains("<div   id=element_6    dg-chart-widget=chartwidget_6  />"));
+			Assert.assertTrue(html.contains("<div   id=element_7    dg-chart-widget=chartwidget_7  /  >"));
 			Assert.assertTrue(
 					html.contains("<div     dg-chart-widget=chartwidget_8 id=\"dataGearChartElement1\"     /  >"));
 			Assert.assertTrue(html.contains("<div     dg-chart-widget=chartwidget_9 id=\"dataGearChartElement2\" />"));
@@ -267,8 +257,6 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains("<div     dg-chart-widget=  />"));
 			Assert.assertTrue(html.contains("</body></html>"));
 
-			for (int i = 0; i < 7; i++)
-				Assert.assertTrue(html.contains("var chartvar_" + (i + 1)));
 			Assert.assertTrue(html.contains("var dataGearChart4"));
 			Assert.assertTrue(html.contains("var dataGearChart5"));
 		}

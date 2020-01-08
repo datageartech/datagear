@@ -14,33 +14,73 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public interface Chart extends Identifiable
+public class Chart extends AbstractIdentifiable
 {
-	/**
-	 * 获取渲染此图表的{@linkplain ChartPlugin}。
-	 * 
-	 * @return
-	 */
-	ChartPlugin<?> getPlugin();
+	public RenderContext renderContext;
 
-	/**
-	 * 获取{@linkplain RenderContext}。
-	 * 
-	 * @return
-	 */
-	RenderContext getRenderContext();
+	private ChartPlugin<?> plugin;
 
-	/**
-	 * 获取{@linkplain ChartPropertyValues}。
-	 * 
-	 * @return
-	 */
-	ChartPropertyValues getPropertyValues();
+	private ChartPropertyValues propertyValues;
 
-	/**
-	 * 获取{@linkplain DataSetFactory}。
-	 * 
-	 * @return
-	 */
-	DataSetFactory[] getDataSetFactories();
+	private DataSetFactory[] dataSetFactories;
+
+	public Chart()
+	{
+		super();
+	}
+
+	public Chart(String id)
+	{
+		super(id);
+	}
+
+	public Chart(String id, RenderContext renderContext, ChartPlugin<?> plugin, ChartPropertyValues propertyValues,
+			DataSetFactory[] dataSetFactories)
+	{
+		super(id);
+		this.renderContext = renderContext;
+		this.plugin = plugin;
+		this.propertyValues = propertyValues;
+		this.dataSetFactories = dataSetFactories;
+	}
+
+	public RenderContext getRenderContext()
+	{
+		return renderContext;
+	}
+
+	public void setRenderContext(RenderContext renderContext)
+	{
+		this.renderContext = renderContext;
+	}
+
+	public ChartPlugin<?> getPlugin()
+	{
+		return plugin;
+	}
+
+	public void setPlugin(ChartPlugin<?> plugin)
+	{
+		this.plugin = plugin;
+	}
+
+	public ChartPropertyValues getPropertyValues()
+	{
+		return propertyValues;
+	}
+
+	public void setPropertyValues(ChartPropertyValues propertyValues)
+	{
+		this.propertyValues = propertyValues;
+	}
+
+	public DataSetFactory[] getDataSetFactories()
+	{
+		return dataSetFactories;
+	}
+
+	public void setDataSetFactories(DataSetFactory[] dataSetFactories)
+	{
+		this.dataSetFactories = dataSetFactories;
+	}
 }

@@ -375,7 +375,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		private static final long serialVersionUID = 1L;
 
-		private transient Map<String, HtmlDashboard> htmlDashboards = new HashMap<String, HtmlDashboard>();
+		private transient Map<String, HtmlDashboard> htmlDashboards;
 
 		public SessionHtmlDashboardManager()
 		{
@@ -384,11 +384,17 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		public synchronized HtmlDashboard get(String htmlDashboardId)
 		{
+			if (this.htmlDashboards == null)
+				return null;
+
 			return this.htmlDashboards.get(htmlDashboardId);
 		}
 
 		public synchronized void put(HtmlDashboard dashboard)
 		{
+			if (this.htmlDashboards == null)
+				this.htmlDashboards = new HashMap<String, HtmlDashboard>();
+
 			this.htmlDashboards.put(dashboard.getId(), dashboard);
 		}
 	}
