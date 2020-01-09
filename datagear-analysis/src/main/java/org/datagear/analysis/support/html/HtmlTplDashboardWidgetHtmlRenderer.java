@@ -359,18 +359,19 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		{
 			for (ChartInfo chartInfo : chartInfos)
 				writeHtmlChartScript(renderContext, dashboard, dashboardInfo, chartInfo);
+
+			// 移除内部设置的属性
+			HtmlRenderAttributes.removeChartRenderContextVarName(renderContext);
+			HtmlRenderAttributes.removeChartNotRenderScriptTag(renderContext);
+			HtmlRenderAttributes.removeChartScriptNotInvokeRender(renderContext);
+			HtmlRenderAttributes.removeChartNotRenderElement(renderContext);
+			HtmlRenderAttributes.removeChartVarName(renderContext);
+			HtmlRenderAttributes.removeChartElementId(renderContext);
+			renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
 		}
 
 		String tmpRenderContextVar = HtmlRenderAttributes
 				.generateRenderContextVarName(HtmlRenderAttributes.getNextSequenceIfNot(renderContext, -1));
-
-		// 移除内部设置的属性
-		HtmlRenderAttributes.removeChartRenderContextVarName(renderContext);
-		HtmlRenderAttributes.removeChartNotRenderScriptTag(renderContext);
-		HtmlRenderAttributes.removeChartScriptNotInvokeRender(renderContext);
-		HtmlRenderAttributes.removeChartVarName(renderContext);
-		HtmlRenderAttributes.removeChartElementId(renderContext);
-		renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
 
 		writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar);
 

@@ -26,7 +26,16 @@
 	renderer.renderDashboard = function(dashboard)
 	{
 		for(var i=0; i<dashboard.charts.length; i++)
-			dashboard.charts[i].render();
+		{
+			try
+			{
+				dashboard.charts[i].render();
+			}
+			catch(e)
+			{
+				this.handleError(e);
+			}
+		}
 		
 		var doUpdate = true;
 		
@@ -50,29 +59,65 @@
 			data : data,
 			success : function(dataSetsMap)
 			{
-				for(var chartId in dataSetsMap)
-				{
-					var chart = renderer.getChart(dashboard, chartId);
-					
-					if(!chart)
-						continue;
-					
-					var dataSets = dataSetsMap[chartId];
-					
-					var doUpdate = true;
-					
-					if(renderer.listener && renderer.listener.onUpdateChart)
-						doUpdate=renderer.listener.onUpdateChart(dashboard, chart, dataSets, renderer);
-					
-					if(doUpdate)
-						chart.update(dataSets);
-				}
+				renderer.updateCharts(dashboard, dataSetsMap);
 			},
 			error : function()
 			{
 				
+			},
+			complete : function()
+			{
+				
 			}
 		});
+	};
+	
+	renderer.updateCharts = function(dashboard, dataSetsMap)
+	{
+		for(var chartId in dataSetsMap)
+		{
+			var chart = this.getChart(dashboard, chartId);
+			
+			if(!chart)
+				continue;
+			
+			var dataSets = dataSetsMap[chartId];
+			
+			try
+			{
+				this.updateChart(dashboard, chart, dataSets);
+			}
+			catch(e)
+			{
+				this.handleError(e);
+			}
+		}
+	};
+	
+	renderer.updateChart = function(dashboard, chart, dataSets)
+	{
+		var doUpdate = true;
+		
+		if(this.listener && this.listener.onUpdateChart)
+			doUpdate=this.listener.onUpdateChart(dashboard, chart, dataSets, this);
+		
+		if(doUpdate)
+			chart.update(dataSets);
+	};
+	
+	renderer.handleError = function(e)
+	{
+		var console = window["console"];
+		
+		if(console)
+		{
+			if(console.error)
+				console.error(e);
+			else if(console.warn)
+				console.warn(e);
+			else if(console.info)
+				console.info(e);
+		}
 	};
 	
 	/**
