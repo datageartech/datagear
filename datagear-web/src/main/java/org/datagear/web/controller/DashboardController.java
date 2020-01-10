@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -316,7 +317,10 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		DataSetParamValues paramValues = new DataSetParamValues();
 
-		return dashboard.getDataSets(paramValues);
+		if (chartsId == null || chartsId.length == 0)
+			return dashboard.getDataSets(paramValues);
+		else
+			return dashboard.getDataSets(Arrays.asList(chartsId), paramValues);
 	}
 
 	protected SessionHtmlDashboardManager getSessionHtmlDashboardManagerNotNull(HttpServletRequest request)

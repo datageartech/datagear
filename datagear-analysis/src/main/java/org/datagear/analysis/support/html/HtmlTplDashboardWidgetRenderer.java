@@ -680,27 +680,12 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		out.write("." + this.dashboardStyleName + "{");
 		writeNewLine(out);
 		writeStyleAttrs(out, dashboardTheme);
-		writeStyleAttrsFillParent(out);
 		out.write("}");
 		writeNewLine(out);
 
 		out.write("." + this.chartStyleName + "{");
 		writeNewLine(out);
 		writeStyleAttrs(out, dashboardTheme.getChartTheme());
-		out.write("  display: inline-block;");
-		writeNewLine(out);
-		out.write("  width: 30%;");
-		writeNewLine(out);
-		out.write("  height: 40%;");
-		writeNewLine(out);
-		out.write("  min-width: 8em;");
-		writeNewLine(out);
-		out.write("  min-height: 6em;");
-		writeNewLine(out);
-		out.write("  margin-left: 2.3%;");
-		writeNewLine(out);
-		out.write("  margin-top: 1.5em;");
-		writeNewLine(out);
 		out.write("}");
 		writeNewLine(out);
 

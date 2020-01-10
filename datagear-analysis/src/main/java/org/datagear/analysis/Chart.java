@@ -83,4 +83,27 @@ public class Chart extends AbstractIdentifiable
 	{
 		this.dataSetFactories = dataSetFactories;
 	}
+
+	/**
+	 * 获取数据集。
+	 * 
+	 * @param dataSetParamValues
+	 * @return
+	 * @throws DataSetException
+	 */
+	public DataSet[] getDataSets(DataSetParamValues dataSetParamValues) throws DataSetException
+	{
+		if (this.dataSetFactories == null || this.dataSetFactories.length == 0)
+			return new DataSet[0];
+
+		DataSet[] dataSets = new DataSet[this.dataSetFactories.length];
+
+		for (int i = 0; i < this.dataSetFactories.length; i++)
+		{
+			DataSet dataSet = this.dataSetFactories[i].getDataSet(dataSetParamValues);
+			dataSets[i] = dataSet;
+		}
+
+		return dataSets;
+	}
 }

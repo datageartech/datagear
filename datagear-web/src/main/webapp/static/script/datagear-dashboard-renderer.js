@@ -46,11 +46,22 @@
 			this.updateDashboard(dashboard);
 	};
 	
-	renderer.updateDashboard = function(dashboard, chartIds)
+	/**
+	 * 更新整个看板的所有、或者指定图表集。
+	 * 
+	 * @param dashboard
+	 * @param charts 可选，指定更新的图表数组，不设置表明更新所有
+	 */
+	renderer.updateDashboard = function(dashboard, charts)
 	{
+		if(this._UPDATING_DASHBOARD)
+			return;
+		
 		var webContext = dashboard.renderContext.webContext;
 		
-		var data = this.buildUpdateDashboardAjaxData(dashboard, chartIds);
+		var data = this.buildUpdateDashboardAjaxData(dashboard, charts);
+		
+		this._UPDATING_DASHBOARD = true;
 		
 		var renderer = this;
 		
@@ -67,19 +78,69 @@
 			},
 			complete : function()
 			{
+				renderer._UPDATING_DASHBOARD = false;
 				
+				var myIntervalId = "";
+				
+				myIntervalId = setInterval(function()
+				{
+					var needUpdateCharts = renderer.getNeedUpdateCharts(dashboard);
+					
+					if(needUpdateCharts.length > 0)
+					{
+						clearInterval(myIntervalId);
+						renderer.updateDashboard(dashboard, needUpdateCharts);
+					}
+				}, 1);
 			}
 		});
 	};
 	
+	/**
+	 * 获取当前需要更新的图表数组，没有则返回空数组。
+	 * 
+	 * @param dashboard
+	 */
+	renderer.getNeedUpdateCharts = function(dashboard)
+	{
+		var nexts = [];
+		
+		var charts = dashboard.charts;
+		
+		if(!charts || !charts.length)
+			return nexts;
+		
+		var time = new Date().getTime();
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			var chart = charts[i];
+			
+			//不需更新
+			if(chart.updateInterval < 0)
+				continue;
+			
+			var prevUpdateTime = this.updateTime(chart);
+			
+			if(prevUpdateTime == null || (prevUpdateTime + chart.updateInterval) <= time)
+				nexts.push(chart);
+		}
+		
+		return nexts;
+	};
+	
 	renderer.updateCharts = function(dashboard, dataSetsMap)
 	{
+		var updateTime = new Date().getTime();
+		
 		for(var chartId in dataSetsMap)
 		{
 			var chart = this.getChart(dashboard, chartId);
 			
 			if(!chart)
 				continue;
+			
+			this.updateTime(chart, updateTime);
 			
 			var dataSets = dataSetsMap[chartId];
 			
@@ -101,7 +162,7 @@
 		if(this.listener && this.listener.onUpdateChart)
 			doUpdate=this.listener.onUpdateChart(dashboard, chart, dataSets, this);
 		
-		if(doUpdate)
+		if(doUpdate != false)
 			chart.update(dataSets);
 	};
 	
@@ -152,16 +213,30 @@
 		return -1;
 	};
 	
-	renderer.buildUpdateDashboardAjaxData = function(dashboard, chartIds)
+	/**
+	 * 获取/设置图表更新时间。
+	 * 
+	 * @param chart
+	 * @param updateTime 要设置的更新时间
+	 */
+	renderer.updateTime = function(chart, updateTime)
+	{
+		if(updateTime == undefined)
+			return chart._UPDATE_TIME;
+		
+		chart._UPDATE_TIME = updateTime;
+	};
+	
+	renderer.buildUpdateDashboardAjaxData = function(dashboard, charts)
 	{
 		var webContext = dashboard.renderContext.webContext;
 		
 		var data = webContext.dashboardIdParam + "=" + encodeURIComponent(dashboard.id);
 		
-		if(chartIds && chartIds.length)
+		if(charts && charts.length)
 		{
-			for(var i=0; i<chartIds.length; i++)
-				data += "&" + webContext.chartsIdParam +"=" + encodeURIComponent(chartIds[i]);
+			for(var i=0; i<charts.length; i++)
+				data += "&" + webContext.chartsIdParam +"=" + encodeURIComponent(charts[i].id);
 		}
 		
 		return data;

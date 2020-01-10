@@ -7,6 +7,7 @@
  */
 package org.datagear.analysis;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,20 +108,40 @@ public class Dashboard extends AbstractIdentifiable
 
 		for (Chart chart : this.charts)
 		{
-			DataSetFactory[] dataSetFactories = chart.getDataSetFactories();
+			DataSet[] dataSets = chart.getDataSets(dataSetParamValues);
 
-			if (dataSetFactories == null || dataSetFactories.length == 0)
+			if (dataSets != null)
+				dataSetsMap.put(chart.getId(), dataSets);
+		}
+
+		return dataSetsMap;
+	}
+
+	/**
+	 * 获取此看板指定图表ID集的数据集。
+	 * 
+	 * @param chartIds
+	 * @param dataSetParamValues
+	 * @return
+	 * @throws DataSetException
+	 */
+	public Map<String, DataSet[]> getDataSets(Collection<String> chartIds, DataSetParamValues dataSetParamValues)
+			throws DataSetException
+	{
+		Map<String, DataSet[]> dataSetsMap = new HashMap<String, DataSet[]>();
+
+		if (this.charts == null || this.charts.isEmpty())
+			return dataSetsMap;
+
+		for (Chart chart : this.charts)
+		{
+			if (!chartIds.contains(chart.getId()))
 				continue;
 
-			DataSet[] dataSets = new DataSet[dataSetFactories.length];
+			DataSet[] dataSets = chart.getDataSets(dataSetParamValues);
 
-			for (int i = 0; i < dataSetFactories.length; i++)
-			{
-				DataSet dataSet = dataSetFactories[i].getDataSet(dataSetParamValues);
-				dataSets[i] = dataSet;
-			}
-
-			dataSetsMap.put(chart.getId(), dataSets);
+			if (dataSets != null)
+				dataSetsMap.put(chart.getId(), dataSets);
 		}
 
 		return dataSetsMap;
