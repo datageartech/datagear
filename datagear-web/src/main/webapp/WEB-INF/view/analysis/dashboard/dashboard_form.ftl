@@ -19,6 +19,8 @@ readonly 是否只读操作，允许为null
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(dashboard.id)!''?html}" />
+			<input type="hidden" name="template" value="${(dashboard.template)!''?html}" />
+			<input type="hidden" name="templateEncoding" value="${(dashboard.templateEncoding)!''?html}" />
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.name' /></label>

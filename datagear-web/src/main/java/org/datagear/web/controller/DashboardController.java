@@ -6,12 +6,15 @@ package org.datagear.web.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipInputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +34,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -44,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 看板控制器。
@@ -58,15 +63,20 @@ public class DashboardController extends AbstractDataAnalysisController
 	@Autowired
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
 
+	@Autowired
+	private File tempDirectory;
+
 	public DashboardController()
 	{
 		super();
 	}
 
-	public DashboardController(HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService)
+	public DashboardController(HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService,
+			File tempDirectory)
 	{
 		super();
 		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
+		this.tempDirectory = tempDirectory;
 	}
 
 	public HtmlTplDashboardWidgetEntityService getHtmlTplDashboardWidgetEntityService()
@@ -80,12 +90,29 @@ public class DashboardController extends AbstractDataAnalysisController
 		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
 	}
 
+	public File getTempDirectory()
+	{
+		return tempDirectory;
+	}
+
+	public void setTempDirectory(File tempDirectory)
+	{
+		this.tempDirectory = tempDirectory;
+	}
+
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
 
+		dashboard.setTemplate(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATE);
+		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
+
+		String templateContent = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"" + dashboard.getTemplateEncoding()
+				+ "\">\n</head>\n<body>\n</body>\n</html>";
+
 		model.addAttribute("dashboard", dashboard);
+		model.addAttribute("templateContent", templateContent);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
 
@@ -99,8 +126,6 @@ public class DashboardController extends AbstractDataAnalysisController
 			throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-
-		dashboard.setTemplate(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATE);
 
 		checkSaveEntity(dashboard);
 
@@ -142,7 +167,8 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		dashboard.setTemplate(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATE);
+		if (isEmpty(dashboard.getTemplate()))
+			dashboard.setTemplate(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATE);
 
 		checkSaveEntity(dashboard);
 
@@ -150,6 +176,124 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		if (updated)
 			saveTemplateContent(dashboard, templateContent);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request);
+	}
+
+	@RequestMapping("/import")
+	public String impt(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		return "/analysis/dashboard/dashboard_import";
+	}
+
+	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, Object> uploadFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("file") MultipartFile multipartFile) throws Exception
+	{
+		String dashboardFileName = "";
+		String template = "";
+		String templateEncoding = "";
+
+		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
+
+		dashboardFileName = tmpDirectory.getName();
+
+		String fileName = multipartFile.getOriginalFilename();
+		
+		if (FileUtil.isExtension(fileName, "zip"))
+		{
+			ZipInputStream in = IOUtil.getZipInputStream(multipartFile.getInputStream());
+			try
+			{
+				IOUtil.unzip(in, tmpDirectory);
+			}
+			finally
+			{
+				IOUtil.close(in);
+			}
+
+			File[] files = tmpDirectory.listFiles();
+			if (files != null)
+			{
+				for (File file : files)
+				{
+					if (file.isDirectory())
+						continue;
+
+					String name = file.getName();
+					if (FileUtil.isExtension(name, "html") || FileUtil.isExtension(name, "htm"))
+					{
+						template = name;
+
+						if (template.equalsIgnoreCase("index.html") || template.equalsIgnoreCase("index.htm"))
+							break;
+					}
+				}
+			}
+		}
+		else
+		{
+			File file = FileUtil.getFile(tmpDirectory, fileName);
+
+			InputStream in = null;
+			OutputStream out = null;
+			try
+			{
+				in = multipartFile.getInputStream();
+				out = IOUtil.getOutputStream(file);
+				IOUtil.write(in, out);
+			}
+			finally
+			{
+				IOUtil.close(in);
+				IOUtil.close(out);
+			}
+
+			template = fileName;
+		}
+
+		Map<String, Object> results = new HashMap<String, Object>();
+		results.put("dashboardFileName", dashboardFileName);
+		results.put("template", template);
+		results.put("templateEncoding", templateEncoding);
+
+		return results;
+	}
+
+	@RequestMapping(value = "/saveImport", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveImport(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("name") String name,
+			@RequestParam("template") String template, @RequestParam("templateEncoding") String templateEncoding,
+			@RequestParam("dashboardFileName") String dashboardFileName)
+			throws Exception
+	{
+		File uploadDirectory = FileUtil.getDirectory(this.tempDirectory, dashboardFileName, false);
+
+		if (!uploadDirectory.exists())
+			throw new IllegalInputException();
+
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
+		dashboard.setTemplate(template);
+		dashboard.setTemplateEncoding(templateEncoding);
+		dashboard.setName(name);
+
+		checkSaveEntity(dashboard);
+
+		dashboard.setId(IDUtil.uuid());
+		dashboard.setCreateUser(user);
+
+		this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
+
+		DashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getDashboardWidgetResManager();
+
+		File dashboardResDirectory = dashboardWidgetResManager.getDirectory(dashboard.getId());
+
+		IOUtil.copy(uploadDirectory, dashboardResDirectory, false);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -241,6 +385,13 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		if (dashboardWidget == null)
 			throw new RecordNotFoundException();
+
+		String responseEncoding = dashboardWidget.getTemplateEncoding();
+
+		if (StringUtil.isEmpty(responseEncoding))
+			responseEncoding = Charset.defaultCharset().name();
+
+		response.setCharacterEncoding(responseEncoding);
 
 		Writer out = response.getWriter();
 

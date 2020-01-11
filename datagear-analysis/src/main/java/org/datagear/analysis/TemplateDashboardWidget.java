@@ -3,8 +3,6 @@
  */
 package org.datagear.analysis;
 
-import org.datagear.util.StringUtil;
-
 /**
  * 模板看板部件。
  * <p>
@@ -17,9 +15,11 @@ import org.datagear.util.StringUtil;
 public abstract class TemplateDashboardWidget<T extends RenderContext> extends AbstractIdentifiable
 		implements DashboardWidget<T>
 {
+	public static final String DEFAULT_TEMPLATE_ENCODING = "UTF-8";
+
 	private String template;
 
-	private String templateEncoding = "UTF-8";
+	private String templateEncoding = DEFAULT_TEMPLATE_ENCODING;
 
 	public TemplateDashboardWidget()
 	{
@@ -40,11 +40,6 @@ public abstract class TemplateDashboardWidget<T extends RenderContext> extends A
 	public void setTemplate(String template)
 	{
 		this.template = template;
-	}
-
-	public boolean hasTemplateEncoding()
-	{
-		return !StringUtil.isEmpty(this.templateEncoding);
 	}
 
 	public String getTemplateEncoding()

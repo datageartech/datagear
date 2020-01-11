@@ -113,6 +113,20 @@ public class DashboardWidgetResManager
 	}
 
 	/**
+	 * 获取指定看板部件的主目录。
+	 * <p>
+	 * 如果目录不存在，则会自动创建。
+	 * </p>
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public File getDirectory(String id)
+	{
+		return FileUtil.getDirectory(this.rootDirectory, id, true);
+	}
+
+	/**
 	 * 获取目录。
 	 * <p>
 	 * 如果目录不存在，则会自动创建。

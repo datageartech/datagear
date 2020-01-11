@@ -25,6 +25,7 @@ selectonly 是否选择操作，允许为null
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<input name="importButton" type="button" value="<@spring.message code='import' />" />
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<input name="showButton" type="button" value="<@spring.message code='dashboard.show' />" />
@@ -63,6 +64,20 @@ selectonly 是否选择操作，允许为null
 	po.element("input[name=addButton]").click(function()
 	{
 		po.open(po.url("add"),
+		{
+			pageParam :
+			{
+				afterSave : function()
+				{
+					po.refresh();
+				}
+			}
+		});
+	});
+	
+	po.element("input[name=importButton]").click(function()
+	{
+		po.open(po.url("import"),
 		{
 			pageParam :
 			{

@@ -391,7 +391,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		if (!templateFile.exists())
 			return new StringReader("");
 
-		if (dashboardWidget.hasTemplateEncoding())
+		if (!StringUtil.isEmpty(dashboardWidget.getTemplateEncoding()))
 			return IOUtil.getReader(templateFile, dashboardWidget.getTemplateEncoding());
 		else
 			return IOUtil.getReader(templateFile);
@@ -411,7 +411,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	{
 		File templateFile = getTemplateFile(dashboardWidget);
 
-		if (dashboardWidget.hasTemplateEncoding())
+		if (!StringUtil.isEmpty(dashboardWidget.getTemplateEncoding()))
 			return IOUtil.getWriter(templateFile, dashboardWidget.getTemplateEncoding());
 		else
 			return IOUtil.getWriter(templateFile);

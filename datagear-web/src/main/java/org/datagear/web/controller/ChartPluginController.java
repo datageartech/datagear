@@ -67,6 +67,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager, File tempDirectory)
 	{
 		super(messageSource, classDataConverter, directoryHtmlChartPluginManager);
+		this.tempDirectory = tempDirectory;
 	}
 
 	public File getTempDirectory()
