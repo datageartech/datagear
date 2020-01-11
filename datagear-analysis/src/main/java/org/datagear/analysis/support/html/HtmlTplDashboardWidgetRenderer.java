@@ -9,6 +9,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
@@ -296,6 +297,128 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	public void setNewLine(String newLine)
 	{
 		this.newLine = newLine;
+	}
+
+	/**
+	 * 解析HTML输入流的字符集，如果解析不到，则返回{@code null}。
+	 * 
+	 * @param in
+	 * @return
+	 * @throws IOException
+	 */
+	public String resolveCharset(InputStream in) throws IOException
+	{
+		Reader reader = IOUtil.getReader(in, "iso-8859-1");
+		return resolveCharset(reader);
+	}
+
+	/**
+	 * 解析HTML输入流的字符集，如果解析不到，则返回{@code null}。
+	 * <p>
+	 * 它从如下内容解析HTML字符集：
+	 * </p>
+	 * <p>
+	 * <code>&lt;meta http-equiv="Content-Type" content="text/html; charset=***"&gt;</code>
+	 * </p>
+	 * <p>
+	 * <code>&lt;meta charset="***"&gt;</code>
+	 * </p>
+	 * 
+	 * @param in
+	 * @return
+	 * @throws IOException
+	 */
+	public String resolveCharset(Reader in) throws IOException
+	{
+		String charset = null;
+
+		StringBuilder nameCache = new StringBuilder();
+		StringBuilder valueCache = new StringBuilder();
+
+		int c = -1;
+		while ((c = in.read()) > -1)
+		{
+			if (charset != null)
+				break;
+
+			if (c == '<')
+			{
+				if (isNotEmpty(nameCache))
+					clear(nameCache);
+				if (isNotEmpty(valueCache))
+					clear(valueCache);
+
+				int last = skipWhitespace(in, null);
+
+				if (last < 0)
+				{
+				}
+				// </...
+				else if (last == '/')
+				{
+					last = resolveHtmlCloseTagName(in, null, nameCache);
+
+					if (isNotEmpty(nameCache))
+					{
+						String tagName = nameCache.toString();
+
+						// </head>时退出
+						if ("head".equalsIgnoreCase(tagName))
+							break;
+					}
+				}
+				// <>
+				else if (last == '>')
+				{
+				}
+				// <...
+				else
+				{
+					appendChar(nameCache, last);
+					last = resolveHtmlTagName(in, null, nameCache);
+
+					String tagName = nameCache.toString();
+
+					if ("meta".equalsIgnoreCase(tagName))
+					{
+						for (;;)
+						{
+							if (isNotEmpty(nameCache))
+								clear(nameCache);
+							if (isNotEmpty(valueCache))
+								clear(valueCache);
+
+							last = resolveHtmlTagAttr(in, last, null, nameCache, valueCache);
+
+							String name = nameCache.toString();
+							String value = valueCache.toString();
+
+							if ("charset".equalsIgnoreCase(name))
+							{
+								charset = value;
+								break;
+							}
+							else if ("content".equalsIgnoreCase(name))
+							{
+								String valueLower = value.toLowerCase();
+								String charsetToken = "charset=";
+								int charsetTokenIdx = valueLower.indexOf(charsetToken);
+								if (charsetTokenIdx > -1)
+								{
+									charset = value.substring(charsetTokenIdx + charsetToken.length());
+									break;
+								}
+							}
+
+							if (isHtmlTagEnd(last))
+								break;
+						}
+					}
+				}
+			}
+		}
+
+		return charset;
 	}
 
 	/**
@@ -807,6 +930,256 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	protected void writeNewLine(Writer out) throws IOException
 	{
 		out.write(getNewLine());
+	}
+
+	/**
+	 * 解析HTML标签名。
+	 * 
+	 * @param in
+	 * @param cache   写入已读取字符的字符缓存，为{@code null}则不写入
+	 * @param tagName
+	 * @return '>'、'/'、空格、-1
+	 * @throws IOException
+	 */
+	protected int resolveHtmlTagName(Reader in, StringBuilder cache, StringBuilder tagName) throws IOException
+	{
+		int c = -1;
+		while ((c = in.read()) > -1)
+		{
+			appendChar(cache, c);
+
+			if (c == '>' || c == '/')
+			{
+				break;
+			}
+			else if (isWhitespace(c))
+			{
+				if (isNotEmpty(tagName))
+					break;
+			}
+			else
+				appendChar(tagName, c);
+		}
+
+		return c;
+	}
+
+	/**
+	 * 解析HTML标签属性。
+	 * 
+	 * @param in
+	 * @param last      上一个已读取的字符
+	 * @param cache     写入已读取字符的缓存，为{@code null}则不写入
+	 * @param attrName
+	 * @param attrValue
+	 * @return '>'、'/'、空格、下一个属性名的第一个字符、-1
+	 * @throws IOException
+	 */
+	protected int resolveHtmlTagAttr(Reader in, int last, StringBuilder cache, StringBuilder attrName,
+			StringBuilder attrValue) throws IOException
+	{
+		// 上一个字符是标签结束字符
+		if (isHtmlTagEnd(last))
+			return last;
+
+		// 上一个字符是此属性名的第一个字符
+		if (last != '/' && !isWhitespace(last))
+			appendChar(attrName, last);
+
+		boolean resolveAttValue = false;
+
+		int c = -1;
+		while ((c = in.read()) > -1)
+		{
+			appendChar(cache, c);
+
+			if (c == '>' || c == '/')
+			{
+				break;
+			}
+			else if (c == '=')
+			{
+				if (isNotEmpty(attrName))
+					resolveAttValue = true;
+				else
+					appendChar(attrName, c);
+			}
+			else if (c == '\'' || c == '"')
+			{
+				if (!resolveAttValue)
+					appendChar(attrName, c);
+				else
+				{
+					if (!isEmpty(attrValue))
+						appendChar(attrValue, c);
+					else
+					{
+						boolean endQuote = false;
+						int quote = c;
+
+						while ((c = in.read()) > -1)
+						{
+							appendChar(cache, c);
+
+							if (c == quote)
+							{
+								c = in.read();
+								appendChar(cache, c);
+
+								endQuote = true;
+								break;
+							}
+							else
+								appendChar(attrValue, c);
+						}
+
+						if (endQuote)
+							break;
+					}
+				}
+			}
+			else if (isWhitespace(c))
+			{
+				if (isNotEmpty(attrValue))
+					break;
+			}
+			else
+			{
+				if (resolveAttValue)
+					appendChar(attrValue, c);
+				else
+				{
+					int prev = (isEmpty(cache) ? 0 : cache.charAt(cache.length() - 1));
+
+					// 只有属性名没有属性值
+					if (isWhitespace(prev))
+						break;
+					else
+						appendChar(attrName, c);
+				}
+			}
+		}
+
+		return c;
+	}
+
+	/**
+	 * 解析HTML关闭标签名（“&lt;/tag-name&gt;”）。
+	 * <p>
+	 * 如果不是合法的关闭标签，{@code tagName}将为空。
+	 * </p>
+	 * 
+	 * @param in
+	 * @param cache   写入已读取字符的缓存，为{@code null}则不写入
+	 * @param tagName
+	 * @return
+	 * @throws IOException
+	 */
+	protected int resolveHtmlCloseTagName(Reader in, StringBuilder cache, StringBuilder tagName) throws IOException
+	{
+		int last = resolveHtmlTagName(in, cache, tagName);
+
+		if (Character.isWhitespace(last))
+			last = skipWhitespace(in, cache);
+
+		if (isHtmlTagEnd(last))
+			;
+		else
+			clear(tagName);
+
+		return last;
+	}
+
+	/**
+	 * 给定字符是否是HTML标签结束符。
+	 * 
+	 * @param c
+	 * @return
+	 */
+	protected boolean isHtmlTagEnd(int c)
+	{
+		return (c == '>' || c < 0);
+	}
+
+	/**
+	 * {@linkplain StringBuilder}是否为空。
+	 * 
+	 * @param sb
+	 * @return
+	 */
+	protected boolean isEmpty(StringBuilder sb)
+	{
+		return (sb == null || sb.length() == 0);
+	}
+
+	/**
+	 * {@linkplain StringBuilder}是否不为空。
+	 * 
+	 * @param sb
+	 * @return
+	 */
+	protected boolean isNotEmpty(StringBuilder sb)
+	{
+		return (sb != null && sb.length() > 0);
+	}
+
+	/**
+	 * 清除{@linkplain StringBuilder}。
+	 * 
+	 * @param sb
+	 */
+	protected void clear(StringBuilder sb)
+	{
+		if (sb == null)
+			return;
+
+		sb.delete(0, sb.length());
+	}
+
+	/**
+	 * 跳过空格。
+	 * 
+	 * @param in
+	 * @param out 写入跳过空格的缓存，为{@code null}则不写入
+	 * @return 非空格字符、-1
+	 * @throws IOException
+	 */
+	protected int skipWhitespace(Reader in, StringBuilder out) throws IOException
+	{
+		int c = -1;
+
+		while ((c = in.read()) > -1)
+		{
+			appendChar(out, c);
+
+			if (!isWhitespace(c))
+				break;
+		}
+
+		return c;
+	}
+
+	/**
+	 * 追加字符。
+	 * 
+	 * @param sb 追加字符缓存，为{@code null}则不写入
+	 * @param c
+	 */
+	protected void appendChar(StringBuilder sb, int c)
+	{
+		if (sb != null)
+			sb.appendCodePoint(c);
+	}
+
+	/**
+	 * 是否空格字符。
+	 * 
+	 * @param c
+	 * @return
+	 */
+	protected boolean isWhitespace(int c)
+	{
+		return Character.isWhitespace(c);
 	}
 
 	/**

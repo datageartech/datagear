@@ -239,7 +239,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 						;
 					else
 					{
-						last = resolveCloseTagName(in, cache, nameCache);
+						last = resolveHtmlCloseTagName(in, cache, nameCache);
 
 						if (isNotEmpty(nameCache))
 						{
@@ -266,7 +266,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 				{
 					appendChar(nameCache, last);
 
-					last = resolveTagName(in, cache, nameCache);
+					last = resolveHtmlTagName(in, cache, nameCache);
 
 					String tagName = nameCache.toString();
 
@@ -283,8 +283,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 
 						for (;;)
 						{
-							last = resolveTagAttr(in, last, cache, nameCache, valueCache);
-							if (isTagEnd(last))
+							last = resolveHtmlTagAttr(in, last, cache, nameCache, valueCache);
+							if (isHtmlTagEnd(last))
 								break;
 						}
 
@@ -448,7 +448,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	{
 		for (;;)
 		{
-			last = resolveTagAttr(in, last, cache, attrName, attrValue);
+			last = resolveHtmlTagAttr(in, last, cache, attrName, attrValue);
 
 			String attrNameStr = attrName.toString();
 
@@ -468,7 +468,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			clear(attrName);
 			clear(attrValue);
 
-			if (isTagEnd(last))
+			if (isHtmlTagEnd(last))
 				break;
 		}
 
@@ -497,7 +497,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 
 		for (;;)
 		{
-			last = resolveTagAttr(in, last, cache, attrName, attrValue);
+			last = resolveHtmlTagAttr(in, last, cache, attrName, attrValue);
 
 			String attrNameStr = attrName.toString();
 
@@ -519,7 +519,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			clear(attrName);
 			clear(attrValue);
 
-			if (isTagEnd(last))
+			if (isHtmlTagEnd(last))
 				break;
 		}
 
@@ -567,258 +567,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		}
 
 		return i;
-	}
-
-	/**
-	 * 解析标签名。
-	 * 
-	 * @param in
-	 * @param cache
-	 *            读取字符缓存
-	 * @param tagName
-	 * @return '>'、'/'、空格、-1
-	 * @throws IOException
-	 */
-	protected int resolveTagName(Reader in, StringBuilder cache, StringBuilder tagName) throws IOException
-	{
-		int c = -1;
-		while ((c = in.read()) > -1)
-		{
-			appendChar(cache, c);
-
-			if (c == '>' || c == '/')
-			{
-				break;
-			}
-			else if (isWhitespace(c))
-			{
-				if (isNotEmpty(tagName))
-					break;
-			}
-			else
-				appendChar(tagName, c);
-		}
-
-		return c;
-	}
-
-	/**
-	 * 解析标签属性。
-	 * 
-	 * @param in
-	 * @param last
-	 *            上一个已读取的字符
-	 * @param cache
-	 * @param attrName
-	 * @param attrValue
-	 * @return '>'、'/'、空格、下一个属性名的第一个字符、-1
-	 * @throws IOException
-	 */
-	protected int resolveTagAttr(Reader in, int last, StringBuilder cache, StringBuilder attrName,
-			StringBuilder attrValue) throws IOException
-	{
-		// 上一个字符是标签结束字符
-		if (isTagEnd(last))
-			return last;
-
-		// 上一个字符是此属性名的第一个字符
-		if (last != '/' && !isWhitespace(last))
-			appendChar(attrName, last);
-
-		boolean resolveAttValue = false;
-
-		int c = -1;
-		while ((c = in.read()) > -1)
-		{
-			appendChar(cache, c);
-
-			if (c == '>' || c == '/')
-			{
-				break;
-			}
-			else if (c == '=')
-			{
-				if (isNotEmpty(attrName))
-					resolveAttValue = true;
-				else
-					appendChar(attrName, c);
-			}
-			else if (c == '\'' || c == '"')
-			{
-				if (!resolveAttValue)
-					appendChar(attrName, c);
-				else
-				{
-					if (!isEmpty(attrValue))
-						appendChar(attrValue, c);
-					else
-					{
-						boolean endQuote = false;
-						int quote = c;
-
-						while ((c = in.read()) > -1)
-						{
-							appendChar(cache, c);
-
-							if (c == quote)
-							{
-								c = in.read();
-								appendChar(cache, c);
-
-								endQuote = true;
-								break;
-							}
-							else
-								appendChar(attrValue, c);
-						}
-
-						if (endQuote)
-							break;
-					}
-				}
-			}
-			else if (isWhitespace(c))
-			{
-				if (isNotEmpty(attrValue))
-					break;
-			}
-			else
-			{
-				if (resolveAttValue)
-					appendChar(attrValue, c);
-				else
-				{
-					int prev = (isEmpty(cache) ? 0 : cache.charAt(cache.length() - 1));
-
-					// 只有属性名没有属性值
-					if (isWhitespace(prev))
-						break;
-					else
-						appendChar(attrName, c);
-				}
-			}
-		}
-
-		return c;
-	}
-
-	/**
-	 * 解析关闭标签名（“&lt;/tag-name&gt;”）。
-	 * <p>
-	 * 如果不是合法的关闭标签，{@code tagName}将为空。
-	 * </p>
-	 * 
-	 * @param in
-	 * @param cache
-	 * @param tagName
-	 * @return
-	 * @throws IOException
-	 */
-	protected int resolveCloseTagName(Reader in, StringBuilder cache, StringBuilder tagName) throws IOException
-	{
-		int last = resolveTagName(in, cache, tagName);
-
-		if (Character.isWhitespace(last))
-			last = skipWhitespace(in, cache);
-
-		if (isTagEnd(last))
-			;
-		else
-			clear(tagName);
-
-		return last;
-	}
-
-	/**
-	 * 给定字符是否是标签结束符。
-	 * 
-	 * @param c
-	 * @return
-	 */
-	protected boolean isTagEnd(int c)
-	{
-		return (c == '>' || c < 0);
-	}
-
-	/**
-	 * {@linkplain StringBuilder}是否为空。
-	 * 
-	 * @param sb
-	 * @return
-	 */
-	protected boolean isEmpty(StringBuilder sb)
-	{
-		return (sb == null || sb.length() == 0);
-	}
-
-	/**
-	 * {@linkplain StringBuilder}是否不为空。
-	 * 
-	 * @param sb
-	 * @return
-	 */
-	protected boolean isNotEmpty(StringBuilder sb)
-	{
-		return (sb != null && sb.length() > 0);
-	}
-
-	/**
-	 * 清除{@linkplain StringBuilder}。
-	 * 
-	 * @param sb
-	 */
-	protected void clear(StringBuilder sb)
-	{
-		if (sb == null)
-			return;
-
-		sb.delete(0, sb.length());
-	}
-
-	/**
-	 * 跳过空格。
-	 * 
-	 * @param in
-	 * @param cache
-	 *            读取字符缓存
-	 * @return 非空格字符、-1
-	 * @throws IOException
-	 */
-	protected int skipWhitespace(Reader in, StringBuilder cache) throws IOException
-	{
-		int c = -1;
-
-		while ((c = in.read()) > -1)
-		{
-			appendChar(cache, c);
-
-			if (!isWhitespace(c))
-				break;
-		}
-
-		return c;
-	}
-
-	/**
-	 * 作为字符追加。
-	 * 
-	 * @param sb
-	 * @param c
-	 */
-	protected void appendChar(StringBuilder sb, int c)
-	{
-		sb.appendCodePoint(c);
-	}
-
-	/**
-	 * 是否空格字符。
-	 * 
-	 * @param c
-	 * @return
-	 */
-	protected boolean isWhitespace(int c)
-	{
-		return Character.isWhitespace(c);
 	}
 
 	protected static class DashboardInfo

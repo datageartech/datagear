@@ -39,14 +39,6 @@
 					<input type="text" name="template" value="" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='dashboard.templateEncoding' /></label>
-				</div>
-				<div class="form-item-value">
-					<input type="text" name="templateEncoding" value="" class="ui-widget ui-widget-content" />
-				</div>
-			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
@@ -76,7 +68,6 @@
 			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
 			po.element("input[name='dashboardFileName']").val(uploadResult.dashboardFileName);
 			po.element("input[name='template']").val(uploadResult.template);
-			po.element("input[name='templateEncoding']").val(uploadResult.templateEncoding);
 		}
 	})
 	.bind('fileuploadadd', function (e, data)

@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Serializable;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -41,6 +42,7 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -131,6 +133,7 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		dashboard.setId(IDUtil.uuid());
 		dashboard.setCreateUser(user);
+		dashboard.setTemplateEncoding(resolveTemplateEncoding(templateContent));
 
 		boolean add = this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 
@@ -172,6 +175,8 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		checkSaveEntity(dashboard);
 
+		dashboard.setTemplateEncoding(resolveTemplateEncoding(templateContent));
+
 		boolean updated = this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
 
 		if (updated)
@@ -193,7 +198,6 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		String dashboardFileName = "";
 		String template = "";
-		String templateEncoding = "";
 
 		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
 
@@ -256,7 +260,6 @@ public class DashboardController extends AbstractDataAnalysisController
 		Map<String, Object> results = new HashMap<String, Object>();
 		results.put("dashboardFileName", dashboardFileName);
 		results.put("template", template);
-		results.put("templateEncoding", templateEncoding);
 
 		return results;
 	}
@@ -265,7 +268,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveImport(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("name") String name,
-			@RequestParam("template") String template, @RequestParam("templateEncoding") String templateEncoding,
+			@RequestParam("template") String template,
 			@RequestParam("dashboardFileName") String dashboardFileName)
 			throws Exception
 	{
@@ -273,6 +276,14 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		if (!uploadDirectory.exists())
 			throw new IllegalInputException();
+
+		File templateFile = FileUtil.getFile(uploadDirectory, template);
+
+		if (!templateFile.exists() || templateFile.isDirectory())
+			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					"dashboard.import.templateFileNotExists", template);
+
+		String templateEncoding = resolveTemplateEncoding(templateFile);
 
 		User user = WebUtils.getUser(request, response);
 
@@ -472,6 +483,69 @@ public class DashboardController extends AbstractDataAnalysisController
 			return dashboard.getDataSets(paramValues);
 		else
 			return dashboard.getDataSets(Arrays.asList(chartsId), paramValues);
+	}
+
+	/**
+	 * 解析HTML模板的字符编码。
+	 * 
+	 * @param templateIn
+	 * @return
+	 * @throws IOException
+	 */
+	protected String resolveTemplateEncoding(String templateContent) throws IOException
+	{
+		String templateEncoding = null;
+
+		if (templateContent != null)
+		{
+			Reader in = null;
+			try
+			{
+				in = IOUtil.getReader(templateContent);
+
+				templateEncoding = this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer()
+						.resolveCharset(in);
+			}
+			finally
+			{
+				IOUtil.close(in);
+			}
+		}
+
+		if (StringUtil.isEmpty(templateEncoding))
+			templateEncoding = HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING;
+
+		return templateEncoding;
+	}
+
+	/**
+	 * 解析HTML模板文件的字符编码。
+	 * 
+	 * @param templateIn
+	 * @return
+	 * @throws IOException
+	 */
+	protected String resolveTemplateEncoding(File templateFile) throws IOException
+	{
+		String templateEncoding = null;
+
+		InputStream in = null;
+		try
+		{
+			in = IOUtil.getInputStream(templateFile);
+
+			templateEncoding = this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer()
+					.resolveCharset(in);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
+
+		if (StringUtil.isEmpty(templateEncoding))
+			templateEncoding = HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING;
+
+		return templateEncoding;
 	}
 
 	protected SessionHtmlDashboardManager getSessionHtmlDashboardManagerNotNull(HttpServletRequest request)
