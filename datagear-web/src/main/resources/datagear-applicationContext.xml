@@ -344,7 +344,15 @@
 					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.js' &gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
-					<property name="name" value="renderer" />
+					<property name="name" value="echarts" />
+					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/echarts-4.6.0/echarts.js' &gt;&lt;/script&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
+					<property name="name" value="chart-util" />
+					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/datagear-chart-util.js' &gt;&lt;/script&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
+					<property name="name" value="dashboard-renderer" />
 					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/datagear-dashboard-renderer.js' &gt;&lt;/script&gt;" />
 				</bean>
 			</list>

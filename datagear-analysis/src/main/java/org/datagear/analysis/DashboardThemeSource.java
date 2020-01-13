@@ -16,6 +16,13 @@ package org.datagear.analysis;
 public interface DashboardThemeSource
 {
 	/**
+	 * 获取默认{@linkplain DashboardTheme}。
+	 * 
+	 * @return
+	 */
+	DashboardTheme getDashboardTheme();
+
+	/**
 	 * 获取指定{@linkplain RenderStyle}的{@linkplain DashboardTheme}，没有则返回{@code null}。
 	 * 
 	 * @param renderStyle

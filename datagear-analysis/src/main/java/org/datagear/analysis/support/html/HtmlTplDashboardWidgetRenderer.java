@@ -431,7 +431,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 */
 	public HtmlDashboard render(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget) throws RenderException
 	{
-		inflateThemes(renderContext);
+		RenderStyle renderStyle = inflateRenderStyle(renderContext);
+		inflateDashboardAndChartTheme(renderContext, renderStyle);
 
 		HtmlDashboard dashboard = createHtmlDashboard(renderContext, dashboardWidget);
 
@@ -555,11 +556,12 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
-	 * 设置主题。
+	 * 设置必要的{@linkplain RenderStyle}。
 	 * 
 	 * @param renderContext
+	 * @return
 	 */
-	protected void inflateThemes(HtmlRenderContext renderContext)
+	protected RenderStyle inflateRenderStyle(HtmlRenderContext renderContext)
 	{
 		RenderStyle renderStyle = HtmlRenderAttributes.getRenderStyle(renderContext);
 
@@ -569,6 +571,17 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			HtmlRenderAttributes.setRenderStyle(renderContext, renderStyle);
 		}
 
+		return renderStyle;
+	}
+
+	/**
+	 * 设置必要的{@linkplain DashboardTheme}和{@linkplain ChartTheme}。
+	 * 
+	 * @param renderContext
+	 * @param renderStyle
+	 */
+	protected void inflateDashboardAndChartTheme(HtmlRenderContext renderContext, RenderStyle renderStyle)
+	{
 		DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
 
 		if (dashboardTheme == null)
@@ -576,18 +589,12 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			dashboardTheme = this.dashboardThemeSource.getDashboardTheme(renderStyle);
 
 			if (dashboardTheme == null)
-				dashboardTheme = SimpleDashboardThemeSource.THEME_LIGHT;
+				dashboardTheme = this.dashboardThemeSource.getDashboardTheme();
 
 			HtmlRenderAttributes.setDashboardTheme(renderContext, dashboardTheme);
 		}
 
-		ChartTheme chartTheme = HtmlRenderAttributes.getChartTheme(renderContext);
-
-		if (chartTheme == null)
-		{
-			chartTheme = dashboardTheme.getChartTheme();
-			HtmlRenderAttributes.setChartTheme(renderContext, chartTheme);
-		}
+		HtmlRenderAttributes.setChartTheme(renderContext, dashboardTheme.getChartTheme());
 	}
 
 	/**
@@ -673,6 +680,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 		HtmlRenderContext renderContext = dashboard.getRenderContext();
 
+		ChartTheme chartTheme = HtmlRenderAttributes.removeChartTheme(renderContext);
+
 		out.write("var ");
 		out.write(renderContextVar);
 		out.write("=");
@@ -682,6 +691,11 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		writeNewLine(out);
 		out.write(varName + ".renderContext.attributes = " + renderContextVar + ".attributes;");
 		writeNewLine(out);
+		out.write(varName + ".renderContext.attributes." + HtmlRenderAttributes.CHART_THEME + " = " + renderContextVar
+				+ ".attributes." + HtmlRenderAttributes.DASHBOARD_THEME + ".chartTheme;");
+		writeNewLine(out);
+
+		HtmlRenderAttributes.setChartTheme(renderContext, chartTheme);
 
 		List<Chart> charts = dashboard.getCharts();
 		if (charts != null)
@@ -830,19 +844,19 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		if (theme != null)
 		{
 			String borderWidth = theme.getBorderWidth();
-			if (borderWidth == null || borderWidth.equals("0") || borderWidth.equalsIgnoreCase("0px"))
-				borderWidth = "";
+			if (StringUtil.isEmpty(borderWidth))
+				borderWidth = "0";
 
 			out.write("  color: " + theme.getForegroundColor() + ";");
 			writeNewLine(out);
 			out.write("  background-color: " + theme.getBackgroundColor() + ";");
 			writeNewLine(out);
-
-			if (!StringUtil.isEmpty(borderWidth))
-			{
-				out.write("  border: " + borderWidth + " solid " + theme.getBorderColor() + ";");
-				writeNewLine(out);
-			}
+			out.write("  border-color: " + theme.getBorderColor() + ";");
+			writeNewLine(out);
+			out.write("  border-width: " + borderWidth + ";");
+			writeNewLine(out);
+			out.write("  border-style: solid;");
+			writeNewLine(out);
 		}
 	}
 
@@ -936,7 +950,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 解析HTML标签名。
 	 * 
 	 * @param in
-	 * @param cache   写入已读取字符的字符缓存，为{@code null}则不写入
+	 * @param cache
+	 *            写入已读取字符的字符缓存，为{@code null}则不写入
 	 * @param tagName
 	 * @return '>'、'/'、空格、-1
 	 * @throws IOException
@@ -968,8 +983,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 解析HTML标签属性。
 	 * 
 	 * @param in
-	 * @param last      上一个已读取的字符
-	 * @param cache     写入已读取字符的缓存，为{@code null}则不写入
+	 * @param last
+	 *            上一个已读取的字符
+	 * @param cache
+	 *            写入已读取字符的缓存，为{@code null}则不写入
 	 * @param attrName
 	 * @param attrValue
 	 * @return '>'、'/'、空格、下一个属性名的第一个字符、-1
@@ -1070,7 +1087,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * </p>
 	 * 
 	 * @param in
-	 * @param cache   写入已读取字符的缓存，为{@code null}则不写入
+	 * @param cache
+	 *            写入已读取字符的缓存，为{@code null}则不写入
 	 * @param tagName
 	 * @return
 	 * @throws IOException
@@ -1140,7 +1158,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 跳过空格。
 	 * 
 	 * @param in
-	 * @param out 写入跳过空格的缓存，为{@code null}则不写入
+	 * @param out
+	 *            写入跳过空格的缓存，为{@code null}则不写入
 	 * @return 非空格字符、-1
 	 * @throws IOException
 	 */
@@ -1162,7 +1181,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	/**
 	 * 追加字符。
 	 * 
-	 * @param sb 追加字符缓存，为{@code null}则不写入
+	 * @param sb
+	 *            追加字符缓存，为{@code null}则不写入
 	 * @param c
 	 */
 	protected void appendChar(StringBuilder sb, int c)

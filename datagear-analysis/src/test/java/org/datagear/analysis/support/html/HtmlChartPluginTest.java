@@ -12,12 +12,11 @@ import java.io.StringWriter;
 import java.util.Locale;
 import java.util.Map;
 
-import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.RenderStyle;
-import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 import org.datagear.analysis.support.LocationResource;
+import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,8 +42,7 @@ public class HtmlChartPluginTest
 		StringWriter stringWriter = new StringWriter();
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), stringWriter);
 		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
-		HtmlRenderAttributes.setChartTheme(renderContext,
-				new ChartTheme("dark", "white", new String[] { "red", "green" }, new Theme("dark", "white")));
+		HtmlRenderAttributes.setChartTheme(renderContext, SimpleDashboardThemeSource.THEME_LIGHT.getChartTheme());
 		HtmlRenderAttributes.setLocale(renderContext, Locale.getDefault());
 
 		htmlChartPlugin.renderChart(renderContext, null, (DataSetFactory[]) null);

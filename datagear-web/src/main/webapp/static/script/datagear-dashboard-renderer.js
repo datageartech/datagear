@@ -55,7 +55,7 @@
 	renderer.updateDashboard = function(dashboard, charts)
 	{
 		if(this._UPDATING_DASHBOARD)
-			return;
+			return false;
 		
 		var webContext = dashboard.renderContext.webContext;
 		
@@ -74,26 +74,39 @@
 			},
 			error : function()
 			{
+				var updateTime = new Date().getTime();
 				
+				for(var i=0; i<dashboard.charts.length; i++)
+					renderer.updateTime(dashboard.charts[i], updateTime);
 			},
 			complete : function()
 			{
 				renderer._UPDATING_DASHBOARD = false;
 				
-				var myIntervalId = "";
-				
-				myIntervalId = setInterval(function()
+				var intervalId = setInterval(function()
 				{
 					var needUpdateCharts = renderer.getNeedUpdateCharts(dashboard);
 					
 					if(needUpdateCharts.length > 0)
 					{
-						clearInterval(myIntervalId);
+						renderer.updateUpdatingDashboardIntervalId();
 						renderer.updateDashboard(dashboard, needUpdateCharts);
 					}
 				}, 1);
+				
+				renderer.updateUpdatingDashboardIntervalId(intervalId);
 			}
 		});
+		
+		return true;
+	};
+	
+	renderer.updateUpdatingDashboardIntervalId = function(intervalId)
+	{
+		if(this._UPDATING_DASHBOARD_INTERVAL_ID)
+			clearInterval(this._UPDATING_DASHBOARD_INTERVAL_ID);
+		
+		this._UPDATING_DASHBOARD_INTERVAL_ID = intervalId;
 	};
 	
 	/**

@@ -21,18 +21,10 @@ public class DashboardTheme extends Theme
 		super();
 	}
 
-	public DashboardTheme(String backgroundColor, String foregroundColor, ChartTheme chartTheme)
+	public DashboardTheme(String backgroundColor, String foregroundColor, String borderColor, ChartTheme chartTheme)
 	{
-		super(backgroundColor, foregroundColor);
+		super(backgroundColor, foregroundColor, borderColor);
 		this.chartTheme = chartTheme;
-	}
-
-	public DashboardTheme(String backgroundColor, String foregroundColor, String chartBackgroundColor,
-			String... chartGraphColors)
-	{
-		super(backgroundColor, foregroundColor);
-		this.chartTheme = new ChartTheme(chartBackgroundColor, foregroundColor, chartGraphColors,
-				new Theme(backgroundColor, foregroundColor));
 	}
 
 	public ChartTheme getChartTheme()

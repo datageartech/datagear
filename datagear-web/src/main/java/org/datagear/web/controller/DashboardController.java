@@ -204,7 +204,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		dashboardFileName = tmpDirectory.getName();
 
 		String fileName = multipartFile.getOriginalFilename();
-		
+
 		if (FileUtil.isExtension(fileName, "zip"))
 		{
 			ZipInputStream in = IOUtil.getZipInputStream(multipartFile.getInputStream());
@@ -267,10 +267,8 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping(value = "/saveImport", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveImport(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("name") String name,
-			@RequestParam("template") String template,
-			@RequestParam("dashboardFileName") String dashboardFileName)
-			throws Exception
+			@RequestParam("name") String name, @RequestParam("template") String template,
+			@RequestParam("dashboardFileName") String dashboardFileName) throws Exception
 	{
 		File uploadDirectory = FileUtil.getDirectory(this.tempDirectory, dashboardFileName, false);
 
