@@ -8,14 +8,18 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
+
 /**
  * 数据列元信息。
  * 
  * @author datagear@163.com
  *
  */
-public class ColumnMeta
+public class ColumnMeta implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	/** 名称 */
 	private String name;
 

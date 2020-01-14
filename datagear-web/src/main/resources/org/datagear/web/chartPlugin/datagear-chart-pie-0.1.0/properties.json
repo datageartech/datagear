@@ -1,0 +1,7 @@
+{
+	id : 'datagear-chart-pie',
+	nameLabel : '饼图',
+	descLabel : '饼图',
+	version: "0.1.0",
+	order : 2
+}

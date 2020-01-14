@@ -618,7 +618,20 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 			columnMetas.add(columnMeta);
 		}
 
-		return new DataSetMeta(columnMetas);
+		return new DataSetMeta(getDataSetMetaName(), columnMetas);
+	}
+
+	/**
+	 * 获取{@linkplain DataSetMeta#getName()}。
+	 * <p>
+	 * 子类可以重写此方法。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	protected String getDataSetMetaName()
+	{
+		return "";
 	}
 
 	protected void setDataCategory(ColumnMeta columnMeta, int column)

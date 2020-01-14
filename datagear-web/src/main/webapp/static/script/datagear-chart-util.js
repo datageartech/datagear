@@ -23,6 +23,14 @@
 	};
 	
 	/**
+	 * 获取渲染样式。
+	 */
+	util.chartRenderStyle = function(chart)
+	{
+		return this.renderContextAttr(chart, "renderStyle");
+	};
+	
+	/**
 	 * 获取/设置图表渲染上下文的属性值。
 	 * 
 	 * @param chart
@@ -42,15 +50,157 @@
 	/**
 	 * 初始化Echarts对象。
 	 * 
-	 * @param par 图表对象或者HTML元素ID
+	 * @param chart 图表对象
 	 */
-	util.echarts.init = function(par)
+	util.echarts.init = function(chart)
 	{
-		var elementId = (par.elementId || par);
-		
-		var echartsObj = echarts.init(document.getElementById(elementId));
+		var echartsObj = echarts.init(document.getElementById(chart.elementId), this.theme(chart));
 		
 		return echartsObj;
+	};
+	
+	/**
+	 * 获取echarts主题，如果没有，则自动注册。
+	 * 
+	 * @param dashboard
+	 */
+	util.echarts.theme = function(chart)
+	{
+		var renderStyle = util.chartRenderStyle(chart);
+		var chartTheme = util.chartTheme(chart);
+		
+		if(!renderStyle || !chartTheme)
+			return "";
+		
+		if(this._REGISTERED_THEME)
+			return renderStyle;
+		
+		this._REGISTERED_THEME = true;
+		
+		var contrastColor = chartTheme.envMajorColor;
+	    var axisCommon = function () {
+	        return {
+	            axisLine: {
+	                lineStyle: {
+	                    color: contrastColor
+	                }
+	            },
+	            axisTick: {
+	                lineStyle: {
+	                    color: contrastColor
+	                }
+	            },
+	            axisLabel: {
+	                textStyle: {
+	                    color: contrastColor
+	                }
+	            },
+	            splitLine: {
+	                lineStyle: {
+	                    type: 'dashed',
+	                    color: chartTheme.envLeastColor
+	                }
+	            },
+	            splitArea: {
+	                areaStyle: {
+	                    color: contrastColor
+	                }
+	            }
+	        };
+	    };
+	    
+	    var colorPalette = chartTheme.graphColors;
+	    var theme = {
+	        color: colorPalette,
+	        backgroundColor: chartTheme.backgroundColor,
+	        tooltip: {
+	            axisPointer: {
+	                lineStyle: {
+	                    color: contrastColor
+	                },
+	                crossStyle: {
+	                    color: contrastColor
+	                }
+	            }
+	        },
+	        legend: {
+	            textStyle: {
+	                color: contrastColor
+	            }
+	        },
+	        textStyle: {
+	            color: contrastColor
+	        },
+	        title: {
+	            textStyle: {
+	                color: contrastColor
+	            }
+	        },
+	        toolbox: {
+	            iconStyle: {
+	                normal: {
+	                    borderColor: contrastColor
+	                }
+	            }
+	        },
+	        dataZoom: {
+	            textStyle: {
+	                color: contrastColor
+	            }
+	        },
+	        timeline: {
+	            lineStyle: {
+	                color: contrastColor
+	            },
+	            itemStyle: {
+	                normal: {
+	                    color: colorPalette[1]
+	                }
+	            },
+	            label: {
+	                normal: {
+	                    textStyle: {
+	                        color: contrastColor
+	                    }
+	                }
+	            },
+	            controlStyle: {
+	                normal: {
+	                    color: contrastColor,
+	                    borderColor: contrastColor
+	                }
+	            }
+	        },
+	        timeAxis: axisCommon(),
+	        logAxis: axisCommon(),
+	        valueAxis: axisCommon(),
+	        categoryAxis: axisCommon(),
+	        line: {
+	            symbol: 'circle'
+	        },
+	        graph: {
+	            color: colorPalette
+	        },
+	        gauge: {
+	            title: {
+	                textStyle: {
+	                    color: contrastColor
+	                }
+	            }
+	        },
+	        candlestick: {
+	            itemStyle: {
+	                normal: {
+	                    color: contrastColor,
+	                    color0: chartTheme.envMinorColor,
+	                    borderColor: chartTheme.borderColor,
+	                    borderColor0: chartTheme.borderColor
+	                }
+	            }
+	        }
+	    };
+	    theme.categoryAxis.splitLine.show = false;
+	    echarts.registerTheme(renderStyle, theme);
 	};
 	
 	/**
@@ -191,6 +341,37 @@
 			
 			for(var i=0; i< datas.length; i++)
 				re[i] = datas[i][name];
+		}
+		
+		return re;
+	};
+	
+
+	/**
+	 * 获取列值的名称/值对象数组：[{name: ..., value: ...}, ...]。
+	 * 
+	 * @param dataSet
+	 * @param nameColumnMeta 名称列元信息对象、列名
+	 * @param valueColumnMeta 值列元信息对象、列名
+	 */
+	util.dataset.columnNameValues = function(dataSet, nameColumnMeta, valueColumnMeta)
+	{
+		var re = [];
+		
+		var datas = dataSet.datas;
+		
+		var nameColumn = (nameColumnMeta.name || nameColumnMeta);
+		var valueColumn = (valueColumnMeta.name || valueColumnMeta);
+		
+		for(var i=0; i< datas.length; i++)
+		{
+			var obj =
+			{
+				"name" : datas[i][nameColumn],
+				"value" : datas[i][valueColumn]
+			};
+			
+			re[i] = obj;
 		}
 		
 		return re;

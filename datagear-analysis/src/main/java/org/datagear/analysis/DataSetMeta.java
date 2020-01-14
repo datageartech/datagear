@@ -8,6 +8,7 @@
 
 package org.datagear.analysis;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,8 +18,13 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public class DataSetMeta
+public class DataSetMeta implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
+	/** 名称 */
+	private String name;
+
 	@SuppressWarnings("unchecked")
 	private List<ColumnMeta> columnMetas = Collections.EMPTY_LIST;
 
@@ -27,10 +33,21 @@ public class DataSetMeta
 	}
 
 	@SuppressWarnings("unchecked")
-	public DataSetMeta(List<? extends ColumnMeta> columnMetas)
+	public DataSetMeta(String name, List<? extends ColumnMeta> columnMetas)
 	{
 		super();
+		this.name = name;
 		this.columnMetas = (List<ColumnMeta>) columnMetas;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	public List<ColumnMeta> getColumnMetas()
@@ -67,6 +84,6 @@ public class DataSetMeta
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [columnMetas=" + columnMetas + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", columnMetas=" + columnMetas + "]";
 	}
 }

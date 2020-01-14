@@ -1,0 +1,7 @@
+{
+	id : 'datagear-chart-line',
+	nameLabel : '折线图',
+	descLabel : '折线图',
+	version: "0.1.0",
+	order : 0
+}

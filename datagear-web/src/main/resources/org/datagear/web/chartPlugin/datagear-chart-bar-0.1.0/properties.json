@@ -1,0 +1,7 @@
+{
+	id : 'datagear-chart-bar',
+	nameLabel : '柱状图',
+	descLabel : '柱状图',
+	version: "0.1.0",
+	order : 1
+}

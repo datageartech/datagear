@@ -191,6 +191,12 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 		this.dataPermission = dataPermission;
 	}
 
+	@Override
+	protected String getDataSetMetaName()
+	{
+		return this.name;
+	}
+
 	protected String[] split(String texts)
 	{
 		texts = texts.trim();
