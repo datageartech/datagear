@@ -34,7 +34,8 @@ public class DerbySqlClient
 
 		try
 		{
-			applicationContext = new ClassPathXmlApplicationContext("datagear-applicationContext-DerbySqlClient.xml");
+			applicationContext = new ClassPathXmlApplicationContext(
+					"org/datagear/web/datagear-applicationContext-DerbySqlClient.xml");
 
 			DriverManagerDataSource dataSource = applicationContext.getBean(DriverManagerDataSource.class);
 

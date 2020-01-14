@@ -197,7 +197,7 @@
 			    		</goals>
 			    		<configuration>
 			    			<tasks>
-			    				<replace file="${project.build.outputDirectory}/log4j.properties"
+			    				<replace file="${project.build.outputDirectory}/org/datagear/web/log4j.properties"
 			    					token="DEBUG, A0" value="${dist.log4j.rootLogger}" />
 			    			</tasks>
 			    		</configuration>

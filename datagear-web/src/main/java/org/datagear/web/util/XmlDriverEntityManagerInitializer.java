@@ -6,50 +6,42 @@ package org.datagear.web.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.ZipInputStream;
-
-import javax.servlet.ServletContext;
 
 import org.datagear.connection.XmlDriverEntityManager;
 import org.datagear.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.support.ServletContextResource;
 
 /**
  * {@linkplain XmlDriverEntityManager}初始化器。
  * <p>
- * 它先将相对于{@linkplain ServletContext}路径下指定的ZIP文件解压到{@linkplain XmlDriverEntityManager#getRootDirectory()}目录下，
+ * 它先将{@linkplain #BUILT_IN_DRIVER_ENTITY_ZIP_CLASS_PATH}
+ * 的ZIP文件解压到{@linkplain XmlDriverEntityManager#getRootDirectory()}目录下，
  * 然后调用{@linkplain XmlDriverEntityManager#init()}方法。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class XmlDriverEntityManagerInitializer implements ServletContextAware
+public class XmlDriverEntityManagerInitializer
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(XmlDriverEntityManagerInitializer.class);
 
-	public static final String DEFAULT_BUILT_IN_FILE_DRIVER_ENTITY_ZIP_PATH = "/WEB-INF/builtInDriverEntity.zip";
+	public static final String BUILT_IN_DRIVER_ENTITY_ZIP_CLASS_PATH = "org/datagear/web/builtInDriverEntity.zip";
 
 	private XmlDriverEntityManager xmlDriverEntityManager;
-
-	private ServletContext servletContext;
-
-	private String builtInFileDriverEntityZipPath = DEFAULT_BUILT_IN_FILE_DRIVER_ENTITY_ZIP_PATH;
 
 	public XmlDriverEntityManagerInitializer()
 	{
 		super();
 	}
 
-	public XmlDriverEntityManagerInitializer(XmlDriverEntityManager xmlDriverEntityManager,
-			ServletContext servletContext)
+	public XmlDriverEntityManagerInitializer(XmlDriverEntityManager xmlDriverEntityManager)
 	{
 		super();
 		this.xmlDriverEntityManager = xmlDriverEntityManager;
-		this.servletContext = servletContext;
 	}
 
 	public XmlDriverEntityManager getXmlDriverEntityManager()
@@ -60,27 +52,6 @@ public class XmlDriverEntityManagerInitializer implements ServletContextAware
 	public void setXmlDriverEntityManager(XmlDriverEntityManager xmlDriverEntityManager)
 	{
 		this.xmlDriverEntityManager = xmlDriverEntityManager;
-	}
-
-	public ServletContext getServletContext()
-	{
-		return servletContext;
-	}
-
-	@Override
-	public void setServletContext(ServletContext servletContext)
-	{
-		this.servletContext = servletContext;
-	}
-
-	public String getBuiltInFileDriverEntityZipPath()
-	{
-		return builtInFileDriverEntityZipPath;
-	}
-
-	public void setBuiltInFileDriverEntityZipPath(String builtInFileDriverEntityZipPath)
-	{
-		this.builtInFileDriverEntityZipPath = builtInFileDriverEntityZipPath;
 	}
 
 	/**
@@ -99,20 +70,18 @@ public class XmlDriverEntityManagerInitializer implements ServletContextAware
 		}
 		else
 		{
-			ServletContextResource resource = new ServletContextResource(this.servletContext,
-					this.builtInFileDriverEntityZipPath);
+			InputStream in = null;
 
-			if (!resource.exists())
+			try
 			{
-				if (LOGGER.isDebugEnabled())
-					LOGGER.debug("built-in drivers initialization is skipped, resource ["
-							+ this.builtInFileDriverEntityZipPath + "] not found");
+				in = getClass().getClassLoader().getResourceAsStream(BUILT_IN_DRIVER_ENTITY_ZIP_CLASS_PATH);
+				ZipInputStream zipIn = new ZipInputStream(in);
+
+				IOUtil.unzip(zipIn, this.xmlDriverEntityManager.getRootDirectory());
 			}
-			else
+			finally
 			{
-				ZipInputStream in = new ZipInputStream(resource.getInputStream());
-
-				IOUtil.unzip(in, this.xmlDriverEntityManager.getRootDirectory());
+				IOUtil.close(in);
 			}
 		}
 

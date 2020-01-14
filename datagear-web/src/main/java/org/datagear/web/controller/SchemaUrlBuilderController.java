@@ -4,11 +4,9 @@
 
 package org.datagear.web.controller;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Writer;
 
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.support.ServletContextResource;
 
 /**
  * 模式JDBC连接URL构建器控制器。
@@ -38,9 +35,7 @@ import org.springframework.web.context.support.ServletContextResource;
 @RequestMapping("/schemaUrlBuilder")
 public class SchemaUrlBuilderController extends AbstractController implements ServletContextAware
 {
-	protected static final String LINE_SEPARATOR = System.getProperty("line.separator");
-
-	public static final String BUILT_IN_DB_URL_BUILDER_PATH = "/WEB-INF/builtInDbUrlBuilder.js";
+	public static final String BUILT_IN_DB_URL_BUILDER_CLASS_PATH = "org/datagear/web/builtInDbUrlBuilder.js";
 
 	public static final String DB_URL_BUILDER_ENCODING = "UTF-8";
 
@@ -172,21 +167,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 
 		Reader reader = IOUtil.getReader(this.schemaUrlBuilderScriptFile, DB_URL_BUILDER_ENCODING);
 
-		BufferedReader bufferedReader = null;
-
-		if (reader instanceof BufferedReader)
-			bufferedReader = (BufferedReader) reader;
-		else
-			bufferedReader = new BufferedReader(reader);
-
-		try
-		{
-			return getUrlBuilderScript(bufferedReader);
-		}
-		finally
-		{
-			IOUtil.close(bufferedReader);
-		}
+		return IOUtil.readString(reader, true);
 	}
 
 	/**
@@ -199,37 +180,10 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	{
 		if (this._builtInDbUrlBuilderScript == null)
 		{
-			ServletContextResource resource = new ServletContextResource(this.servletContext,
-					BUILT_IN_DB_URL_BUILDER_PATH);
-
-			InputStream in = resource.getInputStream();
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, DB_URL_BUILDER_ENCODING));
-
-			try
-			{
-				this._builtInDbUrlBuilderScript = getUrlBuilderScript(bufferedReader);
-			}
-			finally
-			{
-				IOUtil.close(bufferedReader);
-			}
+			InputStream in = getClass().getClassLoader().getResourceAsStream(BUILT_IN_DB_URL_BUILDER_CLASS_PATH);
+			this._builtInDbUrlBuilderScript = IOUtil.readString(in, DB_URL_BUILDER_ENCODING, true);
 		}
 
 		return this._builtInDbUrlBuilderScript;
-	}
-
-	protected String getUrlBuilderScript(BufferedReader reader) throws IOException
-	{
-		StringBuilder sb = new StringBuilder();
-
-		String line = null;
-
-		while ((line = reader.readLine()) != null)
-		{
-			sb.append(line);
-			sb.append(LINE_SEPARATOR);
-		}
-
-		return sb.toString().trim();
 	}
 }

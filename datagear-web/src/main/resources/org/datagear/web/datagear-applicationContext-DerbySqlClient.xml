@@ -18,7 +18,7 @@
     		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     	<property name="locations">
     		<list>
-    			<value>classpath:datagear.properties</value>
+    			<value>classpath:org/datagear/web/datagear.properties</value>
     		</list>
     	</property>
     	<property name="fileEncoding" value="UTF-8" />

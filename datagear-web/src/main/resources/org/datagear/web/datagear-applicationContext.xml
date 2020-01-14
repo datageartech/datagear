@@ -16,9 +16,8 @@
     		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     	<property name="locations">
     		<list>
-    			<value>/WEB-INF/config/datagear.properties</value>
-    			<value>classpath:datagear.properties</value>
-    			<value>classpath:datagear-version.properties</value>
+    			<value>classpath:org/datagear/web/datagear.properties</value>
+    			<value>classpath:org/datagear/web/datagear-version.properties</value>
     		</list>
     	</property>
     	<property name="fileEncoding" value="UTF-8" />
@@ -27,7 +26,7 @@
     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
     	<property name="basenames">
     		<list>
-    			<value>locales.datagear</value>
+    			<value>org.datagear.web.locales.datagear</value>
     		</list>
     	</property>
     </bean>
@@ -341,19 +340,19 @@
 			<list>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="jquery" />
-					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.js' &gt;&lt;/script&gt;" />
+					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.js'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="echarts" />
-					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/echarts-4.6.0/echarts.js' &gt;&lt;/script&gt;" />
+					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/echarts-4.6.0/echarts.js'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="chart-util" />
-					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/datagear-chart-util.js' &gt;&lt;/script&gt;" />
+					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/datagear-chart-util.js'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="dashboard-renderer" />
-					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/datagear-dashboard-renderer.js' &gt;&lt;/script&gt;" />
+					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/datagear-dashboard-renderer.js'&gt;&lt;/script&gt;" />
 				</bean>
 			</list>
 		</property>

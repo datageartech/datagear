@@ -661,11 +661,11 @@
 				}
 				
 				var newTabIndex = newTab.index();
-				$.cookie("mainNavActiveTabIndex", newTabIndex, {expires : 365*5, path : "${contextPath}/"});
+				$.cookie("MAIN_NAV_ACTIVE_TAB_INDEX", newTabIndex, {expires : 365*5, path : "${contextPath}/"});
 			}
 		});
 		
-		var mainNavActiveTabIndex = $.cookie("mainNavActiveTabIndex");
+		var mainNavActiveTabIndex = $.cookie("MAIN_NAV_ACTIVE_TAB_INDEX");
 		if(!mainNavActiveTabIndex)
 			mainNavActiveTabIndex = "0";
 		mainNavActiveTabIndex = parseInt(mainNavActiveTabIndex);

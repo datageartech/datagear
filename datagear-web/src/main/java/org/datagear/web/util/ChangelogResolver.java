@@ -6,68 +6,37 @@ package org.datagear.web.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.List;
-
-import javax.servlet.ServletContext;
 
 import org.datagear.util.IOUtil;
 import org.datagear.util.version.AbstractVersionContentReader;
 import org.datagear.util.version.Version;
 import org.datagear.util.version.VersionContent;
-import org.springframework.web.context.ServletContextAware;
-import org.springframework.web.context.support.ServletContextResource;
 
 /**
  * 更新日志解析器。
+ * <p>
+ * 此类解析{@linkplain #CHANGELOG_CLASS_PATH}类路径文件的更新日志。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class ChangelogResolver extends AbstractVersionContentReader implements ServletContextAware
+public class ChangelogResolver extends AbstractVersionContentReader
 {
-	public static final String DEFAULT_CHANGELOG_PATH = "/WEB-INF/changelog.txt";
+	public static final String CHANGELOG_CLASS_PATH = "org/datagear/web/changelog.txt";
 
 	/** 数据库SQL文件中版本号注释开头标识 */
 	public static final String VERSION_LINE_PREFIX = "--v";
-
-	private ServletContext servletContext;
-
-	private String changelogPath = DEFAULT_CHANGELOG_PATH;
 
 	private String changelogEncoding = ENCODING_UTF8;
 
 	public ChangelogResolver()
 	{
 		super();
-	}
-
-	public ChangelogResolver(ServletContext servletContext)
-	{
-		super();
-		this.servletContext = servletContext;
-	}
-
-	public ServletContext getServletContext()
-	{
-		return servletContext;
-	}
-
-	@Override
-	public void setServletContext(ServletContext servletContext)
-	{
-		this.servletContext = servletContext;
-	}
-
-	public String getChangelogPath()
-	{
-		return changelogPath;
-	}
-
-	public void setChangelogPath(String changelogPath)
-	{
-		this.changelogPath = changelogPath;
 	}
 
 	public String getChangelogEncoding()
@@ -154,12 +123,8 @@ public class ChangelogResolver extends AbstractVersionContentReader implements S
 
 	protected BufferedReader getChangelogBufferedReader() throws IOException
 	{
-		ServletContextResource resource = new ServletContextResource(this.servletContext, this.changelogPath);
-
-		if (!resource.exists())
-			return null;
-
-		return new BufferedReader(new InputStreamReader(resource.getInputStream(), this.changelogEncoding));
+		InputStream in = getClass().getClassLoader().getResourceAsStream(CHANGELOG_CLASS_PATH);
+		return new BufferedReader(new InputStreamReader(in, this.changelogEncoding));
 	}
 
 	@Override

@@ -110,8 +110,7 @@ form .form-content .form-item .form-item-value .input{
 	vertical-align: middle;
 }
 form .form-content .form-item .form-item-value input[type=text],
-form .form-content .form-item .form-item-value input[type=password],
-form .form-content .form-item .form-item-value .input{
+form .form-content .form-item .form-item-value input[type=password]{
 	height: 1.5em;
 }
 form .form-content .form-item .form-item-value textarea{

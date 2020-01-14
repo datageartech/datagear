@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+ 	<bean id="servletPropertyConfigurer"
+    		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    	<property name="locations">
+    		<list>
+    			<value>classpath:org/datagear/web/datagear.properties</value>
+    			<value>classpath:org/datagear/web/datagear-version.properties</value>
+    		</list>
+    	</property>
+    	<property name="fileEncoding" value="UTF-8" />
+    </bean>
+
+    <context:component-scan base-package="org.datagear.web.controller"/>
+    
+    <!--jackson无法处理循环引用，因而改用fastjson-->
+	<bean id="fastJsonHttpMessageConverter" class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+		<property name="fastJsonConfig" ref="fastJsonConfig" />
+	</bean>
+	
+	<bean id="handlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+		<property name="alwaysUseFullPath" value="true" />
+		<property name="interceptors">
+			<list>
+				<ref bean="themeChangeInterceptor" />
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="handlerAdapter" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="fastJsonHttpMessageConverter" />
+			</list>
+		</property>
+		<property name="webBindingInitializer">
+			<bean class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
+				<property name="conversionService" ref="conversionService" />
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="writeJsonTemplateDirectiveModel" class="org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel">
+		<property name="serializeConfig" ref="serializeConfig" />
+		<property name="serializerFeatures" ref="serializerFeatures" />
+	</bean>
+	
+	<bean id="freeMarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPaths" value="/WEB-INF/view/" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+        		<prop key="date_format">yyyy-MM-dd</prop>
+				<prop key="number_format">#.##</prop>
+			</props>
+		</property>
+		<property name="freemarkerVariables">
+			<map>
+				<entry key="writeJson" value-ref="writeJsonTemplateDirectiveModel" />			
+			</map>
+		</property>
+	</bean>
+	
+	<bean id="freeMarkerViewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="viewClass" value="org.datagear.web.freemarker.CustomFreeMarkerView" />
+		<property name="contentType" value="text/html;charset=UTF-8"></property>
+		<property name="exposeRequestAttributes" value="true" />
+		<property name="allowRequestOverride" value="true" />
+		<property name="cache" value="true" />
+		<property name="prefix" value="" />
+		<property name="suffix" value=".ftl" />
+	</bean>
+	
+	<bean id="exceptionResolver" class="org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver" />
+	
+	<bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">
+		<property name="basenamePrefix" value="org.datagear.web.theme." />
+	</bean>
+	<bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver">
+		<property name="defaultThemeName" value="lightness" />
+		<property name="cookieName" value="THEME" />
+		<property name="cookieMaxAge" value="157680000" />
+	</bean>
+	<bean id="themeChangeInterceptor" class="org.datagear.web.util.EnumThemeChangeInterceptor">
+		<property name="themes">
+			<list>
+				<value>lightness</value>
+				<value>dark</value>
+				<value>green</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver" />
+	
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+	
+</beans>
