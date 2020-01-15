@@ -102,6 +102,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	private HtmlChartWidget<HtmlRenderContext> htmlChartWidgetForNotFound = new HtmlChartWidget<HtmlRenderContext>(
 			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartWidgetForNotFound",
+			"HtmlChartWidgetForNotFound",
 			new ValueHtmlChartPlugin<HtmlRenderContext>(
 					StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForNotFound",
 					RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT));

@@ -34,6 +34,7 @@ public class HtmlTplDashboardWidgetFmkRendererTest
 		HtmlChartPlugin<HtmlRenderContext> chartPlugin = HtmlChartPluginTest.createHtmlChartPlugin();
 
 		HtmlChartWidget<HtmlRenderContext> htmlChartWidget = new HtmlChartWidget<HtmlRenderContext>("chart-widget-01",
+				"chart-widget-01",
 				chartPlugin, (DataSetFactory[]) null);
 
 		DashboardWidgetResManager resManager = new DashboardWidgetResManager(

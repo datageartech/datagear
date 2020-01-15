@@ -29,6 +29,35 @@
 	{
 		return this.renderContextAttr(chart, "renderStyle");
 	};
+
+	/**
+	 * 获取/设置图表的"name"属性值。
+	 * 
+	 * @param chart
+	 * @param value 可选，要设置的属性值
+	 */
+	util.propertyValueName = function(chart, value)
+	{
+		return this.propertyValue(chart, "name", value);
+	};
+	
+	/**
+	 * 获取/设置图表属性值。
+	 * 
+	 * @param chart
+	 * @param name
+	 * @param value 可选，要设置的属性值
+	 */
+	util.propertyValue = function(chart, name, value)
+	{
+		if(!chart.propertyValues)
+			chart.propertyValues = {};
+		
+		if(value == undefined)
+			return chart.propertyValues[name];
+		else
+			chart.propertyValues[name] = value;
+	};
 	
 	/**
 	 * 获取/设置图表渲染上下文的属性值。

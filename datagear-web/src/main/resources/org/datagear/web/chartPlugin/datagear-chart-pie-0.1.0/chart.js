@@ -57,7 +57,7 @@
 		var legendData = chartUtil.dataset.columnValues(dataSet, xcolumnMeta);
 		var datas = chartUtil.dataset.columnNameValues(dataSet, xcolumnMeta, ycolumnMeta);
 		
-		var options = { legend : { data : legendData }, series : [ { name : chart.name, data : datas } ] };
+		var options = { legend : { data : legendData }, series : [ { name : chartUtil.propertyValueName(chart), data : datas } ] };
 		this.echarts.chart.setOption(options);
 	};
 })

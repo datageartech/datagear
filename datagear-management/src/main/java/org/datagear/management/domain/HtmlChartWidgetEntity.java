@@ -30,9 +30,6 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 	/** 授权资源类型 */
 	public static final String AUTHORIZATION_RESOURCE_TYPE = "Chart";
 
-	/** 名称 */
-	private String name;
-
 	/** 创建用户 */
 	private User createUser;
 
@@ -45,13 +42,15 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 	public HtmlChartWidgetEntity()
 	{
 		super();
+		super.setDataSetFactories(new SqlDataSetFactoryEntity[0]);
 		this.createTime = new Date();
 	}
 
-	public HtmlChartWidgetEntity(String id, HtmlChartPlugin<HtmlRenderContext> chartPlugin,
-			SqlDataSetFactory[] dataSetFactories, String name, User createUser)
+	public HtmlChartWidgetEntity(String id, String name, HtmlChartPlugin<HtmlRenderContext> chartPlugin,
+			SqlDataSetFactory[] dataSetFactories, User createUser)
 	{
-		super(id, chartPlugin, dataSetFactories);
+		super(id, name, chartPlugin, dataSetFactories);
+		this.createUser = createUser;
 		this.createTime = new Date();
 	}
 
@@ -88,16 +87,6 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 	public void setSqlDataSetFactoryEntities(SqlDataSetFactoryEntity[] sqlDataSetFactoryEntities)
 	{
 		setDataSetFactories(sqlDataSetFactoryEntities);
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
 	}
 
 	@Override

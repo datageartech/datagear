@@ -240,13 +240,8 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 			chartVarName = HtmlRenderAttributes.generateChartVarName(nextSequence);
 		}
 
-		Integer updateInterval = HtmlRenderAttributes.getChartUpdateInterval(renderContext);
-
 		HtmlChart chart = new HtmlChart(IDUtil.uuid(), renderContext, this, chartPropertyValues, dataSetFactories,
 				chartElementId, chartVarName);
-
-		if (updateInterval != null)
-			chart.setUpdateInterval(updateInterval);
 
 		try
 		{

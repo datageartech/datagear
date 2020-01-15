@@ -23,22 +23,45 @@ import org.datagear.analysis.RenderException;
  */
 public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 {
+	/** 图表名称属性名 */
+	public static final String CHART_PROPERTY_VALUE_NAME = "name";
+
+	/** 图表更新间隔属性名 */
+	public static final String CHART_PROPERTY_VALUE_UPDATE_INTERVAL = "updateInterval";
+
+	/** 图表名称 */
+	private String name = "";
+
 	private ChartPlugin<T> chartPlugin;
 
-	private ChartPropertyValues chartPropertyValues;
+	private ChartPropertyValues chartPropertyValues = new ChartPropertyValues();
 
-	private DataSetFactory[] dataSetFactories;
+	private DataSetFactory[] dataSetFactories = new DataSetFactory[0];
+
+	/** 图表更新间隔毫秒数 */
+	private int updateInterval = -1;
 
 	public ChartWidget()
 	{
 		super();
 	}
 
-	public ChartWidget(String id, ChartPlugin<T> chartPlugin, DataSetFactory... dataSetFactories)
+	public ChartWidget(String id, String name, ChartPlugin<T> chartPlugin, DataSetFactory... dataSetFactories)
 	{
 		super(id);
+		this.name = name;
 		this.chartPlugin = chartPlugin;
 		this.dataSetFactories = dataSetFactories;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	public ChartPlugin<T> getChartPlugin()
@@ -72,6 +95,21 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 	}
 
 	/**
+	 * 获取图表更新间隔毫秒数。
+	 * 
+	 * @return {@code <0}：不间隔更新；0 ：实时更新；{@code >0}：间隔更新毫秒数
+	 */
+	public int getUpdateInterval()
+	{
+		return updateInterval;
+	}
+
+	public void setUpdateInterval(int updateInterval)
+	{
+		this.updateInterval = updateInterval;
+	}
+
+	/**
 	 * 渲染{@linkplain Chart}。
 	 * 
 	 * @param renderContext
@@ -80,6 +118,13 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 	 */
 	public Chart render(T renderContext) throws RenderException
 	{
-		return this.chartPlugin.renderChart(renderContext, this.chartPropertyValues, this.dataSetFactories);
+		ChartPropertyValues propertyValues = new ChartPropertyValues();
+		propertyValues.put(CHART_PROPERTY_VALUE_NAME, this.name);
+		propertyValues.put(CHART_PROPERTY_VALUE_UPDATE_INTERVAL, this.updateInterval);
+
+		if (this.chartPropertyValues != null)
+			propertyValues.putAll(this.chartPropertyValues);
+
+		return this.chartPlugin.renderChart(renderContext, propertyValues, this.dataSetFactories);
 	}
 }
