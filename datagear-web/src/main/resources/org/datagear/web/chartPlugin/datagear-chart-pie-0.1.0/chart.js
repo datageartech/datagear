@@ -48,6 +48,8 @@
 	
 	chart.update = function(dataSets)
 	{
+		var chart = this;
+		
 		var dataSet = chartUtil.dataset.first(dataSets);
 		var xcolumnMeta = chartUtil.dataset.columnMetaByDimension(dataSet);
 		var ycolumnMeta = chartUtil.dataset.columnMetaByScalar(dataSet);
@@ -55,7 +57,7 @@
 		var legendData = chartUtil.dataset.columnValues(dataSet, xcolumnMeta);
 		var datas = chartUtil.dataset.columnNameValues(dataSet, xcolumnMeta, ycolumnMeta);
 		
-		var options = { legend : { data : legendData }, series : [ { name : dataSet.meta.name, data : datas } ] };
+		var options = { legend : { data : legendData }, series : [ { name : chart.name, data : datas } ] };
 		this.echarts.chart.setOption(options);
 	};
 })

@@ -199,8 +199,11 @@
 	            }
 	        }
 	    };
+	    
 	    theme.categoryAxis.splitLine.show = false;
 	    echarts.registerTheme(renderStyle, theme);
+	    
+	    return renderStyle;
 	};
 	
 	/**

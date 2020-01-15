@@ -102,7 +102,8 @@ public class SqlDataSetFactoryTest extends DBTestSupport
 				Assert.assertEquals(columnLabels[1], columnMeta.getLabel());
 			}
 
-			List<Map<String, ?>> datas = dataSet.getDatas();
+			@SuppressWarnings("unchecked")
+			List<Map<String, ?>> datas = (List<Map<String, ?>>) dataSet.getDatas();
 
 			Assert.assertEquals(1, datas.size());
 

@@ -8,7 +8,6 @@
 package org.datagear.analysis.support;
 
 import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetExportValues;
@@ -24,7 +23,7 @@ public class SimpleDataSet implements DataSet
 {
 	private DataSetMeta meta;
 
-	private List<Map<String, ?>> datas;
+	private List<?> datas;
 
 	private DataSetExportValues exportValues;
 
@@ -33,12 +32,11 @@ public class SimpleDataSet implements DataSet
 		super();
 	}
 
-	@SuppressWarnings("unchecked")
-	public SimpleDataSet(DataSetMeta meta, List<? extends Map<String, ?>> datas)
+	public SimpleDataSet(DataSetMeta meta, List<?> datas)
 	{
 		super();
 		this.meta = meta;
-		this.datas = (List<Map<String, ?>>) datas;
+		this.datas = datas;
 	}
 
 	@Override
@@ -53,15 +51,14 @@ public class SimpleDataSet implements DataSet
 	}
 
 	@Override
-	public List<Map<String, ?>> getDatas()
+	public List<?> getDatas()
 	{
 		return datas;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void setDatas(List<? extends Map<String, ?>> datas)
+	public void setDatas(List<?> datas)
 	{
-		this.datas = (List<Map<String, ?>>) datas;
+		this.datas = datas;
 	}
 
 	public boolean hasExportValue()
