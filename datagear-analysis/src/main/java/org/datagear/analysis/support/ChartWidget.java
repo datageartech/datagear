@@ -119,12 +119,22 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 	public Chart render(T renderContext) throws RenderException
 	{
 		ChartPropertyValues propertyValues = new ChartPropertyValues();
-		propertyValues.put(CHART_PROPERTY_VALUE_NAME, this.name);
-		propertyValues.put(CHART_PROPERTY_VALUE_UPDATE_INTERVAL, this.updateInterval);
+		inflateInternalChartPropertyValues(propertyValues);
 
 		if (this.chartPropertyValues != null)
 			propertyValues.putAll(this.chartPropertyValues);
 
 		return this.chartPlugin.renderChart(renderContext, propertyValues, this.dataSetFactories);
+	}
+
+	/**
+	 * 设置内置的图表属性。
+	 * 
+	 * @param propertyValues
+	 */
+	protected void inflateInternalChartPropertyValues(ChartPropertyValues propertyValues)
+	{
+		propertyValues.put(CHART_PROPERTY_VALUE_NAME, this.name);
+		propertyValues.put(CHART_PROPERTY_VALUE_UPDATE_INTERVAL, this.updateInterval);
 	}
 }

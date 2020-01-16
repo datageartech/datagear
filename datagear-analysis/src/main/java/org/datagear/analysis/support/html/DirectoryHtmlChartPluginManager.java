@@ -185,7 +185,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 			IOUtil.unzip(IOUtil.getZipInputStream(file), tmpDirectory);
 
-			upload(tmpDirectory, plugins, depth + 1);
+			upload(tmpDirectory, plugins, depth);
 
 			FileUtil.deleteFile(tmpDirectory);
 		}

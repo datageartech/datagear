@@ -6,7 +6,6 @@ package org.datagear.web.controller;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -91,9 +89,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	public Map<String, Object> uploadFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") MultipartFile multipartFile) throws Exception
 	{
-		String pluginFileName = "";
-
-		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
+		File myTmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
 
 		String zipFileName = multipartFile.getOriginalFilename();
 		if (StringUtil.isEmpty(zipFileName))
@@ -102,7 +98,9 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		if (!FileUtil.isExtension(zipFileName, "zip"))
 			zipFileName += ".zip";
 
-		File zipFile = FileUtil.getFile(tmpDirectory, zipFileName);
+		File zipFile = FileUtil.getFile(myTmpDirectory, zipFileName);
+
+		String pluginFileName = FileUtil.getRelativePath(this.tempDirectory, zipFile);
 
 		InputStream in = null;
 		OutputStream out = null;
@@ -127,38 +125,10 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		try
 		{
-			if (loader.isHtmlChartPluginZip(zipFile))
-			{
-				HtmlChartPlugin<?> chartPlugin = loader.loadZip(zipFile);
+			Set<HtmlChartPlugin<?>> loaded = loader.loads(zipFile);
+
+			for (HtmlChartPlugin<?> chartPlugin : loaded)
 				pluginInfos.add(toHtmlChartPluginInfo(chartPlugin, renderStyle, locale));
-				pluginFileName = tmpDirectory.getName();
-			}
-			else
-			{
-				ZipInputStream zin = null;
-				try
-				{
-					zin = IOUtil.getZipInputStream(zipFile);
-					IOUtil.unzip(zin, tmpDirectory);
-
-					Set<HtmlChartPlugin<?>> loaded = loader.loads(tmpDirectory);
-
-					if (!loaded.isEmpty())
-					{
-						for (HtmlChartPlugin<?> chartPlugin : loaded)
-							pluginInfos.add(toHtmlChartPluginInfo(chartPlugin, renderStyle, locale));
-
-						pluginFileName = tmpDirectory.getName();
-					}
-				}
-				finally
-				{
-					IOUtil.close(zin);
-				}
-			}
-		}
-		catch (IOException e)
-		{
 		}
 		catch (HtmlChartPluginLoadException e)
 		{

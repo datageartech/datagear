@@ -25,9 +25,6 @@ public class HtmlChart extends Chart
 
 	private String varName;
 
-	/** 更新间隔毫秒数 */
-	private int updateInterval = -1;
-
 	public HtmlChart()
 	{
 		super();
@@ -75,20 +72,5 @@ public class HtmlChart extends Chart
 	public void setVarName(String varName)
 	{
 		this.varName = varName;
-	}
-
-	/**
-	 * 获取图表更新间隔毫秒数。
-	 * 
-	 * @return {@code <0}：不间隔更新；0 ：实时更新；{@code >0}：间隔更新毫秒数
-	 */
-	public int getUpdateInterval()
-	{
-		return updateInterval;
-	}
-
-	public void setUpdateInterval(int updateInterval)
-	{
-		this.updateInterval = updateInterval;
 	}
 }

@@ -25,6 +25,27 @@ public class FileUtil
 	}
 
 	/**
+	 * 获取子孙文件相对于祖先文件的路径。
+	 * 
+	 * @param ancestor
+	 * @param descendent
+	 * @return
+	 */
+	public static String getRelativePath(File ancestor, File descendent)
+	{
+		String ap = ancestor.getAbsolutePath();
+		String dp = descendent.getAbsolutePath();
+
+		int index = dp.indexOf(ap);
+
+		if (index != 0)
+			throw new IllegalArgumentException(
+					"File [" + descendent + "] is not descendent of File [" + ancestor + "]");
+
+		return dp.substring(index + ap.length());
+	}
+
+	/**
 	 * 获取文件对象。
 	 * 
 	 * @param file

@@ -30,6 +30,7 @@ import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
@@ -111,7 +112,8 @@ public class DashboardController extends AbstractDataAnalysisController
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 
 		String templateContent = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"" + dashboard.getTemplateEncoding()
-				+ "\">\n</head>\n<body>\n</body>\n</html>";
+				+ "\">\n</head>\n<body>\n\t<div " + HtmlTplDashboardWidgetHtmlRenderer.DEFAULT_ATTR_NAME_CHART_WIDGET
+				+ "=\"" + getMessage(request, "dashboard.typeChartIdHere") + "\"></div>\n</body>\n</html>";
 
 		model.addAttribute("dashboard", dashboard);
 		model.addAttribute("templateContent", templateContent);

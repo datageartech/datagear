@@ -95,7 +95,6 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 					new IdChartPlugin(htmlChart.getPlugin()), htmlChart.getPropertyValues(),
 					JsonDataSetFactory.valuesOf(htmlChart.getDataSetFactories()), htmlChart.getElementId(),
 					htmlChart.getVarName());
-			setUpdateInterval(htmlChart.getUpdateInterval());
 		}
 	}
 

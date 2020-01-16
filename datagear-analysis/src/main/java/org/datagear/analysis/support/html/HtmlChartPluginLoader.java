@@ -29,7 +29,7 @@ import org.datagear.util.StringUtil;
 /**
  * {@linkplain HtmlChartPlugin}加载器。
  * <p>
- * 此类从固定格式的文件夹或者ZIP文件中加载{@linkplain HtmlChartPlugin}。
+ * 此类从固定格式的文件夹或者ZIP文件中加载{@linkplain HtmlChartPlugin}，并且在加载后不再依赖原文件。
  * </p>
  * <p>
  * 它支持的文件结构规范如下：
@@ -243,27 +243,77 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
-	 * 从指定目录加载多个{@linkplain HtmlChartPlugin}，没有，则返回空集合。
+	 * 从指定文件加载多个{@linkplain HtmlChartPlugin}，没有，则返回空集合。
 	 * <p>
-	 * 目录中的每个子文件夹、ZIP文件将被认为是单个{@linkplain HtmlChartPlugin}进行加载。
+	 * 文件可以是单个{@linkplain HtmlChartPlugin}的文件夹或者ZIP文件，也可以是包含多个{@linkplain HtmlChartPlugin}的文件夹或者ZIP文件。
 	 * </p>
 	 * 
-	 * @param directory
+	 * @param file
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	public Set<HtmlChartPlugin<?>> loads(File directory) throws HtmlChartPluginLoadException
+	public Set<HtmlChartPlugin<?>> loads(File file) throws HtmlChartPluginLoadException
 	{
 		Set<HtmlChartPlugin<?>> plugins = new HashSet<HtmlChartPlugin<?>>();
 
-		File[] children = directory.listFiles();
-
-		for (File child : children)
+		if (file.isDirectory())
 		{
-			HtmlChartPlugin<?> plugin = loadFile(child);
-
-			if (plugin != null)
+			if (isHtmlChartPluginDirectory(file))
+			{
+				HtmlChartPlugin<?> plugin = load(file);
 				plugins.add(plugin);
+			}
+			else
+			{
+				File[] children = file.listFiles();
+
+				for (File child : children)
+				{
+					HtmlChartPlugin<?> plugin = loadFile(child);
+
+					if (plugin != null)
+						plugins.add(plugin);
+				}
+			}
+		}
+		else if (isZipFile(file))
+		{
+			if (isHtmlChartPluginZip(file))
+			{
+				HtmlChartPlugin<?> plugin = loadZip(file);
+				plugins.add(plugin);
+			}
+			else
+			{
+				File directory = null;
+				ZipInputStream zin = null;
+				try
+				{
+					directory = FileUtil.createTempDirectory();
+					zin = IOUtil.getZipInputStream(file);
+					IOUtil.unzip(zin, directory);
+				}
+				catch (IOException e)
+				{
+					throw new HtmlChartPluginLoadException(e);
+				}
+				finally
+				{
+					IOUtil.close(zin);
+				}
+
+				File[] children = directory.listFiles();
+
+				for (File child : children)
+				{
+					HtmlChartPlugin<?> plugin = loadFile(child);
+
+					if (plugin != null)
+						plugins.add(plugin);
+				}
+
+				FileUtil.deleteFile(directory);
+			}
 		}
 
 		return plugins;
