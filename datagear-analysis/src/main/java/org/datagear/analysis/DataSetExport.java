@@ -8,8 +8,6 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 数据集输出项。
@@ -20,15 +18,9 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public abstract class DataSetExport implements Serializable
+public abstract class DataSetExport extends DataNameAndType implements Serializable
 {
 	private static final long serialVersionUID = 1L;
-
-	/** 名称 */
-	private String name;
-
-	/** 类型 */
-	private DataType type;
 
 	public DataSetExport()
 	{
@@ -37,44 +29,22 @@ public abstract class DataSetExport implements Serializable
 
 	public DataSetExport(String name, DataType type)
 	{
-		super();
-		this.name = name;
-		this.type = type;
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-
-	public DataType getType()
-	{
-		return type;
-	}
-
-	public void setType(DataType type)
-	{
-		this.type = type;
+		super(name, type);
 	}
 
 	/**
 	 * 获取输出项值。
 	 * 
-	 * @param meta
-	 * @param datas
+	 * @param dataSetFactory
+	 * @param dataSet
 	 * @return
 	 * @throws DataSetException
 	 */
-	public abstract Object getExportValue(DataSetMeta meta, List<Map<String, ?>> datas) throws DataSetException;
+	public abstract Object getExportValue(DataSetFactory dataSetFactory, DataSet dataSet) throws DataSetException;
 
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", type=" + type + "]";
+		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + "]";
 	}
 }

@@ -10,6 +10,7 @@ package org.datagear.management.domain;
 import java.util.Date;
 
 import org.datagear.analysis.DataCategory;
+import org.datagear.analysis.DataSetMeta;
 import org.datagear.analysis.support.SqlDataSetFactory;
 import org.datagear.util.resource.ConnectionFactory;
 
@@ -47,10 +48,10 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 		this.createTime = new Date();
 	}
 
-	public SqlDataSetFactoryEntity(String id, SchemaConnectionFactory connectionFactory, String sql,
-			DataCategory[] dataCategories, String name, User createUser)
+	public SqlDataSetFactoryEntity(String id, DataSetMeta meta, SchemaConnectionFactory connectionFactory, String sql,
+			String name, User createUser)
 	{
-		super(id, connectionFactory, sql, dataCategories);
+		super(id, meta, connectionFactory, sql);
 		this.name = name;
 		this.createTime = new Date();
 	}

@@ -93,6 +93,55 @@
   			}
 		}
 	],
+	dataSigns :
+	[
+  		{
+			name : 'x-value',
+			occurRequired : false,
+			occurMultiple : false,
+			nameLabel :
+			{
+				value : 'X值',
+				localeValues :
+				{
+					'en' : 'X value',
+					'zh' : 'X值中文'
+				}
+			},
+			descLabel :
+			{
+				value : 'X值描述',
+				localeValues :
+				{
+					'en' : 'X value desc',
+					'zh' : 'X值描述中文'
+				}
+			}
+		},
+		{
+			name : 'y-value',
+			occurRequired : true,
+			occurMultiple : true,
+			nameLabel :
+			{
+				value : 'Y值',
+				localeValues :
+				{
+					'en' : 'Y value',
+					'zh' : 'Y值中文'
+				}
+			},
+  			descLabel :
+  			{
+  				value : 'Y值描述',
+  				localeValues :
+  				{
+  					'en' : 'Y value desc',
+  					'zh' : 'Y值描述中文'
+  				}
+  			}
+		}
+	],
 	version : "0.1.0",
 	order : 2
 }

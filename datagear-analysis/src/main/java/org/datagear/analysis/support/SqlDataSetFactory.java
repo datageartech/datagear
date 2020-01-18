@@ -21,18 +21,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.ColumnMeta;
-import org.datagear.analysis.DataCategory;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetExportValues;
 import org.datagear.analysis.DataSetFactory;
-import org.datagear.analysis.DataSetMeta;
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetParamValues;
+import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataType;
 import org.datagear.analysis.support.ParameterSqlResolver.ParameterSql;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.JdbcUtil.QueryResultSet;
 import org.datagear.util.StringUtil;
 import org.datagear.util.resource.ConnectionFactory;
 
@@ -54,21 +51,17 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 
 	private String sql;
 
-	private DataCategory[] dataCategories;
-
-	private String[] columnLabels;
-
 	public SqlDataSetFactory()
 	{
 		super();
 	}
 
-	public SqlDataSetFactory(String id, ConnectionFactory connectionFactory, String sql, DataCategory[] dataCategories)
+	public SqlDataSetFactory(String id, List<DataSetProperty> properties, ConnectionFactory connectionFactory,
+			String sql)
 	{
-		super(id);
+		super(id, properties);
 		this.connectionFactory = connectionFactory;
 		this.sql = sql;
-		this.dataCategories = dataCategories;
 	}
 
 	public ConnectionFactory getConnectionFactory()
@@ -91,28 +84,8 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 		this.sql = sql;
 	}
 
-	public DataCategory[] getDataCategories()
-	{
-		return dataCategories;
-	}
-
-	public void setDataCategories(DataCategory[] dataCategories)
-	{
-		this.dataCategories = dataCategories;
-	}
-
-	public String[] getColumnLabels()
-	{
-		return columnLabels;
-	}
-
-	public void setColumnLabels(String[] columnLabels)
-	{
-		this.columnLabels = columnLabels;
-	}
-
 	@Override
-	public DataSet getDataSet(DataSetParamValues dataSetParamValues) throws DataSetException
+	public DataSet getDataSet(Map<String, ?> paramValues) throws DataSetException
 	{
 		Connection cn = null;
 
@@ -128,10 +101,58 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 
 		try
 		{
-			return getDataSet(cn, this.sql, dataSetParamValues);
+			return getDataSet(cn, this.sql, paramValues);
 		}
 		finally
 		{
+			try
+			{
+				getConnectionFactory().release(cn);
+			}
+			catch (Exception e)
+			{
+			}
+		}
+	}
+
+	/**
+	 * 获取属性集。
+	 * 
+	 * @param paramValues
+	 * @return
+	 * @throws DataSetException
+	 */
+	public List<DataSetProperty> getProperties(Map<String, ?> paramValues) throws DataSetException
+	{
+		Connection cn = null;
+
+		try
+		{
+			cn = getConnectionFactory().get();
+		}
+		catch (Exception e)
+		{
+			JdbcUtil.closeConnection(cn);
+			throw new SqlDataSetConnectionException(e);
+		}
+
+		QueryResultSet qrs = null;
+
+		try
+		{
+			qrs = buildQueryResultSet(cn, sql, paramValues);
+
+			return resolveProperties(cn, qrs.getResultSet());
+		}
+		catch (SQLException e)
+		{
+			throw new DataSetException(e);
+		}
+		finally
+		{
+			if (qrs != null)
+				qrs.close();
+
 			try
 			{
 				getConnectionFactory().release(cn);
@@ -147,17 +168,44 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	 * 
 	 * @param cn
 	 * @param sql
-	 * @param dataSetParamValues
+	 * @param paramValues
 	 * @return
 	 */
-	protected DataSet getDataSet(Connection cn, String sql, DataSetParamValues dataSetParamValues)
-			throws DataSetException
+	protected DataSet getDataSet(Connection cn, String sql, Map<String, ?> paramValues) throws DataSetException
+	{
+		QueryResultSet qrs = null;
+
+		try
+		{
+			qrs = buildQueryResultSet(cn, sql, paramValues);
+			return toDataSet(cn, qrs.getResultSet());
+		}
+		catch (SQLException e)
+		{
+			throw new DataSetException(e);
+		}
+		finally
+		{
+			if (qrs != null)
+				qrs.close();
+		}
+	}
+
+	/**
+	 * 构建{@linkplain QueryResultSet}。
+	 * 
+	 * @param cn
+	 * @param sql
+	 * @param paramValues
+	 * @return
+	 */
+	protected QueryResultSet buildQueryResultSet(Connection cn, String sql, Map<String, ?> paramValues)
+			throws SQLException
 	{
 		ParameterSql parameterSql = resolveParameterSql(sql);
 
 		sql = parameterSql.getSql();
-		List<DataSetParam> dataSetParams = (parameterSql.hasParameter()
-				? getDataSetParamsNotNull(parameterSql.getParameters())
+		List<DataSetParam> dataSetParams = (parameterSql.hasParameter() ? getParamsNotNull(parameterSql.getParameters())
 				: null);
 
 		Statement st = null;
@@ -174,40 +222,38 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 			{
 				PreparedStatement pst = cn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY,
 						ResultSet.CONCUR_READ_ONLY);
-				setPreparedStatementParams(pst, dataSetParams, dataSetParamValues);
+				setPreparedStatementParams(pst, dataSetParams, paramValues);
 
 				st = pst;
 				rs = pst.executeQuery();
 			}
-
-			return toDataSet(cn, rs);
 		}
 		catch (SQLException e)
 		{
-			throw new DataSetException(e);
-		}
-		finally
-		{
 			JdbcUtil.closeResultSet(rs);
 			JdbcUtil.closeStatement(st);
+
+			throw e;
 		}
+
+		return new QueryResultSet(st, rs);
 	}
 
 	/**
 	 * 设置参数值。
 	 * 
 	 * @param pst
-	 * @param dataSetParams
-	 * @param dataSetParamValues
+	 * @param params
+	 * @param paramValues
 	 * @throws SQLException
 	 */
-	protected void setPreparedStatementParams(PreparedStatement pst, List<DataSetParam> dataSetParams,
-			DataSetParamValues dataSetParamValues) throws SQLException, DataSetException
+	protected void setPreparedStatementParams(PreparedStatement pst, List<DataSetParam> params,
+			Map<String, ?> paramValues) throws SQLException, DataSetException
 	{
-		for (int i = 0, len = dataSetParams.size(); i < len; i++)
+		for (int i = 0, len = params.size(); i < len; i++)
 		{
-			DataSetParam dataSetParam = dataSetParams.get(i);
-			Object value = dataSetParamValues.get(dataSetParam.getName());
+			DataSetParam dataSetParam = params.get(i);
+			Object value = paramValues.get(dataSetParam.getName());
 			if (value == null)
 				value = dataSetParam.getDefaultValue();
 
@@ -349,11 +395,11 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	 */
 	protected DataSet toDataSet(Connection cn, ResultSet rs) throws SQLException
 	{
-		DataSetMeta dataSetMeta = resolveDataSetMeta(cn, rs);
-		List<Map<String, ?>> datas = resolveDatas(cn, rs, dataSetMeta);
-		DataSetExportValues exportValues = getExportValues(dataSetMeta, datas);
+		List<Map<String, ?>> datas = resolveDatas(cn, rs, getProperties());
+		MapDataSet dataSet = new MapDataSet(datas);
 
-		SimpleDataSet dataSet = new SimpleDataSet(dataSetMeta, datas);
+		Map<String, ?> exportValues = getExportValues(dataSet);
+
 		dataSet.setExportValues(exportValues);
 
 		return dataSet;
@@ -364,35 +410,77 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	 * 
 	 * @param cn
 	 * @param rs
-	 * @param dataSetMeta
+	 * @param properties
 	 * @return
 	 * @throws SQLException
 	 */
-	protected List<Map<String, ?>> resolveDatas(Connection cn, ResultSet rs, DataSetMeta dataSetMeta)
+	protected List<Map<String, ?>> resolveDatas(Connection cn, ResultSet rs, List<DataSetProperty> properties)
 			throws SQLException
 	{
 		List<Map<String, ?>> datas = new ArrayList<Map<String, ?>>();
 
-		List<ColumnMeta> columnMetas = dataSetMeta.getColumnMetas();
-		ResultSetMetaData metaData = rs.getMetaData();
-		int columnCount = metaData.getColumnCount();
+		ResultSetMetaData rsMeta = rs.getMetaData();
+		int[] rsColumns = resolveResultsetColumns(properties, rsMeta);
 
 		while (rs.next())
 		{
 			Map<String, Object> row = new HashMap<String, Object>();
 
-			for (int i = 1; i <= columnCount; i++)
+			for (int i = 0; i < rsColumns.length; i++)
 			{
-				ColumnMeta columnMeta = columnMetas.get(i - 1);
-				Object value = resolveDataValue(cn, rs, i, metaData.getColumnType(i), columnMeta.getDataType());
+				DataSetProperty property = properties.get(i);
+				int rsColumn = rsColumns[i];
 
-				row.put(columnMeta.getName(), value);
+				Object value = resolveDataValue(cn, rs, rsColumn, rsMeta.getColumnType(rsColumn), property.getType());
+
+				row.put(property.getName(), value);
 			}
 
 			datas.add(row);
 		}
 
 		return datas;
+	}
+
+	/**
+	 * 解析结果集中对应{@linkplain DataSetProperty}的索引数组。
+	 * 
+	 * @param properties
+	 * @param rsMeta
+	 * @return
+	 * @throws SQLException
+	 * @throws DataSetException
+	 */
+	protected int[] resolveResultsetColumns(List<DataSetProperty> properties, ResultSetMetaData rsMeta)
+			throws SQLException, DataSetException
+	{
+		int[] columns = new int[properties.size()];
+
+		int rsColumnCount = rsMeta.getColumnCount();
+
+		for (int i = 0; i < columns.length; i++)
+		{
+			String pname = properties.get(i).getName();
+
+			int myIndex = -1;
+
+			for (int j = 1; j <= rsColumnCount; j++)
+			{
+				if (pname.equalsIgnoreCase(rsMeta.getColumnLabel(j)))
+				{
+					myIndex = j;
+					break;
+				}
+			}
+
+			if (myIndex <= 0)
+				throw new DataSetException(
+						"Column named '" + pname + "' not found in the " + ResultSet.class.getSimpleName());
+
+			columns[i] = myIndex;
+		}
+
+		return columns;
 	}
 
 	/**
@@ -586,20 +674,12 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 		return value;
 	}
 
-	/**
-	 * 解析{@linkplain DataSetMeta}。
-	 * 
-	 * @param cn
-	 * @param rs
-	 * @return
-	 * @throws SQLException
-	 */
-	protected DataSetMeta resolveDataSetMeta(Connection cn, ResultSet rs) throws SQLException
+	protected List<DataSetProperty> resolveProperties(Connection cn, ResultSet rs) throws SQLException
 	{
 		ResultSetMetaData metaData = rs.getMetaData();
 		int columnCount = metaData.getColumnCount();
 
-		List<ColumnMeta> columnMetas = new ArrayList<ColumnMeta>(columnCount);
+		List<DataSetProperty> properties = new ArrayList<DataSetProperty>(columnCount);
 
 		for (int i = 1; i <= columnCount; i++)
 		{
@@ -609,45 +689,14 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 
 			DataType dataType = toDataType(metaData, i);
 
-			ColumnMeta columnMeta = createColumnMeta();
+			DataSetProperty columnMeta = createDataSetProperty();
 			columnMeta.setName(columnName);
-			columnMeta.setDataType(dataType);
-			setDataCategory(columnMeta, i);
-			setColumnLabel(columnMeta, i);
+			columnMeta.setType(dataType);
 
-			columnMetas.add(columnMeta);
+			properties.add(columnMeta);
 		}
 
-		return new DataSetMeta(getDataSetMetaName(), columnMetas);
-	}
-
-	/**
-	 * 获取{@linkplain DataSetMeta#getName()}。
-	 * <p>
-	 * 子类可以重写此方法。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	protected String getDataSetMetaName()
-	{
-		return "";
-	}
-
-	protected void setDataCategory(ColumnMeta columnMeta, int column)
-	{
-		if (this.dataCategories == null || (column - 1) >= this.dataCategories.length)
-			throw new DataSetException("The data category must be set for column [" + column + "]");
-
-		columnMeta.setDataCategory(this.dataCategories[column - 1]);
-	}
-
-	protected void setColumnLabel(ColumnMeta columnMeta, int column)
-	{
-		if (this.columnLabels == null || (column - 1) >= this.columnLabels.length)
-			return;
-
-		columnMeta.setLabel(this.columnLabels[column - 1]);
+		return properties;
 	}
 
 	/**
@@ -733,8 +782,8 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 		return PARAMETER_SQL_RESOLVER.resolve(sql);
 	}
 
-	protected ColumnMeta createColumnMeta()
+	protected DataSetProperty createDataSetProperty()
 	{
-		return new ColumnMeta();
+		return new DataSetProperty();
 	}
 }

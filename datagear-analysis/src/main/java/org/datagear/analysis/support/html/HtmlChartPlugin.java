@@ -11,9 +11,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Map;
 
-import org.datagear.analysis.ChartPropertyValues;
-import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.ChartDataSetFactory;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.AbstractChartPlugin;
@@ -210,8 +210,8 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	}
 
 	@Override
-	public HtmlChart renderChart(T renderContext, ChartPropertyValues chartPropertyValues,
-			DataSetFactory... dataSetFactories) throws RenderException
+	public HtmlChart renderChart(T renderContext, Map<String, ?> chartPropertyValues,
+			ChartDataSetFactory... chartDataSetFactories) throws RenderException
 	{
 		boolean notRenderElement = HtmlRenderAttributes.getChartNotRenderElement(renderContext);
 		String chartElementId = HtmlRenderAttributes.getChartElementId(renderContext);
@@ -240,7 +240,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 			chartVarName = HtmlRenderAttributes.generateChartVarName(nextSequence);
 		}
 
-		HtmlChart chart = new HtmlChart(IDUtil.uuid(), renderContext, this, chartPropertyValues, dataSetFactories,
+		HtmlChart chart = new HtmlChart(IDUtil.uuid(), renderContext, this, chartPropertyValues, chartDataSetFactories,
 				chartElementId, chartVarName);
 
 		try

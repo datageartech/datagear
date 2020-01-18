@@ -9,7 +9,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.StringWriter;
 
-import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.ChartDataSetFactory;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
@@ -34,8 +34,7 @@ public class HtmlTplDashboardWidgetFmkRendererTest
 		HtmlChartPlugin<HtmlRenderContext> chartPlugin = HtmlChartPluginTest.createHtmlChartPlugin();
 
 		HtmlChartWidget<HtmlRenderContext> htmlChartWidget = new HtmlChartWidget<HtmlRenderContext>("chart-widget-01",
-				"chart-widget-01",
-				chartPlugin, (DataSetFactory[]) null);
+				"chart-widget-01", chartPlugin, (ChartDataSetFactory[]) null);
 
 		DashboardWidgetResManager resManager = new DashboardWidgetResManager(
 				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/freemarker");

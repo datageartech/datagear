@@ -5,6 +5,7 @@
 package org.datagear.analysis;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 数据集。
@@ -15,13 +16,6 @@ import java.util.List;
 public interface DataSet
 {
 	/**
-	 * 获取{@linkplain DataSetMeta}。
-	 * 
-	 * @return
-	 */
-	DataSetMeta getMeta();
-
-	/**
 	 * 获取数据。
 	 * 
 	 * @return
@@ -29,9 +23,19 @@ public interface DataSet
 	List<?> getDatas();
 
 	/**
+	 * 获取{@linkplain #getDatas()}中单条数据指定名称的属性值。
+	 * 
+	 * @param data
+	 * @param name
+	 * @return
+	 * @throws DataSetException
+	 */
+	Object getDataPropertyValue(Object data, String name) throws DataSetException;
+
+	/**
 	 * 获取输出项值集合，返回{@code null}或空表示没有输出项值。
 	 * 
 	 * @return
 	 */
-	DataSetExportValues getExportValues();
+	Map<String, ?> getExportValues();
 }

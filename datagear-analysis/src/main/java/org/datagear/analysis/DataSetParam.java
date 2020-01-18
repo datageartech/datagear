@@ -13,14 +13,8 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public class DataSetParam
+public class DataSetParam extends DataNameAndType
 {
-	/** 名称 */
-	private String name;
-
-	/** 参数类型 */
-	private DataType type;
-
 	/** 是否必须 */
 	private boolean required;
 
@@ -29,34 +23,13 @@ public class DataSetParam
 
 	public DataSetParam()
 	{
+		super();
 	}
 
 	public DataSetParam(String name, DataType type, boolean required)
 	{
-		super();
-		this.name = name;
-		this.type = type;
+		super(name, type);
 		this.required = required;
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-
-	public DataType getType()
-	{
-		return type;
-	}
-
-	public void setType(DataType type)
-	{
-		this.type = type;
 	}
 
 	public boolean isRequired()
@@ -82,6 +55,7 @@ public class DataSetParam
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", type=" + type + "]";
+		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", required=" + required
+				+ ", defaultValue=" + defaultValue + "]";
 	}
 }

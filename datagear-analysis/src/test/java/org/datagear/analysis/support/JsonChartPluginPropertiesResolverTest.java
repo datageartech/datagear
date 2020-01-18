@@ -3,14 +3,14 @@ package org.datagear.analysis.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartProperties;
+import org.datagear.analysis.ChartDataSetFactory;
 import org.datagear.analysis.ChartProperty;
-import org.datagear.analysis.ChartPropertyValues;
-import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.DataSign;
 import org.datagear.analysis.PropertyType;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
@@ -77,7 +77,8 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("icon-1.png", icons.get(RenderStyle.DARK).getLocation());
 			}
 
-			ChartProperties chartProperties = (ChartProperties) properties
+			@SuppressWarnings("unchecked")
+			List<ChartProperty> chartProperties = (List<ChartProperty>) properties
 					.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_CHART_PROPERTIES);
 
 			{
@@ -131,6 +132,46 @@ public class JsonChartPluginPropertiesResolverTest
 
 				Assert.assertEquals(constraintsExpected, constraints);
 			}
+
+			@SuppressWarnings("unchecked")
+			List<DataSign> dataSigns = (List<DataSign>) properties
+					.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_DATA_SIGNS);
+
+			{
+				DataSign dataSign = dataSigns.get(0);
+
+				Assert.assertEquals("x-value", dataSign.getName());
+				Assert.assertFalse(dataSign.isOccurRequired());
+				Assert.assertFalse(dataSign.isOccurMultiple());
+
+				Label nameLabel = dataSign.getNameLabel();
+				Assert.assertEquals("X值", nameLabel.getValue());
+				Assert.assertEquals("X value", nameLabel.getValue(Label.toLocale("en")));
+				Assert.assertEquals("X值中文", nameLabel.getValue(Label.toLocale("zh")));
+
+				Label descLabel = dataSign.getDescLabel();
+				Assert.assertEquals("X值描述", descLabel.getValue());
+				Assert.assertEquals("X value desc", descLabel.getValue(Label.toLocale("en")));
+				Assert.assertEquals("X值描述中文", descLabel.getValue(Label.toLocale("zh")));
+			}
+
+			{
+				DataSign dataSign = dataSigns.get(1);
+
+				Assert.assertEquals("y-value", dataSign.getName());
+				Assert.assertTrue(dataSign.isOccurRequired());
+				Assert.assertTrue(dataSign.isOccurMultiple());
+
+				Label nameLabel = dataSign.getNameLabel();
+				Assert.assertEquals("Y值", nameLabel.getValue());
+				Assert.assertEquals("Y value", nameLabel.getValue(Label.toLocale("en")));
+				Assert.assertEquals("Y值中文", nameLabel.getValue(Label.toLocale("zh")));
+
+				Label descLabel = dataSign.getDescLabel();
+				Assert.assertEquals("Y值描述", descLabel.getValue());
+				Assert.assertEquals("Y value desc", descLabel.getValue(Label.toLocale("en")));
+				Assert.assertEquals("Y值描述中文", descLabel.getValue(Label.toLocale("zh")));
+			}
 		}
 	}
 
@@ -154,6 +195,7 @@ public class JsonChartPluginPropertiesResolverTest
 		Assert.assertNotNull(chartPlugin.getManualLabel());
 		Assert.assertNotNull(chartPlugin.getIcons());
 		Assert.assertNotNull(chartPlugin.getChartProperties());
+		Assert.assertNotNull(chartPlugin.getDataSigns());
 		Assert.assertEquals("0.1.0", chartPlugin.getVersion());
 		Assert.assertEquals(2, chartPlugin.getOrder());
 	}
@@ -166,8 +208,8 @@ public class JsonChartPluginPropertiesResolverTest
 		}
 
 		@Override
-		public Chart renderChart(RenderContext renderContext, ChartPropertyValues chartPropertyValues,
-				DataSetFactory... dataSetFactories) throws RenderException
+		public Chart renderChart(RenderContext renderContext, Map<String, ?> chartPropertyValues,
+				ChartDataSetFactory... chartDataSetFactories) throws RenderException
 		{
 			throw new UnsupportedOperationException();
 		}

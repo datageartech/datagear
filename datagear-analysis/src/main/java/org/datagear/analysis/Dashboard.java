@@ -99,7 +99,7 @@ public class Dashboard extends AbstractIdentifiable
 	 * @return
 	 * @throws DataSetException
 	 */
-	public Map<String, DataSet[]> getDataSets(DataSetParamValues dataSetParamValues) throws DataSetException
+	public Map<String, DataSet[]> getDataSets(Map<String, ?> dataSetParamValues) throws DataSetException
 	{
 		Map<String, DataSet[]> dataSetsMap = new HashMap<String, DataSet[]>();
 
@@ -125,7 +125,7 @@ public class Dashboard extends AbstractIdentifiable
 	 * @return
 	 * @throws DataSetException
 	 */
-	public Map<String, DataSet[]> getDataSets(Collection<String> chartIds, DataSetParamValues dataSetParamValues)
+	public Map<String, DataSet[]> getDataSets(Collection<String> chartIds, Map<String, ?> dataSetParamValues)
 			throws DataSetException
 	{
 		Map<String, DataSet[]> dataSetsMap = new HashMap<String, DataSet[]>();

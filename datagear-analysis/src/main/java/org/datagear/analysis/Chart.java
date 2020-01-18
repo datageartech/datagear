@@ -8,6 +8,8 @@
 
 package org.datagear.analysis;
 
+import java.util.Map;
+
 /**
  * 图表。
  * 
@@ -20,9 +22,9 @@ public class Chart extends AbstractIdentifiable
 
 	private ChartPlugin<?> plugin;
 
-	private ChartPropertyValues propertyValues;
+	private Map<String, ?> propertyValues;
 
-	private DataSetFactory[] dataSetFactories;
+	private ChartDataSetFactory[] chartDataSetFactories;
 
 	public Chart()
 	{
@@ -34,14 +36,14 @@ public class Chart extends AbstractIdentifiable
 		super(id);
 	}
 
-	public Chart(String id, RenderContext renderContext, ChartPlugin<?> plugin, ChartPropertyValues propertyValues,
-			DataSetFactory[] dataSetFactories)
+	public Chart(String id, RenderContext renderContext, ChartPlugin<?> plugin, Map<String, ?> propertyValues,
+			ChartDataSetFactory[] chartDataSetFactories)
 	{
 		super(id);
 		this.renderContext = renderContext;
 		this.plugin = plugin;
 		this.propertyValues = propertyValues;
-		this.dataSetFactories = dataSetFactories;
+		this.chartDataSetFactories = chartDataSetFactories;
 	}
 
 	public RenderContext getRenderContext()
@@ -64,24 +66,24 @@ public class Chart extends AbstractIdentifiable
 		this.plugin = plugin;
 	}
 
-	public ChartPropertyValues getPropertyValues()
+	public Map<String, ?> getPropertyValues()
 	{
 		return propertyValues;
 	}
 
-	public void setPropertyValues(ChartPropertyValues propertyValues)
+	public void setPropertyValues(Map<String, ?> propertyValues)
 	{
 		this.propertyValues = propertyValues;
 	}
 
-	public DataSetFactory[] getDataSetFactories()
+	public ChartDataSetFactory[] getChartDataSetFactories()
 	{
-		return dataSetFactories;
+		return chartDataSetFactories;
 	}
 
-	public void setDataSetFactories(DataSetFactory[] dataSetFactories)
+	public void setChartDataSetFactories(ChartDataSetFactory[] chartDataSetFactories)
 	{
-		this.dataSetFactories = dataSetFactories;
+		this.chartDataSetFactories = chartDataSetFactories;
 	}
 
 	/**
@@ -91,16 +93,16 @@ public class Chart extends AbstractIdentifiable
 	 * @return
 	 * @throws DataSetException
 	 */
-	public DataSet[] getDataSets(DataSetParamValues dataSetParamValues) throws DataSetException
+	public DataSet[] getDataSets(Map<String, ?> dataSetParamValues) throws DataSetException
 	{
-		if (this.dataSetFactories == null || this.dataSetFactories.length == 0)
+		if (this.chartDataSetFactories == null || this.chartDataSetFactories.length == 0)
 			return new DataSet[0];
 
-		DataSet[] dataSets = new DataSet[this.dataSetFactories.length];
+		DataSet[] dataSets = new DataSet[this.chartDataSetFactories.length];
 
-		for (int i = 0; i < this.dataSetFactories.length; i++)
+		for (int i = 0; i < this.chartDataSetFactories.length; i++)
 		{
-			DataSet dataSet = this.dataSetFactories[i].getDataSet(dataSetParamValues);
+			DataSet dataSet = this.chartDataSetFactories[i].getDataSetFactory().getDataSet(dataSetParamValues);
 			dataSets[i] = dataSet;
 		}
 

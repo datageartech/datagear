@@ -11,10 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -22,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.ChartProperties;
 import org.datagear.analysis.ChartProperty;
+import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.PropertyType;
 import org.datagear.analysis.RenderStyle;
@@ -52,6 +54,7 @@ import com.alibaba.fastjson.JSON;
  * 	manualLabel : { ... },
  * 	icons : { "LIGHT" : "icons/light.png", "DARK" : "icons/dark.png" },
  * 	chartProperties :  [ { ... }, ... ],
+ * 	dataSigns : [ { ... }, ... ],
  * 	version : "...",
  * 	order: 1
  * }
@@ -78,6 +81,8 @@ public class JsonChartPluginPropertiesResolver
 
 	public static final String CHART_PLUGIN_CHART_PROPERTIES = "chartProperties";
 
+	public static final String CHART_PLUGIN_DATA_SIGNS = "dataSigns";
+
 	public static final String CHART_PLUGIN_VERSION = "version";
 
 	public static final String CHART_PLUGIN_ORDER = "order";
@@ -99,6 +104,16 @@ public class JsonChartPluginPropertiesResolver
 	public static final String CHART_PROPERTY_DEFAULT_VALUE = "defaultValue";
 
 	public static final String CHART_PROPERTY_CONSTRAINTS = "constraints";
+
+	public static final String DATA_SIGN_PROPERTY_NAME = "name";
+
+	public static final String DATA_SIGN_PROPERTY_OCCUR_REQUIRED = "occurRequired";
+
+	public static final String DATA_SIGN_PROPERTY_OCCUR_MULTIPLE = "occurMultiple";
+
+	public static final String DATA_SIGN_PROPERTY_NAME_LABEL = "nameLabel";
+
+	public static final String DATA_SIGN_PROPERTY_DESC_LABEL = "descLabel";
 
 	private PropertyTypeValueConverter propertyTypeValueConverter = new PropertyTypeValueConverter();
 
@@ -140,6 +155,7 @@ public class JsonChartPluginPropertiesResolver
 		properties.put(CHART_PLUGIN_MANUAL_LABEL, convertToLabel(map.get(CHART_PLUGIN_MANUAL_LABEL)));
 		properties.put(CHART_PLUGIN_ICONS, convertToIcons(map.get(CHART_PLUGIN_ICONS)));
 		properties.put(CHART_PLUGIN_CHART_PROPERTIES, convertToChartProperties(map.get(CHART_PLUGIN_CHART_PROPERTIES)));
+		properties.put(CHART_PLUGIN_DATA_SIGNS, convertToDataSigns(map.get(CHART_PLUGIN_DATA_SIGNS)));
 
 		return properties;
 	}
@@ -203,7 +219,8 @@ public class JsonChartPluginPropertiesResolver
 		chartPlugin.setDescLabel((Label) properties.get(CHART_PLUGIN_DESC_LABEL));
 		chartPlugin.setManualLabel((Label) properties.get(CHART_PLUGIN_MANUAL_LABEL));
 		chartPlugin.setIcons((Map<RenderStyle, Icon>) properties.get(CHART_PLUGIN_ICONS));
-		chartPlugin.setChartProperties((ChartProperties) properties.get(CHART_PLUGIN_CHART_PROPERTIES));
+		chartPlugin.setChartProperties((List<ChartProperty>) properties.get(CHART_PLUGIN_CHART_PROPERTIES));
+		chartPlugin.setDataSigns((List<DataSign>) properties.get(CHART_PLUGIN_DATA_SIGNS));
 		chartPlugin.setVersion((String) properties.get(CHART_PLUGIN_VERSION));
 
 		Integer order = null;
@@ -382,17 +399,15 @@ public class JsonChartPluginPropertiesResolver
 	 * @param obj
 	 * @return
 	 */
-	protected ChartProperties convertToChartProperties(Object obj)
+	protected List<ChartProperty> convertToChartProperties(Object obj)
 	{
 		if (obj == null)
 			return null;
-		else if (obj instanceof ChartProperties)
-			return (ChartProperties) obj;
 		else if (obj instanceof Object[])
 		{
 			Object[] array = (Object[]) obj;
 
-			ChartProperties chartProperties = createChartProperties();
+			List<ChartProperty> chartProperties = new ArrayList<ChartProperty>();
 
 			for (Object ele : array)
 			{
@@ -438,7 +453,7 @@ public class JsonChartPluginPropertiesResolver
 		else if (obj instanceof Map<?, ?>)
 		{
 			@SuppressWarnings("unchecked")
-			Map<String, ?> map = (Map<String, String>) obj;
+			Map<String, ?> map = (Map<String, ?>) obj;
 
 			String name = (String) map.get(CHART_PROPERTY_NAME);
 			if (name == null || name.isEmpty())
@@ -593,6 +608,110 @@ public class JsonChartPluginPropertiesResolver
 	}
 
 	/**
+	 * 将对象转换为{@linkplain DataSigns}。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected List<DataSign> convertToDataSigns(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof Object[])
+		{
+			Object[] array = (Object[]) obj;
+
+			List<DataSign> dataSigns = new ArrayList<DataSign>();
+
+			for (Object ele : array)
+			{
+				DataSign dataSign = convertToDataSign(ele);
+
+				if (dataSign != null)
+					dataSigns.add(dataSign);
+			}
+
+			if (dataSigns.isEmpty())
+				return null;
+
+			return dataSigns;
+		}
+		else if (obj instanceof Collection<?>)
+		{
+			Collection<?> collection = (Collection<?>) obj;
+			Object[] array = new Object[collection.size()];
+			collection.toArray(array);
+
+			return convertToDataSigns(array);
+		}
+		else
+		{
+			Object[] array = new Object[] { obj };
+
+			return convertToDataSigns(array);
+		}
+	}
+
+	/**
+	 * 将对象转换为{@linkplain DataSign}。
+	 * 
+	 * @param obj
+	 * @return
+	 */
+	protected DataSign convertToDataSign(Object obj)
+	{
+		if (obj == null)
+			return null;
+		else if (obj instanceof DataSign)
+			return (DataSign) obj;
+		else if (obj instanceof Map<?, ?>)
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, ?> map = (Map<String, ?>) obj;
+
+			String name = (String) map.get(DATA_SIGN_PROPERTY_NAME);
+			if (name == null || name.isEmpty())
+				return null;
+
+			DataSign dataSign = createDataSign();
+			dataSign.setName(name);
+
+			dataSign.setOccurRequired(convertToBoolean(map.get(DATA_SIGN_PROPERTY_OCCUR_REQUIRED), true));
+			dataSign.setOccurMultiple(convertToBoolean(map.get(DATA_SIGN_PROPERTY_OCCUR_MULTIPLE), true));
+			dataSign.setNameLabel(convertToLabel(map.get(CHART_PROPERTY_NAME_LABEL)));
+			dataSign.setDescLabel(convertToLabel(map.get(CHART_PROPERTY_DESC_LABEL)));
+
+			return dataSign;
+		}
+		else
+			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
+					+ DataSign.class.getName() + "] is not supported");
+	}
+
+	/**
+	 * 将对象转换为布尔值。
+	 * 
+	 * @param obj
+	 * @param defaultValue
+	 * @return
+	 */
+	protected boolean convertToBoolean(Object obj, boolean defaultValue)
+	{
+		if (obj == null)
+			return defaultValue;
+		else if (obj instanceof Boolean)
+			return ((Boolean) obj).booleanValue();
+		else if (obj instanceof String)
+		{
+			String str = (String) obj;
+			return ("1".equals(str) || "true".equalsIgnoreCase(str));
+		}
+		else
+			throw new UnsupportedOperationException(
+					"Convert object [" + obj + "] to [" + boolean.class.getName() + "] is not supported");
+	}
+
+	/**
 	 * 字符串转换为{@linkplain Locale}。
 	 * 
 	 * @param str
@@ -613,13 +732,13 @@ public class JsonChartPluginPropertiesResolver
 		return new LocationIcon();
 	}
 
-	protected ChartProperties createChartProperties()
-	{
-		return new ChartProperties();
-	}
-
 	protected ChartProperty createChartProperty()
 	{
 		return new ChartProperty();
+	}
+
+	protected DataSign createDataSign()
+	{
+		return new DataSign();
 	}
 }

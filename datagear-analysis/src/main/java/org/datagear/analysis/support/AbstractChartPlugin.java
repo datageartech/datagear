@@ -7,11 +7,13 @@
  */
 package org.datagear.analysis.support;
 
+import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.ChartProperties;
+import org.datagear.analysis.ChartProperty;
+import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderStyle;
@@ -34,7 +36,9 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 
 	private Map<RenderStyle, Icon> icons;
 
-	private ChartProperties chartProperties;
+	private List<ChartProperty> chartProperties;
+
+	private List<DataSign> dataSigns;
 
 	private String version;
 
@@ -105,14 +109,25 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 	}
 
 	@Override
-	public ChartProperties getChartProperties()
+	public List<ChartProperty> getChartProperties()
 	{
 		return chartProperties;
 	}
 
-	public void setChartProperties(ChartProperties chartProperties)
+	public void setChartProperties(List<ChartProperty> chartProperties)
 	{
 		this.chartProperties = chartProperties;
+	}
+
+	@Override
+	public List<DataSign> getDataSigns()
+	{
+		return dataSigns;
+	}
+
+	public void setDataSigns(List<DataSign> dataSigns)
+	{
+		this.dataSigns = dataSigns;
 	}
 
 	@Override

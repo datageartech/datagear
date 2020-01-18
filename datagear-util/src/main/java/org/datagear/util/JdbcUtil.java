@@ -842,6 +842,27 @@ public class JdbcUtil
 	}
 
 	/**
+	 * 设置{@linkplain ResultSet#setFetchSize(int)}。
+	 * 
+	 * @param rs
+	 * @param fetchSize
+	 * @return
+	 */
+	public static boolean setFetchSizeSilently(ResultSet rs, int fetchSize)
+	{
+		try
+		{
+			rs.setFetchSize(fetchSize);
+
+			return true;
+		}
+		catch (SQLException e)
+		{
+			return false;
+		}
+	}
+
+	/**
 	 * 设置为只读。
 	 * 
 	 * @param cn
@@ -1184,6 +1205,9 @@ public class JdbcUtil
 
 		/**
 		 * 关闭。
+		 * <p>
+		 * 此方法不会抛出任何异常。
+		 * </p>
 		 */
 		public void close()
 		{

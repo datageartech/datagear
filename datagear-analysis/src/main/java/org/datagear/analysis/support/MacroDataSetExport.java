@@ -10,13 +10,12 @@ package org.datagear.analysis.support;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
-import org.datagear.analysis.ColumnMeta;
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetExport;
 import org.datagear.analysis.DataSetFactory;
-import org.datagear.analysis.DataSetMeta;
+import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataType;
 import org.datagear.util.StringUtil;
 
@@ -93,64 +92,66 @@ public class MacroDataSetExport extends DataSetExport
 	}
 
 	@Override
-	public Object getExportValue(DataSetMeta meta, List<Map<String, ?>> datas) throws DataSetException
+	public Object getExportValue(DataSetFactory dataSetFactory, DataSet dataSet) throws DataSetException
 	{
 		Macro macro = resolveMacro(getMacro());
-		return getExportValue(meta, datas, macro, getMacro());
+		return getExportValue(dataSetFactory, dataSet, macro, getMacro());
 	}
 
 	/**
 	 * 获取指定宏的输出值。
 	 * 
-	 * @param meta
-	 * @param datas
+	 * @param dataSetFactory
+	 * @param dataSet
 	 * @param macro
 	 * @param macroString
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected Object getExportValue(DataSetMeta meta, List<Map<String, ?>> datas, Macro macro, String macroString)
+	protected Object getExportValue(DataSetFactory dataSetFactory, DataSet dataSet, Macro macro, String macroString)
 			throws DataSetException
 	{
 		String macroName = macro.getName();
-		String columnName = macro.getColumn();
+		String propertyName = macro.getProperty();
+		List<?> datas = dataSet.getDatas();
+		boolean isEmptyData = (datas == null || datas.isEmpty());
 
 		if (MACRO_FIRST.equalsIgnoreCase(macroName))
 		{
-			if (datas == null || datas.isEmpty())
+			if (isEmptyData)
 				return null;
 
-			getColumnMetaNotNull(meta, columnName);
+			getDataSetPropertyNotNull(dataSetFactory, propertyName);
 
-			Map<String, ?> first = datas.get(0);
-			return first.get(columnName);
+			Object first = datas.get(0);
+			return dataSet.getDataPropertyValue(first, propertyName);
 		}
 		else if (MACRO_LAST.equalsIgnoreCase(macroName))
 		{
-			if (datas == null || datas.isEmpty())
+			if (isEmptyData)
 				return null;
 
-			getColumnMetaNotNull(meta, columnName);
+			getDataSetPropertyNotNull(dataSetFactory, propertyName);
 
-			Map<String, ?> last = datas.get(datas.size() - 1);
-			return last.get(columnName);
+			Object last = datas.get(datas.size() - 1);
+			return dataSet.getDataPropertyValue(last, propertyName);
 		}
 		else if (MACRO_MAX.equalsIgnoreCase(macroName))
 		{
-			if (datas == null || datas.isEmpty())
+			if (isEmptyData)
 				return null;
 
-			ColumnMeta columnMeta = getColumnMetaNotNull(meta, columnName);
+			DataSetProperty property = getDataSetPropertyNotNull(dataSetFactory, propertyName);
 
-			if (!DataType.isNumber(columnMeta.getDataType()))
-				throw new MacroEvalException(macroString, "Column [" + columnName + "] must be number type");
+			if (!DataType.isNumber(property.getType()))
+				throw new MacroEvalException(macroString, "Property [" + propertyName + "] must be number type");
 
 			BigDecimal max = null;
 
 			for (int i = 0, len = datas.size(); i < len; i++)
 			{
-				Map<String, ?> row = datas.get(i);
-				BigDecimal my = DataType.castBigDecimal(row.get(columnName));
+				Object row = datas.get(i);
+				BigDecimal my = DataType.castBigDecimal(dataSet.getDataPropertyValue(row, propertyName));
 
 				if (my == null)
 					continue;
@@ -162,20 +163,20 @@ public class MacroDataSetExport extends DataSetExport
 		}
 		else if (MACRO_MIN.equalsIgnoreCase(macroName))
 		{
-			if (datas == null || datas.isEmpty())
+			if (isEmptyData)
 				return null;
 
-			ColumnMeta columnMeta = getColumnMetaNotNull(meta, columnName);
+			DataSetProperty property = getDataSetPropertyNotNull(dataSetFactory, propertyName);
 
-			if (!DataType.isNumber(columnMeta.getDataType()))
-				throw new MacroEvalException(macroString, "Column [" + columnName + "] must be number type");
+			if (!DataType.isNumber(property.getType()))
+				throw new MacroEvalException(macroString, "Property [" + propertyName + "] must be number type");
 
 			BigDecimal min = null;
 
 			for (int i = 0, len = datas.size(); i < len; i++)
 			{
-				Map<String, ?> row = datas.get(i);
-				BigDecimal my = DataType.castBigDecimal(row.get(columnName));
+				Object row = datas.get(i);
+				BigDecimal my = DataType.castBigDecimal(dataSet.getDataPropertyValue(row, propertyName));
 
 				if (my == null)
 					continue;
@@ -187,21 +188,21 @@ public class MacroDataSetExport extends DataSetExport
 		}
 		else if (MACRO_AVG.equalsIgnoreCase(macroName))
 		{
-			if (datas == null || datas.isEmpty())
+			if (isEmptyData)
 				return null;
 
-			ColumnMeta columnMeta = getColumnMetaNotNull(meta, columnName);
+			DataSetProperty columnMeta = getDataSetPropertyNotNull(dataSetFactory, propertyName);
 
-			if (!DataType.isNumber(columnMeta.getDataType()))
-				throw new MacroEvalException(macroString, "Column [" + columnName + "] must be number type");
+			if (!DataType.isNumber(columnMeta.getType()))
+				throw new MacroEvalException(macroString, "Property [" + propertyName + "] must be number type");
 
 			BigDecimal avg = BigDecimal.valueOf(0);
 
 			int len = datas.size();
 			for (int i = 0; i < len; i++)
 			{
-				Map<String, ?> row = datas.get(i);
-				BigDecimal my = DataType.castBigDecimal(row.get(columnName));
+				Object row = datas.get(i);
+				BigDecimal my = DataType.castBigDecimal(dataSet.getDataPropertyValue(row, propertyName));
 
 				if (my == null)
 					continue;
@@ -215,20 +216,20 @@ public class MacroDataSetExport extends DataSetExport
 		}
 		else if (MACRO_SUM.equalsIgnoreCase(macroName))
 		{
-			if (datas == null || datas.isEmpty())
+			if (isEmptyData)
 				return null;
 
-			ColumnMeta columnMeta = getColumnMetaNotNull(meta, columnName);
+			DataSetProperty columnMeta = getDataSetPropertyNotNull(dataSetFactory, propertyName);
 
-			if (!DataType.isNumber(columnMeta.getDataType()))
-				throw new MacroEvalException(macroString, "Column [" + columnName + "] must be number type");
+			if (!DataType.isNumber(columnMeta.getType()))
+				throw new MacroEvalException(macroString, "Property [" + propertyName + "] must be number type");
 
 			BigDecimal sum = BigDecimal.valueOf(0);
 
 			for (int i = 0, len = datas.size(); i < len; i++)
 			{
-				Map<String, ?> row = datas.get(i);
-				BigDecimal my = DataType.castBigDecimal(row.get(columnName));
+				Object row = datas.get(i);
+				BigDecimal my = DataType.castBigDecimal(dataSet.getDataPropertyValue(row, propertyName));
 
 				if (my == null)
 					continue;
@@ -239,21 +240,21 @@ public class MacroDataSetExport extends DataSetExport
 			return sum;
 		}
 		else
-			return getExportValueExt(meta, datas, macro, macroString);
+			return getExportValueExt(dataSetFactory, dataSet, macro, macroString);
 	}
 
 	/**
 	 * 获取扩展宏的输出值。
 	 * 
-	 * @param meta
-	 * @param datas
+	 * @param dataSetFactory
+	 * @param dataSet
 	 * @param macro
 	 * @param macroString
 	 * @return
 	 * @throws DataSetException
 	 * @throws UnsupportedMacroException
 	 */
-	protected Object getExportValueExt(DataSetMeta meta, List<Map<String, ?>> datas, Macro macro, String macroString)
+	protected Object getExportValueExt(DataSetFactory dataSetFactory, DataSet dataSet, Macro macro, String macroString)
 			throws DataSetException, UnsupportedMacroException
 	{
 		throw new UnsupportedMacroException(macroString);
@@ -262,16 +263,17 @@ public class MacroDataSetExport extends DataSetExport
 	/**
 	 * 获取指定名称的{@linkplain ColumnMeta}，没有则抛出异常。
 	 * 
-	 * @param meta
-	 * @param column
+	 * @param dataSetFactory
+	 * @param name
 	 * @return
 	 */
-	protected ColumnMeta getColumnMetaNotNull(DataSetMeta meta, String column) throws ColumnMetaNotFoundException
+	protected DataSetProperty getDataSetPropertyNotNull(DataSetFactory dataSetFactory, String name)
+			throws DataSetPropertyNotFoundException
 	{
-		ColumnMeta columnMeta = meta.getColumnMeta(column);
+		DataSetProperty columnMeta = dataSetFactory.getProperty(name);
 
 		if (columnMeta == null)
-			throw new ColumnMetaNotFoundException(column);
+			throw new DataSetPropertyNotFoundException(name);
 
 		return columnMeta;
 	}
@@ -279,7 +281,7 @@ public class MacroDataSetExport extends DataSetExport
 	/**
 	 * 解析{@linkplain Macro}对象。
 	 * <p>
-	 * 此方法不会返回{@code null}，如果格式非法，它返回的{@linkplain Macro#getName()}、{@linkplain Macro#getColumn()}将是空字符串。
+	 * 此方法不会返回{@code null}，如果格式非法，它返回的{@linkplain Macro#getName()}、{@linkplain Macro#getProperty()}将是空字符串。
 	 * </p>
 	 * 
 	 * @param macro
@@ -325,18 +327,18 @@ public class MacroDataSetExport extends DataSetExport
 
 		private String name;
 
-		private String column;
+		private String property;
 
 		public Macro()
 		{
 			super();
 		}
 
-		public Macro(String name, String column)
+		public Macro(String name, String property)
 		{
 			super();
 			this.name = name;
-			this.column = column;
+			this.property = property;
 		}
 
 		public String getName()
@@ -349,20 +351,20 @@ public class MacroDataSetExport extends DataSetExport
 			this.name = name;
 		}
 
-		public String getColumn()
+		public String getProperty()
 		{
-			return column;
+			return property;
 		}
 
-		public void setColumn(String column)
+		public void setProperty(String property)
 		{
-			this.column = column;
+			this.property = property;
 		}
 
 		@Override
 		public String toString()
 		{
-			return "Macro [name=" + name + ", column=" + column + "]";
+			return "Macro [name=" + name + ", property=" + property + "]";
 		}
 	}
 }

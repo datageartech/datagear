@@ -8,6 +8,9 @@
 
 package org.datagear.analysis;
 
+import java.util.List;
+import java.util.Map;
+
 import org.datagear.util.i18n.Label;
 
 /**
@@ -65,18 +68,28 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	 * 
 	 * @return
 	 */
-	ChartProperties getChartProperties();
+	List<ChartProperty> getChartProperties();
+
+	/**
+	 * 获取{@linkplain DataSign}列表。
+	 * <p>
+	 * 返回{@code null}表示没有。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	List<DataSign> getDataSigns();
 
 	/**
 	 * 渲染{@linkplain Chart}。
 	 * 
 	 * @param renderContext
 	 * @param chartPropertyValues
-	 * @param dataSetFactories
+	 * @param chartDataSetFactories
 	 * @return
 	 * @throws RenderException
 	 */
-	Chart renderChart(T renderContext, ChartPropertyValues chartPropertyValues, DataSetFactory... dataSetFactories)
+	Chart renderChart(T renderContext, Map<String, ?> chartPropertyValues, ChartDataSetFactory... chartDataSetFactories)
 			throws RenderException;
 
 	/**

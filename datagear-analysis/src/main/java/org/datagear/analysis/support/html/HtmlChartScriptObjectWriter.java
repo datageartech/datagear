@@ -9,16 +9,18 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
+import org.datagear.analysis.ChartDataSetFactory;
 import org.datagear.analysis.ChartPlugin;
-import org.datagear.analysis.ChartProperties;
-import org.datagear.analysis.ChartPropertyValues;
+import org.datagear.analysis.ChartProperty;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetFactory;
-import org.datagear.analysis.DataSetParamValues;
+import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
@@ -93,7 +95,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 							? new AttributesHtmlRenderContext(htmlChart.getRenderContext())
 							: new RefHtmlRenderContext(chartRenderContextVarName)),
 					new IdChartPlugin(htmlChart.getPlugin()), htmlChart.getPropertyValues(),
-					JsonDataSetFactory.valuesOf(htmlChart.getDataSetFactories()), htmlChart.getElementId(),
+					JsonChartDataSetFactory.valuesOf(htmlChart.getChartDataSetFactories()), htmlChart.getElementId(),
 					htmlChart.getVarName());
 		}
 	}
@@ -130,7 +132,13 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		}
 
 		@Override
-		public ChartProperties getChartProperties()
+		public List<ChartProperty> getChartProperties()
+		{
+			return null;
+		}
+
+		@Override
+		public List<DataSign> getDataSigns()
 		{
 			return null;
 		}
@@ -148,10 +156,32 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		}
 
 		@Override
-		public Chart renderChart(RenderContext renderContext, ChartPropertyValues chartPropertyValues,
-				DataSetFactory... dataSetFactories) throws RenderException
+		public Chart renderChart(RenderContext renderContext, Map<String, ?> chartPropertyValues,
+				ChartDataSetFactory... chartDataSetFactories) throws RenderException
 		{
 			throw new UnsupportedOperationException();
+		}
+	}
+
+	protected static class JsonChartDataSetFactory extends ChartDataSetFactory
+	{
+		public JsonChartDataSetFactory(DataSetFactory dataSetFactory, List<DataSign> dataSigns)
+		{
+			super(new JsonDataSetFactory(dataSetFactory), dataSigns);
+		}
+
+		public static JsonChartDataSetFactory[] valuesOf(ChartDataSetFactory[] chartDataSetFactories)
+		{
+			if (chartDataSetFactories == null)
+				return null;
+
+			JsonChartDataSetFactory[] jsonDataSetFactories = new JsonChartDataSetFactory[chartDataSetFactories.length];
+
+			for (int i = 0; i < chartDataSetFactories.length; i++)
+				jsonDataSetFactories[i] = new JsonChartDataSetFactory(chartDataSetFactories[i].getDataSetFactory(),
+						chartDataSetFactories[i].getDataSigns());
+
+			return jsonDataSetFactories;
 		}
 	}
 
@@ -159,28 +189,15 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	{
 		public JsonDataSetFactory(DataSetFactory dataSetFactory)
 		{
-			super(dataSetFactory.getId());
+			super(dataSetFactory.getId(), dataSetFactory.getProperties());
 			setParams(dataSetFactory.getParams());
 			setExports(dataSetFactory.getExports());
 		}
 
 		@Override
-		public DataSet getDataSet(DataSetParamValues dataSetParamValues) throws DataSetException
+		public DataSet getDataSet(Map<String, ?> paramValues) throws DataSetException
 		{
 			return null;
-		}
-
-		public static JsonDataSetFactory[] valuesOf(DataSetFactory[] dataSetFactories)
-		{
-			if (dataSetFactories == null)
-				return null;
-
-			JsonDataSetFactory[] jsonDataSetFactories = new JsonDataSetFactory[dataSetFactories.length];
-
-			for (int i = 0; i < dataSetFactories.length; i++)
-				jsonDataSetFactories[i] = new JsonDataSetFactory(dataSetFactories[i]);
-
-			return jsonDataSetFactories;
 		}
 	}
 }

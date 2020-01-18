@@ -8,18 +8,18 @@
 package org.datagear.analysis.support;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
+import org.datagear.analysis.DataNameAndType;
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetExport;
-import org.datagear.analysis.DataSetExportValues;
-import org.datagear.analysis.DataSetExports;
 import org.datagear.analysis.DataSetFactory;
-import org.datagear.analysis.DataSetMeta;
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetParams;
+import org.datagear.analysis.DataSetProperty;
 
 /**
  * 抽象{@linkplain DataSetFactory}。
@@ -29,18 +29,38 @@ import org.datagear.analysis.DataSetParams;
  */
 public abstract class AbstractDataSetFactory extends AbstractIdentifiable implements DataSetFactory
 {
-	private DataSetParams params;
+	private List<DataSetProperty> properties;
 
-	private DataSetExports exports;
+	private List<DataSetParam> params;
+
+	private List<DataSetExport> exports;
 
 	public AbstractDataSetFactory()
 	{
 		super();
 	}
 
-	public AbstractDataSetFactory(String id)
+	public AbstractDataSetFactory(String id, List<DataSetProperty> properties)
 	{
 		super(id);
+		this.properties = properties;
+	}
+
+	@Override
+	public List<DataSetProperty> getProperties()
+	{
+		return properties;
+	}
+
+	public void setProperties(List<DataSetProperty> properties)
+	{
+		this.properties = properties;
+	}
+
+	@Override
+	public DataSetProperty getProperty(String name)
+	{
+		return getDataNameAndTypeByName(this.properties, name);
 	}
 
 	public boolean hasParam()
@@ -49,14 +69,20 @@ public abstract class AbstractDataSetFactory extends AbstractIdentifiable implem
 	}
 
 	@Override
-	public DataSetParams getParams()
+	public List<DataSetParam> getParams()
 	{
 		return params;
 	}
 
-	public void setParams(DataSetParams params)
+	public void setParams(List<DataSetParam> params)
 	{
 		this.params = params;
+	}
+
+	@Override
+	public DataSetParam getParam(String name)
+	{
+		return getDataNameAndTypeByName(this.params, name);
 	}
 
 	public boolean hasExport()
@@ -65,14 +91,20 @@ public abstract class AbstractDataSetFactory extends AbstractIdentifiable implem
 	}
 
 	@Override
-	public DataSetExports getExports()
+	public List<DataSetExport> getExports()
 	{
 		return exports;
 	}
 
-	public void setExports(DataSetExports exports)
+	public void setExports(List<DataSetExport> exports)
 	{
 		this.exports = exports;
+	}
+
+	@Override
+	public DataSetExport getExport(String name)
+	{
+		return getDataNameAndTypeByName(this.exports, name);
 	}
 
 	/**
@@ -83,20 +115,36 @@ public abstract class AbstractDataSetFactory extends AbstractIdentifiable implem
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected DataSetExportValues getExportValues(DataSetMeta meta, List<Map<String, ?>> datas) throws DataSetException
+	protected Map<String, ?> getExportValues(DataSet dataSet) throws DataSetException
 	{
 		if (!hasExport())
 			return null;
 
-		DataSetExportValues exportValues = new DataSetExportValues();
+		Map<String, Object> exportValues = new HashMap<String, Object>();
 
 		for (DataSetExport expt : this.exports)
 		{
-			Object value = expt.getExportValue(meta, datas);
+			Object value = expt.getExportValue(this, dataSet);
 			exportValues.put(expt.getName(), value);
 		}
 
 		return exportValues;
+	}
+
+	/**
+	 * 获取指定名称的{@linkplain DataSetParam}，找不到将抛出{@linkplain DataSetParamNotFountException}。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public DataSetParam getParamNotNull(String name) throws DataSetParamNotFountException
+	{
+		DataSetParam dataSetParam = getParam(name);
+
+		if (dataSetParam == null)
+			throw new DataSetParamNotFountException(name);
+
+		return dataSetParam;
 	}
 
 	/**
@@ -106,47 +154,36 @@ public abstract class AbstractDataSetFactory extends AbstractIdentifiable implem
 	 * @return
 	 * @throws DataSetParamNotFountException
 	 */
-	protected List<DataSetParam> getDataSetParamsNotNull(List<String> names) throws DataSetParamNotFountException
+	public List<DataSetParam> getParamsNotNull(List<String> names) throws DataSetParamNotFountException
 	{
 		List<DataSetParam> dataSetParams = new ArrayList<DataSetParam>(names.size());
 
 		for (String name : names)
-			dataSetParams.add(getDataSetParamNotNull(name));
+			dataSetParams.add(getParamNotNull(name));
 
 		return dataSetParams;
 	}
 
 	/**
-	 * 获取指定名称的{@linkplain DataSetParam}，找不到将抛出{@linkplain DataSetParamNotFountException}。
+	 * 获取指定名称的{@linkplain DataNameAndType}对象，没找到则返回{@code null}。
 	 * 
+	 * @param <T>
+	 * @param list
+	 *            允许为{@code null}
 	 * @param name
 	 * @return
 	 */
-	protected DataSetParam getDataSetParamNotNull(String name) throws DataSetParamNotFountException
+	protected <T extends DataNameAndType> T getDataNameAndTypeByName(List<T> list, String name)
 	{
-		DataSetParam dataSetParam = getDataSetParam(name);
+		if (list != null)
+		{
+			for (T t : list)
+			{
+				if (t.getName().equals(name))
+					return t;
+			}
+		}
 
-		if (dataSetParam == null)
-			throw new DataSetParamNotFountException(name);
-
-		return dataSetParam;
-	}
-
-	/**
-	 * 获取指定名称的{@linkplain DataSetParam}，找不到则返回{@code null}。
-	 * 
-	 * @param name
-	 * @return
-	 */
-	protected DataSetParam getDataSetParam(String name)
-	{
-		DataSetParam dataSetParam = null;
-
-		DataSetParams dataSetParams = getParams();
-
-		if (dataSetParams != null)
-			dataSetParam = dataSetParams.getByName(name);
-
-		return dataSetParam;
+		return null;
 	}
 }
