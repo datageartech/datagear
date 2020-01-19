@@ -9,9 +9,8 @@ package org.datagear.management.domain;
 
 import java.util.Date;
 
-import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.ChartDataSetFactory;
 import org.datagear.analysis.support.ChartWidget;
-import org.datagear.analysis.support.SqlDataSetFactory;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlRenderContext;
@@ -42,14 +41,14 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 	public HtmlChartWidgetEntity()
 	{
 		super();
-		super.setDataSetFactories(new SqlDataSetFactoryEntity[0]);
+		super.setChartDataSetFactories(new ChartDataSetFactory[0]);
 		this.createTime = new Date();
 	}
 
 	public HtmlChartWidgetEntity(String id, String name, HtmlChartPlugin<HtmlRenderContext> chartPlugin,
-			SqlDataSetFactory[] dataSetFactories, User createUser)
+			ChartDataSetFactory[] chartDataSetFactories, User createUser)
 	{
-		super(id, name, chartPlugin, dataSetFactories);
+		super(id, name, chartPlugin, chartDataSetFactories);
 		this.createUser = createUser;
 		this.createTime = new Date();
 	}
@@ -62,31 +61,6 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 	public void setHtmlChartPlugin(HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin)
 	{
 		setChartPlugin(htmlChartPlugin);
-	}
-
-	@Override
-	public SqlDataSetFactoryEntity[] getDataSetFactories()
-	{
-		return (SqlDataSetFactoryEntity[]) super.getDataSetFactories();
-	}
-
-	@Override
-	public void setDataSetFactories(DataSetFactory[] dataSetFactories)
-	{
-		if (dataSetFactories != null && !(dataSetFactories instanceof SqlDataSetFactoryEntity[]))
-			throw new IllegalArgumentException();
-
-		super.setDataSetFactories(dataSetFactories);
-	}
-
-	public SqlDataSetFactoryEntity[] getSqlDataSetFactoryEntities()
-	{
-		return getDataSetFactories();
-	}
-
-	public void setSqlDataSetFactoryEntities(SqlDataSetFactoryEntity[] sqlDataSetFactoryEntities)
-	{
-		setDataSetFactories(sqlDataSetFactoryEntities);
 	}
 
 	@Override

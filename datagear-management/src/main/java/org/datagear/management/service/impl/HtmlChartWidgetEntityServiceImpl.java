@@ -12,20 +12,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.analysis.ChartDataSetFactory;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.ChartWidget;
-import org.datagear.analysis.support.SqlDataSetFactory;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
-import org.datagear.management.domain.SqlDataSetFactoryEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SqlDataSetFactoryEntityService;
+import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -39,6 +40,8 @@ public class HtmlChartWidgetEntityServiceImpl
 		implements HtmlChartWidgetEntityService
 {
 	protected static final String SQL_NAMESPACE = HtmlChartWidgetEntity.class.getName();
+
+	protected static final String DATA_SIGN_SPLITTER = "__DSSP__";
 
 	private ChartPluginManager chartPluginManager;
 
@@ -109,12 +112,7 @@ public class HtmlChartWidgetEntityServiceImpl
 		if (entity == null)
 			return null;
 
-		setHtmlChartPlugin(entity);
-
-		SqlDataSetFactory[] sqlDataSetFactories = this.sqlDataSetFactoryEntityService
-				.getSqlDataSetFactories(entity.getId());
-
-		entity.setDataSetFactories(sqlDataSetFactories);
+		postProcessSelect(entity);
 
 		return (ChartWidget<T>) entity;
 	}
@@ -191,11 +189,33 @@ public class HtmlChartWidgetEntityServiceImpl
 			return;
 
 		setHtmlChartPlugin(obj);
+		setChartDataSetFactories(obj);
+	}
 
-		SqlDataSetFactoryEntity[] sqlDataSetFactories = this.sqlDataSetFactoryEntityService
-				.getSqlDataSetFactoryEntities(obj.getId());
+	protected void setChartDataSetFactories(HtmlChartWidgetEntity widget)
+	{
+		List<WidgetDataSetFactoryRelation> relations = selectListMybatis("getDataSetRelations", widget.getId());
 
-		obj.setSqlDataSetFactoryEntities(sqlDataSetFactories);
+		ChartDataSetFactory[] chartDataSetFactories = new ChartDataSetFactory[relations.size()];
+
+		for (int i = 0; i < relations.size(); i++)
+		{
+			WidgetDataSetFactoryRelation relation = relations.get(i);
+
+			DataSetFactory dataSetFactory = this.sqlDataSetFactoryEntityService
+					.getSqlDataSetFactory(relation.getDataSetFactoryId());
+
+			if (dataSetFactory == null)
+				continue;
+
+			ChartDataSetFactory chartDataSetFactory = new ChartDataSetFactory();
+			chartDataSetFactory.setDataSetFactory(dataSetFactory);
+			chartDataSetFactory.setDataSigns(widget.getChartPlugin(), relation.splitDataSigns());
+
+			chartDataSetFactories[i] = chartDataSetFactory;
+		}
+
+		widget.setChartDataSetFactories(chartDataSetFactories);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -231,6 +251,8 @@ public class HtmlChartWidgetEntityServiceImpl
 
 		private String dataSetFactoryId;
 
+		private String dataSignsText;
+
 		private int order;
 
 		public WidgetDataSetFactoryRelation()
@@ -238,11 +260,12 @@ public class HtmlChartWidgetEntityServiceImpl
 			super();
 		}
 
-		public WidgetDataSetFactoryRelation(String widgetId, String dataSetFactoryId, int order)
+		public WidgetDataSetFactoryRelation(String widgetId, String dataSetFactoryId, String dataSignsText, int order)
 		{
 			super();
 			this.widgetId = widgetId;
 			this.dataSetFactoryId = dataSetFactoryId;
+			this.dataSignsText = dataSignsText;
 			this.order = order;
 		}
 
@@ -266,6 +289,29 @@ public class HtmlChartWidgetEntityServiceImpl
 			this.dataSetFactoryId = dataSetFactoryId;
 		}
 
+		public String getDataSignsText()
+		{
+			return dataSignsText;
+		}
+
+		public void setDataSignsText(String dataSignsText)
+		{
+			this.dataSignsText = dataSignsText;
+		}
+
+		/**
+		 * 拆分{@linkplain #getDataSignsText()}。
+		 * 
+		 * @return
+		 */
+		public String[] splitDataSigns()
+		{
+			if (this.dataSignsText == null)
+				return new String[0];
+
+			return StringUtil.split(this.dataSignsText, DATA_SIGN_SPLITTER, true);
+		}
+
 		public int getOrder()
 		{
 			return order;
@@ -283,15 +329,18 @@ public class HtmlChartWidgetEntityServiceImpl
 			if (obj == null)
 				return list;
 
-			SqlDataSetFactoryEntity[] dataSetFactoryEntities = obj.getSqlDataSetFactoryEntities();
+			ChartDataSetFactory[] chartDataSetFactories = obj.getChartDataSetFactories();
 
-			if (dataSetFactoryEntities == null)
+			if (chartDataSetFactories == null)
 				return list;
 
-			for (int i = 0; i < dataSetFactoryEntities.length; i++)
+			for (int i = 0; i < chartDataSetFactories.length; i++)
 			{
+				ChartDataSetFactory chartDataSetFactory = chartDataSetFactories[i];
+
 				WidgetDataSetFactoryRelation relation = new WidgetDataSetFactoryRelation(obj.getId(),
-						dataSetFactoryEntities[i].getId(), i + 1);
+						chartDataSetFactory.getDataSetFactory().getId(),
+						chartDataSetFactory.getDataSignNamesText(DATA_SIGN_SPLITTER), i + 1);
 
 				list.add(relation);
 			}

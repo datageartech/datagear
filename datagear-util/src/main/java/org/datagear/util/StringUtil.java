@@ -98,6 +98,36 @@ public class StringUtil
 	}
 
 	/**
+	 * 拆分字符串。
+	 * 
+	 * @param text
+	 * @param splitter
+	 * @param trim
+	 * @return
+	 */
+	public static String[] split(String text, String splitter, boolean trim)
+	{
+		if (trim)
+		{
+			text = text.trim();
+
+			if (text.isEmpty())
+				return new String[0];
+		}
+
+		if (text.startsWith(splitter))
+			text = text.substring(splitter.length());
+		if (text.endsWith(splitter))
+			text = text.substring(0, text.length() - splitter.length());
+
+		String[] array = text.split(splitter);
+		for (int i = 0; i < array.length; i++)
+			array[i] = (trim ? array[i].trim() : array[i]);
+
+		return array;
+	}
+
+	/**
 	 * 将字符串第一个字符转为小写。
 	 * 
 	 * @param s

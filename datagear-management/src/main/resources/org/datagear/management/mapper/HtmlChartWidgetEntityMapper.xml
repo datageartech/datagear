@@ -94,13 +94,25 @@
 	<insert id="insertDataSetRelation">
 		INSERT INTO DATAGEAR_HCW_DSF
 			(
-			HCW_ID, DSF_ID, DSF_ORDER
+			HCW_ID, DSF_ID, DATA_SIGNS_TEXT, DSF_ORDER
 			)
 		VALUES
 			(
-			#{widgetId}, #{dataSetFactoryId}, #{order}
+			#{widgetId}, #{dataSetFactoryId}, #{dataSignsText}, #{order}
 			)
 	</insert>
+	
+	<select id="getDataSetRelations" resultType="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl$WidgetDataSetFactoryRelation">
+		SELECT
+			HCW_ID AS ${_iq_}widgetId${_iq_},
+			DSF_ID AS ${_iq_}dataSetFactoryId${_iq_},
+			DATA_SIGNS_TEXT AS ${_iq_}dataSignsText${_iq_},
+			DSF_ORDER AS ${_iq_}order${_iq_}
+		FROM
+			DATAGEAR_HCW_DSF
+		WHERE
+			HCW_ID = #{widgetId}
+	</select>
 	
 	<sql id="queryViewDataPermission">
 		<choose><when test="DP_CURRENT_USER == null">

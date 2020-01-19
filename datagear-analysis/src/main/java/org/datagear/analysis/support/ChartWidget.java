@@ -11,6 +11,7 @@ import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSetFactory;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 
@@ -109,6 +110,19 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 	public void setUpdateInterval(int updateInterval)
 	{
 		this.updateInterval = updateInterval;
+	}
+
+	/**
+	 * 从{@linkplain ChartPluginManager}查找并设置{@linkplain #setChartPlugin(ChartPlugin)}。
+	 * 
+	 * @param chartPluginManager
+	 * @param chartPluginId
+	 * @return
+	 */
+	public void setChartPlugin(ChartPluginManager chartPluginManager, String chartPluginId)
+	{
+		ChartPlugin<T> chartPlugin = chartPluginManager.get(chartPluginId);
+		setChartPlugin(chartPlugin);
 	}
 
 	/**

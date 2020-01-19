@@ -138,7 +138,19 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		}
 
 		@Override
+		public ChartProperty getChartProperty(String name)
+		{
+			return null;
+		}
+
+		@Override
 		public List<DataSign> getDataSigns()
+		{
+			return null;
+		}
+
+		@Override
+		public DataSign getDataSign(String name)
 		{
 			return null;
 		}

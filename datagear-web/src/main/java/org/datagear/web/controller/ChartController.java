@@ -9,6 +9,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.ChartDataSetFactory;
+import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderContext;
@@ -102,17 +104,17 @@ public class ChartController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			HtmlChartWidgetEntity chart)
+			HtmlChartWidgetEntity entity)
 	{
 		User user = WebUtils.getUser(request, response);
 
-		checkSaveEntity(chart);
+		entity.setId(IDUtil.uuid());
+		entity.setCreateUser(user);
+		inflateHtmlChartWidgetEntity(entity, request);
 
-		chart.setId(IDUtil.uuid());
-		chart.setCreateUser(user);
-		chart.setSqlDataSetFactoryEntities(getSqlDataSetFactoryEntityParams(request));
+		checkSaveEntity(entity);
 
-		this.htmlChartWidgetEntityService.add(user, chart);
+		this.htmlChartWidgetEntityService.add(user, entity);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -141,15 +143,17 @@ public class ChartController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			HtmlChartWidgetEntity chart)
+			HtmlChartWidgetEntity entity)
 	{
 		User user = WebUtils.getUser(request, response);
 
-		checkSaveEntity(chart);
+		entity.setId(IDUtil.uuid());
+		entity.setCreateUser(user);
+		inflateHtmlChartWidgetEntity(entity, request);
 
-		chart.setSqlDataSetFactoryEntities(getSqlDataSetFactoryEntityParams(request));
+		checkSaveEntity(entity);
 
-		this.htmlChartWidgetEntityService.update(user, chart);
+		this.htmlChartWidgetEntityService.update(user, entity);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -222,29 +226,54 @@ public class ChartController extends AbstractChartPluginAwareController
 		return pagingData;
 	}
 
-	protected SqlDataSetFactoryEntity[] getSqlDataSetFactoryEntityParams(HttpServletRequest request)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected void inflateHtmlChartWidgetEntity(HtmlChartWidgetEntity entity, HttpServletRequest request)
+	{
+		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = entity.getHtmlChartPlugin();
+
+		if (htmlChartPlugin != null)
+		{
+			htmlChartPlugin = (HtmlChartPlugin<HtmlRenderContext>) (ChartPlugin) this.chartPluginManager
+					.get(htmlChartPlugin.getId());
+
+			entity.setHtmlChartPlugin(htmlChartPlugin);
+		}
+
+		inflateChartDataSetFactories(entity, request);
+	}
+
+	protected void inflateChartDataSetFactories(HtmlChartWidgetEntity entity, HttpServletRequest request)
 	{
 		String[] dataSetIds = request.getParameterValues("dataSetId");
 
 		if (dataSetIds == null || dataSetIds.length == 0)
-			return null;
+			return;
 
-		SqlDataSetFactoryEntity[] params = new SqlDataSetFactoryEntity[dataSetIds.length];
+		ChartDataSetFactory[] chartDataSetFactories = new ChartDataSetFactory[dataSetIds.length];
 
 		for (int i = 0; i < dataSetIds.length; i++)
 		{
-			SqlDataSetFactoryEntity param = new SqlDataSetFactoryEntity();
-			param.setId(dataSetIds[i]);
+			String myDataSignParam = "dataSign_" + i;
+			String[] myDataSigns = request.getParameterValues(myDataSignParam);
 
-			params[i] = param;
+			SqlDataSetFactoryEntity sqlDataSetFactory = new SqlDataSetFactoryEntity();
+			sqlDataSetFactory.setId(dataSetIds[i]);
+
+			ChartDataSetFactory chartDataSetFactory = new ChartDataSetFactory();
+
+			chartDataSetFactory.setDataSetFactory(sqlDataSetFactory);
+			chartDataSetFactory.setDataSigns(entity.getChartPlugin(), myDataSigns);
 		}
 
-		return params;
+		entity.setChartDataSetFactories(chartDataSetFactories);
 	}
 
 	protected void checkSaveEntity(HtmlChartWidgetEntity chart)
 	{
 		if (isBlank(chart.getName()))
+			throw new IllegalInputException();
+
+		if (isEmpty(chart.getChartPlugin()))
 			throw new IllegalInputException();
 
 		if (isEmpty(chart.getChartPlugin()))

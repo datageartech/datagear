@@ -24,11 +24,6 @@ public class UserSQLException extends ControllerException
 		super();
 	}
 
-	public UserSQLException(String message)
-	{
-		super(message);
-	}
-
 	public UserSQLException(SQLException cause)
 	{
 		super(cause);

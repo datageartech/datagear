@@ -8,6 +8,9 @@
 package org.datagear.analysis;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import org.datagear.util.i18n.Label;
 
@@ -117,5 +120,12 @@ public class DataSign implements Serializable
 	{
 		return getClass().getSimpleName() + " [name=" + name + ", occurRequired=" + occurRequired + ", occurMultiple="
 				+ occurMultiple + ", nameLabel=" + nameLabel + ", descLabel=" + descLabel + "]";
+	}
+
+	public static List<DataSign> toDataSigns(List<String> labelValues, Locale locale)
+	{
+		List<DataSign> dataSigns = new ArrayList<DataSign>(labelValues.size());
+
+		return dataSigns;
 	}
 }

@@ -65,7 +65,7 @@ public class Dashboard extends AbstractIdentifiable
 	 */
 	public boolean hasChart()
 	{
-		return (this.charts == null || this.charts.isEmpty());
+		return (this.charts != null && !this.charts.isEmpty());
 	}
 
 	public List<Chart> getCharts()

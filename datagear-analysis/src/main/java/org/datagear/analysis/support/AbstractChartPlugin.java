@@ -120,6 +120,21 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 	}
 
 	@Override
+	public ChartProperty getChartProperty(String name)
+	{
+		if (this.chartProperties == null)
+			return null;
+
+		for (ChartProperty chartProperty : this.chartProperties)
+		{
+			if (chartProperty.getName().equals(name))
+				return chartProperty;
+		}
+
+		return null;
+	}
+
+	@Override
 	public List<DataSign> getDataSigns()
 	{
 		return dataSigns;
@@ -128,6 +143,21 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 	public void setDataSigns(List<DataSign> dataSigns)
 	{
 		this.dataSigns = dataSigns;
+	}
+
+	@Override
+	public DataSign getDataSign(String name)
+	{
+		if (this.dataSigns == null)
+			return null;
+
+		for (DataSign dataSign : this.dataSigns)
+		{
+			if (dataSign.getName().equals(name))
+				return dataSign;
+		}
+
+		return null;
 	}
 
 	@Override

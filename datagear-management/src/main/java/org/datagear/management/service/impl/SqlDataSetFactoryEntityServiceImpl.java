@@ -7,10 +7,15 @@
  */
 package org.datagear.management.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.analysis.DataSetExport;
+import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.DataSetParam;
+import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.SqlDataSetFactory;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.SchemaConnectionFactory;
@@ -100,28 +105,25 @@ public class SqlDataSetFactoryEntityServiceImpl
 	}
 
 	@Override
-	public SqlDataSetFactoryEntity[] getSqlDataSetFactoryEntities(String htmlChartWidgetEntityId)
+	protected boolean add(SqlDataSetFactoryEntity entity, Map<String, Object> params)
 	{
-		List<SqlDataSetFactoryEntity> list = getSqlDataSetFactoryEntityList(htmlChartWidgetEntityId);
+		boolean success = super.add(entity, params);
 
-		SqlDataSetFactoryEntity[] array = new SqlDataSetFactoryEntity[list == null ? 0 : list.size()];
+		if (success)
+			saveDataSetFactoryChildren(entity);
 
-		list.toArray(array);
-
-		return array;
+		return success;
 	}
 
 	@Override
-	public SqlDataSetFactory[] getSqlDataSetFactories(String chartWidgetId)
+	protected boolean update(SqlDataSetFactoryEntity entity, Map<String, Object> params)
 	{
-		List<SqlDataSetFactoryEntity> list = getSqlDataSetFactoryEntityList(chartWidgetId);
-		for (SqlDataSetFactoryEntity entry : list)
-			postProcessSelect(entry);
+		boolean success = super.update(entity, params);
 
-		SqlDataSetFactoryEntity[] array = new SqlDataSetFactoryEntity[list.size()];
-		list.toArray(array);
+		if (success)
+			saveDataSetFactoryChildren(entity);
 
-		return array;
+		return success;
 	}
 
 	@Override
@@ -136,23 +138,15 @@ public class SqlDataSetFactoryEntityServiceImpl
 		return super.getById(user, id);
 	}
 
-	public List<SqlDataSetFactoryEntity> getSqlDataSetFactoryEntityList(String htmlChartWidgetEntityId)
-	{
-		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
-		params.put("htmlChartWidgetEntityId", htmlChartWidgetEntityId);
-
-		List<SqlDataSetFactoryEntity> list = super.query("findByHtmlChartWidgetEntityId", params);
-
-		return list;
-	}
-
 	@Override
 	protected boolean deleteById(String id, Map<String, Object> params)
 	{
 		boolean deleted = super.deleteById(id, params);
 
 		if (deleted)
+		{
 			this.authorizationService.deleteByResource(SqlDataSetFactoryEntity.AUTHORIZATION_RESOURCE_TYPE, id);
+		}
 
 		return deleted;
 	}
@@ -174,6 +168,21 @@ public class SqlDataSetFactoryEntityServiceImpl
 
 		connectionFactory.setSchema(this.schemaService.getById(connectionFactory.getSchema().getId()));
 		connectionFactory.setConnectionSource(this.connectionSource);
+
+		Map<String, Object> sqlParams = buildParamMapWithIdentifierQuoteParameter();
+		sqlParams.put("dataSetFactoryId", obj.getId());
+
+		List<DataSetPropertyPO> propertyPOs = selectListMybatis("getPropertyPOs", sqlParams);
+		List<DataSetProperty> dataSetProperties = DataSetPropertyPO.to(propertyPOs);
+		obj.setProperties(dataSetProperties);
+
+		List<DataSetParamPO> paramPOs = selectListMybatis("getParamPOs", sqlParams);
+		List<DataSetParam> dataSetParams = DataSetParamPO.to(paramPOs);
+		obj.setParams(dataSetParams);
+
+		List<DataSetExportPO> exportPOs = selectListMybatis("getExportPOs", sqlParams);
+		List<DataSetExport> dataSetExports = DataSetExportPO.to(exportPOs);
+		obj.setExports(dataSetExports);
 	}
 
 	@Override
@@ -186,5 +195,243 @@ public class SqlDataSetFactoryEntityServiceImpl
 	protected String getSqlNamespace()
 	{
 		return SQL_NAMESPACE;
+	}
+
+	protected void saveDataSetFactoryChildren(SqlDataSetFactory entity)
+	{
+		saveDataSetPropertyPOs(entity);
+		saveDataSetParamPOs(entity);
+		saveDataSetExportPOs(entity);
+	}
+
+	protected void saveDataSetPropertyPOs(SqlDataSetFactory entity)
+	{
+		deleteMybatis("deletePropertyPOs", entity.getId());
+
+		List<DataSetPropertyPO> pos = DataSetPropertyPO.from(entity);
+
+		if (!pos.isEmpty())
+		{
+			for (DataSetPropertyPO relation : pos)
+				insertMybatis("insertPropertyPO", relation);
+		}
+	}
+
+	protected void saveDataSetParamPOs(SqlDataSetFactory entity)
+	{
+		deleteMybatis("deleteParamPOs", entity.getId());
+
+		List<DataSetParamPO> pos = DataSetParamPO.from(entity);
+
+		if (!pos.isEmpty())
+		{
+			for (DataSetParamPO relation : pos)
+				insertMybatis("insertParamPO", relation);
+		}
+	}
+
+	protected void saveDataSetExportPOs(SqlDataSetFactory entity)
+	{
+		deleteMybatis("deleteExportPOs", entity.getId());
+
+		List<DataSetExportPO> pos = DataSetExportPO.from(entity);
+
+		if (!pos.isEmpty())
+		{
+			for (DataSetExportPO relation : pos)
+				insertMybatis("insertExportPO", relation);
+		}
+	}
+
+	public static abstract class DataSetFactoryChildPO<T>
+	{
+		private String dataSetFactoryId;
+		private T child;
+		private int order = 0;
+
+		public DataSetFactoryChildPO()
+		{
+			super();
+		}
+
+		public DataSetFactoryChildPO(String dataSetFactoryId, T child, int order)
+		{
+			super();
+			this.dataSetFactoryId = dataSetFactoryId;
+			this.child = child;
+			this.order = order;
+		}
+
+		public String getDataSetFactoryId()
+		{
+			return dataSetFactoryId;
+		}
+
+		public void setDataSetFactoryId(String dataSetFactoryId)
+		{
+			this.dataSetFactoryId = dataSetFactoryId;
+		}
+
+		public T getChild()
+		{
+			return child;
+		}
+
+		public void setChild(T child)
+		{
+			this.child = child;
+		}
+
+		public int getOrder()
+		{
+			return order;
+		}
+
+		public void setOrder(int order)
+		{
+			this.order = order;
+		}
+
+		public static <T> List<T> to(List<? extends DataSetFactoryChildPO<T>> pos)
+		{
+			List<T> childs = new ArrayList<T>();
+
+			if (pos != null)
+			{
+				for (DataSetFactoryChildPO<T> po : pos)
+					childs.add(po.getChild());
+			}
+
+			return childs;
+		}
+	}
+
+	public static class DataSetPropertyPO extends DataSetFactoryChildPO<DataSetProperty>
+	{
+		public DataSetPropertyPO()
+		{
+			super();
+		}
+
+		public DataSetPropertyPO(String dataSetFactoryId, DataSetProperty child, int order)
+		{
+			super(dataSetFactoryId, child, order);
+		}
+
+		@Override
+		public DataSetProperty getChild()
+		{
+			return super.getChild();
+		}
+
+		@Override
+		public void setChild(DataSetProperty child)
+		{
+			super.setChild(child);
+		}
+
+		public static List<DataSetPropertyPO> from(DataSetFactory dataSetFactory)
+		{
+			List<DataSetPropertyPO> pos = new ArrayList<DataSetPropertyPO>();
+
+			List<DataSetProperty> properties = dataSetFactory.getProperties();
+
+			if (properties != null)
+			{
+				for (int i = 0; i < properties.size(); i++)
+				{
+					DataSetPropertyPO po = new DataSetPropertyPO(dataSetFactory.getId(), properties.get(i), i);
+					pos.add(po);
+				}
+			}
+
+			return pos;
+		}
+	}
+
+	public static class DataSetParamPO extends DataSetFactoryChildPO<DataSetParam>
+	{
+		public DataSetParamPO()
+		{
+			super();
+		}
+
+		public DataSetParamPO(String dataSetFactoryId, DataSetParam child, int order)
+		{
+			super(dataSetFactoryId, child, order);
+		}
+
+		@Override
+		public DataSetParam getChild()
+		{
+			return super.getChild();
+		}
+
+		@Override
+		public void setChild(DataSetParam child)
+		{
+			super.setChild(child);
+		}
+
+		public static List<DataSetParamPO> from(DataSetFactory dataSetFactory)
+		{
+			List<DataSetParamPO> pos = new ArrayList<DataSetParamPO>();
+
+			List<DataSetParam> params = dataSetFactory.getParams();
+
+			if (params != null)
+			{
+				for (int i = 0; i < params.size(); i++)
+				{
+					DataSetParamPO po = new DataSetParamPO(dataSetFactory.getId(), params.get(i), i);
+					pos.add(po);
+				}
+			}
+
+			return pos;
+		}
+	}
+
+	public static class DataSetExportPO extends DataSetFactoryChildPO<DataSetExport>
+	{
+		public DataSetExportPO()
+		{
+			super();
+		}
+
+		public DataSetExportPO(String dataSetFactoryId, DataSetExport child, int order)
+		{
+			super(dataSetFactoryId, child, order);
+		}
+
+		@Override
+		public DataSetExport getChild()
+		{
+			return super.getChild();
+		}
+
+		@Override
+		public void setChild(DataSetExport child)
+		{
+			super.setChild(child);
+		}
+
+		public static List<DataSetExportPO> from(DataSetFactory dataSetFactory)
+		{
+			List<DataSetExportPO> pos = new ArrayList<DataSetExportPO>();
+
+			List<DataSetExport> exports = dataSetFactory.getExports();
+
+			if (exports != null)
+			{
+				for (int i = 0; i < exports.size(); i++)
+				{
+					DataSetExportPO po = new DataSetExportPO(dataSetFactory.getId(), exports.get(i), i);
+					pos.add(po);
+				}
+			}
+
+			return pos;
+		}
 	}
 }

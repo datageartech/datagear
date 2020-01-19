@@ -61,7 +61,7 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	Icon getIcon(RenderStyle renderStyle);
 
 	/**
-	 * 获取{@linkplain ChartProperties}。
+	 * 获取{@linkplain ChartProperty}列表。
 	 * <p>
 	 * 返回{@code null}表示没有。
 	 * </p>
@@ -69,6 +69,14 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	 * @return
 	 */
 	List<ChartProperty> getChartProperties();
+
+	/**
+	 * 获取指定名称的{@linkplain ChartProperty}，没有找到则返回{@code null}。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	ChartProperty getChartProperty(String name);
 
 	/**
 	 * 获取{@linkplain DataSign}列表。
@@ -79,6 +87,14 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	 * @return
 	 */
 	List<DataSign> getDataSigns();
+
+	/**
+	 * 获取指定名称的{@linkplain DataSign}，没有找到则返回{@code null}。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	DataSign getDataSign(String name);
 
 	/**
 	 * 渲染{@linkplain Chart}。

@@ -8,9 +8,9 @@
 package org.datagear.management.domain;
 
 import java.util.Date;
+import java.util.List;
 
-import org.datagear.analysis.DataCategory;
-import org.datagear.analysis.DataSetMeta;
+import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.SqlDataSetFactory;
 import org.datagear.util.resource.ConnectionFactory;
 
@@ -24,8 +24,6 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 		implements CreateUserEntity<String>, DataPermissionEntity<String>
 {
 	private static final long serialVersionUID = 1L;
-
-	public static final String SPLITTER = ",";
 
 	/** 授权资源类型 */
 	public static final String AUTHORIZATION_RESOURCE_TYPE = "DataSet";
@@ -48,10 +46,10 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 		this.createTime = new Date();
 	}
 
-	public SqlDataSetFactoryEntity(String id, DataSetMeta meta, SchemaConnectionFactory connectionFactory, String sql,
-			String name, User createUser)
+	public SqlDataSetFactoryEntity(String id, List<DataSetProperty> properties,
+			SchemaConnectionFactory connectionFactory, String sql, String name, User createUser)
 	{
-		super(id, meta, connectionFactory, sql);
+		super(id, properties, connectionFactory, sql);
 		this.name = name;
 		this.createTime = new Date();
 	}
@@ -91,73 +89,6 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 		this.name = name;
 	}
 
-	public String getDataCategoriesText()
-	{
-		StringBuilder sb = new StringBuilder();
-
-		DataCategory[] dataCategories = getDataCategories();
-
-		if (dataCategories != null)
-		{
-			for (int i = 0; i < dataCategories.length; i++)
-			{
-				if (i > 0)
-					sb.append(SPLITTER + " ");
-
-				sb.append(dataCategories[i].name());
-			}
-		}
-
-		return sb.toString();
-	}
-
-	public void setDataCategoriesText(String dataCategoriesText)
-	{
-		String[] texts = split(dataCategoriesText);
-
-		DataCategory[] dataCategories = new DataCategory[texts.length];
-
-		for (int i = 0; i < texts.length; i++)
-		{
-			String text = texts[i].trim();
-
-			if (DataCategory.DIMENSION.name().equalsIgnoreCase(text))
-				dataCategories[i] = DataCategory.DIMENSION;
-			else if (DataCategory.SCALAR.name().equalsIgnoreCase(text))
-				dataCategories[i] = DataCategory.SCALAR;
-			else
-				throw new IllegalArgumentException("illegal data categories text [" + dataCategoriesText + "]");
-		}
-
-		setDataCategories(dataCategories);
-	}
-
-	public String getColumnLabelsText()
-	{
-		StringBuilder sb = new StringBuilder();
-
-		String[] columnLabels = getColumnLabels();
-
-		if (columnLabels != null)
-		{
-			for (int i = 0; i < columnLabels.length; i++)
-			{
-				if (i > 0)
-					sb.append(SPLITTER + " ");
-
-				sb.append(columnLabels[i]);
-			}
-		}
-
-		return sb.toString();
-	}
-
-	public void setColumnLabelsText(String columnLabelsText)
-	{
-		String[] texts = split(columnLabelsText);
-		setColumnLabels(texts);
-	}
-
 	@Override
 	public User getCreateUser()
 	{
@@ -190,27 +121,5 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
-	}
-
-	@Override
-	protected String getDataSetMetaName()
-	{
-		return this.name;
-	}
-
-	protected String[] split(String texts)
-	{
-		texts = texts.trim();
-
-		if (texts.startsWith(SPLITTER))
-			texts = texts.substring(SPLITTER.length());
-		if (texts.endsWith(SPLITTER))
-			texts = texts.substring(0, texts.length() - SPLITTER.length());
-
-		String[] array = texts.split(SPLITTER);
-		for (int i = 0; i < array.length; i++)
-			array[i] = array[i].trim();
-
-		return array;
 	}
 }

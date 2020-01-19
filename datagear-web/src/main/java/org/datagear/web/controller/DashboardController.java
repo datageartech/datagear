@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetParamValues;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlDashboard;
@@ -477,12 +476,12 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (dashboard == null)
 			throw new RecordNotFoundException();
 
-		DataSetParamValues paramValues = new DataSetParamValues();
+		Map<String, ?> dataSetParamValues = new HashMap<String, Object>();
 
 		if (chartsId == null || chartsId.length == 0)
-			return dashboard.getDataSets(paramValues);
+			return dashboard.getDataSets(dataSetParamValues);
 		else
-			return dashboard.getDataSets(Arrays.asList(chartsId), paramValues);
+			return dashboard.getDataSets(Arrays.asList(chartsId), dataSetParamValues);
 	}
 
 	/**
