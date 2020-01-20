@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.datagear.management.domain.SqlDataSetFactoryEntity">
+<mapper namespace="org.datagear.management.domain.SqlDataSetEntity">
 
 	<insert id="insert">
-		INSERT INTO DATAGEAR_DATA_SET_FACTORY
+		INSERT INTO DATAGEAR_SQL_DATA_SET
 			(
-			DSF_ID, DSF_NAME, DSF_SCHEMA_ID, DSF_SQL,
-			DSF_CREATE_USER_ID, DSF_CREATE_TIME
+			DS_ID, DS_NAME, DS_SCHEMA_ID, DS_SQL,
+			DS_CREATE_USER_ID, DS_CREATE_TIME
 			)
 		VALUES
 			(
@@ -17,72 +17,72 @@
 	</insert>
 	
 	<insert id="insertPropertyPO">
-		INSERT INTO DATAGEAR_DATA_SET_FACTORY_PROP
+		INSERT INTO DATAGEAR_DATA_SET_PROP
 			(
-			PROP_DSF_ID, PROP_NAME, PROP_TYPE, PROP_LABEL, PROP_ORDER
+			PROP_DS_ID, PROP_NAME, PROP_TYPE, PROP_LABEL, PROP_ORDER
 			)
 		VALUES
 			(
-			#{dataSetFactoryId}, #{child.name}, #{child.type}, #{child.label, jdbcType=VARCHAR}, #{order}
+			#{dataSetId}, #{child.name}, #{child.type}, #{child.label, jdbcType=VARCHAR}, #{order}
 			)
 	</insert>
 	
 	<insert id="insertParamPO">
-		INSERT INTO DATAGEAR_DATA_SET_FACTORY_PAR
+		INSERT INTO DATAGEAR_DATA_SET_PAR
 			(
-			PAR_DSF_ID, PAR_NAME, PAR_TYPE, PAR_REQUIRED, PAR_DEFAULT_VALUE, PAR_ORDER
+			PAR_DS_ID, PAR_NAME, PAR_TYPE, PAR_REQUIRED, PAR_DEFAULT_VALUE, PAR_ORDER
 			)
 		VALUES
 			(
-			#{dataSetFactoryId}, #{child.name}, #{child.type}, #{child.required}, #{child.defaultValue, jdbcType=VARCHAR}, #{order}
+			#{dataSetId}, #{child.name}, #{child.type}, #{child.required}, #{child.defaultValue, jdbcType=VARCHAR}, #{order}
 			)
 	</insert>
 	
 	<insert id="insertExportPO">
-		INSERT INTO DATAGEAR_DATA_SET_FACTORY_EXPT
+		INSERT INTO DATAGEAR_DATA_SET_EXPT
 			(
-			EXPT_DSF_ID, EXPT_NAME, EXPT_TYPE, PROP_ORDER
+			EXPT_DS_ID, EXPT_NAME, EXPT_TYPE, PROP_ORDER
 			)
 		VALUES
 			(
-			#{dataSetFactoryId}, #{child.name}, #{child.type}, #{order}
+			#{dataSetId}, #{child.name}, #{child.type}, #{order}
 			)
 	</insert>
 	
 	<update id="update">
-		UPDATE DATAGEAR_DATA_SET_FACTORY SET
-			DSF_NAME = #{entity.name},
-			DSF_SCHEMA_ID = #{entity.schemaConnectionFactory.schema.id},
-			DSF_SQL = #{entity.sql}
+		UPDATE DATAGEAR_SQL_DATA_SET SET
+			DS_NAME = #{entity.name},
+			DS_SCHEMA_ID = #{entity.schemaConnectionFactory.schema.id},
+			DS_SQL = #{entity.sql}
 		WHERE
-			DSF_ID = #{entity.id}
+			DS_ID = #{entity.id}
 	</update>
 	
 	<delete id="deleteById">
-		DELETE FROM DATAGEAR_DATA_SET_FACTORY
+		DELETE FROM DATAGEAR_SQL_DATA_SET
 		WHERE
-			DSF_ID = #{id}
+			DS_ID = #{id}
 	</delete>
 	
 	<delete id="deletePropertyPOs">
-		DELETE FROM DATAGEAR_DATA_SET_FACTORY_PROP
+		DELETE FROM DATAGEAR_DATA_SET_PROP
 		WHERE
-			PROP_DSF_ID = #{dataSetFactoryId}
+			PROP_DS_ID = #{dataSetId}
 	</delete>
 	
 	<delete id="deleteParamPOs">
-		DELETE FROM DATAGEAR_DATA_SET_FACTORY_PAR
+		DELETE FROM DATAGEAR_DATA_SET_PAR
 		WHERE
-			PAR_DSF_ID = #{dataSetFactoryId}
+			PAR_DS_ID = #{dataSetId}
 	</delete>
 	
 	<delete id="deleteExportPOs">
-		DELETE FROM DATAGEAR_DATA_SET_FACTORY_EXPT
+		DELETE FROM DATAGEAR_DATA_SET_EXPT
 		WHERE
-			EXPT_DSF_ID = #{dataSetFactoryId}
+			EXPT_DS_ID = #{dataSetId}
 	</delete>
 	
-	<select id="getById" resultType="org.datagear.management.domain.SqlDataSetFactoryEntity">
+	<select id="getById" resultType="org.datagear.management.domain.SqlDataSetEntity">
 		SELECT
 			T.*
 		FROM
@@ -91,47 +91,47 @@
 			T.${_iq_}id${_iq_} = #{id}
 	</select>
 	
-	<select id="getPropertyPOs" resultType="org.datagear.management.service.impl.SqlDataSetFactoryEntityServiceImpl$DataSetPropertyPO">
+	<select id="getPropertyPOs" resultType="org.datagear.management.service.impl.SqlDataSetEntityServiceImpl$DataSetPropertyPO">
 		SELECT
-			PROP_DSF_ID AS ${_iq_}dataSetFactoryId${_iq_},
+			PROP_DS_ID AS ${_iq_}dataSetId${_iq_},
 			PROP_NAME AS ${_iq_}child.name${_iq_},
 			PROP_TYPE AS ${_iq_}child.type${_iq_},
 			PROP_LABEL AS ${_iq_}child.label${_iq_},
 			PROP_ORDER AS ${_iq_}order${_iq_}
 		FROM
-			DATAGEAR_DATA_SET_FACTORY_PROP
+			DATAGEAR_DATA_SET_PROP
 		WHERE
-			PROP_DSF_ID = #{dataSetFactoryId}
+			PROP_DS_ID = #{dataSetId}
 		ORDER BY
 			PROP_ORDER ASC
 	</select>
 	
-	<select id="getParamPOs" resultType="org.datagear.management.service.impl.SqlDataSetFactoryEntityServiceImpl$DataSetParamPO">
+	<select id="getParamPOs" resultType="org.datagear.management.service.impl.SqlDataSetEntityServiceImpl$DataSetParamPO">
 		SELECT
-			PAR_DSF_ID AS ${_iq_}dataSetFactoryId${_iq_},
+			PAR_DS_ID AS ${_iq_}dataSetId${_iq_},
 			PAR_NAME AS ${_iq_}child.name${_iq_},
 			PAR_TYPE AS ${_iq_}child.type${_iq_},
 			PAR_REQUIRED AS ${_iq_}child.required${_iq_},
 			PAR_DEFAULT_VALUE AS ${_iq_}child.defaultValue${_iq_},
 			PAR_ORDER AS ${_iq_}order${_iq_}
 		FROM
-			DATAGEAR_DATA_SET_FACTORY_PAR
+			DATAGEAR_DATA_SET_PAR
 		WHERE
-			PAR_DSF_ID = #{dataSetFactoryId}
+			PAR_DS_ID = #{dataSetId}
 		ORDER BY
 			PAR_ORDER ASC
 	</select>
 	
-	<select id="getExportPOs" resultType="org.datagear.management.service.impl.SqlDataSetFactoryEntityServiceImpl$DataSetExportPO">
+	<select id="getExportPOs" resultType="org.datagear.management.service.impl.SqlDataSetEntityServiceImpl$DataSetExportPO">
 		SELECT
-			EXPT_DSF_ID AS ${_iq_}dataSetFactoryId${_iq_},
+			EXPT_DS_ID AS ${_iq_}dataSetId${_iq_},
 			EXPT_NAME AS ${_iq_}child.name${_iq_},
 			EXPT_TYPE AS ${_iq_}child.type${_iq_},
 			EXPT_ORDER AS ${_iq_}order${_iq_}
 		FROM
-			DATAGEAR_DATA_SET_FACTORY_EXPT
+			DATAGEAR_DATA_SET_EXPT
 		WHERE
-			EXPT_DSF_ID = #{dataSetFactoryId}
+			EXPT_DS_ID = #{dataSetId}
 		ORDER BY
 			EXPT_ORDER ASC
 	</select>
@@ -150,7 +150,7 @@
 			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
 	</select>
 	
-	<select id="query" resultType="org.datagear.management.domain.SqlDataSetFactoryEntity">
+	<select id="query" resultType="org.datagear.management.domain.SqlDataSetEntity">
 		SELECT
 			T.*
 		FROM
@@ -169,7 +169,7 @@
 			<include refid="queryCondition" />
 	</select>
 	
-	<select id="pagingQuery" resultType="org.datagear.management.domain.SqlDataSetFactoryEntity">
+	<select id="pagingQuery" resultType="org.datagear.management.domain.SqlDataSetEntity">
 		<include refid="common.pagingQueryHead" />
 			SELECT
 				T.*
@@ -205,31 +205,31 @@
 	
 	<sql id="queryViewDataPermissionId">
 		SELECT
-			A.DSF_ID AS DP_AUTH_DATA_ID,
-			A.DSF_CREATE_USER_ID AS DP_AUTH_DATA_CREATOR_ID
+			A.DS_ID AS DP_AUTH_DATA_ID,
+			A.DS_CREATE_USER_ID AS DP_AUTH_DATA_CREATOR_ID
 		FROM
-			DATAGEAR_DATA_SET_FACTORY A
+			DATAGEAR_SQL_DATA_SET A
 	</sql>
 	
 	<sql id="queryView">
 		SELECT
-			A.DSF_ID AS ${_iq_}id${_iq_},
-			A.DSF_NAME AS ${_iq_}name${_iq_},
+			A.DS_ID AS ${_iq_}id${_iq_},
+			A.DS_NAME AS ${_iq_}name${_iq_},
 			B.SCHEMA_ID AS ${_iq_}schemaConnectionFactory.schema.id${_iq_},
 			B.SCHEMA_TITLE AS ${_iq_}schemaConnectionFactory.schema.title${_iq_},
-			A.DSF_SQL AS ${_iq_}sql${_iq_},
+			A.DS_SQL AS ${_iq_}sql${_iq_},
 			<include refid="common.fieldsForCreateUser" />,
-			A.DSF_CREATE_TIME AS ${_iq_}createTime${_iq_}
+			A.DS_CREATE_TIME AS ${_iq_}createTime${_iq_}
 		FROM
-			DATAGEAR_DATA_SET_FACTORY A
+			DATAGEAR_SQL_DATA_SET A
 		INNER JOIN
 			DATAGEAR_SCHEMA B
 		ON
-			A.DSF_SCHEMA_ID = B.SCHEMA_ID
+			A.DS_SCHEMA_ID = B.SCHEMA_ID
 		LEFT JOIN
 			DATAGEAR_USER USR
 		ON
-			A.DSF_CREATE_USER_ID = USR.USER_ID
+			A.DS_CREATE_USER_ID = USR.USER_ID
 	</sql>
 	
 	<sql id="queryCondition">
@@ -238,9 +238,6 @@
 		AND
 		(
 			${_iq_}name${_iq_} LIKE #{queryKeyword}
-			OR ${_iq_}schemaConnectionFactory.schema.title${_iq_} LIKE #{queryKeyword}
-			OR ${_iq_}createUser.name${_iq_} LIKE #{queryKeyword}
-			OR ${_iq_}createUser.realName${_iq_} LIKE #{queryKeyword}
 		)
 		</if>
 		<include refid="common.queryCondition" />

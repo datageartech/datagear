@@ -2023,6 +2023,70 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	float: right;
 	cursor: pointer;
 }
+.page-form-chart .data-set-wrapper .data-set-item .item-head{
+	padding: 0.2em 0;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-signs{
+	margin-top: 0.3em;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item{
+	padding: 0.2em 0;
+	position: relative;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-item-name{
+	display: inline-block;
+	width: 25%;
+	overflow: hidden;
+	padding: 1px 1px;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-item-values{
+	display: inline-block;
+	width: 75%;
+	height: 1.55em;
+	overflow: hidden;
+	padding: 1px 1px;
+	padding-right: 2.5em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-item-values.ui-widget-content{
+	background: none;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-add-button{
+	position: absolute;
+    top: 0.35em;
+    right: 0.1em;
+    height: 1.2em;
+    border: 0px;
+    padding: 0.4em 0.5em;
+}
+.page-form-chart .data-sign-select-panel{
+	position: absolute;
+	display: none;
+	padding: 0.3em 0.3em;
+	width: 30%;
+	height: 40%;
+}
+.page-form-chart .data-sign-select-panel .select-panel-head{
+	padding: 0.3em 0.1em;
+}
+.page-form-chart .data-sign-select-panel .select-panel-content{
+	position: absolute;
+	left: 0.41em;
+	right: 0.41em;
+	top: 3em;
+	bottom: 0.5em;
+	padding: 0.5em 0.5em;
+	overflow-y: auto;
+}
+.page-form-chart .data-sign-select-panel .select-panel-content .data-sign-item{
+	margin-right: 1em;
+	margin-bottom: 0.41em;
+}
 .page-form-chart .add-data-set-button{
 	vertical-align: top;
 }

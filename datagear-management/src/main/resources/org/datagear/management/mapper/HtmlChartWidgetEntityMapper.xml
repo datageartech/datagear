@@ -16,6 +16,17 @@
 			)
 	</insert>
 	
+	<insert id="insertDataSetRelation">
+		INSERT INTO DATAGEAR_HCW_DS
+			(
+			HCW_ID, DS_ID, DS_PROPERTY_SIGNS, DS_ORDER
+			)
+		VALUES
+			(
+			#{widgetId}, #{dataSetId}, #{propertySignsJson, jdbcType=VARCHAR}, #{order}
+			)
+	</insert>
+	
 	<update id="update">
 		UPDATE DATAGEAR_HTML_CHART_WIDGET SET
 			HCW_NAME = #{entity.name},
@@ -31,6 +42,12 @@
 			HCW_ID = #{id}
 	</delete>
 	
+	<delete id="deleteDataSetRelationById">
+		DELETE FROM DATAGEAR_HCW_DS
+		WHERE
+			HCW_ID = #{id}
+	</delete>
+	
 	<select id="getById" resultType="org.datagear.management.domain.HtmlChartWidgetEntity">
 		SELECT
 			T.*
@@ -38,6 +55,18 @@
 			(<include refid="queryViewDataPermission" />) T
 		WHERE
 			T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="getDataSetRelations" resultType="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl$WidgetDataSetRelation">
+		SELECT
+			HCW_ID AS ${_iq_}widgetId${_iq_},
+			DS_ID AS ${_iq_}dataSetId${_iq_},
+			DS_PROPERTY_SIGNS AS ${_iq_}propertySignsJson${_iq_},
+			DS_ORDER AS ${_iq_}order${_iq_}
+		FROM
+			DATAGEAR_HCW_DS
+		WHERE
+			HCW_ID = #{widgetId}
 	</select>
 	
 	<select id="getDataIdPermissions" resultType="org.datagear.management.domain.DataIdPermission">
@@ -83,35 +112,6 @@
 				<include refid="queryCondition" />
 			<include refid="common.queryOrder" />
 		<include refid="common.pagingQueryFoot" />
-	</select>
-	
-	<delete id="deleteDataSetRelationById">
-		DELETE FROM DATAGEAR_HCW_DSF
-		WHERE
-			HCW_ID = #{id}
-	</delete>
-	
-	<insert id="insertDataSetRelation">
-		INSERT INTO DATAGEAR_HCW_DSF
-			(
-			HCW_ID, DSF_ID, DATA_SIGNS_TEXT, DSF_ORDER
-			)
-		VALUES
-			(
-			#{widgetId}, #{dataSetFactoryId}, #{dataSignsText}, #{order}
-			)
-	</insert>
-	
-	<select id="getDataSetRelations" resultType="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl$WidgetDataSetFactoryRelation">
-		SELECT
-			HCW_ID AS ${_iq_}widgetId${_iq_},
-			DSF_ID AS ${_iq_}dataSetFactoryId${_iq_},
-			DATA_SIGNS_TEXT AS ${_iq_}dataSignsText${_iq_},
-			DSF_ORDER AS ${_iq_}order${_iq_}
-		FROM
-			DATAGEAR_HCW_DSF
-		WHERE
-			HCW_ID = #{widgetId}
 	</select>
 	
 	<sql id="queryViewDataPermission">
@@ -166,8 +166,6 @@
 		AND
 		(
 			${_iq_}name${_iq_} LIKE #{queryKeyword}
-			OR ${_iq_}createUser.name${_iq_} LIKE #{queryKeyword}
-			OR ${_iq_}createUser.realName${_iq_} LIKE #{queryKeyword}
 		)
 		</if>
 		<include refid="common.queryCondition" />

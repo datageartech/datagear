@@ -2,6 +2,11 @@
 	id : 'datagear-chart-line',
 	nameLabel : '折线图',
 	descLabel : '折线图',
+	dataSigns :
+	[
+		{ name : "x-value", nameLabel : "横坐标" },
+		{ name : "y-value", nameLabel : "纵坐标" },
+	],
 	version: "0.1.0",
 	order : 0
 }

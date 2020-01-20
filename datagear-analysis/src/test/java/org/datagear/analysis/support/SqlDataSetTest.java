@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataType;
@@ -24,20 +24,20 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * {@linkplain SqlDataSetFactory}单元测试类。
+ * {@linkplain SqlDataSet}单元测试类。
  * 
  * @author datagear@163.com
  *
  */
-public class SqlDataSetFactoryTest extends DBTestSupport
+public class SqlDataSetTest extends DBTestSupport
 {
 	@Test
-	public void getDataSetTest() throws Exception
+	public void getResultTest() throws Exception
 	{
 		Connection cn = null;
 
 		long recordId = 999999999;
-		String recordName = SqlDataSetFactory.class.getSimpleName();
+		String recordName = SqlDataSet.class.getSimpleName();
 
 		try
 		{
@@ -66,17 +66,17 @@ public class SqlDataSetFactoryTest extends DBTestSupport
 			List<DataSetParam> dataSetParams = Arrays.asList(new DataSetParam("id", DataType.INTEGER, true),
 					new DataSetParam("name", DataType.STRING, true));
 
-			SqlDataSetFactory sqlDataSetFactory = new SqlDataSetFactory("1", dataSetProperties, connectionFactory, sql);
-			sqlDataSetFactory.setParams(dataSetParams);
+			SqlDataSet sqlDataSet = new SqlDataSet("1", dataSetProperties, connectionFactory, sql);
+			sqlDataSet.setParams(dataSetParams);
 
 			Map<String, Object> dataSetParamValues = new HashMap<String, Object>();
 			dataSetParamValues.put("id", recordId);
 			dataSetParamValues.put("name", "name-for-test");
 
-			DataSet dataSet = sqlDataSetFactory.getDataSet(dataSetParamValues);
+			DataSetResult dataSetResult = sqlDataSet.getResult(dataSetParamValues);
 
 			@SuppressWarnings("unchecked")
-			List<Map<String, ?>> datas = (List<Map<String, ?>>) dataSet.getDatas();
+			List<Map<String, ?>> datas = (List<Map<String, ?>>) dataSetResult.getDatas();
 
 			Assert.assertEquals(1, datas.size());
 

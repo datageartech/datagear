@@ -173,7 +173,7 @@ selectonly 是否选择操作，允许为null
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dashboard.name' />"), "name"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dashboard.createUser' />"), "createUser.realName"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='dashboard.createUser' />", "createUser.realName"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='dashboard.createTime' />", "createUser.createTime")
 	];
 	

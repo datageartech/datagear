@@ -12,7 +12,7 @@ import java.io.Serializable;
 /**
  * 数据集输出项。
  * <p>
- * 此类描述{@linkplain DataSetFactory}创建的{@linkplain DataSet}可输出的数据信息。
+ * 此类描述{@linkplain DataSet}创建的{@linkplain DataSetResult}可输出的数据信息。
  * </p>
  * 
  * @author datagear@163.com
@@ -35,12 +35,12 @@ public abstract class DataSetExport extends DataNameAndType implements Serializa
 	/**
 	 * 获取输出项值。
 	 * 
-	 * @param dataSetFactory
 	 * @param dataSet
+	 * @param dataSetResult
 	 * @return
 	 * @throws DataSetException
 	 */
-	public abstract Object getExportValue(DataSetFactory dataSetFactory, DataSet dataSet) throws DataSetException;
+	public abstract Object getExportValue(DataSet dataSet, DataSetResult dataSetResult) throws DataSetException;
 
 	@Override
 	public String toString()

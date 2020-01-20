@@ -313,7 +313,7 @@
 		</property>
 	</bean>
 	
-	<bean id="sqlDataSetFactoryEntityService" class="org.datagear.management.service.impl.SqlDataSetFactoryEntityServiceImpl">
+	<bean id="sqlDataSetEntityService" class="org.datagear.management.service.impl.SqlDataSetEntityServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 		<property name="connectionSource" ref="connectionSource" />
 		<property name="schemaService" ref="schemaService" />
@@ -327,7 +327,7 @@
 	<bean id="htmlChartWidgetEntityService" class="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 		<property name="chartPluginManager" ref="directoryHtmlChartPluginManager" />
-		<property name="sqlDataSetFactoryEntityService" ref="sqlDataSetFactoryEntityService" />
+		<property name="sqlDataSetEntityService" ref="sqlDataSetEntityService" />
 		<property name="authorizationService" ref="authorizationService" />
 	</bean>
 	

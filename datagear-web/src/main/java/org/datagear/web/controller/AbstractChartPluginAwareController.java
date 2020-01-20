@@ -11,12 +11,18 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.datagear.analysis.Chart;
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
+import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
+import org.datagear.analysis.support.AbstractChartPlugin;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderContext;
@@ -61,15 +67,15 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	}
 
 	/**
-	 * 查找插件信息列表。
+	 * 查找插件视图对象列表。
 	 * 
 	 * @param request
 	 * @param keyword
 	 * @return
 	 */
-	protected List<HtmlChartPluginInfo> findHtmlChartPluginInfos(HttpServletRequest request, String keyword)
+	protected List<HtmlChartPluginVO> findHtmlChartPluginVOs(HttpServletRequest request, String keyword)
 	{
-		List<HtmlChartPluginInfo> pluginInfos = new ArrayList<HtmlChartPluginInfo>();
+		List<HtmlChartPluginVO> pluginViews = new ArrayList<HtmlChartPluginVO>();
 
 		List<ChartPlugin<HtmlRenderContext>> plugins = getDirectoryHtmlChartPluginManager()
 				.getAll(HtmlRenderContext.class);
@@ -84,49 +90,71 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 				if (plugin instanceof HtmlChartPlugin<?>)
 				{
 					HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = (HtmlChartPlugin<HtmlRenderContext>) plugin;
-					pluginInfos.add(toHtmlChartPluginInfo(htmlChartPlugin, renderStyle, locale));
+					pluginViews.add(toHtmlChartPluginVO(htmlChartPlugin, renderStyle, locale));
 				}
 			}
 		}
 
-		return KeywordMatcher.<HtmlChartPluginInfo> match(pluginInfos, keyword,
-				new KeywordMatcher.MatchValue<HtmlChartPluginInfo>()
+		return KeywordMatcher.<HtmlChartPluginVO> match(pluginViews, keyword,
+				new KeywordMatcher.MatchValue<HtmlChartPluginVO>()
 				{
 					@Override
-					public String[] get(HtmlChartPluginInfo t)
+					public String[] get(HtmlChartPluginVO t)
 					{
-						return new String[] { t.getName(), t.getDesc() };
+						return new String[] { (t.getNameLabel() == null ? null : t.getNameLabel().getValue()),
+								(t.getDescLabel() == null ? null : t.getDescLabel().getValue()) };
 					}
 				});
 	}
 
-	protected HtmlChartPluginInfo toHtmlChartPluginInfo(HtmlChartPlugin<?> chartPlugin, RenderStyle renderStyle,
+	protected HtmlChartPluginVO toHtmlChartPluginVO(HtmlChartPlugin<?> chartPlugin, RenderStyle renderStyle,
 			Locale locale)
 	{
-		HtmlChartPluginInfo pluginInfo = new HtmlChartPluginInfo();
+		HtmlChartPluginVO pluginVO = new HtmlChartPluginVO();
 
-		pluginInfo.setId(chartPlugin.getId());
+		pluginVO.setId(chartPlugin.getId());
 
-		Label nameLabel = chartPlugin.getNameLabel();
-		if (nameLabel != null)
-			pluginInfo.setName(nameLabel.getValue(locale));
-
-		Label descLabel = chartPlugin.getDescLabel();
-		if (descLabel != null)
-			pluginInfo.setDesc(descLabel.getValue(locale));
-
-		Label manualLabel = chartPlugin.getManualLabel();
-		if (manualLabel != null)
-			pluginInfo.setManual(manualLabel.getValue(locale));
+		pluginVO.setNameLabel(toConcreteLabel(chartPlugin.getNameLabel(), locale));
+		pluginVO.setDescLabel(toConcreteLabel(chartPlugin.getDescLabel(), locale));
+		pluginVO.setManualLabel(toConcreteLabel(chartPlugin.getManualLabel(), locale));
 
 		Icon icon = chartPlugin.getIcon(renderStyle);
-		pluginInfo.setHasIcon(icon != null);
-		if (pluginInfo.isHasIcon())
-			pluginInfo.setIconUrl(resolveIconUrl(chartPlugin));
+		pluginVO.setHasIcon(icon != null);
+		if (pluginVO.isHasIcon())
+			pluginVO.setIconUrl(resolveIconUrl(chartPlugin));
 
-		pluginInfo.setVersion(chartPlugin.getVersion());
+		pluginVO.setVersion(chartPlugin.getVersion());
 
-		return pluginInfo;
+		List<DataSign> dataSigns = chartPlugin.getDataSigns();
+		if (dataSigns != null)
+		{
+			List<DataSign> dataSignVOs = new ArrayList<DataSign>(dataSigns.size());
+			for (DataSign dataSign : dataSigns)
+			{
+				DataSign view = new DataSign(dataSign.getName(), dataSign.isOccurRequired(),
+						dataSign.isOccurMultiple());
+				view.setNameLabel(toConcreteLabel(dataSign.getNameLabel(), locale));
+				view.setDescLabel(toConcreteLabel(dataSign.getDescLabel(), locale));
+
+				dataSignVOs.add(view);
+			}
+
+			pluginVO.setDataSigns(dataSignVOs);
+		}
+
+		return pluginVO;
+	}
+
+	protected Label toConcreteLabel(Label label, Locale locale)
+	{
+		if (label == null)
+			return null;
+
+		String value = label.getValue(locale);
+		if (value == null)
+			value = "";
+
+		return new Label(value);
 	}
 
 	protected String resolveIconUrl(HtmlChartPlugin<?> plugin)
@@ -134,74 +162,28 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		return "/analysis/chartPlugin/icon/" + plugin.getId();
 	}
 
-	public static class HtmlChartPluginInfo implements Serializable
+	/**
+	 * {@linkplain HtmlChartPlugin}视图对象。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class HtmlChartPluginVO extends AbstractChartPlugin<HtmlRenderContext> implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
-
-		private String id;
-
-		private String name;
-
-		private String desc;
-
-		private String manual;
 
 		private boolean hasIcon;
 
 		private String iconUrl;
 
-		private String version;
-
-		public HtmlChartPluginInfo()
+		public HtmlChartPluginVO()
 		{
 			super();
 		}
 
-		public HtmlChartPluginInfo(String id, String name)
+		public HtmlChartPluginVO(String id, Label nameLabel)
 		{
-			super();
-			this.id = id;
-			this.name = name;
-		}
-
-		public String getId()
-		{
-			return id;
-		}
-
-		public void setId(String id)
-		{
-			this.id = id;
-		}
-
-		public String getName()
-		{
-			return name;
-		}
-
-		public void setName(String name)
-		{
-			this.name = name;
-		}
-
-		public String getDesc()
-		{
-			return desc;
-		}
-
-		public void setDesc(String desc)
-		{
-			this.desc = desc;
-		}
-
-		public String getManual()
-		{
-			return manual;
-		}
-
-		public void setManual(String manual)
-		{
-			this.manual = manual;
+			super(id, nameLabel);
 		}
 
 		public boolean isHasIcon()
@@ -224,14 +206,11 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			this.iconUrl = iconUrl;
 		}
 
-		public String getVersion()
+		@Override
+		public Chart renderChart(HtmlRenderContext renderContext, Map<String, ?> chartPropertyValues,
+				ChartDataSet... chartDataSets) throws RenderException
 		{
-			return version;
-		}
-
-		public void setVersion(String version)
-		{
-			this.version = version;
+			throw new UnsupportedOperationException();
 		}
 	}
 }

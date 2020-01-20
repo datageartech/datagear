@@ -678,8 +678,8 @@ public class JsonChartPluginPropertiesResolver
 
 			dataSign.setOccurRequired(convertToBoolean(map.get(DATA_SIGN_PROPERTY_OCCUR_REQUIRED), true));
 			dataSign.setOccurMultiple(convertToBoolean(map.get(DATA_SIGN_PROPERTY_OCCUR_MULTIPLE), true));
-			dataSign.setNameLabel(convertToLabel(map.get(CHART_PROPERTY_NAME_LABEL)));
-			dataSign.setDescLabel(convertToLabel(map.get(CHART_PROPERTY_DESC_LABEL)));
+			dataSign.setNameLabel(convertToLabel(map.get(DATA_SIGN_PROPERTY_NAME_LABEL)));
+			dataSign.setDescLabel(convertToLabel(map.get(DATA_SIGN_PROPERTY_DESC_LABEL)));
 
 			return dataSign;
 		}

@@ -12,7 +12,6 @@
 {
 	var util = (window.chartUtil || (window.chartUtil = {}));
 	util.echarts = (util.echarts || {});
-	util.dataset = (util.dataset || {});
 	
 	/**
 	 * 获取图表主题。
@@ -39,6 +38,17 @@
 	util.propertyValueName = function(chart, value)
 	{
 		return this.propertyValue(chart, "name", value);
+	};
+
+	/**
+	 * 获取/设置图表的"updateInterval"属性值。
+	 * 
+	 * @param chart
+	 * @param value 可选，要设置的属性值
+	 */
+	util.propertyValueUpdateInterval = function(chart, value)
+	{
+		return this.propertyValue(chart, "updateInterval", value);
 	};
 	
 	/**
@@ -75,7 +85,134 @@
 		else
 			return renderContext.attributes[attrName] = attrValue;
 	};
+
+	/**
+	 * 获取指定标记的第一个数据集属性，没有则返回null。
+	 * 
+	 * @param chartDataSet 图表数据集对象
+	 * @param dataSign 数据标记对象、标记名称
+	 */
+	util.dataSetPropertyOfSign = function(chartDataSet, dataSign)
+	{
+		var properties = this.dataSetPropertiesOfSign(chartDataSet, dataSign);
+		
+		return (properties.length > 0 ? properties[0] : null);
+	};
 	
+	/**
+	 * 获取指定标记的数据集属性数组。
+	 * 
+	 * @param chartDataSet 图表数据集对象
+	 * @param dataSign 数据标记对象、标记名称
+	 */
+	util.dataSetPropertiesOfSign = function(chartDataSet, dataSign)
+	{
+		var re = [];
+		
+		dataSign = (dataSign.name || dataSign);
+		var dataSetProperties = (chartDataSet.dataSet.properties || []);
+		var propertySigns = (chartDataSet.propertySigns || {});
+		
+		var signPropertyNames = [];
+		
+		for(var pname : propertySigns)
+		{
+			var mySigns = (propertySigns[pname] || []);
+			
+			for(var i=0; i<mySigns.length; i++)
+			{
+				if(mySigns[i] == dataSign || mySigns[i].name == dataSign)
+				{
+					signPropertyNames.push(pname);
+					break;
+				}
+			}
+		}
+		
+		for(var i=0; i<signPropertyNames.length; i++)
+		{
+			for(var j=0; j<dataSetProperties.length; j++)
+			{
+				if(dataSetProperties[j].name == signPropertyNames[i])
+					re.push(dataSetProperties[j]);
+			}
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 获取结果数据属性值数组。
+	 * 
+	 * @param result 数据集结果对象、对象数组
+	 * @param property 属性对象、属性名、属性对象数组、属性名数组
+	 */
+	util.dataPropertyValues = function(result, property)
+	{
+		var re = [];
+		
+		if(property == null)
+			return re;
+		
+		var datas = (result.length != null ? result : (result.datas || []));
+		
+		if(property.length > 0)
+		{
+			for(var i=0; i<property.length; i++)
+			{
+				var myValues = [];
+				
+				var cm = property[i];
+				
+				var name = (cm.name || cm);
+				
+				for(var j=0; j< datas.length; j++)
+					myValues[j] = datas[j][name];
+				
+				re[i] = myValues;
+			}
+		}
+		else
+		{
+			var name = (property.name || property);
+			
+			for(var i=0; i< datas.length; i++)
+				re[i] = datas[i][name];
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 获取结果数据的名称/值对象数组：[{name: ..., value: ...}, ...]。
+	 * 
+	 * @param result 数据集结果对象、对象数组
+	 * @param nameProperty 名称属性对象、属性名
+	 * @param valueProperty 值属性对象、属性名
+	 */
+	util.dataNameValueObjects = function(result, nameProperty, valueProperty)
+	{
+		var re = [];
+		
+		var datas = (result.length != null ? result : (result.datas || []));
+		
+		nameProperty = (nameProperty.name || nameProperty);
+		valueProperty = (valueProperty.name || valueProperty);
+		
+		for(var i=0; i< datas.length; i++)
+		{
+			var obj =
+			{
+				"name" : datas[i][nameProperty],
+				"value" : datas[i][valueProperty]
+			};
+			
+			re[i] = obj;
+		}
+		
+		return re;
+	};
+
 	/**
 	 * 初始化Echarts对象。
 	 * 
@@ -233,180 +370,6 @@
 	    echarts.registerTheme(renderStyle, theme);
 	    
 	    return renderStyle;
-	};
-	
-	/**
-	 * 获取数据集数组的第一个元素，没有则返回undefined。
-	 * 
-	 * @param dataSets
-	 */
-	util.dataset.first = function(dataSets)
-	{
-		return (dataSets && dataSets.length > 0 ? dataSets[0] : undefined);
-	};
-
-	/**
-	 * 获取指定名称的列元信息对象，没有则返回undefined。
-	 * 
-	 * @param dataSet
-	 * @param name
-	 */
-	util.dataset.columnMetaByName = function(dataSet, name)
-	{
-		var columnMetas = dataSet.meta.columnMetas;
-		
-		for(var i=0; i<columnMetas.length; i++)
-		{
-			if(columnMetas[i].name === name)
-				return columnMetas[i];
-		}
-		
-		return undefined;
-	};
-	
-	/**
-	 * 获取第一个维度列元信息对象，没有则返回undefined。
-	 * 
-	 * @param dataSet
-	 */
-	util.dataset.columnMetaByDimension = function(dataSet)
-	{
-		var columnMetas = dataSet.meta.columnMetas;
-		
-		for(var i=0; i<columnMetas.length; i++)
-		{
-			if(columnMetas[i].dataCategory === "DIMENSION")
-				return columnMetas[i];
-		}
-		
-		return undefined;
-	};
-	
-	/**
-	 * 获取维度列元信息对象数组。
-	 * 
-	 * @param dataSet
-	 */
-	util.dataset.columnMetasByDimension = function(dataSet)
-	{
-		var re = [];
-		
-		var columnMetas = dataSet.meta.columnMetas;
-		
-		for(var i=0; i<columnMetas.length; i++)
-		{
-			if(columnMetas[i].dataCategory === "DIMENSION")
-				re.push(columnMetas[i]);
-		}
-	};
-
-	/**
-	 * 获取第一个量度列元信息对象。
-	 * 
-	 * @param dataSet
-	 */
-	util.dataset.columnMetaByScalar = function(dataSet)
-	{
-		var columnMetas = dataSet.meta.columnMetas;
-		
-		for(var i=0; i<columnMetas.length; i++)
-		{
-			if(columnMetas[i].dataCategory === "SCALAR")
-				return columnMetas[i];
-		}
-		
-		return undefined;
-	};
-	
-	/**
-	 * 获取量度列元信息对象数组。
-	 * 
-	 * @param dataSet
-	 */
-	util.dataset.columnMetasByScalar = function(dataSet)
-	{
-		var re = [];
-		
-		var columnMetas = dataSet.meta.columnMetas;
-		
-		for(var i=0; i<columnMetas.length; i++)
-		{
-			if(columnMetas[i].dataCategory === "SCALAR")
-				re.push(columnMetas[i]);
-		}
-	};
-	
-	/**
-	 * 获取列值数组。
-	 * 
-	 * @param dataSet
-	 * @param columnMeta 列元信息对象、列名、列元信息对象数组、列名数组
-	 */
-	util.dataset.columnValues = function(dataSet, columnMeta)
-	{
-		var re = [];
-		
-		if(columnMeta == null)
-			return re;
-		
-		var datas = dataSet.datas;
-		
-		if(columnMeta.length > 0)
-		{
-			for(var i=0; i<columnMeta.length; i++)
-			{
-				var myValues = [];
-				
-				var cm = columnMeta[i];
-				
-				var name = (cm.name || cm);
-				
-				for(var j=0; j< datas.length; j++)
-					myValues[j] = datas[j][name];
-				
-				re[i] = myValues;
-			}
-		}
-		else
-		{
-			var name = (columnMeta.name || columnMeta);
-			
-			for(var i=0; i< datas.length; i++)
-				re[i] = datas[i][name];
-		}
-		
-		return re;
-	};
-	
-
-	/**
-	 * 获取列值的名称/值对象数组：[{name: ..., value: ...}, ...]。
-	 * 
-	 * @param dataSet
-	 * @param nameColumnMeta 名称列元信息对象、列名
-	 * @param valueColumnMeta 值列元信息对象、列名
-	 */
-	util.dataset.columnNameValues = function(dataSet, nameColumnMeta, valueColumnMeta)
-	{
-		var re = [];
-		
-		var datas = dataSet.datas;
-		
-		var nameColumn = (nameColumnMeta.name || nameColumnMeta);
-		var valueColumn = (valueColumnMeta.name || valueColumnMeta);
-		
-		for(var i=0; i< datas.length; i++)
-		{
-			var obj =
-			{
-				"name" : datas[i][nameColumn],
-				"value" : datas[i][valueColumn]
-			};
-			
-			re[i] = obj;
-		}
-		
-		return re;
 	};
 })
 (window);

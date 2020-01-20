@@ -164,9 +164,9 @@ selectonly 是否选择操作，允许为null
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.name' />"), "name"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.dataSource' />"), "connectionFactory.schema.title"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.dataSource' />", "connectionFactory.schema.title"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.sql' />", "sql"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.createUser' />"), "createUser.realName"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createUser' />", "createUser.realName"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createTime' />", "createUser.createTime")
 	];
 	

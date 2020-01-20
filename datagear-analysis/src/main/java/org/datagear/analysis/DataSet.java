@@ -13,29 +13,69 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public interface DataSet
+public interface DataSet extends Identifiable
 {
 	/**
-	 * 获取数据。
+	 * 获取属性列表。
+	 * <p>
+	 * 此列表描述{@linkplain #getResult(DataSetParamValues)}返回的{@linkplain DataSetResult#getDatas()}元素的属性信息。
+	 * </p>
 	 * 
 	 * @return
 	 */
-	List<?> getDatas();
+	List<DataSetProperty> getProperties();
 
 	/**
-	 * 获取输出项值集合，返回{@code null}或空表示没有输出项值。
+	 * 获取指定名称的属性，没有则返回{@code null}。
 	 * 
-	 * @return
-	 */
-	Map<String, ?> getExportValues();
-
-	/**
-	 * 获取{@linkplain #getDatas()}中单条数据指定名称的属性值。
-	 * 
-	 * @param data
 	 * @param name
+	 * @return
+	 */
+	DataSetProperty getProperty(String name);
+
+	/**
+	 * 获取参数列表。
+	 * <p>
+	 * 返回{@code null}或空列表，表示没有。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	List<DataSetParam> getParams();
+
+	/**
+	 * 获取指定名称的参数，没有则返回{@code null}。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	DataSetParam getParam(String name);
+
+	/**
+	 * 获取输出列表。
+	 * <p>
+	 * 返回{@code null}或空列表，表示没有。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	List<DataSetExport> getExports();
+
+	/**
+	 * 获取指定名称的输出，没有则返回{@code null}。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	DataSetExport getExport(String name);
+
+	/**
+	 * 获取{@linkplain DataSetResult}。
+	 * 
+	 * @param paramValues
+	 *            由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}
 	 * @return
 	 * @throws DataSetException
 	 */
-	Object getDataPropertyValue(Object data, String name) throws DataSetException;
+	DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException;
 }

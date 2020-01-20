@@ -14,18 +14,18 @@ import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartDataSetFactory;
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartProperty;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
-import org.datagear.analysis.support.AbstractDataSetFactory;
+import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 
@@ -95,7 +95,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 							? new AttributesHtmlRenderContext(htmlChart.getRenderContext())
 							: new RefHtmlRenderContext(chartRenderContextVarName)),
 					new IdChartPlugin(htmlChart.getPlugin()), htmlChart.getPropertyValues(),
-					JsonChartDataSetFactory.valuesOf(htmlChart.getChartDataSetFactories()), htmlChart.getElementId(),
+					JsonChartDataSet.valuesOf(htmlChart.getChartDataSets()), htmlChart.getElementId(),
 					htmlChart.getVarName());
 		}
 	}
@@ -169,45 +169,45 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 
 		@Override
 		public Chart renderChart(RenderContext renderContext, Map<String, ?> chartPropertyValues,
-				ChartDataSetFactory... chartDataSetFactories) throws RenderException
+				ChartDataSet... chartDataSets) throws RenderException
 		{
 			throw new UnsupportedOperationException();
 		}
 	}
 
-	protected static class JsonChartDataSetFactory extends ChartDataSetFactory
+	protected static class JsonChartDataSet extends ChartDataSet
 	{
-		public JsonChartDataSetFactory(DataSetFactory dataSetFactory, List<DataSign> dataSigns)
+		public JsonChartDataSet(ChartDataSet chartDataSet)
 		{
-			super(new JsonDataSetFactory(dataSetFactory), dataSigns);
+			super(new JsonDataSet(chartDataSet.getDataSet()));
+			setPropertySigns(chartDataSet.getPropertySigns());
 		}
 
-		public static JsonChartDataSetFactory[] valuesOf(ChartDataSetFactory[] chartDataSetFactories)
+		public static JsonChartDataSet[] valuesOf(ChartDataSet[] chartDataSets)
 		{
-			if (chartDataSetFactories == null)
+			if (chartDataSets == null)
 				return null;
 
-			JsonChartDataSetFactory[] jsonDataSetFactories = new JsonChartDataSetFactory[chartDataSetFactories.length];
+			JsonChartDataSet[] jsonDataSets = new JsonChartDataSet[chartDataSets.length];
 
-			for (int i = 0; i < chartDataSetFactories.length; i++)
-				jsonDataSetFactories[i] = new JsonChartDataSetFactory(chartDataSetFactories[i].getDataSetFactory(),
-						chartDataSetFactories[i].getDataSigns());
+			for (int i = 0; i < chartDataSets.length; i++)
+				jsonDataSets[i] = new JsonChartDataSet(chartDataSets[i]);
 
-			return jsonDataSetFactories;
+			return jsonDataSets;
 		}
 	}
 
-	protected static class JsonDataSetFactory extends AbstractDataSetFactory
+	protected static class JsonDataSet extends AbstractDataSet
 	{
-		public JsonDataSetFactory(DataSetFactory dataSetFactory)
+		public JsonDataSet(DataSet dataSet)
 		{
-			super(dataSetFactory.getId(), dataSetFactory.getProperties());
-			setParams(dataSetFactory.getParams());
-			setExports(dataSetFactory.getExports());
+			super(dataSet.getId(), dataSet.getProperties());
+			setParams(dataSet.getParams());
+			setExports(dataSet.getExports());
 		}
 
 		@Override
-		public DataSet getDataSet(Map<String, ?> paramValues) throws DataSetException
+		public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
 		{
 			return null;
 		}

@@ -10,11 +10,11 @@ package org.datagear.analysis.support;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSetException;
 
 /**
- * 映射表{@linkplain DataSet}。
+ * 映射表{@linkplain DataSetResult}。
  * <p>
  * 它的{@linkplain #getDatas()}元素为映射表对象。
  * </p>
@@ -22,7 +22,7 @@ import org.datagear.analysis.DataSetException;
  * @author datagear@163.com
  *
  */
-public class MapDataSet implements DataSet
+public class MapDataSet implements DataSetResult
 {
 	private List<Map<String, ?>> datas;
 

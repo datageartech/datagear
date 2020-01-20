@@ -11,7 +11,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.datagear.analysis.ChartDataSetFactory;
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
@@ -47,7 +47,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		HtmlChartPlugin<HtmlRenderContext> chartPlugin = HtmlChartPluginTest.createHtmlChartPlugin();
 
 		HtmlChartWidget<HtmlRenderContext> htmlChartWidget = new HtmlChartWidget<HtmlRenderContext>("chart-widget-01",
-				"chart-widget-01", chartPlugin, (ChartDataSetFactory[]) null);
+				"chart-widget-01", chartPlugin, (ChartDataSet[]) null);
 
 		DashboardWidgetResManager resManager = new DashboardWidgetResManager(
 				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/html");

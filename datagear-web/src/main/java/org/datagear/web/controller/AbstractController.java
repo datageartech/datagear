@@ -18,12 +18,15 @@ import org.datagear.persistence.PersistenceManager;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
+import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import freemarker.template.TemplateModel;
 
 /**
  * 抽象控制器。
@@ -562,6 +565,17 @@ public abstract class AbstractController
 		}
 
 		return operationMessage;
+	}
+
+	/**
+	 * 将对象转换为可作为页面使用<code>&lt;@writeJson var=... /&gt;</code>的对象。
+	 * 
+	 * @param object
+	 * @return
+	 */
+	protected TemplateModel toWriteJsonTemplateModel(Object object)
+	{
+		return WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(object);
 	}
 
 	/**

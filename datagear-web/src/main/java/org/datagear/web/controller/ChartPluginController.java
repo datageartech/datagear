@@ -116,7 +116,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			IOUtil.close(out);
 		}
 
-		List<HtmlChartPluginInfo> pluginInfos = new ArrayList<HtmlChartPluginInfo>();
+		List<HtmlChartPluginVO> pluginInfos = new ArrayList<HtmlChartPluginVO>();
 
 		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
 
@@ -128,7 +128,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			Set<HtmlChartPlugin<?>> loaded = loader.loads(zipFile);
 
 			for (HtmlChartPlugin<?> chartPlugin : loaded)
-				pluginInfos.add(toHtmlChartPluginInfo(chartPlugin, renderStyle, locale));
+				pluginInfos.add(toHtmlChartPluginVO(chartPlugin, renderStyle, locale));
 		}
 		catch (HtmlChartPluginLoadException e)
 		{
@@ -196,11 +196,11 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<HtmlChartPluginInfo> queryData(HttpServletRequest request, HttpServletResponse response,
+	public List<HtmlChartPluginVO> queryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel,
 			@RequestParam(value = "keyword", required = false) String keyword) throws Exception
 	{
-		return findHtmlChartPluginInfos(request, keyword);
+		return findHtmlChartPluginVOs(request, keyword);
 	}
 
 	@RequestMapping(value = "/icon/{pluginId}", produces = CONTENT_TYPE_JSON)

@@ -93,57 +93,57 @@ public class Dashboard extends AbstractIdentifiable
 	}
 
 	/**
-	 * 获取此看板的所有数据集。
+	 * 获取此看板的所有数据集结果。
 	 * 
 	 * @param dataSetParamValues
 	 * @return
 	 * @throws DataSetException
 	 */
-	public Map<String, DataSet[]> getDataSets(Map<String, ?> dataSetParamValues) throws DataSetException
+	public Map<String, DataSetResult[]> getDataSetResults(Map<String, ?> dataSetParamValues) throws DataSetException
 	{
-		Map<String, DataSet[]> dataSetsMap = new HashMap<String, DataSet[]>();
+		Map<String, DataSetResult[]> resultsMap = new HashMap<String, DataSetResult[]>();
 
 		if (this.charts == null || this.charts.isEmpty())
-			return dataSetsMap;
+			return resultsMap;
 
 		for (Chart chart : this.charts)
 		{
-			DataSet[] dataSets = chart.getDataSets(dataSetParamValues);
+			DataSetResult[] results = chart.getDataSetResults(dataSetParamValues);
 
-			if (dataSets != null)
-				dataSetsMap.put(chart.getId(), dataSets);
+			if (results != null)
+				resultsMap.put(chart.getId(), results);
 		}
 
-		return dataSetsMap;
+		return resultsMap;
 	}
 
 	/**
-	 * 获取此看板指定图表ID集的数据集。
+	 * 获取此看板指定图表ID集的数据集结果。
 	 * 
 	 * @param chartIds
 	 * @param dataSetParamValues
 	 * @return
 	 * @throws DataSetException
 	 */
-	public Map<String, DataSet[]> getDataSets(Collection<String> chartIds, Map<String, ?> dataSetParamValues)
-			throws DataSetException
+	public Map<String, DataSetResult[]> getDataSetResults(Collection<String> chartIds,
+			Map<String, ?> dataSetParamValues) throws DataSetException
 	{
-		Map<String, DataSet[]> dataSetsMap = new HashMap<String, DataSet[]>();
+		Map<String, DataSetResult[]> resultsMap = new HashMap<String, DataSetResult[]>();
 
 		if (this.charts == null || this.charts.isEmpty())
-			return dataSetsMap;
+			return resultsMap;
 
 		for (Chart chart : this.charts)
 		{
 			if (!chartIds.contains(chart.getId()))
 				continue;
 
-			DataSet[] dataSets = chart.getDataSets(dataSetParamValues);
+			DataSetResult[] results = chart.getDataSetResults(dataSetParamValues);
 
-			if (dataSets != null)
-				dataSetsMap.put(chart.getId(), dataSets);
+			if (results != null)
+				resultsMap.put(chart.getId(), results);
 		}
 
-		return dataSetsMap;
+		return resultsMap;
 	}
 }

@@ -8,12 +8,14 @@
 package org.datagear.management.domain;
 
 import java.util.Date;
+import java.util.Locale;
 
-import org.datagear.analysis.ChartDataSetFactory;
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlRenderContext;
+import org.datagear.util.i18n.Label;
 
 /**
  * HTML {@linkplain ChartWidget}实体。
@@ -38,17 +40,20 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
+	/** 插件名称，展示用 */
+	private String chartPluginName = "";
+
 	public HtmlChartWidgetEntity()
 	{
 		super();
-		super.setChartDataSetFactories(new ChartDataSetFactory[0]);
+		super.setChartDataSets(new ChartDataSet[0]);
 		this.createTime = new Date();
 	}
 
 	public HtmlChartWidgetEntity(String id, String name, HtmlChartPlugin<HtmlRenderContext> chartPlugin,
-			ChartDataSetFactory[] chartDataSetFactories, User createUser)
+			ChartDataSet[] chartDataSets, User createUser)
 	{
-		super(id, name, chartPlugin, chartDataSetFactories);
+		super(id, name, chartPlugin, chartDataSets);
 		this.createUser = createUser;
 		this.createTime = new Date();
 	}
@@ -95,5 +100,30 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	public String getChartPluginName()
+	{
+		return chartPluginName;
+	}
+
+	public void setChartPluginName(String chartPluginName)
+	{
+		this.chartPluginName = chartPluginName;
+	}
+
+	public void updateChartPluginName(Locale locale)
+	{
+		String name = null;
+		HtmlChartPlugin<HtmlRenderContext> plugin = getHtmlChartPlugin();
+
+		if (plugin != null)
+		{
+			Label nameLabel = plugin.getNameLabel();
+			if (nameLabel != null)
+				name = nameLabel.getValue(locale);
+		}
+
+		setChartPluginName(name);
 	}
 }

@@ -13,7 +13,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Map;
 
-import org.datagear.analysis.ChartDataSetFactory;
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.AbstractChartPlugin;
@@ -53,10 +53,10 @@ import org.datagear.util.i18n.Label;
  * 	id : "...",
  * 	elementId : "[图表HTML元素ID]",
  * 	varName : "[图表变量名]",
- * 	plugin : "插件ID",
+ * 	plugin : { id : "插件ID", ... },
  * 	renderContext : { attributes : {...} },
  * 	propertyValues : {...},
- * 	dataSetFactories : [{...}, ...]
+ * 	chartDataSets : [{...}, ...]
  * };
  * [图表脚本内容]
  * [图表变量名].render();
@@ -109,6 +109,8 @@ import org.datagear.util.i18n.Label;
  */
 public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartPlugin<T>
 {
+	protected static final HtmlChartScriptObjectWriter HTML_CHART_SCRIPT_OBJECT_WRITER = new HtmlChartScriptObjectWriter();
+
 	/** 默认图表对象引用占位符 */
 	public static final String DEFAULT_SCRIPT_CHART_REF_PLACEHOLDER = "$CHART";
 
@@ -135,8 +137,6 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 
 	/** 图表脚本换行符 */
 	private String newLine = "\r\n";
-
-	private HtmlChartScriptObjectWriter htmlChartScriptObjectWriter = new HtmlChartScriptObjectWriter();
 
 	public HtmlChartPlugin()
 	{
@@ -199,19 +199,9 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		this.newLine = newLine;
 	}
 
-	public HtmlChartScriptObjectWriter getHtmlChartScriptObjectWriter()
-	{
-		return htmlChartScriptObjectWriter;
-	}
-
-	public void setHtmlChartScriptObjectWriter(HtmlChartScriptObjectWriter htmlChartScriptObjectWriter)
-	{
-		this.htmlChartScriptObjectWriter = htmlChartScriptObjectWriter;
-	}
-
 	@Override
-	public HtmlChart renderChart(T renderContext, Map<String, ?> chartPropertyValues,
-			ChartDataSetFactory... chartDataSetFactories) throws RenderException
+	public HtmlChart renderChart(T renderContext, Map<String, ?> chartPropertyValues, ChartDataSet... chartDataSets)
+			throws RenderException
 	{
 		boolean notRenderElement = HtmlRenderAttributes.getChartNotRenderElement(renderContext);
 		String chartElementId = HtmlRenderAttributes.getChartElementId(renderContext);
@@ -240,7 +230,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 			chartVarName = HtmlRenderAttributes.generateChartVarName(nextSequence);
 		}
 
-		HtmlChart chart = new HtmlChart(IDUtil.uuid(), renderContext, this, chartPropertyValues, chartDataSetFactories,
+		HtmlChart chart = new HtmlChart(IDUtil.uuid(), renderContext, this, chartPropertyValues, chartDataSets,
 				chartElementId, chartVarName);
 
 		try
@@ -333,8 +323,13 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	 */
 	protected void writeChartScriptObject(T renderContext, HtmlChart chart) throws IOException
 	{
-		this.htmlChartScriptObjectWriter.write(renderContext.getWriter(), chart,
+		getHtmlChartScriptObjectWriter().write(renderContext.getWriter(), chart,
 				HtmlRenderAttributes.getChartRenderContextVarName(renderContext));
+	}
+
+	protected HtmlChartScriptObjectWriter getHtmlChartScriptObjectWriter()
+	{
+		return HTML_CHART_SCRIPT_OBJECT_WRITER;
 	}
 
 	/**

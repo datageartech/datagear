@@ -5,17 +5,18 @@
 package org.datagear.web.controller;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.ChartDataSetFactory;
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
-import org.datagear.management.domain.SqlDataSetFactoryEntity;
+import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.persistence.PagingData;
@@ -84,17 +85,17 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
 
-		List<HtmlChartPluginInfo> pluginInfos = findHtmlChartPluginInfos(request, null);
+		List<HtmlChartPluginVO> pluginVOs = findHtmlChartPluginVOs(request, null);
 
-		if (pluginInfos.size() > 0)
+		if (pluginVOs.size() > 0)
 		{
-			String defaultChartPluginId = pluginInfos.get(0).getId();
+			String defaultChartPluginId = pluginVOs.get(0).getId();
 			chart.setHtmlChartPlugin((HtmlChartPlugin<HtmlRenderContext>) this.chartPluginManager
 					.<HtmlRenderContext> get(defaultChartPluginId));
 		}
 
 		model.addAttribute("chart", chart);
-		model.addAttribute("pluginInfos", pluginInfos);
+		model.addAttribute("pluginVOs", toWriteJsonTemplateModel(pluginVOs));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.addChart");
 		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
 
@@ -130,10 +131,10 @@ public class ChartController extends AbstractChartPluginAwareController
 		if (chart == null)
 			throw new RecordNotFoundException();
 
-		List<HtmlChartPluginInfo> pluginInfos = findHtmlChartPluginInfos(request, null);
+		List<HtmlChartPluginVO> pluginVOs = findHtmlChartPluginVOs(request, null);
 
 		model.addAttribute("chart", chart);
-		model.addAttribute("pluginInfos", pluginInfos);
+		model.addAttribute("pluginVOs", toWriteJsonTemplateModel(pluginVOs));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.editChart");
 		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
 
@@ -147,8 +148,6 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		entity.setId(IDUtil.uuid());
-		entity.setCreateUser(user);
 		inflateHtmlChartWidgetEntity(entity, request);
 
 		checkSaveEntity(entity);
@@ -169,10 +168,10 @@ public class ChartController extends AbstractChartPluginAwareController
 		if (chart == null)
 			throw new RecordNotFoundException();
 
-		List<HtmlChartPluginInfo> pluginInfos = findHtmlChartPluginInfos(request, null);
+		List<HtmlChartPluginVO> pluginVOs = findHtmlChartPluginVOs(request, null);
 
 		model.addAttribute("chart", chart);
-		model.addAttribute("pluginInfos", pluginInfos);
+		model.addAttribute("pluginVOs", toWriteJsonTemplateModel(pluginVOs));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.viewChart");
 		model.addAttribute(KEY_READONLY, true);
 
@@ -222,8 +221,20 @@ public class ChartController extends AbstractChartPluginAwareController
 		PagingQuery pagingQuery = getPagingQuery(request);
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery);
+		setChartPluginNames(request, pagingData.getItems());
 
 		return pagingData;
+	}
+
+	protected void setChartPluginNames(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)
+	{
+		if (entities == null)
+			return;
+
+		Locale locale = WebUtils.getLocale(request);
+
+		for (HtmlChartWidgetEntity entity : entities)
+			entity.updateChartPluginName(locale);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -239,33 +250,34 @@ public class ChartController extends AbstractChartPluginAwareController
 			entity.setHtmlChartPlugin(htmlChartPlugin);
 		}
 
-		inflateChartDataSetFactories(entity, request);
+		inflateChartDataSets(entity, request);
 	}
 
-	protected void inflateChartDataSetFactories(HtmlChartWidgetEntity entity, HttpServletRequest request)
+	protected void inflateChartDataSets(HtmlChartWidgetEntity entity, HttpServletRequest request)
 	{
 		String[] dataSetIds = request.getParameterValues("dataSetId");
 
 		if (dataSetIds == null || dataSetIds.length == 0)
 			return;
 
-		ChartDataSetFactory[] chartDataSetFactories = new ChartDataSetFactory[dataSetIds.length];
+		ChartDataSet[] chartDataSets = new ChartDataSet[dataSetIds.length];
 
 		for (int i = 0; i < dataSetIds.length; i++)
 		{
 			String myDataSignParam = "dataSign_" + i;
 			String[] myDataSigns = request.getParameterValues(myDataSignParam);
 
-			SqlDataSetFactoryEntity sqlDataSetFactory = new SqlDataSetFactoryEntity();
-			sqlDataSetFactory.setId(dataSetIds[i]);
+			SqlDataSetEntity sqlDataSet = new SqlDataSetEntity();
+			sqlDataSet.setId(dataSetIds[i]);
 
-			ChartDataSetFactory chartDataSetFactory = new ChartDataSetFactory();
+			ChartDataSet chartDataSet = new ChartDataSet();
 
-			chartDataSetFactory.setDataSetFactory(sqlDataSetFactory);
-			chartDataSetFactory.setDataSigns(entity.getChartPlugin(), myDataSigns);
+			chartDataSet.setDataSet(sqlDataSet);
+
+			chartDataSets[i] = chartDataSet;
 		}
 
-		entity.setChartDataSetFactories(chartDataSetFactories);
+		entity.setChartDataSets(chartDataSets);
 	}
 
 	protected void checkSaveEntity(HtmlChartWidgetEntity chart)

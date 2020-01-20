@@ -13,17 +13,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataType;
-import org.datagear.analysis.support.AbstractDataSetFactory;
+import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.SqlDataSetSupport;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.dbmodel.DatabaseModelResolver;
 import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
-import org.datagear.management.domain.SqlDataSetFactoryEntity;
+import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
-import org.datagear.management.service.SqlDataSetFactoryEntityService;
+import org.datagear.management.service.SqlDataSetEntityService;
 import org.datagear.model.Model;
 import org.datagear.model.Property;
 import org.datagear.persistence.PagingData;
@@ -58,7 +58,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public static final String DATA_SET_PROPERTY_LABELS_SPLITTER = ",";
 
 	@Autowired
-	private SqlDataSetFactoryEntityService sqlDataSetFactoryEntityService;
+	private SqlDataSetEntityService sqlDataSetEntityService;
 
 	@Autowired
 	private ModelSqlSelectService modelSqlSelectService;
@@ -75,24 +75,24 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public DataSetController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource,
-			SqlDataSetFactoryEntityService sqlDataSetFactoryEntityService, ModelSqlSelectService modelSqlSelectService,
+			SqlDataSetEntityService sqlDataSetEntityService, ModelSqlSelectService modelSqlSelectService,
 			DatabaseModelResolver databaseModelResolver)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
-		this.sqlDataSetFactoryEntityService = sqlDataSetFactoryEntityService;
+		this.sqlDataSetEntityService = sqlDataSetEntityService;
 		this.modelSqlSelectService = modelSqlSelectService;
 		this.databaseModelResolver = databaseModelResolver;
 
 	}
 
-	public SqlDataSetFactoryEntityService getSqlDataSetFactoryEntityService()
+	public SqlDataSetEntityService getSqlDataSetEntityService()
 	{
-		return sqlDataSetFactoryEntityService;
+		return sqlDataSetEntityService;
 	}
 
-	public void setSqlDataSetFactoryEntityService(SqlDataSetFactoryEntityService sqlDataSetFactoryEntityService)
+	public void setSqlDataSetEntityService(SqlDataSetEntityService sqlDataSetEntityService)
 	{
-		this.sqlDataSetFactoryEntityService = sqlDataSetFactoryEntityService;
+		this.sqlDataSetEntityService = sqlDataSetEntityService;
 	}
 
 	public ModelSqlSelectService getModelSqlSelectService()
@@ -128,7 +128,7 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
-		SqlDataSetFactoryEntity dataSet = new SqlDataSetFactoryEntity();
+		SqlDataSetEntity dataSet = new SqlDataSetEntity();
 
 		model.addAttribute("dataSet", dataSet);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
@@ -140,7 +140,7 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			SqlDataSetFactoryEntity dataSet)
+			SqlDataSetEntity dataSet)
 	{
 		User user = WebUtils.getUser(request, response);
 
@@ -150,7 +150,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkSaveEntity(dataSet);
 
-		this.sqlDataSetFactoryEntityService.add(user, dataSet);
+		this.sqlDataSetEntityService.add(user, dataSet);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -161,7 +161,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		SqlDataSetFactoryEntity dataSet = this.sqlDataSetFactoryEntityService.getByIdForEdit(user, id);
+		SqlDataSetEntity dataSet = this.sqlDataSetEntityService.getByIdForEdit(user, id);
 
 		if (dataSet == null)
 			throw new RecordNotFoundException();
@@ -178,7 +178,7 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			SqlDataSetFactoryEntity dataSet)
+			SqlDataSetEntity dataSet)
 	{
 		User user = WebUtils.getUser(request, response);
 
@@ -186,7 +186,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkSaveEntity(dataSet);
 
-		this.sqlDataSetFactoryEntityService.update(user, dataSet);
+		this.sqlDataSetEntityService.update(user, dataSet);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -197,7 +197,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		SqlDataSetFactoryEntity dataSet = this.sqlDataSetFactoryEntityService.getById(user, id);
+		SqlDataSetEntity dataSet = this.sqlDataSetEntityService.getById(user, id);
 
 		if (dataSet == null)
 			throw new RecordNotFoundException();
@@ -211,6 +211,46 @@ public class DataSetController extends AbstractSchemaConnController
 		return "/analysis/dataSet/dataSet_form";
 	}
 
+	@RequestMapping(value = "/getById", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public SqlDataSetEntity getById(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestParam("id") String id)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		SqlDataSetEntity dataSet = this.sqlDataSetEntityService.getById(user, id);
+
+		if (dataSet == null)
+			throw new RecordNotFoundException();
+
+		return dataSet;
+	}
+
+	@RequestMapping(value = "/getByIds", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<SqlDataSetEntity> getByIds(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestParam("id") String[] ids)
+	{
+		List<SqlDataSetEntity> dataSets = new ArrayList<SqlDataSetEntity>();
+
+		if (!isEmpty(ids))
+		{
+			User user = WebUtils.getUser(request, response);
+
+			for (String id : ids)
+			{
+				SqlDataSetEntity dataSet = this.sqlDataSetEntityService.getById(user, id);
+
+				if (dataSet == null)
+					throw new RecordNotFoundException();
+
+				dataSets.add(dataSet);
+			}
+		}
+
+		return dataSets;
+	}
+
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
@@ -221,7 +261,7 @@ public class DataSetController extends AbstractSchemaConnController
 		for (int i = 0; i < ids.length; i++)
 		{
 			String id = ids[i];
-			this.sqlDataSetFactoryEntityService.deleteById(user, id);
+			this.sqlDataSetEntityService.deleteById(user, id);
 		}
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
@@ -251,15 +291,14 @@ public class DataSetController extends AbstractSchemaConnController
 
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public PagingData<SqlDataSetFactoryEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<SqlDataSetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
 
 		PagingQuery pagingQuery = getPagingQuery(request, WebUtils.COOKIE_PAGINATION_SIZE);
 
-		PagingData<SqlDataSetFactoryEntity> pagingData = this.sqlDataSetFactoryEntityService.pagingQuery(user,
-				pagingQuery);
+		PagingData<SqlDataSetEntity> pagingData = this.sqlDataSetEntityService.pagingQuery(user, pagingQuery);
 
 		return pagingData;
 	}
@@ -328,7 +367,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return modelSqlResult;
 	}
 
-	protected void inflateDataSetProperties(HttpServletRequest request, AbstractDataSetFactory dataSetFactory)
+	protected void inflateDataSetProperties(HttpServletRequest request, AbstractDataSet dataSet)
 	{
 		String labelsText = request.getParameter("dataSetPropertyLabelsText");
 		if (labelsText == null)
@@ -354,7 +393,7 @@ public class DataSetController extends AbstractSchemaConnController
 			dataSetProperties.add(dataSetProperty);
 		}
 
-		dataSetFactory.setProperties(dataSetProperties);
+		dataSet.setProperties(dataSetProperties);
 	}
 
 	/**
@@ -402,7 +441,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return dataSetProperties;
 	}
 
-	protected void checkSaveEntity(SqlDataSetFactoryEntity dataSet)
+	protected void checkSaveEntity(SqlDataSetEntity dataSet)
 	{
 		if (isBlank(dataSet.getName()))
 			throw new IllegalInputException();

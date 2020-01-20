@@ -24,7 +24,7 @@ public class Chart extends AbstractIdentifiable
 
 	private Map<String, ?> propertyValues;
 
-	private ChartDataSetFactory[] chartDataSetFactories;
+	private ChartDataSet[] chartDataSets;
 
 	public Chart()
 	{
@@ -37,13 +37,13 @@ public class Chart extends AbstractIdentifiable
 	}
 
 	public Chart(String id, RenderContext renderContext, ChartPlugin<?> plugin, Map<String, ?> propertyValues,
-			ChartDataSetFactory[] chartDataSetFactories)
+			ChartDataSet[] chartDataSets)
 	{
 		super(id);
 		this.renderContext = renderContext;
 		this.plugin = plugin;
 		this.propertyValues = propertyValues;
-		this.chartDataSetFactories = chartDataSetFactories;
+		this.chartDataSets = chartDataSets;
 	}
 
 	public RenderContext getRenderContext()
@@ -76,34 +76,35 @@ public class Chart extends AbstractIdentifiable
 		this.propertyValues = propertyValues;
 	}
 
-	public ChartDataSetFactory[] getChartDataSetFactories()
+	public ChartDataSet[] getChartDataSets()
 	{
-		return chartDataSetFactories;
+		return chartDataSets;
 	}
 
-	public void setChartDataSetFactories(ChartDataSetFactory[] chartDataSetFactories)
+	public void setChartDataSets(ChartDataSet[] chartDataSets)
 	{
-		this.chartDataSetFactories = chartDataSetFactories;
+		this.chartDataSets = chartDataSets;
 	}
 
 	/**
-	 * 获取数据集。
+	 * 获取此图表的所有{@linkplain DataSetResult}。
 	 * 
 	 * @param dataSetParamValues
 	 * @return
 	 * @throws DataSetException
 	 */
-	public DataSet[] getDataSets(Map<String, ?> dataSetParamValues) throws DataSetException
+	public DataSetResult[] getDataSetResults(Map<String, ?> dataSetParamValues) throws DataSetException
 	{
-		if (this.chartDataSetFactories == null || this.chartDataSetFactories.length == 0)
-			return new DataSet[0];
+		if (this.chartDataSets == null || this.chartDataSets.length == 0)
+			return new DataSetResult[0];
 
-		DataSet[] dataSets = new DataSet[this.chartDataSetFactories.length];
+		DataSetResult[] dataSets = new DataSetResult[this.chartDataSets.length];
 
-		for (int i = 0; i < this.chartDataSetFactories.length; i++)
+		for (int i = 0; i < this.chartDataSets.length; i++)
 		{
-			DataSet dataSet = this.chartDataSetFactories[i].getDataSetFactory().getDataSet(dataSetParamValues);
-			dataSets[i] = dataSet;
+			DataSetResult dataSetResult = this.chartDataSets[i].getDataSet()
+					.getResult(dataSetParamValues);
+			dataSets[i] = dataSetResult;
 		}
 
 		return dataSets;

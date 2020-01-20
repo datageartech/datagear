@@ -14,20 +14,20 @@ import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.DataNameAndType;
-import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetExport;
-import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 
 /**
- * 抽象{@linkplain DataSetFactory}。
+ * 抽象{@linkplain DataSet}。
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractDataSetFactory extends AbstractIdentifiable implements DataSetFactory
+public abstract class AbstractDataSet extends AbstractIdentifiable implements DataSet
 {
 	private List<DataSetProperty> properties;
 
@@ -35,12 +35,12 @@ public abstract class AbstractDataSetFactory extends AbstractIdentifiable implem
 
 	private List<DataSetExport> exports;
 
-	public AbstractDataSetFactory()
+	public AbstractDataSet()
 	{
 		super();
 	}
 
-	public AbstractDataSetFactory(String id, List<DataSetProperty> properties)
+	public AbstractDataSet(String id, List<DataSetProperty> properties)
 	{
 		super(id);
 		this.properties = properties;
@@ -115,7 +115,7 @@ public abstract class AbstractDataSetFactory extends AbstractIdentifiable implem
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected Map<String, ?> getExportValues(DataSet dataSet) throws DataSetException
+	protected Map<String, ?> getExportValues(DataSetResult dataSetResult) throws DataSetException
 	{
 		if (!hasExport())
 			return null;
@@ -124,7 +124,7 @@ public abstract class AbstractDataSetFactory extends AbstractIdentifiable implem
 
 		for (DataSetExport expt : this.exports)
 		{
-			Object value = expt.getExportValue(this, dataSet);
+			Object value = expt.getExportValue(this, dataSetResult);
 			exportValues.put(expt.getName(), value);
 		}
 

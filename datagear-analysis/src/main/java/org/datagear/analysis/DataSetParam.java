@@ -7,7 +7,7 @@ package org.datagear.analysis;
 /**
  * 数据集参数。
  * <p>
- * 此类描述{@linkplain DataSetFactory}创建{@linkplain DataSet}所需要的输入参数信息。
+ * 此类描述{@linkplain DataSet}创建{@linkplain DataSetResult}所需要的输入参数信息。
  * </p>
  * 
  * @author datagear@163.com

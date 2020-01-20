@@ -13,9 +13,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetFactory;
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.ParameterSqlResolver.ParameterSql;
@@ -24,16 +24,16 @@ import org.datagear.util.JdbcUtil.QueryResultSet;
 import org.datagear.util.resource.ConnectionFactory;
 
 /**
- * SQL {@linkplain DataSetFactory}。
+ * SQL {@linkplain DataSet}。
  * <p>
  * 它的{@linkplain #setSql(String)}中可以包含<code>${parameter}</code>格式的参数（<code>parameter</code>必须是在{@linkplain #getParams()}中预定义的），
- * 在{@linkplain #getDataSet(DataSetParamValues)}中会被替换为具体的参数值。
+ * 在{@linkplain #getResult(DataSetParamValues)}中会被替换为具体的参数值。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class SqlDataSetFactory extends AbstractDataSetFactory
+public class SqlDataSet extends AbstractDataSet
 {
 	protected static final SqlDataSetSupport SQL_DATA_SET_SUPPORT = new SqlDataSetSupport();
 
@@ -41,12 +41,12 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 
 	private String sql;
 
-	public SqlDataSetFactory()
+	public SqlDataSet()
 	{
 		super();
 	}
 
-	public SqlDataSetFactory(String id, List<DataSetProperty> properties, ConnectionFactory connectionFactory,
+	public SqlDataSet(String id, List<DataSetProperty> properties, ConnectionFactory connectionFactory,
 			String sql)
 	{
 		super(id, properties);
@@ -75,7 +75,7 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	}
 
 	@Override
-	public DataSet getDataSet(Map<String, ?> paramValues) throws DataSetException
+	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
 	{
 		Connection cn = null;
 
@@ -106,14 +106,14 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	}
 
 	/**
-	 * 获取指定SQL的{@linkplain DataSet}。
+	 * 获取指定SQL的{@linkplain DataSetResult}。
 	 * 
 	 * @param cn
 	 * @param sql
 	 * @param paramValues
 	 * @return
 	 */
-	protected DataSet getDataSet(Connection cn, String sql, Map<String, ?> paramValues) throws DataSetException
+	protected DataSetResult getDataSet(Connection cn, String sql, Map<String, ?> paramValues) throws DataSetException
 	{
 		ParameterSql parameterSql = getSqlDataSetSupport().resolveParameterSql(sql);
 		sql = parameterSql.getSql();
@@ -139,14 +139,14 @@ public class SqlDataSetFactory extends AbstractDataSetFactory
 	}
 
 	/**
-	 * 将{@linkplain ResultSet}转换为{@linkplain DataSet}。
+	 * 将{@linkplain ResultSet}转换为{@linkplain DataSetResult}。
 	 * 
 	 * @param cn
 	 * @param rs
 	 * @return
 	 * @throws SQLException
 	 */
-	public DataSet toDataSet(Connection cn, ResultSet rs) throws SQLException
+	public DataSetResult toDataSet(Connection cn, ResultSet rs) throws SQLException
 	{
 		List<Map<String, ?>> datas = getSqlDataSetSupport().resolveDatas(cn, rs, getProperties());
 		MapDataSet dataSet = new MapDataSet(datas);

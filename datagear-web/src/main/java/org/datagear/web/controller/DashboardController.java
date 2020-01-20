@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlDashboard;
@@ -459,7 +459,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	 */
 	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Map<String, DataSet[]> showData(HttpServletRequest request, HttpServletResponse response,
+	public Map<String, DataSetResult[]> showData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model) throws Exception
 	{
 		WebContext webContext = createWebContext(request);
@@ -479,9 +479,9 @@ public class DashboardController extends AbstractDataAnalysisController
 		Map<String, ?> dataSetParamValues = new HashMap<String, Object>();
 
 		if (chartsId == null || chartsId.length == 0)
-			return dashboard.getDataSets(dataSetParamValues);
+			return dashboard.getDataSetResults(dataSetParamValues);
 		else
-			return dashboard.getDataSets(Arrays.asList(chartsId), dataSetParamValues);
+			return dashboard.getDataSetResults(Arrays.asList(chartsId), dataSetParamValues);
 	}
 
 	/**

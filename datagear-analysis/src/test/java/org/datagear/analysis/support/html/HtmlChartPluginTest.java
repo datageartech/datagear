@@ -12,7 +12,7 @@ import java.io.StringWriter;
 import java.util.Locale;
 import java.util.Map;
 
-import org.datagear.analysis.ChartDataSetFactory;
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 import org.datagear.analysis.support.LocationResource;
@@ -45,8 +45,8 @@ public class HtmlChartPluginTest
 		HtmlRenderAttributes.setChartTheme(renderContext, SimpleDashboardThemeSource.THEME_LIGHT.getChartTheme());
 		HtmlRenderAttributes.setLocale(renderContext, Locale.getDefault());
 
-		htmlChartPlugin.renderChart(renderContext, null, (ChartDataSetFactory[]) null);
-		htmlChartPlugin.renderChart(renderContext, null, (ChartDataSetFactory[]) null);
+		htmlChartPlugin.renderChart(renderContext, null, (ChartDataSet[]) null);
+		htmlChartPlugin.renderChart(renderContext, null, (ChartDataSet[]) null);
 
 		String html = stringWriter.toString();
 
@@ -70,7 +70,7 @@ public class HtmlChartPluginTest
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), stringWriter);
 		HtmlRenderAttributes.setChartRenderContextVarName(renderContext, "chartRenderContext");
 
-		htmlChartPlugin.renderChart(renderContext, null, (ChartDataSetFactory[]) null);
+		htmlChartPlugin.renderChart(renderContext, null, (ChartDataSet[]) null);
 
 		String html = stringWriter.toString();
 

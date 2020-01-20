@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartDataSetFactory;
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.RenderContext;
@@ -39,7 +39,7 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 
 	private Map<String, ?> chartPropertyValues = new HashMap<String, Object>();
 
-	private ChartDataSetFactory[] chartDataSetFactories = new ChartDataSetFactory[0];
+	private ChartDataSet[] chartDataSets = new ChartDataSet[0];
 
 	/** 图表更新间隔毫秒数 */
 	private int updateInterval = -1;
@@ -49,12 +49,12 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 		super();
 	}
 
-	public ChartWidget(String id, String name, ChartPlugin<T> chartPlugin, ChartDataSetFactory... chartDataSetFactories)
+	public ChartWidget(String id, String name, ChartPlugin<T> chartPlugin, ChartDataSet... chartDataSets)
 	{
 		super(id);
 		this.name = name;
 		this.chartPlugin = chartPlugin;
-		this.chartDataSetFactories = chartDataSetFactories;
+		this.chartDataSets = chartDataSets;
 	}
 
 	public String getName()
@@ -87,14 +87,14 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 		this.chartPropertyValues = chartPropertyValues;
 	}
 
-	public ChartDataSetFactory[] getChartDataSetFactories()
+	public ChartDataSet[] getChartDataSets()
 	{
-		return chartDataSetFactories;
+		return chartDataSets;
 	}
 
-	public void setChartDataSetFactories(ChartDataSetFactory[] chartDataSetFactories)
+	public void setChartDataSets(ChartDataSet[] chartDataSets)
 	{
-		this.chartDataSetFactories = chartDataSetFactories;
+		this.chartDataSets = chartDataSets;
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 		if (this.chartPropertyValues != null)
 			propertyValues.putAll(this.chartPropertyValues);
 
-		return this.chartPlugin.renderChart(renderContext, propertyValues, this.chartDataSetFactories);
+		return this.chartPlugin.renderChart(renderContext, propertyValues, this.chartDataSets);
 	}
 
 	/**

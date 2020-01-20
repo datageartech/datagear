@@ -101,11 +101,11 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	 * 
 	 * @param renderContext
 	 * @param chartPropertyValues
-	 * @param chartDataSetFactories
+	 * @param chartDataSets
 	 * @return
 	 * @throws RenderException
 	 */
-	Chart renderChart(T renderContext, Map<String, ?> chartPropertyValues, ChartDataSetFactory... chartDataSetFactories)
+	Chart renderChart(T renderContext, Map<String, ?> chartPropertyValues, ChartDataSet... chartDataSets)
 			throws RenderException;
 
 	/**

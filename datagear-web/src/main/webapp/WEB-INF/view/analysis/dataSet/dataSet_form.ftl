@@ -40,8 +40,8 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSet.dataSource' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="schemaConnectionFactory.schema.title" class="ui-widget ui-widget-content" value="${(dataSet.schemaConnectionFactory.schema.title)!''?html}" readonly="readonly" />
-					<input type="hidden" name="schemaConnectionFactory.schema.id" class="ui-widget ui-widget-content" value="${(dataSet.schemaConnectionFactory.schema.id)!''?html}" />
+					<input type="text" name="schemaConnectionFactory.schema.title" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.title)!''?html}" readonly="readonly" />
+					<input type="hidden" name="schemaConnectionFactory.schema.id" class="ui-widget ui-widget-content" value="${(dataSet.connectionFactory.schema.id)!''?html}" />
 					<#if !readonly>
 					<button type="button" class="select-schema-button"><@spring.message code='select' /></button>
 					</#if>

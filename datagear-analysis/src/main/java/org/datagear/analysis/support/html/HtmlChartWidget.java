@@ -7,7 +7,7 @@
  */
 package org.datagear.analysis.support.html;
 
-import org.datagear.analysis.ChartDataSetFactory;
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
@@ -26,9 +26,9 @@ public class HtmlChartWidget<T extends HtmlRenderContext> extends ChartWidget<T>
 	}
 
 	public HtmlChartWidget(String id, String name, HtmlChartPlugin<T> chartPlugin,
-			ChartDataSetFactory... chartDataSetFactories)
+			ChartDataSet... chartDataSets)
 	{
-		super(id, name, chartPlugin, chartDataSetFactories);
+		super(id, name, chartPlugin, chartDataSets);
 	}
 
 	@Override

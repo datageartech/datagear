@@ -11,17 +11,16 @@ import java.util.Date;
 import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.support.SqlDataSetFactory;
+import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.util.resource.ConnectionFactory;
 
 /**
- * {@linkplain SqlDataSetFactoryEntity}实体。
+ * {@linkplain SqlDataSetEntity}实体。
  * 
  * @author datagear@163.com
  *
  */
-public class SqlDataSetFactoryEntity extends SqlDataSetFactory
-		implements CreateUserEntity<String>, DataPermissionEntity<String>
+public class SqlDataSetEntity extends SqlDataSet implements CreateUserEntity<String>, DataPermissionEntity<String>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -40,14 +39,14 @@ public class SqlDataSetFactoryEntity extends SqlDataSetFactory
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
-	public SqlDataSetFactoryEntity()
+	public SqlDataSetEntity()
 	{
 		super();
 		this.createTime = new Date();
 	}
 
-	public SqlDataSetFactoryEntity(String id, List<DataSetProperty> properties,
-			SchemaConnectionFactory connectionFactory, String sql, String name, User createUser)
+	public SqlDataSetEntity(String id, List<DataSetProperty> properties, SchemaConnectionFactory connectionFactory,
+			String sql, String name, User createUser)
 	{
 		super(id, properties, connectionFactory, sql);
 		this.name = name;

@@ -17,7 +17,7 @@ import org.datagear.util.i18n.Label;
 /**
  * 数据标记。
  * <p>
- * {@linkplain ChartPlugin}使用此类标记{@linkplain DataSetFactory}产生的数据，并依此进行图表绘制。
+ * {@linkplain ChartPlugin}使用此类标记{@linkplain DataSet}产生的数据，并依此进行图表绘制。
  * </p>
  * 
  * @author datagear@163.com

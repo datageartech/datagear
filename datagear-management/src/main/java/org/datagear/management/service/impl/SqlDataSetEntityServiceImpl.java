@@ -12,32 +12,31 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetExport;
-import org.datagear.analysis.DataSetFactory;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.support.SqlDataSetFactory;
+import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.SchemaConnectionFactory;
-import org.datagear.management.domain.SqlDataSetFactoryEntity;
+import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
-import org.datagear.management.service.SqlDataSetFactoryEntityService;
+import org.datagear.management.service.SqlDataSetEntityService;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
- * {@linkplain SqlDataSetFactoryEntityService}实现类。
+ * {@linkplain SqlDataSetEntityService}实现类。
  * 
  * @author datagear@163.com
  *
  */
-public class SqlDataSetFactoryEntityServiceImpl
-		extends AbstractMybatisDataPermissionEntityService<String, SqlDataSetFactoryEntity>
-		implements SqlDataSetFactoryEntityService
+public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntityService<String, SqlDataSetEntity>
+		implements SqlDataSetEntityService
 {
-	protected static final String SQL_NAMESPACE = SqlDataSetFactoryEntity.class.getName();
+	protected static final String SQL_NAMESPACE = SqlDataSetEntity.class.getName();
 
 	private ConnectionSource connectionSource;
 
@@ -45,12 +44,12 @@ public class SqlDataSetFactoryEntityServiceImpl
 
 	private AuthorizationService authorizationService;
 
-	public SqlDataSetFactoryEntityServiceImpl()
+	public SqlDataSetEntityServiceImpl()
 	{
 		super();
 	}
 
-	public SqlDataSetFactoryEntityServiceImpl(SqlSessionFactory sqlSessionFactory, ConnectionSource connectionSource,
+	public SqlDataSetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, ConnectionSource connectionSource,
 			SchemaService schemaService, AuthorizationService authorizationService)
 	{
 		super(sqlSessionFactory);
@@ -59,7 +58,7 @@ public class SqlDataSetFactoryEntityServiceImpl
 		this.authorizationService = authorizationService;
 	}
 
-	public SqlDataSetFactoryEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, ConnectionSource connectionSource,
+	public SqlDataSetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, ConnectionSource connectionSource,
 			SchemaService schemaService, AuthorizationService authorizationService)
 	{
 		super(sqlSessionTemplate);
@@ -99,29 +98,36 @@ public class SqlDataSetFactoryEntityServiceImpl
 	}
 
 	@Override
-	public SqlDataSetFactory getSqlDataSetFactory(String id)
+	public SqlDataSet getSqlDataSet(String id)
 	{
-		return getById(id);
+		SqlDataSetEntity entity = getById(id);
+
+		SchemaConnectionFactory connectionFactory = entity.getConnectionFactory();
+
+		connectionFactory.setSchema(this.schemaService.getById(connectionFactory.getSchema().getId()));
+		connectionFactory.setConnectionSource(this.connectionSource);
+
+		return entity;
 	}
 
 	@Override
-	protected boolean add(SqlDataSetFactoryEntity entity, Map<String, Object> params)
+	protected boolean add(SqlDataSetEntity entity, Map<String, Object> params)
 	{
 		boolean success = super.add(entity, params);
 
 		if (success)
-			saveDataSetFactoryChildren(entity);
+			saveDataSetChildren(entity);
 
 		return success;
 	}
 
 	@Override
-	protected boolean update(SqlDataSetFactoryEntity entity, Map<String, Object> params)
+	protected boolean update(SqlDataSetEntity entity, Map<String, Object> params)
 	{
 		boolean success = super.update(entity, params);
 
 		if (success)
-			saveDataSetFactoryChildren(entity);
+			saveDataSetChildren(entity);
 
 		return success;
 	}
@@ -129,11 +135,11 @@ public class SqlDataSetFactoryEntityServiceImpl
 	@Override
 	public String getResourceType()
 	{
-		return SqlDataSetFactoryEntity.AUTHORIZATION_RESOURCE_TYPE;
+		return SqlDataSetEntity.AUTHORIZATION_RESOURCE_TYPE;
 	}
 
 	@Override
-	public SqlDataSetFactoryEntity getByStringId(User user, String id) throws PermissionDeniedException
+	public SqlDataSetEntity getByStringId(User user, String id) throws PermissionDeniedException
 	{
 		return super.getById(user, id);
 	}
@@ -145,32 +151,27 @@ public class SqlDataSetFactoryEntityServiceImpl
 
 		if (deleted)
 		{
-			this.authorizationService.deleteByResource(SqlDataSetFactoryEntity.AUTHORIZATION_RESOURCE_TYPE, id);
+			this.authorizationService.deleteByResource(SqlDataSetEntity.AUTHORIZATION_RESOURCE_TYPE, id);
 		}
 
 		return deleted;
 	}
 
 	@Override
-	protected void postProcessSelects(List<SqlDataSetFactoryEntity> list)
+	protected void postProcessSelects(List<SqlDataSetEntity> list)
 	{
 		// XXX 查询操作仅用于展示，不必完全加载
 		// super.postProcessSelects(list);
 	}
 
 	@Override
-	protected void postProcessSelect(SqlDataSetFactoryEntity obj)
+	protected void postProcessSelect(SqlDataSetEntity obj)
 	{
 		if (obj == null)
 			return;
 
-		SchemaConnectionFactory connectionFactory = obj.getConnectionFactory();
-
-		connectionFactory.setSchema(this.schemaService.getById(connectionFactory.getSchema().getId()));
-		connectionFactory.setConnectionSource(this.connectionSource);
-
 		Map<String, Object> sqlParams = buildParamMapWithIdentifierQuoteParameter();
-		sqlParams.put("dataSetFactoryId", obj.getId());
+		sqlParams.put("dataSetId", obj.getId());
 
 		List<DataSetPropertyPO> propertyPOs = selectListMybatis("getPropertyPOs", sqlParams);
 		List<DataSetProperty> dataSetProperties = DataSetPropertyPO.to(propertyPOs);
@@ -197,14 +198,14 @@ public class SqlDataSetFactoryEntityServiceImpl
 		return SQL_NAMESPACE;
 	}
 
-	protected void saveDataSetFactoryChildren(SqlDataSetFactory entity)
+	protected void saveDataSetChildren(SqlDataSet entity)
 	{
 		saveDataSetPropertyPOs(entity);
 		saveDataSetParamPOs(entity);
 		saveDataSetExportPOs(entity);
 	}
 
-	protected void saveDataSetPropertyPOs(SqlDataSetFactory entity)
+	protected void saveDataSetPropertyPOs(SqlDataSet entity)
 	{
 		deleteMybatis("deletePropertyPOs", entity.getId());
 
@@ -217,7 +218,7 @@ public class SqlDataSetFactoryEntityServiceImpl
 		}
 	}
 
-	protected void saveDataSetParamPOs(SqlDataSetFactory entity)
+	protected void saveDataSetParamPOs(SqlDataSet entity)
 	{
 		deleteMybatis("deleteParamPOs", entity.getId());
 
@@ -230,7 +231,7 @@ public class SqlDataSetFactoryEntityServiceImpl
 		}
 	}
 
-	protected void saveDataSetExportPOs(SqlDataSetFactory entity)
+	protected void saveDataSetExportPOs(SqlDataSet entity)
 	{
 		deleteMybatis("deleteExportPOs", entity.getId());
 
@@ -243,33 +244,33 @@ public class SqlDataSetFactoryEntityServiceImpl
 		}
 	}
 
-	public static abstract class DataSetFactoryChildPO<T>
+	public static abstract class DataSetChildPO<T>
 	{
-		private String dataSetFactoryId;
+		private String dataSetId;
 		private T child;
 		private int order = 0;
 
-		public DataSetFactoryChildPO()
+		public DataSetChildPO()
 		{
 			super();
 		}
 
-		public DataSetFactoryChildPO(String dataSetFactoryId, T child, int order)
+		public DataSetChildPO(String dataSetId, T child, int order)
 		{
 			super();
-			this.dataSetFactoryId = dataSetFactoryId;
+			this.dataSetId = dataSetId;
 			this.child = child;
 			this.order = order;
 		}
 
-		public String getDataSetFactoryId()
+		public String getDataSetId()
 		{
-			return dataSetFactoryId;
+			return dataSetId;
 		}
 
-		public void setDataSetFactoryId(String dataSetFactoryId)
+		public void setDataSetId(String dataSetId)
 		{
-			this.dataSetFactoryId = dataSetFactoryId;
+			this.dataSetId = dataSetId;
 		}
 
 		public T getChild()
@@ -292,13 +293,13 @@ public class SqlDataSetFactoryEntityServiceImpl
 			this.order = order;
 		}
 
-		public static <T> List<T> to(List<? extends DataSetFactoryChildPO<T>> pos)
+		public static <T> List<T> to(List<? extends DataSetChildPO<T>> pos)
 		{
 			List<T> childs = new ArrayList<T>();
 
 			if (pos != null)
 			{
-				for (DataSetFactoryChildPO<T> po : pos)
+				for (DataSetChildPO<T> po : pos)
 					childs.add(po.getChild());
 			}
 
@@ -306,16 +307,16 @@ public class SqlDataSetFactoryEntityServiceImpl
 		}
 	}
 
-	public static class DataSetPropertyPO extends DataSetFactoryChildPO<DataSetProperty>
+	public static class DataSetPropertyPO extends DataSetChildPO<DataSetProperty>
 	{
 		public DataSetPropertyPO()
 		{
 			super();
 		}
 
-		public DataSetPropertyPO(String dataSetFactoryId, DataSetProperty child, int order)
+		public DataSetPropertyPO(String dataSetId, DataSetProperty child, int order)
 		{
-			super(dataSetFactoryId, child, order);
+			super(dataSetId, child, order);
 		}
 
 		@Override
@@ -330,17 +331,17 @@ public class SqlDataSetFactoryEntityServiceImpl
 			super.setChild(child);
 		}
 
-		public static List<DataSetPropertyPO> from(DataSetFactory dataSetFactory)
+		public static List<DataSetPropertyPO> from(DataSet dataSet)
 		{
 			List<DataSetPropertyPO> pos = new ArrayList<DataSetPropertyPO>();
 
-			List<DataSetProperty> properties = dataSetFactory.getProperties();
+			List<DataSetProperty> properties = dataSet.getProperties();
 
 			if (properties != null)
 			{
 				for (int i = 0; i < properties.size(); i++)
 				{
-					DataSetPropertyPO po = new DataSetPropertyPO(dataSetFactory.getId(), properties.get(i), i);
+					DataSetPropertyPO po = new DataSetPropertyPO(dataSet.getId(), properties.get(i), i);
 					pos.add(po);
 				}
 			}
@@ -349,16 +350,16 @@ public class SqlDataSetFactoryEntityServiceImpl
 		}
 	}
 
-	public static class DataSetParamPO extends DataSetFactoryChildPO<DataSetParam>
+	public static class DataSetParamPO extends DataSetChildPO<DataSetParam>
 	{
 		public DataSetParamPO()
 		{
 			super();
 		}
 
-		public DataSetParamPO(String dataSetFactoryId, DataSetParam child, int order)
+		public DataSetParamPO(String dataSetId, DataSetParam child, int order)
 		{
-			super(dataSetFactoryId, child, order);
+			super(dataSetId, child, order);
 		}
 
 		@Override
@@ -373,17 +374,17 @@ public class SqlDataSetFactoryEntityServiceImpl
 			super.setChild(child);
 		}
 
-		public static List<DataSetParamPO> from(DataSetFactory dataSetFactory)
+		public static List<DataSetParamPO> from(DataSet dataSet)
 		{
 			List<DataSetParamPO> pos = new ArrayList<DataSetParamPO>();
 
-			List<DataSetParam> params = dataSetFactory.getParams();
+			List<DataSetParam> params = dataSet.getParams();
 
 			if (params != null)
 			{
 				for (int i = 0; i < params.size(); i++)
 				{
-					DataSetParamPO po = new DataSetParamPO(dataSetFactory.getId(), params.get(i), i);
+					DataSetParamPO po = new DataSetParamPO(dataSet.getId(), params.get(i), i);
 					pos.add(po);
 				}
 			}
@@ -392,16 +393,16 @@ public class SqlDataSetFactoryEntityServiceImpl
 		}
 	}
 
-	public static class DataSetExportPO extends DataSetFactoryChildPO<DataSetExport>
+	public static class DataSetExportPO extends DataSetChildPO<DataSetExport>
 	{
 		public DataSetExportPO()
 		{
 			super();
 		}
 
-		public DataSetExportPO(String dataSetFactoryId, DataSetExport child, int order)
+		public DataSetExportPO(String dataSetId, DataSetExport child, int order)
 		{
-			super(dataSetFactoryId, child, order);
+			super(dataSetId, child, order);
 		}
 
 		@Override
@@ -416,17 +417,17 @@ public class SqlDataSetFactoryEntityServiceImpl
 			super.setChild(child);
 		}
 
-		public static List<DataSetExportPO> from(DataSetFactory dataSetFactory)
+		public static List<DataSetExportPO> from(DataSet dataSet)
 		{
 			List<DataSetExportPO> pos = new ArrayList<DataSetExportPO>();
 
-			List<DataSetExport> exports = dataSetFactory.getExports();
+			List<DataSetExport> exports = dataSet.getExports();
 
 			if (exports != null)
 			{
 				for (int i = 0; i < exports.size(); i++)
 				{
-					DataSetExportPO po = new DataSetExportPO(dataSetFactory.getId(), exports.get(i), i);
+					DataSetExportPO po = new DataSetExportPO(dataSet.getId(), exports.get(i), i);
 					pos.add(po);
 				}
 			}
