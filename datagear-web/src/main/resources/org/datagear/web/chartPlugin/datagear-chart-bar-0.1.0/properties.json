@@ -2,6 +2,11 @@
 	id : 'datagear-chart-bar',
 	nameLabel : '柱状图',
 	descLabel : '柱状图',
+	dataSigns :
+	[
+		{ name : "x-value", nameLabel : "横坐标", occurRequired: true, occurMultiple: false },
+		{ name : "y-value", nameLabel : "纵坐标", occurRequired: true, occurMultiple: true }
+	],
 	version: "0.1.0",
 	order : 1
 }

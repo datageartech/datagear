@@ -2007,14 +2007,17 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .page-form-chart .data-set-wrapper{
 	display: inline-block;
-	width: 50%;
-	height: 10em;
-	padding: 0.3em 0.2em;
+	width: 60%;
+	min-height: 10em;
+	padding: 0.3em 0.3em;
 	overflow: auto;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .page-form-chart .data-set-wrapper .data-set-item{
 	padding: 0.3em 0.3em;
-	margin-top: 0.3em;
+	margin-top: 0.5em;
 }
 .page-form-chart .data-set-wrapper .data-set-item:first-child{
 	margin-top: 0;
@@ -2024,43 +2027,71 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	cursor: pointer;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-head{
-	padding: 0.2em 0;
+	padding: 0.2em 0.2em;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-signs{
 	margin-top: 0.3em;
+	padding: 0 0.3em;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item{
 	padding: 0.2em 0;
 	position: relative;
+	height: 3em;
+	margin-bottom: 0.3em;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-item-name{
 	display: inline-block;
-	width: 25%;
+	width: 30%;
 	overflow: hidden;
 	padding: 1px 1px;
+	margin-top: 0.8em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-item-values-wrapper{
+	position: absolute;
+    left: 30%;
+    top: 0;
+    bottom: 0;
+    right: 0;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-item-values{
-	display: inline-block;
-	width: 75%;
-	height: 1.55em;
-	overflow: hidden;
-	padding: 1px 1px;
-	padding-right: 2.5em;
+	position: absolute;
+    left: 0.1em;
+    top: 0.1em;
+    bottom: 0.1em;
+    right: 3em;
+    padding: 2px 2px;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
+	overflow-y: auto;
 }
 .page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-item-values.ui-widget-content{
 	background: none;
 }
+.page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-item-values .sign-value{
+	display: inline-block;
+	padding: 0.41em 0.41em;
+	border: 0;
+	margin-right: 0.3em;
+	margin-bottom: 0.3em;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-item-values .sign-value .sign-value-label{
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-item-values .sign-value .sign-value-delete-icon{
+	cursor: pointer;
+}
 .page-form-chart .data-set-wrapper .data-set-item .item-signs .item-signs-item .sign-add-button{
 	position: absolute;
-    top: 0.35em;
-    right: 0.1em;
-    height: 1.2em;
+    top: 50%;
+    right: 0.05em;
+    height: 1.7em;
+    margin-top: -0.9em;
     border: 0px;
     padding: 0.4em 0.5em;
 }
@@ -2068,8 +2099,8 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	position: absolute;
 	display: none;
 	padding: 0.3em 0.3em;
-	width: 30%;
-	height: 40%;
+	width: 40%;
+	height: 70%;
 }
 .page-form-chart .data-sign-select-panel .select-panel-head{
 	padding: 0.3em 0.1em;
@@ -2087,8 +2118,19 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	margin-right: 1em;
 	margin-bottom: 0.41em;
 }
+.page-form-chart .form-item-value-chartDataSet{
+	position: relative;
+}
+.page-form-chart .form-item-value-chartDataSet > .error{
+	position: absolute;
+	bottom: 0;
+	left: 0;
+}
 .page-form-chart .add-data-set-button{
 	vertical-align: top;
+	position: absolute;
+	left: 60%;
+	margin-left: 0.3em;
 }
 
 .page-grid-chartPlugin{

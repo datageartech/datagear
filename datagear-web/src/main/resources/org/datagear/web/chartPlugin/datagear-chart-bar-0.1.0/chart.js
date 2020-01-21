@@ -29,14 +29,16 @@
 		this.echarts.chart.setOption(options);
 	};
 	
-	chart.update = function(dataSets)
+	chart.update = function(results)
 	{
-		var dataSet = chartUtil.dataset.first(dataSets);
-		var xcolumnMeta = chartUtil.dataset.columnMetaByDimension(dataSet);
-		var ycolumnMeta = chartUtil.dataset.columnMetaByScalar(dataSet);
+		var chartDataSet = chartUtil.firstChartDataSet(this);
+		var result = chartUtil.firstResult(results);
 		
-		var xdatas = chartUtil.dataset.columnValues(dataSet, xcolumnMeta);
-		var ydatas = chartUtil.dataset.columnValues(dataSet, ycolumnMeta);
+		var xp = chartUtil.dataSetPropertyOfSign(chartDataSet, "x-value");
+		var yp = chartUtil.dataSetPropertyOfSign(chartDataSet, "y-value");
+		
+		var xdatas = chartUtil.dataPropertyValues(result, xp);
+		var ydatas = chartUtil.dataPropertyValues(result, yp);
 		
 		var options = { xAxis : { data : xdatas }, series : [ { data : ydatas } ] };
 		this.echarts.chart.setOption(options);

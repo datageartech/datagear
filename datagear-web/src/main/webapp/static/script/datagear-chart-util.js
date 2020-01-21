@@ -85,7 +85,20 @@
 		else
 			return renderContext.attributes[attrName] = attrValue;
 	};
-
+	
+	/**
+	 * 获取第一个图标数据集对象。
+	 * 
+	 * @param chart
+	 */
+	util.firstChartDataSet = function(chart)
+	{
+		if(!chart || !chart.chartDataSets || chart.chartDataSets.length < 1)
+			return {};
+			
+		return chart.chartDataSets[0];
+	};
+	
 	/**
 	 * 获取指定标记的第一个数据集属性，没有则返回null。
 	 * 
@@ -115,7 +128,7 @@
 		
 		var signPropertyNames = [];
 		
-		for(var pname : propertySigns)
+		for(var pname in propertySigns)
 		{
 			var mySigns = (propertySigns[pname] || []);
 			
@@ -140,7 +153,18 @@
 		
 		return re;
 	};
-	
+
+	/**
+	 * 返回第一个数据结果集。
+	 */
+	util.firstResult = function(dataSetResults)
+	{
+		if(!dataSetResults || dataSetResults.length < 1)
+			return [];
+		
+		return dataSetResults[0];
+	};
+
 	/**
 	 * 获取结果数据属性值数组。
 	 * 

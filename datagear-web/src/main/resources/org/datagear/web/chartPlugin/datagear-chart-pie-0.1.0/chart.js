@@ -46,16 +46,17 @@
 		this.echarts.chart.setOption(options);
 	};
 	
-	chart.update = function(dataSets)
+	chart.update = function(results)
 	{
 		var chart = this;
+		var chartDataSet = chartUtil.firstChartDataSet(chart);
+		var result = chartUtil.firstResult(results);
 		
-		var dataSet = chartUtil.dataset.first(dataSets);
-		var xcolumnMeta = chartUtil.dataset.columnMetaByDimension(dataSet);
-		var ycolumnMeta = chartUtil.dataset.columnMetaByScalar(dataSet);
+		var np = chartUtil.dataSetPropertyOfSign(chartDataSet, "name");
+		var vp = chartUtil.dataSetPropertyOfSign(chartDataSet, "value");
 		
-		var legendData = chartUtil.dataset.columnValues(dataSet, xcolumnMeta);
-		var datas = chartUtil.dataset.columnNameValues(dataSet, xcolumnMeta, ycolumnMeta);
+		var legendData = chartUtil.dataPropertyValues(result, np);
+		var datas = chartUtil.dataNameValueObjects(result, np, vp);
 		
 		var options = { legend : { data : legendData }, series : [ { name : chartUtil.propertyValueName(chart), data : datas } ] };
 		this.echarts.chart.setOption(options);

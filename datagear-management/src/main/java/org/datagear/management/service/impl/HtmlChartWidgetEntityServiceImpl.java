@@ -118,6 +118,9 @@ public class HtmlChartWidgetEntityServiceImpl
 		if (entity == null)
 			return null;
 
+		setHtmlChartPlugin(entity, true);
+		setChartDataSets(entity, true);
+
 		return (ChartWidget<T>) entity;
 	}
 
@@ -187,16 +190,7 @@ public class HtmlChartWidgetEntityServiceImpl
 			return;
 
 		for (HtmlChartWidgetEntity e : list)
-		{
-			HtmlChartPlugin<HtmlRenderContext> plugin = e.getHtmlChartPlugin();
-
-			if (plugin != null)
-			{
-				HtmlChartPlugin<HtmlRenderContext> full = getHtmlChartPlugin(plugin.getId());
-				plugin.setNameLabel(full.getNameLabel());
-				plugin.setDescLabel(full.getDescLabel());
-			}
-		}
+			setHtmlChartPlugin(e, false);
 	}
 
 	@Override
@@ -205,8 +199,8 @@ public class HtmlChartWidgetEntityServiceImpl
 		if (obj == null)
 			return;
 
-		setHtmlChartPlugin(obj);
-		setChartDataSets(obj);
+		setHtmlChartPlugin(obj, false);
+		setChartDataSets(obj, false);
 	}
 
 	@Override
@@ -221,24 +215,28 @@ public class HtmlChartWidgetEntityServiceImpl
 		return SQL_NAMESPACE;
 	}
 
-	protected void setHtmlChartPlugin(HtmlChartWidgetEntity obj)
+	protected void setHtmlChartPlugin(HtmlChartWidgetEntity obj, boolean forAnalysis)
 	{
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = obj.getHtmlChartPlugin();
 
 		if (htmlChartPlugin != null)
 		{
-			htmlChartPlugin = getHtmlChartPlugin(htmlChartPlugin.getId());
-			obj.setHtmlChartPlugin(htmlChartPlugin);
+			HtmlChartPlugin<HtmlRenderContext> full = getHtmlChartPlugin(htmlChartPlugin.getId());
+
+			if (forAnalysis)
+				obj.setHtmlChartPlugin(full);
+			else
+			{
+				if (full != null)
+				{
+					htmlChartPlugin.setNameLabel(full.getNameLabel());
+					htmlChartPlugin.setDescLabel(full.getDescLabel());
+				}
+			}
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected HtmlChartPlugin<HtmlRenderContext> getHtmlChartPlugin(String id)
-	{
-		return (HtmlChartPlugin<HtmlRenderContext>) (ChartPlugin) this.chartPluginManager.get(id);
-	}
-
-	protected void setChartDataSets(HtmlChartWidgetEntity widget)
+	protected void setChartDataSets(HtmlChartWidgetEntity widget, boolean forAnalysis)
 	{
 		Map<String, Object> sqlParams = buildParamMapWithIdentifierQuoteParameter();
 		sqlParams.put("widgetId", widget.getId());
@@ -249,7 +247,7 @@ public class HtmlChartWidgetEntityServiceImpl
 
 		for (int i = 0; i < relations.size(); i++)
 		{
-			ChartDataSet chartDataSet = toChartDataSet(relations.get(i));
+			ChartDataSet chartDataSet = toChartDataSet(relations.get(i), forAnalysis);
 
 			if (chartDataSet != null)
 				chartDataSets.add(chartDataSet);
@@ -258,12 +256,17 @@ public class HtmlChartWidgetEntityServiceImpl
 		widget.setChartDataSets(chartDataSets.toArray(new ChartDataSet[chartDataSets.size()]));
 	}
 
-	protected ChartDataSet toChartDataSet(WidgetDataSetRelation relation)
+	protected ChartDataSet toChartDataSet(WidgetDataSetRelation relation, boolean forAnalysis)
 	{
 		if (relation == null || StringUtil.isEmpty(relation.getDataSetId()))
 			return null;
 
-		DataSet dataSet = this.sqlDataSetEntityService.getSqlDataSet(relation.getDataSetId());
+		DataSet dataSet = null;
+
+		if (forAnalysis)
+			dataSet = this.sqlDataSetEntityService.getSqlDataSet(relation.getDataSetId());
+		else
+			dataSet = this.sqlDataSetEntityService.getById(relation.getDataSetId());
 
 		if (dataSet == null)
 			return null;
@@ -312,6 +315,12 @@ public class HtmlChartWidgetEntityServiceImpl
 		}
 
 		return propertySigns;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected HtmlChartPlugin<HtmlRenderContext> getHtmlChartPlugin(String id)
+	{
+		return (HtmlChartPlugin<HtmlRenderContext>) (ChartPlugin) this.chartPluginManager.get(id);
 	}
 
 	protected List<WidgetDataSetRelation> getWidgetDataSetRelations(HtmlChartWidgetEntity obj)

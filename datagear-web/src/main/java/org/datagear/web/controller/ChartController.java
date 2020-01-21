@@ -4,8 +4,13 @@
 
 package org.datagear.web.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -134,6 +139,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		List<HtmlChartPluginVO> pluginVOs = findHtmlChartPluginVOs(request, null);
 
 		model.addAttribute("chart", chart);
+		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(chart.getChartDataSets()));
 		model.addAttribute("pluginVOs", toWriteJsonTemplateModel(pluginVOs));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.editChart");
 		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
@@ -171,6 +177,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		List<HtmlChartPluginVO> pluginVOs = findHtmlChartPluginVOs(request, null);
 
 		model.addAttribute("chart", chart);
+		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(chart.getChartDataSets()));
 		model.addAttribute("pluginVOs", toWriteJsonTemplateModel(pluginVOs));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.viewChart");
 		model.addAttribute(KEY_READONLY, true);
@@ -255,29 +262,60 @@ public class ChartController extends AbstractChartPluginAwareController
 
 	protected void inflateChartDataSets(HtmlChartWidgetEntity entity, HttpServletRequest request)
 	{
-		String[] dataSetIds = request.getParameterValues("dataSetId");
+		String[] chartDataSetIndexes = request.getParameterValues("chartDataSetIndex");
 
-		if (dataSetIds == null || dataSetIds.length == 0)
+		if (isEmpty(chartDataSetIndexes))
 			return;
 
-		ChartDataSet[] chartDataSets = new ChartDataSet[dataSetIds.length];
+		List<ChartDataSet> chartDataSets = new ArrayList<ChartDataSet>();
 
-		for (int i = 0; i < dataSetIds.length; i++)
+		for (String chartDataSetIndex : chartDataSetIndexes)
 		{
-			String myDataSignParam = "dataSign_" + i;
-			String[] myDataSigns = request.getParameterValues(myDataSignParam);
+			String dataSetId = request.getParameter("chartDataSet_" + chartDataSetIndex + "_dataSetId");
+
+			if (isEmpty(dataSetId))
+				continue;
 
 			SqlDataSetEntity sqlDataSet = new SqlDataSetEntity();
-			sqlDataSet.setId(dataSetIds[i]);
+			sqlDataSet.setId(dataSetId);
+
+			Map<String, Set<String>> propertySigns = new HashMap<String, Set<String>>();
+
+			String[] propertySignIndexes = request
+					.getParameterValues("chartDataSet_" + chartDataSetIndex + "_propertySignIndex");
+
+			if (!isEmpty(propertySignIndexes))
+			{
+				for (String propertySignIndex : propertySignIndexes)
+				{
+					String propertyName = request.getParameter(
+							"chartDataSet_" + chartDataSetIndex + "_propertySign_" + propertySignIndex + "_name");
+
+					if (isEmpty(propertyName))
+						continue;
+
+					String[] signs = request.getParameterValues(
+							"chartDataSet_" + chartDataSetIndex + "_propertySign_" + propertySignIndex + "_value");
+
+					if (!isEmpty(signs))
+					{
+						Set<String> signSet = new HashSet<String>();
+						for (String sign : signs)
+							signSet.add(sign);
+
+						propertySigns.put(propertyName, signSet);
+					}
+				}
+			}
 
 			ChartDataSet chartDataSet = new ChartDataSet();
-
 			chartDataSet.setDataSet(sqlDataSet);
+			chartDataSet.setPropertySigns(propertySigns);
 
-			chartDataSets[i] = chartDataSet;
+			chartDataSets.add(chartDataSet);
 		}
 
-		entity.setChartDataSets(chartDataSets);
+		entity.setChartDataSets(chartDataSets.toArray(new ChartDataSet[chartDataSets.size()]));
 	}
 
 	protected void checkSaveEntity(HtmlChartWidgetEntity chart)

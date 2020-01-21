@@ -86,7 +86,7 @@ import org.datagear.util.i18n.Label;
  * (function(chart)
  * {
  * 	chart.render = function(){ ... };
- * 	chart.update = function(dataSets){ ... };
+ * 	chart.update = function(dataSetResults){ ... };
  * })
  * ($CHART);
  * </pre>
@@ -97,7 +97,7 @@ import org.datagear.util.i18n.Label;
  * <code>
  * <pre>
  * $CHART.render = function(){ ... };
- * $CHART.update = function(dataSets){ ... };
+ * $CHART.update = function(dataSetResults){ ... };
  * </pre>
  * </code>
  * <p>

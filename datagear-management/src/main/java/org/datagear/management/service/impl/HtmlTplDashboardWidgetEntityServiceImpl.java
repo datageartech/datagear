@@ -89,7 +89,12 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	@Override
 	public HtmlTplDashboardWidget<HtmlRenderContext> getHtmlTplDashboardWidget(User user, String id)
 	{
-		return getById(user, id);
+		HtmlTplDashboardWidget<HtmlRenderContext> dashboard = getById(user, id);
+
+		if (dashboard != null)
+			dashboard.setRenderer(this.htmlTplDashboardWidgetRenderer);
+
+		return dashboard;
 	}
 
 	@Override
@@ -144,10 +149,6 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	@Override
 	protected void postProcessSelect(HtmlTplDashboardWidgetEntity obj)
 	{
-		if (obj == null)
-			return;
-
-		obj.setRenderer(this.htmlTplDashboardWidgetRenderer);
 	}
 
 	@Override

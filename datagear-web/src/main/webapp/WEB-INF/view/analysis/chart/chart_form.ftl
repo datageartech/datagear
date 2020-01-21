@@ -41,25 +41,15 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-label">
 					<label><@spring.message code='chart.chartDataSets' /></label>
 				</div>
-				<div class="form-item-value">
-					<div class="data-set-wrapper ui-widget ui-widget-content ui-corner-all">
-						<#if (chart.chartDataSets)??>
-						<#list chart.chartDataSets as cds>
-						<div class='data-set-item ui-widget ui-widget-content ui-corner-all ui-state-default'>
-							<input type='hidden' name='dataSetId' value="${(cds.dataSet.id)!''?html}" />
-							<span class='data-set-name'>${(cds.dataSet.name)!''?html}</span>
-							<#if !readonly>
-							<div class='delete-icon'><span class=' ui-icon ui-icon-close'>&nbsp;</span></div>
-							</#if>
-						</div>
-						</#list>
-						</#if>
+				<div class="form-item-value form-item-value-chartDataSet">
+					<input type="text" name="dataSignValidation" style="display: none" />
+					<div class="data-set-wrapper ui-widget ui-widget-content">
 					</div>
 					<#if !readonly>
 					<button type="button" class="add-data-set-button"><@spring.message code='add' /></button>
 					</#if>
 					<div class='data-sign-select-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
-						<div class="select-panel-head ui-widget-header ui-corner-all">选择数据标记</div>
+						<div class="select-panel-head ui-widget-header ui-corner-all"><@spring.message code='chart.selectDataSign' /></div>
 						<div class="select-panel-content"></div>
 					</div>
 				</div>
@@ -88,7 +78,16 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
+	var dataSetWrapperHeight = $(window).height()/5*2;
+	po.element(".data-set-wrapper").height(dataSetWrapperHeight);
+	po.element(".form-item-value-chartDataSet").height(dataSetWrapperHeight + 35);
 	
+	po.url = function(action)
+	{
+		return "${contextPath}/analysis/chart/" + action;
+	};
+	
+	po.chartDataSets = <@writeJson var=chartDataSets />;
 	po.chartPluginVOs = <@writeJson var=pluginVOs />;
 	
 	po.getChartPlugin = function(id)
@@ -112,6 +111,11 @@ readonly 是否只读操作，允许为null
 		return po.getChartPlugin(id);
 	};
 	
+	po.dataSignLabel = function(dataSign)
+	{
+		return (dataSign.nameLabel && dataSign.nameLabel.value ? dataSign.nameLabel.value : dataSign.name);
+	};
+	
 	po.initChartPluginList = function()
 	{
 		if(!po.chartPluginVOs)
@@ -128,25 +132,71 @@ readonly 是否只读操作，允许为null
 						.attr("chart-plugin-id", cp.id).attr("title", cp.nameLabel.value)
 						.appendTo($wapper);
 			
-			if(cp.hasIcon)
+			if(cp.iconUrl)
 				$("<a class='plugin-icon'>&nbsp;</a>").css("background-image", "url(${contextPath}/"+cp.iconUrl+")").appendTo($li);
 			else
 				$("<a class='plugin-name'></a>").text(cp.nameLabel.value).appendTo($li);
 		}
-	};
+		
+		var currentPluginId = po.element("input[name='htmlChartPlugin.id']").val();
+		
+		po.element(".chart-plugin-list li")
+			.hover(function(){ $(this).addClass("ui-state-hover"); },
+				function(){ $(this).removeClass("ui-state-hover"); })
+			.click(function()
+			{
+				<#if !readonly>
+				var $this = $(this);
+				
+				po.element("input[name='htmlChartPlugin.id']").val($this.attr("chart-plugin-id"));
 
-	po.initChartPluginList();
+				po.element(".chart-plugin-list li").removeClass("ui-state-active");
+				$this.addClass("ui-state-active");
+				</#if>
+			})
+			.each(function()
+			{
+				var $this = $(this);
+				
+				var myPluginId = $this.attr("chart-plugin-id");
+				if(myPluginId == currentPluginId)
+					$this.addClass("ui-state-active");
+			});
+	};
+	
+	po.initChartDataSets = function()
+	{
+		if(!po.chartDataSets)
+			return;
+		
+		var $parent = po.element(".data-set-wrapper");
+		var chartPlugin = po.getCurrentChartPlugin();
+		
+		for(var i=0; i<po.chartDataSets.length; i++)
+			po.renderChartDataSetItem($parent, chartPlugin, po.chartDataSets[i]);
+	};
+	
+	po.nextChartDataSetSeq = function()
+	{
+		if(!po._nextChartDataSetSeq)
+			po._nextChartDataSetSeq = 0;
+		
+		return (po._nextChartDataSetSeq++);
+	};
 	
 	po.renderChartDataSetItem = function($parent, chartPlugin, chartDataSet)
 	{
+		var chartDataSetIndex = po.nextChartDataSetSeq();
+		
 		var dataSet = chartDataSet.dataSet;
 		var propertySigns = (chartDataSet.propertySigns || {});
 		var dataSetProperties = (dataSet.properties || []);
 		
-		var $item = $("<div class='data-set-item ui-widget ui-widget-content ui-corner-all ui-state-default' />").appendTo($parent);
-		$("<input type='hidden' name='dataSetId' />").attr("value", dataSet.id).appendTo($item);
+		var $item = $("<div class='data-set-item ui-widget ui-widget-content ui-corner-all' />").appendTo($parent);
+		$("<input type='hidden' name='chartDataSetIndex' />").attr("value", chartDataSetIndex).appendTo($item);
+		$("<input type='hidden' class='chartDataSetId' />").attr("name", "chartDataSet_"+chartDataSetIndex+"_dataSetId").attr("value", dataSet.id).appendTo($item);
 		
-		var $head = $("<div class='item-head ui-widget-header' />").appendTo($item);
+		var $head = $("<div class='item-head ui-widget-header ui-corner-all' />").appendTo($item);
 		$("<span class='data-set-name' />").text(dataSet.name).appendTo($head);
 		<#if !readonly>
 		$("<div class='delete-icon''><span class=' ui-icon ui-icon-close'>&nbsp;</span></div>").attr("title", "<@spring.message code='delete' />").appendTo($head);
@@ -158,44 +208,77 @@ readonly 是否只读操作，允许为null
 			var dsp = dataSetProperties[i];
 			
 			var $signItem = $("<div class='item-signs-item' />").appendTo($signs);
-			$("<div class='sign-item-name' />").text(dsp.name).attr("title", (dsp.label || "")).appendTo($signItem);
-			$("<div class='sign-item-values ui-widget ui-widget-content ui-corner-all' />").appendTo($signItem);
+			
+			$("<input type='hidden' />")
+				.attr("name", "chartDataSet_"+chartDataSetIndex+"_propertySignIndex").attr("value", i)
+				.appendTo($item);
+			
+			var $name = $("<div class='sign-item-name' />")
+				.text(dsp.name)
+				.attr("title", (dsp.label || ""))
+				.appendTo($signItem);
+			
+			$("<input type='hidden' class='chartDataSetPropertySignName' />")
+				.attr("name", "chartDataSet_"+chartDataSetIndex+"_propertySign"+"_" +i+"_name")
+				.val(dsp.name)
+				.appendTo($name);
+			
+			var $valuesWrapper = $("<div class='sign-item-values-wrapper ui-widget ui-widget-content ui-corner-all' />")
+				.appendTo($signItem);
+			
+			var $values = $("<div class='sign-item-values' />")
+				.attr("chartDataSetIndex", chartDataSetIndex)
+				.attr("propertySignIndex", i).appendTo($valuesWrapper);
+			
+			var mySigns = propertySigns[dsp.name];
+			if(chartPlugin && chartPlugin.dataSigns && mySigns)
+			{
+				for(var j=0; j<chartPlugin.dataSigns.length; j++)
+				{
+					var dataSign = chartPlugin.dataSigns[j];
+					
+					for(var k=0; k<mySigns.length; k++)
+					{
+						if(mySigns[k] == dataSign.name)
+							po.addPropertySignItem($values, dataSign.name, po.dataSignLabel(dataSign));
+					}
+				}
+			}
+			
 			<#if !readonly>
-			$("<button type='button' class='sign-add-button ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button'><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'> </span></button>").attr("title", "<@spring.message code='add' />").appendTo($signItem);
+			$("<button type='button' class='sign-add-button ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button'><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'> </span></button>")
+				.attr("title", "<@spring.message code='chart.addDataSign' />")
+				.appendTo($valuesWrapper);
 			</#if>
 		}
 	};
 	
-	po.url = function(action)
+	po.addPropertySignItem = function($parent, value, label)
 	{
-		return "${contextPath}/analysis/chart/" + action;
-	};
-	
-	var currentPluginId = po.element("input[name='htmlChartPlugin.id']").val();
-	
-	po.element(".chart-plugin-list li")
-		.hover(function(){ $(this).addClass("ui-state-hover"); },
-			function(){ $(this).removeClass("ui-state-hover"); })
-		.click(function()
-		{
-			<#if !readonly>
-			var $this = $(this);
-			
-			po.element("input[name='htmlChartPlugin.id']").val($this.attr("chart-plugin-id"));
-
-			po.element(".chart-plugin-list li").removeClass("ui-state-active");
-			$this.addClass("ui-state-active");
-			</#if>
-		})
-		.each(function()
+		$(".chartDataSetPropertySignValue", $parent).each(function()
 		{
 			var $this = $(this);
-			
-			var myPluginId = $this.attr("chart-plugin-id");
-			if(myPluginId == currentPluginId)
-				$this.addClass("ui-state-active");
+			if($this.val() === value)
+				$this.closest(".sign-value").remove();;
 		});
-	
+		
+		var chartDataSetIndex = $parent.attr("chartDataSetIndex");
+		var propertySignIndexIndex = $parent.attr("propertySignIndex");
+		
+		var $value = $("<div class='sign-value ui-state-default ui-corner-all' />").appendTo($parent);
+		
+		$("<input type='hidden' class='chartDataSetPropertySignValue' />")
+			.attr("name", "chartDataSet_"+chartDataSetIndex+"_propertySign"+"_" +propertySignIndexIndex+"_value")
+			.attr("value", value)
+			.appendTo($value);
+		
+		$("<span class='sign-value-label' />").text((label || value)).appendTo($value);
+		
+		<#if !readonly>
+		$("<span class='sign-value-delete-icon ui-icon ui-icon-close'>&nbsp;</span>")
+			.attr("title", "<@spring.message code='delete' />").appendTo($value);
+		</#if>
+	};
 	
 	<#if !readonly>
 	po.element(".add-data-set-button").click(function()
@@ -231,17 +314,25 @@ readonly 是否只读操作，允许为null
 			{
 				var dataSet = dataSets[i];
 				
-				po.renderChartDataSetItem($wrapper, null, { "dataSet" : dataSet });
+				po.renderChartDataSetItem($wrapper, po.getCurrentChartPlugin(), { "dataSet" : dataSet });
 			}
 		});
 	}
 	
-	po.element(".data-set-wrapper").on("click", ".delete-icon", function(){ $(this).parent().parent().remove(); });
-	po.element(".data-set-wrapper").on("click", ".sign-add-button", function()
+	po.element(".data-sign-select-panel").draggable({ handle : ".select-panel-head" });
+	
+	po.element(".data-set-wrapper").on("click", ".delete-icon", function()
 	{
+		$(this).closest(".data-set-item").remove();
+	})
+	.on("click", ".sign-add-button", function()
+	{
+		var $this =$(this);
+		
 		var chartPlugin = po.getCurrentChartPlugin();
 		var dataSigns = (chartPlugin ? (chartPlugin.dataSigns || []) : []);
 		
+		var $itemSigns = $this.closest(".item-signs");
 		var $panel = po.element(".data-sign-select-panel");
 		var $panelContent = po.element("> .select-panel-content", $panel);
 		$panelContent.empty();
@@ -250,26 +341,137 @@ readonly 是否只读操作，允许为null
 		{
 			var dataSign = dataSigns[i];
 			
-			$("<button type='button' class='data-sign-item ui-button ui-corner-all' />")
+			var $button = $("<button type='button' class='data-sign-item ui-button ui-corner-all' />")
 				.attr("value", dataSign.name)
-				.text(dataSign.nameLabel.value || dataSign.name).appendTo($panelContent);
+				.attr("occurMultiple", dataSign.occurMultiple)
+				.text(po.dataSignLabel(dataSign)).appendTo($panelContent);
+			
+			po.updatePropertySignButtonEnable($button, $itemSigns);
 		}
 		
 		$panel.show();
-		$panel.position({ my : "left top", at : "left bottom+3", of : this});
+		$panel.position({ my : "left top", at : "right bottom+3", of : $this});
+		
+		po._currentPropertySignItemParent = $(".sign-item-values", $this.closest(".item-signs-item"));
+	})
+	.on("click", ".sign-value-delete-icon", function()
+	{
+		$(this).closest(".sign-value").remove();
 	});
 	
+	po.element(".data-sign-select-panel").on("click", ".data-sign-item", function()
+	{
+		if(!po._currentPropertySignItemParent)
+			return;
+		
+		var $this = $(this);
+		po.addPropertySignItem(po._currentPropertySignItemParent, $this.val(), $this.text());
+		po.updatePropertySignButtonEnable($this, po._currentPropertySignItemParent.closest(".item-signs"));
+	});
+	
+	po.updatePropertySignButtonEnable = function($button, $itemSigns)
+	{
+		if($button.attr("occurMultiple") != "false")
+			return;
+		
+		var setSigns = [];
+		$(".chartDataSetPropertySignValue", $itemSigns).each(function()
+		{
+			setSigns.push($(this).val());
+		});
+		
+		for(var i=0;i<setSigns.length; i++)
+		{
+			if(setSigns[i] == $button.val())
+			{
+				$button.addClass("ui-state-disabled");
+				break;
+			}
+		}
+	};
+	
 	po.element(".data-set-wrapper").sortable();
+
+	$.validator.addMethod("dataSignValidationRequired", function(value, element)
+	{
+		var chartPlugin = po.getCurrentChartPlugin();
+		var dataSigns = (chartPlugin ? (chartPlugin.dataSigns || []) : []);
+		
+		if(!dataSigns)
+			return true;
+		
+		var $element = $(element);
+		
+		var requiredSigns = [];
+		for(var i=0; i<dataSigns.length; i++)
+		{
+			if(dataSigns[i].occurRequired == true)
+				requiredSigns.push(dataSigns[i]);
+		}
+		
+		var $chartDataSetItems = po.element(".data-set-item");
+		for(var i=0; i<$chartDataSetItems.length; i++)
+		{
+			var $chartDataSetItem = $($chartDataSetItems[i]);
+			var $itemSigns = $(".item-signs" , $chartDataSetItem);
+			
+			var setSigns = [];
+			$(".chartDataSetPropertySignValue", $itemSigns).each(function()
+			{
+				setSigns.push($(this).val());
+			});
+			
+			for(var j=0; j<requiredSigns.length; j++)
+			{
+				var requiredSign = requiredSigns[j];
+				
+				var contains = false;
+				for(var k=0; k<setSigns.length; k++)
+				{
+					if(requiredSign.name == setSigns[k])
+					{
+						contains = true;
+						break;
+					}
+				}
+				
+				if(!contains)
+				{
+					var dataSetName = $(".data-set-name", $chartDataSetItem).text();
+					$element.attr("needSignDataSetName", dataSetName)
+						.attr("needDataSignLabel", po.dataSignLabel(requiredSign));
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	});
 	
 	po.form().validate(
 	{
+		ignore : "[hidden]",
 		rules :
 		{
-			"name" : "required"
+			"name" : "required",
+			"dataSignValidation" : "dataSignValidationRequired"
 		},
 		messages :
 		{
-			"name" : "<@spring.message code='validation.required' />"
+			"name" : "<@spring.message code='validation.required' />",
+			"dataSignValidation" :
+			{
+				"dataSignValidationRequired" : function()
+				{
+					var $input = po.element("input[name='dataSignValidation']");
+					var needSignDataSetName = $input.attr("needSignDataSetName");
+					var needDataSignLabel = $input.attr("needDataSignLabel");
+					
+					return "<@spring.message code='chart.validation.chartDataSetSign' />"
+						.replace( /\{needSignDataSetName\}/g, needSignDataSetName)
+						.replace( /\{needDataSignLabel\}/g, needDataSignLabel);
+				}
+			}
 		},
 		submitHandler : function(form)
 		{
@@ -289,7 +491,22 @@ readonly 是否只读操作，允许为null
 			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
+	
+	$(document.body).on("click", function(event)
+	{
+		var $target = $(event.target);
+
+		var $ssp = po.element(".data-sign-select-panel");
+		if(!$ssp.is(":hidden"))
+		{
+			if($target.closest(".data-sign-select-panel, .sign-add-button").length == 0)
+				$ssp.hide();
+		}
+	});
 	</#if>
+	
+	po.initChartPluginList();
+	po.initChartDataSets();
 })
 (${pageId});
 </script>

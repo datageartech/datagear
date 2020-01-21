@@ -2,6 +2,11 @@
 	id : 'datagear-chart-pie',
 	nameLabel : '饼图',
 	descLabel : '饼图',
+	dataSigns :
+	[
+		{ name : "name", nameLabel : "名称", occurRequired: true, occurMultiple: false },
+		{ name : "value", nameLabel : "数值", occurRequired: true, occurMultiple: true }
+	],
 	version: "0.1.0",
 	order : 2
 }
