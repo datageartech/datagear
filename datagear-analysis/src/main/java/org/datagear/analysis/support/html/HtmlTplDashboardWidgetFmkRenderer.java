@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.Chart;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.util.StringUtil;
@@ -362,16 +363,12 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			String dashboardVar = getStringParamValue(params, "var");
 			String rendererVar = getStringParamValue(params, "renderer");
 
+			if (StringUtil.isEmpty(dashboardVar))
+				dashboardVar = getDefaultDashboardVar();
+
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
 			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
 			HtmlRenderContext renderContext = dashboard.getRenderContext();
-			int nextSequence = -1;
-
-			if (StringUtil.isEmpty(dashboardVar))
-			{
-				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
-				dashboardVar = HtmlRenderAttributes.generateDashboardVarName(nextSequence);
-			}
 
 			dashboard.setVarName(dashboardVar);
 
@@ -380,12 +377,12 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			writeScriptStartTag(out);
 			writeNewLine(out);
 
-			writeHtmlDashboardJSVar(out, dashboard, true);
+			writeHtmlDashboardJSVar(renderContext, out, dashboard);
 
 			writeScriptEndTag(out);
 			writeNewLine(out);
 
-			HtmlRenderAttributes.setChartRenderContextVarName(renderContext, dashboardVar + ".renderContext");
+			setHtmlChartPluginRenderOption(renderContext, dashboardVar);
 
 			if (body != null)
 				body.render(out);
@@ -393,22 +390,37 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			writeScriptStartTag(out);
 			writeNewLine(out);
 
-			String tmpRenderContextVar = HtmlRenderAttributes.generateRenderContextVarName(nextSequence);
-
 			// 移除内部设置的属性
-			HtmlRenderAttributes.removeChartRenderContextVarName(renderContext);
-			HtmlRenderAttributes.removeChartNotRenderScriptTag(renderContext);
-			HtmlRenderAttributes.removeChartScriptNotInvokeRender(renderContext);
-			HtmlRenderAttributes.removeChartVarName(renderContext);
-			HtmlRenderAttributes.removeChartElementId(renderContext);
-			renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
+			HtmlChartPluginRenderOption.removeOption(renderContext);
 
-			writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar);
+			writeHtmlDashboardJSInit(out, dashboard);
 			writeHtmlDashboardJSRender(out, dashboard, rendererVar);
 
 			writeScriptEndTag(out);
 			writeNewLine(out);
 		}
+	}
+
+	/**
+	 * 设置用于渲染Freemark看板图表的{@linkplain HtmlChartPluginRenderOption}。
+	 * 
+	 * @param renderContext
+	 * @param dashboardVarName
+	 * @return
+	 */
+	protected HtmlChartPluginRenderOption setHtmlChartPluginRenderOption(RenderContext renderContext,
+			String dashboardVarName)
+	{
+		HtmlChartPluginRenderOption option = new HtmlChartPluginRenderOption();
+		option.setNotWriteChartElement(false);
+		option.setNotWriteScriptTag(false);
+		option.setNotWriteInvoke(true);
+		option.setNotWriteRenderContextObject(true);
+		option.setRenderContextVarName(dashboardVarName + ".renderContext");
+
+		HtmlChartPluginRenderOption.setOption(renderContext, option);
+
+		return option;
 	}
 
 	/**
@@ -436,26 +448,18 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
 			HtmlDashboard htmlDashboard = dataModel.getHtmlDashboard();
 			HtmlRenderContext renderContext = htmlDashboard.getRenderContext();
-			int nextSequence = -1;
 
 			HtmlChartWidget<HtmlRenderContext> chartWidget = getHtmlChartWidgetForRender(renderContext, widget);
 
 			if (StringUtil.isEmpty(var))
-			{
-				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
-				var = HtmlRenderAttributes.generateChartVarName(nextSequence);
-			}
+				var = HtmlRenderAttributes.generateChartVarName(renderContext);
 
 			if (StringUtil.isEmpty(elementId))
-			{
-				nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
-				elementId = HtmlRenderAttributes.generateChartElementId(nextSequence);
-			}
+				elementId = HtmlRenderAttributes.generateChartElementId(renderContext);
 
-			HtmlRenderAttributes.setChartNotRenderScriptTag(renderContext, false);
-			HtmlRenderAttributes.setChartScriptNotInvokeRender(renderContext, true);
-			HtmlRenderAttributes.setChartVarName(renderContext, var);
-			HtmlRenderAttributes.setChartElementId(renderContext, elementId);
+			HtmlChartPluginRenderOption option = HtmlChartPluginRenderOption.getOption(renderContext);
+			option.setChartElementId(elementId);
+			option.setChartVarName(var);
 
 			HtmlChart chart = chartWidget.render(renderContext);
 

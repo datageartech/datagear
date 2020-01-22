@@ -50,10 +50,17 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	Label getManualLabel();
 
 	/**
-	 * 获取指定风格的图标。
+	 * 获取所有风格图标。
 	 * <p>
-	 * 返回{@code null}表示无图标。
+	 * 返回{@code null}或空表示无图标。
 	 * </p>
+	 * 
+	 * @return
+	 */
+	Map<RenderStyle, Icon> getIcons();
+
+	/**
+	 * 获取指定风格的图标，没有找到则返回{@code null}。
 	 * 
 	 * @param renderStyle
 	 * @return

@@ -87,6 +87,7 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 		this.manualLabel = manualLabel;
 	}
 
+	@Override
 	public Map<RenderStyle, Icon> getIcons()
 	{
 		return icons;

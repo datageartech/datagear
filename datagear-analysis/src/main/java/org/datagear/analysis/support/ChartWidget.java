@@ -87,6 +87,18 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 		this.chartPropertyValues = chartPropertyValues;
 	}
 
+	/**
+	 * 添加图表属性值。
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	@SuppressWarnings("unchecked")
+	public void addChartPropertyValue(String name, Object value)
+	{
+		((Map<String, Object>) this.chartPropertyValues).put(name, value);
+	}
+
 	public ChartDataSet[] getChartDataSets()
 	{
 		return chartDataSets;
@@ -134,13 +146,9 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 	 */
 	public Chart render(T renderContext) throws RenderException
 	{
-		Map<String, Object> propertyValues = new HashMap<String, Object>();
-		inflateInternalChartPropertyValues(propertyValues);
+		inflateInternalChartPropertyValues();
 
-		if (this.chartPropertyValues != null)
-			propertyValues.putAll(this.chartPropertyValues);
-
-		return this.chartPlugin.renderChart(renderContext, propertyValues, this.chartDataSets);
+		return this.chartPlugin.renderChart(renderContext, this.chartPropertyValues, this.chartDataSets);
 	}
 
 	/**
@@ -148,9 +156,9 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 	 * 
 	 * @param propertyValues
 	 */
-	protected void inflateInternalChartPropertyValues(Map<String, Object> propertyValues)
+	protected void inflateInternalChartPropertyValues()
 	{
-		propertyValues.put(CHART_PROPERTY_VALUE_NAME, this.name);
-		propertyValues.put(CHART_PROPERTY_VALUE_UPDATE_INTERVAL, this.updateInterval);
+		addChartPropertyValue(CHART_PROPERTY_VALUE_NAME, this.name);
+		addChartPropertyValue(CHART_PROPERTY_VALUE_UPDATE_INTERVAL, this.updateInterval);
 	}
 }

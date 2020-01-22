@@ -9,7 +9,6 @@ package org.datagear.analysis.support.html;
 
 import java.util.Locale;
 
-import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.RenderContext;
@@ -32,18 +31,6 @@ public class HtmlRenderAttributes
 	public static final String CHART_THEME = "chartTheme";
 
 	public static final String LOCALE = "locale";
-
-	public static final String CHART_ELEMENT_ID = "chartElementId";
-
-	public static final String CHART_NOT_RENDER_ELEMENT = "chartNotRenderElement";
-
-	public static final String CHART_VAR_NAME = "chartVarName";
-
-	public static final String CHART_RENDER_CONTEXT_VAR_NAME = "chartRenderContextVarName";
-
-	public static final String CHART_NOT_RENDER_SCRIPT_TAG = "chartNotRenderScriptTag";
-
-	public static final String CHART_SCRIPT_NOT_INVOKE_RENDER = "chartScriptNotInvokeRender";
 
 	/**
 	 * 获取{@linkplain RenderStyle}，没有则返回{@code null}。
@@ -174,273 +161,112 @@ public class HtmlRenderAttributes
 	}
 
 	/**
-	 * 获取用于渲染图表的HTML元素ID，没有则返回{@code null}。
+	 * 生成图表HTML元素ID。
 	 * 
 	 * @param renderContext
 	 * @return
 	 */
-	public static String getChartElementId(RenderContext renderContext)
+	public static String generateChartElementId(HtmlRenderContext renderContext)
 	{
-		return renderContext.getAttribute(CHART_ELEMENT_ID);
-	}
-
-	/**
-	 * 设置用于渲染图表的HTML元素ID。
-	 * 
-	 * @param renderContext
-	 * @param chartElementId
-	 */
-	public static void setChartElementId(RenderContext renderContext, String chartElementId)
-	{
-		renderContext.setAttribute(CHART_ELEMENT_ID, chartElementId);
-	}
-
-	/**
-	 * 移除图是否不渲染图表HTML元素。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static String removeChartElementId(RenderContext renderContext)
-	{
-		return renderContext.removeAttribute(CHART_ELEMENT_ID);
-	}
-
-	/**
-	 * 获取是否不渲染图表HTML元素。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static boolean getChartNotRenderElement(RenderContext renderContext)
-	{
-		Boolean re = renderContext.getAttribute(CHART_NOT_RENDER_ELEMENT);
-
-		return (re == null ? false : re.booleanValue());
-	}
-
-	/**
-	 * 设置图是否不渲染图表HTML元素。
-	 * <p>
-	 * 如果设置为{@code true}，那么必须设置{@linkplain #setChartElementId(RenderContext, String)}。
-	 * </p>
-	 * 
-	 * @param renderContext
-	 * @param chartNotRenderElement
-	 */
-	public static void setChartNotRenderElement(RenderContext renderContext, boolean chartNotRenderElement)
-	{
-		renderContext.setAttribute(CHART_NOT_RENDER_ELEMENT, chartNotRenderElement);
-	}
-
-	/**
-	 * 移除图是否不渲染图表HTML元素。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static Boolean removeChartNotRenderElement(RenderContext renderContext)
-	{
-		return renderContext.removeAttribute(CHART_NOT_RENDER_ELEMENT);
-	}
-
-	/**
-	 * 获取图表的JS变量名，没有则返回{@code null}。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static String getChartVarName(RenderContext renderContext)
-	{
-		return renderContext.getAttribute(CHART_VAR_NAME);
-	}
-
-	/**
-	 * 设置图表的JS变量名。
-	 * 
-	 * @param renderContext
-	 * @param chartVarName
-	 */
-	public static void setChartVarName(RenderContext renderContext, String chartVarName)
-	{
-		renderContext.setAttribute(CHART_VAR_NAME, chartVarName);
-	}
-
-	/**
-	 * 移除图表的JS变量名。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static String removeChartVarName(RenderContext renderContext)
-	{
-		return renderContext.removeAttribute(CHART_VAR_NAME);
-	}
-
-	/**
-	 * 获取图表{@linkplain Chart#getRenderContext()}JS变量名，没有则返回{@code null}。
-	 * <p>
-	 * 如果有返回值，那么{@linkplain HtmlChartPlugin}将不输出{@linkplain Chart#getRenderContext()}内容，而直接赋值为此变量。
-	 * </p>
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static String getChartRenderContextVarName(RenderContext renderContext)
-	{
-		return renderContext.getAttribute(CHART_RENDER_CONTEXT_VAR_NAME);
-	}
-
-	/**
-	 * 设置图表{@linkplain Chart#getRenderContext()}JS变量名。
-	 * 
-	 * @param renderContext
-	 * @param renderContextVarName
-	 */
-	public static void setChartRenderContextVarName(RenderContext renderContext, String renderContextVarName)
-	{
-		renderContext.setAttribute(CHART_RENDER_CONTEXT_VAR_NAME, renderContextVarName);
-	}
-
-	/**
-	 * 移除图表{@linkplain Chart#getRenderContext()}JS变量名。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static String removeChartRenderContextVarName(RenderContext renderContext)
-	{
-		return renderContext.removeAttribute(CHART_RENDER_CONTEXT_VAR_NAME);
-	}
-
-	/**
-	 * 获取图表脚本是否不渲染{@code <script>}标签。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static boolean getChartNotRenderScriptTag(RenderContext renderContext)
-	{
-		Boolean re = renderContext.getAttribute(CHART_NOT_RENDER_SCRIPT_TAG);
-
-		return (re == null ? false : re.booleanValue());
-	}
-
-	/**
-	 * 设置图表脚本是否不渲染{@code <script>}标签。
-	 * 
-	 * @param renderContext
-	 * @param chartNotRenderScriptTag
-	 */
-	public static void setChartNotRenderScriptTag(RenderContext renderContext, boolean chartNotRenderScriptTag)
-	{
-		renderContext.setAttribute(CHART_NOT_RENDER_SCRIPT_TAG, chartNotRenderScriptTag);
-	}
-
-	/**
-	 * 移除图表脚本是否不渲染{@code <script>}标签属性。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static Boolean removeChartNotRenderScriptTag(RenderContext renderContext)
-	{
-		return renderContext.removeAttribute(CHART_NOT_RENDER_SCRIPT_TAG);
-	}
-
-	/**
-	 * 获取图表脚本是否不调用渲染函数。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static boolean getChartScriptNotInvokeRender(RenderContext renderContext)
-	{
-		Boolean re = renderContext.getAttribute(CHART_SCRIPT_NOT_INVOKE_RENDER);
-
-		return (re == null ? false : re.booleanValue());
-	}
-
-	/**
-	 * 设置图表脚本是否不调用渲染函数。
-	 * 
-	 * @param renderContext
-	 * @param chartScriptNotInvokeRender
-	 */
-	public static void setChartScriptNotInvokeRender(RenderContext renderContext, boolean chartScriptNotInvokeRender)
-	{
-		renderContext.setAttribute(CHART_SCRIPT_NOT_INVOKE_RENDER, chartScriptNotInvokeRender);
-	}
-
-	/**
-	 * 移除图表脚本是否不调用渲染函数。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static Boolean removeChartScriptNotInvokeRender(RenderContext renderContext)
-	{
-		return renderContext.removeAttribute(CHART_SCRIPT_NOT_INVOKE_RENDER);
-	}
-
-	/**
-	 * 获取下一个序列。
-	 * <p>
-	 * 如果{@code sequence > 0}，直接返回它，否则，新生成一个并返回。
-	 * </p>
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public static int getNextSequenceIfNot(HtmlRenderContext renderContext, int sequence)
-	{
-		if (sequence > 0)
-			return sequence;
-
-		return renderContext.nextSequence();
+		return generateChartElementId(Integer.toString(renderContext.nextSequence()));
 	}
 
 	/**
 	 * 生成图表HTML元素ID。
 	 * 
-	 * @param seq
+	 * @param suffix
 	 * @return
 	 */
-	public static String generateChartElementId(int seq)
+	public static String generateChartElementId(String suffix)
 	{
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "ChartElement" + seq;
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "ChartElement" + suffix;
+	}
+
+	/**
+	 * 生成图表插件变量名。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public static String generateChartPluginVarName(HtmlRenderContext renderContext)
+	{
+		return generateChartPluginVarName(Integer.toString(renderContext.nextSequence()));
+	}
+
+	/**
+	 * 生成图表插件变量名。
+	 * 
+	 * @param suffix
+	 * @return
+	 */
+	public static String generateChartPluginVarName(String suffix)
+	{
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "ChartPlugin" + suffix;
 	}
 
 	/**
 	 * 生成图表变量名。
 	 * 
-	 * @param seq
+	 * @param renderContext
 	 * @return
 	 */
-	public static String generateChartVarName(int seq)
+	public static String generateChartVarName(HtmlRenderContext renderContext)
 	{
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Chart" + seq;
+		return generateChartVarName(Integer.toString(renderContext.nextSequence()));
+	}
+
+	/**
+	 * 生成图表变量名。
+	 * 
+	 * @param suffix
+	 * @return
+	 */
+	public static String generateChartVarName(String suffix)
+	{
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Chart" + suffix;
 	}
 
 	/**
 	 * 生成看板变量名。
 	 * 
-	 * @param seq
+	 * @param renderContext
 	 * @return
 	 */
-	public static String generateDashboardVarName(int seq)
+	public static String generateDashboardVarName(HtmlRenderContext renderContext)
 	{
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Dashboard" + seq;
+		return generateDashboardVarName(Integer.toString(renderContext.nextSequence()));
+	}
+
+	/**
+	 * 生成看板变量名。
+	 * 
+	 * @param suffix
+	 * @return
+	 */
+	public static String generateDashboardVarName(String suffix)
+	{
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Dashboard" + suffix;
 	}
 
 	/**
 	 * 生成{@linkplain RenderContext}变量名。
 	 * 
-	 * @param seq
+	 * @param renderContext
 	 * @return
 	 */
-	public static String generateRenderContextVarName(int seq)
+	public static String generateRenderContextVarName(HtmlRenderContext renderContext)
 	{
-		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderContext" + seq;
+		return generateRenderContextVarName(Integer.toString(renderContext.nextSequence()));
+	}
+
+	/**
+	 * 生成{@linkplain RenderContext}变量名。
+	 * 
+	 * @param suffix
+	 * @return
+	 */
+	public static String generateRenderContextVarName(String suffix)
+	{
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderContext" + suffix;
 	}
 }

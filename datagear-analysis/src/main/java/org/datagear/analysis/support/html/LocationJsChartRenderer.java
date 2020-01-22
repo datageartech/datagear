@@ -16,23 +16,23 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
 /**
- * 位置{@linkplain ScriptContent}。
+ * 位置{@linkplain JsChartRenderer}。
  * 
  * @author datagear@163.com
  *
  */
-public class LocationScriptContent extends LocationResource implements ScriptContent
+public class LocationJsChartRenderer extends LocationResource implements JsChartRenderer
 {
 	private static final long serialVersionUID = 1L;
 
 	private String encoding;
 
-	public LocationScriptContent()
+	public LocationJsChartRenderer()
 	{
 		super();
 	}
 
-	public LocationScriptContent(String location)
+	public LocationJsChartRenderer(String location)
 	{
 		super(location);
 	}

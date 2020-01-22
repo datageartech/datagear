@@ -25,11 +25,15 @@
 	
 	renderer.renderDashboard = function(dashboard)
 	{
-		for(var i=0; i<dashboard.charts.length; i++)
+		var charts = (dashboard.charts || []);
+		
+		for(var i=0; i<charts.length; i++)
 		{
+			var chart = charts[i];
+			
 			try
 			{
-				dashboard.charts[i].render();
+				chart.plugin.jsChartRender.render(chart);
 			}
 			catch(e)
 			{
@@ -68,9 +72,9 @@
 		$.ajax({
 			url : webContext.updateDashboardURL,
 			data : data,
-			success : function(dataSetsMap)
+			success : function(resultsMap)
 			{
-				renderer.updateCharts(dashboard, dataSetsMap);
+				renderer.updateCharts(dashboard, resultsMap);
 			},
 			error : function()
 			{
@@ -142,11 +146,11 @@
 		return nexts;
 	};
 	
-	renderer.updateCharts = function(dashboard, dataSetsMap)
+	renderer.updateCharts = function(dashboard, resultsMap)
 	{
 		var updateTime = new Date().getTime();
 		
-		for(var chartId in dataSetsMap)
+		for(var chartId in resultsMap)
 		{
 			var chart = this.getChart(dashboard, chartId);
 			
@@ -155,11 +159,11 @@
 			
 			this.updateTime(chart, updateTime);
 			
-			var dataSets = dataSetsMap[chartId];
+			var results = resultsMap[chartId];
 			
 			try
 			{
-				this.updateChart(dashboard, chart, dataSets);
+				this.updateChart(dashboard, chart, results);
 			}
 			catch(e)
 			{
@@ -168,15 +172,15 @@
 		}
 	};
 	
-	renderer.updateChart = function(dashboard, chart, dataSets)
+	renderer.updateChart = function(dashboard, chart, results)
 	{
 		var doUpdate = true;
 		
 		if(this.listener && this.listener.onUpdateChart)
-			doUpdate=this.listener.onUpdateChart(dashboard, chart, dataSets, this);
+			doUpdate=this.listener.onUpdateChart(dashboard, chart, results, this);
 		
 		if(doUpdate != false)
-			chart.update(dataSets);
+			chart.plugin.jsChartRender.update(chart, results);
 	};
 	
 	renderer.handleError = function(e)

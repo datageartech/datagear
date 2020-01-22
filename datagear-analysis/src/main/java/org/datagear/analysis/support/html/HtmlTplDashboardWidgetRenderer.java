@@ -89,8 +89,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	public static final String DEFAULT_CHART_STYLE_NAME = "dg-chart";
 
-	protected static final String RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT = StringUtil
-			.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderValueForNotFound";
+	public static final String DEFAULT_DASHBOARD_VAR = "dashboard";
 
 	private DashboardWidgetResManager dashboardWidgetResManager;
 
@@ -98,14 +97,14 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	private DashboardThemeSource dashboardThemeSource = new SimpleDashboardThemeSource();
 
+	private HtmlRenderContextScriptObjectWriter htmlRenderContextScriptObjectWriter = new HtmlRenderContextScriptObjectWriter();
+
+	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = new HtmlChartPluginScriptObjectWriter();
+
 	private HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter = new HtmlDashboardScriptObjectWriter();
 
-	private HtmlChartWidget<HtmlRenderContext> htmlChartWidgetForNotFound = new HtmlChartWidget<HtmlRenderContext>(
-			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartWidgetForNotFound",
-			"HtmlChartWidgetForNotFound",
-			new ValueHtmlChartPlugin<HtmlRenderContext>(
-					StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForNotFound",
-					RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT));
+	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForNotFound = new ValueHtmlChartPlugin<HtmlRenderContext>(
+			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForNotFound");
 
 	/** 内置导入内容 */
 	private List<HtmlDashboardImport> dashboardImports;
@@ -134,8 +133,11 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	/** 主题中的图表样式名 */
 	private String chartStyleName = DEFAULT_CHART_STYLE_NAME;
 
+	/** 默认看板变量名 */
+	private String defaultDashboardVar = DEFAULT_DASHBOARD_VAR;
+
 	/** 换行符 */
-	private String newLine = "\r\n";
+	private String newLine = HtmlChartPlugin.HTML_NEW_LINE;
 
 	public HtmlTplDashboardWidgetRenderer()
 	{
@@ -180,6 +182,28 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		this.dashboardThemeSource = dashboardThemeSource;
 	}
 
+	public HtmlRenderContextScriptObjectWriter getHtmlRenderContextScriptObjectWriter()
+	{
+		return htmlRenderContextScriptObjectWriter;
+	}
+
+	public void setHtmlRenderContextScriptObjectWriter(
+			HtmlRenderContextScriptObjectWriter htmlRenderContextScriptObjectWriter)
+	{
+		this.htmlRenderContextScriptObjectWriter = htmlRenderContextScriptObjectWriter;
+	}
+
+	public HtmlChartPluginScriptObjectWriter getHtmlChartPluginScriptObjectWriter()
+	{
+		return htmlChartPluginScriptObjectWriter;
+	}
+
+	public void setHtmlChartPluginScriptObjectWriter(
+			HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter)
+	{
+		this.htmlChartPluginScriptObjectWriter = htmlChartPluginScriptObjectWriter;
+	}
+
 	public HtmlDashboardScriptObjectWriter getHtmlDashboardScriptObjectWriter()
 	{
 		return htmlDashboardScriptObjectWriter;
@@ -190,14 +214,14 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		this.htmlDashboardScriptObjectWriter = htmlDashboardScriptObjectWriter;
 	}
 
-	public HtmlChartWidget<HtmlRenderContext> getHtmlChartWidgetForNotFound()
+	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForNotFound()
 	{
-		return htmlChartWidgetForNotFound;
+		return htmlChartPluginForNotFound;
 	}
 
-	public void setHtmlChartWidgetForNotFound(HtmlChartWidget<HtmlRenderContext> htmlChartWidgetForNotFound)
+	public void setHtmlChartPluginForNotFound(HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForNotFound)
 	{
-		this.htmlChartWidgetForNotFound = htmlChartWidgetForNotFound;
+		this.htmlChartPluginForNotFound = htmlChartPluginForNotFound;
 	}
 
 	public List<HtmlDashboardImport> getDashboardImports()
@@ -288,6 +312,16 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	public void setChartStyleName(String chartStyleName)
 	{
 		this.chartStyleName = chartStyleName;
+	}
+
+	public String getDefaultDashboardVar()
+	{
+		return defaultDashboardVar;
+	}
+
+	public void setDefaultDashboardVar(String defaultDashboardVar)
+	{
+		this.defaultDashboardVar = defaultDashboardVar;
 	}
 
 	public String getNewLine()
@@ -614,13 +648,20 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		ChartWidget chartWidget = (StringUtil.isEmpty(id) ? null : this.chartWidgetSource.getChartWidget(id));
 
 		if (chartWidget == null)
-		{
-			chartWidget = this.htmlChartWidgetForNotFound;
-			renderContext.setAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT,
-					"Chart '" + (id == null ? "" : id) + "' Not Found");
-		}
+			chartWidget = createHtmlChartWidgetForNotFound(id);
 
 		return (HtmlChartWidget<HtmlRenderContext>) chartWidget;
+	}
+
+	protected HtmlChartWidget<HtmlRenderContext> createHtmlChartWidgetForNotFound(String notFoundWidgetId)
+	{
+		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<HtmlRenderContext>(IDUtil.uuid(),
+				"HtmlChartWidgetForNotFound", this.htmlChartPluginForNotFound);
+
+		widget.addChartPropertyValue(ValueHtmlChartPlugin.VALUE_CHART_PROPERTY_NAME,
+				"Chart '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' Not Found");
+
+		return widget;
 	}
 
 	/**
@@ -629,26 +670,22 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * <code>var dashboard = {...};</code>
 	 * </p>
 	 * 
+	 * @param renderContext
 	 * @param out
 	 * @param dashboard
-	 * @param renderContextNoAttrs
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSVar(Writer out, HtmlDashboard dashboard, boolean renderContextNoAttrs)
+	protected void writeHtmlDashboardJSVar(HtmlRenderContext renderContext, Writer out, HtmlDashboard dashboard)
 			throws IOException
 	{
-		String varName = dashboard.getVarName();
-
-		if (StringUtil.isEmpty(varName))
+		if (StringUtil.isEmpty(dashboard.getVarName()))
 			throw new IllegalArgumentException();
 
-		out.write("var ");
-		out.write(varName);
-		out.write("=");
-		writeNewLine(out);
-		getHtmlDashboardScriptObjectWriter().write(out, dashboard, renderContextNoAttrs);
-		out.write(";");
-		writeNewLine(out);
+		String tmpRenderContextVarName = HtmlRenderAttributes
+				.generateRenderContextVarName(Long.toHexString(System.currentTimeMillis()));
+		getHtmlRenderContextScriptObjectWriter().writeNoAttributes(out, renderContext, tmpRenderContextVarName);
+
+		getHtmlDashboardScriptObjectWriter().write(out, dashboard, tmpRenderContextVarName);
 	}
 
 	/**
@@ -656,7 +693,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * <p>
 	 * <code>
 	 * <pre>
-	 * var renderContext = {...};
+	 * var tmpRenderContext = {...};
 	 * dashboard.renderContext.attributes = renderContext.attributes;
 	 * ...
 	 * dashboard.charts.push(...);
@@ -668,11 +705,9 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 
 	 * @param out
 	 * @param dashboard
-	 * @param renderContextVar
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSInit(Writer out, HtmlDashboard dashboard, String renderContextVar)
-			throws IOException
+	protected void writeHtmlDashboardJSInit(Writer out, HtmlDashboard dashboard) throws IOException
 	{
 		String varName = dashboard.getVarName();
 
@@ -681,19 +716,15 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 		HtmlRenderContext renderContext = dashboard.getRenderContext();
 
+		String tmpRenderContextVar = HtmlRenderAttributes.generateRenderContextVarName(renderContext);
+
 		ChartTheme chartTheme = HtmlRenderAttributes.removeChartTheme(renderContext);
 
-		out.write("var ");
-		out.write(renderContextVar);
-		out.write("=");
+		getHtmlRenderContextScriptObjectWriter().writeOnlyAttributes(out, renderContext, tmpRenderContextVar);
+		out.write(varName + ".renderContext.attributes = " + tmpRenderContextVar + ".attributes;");
 		writeNewLine(out);
-		getHtmlDashboardScriptObjectWriter().writeRenderContext(out, renderContext, true);
-		out.write(";");
-		writeNewLine(out);
-		out.write(varName + ".renderContext.attributes = " + renderContextVar + ".attributes;");
-		writeNewLine(out);
-		out.write(varName + ".renderContext.attributes." + HtmlRenderAttributes.CHART_THEME + " = " + renderContextVar
-				+ ".attributes." + HtmlRenderAttributes.DASHBOARD_THEME + ".chartTheme;");
+		out.write(varName + ".renderContext.attributes." + HtmlRenderAttributes.CHART_THEME + " = "
+				+ tmpRenderContextVar + ".attributes." + HtmlRenderAttributes.DASHBOARD_THEME + ".chartTheme;");
 		writeNewLine(out);
 
 		HtmlRenderAttributes.setChartTheme(renderContext, chartTheme);

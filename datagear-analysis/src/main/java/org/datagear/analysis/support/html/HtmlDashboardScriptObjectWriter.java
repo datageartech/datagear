@@ -18,7 +18,7 @@ import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 
 /**
- * {@linkplain HtmlDashboard}脚本对象输出流。
+ * {@linkplain HtmlDashboard} JS对象输出流。
  * 
  * @author datagear@163.com
  *
@@ -31,55 +31,54 @@ public class HtmlDashboardScriptObjectWriter extends AbstractHtmlScriptObjectWri
 	}
 
 	/**
-	 * 将{@linkplain HtmlDashboard}以脚本对象格式（“<code>{...}</code>”）写入输出流。
+	 * 将{@linkplain HtmlDashboard}的JS脚本对象写入输出流。
+	 * <p>
+	 * 格式为：
+	 * </p>
+	 * <code>
+	 * <pre>
+	 * var [varName]=
+	 * {
+	 * 	...,
+	 * 	renderContext : [renderContextVarName],
+	 * 	widget : { "id" : "...." },
+	 * 	charts : [],
+	 * 	...
+	 * };
+	 * <pre>
+	 * </code>
 	 * 
 	 * @param out
 	 * @param dashboard
+	 * @param renderContextVarName
 	 * @throws IOException
 	 */
-	public void write(Writer out, HtmlDashboard dashboard) throws IOException
+	public void write(Writer out, HtmlDashboard dashboard, String renderContextVarName) throws IOException
 	{
-		write(out, dashboard, false);
+		JsonHtmlDashboard jsonHtmlDashboard = new JsonHtmlDashboard(dashboard, renderContextVarName);
+
+		out.write("var " + dashboard.getVarName() + "=");
+		writeNewLine(out);
+		writeJsonObject(out, jsonHtmlDashboard);
+		out.write(";");
+		writeNewLine(out);
 	}
 
 	/**
-	 * 将{@linkplain HtmlDashboard}以脚本对象格式（“<code>{...}</code>”）写入输出流。
-	 * 
-	 * @param out
-	 * @param dashboard
-	 * @param renderContextNoAttrs
-	 *            {@linkplain HtmlDashboard#getRenderContext()}是否不输出{@linkplain HtmlRenderContext#getAttributes()}。
-	 * @throws IOException
-	 */
-	public void write(Writer out, HtmlDashboard dashboard, boolean renderContextNoAttrs) throws IOException
-	{
-		JsonHtmlDashboard jsonHtmlDashboard = new JsonHtmlDashboard(dashboard, renderContextNoAttrs);
-
-		writeScriptObject(out, jsonHtmlDashboard);
-	}
-
-	/**
-	 * 仅用于JSON输出的{@linkplain HtmlDashboard}。
+	 * 可输出JSON的{@linkplain HtmlDashboard}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
 	protected static class JsonHtmlDashboard extends HtmlDashboard
 	{
-		public JsonHtmlDashboard()
-		{
-			super();
-		}
-
 		@SuppressWarnings("unchecked")
-		public JsonHtmlDashboard(HtmlDashboard dashboard, boolean renderContextNoAttrs)
+		public JsonHtmlDashboard(HtmlDashboard dashboard, String renderContextVarName)
 		{
-			super(dashboard.getId(),
-					(renderContextNoAttrs ? new NoAttributesHtmlRenderContext(dashboard.getRenderContext())
-							: new AttributesHtmlRenderContext(dashboard.getRenderContext())),
+			super(dashboard.getId(), new RefHtmlRenderContext(renderContextVarName),
 					new IdDashboardWidget(dashboard.getWidget()), dashboard.getVarName());
 
-			super.setCharts(Collections.EMPTY_LIST);
+			setCharts(Collections.EMPTY_LIST);
 		}
 	}
 

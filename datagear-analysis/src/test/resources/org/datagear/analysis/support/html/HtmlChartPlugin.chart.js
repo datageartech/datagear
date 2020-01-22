@@ -1,13 +1,12 @@
-(function(chart)
 {
-	chart.render = function()
+	render: function(chart)
 	{
-		var element = document.getElementById(this.elementId);
+		var element = document.getElementById(chart.elementId);
 		var innerHtml = "my chart";
 		
-		if(this.renderContext && this.renderContext.attributes && this.renderContext.attributes.chartTheme)
+		if(chart.renderContext && chart.renderContext.attributes && chart.renderContext.attributes.chartTheme)
 		{
-			var graphColors = (this.renderContext.attributes.chartTheme.graphColors || []);
+			var graphColors = (chart.renderContext.attributes.chartTheme.graphColors || []);
 			
 			for(var i=0; i< graphColors.length; i++)
 			{
@@ -16,13 +15,10 @@
 		}
 		
 		element.innerHTML = innerHtml;
-	};
-	
-	chart.update = function(dataSets)
+	},
+	update: function(chart, results)
 	{
-		var element = document.getElementById(this.elementId);
-		
+		var element = document.getElementById(chart.elementId);
 		element.innerHTML += "<div>update</div>";
-	};
-})
-($CHART);
+	}
+}

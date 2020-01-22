@@ -215,25 +215,25 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 		// 图表属性
 		{
-			String template = "<html><head></head><body>" + "\r\n"
-					+ "<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\"></div>" + "\r\n"
-					+ "<div id='element_2' dg-chart-widget='chartwidget_2'></div>" + "\r\n"
-					+ "<div id=element_3 dg-chart-widget=chartwidget_3></div>" + "\r\n"
+			String template = "<html><head></head><body>" + HtmlChartPlugin.HTML_NEW_LINE
+					+ "<div id=\"element_1\" dg-chart-widget=\"chartwidget_1\"></div>" + HtmlChartPlugin.HTML_NEW_LINE
+					+ "<div id='element_2' dg-chart-widget='chartwidget_2'></div>" + HtmlChartPlugin.HTML_NEW_LINE
+					+ "<div id=element_3 dg-chart-widget=chartwidget_3></div>" + HtmlChartPlugin.HTML_NEW_LINE
 					+ "<div sdf abc def 12345677788 // >"
 					//
-					+ "\r\n" + "<div   id=element_4    dg-chart-widget=chartwidget_4    ></div>" + "\r\n"
-					+ "<div   id  =  element_5    dg-chart-widget=  chartwidget_5/>" + "\r\n"
-					+ "<div   id=element_6    dg-chart-widget=chartwidget_6  />" + "\r\n"
-					+ "<div   id=element_7    dg-chart-widget=chartwidget_7  /  >" + "\r\n"
-					+ "<div     dg-chart-widget=chartwidget_8    /  >"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div   id=element_4    dg-chart-widget=chartwidget_4    ></div>"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div   id  =  element_5    dg-chart-widget=  chartwidget_5/>"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div   id=element_6    dg-chart-widget=chartwidget_6  />"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div   id=element_7    dg-chart-widget=chartwidget_7  /  >"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div     dg-chart-widget=chartwidget_8    /  >"
 					//
-					+ "\r\n" + "<div     dg-chart-widget=chartwidget_9/>"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div     dg-chart-widget=chartwidget_9/>"
 					//
-					+ "\r\n" + "<div     dg-chart-widget=/>"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div     dg-chart-widget=/>"
 					//
-					+ "\r\n" + "<div     dg-chart-widget=  />"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div     dg-chart-widget=  />"
 					//
-					+ "\r\n" + "</body></html>";
+					+ HtmlChartPlugin.HTML_NEW_LINE + "</body></html>";
 
 			StringWriter out = new StringWriter();
 			DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), out);
@@ -271,9 +271,6 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains("<div     dg-chart-widget=/>"));
 			Assert.assertTrue(html.contains("<div     dg-chart-widget=  />"));
 			Assert.assertTrue(html.contains("</body></html>"));
-
-			Assert.assertTrue(html.contains("var dataGearChart4"));
-			Assert.assertTrue(html.contains("var dataGearChart5"));
 		}
 	}
 

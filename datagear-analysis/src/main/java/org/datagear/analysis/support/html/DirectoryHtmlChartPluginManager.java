@@ -438,7 +438,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			{
 				HtmlChartPlugin<?> htmlChartPlugin = (HtmlChartPlugin<?>) chartPlugin;
 
-				if (htmlChartPlugin.getScriptContent() == null)
+				if (htmlChartPlugin.getJsChartRenderer() == null)
 					legal = false;
 			}
 		}

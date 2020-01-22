@@ -8,7 +8,10 @@ var dashboardRenderer =
 	render : function(dashboard)
 	{
 		for(var i=0; i<dashboard.charts.length; i++)
-			dashboard.charts[i].render();
+		{
+			var chart = dashboard.charts[i];
+			chart.plugin.jsChartRender.render(chart);
+		}
 	}
 };
 </script>

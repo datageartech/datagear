@@ -9,9 +9,6 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.support.AbstractRenderContext;
-
 import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.ObjectSerializer;
 import com.alibaba.fastjson.serializer.SerializeConfig;
@@ -34,6 +31,9 @@ public abstract class AbstractHtmlScriptObjectWriter
 
 	private SerializeConfig serializeConfig = new SerializeConfig();
 
+	/** 换行符 */
+	private String newLine = HtmlChartPlugin.HTML_NEW_LINE;
+
 	public AbstractHtmlScriptObjectWriter()
 	{
 		super();
@@ -55,49 +55,36 @@ public abstract class AbstractHtmlScriptObjectWriter
 		return serializeConfig;
 	}
 
+	public void setSerializeConfig(SerializeConfig serializeConfig)
+	{
+		this.serializeConfig = serializeConfig;
+	}
+
+	public String getNewLine()
+	{
+		return newLine;
+	}
+
+	public void setNewLine(String newLine)
+	{
+		this.newLine = newLine;
+	}
+
 	protected void initSerializeConfig(SerializeConfig serializeConfig)
 	{
-		RefRenderContextSerializer refRenderContextSerializer = new RefRenderContextSerializer();
-
-		serializeConfig.put(RefHtmlRenderContext.class, refRenderContextSerializer);
+		RefObjectSerializer refHtmlRenderContextSerializer = new RefObjectSerializer();
+		serializeConfig.put(RefHtmlRenderContext.class, refHtmlRenderContextSerializer);
+		serializeConfig.put(RefHtmlChartPlugin.class, refHtmlRenderContextSerializer);
 	}
 
 	/**
-	 * 将{@linkplain RenderContext}以脚本对象格式（“<code>{...}</code>”）写入输出流。
-	 * 
-	 * @param out
-	 * @param renderContext
-	 * @throws IOException
-	 */
-	public void writeRenderContext(Writer out, RenderContext renderContext) throws IOException
-	{
-		writeRenderContext(out, renderContext, false);
-	}
-
-	/**
-	 * 将{@linkplain RenderContext}以脚本对象格式（“<code>{...}</code>”）写入输出流。
-	 * 
-	 * @param out
-	 * @param renderContext
-	 * @param onlyAttributes
-	 * @throws IOException
-	 */
-	public void writeRenderContext(Writer out, RenderContext renderContext, boolean onlyAttributes) throws IOException
-	{
-		if (onlyAttributes)
-			renderContext = new AttributesHtmlRenderContext(renderContext);
-
-		writeScriptObject(out, renderContext);
-	}
-
-	/**
-	 * 写脚本对象。
+	 * 写JSON对象。
 	 * 
 	 * @param out
 	 * @param object
 	 * @throws IOException
 	 */
-	protected void writeScriptObject(Writer out, Object object) throws IOException
+	protected void writeJsonObject(Writer out, Object object) throws IOException
 	{
 		SerializeWriter serializeWriter = new SerializeWriter(out, this.serializerFeatures);
 		JSONSerializer serializer = new JSONSerializer(serializeWriter, this.serializeConfig);
@@ -113,146 +100,48 @@ public abstract class AbstractHtmlScriptObjectWriter
 	}
 
 	/**
-	 * {@linkplain HtmlRenderContext#getAttributes()}为空的{@linkplain HtmlRenderContext}。
+	 * 写换行符。
 	 * 
-	 * @author datagear@163.com
-	 *
+	 * @param out
+	 * @throws IOException
 	 */
-	protected static class NoAttributesHtmlRenderContext extends AbstractRenderContext implements HtmlRenderContext
+	protected void writeNewLine(Writer out) throws IOException
 	{
-		private WebContext webContext;
-
-		public NoAttributesHtmlRenderContext(HtmlRenderContext renderContext)
-		{
-			super();
-			super.setAttributes(null);
-			this.webContext = renderContext.getWebContext();
-		}
-
-		@Override
-		public WebContext getWebContext()
-		{
-			return webContext;
-		}
-
-		public void setWebContext(WebContext webContext)
-		{
-			this.webContext = webContext;
-		}
-
-		@Override
-		public <T> T getAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void setAttribute(String name, Object value)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <T> T removeAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean hasAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Writer getWriter()
-		{
-			return null;
-		}
-
-		@Override
-		public int nextSequence()
-		{
-			return 0;
-		}
+		out.write(this.newLine);
 	}
 
 	/**
-	 * 仅带有{@linkplain RenderContext#getAttributes()}的{@linkplain HtmlRenderContext}。
-	 * <p>
-	 * 此类仅用于脚本输出。
-	 * </p>
+	 * JSON引用名对象。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class AttributesHtmlRenderContext extends AbstractRenderContext implements HtmlRenderContext
+	protected static interface JsonRefObject
 	{
-		public AttributesHtmlRenderContext(RenderContext renderContext)
-		{
-			super(renderContext.getAttributes());
-		}
+		String getRefName();
+	}
 
+	protected static class RefObjectSerializer implements ObjectSerializer
+	{
 		@Override
-		public WebContext getWebContext()
+		public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features)
+				throws IOException
 		{
-			return null;
-		}
+			String refName = null;
 
-		@Override
-		public <T> T getAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
+			if (object != null)
+			{
+				JsonRefObject jsonRefObject = (JsonRefObject) object;
+				refName = jsonRefObject.getRefName();
+			}
 
-		@Override
-		public void setAttribute(String name, Object value)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <T> T removeAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean hasAttribute(String name)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Writer getWriter()
-		{
-			return null;
-		}
-
-		@Override
-		public int nextSequence()
-		{
-			return 0;
+			serializer.getWriter().append(refName);
 		}
 	}
 
-	/**
-	 * 引用名{@linkplain HtmlRenderContext}。
-	 * <p>
-	 * 此类仅用于脚本输出。
-	 * </p>
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	protected static class RefHtmlRenderContext implements HtmlRenderContext
+	protected static class RefHtmlRenderContext implements HtmlRenderContext, JsonRefObject
 	{
 		private String refName;
-
-		public RefHtmlRenderContext()
-		{
-			super();
-		}
 
 		public RefHtmlRenderContext(String refName)
 		{
@@ -260,14 +149,10 @@ public abstract class AbstractHtmlScriptObjectWriter
 			this.refName = refName;
 		}
 
+		@Override
 		public String getRefName()
 		{
 			return refName;
-		}
-
-		public void setRefName(String refName)
-		{
-			this.refName = refName;
 		}
 
 		@Override
@@ -319,21 +204,20 @@ public abstract class AbstractHtmlScriptObjectWriter
 		}
 	}
 
-	protected static class RefRenderContextSerializer implements ObjectSerializer
+	protected static class RefHtmlChartPlugin extends HtmlChartPlugin<HtmlRenderContext> implements JsonRefObject
 	{
-		@Override
-		public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features)
-				throws IOException
+		private String refName;
+
+		public RefHtmlChartPlugin(String refName)
 		{
-			String refName = null;
+			super();
+			this.refName = refName;
+		}
 
-			if (object != null)
-			{
-				RefHtmlRenderContext refHtmlRenderContext = (RefHtmlRenderContext) object;
-				refName = refHtmlRenderContext.getRefName();
-			}
-
-			serializer.getWriter().append(refName);
+		@Override
+		public String getRefName()
+		{
+			return refName;
 		}
 	}
 }

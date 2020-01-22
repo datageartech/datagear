@@ -1,0 +1,51 @@
+/*
+ * Copyright (c) 2018 datagear.tech. All Rights Reserved.
+ */
+
+/**
+ * 
+ */
+package org.datagear.analysis.support.html;
+
+import java.io.IOException;
+import java.io.Reader;
+
+/**
+ * JS图表渲染器。
+ * <p>
+ * 它封装JS图表渲染器对象代码。
+ * </p>
+ * <p>
+ * {@linkplain HtmlChartPlugin}使用它在HTML端渲染图表。
+ * </p>
+ * <p>
+ * 它的格式应为：
+ * </p>
+ * <code>
+ * <pre>
+ * {
+ * 	render : function(chart){ ... },
+ * 	update : function(chart, results){ ... }
+ * }
+ * </pre>
+ * </code>
+ * 
+ * @author datagear@163.com
+ *
+ */
+public interface JsChartRenderer
+{
+	/** JS图表渲染器的渲染函数名 */
+	public static final String RENDER_FUNCTION_NAME = "render";
+
+	/** JS图表渲染器的更新函数名 */
+	public static final String UPDATE_FUNCTION_NAME = "update";
+
+	/**
+	 * 获取JS图表渲染器对象代码输入流。
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	Reader getReader() throws IOException;
+}

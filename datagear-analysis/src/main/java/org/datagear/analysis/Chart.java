@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class Chart extends AbstractIdentifiable
 {
-	public RenderContext renderContext;
+	private RenderContext renderContext;
 
 	private ChartPlugin<?> plugin;
 
@@ -102,8 +102,7 @@ public class Chart extends AbstractIdentifiable
 
 		for (int i = 0; i < this.chartDataSets.length; i++)
 		{
-			DataSetResult dataSetResult = this.chartDataSets[i].getDataSet()
-					.getResult(dataSetParamValues);
+			DataSetResult dataSetResult = this.chartDataSets[i].getDataSet().getResult(dataSetParamValues);
 			dataSets[i] = dataSetResult;
 		}
 

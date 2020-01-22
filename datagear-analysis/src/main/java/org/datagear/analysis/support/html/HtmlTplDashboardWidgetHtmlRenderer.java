@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.util.StringUtil;
@@ -79,8 +78,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 
 	public static final String DEFAULT_ATTR_NAME_CHART_WIDGET = "dg-chart-widget";
 
-	public static final String DEFAULT_DASHBOARD_VAR = "dashboard";
-
 	/** 看板设置标签名 */
 	private String dashboardSetTagName = DEFAULT_DASHBOARD_SET_TAG_NAME;
 
@@ -98,9 +95,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 
 	/** 属性名：图表部件ID */
 	private String attrNameChartWidget = DEFAULT_ATTR_NAME_CHART_WIDGET;
-
-	/** 默认看板变量名 */
-	private String defaultDashboardVar = DEFAULT_DASHBOARD_VAR;
 
 	public HtmlTplDashboardWidgetHtmlRenderer()
 	{
@@ -171,16 +165,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	public void setAttrNameChartWidget(String attrNameChartWidget)
 	{
 		this.attrNameChartWidget = attrNameChartWidget;
-	}
-
-	public String getDefaultDashboardVar()
-	{
-		return defaultDashboardVar;
-	}
-
-	public void setDefaultDashboardVar(String defaultDashboardVar)
-	{
-		this.defaultDashboardVar = defaultDashboardVar;
 	}
 
 	@Override
@@ -338,7 +322,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	{
 		String dashboardVar = dashboardInfo.getDashboardVar();
 		if (StringUtil.isEmpty(dashboardVar))
-			dashboardVar = this.defaultDashboardVar;
+			dashboardVar = getDefaultDashboardVar();
 
 		dashboard.setVarName(dashboardVar);
 
@@ -347,33 +331,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		writeScriptStartTag(out);
 		writeNewLine(out);
 
-		writeHtmlDashboardJSVar(out, dashboard, true);
+		writeHtmlDashboardJSVar(renderContext, out, dashboard);
 
 		out.write("(function(){");
 		writeNewLine(out);
 
-		HtmlRenderAttributes.setChartRenderContextVarName(renderContext, dashboardVar + ".renderContext");
+		writeHtmlChartScripts(renderContext, dashboard, dashboardInfo);
 
-		List<ChartInfo> chartInfos = dashboardInfo.getChartInfos();
-		if (chartInfos != null)
-		{
-			for (ChartInfo chartInfo : chartInfos)
-				writeHtmlChartScript(renderContext, dashboard, dashboardInfo, chartInfo);
-
-			// 移除内部设置的属性
-			HtmlRenderAttributes.removeChartRenderContextVarName(renderContext);
-			HtmlRenderAttributes.removeChartNotRenderScriptTag(renderContext);
-			HtmlRenderAttributes.removeChartScriptNotInvokeRender(renderContext);
-			HtmlRenderAttributes.removeChartNotRenderElement(renderContext);
-			HtmlRenderAttributes.removeChartVarName(renderContext);
-			HtmlRenderAttributes.removeChartElementId(renderContext);
-			renderContext.removeAttribute(RENDER_ATTR_NAME_FOR_NOT_FOUND_SCRIPT);
-		}
-
-		String tmpRenderContextVar = HtmlRenderAttributes
-				.generateRenderContextVarName(HtmlRenderAttributes.getNextSequenceIfNot(renderContext, -1));
-
-		writeHtmlDashboardJSInit(out, dashboard, tmpRenderContextVar);
+		writeHtmlDashboardJSInit(out, dashboard);
 
 		out.write("})();");
 		writeNewLine(out);
@@ -384,43 +349,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		writeNewLine(out);
 	}
 
-	/**
-	 * 写HTML图表脚本内容。
-	 * 
-	 * @param renderContext
-	 * @param dashboard
-	 * @param dashboardInfo
-	 * @param chartInfo
-	 * @throws IOException
-	 */
-	protected void writeHtmlChartScript(T renderContext, HtmlDashboard dashboard, DashboardInfo dashboardInfo,
-			ChartInfo chartInfo) throws IOException
+	protected void writeHtmlChartScripts(T renderContext, HtmlDashboard dashboard, DashboardInfo dashboardInfo)
+			throws IOException
 	{
-		String widget = chartInfo.getWidgetId();
-		String elementId = chartInfo.getElementId();
-		String var = null;
-
-		if (StringUtil.isEmpty(elementId))
-			throw new RenderException("The 'id' attribute must be set for chart element");
-
-		int nextSequence = -1;
-
-		HtmlChartWidget<HtmlRenderContext> chartWidget = getHtmlChartWidgetForRender(renderContext, widget);
-
-		if (StringUtil.isEmpty(var))
-		{
-			nextSequence = HtmlRenderAttributes.getNextSequenceIfNot(renderContext, nextSequence);
-			var = HtmlRenderAttributes.generateChartVarName(nextSequence);
-		}
-
-		HtmlRenderAttributes.setChartNotRenderScriptTag(renderContext, true);
-		HtmlRenderAttributes.setChartNotRenderElement(renderContext, true);
-		HtmlRenderAttributes.setChartScriptNotInvokeRender(renderContext, true);
-		HtmlRenderAttributes.setChartVarName(renderContext, var);
-		HtmlRenderAttributes.setChartElementId(renderContext, elementId);
-
-		HtmlChart chart = chartWidget.render(renderContext);
-
 		List<Chart> charts = dashboard.getCharts();
 		if (charts == null)
 		{
@@ -428,7 +359,91 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			dashboard.setCharts(charts);
 		}
 
-		charts.add(chart);
+		List<ChartInfo> chartInfos = dashboardInfo.getChartInfos();
+		if (chartInfos != null)
+		{
+			List<HtmlChartWidget<HtmlRenderContext>> chartWidgets = getHtmlChartWidgets(renderContext, chartInfos);
+			List<String> chartPluginVarNames = writeHtmlChartPluginScripts(renderContext, chartWidgets);
+
+			HtmlChartPluginRenderOption option = new HtmlChartPluginRenderOption();
+			option.setNotWriteChartElement(true);
+			option.setNotWriteScriptTag(true);
+			option.setNotWriteInvoke(true);
+			option.setNotWritePluginObject(true);
+			option.setNotWriteRenderContextObject(true);
+			option.setRenderContextVarName(dashboard.getVarName() + ".renderContext");
+
+			HtmlChartPluginRenderOption.setOption(renderContext, option);
+
+			for (int i = 0; i < chartInfos.size(); i++)
+			{
+				ChartInfo chartInfo = chartInfos.get(i);
+				HtmlChartWidget<HtmlRenderContext> chartWidget = chartWidgets.get(i);
+
+				option.setChartElementId(chartInfo.getElementId());
+
+				String chartVarName = HtmlRenderAttributes.generateChartVarName(renderContext);
+
+				option.setPluginVarName(chartPluginVarNames.get(i));
+				option.setChartVarName(chartVarName);
+
+				HtmlChart chart = chartWidget.render(renderContext);
+				charts.add(chart);
+			}
+
+			// 移除内部设置的属性
+			HtmlChartPluginRenderOption.removeOption(renderContext);
+		}
+	}
+
+	protected List<String> writeHtmlChartPluginScripts(T renderContext,
+			List<HtmlChartWidget<HtmlRenderContext>> htmlChartWidgets) throws IOException
+	{
+		List<String> pluginVarNames = new ArrayList<String>(htmlChartWidgets.size());
+
+		for (int i = 0; i < htmlChartWidgets.size(); i++)
+		{
+			String pluginVarName = null;
+
+			HtmlChartWidget<HtmlRenderContext> widget = htmlChartWidgets.get(i);
+			HtmlChartPlugin<HtmlRenderContext> plugin = widget.getChartPlugin();
+
+			for (int j = 0; j < i; j++)
+			{
+				HtmlChartWidget<HtmlRenderContext> myWidget = htmlChartWidgets.get(j);
+				HtmlChartPlugin<HtmlRenderContext> myPlugin = myWidget.getChartPlugin();
+
+				if (myPlugin.getId().equals(plugin.getId()))
+				{
+					pluginVarName = pluginVarNames.get(j);
+					break;
+				}
+			}
+
+			if (pluginVarName == null)
+			{
+				pluginVarName = HtmlRenderAttributes.generateChartPluginVarName(renderContext);
+				getHtmlChartPluginScriptObjectWriter().write(renderContext.getWriter(), plugin, pluginVarName);
+			}
+
+			pluginVarNames.add(pluginVarName);
+		}
+
+		return pluginVarNames;
+	}
+
+	protected List<HtmlChartWidget<HtmlRenderContext>> getHtmlChartWidgets(HtmlRenderContext renderContext,
+			List<ChartInfo> chartInfos)
+	{
+		List<HtmlChartWidget<HtmlRenderContext>> list = new ArrayList<HtmlChartWidget<HtmlRenderContext>>();
+
+		if (chartInfos == null)
+			return list;
+
+		for (ChartInfo chartInfo : chartInfos)
+			list.add(getHtmlChartWidgetForRender(renderContext, chartInfo.getWidgetId()));
+
+		return list;
 	}
 
 	/**
@@ -529,8 +544,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		// 元素没有定义“id”属性
 		if (chartInfo != null && StringUtil.isEmpty(chartInfo.getElementId()))
 		{
-			String elementId = HtmlRenderAttributes
-					.generateChartElementId(HtmlRenderAttributes.getNextSequenceIfNot(renderContext, -1));
+			String elementId = HtmlRenderAttributes.generateChartElementId(renderContext);
 
 			chartInfo.setElementId(elementId);
 

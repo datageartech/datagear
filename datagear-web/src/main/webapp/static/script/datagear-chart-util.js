@@ -241,10 +241,14 @@
 	 * 初始化Echarts对象。
 	 * 
 	 * @param chart 图表对象
+	 * @param echartsOption Echarts设置项
 	 */
-	util.echarts.init = function(chart)
+	util.echarts.init = function(chart, echartsOption)
 	{
 		var echartsObj = echarts.init(document.getElementById(chart.elementId), this.theme(chart));
+		
+		if(echartsOption != null)
+			echartsObj.setOption(echartsOption);
 		
 		return echartsObj;
 	};

@@ -56,17 +56,20 @@ public class HtmlTplDashboardWidgetFmkRendererTest
 		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
 		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
 
-		String html = stringWriter.toString();
+		getHtmlWithPrint(stringWriter);
 
 		Assert.assertEquals(6, dashboard.getCharts().size());
-		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateDashboardVarName(1)));
-		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(2)));
-		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(3)));
-		Assert.assertTrue(html.contains("chart01"));
-		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(4)));
-		Assert.assertTrue(html.contains("chart02"));
-		Assert.assertTrue(html.contains(HtmlRenderAttributes.generateChartVarName(6)));
+	}
 
-		System.out.println(stringWriter.toString());
+	protected String getHtmlWithPrint(StringWriter out)
+	{
+		String html = out.toString();
+
+		System.out.println(html);
+		System.out.println("");
+		System.out.println("-----------------------");
+		System.out.println("");
+
+		return html;
 	}
 }

@@ -7,10 +7,11 @@
  */
 package org.datagear.analysis.support.html;
 
-import java.io.IOException;
-import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.datagear.util.StringUtil;
+import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.RenderException;
 import org.datagear.util.i18n.Label;
 
 /**
@@ -24,59 +25,47 @@ import org.datagear.util.i18n.Label;
  */
 public class ValueHtmlChartPlugin<T extends HtmlRenderContext> extends HtmlChartPlugin<T>
 {
-	private String valueAttributeName;
+	public static final String VALUE_CHART_PROPERTY_NAME = "valueHtmlChartPluginValue";
+
+	protected static final StringJsChartRenderer JS_CHART_RENDERER = new StringJsChartRenderer(
+			"{" + HtmlChartPlugin.HTML_NEW_LINE +
+			//
+					"	render : function(chart)" + HtmlChartPlugin.HTML_NEW_LINE +
+					//
+					"	{" + HtmlChartPlugin.HTML_NEW_LINE +
+					//
+					"		var element = document.getElementById(chart.elementId);" + HtmlChartPlugin.HTML_NEW_LINE +
+					//
+					"		var propertyValues = (chart.propertyValues || {});" + HtmlChartPlugin.HTML_NEW_LINE +
+					//
+					"		element.innerHTML=propertyValues['" + VALUE_CHART_PROPERTY_NAME + "'];"
+					+ HtmlChartPlugin.HTML_NEW_LINE +
+					//
+					"	}," + HtmlChartPlugin.HTML_NEW_LINE +
+					//
+					"	update : function(){}" + HtmlChartPlugin.HTML_NEW_LINE +
+					//
+					"}");
 
 	public ValueHtmlChartPlugin()
 	{
 		super();
 	}
 
-	public ValueHtmlChartPlugin(String id, String valueAttributeName)
+	public ValueHtmlChartPlugin(String id)
 	{
-		super(id, new Label("ValueHtmlChartPlugin"), new StringScriptContent(""));
-		this.valueAttributeName = valueAttributeName;
-	}
-
-	public String getValueAttributeName()
-	{
-		return valueAttributeName;
-	}
-
-	public void setValueAttributeName(String valueAttributeName)
-	{
-		this.valueAttributeName = valueAttributeName;
+		super(id, new Label("ValueHtmlChartPlugin"), JS_CHART_RENDERER);
 	}
 
 	@Override
-	protected void writeChartScriptContent(T renderContext, HtmlChart chart) throws IOException
+	public HtmlChart renderChart(T renderContext, Map<String, ?> chartPropertyValues, ChartDataSet... chartDataSets)
+			throws RenderException
 	{
-		String value = "";
+		@SuppressWarnings("unchecked")
+		Map<String, Object> myChartPropertyValues = (Map<String, Object>) chartPropertyValues;
+		if (myChartPropertyValues == null)
+			myChartPropertyValues = new HashMap<String, Object>();
 
-		Object valueObj = renderContext.getAttribute(this.valueAttributeName);
-		if (valueObj == null)
-			;
-		else if (valueObj instanceof String)
-			value = (String) valueObj;
-		else
-			value = valueObj.toString();
-
-		value = StringUtil.escapeJavaScriptStringValue(value);
-
-		Writer out = renderContext.getWriter();
-		String chartVarName = chart.getVarName();
-
-		out.write("(function(chart)");
-		writeNewLine(out);
-		out.write("{");
-		writeNewLine(out);
-		out.write("  chart." + SCRIPT_RENDER_FUNCTION_NAME
-				+ " = function(){ var element = document.getElementById(this.elementId); element.innerHTML=\"" + value
-				+ "\"; };");
-		writeNewLine(out);
-		out.write("  chart." + SCRIPT_UPDATE_FUNCTION_NAME + " = function(){};");
-		writeNewLine(out);
-		out.write("})");
-		writeNewLine(out);
-		out.write("(" + chartVarName + ");");
+		return super.renderChart(renderContext, myChartPropertyValues, chartDataSets);
 	}
 }

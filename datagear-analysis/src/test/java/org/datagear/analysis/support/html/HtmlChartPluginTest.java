@@ -46,19 +46,11 @@ public class HtmlChartPluginTest
 		HtmlRenderAttributes.setLocale(renderContext, Locale.getDefault());
 
 		htmlChartPlugin.renderChart(renderContext, null, (ChartDataSet[]) null);
-		htmlChartPlugin.renderChart(renderContext, null, (ChartDataSet[]) null);
 
-		String html = stringWriter.toString();
+		String html = getHtmlWithPrint(stringWriter);
 
-		Assert.assertTrue(html
-				.contains("<div id=\"" + HtmlRenderAttributes.generateChartElementId(1) + "\" class=\"chart\"></div>"));
-		Assert.assertTrue(html.contains("(" + HtmlRenderAttributes.generateChartVarName(1) + ");"));
-
-		Assert.assertTrue(html
-				.contains("<div id=\"" + HtmlRenderAttributes.generateChartElementId(2) + "\" class=\"chart\"></div>"));
-		Assert.assertTrue(html.contains("(" + HtmlRenderAttributes.generateChartVarName(2) + ");"));
-
-		System.out.println(html);
+		Assert.assertTrue(html.contains("<div id=\"" + HtmlRenderAttributes.generateChartElementId("1") + "\"></div>"));
+		Assert.assertTrue(html.contains("(" + HtmlRenderAttributes.generateChartVarName("4") + ");"));
 	}
 
 	@Test
@@ -68,15 +60,16 @@ public class HtmlChartPluginTest
 
 		StringWriter stringWriter = new StringWriter();
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), stringWriter);
-		HtmlRenderAttributes.setChartRenderContextVarName(renderContext, "chartRenderContext");
+
+		HtmlChartPluginRenderOption option = new HtmlChartPluginRenderOption();
+		option.setRenderContextVarName("chartRenderContext");
+		HtmlChartPluginRenderOption.setOption(renderContext, option);
 
 		htmlChartPlugin.renderChart(renderContext, null, (ChartDataSet[]) null);
 
-		String html = stringWriter.toString();
+		String html = getHtmlWithPrint(stringWriter);
 
 		Assert.assertTrue(html.contains("\"renderContext\":chartRenderContext"));
-
-		System.out.println(html);
 	}
 
 	public static HtmlChartPlugin<HtmlRenderContext> createHtmlChartPlugin() throws Exception
@@ -89,9 +82,21 @@ public class HtmlChartPluginTest
 		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = new HtmlChartPlugin<HtmlRenderContext>();
 		jsonChartPluginPropertiesResolver.setChartPluginProperties(htmlChartPlugin, properties);
 
-		htmlChartPlugin.setScriptContent(new LocationScriptContent(
+		htmlChartPlugin.setJsChartRenderer(new LocationJsChartRenderer(
 				LocationResource.toClasspathLocation("org/datagear/analysis/support/html/HtmlChartPlugin.chart.js")));
 
 		return htmlChartPlugin;
+	}
+
+	protected String getHtmlWithPrint(StringWriter out)
+	{
+		String html = out.toString();
+
+		System.out.println(html);
+		System.out.println("");
+		System.out.println("-----------------------");
+		System.out.println("");
+
+		return html;
 	}
 }

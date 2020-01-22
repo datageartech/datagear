@@ -349,7 +349,7 @@ public class HtmlChartPluginLoader
 			plugin = createHtmlChartPlugin();
 
 			this.jsonChartPluginPropertiesResolver.setChartPluginProperties(plugin, properties);
-			plugin.setScriptContent(new StringScriptContent(scriptContent));
+			plugin.setJsChartRenderer(new StringJsChartRenderer(scriptContent));
 
 			plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
 		}

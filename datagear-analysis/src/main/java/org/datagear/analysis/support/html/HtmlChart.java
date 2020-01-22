@@ -31,9 +31,8 @@ public class HtmlChart extends Chart
 		super();
 	}
 
-	public HtmlChart(String id, HtmlRenderContext renderContext, ChartPlugin<?> chartPlugin,
-			Map<String, ?> chartPropertyValues, ChartDataSet[] chartDataSets, String elementId,
-			String varName)
+	public HtmlChart(String id, HtmlRenderContext renderContext, HtmlChartPlugin<?> chartPlugin,
+			Map<String, ?> chartPropertyValues, ChartDataSet[] chartDataSets, String elementId, String varName)
 	{
 		super(id, renderContext, chartPlugin, chartPropertyValues, chartDataSets);
 		this.elementId = elementId;
@@ -53,6 +52,21 @@ public class HtmlChart extends Chart
 			throw new IllegalArgumentException();
 
 		super.setRenderContext(renderContext);
+	}
+
+	@Override
+	public HtmlChartPlugin<?> getPlugin()
+	{
+		return (HtmlChartPlugin<?>) super.getPlugin();
+	}
+
+	@Override
+	public void setPlugin(ChartPlugin<?> plugin)
+	{
+		if (plugin != null && !(plugin instanceof HtmlChartPlugin<?>))
+			throw new IllegalArgumentException();
+
+		super.setPlugin(plugin);
 	}
 
 	public String getElementId()

@@ -13,23 +13,23 @@ import java.io.Serializable;
 import java.io.StringReader;
 
 /**
- * 字符串{@linkplain ScriptContent}。
+ * 字符串{@linkplain JsChartRenderer}。
  * 
  * @author datagear@163.com
  *
  */
-public class StringScriptContent implements ScriptContent, Serializable
+public class StringJsChartRenderer implements JsChartRenderer, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	private String content;
 
-	public StringScriptContent()
+	public StringJsChartRenderer()
 	{
 		super();
 	}
 
-	public StringScriptContent(String content)
+	public StringJsChartRenderer(String content)
 	{
 		super();
 		this.content = content;

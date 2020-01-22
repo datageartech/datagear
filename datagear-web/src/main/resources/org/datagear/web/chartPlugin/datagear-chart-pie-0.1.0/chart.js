@@ -1,13 +1,12 @@
+{
 /**
  * 依赖：
  * chartUtil
  * echarts
  */
-(function(chart)
-{
-	chart.render = function()
+	render: function(chart)
 	{
-		this.echarts = {};
+		chart.echarts = {};
 		
 		var options =
 		{
@@ -42,13 +41,10 @@
 			]
 		};
 		
-		this.echarts.chart = chartUtil.echarts.init(this);
-		this.echarts.chart.setOption(options);
-	};
-	
-	chart.update = function(results)
+		chart.echarts.chart = chartUtil.echarts.init(chart, options);
+	},
+	update: function(chart, results)
 	{
-		var chart = this;
 		var chartDataSet = chartUtil.firstChartDataSet(chart);
 		var result = chartUtil.firstResult(results);
 		
@@ -59,7 +55,6 @@
 		var datas = chartUtil.dataNameValueObjects(result, np, vp);
 		
 		var options = { legend : { data : legendData }, series : [ { name : chartUtil.propertyValueName(chart), data : datas } ] };
-		this.echarts.chart.setOption(options);
-	};
-})
-($CHART);
+		chart.echarts.chart.setOption(options);
+	}
+}
