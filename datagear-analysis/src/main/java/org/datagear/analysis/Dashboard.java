@@ -20,6 +20,11 @@ import java.util.Map;
  */
 public class Dashboard extends AbstractIdentifiable
 {
+	public static final String PROPERTY_ID = "id";
+	public static final String PROPERTY_RENDER_CONTEXT = "renderContext";
+	public static final String PROPERTY_WIDGET = "widget";
+	public static final String PROPERTY_CHARTS = "charts";
+
 	private RenderContext renderContext;
 
 	private DashboardWidget<?> widget;

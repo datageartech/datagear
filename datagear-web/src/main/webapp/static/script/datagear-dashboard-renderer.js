@@ -33,7 +33,7 @@
 			
 			try
 			{
-				chart.plugin.jsChartRender.render(chart);
+				chart.plugin.chartRender.render(chart);
 			}
 			catch(e)
 			{
@@ -180,7 +180,7 @@
 			doUpdate=this.listener.onUpdateChart(dashboard, chart, results, this);
 		
 		if(doUpdate != false)
-			chart.plugin.jsChartRender.update(chart, results);
+			chart.plugin.chartRender.update(chart, results);
 	};
 	
 	renderer.handleError = function(e)

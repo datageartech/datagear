@@ -14,6 +14,8 @@ public class DashboardTheme extends Theme
 {
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROPERTY_CHART_THEME = "chartTheme";
+
 	private ChartTheme chartTheme;
 
 	public DashboardTheme()

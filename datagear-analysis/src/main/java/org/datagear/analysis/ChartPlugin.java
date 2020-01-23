@@ -22,6 +22,16 @@ import org.datagear.util.i18n.Label;
  */
 public interface ChartPlugin<T extends RenderContext> extends Identifiable
 {
+	String PROPERTY_ID = "id";
+	String PROPERTY_NAME_LABEL = "nameLabel";
+	String PROPERTY_DESC_LABEL = "descLabel";
+	String PROPERTY_MANUAL_LABEL = "manualLabel";
+	String PROPERTY_ICONS = "icons";
+	String PROPERTY_CHART_PROPERTIES = "chartProperties";
+	String PROPERTY_DATA_SIGNS = "dataSigns";
+	String PROPERTY_VERSION = "version";
+	String PROPERTY_ORDER = "order";
+
 	/**
 	 * 获取名称标签。
 	 * 

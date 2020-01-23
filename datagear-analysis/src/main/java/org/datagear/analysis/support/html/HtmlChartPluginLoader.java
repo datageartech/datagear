@@ -10,6 +10,7 @@ package org.datagear.analysis.support.html;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.BytesIcon;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 import org.datagear.analysis.support.LocationIcon;
+import org.datagear.analysis.support.html.HtmlChartPluginJsDefResolver.JsDefContent;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -36,15 +38,25 @@ import org.datagear.util.StringUtil;
  * </p>
  * <code>
  * <pre>
- * |---- properties.json
- * |---- chart.js
+ * |---- plugin.js
  * </pre>
  * </code>
  * <p>
- * <code>properties.json</code>用于定义{@linkplain HtmlChartPlugin}本身的属性。
+ * 上述文件格式规范如下：
  * </p>
+ * <code>
+ * <pre>
+ * {
+ * 	id : "...",
+ * 	nameLabel : { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
+ * 	...,
+ * 	chartRender: { ... },
+ * 	...
+ * }
+ * </pre>
+ * </code>
  * <p>
- * 如果<code>properties.json</code>中定义了插件图标，比如：
+ * 如果<code>plugin.js</code>中定义了插件图标，比如：
  * </p>
  * <p>
  * <code>icons : { "LIGHT" : "icons/light.png" }</code>
@@ -52,10 +64,10 @@ import org.datagear.util.StringUtil;
  * <p>
  * ，那么上述文件结构中还应有<code>icons/light.png</code>文件。
  * </p>
- * <code>chart.js</code>用于定义{@linkplain HtmlChartPlugin}的图表渲染逻辑。
+ * <code>chartRender</code>用于定义{@linkplain HtmlChartPlugin#getChartRenderer()}内容。
  * </p>
  * <p>
- * 默认地，上述两个文件都应该为<code>UTF-8</code>编码。
+ * 默认地，上述文件应该为<code>UTF-8</code>编码。
  * </p>
  * 
  * @author datagear@163.com
@@ -63,9 +75,9 @@ import org.datagear.util.StringUtil;
  */
 public class HtmlChartPluginLoader
 {
-	public static final String NAME_PROPERTIES = "properties.json";
+	public static final String FILE_NAME_PLUGIN = "plugin.js";
 
-	public static final String NAME_CHART = "chart.js";
+	private HtmlChartPluginJsDefResolver htmlChartPluginJsDefResolver = new HtmlChartPluginJsDefResolver();
 
 	private JsonChartPluginPropertiesResolver jsonChartPluginPropertiesResolver = new JsonChartPluginPropertiesResolver();
 
@@ -75,6 +87,16 @@ public class HtmlChartPluginLoader
 	public HtmlChartPluginLoader()
 	{
 		super();
+	}
+
+	public HtmlChartPluginJsDefResolver getHtmlChartPluginJsDefResolver()
+	{
+		return htmlChartPluginJsDefResolver;
+	}
+
+	public void setHtmlChartPluginJsDefResolver(HtmlChartPluginJsDefResolver htmlChartPluginJsDefResolver)
+	{
+		this.htmlChartPluginJsDefResolver = htmlChartPluginJsDefResolver;
 	}
 
 	public JsonChartPluginPropertiesResolver getJsonChartPluginPropertiesResolver()
@@ -109,10 +131,9 @@ public class HtmlChartPluginLoader
 		if (!directory.exists())
 			return false;
 
-		File propFile = new File(directory, NAME_PROPERTIES);
-		File chartFile = new File(directory, NAME_CHART);
+		File pluginFile = new File(directory, FILE_NAME_PLUGIN);
 
-		return (propFile.exists() && chartFile.exists());
+		return (pluginFile.exists());
 	}
 
 	/**
@@ -165,11 +186,7 @@ public class HtmlChartPluginLoader
 
 				if (zipEntry.isDirectory())
 					;
-				else if (name.equals(NAME_PROPERTIES))
-				{
-					yes += 1;
-				}
-				else if (name.equals(NAME_CHART))
+				else if (name.equals(FILE_NAME_PLUGIN))
 				{
 					yes += 1;
 				}
@@ -182,7 +199,7 @@ public class HtmlChartPluginLoader
 			throw new HtmlChartPluginLoadException(e);
 		}
 
-		return (yes >= 2);
+		return (yes >= 1);
 	}
 
 	/**
@@ -326,32 +343,34 @@ public class HtmlChartPluginLoader
 
 	protected HtmlChartPlugin<?> loadSingleForDirectory(File directory) throws HtmlChartPluginLoadException
 	{
-		File propFile = new File(directory, NAME_PROPERTIES);
-		File chartFile = new File(directory, NAME_CHART);
+		File chartFile = new File(directory, FILE_NAME_PLUGIN);
 
-		if (!propFile.exists() || !chartFile.exists())
+		if (!chartFile.exists())
 			return null;
 
 		HtmlChartPlugin<?> plugin = null;
 
-		InputStream propIn = null;
-		InputStream chartIn = null;
+		Reader chartIn = null;
 
 		try
 		{
-			propIn = IOUtil.getInputStream(propFile);
-			chartIn = IOUtil.getInputStream(chartFile);
+			chartIn = IOUtil.getReader(chartFile, this.encoding);
 
-			Map<String, Object> properties = this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(propIn,
-					this.encoding);
-			String scriptContent = readScriptContent(chartIn, false);
+			JsDefContent jsDefContent = this.htmlChartPluginJsDefResolver.resolve(chartIn);
 
-			plugin = createHtmlChartPlugin();
+			if (!StringUtil.isEmpty(jsDefContent.getPluginJson())
+					&& !StringUtil.isEmpty(jsDefContent.getPluginChartRender()))
+			{
+				Map<String, Object> properties = this.jsonChartPluginPropertiesResolver
+						.resolveChartPluginProperties(jsDefContent.getPluginJson());
 
-			this.jsonChartPluginPropertiesResolver.setChartPluginProperties(plugin, properties);
-			plugin.setJsChartRenderer(new StringJsChartRenderer(scriptContent));
+				plugin = createHtmlChartPlugin();
 
-			plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
+				this.jsonChartPluginPropertiesResolver.setChartPluginProperties(plugin, properties);
+				plugin.setChartRenderer(new StringJsChartRenderer(jsDefContent.getPluginChartRender()));
+
+				plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
+			}
 		}
 		catch (Exception e)
 		{
@@ -359,7 +378,6 @@ public class HtmlChartPluginLoader
 		}
 		finally
 		{
-			IOUtil.close(propIn);
 			IOUtil.close(chartIn);
 		}
 

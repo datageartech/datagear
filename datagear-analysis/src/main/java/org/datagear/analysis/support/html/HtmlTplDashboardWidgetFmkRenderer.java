@@ -207,6 +207,28 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 	}
 
 	/**
+	 * 设置用于渲染Freemark看板图表的{@linkplain HtmlChartPluginRenderOption}。
+	 * 
+	 * @param renderContext
+	 * @param dashboardVarName
+	 * @return
+	 */
+	protected HtmlChartPluginRenderOption setHtmlChartPluginRenderOption(RenderContext renderContext,
+			String dashboardVarName)
+	{
+		HtmlChartPluginRenderOption option = new HtmlChartPluginRenderOption();
+		option.setNotWriteChartElement(false);
+		option.setNotWriteScriptTag(false);
+		option.setNotWriteInvoke(true);
+		option.setNotWriteRenderContextObject(true);
+		option.setRenderContextVarName(dashboardVarName + ".renderContext");
+
+		HtmlChartPluginRenderOption.setOption(renderContext, option);
+
+		return option;
+	}
+
+	/**
 	 * HTML看板渲染数据模型。
 	 * 
 	 * @author datagear@163.com
@@ -402,28 +424,6 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 	}
 
 	/**
-	 * 设置用于渲染Freemark看板图表的{@linkplain HtmlChartPluginRenderOption}。
-	 * 
-	 * @param renderContext
-	 * @param dashboardVarName
-	 * @return
-	 */
-	protected HtmlChartPluginRenderOption setHtmlChartPluginRenderOption(RenderContext renderContext,
-			String dashboardVarName)
-	{
-		HtmlChartPluginRenderOption option = new HtmlChartPluginRenderOption();
-		option.setNotWriteChartElement(false);
-		option.setNotWriteScriptTag(false);
-		option.setNotWriteInvoke(true);
-		option.setNotWriteRenderContextObject(true);
-		option.setRenderContextVarName(dashboardVarName + ".renderContext");
-
-		HtmlChartPluginRenderOption.setOption(renderContext, option);
-
-		return option;
-	}
-
-	/**
 	 * “@chart”指令。
 	 * 
 	 * @author datagear@163.com
@@ -461,7 +461,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			option.setChartElementId(elementId);
 			option.setChartVarName(var);
 
-			HtmlChart chart = chartWidget.render(renderContext);
+			HtmlChart chart = writeHtmlChart(chartWidget, renderContext);
 
 			List<Chart> charts = htmlDashboard.getCharts();
 			if (charts == null)

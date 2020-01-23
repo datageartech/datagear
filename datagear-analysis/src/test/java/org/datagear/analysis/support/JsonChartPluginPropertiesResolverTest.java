@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartProperty;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.PropertyType;
@@ -45,24 +46,24 @@ public class JsonChartPluginPropertiesResolverTest
 			Map<String, Object> properties = jsonChartPluginPropertiesResolver
 					.resolveChartPluginProperties(jsonInputStream, "UTF-8");
 
-			Assert.assertEquals("pie-chart", properties.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_ID));
+			Assert.assertEquals("pie-chart", properties.get(ChartPlugin.PROPERTY_ID));
 
 			{
-				Label nameLabel = (Label) properties.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_NAME_LABEL);
+				Label nameLabel = (Label) properties.get(ChartPlugin.PROPERTY_NAME_LABEL);
 				Assert.assertEquals("饼图", nameLabel.getValue());
 				Assert.assertEquals("pie chart", nameLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("饼图中文", nameLabel.getValue(Label.toLocale("zh")));
 			}
 
 			{
-				Label descLabel = (Label) properties.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_DESC_LABEL);
+				Label descLabel = (Label) properties.get(ChartPlugin.PROPERTY_DESC_LABEL);
 				Assert.assertEquals("饼图描述", descLabel.getValue());
 				Assert.assertEquals("pie chart desc", descLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("饼图描述中文", descLabel.getValue(Label.toLocale("zh")));
 			}
 
 			{
-				Label manualLabel = (Label) properties.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_MANUAL_LABEL);
+				Label manualLabel = (Label) properties.get(ChartPlugin.PROPERTY_MANUAL_LABEL);
 				Assert.assertEquals("饼图指南", manualLabel.getValue());
 				Assert.assertEquals("pie chart manual", manualLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("饼图指南中文", manualLabel.getValue(Label.toLocale("zh")));
@@ -71,7 +72,7 @@ public class JsonChartPluginPropertiesResolverTest
 			{
 				@SuppressWarnings("unchecked")
 				Map<RenderStyle, LocationIcon> icons = (Map<RenderStyle, LocationIcon>) properties
-						.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_ICONS);
+						.get(ChartPlugin.PROPERTY_ICONS);
 
 				Assert.assertEquals("icon-0.png", icons.get(RenderStyle.LIGHT).getLocation());
 				Assert.assertEquals("icon-1.png", icons.get(RenderStyle.DARK).getLocation());
@@ -79,7 +80,7 @@ public class JsonChartPluginPropertiesResolverTest
 
 			@SuppressWarnings("unchecked")
 			List<ChartProperty> chartProperties = (List<ChartProperty>) properties
-					.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_CHART_PROPERTIES);
+					.get(ChartPlugin.PROPERTY_CHART_PROPERTIES);
 
 			{
 				ChartProperty chartProperty = chartProperties.get(0);
@@ -134,8 +135,7 @@ public class JsonChartPluginPropertiesResolverTest
 			}
 
 			@SuppressWarnings("unchecked")
-			List<DataSign> dataSigns = (List<DataSign>) properties
-					.get(JsonChartPluginPropertiesResolver.CHART_PLUGIN_DATA_SIGNS);
+			List<DataSign> dataSigns = (List<DataSign>) properties.get(ChartPlugin.PROPERTY_DATA_SIGNS);
 
 			{
 				DataSign dataSign = dataSigns.get(0);

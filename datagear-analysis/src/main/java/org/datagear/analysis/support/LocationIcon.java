@@ -24,6 +24,8 @@ public class LocationIcon extends LocationResource implements Icon
 {
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROPERTY_LOCATION = "location";
+
 	private String type = "";
 
 	private long lastModified = System.currentTimeMillis();

@@ -18,6 +18,9 @@ public class Label implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROPERTY_VALUE = "value";
+	public static final String PROPERTY_LOCALE_VALUES = "localeValues";
+
 	private String value;
 
 	private Map<Locale, String> localeValues;

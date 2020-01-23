@@ -387,7 +387,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 				option.setPluginVarName(chartPluginVarNames.get(i));
 				option.setChartVarName(chartVarName);
 
-				HtmlChart chart = chartWidget.render(renderContext);
+				HtmlChart chart = writeHtmlChart(chartWidget, renderContext);
 				charts.add(chart);
 			}
 

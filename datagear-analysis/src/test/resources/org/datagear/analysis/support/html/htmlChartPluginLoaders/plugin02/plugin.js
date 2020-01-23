@@ -1,5 +1,5 @@
 {
-	id : 'plugin01',
+	id : 'plugin02',
 	nameLabel :
 	{
 		value : '折线图',
@@ -10,5 +10,6 @@
 		}
 	},
 	icons : { "light" : "icon-01.png", "dark" : "icons/icon-02.png" },
-	order : 4
+	order : 3,
+	chartRender : {}
 }

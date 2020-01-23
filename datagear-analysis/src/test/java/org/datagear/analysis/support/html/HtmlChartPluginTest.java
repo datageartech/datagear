@@ -7,15 +7,12 @@
  */
 package org.datagear.analysis.support.html;
 
-import java.io.InputStream;
+import java.io.File;
 import java.io.StringWriter;
 import java.util.Locale;
-import java.util.Map;
 
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.RenderStyle;
-import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
-import org.datagear.analysis.support.LocationResource;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.junit.Assert;
@@ -27,8 +24,6 @@ import org.junit.Test;
  */
 public class HtmlChartPluginTest
 {
-	private static JsonChartPluginPropertiesResolver jsonChartPluginPropertiesResolver = new JsonChartPluginPropertiesResolver();
-
 	public HtmlChartPluginTest() throws Throwable
 	{
 		super();
@@ -74,16 +69,11 @@ public class HtmlChartPluginTest
 
 	public static HtmlChartPlugin<HtmlRenderContext> createHtmlChartPlugin() throws Exception
 	{
-		InputStream jsonInputStream = HtmlChartPluginTest.class.getClassLoader()
-				.getResourceAsStream("org/datagear/analysis/support/html/HtmlChartPlugin.config.json");
-		Map<String, Object> properties = jsonChartPluginPropertiesResolver.resolveChartPluginProperties(jsonInputStream,
-				"UTF-8");
+		File directory = new File("src/test/resources/org/datagear/analysis/support/html/HtmlChartPluginTest");
 
-		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = new HtmlChartPlugin<HtmlRenderContext>();
-		jsonChartPluginPropertiesResolver.setChartPluginProperties(htmlChartPlugin, properties);
-
-		htmlChartPlugin.setJsChartRenderer(new LocationJsChartRenderer(
-				LocationResource.toClasspathLocation("org/datagear/analysis/support/html/HtmlChartPlugin.chart.js")));
+		@SuppressWarnings("unchecked")
+		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = (HtmlChartPlugin<HtmlRenderContext>) new HtmlChartPluginLoader()
+				.load(directory);
 
 		return htmlChartPlugin;
 	}

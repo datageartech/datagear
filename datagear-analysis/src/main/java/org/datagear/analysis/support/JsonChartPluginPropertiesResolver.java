@@ -69,52 +69,6 @@ import com.alibaba.fastjson.JSON;
  */
 public class JsonChartPluginPropertiesResolver
 {
-	public static final String CHART_PLUGIN_ID = "id";
-
-	public static final String CHART_PLUGIN_NAME_LABEL = "nameLabel";
-
-	public static final String CHART_PLUGIN_DESC_LABEL = "descLabel";
-
-	public static final String CHART_PLUGIN_MANUAL_LABEL = "manualLabel";
-
-	public static final String CHART_PLUGIN_ICONS = "icons";
-
-	public static final String CHART_PLUGIN_CHART_PROPERTIES = "chartProperties";
-
-	public static final String CHART_PLUGIN_DATA_SIGNS = "dataSigns";
-
-	public static final String CHART_PLUGIN_VERSION = "version";
-
-	public static final String CHART_PLUGIN_ORDER = "order";
-
-	public static final String LABEL_VALUE = "value";
-
-	public static final String LABEL_LOCALE_VALUES = "localeValues";
-
-	public static final String LOCATION_ICON_LOCATION = "location";
-
-	public static final String CHART_PROPERTY_NAME = "name";
-
-	public static final String CHART_PROPERTY_TYPE = "type";
-
-	public static final String CHART_PROPERTY_NAME_LABEL = "nameLabel";
-
-	public static final String CHART_PROPERTY_DESC_LABEL = "descLabel";
-
-	public static final String CHART_PROPERTY_DEFAULT_VALUE = "defaultValue";
-
-	public static final String CHART_PROPERTY_CONSTRAINTS = "constraints";
-
-	public static final String DATA_SIGN_PROPERTY_NAME = "name";
-
-	public static final String DATA_SIGN_PROPERTY_OCCUR_REQUIRED = "occurRequired";
-
-	public static final String DATA_SIGN_PROPERTY_OCCUR_MULTIPLE = "occurMultiple";
-
-	public static final String DATA_SIGN_PROPERTY_NAME_LABEL = "nameLabel";
-
-	public static final String DATA_SIGN_PROPERTY_DESC_LABEL = "descLabel";
-
 	private PropertyTypeValueConverter propertyTypeValueConverter = new PropertyTypeValueConverter();
 
 	private ConcurrentMap<String, Locale> _localeCache = new ConcurrentHashMap<String, Locale>();
@@ -150,12 +104,13 @@ public class JsonChartPluginPropertiesResolver
 
 		Map<String, Object> properties = new HashMap<String, Object>(map);
 
-		properties.put(CHART_PLUGIN_NAME_LABEL, convertToLabel(map.get(CHART_PLUGIN_NAME_LABEL)));
-		properties.put(CHART_PLUGIN_DESC_LABEL, convertToLabel(map.get(CHART_PLUGIN_DESC_LABEL)));
-		properties.put(CHART_PLUGIN_MANUAL_LABEL, convertToLabel(map.get(CHART_PLUGIN_MANUAL_LABEL)));
-		properties.put(CHART_PLUGIN_ICONS, convertToIcons(map.get(CHART_PLUGIN_ICONS)));
-		properties.put(CHART_PLUGIN_CHART_PROPERTIES, convertToChartProperties(map.get(CHART_PLUGIN_CHART_PROPERTIES)));
-		properties.put(CHART_PLUGIN_DATA_SIGNS, convertToDataSigns(map.get(CHART_PLUGIN_DATA_SIGNS)));
+		properties.put(ChartPlugin.PROPERTY_NAME_LABEL, convertToLabel(map.get(ChartPlugin.PROPERTY_NAME_LABEL)));
+		properties.put(ChartPlugin.PROPERTY_DESC_LABEL, convertToLabel(map.get(ChartPlugin.PROPERTY_DESC_LABEL)));
+		properties.put(ChartPlugin.PROPERTY_MANUAL_LABEL, convertToLabel(map.get(ChartPlugin.PROPERTY_MANUAL_LABEL)));
+		properties.put(ChartPlugin.PROPERTY_ICONS, convertToIcons(map.get(ChartPlugin.PROPERTY_ICONS)));
+		properties.put(ChartPlugin.PROPERTY_CHART_PROPERTIES,
+				convertToChartProperties(map.get(ChartPlugin.PROPERTY_CHART_PROPERTIES)));
+		properties.put(ChartPlugin.PROPERTY_DATA_SIGNS, convertToDataSigns(map.get(ChartPlugin.PROPERTY_DATA_SIGNS)));
 
 		return properties;
 	}
@@ -214,18 +169,18 @@ public class JsonChartPluginPropertiesResolver
 	@SuppressWarnings("unchecked")
 	public void setChartPluginProperties(AbstractChartPlugin<?> chartPlugin, Map<String, ?> properties)
 	{
-		chartPlugin.setId((String) properties.get(CHART_PLUGIN_ID));
-		chartPlugin.setNameLabel((Label) properties.get(CHART_PLUGIN_NAME_LABEL));
-		chartPlugin.setDescLabel((Label) properties.get(CHART_PLUGIN_DESC_LABEL));
-		chartPlugin.setManualLabel((Label) properties.get(CHART_PLUGIN_MANUAL_LABEL));
-		chartPlugin.setIcons((Map<RenderStyle, Icon>) properties.get(CHART_PLUGIN_ICONS));
-		chartPlugin.setChartProperties((List<ChartProperty>) properties.get(CHART_PLUGIN_CHART_PROPERTIES));
-		chartPlugin.setDataSigns((List<DataSign>) properties.get(CHART_PLUGIN_DATA_SIGNS));
-		chartPlugin.setVersion((String) properties.get(CHART_PLUGIN_VERSION));
+		chartPlugin.setId((String) properties.get(ChartPlugin.PROPERTY_ID));
+		chartPlugin.setNameLabel((Label) properties.get(ChartPlugin.PROPERTY_NAME_LABEL));
+		chartPlugin.setDescLabel((Label) properties.get(ChartPlugin.PROPERTY_DESC_LABEL));
+		chartPlugin.setManualLabel((Label) properties.get(ChartPlugin.PROPERTY_MANUAL_LABEL));
+		chartPlugin.setIcons((Map<RenderStyle, Icon>) properties.get(ChartPlugin.PROPERTY_ICONS));
+		chartPlugin.setChartProperties((List<ChartProperty>) properties.get(ChartPlugin.PROPERTY_CHART_PROPERTIES));
+		chartPlugin.setDataSigns((List<DataSign>) properties.get(ChartPlugin.PROPERTY_DATA_SIGNS));
+		chartPlugin.setVersion((String) properties.get(ChartPlugin.PROPERTY_VERSION));
 
 		Integer order = null;
 
-		Object orderObj = properties.get(CHART_PLUGIN_ORDER);
+		Object orderObj = properties.get(ChartPlugin.PROPERTY_ORDER);
 		if (orderObj instanceof Number)
 			order = ((Number) orderObj).intValue();
 		else if (orderObj instanceof String)
@@ -268,9 +223,9 @@ public class JsonChartPluginPropertiesResolver
 			Map<String, ?> map = (Map<String, ?>) obj;
 
 			Label label = createLabel();
-			label.setValue((String) map.get(LABEL_VALUE));
+			label.setValue((String) map.get(Label.PROPERTY_VALUE));
 
-			Object localeValuesObj = map.get(LABEL_LOCALE_VALUES);
+			Object localeValuesObj = map.get(Label.PROPERTY_LOCALE_VALUES);
 			if (localeValuesObj != null)
 			{
 				Map<Locale, String> localeValues = new HashMap<Locale, String>();
@@ -367,7 +322,7 @@ public class JsonChartPluginPropertiesResolver
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, String>) obj;
 
-			String location = (String) map.get(LOCATION_ICON_LOCATION);
+			String location = (String) map.get(LocationIcon.PROPERTY_LOCATION);
 
 			if (location == null)
 				return null;
@@ -455,22 +410,23 @@ public class JsonChartPluginPropertiesResolver
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			String name = (String) map.get(CHART_PROPERTY_NAME);
+			String name = (String) map.get(ChartProperty.PROPERTY_NAME);
 			if (name == null || name.isEmpty())
 				return null;
 
 			ChartProperty chartProperty = createChartProperty();
 			chartProperty.setName(name);
 
-			PropertyType type = convertToPropertyType(map.get(CHART_PROPERTY_TYPE));
+			PropertyType type = convertToPropertyType(map.get(ChartProperty.PROPERTY_TYPE));
 			if (type == null)
 				type = PropertyType.STRING;
 
 			chartProperty.setType(type);
-			chartProperty.setNameLabel(convertToLabel(map.get(CHART_PROPERTY_NAME_LABEL)));
-			chartProperty.setDescLabel(convertToLabel(map.get(CHART_PROPERTY_DESC_LABEL)));
-			chartProperty.setDefaultValue(convertToPropertyTypeValue(type, map.get(CHART_PROPERTY_DEFAULT_VALUE)));
-			chartProperty.setConstraints(convertToConstraints(map.get(CHART_PROPERTY_CONSTRAINTS)));
+			chartProperty.setNameLabel(convertToLabel(map.get(ChartProperty.PROPERTY_NAME_LABEL)));
+			chartProperty.setDescLabel(convertToLabel(map.get(ChartProperty.PROPERTY_DESC_LABEL)));
+			chartProperty
+					.setDefaultValue(convertToPropertyTypeValue(type, map.get(ChartProperty.PROPERTY_DEFAULT_VALUE)));
+			chartProperty.setConstraints(convertToConstraints(map.get(ChartProperty.PROPERTY_CONSTRAINTS)));
 
 			return chartProperty;
 		}
@@ -669,17 +625,17 @@ public class JsonChartPluginPropertiesResolver
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			String name = (String) map.get(DATA_SIGN_PROPERTY_NAME);
+			String name = (String) map.get(DataSign.PROPERTY_NAME);
 			if (name == null || name.isEmpty())
 				return null;
 
 			DataSign dataSign = createDataSign();
 			dataSign.setName(name);
 
-			dataSign.setOccurRequired(convertToBoolean(map.get(DATA_SIGN_PROPERTY_OCCUR_REQUIRED), true));
-			dataSign.setOccurMultiple(convertToBoolean(map.get(DATA_SIGN_PROPERTY_OCCUR_MULTIPLE), true));
-			dataSign.setNameLabel(convertToLabel(map.get(DATA_SIGN_PROPERTY_NAME_LABEL)));
-			dataSign.setDescLabel(convertToLabel(map.get(DATA_SIGN_PROPERTY_DESC_LABEL)));
+			dataSign.setOccurRequired(convertToBoolean(map.get(DataSign.PROPERTY_OCCUR_REQUIRED), true));
+			dataSign.setOccurMultiple(convertToBoolean(map.get(DataSign.PROPERTY_OCCUR_MULTIPLE), true));
+			dataSign.setNameLabel(convertToLabel(map.get(DataSign.PROPERTY_NAME_LABEL)));
+			dataSign.setDescLabel(convertToLabel(map.get(DataSign.PROPERTY_DESC_LABEL)));
 
 			return dataSign;
 		}

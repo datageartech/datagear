@@ -102,6 +102,8 @@ import org.datagear.util.i18n.Label;
  */
 public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartPlugin<T>
 {
+	public static final String PROPERTY_CHART_RENDER = "chartRender";
+
 	/** HTML换行符 */
 	public static final String HTML_NEW_LINE = "\n";
 
@@ -113,7 +115,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	public static final String DEFAULT_SCRIPT_CHART_REF_PLACEHOLDER = "$CHART";
 
 	/** JS图表渲染器 */
-	private JsChartRenderer jsChartRenderer;
+	private JsChartRenderer chartRenderer;
 
 	/** 图表HTML元素标签名 */
 	private String elementTagName = "div";
@@ -126,20 +128,20 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		super();
 	}
 
-	public HtmlChartPlugin(String id, Label nameLabel, JsChartRenderer jsChartRenderer)
+	public HtmlChartPlugin(String id, Label nameLabel, JsChartRenderer chartRenderer)
 	{
 		super(id, nameLabel);
-		this.jsChartRenderer = jsChartRenderer;
+		this.chartRenderer = chartRenderer;
 	}
 
-	public JsChartRenderer getJsChartRenderer()
+	public JsChartRenderer getChartRenderer()
 	{
-		return jsChartRenderer;
+		return chartRenderer;
 	}
 
-	public void setJsChartRenderer(JsChartRenderer jsChartRenderer)
+	public void setChartRenderer(JsChartRenderer chartRenderer)
 	{
-		this.jsChartRenderer = jsChartRenderer;
+		this.chartRenderer = chartRenderer;
 	}
 
 	public String getElementTagName()
@@ -256,9 +258,8 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 
 		if (!optionInitialized.isNotWriteInvoke())
 		{
-			out.write(
-					optionInitialized.getPluginVarName() + "." + HtmlChartPluginScriptObjectWriter.JS_CHART_RENDER_NAME
-							+ "." + JsChartRenderer.RENDER_FUNCTION_NAME + "(" + chart.getVarName() + ");");
+			out.write(optionInitialized.getPluginVarName() + "." + PROPERTY_CHART_RENDER + "."
+					+ JsChartRenderer.RENDER_FUNCTION_NAME + "(" + chart.getVarName() + ");");
 			writeNewLine(out);
 		}
 	}

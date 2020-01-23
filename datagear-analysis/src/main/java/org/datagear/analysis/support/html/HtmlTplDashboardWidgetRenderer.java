@@ -21,6 +21,7 @@ import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DashboardThemeSource;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.Theme;
@@ -91,6 +92,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	public static final String DEFAULT_DASHBOARD_VAR = "dashboard";
 
+	public static final String PROPERTY_VALUE_FOR_NOT_FOUND = "targetHtmlChartWidgetNotFoundMessage";
+
+	public static final String PROPERTY_VALUE_FOR_RENDER_EXCEPTION = "targetHtmlChartRenderExceptionMessage";
+
 	private DashboardWidgetResManager dashboardWidgetResManager;
 
 	private ChartWidgetSource chartWidgetSource;
@@ -104,7 +109,12 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	private HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter = new HtmlDashboardScriptObjectWriter();
 
 	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForNotFound = new ValueHtmlChartPlugin<HtmlRenderContext>(
-			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForNotFound");
+			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForNotFound",
+			PROPERTY_VALUE_FOR_NOT_FOUND);
+
+	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForRenderException = new ValueHtmlChartPlugin<HtmlRenderContext>(
+			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForRenderException",
+			PROPERTY_VALUE_FOR_RENDER_EXCEPTION);
 
 	/** 内置导入内容 */
 	private List<HtmlDashboardImport> dashboardImports;
@@ -222,6 +232,17 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	public void setHtmlChartPluginForNotFound(HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForNotFound)
 	{
 		this.htmlChartPluginForNotFound = htmlChartPluginForNotFound;
+	}
+
+	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForRenderException()
+	{
+		return htmlChartPluginForRenderException;
+	}
+
+	public void setHtmlChartPluginForRenderException(
+			HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForRenderException)
+	{
+		this.htmlChartPluginForRenderException = htmlChartPluginForRenderException;
 	}
 
 	public List<HtmlDashboardImport> getDashboardImports()
@@ -658,7 +679,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<HtmlRenderContext>(IDUtil.uuid(),
 				"HtmlChartWidgetForNotFound", this.htmlChartPluginForNotFound);
 
-		widget.addChartPropertyValue(ValueHtmlChartPlugin.VALUE_CHART_PROPERTY_NAME,
+		widget.addChartPropertyValue(PROPERTY_VALUE_FOR_NOT_FOUND,
 				"Chart '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' Not Found");
 
 		return widget;
@@ -721,10 +742,13 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		ChartTheme chartTheme = HtmlRenderAttributes.removeChartTheme(renderContext);
 
 		getHtmlRenderContextScriptObjectWriter().writeOnlyAttributes(out, renderContext, tmpRenderContextVar);
-		out.write(varName + ".renderContext.attributes = " + tmpRenderContextVar + ".attributes;");
+		out.write(varName + "." + Dashboard.PROPERTY_RENDER_CONTEXT + "." + RenderContext.PROPERTY_ATTRIBUTES + " = "
+				+ tmpRenderContextVar + "." + RenderContext.PROPERTY_ATTRIBUTES + ";");
 		writeNewLine(out);
-		out.write(varName + ".renderContext.attributes." + HtmlRenderAttributes.CHART_THEME + " = "
-				+ tmpRenderContextVar + ".attributes." + HtmlRenderAttributes.DASHBOARD_THEME + ".chartTheme;");
+		out.write(varName + "." + Dashboard.PROPERTY_RENDER_CONTEXT + "." + RenderContext.PROPERTY_ATTRIBUTES + "."
+				+ HtmlRenderAttributes.CHART_THEME + " = " + tmpRenderContextVar + "."
+				+ RenderContext.PROPERTY_ATTRIBUTES + "." + HtmlRenderAttributes.DASHBOARD_THEME + "."
+				+ DashboardTheme.PROPERTY_CHART_THEME + ";");
 		writeNewLine(out);
 
 		HtmlRenderAttributes.setChartTheme(renderContext, chartTheme);
@@ -737,7 +761,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 				if (!(chart instanceof HtmlChart))
 					continue;
 
-				out.write(varName + ".charts.push(" + ((HtmlChart) chart).getVarName() + ");");
+				out.write(
+						varName + "." + Dashboard.PROPERTY_CHARTS + ".push(" + ((HtmlChart) chart).getVarName() + ");");
 				writeNewLine(out);
 			}
 		}
@@ -825,6 +850,19 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			writeNewLine(out);
 			writeDashboardThemeStyle(renderContext, dashboard, out);
 		}
+	}
+
+	/**
+	 * 写{@linkplain HtmlChart}。
+	 * 
+	 * @param chartWidget
+	 * @param renderContext
+	 * @return
+	 */
+	protected HtmlChart writeHtmlChart(HtmlChartWidget<HtmlRenderContext> chartWidget,
+			HtmlRenderContext renderContext) throws RenderException
+	{
+		return chartWidget.render(renderContext);
 	}
 
 	/**

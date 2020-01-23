@@ -1,0 +1,37 @@
+{
+	id : 'pie-chart',
+	nameLabel :
+	{
+		value : '饼图',
+		localeValues :
+		{
+			'en' : 'pie chart',
+			'zh' : '饼图中文'
+		}
+	},
+	chartRender:
+	{
+		render: function(chart)
+		{
+			var element = document.getElementById(chart.elementId);
+			var innerHtml = "my chart";
+			
+			if(chart.renderContext && chart.renderContext.attributes && chart.renderContext.attributes.chartTheme)
+			{
+				var graphColors = (chart.renderContext.attributes.chartTheme.graphColors || []);
+				
+				for(var i=0; i< graphColors.length; i++)
+				{
+					innerHtml +="<div style='background-color:"+graphColors[i]+";'>&nbsp;</div>";
+				}
+			}
+			
+			element.innerHTML = innerHtml;
+		},
+		update: function(chart, results)
+		{
+			var element = document.getElementById(chart.elementId);
+			element.innerHTML += "<div>update</div>";
+		}
+	}
+}

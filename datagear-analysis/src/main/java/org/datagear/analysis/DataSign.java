@@ -27,6 +27,12 @@ public class DataSign implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	public static final String PROPERTY_NAME = "name";
+	public static final String PROPERTY_OCCUR_REQUIRED = "occurRequired";
+	public static final String PROPERTY_OCCUR_MULTIPLE = "occurMultiple";
+	public static final String PROPERTY_NAME_LABEL = "nameLabel";
+	public static final String PROPERTY_DESC_LABEL = "descLabel";
+
 	/** 名称 */
 	private String name;
 

@@ -21,6 +21,8 @@ import java.util.Map;
  */
 public interface RenderContext
 {
+	String PROPERTY_ATTRIBUTES = "attributes";
+
 	/**
 	 * 获取属性。
 	 * 

@@ -20,6 +20,13 @@ import org.datagear.util.i18n.Label;
  */
 public class ChartProperty
 {
+	public static final String PROPERTY_NAME = "name";
+	public static final String PROPERTY_TYPE = "type";
+	public static final String PROPERTY_NAME_LABEL = "nameLabel";
+	public static final String PROPERTY_DESC_LABEL = "descLabel";
+	public static final String PROPERTY_DEFAULT_VALUE = "defaultValue";
+	public static final String PROPERTY_CONSTRAINTS = "constraints";
+
 	/** 名称 */
 	private String name;
 

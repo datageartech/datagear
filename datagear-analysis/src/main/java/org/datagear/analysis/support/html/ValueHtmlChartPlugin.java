@@ -12,12 +12,13 @@ import java.util.Map;
 
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.RenderException;
+import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 
 /**
  * 仅渲染指定内容值的{@linkplain HtmlChartPlugin}。
  * <p>
- * 它从{@linkplain HtmlRenderContext}中获取{@linkplain #getValueAttributeName()}的属性值，并将其作为图表内容渲染。
+ * 它从{@code chartPropertyValues}中获取{@linkplain #getValueChartPropertyName()}的属性值，并将其作为图表内容渲染。
  * </p>
  * 
  * @author datagear@163.com
@@ -25,36 +26,43 @@ import org.datagear.util.i18n.Label;
  */
 public class ValueHtmlChartPlugin<T extends HtmlRenderContext> extends HtmlChartPlugin<T>
 {
-	public static final String VALUE_CHART_PROPERTY_NAME = "valueHtmlChartPluginValue";
-
-	protected static final StringJsChartRenderer JS_CHART_RENDERER = new StringJsChartRenderer(
-			"{" + HtmlChartPlugin.HTML_NEW_LINE +
-			//
-					"	render : function(chart)" + HtmlChartPlugin.HTML_NEW_LINE +
-					//
-					"	{" + HtmlChartPlugin.HTML_NEW_LINE +
-					//
-					"		var element = document.getElementById(chart.elementId);" + HtmlChartPlugin.HTML_NEW_LINE +
-					//
-					"		var propertyValues = (chart.propertyValues || {});" + HtmlChartPlugin.HTML_NEW_LINE +
-					//
-					"		element.innerHTML=propertyValues['" + VALUE_CHART_PROPERTY_NAME + "'];"
-					+ HtmlChartPlugin.HTML_NEW_LINE +
-					//
-					"	}," + HtmlChartPlugin.HTML_NEW_LINE +
-					//
-					"	update : function(){}" + HtmlChartPlugin.HTML_NEW_LINE +
-					//
-					"}");
+	private String valueChartPropertyName;
 
 	public ValueHtmlChartPlugin()
 	{
 		super();
 	}
 
-	public ValueHtmlChartPlugin(String id)
+	public ValueHtmlChartPlugin(String id, String valueChartPropertyName)
 	{
-		super(id, new Label("ValueHtmlChartPlugin"), JS_CHART_RENDERER);
+		super();
+		super.setId(id);
+		super.setNameLabel(new Label("ValueHtmlChartPlugin"));
+		super.setChartRenderer(buildJsChartRenderer(valueChartPropertyName));
+		this.valueChartPropertyName = valueChartPropertyName;
+	}
+
+	public String getValueChartPropertyName()
+	{
+		return valueChartPropertyName;
+	}
+
+	public void setValueChartPropertyName(String valueChartPropertyName)
+	{
+		this.valueChartPropertyName = valueChartPropertyName;
+		super.setChartRenderer(buildJsChartRenderer(valueChartPropertyName));
+	}
+
+	@Override
+	public JsChartRenderer getChartRenderer()
+	{
+		return super.getChartRenderer();
+	}
+
+	@Override
+	public void setChartRenderer(JsChartRenderer chartRenderer)
+	{
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -67,5 +75,28 @@ public class ValueHtmlChartPlugin<T extends HtmlRenderContext> extends HtmlChart
 			myChartPropertyValues = new HashMap<String, Object>();
 
 		return super.renderChart(renderContext, myChartPropertyValues, chartDataSets);
+	}
+
+	protected StringJsChartRenderer buildJsChartRenderer(String valueChartPropertyName)
+	{
+		return new StringJsChartRenderer("{" + HtmlChartPlugin.HTML_NEW_LINE
+		//
+				+ "	render : function(chart)" + HtmlChartPlugin.HTML_NEW_LINE
+				//
+				+ "	{" + HtmlChartPlugin.HTML_NEW_LINE +
+				//
+				"		var element = document.getElementById(chart.elementId);" + HtmlChartPlugin.HTML_NEW_LINE
+				//
+				+ "		var propertyValues = (chart.propertyValues || {});" + HtmlChartPlugin.HTML_NEW_LINE
+				//
+				+ "		element.innerHTML=propertyValues['"
+				+ StringUtil.escapeJavaScriptStringValue(valueChartPropertyName) + "'];" + HtmlChartPlugin.HTML_NEW_LINE
+
+				//
+				+ "	}," + HtmlChartPlugin.HTML_NEW_LINE
+				//
+				+ "	update : function(){}" + HtmlChartPlugin.HTML_NEW_LINE
+				//
+				+ "}");
 	}
 }

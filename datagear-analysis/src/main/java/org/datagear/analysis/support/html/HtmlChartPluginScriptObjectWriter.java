@@ -28,8 +28,6 @@ import org.datagear.util.IOUtil;
  */
 public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 {
-	public static final String JS_CHART_RENDER_NAME = "jsChartRender";
-
 	public HtmlChartPluginScriptObjectWriter()
 	{
 		super();
@@ -44,7 +42,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 * <pre>
 	 * var [varName]=
 	 * { ... };
-	 * [varName].jsChartRender=
+	 * [varName].chartRender=
 	 * {...};
 	 * <pre>
 	 * </code>
@@ -63,7 +61,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 		writeJsonObject(out, jsonPlugin);
 		out.write(";");
 		writeNewLine(out);
-		writeJsChartRender(out, plugin, varName);
+		writeHtmlChartRender(out, plugin, varName);
 	}
 
 	/**
@@ -73,14 +71,14 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 * @param chart
 	 * @throws IOException
 	 */
-	protected void writeJsChartRender(Writer out, HtmlChartPlugin<?> plugin, String varName) throws IOException
+	protected void writeHtmlChartRender(Writer out, HtmlChartPlugin<?> plugin, String varName) throws IOException
 	{
-		out.write(varName + "." + JS_CHART_RENDER_NAME + "=");
+		out.write(varName + "." + HtmlChartPlugin.PROPERTY_CHART_RENDER + "=");
 		writeNewLine(out);
 
-		JsChartRenderer jsChartRenderer = plugin.getJsChartRenderer();
+		JsChartRenderer chartRenderer = plugin.getChartRenderer();
 
-		Reader reader = jsChartRenderer.getReader();
+		Reader reader = chartRenderer.getReader();
 
 		try
 		{
