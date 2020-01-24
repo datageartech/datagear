@@ -29,7 +29,7 @@ import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
@@ -110,38 +110,67 @@ public class DashboardController extends AbstractDataAnalysisController
 		dashboard.setTemplate(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATE);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 
-		String templateContent = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"" + dashboard.getTemplateEncoding()
-				+ "\">\n</head>\n<body>\n\t<div " + HtmlTplDashboardWidgetHtmlRenderer.DEFAULT_ATTR_NAME_CHART_WIDGET
-				+ "=\"" + getMessage(request, "dashboard.typeChartIdHere") + "\"></div>\n</body>\n</html>";
+		HtmlTplDashboardWidgetRenderer<HtmlRenderContext> renderer = getHtmlTplDashboardWidgetEntityService()
+				.getHtmlTplDashboardWidgetRenderer();
+		String dashbaordStyleName = renderer.getDashboardStyleName();
+		String chartStyleName = renderer.getChartStyleName();
+
+		String templateContent = "<!DOCTYPE html>\n"
+				//
+				+ "<html>\n"
+				//
+				+ "<head>\n"
+				//
+				+ "<meta charset=\"" + dashboard.getTemplateEncoding() + "\">\n"
+				//
+				+ "<style type=\"text/css\">\n"
+				//
+				+ "." + dashbaordStyleName + "{\n"
+				//
+				+ "  position: absolute;\n"
+				//
+				+ "  left: 0px;\n"
+				//
+				+ "  right: 0px;\n"
+				//
+				+ "  top: 0px;\n"
+				//
+				+ "  bottom: 0px;\n"
+				//
+				+ "}\n"
+				//
+				+ "." + chartStyleName + "{\n"
+				//
+				+ "  display: inline-block;\n"
+				//
+				+ "  min-width: 30%;\n"
+				//
+				+ "  min-height: 30%;\n"
+				//
+				+ "  margin-left: 2.3%;\n"
+				//
+				+ "  margin-bottom: 1em;\n"
+				//
+				+ "}\n"
+				//
+				+ "</style>\n"
+				//
+				+ "</head>\n"
+				//
+				+ "<body class=\"" + dashbaordStyleName + "\">\n"
+				//
+				+ "\n"
+				//
+				+ "</body>\n"
+				//
+				+ "</html>";
 
 		model.addAttribute("dashboard", dashboard);
 		model.addAttribute("templateContent", templateContent);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
-		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
+		model.addAttribute(KEY_FORM_ACTION, "save");
 
 		return "/analysis/dashboard/dashboard_form";
-	}
-
-	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			HtmlTplDashboardWidgetEntity dashboard, @RequestParam("templateContent") String templateContent)
-			throws Exception
-	{
-		User user = WebUtils.getUser(request, response);
-
-		checkSaveEntity(dashboard);
-
-		dashboard.setId(IDUtil.uuid());
-		dashboard.setCreateUser(user);
-		dashboard.setTemplateEncoding(resolveTemplateEncoding(templateContent));
-
-		boolean add = this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
-
-		if (add)
-			saveTemplateContent(dashboard, templateContent);
-
-		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/edit")
@@ -158,32 +187,46 @@ public class DashboardController extends AbstractDataAnalysisController
 		model.addAttribute("dashboard", dashboard);
 		readAndSetTemplateContent(dashboard, model);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editDashboard");
-		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
+		model.addAttribute(KEY_FORM_ACTION, "save");
 
 		return "/analysis/dashboard/dashboard_form";
 	}
 
-	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
 			HtmlTplDashboardWidgetEntity dashboard, @RequestParam("templateContent") String templateContent)
 			throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
 
-		if (isEmpty(dashboard.getTemplate()))
-			dashboard.setTemplate(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATE);
-
 		checkSaveEntity(dashboard);
 
-		dashboard.setTemplateEncoding(resolveTemplateEncoding(templateContent));
+		boolean save = false;
 
-		boolean updated = this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+		if (isEmpty(dashboard.getId()))
+		{
+			dashboard.setId(IDUtil.uuid());
+			dashboard.setCreateUser(user);
+			dashboard.setTemplateEncoding(resolveTemplateEncoding(templateContent));
+			save = this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
+		}
+		else
+		{
+			dashboard.setTemplateEncoding(resolveTemplateEncoding(templateContent));
+			save = this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+		}
 
-		if (updated)
+		if (save)
 			saveTemplateContent(dashboard, templateContent);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("id", dashboard.getId());
+
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
+		responseEntity.getBody().setData(data);
+
+		return responseEntity;
 	}
 
 	@RequestMapping("/import")

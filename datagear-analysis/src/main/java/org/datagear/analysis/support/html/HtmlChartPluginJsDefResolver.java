@@ -33,10 +33,25 @@ import org.datagear.util.IOUtil;
  * 此类从上述格式的输入流解析{@linkplain JsDefContent}对象，其中：
  * </p>
  * <p>
- * {@linkplain JsDefContent#getPluginJson()}为上述格式中将<code>chartRender: {...}</code>替换为<code>chartRender: {}</code>的内容。
+ * {@linkplain JsDefContent#getPluginJson()}为上述格式中将
  * </p>
  * <p>
- * {@linkplain JsDefContent#getPluginChartRender()}为上述格式中<code>chartRender</code>属性值部分的内容：<code>{...}</code>
+ * <code>chartRender: {...}</code>
+ * </p>
+ * <p>
+ * 替换为
+ * </p>
+ * <p>
+ * <code>chartRender: {}</code>
+ * </p>
+ * <p>
+ * 的内容。
+ * </p>
+ * <p>
+ * {@linkplain JsDefContent#getPluginChartRender()}为上述格式中<code>chartRender</code>属性值的内容：
+ * </p>
+ * <p>
+ * <code>{...}</code>
  * </p>
  * 
  * @author datagear@163.com

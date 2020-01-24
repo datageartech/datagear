@@ -341,6 +341,13 @@ public class HtmlChartPluginLoader
 		return null;
 	}
 
+	/**
+	 * 从指定目录加载单个{@linkplain HtmlChartPlugin}，返回{@code null}表示文件不合法。
+	 * 
+	 * @param directory
+	 * @return
+	 * @throws HtmlChartPluginLoadException
+	 */
 	protected HtmlChartPlugin<?> loadSingleForDirectory(File directory) throws HtmlChartPluginLoadException
 	{
 		File chartFile = new File(directory, FILE_NAME_PLUGIN);
@@ -370,6 +377,9 @@ public class HtmlChartPluginLoader
 				plugin.setChartRenderer(new StringJsChartRenderer(jsDefContent.getPluginChartRender()));
 
 				plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
+
+				if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))
+					plugin = null;
 			}
 		}
 		catch (Exception e)

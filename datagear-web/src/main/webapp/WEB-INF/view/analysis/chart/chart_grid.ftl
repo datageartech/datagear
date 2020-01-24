@@ -5,6 +5,7 @@ titleMessageKey 标题标签I18N关键字，不允许null
 selectonly 是否选择操作，允许为null
 -->
 <#assign selectonly=(selectonly!false)>
+<#assign isMultipleSelect=(isMultipleSelect!false)>
 <html>
 <head>
 <#include "../../include/html_head.ftl">
@@ -132,6 +133,19 @@ selectonly 是否选择操作，允许为null
 	<#if selectonly>
 	po.element("input[name=confirmButton]").click(function()
 	{
+		<#if isMultipleSelect>
+		po.executeOnSelects(function(rows)
+		{
+			var close = po.pageParamCall("submit", rows);
+			
+			//单选默认关闭
+			if(close == undefined)
+				close = true;
+			
+			if(close)
+				po.close();
+		});
+		<#else>
 		po.executeOnSelect(function(row)
 		{
 			var close = po.pageParamCall("submit", row);
@@ -143,6 +157,7 @@ selectonly 是否选择操作，允许为null
 			if(close)
 				po.close();
 		});
+		</#if>
 	});
 	</#if>
 	

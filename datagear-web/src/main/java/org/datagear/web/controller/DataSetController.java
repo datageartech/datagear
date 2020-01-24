@@ -278,13 +278,9 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/select")
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
-		boolean isMultipleSelect = false;
-		if (request.getParameter("multiple") != null)
-			isMultipleSelect = true;
-
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.selectDataSet");
 		model.addAttribute(KEY_SELECTONLY, true);
-		model.addAttribute("isMultipleSelect", isMultipleSelect);
+		setIsMultipleSelectAttribute(request, model);
 
 		return "/analysis/dataSet/dataSet_grid";
 	}

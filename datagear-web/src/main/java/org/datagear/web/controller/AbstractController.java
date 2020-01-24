@@ -91,6 +91,24 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 设置{@code isMultipleSelect}属性。
+	 * 
+	 * @param request
+	 * @param model
+	 * @return
+	 */
+	protected boolean setIsMultipleSelectAttribute(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		boolean isMultipleSelect = false;
+		if (request.getParameter("multiple") != null)
+			isMultipleSelect = true;
+
+		model.addAttribute("isMultipleSelect", isMultipleSelect);
+
+		return isMultipleSelect;
+	}
+
+	/**
 	 * 获取{@linkplain PagingQuery}。
 	 * 
 	 * @param request

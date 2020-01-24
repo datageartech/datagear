@@ -214,6 +214,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	{
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.selectChart");
 		model.addAttribute(KEY_SELECTONLY, true);
+		setIsMultipleSelectAttribute(request, model);
 
 		return "/analysis/chart/chart_grid";
 	}

@@ -32,17 +32,22 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.template' /></label>
 				</div>
-				<div class="form-item-value">
+				<div class="form-item-value form-item-value-template">
 					<textarea name="templateContent" class="ui-widget ui-widget-content" style="display: none;">${templateContent!''?html}</textarea>
 					<div class="ui-widget ui-widget-content template-editor-wrapper">
 						<div id="${pageId}-template-editor" class="template-editor"></div>
 					</div>
+					<#if !readonly>
+					<button type="button" class="insert-chart-button"><@spring.message code='dashboard.insertChart' /></button>
+					</#if>
 				</div>
 			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">
 			<#if !readonly>
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
+			&nbsp;&nbsp;
+			<button type="button" name="saveAndShow"><@spring.message code='dashboard.saveAndShow' /></button>
 			&nbsp;&nbsp;
 			<input type="reset" value="<@spring.message code='reset' />" />
 			</#if>
@@ -89,14 +94,54 @@ readonly 是否只读操作，允许为null
 	<#if readonly>
 	po.templateEditor.setReadOnly(true);
 	</#if>
-	
+
 	<#if !readonly>
+	po.insertChartCode = function(charts)
+	{
+		if(!charts || !charts.length)
+			return;
+		
+		var code = "";
+		
+		for(var i=0; i<charts.length; i++)
+			code += "<div class=\"dg-chart\" dg-chart-widget=\""+charts[i].id+"\">" + "<!--"+charts[i].name+"-->" + "</div>\n";
+		
+		var cursor = po.templateEditor.getCursorPosition();
+		po.templateEditor.moveCursorToPosition(cursor);
+		po.templateEditor.session.insert(cursor, code);
+	};
+	po.element(".insert-chart-button").click(function()
+	{
+		var options =
+		{
+			pageParam :
+			{
+				submit : function(charts)
+				{
+					po.insertChartCode(charts);
+				}
+			}
+		};
+		
+		$.setGridPageHeightOption(options);
+		
+		po.open("${contextPath}/analysis/chart/select?multiple", options);
+	});
+	
+	po.showAfterSave = false;
+	
+	po.element("button[name=saveAndShow]").click(function()
+	{
+		po.showAfterSave = true;
+		po.element("input[type='submit']").click();
+	});
+	
 	$.validator.addMethod("dashboardTemplateContent", function(value, element)
 	{
 		var html = po.templateEditor.getValue();
 		return html.length > 0;
 	});
-	
+			
 	po.form().validate(
 	{
 		ignore : "",
@@ -116,12 +161,22 @@ readonly 是否只读操作，允许为null
 			
 			$(form).ajaxSubmit(
 			{
-				success : function()
+				success : function(response)
 				{
-					var close = (po.pageParamCall("afterSave")  != false);
+					var dashboard = response.data;
+					po.element("input[name='id']").val(dashboard.id);
+					
+					var close = (po.pageParamCall("afterSave")  == true);
 					
 					if(close)
 						po.close();
+					
+					if(po.showAfterSave)
+						window.open(po.url("show/"+dashboard.id+"/index"), dashboard.id);
+				},
+				complete: function()
+				{
+					po.showAfterSave = false;
 				}
 			});
 		},

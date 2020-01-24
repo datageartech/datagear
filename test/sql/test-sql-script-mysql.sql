@@ -147,6 +147,12 @@ CREATE TABLE T_DATA_EXPORT
 	PRIMARY KEY (ID)
 );
 
+CREATE TABLE T_ANALYSIS
+(
+	NAME VARCHAR(50) NOT NULL,
+	VALUE FLOAT(10,2) NOT NULL
+);
+
 /*
 truncate table t_auto_generated_keys;
 truncate table t_data_export;
