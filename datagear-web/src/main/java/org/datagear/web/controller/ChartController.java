@@ -4,6 +4,7 @@
 
 package org.datagear.web.controller;
 
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,8 +19,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.analysis.support.html.HtmlDashboard;
 import org.datagear.analysis.support.html.HtmlRenderContext;
+import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
@@ -30,8 +36,10 @@ import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -52,17 +60,23 @@ public class ChartController extends AbstractChartPluginAwareController
 	@Autowired
 	private ChartPluginManager chartPluginManager;
 
+	@Autowired
+	@Qualifier("chartPreviewHtmlTplDashboardWidgetHtmlRenderer")
+	private HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartPreviewHtmlTplDashboardWidgetHtmlRenderer;
+
 	public ChartController()
 	{
 		super();
 	}
 
 	public ChartController(HtmlChartWidgetEntityService htmlChartWidgetEntityService,
-			ChartPluginManager chartPluginManager)
+			ChartPluginManager chartPluginManager,
+			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartPreviewHtmlTplDashboardWidgetHtmlRenderer)
 	{
 		super();
 		this.htmlChartWidgetEntityService = htmlChartWidgetEntityService;
 		this.chartPluginManager = chartPluginManager;
+		this.chartPreviewHtmlTplDashboardWidgetHtmlRenderer = chartPreviewHtmlTplDashboardWidgetHtmlRenderer;
 	}
 
 	public HtmlChartWidgetEntityService getHtmlChartWidgetEntityService()
@@ -85,6 +99,17 @@ public class ChartController extends AbstractChartPluginAwareController
 		this.chartPluginManager = chartPluginManager;
 	}
 
+	public HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> getChartPreviewHtmlTplDashboardWidgetHtmlRenderer()
+	{
+		return chartPreviewHtmlTplDashboardWidgetHtmlRenderer;
+	}
+
+	public void setChartPreviewHtmlTplDashboardWidgetHtmlRenderer(
+			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartPreviewHtmlTplDashboardWidgetHtmlRenderer)
+	{
+		this.chartPreviewHtmlTplDashboardWidgetHtmlRenderer = chartPreviewHtmlTplDashboardWidgetHtmlRenderer;
+	}
+
 	@RequestMapping("/add")
 	public String add(HttpServletRequest request, org.springframework.ui.Model model)
 	{
@@ -102,27 +127,9 @@ public class ChartController extends AbstractChartPluginAwareController
 		model.addAttribute("chart", chart);
 		model.addAttribute("pluginVOs", toWriteJsonTemplateModel(pluginVOs));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.addChart");
-		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
+		model.addAttribute(KEY_FORM_ACTION, "save");
 
 		return "/analysis/chart/chart_form";
-	}
-
-	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			HtmlChartWidgetEntity entity)
-	{
-		User user = WebUtils.getUser(request, response);
-
-		entity.setId(IDUtil.uuid());
-		entity.setCreateUser(user);
-		inflateHtmlChartWidgetEntity(entity, request);
-
-		checkSaveEntity(entity);
-
-		this.htmlChartWidgetEntityService.add(user, entity);
-
-		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
 
 	@RequestMapping("/edit")
@@ -142,25 +149,42 @@ public class ChartController extends AbstractChartPluginAwareController
 		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(chart.getChartDataSets()));
 		model.addAttribute("pluginVOs", toWriteJsonTemplateModel(pluginVOs));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.editChart");
-		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
+		model.addAttribute(KEY_FORM_ACTION, "save");
 
 		return "/analysis/chart/chart_form";
 	}
 
-	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
 			HtmlChartWidgetEntity entity)
 	{
 		User user = WebUtils.getUser(request, response);
 
-		inflateHtmlChartWidgetEntity(entity, request);
+		if (isEmpty(entity.getId()))
+		{
+			entity.setId(IDUtil.uuid());
+			entity.setCreateUser(user);
+			inflateHtmlChartWidgetEntity(entity, request);
 
-		checkSaveEntity(entity);
+			checkSaveEntity(entity);
 
-		this.htmlChartWidgetEntityService.update(user, entity);
+			this.htmlChartWidgetEntityService.add(user, entity);
+		}
+		else
+		{
+			inflateHtmlChartWidgetEntity(entity, request);
+			checkSaveEntity(entity);
+			this.htmlChartWidgetEntityService.update(user, entity);
+		}
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("id", entity.getId());
+
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
+		responseEntity.getBody().setData(data);
+
+		return responseEntity;
 	}
 
 	@RequestMapping("/view")
@@ -232,6 +256,70 @@ public class ChartController extends AbstractChartPluginAwareController
 		setChartPluginNames(request, pagingData.getItems());
 
 		return pagingData;
+	}
+
+	/**
+	 * 预览图表。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	@RequestMapping("/preview/{id}")
+	public void preview(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@PathVariable("id") String id) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
+
+		if (chart == null)
+			throw new RecordNotFoundException();
+
+		String htmlTitle = getMessage(request, "chart.preview.htmlTitle", chart.getName());
+		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(id,
+				this.chartPreviewHtmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
+						"  width:80%;\n  height:80%;\n  margin-left:10%;\n  margin-top:5%;\n",
+						new String[] { id }),
+				this.chartPreviewHtmlTplDashboardWidgetHtmlRenderer);
+
+		String responseEncoding = dashboardWidget.getTemplateEncoding();
+		response.setCharacterEncoding(responseEncoding);
+
+		Writer out = response.getWriter();
+
+		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), out);
+
+		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
+
+		SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
+		dashboardManager.put(dashboard);
+	}
+
+	/**
+	 * 预览数据。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/previewData", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, DataSetResult[]> previewData(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model) throws Exception
+	{
+		WebContext webContext = createWebContext(request);
+		return getDashboardData(request, response, model, webContext);
+	}
+
+	protected WebContext createWebContext(HttpServletRequest request)
+	{
+		String contextPath = request.getContextPath();
+		return new WebContext(contextPath, contextPath + "/analysis/chart/previewData");
 	}
 
 	protected void setChartPluginNames(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)

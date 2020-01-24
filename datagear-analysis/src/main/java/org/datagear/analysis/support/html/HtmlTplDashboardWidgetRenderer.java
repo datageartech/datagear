@@ -7,7 +7,6 @@
  */
 package org.datagear.analysis.support.html;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -546,6 +545,15 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
+	 * 生成基本的模板内容。
+	 * 
+	 * @param htmlCharset
+	 * @param chartWidgetId
+	 * @return
+	 */
+	public abstract String simpleTemplateContent(String htmlCharset, String... chartWidgetId);
+
+	/**
 	 * 渲染{@linkplain Dashboard}。
 	 * 
 	 * @param renderContext
@@ -566,15 +574,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 */
 	protected Reader getTemplateReaderNotNull(HtmlTplDashboardWidget<?> dashboardWidget) throws IOException
 	{
-		File templateFile = getTemplateFile(dashboardWidget);
+		String template = dashboardWidget.getTemplate();
+		String templateEncoding = dashboardWidget.getTemplateEncoding();
 
-		if (!templateFile.exists())
-			return new StringReader("");
-
-		if (!StringUtil.isEmpty(dashboardWidget.getTemplateEncoding()))
-			return IOUtil.getReader(templateFile, dashboardWidget.getTemplateEncoding());
-		else
-			return IOUtil.getReader(templateFile);
+		return getDashboardWidgetResManager().getReader(dashboardWidget.getId(), template, templateEncoding);
 	}
 
 	/**
@@ -589,26 +592,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 */
 	protected Writer getTemplateWriter(HtmlTplDashboardWidget<?> dashboardWidget) throws IOException
 	{
-		File templateFile = getTemplateFile(dashboardWidget);
+		String template = dashboardWidget.getTemplate();
+		String templateEncoding = dashboardWidget.getTemplateEncoding();
 
-		if (!StringUtil.isEmpty(dashboardWidget.getTemplateEncoding()))
-			return IOUtil.getWriter(templateFile, dashboardWidget.getTemplateEncoding());
-		else
-			return IOUtil.getWriter(templateFile);
-	}
-
-	/**
-	 * 获取{@linkplain HtmlTplDashboardWidget#getId()}的指定模板文件。
-	 * 
-	 * @param dashboardWidget
-	 * @return
-	 */
-	protected File getTemplateFile(HtmlTplDashboardWidget<?> dashboardWidget)
-	{
-		File templateFile = this.dashboardWidgetResManager.getFile(dashboardWidget.getId(),
-				dashboardWidget.getTemplate());
-
-		return templateFile;
+		return getDashboardWidgetResManager().getWriter(dashboardWidget.getId(), template, templateEncoding);
 	}
 
 	/**

@@ -18,6 +18,7 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.DashboardWidgetResManager;
+import org.datagear.analysis.support.FileDashboardWidgetResManager;
 import org.datagear.util.StringUtil;
 
 import freemarker.core.Environment;
@@ -36,8 +37,8 @@ import freemarker.template.TemplateScalarModel;
 /**
  * 使用Freemarker作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 此类可渲染由{@linkplain DashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
- * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}应该是可以通过{@linkplain DashboardWidgetResManager#getFile(String, String)}找到的模板文件名。
+ * 此类可渲染由{@linkplain FileDashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
+ * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}即是可以通过{@linkplain FileDashboardWidgetResManager#getRelativePath(String, String)}找到的模板文件。
  * </p>
  * <p>
  * 此类需要手动调用{@linkplain #init()}方法进行初始化。
@@ -103,10 +104,25 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 		super();
 	}
 
-	public HtmlTplDashboardWidgetFmkRenderer(DashboardWidgetResManager dashboardWidgetResManager,
+	public HtmlTplDashboardWidgetFmkRenderer(FileDashboardWidgetResManager dashboardWidgetResManager,
 			ChartWidgetSource chartWidgetSource)
 	{
 		super(dashboardWidgetResManager, chartWidgetSource);
+	}
+
+	@Override
+	public FileDashboardWidgetResManager getDashboardWidgetResManager()
+	{
+		return (FileDashboardWidgetResManager) super.getDashboardWidgetResManager();
+	}
+
+	@Override
+	public void setDashboardWidgetResManager(DashboardWidgetResManager dashboardWidgetResManager)
+	{
+		if (dashboardWidgetResManager != null && !(dashboardWidgetResManager instanceof FileDashboardWidgetResManager))
+			throw new IllegalArgumentException();
+
+		super.setDashboardWidgetResManager(dashboardWidgetResManager);
 	}
 
 	public String getDefaultTemplateEncoding()
@@ -149,6 +165,12 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 		cfg.setSharedVariable(DIRECTIVE_CHART, new ChartTemplateDirectiveModel());
 
 		setConfiguration(cfg);
+	}
+
+	@Override
+	public String simpleTemplateContent(String htmlCharset, String... chartWidgetId)
+	{
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

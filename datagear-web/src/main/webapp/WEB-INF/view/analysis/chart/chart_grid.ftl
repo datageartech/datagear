@@ -28,6 +28,7 @@ selectonly 是否选择操作，允许为null
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<input name="previewButton" type="button" value="<@spring.message code='preview' />" />
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 			</#if>
 		</div>
@@ -105,6 +106,14 @@ selectonly 是否选择操作，允许为null
 			{
 				data : data
 			});
+		});
+	});
+	
+	po.element("input[name=previewButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
+		{
+			window.open(po.url("preview/"+row.id), row.id);
 		});
 	});
 	

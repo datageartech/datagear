@@ -1,172 +1,110 @@
 package org.datagear.analysis.support;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 
+import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardWidget;
-import org.datagear.util.FileUtil;
 
 /**
- * {@linkplain DashboardWidget}文件资源管理器。
+ * {@linkplain DashboardWidget}资源管理器。
  * <p>
- * 此类用于通过{@linkplain DashboardWidget#getId()}来管理{@linkplain DashboardWidget}文件资源。
+ * 此类通过{@linkplain DashboardWidget#getId()}来管理{@linkplain DashboardWidget}资源。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class DashboardWidgetResManager
+public interface DashboardWidgetResManager
 {
-	private File rootDirectory;
-
-	public DashboardWidgetResManager()
-	{
-		super();
-	}
-
-	public DashboardWidgetResManager(File rootDirectory)
-	{
-		super();
-		this.rootDirectory = rootDirectory;
-	}
-
-	public DashboardWidgetResManager(String rootDirectory)
-	{
-		super();
-		this.rootDirectory = FileUtil.getDirectory(FileUtil.trimPath(rootDirectory));
-	}
-
-	public File getRootDirectory()
-	{
-		return rootDirectory;
-	}
-
-	public void setRootDirectory(File rootDirectory)
-	{
-		this.rootDirectory = rootDirectory;
-
-		if (!this.rootDirectory.exists())
-			this.rootDirectory.mkdirs();
-	}
-
 	/**
-	 * 获取相对{@linkplain #getRootDirectory()}的资源路径。
+	 * 获取默认资源编码。
 	 * 
-	 * @param id
-	 * @param subPath
 	 * @return
 	 */
-	public String getRelativePath(String id, String subPath)
-	{
-		String path = FileUtil.concatPath(id, subPath);
-
-		return path;
-	}
+	String getDefaultEncoding();
 
 	/**
-	 * 获取文件。
+	 * 获取指定名称资源的输入流。
+	 * 
+	 * @param id       {@linkplain Dashboard#getId()}
+	 * @param name     资源名称
+	 * @param encoding 资源编码，为{@code null}或空则使用默认编码
+	 * @return
+	 * @throws IOException
+	 */
+	Reader getReader(String id, String name, String encoding) throws IOException;
+
+	/**
+	 * 获取指定名称资源的输出流。
+	 * 
+	 * @param id       {@linkplain Dashboard#getId()}
+	 * @param name     资源名称
+	 * @param encoding 资源编码，为{@code null}或空则使用默认编码
+	 * @return
+	 * @throws IOException
+	 */
+	Writer getWriter(String id, String name, String encoding) throws IOException;
+
+	/**
+	 * 获取指定名称资源的输入流。
+	 * 
+	 * @param id   {@linkplain Dashboard#getId()}
+	 * @param name 资源名称
+	 * @return
+	 * @throws IOException
+	 */
+	InputStream getInputStream(String id, String name) throws IOException;
+
+	/**
+	 * 获取指定名称资源的输出流。
+	 * 
+	 * @param id       {@linkplain Dashboard#getId()}
+	 * @param name     资源名称
+	 * @param encoding 资源编码，为{@code null}则使用默认编码
+	 * @return
+	 * @throws IOException
+	 */
+	OutputStream getOutputStream(String id, String name) throws IOException;
+
+	/**
+	 * 将指定目录下的所有文件作为资源拷入。
 	 * <p>
-	 * 如果上级目录不存在，则会自动创建。
+	 * 拷入后，目录下所有子文件的相对路径名（比如：<code>some-file.txt</code>、<code>some-directory/some-file.png</code>），即可作为此类的资源名称使用。
 	 * </p>
 	 * 
-	 * @param id
-	 * @param subPath
-	 * @return
+	 * @param id        {@linkplain Dashboard#getId()}
+	 * @param directory
+	 * @throws IOException
 	 */
-	public File getFile(String id, String subPath)
-	{
-		return getFile(id, subPath, true);
-	}
+	void copyFrom(String id, File directory) throws IOException;
 
 	/**
-	 * 获取文件。
+	 * 是否包含指定名称的资源。
 	 * 
-	 * @param id
-	 * @param subPath
-	 * @param create
-	 *            是否自动创建目录
+	 * @param id   {@linkplain Dashboard#getId()}
+	 * @param name 资源名称
 	 * @return
 	 */
-	public File getFile(String id, String subPath, boolean create)
-	{
-		if (FileUtil.trimPath(subPath).endsWith(FileUtil.PATH_SEPARATOR))
-			return getDirectory(id, subPath, create);
-
-		String path = getRelativePath(id, subPath);
-
-		int sidx = path.lastIndexOf(FileUtil.PATH_SEPARATOR);
-
-		if (sidx < 0)
-			return FileUtil.getFile(this.rootDirectory, path);
-		else
-		{
-			String parent = path.substring(0, sidx);
-
-			if (create && !parent.isEmpty())
-			{
-				File parentDirectory = FileUtil.getDirectory(this.rootDirectory, parent);
-
-				return FileUtil.getFile(parentDirectory, path.substring(sidx + 1));
-			}
-			else
-				return FileUtil.getFile(this.rootDirectory, path);
-		}
-	}
+	boolean contains(String id, String name);
 
 	/**
-	 * 获取指定看板部件的主目录。
-	 * <p>
-	 * 如果目录不存在，则会自动创建。
-	 * </p>
+	 * 获取指定资源上次修改时间。
 	 * 
 	 * @param id
+	 * @param name
 	 * @return
 	 */
-	public File getDirectory(String id)
-	{
-		return FileUtil.getDirectory(this.rootDirectory, id, true);
-	}
-
-	/**
-	 * 获取目录。
-	 * <p>
-	 * 如果目录不存在，则会自动创建。
-	 * </p>
-	 * 
-	 * @param id
-	 * @param subPath
-	 * @return
-	 */
-	public File getDirectory(String id, String subPath)
-	{
-		return getDirectory(id, subPath, true);
-	}
-
-	/**
-	 * 获取目录。
-	 * 
-	 * @param id
-	 * @param subPath
-	 * @param create
-	 *            是否自动创建目录
-	 * @return
-	 */
-	public File getDirectory(String id, String subPath, boolean create)
-	{
-		String path = getRelativePath(id, subPath);
-
-		File file = FileUtil.getDirectory(this.rootDirectory, path, create);
-
-		return file;
-	}
+	long lastModified(String id, String name);
 
 	/**
 	 * 删除指定ID的所有资源。
 	 * 
 	 * @param id
 	 */
-	public void delete(String id)
-	{
-		File directory = FileUtil.getDirectory(this.rootDirectory, id);
-		FileUtil.deleteFile(directory);
-	}
+	void delete(String id);
 }

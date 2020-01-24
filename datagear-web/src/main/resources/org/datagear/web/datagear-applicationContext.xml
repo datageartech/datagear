@@ -313,29 +313,11 @@
 		</property>
 	</bean>
 	
-	<bean id="sqlDataSetEntityService" class="org.datagear.management.service.impl.SqlDataSetEntityServiceImpl">
-		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
-		<property name="connectionSource" ref="connectionSource" />
-		<property name="schemaService" ref="schemaService" />
-		<property name="authorizationService" ref="authorizationService" />
-	</bean>
-	
-	<bean id="directoryHtmlChartPluginManager" class="org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager" init-method="init">
-		<property name="directory" ref="chartPluginRootDirectory" />
-	</bean>
-	
-	<bean id="htmlChartWidgetEntityService" class="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl">
-		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
-		<property name="chartPluginManager" ref="directoryHtmlChartPluginManager" />
-		<property name="sqlDataSetEntityService" ref="sqlDataSetEntityService" />
-		<property name="authorizationService" ref="authorizationService" />
-	</bean>
-	
-	<bean id="dashboardWidgetResManager" class="org.datagear.analysis.support.DashboardWidgetResManager">
+	<bean id="dashboardWidgetResManager" class="org.datagear.analysis.support.FileDashboardWidgetResManager">
 		<property name="rootDirectory" ref="dashboardRootDirectory" />
 	</bean>
 	
-	<bean id="htmlTplDashboardWidgetRenderer" class="org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer">
+	<bean id="htmlTplDashboardWidgetRendererParent" abstract="true" class="org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer">
 		<property name="dashboardImports">
 			<list>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
@@ -358,6 +340,33 @@
 		</property>
 		<property name="dashboardWidgetResManager" ref="dashboardWidgetResManager" />
 		<property name="chartWidgetSource" ref="htmlChartWidgetEntityService" />
+	</bean>
+	
+	<bean id="sqlDataSetEntityService" class="org.datagear.management.service.impl.SqlDataSetEntityServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<property name="connectionSource" ref="connectionSource" />
+		<property name="schemaService" ref="schemaService" />
+		<property name="authorizationService" ref="authorizationService" />
+	</bean>
+	
+	<bean id="directoryHtmlChartPluginManager" class="org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager" init-method="init">
+		<property name="directory" ref="chartPluginRootDirectory" />
+	</bean>
+	
+	<bean id="htmlChartWidgetEntityService" class="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<property name="chartPluginManager" ref="directoryHtmlChartPluginManager" />
+		<property name="sqlDataSetEntityService" ref="sqlDataSetEntityService" />
+		<property name="authorizationService" ref="authorizationService" />
+	</bean>
+	
+	<bean id="chartPreviewHtmlTplDashboardWidgetHtmlRenderer" parent="htmlTplDashboardWidgetRendererParent">
+		<property name="dashboardWidgetResManager">
+			<bean class="org.datagear.analysis.support.DirectDashboardWidgetResManager" />
+		</property>
+	</bean>
+	
+	<bean id="htmlTplDashboardWidgetRenderer" parent="htmlTplDashboardWidgetRendererParent">
 	</bean>
 	
 	<bean id="htmlTplDashboardWidgetEntityService" class="org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceImpl">

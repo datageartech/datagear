@@ -9,23 +9,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.io.Serializable;
 import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.DashboardWidgetResManager;
-import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlDashboard;
-import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
@@ -112,58 +106,8 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		HtmlTplDashboardWidgetRenderer<HtmlRenderContext> renderer = getHtmlTplDashboardWidgetEntityService()
 				.getHtmlTplDashboardWidgetRenderer();
-		String dashbaordStyleName = renderer.getDashboardStyleName();
-		String chartStyleName = renderer.getChartStyleName();
 
-		String templateContent = "<!DOCTYPE html>\n"
-				//
-				+ "<html>\n"
-				//
-				+ "<head>\n"
-				//
-				+ "<meta charset=\"" + dashboard.getTemplateEncoding() + "\">\n"
-				//
-				+ "<style type=\"text/css\">\n"
-				//
-				+ "." + dashbaordStyleName + "{\n"
-				//
-				+ "  position: absolute;\n"
-				//
-				+ "  left: 0px;\n"
-				//
-				+ "  right: 0px;\n"
-				//
-				+ "  top: 0px;\n"
-				//
-				+ "  bottom: 0px;\n"
-				//
-				+ "}\n"
-				//
-				+ "." + chartStyleName + "{\n"
-				//
-				+ "  display: inline-block;\n"
-				//
-				+ "  min-width: 30%;\n"
-				//
-				+ "  min-height: 30%;\n"
-				//
-				+ "  margin-left: 2.3%;\n"
-				//
-				+ "  margin-bottom: 1em;\n"
-				//
-				+ "}\n"
-				//
-				+ "</style>\n"
-				//
-				+ "</head>\n"
-				//
-				+ "<body class=\"" + dashbaordStyleName + "\">\n"
-				//
-				+ "\n"
-				//
-				+ "</body>\n"
-				//
-				+ "</html>";
+		String templateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
 
 		model.addAttribute("dashboard", dashboard);
 		model.addAttribute("templateContent", templateContent);
@@ -344,9 +288,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		DashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidgetRenderer().getDashboardWidgetResManager();
 
-		File dashboardResDirectory = dashboardWidgetResManager.getDirectory(dashboard.getId());
-
-		IOUtil.copy(uploadDirectory, dashboardResDirectory, false);
+		dashboardWidgetResManager.copyFrom(dashboard.getId(), uploadDirectory);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -439,17 +381,19 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (dashboardWidget == null)
 			throw new RecordNotFoundException();
 
+		DashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getDashboardWidgetResManager();
+
 		String responseEncoding = dashboardWidget.getTemplateEncoding();
 
 		if (StringUtil.isEmpty(responseEncoding))
-			responseEncoding = Charset.defaultCharset().name();
+			responseEncoding = dashboardWidgetResManager.getDefaultEncoding();
 
 		response.setCharacterEncoding(responseEncoding);
 
 		Writer out = response.getWriter();
 
-		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(createWebContext(request), out);
-		HtmlRenderAttributes.setRenderStyle(renderContext, resolveRenderStyle(request));
+		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), out);
 
 		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
 
@@ -477,18 +421,14 @@ public class DashboardController extends AbstractDataAnalysisController
 		DashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidgetRenderer().getDashboardWidgetResManager();
 
-		File resFile = resManager.getFile(id, resPath, false);
-
-		if (!resFile.exists())
-			throw new FileNotFoundException(resPath);
-
-		long lastModified = resFile.lastModified();
+		long lastModified = resManager.lastModified(id, resPath);
 		if (webRequest.checkNotModified(lastModified))
 			return;
 
+		InputStream in = resManager.getInputStream(id, resPath);
 		OutputStream out = response.getOutputStream();
 
-		IOUtil.write(resFile, out);
+		IOUtil.write(in, out);
 	}
 
 	/**
@@ -506,25 +446,7 @@ public class DashboardController extends AbstractDataAnalysisController
 			org.springframework.ui.Model model) throws Exception
 	{
 		WebContext webContext = createWebContext(request);
-		String dashboardId = request.getParameter(webContext.getDashboardIdParam());
-		String[] chartsId = request.getParameterValues(webContext.getChartsIdParam());
-
-		if (StringUtil.isEmpty(dashboardId))
-			throw new IllegalInputException();
-
-		SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
-
-		HtmlDashboard dashboard = dashboardManager.get(dashboardId);
-
-		if (dashboard == null)
-			throw new RecordNotFoundException();
-
-		Map<String, ?> dataSetParamValues = new HashMap<String, Object>();
-
-		if (chartsId == null || chartsId.length == 0)
-			return dashboard.getDataSetResults(dataSetParamValues);
-		else
-			return dashboard.getDataSetResults(Arrays.asList(chartsId), dataSetParamValues);
+		return getDashboardData(request, response, model, webContext);
 	}
 
 	/**
@@ -590,25 +512,6 @@ public class DashboardController extends AbstractDataAnalysisController
 		return templateEncoding;
 	}
 
-	protected SessionHtmlDashboardManager getSessionHtmlDashboardManagerNotNull(HttpServletRequest request)
-	{
-		HttpSession session = request.getSession();
-
-		SessionHtmlDashboardManager dashboardManager = (SessionHtmlDashboardManager) session
-				.getAttribute(SessionHtmlDashboardManager.class.getName());
-
-		synchronized (session)
-		{
-			if (dashboardManager == null)
-			{
-				dashboardManager = new SessionHtmlDashboardManager();
-				session.setAttribute(SessionHtmlDashboardManager.class.getName(), dashboardManager);
-			}
-		}
-
-		return dashboardManager;
-	}
-
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
 		String contextPath = request.getContextPath();
@@ -640,33 +543,5 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer().saveTemplateContent(dashboard,
 				templateContent);
-	}
-
-	protected static class SessionHtmlDashboardManager implements Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		private transient Map<String, HtmlDashboard> htmlDashboards;
-
-		public SessionHtmlDashboardManager()
-		{
-			super();
-		}
-
-		public synchronized HtmlDashboard get(String htmlDashboardId)
-		{
-			if (this.htmlDashboards == null)
-				return null;
-
-			return this.htmlDashboards.get(htmlDashboardId);
-		}
-
-		public synchronized void put(HtmlDashboard dashboard)
-		{
-			if (this.htmlDashboards == null)
-				this.htmlDashboards = new HashMap<String, HtmlDashboard>();
-
-			this.htmlDashboards.put(dashboard.getId(), dashboard);
-		}
 	}
 }

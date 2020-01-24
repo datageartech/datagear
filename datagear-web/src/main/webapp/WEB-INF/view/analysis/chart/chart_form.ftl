@@ -67,6 +67,8 @@ readonly 是否只读操作，允许为null
 			<#if !readonly>
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
 			&nbsp;&nbsp;
+			<button type="button" name="saveAndPreview"><@spring.message code='chart.saveAndPreview' /></button>
+			&nbsp;&nbsp;
 			<input type="reset" value="<@spring.message code='reset' />" />
 			</#if>
 		</div>
@@ -392,6 +394,14 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".data-set-wrapper").sortable();
 
+	po.previewAfterSave = false;
+	
+	po.element("button[name=saveAndPreview]").click(function()
+	{
+		po.previewAfterSave = true;
+		po.element("input[type='submit']").click();
+	});
+	
 	$.validator.addMethod("dataSignValidationRequired", function(value, element)
 	{
 		var chartPlugin = po.getCurrentChartPlugin();
@@ -477,12 +487,22 @@ readonly 是否只读操作，允许为null
 		{
 			$(form).ajaxSubmit(
 			{
-				success : function()
+				success : function(response)
 				{
-					var close = (po.pageParamCall("afterSave")  != false);
+					var chart = response.data;
+					po.element("input[name='id']").val(chart.id);
+					
+					var close = (po.pageParamCall("afterSave")  == true);
 					
 					if(close)
 						po.close();
+					
+					if(po.previewAfterSave)
+						window.open(po.url("preview/"+chart.id), chart.id);
+				},
+				complete: function()
+				{
+					po.previewAfterSave = false;
 				}
 			});
 		},

@@ -7,9 +7,6 @@
  */
 package org.datagear.analysis.support.html;
 
-import java.util.List;
-
-import org.datagear.analysis.Chart;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardWidget;
 import org.datagear.analysis.RenderContext;
@@ -48,20 +45,6 @@ public class HtmlDashboard extends Dashboard
 			throw new IllegalArgumentException();
 
 		super.setRenderContext(renderContext);
-	}
-
-	@Override
-	public List<Chart> getCharts()
-	{
-		// TODO Auto-generated method stub
-		return super.getCharts();
-	}
-
-	@Override
-	public void setCharts(List<Chart> charts)
-	{
-		// TODO Auto-generated method stub
-		super.setCharts(charts);
 	}
 
 	public String getVarName()

@@ -92,6 +92,12 @@ public class HtmlTplDashboardWidgetRendererTest
 	private class TestHtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext> extends HtmlTplDashboardWidgetRenderer<T>
 	{
 		@Override
+		public String simpleTemplateContent(String htmlCharset, String... chartWidgetId)
+		{
+			return null;
+		}
+
+		@Override
 		protected void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Throwable
 		{
 		}

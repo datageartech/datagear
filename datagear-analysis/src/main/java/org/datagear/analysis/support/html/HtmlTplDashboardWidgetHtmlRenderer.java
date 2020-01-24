@@ -22,7 +22,7 @@ import org.datagear.util.StringUtil;
  * 使用原生HTML网页作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
  * 此类可渲染由{@linkplain DashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
- * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}应该是可以通过{@linkplain DashboardWidgetResManager#getFile(String, String)}找到的模板文件名。
+ * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}即是可以通过{@linkplain DashboardWidgetResManager#getReader(String, String, String)}找到的输入流。
  * </p>
  * <p>
  * 支持的模板格式如下：
@@ -165,6 +165,65 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	public void setAttrNameChartWidget(String attrNameChartWidget)
 	{
 		this.attrNameChartWidget = attrNameChartWidget;
+	}
+
+	@Override
+	public String simpleTemplateContent(String htmlCharset, String... chartWidgetId)
+	{
+		return simpleTemplateContent(htmlCharset, "", "", chartWidgetId);
+	}
+
+	/**
+	 * 获取简单模板内容。
+	 * 
+	 * @param htmlCharset
+	 * @param htmlTitle
+	 * @param customChartCssAttrs 自定义图表样式属性，允许为{@code null}
+	 * @param chartWidgetId
+	 * @return
+	 */
+	public String simpleTemplateContent(String htmlCharset, String htmlTitle, String customChartCssAttrs,
+			String[] chartWidgetId)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("<!DOCTYPE html>\n");
+		sb.append("<html>\n");
+		sb.append("<head>\n");
+		sb.append("<meta charset=\"" + htmlCharset + "\">\n");
+		sb.append("<title>" + htmlTitle + "</title>\n");
+		sb.append("<style type=\"text/css\">\n");
+		sb.append("." + getDashboardStyleName() + "{\n");
+		sb.append("  position: absolute;\n");
+		sb.append("  left: 0px;\n");
+		sb.append("  right: 0px;\n");
+		sb.append("  top: 0px;\n");
+		sb.append("  bottom: 0px;\n");
+		sb.append("}\n");
+		sb.append("." + getChartStyleName() + "{\n");
+		sb.append("  display: inline-block;\n");
+		sb.append("  min-width: 30%;\n");
+		sb.append("  min-height: 30%;\n");
+		sb.append("  margin-left: 2.3%;\n");
+		sb.append("  margin-bottom: 1em;\n");
+
+		if (!StringUtil.isEmpty(customChartCssAttrs))
+			sb.append(customChartCssAttrs);
+
+		sb.append("}\n");
+		sb.append("</style>\n");
+		sb.append("</head>\n");
+		sb.append("<body class=\"" + getDashboardStyleName() + "\">\n");
+		sb.append("\n");
+
+		for (String cwi : chartWidgetId)
+			sb.append("  <div class=\"" + getChartStyleName() + "\" " + getAttrNameChartWidget() + "=\"" + cwi
+					+ "\"></div>\n");
+
+		sb.append("</body>\n");
+		sb.append("</html>");
+
+		return sb.toString();
 	}
 
 	@Override
