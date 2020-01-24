@@ -67,33 +67,45 @@ readonly 是否只读操作，允许为null
 		return "${contextPath}/analysis/dashboard/" + action;
 	};
 	
-	po.templateEditorCompleters =
-	[
-		{
-			identifierRegexps : [/[a-zA-Z_0-9\.\$]/],
-			getCompletions: function(editor, session, pos, prefix, callback)
-			{
-				return [];
-			}
-		}
-	];
-	var languageTools = ace.require("ace/ext/language_tools");
-	var HtmlMode = ace.require("ace/mode/html").Mode;
-	po.templateEditor = ace.edit("${pageId}-template-editor");
-	po.templateEditor.session.setMode(new HtmlMode());
-	po.templateEditor.setShowPrintMargin(false);
-	po.templateEditor.setOptions(
+	po.initTemplateEditor = function()
 	{
-		enableBasicAutocompletion: po.templateEditorCompleters,
-		enableLiveAutocompletion: po.templateEditorCompleters
-	});
-	po.templateEditor.focus();
-	var cursor = po.templateEditor.getCursorPosition();
-	po.templateEditor.moveCursorToPosition(cursor);
-	po.templateEditor.session.insert(cursor, po.element("textarea[name='templateContent']").val());
-	<#if readonly>
-	po.templateEditor.setReadOnly(true);
-	</#if>
+		var templateEditorCompleters =
+		[
+			{
+				identifierRegexps : [/[a-zA-Z_0-9\.\$]/],
+				getCompletions: function(editor, session, pos, prefix, callback)
+				{
+					return [];
+				}
+			}
+		];
+		var languageTools = ace.require("ace/ext/language_tools");
+		var HtmlMode = ace.require("ace/mode/html").Mode;
+		po.templateEditor = ace.edit("${pageId}-template-editor");
+		po.templateEditor.session.setMode(new HtmlMode());
+		po.templateEditor.setShowPrintMargin(false);
+		po.templateEditor.setOptions(
+		{
+			enableBasicAutocompletion: po.templateEditorCompleters,
+			enableLiveAutocompletion: po.templateEditorCompleters
+		});
+		po.templateEditor.focus();
+		var cursor = {row: 0, column: 0};
+		po.templateEditor.session.insert(cursor, po.element("textarea[name='templateContent']").val());
+		var found = po.templateEditor.find("</body>",{backwards: true, wrap: false, caseSensitive: false, wholeWord: false, regExp: false});
+		if(found && found.start && found.start.row > 0)
+		{
+			cursor = {row: found.start.row-1, column: 0};
+			po.templateEditor.moveCursorToPosition(cursor);
+			var selection = po.templateEditor.session.getSelection();
+			selection.clearSelection();
+		}
+		//滚动到底部
+		po.templateEditor.session.setScrollTop(1000);
+		<#if readonly>
+		po.templateEditor.setReadOnly(true);
+		</#if>
+	};
 
 	<#if !readonly>
 	po.insertChartCode = function(charts)
@@ -104,11 +116,12 @@ readonly 是否只读操作，允许为null
 		var code = "";
 		
 		for(var i=0; i<charts.length; i++)
-			code += "<div class=\"dg-chart\" dg-chart-widget=\""+charts[i].id+"\">" + "<!--"+charts[i].name+"-->" + "</div>\n";
+			code += "  <div class=\"dg-chart\" dg-chart-widget=\""+charts[i].id+"\">" + "<!--"+charts[i].name+"-->" + "</div>\n";
 		
 		var cursor = po.templateEditor.getCursorPosition();
 		po.templateEditor.moveCursorToPosition(cursor);
 		po.templateEditor.session.insert(cursor, code);
+		po.templateEditor.focus();
 	};
 	po.element(".insert-chart-button").click(function()
 	{
@@ -186,6 +199,8 @@ readonly 是否只读操作，允许为null
 		}
 	});
 	</#if>
+	
+	po.initTemplateEditor();
 })
 (${pageId});
 </script>
