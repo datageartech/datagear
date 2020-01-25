@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.analysis.Chart;
+import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.util.StringUtil;
 
 /**
@@ -101,10 +101,10 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		super();
 	}
 
-	public HtmlTplDashboardWidgetHtmlRenderer(DashboardWidgetResManager dashboardWidgetResManager,
+	public HtmlTplDashboardWidgetHtmlRenderer(TemplateDashboardWidgetResManager templateDashboardWidgetResManager,
 			ChartWidgetSource chartWidgetSource)
 	{
-		super(dashboardWidgetResManager, chartWidgetSource);
+		super(templateDashboardWidgetResManager, chartWidgetSource);
 	}
 
 	public String getDashboardSetTagName()

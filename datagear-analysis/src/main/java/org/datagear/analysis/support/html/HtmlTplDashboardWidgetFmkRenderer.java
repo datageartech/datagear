@@ -16,9 +16,9 @@ import java.util.Map;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.analysis.support.DashboardWidgetResManager;
-import org.datagear.analysis.support.FileDashboardWidgetResManager;
+import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.util.StringUtil;
 
 import freemarker.core.Environment;
@@ -37,8 +37,8 @@ import freemarker.template.TemplateScalarModel;
 /**
  * 使用Freemarker作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 此类可渲染由{@linkplain FileDashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
- * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}即是可以通过{@linkplain FileDashboardWidgetResManager#getRelativePath(String, String)}找到的模板文件。
+ * 此类可渲染由{@linkplain FileTemplateDashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
+ * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}即是可以通过{@linkplain FileTemplateDashboardWidgetResManager#getRelativePath(String, String)}找到的模板文件。
  * </p>
  * <p>
  * 此类需要手动调用{@linkplain #init()}方法进行初始化。
@@ -104,25 +104,27 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 		super();
 	}
 
-	public HtmlTplDashboardWidgetFmkRenderer(FileDashboardWidgetResManager dashboardWidgetResManager,
+	public HtmlTplDashboardWidgetFmkRenderer(FileTemplateDashboardWidgetResManager templateDashboardWidgetResManager,
 			ChartWidgetSource chartWidgetSource)
 	{
-		super(dashboardWidgetResManager, chartWidgetSource);
+		super(templateDashboardWidgetResManager, chartWidgetSource);
 	}
 
 	@Override
-	public FileDashboardWidgetResManager getDashboardWidgetResManager()
+	public FileTemplateDashboardWidgetResManager getTemplateDashboardWidgetResManager()
 	{
-		return (FileDashboardWidgetResManager) super.getDashboardWidgetResManager();
+		return (FileTemplateDashboardWidgetResManager) super.getTemplateDashboardWidgetResManager();
 	}
 
 	@Override
-	public void setDashboardWidgetResManager(DashboardWidgetResManager dashboardWidgetResManager)
+	public void setTemplateDashboardWidgetResManager(
+			TemplateDashboardWidgetResManager templateDashboardWidgetResManager)
 	{
-		if (dashboardWidgetResManager != null && !(dashboardWidgetResManager instanceof FileDashboardWidgetResManager))
+		if (templateDashboardWidgetResManager != null
+				&& !(templateDashboardWidgetResManager instanceof FileTemplateDashboardWidgetResManager))
 			throw new IllegalArgumentException();
 
-		super.setDashboardWidgetResManager(dashboardWidgetResManager);
+		super.setTemplateDashboardWidgetResManager(templateDashboardWidgetResManager);
 	}
 
 	public String getDefaultTemplateEncoding()
@@ -153,7 +155,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 	public void init() throws IOException
 	{
 		Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
-		cfg.setDirectoryForTemplateLoading(getDashboardWidgetResManager().getRootDirectory());
+		cfg.setDirectoryForTemplateLoading(getTemplateDashboardWidgetResManager().getRootDirectory());
 		cfg.setDefaultEncoding(this.defaultTemplateEncoding);
 		cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 		cfg.setLogTemplateExceptions(false);
@@ -193,7 +195,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 	 */
 	protected Template getTemplate(HtmlTplDashboardWidget<?> dashboardWidget) throws Exception
 	{
-		String path = getDashboardWidgetResManager().getRelativePath(dashboardWidget.getId(),
+		String path = getTemplateDashboardWidgetResManager().getRelativePath(dashboardWidget.getId(),
 				dashboardWidget.getTemplate());
 
 		return getConfiguration().getTemplate(path);

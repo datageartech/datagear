@@ -11,7 +11,7 @@ import java.io.StringWriter;
 
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.RenderStyle;
-import org.datagear.analysis.support.FileDashboardWidgetResManager;
+import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.junit.Assert;
@@ -36,7 +36,7 @@ public class HtmlTplDashboardWidgetFmkRendererTest
 		HtmlChartWidget<HtmlRenderContext> htmlChartWidget = new HtmlChartWidget<HtmlRenderContext>("chart-widget-01",
 				"chart-widget-01", chartPlugin, (ChartDataSet[]) null);
 
-		FileDashboardWidgetResManager resManager = new FileDashboardWidgetResManager(
+		FileTemplateDashboardWidgetResManager resManager = new FileTemplateDashboardWidgetResManager(
 				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/freemarker");
 
 		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);

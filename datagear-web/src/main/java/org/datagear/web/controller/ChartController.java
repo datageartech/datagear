@@ -4,6 +4,8 @@
 
 package org.datagear.web.controller;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlDashboard;
 import org.datagear.analysis.support.html.HtmlRenderContext;
@@ -33,6 +36,7 @@ import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +47,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.WebRequest;
 
 /**
  * 图表控制器。
@@ -61,8 +66,8 @@ public class ChartController extends AbstractChartPluginAwareController
 	private ChartPluginManager chartPluginManager;
 
 	@Autowired
-	@Qualifier("chartPreviewHtmlTplDashboardWidgetHtmlRenderer")
-	private HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartPreviewHtmlTplDashboardWidgetHtmlRenderer;
+	@Qualifier("chartShowHtmlTplDashboardWidgetHtmlRenderer")
+	private HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer;
 
 	public ChartController()
 	{
@@ -71,12 +76,12 @@ public class ChartController extends AbstractChartPluginAwareController
 
 	public ChartController(HtmlChartWidgetEntityService htmlChartWidgetEntityService,
 			ChartPluginManager chartPluginManager,
-			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartPreviewHtmlTplDashboardWidgetHtmlRenderer)
+			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer)
 	{
 		super();
 		this.htmlChartWidgetEntityService = htmlChartWidgetEntityService;
 		this.chartPluginManager = chartPluginManager;
-		this.chartPreviewHtmlTplDashboardWidgetHtmlRenderer = chartPreviewHtmlTplDashboardWidgetHtmlRenderer;
+		this.chartShowHtmlTplDashboardWidgetHtmlRenderer = chartShowHtmlTplDashboardWidgetHtmlRenderer;
 	}
 
 	public HtmlChartWidgetEntityService getHtmlChartWidgetEntityService()
@@ -99,15 +104,15 @@ public class ChartController extends AbstractChartPluginAwareController
 		this.chartPluginManager = chartPluginManager;
 	}
 
-	public HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> getChartPreviewHtmlTplDashboardWidgetHtmlRenderer()
+	public HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> getChartShowHtmlTplDashboardWidgetHtmlRenderer()
 	{
-		return chartPreviewHtmlTplDashboardWidgetHtmlRenderer;
+		return chartShowHtmlTplDashboardWidgetHtmlRenderer;
 	}
 
-	public void setChartPreviewHtmlTplDashboardWidgetHtmlRenderer(
-			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartPreviewHtmlTplDashboardWidgetHtmlRenderer)
+	public void setChartShowHtmlTplDashboardWidgetHtmlRenderer(
+			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer)
 	{
-		this.chartPreviewHtmlTplDashboardWidgetHtmlRenderer = chartPreviewHtmlTplDashboardWidgetHtmlRenderer;
+		this.chartShowHtmlTplDashboardWidgetHtmlRenderer = chartShowHtmlTplDashboardWidgetHtmlRenderer;
 	}
 
 	@RequestMapping("/add")
@@ -259,7 +264,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	}
 
 	/**
-	 * 预览图表。
+	 * 展示图表。
 	 * 
 	 * @param request
 	 * @param response
@@ -267,8 +272,8 @@ public class ChartController extends AbstractChartPluginAwareController
 	 * @param id
 	 * @throws Exception
 	 */
-	@RequestMapping("/preview/{id}")
-	public void preview(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+	@RequestMapping({ "/show/{id}/", "/show/{id}/index" })
+	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("id") String id) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
@@ -278,12 +283,12 @@ public class ChartController extends AbstractChartPluginAwareController
 		if (chart == null)
 			throw new RecordNotFoundException();
 
-		String htmlTitle = getMessage(request, "chart.preview.htmlTitle", chart.getName());
+		String htmlTitle = getMessage(request, "chart.show.htmlTitle", chart.getName());
 		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(id,
-				this.chartPreviewHtmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
-						"  width:80%;\n  height:80%;\n  margin-left:10%;\n  margin-top:5%;\n",
+				this.chartShowHtmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
+						"  position:absolute;\n  left:1em;\n  right:1em;\n  top:1em;\n  bottom:1em;\n  margin:0 0;\n",
 						new String[] { id }),
-				this.chartPreviewHtmlTplDashboardWidgetHtmlRenderer);
+				this.chartShowHtmlTplDashboardWidgetHtmlRenderer);
 
 		String responseEncoding = dashboardWidget.getTemplateEncoding();
 		response.setCharacterEncoding(responseEncoding);
@@ -299,7 +304,37 @@ public class ChartController extends AbstractChartPluginAwareController
 	}
 
 	/**
-	 * 预览数据。
+	 * 加载展示图表的资源。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param webRequest
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	@RequestMapping("/show/{id}/**/*")
+	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
+			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
+	{
+		String pathInfo = request.getPathInfo();
+		String resPath = pathInfo.substring(pathInfo.indexOf(id) + id.length() + 1);
+
+		TemplateDashboardWidgetResManager resManager = this.chartShowHtmlTplDashboardWidgetHtmlRenderer
+				.getTemplateDashboardWidgetResManager();
+
+		long lastModified = resManager.lastModifiedResource(id, resPath);
+		if (webRequest.checkNotModified(lastModified))
+			return;
+
+		InputStream in = resManager.getResourceInputStream(id, resPath);
+		OutputStream out = response.getOutputStream();
+
+		IOUtil.write(in, out);
+	}
+
+	/**
+	 * 展示数据。
 	 * 
 	 * @param request
 	 * @param response
@@ -307,9 +342,9 @@ public class ChartController extends AbstractChartPluginAwareController
 	 * @param id
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/previewData", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Map<String, DataSetResult[]> previewData(HttpServletRequest request, HttpServletResponse response,
+	public Map<String, DataSetResult[]> showData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model) throws Exception
 	{
 		WebContext webContext = createWebContext(request);
@@ -319,7 +354,7 @@ public class ChartController extends AbstractChartPluginAwareController
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
 		String contextPath = request.getContextPath();
-		return new WebContext(contextPath, contextPath + "/analysis/chart/previewData");
+		return new WebContext(contextPath, contextPath + "/analysis/chart/showData");
 	}
 
 	protected void setChartPluginNames(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)

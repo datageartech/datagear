@@ -67,7 +67,7 @@ readonly 是否只读操作，允许为null
 			<#if !readonly>
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
 			&nbsp;&nbsp;
-			<button type="button" name="saveAndPreview"><@spring.message code='chart.saveAndPreview' /></button>
+			<button type="button" name="saveAndShow"><@spring.message code='chart.saveAndShow' /></button>
 			&nbsp;&nbsp;
 			<input type="reset" value="<@spring.message code='reset' />" />
 			</#if>
@@ -396,7 +396,7 @@ readonly 是否只读操作，允许为null
 
 	po.previewAfterSave = false;
 	
-	po.element("button[name=saveAndPreview]").click(function()
+	po.element("button[name=saveAndShow]").click(function()
 	{
 		po.previewAfterSave = true;
 		po.element("input[type='submit']").click();
@@ -498,7 +498,7 @@ readonly 是否只读操作，允许为null
 						po.close();
 					
 					if(po.previewAfterSave)
-						window.open(po.url("preview/"+chart.id), chart.id);
+						window.open(po.url("show/"+chart.id+"/index"), chart.id);
 				},
 				complete: function()
 				{

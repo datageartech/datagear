@@ -10,7 +10,6 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +22,10 @@ import org.datagear.analysis.DashboardThemeSource;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
+import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.analysis.support.DashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
@@ -95,7 +94,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	public static final String PROPERTY_VALUE_FOR_RENDER_EXCEPTION = "targetHtmlChartRenderExceptionMessage";
 
-	private DashboardWidgetResManager dashboardWidgetResManager;
+	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
 
 	private ChartWidgetSource chartWidgetSource;
 
@@ -153,22 +152,23 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		super();
 	}
 
-	public HtmlTplDashboardWidgetRenderer(DashboardWidgetResManager dashboardWidgetResManager,
+	public HtmlTplDashboardWidgetRenderer(TemplateDashboardWidgetResManager templateDashboardWidgetResManager,
 			ChartWidgetSource chartWidgetSource)
 	{
 		super();
-		this.dashboardWidgetResManager = dashboardWidgetResManager;
+		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
 		this.chartWidgetSource = chartWidgetSource;
 	}
 
-	public DashboardWidgetResManager getDashboardWidgetResManager()
+	public TemplateDashboardWidgetResManager getTemplateDashboardWidgetResManager()
 	{
-		return dashboardWidgetResManager;
+		return templateDashboardWidgetResManager;
 	}
 
-	public void setDashboardWidgetResManager(DashboardWidgetResManager dashboardWidgetResManager)
+	public void setTemplateDashboardWidgetResManager(
+			TemplateDashboardWidgetResManager templateDashboardWidgetResManager)
 	{
-		this.dashboardWidgetResManager = dashboardWidgetResManager;
+		this.templateDashboardWidgetResManager = templateDashboardWidgetResManager;
 	}
 
 	public ChartWidgetSource getChartWidgetSource()
@@ -564,9 +564,6 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	/**
 	 * 获取{@linkplain HtmlTplDashboardWidget}的模板输入流。
-	 * <p>
-	 * 如果文件不存在，它将返回一个空字符串的{@linkplain StringReader}。
-	 * </p>
 	 * 
 	 * @param dashboardWidget
 	 * @return
@@ -574,17 +571,11 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 */
 	protected Reader getTemplateReaderNotNull(HtmlTplDashboardWidget<?> dashboardWidget) throws IOException
 	{
-		String template = dashboardWidget.getTemplate();
-		String templateEncoding = dashboardWidget.getTemplateEncoding();
-
-		return getDashboardWidgetResManager().getReader(dashboardWidget.getId(), template, templateEncoding);
+		return getTemplateDashboardWidgetResManager().getTemplateReader(dashboardWidget);
 	}
 
 	/**
 	 * 获取{@linkplain HtmlTplDashboardWidget}的模板输入流。
-	 * <p>
-	 * 如果文件不存在，它将返回一个空字符串的{@linkplain StringReader}。
-	 * </p>
 	 * 
 	 * @param dashboardWidget
 	 * @return
@@ -592,10 +583,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 */
 	protected Writer getTemplateWriter(HtmlTplDashboardWidget<?> dashboardWidget) throws IOException
 	{
-		String template = dashboardWidget.getTemplate();
-		String templateEncoding = dashboardWidget.getTemplateEncoding();
-
-		return getDashboardWidgetResManager().getWriter(dashboardWidget.getId(), template, templateEncoding);
+		return getTemplateDashboardWidgetResManager().getTemplateWriter(dashboardWidget);
 	}
 
 	/**

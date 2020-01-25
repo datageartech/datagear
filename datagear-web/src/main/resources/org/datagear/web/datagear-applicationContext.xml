@@ -313,7 +313,7 @@
 		</property>
 	</bean>
 	
-	<bean id="dashboardWidgetResManager" class="org.datagear.analysis.support.FileDashboardWidgetResManager">
+	<bean id="templateDashboardWidgetResManager" class="org.datagear.analysis.support.FileTemplateDashboardWidgetResManager">
 		<property name="rootDirectory" ref="dashboardRootDirectory" />
 	</bean>
 	
@@ -338,7 +338,7 @@
 				</bean>
 			</list>
 		</property>
-		<property name="dashboardWidgetResManager" ref="dashboardWidgetResManager" />
+		<property name="templateDashboardWidgetResManager" ref="templateDashboardWidgetResManager" />
 		<property name="chartWidgetSource" ref="htmlChartWidgetEntityService" />
 	</bean>
 	
@@ -360,9 +360,12 @@
 		<property name="authorizationService" ref="authorizationService" />
 	</bean>
 	
-	<bean id="chartPreviewHtmlTplDashboardWidgetHtmlRenderer" parent="htmlTplDashboardWidgetRendererParent">
-		<property name="dashboardWidgetResManager">
-			<bean class="org.datagear.analysis.support.DirectDashboardWidgetResManager" />
+	<bean id="chartShowHtmlTplDashboardWidgetHtmlRenderer" parent="htmlTplDashboardWidgetRendererParent">
+		<property name="templateDashboardWidgetResManager">
+			<bean id="templateDashboardWidgetResManager" class="org.datagear.analysis.support.FileTemplateDashboardWidgetResManager">
+				<property name="rootDirectory" ref="dashboardRootDirectory" />
+				<property name="templateAsContent" value="true" />
+			</bean>
 		</property>
 	</bean>
 	

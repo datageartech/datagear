@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSetResult;
-import org.datagear.analysis.support.DashboardWidgetResManager;
+import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlDashboard;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
@@ -285,8 +285,8 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 
-		DashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidgetRenderer().getDashboardWidgetResManager();
+		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
 
 		dashboardWidgetResManager.copyFrom(dashboard.getId(), uploadDirectory);
 
@@ -381,8 +381,8 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (dashboardWidget == null)
 			throw new RecordNotFoundException();
 
-		DashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidgetRenderer().getDashboardWidgetResManager();
+		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
 
 		String responseEncoding = dashboardWidget.getTemplateEncoding();
 
@@ -418,14 +418,14 @@ public class DashboardController extends AbstractDataAnalysisController
 		String pathInfo = request.getPathInfo();
 		String resPath = pathInfo.substring(pathInfo.indexOf(id) + id.length() + 1);
 
-		DashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidgetRenderer().getDashboardWidgetResManager();
+		TemplateDashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
 
-		long lastModified = resManager.lastModified(id, resPath);
+		long lastModified = resManager.lastModifiedResource(id, resPath);
 		if (webRequest.checkNotModified(lastModified))
 			return;
 
-		InputStream in = resManager.getInputStream(id, resPath);
+		InputStream in = resManager.getResourceInputStream(id, resPath);
 		OutputStream out = response.getOutputStream();
 
 		IOUtil.write(in, out);

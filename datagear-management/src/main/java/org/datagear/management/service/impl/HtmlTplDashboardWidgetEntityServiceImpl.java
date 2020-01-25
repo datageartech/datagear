@@ -133,7 +133,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 		if (deleted)
 		{
 			this.authorizationService.deleteByResource(HtmlChartWidgetEntity.AUTHORIZATION_RESOURCE_TYPE, id);
-			this.htmlTplDashboardWidgetRenderer.getDashboardWidgetResManager().delete(id);
+			this.htmlTplDashboardWidgetRenderer.getTemplateDashboardWidgetResManager().delete(id);
 		}
 
 		return deleted;

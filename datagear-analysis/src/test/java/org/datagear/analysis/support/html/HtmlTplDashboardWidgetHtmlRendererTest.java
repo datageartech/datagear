@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.RenderStyle;
-import org.datagear.analysis.support.DashboardWidgetResManager;
-import org.datagear.analysis.support.FileDashboardWidgetResManager;
+import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.ChartInfo;
@@ -50,7 +50,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		HtmlChartWidget<HtmlRenderContext> htmlChartWidget = new HtmlChartWidget<HtmlRenderContext>("chart-widget-01",
 				"chart-widget-01", chartPlugin, (ChartDataSet[]) null);
 
-		DashboardWidgetResManager resManager = new FileDashboardWidgetResManager(
+		TemplateDashboardWidgetResManager resManager = new FileTemplateDashboardWidgetResManager(
 				"src/test/resources/org/datagear/analysis/support/html/htmlTplDashboardWidgets/html");
 
 		SimpleChartWidgetSource chartWidgetSource = new SimpleChartWidgetSource(htmlChartWidget);

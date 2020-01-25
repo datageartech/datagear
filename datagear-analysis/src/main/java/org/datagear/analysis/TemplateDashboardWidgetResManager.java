@@ -1,4 +1,4 @@
-package org.datagear.analysis.support;
+package org.datagear.analysis;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,11 +7,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
-import org.datagear.analysis.Dashboard;
-import org.datagear.analysis.DashboardWidget;
-
 /**
- * {@linkplain DashboardWidget}资源管理器。
+ * {@linkplain TemplateDashboardWidget}资源管理器。
  * <p>
  * 此类通过{@linkplain DashboardWidget#getId()}来管理{@linkplain DashboardWidget}资源。
  * </p>
@@ -19,7 +16,7 @@ import org.datagear.analysis.DashboardWidget;
  * @author datagear@163.com
  *
  */
-public interface DashboardWidgetResManager
+public interface TemplateDashboardWidgetResManager
 {
 	/**
 	 * 获取默认资源编码。
@@ -29,47 +26,64 @@ public interface DashboardWidgetResManager
 	String getDefaultEncoding();
 
 	/**
+	 * 获取{@linkplain TemplateDashboardWidget#getTemplate()}的输入流。
+	 * 
+	 * @param widget
+	 * @return
+	 * @throws IOException
+	 */
+	Reader getTemplateReader(TemplateDashboardWidget<?> widget) throws IOException;
+
+	/**
+	 * 获取{@linkplain TemplateDashboardWidget#getTemplate()}的输出流。
+	 * 
+	 * @param widget
+	 * @return
+	 * @throws IOException
+	 */
+	Writer getTemplateWriter(TemplateDashboardWidget<?> widget) throws IOException;
+
+	/**
 	 * 获取指定名称资源的输入流。
 	 * 
-	 * @param id       {@linkplain Dashboard#getId()}
+	 * @param id       {@linkplain TemplateDashboardWidget#getId()}
 	 * @param name     资源名称
 	 * @param encoding 资源编码，为{@code null}或空则使用默认编码
 	 * @return
 	 * @throws IOException
 	 */
-	Reader getReader(String id, String name, String encoding) throws IOException;
+	Reader getResourceReader(String id, String name, String encoding) throws IOException;
 
 	/**
 	 * 获取指定名称资源的输出流。
 	 * 
-	 * @param id       {@linkplain Dashboard#getId()}
+	 * @param id       {@linkplain TemplateDashboardWidget#getId()}
 	 * @param name     资源名称
 	 * @param encoding 资源编码，为{@code null}或空则使用默认编码
 	 * @return
 	 * @throws IOException
 	 */
-	Writer getWriter(String id, String name, String encoding) throws IOException;
+	Writer getResourceWriter(String id, String name, String encoding) throws IOException;
 
 	/**
 	 * 获取指定名称资源的输入流。
 	 * 
-	 * @param id   {@linkplain Dashboard#getId()}
-	 * @param name 资源名称
+	 * @param id       {@linkplain TemplateDashboardWidget#getId()}
+	 * @param name     资源名称
 	 * @return
 	 * @throws IOException
 	 */
-	InputStream getInputStream(String id, String name) throws IOException;
+	InputStream getResourceInputStream(String id, String name) throws IOException;
 
 	/**
 	 * 获取指定名称资源的输出流。
 	 * 
-	 * @param id       {@linkplain Dashboard#getId()}
+	 * @param id       {@linkplain TemplateDashboardWidget#getId()}
 	 * @param name     资源名称
-	 * @param encoding 资源编码，为{@code null}则使用默认编码
 	 * @return
 	 * @throws IOException
 	 */
-	OutputStream getOutputStream(String id, String name) throws IOException;
+	OutputStream getResourceOutputStream(String id, String name) throws IOException;
 
 	/**
 	 * 将指定目录下的所有文件作为资源拷入。
@@ -90,7 +104,7 @@ public interface DashboardWidgetResManager
 	 * @param name 资源名称
 	 * @return
 	 */
-	boolean contains(String id, String name);
+	boolean containsResource(String id, String name);
 
 	/**
 	 * 获取指定资源上次修改时间。
@@ -99,7 +113,7 @@ public interface DashboardWidgetResManager
 	 * @param name
 	 * @return
 	 */
-	long lastModified(String id, String name);
+	long lastModifiedResource(String id, String name);
 
 	/**
 	 * 删除指定ID的所有资源。
