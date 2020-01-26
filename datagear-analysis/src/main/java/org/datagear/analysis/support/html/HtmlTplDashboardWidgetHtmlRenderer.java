@@ -21,8 +21,7 @@ import org.datagear.util.StringUtil;
 /**
  * 使用原生HTML网页作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 此类可渲染由{@linkplain DashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
- * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}即是可以通过{@linkplain DashboardWidgetResManager#getReader(String, String, String)}找到的输入流。
+ * 此类可渲染由{@linkplain TemplateDashboardWidgetResManager}管理模板资源的{@linkplain HtmlTplDashboardWidget}。
  * </p>
  * <p>
  * 支持的模板格式如下：
@@ -248,108 +247,160 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	{
 		Writer out = renderContext.getWriter();
 
-		DashboardInfo dashboardInfo = new DashboardInfo();
-		boolean wroteDashboard = false;
+		HtmlTitleHandler htmlTitleHandler = HtmlRenderAttributes.removeHtmlTitleHandler(renderContext);
 
-		StringBuilder cache = new StringBuilder();
-		StringBuilder nameCache = new StringBuilder();
-		StringBuilder valueCache = new StringBuilder();
+		boolean resolvedDashboardInfo = false;
+		boolean wroteDashboardImport = false;
+		boolean wroteDashboardScript = false;
+		boolean inHeadTag = false;
+		boolean handledTitle = false;
+
+		DashboardInfo dashboardInfo = new DashboardInfo();
+
+		StringBuilder nameCache = createStringBuilder();
+		StringBuilder valueCache = createStringBuilder();
+		StringBuilder tagContentCache = createStringBuilder();
 
 		int c = -1;
 		while ((c = in.read()) > -1)
 		{
 			if (c == '<')
 			{
-				if (isNotEmpty(cache))
-					clear(cache);
-				if (isNotEmpty(nameCache))
-					clear(nameCache);
-				if (isNotEmpty(valueCache))
-					clear(valueCache);
+				clear(nameCache);
 
-				appendChar(cache, c);
+				int last = readHtmlTagName(in, nameCache);
+				String tagName = nameCache.toString();
 
-				int last = skipWhitespace(in, cache);
-
-				if (last < 0)
+				// <html
+				if (this.dashboardSetTagName.equalsIgnoreCase(tagName))
 				{
-					out.write(cache.toString());
-				}
-				// </...
-				else if (last == '/')
-				{
-					if (wroteDashboard)
+					appendResolvedTagInfo(out, c, tagName, last);
+
+					if (last == '>' || resolvedDashboardInfo)
 						;
 					else
 					{
-						last = resolveHtmlCloseTagName(in, cache, nameCache);
-
-						if (isNotEmpty(nameCache))
-						{
-							String tagName = nameCache.toString();
-
-							// </body>前写入看板脚本
-							if ("body".equalsIgnoreCase(tagName))
-							{
-								writeHtmlDashboardScript(renderContext, dashboard, dashboardInfo);
-								wroteDashboard = true;
-							}
-						}
-					}
-
-					out.write(cache.toString());
-				}
-				// <>
-				else if (last == '>')
-				{
-					out.write(cache.toString());
-				}
-				// <...
-				else
-				{
-					appendChar(nameCache, last);
-
-					last = resolveHtmlTagName(in, cache, nameCache);
-
-					String tagName = nameCache.toString();
-
-					if (this.dashboardSetTagName.equalsIgnoreCase(tagName))
-					{
 						clear(nameCache);
-						last = resolveDashboardInfo(in, last, cache, nameCache, valueCache, dashboardInfo);
+						clear(valueCache);
+						clear(tagContentCache);
 
-						out.write(cache.toString());
+						last = resolveDashboardInfo(in, last, tagContentCache, nameCache, valueCache,
+								dashboardInfo);
+
+						resolvedDashboardInfo = true;
+
+						append(out, tagContentCache);
 					}
-					else if ("head".equalsIgnoreCase(tagName))
-					{
-						clear(nameCache);
+				}
+				// <head
+				else if ("head".equalsIgnoreCase(tagName))
+				{
+					inHeadTag = true;
 
-						for (;;)
-						{
-							last = resolveHtmlTagAttr(in, last, cache, nameCache, valueCache);
-							if (isHtmlTagEnd(last))
-								break;
-						}
+					appendResolvedTagInfo(out, c, tagName, last);
+					if (last != '>')
+						readToTagEnd(in, out);
 
-						out.write(cache.toString());
+					if (!wroteDashboardImport)
 						writeDashboardImport(renderContext, dashboard, dashboardInfo);
-					}
-					else if (this.chartTagName.equalsIgnoreCase(tagName))
+				}
+				// <title
+				else if (inHeadTag && "title".equalsIgnoreCase(tagName))
+				{
+					appendResolvedTagInfo(out, c, tagName, last);
+
+					if (last != '>')
+						readToTagEnd(in, out);
+
+					clear(nameCache);
+					last = readToTagStart(in, nameCache);
+
+					if (htmlTitleHandler != null)
 					{
-						clear(nameCache);
+						String titleContent = htmlTitleHandler.handle(nameCache.toString());
 
-						last = resolveDashboardChartInfo(renderContext, dashboard, in, last, cache, nameCache,
-								valueCache, dashboardInfo);
-
-						out.write(cache.toString());
+						out.write(titleContent);
+						appendIfValid(out, last);
 					}
 					else
-						out.write(cache.toString());
+					{
+						append(out, nameCache);
+						appendIfValid(out, last);
+					}
+
+					handledTitle = true;
+				}
+				// </head
+				else if ("/head".equalsIgnoreCase(tagName))
+				{
+					if (!handledTitle)
+					{
+						if (htmlTitleHandler != null)
+						{
+							String titleContent = htmlTitleHandler.handle("");
+
+							out.write("<title>");
+							out.write(titleContent);
+							out.write("</title>");
+						}
+
+						handledTitle = true;
+					}
+
+					appendResolvedTagInfo(out, c, tagName, last);
+					inHeadTag = false;
+				}
+				// <div
+				else if (this.chartTagName.equalsIgnoreCase(tagName))
+				{
+					appendResolvedTagInfo(out, c, tagName, last);
+
+					if (last == '>')
+						;
+					else
+					{
+						clear(nameCache);
+						clear(valueCache);
+						clear(tagContentCache);
+
+						last = resolveDashboardChartInfo(renderContext, dashboard, in, last, tagContentCache, nameCache,
+								valueCache, dashboardInfo);
+
+						append(out, tagContentCache);
+					}
+				}
+				// </body
+				else if ("/body".equalsIgnoreCase(tagName))
+				{
+					if (!wroteDashboardScript)
+					{
+						writeHtmlDashboardScript(renderContext, dashboard, dashboardInfo);
+						wroteDashboardScript = true;
+					}
+
+					appendResolvedTagInfo(out, c, tagName, last);
+				}
+				// <!--
+				else if (tagName.startsWith("!--"))
+				{
+					appendResolvedTagInfo(out, c, tagName, last);
+
+					// 空注释
+					if (isReadHtmlTagEmptyComment(tagName, last))
+						;
+					else
+						skipHtmlComment(in, out);
+				}
+				else
+				{
+					appendResolvedTagInfo(out, c, tagName, last);
 				}
 			}
 			else
 				out.write(c);
 		}
+
+		HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 		return dashboardInfo;
 	}
@@ -506,7 +557,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	}
 
 	/**
-	 * 解析{@linkplain DashboardInfo#getImportExclude()}。
+	 * 解析{@linkplain DashboardInfo}。
 	 * 
 	 * @param in
 	 * @param last
@@ -520,33 +571,37 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	protected int resolveDashboardInfo(Reader in, int last, StringBuilder cache, StringBuilder attrName,
 			StringBuilder attrValue, DashboardInfo dashboardInfo) throws IOException
 	{
+		int c = -1;
 		for (;;)
 		{
-			last = resolveHtmlTagAttr(in, last, cache, attrName, attrValue);
+			c = resolveHtmlTagAttr(in, last, cache, attrName, attrValue);
 
-			String attrNameStr = attrName.toString();
+			String attrNameStr = toString(attrName);
+			String attrValueStr = toString(attrValue);
 
 			if (this.attrNameDashboardVar.equalsIgnoreCase(attrNameStr))
 			{
-				dashboardInfo.setDashboardVar(attrValue.toString().trim());
+				dashboardInfo.setDashboardVar(attrValueStr);
 			}
 			else if (this.attrNameDashboardRenderer.equalsIgnoreCase(attrNameStr))
 			{
-				dashboardInfo.setRendererVar(attrValue.toString().trim());
+				dashboardInfo.setRendererVar(attrValueStr);
 			}
 			else if (this.attrNameDashboardImportExclude.equalsIgnoreCase(attrNameStr))
 			{
-				dashboardInfo.setImportExclude(attrValue.toString().trim());
+				dashboardInfo.setImportExclude(attrValueStr);
 			}
 
 			clear(attrName);
 			clear(attrValue);
 
-			if (isHtmlTagEnd(last))
+			if (isHtmlTagEnd(c))
+			{
 				break;
+			}
 		}
 
-		return last;
+		return c;
 	}
 
 	/**
@@ -640,6 +695,120 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		}
 
 		return i;
+	}
+
+	/**
+	 * 读取到“{@code <}”。
+	 * 
+	 * @param in
+	 * @param out
+	 * @return &lt;、-1，这个字符不会写入{@code out}
+	 * @throws IOException
+	 */
+	protected int readToTagStart(Reader in, StringBuilder out) throws IOException
+	{
+		int c = -1;
+
+		while ((c = in.read()) > -1)
+		{
+			if (c == '<')
+				break;
+
+			appendChar(out, c);
+		}
+
+		return c;
+	}
+
+	/**
+	 * 读取到“{@code >}”。
+	 * 
+	 * @param in
+	 * @param out
+	 * @return >、-1
+	 * @throws IOException
+	 */
+	protected int readToTagEnd(Reader in, Writer out) throws IOException
+	{
+		int c = -1;
+
+		while ((c = in.read()) > -1)
+		{
+			out.write(c);
+
+			if (c == '>')
+				break;
+		}
+
+		return c;
+	}
+
+	/**
+	 * 读取到“{@code >}”。
+	 * 
+	 * @param in
+	 * @param out
+	 * @return &gt;、-1
+	 * @throws IOException
+	 */
+	protected int readToTagEnd(Reader in, StringBuilder out) throws IOException
+	{
+		int c = -1;
+
+		while ((c = in.read()) > -1)
+		{
+			appendChar(out, c);
+
+			if (c == '>')
+				break;
+		}
+
+		return c;
+	}
+
+	/**
+	 * 写入HTML标签属性。
+	 * 
+	 * @param out
+	 * @param name
+	 * @param value
+	 * @throws IOException
+	 */
+	protected void appendHtmlAttr(Writer out, StringBuilder name, StringBuilder value) throws IOException
+	{
+		appendHtmlAttr(out, name.toString(), value.toString());
+	}
+
+	/**
+	 * 写入HTML标签属性。
+	 * 
+	 * @param out
+	 * @param name
+	 * @param value
+	 * @throws IOException
+	 */
+	protected void appendHtmlAttr(Writer out, String name, String value) throws IOException
+	{
+		if (name.isEmpty() && value.isEmpty())
+			return;
+
+		out.write(' ');
+		out.write(name);
+
+		if (!StringUtil.isEmpty(value))
+		{
+			out.write('=');
+			out.write(value);
+		}
+	}
+
+	protected void appendResolvedTagInfo(Writer out, int tagChar, String tagName, int last) throws IOException
+	{
+		out.write(tagChar);
+		out.write(tagName);
+
+		if (isValidReadChar(last))
+			out.write(last);
 	}
 
 	protected static class DashboardInfo

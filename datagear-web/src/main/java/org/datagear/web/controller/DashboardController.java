@@ -20,10 +20,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlDashboard;
+import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
@@ -394,6 +396,9 @@ public class DashboardController extends AbstractDataAnalysisController
 		Writer out = response.getWriter();
 
 		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), out);
+		AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler(
+				getMessage(request, "dashboard.show.htmlTitlePrefix", getMessage(request, "app.name")));
+		HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
 

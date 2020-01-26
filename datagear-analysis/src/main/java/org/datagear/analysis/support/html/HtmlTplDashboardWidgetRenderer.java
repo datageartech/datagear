@@ -74,7 +74,7 @@ import org.datagear.util.StringUtil;
  *
  * @param <T>
  */
-public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext>
+public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext> extends TextParserSupport
 {
 	public static final String DEFAULT_CONTEXT_PATH_PLACE_HOLDER = "$CONTEXTPATH";
 
@@ -387,8 +387,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	{
 		String charset = null;
 
-		StringBuilder nameCache = new StringBuilder();
-		StringBuilder valueCache = new StringBuilder();
+		StringBuilder nameCache = createStringBuilder();
 
 		int c = -1;
 		while ((c = in.read()) > -1)
@@ -398,77 +397,59 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 			if (c == '<')
 			{
-				if (isNotEmpty(nameCache))
-					clear(nameCache);
-				if (isNotEmpty(valueCache))
-					clear(valueCache);
+				clear(nameCache);
 
-				int last = skipWhitespace(in, null);
+				int last = readHtmlTagName(in, nameCache);
+				String tagName = nameCache.toString();
 
-				if (last < 0)
+				// </head
+				if ("/head".equalsIgnoreCase(tagName))
+					break;
+				// <meta
+				else if ("meta".equalsIgnoreCase(tagName))
 				{
-				}
-				// </...
-				else if (last == '/')
-				{
-					last = resolveHtmlCloseTagName(in, null, nameCache);
+					StringBuilder cache = createStringBuilder();
+					StringBuilder valueCache = createStringBuilder();
 
-					if (isNotEmpty(nameCache))
+					for (;;)
 					{
-						String tagName = nameCache.toString();
+						clear(nameCache);
+						clear(valueCache);
 
-						// </head>时退出
-						if ("head".equalsIgnoreCase(tagName))
+						last = resolveHtmlTagAttr(in, last, cache, nameCache, valueCache);
+
+						String name = toString(nameCache);
+						String value = toString(valueCache);
+
+						if ("charset".equalsIgnoreCase(name))
+						{
+							charset = value;
+							break;
+						}
+						else if ("content".equalsIgnoreCase(name))
+						{
+							String valueLower = value.toLowerCase();
+							String charsetToken = "charset=";
+							int charsetTokenIdx = valueLower.indexOf(charsetToken);
+							if (charsetTokenIdx > -1)
+							{
+								charset = value.substring(charsetTokenIdx + charsetToken.length());
+								break;
+							}
+						}
+
+						if (isHtmlTagEnd(last))
 							break;
 					}
 				}
-				// <>
-				else if (last == '>')
+				// <!--
+				else if (tagName.startsWith("!--"))
 				{
-				}
-				// <...
-				else
-				{
-					appendChar(nameCache, last);
-					last = resolveHtmlTagName(in, null, nameCache);
-
-					String tagName = nameCache.toString();
-
-					if ("meta".equalsIgnoreCase(tagName))
-					{
-						for (;;)
-						{
-							if (isNotEmpty(nameCache))
-								clear(nameCache);
-							if (isNotEmpty(valueCache))
-								clear(valueCache);
-
-							last = resolveHtmlTagAttr(in, last, null, nameCache, valueCache);
-
-							String name = nameCache.toString();
-							String value = valueCache.toString();
-
-							if ("charset".equalsIgnoreCase(name))
-							{
-								charset = value;
-								break;
-							}
-							else if ("content".equalsIgnoreCase(name))
-							{
-								String valueLower = value.toLowerCase();
-								String charsetToken = "charset=";
-								int charsetTokenIdx = valueLower.indexOf(charsetToken);
-								if (charsetTokenIdx > -1)
-								{
-									charset = value.substring(charsetTokenIdx + charsetToken.length());
-									break;
-								}
-							}
-
-							if (isHtmlTagEnd(last))
-								break;
-						}
-					}
+					// 空注释
+					if (isReadHtmlTagEmptyComment(tagName, last))
+						;
+					else
+						skipHtmlComment(in, null);
 				}
 			}
 		}
@@ -1028,16 +1009,14 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 解析HTML标签属性。
 	 * 
 	 * @param in
-	 * @param last
-	 *            上一个已读取的字符
-	 * @param cache
-	 *            写入已读取字符的缓存，为{@code null}则不写入
-	 * @param attrName
-	 * @param attrValue
+	 * @param last      上一个已读取的字符
+	 * @param out       写入已读取字符的缓存
+	 * @param attrName  属性名写入缓存
+	 * @param attrValue 属性值写入缓存，引号不会写入
 	 * @return '>'、'/'、空格、下一个属性名的第一个字符、-1
 	 * @throws IOException
 	 */
-	protected int resolveHtmlTagAttr(Reader in, int last, StringBuilder cache, StringBuilder attrName,
+	protected int resolveHtmlTagAttr(Reader in, int last, StringBuilder out, StringBuilder attrName,
 			StringBuilder attrValue) throws IOException
 	{
 		// 上一个字符是标签结束字符
@@ -1053,7 +1032,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		int c = -1;
 		while ((c = in.read()) > -1)
 		{
-			appendChar(cache, c);
+			appendChar(out, c);
 
 			if (c == '>' || c == '/')
 			{
@@ -1081,12 +1060,12 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 						while ((c = in.read()) > -1)
 						{
-							appendChar(cache, c);
+							appendChar(out, c);
 
 							if (c == quote)
 							{
 								c = in.read();
-								appendChar(cache, c);
+								appendChar(out, c);
 
 								endQuote = true;
 								break;
@@ -1111,7 +1090,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 					appendChar(attrValue, c);
 				else
 				{
-					int prev = (isEmpty(cache) ? 0 : cache.charAt(cache.length() - 1));
+					int prev = (isEmpty(out) ? 0 : out.charAt(out.length() - 1));
 
 					// 只有属性名没有属性值
 					if (isWhitespace(prev))
@@ -1126,35 +1105,68 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
-	 * 解析HTML关闭标签名（“&lt;/tag-name&gt;”）。
-	 * <p>
-	 * 如果不是合法的关闭标签，{@code tagName}将为空。
-	 * </p>
+	 * 读取字符到“{@code -->}”。
 	 * 
 	 * @param in
-	 * @param cache
-	 *            写入已读取字符的缓存，为{@code null}则不写入
-	 * @param tagName
-	 * @return
+	 * @param out 为{@code null}则不写入
 	 * @throws IOException
 	 */
-	protected int resolveHtmlCloseTagName(Reader in, StringBuilder cache, StringBuilder tagName) throws IOException
+	protected void skipHtmlComment(Reader in, Writer out) throws IOException
 	{
-		int last = resolveHtmlTagName(in, cache, tagName);
+		int ppc = -1;
+		int pc = -1;
+		int c = -1;
 
-		if (Character.isWhitespace(last))
-			last = skipWhitespace(in, cache);
+		while ((c = in.read()) > -1)
+		{
+			if (out != null)
+				out.write(c);
 
-		if (isHtmlTagEnd(last))
-			;
-		else
-			clear(tagName);
+			if (c == '>' && pc == '-' && ppc == '-')
+				break;
 
-		return last;
+			ppc = pc;
+			pc = c;
+		}
 	}
 
 	/**
-	 * 给定字符是否是HTML标签结束符。
+	 * 读取HTML标签名。
+	 * 
+	 * @param in
+	 * @param out
+	 * @return 最后读取的不是标签名的字符：空格、>、-1，这个字符不会写入{@code out}
+	 * @throws IOException
+	 */
+	protected int readHtmlTagName(Reader in, StringBuilder out) throws IOException
+	{
+		int c = -1;
+
+		while ((c = in.read()) > -1)
+		{
+			if (isWhitespace(c) || c == '>')
+				break;
+
+			appendChar(out, c);
+		}
+
+		return c;
+	}
+
+	/**
+	 * 读取的标签名是否是空HTML注释：&lt;!----&gt;、&lt;!-------&gt;
+	 * 
+	 * @param tagName
+	 * @param last
+	 * @return
+	 */
+	protected boolean isReadHtmlTagEmptyComment(String tagName, int last)
+	{
+		return (tagName.length() >= 5 && tagName.endsWith("--") && last == '>');
+	}
+
+	/**
+	 * 给定字符是否表明HTML标签结束：>、-1。
 	 * 
 	 * @param c
 	 * @return
@@ -1162,89 +1174,6 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	protected boolean isHtmlTagEnd(int c)
 	{
 		return (c == '>' || c < 0);
-	}
-
-	/**
-	 * {@linkplain StringBuilder}是否为空。
-	 * 
-	 * @param sb
-	 * @return
-	 */
-	protected boolean isEmpty(StringBuilder sb)
-	{
-		return (sb == null || sb.length() == 0);
-	}
-
-	/**
-	 * {@linkplain StringBuilder}是否不为空。
-	 * 
-	 * @param sb
-	 * @return
-	 */
-	protected boolean isNotEmpty(StringBuilder sb)
-	{
-		return (sb != null && sb.length() > 0);
-	}
-
-	/**
-	 * 清除{@linkplain StringBuilder}。
-	 * 
-	 * @param sb
-	 */
-	protected void clear(StringBuilder sb)
-	{
-		if (sb == null)
-			return;
-
-		sb.delete(0, sb.length());
-	}
-
-	/**
-	 * 跳过空格。
-	 * 
-	 * @param in
-	 * @param out
-	 *            写入跳过空格的缓存，为{@code null}则不写入
-	 * @return 非空格字符、-1
-	 * @throws IOException
-	 */
-	protected int skipWhitespace(Reader in, StringBuilder out) throws IOException
-	{
-		int c = -1;
-
-		while ((c = in.read()) > -1)
-		{
-			appendChar(out, c);
-
-			if (!isWhitespace(c))
-				break;
-		}
-
-		return c;
-	}
-
-	/**
-	 * 追加字符。
-	 * 
-	 * @param sb
-	 *            追加字符缓存，为{@code null}则不写入
-	 * @param c
-	 */
-	protected void appendChar(StringBuilder sb, int c)
-	{
-		if (sb != null)
-			sb.appendCodePoint(c);
-	}
-
-	/**
-	 * 是否空格字符。
-	 * 
-	 * @param c
-	 * @return
-	 */
-	protected boolean isWhitespace(int c)
-	{
-		return Character.isWhitespace(c);
 	}
 
 	/**
@@ -1264,5 +1193,60 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		dashboard.setCharts(new ArrayList<Chart>());
 
 		return dashboard;
+	}
+
+	/**
+	 * HTML <code>&lt;title&gt;</code>内容处理器。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static interface HtmlTitleHandler
+	{
+		/**
+		 * 处理原始<code>&lt;title&gt;</code>内容并返回新内容。
+		 * 
+		 * @param rawTitle
+		 * @return
+		 */
+		String handle(String rawTitle);
+	}
+
+	/**
+	 * 为HTML标题添加前缀的{@linkplain HtmlTitleHandler}。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class AddPrefixHtmlTitleHandler implements HtmlTitleHandler
+	{
+		private String prefix;
+
+		public AddPrefixHtmlTitleHandler()
+		{
+			super();
+		}
+
+		public AddPrefixHtmlTitleHandler(String prefix)
+		{
+			super();
+			this.prefix = prefix;
+		}
+
+		public String getPrefix()
+		{
+			return prefix;
+		}
+
+		public void setPrefix(String prefix)
+		{
+			this.prefix = prefix;
+		}
+
+		@Override
+		public String handle(String rawTitle)
+		{
+			return this.prefix + rawTitle;
+		}
 	}
 }

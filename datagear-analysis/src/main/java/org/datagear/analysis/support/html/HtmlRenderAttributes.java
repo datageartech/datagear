@@ -13,6 +13,7 @@ import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderStyle;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.HtmlTitleHandler;
 import org.datagear.util.Global;
 import org.datagear.util.StringUtil;
 
@@ -31,6 +32,8 @@ public class HtmlRenderAttributes
 	public static final String CHART_THEME = "chartTheme";
 
 	public static final String LOCALE = "locale";
+
+	public static final String HTML_TITLE_HANDLER = HtmlTitleHandler.class.getName();
 
 	/**
 	 * 获取{@linkplain RenderStyle}，没有则返回{@code null}。
@@ -158,6 +161,38 @@ public class HtmlRenderAttributes
 	public static Locale removeLocale(RenderContext renderContext)
 	{
 		return renderContext.removeAttribute(LOCALE);
+	}
+
+	/**
+	 * 获取{@linkplain HtmlTitleHandler}，没有则返回{@code null}。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public static HtmlTitleHandler getHtmlTitleHandler(RenderContext renderContext)
+	{
+		return renderContext.getAttribute(HTML_TITLE_HANDLER);
+	}
+
+	/**
+	 * 设置{@linkplain HtmlTitleHandler}。
+	 * 
+	 * @param renderContext
+	 * @param htmlTitleHandler
+	 */
+	public static void setHtmlTitleHandler(RenderContext renderContext, HtmlTitleHandler htmlTitleHandler)
+	{
+		renderContext.setAttribute(HTML_TITLE_HANDLER, htmlTitleHandler);
+	}
+
+	/**
+	 * 移除{@linkplain HtmlTitleHandler}。
+	 * 
+	 * @param renderContext
+	 */
+	public static HtmlTitleHandler removeHtmlTitleHandler(RenderContext renderContext)
+	{
+		return renderContext.removeAttribute(HTML_TITLE_HANDLER);
 	}
 
 	/**

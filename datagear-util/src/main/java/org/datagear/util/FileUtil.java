@@ -53,7 +53,21 @@ public class FileUtil
 	 */
 	public static File getFile(String file)
 	{
+		file = trimPath(file);
+
 		return new File(file);
+	}
+
+	/**
+	 * 获取文件对象。
+	 * 
+	 * @param file
+	 * @param createDirectory 是否创建自身目录和上级目录
+	 * @return
+	 */
+	public static File getFile(String file, boolean createDirectory)
+	{
+		return getFileNullable(null, file, createDirectory);
 	}
 
 	/**
@@ -65,9 +79,58 @@ public class FileUtil
 	 */
 	public static File getFile(File parent, String file)
 	{
-		checkBackwardPath(file);
+		file = trimPath(file);
+
+		checkBackwardPathNoTrime(file);
 
 		return new File(parent, file);
+	}
+
+	/**
+	 * 获取指定目录下的文件对象。
+	 * 
+	 * @param parent
+	 * @param file
+	 * @param createDirectory 是否创建自身目录和上级目录
+	 * @return
+	 */
+	public static File getFile(File parent, String file, boolean createDirectory)
+	{
+		return getFileNullable(parent, file, createDirectory);
+	}
+
+	/**
+	 * 获取文件对象。
+	 * 
+	 * @param parent          允许为{@code null}
+	 * @param file
+	 * @param createDirectory 是否创建自身目录和上级目录
+	 * @return
+	 */
+	protected static File getFileNullable(File parent, String file, boolean createDirectory)
+	{
+		file = trimPath(file);
+
+		if (!createDirectory)
+		{
+			return (parent == null ? new File(file) : new File(parent, file));
+		}
+		else
+		{
+			int spIdx = file.lastIndexOf(PATH_SEPARATOR);
+
+			if (spIdx <= 0)
+				return (parent == null ? new File(file) : new File(parent, file));
+			else if (spIdx + PATH_SEPARATOR.length() == file.length())
+				return (parent == null ? getDirectory(file, true) : getDirectory(parent, file, true));
+			else
+			{
+				String myParent = file.substring(0, spIdx);
+				File myDirectory = (parent == null ? getDirectory(myParent, true)
+						: getDirectory(parent, myParent, true));
+				return getFile(myDirectory, file.substring(spIdx + PATH_SEPARATOR.length()));
+			}
+		}
 	}
 
 	/**
@@ -94,6 +157,8 @@ public class FileUtil
 	 */
 	public static File getDirectory(String file, boolean create)
 	{
+		file = trimPath(file);
+
 		File directory = new File(file);
 
 		if (create && !directory.exists())
@@ -128,7 +193,9 @@ public class FileUtil
 	 */
 	public static File getDirectory(File parent, String file, boolean create)
 	{
-		checkBackwardPath(file);
+		file = trimPath(file);
+
+		checkBackwardPathNoTrime(file);
 
 		File directory = new File(parent, file);
 
@@ -490,7 +557,13 @@ public class FileUtil
 		if (path == null)
 			return false;
 
-		path = trimPath(path);
+		return containsBackwardPathNoTrim(trimPath(path));
+	}
+
+	protected static boolean containsBackwardPathNoTrim(String path)
+	{
+		if (path == null)
+			return false;
 
 		return (path.indexOf(".." + PATH_SEPARATOR) > -1 || path.indexOf(PATH_SEPARATOR + "..") > -1);
 	}
@@ -503,7 +576,15 @@ public class FileUtil
 	 */
 	public static void checkBackwardPath(String path) throws IllegalArgumentException
 	{
-		if (containsBackwardPath(path))
+		if (path == null)
+			return;
+
+		checkBackwardPathNoTrime(trimPath(path));
+	}
+
+	protected static void checkBackwardPathNoTrime(String path) throws IllegalArgumentException
+	{
+		if (containsBackwardPathNoTrim(path))
 			throw new IllegalArgumentException("[../] and [..\\] is not allowed in path [" + path + "]");
 	}
 

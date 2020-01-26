@@ -87,6 +87,13 @@ public class HtmlTplDashboardWidgetRendererTest
 			String charset = this.renderer.resolveCharset(in);
 			Assert.assertEquals("", charset);
 		}
+
+		{
+			String html = "<html><head><!--<meta charset='GBK'></head>--> <!----> <meta charset='UTF-8'></head></html>";
+			StringReader in = new StringReader(html);
+			String charset = this.renderer.resolveCharset(in);
+			Assert.assertEquals("UTF-8", charset);
+		}
 	}
 
 	private class TestHtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext> extends HtmlTplDashboardWidgetRenderer<T>

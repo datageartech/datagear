@@ -37,8 +37,7 @@ import freemarker.template.TemplateScalarModel;
 /**
  * 使用Freemarker作为模板的{@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 此类可渲染由{@linkplain FileTemplateDashboardWidgetResManager}管理模板的{@linkplain HtmlTplDashboardWidget}，
- * 其中{@linkplain HtmlTplDashboardWidget#getTemplate()}即是可以通过{@linkplain FileTemplateDashboardWidgetResManager#getRelativePath(String, String)}找到的模板文件。
+ * 此类可渲染由{@linkplain FileTemplateDashboardWidgetResManager}管理模板资源的{@linkplain HtmlTplDashboardWidget}。
  * </p>
  * <p>
  * 此类需要手动调用{@linkplain #init()}方法进行初始化。

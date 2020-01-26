@@ -1,5 +1,6 @@
 package org.datagear.analysis.support;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,12 +10,13 @@ import java.io.Writer;
 
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.TemplateDashboardWidget;
+import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
 /**
- * 基于文件的{@linkplain DashboardWidgetResManager}。
+ * 基于文件的{@linkplain TemplateDashboardWidgetResManager}。
  * <p>
  * 此类将{@linkplain TemplateDashboardWidget#getTemplate()}作为资源文件名处理。
  * </p>
@@ -118,14 +120,18 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	@Override
 	public InputStream getResourceInputStream(String id, String name) throws IOException
 	{
-		File file = getFile(id, name);
-		return IOUtil.getInputStream(file);
+		File file = getFile(id, name, true);
+
+		if (!file.exists())
+			return new ByteArrayInputStream(new byte[0]);
+		else
+			return IOUtil.getInputStream(file);
 	}
 
 	@Override
 	public OutputStream getResourceOutputStream(String id, String name) throws IOException
 	{
-		File file = getFile(id, name);
+		File file = getFile(id, name, true);
 		return IOUtil.getOutputStream(file);
 	}
 
@@ -139,14 +145,14 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	@Override
 	public boolean containsResource(String id, String name)
 	{
-		File file = getFile(id, name);
+		File file = getFile(id, name, false);
 		return file.exists();
 	}
 
 	@Override
 	public long lastModifiedResource(String id, String name)
 	{
-		File file = getFile(id, name);
+		File file = getFile(id, name, false);
 		return file.lastModified();
 	}
 
@@ -168,10 +174,10 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 		return widget.getTemplate();
 	}
 
-	protected File getFile(String id, String name)
+	protected File getFile(String id, String name, boolean create)
 	{
 		String path = doGetRelativePath(id, name);
-		return FileUtil.getFile(this.rootDirectory, path);
+		return FileUtil.getFile(this.rootDirectory, path, create);
 	}
 
 	protected String doGetRelativePath(String id, String name)

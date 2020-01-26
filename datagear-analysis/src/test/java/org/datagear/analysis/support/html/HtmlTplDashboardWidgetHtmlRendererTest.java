@@ -19,6 +19,7 @@ import org.datagear.analysis.support.SimpleChartWidgetSource;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.ChartInfo;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DashboardInfo;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
 import org.datagear.util.IOUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -166,7 +167,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		// 看板属性，多个导入排除值
 		{
 			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-renderer='myRenderer' "
-					+ " dg-dashboard-import-exclude='jquery,theme, style '><head></head><body></body></html>";
+					+ " dg-dashboard-import-exclude='jquery,theme, style'><head></head><body></body></html>";
 
 			StringWriter out = new StringWriter();
 			DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), out);
@@ -223,16 +224,16 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 					+ "<div sdf abc def 12345677788 // >"
 					//
 					+ HtmlChartPlugin.HTML_NEW_LINE + "<div   id=element_4    dg-chart-widget=chartwidget_4    ></div>"
-					+ HtmlChartPlugin.HTML_NEW_LINE + "<div   id  =  element_5    dg-chart-widget=  chartwidget_5/>"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div   id  =  element_5    dg-chart-widget=  chartwidget_5 />"
 					+ HtmlChartPlugin.HTML_NEW_LINE + "<div   id=element_6    dg-chart-widget=chartwidget_6  />"
 					+ HtmlChartPlugin.HTML_NEW_LINE + "<div   id=element_7    dg-chart-widget=chartwidget_7  /  >"
 					+ HtmlChartPlugin.HTML_NEW_LINE + "<div     dg-chart-widget=chartwidget_8    /  >"
 					//
 					+ HtmlChartPlugin.HTML_NEW_LINE + "<div     dg-chart-widget=chartwidget_9/>"
 					//
-					+ HtmlChartPlugin.HTML_NEW_LINE + "<div     dg-chart-widget=/>"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div     dg-chart-widget='' />"
 					//
-					+ HtmlChartPlugin.HTML_NEW_LINE + "<div     dg-chart-widget=  />"
+					+ HtmlChartPlugin.HTML_NEW_LINE + "<div     dg-chart-widget=\"\"  />"
 					//
 					+ HtmlChartPlugin.HTML_NEW_LINE + "</body></html>";
 
@@ -263,15 +264,50 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			Assert.assertTrue(html.contains("<div id=element_3 dg-chart-widget=chartwidget_3></div>"));
 			Assert.assertTrue(html.contains("<div sdf abc def 12345677788 // >"));
 			Assert.assertTrue(html.contains("<div   id=element_4    dg-chart-widget=chartwidget_4    ></div>"));
-			Assert.assertTrue(html.contains("<div   id  =  element_5    dg-chart-widget=  chartwidget_5/>"));
+			Assert.assertTrue(html.contains("<div   id  =  element_5    dg-chart-widget=  chartwidget_5 />"));
 			Assert.assertTrue(html.contains("<div   id=element_6    dg-chart-widget=chartwidget_6  />"));
 			Assert.assertTrue(html.contains("<div   id=element_7    dg-chart-widget=chartwidget_7  /  >"));
 			Assert.assertTrue(
 					html.contains("<div     dg-chart-widget=chartwidget_8 id=\"dataGearChartElement1\"     /  >"));
 			Assert.assertTrue(html.contains("<div     dg-chart-widget=chartwidget_9 id=\"dataGearChartElement2\" />"));
-			Assert.assertTrue(html.contains("<div     dg-chart-widget=/>"));
-			Assert.assertTrue(html.contains("<div     dg-chart-widget=  />"));
+			Assert.assertTrue(html.contains("<div     dg-chart-widget='' />"));
+			Assert.assertTrue(html.contains("<div     dg-chart-widget=\"\"  />"));
 			Assert.assertTrue(html.contains("</body></html>"));
+		}
+
+		// 处理标题
+		{
+			String template = "<html><head></head><body></body></html>";
+
+			StringWriter out = new StringWriter();
+			DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), out);
+			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler("prefix-");
+			HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+
+			HtmlDashboard dashboard = this.renderer.createHtmlDashboard(renderContext, dashboardWidget);
+			this.renderer.renderHtmlDashboard(renderContext, dashboard,
+					IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertTrue(html.contains("<title>prefix-</title></head>"));
+		}
+		{
+			String template = "<html><head><title>abc</title></head><body><title>sdf</title></body></html>";
+
+			StringWriter out = new StringWriter();
+			DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), out);
+			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler("prefix-");
+			HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+
+			HtmlDashboard dashboard = this.renderer.createHtmlDashboard(renderContext, dashboardWidget);
+			this.renderer.renderHtmlDashboard(renderContext, dashboard,
+					IOUtil.getReader(template));
+
+			String html = getHtmlWithPrint(out);
+
+			Assert.assertTrue(html.contains("<title>prefix-abc</title></head>"));
+			Assert.assertTrue(html.contains("<title>sdf</title>"));
 		}
 	}
 

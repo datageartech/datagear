@@ -9,6 +9,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Writer;
 
 /**
  * 文本解析支持类。
@@ -44,19 +45,19 @@ public class TextParserSupport
 	 * 读取最多指定字符。
 	 * 
 	 * @param reader
-	 * @param cache
+	 * @param out
 	 * @param count
 	 * @return
 	 * @throws IOException
 	 */
-	public void readChars(Reader reader, StringBuilder cache, int count) throws IOException
+	public void readChars(Reader reader, StringBuilder out, int count) throws IOException
 	{
 		for (int i = 0; i < count; i++)
 		{
 			int c = reader.read();
 
 			if (isValidReadChar(c))
-				appendChar(cache, c);
+				appendChar(out, c);
 			else
 				break;
 		}
@@ -65,24 +66,23 @@ public class TextParserSupport
 	/**
 	 * 读取到{@code '}或者{@code "}引号的下一个字符。
 	 * <p>
-	 * 下一个字符不会写入{@code quoted}。
+	 * 下一个字符不会写入{@code out}。
 	 * </p>
 	 * 
 	 * @param in
-	 * @param quoted
-	 * @param quote
-	 *            {@code '}或者{@code "}
+	 * @param out
+	 * @param quote {@code '}或者{@code "}
 	 * @return 引号的下一个字符、-1
 	 * @throws IOException
 	 */
-	public int readQuoted(Reader in, StringBuilder quoted, int quote) throws IOException
+	public int readQuoted(Reader in, StringBuilder out, int quote) throws IOException
 	{
 		int c = -1;
 		boolean inEscape = false;
 
 		while ((c = in.read()) > -1)
 		{
-			appendChar(quoted, c);
+			appendChar(out, c);
 
 			if (inEscape)
 				inEscape = false;
@@ -374,6 +374,23 @@ public class TextParserSupport
 		return true;
 	}
 
+	public void append(Writer out, StringBuilder sb) throws IOException
+	{
+		out.write(sb.toString());
+	}
+
+	public void appendAndClear(Writer out, StringBuilder sb) throws IOException
+	{
+		out.write(sb.toString());
+		clear(sb);
+	}
+
+	public void appendIfValid(Writer out, int c) throws IOException
+	{
+		if (isValidReadChar(c))
+			out.write(c);
+	}
+
 	/**
 	 * 是否是有效的读取字符。
 	 * 
@@ -416,15 +433,99 @@ public class TextParserSupport
 	 */
 	public void clear(StringBuilder sb)
 	{
-		if (sb == null)
+		if (sb == null || isEmpty(sb))
 			return;
 
 		sb.delete(0, sb.length());
 	}
 
+	/**
+	 * {@code sb}是否以{@code tail}结尾。
+	 * 
+	 * @param sb
+	 * @param tail
+	 * @return
+	 */
+	public boolean isTail(StringBuilder sb, String tail)
+	{
+		int sbLen = sb.length();
+		int tailLen = tail.length();
+
+		if (sbLen < tailLen)
+			return false;
+
+		for (int i = tailLen - 1; i >= 0; i--)
+		{
+			if (tail.charAt(i) != sb.charAt(i))
+				return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * {@linkplain StringBuilder}是否为空。
+	 * 
+	 * @param sb
+	 * @return
+	 */
+	public boolean isEmpty(StringBuilder sb)
+	{
+		return (sb == null || sb.length() == 0);
+	}
+
+	/**
+	 * {@linkplain StringBuilder}是否不为空。
+	 * 
+	 * @param sb
+	 * @return
+	 */
+	public boolean isNotEmpty(StringBuilder sb)
+	{
+		return (sb != null && sb.length() > 0);
+	}
+
 	public StringBuilder createStringBuilder()
 	{
 		return new StringBuilder();
+	}
+
+	public String toString(StringBuilder sb)
+	{
+		return sb.toString();
+	}
+
+	/**
+	 * 获取引号内容。
+	 * 
+	 * @param sb
+	 * @return
+	 */
+	protected String valueIfQuoted(StringBuilder sb)
+	{
+		return valueIfQuoted(sb.toString());
+	}
+
+	/**
+	 * 获取引号内容。
+	 * 
+	 * @param str
+	 * @return
+	 */
+	protected String valueIfQuoted(String str)
+	{
+		int len = str.length();
+
+		if (len < 2)
+			return str.toString();
+
+		int ch = str.charAt(0);
+		int ct = str.charAt(len - 1);
+
+		if ((ch == '\'' && ct == '\'') || (ch == '"' && ct == '"'))
+			return str.substring(1, len - 1);
+		else
+			return str.toString();
 	}
 
 	public static interface Predicate

@@ -25,10 +25,12 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlDashboard;
+import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
@@ -283,7 +285,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		if (chart == null)
 			throw new RecordNotFoundException();
 
-		String htmlTitle = getMessage(request, "chart.show.htmlTitle", chart.getName());
+		String htmlTitle = chart.getName();
 		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(id,
 				this.chartShowHtmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
 						"  position:absolute;\n  left:1em;\n  right:1em;\n  top:1em;\n  bottom:1em;\n  margin:0 0;\n",
@@ -296,6 +298,9 @@ public class ChartController extends AbstractChartPluginAwareController
 		Writer out = response.getWriter();
 
 		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), out);
+		AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler(
+				getMessage(request, "chart.show.htmlTitlePrefix", getMessage(request, "app.name")));
+		HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
 
