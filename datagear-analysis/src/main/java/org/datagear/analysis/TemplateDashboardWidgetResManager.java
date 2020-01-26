@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.List;
 
 /**
  * {@linkplain TemplateDashboardWidget}资源管理器。
@@ -116,9 +117,25 @@ public interface TemplateDashboardWidgetResManager
 	long lastModifiedResource(String id, String name);
 
 	/**
+	 * 列出所有资源。
+	 * 
+	 * @param id
+	 * @return
+	 */
+	List<String> listResources(String id);
+
+	/**
 	 * 删除指定ID的所有资源。
 	 * 
 	 * @param id
 	 */
 	void delete(String id);
+
+	/**
+	 * 删除指定资源。
+	 * 
+	 * @param id
+	 * @param name
+	 */
+	void delete(String id, String name);
 }

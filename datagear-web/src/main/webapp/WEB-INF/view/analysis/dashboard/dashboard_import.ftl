@@ -61,7 +61,7 @@
 	
 	po.element(".fileinput-button").fileupload(
 	{
-		url : po.url("uploadFile"),
+		url : po.url("uploadImportFile"),
 		paramName : "file",
 		success : function(uploadResult, textStatus, jqXHR)
 		{

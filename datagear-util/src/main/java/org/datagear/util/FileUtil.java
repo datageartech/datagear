@@ -42,7 +42,12 @@ public class FileUtil
 			throw new IllegalArgumentException(
 					"File [" + descendent + "] is not descendent of File [" + ancestor + "]");
 
-		return dp.substring(index + ap.length());
+		String rp = dp.substring(index + ap.length());
+
+		if (rp.startsWith(PATH_SEPARATOR))
+			rp = rp.substring(PATH_SEPARATOR.length());
+
+		return rp;
 	}
 
 	/**

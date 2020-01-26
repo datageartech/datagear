@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
@@ -130,6 +132,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (dashboard == null)
 			throw new RecordNotFoundException();
 
+
 		model.addAttribute("dashboard", dashboard);
 		readAndSetTemplateContent(dashboard, model);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editDashboard");
@@ -175,15 +178,129 @@ public class DashboardController extends AbstractDataAnalysisController
 		return responseEntity;
 	}
 
+	@RequestMapping(value = "/listResources", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<String> listResources(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestParam("id") String id) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
+
+		if (dashboard == null)
+			return new ArrayList<String>(0);
+
+		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+
+		List<String> resources = dashboardWidgetResManager.listResources(dashboard.getId());
+
+		return resources;
+	}
+
+	@RequestMapping(value = "/deleteResource", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public boolean deleteResource(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestParam("id") String id, @RequestParam("name") String name)
+			throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
+
+		if (dashboard == null)
+			return false;
+
+		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+
+		dashboardWidgetResManager.delete(id, name);
+
+		return true;
+	}
+
+	@RequestMapping(value = "/uploadResourceFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, Object> uploadResourceFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("file") MultipartFile multipartFile) throws Exception
+	{
+		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
+		String fileName = multipartFile.getOriginalFilename();
+		File file = FileUtil.getFile(tmpDirectory, fileName);
+
+		InputStream in = null;
+		OutputStream out = null;
+		try
+		{
+			in = multipartFile.getInputStream();
+			out = IOUtil.getOutputStream(file);
+			IOUtil.write(in, out);
+		}
+		finally
+		{
+			IOUtil.close(in);
+			IOUtil.close(out);
+		}
+
+		String uploadFilePath = FileUtil.getRelativePath(this.tempDirectory, file);
+
+		Map<String, Object> results = new HashMap<String, Object>();
+		results.put("uploadFilePath", uploadFilePath);
+		results.put("fileName", fileName);
+
+		return results;
+	}
+
+	@RequestMapping(value = "/saveResourceFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveResourceFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("id") String id,
+			@RequestParam("resourceFilePath") String resourceFilePath,
+			@RequestParam("resourceName") String resourceName) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
+
+		File uploadFile = FileUtil.getDirectory(this.tempDirectory, resourceFilePath, false);
+
+		if (!uploadFile.exists())
+			throw new IllegalInputException();
+
+		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+
+		InputStream in = null;
+		OutputStream out = null;
+
+		try
+		{
+			in = IOUtil.getInputStream(uploadFile);
+			out = dashboardWidgetResManager.getResourceOutputStream(id, resourceName);
+
+			IOUtil.write(in, out);
+		}
+		finally
+		{
+			IOUtil.close(in);
+			IOUtil.close(out);
+		}
+
+		return buildOperationMessageSaveSuccessResponseEntity(request);
+	}
+
 	@RequestMapping("/import")
 	public String impt(HttpServletRequest request, org.springframework.ui.Model model)
 	{
 		return "/analysis/dashboard/dashboard_import";
 	}
 
-	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/uploadImportFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Map<String, Object> uploadFile(HttpServletRequest request, HttpServletResponse response,
+	public Map<String, Object> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") MultipartFile multipartFile) throws Exception
 	{
 		String dashboardFileName = "";

@@ -248,7 +248,7 @@ readonly 是否只读操作，允许为null
 			}
 			
 			<#if !readonly>
-			$("<button type='button' class='sign-add-button ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button'><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'> </span></button>")
+			$("<button type='button' class='sign-add-button ui-button ui-corner-all ui-widget ui-button-icon-only'><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'> </span></button>")
 				.attr("title", "<@spring.message code='chart.addDataSign' />")
 				.appendTo($valuesWrapper);
 			</#if>

@@ -7,6 +7,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.TemplateDashboardWidget;
@@ -157,10 +161,68 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	}
 
 	@Override
+	public List<String> listResources(String id)
+	{
+		File directory = FileUtil.getDirectory(this.rootDirectory, id, false);
+
+		if (!directory.exists())
+			return new ArrayList<String>(0);
+
+		List<File> files = new ArrayList<File>();
+		listAllDescendentFiles(directory, files);
+
+		List<String> resources = new ArrayList<String>(files.size());
+
+		for (File file : files)
+		{
+			String resource = FileUtil.getRelativePath(directory, file);
+
+			if (file.isDirectory())
+				resource += FileUtil.PATH_SEPARATOR;
+
+			resources.add(resource);
+		}
+
+		return resources;
+	}
+
+	@Override
 	public void delete(String id)
 	{
 		File directory = FileUtil.getDirectory(this.rootDirectory, id);
 		FileUtil.deleteFile(directory);
+	}
+
+	@Override
+	public void delete(String id, String name)
+	{
+		File file = getFile(id, name, false);
+		FileUtil.deleteFile(file);
+	}
+
+	protected void listAllDescendentFiles(File directory, List<File> files)
+	{
+		if (!directory.exists())
+			return;
+
+		File[] children = directory.listFiles();
+
+		Arrays.sort(children, new Comparator<File>()
+		{
+			@Override
+			public int compare(File o1, File o2)
+			{
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
+
+		for (File child : children)
+		{
+			files.add(child);
+
+			if (child.isDirectory())
+				listAllDescendentFiles(child, files);
+		}
 	}
 
 	/**
