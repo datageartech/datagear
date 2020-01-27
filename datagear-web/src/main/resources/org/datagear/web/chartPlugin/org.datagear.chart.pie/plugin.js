@@ -1,5 +1,5 @@
 {
-	id : 'datagear-chart-pie',
+	id : 'org.datagear.chart.pie',
 	nameLabel : '饼图',
 	descLabel : '饼图',
 	dataSigns :

@@ -45,7 +45,7 @@ readonly 是否只读操作，允许为null
 								<@spring.message code='dashboard.dashboardResource' />
 							</div>
 							<#if !readonly>
-							<button type='button' class='copy-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' id="${pageId}-copyResourceButton" title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'> </span></button>
+							<button type='button' class='copy-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'> </span></button>
 							<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='add' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'> </span></button>
 							<button type='button' class='refresh-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='refresh' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'> </span></button>
 							<button type='button' class='delete-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'> </span></button>
@@ -158,22 +158,21 @@ readonly 是否只读操作，允许为null
 		return $res.attr("resource-name");
 	};
 	
-	po.initCopyResourceButton = function()
+	po.resourceNameClipboard = new ClipboardJS(po.element(".copy-resource-button")[0],
 	{
-		var clipboard = new ClipboardJS(po.element("#${pageId}-copyResourceButton")[0],
+		text: function(trigger)
 		{
-			text: function(trigger)
-			{
-				var text = po.getSelectedResourceName();
-				
-				return text;
-			}
-		});
-		clipboard.on('success', function(e)
-		{
-			$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
-		});
-	};
+			var text = po.getSelectedResourceName();
+			if(!text)
+				text = "";
+			
+			return text;
+		}
+	});
+	po.resourceNameClipboard.on('success', function(e)
+	{
+		$.tipSuccess("<@spring.message code='copyToClipboardSuccess' />");
+	});
 	
 	po.element(".add-resource-panel").draggable({ handle : ".add-resource-panel-head" });
 
@@ -404,10 +403,6 @@ readonly 是否只读操作，允许为null
 	
 	po.initTemplateEditor();
 	po.refreshDashboardResources();
-	
-	<#if !readonly>
-	po.initCopyResourceButton();
-	</#if>
 })
 (${pageId});
 </script>

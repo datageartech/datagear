@@ -1,14 +1,14 @@
 {
-	id : 'datagear-chart-bar',
-	nameLabel : '柱状图',
-	descLabel : '柱状图',
+	id : 'org.datagear.chart.line',
+	nameLabel : '折线图',
+	descLabel : '折线图',
 	dataSigns :
 	[
 		{ name : "x-value", nameLabel : "横坐标", occurRequired: true, occurMultiple: false },
 		{ name : "y-value", nameLabel : "纵坐标", occurRequired: true, occurMultiple: true }
 	],
 	version: "0.1.0",
-	order : 1,
+	order : 0,
 	chartRender:
 	{
 	/**
@@ -28,11 +28,11 @@
 					data: []
 				},
 				yAxis: {
-					type: 'value'
+					type: 'value',
 				},
 				series: [{
 					data: [],
-					type: 'bar'
+					type: 'line'
 				}]
 			};
 			

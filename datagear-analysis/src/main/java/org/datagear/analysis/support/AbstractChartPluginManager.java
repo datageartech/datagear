@@ -242,8 +242,18 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 		});
 	}
 
+	/**
+	 * {@code my}是否可替换{@code old}。
+	 * 
+	 * @param my
+	 * @param old 允许为{@code null}
+	 * @return
+	 */
 	protected boolean canReplaceForSameId(ChartPlugin<?> my, ChartPlugin<?> old)
 	{
+		if (old == null)
+			return true;
+
 		boolean replace = false;
 
 		Version myVersion = null;
