@@ -59,7 +59,25 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='chart.updateInterval' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="updateInterval" value="${(chart.updateInterval)!'-1'?html}" class="ui-widget ui-widget-content" />
+					<div class="updateInterval-radios">
+						<label for="${pageId}-updateInterval_0" title="">
+							<@spring.message code='chart.updateInterval.none' />
+						</label>
+			   			<input type="radio" id="${pageId}-updateInterval_0" name="updateIntervalRadio" value="0" />
+						<label for="${pageId}-updateInterval_1" title="">
+							<@spring.message code='chart.updateInterval.realtime' />
+						</label>
+			   			<input type="radio" id="${pageId}-updateInterval_1" name="updateIntervalRadio" value="1"  />
+						<label for="${pageId}-updateInterval_2" title="">
+							<@spring.message code='chart.updateInterval.interval' />
+						</label>
+			   			<input type="radio" id="${pageId}-updateInterval_2" name="updateIntervalRadio" value="2"  />
+					</div>
+					&nbsp;
+					<span class="updateInterval-wrapper">
+						<input type="text" name="updateInterval" value="${(chart.updateInterval)!'-1'?html}" class="ui-widget ui-widget-content" style="width:7em;" />
+						<span><@spring.message code='chart.updateIntervalUnit' /></span>
+					</span>
 				</div>
 			</div>
 		</div>
@@ -84,6 +102,9 @@ readonly 是否只读操作，允许为null
 	po.element(".data-set-wrapper").height(dataSetWrapperHeight);
 	po.element(".form-item-value-chartDataSet").height(dataSetWrapperHeight + 35);
 	
+	po.element("input[name='updateIntervalRadio']").checkboxradio({icon:false});
+	po.element(".updateInterval-radios").controlgroup();
+	
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/chart/" + action;
@@ -91,6 +112,74 @@ readonly 是否只读操作，允许为null
 	
 	po.chartDataSets = <@writeJson var=chartDataSets />;
 	po.chartPluginVOs = <@writeJson var=pluginVOs />;
+	
+	po.element("input[name='updateIntervalRadio']").on("change", function()
+	{
+		var radioVal = $(this).val();
+		var $inputWrapper = po.element(".updateInterval-wrapper");
+		var $input = po.element("input[name='updateInterval']");
+		var inputVal = parseInt($input.val());
+		
+		if(!$input.attr("init-val"))
+			$input.attr("init-val", inputVal);
+		
+		if(radioVal == "0")
+		{
+			$input.val("-1");
+			if(inputVal > 0)
+				$input.attr("init-val", inputVal);
+			
+			$inputWrapper.hide();
+		}
+		else if(radioVal == "1")
+		{
+			$input.val("0");
+			if(inputVal > 0)
+				$input.attr("init-val", inputVal);
+			
+			$inputWrapper.hide();
+		}
+		else
+		{
+			var initVal = parseInt($input.attr("init-val"));
+			if(initVal > 0)
+				$input.val(initVal);
+			else
+				$input.val("");
+			
+			$inputWrapper.show();
+		}
+	});
+	
+	po.updateIntervalValue = function(value)
+	{
+		if(value == undefined)
+		{
+			var radioVal = po.element("input[name='updateIntervalRadio']").val();
+			
+			if(radioVal == "2")
+				return parseInt(po.element("input[name='updateInterval']").val());
+			else if(radioVal == "1")
+				return 0;
+			else
+				return -1;
+		}
+		else
+		{
+			var radioVal = "-1";
+			
+			if(value < 0)
+				radioVal = "0";
+			else if(value == 0)
+				radioVal = "1";
+			else
+				radioVal = "2";
+			
+			po.element("input[name='updateIntervalRadio'][value='"+radioVal+"']").attr("checked", "checked").change();
+		}
+	};
+	
+	po.updateIntervalValue(${(chart.updateInterval)!"-1"});
 	
 	po.getChartPlugin = function(id)
 	{
@@ -465,7 +554,8 @@ readonly 是否只读操作，允许为null
 		{
 			"name" : "required",
 			"htmlChartPlugin.id": "required",
-			"dataSignValidation" : "dataSignValidationRequired"
+			"dataSignValidation" : "dataSignValidationRequired",
+			"updateInterval" : "integer"
 		},
 		messages :
 		{
@@ -483,7 +573,8 @@ readonly 是否只读操作，允许为null
 						.replace( /\{needSignDataSetName\}/g, needSignDataSetName)
 						.replace( /\{needDataSignLabel\}/g, needDataSignLabel);
 				}
-			}
+			},
+			"updateInterval" : "<@spring.message code='validation.integer' />"
 		},
 		submitHandler : function(form)
 		{

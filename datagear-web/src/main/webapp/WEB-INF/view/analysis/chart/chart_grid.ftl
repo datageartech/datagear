@@ -170,11 +170,25 @@ selectonly 是否选择操作，允许为null
 	});
 	</#if>
 	
+	var updateIntervalColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='chart.updateInterval' />", "updateInterval");
+	updateIntervalColumn.render = function(data)
+	{
+		if(data < 0)
+			return "<@spring.message code='chart.updateInterval.none' />";
+		else if(data == 0)
+			return "<@spring.message code='chart.updateInterval.realtime' />";
+		else
+		{
+			<#assign messageArgs=['"+data+"'] />
+			return "<@spring.messageArgs code='chart.updateIntervalWithUnit' args=messageArgs />";
+		}
+	};
+	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id"),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.name' />"), "name"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", "chartPluginName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.updateInterval' />", "updateInterval"),
+		updateIntervalColumn,
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createUser' />", "createUser.realName"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createTime' />", "createUser.createTime")
 	];
