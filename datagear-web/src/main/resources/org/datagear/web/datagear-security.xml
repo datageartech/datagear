@@ -11,7 +11,7 @@
 		http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context-3.2.xsd">
 	
-	<beans:bean id="sercurityDisableAnonymous" class="java.lang.Boolean">
+	<beans:bean id="sercurityDisableAnonymous" class="org.datagear.web.util.BooleanBean">
 		<beans:constructor-arg value="${disableAnonymous}" />
 	</beans:bean>
 	
@@ -66,7 +66,7 @@
 		<intercept-url pattern="/notification/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
 		<intercept-url pattern="/changeThemeData/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
 		
-		<intercept-url pattern="/**" access="#{sercurityDisableAnonymous ? 'ROLE_USER' : 'IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER'}" />
+		<intercept-url pattern="/**" access="#{sercurityDisableAnonymous.value ? 'ROLE_USER' : 'IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER'}" />
 		
 		<!-- 表单登录页登录 -->
 		<form-login login-page="/login" login-processing-url="/login/doLogin"
