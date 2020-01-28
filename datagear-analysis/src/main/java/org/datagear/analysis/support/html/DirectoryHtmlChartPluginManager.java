@@ -38,7 +38,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 	private HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
 
-	private long readCheckForReloadTimeThreashold = 20 * 1000;
+	private long readCheckForReloadTimeThreashold = 60 * 1000;
 
 	private Map<String, String> pluginIdFileNameMap = new HashMap<String, String>();
 
@@ -462,7 +462,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			readLock.unlock();
 		}
 
-		if (reloads.isEmpty())
+		if (reloads.isEmpty() && !hasDelete)
 			return;
 
 		WriteLock writeLock = this.lock.writeLock();
@@ -472,7 +472,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 			if (hasDelete)
 			{
-				getChartPluginMap().clear();
+				super.removeAllChartPlugins();
 				this.pluginIdFileNameMap.clear();
 				this.fileNameCheckTimeMap.clear();
 			}

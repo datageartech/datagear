@@ -60,6 +60,7 @@ public class DerbySqlClient
 				else if ("exit".equalsIgnoreCase(input))
 				{
 					println("Bye!");
+					IOUtil.close(scanner);
 					System.exit(0);
 				}
 				else if (input.startsWith("@"))
@@ -68,10 +69,11 @@ public class DerbySqlClient
 
 					println("start execute sql scripts in file :" + filePath);
 
-					Reader reader = IOUtil.getReader(new File(filePath), "UTF-8");
+					Reader reader = null;
 
 					try
 					{
+						reader = IOUtil.getReader(new File(filePath), "UTF-8");
 						SqlScriptParser sqlScriptParser = new SqlScriptParser(reader);
 						SqlStatement sql = null;
 

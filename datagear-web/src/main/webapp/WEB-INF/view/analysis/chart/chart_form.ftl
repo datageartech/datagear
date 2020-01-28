@@ -34,7 +34,7 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<ul class="chart-plugin-list ui-widget ui-helper-clearfix">
 					</ul>
-					<input type="hidden" name="htmlChartPlugin.id" class="ui-widget ui-widget-content" value="${(chart.htmlChartPlugin.id)!''?html}" />
+					<input type="text" name="htmlChartPlugin.id" class="ui-widget ui-widget-content" value="${(chart.htmlChartPlugin.id)!''?html}" style="display:none" />
 				</div>
 			</div>
 			<div class="form-item">
@@ -464,11 +464,13 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
+			"htmlChartPlugin.id": "required",
 			"dataSignValidation" : "dataSignValidationRequired"
 		},
 		messages :
 		{
 			"name" : "<@spring.message code='validation.required' />",
+			"htmlChartPlugin.id" : "<@spring.message code='validation.required' />",
 			"dataSignValidation" :
 			{
 				"dataSignValidationRequired" : function()

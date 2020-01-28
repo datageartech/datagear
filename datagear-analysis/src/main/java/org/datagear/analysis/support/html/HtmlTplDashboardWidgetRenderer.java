@@ -90,9 +90,9 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	public static final String DEFAULT_DASHBOARD_VAR = "dashboard";
 
-	public static final String PROPERTY_VALUE_FOR_NOT_FOUND = "targetHtmlChartWidgetNotFoundMessage";
+	public static final String PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND = "targetHtmlChartWidgetNotFoundMessage";
 
-	public static final String PROPERTY_VALUE_FOR_RENDER_EXCEPTION = "targetHtmlChartRenderExceptionMessage";
+	public static final String PROPERTY_VALUE_FOR_PLUGIN_NULL = "targetHtmlChartWidgePluginNullMessage";
 
 	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
 
@@ -106,13 +106,13 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	private HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter = new HtmlDashboardScriptObjectWriter();
 
-	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForNotFound = new ValueHtmlChartPlugin<HtmlRenderContext>(
-			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForNotFound",
-			PROPERTY_VALUE_FOR_NOT_FOUND);
+	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetNotFound = new ValueHtmlChartPlugin<HtmlRenderContext>(
+			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForWidgetNotFound",
+			PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND);
 
-	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForRenderException = new ValueHtmlChartPlugin<HtmlRenderContext>(
-			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForRenderException",
-			PROPERTY_VALUE_FOR_RENDER_EXCEPTION);
+	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetPluginNull = new ValueHtmlChartPlugin<HtmlRenderContext>(
+			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForWidgetPluginNull",
+			PROPERTY_VALUE_FOR_PLUGIN_NULL);
 
 	/** 内置导入内容 */
 	private List<HtmlDashboardImport> dashboardImports;
@@ -223,25 +223,25 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		this.htmlDashboardScriptObjectWriter = htmlDashboardScriptObjectWriter;
 	}
 
-	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForNotFound()
+	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForWidgetNotFound()
 	{
-		return htmlChartPluginForNotFound;
+		return htmlChartPluginForWidgetNotFound;
 	}
 
-	public void setHtmlChartPluginForNotFound(HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForNotFound)
+	public void setHtmlChartPluginForWidgetNotFound(HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetNotFound)
 	{
-		this.htmlChartPluginForNotFound = htmlChartPluginForNotFound;
+		this.htmlChartPluginForWidgetNotFound = htmlChartPluginForWidgetNotFound;
 	}
 
-	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForRenderException()
+	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForWidgetPluginNull()
 	{
-		return htmlChartPluginForRenderException;
+		return htmlChartPluginForWidgetPluginNull;
 	}
 
-	public void setHtmlChartPluginForRenderException(
-			HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForRenderException)
+	public void setHtmlChartPluginForWidgetPluginNull(
+			HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetPluginNull)
 	{
-		this.htmlChartPluginForRenderException = htmlChartPluginForRenderException;
+		this.htmlChartPluginForWidgetPluginNull = htmlChartPluginForWidgetPluginNull;
 	}
 
 	public List<HtmlDashboardImport> getDashboardImports()
@@ -627,16 +627,30 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		if (chartWidget == null)
 			chartWidget = createHtmlChartWidgetForNotFound(id);
 
+		if (chartWidget.getChartPlugin() == null)
+			chartWidget = createHtmlChartWidgetForPluginNull(chartWidget);
+
 		return (HtmlChartWidget<HtmlRenderContext>) chartWidget;
 	}
 
 	protected HtmlChartWidget<HtmlRenderContext> createHtmlChartWidgetForNotFound(String notFoundWidgetId)
 	{
 		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<HtmlRenderContext>(IDUtil.uuid(),
-				"HtmlChartWidgetForNotFound", this.htmlChartPluginForNotFound);
+				"HtmlChartWidgetForWidgetNotFound", this.htmlChartPluginForWidgetNotFound);
 
-		widget.addChartPropertyValue(PROPERTY_VALUE_FOR_NOT_FOUND,
-				"Chart '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' Not Found");
+		widget.addChartPropertyValue(PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND,
+				"Chart '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
+
+		return widget;
+	}
+
+	protected HtmlChartWidget<HtmlRenderContext> createHtmlChartWidgetForPluginNull(ChartWidget<?> chartWidget)
+	{
+		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<HtmlRenderContext>(IDUtil.uuid(),
+				"HtmlChartWidgetForWidgetPluginNull", this.htmlChartPluginForWidgetPluginNull);
+
+		widget.addChartPropertyValue(PROPERTY_VALUE_FOR_PLUGIN_NULL,
+				"Chart plugin for rendering chart '" + chartWidget.getName() + "' not found");
 
 		return widget;
 	}

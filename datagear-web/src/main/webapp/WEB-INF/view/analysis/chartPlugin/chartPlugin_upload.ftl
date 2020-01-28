@@ -70,7 +70,7 @@
 			if(chartPluginInfo.hasIcon)
 				$("<a class=\"plugin-icon\" style=\"background-image: url(${contextPath}/"+chartPluginInfo.iconUrl+")\">&nbsp;</a>").appendTo($item);
 			
-			$("<span class='name'></span>").text(chartPluginInfo.name).appendTo($item);
+			$("<span class='name'></span>").text(chartPluginInfo.nameLabel.value).appendTo($item);
 			
 			if(chartPluginInfo.version)
 				$("<span class='version'></span>").text("(" +chartPluginInfo.version+")").appendTo($item);

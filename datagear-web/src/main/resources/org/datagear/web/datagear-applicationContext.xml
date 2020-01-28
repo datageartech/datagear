@@ -349,8 +349,11 @@
 		<property name="authorizationService" ref="authorizationService" />
 	</bean>
 	
-	<bean id="directoryHtmlChartPluginManager" class="org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager" init-method="init">
+	<bean id="directoryHtmlChartPluginManager" class="org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager">
 		<property name="directory" ref="chartPluginRootDirectory" />
+	</bean>
+	<bean id="directoryHtmlChartPluginManagerInitializer" class="org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer" init-method="init">
+		<property name="directoryHtmlChartPluginManager" ref="directoryHtmlChartPluginManager" />
 	</bean>
 	
 	<bean id="htmlChartWidgetEntityService" class="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl">
