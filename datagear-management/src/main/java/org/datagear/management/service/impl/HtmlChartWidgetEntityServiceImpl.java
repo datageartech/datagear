@@ -111,9 +111,16 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends RenderContext> ChartWidget<T> getChartWidget(String id)
+	public <T extends RenderContext> ChartWidget<T> getChartWidget(String id) throws Throwable
 	{
-		HtmlChartWidgetEntity entity = getById(id);
+		ChartWidgetSourceContext context = ChartWidgetSourceContext.get();
+
+		HtmlChartWidgetEntity entity = null;
+
+		if (context.hasUser())
+			entity = getById(context.getUser(), id);
+		else
+			entity = getById(id);
 
 		if (entity == null)
 			return null;

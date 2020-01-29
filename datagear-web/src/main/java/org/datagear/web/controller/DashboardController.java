@@ -30,6 +30,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -494,33 +495,43 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = this.htmlTplDashboardWidgetEntityService
+		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidget(user, id);
 
 		if (dashboardWidget == null)
 			throw new RecordNotFoundException();
 
-		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+		// 上面已确保当前用户对此看板有读权限，这里则确保看板创建用户对看板模板内定义的图表有权限
+		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
 
-		String responseEncoding = dashboardWidget.getTemplateEncoding();
+		try
+		{
+			TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+					.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
 
-		if (StringUtil.isEmpty(responseEncoding))
-			responseEncoding = dashboardWidgetResManager.getDefaultEncoding();
+			String responseEncoding = dashboardWidget.getTemplateEncoding();
 
-		response.setCharacterEncoding(responseEncoding);
+			if (StringUtil.isEmpty(responseEncoding))
+				responseEncoding = dashboardWidgetResManager.getDefaultEncoding();
 
-		Writer out = response.getWriter();
+			response.setCharacterEncoding(responseEncoding);
 
-		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), out);
-		AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler(
-				getMessage(request, "dashboard.show.htmlTitlePrefix", getMessage(request, "app.name")));
-		HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+			Writer out = response.getWriter();
 
-		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
+			HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), out);
+			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler(
+					getMessage(request, "dashboard.show.htmlTitlePrefix", getMessage(request, "app.name")));
+			HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
-		SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
-		dashboardManager.put(dashboard);
+			HtmlDashboard dashboard = dashboardWidget.render(renderContext);
+
+			SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
+			dashboardManager.put(dashboard);
+		}
+		finally
+		{
+			ChartWidgetSourceContext.remove();
+		}
 	}
 
 	/**

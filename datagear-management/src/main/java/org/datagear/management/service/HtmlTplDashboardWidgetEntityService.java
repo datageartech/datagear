@@ -36,5 +36,5 @@ public interface HtmlTplDashboardWidgetEntityService
 	 * @param id
 	 * @return
 	 */
-	HtmlTplDashboardWidget<HtmlRenderContext> getHtmlTplDashboardWidget(User user, String id);
+	HtmlTplDashboardWidgetEntity getHtmlTplDashboardWidget(User user, String id);
 }

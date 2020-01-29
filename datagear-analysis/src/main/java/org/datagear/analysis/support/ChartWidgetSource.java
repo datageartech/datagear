@@ -19,6 +19,7 @@ public interface ChartWidgetSource
 	 * 
 	 * @param id
 	 * @return
+	 * @throws Throwable
 	 */
-	<T extends RenderContext> ChartWidget<T> getChartWidget(String id);
+	<T extends RenderContext> ChartWidget<T> getChartWidget(String id) throws Throwable;
 }

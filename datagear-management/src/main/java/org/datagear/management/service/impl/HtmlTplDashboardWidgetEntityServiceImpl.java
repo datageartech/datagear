@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.support.html.HtmlRenderContext;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetFmkRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
@@ -87,9 +86,9 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	}
 
 	@Override
-	public HtmlTplDashboardWidget<HtmlRenderContext> getHtmlTplDashboardWidget(User user, String id)
+	public HtmlTplDashboardWidgetEntity getHtmlTplDashboardWidget(User user, String id)
 	{
-		HtmlTplDashboardWidget<HtmlRenderContext> dashboard = getById(user, id);
+		HtmlTplDashboardWidgetEntity dashboard = getById(user, id);
 
 		if (dashboard != null)
 			dashboard.setRenderer(this.htmlTplDashboardWidgetRenderer);

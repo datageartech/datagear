@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.management.service.impl;
+package org.datagear.management.service;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +56,18 @@ public class ServiceContext
 	public <T> T getValue(String name)
 	{
 		return (T) this.values.get(name);
+	}
+
+	/**
+	 * 移除上下文名字值。
+	 * 
+	 * @param name
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T removeValue(String name)
+	{
+		return (T) this.values.remove(name);
 	}
 
 	/**

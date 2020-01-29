@@ -90,6 +90,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	public static final String DEFAULT_DASHBOARD_VAR = "dashboard";
 
+	public static final String PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION = "targetHtmlChartWidgetGetExceptionMessage";
+
 	public static final String PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND = "targetHtmlChartWidgetNotFoundMessage";
 
 	public static final String PROPERTY_VALUE_FOR_PLUGIN_NULL = "targetHtmlChartWidgePluginNullMessage";
@@ -105,6 +107,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = new HtmlChartPluginScriptObjectWriter();
 
 	private HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter = new HtmlDashboardScriptObjectWriter();
+
+	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetGetException = new ValueHtmlChartPlugin<HtmlRenderContext>(
+			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForWidgetGetException",
+			PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION);
 
 	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetNotFound = new ValueHtmlChartPlugin<HtmlRenderContext>(
 			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForWidgetNotFound",
@@ -221,6 +227,17 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	public void setHtmlDashboardScriptObjectWriter(HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter)
 	{
 		this.htmlDashboardScriptObjectWriter = htmlDashboardScriptObjectWriter;
+	}
+
+	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForWidgetGetException()
+	{
+		return htmlChartPluginForWidgetGetException;
+	}
+
+	public void setHtmlChartPluginForWidgetGetException(
+			HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetGetException)
+	{
+		this.htmlChartPluginForWidgetGetException = htmlChartPluginForWidgetGetException;
 	}
 
 	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForWidgetNotFound()
@@ -612,7 +629,16 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	/**
 	 * 获取用于渲染指定ID图表的{@linkplain ChartWidget}。
 	 * <p>
-	 * 此方法不会返回{@code null}，如果找不到指定ID的{@linkplain ChartWidget}，它将返回{@linkplain #htmlChartWidgetForNotFound}。
+	 * 此方法不会返回{@code null}。
+	 * </p>
+	 * <p>
+	 * 如果没有找到，则返回{@linkplain #createHtmlChartWidgetForNotFound(String)}。
+	 * </p>
+	 * <p>
+	 * 如果出现异常，则返回{@linkplain #createHtmlChartWidgetForGetException(String, Throwable)}。
+	 * </p>
+	 * <p>
+	 * 如果{@linkplain HtmlChartWidget#getChartPlugin()}为{@code null}，则返回{@linkplain #createHtmlChartWidgetForPluginNull(ChartWidget)}。
 	 * </p>
 	 * 
 	 * @param renderContext
@@ -622,7 +648,19 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected HtmlChartWidget<HtmlRenderContext> getHtmlChartWidgetForRender(HtmlRenderContext renderContext, String id)
 	{
-		ChartWidget chartWidget = (StringUtil.isEmpty(id) ? null : this.chartWidgetSource.getChartWidget(id));
+		ChartWidget chartWidget = null;
+
+		if (!StringUtil.isEmpty(id))
+		{
+			try
+			{
+				chartWidget = this.chartWidgetSource.getChartWidget(id);
+			}
+			catch(Throwable t)
+			{
+				chartWidget = createHtmlChartWidgetForGetException(id, t);
+			}
+		}
 
 		if (chartWidget == null)
 			chartWidget = createHtmlChartWidgetForNotFound(id);
@@ -631,6 +669,18 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			chartWidget = createHtmlChartWidgetForPluginNull(chartWidget);
 
 		return (HtmlChartWidget<HtmlRenderContext>) chartWidget;
+	}
+
+	protected HtmlChartWidget<HtmlRenderContext> createHtmlChartWidgetForGetException(String exceptionWidgetId,
+			Throwable t)
+	{
+		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<HtmlRenderContext>(IDUtil.uuid(),
+				"HtmlChartWidgetForWidgetGetException", this.htmlChartPluginForWidgetGetException);
+
+		widget.addChartPropertyValue(PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION,
+				"Chart '" + (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
+
+		return widget;
 	}
 
 	protected HtmlChartWidget<HtmlRenderContext> createHtmlChartWidgetForNotFound(String notFoundWidgetId)

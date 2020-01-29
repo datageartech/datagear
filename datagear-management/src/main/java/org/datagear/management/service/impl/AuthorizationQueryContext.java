@@ -7,6 +7,7 @@ package org.datagear.management.service.impl;
 import java.io.Serializable;
 
 import org.datagear.management.domain.Authorization;
+import org.datagear.management.service.ServiceContext;
 
 /**
  * {@linkplain Authorization}查询上下文。
