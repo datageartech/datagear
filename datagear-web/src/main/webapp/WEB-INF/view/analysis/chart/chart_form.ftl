@@ -555,7 +555,7 @@ readonly 是否只读操作，允许为null
 			"name" : "required",
 			"htmlChartPlugin.id": "required",
 			"dataSignValidation" : "dataSignValidationRequired",
-			"updateInterval" : "integer"
+			"updateInterval" : {"required": true, "integer": true}
 		},
 		messages :
 		{
@@ -574,7 +574,7 @@ readonly 是否只读操作，允许为null
 						.replace( /\{needDataSignLabel\}/g, needDataSignLabel);
 				}
 			},
-			"updateInterval" : "<@spring.message code='validation.integer' />"
+			"updateInterval" : {"required": "<@spring.message code='validation.required' />", "integer": "<@spring.message code='validation.integer' />"}
 		},
 		submitHandler : function(form)
 		{

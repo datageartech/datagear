@@ -2249,6 +2249,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	margin-top: 0.2em;
 	padding-left: 0.2em;
 	cursor: default;
+	white-space: nowrap;
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-item.ui-state-active{
 	border: 0px;
