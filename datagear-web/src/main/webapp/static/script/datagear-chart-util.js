@@ -122,6 +122,9 @@
 	{
 		var re = [];
 		
+		if(!chartDataSet || !chartDataSet.dataSet || !dataSign)
+			return re;
+		
 		dataSign = (dataSign.name || dataSign);
 		var dataSetProperties = (chartDataSet.dataSet.properties || []);
 		var propertySigns = (chartDataSet.propertySigns || {});

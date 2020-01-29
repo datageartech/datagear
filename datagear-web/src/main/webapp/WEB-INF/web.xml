@@ -3,10 +3,13 @@
 	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	id="WebApp_ID" version="3.0">
+	
 	<display-name>Data Gear</display-name>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
+			classpath:org/datagear/web/datagear-applicationContext-propertyConfigurer.xml,
+			classpath:org/datagear/web/datagear-applicationContext-dataSource.xml,
 			classpath:org/datagear/web/datagear-applicationContext.xml,
 			classpath:org/datagear/web/datagear-security.xml
 		</param-value>
@@ -57,8 +60,7 @@
 	
 	<servlet>
 		<servlet-name>dispatcherServlet</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet
-		</servlet-class>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
 			<param-value>classpath:org/datagear/web/datagear-servlet.xml</param-value>

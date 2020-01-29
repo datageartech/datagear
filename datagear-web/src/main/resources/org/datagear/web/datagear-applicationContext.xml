@@ -11,17 +11,11 @@
      http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
      http://www.springframework.org/schema/context 
      http://www.springframework.org/schema/context/spring-context-3.2.xsd">
-     
-    <bean id="propertyConfigurer"
-    		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    	<property name="locations">
-    		<list>
-    			<value>classpath:org/datagear/web/datagear.properties</value>
-    			<value>classpath:org/datagear/web/datagear-version.properties</value>
-    		</list>
-    	</property>
-    	<property name="fileEncoding" value="UTF-8" />
-    </bean>
+    
+    <!-- 应用主配置 -->
+    <!-- 依赖如下配置： -->
+    <!-- datagear-applicationContext-propertyConfigurer.xml -->
+    <!-- datagear-applicationContext-dataSource.xml -->
     
     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
     	<property name="basenames">
@@ -54,11 +48,6 @@
     </bean>
     <bean id="driverEntityManagerRootDirectory" factory-bean="driverEntityManagerRootDirectoryFactory" factory-method="getDirectory" />
     
-    <bean id="derbyRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
-    	<property name="directoryName" value="${directory.derby}" />
-    	<property name="createIfInexistence" value="false" />
-    </bean>
-    
     <bean id="tempDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
     	<property name="directoryName" value="${directory.temp}" />
     </bean>
@@ -89,24 +78,6 @@
     </bean>
     <bean id="dashboardRootDirectory" factory-bean="dashboardRootDirectoryFactory" factory-method="getDirectory" />
 	
-    <bean id="dataSource"
-    		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		<property name="driverClassName">
-			<value>org.apache.derby.jdbc.EmbeddedDriver</value>
-		</property>
-		<property name="url">
-			<value>jdbc:derby:#{derbyRootDirectoryFactory.getDirectoryAbsolutePath()};create=true</value>
-		</property>
-		<!--
-		<property name="username">
-			<value></value>
-		</property>
-		<property name="password">
-			<value></value>
-		</property>
-		-->
-    </bean>
-    
     <bean id="dbVersionManager" class="org.datagear.management.dbversion.DbVersionManager" init-method="upgrade">
     	<property name="dataSource" ref="dataSource" />
     </bean>

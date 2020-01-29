@@ -11,19 +11,7 @@
      http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
      http://www.springframework.org/schema/context 
      http://www.springframework.org/schema/context/spring-context-3.2.xsd">
-    
-    <!-- 仅用于初始化DerbySqlClient独立应用，与系统功能无关 -->
      
-    <bean id="propertyConfigurer"
-    		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    	<property name="locations">
-    		<list>
-    			<value>classpath:org/datagear/web/datagear.properties</value>
-    		</list>
-    	</property>
-    	<property name="fileEncoding" value="UTF-8" />
-    </bean>
-    
     <bean id="derbyRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
     	<property name="directoryName" value="${directory.derby}" />
     	<property name="createIfInexistence" value="false" />
