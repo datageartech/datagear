@@ -9,8 +9,8 @@
 		<version>1.5.0</version>
 	</parent>
 	
-	<artifactId>datagear-webembd</artifactId>
-	<name>datagear-webembd</name>
+	<artifactId>datagear-webappembd</artifactId>
+	<name>datagear-webappembd</name>
 	
 	<properties>
 		<dist.target.dir>${project.build.directory}/datagear-${project.version}</dist.target.dir>

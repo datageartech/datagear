@@ -48,7 +48,9 @@ SQL工作台
 
 ## 运行
 
-	cd datagear-webembd/target/datagear-[version]
+	设置JAVA_HOME环境变量
+
+	cd datagear-webappembd/target/datagear-[version]
 	
 	（Linux环境）
 	./startup.sh
@@ -64,7 +66,7 @@ SQL工作台
 
 3. 将刚才新建的标记推送到仓库保存；
 
-4. 将构建的程序包（`datagear-webembd/target/datagear-[version]-packages/`目录内）发布到官网；
+4. 将构建的程序包（`datagear-webappembd/target/datagear-[version]-packages/`目录内）发布到官网；
 
 5. 切换回主分支，修改`pom.xml`文件中的`version`标签内的版本号为下一个版本；
 

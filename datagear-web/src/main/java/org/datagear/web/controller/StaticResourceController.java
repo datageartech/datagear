@@ -17,13 +17,13 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 /**
  * 静态资源控制器。
  * <p>
- * 此控制器负责加载{@code org/datagear/web/webapp/staticResource}类路径内的资源。
+ * 此控制器负责将的<code>/static/*</code>请求映射至{@code org/datagear/web/webapp/staticResource}类路径内的资源。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-@Controller("/static")
+@Controller
 public class StaticResourceController extends ResourceHttpRequestHandler
 {
 	public static final String STATIC_RESOURCE_CLASSPATH_ROOT = "org/datagear/web/webapp/staticResource/";
@@ -37,7 +37,7 @@ public class StaticResourceController extends ResourceHttpRequestHandler
 		setLocations(locations);
 	}
 
-	@RequestMapping("/**/*")
+	@RequestMapping("/static/**/*")
 	public void handle(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
 		handleRequest(request, response);

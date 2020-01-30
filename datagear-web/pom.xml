@@ -11,7 +11,6 @@
 	
 	<artifactId>datagear-web</artifactId>
 	<name>datagear-web</name>
-	<packaging>war</packaging>
 	
 	<properties>
 		<dist.log4j.rootLogger>INFO, A1</dist.log4j.rootLogger>
@@ -186,7 +185,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-antrun-plugin</artifactId>
-			    <version>1.4</version>
+			    <version>${maven-antrun-plugin.version}</version>
 			    <executions>
 			    	<!-- 打包前修改log4j的日志设置 -->
 			    	<execution>
@@ -212,7 +211,7 @@
 			    		</goals>
 			    		<configuration>
 			    			<tasks>
-			    				<copy file="../LICENSE" todir="${project.build.directory}/${project.build.finalName}" />
+			    				<copy file="../LICENSE" todir="${project.build.outputDirectory}" />
 			    			</tasks>
 			    		</configuration>
 			    	</execution>

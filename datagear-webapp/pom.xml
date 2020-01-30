@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <project
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.datagear</groupId>
@@ -9,13 +10,17 @@
 		<version>1.5.0</version>
 	</parent>
 	
-	<artifactId>datagear-connection</artifactId>
-	<name>datagear-connection</name>
+	<artifactId>datagear-webapp</artifactId>
+	<name>datagear-webapp</name>
+	<packaging>war</packaging>
+	
+	<properties>
+	</properties>
 	
 	<dependencies>
 		<dependency>
 			<groupId>org.datagear</groupId>
-			<artifactId>datagear-util</artifactId>
+			<artifactId>datagear-web</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
@@ -36,7 +41,7 @@
 			    		</goals>
 			    		<configuration>
 			    			<tasks>
-			    				<copy file="../LICENSE" todir="${project.build.outputDirectory}" />
+			    				<copy file="../LICENSE" todir="${project.build.directory}/${project.name}-${project.version}" />
 			    			</tasks>
 			    		</configuration>
 			    	</execution>
