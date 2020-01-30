@@ -55,7 +55,7 @@
 	</bean>
 	
 	<bean id="freeMarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
-		<property name="templateLoaderPaths" value="/WEB-INF/view/" />
+		<property name="templateLoaderPaths" value="classpath:org/datagear/web/webapp/view/freemarker/" />
 		<property name="defaultEncoding" value="UTF-8" />
 		<property name="freemarkerSettings">
 			<props>

@@ -69,30 +69,7 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>dispatcherServlet</servlet-name>
-		<url-pattern>/index.html</url-pattern>
-		<url-pattern>/login/*</url-pattern>
-		<url-pattern>/register/*</url-pattern>
-		<url-pattern>/main/*</url-pattern>
-		<url-pattern>/about/*</url-pattern>
-		<url-pattern>/changelog/*</url-pattern>
-		<url-pattern>/changelogs/*</url-pattern>
-		<url-pattern>/changeThemeData</url-pattern>
-		<url-pattern>/user/*</url-pattern>
-		<url-pattern>/role/*</url-pattern>
-		<url-pattern>/authorization/*</url-pattern>
-		<url-pattern>/driverEntity/*</url-pattern>
-		<url-pattern>/schema/*</url-pattern>
-		<url-pattern>/schemaUrlBuilder/*</url-pattern>
-		<url-pattern>/data/*</url-pattern>
-		<url-pattern>/sqlpad/*</url-pattern>
-		<url-pattern>/dataexchange/*</url-pattern>
-		<url-pattern>/error</url-pattern>
-		<url-pattern>/resetPassword/*</url-pattern>
-		<url-pattern>/resetPasswordRequestHistory/*</url-pattern>
-		<url-pattern>/globalSetting/*</url-pattern>
-		<url-pattern>/notification/*</url-pattern>
-		<url-pattern>/analysis/*</url-pattern>
-		<url-pattern>/sqlEditor/*</url-pattern>
+		<url-pattern>/*</url-pattern>
 	</servlet-mapping>
 	
 	<servlet>
