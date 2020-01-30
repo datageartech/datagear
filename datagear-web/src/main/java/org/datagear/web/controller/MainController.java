@@ -11,6 +11,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.util.Global;
 import org.datagear.util.version.Version;
 import org.datagear.util.version.VersionContent;
 import org.datagear.web.util.ChangelogResolver;
@@ -30,8 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class MainController extends AbstractController
 {
-	private String version;
-
 	private boolean disableRegister = false;
 
 	@Autowired
@@ -42,22 +41,10 @@ public class MainController extends AbstractController
 		super();
 	}
 
-	public MainController(String version, ChangelogResolver changelogResolver)
+	public MainController(ChangelogResolver changelogResolver)
 	{
 		super();
-		this.version = version;
 		this.changelogResolver = changelogResolver;
-	}
-
-	public String getVersion()
-	{
-		return version;
-	}
-
-	@Value("${version}")
-	public void setVersion(String version)
-	{
-		this.version = version;
 	}
 
 	public boolean isDisableRegister()
@@ -100,7 +87,7 @@ public class MainController extends AbstractController
 	@RequestMapping("/about")
 	public String about(HttpServletRequest request)
 	{
-		request.setAttribute("version", this.version);
+		request.setAttribute("version", Global.VERSION);
 
 		return "/about";
 	}
@@ -112,7 +99,7 @@ public class MainController extends AbstractController
 
 		try
 		{
-			version = Version.valueOf(this.version);
+			version = Version.valueOf(Global.VERSION);
 		}
 		catch (IllegalArgumentException e)
 		{

@@ -14,7 +14,6 @@
 	
 	<properties>
 		<dist.log4j.rootLogger>INFO, A1</dist.log4j.rootLogger>
-		<buildtimestamp>${timestamp}</buildtimestamp>
 	</properties>
 	
 	<dependencies>
@@ -168,14 +167,14 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<includes>
-					<include>datagear-version.properties</include>
+					<include>org/datagear/web/datagear-version.properties</include>
 				</includes>
 				<filtering>true</filtering>
 			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
 				<excludes>
-					<exclude>datagear-version.properties</exclude>
+					<exclude>org/datagear/web/datagear-version.properties</exclude>
 				</excludes>
 				<filtering>false</filtering>
 			</resource>
@@ -233,6 +232,7 @@
 				</executions>
 				<configuration>
 					<timestampFormat>yyyy-MM-dd HH:mm</timestampFormat>
+					<timestampPropertyName>buildtimestamp</timestampPropertyName>
 				</configuration>
 			</plugin>
 		</plugins>

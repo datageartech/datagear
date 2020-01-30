@@ -14,8 +14,8 @@
     
     <!-- 应用主配置 -->
     <!-- 依赖如下配置： -->
-    <!-- datagear-applicationContext-propertyConfigurer.xml -->
-    <!-- datagear-applicationContext-dataSource.xml -->
+    <!-- datagear-propertyConfigurer.xml -->
+    <!-- datagear-dataSource.xml -->
     
     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
     	<property name="basenames">

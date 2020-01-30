@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.datagear.util.Global;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.version.AbstractVersionContentReader;
@@ -194,6 +195,7 @@ public class DbVersionManager extends AbstractVersionContentReader
 			LOGGER.info("Start upgrade database version from [" + current + "] to the latest");
 
 		Version target = updateSchema(cn, current);
+		target = Version.valueOf(Global.VERSION);
 
 		if (target.isHigherThan(current))
 			updateVersion(cn, target);
