@@ -35,7 +35,8 @@ public class DerbySqlClient
 		try
 		{
 			applicationContext = new ClassPathXmlApplicationContext(
-					"org/datagear/web/datagear-propertyConfigurer.xml, datagear-dataSource.xml");
+					"classpath:org/datagear/web/datagear-propertyConfigurer.xml",
+					"classpath:org/datagear/web/datagear-dataSource.xml");
 
 			DriverManagerDataSource dataSource = applicationContext.getBean(DriverManagerDataSource.class);
 
@@ -100,10 +101,14 @@ public class DerbySqlClient
 				}
 			}
 		}
+		catch(Throwable t)
+		{
+			t.printStackTrace();
+		}
 		finally
 		{
 			JdbcUtil.closeConnection(cn);
-			applicationContext.close();
+			IOUtil.close(applicationContext);
 		}
 	}
 
