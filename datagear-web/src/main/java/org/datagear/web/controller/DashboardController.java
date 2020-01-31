@@ -647,7 +647,7 @@ public class DashboardController extends AbstractDataAnalysisController
 
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
-		String contextPath = request.getContextPath();
+		String contextPath = getWebContextPath(request).get(request);
 		return new WebContext(contextPath, contextPath + "/analysis/dashboard/showData");
 	}
 

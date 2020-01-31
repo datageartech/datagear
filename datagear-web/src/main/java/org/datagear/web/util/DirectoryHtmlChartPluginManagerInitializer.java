@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 datagear.org. All Rights Reserved.
+ */
+
 package org.datagear.web.util;
 
 import java.io.File;

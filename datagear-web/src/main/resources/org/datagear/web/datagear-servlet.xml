@@ -20,8 +20,9 @@
 		<property name="fastJsonConfig" ref="fastJsonConfig" />
 	</bean>
 	
-	<bean id="handlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+	<bean id="handlerMapping" class="org.datagear.web.util.SubContextPathRequestMappingHandlerMapping">
 		<property name="alwaysUseFullPath" value="true" />
+		<property name="subContextPath" value="${subContextPath}" />
 		<property name="interceptors">
 			<list>
 				<ref bean="themeChangeInterceptor" />

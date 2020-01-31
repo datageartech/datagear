@@ -17,6 +17,14 @@
     <!-- datagear-propertyConfigurer.xml -->
     <!-- datagear-dataSource.xml -->
     
+    <bean id="webContextPathFilter" class="org.datagear.web.util.WebContextPathFilter">
+    	<property name="webContextPath">
+    		<bean class="org.datagear.web.util.WebContextPath">
+    			<property name="subContextPath" value="${subContextPath}" />
+    		</bean>
+    	</property>
+    </bean>
+    
     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
     	<property name="basenames">
     		<list>

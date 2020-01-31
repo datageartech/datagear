@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
+import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -53,7 +54,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 	{
 		mergeAnonymousUserSchema(request, response, authentication);
 
-		response.sendRedirect(request.getContextPath() + "/");
+		response.sendRedirect(WebContextPath.getWebContextPath(request).concat(request, "/"));
 	}
 
 	/**

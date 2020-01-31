@@ -15,61 +15,61 @@
 		<beans:constructor-arg value="${disableAnonymous}" />
 	</beans:bean>
 	
-	<http pattern="/static/**" security="none" />
+	<http pattern="${subContextPath}/static/**" security="none" />
 	
 	<http>
 		
 		<!-- 驱动程序管理 -->
-		<intercept-url pattern="/driverEntity/add" access="ROLE_ADMIN" />
-		<intercept-url pattern="/driverEntity/saveAdd" access="ROLE_ADMIN" />
-		<intercept-url pattern="/driverEntity/import" access="ROLE_ADMIN" />
-		<intercept-url pattern="/driverEntity/uploadImportFile" access="ROLE_ADMIN" />
-		<intercept-url pattern="/driverEntity/saveImport" access="ROLE_ADMIN" />
-		<intercept-url pattern="/driverEntity/edit" access="ROLE_ADMIN" />
-		<intercept-url pattern="/driverEntity/saveEdit" access="ROLE_ADMIN" />
-		<intercept-url pattern="/driverEntity/delete" access="ROLE_ADMIN" />
-		<intercept-url pattern="/driverEntity/query" access="ROLE_ADMIN" />
-		<intercept-url pattern="/driverEntity/uploadDriverFile" access="ROLE_ADMIN" />
-		<intercept-url pattern="/driverEntity/deleteDriverFile" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/add" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/saveAdd" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/import" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/uploadImportFile" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/saveImport" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/edit" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/saveEdit" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/delete" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/query" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/uploadDriverFile" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/driverEntity/deleteDriverFile" access="ROLE_ADMIN" />
 		
 		<!-- 用户管理 -->
-		<intercept-url pattern="/user/personalSet" access="ROLE_USER" />
-		<intercept-url pattern="/user/savePersonalSet" access="ROLE_USER" />
-		<intercept-url pattern="/user/select" access="ROLE_USER" />
-		<intercept-url pattern="/user/queryData" access="ROLE_USER" />
-		<intercept-url pattern="/user/*" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/user/personalSet" access="ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/user/savePersonalSet" access="ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/user/select" access="ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/user/queryData" access="ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/user/*" access="ROLE_ADMIN" />
 		
 		<!-- 角色管理 -->
-		<intercept-url pattern="/role/select" access="ROLE_USER" />
-		<intercept-url pattern="/role/queryData" access="ROLE_USER" />
-		<intercept-url pattern="/role/**" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/role/select" access="ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/role/queryData" access="ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/role/**" access="ROLE_ADMIN" />
 		
 		<!-- 权限管理 -->
-		<intercept-url pattern="/authorization/**" access="ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/authorization/**" access="ROLE_USER" />
 		
 		<!-- 全局设置 -->
-		<intercept-url pattern="/globalSetting/**" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/globalSetting/**" access="ROLE_ADMIN" />
 		
 		<!-- 设置数据库URL构建器脚本 -->
-		<intercept-url pattern="/schemaUrlBuilder/editScriptCode" access="ROLE_ADMIN" />
-		<intercept-url pattern="/schemaUrlBuilder/saveScriptCode" access="ROLE_ADMIN" />
-		<intercept-url pattern="/schemaUrlBuilder/previewScriptCode" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/schemaUrlBuilder/editScriptCode" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/schemaUrlBuilder/saveScriptCode" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/schemaUrlBuilder/previewScriptCode" access="ROLE_ADMIN" />
 		
 		<!-- 图表插件管理 -->
-		<intercept-url pattern="/analysis/chartPlugin/icon/*" access="ROLE_USER, IS_AUTHENTICATED_ANONYMOUSLY" />
-		<intercept-url pattern="/analysis/chartPlugin/**" access="ROLE_ADMIN" />
+		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/icon/*" access="ROLE_USER, IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/**" access="ROLE_ADMIN" />
 		
-		<intercept-url pattern="/login/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-		<intercept-url pattern="/register/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-		<intercept-url pattern="/resetPassword/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-		<intercept-url pattern="/resetPasswordRequestHistory/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
-		<intercept-url pattern="/notification/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
-		<intercept-url pattern="/changeThemeData/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/login/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="${subContextPath}/register/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="${subContextPath}/resetPassword/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="${subContextPath}/resetPasswordRequestHistory/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/notification/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/changeThemeData/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
 		
-		<intercept-url pattern="/**" access="#{sercurityDisableAnonymous.value ? 'ROLE_USER' : 'IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER'}" />
+		<intercept-url pattern="${subContextPath}/**" access="#{sercurityDisableAnonymous.value ? 'ROLE_USER' : 'IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER'}" />
 		
 		<!-- 表单登录页登录 -->
-		<form-login login-page="/login" login-processing-url="/login/doLogin"
+		<form-login login-page="${subContextPath}/login" login-processing-url="${subContextPath}/login/doLogin"
 			username-parameter="name" password-parameter="password"
 		 	authentication-success-handler-ref="authenticationSuccessHandler" />
 		
@@ -77,7 +77,7 @@
 		<remember-me key="REMEMBER_ME_KEY" remember-me-parameter="autoLogin" token-validity-seconds="94608000"
 			user-service-ref="userDetailsService" />
 		
-		<logout logout-url="/logout" invalidate-session="true" logout-success-url="/" />
+		<logout logout-url="${subContextPath}/logout" invalidate-session="true" logout-success-url="${subContextPath}/" />
 		
 	</http>
 	

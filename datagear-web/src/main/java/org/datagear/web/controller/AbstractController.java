@@ -19,6 +19,7 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
+import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -88,6 +89,17 @@ public abstract class AbstractController
 	public void setClassDataConverter(ClassDataConverter classDataConverter)
 	{
 		this.classDataConverter = classDataConverter;
+	}
+
+	/**
+	 * 获取当前请求的{@linkplain WebContextPath}。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected WebContextPath getWebContextPath(HttpServletRequest request)
+	{
+		return WebContextPath.getWebContextPath(request);
 	}
 
 	/**

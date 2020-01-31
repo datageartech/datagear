@@ -75,7 +75,7 @@ public class MainController extends AbstractController
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping({ "/", "/index.html" })
+	@RequestMapping({ "", "/", "/index.html" })
 	public String main(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		request.setAttribute("disableRegister", this.disableRegister);
