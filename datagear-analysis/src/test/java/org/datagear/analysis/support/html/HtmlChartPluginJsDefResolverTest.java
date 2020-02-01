@@ -149,5 +149,15 @@ public class HtmlChartPluginJsDefResolverTest
 			Assert.assertEquals("{render:function() { if(a==b) {}; /*sdf*/  \n\n //sdf\n var a= {};   }}",
 					content.getPluginChartRender());
 		}
+		{
+			String text = "{a: 'a', b : 'b', chartRender: {render:function() { var options = { tooltip: {formatter: \"{a} <br/>{b} : {c}%\"} }; }}}";
+
+			JsDefContent content = resolver.resolve(text);
+
+			Assert.assertEquals("{a: 'a', b : 'b', chartRender:{}}", content.getPluginJson());
+			Assert.assertEquals(
+					" {render:function() { var options = { tooltip: {formatter: \"{a} <br/>{b} : {c}%\"} }; }}",
+					content.getPluginChartRender());
+		}
 	}
 }

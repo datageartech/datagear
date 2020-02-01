@@ -156,6 +156,24 @@
 		
 		return re;
 	};
+	
+	/**
+	 * 获取数据集属性标签，没有则返回空字符串。
+	 * 
+	 * @param datasetProperty
+	 */
+	util.dataSetPropertyLabel = function(datasetProperty)
+	{
+		var label = (datasetProperty ? datasetProperty.label : null);
+		
+		if(!label && datasetProperty)
+			label = datasetProperty.name;
+		
+		if(!label)
+			label = "";
+		
+		return label;
+	};
 
 	/**
 	 * 返回第一个数据结果集。
@@ -167,14 +185,39 @@
 		
 		return dataSetResults[0];
 	};
-
+	
+	/**
+	 * 获取结果数据第一行的属性值。
+	 * 
+	 * @param result 数据集结果对象、对象数组
+	 * @param property 属性对象、属性名、属性对象数组、属性名数组
+	 */
+	util.dataPropertyValue = function(result, property)
+	{
+		if(property == null)
+			return null;
+		
+		var re = this.dataPropertyValues(result, property, 1);
+		
+		if(property.length > 0)
+		{
+			for(var i=0; i< property.length; i++)
+				re[i] = (re[i].length > 0 ? re[i][0] : null);
+			
+			return re;
+		}
+		else
+			return (re.length > 0 ? re[0] : null);
+	};
+	
 	/**
 	 * 获取结果数据属性值数组。
 	 * 
 	 * @param result 数据集结果对象、对象数组
 	 * @param property 属性对象、属性名、属性对象数组、属性名数组
+	 * @param count 获取结果数据的最多行数，可选，默认为全部
 	 */
-	util.dataPropertyValues = function(result, property)
+	util.dataPropertyValues = function(result, property, count)
 	{
 		var re = [];
 		
@@ -182,6 +225,9 @@
 			return re;
 		
 		var datas = (result.length != null ? result : (result.datas || []));
+		var getCount = datas.length;
+		if(count != null && count < getCount)
+			getCount = count;
 		
 		if(property.length > 0)
 		{
@@ -193,7 +239,7 @@
 				
 				var name = (cm.name || cm);
 				
-				for(var j=0; j< datas.length; j++)
+				for(var j=0; j< getCount; j++)
 					myValues[j] = datas[j][name];
 				
 				re[i] = myValues;
@@ -203,7 +249,7 @@
 		{
 			var name = (property.name || property);
 			
-			for(var i=0; i< datas.length; i++)
+			for(var i=0; i< getCount; i++)
 				re[i] = datas[i][name];
 		}
 		

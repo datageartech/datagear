@@ -194,14 +194,16 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 	{
 		int qcount = 0;
 
-		int c = -1;
-		while ((c = in.read()) > -1)
+		int c = in.read();
+
+		while (c > -1)
 		{
 			appendChar(chartRenderBuilder, c);
 
 			if (c == '{')
 			{
 				qcount++;
+				c = in.read();
 			}
 			else if (c == '}')
 			{
@@ -209,25 +211,33 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 
 				if (qcount == 0)
 					break;
+				else
+					c = in.read();
 			}
 			// 字符串
 			else if (c == '\'' || c == '"')
 			{
 				c = readQuoted(in, chartRenderBuilder, c);
-				appendCharIfValid(chartRenderBuilder, c);
 			}
 			// 注释
 			else if (c == '/')
 			{
-				int next = in.read();
-				appendCharIfValid(chartRenderBuilder, next);
+				c = in.read();
 
 				// 行注释
-				if (next == '/')
-					skipLineComment(in, chartRenderBuilder, true);
-				else if (next == '*')
-					skipBlockComment(in, chartRenderBuilder, true);
+				if (c == '/')
+				{
+					appendChar(chartRenderBuilder, c);
+					c = skipLineComment(in, chartRenderBuilder, false);
+				}
+				else if (c == '*')
+				{
+					appendChar(chartRenderBuilder, c);
+					c = skipBlockComment(in, chartRenderBuilder, false);
+				}
 			}
+			else
+				c = in.read();
 		}
 	}
 

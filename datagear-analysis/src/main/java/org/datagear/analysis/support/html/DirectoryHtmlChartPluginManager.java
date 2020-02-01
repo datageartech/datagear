@@ -19,6 +19,8 @@ import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.ConcurrentChartPluginManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 基于文件目录的{@linkplain ChartPluginManager}。
@@ -34,11 +36,13 @@ import org.datagear.util.IOUtil;
  */
 public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManager
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryHtmlChartPluginManager.class);
+
 	private File directory;
 
 	private HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
 
-	private long readCheckForReloadTimeThreashold = 60 * 1000;
+	private long readCheckForReloadTimeThreashold = 5 * 60 * 1000;
 
 	private Map<String, String> pluginIdFileNameMap = new HashMap<String, String>();
 
@@ -494,8 +498,20 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 */
 	protected HtmlChartPlugin<?> loadAndRegisterHtmlChartPlugin(File file)
 	{
-		HtmlChartPlugin<?> plugin = this.htmlChartPluginLoader.loadFile(file);
-		return registerHtmlChartPlugin(plugin, file);
+		try
+		{
+			HtmlChartPlugin<?> plugin = this.htmlChartPluginLoader.loadFile(file);
+			return registerHtmlChartPlugin(plugin, file);
+		}
+		catch(Throwable t)
+		{
+			if (LOGGER.isErrorEnabled())
+				LOGGER.error(
+						"Load " + HtmlChartPlugin.class.getSimpleName() + " from file [" + file.getName() + "] error :",
+						t);
+
+			return null;
+		}
 	}
 
 	/**
