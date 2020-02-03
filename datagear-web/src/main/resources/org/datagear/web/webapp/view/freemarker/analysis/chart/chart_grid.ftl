@@ -6,6 +6,7 @@ selectonly 是否选择操作，允许为null
 -->
 <#assign selectonly=(selectonly!false)>
 <#assign isMultipleSelect=(isMultipleSelect!false)>
+<#assign HtmlChartWidgetEntity=statics['org.datagear.management.domain.HtmlChartWidgetEntity']>
 <html>
 <head>
 <#include "../../include/html_head.ftl">
@@ -15,10 +16,11 @@ selectonly 是否选择操作，允许为null
 <#if !isAjaxRequest>
 <div class="fill-parent">
 </#if>
+<#include "../../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-grid page-grid-chart">
 	<div class="head">
 		<div class="search">
-			<#include "../../include/page_obj_searchform.html.ftl">
+			<#include "../../include/page_obj_searchform_data_filter.ftl">
 		</div>
 		<div class="operation">
 			<#if selectonly>
@@ -29,6 +31,9 @@ selectonly 是否选择操作，允许为null
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<input name="showButton" type="button" value="<@spring.message code='chart.show' />" />
+				<#if !(currentUser.anonymous)>
+				<input name="shareButton" type="button" value="<@spring.message code='share' />" />
+				</#if>
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 			</#if>
 		</div>
@@ -46,14 +51,16 @@ selectonly 是否选择操作，允许为null
 <#if !isAjaxRequest>
 </div>
 </#if>
-<#include "../../include/page_js_obj.ftl">
-<#include "../../include/page_obj_searchform_js.ftl">
 <#include "../../include/page_obj_pagination.ftl">
 <#include "../../include/page_obj_grid.ftl">
+<#include "../../include/page_obj_data_permission.ftl" >
 <script type="text/javascript">
 (function(po)
 {
 	$.initButtons(po.element(".operation"));
+	po.initDataFilter();
+
+	po.currentUser = <@writeJson var=currentUser />;
 	
 	po.url = function(action)
 	{
@@ -92,6 +99,23 @@ selectonly 是否选择操作，允许为null
 					}
 				}
 			});
+		});
+	});
+	
+	po.element("input[name=shareButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
+		{
+			if(!po.canAuthorize(row, po.currentUser))
+			{
+				$.tipInfo("<@spring.message code='error.PermissionDeniedException' />");
+				return;
+			}
+			
+			var options = {};
+			$.setGridPageHeightOption(options);
+			po.open(contextPath+"/authorization/${HtmlChartWidgetEntity.AUTHORIZATION_RESOURCE_TYPE}/query?"
+					+"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent(row.id), options);
 		});
 	});
 	</#if>

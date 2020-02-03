@@ -22,8 +22,6 @@ import org.datagear.management.domain.Schema;
  */
 public class AuthorizationResourceMetas
 {
-	public static final String LABEL_KEY_PREFIX = "authorization.resourceMeta.";
-
 	private static final ConcurrentMap<String, ResourceMeta> RESOURCEMETA_MAP = new ConcurrentHashMap<String, ResourceMeta>();
 
 	/**
@@ -34,6 +32,31 @@ public class AuthorizationResourceMetas
 	public static void register(ResourceMeta resourceMeta)
 	{
 		RESOURCEMETA_MAP.put(resourceMeta.getResourceType(), resourceMeta);
+	}
+
+	/**
+	 * 注册用于支持分享功能的{@linkplain ResourceMeta}。
+	 * 
+	 * @param resourceType
+	 * @param labelKeyPrefix
+	 */
+	public static void registerForShare(String resourceType, String labelKeyPrefix)
+	{
+		PermissionMeta read = PermissionMeta.valueOfRead();
+		ResourceMeta resourceMeta = new ResourceMeta(resourceType, labelKeyPrefix, PermissionMeta.valuesOf(read));
+		resourceMeta.updateResouceTypeLabel();
+		resourceMeta.setSupportSelectResource(false);
+		resourceMeta.setSupportPatternResource(false);
+		resourceMeta.setEnableSetEnable(false);
+
+		resourceMeta.setAuthManageAuthorizationLabel("authorization.default.share.manageAuthorization");
+		resourceMeta.setAuthAddAuthorizationLabel("authorization.default.share.addAuthorization");
+		resourceMeta.setAuthEditAuthorizationLabel("authorization.default.share.editAuthorization");
+		resourceMeta.setAuthViewAuthorizationLabel("authorization.default.share.viewAuthorization");
+		resourceMeta.setAuthPrincipalTypeLabel("authorization.default.share.principalType");
+		resourceMeta.setAuthPrincipalLabel("authorization.default.share.principal");
+
+		register(resourceMeta);
 	}
 
 	/**
@@ -54,11 +77,29 @@ public class AuthorizationResourceMetas
 	{
 		// 数据源授权资源元信息
 		{
-			ResourceMeta resourceMeta = ResourceMeta.valueOf(Schema.AUTHORIZATION_RESOURCE_TYPE, "/schema/select", "id",
-					"title", true,
-					PermissionMeta.valuesOf(Schema.AUTHORIZATION_RESOURCE_TYPE, Schema.PERMISSION_TABLE_DATA_READ,
-							Schema.PERMISSION_TABLE_DATA_EDIT, Schema.PERMISSION_TABLE_DATA_DELETE,
-							Authorization.PERMISSION_NONE_START, true));
+			PermissionMeta read = PermissionMeta.valueOfRead(Schema.PERMISSION_TABLE_DATA_READ);
+			read.setPermissionLabelDesc(ResourceMeta.buildLabelKey("schema", "permission.read.desc"));
+
+			PermissionMeta edit = PermissionMeta.valueOfEdit(Schema.PERMISSION_TABLE_DATA_EDIT);
+			edit.setPermissionLabelDesc(ResourceMeta.buildLabelKey("schema", "permission.edit.desc"));
+
+			PermissionMeta delete = PermissionMeta.valueOfDelete(Schema.PERMISSION_TABLE_DATA_DELETE);
+			delete.setPermissionLabelDesc(ResourceMeta.buildLabelKey("schema", "permission.delete.desc"));
+
+			PermissionMeta none = PermissionMeta.valueOfNone();
+			none.setPermissionLabelDesc(ResourceMeta.buildLabelKey("schema", "permission.none.desc"));
+
+			ResourceMeta resourceMeta = new ResourceMeta(Schema.AUTHORIZATION_RESOURCE_TYPE, "schema",
+					PermissionMeta.valuesOf(read, edit, delete, none));
+			resourceMeta.updateResouceTypeLabel();
+			resourceMeta.setSupportSelectResource(true);
+			resourceMeta.setSelectResourceURL("/schema/select");
+			resourceMeta.setSelectResourceIdField(Schema.ID_PROP_NAME);
+			resourceMeta.setSelectResourceNameField(Schema.PROPERTY_TITLE);
+			resourceMeta.updateAuthModeSelectResourceLabel();
+			resourceMeta.setSupportPatternResource(true);
+			resourceMeta.updateAuthModePatternResourceLabel();
+			resourceMeta.updateAuthModePatternResourceLabelDesc();
 
 			register(resourceMeta);
 		}
@@ -79,42 +120,80 @@ public class AuthorizationResourceMetas
 	{
 		private static final long serialVersionUID = 1L;
 
+		/** 资源类型 */
 		private String resourceType;
 
-		private String resouceTypeLabelKey;
+		/** 标签I18N关键字前缀 */
+		private String labelKeyPrefix;
 
-		private String selectResourceURL;
-
-		private String selectResourceIdField;
-
-		private String selectResourceNameField;
-
+		/** 资源权限元信息 */
 		private PermissionMeta[] permissionMetas;
 
-		private boolean supportPattern = false;
+		/** 资源类型标签I18N关键字 */
+		private String resouceTypeLabel = "authorization.default.resouceTypeLabel";
 
-		private String selectResourceLabelKey;
+		/** 是否支持选择资源授权 */
+		private boolean supportSelectResource = false;
 
-		private String selectResourceLabelDescKey;
+		/** supportSelectResource=true时必须，选择资源URL */
+		private String selectResourceURL = "";
 
-		private String fillPatternLabelKey;
+		/** supportSelectResource=true时必须，选择资源的ID字段名 */
+		private String selectResourceIdField = "";
 
-		private String fillPatternLabelDescKey;
+		/** supportSelectResource=true时必须，选择资源的名称字段名 */
+		private String selectResourceNameField = "";
+
+		/** 是否支持模式匹配授权 */
+		private boolean supportPatternResource = false;
+
+		/** 可选，授权模式-选择资源选项卡标签名I18N关键字 */
+		private String authModeSelectResourceLabel = "authorization.default.authModeSelectResourceLabel";
+
+		/** 可选，授权模式-选择资源选项卡标签描述I18N关键字 */
+		private String authModeSelectResourceLabelDesc = "authorization.default.authModeSelectResourceLabelDesc";
+
+		/** 可选，授权模式-模式输入选项卡标签I18N关键字 */
+		private String authModePatternResourceLabel = "authorization.default.authModePatternResourceLabel";
+
+		/** 可选，授权模式-模式输入选项卡标签描述I18N关键字 */
+		private String authModePatternResourceLabelDesc = "authorization.default.authModePatternResourceLabelDesc";
+
+		/** 是否开启设置启用/禁用功能 */
+		private boolean enableSetEnable = true;
+
+		private String authManageAuthorizationLabel = "authorization.manageAuthorization";
+
+		private String authAddAuthorizationLabel = "authorization.addAuthorization";
+
+		private String authEditAuthorizationLabel = "authorization.editAuthorization";
+
+		private String authViewAuthorizationLabel = "authorization.viewAuthorization";
+
+		private String authResourceLabel = "authorization.resource";
+
+		private String authResourceTypeLabel = "authorization.resourceType";
+
+		private String authPrincipalLabel = "authorization.principal";
+
+		private String authPrincipalTypeLabel = "authorization.principalType";
+
+		private String authPermissionLabel = "authorization.permission";
+
+		private String authEnabledLabel = "authorization.enabled";
+
+		private String authCreateUserLabel = "authorization.createUser";
 
 		public ResourceMeta()
 		{
 			super();
 		}
 
-		public ResourceMeta(String resourceType, String resouceTypeLabelKey, String selectResourceURL,
-				String selectResourceIdField, String selectResourceNameField, PermissionMeta... permissionMetas)
+		public ResourceMeta(String resourceType, String labelKeyPrefix, PermissionMeta... permissionMetas)
 		{
 			super();
 			this.resourceType = resourceType;
-			this.resouceTypeLabelKey = resouceTypeLabelKey;
-			this.selectResourceURL = selectResourceURL;
-			this.selectResourceIdField = selectResourceIdField;
-			this.selectResourceNameField = selectResourceNameField;
+			this.labelKeyPrefix = labelKeyPrefix;
 			this.permissionMetas = permissionMetas;
 		}
 
@@ -128,14 +207,44 @@ public class AuthorizationResourceMetas
 			this.resourceType = resourceType;
 		}
 
-		public String getResouceTypeLabelKey()
+		public String getLabelKeyPrefix()
 		{
-			return resouceTypeLabelKey;
+			return labelKeyPrefix;
 		}
 
-		public void setResouceTypeLabelKey(String resouceTypeLabelKey)
+		public void setLabelKeyPrefix(String labelKeyPrefix)
 		{
-			this.resouceTypeLabelKey = resouceTypeLabelKey;
+			this.labelKeyPrefix = labelKeyPrefix;
+		}
+
+		public PermissionMeta[] getPermissionMetas()
+		{
+			return permissionMetas;
+		}
+
+		public void setPermissionMetas(PermissionMeta[] permissionMetas)
+		{
+			this.permissionMetas = permissionMetas;
+		}
+
+		public String getResouceTypeLabel()
+		{
+			return resouceTypeLabel;
+		}
+
+		public void setResouceTypeLabel(String resouceTypeLabel)
+		{
+			this.resouceTypeLabel = resouceTypeLabel;
+		}
+
+		public boolean isSupportSelectResource()
+		{
+			return supportSelectResource;
+		}
+
+		public void setSupportSelectResource(boolean supportSelectResource)
+		{
+			this.supportSelectResource = supportSelectResource;
 		}
 
 		public String getSelectResourceURL()
@@ -168,88 +277,289 @@ public class AuthorizationResourceMetas
 			this.selectResourceNameField = selectResourceNameField;
 		}
 
-		public PermissionMeta[] getPermissionMetas()
+		public String getAuthModeSelectResourceLabel()
 		{
-			return permissionMetas;
+			return authModeSelectResourceLabel;
 		}
 
-		public void setPermissionMetas(PermissionMeta... permissionMetas)
+		public void setAuthModeSelectResourceLabel(String authModeSelectResourceLabel)
 		{
-			this.permissionMetas = permissionMetas;
+			this.authModeSelectResourceLabel = authModeSelectResourceLabel;
 		}
 
-		public boolean isSupportPattern()
+		public String getAuthModeSelectResourceLabelDesc()
 		{
-			return supportPattern;
+			return authModeSelectResourceLabelDesc;
 		}
 
-		public void setSupportPattern(boolean supportPattern)
+		public void setAuthModeSelectResourceLabelDesc(String authModeSelectResourceLabelDesc)
 		{
-			this.supportPattern = supportPattern;
+			this.authModeSelectResourceLabelDesc = authModeSelectResourceLabelDesc;
 		}
 
-		public String getSelectResourceLabelKey()
+		public boolean isSupportPatternResource()
 		{
-			return selectResourceLabelKey;
+			return supportPatternResource;
 		}
 
-		public void setSelectResourceLabelKey(String selectResourceLabelKey)
+		public void setSupportPatternResource(boolean supportPatternResource)
 		{
-			this.selectResourceLabelKey = selectResourceLabelKey;
+			this.supportPatternResource = supportPatternResource;
 		}
 
-		public String getSelectResourceLabelDescKey()
+		public String getAuthModePatternResourceLabel()
 		{
-			return selectResourceLabelDescKey;
+			return authModePatternResourceLabel;
 		}
 
-		public void setSelectResourceLabelDescKey(String selectResourceLabelDescKey)
+		public void setAuthModePatternResourceLabel(String authModePatternResourceLabel)
 		{
-			this.selectResourceLabelDescKey = selectResourceLabelDescKey;
+			this.authModePatternResourceLabel = authModePatternResourceLabel;
 		}
 
-		public String getFillPatternLabelKey()
+		public String getAuthModePatternResourceLabelDesc()
 		{
-			return fillPatternLabelKey;
+			return authModePatternResourceLabelDesc;
 		}
 
-		public void setFillPatternLabelKey(String fillPatternLabelKey)
+		public void setAuthModePatternResourceLabelDesc(String authModePatternResourceLabelDesc)
 		{
-			this.fillPatternLabelKey = fillPatternLabelKey;
+			this.authModePatternResourceLabelDesc = authModePatternResourceLabelDesc;
 		}
 
-		public String getFillPatternLabelDescKey()
+		public boolean isEnableSetEnable()
 		{
-			return fillPatternLabelDescKey;
+			return enableSetEnable;
 		}
 
-		public void setFillPatternLabelDescKey(String fillPatternLabelDescKey)
+		public void setEnableSetEnable(boolean enableSetEnable)
 		{
-			this.fillPatternLabelDescKey = fillPatternLabelDescKey;
+			this.enableSetEnable = enableSetEnable;
 		}
 
-		public static ResourceMeta valueOf(String resourceType, String selectResourceURL, String selectResourceIdField,
-				String selectResourceNameField, boolean supportPattern, PermissionMeta... permissionMetas)
+		public String getAuthManageAuthorizationLabel()
 		{
-			String resouceTypeLabelKey = LABEL_KEY_PREFIX + resourceType + ".resouceTypeLabel";
-			ResourceMeta meta = new ResourceMeta(resourceType, resouceTypeLabelKey, selectResourceURL,
-					selectResourceIdField, selectResourceNameField, permissionMetas);
+			return authManageAuthorizationLabel;
+		}
 
-			if (supportPattern)
-			{
-				String selectResourceLabelKey = LABEL_KEY_PREFIX + resourceType + ".selectResourceLabel";
-				String selectResourceLabelDescKey = selectResourceLabelKey + ".desc";
-				String fillPatternLabelKey = LABEL_KEY_PREFIX + resourceType + ".fillPatternLabel";
-				String fillPatternLabelDescKey = fillPatternLabelKey + ".desc";
+		public void setAuthManageAuthorizationLabel(String authManageAuthorizationLabel)
+		{
+			this.authManageAuthorizationLabel = authManageAuthorizationLabel;
+		}
 
-				meta.setSupportPattern(true);
-				meta.setSelectResourceLabelKey(selectResourceLabelKey);
-				meta.setSelectResourceLabelDescKey(selectResourceLabelDescKey);
-				meta.setFillPatternLabelKey(fillPatternLabelKey);
-				meta.setFillPatternLabelDescKey(fillPatternLabelDescKey);
-			}
+		public String getAuthAddAuthorizationLabel()
+		{
+			return authAddAuthorizationLabel;
+		}
 
-			return meta;
+		public void setAuthAddAuthorizationLabel(String authAddAuthorizationLabel)
+		{
+			this.authAddAuthorizationLabel = authAddAuthorizationLabel;
+		}
+
+		public String getAuthEditAuthorizationLabel()
+		{
+			return authEditAuthorizationLabel;
+		}
+
+		public void setAuthEditAuthorizationLabel(String authEditAuthorizationLabel)
+		{
+			this.authEditAuthorizationLabel = authEditAuthorizationLabel;
+		}
+
+		public String getAuthViewAuthorizationLabel()
+		{
+			return authViewAuthorizationLabel;
+		}
+
+		public void setAuthViewAuthorizationLabel(String authViewAuthorizationLabel)
+		{
+			this.authViewAuthorizationLabel = authViewAuthorizationLabel;
+		}
+
+		public String getAuthResourceLabel()
+		{
+			return authResourceLabel;
+		}
+
+		public void setAuthResourceLabel(String authResourceLabel)
+		{
+			this.authResourceLabel = authResourceLabel;
+		}
+
+		public String getAuthResourceTypeLabel()
+		{
+			return authResourceTypeLabel;
+		}
+
+		public void setAuthResourceTypeLabel(String authResourceTypeLabel)
+		{
+			this.authResourceTypeLabel = authResourceTypeLabel;
+		}
+
+		public String getAuthPrincipalLabel()
+		{
+			return authPrincipalLabel;
+		}
+
+		public void setAuthPrincipalLabel(String authPrincipalLabel)
+		{
+			this.authPrincipalLabel = authPrincipalLabel;
+		}
+
+		public String getAuthPrincipalTypeLabel()
+		{
+			return authPrincipalTypeLabel;
+		}
+
+		public void setAuthPrincipalTypeLabel(String authPrincipalTypeLabel)
+		{
+			this.authPrincipalTypeLabel = authPrincipalTypeLabel;
+		}
+
+		public String getAuthPermissionLabel()
+		{
+			return authPermissionLabel;
+		}
+
+		public void setAuthPermissionLabel(String authPermissionLabel)
+		{
+			this.authPermissionLabel = authPermissionLabel;
+		}
+
+		public String getAuthEnabledLabel()
+		{
+			return authEnabledLabel;
+		}
+
+		public void setAuthEnabledLabel(String authEnabledLabel)
+		{
+			this.authEnabledLabel = authEnabledLabel;
+		}
+
+		public String getAuthCreateUserLabel()
+		{
+			return authCreateUserLabel;
+		}
+
+		public void setAuthCreateUserLabel(String authCreateUserLabel)
+		{
+			this.authCreateUserLabel = authCreateUserLabel;
+		}
+
+		/**
+		 * 是否只有一个权限。
+		 * 
+		 * @return
+		 */
+		public boolean isSinglePermission()
+		{
+			return (this.permissionMetas != null && this.permissionMetas.length == 1);
+		}
+
+		public PermissionMeta getSinglePermissionMeta()
+		{
+			return this.permissionMetas[0];
+		}
+
+		/**
+		 * 查询、编辑操作是否必须首先设置资源。
+		 * 
+		 * @return
+		 */
+		public boolean mustAssignResource()
+		{
+			return (!this.supportSelectResource && !supportPatternResource);
+		}
+
+		public String buildLabelKey(String subKey)
+		{
+			return buildLabelKey(this.labelKeyPrefix, subKey);
+		}
+
+		public void updateResouceTypeLabel()
+		{
+			this.resouceTypeLabel = buildLabelKey("resouceTypeLabel");
+		}
+
+		public void updateAuthModeSelectResourceLabel()
+		{
+			this.authModeSelectResourceLabel = buildLabelKey("authModeSelectResourceLabel");
+		}
+
+		public void updateAuthModeSelectResourceLabelDesc()
+		{
+			this.authModeSelectResourceLabelDesc = buildLabelKey("authModeSelectResourceLabelDesc");
+		}
+
+		public void updateAuthModePatternResourceLabel()
+		{
+			this.authModePatternResourceLabel = buildLabelKey("authModePatternResourceLabel");
+		}
+
+		public void updateAuthModePatternResourceLabelDesc()
+		{
+			this.authModePatternResourceLabelDesc = buildLabelKey("authModePatternResourceLabelDesc");
+		}
+
+		public void updateAuthManageAuthorizationLabel()
+		{
+			this.authManageAuthorizationLabel = buildLabelKey("authManageAuthorizationLabel");
+		}
+
+		public void updateAuthAddAuthorizationLabel()
+		{
+			this.authAddAuthorizationLabel = buildLabelKey("authAddAuthorizationLabel");
+		}
+
+		public void updateAuthEditAuthorizationLabel()
+		{
+			this.authEditAuthorizationLabel = buildLabelKey("authEditAuthorizationLabel");
+		}
+
+		public void updateAuthViewAuthorizationLabel()
+		{
+			this.authViewAuthorizationLabel = buildLabelKey("authViewAuthorizationLabel");
+		}
+
+		public void updateAuthResourceLabel()
+		{
+			this.authResourceLabel = buildLabelKey("authResourceLabel");
+		}
+
+		public void updateAuthResourceTypeLabel()
+		{
+			this.authResourceTypeLabel = buildLabelKey("authResourceTypeLabel");
+		}
+
+		public void updateAuthPrincipalLabel()
+		{
+			this.authPrincipalLabel = buildLabelKey("authPrincipalLabel");
+		}
+
+		public void updateAuthPrincipalTypeLabel()
+		{
+			this.authPrincipalTypeLabel = buildLabelKey("authPrincipalTypeLabel");
+		}
+
+		public void updateAuthPermissionLabel()
+		{
+			this.authPermissionLabel = buildLabelKey("authPermissionLabel");
+		}
+
+		public void updateAuthEnabledLabel()
+		{
+			this.authEnabledLabel = buildLabelKey("authEnabledLabel");
+		}
+
+		public void updateAuthCreateUserLabel()
+		{
+			this.authCreateUserLabel = buildLabelKey("authCreateUserLabel");
+		}
+
+		public static String buildLabelKey(String labelKeyPrefix, String subKey)
+		{
+			return labelKeyPrefix + ".auth." + subKey;
 		}
 	}
 
@@ -265,23 +575,25 @@ public class AuthorizationResourceMetas
 
 		private static final long serialVersionUID = 1L;
 
+		/** 权限值 */
 		private int permission;
 
-		private String permissionLabelKey;
+		/** 权限标签I18N关键字 */
+		private String permissionLabel;
 
-		private String permissionLabelDescKey;
+		/** 可选，权限标签描述I18N关键字 */
+		private String permissionLabelDesc = "authorization.default.permission.desc";
 
 		public PermissionMeta()
 		{
 			super();
 		}
 
-		public PermissionMeta(int permission, String permissionLabelKey, String permissionLabelDescKey)
+		public PermissionMeta(int permission, String permissionLabel)
 		{
 			super();
 			this.permission = permission;
-			this.permissionLabelKey = permissionLabelKey;
-			this.permissionLabelDescKey = permissionLabelDescKey;
+			this.permissionLabel = permissionLabel;
 		}
 
 		public int getPermission()
@@ -294,62 +606,73 @@ public class AuthorizationResourceMetas
 			this.permission = permission;
 		}
 
-		public String getPermissionLabelKey()
+		public String getPermissionLabel()
 		{
-			return permissionLabelKey;
+			return permissionLabel;
 		}
 
-		public void setPermissionLabelKey(String permissionLabelKey)
+		public void setPermissionLabel(String permissionLabel)
 		{
-			this.permissionLabelKey = permissionLabelKey;
+			this.permissionLabel = permissionLabel;
 		}
 
-		public String getPermissionLabelDescKey()
+		public String getPermissionLabelDesc()
 		{
-			return permissionLabelDescKey;
+			return permissionLabelDesc;
 		}
 
-		public void setPermissionLabelDescKey(String permissionLabelDescKey)
+		public void setPermissionLabelDesc(String permissionLabelDesc)
 		{
-			this.permissionLabelDescKey = permissionLabelDescKey;
+			this.permissionLabelDesc = permissionLabelDesc;
 		}
 
-		public static PermissionMeta valueOf(int permission, String permissionLabelKey)
+		public static PermissionMeta valueOf(int permission, String permissionLabel)
 		{
-			return new PermissionMeta(permission, permissionLabelKey, permissionLabelKey + ".desc");
+			return new PermissionMeta(permission, permissionLabel);
 		}
 
-		public static PermissionMeta[] valuesOf()
+		public static PermissionMeta valueOfRead()
 		{
-			PermissionMeta[] permissionMetas = new PermissionMeta[4];
-
-			permissionMetas[0] = valueOf(Authorization.PERMISSION_READ_START, "authorization.permission.READ");
-			permissionMetas[1] = valueOf(Authorization.PERMISSION_EDIT_START, "authorization.permission.EDIT");
-			permissionMetas[2] = valueOf(Authorization.PERMISSION_DELETE_START, "authorization.permission.DELETE");
-			permissionMetas[3] = valueOf(Authorization.PERMISSION_NONE_START, "authorization.permission.NONE");
-
-			return permissionMetas;
+			return valueOfRead(Authorization.PERMISSION_READ_START);
 		}
 
-		public static PermissionMeta[] valuesOf(String resourceType, int read, int edit, int delete, int none,
-				boolean customDesc)
+		public static PermissionMeta valueOfRead(int permission)
 		{
-			PermissionMeta[] permissionMetas = new PermissionMeta[4];
+			return new PermissionMeta(permission, "authorization.permission.READ");
+		}
 
-			permissionMetas[0] = valueOf(read, "authorization.permission.READ");
-			permissionMetas[1] = valueOf(edit, "authorization.permission.EDIT");
-			permissionMetas[2] = valueOf(delete, "authorization.permission.DELETE");
-			permissionMetas[3] = valueOf(none, "authorization.permission.NONE");
+		public static PermissionMeta valueOfEdit()
+		{
+			return valueOfEdit(Authorization.PERMISSION_EDIT_START);
+		}
 
-			if (customDesc)
-			{
-				permissionMetas[0].setPermissionLabelDescKey(LABEL_KEY_PREFIX + resourceType + ".permission.READ.desc");
-				permissionMetas[1].setPermissionLabelDescKey(LABEL_KEY_PREFIX + resourceType + ".permission.EDIT.desc");
-				permissionMetas[2]
-						.setPermissionLabelDescKey(LABEL_KEY_PREFIX + resourceType + ".permission.DELETE.desc");
-				permissionMetas[3].setPermissionLabelDescKey(LABEL_KEY_PREFIX + resourceType + ".permission.NONE.desc");
-			}
+		public static PermissionMeta valueOfEdit(int permission)
+		{
+			return new PermissionMeta(permission, "authorization.permission.EDIT");
+		}
 
+		public static PermissionMeta valueOfDelete()
+		{
+			return valueOfEdit(Authorization.PERMISSION_DELETE_START);
+		}
+
+		public static PermissionMeta valueOfDelete(int permission)
+		{
+			return new PermissionMeta(permission, "authorization.permission.DELETE");
+		}
+
+		public static PermissionMeta valueOfNone()
+		{
+			return valueOfEdit(Authorization.PERMISSION_NONE_START);
+		}
+
+		public static PermissionMeta valueOfNone(int permission)
+		{
+			return new PermissionMeta(permission, "authorization.permission.NONE");
+		}
+
+		public static PermissionMeta[] valuesOf(PermissionMeta... permissionMetas)
+		{
 			return permissionMetas;
 		}
 	}

@@ -240,15 +240,19 @@
 	
 	<sql id="queryCondition">
 		1 = 1
-		<if test="queryKeyword != null">
-		AND
-		(
-			${_iq_}resourceName${_iq_} LIKE #{queryKeyword} OR ${_iq_}principalName${_iq_} LIKE #{queryKeyword}
-		)
-		</if>
-		<if test="appointResource != null">
-		AND ${_iq_}resource${_iq_} = #{appointResource} AND ${_iq_}resourceType${_iq_} NOT LIKE '%_PATTERN'
-		</if>
+		<choose><when test="assignedResource != null">
+			AND ${_iq_}resource${_iq_} = #{assignedResource} AND ${_iq_}resourceType${_iq_} NOT LIKE '%_PATTERN'
+			<if test="queryKeyword != null">
+			AND  ${_iq_}principalName${_iq_} LIKE #{queryKeyword}
+			</if>
+		</when><otherwise>
+			<if test="queryKeyword != null">
+			AND
+			(
+				${_iq_}resourceName${_iq_} LIKE #{queryKeyword} OR ${_iq_}principalName${_iq_} LIKE #{queryKeyword}
+			)
+			</if>
+		</otherwise></choose>
 		<include refid="common.queryCondition" />
 	</sql>
 </mapper>

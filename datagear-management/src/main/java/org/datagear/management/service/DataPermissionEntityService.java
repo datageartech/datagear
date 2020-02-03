@@ -44,6 +44,15 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	/** 数据权限参数：未设置任何权限时的默认权限值 */
 	String DATA_PERMISSION_PARAM_UNSET_PERMISSION = "DP_UNSET_PERMISSION";
 
+	/** 查询过滤值：我的 */
+	String DATA_FILTER_VALUE_MINE = "mine";
+
+	/** 查询过滤值：其他人的 */
+	String DATA_FILTER_VALUE_OTHER = "other";
+
+	/** 查询过滤值：全部 */
+	String DATA_FILTER_VALUE_ALL = "all";
+
 	/**
 	 * 获取数据权限资源类型。
 	 * 
@@ -167,4 +176,14 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	 * @return
 	 */
 	PagingData<T> pagingQuery(User user, PagingQuery pagingQuery);
+
+	/**
+	 * 授权分页查询。
+	 * 
+	 * @param user        操作用户
+	 * @param pagingQuery
+	 * @param dataFilter
+	 * @return
+	 */
+	PagingData<T> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter);
 }

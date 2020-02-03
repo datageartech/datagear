@@ -44,9 +44,9 @@ public interface AuthorizationService extends DataPermissionEntityService<String
 	 * 查询指定资源的{@linkplain Authorization}。
 	 * 
 	 * @param user
-	 * @param appointResource
+	 * @param assignedResource
 	 * @param query
 	 * @return
 	 */
-	List<Authorization> queryForAppointResource(User user, String appointResource, Query query);
+	List<Authorization> queryForAssignedResource(User user, String assignedResource, Query query);
 }

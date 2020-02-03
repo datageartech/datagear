@@ -32,6 +32,12 @@ po.search = undefined;
 		return param;
 	};
 	
+	po.getSearchParamString = function()
+	{
+		var param = po.getSearchParam();
+		return $.param(param);
+	};
+	
 	po.element("input:submit", po.searchForm()).button();
 })
 (${pageId});

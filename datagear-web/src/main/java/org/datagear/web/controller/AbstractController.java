@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Paging;
 import org.datagear.persistence.PagingQuery;
@@ -51,7 +52,11 @@ public abstract class AbstractController
 
 	public static final String KEY_SELECTONLY = "selectonly";
 
-	protected static final String ERROR_PAGE_URL = "/error";
+	public static final String DATA_FILTER_PARAM = "dataFilter";
+
+	public static final String DATA_FILTER_COOKIE = "DATA_FILTER_SEARCH";
+
+	public static final String ERROR_PAGE_URL = "/error";
 
 	@Autowired
 	private MessageSource messageSource;
@@ -89,6 +94,31 @@ public abstract class AbstractController
 	public void setClassDataConverter(ClassDataConverter classDataConverter)
 	{
 		this.classDataConverter = classDataConverter;
+	}
+
+	/**
+	 * 获取数据查询过滤值。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	protected String getDataFilterValue(HttpServletRequest request)
+	{
+		String value = request.getParameter(DATA_FILTER_PARAM);
+
+		if (isEmpty(value))
+			value = WebUtils.getCookieValue(request, DATA_FILTER_COOKIE);
+
+		if (DataPermissionEntityService.DATA_FILTER_VALUE_MINE.equalsIgnoreCase(value))
+			value = DataPermissionEntityService.DATA_FILTER_VALUE_MINE;
+		else if (DataPermissionEntityService.DATA_FILTER_VALUE_OTHER.equalsIgnoreCase(value))
+			value = DataPermissionEntityService.DATA_FILTER_VALUE_OTHER;
+		else if (DataPermissionEntityService.DATA_FILTER_VALUE_ALL.equalsIgnoreCase(value))
+			value = DataPermissionEntityService.DATA_FILTER_VALUE_ALL;
+		else
+			value = DataPermissionEntityService.DATA_FILTER_VALUE_MINE;
+
+		return value;
 	}
 
 	/**

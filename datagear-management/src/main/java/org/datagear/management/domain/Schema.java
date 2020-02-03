@@ -41,6 +41,8 @@ public class Schema extends AbstractStringIdEntity
 
 	/*------------------------------------------------------*/
 
+	public static final String PROPERTY_TITLE = "title";
+
 	/** 标题 */
 	private String title;
 

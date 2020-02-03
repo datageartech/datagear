@@ -156,6 +156,7 @@
 			${_iq_}name${_iq_} LIKE #{queryKeyword}
 		)
 		</if>
+		<include refid="commonDataPermission.dataFilterCondition" />
 		<include refid="common.queryCondition" />
 	</sql>
 </mapper>

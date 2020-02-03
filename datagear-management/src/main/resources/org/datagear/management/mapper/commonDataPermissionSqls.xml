@@ -162,4 +162,16 @@
 			)
 	</sql>
 	
+	<sql id="dataFilterCondition">
+		<if test="_dataFilter != null and DP_CURRENT_USER != null">
+			<choose><when test="_dataFilter == 'mine'">
+			AND ${_iq_}createUser.id${_iq_} = #{DP_CURRENT_USER.id}
+			</when><when test="_dataFilter == 'other'">
+			AND ${_iq_}createUser.id${_iq_} != #{DP_CURRENT_USER.id}
+			</when><when test="_dataFilter == 'all'">
+			</when>
+			</choose>
+		</if>
+	</sql>
+	
 </mapper>

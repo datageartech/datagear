@@ -19,6 +19,7 @@ import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
+import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -169,8 +170,17 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	@Override
 	public PagingData<T> pagingQuery(User user, PagingQuery pagingQuery)
 	{
+		return pagingQuery(user, pagingQuery, null);
+	}
+
+	@Override
+	public PagingData<T> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter)
+	{
 		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user);
+
+		if (!StringUtil.isEmpty(dataFilter))
+			params.put("_dataFilter", dataFilter);
 
 		return pagingQuery(pagingQuery, params);
 	}

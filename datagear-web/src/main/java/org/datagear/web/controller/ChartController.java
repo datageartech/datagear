@@ -61,6 +61,11 @@ import org.springframework.web.context.request.WebRequest;
 @RequestMapping("/analysis/chart")
 public class ChartController extends AbstractChartPluginAwareController
 {
+	static
+	{
+		AuthorizationResourceMetas.registerForShare(HtmlChartWidgetEntity.AUTHORIZATION_RESOURCE_TYPE, "chart");
+	}
+
 	@Autowired
 	private HtmlChartWidgetEntityService htmlChartWidgetEntityService;
 
@@ -233,8 +238,12 @@ public class ChartController extends AbstractChartPluginAwareController
 	}
 
 	@RequestMapping("/pagingQuery")
-	public String pagingQuery(HttpServletRequest request, org.springframework.ui.Model model)
+	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
+		User user = WebUtils.getUser(request, response);
+		model.addAttribute("currentUser", user);
+
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.manageChart");
 
 		return "/analysis/chart/chart_grid";
@@ -258,8 +267,10 @@ public class ChartController extends AbstractChartPluginAwareController
 		User user = WebUtils.getUser(request, response);
 
 		PagingQuery pagingQuery = getPagingQuery(request);
+		String dataFilter = getDataFilterValue(request);
 
-		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery);
+		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
+				dataFilter);
 		setChartPluginNames(request, pagingData.getItems());
 
 		return pagingData;

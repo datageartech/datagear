@@ -61,6 +61,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/analysis/dashboard")
 public class DashboardController extends AbstractDataAnalysisController
 {
+	static
+	{
+		AuthorizationResourceMetas.registerForShare(HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE,
+				"dashboard");
+	}
+
 	@Autowired
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
 
@@ -449,8 +455,12 @@ public class DashboardController extends AbstractDataAnalysisController
 	}
 
 	@RequestMapping("/pagingQuery")
-	public String pagingQuery(HttpServletRequest request, org.springframework.ui.Model model)
+	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
+		User user = WebUtils.getUser(request, response);
+		model.addAttribute("currentUser", user);
+
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.manageDashboard");
 
 		return "/analysis/dashboard/dashboard_grid";
@@ -473,9 +483,10 @@ public class DashboardController extends AbstractDataAnalysisController
 		User user = WebUtils.getUser(request, response);
 
 		PagingQuery pagingQuery = getPagingQuery(request);
+		String dataFilter = getDataFilterValue(request);
 
 		PagingData<HtmlTplDashboardWidgetEntity> pagingData = this.htmlTplDashboardWidgetEntityService.pagingQuery(user,
-				pagingQuery);
+				pagingQuery, dataFilter);
 
 		return pagingData;
 	}

@@ -14,7 +14,6 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetFmkRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
-import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
@@ -99,7 +98,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	@Override
 	public String getResourceType()
 	{
-		return HtmlChartWidgetEntity.AUTHORIZATION_RESOURCE_TYPE;
+		return HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE;
 	}
 
 	@Override
@@ -131,7 +130,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 
 		if (deleted)
 		{
-			this.authorizationService.deleteByResource(HtmlChartWidgetEntity.AUTHORIZATION_RESOURCE_TYPE, id);
+			this.authorizationService.deleteByResource(HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE, id);
 			this.htmlTplDashboardWidgetRenderer.getTemplateDashboardWidgetResManager().delete(id);
 		}
 

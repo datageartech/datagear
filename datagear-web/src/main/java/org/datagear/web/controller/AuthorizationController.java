@@ -16,6 +16,7 @@ import org.datagear.management.service.impl.AuthorizationQueryContext;
 import org.datagear.management.service.impl.EnumValueLabel;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.controller.AuthorizationResourceMetas.PermissionMeta;
 import org.datagear.web.controller.AuthorizationResourceMetas.ResourceMeta;
@@ -41,7 +42,7 @@ public class AuthorizationController extends AbstractController
 	/**
 	 * 指定授权资源参数，设置后，所有CRUD操作都只针对这一个资源。
 	 */
-	public static final String PARAM_APPOINT_RESOURCE = "appointResource";
+	public static final String PARAM_ASSIGNED_RESOURCE = "assignedResource";
 
 	@Autowired
 	private AuthorizationService authorizationService;
@@ -73,10 +74,10 @@ public class AuthorizationController extends AbstractController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		setResourceMetaAttribute(model, resourceType);
-		setAppoiontResourceAttributeIf(request, model);
+		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
+		setAssignedResourceAttributeIf(request, model, resourceMeta);
 		model.addAttribute("user", user);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "authorization.addAuthorization");
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, resourceMeta.getAuthAddAuthorizationLabel());
 		model.addAttribute(KEY_FORM_ACTION, "saveAdd");
 
 		return "/authorization/authorization_form";
@@ -112,10 +113,10 @@ public class AuthorizationController extends AbstractController
 
 		Authorization authorization = this.authorizationService.getByIdForEdit(user, id);
 
-		setAppoiontResourceAttributeIf(request, model);
+		setAssignedResourceAttributeIf(request, model, resourceMeta);
 		model.addAttribute("authorization", authorization);
 		model.addAttribute("user", user);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "authorization.editAuthorization");
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, resourceMeta.getAuthEditAuthorizationLabel());
 		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
 
 		return "/authorization/authorization_form";
@@ -154,9 +155,9 @@ public class AuthorizationController extends AbstractController
 		if (authorization == null)
 			throw new RecordNotFoundException();
 
-		setAppoiontResourceAttributeIf(request, model);
+		setAssignedResourceAttributeIf(request, model, resourceMeta);
 		model.addAttribute("authorization", authorization);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "authorization.viewAuthorization");
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, resourceMeta.getAuthViewAuthorizationLabel());
 		model.addAttribute(KEY_READONLY, true);
 
 		return "/authorization/authorization_form";
@@ -178,9 +179,9 @@ public class AuthorizationController extends AbstractController
 	public String query(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("resourceType") String resourceType)
 	{
-		setResourceMetaAttribute(model, resourceType);
-		setAppoiontResourceAttributeIf(request, model);
-		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "authorization.manageAuthorization");
+		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
+		setAssignedResourceAttributeIf(request, model, resourceMeta);
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, resourceMeta.getAuthManageAuthorizationLabel());
 
 		return "/authorization/authorization_grid";
 	}
@@ -194,26 +195,30 @@ public class AuthorizationController extends AbstractController
 
 		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
 		setAuthorizationQueryContext(request, resourceMeta);
-		String appointResource = getAppoiontResource(request);
+		String assignedResource = getAssignedResource(request);
 
 		PagingQuery pagingQuery = getPagingQuery(request, null);
 
 		List<Authorization> authorizations = null;
 
-		if (!isEmpty(appointResource))
-			authorizations = this.authorizationService.queryForAppointResource(user, appointResource, pagingQuery);
+		if (!isEmpty(assignedResource))
+			authorizations = this.authorizationService.queryForAssignedResource(user, assignedResource, pagingQuery);
 		else
 			authorizations = this.authorizationService.query(user, pagingQuery);
 
 		return authorizations;
 	}
 
-	protected void setAppoiontResourceAttributeIf(HttpServletRequest request, org.springframework.ui.Model model)
+	protected void setAssignedResourceAttributeIf(HttpServletRequest request, org.springframework.ui.Model model,
+			ResourceMeta resourceMeta)
 	{
-		String ap = getAppoiontResource(request);
+		String ap = getAssignedResource(request);
 
-		if (ap != null)
-			model.addAttribute("appointResource", ap);
+		if (resourceMeta.mustAssignResource() && StringUtil.isEmpty(ap))
+			throw new IllegalInputException();
+
+		if (!StringUtil.isEmpty(ap))
+			model.addAttribute("assignedResource", ap);
 	}
 
 	protected ResourceMeta setResourceMetaAttribute(org.springframework.ui.Model model, String resourceType)
@@ -228,9 +233,9 @@ public class AuthorizationController extends AbstractController
 		return resourceMeta;
 	}
 
-	protected String getAppoiontResource(HttpServletRequest request)
+	protected String getAssignedResource(HttpServletRequest request)
 	{
-		return request.getParameter(PARAM_APPOINT_RESOURCE);
+		return request.getParameter(PARAM_ASSIGNED_RESOURCE);
 	}
 
 	protected void setAuthorizationQueryContext(HttpServletRequest request, ResourceMeta resourceMeta)
@@ -248,7 +253,7 @@ public class AuthorizationController extends AbstractController
 			PermissionMeta permissionMeta = permissionMetas[i];
 
 			permissionLabels[i] = new EnumValueLabel<Integer>(permissionMeta.getPermission(),
-					getMessage(request, permissionMeta.getPermissionLabelKey()));
+					getMessage(request, permissionMeta.getPermissionLabel()));
 		}
 		context.setPermissionLabels(permissionLabels);
 

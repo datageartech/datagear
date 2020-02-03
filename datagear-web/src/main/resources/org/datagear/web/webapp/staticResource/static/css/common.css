@@ -1146,6 +1146,25 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
     overflow-x: hidden;
     font-size: 0.8em;
 }
+.search-form .data-filter-select-wrapper{
+	position: absolute;
+	display: inline-block;
+	padding-left: 0.5em;
+}
+.search-form .data-filter-select-wrapper .ui-selectmenu-button.ui-button{
+	width: 5em;
+	padding-left: 0.2em;
+	padding-right: 0.2em;
+	background: none;
+	border: none;
+}
+.search-form .data-filter-select-wrapper .ui-selectmenu-button.ui-button .ui-icon{
+	float: left;
+	margin-top: 0.2em;
+}
+.search-form .data-filter-select-wrapper .ui-selectmenu-button.ui-button .ui-selectmenu-text{
+	margin-right: 0px;
+}
 
 /*表格页*/
 .page-grid{

@@ -288,6 +288,9 @@
 		<property name="resourceServices">
 			<list>
 				<ref bean="schemaService" />
+				<ref bean="sqlDataSetEntityService" />
+				<ref bean="htmlChartWidgetEntityService" />
+				<ref bean="htmlTplDashboardWidgetEntityService" />
 			</list>
 		</property>
 	</bean>

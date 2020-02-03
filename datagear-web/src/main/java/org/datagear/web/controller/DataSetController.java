@@ -57,6 +57,11 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static final String DATA_SET_PROPERTY_LABELS_SPLITTER = ",";
 
+	static
+	{
+		AuthorizationResourceMetas.registerForShare(SqlDataSetEntity.AUTHORIZATION_RESOURCE_TYPE, "dataSet");
+	}
+
 	@Autowired
 	private SqlDataSetEntityService sqlDataSetEntityService;
 
@@ -268,8 +273,12 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	@RequestMapping("/pagingQuery")
-	public String pagingQuery(HttpServletRequest request, org.springframework.ui.Model model)
+	public String pagingQuery(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
+		User user = WebUtils.getUser(request, response);
+		model.addAttribute("currentUser", user);
+
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.manageDataSet");
 
 		return "/analysis/dataSet/dataSet_grid";
@@ -293,8 +302,10 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		PagingQuery pagingQuery = getPagingQuery(request, WebUtils.COOKIE_PAGINATION_SIZE);
+		String dataFilter = getDataFilterValue(request);
 
-		PagingData<SqlDataSetEntity> pagingData = this.sqlDataSetEntityService.pagingQuery(user, pagingQuery);
+		PagingData<SqlDataSetEntity> pagingData = this.sqlDataSetEntityService.pagingQuery(user, pagingQuery,
+				dataFilter);
 
 		return pagingData;
 	}

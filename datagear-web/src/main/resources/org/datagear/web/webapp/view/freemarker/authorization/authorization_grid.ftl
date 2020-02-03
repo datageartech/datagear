@@ -5,10 +5,11 @@ String titleMessageKey 标题标签I18N关键字，不允许null
 ResourceMeta resourceMeta 资源元信息，不允许null
 -->
 <#assign AuthorizationController=statics['org.datagear.web.controller.AuthorizationController']>
+<#assign isAssignedResource=(assignedResource??)>
 <html>
 <head>
 <#include "../include/html_head.ftl">
-<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /> - <@spring.message code='${resourceMeta.resouceTypeLabelKey}' /></title>
+<title><#include "../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /> - <@spring.message code='${resourceMeta.resouceTypeLabel}' /></title>
 </head>
 <body class="fill-parent">
 <#if !isAjaxRequest>
@@ -57,8 +58,8 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 	{
 		var data =
 		{
-			<#if appointResource??>
-			"${AuthorizationController.PARAM_APPOINT_RESOURCE}" : "${appointResource}"
+			<#if assignedResource??>
+			"${AuthorizationController.PARAM_ASSIGNED_RESOURCE}" : "${assignedResource}"
 			</#if>
 		};
 		
@@ -81,8 +82,8 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		{
 			var data =
 			{
-				<#if appointResource??>
-				"${AuthorizationController.PARAM_APPOINT_RESOURCE}" : "${appointResource?js_string}",
+				<#if assignedResource??>
+				"${AuthorizationController.PARAM_ASSIGNED_RESOURCE}" : "${assignedResource?js_string}",
 				</#if>
 				"id" : row.id
 			};
@@ -107,8 +108,8 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		{
 			var data =
 			{
-				<#if appointResource??>
-				"${AuthorizationController.PARAM_APPOINT_RESOURCE}" : "${appointResource?js_string}",
+				<#if assignedResource??>
+				"${AuthorizationController.PARAM_ASSIGNED_RESOURCE}" : "${assignedResource?js_string}",
 				</#if>
 				"id" : row.id
 			};
@@ -140,7 +141,7 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 		});
 	});
 	
-	var columnEnabled = $.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.enabled' />", "enabled");
+	var columnEnabled = $.buildDataTablesColumnSimpleOption("<@spring.message code='${resourceMeta.authEnabledLabel}' />", "enabled", ${(resourceMeta.enableSetEnable)?string('false', 'true')});
 	columnEnabled.render = function(data, type, row, meta)
 	{
 		if(data == true)
@@ -153,16 +154,16 @@ ResourceMeta resourceMeta 资源元信息，不允许null
 	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='authorization.resource' />"), "resourceName"),
-		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='authorization.principal' />"), "principalName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.permission' />", "permissionLabel"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='${resourceMeta.authResourceLabel}' />"), "resourceName", ${isAssignedResource?string('true', 'false')}),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='${resourceMeta.authPrincipalLabel}' />"), "principalName"),
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='${resourceMeta.authPermissionLabel}' />", "permissionLabel", ${(resourceMeta.singlePermission)?string('true', 'false')}),
 		columnEnabled,
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='authorization.createUser' />", "createUser.nameLabel")
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='${resourceMeta.authCreateUserLabel}' />", "createUser.nameLabel")
 	];
 	
 	var url = po.url("queryData");
-	<#if appointResource??>
-	url = po.url("queryData?${AuthorizationController.PARAM_APPOINT_RESOURCE}="+encodeURIComponent("${appointResource?js_string}"));
+	<#if assignedResource??>
+	url = po.url("queryData?${AuthorizationController.PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent("${assignedResource?js_string}"));
 	</#if>
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, url);
 	po.initDataTable(tableSettings);

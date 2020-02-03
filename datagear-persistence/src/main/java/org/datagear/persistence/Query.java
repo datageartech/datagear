@@ -6,6 +6,8 @@ package org.datagear.persistence;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 查询。
@@ -29,6 +31,9 @@ public class Query implements Serializable
 
 	/** 排序方式 */
 	private Order[] orders;
+
+	/** 查询参数 */
+	private Map<String, Object> params = new HashMap<String, Object>();
 
 	public Query()
 	{
@@ -99,6 +104,16 @@ public class Query implements Serializable
 	public void setOrders(Order... orders)
 	{
 		this.orders = orders;
+	}
+
+	public Map<String, Object> getParams()
+	{
+		return params;
+	}
+
+	public void setParam(String name, Object value)
+	{
+		this.params.put(name, value);
 	}
 
 	@Override
