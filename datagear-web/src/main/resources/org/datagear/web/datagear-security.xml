@@ -47,9 +47,6 @@
 		<!-- 权限管理 -->
 		<intercept-url pattern="${subContextPath}/authorization/**" access="ROLE_USER" />
 		
-		<!-- 全局设置 -->
-		<intercept-url pattern="${subContextPath}/globalSetting/**" access="ROLE_ADMIN" />
-		
 		<!-- 设置数据库URL构建器脚本 -->
 		<intercept-url pattern="${subContextPath}/schemaUrlBuilder/editScriptCode" access="ROLE_ADMIN" />
 		<intercept-url pattern="${subContextPath}/schemaUrlBuilder/saveScriptCode" access="ROLE_ADMIN" />
@@ -62,8 +59,6 @@
 		<intercept-url pattern="${subContextPath}/login/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<intercept-url pattern="${subContextPath}/register/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<intercept-url pattern="${subContextPath}/resetPassword/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
-		<intercept-url pattern="${subContextPath}/resetPasswordRequestHistory/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
-		<intercept-url pattern="${subContextPath}/notification/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
 		<intercept-url pattern="${subContextPath}/changeThemeData/**" access="IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER" />
 		
 		<intercept-url pattern="${subContextPath}/**" access="#{sercurityDisableAnonymous.value ? 'ROLE_USER' : 'IS_AUTHENTICATED_ANONYMOUSLY, ROLE_USER'}" />

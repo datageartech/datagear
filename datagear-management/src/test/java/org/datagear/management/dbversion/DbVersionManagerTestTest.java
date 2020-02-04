@@ -39,20 +39,11 @@ public class DbVersionManagerTestTest
 			Assert.assertTrue(contents.get(0).startsWith("CREATE TABLE DATAGEAR_VERSION"));
 			Assert.assertTrue(contents.get(0).endsWith(")"));
 
-			Assert.assertTrue(contents.get(1).startsWith("CREATE TABLE DATAGEAR_GLOBALSETTING"));
-			Assert.assertTrue(contents.get(1).endsWith(")"));
-
 			Assert.assertTrue(contents.get(2).startsWith("CREATE TABLE DATAGEAR_USER"));
 			Assert.assertTrue(contents.get(2).endsWith(")"));
 
 			Assert.assertTrue(contents.get(3).startsWith("INSERT INTO DATAGEAR_USER"));
 			Assert.assertTrue(contents.get(3).endsWith("CURRENT_TIMESTAMP)"));
-
-			Assert.assertTrue(contents.get(4).startsWith("CREATE TABLE DATAGEAR_RESET_PSD_REQUEST"));
-			Assert.assertTrue(contents.get(4).endsWith(")"));
-
-			Assert.assertTrue(contents.get(5).startsWith("CREATE TABLE DATAGEAR_RESET_PSD_REQUEST_HISTORY"));
-			Assert.assertTrue(contents.get(5).endsWith(")"));
 
 			Assert.assertTrue(contents.get(6).startsWith("CREATE TABLE DATAGEAR_SCHEMA"));
 			Assert.assertTrue(contents.get(6).endsWith(")"));

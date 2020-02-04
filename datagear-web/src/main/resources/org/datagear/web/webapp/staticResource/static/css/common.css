@@ -1316,6 +1316,15 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	height: 10em;
 	padding: 2em 3em;
 }
+.page-form-reset-password .form-item-value-checkFile{
+	padding-top: 0.5em;
+}
+.page-form-reset-password .form-item-value-checkFile .ui-state-default{
+	padding: 0.2em 0.5em;
+	margin-left: 0.2em;
+	margin-right: 0.2em;
+	border: 0;
+}
 .page-form-reset-password .content .form-foot .ui-button{
 	width: 14em;
 }
@@ -1325,13 +1334,6 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-reset-password .content .form-content .step-finish-content a{
 	margin: 0 0.3em;
 	font-weight: bold;
-}
-.page-form-reset-password .content .form-content .skip-check-user-admin-warn{
-	margin-top: 0.2em;
-	padding: 0.3em 0.3em;
-}
-.page-form-reset-password .content .form-content .skip-check-user-admin-warn .ui-icon-info{
-	margin-right: 0.3em;
 }
 
 .page-changelog form .form-content .form-item .form-item-label{

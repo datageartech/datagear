@@ -86,6 +86,11 @@
     </bean>
     <bean id="dashboardRootDirectory" factory-bean="dashboardRootDirectoryFactory" factory-method="getDirectory" />
 	
+    <bean id="resetPasswordCheckFileDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
+    	<property name="directoryName" value="${directory.resetPasswordCheckFile}" />
+    </bean>
+    <bean id="resetPasswordCheckFileDirectory" factory-bean="resetPasswordCheckFileDirectoryFactory" factory-method="getDirectory" />
+	
     <bean id="dbVersionManager" class="org.datagear.management.dbversion.DbVersionManager" init-method="upgrade">
     	<property name="dataSource" ref="dataSource" />
     </bean>
@@ -252,27 +257,6 @@
 	<bean id="userService" class="org.datagear.management.service.impl.UserServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 		<property name="userPasswordEncoder" ref="userPasswordEncoder" />
-	</bean>
-	
-	<bean id="globalSettingService" class="org.datagear.management.service.impl.GlobalSettingServiceImpl">
-		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
-		<property name="smtpSettingPasswordEncryptor">
-			<bean class="org.datagear.web.security.SmtpSettingPasswordEncryptorImpl" />
-		</property>
-	</bean>
-	
-	<bean id="resetPasswordRequestService" class="org.datagear.management.service.impl.ResetPasswordRequestServiceImpl">
-		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
-		<property name="userPasswordEncoder" ref="userPasswordEncoder" />
-	</bean>
-	
-	<bean id="resetPasswordRequestConfig" class="org.datagear.web.ResetPasswordRequestConfig">
-		<property name="handleDelayHours" value="${resetPasswordRequestDelayHours}" />
-		<property name="historyRetainDays" value="${resetPasswordRequestHistoryRetainDays}" />
-	</bean>
-	
-	<bean id="resetPasswordRequestHistoryService" class="org.datagear.management.service.impl.ResetPasswordRequestHistoryServiceImpl">
-		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 	</bean>
 	
 	<bean id="roleService" class="org.datagear.management.service.impl.RoleServiceImpl">
@@ -546,36 +530,6 @@
 		<property name="cronExpression" value="0 0,30 * * * ?" /><!-- 每半小时 -->
 	</bean>
 	
-	<!-- 处理重置密码请求 -->
-	<bean id="handleResetPasswordRequestJob" class="org.datagear.web.scheduling.HandleResetPasswordRequestJob">
-		<property name="resetPasswordRequestService" ref="resetPasswordRequestService" />
-		<property name="resetPasswordRequestConfig" ref="resetPasswordRequestConfig" />
-		<property name="userService" ref="userService" />
-		<property name="resetPasswordRequestHistoryService" ref="resetPasswordRequestHistoryService" />
-	</bean>
-	<bean id="handleResetPasswordRequestJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="handleResetPasswordRequestJob" />
-		<property name="targetMethod" value="handle" />
-	</bean>
-	<bean id="handleResetPasswordRequestJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<property name="jobDetail" ref="handleResetPasswordRequestJobDetail" />
-		<property name="cronExpression" value="0 * * * * ?" /><!-- 每分钟 -->
-	</bean>
-	
-	<!-- 删除过期的重置密码请求历史数据 -->
-	<bean id="deleteExpiredResetPasswordRequestHistoryJob" class="org.datagear.web.scheduling.DeleteExpiredResetPasswordRequestHistoryJob">
-		<property name="resetPasswordRequestConfig" ref="resetPasswordRequestConfig" />
-		<property name="resetPasswordRequestHistoryService" ref="resetPasswordRequestHistoryService" />
-	</bean>
-	<bean id="deleteExpiredResetPasswordRequestHistoryJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="deleteExpiredResetPasswordRequestHistoryJob" />
-		<property name="targetMethod" value="delete" />
-	</bean>
-	<bean id="deleteExpiredResetPasswordRequestHistoryJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<property name="jobDetail" ref="deleteExpiredResetPasswordRequestHistoryJobDetail" />
-		<property name="cronExpression" value="0 0 2 * * ?" /><!-- 每天凌晨2点 -->
-	</bean>
-	
 	<!-- 删除临时文件 -->
 	<bean id="deleteTempFileJob" class="org.datagear.web.scheduling.DeleteExpiredFileJob">
 		<property name="directory" ref="tempDirectory" />
@@ -594,8 +548,6 @@
 		<property name="triggers">
 			<list>
 				<ref bean="deleteExpiredBlobJobCronTrigger" />
-				<ref bean="handleResetPasswordRequestJobCronTrigger" />
-				<ref bean="deleteExpiredResetPasswordRequestHistoryJobCronTrigger" />
 				<ref bean="deleteTempFileJobCronTrigger" />
 			</list>
 		</property>

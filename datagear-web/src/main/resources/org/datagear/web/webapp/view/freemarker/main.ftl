@@ -555,11 +555,7 @@
 				if($item.hasClass("ui-state-disabled"))
 					return;
 				
-				if($item.hasClass("system-set-global-setting"))
-				{
-					po.open(contextPath+"/globalSetting");
-				}
-				else if($item.hasClass("system-set-schema-url-builder"))
+				if($item.hasClass("system-set-schema-url-builder"))
 				{
 					po.open(contextPath+"/schemaUrlBuilder/editScriptCode");
 				}
@@ -1150,18 +1146,6 @@
 		});
 		
 		po.bindTabsMenuHiddenEvent(po.mainTabs);
-		
-		//系统通知
-		$.get("${contextPath}/notification/list", function(data)
-		{
-			if(data && data.length)
-			{
-				for(var i=0; i< data.length; i++)
-				{
-					$.tipInfo(data[i].content);
-				}
-			}
-		});
 	});
 })
 (${pageId});
@@ -1190,12 +1174,7 @@
 					</#if>
 					<li class="system-set-personal-set"><a href="javascript:void(0);"><@spring.message code='main.personalSet' /></a></li>
 					<#if currentUser.admin>
-					<li class=""><a href="javascript:void(0);"><@spring.message code='main.globalSetting' /></a>
-						<ul class="ui-widget-shadow">
-							<li class="system-set-global-setting"><a href="javascript:void(0);"><@spring.message code='globalSetting.smtpSetting' /></a></li>
-							<li class="system-set-schema-url-builder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
-						</ul>
-					</li>
+					<li class="system-set-schema-url-builder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
 					</#if>
 					<li class="ui-widget-header"></li>
 					</#if>
