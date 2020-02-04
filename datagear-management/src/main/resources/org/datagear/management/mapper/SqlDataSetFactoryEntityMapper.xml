@@ -218,6 +218,7 @@
 			B.SCHEMA_ID AS ${_iq_}schemaConnectionFactory.schema.id${_iq_},
 			B.SCHEMA_TITLE AS ${_iq_}schemaConnectionFactory.schema.title${_iq_},
 			A.DS_SQL AS ${_iq_}sql${_iq_},
+			A.DS_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			<include refid="common.fieldsForCreateUser" />,
 			A.DS_CREATE_TIME AS ${_iq_}createTime${_iq_}
 		FROM

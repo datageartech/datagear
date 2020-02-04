@@ -150,6 +150,7 @@
 			A.HCW_NAME AS ${_iq_}name${_iq_},
 			A.HCW_PLUGIN_ID AS ${_iq_}htmlChartPlugin.id${_iq_},
 			A.HCW_UPDATE_INTERVAL AS ${_iq_}updateInterval${_iq_},
+			A.HCW_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			<include refid="common.fieldsForCreateUser" />,
 			A.HCW_CREATE_TIME AS ${_iq_}createTime${_iq_}
 		FROM

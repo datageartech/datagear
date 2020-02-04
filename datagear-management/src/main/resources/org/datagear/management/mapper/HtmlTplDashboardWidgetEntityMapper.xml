@@ -138,6 +138,7 @@
 			A.HD_NAME AS ${_iq_}name${_iq_},
 			A.HD_TEMPLATE AS ${_iq_}template${_iq_},
 			A.HD_TEMPLATE_ENCODING AS ${_iq_}templateEncoding${_iq_},
+			A.HD_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			<include refid="common.fieldsForCreateUser" />,
 			A.HD_CREATE_TIME AS ${_iq_}createTime${_iq_}
 		FROM
