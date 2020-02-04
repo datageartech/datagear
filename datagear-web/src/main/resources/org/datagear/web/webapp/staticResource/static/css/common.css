@@ -879,6 +879,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu{
 	position: fixed;
 	z-index: 2;
+	margin-top: 0.1em;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li > .ui-menu-item-wrapper{
 	width: 1.5em;
@@ -1153,10 +1154,11 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .search-form .data-filter-select-wrapper .ui-selectmenu-button.ui-button{
 	width: 5em;
-	padding-left: 0.2em;
-	padding-right: 0.2em;
 	background: none;
 	border: none;
+	margin-left: -0.2em;
+    padding: 0.2em 0.2em;
+    margin-top: 0.25em;
 }
 .search-form .data-filter-select-wrapper .ui-selectmenu-button.ui-button .ui-icon{
 	float: left;
