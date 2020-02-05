@@ -1007,6 +1007,9 @@
 			//.DataTable().settings()结构
 			else if(settings[0])
 				columnMetas = settings[0].aoColumns;
+			//构造DataTable前的设置
+			else if(settings.columns)
+				columnMetas =  settings.columns;
 			
 			return columnMetas;
 		},

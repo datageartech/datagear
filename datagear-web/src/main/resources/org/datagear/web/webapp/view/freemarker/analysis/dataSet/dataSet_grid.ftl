@@ -197,6 +197,7 @@ selectonly 是否选择操作，允许为null
 	po.initPagination();
 	
 	var tableSettings = po.buildDataTableSettingsAjax(tableColumns, po.url("pagingQueryData"));
+	tableSettings.order = [[$.getDataTableColumn(tableSettings, "createTime"), "desc"]];
 	po.initDataTable(tableSettings);
 	po.bindResizeDataTable();
 })
