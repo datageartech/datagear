@@ -48,7 +48,7 @@ public class SqlHistoryServiceImpl extends AbstractMybatisEntityService<String, 
 	{
 		for (int i = 0, len = sqls.size(); i < len; i++)
 		{
-			SqlHistory sqlHistory = new SqlHistory(IDUtil.uuid(), sqls.get(i), schemaId, userId);
+			SqlHistory sqlHistory = new SqlHistory(IDUtil.randomIdOnTime20(), sqls.get(i), schemaId, userId);
 			add(sqlHistory);
 		}
 

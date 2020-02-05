@@ -170,7 +170,8 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	{
 		HtmlChartPluginRenderOption option = getOptionInitialized(renderContext);
 
-		HtmlChart chart = new HtmlChart(IDUtil.uuid(), renderContext, this, chartPropertyValues, chartDataSets,
+		HtmlChart chart = new HtmlChart(IDUtil.uuid(), renderContext, this, chartPropertyValues,
+				chartDataSets,
 				option.getChartElementId(), option.getChartVarName());
 
 		try

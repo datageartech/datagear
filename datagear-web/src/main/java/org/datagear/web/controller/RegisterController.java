@@ -105,7 +105,7 @@ public class RegisterController extends AbstractController
 				|| !confirmPassword.equals(user.getPassword()))
 			throw new IllegalInputException();
 
-		user.setId(IDUtil.uuid());
+		user.setId(IDUtil.randomIdOnTime20());
 		user.setAdmin(false);
 		user.setAnonymous(false);
 		user.setCreateTime(new Date());

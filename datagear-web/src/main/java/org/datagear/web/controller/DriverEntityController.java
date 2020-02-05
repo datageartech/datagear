@@ -109,7 +109,7 @@ public class DriverEntityController extends AbstractController
 	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		DriverEntity driverEntity = new DriverEntity();
-		driverEntity.setId(IDUtil.uuid());
+		driverEntity.setId(IDUtil.randomIdOnTime20());
 
 		model.addAttribute("driverEntity", driverEntity);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "driverEntity.addDriverEntity");

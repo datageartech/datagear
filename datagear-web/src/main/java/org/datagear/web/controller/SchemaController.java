@@ -115,7 +115,7 @@ public class SchemaController extends AbstractSchemaModelConnController
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
 
-		schema.setId(IDUtil.uuid());
+		schema.setId(IDUtil.randomIdOnTime20());
 		schema.setCreateTime(new Date());
 		schema.setCreateUser(WebUtils.getUser(request, response));
 

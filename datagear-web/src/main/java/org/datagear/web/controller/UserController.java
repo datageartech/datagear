@@ -104,7 +104,7 @@ public class UserController extends AbstractController
 			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
 					buildMessageCode("userNameExists"), user.getName());
 
-		user.setId(IDUtil.uuid());
+		user.setId(IDUtil.randomIdOnTime20());
 
 		// 禁用新建管理员账号功能
 		user.setAdmin(User.isAdminUser(user));

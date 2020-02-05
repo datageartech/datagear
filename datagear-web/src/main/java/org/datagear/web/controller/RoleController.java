@@ -94,7 +94,7 @@ public class RoleController extends AbstractController
 		if (isBlank(role.getName()))
 			throw new IllegalInputException();
 
-		role.setId(IDUtil.uuid());
+		role.setId(IDUtil.randomIdOnTime20());
 
 		this.roleService.add(role);
 
@@ -227,7 +227,7 @@ public class RoleController extends AbstractController
 
 		for (int i = 0; i < users.size(); i++)
 		{
-			RoleUser roleUser = new RoleUser(IDUtil.uuid(), role, users.get(i));
+			RoleUser roleUser = new RoleUser(IDUtil.randomIdOnTime20(), role, users.get(i));
 			roleUsers[i] = roleUser;
 		}
 

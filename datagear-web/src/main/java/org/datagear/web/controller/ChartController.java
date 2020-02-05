@@ -175,7 +175,7 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		if (isEmpty(entity.getId()))
 		{
-			entity.setId(IDUtil.uuid());
+			entity.setId(IDUtil.randomIdOnTime20());
 			entity.setCreateUser(user);
 			inflateHtmlChartWidgetEntity(entity, request);
 

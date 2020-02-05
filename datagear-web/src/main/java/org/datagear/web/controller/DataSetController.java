@@ -149,7 +149,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		dataSet.setId(IDUtil.uuid());
+		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(user);
 		inflateDataSetProperties(request, dataSet);
 

@@ -318,9 +318,7 @@ public class WebUtils
 	 */
 	public static String generatePageId(String prefix)
 	{
-		long timeMs = System.currentTimeMillis();
-		long random = Math.round(Math.random() * 100000);
-		return prefix + Long.toHexString(timeMs) + Long.toHexString(random);
+		return prefix + IDUtil.randomIdOnTime20();
 	}
 
 	/**

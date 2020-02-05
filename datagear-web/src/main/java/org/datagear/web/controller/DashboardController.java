@@ -162,7 +162,7 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		if (isEmpty(dashboard.getId()))
 		{
-			dashboard.setId(IDUtil.uuid());
+			dashboard.setId(IDUtil.randomIdOnTime20());
 			dashboard.setCreateUser(user);
 			dashboard.setTemplateEncoding(resolveTemplateEncoding(templateContent));
 			save = this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
@@ -406,7 +406,7 @@ public class DashboardController extends AbstractDataAnalysisController
 
 		checkSaveEntity(dashboard);
 
-		dashboard.setId(IDUtil.uuid());
+		dashboard.setId(IDUtil.randomIdOnTime20());
 		dashboard.setCreateUser(user);
 
 		this.htmlTplDashboardWidgetEntityService.add(user, dashboard);

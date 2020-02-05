@@ -94,7 +94,7 @@ public class AuthorizationController extends AbstractController
 
 		User user = WebUtils.getUser(request, response);
 
-		authorization.setId(IDUtil.uuid());
+		authorization.setId(IDUtil.randomIdOnTime20());
 		authorization.setCreateUser(user);
 
 		this.authorizationService.add(user, authorization);
