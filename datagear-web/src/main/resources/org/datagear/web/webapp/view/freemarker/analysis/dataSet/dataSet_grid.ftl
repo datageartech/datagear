@@ -191,7 +191,7 @@ selectonly 是否选择操作，允许为null
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.dataSource' />", "connectionFactory.schema.title"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.sql' />", "sql"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createUser' />", "createUser.realName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createTime' />", "createUser.createTime")
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createTime' />", "createTime")
 	];
 	
 	po.initPagination();

@@ -214,7 +214,7 @@ selectonly 是否选择操作，允许为null
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", "chartPluginName"),
 		updateIntervalColumn,
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createUser' />", "createUser.realName"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createTime' />", "createUser.createTime")
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createTime' />", "createTime")
 	];
 	
 	po.initPagination();
