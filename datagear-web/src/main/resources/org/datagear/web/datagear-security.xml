@@ -16,6 +16,7 @@
 	</beans:bean>
 	
 	<http pattern="${subContextPath}/static/**" security="none" />
+	<http pattern="${subContextPath}/cometd/**" security="none" />
 	
 	<http>
 		
