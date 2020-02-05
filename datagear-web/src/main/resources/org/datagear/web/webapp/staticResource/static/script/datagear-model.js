@@ -1205,6 +1205,26 @@
 		},
 		
 		/**
+		 * 属性是否是字符串JDBC类型。
+		 */
+		isStringJdbcType : function(property)
+		{
+			var jdbcType = this.featureJdbcTypeValue(property);
+			
+			return (
+					jdbcType == 1			//Types.CHAR
+					|| jdbcType == 2005 	//Types.CLOB
+					|| jdbcType == 12 		//Types.VARCHAR
+					|| jdbcType == -16		//Types.LONGNVARCHAR
+					|| jdbcType == -1		//Types.LONGVARCHAR
+					|| jdbcType == -15 		//Types.NCHAR
+					|| jdbcType == 2011		//Types.NCLOB
+					|| jdbcType == -9 		//Types.NVARCHAR
+					|| jdbcType == 12 		//Types.VARCHAR
+				);
+		},
+		
+		/**
 		 * 属性模型是否长字符串JDBC类型。
 		 */
 		isLongTextJdbcType : function(property)

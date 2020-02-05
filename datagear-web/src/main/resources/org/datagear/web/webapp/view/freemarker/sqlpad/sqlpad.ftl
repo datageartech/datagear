@@ -749,18 +749,38 @@ Schema schema 数据库，不允许为null
 				{
 					postRender : function(data, type, rowData, meta, rowIndex, renderValue, model, property, thisColumn)
 					{
-						if(rowIndex < po.sqlResultFullLoadingLobMaxRow && data)
+						if(!data)
 						{
-							if($.model.isLongTextJdbcType(property))
+							return renderValue;
+						}
+						else if($.model.isLongTextJdbcType(property))
+						{
+							if(rowIndex < po.sqlResultFullLoadingLobMaxRow)
 							{
 								return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' class='view-sql-result-long-text-link'>"
 										+ renderValue
 										+ "<span style='display:none;'>"+$.escapeHtml(data)+"</span>" + "</a>";
 							}
-							else if($.model.isBinaryJdbcType(property))
+							else
+								return renderValue;
+						}
+						else if($.model.isBinaryJdbcType(property))
+						{
+							if(rowIndex < po.sqlResultFullLoadingLobMaxRow)
 							{
 								return "<a href='${contextPath}/sqlpad/"+po.schemaId+"/downloadResultField?sqlpadId="+po.sqlpadId+"&value="+encodeURIComponent(data)+"'>"
 										+ renderValue + "</a>";
+							}
+							else
+								return renderValue;
+						}
+						else if($.model.isStringJdbcType(property))
+						{
+							if(data != renderValue)
+							{
+								return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' class='view-sql-result-long-text-link'>"
+										+ renderValue
+										+ "<span style='display:none;'>"+$.escapeHtml(data)+"</span>" + "</a>";
 							}
 							else
 								return renderValue;
