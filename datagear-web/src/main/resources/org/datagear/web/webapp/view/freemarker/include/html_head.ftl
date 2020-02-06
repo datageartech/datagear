@@ -1,6 +1,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="description" content="数据齿轮（DataGear）是一款数据库管理系统，使用Java语言开发，采用浏览器/服务器架构，以数据管理为核心功能，支持多种数据库。它的数据模型并不是原始的数据库表，而是融合了数据库表及表间关系，更偏向于领域模型的数据模型，能够更友好、方便、快速地查询和维护数据" />
-<meta name="keywords" content="数据齿轮, Data Gear, 数据, data, 数据库, database, 数据管理 , data management, 数据库管理, database management, 浏览器/服务器, B/S" />
+<meta name="description" content="数据齿轮（DataGear）是一款数据管理与可视化分析平台，使用Java语言开发，采用浏览器/服务器架构，支持多种数据库，主要功能包括数据管理、SQL工作台、数据导入/导出、数据集管理、图表管理、看板管理等。" />
+<meta name="keywords" content="数据齿轮, Data Gear, 数据管理, data management, 可视化分析, BI, 数据库管理, database management" />
 <#if !isAjaxRequest>
 <script type="text/javascript">
 var contextPath="${contextPath}";
