@@ -192,7 +192,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		User user = WebUtils.getUser(request, response);
 
-		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
 
 		if (dashboard == null)
 			return new ArrayList<String>(0);
