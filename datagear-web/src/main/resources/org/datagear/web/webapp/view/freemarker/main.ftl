@@ -1163,19 +1163,17 @@
 					<li class="system-set-driverEntity-manage"><a href="javascript:void(0);"><@spring.message code='main.manageDriverEntity' /></a></li>
 					<li class="system-set-driverEntity-add"><a href="javascript:void(0);"><@spring.message code='main.addDriverEntity' /></a></li>
 					<li class="ui-widget-header"></li>
-					<li class="system-set-user-manage"><a href="javascript:void(0);"><@spring.message code='main.manageUser' /></a></li>
-					<li class="system-set-user-add"><a href="javascript:void(0);"><@spring.message code='main.addUser' /></a></li>
-					<li class="system-set-rold-manage"><a href="javascript:void(0);"><@spring.message code='main.manageRole' /></a></li>
-					<li class="system-set-authorization-manage"><a href="javascript:void(0);"><@spring.message code='main.manageAuthorization' /></a></li>
+					<li class="system-set-schema-url-builder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
+					<li class="system-set-authorization-manage"><a href="javascript:void(0);"><@spring.message code='main.manageSchemaAuth' /></a></li>
 					<li class="ui-widget-header"></li>
 					<li class="system-set-chartPlugin-manage"><a href="javascript:void(0);"><@spring.message code='main.manageChartPlugin' /></a></li>
 					<li class="system-set-chartPlugin-upload"><a href="javascript:void(0);"><@spring.message code='main.uploadChartPlugin' /></a></li>
 					<li class="ui-widget-header"></li>
+					<li class="system-set-user-manage"><a href="javascript:void(0);"><@spring.message code='main.manageUser' /></a></li>
+					<li class="system-set-user-add"><a href="javascript:void(0);"><@spring.message code='main.addUser' /></a></li>
+					<li class="system-set-rold-manage"><a href="javascript:void(0);"><@spring.message code='main.manageRole' /></a></li>
 					</#if>
 					<li class="system-set-personal-set"><a href="javascript:void(0);"><@spring.message code='main.personalSet' /></a></li>
-					<#if currentUser.admin>
-					<li class="system-set-schema-url-builder"><a href="javascript:void(0);"><@spring.message code='schemaUrlBuilder.schemaUrlBuilder' /></a></li>
-					</#if>
 					<li class="ui-widget-header"></li>
 					</#if>
 					<li class=""><a href="javascript:void(0);"><@spring.message code='main.changeTheme' /></a>
