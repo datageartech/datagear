@@ -1,4 +1,4 @@
-# 数据齿轮 DataGear
+# 数据齿轮（DataGear）
 
 数据齿轮（DataGear）是一款数据管理与可视化分析平台，使用Java语言开发，采用浏览器/服务器架构，支持多种数据库，
 主要功能包括数据管理、SQL工作台、数据导入/导出、数据集管理、图表管理、看板管理等。
@@ -44,8 +44,6 @@ SQL工作台
 	mvn clean package -DskipTests
 
 ## 运行
-
-	设置JAVA_HOME环境变量
 
 	cd datagear-webappembd/target/datagear-[version]
 	
