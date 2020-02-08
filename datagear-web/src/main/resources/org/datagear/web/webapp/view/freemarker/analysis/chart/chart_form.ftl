@@ -434,7 +434,7 @@ readonly 是否只读操作，允许为null
 			
 			var $button = $("<button type='button' class='data-sign-item ui-button ui-corner-all' />")
 				.attr("value", dataSign.name)
-				.attr("occurMultiple", dataSign.occurMultiple)
+				.attr("dataSignMultiple", dataSign.multiple)
 				.text(po.dataSignLabel(dataSign)).appendTo($panelContent);
 			
 			po.updatePropertySignButtonEnable($button, $itemSigns);
@@ -462,7 +462,7 @@ readonly 是否只读操作，允许为null
 	
 	po.updatePropertySignButtonEnable = function($button, $itemSigns)
 	{
-		if($button.attr("occurMultiple") != "false")
+		if($button.attr("dataSignMultiple") != "false")
 			return;
 		
 		var setSigns = [];
@@ -504,7 +504,7 @@ readonly 是否只读操作，允许为null
 		var requiredSigns = [];
 		for(var i=0; i<dataSigns.length; i++)
 		{
-			if(dataSigns[i].occurRequired == true)
+			if(dataSigns[i].required == true)
 				requiredSigns.push(dataSigns[i]);
 		}
 		

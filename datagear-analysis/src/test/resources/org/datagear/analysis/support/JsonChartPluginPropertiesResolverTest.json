@@ -97,8 +97,8 @@
 	[
   		{
 			name : 'x-value',
-			occurRequired : false,
-			occurMultiple : false,
+			required : false,
+			multiple : false,
 			nameLabel :
 			{
 				value : 'X值',
@@ -120,8 +120,8 @@
 		},
 		{
 			name : 'y-value',
-			occurRequired : true,
-			occurMultiple : true,
+			required : true,
+			multiple : true,
 			nameLabel :
 			{
 				value : 'Y值',

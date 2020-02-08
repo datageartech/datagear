@@ -131,8 +131,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			List<DataSign> dataSignVOs = new ArrayList<DataSign>(dataSigns.size());
 			for (DataSign dataSign : dataSigns)
 			{
-				DataSign view = new DataSign(dataSign.getName(), dataSign.isOccurRequired(),
-						dataSign.isOccurMultiple());
+				DataSign view = new DataSign(dataSign.getName(), dataSign.isRequired(),
+						dataSign.isMultiple());
 				view.setNameLabel(toConcreteLabel(dataSign.getNameLabel(), locale));
 				view.setDescLabel(toConcreteLabel(dataSign.getDescLabel(), locale));
 

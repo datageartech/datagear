@@ -28,8 +28,8 @@ public class DataSign implements Serializable
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROPERTY_NAME = "name";
-	public static final String PROPERTY_OCCUR_REQUIRED = "occurRequired";
-	public static final String PROPERTY_OCCUR_MULTIPLE = "occurMultiple";
+	public static final String PROPERTY_REQUIRED = "required";
+	public static final String PROPERTY_MULTIPLE = "multiple";
 	public static final String PROPERTY_NAME_LABEL = "nameLabel";
 	public static final String PROPERTY_DESC_LABEL = "descLabel";
 
@@ -37,10 +37,10 @@ public class DataSign implements Serializable
 	private String name;
 
 	/** 数据集是否必须有此标记 */
-	private boolean occurRequired;
+	private boolean required;
 
 	/** 数据集是否可有多个此标记 */
-	private boolean occurMultiple;
+	private boolean multiple;
 
 	/** 名称标签 */
 	private Label nameLabel;
@@ -53,12 +53,12 @@ public class DataSign implements Serializable
 		super();
 	}
 
-	public DataSign(String name, boolean occurRequired, boolean occurMultiple)
+	public DataSign(String name, boolean required, boolean multiple)
 	{
 		super();
 		this.name = name;
-		this.occurRequired = occurRequired;
-		this.occurMultiple = occurMultiple;
+		this.required = required;
+		this.multiple = multiple;
 	}
 
 	public String getName()
@@ -71,24 +71,24 @@ public class DataSign implements Serializable
 		this.name = name;
 	}
 
-	public boolean isOccurRequired()
+	public boolean isRequired()
 	{
-		return occurRequired;
+		return required;
 	}
 
-	public void setOccurRequired(boolean occurRequired)
+	public void setRequired(boolean required)
 	{
-		this.occurRequired = occurRequired;
+		this.required = required;
 	}
 
-	public boolean isOccurMultiple()
+	public boolean isMultiple()
 	{
-		return occurMultiple;
+		return multiple;
 	}
 
-	public void setOccurMultiple(boolean occurMultiple)
+	public void setMultiple(boolean multiple)
 	{
-		this.occurMultiple = occurMultiple;
+		this.multiple = multiple;
 	}
 
 	public boolean hasNameLabel()
@@ -124,8 +124,8 @@ public class DataSign implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name=" + name + ", occurRequired=" + occurRequired + ", occurMultiple="
-				+ occurMultiple + ", nameLabel=" + nameLabel + ", descLabel=" + descLabel + "]";
+		return getClass().getSimpleName() + " [name=" + name + ", required=" + required + ", multiple="
+				+ multiple + ", nameLabel=" + nameLabel + ", descLabel=" + descLabel + "]";
 	}
 
 	public static List<DataSign> toDataSigns(List<String> labelValues, Locale locale)

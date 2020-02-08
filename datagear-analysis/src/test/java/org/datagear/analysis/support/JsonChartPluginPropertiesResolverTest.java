@@ -141,8 +141,8 @@ public class JsonChartPluginPropertiesResolverTest
 				DataSign dataSign = dataSigns.get(0);
 
 				Assert.assertEquals("x-value", dataSign.getName());
-				Assert.assertFalse(dataSign.isOccurRequired());
-				Assert.assertFalse(dataSign.isOccurMultiple());
+				Assert.assertFalse(dataSign.isRequired());
+				Assert.assertFalse(dataSign.isMultiple());
 
 				Label nameLabel = dataSign.getNameLabel();
 				Assert.assertEquals("X值", nameLabel.getValue());
@@ -159,8 +159,8 @@ public class JsonChartPluginPropertiesResolverTest
 				DataSign dataSign = dataSigns.get(1);
 
 				Assert.assertEquals("y-value", dataSign.getName());
-				Assert.assertTrue(dataSign.isOccurRequired());
-				Assert.assertTrue(dataSign.isOccurMultiple());
+				Assert.assertTrue(dataSign.isRequired());
+				Assert.assertTrue(dataSign.isMultiple());
 
 				Label nameLabel = dataSign.getNameLabel();
 				Assert.assertEquals("Y值", nameLabel.getValue());

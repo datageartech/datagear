@@ -632,8 +632,8 @@ public class JsonChartPluginPropertiesResolver
 			DataSign dataSign = createDataSign();
 			dataSign.setName(name);
 
-			dataSign.setOccurRequired(convertToBoolean(map.get(DataSign.PROPERTY_OCCUR_REQUIRED), true));
-			dataSign.setOccurMultiple(convertToBoolean(map.get(DataSign.PROPERTY_OCCUR_MULTIPLE), true));
+			dataSign.setRequired(convertToBoolean(map.get(DataSign.PROPERTY_REQUIRED), true));
+			dataSign.setMultiple(convertToBoolean(map.get(DataSign.PROPERTY_MULTIPLE), true));
 			dataSign.setNameLabel(convertToLabel(map.get(DataSign.PROPERTY_NAME_LABEL)));
 			dataSign.setDescLabel(convertToLabel(map.get(DataSign.PROPERTY_DESC_LABEL)));
 
