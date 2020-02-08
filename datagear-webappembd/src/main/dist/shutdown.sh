@@ -12,15 +12,33 @@ APP_MAIN="org.datagear.webappembd.App"
 APP_PID=0
 
 echo "$BORDER"
-echo "$ECHO_PREFIX using JAVA_HOME '$JAVA_HOME'"
 
-readAppPID(){
-	JAVAPS=`$JAVA_HOME/bin/jps -l | grep $APP_MAIN`
+if [ -n "$JAVA_HOME" ]; then
+	echo "$ECHO_PREFIX using JAVA_HOME '$JAVA_HOME'"
+else
+	java -version
+	echo ""
+	echo "$ECHO_PREFIX using previous java runtime"
+fi
 
-	if [ -n "$JAVAPS" ]; then
-		APP_PID=`echo $JAVAPS | awk '{print $1}'`
+readAppPID()
+{
+	if [ -n "$JAVA_HOME" ]; then
+		JAVAPS=`$JAVA_HOME/bin/jps -l | grep "$APP_MAIN"`
+		
+		if [ -n "$JAVAPS" ]; then
+			APP_PID=`echo $JAVAPS | awk '{print $1}'`
+		else
+			APP_PID=0
+		fi
 	else
-		APP_PID=0
+		JAVAPS=`ps -ef | grep "$APP_MAIN" | grep -v grep`
+		
+		if [ -n "$JAVAPS" ]; then
+			APP_PID=`echo $JAVAPS | awk '{print $2}'`
+		else
+			APP_PID=0
+		fi
 	fi
 }
 
