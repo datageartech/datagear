@@ -14,12 +14,12 @@ import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.DataNameAndType;
-import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetExport;
-import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetResult;
 
 /**
  * 抽象{@linkplain DataSet}。
@@ -29,6 +29,8 @@ import org.datagear.analysis.DataSetProperty;
  */
 public abstract class AbstractDataSet extends AbstractIdentifiable implements DataSet
 {
+	private String name;
+
 	private List<DataSetProperty> properties;
 
 	private List<DataSetParam> params;
@@ -40,10 +42,22 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		super();
 	}
 
-	public AbstractDataSet(String id, List<DataSetProperty> properties)
+	public AbstractDataSet(String id, String name, List<DataSetProperty> properties)
 	{
 		super(id);
+		this.name = name;
 		this.properties = properties;
+	}
+
+	@Override
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	@Override

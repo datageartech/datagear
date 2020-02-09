@@ -13,11 +13,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetResult;
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.ParameterSqlResolver.ParameterSql;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.JdbcUtil.QueryResultSet;
@@ -46,10 +46,10 @@ public class SqlDataSet extends AbstractDataSet
 		super();
 	}
 
-	public SqlDataSet(String id, List<DataSetProperty> properties, ConnectionFactory connectionFactory,
+	public SqlDataSet(String id, String name, List<DataSetProperty> properties, ConnectionFactory connectionFactory,
 			String sql)
 	{
-		super(id, properties);
+		super(id, name, properties);
 		this.connectionFactory = connectionFactory;
 		this.sql = sql;
 	}

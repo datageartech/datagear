@@ -14,9 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataType;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.SimpleConnectionFactory;
@@ -66,7 +66,7 @@ public class SqlDataSetTest extends DBTestSupport
 			List<DataSetParam> dataSetParams = Arrays.asList(new DataSetParam("id", DataType.INTEGER, true),
 					new DataSetParam("name", DataType.STRING, true));
 
-			SqlDataSet sqlDataSet = new SqlDataSet("1", dataSetProperties, connectionFactory, sql);
+			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetProperties, connectionFactory, sql);
 			sqlDataSet.setParams(dataSetParams);
 
 			Map<String, Object> dataSetParamValues = new HashMap<String, Object>();

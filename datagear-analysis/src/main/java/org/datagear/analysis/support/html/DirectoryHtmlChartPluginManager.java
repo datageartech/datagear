@@ -42,7 +42,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 	private HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
 
-	private long readCheckForReloadTimeThreashold = 5 * 60 * 1000;
+	private long readCheckForReloadTimeThreashold = (LOGGER.isDebugEnabled() ? 0 : 5 * 60 * 1000);
 
 	private Map<String, String> pluginIdFileNameMap = new HashMap<String, String>();
 

@@ -27,9 +27,6 @@ public class SqlDataSetEntity extends SqlDataSet implements CreateUserEntity<Str
 	/** 授权资源类型 */
 	public static final String AUTHORIZATION_RESOURCE_TYPE = "DataSet";
 
-	/** 名称 */
-	private String name;
-
 	/** 创建用户 */
 	private User createUser;
 
@@ -45,11 +42,11 @@ public class SqlDataSetEntity extends SqlDataSet implements CreateUserEntity<Str
 		this.createTime = new Date();
 	}
 
-	public SqlDataSetEntity(String id, List<DataSetProperty> properties, SchemaConnectionFactory connectionFactory,
-			String sql, String name, User createUser)
+	public SqlDataSetEntity(String id, String name, List<DataSetProperty> properties,
+			SchemaConnectionFactory connectionFactory,
+			String sql, User createUser)
 	{
-		super(id, properties, connectionFactory, sql);
-		this.name = name;
+		super(id, name, properties, connectionFactory, sql);
 		this.createTime = new Date();
 	}
 
@@ -76,16 +73,6 @@ public class SqlDataSetEntity extends SqlDataSet implements CreateUserEntity<Str
 	public void setSchemaConnectionFactory(SchemaConnectionFactory schemaConnectionFactory)
 	{
 		setConnectionFactory(schemaConnectionFactory);
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public void setName(String name)
-	{
-		this.name = name;
 	}
 
 	@Override

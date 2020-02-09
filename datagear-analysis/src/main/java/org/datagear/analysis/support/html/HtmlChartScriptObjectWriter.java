@@ -107,7 +107,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	{
 		public JsonDataSet(DataSet dataSet)
 		{
-			super(dataSet.getId(), dataSet.getProperties());
+			super(dataSet.getId(), dataSet.getName(), dataSet.getProperties());
 			setParams(dataSet.getParams());
 			setExports(dataSet.getExports());
 		}

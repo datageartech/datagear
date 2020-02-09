@@ -15,6 +15,9 @@
 	
 	/**
 	 * 获取图表主题。
+	 * 
+	 * @param chart
+	 * @return {...}
 	 */
 	util.chartTheme = function(chart)
 	{
@@ -22,7 +25,10 @@
 	};
 	
 	/**
-	 * 获取渲染样式。
+	 * 获取渲染风格。
+	 * 
+	 * @param chart
+	 * @return "..."
 	 */
 	util.chartRenderStyle = function(chart)
 	{
@@ -87,9 +93,10 @@
 	};
 	
 	/**
-	 * 获取第一个图标数据集对象。
+	 * 获取第一个图表数据集对象。
 	 * 
 	 * @param chart
+	 * @return {dataSet: [], propertySigns: {...}}
 	 */
 	util.firstChartDataSet = function(chart)
 	{
@@ -97,6 +104,30 @@
 			return {};
 			
 		return chart.chartDataSets[0];
+	};
+	
+	/**
+	 * 获取图表数据集对象数组。
+	 */
+	util.chartDataSets = function(chart)
+	{
+		if(!chart || !chart.chartDataSets || chart.chartDataSets.length < 1)
+			return [];
+			
+		return chart.chartDataSets;
+	};
+	
+	/**
+	 * 获取图表名称。
+	 * 
+	 * @param chartDataSet 图表数据集对象
+	 */
+	util.dataSetName = function(chartDataSet)
+	{
+		var dataSet = (chartDataSet.dataSet || chartDataSet);
+		var name = (dataSet ? dataSet.name : "");
+		
+		return (name ? name : "");
 	};
 	
 	/**
@@ -145,12 +176,12 @@
 			}
 		}
 		
-		for(var i=0; i<signPropertyNames.length; i++)
+		for(var i=0; i<dataSetProperties.length; i++)
 		{
-			for(var j=0; j<dataSetProperties.length; j++)
+			for(var j=0; j<signPropertyNames.length; j++)
 			{
-				if(dataSetProperties[j].name == signPropertyNames[i])
-					re.push(dataSetProperties[j]);
+				if(dataSetProperties[i].name == signPropertyNames[j])
+					re.push(dataSetProperties[i]);
 			}
 		}
 		
@@ -160,14 +191,14 @@
 	/**
 	 * 获取数据集属性标签，没有则返回空字符串。
 	 * 
-	 * @param datasetProperty
+	 * @param dataSetProperty
 	 */
-	util.dataSetPropertyLabel = function(datasetProperty)
+	util.dataSetPropertyLabel = function(dataSetProperty)
 	{
-		var label = (datasetProperty ? datasetProperty.label : null);
+		var label = (dataSetProperty ? dataSetProperty.label : null);
 		
-		if(!label && datasetProperty)
-			label = datasetProperty.name;
+		if(!label && dataSetProperty)
+			label = dataSetProperty.name;
 		
 		if(!label)
 			label = "";
@@ -176,103 +207,179 @@
 	};
 
 	/**
-	 * 返回第一个数据结果集。
+	 * 返回第一个数据集结果。
 	 */
-	util.firstResult = function(dataSetResults)
+	util.resultFirst = function(dataSetResults)
 	{
 		if(!dataSetResults || dataSetResults.length < 1)
-			return [];
+			return {};
 		
 		return dataSetResults[0];
 	};
 	
-	/**
-	 * 获取结果数据第一行的属性值。
-	 * 
-	 * @param result 数据集结果对象、对象数组
-	 * @param property 属性对象、属性名、属性对象数组、属性名数组
-	 */
-	util.dataPropertyValue = function(result, property)
+	util.resultIndex = function(dataSetResults, index)
 	{
-		if(property == null)
-			return null;
-		
-		var re = this.dataPropertyValues(result, property, 1);
-		
-		if(property.length > 0)
-		{
-			for(var i=0; i< property.length; i++)
-				re[i] = (re[i].length > 0 ? re[i][0] : null);
+		if(!dataSetResults || !dataSetResults.length || dataSetResults.length < index)
+			return {};
 			
-			return re;
-		}
-		else
-			return (re.length > 0 ? re[0] : null);
+		return dataSetResults[index];
 	};
 	
 	/**
-	 * 获取结果数据属性值数组。
+	 * 获取数据集结果指定属性、指定行的单元格值。
 	 * 
 	 * @param result 数据集结果对象、对象数组
-	 * @param property 属性对象、属性名、属性对象数组、属性名数组
-	 * @param count 获取结果数据的最多行数，可选，默认为全部
+	 * @param property 数据集属性对象、属性名
+	 * @param row 行索引，以0开始，默认为0
 	 */
-	util.dataPropertyValues = function(result, property, count)
+	util.resultCell = function(result, property, row)
+	{
+		if(row == null)
+			row = 0;
+		
+		var re = this.resultRowArrays(result, property, row+1);
+		
+		return (re.length > row ? re[row] : undefined);
+	};
+	
+	/**
+	 * 将数据集结果的行对象按照指定properties顺序转换为行值数组。
+	 * 
+	 * @param result 数据集结果对象、对象数组
+	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
+	 * @param count 获取的最多行数，可选，默认为全部
+	 * @return properties为数组时：[[..., ...], ...]；properties非数组时：[..., ...]
+	 */
+	util.resultRowArrays = function(result, properties, count)
 	{
 		var re = [];
 		
-		if(property == null)
+		if(properties == null)
 			return re;
 		
 		var datas = (result.length != null ? result : (result.datas || []));
+		
 		var getCount = datas.length;
 		if(count != null && count < getCount)
 			getCount = count;
 		
-		if(property.length > 0)
+		if(properties.length > 0)
 		{
-			for(var i=0; i<property.length; i++)
+			for(var i=0; i< getCount; i++)
 			{
-				var myValues = [];
+				var rowObj = datas[i];
+				var row = [];
 				
-				var cm = property[i];
+				for(var j=0; j<properties.length; j++)
+				{
+					var p = properties[j];
+					
+					var name = (p ? (p.name || p) : undefined);
+					if(!name)
+						continue;
+					
+					row[j] = rowObj[name];
+				}
 				
-				var name = (cm.name || cm);
-				
-				for(var j=0; j< getCount; j++)
-					myValues[j] = datas[j][name];
-				
-				re[i] = myValues;
+				re[i] = row;
 			}
 		}
 		else
 		{
-			var name = (property.name || property);
+			var name = (properties ? (properties.name || properties) : undefined);
 			
-			for(var i=0; i< getCount; i++)
-				re[i] = datas[i][name];
+			if(name)
+			{
+				for(var i=0; i< getCount; i++)
+				{
+					var rowObj = datas[i];
+					re[i] = rowObj[name];
+				}
+			}
 		}
 		
 		return re;
 	};
 	
 	/**
-	 * 获取结果数据的名称/值对象数组：[{name: ..., value: ...}, ...]。
+	 * 将数据集结果的行对象按照指定properties顺序转换为列值数组。
+	 * 
+	 * @param result 数据集结果对象、对象数组
+	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
+	 * @param count 获取的最多行数，可选，默认为全部
+	 * @return properties为数组时：[[..., ...], ...]；properties非数组时：[..., ...]
+	 */
+	util.resultColumnArrays = function(result, properties, count)
+	{
+		var re = [];
+		
+		if(properties == null)
+			return re;
+		
+		var datas = (result.length != null ? result : (result.datas || []));
+		
+		var getCount = datas.length;
+		if(count != null && count < getCount)
+			getCount = count;
+		
+		if(properties.length > 0)
+		{
+			for(var i=0; i<properties.length; i++)
+			{
+				var p = properties[i];
+				
+				var name = (p ? (p.name || p) : undefined);
+				if(!name)
+					continue;
+				
+				var column = [];
+				
+				for(var j=0; j< getCount; j++)
+					column[j] = datas[j][name];
+				
+				re[i] = column;
+			}
+		}
+		else
+		{
+			var name = (properties ? (properties.name || properties) : undefined);
+
+			if(name)
+			{
+				for(var i=0; i< getCount; i++)
+				{
+					var rowObj = datas[i];
+					re[i] = rowObj[name];
+				}
+			}
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 获取数据集结果的名称/值对象数组。
 	 * 
 	 * @param result 数据集结果对象、对象数组
 	 * @param nameProperty 名称属性对象、属性名
 	 * @param valueProperty 值属性对象、属性名
+	 * @param count 获取结果数据的最多行数，可选，默认为全部
+	 * @return [{name: ..., value: ...}, ...]
 	 */
-	util.dataNameValueObjects = function(result, nameProperty, valueProperty)
+	util.resultNameValueObjects = function(result, nameProperty, valueProperty, count)
 	{
 		var re = [];
 		
 		var datas = (result.length != null ? result : (result.datas || []));
 		
+		var getCount = datas.length;
+		if(count != null && count < getCount)
+			getCount = count;
+		
 		nameProperty = (nameProperty.name || nameProperty);
 		valueProperty = (valueProperty.name || valueProperty);
 		
-		for(var i=0; i< datas.length; i++)
+		for(var i=0; i< getCount; i++)
 		{
 			var obj =
 			{

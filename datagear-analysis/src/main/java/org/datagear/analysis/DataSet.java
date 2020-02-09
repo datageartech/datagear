@@ -16,6 +16,13 @@ import java.util.Map;
 public interface DataSet extends Identifiable
 {
 	/**
+	 * 获取名称。
+	 * 
+	 * @return
+	 */
+	String getName();
+
+	/**
 	 * 获取属性列表。
 	 * <p>
 	 * 此列表描述{@linkplain #getResult(DataSetParamValues)}返回的{@linkplain DataSetResult#getDatas()}元素的属性信息。
