@@ -18,7 +18,7 @@ import org.junit.Test;
  * @author datagear@163.com
  *
  */
-public class DbVersionManagerTestTest
+public class DbVersionManagerTest
 {
 	private DbVersionManager dbVersionManager = new DbVersionManager();
 
@@ -34,19 +34,19 @@ public class DbVersionManagerTestTest
 			List<String> contents = versionContent.getContents();
 
 			Assert.assertEquals(Version.valueOf("1.0.0"), versionContent.getVersion());
-			Assert.assertEquals(7, contents.size());
+			Assert.assertEquals(4, contents.size());
 
 			Assert.assertTrue(contents.get(0).startsWith("CREATE TABLE DATAGEAR_VERSION"));
 			Assert.assertTrue(contents.get(0).endsWith(")"));
 
-			Assert.assertTrue(contents.get(2).startsWith("CREATE TABLE DATAGEAR_USER"));
-			Assert.assertTrue(contents.get(2).endsWith(")"));
+			Assert.assertTrue(contents.get(1).startsWith("CREATE TABLE DATAGEAR_USER"));
+			Assert.assertTrue(contents.get(1).endsWith(")"));
 
-			Assert.assertTrue(contents.get(3).startsWith("INSERT INTO DATAGEAR_USER"));
-			Assert.assertTrue(contents.get(3).endsWith("CURRENT_TIMESTAMP)"));
+			Assert.assertTrue(contents.get(2).startsWith("INSERT INTO DATAGEAR_USER"));
+			Assert.assertTrue(contents.get(2).endsWith("CURRENT_TIMESTAMP)"));
 
-			Assert.assertTrue(contents.get(6).startsWith("CREATE TABLE DATAGEAR_SCHEMA"));
-			Assert.assertTrue(contents.get(6).endsWith(")"));
+			Assert.assertTrue(contents.get(3).startsWith("CREATE TABLE DATAGEAR_SCHEMA"));
+			Assert.assertTrue(contents.get(3).endsWith(")"));
 		}
 	}
 }

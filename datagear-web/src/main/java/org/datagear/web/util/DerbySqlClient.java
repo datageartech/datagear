@@ -61,7 +61,7 @@ public class DerbySqlClient
 				else if ("exit".equalsIgnoreCase(input))
 				{
 					println("Bye!");
-					IOUtil.close(scanner);
+					scanner.close();
 					System.exit(0);
 				}
 				else if (input.startsWith("@"))
@@ -101,7 +101,7 @@ public class DerbySqlClient
 				}
 			}
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			t.printStackTrace();
 		}
