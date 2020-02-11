@@ -23,9 +23,9 @@ public class DashboardTheme extends Theme
 		super();
 	}
 
-	public DashboardTheme(String backgroundColor, String foregroundColor, String borderColor, ChartTheme chartTheme)
+	public DashboardTheme(String color, String backgroundColor, String borderColor, ChartTheme chartTheme)
 	{
-		super(backgroundColor, foregroundColor, borderColor);
+		super(color, backgroundColor, borderColor);
 		this.chartTheme = chartTheme;
 	}
 

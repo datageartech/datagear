@@ -427,133 +427,486 @@
 		
 		this._REGISTERED_THEME = true;
 		
-		var contrastColor = chartTheme.envMajorColor;
-	    var axisCommon = function () {
-	        return {
-	            axisLine: {
-	                lineStyle: {
-	                    color: contrastColor
-	                }
-	            },
-	            axisTick: {
-	                lineStyle: {
-	                    color: contrastColor
-	                }
-	            },
-	            axisLabel: {
-	                textStyle: {
-	                    color: contrastColor
-	                }
-	            },
-	            splitLine: {
-	                lineStyle: {
-	                    type: 'dashed',
-	                    color: chartTheme.envLeastColor
-	                }
-	            },
-	            splitArea: {
-	                areaStyle: {
-	                    color: contrastColor
-	                }
-	            }
-	        };
-	    };
-	    
-	    var colorPalette = chartTheme.graphColors;
-	    var theme = {
-	        color: colorPalette,
-	        backgroundColor: chartTheme.backgroundColor,
-	        tooltip: {
-	            axisPointer: {
-	                lineStyle: {
-	                    color: contrastColor
-	                },
-	                crossStyle: {
-	                    color: contrastColor
-	                }
-	            }
-	        },
-	        legend: {
-	            textStyle: {
-	                color: contrastColor
-	            }
-	        },
-	        textStyle: {
-	            color: contrastColor
-	        },
-	        title: {
-	            textStyle: {
-	                color: contrastColor
-	            }
-	        },
-	        toolbox: {
-	            iconStyle: {
-	                normal: {
-	                    borderColor: contrastColor
-	                }
-	            }
-	        },
-	        dataZoom: {
-	            textStyle: {
-	                color: contrastColor
-	            }
-	        },
-	        timeline: {
-	            lineStyle: {
-	                color: contrastColor
-	            },
-	            itemStyle: {
-	                normal: {
-	                    color: colorPalette[1]
-	                }
-	            },
-	            label: {
-	                normal: {
-	                    textStyle: {
-	                        color: contrastColor
-	                    }
-	                }
-	            },
-	            controlStyle: {
-	                normal: {
-	                    color: contrastColor,
-	                    borderColor: contrastColor
-	                }
-	            }
-	        },
-	        timeAxis: axisCommon(),
-	        logAxis: axisCommon(),
-	        valueAxis: axisCommon(),
-	        categoryAxis: axisCommon(),
-	        line: {
-	            symbol: 'circle'
-	        },
-	        graph: {
-	            color: colorPalette
-	        },
-	        gauge: {
-	            title: {
-	                textStyle: {
-	                    color: contrastColor
-	                }
-	            }
-	        },
-	        candlestick: {
-	            itemStyle: {
-	                normal: {
-	                    color: contrastColor,
-	                    color0: chartTheme.envMinorColor,
-	                    borderColor: chartTheme.borderColor,
-	                    borderColor0: chartTheme.borderColor
-	                }
-	            }
-	        }
-	    };
-	    
-	    theme.categoryAxis.splitLine.show = false;
+		var theme = this.buildTheme(renderStyle, chartTheme);
 	    echarts.registerTheme(renderStyle, theme);
 	    
 	    return renderStyle;
+	};
+	
+	/**
+	 * 构建echarts主题。
+	 * 
+	 * @param renderStyle 当前渲染风格
+	 * @param chartTheme 图表主题
+	 */
+	util.echarts.buildTheme = function(renderStyle, chartTheme)
+	{
+		var theme =
+		{
+			"color" : chartTheme.graphColors,
+			"backgroundColor" : chartTheme.backgroundColor,
+			"textStyle" : {},
+			"title" : {
+				"textStyle" : {
+					"color" : chartTheme.color
+				},
+				"subtextStyle" : {
+					"color" : chartTheme.colorSecond
+				}
+			},
+			"line" : {
+				"itemStyle" : {
+					"normal" : {
+						"borderWidth" : 1
+					}
+				},
+				"lineStyle" : {
+					"normal" : {
+						"width" : 2
+					}
+				},
+				"symbolSize" : 4,
+				"symbol" : "circle",
+				"smooth" : false
+			},
+			"radar" : {
+				"name" : { "textStyle" : { "color" : chartTheme.color } },
+				"axisLine" : { "lineStyle" : { "color" : chartTheme.colorThird } },
+				"splitLine" : { "lineStyle" : { "color" : chartTheme.colorThird } },
+				"splitArea" : { "areaStyle" : { "color" : [ chartTheme.colorFourth, chartTheme.backgroundColor ] } },
+				"itemStyle" : {
+					"normal" : {
+						"borderWidth" : 1
+					}
+				},
+				"lineStyle" : {
+					"normal" : {
+						"width" : 2
+					}
+				},
+				"symbolSize" : 4,
+				"symbol" : "circle",
+				"smooth" : false
+			},
+			"bar" : {
+				"itemStyle" : {
+					"normal" : {
+						"barBorderWidth" : 0,
+						"barBorderColor" : chartTheme.colorFourth
+					},
+					"emphasis" : {
+						"barBorderWidth" : 0,
+						"barBorderColor" : chartTheme.colorFourth
+					}
+				}
+			},
+			"pie" : {
+				"itemStyle" : {
+					"normal" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					},
+					"emphasis" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					}
+				}
+			},
+			"scatter" : {
+				"itemStyle" : {
+					"normal" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					},
+					"emphasis" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					}
+				}
+			},
+			"boxplot" : {
+				"itemStyle" : {
+					"normal" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					},
+					"emphasis" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					}
+				}
+			},
+			"parallel" : {
+				"itemStyle" : {
+					"normal" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					},
+					"emphasis" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					}
+				}
+			},
+			"sankey" : {
+				"itemStyle" : {
+					"normal" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					},
+					"emphasis" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					}
+				}
+			},
+			"funnel" : {
+				"label" : { "color" : chartTheme.color },
+				"itemStyle" : {
+					"borderColor" : chartTheme.colorFourth,
+					"borderWidth" : 0,
+					"normal" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					},
+					"emphasis" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					}
+				}
+			},
+			"gauge" : {
+				"title" : { color : chartTheme.color },
+				"itemStyle" : {
+					"normal" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					},
+					"emphasis" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorFourth
+					}
+				}
+			},
+			"candlestick" : {
+				"itemStyle" : {
+					"normal" : {
+						"color" : chartTheme.graphColors[0],
+						"color0" : chartTheme.graphColors[1],
+						"borderColor" : chartTheme.colorThird,
+						"borderColor0" : chartTheme.colorFourth,
+						"borderWidth" : 1
+					}
+				}
+			},
+			"graph" : {
+				"itemStyle" : {
+					"normal" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.colorThird
+					}
+				},
+				"lineStyle" : {
+					"normal" : {
+						"width" : 1,
+						"color" : chartTheme.colorFourth
+					}
+				},
+				"symbolSize" : 4,
+				"symbol" : "circle",
+				"smooth" : false,
+				"color" : chartTheme.graphColors,
+				"label" : {
+					"normal" : {
+						"textStyle" : {
+							"color" : chartTheme.colorSecond
+						}
+					}
+				}
+			},
+			"map" : {
+				"itemStyle" : {
+					"normal" : {
+						"areaColor" : chartTheme.colorThird,
+						"borderColor" : chartTheme.colorFourth,
+						"borderWidth" : 0.5
+					},
+					"emphasis" : {
+						"areaColor" : chartTheme.highlightTheme.backgroundColor,
+						"borderColor" : chartTheme.highlightTheme.borderColor,
+						"borderWidth" : 1
+					}
+				},
+				"label" : {
+					"normal" : {
+						"textStyle" : {
+							"color" : chartTheme.colorSecond
+						}
+					},
+					"emphasis" : {
+						"textStyle" : {
+							"color" : chartTheme.colorThird
+						}
+					}
+				}
+			},
+			"geo" : {
+				"itemStyle" : {
+					"normal" : {
+						"areaColor" : chartTheme.colorThird,
+						"borderColor" : chartTheme.colorFourth,
+						"borderWidth" : 0.5
+					},
+					"emphasis" : {
+						"areaColor" : chartTheme.highlightTheme.backgroundColor,
+						"borderColor" : chartTheme.highlightTheme.borderColor,
+						"borderWidth" : 1
+					}
+				},
+				"label" : {
+					"normal" : {
+						"textStyle" : {
+							"color" : chartTheme.colorSecond
+						}
+					},
+					"emphasis" : {
+						"textStyle" : {
+							"color" : chartTheme.colorThird
+						}
+					}
+				}
+			},
+			"categoryAxis" : {
+				"axisLine" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : chartTheme.colorSecond
+					}
+				},
+				"axisTick" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : chartTheme.colorThird
+					}
+				},
+				"axisLabel" : {
+					"show" : true,
+					"textStyle" : {
+						"color" : chartTheme.colorSecond
+					}
+				},
+				"splitLine" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : [ chartTheme.colorFourth ]
+					}
+				},
+				"splitArea" : {
+					"show" : false,
+					"areaStyle" : {
+						"color" : [ chartTheme.colorThird ]
+					}
+				}
+			},
+			"valueAxis" : {
+				"axisLine" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : chartTheme.colorSecond
+					}
+				},
+				"axisTick" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : chartTheme.colorThird
+					}
+				},
+				"axisLabel" : {
+					"show" : true,
+					"textStyle" : {
+						"color" : chartTheme.colorSecond
+					}
+				},
+				"splitLine" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : [ chartTheme.colorFourth ]
+					}
+				},
+				"splitArea" : {
+					"show" : false,
+					"areaStyle" : {
+						"color" : [ chartTheme.colorThird ]
+					}
+				}
+			},
+			"logAxis" : {
+				"axisLine" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : chartTheme.colorThird
+					}
+				},
+				"axisTick" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : chartTheme.colorThird
+					}
+				},
+				"axisLabel" : {
+					"show" : true,
+					"textStyle" : {
+						"color" : chartTheme.colorThird
+					}
+				},
+				"splitLine" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : [ chartTheme.colorFourth ]
+					}
+				},
+				"splitArea" : {
+					"show" : false,
+					"areaStyle" : {
+						"color" : [ chartTheme.colorThird ]
+					}
+				}
+			},
+			"timeAxis" : {
+				"axisLine" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : chartTheme.colorThird
+					}
+				},
+				"axisTick" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : chartTheme.colorThird
+					}
+				},
+				"axisLabel" : {
+					"show" : true,
+					"textStyle" : {
+						"color" : chartTheme.colorThird
+					}
+				},
+				"splitLine" : {
+					"show" : true,
+					"lineStyle" : {
+						"color" : [ chartTheme.colorFourth ]
+					}
+				},
+				"splitArea" : {
+					"show" : false,
+					"areaStyle" : {
+						"color" : [ chartTheme.colorThird ]
+					}
+				}
+			},
+			"toolbox" : {
+				"iconStyle" : {
+					"normal" : {
+						"borderColor" : chartTheme.colorFourth
+					},
+					"emphasis" : {
+						"borderColor" : chartTheme.colorThird
+					}
+				}
+			},
+			"legend" : {
+				"textStyle" : {
+					"color" : chartTheme.colorSecond
+				},
+				"inactiveColor" : chartTheme.colorThird
+			},
+			"tooltip" : {
+				"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
+				"textStyle" : { color: chartTheme.tooltipTheme.color },
+				"axisPointer" : {
+					"lineStyle" : {
+						"color" : chartTheme.colorSecond,
+						"width" : "1"
+					},
+					"crossStyle" : {
+						"color" : chartTheme.colorSecond,
+						"width" : "1"
+					}
+				}
+			},
+			"timeline" : {
+				"lineStyle" : {
+					"color" : chartTheme.colorThird,
+					"width" : 1
+				},
+				"itemStyle" : {
+					"normal" : {
+						"color" : chartTheme.colorThird,
+						"borderWidth" : 1
+					},
+					"emphasis" : {
+						"color" : chartTheme.colorSecond
+					}
+				},
+				"controlStyle" : {
+					"normal" : {
+						"color" : chartTheme.colorThird,
+						"borderColor" : chartTheme.colorThird,
+						"borderWidth" : 0.5
+					},
+					"emphasis" : {
+						"color" : chartTheme.colorThird,
+						"borderColor" : chartTheme.colorThird,
+						"borderWidth" : 0.5
+					}
+				},
+				"checkpointStyle" : {
+					"color" : chartTheme.highlightTheme.backgroundColor,
+					"borderColor" : chartTheme.highlightTheme.borderColor
+				},
+				"label" : {
+					"normal" : {
+						"textStyle" : {
+							"color" : chartTheme.colorThird
+						}
+					},
+					"emphasis" : {
+						"textStyle" : {
+							"color" : chartTheme.colorThird
+						}
+					}
+				}
+			},
+			"visualMap" : {
+				"color" : chartTheme.graphColors
+			},
+			"dataZoom" : {
+				"backgroundColor" : chartTheme.backgroundColor,
+				"dataBackgroundColor" : chartTheme.colorFourth,
+				"fillerColor" : chartTheme.colorThird,
+				"handleColor" : chartTheme.colorThird,
+				"handleSize" : "100%",
+				"textStyle" : {
+					"color" : chartTheme.colorThird
+				}
+			},
+			"markPoint" : {
+				"label" : {
+					"normal" : {
+						"textStyle" : {
+							"color" : chartTheme.colorThird
+						}
+					},
+					"emphasis" : {
+						"textStyle" : {
+							"color" : chartTheme.colorThird
+						}
+					}
+				}
+			}
+		};
+		
+		return theme;
 	};
 })
 (window);

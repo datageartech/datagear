@@ -12,6 +12,11 @@
 {
 	var renderer = (window.dashboardRenderer || (window.dashboardRenderer = {}));
 	
+	/**
+	 * 渲染看板。
+	 * 
+	 * @param dashboard 看板对象
+	 */
 	renderer.render = function(dashboard)
 	{
 		var doRender = true;
@@ -33,7 +38,7 @@
 			
 			try
 			{
-				chart.plugin.chartRender.render(chart);
+				this.renderChart(dashboard, chart, i);
 			}
 			catch(e)
 			{
@@ -48,6 +53,17 @@
 		
 		if(doUpdate != false)
 			this.updateDashboard(dashboard);
+	};
+	
+	renderer.renderChart = function(dashboard, chart, chartIndex)
+	{
+		var doRender = true;
+		
+		if(this.listener && this.listener.onRenderChart)
+			doRender=this.listener.onRenderChart(dashboard, chart, chartIndex, this);
+		
+		if(doRender != false)
+			chart.plugin.chartRender.render(chart);
 	};
 	
 	/**

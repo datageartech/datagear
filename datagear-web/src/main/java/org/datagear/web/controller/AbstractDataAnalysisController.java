@@ -10,6 +10,7 @@ package org.datagear.web.controller;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,15 +50,30 @@ public class AbstractDataAnalysisController extends AbstractController
 
 	protected RenderStyle resolveRenderStyle(HttpServletRequest request)
 	{
-		String theme = WebUtils.getTheme(request);
+		String style = request.getParameter("renderStyle");
 
-		if (StringUtil.isEmpty(theme))
-			return RenderStyle.LIGHT;
+		if (!StringUtil.isEmpty(style))
+		{
+			EnumSet<RenderStyle> enumSet = EnumSet.allOf(RenderStyle.class);
 
-		theme = theme.toLowerCase();
+			for (RenderStyle e : enumSet)
+			{
+				if (e.name().equalsIgnoreCase(style))
+					return e;
+			}
+		}
+		else
+		{
+			String theme = WebUtils.getTheme(request);
 
-		if (theme.indexOf("dark") > -1)
-			return RenderStyle.DARK;
+			if (!StringUtil.isEmpty(theme))
+			{
+				theme = theme.toLowerCase();
+
+				if (theme.indexOf("dark") > -1)
+					return RenderStyle.DARK;
+			}
+		}
 
 		return RenderStyle.LIGHT;
 	}

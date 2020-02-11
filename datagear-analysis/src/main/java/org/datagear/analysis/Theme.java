@@ -19,11 +19,11 @@ public class Theme implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	/** 前景色 */
+	private String color;
+
 	/** 背景色 */
 	private String backgroundColor;
-
-	/** 前景色 */
-	private String foregroundColor;
 
 	/** 边框颜色 */
 	private String borderColor;
@@ -36,12 +36,22 @@ public class Theme implements Serializable
 		super();
 	}
 
-	public Theme(String backgroundColor, String foregroundColor, String borderColor)
+	public Theme(String color, String backgroundColor, String borderColor)
 	{
 		super();
+		this.color = color;
 		this.backgroundColor = backgroundColor;
-		this.foregroundColor = foregroundColor;
 		this.borderColor = borderColor;
+	}
+
+	public String getColor()
+	{
+		return color;
+	}
+
+	public void setColor(String color)
+	{
+		this.color = color;
 	}
 
 	public String getBackgroundColor()
@@ -52,16 +62,6 @@ public class Theme implements Serializable
 	public void setBackgroundColor(String backgroundColor)
 	{
 		this.backgroundColor = backgroundColor;
-	}
-
-	public String getForegroundColor()
-	{
-		return foregroundColor;
-	}
-
-	public void setForegroundColor(String foregroundColor)
-	{
-		this.foregroundColor = foregroundColor;
 	}
 
 	public String getBorderColor()
@@ -87,7 +87,8 @@ public class Theme implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [backgroundColor=" + backgroundColor + ", foregroundColor="
-				+ foregroundColor + ", borderColor=" + borderColor + ", borderWidth=" + borderWidth + "]";
+		return getClass().getSimpleName() + " [color=" + color + ", backgroundColor=" + backgroundColor
+				+ ", borderColor=" + borderColor
+				+ ", borderWidth=" + borderWidth + "]";
 	}
 }

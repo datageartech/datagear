@@ -26,36 +26,36 @@ public class ChartTheme extends Theme implements Serializable
 	/** 图形颜色 */
 	private String[] graphColors;
 
-	/** 环境主要颜色 */
-	private String envMajorColor;
+	/** 二级前景颜色 */
+	private String colorSecond;
 
-	/** 环境次要颜色 */
-	private String envMinorColor;
+	/** 三级前景颜色 */
+	private String colorThird;
 
-	/** 环境最不重要的颜色 */
-	private String envLeastColor;
-
-	/** 环境高亮颜色 */
-	private String envHighlightColor;
+	/** 四级前景颜色 */
+	private String colorFourth;
 
 	/** 提示框主题 */
 	private Theme tooltipTheme;
+
+	/** 高亮区主题 */
+	private Theme highlightTheme;
 
 	public ChartTheme()
 	{
 	}
 
-	public ChartTheme(String backgroundColor, String foregroundColor, String borderColor, String envMajorColor,
-			String envMinorColor, String envLeastColor, String envHighlightColor, String[] graphColors,
-			Theme tooltipTheme)
+	public ChartTheme(String color, String backgroundColor, String borderColor, String[] graphColors,
+			String colorSecond,
+			String colorThird, String colorFourth, Theme tooltipTheme, Theme highlightTheme)
 	{
-		super(backgroundColor, foregroundColor, borderColor);
+		super(color, backgroundColor, borderColor);
 		this.graphColors = graphColors;
-		this.envMajorColor = envMajorColor;
-		this.envMinorColor = envMinorColor;
-		this.envLeastColor = envLeastColor;
-		this.envHighlightColor = envHighlightColor;
+		this.colorSecond = colorSecond;
+		this.colorThird = colorThird;
+		this.colorFourth = colorFourth;
 		this.tooltipTheme = tooltipTheme;
+		this.highlightTheme = highlightTheme;
 	}
 
 	public String[] getGraphColors()
@@ -68,44 +68,34 @@ public class ChartTheme extends Theme implements Serializable
 		this.graphColors = graphColors;
 	}
 
-	public String getEnvMajorColor()
+	public String getColorSecond()
 	{
-		return envMajorColor;
+		return colorSecond;
 	}
 
-	public void setEnvMajorColor(String envMajorColor)
+	public void setColorSecond(String colorSecond)
 	{
-		this.envMajorColor = envMajorColor;
+		this.colorSecond = colorSecond;
 	}
 
-	public String getEnvMinorColor()
+	public String getColorThird()
 	{
-		return envMinorColor;
+		return colorThird;
 	}
 
-	public void setEnvMinorColor(String envMinorColor)
+	public void setColorThird(String colorThird)
 	{
-		this.envMinorColor = envMinorColor;
+		this.colorThird = colorThird;
 	}
 
-	public String getEnvLeastColor()
+	public String getColorFourth()
 	{
-		return envLeastColor;
+		return colorFourth;
 	}
 
-	public void setEnvLeastColor(String envLeastColor)
+	public void setColorFourth(String colorFourth)
 	{
-		this.envLeastColor = envLeastColor;
-	}
-
-	public String getEnvHighlightColor()
-	{
-		return envHighlightColor;
-	}
-
-	public void setEnvHighlightColor(String envHighlightColor)
-	{
-		this.envHighlightColor = envHighlightColor;
+		this.colorFourth = colorFourth;
 	}
 
 	public Theme getTooltipTheme()
@@ -118,11 +108,22 @@ public class ChartTheme extends Theme implements Serializable
 		this.tooltipTheme = tooltipTheme;
 	}
 
+	public Theme getHighlightTheme()
+	{
+		return highlightTheme;
+	}
+
+	public void setHighlightTheme(Theme highlightTheme)
+	{
+		this.highlightTheme = highlightTheme;
+	}
+
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [graphColors=" + Arrays.toString(graphColors) + ", envMajorColor="
-				+ envMajorColor + ", envMinorColor=" + envMinorColor + ", envLeastColor=" + envLeastColor
-				+ ", tooltipTheme=" + tooltipTheme + "]";
+		return getClass().getSimpleName() + " [color=" + getColor() + ", backgroundColor=" + getBackgroundColor()
+				+ ", borderColor=" + getBorderColor() + ", graphColors=" + Arrays.toString(graphColors)
+				+ ", colorSecond=" + colorSecond + ", colorThird=" + colorThird + ", colorFourth=" + colorFourth
+				+ ", tooltipTheme=" + tooltipTheme + ", highlightTheme=" + highlightTheme + "]";
 	}
 }

@@ -937,7 +937,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			if (StringUtil.isEmpty(borderWidth))
 				borderWidth = "0";
 
-			out.write("  color: " + theme.getForegroundColor() + ";");
+			out.write("  color: " + theme.getColor() + ";");
 			writeNewLine(out);
 			out.write("  background-color: " + theme.getBackgroundColor() + ";");
 			writeNewLine(out);

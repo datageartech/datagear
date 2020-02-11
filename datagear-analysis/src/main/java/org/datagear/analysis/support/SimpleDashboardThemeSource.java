@@ -24,15 +24,16 @@ import org.datagear.analysis.Theme;
  */
 public class SimpleDashboardThemeSource implements DashboardThemeSource
 {
-	public static final DashboardTheme THEME_LIGHT = new DashboardTheme("#FFF", "#333", "#c5c5c5",
-			new ChartTheme("#FBFBFB", "#333", "#c5c5c5", "#333", "#AAA", "#DDD", "#007FFF", new String[] { "#2EC7C9",
+	public static final DashboardTheme THEME_LIGHT = new DashboardTheme("#333", "#FFF", "#c5c5c5",
+			new ChartTheme("#333", "#FBFBFB", "#c5c5c5", new String[] { "#2EC7C9",
 					"#B6A2DE", "#5AB1EF", "#FFB980", "#D87A80", "#8D98B3", "#E5CF0D", "#97B552", "#95706D", "#DC69AA" },
-					new Theme("#FFF", "#333", "#c5c5c5")));
+					"#333", "#AAA", "#EEE", new Theme("#333", "#DDD", "#c5c5c5"),
+					new Theme("#FFF", "#007FFF", "#c5c5c5")));
 
-	public static final DashboardTheme THEME_DARK = new DashboardTheme("#000", "#EEE", "#333",
-			new ChartTheme("#101010", "#EEE", "#202020", "#CCC", "#888", "#444", "#F58400", new String[] { "#5EF6FE",
+	public static final DashboardTheme THEME_DARK = new DashboardTheme("#EEE", "#000", "#333",
+			new ChartTheme("#EEE", "#101010", "#202020", new String[] { "#5EF6FE",
 					"#91CA8C", "#EA7E53", "#24666C", "#73A373", "#019DA2", "#EEDD78", "#73B9BC", "#7289AB", "#12CDD2" },
-					new Theme("#000", "#EEE", "#333")));
+					"#CCC", "#888", "#444", new Theme("#EEE", "#444", "#333"), new Theme("#EEE", "#F58400", "#333")));
 
 	private Map<RenderStyle, DashboardTheme> dashboardThemes;
 
