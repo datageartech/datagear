@@ -471,9 +471,9 @@
 			},
 			"radar" : {
 				"name" : { "textStyle" : { "color" : chartTheme.color } },
-				"axisLine" : { "lineStyle" : { "color" : chartTheme.colorThird } },
-				"splitLine" : { "lineStyle" : { "color" : chartTheme.colorThird } },
-				"splitArea" : { "areaStyle" : { "color" : [ chartTheme.colorFourth, chartTheme.backgroundColor ] } },
+				"axisLine" : { "lineStyle" : { "color" : chartTheme.colorFourth } },
+				"splitLine" : { "lineStyle" : { "color" : chartTheme.colorFourth } },
+				"splitArea" : { "areaStyle" : { "color" : [ chartTheme.colorFifth, chartTheme.backgroundColor ] } },
 				"itemStyle" : {
 					"normal" : {
 						"borderWidth" : 1
@@ -704,7 +704,7 @@
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.colorThird ]
+						"color" : [ chartTheme.colorFourth ]
 					}
 				}
 			},
@@ -718,7 +718,7 @@
 				"axisTick" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.colorFourth
 					}
 				},
 				"axisLabel" : {
@@ -736,7 +736,7 @@
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.colorThird ]
+						"color" : [ chartTheme.colorFourth ]
 					}
 				}
 			},

@@ -35,6 +35,9 @@ public class ChartTheme extends Theme implements Serializable
 	/** 四级前景颜色 */
 	private String colorFourth;
 
+	/** 五级前景颜色 */
+	private String colorFifth;
+
 	/** 提示框主题 */
 	private Theme tooltipTheme;
 
@@ -46,14 +49,15 @@ public class ChartTheme extends Theme implements Serializable
 	}
 
 	public ChartTheme(String color, String backgroundColor, String borderColor, String[] graphColors,
-			String colorSecond,
-			String colorThird, String colorFourth, Theme tooltipTheme, Theme highlightTheme)
+			String colorSecond, String colorThird, String colorFourth, String colorFifth, Theme tooltipTheme,
+			Theme highlightTheme)
 	{
 		super(color, backgroundColor, borderColor);
 		this.graphColors = graphColors;
 		this.colorSecond = colorSecond;
 		this.colorThird = colorThird;
 		this.colorFourth = colorFourth;
+		this.colorFifth = colorFifth;
 		this.tooltipTheme = tooltipTheme;
 		this.highlightTheme = highlightTheme;
 	}
@@ -98,6 +102,16 @@ public class ChartTheme extends Theme implements Serializable
 		this.colorFourth = colorFourth;
 	}
 
+	public String getColorFifth()
+	{
+		return colorFifth;
+	}
+
+	public void setColorFifth(String colorFifth)
+	{
+		this.colorFifth = colorFifth;
+	}
+
 	public Theme getTooltipTheme()
 	{
 		return tooltipTheme;
@@ -124,6 +138,7 @@ public class ChartTheme extends Theme implements Serializable
 		return getClass().getSimpleName() + " [color=" + getColor() + ", backgroundColor=" + getBackgroundColor()
 				+ ", borderColor=" + getBorderColor() + ", graphColors=" + Arrays.toString(graphColors)
 				+ ", colorSecond=" + colorSecond + ", colorThird=" + colorThird + ", colorFourth=" + colorFourth
-				+ ", tooltipTheme=" + tooltipTheme + ", highlightTheme=" + highlightTheme + "]";
+				+ ", colorFifth=" + colorFifth + ", tooltipTheme=" + tooltipTheme + ", highlightTheme=" + highlightTheme
+				+ "]";
 	}
 }
