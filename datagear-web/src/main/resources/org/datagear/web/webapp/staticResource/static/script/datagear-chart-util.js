@@ -447,6 +447,7 @@
 			"backgroundColor" : chartTheme.backgroundColor,
 			"textStyle" : {},
 			"title" : {
+		        left: "center",
 				"textStyle" : {
 					"color" : chartTheme.color
 				},
@@ -814,7 +815,17 @@
 					}
 				}
 			},
+			"grid":
+			{
+				"left": 30,
+				"right": 46,
+				"top": 80,
+				"bottom": 20,
+				"containLabel": true
+			},
 			"legend" : {
+				"orient": "horizontal",
+				"top": 25,
 				"textStyle" : {
 					"color" : chartTheme.colorSecond
 				},
