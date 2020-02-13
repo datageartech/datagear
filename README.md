@@ -15,19 +15,27 @@
 
 数据管理
 
-![界面图片](http://datagear.tech/static/theme/lightness/images/datagear-home-screen.png)
+![界面图片](screenshot/1-datamanage.png)
 
 SQL工作台
 
-![界面图片](http://datagear.tech/static/theme/lightness/images/datagear-sqlpad-screen.png)
+![界面图片](screenshot/2-sqlpad.png)
 
 数据导入
 
-![界面图片](http://datagear.tech/static/theme/lightness/images/datagear-dataimport-screen.png)
+![界面图片](screenshot/3-dataimport.png)
 
 数据导出
 
-![界面图片](http://datagear.tech/static/theme/lightness/images/datagear-dataexport-screen.png)
+![界面图片](screenshot/4-dataexport.png)
+
+图表
+
+![界面图片](screenshot/5-chart.png)
+
+看板
+
+![界面图片](screenshot/6-dashboard.png)
 
 ## 依赖
 
