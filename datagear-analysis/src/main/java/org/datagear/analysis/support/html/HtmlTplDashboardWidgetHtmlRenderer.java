@@ -177,7 +177,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	 * 
 	 * @param htmlCharset
 	 * @param htmlTitle
-	 * @param customChartCssAttrs 自定义图表样式属性，允许为{@code null}
+	 * @param customChartCssAttrs
+	 *            自定义图表样式属性，允许为{@code null}
 	 * @param chartWidgetId
 	 * @return
 	 */
@@ -201,10 +202,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		sb.append("}\n");
 		sb.append("." + getChartStyleName() + "{\n");
 		sb.append("  display: inline-block;\n");
-		sb.append("  min-width: 30%;\n");
-		sb.append("  min-height: 30%;\n");
-		sb.append("  margin-left: 2.3%;\n");
-		sb.append("  margin-bottom: 1em;\n");
+		sb.append("  width: 300px;\n");
+		sb.append("  height: 300px;\n");
 
 		if (!StringUtil.isEmpty(customChartCssAttrs))
 			sb.append(customChartCssAttrs);
@@ -284,8 +283,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 						clear(valueCache);
 						clear(tagContentCache);
 
-						last = resolveDashboardInfo(in, last, tagContentCache, nameCache, valueCache,
-								dashboardInfo);
+						last = resolveDashboardInfo(in, last, tagContentCache, nameCache, valueCache, dashboardInfo);
 
 						resolvedDashboardInfo = true;
 

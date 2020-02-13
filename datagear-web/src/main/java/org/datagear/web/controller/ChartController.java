@@ -299,7 +299,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		String htmlTitle = chart.getName();
 		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(id,
 				this.chartShowHtmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
-						"  position:absolute;\n  left:1em;\n  right:1em;\n  top:1em;\n  bottom:1em;\n  margin:0 0;\n",
+						"  position:absolute;\n  left:1em;\n  right:1em;\n  top:1em;\n  bottom:1em;\n  margin:0 0;\n  width:auto;\n  height:auto;",
 						new String[] { id }),
 				this.chartShowHtmlTplDashboardWidgetHtmlRenderer);
 
