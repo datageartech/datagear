@@ -6,7 +6,8 @@
  * 图表工具集：window.chartUtil。
  * 
  * 依赖:
- * echarts.js
+ * jquery.js
+ * chartUtil.echarts依赖echarts.js
  */
 (function(window)
 {
@@ -34,7 +35,47 @@
 	{
 		return this.renderContextAttr(chart, "renderStyle");
 	};
-
+	
+	/**
+	 * 获取通过图表元素的"dg-chart-options"属性值、或者图表元素的"> .dg-chart-options"子元素内容定义的JSON图表设置项。
+	 * 
+	 * @param chart
+	 * @return {...}
+	 */
+	util.chartElementOptions = function(chart)
+	{
+		var $ele = $("#"+chart.elementId);
+		
+		if(!$ele.length)
+			return {};
+		
+		//元素属性
+		var optionsStr = $ele.attr("dg-chart-options");
+		
+		//子元素
+		if(!optionsStr)
+			optionsStr = $("> .dg-chart-options", $ele).text();
+		
+		if(!optionsStr)
+			return {};
+		
+		optionsStr = this.trimJSONString(optionsStr);
+		
+		try
+		{
+			if(typeof $ != "undefined" && $.parseJSON)
+				return $.parseJSON(optionsStr);
+			else
+				return JSON.parse(optionsStr);
+		}
+		catch(e)
+		{
+			this.handleError(e);
+		}
+		
+		return {};
+	};
+	
 	/**
 	 * 获取/设置图表的"name"属性值。
 	 * 
@@ -392,7 +433,67 @@
 		
 		return re;
 	};
-
+	
+	/**
+	 * 将不符合JSON规范的字符串定义规范化：属性名添加双引号、或将属性名单引号替换为双引号。
+	 */
+	util.trimJSONString = function(str)
+	{
+		if(!str)
+			return str;
+		
+		//替换单引号为双引号
+		var str1 = "";
+		for(var i=0; i<str.length;i++)
+		{
+			var c = str.charAt(i);
+			
+			if(c == '\\')
+			{
+				str1 += c;
+				i = i+1;
+				str1 += str.charAt(i);
+			}
+			else if(c == '\'')
+				str1 += '"';
+			else
+				str1 += c;
+		}
+		
+		str = str1;
+		
+		//属性名匹配表达式
+		var reg = /([{,]\s*)([^\:\s]*)(\s*:)/g;
+		
+		return str.replace(reg, function(token, prefix, name, suffix)
+		{
+			var len = name.length;
+			
+			if(len > 1 && name.charAt(0) == '"' && name.charAt(len-1) == '"')
+				return token;
+			else if(len > 1 && name.charAt(0) == '\'' && name.charAt(len-1) == '\'')
+			{
+				name = '"' + name.substring(1, len-1) + '"';
+				return prefix + name + suffix;
+			}
+			else
+				return prefix + '"' + name + '"' + suffix;
+		});
+	};
+	
+	util.handleError = function(e)
+	{
+		if(typeof console != "undefined")
+		{
+			if(console.error)
+				console.error(e);
+			else if(console.warn)
+				console.warn(e);
+			else if(console.info)
+				console.info(e);
+		}
+	};
+	
 	/**
 	 * 初始化Echarts对象。
 	 * 
@@ -428,9 +529,20 @@
 		this._REGISTERED_THEME = true;
 		
 		var theme = this.buildTheme(renderStyle, chartTheme);
-	    echarts.registerTheme(renderStyle, theme);
+		this.registerTheme(renderStyle, theme);
 	    
 	    return renderStyle;
+	};
+	
+	/**
+	 * 注册echarts主题。
+	 * 
+	 * @param name 主题名称
+	 * @param theme 主题对象
+	 */
+	util.echarts.registerTheme = function(name, theme)
+	{
+		echarts.registerTheme(name, theme);
 	};
 	
 	/**

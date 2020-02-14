@@ -201,9 +201,7 @@
 	
 	renderer.handleError = function(e)
 	{
-		var console = window["console"];
-		
-		if(console)
+		if(typeof console != "undefined")
 		{
 			if(console.error)
 				console.error(e);
