@@ -139,7 +139,6 @@ public class DashboardController extends AbstractDataAnalysisController
 		if (dashboard == null)
 			throw new RecordNotFoundException();
 
-
 		model.addAttribute("dashboard", dashboard);
 		readAndSetTemplateContent(dashboard, model);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editDashboard");
@@ -261,8 +260,7 @@ public class DashboardController extends AbstractDataAnalysisController
 	@RequestMapping(value = "/saveResourceFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveResourceFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("id") String id,
-			@RequestParam("resourceFilePath") String resourceFilePath,
+			@RequestParam("id") String id, @RequestParam("resourceFilePath") String resourceFilePath,
 			@RequestParam("resourceName") String resourceName) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
@@ -526,6 +524,7 @@ public class DashboardController extends AbstractDataAnalysisController
 				responseEncoding = dashboardWidgetResManager.getDefaultEncoding();
 
 			response.setCharacterEncoding(responseEncoding);
+			response.setContentType(CONTENT_TYPE_HTML);
 
 			Writer out = response.getWriter();
 

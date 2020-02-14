@@ -305,6 +305,7 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		String responseEncoding = dashboardWidget.getTemplateEncoding();
 		response.setCharacterEncoding(responseEncoding);
+		response.setContentType(CONTENT_TYPE_HTML);
 
 		Writer out = response.getWriter();
 
