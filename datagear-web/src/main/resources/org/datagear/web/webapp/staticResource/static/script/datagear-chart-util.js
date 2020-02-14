@@ -7,12 +7,11 @@
  * 
  * 依赖:
  * jquery.js
- * chartUtil.echarts依赖echarts.js
+ * chartUtil.echarts* 依赖echarts.js
  */
 (function(window)
 {
 	var util = (window.chartUtil || (window.chartUtil = {}));
-	util.echarts = (util.echarts || {});
 	
 	/**
 	 * 获取图表主题。
@@ -37,43 +36,38 @@
 	};
 	
 	/**
-	 * 获取通过图表元素的"dg-chart-options"属性值、或者图表元素的"> .dg-chart-options"子元素内容定义的JSON图表设置项。
+	 * 获取通过图表元素的"dg-chart-options"属性定义的JSON图表设置项。
 	 * 
 	 * @param chart
+	 * @param options 可选，初始设置项
 	 * @return {...}
 	 */
-	util.chartElementOptions = function(chart)
+	util.chartElementOptions = function(chart, options)
 	{
+		options = (options || {});
+		
 		var $ele = $("#"+chart.elementId);
 		
 		if(!$ele.length)
-			return {};
+			return options;
 		
-		//元素属性
-		var optionsStr = $ele.attr("dg-chart-options");
+		//元素属性选项
+		var optsStr = $ele.attr("dg-chart-options");
+		//全局选项
+		var optsStrGlobal = $("body").attr("dg-chart-options");
 		
-		//子元素
-		if(!optionsStr)
-			optionsStr = $("> .dg-chart-options", $ele).text();
+		if(!optsStr && !optsStrGlobal)
+			return options;
 		
-		if(!optionsStr)
-			return {};
+		optsStr = this.trimJSONString(optsStr);
+		optsStrGlobal = this.trimJSONString(optsStrGlobal);
 		
-		optionsStr = this.trimJSONString(optionsStr);
+		var opts = this.parseJSONSilently(optsStr);
+		var optsGlobal = this.parseJSONSilently(optsStrGlobal);
 		
-		try
-		{
-			if(typeof $ != "undefined" && $.parseJSON)
-				return $.parseJSON(optionsStr);
-			else
-				return JSON.parse(optionsStr);
-		}
-		catch(e)
-		{
-			this.handleError(e);
-		}
+		options = $.extend(true, options, optsGlobal, opts);
 		
-		return {};
+		return options;
 	};
 	
 	/**
@@ -435,77 +429,40 @@
 	};
 	
 	/**
-	 * 将不符合JSON规范的字符串定义规范化：属性名添加双引号、或将属性名单引号替换为双引号。
+	 * 解析JSON。
+	 * 如果参数不合法，将返回空对象：{}。
 	 */
-	util.trimJSONString = function(str)
+	util.parseJSONSilently = function(str)
 	{
 		if(!str)
-			return str;
+			return {};
 		
-		//替换单引号为双引号
-		var str1 = "";
-		for(var i=0; i<str.length;i++)
+		try
 		{
-			var c = str.charAt(i);
-			
-			if(c == '\\')
-			{
-				str1 += c;
-				i = i+1;
-				str1 += str.charAt(i);
-			}
-			else if(c == '\'')
-				str1 += '"';
+			if(typeof $ != "undefined" && $.parseJSON)
+				return $.parseJSON(str);
 			else
-				str1 += c;
+				return JSON.parse(str);
+		}
+		catch(e)
+		{
+			this.handleError(e);
 		}
 		
-		str = str1;
-		
-		//属性名匹配表达式
-		var reg = /([{,]\s*)([^\:\s]*)(\s*:)/g;
-		
-		return str.replace(reg, function(token, prefix, name, suffix)
-		{
-			var len = name.length;
-			
-			if(len > 1 && name.charAt(0) == '"' && name.charAt(len-1) == '"')
-				return token;
-			else if(len > 1 && name.charAt(0) == '\'' && name.charAt(len-1) == '\'')
-			{
-				name = '"' + name.substring(1, len-1) + '"';
-				return prefix + name + suffix;
-			}
-			else
-				return prefix + '"' + name + '"' + suffix;
-		});
-	};
-	
-	util.handleError = function(e)
-	{
-		if(typeof console != "undefined")
-		{
-			if(console.error)
-				console.error(e);
-			else if(console.warn)
-				console.warn(e);
-			else if(console.info)
-				console.info(e);
-		}
+		return {};
 	};
 	
 	/**
 	 * 初始化Echarts对象。
 	 * 
 	 * @param chart 图表对象
-	 * @param echartsOption Echarts设置项
+	 * @param options echarts设置项
 	 */
-	util.echarts.init = function(chart, echartsOption)
+	util.echartsInit = function(chart, options)
 	{
-		var echartsObj = echarts.init(document.getElementById(chart.elementId), this.theme(chart));
-		
-		if(echartsOption != null)
-			echartsObj.setOption(echartsOption);
+		var echartsObj = echarts.init(document.getElementById(chart.elementId), this.echartsTheme(chart));
+		options = this.chartElementOptions(chart, options);
+		echartsObj.setOption(options);
 		
 		return echartsObj;
 	};
@@ -515,10 +472,10 @@
 	 * 
 	 * @param dashboard
 	 */
-	util.echarts.theme = function(chart)
+	util.echartsTheme = function(chart)
 	{
-		var renderStyle = util.chartRenderStyle(chart);
-		var chartTheme = util.chartTheme(chart);
+		var renderStyle = this.chartRenderStyle(chart);
+		var chartTheme = this.chartTheme(chart);
 		
 		if(!renderStyle || !chartTheme)
 			return "";
@@ -528,8 +485,8 @@
 		
 		this._REGISTERED_THEME = true;
 		
-		var theme = this.buildTheme(renderStyle, chartTheme);
-		this.registerTheme(renderStyle, theme);
+		var theme = this.echartsBuildTheme(renderStyle, chartTheme);
+		this.echartsRegisterTheme(renderStyle, theme);
 	    
 	    return renderStyle;
 	};
@@ -540,7 +497,7 @@
 	 * @param name 主题名称
 	 * @param theme 主题对象
 	 */
-	util.echarts.registerTheme = function(name, theme)
+	util.echartsRegisterTheme = function(name, theme)
 	{
 		echarts.registerTheme(name, theme);
 	};
@@ -551,7 +508,7 @@
 	 * @param renderStyle 当前渲染风格
 	 * @param chartTheme 图表主题
 	 */
-	util.echarts.buildTheme = function(renderStyle, chartTheme)
+	util.echartsBuildTheme = function(renderStyle, chartTheme)
 	{
 		var theme =
 		{
@@ -1030,6 +987,66 @@
 		};
 		
 		return theme;
+	};
+	
+	/**
+	 * 将不符合JSON规范的字符串定义规范化：属性名添加双引号、或将属性名单引号替换为双引号。
+	 */
+	util.trimJSONString = function(str)
+	{
+		if(!str)
+			return str;
+		
+		//替换单引号为双引号
+		var str1 = "";
+		for(var i=0; i<str.length;i++)
+		{
+			var c = str.charAt(i);
+			
+			if(c == '\\')
+			{
+				str1 += c;
+				i = i+1;
+				str1 += str.charAt(i);
+			}
+			else if(c == '\'')
+				str1 += '"';
+			else
+				str1 += c;
+		}
+		
+		str = str1;
+		
+		//属性名匹配表达式
+		var reg = /([{,]\s*)([^\:\s]*)(\s*:)/g;
+		
+		return str.replace(reg, function(token, prefix, name, suffix)
+		{
+			var len = name.length;
+			
+			if(len > 1 && name.charAt(0) == '"' && name.charAt(len-1) == '"')
+				return token;
+			else if(len > 1 && name.charAt(0) == '\'' && name.charAt(len-1) == '\'')
+			{
+				name = '"' + name.substring(1, len-1) + '"';
+				return prefix + name + suffix;
+			}
+			else
+				return prefix + '"' + name + '"' + suffix;
+		});
+	};
+	
+	util.handleError = function(e)
+	{
+		if(typeof console != "undefined")
+		{
+			if(console.error)
+				console.error(e);
+			else if(console.warn)
+				console.warn(e);
+			else if(console.info)
+				console.info(e);
+		}
 	};
 })
 (window);
