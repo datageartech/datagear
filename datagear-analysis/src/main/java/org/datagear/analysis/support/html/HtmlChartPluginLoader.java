@@ -38,7 +38,7 @@ import org.datagear.util.StringUtil;
  * </p>
  * <code>
  * <pre>
- * |---- plugin.js
+ * |---- plugin.json
  * </pre>
  * </code>
  * <p>
@@ -56,7 +56,7 @@ import org.datagear.util.StringUtil;
  * </pre>
  * </code>
  * <p>
- * 如果<code>plugin.js</code>中定义了插件图标，比如：
+ * 如果<code>plugin.json</code>中定义了插件图标，比如：
  * </p>
  * <p>
  * <code>icons : { "LIGHT" : "icons/light.png" }</code>
@@ -75,7 +75,7 @@ import org.datagear.util.StringUtil;
  */
 public class HtmlChartPluginLoader
 {
-	public static final String FILE_NAME_PLUGIN = "plugin.js";
+	public static final String FILE_NAME_PLUGIN = "plugin.json";
 
 	private HtmlChartPluginJsDefResolver htmlChartPluginJsDefResolver = new HtmlChartPluginJsDefResolver();
 

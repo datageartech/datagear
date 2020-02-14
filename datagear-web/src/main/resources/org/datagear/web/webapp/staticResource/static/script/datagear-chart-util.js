@@ -131,13 +131,13 @@
 	 * 获取第一个图表数据集对象。
 	 * 
 	 * @param chart
-	 * @return {dataSet: [], propertySigns: {...}}
+	 * @return {dataSet: [], propertySigns: {...}} 或  undefined
 	 */
 	util.firstChartDataSet = function(chart)
 	{
 		if(!chart || !chart.chartDataSets || chart.chartDataSets.length < 1)
-			return {};
-			
+			return undefined;
+		
 		return chart.chartDataSets[0];
 	};
 	
@@ -265,16 +265,15 @@
 	 * 
 	 * @param result 数据集结果对象、对象数组
 	 * @param property 数据集属性对象、属性名
-	 * @param row 行索引，以0开始，默认为0
+	 * @param row 行索引，以0开始，可选，默认为0
 	 */
 	util.resultCell = function(result, property, row)
 	{
-		if(row == null)
-			row = 0;
+		row = (row || 0);
 		
-		var re = this.resultRowArrays(result, property, row+1);
+		var re = this.resultRowArrays(result, property, row, 1);
 		
-		return (re.length > row ? re[row] : undefined);
+		return (re.length > 0 ? re[0] : undefined);
 	};
 	
 	/**
@@ -282,10 +281,11 @@
 	 * 
 	 * @param result 数据集结果对象、对象数组
 	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
+	 * @param row 行索引，以0开始，可选，默认为0
 	 * @param count 获取的最多行数，可选，默认为全部
 	 * @return properties为数组时：[[..., ...], ...]；properties非数组时：[..., ...]
 	 */
-	util.resultRowArrays = function(result, properties, count)
+	util.resultRowArrays = function(result, properties, row, count)
 	{
 		var re = [];
 		
@@ -294,13 +294,14 @@
 		
 		var datas = (result.length != null ? result : (result.datas || []));
 		
+		row = (row || 0);
 		var getCount = datas.length;
 		if(count != null && count < getCount)
 			getCount = count;
 		
 		if(properties.length > 0)
 		{
-			for(var i=0; i< getCount; i++)
+			for(var i=row; i< getCount; i++)
 			{
 				var rowObj = datas[i];
 				var row = [];
@@ -316,7 +317,7 @@
 					row[j] = rowObj[name];
 				}
 				
-				re[i] = row;
+				re.push(row);
 			}
 		}
 		else
@@ -325,10 +326,10 @@
 			
 			if(name)
 			{
-				for(var i=0; i< getCount; i++)
+				for(var i=row; i< getCount; i++)
 				{
 					var rowObj = datas[i];
-					re[i] = rowObj[name];
+					re.push(rowObj[name]);
 				}
 			}
 		}
@@ -341,10 +342,11 @@
 	 * 
 	 * @param result 数据集结果对象、对象数组
 	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
+	 * @param row 行索引，以0开始，可选，默认为0
 	 * @param count 获取的最多行数，可选，默认为全部
 	 * @return properties为数组时：[[..., ...], ...]；properties非数组时：[..., ...]
 	 */
-	util.resultColumnArrays = function(result, properties, count)
+	util.resultColumnArrays = function(result, properties, row, count)
 	{
 		var re = [];
 		
@@ -353,6 +355,7 @@
 		
 		var datas = (result.length != null ? result : (result.datas || []));
 		
+		row = (row || 0);
 		var getCount = datas.length;
 		if(count != null && count < getCount)
 			getCount = count;
@@ -369,8 +372,8 @@
 				
 				var column = [];
 				
-				for(var j=0; j< getCount; j++)
-					column[j] = datas[j][name];
+				for(var j=row; j< getCount; j++)
+					column.push(datas[j][name]);
 				
 				re[i] = column;
 			}
@@ -381,10 +384,10 @@
 
 			if(name)
 			{
-				for(var i=0; i< getCount; i++)
+				for(var i=row; i< getCount; i++)
 				{
 					var rowObj = datas[i];
-					re[i] = rowObj[name];
+					re.push(rowObj[name]);
 				}
 			}
 		}
@@ -398,15 +401,17 @@
 	 * @param result 数据集结果对象、对象数组
 	 * @param nameProperty 名称属性对象、属性名
 	 * @param valueProperty 值属性对象、属性名
+	 * @param row 行索引，以0开始，可选，默认为0
 	 * @param count 获取结果数据的最多行数，可选，默认为全部
 	 * @return [{name: ..., value: ...}, ...]
 	 */
-	util.resultNameValueObjects = function(result, nameProperty, valueProperty, count)
+	util.resultNameValueObjects = function(result, nameProperty, valueProperty, row, count)
 	{
 		var re = [];
 		
 		var datas = (result.length != null ? result : (result.datas || []));
 		
+		row = (row || 0);
 		var getCount = datas.length;
 		if(count != null && count < getCount)
 			getCount = count;
@@ -414,7 +419,7 @@
 		nameProperty = (nameProperty.name || nameProperty);
 		valueProperty = (valueProperty.name || valueProperty);
 		
-		for(var i=0; i< getCount; i++)
+		for(var i=row; i< getCount; i++)
 		{
 			var obj =
 			{
@@ -422,7 +427,7 @@
 				"value" : datas[i][valueProperty]
 			};
 			
-			re[i] = obj;
+			re.push(obj);
 		}
 		
 		return re;
