@@ -117,12 +117,11 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	 * 渲染{@linkplain Chart}。
 	 * 
 	 * @param renderContext
-	 * @param chartPropertyValues
-	 * @param chartDataSets
+	 * @param chartDefinition
 	 * @return
 	 * @throws RenderException
 	 */
-	Chart renderChart(T renderContext, Map<String, ?> chartPropertyValues, ChartDataSet... chartDataSets)
+	Chart renderChart(T renderContext, ChartDefinition chartDefinition)
 			throws RenderException;
 
 	/**

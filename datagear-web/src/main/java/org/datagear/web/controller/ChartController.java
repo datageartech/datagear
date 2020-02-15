@@ -464,10 +464,7 @@ public class ChartController extends AbstractChartPluginAwareController
 		if (isBlank(chart.getName()))
 			throw new IllegalInputException();
 
-		if (isEmpty(chart.getChartPlugin()))
-			throw new IllegalInputException();
-
-		if (isEmpty(chart.getChartPlugin()))
+		if (isEmpty(chart.getPlugin()))
 			throw new IllegalInputException();
 	}
 }

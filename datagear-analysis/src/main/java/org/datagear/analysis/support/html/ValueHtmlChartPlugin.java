@@ -7,18 +7,13 @@
  */
 package org.datagear.analysis.support.html;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.datagear.analysis.ChartDataSet;
-import org.datagear.analysis.RenderException;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 
 /**
  * 仅渲染指定内容值的{@linkplain HtmlChartPlugin}。
  * <p>
- * 它从{@code chartPropertyValues}中获取{@linkplain #getValueChartPropertyName()}的属性值，并将其作为图表内容渲染。
+ * 它使用{@code ChartDefinition#getProperty(String)}获取{@linkplain #getPropertyName()}的属性值，并将其作为图表内容渲染。
  * </p>
  * 
  * @author datagear@163.com
@@ -26,55 +21,31 @@ import org.datagear.util.i18n.Label;
  */
 public class ValueHtmlChartPlugin<T extends HtmlRenderContext> extends HtmlChartPlugin<T>
 {
-	private String valueChartPropertyName;
+	private String propertyName;
 
 	public ValueHtmlChartPlugin()
 	{
 		super();
 	}
 
-	public ValueHtmlChartPlugin(String id, String valueChartPropertyName)
+	public ValueHtmlChartPlugin(String id, String propertyName)
 	{
 		super();
 		super.setId(id);
 		super.setNameLabel(new Label("ValueHtmlChartPlugin"));
-		super.setChartRenderer(buildJsChartRenderer(valueChartPropertyName));
-		this.valueChartPropertyName = valueChartPropertyName;
+		super.setChartRenderer(buildJsChartRenderer(propertyName));
+		this.propertyName = propertyName;
 	}
 
-	public String getValueChartPropertyName()
+	public String getPropertyName()
 	{
-		return valueChartPropertyName;
+		return propertyName;
 	}
 
-	public void setValueChartPropertyName(String valueChartPropertyName)
+	public void setPropertyName(String propertyName)
 	{
-		this.valueChartPropertyName = valueChartPropertyName;
-		super.setChartRenderer(buildJsChartRenderer(valueChartPropertyName));
-	}
-
-	@Override
-	public JsChartRenderer getChartRenderer()
-	{
-		return super.getChartRenderer();
-	}
-
-	@Override
-	public void setChartRenderer(JsChartRenderer chartRenderer)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public HtmlChart renderChart(T renderContext, Map<String, ?> chartPropertyValues, ChartDataSet... chartDataSets)
-			throws RenderException
-	{
-		@SuppressWarnings("unchecked")
-		Map<String, Object> myChartPropertyValues = (Map<String, Object>) chartPropertyValues;
-		if (myChartPropertyValues == null)
-			myChartPropertyValues = new HashMap<String, Object>();
-
-		return super.renderChart(renderContext, myChartPropertyValues, chartDataSets);
+		this.propertyName = propertyName;
+		super.setChartRenderer(buildJsChartRenderer(propertyName));
 	}
 
 	protected StringJsChartRenderer buildJsChartRenderer(String valueChartPropertyName)
@@ -87,9 +58,10 @@ public class ValueHtmlChartPlugin<T extends HtmlRenderContext> extends HtmlChart
 				//
 				"		var element = document.getElementById(chart.elementId);" + HtmlChartPlugin.HTML_NEW_LINE
 				//
-				+ "		var propertyValues = (chart.propertyValues || {});" + HtmlChartPlugin.HTML_NEW_LINE
+				+ "		var properties = (chart." + HtmlChart.PROPERTY_PROPERTIES + " || {});"
+				+ HtmlChartPlugin.HTML_NEW_LINE
 				//
-				+ "		element.innerHTML=propertyValues['"
+				+ "		element.innerHTML=properties['"
 				+ StringUtil.escapeJavaScriptStringValue(valueChartPropertyName) + "'];" + HtmlChartPlugin.HTML_NEW_LINE
 
 				//

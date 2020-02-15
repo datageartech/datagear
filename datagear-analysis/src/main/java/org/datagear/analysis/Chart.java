@@ -16,34 +16,35 @@ import java.util.Map;
  * @author datagear@163.com
  *
  */
-public class Chart extends AbstractIdentifiable
+public class Chart extends ChartDefinition
 {
-	private RenderContext renderContext;
-
 	private ChartPlugin<?> plugin;
 
-	private Map<String, ?> propertyValues;
-
-	private ChartDataSet[] chartDataSets;
+	private RenderContext renderContext;
 
 	public Chart()
 	{
 		super();
 	}
 
-	public Chart(String id)
+	public Chart(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin<?> plugin,
+			RenderContext renderContext)
 	{
-		super(id);
+		super(id, name, chartDataSets);
+		this.plugin = plugin;
+		this.renderContext = renderContext;
 	}
 
-	public Chart(String id, RenderContext renderContext, ChartPlugin<?> plugin, Map<String, ?> propertyValues,
-			ChartDataSet[] chartDataSets)
+	public Chart(ChartDefinition chartDefinition, ChartPlugin<?> plugin,
+			RenderContext renderContext)
 	{
-		super(id);
-		this.renderContext = renderContext;
+		super(chartDefinition.getId(), chartDefinition.getName(), chartDefinition.getChartDataSets());
+		setProperties(chartDefinition.getProperties());
+		setParams(chartDefinition.getParams());
+		setUpdateInterval(chartDefinition.getUpdateInterval());
+
 		this.plugin = plugin;
-		this.propertyValues = propertyValues;
-		this.chartDataSets = chartDataSets;
+		this.renderContext = renderContext;
 	}
 
 	public RenderContext getRenderContext()
@@ -66,26 +67,6 @@ public class Chart extends AbstractIdentifiable
 		this.plugin = plugin;
 	}
 
-	public Map<String, ?> getPropertyValues()
-	{
-		return propertyValues;
-	}
-
-	public void setPropertyValues(Map<String, ?> propertyValues)
-	{
-		this.propertyValues = propertyValues;
-	}
-
-	public ChartDataSet[] getChartDataSets()
-	{
-		return chartDataSets;
-	}
-
-	public void setChartDataSets(ChartDataSet[] chartDataSets)
-	{
-		this.chartDataSets = chartDataSets;
-	}
-
 	/**
 	 * 获取此图表的所有{@linkplain DataSetResult}。
 	 * 
@@ -95,14 +76,16 @@ public class Chart extends AbstractIdentifiable
 	 */
 	public DataSetResult[] getDataSetResults(Map<String, ?> dataSetParamValues) throws DataSetException
 	{
-		if (this.chartDataSets == null || this.chartDataSets.length == 0)
+		ChartDataSet[] chartDataSets = getChartDataSets();
+
+		if (chartDataSets == null || chartDataSets.length == 0)
 			return new DataSetResult[0];
 
-		DataSetResult[] dataSets = new DataSetResult[this.chartDataSets.length];
+		DataSetResult[] dataSets = new DataSetResult[chartDataSets.length];
 
-		for (int i = 0; i < this.chartDataSets.length; i++)
+		for (int i = 0; i < chartDataSets.length; i++)
 		{
-			DataSetResult dataSetResult = this.chartDataSets[i].getDataSet().getResult(dataSetParamValues);
+			DataSetResult dataSetResult = chartDataSets[i].getDataSet().getResult(dataSetParamValues);
 			dataSets[i] = dataSetResult;
 		}
 

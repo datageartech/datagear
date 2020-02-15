@@ -11,12 +11,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
@@ -207,8 +206,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		}
 
 		@Override
-		public Chart renderChart(HtmlRenderContext renderContext, Map<String, ?> chartPropertyValues,
-				ChartDataSet... chartDataSets) throws RenderException
+		public Chart renderChart(HtmlRenderContext renderContext, ChartDefinition chartDefinition)
+				throws RenderException
 		{
 			throw new UnsupportedOperationException();
 		}

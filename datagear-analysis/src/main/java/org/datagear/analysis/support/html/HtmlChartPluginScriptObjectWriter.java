@@ -10,10 +10,9 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Map;
 
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
@@ -113,8 +112,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 		}
 
 		@Override
-		public Chart renderChart(RenderContext renderContext, Map<String, ?> chartPropertyValues,
-				ChartDataSet... chartDataSets) throws RenderException
+		public Chart renderChart(RenderContext renderContext, ChartDefinition chartDefinition) throws RenderException
 		{
 			throw new UnsupportedOperationException();
 		}

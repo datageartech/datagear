@@ -150,12 +150,12 @@
 			var chart = charts[i];
 			
 			//不需更新
-			if(chart.propertyValues.updateInterval < 0)
+			if(chart.updateInterval < 0)
 				continue;
 			
 			var prevUpdateTime = this.updateTime(chart);
 			
-			if(prevUpdateTime == null || (prevUpdateTime + chart.propertyValues.updateInterval) <= time)
+			if(prevUpdateTime == null || (prevUpdateTime + chart.updateInterval) <= time)
 				nexts.push(chart);
 		}
 		

@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.util.Map;
 
 import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetResult;
@@ -74,10 +75,13 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	{
 		public JsonHtmlChart(HtmlChart htmlChart, String renderContextVarName, String pluginVarName)
 		{
-			super(htmlChart.getId(), new RefHtmlRenderContext(renderContextVarName),
-					new RefHtmlChartPlugin(pluginVarName), htmlChart.getPropertyValues(),
-					JsonChartDataSet.valuesOf(htmlChart.getChartDataSets()), htmlChart.getElementId(),
-					htmlChart.getVarName());
+			super();
+			ChartDefinition.copy(htmlChart, this);
+			setChartDataSets(JsonChartDataSet.valuesOf(htmlChart.getChartDataSets()));
+			setPlugin(new RefHtmlChartPlugin(pluginVarName));
+			setRenderContext(new RefHtmlRenderContext(renderContextVarName));
+			setElementId(htmlChart.getElementId());
+			setVarName(htmlChart.getVarName());
 		}
 	}
 

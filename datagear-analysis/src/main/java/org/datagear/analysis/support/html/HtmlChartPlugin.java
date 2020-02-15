@@ -9,12 +9,11 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Map;
 
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.Chart;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.AbstractChartPlugin;
-import org.datagear.util.IDUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 
@@ -165,13 +164,11 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	}
 
 	@Override
-	public HtmlChart renderChart(T renderContext, Map<String, ?> chartPropertyValues, ChartDataSet... chartDataSets)
-			throws RenderException
+	public Chart renderChart(T renderContext, ChartDefinition chartDefinition) throws RenderException
 	{
 		HtmlChartPluginRenderOption option = getOptionInitialized(renderContext);
 
-		HtmlChart chart = new HtmlChart(IDUtil.uuid(), renderContext, this, chartPropertyValues,
-				chartDataSets,
+		HtmlChart chart = new HtmlChart(chartDefinition, this, renderContext,
 				option.getChartElementId(), option.getChartVarName());
 
 		try

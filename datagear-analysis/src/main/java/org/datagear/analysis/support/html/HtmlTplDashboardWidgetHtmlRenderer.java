@@ -514,12 +514,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			String pluginVarName = null;
 
 			HtmlChartWidget<HtmlRenderContext> widget = htmlChartWidgets.get(i);
-			HtmlChartPlugin<HtmlRenderContext> plugin = widget.getChartPlugin();
+			HtmlChartPlugin<HtmlRenderContext> plugin = widget.getPlugin();
 
 			for (int j = 0; j < i; j++)
 			{
 				HtmlChartWidget<HtmlRenderContext> myWidget = htmlChartWidgets.get(j);
-				HtmlChartPlugin<HtmlRenderContext> myPlugin = myWidget.getChartPlugin();
+				HtmlChartPlugin<HtmlRenderContext> myPlugin = myWidget.getPlugin();
 
 				if (myPlugin.getId().equals(plugin.getId()))
 				{

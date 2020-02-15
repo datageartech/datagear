@@ -50,22 +50,23 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 		this.createTime = new Date();
 	}
 
-	public HtmlChartWidgetEntity(String id, String name, HtmlChartPlugin<HtmlRenderContext> chartPlugin,
-			ChartDataSet[] chartDataSets, User createUser)
+	public HtmlChartWidgetEntity(String id, String name, ChartDataSet[] chartDataSets,
+			HtmlChartPlugin<HtmlRenderContext> chartPlugin,
+			User createUser)
 	{
-		super(id, name, chartPlugin, chartDataSets);
+		super(id, name, chartDataSets, chartPlugin);
 		this.createUser = createUser;
 		this.createTime = new Date();
 	}
 
 	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPlugin()
 	{
-		return getChartPlugin();
+		return getPlugin();
 	}
 
 	public void setHtmlChartPlugin(HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin)
 	{
-		setChartPlugin(htmlChartPlugin);
+		setPlugin(htmlChartPlugin);
 	}
 
 	@Override

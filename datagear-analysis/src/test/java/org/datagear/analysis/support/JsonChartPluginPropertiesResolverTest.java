@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartProperty;
 import org.datagear.analysis.DataSign;
@@ -208,8 +208,7 @@ public class JsonChartPluginPropertiesResolverTest
 		}
 
 		@Override
-		public Chart renderChart(RenderContext renderContext, Map<String, ?> chartPropertyValues,
-				ChartDataSet... chartDataSets) throws RenderException
+		public Chart renderChart(RenderContext renderContext, ChartDefinition chartDefinition) throws RenderException
 		{
 			throw new UnsupportedOperationException();
 		}

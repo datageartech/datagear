@@ -71,25 +71,26 @@
 	};
 	
 	/**
-	 * 获取/设置图表的"name"属性值。
+	 * 获取图表名称。
 	 * 
 	 * @param chart
-	 * @param value 可选，要设置的属性值
 	 */
-	util.propertyValueName = function(chart, value)
+	util.chartName = function(chart)
 	{
-		return this.propertyValue(chart, "name", value);
+		return (chart ? (chart.name || "") : "");
 	};
-
+	
 	/**
-	 * 获取/设置图表的"updateInterval"属性值。
+	 * 获取图表的更新间隔。
 	 * 
 	 * @param chart
-	 * @param value 可选，要设置的属性值
 	 */
-	util.propertyValueUpdateInterval = function(chart, value)
+	util.chartUpdateInterval = function(chart)
 	{
-		return this.propertyValue(chart, "updateInterval", value);
+		if(chart && chart.updateInterval != null)
+			return chart.updateInterval;
+		
+		return -1;
 	};
 	
 	/**
@@ -99,15 +100,15 @@
 	 * @param name
 	 * @param value 可选，要设置的属性值
 	 */
-	util.propertyValue = function(chart, name, value)
+	util.chartProperty = function(chart, name, value)
 	{
-		if(!chart.propertyValues)
-			chart.propertyValues = {};
+		if(!chart.properties)
+			chart.properties = {};
 		
 		if(value == undefined)
-			return chart.propertyValues[name];
+			return chart.properties[name];
 		else
-			chart.propertyValues[name] = value;
+			chart.properties[name] = value;
 	};
 	
 	/**

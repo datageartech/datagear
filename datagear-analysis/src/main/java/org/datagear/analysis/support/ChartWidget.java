@@ -4,12 +4,9 @@
 
 package org.datagear.analysis.support;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.RenderContext;
@@ -24,117 +21,42 @@ import org.datagear.analysis.RenderException;
  * @author datagear@163.com
  *
  */
-public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
+public class ChartWidget<T extends RenderContext> extends ChartDefinition
 {
-	/** 图表名称属性名 */
-	public static final String CHART_PROPERTY_VALUE_NAME = "name";
-
-	/** 图表更新间隔属性名 */
-	public static final String CHART_PROPERTY_VALUE_UPDATE_INTERVAL = "updateInterval";
-
-	/** 图表名称 */
-	private String name = "";
-
-	private ChartPlugin<T> chartPlugin;
-
-	private Map<String, ?> chartPropertyValues = new HashMap<String, Object>();
-
-	private ChartDataSet[] chartDataSets = new ChartDataSet[0];
-
-	/** 图表更新间隔毫秒数 */
-	private int updateInterval = -1;
+	private ChartPlugin<T> plugin;
 
 	public ChartWidget()
 	{
 		super();
 	}
 
-	public ChartWidget(String id, String name, ChartPlugin<T> chartPlugin, ChartDataSet... chartDataSets)
+	public ChartWidget(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin<T> plugin)
 	{
-		super(id);
-		this.name = name;
-		this.chartPlugin = chartPlugin;
-		this.chartDataSets = chartDataSets;
+		super(id, name, chartDataSets);
+		this.plugin = plugin;
 	}
 
-	public String getName()
+	public ChartPlugin<T> getPlugin()
 	{
-		return name;
+		return plugin;
 	}
 
-	public void setName(String name)
+	public void setPlugin(ChartPlugin<T> plugin)
 	{
-		this.name = name;
-	}
-
-	public ChartPlugin<T> getChartPlugin()
-	{
-		return chartPlugin;
-	}
-
-	public void setChartPlugin(ChartPlugin<T> chartPlugin)
-	{
-		this.chartPlugin = chartPlugin;
-	}
-
-	public Map<String, ?> getChartPropertyValues()
-	{
-		return chartPropertyValues;
-	}
-
-	public void setChartPropertyValues(Map<String, ?> chartPropertyValues)
-	{
-		this.chartPropertyValues = chartPropertyValues;
+		this.plugin = plugin;
 	}
 
 	/**
-	 * 添加图表属性值。
-	 * 
-	 * @param name
-	 * @param value
-	 */
-	@SuppressWarnings("unchecked")
-	public void addChartPropertyValue(String name, Object value)
-	{
-		((Map<String, Object>) this.chartPropertyValues).put(name, value);
-	}
-
-	public ChartDataSet[] getChartDataSets()
-	{
-		return chartDataSets;
-	}
-
-	public void setChartDataSets(ChartDataSet[] chartDataSets)
-	{
-		this.chartDataSets = chartDataSets;
-	}
-
-	/**
-	 * 获取图表更新间隔毫秒数。
-	 * 
-	 * @return {@code <0}：不间隔更新；0 ：实时更新；{@code >0}：间隔更新毫秒数
-	 */
-	public int getUpdateInterval()
-	{
-		return updateInterval;
-	}
-
-	public void setUpdateInterval(int updateInterval)
-	{
-		this.updateInterval = updateInterval;
-	}
-
-	/**
-	 * 从{@linkplain ChartPluginManager}查找并设置{@linkplain #setChartPlugin(ChartPlugin)}。
+	 * 从{@linkplain ChartPluginManager}查找并设置{@linkplain #setPlugin(ChartPlugin)}。
 	 * 
 	 * @param chartPluginManager
 	 * @param chartPluginId
 	 * @return
 	 */
-	public void setChartPlugin(ChartPluginManager chartPluginManager, String chartPluginId)
+	public void setPlugin(ChartPluginManager chartPluginManager, String chartPluginId)
 	{
 		ChartPlugin<T> chartPlugin = chartPluginManager.get(chartPluginId);
-		setChartPlugin(chartPlugin);
+		setPlugin(chartPlugin);
 	}
 
 	/**
@@ -146,19 +68,37 @@ public class ChartWidget<T extends RenderContext> extends AbstractIdentifiable
 	 */
 	public Chart render(T renderContext) throws RenderException
 	{
-		inflateInternalChartPropertyValues();
+		return this.plugin.renderChart(renderContext, buildChartDefinition(renderContext));
+	}
 
-		return this.chartPlugin.renderChart(renderContext, this.chartPropertyValues, this.chartDataSets);
+	protected ChartDefinition buildChartDefinition(T renderContext) throws RenderException
+	{
+		ChartDefinition chartDefinition = new ChartDefinition();
+		ChartDefinition.copy(this, chartDefinition);
+		chartDefinition.setId(generateChartId(renderContext));
+		return chartDefinition;
 	}
 
 	/**
-	 * 设置内置的图表属性。
+	 * 生成图表ID。
+	 * <p>
+	 * 同一个渲染上下文内，允许多次使用同一个{@linkplain ChartWidget}，
+	 * 为了保证{@linkplain Chart#getId()}不重复，所以这里要生成新的ID。
+	 * </p>
 	 * 
-	 * @param propertyValues
+	 * @param renderContext
+	 * @return
+	 * @throws RenderException
 	 */
-	protected void inflateInternalChartPropertyValues()
+	protected String generateChartId(T renderContext) throws RenderException
 	{
-		addChartPropertyValue(CHART_PROPERTY_VALUE_NAME, this.name);
-		addChartPropertyValue(CHART_PROPERTY_VALUE_UPDATE_INTERVAL, this.updateInterval);
+		String key = "chartIndex-" + getId();
+		Integer index = renderContext.getAttribute(key);
+		if (index == null)
+			index = 0;
+
+		renderContext.setAttribute(key, index + 1);
+
+		return getId() + "-" + index.toString();
 	}
 }

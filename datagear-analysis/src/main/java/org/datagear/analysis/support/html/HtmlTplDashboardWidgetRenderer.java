@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.analysis.Chart;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
@@ -665,7 +666,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		if (chartWidget == null)
 			chartWidget = createHtmlChartWidgetForNotFound(id);
 
-		if (chartWidget.getChartPlugin() == null)
+		if (chartWidget.getPlugin() == null)
 			chartWidget = createHtmlChartWidgetForPluginNull(chartWidget);
 
 		return (HtmlChartWidget<HtmlRenderContext>) chartWidget;
@@ -675,9 +676,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			Throwable t)
 	{
 		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<HtmlRenderContext>(IDUtil.uuid(),
-				"HtmlChartWidgetForWidgetGetException", this.htmlChartPluginForWidgetGetException);
+				"HtmlChartWidgetForWidgetGetException", ChartDefinition.EMPTY_CHART_DATA_SET,
+				this.htmlChartPluginForWidgetGetException);
 
-		widget.addChartPropertyValue(PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION,
+		widget.setProperty(PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION,
 				"Chart '" + (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
 
 		return widget;
@@ -686,9 +688,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	protected HtmlChartWidget<HtmlRenderContext> createHtmlChartWidgetForNotFound(String notFoundWidgetId)
 	{
 		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<HtmlRenderContext>(IDUtil.uuid(),
-				"HtmlChartWidgetForWidgetNotFound", this.htmlChartPluginForWidgetNotFound);
+				"HtmlChartWidgetForWidgetNotFound", ChartDefinition.EMPTY_CHART_DATA_SET,
+				this.htmlChartPluginForWidgetNotFound);
 
-		widget.addChartPropertyValue(PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND,
+		widget.setProperty(PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND,
 				"Chart '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
 
 		return widget;
@@ -697,9 +700,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	protected HtmlChartWidget<HtmlRenderContext> createHtmlChartWidgetForPluginNull(ChartWidget<?> chartWidget)
 	{
 		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<HtmlRenderContext>(IDUtil.uuid(),
-				"HtmlChartWidgetForWidgetPluginNull", this.htmlChartPluginForWidgetPluginNull);
+				"HtmlChartWidgetForWidgetPluginNull", ChartDefinition.EMPTY_CHART_DATA_SET,
+				this.htmlChartPluginForWidgetPluginNull);
 
-		widget.addChartPropertyValue(PROPERTY_VALUE_FOR_PLUGIN_NULL,
+		widget.setProperty(PROPERTY_VALUE_FOR_PLUGIN_NULL,
 				"Chart plugin for rendering chart '" + chartWidget.getName() + "' not found");
 
 		return widget;

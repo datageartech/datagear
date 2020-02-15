@@ -7,10 +7,9 @@
  */
 package org.datagear.analysis.support.html;
 
-import java.util.Map;
-
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.RenderContext;
 
@@ -31,10 +30,18 @@ public class HtmlChart extends Chart
 		super();
 	}
 
-	public HtmlChart(String id, HtmlRenderContext renderContext, HtmlChartPlugin<?> chartPlugin,
-			Map<String, ?> chartPropertyValues, ChartDataSet[] chartDataSets, String elementId, String varName)
+	public HtmlChart(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin<?> plugin,
+			RenderContext renderContext, String elementId, String varName)
 	{
-		super(id, renderContext, chartPlugin, chartPropertyValues, chartDataSets);
+		super(id, name, chartDataSets, plugin, renderContext);
+		this.elementId = elementId;
+		this.varName = varName;
+	}
+
+	public HtmlChart(ChartDefinition chartDefinition, ChartPlugin<?> plugin, RenderContext renderContext,
+			String elementId, String varName)
+	{
+		super(chartDefinition, plugin, renderContext);
 		this.elementId = elementId;
 		this.varName = varName;
 	}

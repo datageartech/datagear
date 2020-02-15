@@ -25,25 +25,24 @@ public class HtmlChartWidget<T extends HtmlRenderContext> extends ChartWidget<T>
 		super();
 	}
 
-	public HtmlChartWidget(String id, String name, HtmlChartPlugin<T> chartPlugin,
-			ChartDataSet... chartDataSets)
+	public HtmlChartWidget(String id, String name, ChartDataSet[] chartDataSets, HtmlChartPlugin<T> plugin)
 	{
-		super(id, name, chartPlugin, chartDataSets);
+		super(id, name, chartDataSets, plugin);
 	}
 
 	@Override
-	public HtmlChartPlugin<T> getChartPlugin()
+	public HtmlChartPlugin<T> getPlugin()
 	{
-		return (HtmlChartPlugin<T>) super.getChartPlugin();
+		return (HtmlChartPlugin<T>) super.getPlugin();
 	}
 
 	@Override
-	public void setChartPlugin(ChartPlugin<T> chartPlugin)
+	public void setPlugin(ChartPlugin<T> plugin)
 	{
-		if (chartPlugin != null && !(chartPlugin instanceof HtmlChartPlugin<?>))
+		if (plugin != null && !(plugin instanceof HtmlChartPlugin<?>))
 			throw new IllegalArgumentException();
 
-		super.setChartPlugin(chartPlugin);
+		super.setPlugin(plugin);
 	}
 
 	@Override
