@@ -63,7 +63,7 @@
 			doRender=this.listener.onRenderChart(dashboard, chart, chartIndex, this);
 		
 		if(doRender != false)
-			chart.plugin.chartRender.render(chart);
+			chart.plugin.chartRenderer.render(chart);
 	};
 	
 	/**
@@ -196,7 +196,7 @@
 			doUpdate=this.listener.onUpdateChart(dashboard, chart, results, this);
 		
 		if(doUpdate != false)
-			chart.plugin.chartRender.update(chart, results);
+			chart.plugin.chartRenderer.update(chart, results);
 	};
 	
 	renderer.handleError = function(e)

@@ -41,7 +41,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 * <pre>
 	 * var [varName]=
 	 * { ... };
-	 * [varName].chartRender=
+	 * [varName].chartRenderer=
 	 * {...};
 	 * <pre>
 	 * </code>
@@ -60,7 +60,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 		writeJsonObject(out, jsonPlugin);
 		out.write(";");
 		writeNewLine(out);
-		writeHtmlChartRender(out, plugin, varName);
+		writeHtmlChartRenderer(out, plugin, varName);
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 * @param chart
 	 * @throws IOException
 	 */
-	protected void writeHtmlChartRender(Writer out, HtmlChartPlugin<?> plugin, String varName) throws IOException
+	protected void writeHtmlChartRenderer(Writer out, HtmlChartPlugin<?> plugin, String varName) throws IOException
 	{
 		out.write(varName + "." + HtmlChartPlugin.PROPERTY_CHART_RENDER + "=");
 		writeNewLine(out);

@@ -50,7 +50,7 @@ import org.datagear.util.StringUtil;
  * 	id : "...",
  * 	nameLabel : { value : "...", localeValues : { "zh" : "...", "en" : "..." }},
  * 	...,
- * 	chartRender: { ... },
+ * 	chartRenderer: { ... },
  * 	...
  * }
  * </pre>
@@ -64,7 +64,7 @@ import org.datagear.util.StringUtil;
  * <p>
  * ，那么上述文件结构中还应有<code>icons/light.png</code>文件。
  * </p>
- * <code>chartRender</code>用于定义{@linkplain HtmlChartPlugin#getChartRenderer()}内容。
+ * <code>chartRenderer</code>用于定义{@linkplain HtmlChartPlugin#getChartRenderer()}内容。
  * </p>
  * <p>
  * 默认地，上述文件应该为<code>UTF-8</code>编码。
@@ -366,7 +366,7 @@ public class HtmlChartPluginLoader
 			JsDefContent jsDefContent = this.htmlChartPluginJsDefResolver.resolve(chartIn);
 
 			if (!StringUtil.isEmpty(jsDefContent.getPluginJson())
-					&& !StringUtil.isEmpty(jsDefContent.getPluginChartRender()))
+					&& !StringUtil.isEmpty(jsDefContent.getPluginChartRenderer()))
 			{
 				Map<String, Object> properties = this.jsonChartPluginPropertiesResolver
 						.resolveChartPluginProperties(jsDefContent.getPluginJson());
@@ -374,7 +374,7 @@ public class HtmlChartPluginLoader
 				plugin = createHtmlChartPlugin();
 
 				this.jsonChartPluginPropertiesResolver.setChartPluginProperties(plugin, properties);
-				plugin.setChartRenderer(new StringJsChartRenderer(jsDefContent.getPluginChartRender()));
+				plugin.setChartRenderer(new StringJsChartRenderer(jsDefContent.getPluginChartRenderer()));
 
 				plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
 

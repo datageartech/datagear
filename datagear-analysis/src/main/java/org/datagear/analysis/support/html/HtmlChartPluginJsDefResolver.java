@@ -24,7 +24,7 @@ import org.datagear.util.IOUtil;
  * 	id: ...,
  * 	nameLabel: ...,
  * 	...,
- * 	chartRender: {...},
+ * 	chartRenderer: {...},
  * 	...
  * }
  * </pre>
@@ -36,19 +36,19 @@ import org.datagear.util.IOUtil;
  * {@linkplain JsDefContent#getPluginJson()}为上述格式中将
  * </p>
  * <p>
- * <code>chartRender: {...}</code>
+ * <code>chartRenderer: {...}</code>
  * </p>
  * <p>
  * 替换为
  * </p>
  * <p>
- * <code>chartRender: {}</code>
+ * <code>chartRenderer: {}</code>
  * </p>
  * <p>
  * 的内容。
  * </p>
  * <p>
- * {@linkplain JsDefContent#getPluginChartRender()}为上述格式中<code>chartRender</code>属性值的内容：
+ * {@linkplain JsDefContent#getPluginChartRenderer()}为上述格式中<code>chartRenderer</code>属性值的内容：
  * </p>
  * <p>
  * <code>{...}</code>
@@ -103,14 +103,14 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 	public JsDefContent resolve(Reader reader) throws IOException
 	{
 		StringBuilder jsonBuilder = new StringBuilder();
-		StringBuilder chartRenderBuilder = new StringBuilder();
+		StringBuilder chartRendererBuilder = new StringBuilder();
 
-		resolveJsDefContent(reader, jsonBuilder, chartRenderBuilder);
+		resolveJsDefContent(reader, jsonBuilder, chartRendererBuilder);
 
-		return new JsDefContent(jsonBuilder.toString(), chartRenderBuilder.toString());
+		return new JsDefContent(jsonBuilder.toString(), chartRendererBuilder.toString());
 	}
 
-	protected void resolveJsDefContent(Reader in, StringBuilder jsonBuilder, StringBuilder chartRenderBuilder)
+	protected void resolveJsDefContent(Reader in, StringBuilder jsonBuilder, StringBuilder chartRendererBuilder)
 			throws IOException
 	{
 		StringBuilder token = createStringBuilder();
@@ -132,7 +132,7 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 				if (tokenStr.equals(HtmlChartPlugin.PROPERTY_CHART_RENDER) || tokenStr.equals(PROPERTY_CHART_RENDER_DQ)
 						|| tokenStr.equals(PROPERTY_CHART_RENDER_SQ))
 				{
-					readChartRenderObjectContent(in, chartRenderBuilder);
+					readChartRendererObjectContent(in, chartRendererBuilder);
 					jsonBuilder.append("{}");
 				}
 
@@ -181,16 +181,16 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 	}
 
 	/**
-	 * 从<code>{</code>之前的位置开始读取{@linkplain JsChartRenderer}内容。
+	 * 从<code>{</code>之前的位置开始读取{@linkplain JsChartRendererer}内容。
 	 * <p>
 	 * 读取停止位置为：<code>}</code>
 	 * </p>
 	 * 
 	 * @param in
-	 * @param chartRenderBuilder
+	 * @param chartRendererBuilder
 	 * @throws IOException
 	 */
-	protected void readChartRenderObjectContent(Reader in, StringBuilder chartRenderBuilder) throws IOException
+	protected void readChartRendererObjectContent(Reader in, StringBuilder chartRendererBuilder) throws IOException
 	{
 		int qcount = 0;
 
@@ -198,7 +198,7 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 
 		while (c > -1)
 		{
-			appendChar(chartRenderBuilder, c);
+			appendChar(chartRendererBuilder, c);
 
 			if (c == '{')
 			{
@@ -217,7 +217,7 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 			// 字符串
 			else if (c == '\'' || c == '"')
 			{
-				c = readQuoted(in, chartRenderBuilder, c);
+				c = readQuoted(in, chartRendererBuilder, c);
 			}
 			// 注释
 			else if (c == '/')
@@ -227,13 +227,13 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 				// 行注释
 				if (c == '/')
 				{
-					appendChar(chartRenderBuilder, c);
-					c = skipLineComment(in, chartRenderBuilder, false);
+					appendChar(chartRendererBuilder, c);
+					c = skipLineComment(in, chartRendererBuilder, false);
 				}
 				else if (c == '*')
 				{
-					appendChar(chartRenderBuilder, c);
-					c = skipBlockComment(in, chartRenderBuilder, false);
+					appendChar(chartRendererBuilder, c);
+					c = skipBlockComment(in, chartRendererBuilder, false);
 				}
 			}
 			else
@@ -249,18 +249,18 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 		private String pluginJson;
 
 		/** 插件JS渲染器对象内容 */
-		private String pluginChartRender;
+		private String pluginChartRenderer;
 
 		public JsDefContent()
 		{
 			super();
 		}
 
-		public JsDefContent(String pluginJson, String pluginChartRender)
+		public JsDefContent(String pluginJson, String pluginChartRenderer)
 		{
 			super();
 			this.pluginJson = pluginJson;
-			this.pluginChartRender = pluginChartRender;
+			this.pluginChartRenderer = pluginChartRenderer;
 		}
 
 		public String getPluginJson()
@@ -273,21 +273,21 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 			this.pluginJson = pluginJson;
 		}
 
-		public String getPluginChartRender()
+		public String getPluginChartRenderer()
 		{
-			return pluginChartRender;
+			return pluginChartRenderer;
 		}
 
-		public void setPluginChartRender(String pluginChartRender)
+		public void setPluginChartRenderer(String pluginChartRenderer)
 		{
-			this.pluginChartRender = pluginChartRender;
+			this.pluginChartRenderer = pluginChartRenderer;
 		}
 
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [pluginJson=" + pluginJson + ", pluginChartRender="
-					+ pluginChartRender + "]";
+			return getClass().getSimpleName() + " [pluginJson=" + pluginJson + ", pluginChartRenderer="
+					+ pluginChartRenderer + "]";
 		}
 	}
 }

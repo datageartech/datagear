@@ -2005,15 +2005,12 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding:  0 0;
 }
 .page-form-chart .chart-plugin-list > li{
-	margin: 5px;
+	margin: 5px 10px 5px 0px;
 	position: relative;
 	padding: 2px 2px;
 	cursor: pointer;
 	float: left;
 	list-style: none;
-}
-.page-form-chart .chart-plugin-list > li:first-child{
-	margin-left: 0px;
 }
 .page-form-chart .chart-plugin-list > li a{
 	display: inline-block;

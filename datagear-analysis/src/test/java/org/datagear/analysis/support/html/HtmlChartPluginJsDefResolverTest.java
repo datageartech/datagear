@@ -28,136 +28,136 @@ public class HtmlChartPluginJsDefResolverTest
 	{
 		// 无引号
 		{
-			String text = "{a: 'a', b : 'b', chartRender:{render:function() {}}}";
+			String text = "{a: 'a', b : 'b', chartRenderer:{render:function() {}}}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', b : 'b', chartRender:{}}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{a: 'a', b : 'b', chartRenderer:{}}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 		{
-			String text = "{a: 'a', chartRender:{render:function() {}}, b : 'b'}";
+			String text = "{a: 'a', chartRenderer:{render:function() {}}, b : 'b'}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', chartRender:{}, b : 'b'}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{a: 'a', chartRenderer:{}, b : 'b'}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 		{
-			String text = "{chartRender:{render:function() {}}, a: 'a', b : 'b'}";
+			String text = "{chartRenderer:{render:function() {}}, a: 'a', b : 'b'}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{chartRender:{}, a: 'a', b : 'b'}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{chartRenderer:{}, a: 'a', b : 'b'}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 
 		// 单引号
 		{
-			String text = "{a: 'a', b : 'b', 'chartRender':{render:function() {}}}";
+			String text = "{a: 'a', b : 'b', 'chartRenderer':{render:function() {}}}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', b : 'b', 'chartRender':{}}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{a: 'a', b : 'b', 'chartRenderer':{}}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 		{
-			String text = "{a: 'a', 'chartRender':{render:function() {}}, b : 'b'}";
+			String text = "{a: 'a', 'chartRenderer':{render:function() {}}, b : 'b'}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', 'chartRender':{}, b : 'b'}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{a: 'a', 'chartRenderer':{}, b : 'b'}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 		{
-			String text = "{'chartRender':{render:function() {}}, a: 'a', b : 'b'}";
+			String text = "{'chartRenderer':{render:function() {}}, a: 'a', b : 'b'}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{'chartRender':{}, a: 'a', b : 'b'}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{'chartRenderer':{}, a: 'a', b : 'b'}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 
 		// 双引号
 		{
-			String text = "{a: 'a', b : 'b', \"chartRender\":{render:function() {}}}";
+			String text = "{a: 'a', b : 'b', \"chartRenderer\":{render:function() {}}}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', b : 'b', \"chartRender\":{}}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{a: 'a', b : 'b', \"chartRenderer\":{}}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 		{
-			String text = "{a: 'a', \"chartRender\":{render:function() {}}, b : 'b'}";
+			String text = "{a: 'a', \"chartRenderer\":{render:function() {}}, b : 'b'}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', \"chartRender\":{}, b : 'b'}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{a: 'a', \"chartRenderer\":{}, b : 'b'}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 		{
-			String text = "{\"chartRender\":{render:function() {}}, a: 'a', b : 'b'}";
+			String text = "{\"chartRenderer\":{render:function() {}}, a: 'a', b : 'b'}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{\"chartRender\":{}, a: 'a', b : 'b'}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{\"chartRenderer\":{}, a: 'a', b : 'b'}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 
 		// 带注释
 		{
-			String text = "{a: 'a', b : 'b', /*sdf*/chartRender/*sdf*/:{render:function() {}}}";
+			String text = "{a: 'a', b : 'b', /*sdf*/chartRenderer/*sdf*/:{render:function() {}}}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', b : 'b', /*sdf*/chartRender/*sdf*/:{}}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{a: 'a', b : 'b', /*sdf*/chartRenderer/*sdf*/:{}}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 		{
-			String text = "{a: 'a', b : 'b', /*sdf*/ chartRender /*sdf*/ :{render:function() {}}}";
+			String text = "{a: 'a', b : 'b', /*sdf*/ chartRenderer /*sdf*/ :{render:function() {}}}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', b : 'b', /*sdf*/ chartRender /*sdf*/ :{}}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{a: 'a', b : 'b', /*sdf*/ chartRenderer /*sdf*/ :{}}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 		{
-			String text = "{a: 'a', b : 'b', //sdf\nchartRender//sdf\n:{render:function() {}}}";
+			String text = "{a: 'a', b : 'b', //sdf\nchartRenderer//sdf\n:{render:function() {}}}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', b : 'b', //sdf\nchartRender//sdf\n:{}}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{a: 'a', b : 'b', //sdf\nchartRenderer//sdf\n:{}}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 		{
-			String text = "{a: 'a', b : 'b',  //sdf\n chartRender //sdf\n :{render:function() {}}}";
+			String text = "{a: 'a', b : 'b',  //sdf\n chartRenderer //sdf\n :{render:function() {}}}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', b : 'b',  //sdf\n chartRender //sdf\n :{}}", content.getPluginJson());
-			Assert.assertEquals("{render:function() {}}", content.getPluginChartRender());
+			Assert.assertEquals("{a: 'a', b : 'b',  //sdf\n chartRenderer //sdf\n :{}}", content.getPluginJson());
+			Assert.assertEquals("{render:function() {}}", content.getPluginChartRenderer());
 		}
 
 		// 复杂内容
 
 		{
-			String text = "{a: 'a', b : 'b',  //sdf\n chartRender //sdf\n :{render:function() { if(a==b) {}; /*sdf*/  \n\n //sdf\n var a= {};   }}}";
+			String text = "{a: 'a', b : 'b',  //sdf\n chartRenderer //sdf\n :{render:function() { if(a==b) {}; /*sdf*/  \n\n //sdf\n var a= {};   }}}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', b : 'b',  //sdf\n chartRender //sdf\n :{}}", content.getPluginJson());
+			Assert.assertEquals("{a: 'a', b : 'b',  //sdf\n chartRenderer //sdf\n :{}}", content.getPluginJson());
 			Assert.assertEquals("{render:function() { if(a==b) {}; /*sdf*/  \n\n //sdf\n var a= {};   }}",
-					content.getPluginChartRender());
+					content.getPluginChartRenderer());
 		}
 		{
-			String text = "{a: 'a', b : 'b', chartRender: {render:function() { var options = { tooltip: {formatter: \"{a} <br/>{b} : {c}%\"} }; }}}";
+			String text = "{a: 'a', b : 'b', chartRenderer: {render:function() { var options = { tooltip: {formatter: \"{a} <br/>{b} : {c}%\"} }; }}}";
 
 			JsDefContent content = resolver.resolve(text);
 
-			Assert.assertEquals("{a: 'a', b : 'b', chartRender:{}}", content.getPluginJson());
+			Assert.assertEquals("{a: 'a', b : 'b', chartRenderer:{}}", content.getPluginJson());
 			Assert.assertEquals(
 					" {render:function() { var options = { tooltip: {formatter: \"{a} <br/>{b} : {c}%\"} }; }}",
-					content.getPluginChartRender());
+					content.getPluginChartRenderer());
 		}
 	}
 }

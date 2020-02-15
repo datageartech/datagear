@@ -101,7 +101,7 @@ import org.datagear.util.i18n.Label;
  */
 public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartPlugin<T>
 {
-	public static final String PROPERTY_CHART_RENDER = "chartRender";
+	public static final String PROPERTY_CHART_RENDER = "chartRenderer";
 
 	/** HTML换行符 */
 	public static final String HTML_NEW_LINE = "\n";

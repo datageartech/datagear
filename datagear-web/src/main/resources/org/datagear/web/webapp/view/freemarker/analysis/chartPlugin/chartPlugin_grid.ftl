@@ -103,7 +103,7 @@ selectonly 是否选择操作，允许为null
 	});
 	</#if>
 	
-	var columnIcon = $.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.icon' />", "iconUrl");
+	var columnIcon = $.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.icon' />", "iconUrl", true);
 	columnIcon.render = function(data, type, row, meta)
 	{
 		if(data)

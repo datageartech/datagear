@@ -11,5 +11,5 @@
 	},
 	icons : { "light" : "icon-01.png", "dark" : "icons/icon-02.png" },
 	order : 3,
-	chartRender : {}
+	chartRenderer : {}
 }
