@@ -25,75 +25,27 @@ import org.datagear.util.i18n.Label;
  * <p>
  * 输出格式为：
  * </p>
- * <p>
- * 1.
- * HTML部分（{@linkplain HtmlChartPluginRenderOption#isNotWriteChartElement()}可控制不输出）：
- * </p>
  * <code>
  * <pre>
  * &lt;div id="[图表HTML元素ID]"&gt;&lt;/div&gt;
- * </pre>
- * </code>
- * <p>
- * {@linkplain HtmlChartPluginRenderOption#setChartElementId(String)}可自定义“[图表HTML元素ID]”；
- * </p>
- * <p>
- * 2. JavaScript部分：
- * </p>
- * <code>
- * <pre>
  * &lt;script type="text/javascript"&gt;
+ * var [图表插件变量名]={..., chartRenderer: {...}};
+ * var [渲染上下文变量名]={...};
  * var [图表变量名]=
  * {
  * 	id : "...",
  * 	elementId : "[图表HTML元素ID]",
  * 	varName : "[图表变量名]",
- * 	plugin : { id : "插件ID", ... },
- * 	renderContext : { attributes : {...} },
- * 	propertyValues : {...},
+ * 	plugin : [图表插件变量名],
+ * 	renderContext : [渲染上下文变量名],
  * 	chartDataSets : [{...}, ...]
  * };
- * [图表脚本内容]
- * [图表变量名].render();
+ * [图表插件变量名].chartRenderer.render([图表变量名]);
  * &lt;/script&gt;
  * </pre>
  * </code>
  * <p>
- * {@linkplain HtmlChartPluginRenderOption#setChartVarName(String)}可自定义“[图表变量名]”。
- * </p>
- * <p>
- * {@linkplain HtmlChartPluginRenderOption#setNotWriteScriptTag(boolean)}可控制不输出“script”开始和结束标签。
- * </p>
- * <p>
- * {@linkplain HtmlChartPluginRenderOption#setNotWriteInvoke(boolean)}可控制不输出“[图表变量名].render();”脚本。
- * </p>
- * <p>
- * {@linkplain HtmlChartPluginRenderOption#setRenderContextVarName(String)}可控制“renderContext”不输出对象内容，而输出这个变量引用。
- * </p>
- * <p>
- * “[图表脚本内容]”格式应为：
- * </p>
- * <code>
- * <pre>
- * (function(chart)
- * {
- * 	chart.render = function(){ ... };
- * 	chart.update = function(dataSetResults){ ... };
- * })
- * ($CHART);
- * </pre>
- * </code>
- * <p>
- * 或者：
- * </p>
- * <code>
- * <pre>
- * $CHART.render = function(){ ... };
- * $CHART.update = function(dataSetResults){ ... };
- * </pre>
- * </code>
- * <p>
- * 其中，“<code>$CHART</code>”用作图表脚本对象占位符，会在输出时替换为“[图表变量名]”。
+ * {@linkplain HtmlChartPluginRenderOption}可自定义上述输出内容。
  * </p>
  * 
  * @author datagear@163.com
@@ -101,7 +53,7 @@ import org.datagear.util.i18n.Label;
  */
 public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartPlugin<T>
 {
-	public static final String PROPERTY_CHART_RENDER = "chartRenderer";
+	public static final String PROPERTY_CHART_RENDERER = "chartRenderer";
 
 	/** HTML换行符 */
 	public static final String HTML_NEW_LINE = "\n";
@@ -109,9 +61,6 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	protected static final HtmlChartPluginScriptObjectWriter HTML_CHART_PLUGIN_SCRIPT_OBJECT_WRITER = new HtmlChartPluginScriptObjectWriter();
 	protected static final HtmlRenderContextScriptObjectWriter HTML_RENDER_CONTEXT_SCRIPT_OBJECT_WRITER = new HtmlRenderContextScriptObjectWriter();
 	protected static final HtmlChartScriptObjectWriter HTML_CHART_SCRIPT_OBJECT_WRITER = new HtmlChartScriptObjectWriter();
-
-	/** 默认图表对象引用占位符 */
-	public static final String DEFAULT_SCRIPT_CHART_REF_PLACEHOLDER = "$CHART";
 
 	/** JS图表渲染器 */
 	private JsChartRenderer chartRenderer;
@@ -256,7 +205,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 
 		if (!optionInitialized.isNotWriteInvoke())
 		{
-			out.write(optionInitialized.getPluginVarName() + "." + PROPERTY_CHART_RENDER + "."
+			out.write(optionInitialized.getPluginVarName() + "." + PROPERTY_CHART_RENDERER + "."
 					+ JsChartRenderer.RENDER_FUNCTION_NAME + "(" + chart.getVarName() + ");");
 			writeNewLine(out);
 		}

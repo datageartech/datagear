@@ -149,13 +149,13 @@ public class SqlDataSet extends AbstractDataSet
 	public DataSetResult toDataSet(Connection cn, ResultSet rs) throws SQLException
 	{
 		List<Map<String, ?>> datas = getSqlDataSetSupport().resolveDatas(cn, rs, getProperties());
-		MapDataSet dataSet = new MapDataSet(datas);
+		MapDataSetResult result = new MapDataSetResult(datas);
 
-		Map<String, ?> exportValues = getExportValues(dataSet);
+		Map<String, ?> exportValues = getExportValues(result);
 
-		dataSet.setExportValues(exportValues);
+		result.setExportValues(exportValues);
 
-		return dataSet;
+		return result;
 	}
 
 	protected SqlDataSetSupport getSqlDataSetSupport()

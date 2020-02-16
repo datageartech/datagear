@@ -22,18 +22,18 @@ import org.datagear.analysis.DataSetException;
  * @author datagear@163.com
  *
  */
-public class MapDataSet implements DataSetResult
+public class MapDataSetResult implements DataSetResult
 {
 	private List<Map<String, ?>> datas;
 
 	private Map<String, ?> exportValues;
 
-	public MapDataSet()
+	public MapDataSetResult()
 	{
 		super();
 	}
 
-	public MapDataSet(List<Map<String, ?>> datas)
+	public MapDataSetResult(List<Map<String, ?>> datas)
 	{
 		super();
 		this.datas = datas;

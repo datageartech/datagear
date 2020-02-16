@@ -72,7 +72,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 */
 	protected void writeHtmlChartRenderer(Writer out, HtmlChartPlugin<?> plugin, String varName) throws IOException
 	{
-		out.write(varName + "." + HtmlChartPlugin.PROPERTY_CHART_RENDER + "=");
+		out.write(varName + "." + HtmlChartPlugin.PROPERTY_CHART_RENDERER + "=");
 		writeNewLine(out);
 
 		JsChartRenderer chartRenderer = plugin.getChartRenderer();

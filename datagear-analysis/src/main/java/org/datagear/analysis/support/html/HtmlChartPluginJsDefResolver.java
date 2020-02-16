@@ -59,9 +59,9 @@ import org.datagear.util.IOUtil;
  */
 public class HtmlChartPluginJsDefResolver extends TextParserSupport
 {
-	protected static final char PROPERTY_CHART_RENDER_FIRST = HtmlChartPlugin.PROPERTY_CHART_RENDER.charAt(0);
-	protected static final String PROPERTY_CHART_RENDER_DQ = "\"" + HtmlChartPlugin.PROPERTY_CHART_RENDER + "\"";
-	protected static final String PROPERTY_CHART_RENDER_SQ = "'" + HtmlChartPlugin.PROPERTY_CHART_RENDER + "'";
+	protected static final char PROPERTY_CHART_RENDERER_FIRST = HtmlChartPlugin.PROPERTY_CHART_RENDERER.charAt(0);
+	protected static final String PROPERTY_CHART_RENDERER_DQ = "\"" + HtmlChartPlugin.PROPERTY_CHART_RENDERER + "\"";
+	protected static final String PROPERTY_CHART_RENDERER_SQ = "'" + HtmlChartPlugin.PROPERTY_CHART_RENDERER + "'";
 
 	public HtmlChartPluginJsDefResolver()
 	{
@@ -129,8 +129,8 @@ public class HtmlChartPluginJsDefResolver extends TextParserSupport
 				String tokenStr = token.toString();
 				clear(token);
 
-				if (tokenStr.equals(HtmlChartPlugin.PROPERTY_CHART_RENDER) || tokenStr.equals(PROPERTY_CHART_RENDER_DQ)
-						|| tokenStr.equals(PROPERTY_CHART_RENDER_SQ))
+				if (tokenStr.equals(HtmlChartPlugin.PROPERTY_CHART_RENDERER) || tokenStr.equals(PROPERTY_CHART_RENDERER_DQ)
+						|| tokenStr.equals(PROPERTY_CHART_RENDERER_SQ))
 				{
 					readChartRendererObjectContent(in, chartRendererBuilder);
 					jsonBuilder.append("{}");
