@@ -281,6 +281,7 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 			}
 		}
 
+		// 没定义版本号的总是替换，便于自定义插件的替换调试
 		if (StringUtil.isEmpty(oldVersion) && StringUtil.isEmpty(myVersion))
 			replace = true;
 		else if (StringUtil.isEmpty(oldVersion))
@@ -288,7 +289,7 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 		else if (StringUtil.isEmpty(myVersion))
 			replace = false;
 		else
-			replace = !myVersion.isLowerThan(oldVersion);
+			replace = myVersion.isHigherThan(oldVersion);
 
 		return replace;
 	}

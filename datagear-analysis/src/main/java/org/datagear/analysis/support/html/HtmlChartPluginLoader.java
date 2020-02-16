@@ -278,7 +278,9 @@ public class HtmlChartPluginLoader
 			if (isHtmlChartPluginDirectory(file))
 			{
 				HtmlChartPlugin<?> plugin = load(file);
-				plugins.add(plugin);
+
+				if (plugin != null)
+					plugins.add(plugin);
 			}
 			else
 			{
@@ -298,7 +300,9 @@ public class HtmlChartPluginLoader
 			if (isHtmlChartPluginZip(file))
 			{
 				HtmlChartPlugin<?> plugin = loadZip(file);
-				plugins.add(plugin);
+
+				if (plugin != null)
+					plugins.add(plugin);
 			}
 			else
 			{
