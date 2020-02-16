@@ -54,7 +54,7 @@
 		//元素属性选项
 		var optsStr = $ele.attr("dg-chart-options");
 		//全局选项
-		var optsStrGlobal = $("body").attr("dg-chart-options");
+		var optsStrGlobal = $(document.body).attr("dg-chart-options");
 		
 		if(!optsStr && !optsStrGlobal)
 			return options;
