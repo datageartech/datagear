@@ -220,3 +220,9 @@ CREATE TABLE DATAGEAR_HTML_DASHBOARD
 	HD_CREATE_TIME TIMESTAMP,
 	PRIMARY KEY (HD_ID)
 );
+
+
+-----------------------------------------
+--version[1.6.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
