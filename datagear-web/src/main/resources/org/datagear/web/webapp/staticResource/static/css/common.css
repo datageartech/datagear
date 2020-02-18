@@ -261,7 +261,11 @@ form .form-foot .ui-button{
 }
 .ui-tabs .tab-operation{
 	display: inline-block;
+	position: absolute;
 	width: 16px;
+	top: 0;
+	right: 0;
+	bottom: 0;
 }
 .ui-tabs .tab-operation .tabs-more-operation-button{
 	float: left;
@@ -961,6 +965,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	height: 2.3em;
 	overflow: hidden;
 	padding-right: 25px;
+}
+.main-page-content .main-tabs.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
+	padding-right: 1.4em;
 }
 .main-page-content .main-tabs .ui-tabs-nav .category-bar{
     position:  absolute;
