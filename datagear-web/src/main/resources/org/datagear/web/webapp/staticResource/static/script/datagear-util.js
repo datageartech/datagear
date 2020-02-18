@@ -585,10 +585,17 @@
 		
 		/**
 		 * 获取对象或者对象数组的属性值参数字符串，例如：“id=1&id=2&id=3”
+		 * 
+		 * @param objOrArray
+		 * @param propertyName
+		 * @param paramName 可选，参数名
 		 */
-		getPropertyParamString : function(objOrArray, propertyName)
+		getPropertyParamString : function(objOrArray, propertyName, paramName)
 		{
 			var re = "";
+			
+			paramName = (paramName ? paramName : propertyName);
+			paramName = encodeURIComponent(paramName);
 			
 			if(!$.isArray(objOrArray))
 				objOrArray = [objOrArray];
@@ -605,7 +612,7 @@
 				if(re != "")
 					re += "&";
 				
-				re += propertyName + "=" + encodeURIComponent(pv);
+				re += paramName + "=" + encodeURIComponent(pv);
 			}
 			
 			return re;

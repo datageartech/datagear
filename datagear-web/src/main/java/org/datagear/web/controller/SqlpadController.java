@@ -184,12 +184,17 @@ public class SqlpadController extends AbstractSchemaConnController
 			}
 		}.execute();
 
+		String initSql = request.getParameter("initSql");
+		if (initSql == null)
+			initSql = "";
+
 		String sqlpadId = generateSqlpadId(request, response);
 		String sqlpadChannelId = this.sqlpadExecutionService.getSqlpadChannelId(sqlpadId);
 
 		springModel.addAttribute("sqlpadId", sqlpadId);
 		springModel.addAttribute("sqlpadChannelId", sqlpadChannelId);
 		springModel.addAttribute("sqlResultFullLoadingLobMaxRow", this.modelSqlSelectService.getFullLoadingLobMaxRow());
+		springModel.addAttribute("initSql", initSql);
 
 		return "/sqlpad/sqlpad";
 	}

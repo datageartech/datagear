@@ -292,6 +292,24 @@
 			}
 		});
 	};
+
+	po.getSelTables = function(jstree, selNodes)
+	{
+		var tables = [];
+		
+		if(!selNodes)
+			return tables;
+		
+		for(var i=0; i<selNodes.length; i++)
+		{
+			if(!po.isTableNode(selNodes[i]))
+				continue;
+			
+			tables.push(selNodes[i].original);
+		}
+		
+		return tables;
+	};
 	
 	po.isSearchTable = function()
 	{
@@ -508,6 +526,47 @@
 			po.activeWorkTab(po.toMainTabId(tabId), tabName, "", tabUrl);
 		});
 	};
+
+	po.evalSchemaTreeSelState = function(jstree, selNodes)
+	{
+		var state=
+		{
+			selCount: 0,
+			selSchemaCount: 0,
+			selTableCount: 0,
+			selTableSameSchema: true
+		};
+		
+		if(!selNodes || !selNodes.length)
+			return state;
+		
+		state.selCount = selNodes.length;
+		
+		var prevTableSchemaNode = null;
+		for(var i=0; i<selNodes.length; i++)
+		{
+			var selNode = selNodes[i];
+			
+			if(po.isSchemaNode(selNode))
+				state.selSchemaCount++;
+			else if(po.isTableNode(selNode))
+			{
+				state.selTableCount++;
+				
+				if(state.selTableSameSchema)
+				{
+					var mySchemaNode = po.getSchemaNode(jstree, selNode);
+					
+					if(prevTableSchemaNode && mySchemaNode != prevTableSchemaNode)
+						state.selTableSameSchema = false;
+					
+					prevTableSchemaNode = mySchemaNode;
+				}
+			}
+		}
+		
+		return state;
+	};
 	
 	$(document).ready(function()
 	{
@@ -688,101 +747,82 @@
 				{
 					var menuItemEnables =
 					{
-						"schema-operation-edit" : true,
-						"schema-operation-delete" : true,
-						"schema-operation-view" : true,
-						"schema-operation-refresh" : true,
-						"schema-operation-authorize" : true,
-						"schema-operation-reload" : true,
-						"schema-operation-sqlpad" : true,
-						"schema-operation-dataimport" : true,
-						"schema-operation-dataexport" : true
+						"edit" : false,
+						"delete" : false,
+						"view" : false,
+						"refresh" : false,
+						"authorize" : false,
+						"reload" : true,
+						"sqlpad" : false,
+						"dataimport" : false,
+						"dataexport" : false
 					};
 					
 					var jstree = po.element(".schema-panel-content").jstree(true);
 					var selNodes = jstree.get_selected(true);
+					var selState = po.evalSchemaTreeSelState(jstree, selNodes);
+
+					//只要选中表，则禁用重载
+					if(selState.selTableCount > 0)
+						menuItemEnables["reload"] = false;
 					
-					var disableSchemaOperation = false;
-					
-					//未选中数据库，则禁用CRUD按钮
-					if(!selNodes.length)
+					//仅选中数据库
+					if(selState.selSchemaCount > 0 && selState.selTableCount == 0)
 					{
-						disableSchemaOperation = true;
-					}
-					else
-					{
-						for(var i=0; i<selNodes.length; i++)
+						if(selState.selSchemaCount == 1)
 						{
-							if(!po.isSchemaNode(selNodes[i]))
+							var schema = selNodes[0].original;
+							
+							if(po.canEdit(schema))
+								menuItemEnables["edit"] = true;
+							
+							if(po.canDelete(schema))
+								menuItemEnables["delete"] = true;
+							
+							menuItemEnables["view"] = true;
+							menuItemEnables["refresh"] = true;
+
+							if(po.canAuthorize(schema, po.currentUser))
+								menuItemEnables["authorize"] = true;
+							
+							menuItemEnables["sqlpad"] = true;
+							
+							if(po.canDeleteTableData(schema))
+								menuItemEnables["dataimport"] = true;
+							
+							menuItemEnables["dataexport"] = true;
+						}
+						else
+						{
+							menuItemEnables["delete"] = true;
+							menuItemEnables["refresh"] = true;
+							
+							for(var i=0; i<selNodes.length; i++)
 							{
-								disableSchemaOperation = true;
-								break;
+								var schema = selNodes[i].original;
+								if(!po.canDelete(schema))
+								{
+									menuItemEnables["delete"] = false;
+									break;
+								}
 							}
 						}
 					}
-					
-					if(disableSchemaOperation)
+					//仅选中表
+					else if(selState.selSchemaCount == 0 && selState.selTableCount > 0)
 					{
-						menuItemEnables["schema-operation-edit"] = false;
-						menuItemEnables["schema-operation-delete"] = false;
-						menuItemEnables["schema-operation-view"] = false;
-						menuItemEnables["schema-operation-authorize"] = false;
-						menuItemEnables["schema-operation-sqlpad"] = false;
-						menuItemEnables["schema-operation-dataimport"] = false;
-						menuItemEnables["schema-operation-dataexport"] = false;
-					}
-					else
-					{
-						for(var i=0; i<selNodes.length; i++)
-						{
-							var schema = selNodes[i].original;
-							
-							if(!po.canEdit(schema))
-								menuItemEnables["schema-operation-edit"] = false;
-							
-							if(!po.canDelete(schema))
-							{
-								menuItemEnables["schema-operation-delete"] = false;
-							}
-							
-							if(!po.canDeleteTableData(schema))
-							{
-								menuItemEnables["schema-operation-dataimport"] = false;
-							}
-							
-							if(!po.canAuthorize(schema, po.currentUser))
-								menuItemEnables["schema-operation-authorize"] = false;
-						}
-					}
-					
-					//如果有选中，且全都是数据库或者全都是表，则启用刷新按钮
-					menuItemEnables["schema-operation-refresh"] = false;
-					if(selNodes.length)
-					{
-						var selSchemaCount = 0, selTableCount = 0;
-						for(var i=0; i<selNodes.length; i++)
-						{
-							if(po.isTableNode(selNodes[i]))
-							{
-								selTableCount++;
-							}
-							else if(po.isSchemaNode(selNodes[i]))
-							{
-								selSchemaCount++;
-							}
-						}
+						menuItemEnables["refresh"] = true;
 						
-						if(selSchemaCount == 0 || selTableCount == 0)
-							menuItemEnables["schema-operation-refresh"] = true;
-					}
-					
-					//只要选中了表，就禁用重载按钮
-					for(var i=0; i<selNodes.length; i++)
-					{
-						if(po.isTableNode(selNodes[i]))
+						if(selState.selTableSameSchema)
 						{
-							menuItemEnables["schema-operation-reload"] = false;
-							break;
+							var schema = po.getSchemaNode(jstree, selNodes[0]).original;
+							
+							menuItemEnables["sqlpad"] = true;
+							
+							if(po.canDeleteTableData(schema))
+								menuItemEnables["dataimport"] = true;
+							
+							menuItemEnables["dataexport"] = true;
 						}
 					}
 					
@@ -791,9 +831,9 @@
 					for(var itemClass in menuItemEnables)
 					{
 						if(menuItemEnables[itemClass])
-							$("." + itemClass, this).removeClass("ui-state-disabled");
+							$(".schema-operation-" + itemClass, this).removeClass("ui-state-disabled");
 						else
-							$("." + itemClass, this).addClass("ui-state-disabled");
+							$(".schema-operation-" + itemClass, this).addClass("ui-state-disabled");
 					}
 				}
 			},
@@ -809,11 +849,8 @@
 				
 				if($item.hasClass("schema-operation-edit") || $item.hasClass("schema-operation-view"))
 				{
-					if(selNodes.length != 1)
-					{
-						$.tipInfo("<@spring.message code='pleaseSelectOnlyOneRow' />");
+					if(!selNodes || selNodes.length != 1)
 						return;
-					}
 					
 					var selNode = selNodes[0];
 					
@@ -927,11 +964,8 @@
 				}
 				else if($item.hasClass("schema-operation-authorize"))
 				{
-					if(selNodes.length != 1)
-					{
-						$.tipInfo("<@spring.message code='pleaseSelectOnlyOneRow' />");
+					if(!selNodes || selNodes.length != 1)
 						return;
-					}
 					
 					var selNode = selNodes[0];
 					
@@ -950,35 +984,31 @@
 				}
 				else if($item.hasClass("schema-operation-sqlpad"))
 				{
-					if(!selNodes.length || selNodes.length < 1)
+					if(!selNodes || selNodes.length < 1)
 						return;
 					
-					if(selNodes.length != 1)
+					var schemaNode = po.getSchemaNode(jstree, selNodes[0]);
+					var schema = (schemaNode ? schemaNode.original : null);
+					
+					if(schema)
 					{
-						$.tipInfo("<@spring.message code='pleaseSelectOnlyOneRow' />");
-					}
-					else
-					{
-						var schemaNode = po.getSchemaNode(jstree, selNodes[0]);
-						var schema = (schemaNode ? schemaNode.original : null);
-						
-						if(schema)
+						var tables = po.getSelTables(jstree, selNodes);
+						var initSql = "";
+						for(var i=0; i<tables.length; i++)
 						{
-							var tabTitle = "<@spring.message code='main.sqlpad' /><@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
-			    			
-							var tabUrl = "${contextPath}/sqlpad/" + schema.id;
-							
-							po.activeWorkTab(po.toMainTabIdForSchemaName(schema.id, "sqlpad"), "<@spring.message code='main.sqlpad' />", tabTitle, tabUrl, schema);
+							if(i > 0)
+								initSql += "\n";
+							initSql += "SELECT * FROM " + tables[i].name+";";
 						}
+						var tabTitle = "<@spring.message code='main.sqlpad' /><@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
+						var tabUrl = "${contextPath}/sqlpad/" + schema.id + (initSql ? "?initSql=" + encodeURIComponent(initSql) : "");
+						po.activeWorkTab(po.toMainTabIdForSchemaName(schema.id, "sqlpad"), "<@spring.message code='main.sqlpad' />", tabTitle, tabUrl, schema);
 					}
 				}
 				else if($item.hasClass("schema-operation-dataimport") || $item.hasClass("schema-operation-dataexport"))
 				{
-					if(selNodes.length != 1)
-					{
-						$.tipInfo("<@spring.message code='pleaseSelectOnlyOneRow' />");
+					if(!selNodes || selNodes.length < 1)
 						return;
-					}
 					
 					var isImport = $item.hasClass("schema-operation-dataimport");
 					

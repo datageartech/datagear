@@ -111,7 +111,7 @@ Schema schema 数据库，不允许为null
 	<div class="content ui-widget ui-widget-content">
 		<div class="content-editor">
 			<div class="content-edit-content">
-				<div id="${pageId}-sql-editor" class="sql-editor"></div>
+				<div id="${pageId}-sql-editor" class="sql-editor">${initSql!''?html}</div>
 			</div>
 		</div>
 		<div class="content-result">
