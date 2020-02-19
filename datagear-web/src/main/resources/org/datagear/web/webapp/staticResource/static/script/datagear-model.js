@@ -853,6 +853,8 @@
 					epn += '&amp;';
 				else if(c == '"')
 					epn += '&quot;';
+				else if(c == '\'')
+					epn += '&#39;';
 				else
 					epn += c;
 			}

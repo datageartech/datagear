@@ -111,12 +111,10 @@ Schema schema 数据库，不允许为null
 <script type="text/javascript">
 (function(po)
 {
-	po.toExportFileName = function(tableName)
+	po.toExportFileNameSuper = po.toExportFileName;
+	po.toExportFileName = function(query)
 	{
-		if(!tableName)
-			return "";
-		
-		return $.toValidFileName(tableName)+".xlsx";
+		return po.toExportFileNameSuper(query, ".xlsx");
 	};
 	
 	po.cometdInitIfNot();

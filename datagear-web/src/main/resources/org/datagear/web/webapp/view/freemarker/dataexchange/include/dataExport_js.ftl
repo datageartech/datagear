@@ -13,12 +13,12 @@ dataExchange_js.ftl
 {
 	po.dataExchangeChannelId = "${dataExchangeChannelId}";
 	
-	po.addSubDataExchange = function(tableName)
+	po.addSubDataExchange = function(query)
 	{
-		if(tableName == null)
-			tableName = "";
+		if(query == null)
+			query = "";
 		
-		var rowData = { subDataExchangeId : po.nextSubDataExchangeId(), query : tableName, fileName : po.toExportFileName(tableName), status : "" };
+		var rowData = { subDataExchangeId : po.nextSubDataExchangeId(), query : query, fileName : po.toExportFileName(query), status : "" };
 		po.postBuildSubDataExchange(rowData);
 		po.addRowData(rowData);
 		
@@ -71,9 +71,30 @@ dataExchange_js.ftl
 		});
 	};
 	
-	po.toExportFileName = function(tableName)
+	po.toExportFileName = function(query, suffix)
 	{
-		return tableName;
+		if(!query)
+			return "";
+		
+		return $.toValidFileName(po.resolveTableName(query)) + (suffix ? suffix : "");
+	};
+	
+	po.resolveTableName = function(query)
+	{
+		if(!query)
+			return "";
+		
+		//表名称
+		if(!/\s/.test(query))
+			return query;
+		
+		//第一个表名正则
+		var result = query.match(/from\s([^\,\s]*)/i);
+		
+		if(result == null || result.length < 2)
+			return "";
+		
+		return result[1];
 	};
 	
 	po.handleSubDataExchangeStatus = function(subDataExchangeId, status, message)
