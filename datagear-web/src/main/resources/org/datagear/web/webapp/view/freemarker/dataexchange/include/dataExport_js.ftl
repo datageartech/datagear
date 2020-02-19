@@ -333,6 +333,18 @@ dataExchange_js.ftl
 			
 			return false;
 		});
+		
+		<#if initSqls??>
+		var initSqlsParam = "";
+		<#list initSqls as initSql>
+		po.addSubDataExchange("${initSql?js_string}");
+		if(initSqlsParam != "")
+			initSqlsParam += "&";
+		initSqlsParam += "initSqls=" + encodeURIComponent("${initSql?js_string}");
+		</#list>
+		var $returnButton = po.element(".return-button");
+		$returnButton.attr("return-url", $.addParamString($returnButton.attr("return-url"), initSqlsParam));
+		</#if>
 	};
 })
 (${pageId});

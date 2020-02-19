@@ -23,6 +23,13 @@ Schema schema 数据库，不允许为null
 	</div>
 	<div class="content">
 		<form id="${pageId}-form" action="" method="POST">
+			<div class="init-sqls" style="display:none;">
+				<#if initSqls??>
+				<#list initSqls as initSql>
+					<textarea name="initSqls">${initSql?html}</textarea>
+				</#list>
+				</#if>
+			</div>
 			<div class="form-head">
 				<@spring.message code='dataExport.selectDataType' />
 			</div>

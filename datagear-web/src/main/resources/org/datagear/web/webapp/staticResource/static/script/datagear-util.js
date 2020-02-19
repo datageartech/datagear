@@ -584,6 +584,15 @@
 		},
 		
 		/**
+		 * 给URL添加参数字符串。
+		 */
+		addParamString : function(url, param)
+		{
+			var f = (url.indexOf('?') < 0 ? "?" : "&" );
+			return url + f + param;
+		},
+		
+		/**
 		 * 获取对象或者对象数组的属性值参数字符串，例如：“id=1&id=2&id=3”
 		 * 
 		 * @param objOrArray

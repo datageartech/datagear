@@ -14,10 +14,12 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,6 +74,9 @@ import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.SqlScriptParser;
+import org.datagear.util.SqlScriptParser.SqlStatement;
+import org.datagear.util.StringUtil;
 import org.datagear.util.resource.ConnectionFactory;
 import org.datagear.util.resource.DataSourceConnectionFactory;
 import org.datagear.util.resource.FileOutputStreamResourceFactory;
@@ -839,6 +844,33 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
+		List<String> initSqlList = new ArrayList<String>();
+		
+		String[] initSqls = request.getParameterValues("initSqls");
+		if (initSqls == null)
+			initSqls = new String[0];
+		else
+			initSqlList.addAll(Arrays.asList(initSqls));
+		
+		String initScript = request.getParameter("initScript");
+		if (!StringUtil.isEmpty(initScript))
+		{
+			String initScriptDelimiter = request.getParameter("initScriptDelimiter");
+
+			SqlScriptParser sqlScriptParser = new SqlScriptParser(new StringReader(initScript));
+			if (!isEmpty(initScriptDelimiter))
+				sqlScriptParser.setDelimiter(initScriptDelimiter);
+
+			List<SqlStatement> sqlStatements = sqlScriptParser.parseAll();
+			if (!StringUtil.isEmpty(sqlStatements))
+			{
+				for (SqlStatement sqlst : sqlStatements)
+					initSqlList.add(sqlst.getSql());
+			}
+		}
+		
+		springModel.addAttribute("initSqls", initSqlList);
+
 		return "/dataexchange/export";
 	}
 
@@ -867,6 +899,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+		setParamInitSqlsAttribute(request, springModel);
 
 		return "/dataexchange/export_csv";
 	}
@@ -975,6 +1008,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+		setParamInitSqlsAttribute(request, springModel);
 
 		return "/dataexchange/export_excel";
 	}
@@ -1086,6 +1120,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+		setParamInitSqlsAttribute(request, springModel);
 
 		return "/dataexchange/export_sql";
 	}
@@ -1198,6 +1233,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 		springModel.addAttribute("dataExchangeChannelId", getDataExchangeChannelId(dataExchangeId));
 		springModel.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		springModel.addAttribute("defaultCharsetName", Charset.defaultCharset().name());
+		setParamInitSqlsAttribute(request, springModel);
 
 		return "/dataexchange/export_json";
 	}
@@ -1341,6 +1377,17 @@ public class DataExchangeController extends AbstractSchemaConnController
 		{
 			IOUtil.close(out);
 		}
+	}
+
+	protected String[] setParamInitSqlsAttribute(HttpServletRequest request, org.springframework.ui.Model springModel)
+	{
+		String[] initSqls = request.getParameterValues("initSqls");
+		if (initSqls == null)
+			initSqls = new String[0];
+
+		springModel.addAttribute("initSqls", initSqls);
+
+		return initSqls;
 	}
 
 	/**

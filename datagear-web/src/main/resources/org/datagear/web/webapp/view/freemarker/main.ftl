@@ -410,6 +410,9 @@
 		{
 			var tree = $(this).jstree(true);
 			
+			if(data.selected && data.selected.length > 1)
+				return;
+			
 			if(po.isTableNode(data.node))
 			{
 				var schema = tree.get_node(data.node.parent).original;
@@ -1031,10 +1034,13 @@
 						}
 						else
 						{
+							var tables = po.getSelTables(jstree, selNodes);
+							var initSqls = $.getPropertyParamString(tables, "name", "initSqls");
+							
 							tabId = po.toMainTabIdForSchemaName(schema.id, "dataexport");
 							tabLabel = "<@spring.message code='main.dataexport' />";
 							tabTitle = "<@spring.message code='main.dataexport' /><@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
-							tabUrl = "${contextPath}/dataexchange/" + schema.id+"/export";
+							tabUrl = "${contextPath}/dataexchange/" + schema.id+"/export" + (initSqls ? "?" + initSqls : "");
 						}
 						
 						po.activeWorkTab(tabId, tabLabel, tabTitle, tabUrl, schema);
