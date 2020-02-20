@@ -546,7 +546,7 @@
 				"smooth" : false
 			},
 			"radar" : {
-				"name" : { "textStyle" : { "color" : chartTheme.color } },
+				"name" : { "textStyle" : { "color" : chartTheme.colorSecond } },
 				"axisLine" : { "lineStyle" : { "color" : chartTheme.colorFourth } },
 				"splitLine" : { "lineStyle" : { "color" : chartTheme.colorFourth } },
 				"splitArea" : { "areaStyle" : { "color" : [ chartTheme.colorFifth, chartTheme.backgroundColor ] } },
