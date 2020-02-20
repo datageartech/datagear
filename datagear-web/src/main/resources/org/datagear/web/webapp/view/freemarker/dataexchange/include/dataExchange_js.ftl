@@ -438,19 +438,15 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	
 	po.initDataExchangeActions = function()
 	{
-		po.element(".return-button").click(function()
+		<#if isAjaxRequest>
+		po.element("#${pageId}-returnForm").ajaxForm(
 		{
-			var returnUrl = $(this).attr("return-url");
-			
-			if(!returnUrl)
-				return;
-			
-			<#if isAjaxRequest>
-			po.element().parent().load(returnUrl);
-			<#else>
-			window.location.href = returnUrl;
-			</#if>
+			success: function(data)
+			{
+				po.element().parent().html(data);
+			}
 		});
+		</#if>
 	}
 })
 (${pageId});

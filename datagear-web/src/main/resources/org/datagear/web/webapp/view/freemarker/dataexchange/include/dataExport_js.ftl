@@ -356,15 +356,11 @@ dataExchange_js.ftl
 		});
 		
 		<#if initSqls??>
-		var initSqlsParam = "";
+		var $returnForm = po.element("#${pageId}-returnForm");
 		<#list initSqls as initSql>
 		po.addSubDataExchange("${initSql?js_string}");
-		if(initSqlsParam != "")
-			initSqlsParam += "&";
-		initSqlsParam += "initSqls=" + encodeURIComponent("${initSql?js_string}");
+		$("<textarea name='initSqls' style='display:none;'></textarea>").val("${initSql?js_string}").appendTo($returnForm);
 		</#list>
-		var $returnButton = po.element(".return-button");
-		$returnButton.attr("return-url", $.addParamString($returnButton.attr("return-url"), initSqlsParam));
 		</#if>
 	};
 })

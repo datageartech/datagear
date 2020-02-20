@@ -95,9 +95,7 @@ Schema schema 数据库，不允许为null
 			</div>
 		</form>
 		<div class="return-wrapper page-status-aware-show edit-status-show finish-status-show">
-			<button type="button" class="return-button" return-url="${contextPath}/dataexchange/${schema.id}/export">
-				<@spring.message code='return' />
-			</button>
+			<#include "include/dataExchange_return_form_export.ftl">
 		</div>
 		<div class="restart-wrapper page-status-aware-show finish-status-show">
 			<button type="button" class="restart-button"><@spring.message code='restart' /></button>
