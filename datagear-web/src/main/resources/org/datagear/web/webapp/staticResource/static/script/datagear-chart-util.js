@@ -652,7 +652,7 @@
 				}
 			},
 			"gauge" : {
-				"title" : { color : chartTheme.color },
+				"title" : { color : chartTheme.colorSecond },
 				"itemStyle" : {
 					"normal" : {
 						"borderWidth" : 0,
@@ -756,7 +756,7 @@
 				"axisLine" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorSecond
+						"color" : chartTheme.colorThird
 					}
 				},
 				"axisTick" : {
@@ -774,6 +774,7 @@
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
+						"type" : "dotted",
 						"color" : [ chartTheme.colorFourth ]
 					}
 				},
@@ -788,13 +789,13 @@
 				"axisLine" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorSecond
+						"color" : chartTheme.colorThird
 					}
 				},
 				"axisTick" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorFourth
+						"color" : chartTheme.colorThird
 					}
 				},
 				"axisLabel" : {
@@ -806,6 +807,7 @@
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
+						"type" : "dotted",
 						"color" : [ chartTheme.colorFourth ]
 					}
 				},
@@ -832,19 +834,20 @@
 				"axisLabel" : {
 					"show" : true,
 					"textStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.colorSecond
 					}
 				},
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
+						"type" : "dotted",
 						"color" : [ chartTheme.colorFourth ]
 					}
 				},
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.colorThird ]
+						"color" : [ chartTheme.colorFourth ]
 					}
 				}
 			},
@@ -864,19 +867,20 @@
 				"axisLabel" : {
 					"show" : true,
 					"textStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.colorSecond
 					}
 				},
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
+						"type" : "dotted",
 						"color" : [ chartTheme.colorFourth ]
 					}
 				},
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.colorThird ]
+						"color" : [ chartTheme.colorFourth ]
 					}
 				}
 			},
