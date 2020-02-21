@@ -314,12 +314,39 @@ readonly 是否只读操作，允许为null
 		if(!charts || !charts.length)
 			return;
 		
+		var cursor = po.templateEditor.getCursorPosition();
+		
 		var code = "";
 		
-		for(var i=0; i<charts.length; i++)
-			code += "  <div class=\"dg-chart\" dg-chart-widget=\""+charts[i].id+"\">" + "<!--"+charts[i].name+"-->" + "</div>\n";
+		if(charts.length == 1)
+		{
+			var chartId = charts[0].id;
+			
+			var text = po.templateEditor.session.getLine(cursor.row).substring(0, cursor.column);
+			
+			//获取所处标签字符串
+			var prevRow = cursor.row;
+			while((!text || !(/[<>]/g.test(text))) && (prevRow--) >= 0)
+				text = po.templateEditor.session.getLine(prevRow) + text;
+			
+			// =
+			if(/=\s*$/g.test(text))
+				code = "\"" + chartId + "\"";
+			// =" 或 ='
+			else if(/=\s*['"]$/g.test(text))
+				code = chartId;
+			// <...
+			else if(/<[^>]*$/g.test(text))
+				code = " dg-chart-widget=\""+chartId+"\"";
+			else
+				code = "<div class=\"dg-chart\" dg-chart-widget=\""+chartId+"\"></div>\n";
+		}
+		else
+		{
+			for(var i=0; i<charts.length; i++)
+				code += "<div class=\"dg-chart\" dg-chart-widget=\""+charts[i].id+"\"></div>\n";
+		}
 		
-		var cursor = po.templateEditor.getCursorPosition();
 		po.templateEditor.moveCursorToPosition(cursor);
 		po.templateEditor.session.insert(cursor, code);
 		po.templateEditor.focus();
