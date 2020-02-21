@@ -39,7 +39,7 @@ SQL工作台
 
 ![界面图片](screenshot/6-dashboard.png)
 
-![界面图片](screenshot/6-dashboard-dark.png)
+![界面图片](screenshot/6-dashboard-darkblue.png)
 
 ## 依赖
 
