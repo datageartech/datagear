@@ -154,7 +154,7 @@
 		<if test="queryKeyword != null">
 		AND
 		(
-			${_iq_}name${_iq_} LIKE #{queryKeyword}
+			${_iq_}id${_iq_} LIKE #{queryKeyword} OR ${_iq_}name${_iq_} LIKE #{queryKeyword}
 		)
 		</if>
 		<include refid="commonDataPermission.dataFilterCondition" />

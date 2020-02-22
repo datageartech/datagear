@@ -209,7 +209,7 @@ selectonly 是否选择操作，允许为null
 	};
 	
 	var tableColumns = [
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id"),
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='id' />"), "id"),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.name' />"), "name"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", "chartPluginName"),
 		updateIntervalColumn,
