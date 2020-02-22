@@ -55,6 +55,24 @@ readonly 是否只读操作，允许为null
 				</div>
 			</div>
 			</#if>
+			<#if readonly>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label><@spring.message code='schema.createUser' /></label>
+				</div>
+				<div class="form-item-value">
+					<input type="text" name="user" value="${(schema.createUser.nameLabel)!''?html}" class="ui-widget ui-widget-content" />
+				</div>
+			</div>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label><@spring.message code='schema.createTime' /></label>
+				</div>
+				<div class="form-item-value">
+					<input type="text" name="user" value="${((schema.createTime)?datetime)!''?html}" class="ui-widget ui-widget-content" />
+				</div>
+			</div>
+			</#if>
 			<#if !readonly>
 			<div class="form-item">
 				<div class="form-item-label">
@@ -82,6 +100,16 @@ readonly 是否只读操作，允许为null
 					</#if>
 				</div>
 			</div>
+			<#if !readonly>
+			<div class="form-item">
+				<div class="form-item-label">
+					&nbsp;
+				</div>
+				<div class="form-item-value">
+					<button class="test-connection-button" type="button"><@spring.message code='schema.testConnection' /></button>
+				</div>
+			</div>
+			</#if>
 		</div>
 		<div class="form-foot" style="text-align:center;">
 			<#if !readonly>
@@ -155,6 +183,12 @@ readonly 是否只读操作，允许为null
     	}
 	});
 	
+	po.element(".test-connection-button").click(function()
+	{
+		po._STATE_TEST_CONNECTION = true;
+		po.form().submit();
+	});
+	
 	po.element("#driverEntityActionGroup").controlgroup();
 	
 	po.form().validate(
@@ -171,14 +205,32 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			$(form).ajaxSubmit(
+			var $form = $(form);
+			
+			var originAction = $form.attr("action");
+			
+			if(po._STATE_TEST_CONNECTION == true)
+				$form.attr("action", "${contextPath}/schema/testConnection");
+			
+			$form.ajaxSubmit(
 			{
 				success : function()
 				{
+					if(po._STATE_TEST_CONNECTION == true)
+						return;
+					
 					var close = (po.pageParamCall("afterSave")  != false);
 					
 					if(close)
 						po.close();
+				},
+				complete: function()
+				{
+					if(po._STATE_TEST_CONNECTION == true)
+					{
+						$form.attr("action", originAction);
+						po._STATE_TEST_CONNECTION = false;
+					}
 				}
 			});
 		},

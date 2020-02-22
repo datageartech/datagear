@@ -123,17 +123,13 @@
 			A.SCHEMA_CREATE_TIME AS ${_iq_}createTime${_iq_},
 			A.DRIVER_ENTITY_ID AS ${_iq_}driverEntity.id${_iq_},
 			A.SCHEMA_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
-			B.USER_NAME AS ${_iq_}createUser.name${_iq_},
-			B.USER_REAL_NAME AS ${_iq_}createUser.realName${_iq_},
-			(CASE WHEN B.USER_IS_ADMIN IS NULL THEN '0' ELSE B.USER_IS_ADMIN END) AS ${_iq_}createUser.admin${_iq_},
-			(CASE WHEN B.USER_ID IS NULL THEN '1' ELSE '0' END) AS ${_iq_}createUser.anonymous${_iq_},
-			B.USER_CREATE_TIME AS ${_iq_}createUser.createTime${_iq_}
+			<include refid="common.fieldsForCreateUser" />
 		FROM
 			DATAGEAR_SCHEMA A
 		LEFT JOIN
-			DATAGEAR_USER B
+			DATAGEAR_USER USR
 		ON
-			A.SCHEMA_CREATE_USER_ID = B.USER_ID
+			A.SCHEMA_CREATE_USER_ID = USR.USER_ID
 	</sql>
 	
 	<sql id="queryCondition">

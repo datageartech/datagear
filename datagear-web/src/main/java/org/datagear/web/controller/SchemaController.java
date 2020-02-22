@@ -4,6 +4,7 @@
 
 package org.datagear.web.controller;
 
+import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -25,6 +26,7 @@ import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;
 import org.datagear.util.IDUtil;
+import org.datagear.util.JdbcUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.KeywordMatcher;
@@ -232,6 +234,28 @@ public class SchemaController extends AbstractSchemaModelConnController
 		processForUI(request, schemas);
 
 		return schemas;
+	}
+
+	@RequestMapping(value = "/testConnection", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> testConnection(HttpServletRequest request, HttpServletResponse response,
+			Schema schema) throws Exception
+	{
+		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
+			throw new IllegalInputException();
+		
+		Connection cn = null;
+		
+		try
+		{
+			cn = getSchemaConnection(schema);
+		}
+		finally
+		{
+			JdbcUtil.closeConnection(cn);
+		}
+
+		return buildOperationMessageSuccessResponseEntity(request, "schema.testConnection.ok");
 	}
 
 	@RequestMapping(value = "/list", produces = CONTENT_TYPE_JSON)
