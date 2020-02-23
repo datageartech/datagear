@@ -38,7 +38,9 @@ readonly 是否只读操作，允许为null
 							<div id="${pageId}-template-editor" class="template-editor"></div>
 						</div>
 						<#if !readonly>
-						<button type="button" class="insert-chart-button"><@spring.message code='dashboard.insertChart' /></button>
+						<div class="insert-chart-button-wrapper">
+							<button type="button" class="insert-chart-button"><@spring.message code='dashboard.insertChart' /></button>
+						</div>
 						</#if>
 						<div class="dashboard-resource-wrapper ui-widget ui-widget-content ui-corner-all">
 							<div class="resource-title ui-widget ui-widget-content">
@@ -73,6 +75,9 @@ readonly 是否只读操作，允许为null
 							</div>
 						</div>
 					</div>
+					<div class="resize-editor-wrapper">
+						<button type='button' class='resize-editor-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='expandOrCollapse' />"><span class='ui-icon ui-icon-arrowstop-1-w'></span><span class='ui-button-icon-space'></span></button>
+					</div>
 				</div>
 			</div>
 			<div class="form-item">
@@ -101,9 +106,9 @@ readonly 是否只读操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element());
-	var tewHeight = $(window).height()/2;
+	var tewHeight = $(window).height()*5/9;
 	po.element(".template-editor-wrapper").height(tewHeight);
-	po.element(".form-item-value-template").height(tewHeight + 35);
+	po.element(".form-item-value-template").height(tewHeight + 30);
 
 	po.url = function(action)
 	{
@@ -151,6 +156,23 @@ readonly 是否只读操作，允许为null
 	};
 	
 	po.element(".resource-content").selectable({classes: {"ui-selected": "ui-state-active"}});
+	
+	po.element(".resize-editor-button").click(function()
+	{
+		var $ele = po.element();
+		var $icon = $(".ui-icon", this);
+		
+		if($ele.hasClass("max-template-editor"))
+		{
+			$ele.removeClass("max-template-editor");
+			$icon.removeClass("ui-icon-arrowstop-1-e").addClass("ui-icon-arrowstop-1-w");
+		}
+		else
+		{
+			$ele.addClass("max-template-editor");
+			$icon.removeClass("ui-icon-arrowstop-1-w").addClass("ui-icon-arrowstop-1-e");
+		}
+	});
 	
 	<#if !readonly>
 	po.getSelectedResourceName = function()
@@ -391,12 +413,14 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
-			"templateContent" : "dashboardTemplateContent"
+			"templateContent" : "dashboardTemplateContent",
+			"template" : "required"
 		},
 		messages :
 		{
 			"name" : "<@spring.message code='validation.required' />",
-			"templateContent" : "<@spring.message code='validation.required' />"
+			"templateContent" : "<@spring.message code='validation.required' />",
+			"template" : "<@spring.message code='validation.required' />"
 		},
 		submitHandler : function(form)
 		{
@@ -429,6 +453,9 @@ readonly 是否只读操作，允许为null
 		}
 	});
 	</#if>
+	
+	if(po.element("input[name='id']").val())
+		po.element(".resize-editor-button").click();
 	
 	po.initTemplateEditor();
 	po.refreshDashboardResources();
