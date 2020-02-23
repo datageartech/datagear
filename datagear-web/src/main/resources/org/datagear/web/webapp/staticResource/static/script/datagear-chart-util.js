@@ -21,7 +21,19 @@
 	 */
 	util.chartTheme = function(chart)
 	{
-		return this.renderContextAttr(chart, "chartTheme");
+		var chartTheme = this.renderContextAttr(chart, "chartTheme");
+		
+		var bodyTheme = $(document.body).attr("dg-chart-theme");
+		
+		if(chartTheme._BODY_THEME == bodyTheme)
+			return chartTheme;
+		
+		if(bodyTheme)
+			$.extend(true, chartTheme, this.evalSilently(bodyTheme, {}));
+		
+		chartTheme._BODY_THEME = bodyTheme;
+		
+		return chartTheme;
 	};
 	
 	/**
@@ -59,11 +71,8 @@
 		if(!optsStr && !optsStrGlobal)
 			return options;
 		
-		optsStr = this.trimJSONString(optsStr);
-		optsStrGlobal = this.trimJSONString(optsStrGlobal);
-		
-		var opts = this.parseJSONSilently(optsStr);
-		var optsGlobal = this.parseJSONSilently(optsStrGlobal);
+		var opts = this.evalSilently(optsStr, {});
+		var optsGlobal = this.evalSilently(optsStrGlobal, {});
 		
 		options = $.extend(true, options, optsGlobal, opts);
 		
@@ -432,30 +441,6 @@
 		}
 		
 		return re;
-	};
-	
-	/**
-	 * 解析JSON。
-	 * 如果参数不合法，将返回空对象：{}。
-	 */
-	util.parseJSONSilently = function(str)
-	{
-		if(!str)
-			return {};
-		
-		try
-		{
-			if(typeof $ != "undefined" && $.parseJSON)
-				return $.parseJSON(str);
-			else
-				return JSON.parse(str);
-		}
-		catch(e)
-		{
-			this.handleError(e);
-		}
-		
-		return {};
 	};
 	
 	/**
@@ -997,6 +982,52 @@
 		};
 		
 		return theme;
+	};
+
+	/**
+	 * 执行JS代码。
+	 * 
+	 * @param str JS代码
+	 * @param defaultValue 默认返回值，可选，默认为：undefined
+	 */
+	util.evalSilently = function(str, defaultValue)
+	{
+		var re = undefined;
+		
+		try
+		{
+			re = Function("return ("+str+");")();
+		}
+		catch(e)
+		{
+			this.handleError(e);
+		}
+		
+		return (re || defaultValue);
+	};
+	
+	/**
+	 * 解析JSON。
+	 * 如果参数不合法，将返回空对象：{}。
+	 */
+	util.parseJSONSilently = function(str)
+	{
+		if(!str)
+			return {};
+		
+		try
+		{
+			if(typeof $ != "undefined" && $.parseJSON)
+				return $.parseJSON(str);
+			else
+				return JSON.parse(str);
+		}
+		catch(e)
+		{
+			this.handleError(e);
+		}
+		
+		return {};
 	};
 	
 	/**
