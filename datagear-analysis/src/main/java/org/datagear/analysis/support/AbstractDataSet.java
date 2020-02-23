@@ -168,7 +168,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @return
 	 * @throws DataSetParamNotFountException
 	 */
-	public List<DataSetParam> getParamsNotNull(List<String> names) throws DataSetParamNotFountException
+	public List<DataSetParam> getDataSetParamsNotNull(List<String> names) throws DataSetParamNotFountException
 	{
 		List<DataSetParam> dataSetParams = new ArrayList<DataSetParam>(names.size());
 

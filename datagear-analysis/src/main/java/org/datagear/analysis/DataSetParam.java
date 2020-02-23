@@ -42,6 +42,11 @@ public class DataSetParam extends DataNameAndType
 		this.required = required;
 	}
 
+	public boolean hasDefaultValue()
+	{
+		return (this.defaultValue != null);
+	}
+
 	public Object getDefaultValue()
 	{
 		return defaultValue;

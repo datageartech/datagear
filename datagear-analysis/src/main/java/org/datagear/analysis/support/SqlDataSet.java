@@ -10,6 +10,7 @@ package org.datagear.analysis.support;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +27,12 @@ import org.datagear.util.resource.ConnectionFactory;
 /**
  * SQL {@linkplain DataSet}。
  * <p>
- * 它的{@linkplain #setSql(String)}中可以包含<code>${parameter}</code>格式的参数（<code>parameter</code>必须是在{@linkplain #getParams()}中预定义的），
- * 在{@linkplain #getResult(DataSetParamValues)}中会被替换为具体的参数值。
+ * 它的{@linkplain #setSql(String)}中可以包含<code>#{parameter}</code>格式的参数（<code>parameter</code>必须是在{@linkplain #getParams()}中预定义的），
+ * 在{@linkplain #getResult(Map)}中会被替换为具体的参数值。
+ * </p>
+ * <p>
+ * 它的{@linkplain #getResult(Map)}方法参数映射表可以包含{@linkplain ParameterSqlResolver#isLiteralParamValue(String)
+ * 字面参数值}，具体参考{@linkplain ParameterSqlResolver#evaluate(String, Map)}。
  * </p>
  * 
  * @author datagear@163.com
@@ -115,10 +120,29 @@ public class SqlDataSet extends AbstractDataSet
 	 */
 	protected DataSetResult getDataSet(Connection cn, String sql, Map<String, ?> paramValues) throws DataSetException
 	{
-		ParameterSql parameterSql = getSqlDataSetSupport().resolveParameterSql(sql);
-		sql = parameterSql.getSql();
-		List<DataSetParam> dataSetParams = (parameterSql.hasParameter() ? getParamsNotNull(parameterSql.getParameters())
-				: null);
+		List<String> paramNames = getSqlDataSetSupport().resolveParams(sql);
+		List<DataSetParam> dataSetParams = null;
+
+		if (!paramNames.isEmpty())
+		{
+			HashMap<String, Object> myParamValues = new HashMap<String, Object>();
+			if (paramValues != null)
+				myParamValues.putAll(paramValues);
+
+			dataSetParams = getDataSetParamsNotNull(paramNames);
+			for (DataSetParam dataSetParam : dataSetParams)
+			{
+				if (!myParamValues.containsKey(dataSetParam.getName()) && dataSetParam.hasDefaultValue())
+					myParamValues.put(dataSetParam.getName(), dataSetParam.getDefaultValue());
+			}
+
+			ParameterSql parameterSql = getSqlDataSetSupport().evalParameterSql(sql, myParamValues);
+
+			sql = parameterSql.getSql();
+			paramNames = parameterSql.getNames();
+			dataSetParams = getDataSetParamsNotNull(paramNames);
+			paramValues = myParamValues;
+		}
 
 		QueryResultSet qrs = null;
 

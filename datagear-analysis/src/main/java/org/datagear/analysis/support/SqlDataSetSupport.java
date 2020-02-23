@@ -619,16 +619,28 @@ public class SqlDataSetSupport
 
 		return dataType;
 	}
+	
+	/**
+	 * 解析SQL语句参数名列表。
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	public List<String> resolveParams(String sql)
+	{
+		return getParameterSqlResolver().resolveParams(sql);
+	}
 
 	/**
 	 * 解析{@linkplain ParameterSql}。
 	 * 
 	 * @param sql
+	 * @param paramValues
 	 * @return
 	 */
-	public ParameterSql resolveParameterSql(String sql)
+	public ParameterSql evalParameterSql(String sql, Map<String, ?> paramValues)
 	{
-		return getParameterSqlResolver().resolve(sql);
+		return getParameterSqlResolver().evaluate(sql, paramValues);
 	}
 
 	protected ParameterSqlResolver getParameterSqlResolver()
