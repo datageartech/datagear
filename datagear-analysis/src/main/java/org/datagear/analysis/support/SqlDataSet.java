@@ -31,7 +31,7 @@ import org.datagear.util.resource.ConnectionFactory;
  * 在{@linkplain #getResult(Map)}中会被替换为具体的参数值。
  * </p>
  * <p>
- * 它的{@linkplain #getResult(Map)}方法参数映射表可以包含{@linkplain ParameterSqlResolver#isLiteralParamValue(String)
+ * 它的{@linkplain DataSetParam#getDefaultValue()}值、{@linkplain #getResult(Map)}方法参数的映射值可以是{@linkplain ParameterSqlResolver#isLiteralParamValue(String)
  * 字面参数值}，具体参考{@linkplain ParameterSqlResolver#evaluate(String, Map)}。
  * </p>
  * 
@@ -139,8 +139,9 @@ public class SqlDataSet extends AbstractDataSet
 			ParameterSql parameterSql = getSqlDataSetSupport().evalParameterSql(sql, myParamValues);
 
 			sql = parameterSql.getSql();
-			paramNames = parameterSql.getNames();
+			paramNames = parameterSql.getParameterNames();
 			dataSetParams = getDataSetParamsNotNull(paramNames);
+			parameterSql.addParameterValues(myParamValues);
 			paramValues = myParamValues;
 		}
 

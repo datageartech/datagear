@@ -53,7 +53,7 @@ public class ParameterSqlResolver
 	 * @param sql
 	 * @return
 	 */
-	public List<String> resolveParams(String sql)
+	public List<String> resolve(String sql)
 	{
 		List<String> params = new ArrayList<String>();
 
@@ -78,9 +78,8 @@ public class ParameterSqlResolver
 	 * </p>
 	 * <ul>
 	 * <li>如果<code>parameter</code>的值是{@linkplain #isLiteralParamValue(String)
-	 * 字面参数值}，则直接使用其中的<code>"..."</code>替换SQL语句中对应内容；</li>
-	 * <li>否则，替换为JDBC规范的<code>?</code>占位符，并将<code>parameter</code>加入返回对象的{@linkplain ParameterSql#getNames()}，
-	 * 值加入返回对象的{@linkplain ParameterSql#getValues()}中。</li>
+	 * 字面参数值}，则直接使用字面参数值内容替换SQL语句中对应内容；</li>
+	 * <li>否则，替换为JDBC规范的<code>?</code>占位符，并将<code>parameter</code>及其参数值的一个{@linkplain ParameterValue}对象加入返回对象的{@linkplain ParameterSql#getParameterValues()}中。</li>
 	 * </ul>
 	 * 
 	 * @param sql
@@ -94,8 +93,7 @@ public class ParameterSqlResolver
 		if (expressions == null || expressions.isEmpty())
 			return new ParameterSql(sql);
 
-		List<String> reNames = new ArrayList<String>(expressions.size());
-		List<Object> reValues = new ArrayList<Object>(expressions.size());
+		List<ParameterValue> reParameterValues = new ArrayList<ParameterValue>(expressions.size());
 		List<String> expValues = new ArrayList<String>(expressions.size());
 
 		for (Expression expression : expressions)
@@ -119,15 +117,14 @@ public class ParameterSqlResolver
 
 			if (isPrepared)
 			{
-				reNames.add(name);
-				reValues.add(value);
+				reParameterValues.add(new ParameterValue(name, value));
 				expValues.add("?");
 			}
 		}
 
 		sql = this.expressionResolver.evaluate(sql, expressions, expValues, "?");
 
-		return new ParameterSql(sql, reNames, reValues);
+		return new ParameterSql(sql, reParameterValues);
 	}
 
 	/**
@@ -176,9 +173,7 @@ public class ParameterSqlResolver
 	{
 		private String sql;
 
-		private List<String> names;
-
-		private List<Object> values;
+		private List<ParameterValue> parameterValues;
 
 		public ParameterSql()
 		{
@@ -191,12 +186,11 @@ public class ParameterSqlResolver
 			this.sql = sql;
 		}
 
-		public ParameterSql(String sql, List<String> names, List<Object> values)
+		public ParameterSql(String sql, List<ParameterValue> parameterValues)
 		{
 			super();
 			this.sql = sql;
-			this.names = names;
-			this.values = values;
+			this.parameterValues = parameterValues;
 		}
 
 		public String getSql()
@@ -211,33 +205,118 @@ public class ParameterSqlResolver
 
 		public boolean hasParameter()
 		{
-			return (this.names != null && !this.names.isEmpty());
+			return (this.parameterValues != null && !this.parameterValues.isEmpty());
 		}
 
-		public List<String> getNames()
+		public List<ParameterValue> getParameterValues()
 		{
+			return parameterValues;
+		}
+
+		public void setParameterValues(List<ParameterValue> parameterValues)
+		{
+			this.parameterValues = parameterValues;
+		}
+
+		/**
+		 * 获取参数名列表。
+		 * 
+		 * @return
+		 */
+		public List<String> getParameterNames()
+		{
+			List<String> names = new ArrayList<String>(
+					(this.parameterValues == null ? 0 : this.parameterValues.size()));
+			addParameterNames(names);
+
 			return names;
 		}
 
-		public void setNames(List<String> names)
+		/**
+		 * 如果有参数，则将它们添加至给定列表。
+		 * 
+		 * @param list
+		 */
+		public void addParameterNames(List<String> list)
 		{
-			this.names = names;
+			if (this.parameterValues == null)
+				return;
+
+			for (ParameterValue pv : this.parameterValues)
+				list.add(pv.getName());
 		}
 
-		public List<Object> getValues()
+		/**
+		 * 如果有参数，则将它们添加至给定映射表。
+		 * 
+		 * @param map
+		 */
+		public void addParameterValues(Map<String, Object> map)
 		{
-			return values;
-		}
+			if (this.parameterValues == null)
+				return;
 
-		public void setValues(List<Object> values)
-		{
-			this.values = values;
+			for (ParameterValue pv : this.parameterValues)
+				map.put(pv.getName(), pv.getValue());
 		}
 
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [sql=" + sql + ", names=" + names + ", values=" + values + "]";
+			return getClass().getSimpleName() + " [sql=" + sql + ", parameterValues=" + parameterValues + "]";
+		}
+	}
+
+	/**
+	 * SQL参数值。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class ParameterValue
+	{
+		/** 参数名 */
+		private String name;
+
+		/** 参数值 */
+		private Object value;
+
+		public ParameterValue()
+		{
+			super();
+		}
+
+		public ParameterValue(String name, Object value)
+		{
+			super();
+			this.name = name;
+			this.value = value;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		public Object getValue()
+		{
+			return value;
+		}
+
+		public void setValue(Object value)
+		{
+			this.value = value;
+		}
+
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName() + " [name=" + name + ", value=" + value + "]";
 		}
 	}
 }

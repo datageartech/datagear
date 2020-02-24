@@ -628,7 +628,7 @@ public class SqlDataSetSupport
 	 */
 	public List<String> resolveParams(String sql)
 	{
-		return getParameterSqlResolver().resolveParams(sql);
+		return getParameterSqlResolver().resolve(sql);
 	}
 
 	/**
