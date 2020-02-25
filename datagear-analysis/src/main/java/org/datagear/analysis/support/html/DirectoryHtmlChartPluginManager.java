@@ -19,6 +19,7 @@ import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.ConcurrentChartPluginManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.version.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +143,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	public <T extends RenderContext> ChartPlugin<T> get(String id)
 	{
 		readCheckForReload();
-	
+
 		return super.get(id);
 	}
 
@@ -150,7 +151,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	public <T extends RenderContext> List<ChartPlugin<T>> getAll(Class<? extends T> renderContextType)
 	{
 		readCheckForReload();
-	
+
 		return super.getAll(renderContextType);
 	}
 
@@ -158,7 +159,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	public List<ChartPlugin<?>> getAll()
 	{
 		readCheckForReload();
-	
+
 		return super.getAll();
 	}
 
@@ -203,13 +204,13 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		readCheckForReload();
 
 		ReadLock readLock = this.lock.readLock();
-	
+
 		try
 		{
 			readLock.lock();
-	
+
 			File tmpDirectory = FileUtil.createTempDirectory();
-	
+
 			for (String id : ids)
 			{
 				File pluginFile = getPluginFile(id);
@@ -217,7 +218,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 				if (pluginFile.exists())
 					IOUtil.copy(pluginFile, tmpDirectory, true);
 			}
-	
+
 			IOUtil.writeFileToZipOutputStream(out, tmpDirectory, "");
 		}
 		finally
@@ -286,11 +287,11 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			return null;
 
 		String pluginFileName = uploadPluginFile.getName();
-		
+
 		File sameName = FileUtil.getFile(this.directory, pluginFileName, false);
-		
-		//不存在同名的文件，则拷贝并执行加载
-		if(!sameName.exists())
+
+		// 不存在同名的文件，则拷贝并执行加载
+		if (!sameName.exists())
 		{
 			IOUtil.copy(uploadPluginFile, this.directory, true);
 			return registerHtmlChartPlugin(uploadPlugin, sameName);
@@ -430,8 +431,10 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 					hasDelete = true;
 					break;
 				}
-				else if (fileCheckTime.isTimeout())
+
+				if (fileCheckTime.isTimeout())
 					reloads.add(fileCheckTime);
+
 			}
 
 			if (hasDelete)
@@ -493,7 +496,8 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	/**
 	 * 加载并注册插件，如果注册失败，将返回{@code null}。
 	 * 
-	 * @param file {@linkplain #directory}目录下的一个文件
+	 * @param file
+	 *            {@linkplain #directory}目录下的一个文件
 	 * @return
 	 */
 	protected HtmlChartPlugin<?> loadAndRegisterHtmlChartPlugin(File file)
@@ -503,7 +507,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			HtmlChartPlugin<?> plugin = this.htmlChartPluginLoader.loadFile(file);
 			return registerHtmlChartPlugin(plugin, file);
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			if (LOGGER.isErrorEnabled())
 				LOGGER.error(
@@ -518,7 +522,8 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 * 注册插件，如果注册失败，将返回{@code null}。
 	 * 
 	 * @param plugin
-	 * @param file   {@linkplain #directory}目录下的一个文件
+	 * @param file
+	 *            {@linkplain #directory}目录下的一个文件
 	 * @return
 	 */
 	protected HtmlChartPlugin<?> registerHtmlChartPlugin(HtmlChartPlugin<?> plugin, File file)
@@ -540,6 +545,16 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		return plugin;
 	}
 
+	@Override
+	protected boolean canReplaceForSameId(ChartPlugin<?> my, Version myVersion, ChartPlugin<?> old, Version oldVersion)
+	{
+		// 调试模式下总替换
+		if (LOGGER.isDebugEnabled())
+			return true;
+
+		return super.canReplaceForSameId(my, myVersion, old, oldVersion);
+	}
+
 	/**
 	 * 生成{@linkplain #directory}目录下的唯一插件文件名。
 	 * 
@@ -549,10 +564,10 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	protected String generateUniquePluginFileName(File originPluginFile)
 	{
 		String originName = originPluginFile.getName();
-	
+
 		String prefix = originName;
 		String ext = "";
-	
+
 		if (!originPluginFile.isDirectory())
 		{
 			int eidx = originName.lastIndexOf('.');
@@ -562,17 +577,17 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 				ext = originName.substring(eidx);
 			}
 		}
-	
+
 		String name = prefix + ext;
 		for (int i = 1;; i++)
 		{
 			File file = FileUtil.getFile(this.directory, name);
 			if (!file.exists())
 				break;
-	
+
 			name = prefix + "_" + i + ext;
 		}
-	
+
 		return name;
 	}
 
@@ -604,13 +619,13 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	protected static class FileCheckTime
 	{
 		private File file;
-		private volatile long checkTime;
+		private volatile long lastModified;
 
 		public FileCheckTime(File file)
 		{
 			super();
 			this.file = file;
-			this.checkTime = System.currentTimeMillis();
+			this.lastModified = resolveLastModified(this.file);
 		}
 
 		public File getFile()
@@ -621,7 +636,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		public void setFile(File file)
 		{
 			this.file = file;
-			this.checkTime = resolveLastModified(file);
+			this.lastModified = resolveLastModified(file);
 		}
 
 		public boolean isFileExists()
@@ -629,32 +644,21 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			return this.file.exists();
 		}
 
-		public long getCheckTime()
-		{
-			return checkTime;
-		}
-
-		public void setCheckTime(long checkTime)
-		{
-			this.checkTime = checkTime;
-		}
-
-		public long updateCheckTime()
-		{
-			this.checkTime = System.currentTimeMillis();
-			return this.checkTime;
-		}
-
 		public boolean isTimeout()
 		{
 			long fileModified = resolveLastModified(this.file);
-			return this.checkTime < fileModified;
+
+			boolean timeout = (fileModified > this.lastModified);
+
+			this.lastModified = fileModified;
+
+			return timeout;
 		}
 
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [file=" + file + ", checkTime=" + checkTime + "]";
+			return getClass().getSimpleName() + " [file=" + file + ", lastModified=" + lastModified + "]";
 		}
 
 		protected long resolveLastModified(File file)

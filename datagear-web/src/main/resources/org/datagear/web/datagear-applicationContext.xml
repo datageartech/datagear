@@ -288,19 +288,35 @@
 			<list>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="jquery" />
-					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.js'&gt;&lt;/script&gt;" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='jquery' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.js'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="echarts" />
-					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/echarts-4.6.0/echarts.js'&gt;&lt;/script&gt;" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='echarts' src='$CONTEXTPATH/static/script/echarts-4.6.0/echarts.js'&gt;&lt;/script&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
+					<property name="name" value="echarts-map-china" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='echarts-map-china' src='$CONTEXTPATH/static/script/echarts-map/china.js'&gt;&lt;/script&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
+					<property name="name" value="echarts-map-china-province" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='echarts-map-china-province' src='$CONTEXTPATH/static/script/echarts-map/china-province.js'&gt;&lt;/script&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
+					<property name="name" value="echarts-map-china-contour" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='echarts-map-china-contour' src='$CONTEXTPATH/static/script/echarts-map/china-contour.js'&gt;&lt;/script&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
+					<property name="name" value="echarts-map-world" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='echarts-map-world' src='$CONTEXTPATH/static/script/echarts-map/world.js'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="chart-util" />
-					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/datagear-chart-util.js'&gt;&lt;/script&gt;" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='chart-util' src='$CONTEXTPATH/static/script/datagear-chart-util.js'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="dashboard-renderer" />
-					<property name="content" value="&lt;script type='text/javascript' src='$CONTEXTPATH/static/script/datagear-dashboard-renderer.js'&gt;&lt;/script&gt;" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='dashboard-renderer' src='$CONTEXTPATH/static/script/datagear-dashboard-renderer.js'&gt;&lt;/script&gt;" />
 				</bean>
 			</list>
 		</property>

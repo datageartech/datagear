@@ -167,6 +167,12 @@ CREATE TABLE T_ANALYSIS_2
 	COL_Y FLOAT(10,2) NOT NULL
 );
 
+CREATE TABLE T_ANALYSIS_MAP
+(
+    COL_NAME VARCHAR(50) NOT NULL,
+    COL_VALUE FLOAT(10,2) NOT NULL
+);
+
 /*
 truncate table t_auto_generated_keys;
 truncate table t_data_export;

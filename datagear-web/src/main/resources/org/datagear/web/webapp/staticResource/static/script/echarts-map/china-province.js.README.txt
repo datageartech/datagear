@@ -1,0 +1,1 @@
+china-province.js由echarts各省地图JS文件合并而成

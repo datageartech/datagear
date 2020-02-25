@@ -246,7 +246,8 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * {@code my}是否可替换{@code old}。
 	 * 
 	 * @param my
-	 * @param old 允许为{@code null}
+	 * @param old
+	 *            允许为{@code null}
 	 * @return
 	 */
 	protected boolean canReplaceForSameId(ChartPlugin<?> my, ChartPlugin<?> old)
@@ -281,7 +282,25 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 			}
 		}
 
-		// 没定义版本号的总是替换，便于自定义插件的替换调试
+		replace = canReplaceForSameId(my, myVersion, old, oldVersion);
+
+		return replace;
+	}
+
+	/**
+	 * {@code my}是否可替换{@code old}。
+	 * 
+	 * @param my
+	 * @param myVersion
+	 * @param old
+	 * @param oldVersion
+	 * @return
+	 */
+	protected boolean canReplaceForSameId(ChartPlugin<?> my, Version myVersion, ChartPlugin<?> old, Version oldVersion)
+	{
+		boolean replace = false;
+
+		// 没定义版本号的总是替换，便于调试和添加覆盖自定义插件
 		if (StringUtil.isEmpty(oldVersion) && StringUtil.isEmpty(myVersion))
 			replace = true;
 		else if (StringUtil.isEmpty(oldVersion))

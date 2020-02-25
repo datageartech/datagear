@@ -687,53 +687,47 @@
 			},
 			"map" : {
 				"itemStyle" : {
-					"normal" : {
-						"areaColor" : chartTheme.colorThird,
-						"borderColor" : chartTheme.colorFourth,
-						"borderWidth" : 0.5
+					"areaColor" : chartTheme.colorFifth,
+					"borderColor" : chartTheme.colorThird,
+					"borderWidth" : 0.5
+				},
+				"label" : {
+					"color" : chartTheme.colorSecond
+				},
+				"emphasis" :
+				{
+					"label":
+					{
+						"color" : chartTheme.highlightTheme.color
 					},
-					"emphasis" : {
+					"itemStyle":
+					{
 						"areaColor" : chartTheme.highlightTheme.backgroundColor,
 						"borderColor" : chartTheme.highlightTheme.borderColor,
 						"borderWidth" : 1
-					}
-				},
-				"label" : {
-					"normal" : {
-						"textStyle" : {
-							"color" : chartTheme.colorSecond
-						}
-					},
-					"emphasis" : {
-						"textStyle" : {
-							"color" : chartTheme.colorThird
-						}
 					}
 				}
 			},
 			"geo" : {
 				"itemStyle" : {
-					"normal" : {
-						"areaColor" : chartTheme.colorThird,
-						"borderColor" : chartTheme.colorFourth,
-						"borderWidth" : 0.5
+					"areaColor" : chartTheme.colorFifth,
+					"borderColor" : chartTheme.colorThird,
+					"borderWidth" : 0.5
+				},
+				"label" : {
+					"color" : chartTheme.colorSecond
+				},
+				"emphasis" :
+				{
+					"label":
+					{
+						"color" : chartTheme.highlightTheme.color
 					},
-					"emphasis" : {
+					"itemStyle":
+					{
 						"areaColor" : chartTheme.highlightTheme.backgroundColor,
 						"borderColor" : chartTheme.highlightTheme.borderColor,
 						"borderWidth" : 1
-					}
-				},
-				"label" : {
-					"normal" : {
-						"textStyle" : {
-							"color" : chartTheme.colorSecond
-						}
-					},
-					"emphasis" : {
-						"textStyle" : {
-							"color" : chartTheme.colorThird
-						}
 					}
 				}
 			},
@@ -953,16 +947,24 @@
 				}
 			},
 			"visualMap" : {
-				"color" : chartTheme.graphColors
+				"inRange" :
+				{
+					"color" : ['#008B45', '#FFD700', '#FF4500']
+				},
+				"backgroundColor" : chartTheme.backgroundColor,
+				"textStyle" :
+				{
+					"color" : chartTheme.colorSecond
+				}
 			},
 			"dataZoom" : {
-				"backgroundColor" : chartTheme.backgroundColor,
+				"backgroundColor" : "red",
 				"dataBackgroundColor" : chartTheme.colorFourth,
 				"fillerColor" : chartTheme.colorThird,
-				"handleColor" : chartTheme.colorThird,
+				"handleColor" : chartTheme.colorSecond,
 				"handleSize" : "100%",
 				"textStyle" : {
-					"color" : chartTheme.colorThird
+					"color" : chartTheme.colorSecond
 				}
 			},
 			"markPoint" : {
