@@ -949,7 +949,7 @@
 			"visualMap" : {
 				"inRange" :
 				{
-					"color" : ['#008B45', '#FFD700', '#FF4500']
+					"color" : ['#58A52D', '#FFD700', '#FF4500']
 				},
 				"backgroundColor" : chartTheme.backgroundColor,
 				"textStyle" :
