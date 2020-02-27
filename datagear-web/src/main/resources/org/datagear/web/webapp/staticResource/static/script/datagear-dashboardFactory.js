@@ -105,7 +105,7 @@
 			}
 			catch(e)
 			{
-				chartFactory.logError(e);
+				chartFactory.logException(e);
 			}
 		}
 	};
@@ -232,7 +232,7 @@
 			}
 			catch(e)
 			{
-				chartFactory.logError(e);
+				chartFactory.logException(e);
 			}
 		}
 	};

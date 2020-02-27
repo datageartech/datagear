@@ -201,6 +201,25 @@
 	};
 	
 	/**
+	 * 获取/设置扩展值。
+	 * 图表插件渲染器可以用此函数在render()、update()间传递数据，避免与图表本身的属性命名冲突。
+	 * 
+	 * @param name 扩展名
+	 * @param value 要设置的扩展值，可选，不设置则执行获取操作
+	 */
+	chartBase.extValue = function(name, value)
+	{
+		if(value == undefined)
+			return (this._extValues ? this._extValues[name] : undefined);
+		else
+		{
+			if(!this._extValues)
+				this._extValues = {};
+			this._extValues[name] = value;
+		}
+	};
+	
+	/**
 	 * 获取图表数据集对象数组。
 	 */
 	chartBase.chartDataSetsNonNull = function()
@@ -531,7 +550,7 @@
 		
 		this._echartsInstance = instance;
 		
-		return echartsObj;
+		return instance;
 	};
 	
 	/**
@@ -540,6 +559,17 @@
 	chartBase.echartsInstance = function()
 	{
 		return this._echartsInstance;
+	};
+	
+	/**
+	 * 设置echarts实例的选项值。
+	 * 
+	 * @params options
+	 */
+	chartBase.echartsOptions = function(options)
+	{
+		var instance = this.echartsInstance();
+		instance.setOption(options);
 	};
 	
 	/**
@@ -623,101 +653,114 @@
 			},
 			"bar" : {
 				"itemStyle" : {
-					"normal" : {
+					"barBorderWidth" : 0,
+					"barBorderColor" : chartTheme.colorFourth
+				},
+				"emphasis" : {
+					"itemStyle" : {
 						"barBorderWidth" : 0,
-						"barBorderColor" : chartTheme.colorFourth
-					},
-					"emphasis" : {
-						"barBorderWidth" : 0,
-						"barBorderColor" : chartTheme.colorFourth
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+				        "shadowOffsetY" : 0,
+						"barBorderColor" : chartTheme.colorFifth
 					}
 				}
 			},
 			"pie" : {
 				"itemStyle" : {
-					"normal" : {
+					"borderWidth" : 0,
+					"borderColor" : chartTheme.colorFourth
+				},
+				"emphasis" :
+				{
+					"itemStyle":
+					{
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.colorThird,
 						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
-					},
-					"emphasis" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
+						"borderColor" : chartTheme.colorThird
 					}
 				}
 			},
 			"scatter" : {
 				"itemStyle" : {
-					"normal" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
-					},
-					"emphasis" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
+					"barBorderWidth" : 0,
+					"barBorderColor" : chartTheme.colorFourth
+				},
+				"emphasis" : {
+					"itemStyle" : {
+						"barBorderWidth" : 0,
+						"barBorderColor" : chartTheme.colorThird
 					}
 				}
 			},
 			"boxplot" : {
 				"itemStyle" : {
-					"normal" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
-					},
-					"emphasis" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
+					"borderWidth" : 0,
+					"borderColor" : chartTheme.colorFourth
+				},
+				"emphasis" : {
+					"itemStyle" : {
+						"barBorderWidth" : 0,
+						"barBorderColor" : chartTheme.colorThird
 					}
 				}
 			},
 			"parallel" : {
 				"itemStyle" : {
-					"normal" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
-					},
-					"emphasis" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
+					"borderWidth" : 0,
+					"borderColor" : chartTheme.colorFourth
+				},
+				"emphasis" : {
+					"itemStyle" : {
+						"barBorderWidth" : 0,
+						"barBorderColor" : chartTheme.colorThird
 					}
 				}
 			},
 			"sankey" : {
 				"itemStyle" : {
-					"normal" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
-					},
-					"emphasis" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
+					"borderWidth" : 0,
+					"borderColor" : chartTheme.colorFourth
+				},
+				"emphasis" : {
+					"itemStyle" : {
+						"barBorderWidth" : 0,
+						"barBorderColor" : chartTheme.colorThird
 					}
 				}
 			},
 			"funnel" : {
-				"label" : { "color" : chartTheme.color },
+				"label" : {
+					"color" : chartTheme.colorSecond,
+					"show": true,
+	                "position": "inside"
+	            },
 				"itemStyle" : {
 					"borderColor" : chartTheme.colorFourth,
-					"borderWidth" : 0,
-					"normal" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
-					},
-					"emphasis" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
+					"borderWidth" : 0
+				},
+				"emphasis" : {
+					"label" : {
+	                    "fontSize" : 20
+	                },
+					"itemStyle" : {
+						"barBorderWidth" : 0,
+						"barBorderColor" : chartTheme.colorThird
 					}
 				}
 			},
 			"gauge" : {
 				"title" : { color : chartTheme.colorSecond },
 				"itemStyle" : {
-					"normal" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
-					},
-					"emphasis" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorFourth
+					"borderColor" : chartTheme.colorFourth,
+					"borderWidth" : 0
+				},
+				"emphasis" : {
+					"itemStyle" : {
+						"barBorderWidth" : 0,
+						"barBorderColor" : chartTheme.colorThird
 					}
 				}
 			},
