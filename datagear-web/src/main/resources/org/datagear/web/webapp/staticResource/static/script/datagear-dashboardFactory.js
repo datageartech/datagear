@@ -65,6 +65,21 @@
 			dashboard.listener = listener;
 	};
 	
+	/**图表状态：等待render*/
+	dashboardFactory.CHART_STATUS_WAIT_RENDER = "WAIT_RENDER";
+	
+	/**图表状态：完成render*/
+	dashboardFactory.CHART_STATUS_FINISH_RENDER = "FINISH_RENDER";
+	
+	/**图表状态：等待update*/
+	dashboardFactory.CHART_STATUS_WAIT_UPDATE = "WAIT_UPDATE";
+	
+	/**图表状态：完成update*/
+	dashboardFactory.CHART_STATUS_FINISH_UPDATE = "FINISH_UPDATE";
+	
+	/**图表状态：终止*/
+	dashboardFactory.CHART_STATUS_TERMINATE = "TERMINATE";
+	
 	/**
 	 * 渲染看板。
 	 */
@@ -296,6 +311,90 @@
 		}
 		
 		return -1;
+	};
+	
+	/**
+	 * 图表状态是否为/设置为：等待render。
+	 * 
+	 * @param chart 图表对象
+	 * @param set 为undefined时执行读取操作，否则执行设置操作
+	 */
+	dashboardBase.chartStatusWaitRender = function(chart, set)
+	{
+		if(set == undefined)
+			return (chart._CHART_STATUS == dashboardFactory.CHART_STATUS_WAIT_RENDER);
+		else
+			chart._CHART_STATUS = dashboardFactory.CHART_STATUS_WAIT_RENDER;
+	};
+	
+	/**
+	 * 图表状态是否为/设置为：完成render。
+	 * 
+	 * @param chart 图表对象
+	 * @param set 为undefined时执行读取操作，否则执行设置操作
+	 */
+	dashboardBase.chartStatusFinishRender = function(chart, set)
+	{
+		if(set == undefined)
+			return (chart._CHART_STATUS == dashboardFactory.CHART_STATUS_FINISH_RENDER);
+		else
+			chart._CHART_STATUS = dashboardFactory.CHART_STATUS_FINISH_RENDER;
+	};
+	
+	/**
+	 * 图表状态是否为/设置为：等待update。
+	 * 
+	 * @param chart 图表对象
+	 * @param set 为undefined时执行读取操作，否则执行设置操作
+	 */
+	dashboardBase.chartStatusWaitUpdate = function(chart, set)
+	{
+		if(set == undefined)
+			return (chart._CHART_STATUS == dashboardFactory.CHART_STATUS_WAIT_UPDATE);
+		else
+			chart._CHART_STATUS = dashboardFactory.CHART_STATUS_WAIT_UPDATE;
+	};
+
+	/**
+	 * 图表状态是否为/设置为：完成update。
+	 * 
+	 * @param chart 图表对象
+	 * @param set 为undefined时执行读取操作，否则执行设置操作
+	 */
+	dashboardBase.chartStatusFinishUpdate = function(chart, set)
+	{
+		if(set == undefined)
+			return (chart._CHART_STATUS == dashboardFactory.CHART_STATUS_FINISH_UPDATE);
+		else
+			chart._CHART_STATUS = dashboardFactory.CHART_STATUS_FINISH_UPDATE;
+	};
+
+	/**
+	 * 图表状态是否为/设置为：终止。
+	 * 
+	 * @param chart 图表对象
+	 * @param set 为undefined时执行读取操作，否则执行设置操作
+	 */
+	dashboardBase.chartStatusTerminate = function(chart, set)
+	{
+		if(set == undefined)
+			return (chart._CHART_STATUS == dashboardFactory.CHART_STATUS_TERMINATE);
+		else
+			chart._CHART_STATUS = dashboardFactory.CHART_STATUS_TERMINATE;
+	};
+	
+	/**
+	 * 获取/设置图表状态。
+	 * 
+	 * @param chart 图表对象
+	 * @param status 要设置的状态，可选，不设置则执行获取操作
+	 */
+	dashboardBase.chartStatus = function(chart, status)
+	{
+		if(status == undefined)
+			return (chart._CHART_STATUS || dashboardFactory.CHART_STATUS_WAIT_RENDER);
+		else
+			chart._CHART_STATUS = (status || dashboardFactory.CHART_STATUS_WAIT_RENDER);
 	};
 	
 	/**
