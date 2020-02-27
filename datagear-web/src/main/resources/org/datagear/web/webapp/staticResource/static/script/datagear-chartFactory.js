@@ -1134,7 +1134,7 @@
 		
 		try
 		{
-			if(typeof $ != "undefined" && $.parseJSON)
+			if(typeof($) != "undefined" && $.parseJSON)
 				return $.parseJSON(str);
 			else
 				return JSON.parse(str);

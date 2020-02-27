@@ -845,7 +845,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * <p>
 	 * <code>
 	 * <pre>
-	 * if(typeof $ != "undefined")
+	 * if(typeof($) != "undefined")
 	 * 	$(document).ready(function(){ dashboard.render(); });
 	 * else
 	 * 	window.onload = function(){ dashboard.render(); };
@@ -864,7 +864,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		if (StringUtil.isEmpty(varName))
 			throw new IllegalArgumentException();
 
-		out.write("if(typeof $ != \"undefined\")");
+		out.write("if(typeof($) != \"undefined\")");
 		writeNewLine(out);
 		out.write("  $(document).ready(function(){ " + varName + "." + this.dashboardRenderFuncName + "(); });");
 		writeNewLine(out);
