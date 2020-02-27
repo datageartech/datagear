@@ -216,7 +216,7 @@
 	 */
 	chartBase.chartDataSetFirst = function()
 	{
-		return this.indexChartDataSet(0);
+		return this.chartDataSetAt(0);
 	};
 	
 	/**
@@ -327,7 +327,7 @@
 	 */
 	chartBase.resultFirst = function(results)
 	{
-		return this.indexResult(results, 0);
+		return this.resultAt(results, 0);
 	};
 	
 	/**

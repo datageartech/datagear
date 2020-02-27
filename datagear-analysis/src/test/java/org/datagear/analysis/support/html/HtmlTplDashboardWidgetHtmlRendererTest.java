@@ -88,7 +88,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 
 		// 看板属性，双引号
 		{
-			String template = "<html dg-dashboard-var=\"myDashboard\" dg-dashboard-renderer=\"myRenderer\" "
+			String template = "<html dg-dashboard-var=\"myDashboard\" dg-dashboard-factory=\"myDashboardFactory\" "
 					+ " dg-dashboard-import-exclude=\"jquery\"><head></head><body></body></html>";
 
 			StringWriter out = new StringWriter();
@@ -102,19 +102,19 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(out);
 
 			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			Assert.assertEquals("myRenderer", dashboardInfo.getRendererVar());
+			Assert.assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
 			Assert.assertEquals("jquery", dashboardInfo.getImportExclude());
 			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			Assert.assertTrue(html.contains("var myDashboard"));
-			Assert.assertTrue(html.contains("myRenderer.render(myDashboard);"));
+			Assert.assertTrue(html.contains("myDashboardFactory.init(myDashboard);"));
 		}
 
 		// 看板属性，无引号
 		{
-			String template = "<html dg-dashboard-var=myDashboard dg-dashboard-renderer=myRenderer "
+			String template = "<html dg-dashboard-var=myDashboard dg-dashboard-factory=myDashboardFactory "
 					+ " dg-dashboard-import-exclude=jquery><head></head><body></body></html>";
 
 			StringWriter out = new StringWriter();
@@ -128,19 +128,19 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(out);
 
 			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			Assert.assertEquals("myRenderer", dashboardInfo.getRendererVar());
+			Assert.assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
 			Assert.assertEquals("jquery", dashboardInfo.getImportExclude());
 			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			Assert.assertTrue(html.contains("var myDashboard"));
-			Assert.assertTrue(html.contains("myRenderer.render(myDashboard);"));
+			Assert.assertTrue(html.contains("myDashboardFactory.init(myDashboard);"));
 		}
 
 		// 看板属性，单引号
 		{
-			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-renderer='myRenderer' "
+			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-factory='myDashboardFactory' "
 					+ " dg-dashboard-import-exclude='jquery'><head></head><body></body></html>";
 
 			StringWriter out = new StringWriter();
@@ -154,19 +154,19 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(out);
 
 			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			Assert.assertEquals("myRenderer", dashboardInfo.getRendererVar());
+			Assert.assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
 			Assert.assertEquals("jquery", dashboardInfo.getImportExclude());
 			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			Assert.assertTrue(html.contains("var myDashboard"));
-			Assert.assertTrue(html.contains("myRenderer.render(myDashboard);"));
+			Assert.assertTrue(html.contains("myDashboardFactory.init(myDashboard);"));
 		}
 
 		// 看板属性，多个导入排除值
 		{
-			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-renderer='myRenderer' "
+			String template = "<html dg-dashboard-var='myDashboard' dg-dashboard-factory='myDashboardFactory' "
 					+ " dg-dashboard-import-exclude='jquery,theme, style'><head></head><body></body></html>";
 
 			StringWriter out = new StringWriter();
@@ -180,14 +180,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(out);
 
 			Assert.assertEquals("myDashboard", dashboardInfo.getDashboardVar());
-			Assert.assertEquals("myRenderer", dashboardInfo.getRendererVar());
+			Assert.assertEquals("myDashboardFactory", dashboardInfo.getDashboardFactoryVar());
 			Assert.assertEquals("jquery,theme, style", dashboardInfo.getImportExclude());
 			Assert.assertFalse(html.contains(IMPORT_CONTENT_JQUERY));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertFalse(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertFalse(html.contains(IMPORT_CONTENT_STYLE));
 			Assert.assertTrue(html.contains("var myDashboard"));
-			Assert.assertTrue(html.contains("myRenderer.render(myDashboard);"));
+			Assert.assertTrue(html.contains("myDashboardFactory.init(myDashboard);"));
 		}
 
 		// 看板属性，默认
@@ -205,14 +205,14 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			String html = getHtmlWithPrint(out);
 
 			Assert.assertNull(dashboardInfo.getDashboardVar());
-			Assert.assertNull(dashboardInfo.getRendererVar());
+			Assert.assertNull(dashboardInfo.getDashboardFactoryVar());
 			Assert.assertNull(dashboardInfo.getImportExclude());
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_JQUERY));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_UTIL));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_THEME));
 			Assert.assertTrue(html.contains(IMPORT_CONTENT_STYLE));
 			Assert.assertTrue(html.contains("var dashboard"));
-			Assert.assertTrue(html.contains("dashboardRenderer.render(dashboard);"));
+			Assert.assertTrue(html.contains("dashboardFactory.init(dashboard);"));
 		}
 
 		// 图表属性
@@ -285,8 +285,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlDashboard dashboard = this.renderer.createHtmlDashboard(renderContext, dashboardWidget);
-			this.renderer.renderHtmlDashboard(renderContext, dashboard,
-					IOUtil.getReader(template));
+			this.renderer.renderHtmlDashboard(renderContext, dashboard, IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
 
@@ -301,8 +300,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
 			HtmlDashboard dashboard = this.renderer.createHtmlDashboard(renderContext, dashboardWidget);
-			this.renderer.renderHtmlDashboard(renderContext, dashboard,
-					IOUtil.getReader(template));
+			this.renderer.renderHtmlDashboard(renderContext, dashboard, IOUtil.getReader(template));
 
 			String html = getHtmlWithPrint(out);
 

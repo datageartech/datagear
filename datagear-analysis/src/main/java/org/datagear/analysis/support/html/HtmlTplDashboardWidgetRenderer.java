@@ -36,23 +36,21 @@ import org.datagear.util.StringUtil;
 /**
  * 抽象{@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 此类的{@linkplain #writeHtmlDashboardJSRender(Writer, HtmlDashboard, String)}方法的JS看板渲染逻辑为：
+ * 此类的{@linkplain #writeHtmlDashboardJSFactoryInit(Writer, HtmlDashboard, String)}方法的JS看板渲染逻辑为：
  * </p>
  * <code>
  * <pre>
- * window.onload = function(){
- *   dashboardRenderer.render(dashboard);
- * };
+ * dashboardFactory.init(dashboard);
  * </pre>
  * </code>
  * <p>
- * 因此，看板页面应该定义如下JS看板渲染器对象：
+ * 因此，看板页面应该定义如下JS看板工厂对象：
  * </p>
  * <code>
  * <pre>
- * var dashboardRenderer =
+ * var dashboardFactory =
  * {
- *   render : function(dashboard)
+ *   init : function(dashboard)
  *   {
  *     ...
  *   }
@@ -60,7 +58,7 @@ import org.datagear.util.StringUtil;
  * </pre>
  * </code>
  * <p>
- * 子类在调用此方法时可以传入自定义JS看板渲染器对象的变量名，默认为{@linkplain #getDefaultDashboardRendererVar()}。
+ * 子类在调用此方法时可以传入自定义JS看板工厂对象的变量名，默认为{@linkplain #getDefaultDashboardFactoryVar()}。
  * </p>
  * <p>
  * 此类的{@linkplain #getHtmlDashboardImports()}的{@linkplain HtmlDashboardImport#getContent()}可以包含{@linkplain #getContextPathPlaceholder()}占位符，
@@ -81,7 +79,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	public static final String DEFAULT_DASHBOARD_VAR_PLACE_HOLDER = "$DASHBOARD";
 
-	public static final String DEFAULT_DASHBOARD_RENDERER_VAR = "dashboardRenderer";
+	public static final String DEFAULT_DASHBOARD_FACTORY_VAR = "dashboardFactory";
 
 	public static final String DEFAULT_THEME_IMPORT_NAME = "dg-theme";
 
@@ -133,11 +131,14 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	/** 看板变量占位符 */
 	private String dashboardVarPlaceholder = DEFAULT_DASHBOARD_VAR_PLACE_HOLDER;
 
-	/** 默认JS看板渲染器变量名 */
-	private String defaultDashboardRendererVar = DEFAULT_DASHBOARD_RENDERER_VAR;
+	/** 默认JS看板工厂变量名 */
+	private String defaultDashboardFactoryVar = DEFAULT_DASHBOARD_FACTORY_VAR;
 
-	/** JS看板渲染器的渲染函数名 */
-	private String dashboardRendererRenderFunctionName = "render";
+	/** JS看板工厂初始化函数名 */
+	private String dashboardFactoryInitFuncName = "init";
+
+	/** 看板对象渲染函数名 */
+	private String dashboardRenderFuncName = "render";
 
 	/** 主题导入名 */
 	private String themeImportName = DEFAULT_THEME_IMPORT_NAME;
@@ -302,24 +303,34 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		this.dashboardVarPlaceholder = dashboardVarPlaceholder;
 	}
 
-	public String getDefaultDashboardRendererVar()
+	public String getDefaultDashboardFactoryVar()
 	{
-		return defaultDashboardRendererVar;
+		return defaultDashboardFactoryVar;
 	}
 
-	public void setDefaultDashboardRendererVar(String defaultDashboardRendererVar)
+	public void setDefaultDashboardFactoryVar(String defaultDashboardFactoryVar)
 	{
-		this.defaultDashboardRendererVar = defaultDashboardRendererVar;
+		this.defaultDashboardFactoryVar = defaultDashboardFactoryVar;
 	}
 
-	public String getDashboardRendererRenderFunctionName()
+	public String getDashboardFactoryInitFuncName()
 	{
-		return dashboardRendererRenderFunctionName;
+		return dashboardFactoryInitFuncName;
 	}
 
-	public void setDashboardRendererRenderFunctionName(String dashboardRendererRenderFunctionName)
+	public void setDashboardFactoryInitFuncName(String dashboardFactoryInitFuncName)
 	{
-		this.dashboardRendererRenderFunctionName = dashboardRendererRenderFunctionName;
+		this.dashboardFactoryInitFuncName = dashboardFactoryInitFuncName;
+	}
+
+	public String getDashboardRenderFuncName()
+	{
+		return dashboardRenderFuncName;
+	}
+
+	public void setDashboardRenderFuncName(String dashboardRenderFuncName)
+	{
+		this.dashboardRenderFuncName = dashboardRenderFuncName;
 	}
 
 	public String getThemeImportName()
@@ -657,7 +668,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			{
 				chartWidget = this.chartWidgetSource.getChartWidget(id);
 			}
-			catch(Throwable t)
+			catch (Throwable t)
 			{
 				chartWidget = createHtmlChartWidgetForGetException(id, t);
 			}
@@ -799,24 +810,22 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
-	 * 写{@linkplain HtmlDashboard} JS渲染代码：
+	 * 写{@linkplain HtmlDashboard} JS工厂初始化代码：
 	 * <p>
 	 * <code>
 	 * <pre>
-	 * window.onload = function(){
-	 * dashboardRenderer.render();
-	 * };
+	 * dashboardFactory.init(dashboard);
 	 * </pre>
 	 * </code>
 	 * </p>
 	 * 
 	 * @param out
 	 * @param dashboard
-	 * @param dashboardRendererVar
-	 *            如果为{@code null}，则使用{@linkplain #getDefaultDashboardRendererVar()}
+	 * @param dashboardFactoryVar
+	 *            如果为{@code null}，则使用{@linkplain #getDefaultDashboardFactoryVar()}
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSRender(Writer out, HtmlDashboard dashboard, String dashboardRendererVar)
+	protected void writeHtmlDashboardJSFactoryInit(Writer out, HtmlDashboard dashboard, String dashboardFactoryVar)
 			throws IOException
 	{
 		String varName = dashboard.getVarName();
@@ -824,16 +833,44 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		if (StringUtil.isEmpty(varName))
 			throw new IllegalArgumentException();
 
-		if (StringUtil.isEmpty(dashboardRendererVar))
-			dashboardRendererVar = this.defaultDashboardRendererVar;
+		if (StringUtil.isEmpty(dashboardFactoryVar))
+			dashboardFactoryVar = this.defaultDashboardFactoryVar;
 
-		out.write("window.onload = function(){");
+		out.write(dashboardFactoryVar + "." + this.dashboardFactoryInitFuncName + "(" + varName + ");");
 		writeNewLine(out);
+	}
 
-		out.write("  " + dashboardRendererVar + "." + this.dashboardRendererRenderFunctionName + "(" + varName + ");");
+	/**
+	 * 写{@linkplain HtmlDashboard} JS渲染代码：
+	 * <p>
+	 * <code>
+	 * <pre>
+	 * if(typeof $ != "undefined")
+	 * 	$(document).ready(function(){ dashboard.render(); });
+	 * else
+	 * 	window.onload = function(){ dashboard.render(); };
+	 * </pre>
+	 * </code>
+	 * </p>
+	 * 
+	 * @param out
+	 * @param dashboard
+	 * @throws IOException
+	 */
+	protected void writeHtmlDashboardJSRender(Writer out, HtmlDashboard dashboard) throws IOException
+	{
+		String varName = dashboard.getVarName();
+
+		if (StringUtil.isEmpty(varName))
+			throw new IllegalArgumentException();
+
+		out.write("if(typeof $ != \"undefined\")");
 		writeNewLine(out);
-
-		out.write("};");
+		out.write("  $(document).ready(function(){ " + varName + "." + this.dashboardRenderFuncName + "(); });");
+		writeNewLine(out);
+		out.write("else");
+		writeNewLine(out);
+		out.write("  window.onload = function(){ " + varName + "." + this.dashboardRenderFuncName + "(); };");
 		writeNewLine(out);
 	}
 
@@ -883,8 +920,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param renderContext
 	 * @return
 	 */
-	protected HtmlChart writeHtmlChart(HtmlChartWidget<HtmlRenderContext> chartWidget,
-			HtmlRenderContext renderContext) throws RenderException
+	protected HtmlChart writeHtmlChart(HtmlChartWidget<HtmlRenderContext> chartWidget, HtmlRenderContext renderContext)
+			throws RenderException
 	{
 		return chartWidget.render(renderContext);
 	}
@@ -1077,10 +1114,14 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 解析HTML标签属性。
 	 * 
 	 * @param in
-	 * @param last      上一个已读取的字符
-	 * @param out       写入已读取字符的缓存
-	 * @param attrName  属性名写入缓存
-	 * @param attrValue 属性值写入缓存，引号不会写入
+	 * @param last
+	 *            上一个已读取的字符
+	 * @param out
+	 *            写入已读取字符的缓存
+	 * @param attrName
+	 *            属性名写入缓存
+	 * @param attrValue
+	 *            属性值写入缓存，引号不会写入
 	 * @return '>'、'/'、空格、下一个属性名的第一个字符、-1
 	 * @throws IOException
 	 */
@@ -1176,7 +1217,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 读取字符到“{@code -->}”。
 	 * 
 	 * @param in
-	 * @param out 为{@code null}则不写入
+	 * @param out
+	 *            为{@code null}则不写入
 	 * @throws IOException
 	 */
 	protected void skipHtmlComment(Reader in, Writer out) throws IOException

@@ -52,7 +52,7 @@ import freemarker.template.TemplateScalarModel;
  * ...
  * &lt;@theme /&gt;
  * ...
- * &lt;@dashboard var="..." renderer="..."&gt;
+ * &lt;@dashboard var="..." factory="..."&gt;
  *   ...
  *   <@chart widget="..." var="..." elementId="..." /&gt;
  *   ...
@@ -68,7 +68,7 @@ import freemarker.template.TemplateScalarModel;
  * &lt;@theme /&gt;：引入内置CSS主题样式。
  * </p>
  * <p>
- * &lt;@dashboard&gt;：定义看板，“var”自定义看板JS变量名，可不填；“renderer”自定义看板渲染器JS变量，可不填，默认为{@linkplain HtmlTplDashboardWidgetRenderer#getDefaultDashboardRendererVar()}。
+ * &lt;@dashboard&gt;：定义看板，“var”自定义看板JS变量名，可不填；“factory”自定义看板工厂JS变量，可不填，默认为{@linkplain HtmlTplDashboardWidgetRenderer#getDefaultDashboardFactoryVar()}。
  * </p>
  * <p>
  * &lt;@chart
@@ -406,7 +406,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 				throws TemplateException, IOException
 		{
 			String dashboardVar = getStringParamValue(params, "var");
-			String rendererVar = getStringParamValue(params, "renderer");
+			String factoryVar = getStringParamValue(params, "factory");
 
 			if (StringUtil.isEmpty(dashboardVar))
 				dashboardVar = getDefaultDashboardVar();
@@ -439,7 +439,8 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			HtmlChartPluginRenderOption.removeOption(renderContext);
 
 			writeHtmlDashboardJSInit(out, dashboard);
-			writeHtmlDashboardJSRender(out, dashboard, rendererVar);
+			writeHtmlDashboardJSFactoryInit(out, dashboard, factoryVar);
+			writeHtmlDashboardJSRender(out, dashboard);
 
 			writeScriptEndTag(out);
 			writeNewLine(out);
