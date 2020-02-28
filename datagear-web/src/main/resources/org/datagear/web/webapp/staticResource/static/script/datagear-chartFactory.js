@@ -50,6 +50,15 @@
 	var chartBase = (chartFactory.chartBase || (chartFactory.chartBase = {}));
 	
 	/**
+	 * echarts地图名称及其JSON地址映射表，如果页面有地图图表，应该设置这个对象。
+	 * 例如：{"china" : "/map/china.json", "beijing" : "map/beijing.json", , "shanghai" : "../map/shanghai.json"}
+	 * 此对象也可以定义一个名为"mapURL"的函数属性，用于获取没有名称对应的地址，格式为：function(name){ return "..."; }
+	 * 具体参考下面的chartBase.echartsMapURL函数
+	 */
+	if(!chartFactory.echartsMapURLs)
+		chartFactory.echartsMapURLs = {};
+	
+	/**
 	 * 初始化指定图表对象。
 	 * 
 	 * @param chart 图表对象
@@ -61,21 +70,6 @@
 		chart.statusPreRender(true);
 	};
 	
-	/**图表状态：准备render*/
-	chartFactory.STATUS_PRE_RENDER = "PRE_RENDER";
-	
-	/**图表状态：正在render*/
-	chartFactory.STATUS_RENDERING = "RENDERING";
-	
-	/**图表状态：准备update*/
-	chartFactory.STATUS_PRE_UPDATE = "PRE_UPDATE";
-	
-	/**图表状态：正在update*/
-	chartFactory.STATUS_UPDATING = "UPDATING";
-	
-	/**图表状态：完成update*/
-	chartFactory.STATUS_UPDATED = "UPDATED";
-	
 	/**
 	 * 渲染图表。
 	 */
@@ -83,9 +77,10 @@
 	{
 		this.statusRendering(true);
 		
+		var async = this.isAsyncRender();
 		var re = this.plugin.chartRenderer.render(this);
 		
-		if(!this.isAsyncRender())
+		if(!async)
 		{
 			if(re == false)
 				this.statusPreRender(true);
@@ -103,9 +98,10 @@
 	{
 		this.statusUpdating(true);
 		
+		var async = this.isAsyncUpdate(results);
 		var re = this.plugin.chartRenderer.update(this, results);
 		
-		if(!this.isAsyncUpdate(results))
+		if(!async)
 		{
 			if(re == false)
 				this.statusPreUpdate(true);
@@ -119,13 +115,15 @@
 	 */
 	chartBase.isAsyncRender = function()
 	{
-		if(this.plugin.asyncRender == undefined)
+		var chartRenderer = this.plugin.chartRenderer;
+		
+		if(chartRenderer.asyncRender == undefined)
 			return false;
 		
-		if(typeof(this.plugin.asyncRender) == "function")
-			return this.plugin.asyncRender(this);
+		if(typeof(chartRenderer.asyncRender) == "function")
+			return chartRenderer.asyncRender(this);
 		
-		return (this.plugin.asyncRender == true);
+		return (chartRenderer.asyncRender == true);
 	};
 	
 	/**
@@ -135,13 +133,15 @@
 	 */
 	chartBase.isAsyncUpdate = function(results)
 	{
-		if(this.plugin.asyncUpdate == undefined)
+		var chartRenderer = this.plugin.chartRenderer;
+		
+		if(chartRenderer.asyncUpdate == undefined)
 			return false;
 		
-		if(typeof(this.plugin.asyncUpdate) == "function")
-			return this.plugin.asyncUpdate(this, results);
+		if(typeof(chartRenderer.asyncUpdate) == "function")
+			return chartRenderer.asyncUpdate(this, results);
 		
-		return (this.plugin.asyncUpdate == true);
+		return (chartRenderer.asyncUpdate == true);
 	};
 	
 	/**
@@ -716,11 +716,14 @@
 	 * 初始化Echarts对象。
 	 * 
 	 * @param options echarts设置项
+	 * @param customized 是否为options扩展自定义设置项，可选，默认为true
 	 * @return echarts实例对象
 	 */
-	chartBase.echartsInit = function(options)
+	chartBase.echartsInit = function(options, customized)
 	{
-		options = this.options(options);
+		if(customized != false)
+			options = this.options(options);
+		
 		var instance = echarts.init(this.element(), this.echartsThemeName());
 		instance.setOption(options);
 		
@@ -1278,6 +1281,58 @@
 	};
 	
 	/**
+	 * 指定名称的echarts地图是否已经注册过而无需再加载。
+	 * 
+	 * @param name echarts地图名称
+	 */
+	chartBase.echartsMapRegistered = function(name)
+	{
+		return (echarts.getMap(name) != null);
+	};
+	
+	/**
+	 * 获取echarts指定名称的地图JSON地址，如果找不到，则直接将name作为地址返回。
+	 * 
+	 * @param name echarts地图名称
+	 */
+	chartBase.echartsMapURL = function(name)
+	{
+		var url = chartFactory.echartsMapURLs[name];
+		
+		if(!url && typeof(chartFactory.echartsMapURLs.mapURL) == "function")
+			url = chartFactory.echartsMapURLs.mapURL(name);
+		
+		url = (url || name);
+		
+		var contextPath = this.renderContext.webContext.contextPath;
+		
+		if(contextPath && url.indexOf("/") == 0 && url.indexOf(contextPath) != 0)
+			url = contextPath + url;
+		
+		return url;
+	};
+	
+	/**
+	 * 加载指定名称的echarts地图JSON，并在完成后执行回调函数。
+	 * 注意：如果地图图表插件的render/update函数中调用此函数，应该首先设置插件的asyncRender/asyncUpdate，
+	 * 并在callback中调用chart.statusPreUpdate()/chart.statusUpdated()，具体参考此文件顶部的注释。
+	 * 
+	 * @param name echarts地图名称
+	 * @param callback 完成回调函数：function(){ ... }
+	 */
+	chartBase.echartsMapLoad = function(name, callback)
+	{
+		var url = this.echartsMapURL(name);
+		$.getJSON(url, function(geoJson)
+		{
+			echarts.registerMap(name, geoJson);
+			
+			if(callback)
+				callback();
+		});
+	};
+	
+	/**
 	 * 执行JS代码。
 	 * 
 	 * @param str JS代码
@@ -1387,5 +1442,20 @@
 				console.info(exception);
 		}
 	};
+	
+	/**图表状态：准备render*/
+	chartFactory.STATUS_PRE_RENDER = "PRE_RENDER";
+	
+	/**图表状态：正在render*/
+	chartFactory.STATUS_RENDERING = "RENDERING";
+	
+	/**图表状态：准备update*/
+	chartFactory.STATUS_PRE_UPDATE = "PRE_UPDATE";
+	
+	/**图表状态：正在update*/
+	chartFactory.STATUS_UPDATING = "UPDATING";
+	
+	/**图表状态：完成update*/
+	chartFactory.STATUS_UPDATED = "UPDATED";
 })
 (this);

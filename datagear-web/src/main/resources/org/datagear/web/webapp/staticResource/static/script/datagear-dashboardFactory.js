@@ -26,6 +26,7 @@
 	 */
 	dashboardFactory.init = function(dashboard)
 	{
+		this.initEchartsMapURLs();
 		this.initCharts(dashboard);
 		$.extend(dashboard, this.dashboardBase);
 		this.initListener(dashboard);
@@ -66,6 +67,27 @@
 		
 		if(listener)
 			dashboard.listener = listener;
+	};
+	
+	/**
+	 * 初始化chartFactory.echartsMapURLs。
+	 * 它将body元素的"dg-echarts-map-urls"属性值设置为自定义地图JSON地址映射表。
+	 */
+	dashboardFactory.initEchartsMapURLs = function()
+	{
+		for(var i=0; i<this.builtInEchartsMaps.length; i++)
+		{
+			var urlNames = this.builtInEchartsMaps[i];
+			for(var j=0; j<urlNames.names.length; j++)
+				chartFactory.echartsMapURLs[urlNames.names[j]] = this.builtInEchartsMapBaseURL + urlNames.url;
+		}
+		
+		var mapUrls = $(document.body).attr("dg-echarts-map-urls");
+		
+		if(mapUrls)
+			mapUrls = global.chartFactory.evalSilently(mapUrls);
+		
+		$.extend(chartFactory.echartsMapURLs, mapUrls);
 	};
 	
 	/**
@@ -300,5 +322,51 @@
 		
 		return data;
 	};
+	
+	/**
+	 * 内置地图JSON地址配置。
+	 */
+	dashboardFactory.builtInEchartsMapBaseURL = "/static/script/echarts-map";
+	dashboardFactory.builtInEchartsMaps =
+	[
+		{names: ["china", "中国"], url: "/china.json"},
+		{names: ["china-contour", "中国轮廓"], url: "/china-contour.json"},
+		{names: ["china-cities", "中国城市"], url: "/china-cities.json"},
+		{names: ["world", "世界"], url: "/world.json"},
+		{names: ["anhui", "安徽"], url: "/province/anhui.json"},
+		{names: ["aomen", "澳门"], url: "/province/aomen.json"},
+		{names: ["beijing", "北京"], url: "/province/beijing.json"},
+		{names: ["chongqing", "重庆"], url: "/province/chongqing.json"},
+		{names: ["fujian", "福建"], url: "/province/fujian.json"},
+		{names: ["gansu", "甘肃"], url: "/province/gansu.json"},
+		{names: ["guangdong", "广东"], url: "/province/guangdong.json"},
+		{names: ["guangxi", "广西"], url: "/province/guangxi.json"},
+		{names: ["guizhou", "贵州"], url: "/province/guizhou.json"},
+		{names: ["hainan", "海南"], url: "/province/hainan.json"},
+		{names: ["hebei", "河北"], url: "/province/hebei.json"},
+		{names: ["heilongjiang", "黑龙江"], url: "/province/heilongjiang.json"},
+		{names: ["henan", "河南"], url: "/province/henan.json"},
+		{names: ["hubei", "湖北"], url: "/province/hubei.json"},
+		{names: ["hunan", "湖南"], url: "/province/hunan.json"},
+		{names: ["jiangsu", "江苏"], url: "/province/jiangsu.json"},
+		{names: ["jiangxi", "江西"], url: "/province/jiangxi.json"},
+		{names: ["jilin", "吉林"], url: "/province/jilin.json"},
+		{names: ["liaoning", "辽宁"], url: "/province/liaoning.json"},
+		{names: ["neimenggu", "内蒙古"], url: "/province/neimenggu.json"},
+		{names: ["ningxia", "宁夏"], url: "/province/ningxia.json"},
+		{names: ["qinghai", "青海"], url: "/province/qinghai.json"},
+		{names: ["shandong", "山东"], url: "/province/shandong.json"},
+		{names: ["shanghai", "上海"], url: "/province/shanghai.json"},
+		{names: ["shanxi", "山西"], url: "/province/shanxi.json"},
+		{names: ["shanxi1", "陕西"], url: "/province/shanxi1.json"},
+		{names: ["sichuan", "四川"], url: "/province/sichuan.json"},
+		{names: ["taiwan", "台湾"], url: "/province/taiwan.json"},
+		{names: ["tianjin", "天津"], url: "/province/tianjin.json"},
+		{names: ["xianggang", "香港"], url: "/province/xianggang.json"},
+		{names: ["xinjiang", "新疆"], url: "/province/xinjiang.json"},
+		{names: ["xizang", "西藏"], url: "/province/xizang.json"},
+		{names: ["yunnan", "云南"], url: "/province/yunnan.json"},
+		{names: ["zhejiang", "浙江"], url: "/province/zhejiang.json"}
+	];
 })
 (this);
