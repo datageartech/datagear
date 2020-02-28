@@ -7,6 +7,8 @@
  * 
  * 依赖:
  * jquery.js
+ * 
+ * @deprecated 此模块已被datagear-dashboardFactory.js代替，未来版本会移除
  */
 (function(window)
 {

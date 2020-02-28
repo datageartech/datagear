@@ -8,6 +8,8 @@
  * 依赖:
  * jquery.js
  * chartUtil.echarts* 依赖echarts.js
+ * 
+ * @deprecated 此模块已被datagear-chartFactory.js代替，未来版本会移除
  */
 (function(window)
 {

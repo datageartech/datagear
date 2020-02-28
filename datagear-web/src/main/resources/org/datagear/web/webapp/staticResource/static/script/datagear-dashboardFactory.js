@@ -17,8 +17,7 @@
 {
 	var dashboardFactory = (global.dashboardFactory || (global.dashboardFactory = {}));
 	var dashboardBase = (dashboardFactory.dashboardBase || (dashboardFactory.dashboardBase = {}));
-	
-	var chartFactory = global.chartFactory;
+	var chartStatus = (dashboardFactory.chartStatus || (dashboardFactory.chartStatus = {}));
 	
 	/**
 	 * 初始化指定看板对象。
@@ -43,7 +42,7 @@
 			return;
 		
 		for(var i=0; i<dashboard.charts.length; i++)
-			chartFactory.init(dashboard.charts[i]);
+			global.chartFactory.init(dashboard.charts[i]);
 	};
 	
 	/**
@@ -58,27 +57,16 @@
 			return;
 		
 		var listener = $(document.body).attr("dg-dashboard-listener");
+		
 		if(listener)
-			listener = chartFactory.evalSilently(listener);
+			listener = global.chartFactory.evalSilently(listener);
+		//@deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
+		else if(typeof(dashboardRenderer) != "undefined")
+			listener = dashboardRenderer.listener;
 		
 		if(listener)
 			dashboard.listener = listener;
 	};
-	
-	/**图表状态：等待render*/
-	dashboardFactory.CHART_STATUS_WAIT_RENDER = "WAIT_RENDER";
-	
-	/**图表状态：完成render*/
-	dashboardFactory.CHART_STATUS_FINISH_RENDER = "FINISH_RENDER";
-	
-	/**图表状态：等待update*/
-	dashboardFactory.CHART_STATUS_WAIT_UPDATE = "WAIT_UPDATE";
-	
-	/**图表状态：完成update*/
-	dashboardFactory.CHART_STATUS_FINISH_UPDATE = "FINISH_UPDATE";
-	
-	/**图表状态：终止*/
-	dashboardFactory.CHART_STATUS_TERMINATE = "TERMINATE";
 	
 	/**
 	 * 渲染看板。
@@ -91,22 +79,13 @@
 		  doRender=this.listener.onRender(this);
 		
 		if(doRender != false)
-			this.doRender(dashboard);
+			this.doHandleCharts();
 	};
 	
 	/**
-	 * 执行看板渲染。
+	 * 处理看板所有图表，根据其状态执行render或者update。
 	 */
-	dashboardBase.doRender = function()
-	{
-		this.renderCharts();
-		this.update();
-	};
-	
-	/**
-	 * 渲染看板的所有图表。
-	 */
-	dashboardBase.renderCharts = function()
+	dashboardBase.doHandleCharts = function()
 	{
 		var charts = (this.charts || []);
 		
@@ -114,14 +93,59 @@
 		{
 			var chart = charts[i];
 			
-			try
-			{
+			if(chart.statusPreRender())
 				this.renderChart(chart, i);
-			}
-			catch(e)
+		}
+		
+		var preUpdates = [];
+		var time = new Date().getTime();
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			var chart = charts[i];
+			var updateInterval = chart.updateIntervalNonNull();
+			
+			if(chart.statusPreUpdate() || (chart.statusUpdated() && updateInterval > -1))
 			{
-				chartFactory.logException(e);
+				var prevUpdateTime = this.chartUpdateTime(chart);
+				
+				if(prevUpdateTime == null || (prevUpdateTime + updateInterval) <= time)
+					preUpdates.push(chart);
 			}
+		}
+		
+		if(preUpdates.length == 0)
+		{
+			var dashboard = this;
+			setTimeout(function(){ dashboard.doHandleCharts(); }, 1);
+		}
+		else
+		{
+			var webContext = this.renderContext.webContext;
+			
+			var data = this.buildUpdateDashboardAjaxData(preUpdates);
+			
+			var dashboard = this;
+			
+			$.ajax({
+				url : webContext.updateDashboardURL,
+				data : data,
+				success : function(resultsMap)
+				{
+					dashboard.updateCharts(resultsMap);
+				},
+				error : function()
+				{
+					var updateTime = new Date().getTime();
+					
+					for(var i=0; i<dashboard.charts.length; i++)
+						dashboard.chartUpdateTime(dashboard.charts[i], updateTime);
+				},
+				complete : function()
+				{
+					dashboard.doHandleCharts();
+				}
+			});
 		}
 	};
 	
@@ -150,75 +174,7 @@
 	 */
 	dashboardBase.doRenderChart = function(chart, chartIndex)
 	{
-		chart.render();
-	};
-	
-	/**
-	 * 更新看板所有图表。
-	 */
-	dashboardBase.update = function()
-	{
-		var doUpdate = true;
-		
-		if(this.listener && this.listener.onUpdate)
-			doUpdate=this.listener.onUpdate(this);
-		
-		if(doUpdate != false)
-			this.doUpdate();
-	};
-	
-	/**
-	 * 执行更新看板的所有、或者指定图表。
-	 * 
-	 * @param charts 指定更新的图表数组，可选，默认为所有
-	 */
-	dashboardBase.doUpdate = function(charts)
-	{
-		if(this._UPDATING_DASHBOARD)
-			return false;
-		
-		var webContext = this.renderContext.webContext;
-		
-		var data = this.buildUpdateDashboardAjaxData(charts);
-		
-		this._UPDATING_DASHBOARD = true;
-		
-		var dashboard = this;
-		
-		$.ajax({
-			url : webContext.updateDashboardURL,
-			data : data,
-			success : function(resultsMap)
-			{
-				dashboard.updateCharts(resultsMap);
-			},
-			error : function()
-			{
-				var updateTime = new Date().getTime();
-				
-				for(var i=0; i<dashboard.charts.length; i++)
-					dashboard.updateTime(dashboard.charts[i], updateTime);
-			},
-			complete : function()
-			{
-				dashboard._UPDATING_DASHBOARD = false;
-				
-				var intervalId = setInterval(function()
-				{
-					var needUpdateCharts = dashboard.getNeedUpdateCharts();
-					
-					if(needUpdateCharts.length > 0)
-					{
-						dashboard.updateUpdatingDashboardIntervalId();
-						dashboard.doUpdate(needUpdateCharts);
-					}
-				}, 1);
-				
-				dashboard.updateUpdatingDashboardIntervalId(intervalId);
-			}
-		});
-		
-		return true;
+		return chart.render();
 	};
 	
 	/**
@@ -237,7 +193,7 @@
 			if(!chart)
 				continue;
 			
-			this.updateTime(chart, updateTime);
+			this.chartUpdateTime(chart, updateTime);
 			
 			var results = resultsMap[chartId];
 			
@@ -247,7 +203,7 @@
 			}
 			catch(e)
 			{
-				chartFactory.logException(e);
+				global.chartFactory.logException(e);
 			}
 		}
 	};
@@ -277,7 +233,7 @@
 	 */
 	dashboardBase.doUpdateChart = function(chart, results)
 	{
-		chart.update(results);
+		return chart.update(results);
 	};
 	
 	/**
@@ -314,143 +270,17 @@
 	};
 	
 	/**
-	 * 图表状态是否为/设置为：等待render。
-	 * 
-	 * @param chart 图表对象
-	 * @param set 为undefined时执行读取操作，否则执行设置操作
-	 */
-	dashboardBase.chartStatusWaitRender = function(chart, set)
-	{
-		if(set == undefined)
-			return (chart._CHART_STATUS == dashboardFactory.CHART_STATUS_WAIT_RENDER);
-		else
-			chart._CHART_STATUS = dashboardFactory.CHART_STATUS_WAIT_RENDER;
-	};
-	
-	/**
-	 * 图表状态是否为/设置为：完成render。
-	 * 
-	 * @param chart 图表对象
-	 * @param set 为undefined时执行读取操作，否则执行设置操作
-	 */
-	dashboardBase.chartStatusFinishRender = function(chart, set)
-	{
-		if(set == undefined)
-			return (chart._CHART_STATUS == dashboardFactory.CHART_STATUS_FINISH_RENDER);
-		else
-			chart._CHART_STATUS = dashboardFactory.CHART_STATUS_FINISH_RENDER;
-	};
-	
-	/**
-	 * 图表状态是否为/设置为：等待update。
-	 * 
-	 * @param chart 图表对象
-	 * @param set 为undefined时执行读取操作，否则执行设置操作
-	 */
-	dashboardBase.chartStatusWaitUpdate = function(chart, set)
-	{
-		if(set == undefined)
-			return (chart._CHART_STATUS == dashboardFactory.CHART_STATUS_WAIT_UPDATE);
-		else
-			chart._CHART_STATUS = dashboardFactory.CHART_STATUS_WAIT_UPDATE;
-	};
-
-	/**
-	 * 图表状态是否为/设置为：完成update。
-	 * 
-	 * @param chart 图表对象
-	 * @param set 为undefined时执行读取操作，否则执行设置操作
-	 */
-	dashboardBase.chartStatusFinishUpdate = function(chart, set)
-	{
-		if(set == undefined)
-			return (chart._CHART_STATUS == dashboardFactory.CHART_STATUS_FINISH_UPDATE);
-		else
-			chart._CHART_STATUS = dashboardFactory.CHART_STATUS_FINISH_UPDATE;
-	};
-
-	/**
-	 * 图表状态是否为/设置为：终止。
-	 * 
-	 * @param chart 图表对象
-	 * @param set 为undefined时执行读取操作，否则执行设置操作
-	 */
-	dashboardBase.chartStatusTerminate = function(chart, set)
-	{
-		if(set == undefined)
-			return (chart._CHART_STATUS == dashboardFactory.CHART_STATUS_TERMINATE);
-		else
-			chart._CHART_STATUS = dashboardFactory.CHART_STATUS_TERMINATE;
-	};
-	
-	/**
-	 * 获取/设置图表状态。
-	 * 
-	 * @param chart 图表对象
-	 * @param status 要设置的状态，可选，不设置则执行获取操作
-	 */
-	dashboardBase.chartStatus = function(chart, status)
-	{
-		if(status == undefined)
-			return (chart._CHART_STATUS || dashboardFactory.CHART_STATUS_WAIT_RENDER);
-		else
-			chart._CHART_STATUS = (status || dashboardFactory.CHART_STATUS_WAIT_RENDER);
-	};
-	
-	/**
-	 * 获取当前需要更新的图表数组，没有则返回空数组。
-	 */
-	dashboardBase.getNeedUpdateCharts = function()
-	{
-		var nexts = [];
-		
-		var charts = this.charts;
-		
-		if(!charts || !charts.length)
-			return nexts;
-		
-		var time = new Date().getTime();
-		
-		for(var i=0; i<charts.length; i++)
-		{
-			var chart = charts[i];
-			
-			//不需更新
-			if(chart.updateInterval < 0)
-				continue;
-			
-			var prevUpdateTime = this.updateTime(chart);
-			
-			if(prevUpdateTime == null || (prevUpdateTime + chart.updateInterval) <= time)
-				nexts.push(chart);
-		}
-		
-		return nexts;
-	};
-	
-	/**
-	 * 更新定时器ID。
-	 */
-	dashboardBase.updateUpdatingDashboardIntervalId = function(intervalId)
-	{
-		if(this._UPDATING_DASHBOARD_INTERVAL_ID)
-			clearInterval(this._UPDATING_DASHBOARD_INTERVAL_ID);
-		
-		this._UPDATING_DASHBOARD_INTERVAL_ID = intervalId;
-	};
-	
-	/**
 	 * 获取/设置图表更新时间。
 	 * 
 	 * @param chart
 	 * @param updateTime 要设置的更新时间
 	 */
-	dashboardBase.updateTime = function(chart, updateTime)
+	dashboardBase.chartUpdateTime = function(chart, updateTime)
 	{
 		if(updateTime == undefined)
-			return chart._UPDATE_TIME;
+			return chart._update_time;
 		
-		chart._UPDATE_TIME = updateTime;
+		chart._update_time = updateTime;
 	};
 	
 	/**

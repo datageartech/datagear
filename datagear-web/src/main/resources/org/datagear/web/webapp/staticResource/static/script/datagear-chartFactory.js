@@ -12,6 +12,37 @@
  * 运行时依赖:
  *   jquery.js
  *   echarts.js
+ * 
+ * 此模块和dashboardFactory.js一起可以支持异步图表插件，示例如下：
+ * {
+ *   //声明render函数是否为异步，默认为false
+ *   asyncRender: true || false || function(chart){ return true || false },
+ *   
+ *   render: function(chart)
+ *   {
+ *     $.get("...", function()
+ *     {
+ *       ...;
+ *       
+ *       //将图表状态设置为已完成render
+ *       chart.statusPreUpdate();
+ *     });
+ *   },
+ *   
+ *   //声明update函数是否为异步，默认为false
+ *   asyncUpdate: true || false || function(chart, results){ return true || false },
+ *   
+ *   update: function(chart, results)
+ *   {
+ *     $.get("...", function()
+ *     {
+ *       ...;
+ *       
+ *       //将图表状态设置为已完成update
+ *       chart.statusUpdated();
+ *     });
+ *   }
+ * }
  */
 (function(global)
 {
@@ -26,14 +57,41 @@
 	chartFactory.init = function(chart)
 	{
 		$.extend(chart, this.chartBase);
+		
+		chart.statusPreRender(true);
 	};
+	
+	/**图表状态：准备render*/
+	chartFactory.STATUS_PRE_RENDER = "PRE_RENDER";
+	
+	/**图表状态：正在render*/
+	chartFactory.STATUS_RENDERING = "RENDERING";
+	
+	/**图表状态：准备update*/
+	chartFactory.STATUS_PRE_UPDATE = "PRE_UPDATE";
+	
+	/**图表状态：正在update*/
+	chartFactory.STATUS_UPDATING = "UPDATING";
+	
+	/**图表状态：完成update*/
+	chartFactory.STATUS_UPDATED = "UPDATED";
 	
 	/**
 	 * 渲染图表。
 	 */
 	chartBase.render = function()
 	{
-		this.plugin.chartRenderer.render(this);
+		this.statusRendering(true);
+		
+		var re = this.plugin.chartRenderer.render(this);
+		
+		if(!this.isAsyncRender())
+		{
+			if(re == false)
+				this.statusPreRender(true);
+			else
+				this.statusPreUpdate(true);
+		}
 	};
 	
 	/**
@@ -43,7 +101,125 @@
 	 */
 	chartBase.update = function(results)
 	{
-		this.plugin.chartRenderer.update(this, results);
+		this.statusUpdating(true);
+		
+		var re = this.plugin.chartRenderer.update(this, results);
+		
+		if(!this.isAsyncUpdate(results))
+		{
+			if(re == false)
+				this.statusPreUpdate(true);
+			else
+				this.statusUpdated(true);
+		}
+	};
+	
+	/**
+	 * 图表的render方法是否是异步的。
+	 */
+	chartBase.isAsyncRender = function()
+	{
+		if(this.plugin.asyncRender == undefined)
+			return false;
+		
+		if(typeof(this.plugin.asyncRender) == "function")
+			return this.plugin.asyncRender(this);
+		
+		return (this.plugin.asyncRender == true);
+	};
+	
+	/**
+	 * 图表的update方法是否是异步的。
+	 * 
+	 * @param results 图表数据集结果
+	 */
+	chartBase.isAsyncUpdate = function(results)
+	{
+		if(this.plugin.asyncUpdate == undefined)
+			return false;
+		
+		if(typeof(this.plugin.asyncUpdate) == "function")
+			return this.plugin.asyncUpdate(this, results);
+		
+		return (this.plugin.asyncUpdate == true);
+	};
+	
+	/**
+	 * 图表是否可为/设置为：准备render。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusPreRender = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_PRE_RENDER);
+		else
+			this.status(chartFactory.STATUS_PRE_RENDER);
+	};
+	
+	/**
+	 * 图表是否可为/设置为：正在render。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusRendering = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_RENDERING);
+		else
+			this.status(chartFactory.STATUS_RENDERING);
+	};
+	
+	/**
+	 * 图表是否可为/设置为：准备update。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusPreUpdate = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_PRE_UPDATE);
+		else
+			this.status(chartFactory.STATUS_PRE_UPDATE);
+	};
+	
+	/**
+	 * 图表是否可为/设置为：正在update。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusUpdating = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_UPDATING);
+		else
+			this.status(chartFactory.STATUS_UPDATING);
+	};
+	
+	/**
+	 * 图表是否可为/设置为：完成update。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusUpdated = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_UPDATED);
+		else
+			this.status(chartFactory.STATUS_UPDATED);
+	};
+	
+	/**
+	 * 获取/设置图表状态。
+	 * 
+	 * @param status 要设置的状态，可选，不设置则执行获取操作
+	 */
+	chartBase.status = function(status)
+	{
+		if(status == undefined)
+			return (this._status || chartFactory.STATUS_PRE_RENDER);
+		else
+			this._status = (status || chartFactory.STATUS_PRE_RENDER);
 	};
 	
 	/**

@@ -318,10 +318,12 @@
 					<property name="name" value="dashboardFactory" />
 					<property name="content" value="&lt;script type='text/javascript' res-name='dashboardFactory' src='$CONTEXTPATH/static/script/datagear-dashboardFactory.js'&gt;&lt;/script&gt;" />
 				</bean>
+				<!-- @deprecated 此模块已被datagear-chartFactory.js代替，未来版本会移除 -->
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="chart-util" />
 					<property name="content" value="&lt;script type='text/javascript' deprecated='use chartFactory' res-name='chart-util' src='$CONTEXTPATH/static/script/datagear-chart-util.js'&gt;&lt;/script&gt;" />
 				</bean>
+				<!-- @deprecated 此模块已被datagear-dashboardFactory.js代替，未来版本会移除 -->
 				<bean class="org.datagear.analysis.support.html.HtmlDashboardImport">
 					<property name="name" value="dashboard-renderer" />
 					<property name="content" value="&lt;script type='text/javascript' deprecated='use dashboardFactory' res-name='dashboard-renderer' src='$CONTEXTPATH/static/script/datagear-dashboard-renderer.js'&gt;&lt;/script&gt;" />
