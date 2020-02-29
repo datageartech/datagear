@@ -79,3 +79,8 @@
 .ace-tm .ace_attribute-name{
 	color: #00dddd;
 }
+/*缩进*/
+.ace-tm .ace_indent-guide{
+	border-right: 1px dotted #326d04;
+	background: none;
+}

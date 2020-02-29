@@ -82,7 +82,7 @@
 		
 		if(!async)
 		{
-			if(re == false)
+			if(re === false)
 				this.statusPreRender(true);
 			else
 				this.statusPreUpdate(true);
@@ -103,7 +103,7 @@
 		
 		if(!async)
 		{
-			if(re == false)
+			if(re === false)
 				this.statusPreUpdate(true);
 			else
 				this.statusUpdated(true);

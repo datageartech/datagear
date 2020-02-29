@@ -17,7 +17,6 @@
 {
 	var dashboardFactory = (global.dashboardFactory || (global.dashboardFactory = {}));
 	var dashboardBase = (dashboardFactory.dashboardBase || (dashboardFactory.dashboardBase = {}));
-	var chartStatus = (dashboardFactory.chartStatus || (dashboardFactory.chartStatus = {}));
 	
 	/**
 	 * 初始化指定看板对象。
