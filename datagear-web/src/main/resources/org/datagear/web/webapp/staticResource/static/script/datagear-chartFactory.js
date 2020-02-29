@@ -1244,16 +1244,16 @@
 			"visualMap" : {
 				"inRange" :
 				{
-					"color" : ['#58A52D', '#FFD700', '#FF4500']
+					"color" : ["#58A52D", "#FFD700", "#FF4500"]
 				},
-				"backgroundColor" : chartTheme.backgroundColor,
+				"backgroundColor" : "transparent",
 				"textStyle" :
 				{
 					"color" : chartTheme.colorSecond
 				}
 			},
 			"dataZoom" : {
-				"backgroundColor" : "red",
+				"backgroundColor" : "transparent",
 				"dataBackgroundColor" : chartTheme.colorFourth,
 				"fillerColor" : chartTheme.colorThird,
 				"handleColor" : chartTheme.colorSecond,

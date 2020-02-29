@@ -36,7 +36,7 @@ public class SimpleDashboardThemeSource implements DashboardThemeSource
 					new String[] { "#5EF6FE", "#91CA8C", "#EA7E53", "#24666C", "#73A373", "#019DA2", "#EEDD78",
 							"#73B9BC", "#7289AB", "#12CDD2" },
 					"#CCC", "#888", "#444", "#262626", new Theme("#EEE", "#444", "#333"),
-					new Theme("#EEE", "#F58400", "#333")));
+					new Theme("#FFF", "#1E90FF", "#333")));
 
 	private Map<RenderStyle, DashboardTheme> dashboardThemes;
 
