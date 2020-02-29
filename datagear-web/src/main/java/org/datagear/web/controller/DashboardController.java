@@ -490,6 +490,74 @@ public class DashboardController extends AbstractDataAnalysisController
 	}
 
 	/**
+	 * 展示看板首页。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	@RequestMapping("/show/{id}/")
+	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@PathVariable("id") String id) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidget(user, id);
+
+		showDashboard(request, response, model, user, dashboardWidget);
+	}
+
+	/**
+	 * 加载看板资源。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param webRequest
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	@RequestMapping("/show/{id}/**/*")
+	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
+			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+		HtmlTplDashboardWidgetEntity entity = this.htmlTplDashboardWidgetEntityService.getById(user, id);
+
+		if (entity == null)
+			throw new RecordNotFoundException();
+		
+		String resName = resolveDashboardResName(request, response, id);
+
+		if (isEmpty(resName) || resName.equals(entity.getTemplate()))
+		{
+			HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
+					.getHtmlTplDashboardWidget(user, id);
+
+			showDashboard(request, response, model, user, dashboardWidget);
+		}
+		else
+		{
+			TemplateDashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
+					.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+
+			if (!resManager.containsResource(id, resName))
+				throw new FileNotFoundException(resName);
+
+			long lastModified = resManager.lastModifiedResource(id, resName);
+			if (webRequest.checkNotModified(lastModified))
+				return;
+
+			InputStream in = resManager.getResourceInputStream(id, resName);
+			OutputStream out = response.getOutputStream();
+
+			IOUtil.write(in, out);
+		}
+	}
+
+	/**
 	 * 展示看板。
 	 * 
 	 * @param request
@@ -498,19 +566,14 @@ public class DashboardController extends AbstractDataAnalysisController
 	 * @param id
 	 * @throws Exception
 	 */
-	@RequestMapping({ "/show/{id}/", "/show/{id}/index" })
-	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
-			@PathVariable("id") String id) throws Exception
+	protected void showDashboard(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model,
+			User user, HtmlTplDashboardWidgetEntity dashboardWidget) throws Exception
 	{
-		User user = WebUtils.getUser(request, response);
-
-		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidget(user, id);
-
 		if (dashboardWidget == null)
 			throw new RecordNotFoundException();
 
-		// 上面已确保当前用户对此看板有读权限，这里则确保看板创建用户对看板模板内定义的图表有权限
+		// 确保看板创建用户对看板模板内定义的图表有权限
 		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
 
 		try
@@ -545,36 +608,6 @@ public class DashboardController extends AbstractDataAnalysisController
 	}
 
 	/**
-	 * 从看板目录中加载看板资源。
-	 * 
-	 * @param request
-	 * @param response
-	 * @param webRequest
-	 * @param model
-	 * @param id
-	 * @throws Exception
-	 */
-	@RequestMapping("/show/{id}/**/*")
-	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
-			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
-	{
-		String pathInfo = request.getPathInfo();
-		String resPath = pathInfo.substring(pathInfo.indexOf(id) + id.length() + 1);
-
-		TemplateDashboardWidgetResManager resManager = this.htmlTplDashboardWidgetEntityService
-				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
-
-		long lastModified = resManager.lastModifiedResource(id, resPath);
-		if (webRequest.checkNotModified(lastModified))
-			return;
-
-		InputStream in = resManager.getResourceInputStream(id, resPath);
-		OutputStream out = response.getOutputStream();
-
-		IOUtil.write(in, out);
-	}
-
-	/**
 	 * 看板数据。
 	 * 
 	 * @param request
@@ -590,6 +623,32 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		WebContext webContext = createWebContext(request);
 		return getDashboardData(request, response, model, webContext);
+	}
+
+	/**
+	 * 解析展示看板请求路径的看板资源名。
+	 * <p>
+	 * 返回空字符串表情请求展示首页。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param id
+	 * @return
+	 */
+	protected String resolveDashboardResName(HttpServletRequest request, HttpServletResponse response,
+			String id)
+	{
+		String pathInfo = request.getPathInfo();
+
+		String idPath = id + "/";
+
+		if (pathInfo.endsWith(id) || pathInfo.endsWith(idPath))
+			return "";
+
+		String resPath = pathInfo.substring(pathInfo.indexOf(idPath) + idPath.length());
+
+		return resPath;
 	}
 
 	/**

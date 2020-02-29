@@ -285,16 +285,89 @@ public class ChartController extends AbstractChartPluginAwareController
 	 * @param id
 	 * @throws Exception
 	 */
-	@RequestMapping({ "/show/{id}/", "/show/{id}/index" })
+	@RequestMapping("/show/{id}/")
 	public void show(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@PathVariable("id") String id) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-
 		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
 
+		showChart(request, response, model, user, chart);
+	}
+
+	/**
+	 * 加载展示图表的资源。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param webRequest
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	@RequestMapping("/show/{id}/**/*")
+	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
+			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
+
+		String resName = resolveChartResName(request, response, id);
+
+		if (isEmpty(resName))
+		{
+			showChart(request, response, model, user, chart);
+		}
+		else
+		{
+			TemplateDashboardWidgetResManager resManager = this.chartShowHtmlTplDashboardWidgetHtmlRenderer
+					.getTemplateDashboardWidgetResManager();
+
+			long lastModified = resManager.lastModifiedResource(id, resName);
+			if (webRequest.checkNotModified(lastModified))
+				return;
+
+			InputStream in = resManager.getResourceInputStream(id, resName);
+			OutputStream out = response.getOutputStream();
+
+			IOUtil.write(in, out);
+		}
+	}
+
+	/**
+	 * 展示数据。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, DataSetResult[]> showData(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model) throws Exception
+	{
+		WebContext webContext = createWebContext(request);
+		return getDashboardData(request, response, model, webContext);
+	}
+
+	/**
+	 * 展示图表。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param id
+	 * @throws Exception
+	 */
+	protected void showChart(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, User user, HtmlChartWidgetEntity chart) throws Exception
+	{
 		if (chart == null)
 			throw new RecordNotFoundException();
+
+		String id = chart.getId();
 
 		String htmlTitle = chart.getName();
 		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(id,
@@ -321,51 +394,29 @@ public class ChartController extends AbstractChartPluginAwareController
 	}
 
 	/**
-	 * 加载展示图表的资源。
+	 * 解析展示图表请求路径的看板资源名。
+	 * <p>
+	 * 返回空字符串表情请求展示首页。
+	 * </p>
 	 * 
 	 * @param request
 	 * @param response
-	 * @param webRequest
-	 * @param model
 	 * @param id
-	 * @throws Exception
+	 * @return
 	 */
-	@RequestMapping("/show/{id}/**/*")
-	public void showResource(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
-			org.springframework.ui.Model model, @PathVariable("id") String id) throws Exception
+	protected String resolveChartResName(HttpServletRequest request, HttpServletResponse response,
+			String id)
 	{
 		String pathInfo = request.getPathInfo();
-		String resPath = pathInfo.substring(pathInfo.indexOf(id) + id.length() + 1);
 
-		TemplateDashboardWidgetResManager resManager = this.chartShowHtmlTplDashboardWidgetHtmlRenderer
-				.getTemplateDashboardWidgetResManager();
+		String idPath = id + "/";
 
-		long lastModified = resManager.lastModifiedResource(id, resPath);
-		if (webRequest.checkNotModified(lastModified))
-			return;
+		if (pathInfo.endsWith(id) || pathInfo.endsWith(idPath))
+			return "";
 
-		InputStream in = resManager.getResourceInputStream(id, resPath);
-		OutputStream out = response.getOutputStream();
+		String resPath = pathInfo.substring(pathInfo.indexOf(idPath) + idPath.length());
 
-		IOUtil.write(in, out);
-	}
-
-	/**
-	 * 展示数据。
-	 * 
-	 * @param request
-	 * @param response
-	 * @param model
-	 * @param id
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public Map<String, DataSetResult[]> showData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model) throws Exception
-	{
-		WebContext webContext = createWebContext(request);
-		return getDashboardData(request, response, model, webContext);
+		return resPath;
 	}
 
 	protected WebContext createWebContext(HttpServletRequest request)

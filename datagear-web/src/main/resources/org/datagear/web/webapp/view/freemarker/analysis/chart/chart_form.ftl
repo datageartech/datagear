@@ -591,7 +591,7 @@ readonly 是否只读操作，允许为null
 						po.close();
 					
 					if(po.previewAfterSave)
-						window.open(po.url("show/"+chart.id+"/index"), chart.id);
+						window.open(po.url("show/"+chart.id+"/"), chart.id);
 				},
 				complete: function()
 				{

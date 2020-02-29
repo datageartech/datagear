@@ -151,7 +151,7 @@ selectonly 是否选择操作，允许为null
 	{
 		po.executeOnSelect(function(row)
 		{
-			window.open(po.url("show/"+row.id+"/index"), row.id);
+			window.open(po.url("show/"+row.id+"/"), row.id);
 		});
 	});
 	

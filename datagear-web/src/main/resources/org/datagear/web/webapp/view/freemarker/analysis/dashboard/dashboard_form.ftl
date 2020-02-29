@@ -439,7 +439,7 @@ readonly 是否只读操作，允许为null
 						po.close();
 					
 					if(po.showAfterSave)
-						window.open(po.url("show/"+dashboard.id+"/index"), dashboard.id);
+						window.open(po.url("show/"+dashboard.id+"/"), dashboard.id);
 				},
 				complete: function()
 				{
