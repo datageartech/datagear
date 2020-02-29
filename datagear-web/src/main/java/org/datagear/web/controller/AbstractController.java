@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -636,6 +637,48 @@ public abstract class AbstractController
 	protected TemplateModel toWriteJsonTemplateModel(Object object)
 	{
 		return WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(object);
+	}
+
+	/**
+	 * 设置看板资源响应内容类型。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param resName
+	 */
+	protected String setContentTypeByName(HttpServletRequest request, HttpServletResponse response,
+			ServletContext servletContext,
+			String resName)
+	{
+		String mimeType = servletContext.getMimeType(resName);
+		if (!isEmpty(mimeType))
+			response.setContentType(mimeType);
+
+		return mimeType;
+	}
+
+	/**
+	 * 解析请求路径中{@code pathPrefix}之后的路径名，如果路径不包含{@code pathPrefix}，则返回{@code null}。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param pathPrefix
+	 * @return
+	 */
+	protected String resolvePathAfter(HttpServletRequest request, HttpServletResponse response,
+			String pathPrefix)
+	{
+		String pathInfo = request.getPathInfo();
+
+		if (pathInfo.endsWith(pathPrefix))
+			return "";
+
+		int index = pathInfo.indexOf(pathPrefix);
+
+		if (index < 0)
+			return null;
+
+		return pathInfo.substring(index + pathPrefix.length());
 	}
 
 	/**

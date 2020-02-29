@@ -327,7 +327,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		User user = WebUtils.getUser(request, response);
 		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
 
-		String resName = resolveChartResName(request, response, id);
+		String resName = resolvePathAfter(request, response, "/show/" + id + "/");
 
 		if (isEmpty(resName))
 		{
@@ -338,7 +338,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			TemplateDashboardWidgetResManager resManager = this.chartShowHtmlTplDashboardWidgetHtmlRenderer
 					.getTemplateDashboardWidgetResManager();
 
-			setChartResResponseContentType(request, response, resName);
+			setContentTypeByName(request, response, servletContext, resName);
 
 			long lastModified = resManager.lastModifiedResource(id, resName);
 			if (webRequest.checkNotModified(lastModified))
@@ -408,47 +408,6 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
 		dashboardManager.put(dashboard);
-	}
-
-	/**
-	 * 设置图表资源响应内容类型。
-	 * 
-	 * @param request
-	 * @param response
-	 * @param resName
-	 */
-	protected void setChartResResponseContentType(HttpServletRequest request, HttpServletResponse response,
-			String resName)
-	{
-		String mimeType = getServletContext().getMimeType(resName);
-		if (!isEmpty(mimeType))
-			response.setContentType(mimeType);
-	}
-
-	/**
-	 * 解析展示图表请求路径的看板资源名。
-	 * <p>
-	 * 返回空字符串表情请求展示首页。
-	 * </p>
-	 * 
-	 * @param request
-	 * @param response
-	 * @param id
-	 * @return
-	 */
-	protected String resolveChartResName(HttpServletRequest request, HttpServletResponse response,
-			String id)
-	{
-		String pathInfo = request.getPathInfo();
-
-		String idPath = id + "/";
-
-		if (pathInfo.endsWith(id) || pathInfo.endsWith(idPath))
-			return "";
-
-		String resPath = pathInfo.substring(pathInfo.indexOf(idPath) + idPath.length());
-
-		return resPath;
 	}
 
 	protected WebContext createWebContext(HttpServletRequest request)

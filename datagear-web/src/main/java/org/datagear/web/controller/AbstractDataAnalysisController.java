@@ -87,6 +87,32 @@ public class AbstractDataAnalysisController extends AbstractController
 	}
 
 	/**
+	 * 解析展示看板请求路径的看板资源名。
+	 * <p>
+	 * 返回空字符串表情请求展示首页。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param id
+	 * @return
+	 */
+	protected String resolveDashboardResName(HttpServletRequest request, HttpServletResponse response,
+			String id)
+	{
+		String pathInfo = request.getPathInfo();
+
+		String idPath = id + "/";
+
+		if (pathInfo.endsWith(id) || pathInfo.endsWith(idPath))
+			return "";
+
+		String resPath = pathInfo.substring(pathInfo.indexOf(idPath) + idPath.length());
+
+		return resPath;
+	}
+
+	/**
 	 * 获取看板数据。
 	 * 
 	 * @param request

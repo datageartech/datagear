@@ -544,7 +544,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (entity == null)
 			throw new RecordNotFoundException();
 		
-		String resName = resolveDashboardResName(request, response, id);
+		String resName = resolvePathAfter(request, response, "/show/" + id + "/");
 
 		if (isEmpty(resName) || resName.equals(entity.getTemplate()))
 		{
@@ -561,7 +561,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			if (!resManager.containsResource(id, resName))
 				throw new FileNotFoundException(resName);
 
-			setDashboardResResponseContentType(request, response, resName);
+			setContentTypeByName(request, response, getServletContext(), resName);
 
 			long lastModified = resManager.lastModifiedResource(id, resName);
 			if (webRequest.checkNotModified(lastModified))
@@ -640,47 +640,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		WebContext webContext = createWebContext(request);
 		return getDashboardData(request, response, model, webContext);
-	}
-
-	/**
-	 * 设置看板资源响应内容类型。
-	 * 
-	 * @param request
-	 * @param response
-	 * @param resName
-	 */
-	protected void setDashboardResResponseContentType(HttpServletRequest request, HttpServletResponse response,
-			String resName)
-	{
-		String mimeType = getServletContext().getMimeType(resName);
-		if (!isEmpty(mimeType))
-			response.setContentType(mimeType);
-	}
-
-	/**
-	 * 解析展示看板请求路径的看板资源名。
-	 * <p>
-	 * 返回空字符串表情请求展示首页。
-	 * </p>
-	 * 
-	 * @param request
-	 * @param response
-	 * @param id
-	 * @return
-	 */
-	protected String resolveDashboardResName(HttpServletRequest request, HttpServletResponse response,
-			String id)
-	{
-		String pathInfo = request.getPathInfo();
-
-		String idPath = id + "/";
-
-		if (pathInfo.endsWith(id) || pathInfo.endsWith(idPath))
-			return "";
-
-		String resPath = pathInfo.substring(pathInfo.indexOf(idPath) + idPath.length());
-
-		return resPath;
 	}
 
 	/**
