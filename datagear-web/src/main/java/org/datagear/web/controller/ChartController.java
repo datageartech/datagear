@@ -15,6 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -49,6 +50,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.request.WebRequest;
 
 /**
@@ -59,7 +61,7 @@ import org.springframework.web.context.request.WebRequest;
  */
 @Controller
 @RequestMapping("/analysis/chart")
-public class ChartController extends AbstractChartPluginAwareController
+public class ChartController extends AbstractChartPluginAwareController implements ServletContextAware
 {
 	static
 	{
@@ -75,6 +77,8 @@ public class ChartController extends AbstractChartPluginAwareController
 	@Autowired
 	@Qualifier("chartShowHtmlTplDashboardWidgetHtmlRenderer")
 	private HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer;
+
+	private ServletContext servletContext;
 
 	public ChartController()
 	{
@@ -120,6 +124,17 @@ public class ChartController extends AbstractChartPluginAwareController
 			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer)
 	{
 		this.chartShowHtmlTplDashboardWidgetHtmlRenderer = chartShowHtmlTplDashboardWidgetHtmlRenderer;
+	}
+
+	public ServletContext getServletContext()
+	{
+		return servletContext;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext)
+	{
+		this.servletContext = servletContext;
 	}
 
 	@RequestMapping("/add")
@@ -323,6 +338,8 @@ public class ChartController extends AbstractChartPluginAwareController
 			TemplateDashboardWidgetResManager resManager = this.chartShowHtmlTplDashboardWidgetHtmlRenderer
 					.getTemplateDashboardWidgetResManager();
 
+			setChartResResponseContentType(request, response, resName);
+
 			long lastModified = resManager.lastModifiedResource(id, resName);
 			if (webRequest.checkNotModified(lastModified))
 				return;
@@ -391,6 +408,21 @@ public class ChartController extends AbstractChartPluginAwareController
 
 		SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
 		dashboardManager.put(dashboard);
+	}
+
+	/**
+	 * 设置图表资源响应内容类型。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param resName
+	 */
+	protected void setChartResResponseContentType(HttpServletRequest request, HttpServletResponse response,
+			String resName)
+	{
+		String mimeType = getServletContext().getMimeType(resName);
+		if (!isEmpty(mimeType))
+			response.setContentType(mimeType);
 	}
 
 	/**

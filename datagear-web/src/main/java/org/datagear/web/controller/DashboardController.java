@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,6 +49,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,7 +61,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 @RequestMapping("/analysis/dashboard")
-public class DashboardController extends AbstractDataAnalysisController
+public class DashboardController extends AbstractDataAnalysisController implements ServletContextAware
 {
 	static
 	{
@@ -72,6 +74,8 @@ public class DashboardController extends AbstractDataAnalysisController
 
 	@Autowired
 	private File tempDirectory;
+
+	private ServletContext servletContext;
 
 	public DashboardController()
 	{
@@ -105,6 +109,17 @@ public class DashboardController extends AbstractDataAnalysisController
 	public void setTempDirectory(File tempDirectory)
 	{
 		this.tempDirectory = tempDirectory;
+	}
+
+	public ServletContext getServletContext()
+	{
+		return servletContext;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext)
+	{
+		this.servletContext = servletContext;
 	}
 
 	@RequestMapping("/add")
@@ -546,6 +561,8 @@ public class DashboardController extends AbstractDataAnalysisController
 			if (!resManager.containsResource(id, resName))
 				throw new FileNotFoundException(resName);
 
+			setDashboardResResponseContentType(request, response, resName);
+
 			long lastModified = resManager.lastModifiedResource(id, resName);
 			if (webRequest.checkNotModified(lastModified))
 				return;
@@ -623,6 +640,21 @@ public class DashboardController extends AbstractDataAnalysisController
 	{
 		WebContext webContext = createWebContext(request);
 		return getDashboardData(request, response, model, webContext);
+	}
+
+	/**
+	 * 设置看板资源响应内容类型。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param resName
+	 */
+	protected void setDashboardResResponseContentType(HttpServletRequest request, HttpServletResponse response,
+			String resName)
+	{
+		String mimeType = getServletContext().getMimeType(resName);
+		if (!isEmpty(mimeType))
+			response.setContentType(mimeType);
 	}
 
 	/**
