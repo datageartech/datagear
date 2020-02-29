@@ -980,6 +980,7 @@
 				}
 			},
 			"map" : {
+				"roam" : true,
 				"itemStyle" : {
 					"areaColor" : chartTheme.colorFifth,
 					"borderColor" : chartTheme.colorThird,
