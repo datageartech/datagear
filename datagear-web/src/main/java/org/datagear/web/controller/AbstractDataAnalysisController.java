@@ -21,7 +21,7 @@ import javax.servlet.http.HttpSession;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
-import org.datagear.analysis.support.html.HtmlDashboard;
+import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
@@ -131,9 +131,9 @@ public class AbstractDataAnalysisController extends AbstractController
 		if (StringUtil.isEmpty(dashboardId))
 			throw new IllegalInputException();
 
-		SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
+		SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
 
-		HtmlDashboard dashboard = dashboardManager.get(dashboardId);
+		HtmlTplDashboard dashboard = dashboardManager.get(dashboardId);
 
 		if (dashboard == null)
 			throw new RecordNotFoundException();
@@ -146,50 +146,50 @@ public class AbstractDataAnalysisController extends AbstractController
 			return dashboard.getDataSetResults(Arrays.asList(chartsId), dataSetParamValues);
 	}
 
-	protected SessionHtmlDashboardManager getSessionHtmlDashboardManagerNotNull(HttpServletRequest request)
+	protected SessionHtmlTplDashboardManager getSessionHtmlTplDashboardManagerNotNull(HttpServletRequest request)
 	{
 		HttpSession session = request.getSession();
 
-		SessionHtmlDashboardManager dashboardManager = (SessionHtmlDashboardManager) session
-				.getAttribute(SessionHtmlDashboardManager.class.getName());
+		SessionHtmlTplDashboardManager dashboardManager = (SessionHtmlTplDashboardManager) session
+				.getAttribute(SessionHtmlTplDashboardManager.class.getName());
 
 		synchronized (session)
 		{
 			if (dashboardManager == null)
 			{
-				dashboardManager = new SessionHtmlDashboardManager();
-				session.setAttribute(SessionHtmlDashboardManager.class.getName(), dashboardManager);
+				dashboardManager = new SessionHtmlTplDashboardManager();
+				session.setAttribute(SessionHtmlTplDashboardManager.class.getName(), dashboardManager);
 			}
 		}
 
 		return dashboardManager;
 	}
 
-	protected static class SessionHtmlDashboardManager implements Serializable
+	protected static class SessionHtmlTplDashboardManager implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
-		private transient Map<String, HtmlDashboard> htmlDashboards;
+		private transient Map<String, HtmlTplDashboard> htmlTplDashboards;
 
-		public SessionHtmlDashboardManager()
+		public SessionHtmlTplDashboardManager()
 		{
 			super();
 		}
 
-		public synchronized HtmlDashboard get(String htmlDashboardId)
+		public synchronized HtmlTplDashboard get(String htmlTplDashboardId)
 		{
-			if (this.htmlDashboards == null)
+			if (this.htmlTplDashboards == null)
 				return null;
 
-			return this.htmlDashboards.get(htmlDashboardId);
+			return this.htmlTplDashboards.get(htmlTplDashboardId);
 		}
 
-		public synchronized void put(HtmlDashboard dashboard)
+		public synchronized void put(HtmlTplDashboard dashboard)
 		{
-			if (this.htmlDashboards == null)
-				this.htmlDashboards = new HashMap<String, HtmlDashboard>();
+			if (this.htmlTplDashboards == null)
+				this.htmlTplDashboards = new HashMap<String, HtmlTplDashboard>();
 
-			this.htmlDashboards.put(dashboard.getId(), dashboard);
+			this.htmlTplDashboards.put(dashboard.getId(), dashboard);
 		}
 	}
 }

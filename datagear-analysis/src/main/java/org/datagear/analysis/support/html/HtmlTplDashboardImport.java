@@ -15,7 +15,7 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public class HtmlDashboardImport implements Serializable
+public class HtmlTplDashboardImport implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -25,12 +25,12 @@ public class HtmlDashboardImport implements Serializable
 	/** 内容 */
 	private String content;
 
-	public HtmlDashboardImport()
+	public HtmlTplDashboardImport()
 	{
 		super();
 	}
 
-	public HtmlDashboardImport(String name, String content)
+	public HtmlTplDashboardImport(String name, String content)
 	{
 		super();
 		this.name = name;

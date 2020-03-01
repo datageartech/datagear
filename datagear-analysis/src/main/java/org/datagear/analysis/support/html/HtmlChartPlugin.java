@@ -117,8 +117,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	{
 		HtmlChartPluginRenderOption option = getOptionInitialized(renderContext);
 
-		HtmlChart chart = new HtmlChart(chartDefinition, this, renderContext,
-				option.getChartElementId(), option.getChartVarName());
+		HtmlChart chart = createHtmlChart(renderContext, chartDefinition, option);
 
 		try
 		{
@@ -131,6 +130,13 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		}
 
 		return chart;
+	}
+
+	protected HtmlChart createHtmlChart(T renderContext, ChartDefinition chartDefinition,
+			HtmlChartPluginRenderOption option)
+	{
+		return new HtmlChart(chartDefinition, this, renderContext,
+				option.getChartElementId(), option.getChartVarName());
 	}
 
 	protected boolean writeChartElement(T renderContext, HtmlChartPluginRenderOption option) throws IOException

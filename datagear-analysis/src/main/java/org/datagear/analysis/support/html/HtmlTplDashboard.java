@@ -7,28 +7,29 @@
  */
 package org.datagear.analysis.support.html;
 
-import org.datagear.analysis.Dashboard;
-import org.datagear.analysis.DashboardWidget;
 import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.TemplateDashboard;
+import org.datagear.analysis.TemplateDashboardWidget;
 
 /**
- * HTML看板。
+ * HTML模板看板。
  * 
  * @author datagear@163.com
  *
  */
-public class HtmlDashboard extends Dashboard
+public class HtmlTplDashboard extends TemplateDashboard
 {
 	private String varName;
 
-	public HtmlDashboard()
+	public HtmlTplDashboard()
 	{
 		super();
 	}
 
-	public HtmlDashboard(String id, HtmlRenderContext renderContext, DashboardWidget<?> dashboardWidget, String varName)
+	public HtmlTplDashboard(String id, String template, HtmlRenderContext renderContext,
+			TemplateDashboardWidget<?> dashboardWidget, String varName)
 	{
-		super(id, renderContext, dashboardWidget);
+		super(id, template, renderContext, dashboardWidget);
 		this.varName = varName;
 	}
 

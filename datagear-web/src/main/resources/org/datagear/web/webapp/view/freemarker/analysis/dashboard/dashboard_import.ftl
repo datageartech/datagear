@@ -36,7 +36,7 @@
 					<label><@spring.message code='dashboard.templateName' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="template" value="" class="ui-widget ui-widget-content" />
+					<input type="text" name="template" value="" class="ui-widget ui-widget-content" placeholder="<@spring.message code='dashboard.import.template.desc' />" />
 				</div>
 			</div>
 		</div>
@@ -66,8 +66,9 @@
 		success : function(uploadResult, textStatus, jqXHR)
 		{
 			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-			po.element("input[name='dashboardFileName']").val(uploadResult.dashboardFileName);
+			po.element("input[name='name']").val(uploadResult.dashboardName);
 			po.element("input[name='template']").val(uploadResult.template);
+			po.element("input[name='dashboardFileName']").val(uploadResult.dashboardFileName);
 		}
 	})
 	.bind('fileuploadadd', function (e, data)

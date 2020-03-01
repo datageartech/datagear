@@ -31,6 +31,12 @@ public class HtmlTplDashboardWidget<T extends HtmlRenderContext> extends Templat
 		this.renderer = renderer;
 	}
 
+	public HtmlTplDashboardWidget(String id, String[] templates, HtmlTplDashboardWidgetRenderer<T> renderer)
+	{
+		super(id, templates);
+		this.renderer = renderer;
+	}
+
 	public HtmlTplDashboardWidgetRenderer<T> getRenderer()
 	{
 		return renderer;
@@ -42,8 +48,20 @@ public class HtmlTplDashboardWidget<T extends HtmlRenderContext> extends Templat
 	}
 
 	@Override
-	public HtmlDashboard render(T renderContext) throws RenderException
+	public HtmlTplDashboard render(T renderContext) throws RenderException
 	{
-		return this.renderer.render(renderContext, this);
+		return (HtmlTplDashboard) super.render(renderContext);
+	}
+
+	@Override
+	public HtmlTplDashboard render(T renderContext, String template) throws RenderException, IllegalArgumentException
+	{
+		return (HtmlTplDashboard) super.render(renderContext, template);
+	}
+
+	@Override
+	protected HtmlTplDashboard renderTemplate(T renderContext, String template) throws RenderException
+	{
+		return this.renderer.render(renderContext, this, template);
 	}
 }

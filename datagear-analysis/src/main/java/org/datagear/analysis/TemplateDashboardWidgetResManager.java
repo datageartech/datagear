@@ -27,22 +27,24 @@ public interface TemplateDashboardWidgetResManager
 	String getDefaultEncoding();
 
 	/**
-	 * 获取{@linkplain TemplateDashboardWidget#getTemplate()}的输入流。
+	 * 获取指定模板的输入流。
 	 * 
 	 * @param widget
+	 * @param template
 	 * @return
 	 * @throws IOException
 	 */
-	Reader getTemplateReader(TemplateDashboardWidget<?> widget) throws IOException;
+	Reader getTemplateReader(TemplateDashboardWidget<?> widget, String template) throws IOException;
 
 	/**
-	 * 获取{@linkplain TemplateDashboardWidget#getTemplate()}的输出流。
+	 * 获取指定模板的输出流。
 	 * 
 	 * @param widget
+	 * @param template
 	 * @return
 	 * @throws IOException
 	 */
-	Writer getTemplateWriter(TemplateDashboardWidget<?> widget) throws IOException;
+	Writer getTemplateWriter(TemplateDashboardWidget<?> widget, String template) throws IOException;
 
 	/**
 	 * 获取指定名称资源的输入流。

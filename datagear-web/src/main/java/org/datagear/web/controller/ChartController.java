@@ -25,7 +25,7 @@ import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
-import org.datagear.analysis.support.html.HtmlDashboard;
+import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
@@ -404,9 +404,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 				getMessage(request, "chart.show.htmlTitlePrefix", getMessage(request, "app.name")));
 		HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
-		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
+		HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 
-		SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
+		SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
 		dashboardManager.put(dashboard);
 	}
 

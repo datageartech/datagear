@@ -105,7 +105,7 @@ public class HtmlTplDashboardWidgetRendererTest
 		}
 
 		@Override
-		protected void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Throwable
+		protected void renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard) throws Throwable
 		{
 		}
 	}

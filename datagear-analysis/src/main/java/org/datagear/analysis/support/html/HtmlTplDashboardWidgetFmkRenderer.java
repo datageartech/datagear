@@ -89,7 +89,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 
 	public static final String DIRECTIVE_CHART = "chart";
 
-	protected static final String KEY_HTML_DASHBOARD_RENDER_DATA_MODEL = HtmlDashboardRenderDataModel.class
+	protected static final String KEY_HTML_DASHBOARD_RENDER_DATA_MODEL = HtmlTplDashboardRenderDataModel.class
 			.getSimpleName();
 
 	private String defaultTemplateEncoding = "UTF-8";
@@ -175,27 +175,28 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 	}
 
 	@Override
-	protected void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Throwable
+	protected void renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard) throws Throwable
 	{
-		HtmlDashboardRenderDataModel dataModel = new HtmlDashboardRenderDataModel(dashboard,
+		HtmlTplDashboardRenderDataModel dataModel = new HtmlTplDashboardRenderDataModel(dashboard,
 				renderContext.getWebContext().getContextPath());
 
-		Template template = getTemplate((HtmlTplDashboardWidget<?>) dashboard.getWidget());
+		Template template = getTemplate((HtmlTplDashboardWidget<?>) dashboard.getWidget(), dashboard.getTemplate());
 
-		template.process(buildHtmlDashboardRenderDataModel(dataModel), renderContext.getWriter());
+		template.process(buildHtmlTplDashboardRenderDataModel(dataModel), renderContext.getWriter());
 	}
 
 	/**
 	 * 获取{@linkplain HtmlTplDashboardWidget#getId()}的指定模板对象。
 	 * 
 	 * @param dashboardWidget
+	 * @param template
 	 * @return
 	 * @throws Exception
 	 */
-	protected Template getTemplate(HtmlTplDashboardWidget<?> dashboardWidget) throws Exception
+	protected Template getTemplate(HtmlTplDashboardWidget<?> dashboardWidget, String template) throws Exception
 	{
 		String path = getTemplateDashboardWidgetResManager().getRelativePath(dashboardWidget.getId(),
-				dashboardWidget.getTemplate());
+				template);
 
 		return getConfiguration().getTemplate(path);
 	}
@@ -210,7 +211,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 		this._configuration = _configuration;
 	}
 
-	protected Object buildHtmlDashboardRenderDataModel(HtmlDashboardRenderDataModel dataModel)
+	protected Object buildHtmlTplDashboardRenderDataModel(HtmlTplDashboardRenderDataModel dataModel)
 	{
 		Map<String, Object> map = new HashMap<String, Object>();
 
@@ -219,11 +220,11 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 		return map;
 	}
 
-	protected HtmlDashboardRenderDataModel getHtmlDashboardRenderDataModel(Environment env)
+	protected HtmlTplDashboardRenderDataModel getHtmlTplDashboardRenderDataModel(Environment env)
 			throws TemplateModelException
 	{
 		TemplateHashModel templateHashModel = env.getDataModel();
-		HtmlDashboardRenderDataModel dataModel = (HtmlDashboardRenderDataModel) templateHashModel
+		HtmlTplDashboardRenderDataModel dataModel = (HtmlTplDashboardRenderDataModel) templateHashModel
 				.get(KEY_HTML_DASHBOARD_RENDER_DATA_MODEL);
 
 		return dataModel;
@@ -257,32 +258,32 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class HtmlDashboardRenderDataModel implements WrapperTemplateModel
+	protected static class HtmlTplDashboardRenderDataModel implements WrapperTemplateModel
 	{
-		private HtmlDashboard htmlDashboard;
+		private HtmlTplDashboard htmlTplDashboard;
 
 		private String contextPath = "";
 
-		public HtmlDashboardRenderDataModel()
+		public HtmlTplDashboardRenderDataModel()
 		{
 			super();
 		}
 
-		public HtmlDashboardRenderDataModel(HtmlDashboard htmlDashboard, String contextPath)
+		public HtmlTplDashboardRenderDataModel(HtmlTplDashboard htmlTplDashboard, String contextPath)
 		{
 			super();
-			this.htmlDashboard = htmlDashboard;
+			this.htmlTplDashboard = htmlTplDashboard;
 			this.contextPath = contextPath;
 		}
 
-		public HtmlDashboard getHtmlDashboard()
+		public HtmlTplDashboard getHtmlTplDashboard()
 		{
-			return htmlDashboard;
+			return htmlTplDashboard;
 		}
 
-		public void setHtmlDashboard(HtmlDashboard htmlDashboard)
+		public void setHtmlTplDashboard(HtmlTplDashboard htmlTplDashboard)
 		{
-			this.htmlDashboard = htmlDashboard;
+			this.htmlTplDashboard = htmlTplDashboard;
 		}
 
 		public String getContextPath()
@@ -298,7 +299,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 		@Override
 		public Object getWrappedObject()
 		{
-			return this.htmlDashboard;
+			return this.htmlTplDashboard;
 		}
 	}
 
@@ -351,8 +352,8 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 				throws TemplateException, IOException
 		{
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
+			HtmlTplDashboardRenderDataModel dataModel = getHtmlTplDashboardRenderDataModel(env);
+			HtmlTplDashboard dashboard = dataModel.getHtmlTplDashboard();
 			HtmlRenderContext renderContext = dashboard.getRenderContext();
 
 			writeDashboardImport(renderContext, dashboard, "");
@@ -377,8 +378,8 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 		public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
 				throws TemplateException, IOException
 		{
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
+			HtmlTplDashboardRenderDataModel dataModel = getHtmlTplDashboardRenderDataModel(env);
+			HtmlTplDashboard dashboard = dataModel.getHtmlTplDashboard();
 			HtmlRenderContext renderContext = dashboard.getRenderContext();
 
 			Writer out = env.getOut();
@@ -411,8 +412,8 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			if (StringUtil.isEmpty(dashboardVar))
 				dashboardVar = getDefaultDashboardVar();
 
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-			HtmlDashboard dashboard = dataModel.getHtmlDashboard();
+			HtmlTplDashboardRenderDataModel dataModel = getHtmlTplDashboardRenderDataModel(env);
+			HtmlTplDashboard dashboard = dataModel.getHtmlTplDashboard();
 			HtmlRenderContext renderContext = dashboard.getRenderContext();
 
 			dashboard.setVarName(dashboardVar);
@@ -422,7 +423,7 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			writeScriptStartTag(out);
 			writeNewLine(out);
 
-			writeHtmlDashboardJSVar(renderContext, out, dashboard);
+			writeHtmlTplDashboardJSVar(renderContext, out, dashboard);
 
 			writeScriptEndTag(out);
 			writeNewLine(out);
@@ -438,9 +439,9 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			// 移除内部设置的属性
 			HtmlChartPluginRenderOption.removeOption(renderContext);
 
-			writeHtmlDashboardJSInit(out, dashboard);
-			writeHtmlDashboardJSFactoryInit(out, dashboard, factoryVar);
-			writeHtmlDashboardJSRender(out, dashboard);
+			writeHtmlTplDashboardJSInit(out, dashboard);
+			writeHtmlTplDashboardJSFactoryInit(out, dashboard, factoryVar);
+			writeHtmlTplDashboardJSRender(out, dashboard);
 
 			writeScriptEndTag(out);
 			writeNewLine(out);
@@ -469,9 +470,9 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 			String var = getStringParamValue(params, "var");
 			String elementId = getStringParamValue(params, "elementId");
 
-			HtmlDashboardRenderDataModel dataModel = getHtmlDashboardRenderDataModel(env);
-			HtmlDashboard htmlDashboard = dataModel.getHtmlDashboard();
-			HtmlRenderContext renderContext = htmlDashboard.getRenderContext();
+			HtmlTplDashboardRenderDataModel dataModel = getHtmlTplDashboardRenderDataModel(env);
+			HtmlTplDashboard htmlTplDashboard = dataModel.getHtmlTplDashboard();
+			HtmlRenderContext renderContext = htmlTplDashboard.getRenderContext();
 
 			HtmlChartWidget<HtmlRenderContext> chartWidget = getHtmlChartWidgetForRender(renderContext, widget);
 
@@ -487,11 +488,11 @@ public class HtmlTplDashboardWidgetFmkRenderer<T extends HtmlRenderContext> exte
 
 			HtmlChart chart = writeHtmlChart(chartWidget, renderContext);
 
-			List<Chart> charts = htmlDashboard.getCharts();
+			List<Chart> charts = htmlTplDashboard.getCharts();
 			if (charts == null)
 			{
 				charts = new ArrayList<Chart>();
-				htmlDashboard.setCharts(charts);
+				htmlTplDashboard.setCharts(charts);
 			}
 
 			charts.add(chart);

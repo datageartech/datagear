@@ -448,6 +448,25 @@ public class FileUtil
 	}
 
 	/**
+	 * 删除文件名后缀。
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public static String deleteExtension(String fileName)
+	{
+		if (StringUtil.isEmpty(fileName))
+			return fileName;
+
+		int idx = fileName.lastIndexOf('.');
+
+		if (idx < 0)
+			return fileName;
+
+		return fileName.substring(0, idx);
+	}
+
+	/**
 	 * 连接路径。
 	 * 
 	 * @param parent

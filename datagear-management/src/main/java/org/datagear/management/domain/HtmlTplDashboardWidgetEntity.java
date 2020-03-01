@@ -7,11 +7,13 @@
  */
 package org.datagear.management.domain;
 
+import java.util.Collection;
 import java.util.Date;
 
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetFmkRenderer;
+import org.datagear.util.StringUtil;
 
 /**
  * {@linkplain HtmlTplDashboardWidget}实体。
@@ -24,7 +26,9 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRen
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final String DEFAULT_TEMPLATE = "index.html";
+	public static final String TEMPLATE_SPLITTER = ",";
+
+	public static final String[] DEFAULT_TEMPLATES = { "index.html" };
 
 	/** 授权资源类型 */
 	public static final String AUTHORIZATION_RESOURCE_TYPE = "Dashboard";
@@ -100,4 +104,66 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRen
 		this.dataPermission = dataPermission;
 	}
 
+	/**
+	 * 获取{@linkplain #getTemplates()}以{@linkplain #TEMPLATE_SPLITTER}分隔符合并后的字符串。
+	 * 
+	 * @return
+	 */
+	public String getTemplate()
+	{
+		return concatTemplates(getTemplates());
+	}
+
+	/**
+	 * 将{@code template}以{@linkplain #TEMPLATE_SPLITTER}分割后，并调用{@linkplain #setTemplates(String...)}。
+	 * 
+	 * @param template
+	 */
+	public void setTemplate(String template)
+	{
+		setTemplates(splitTemplates(template));
+	}
+
+	/**
+	 * 返回{@linkplain #TEMPLATE_SPLITTER}分隔符合并后的字符串。
+	 * 
+	 * @param templates
+	 * @return
+	 */
+	public static String concatTemplates(String... templates)
+	{
+		return StringUtil.concat(templates, TEMPLATE_SPLITTER);
+	}
+
+	/**
+	 * 返回{@linkplain #TEMPLATE_SPLITTER}分隔符合并后的字符串。
+	 * 
+	 * @param templates
+	 * @return
+	 */
+	public static String concatTemplates(Collection<String> templates)
+	{
+		if (templates == null)
+			return "";
+
+		String[] strs = new String[templates.size()];
+		templates.toArray(strs);
+
+		return StringUtil.concat(strs, TEMPLATE_SPLITTER);
+	}
+
+	/**
+	 * 以{@linkplain #TEMPLATE_SPLITTER}分割。
+	 * 
+	 * @param template
+	 * @return
+	 */
+	public static String[] splitTemplates(String template)
+	{
+		if (StringUtil.isEmpty(template))
+			return new String[0];
+
+		String[] templates = StringUtil.split(template, TEMPLATE_SPLITTER, true);
+		return templates;
+	}
 }

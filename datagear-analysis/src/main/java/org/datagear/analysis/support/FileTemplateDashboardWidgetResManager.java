@@ -92,11 +92,11 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	}
 
 	@Override
-	public Reader getTemplateReader(TemplateDashboardWidget<?> widget) throws IOException
+	public Reader getTemplateReader(TemplateDashboardWidget<?> widget, String template) throws IOException
 	{
 		if (this.templateAsContent)
 		{
-			String content = widget.getTemplate();
+			String content = template;
 			if (StringUtil.isEmpty(content))
 				content = "";
 
@@ -104,19 +104,19 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 		}
 		else
 		{
-			String name = getResourceNameForTemplate(widget);
+			String name = getResourceNameForTemplate(widget, template);
 			return getResourceReader(widget.getId(), name, getTemplateEncodingWithDefault(widget));
 		}
 	}
 
 	@Override
-	public Writer getTemplateWriter(TemplateDashboardWidget<?> widget) throws IOException
+	public Writer getTemplateWriter(TemplateDashboardWidget<?> widget, String template) throws IOException
 	{
 		if (this.templateAsContent)
 			throw new UnsupportedOperationException();
 		else
 		{
-			String name = getResourceNameForTemplate(widget);
+			String name = getResourceNameForTemplate(widget, template);
 			return getResourceWriter(widget.getId(), name, getTemplateEncodingWithDefault(widget));
 		}
 	}
@@ -226,14 +226,15 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	}
 
 	/**
-	 * 获取{@linkplain TemplateDashboardWidget#getTemplate()}的资源名。
+	 * 获取模板的资源名。
 	 * 
 	 * @param widget
+	 * @param template
 	 * @return
 	 */
-	protected String getResourceNameForTemplate(TemplateDashboardWidget<?> widget)
+	protected String getResourceNameForTemplate(TemplateDashboardWidget<?> widget, String template)
 	{
-		return widget.getTemplate();
+		return template;
 	}
 
 	protected File getFile(String id, String name, boolean create)

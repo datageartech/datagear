@@ -54,7 +54,7 @@ public class HtmlTplDashboardWidgetFmkRendererTest
 		StringWriter stringWriter = new StringWriter();
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), stringWriter);
 		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
-		HtmlDashboard dashboard = dashboardWidget.render(renderContext);
+		HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 
 		getHtmlWithPrint(stringWriter);
 

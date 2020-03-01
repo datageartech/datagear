@@ -128,6 +128,31 @@ public class StringUtil
 	}
 
 	/**
+	 * 将文本数组以分隔符合并为一个字符串。
+	 * 
+	 * @param text
+	 * @param splitter
+	 * @return
+	 */
+	public static String concat(String[] texts, String splitter)
+	{
+		if (texts == null)
+			return "";
+
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < texts.length; i++)
+		{
+			if (i > 0)
+				sb.append(splitter);
+
+			sb.append(texts[i]);
+		}
+
+		return sb.toString();
+	}
+
+	/**
 	 * 将字符串第一个字符转为小写。
 	 * 
 	 * @param s

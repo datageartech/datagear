@@ -36,7 +36,7 @@ import org.datagear.util.StringUtil;
 /**
  * 抽象{@linkplain HtmlTplDashboardWidget}渲染器。
  * <p>
- * 此类的{@linkplain #writeHtmlDashboardJSFactoryInit(Writer, HtmlDashboard, String)}方法的JS看板渲染逻辑为：
+ * 此类的{@linkplain #writeHtmlTplDashboardJSFactoryInit(Writer, HtmlTplDashboard, String)}方法的JS看板渲染逻辑为：
  * </p>
  * <code>
  * <pre>
@@ -61,12 +61,12 @@ import org.datagear.util.StringUtil;
  * 子类在调用此方法时可以传入自定义JS看板工厂对象的变量名，默认为{@linkplain #getDefaultDashboardFactoryVar()}。
  * </p>
  * <p>
- * 此类的{@linkplain #getHtmlDashboardImports()}的{@linkplain HtmlDashboardImport#getContent()}可以包含{@linkplain #getContextPathPlaceholder()}占位符，
+ * 此类的{@linkplain #getHtmlTplDashboardImports()}的{@linkplain HtmlTplDashboardImport#getContent()}可以包含{@linkplain #getContextPathPlaceholder()}占位符，
  * 在渲染时，占位符会被替换为实际的{@linkplain HtmlRenderContext#getContextPath()}。
  * </p>
  * <p>
  * 此类的{@linkplain #getExtDashboardInitScript()}可以包含{@linkplain #getDashboardVarPlaceholder()}占位符，
- * 在渲染时，占位符会被替换为实际的{@linkplain HtmlDashboard#getVarName()}。
+ * 在渲染时，占位符会被替换为实际的{@linkplain HtmlTplDashboard#getVarName()}。
  * </p>
  * 
  * @author datagear@163.com
@@ -105,7 +105,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = new HtmlChartPluginScriptObjectWriter();
 
-	private HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter = new HtmlDashboardScriptObjectWriter();
+	private HtmlTplDashboardScriptObjectWriter htmlTplDashboardScriptObjectWriter = new HtmlTplDashboardScriptObjectWriter();
 
 	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetGetException = new ValueHtmlChartPlugin<HtmlRenderContext>(
 			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForWidgetGetException",
@@ -120,7 +120,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			PROPERTY_VALUE_FOR_PLUGIN_NULL);
 
 	/** 内置导入内容 */
-	private List<HtmlDashboardImport> dashboardImports;
+	private List<HtmlTplDashboardImport> dashboardImports;
 
 	/** 上下文路径占位符 */
 	private String contextPathPlaceholder = DEFAULT_CONTEXT_PATH_PLACE_HOLDER;
@@ -221,14 +221,14 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		this.htmlChartPluginScriptObjectWriter = htmlChartPluginScriptObjectWriter;
 	}
 
-	public HtmlDashboardScriptObjectWriter getHtmlDashboardScriptObjectWriter()
+	public HtmlTplDashboardScriptObjectWriter getHtmlTplDashboardScriptObjectWriter()
 	{
-		return htmlDashboardScriptObjectWriter;
+		return htmlTplDashboardScriptObjectWriter;
 	}
 
-	public void setHtmlDashboardScriptObjectWriter(HtmlDashboardScriptObjectWriter htmlDashboardScriptObjectWriter)
+	public void setHtmlTplDashboardScriptObjectWriter(HtmlTplDashboardScriptObjectWriter htmlTplDashboardScriptObjectWriter)
 	{
-		this.htmlDashboardScriptObjectWriter = htmlDashboardScriptObjectWriter;
+		this.htmlTplDashboardScriptObjectWriter = htmlTplDashboardScriptObjectWriter;
 	}
 
 	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForWidgetGetException()
@@ -263,12 +263,12 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		this.htmlChartPluginForWidgetPluginNull = htmlChartPluginForWidgetPluginNull;
 	}
 
-	public List<HtmlDashboardImport> getDashboardImports()
+	public List<HtmlTplDashboardImport> getDashboardImports()
 	{
 		return dashboardImports;
 	}
 
-	public void setDashboardImports(List<HtmlDashboardImport> dashboardImports)
+	public void setDashboardImports(List<HtmlTplDashboardImport> dashboardImports)
 	{
 		this.dashboardImports = dashboardImports;
 	}
@@ -491,19 +491,21 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 
 	 * @param renderContext
 	 * @param dashboardWidget
+	 * @param template
 	 * @return
 	 * @throws RenderException
 	 */
-	public HtmlDashboard render(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget) throws RenderException
+	public HtmlTplDashboard render(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget, String template)
+			throws RenderException
 	{
 		RenderStyle renderStyle = inflateRenderStyle(renderContext);
 		inflateDashboardAndChartTheme(renderContext, renderStyle);
 
-		HtmlDashboard dashboard = createHtmlDashboard(renderContext, dashboardWidget);
+		HtmlTplDashboard dashboard = createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
 		try
 		{
-			renderHtmlDashboard(renderContext, dashboard);
+			renderHtmlTplDashboard(renderContext, dashboard);
 		}
 		catch (RenderException e)
 		{
@@ -521,12 +523,13 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 读取指定{@linkplain HtmlTplDashboardWidget}的模板内容。
 	 * 
 	 * @param dashboardWidget
+	 * @param template
 	 * @return
 	 * @throws IOException
 	 */
-	public String readTemplateContent(HtmlTplDashboardWidget<T> dashboardWidget) throws IOException
+	public String readTemplateContent(HtmlTplDashboardWidget<T> dashboardWidget, String template) throws IOException
 	{
-		Reader reader = getTemplateReaderNotNull(dashboardWidget);
+		Reader reader = getTemplateReaderNotNull(dashboardWidget, template);
 
 		return IOUtil.readString(reader, true);
 	}
@@ -535,17 +538,18 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 保存指定指定{@linkplain HtmlTplDashboardWidget}的模板内容。
 	 * 
 	 * @param dashboardWidget
+	 * @param template
 	 * @param templateContent
 	 * @throws IOException
 	 */
-	public void saveTemplateContent(HtmlTplDashboardWidget<T> dashboardWidget, String templateContent)
+	public void saveTemplateContent(HtmlTplDashboardWidget<T> dashboardWidget, String template, String templateContent)
 			throws IOException
 	{
 		Writer writer = null;
 
 		try
 		{
-			writer = getTemplateWriter(dashboardWidget);
+			writer = getTemplateWriter(dashboardWidget, template);
 			writer.write(templateContent);
 		}
 		finally
@@ -570,30 +574,34 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param dashboard
 	 * @throws Throwable
 	 */
-	protected abstract void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Throwable;
+	protected abstract void renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard)
+			throws Throwable;
 
 	/**
 	 * 获取{@linkplain HtmlTplDashboardWidget}的模板输入流。
 	 * 
 	 * @param dashboardWidget
+	 * @param template
 	 * @return
 	 * @throws IOException
 	 */
-	protected Reader getTemplateReaderNotNull(HtmlTplDashboardWidget<?> dashboardWidget) throws IOException
+	protected Reader getTemplateReaderNotNull(HtmlTplDashboardWidget<?> dashboardWidget, String template)
+			throws IOException
 	{
-		return getTemplateDashboardWidgetResManager().getTemplateReader(dashboardWidget);
+		return getTemplateDashboardWidgetResManager().getTemplateReader(dashboardWidget, template);
 	}
 
 	/**
 	 * 获取{@linkplain HtmlTplDashboardWidget}的模板输入流。
 	 * 
 	 * @param dashboardWidget
+	 * @param template
 	 * @return
 	 * @throws IOException
 	 */
-	protected Writer getTemplateWriter(HtmlTplDashboardWidget<?> dashboardWidget) throws IOException
+	protected Writer getTemplateWriter(HtmlTplDashboardWidget<?> dashboardWidget, String template) throws IOException
 	{
-		return getTemplateDashboardWidgetResManager().getTemplateWriter(dashboardWidget);
+		return getTemplateDashboardWidgetResManager().getTemplateWriter(dashboardWidget, template);
 	}
 
 	/**
@@ -721,7 +729,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
-	 * 写{@linkplain HtmlDashboard} JS变量：
+	 * 写{@linkplain HtmlTplDashboard} JS变量：
 	 * <p>
 	 * <code>var dashboard = {...};</code>
 	 * </p>
@@ -731,7 +739,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param dashboard
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSVar(HtmlRenderContext renderContext, Writer out, HtmlDashboard dashboard)
+	protected void writeHtmlTplDashboardJSVar(HtmlRenderContext renderContext, Writer out, HtmlTplDashboard dashboard)
 			throws IOException
 	{
 		if (StringUtil.isEmpty(dashboard.getVarName()))
@@ -741,11 +749,11 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 				.generateRenderContextVarName(Long.toHexString(System.currentTimeMillis()));
 		getHtmlRenderContextScriptObjectWriter().writeNoAttributes(out, renderContext, tmpRenderContextVarName);
 
-		getHtmlDashboardScriptObjectWriter().write(out, dashboard, tmpRenderContextVarName);
+		getHtmlTplDashboardScriptObjectWriter().write(out, dashboard, tmpRenderContextVarName);
 	}
 
 	/**
-	 * 写{@linkplain HtmlDashboard} JS初始化代码：
+	 * 写{@linkplain HtmlTplDashboard} JS初始化代码：
 	 * <p>
 	 * <code>
 	 * <pre>
@@ -763,7 +771,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param dashboard
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSInit(Writer out, HtmlDashboard dashboard) throws IOException
+	protected void writeHtmlTplDashboardJSInit(Writer out, HtmlTplDashboard dashboard) throws IOException
 	{
 		String varName = dashboard.getVarName();
 
@@ -810,7 +818,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
-	 * 写{@linkplain HtmlDashboard} JS工厂初始化代码：
+	 * 写{@linkplain HtmlTplDashboard} JS工厂初始化代码：
 	 * <p>
 	 * <code>
 	 * <pre>
@@ -825,7 +833,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 *            如果为{@code null}，则使用{@linkplain #getDefaultDashboardFactoryVar()}
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSFactoryInit(Writer out, HtmlDashboard dashboard, String dashboardFactoryVar)
+	protected void writeHtmlTplDashboardJSFactoryInit(Writer out, HtmlTplDashboard dashboard, String dashboardFactoryVar)
 			throws IOException
 	{
 		String varName = dashboard.getVarName();
@@ -841,7 +849,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
-	 * 写{@linkplain HtmlDashboard} JS渲染代码：
+	 * 写{@linkplain HtmlTplDashboard} JS渲染代码：
 	 * <p>
 	 * <code>
 	 * <pre>
@@ -857,7 +865,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param dashboard
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardJSRender(Writer out, HtmlDashboard dashboard) throws IOException
+	protected void writeHtmlTplDashboardJSRender(Writer out, HtmlTplDashboard dashboard) throws IOException
 	{
 		String varName = dashboard.getVarName();
 
@@ -882,7 +890,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param importExclude
 	 * @throws IOException
 	 */
-	protected void writeDashboardImport(HtmlRenderContext renderContext, HtmlDashboard dashboard, String importExclude)
+	protected void writeDashboardImport(HtmlRenderContext renderContext, HtmlTplDashboard dashboard, String importExclude)
 			throws IOException
 	{
 		Writer out = renderContext.getWriter();
@@ -891,7 +899,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 		if (this.dashboardImports != null)
 		{
-			for (HtmlDashboardImport impt : this.dashboardImports)
+			for (HtmlTplDashboardImport impt : this.dashboardImports)
 			{
 				String name = impt.getName();
 
@@ -935,7 +943,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean writeDashboardThemeStyle(HtmlRenderContext renderContext, HtmlDashboard dashboard, Writer out)
+	protected boolean writeDashboardThemeStyle(HtmlRenderContext renderContext, HtmlTplDashboard dashboard, Writer out)
 			throws IOException
 	{
 		DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
@@ -1287,17 +1295,20 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
-	 * 创建{@linkplain HtmlDashboard}实例。
+	 * 创建{@linkplain HtmlTplDashboard}实例。
 	 * 
 	 * @param renderContext
 	 * @param dashboardWidget
+	 * @param template
 	 * @return
 	 */
-	protected HtmlDashboard createHtmlDashboard(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget)
+	protected HtmlTplDashboard createHtmlTplDashboard(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget,
+			String template)
 	{
-		HtmlDashboard dashboard = new HtmlDashboard();
+		HtmlTplDashboard dashboard = new HtmlTplDashboard();
 
 		dashboard.setId(IDUtil.uuid());
+		dashboard.setTemplate(template);
 		dashboard.setWidget(dashboardWidget);
 		dashboard.setRenderContext(renderContext);
 		dashboard.setCharts(new ArrayList<Chart>());

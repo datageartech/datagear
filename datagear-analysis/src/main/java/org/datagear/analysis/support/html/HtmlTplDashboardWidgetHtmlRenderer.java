@@ -225,16 +225,16 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	}
 
 	@Override
-	protected void renderHtmlDashboard(T renderContext, HtmlDashboard dashboard) throws Throwable
+	protected void renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard) throws Throwable
 	{
 		HtmlTplDashboardWidget<?> dashboardWidget = (HtmlTplDashboardWidget<?>) dashboard.getWidget();
-		Reader in = getTemplateReaderNotNull(dashboardWidget);
+		Reader in = getTemplateReaderNotNull(dashboardWidget, dashboard.getTemplate());
 
-		renderHtmlDashboard(renderContext, dashboard, in);
+		renderHtmlTplDashboard(renderContext, dashboard, in);
 	}
 
 	/**
-	 * 渲染{@linkplain HtmlDashboard}。
+	 * 渲染{@linkplain HtmlTplDashboard}。
 	 * 
 	 * @param renderContext
 	 * @param dashboard
@@ -242,7 +242,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	 * @return
 	 * @throws Exception
 	 */
-	protected DashboardInfo renderHtmlDashboard(T renderContext, HtmlDashboard dashboard, Reader in) throws Exception
+	protected DashboardInfo renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard, Reader in) throws Exception
 	{
 		Writer out = renderContext.getWriter();
 
@@ -372,7 +372,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 				{
 					if (!wroteDashboardScript)
 					{
-						writeHtmlDashboardScript(renderContext, dashboard, dashboardInfo);
+						writeHtmlTplDashboardScript(renderContext, dashboard, dashboardInfo);
 						wroteDashboardScript = true;
 					}
 
@@ -411,7 +411,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	 * @param dashboardInfo
 	 * @throws IOException
 	 */
-	protected void writeDashboardImport(T renderContext, HtmlDashboard dashboard, DashboardInfo dashboardInfo)
+	protected void writeDashboardImport(T renderContext, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
 			throws IOException
 	{
 		writeDashboardImport(renderContext, dashboard, dashboardInfo.getImportExclude());
@@ -425,7 +425,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	 * @param dashboardInfo
 	 * @throws IOException
 	 */
-	protected void writeHtmlDashboardScript(T renderContext, HtmlDashboard dashboard, DashboardInfo dashboardInfo)
+	protected void writeHtmlTplDashboardScript(T renderContext, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
 			throws IOException
 	{
 		String dashboardVar = dashboardInfo.getDashboardVar();
@@ -439,25 +439,25 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		writeScriptStartTag(out);
 		writeNewLine(out);
 
-		writeHtmlDashboardJSVar(renderContext, out, dashboard);
+		writeHtmlTplDashboardJSVar(renderContext, out, dashboard);
 
 		out.write("(function(){");
 		writeNewLine(out);
 
 		writeHtmlChartScripts(renderContext, dashboard, dashboardInfo);
-		writeHtmlDashboardJSInit(out, dashboard);
-		writeHtmlDashboardJSFactoryInit(out, dashboard, dashboardInfo.getDashboardFactoryVar());
+		writeHtmlTplDashboardJSInit(out, dashboard);
+		writeHtmlTplDashboardJSFactoryInit(out, dashboard, dashboardInfo.getDashboardFactoryVar());
 
 		out.write("})();");
 		writeNewLine(out);
 
-		writeHtmlDashboardJSRender(out, dashboard);
+		writeHtmlTplDashboardJSRender(out, dashboard);
 
 		writeScriptEndTag(out);
 		writeNewLine(out);
 	}
 
-	protected void writeHtmlChartScripts(T renderContext, HtmlDashboard dashboard, DashboardInfo dashboardInfo)
+	protected void writeHtmlChartScripts(T renderContext, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
 			throws IOException
 	{
 		List<Chart> charts = dashboard.getCharts();
@@ -616,7 +616,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	 * @return
 	 * @throws IOException
 	 */
-	protected int resolveDashboardChartInfo(T renderContext, HtmlDashboard dashboard, Reader in, int last,
+	protected int resolveDashboardChartInfo(T renderContext, HtmlTplDashboard dashboard, Reader in, int last,
 			StringBuilder cache, StringBuilder attrName, StringBuilder attrValue, DashboardInfo dashboardInfo)
 			throws IOException
 	{

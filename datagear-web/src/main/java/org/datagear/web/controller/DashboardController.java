@@ -22,10 +22,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
-import org.datagear.analysis.support.html.HtmlDashboard;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
+import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
@@ -127,7 +127,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
 
-		dashboard.setTemplate(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATE);
+		dashboard.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 
 		HtmlTplDashboardWidgetRenderer<HtmlRenderContext> renderer = getHtmlTplDashboardWidgetEntityService()
@@ -323,8 +323,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	public Map<String, Object> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") MultipartFile multipartFile) throws Exception
 	{
+		String dasboardName = "";
 		String dashboardFileName = "";
-		String template = "";
+		List<String> templates = new ArrayList<String>();
 
 		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
 
@@ -353,13 +354,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 						continue;
 
 					String name = file.getName();
-					if (FileUtil.isExtension(name, "html") || FileUtil.isExtension(name, "htm"))
-					{
-						template = name;
 
-						if (template.equalsIgnoreCase("index.html") || template.equalsIgnoreCase("index.htm"))
-							break;
-					}
+					if (name.equalsIgnoreCase("index.html") || name.equalsIgnoreCase("index.htm"))
+						templates.add(0, name);
+					else if (FileUtil.isExtension(name, "html") || FileUtil.isExtension(name, "htm"))
+						templates.add(name);
 				}
 			}
 		}
@@ -381,12 +380,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 				IOUtil.close(out);
 			}
 
-			template = fileName;
+			templates.add(fileName);
 		}
 
+		dasboardName = FileUtil.deleteExtension(fileName);
+
 		Map<String, Object> results = new HashMap<String, Object>();
+
+		results.put("dashboardName", dasboardName);
+		results.put("template", HtmlTplDashboardWidgetEntity.concatTemplates(templates));
 		results.put("dashboardFileName", dashboardFileName);
-		results.put("template", template);
 
 		return results;
 	}
@@ -402,13 +405,21 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (!uploadDirectory.exists())
 			throw new IllegalInputException();
 
-		File templateFile = FileUtil.getFile(uploadDirectory, template);
+		String[] templates = HtmlTplDashboardWidgetEntity.splitTemplates(template);
 
-		if (!templateFile.exists() || templateFile.isDirectory())
-			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-					"dashboard.import.templateFileNotExists", template);
+		if (isEmpty(templates))
+			throw new IllegalInputException();
 
-		String templateEncoding = resolveTemplateEncoding(templateFile);
+		for (String fileName : templates)
+		{
+			File templateFile = FileUtil.getFile(uploadDirectory, fileName);
+
+			if (!templateFile.exists() || templateFile.isDirectory())
+				return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+						"dashboard.import.templateFileNotExists", fileName);
+		}
+
+		String templateEncoding = resolveTemplateEncoding(FileUtil.getFile(uploadDirectory, templates[0]));
 
 		User user = WebUtils.getUser(request, response);
 
@@ -521,7 +532,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidget(user, id);
 
-		showDashboard(request, response, model, user, dashboardWidget);
+		showDashboard(request, response, model, user, dashboardWidget, dashboardWidget.getFirstTemplate());
 	}
 
 	/**
@@ -546,12 +557,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		
 		String resName = resolvePathAfter(request, response, "/show/" + id + "/");
 
-		if (isEmpty(resName) || resName.equals(entity.getTemplate()))
+		if (entity.isTemplate(resName))
 		{
 			HtmlTplDashboardWidgetEntity dashboardWidget = this.htmlTplDashboardWidgetEntityService
 					.getHtmlTplDashboardWidget(user, id);
 
-			showDashboard(request, response, model, user, dashboardWidget);
+			showDashboard(request, response, model, user, dashboardWidget, resName);
 		}
 		else
 		{
@@ -585,7 +596,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 */
 	protected void showDashboard(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model,
-			User user, HtmlTplDashboardWidgetEntity dashboardWidget) throws Exception
+			User user, HtmlTplDashboardWidgetEntity dashboardWidget, String template) throws Exception
 	{
 		if (dashboardWidget == null)
 			throw new RecordNotFoundException();
@@ -613,9 +624,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 					getMessage(request, "dashboard.show.htmlTitlePrefix", getMessage(request, "app.name")));
 			HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
 
-			HtmlDashboard dashboard = dashboardWidget.render(renderContext);
+			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext, template);
 
-			SessionHtmlDashboardManager dashboardManager = getSessionHtmlDashboardManagerNotNull(request);
+			SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
 			dashboardManager.put(dashboard);
 		}
 		finally
@@ -711,30 +722,31 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		return new WebContext(contextPath, contextPath + "/analysis/dashboard/showData");
 	}
 
-	protected void checkSaveEntity(HtmlTplDashboardWidgetEntity dashboard)
+	protected void checkSaveEntity(HtmlTplDashboardWidgetEntity widget)
 	{
-		if (isBlank(dashboard.getName()))
+		if (isBlank(widget.getName()))
 			throw new IllegalInputException();
 
-		if (isEmpty(dashboard.getTemplate()))
+		if (isEmpty(widget.getTemplates()))
 			throw new IllegalInputException();
 	}
 
-	protected String readAndSetTemplateContent(HtmlTplDashboardWidgetEntity dashboard,
-			org.springframework.ui.Model model) throws IOException
+	protected String readAndSetTemplateContent(HtmlTplDashboardWidgetEntity widget, org.springframework.ui.Model model)
+			throws IOException
 	{
 		String templateContent = this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer()
-				.readTemplateContent(dashboard);
+				.readTemplateContent(widget, widget.getFirstTemplate());
 
 		model.addAttribute("templateContent", templateContent);
 
 		return templateContent;
 	}
 
-	protected void saveTemplateContent(HtmlTplDashboardWidgetEntity dashboard, String templateContent)
+	protected void saveTemplateContent(HtmlTplDashboardWidgetEntity widget, String templateContent)
 			throws IOException
 	{
-		this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer().saveTemplateContent(dashboard,
+		this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer().saveTemplateContent(widget,
+				widget.getFirstTemplate(),
 				templateContent);
 	}
 }
