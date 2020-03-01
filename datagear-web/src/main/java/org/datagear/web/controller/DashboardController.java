@@ -136,6 +136,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		String templateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
 
 		model.addAttribute("dashboard", dashboard);
+		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
+		model.addAttribute("templateName", dashboard.getFirstTemplate());
 		model.addAttribute("templateContent", templateContent);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.addDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
@@ -155,7 +157,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new RecordNotFoundException();
 
 		model.addAttribute("dashboard", dashboard);
-		readAndSetTemplateContent(dashboard, model);
+		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
+		model.addAttribute("templateName", dashboard.getFirstTemplate());
+		model.addAttribute("templateContent", readTemplateContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.editDashboard");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -165,33 +169,39 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
-			HtmlTplDashboardWidgetEntity dashboard, @RequestParam("templateContent") String templateContent)
+			HtmlTplDashboardWidgetEntity dashboard, @RequestParam("templateName") String templateName,
+			@RequestParam("templateContent") String templateContent)
 			throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
+
+		if (isEmpty(dashboard.getTemplates()))
+			dashboard.setTemplates(new String[] { templateName });
 
 		checkSaveEntity(dashboard);
 
 		boolean save = false;
 
+		if (templateName.equals(dashboard.getFirstTemplate()))
+			dashboard.setTemplateEncoding(resolveTemplateEncoding(templateContent));
+
 		if (isEmpty(dashboard.getId()))
 		{
 			dashboard.setId(IDUtil.randomIdOnTime20());
 			dashboard.setCreateUser(user);
-			dashboard.setTemplateEncoding(resolveTemplateEncoding(templateContent));
 			save = this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 		}
 		else
 		{
-			dashboard.setTemplateEncoding(resolveTemplateEncoding(templateContent));
 			save = this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
 		}
 
 		if (save)
-			saveTemplateContent(dashboard, templateContent);
+			saveTemplateContent(dashboard, templateName, templateContent);
 
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("id", dashboard.getId());
+		data.put("templates", dashboard.getTemplates());
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
 		responseEntity.getBody().setData(data);
@@ -455,7 +465,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new RecordNotFoundException();
 
 		model.addAttribute("dashboard", dashboard);
-		readAndSetTemplateContent(dashboard, model);
+		model.addAttribute("templates", toWriteJsonTemplateModel(dashboard.getTemplates()));
+		model.addAttribute("templateName", dashboard.getFirstTemplate());
+		model.addAttribute("templateContent", readTemplateContent(dashboard, dashboard.getFirstTemplate()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dashboard.viewDashboard");
 		model.addAttribute(KEY_READONLY, true);
 
@@ -731,22 +743,19 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new IllegalInputException();
 	}
 
-	protected String readAndSetTemplateContent(HtmlTplDashboardWidgetEntity widget, org.springframework.ui.Model model)
+	protected String readTemplateContent(HtmlTplDashboardWidgetEntity widget, String templateName)
 			throws IOException
 	{
 		String templateContent = this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer()
-				.readTemplateContent(widget, widget.getFirstTemplate());
-
-		model.addAttribute("templateContent", templateContent);
+				.readTemplateContent(widget, templateName);
 
 		return templateContent;
 	}
 
-	protected void saveTemplateContent(HtmlTplDashboardWidgetEntity widget, String templateContent)
+	protected void saveTemplateContent(HtmlTplDashboardWidgetEntity widget, String templateName, String templateContent)
 			throws IOException
 	{
 		this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer().saveTemplateContent(widget,
-				widget.getFirstTemplate(),
-				templateContent);
+				templateName, templateContent);
 	}
 }

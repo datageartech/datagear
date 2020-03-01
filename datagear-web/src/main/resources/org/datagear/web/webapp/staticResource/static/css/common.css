@@ -2221,7 +2221,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	left: 0;
 	top: 0;
 	bottom: 0;
-	right: 13.5em;
+	right: 14.5em;
 }
 .page-form-dashboard .template-editor-wrapper .template-editor-parent .template-editor{
 	position: absolute;
@@ -2234,16 +2234,16 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	position: absolute;
 	right: 0;
 	top: 0;
-	width: 13em;
+	width: 14em;
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper{
 	position: absolute;
 	right: 0;
 	top: 3em;
 	bottom: 0;
-	width: 13em;
+	width: 14em;
 }
-.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-title{
+.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-head{
 	font-weight: normal;
 	padding-left: 0.1em;
 	border-width: 0;
@@ -2251,20 +2251,39 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding-top: 0.1em;
 	padding-bottom: 0.2em;
 	margin-top: 0.1em;
+	position: relative;
+}
+.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-title{
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper{
 	position: absolute;
-	top: 0px;
-	right: 0.1em;
 	display: inline-block;
+	top: 0;
+    right: 0.1em;
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .ui-button-icon-only{
 	width: 1.5em;
 	height: 1.5em;
 	padding: 0.3em 0.3em;
-	margin-top: 0.15em;
 	margin-right: 0;
 	border: 0;
+}
+.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper{
+	display: inline-block;
+	position: relative;
+}
+.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-icon{
+	margin-top: 0.2em;
+}
+.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel{
+	display: none;
+	position: absolute;
+	padding: 0.2em 0.2em;
+	top: 1.5em;
+	right: -0.5px;
+}
+.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel button{
+	margin: 0.2em 0.2em;
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-content{
 	position: absolute;
@@ -2280,8 +2299,18 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	cursor: default;
 	white-space: nowrap;
 }
+.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-item.ui-state-default,
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-item.ui-state-active{
 	border: 0px;
+}
+.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-item-divider{
+	display: inline-block;
+	width: 100%;
+	height: 3px;
+	margin-bottom: 3px;
+	border-top-width: 0px;
+	border-left-width: 0px;
+	border-right-width: 0px;
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .add-resource-panel{
 	position: absolute;

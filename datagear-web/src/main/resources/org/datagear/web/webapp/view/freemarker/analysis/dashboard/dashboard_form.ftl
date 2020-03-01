@@ -29,6 +29,14 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
+					<label><@spring.message code='dashboard.templateName' /></label>
+				</div>
+				<div class="form-item-value">
+					<input type="text" name="templateName" value="${templateName?html}" class="ui-widget ui-widget-content" />
+				</div>
+			</div>
+			<div class="form-item">
+				<div class="form-item-label">
 					<label><@spring.message code='dashboard.template' /></label>
 				</div>
 				<div class="form-item-value form-item-value-template">
@@ -43,17 +51,28 @@ readonly 是否只读操作，允许为null
 						</div>
 						</#if>
 						<div class="dashboard-resource-wrapper ui-widget ui-widget-content ui-corner-all">
-							<div class="resource-title ui-widget ui-widget-content">
-								<@spring.message code='dashboard.dashboardResource' />
+							<div class="resource-head ui-widget ui-widget-content">
+								<div class="resource-title">
+									<@spring.message code='dashboard.dashboardResource' />
+								</div>
+								<#if !readonly>
+								<div class="resource-button-wrapper">
+									<button type='button' class='edit-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editTemplateContent' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
+									<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='add' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
+									<button type='button' class='copy-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
+									<button type='button' class='delete-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
+									<div class="resource-more-button-wrapper">
+										<span class="resource-more-icon ui-icon ui-icon-caret-1-s"></span>
+										<div class="resource-more-button-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow">
+											<button type='button' class='as-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='as-template-first-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='as-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='refresh-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='refresh' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
+										</div>
+									</div>
+								</div>
+								</#if>
 							</div>
-							<#if !readonly>
-							<div class="resource-button-wrapper">
-								<button type='button' class='copy-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
-								<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='add' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
-								<button type='button' class='refresh-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='refresh' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
-								<button type='button' class='delete-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
-							</div>
-							</#if>
 							<div class="resource-content"></div>
 							<div class='add-resource-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
 								<div class="add-resource-panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.addResource' /></div>
@@ -80,14 +99,6 @@ readonly 是否只读操作，允许为null
 					</div>
 				</div>
 			</div>
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='dashboard.templateName' /></label>
-				</div>
-				<div class="form-item-value">
-					<input type="text" name="template" value="${(dashboard.template)!''?html}" class="ui-widget ui-widget-content" />
-				</div>
-			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">
 			<#if !readonly>
@@ -109,7 +120,9 @@ readonly 是否只读操作，允许为null
 	var tewHeight = $(window).height()*5/9;
 	po.element(".template-editor-wrapper").height(tewHeight);
 	po.element(".form-item-value-template").height(tewHeight + 30);
-
+	
+	po.templates = <@writeJson var=templates />;
+	
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/dashboard/" + action;
@@ -155,7 +168,17 @@ readonly 是否只读操作，允许为null
 		</#if>
 	};
 	
-	po.element(".resource-content").selectable({classes: {"ui-selected": "ui-state-active"}});
+	po.element(".resource-content").selectable({classes: {"ui-selected": "ui-state-active"}, filter: ".resource-item"})
+	.on("mouseenter", ".resource-item", function()
+	{
+		var $this = $(this);
+		$this.addClass("ui-state-default");
+	})
+	.on("mouseleave", ".resource-item", function()
+	{
+		var $this = $(this);
+		$this.removeClass("ui-state-default");
+	});
 	
 	po.element(".resize-editor-button").click(function()
 	{
@@ -210,6 +233,16 @@ readonly 是否只读操作，允许为null
 			if($target.closest(".add-resource-panel, .add-resource-button").length == 0)
 				$ssp.hide();
 		}
+	});
+	
+	po.element(".resource-more-button-wrapper").hover(
+	function()
+	{
+		po.element(".resource-more-button-panel").show();
+	},
+	function()
+	{
+		po.element(".resource-more-button-panel").hide();
 	});
 	
 	po.element(".add-resource-button").click(function()
@@ -322,17 +355,126 @@ readonly 是否只读操作，允许为null
 			if(!resources)
 				return;
 			
-			for(var i=0; i<resources.length; i++)
+			var templateCount = 0;
+			for(var i=0; i<po.templates.length; i++)
 			{
-				var $res = $("<div class='resource-item'></div>").attr("resource-name", resources[i]).text(resources[i]);
-				$resources.append($res);
+				for(var j=0; j<resources.length; j++)
+				{
+					if(po.templates[i] == resources[j])
+					{
+						po.addDashboardResourceTemplate($resources, resources[j]);
+						templateCount++;
+					}
+				}
 			}
+			
+			if(templateCount > 0)
+				$resources.append($("<div class='resource-item-divider ui-widget ui-widget-content'></div>"));
+			
+			for(var i=0; i<resources.length; i++)
+				po.addDashboardResource($resources, resources[i]);
 			
 			$resources.selectable("refresh");
 		});
 	};
+	
+	po.addDashboardResource = function($parent, resourceName)
+	{
+		var $res = $("<div class='resource-item'></div>").attr("resource-name", resourceName).text(resourceName);
+		$parent.append($res);
+	};
+	
+	po.addDashboardResourceTemplate = function($parent, templateName, prepend)
+	{
+		var $res = $("<div class='resource-item resource-item-template'></div>").attr("resource-name", templateName).text(templateName);
+		$("<input type='hidden' name='templates' />").attr("value", templateName).appendTo($res);
+		
+		if(prepend == true)
+			$parent.prepend($res);
+		else
+			$parent.append($res);
+	};
+	
+	po.asResourceTemplateFirstAllowed = function($parent, $res)
+	{
+		return $res.hasClass("resource-item-template");
+	};
+	
+	po.asResourceTemplateFirst = function($parent, $res)
+	{
+		if(!po.asResourceTemplateFirstAllowed($parent, $res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		$res.remove();
+		
+		var idx = po.getTemplateIndex(resName);
+		
+		if(idx > -1)
+			po.templates.splice(idx, 1);
+		
+		po.addDashboardResourceTemplate($parent, resName, true);
+		po.templates.unshift(resName);
+	};
+	
+	po.removeResourceTemplateFeatureAllowed = function($parent, $res)
+	{
+		return $res.hasClass("resource-item-template");
+	};
+	
+	po.removeResourceTemplateFeature = function($parent, $res)
+	{
+		if(!po.removeResourceTemplateFeatureAllowed($parent, $res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		$res.remove();
+		
+		var idx = po.getTemplateIndex(resName);
+		
+		if(idx > -1)
+			po.templates.splice(idx, 1);
+	};
+	
+	po.setResourceTemplateFeatureAllowed = function($parent, $res)
+	{
+		if($res.hasClass("resource-item-template"))
+			return false;
+		
+		var resName = $res.attr("resource-name");
+		
+		if(!resName)
+			return false;
+		
+		var htmlReg = /\.(html|htm)$/gi;
+		
+		return htmlReg.test(resName);
+	};
+	
+	po.setResourceTemplateFeature = function($parent, $res)
+	{
+		if(!po.setResourceTemplateFeatureAllowed($parent, $res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		
+		po.addDashboardResourceTemplate($parent, resName);
+		po.templates.push(resName);
+	};
 
+	po.getTemplateIndex = function(templateName)
+	{
+		for(var i=0; i<po.templates.length; i++)
+		{
+			if(po.templates[i] == templateName)
+				return i;
+		}
+		
+		return -1;
+	};
+	
 	<#if !readonly>
+	
 	po.insertChartCode = function(charts)
 	{
 		if(!charts || !charts.length)
@@ -414,13 +556,13 @@ readonly 是否只读操作，允许为null
 		{
 			"name" : "required",
 			"templateContent" : "dashboardTemplateContent",
-			"template" : "required"
+			"templateName" : "required"
 		},
 		messages :
 		{
 			"name" : "<@spring.message code='validation.required' />",
 			"templateContent" : "<@spring.message code='validation.required' />",
-			"template" : "<@spring.message code='validation.required' />"
+			"templateName" : "<@spring.message code='validation.required' />"
 		},
 		submitHandler : function(form)
 		{
@@ -430,6 +572,7 @@ readonly 是否只读操作，允许为null
 			{
 				success : function(response)
 				{
+					var isSaveAdd = !(po.element("input[name='id']").val());
 					var dashboard = response.data;
 					po.element("input[name='id']").val(dashboard.id);
 					
@@ -437,6 +580,9 @@ readonly 是否只读操作，允许为null
 					
 					if(close)
 						po.close();
+					
+					if(!close)
+						po.refreshDashboardResources();
 					
 					if(po.showAfterSave)
 						window.open(po.url("show/"+dashboard.id+"/"), dashboard.id);
