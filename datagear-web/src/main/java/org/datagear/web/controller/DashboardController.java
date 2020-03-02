@@ -173,9 +173,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			HtmlTplDashboardWidgetEntity dashboard, @RequestParam("templateName") String templateName,
 			@RequestParam("templateContent") String templateContent) throws Exception
 	{
-		templateName = FileUtil.trimPath(templateName, FileUtil.PATH_SEPARATOR_SLASH);
-		if (templateName.startsWith(FileUtil.PATH_SEPARATOR_SLASH))
-			templateName = templateName.substring(1);
+		templateName = trimResourceName(templateName);
 
 		User user = WebUtils.getUser(request, response);
 
@@ -189,6 +187,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			templates.add(templateName);
 
 			dashboard.setTemplates(templates.toArray(new String[templates.size()]));
+			trimResourceNames(dashboard.getTemplates());
 		}
 
 		checkSaveEntity(dashboard);
@@ -216,6 +215,38 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		data.put("id", dashboard.getId());
 		data.put("templateName", templateName);
 		data.put("templates", dashboard.getTemplates());
+
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
+		responseEntity.getBody().setData(data);
+
+		return responseEntity;
+	}
+
+	@RequestMapping(value = "/saveTemplateNames", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveTemplateNames(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestParam("id") String id,
+			@RequestParam(value = "templates", required = false) String[] templates) throws Exception
+	{
+		if (isEmpty(templates))
+			return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+					"dashboard.saveFailForAtLeastOneTemplate");
+
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity widget = this.htmlTplDashboardWidgetEntityService.getById(user, id);
+
+		if (widget == null)
+			throw new RecordNotFoundException();
+
+		trimResourceNames(templates);
+		widget.setTemplates(templates);
+
+		this.htmlTplDashboardWidgetEntityService.update(user, widget);
+
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("id", id);
+		data.put("templates", templates);
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
 		responseEntity.getBody().setData(data);
@@ -266,23 +297,46 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	@RequestMapping(value = "/deleteResource", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public boolean deleteResource(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> deleteResource(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestParam("id") String id, @RequestParam("name") String name)
 			throws Exception
 	{
+		name = trimResourceName(name);
+
 		User user = WebUtils.getUser(request, response);
 
 		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getByIdForEdit(user, id);
 
 		if (dashboard == null)
-			return false;
+			throw new RecordNotFoundException();
+		
+		if(dashboard.isTemplate(name))
+		{
+			dashboard.removeTemplate(name);
+
+			// 不允许删除唯一的模板文件
+			if (dashboard.getTemplateCount() == 0)
+			{
+				return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
+						"dashboard.deleteFailForAtLeastOneTemplate");
+			}
+			else
+				this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
+		}
 
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
 
 		dashboardWidgetResManager.delete(id, name);
 
-		return true;
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("id", id);
+		data.put("templates", dashboard.getTemplates());
+
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
+		responseEntity.getBody().setData(data);
+
+		return responseEntity;
 	}
 
 	@RequestMapping(value = "/uploadResourceFile", produces = CONTENT_TYPE_JSON)
@@ -791,5 +845,26 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer().saveTemplateContent(widget,
 				templateName, templateContent);
+	}
+
+	protected void trimResourceNames(String[] resourceNames)
+	{
+		if (resourceNames == null)
+			return;
+
+		for (int i = 0; i < resourceNames.length; i++)
+			resourceNames[i] = trimResourceName(resourceNames[i]);
+	}
+
+	protected String trimResourceName(String resourceName)
+	{
+		if (StringUtil.isEmpty(resourceName))
+			return "";
+
+		resourceName = FileUtil.trimPath(resourceName, FileUtil.PATH_SEPARATOR_SLASH);
+		if (resourceName.startsWith(FileUtil.PATH_SEPARATOR_SLASH))
+			resourceName = resourceName.substring(1);
+
+		return resourceName;
 	}
 }

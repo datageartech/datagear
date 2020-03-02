@@ -593,6 +593,23 @@
 		},
 		
 		/**
+		 * 将字符串数组转换为参数字符串。
+		 */
+		toParamString : function(paramName, strArray)
+		{
+			var re = "";
+			
+			for(var i=0; i<strArray.length; i++)
+			{
+				if(i > 0)
+					re += "&";
+				re += paramName + "=" + encodeURIComponent(strArray[i]);
+			}
+			
+			return re;
+		},
+		
+		/**
 		 * 获取对象或者对象数组的属性值参数字符串，例如：“id=1&id=2&id=3”
 		 * 
 		 * @param objOrArray

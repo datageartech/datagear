@@ -3,6 +3,9 @@
  */
 package org.datagear.analysis;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.datagear.util.StringUtil;
 
 /**
@@ -88,6 +91,37 @@ public abstract class TemplateDashboardWidget<T extends RenderContext> extends A
 		}
 		
 		return false;
+	}
+
+	/**
+	 * 获取模板数目。
+	 * 
+	 * @return
+	 */
+	public int getTemplateCount()
+	{
+		return (this.templates == null ? 0 : this.templates.length);
+	}
+
+	/**
+	 * 移除指定模板。
+	 * 
+	 * @param template
+	 */
+	public void removeTemplate(String template)
+	{
+		if (this.templates == null || this.templates.length == 0)
+			return;
+
+		List<String> list = new ArrayList<String>(this.templates.length);
+
+		for (String t : this.templates)
+		{
+			if (!t.equals(template))
+				list.add(t);
+		}
+
+		this.templates = list.toArray(new String[list.size()]);
 	}
 
 	@Override

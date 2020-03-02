@@ -168,6 +168,54 @@ readonly 是否只读操作，允许为null
 		</#if>
 	};
 	
+	po.setTemplateNameAndContent = function(templateName, templateContent, focusEditor)
+	{
+		po.element("input[name='templateName']").val(templateName);
+		po.element("textarea[name='templateContent']").val(templateContent);
+		
+		po.templateEditor.setValue("");
+		if(templateContent)
+		{
+			var cursor = {row: 0, column: 0};
+			po.templateEditor.session.insert(cursor, templateContent);
+		}
+		
+		if(focusEditor)
+			po.templateEditor.focus();
+	};
+	
+	po.isTemplateContentModified = function()
+	{
+		var initContent = po.element("textarea[name='templateContent']").val();
+	 	var curContent = po.templateEditor.getValue();
+	 	
+	 	return (initContent != curContent);
+	};
+	
+	po.isTemplateCurrent = function(templateName)
+	{
+		return (po.element("input[name='templateName']").val() == templateName);
+	};
+	
+	po.getDashboardId = function()
+	{
+		return  po.element("input[name='id']").val();
+	};
+	
+	po.getSelectedResourceItem = function()
+	{
+		var $resources = po.element(".resource-content");
+		return $("> .resource-item.ui-state-active", $resources);
+	};
+	
+	po.getSelectedResourceName = function($res)
+	{
+		if(!$res)
+			$res = po.getSelectedResourceItem();
+		
+		return $res.attr("resource-name");
+	};
+	
 	po.enableResButonStatus = function(status)
 	{
 		var buttons = [
@@ -221,37 +269,6 @@ readonly 是否只读操作，允许为null
 		return $res.hasClass("resource-item-template");
 	};
 	
-	po.asResourceTemplateFirst = function($parent, $res)
-	{
-		if(!po.isResourceTemplateItem($res))
-			return;
-		
-		var resName = $res.attr("resource-name");
-		$res.remove();
-		
-		var idx = po.getTemplateIndex(resName);
-		
-		if(idx > -1)
-			po.templates.splice(idx, 1);
-		
-		po.addDashboardResourceTemplate($parent, resName, true);
-		po.templates.unshift(resName);
-	};
-	
-	po.asNormalResourceItem = function($parent, $res)
-	{
-		if(!po.isResourceTemplateItem($res))
-			return;
-		
-		var resName = $res.attr("resource-name");
-		$res.remove();
-		
-		var idx = po.getTemplateIndex(resName);
-		
-		if(idx > -1)
-			po.templates.splice(idx, 1);
-	};
-	
 	po.asTemplateItemAllowed = function($res)
 	{
 		if(po.isResourceTemplateItem($res))
@@ -278,32 +295,22 @@ readonly 是否只读操作，允许为null
 		return true;
 	};
 	
-	po.asTemplateItem = function($parent, $res)
+	po.getTemplateIndex = function(templateName, templates)
 	{
-		if(!po.asTemplateItemAllowed($res))
-			return;
+		templates = (templates || po.templates);
 		
-		var resName = $res.attr("resource-name");
-		
-		po.addDashboardResourceTemplate($parent, resName);
-		po.templates.push(resName);
-	};
-
-	po.getTemplateIndex = function(templateName)
-	{
-		for(var i=0; i<po.templates.length; i++)
+		for(var i=0; i<templates.length; i++)
 		{
-			if(po.templates[i] == templateName)
+			if(templates[i] == templateName)
 				return i;
 		}
 		
 		return -1;
 	};
-
+	
 	po.refreshDashboardResources = function()
 	{
-		var id = po.element("input[name='id']").val();
-		
+		var id = po.getDashboardId();
 		if(!id)
 			return;
 		
@@ -403,13 +410,6 @@ readonly 是否只读操作，允许为null
 	});
 	
 	<#if !readonly>
-	po.getSelectedResourceName = function()
-	{
-		var $resources = po.element(".resource-content");
-		var $res = $("> .resource-item.ui-state-active", $resources);
-		return $res.attr("resource-name");
-	};
-	
 	po.resourceNameClipboard = new ClipboardJS(po.element(".copy-resource-button")[0],
 	{
 		text: function(trigger)
@@ -452,7 +452,7 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".edit-template-button").click(function()
 	{
-		var id = po.element("input[name='id']").val();
+		var id = po.getDashboardId();
 		
 		if(!id)
 			return;
@@ -461,10 +461,7 @@ readonly 是否只读操作，允许为null
 		var $res = $("> .resource-item.ui-state-active", $parent);
 		var templateName = $res.attr("resource-name");
 		
-	 	var initContent = po.element("textarea[name='templateContent']").val();
-	 	var curContent = po.templateEditor.getValue();
-	 	
-	 	if(initContent != curContent)
+	 	if(po.isTemplateContentModified())
 	 	{
 	 		po.confirm("<@spring.message code='dashboard.confirmDiscardCurrentTemplateContent' />",
 			{
@@ -482,16 +479,21 @@ readonly 是否只读操作，允许为null
 	{
 	 	$.get(po.url("getTemplateContent"), {"id": id, "templateName": templateName}, function(data)
 	 	{
-	 		var templateContent = data.templateContent;
-	 		
-	 		po.element("input[name='templateName']").val(data.templateName);
-	 		po.element("textarea[name='templateContent']").val(templateContent);
-	 		
-	 		po.templateEditor.focus();
-	 		po.templateEditor.setValue("");
-			var cursor = {row: 0, column: 0};
-			po.templateEditor.session.insert(cursor, templateContent);
+	 		po.setTemplateNameAndContent(data.templateName, data.templateContent, true);
 	 	});
+	};
+
+	po.asTemplateItem = function($parent, $res)
+	{
+		if(!po.asTemplateItemAllowed($res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		
+		var templates = po.templates.concat([]);
+		templates.push(resName);
+		
+		po.saveTemplateNames(templates);
 	};
 	
 	po.element(".as-template-button").click(function()
@@ -501,15 +503,63 @@ readonly 是否只读操作，允许为null
 		
 		po.asTemplateItem($parent, $res);
 	});
+
+	po.asNormalResourceItem = function($parent, $res)
+	{
+		if(!po.isResourceTemplateItem($res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		
+		var templates = po.templates.concat([]);
+		var idx = po.getTemplateIndex(resName, templates);
+		if(idx > -1)
+			templates.splice(idx, 1);
+		
+		po.saveTemplateNames(templates, function()
+		{
+			if(po.isTemplateCurrent(resName))
+				po.setTemplateNameAndContent("", "");
+		});
+	};
 	
 	po.element(".as-resource-button").click(function()
 	{
 		var $parent = po.element(".resource-content");
 		var $res = $("> .resource-item.ui-state-active", $parent);
+		var resName = $res.attr("resource-name");
+		var isCurrent = po.isTemplateCurrent(resName);
 		
-		po.asNormalResourceItem($parent, $res);
+		if(isCurrent && po.isTemplateContentModified())
+	 	{
+	 		po.confirm("<@spring.message code='dashboard.confirmDiscardCurrentTemplateContent' />",
+			{
+				"confirm" : function()
+				{
+					po.asNormalResourceItem($parent, $res);
+				}
+			});
+	 	}
+	 	else
+	 		po.asNormalResourceItem($parent, $res);
 	});
-
+	
+	po.asResourceTemplateFirst = function($parent, $res)
+	{
+		if(!po.isResourceTemplateItem($res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		
+		var templates = po.templates.concat([]);
+		var idx = po.getTemplateIndex(resName, templates);
+		if(idx > -1)
+			templates.splice(idx, 1);
+		templates.unshift(resName);
+		
+		po.saveTemplateNames(templates);
+	};
+	
 	po.element(".as-template-first-button").click(function()
 	{
 		var $parent = po.element(".resource-content");
@@ -518,9 +568,27 @@ readonly 是否只读操作，允许为null
 		po.asResourceTemplateFirst($parent, $res);
 	});
 	
+	po.saveTemplateNames = function(templateNames, success)
+	{
+		var id = po.getDashboardId();
+		if(!id)
+			return;
+		
+		var param = $.toParamString("templates", templateNames);
+		
+		$.post(po.url("saveTemplateNames?id="+id), param, function(response)
+		{
+			po.templates = response.data.templates;
+			po.refreshDashboardResources();
+			
+			if(success)
+				success();
+		});
+	};
+	
 	po.element(".add-resource-button").click(function()
 	{
-		var id = po.element("input[name='id']").val();
+		var id = po.getDashboardId();
 		
 		if(!id)
 		{
@@ -539,7 +607,7 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".save-resource-button").click(function()
 	{
-		var id = po.element("input[name='id']").val();
+		var id = po.getDashboardId();
 		var resourceFilePath = po.element(".resource-uploadFilePath").val();
 		var resourceName = po.element(".add-resource-name-input").val();
 		
@@ -560,8 +628,9 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".delete-resource-button").click(function()
 	{
-		var id = po.element("input[name='id']").val();
-		var name = po.getSelectedResourceName();
+		var id = po.getDashboardId();
+		var $res = po.getSelectedResourceItem();
+		var name = po.getSelectedResourceName($res);
 		
 		if(!id || !name)
 			return;
@@ -570,7 +639,14 @@ readonly 是否只读操作，允许为null
 		{
 			"confirm" : function()
 			{
-				$.post(po.url("deleteResource"), {"id": id, "name" : name}, function(){
+				$.post(po.url("deleteResource"), {"id": id, "name" : name},
+				function(response)
+				{
+					po.templates = response.data.templates;
+					
+					if(po.isTemplateCurrent(name))
+						po.setTemplateNameAndContent("", "");
+					
 					po.refreshDashboardResources();
 				});
 			}
@@ -589,7 +665,7 @@ readonly 是否只读操作，允许为null
 			if(currentRes)
 			{
 				var lastChar = currentRes.charAt(currentRes.length - 1);
-				if(lastChar == "/" || lastChar == "\\")
+				if(lastChar == "/")
 					;
 				else
 					currentRes = "";
@@ -711,7 +787,7 @@ readonly 是否只读操作，允许为null
 			{
 				success : function(response)
 				{
-					var isSaveAdd = !(po.element("input[name='id']").val());
+					var isSaveAdd = !po.getDashboardId();
 					
 					var dashboard = response.data;
 					po.element("input[name='id']").val(dashboard.id);
@@ -748,7 +824,7 @@ readonly 是否只读操作，允许为null
 	});
 	</#if>
 	
-	if(po.element("input[name='id']").val())
+	if(po.getDashboardId())
 		po.element(".resize-editor-button").click();
 	
 	po.initTemplateEditor();
