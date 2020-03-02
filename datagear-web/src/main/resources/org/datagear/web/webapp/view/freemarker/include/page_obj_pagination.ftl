@@ -31,7 +31,7 @@ po.paging = undefined;
 			pageSizeSetLabel : "<@spring.message code='confirm' />",
 			toPageLabel : "<@spring.message code='jumpto' />",
 			pageSizeCookie: "PAGINATION_PAGE_SIZE",
-			pageSizeCookiePath: "${contextPath}/",
+			pageSizeCookiePath: "${contextPath}",
 			update: function(page, pageSize, total)
 			{
 				var pagingParam =

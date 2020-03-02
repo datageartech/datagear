@@ -80,7 +80,7 @@ public class WebUtils
 				anonymousUserId = IDUtil.uuid();
 
 				Cookie cookie = new Cookie(COOKIE_USER_ID_ANONYMOUS, anonymousUserId);
-				cookie.setPath(WebContextPath.getWebContextPath(request).concat(request, "/"));
+				cookie.setPath(WebContextPath.getWebContextPath(request).get(request));
 				cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
 
 				response.addCookie(cookie);

@@ -719,7 +719,7 @@
 				}
 				
 				var newTabIndex = newTab.index();
-				$.cookie("MAIN_NAV_ACTIVE_TAB_INDEX", newTabIndex, {expires : 365*5, path : "${contextPath}/"});
+				$.cookie("MAIN_NAV_ACTIVE_TAB_INDEX", newTabIndex, {expires : 365*5, path : "${contextPath}"});
 			}
 		});
 		
