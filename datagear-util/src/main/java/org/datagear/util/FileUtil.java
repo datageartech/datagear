@@ -19,6 +19,16 @@ public class FileUtil
 {
 	public static final String PATH_SEPARATOR = File.separator;
 
+	/**
+	 * 斜杠（/）路径分隔符
+	 */
+	public static final String PATH_SEPARATOR_SLASH = "/";
+
+	/**
+	 * 反斜杠（\）路径分隔符
+	 */
+	public static final String PATH_SEPARATOR_BACK_SLASH = "\\";
+
 	private FileUtil()
 	{
 		throw new UnsupportedOperationException();
@@ -67,7 +77,8 @@ public class FileUtil
 	 * 获取文件对象。
 	 * 
 	 * @param file
-	 * @param createDirectory 是否创建自身目录和上级目录
+	 * @param createDirectory
+	 *            是否创建自身目录和上级目录
 	 * @return
 	 */
 	public static File getFile(String file, boolean createDirectory)
@@ -96,7 +107,8 @@ public class FileUtil
 	 * 
 	 * @param parent
 	 * @param file
-	 * @param createDirectory 是否创建自身目录和上级目录
+	 * @param createDirectory
+	 *            是否创建自身目录和上级目录
 	 * @return
 	 */
 	public static File getFile(File parent, String file, boolean createDirectory)
@@ -107,9 +119,11 @@ public class FileUtil
 	/**
 	 * 获取文件对象。
 	 * 
-	 * @param parent          允许为{@code null}
+	 * @param parent
+	 *            允许为{@code null}
 	 * @param file
-	 * @param createDirectory 是否创建自身目录和上级目录
+	 * @param createDirectory
+	 *            是否创建自身目录和上级目录
 	 * @return
 	 */
 	protected static File getFileNullable(File parent, String file, boolean createDirectory)

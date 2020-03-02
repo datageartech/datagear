@@ -647,8 +647,7 @@ public abstract class AbstractController
 	 * @param resName
 	 */
 	protected String setContentTypeByName(HttpServletRequest request, HttpServletResponse response,
-			ServletContext servletContext,
-			String resName)
+			ServletContext servletContext, String resName)
 	{
 		String mimeType = servletContext.getMimeType(resName);
 		if (!isEmpty(mimeType))
@@ -661,14 +660,16 @@ public abstract class AbstractController
 	 * 解析请求路径中{@code pathPrefix}之后的路径名，如果路径不包含{@code pathPrefix}，则返回{@code null}。
 	 * 
 	 * @param request
-	 * @param response
 	 * @param pathPrefix
+	 *            为空或{@code null}，则返回整个请求路径
 	 * @return
 	 */
-	protected String resolvePathAfter(HttpServletRequest request, HttpServletResponse response,
-			String pathPrefix)
+	protected String resolvePathAfter(HttpServletRequest request, String pathPrefix)
 	{
 		String pathInfo = request.getPathInfo();
+
+		if (StringUtil.isEmpty(pathPrefix))
+			return pathInfo;
 
 		if (pathInfo.endsWith(pathPrefix))
 			return "";

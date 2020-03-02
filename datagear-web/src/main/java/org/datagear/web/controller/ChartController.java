@@ -25,10 +25,10 @@ import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
-import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
+import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
@@ -327,7 +327,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		User user = WebUtils.getUser(request, response);
 		HtmlChartWidgetEntity chart = this.htmlChartWidgetEntityService.getById(user, id);
 
-		String resName = resolvePathAfter(request, response, "/show/" + id + "/");
+		String resName = resolvePathAfter(request, "/show/" + id + "/");
 
 		if (isEmpty(resName))
 		{

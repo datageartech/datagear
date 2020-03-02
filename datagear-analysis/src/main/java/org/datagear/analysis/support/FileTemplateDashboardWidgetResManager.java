@@ -82,8 +82,10 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	/**
 	 * 获取指定资源相对{@linkplain #getRootDirectory()}的路径。
 	 * 
-	 * @param id   {@linkplain Dashboard#getId()}
-	 * @param name 资源名称
+	 * @param id
+	 *            {@linkplain Dashboard#getId()}
+	 * @param name
+	 *            资源名称
 	 * @return
 	 */
 	public String getRelativePath(String id, String name)
@@ -177,8 +179,9 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 		{
 			String resource = FileUtil.getRelativePath(directory, file);
 
+			resource = FileUtil.trimPath(resource, FileUtil.PATH_SEPARATOR_SLASH);
 			if (file.isDirectory())
-				resource += FileUtil.PATH_SEPARATOR;
+				resource += FileUtil.PATH_SEPARATOR_SLASH;
 
 			resources.add(resource);
 		}

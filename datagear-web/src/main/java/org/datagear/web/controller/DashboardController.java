@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,13 +171,25 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@ResponseBody
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
 			HtmlTplDashboardWidgetEntity dashboard, @RequestParam("templateName") String templateName,
-			@RequestParam("templateContent") String templateContent)
-			throws Exception
+			@RequestParam("templateContent") String templateContent) throws Exception
 	{
+		templateName = FileUtil.trimPath(templateName, FileUtil.PATH_SEPARATOR_SLASH);
+		if (templateName.startsWith(FileUtil.PATH_SEPARATOR_SLASH))
+			templateName = templateName.substring(1);
+
 		User user = WebUtils.getUser(request, response);
 
-		if (isEmpty(dashboard.getTemplates()))
-			dashboard.setTemplates(new String[] { templateName });
+		if (!dashboard.isTemplate(templateName))
+		{
+			List<String> templates = new ArrayList<String>();
+
+			if (!isEmpty(dashboard.getTemplates()))
+				templates.addAll(Arrays.asList(dashboard.getTemplates()));
+
+			templates.add(templateName);
+
+			dashboard.setTemplates(templates.toArray(new String[templates.size()]));
+		}
 
 		checkSaveEntity(dashboard);
 
@@ -201,12 +214,34 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("id", dashboard.getId());
+		data.put("templateName", templateName);
 		data.put("templates", dashboard.getTemplates());
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
 		responseEntity.getBody().setData(data);
 
 		return responseEntity;
+	}
+
+	@RequestMapping(value = "/getTemplateContent", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, Object> getTemplateContent(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestParam("id") String id,
+			@RequestParam("templateName") String templateName) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity widget = this.htmlTplDashboardWidgetEntityService.getById(user, id);
+
+		if (widget == null)
+			throw new RecordNotFoundException();
+
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("id", id);
+		data.put("templateName", templateName);
+		data.put("templateContent", readTemplateContent(widget, templateName));
+
+		return data;
 	}
 
 	@RequestMapping(value = "/listResources", produces = CONTENT_TYPE_JSON)
@@ -566,8 +601,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (entity == null)
 			throw new RecordNotFoundException();
-		
-		String resName = resolvePathAfter(request, response, "/show/" + id + "/");
+
+		String resName = resolvePathAfter(request, "/show/" + id + "/");
 
 		if (entity.isTemplate(resName))
 		{
@@ -607,8 +642,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @throws Exception
 	 */
 	protected void showDashboard(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model,
-			User user, HtmlTplDashboardWidgetEntity dashboardWidget, String template) throws Exception
+			org.springframework.ui.Model model, User user, HtmlTplDashboardWidgetEntity dashboardWidget,
+			String template) throws Exception
 	{
 		if (dashboardWidget == null)
 			throw new RecordNotFoundException();
@@ -743,8 +778,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			throw new IllegalInputException();
 	}
 
-	protected String readTemplateContent(HtmlTplDashboardWidgetEntity widget, String templateName)
-			throws IOException
+	protected String readTemplateContent(HtmlTplDashboardWidgetEntity widget, String templateName) throws IOException
 	{
 		String templateContent = this.htmlTplDashboardWidgetEntityService.getHtmlTplDashboardWidgetRenderer()
 				.readTemplateContent(widget, templateName);

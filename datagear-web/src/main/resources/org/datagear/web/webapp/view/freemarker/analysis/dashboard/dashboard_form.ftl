@@ -58,15 +58,15 @@ readonly 是否只读操作，允许为null
 								<#if !readonly>
 								<div class="resource-button-wrapper">
 									<button type='button' class='edit-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editTemplateContent' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
-									<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='add' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
+									<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
 									<button type='button' class='copy-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
 									<button type='button' class='delete-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
 									<div class="resource-more-button-wrapper">
 										<span class="resource-more-icon ui-icon ui-icon-caret-1-s"></span>
 										<div class="resource-more-button-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow">
 											<button type='button' class='as-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
-											<button type='button' class='as-template-first-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
 											<button type='button' class='as-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
+											<button type='button' class='as-template-first-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
 											<button type='button' class='refresh-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='refresh' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
 										</div>
 									</div>
@@ -168,7 +168,212 @@ readonly 是否只读操作，允许为null
 		</#if>
 	};
 	
-	po.element(".resource-content").selectable({classes: {"ui-selected": "ui-state-active"}, filter: ".resource-item"})
+	po.enableResButonStatus = function(status)
+	{
+		var buttons = [
+			po.element(".edit-template-button"),
+			po.element(".copy-resource-button"),
+			po.element(".delete-resource-button"),
+			po.element(".as-template-button"),
+			po.element(".as-resource-button"),
+			po.element(".as-template-first-button")
+		];
+		
+		if(!status.length)
+			status = [status];
+		
+		for(var i=0; i<buttons.length; i++)
+		{
+			var s = (status[i] != undefined ? status[i] : status[0]);
+			if(s)
+				buttons[i].button("enable");
+			else
+				buttons[i].button("disable");
+		}
+	};
+	
+	po.addDashboardResource = function($parent, resourceName)
+	{
+		var $res = $("<div class='resource-item'></div>").attr("resource-name", resourceName).text(resourceName);
+		$parent.append($res);
+	};
+	
+	po.addDashboardResourceTemplate = function($parent, templateName, prepend)
+	{
+		var $res = $("<div class='resource-item resource-item-template'></div>").attr("resource-name", templateName).text(templateName);
+		$res.prepend($("<span class='ui-icon ui-icon-contact'></span>").attr("title", "<@spring.message code='dashboard.dashboardTemplateResource' />"));
+		$("<input type='hidden' name='templates' />").attr("value", templateName).appendTo($res);
+		
+		if(prepend == true)
+			$parent.prepend($res);
+		else
+		{
+			var last = $(".resource-item-template", $parent).last();
+			if(last.length == 0)
+				$parent.prepend($res);
+			else
+				last.after($res);
+		}
+	};
+	
+	po.isResourceTemplateItem = function($res)
+	{
+		return $res.hasClass("resource-item-template");
+	};
+	
+	po.asResourceTemplateFirst = function($parent, $res)
+	{
+		if(!po.isResourceTemplateItem($res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		$res.remove();
+		
+		var idx = po.getTemplateIndex(resName);
+		
+		if(idx > -1)
+			po.templates.splice(idx, 1);
+		
+		po.addDashboardResourceTemplate($parent, resName, true);
+		po.templates.unshift(resName);
+	};
+	
+	po.asNormalResourceItem = function($parent, $res)
+	{
+		if(!po.isResourceTemplateItem($res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		$res.remove();
+		
+		var idx = po.getTemplateIndex(resName);
+		
+		if(idx > -1)
+			po.templates.splice(idx, 1);
+	};
+	
+	po.asTemplateItemAllowed = function($res)
+	{
+		if(po.isResourceTemplateItem($res))
+			return false;
+		
+		var resName = $res.attr("resource-name");
+		
+		if(!resName)
+			return false;
+		
+		var htmlReg = /\.(html|htm)$/gi;
+		
+		if(!htmlReg.test(resName))
+			return false;
+		
+		var $parent = $res.parent();
+		var $templates = $(".resource-item-template", $parent);
+		for(var i=0; i<$templates.length; i++)
+		{
+			if($($templates[i]).attr("resource-name") == resName)
+				return false;
+		}
+		
+		return true;
+	};
+	
+	po.asTemplateItem = function($parent, $res)
+	{
+		if(!po.asTemplateItemAllowed($res))
+			return;
+		
+		var resName = $res.attr("resource-name");
+		
+		po.addDashboardResourceTemplate($parent, resName);
+		po.templates.push(resName);
+	};
+
+	po.getTemplateIndex = function(templateName)
+	{
+		for(var i=0; i<po.templates.length; i++)
+		{
+			if(po.templates[i] == templateName)
+				return i;
+		}
+		
+		return -1;
+	};
+
+	po.refreshDashboardResources = function()
+	{
+		var id = po.element("input[name='id']").val();
+		
+		if(!id)
+			return;
+		
+		var $resources = po.element(".resource-content");
+		$resources.empty();
+		
+		$.get(po.url("listResources?id="+id), function(resources)
+		{
+			po.enableResButonStatus(false);
+			
+			if(!resources)
+				return;
+			
+			var templateCount = 0;
+			for(var i=0; i<po.templates.length; i++)
+			{
+				for(var j=0; j<resources.length; j++)
+				{
+					if(po.templates[i] == resources[j])
+					{
+						po.addDashboardResourceTemplate($resources, resources[j]);
+						templateCount++;
+					}
+				}
+			}
+			
+			if(templateCount > 0)
+				$resources.append($("<div class='resource-item-divider ui-widget ui-widget-content'></div>"));
+			
+			for(var i=0; i<resources.length; i++)
+				po.addDashboardResource($resources, resources[i]);
+			
+			$resources.selectable("refresh");
+		});
+	};
+	
+	po.element(".resource-content").selectable
+	(
+		{
+			classes: {"ui-selected": "ui-state-active"},
+			filter: ".resource-item",
+			selected: function(event, ui)
+			{
+				<#if !readonly>
+				var $selected = $(ui.selected);
+				var selectedCount = $(".ui-selected", this).length;
+				
+				var status = [false, false, false, false, false, false];
+				
+				if(selectedCount == 1)
+				{
+					status[0] = po.isResourceTemplateItem($selected);
+					status[1] = true;
+					status[2] = true;
+					status[3] = po.asTemplateItemAllowed($selected);
+					status[4] = status[0];
+					status[5] = status[0];
+				}
+				
+				po.enableResButonStatus(status);
+				</#if>
+			},
+			unselected: function(event, ui)
+			{
+				<#if !readonly>
+				po.enableResButonStatus(false);
+				</#if>
+			}
+		}
+	)
 	.on("mouseenter", ".resource-item", function()
 	{
 		var $this = $(this);
@@ -243,6 +448,74 @@ readonly 是否只读操作，允许为null
 	function()
 	{
 		po.element(".resource-more-button-panel").hide();
+	});
+	
+	po.element(".edit-template-button").click(function()
+	{
+		var id = po.element("input[name='id']").val();
+		
+		if(!id)
+			return;
+		
+		var $parent = po.element(".resource-content");
+		var $res = $("> .resource-item.ui-state-active", $parent);
+		var templateName = $res.attr("resource-name");
+		
+	 	var initContent = po.element("textarea[name='templateContent']").val();
+	 	var curContent = po.templateEditor.getValue();
+	 	
+	 	if(initContent != curContent)
+	 	{
+	 		po.confirm("<@spring.message code='dashboard.confirmDiscardCurrentTemplateContent' />",
+			{
+				"confirm" : function()
+				{
+					po.loadTemplateContentForEdit(id, templateName);
+				}
+			});
+	 	}
+	 	else
+	 		po.loadTemplateContentForEdit(id, templateName);
+	});
+	
+	po.loadTemplateContentForEdit = function(id, templateName)
+	{
+	 	$.get(po.url("getTemplateContent"), {"id": id, "templateName": templateName}, function(data)
+	 	{
+	 		var templateContent = data.templateContent;
+	 		
+	 		po.element("input[name='templateName']").val(data.templateName);
+	 		po.element("textarea[name='templateContent']").val(templateContent);
+	 		
+	 		po.templateEditor.focus();
+	 		po.templateEditor.setValue("");
+			var cursor = {row: 0, column: 0};
+			po.templateEditor.session.insert(cursor, templateContent);
+	 	});
+	};
+	
+	po.element(".as-template-button").click(function()
+	{
+		var $parent = po.element(".resource-content");
+		var $res = $("> .resource-item.ui-state-active", $parent);
+		
+		po.asTemplateItem($parent, $res);
+	});
+	
+	po.element(".as-resource-button").click(function()
+	{
+		var $parent = po.element(".resource-content");
+		var $res = $("> .resource-item.ui-state-active", $parent);
+		
+		po.asNormalResourceItem($parent, $res);
+	});
+
+	po.element(".as-template-first-button").click(function()
+	{
+		var $parent = po.element(".resource-content");
+		var $res = $("> .resource-item.ui-state-active", $parent);
+		
+		po.asResourceTemplateFirst($parent, $res);
 	});
 	
 	po.element(".add-resource-button").click(function()
@@ -340,141 +613,7 @@ readonly 是否只读操作，允许为null
 	});
 	</#if>
 	
-	po.refreshDashboardResources = function()
-	{
-		var id = po.element("input[name='id']").val();
-		
-		if(!id)
-			return;
-		
-		var $resources = po.element(".resource-content");
-		$resources.empty();
-		
-		$.get(po.url("listResources?id="+id), function(resources)
-		{
-			if(!resources)
-				return;
-			
-			var templateCount = 0;
-			for(var i=0; i<po.templates.length; i++)
-			{
-				for(var j=0; j<resources.length; j++)
-				{
-					if(po.templates[i] == resources[j])
-					{
-						po.addDashboardResourceTemplate($resources, resources[j]);
-						templateCount++;
-					}
-				}
-			}
-			
-			if(templateCount > 0)
-				$resources.append($("<div class='resource-item-divider ui-widget ui-widget-content'></div>"));
-			
-			for(var i=0; i<resources.length; i++)
-				po.addDashboardResource($resources, resources[i]);
-			
-			$resources.selectable("refresh");
-		});
-	};
-	
-	po.addDashboardResource = function($parent, resourceName)
-	{
-		var $res = $("<div class='resource-item'></div>").attr("resource-name", resourceName).text(resourceName);
-		$parent.append($res);
-	};
-	
-	po.addDashboardResourceTemplate = function($parent, templateName, prepend)
-	{
-		var $res = $("<div class='resource-item resource-item-template'></div>").attr("resource-name", templateName).text(templateName);
-		$("<input type='hidden' name='templates' />").attr("value", templateName).appendTo($res);
-		
-		if(prepend == true)
-			$parent.prepend($res);
-		else
-			$parent.append($res);
-	};
-	
-	po.asResourceTemplateFirstAllowed = function($parent, $res)
-	{
-		return $res.hasClass("resource-item-template");
-	};
-	
-	po.asResourceTemplateFirst = function($parent, $res)
-	{
-		if(!po.asResourceTemplateFirstAllowed($parent, $res))
-			return;
-		
-		var resName = $res.attr("resource-name");
-		$res.remove();
-		
-		var idx = po.getTemplateIndex(resName);
-		
-		if(idx > -1)
-			po.templates.splice(idx, 1);
-		
-		po.addDashboardResourceTemplate($parent, resName, true);
-		po.templates.unshift(resName);
-	};
-	
-	po.removeResourceTemplateFeatureAllowed = function($parent, $res)
-	{
-		return $res.hasClass("resource-item-template");
-	};
-	
-	po.removeResourceTemplateFeature = function($parent, $res)
-	{
-		if(!po.removeResourceTemplateFeatureAllowed($parent, $res))
-			return;
-		
-		var resName = $res.attr("resource-name");
-		$res.remove();
-		
-		var idx = po.getTemplateIndex(resName);
-		
-		if(idx > -1)
-			po.templates.splice(idx, 1);
-	};
-	
-	po.setResourceTemplateFeatureAllowed = function($parent, $res)
-	{
-		if($res.hasClass("resource-item-template"))
-			return false;
-		
-		var resName = $res.attr("resource-name");
-		
-		if(!resName)
-			return false;
-		
-		var htmlReg = /\.(html|htm)$/gi;
-		
-		return htmlReg.test(resName);
-	};
-	
-	po.setResourceTemplateFeature = function($parent, $res)
-	{
-		if(!po.setResourceTemplateFeatureAllowed($parent, $res))
-			return;
-		
-		var resName = $res.attr("resource-name");
-		
-		po.addDashboardResourceTemplate($parent, resName);
-		po.templates.push(resName);
-	};
-
-	po.getTemplateIndex = function(templateName)
-	{
-		for(var i=0; i<po.templates.length; i++)
-		{
-			if(po.templates[i] == templateName)
-				return i;
-		}
-		
-		return -1;
-	};
-	
 	<#if !readonly>
-	
 	po.insertChartCode = function(charts)
 	{
 		if(!charts || !charts.length)
@@ -573,19 +712,28 @@ readonly 是否只读操作，允许为null
 				success : function(response)
 				{
 					var isSaveAdd = !(po.element("input[name='id']").val());
+					
 					var dashboard = response.data;
 					po.element("input[name='id']").val(dashboard.id);
+					po.templates = dashboard.templates;
 					
 					var close = (po.pageParamCall("afterSave")  == true);
-					
-					if(close)
-						po.close();
 					
 					if(!close)
 						po.refreshDashboardResources();
 					
 					if(po.showAfterSave)
-						window.open(po.url("show/"+dashboard.id+"/"), dashboard.id);
+					{
+						var showUrl = po.url("show/"+dashboard.id+"/");
+						var templateName = dashboard.templateName;
+						if(po.getTemplateIndex(templateName) != 0)
+							showUrl += templateName;
+						
+						window.open(showUrl, showUrl);
+					}
+					
+					if(close)
+						po.close();
 				},
 				complete: function()
 				{
