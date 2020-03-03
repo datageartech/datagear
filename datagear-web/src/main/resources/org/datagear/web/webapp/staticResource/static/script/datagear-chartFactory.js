@@ -270,18 +270,47 @@
 		
 		var $ele = this.elementJquery();
 		
-		//元素属性选项
-		var optsStr = $ele.attr("dg-chart-options");
-		//全局选项
 		var optsStrGlobal = $(document.body).attr("dg-chart-options");
+		var optsStr = $ele.attr("dg-chart-options");
 		
-		if(!optsStr && !optsStrGlobal)
-			return options;
+		if(optsStrGlobal)
+			options = $.extend(true, options, chartFactory.evalSilently(optsStrGlobal, {}));
 		
-		var opts = chartFactory.evalSilently(optsStr, {});
-		var optsGlobal = chartFactory.evalSilently(optsStrGlobal, {});
+		if(optsStr)
+			options = $.extend(true, options, chartFactory.evalSilently(optsStr, {}));
 		
-		options = $.extend(true, options, optsGlobal, opts);
+		return options;
+	};
+	
+	/**
+	 * 获取更改的图表设置项。
+	 * 它检查图表DOM元素和body元素上的"dg-chart-options"属性值，如果有更改，才读取，否则，返回空对象{}或者options。
+	 * 
+	 * @param options 初始设置项，可选，默认为：{}
+	 * @return {...}
+	 */
+	chartBase.optionsModified = function(options)
+	{
+		options = (options || {});
+		
+		var $ele = this.elementJquery();
+		
+		var optsStrGlobal = ($(document.body).attr("dg-chart-options") || "");
+		var optsStr = ($ele.attr("dg-chart-options") || "");
+		
+		if(this._prevReadOptionsGlobal != optsStrGlobal)
+		{
+			if(optsStrGlobal)
+				options = $.extend(true, options, chartFactory.evalSilently(optsStrGlobal, {}));
+			this._prevReadOptionsGlobal = optsStrGlobal;
+		}
+		
+		if(this._prevReadOptions != optsStr)
+		{
+			if(optsStr)
+				options = $.extend(true, options, chartFactory.evalSilently(optsStr, {}));
+			this._prevReadOptions = optsStr;
+		}
 		
 		return options;
 	};
@@ -743,10 +772,14 @@
 	/**
 	 * 设置echarts实例的选项值。
 	 * 
-	 * @params options
+	 * @param options
+	 * @param checkModified 是否检查并合并元素上的配置项变更，默认为true
 	 */
-	chartBase.echartsOptions = function(options)
+	chartBase.echartsOptions = function(options, checkModified)
 	{
+		if(checkModified != false)
+			options = this.optionsModified(options);
+		
 		var instance = this.echartsInstance();
 		instance.setOption(options);
 	};
