@@ -126,7 +126,7 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	@Override
 	public InputStream getResourceInputStream(String id, String name) throws IOException
 	{
-		File file = getFile(id, name, true);
+		File file = getFile(id, name, false);
 
 		if (!file.exists())
 			return new ByteArrayInputStream(new byte[0]);

@@ -614,7 +614,8 @@ readonly 是否只读操作，允许为null
 		if(!id || !resourceFilePath || !resourceName)
 			return;
 		
-		$.post(po.url("saveResourceFile"), {"id": id, "resourceFilePath": resourceFilePath, "resourceName": resourceName}, function()
+		$.post(po.url("saveResourceFile"), {"id": id, "resourceFilePath": resourceFilePath, "resourceName": resourceName},
+		function()
 		{
 			po.refreshDashboardResources();
 			po.element(".add-resource-panel").hide();
@@ -642,8 +643,6 @@ readonly 是否只读操作，允许为null
 				$.post(po.url("deleteResource"), {"id": id, "name" : name},
 				function(response)
 				{
-					po.templates = response.data.templates;
-					
 					if(po.isTemplateCurrent(name))
 						po.setTemplateNameAndContent("", "");
 					

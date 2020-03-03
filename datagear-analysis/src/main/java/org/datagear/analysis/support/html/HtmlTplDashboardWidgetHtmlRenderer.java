@@ -16,6 +16,7 @@ import java.util.List;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
+import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
 /**
@@ -230,7 +231,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		HtmlTplDashboardWidget<?> dashboardWidget = (HtmlTplDashboardWidget<?>) dashboard.getWidget();
 		Reader in = getTemplateReaderNotNull(dashboardWidget, dashboard.getTemplate());
 
-		renderHtmlTplDashboard(renderContext, dashboard, in);
+		try
+		{
+			renderHtmlTplDashboard(renderContext, dashboard, in);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
 	}
 
 	/**
@@ -242,7 +250,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	 * @return
 	 * @throws Exception
 	 */
-	protected DashboardInfo renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard, Reader in) throws Exception
+	protected DashboardInfo renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard, Reader in)
+			throws Exception
 	{
 		Writer out = renderContext.getWriter();
 

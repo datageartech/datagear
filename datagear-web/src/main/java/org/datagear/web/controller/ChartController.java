@@ -347,7 +347,14 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			InputStream in = resManager.getResourceInputStream(id, resName);
 			OutputStream out = response.getOutputStream();
 
-			IOUtil.write(in, out);
+			try
+			{
+				IOUtil.write(in, out);
+			}
+			finally
+			{
+				IOUtil.close(in);
+			}
 		}
 	}
 

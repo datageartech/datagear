@@ -150,6 +150,13 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	}
 
 	@Override
+	protected void checkInput(HtmlTplDashboardWidgetEntity entity)
+	{
+		if (isBlank(entity.getId()) || isEmpty(entity.getTemplates()))
+			throw new IllegalArgumentException();
+	}
+
+	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
 		addDataPermissionParameters(params, user, getResourceType(), false, true);

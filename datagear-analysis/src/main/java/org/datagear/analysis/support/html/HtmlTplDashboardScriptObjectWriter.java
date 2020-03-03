@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
 
-import org.datagear.analysis.DashboardWidget;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.TemplateDashboard;
@@ -76,17 +75,17 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 		public JsonHtmlTplDashboard(HtmlTplDashboard dashboard, String renderContextVarName)
 		{
 			super(dashboard.getId(), dashboard.getTemplate(), new RefHtmlRenderContext(renderContextVarName),
-					new IdTemplateDashboardWidget(dashboard.getWidget()), dashboard.getVarName());
+					new JsonTemplateDashboardWidget(dashboard.getWidget()), dashboard.getVarName());
 
 			setCharts(Collections.EMPTY_LIST);
 		}
 	}
 
-	protected static class IdTemplateDashboardWidget extends TemplateDashboardWidget<RenderContext>
+	protected static class JsonTemplateDashboardWidget extends TemplateDashboardWidget<RenderContext>
 	{
-		public IdTemplateDashboardWidget(DashboardWidget<?> dashboardWidget)
+		public JsonTemplateDashboardWidget(TemplateDashboardWidget<?> dashboardWidget)
 		{
-			super(dashboardWidget.getId());
+			super(dashboardWidget.getId(), dashboardWidget.getTemplates());
 		}
 
 		@Override

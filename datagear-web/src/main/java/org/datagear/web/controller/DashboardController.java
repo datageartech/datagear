@@ -309,34 +309,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (dashboard == null)
 			throw new RecordNotFoundException();
-		
-		if(dashboard.isTemplate(name))
-		{
-			dashboard.removeTemplate(name);
-
-			// 不允许删除唯一的模板文件
-			if (dashboard.getTemplateCount() == 0)
-			{
-				return buildOperationMessageFailResponseEntity(request, HttpStatus.BAD_REQUEST,
-						"dashboard.deleteFailForAtLeastOneTemplate");
-			}
-			else
-				this.htmlTplDashboardWidgetEntityService.update(user, dashboard);
-		}
 
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
 
 		dashboardWidgetResManager.delete(id, name);
 
-		Map<String, Object> data = new HashMap<String, Object>();
-		data.put("id", id);
-		data.put("templates", dashboard.getTemplates());
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessEmptyResponseEntity();
-		responseEntity.getBody().setData(data);
-
-		return responseEntity;
+		return buildOperationMessageSuccessEmptyResponseEntity();
 	}
 
 	@RequestMapping(value = "/uploadResourceFile", produces = CONTENT_TYPE_JSON)
@@ -523,7 +502,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		User user = WebUtils.getUser(request, response);
 
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
-		dashboard.setTemplate(template);
+		dashboard.setTemplateSplit(template);
 		dashboard.setTemplateEncoding(templateEncoding);
 		dashboard.setName(name);
 
@@ -682,7 +661,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			InputStream in = resManager.getResourceInputStream(id, resName);
 			OutputStream out = response.getOutputStream();
 
-			IOUtil.write(in, out);
+			try
+			{
+				IOUtil.write(in, out);
+			}
+			finally
+			{
+				IOUtil.close(in);
+			}
 		}
 	}
 

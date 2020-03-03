@@ -67,8 +67,8 @@ public abstract class TemplateDashboardWidget<T extends RenderContext> extends A
 	 */
 	public String getFirstTemplate()
 	{
-		if (this.templates == null || this.templates.length < 1)
-			return null;
+		if (getTemplateCount() < 1)
+			throw new IllegalStateException();
 
 		return this.templates[0];
 	}
@@ -84,12 +84,12 @@ public abstract class TemplateDashboardWidget<T extends RenderContext> extends A
 		if (this.templates == null)
 			return false;
 
-		for(String t : this.templates)
+		for (String t : this.templates)
 		{
-			if(t.equals(template))
+			if (t.equals(template))
 				return true;
 		}
-		
+
 		return false;
 	}
 
@@ -142,7 +142,8 @@ public abstract class TemplateDashboardWidget<T extends RenderContext> extends A
 	 * @param template
 	 * @return
 	 * @throws RenderException
-	 * @throws IllegalArgumentException {@code template}不是模板时
+	 * @throws IllegalArgumentException
+	 *             {@code template}不是模板时
 	 */
 	public TemplateDashboard render(T renderContext, String template) throws RenderException, IllegalArgumentException
 	{

@@ -11,7 +11,7 @@
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.name}, #{entity.template}, #{entity.templateEncoding}, #{entity.createUser.id},
+			#{entity.id}, #{entity.name}, #{entity.templatesJson}, #{entity.templateEncoding}, #{entity.createUser.id},
 			#{entity.createTime}
 			)
 	</insert>
@@ -19,7 +19,7 @@
 	<update id="update">
 		UPDATE DATAGEAR_HTML_DASHBOARD SET
 			HD_NAME = #{entity.name},
-			HD_TEMPLATE = #{entity.template},
+			HD_TEMPLATE = #{entity.templatesJson},
 			HD_TEMPLATE_ENCODING = #{entity.templateEncoding}
 		WHERE
 			HD_ID = #{entity.id}
@@ -136,7 +136,7 @@
 		SELECT
 			A.HD_ID AS ${_iq_}id${_iq_},
 			A.HD_NAME AS ${_iq_}name${_iq_},
-			A.HD_TEMPLATE AS ${_iq_}template${_iq_},
+			A.HD_TEMPLATE AS ${_iq_}templatesJson${_iq_},
 			A.HD_TEMPLATE_ENCODING AS ${_iq_}templateEncoding${_iq_},
 			A.HD_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			<include refid="common.fieldsForCreateUser" />,

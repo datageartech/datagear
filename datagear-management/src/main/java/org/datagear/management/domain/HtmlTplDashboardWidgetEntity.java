@@ -9,11 +9,14 @@ package org.datagear.management.domain;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetFmkRenderer;
 import org.datagear.util.StringUtil;
+
+import com.alibaba.fastjson.JSON;
 
 /**
  * {@linkplain HtmlTplDashboardWidget}实体。
@@ -105,11 +108,48 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRen
 	}
 
 	/**
+	 * 返回{@linkplain #getTemplates()}的JSON。
+	 * 
+	 * @return
+	 */
+	public String getTemplatesJson()
+	{
+		String[] templates = getTemplates();
+
+		if (templates == null)
+			return "[]";
+
+		return JSON.toJSONString(templates);
+	}
+
+	/**
+	 * 设置{@linkplain #setTemplates(String...)}的JSON。
+	 * 
+	 * @param json
+	 */
+	public void setTemplatesJson(String json)
+	{
+		if (StringUtil.isEmpty(json))
+			setTemplates(new String[0]);
+
+		json = json.trim();
+
+		// XXX 兼容非JSON格式，比如旧版数据库中已存储的格式
+		if (!json.startsWith("[") && !json.endsWith("]"))
+			setTemplates(splitTemplates(json));
+		else
+		{
+			List<String> templates = JSON.parseArray(json, String.class);
+			setTemplates(templates.toArray(new String[templates.size()]));
+		}
+	}
+
+	/**
 	 * 获取{@linkplain #getTemplates()}以{@linkplain #TEMPLATE_SPLITTER}分隔符合并后的字符串。
 	 * 
 	 * @return
 	 */
-	public String getTemplate()
+	public String getTemplatesSplit()
 	{
 		return concatTemplates(getTemplates());
 	}
@@ -119,7 +159,7 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRen
 	 * 
 	 * @param template
 	 */
-	public void setTemplate(String template)
+	public void setTemplateSplit(String template)
 	{
 		setTemplates(splitTemplates(template));
 	}

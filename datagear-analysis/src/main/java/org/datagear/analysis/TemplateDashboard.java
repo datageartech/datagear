@@ -33,6 +33,12 @@ public class TemplateDashboard extends Dashboard
 	}
 
 	@Override
+	public TemplateDashboardWidget<?> getWidget()
+	{
+		return (TemplateDashboardWidget<?>) super.getWidget();
+	}
+
+	@Override
 	public void setWidget(DashboardWidget<?> widget)
 	{
 		if (widget != null && !(widget instanceof TemplateDashboardWidget<?>))
