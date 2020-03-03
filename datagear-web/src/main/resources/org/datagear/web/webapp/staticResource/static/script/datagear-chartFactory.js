@@ -785,25 +785,26 @@
 	};
 	
 	/**
-	 * 获取与此图表主题对应的且已注册至echarts的主题名，如果没有，则返回undefined。
+	 * 获取当前echarts主题名，如果没有，此方法将注册默认图表主题。
+	 * 它读取body元素上的"dg-chart-echarts-theme"属性值，作为当前echarts主题名。
 	 */
 	chartBase.echartsThemeName = function()
 	{
+		var themeName = $(document.body).attr("dg-chart-echarts-theme");
+		
+		if(themeName)
+			return themeName;
+		
 		var chartTheme = this.theme();
 		
 		if(!chartTheme)
 			return undefined;
-		
-		var regThemeName = $(document.body).attr("dg-chart-registered-echarts-theme");
-		
-		if(regThemeName)
-			return regThemeName;
-		
-		var themeName = "dg-echarts-theme";
+
+		themeName = "defaultChartTheme";
 		
 		var theme = this.echartsBuildTheme(chartTheme);
 		echarts.registerTheme(themeName, theme);
-		$(document.body).attr("dg-chart-registered-echarts-theme", themeName);
+		$(document.body).attr("dg-chart-echarts-theme", themeName);
 	    
 	    return themeName;
 	};
