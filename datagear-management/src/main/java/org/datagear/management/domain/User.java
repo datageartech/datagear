@@ -166,4 +166,24 @@ public class User extends AbstractStringIdEntity
 	{
 		return ADMIN_USER_ID.equals(userId);
 	}
+
+	/**
+	 * 拷贝对象，排除密码。
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public static User copyWithoutPassword(User user)
+	{
+		User re = new User(user.getId());
+
+		re.setName(user.getName());
+		re.setRealName(user.getRealName());
+		re.setEmail(user.getEmail());
+		re.setAdmin(user.isAdmin());
+		re.setAnonymous(user.isAnonymous());
+		re.setCreateTime(user.getCreateTime());
+
+		return re;
+	}
 }

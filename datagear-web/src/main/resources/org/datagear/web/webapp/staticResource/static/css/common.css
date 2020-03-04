@@ -61,6 +61,16 @@ a.link:hover{
 	cursor: pointer;
 }
 
+.new-version-tip{
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	background: #EE2C2C;
+	border-radius: 4px;
+	position: relative;
+	top: -0.5em;
+}
+
 /*表单*/
 form{}
 form .form-head{}

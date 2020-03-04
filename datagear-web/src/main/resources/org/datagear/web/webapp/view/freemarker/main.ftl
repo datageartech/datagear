@@ -3,6 +3,7 @@
 <html>
 <head>
 <#include "include/html_head.ftl">
+${detectNewVersionScript}
 <title><@spring.message code='app.name' /></title>
 <#include "include/page_js_obj.ftl" >
 <#include "include/page_obj_tabs.ftl" >
@@ -11,6 +12,7 @@
 <script type="text/javascript">
 (function(po)
 {
+	po.currentVersion = "${currentVersion?js_string}";
 	po.currentUser = <@writeJson var=currentUser />;
 	
 	//将在document.ready中初始化
@@ -689,6 +691,10 @@
 				{
 					po.open(contextPath+"/changelog");
 				}
+				else if($item.hasClass("downloadLatestVersion"))
+				{
+					window.open("http://www.datagear.tech");
+				}
 			}
 		});
 		
@@ -1182,6 +1188,11 @@
 		});
 		
 		po.bindTabsMenuHiddenEvent(po.mainTabs);
+		
+		if($.newVersionDetected(po.currentVersion))
+			$(".new-version-tip").show();
+		else
+			$(".new-version-tip").hide();
 	});
 })
 (${pageId});
@@ -1192,7 +1203,7 @@
 	<#include "include/html_logo.ftl">
 	<div class="toolbar">
 		<ul id="systemSetMenu" class="lightweight-menu">
-			<li class="system-set-root"><span><span class="ui-icon ui-icon-gear"></span></span>
+			<li class="system-set-root"><span><span class="ui-icon ui-icon-gear"></span><span class="new-version-tip"></span></span>
 				<ul style="display:none;" class="ui-widget-shadow">
 					<#if !currentUser.anonymous>
 					<#if currentUser.admin>
@@ -1219,11 +1230,14 @@
 							<li class="theme-item" theme="green"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
 						</ul>
 					</li>
-					<li><a href="javascript:void(0);"><@spring.message code='help' /></a>
+					<li><a href="javascript:void(0);"><@spring.message code='help' /><span class="new-version-tip"></span></a>
 						<ul class="ui-widget-shadow">
 							<li class="about"><a href="javascript:void(0);"><@spring.message code='main.about' /></a></li>
 							<li class="documentation"><a href="javascript:void(0);"><@spring.message code='main.documentation' /></a></li>
 							<li class="changelog"><a href="javascript:void(0);"><@spring.message code='main.changelog' /></a></li>
+							<li class="downloadLatestVersion">
+								<a href="javascript:void(0);"><@spring.message code='main.downloadLatestVersion' /><span class="new-version-tip"></span></a>
+							</li>
 						</ul>
 					</li>
 				</ul>

@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import org.datagear.management.domain.User;
 import org.datagear.util.IDUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.security.AuthUser;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -78,12 +79,7 @@ public class WebUtils
 			if (anonymousUserId == null || anonymousUserId.isEmpty())
 			{
 				anonymousUserId = IDUtil.uuid();
-
-				Cookie cookie = new Cookie(COOKIE_USER_ID_ANONYMOUS, anonymousUserId);
-				cookie.setPath(WebContextPath.getWebContextPath(request).get(request));
-				cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
-
-				response.addCookie(cookie);
+				setCookie(request, response, COOKIE_USER_ID_ANONYMOUS, anonymousUserId, 60 * 60 * 24 * 365 * 10);
 			}
 
 			anonymousUser = new User(anonymousUserId);
@@ -148,7 +144,7 @@ public class WebUtils
 	}
 
 	/**
-	 * 获取{@linkplain Cookie}。
+	 * 获取{@linkplain Cookie}，没有则返回{@code null}。
 	 * 
 	 * @param request
 	 * @param cookieName
@@ -168,6 +164,44 @@ public class WebUtils
 		}
 
 		return null;
+	}
+
+	/**
+	 * 设置Cookie。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param name
+	 * @param value
+	 * @param age
+	 */
+	public static void setCookie(HttpServletRequest request, HttpServletResponse response, String name, String value,
+			int age)
+	{
+		setCookie(request, response, name, value, age, null);
+	}
+
+	/**
+	 * 设置Cookie。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param name
+	 * @param value
+	 * @param age
+	 * @param path     为{@code null}时则设置为应用根路径
+	 */
+	public static void setCookie(HttpServletRequest request, HttpServletResponse response, String name, String value,
+			int age, String path)
+	{
+		if (StringUtil.isEmpty(path))
+			path = WebContextPath.getWebContextPath(request).get(request);
+
+		Cookie cookie = new Cookie(name, value);
+		cookie.setPath(path);
+		cookie.setMaxAge(age);
+
+		response.addCookie(cookie);
 	}
 
 	/**

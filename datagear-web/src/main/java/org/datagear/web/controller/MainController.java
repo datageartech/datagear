@@ -11,7 +11,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.management.domain.User;
 import org.datagear.util.Global;
+import org.datagear.util.StringUtil;
 import org.datagear.util.version.Version;
 import org.datagear.util.version.VersionContent;
 import org.datagear.web.util.ChangelogResolver;
@@ -36,6 +38,8 @@ public class MainController extends AbstractController
 	@Autowired
 	private ChangelogResolver changelogResolver;
 
+	private String detectNewVersionScriptLocation;
+
 	public MainController()
 	{
 		super();
@@ -56,6 +60,17 @@ public class MainController extends AbstractController
 	public void setDisableRegister(boolean disableRegister)
 	{
 		this.disableRegister = disableRegister;
+	}
+
+	public String getDetectNewVersionScriptLocation()
+	{
+		return detectNewVersionScriptLocation;
+	}
+
+	@Value("${detectNewVersionScriptLocation}")
+	public void setDetectNewVersionScriptLocation(String detectNewVersionScriptLocation)
+	{
+		this.detectNewVersionScriptLocation = detectNewVersionScriptLocation;
 	}
 
 	public ChangelogResolver getChangelogResolver()
@@ -79,7 +94,9 @@ public class MainController extends AbstractController
 	public String main(HttpServletRequest request, HttpServletResponse response, Model model)
 	{
 		request.setAttribute("disableRegister", this.disableRegister);
-		request.setAttribute("currentUser", WebUtils.getUser(request, response));
+		request.setAttribute("currentUser", User.copyWithoutPassword(WebUtils.getUser(request, response)));
+		request.setAttribute("currentVersion", Global.VERSION);
+		request.setAttribute("detectNewVersionScript", resolveDetectNewVersionScript(request, response));
 
 		return "/main";
 	}
@@ -135,5 +152,13 @@ public class MainController extends AbstractController
 		response.setContentType(CONTENT_TYPE_JSON);
 
 		return "/change_theme_data";
+	}
+
+	protected String resolveDetectNewVersionScript(HttpServletRequest request, HttpServletResponse response)
+	{
+		if (StringUtil.isEmpty(this.detectNewVersionScriptLocation))
+			return "";
+
+		return "<script src=\"" + this.detectNewVersionScriptLocation + "\" type=\"text/javascript\"></script>";
 	}
 }
