@@ -78,7 +78,7 @@
 		{
 			var urlNames = this.builtInEchartsMaps[i];
 			for(var j=0; j<urlNames.names.length; j++)
-				chartFactory.echartsMapURLs[urlNames.names[j]] = this.builtInEchartsMapBaseURL + urlNames.url;
+				global.chartFactory.echartsMapURLs[urlNames.names[j]] = this.builtInEchartsMapBaseURL + urlNames.url;
 		}
 		
 		var mapUrls = $(document.body).attr("dg-echarts-map-urls");
@@ -86,7 +86,7 @@
 		if(mapUrls)
 			mapUrls = global.chartFactory.evalSilently(mapUrls);
 		
-		$.extend(chartFactory.echartsMapURLs, mapUrls);
+		$.extend(global.chartFactory.echartsMapURLs, mapUrls);
 	};
 	
 	//----------------------------------------

@@ -790,11 +790,11 @@
 	
 	/**
 	 * 获取当前echarts主题名，如果没有，此方法将注册默认图表主题。
-	 * 它读取body元素上的"dg-chart-echarts-theme"属性值，作为当前echarts主题名。
+	 * 它读取body元素上的"dg-echarts-theme"属性值，作为当前echarts主题名。
 	 */
 	chartBase.echartsThemeName = function()
 	{
-		var themeName = $(document.body).attr("dg-chart-echarts-theme");
+		var themeName = $(document.body).attr("dg-echarts-theme");
 		
 		if(themeName)
 			return themeName;
@@ -803,12 +803,12 @@
 		
 		if(!chartTheme)
 			return undefined;
-
-		themeName = "defaultChartTheme";
+		
+		themeName = "themeByChartTheme";
 		
 		var theme = this.echartsBuildTheme(chartTheme);
 		echarts.registerTheme(themeName, theme);
-		$(document.body).attr("dg-chart-echarts-theme", themeName);
+		$(document.body).attr("dg-echarts-theme", themeName);
 	    
 	    return themeName;
 	};
