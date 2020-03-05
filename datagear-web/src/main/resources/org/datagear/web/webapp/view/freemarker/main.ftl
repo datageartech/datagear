@@ -1,5 +1,6 @@
 <#include "include/import_global.ftl">
 <#include "include/html_doctype.ftl">
+<#assign Global=statics['org.datagear.util.Global']>
 <html>
 <head>
 <#include "include/html_head.ftl">
@@ -685,7 +686,7 @@ ${detectNewVersionScript}
 				}
 				else if($item.hasClass("documentation"))
 				{
-					window.open("http://www.datagear.tech/documentation/");
+					window.open("${Global.WEB_SITE}/documentation/");
 				}
 				else if($item.hasClass("changelog"))
 				{
@@ -693,7 +694,7 @@ ${detectNewVersionScript}
 				}
 				else if($item.hasClass("downloadLatestVersion"))
 				{
-					window.open("http://www.datagear.tech");
+					window.open("${Global.WEB_SITE}");
 				}
 			}
 		});

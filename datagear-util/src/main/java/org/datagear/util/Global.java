@@ -29,4 +29,6 @@ public final class Global
 	/** 英文产品名称 */
 	public static final String PRODUCT_NAME_EN = "DataGear";
 
+	/** 官网 */
+	public static final String WEB_SITE = "http://www.datagear.tech";
 }

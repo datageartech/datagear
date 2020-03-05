@@ -1,5 +1,6 @@
 <#include "include/import_global.ftl">
 <#include "include/html_doctype.ftl">
+<#assign Global=statics['org.datagear.util.Global']>
 <html>
 <head>
 <#include "include/html_head.ftl">
@@ -30,7 +31,7 @@
 					<label><@spring.message code='about.app.website' /></label>
 				</div>
 				<div class="form-item-value">
-					<a href="http://www.datagear.tech" target="_blank" class="link">http://www.datagear.tech</a>
+					<a href="${Global.WEB_SITE}" target="_blank" class="link">${Global.WEB_SITE}</a>
 				</div>
 			</div>
 		</div>

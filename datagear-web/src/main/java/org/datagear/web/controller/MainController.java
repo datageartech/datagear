@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
 import org.datagear.util.Global;
-import org.datagear.util.StringUtil;
 import org.datagear.util.version.Version;
 import org.datagear.util.version.VersionContent;
 import org.datagear.web.util.ChangelogResolver;
@@ -33,12 +32,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class MainController extends AbstractController
 {
+	public static final String LATEST_VERSION_SCRIPT_LOCATION = Global.WEB_SITE + "/latest-version.js";
+
 	private boolean disableRegister = false;
 
 	@Autowired
 	private ChangelogResolver changelogResolver;
 
-	private String detectNewVersionScriptLocation;
+	private boolean disableDetectNewVersion;
 
 	public MainController()
 	{
@@ -62,15 +63,15 @@ public class MainController extends AbstractController
 		this.disableRegister = disableRegister;
 	}
 
-	public String getDetectNewVersionScriptLocation()
+	public boolean isDisableDetectNewVersion()
 	{
-		return detectNewVersionScriptLocation;
+		return disableDetectNewVersion;
 	}
 
-	@Value("${detectNewVersionScriptLocation}")
-	public void setDetectNewVersionScriptLocation(String detectNewVersionScriptLocation)
+	@Value("${disableDetectNewVersion}")
+	public void setDisableDetectNewVersion(boolean disableDetectNewVersion)
 	{
-		this.detectNewVersionScriptLocation = detectNewVersionScriptLocation;
+		this.disableDetectNewVersion = disableDetectNewVersion;
 	}
 
 	public ChangelogResolver getChangelogResolver()
@@ -156,9 +157,9 @@ public class MainController extends AbstractController
 
 	protected String resolveDetectNewVersionScript(HttpServletRequest request, HttpServletResponse response)
 	{
-		if (StringUtil.isEmpty(this.detectNewVersionScriptLocation))
+		if (this.disableDetectNewVersion)
 			return "";
 
-		return "<script src=\"" + this.detectNewVersionScriptLocation + "\" type=\"text/javascript\"></script>";
+		return "<script src=\"" + LATEST_VERSION_SCRIPT_LOCATION + "\" type=\"text/javascript\"></script>";
 	}
 }
