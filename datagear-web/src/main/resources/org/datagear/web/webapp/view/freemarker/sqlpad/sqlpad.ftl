@@ -1291,7 +1291,7 @@ Schema schema 数据库，不允许为null
 			var tabForm = po.element("#" + tabId);
 			var sql = $("textarea[name='sql']", tabForm).val();
 			
-			var options = {data: {"initSqls": sql}, height: "80%"};
+			var options = {data: {"initSqls": sql}, height: "90%"};
 			po.open("${contextPath}/dataexchange/"+po.schemaId+"/export", options);
 		}
 	});
