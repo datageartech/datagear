@@ -696,11 +696,15 @@ readonly 是否只读操作，允许为null
 		
 		var cursor = po.templateEditor.getCursorPosition();
 		
+		//如果body上没有定义dg-dashboard样式，则图表元素也不必添加dg-chart样式，比如导入的看板
+		var setDashboardTheme = true;
+		
 		var code = "";
 		
 		if(charts.length == 1)
 		{
 			var chartId = charts[0].id;
+			var chartName = charts[0].name;
 			
 			var text = po.templateEditor.session.getLine(cursor.row).substring(0, cursor.column);
 			
@@ -719,12 +723,16 @@ readonly 是否只读操作，允许为null
 			else if(/<[^>]*$/g.test(text))
 				code = " dg-chart-widget=\""+chartId+"\"";
 			else
-				code = "<div class=\"dg-chart\" dg-chart-widget=\""+chartId+"\"></div>\n";
+			{
+				setDashboardTheme = po.isCodeHasDefaultThemeClass(cursor);
+				code = "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+chartId+"\"><!--"+chartName+"--></div>\n";
+			}
 		}
 		else
 		{
+			setDashboardTheme = po.isCodeHasDefaultThemeClass(cursor);
 			for(var i=0; i<charts.length; i++)
-				code += "<div class=\"dg-chart\" dg-chart-widget=\""+charts[i].id+"\"></div>\n";
+				code += "<div "+(setDashboardTheme ? "class=\"dg-chart\" " : "")+"dg-chart-widget=\""+charts[i].id+"\"><!--"+charts[i].name+"--></div>\n";
 		}
 		
 		po.templateEditor.moveCursorToPosition(cursor);
@@ -748,6 +756,26 @@ readonly 是否只读操作，允许为null
 		
 		po.open("${contextPath}/analysis/chart/select?multiple", options);
 	});
+	
+	po.isCodeHasDefaultThemeClass = function(cursor)
+	{
+		var row = cursor.row;
+		var text = "";
+		while(row >= 0)
+		{
+			text = po.templateEditor.session.getLine(row);
+			
+			if(text && /["'\s]dg-dashboard["'\s]/g.test(text))
+				return true;
+			
+			if(/<body/gi.test(text))
+				break;
+			
+			row--;
+		}
+		
+		return false;
+	};
 	
 	po.showAfterSave = false;
 	
