@@ -23,20 +23,23 @@ public class ChartTheme extends Theme implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 图形颜色 */
+	/** 标题颜色 */
+	private String titleColor;
+
+	/** 图例颜色 */
+	private String legendColor;
+
+	/** 坐标轴颜色 */
+	private String axisColor;
+
+	/** 坐标轴刻度线线颜色 */
+	private String axisScaleLineColor;
+
+	/** 图形条目颜色 */
 	private String[] graphColors;
 
-	/** 二级前景颜色 */
-	private String colorSecond;
-
-	/** 三级前景颜色 */
-	private String colorThird;
-
-	/** 四级前景颜色 */
-	private String colorFourth;
-
-	/** 五级前景颜色 */
-	private String colorFifth;
+	/** 值域映射范围图形条目颜色 */
+	private String[] graphRangeColors;
 
 	/** 提示框主题 */
 	private Theme tooltipTheme;
@@ -48,18 +51,59 @@ public class ChartTheme extends Theme implements Serializable
 	{
 	}
 
-	public ChartTheme(String color, String backgroundColor, String borderColor, String[] graphColors,
-			String colorSecond, String colorThird, String colorFourth, String colorFifth, Theme tooltipTheme,
-			Theme highlightTheme)
+	public ChartTheme(String color, String backgroundColor, String borderColor, String titleColor, String legendColor,
+			String axisColor, String axisScaleLineColor, String[] graphColors, String[] graphRangeColors,
+			Theme tooltipTheme, Theme highlightTheme)
 	{
 		super(color, backgroundColor, borderColor);
+		this.titleColor = titleColor;
+		this.legendColor = legendColor;
+		this.axisColor = axisColor;
+		this.axisScaleLineColor = axisScaleLineColor;
 		this.graphColors = graphColors;
-		this.colorSecond = colorSecond;
-		this.colorThird = colorThird;
-		this.colorFourth = colorFourth;
-		this.colorFifth = colorFifth;
+		this.graphRangeColors = graphRangeColors;
 		this.tooltipTheme = tooltipTheme;
 		this.highlightTheme = highlightTheme;
+	}
+
+	public String getTitleColor()
+	{
+		return titleColor;
+	}
+
+	public void setTitleColor(String titleColor)
+	{
+		this.titleColor = titleColor;
+	}
+
+	public String getLegendColor()
+	{
+		return legendColor;
+	}
+
+	public void setLegendColor(String legendColor)
+	{
+		this.legendColor = legendColor;
+	}
+
+	public String getAxisColor()
+	{
+		return axisColor;
+	}
+
+	public void setAxisColor(String axisColor)
+	{
+		this.axisColor = axisColor;
+	}
+
+	public String getAxisScaleLineColor()
+	{
+		return axisScaleLineColor;
+	}
+
+	public void setAxisScaleLineColor(String axisScaleLineColor)
+	{
+		this.axisScaleLineColor = axisScaleLineColor;
 	}
 
 	public String[] getGraphColors()
@@ -72,44 +116,14 @@ public class ChartTheme extends Theme implements Serializable
 		this.graphColors = graphColors;
 	}
 
-	public String getColorSecond()
+	public String[] getGraphRangeColors()
 	{
-		return colorSecond;
+		return graphRangeColors;
 	}
 
-	public void setColorSecond(String colorSecond)
+	public void setGraphRangeColors(String[] graphRangeColors)
 	{
-		this.colorSecond = colorSecond;
-	}
-
-	public String getColorThird()
-	{
-		return colorThird;
-	}
-
-	public void setColorThird(String colorThird)
-	{
-		this.colorThird = colorThird;
-	}
-
-	public String getColorFourth()
-	{
-		return colorFourth;
-	}
-
-	public void setColorFourth(String colorFourth)
-	{
-		this.colorFourth = colorFourth;
-	}
-
-	public String getColorFifth()
-	{
-		return colorFifth;
-	}
-
-	public void setColorFifth(String colorFifth)
-	{
-		this.colorFifth = colorFifth;
+		this.graphRangeColors = graphRangeColors;
 	}
 
 	public Theme getTooltipTheme()
@@ -136,9 +150,9 @@ public class ChartTheme extends Theme implements Serializable
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [color=" + getColor() + ", backgroundColor=" + getBackgroundColor()
-				+ ", borderColor=" + getBorderColor() + ", graphColors=" + Arrays.toString(graphColors)
-				+ ", colorSecond=" + colorSecond + ", colorThird=" + colorThird + ", colorFourth=" + colorFourth
-				+ ", colorFifth=" + colorFifth + ", tooltipTheme=" + tooltipTheme + ", highlightTheme=" + highlightTheme
-				+ "]";
+				+ ", borderColor=" + getBorderColor() + ", titleColor=" + titleColor + ", legendColor=" + legendColor
+				+ ", axisColor=" + axisColor + ", axisScaleLineColor=" + axisScaleLineColor + ", graphColors="
+				+ Arrays.toString(graphColors) + ", graphRangeColors=" + Arrays.toString(graphRangeColors)
+				+ ", tooltipTheme=" + tooltipTheme + ", highlightTheme=" + highlightTheme + "]";
 	}
 }

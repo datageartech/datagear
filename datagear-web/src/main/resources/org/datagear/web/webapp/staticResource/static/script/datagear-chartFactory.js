@@ -820,18 +820,28 @@
 	 */
 	chartBase.echartsBuildTheme = function(chartTheme)
 	{
+		//@deprecated 用于兼容1.5.0版本的chartTheme结构，未来版本会移除
+		if(chartTheme.colorSecond)
+		{
+			chartTheme.color = chartTheme.colorSecond;
+			chartTheme.titleColor = chartTheme.color;
+			chartTheme.legendColor = chartTheme.colorSecond;
+			chartTheme.axisColor = chartTheme.colorThird;
+			chartTheme.axisScaleLineColor = chartTheme.colorFourth;
+		}
+		
 		var theme =
 		{
 			"color" : chartTheme.graphColors,
 			"backgroundColor" : chartTheme.backgroundColor,
 			"textStyle" : {},
 			"title" : {
-		        left: "center",
+		        "left" : "center",
 				"textStyle" : {
-					"color" : chartTheme.color
+					"color" : chartTheme.titleColor
 				},
 				"subtextStyle" : {
-					"color" : chartTheme.colorSecond
+					"color" : chartTheme.legendColor
 				}
 			},
 			"line" : {
@@ -850,10 +860,10 @@
 				"smooth" : false
 			},
 			"radar" : {
-				"name" : { "textStyle" : { "color" : chartTheme.colorSecond } },
-				"axisLine" : { "lineStyle" : { "color" : chartTheme.colorFourth } },
-				"splitLine" : { "lineStyle" : { "color" : chartTheme.colorFourth } },
-				"splitArea" : { "areaStyle" : { "color" : [ chartTheme.colorFifth, chartTheme.backgroundColor ] } },
+				"name" : { "textStyle" : { "color" : chartTheme.legendColor } },
+				"axisLine" : { "lineStyle" : { "color" : chartTheme.borderColor } },
+				"splitLine" : { "lineStyle" : { "color" : chartTheme.axisScaleLineColor } },
+				"splitArea" : { "areaStyle" : { "color" : [ chartTheme.axisScaleLineColor, chartTheme.backgroundColor ] } },
 				"itemStyle" : {
 					"normal" : {
 						"borderWidth" : 1
@@ -871,7 +881,7 @@
 			"bar" : {
 				"itemStyle" : {
 					"barBorderWidth" : 0,
-					"barBorderColor" : chartTheme.colorFourth
+					"barBorderColor" : chartTheme.borderColor
 				},
 				"emphasis" : {
 					"itemStyle" : {
@@ -879,14 +889,14 @@
 						"shadowBlur" : 10,
 						"shadowOffsetX" : 0,
 				        "shadowOffsetY" : 0,
-						"barBorderColor" : chartTheme.colorFifth
+						"barBorderColor" : chartTheme.axisColor
 					}
 				}
 			},
 			"pie" : {
 				"itemStyle" : {
 					"borderWidth" : 0,
-					"borderColor" : chartTheme.colorFourth
+					"borderColor" : chartTheme.borderColor
 				},
 				"emphasis" :
 				{
@@ -894,68 +904,68 @@
 					{
 						"shadowBlur" : 10,
 						"shadowOffsetX" : 0,
-						"shadowColor" : chartTheme.colorThird,
+						"shadowColor" : chartTheme.axisColor,
 						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorThird
+						"borderColor" : chartTheme.axisColor
 					}
 				}
 			},
 			"scatter" : {
 				"itemStyle" : {
-					"barBorderWidth" : 0,
-					"barBorderColor" : chartTheme.colorFourth
+					"borderWidth" : 0,
+					"borderColor" : chartTheme.borderColor
 				},
 				"emphasis" : {
 					"itemStyle" : {
-						"barBorderWidth" : 0,
-						"barBorderColor" : chartTheme.colorThird
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.axisColor
 					}
 				}
 			},
 			"boxplot" : {
 				"itemStyle" : {
 					"borderWidth" : 0,
-					"borderColor" : chartTheme.colorFourth
+					"borderColor" : chartTheme.borderColor
 				},
 				"emphasis" : {
 					"itemStyle" : {
-						"barBorderWidth" : 0,
-						"barBorderColor" : chartTheme.colorThird
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.axisColor
 					}
 				}
 			},
 			"parallel" : {
 				"itemStyle" : {
 					"borderWidth" : 0,
-					"borderColor" : chartTheme.colorFourth
+					"borderColor" : chartTheme.borderColor
 				},
 				"emphasis" : {
 					"itemStyle" : {
-						"barBorderWidth" : 0,
-						"barBorderColor" : chartTheme.colorThird
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.axisColor
 					}
 				}
 			},
 			"sankey" : {
 				"itemStyle" : {
 					"borderWidth" : 0,
-					"borderColor" : chartTheme.colorFourth
+					"borderColor" : chartTheme.borderColor
 				},
 				"emphasis" : {
 					"itemStyle" : {
-						"barBorderWidth" : 0,
-						"barBorderColor" : chartTheme.colorThird
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.axisColor
 					}
 				}
 			},
 			"funnel" : {
 				"label" : {
-					"color" : chartTheme.colorSecond,
+					"color" : chartTheme.color,
 					"show": true,
 	                "position": "inside"
 	            },
 				"itemStyle" : {
-					"borderColor" : chartTheme.colorFourth,
+					"borderColor" : chartTheme.borderColor,
 					"borderWidth" : 0
 				},
 				"emphasis" : {
@@ -964,20 +974,20 @@
 	                },
 					"itemStyle" : {
 						"barBorderWidth" : 0,
-						"barBorderColor" : chartTheme.colorThird
+						"barBorderColor" : chartTheme.axisColor
 					}
 				}
 			},
 			"gauge" : {
-				"title" : { color : chartTheme.colorSecond },
+				"title" : { color : chartTheme.legendColor },
 				"itemStyle" : {
-					"borderColor" : chartTheme.colorFourth,
+					"borderColor" : chartTheme.borderColor,
 					"borderWidth" : 0
 				},
 				"emphasis" : {
 					"itemStyle" : {
 						"barBorderWidth" : 0,
-						"barBorderColor" : chartTheme.colorThird
+						"barBorderColor" : chartTheme.axisColor
 					}
 				}
 			},
@@ -986,8 +996,8 @@
 					"normal" : {
 						"color" : chartTheme.graphColors[0],
 						"color0" : chartTheme.graphColors[1],
-						"borderColor" : chartTheme.colorThird,
-						"borderColor0" : chartTheme.colorFourth,
+						"borderColor" : chartTheme.borderColor,
+						"borderColor0" : chartTheme.axisColor,
 						"borderWidth" : 1
 					}
 				}
@@ -996,13 +1006,13 @@
 				"itemStyle" : {
 					"normal" : {
 						"borderWidth" : 0,
-						"borderColor" : chartTheme.colorThird
+						"borderColor" : chartTheme.borderColor
 					}
 				},
 				"lineStyle" : {
 					"normal" : {
 						"width" : 1,
-						"color" : chartTheme.colorFourth
+						"color" : chartTheme.axisScaleLineColor
 					}
 				},
 				"symbolSize" : 4,
@@ -1012,7 +1022,7 @@
 				"label" : {
 					"normal" : {
 						"textStyle" : {
-							"color" : chartTheme.colorSecond
+							"color" : chartTheme.color
 						}
 					}
 				}
@@ -1020,12 +1030,12 @@
 			"map" : {
 				"roam" : true,
 				"itemStyle" : {
-					"areaColor" : chartTheme.colorFifth,
-					"borderColor" : chartTheme.colorThird,
+					"areaColor" : chartTheme.axisScaleLineColor,
+					"borderColor" : chartTheme.borderColor,
 					"borderWidth" : 0.5
 				},
 				"label" : {
-					"color" : chartTheme.colorSecond
+					"color" : chartTheme.color
 				},
 				"emphasis" :
 				{
@@ -1043,12 +1053,12 @@
 			},
 			"geo" : {
 				"itemStyle" : {
-					"areaColor" : chartTheme.colorFifth,
-					"borderColor" : chartTheme.colorThird,
+					"areaColor" : chartTheme.axisScaleLineColor,
+					"borderColor" : chartTheme.borderColor,
 					"borderWidth" : 0.5
 				},
 				"label" : {
-					"color" : chartTheme.colorSecond
+					"color" : chartTheme.color
 				},
 				"emphasis" :
 				{
@@ -1068,32 +1078,32 @@
 				"axisLine" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.axisColor
 					}
 				},
 				"axisTick" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.axisColor
 					}
 				},
 				"axisLabel" : {
 					"show" : true,
 					"textStyle" : {
-						"color" : chartTheme.colorSecond
+						"color" : chartTheme.axisColor
 					}
 				},
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
 						"type" : "dotted",
-						"color" : [ chartTheme.colorFourth ]
+						"color" : [ chartTheme.axisScaleLineColor ]
 					}
 				},
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.colorFourth ]
+						"color" : [ chartTheme.axisScaleLineColor ]
 					}
 				}
 			},
@@ -1101,32 +1111,32 @@
 				"axisLine" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.axisColor
 					}
 				},
 				"axisTick" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.axisColor
 					}
 				},
 				"axisLabel" : {
 					"show" : true,
 					"textStyle" : {
-						"color" : chartTheme.colorSecond
+						"color" : chartTheme.axisColor
 					}
 				},
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
 						"type" : "dotted",
-						"color" : [ chartTheme.colorFourth ]
+						"color" : [ chartTheme.axisScaleLineColor ]
 					}
 				},
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.colorFourth ]
+						"color" : [ chartTheme.axisScaleLineColor ]
 					}
 				}
 			},
@@ -1134,32 +1144,32 @@
 				"axisLine" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.axisColor
 					}
 				},
 				"axisTick" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.axisColor
 					}
 				},
 				"axisLabel" : {
 					"show" : true,
 					"textStyle" : {
-						"color" : chartTheme.colorSecond
+						"color" : chartTheme.axisColor
 					}
 				},
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
 						"type" : "dotted",
-						"color" : [ chartTheme.colorFourth ]
+						"color" : [ chartTheme.axisScaleLineColor ]
 					}
 				},
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.colorFourth ]
+						"color" : [ chartTheme.axisScaleLineColor ]
 					}
 				}
 			},
@@ -1167,42 +1177,42 @@
 				"axisLine" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.axisColor
 					}
 				},
 				"axisTick" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.colorThird
+						"color" : chartTheme.axisColor
 					}
 				},
 				"axisLabel" : {
 					"show" : true,
 					"textStyle" : {
-						"color" : chartTheme.colorSecond
+						"color" : chartTheme.axisColor
 					}
 				},
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
 						"type" : "dotted",
-						"color" : [ chartTheme.colorFourth ]
+						"color" : [ chartTheme.axisScaleLineColor ]
 					}
 				},
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.colorFourth ]
+						"color" : [ chartTheme.axisScaleLineColor ]
 					}
 				}
 			},
 			"toolbox" : {
 				"iconStyle" : {
 					"normal" : {
-						"borderColor" : chartTheme.colorFourth
+						"borderColor" : chartTheme.borderColor
 					},
 					"emphasis" : {
-						"borderColor" : chartTheme.colorThird
+						"borderColor" : chartTheme.axisColor
 					}
 				}
 			},
@@ -1218,47 +1228,47 @@
 				"orient": "horizontal",
 				"top": 25,
 				"textStyle" : {
-					"color" : chartTheme.colorSecond
+					"color" : chartTheme.legendColor
 				},
-				"inactiveColor" : chartTheme.colorThird
+				"inactiveColor" : chartTheme.axisScaleLineColor
 			},
 			"tooltip" : {
 				"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
 				"textStyle" : { color: chartTheme.tooltipTheme.color },
 				"axisPointer" : {
 					"lineStyle" : {
-						"color" : chartTheme.colorSecond,
+						"color" : chartTheme.tooltipTheme.borderColor,
 						"width" : "1"
 					},
 					"crossStyle" : {
-						"color" : chartTheme.colorSecond,
+						"color" : chartTheme.tooltipTheme.borderColor,
 						"width" : "1"
 					}
 				}
 			},
 			"timeline" : {
 				"lineStyle" : {
-					"color" : chartTheme.colorThird,
+					"color" : chartTheme.axisColor,
 					"width" : 1
 				},
 				"itemStyle" : {
 					"normal" : {
-						"color" : chartTheme.colorThird,
+						"color" : chartTheme.color,
 						"borderWidth" : 1
 					},
 					"emphasis" : {
-						"color" : chartTheme.colorSecond
+						"color" : chartTheme.color
 					}
 				},
 				"controlStyle" : {
 					"normal" : {
-						"color" : chartTheme.colorThird,
-						"borderColor" : chartTheme.colorThird,
+						"color" : chartTheme.color,
+						"borderColor" : chartTheme.borderColor,
 						"borderWidth" : 0.5
 					},
 					"emphasis" : {
-						"color" : chartTheme.colorThird,
-						"borderColor" : chartTheme.colorThird,
+						"color" : chartTheme.color,
+						"borderColor" : chartTheme.borderColor,
 						"borderWidth" : 0.5
 					}
 				},
@@ -1269,12 +1279,12 @@
 				"label" : {
 					"normal" : {
 						"textStyle" : {
-							"color" : chartTheme.colorThird
+							"color" : chartTheme.axisColor
 						}
 					},
 					"emphasis" : {
 						"textStyle" : {
-							"color" : chartTheme.colorThird
+							"color" : chartTheme.color
 						}
 					}
 				}
@@ -1282,34 +1292,34 @@
 			"visualMap" : {
 				"inRange" :
 				{
-					"color" : ["#58A52D", "#FFD700", "#FF4500"]
+					"color" : chartTheme.graphRangeColors
 				},
 				"backgroundColor" : "transparent",
 				"textStyle" :
 				{
-					"color" : chartTheme.colorSecond
+					"color" : chartTheme.axisColor
 				}
 			},
 			"dataZoom" : {
 				"backgroundColor" : "transparent",
-				"dataBackgroundColor" : chartTheme.colorFourth,
-				"fillerColor" : chartTheme.colorThird,
-				"handleColor" : chartTheme.colorSecond,
+				"dataBackgroundColor" : chartTheme.axisScaleLineColor,
+				"fillerColor" : chartTheme.axisScaleLineColor,
+				"handleColor" : chartTheme.axisScaleLineColor,
 				"handleSize" : "100%",
 				"textStyle" : {
-					"color" : chartTheme.colorSecond
+					"color" : chartTheme.axisColor
 				}
 			},
 			"markPoint" : {
 				"label" : {
 					"normal" : {
 						"textStyle" : {
-							"color" : chartTheme.colorThird
+							"color" : chartTheme.axisColor
 						}
 					},
 					"emphasis" : {
 						"textStyle" : {
-							"color" : chartTheme.colorThird
+							"color" : chartTheme.axisColor
 						}
 					}
 				}
@@ -1466,6 +1476,98 @@
 			else
 				return prefix + '"' + name + '"' + suffix;
 		});
+	};
+	
+	/**
+	 * 计算渐变颜色。
+	 * 
+	 * @param start 起始颜色
+	 * @param end 终止颜色
+	 * @param count 计算数目
+	 * @param rgb true 返回"rgb(...)"格式；fasle 返回"#FFFFFF"格式，默认为false
+	 */
+	chartFactory.evalGradientColors = function(start, end, count, rgb)
+	{
+		var colors = [];
+		
+		start = this.parseColor(start);
+		end = this.parseColor(end);
+		
+		for(var i=0; i<count; i++)
+		{
+			var color = {};
+			
+			color.r = start.r + (end.r - start.r)/count*i;
+			color.g = start.g + (end.g - start.g)/count*i;
+			color.b = start.b + (end.b - start.b)/count*i;
+			
+			if(rgb)
+				color = "rgb("+color.r+","+color.g+","+color.b+")";
+			else
+			{
+				var r = new Number(color.r).toString(16);
+				var g = new Number(color.g).toString(16);
+				var b = new Number(color.b).toString(16);
+				
+				color = "#" + (r.length == 1 ? "0"+r : r)
+							 + (g.length == 1 ? "0"+g : g)
+							  + (b.length == 1 ? "0"+b : b);
+			}
+			
+			colors.push(color);
+		}
+		
+		return colors;
+	};
+	
+	/**
+	 * 解析颜色对象。
+	 * 将颜色字符串解析为{r: number, g: number, b: number}格式的对象。
+	 * 
+	 * @param color 颜色字符串，格式为："#FFF"、"#FFFFFF"、"rgb(255,255,255)"
+	 */
+	chartFactory.parseColor = function(color)
+	{
+		var re = {r: 0, g: 0, b: 0};
+		
+		if(!color)
+			return re;
+		
+		// #FFF、#FFFFFF
+		if(color.charAt(0) == '#')
+		{
+			color = color.substring(1);
+			
+			if(color.length == 3)
+				color = color + color;
+			
+			if(color.length >= 2)
+				re.r = parseInt(color.substr(0, 2), 16);
+			if(color.length >= 4)
+				re.g = parseInt(color.substr(2, 2), 16);
+			if(color.length >= 6)
+				re.b = parseInt(color.substr(4, 2), 16);
+		}
+		// rgb()
+		else
+		{
+			var si = color.indexOf("(");
+			var ei = (si >= 0 ? color.indexOf(")", si+1) : -1);
+			
+			if(ei > si)
+			{
+				color = color.substring(si+1, ei).split(",");
+				
+				if(color.length >= 1)
+					re.r = parseInt(color[0]);
+				if(color.length >= 2)
+					re.g = parseInt(color[1]);
+				if(color.length >= 3)
+					re.b = parseInt(color[2]);
+			}
+		}
+		
+		return re;
 	};
 	
 	/**
