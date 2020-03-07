@@ -180,10 +180,10 @@ readonly 是否只读操作，允许为null
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-renderer' />", tagNames: ["div"]},
 			{name: "dg-chart-theme", value: "dg-chart-theme", caption: "",
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-theme' />", tagNames: ["body"]},
+			{name: "dg-chart-map-urls", value: "dg-chart-map-urls", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-map-urls' />", tagNames: ["body"]},
 			{name: "dg-echarts-theme", value: "dg-echarts-theme", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.echarts-theme' />", tagNames: ["body"]},
-			{name: "dg-echarts-map-urls", value: "dg-echarts-map-urls", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.map-urls' />", tagNames: ["body"]}
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.echarts-theme' />", tagNames: ["body"]}
 		];
 		
 		po.templateEditorCompleters =

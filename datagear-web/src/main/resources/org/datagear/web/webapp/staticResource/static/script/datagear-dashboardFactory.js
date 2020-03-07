@@ -70,7 +70,7 @@
 	
 	/**
 	 * 初始化chartFactory.echartsMapURLs。
-	 * 它将body元素的"dg-echarts-map-urls"属性值设置为自定义地图JSON地址映射表。
+	 * 它将body元素的"dg-chart-map-urls"属性值设置为自定义地图JSON地址映射表。
 	 */
 	dashboardFactory.initEchartsMapURLs = function()
 	{
@@ -81,7 +81,7 @@
 				global.chartFactory.echartsMapURLs[urlNames.names[j]] = this.builtInEchartsMapBaseURL + urlNames.url;
 		}
 		
-		var mapUrls = $(document.body).attr("dg-echarts-map-urls");
+		var mapUrls = $(document.body).attr("dg-chart-map-urls");
 		
 		if(mapUrls)
 			mapUrls = global.chartFactory.evalSilently(mapUrls);
