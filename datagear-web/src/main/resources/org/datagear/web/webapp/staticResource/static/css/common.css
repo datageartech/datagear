@@ -62,7 +62,7 @@ a.link:hover{
 }
 
 .new-version-tip{
-	display: inline-block;
+	display: none;
 	width: 8px;
 	height: 8px;
 	background: #EE2C2C;

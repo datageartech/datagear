@@ -1707,18 +1707,6 @@
 		},
 		
 		/**
-		 * 是否检测到新版本。
-		 * @param currentVersion 当前版本号
-		 */
-		newVersionDetected : function(currentVersion)
-		{
-			if(!currentVersion || typeof(DATA_GEAR_LATEST_VERSION) == "undefined")
-				return false;
-			
-			return ($.compareVersion(DATA_GEAR_LATEST_VERSION, currentVersion) > 0);
-		},
-		
-		/**
 		 * 比较两个版本号。
 		 * > 1：v0高于v1；= 0：v0等于v1；< 0：v0小于v1。
 		 * 

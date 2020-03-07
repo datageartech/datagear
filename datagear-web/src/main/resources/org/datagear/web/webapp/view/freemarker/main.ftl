@@ -574,6 +574,24 @@ ${detectNewVersionScript}
 		return state;
 	};
 	
+	po.newVersionDetected = function()
+	{
+		var detectedVersion = $.cookie("DETECTED_VERSION");
+		if(typeof(DATA_GEAR_LATEST_VERSION) != "undefined")
+		{
+			if(DATA_GEAR_LATEST_VERSION != detectedVersion)
+			{
+				detectedVersion = DATA_GEAR_LATEST_VERSION;
+				$.cookie("DETECTED_VERSION", detectedVersion, {expires : 365, path : "${contextPath}"});
+			}
+		}
+		
+		if(!detectedVersion)
+			return false;
+		
+		return ($.compareVersion(detectedVersion, po.currentVersion) > 0);
+	};
+	
 	$(document).ready(function()
 	{
 		var westMinSize = po.element(".schema-panel-head").css("min-width");
@@ -1190,10 +1208,10 @@ ${detectNewVersionScript}
 		
 		po.bindTabsMenuHiddenEvent(po.mainTabs);
 		
-		if($.newVersionDetected(po.currentVersion))
-			$(".new-version-tip").show();
-		else
-			$(".new-version-tip").hide();
+		<#if !disableDetectNewVersion>
+		if(po.newVersionDetected())
+			$(".new-version-tip").css("display", "inline-block");
+		</#if>
 	});
 })
 (${pageId});

@@ -97,6 +97,7 @@ public class MainController extends AbstractController
 		request.setAttribute("disableRegister", this.disableRegister);
 		request.setAttribute("currentUser", User.copyWithoutPassword(WebUtils.getUser(request, response)));
 		request.setAttribute("currentVersion", Global.VERSION);
+		request.setAttribute("disableDetectNewVersion", disableDetectNewVersion);
 		request.setAttribute("detectNewVersionScript", resolveDetectNewVersionScript(request, response));
 
 		return "/main";
