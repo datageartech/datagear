@@ -130,10 +130,10 @@ ${line.separator}
 ${line.separator}
 </echo>
 								<!-- 替换web模块readme.txt中的版本号 -->
-								<replaceregexp file="datagear-webapp/src/main/webapp/readme.txt" encoding="UTF-8" match="数据齿轮\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="数据齿轮-v${project.version}"/>
+								<replaceregexp file="datagear-webapp/src/main/webapp/readme.txt" encoding="UTF-8" match="DataGear\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="DataGear-v${project.version}"/>
 								
 								<!-- 替换webappembd模块readme.txt中的版本号 -->
-								<replaceregexp file="datagear-webappembd/src/main/dist/readme.txt" encoding="UTF-8" match="数据齿轮\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="数据齿轮-v${project.version}"/>
+								<replaceregexp file="datagear-webappembd/src/main/dist/readme.txt" encoding="UTF-8" match="DataGear\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="DataGear-v${project.version}"/>
 								
 								<!-- 替换webappembd模块startup.bat中的版本号 -->
 								<replaceregexp file="datagear-webappembd/src/main/dist/startup.bat" encoding="UTF-8" match="datagear\-webappembd\-\d+(\.\d+){1,2}(\-\w+){0,1}" replace="datagear-webappembd-${project.version}"/>
