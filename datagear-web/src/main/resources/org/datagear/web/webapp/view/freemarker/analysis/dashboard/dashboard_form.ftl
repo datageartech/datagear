@@ -127,16 +127,91 @@ readonly 是否只读操作，允许为null
 	{
 		return "${contextPath}/analysis/dashboard/" + action;
 	};
+
+	po.getLastTagText = function(text)
+	{
+		if(!text)
+			return text;
+		
+		var idx = -1;
+		for(var i=text.length-1;i>=0;i--)
+		{
+			var c = text.charAt(i);
+			if(c == '>' || c == '<')
+			{
+				idx = i;
+				break;
+			}
+		}
+		
+		return (idx < 0 ? text : text.substr(idx));
+	};
+	
+	po.getTemplatePrevTagText = function(row, column)
+	{
+		var text = po.templateEditor.session.getLine(row).substring(0, column);
+		
+		//反向查找直到'>'或'<'
+		var prevRow = row;
+		while((!text || !(/[<>]/g.test(text))) && (prevRow--) >= 0)
+			text = po.templateEditor.session.getLine(prevRow) + text;
+		
+		return po.getLastTagText(text);
+	};
+	
+	po.resolveHtmlTagName = function(text)
+	{
+		var re = text.match(/<\S*/);
+		
+		if(re)
+			return re[0].substr(1);
+		
+		return "";
+	};
 	
 	po.initTemplateEditor = function()
 	{
-		var templateEditorCompleters =
+		po.templateEditorCompletions = [
+			{name: "dg-chart-widget", value: "dg-chart-widget", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-widget' />", tagNames: ["div"]},
+			{name: "dg-chart-options", value: "dg-chart-options", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-options' />", tagNames: ["div","body"]},
+			{name: "dg-chart-renderer", value: "dg-chart-renderer", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-renderer' />", tagNames: ["div"]},
+			{name: "dg-chart-theme", value: "dg-chart-theme", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-theme' />", tagNames: ["body"]},
+			{name: "dg-echarts-theme", value: "dg-echarts-theme", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.echarts-theme' />", tagNames: ["body"]},
+			{name: "dg-echarts-map-urls", value: "dg-echarts-map-urls", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.map-urls' />", tagNames: ["body"]}
+		];
+		
+		po.templateEditorCompleters =
 		[
 			{
-				identifierRegexps : [/[a-zA-Z_0-9\.\$]/],
+				identifierRegexps : [/[a-zA-Z_0-9\-]/],
 				getCompletions: function(editor, session, pos, prefix, callback)
 				{
-					return [];
+					var prevText = po.getTemplatePrevTagText(pos.row, pos.column);
+					
+					var tagName = po.resolveHtmlTagName(prevText);
+					
+					if(tagName)
+					{
+						tagName = tagName.toLowerCase();
+						
+						var completions = [];
+						for(var i=0; i<po.templateEditorCompletions.length; i++)
+						{
+							var comp = po.templateEditorCompletions[i];
+							if(!comp.tagNames || $.inArray(tagName, comp.tagNames) > -1)
+								completions.push(comp);
+						}
+						
+						callback(null, completions);
+					}
+					else
+						callback(null, []);
 				}
 			}
 		];
@@ -706,12 +781,7 @@ readonly 是否只读操作，允许为null
 			var chartId = charts[0].id;
 			var chartName = charts[0].name;
 			
-			var text = po.templateEditor.session.getLine(cursor.row).substring(0, cursor.column);
-			
-			//获取所处标签字符串
-			var prevRow = cursor.row;
-			while((!text || !(/[<>]/g.test(text))) && (prevRow--) >= 0)
-				text = po.templateEditor.session.getLine(prevRow) + text;
+			var text = po.getTemplatePrevTagText(cursor.row, cursor.column);
 			
 			// =
 			if(/=\s*$/g.test(text))
