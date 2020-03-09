@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.datagear</groupId>
 		<artifactId>datagear</artifactId>
-		<version>1.7.0</version>
+		<version>1.6.1</version>
 	</parent>
 	
 	<artifactId>datagear-dataexchange</artifactId>

@@ -228,8 +228,7 @@ CREATE TABLE DATAGEAR_HTML_DASHBOARD
 
 ALTER TABLE DATAGEAR_HTML_DASHBOARD ALTER COLUMN HD_TEMPLATE SET DATA TYPE VARCHAR(500);
 
-
 -----------------------------------------
---version[1.7.0], DO NOT EDIT THIS LINE!
+--version[1.6.1], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
