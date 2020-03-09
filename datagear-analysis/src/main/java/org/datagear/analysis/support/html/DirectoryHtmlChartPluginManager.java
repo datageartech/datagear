@@ -313,7 +313,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 				// 同ID的插件，比较版本是否可覆盖
 				if (uploadPlugin.getId().equals(loadedPlugin.getId()))
 				{
-					if (canReplaceForSameId(uploadPlugin, uploadPlugin))
+					if (canReplaceForSameId(uploadPlugin, loadedPlugin))
 					{
 						FileUtil.deleteFile(sameName);
 						IOUtil.copy(uploadPluginFile, this.directory, true);
