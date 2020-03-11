@@ -89,15 +89,16 @@ public class PathDriverClassLoader extends URLClassLoader
 		URL url = findResource(name);
 
 		// 对于独立的驱动程序类加载器，不应该代理至父类加载器
-//		if (url == null)
-//		{
-//			ClassLoader parent = getParentClassLoader();
-//
-//			if (LOGGER.isDebugEnabled())
-//				LOGGER.debug("delegate parent class loader for getting resource URL for [" + name + "]");
-//
-//			return parent.getResource(name);
-//		}
+		// if (url == null)
+		// {
+		// ClassLoader parent = getParentClassLoader();
+		//
+		// if (LOGGER.isDebugEnabled())
+		// LOGGER.debug("delegate parent class loader for getting resource URL
+		// for [" + name + "]");
+		//
+		// return parent.getResource(name);
+		// }
 
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("getResource [" + url + "] for [" + name + "] in path [" + getPath() + "]");
@@ -111,15 +112,16 @@ public class PathDriverClassLoader extends URLClassLoader
 		Enumeration<URL> urls = findResources(name);
 
 		// 对于独立的驱动程序类加载器，不应该代理至父类加载器
-//		if (urls == null || urls.hasMoreElements())
-//		{
-//			ClassLoader parent = getParentClassLoader();
-//
-//			if (LOGGER.isDebugEnabled())
-//				LOGGER.debug("delegate parent class loader for getting resource URLs for [" + name + "]");
-//
-//			return parent.getResources(name);
-//		}
+		// if (urls == null || urls.hasMoreElements())
+		// {
+		// ClassLoader parent = getParentClassLoader();
+		//
+		// if (LOGGER.isDebugEnabled())
+		// LOGGER.debug("delegate parent class loader for getting resource URLs
+		// for [" + name + "]");
+		//
+		// return parent.getResources(name);
+		// }
 
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("getResources for [" + name + "] in path [" + getPath() + "]");
@@ -133,15 +135,16 @@ public class PathDriverClassLoader extends URLClassLoader
 		URL url = findResource(name);
 
 		// 对于独立的驱动程序类加载器，不应该代理至父类加载器
-//		if (url == null)
-//		{
-//			ClassLoader parent = getParentClassLoader();
-//
-//			if (LOGGER.isDebugEnabled())
-//				LOGGER.debug("delegate parent class loader for getting resource as stream for [" + name + "]");
-//
-//			return parent.getResourceAsStream(name);
-//		}
+		// if (url == null)
+		// {
+		// ClassLoader parent = getParentClassLoader();
+		//
+		// if (LOGGER.isDebugEnabled())
+		// LOGGER.debug("delegate parent class loader for getting resource as
+		// stream for [" + name + "]");
+		//
+		// return parent.getResourceAsStream(name);
+		// }
 
 		if (url == null)
 			return null;
@@ -190,10 +193,10 @@ public class PathDriverClassLoader extends URLClassLoader
 			{
 				clazz = findClass(name);
 			}
-			catch(ClassNotFoundException e)
+			catch (ClassNotFoundException e)
 			{
 			}
-			catch(ClassFormatError e)
+			catch (ClassFormatError e)
 			{
 				// 类加载出错（比如版本不兼容），则抛出
 				throw e;
@@ -214,7 +217,7 @@ public class PathDriverClassLoader extends URLClassLoader
 			{
 				bytes = IOUtil.getBytes(in);
 			}
-			catch(IOException e)
+			catch (IOException e)
 			{
 				throw new ClassNotFoundException(name, e);
 			}
@@ -236,6 +239,9 @@ public class PathDriverClassLoader extends URLClassLoader
 
 			clazz = Class.forName(name, false, parent);
 		}
+
+		if (clazz == null)
+			throw new ClassNotFoundException(name);
 
 		if (resolve)
 			resolveClass(clazz);
@@ -267,7 +273,7 @@ public class PathDriverClassLoader extends URLClassLoader
 	protected boolean isJDKExtClassName(String name)
 	{
 		return (name.startsWith("sun.") || name.startsWith("org.ietf.") || name.startsWith("org.omg.")
-				|| name.startsWith("org.w3c.") || name.startsWith("org.xml."));
+				|| name.startsWith("org.w3c.") || name.startsWith("org.xml.") || name.startsWith("jdk."));
 	}
 
 	/**
