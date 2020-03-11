@@ -9,18 +9,29 @@ import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp.ConnectionFactory;
+import org.apache.commons.dbcp.DriverConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * 默认{@linkplain ConnectionSource}实现。
+ * <p>
+ * 注意：此类实例不再使用后，应该调用。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -38,6 +49,10 @@ public class DefaultConnectionSource implements ConnectionSource
 	private ConcurrentMap<String, PreferedDriverEntityResult> urlPreferedDriverEntityMap = new ConcurrentHashMap<String, PreferedDriverEntityResult>();
 
 	private volatile long driverEntityManagerLastModified = -1;
+
+	private HashMap<Driver, DriverBasicDataSource> _dataSourceMap = new HashMap<Driver, DriverBasicDataSource>();
+
+	private ReadWriteLock _dataSourceMapLock = new ReentrantReadWriteLock();
 
 	public DefaultConnectionSource()
 	{
@@ -96,6 +111,36 @@ public class DefaultConnectionSource implements ConnectionSource
 	public Connection getConnection(ConnectionOption connectionOption) throws ConnectionSourceException
 	{
 		return getPreferredConnection(connectionOption);
+	}
+
+	/**
+	 * 关闭。
+	 */
+	public void close()
+	{
+		Lock writeLock = this._dataSourceMapLock.writeLock();
+		try
+		{
+			writeLock.lock();
+			Collection<DriverBasicDataSource> dataSources = this._dataSourceMap.values();
+			for (DriverBasicDataSource dataSource : dataSources)
+			{
+				try
+				{
+					dataSource.close();
+				}
+				catch(Throwable t)
+				{
+					LOGGER.warn("Close data source exception:", t);
+				}
+			}
+
+			this._dataSourceMap.clear();
+		}
+		finally
+		{
+			writeLock.unlock();
+		}
 	}
 
 	/**
@@ -323,7 +368,7 @@ public class DefaultConnectionSource implements ConnectionSource
 
 		try
 		{
-			return driver.connect(connectionOption.getUrl(), properties);
+			return getConnection(driver, connectionOption.getUrl(), properties);
 		}
 		catch (SQLException e)
 		{
@@ -333,6 +378,44 @@ public class DefaultConnectionSource implements ConnectionSource
 		{
 			throw new ConnectionSourceException(t);
 		}
+	}
+
+	protected Connection getConnection(Driver driver, String url, Properties properties) throws SQLException
+	{
+		DriverBasicDataSource dataSource = null;
+
+		Lock readLock = this._dataSourceMapLock.readLock();
+		try
+		{
+			readLock.lock();
+			dataSource = this._dataSourceMap.get(driver);
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+
+		if (dataSource == null)
+		{
+			Lock writeLock = this._dataSourceMapLock.writeLock();
+			try
+			{
+				writeLock.lock();
+				dataSource = createDataSource(driver, url, properties);
+				this._dataSourceMap.put(driver, dataSource);
+			}
+			finally
+			{
+				writeLock.unlock();
+			}
+		}
+
+		return dataSource.getConnection();
+	}
+
+	protected DriverBasicDataSource createDataSource(Driver driver, String url, Properties properties)
+	{
+		return new DriverBasicDataSource(driver, url, properties);
 	}
 
 	protected String toDriverString(Driver driver)
@@ -450,6 +533,42 @@ public class DefaultConnectionSource implements ConnectionSource
 		public void setDriver(Driver driver)
 		{
 			this.driver = driver;
+		}
+	}
+
+	/**
+	 * 基于{@linkplain Driver}实例的{@linkplain BasicDataSource}。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class DriverBasicDataSource extends BasicDataSource
+	{
+		private Driver driver;
+
+		public DriverBasicDataSource(Driver driver, String url, Properties properties)
+		{
+			super();
+			this.driver = driver;
+			super.setDriverClassName(driver.getClass().getName());
+			super.setUrl(url);
+			super.connectionProperties = properties;
+		}
+
+		protected Driver getDriver()
+		{
+			return driver;
+		}
+
+		protected void setDriver(Driver driver)
+		{
+			this.driver = driver;
+		}
+
+		@Override
+		protected ConnectionFactory createConnectionFactory() throws SQLException
+		{
+			return new DriverConnectionFactory(driver, url, connectionProperties);
 		}
 	}
 }

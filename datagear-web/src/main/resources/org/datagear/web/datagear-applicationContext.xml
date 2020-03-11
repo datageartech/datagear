@@ -121,7 +121,7 @@
 		<property name="xmlDriverEntityManager" ref="driverEntityManager" />
 	</bean>
 	
-	<bean id="connectionSource" class="org.datagear.connection.DefaultConnectionSource">
+	<bean id="connectionSource" class="org.datagear.connection.DefaultConnectionSource" destroy-method="close">
 		<property name="driverEntityManager" ref="driverEntityManager" />
 		<property name="driverChecker">
 			<bean class="org.datagear.web.util.SqlDriverChecker">

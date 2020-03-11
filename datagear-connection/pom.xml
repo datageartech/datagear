@@ -18,6 +18,11 @@
 			<artifactId>datagear-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>${DBCP.version}</version>
+		</dependency>
 	</dependencies>
 	
 	<build>
