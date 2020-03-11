@@ -96,7 +96,7 @@ public class PathDriverFactory
 	}
 
 	/**
-	 * 初始化{@linkplain PathClassLoader}。
+	 * 初始化{@linkplain PathDriverClassLoader}。
 	 * 
 	 * @param path
 	 * @return
