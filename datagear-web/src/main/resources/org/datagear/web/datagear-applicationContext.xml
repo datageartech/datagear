@@ -4,13 +4,13 @@
 	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="
      http://www.springframework.org/schema/beans 
-     http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+     http://www.springframework.org/schema/beans/spring-beans.xsd
      http://www.springframework.org/schema/tx
-     http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+     http://www.springframework.org/schema/tx/spring-tx.xsd
      http://www.springframework.org/schema/aop 
-     http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+     http://www.springframework.org/schema/aop/spring-aop.xsd
      http://www.springframework.org/schema/context 
-     http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+     http://www.springframework.org/schema/context/spring-context.xsd">
     
     <!-- 应用主配置 -->
     <!-- 依赖如下配置： -->
@@ -460,7 +460,7 @@
 		<property name="attributes">
 			<map>
 				<entry key="org.cometd.bayeux">
-					<ref local="bayeuxServer" />
+					<ref bean="bayeuxServer" />
 				</entry>
 			</map>
 		</property>
@@ -474,7 +474,7 @@
 	</bean>
 	
 	<bean id="sqlpadCometdService" class="org.datagear.web.sqlpad.SqlpadCometdService">
-        <constructor-arg><ref local="bayeuxServer" /></constructor-arg>
+        <constructor-arg><ref bean="bayeuxServer" /></constructor-arg>
     </bean>
     
     <bean id="sqlpadExecutionService" class="org.datagear.web.sqlpad.SqlpadExecutionService" destroy-method="shutdown">
@@ -520,7 +520,7 @@
     </bean>
 	
 	<bean id="dataExchangeCometdService" class="org.datagear.web.cometd.dataexchange.DataExchangeCometdService">
-        <constructor-arg><ref local="bayeuxServer" /></constructor-arg>
+        <constructor-arg><ref bean="bayeuxServer" /></constructor-arg>
     </bean>
     
 	<!-- 定时任务开始 -->
@@ -535,7 +535,7 @@
 		<property name="targetObject" ref="deleteExpiredBlobJob" />
 		<property name="targetMethod" value="delete" />
 	</bean>
-	<bean id="deleteExpiredBlobJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+	<bean id="deleteExpiredBlobJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="deleteExpiredBlobJobDetail" />
 		<property name="cronExpression" value="0 0,30 * * * ?" /><!-- 每半小时 -->
 	</bean>
@@ -549,7 +549,7 @@
 		<property name="targetObject" ref="deleteTempFileJob" />
 		<property name="targetMethod" value="delete" />
 	</bean>
-	<bean id="deleteTempFileJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+	<bean id="deleteTempFileJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="deleteTempFileJobDetail" />
 		<property name="cronExpression" value="0 0 1 * * ?" /><!-- 每天凌晨1点 -->
 	</bean>

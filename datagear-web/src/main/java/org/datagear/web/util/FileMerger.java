@@ -111,6 +111,8 @@ public class FileMerger
 				println("Print the file name merge to:");
 		}
 
+		IOUtil.close(scanner);
+
 		FileMerger fileMerger = new FileMerger();
 		fileMerger.merge(directory, toFileName);
 	}

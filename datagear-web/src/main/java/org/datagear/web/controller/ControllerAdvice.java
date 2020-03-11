@@ -6,7 +6,6 @@ package org.datagear.web.controller;
 
 import java.sql.SQLException;
 
-import javax.mail.AuthenticationFailedException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -84,17 +83,6 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(MethodArgumentNotValidException.class), exception,
 				false);
-
-		return getErrorView(request, response);
-	}
-
-	@ExceptionHandler(AuthenticationFailedException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleAuthenticationFailedException(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationFailedException exception)
-	{
-		setOperationMessageForThrowable(request, buildMessageCode(AuthenticationFailedException.class), exception,
-				true);
 
 		return getErrorView(request, response);
 	}

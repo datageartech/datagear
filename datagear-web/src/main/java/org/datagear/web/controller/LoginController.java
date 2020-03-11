@@ -11,7 +11,6 @@ import java.net.URLEncoder;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.WebAttributes;
 import org.springframework.stereotype.Controller;
@@ -59,16 +58,9 @@ public class LoginController extends AbstractController
 		// 参考org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler.saveException()
 		AuthenticationException authenticationException = (AuthenticationException) request.getSession()
 				.getAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+
 		if (authenticationException != null)
-		{
 			request.getSession().removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
-
-			@SuppressWarnings("deprecation")
-			Authentication authentication = authenticationException.getAuthentication();
-
-			if (authentication != null && authentication.getPrincipal() != null)
-				loginUser = authentication.getPrincipal().toString();
-		}
 
 		if (loginUser == null)
 			loginUser = "";

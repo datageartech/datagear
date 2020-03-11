@@ -12,10 +12,12 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compile.source>1.6</maven.compile.source>
-		<maven.compile.target>1.6</maven.compile.target>
+		<maven.compile.source>1.8</maven.compile.source>
+		<maven.compile.target>1.8</maven.compile.target>
 		<junit.version>4.11</junit.version>
-		<spring.version>3.2.3.RELEASE</spring.version>
+		<spring.version>4.3.26.RELEASE</spring.version>
+		<spring.security.version>3.2.10.RELEASE</spring.security.version>
+		<DBCP.version>1.4</DBCP.version><!-- 更高版本的不兼容JDBC 4.0 -->
 		<slf4j.version>1.7.9</slf4j.version>
 		<slf4j-log4j12.version>1.7.9</slf4j-log4j12.version>
 		<log4j.version>1.2.17</log4j.version>

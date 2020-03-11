@@ -43,7 +43,7 @@ SQL工作台
 
 ## 依赖
 
-	Java 6+
+	Java 8+
 	Servlet 3.0+
 
 ## 编译
