@@ -15,6 +15,7 @@
 		<maven.compile.source>1.8</maven.compile.source>
 		<maven.compile.target>1.8</maven.compile.target>
 		<junit.version>4.11</junit.version>
+		<hamcrest.version>2.2</hamcrest.version>
 		<spring.version>4.3.26.RELEASE</spring.version>
 		<spring.security.version>3.2.10.RELEASE</spring.security.version>
 		<DBCP.version>1.4</DBCP.version><!-- 更高版本的不兼容JDBC 4.0 -->
@@ -41,13 +42,20 @@
 		<module>datagear-web</module>
 		<module>datagear-webapp</module>
 		<module>datagear-webappembd</module>
-	</modules>
+    	<module>datagear-meta</module>
+  </modules>
 	
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest</artifactId>
+			<version>${hamcrest.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
