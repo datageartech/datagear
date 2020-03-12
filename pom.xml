@@ -41,7 +41,8 @@
 		<module>datagear-web</module>
 		<module>datagear-webapp</module>
 		<module>datagear-webappembd</module>
-	</modules>
+    	<module>datagear-meta</module>
+  </modules>
 	
 	<dependencies>
 		<dependency>
