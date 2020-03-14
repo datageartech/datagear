@@ -10,6 +10,8 @@ import java.util.List;
 
 import org.datagear.connection.ConnectionOption;
 import org.datagear.meta.Column;
+import org.datagear.meta.DataType;
+import org.datagear.meta.Database;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 
@@ -54,6 +56,13 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	}
 
 	@Override
+	public Database getDatabase(Connection cn) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.getDatabase(cn);
+	}
+
+	@Override
 	public List<SimpleTable> getSimpleTables(Connection cn) throws DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
@@ -86,6 +95,13 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
 		return resolver.getColumns(cn, resultSetMetaData);
+	}
+
+	@Override
+	public List<DataType> getDataTypes(Connection cn) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.getDataTypes(cn);
 	}
 
 	/**

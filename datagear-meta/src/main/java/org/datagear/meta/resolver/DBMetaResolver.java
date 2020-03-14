@@ -9,6 +9,8 @@ import java.sql.ResultSetMetaData;
 import java.util.List;
 
 import org.datagear.meta.Column;
+import org.datagear.meta.DataType;
+import org.datagear.meta.Database;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 
@@ -20,6 +22,15 @@ import org.datagear.meta.Table;
  */
 public interface DBMetaResolver
 {
+	/**
+	 * 获取{@linkplain Database}。
+	 * 
+	 * @param cn
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	Database getDatabase(Connection cn) throws DBMetaResolverException;
+
 	/**
 	 * 获取所有{@linkplain SimpleTable}。
 	 * 
@@ -67,4 +78,13 @@ public interface DBMetaResolver
 	 * @throws DBMetaResolverException
 	 */
 	Column[] getColumns(Connection cn, ResultSetMetaData resultSetMetaData) throws DBMetaResolverException;
+
+	/**
+	 * 获取所有{@linkplain DataType}。
+	 * 
+	 * @param cn
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	List<DataType> getDataTypes(Connection cn) throws DBMetaResolverException;
 }

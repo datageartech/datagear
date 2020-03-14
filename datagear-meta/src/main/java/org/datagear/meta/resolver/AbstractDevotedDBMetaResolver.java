@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.meta.Column;
+import org.datagear.meta.DataType;
+import org.datagear.meta.Database;
 import org.datagear.meta.ImportKey;
 import org.datagear.meta.PrimaryKey;
 import org.datagear.meta.SimpleTable;
@@ -48,6 +50,33 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 	public AbstractDevotedDBMetaResolver()
 	{
 		super();
+	}
+
+	@Override
+	public Database getDatabase(Connection cn) throws DBMetaResolverException
+	{
+		try
+		{
+			DatabaseMetaData metaData = cn.getMetaData();
+
+			Database databaseInfo = new Database();
+
+			databaseInfo.setCatalog(cn.getCatalog());
+			databaseInfo.setSchema(getSchema(cn, metaData));
+
+			databaseInfo.setUrl(metaData.getURL());
+			databaseInfo.setUser(metaData.getUserName());
+			databaseInfo.setProductName(metaData.getDatabaseProductName());
+			databaseInfo.setProductVersion(metaData.getDatabaseProductVersion());
+			databaseInfo.setDriverName(metaData.getDriverName());
+			databaseInfo.setDriverVersion(metaData.getDriverVersion());
+
+			return databaseInfo;
+		}
+		catch(SQLException e)
+		{
+			throw new DBMetaResolverException(e);
+		}
 	}
 
 	@Override
@@ -121,6 +150,43 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		catch(SQLException e)
 		{
 			throw new DBMetaResolverException(e);
+		}
+	}
+
+	@Override
+	public List<DataType> getDataTypes(Connection cn) throws DBMetaResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		return getDataTypes(cn, metaData);
+	}
+
+	protected List<DataType> getDataTypes(Connection cn, DatabaseMetaData metaData) throws DBMetaResolverException
+	{
+		List<DataType> dataTypes = new ArrayList<DataType>();
+
+		ResultSet rs = null;
+
+		try
+		{
+			rs = getDataTypeResultSet(cn, metaData);
+
+			while (rs.next())
+			{
+				DataType dataType = readDataType(rs);
+
+				if (dataType != null)
+					dataTypes.add(dataType);
+			}
+
+			return dataTypes;
+		}
+		catch(SQLException e)
+		{
+			throw new DBMetaResolverException(e);
+		}
+		finally
+		{
+			JdbcUtil.closeResultSet(rs);
 		}
 	}
 
@@ -447,6 +513,27 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		return false;
 	}
 
+	protected DataType readDataType(ResultSet rs)
+	{
+		try
+		{
+			String name = rs.getString("TYPE_NAME");
+			if (StringUtil.isEmpty(name))
+			{
+				LOGGER.warn("Invalid data type row : name={}", name);
+				return null;
+			}
+
+			DataType column = new DataType(name, rs.getInt("DATA_TYPE"));
+
+			return column;
+		}
+		catch(SQLException e)
+		{
+			return null;
+		}
+	}
+
 	/**
 	 * 
 	 * @param rs
@@ -509,6 +596,11 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 			String tableName) throws SQLException
 	{
 		return databaseMetaData.getImportedKeys(cn.getCatalog(), schema, tableName);
+	}
+
+	protected ResultSet getDataTypeResultSet(Connection cn, DatabaseMetaData databaseMetaData) throws SQLException
+	{
+		return databaseMetaData.getTypeInfo();
 	}
 
 	/**

@@ -5,6 +5,7 @@
 package org.datagear.meta;
 
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
+import static org.hamcrest.collection.ArrayMatching.arrayContaining;
 import static org.hamcrest.collection.ArrayMatching.hasItemInArray;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsIterableContaining.hasItem;
@@ -20,6 +21,8 @@ import org.datagear.meta.resolver.WildcardDevotedDBMetaResolver;
 import org.datagear.meta.resolver.support.MySqlDevotedDBMetaResolver;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.test.DBTestSupport;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -32,6 +35,8 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 {
 	private GenericDBMetaResolver genericDBMetaResolver;
 
+	private Connection connection;
+
 	public GenericDBMetaResolverTest()
 	{
 		super();
@@ -43,23 +48,22 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 		this.genericDBMetaResolver = new GenericDBMetaResolver(devotedDBMetaResolvers);
 	}
 
+	@Before
+	public void init() throws Exception
+	{
+		this.connection = getConnection();
+	}
+
+	@After
+	public void destroy()
+	{
+		JdbcUtil.closeConnection(this.connection);
+	}
+
 	@Test
 	public void getSimpleTablesTest() throws Exception
 	{
-		Connection cn = null;
-
-		List<SimpleTable> simpleTables = null;
-
-		try
-		{
-			cn = getConnection();
-
-			simpleTables = this.genericDBMetaResolver.getSimpleTables(cn);
-		}
-		finally
-		{
-			JdbcUtil.closeConnection(cn);
-		}
+		List<SimpleTable> simpleTables = this.genericDBMetaResolver.getSimpleTables(this.connection);
 
 		assertThat(simpleTables, hasItem(hasProperty("name", equalTo("T_ACCOUNT"))));
 		assertThat(simpleTables, hasItem(hasProperty("name", equalTo("T_ADDRESS"))));
@@ -68,28 +72,19 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 	@Test
 	public void getTableTest() throws Exception
 	{
-		Connection cn = null;
-
-		Table table0 = null;
-		Table table1 = null;
-
-		try
 		{
-			cn = getConnection();
-
-			table0 = this.genericDBMetaResolver.getTable(cn, "T_ACCOUNT");
-			table1 = this.genericDBMetaResolver.getTable(cn, "T_ADDRESS");
-		}
-		finally
-		{
-			JdbcUtil.closeConnection(cn);
+			Table table = this.genericDBMetaResolver.getTable(this.connection, "T_ACCOUNT");
+			assertThat(table, hasProperty("name", equalTo("T_ACCOUNT")));
+			assertThat(table.getColumns(), hasItemInArray(hasProperty("name", equalTo("ID"))));
+			assertThat(table.getPrimaryKey(), hasProperty("columnNames", hasItemInArray(equalTo("ID"))));
 		}
 
-		assertThat(table0, hasProperty("name", equalTo("T_ACCOUNT")));
-		assertThat(table0, hasProperty("columns", hasItemInArray(hasProperty("name", equalTo("ID")))));
-		assertThat(table0, hasProperty("primaryKey", hasProperty("columnNames", hasItemInArray(equalTo("ID")))));
-
-		assertThat(table1, hasProperty("name", equalTo("T_ADDRESS")));
-		assertThat(table1, hasProperty("columns", hasItemInArray(hasProperty("name", equalTo("ACCOUNT_ID")))));
+		{
+			Table table = this.genericDBMetaResolver.getTable(this.connection, "T_ADDRESS");
+			assertThat(table, hasProperty("name", equalTo("T_ADDRESS")));
+			assertThat(table.getColumns(), hasItemInArray(hasProperty("name", equalTo("ACCOUNT_ID"))));
+			assertThat(table.getUniqueKeys(),
+					hasItemInArray(hasProperty("columnNames", arrayContaining("ACCOUNT_ID"))));
+		}
 	}
 }

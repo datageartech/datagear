@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compile.source>1.8</maven.compile.source>
 		<maven.compile.target>1.8</maven.compile.target>
-		<junit.version>4.11</junit.version>
+		<junit.version>4.12</junit.version>
 		<hamcrest.version>2.2</hamcrest.version>
 		<spring.version>4.3.26.RELEASE</spring.version>
 		<spring.security.version>3.2.10.RELEASE</spring.security.version>
@@ -54,6 +54,12 @@
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest</artifactId>
+			<version>${hamcrest.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
 			<version>${hamcrest.version}</version>
 			<scope>test</scope>
 		</dependency>
