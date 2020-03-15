@@ -94,6 +94,39 @@ public class Table extends AbstractTable
 		this.importKeys = importKeys;
 	}
 
+	/**
+	 * 获取指定名称的{@linkplain Column}。
+	 * 
+	 * @param name
+	 * @return 返回{@code null}表示没有
+	 */
+	public Column getColumn(String name)
+	{
+		for (Column column : this.columns)
+		{
+			if (column.getName().equals(name))
+				return column;
+		}
+
+		return null;
+	}
+
+	/**
+	 * 获取指定名称的{@linkplain Column}数组。
+	 * 
+	 * @param names
+	 * @return 返回元素{@code null}表示没有
+	 */
+	public Column[] getColumns(String... names)
+	{
+		Column[] columns = new Column[names.length];
+
+		for (int i = 0; i < columns.length; i++)
+			columns[i] = getColumn(names[i]);
+
+		return columns;
+	}
+
 	@Override
 	public String toString()
 	{

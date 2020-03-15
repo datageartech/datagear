@@ -43,7 +43,8 @@
 		<module>datagear-webapp</module>
 		<module>datagear-webappembd</module>
     	<module>datagear-meta</module>
-  </modules>
+    	<module>datagear-persistence-refactor</module>
+	</modules>
 	
 	<dependencies>
 		<dependency>

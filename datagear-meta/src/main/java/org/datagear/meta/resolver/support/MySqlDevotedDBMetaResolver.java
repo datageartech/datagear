@@ -4,7 +4,9 @@
 
 package org.datagear.meta.resolver.support;
 
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
 import org.datagear.connection.ConnectionSensor;
 import org.datagear.connection.URLConnectionSensor;
@@ -34,15 +36,10 @@ public class MySqlDevotedDBMetaResolver extends AbstractConnectionDevotedDBMetaR
 	}
 
 	@Override
-	protected List<SimpleTable> postProcessSimpleTables(List<SimpleTable> simpleTables)
+	protected void postProcessSimpleTable(Connection cn, DatabaseMetaData metaData, String schema,
+			SimpleTable simpleTable) throws SQLException
 	{
-		if (simpleTables != null)
-		{
-			for (SimpleTable st : simpleTables)
-				resolveTableComment(st);
-		}
-
-		return simpleTables;
+		resolveTableComment(simpleTable);
 	}
 
 	protected void resolveTableComment(SimpleTable st)

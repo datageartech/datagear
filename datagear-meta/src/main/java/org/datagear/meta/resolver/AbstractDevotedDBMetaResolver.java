@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLNonTransientException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import org.datagear.meta.DataType;
 import org.datagear.meta.Database;
 import org.datagear.meta.ImportKey;
 import org.datagear.meta.PrimaryKey;
+import org.datagear.meta.SearchableType;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 import org.datagear.meta.TableType;
@@ -107,6 +109,15 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 	}
 
 	@Override
+	public Column[] getColumns(Connection cn, String tableName) throws DBMetaResolverException
+	{
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		return getColumns(cn, metaData, schema, tableName, null);
+	}
+
+	@Override
 	public Column getRandomColumn(Connection cn, String tableName) throws DBMetaResolverException
 	{
 		DatabaseMetaData metaData = getDatabaseMetaData(cn);
@@ -160,6 +171,91 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		return getDataTypes(cn, metaData);
 	}
 
+	/**
+	 * @param cn
+	 * @param metaData
+	 * @param schema
+	 * @param tableNamePattern 允许为{@code null}
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	protected List<SimpleTable> getSimpleTables(Connection cn, DatabaseMetaData metaData, String schema,
+			String tableNamePattern)
+			throws DBMetaResolverException
+	{
+		ResultSet rs = null;
+	
+		try
+		{
+			rs = getTableResulSet(cn, metaData, schema, tableNamePattern, TABLE_TYPES);
+	
+			List<SimpleTable> simpleTables = new ArrayList<SimpleTable>();
+	
+			while (rs.next())
+			{
+				SimpleTable simpleTable = readSimpleTable(cn, metaData, schema, rs);
+	
+				if (simpleTable != null)
+				{
+					postProcessSimpleTable(cn, metaData, schema, simpleTable);
+					simpleTables.add(simpleTable);
+				}
+			}
+	
+			return simpleTables;
+		}
+		catch(SQLException e)
+		{
+			throw new DBMetaResolverException(e);
+		}
+		finally
+		{
+			JdbcUtil.closeResultSet(rs);
+		}
+	}
+
+	/**
+	 * @return 返回{@code null}表示未读取到
+	 */
+	protected SimpleTable readSimpleTable(Connection cn, DatabaseMetaData metaData, String schema, ResultSet rs)
+	{
+		try
+		{
+			String name = rs.getString("TABLE_NAME");
+			TableType type = toTableType(rs.getString("TABLE_TYPE"));
+	
+			if (StringUtil.isEmpty(name) || StringUtil.isEmpty(type))
+			{
+				LOGGER.warn("Invalid table row : name={}, type={}", name, type);
+				return null;
+			}
+	
+			SimpleTable simpleTable = new SimpleTable(name, type);
+			simpleTable.setComment(rs.getString("REMARKS"));
+	
+			return simpleTable;
+		}
+		catch(SQLException e)
+		{
+			return null;
+		}
+	}
+
+	protected TableType toTableType(String type)
+	{
+		if (TABLE_TYPE_TABLE.equalsIgnoreCase(type))
+			return TableType.TABLE;
+		else if (TABLE_TYPE_VIEW.equalsIgnoreCase(type))
+			return TableType.VIEW;
+		else
+			return null;
+	}
+
+	protected void postProcessSimpleTable(Connection cn, DatabaseMetaData metaData, String schema,
+			SimpleTable simpleTable) throws SQLException
+	{
+	}
+
 	protected List<DataType> getDataTypes(Connection cn, DatabaseMetaData metaData) throws DBMetaResolverException
 	{
 		List<DataType> dataTypes = new ArrayList<DataType>();
@@ -211,6 +307,139 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		return table;
 	}
 
+	protected ResultSet getTableResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
+			String tableNamePattern, String[] tableTypes) throws SQLException
+	{
+		if (tableNamePattern == null || tableNamePattern.isEmpty())
+			tableNamePattern = "%";
+	
+		return databaseMetaData.getTables(cn.getCatalog(), schema, tableNamePattern, tableTypes);
+	}
+
+	/**
+	 * 
+	 * @param cn
+	 * @param metaData
+	 * @param schema
+	 * @param tableName
+	 * @param count     为{@code null}获取全部，否则获取指定数目
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	protected Column[] getColumns(Connection cn, DatabaseMetaData metaData, String schema, String tableName,
+			Integer count)
+			throws DBMetaResolverException
+	{
+		ResultSet rs = null;
+	
+		try
+		{
+			rs = getColumnResulSet(cn, metaData, schema, tableName);
+	
+			List<Column> columns = new ArrayList<Column>();
+	
+			while (rs.next())
+			{
+				Column column = readColumn(cn, metaData, schema, tableName, rs);
+				if (addColumn(columns, column))
+					postProcessColumn(cn, metaData, schema, tableName, column);
+	
+				if (count != null && columns.size() == count)
+					break;
+			}
+	
+			return columns.toArray(new Column[columns.size()]);
+		}
+		catch(SQLException e)
+		{
+			throw new DBMetaResolverException(e);
+		}
+		finally
+		{
+			JdbcUtil.closeResultSet(rs);
+		}
+	}
+
+	/**
+	 * @return 返回{@code null}表示未读取到
+	 */
+	protected Column readColumn(Connection cn, DatabaseMetaData metaData, String schema,
+			String tableName, ResultSet rs)
+	{
+		try
+		{
+			String name = rs.getString("COLUMN_NAME");
+	
+			if (StringUtil.isEmpty(name))
+			{
+				LOGGER.warn("Invalid column row : name={}", name);
+				return null;
+			}
+	
+			Column column = new Column(name, rs.getInt("DATA_TYPE"));
+	
+			column.setTypeName(rs.getString("TYPE_NAME"));
+			column.setSize(rs.getInt("COLUMN_SIZE"));
+			column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
+			column.setNullable(DatabaseMetaData.columnNoNulls == rs.getInt("NULLABLE"));
+			column.setComment(rs.getString("REMARKS"));
+			column.setDefaultValue(rs.getString("COLUMN_DEF"));
+			column.setAutoincrement("yes".equalsIgnoreCase(rs.getString("IS_AUTOINCREMENT")));
+			resolveSortable(cn, metaData, schema, tableName, column);
+			resolveSearchableType(cn, metaData, schema, tableName, column);
+	
+			return column;
+		}
+		catch(SQLException e)
+		{
+			return null;
+		}
+	}
+
+	@JDBCCompatiblity("很多驱动程序的值为SearchableType.ALL但实际并不支持LIKE语法（比如：PostgreSQL JDBC 42.2.5），"
+			+ "这里为了兼容，不采用数据库级的SearchableType逻辑")
+	protected void resolveSearchableType(Connection cn, DatabaseMetaData metaData, String schema,
+			String tableName, Column column)
+	{
+		SearchableType searchableType = null;
+
+		int sqlType = column.getType();
+
+		if (Types.CHAR == sqlType || Types.VARCHAR == sqlType || Types.NCHAR == sqlType
+				|| Types.NVARCHAR == sqlType)
+			searchableType = SearchableType.ALL;
+
+		column.setSearchableType(searchableType);
+	}
+
+	@JDBCCompatiblity("某些驱动程序对有些类型不支持排序（比如Oracle对于BLOB类型）")
+	protected void resolveSortable(Connection cn, DatabaseMetaData metaData, String schema,
+			String tableName, Column column)
+	{
+		int sqlType = column.getType();
+	
+		boolean sortable = (Types.BIGINT == sqlType || Types.BIT == sqlType || Types.BOOLEAN == sqlType
+				|| Types.CHAR == sqlType
+				|| Types.DATE == sqlType || Types.DECIMAL == sqlType || Types.DOUBLE == sqlType
+				|| Types.FLOAT == sqlType || Types.INTEGER == sqlType || Types.NCHAR == sqlType
+				|| Types.NUMERIC == sqlType || Types.NVARCHAR == sqlType || Types.REAL == sqlType
+				|| Types.SMALLINT == sqlType || Types.TIME == sqlType || Types.TIMESTAMP == sqlType
+				|| Types.TINYINT == sqlType || Types.VARCHAR == sqlType);
+	
+		column.setSortable(sortable);
+	}
+
+	protected void postProcessColumn(Connection cn, DatabaseMetaData metaData, String schema,
+			String tableName, Column column) throws SQLException
+	{
+	}
+
+	protected ResultSet getColumnResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
+			String tableName) throws SQLException
+	{
+		return databaseMetaData.getColumns(cn.getCatalog(), schema, tableName, "%");
+	}
+
 	/**
 	 * 
 	 * @param cn
@@ -258,51 +487,6 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 			LOGGER.warn("return null primary key object for exception", e1);
 
 			return null;
-		}
-		catch(SQLException e)
-		{
-			throw new DBMetaResolverException(e);
-		}
-		finally
-		{
-			JdbcUtil.closeResultSet(rs);
-		}
-	}
-
-	/**
-	 * 
-	 * @param cn
-	 * @param metaData
-	 * @param schema
-	 * @param tableName
-	 * @param count     为{@code null}获取全部，否则获取指定数目
-	 * @return
-	 * @throws DBMetaResolverException
-	 */
-	protected Column[] getColumns(Connection cn, DatabaseMetaData metaData, String schema, String tableName,
-			Integer count)
-			throws DBMetaResolverException
-	{
-		ResultSet rs = null;
-
-		try
-		{
-			rs = getColumnResulSet(cn, metaData, schema, tableName);
-
-			List<Column> columns = new ArrayList<Column>();
-
-			while (rs.next())
-			{
-				Column column = readColumn(rs);
-				addColumn(columns, column);
-
-				if (count != null && columns.size() == count)
-					break;
-			}
-
-			columns = postProcessColumns(columns);
-
-			return columns.toArray(new Column[columns.size()]);
 		}
 		catch(SQLException e)
 		{
@@ -534,56 +718,10 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		}
 	}
 
-	/**
-	 * 
-	 * @param rs
-	 * @return 返回{@code null}表示未读取到
-	 */
-	protected Column readColumn(ResultSet rs)
-	{
-		try
-		{
-			String name = rs.getString("COLUMN_NAME");
-	
-			if (StringUtil.isEmpty(name))
-			{
-				LOGGER.warn("Invalid column row : name={}", name);
-				return null;
-			}
-
-			Column column = new Column(name, rs.getInt("DATA_TYPE"));
-
-			column.setTypeName(rs.getString("TYPE_NAME"));
-			column.setSize(rs.getInt("COLUMN_SIZE"));
-			column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
-			column.setNullable(DatabaseMetaData.columnNoNulls == rs.getInt("NULLABLE"));
-			column.setComment(rs.getString("REMARKS"));
-			column.setDefaultValue(rs.getString("COLUMN_DEF"));
-			column.setAutoincrement("yes".equalsIgnoreCase(rs.getString("IS_AUTOINCREMENT")));
-
-			return column;
-		}
-		catch(SQLException e)
-		{
-			return null;
-		}
-	}
-
-	private List<Column> postProcessColumns(List<Column> columns)
-	{
-		return columns;
-	}
-
 	protected ResultSet getPrimaryKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
 			String tableName) throws SQLException
 	{
 		return databaseMetaData.getPrimaryKeys(cn.getCatalog(), schema, tableName);
-	}
-
-	protected ResultSet getColumnResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
-			String tableName) throws SQLException
-	{
-		return databaseMetaData.getColumns(cn.getCatalog(), schema, tableName, "%");
 	}
 
 	protected ResultSet getUniqueKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
@@ -603,48 +741,6 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		return databaseMetaData.getTypeInfo();
 	}
 
-	/**
-	 * @param cn
-	 * @param metaData
-	 * @param schema
-	 * @param tableNamePattern 允许为{@code null}
-	 * @return
-	 * @throws DBMetaResolverException
-	 */
-	protected List<SimpleTable> getSimpleTables(Connection cn, DatabaseMetaData metaData, String schema,
-			String tableNamePattern)
-			throws DBMetaResolverException
-	{
-		ResultSet rs = null;
-
-		try
-		{
-			rs = getTableResulSet(cn, metaData, schema, tableNamePattern, TABLE_TYPES);
-
-			List<SimpleTable> simpleTables = new ArrayList<SimpleTable>();
-
-			while (rs.next())
-			{
-				SimpleTable simpleTable = readSimpleTable(rs);
-
-				if (simpleTable != null)
-					simpleTables.add(simpleTable);
-			}
-
-			simpleTables = postProcessSimpleTables(simpleTables);
-
-			return simpleTables;
-		}
-		catch(SQLException e)
-		{
-			throw new DBMetaResolverException(e);
-		}
-		finally
-		{
-			JdbcUtil.closeResultSet(rs);
-		}
-	}
-
 	protected SimpleTable getRandomSimpleTable(Connection cn, DatabaseMetaData metaData, String schema)
 			throws DBMetaResolverException
 	{
@@ -658,7 +754,7 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 
 			while (rs.next())
 			{
-				simpleTable = readSimpleTable(rs);
+				simpleTable = readSimpleTable(cn, metaData, schema, rs);
 
 				if (simpleTable != null)
 					return simpleTable;
@@ -674,58 +770,6 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		{
 			JdbcUtil.closeResultSet(rs);
 		}
-	}
-
-	/**
-	 * @param rs
-	 * @return 返回{@code null}表示未读取到
-	 */
-	protected SimpleTable readSimpleTable(ResultSet rs)
-	{
-		try
-		{
-			String name = rs.getString("TABLE_NAME");
-			TableType type = toTableType(rs.getString("TABLE_TYPE"));
-
-			if (StringUtil.isEmpty(name) || StringUtil.isEmpty(type))
-			{
-				LOGGER.warn("Invalid table row : name={}, type={}", name, type);
-				return null;
-			}
-
-			SimpleTable simpleTable = new SimpleTable(name, type);
-			simpleTable.setComment(rs.getString("REMARKS"));
-
-			return simpleTable;
-		}
-		catch(SQLException e)
-		{
-			return null;
-		}
-	}
-
-	protected TableType toTableType(String type)
-	{
-		if (TABLE_TYPE_TABLE.equalsIgnoreCase(type))
-			return TableType.TABLE;
-		else if (TABLE_TYPE_VIEW.equalsIgnoreCase(type))
-			return TableType.VIEW;
-		else
-			return null;
-	}
-
-	protected List<SimpleTable> postProcessSimpleTables(List<SimpleTable> simpleTables)
-	{
-		return simpleTables;
-	}
-
-	protected ResultSet getTableResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
-			String tableNamePattern, String[] tableTypes) throws SQLException
-	{
-		if (tableNamePattern == null || tableNamePattern.isEmpty())
-			tableNamePattern = "%";
-
-		return databaseMetaData.getTables(cn.getCatalog(), schema, tableNamePattern, tableTypes);
 	}
 
 	protected DatabaseMetaData getDatabaseMetaData(Connection cn) throws DBMetaResolverException

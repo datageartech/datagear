@@ -84,6 +84,13 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	}
 
 	@Override
+	public Column[] getColumns(Connection cn, String tableName) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.getColumns(cn, tableName);
+	}
+
+	@Override
 	public Column getRandomColumn(Connection cn, String tableName) throws DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);

@@ -60,6 +60,16 @@ public interface DBMetaResolver
 	Table getTable(Connection cn, String tableName) throws DBMetaResolverException;
 
 	/**
+	 * 获取指定表的所有{@linkplain Column}。
+	 * 
+	 * @param cn
+	 * @param tableName
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	Column[] getColumns(Connection cn, String tableName) throws DBMetaResolverException;
+
+	/**
 	 * 获取指定表的一个随机{@linkplain Column}。
 	 * 
 	 * @param cn

@@ -46,6 +46,9 @@ public class Column implements Serializable
 	/** 可搜索类型 */
 	private SearchableType searchableType;
 
+	/*** 是否可用于排序的 */
+	private boolean sortable = false;
+
 	public Column()
 	{
 		super();
@@ -178,6 +181,16 @@ public class Column implements Serializable
 		this.searchableType = searchableType;
 	}
 
+	public boolean isSortable()
+	{
+		return sortable;
+	}
+
+	public void setSortable(boolean sortable)
+	{
+		this.sortable = sortable;
+	}
+
 	@Override
 	public String toString()
 	{
@@ -185,6 +198,6 @@ public class Column implements Serializable
 				+ size
 				+ ", decimalDigits=" + decimalDigits + ", nullable=" + nullable + ", comment=" + comment
 				+ ", defaultValue=" + defaultValue + ", autoincrement=" + autoincrement + ", searchableType="
-				+ searchableType + "]";
+				+ searchableType + ", sortable=" + this.sortable + "]";
 	}
 }
