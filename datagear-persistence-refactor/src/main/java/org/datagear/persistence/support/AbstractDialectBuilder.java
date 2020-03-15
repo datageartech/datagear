@@ -2,10 +2,13 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.persistence.support;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import org.datagear.persistence.DialectBuilder;
+import org.datagear.persistence.DialectException;
 
 /**
  * 抽象{@linkplain DialectBuilder}。

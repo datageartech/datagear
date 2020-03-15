@@ -10,7 +10,7 @@ package org.datagear.persistence;
  * @author datagear@163.com
  *
  */
-public class PstValueConverterException extends RuntimeException
+public class PstValueConverterException extends PersistenceException
 {
 	private static final long serialVersionUID = 1L;
 
@@ -32,11 +32,5 @@ public class PstValueConverterException extends RuntimeException
 	public PstValueConverterException(String message, Throwable cause)
 	{
 		super(message, cause);
-	}
-
-	public PstValueConverterException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace)
-	{
-		super(message, cause, enableSuppression, writableStackTrace);
 	}
 }

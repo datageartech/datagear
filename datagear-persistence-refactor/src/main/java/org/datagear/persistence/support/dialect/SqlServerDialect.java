@@ -2,11 +2,11 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence.dialect;
+package org.datagear.persistence.support.dialect;
 
-import org.datagear.persistence.AbstractDialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Sql;
+import org.datagear.persistence.support.AbstractDialect;
 
 /**
  * SqlServer方言。

@@ -2,12 +2,13 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.persistence.support;
 
 import java.sql.Connection;
 
 import org.datagear.connection.URLConnectionSensor;
 import org.datagear.connection.URLSensor;
+import org.datagear.persistence.DialectBuilder;
 
 /**
  * 抽象URL敏感的{@linkplain DialectBuilder}。

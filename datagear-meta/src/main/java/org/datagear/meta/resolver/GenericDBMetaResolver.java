@@ -6,6 +6,7 @@ package org.datagear.meta.resolver;
 
 import java.sql.Connection;
 import java.sql.ResultSetMetaData;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.connection.ConnectionOption;
@@ -14,6 +15,7 @@ import org.datagear.meta.DataType;
 import org.datagear.meta.Database;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
+import org.datagear.meta.resolver.support.MySqlDevotedDBMetaResolver;
 
 /**
  * 通用{@linkplain DBMetaResolver}。
@@ -37,12 +39,10 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	public GenericDBMetaResolver()
 	{
 		super();
-	}
 
-	public GenericDBMetaResolver(List<DevotedDBMetaResolver> devotedDBMetaResolvers)
-	{
-		super();
-		this.devotedDBMetaResolvers = devotedDBMetaResolvers;
+		this.devotedDBMetaResolvers = new ArrayList<DevotedDBMetaResolver>();
+		this.devotedDBMetaResolvers.add(new MySqlDevotedDBMetaResolver());
+		this.devotedDBMetaResolvers.add(new WildcardDevotedDBMetaResolver());
 	}
 
 	public List<DevotedDBMetaResolver> getDevotedDBMetaResolvers()

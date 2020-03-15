@@ -2,26 +2,26 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence.dialect;
+package org.datagear.persistence.support.dialect;
 
-import org.datagear.persistence.AbstractDialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Sql;
+import org.datagear.persistence.support.AbstractDialect;
 
 /**
- * Oracle方言。
+ * Mysql方言。
  * 
  * @author datagear@163.com
  *
  */
-public class OracleDialect extends AbstractDialect
+public class MysqlDialect extends AbstractDialect
 {
-	public OracleDialect()
+	public MysqlDialect()
 	{
 		super();
 	}
 
-	public OracleDialect(String identifierQuote)
+	public MysqlDialect(String identifierQuote)
 	{
 		super(identifierQuote);
 	}
@@ -39,8 +39,6 @@ public class OracleDialect extends AbstractDialect
 
 		Sql orderSql = toOrderSql(orders);
 
-		sql.sql("SELECT T2.* FROM (SELECT T1.*, ROWNUM AS ROWNUM_____ FROM (");
-
 		if (isEmptySql(orderSql))
 		{
 			sql.sql(query);
@@ -49,17 +47,12 @@ public class OracleDialect extends AbstractDialect
 		{
 			sql.sql("SELECT * FROM (");
 			sql.sql(query);
-			sql.sql(") T0 ");
-
-			if (!isEmptySql(orderSql))
-			{
-				sql.sql(" ORDER BY ");
-				sql.sql(orderSql);
-			}
+			sql.sql(") T ");
+			sql.sql(" ORDER BY ");
+			sql.sql(orderSql);
 		}
 
-		sql.sql(") T1 WHERE ROWNUM < " + (startRow + count));
-		sql.sql(") T2 WHERE ROWNUM_____ >= " + startRow);
+		sql.sql(" LIMIT " + (startRow - 1) + ", " + count);
 
 		return sql;
 	}

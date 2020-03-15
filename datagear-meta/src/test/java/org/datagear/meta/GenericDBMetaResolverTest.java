@@ -12,13 +12,9 @@ import static org.hamcrest.core.IsIterableContaining.hasItem;
 import static org.junit.Assert.assertThat;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.datagear.meta.resolver.DevotedDBMetaResolver;
 import org.datagear.meta.resolver.GenericDBMetaResolver;
-import org.datagear.meta.resolver.WildcardDevotedDBMetaResolver;
-import org.datagear.meta.resolver.support.MySqlDevotedDBMetaResolver;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.test.DBTestSupport;
 import org.junit.After;
@@ -40,12 +36,7 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 	public GenericDBMetaResolverTest()
 	{
 		super();
-
-		List<DevotedDBMetaResolver> devotedDBMetaResolvers = new ArrayList<DevotedDBMetaResolver>();
-		devotedDBMetaResolvers.add(new MySqlDevotedDBMetaResolver());
-		devotedDBMetaResolvers.add(new WildcardDevotedDBMetaResolver());
-
-		this.genericDBMetaResolver = new GenericDBMetaResolver(devotedDBMetaResolvers);
+		this.genericDBMetaResolver = new GenericDBMetaResolver();
 	}
 
 	@Before

@@ -18,7 +18,7 @@ import org.datagear.meta.Table;
 public interface PersistenceManager
 {
 	/**
-	 * 插入行。
+	 * 插入行对象。
 	 * 
 	 * @param cn
 	 * @param dialect
@@ -32,7 +32,7 @@ public interface PersistenceManager
 			throws PersistenceException;
 
 	/**
-	 * 更新行。
+	 * 更新行对象。
 	 * 
 	 * @param cn
 	 * @param dialect
@@ -47,7 +47,7 @@ public interface PersistenceManager
 			throws PersistenceException;
 
 	/**
-	 * 删除行。
+	 * 删除行对象。
 	 * 
 	 * @param cn
 	 * @param dialect
@@ -61,7 +61,7 @@ public interface PersistenceManager
 			throws PersistenceException;
 
 	/**
-	 * 删除多行。
+	 * 删除多行对象。
 	 * 
 	 * @param cn
 	 * @param dialect
@@ -87,7 +87,7 @@ public interface PersistenceManager
 	int delete(Connection cn, Dialect dialect, Table table, Query query) throws PersistenceException;
 
 	/**
-	 * 获取行。
+	 * 获取行对象。
 	 * 
 	 * @param cn
 	 * @param table
@@ -95,11 +95,10 @@ public interface PersistenceManager
 	 * @param converter
 	 * @param mapper
 	 * @return
-	 * @throws NotUniqueRowException
 	 * @throws PersistenceException
 	 */
 	Row get(Connection cn, Dialect dialect, Table table, Row param, PstValueConverter converter, RowMapper mapper)
-			throws NotUniqueRowException, PersistenceException;
+			throws PersistenceException;
 
 	/**
 	 * 查询。

@@ -2,11 +2,12 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.persistence.support;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -15,6 +16,15 @@ import org.datagear.connection.ConnectionOption;
 import org.datagear.meta.Column;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.resolver.DBMetaResolver;
+import org.datagear.persistence.Dialect;
+import org.datagear.persistence.DialectBuilder;
+import org.datagear.persistence.DialectException;
+import org.datagear.persistence.DialectSource;
+import org.datagear.persistence.Order;
+import org.datagear.persistence.Sql;
+import org.datagear.persistence.support.dialect.MysqlDialectBuilder;
+import org.datagear.persistence.support.dialect.OracleDialectBuilder;
+import org.datagear.persistence.support.dialect.SqlServerDialectBuilder;
 import org.datagear.util.JdbcUtil;
 
 /**
@@ -38,11 +48,15 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 		super();
 	}
 
-	public DefaultDialectSource(DBMetaResolver dbMetaResolver, List<DialectBuilder> dialectBuilders)
+	public DefaultDialectSource(DBMetaResolver dbMetaResolver)
 	{
 		super();
 		this.dbMetaResolver = dbMetaResolver;
-		this.dialectBuilders = dialectBuilders;
+		this.dialectBuilders = new ArrayList<DialectBuilder>();
+
+		this.dialectBuilders.add(new MysqlDialectBuilder());
+		this.dialectBuilders.add(new OracleDialectBuilder());
+		this.dialectBuilders.add(new SqlServerDialectBuilder());
 	}
 
 	public DBMetaResolver getDbMetaResolver()

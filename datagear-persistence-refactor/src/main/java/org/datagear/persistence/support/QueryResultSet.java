@@ -2,7 +2,7 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.persistence.support;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

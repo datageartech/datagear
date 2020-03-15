@@ -10,7 +10,7 @@ package org.datagear.persistence;
  * @author datagear@163.com
  *
  */
-public class DialectException extends RuntimeException
+public class DialectException extends PersistenceException
 {
 	private static final long serialVersionUID = 1L;
 

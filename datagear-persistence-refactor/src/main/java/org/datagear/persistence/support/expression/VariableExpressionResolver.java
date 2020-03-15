@@ -2,7 +2,7 @@
  * Copyright (c) 2018 datagear.org. All Rights Reserved.
  */
 
-package org.datagear.persistence.expression;
+package org.datagear.persistence.support.expression;
 
 /**
  * 变量表达式解析器。

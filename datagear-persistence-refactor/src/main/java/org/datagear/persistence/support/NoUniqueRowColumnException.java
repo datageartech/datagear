@@ -2,7 +2,9 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.persistence.support;
+
+import org.datagear.persistence.PersistenceException;
 
 /**
  * 找不到能确定唯一行的列异常。

@@ -36,19 +36,7 @@ public class Sql implements Serializable
 	public Sql(String sql)
 	{
 		super();
-
-		if (sql != null && !sql.isEmpty())
-			this.sql.append(sql);
-	}
-
-	/**
-	 * 获取SQL语句。
-	 * 
-	 * @return
-	 */
-	public String getSqlString()
-	{
-		return this.sql.toString();
+		this.sql.append(sql);
 	}
 
 	/**
@@ -59,6 +47,16 @@ public class Sql implements Serializable
 	public StringBuilder getSql()
 	{
 		return sql;
+	}
+
+	/**
+	 * 获取SQL语句。
+	 * 
+	 * @return
+	 */
+	public String getSqlValue()
+	{
+		return this.sql.toString();
 	}
 
 	/**
@@ -151,7 +149,7 @@ public class Sql implements Serializable
 	{
 		resetDelimiterStatus();
 
-		this.sql.append(sql.getSqlString());
+		this.sql.append(sql.getSqlValue());
 		this.paramValues.addAll(sql.getParamValues());
 
 		return this;

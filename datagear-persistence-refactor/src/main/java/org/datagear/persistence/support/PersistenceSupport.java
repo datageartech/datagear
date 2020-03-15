@@ -2,7 +2,7 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.persistence.support;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -20,11 +20,17 @@ import java.util.List;
 
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
+import org.datagear.persistence.Dialect;
+import org.datagear.persistence.PersistenceException;
+import org.datagear.persistence.Row;
+import org.datagear.persistence.RowMapper;
+import org.datagear.persistence.Sql;
+import org.datagear.persistence.SqlParamValue;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcUtil;
 
 /**
- * 抽象持久操作类。
+ * 持久操作支持类。
  * 
  * @author datagear@163.com
  *
@@ -98,7 +104,7 @@ public abstract class PersistenceSupport
 		}
 		finally
 		{
-			org.datagear.persistence.QueryResultSet.close(qrs);
+			org.datagear.persistence.support.QueryResultSet.close(qrs);
 		}
 	}
 
@@ -207,7 +213,7 @@ public abstract class PersistenceSupport
 
 		try
 		{
-			pst = cn.prepareStatement(sql.getSqlString());
+			pst = cn.prepareStatement(sql.getSqlValue());
 		}
 		catch(SQLException e)
 		{
@@ -770,8 +776,10 @@ public abstract class PersistenceSupport
 	 * @param column
 	 * @param columnName
 	 * @return
+	 * @throws SQLException
 	 */
 	protected Object getColumnValueUnknown(Connection cn, ResultSet rs, Column column, String columnName)
+			throws SQLException
 	{
 		throw new UnsupportedOperationException("Get JDBC [" + column.getType() + "] type value is not supported");
 	}

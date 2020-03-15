@@ -2,7 +2,7 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.persistence.support;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +13,16 @@ import java.util.List;
 
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
+import org.datagear.persistence.Dialect;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
+import org.datagear.persistence.PersistenceException;
+import org.datagear.persistence.PersistenceManager;
+import org.datagear.persistence.PstValueConverter;
+import org.datagear.persistence.Query;
+import org.datagear.persistence.Row;
+import org.datagear.persistence.RowMapper;
+import org.datagear.persistence.Sql;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
 
@@ -170,8 +180,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 	@Override
 	public Row get(Connection cn, Dialect dialect, Table table, Row param, PstValueConverter converter,
-			RowMapper mapper)
-			throws NotUniqueRowException, PersistenceException
+			RowMapper mapper) throws PersistenceException
 	{
 		Sql sql = Sql.valueOf().sql("SELECT * FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")
 				.delimit(" AND ");
@@ -192,7 +201,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		List<Row> rows = executeListQuery(cn, table, sql, mapper);
 
 		if (rows.size() > 1)
-			throw new NotUniqueRowException();
+			throw new NonUniqueResultException();
 
 		return rows.get(0);
 	}

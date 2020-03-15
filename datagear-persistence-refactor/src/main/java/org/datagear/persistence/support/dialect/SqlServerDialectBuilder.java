@@ -2,27 +2,27 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence.dialect;
+package org.datagear.persistence.support.dialect;
 
 import java.sql.Connection;
 
 import org.datagear.connection.URLSensor;
-import org.datagear.connection.support.MySqlURLSensor;
-import org.datagear.persistence.AbstractURLSensedDialectBuilder;
+import org.datagear.connection.support.SqlServerURLSensor;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectBuilder;
+import org.datagear.persistence.support.AbstractURLSensedDialectBuilder;
 
 /**
- * Mysql的{@linkplain DialectBuilder}。
+ * SqlServer的{@linkplain DialectBuilder}。
  * 
  * @author datagear@163.com
  *
  */
-public class MysqlDialectBuilder extends AbstractURLSensedDialectBuilder
+public class SqlServerDialectBuilder extends AbstractURLSensedDialectBuilder
 {
-	public MysqlDialectBuilder()
+	public SqlServerDialectBuilder()
 	{
-		super(new MySqlURLSensor());
+		super(new SqlServerURLSensor());
 	}
 
 	@Override
@@ -34,6 +34,6 @@ public class MysqlDialectBuilder extends AbstractURLSensedDialectBuilder
 	@Override
 	public Dialect build(Connection cn)
 	{
-		return new MysqlDialect(getIdentifierQuote(cn));
+		return new SqlServerDialect(getIdentifierQuote(cn));
 	}
 }

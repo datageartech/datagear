@@ -2,22 +2,19 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.persistence.support;
 
 import static org.junit.Assert.assertEquals;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.datagear.meta.Table;
-import org.datagear.meta.resolver.DevotedDBMetaResolver;
 import org.datagear.meta.resolver.GenericDBMetaResolver;
-import org.datagear.meta.resolver.WildcardDevotedDBMetaResolver;
-import org.datagear.meta.resolver.support.MySqlDevotedDBMetaResolver;
-import org.datagear.persistence.dialect.MysqlDialectBuilder;
-import org.datagear.persistence.dialect.OracleDialectBuilder;
-import org.datagear.persistence.dialect.SqlServerDialectBuilder;
+import org.datagear.persistence.Dialect;
+import org.datagear.persistence.DialectSource;
+import org.datagear.persistence.PstValueConverter;
+import org.datagear.persistence.Row;
+import org.datagear.persistence.RowMapper;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.test.DBTestSupport;
 import org.junit.After;
@@ -45,17 +42,8 @@ public class DefaultPersistenceManagerTest extends DBTestSupport
 	{
 		super();
 
-		List<DevotedDBMetaResolver> devotedDBMetaResolvers = new ArrayList<DevotedDBMetaResolver>();
-		devotedDBMetaResolvers.add(new MySqlDevotedDBMetaResolver());
-		devotedDBMetaResolvers.add(new WildcardDevotedDBMetaResolver());
-		this.genericDBMetaResolver = new GenericDBMetaResolver(devotedDBMetaResolvers);
-
-		List<DialectBuilder> dialectBuilders = new ArrayList<DialectBuilder>();
-		dialectBuilders.add(new MysqlDialectBuilder());
-		dialectBuilders.add(new OracleDialectBuilder());
-		dialectBuilders.add(new SqlServerDialectBuilder());
-		this.dialectSource = new DefaultDialectSource(this.genericDBMetaResolver, dialectBuilders);
-
+		this.genericDBMetaResolver = new GenericDBMetaResolver();
+		this.dialectSource = new DefaultDialectSource(this.genericDBMetaResolver);
 		this.defaultPersistenceManager = new DefaultPersistenceManager();
 	}
 

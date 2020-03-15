@@ -2,11 +2,15 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.persistence.support;
 
 import org.datagear.meta.Column;
 import org.datagear.meta.SearchableType;
 import org.datagear.meta.Table;
+import org.datagear.persistence.Dialect;
+import org.datagear.persistence.Order;
+import org.datagear.persistence.Query;
+import org.datagear.persistence.Sql;
 import org.datagear.util.JdbcUtil;
 
 /**
