@@ -9,8 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.meta.Column;
+import org.datagear.meta.resolver.DBMetaResolver;
 
 /**
  * 抽象导入服务。
@@ -19,30 +19,30 @@ import org.datagear.dbinfo.DatabaseInfoResolver;
  *
  * @param <T>
  */
-public abstract class AbstractDevotedDbInfoAwareDataExchangeService<T extends DataExchange>
+public abstract class AbstractDevotedDBMetaDataExchangeService<T extends DataExchange>
 		extends AbstractDevotedDataExchangeService<T>
 {
-	private DatabaseInfoResolver databaseInfoResolver;
+	private DBMetaResolver dbMetaResolver;
 
-	public AbstractDevotedDbInfoAwareDataExchangeService()
+	public AbstractDevotedDBMetaDataExchangeService()
 	{
 		super();
 	}
 
-	public AbstractDevotedDbInfoAwareDataExchangeService(DatabaseInfoResolver databaseInfoResolver)
+	public AbstractDevotedDBMetaDataExchangeService(DBMetaResolver dbMetaResolver)
 	{
 		super();
-		this.databaseInfoResolver = databaseInfoResolver;
+		this.dbMetaResolver = dbMetaResolver;
 	}
 
-	public DatabaseInfoResolver getDatabaseInfoResolver()
+	public DBMetaResolver getDBMetaResolver()
 	{
-		return databaseInfoResolver;
+		return dbMetaResolver;
 	}
 
-	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
+	public void setDBMetaResolver(DBMetaResolver dbMetaResolver)
 	{
-		this.databaseInfoResolver = databaseInfoResolver;
+		this.dbMetaResolver = dbMetaResolver;
 	}
 
 	/**
@@ -53,9 +53,9 @@ public abstract class AbstractDevotedDbInfoAwareDataExchangeService<T extends Da
 	 * @return
 	 * @throws SQLException
 	 */
-	protected List<ColumnInfo> getColumnInfos(Connection cn, ResultSet rs) throws SQLException
+	protected List<Column> getColumns(Connection cn, ResultSet rs) throws SQLException
 	{
-		return super.getColumnInfos(cn, rs, this.databaseInfoResolver);
+		return super.getColumns(cn, rs, this.dbMetaResolver);
 	}
 
 	/**
@@ -66,9 +66,9 @@ public abstract class AbstractDevotedDbInfoAwareDataExchangeService<T extends Da
 	 * @return
 	 * @throws TableNotFoundException
 	 */
-	protected List<ColumnInfo> getColumnInfos(Connection cn, String table) throws TableNotFoundException
+	protected List<Column> getColumns(Connection cn, String table) throws TableNotFoundException
 	{
-		return super.getColumnInfos(cn, table, this.databaseInfoResolver);
+		return super.getColumns(cn, table, this.dbMetaResolver);
 	}
 
 	/**
@@ -86,9 +86,9 @@ public abstract class AbstractDevotedDbInfoAwareDataExchangeService<T extends Da
 	 * @throws TableNotFoundException
 	 * @throws ColumnNotFoundException
 	 */
-	protected List<ColumnInfo> getColumnInfos(Connection cn, String table, List<String> columnNames,
+	protected List<Column> getColumns(Connection cn, String table, List<String> columnNames,
 			boolean nullIfColumnNotFound) throws TableNotFoundException, ColumnNotFoundException
 	{
-		return getColumnInfos(cn, table, columnNames, nullIfColumnNotFound, this.databaseInfoResolver);
+		return getColumns(cn, table, columnNames, nullIfColumnNotFound, this.dbMetaResolver);
 	}
 }

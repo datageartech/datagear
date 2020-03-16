@@ -12,15 +12,15 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
+import org.datagear.dataexchange.AbstractDevotedDBMetaDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.meta.Column;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
 
 /**
@@ -29,16 +29,16 @@ import org.datagear.util.JdbcUtil;
  * @author datagear@163.com
  *
  */
-public class CsvDataExportService extends AbstractDevotedDbInfoAwareDataExchangeService<CsvDataExport>
+public class CsvDataExportService extends AbstractDevotedDBMetaDataExchangeService<CsvDataExport>
 {
 	public CsvDataExportService()
 	{
 		super();
 	}
 
-	public CsvDataExportService(DatabaseInfoResolver databaseInfoResolver)
+	public CsvDataExportService(DBMetaResolver dbMetaResolver)
 	{
-		super(databaseInfoResolver);
+		super(dbMetaResolver);
 	}
 
 	@Override
@@ -62,12 +62,12 @@ public class CsvDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 
 		ResultSet rs = dataExchange.getQuery().execute(cn);
 
-		List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);
-		int columnCount = columnInfos.size();
+		List<Column> columns = getColumns(cn, rs);
+		int columnCount = columns.size();
 
 		CSVPrinter csvPrinter = buildCSVPrinter(csvWriter);
 
-		writeColumnInfos(csvPrinter, columnInfos);
+		writeColumns(csvPrinter, columns);
 
 		long row = 0;
 
@@ -77,13 +77,13 @@ public class CsvDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 
 			for (int i = 0; i < columnCount; i++)
 			{
-				ColumnInfo columnInfo = columnInfos.get(i);
+				Column column = columns.get(i);
 
 				String value = null;
 
 				try
 				{
-					value = getStringValue(cn, rs, i + 1, columnInfo.getType(), exportContext.getDataFormatContext());
+					value = getStringValue(cn, rs, i + 1, column.getType(), exportContext.getDataFormatContext());
 				}
 				catch (Throwable t)
 				{
@@ -92,7 +92,7 @@ public class CsvDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 						value = null;
 
 						if (listener != null)
-							listener.onSetNullTextValue(exportContext.getDataIndex(), columnInfo.getName(),
+							listener.onSetNullTextValue(exportContext.getDataIndex(), column.getName(),
 									wrapToDataExchangeException(t));
 					}
 					else
@@ -130,12 +130,12 @@ public class CsvDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 		}
 	}
 
-	protected void writeColumnInfos(CSVPrinter csvPrinter, List<ColumnInfo> columnInfos) throws DataExchangeException
+	protected void writeColumns(CSVPrinter csvPrinter, List<Column> columns) throws DataExchangeException
 	{
 		try
 		{
-			for (ColumnInfo columnInfo : columnInfos)
-				csvPrinter.print(columnInfo.getName());
+			for (Column column : columns)
+				csvPrinter.print(column.getName());
 
 			csvPrinter.println();
 		}

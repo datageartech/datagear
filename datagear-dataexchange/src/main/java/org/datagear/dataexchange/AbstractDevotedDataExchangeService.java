@@ -30,13 +30,12 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.codec.DecoderException;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.meta.Column;
+import org.datagear.meta.resolver.DBMetaResolver;
+import org.datagear.persistence.support.PersistenceSupport;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.ResourceFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 抽象{@linkplain DevotedDataExchangeService}。
@@ -45,11 +44,9 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T>
  */
-public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
+public abstract class AbstractDevotedDataExchangeService<T extends DataExchange> extends PersistenceSupport
 		implements DevotedDataExchangeService<T>
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDevotedDataExchangeService.class);
-
 	public AbstractDevotedDataExchangeService()
 	{
 		super();
@@ -251,40 +248,6 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
-	 * 静默回滚。
-	 * 
-	 * @param cn
-	 */
-	protected void rollbackSilently(Connection cn)
-	{
-		try
-		{
-			JdbcUtil.rollbackIfSupports(cn);
-		}
-		catch (Throwable t)
-		{
-			LOGGER.error("rollback connection exception", t);
-		}
-	}
-
-	/**
-	 * 静默提交。
-	 * 
-	 * @param cn
-	 */
-	protected void commitSilently(Connection cn)
-	{
-		try
-		{
-			JdbcUtil.commitIfSupports(cn);
-		}
-		catch (Throwable t)
-		{
-			LOGGER.error("commit connection exception", t);
-		}
-	}
-
-	/**
 	 * 获取资源。
 	 * 
 	 * @param <R>
@@ -329,16 +292,16 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * 
 	 * @param cn
 	 * @param table
-	 * @param columnInfos
+	 * @param columns
 	 * @return
 	 * @throws DataExchangeException
 	 */
-	protected String buildInsertPreparedSqlUnchecked(Connection cn, String table, List<ColumnInfo> columnInfos)
+	protected String buildInsertPreparedSqlUnchecked(Connection cn, String table, List<Column> columns)
 			throws DataExchangeException
 	{
 		try
 		{
-			return buildInsertPreparedSql(cn, table, columnInfos);
+			return buildInsertPreparedSql(cn, table, columns);
 		}
 		catch (SQLException e)
 		{
@@ -351,12 +314,11 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * 
 	 * @param cn
 	 * @param table
-	 * @param columnInfos
+	 * @param columns
 	 * @return
 	 * @throws SQLException
 	 */
-	protected String buildInsertPreparedSql(Connection cn, String table, List<ColumnInfo> columnInfos)
-			throws SQLException
+	protected String buildInsertPreparedSql(Connection cn, String table, List<Column> columns) throws SQLException
 	{
 		String quote = cn.getMetaData().getIdentifierQuoteString();
 
@@ -364,14 +326,14 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		sql.append(quote).append(table).append(quote);
 		sql.append(" (");
 
-		int size = columnInfos.size();
+		int size = columns.size();
 
 		for (int i = 0; i < size; i++)
 		{
 			if (i != 0)
 				sql.append(',');
 
-			sql.append(quote).append(columnInfos.get(i).getName()).append(quote);
+			sql.append(quote).append(columns.get(i).getName()).append(quote);
 		}
 
 		sql.append(") VALUES (");
@@ -428,18 +390,18 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * 如果没有{@code null}列信息，将返回原列值列表。
 	 * </p>
 	 * 
-	 * @param rawColumnInfos
-	 * @param noNullColumnInfos
+	 * @param rawColumns
+	 * @param noNullColumns
 	 * @param columnValues
 	 * @return
 	 */
-	protected <G> List<G> removeNullColumnValues(List<ColumnInfo> rawColumnInfos, List<ColumnInfo> noNullColumnInfos,
+	protected <G> List<G> removeNullColumnValues(List<Column> rawColumns, List<Column> noNullColumns,
 			List<G> columnValues)
 	{
-		if (noNullColumnInfos == rawColumnInfos || noNullColumnInfos.size() == rawColumnInfos.size())
+		if (noNullColumns == rawColumns || noNullColumns.size() == rawColumns.size())
 			return columnValues;
 
-		List<G> newColumnValues = new ArrayList<G>(noNullColumnInfos.size());
+		List<G> newColumnValues = new ArrayList<>(noNullColumns.size());
 
 		for (G ele : columnValues)
 		{
@@ -453,21 +415,21 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	}
 
 	/**
-	 * 移除{@linkplain ColumnInfo}列表中的{@code null}元素。
+	 * 移除{@linkplain Column}列表中的{@code null}元素。
 	 * <p>
 	 * 如果没有{@code null}元素，将返回原列表。
 	 * </p>
 	 * 
-	 * @param columnInfos
+	 * @param columns
 	 * @return
 	 */
-	protected List<ColumnInfo> removeNullColumnInfos(List<ColumnInfo> columnInfos)
+	protected List<Column> removeNullColumns(List<Column> columns)
 	{
 		boolean noNull = true;
 
-		for (ColumnInfo columnInfo : columnInfos)
+		for (Column column : columns)
 		{
-			if (columnInfo == null)
+			if (column == null)
 			{
 				noNull = false;
 				break;
@@ -475,14 +437,14 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		}
 
 		if (noNull)
-			return columnInfos;
+			return columns;
 
-		List<ColumnInfo> list = new ArrayList<ColumnInfo>(columnInfos.size());
+		List<Column> list = new ArrayList<>(columns.size());
 
-		for (ColumnInfo columnInfo : columnInfos)
+		for (Column column : columns)
 		{
-			if (columnInfo != null)
-				list.add(columnInfo);
+			if (column != null)
+				list.add(column);
 		}
 
 		return list;
@@ -493,19 +455,19 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * 
 	 * @param cn
 	 * @param table
-	 * @param databaseInfoResolver
+	 * @param dbMetaResolver
 	 * @return
 	 * @throws TableNotFoundException
 	 */
-	protected List<ColumnInfo> getColumnInfos(Connection cn, String table, DatabaseInfoResolver databaseInfoResolver)
+	protected List<Column> getColumns(Connection cn, String table, DBMetaResolver dbMetaResolver)
 			throws TableNotFoundException
 	{
-		ColumnInfo[] allColumnInfos = databaseInfoResolver.getColumnInfos(cn, table);
+		Column[] allColumns = dbMetaResolver.getColumns(cn, table);
 
-		if (allColumnInfos == null || allColumnInfos.length == 0)
+		if (allColumns == null || allColumns.length == 0)
 			throw new TableNotFoundException(table);
 
-		return Arrays.asList(allColumnInfos);
+		return Arrays.asList(allColumns);
 	}
 
 	/**
@@ -519,46 +481,46 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param table
 	 * @param columnNames
 	 * @param nullIfColumnNotFound
-	 * @param databaseInfoResolver
+	 * @param dbMetaResolver
 	 * @return
 	 * @throws TableNotFoundException
 	 * @throws ColumnNotFoundException
 	 */
-	protected List<ColumnInfo> getColumnInfos(Connection cn, String table, List<String> columnNames,
-			boolean nullIfColumnNotFound, DatabaseInfoResolver databaseInfoResolver)
+	protected List<Column> getColumns(Connection cn, String table, List<String> columnNames,
+			boolean nullIfColumnNotFound, DBMetaResolver dbMetaResolver)
 			throws TableNotFoundException, ColumnNotFoundException
 	{
 		int size = columnNames.size();
 
-		List<ColumnInfo> columnInfos = new ArrayList<ColumnInfo>(size);
+		List<Column> columns = new ArrayList<>(size);
 
-		ColumnInfo[] allColumnInfos = databaseInfoResolver.getColumnInfos(cn, table);
+		Column[] allColumns = dbMetaResolver.getColumns(cn, table);
 
-		if (allColumnInfos == null || allColumnInfos.length == 0)
+		if (allColumns == null || allColumns.length == 0)
 			throw new TableNotFoundException(table);
 
 		for (int i = 0; i < size; i++)
 		{
 			String columnName = columnNames.get(i);
 
-			ColumnInfo columnInfo = null;
+			Column column = null;
 
-			for (int j = 0; j < allColumnInfos.length; j++)
+			for (int j = 0; j < allColumns.length; j++)
 			{
-				if (allColumnInfos[j].getName().equals(columnName))
+				if (allColumns[j].getName().equals(columnName))
 				{
-					columnInfo = allColumnInfos[j];
+					column = allColumns[j];
 					break;
 				}
 			}
 
-			if (!nullIfColumnNotFound && columnInfo == null)
+			if (!nullIfColumnNotFound && column == null)
 				throw new ColumnNotFoundException(table, columnName);
 
-			columnInfos.add(columnInfo);
+			columns.add(column);
 		}
 
-		return columnInfos;
+		return columns;
 	}
 
 	/**
@@ -566,20 +528,19 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * 
 	 * @param cn
 	 * @param rs
-	 * @param databaseInfoResolver
+	 * @param dbMetaResolver
 	 * @return
 	 * @throws SQLException
 	 */
-	protected List<ColumnInfo> getColumnInfos(Connection cn, ResultSet rs, DatabaseInfoResolver databaseInfoResolver)
-			throws SQLException
+	protected List<Column> getColumns(Connection cn, ResultSet rs, DBMetaResolver dbMetaResolver) throws SQLException
 	{
 		ResultSetMetaData resultSetMetaData = rs.getMetaData();
-		ColumnInfo[] columnInfos = databaseInfoResolver.getColumnInfos(cn, resultSetMetaData);
+		Column[] columns = dbMetaResolver.getColumns(cn, resultSetMetaData);
 
-		List<ColumnInfo> list = new ArrayList<ColumnInfo>(columnInfos.length);
+		List<Column> list = new ArrayList<>(columns.length);
 
-		for (ColumnInfo columnInfo : columnInfos)
-			list.add(columnInfo);
+		for (Column column : columns)
+			list.add(column);
 
 		return list;
 	}
@@ -590,16 +551,16 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * 没找到将返回{@code null}。
 	 * </p>
 	 * 
-	 * @param columnInfos
+	 * @param columns
 	 * @param name
 	 * @return
 	 */
-	protected ColumnInfo findColumnInfo(Collection<? extends ColumnInfo> columnInfos, String name)
+	protected Column findColumn(Collection<? extends Column> columns, String name)
 	{
-		for (ColumnInfo columnInfo : columnInfos)
+		for (Column column : columns)
 		{
-			if (columnInfo.getName().equals(name))
-				return columnInfo;
+			if (column.getName().equals(name))
+				return column;
 		}
 
 		return null;
@@ -1344,7 +1305,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * 
 	 * @param cn
 	 * @param st
-	 * @param columnInfos
+	 * @param columns
 	 * @param columnValues
 	 * @param dataIndex
 	 * @param nullForIllegalColumnValue
@@ -1354,7 +1315,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @return
 	 * @throws DataExchangeException
 	 */
-	protected boolean importValueData(Connection cn, PreparedStatement st, List<ColumnInfo> columnInfos,
+	protected boolean importValueData(Connection cn, PreparedStatement st, List<Column> columns,
 			List<? extends Object> columnValues, DataIndex dataIndex, boolean nullForIllegalColumnValue,
 			ExceptionResolve exceptionResolve, DataFormatContext dataFormatContext, ValueDataImportListener listener)
 			throws DataExchangeException
@@ -1363,7 +1324,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 
 		try
 		{
-			setImportParameterValues(cn, st, columnInfos, columnValues, dataIndex, nullForIllegalColumnValue,
+			setImportParameterValues(cn, st, columns, columnValues, dataIndex, nullForIllegalColumnValue,
 					dataFormatContext, listener);
 
 			executeImportPreparedStatement(st, dataIndex);
@@ -1420,7 +1381,7 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * 
 	 * @param cn
 	 * @param st
-	 * @param columnInfos
+	 * @param columns
 	 * @param columnValues
 	 * @param dataIndex
 	 * @param nullForIllegalColumnValue
@@ -1428,18 +1389,18 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 	 * @param listener
 	 * @throws SetImportColumnValueException
 	 */
-	protected void setImportParameterValues(Connection cn, PreparedStatement st, List<ColumnInfo> columnInfos,
+	protected void setImportParameterValues(Connection cn, PreparedStatement st, List<Column> columns,
 			List<? extends Object> columnValues, DataIndex dataIndex, boolean nullForIllegalColumnValue,
 			DataFormatContext dataFormatContext, ValueDataImportListener listener) throws SetImportColumnValueException
 	{
-		int columnCount = columnInfos.size();
+		int columnCount = columns.size();
 		int columnValueCount = columnValues.size();
 
 		for (int i = 0; i < columnCount; i++)
 		{
-			ColumnInfo columnInfo = columnInfos.get(i);
-			String columnName = columnInfo.getName();
-			int sqlType = columnInfo.getType();
+			Column column = columns.get(i);
+			String columnName = column.getName();
+			int sqlType = column.getType();
 			int parameterIndex = i + 1;
 			Object rawValue = (columnValues == null || columnValueCount - 1 < i ? null : columnValues.get(i));
 

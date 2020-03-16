@@ -12,13 +12,14 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
+import org.datagear.dataexchange.AbstractDevotedDBMetaDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.meta.Column;
+import org.datagear.meta.PrimaryKey;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
 
 /**
@@ -27,7 +28,7 @@ import org.datagear.util.JdbcUtil;
  * @author datagear@163.com
  *
  */
-public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchangeService<SqlDataExport>
+public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeService<SqlDataExport>
 {
 	public static final String LINE_SEPARATOR = "\r\n";
 
@@ -36,9 +37,9 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 		super();
 	}
 
-	public SqlDataExportService(DatabaseInfoResolver databaseInfoResolver)
+	public SqlDataExportService(DBMetaResolver dbMetaResolver)
 	{
-		super(databaseInfoResolver);
+		super(dbMetaResolver);
 	}
 
 	@Override
@@ -58,9 +59,9 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 		JdbcUtil.setReadonlyIfSupports(cn, true);
 
 		ResultSet rs = dataExchange.getQuery().execute(cn);
-		List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);
+		List<Column> columns = getColumns(cn, rs);
 
-		writeRecords(dataExchange, cn, columnInfos, rs, sqlWriter, exportContext);
+		writeRecords(dataExchange, cn, columns, rs, sqlWriter, exportContext);
 	}
 
 	/**
@@ -68,23 +69,23 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 	 * 
 	 * @param dataExchange
 	 * @param cn
-	 * @param columnInfos
+	 * @param columns
 	 * @param rs
 	 * @param out
 	 * @param exportContext
 	 */
-	protected void writeRecords(SqlDataExport dataExchange, Connection cn, List<ColumnInfo> columnInfos, ResultSet rs,
+	protected void writeRecords(SqlDataExport dataExchange, Connection cn, List<Column> columns, ResultSet rs,
 			Writer out, IndexFormatDataExchangeContext exportContext) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
 		SqlDataExportOption exportOption = dataExchange.getExportOption();
-		int columnCount = columnInfos.size();
+		int columnCount = columns.size();
 
 		DatabaseMetaData metaData = cn.getMetaData();
 		String quote = metaData.getIdentifierQuoteString();
 
 		if (exportOption.isExportCreationSql())
-			writeCreationSql(dataExchange, cn, columnInfos, rs, quote, out, exportContext);
+			writeCreationSql(dataExchange, cn, columns, rs, quote, out, exportContext);
 
 		long row = 0;
 
@@ -100,13 +101,13 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 
 			for (int i = 0; i < columnCount; i++)
 			{
-				ColumnInfo columnInfo = columnInfos.get(i);
+				Column column = columns.get(i);
 
 				if (i > 0)
 					out.write(",");
 
 				out.write(quote);
-				out.write(columnInfo.getName());
+				out.write(column.getName());
 				out.write(quote);
 			}
 
@@ -114,13 +115,13 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 
 			for (int i = 0; i < columnCount; i++)
 			{
-				ColumnInfo columnInfo = columnInfos.get(i);
+				Column column = columns.get(i);
 
 				String value = null;
 
 				try
 				{
-					value = getStringValue(cn, rs, i + 1, columnInfo.getType(), exportContext.getDataFormatContext());
+					value = getStringValue(cn, rs, i + 1, column.getType(), exportContext.getDataFormatContext());
 				}
 				catch (Throwable t)
 				{
@@ -129,7 +130,7 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 						value = null;
 
 						if (listener != null)
-							listener.onSetNullTextValue(exportContext.getDataIndex(), columnInfo.getName(),
+							listener.onSetNullTextValue(exportContext.getDataIndex(), column.getName(),
 									wrapToDataExchangeException(t));
 					}
 					else
@@ -143,7 +144,7 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 				{
 					out.write("NULL");
 				}
-				else if (isSqlStringType(columnInfo.getType()))
+				else if (isSqlStringType(column.getType()))
 				{
 					out.write('\'');
 					out.write(escapeSqlStringValue(value));
@@ -169,15 +170,15 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 	 * 
 	 * @param dataExchange
 	 * @param cn
-	 * @param columnInfos
+	 * @param columns
 	 * @param rs
 	 * @param quote
 	 * @param out
 	 * @param exportContext
 	 * @throws Throwable
 	 */
-	protected void writeCreationSql(SqlDataExport dataExchange, Connection cn, List<ColumnInfo> columnInfos,
-			ResultSet rs, String quote, Writer out, IndexFormatDataExchangeContext exportContext) throws Throwable
+	protected void writeCreationSql(SqlDataExport dataExchange, Connection cn, List<Column> columns, ResultSet rs,
+			String quote, Writer out, IndexFormatDataExchangeContext exportContext) throws Throwable
 	{
 		out.write("CREATE TABLE ");
 		out.write(quote);
@@ -187,37 +188,36 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 		out.write('(');
 		out.write(LINE_SEPARATOR);
 
-		String[] primaryColumnNames = getDatabaseInfoResolver().getPrimaryKeyColumnNames(cn,
-				dataExchange.getTableName());
-		List<String> filterPkNames = filterPrimaryColumnNames(primaryColumnNames, columnInfos);
+		PrimaryKey primaryKey = getDBMetaResolver().getPrimaryKey(cn, dataExchange.getTableName());
+		List<String> filterPkNames = filterPrimaryColumnNames(primaryKey, columns);
 
-		for (int i = 0, len = columnInfos.size(); i < len; i++)
+		for (int i = 0, len = columns.size(); i < len; i++)
 		{
-			ColumnInfo columnInfo = columnInfos.get(i);
+			Column column = columns.get(i);
 
 			out.write("  ");
 			out.write(quote);
-			out.write(columnInfo.getName());
+			out.write(column.getName());
 			out.write(quote);
 			out.write(' ');
 
-			out.write(columnInfo.getTypeName());
+			out.write(column.getTypeName());
 
-			if (columnInfo.getSize() > 0)
+			if (column.getSize() > 0)
 			{
 				out.write('(');
-				out.write(Integer.toString(columnInfo.getSize()));
+				out.write(Integer.toString(column.getSize()));
 
-				if (columnInfo.getDecimalDigits() > 0)
+				if (column.getDecimalDigits() > 0)
 				{
 					out.write(',');
-					out.write(Integer.toString(columnInfo.getDecimalDigits()));
+					out.write(Integer.toString(column.getDecimalDigits()));
 				}
 
 				out.write(')');
 			}
 
-			if (!columnInfo.isNullable())
+			if (!column.isNullable())
 				out.write(" NOT NULL");
 
 			if (i < len - 1)
@@ -253,30 +253,32 @@ public class SqlDataExportService extends AbstractDevotedDbInfoAwareDataExchange
 	}
 
 	/**
-	 * 过滤主键列名，仅保留在{@code columnInfos}包含的。
+	 * 过滤主键列名，仅保留在{@code columns}包含的。
 	 * 
-	 * @param primaryColumnNames
-	 * @param columnInfos
+	 * @param primaryKey
+	 * @param columns
 	 * @return
 	 */
-	protected List<String> filterPrimaryColumnNames(String[] primaryColumnNames, List<ColumnInfo> columnInfos)
+	protected List<String> filterPrimaryColumnNames(PrimaryKey primaryKey, List<Column> columns)
 	{
-		List<String> names = new ArrayList<String>(3);
+		List<String> names = new ArrayList<>();
 
-		if (primaryColumnNames == null)
+		if (primaryKey == null)
 			return names;
 
-		for (int i = 0; i < primaryColumnNames.length; i++)
+		String[] pkColumnNames = primaryKey.getColumnNames();
+
+		for (int i = 0; i < pkColumnNames.length; i++)
 		{
-			if (columnInfos == null)
-				names.add(primaryColumnNames[i]);
+			if (columns == null)
+				names.add(pkColumnNames[i]);
 			else
 			{
-				for (ColumnInfo columnInfo : columnInfos)
+				for (Column column : columns)
 				{
-					if (columnInfo.getName().equals(primaryColumnNames[i]))
+					if (column.getName().equals(pkColumnNames[i]))
 					{
-						names.add(primaryColumnNames[i]);
+						names.add(pkColumnNames[i]);
 						break;
 					}
 				}

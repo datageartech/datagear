@@ -11,6 +11,7 @@ import java.util.List;
 import org.datagear.meta.Column;
 import org.datagear.meta.DataType;
 import org.datagear.meta.Database;
+import org.datagear.meta.PrimaryKey;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 
@@ -88,6 +89,16 @@ public interface DBMetaResolver
 	 * @throws DBMetaResolverException
 	 */
 	Column[] getColumns(Connection cn, ResultSetMetaData resultSetMetaData) throws DBMetaResolverException;
+
+	/**
+	 * 获取{@linkplain PrimaryKey}。
+	 * 
+	 * @param cn
+	 * @param tableName
+	 * @return 返回{@code null}表示无主键
+	 * @throws DBMetaResolverException
+	 */
+	PrimaryKey getPrimaryKey(Connection cn, String tableName) throws DBMetaResolverException;
 
 	/**
 	 * 获取所有{@linkplain DataType}。

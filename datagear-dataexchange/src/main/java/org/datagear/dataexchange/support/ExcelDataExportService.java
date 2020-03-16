@@ -23,14 +23,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
+import org.datagear.dataexchange.AbstractDevotedDBMetaDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataFormatContext;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.TextDataExportListener;
 import org.datagear.dataexchange.TextDataExportOption;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.meta.Column;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.ConnectionFactory;
 
@@ -40,16 +40,16 @@ import org.datagear.util.resource.ConnectionFactory;
  * @author datagear@163.com
  *
  */
-public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchangeService<ExcelDataExport>
+public class ExcelDataExportService extends AbstractDevotedDBMetaDataExchangeService<ExcelDataExport>
 {
 	public ExcelDataExportService()
 	{
 		super();
 	}
 
-	public ExcelDataExportService(DatabaseInfoResolver databaseInfoResolver)
+	public ExcelDataExportService(DBMetaResolver dbMetaResolver)
 	{
-		super(databaseInfoResolver);
+		super(dbMetaResolver);
 	}
 
 	@Override
@@ -70,9 +70,9 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 		JdbcUtil.setReadonlyIfSupports(cn, true);
 
 		ResultSet rs = dataExchange.getQuery().execute(cn);
-		List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);
+		List<Column> columns = getColumns(cn, rs);
 
-		writeRecords(dataExchange, cn, columnInfos, rs, out, exportContext);
+		writeRecords(dataExchange, cn, columns, rs, out, exportContext);
 	}
 
 	/**
@@ -80,18 +80,18 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 	 * 
 	 * @param dataExchange
 	 * @param cn
-	 * @param columnInfos
+	 * @param columns
 	 * @param rs
 	 * @param out
 	 * @param exportContext
 	 * @throws Throwable
 	 */
-	protected void writeRecords(ExcelDataExport dataExchange, Connection cn, List<ColumnInfo> columnInfos, ResultSet rs,
+	protected void writeRecords(ExcelDataExport dataExchange, Connection cn, List<Column> columns, ResultSet rs,
 			OutputStream out, ExcelDataExportContext exportContext) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
 		TextDataExportOption exportOption = dataExchange.getExportOption();
-		int columnCount = columnInfos.size();
+		int columnCount = columns.size();
 
 		int maxRows = SpreadsheetVersion.EXCEL2007.getMaxRows();
 
@@ -120,12 +120,12 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 
 				for (int i = 0; i < columnCount; i++)
 				{
-					ColumnInfo columnInfo = columnInfos.get(i);
+					Column column = columns.get(i);
 
 					Cell cell = titleRow.createCell(i);
 
 					cell.setCellType(CellType.STRING);
-					cell.setCellValue(columnInfo.getName());
+					cell.setCellValue(column.getName());
 				}
 
 				rowIndex++;
@@ -137,11 +137,11 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 
 			for (int i = 0; i < columnCount; i++)
 			{
-				ColumnInfo columnInfo = columnInfos.get(i);
+				Column column = columns.get(i);
 
 				Cell cell = row.createCell(i);
 
-				setCellValue(dataExchange, cn, rs, i + 1, columnInfo, exportOption, exportContext, wb, creationHelper,
+				setCellValue(dataExchange, cn, rs, i + 1, column, exportOption, exportContext, wb, creationHelper,
 						cell);
 			}
 
@@ -163,7 +163,7 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 	 * @param cn
 	 * @param rs
 	 * @param columnIndex
-	 * @param columnInfo
+	 * @param column
 	 * @param exportOption
 	 * @param exportContext
 	 * @param workbook
@@ -172,7 +172,7 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 	 * @throws Throwable
 	 */
 	protected void setCellValue(ExcelDataExport dataExchange, Connection cn, ResultSet rs, int columnIndex,
-			ColumnInfo columnInfo, TextDataExportOption exportOption, ExcelDataExportContext exportContext,
+			Column column, TextDataExportOption exportOption, ExcelDataExportContext exportContext,
 			SXSSFWorkbook workbook, CreationHelper creationHelper, Cell cell) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
@@ -182,7 +182,7 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 
 		try
 		{
-			value = getValue(cn, rs, columnIndex, columnInfo.getType());
+			value = getValue(cn, rs, columnIndex, column.getType());
 		}
 		catch (Throwable t)
 		{
@@ -191,7 +191,7 @@ public class ExcelDataExportService extends AbstractDevotedDbInfoAwareDataExchan
 				value = null;
 
 				if (listener != null)
-					listener.onSetNullTextValue(exportContext.getDataIndex(), columnInfo.getName(),
+					listener.onSetNullTextValue(exportContext.getDataIndex(), column.getName(),
 							wrapToDataExchangeException(t));
 			}
 			else

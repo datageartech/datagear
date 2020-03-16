@@ -28,6 +28,8 @@ import org.datagear.persistence.Sql;
 import org.datagear.persistence.SqlParamValue;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.JdbcUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 持久操作支持类。
@@ -35,8 +37,10 @@ import org.datagear.util.JdbcUtil;
  * @author datagear@163.com
  *
  */
-public abstract class PersistenceSupport
+public class PersistenceSupport
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PersistenceSupport.class);
+
 	/**
 	 * 转换为引号名字。
 	 * 
@@ -58,17 +62,19 @@ public abstract class PersistenceSupport
 	 * @param cn
 	 * @param query
 	 * @param mapper
-	 * @param startRow 起始行号，以1开头
-	 * @param count    读取行数，如果{@code <0}，表示读取全部
+	 * @param startRow
+	 *            起始行号，以1开头
+	 * @param count
+	 *            读取行数，如果{@code <0}，表示读取全部
 	 * @return
 	 */
-	public List<Row> executeListQuery(Connection cn, Table table, Sql sql, RowMapper mapper, int startRow,
-			int count) throws PersistenceException
+	public List<Row> executeListQuery(Connection cn, Table table, Sql sql, RowMapper mapper, int startRow, int count)
+			throws PersistenceException
 	{
 		if (startRow < 1)
 			startRow = 1;
 
-		List<Row> resultList = new ArrayList<Row>();
+		List<Row> resultList = new ArrayList<>();
 
 		QueryResultSet qrs = null;
 
@@ -98,7 +104,7 @@ public abstract class PersistenceSupport
 
 			return resultList;
 		}
-		catch(SQLException e)
+		catch (SQLException e)
 		{
 			throw new PersistenceException(e);
 		}
@@ -132,7 +138,7 @@ public abstract class PersistenceSupport
 
 			return count;
 		}
-		catch(SQLException e)
+		catch (SQLException e)
 		{
 			throw new PersistenceException(e);
 		}
@@ -155,7 +161,7 @@ public abstract class PersistenceSupport
 
 			return new QueryResultSet(pst, rs);
 		}
-		catch(SQLException e)
+		catch (SQLException e)
 		{
 			JdbcUtil.closeResultSet(rs);
 			JdbcUtil.closeStatement(pst);
@@ -175,7 +181,7 @@ public abstract class PersistenceSupport
 
 			return pst.executeUpdate();
 		}
-		catch(SQLException e)
+		catch (SQLException e)
 		{
 			JdbcUtil.closeStatement(pst);
 
@@ -215,7 +221,7 @@ public abstract class PersistenceSupport
 		{
 			pst = cn.prepareStatement(sql.getSqlValue());
 		}
-		catch(SQLException e)
+		catch (SQLException e)
 		{
 			JdbcUtil.closeStatement(pst);
 
@@ -228,8 +234,8 @@ public abstract class PersistenceSupport
 	/**
 	 * 设置{@linkplain PreparedStatement}的参数值。
 	 * <p>
-	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Java Types Mapper to JDBC
-	 * Types”表。
+	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Java Types Mapper to
+	 * JDBC Types”表。
 	 * </p>
 	 * 
 	 * @param cn
@@ -600,8 +606,8 @@ public abstract class PersistenceSupport
 	/**
 	 * 获取列值。
 	 * <p>
-	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Type Conversions Supported
-	 * by ResultSet getter Methods”表，并且使用其中的最佳方法。
+	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Type Conversions
+	 * Supported by ResultSet getter Methods”表，并且使用其中的最佳方法。
 	 * </p>
 	 * 
 	 * @param cn
@@ -610,8 +616,7 @@ public abstract class PersistenceSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	public Object getColumnValue(Connection cn, ResultSet rs, Column column)
-			throws SQLException
+	public Object getColumnValue(Connection cn, ResultSet rs, Column column) throws SQLException
 	{
 		String columnName = column.getName();
 		int sqlType = column.getType();
@@ -782,5 +787,39 @@ public abstract class PersistenceSupport
 			throws SQLException
 	{
 		throw new UnsupportedOperationException("Get JDBC [" + column.getType() + "] type value is not supported");
+	}
+
+	/**
+	 * 静默回滚。
+	 * 
+	 * @param cn
+	 */
+	public void rollbackSilently(Connection cn)
+	{
+		try
+		{
+			JdbcUtil.rollbackIfSupports(cn);
+		}
+		catch (Throwable t)
+		{
+			LOGGER.error("rollback connection exception", t);
+		}
+	}
+
+	/**
+	 * 静默提交。
+	 * 
+	 * @param cn
+	 */
+	public void commitSilently(Connection cn)
+	{
+		try
+		{
+			JdbcUtil.commitIfSupports(cn);
+		}
+		catch (Throwable t)
+		{
+			LOGGER.error("commit connection exception", t);
+		}
 	}
 }

@@ -39,7 +39,7 @@ public class ExcelDataImportServiceTest extends DataexchangeTestSupport
 	public ExcelDataImportServiceTest()
 	{
 		super();
-		this.excelDataImportService = new ExcelDataImportService(databaseInfoResolver);
+		this.excelDataImportService = new ExcelDataImportService(dbMetaResolver);
 	}
 
 	@Test

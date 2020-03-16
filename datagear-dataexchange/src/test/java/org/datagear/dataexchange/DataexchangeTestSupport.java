@@ -13,20 +13,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import org.datagear.dbinfo.DatabaseInfoResolver;
-import org.datagear.dbinfo.DevotedDatabaseInfoResolver;
-import org.datagear.dbinfo.GenericDatabaseInfoResolver;
-import org.datagear.dbinfo.WildcardDevotedDatabaseInfoResolver;
+import org.datagear.meta.resolver.DBMetaResolver;
+import org.datagear.meta.resolver.GenericDBMetaResolver;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.ClasspathInputStreamResourceFactory;
 import org.datagear.util.resource.ClasspathReaderResourceFactory;
 import org.datagear.util.resource.ResourceFactory;
+import org.datagear.util.test.DBTestSupport;
 
 /**
  * 数据交换测试支持类。
@@ -39,15 +36,12 @@ public abstract class DataexchangeTestSupport extends DBTestSupport
 	public static final String TABLE_NAME_DATA_IMPORT = "T_DATA_IMPORT";
 	public static final String TABLE_NAME_DATA_EXPORT = "T_DATA_EXPORT";
 
-	protected DatabaseInfoResolver databaseInfoResolver;
+	protected DBMetaResolver dbMetaResolver;
 
 	public DataexchangeTestSupport()
 	{
 		super();
-
-		List<DevotedDatabaseInfoResolver> devotedDatabaseInfoResolver = new ArrayList<DevotedDatabaseInfoResolver>();
-		devotedDatabaseInfoResolver.add(new WildcardDevotedDatabaseInfoResolver());
-		this.databaseInfoResolver = new GenericDatabaseInfoResolver(devotedDatabaseInfoResolver);
+		this.dbMetaResolver = new GenericDBMetaResolver();
 	}
 
 	protected void clearTable(Connection cn, String table) throws SQLException
@@ -142,6 +136,7 @@ public abstract class DataexchangeTestSupport extends DBTestSupport
 			}
 
 			// @Override
+			@Override
 			public Logger getParentLogger() throws SQLFeatureNotSupportedException
 			{
 				throw new SQLFeatureNotSupportedException();

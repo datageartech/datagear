@@ -42,14 +42,14 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		super();
 
 		GenericDataExchangeService genericDataExchangeService = new GenericDataExchangeService();
-		CsvDataImportService csvDataImportService = new CsvDataImportService(databaseInfoResolver);
-		CsvDataExportService csvDataExportService = new CsvDataExportService(databaseInfoResolver);
-		List<DevotedDataExchangeService<?>> devotedDataExchangeServices = new ArrayList<DevotedDataExchangeService<?>>();
+		CsvDataImportService csvDataImportService = new CsvDataImportService(dbMetaResolver);
+		CsvDataExportService csvDataExportService = new CsvDataExportService(dbMetaResolver);
+		List<DevotedDataExchangeService<?>> devotedDataExchangeServices = new ArrayList<>();
 		devotedDataExchangeServices.add(csvDataImportService);
 		devotedDataExchangeServices.add(csvDataExportService);
 		genericDataExchangeService.setDevotedDataExchangeServices(devotedDataExchangeServices);
 
-		this.batchDataExchangeService = new BatchDataExchangeService<BatchDataExchange>(genericDataExchangeService);
+		this.batchDataExchangeService = new BatchDataExchangeService<>(genericDataExchangeService);
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 		DataFormat dataFormat = new DataFormat();
 		ValueDataImportOption importOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
 
-		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+		Set<SubDataExchange> subDataExchanges = new HashSet<>();
 
 		{
 			CsvDataImport csvDataImport = new CsvDataImport(connectionFactory, dataFormat, importOption, TABLE_NAME,
@@ -126,7 +126,7 @@ public class BatchDataExchangeServiceTest extends DataexchangeTestSupport
 
 			SubDataExchange subDataExchange = new SubDataExchange(subDataExchangeId, csvDataExport);
 
-			Set<SubDataExchange> dependents = new HashSet<SubDataExchange>();
+			Set<SubDataExchange> dependents = new HashSet<>();
 			dependents.addAll(subDataExchanges);
 			subDataExchange.setDependencies(dependents);
 

@@ -53,8 +53,8 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 	public CsvDataExportServiceTest()
 	{
 		super();
-		this.csvDataImportService = new CsvDataImportService(databaseInfoResolver);
-		this.csvDataExportService = new CsvDataExportService(databaseInfoResolver);
+		this.csvDataImportService = new CsvDataImportService(dbMetaResolver);
+		this.csvDataExportService = new CsvDataExportService(dbMetaResolver);
 	}
 
 	@Before
@@ -71,8 +71,7 @@ public class CsvDataExportServiceTest extends DataexchangeTestSupport
 			ResourceFactory<Reader> readerFactory = ClasspathReaderResourceFactory
 					.valueOf(getResourceClasspath("support/CsvDataExportServiceTest.csv"), "UTF-8");
 
-			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT,
-					true, true);
+			ValueDataImportOption valueDataImportOption = new ValueDataImportOption(ExceptionResolve.ABORT, true, true);
 			CsvDataImport impt = new CsvDataImport(new SimpleConnectionFactory(cn, false), dataFormat,
 					valueDataImportOption, TABLE_NAME, readerFactory);
 

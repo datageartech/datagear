@@ -37,12 +37,12 @@ import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
+import org.datagear.dataexchange.AbstractDevotedDBMetaDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.meta.Column;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.xml.sax.Attributes;
@@ -58,16 +58,16 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author datagear@163.com
  *
  */
-public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchangeService<ExcelDataImport>
+public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeService<ExcelDataImport>
 {
 	public ExcelDataImportService()
 	{
 		super();
 	}
 
-	public ExcelDataImportService(DatabaseInfoResolver databaseInfoResolver)
+	public ExcelDataImportService(DBMetaResolver dbMetaResolver)
 	{
-		super(databaseInfoResolver);
+		super(dbMetaResolver);
 	}
 
 	@Override
@@ -191,7 +191,7 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 
 	protected <T> List<T> createListWithNullElements(int size)
 	{
-		List<T> list = new ArrayList<T>(size);
+		List<T> list = new ArrayList<>(size);
 
 		for (int i = 0; i < size; i++)
 			list.add(null);
@@ -235,7 +235,7 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 		private Connection connection;
 
 		// 存储所有sheet列表，因为processRecord先处理完所有BoundSheetRecord，再处理其他
-		private List<String> _sheetNames = new ArrayList<String>();
+		private List<String> _sheetNames = new ArrayList<>();
 		// 当前sheet索引
 		private int _sheetIndex = -1;
 		// 当前行索引
@@ -243,8 +243,8 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 		private SSTRecord _sstRecord;
 		private List<String> _columnNames = null;
 		private List<Object> _columnValues = null;
-		private List<ColumnInfo> _columnInfos = null;
-		private List<ColumnInfo> _noNullColumnInfos = null;
+		private List<Column> _columns = null;
+		private List<Column> _noNullColumns = null;
 		private PreparedStatement _statement = null;
 
 		public XlsEventListener()
@@ -367,12 +367,12 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 
 					boolean isDate = false;
 
-					if (this._columnInfos != null && cellColumn < this._columnInfos.size())
+					if (this._columns != null && cellColumn < this._columns.size())
 					{
-						ColumnInfo columnInfo = this._columnInfos.get(cellColumn);
-						if (columnInfo != null)
+						Column column = this._columns.get(cellColumn);
+						if (column != null)
 						{
-							int sqlType = columnInfo.getType();
+							int sqlType = column.getType();
 
 							if (Types.DATE == sqlType || Types.TIME == sqlType || Types.TIMESTAMP == sqlType)
 								isDate = true;
@@ -445,16 +445,16 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 				{
 					String tableName = (this.excelDataImport.hasUnifiedTable() ? this.excelDataImport.getUnifiedTable()
 							: this._sheetNames.get(this._sheetIndex));
-					this._columnInfos = ExcelDataImportService.this.getColumnInfos(this.connection, tableName,
+					this._columns = ExcelDataImportService.this.getColumns(this.connection, tableName,
 							this._columnNames, this.excelDataImport.getImportOption().isIgnoreInexistentColumn());
 
-					this._noNullColumnInfos = removeNullColumnInfos(this._columnInfos);
+					this._noNullColumns = removeNullColumns(this._columns);
 
 					// 表不匹配
-					if (this._noNullColumnInfos == null || this._noNullColumnInfos.isEmpty())
+					if (this._noNullColumns == null || this._noNullColumns.isEmpty())
 						throw new TableMismatchException(tableName);
 
-					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._noNullColumnInfos);
+					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._noNullColumns);
 					this._statement = createPreparedStatementUnchecked(this.connection, sql);
 				}
 				// 导入数据
@@ -465,13 +465,13 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 						;
 					else
 					{
-						List<Object> columnValues = removeNullColumnValues(this._columnInfos, this._noNullColumnInfos,
+						List<Object> columnValues = removeNullColumnValues(this._columns, this._noNullColumns,
 								this._columnValues);
 
 						this.importContext.setDataIndex(ExcelDataIndex.valueOf(this._sheetIndex, this._rowIndex));
 
 						ExcelDataImportService.this.importValueData(this.connection, this._statement,
-								this._noNullColumnInfos, columnValues, this.importContext.getDataIndex(),
+								this._noNullColumns, columnValues, this.importContext.getDataIndex(),
 								this.excelDataImport.getImportOption().isNullForIllegalColumnValue(),
 								this.excelDataImport.getImportOption().getExceptionResolve(),
 								this.importContext.getDataFormatContext(), this.excelDataImport.getListener());
@@ -525,11 +525,11 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 		private boolean _inIsElement = false;
 
 		// 数据库列名称
-		private List<String> _columnNames = new ArrayList<String>();
+		private List<String> _columnNames = new ArrayList<>();
 		// 当前行的数据库列值
-		private List<Object> _columnValues = new ArrayList<Object>();
-		private List<ColumnInfo> _columnInfos = null;
-		private List<ColumnInfo> _noNullColumnInfos = null;
+		private List<Object> _columnValues = new ArrayList<>();
+		private List<Column> _columns = null;
+		private List<Column> _noNullColumns = null;
 		private PreparedStatement _statement = null;
 
 		public XlsxSheetHandler()
@@ -704,12 +704,12 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 
 					boolean isDate = false;
 
-					if (this._columnInfos != null && this._cellIndex < this._columnInfos.size())
+					if (this._columns != null && this._cellIndex < this._columns.size())
 					{
-						ColumnInfo columnInfo = this._columnInfos.get(this._cellIndex);
-						if (columnInfo != null)
+						Column column = this._columns.get(this._cellIndex);
+						if (column != null)
 						{
-							int sqlType = columnInfo.getType();
+							int sqlType = column.getType();
 
 							if (Types.DATE == sqlType || Types.TIME == sqlType || Types.TIMESTAMP == sqlType)
 								isDate = true;
@@ -759,16 +759,16 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 				{
 					String tableName = (this.excelDataImport.hasUnifiedTable() ? this.excelDataImport.getUnifiedTable()
 							: this.sheetName);
-					this._columnInfos = ExcelDataImportService.this.getColumnInfos(this.connection, tableName,
+					this._columns = ExcelDataImportService.this.getColumns(this.connection, tableName,
 							this._columnNames, this.excelDataImport.getImportOption().isIgnoreInexistentColumn());
 
-					this._noNullColumnInfos = removeNullColumnInfos(this._columnInfos);
+					this._noNullColumns = removeNullColumns(this._columns);
 
 					// 表不匹配
-					if (this._noNullColumnInfos == null || this._noNullColumnInfos.isEmpty())
+					if (this._noNullColumns == null || this._noNullColumns.isEmpty())
 						throw new TableMismatchException(tableName);
 
-					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._noNullColumnInfos);
+					String sql = buildInsertPreparedSqlUnchecked(this.connection, tableName, this._noNullColumns);
 					this._statement = createPreparedStatementUnchecked(this.connection, sql);
 				}
 				// 导入数据
@@ -779,13 +779,13 @@ public class ExcelDataImportService extends AbstractDevotedDbInfoAwareDataExchan
 						;
 					else
 					{
-						List<Object> columnValues = removeNullColumnValues(this._columnInfos, this._noNullColumnInfos,
+						List<Object> columnValues = removeNullColumnValues(this._columns, this._noNullColumns,
 								this._columnValues);
 
 						this.importContext.setDataIndex(ExcelDataIndex.valueOf(this.sheetIndex, this._rowIndex));
 
 						ExcelDataImportService.this.importValueData(this.connection, this._statement,
-								this._noNullColumnInfos, columnValues, this.importContext.getDataIndex(),
+								this._noNullColumns, columnValues, this.importContext.getDataIndex(),
 								this.excelDataImport.getImportOption().isNullForIllegalColumnValue(),
 								this.excelDataImport.getImportOption().getExceptionResolve(),
 								this.importContext.getDataFormatContext(), this.excelDataImport.getListener());

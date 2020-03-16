@@ -13,15 +13,15 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
+import org.datagear.dataexchange.AbstractDevotedDBMetaDataExchangeService;
 import org.datagear.dataexchange.ColumnNotFoundException;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.ValueDataImportOption;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.meta.Column;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
 
 /**
@@ -30,16 +30,16 @@ import org.datagear.util.JdbcUtil;
  * @author datagear@163.com
  *
  */
-public class CsvDataImportService extends AbstractDevotedDbInfoAwareDataExchangeService<CsvDataImport>
+public class CsvDataImportService extends AbstractDevotedDBMetaDataExchangeService<CsvDataImport>
 {
 	public CsvDataImportService()
 	{
 		super();
 	}
 
-	public CsvDataImportService(DatabaseInfoResolver databaseInfoResolver)
+	public CsvDataImportService(DBMetaResolver dbMetaResolver)
 	{
-		super(databaseInfoResolver);
+		super(dbMetaResolver);
 	}
 
 	@Override
@@ -60,8 +60,8 @@ public class CsvDataImportService extends AbstractDevotedDbInfoAwareDataExchange
 		JdbcUtil.setAutoCommitIfSupports(cn, false);
 		PreparedStatement st = null;
 
-		List<ColumnInfo> rawColumnInfos = null;
-		List<ColumnInfo> noNullColumnInfos = null;
+		List<Column> rawColumns = null;
+		List<Column> noNullColumns = null;
 
 		CSVParser csvParser = buildCSVParser(csvReader);
 
@@ -71,24 +71,23 @@ public class CsvDataImportService extends AbstractDevotedDbInfoAwareDataExchange
 		{
 			importContext.setDataIndex(RowDataIndex.valueOf(row));
 
-			if (rawColumnInfos == null)
+			if (rawColumns == null)
 			{
-				rawColumnInfos = resolveColumnInfos(dataExchange, cn, csvRecord);
-				noNullColumnInfos = removeNullColumnInfos(rawColumnInfos);
+				rawColumns = resolveColumns(dataExchange, cn, csvRecord);
+				noNullColumns = removeNullColumns(rawColumns);
 
 				// 表不匹配
-				if (noNullColumnInfos == null || noNullColumnInfos.isEmpty())
+				if (noNullColumns == null || noNullColumns.isEmpty())
 					throw new TableMismatchException(dataExchange.getTable());
 
-				String sql = buildInsertPreparedSql(cn, dataExchange.getTable(), noNullColumnInfos);
+				String sql = buildInsertPreparedSql(cn, dataExchange.getTable(), noNullColumns);
 				st = cn.prepareStatement(sql);
 			}
 			else
 			{
-				List<String> columnValues = resolveCSVRecordValues(dataExchange, csvRecord, rawColumnInfos,
-						noNullColumnInfos);
+				List<String> columnValues = resolveCSVRecordValues(dataExchange, csvRecord, rawColumns, noNullColumns);
 
-				importValueData(cn, st, noNullColumnInfos, columnValues, importContext.getDataIndex(),
+				importValueData(cn, st, noNullColumns, columnValues, importContext.getDataIndex(),
 						importOption.isNullForIllegalColumnValue(), importOption.getExceptionResolve(),
 						importContext.getDataFormatContext(), dataExchange.getListener());
 			}
@@ -121,12 +120,12 @@ public class CsvDataImportService extends AbstractDevotedDbInfoAwareDataExchange
 	 * @return
 	 * @throws ColumnNotFoundException
 	 */
-	protected List<ColumnInfo> resolveColumnInfos(CsvDataImport impt, Connection cn, CSVRecord csvRecord)
+	protected List<Column> resolveColumns(CsvDataImport impt, Connection cn, CSVRecord csvRecord)
 			throws ColumnNotFoundException
 	{
 		List<String> columnNames = resolveCSVRecordValues(impt, csvRecord);
 
-		return getColumnInfos(cn, impt.getTable(), columnNames, impt.getImportOption().isIgnoreInexistentColumn());
+		return getColumns(cn, impt.getTable(), columnNames, impt.getImportOption().isIgnoreInexistentColumn());
 	}
 
 	/**
@@ -134,16 +133,16 @@ public class CsvDataImportService extends AbstractDevotedDbInfoAwareDataExchange
 	 * 
 	 * @param impt
 	 * @param csvRecord
-	 * @param rawColumnInfos
-	 * @param noNullColumnInfos
+	 * @param rawColumns
+	 * @param noNullColumns
 	 * @return
 	 */
-	protected List<String> resolveCSVRecordValues(CsvDataImport impt, CSVRecord csvRecord,
-			List<ColumnInfo> rawColumnInfos, List<ColumnInfo> noNullColumnInfos)
+	protected List<String> resolveCSVRecordValues(CsvDataImport impt, CSVRecord csvRecord, List<Column> rawColumns,
+			List<Column> noNullColumns)
 	{
 		List<String> values = resolveCSVRecordValues(impt, csvRecord);
 
-		return removeNullColumnValues(rawColumnInfos, noNullColumnInfos, values);
+		return removeNullColumnValues(rawColumns, noNullColumns, values);
 	}
 
 	/**
@@ -156,7 +155,7 @@ public class CsvDataImportService extends AbstractDevotedDbInfoAwareDataExchange
 	protected List<String> resolveCSVRecordValues(CsvDataImport impt, CSVRecord csvRecord)
 	{
 		int size = csvRecord.size();
-		List<String> list = new ArrayList<String>(size);
+		List<String> list = new ArrayList<>(size);
 
 		for (int i = 0; i < size; i++)
 			list.add(csvRecord.get(i));

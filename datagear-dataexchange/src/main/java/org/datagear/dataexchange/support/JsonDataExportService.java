@@ -20,15 +20,15 @@ import javax.json.Json;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonGeneratorFactory;
 
-import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
+import org.datagear.dataexchange.AbstractDevotedDBMetaDataExchangeService;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.DataFormatContext;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowDataIndex;
 import org.datagear.dataexchange.TextDataExportListener;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.meta.Column;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
 
 /**
@@ -37,14 +37,14 @@ import org.datagear.util.JdbcUtil;
  * @author datagear@163.com
  *
  */
-public class JsonDataExportService extends AbstractDevotedDbInfoAwareDataExchangeService<JsonDataExport>
+public class JsonDataExportService extends AbstractDevotedDBMetaDataExchangeService<JsonDataExport>
 {
 	protected static final JsonGeneratorFactory FACTORY = Json.createGeneratorFactory(new HashMap<String, Object>());
 
 	protected static JsonGeneratorFactory FACTORY_PRETTY_PRINT = null;
 	static
 	{
-		Map<String, Object> config = new HashMap<String, Object>();
+		Map<String, Object> config = new HashMap<>();
 		config.put(JsonGenerator.PRETTY_PRINTING, true);
 
 		FACTORY_PRETTY_PRINT = Json.createGeneratorFactory(config);
@@ -55,9 +55,9 @@ public class JsonDataExportService extends AbstractDevotedDbInfoAwareDataExchang
 		super();
 	}
 
-	public JsonDataExportService(DatabaseInfoResolver databaseInfoResolver)
+	public JsonDataExportService(DBMetaResolver dbMetaResolver)
 	{
-		super(databaseInfoResolver);
+		super(dbMetaResolver);
 	}
 
 	@Override
@@ -77,9 +77,9 @@ public class JsonDataExportService extends AbstractDevotedDbInfoAwareDataExchang
 		JdbcUtil.setReadonlyIfSupports(cn, true);
 
 		ResultSet rs = dataExchange.getQuery().execute(cn);
-		List<ColumnInfo> columnInfos = getColumnInfos(cn, rs);
+		List<Column> columns = getColumns(cn, rs);
 
-		writeRecords(dataExchange, cn, columnInfos, rs, jsonWriter, exportContext);
+		writeRecords(dataExchange, cn, columns, rs, jsonWriter, exportContext);
 	}
 
 	/**
@@ -87,20 +87,20 @@ public class JsonDataExportService extends AbstractDevotedDbInfoAwareDataExchang
 	 * 
 	 * @param dataExchange
 	 * @param cn
-	 * @param columnInfos
+	 * @param columns
 	 * @param rs
 	 * @param out
 	 * @param exportContext
 	 */
 	@SuppressWarnings("resource")
-	protected void writeRecords(JsonDataExport dataExchange, Connection cn, List<ColumnInfo> columnInfos, ResultSet rs,
+	protected void writeRecords(JsonDataExport dataExchange, Connection cn, List<Column> columns, ResultSet rs,
 			Writer out, IndexFormatDataExchangeContext exportContext) throws Throwable
 	{
 		TextDataExportListener listener = dataExchange.getListener();
 		JsonDataExportOption exportOption = dataExchange.getExportOption();
 		JsonDataFormat jsonDataFormat = exportOption.getJsonDataFormat();
 
-		int columnCount = columnInfos.size();
+		int columnCount = columns.size();
 
 		JsonGenerator generator = (exportOption.isPrettyPrint() ? FACTORY_PRETTY_PRINT.createGenerator(out)
 				: FACTORY.createGenerator(out));
@@ -128,10 +128,10 @@ public class JsonDataExportService extends AbstractDevotedDbInfoAwareDataExchang
 
 			for (int i = 0; i < columnCount; i++)
 			{
-				ColumnInfo columnInfo = columnInfos.get(i);
+				Column column = columns.get(i);
 
-				writeJsonValue(dataExchange, cn, columnInfos, rs, exportContext, generator, i + 1, columnInfo,
-						exportOption, jsonDataFormat, listener);
+				writeJsonValue(dataExchange, cn, columns, rs, exportContext, generator, i + 1, column, exportOption,
+						jsonDataFormat, listener);
 			}
 
 			generator.writeEnd();
@@ -160,28 +160,29 @@ public class JsonDataExportService extends AbstractDevotedDbInfoAwareDataExchang
 	 * 
 	 * @param dataExchange
 	 * @param cn
-	 * @param columnInfos
+	 * @param columns
 	 * @param rs
 	 * @param exportContext
 	 * @param generator
+	 * @param columnIndex
+	 *            行号，以{@code 1}开始
 	 * @param column
-	 * @param columnInfo
 	 * @param exportOption
 	 * @param jsonDataFormat
 	 * @param listener
 	 * @throws Throwable
 	 */
-	protected void writeJsonValue(JsonDataExport dataExchange, Connection cn, List<ColumnInfo> columnInfos,
-			ResultSet rs, IndexFormatDataExchangeContext exportContext, JsonGenerator generator, int column,
-			ColumnInfo columnInfo, JsonDataExportOption exportOption, JsonDataFormat jsonDataFormat,
-			TextDataExportListener listener) throws Throwable
+	protected void writeJsonValue(JsonDataExport dataExchange, Connection cn, List<Column> columns, ResultSet rs,
+			IndexFormatDataExchangeContext exportContext, JsonGenerator generator, int columnIndex, Column column,
+			JsonDataExportOption exportOption, JsonDataFormat jsonDataFormat, TextDataExportListener listener)
+			throws Throwable
 	{
-		String name = columnInfo.getName();
+		String name = column.getName();
 		Object value = null;
 
 		try
 		{
-			value = getValue(cn, rs, column, columnInfo.getType());
+			value = getValue(cn, rs, columnIndex, column.getType());
 
 			if (value == null)
 			{
@@ -253,7 +254,7 @@ public class JsonDataExportService extends AbstractDevotedDbInfoAwareDataExchang
 				generator.writeNull(name);
 
 				if (listener != null)
-					listener.onSetNullTextValue(exportContext.getDataIndex(), columnInfo.getName(),
+					listener.onSetNullTextValue(exportContext.getDataIndex(), column.getName(),
 							wrapToDataExchangeException(t));
 			}
 			else

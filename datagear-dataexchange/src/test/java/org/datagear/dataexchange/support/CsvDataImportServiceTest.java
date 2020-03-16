@@ -43,7 +43,7 @@ public class CsvDataImportServiceTest extends DataexchangeTestSupport
 	public CsvDataImportServiceTest()
 	{
 		super();
-		this.csvDataImportService = new CsvDataImportService(databaseInfoResolver);
+		this.csvDataImportService = new CsvDataImportService(dbMetaResolver);
 	}
 
 	@Test

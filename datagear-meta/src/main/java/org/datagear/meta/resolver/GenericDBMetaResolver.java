@@ -13,6 +13,7 @@ import org.datagear.connection.ConnectionOption;
 import org.datagear.meta.Column;
 import org.datagear.meta.DataType;
 import org.datagear.meta.Database;
+import org.datagear.meta.PrimaryKey;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
 import org.datagear.meta.resolver.support.MySqlDevotedDBMetaResolver;
@@ -40,7 +41,7 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	{
 		super();
 
-		this.devotedDBMetaResolvers = new ArrayList<DevotedDBMetaResolver>();
+		this.devotedDBMetaResolvers = new ArrayList<>();
 		this.devotedDBMetaResolvers.add(new MySqlDevotedDBMetaResolver());
 		this.devotedDBMetaResolvers.add(new WildcardDevotedDBMetaResolver());
 	}
@@ -102,6 +103,13 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
 		return resolver.getColumns(cn, resultSetMetaData);
+	}
+
+	@Override
+	public PrimaryKey getPrimaryKey(Connection cn, String tableName) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.getPrimaryKey(cn, tableName);
 	}
 
 	@Override

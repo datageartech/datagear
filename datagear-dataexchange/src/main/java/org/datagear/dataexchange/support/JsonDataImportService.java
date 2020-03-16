@@ -18,14 +18,14 @@ import javax.json.stream.JsonLocation;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParser.Event;
 
-import org.datagear.dataexchange.AbstractDevotedDbInfoAwareDataExchangeService;
+import org.datagear.dataexchange.AbstractDevotedDBMetaDataExchangeService;
 import org.datagear.dataexchange.ColumnNotFoundException;
 import org.datagear.dataexchange.DataExchangeContext;
 import org.datagear.dataexchange.DataExchangeException;
 import org.datagear.dataexchange.IndexFormatDataExchangeContext;
 import org.datagear.dataexchange.RowColumnDataIndex;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.meta.Column;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
 
@@ -35,16 +35,16 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public class JsonDataImportService extends AbstractDevotedDbInfoAwareDataExchangeService<JsonDataImport>
+public class JsonDataImportService extends AbstractDevotedDBMetaDataExchangeService<JsonDataImport>
 {
 	public JsonDataImportService()
 	{
 		super();
 	}
 
-	public JsonDataImportService(DatabaseInfoResolver databaseInfoResolver)
+	public JsonDataImportService(DBMetaResolver dbMetaResolver)
 	{
-		super(databaseInfoResolver);
+		super(dbMetaResolver);
 	}
 
 	@Override
@@ -173,10 +173,10 @@ public class JsonDataImportService extends AbstractDevotedDbInfoAwareDataExchang
 	{
 		JsonDataImportOption importOption = dataExchange.getImportOption();
 
-		List<ColumnInfo> totalColumnInfos = getColumnInfos(cn, table);
+		List<Column> totalColumns = getColumns(cn, table);
 
 		PreparedStatement prevSt = null;
-		List<ColumnInfo> prevColumnInfos = null;
+		List<Column> prevColumns = null;
 
 		while (p.hasNext())
 		{
@@ -194,17 +194,17 @@ public class JsonDataImportService extends AbstractDevotedDbInfoAwareDataExchang
 
 			Map<String, Object> row = parseNextObject(p);
 
-			Object[] myColumnInfoValues = getColumnInfoValues(dataExchange, table, totalColumnInfos, row);
-			List<ColumnInfo> myColumnInfos = (List<ColumnInfo>) myColumnInfoValues[0];
-			List<Object> myColumnValues = (List<Object>) myColumnInfoValues[1];
+			Object[] myColumnValuess = getColumnValues(dataExchange, table, totalColumns, row);
+			List<Column> myColumns = (List<Column>) myColumnValuess[0];
+			List<Object> myColumnValues = (List<Object>) myColumnValuess[1];
 
-			if (!myColumnInfos.isEmpty())
+			if (!myColumns.isEmpty())
 			{
 				boolean newSql = false;
 
-				if (prevSt == null || prevColumnInfos == null)
+				if (prevSt == null || prevColumns == null)
 					newSql = true;
-				else if (myColumnInfos.equals(prevColumnInfos))
+				else if (myColumns.equals(prevColumns))
 					newSql = false;
 				else
 					newSql = true;
@@ -213,13 +213,13 @@ public class JsonDataImportService extends AbstractDevotedDbInfoAwareDataExchang
 				{
 					JdbcUtil.closeStatement(prevSt);
 
-					String sql = buildInsertPreparedSql(cn, table, myColumnInfos);
+					String sql = buildInsertPreparedSql(cn, table, myColumns);
 
 					prevSt = cn.prepareStatement(sql);
-					prevColumnInfos = myColumnInfos;
+					prevColumns = myColumns;
 				}
 
-				importValueData(cn, prevSt, prevColumnInfos, myColumnValues, context.getDataIndex(),
+				importValueData(cn, prevSt, prevColumns, myColumnValues, context.getDataIndex(),
 						importOption.isNullForIllegalColumnValue(), importOption.getExceptionResolve(),
 						context.getDataFormatContext(), dataExchange.getListener());
 			}
@@ -233,39 +233,39 @@ public class JsonDataImportService extends AbstractDevotedDbInfoAwareDataExchang
 	 * 
 	 * @param dataExchange
 	 * @param table
-	 * @param columnInfos
+	 * @param columns
 	 * @param row
 	 * @return
 	 * @throws ColumnNotFoundException
 	 */
-	protected Object[] getColumnInfoValues(JsonDataImport dataExchange, String table, List<ColumnInfo> columnInfos,
+	protected Object[] getColumnValues(JsonDataImport dataExchange, String table, List<Column> columns,
 			Map<String, Object> row) throws ColumnNotFoundException
 	{
-		List<ColumnInfo> myColumnInfos = new ArrayList<ColumnInfo>();
-		List<Object> myColumnValues = new ArrayList<Object>();
+		List<Column> myColumns = new ArrayList<>();
+		List<Object> myColumnValues = new ArrayList<>();
 
-		for (ColumnInfo columnInfo : columnInfos)
+		for (Column column : columns)
 		{
-			if (row.containsKey(columnInfo.getName()))
+			if (row.containsKey(column.getName()))
 			{
-				myColumnInfos.add(columnInfo);
-				myColumnValues.add(row.get(columnInfo.getName()));
+				myColumns.add(column);
+				myColumnValues.add(row.get(column.getName()));
 			}
 		}
 
 		// 有不存在的列且不被允许
-		if (row.size() > myColumnInfos.size() && !dataExchange.getImportOption().isIgnoreInexistentColumn())
+		if (row.size() > myColumns.size() && !dataExchange.getImportOption().isIgnoreInexistentColumn())
 		{
 			Set<String> myNames = row.keySet();
 
 			for (String myName : myNames)
 			{
-				if (findColumnInfo(columnInfos, myName) == null)
+				if (findColumn(columns, myName) == null)
 					throw new ColumnNotFoundException(table, myName);
 			}
 		}
 
-		return new Object[] { myColumnInfos, myColumnValues };
+		return new Object[] { myColumns, myColumnValues };
 	}
 
 	/**
@@ -277,7 +277,7 @@ public class JsonDataImportService extends AbstractDevotedDbInfoAwareDataExchang
 	 */
 	protected Map<String, Object> parseNextObject(JsonParser p) throws Throwable
 	{
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 
 		String name = null;
 
@@ -367,7 +367,7 @@ public class JsonDataImportService extends AbstractDevotedDbInfoAwareDataExchang
 	 */
 	protected Object[] parseNextArray(JsonParser p) throws Throwable
 	{
-		List<Object> list = new ArrayList<Object>();
+		List<Object> list = new ArrayList<>();
 
 		while (p.hasNext())
 		{

@@ -16,7 +16,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.datagear</groupId>
-			<artifactId>datagear-deprecated</artifactId>
+			<artifactId>datagear-util</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.datagear</groupId>
+			<artifactId>datagear-persistence</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
