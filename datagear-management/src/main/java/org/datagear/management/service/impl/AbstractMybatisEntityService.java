@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.datagear.management.domain.Entity;
 import org.datagear.management.service.EntityService;
-import org.datagear.model.support.Entity;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;

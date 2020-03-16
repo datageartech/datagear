@@ -6,7 +6,7 @@ package org.datagear.management.service;
 
 import java.util.List;
 
-import org.datagear.model.support.Entity;
+import org.datagear.management.domain.Entity;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Query;

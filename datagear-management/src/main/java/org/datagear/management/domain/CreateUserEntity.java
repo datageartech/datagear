@@ -4,8 +4,6 @@
 
 package org.datagear.management.domain;
 
-import org.datagear.model.support.Entity;
-
 /**
  * 带有创建用户信息的实体。
  * 

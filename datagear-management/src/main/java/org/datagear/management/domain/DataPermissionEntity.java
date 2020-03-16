@@ -4,8 +4,6 @@
 
 package org.datagear.management.domain;
 
-import org.datagear.model.support.Entity;
-
 /**
  * 数据权限实体。
  * 

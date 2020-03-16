@@ -16,7 +16,6 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.management.domain.User;
-import org.datagear.model.support.Entity;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -312,7 +311,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 
 		int total = (Integer) selectOneMybatis(statement + "Count", params);
 
-		PagingData<T> pagingData = new PagingData<T>(pagingQuery.getPage(), total, pagingQuery.getPageSize());
+		PagingData<T> pagingData = new PagingData<>(pagingQuery.getPage(), total, pagingQuery.getPageSize());
 
 		int startIndex = pagingData.getStartIndex();
 
@@ -714,7 +713,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 */
 	protected Map<String, Object> buildParamMap()
 	{
-		return new HashMap<String, Object>();
+		return new HashMap<>();
 	}
 
 	/**
@@ -724,7 +723,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 */
 	protected Map<String, Object> buildParamMapWithIdentifierQuoteParameter()
 	{
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		addIdentifierQuoteParameter(map);
 
 		return map;

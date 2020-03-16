@@ -7,7 +7,6 @@ package org.datagear.management.domain;
 import java.util.Date;
 
 import org.datagear.connection.DriverEntity;
-import org.datagear.model.support.AbstractStringIdEntity;
 
 /**
  * 数据库模式实体。

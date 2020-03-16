@@ -15,12 +15,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.datagear</groupId>
-			<artifactId>datagear-deprecated</artifactId>
+			<artifactId>datagear-connection</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.datagear</groupId>
-			<artifactId>datagear-connection</artifactId>
+			<artifactId>datagear-persistence</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -47,6 +47,18 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>${guava.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	

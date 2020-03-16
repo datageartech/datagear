@@ -6,8 +6,6 @@ package org.datagear.management.domain;
 
 import java.util.Date;
 
-import org.datagear.model.support.AbstractStringIdEntity;
-
 /**
  * SQL历史。
  * 

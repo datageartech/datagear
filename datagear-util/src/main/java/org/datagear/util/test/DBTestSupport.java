@@ -2,11 +2,16 @@ package org.datagear.util.test;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
+
+import javax.sql.DataSource;
 
 /**
  * 数据库测试支持类。
@@ -51,6 +56,65 @@ public abstract class DBTestSupport
 		properties.setProperty("password", JDBC_PROPERTIES.getProperty("jdbc.password"));
 
 		return DriverManager.getConnection(JDBC_PROPERTIES.getProperty("jdbc.url"), properties);
+	}
+
+	protected DataSource getDataSource() throws SQLException
+	{
+		return new DataSource()
+		{
+			@SuppressWarnings("unchecked")
+			@Override
+			public <T> T unwrap(Class<T> iface) throws SQLException
+			{
+				return (T) this;
+			}
+
+			@Override
+			public boolean isWrapperFor(Class<?> iface) throws SQLException
+			{
+				return true;
+			}
+
+			@Override
+			public void setLoginTimeout(int seconds) throws SQLException
+			{
+			}
+
+			@Override
+			public void setLogWriter(PrintWriter out) throws SQLException
+			{
+			}
+
+			@Override
+			public Logger getParentLogger() throws SQLFeatureNotSupportedException
+			{
+				return null;
+			}
+
+			@Override
+			public int getLoginTimeout() throws SQLException
+			{
+				return 0;
+			}
+
+			@Override
+			public PrintWriter getLogWriter() throws SQLException
+			{
+				return null;
+			}
+
+			@Override
+			public Connection getConnection(String username, String password) throws SQLException
+			{
+				return getConnection();
+			}
+
+			@Override
+			public synchronized Connection getConnection() throws SQLException
+			{
+				return DBTestSupport.this.getConnection();
+			}
+		};
 	}
 
 	protected void println()

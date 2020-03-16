@@ -6,8 +6,6 @@ package org.datagear.management.domain;
 
 import java.util.Date;
 
-import org.datagear.model.support.AbstractStringIdEntity;
-
 /**
  * 用户实体。
  * 
@@ -50,6 +48,13 @@ public class User extends AbstractStringIdEntity
 	public User(String id)
 	{
 		super(id);
+	}
+
+	public User(String id, String name, String password)
+	{
+		super(id);
+		this.name = name;
+		this.password = password;
 	}
 
 	public String getName()

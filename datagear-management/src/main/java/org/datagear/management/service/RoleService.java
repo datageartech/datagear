@@ -14,5 +14,4 @@ import org.datagear.management.domain.Role;
  */
 public interface RoleService extends EntityService<String, Role>
 {
-
 }
