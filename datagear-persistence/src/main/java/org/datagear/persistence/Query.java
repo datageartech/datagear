@@ -13,7 +13,6 @@ import java.util.Map;
  * 查询。
  *
  * @author datagear@163.com
- * @createDate 2013-2-4
  *
  */
 public class Query implements Serializable
@@ -30,7 +29,7 @@ public class Query implements Serializable
 	private Order[] orders;
 
 	/** 查询参数 */
-	private Map<String, Object> params = new HashMap<String, Object>();
+	private Map<String, Object> params = new HashMap<>();
 
 	/** 针对keyword，是否使用“NOT LIKE”而非“LIKE” */
 	private boolean notLike = false;
@@ -120,7 +119,6 @@ public class Query implements Serializable
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [keyword=" + keyword + ", condition=" + condition + ", orders="
-				+ Arrays.toString(orders)
-				+ ", params=" + params + ", notLike=" + notLike + "]";
+				+ Arrays.toString(orders) + ", params=" + params + ", notLike=" + notLike + "]";
 	}
 }

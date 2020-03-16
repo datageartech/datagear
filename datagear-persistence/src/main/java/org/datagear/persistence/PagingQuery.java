@@ -10,7 +10,6 @@ import java.util.Arrays;
  * 分页查询。
  *
  * @author datagear@163.com
- * @createDate 2013-2-4
  *
  */
 public class PagingQuery extends Query

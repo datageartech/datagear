@@ -10,7 +10,6 @@ import java.io.Serializable;
  * 分页信息。
  *
  * @author datagear@163.com
- * @createDate 2013-2-4
  *
  */
 public class Paging implements Serializable

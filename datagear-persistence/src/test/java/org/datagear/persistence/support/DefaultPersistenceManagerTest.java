@@ -12,9 +12,7 @@ import org.datagear.meta.Table;
 import org.datagear.meta.resolver.GenericDBMetaResolver;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectSource;
-import org.datagear.persistence.PstValueConverter;
 import org.datagear.persistence.Row;
-import org.datagear.persistence.RowMapper;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.test.DBTestSupport;
 import org.junit.After;
@@ -64,28 +62,26 @@ public class DefaultPersistenceManagerTest extends DBTestSupport
 	public void insertTest()
 	{
 		Table table = this.genericDBMetaResolver.getTable(this.connection, "T_ACCOUNT");
-		PstValueConverter converter = new SimplePstValueConverter();
-		RowMapper mapper = new SimpleRowMapper();
-		
+
 		int id = 999999999;
 		String name = "NAME-FOR-TEST";
-		
+
 		Row row = new Row();
 		row.put("ID", id);
 		row.put("NAME", name);
-		
+
 		try
 		{
-			this.defaultPersistenceManager.insert(connection, dialect, table, row, converter);
+			this.defaultPersistenceManager.insert(connection, dialect, table, row);
 
-			Row getRow = this.defaultPersistenceManager.get(connection, dialect, table, row, converter, mapper);
+			Row getRow = this.defaultPersistenceManager.get(connection, dialect, table, row);
 
 			assertEquals(id, ((Number) getRow.get("ID")).intValue());
 			assertEquals(name, getRow.get("NAME"));
 		}
 		finally
 		{
-			this.defaultPersistenceManager.delete(connection, dialect, table, row, converter);
+			this.defaultPersistenceManager.delete(connection, dialect, table, row);
 		}
 	}
 }

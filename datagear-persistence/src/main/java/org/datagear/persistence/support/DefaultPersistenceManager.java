@@ -34,14 +34,37 @@ import org.datagear.util.StringUtil;
  */
 public class DefaultPersistenceManager extends PersistenceSupport implements PersistenceManager
 {
+	private PstValueConverter pstValueConverter = new SimplePstValueConverter();
+
+	private RowMapper rowMapper = new SimpleRowMapper();
+
 	public DefaultPersistenceManager()
 	{
 		super();
 	}
 
+	public PstValueConverter getPstValueConverter()
+	{
+		return pstValueConverter;
+	}
+
+	public void setPstValueConverter(PstValueConverter pstValueConverter)
+	{
+		this.pstValueConverter = pstValueConverter;
+	}
+
+	public RowMapper getRowMapper()
+	{
+		return rowMapper;
+	}
+
+	public void setRowMapper(RowMapper rowMapper)
+	{
+		this.rowMapper = rowMapper;
+	}
+
 	@Override
-	public int insert(Connection cn, Dialect dialect, Table table, Row row, PstValueConverter converter)
-			throws PersistenceException
+	public int insert(Connection cn, Dialect dialect, Table table, Row row) throws PersistenceException
 	{
 		Sql sql = Sql.valueOf().sql("INSERT INTO ").sql(quote(dialect, table.getName())).sql(" (").delimit(",");
 		Sql valueSql = Sql.valueOf().sql(" VALUES (").delimit(",");
@@ -64,7 +87,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			if (value == null && column.hasDefaultValue())
 				value = column.getDefaultValue();
 
-			value = converter.convert(cn, dialect, table, column, value);
+			value = convertToPstValue(cn, dialect, table, column, value);
 
 			sql.sqld(quote(dialect, name));
 			valueSql.sqld("?").param(value, column.getType());
@@ -78,8 +101,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	}
 
 	@Override
-	public int update(Connection cn, Dialect dialect, Table table, Row origin, Row update, PstValueConverter converter)
-			throws PersistenceException
+	public int update(Connection cn, Dialect dialect, Table table, Row origin, Row update) throws PersistenceException
 	{
 		Sql sql = Sql.valueOf().sql("UPDATE ").sql(quote(dialect, table.getName())).sql(" SET ").delimit(",");
 
@@ -95,26 +117,18 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 			Object value = update.get(name);
 
-			value = converter.convert(cn, dialect, table, column, value);
+			value = convertToPstValue(cn, dialect, table, column, value);
 
 			sql.sqld(quote(dialect, name) + "=?").param(value, column.getType());
 		}
 
-		sql.sql(" WHERE ").sql(buildUniqueRecordCondition(cn, dialect, table, origin, converter));
+		sql.sql(" WHERE ").sql(buildUniqueRecordCondition(cn, dialect, table, origin));
 
 		return executeUpdate(cn, sql);
 	}
 
 	@Override
-	public int delete(Connection cn, Dialect dialect, Table table, Row row, PstValueConverter converter)
-			throws PersistenceException
-	{
-		return delete(cn, dialect, table, new Row[] { row }, converter);
-	}
-
-	@Override
-	public int delete(Connection cn, Dialect dialect, Table table, Row[] rows, PstValueConverter converter)
-			throws PersistenceException
+	public int delete(Connection cn, Dialect dialect, Table table, Row... rows) throws PersistenceException
 	{
 		Sql sql = Sql.valueOf().sql("DELETE FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")
 				.delimit(" AND ");
@@ -146,7 +160,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 					String name = column.getName();
 					Object value = row.get(name);
 
-					value = converter.convert(cn, dialect, table, column, value);
+					value = convertToPstValue(cn, dialect, table, column, value);
 
 					sql.param(value, column.getType());
 				}
@@ -178,8 +192,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	}
 
 	@Override
-	public Row get(Connection cn, Dialect dialect, Table table, Row param, PstValueConverter converter,
-			RowMapper mapper) throws PersistenceException
+	public Row get(Connection cn, Dialect dialect, Table table, Row param) throws PersistenceException
 	{
 		Sql sql = Sql.valueOf().sql("SELECT * FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")
 				.delimit(" AND ");
@@ -192,12 +205,12 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			String name = column.getName();
 			Object value = param.get(name);
 
-			value = converter.convert(cn, dialect, table, column, value);
+			value = convertToPstValue(cn, dialect, table, column, value);
 
 			sql.sqld(quote(dialect, name) + "=?").param(value, column.getType());
 		}
 
-		List<Row> rows = executeListQuery(cn, table, sql, mapper);
+		List<Row> rows = executeListQuery(cn, table, sql, this.rowMapper);
 
 		if (rows.size() > 1)
 			throw new NonUniqueResultException();
@@ -206,16 +219,15 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	}
 
 	@Override
-	public List<Row> query(Connection cn, Dialect dialect, Table table, Query query, RowMapper mapper)
-			throws PersistenceException
+	public List<Row> query(Connection cn, Dialect dialect, Table table, Query query) throws PersistenceException
 	{
 		Sql sql = buildQuery(cn, dialect, table, query);
-		return executeListQuery(cn, table, sql, mapper);
+		return executeListQuery(cn, table, sql);
 	}
 
 	@Override
-	public PagingData<Row> pagingQuery(Connection cn, Dialect dialect, Table table, PagingQuery pagingQuery,
-			RowMapper mapper) throws PersistenceException
+	public PagingData<Row> pagingQuery(Connection cn, Dialect dialect, Table table, PagingQuery pagingQuery)
+			throws PersistenceException
 	{
 		Sql queryView = buildQuery(cn, dialect, table, pagingQuery);
 
@@ -244,7 +256,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		if (query == null)
 			query = dialect.toOrderSql(queryView, pagingQuery.getOrders());
 
-		List<Row> rows = executeListQuery(cn, table, query, mapper, startRow, count);
+		List<Row> rows = executeListQuery(cn, table, query, startRow, count);
 
 		pagingData.setItems(rows);
 
@@ -327,8 +339,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	 * @return
 	 * @throws PersistenceException
 	 */
-	protected Sql buildUniqueRecordCondition(Connection cn, Dialect dialect, Table table, Row row,
-			PstValueConverter converter) throws PersistenceException
+	protected Sql buildUniqueRecordCondition(Connection cn, Dialect dialect, Table table, Row row)
+			throws PersistenceException
 	{
 		Column[] columns = getUniqueRecordColumns(table);
 
@@ -341,7 +353,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 			Object value = row.get(name);
 
-			value = converter.convert(cn, dialect, table, column, value);
+			value = convertToPstValue(cn, dialect, table, column, value);
 
 			sql.sqld(quote(dialect, name) + "=?").param(value, column.getType());
 		}
@@ -399,5 +411,22 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		}
 
 		return re.toArray(new Column[re.size()]);
+	}
+
+	protected List<Row> executeListQuery(Connection cn, Table table, Sql sql) throws PersistenceException
+	{
+		return executeListQuery(cn, table, sql, 1, -1);
+	}
+
+	protected List<Row> executeListQuery(Connection cn, Table table, Sql sql, int startRow, int count)
+			throws PersistenceException
+	{
+		return executeListQuery(cn, table, sql, this.rowMapper, startRow, count);
+	}
+
+	protected Object convertToPstValue(Connection cn, Dialect dialect, Table table, Column column, Object value)
+			throws PersistenceException
+	{
+		return this.pstValueConverter.convert(cn, dialect, table, column, value);
 	}
 }

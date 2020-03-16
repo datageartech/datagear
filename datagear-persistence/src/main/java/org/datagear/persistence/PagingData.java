@@ -10,7 +10,6 @@ import java.util.List;
  * 分页数据。
  * 
  * @author datagear@163.com
- * @createDate 2013-2-4
  *
  * @param <T>
  */
