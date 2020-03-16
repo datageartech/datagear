@@ -10,7 +10,6 @@ import java.sql.Connection;
 
 import org.datagear.meta.Table;
 import org.datagear.meta.resolver.GenericDBMetaResolver;
-import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectSource;
 import org.datagear.persistence.Row;
 import org.datagear.util.JdbcUtil;
@@ -28,28 +27,23 @@ import org.junit.Test;
 public class DefaultPersistenceManagerTest extends DBTestSupport
 {
 	private GenericDBMetaResolver genericDBMetaResolver;
-
-	private DialectSource dialectSource;
-
 	private DefaultPersistenceManager defaultPersistenceManager;
 
 	private Connection connection;
-	private Dialect dialect;
 
 	public DefaultPersistenceManagerTest()
 	{
 		super();
 
 		this.genericDBMetaResolver = new GenericDBMetaResolver();
-		this.dialectSource = new DefaultDialectSource(this.genericDBMetaResolver);
-		this.defaultPersistenceManager = new DefaultPersistenceManager();
+		DialectSource dialectSource = new DefaultDialectSource(genericDBMetaResolver);
+		this.defaultPersistenceManager = new DefaultPersistenceManager(dialectSource);
 	}
 
 	@Before
 	public void init() throws Exception
 	{
 		this.connection = getConnection();
-		this.dialect = this.dialectSource.getDialect(this.connection);
 	}
 
 	@After
@@ -72,16 +66,16 @@ public class DefaultPersistenceManagerTest extends DBTestSupport
 
 		try
 		{
-			this.defaultPersistenceManager.insert(connection, dialect, table, row);
+			this.defaultPersistenceManager.insert(connection, table, row);
 
-			Row getRow = this.defaultPersistenceManager.get(connection, dialect, table, row);
+			Row getRow = this.defaultPersistenceManager.get(connection, table, row);
 
 			assertEquals(id, ((Number) getRow.get("ID")).intValue());
 			assertEquals(name, getRow.get("NAME"));
 		}
 		finally
 		{
-			this.defaultPersistenceManager.delete(connection, dialect, table, row);
+			this.defaultPersistenceManager.delete(connection, table, row);
 		}
 	}
 }

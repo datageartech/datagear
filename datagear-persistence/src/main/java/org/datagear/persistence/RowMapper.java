@@ -23,9 +23,9 @@ public interface RowMapper
 	 * @param cn
 	 * @param table
 	 * @param rs
-	 * @param row   行号，以{@code 1}开始
+	 * @param rowIndex   行号，以{@code 1}开始
 	 * @return
 	 * @throws RowMapperException
 	 */
-	Row map(Connection cn, Table table, ResultSet rs, int row) throws RowMapperException;
+	Row map(Connection cn, Table table, ResultSet rs, int rowIndex) throws RowMapperException;
 }

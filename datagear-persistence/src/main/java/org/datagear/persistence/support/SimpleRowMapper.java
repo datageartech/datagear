@@ -28,7 +28,7 @@ public class SimpleRowMapper extends PersistenceSupport implements RowMapper
 	}
 
 	@Override
-	public Row map(Connection cn, Table table, ResultSet rs, int row) throws RowMapperException
+	public Row map(Connection cn, Table table, ResultSet rs, int rowIndex) throws RowMapperException
 	{
 		Row rowObj = new Row();
 

@@ -11,15 +11,15 @@ import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 
 /**
- * 对象至{@linkplain PreparedStatement}可用值转换器。
+ * 对象至{@linkplain PreparedStatement}可用值映射器。
  * 
  * @author datagear@163.com
  *
  */
-public interface PstValueConverter
+public interface PstValueMapper
 {
 	/**
-	 * 转换。
+	 * 映射。
 	 * 
 	 * @param cn
 	 * @param dialect
@@ -27,8 +27,8 @@ public interface PstValueConverter
 	 * @param column
 	 * @param value
 	 * @return
-	 * @throws PstValueConverterException
+	 * @throws PstValueMapperException
 	 */
-	Object convert(Connection cn, Dialect dialect, Table table, Column column, Object value)
-			throws PstValueConverterException;
+	Object map(Connection cn, Dialect dialect, Table table, Column column, Object value)
+			throws PstValueMapperException;
 }

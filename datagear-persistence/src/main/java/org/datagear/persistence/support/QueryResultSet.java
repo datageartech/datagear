@@ -4,10 +4,13 @@
 
 package org.datagear.persistence.support;
 
+import java.io.Closeable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.List;
 
+import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 
 /**
@@ -22,6 +25,8 @@ public class QueryResultSet
 
 	private ResultSet resultSet;
 
+	private List<Object> params;
+
 	public QueryResultSet()
 	{
 		super();
@@ -32,6 +37,14 @@ public class QueryResultSet
 		super();
 		this.statement = statement;
 		this.resultSet = resultSet;
+	}
+
+	public QueryResultSet(Statement statement, ResultSet resultSet, List<Object> params)
+	{
+		super();
+		this.statement = statement;
+		this.resultSet = resultSet;
+		this.params = params;
 	}
 
 	public Statement getStatement()
@@ -54,6 +67,21 @@ public class QueryResultSet
 		this.resultSet = resultSet;
 	}
 
+	public boolean hasParam()
+	{
+		return (this.params != null && !this.params.isEmpty());
+	}
+
+	public List<Object> getParams()
+	{
+		return params;
+	}
+
+	public void setParams(List<Object> params)
+	{
+		this.params = params;
+	}
+
 	public boolean isPreparedStatement()
 	{
 		return (this.statement instanceof PreparedStatement);
@@ -69,6 +97,15 @@ public class QueryResultSet
 	 */
 	public void close()
 	{
+		if (this.params != null)
+		{
+			for (Object param : this.params)
+			{
+				if (param instanceof Closeable)
+					IOUtil.close((Closeable) param);
+			}
+		}
+
 		JdbcUtil.closeResultSet(this.resultSet);
 		JdbcUtil.closeStatement(this.statement);
 	}

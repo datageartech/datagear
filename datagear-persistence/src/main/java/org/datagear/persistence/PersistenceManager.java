@@ -20,19 +20,17 @@ public interface PersistenceManager
 	 * 插入行对象。
 	 * 
 	 * @param cn
-	 * @param dialect
 	 * @param table
 	 * @param row
 	 * @return
 	 * @throws PersistenceException
 	 */
-	int insert(Connection cn, Dialect dialect, Table table, Row row) throws PersistenceException;
+	int insert(Connection cn, Table table, Row row) throws PersistenceException;
 
 	/**
 	 * 更新行对象。
 	 * 
 	 * @param cn
-	 * @param dialect
 	 * @param table
 	 * @param origin
 	 *            原行
@@ -41,31 +39,29 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	int update(Connection cn, Dialect dialect, Table table, Row origin, Row update) throws PersistenceException;
+	int update(Connection cn, Table table, Row origin, Row update) throws PersistenceException;
 
 	/**
 	 * 删除行对象。
 	 * 
 	 * @param cn
-	 * @param dialect
 	 * @param table
 	 * @param rows
 	 * @return
 	 * @throws PersistenceException
 	 */
-	int delete(Connection cn, Dialect dialect, Table table, Row... rows) throws PersistenceException;
+	int delete(Connection cn, Table table, Row... rows) throws PersistenceException;
 
 	/**
 	 * 删除查询结果。
 	 * 
 	 * @param cn
-	 * @param dialect
 	 * @param table
 	 * @param query
 	 * @return
 	 * @throws PersistenceException
 	 */
-	int delete(Connection cn, Dialect dialect, Table table, Query query) throws PersistenceException;
+	int delete(Connection cn, Table table, Query query) throws PersistenceException;
 
 	/**
 	 * 获取行对象。
@@ -76,7 +72,7 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	Row get(Connection cn, Dialect dialect, Table table, Row param) throws PersistenceException;
+	Row get(Connection cn, Table table, Row param) throws PersistenceException;
 
 	/**
 	 * 查询。
@@ -88,7 +84,7 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	List<Row> query(Connection cn, Dialect dialect, Table table, Query query) throws PersistenceException;
+	List<Row> query(Connection cn, Table table, Query query) throws PersistenceException;
 
 	/**
 	 * 分页查询。
@@ -99,6 +95,5 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	PagingData<Row> pagingQuery(Connection cn, Dialect dialect, Table table, PagingQuery pagingQuery)
-			throws PersistenceException;
+	PagingData<Row> pagingQuery(Connection cn, Table table, PagingQuery pagingQuery) throws PersistenceException;
 }
