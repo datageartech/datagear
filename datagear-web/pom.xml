@@ -19,17 +19,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.datagear</groupId>
-			<artifactId>datagear-model</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.datagear</groupId>
-			<artifactId>datagear-persistence</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.datagear</groupId>
-			<artifactId>datagear-dbmodel</artifactId>
+			<artifactId>datagear-deprecated</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

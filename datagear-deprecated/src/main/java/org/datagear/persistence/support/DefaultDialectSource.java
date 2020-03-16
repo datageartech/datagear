@@ -6,26 +6,26 @@ package org.datagear.persistence.support;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.datagear.connection.ConnectionOption;
-import org.datagear.meta.Column;
-import org.datagear.meta.SimpleTable;
-import org.datagear.meta.resolver.DBMetaResolver;
+import org.datagear.dbinfo.ColumnInfo;
+import org.datagear.dbinfo.DatabaseInfoResolver;
+import org.datagear.dbinfo.TableInfo;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectBuilder;
 import org.datagear.persistence.DialectException;
 import org.datagear.persistence.DialectSource;
 import org.datagear.persistence.Order;
-import org.datagear.persistence.Sql;
-import org.datagear.persistence.support.dialect.MysqlDialectBuilder;
-import org.datagear.persistence.support.dialect.OracleDialectBuilder;
-import org.datagear.persistence.support.dialect.SqlServerDialectBuilder;
+import org.datagear.persistence.SqlBuilder;
+import org.datagear.persistence.UnsupportedDialectException;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.JdbcUtil.QueryResultSet;
 
 /**
  * 默认{@linkplain DialectSource}。
@@ -33,9 +33,15 @@ import org.datagear.util.JdbcUtil;
  * @author datagear@163.com
  *
  */
-public class DefaultDialectSource extends PersistenceSupport implements DialectSource
+public class DefaultDialectSource implements DialectSource
 {
-	private DBMetaResolver dbMetaResolver;
+	protected static final String[] TABLE_TYPES = { "TABLE", "VIEW", "ALIAS" };
+
+	protected static final String COLUMN_TABLE_NAME = "TABLE_NAME";
+
+	protected static final String COLUMN_COLUMN_NAME = "COLUMN_NAME";
+
+	private DatabaseInfoResolver databaseInfoResolver;
 
 	private List<DialectBuilder> dialectBuilders;
 
@@ -48,25 +54,21 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 		super();
 	}
 
-	public DefaultDialectSource(DBMetaResolver dbMetaResolver)
+	public DefaultDialectSource(DatabaseInfoResolver databaseInfoResolver, List<DialectBuilder> dialectBuilders)
 	{
 		super();
-		this.dbMetaResolver = dbMetaResolver;
-		this.dialectBuilders = new ArrayList<DialectBuilder>();
-
-		this.dialectBuilders.add(new MysqlDialectBuilder());
-		this.dialectBuilders.add(new OracleDialectBuilder());
-		this.dialectBuilders.add(new SqlServerDialectBuilder());
+		this.databaseInfoResolver = databaseInfoResolver;
+		this.dialectBuilders = dialectBuilders;
 	}
 
-	public DBMetaResolver getDbMetaResolver()
+	public DatabaseInfoResolver getDatabaseInfoResolver()
 	{
-		return dbMetaResolver;
+		return databaseInfoResolver;
 	}
 
-	public void setDbMetaResolver(DBMetaResolver dbMetaResolver)
+	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
 	{
-		this.dbMetaResolver = dbMetaResolver;
+		this.databaseInfoResolver = databaseInfoResolver;
 	}
 
 	public List<DialectBuilder> getDialectBuilders()
@@ -202,21 +204,23 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 	 */
 	protected TestInfo buildTestInfo(Connection cn, DatabaseMetaData databaseMetaData)
 	{
-		SimpleTable table = this.dbMetaResolver.getRandomSimpleTable(cn);
+		TableInfo tableInfo = this.databaseInfoResolver.getRandomTableInfo(cn);
 
-		if (table == null)
+		if (tableInfo == null)
 			return null;
 
-		Column column = this.dbMetaResolver.getRandomColumn(cn, table.getName());
+		String tableName = tableInfo.getName();
 
-		if (column == null)
+		ColumnInfo columnInfo = this.databaseInfoResolver.getRandomColumnInfo(cn, tableName);
+
+		if (columnInfo == null)
 			return null;
 
-		return new TestInfo(table.getName(), column.getName());
+		return new TestInfo(tableInfo.getName(), columnInfo.getName());
 	}
 
 	/**
-	 * 测试{@linkplain Dialect#toPagingSql(Sql, Sql, Order[], long, int)}方法。
+	 * 测试{@linkplain Dialect#toPagingSql(SqlBuilder, SqlBuilder, Order[], long, int)}方法。
 	 * 
 	 * @param cn
 	 * @param databaseMetaData
@@ -233,16 +237,43 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 		String tableQuote = identifierQuote + testInfo.getTableName() + identifierQuote;
 		String columnName = identifierQuote + testInfo.getOrderColumnName() + identifierQuote;
 
-		Sql query = Sql.valueOf();
+		SqlBuilder query = SqlBuilder.valueOf();
 		query.sql("SELECT * FROM ").sql(tableQuote);
 
 		Order[] orders = Order.asArray(Order.valueOf(columnName, Order.ASC));
 
-		Sql pagingQuerySql = dialect.toPagingQuerySql(query, orders, 1, 5);
+		SqlBuilder pagingQuerySql = dialect.toPagingQuerySql(query, orders, 1, 5);
 
 		executeQuery(cn, pagingQuerySql);
 
 		return true;
+	}
+
+	/**
+	 * 执行查询。
+	 * 
+	 * @param cn
+	 * @param query
+	 * @return
+	 */
+	protected void executeQuery(Connection cn, SqlBuilder query) throws Exception
+	{
+		PreparedStatement pst = null;
+		ResultSet rs = null;
+
+		try
+		{
+			QueryResultSet queryResultSet = JdbcUtil.executeQuery(cn, query.getSqlString(), query.getArgTypes(),
+					query.getArgs());
+
+			pst = queryResultSet.getPreparedStatement();
+			rs = queryResultSet.getResultSet();
+		}
+		finally
+		{
+			JdbcUtil.closeResultSet(rs);
+			JdbcUtil.closeStatement(pst);
+		}
 	}
 
 	protected static class TestInfo
@@ -315,7 +346,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 		}
 
 		@Override
-		public Sql toPagingQuerySql(Sql query, Order[] orders, long startRow, int count)
+		public SqlBuilder toPagingQuerySql(SqlBuilder query, Order[] orders, long startRow, int count)
 		{
 			if (this.toPagingQuerySqlDialect == null)
 				return null;

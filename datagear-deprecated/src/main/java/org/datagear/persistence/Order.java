@@ -134,6 +134,32 @@ public class Order implements Serializable
 	}
 
 	/**
+	 * 将{@linkplain Order}数组转换为排序SQL。
+	 * <p>
+	 * 如果{@code orders}为{@code null}或者空数组，将返回{@code null}。
+	 * </p>
+	 * 
+	 * @param orders
+	 * @return
+	 */
+	public static SqlBuilder toOrderSql(Order... orders)
+	{
+		if (orders == null || orders.length == 0)
+			return null;
+
+		SqlBuilder orderSql = SqlBuilder.valueOf().delimit(", ");
+
+		for (int i = 0; i < orders.length; i++)
+		{
+			Order order = orders[i];
+
+			orderSql.sqld(order.getName() + " " + (order.isAsc() ? ASC : DESC));
+		}
+
+		return orderSql;
+	}
+
+	/**
 	 * 转换为数组。
 	 * 
 	 * @param order

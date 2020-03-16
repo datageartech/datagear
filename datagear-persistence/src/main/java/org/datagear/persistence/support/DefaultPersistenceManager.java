@@ -5,516 +5,399 @@
 package org.datagear.persistence.support;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.datagear.model.Model;
-import org.datagear.model.Property;
-import org.datagear.model.support.MU;
-import org.datagear.model.support.PropertyPathInfo;
+import org.datagear.meta.Column;
+import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
-import org.datagear.persistence.DialectSource;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.PersistenceManager;
-import org.datagear.persistence.QueryResultMetaInfo;
-import org.datagear.persistence.SqlBuilder;
-import org.datagear.persistence.mapper.Mapper;
-import org.springframework.core.convert.ConversionService;
+import org.datagear.persistence.PstValueConverter;
+import org.datagear.persistence.Query;
+import org.datagear.persistence.Row;
+import org.datagear.persistence.RowMapper;
+import org.datagear.persistence.Sql;
+import org.datagear.util.JdbcUtil;
+import org.datagear.util.StringUtil;
 
 /**
- * 默认持久化管理器。
+ * 默认{@linkplain PersistenceManager}。
  * 
  * @author datagear@163.com
  *
  */
-public class DefaultPersistenceManager extends AbstractModelDataAccessObject implements PersistenceManager
+public class DefaultPersistenceManager extends PersistenceSupport implements PersistenceManager
 {
-	protected static final String COLLECTION_PROPERTY_SIZE_NAME = "size";
-
-	/** 数据库方言源 */
-	private DialectSource dialectSource;
-
-	private ConversionService conversionService;
-
-	private NameExpressionResolver variableExpressionResolver;
-
-	private NameExpressionResolver sqlExpressionResolver;
-
-	private InsertPersistenceOperation insertPersistenceOperation;
-
-	private UpdatePersistenceOperation updatePersistenceOperation;
-
-	private DeletePersistenceOperation deletePersistenceOperation;
-
-	private SelectPersistenceOperation selectPersistenceOperation;
-
 	public DefaultPersistenceManager()
 	{
-		this(null, null);
-	}
-
-	public DefaultPersistenceManager(DialectSource dialectSource, ConversionService conversionService)
-	{
 		super();
-
-		this.dialectSource = dialectSource;
-		this.conversionService = conversionService;
-
-		this.variableExpressionResolver = new VariableExpressionResolver();
-
-		this.sqlExpressionResolver = new SqlExpressionResolver();
-
-		this.insertPersistenceOperation = new InsertPersistenceOperation(this.conversionService,
-				this.variableExpressionResolver, this.sqlExpressionResolver);
-
-		this.deletePersistenceOperation = new DeletePersistenceOperation();
-
-		this.updatePersistenceOperation = new UpdatePersistenceOperation(this.insertPersistenceOperation,
-				this.deletePersistenceOperation, this.conversionService, this.variableExpressionResolver,
-				this.sqlExpressionResolver);
-
-		this.selectPersistenceOperation = new SelectPersistenceOperation();
 	}
 
 	@Override
-	public DialectSource getDialectSource()
-	{
-		return dialectSource;
-	}
-
-	public void setDialectSource(DialectSource dialectSource)
-	{
-		this.dialectSource = dialectSource;
-	}
-
-	public ConversionService getConversionService()
-	{
-		return conversionService;
-	}
-
-	public void setConversionService(ConversionService conversionService)
-	{
-		this.conversionService = conversionService;
-		this.insertPersistenceOperation.setConversionService(conversionService);
-		this.updatePersistenceOperation.setConversionService(conversionService);
-	}
-
-	public NameExpressionResolver getVariableExpressionResolver()
-	{
-		return variableExpressionResolver;
-	}
-
-	public void setVariableExpressionResolver(NameExpressionResolver variableExpressionResolver)
-	{
-		this.variableExpressionResolver = variableExpressionResolver;
-		this.insertPersistenceOperation.setVariableExpressionResolver(variableExpressionResolver);
-		this.updatePersistenceOperation.setVariableExpressionResolver(variableExpressionResolver);
-	}
-
-	public NameExpressionResolver getSqlExpressionResolver()
-	{
-		return sqlExpressionResolver;
-	}
-
-	public void setSqlExpressionResolver(NameExpressionResolver sqlExpressionResolver)
-	{
-		this.sqlExpressionResolver = sqlExpressionResolver;
-		this.insertPersistenceOperation.setSqlExpressionResolver(sqlExpressionResolver);
-		this.updatePersistenceOperation.setSqlExpressionResolver(sqlExpressionResolver);
-	}
-
-	public InsertPersistenceOperation getInsertPersistenceOperation()
-	{
-		return insertPersistenceOperation;
-	}
-
-	public void setInsertPersistenceOperation(InsertPersistenceOperation insertPersistenceOperation)
-	{
-		this.insertPersistenceOperation = insertPersistenceOperation;
-	}
-
-	public UpdatePersistenceOperation getUpdatePersistenceOperation()
-	{
-		return updatePersistenceOperation;
-	}
-
-	public void setUpdatePersistenceOperation(UpdatePersistenceOperation updatePersistenceOperation)
-	{
-		this.updatePersistenceOperation = updatePersistenceOperation;
-	}
-
-	public DeletePersistenceOperation getDeletePersistenceOperation()
-	{
-		return deletePersistenceOperation;
-	}
-
-	public void setDeletePersistenceOperation(DeletePersistenceOperation deletePersistenceOperation)
-	{
-		this.deletePersistenceOperation = deletePersistenceOperation;
-	}
-
-	public SelectPersistenceOperation getSelectPersistenceOperation()
-	{
-		return selectPersistenceOperation;
-	}
-
-	public void setSelectPersistenceOperation(SelectPersistenceOperation selectPersistenceOperation)
-	{
-		this.selectPersistenceOperation = selectPersistenceOperation;
-	}
-
-	@Override
-	public String getTableName(Model model)
-	{
-		return super.getTableName(model);
-	}
-
-	@Override
-	public int insert(Connection cn, Model model, Object obj) throws PersistenceException
-	{
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		return this.insertPersistenceOperation.insert(cn, dialect, getTableName(model), model, obj);
-	}
-
-	@Override
-	public int insert(Connection cn, Dialect dialect, String table, Model model, Object obj,
-			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException
-	{
-		return this.insertPersistenceOperation.insert(cn, dialect, table, model, obj, expressionEvaluationContext);
-	}
-
-	@Override
-	public int update(Connection cn, Model model, Object originalObj, Object updateObj, boolean updateMultipleProperty)
+	public int insert(Connection cn, Dialect dialect, Table table, Row row, PstValueConverter converter)
 			throws PersistenceException
 	{
-		Dialect dialect = this.dialectSource.getDialect(cn);
+		Sql sql = Sql.valueOf().sql("INSERT INTO ").sql(quote(dialect, table.getName())).sql(" (").delimit(",");
+		Sql valueSql = Sql.valueOf().sql(" VALUES (").delimit(",");
 
-		return this.updatePersistenceOperation.update(cn, dialect, getTableName(model), model, null, originalObj,
-				updateObj);
+		Column[] columns = table.getColumns();
+
+		for (int i = 0; i < columns.length; i++)
+		{
+			Column column = columns[i];
+			String name = column.getName();
+
+			if (!row.containsKey(name))
+				continue;
+
+			Object value = row.get(name);
+
+			if (value == null && column.isAutoincrement())
+				continue;
+
+			if (value == null && column.hasDefaultValue())
+				value = column.getDefaultValue();
+
+			value = converter.convert(cn, dialect, table, column, value);
+
+			sql.sqld(quote(dialect, name));
+			valueSql.sqld("?").param(value, column.getType());
+		}
+
+		sql.sql(")");
+		valueSql.sql(")");
+		sql.sql(valueSql);
+
+		return executeUpdate(cn, sql);
 	}
 
 	@Override
-	public int update(Connection cn, Model model, Property[] updateProperties, Object originalObj, Object updateObj)
+	public int update(Connection cn, Dialect dialect, Table table, Row origin, Row update, PstValueConverter converter)
 			throws PersistenceException
 	{
-		Dialect dialect = this.dialectSource.getDialect(cn);
+		Sql sql = Sql.valueOf().sql("UPDATE ").sql(quote(dialect, table.getName())).sql(" SET ").delimit(",");
 
-		return this.updatePersistenceOperation.update(cn, dialect, getTableName(model), model, updateProperties,
-				originalObj, updateObj);
+		Column[] columns = table.getColumns();
+
+		for (int i = 0; i < columns.length; i++)
+		{
+			Column column = columns[i];
+			String name = column.getName();
+
+			if (!update.containsKey(name))
+				continue;
+
+			Object value = update.get(name);
+
+			value = converter.convert(cn, dialect, table, column, value);
+
+			sql.sqld(quote(dialect, name) + "=?").param(value, column.getType());
+		}
+
+		sql.sql(" WHERE ").sql(buildUniqueRecordCondition(cn, dialect, table, origin, converter));
+
+		return executeUpdate(cn, sql);
 	}
 
 	@Override
-	public int update(Connection cn, Dialect dialect, String table, Model model, Object originalObj, Object updateObj,
-			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException
-	{
-		return this.updatePersistenceOperation.update(cn, dialect, table, model, null, originalObj, updateObj,
-				expressionEvaluationContext);
-	}
-
-	@Override
-	public int insertSinglePropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
-			Object propValue) throws PersistenceException
-	{
-		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
-
-		Model ownerModel = propertyPathInfo.getOwnerModelTail();
-		Object ownerObj = propertyPathInfo.getOwnerObjTail();
-		Property property = propertyPathInfo.getPropertyTail();
-
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		return insertPersistenceOperation.insertPropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
-				ownerObj, property, propValue);
-	}
-
-	@Override
-	public int updateSinglePropValue(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
-			Object propValue) throws PersistenceException
-	{
-		checkPropertyPathInfoModelTail(propertyPathInfo);
-		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
-		checkPropertyPathInfoValueTail(propertyPathInfo);
-
-		Model ownerModel = propertyPathInfo.getOwnerModelTail();
-		Object ownerObj = propertyPathInfo.getOwnerObjTail();
-		Property property = propertyPathInfo.getPropertyTail();
-		Mapper mapper = getMapper(ownerModel, property);
-
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		SqlBuilder condition = buildRecordCondition(cn, dialect, ownerModel, ownerObj, null);
-
-		return updatePersistenceOperation.updatePropertyTableData(cn, dialect, getTableName(ownerModel), model,
-				condition, property, mapper, null, propertyPathInfo.getValueTail(), propValue);
-	}
-
-	@Override
-	public int insertMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
-			Object... propValueElements) throws PersistenceException
-	{
-		checkPropertyPathInfoMultipleTail(propertyPathInfo);
-		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
-
-		Model ownerModel = propertyPathInfo.getOwnerModelTail();
-		Object ownerObj = propertyPathInfo.getOwnerObjTail();
-		Property property = propertyPathInfo.getPropertyTail();
-
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		return insertPersistenceOperation.insertPropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
-				ownerObj, property, propValueElements);
-	}
-
-	@Override
-	public int insertMultiplePropValueElement(Connection cn, Dialect dialect, Model model, Object obj,
-			PropertyPathInfo propertyPathInfo, Object propValueElement,
-			ExpressionEvaluationContext expressionEvaluationContext) throws PersistenceException
-	{
-		checkPropertyPathInfoMultipleTail(propertyPathInfo);
-		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
-
-		Model ownerModel = propertyPathInfo.getOwnerModelTail();
-		Object ownerObj = propertyPathInfo.getOwnerObjTail();
-		Property property = propertyPathInfo.getPropertyTail();
-
-		return insertPersistenceOperation.insertPropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
-				ownerObj, property, propValueElement, expressionEvaluationContext);
-	}
-
-	@Override
-	public int updateMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
-			Object propertyValueElement) throws PersistenceException
-	{
-		return updateMultiplePropValueElement(cn, model, obj, propertyPathInfo, null, propertyValueElement);
-	}
-
-	@Override
-	public int updateMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
-			Property[] updatePropertyProperties, Object propertyValueElement) throws PersistenceException
-	{
-		checkPropertyPathInfoMultipleTail(propertyPathInfo);
-		checkPropertyPathInfoModelTail(propertyPathInfo);
-		checkPropertyPathInfoValueTail(propertyPathInfo);
-		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
-
-		Model ownerModel = propertyPathInfo.getOwnerModelTail();
-		Object ownerObj = propertyPathInfo.getOwnerObjTail();
-		Object oldPropValueElement = propertyPathInfo.getValueTail();
-		Property property = propertyPathInfo.getPropertyTail();
-		Mapper mapper = getMapper(ownerModel, property);
-
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		SqlBuilder condition = buildRecordCondition(cn, dialect, ownerModel, ownerObj, null);
-
-		return updatePersistenceOperation.updatePropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
-				condition, property, mapper, updatePropertyProperties, oldPropValueElement, propertyValueElement);
-	}
-
-	@Override
-	public int delete(Connection cn, Model model, Object... objs) throws PersistenceException
-	{
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		return this.deletePersistenceOperation.delete(cn, dialect, getTableName(model), model, objs);
-	}
-
-	@Override
-	public int deleteMultiplePropValueElement(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo,
-			Object... propValueElements) throws PersistenceException
-	{
-		checkPropertyPathInfoMultipleTail(propertyPathInfo);
-		checkPropertyPathInfoModelTail(propertyPathInfo);
-		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
-
-		Model ownerModel = propertyPathInfo.getOwnerModelTail();
-		Object ownerObj = propertyPathInfo.getOwnerObjTail();
-		Property property = propertyPathInfo.getPropertyTail();
-		Model propertyModel = propertyPathInfo.getModelTail();
-		Mapper mapper = getMapper(ownerModel, property);
-
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		SqlBuilder ownerRecordCondition = buildRecordCondition(cn, dialect, ownerModel, ownerObj, null);
-		SqlBuilder propertyTableCondition = buildRecordCondition(cn, dialect, propertyModel, propValueElements,
-				getMappedByWith(mapper));
-
-		return deletePersistenceOperation.deletePropertyTableData(cn, dialect, getTableName(ownerModel), ownerModel,
-				ownerRecordCondition, property, mapper, propertyTableCondition, true);
-	}
-
-	@Override
-	public List<Object> getByParam(Connection cn, Model model, Object param) throws PersistenceException
-	{
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		return this.selectPersistenceOperation.getByParam(cn, dialect, getTableName(model), model, param);
-	}
-
-	@Override
-	public List<Object> getPropValueByParam(Connection cn, Model model, Object obj, PropertyPathInfo propertyPathInfo)
+	public int delete(Connection cn, Dialect dialect, Table table, Row row, PstValueConverter converter)
 			throws PersistenceException
 	{
-		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
-		checkPropertyPathInfoModelTail(propertyPathInfo);
-
-		Model ownerModel = propertyPathInfo.getOwnerModelTail();
-		Object ownerObj = propertyPathInfo.getOwnerObjTail();
-		Property property = propertyPathInfo.getPropertyTail();
-
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		return this.selectPersistenceOperation.getPropValueByParam(cn, dialect, getTableName(ownerModel), ownerModel,
-				ownerObj, property);
+		return delete(cn, dialect, table, new Row[] { row }, converter);
 	}
 
 	@Override
-	public List<Object> getMultiplePropValueElementByParam(Connection cn, Model model, Object obj,
-			PropertyPathInfo propertyPathInfo, Object propValueElementParam) throws PersistenceException
-	{
-		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
-		checkPropertyPathInfoModelTail(propertyPathInfo);
-
-		Model ownerModel = propertyPathInfo.getOwnerModelTail();
-		Object ownerObj = propertyPathInfo.getOwnerObjTail();
-		Property property = propertyPathInfo.getPropertyTail();
-
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		return this.selectPersistenceOperation.getMultiplePropValueElementByParam(cn, dialect, getTableName(ownerModel),
-				ownerModel, ownerObj, property, propValueElementParam);
-	}
-
-	@Override
-	public PagingData<Object> query(Connection cn, Model model, PagingQuery pagingQuery) throws PersistenceException
-	{
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		return this.selectPersistenceOperation.pagingQuery(cn, dialect, getTableName(model), model, pagingQuery);
-	}
-
-	@Override
-	public QueryResultMetaInfo getQueryResultMetaInfo(Connection cn, Model model) throws PersistenceException
-	{
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		QueryResultMetaInfo queryResultMetaInfo = this.selectPersistenceOperation.getQueryResultMetaInfo(dialect,
-				getTableName(model), model);
-
-		return queryResultMetaInfo;
-	}
-
-	@Override
-	public PagingData<Object> queryMultiplePropValue(Connection cn, Model model, Object obj,
-			PropertyPathInfo propertyPathInfo, PagingQuery pagingQuery, boolean propertyModelQueryPattern)
+	public int delete(Connection cn, Dialect dialect, Table table, Row[] rows, PstValueConverter converter)
 			throws PersistenceException
 	{
-		checkPropertyPathInfoMultipleTail(propertyPathInfo);
-		checkPropertyPathInfoOwnerObjTail(propertyPathInfo);
-		checkPropertyPathInfoModelTail(propertyPathInfo);
+		Sql sql = Sql.valueOf().sql("DELETE FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")
+				.delimit(" AND ");
 
-		Model ownerModel = propertyPathInfo.getOwnerModelTail();
-		Object ownerObj = propertyPathInfo.getOwnerObjTail();
-		Property property = propertyPathInfo.getPropertyTail();
+		Column[] columns = getUniqueRecordColumns(table);
 
-		Dialect dialect = this.dialectSource.getDialect(cn);
+		for (int i = 0; i < columns.length; i++)
+		{
+			Column column = columns[i];
+			String name = column.getName();
 
-		return this.selectPersistenceOperation.pagingQueryPropValue(cn, dialect, getTableName(ownerModel), ownerModel,
-				ownerObj, property, pagingQuery, propertyModelQueryPattern);
+			sql.sqld(quote(dialect, name) + "=?");
+		}
+
+		PreparedStatement pst = null;
+
+		try
+		{
+			pst = createPreparedStatement(cn, sql);
+
+			int count = 0;
+
+			for (int i = 0; i < rows.length; i++)
+			{
+				Row row = rows[i];
+				for (int j = 0; j < columns.length; j++)
+				{
+					Column column = columns[i];
+					String name = column.getName();
+					Object value = row.get(name);
+
+					value = converter.convert(cn, dialect, table, column, value);
+
+					sql.param(value, column.getType());
+				}
+
+				setParamValues(cn, pst, sql);
+				count += pst.executeUpdate();
+
+				sql.clearParam();
+				pst.clearParameters();
+			}
+
+			return count;
+		}
+		catch (SQLException e)
+		{
+			throw new PersistenceException(e);
+		}
+		finally
+		{
+			JdbcUtil.closeStatement(pst);
+		}
 	}
 
 	@Override
-	public QueryResultMetaInfo getQueryMultiplePropValueQueryResultMetaInfo(Connection cn, Model model, Object obj,
-			PropertyPathInfo propertyPathInfo, boolean propertyModelPattern) throws PersistenceException
+	public int delete(Connection cn, Dialect dialect, Table table, Query query) throws PersistenceException
 	{
-		checkPropertyPathInfoMultipleTail(propertyPathInfo);
-		checkPropertyPathInfoModelTail(propertyPathInfo);
-
-		Model ownerModel = propertyPathInfo.getOwnerModelTail();
-		Property property = propertyPathInfo.getPropertyTail();
-
-		Dialect dialect = this.dialectSource.getDialect(cn);
-
-		QueryResultMetaInfo queryResultMetaInfo = this.selectPersistenceOperation.getQueryPropValueQueryResultMetaInfo(
-				dialect, getTableName(ownerModel), ownerModel, property, propertyModelPattern);
-
-		return queryResultMetaInfo;
+		// TODO
+		throw new UnsupportedOperationException("TODO");
 	}
 
 	@Override
-	public PagingData<Object> queryPropValueSource(Connection cn, Model model, Object obj,
-			PropertyPathInfo propertyPathInfo, PagingQuery pagingQuery) throws PersistenceException
+	public Row get(Connection cn, Dialect dialect, Table table, Row param, PstValueConverter converter,
+			RowMapper mapper) throws PersistenceException
 	{
-		checkPropertyPathInfoModelTail(propertyPathInfo);
+		Sql sql = Sql.valueOf().sql("SELECT * FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")
+				.delimit(" AND ");
 
-		Model pmodel = propertyPathInfo.getModelTail();
+		Column[] columns = getUniqueRecordColumns(table);
 
-		Dialect dialect = this.dialectSource.getDialect(cn);
+		for (int i = 0; i < columns.length; i++)
+		{
+			Column column = columns[i];
+			String name = column.getName();
+			Object value = param.get(name);
 
-		return selectPersistenceOperation.pagingQuery(cn, dialect, getTableName(pmodel), pmodel, pagingQuery);
+			value = converter.convert(cn, dialect, table, column, value);
+
+			sql.sqld(quote(dialect, name) + "=?").param(value, column.getType());
+		}
+
+		List<Row> rows = executeListQuery(cn, table, sql, mapper);
+
+		if (rows.size() > 1)
+			throw new NonUniqueResultException();
+
+		return rows.get(0);
 	}
 
 	@Override
-	public QueryResultMetaInfo getQueryPropValueSourceQueryResultMetaInfo(Connection cn, Model model, Object obj,
-			PropertyPathInfo propertyPathInfo) throws PersistenceException
+	public List<Row> query(Connection cn, Dialect dialect, Table table, Query query, RowMapper mapper)
+			throws PersistenceException
 	{
-		checkPropertyPathInfoModelTail(propertyPathInfo);
+		Sql sql = buildQuery(cn, dialect, table, query);
+		return executeListQuery(cn, table, sql, mapper);
+	}
 
-		Model pmodel = propertyPathInfo.getModelTail();
+	@Override
+	public PagingData<Row> pagingQuery(Connection cn, Dialect dialect, Table table, PagingQuery pagingQuery,
+			RowMapper mapper) throws PersistenceException
+	{
+		Sql queryView = buildQuery(cn, dialect, table, pagingQuery);
 
-		Dialect dialect = this.dialectSource.getDialect(cn);
+		long total = executeCountQuery(cn, queryView);
 
-		QueryResultMetaInfo queryResultMetaInfo = this.selectPersistenceOperation.getQueryResultMetaInfo(dialect,
-				getTableName(pmodel), pmodel);
+		PagingData<Row> pagingData = new PagingData<>(pagingQuery.getPage(), total, pagingQuery.getPageSize());
 
-		return queryResultMetaInfo;
+		Sql query = null;
+
+		int startRow = pagingData.getStartRow();
+		int count = pagingData.getPageSize();
+
+		// 数据库分页
+		if (dialect.supportsPagingSql())
+		{
+			query = dialect.toPagingQuerySql(queryView, pagingQuery.getOrders(), startRow, count);
+
+			if (query != null)
+			{
+				startRow = 1;
+				count = -1;
+			}
+		}
+
+		// 内存分页
+		if (query == null)
+			query = dialect.toOrderSql(queryView, pagingQuery.getOrders());
+
+		List<Row> rows = executeListQuery(cn, table, query, mapper, startRow, count);
+
+		pagingData.setItems(rows);
+
+		return pagingData;
+	}
+
+	protected long queryCount(Connection cn, Sql query)
+	{
+		Sql countQuery = Sql.valueOf().sql("SELECT COUNT(*) FROM (").sql(query).sql(") T");
+
+		long re = executeCountQuery(cn, countQuery);
+
+		return re;
+	}
+
+	protected Sql buildQuery(Connection cn, Dialect dialect, Table table, Query query)
+	{
+		Sql sql = Sql.valueOf().sql("SELECT * FROM ").sql(quote(dialect, table.getName()));
+		Sql condition = buildQueryCondition(cn, dialect, table, query);
+
+		if (!Sql.isEmpty(condition))
+		{
+			sql.sql(" WHERE ");
+			sql.sql(condition);
+		}
+
+		return sql;
 	}
 
 	/**
-	 * 检查属性路径合法性。
+	 * 构建查询条件。
 	 * 
-	 * @param propertyPathInfo
+	 * @param cn
+	 * @param dialect
+	 * @param table
+	 * @param query
+	 * @return 返回{@code null}表示无条件
 	 */
-	protected void checkPropertyPathInfoMultipleTail(PropertyPathInfo propertyPathInfo)
+	protected Sql buildQueryCondition(Connection cn, Dialect dialect, Table table, Query query)
 	{
-		Property property = propertyPathInfo.getPropertyTail();
+		if (query == null)
+			return null;
 
-		if (!MU.isMultipleProperty(property))
-			throw new IllegalArgumentException("[propertyPathInfo] is illegal : not multiple");
+		if (!query.hasKeyword() && !query.hasCondition())
+			return null;
+
+		String conditionStr = (query.hasCondition() ? query.getCondition().trim() : null);
+		boolean hasCondition = !StringUtil.isEmpty(conditionStr);
+
+		Sql keywordCondition = dialect.toKeywordQueryCondition(table, query);
+
+		if (!hasCondition)
+		{
+			return keywordCondition;
+		}
+		else
+		{
+			Sql sql = Sql.valueOf();
+
+			if (Sql.isEmpty(keywordCondition))
+				sql.sql(conditionStr);
+			else
+				sql.sql("(").sql(conditionStr).sql(")").sql(" AND (").sql(keywordCondition).sql(")");
+
+			return sql;
+		}
 	}
 
 	/**
-	 * 检查属性路径合法性。
+	 * 尝试构建能够确定唯一行记录的查询条件。
+	 * <p>
+	 * 注意：如果表没有主键和唯一键，返回的查询结果不一定是能够确定唯一行的。
+	 * </p>
 	 * 
-	 * @param propertyPathInfo
+	 * @param cn
+	 * @param dialect
+	 * @param table
+	 * @param row
+	 * @param converter
+	 * @return
+	 * @throws PersistenceException
 	 */
-	protected void checkPropertyPathInfoOwnerObjTail(PropertyPathInfo propertyPathInfo)
+	protected Sql buildUniqueRecordCondition(Connection cn, Dialect dialect, Table table, Row row,
+			PstValueConverter converter) throws PersistenceException
 	{
-		if (!propertyPathInfo.hasOwnerObjTail())
-			throw new IllegalArgumentException("[propertyPathInfo] is illegal : no owner obj for tail");
+		Column[] columns = getUniqueRecordColumns(table);
+
+		Sql sql = Sql.valueOf().delimit(" AND ");
+
+		for (int i = 0; i < columns.length; i++)
+		{
+			Column column = columns[i];
+			String name = column.getName();
+
+			Object value = row.get(name);
+
+			value = converter.convert(cn, dialect, table, column, value);
+
+			sql.sqld(quote(dialect, name) + "=?").param(value, column.getType());
+		}
+
+		return sql;
 	}
 
 	/**
-	 * 检查属性路径合法性。
+	 * 尝试获取能确定唯一行记录的列数组。
 	 * 
-	 * @param propertyPathInfo
+	 * @param table
+	 * @return
+	 * @throws NonUniqueRecordColumnException
 	 */
-	protected void checkPropertyPathInfoModelTail(PropertyPathInfo propertyPathInfo)
+	protected Column[] getUniqueRecordColumns(Table table) throws NonUniqueRecordColumnException
 	{
-		if (!propertyPathInfo.hasModelTail())
-			throw new IllegalArgumentException("[propertyPathInfo] is illegal : no model tail");
+		Column[] columns = null;
+
+		if (table.hasPrimaryKey())
+			columns = table.getColumns(table.getPrimaryKey().getColumnNames());
+		else if (table.hasUniqueKey())
+			columns = table.getColumns(table.getUniqueKeys()[0].getColumnNames());
+		else
+			columns = getColumnsMaybeUniqueRecord(table);
+
+		if (columns == null || columns.length == 0)
+			throw new NonUniqueRecordColumnException("can not build unique row condition");
+
+		return columns;
 	}
 
 	/**
-	 * 检查属性路径合法性。
+	 * 获取可能用于作为行唯一行记标识的{@linkplain Column}数组。
 	 * 
-	 * @param propertyPathInfo
+	 * @param table
+	 * @return
 	 */
-	protected void checkPropertyPathInfoValueTail(PropertyPathInfo propertyPathInfo)
+	protected Column[] getColumnsMaybeUniqueRecord(Table table)
 	{
-		if (!propertyPathInfo.hasValueTail())
-			throw new IllegalArgumentException("[propertyPathInfo] is illegal : no value tail");
+		List<Column> re = new ArrayList<>();
+
+		Column[] columns = table.getColumns();
+		for (int i = 0; i < columns.length; i++)
+		{
+			int jdbcTypeValue = columns[i].getType();
+
+			if (Types.BIGINT == jdbcTypeValue || Types.BIT == jdbcTypeValue || Types.BOOLEAN == jdbcTypeValue
+					|| Types.CHAR == jdbcTypeValue || Types.DATE == jdbcTypeValue || Types.DECIMAL == jdbcTypeValue
+					|| Types.DOUBLE == jdbcTypeValue || Types.FLOAT == jdbcTypeValue || Types.INTEGER == jdbcTypeValue
+					|| Types.NULL == jdbcTypeValue || Types.NUMERIC == jdbcTypeValue || Types.REAL == jdbcTypeValue
+					|| Types.SMALLINT == jdbcTypeValue || Types.TIME == jdbcTypeValue
+					|| Types.TIMESTAMP == jdbcTypeValue || Types.TINYINT == jdbcTypeValue
+					|| Types.VARCHAR == jdbcTypeValue)
+				re.add(columns[i]);
+		}
+
+		return re.toArray(new Column[re.size()]);
 	}
 }

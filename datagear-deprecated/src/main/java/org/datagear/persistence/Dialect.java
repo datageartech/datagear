@@ -5,8 +5,9 @@
 package org.datagear.persistence;
 
 import java.sql.ResultSet;
+import java.util.List;
 
-import org.datagear.meta.Table;
+import org.datagear.model.Model;
 
 /**
  * 数据库方言。
@@ -16,9 +17,6 @@ import org.datagear.meta.Table;
  */
 public interface Dialect
 {
-	/** 默认作为关键字查询的列数。 */
-	int DEFAULT_KEYWORD_QUERY_COLUMN_COUNT = 3;
-
 	/**
 	 * 为给定名字添加标识符引用符号。
 	 * 
@@ -82,34 +80,44 @@ public interface Dialect
 	 *            查询记录数
 	 * @return
 	 */
-	Sql toPagingQuerySql(Sql query, Order[] orders, long startRow, int count);
-
-	/**
-	 * 获取作为关键字查询的列数。
-	 * 
-	 * @return
-	 */
-	int getKeywordQueryColumnCount();
+	SqlBuilder toPagingQuerySql(SqlBuilder query, Order[] orders, long startRow, int count);
 
 	/**
 	 * 构建关键字SQL查询条件。
 	 * <p>
-	 * 返回{@code null}、或者空{@linkplain Sql}表示无关键字SQL查询条件。
+	 * SQL查询条件应该使用{@linkplain QueryColumnMetaInfo#getColumnPath()}作为列引用。
+	 * </p>
+	 * <p>
+	 * 返回{@code null}、或者空{@linkplain SqlBuilder}表示无关键字SQL查询条件。
 	 * </p>
 	 * 
-	 * @param table
+	 * @param model
 	 * @param query
 	 *            此次查询
+	 * @param queryColumnMetaInfos
+	 *            此次查询的结果集{@linkplain QueryColumnMetaInfo}列表
 	 * @return
 	 */
-	Sql toKeywordQueryCondition(Table table, Query query);
+	SqlBuilder toKeywordQueryCondition(Model model, Query query,
+			List<? extends QueryColumnMetaInfo> queryColumnMetaInfos);
 
 	/**
-	 * 构建排序SQL。
+	 * 给定SQL类型的列是否是可排序的。
 	 * 
-	 * @param query
-	 * @param orders
+	 * @param sqlType
 	 * @return
 	 */
-	Sql toOrderSql(Sql query, Order[] orders);
+	boolean isSortable(int sqlType);
+
+	/**
+	 * 获取用于{@linkplain #toPagingQuerySql(SqlBuilder, Order[], long, int)}的排序名。
+	 * <p>
+	 * 如果{@linkplain #toPagingQuerySql(SqlBuilder, Order[], long, int)}内部包裹初始的查询SQL，
+	 * 那么只能使用{@linkplain QueryColumnMetaInfo#getColumnAlias()}作为排序名。
+	 * </p>
+	 * 
+	 * @param queryColumnMetaInfo
+	 * @return
+	 */
+	String getPagingQueryOrderName(QueryColumnMetaInfo queryColumnMetaInfo);
 }

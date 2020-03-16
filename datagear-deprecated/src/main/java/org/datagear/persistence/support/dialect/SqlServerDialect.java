@@ -5,7 +5,7 @@
 package org.datagear.persistence.support.dialect;
 
 import org.datagear.persistence.Order;
-import org.datagear.persistence.Sql;
+import org.datagear.persistence.SqlBuilder;
 import org.datagear.persistence.support.AbstractDialect;
 
 /**
@@ -33,15 +33,15 @@ public class SqlServerDialect extends AbstractDialect
 	}
 
 	@Override
-	public Sql toPagingQuerySql(Sql query, Order[] orders, long startRow, int count)
+	public SqlBuilder toPagingQuerySql(SqlBuilder query, Order[] orders, long startRow, int count)
 	{
 		// SqlServer分页需要排序字段
 		if (orders == null || orders.length == 0)
 			return null;
 
-		Sql sql = Sql.valueOf();
+		SqlBuilder sql = SqlBuilder.valueOf();
 
-		Sql orderSql = toOrderSql(orders);
+		SqlBuilder orderSql = toOrderSql(orders);
 
 		sql.sql("SELECT T1.* FROM (SELECT ROW_NUMBER() OVER (ORDER BY ").sql(orderSql).sql(") AS ROWNUM_____, T0.* ");
 		sql.sql(" FROM (").sql(query).sql(

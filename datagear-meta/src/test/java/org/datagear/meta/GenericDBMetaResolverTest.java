@@ -7,8 +7,8 @@ package org.datagear.meta;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.hamcrest.collection.ArrayMatching.arrayContaining;
 import static org.hamcrest.collection.ArrayMatching.hasItemInArray;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsIterableContaining.hasItem;
+import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 import static org.junit.Assert.assertThat;
 
 import java.sql.Connection;
@@ -56,8 +56,8 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 	{
 		List<SimpleTable> simpleTables = this.genericDBMetaResolver.getSimpleTables(this.connection);
 
-		assertThat(simpleTables, hasItem(hasProperty("name", equalTo("T_ACCOUNT"))));
-		assertThat(simpleTables, hasItem(hasProperty("name", equalTo("T_ADDRESS"))));
+		assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ACCOUNT"))));
+		assertThat(simpleTables, hasItem(hasProperty("name", equalToIgnoringCase("T_ADDRESS"))));
 	}
 
 	@Test
@@ -65,17 +65,17 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 	{
 		{
 			Table table = this.genericDBMetaResolver.getTable(this.connection, "T_ACCOUNT");
-			assertThat(table, hasProperty("name", equalTo("T_ACCOUNT")));
-			assertThat(table.getColumns(), hasItemInArray(hasProperty("name", equalTo("ID"))));
-			assertThat(table.getPrimaryKey(), hasProperty("columnNames", hasItemInArray(equalTo("ID"))));
+			assertThat(table, hasProperty("name", equalToIgnoringCase("T_ACCOUNT")));
+			assertThat(table.getColumns(), hasItemInArray(hasProperty("name", equalToIgnoringCase("ID"))));
+			assertThat(table.getPrimaryKey(), hasProperty("columnNames", hasItemInArray(equalToIgnoringCase("ID"))));
 		}
 
 		{
 			Table table = this.genericDBMetaResolver.getTable(this.connection, "T_ADDRESS");
-			assertThat(table, hasProperty("name", equalTo("T_ADDRESS")));
-			assertThat(table.getColumns(), hasItemInArray(hasProperty("name", equalTo("ACCOUNT_ID"))));
+			assertThat(table, hasProperty("name", equalToIgnoringCase("T_ADDRESS")));
+			assertThat(table.getColumns(), hasItemInArray(hasProperty("name", equalToIgnoringCase("ACCOUNT_ID"))));
 			assertThat(table.getUniqueKeys(),
-					hasItemInArray(hasProperty("columnNames", arrayContaining("ACCOUNT_ID"))));
+					hasItemInArray(hasProperty("columnNames", arrayContaining(equalToIgnoringCase("ACCOUNT_ID")))));
 		}
 	}
 }

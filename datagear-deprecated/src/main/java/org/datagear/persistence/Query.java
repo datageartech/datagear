@@ -20,6 +20,9 @@ public class Query implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	/** 针对keyword，是否使用“NOT LIKE”而非“LIKE” */
+	private boolean notLike = false;
+
 	/** 查询关键字 */
 	private String keyword;
 
@@ -31,9 +34,6 @@ public class Query implements Serializable
 
 	/** 查询参数 */
 	private Map<String, Object> params = new HashMap<String, Object>();
-
-	/** 针对keyword，是否使用“NOT LIKE”而非“LIKE” */
-	private boolean notLike = false;
 
 	public Query()
 	{
@@ -119,8 +119,50 @@ public class Query implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [keyword=" + keyword + ", condition=" + condition + ", orders="
-				+ Arrays.toString(orders)
-				+ ", params=" + params + ", notLike=" + notLike + "]";
+		return getClass().getSimpleName() + " [notLike=" + notLike + ", keyword=" + keyword + ", condition=" + condition
+				+ ", orders=" + Arrays.toString(orders) + "]";
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((condition == null) ? 0 : condition.hashCode());
+		result = prime * result + ((keyword == null) ? 0 : keyword.hashCode());
+		result = prime * result + (notLike ? 1231 : 1237);
+		result = prime * result + Arrays.hashCode(orders);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Query other = (Query) obj;
+		if (condition == null)
+		{
+			if (other.condition != null)
+				return false;
+		}
+		else if (!condition.equals(other.condition))
+			return false;
+		if (keyword == null)
+		{
+			if (other.keyword != null)
+				return false;
+		}
+		else if (!keyword.equals(other.keyword))
+			return false;
+		if (notLike != other.notLike)
+			return false;
+		if (!Arrays.equals(orders, other.orders))
+			return false;
+		return true;
 	}
 }

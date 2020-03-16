@@ -15,17 +15,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.datagear</groupId>
-			<artifactId>datagear-model</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.datagear</groupId>
-			<artifactId>datagear-connection</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.datagear</groupId>
-			<artifactId>datagear-dbinfo</artifactId>
+			<artifactId>datagear-meta</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

@@ -4,17 +4,13 @@
 
 package org.datagear.persistence.support;
 
-import java.sql.Types;
-import java.util.List;
-
-import org.datagear.dbinfo.SqlTypeInfo.SearchableType;
-import org.datagear.model.Model;
+import org.datagear.meta.Column;
+import org.datagear.meta.SearchableType;
+import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Query;
-import org.datagear.persistence.QueryColumnMetaInfo;
-import org.datagear.persistence.SqlBuilder;
-import org.datagear.util.JDBCCompatiblity;
+import org.datagear.persistence.Sql;
 import org.datagear.util.JdbcUtil;
 
 /**
@@ -27,6 +23,9 @@ public abstract class AbstractDialect implements Dialect
 {
 	/** 标识引用符 */
 	private String identifierQuote;
+
+	/** 作为关键字查询的列数 */
+	private int keywordQueryColumnCount = Dialect.DEFAULT_KEYWORD_QUERY_COLUMN_COUNT;
 
 	public AbstractDialect()
 	{
@@ -48,6 +47,17 @@ public abstract class AbstractDialect implements Dialect
 	public void setIdentifierQuote(String identifierQuote)
 	{
 		this.identifierQuote = identifierQuote;
+	}
+
+	@Override
+	public int getKeywordQueryColumnCount()
+	{
+		return keywordQueryColumnCount;
+	}
+
+	public void setKeywordQueryColumnCount(int keywordQueryColumnCount)
+	{
+		this.keywordQueryColumnCount = keywordQueryColumnCount;
 	}
 
 	@Override
@@ -74,39 +84,27 @@ public abstract class AbstractDialect implements Dialect
 	}
 
 	@Override
-	public SqlBuilder toKeywordQueryCondition(Model model, Query query,
-			List<? extends QueryColumnMetaInfo> queryColumnMetaInfos)
+	public Sql toKeywordQueryCondition(Table table, Query query)
 	{
-		SqlBuilder keywordCondition = SqlBuilder.valueOf();
+		Sql sql = Sql.valueOf();
 
 		if (!query.hasKeyword())
-			return keywordCondition;
+			return sql;
 
 		String joinOpt = (query.isNotLike() ? " AND " : " OR ");
 		String likeOpt = (query.isNotLike() ? " NOT LIKE " : " LIKE ");
 		String equalOpt = (query.isNotLike() ? " != " : " = ");
 
-		for (QueryColumnMetaInfo queryColumnMetaInfo : queryColumnMetaInfos)
+		Column[] columns=table.getColumns();
+		for (int i=0; i< columns.length; i++)
 		{
-			if (!queryColumnMetaInfo.isToken())
-				continue;
+			if (i >= this.keywordQueryColumnCount)
+				break;
 
-			int sqlType = queryColumnMetaInfo.getColumnSqlType();
-
-			@JDBCCompatiblity("很多驱动程序的值为SearchableType.ALL但实际并不支持LIKE语法（比如：PostgreSQL JDBC 42.2.5），"
-					+ "这里为了兼容，不采用SearchableType逻辑")
-			SearchableType searchableType = null;
+			Column column = columns[i];
+			SearchableType searchableType = column.getSearchableType();
 			String myOperator = null;
 			Object myKeyword = null;
-			// PropertyPath propertyPath =
-			// PropertyPath.valueOf(queryColumnMetaInfo.getPropertyPath());
-			// PropertyPathInfo propertyPathInfo =
-			// PropertyPathInfo.valueOf(model, propertyPath);
-			// Property tailProperty = propertyPathInfo.getPropertyTail();
-			// Searchable searchable =
-			// tailProperty.getFeature(Searchable.class);
-			// searchableType = (searchable == null ? null :
-			// searchable.getValue());
 
 			if (SearchableType.NO.equals(searchableType))
 				;
@@ -117,80 +115,59 @@ public abstract class AbstractDialect implements Dialect
 			}
 			else
 			{
-				// SearchableType.EXPCEPT_LIKE、或者无SearchableType
+				Number number = JdbcUtil.parseToNumber(query.getKeyword(), column.getType());
 
-				if (isLikeableSqlType(sqlType))
+				if (number != null)
 				{
-					myOperator = likeOpt;
-					myKeyword = wrapLikeKeyword(query.getKeyword());
-				}
-				else
-				{
-					Number number = JdbcUtil.parseToNumber(query.getKeyword(), sqlType);
-
-					if (number != null)
-					{
-						myOperator = equalOpt;
-						myKeyword = number;
-					}
+					myOperator = equalOpt;
+					myKeyword = number;
 				}
 			}
 
 			if (myOperator != null && myKeyword != null)
 			{
-				if (!keywordCondition.isEmpty())
-					keywordCondition.sql(joinOpt);
+				if (!sql.isEmpty())
+					sql.sql(joinOpt);
 
-				keywordCondition.sql(queryColumnMetaInfo.getColumnPath() + myOperator + "?", myKeyword);
+				sql.sql(quote(column.getName()) + myOperator + "?", myKeyword, column.getType());
 			}
 		}
 
-		return keywordCondition;
+		return sql;
 	}
 
 	@Override
-	@JDBCCompatiblity("某些驱动程序对有些类型不支持排序（比如Oracle对于BLOB类型）")
-	public boolean isSortable(int sqlType)
+	public Sql toOrderSql(Sql query, Order[] orders)
 	{
-		if (Types.BIGINT == sqlType || Types.BIT == sqlType || Types.BOOLEAN == sqlType || Types.CHAR == sqlType
-				|| Types.DATE == sqlType || Types.DECIMAL == sqlType || Types.DOUBLE == sqlType
-				|| Types.FLOAT == sqlType || Types.INTEGER == sqlType || Types.NCHAR == sqlType
-				|| Types.NUMERIC == sqlType || Types.NVARCHAR == sqlType || Types.REAL == sqlType
-				|| Types.SMALLINT == sqlType || Types.TIME == sqlType || Types.TIMESTAMP == sqlType
-				|| Types.TINYINT == sqlType || Types.VARCHAR == sqlType)
-			return true;
+		Sql orderSql = toOrderSql(orders);
 
-		return false;
-	}
+		if (Sql.isEmpty(orderSql))
+			return query;
 
-	@Override
-	public String getPagingQueryOrderName(QueryColumnMetaInfo queryColumnMetaInfo)
-	{
-		return quote(queryColumnMetaInfo.getColumnAlias());
-	}
-
-	/**
-	 * 指定SQL类型是否可用作LIKE条件。
-	 * 
-	 * @param sqlType
-	 * @return
-	 */
-	protected boolean isLikeableSqlType(int sqlType)
-	{
-		return (Types.CHAR == sqlType || Types.VARCHAR == sqlType || Types.NCHAR == sqlType
-				|| Types.NVARCHAR == sqlType);
+		return Sql.valueOf().sql(query).sql(" ORDER BY ").sql(orderSql);
 	}
 
 	/**
 	 * 转换为排序SQL。
 	 * 
 	 * @param orders
-	 * @return
-	 * @see Order#toOrderSql(Order...)
+	 * @return 返回{@code null}表示无排序SQL
 	 */
-	protected SqlBuilder toOrderSql(Order... orders)
+	protected Sql toOrderSql(Order... orders)
 	{
-		return Order.toOrderSql(orders);
+		if (orders == null || orders.length == 0)
+			return null;
+
+		Sql orderSql = Sql.valueOf().delimit(", ");
+
+		for (int i = 0; i < orders.length; i++)
+		{
+			Order order = orders[i];
+
+			orderSql.sqld(quote(order.getName()) + " " + (order.isAsc() ? Order.ASC : Order.DESC));
+		}
+
+		return orderSql;
 	}
 
 	/**
@@ -199,7 +176,7 @@ public abstract class AbstractDialect implements Dialect
 	 * @param sql
 	 * @return
 	 */
-	protected boolean isEmptySql(SqlBuilder sql)
+	protected boolean isEmptySql(Sql sql)
 	{
 		return sql == null || sql.isEmpty();
 	}

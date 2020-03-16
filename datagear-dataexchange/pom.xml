@@ -16,7 +16,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.datagear</groupId>
-			<artifactId>datagear-dbinfo</artifactId>
+			<artifactId>datagear-deprecated</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

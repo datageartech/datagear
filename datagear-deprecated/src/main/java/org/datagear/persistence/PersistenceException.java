@@ -6,6 +6,9 @@ package org.datagear.persistence;
 
 /**
  * 持久化异常。
+ * <p>
+ * 此异常作为整个persistence模块的顶级异常类，所有persistence模块的异常类都继承自此类。
+ * </p>
  * 
  * @author datagear@163.com
  *
