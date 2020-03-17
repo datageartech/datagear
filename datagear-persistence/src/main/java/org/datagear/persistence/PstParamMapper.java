@@ -11,12 +11,12 @@ import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 
 /**
- * 对象至{@linkplain PreparedStatement}可用值映射器。
+ * 对象至{@linkplain PreparedStatement}参数值映射器。
  * 
  * @author datagear@163.com
  *
  */
-public interface PstValueMapper
+public interface PstParamMapper
 {
 	/**
 	 * 映射。
@@ -27,8 +27,8 @@ public interface PstValueMapper
 	 * @param column
 	 * @param value
 	 * @return
-	 * @throws PstValueMapperException
+	 * @throws PstParamMapperException
 	 */
 	Object map(Connection cn, Dialect dialect, Table table, Column column, Object value)
-			throws PstValueMapperException;
+			throws PstParamMapperException;
 }

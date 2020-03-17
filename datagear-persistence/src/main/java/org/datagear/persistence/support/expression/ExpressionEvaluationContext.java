@@ -63,6 +63,9 @@ public class ExpressionEvaluationContext
 	 */
 	public boolean containsCachedValue(NameExpression expression)
 	{
+		if (!expression.hasName())
+			return false;
+
 		String cacheKey = getCachedValueKey(expression);
 
 		return this.valueCache.containsKey(cacheKey);
@@ -149,7 +152,9 @@ public class ExpressionEvaluationContext
 	 */
 	protected String getCachedValueKey(NameExpression expression)
 	{
-		return expression.getStartIdentifier() + (expression.hasName() ? expression.getName() : expression.getContent())
-				+ expression.getEndIdentifier();
+		if (!expression.hasName())
+			throw new IllegalArgumentException("The [expression] must has name");
+
+		return expression.getStartIdentifier() + expression.getName() + expression.getEndIdentifier();
 	}
 }
