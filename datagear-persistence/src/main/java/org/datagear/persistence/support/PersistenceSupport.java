@@ -5,6 +5,10 @@
 package org.datagear.persistence.support;
 
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Blob;
@@ -76,7 +80,8 @@ public class PersistenceSupport
 	 * @param cn
 	 * @param table
 	 * @param sql
-	 * @param mapper 允许为{@code null}
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */
@@ -90,9 +95,12 @@ public class PersistenceSupport
 	 * 
 	 * @param cn
 	 * @param query
-	 * @param startRow 起始行号，以{@code 1}开头
-	 * @param count    读取行数，如果{@code <0}，表示读取全部
-	 * @param mapper   允许为{@code null}
+	 * @param startRow
+	 *            起始行号，以{@code 1}开头
+	 * @param count
+	 *            读取行数，如果{@code <0}，表示读取全部
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 */
 	public List<Row> executeListQuery(Connection cn, Table table, Sql sql, int startRow, int count, RowMapper mapper)
@@ -147,12 +155,12 @@ public class PersistenceSupport
 	 * @param cn
 	 * @param table
 	 * @param rs
-	 * @param rowIndex 行号，以{@code 1}开头
+	 * @param rowIndex
+	 *            行号，以{@code 1}开头
 	 * @return
 	 * @throws RowMapperException
 	 */
-	public Row mapToRow(Connection cn, Table table, ResultSet rs, int rowIndex)
-			throws RowMapperException
+	public Row mapToRow(Connection cn, Table table, ResultSet rs, int rowIndex) throws RowMapperException
 	{
 		return mapToRow(cn, table, rs, rowIndex, null);
 	}
@@ -163,15 +171,17 @@ public class PersistenceSupport
 	 * @param cn
 	 * @param table
 	 * @param rs
-	 * @param rowIndex 行号，以{@code 1}开头
-	 * @param mapper   允许为{@code null}
+	 * @param rowIndex
+	 *            行号，以{@code 1}开头
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws RowMapperException
 	 */
 	public Row mapToRow(Connection cn, Table table, ResultSet rs, int rowIndex, RowMapper mapper)
 			throws RowMapperException
 	{
-		if(mapper != null)
+		if (mapper != null)
 			return mapper.map(cn, table, rs, rowIndex);
 		else
 		{
@@ -186,7 +196,7 @@ public class PersistenceSupport
 					row.put(columns[i].getName(), value);
 				}
 			}
-			catch(SQLException e)
+			catch (SQLException e)
 			{
 				throw new RowMapperException(e);
 			}
@@ -283,7 +293,7 @@ public class PersistenceSupport
 	public List<Object> setParamValues(Connection cn, PreparedStatement st, List<SqlParamValue> paramValues)
 			throws SQLException
 	{
-		List<Object> setValues = new ArrayList<Object>(paramValues.size());
+		List<Object> setValues = new ArrayList<>(paramValues.size());
 
 		for (int i = 1; i <= paramValues.size(); i++)
 		{
@@ -326,8 +336,8 @@ public class PersistenceSupport
 	/**
 	 * 设置{@linkplain PreparedStatement}的参数值。
 	 * <p>
-	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Java Types Mapper to JDBC
-	 * Types”表。
+	 * 此方法实现参考自JDBC4.0规范“Data Type Conversion Tables”章节中的“Java Types Mapper to
+	 * JDBC Types”表。
 	 * </p>
 	 * 
 	 * @param cn
@@ -358,6 +368,8 @@ public class PersistenceSupport
 			{
 				if (value instanceof String)
 					st.setString(paramIndex, (String) value);
+				else if (value instanceof Reader)
+					st.setCharacterStream(paramIndex, (Reader) value);
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
 
@@ -486,9 +498,14 @@ public class PersistenceSupport
 			case Types.LONGVARBINARY:
 			{
 				if (value instanceof byte[])
+					st.setBytes(paramIndex, (byte[]) value);
+				else if (value instanceof InputStream)
+					st.setBinaryStream(paramIndex, (InputStream) value);
+				else if (value instanceof File)
 				{
-					byte[] v = (byte[]) value;
-					st.setBytes(paramIndex, v);
+					InputStream v = getInputStreamForSql((File) value);
+					st.setBinaryStream(paramIndex, v);
+					value = v;
 				}
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
@@ -560,6 +577,8 @@ public class PersistenceSupport
 			{
 				if (value instanceof Clob)
 					st.setClob(paramIndex, (Clob) value);
+				else if (value instanceof Reader)
+					st.setClob(paramIndex, (Reader) value);
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
 
@@ -570,6 +589,14 @@ public class PersistenceSupport
 			{
 				if (value instanceof Blob)
 					st.setBlob(paramIndex, (Blob) value);
+				else if (value instanceof InputStream)
+					st.setBlob(paramIndex, (InputStream) value);
+				else if (value instanceof File)
+				{
+					InputStream v = getInputStreamForSql((File) value);
+					st.setBlob(paramIndex, v);
+					value = v;
+				}
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
 
@@ -582,6 +609,8 @@ public class PersistenceSupport
 			{
 				if (value instanceof String)
 					st.setNString(paramIndex, (String) value);
+				else if (value instanceof Reader)
+					st.setNCharacterStream(paramIndex, (Reader) value);
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
 
@@ -592,6 +621,8 @@ public class PersistenceSupport
 			{
 				if (value instanceof NClob)
 					st.setNClob(paramIndex, (NClob) value);
+				else if (value instanceof Reader)
+					st.setNClob(paramIndex, (Reader) value);
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
 
@@ -629,6 +660,18 @@ public class PersistenceSupport
 			throws SQLException
 	{
 		throw new UnsupportedOperationException("Set JDBC [" + paramValue.getType() + "] type value is not supported");
+	}
+
+	protected InputStream getInputStreamForSql(File file) throws SQLException
+	{
+		try
+		{
+			return IOUtil.getInputStream(file);
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new SQLException("File [" + file.getAbsolutePath() + "] not found");
+		}
 	}
 
 	/**
@@ -853,10 +896,10 @@ public class PersistenceSupport
 
 	public void closeIfClosable(List<?> list)
 	{
-		if(list == null)
+		if (list == null)
 			return;
-		
-		for(Object o : list)
+
+		for (Object o : list)
 			closeIfClosable(o);
 	}
 

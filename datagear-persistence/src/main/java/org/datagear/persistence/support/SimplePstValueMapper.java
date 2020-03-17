@@ -14,6 +14,9 @@ import org.datagear.persistence.PstValueMapperException;
 
 /**
  * 简单{@linkplain PstValueMapper}。
+ * <p>
+ * 它什么也不做，直接返回原值。
+ * </p>
  * 
  * @author datagear@163.com
  *
