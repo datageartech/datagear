@@ -25,6 +25,7 @@ import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.Row;
 import org.datagear.persistence.RowMapper;
+import org.datagear.persistence.RowMapperException;
 import org.datagear.persistence.Sql;
 import org.datagear.persistence.SqlParamValue;
 import org.datagear.util.IOUtil;
@@ -55,22 +56,46 @@ public class PersistenceSupport
 		return dialect.quote(name);
 	}
 
-	public List<Row> executeListQuery(Connection cn, Table table, Sql sql, RowMapper mapper) throws PersistenceException
+	/**
+	 * 执行列表结果查询。
+	 * 
+	 * @param cn
+	 * @param table
+	 * @param sql
+	 * @return
+	 * @throws PersistenceException
+	 */
+	public List<Row> executeListQuery(Connection cn, Table table, Sql sql) throws PersistenceException
 	{
-		return executeListQuery(cn, table, sql, mapper, 1, -1);
+		return executeListQuery(cn, table, sql, 1, -1, null);
 	}
 
 	/**
+	 * 执行列表结果查询。
+	 * 
+	 * @param cn
+	 * @param table
+	 * @param sql
+	 * @param mapper 允许为{@code null}
+	 * @return
+	 * @throws PersistenceException
+	 */
+	public List<Row> executeListQuery(Connection cn, Table table, Sql sql, RowMapper mapper) throws PersistenceException
+	{
+		return executeListQuery(cn, table, sql, 1, -1, mapper);
+	}
+
+	/**
+	 * 执行列表结果查询。
+	 * 
 	 * @param cn
 	 * @param query
-	 * @param mapper
-	 * @param startRow
-	 *            起始行号，以1开头
-	 * @param count
-	 *            读取行数，如果{@code <0}，表示读取全部
+	 * @param startRow 起始行号，以{@code 1}开头
+	 * @param count    读取行数，如果{@code <0}，表示读取全部
+	 * @param mapper   允许为{@code null}
 	 * @return
 	 */
-	public List<Row> executeListQuery(Connection cn, Table table, Sql sql, RowMapper mapper, int startRow, int count)
+	public List<Row> executeListQuery(Connection cn, Table table, Sql sql, int startRow, int count, RowMapper mapper)
 			throws PersistenceException
 	{
 		if (startRow < 1)
@@ -91,17 +116,17 @@ public class PersistenceSupport
 
 			int endRow = (count >= 0 ? startRow + count : -1);
 
-			int row = startRow;
+			int rowIndex = startRow;
 			while (rs.next())
 			{
-				if (endRow >= 0 && row >= endRow)
+				if (endRow >= 0 && rowIndex >= endRow)
 					break;
 
-				Row rowObj = mapper.map(cn, table, rs, row);
+				Row row = mapToRow(cn, table, rs, rowIndex, mapper);
 
-				resultList.add(rowObj);
+				resultList.add(row);
 
-				row++;
+				rowIndex++;
 			}
 
 			return resultList;
@@ -117,7 +142,61 @@ public class PersistenceSupport
 	}
 
 	/**
-	 * 查询数目。
+	 * 将结果集行映射为{@linkplain Row}对象。
+	 * 
+	 * @param cn
+	 * @param table
+	 * @param rs
+	 * @param rowIndex 行号，以{@code 1}开头
+	 * @return
+	 * @throws RowMapperException
+	 */
+	public Row mapToRow(Connection cn, Table table, ResultSet rs, int rowIndex)
+			throws RowMapperException
+	{
+		return mapToRow(cn, table, rs, rowIndex, null);
+	}
+
+	/**
+	 * 将结果集行映射为{@linkplain Row}对象。
+	 * 
+	 * @param cn
+	 * @param table
+	 * @param rs
+	 * @param rowIndex 行号，以{@code 1}开头
+	 * @param mapper   允许为{@code null}
+	 * @return
+	 * @throws RowMapperException
+	 */
+	public Row mapToRow(Connection cn, Table table, ResultSet rs, int rowIndex, RowMapper mapper)
+			throws RowMapperException
+	{
+		if(mapper != null)
+			return mapper.map(cn, table, rs, rowIndex);
+		else
+		{
+			Row row = new Row();
+
+			try
+			{
+				Column[] columns = table.getColumns();
+				for (int i = 0; i < columns.length; i++)
+				{
+					Object value = getColumnValue(cn, rs, columns[i]);
+					row.put(columns[i].getName(), value);
+				}
+			}
+			catch(SQLException e)
+			{
+				throw new RowMapperException(e);
+			}
+
+			return row;
+		}
+	}
+
+	/**
+	 * 执行数目查询。
 	 * 
 	 * @param cn
 	 * @param query

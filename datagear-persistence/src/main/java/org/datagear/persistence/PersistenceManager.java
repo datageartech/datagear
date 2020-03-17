@@ -17,6 +17,13 @@ import org.datagear.meta.Table;
 public interface PersistenceManager
 {
 	/**
+	 * 获取{@linkplain DialectSource}。
+	 * 
+	 * @return
+	 */
+	DialectSource getDialectSource();
+
+	/**
 	 * 插入行对象。
 	 * 
 	 * @param cn
@@ -28,18 +35,44 @@ public interface PersistenceManager
 	int insert(Connection cn, Table table, Row row) throws PersistenceException;
 
 	/**
+	 * 插入行对象。
+	 * 
+	 * @param cn
+	 * @param dialect 允许为{@code null}
+	 * @param table
+	 * @param row
+	 * @param mapper  允许为{@code null}
+	 * @return
+	 * @throws PersistenceException
+	 */
+	int insert(Connection cn, Dialect dialect, Table table, Row row, PstValueMapper mapper) throws PersistenceException;
+
+	/**
 	 * 更新行对象。
 	 * 
 	 * @param cn
 	 * @param table
-	 * @param origin
-	 *            原行
-	 * @param update
-	 *            更新行
+	 * @param origin 原行
+	 * @param update 更新行
 	 * @return
 	 * @throws PersistenceException
 	 */
 	int update(Connection cn, Table table, Row origin, Row update) throws PersistenceException;
+
+	/**
+	 * 更新行对象。
+	 * 
+	 * @param cn
+	 * @param dialect 允许为{@code null}
+	 * @param table
+	 * @param origin  原行
+	 * @param update  更新行
+	 * @param mapper  允许为{@code null}
+	 * @return
+	 * @throws PersistenceException
+	 */
+	int update(Connection cn, Dialect dialect, Table table, Row origin, Row update, PstValueMapper mapper)
+			throws PersistenceException;
 
 	/**
 	 * 删除行对象。
@@ -53,6 +86,33 @@ public interface PersistenceManager
 	int delete(Connection cn, Table table, Row... rows) throws PersistenceException;
 
 	/**
+	 * 删除行对象。
+	 * 
+	 * @param cn
+	 * @param dialect 允许为{@code null}
+	 * @param table
+	 * @param row
+	 * @param mapper  允许为{@code null}
+	 * @return
+	 * @throws PersistenceException
+	 */
+	int delete(Connection cn, Dialect dialect, Table table, Row row, PstValueMapper mapper) throws PersistenceException;
+
+	/**
+	 * 删除行对象。
+	 * 
+	 * @param cn
+	 * @param dialect 允许为{@code null}
+	 * @param table
+	 * @param rows
+	 * @param mapper  允许为{@code null}
+	 * @return
+	 * @throws PersistenceException
+	 */
+	int delete(Connection cn, Dialect dialect, Table table, Row[] rows, PstValueMapper mapper)
+			throws PersistenceException;
+
+	/**
 	 * 删除查询结果。
 	 * 
 	 * @param cn
@@ -62,6 +122,18 @@ public interface PersistenceManager
 	 * @throws PersistenceException
 	 */
 	int delete(Connection cn, Table table, Query query) throws PersistenceException;
+
+	/**
+	 * 删除查询结果。
+	 * 
+	 * @param cn
+	 * @param dialect 允许为{@code null}
+	 * @param table
+	 * @param query
+	 * @return
+	 * @throws PersistenceException
+	 */
+	int delete(Connection cn, Dialect dialect, Table table, Query query) throws PersistenceException;
 
 	/**
 	 * 获取行对象。
@@ -75,16 +147,44 @@ public interface PersistenceManager
 	Row get(Connection cn, Table table, Row param) throws PersistenceException;
 
 	/**
+	 * 获取行对象。
+	 * 
+	 * @param cn
+	 * @param dialect        允许为{@code null}
+	 * @param table
+	 * @param param
+	 * @param pstValueMapper 允许为{@code null}
+	 * @param rowMapper      允许为{@code null}
+	 * @return
+	 * @throws PersistenceException
+	 */
+	Row get(Connection cn, Dialect dialect, Table table, Row param, PstValueMapper pstValueMapper, RowMapper rowMapper)
+			throws PersistenceException;
+
+	/**
 	 * 查询。
 	 * 
 	 * @param cn
 	 * @param table
-	 * @param query
-	 *            为{@code null}表示查询全部
+	 * @param query 为{@code null}表示查询全部
 	 * @return
 	 * @throws PersistenceException
 	 */
 	List<Row> query(Connection cn, Table table, Query query) throws PersistenceException;
+
+	/**
+	 * 查询。
+	 * 
+	 * @param cn
+	 * @param dialect 允许为{@code null}
+	 * @param table
+	 * @param query   为{@code null}表示查询全部
+	 * @param mapper  允许为{@code null}
+	 * @return
+	 * @throws PersistenceException
+	 */
+	List<Row> query(Connection cn, Dialect dialect, Table table, Query query, RowMapper mapper)
+			throws PersistenceException;
 
 	/**
 	 * 分页查询。
@@ -96,4 +196,18 @@ public interface PersistenceManager
 	 * @throws PersistenceException
 	 */
 	PagingData<Row> pagingQuery(Connection cn, Table table, PagingQuery pagingQuery) throws PersistenceException;
+
+	/**
+	 * 分页查询。
+	 * 
+	 * @param cn
+	 * @param dialect     允许为{@code null}
+	 * @param table
+	 * @param pagingQuery
+	 * @param mapper      允许为{@code null}
+	 * @return
+	 * @throws PersistenceException
+	 */
+	PagingData<Row> pagingQuery(Connection cn, Dialect dialect, Table table, PagingQuery pagingQuery, RowMapper mapper)
+			throws PersistenceException;
 }
