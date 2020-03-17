@@ -2,7 +2,7 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.util;
 
 /**
  * SQL参数值。

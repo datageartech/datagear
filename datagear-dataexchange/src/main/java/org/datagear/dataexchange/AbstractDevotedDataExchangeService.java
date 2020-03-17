@@ -192,11 +192,11 @@ public abstract class AbstractDevotedDataExchangeService<T extends DataExchange>
 		Connection cn = getConnection(context);
 
 		if (ExceptionResolve.ABORT.equals(exceptionResolve) || ExceptionResolve.IGNORE.equals(exceptionResolve))
-			commitSilently(cn);
+			JdbcUtil.commitSilently(cn);
 		else if (ExceptionResolve.ROLLBACK.equals(exceptionResolve))
-			rollbackSilently(cn);
+			JdbcUtil.rollbackSilently(cn);
 		else
-			rollbackSilently(cn);
+			JdbcUtil.rollbackSilently(cn);
 	}
 
 	protected Connection getConnection(DataExchangeContext context) throws DataExchangeException

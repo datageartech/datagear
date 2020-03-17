@@ -2,7 +2,7 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence;
+package org.datagear.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;

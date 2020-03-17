@@ -24,6 +24,19 @@ public class PagingQuery extends Query
 		super();
 	}
 
+	public PagingQuery(int page)
+	{
+		super();
+		this.paging.setPage(page);
+	}
+
+	public PagingQuery(int page, int pageSize)
+	{
+		super();
+		this.paging.setPage(page);
+		this.paging.setPageSize(pageSize);
+	}
+
 	public PagingQuery(int page, int pageSize, String keyword)
 	{
 		super(keyword);

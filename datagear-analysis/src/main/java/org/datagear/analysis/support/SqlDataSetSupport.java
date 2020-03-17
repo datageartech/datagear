@@ -26,8 +26,9 @@ import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataType;
 import org.datagear.analysis.support.ParameterSqlResolver.ParameterSql;
+import org.datagear.util.JdbcSupport;
 import org.datagear.util.JdbcUtil;
-import org.datagear.util.JdbcUtil.QueryResultSet;
+import org.datagear.util.QueryResultSet;
 import org.datagear.util.StringUtil;
 
 /**
@@ -36,7 +37,7 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public class SqlDataSetSupport
+public class SqlDataSetSupport extends JdbcSupport
 {
 	protected static final ParameterSqlResolver PARAMETER_SQL_RESOLVER = new ParameterSqlResolver();
 
@@ -67,13 +68,12 @@ public class SqlDataSetSupport
 		{
 			if (dataSetParams == null || dataSetParams.isEmpty())
 			{
-				st = cn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+				st = createQueryStatement(cn, ResultSet.TYPE_FORWARD_ONLY);
 				rs = st.executeQuery(sql);
 			}
 			else
 			{
-				PreparedStatement pst = cn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY,
-						ResultSet.CONCUR_READ_ONLY);
+				PreparedStatement pst = createQueryPreparedStatement(cn, sql, ResultSet.TYPE_FORWARD_ONLY);
 				setPreparedStatementParams(pst, dataSetParams, paramValues);
 
 				st = pst;
@@ -249,14 +249,14 @@ public class SqlDataSetSupport
 	public List<Map<String, ?>> resolveDatas(Connection cn, ResultSet rs, List<DataSetProperty> properties)
 			throws SQLException
 	{
-		List<Map<String, ?>> datas = new ArrayList<Map<String, ?>>();
+		List<Map<String, ?>> datas = new ArrayList<>();
 
 		ResultSetMetaData rsMeta = rs.getMetaData();
 		int[] rsColumns = resolveResultsetColumns(properties, rsMeta);
 
 		while (rs.next())
 		{
-			Map<String, Object> row = new HashMap<String, Object>();
+			Map<String, Object> row = new HashMap<>();
 
 			for (int i = 0; i < rsColumns.length; i++)
 			{
@@ -522,7 +522,7 @@ public class SqlDataSetSupport
 		ResultSetMetaData metaData = rs.getMetaData();
 		int columnCount = metaData.getColumnCount();
 
-		List<DataSetProperty> properties = new ArrayList<DataSetProperty>(columnCount);
+		List<DataSetProperty> properties = new ArrayList<>(columnCount);
 
 		for (int i = 1; i <= columnCount; i++)
 		{
@@ -619,7 +619,7 @@ public class SqlDataSetSupport
 
 		return dataType;
 	}
-	
+
 	/**
 	 * 解析SQL语句参数名列表。
 	 * 

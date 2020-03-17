@@ -7,6 +7,7 @@ package org.datagear.persistence;
 import java.sql.ResultSet;
 
 import org.datagear.meta.Table;
+import org.datagear.util.Sql;
 
 /**
  * 数据库方言。

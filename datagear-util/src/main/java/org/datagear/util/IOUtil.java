@@ -25,6 +25,7 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -660,5 +661,47 @@ public class IOUtil
 		catch (IOException e)
 		{
 		}
+	}
+
+	/**
+	 * 如果是{@linkplain Closeable}，则将其关闭。
+	 * 
+	 * @param list
+	 */
+	public static void closeIf(List<?> list)
+	{
+		if (list == null)
+			return;
+
+		for (Object o : list)
+			closeIf(o);
+	}
+
+	/**
+	 * 如果是{@linkplain Closeable}，则将其关闭。
+	 * 
+	 * @param objs
+	 */
+	public static void closeIf(Object[] objs)
+	{
+		for (Object o : objs)
+			closeIf(o);
+	}
+
+	/**
+	 * 如果是{@linkplain Closeable}，则将其关闭。
+	 * 
+	 * @param o
+	 * @return
+	 */
+	public static boolean closeIf(Object o)
+	{
+		if (o instanceof Closeable)
+		{
+			close((Closeable) o);
+			return true;
+		}
+
+		return false;
 	}
 }

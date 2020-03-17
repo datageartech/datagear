@@ -5,12 +5,16 @@
 package org.datagear.persistence.support;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
+import java.util.List;
 
 import org.datagear.meta.Table;
 import org.datagear.meta.resolver.GenericDBMetaResolver;
 import org.datagear.persistence.DialectSource;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Row;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.test.DBTestSupport;
@@ -77,5 +81,17 @@ public class DefaultPersistenceManagerTest extends DBTestSupport
 		{
 			this.defaultPersistenceManager.delete(connection, table, row);
 		}
+	}
+
+	@Test
+	public void pagingQueryTest()
+	{
+		Table table = this.genericDBMetaResolver.getTable(this.connection, "T_ACCOUNT");
+
+		PagingData<Row> pagingData = this.defaultPersistenceManager.pagingQuery(connection, table,
+				new PagingQuery(1, 1));
+		List<Row> rows = pagingData.getItems();
+
+		assertTrue(rows.size() <= 1);
 	}
 }

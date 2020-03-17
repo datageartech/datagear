@@ -6,6 +6,7 @@ package org.datagear.persistence.support;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +22,11 @@ import org.datagear.persistence.DialectBuilder;
 import org.datagear.persistence.DialectException;
 import org.datagear.persistence.DialectSource;
 import org.datagear.persistence.Order;
-import org.datagear.persistence.Sql;
 import org.datagear.persistence.support.dialect.MysqlDialectBuilder;
 import org.datagear.persistence.support.dialect.OracleDialectBuilder;
 import org.datagear.persistence.support.dialect.SqlServerDialectBuilder;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.Sql;
 
 /**
  * 默认{@linkplain DialectSource}。
@@ -41,7 +42,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 
 	private boolean detection = true;
 
-	private ConcurrentMap<String, DialectBuilder> dialectBuilderCache = new ConcurrentHashMap<String, DialectBuilder>();
+	private ConcurrentMap<String, DialectBuilder> dialectBuilderCache = new ConcurrentHashMap<>();
 
 	public DefaultDialectSource()
 	{
@@ -52,7 +53,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 	{
 		super();
 		this.dbMetaResolver = dbMetaResolver;
-		this.dialectBuilders = new ArrayList<DialectBuilder>();
+		this.dialectBuilders = new ArrayList<>();
 
 		this.dialectBuilders.add(new MysqlDialectBuilder());
 		this.dialectBuilders.add(new OracleDialectBuilder());
@@ -240,7 +241,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 
 		Sql pagingQuerySql = dialect.toPagingQuerySql(query, orders, 1, 5);
 
-		executeQuery(cn, pagingQuerySql);
+		executeQuery(cn, pagingQuerySql, ResultSet.TYPE_FORWARD_ONLY);
 
 		return true;
 	}

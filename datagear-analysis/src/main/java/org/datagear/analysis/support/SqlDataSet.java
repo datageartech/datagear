@@ -21,7 +21,7 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.ParameterSqlResolver.ParameterSql;
 import org.datagear.util.JdbcUtil;
-import org.datagear.util.JdbcUtil.QueryResultSet;
+import org.datagear.util.QueryResultSet;
 import org.datagear.util.resource.ConnectionFactory;
 
 /**
@@ -125,7 +125,7 @@ public class SqlDataSet extends AbstractDataSet
 
 		if (!paramNames.isEmpty())
 		{
-			HashMap<String, Object> myParamValues = new HashMap<String, Object>();
+			HashMap<String, Object> myParamValues = new HashMap<>();
 			if (paramValues != null)
 				myParamValues.putAll(paramValues);
 

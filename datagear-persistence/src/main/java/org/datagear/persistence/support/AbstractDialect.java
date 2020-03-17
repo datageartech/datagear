@@ -10,8 +10,8 @@ import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Query;
-import org.datagear.persistence.Sql;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.Sql;
 
 /**
  * 抽象{@linkplain Dialect}。

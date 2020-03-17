@@ -2,16 +2,12 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence.support;
+package org.datagear.util;
 
-import java.io.Closeable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
-
-import org.datagear.util.IOUtil;
-import org.datagear.util.JdbcUtil;
 
 /**
  * 查询结果集。
@@ -97,14 +93,8 @@ public class QueryResultSet
 	 */
 	public void close()
 	{
-		if (this.params != null)
-		{
-			for (Object param : this.params)
-			{
-				if (param instanceof Closeable)
-					IOUtil.close((Closeable) param);
-			}
-		}
+		if (this.hasParam())
+			IOUtil.closeIf(this.params);
 
 		JdbcUtil.closeResultSet(this.resultSet);
 		JdbcUtil.closeStatement(this.statement);

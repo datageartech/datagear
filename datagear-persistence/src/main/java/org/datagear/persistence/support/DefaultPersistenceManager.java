@@ -6,6 +6,7 @@ package org.datagear.persistence.support;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -23,8 +24,8 @@ import org.datagear.persistence.PstValueMapper;
 import org.datagear.persistence.Query;
 import org.datagear.persistence.Row;
 import org.datagear.persistence.RowMapper;
-import org.datagear.persistence.Sql;
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.Sql;
 import org.datagear.util.StringUtil;
 
 /**
@@ -102,7 +103,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		valueSql.sql(")");
 		sql.sql(valueSql);
 
-		return executeUpdate(cn, sql);
+		return executeUpdateWrap(cn, sql);
 	}
 
 	@Override
@@ -138,7 +139,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 		sql.sql(" WHERE ").sql(buildUniqueRecordCondition(cn, dialect, table, origin, mapper));
 
-		return executeUpdate(cn, sql);
+		return executeUpdateWrap(cn, sql);
 	}
 
 	@Override
@@ -177,7 +178,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 		try
 		{
-			pst = createPreparedStatement(cn, sql);
+			pst = createUpdatePreparedStatement(cn, sql.getSqlValue());
 
 			int count = 0;
 
@@ -255,7 +256,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			sql.sqld(quote(dialect, name) + "=?").param(value, column.getType());
 		}
 
-		List<Row> rows = executeListQuery(cn, table, sql, rowMapper);
+		List<Row> rows = executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, rowMapper);
 
 		if (rows.size() > 1)
 			throw new NonUniqueResultException();
@@ -276,12 +277,11 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		dialect = getDialect(cn, dialect);
 
 		Sql sql = buildQuery(cn, dialect, table, query);
-		return executeListQuery(cn, table, sql, mapper);
+		return executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, mapper);
 	}
 
 	@Override
-	public PagingData<Row> pagingQuery(Connection cn, Table table, PagingQuery pagingQuery)
-			throws PersistenceException
+	public PagingData<Row> pagingQuery(Connection cn, Table table, PagingQuery pagingQuery) throws PersistenceException
 	{
 		return pagingQuery(cn, null, table, pagingQuery, null);
 	}
@@ -294,20 +294,20 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 		Sql queryView = buildQuery(cn, dialect, table, pagingQuery);
 
-		long total = executeCountQuery(cn, queryView);
+		long total = queryCount(cn, queryView);
 
 		PagingData<Row> pagingData = new PagingData<>(pagingQuery.getPage(), total, pagingQuery.getPageSize());
 
 		Sql query = null;
-
+		List<Row> rows = null;
 		int startRow = pagingData.getStartRow();
 		int count = pagingData.getPageSize();
 
-		// 数据库分页
 		if (dialect.supportsPagingSql())
 		{
 			query = dialect.toPagingQuerySql(queryView, pagingQuery.getOrders(), startRow, count);
 
+			// 数据库分页
 			if (query != null)
 			{
 				startRow = 1;
@@ -319,7 +319,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		if (query == null)
 			query = dialect.toOrderSql(queryView, pagingQuery.getOrders());
 
-		List<Row> rows = executeListQuery(cn, table, query, startRow, count, mapper);
+		rows = executeListQuery(cn, table, query, ResultSet.TYPE_SCROLL_INSENSITIVE, startRow, count, mapper);
 
 		pagingData.setItems(rows);
 
@@ -330,7 +330,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		Sql countQuery = Sql.valueOf().sql("SELECT COUNT(*) FROM (").sql(query).sql(") T");
 
-		long re = executeCountQuery(cn, countQuery);
+		long re = executeCountQueryWrap(cn, countQuery);
 
 		return re;
 	}
@@ -398,13 +398,13 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	 * @param dialect
 	 * @param table
 	 * @param row
-	 * @param mapper  允许为{@code null}
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */
 	protected Sql buildUniqueRecordCondition(Connection cn, Dialect dialect, Table table, Row row,
-			PstValueMapper mapper)
-			throws PersistenceException
+			PstValueMapper mapper) throws PersistenceException
 	{
 		Column[] columns = getUniqueRecordColumns(table);
 
@@ -484,13 +484,13 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	 * @param table
 	 * @param column
 	 * @param value
-	 * @param mapper  允许为{@code null}
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */
-	protected Object mapToPstValue(Connection cn, Dialect dialect, Table table, Column column,
-			Object value, PstValueMapper mapper)
-			throws PersistenceException
+	protected Object mapToPstValue(Connection cn, Dialect dialect, Table table, Column column, Object value,
+			PstValueMapper mapper) throws PersistenceException
 	{
 		if (mapper == null)
 			return value;
@@ -501,7 +501,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	/**
 	 * 
 	 * @param cn
-	 * @param init 允许为{@code null}
+	 * @param init
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */

@@ -5,8 +5,8 @@
 package org.datagear.persistence.support.dialect;
 
 import org.datagear.persistence.Order;
-import org.datagear.persistence.Sql;
 import org.datagear.persistence.support.AbstractDialect;
+import org.datagear.util.Sql;
 
 /**
  * Mysql方言。
