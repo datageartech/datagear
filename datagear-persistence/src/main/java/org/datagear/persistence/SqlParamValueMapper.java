@@ -5,30 +5,28 @@
 package org.datagear.persistence;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
+import org.datagear.util.SqlParamValue;
 
 /**
- * 对象至{@linkplain PreparedStatement}参数值映射器。
+ * 列值至{@linkplain SqlParamValue}映射器。
  * 
  * @author datagear@163.com
  *
  */
-public interface PstParamMapper
+public interface SqlParamValueMapper
 {
 	/**
 	 * 映射。
 	 * 
 	 * @param cn
-	 * @param dialect
 	 * @param table
 	 * @param column
 	 * @param value
 	 * @return
-	 * @throws PstParamMapperException
+	 * @throws SqlParamValueMapperException
 	 */
-	Object map(Connection cn, Dialect dialect, Table table, Column column, Object value)
-			throws PstParamMapperException;
+	SqlParamValue map(Connection cn, Table table, Column column, Object value) throws SqlParamValueMapperException;
 }

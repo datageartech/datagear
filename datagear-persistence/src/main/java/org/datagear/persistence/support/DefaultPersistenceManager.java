@@ -20,12 +20,13 @@ import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.PersistenceManager;
-import org.datagear.persistence.PstParamMapper;
 import org.datagear.persistence.Query;
 import org.datagear.persistence.Row;
 import org.datagear.persistence.RowMapper;
+import org.datagear.persistence.SqlParamValueMapper;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.Sql;
+import org.datagear.util.SqlParamValue;
 import org.datagear.util.StringUtil;
 
 /**
@@ -67,7 +68,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	}
 
 	@Override
-	public int insert(Connection cn, Dialect dialect, Table table, Row row, PstParamMapper mapper)
+	public int insert(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper)
 			throws PersistenceException
 	{
 		dialect = getDialect(cn, dialect);
@@ -93,10 +94,10 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			if (value == null && column.hasDefaultValue())
 				value = column.getDefaultValue();
 
-			value = mapToPstParam(cn, dialect, table, column, value, mapper);
+			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper);
 
 			sql.sqld(quote(dialect, name));
-			valueSql.sqld("?").param(value, column.getType());
+			valueSql.sqld("?").param(sqlParamValue);
 		}
 
 		sql.sql(")");
@@ -113,7 +114,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	}
 
 	@Override
-	public int update(Connection cn, Dialect dialect, Table table, Row origin, Row update, PstParamMapper mapper)
+	public int update(Connection cn, Dialect dialect, Table table, Row origin, Row update, SqlParamValueMapper mapper)
 			throws PersistenceException
 	{
 		dialect = getDialect(cn, dialect);
@@ -132,9 +133,9 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 			Object value = update.get(name);
 
-			value = mapToPstParam(cn, dialect, table, column, value, mapper);
+			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper);
 
-			sql.sqld(quote(dialect, name) + "=?").param(value, column.getType());
+			sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
 		}
 
 		sql.sql(" WHERE ").sql(buildUniqueRecordCondition(cn, dialect, table, origin, mapper));
@@ -149,14 +150,14 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	}
 
 	@Override
-	public int delete(Connection cn, Dialect dialect, Table table, Row row, PstParamMapper mapper)
+	public int delete(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper)
 			throws PersistenceException
 	{
 		return delete(cn, dialect, table, new Row[] { row }, mapper);
 	}
 
 	@Override
-	public int delete(Connection cn, Dialect dialect, Table table, Row[] rows, PstParamMapper mapper)
+	public int delete(Connection cn, Dialect dialect, Table table, Row[] rows, SqlParamValueMapper mapper)
 			throws PersistenceException
 	{
 		dialect = getDialect(cn, dialect);
@@ -191,9 +192,9 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 					String name = column.getName();
 					Object value = row.get(name);
 
-					value = mapToPstParam(cn, dialect, table, column, value, mapper);
+					SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper);
 
-					sql.param(value, column.getType());
+					sql.param(sqlParamValue);
 				}
 
 				setParamValues(cn, pst, sql);
@@ -235,7 +236,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	}
 
 	@Override
-	public Row get(Connection cn, Dialect dialect, Table table, Row param, PstParamMapper pstParamMapper,
+	public Row get(Connection cn, Dialect dialect, Table table, Row param, SqlParamValueMapper sqlParamValueMapper,
 			RowMapper rowMapper) throws PersistenceException
 	{
 		dialect = getDialect(cn, dialect);
@@ -251,9 +252,9 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			String name = column.getName();
 			Object value = param.get(name);
 
-			value = mapToPstParam(cn, dialect, table, column, value, pstParamMapper);
+			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, sqlParamValueMapper);
 
-			sql.sqld(quote(dialect, name) + "=?").param(value, column.getType());
+			sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
 		}
 
 		List<Row> rows = executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, rowMapper);
@@ -404,7 +405,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	 * @throws PersistenceException
 	 */
 	protected Sql buildUniqueRecordCondition(Connection cn, Dialect dialect, Table table, Row row,
-			PstParamMapper mapper) throws PersistenceException
+			SqlParamValueMapper mapper) throws PersistenceException
 	{
 		Column[] columns = getUniqueRecordColumns(table);
 
@@ -417,9 +418,9 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 			Object value = row.get(name);
 
-			value = mapToPstParam(cn, dialect, table, column, value, mapper);
+			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper);
 
-			sql.sqld(quote(dialect, name) + "=?").param(value, column.getType());
+			sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
 		}
 
 		return sql;
@@ -480,7 +481,6 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	/**
 	 * 
 	 * @param cn
-	 * @param dialect
 	 * @param table
 	 * @param column
 	 * @param value
@@ -489,13 +489,13 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	 * @return
 	 * @throws PersistenceException
 	 */
-	protected Object mapToPstParam(Connection cn, Dialect dialect, Table table, Column column, Object value,
-			PstParamMapper mapper) throws PersistenceException
+	protected SqlParamValue mapToSqlParamValue(Connection cn, Table table, Column column, Object value,
+			SqlParamValueMapper mapper) throws PersistenceException
 	{
 		if (mapper == null)
-			return value;
+			return toSqlParamValue(column, value);
 
-		return mapper.map(cn, dialect, table, column, value);
+		return mapper.map(cn, table, column, value);
 	}
 
 	/**

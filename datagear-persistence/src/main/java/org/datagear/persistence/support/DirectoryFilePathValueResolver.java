@@ -6,7 +6,9 @@ package org.datagear.persistence.support;
 
 import java.io.File;
 
-import org.datagear.persistence.PstParamMapperException;
+import org.datagear.meta.Column;
+import org.datagear.meta.Table;
+import org.datagear.persistence.SqlParamValueMapperException;
 import org.datagear.util.FileUtil;
 
 /**
@@ -45,12 +47,12 @@ public class DirectoryFilePathValueResolver extends FilePathValueResolver
 	}
 
 	@Override
-	public File getFileValue(String filePathValue) throws PstParamMapperException
+	public File getFileValue(Table table, Column column, String filePathValue) throws SqlParamValueMapperException
 	{
 		if (!isFilePathValue(filePathValue))
 			return null;
 
-		filePathValue = getFilePathContent(filePathValue);
+		filePathValue = getFilePath(filePathValue);
 
 		File file = FileUtil.getFile(this.directory, filePathValue);
 

@@ -6,11 +6,15 @@ package org.datagear.persistence.support;
 
 import java.sql.Connection;
 
+import org.datagear.meta.Column;
+import org.datagear.meta.Table;
+import org.datagear.persistence.SqlParamValueMapperException;
 import org.datagear.persistence.support.expression.ExpressionEvaluationContext;
+import org.datagear.util.SqlParamValue;
 import org.springframework.core.convert.ConversionService;
 
 /**
- * 代理{@linkplain ConversionPstParamMapper}实现。
+ * 代理{@linkplain ConversionSqlParamValueMapper}实现。
  * <p>
  * 它将类型转换代理给{@linkplain ConversionService}。
  * </p>
@@ -18,22 +22,22 @@ import org.springframework.core.convert.ConversionService;
  * @author datagear@163.com
  *
  */
-public class DelegationConversionPstParamMapper extends ConversionPstParamMapper
+public class DelegationConversionSqlParamValueMapper extends ConversionSqlParamValueMapper
 {
 	private ConversionService conversionService;
 
-	public DelegationConversionPstParamMapper()
+	public DelegationConversionSqlParamValueMapper()
 	{
 		super();
 	}
 
-	public DelegationConversionPstParamMapper(ConversionService conversionService)
+	public DelegationConversionSqlParamValueMapper(ConversionService conversionService)
 	{
 		super();
 		this.conversionService = conversionService;
 	}
 
-	public DelegationConversionPstParamMapper(ConversionService conversionService,
+	public DelegationConversionSqlParamValueMapper(ConversionService conversionService,
 			ExpressionEvaluationContext expressionEvaluationContext)
 	{
 		super();
@@ -51,11 +55,12 @@ public class DelegationConversionPstParamMapper extends ConversionPstParamMapper
 		this.conversionService = conversionService;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	protected Object convertToPstParamExt(Connection cn, Object value, int sqlType, Class<?> suggestType)
-			throws Throwable
+	protected SqlParamValue convertToSqlParamValueExt(Connection cn, Table table, Column column, Object value,
+			Class<?> suggestType) throws Throwable, SqlParamValueMapperException
 	{
-		return this.conversionService.convert(value, (Class<Object>) suggestType);
+		@SuppressWarnings("unchecked")
+		Object paramValue = this.conversionService.convert(value, (Class<Object>) suggestType);
+		return toSqlParamValue(column, paramValue);
 	}
 }

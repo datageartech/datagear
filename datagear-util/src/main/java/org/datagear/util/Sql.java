@@ -123,24 +123,6 @@ public class Sql implements Serializable
 	}
 
 	/**
-	 * 追加SQL语句、参数、参数类型。
-	 * 
-	 * @param sql
-	 * @param param
-	 * @param type
-	 * @return
-	 */
-	public Sql sql(String sql, Object param, int type)
-	{
-		resetDelimiterStatus();
-
-		this.sql.append(sql);
-		this.paramValues.add(new SqlParamValue(param, type));
-
-		return this;
-	}
-
-	/**
 	 * 追加另一个Sql对象。
 	 * 
 	 * @param sql
@@ -178,20 +160,6 @@ public class Sql implements Serializable
 	public Sql param(List<? extends SqlParamValue> paramValues)
 	{
 		this.paramValues.addAll(paramValues);
-
-		return this;
-	}
-
-	/**
-	 * 追加参数。
-	 * 
-	 * @param value
-	 * @param type
-	 * @return
-	 */
-	public Sql param(Object value, int type)
-	{
-		this.paramValues.add(new SqlParamValue(value, type));
 
 		return this;
 	}

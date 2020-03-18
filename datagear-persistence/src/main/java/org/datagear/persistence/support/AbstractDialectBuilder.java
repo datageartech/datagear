@@ -16,7 +16,7 @@ import org.datagear.persistence.DialectException;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractDialectBuilder implements DialectBuilder
+public abstract class AbstractDialectBuilder extends PersistenceSupport implements DialectBuilder
 {
 	public AbstractDialectBuilder()
 	{

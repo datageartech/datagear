@@ -20,6 +20,7 @@ import org.datagear.persistence.RowMapperException;
 import org.datagear.util.JdbcSupport;
 import org.datagear.util.QueryResultSet;
 import org.datagear.util.Sql;
+import org.datagear.util.SqlParamValue;
 
 /**
  * 持久操作支持类。
@@ -235,5 +236,10 @@ public class PersistenceSupport extends JdbcSupport
 	public Object getColumnValue(Connection cn, ResultSet rs, Column column) throws SQLException
 	{
 		return getColumnValue(cn, rs, column.getName(), column.getType());
+	}
+
+	public SqlParamValue toSqlParamValue(Column column, Object value)
+	{
+		return new SqlParamValue(value, column.getType());
 	}
 }

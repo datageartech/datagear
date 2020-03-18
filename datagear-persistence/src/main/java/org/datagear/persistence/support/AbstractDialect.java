@@ -19,7 +19,7 @@ import org.datagear.util.Sql;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractDialect implements Dialect
+public abstract class AbstractDialect extends PersistenceSupport implements Dialect
 {
 	/** 标识引用符 */
 	private String identifierQuote;
@@ -95,8 +95,8 @@ public abstract class AbstractDialect implements Dialect
 		String likeOpt = (query.isNotLike() ? " NOT LIKE " : " LIKE ");
 		String equalOpt = (query.isNotLike() ? " != " : " = ");
 
-		Column[] columns=table.getColumns();
-		for (int i=0; i< columns.length; i++)
+		Column[] columns = table.getColumns();
+		for (int i = 0; i < columns.length; i++)
 		{
 			if (i >= this.keywordQueryColumnCount)
 				break;
@@ -129,7 +129,7 @@ public abstract class AbstractDialect implements Dialect
 				if (!sql.isEmpty())
 					sql.sql(joinOpt);
 
-				sql.sql(quote(column.getName()) + myOperator + "?", myKeyword, column.getType());
+				sql.sql(quote(column.getName()) + myOperator + "?", toSqlParamValue(column, myKeyword));
 			}
 		}
 

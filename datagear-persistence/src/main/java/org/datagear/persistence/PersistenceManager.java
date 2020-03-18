@@ -45,7 +45,7 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	int insert(Connection cn, Dialect dialect, Table table, Row row, PstParamMapper mapper) throws PersistenceException;
+	int insert(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper) throws PersistenceException;
 
 	/**
 	 * 更新行对象。
@@ -71,7 +71,7 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	int update(Connection cn, Dialect dialect, Table table, Row origin, Row update, PstParamMapper mapper)
+	int update(Connection cn, Dialect dialect, Table table, Row origin, Row update, SqlParamValueMapper mapper)
 			throws PersistenceException;
 
 	/**
@@ -96,7 +96,7 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	int delete(Connection cn, Dialect dialect, Table table, Row row, PstParamMapper mapper) throws PersistenceException;
+	int delete(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper) throws PersistenceException;
 
 	/**
 	 * 删除行对象。
@@ -109,7 +109,7 @@ public interface PersistenceManager
 	 * @return
 	 * @throws PersistenceException
 	 */
-	int delete(Connection cn, Dialect dialect, Table table, Row[] rows, PstParamMapper mapper)
+	int delete(Connection cn, Dialect dialect, Table table, Row[] rows, SqlParamValueMapper mapper)
 			throws PersistenceException;
 
 	/**
@@ -153,12 +153,12 @@ public interface PersistenceManager
 	 * @param dialect        允许为{@code null}
 	 * @param table
 	 * @param param
-	 * @param pstParamMapper 允许为{@code null}
+	 * @param sqlParamValueMapper 允许为{@code null}
 	 * @param rowMapper      允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */
-	Row get(Connection cn, Dialect dialect, Table table, Row param, PstParamMapper pstParamMapper, RowMapper rowMapper)
+	Row get(Connection cn, Dialect dialect, Table table, Row param, SqlParamValueMapper sqlParamValueMapper, RowMapper rowMapper)
 			throws PersistenceException;
 
 	/**
