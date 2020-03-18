@@ -38,22 +38,27 @@ public interface PersistenceManager
 	 * 插入行对象。
 	 * 
 	 * @param cn
-	 * @param dialect 允许为{@code null}
+	 * @param dialect
+	 *            允许为{@code null}
 	 * @param table
 	 * @param row
-	 * @param mapper  允许为{@code null}
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */
-	int insert(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper) throws PersistenceException;
+	int insert(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper)
+			throws PersistenceException;
 
 	/**
 	 * 更新行对象。
 	 * 
 	 * @param cn
 	 * @param table
-	 * @param origin 原行
-	 * @param update 更新行
+	 * @param origin
+	 *            原行
+	 * @param update
+	 *            更新行
 	 * @return
 	 * @throws PersistenceException
 	 */
@@ -63,11 +68,15 @@ public interface PersistenceManager
 	 * 更新行对象。
 	 * 
 	 * @param cn
-	 * @param dialect 允许为{@code null}
+	 * @param dialect
+	 *            允许为{@code null}
 	 * @param table
-	 * @param origin  原行
-	 * @param update  更新行
-	 * @param mapper  允许为{@code null}
+	 * @param origin
+	 *            原行
+	 * @param update
+	 *            更新行
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */
@@ -89,23 +98,28 @@ public interface PersistenceManager
 	 * 删除行对象。
 	 * 
 	 * @param cn
-	 * @param dialect 允许为{@code null}
+	 * @param dialect
+	 *            允许为{@code null}
 	 * @param table
 	 * @param row
-	 * @param mapper  允许为{@code null}
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */
-	int delete(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper) throws PersistenceException;
+	int delete(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper)
+			throws PersistenceException;
 
 	/**
 	 * 删除行对象。
 	 * 
 	 * @param cn
-	 * @param dialect 允许为{@code null}
+	 * @param dialect
+	 *            允许为{@code null}
 	 * @param table
 	 * @param rows
-	 * @param mapper  允许为{@code null}
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */
@@ -127,7 +141,8 @@ public interface PersistenceManager
 	 * 删除查询结果。
 	 * 
 	 * @param cn
-	 * @param dialect 允许为{@code null}
+	 * @param dialect
+	 *            允许为{@code null}
 	 * @param table
 	 * @param query
 	 * @return
@@ -150,23 +165,27 @@ public interface PersistenceManager
 	 * 获取行对象。
 	 * 
 	 * @param cn
-	 * @param dialect        允许为{@code null}
+	 * @param dialect
+	 *            允许为{@code null}
 	 * @param table
 	 * @param param
-	 * @param sqlParamValueMapper 允许为{@code null}
-	 * @param rowMapper      允许为{@code null}
+	 * @param sqlParamValueMapper
+	 *            允许为{@code null}
+	 * @param rowMapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */
-	Row get(Connection cn, Dialect dialect, Table table, Row param, SqlParamValueMapper sqlParamValueMapper, RowMapper rowMapper)
-			throws PersistenceException;
+	Row get(Connection cn, Dialect dialect, Table table, Row param, SqlParamValueMapper sqlParamValueMapper,
+			RowMapper rowMapper) throws PersistenceException;
 
 	/**
 	 * 查询。
 	 * 
 	 * @param cn
 	 * @param table
-	 * @param query 为{@code null}表示查询全部
+	 * @param query
+	 *            为{@code null}表示查询全部
 	 * @return
 	 * @throws PersistenceException
 	 */
@@ -176,10 +195,13 @@ public interface PersistenceManager
 	 * 查询。
 	 * 
 	 * @param cn
-	 * @param dialect 允许为{@code null}
+	 * @param dialect
+	 *            允许为{@code null}
 	 * @param table
-	 * @param query   为{@code null}表示查询全部
-	 * @param mapper  允许为{@code null}
+	 * @param query
+	 *            为{@code null}表示查询全部
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */
@@ -201,10 +223,12 @@ public interface PersistenceManager
 	 * 分页查询。
 	 * 
 	 * @param cn
-	 * @param dialect     允许为{@code null}
+	 * @param dialect
+	 *            允许为{@code null}
 	 * @param table
 	 * @param pagingQuery
-	 * @param mapper      允许为{@code null}
+	 * @param mapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws PersistenceException
 	 */

@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -623,14 +622,14 @@ public class IOUtil
 	}
 
 	/**
-	 * 关闭{@linkplain Closeable}。
+	 * 关闭{@linkplain AutoCloseable}。
 	 * <p>
 	 * 此方法不会抛出任何{@linkplain Throwable}。
 	 * </p>
 	 * 
 	 * @param closeable
 	 */
-	public static void close(Closeable closeable)
+	public static void close(AutoCloseable closeable)
 	{
 		if (closeable == null)
 			return;
@@ -664,7 +663,10 @@ public class IOUtil
 	}
 
 	/**
-	 * 如果是{@linkplain Closeable}，则将其关闭。
+	 * 如果是{@linkplain AutoCloseable}，则将其关闭。
+	 * <p>
+	 * 此方法不会抛出异常。
+	 * </p>
 	 * 
 	 * @param list
 	 */
@@ -678,27 +680,36 @@ public class IOUtil
 	}
 
 	/**
-	 * 如果是{@linkplain Closeable}，则将其关闭。
+	 * 如果是{@linkplain AutoCloseable}，则将其关闭。
+	 * <p>
+	 * 此方法不会抛出异常。
+	 * </p>
 	 * 
 	 * @param objs
 	 */
 	public static void closeIf(Object[] objs)
 	{
+		if (objs == null)
+			return;
+
 		for (Object o : objs)
 			closeIf(o);
 	}
 
 	/**
-	 * 如果是{@linkplain Closeable}，则将其关闭。
+	 * 如果是{@linkplain AutoCloseable}，则将其关闭。
+	 * <p>
+	 * 此方法不会抛出异常。
+	 * </p>
 	 * 
 	 * @param o
 	 * @return
 	 */
 	public static boolean closeIf(Object o)
 	{
-		if (o instanceof Closeable)
+		if (o instanceof AutoCloseable)
 		{
-			close((Closeable) o);
+			close((AutoCloseable) o);
 			return true;
 		}
 

@@ -73,38 +73,47 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
+		ReleasableRegistry releasableRegistry = createReleasableRegistry();
+
 		Sql sql = Sql.valueOf().sql("INSERT INTO ").sql(quote(dialect, table.getName())).sql(" (").delimit(",");
 		Sql valueSql = Sql.valueOf().sql(" VALUES (").delimit(",");
 
 		Column[] columns = table.getColumns();
 
-		for (int i = 0; i < columns.length; i++)
+		try
 		{
-			Column column = columns[i];
-			String name = column.getName();
+			for (int i = 0; i < columns.length; i++)
+			{
+				Column column = columns[i];
+				String name = column.getName();
 
-			if (!row.containsKey(name))
-				continue;
+				if (!row.containsKey(name))
+					continue;
 
-			Object value = row.get(name);
+				Object value = row.get(name);
 
-			if (value == null && column.isAutoincrement())
-				continue;
+				if (value == null && column.isAutoincrement())
+					continue;
 
-			if (value == null && column.hasDefaultValue())
-				value = column.getDefaultValue();
+				if (value == null && column.hasDefaultValue())
+					value = column.getDefaultValue();
 
-			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper);
+				SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper, releasableRegistry);
 
-			sql.sqld(quote(dialect, name));
-			valueSql.sqld("?").param(sqlParamValue);
+				sql.sqld(quote(dialect, name));
+				valueSql.sqld("?").param(sqlParamValue);
+			}
+
+			sql.sql(")");
+			valueSql.sql(")");
+			sql.sql(valueSql);
+
+			return executeUpdateWrap(cn, sql);
 		}
-
-		sql.sql(")");
-		valueSql.sql(")");
-		sql.sql(valueSql);
-
-		return executeUpdateWrap(cn, sql);
+		finally
+		{
+			releasableRegistry.release();
+		}
 	}
 
 	@Override
@@ -119,28 +128,37 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
+		ReleasableRegistry releasableRegistry = createReleasableRegistry();
+
 		Sql sql = Sql.valueOf().sql("UPDATE ").sql(quote(dialect, table.getName())).sql(" SET ").delimit(",");
 
 		Column[] columns = table.getColumns();
 
-		for (int i = 0; i < columns.length; i++)
+		try
 		{
-			Column column = columns[i];
-			String name = column.getName();
+			for (int i = 0; i < columns.length; i++)
+			{
+				Column column = columns[i];
+				String name = column.getName();
 
-			if (!update.containsKey(name))
-				continue;
+				if (!update.containsKey(name))
+					continue;
 
-			Object value = update.get(name);
+				Object value = update.get(name);
 
-			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper);
+				SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper, releasableRegistry);
 
-			sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
+				sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
+			}
+
+			sql.sql(" WHERE ").sql(buildUniqueRecordCondition(cn, dialect, table, origin, mapper, releasableRegistry));
+
+			return executeUpdateWrap(cn, sql);
 		}
-
-		sql.sql(" WHERE ").sql(buildUniqueRecordCondition(cn, dialect, table, origin, mapper));
-
-		return executeUpdateWrap(cn, sql);
+		finally
+		{
+			releasableRegistry.release();
+		}
 	}
 
 	@Override
@@ -161,6 +179,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			throws PersistenceException
 	{
 		dialect = getDialect(cn, dialect);
+
+		ReleasableRegistry releasableRegistry = createReleasableRegistry();
 
 		Sql sql = Sql.valueOf().sql("DELETE FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")
 				.delimit(" AND ");
@@ -192,7 +212,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 					String name = column.getName();
 					Object value = row.get(name);
 
-					SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper);
+					SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper,
+							releasableRegistry);
 
 					sql.param(sqlParamValue);
 				}
@@ -202,6 +223,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 				sql.clearParam();
 				pst.clearParameters();
+				releasableRegistry.releaseClear();
 			}
 
 			return count;
@@ -213,6 +235,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		finally
 		{
 			JdbcUtil.closeStatement(pst);
+			releasableRegistry.release();
 		}
 	}
 
@@ -241,28 +264,38 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
+		ReleasableRegistry releasableRegistry = createReleasableRegistry();
+
 		Sql sql = Sql.valueOf().sql("SELECT * FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")
 				.delimit(" AND ");
 
 		Column[] columns = getUniqueRecordColumns(table);
 
-		for (int i = 0; i < columns.length; i++)
+		try
 		{
-			Column column = columns[i];
-			String name = column.getName();
-			Object value = param.get(name);
+			for (int i = 0; i < columns.length; i++)
+			{
+				Column column = columns[i];
+				String name = column.getName();
+				Object value = param.get(name);
 
-			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, sqlParamValueMapper);
+				SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, sqlParamValueMapper,
+						releasableRegistry);
 
-			sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
+				sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
+			}
+
+			List<Row> rows = executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, rowMapper);
+
+			if (rows.size() > 1)
+				throw new NonUniqueResultException();
+
+			return rows.get(0);
 		}
-
-		List<Row> rows = executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, rowMapper);
-
-		if (rows.size() > 1)
-			throw new NonUniqueResultException();
-
-		return rows.get(0);
+		finally
+		{
+			releasableRegistry.release();
+		}
 	}
 
 	@Override
@@ -277,7 +310,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
-		Sql sql = buildQuery(cn, dialect, table, query);
+		Sql sql = buildQuerySql(cn, dialect, table, query);
 		return executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, mapper);
 	}
 
@@ -293,7 +326,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
-		Sql queryView = buildQuery(cn, dialect, table, pagingQuery);
+		Sql queryView = buildQuerySql(cn, dialect, table, pagingQuery);
 
 		long total = queryCount(cn, queryView);
 
@@ -336,7 +369,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		return re;
 	}
 
-	protected Sql buildQuery(Connection cn, Dialect dialect, Table table, Query query)
+	protected Sql buildQuerySql(Connection cn, Dialect dialect, Table table, Query query)
 	{
 		Sql sql = Sql.valueOf().sql("SELECT * FROM ").sql(quote(dialect, table.getName()));
 		Sql condition = buildQueryCondition(cn, dialect, table, query);
@@ -401,11 +434,12 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	 * @param row
 	 * @param mapper
 	 *            允许为{@code null}
+	 * @param releasableRegistry
 	 * @return
 	 * @throws PersistenceException
 	 */
 	protected Sql buildUniqueRecordCondition(Connection cn, Dialect dialect, Table table, Row row,
-			SqlParamValueMapper mapper) throws PersistenceException
+			SqlParamValueMapper mapper, ReleasableRegistry releasableRegistry) throws PersistenceException
 	{
 		Column[] columns = getUniqueRecordColumns(table);
 
@@ -418,7 +452,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 			Object value = row.get(name);
 
-			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper);
+			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper, releasableRegistry);
 
 			sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
 		}
@@ -486,16 +520,23 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	 * @param value
 	 * @param mapper
 	 *            允许为{@code null}
+	 * @param releasableRegistry
 	 * @return
 	 * @throws PersistenceException
 	 */
 	protected SqlParamValue mapToSqlParamValue(Connection cn, Table table, Column column, Object value,
-			SqlParamValueMapper mapper) throws PersistenceException
+			SqlParamValueMapper mapper, ReleasableRegistry releasableRegistry) throws PersistenceException
 	{
-		if (mapper == null)
-			return toSqlParamValue(column, value);
+		SqlParamValue sqlParamValue = null;
 
-		return mapper.map(cn, table, column, value);
+		if (mapper == null)
+			sqlParamValue = createSqlParamValue(column, value);
+		else
+			sqlParamValue = mapper.map(cn, table, column, value);
+
+		releasableRegistry.register(sqlParamValue.getValue());
+
+		return sqlParamValue;
 	}
 
 	/**
@@ -512,5 +553,10 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			return init;
 
 		return this.dialectSource.getDialect(cn);
+	}
+
+	protected ReleasableRegistry createReleasableRegistry()
+	{
+		return new ReleasableRegistry();
 	}
 }

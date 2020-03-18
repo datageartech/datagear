@@ -61,6 +61,6 @@ public class DelegationConversionSqlParamValueMapper extends ConversionSqlParamV
 	{
 		@SuppressWarnings("unchecked")
 		Object paramValue = this.conversionService.convert(value, (Class<Object>) suggestType);
-		return toSqlParamValue(column, paramValue);
+		return createSqlParamValue(column, paramValue);
 	}
 }

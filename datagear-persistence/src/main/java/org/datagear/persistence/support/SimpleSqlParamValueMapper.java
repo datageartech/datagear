@@ -32,6 +32,6 @@ public class SimpleSqlParamValueMapper extends AbstractSqlParamValueMapper
 	public SqlParamValue map(Connection cn, Table table, Column column, Object value)
 			throws SqlParamValueMapperException
 	{
-		return toSqlParamValue(column, value);
+		return createSqlParamValue(column, value);
 	}
 }

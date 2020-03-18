@@ -457,7 +457,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		if (sqlParamValue != null)
 			return sqlParamValue;
 		else
-			return toSqlParamValue(column, paramValue);
+			return createSqlParamValue(column, paramValue);
 	}
 
 	protected SqlParamValue convertToSqlParamValueExtWrap(Connection cn, Table table, Column column, Object value,

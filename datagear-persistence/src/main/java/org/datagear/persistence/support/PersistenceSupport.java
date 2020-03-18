@@ -238,7 +238,7 @@ public class PersistenceSupport extends JdbcSupport
 		return getColumnValue(cn, rs, column.getName(), column.getType());
 	}
 
-	public SqlParamValue toSqlParamValue(Column column, Object value)
+	public SqlParamValue createSqlParamValue(Column column, Object value)
 	{
 		return new SqlParamValue(value, column.getType());
 	}

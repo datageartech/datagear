@@ -129,7 +129,7 @@ public abstract class AbstractDialect extends PersistenceSupport implements Dial
 				if (!sql.isEmpty())
 					sql.sql(joinOpt);
 
-				sql.sql(quote(column.getName()) + myOperator + "?", toSqlParamValue(column, myKeyword));
+				sql.sql(quote(column.getName()) + myOperator + "?", createSqlParamValue(column, myKeyword));
 			}
 		}
 

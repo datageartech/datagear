@@ -70,6 +70,14 @@ public class Sql implements Serializable
 	}
 
 	/**
+	 * 清除参数。
+	 */
+	public void clearParam()
+	{
+		this.paramValues.clear();
+	}
+
+	/**
 	 * 获取SQL语句的长度。
 	 * 
 	 * @return
@@ -162,14 +170,6 @@ public class Sql implements Serializable
 		this.paramValues.addAll(paramValues);
 
 		return this;
-	}
-
-	/**
-	 * 清除参数。
-	 */
-	public void clearParam()
-	{
-		this.paramValues.clear();
 	}
 
 	/**
