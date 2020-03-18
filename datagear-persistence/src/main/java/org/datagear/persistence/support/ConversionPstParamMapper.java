@@ -20,6 +20,7 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.datagear.meta.Column;
@@ -37,11 +38,13 @@ import org.datagear.persistence.support.expression.VariableExpressionResolver;
 import org.datagear.persistence.support.expression.VariableExpressionSyntaxErrorException;
 import org.datagear.util.JdbcSupport;
 import org.datagear.util.JdbcUtil;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * 支持类型转换的{@linkplain PstParamMapper}。
+ * <p>
+ * 对于SQL大对象类型、二进制类型，此类支持原值是文件路径格式的字符串，具体参考{@linkplain FilePathValueResolver}。
+ * </p>
  * <p>
  * 如果{@linkplain #hasExpressionEvaluationContext()}，它还支持变量表达式<code>"#{...}"</code>、
  * SQL表达式<code>"${select...}"</code>。
@@ -55,12 +58,10 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 	protected static final VariableExpressionResolver DEFAULT_VARIABLE_EXPRESSION_RESOLVER = new VariableExpressionResolver();
 
 	protected static final SqlExpressionResolver DEFAULT_SQL_EXPRESSION_RESOLVER = new SqlExpressionResolver();
-	
-	protected static final SpelExpressionParser DEFAULT_SPEL_EXPRESSION_PARSER = new SpelExpressionParser();
-	
-	protected static final FilePathValueResolver DEFAULT_FILE_PATH_VALUE_RESOLVER = new FilePathValueResolver();
 
-	private ConversionService conversionService;
+	protected static final SpelExpressionParser DEFAULT_SPEL_EXPRESSION_PARSER = new SpelExpressionParser();
+
+	protected static final FilePathValueResolver DEFAULT_FILE_PATH_VALUE_RESOLVER = new FilePathValueResolver();
 
 	/** 变量表达式解析器 */
 	private VariableExpressionResolver variableExpressionResolver = DEFAULT_VARIABLE_EXPRESSION_RESOLVER;
@@ -70,7 +71,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 
 	/** 变量表达式计算器 */
 	private SpelExpressionParser spelExpressionParser = DEFAULT_SPEL_EXPRESSION_PARSER;
-	
+
 	private FilePathValueResolver filePathValueResolver = DEFAULT_FILE_PATH_VALUE_RESOLVER;
 
 	/** 表达式计算上下文 */
@@ -79,30 +80,6 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 	public ConversionPstParamMapper()
 	{
 		super();
-	}
-
-	public ConversionPstParamMapper(ConversionService conversionService)
-	{
-		super();
-		this.conversionService = conversionService;
-	}
-
-	public ConversionPstParamMapper(ConversionService conversionService,
-			ExpressionEvaluationContext expressionEvaluationContext)
-	{
-		super();
-		this.conversionService = conversionService;
-		this.expressionEvaluationContext = expressionEvaluationContext;
-	}
-
-	public ConversionService getConversionService()
-	{
-		return conversionService;
-	}
-
-	public void setConversionService(ConversionService conversionService)
-	{
-		this.conversionService = conversionService;
 	}
 
 	public VariableExpressionResolver getVariableExpressionResolver()
@@ -170,13 +147,13 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 		if (value instanceof String)
 			value = evalExpressionIf(cn, dialect, table, column, (String) value);
 
-		value = convertToPstParam(cn, value, column.getType());
+		value = mapToPstParam(cn, value, column.getType());
 
 		return value;
 	}
 
 	/**
-	 * 将源值转换为可用于{@linkplain JdbcSupport#setParamValue(Connection, PreparedStatement, int, org.datagear.util.SqlParamValue)}参数值的对象。
+	 * 将源值映射为可用于{@linkplain JdbcSupport#setParamValue(Connection, PreparedStatement, int, org.datagear.util.SqlParamValue)}参数值的对象。
 	 * 
 	 * @param cn
 	 * @param value
@@ -184,7 +161,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 	 * @return
 	 * @throws PstParamMapperException
 	 */
-	public Object convertToPstParam(Connection cn, Object value, int sqlType) throws PstParamMapperException
+	public Object mapToPstParam(Connection cn, Object value, int sqlType) throws PstParamMapperException
 	{
 		if (value == null)
 			return null;
@@ -199,7 +176,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				if (value instanceof String)
 					pstParam = value;
 				else
-					pstParam = convertToType(value, String.class);
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, String.class);
 
 				break;
 			}
@@ -209,10 +186,9 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				if (value instanceof String)
 				{
 					String v = (String) value;
-					
-					if(this.filePathValueResolver.isFilePathValue(v))
-						pstParam = this.filePathValueResolver.getReader(v);
-					else
+					pstParam = getReaderIfFilePath(v);
+
+					if (pstParam == null)
 						pstParam = v;
 				}
 				else if (value instanceof Reader)
@@ -220,7 +196,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				else if (value instanceof File)
 					pstParam = this.filePathValueResolver.getReader((File) value);
 				else
-					pstParam = convertToType(value, Reader.class);
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, Reader.class);
 
 				break;
 			}
@@ -228,14 +204,22 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 			{
-				pstParam = convertToType(value, BigDecimal.class);
+				if (value instanceof Number)
+					pstParam = value;
+				else
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, BigDecimal.class);
+
 				break;
 			}
 
 			case Types.BIT:
 			case Types.BOOLEAN:
 			{
-				pstParam = convertToType(value, Boolean.class);
+				if (value instanceof Boolean)
+					pstParam = value;
+				else
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, Boolean.class);
+
 				break;
 			}
 
@@ -243,26 +227,42 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 			case Types.SMALLINT:
 			case Types.INTEGER:
 			{
-				pstParam = convertToType(value, Integer.class);
+				if (value instanceof Number)
+					pstParam = value;
+				else
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, Integer.class);
+
 				break;
 			}
 
 			case Types.BIGINT:
 			{
-				pstParam = convertToType(value, Long.class);
+				if (value instanceof Number)
+					pstParam = value;
+				else
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, Long.class);
+
 				break;
 			}
 
 			case Types.REAL:
 			{
-				pstParam = convertToType(value, Float.class);
+				if (value instanceof Number)
+					pstParam = value;
+				else
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, Float.class);
+
 				break;
 			}
 
 			case Types.FLOAT:
 			case Types.DOUBLE:
 			{
-				pstParam = convertToType(value, Double.class);
+				if (value instanceof Number)
+					pstParam = value;
+				else
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, Double.class);
+
 				break;
 			}
 
@@ -279,33 +279,44 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				else if (value instanceof String)
 				{
 					String v = (String) value;
+					pstParam = getInputStreamIfFilePath(v);
 
-					if (this.filePathValueResolver.isFilePathValue(v))
-						pstParam = this.filePathValueResolver.getReader(v);
-					else
-						pstParam = convertToType(value, InputStream.class);
+					if (pstParam == null)
+						pstParam = convertToPstParamExtWrap(cn, value, sqlType, InputStream.class);
 				}
 				else
-					pstParam = convertToType(value, InputStream.class);
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, InputStream.class);
 
 				break;
 			}
 
 			case Types.DATE:
 			{
-				pstParam = convertToType(value, java.sql.Date.class);
+				if (value instanceof Date)
+					pstParam = value;
+				else
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, java.sql.Date.class);
+
 				break;
 			}
 
 			case Types.TIME:
 			{
-				pstParam = convertToType(value, java.sql.Time.class);
+				if (value instanceof Date)
+					pstParam = value;
+				else
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, java.sql.Time.class);
+
 				break;
 			}
 
 			case Types.TIMESTAMP:
 			{
-				pstParam = convertToType(value, java.sql.Timestamp.class);
+				if (value instanceof Date)
+					pstParam = value;
+				else
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, java.sql.Timestamp.class);
+
 				break;
 			}
 
@@ -316,11 +327,10 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				else if (value instanceof String)
 				{
 					String v = (String) value;
+					pstParam = getReaderIfFilePath(v);
 
-					if (this.filePathValueResolver.isFilePathValue(v))
-						pstParam = this.filePathValueResolver.getReader(v);
-					else
-						pstParam = value;
+					if (pstParam == null)
+						pstParam = v;
 				}
 				else if (value instanceof Reader)
 					pstParam = value;
@@ -329,7 +339,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				else if (value instanceof File)
 					pstParam = this.filePathValueResolver.getReader((File) value);
 				else
-					pstParam = convertToType(value, Reader.class);
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, Clob.class);
 
 				break;
 			}
@@ -347,14 +357,13 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				else if (value instanceof String)
 				{
 					String v = (String) value;
+					pstParam = getInputStreamIfFilePath(v);
 
-					if (this.filePathValueResolver.isFilePathValue(v))
-						pstParam = this.filePathValueResolver.getInputStream(v);
-					else
-						pstParam = convertToType(value, InputStream.class);
+					if (pstParam == null)
+						pstParam = convertToPstParamExtWrap(cn, value, sqlType, Blob.class);
 				}
 				else
-					pstParam = convertToType(value, InputStream.class);
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, Blob.class);
 
 				break;
 			}
@@ -365,7 +374,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				if (value instanceof String)
 					pstParam = value;
 				else
-					pstParam = convertToType(value, String.class);
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, String.class);
 
 				break;
 			}
@@ -375,18 +384,17 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				if (value instanceof String)
 				{
 					String v = (String) value;
+					pstParam = getReaderIfFilePath(v);
 
-					if (this.filePathValueResolver.isFilePathValue(v))
-						pstParam = this.filePathValueResolver.getReader(v);
-					else
-						pstParam = value;
+					if (pstParam == null)
+						pstParam = v;
 				}
 				else if (value instanceof Reader)
 					pstParam = value;
 				else if (value instanceof File)
 					pstParam = this.filePathValueResolver.getReader((File) value);
 				else
-					pstParam = convertToType(value, Reader.class);
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, Reader.class);
 
 				break;
 			}
@@ -398,11 +406,10 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				else if (value instanceof String)
 				{
 					String v = (String) value;
+					pstParam = getReaderIfFilePath(v);
 
-					if (this.filePathValueResolver.isFilePathValue(v))
-						pstParam = this.filePathValueResolver.getReader(v);
-					else
-						pstParam = value;
+					if (pstParam == null)
+						pstParam = v;
 				}
 				else if (value instanceof Reader)
 					pstParam = value;
@@ -411,7 +418,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				else if (value instanceof File)
 					pstParam = this.filePathValueResolver.getReader((File) value);
 				else
-					pstParam = convertToType(value, Reader.class);
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, NClob.class);
 
 				break;
 			}
@@ -423,11 +430,10 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				else if (value instanceof String)
 				{
 					String v = (String) value;
+					pstParam = getReaderIfFilePath(v);
 
-					if (this.filePathValueResolver.isFilePathValue(v))
-						pstParam = this.filePathValueResolver.getReader(v);
-					else
-						pstParam = value;
+					if (pstParam == null)
+						pstParam = v;
 				}
 				else if (value instanceof Reader)
 					pstParam = value;
@@ -436,7 +442,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 				else if (value instanceof File)
 					pstParam = this.filePathValueResolver.getReader((File) value);
 				else
-					pstParam = convertToType(value, Reader.class);
+					pstParam = convertToPstParamExtWrap(cn, value, sqlType, SQLXML.class);
 
 				break;
 			}
@@ -449,17 +455,66 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 		return pstParam;
 	}
 
-	@SuppressWarnings("unchecked")
-	protected Object convertToType(Object src, Class<?> type) throws PstParamMapperException
+	protected Object convertToPstParamExtWrap(Connection cn, Object value, int sqlType, Class<?> suggestType)
+			throws PstParamMapperException
 	{
 		try
 		{
-			return this.conversionService.convert(src, (Class<Object>) type);
+			return convertToPstParamExt(cn, value, sqlType, suggestType);
 		}
-		catch(Throwable t)
+		catch (PstParamMapperException e)
+		{
+			throw e;
+		}
+		catch (Throwable t)
 		{
 			throw new PstParamMapperException(t);
 		}
+	}
+
+	/**
+	 * 将源值转换为可用于{@linkplain JdbcSupport#setParamValue(Connection, PreparedStatement, int, org.datagear.util.SqlParamValue)}参数值的对象。
+	 * <p>
+	 * 此方法默认直接抛出{@linkplain UnsupportedSqlTypeException}，子类可以重写进行扩展。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param value
+	 * @param sqlType
+	 * @param suggestType
+	 *            建议类型
+	 * @return
+	 * @throws Throwable
+	 * @throws PstParamMapperException
+	 */
+	protected Object convertToPstParamExt(Connection cn, Object value, int sqlType, Class<?> suggestType)
+			throws Throwable, PstParamMapperException
+	{
+		throw new UnsupportedSqlTypeException(sqlType);
+	}
+
+	/**
+	 * 如果是文件路径，则返回其输入流；否则，返回{@code null}。
+	 * 
+	 * @param value
+	 * @return
+	 */
+	protected Reader getReaderIfFilePath(String value)
+	{
+		File file = this.filePathValueResolver.getFileValue(value);
+		return (file == null ? null : this.filePathValueResolver.getReader(file));
+	}
+
+	/**
+	 * 如果是文件路径，则返回其输入流；否则，返回{@code null}。
+	 * 
+	 * @param value
+	 * @return
+	 */
+	protected InputStream getInputStreamIfFilePath(String value)
+	{
+		File file = this.filePathValueResolver.getFileValue(value);
+		return (file == null ? null : this.filePathValueResolver.getInputStream(file));
 	}
 
 	/**
@@ -504,7 +559,8 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 	/**
 	 * 计算给定变量表达式的值。
 	 * 
-	 * @param source                      变量表达式字符串
+	 * @param source
+	 *            变量表达式字符串
 	 * @param expressions
 	 * @param expressionEvaluationContext
 	 * @return
@@ -513,7 +569,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 	protected String evaluateVariableExpressions(String source, List<NameExpression> expressions,
 			ExpressionEvaluationContext expressionEvaluationContext) throws VariableExpressionErrorException
 	{
-		List<Object> expressionValues = new ArrayList<Object>();
+		List<Object> expressionValues = new ArrayList<>();
 
 		for (int i = 0, len = expressions.size(); i < len; i++)
 		{
@@ -553,7 +609,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 		{
 			spelExpression = this.spelExpressionParser.parseExpression(expression.getContent());
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			throw new VariableExpressionSyntaxErrorException(expression, e);
 		}
@@ -565,7 +621,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 			expressionValues.add(value);
 			expressionEvaluationContext.putCachedValue(expression, value);
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			throw new VariableExpressionErrorException(expression, e);
 		}
@@ -576,7 +632,8 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 	 * 
 	 * @param cn
 	 * @param dialect
-	 * @param source                      SQL表达式字符串
+	 * @param source
+	 *            SQL表达式字符串
 	 * @param expressions
 	 * @param expressionEvaluationContext
 	 * @return
@@ -584,11 +641,10 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 	 * @throws VariableExpressionErrorException
 	 */
 	protected String evaluateSqlExpressions(Connection cn, Dialect dialect, String source,
-			List<NameExpression> expressions,
-			ExpressionEvaluationContext expressionEvaluationContext)
+			List<NameExpression> expressions, ExpressionEvaluationContext expressionEvaluationContext)
 			throws SqlExpressionErrorException, VariableExpressionErrorException
 	{
-		List<Object> expressionValues = new ArrayList<Object>();
+		List<Object> expressionValues = new ArrayList<>();
 
 		for (int i = 0, len = expressions.size(); i < len; i++)
 		{
@@ -620,8 +676,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 	 * @param expressionValues
 	 * @throws SqlExpressionErrorException
 	 */
-	protected void evaluateSelectSqlExpression(Connection cn,
-			Dialect dialect, NameExpression expression,
+	protected void evaluateSelectSqlExpression(Connection cn, Dialect dialect, NameExpression expression,
 			ExpressionEvaluationContext expressionEvaluationContext, List<Object> expressionValues)
 			throws SqlExpressionErrorException
 	{
@@ -640,11 +695,11 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 			expressionValues.add(value);
 			expressionEvaluationContext.putCachedValue(expression, value);
 		}
-		catch(SQLNonTransientException e)
+		catch (SQLNonTransientException e)
 		{
 			throw new SqlExpressionSyntaxErrorException(expression, e);
 		}
-		catch(SQLException e)
+		catch (SQLException e)
 		{
 			throw new SqlExpressionErrorException(expression, e);
 		}
