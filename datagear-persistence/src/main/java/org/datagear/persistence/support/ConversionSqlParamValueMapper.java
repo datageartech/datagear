@@ -41,7 +41,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 /**
  * 支持类型转换的{@linkplain SqlParamValueMapper}。
  * <p>
- * 对于SQL大对象类型、二进制类型，此类支持原值是文件路径格式的字符串，具体参考{@linkplain FilePathValueResolver}。
+ * 对于SQL大对象类型、二进制类型，此类通过{@linkplain #getSqlParamValueMapResolver()}支持文件路径、Hex编码、Base64编码格式的字符串原值。
  * </p>
  * <p>
  * 如果{@linkplain #hasExpressionEvaluationContext()}，它还支持变量表达式<code>"#{...}"</code>、
@@ -59,7 +59,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 
 	protected static final SpelExpressionParser DEFAULT_SPEL_EXPRESSION_PARSER = new SpelExpressionParser();
 
-	protected static final FilePathValueResolver DEFAULT_FILE_PATH_VALUE_RESOLVER = new FilePathValueResolver();
+	protected static final SqlParamValueMapResolver DEFAULT_SQL_PARAM_VALUE_MAP_RESOLVER = new SqlParamValueMapResolver();
 
 	/** 变量表达式解析器 */
 	private VariableExpressionResolver variableExpressionResolver = DEFAULT_VARIABLE_EXPRESSION_RESOLVER;
@@ -70,7 +70,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	/** 变量表达式计算器 */
 	private SpelExpressionParser spelExpressionParser = DEFAULT_SPEL_EXPRESSION_PARSER;
 
-	private FilePathValueResolver filePathValueResolver = DEFAULT_FILE_PATH_VALUE_RESOLVER;
+	private SqlParamValueMapResolver sqlParamValueMapResolver = DEFAULT_SQL_PARAM_VALUE_MAP_RESOLVER;
 
 	/** 表达式计算上下文 */
 	private ExpressionEvaluationContext expressionEvaluationContext = null;
@@ -110,14 +110,14 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		this.spelExpressionParser = spelExpressionParser;
 	}
 
-	public FilePathValueResolver getFilePathValueResolver()
+	public SqlParamValueMapResolver getSqlParamValueMapResolver()
 	{
-		return filePathValueResolver;
+		return sqlParamValueMapResolver;
 	}
 
-	public void setFilePathValueResolver(FilePathValueResolver filePathValueResolver)
+	public void setSqlParamValueMapResolver(SqlParamValueMapResolver sqlParamValueMapResolver)
 	{
-		this.filePathValueResolver = filePathValueResolver;
+		this.sqlParamValueMapResolver = sqlParamValueMapResolver;
 	}
 
 	public boolean hasExpressionEvaluationContext()
@@ -196,7 +196,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				else if (value instanceof Reader)
 					paramValue = value;
 				else if (value instanceof File)
-					paramValue = this.filePathValueResolver.getReader(table, column, (File) value);
+					paramValue = this.sqlParamValueMapResolver.getReader(table, column, (File) value);
 				else
 					sqlParamValue = convertToSqlParamValueExtWrap(cn, table, column, value, Reader.class);
 
@@ -277,11 +277,14 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				else if (value instanceof InputStream)
 					paramValue = value;
 				else if (value instanceof File)
-					paramValue = this.filePathValueResolver.getInputStream(table, column, (File) value);
+					paramValue = this.sqlParamValueMapResolver.getInputStream(table, column, (File) value);
 				else if (value instanceof String)
 				{
 					String v = (String) value;
 					paramValue = getInputStreamIfFilePath(table, column, v);
+
+					if (paramValue == null)
+						paramValue = this.sqlParamValueMapResolver.getBytes(table, column, v);
 
 					if (paramValue == null)
 						sqlParamValue = convertToSqlParamValueExtWrap(cn, table, column, value, InputStream.class);
@@ -339,7 +342,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				else if (value instanceof InputStream)
 					paramValue = value;
 				else if (value instanceof File)
-					paramValue = this.filePathValueResolver.getReader(table, column, (File) value);
+					paramValue = this.sqlParamValueMapResolver.getReader(table, column, (File) value);
 				else
 					sqlParamValue = convertToSqlParamValueExtWrap(cn, table, column, value, Clob.class);
 
@@ -355,11 +358,14 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				else if (value instanceof InputStream)
 					paramValue = value;
 				else if (value instanceof File)
-					paramValue = this.filePathValueResolver.getInputStream(table, column, (File) value);
+					paramValue = this.sqlParamValueMapResolver.getInputStream(table, column, (File) value);
 				else if (value instanceof String)
 				{
 					String v = (String) value;
 					paramValue = getInputStreamIfFilePath(table, column, v);
+
+					if (paramValue == null)
+						paramValue = this.sqlParamValueMapResolver.getBytes(table, column, v);
 
 					if (paramValue == null)
 						sqlParamValue = convertToSqlParamValueExtWrap(cn, table, column, value, Blob.class);
@@ -394,7 +400,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				else if (value instanceof Reader)
 					paramValue = value;
 				else if (value instanceof File)
-					paramValue = this.filePathValueResolver.getReader(table, column, (File) value);
+					paramValue = this.sqlParamValueMapResolver.getReader(table, column, (File) value);
 				else
 					sqlParamValue = convertToSqlParamValueExtWrap(cn, table, column, value, Reader.class);
 
@@ -418,7 +424,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				else if (value instanceof InputStream)
 					paramValue = value;
 				else if (value instanceof File)
-					paramValue = this.filePathValueResolver.getReader(table, column, (File) value);
+					paramValue = this.sqlParamValueMapResolver.getReader(table, column, (File) value);
 				else
 					sqlParamValue = convertToSqlParamValueExtWrap(cn, table, column, value, NClob.class);
 
@@ -442,7 +448,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				else if (value instanceof InputStream)
 					paramValue = value;
 				else if (value instanceof File)
-					paramValue = this.filePathValueResolver.getReader(table, column, (File) value);
+					paramValue = this.sqlParamValueMapResolver.getReader(table, column, (File) value);
 				else
 					sqlParamValue = convertToSqlParamValueExtWrap(cn, table, column, value, SQLXML.class);
 
@@ -509,8 +515,8 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	 */
 	protected Reader getReaderIfFilePath(Table table, Column column, String value)
 	{
-		File file = this.filePathValueResolver.getFileValue(table, column, value);
-		return (file == null ? null : this.filePathValueResolver.getReader(table, column, file));
+		File file = this.sqlParamValueMapResolver.getFile(table, column, value);
+		return (file == null ? null : this.sqlParamValueMapResolver.getReader(table, column, file));
 	}
 
 	/**
@@ -523,8 +529,8 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	 */
 	protected InputStream getInputStreamIfFilePath(Table table, Column column, String value)
 	{
-		File file = this.filePathValueResolver.getFileValue(table, column, value);
-		return (file == null ? null : this.filePathValueResolver.getInputStream(table, column, file));
+		File file = this.sqlParamValueMapResolver.getFile(table, column, value);
+		return (file == null ? null : this.sqlParamValueMapResolver.getInputStream(table, column, file));
 	}
 
 	/**

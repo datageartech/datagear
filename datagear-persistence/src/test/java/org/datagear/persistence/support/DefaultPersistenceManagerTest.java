@@ -4,9 +4,11 @@
 
 package org.datagear.persistence.support;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.util.List;
 
@@ -16,6 +18,7 @@ import org.datagear.persistence.DialectSource;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Row;
+import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.test.DBTestSupport;
 import org.junit.After;
@@ -57,25 +60,29 @@ public class DefaultPersistenceManagerTest extends DBTestSupport
 	}
 
 	@Test
-	public void insertTest()
+	public void insertTest() throws Exception
 	{
 		Table table = this.genericDBMetaResolver.getTable(this.connection, "T_ACCOUNT");
 
 		int id = 999999999;
 		String name = "NAME-FOR-TEST";
+		String INTRODUCTION = "INTRODUCTION-for-test";
 
 		Row row = new Row();
 		row.put("ID", id);
 		row.put("NAME", name);
+		row.put("HEAD_IMG", "hex:0x09");
+		row.put("INTRODUCTION", INTRODUCTION);
 
 		try
 		{
-			this.defaultPersistenceManager.insert(connection, table, row);
+			this.defaultPersistenceManager.insert(connection, null, table, row, new ConversionSqlParamValueMapper());
 
 			Row getRow = this.defaultPersistenceManager.get(connection, table, row);
 
 			assertEquals(id, ((Number) getRow.get("ID")).intValue());
 			assertEquals(name, getRow.get("NAME"));
+			assertArrayEquals(new byte[] { 0x09 }, toBytes(getRow.get("HEAD_IMG")));
 		}
 		finally
 		{
@@ -93,5 +100,15 @@ public class DefaultPersistenceManagerTest extends DBTestSupport
 		List<Row> rows = pagingData.getItems();
 
 		assertTrue(rows.size() <= 1);
+	}
+
+	protected byte[] toBytes(Object o) throws Exception
+	{
+		if (o instanceof byte[])
+			return (byte[]) o;
+		else if (o instanceof InputStream)
+			return IOUtil.getBytes((InputStream) o);
+		else
+			throw new UnsupportedOperationException();
 	}
 }

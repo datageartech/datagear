@@ -23,11 +23,17 @@ import org.datagear.util.IOUtil;
  */
 public class ReleasableRegistry
 {
-	private List<Object> releasables = new ArrayList<>();
+	private List<Object> releasables;
 
 	public ReleasableRegistry()
 	{
+		this(2);
+	}
+
+	public ReleasableRegistry(int initialCapacity)
+	{
 		super();
+		this.releasables = new ArrayList<Object>(initialCapacity);
 	}
 
 	public List<Object> getReleasables()

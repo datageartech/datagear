@@ -73,6 +73,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
+		// 用于避免SQL参数转换中出现异常导致已转换的资源无法释放
 		ReleasableRegistry releasableRegistry = createReleasableRegistry();
 
 		Sql sql = Sql.valueOf().sql("INSERT INTO ").sql(quote(dialect, table.getName())).sql(" (").delimit(",");
@@ -128,6 +129,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
+		// 用于避免SQL参数转换中出现异常导致已转换的资源无法释放
 		ReleasableRegistry releasableRegistry = createReleasableRegistry();
 
 		Sql sql = Sql.valueOf().sql("UPDATE ").sql(quote(dialect, table.getName())).sql(" SET ").delimit(",");
@@ -180,6 +182,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
+		// 用于避免SQL参数转换中出现异常导致已转换的资源无法释放
 		ReleasableRegistry releasableRegistry = createReleasableRegistry();
 
 		Sql sql = Sql.valueOf().sql("DELETE FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")
@@ -264,6 +267,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
+		// 用于避免SQL参数转换中出现异常导致已转换的资源无法释放
 		ReleasableRegistry releasableRegistry = createReleasableRegistry();
 
 		Sql sql = Sql.valueOf().sql("SELECT * FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")

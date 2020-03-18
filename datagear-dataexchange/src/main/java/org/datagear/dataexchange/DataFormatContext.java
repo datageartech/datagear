@@ -13,9 +13,9 @@ import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.datagear.util.expression.Expression;
 import org.datagear.util.expression.ExpressionResolver;
@@ -564,7 +564,7 @@ public class DataFormatContext
 		if (bytes == null)
 			return null;
 
-		return Base64.encodeBase64String(bytes);
+		return Base64.getEncoder().encodeToString(bytes);
 	}
 
 	/**
@@ -596,7 +596,7 @@ public class DataFormatContext
 		if (value == null || value.isEmpty())
 			return null;
 
-		return Base64.decodeBase64(value);
+		return Base64.getDecoder().decode(value);
 	}
 
 	/**

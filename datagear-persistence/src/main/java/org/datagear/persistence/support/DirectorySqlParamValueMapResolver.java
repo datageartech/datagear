@@ -12,7 +12,7 @@ import org.datagear.persistence.SqlParamValueMapperException;
 import org.datagear.util.FileUtil;
 
 /**
- * 指定目录的{@linkplain FilePathValueResolver}。
+ * 指定目录的{@linkplain SqlParamValueMapResolver}。
  * <p>
  * 它限定特定目录下的相对文件路径。
  * </p>
@@ -20,17 +20,17 @@ import org.datagear.util.FileUtil;
  * @author datagear@163.com
  *
  */
-public class DirectoryFilePathValueResolver extends FilePathValueResolver
+public class DirectorySqlParamValueMapResolver extends SqlParamValueMapResolver
 {
 	/** 文件根目录 */
 	private File directory;
 
-	public DirectoryFilePathValueResolver()
+	public DirectorySqlParamValueMapResolver()
 	{
 		super();
 	}
 
-	public DirectoryFilePathValueResolver(File directory)
+	public DirectorySqlParamValueMapResolver(File directory)
 	{
 		super();
 		this.directory = directory;
@@ -47,14 +47,14 @@ public class DirectoryFilePathValueResolver extends FilePathValueResolver
 	}
 
 	@Override
-	public File getFileValue(Table table, Column column, String filePathValue) throws SqlParamValueMapperException
+	public File getFile(Table table, Column column, String value) throws SqlParamValueMapperException
 	{
-		if (!isFilePathValue(filePathValue))
+		if (!isFile(value))
 			return null;
 
-		filePathValue = getFilePath(filePathValue);
+		value = getFilePath(value);
 
-		File file = FileUtil.getFile(this.directory, filePathValue);
+		File file = FileUtil.getFile(this.directory, value);
 
 		return (file.exists() ? file : null);
 	}
