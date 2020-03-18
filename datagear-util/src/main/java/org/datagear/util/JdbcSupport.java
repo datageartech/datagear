@@ -6,8 +6,11 @@ package org.datagear.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Blob;
@@ -546,8 +549,34 @@ public class JdbcSupport
 			{
 				if (value instanceof Clob)
 					st.setClob(paramIndex, (Clob) value);
+				else if (value instanceof String)
+				{
+					Clob clob = cn.createClob();
+					clob.setString(0, (String) value);
+
+					st.setClob(paramIndex, clob);
+					value = clob;
+				}
 				else if (value instanceof Reader)
 					st.setClob(paramIndex, (Reader) value);
+				else if (value instanceof InputStream)
+				{
+					Clob clob = cn.createClob();
+					OutputStream out = clob.setAsciiStream(0);
+					write((InputStream) value, out);
+
+					st.setClob(paramIndex, clob);
+					value = clob;
+				}
+				else if (value instanceof File)
+				{
+					Clob clob = cn.createClob();
+					OutputStream out = clob.setAsciiStream(0);
+					write((File) value, out);
+
+					st.setClob(paramIndex, clob);
+					value = clob;
+				}
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
 
@@ -558,6 +587,14 @@ public class JdbcSupport
 			{
 				if (value instanceof Blob)
 					st.setBlob(paramIndex, (Blob) value);
+				else if (value instanceof byte[])
+				{
+					Blob blob = cn.createBlob();
+					blob.setBytes(0, (byte[]) value);
+
+					st.setBlob(paramIndex, blob);
+					value = blob;
+				}
 				else if (value instanceof InputStream)
 					st.setBlob(paramIndex, (InputStream) value);
 				else if (value instanceof File)
@@ -590,8 +627,34 @@ public class JdbcSupport
 			{
 				if (value instanceof NClob)
 					st.setNClob(paramIndex, (NClob) value);
+				else if (value instanceof String)
+				{
+					NClob nClob = cn.createNClob();
+					nClob.setString(0, (String) value);
+
+					st.setNClob(paramIndex, nClob);
+					value = nClob;
+				}
 				else if (value instanceof Reader)
 					st.setNClob(paramIndex, (Reader) value);
+				else if (value instanceof InputStream)
+				{
+					NClob nClob = cn.createNClob();
+					OutputStream out = nClob.setAsciiStream(0);
+					write((InputStream) value, out);
+
+					st.setNClob(paramIndex, nClob);
+					value = nClob;
+				}
+				else if (value instanceof File)
+				{
+					NClob nClob = cn.createNClob();
+					OutputStream out = nClob.setAsciiStream(0);
+					write((File) value, out);
+
+					st.setNClob(paramIndex, nClob);
+					value = nClob;
+				}
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
 
@@ -602,6 +665,41 @@ public class JdbcSupport
 			{
 				if (value instanceof SQLXML)
 					st.setSQLXML(paramIndex, (SQLXML) value);
+				else if (value instanceof String)
+				{
+					SQLXML sqlxml = cn.createSQLXML();
+					sqlxml.setString((String) value);
+
+					st.setSQLXML(paramIndex, sqlxml);
+					value = sqlxml;
+				}
+				else if (value instanceof Reader)
+				{
+					SQLXML sqlxml = cn.createSQLXML();
+					Writer out = sqlxml.setCharacterStream();
+					write((Reader) value, out);
+
+					st.setSQLXML(paramIndex, sqlxml);
+					value = sqlxml;
+				}
+				else if (value instanceof InputStream)
+				{
+					SQLXML sqlxml = cn.createSQLXML();
+					OutputStream out = sqlxml.setBinaryStream();
+					write((InputStream) value, out);
+
+					st.setSQLXML(paramIndex, sqlxml);
+					value = sqlxml;
+				}
+				else if (value instanceof File)
+				{
+					SQLXML sqlxml = cn.createSQLXML();
+					OutputStream out = sqlxml.setBinaryStream();
+					write((File) value, out);
+
+					st.setSQLXML(paramIndex, sqlxml);
+					value = sqlxml;
+				}
 				else
 					value = setParamValueExt(cn, st, paramIndex, paramValue);
 
@@ -629,6 +727,56 @@ public class JdbcSupport
 			throws SQLException
 	{
 		throw new UnsupportedOperationException("Set JDBC [" + paramValue.getType() + "] type value is not supported");
+	}
+
+	protected void write(File file, OutputStream out) throws SQLException
+	{
+		try
+		{
+			IOUtil.write(file, out);
+		}
+		catch(IOException e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			IOUtil.close(out);
+		}
+	}
+
+	protected void write(InputStream in, OutputStream out) throws SQLException
+	{
+		try
+		{
+			IOUtil.write(in, out);
+		}
+		catch(IOException e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			IOUtil.close(in);
+			IOUtil.close(out);
+		}
+	}
+
+	protected void write(Reader in, Writer out) throws SQLException
+	{
+		try
+		{
+			IOUtil.write(in, out);
+		}
+		catch(IOException e)
+		{
+			throw new SQLException(e);
+		}
+		finally
+		{
+			IOUtil.close(in);
+			IOUtil.close(out);
+		}
 	}
 
 	protected InputStream getInputStreamForSql(File file) throws SQLException

@@ -35,6 +35,7 @@ import org.datagear.persistence.support.expression.SqlExpressionSyntaxErrorExcep
 import org.datagear.persistence.support.expression.VariableExpressionErrorException;
 import org.datagear.persistence.support.expression.VariableExpressionResolver;
 import org.datagear.persistence.support.expression.VariableExpressionSyntaxErrorException;
+import org.datagear.util.JdbcSupport;
 import org.datagear.util.JdbcUtil;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -175,7 +176,7 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 	}
 
 	/**
-	 * 将源值转换为可用于{@linkplain PreparedStatement}参数值的对象。
+	 * 将源值转换为可用于{@linkplain JdbcSupport#setParamValue(Connection, PreparedStatement, int, org.datagear.util.SqlParamValue)}参数值的对象。
 	 * 
 	 * @param cn
 	 * @param value
@@ -275,6 +276,15 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 					pstParam = value;
 				else if (value instanceof File)
 					pstParam = this.filePathValueResolver.getInputStream((File) value);
+				else if (value instanceof String)
+				{
+					String v = (String) value;
+
+					if (this.filePathValueResolver.isFilePathValue(v))
+						pstParam = this.filePathValueResolver.getReader(v);
+					else
+						pstParam = convertToType(value, InputStream.class);
+				}
 				else
 					pstParam = convertToType(value, InputStream.class);
 
@@ -303,10 +313,6 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 			{
 				if (value instanceof Clob)
 					pstParam = value;
-				else if (value instanceof Reader)
-					pstParam = value;
-				else if (value instanceof File)
-					pstParam = this.filePathValueResolver.getReader((File) value);
 				else if (value instanceof String)
 				{
 					String v = (String) value;
@@ -314,8 +320,14 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 					if (this.filePathValueResolver.isFilePathValue(v))
 						pstParam = this.filePathValueResolver.getReader(v);
 					else
-						pstParam = convertToType(value, Reader.class);
+						pstParam = value;
 				}
+				else if (value instanceof Reader)
+					pstParam = value;
+				else if (value instanceof InputStream)
+					pstParam = value;
+				else if (value instanceof File)
+					pstParam = this.filePathValueResolver.getReader((File) value);
 				else
 					pstParam = convertToType(value, Reader.class);
 
@@ -325,6 +337,8 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 			case Types.BLOB:
 			{
 				if (value instanceof Blob)
+					pstParam = value;
+				else if (value instanceof byte[])
 					pstParam = value;
 				else if (value instanceof InputStream)
 					pstParam = value;
@@ -359,20 +373,18 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 			case Types.LONGNVARCHAR:
 			{
 				if (value instanceof String)
-					pstParam = value;
-				else if (value instanceof Reader)
-					pstParam = value;
-				else if (value instanceof File)
-					pstParam = this.filePathValueResolver.getReader((File) value);
-				else if (value instanceof String)
 				{
 					String v = (String) value;
 
 					if (this.filePathValueResolver.isFilePathValue(v))
 						pstParam = this.filePathValueResolver.getReader(v);
 					else
-						pstParam = convertToType(value, Reader.class);
+						pstParam = value;
 				}
+				else if (value instanceof Reader)
+					pstParam = value;
+				else if (value instanceof File)
+					pstParam = this.filePathValueResolver.getReader((File) value);
 				else
 					pstParam = convertToType(value, Reader.class);
 
@@ -383,10 +395,6 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 			{
 				if (value instanceof NClob)
 					pstParam = value;
-				else if (value instanceof Reader)
-					pstParam = value;
-				else if (value instanceof File)
-					pstParam = this.filePathValueResolver.getReader((File) value);
 				else if (value instanceof String)
 				{
 					String v = (String) value;
@@ -394,8 +402,14 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 					if (this.filePathValueResolver.isFilePathValue(v))
 						pstParam = this.filePathValueResolver.getReader(v);
 					else
-						pstParam = convertToType(value, Reader.class);
+						pstParam = value;
 				}
+				else if (value instanceof Reader)
+					pstParam = value;
+				else if (value instanceof InputStream)
+					pstParam = value;
+				else if (value instanceof File)
+					pstParam = this.filePathValueResolver.getReader((File) value);
 				else
 					pstParam = convertToType(value, Reader.class);
 
@@ -406,10 +420,6 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 			{
 				if (value instanceof SQLXML)
 					pstParam = value;
-				else if (value instanceof Reader)
-					pstParam = value;
-				else if (value instanceof File)
-					pstParam = this.filePathValueResolver.getReader((File) value);
 				else if (value instanceof String)
 				{
 					String v = (String) value;
@@ -417,8 +427,14 @@ public class ConversionPstParamMapper extends PersistenceSupport implements PstP
 					if (this.filePathValueResolver.isFilePathValue(v))
 						pstParam = this.filePathValueResolver.getReader(v);
 					else
-						pstParam = convertToType(value, Reader.class);
+						pstParam = value;
 				}
+				else if (value instanceof Reader)
+					pstParam = value;
+				else if (value instanceof InputStream)
+					pstParam = value;
+				else if (value instanceof File)
+					pstParam = this.filePathValueResolver.getReader((File) value);
 				else
 					pstParam = convertToType(value, Reader.class);
 
