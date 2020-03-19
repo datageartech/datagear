@@ -48,7 +48,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * 支持类型转换的{@linkplain SqlParamValueMapper}。
  * <p>
  * 对于LOB、二进制类型，此类支持文件路径（{@code "file:..."}）、Hex编码（{@code "hex:..."}）、Base64（{@code "base64:..."}）编码格式的字符串原值，<br>
- * 如果设置了{@linkplain #setFilePathValueParent(File)}，则文件路径限制为其子路径。
+ * 如果设置了{@linkplain #setFilePathValueDirectory(File)}，则文件路径限制为其子路径。
  * </p>
  * <p>
  * 对于基本类型转换，应该设置{@linkplain #setConversionService(ConversionService)}。
@@ -88,8 +88,8 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	/** 用于支持基本类型转换的转换服务类 */
 	private ConversionService conversionService = null;
 
-	/** 文件路径值的上级级目录 */
-	private File filePathValueParent = null;
+	/** 文件路径值所在的目录 */
+	private File filePathValueDirectory = null;
 
 	/** 表达式计算上下文 */
 	private ExpressionEvaluationContext expressionEvaluationContext = null;
@@ -144,19 +144,19 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		this.conversionService = conversionService;
 	}
 
-	public boolean hasFilePathValueParent()
+	public boolean hasFilePathValueDirectory()
 	{
-		return (this.filePathValueParent != null);
+		return (this.filePathValueDirectory != null);
 	}
 
-	public File getFilePathValueParent()
+	public File getFilePathValueDirectory()
 	{
-		return filePathValueParent;
+		return filePathValueDirectory;
 	}
 
-	public void setFilePathValueParent(File filePathValueParent)
+	public void setFilePathValueDirectory(File filePathValueDirectory)
 	{
-		this.filePathValueParent = filePathValueParent;
+		this.filePathValueDirectory = filePathValueDirectory;
 	}
 
 	public boolean hasExpressionEvaluationContext()
@@ -603,8 +603,8 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	{
 		String filePath = getActualFilePath(value);
 
-		if (this.filePathValueParent != null)
-			return FileUtil.getFile(this.filePathValueParent, filePath);
+		if (this.filePathValueDirectory != null)
+			return FileUtil.getFile(this.filePathValueDirectory, filePath);
 		else
 			return FileUtil.getFile(filePath);
 	}
