@@ -16,6 +16,7 @@ import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectSource;
+import org.datagear.persistence.NonUniqueResultException;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceException;
@@ -256,14 +257,14 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	}
 
 	@Override
-	public Row get(Connection cn, Table table, Row param) throws PersistenceException
+	public Row get(Connection cn, Table table, Row param) throws NonUniqueResultException, PersistenceException
 	{
 		return get(cn, null, table, param, null, null);
 	}
 
 	@Override
 	public Row get(Connection cn, Dialect dialect, Table table, Row param, SqlParamValueMapper sqlParamValueMapper,
-			RowMapper rowMapper) throws PersistenceException
+			RowMapper rowMapper) throws NonUniqueResultException, PersistenceException
 	{
 		dialect = getDialect(cn, dialect);
 

@@ -157,27 +157,26 @@ public interface PersistenceManager
 	 * @param table
 	 * @param param
 	 * @return
+	 * @throws NonUniqueResultException
 	 * @throws PersistenceException
 	 */
-	Row get(Connection cn, Table table, Row param) throws PersistenceException;
+	Row get(Connection cn, Table table, Row param) throws NonUniqueResultException, PersistenceException;
 
 	/**
 	 * 获取行对象。
 	 * 
 	 * @param cn
-	 * @param dialect
-	 *            允许为{@code null}
+	 * @param dialect             允许为{@code null}
 	 * @param table
 	 * @param param
-	 * @param sqlParamValueMapper
-	 *            允许为{@code null}
-	 * @param rowMapper
-	 *            允许为{@code null}
+	 * @param sqlParamValueMapper 允许为{@code null}
+	 * @param rowMapper           允许为{@code null}
 	 * @return
+	 * @throws NonUniqueResultException
 	 * @throws PersistenceException
 	 */
 	Row get(Connection cn, Dialect dialect, Table table, Row param, SqlParamValueMapper sqlParamValueMapper,
-			RowMapper rowMapper) throws PersistenceException;
+			RowMapper rowMapper) throws NonUniqueResultException, PersistenceException;
 
 	/**
 	 * 查询。

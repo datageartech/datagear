@@ -2,9 +2,7 @@
  * Copyright 2018 datagear.tech. All Rights Reserved.
  */
 
-package org.datagear.persistence.support;
-
-import org.datagear.persistence.PersistenceException;
+package org.datagear.persistence;
 
 /**
  * 非唯一结果异常。

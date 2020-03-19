@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.sql.Connection;
 import java.util.List;
 
@@ -76,13 +77,16 @@ public class DefaultPersistenceManagerTest extends DBTestSupport
 
 		try
 		{
+			this.defaultPersistenceManager.delete(connection, table, row);
+
 			this.defaultPersistenceManager.insert(connection, null, table, row, new ConversionSqlParamValueMapper());
 
 			Row getRow = this.defaultPersistenceManager.get(connection, table, row);
 
 			assertEquals(id, ((Number) getRow.get("ID")).intValue());
 			assertEquals(name, getRow.get("NAME"));
-			assertArrayEquals(new byte[] { 0x09 }, toBytes(getRow.get("HEAD_IMG")));
+			assertArrayEquals(new byte[] { 0x09 }, columnValueToBytes(getRow.get("HEAD_IMG")));
+			assertEquals(INTRODUCTION, columnValueToString(getRow.get("INTRODUCTION")));
 		}
 		finally
 		{
@@ -102,12 +106,27 @@ public class DefaultPersistenceManagerTest extends DBTestSupport
 		assertTrue(rows.size() <= 1);
 	}
 
-	protected byte[] toBytes(Object o) throws Exception
+	protected byte[] columnValueToBytes(Object o) throws Exception
 	{
 		if (o instanceof byte[])
 			return (byte[]) o;
 		else if (o instanceof InputStream)
 			return IOUtil.getBytes((InputStream) o);
+		else
+			throw new UnsupportedOperationException();
+	}
+
+	protected String columnValueToString(Object o) throws Exception
+	{
+		if (o instanceof String)
+			return (String) o;
+		else if (o instanceof Reader)
+			return IOUtil.readString((Reader) o, true);
+		else if (o instanceof InputStream)
+		{
+			Reader reader = IOUtil.getReader((InputStream) o, null);
+			return IOUtil.readString(reader, true);
+		}
 		else
 			throw new UnsupportedOperationException();
 	}

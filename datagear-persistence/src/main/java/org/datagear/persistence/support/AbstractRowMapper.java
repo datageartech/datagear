@@ -51,9 +51,6 @@ public abstract class AbstractRowMapper extends PersistenceSupport implements Ro
 
 	/**
 	 * 映射列值。
-	 * <p>
-	 * 子类应该重写此方法实现映射列值。
-	 * </p>
 	 * 
 	 * @param cn
 	 * @param table
@@ -64,9 +61,6 @@ public abstract class AbstractRowMapper extends PersistenceSupport implements Ro
 	 * @throws SQLException
 	 * @throws RowMapperException
 	 */
-	protected Object mapColumn(Connection cn, Table table, ResultSet rs, int rowIndex, Column column)
-			throws SQLException, RowMapperException
-	{
-		throw new UnsupportedOperationException("Not implement");
-	}
+	protected abstract Object mapColumn(Connection cn, Table table, ResultSet rs, int rowIndex, Column column)
+			throws SQLException, RowMapperException;
 }

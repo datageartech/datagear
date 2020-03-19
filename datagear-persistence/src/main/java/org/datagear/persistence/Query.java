@@ -6,8 +6,6 @@ package org.datagear.persistence;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 查询。
@@ -27,9 +25,6 @@ public class Query implements Serializable
 
 	/** 排序方式 */
 	private Order[] orders;
-
-	/** 查询参数 */
-	private Map<String, Object> params = new HashMap<>();
 
 	/** 针对keyword，是否使用“NOT LIKE”而非“LIKE” */
 	private boolean notLike = false;
@@ -105,20 +100,10 @@ public class Query implements Serializable
 		this.orders = orders;
 	}
 
-	public Map<String, Object> getParams()
-	{
-		return params;
-	}
-
-	public void setParam(String name, Object value)
-	{
-		this.params.put(name, value);
-	}
-
 	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [keyword=" + keyword + ", condition=" + condition + ", orders="
-				+ Arrays.toString(orders) + ", params=" + params + ", notLike=" + notLike + "]";
+				+ Arrays.toString(orders) + ", notLike=" + notLike + "]";
 	}
 }
