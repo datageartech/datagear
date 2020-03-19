@@ -8,8 +8,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.InputStream;
-import java.io.Reader;
 import java.sql.Connection;
 import java.util.List;
 
@@ -19,7 +17,6 @@ import org.datagear.persistence.DialectSource;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.Row;
-import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.test.DBTestSupport;
 import org.junit.After;
@@ -81,12 +78,13 @@ public class DefaultPersistenceManagerTest extends DBTestSupport
 
 			this.defaultPersistenceManager.insert(connection, null, table, row, new ConversionSqlParamValueMapper());
 
-			Row getRow = this.defaultPersistenceManager.get(connection, table, row);
+			Row actual = this.defaultPersistenceManager.get(connection, null, table, row, null,
+					new DefaultLOBRowMapper());
 
-			assertEquals(id, ((Number) getRow.get("ID")).intValue());
-			assertEquals(name, getRow.get("NAME"));
-			assertArrayEquals(new byte[] { 0x09 }, columnValueToBytes(getRow.get("HEAD_IMG")));
-			assertEquals(INTRODUCTION, columnValueToString(getRow.get("INTRODUCTION")));
+			assertEquals(id, ((Number) actual.get("ID")).intValue());
+			assertEquals(name, actual.get("NAME"));
+			assertArrayEquals(new byte[] { 0x09 }, (byte[]) actual.get("HEAD_IMG"));
+			assertEquals(INTRODUCTION, actual.get("INTRODUCTION"));
 		}
 		finally
 		{
@@ -104,30 +102,5 @@ public class DefaultPersistenceManagerTest extends DBTestSupport
 		List<Row> rows = pagingData.getItems();
 
 		assertTrue(rows.size() <= 1);
-	}
-
-	protected byte[] columnValueToBytes(Object o) throws Exception
-	{
-		if (o instanceof byte[])
-			return (byte[]) o;
-		else if (o instanceof InputStream)
-			return IOUtil.getBytes((InputStream) o);
-		else
-			throw new UnsupportedOperationException();
-	}
-
-	protected String columnValueToString(Object o) throws Exception
-	{
-		if (o instanceof String)
-			return (String) o;
-		else if (o instanceof Reader)
-			return IOUtil.readString((Reader) o, true);
-		else if (o instanceof InputStream)
-		{
-			Reader reader = IOUtil.getReader((InputStream) o, null);
-			return IOUtil.readString(reader, true);
-		}
-		else
-			throw new UnsupportedOperationException();
 	}
 }

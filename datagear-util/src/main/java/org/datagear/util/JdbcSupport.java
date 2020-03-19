@@ -506,6 +506,7 @@ public class JdbcSupport
 			}
 
 			case Types.TIME:
+			case Types.TIME_WITH_TIMEZONE:
 			{
 				java.sql.Time v = null;
 
@@ -526,6 +527,7 @@ public class JdbcSupport
 			}
 
 			case Types.TIMESTAMP:
+			case Types.TIMESTAMP_WITH_TIMEZONE:
 			{
 				java.sql.Timestamp v = null;
 
@@ -735,7 +737,7 @@ public class JdbcSupport
 		{
 			IOUtil.write(file, out);
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
 			throw new SQLException(e);
 		}
@@ -751,7 +753,7 @@ public class JdbcSupport
 		{
 			IOUtil.write(in, out);
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
 			throw new SQLException(e);
 		}
@@ -768,7 +770,7 @@ public class JdbcSupport
 		{
 			IOUtil.write(in, out);
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
 			throw new SQLException(e);
 		}
@@ -899,12 +901,14 @@ public class JdbcSupport
 			}
 
 			case Types.TIME:
+			case Types.TIME_WITH_TIMEZONE:
 			{
 				value = rs.getTime(columnName);
 				break;
 			}
 
 			case Types.TIMESTAMP:
+			case Types.TIMESTAMP_WITH_TIMEZONE:
 			{
 				value = rs.getTimestamp(columnName);
 				break;

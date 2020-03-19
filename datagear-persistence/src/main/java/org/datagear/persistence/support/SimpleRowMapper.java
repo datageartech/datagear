@@ -6,12 +6,10 @@ package org.datagear.persistence.support;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 import org.datagear.persistence.RowMapper;
-import org.datagear.persistence.RowMapperException;
 
 /**
  * 简单{@linkplain RowMapper}。
@@ -30,8 +28,7 @@ public class SimpleRowMapper extends AbstractRowMapper
 	}
 
 	@Override
-	protected Object mapColumn(Connection cn, Table table, ResultSet rs, int rowIndex, Column column)
-			throws SQLException, RowMapperException
+	protected Object mapColumn(Connection cn, Table table, ResultSet rs, int rowIndex, Column column) throws Throwable
 	{
 		return getColumnValue(cn, rs, column);
 	}

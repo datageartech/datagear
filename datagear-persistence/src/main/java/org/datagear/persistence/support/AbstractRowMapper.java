@@ -6,7 +6,6 @@ package org.datagear.persistence.support;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
@@ -41,9 +40,13 @@ public abstract class AbstractRowMapper extends PersistenceSupport implements Ro
 				rowObj.put(columns[i].getName(), value);
 			}
 		}
-		catch (SQLException e)
+		catch (RowMapperException e)
 		{
-			throw new RowMapperException(e);
+			throw e;
+		}
+		catch (Throwable t)
+		{
+			throw new RowMapperException(t);
 		}
 
 		return rowObj;
@@ -58,9 +61,8 @@ public abstract class AbstractRowMapper extends PersistenceSupport implements Ro
 	 * @param rowIndex
 	 * @param column
 	 * @return
-	 * @throws SQLException
-	 * @throws RowMapperException
+	 * @throws Throwable
 	 */
 	protected abstract Object mapColumn(Connection cn, Table table, ResultSet rs, int rowIndex, Column column)
-			throws SQLException, RowMapperException;
+			throws Throwable;
 }

@@ -282,6 +282,19 @@ public class IOUtil
 	 */
 	public static byte[] getBytes(InputStream in) throws IOException
 	{
+		return getBytes(in, false);
+	}
+
+	/**
+	 * 获取输入流的数据字节数组。
+	 * 
+	 * @param in
+	 * @param closeIn
+	 * @return
+	 * @throws IOException
+	 */
+	public static byte[] getBytes(InputStream in, boolean closeIn) throws IOException
+	{
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		try
@@ -291,6 +304,9 @@ public class IOUtil
 		}
 		finally
 		{
+			if (closeIn)
+				close(in);
+
 			close(out);
 		}
 	}
