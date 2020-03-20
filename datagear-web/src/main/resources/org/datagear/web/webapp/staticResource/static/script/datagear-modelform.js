@@ -94,7 +94,7 @@
 			filePropertyLabelValue : undefined,
 			
 			//"readonly=false"时必须，下载单元文件属性值处理函数
-			downloadSinglePropertyValueFile : function(property){ throw new Error("TODO"); },
+			downloadColumnValue : function(property){ throw new Error("TODO"); },
 			
 			//可选，使用文本域而非文本框的长度阀值
 			asTextareaLength : 101,
@@ -724,7 +724,7 @@
 		    		var myPropertyName = $(this).attr("__propertyName");
 					var myPropertyInfo = _this._getPropertyInfo(myPropertyName);
 					
-	    			_this.options.downloadSinglePropertyValueFile.call(_this.element, myPropertyInfo.property,
+	    			_this.options.downloadColumnValue.call(_this.element, myPropertyInfo.property,
 							myPropertyInfo.propertyValue);
 				});
 			}
@@ -818,7 +818,7 @@
 			    			var rawValue = $.model.getShowableRawValue(myPropertyInfo.propertyValue);
 			    			
 			    			if(rawValue)
-			    				_this.options.downloadSinglePropertyValueFile.call(_this.element, myPropertyInfo.property,
+			    				_this.options.downloadColumnValue.call(_this.element, myPropertyInfo.property,
 										myPropertyInfo.propertyValue);
 			    		}
 			    		else if("del" == action)

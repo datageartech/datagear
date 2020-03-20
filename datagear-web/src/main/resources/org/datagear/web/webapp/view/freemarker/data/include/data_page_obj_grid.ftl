@@ -2,23 +2,13 @@
 <script type="text/javascript">
 (function(po)
 {
-	po.queryLeftClobLengthOnReading = ${queryLeftClobLengthOnReading};
-	
 	//单元基本属性值是否已完全获取，如果不是单元基本属性，也将返回true（为了提高表格数据读取效率，后台对CLOB类的属性值仅会读取前段）
 	po.isSinglePrimitivePropertyValueFullyFetched = function(model, property, propertyValue)
 	{
 		if(propertyValue == null)
 			return true;
 		
-		if(po.queryLeftClobLengthOnReading == null || po.queryLeftClobLengthOnReading < 0)
-			return true;
-		
-		var re = true;
-		
-		if($.model.isLongTextJdbcType(property))
-			re = (propertyValue.length < po.queryLeftClobLengthOnReading);
-		
-		return re;
+		return !$.model.isLongTextJdbcType(property);
 	};
 	
 	//所有单元属性值是否已完全获取

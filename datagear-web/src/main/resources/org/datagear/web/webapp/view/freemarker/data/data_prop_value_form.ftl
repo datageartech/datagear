@@ -189,9 +189,9 @@ boolean batchSet 是否开启批量执行功能，默认为false
 			},
 			filePropertyUploadURL : "${contextPath}/data/file/upload",
 			filePropertyDeleteURL : "${contextPath}/data/file/delete",
-			downloadSinglePropertyValueFile : function(property)
+			downloadColumnValue : function(property)
 			{
-				po.downloadSinglePropertyValueFile(property);
+				po.downloadColumnValue(property);
 			},
 			validationRequiredAsAdd : ("saveAdd" == po.submitAction),
 			batchSet : po.batchSet,

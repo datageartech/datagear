@@ -629,8 +629,8 @@ data_page_obj_edit_grid_html.ftl
 		var options =
 		{
 			"type" : "POST",
-			"url" : po.url("getPropertyValuess"),
-			"data" : { "datas" : needFetchRowDatas, "propertyNamess" : needFetchPropertyNamess },
+			"url" : po.url("getColumnValuess"),
+			"data" : { "datas" : needFetchRowDatas, "columnNamess" : needFetchPropertyNamess },
 			"success" : function(fetchedPropertyValuess)
 			{
 				if(fetchedPropertyValuess)
@@ -824,9 +824,9 @@ data_page_obj_edit_grid_html.ftl
 			},
 			filePropertyUploadURL : "${contextPath}/data/file/upload",
 			filePropertyDeleteURL : "${contextPath}/data/file/delete",
-			downloadSinglePropertyValueFile : function(property)
+			downloadColumnValue : function(property)
 			{
-				po.editGridFormPage.downloadSinglePropertyValueFile(property);
+				po.editGridFormPage.downloadColumnValue(property);
 			},
 			validationRequiredAsAdd : false,
 			labels : po.editGridFormPage.formLabels,

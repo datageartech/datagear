@@ -183,12 +183,12 @@ po.isClientPageData = undefined;
 		po.open(po.url("viewMultiplePropValue"), options);
 	};
 	
-	po.downloadSinglePropertyValueFile = function(property)
+	po.downloadColumnValue = function(property)
 	{
 		var options = po.buildPropertyActionOptions(property);
 		options.target="_file";
 		
-		po.open(po.url("downloadSinglePropertyValueFile"), options);
+		po.open(po.url("downloadColumnValue"), options);
 	};
 	
 	po.refreshParent = function()

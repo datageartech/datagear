@@ -234,11 +234,19 @@ public class JdbcUtil
 	 * 是否只读。
 	 * 
 	 * @param cn
+	 * @param defaultValue 出现异常时的默认值
 	 * @return
 	 */
-	public static boolean isReadonly(Connection cn) throws SQLException
+	public static boolean isReadonlyIfSupports(Connection cn, boolean defaultValue)
 	{
-		return cn.isReadOnly();
+		try
+		{
+			return cn.isReadOnly();
+		}
+		catch(SQLException e)
+		{
+			return defaultValue;
+		}
 	}
 
 	/**

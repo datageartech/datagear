@@ -6,7 +6,6 @@ package org.datagear.web.controller;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -25,11 +24,11 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
+import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.Row;
-import org.datagear.persistence.SqlParamValueMapper;
 import org.datagear.persistence.support.ConversionSqlParamValueMapper;
 import org.datagear.persistence.support.DefaultLOBRowMapper;
 import org.datagear.persistence.support.expression.ExpressionEvaluationContext;
@@ -38,6 +37,7 @@ import org.datagear.persistence.support.expression.VariableExpressionSyntaxError
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.convert.ConverterException;
@@ -546,16 +546,16 @@ public class DataController extends AbstractSchemaConnTableController
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Object updatesParam = getParamMap(request, "updates");
+		final Row[] updateOriginRows = paramToRows(request, getParamObj(request, "updates"));
 		final Object updatePropertyNamessParam = getParamMap(request, "updatePropertyNamess");
 		final Object updatePropertyValuessParam = getParamMap(request, "updatePropertyValuess");
-		final Object addsParam = getParamMap(request, "adds");
-		final Object deletesParam = getParamMap(request, "deletes");
+		final Row[] addRows = paramToRows(request, getParamObj(request, "adds"));
+		final Row[] deleteRows = paramToRows(request, getParamObj(request, "deletes"));
 
-		final String[][] updatePropertyNamess = (updatesParam == null ? null
+		final String[][] updateColumnNamess = (StringUtil.isEmpty(updateOriginRows) ? null
 				: getClassDataConverter().convertToArray(updatePropertyNamessParam, String[].class));
 
-		final Object[][] updatePropertyValueParamss = (updatesParam == null ? null
+		final Object[][] updateColumnValuess = (StringUtil.isEmpty(updateOriginRows) ? null
 				: getClassDataConverter().convertToArray(updatePropertyValuessParam, Object[].class));
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
@@ -568,60 +568,48 @@ public class DataController extends AbstractSchemaConnTableController
 				checkEditTableDataPermission(schema, user);
 
 				Connection cn = getConnection();
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
 
-				Object[] updates = modelDataConverter.convertToArray(updatesParam, model);
-
-				Object[] adds = modelDataConverter.convertToArray(addsParam, model);
-				Object[] deletes = modelDataConverter.convertToArray(deletesParam, model);
-
-				int expectedUpdateCount = (updates == null ? 0 : updates.length);
-				int expectedAddCount = (adds == null ? 0 : adds.length);
-				int expectedDeleteCount = (deletes == null ? 0 : deletes.length);
+				int expectedUpdateCount = (updateOriginRows == null ? 0 : updateOriginRows.length);
+				int expectedAddCount = (addRows == null ? 0 : addRows.length);
+				int expectedDeleteCount = (deleteRows == null ? 0 : deleteRows.length);
 
 				if (expectedDeleteCount > 0)
 					checkDeleteTableDataPermission(schema, user);
 
+				ConversionSqlParamValueMapper paramValueMapper = buildSqlParamValueMapper();
+
 				int acutalUpdateCount = 0, actualAddCount = 0, actualDeleteCount = 0;
 
-				if (updates != null && updates.length > 0)
+				if (updateOriginRows != null && updateOriginRows.length > 0)
 				{
-					for (int i = 0; i < updates.length; i++)
+					for (int i = 0; i < updateOriginRows.length; i++)
 					{
-						String[] updatePropertyNames = updatePropertyNamess[i];
-						Object[] updatePropertyValueParams = updatePropertyValueParamss[i];
+						String[] updateColumnNames = updateColumnNamess[i];
+						Object[] updateColumnValues = updateColumnValuess[i];
 
-						Property[] updateProperties = new Property[updatePropertyNames.length];
-						Object[] updatePropertyValues = convertToPropertyValues(model, updates[i], updatePropertyNames,
-								updatePropertyValueParams, updateProperties);
+						Row updateRow = buildRow(updateColumnNames, updateColumnValues);
 
-						Object updateObj = MU.clone(model, updates[i]);
-						MU.setPropertyValues(model, updateObj, updateProperties, updatePropertyValues);
-
-						int myUpdateCount = persistenceManager.update(cn, model, updateProperties, updates[i],
-								updateObj);
-
-						if (myUpdateCount > 0)
-							acutalUpdateCount += myUpdateCount;
+						int myUpdateCount = persistenceManager.update(cn, dialect, table, updateOriginRows[i],
+								updateRow,
+								paramValueMapper);
+						acutalUpdateCount += myUpdateCount;
 					}
 				}
 
-				if (adds != null && adds.length > 0)
+				if (addRows != null && addRows.length > 0)
 				{
-					for (int i = 0; i < adds.length; i++)
+					for (int i = 0; i < addRows.length; i++)
 					{
-						int myAddCount = persistenceManager.insert(cn, model, adds[i]);
-
-						if (myAddCount > 0)
-							actualAddCount += myAddCount;
+						int myAddCount = persistenceManager.insert(cn, dialect, table, addRows[i], paramValueMapper);
+						actualAddCount += myAddCount;
 					}
 				}
 
-				if (deletes != null && deletes.length > 0)
+				if (deleteRows != null && deleteRows.length > 0)
 				{
-					int myDeleteCount = persistenceManager.delete(cn, model, deletes);
-
-					if (myDeleteCount > 0)
-						actualDeleteCount += myDeleteCount;
+					int myDeleteCount = persistenceManager.delete(cn, dialect, table, deleteRows, paramValueMapper);
+					actualDeleteCount += myDeleteCount;
 				}
 
 				OperationMessage operationMessage = buildOperationMessageSuccess(request,
@@ -662,18 +650,18 @@ public class DataController extends AbstractSchemaConnTableController
 		return "/data/data_grid";
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/getPropertyValuess", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/{tableName}/getColumnValuess", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Object[][] getPropertyValuess(HttpServletRequest request, HttpServletResponse response,
+	public Object[][] getColumnValuess(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Object datasParam = getParamMap(request, "datas");
-		Object propertyNamesParam = getParamMap(request, "propertyNamess");
-		final String[][] propertyNamess = getClassDataConverter().convertToArray(propertyNamesParam, String[].class);
+		final Row[] rows = paramToRows(request, getParamMap(request, "datas"));
+		Object columnNamessParam = getParamMap(request, "columnNamess");
+		final String[][] columnNamess = getClassDataConverter().convertToArray(columnNamessParam, String[].class);
 
-		Object[][] propertyValuess = new ReturnSchemaConnTableExecutor<Object[][]>(request, response, springModel,
+		Object[][] columnValuess = new ReturnSchemaConnTableExecutor<Object[][]>(request, response, springModel,
 				schemaId, tableName, true)
 		{
 			@Override
@@ -684,98 +672,76 @@ public class DataController extends AbstractSchemaConnTableController
 
 				Connection cn = getConnection();
 
-				Object[] datas = modelDataConverter.convertToArray(datasParam, model);
+				Object[][] columnValuess = new Object[rows.length][];
 
-				Object[][] propertyValuess = new Object[datas.length][];
-
-				for (int i = 0; i < datas.length; i++)
+				for (int i = 0; i < rows.length; i++)
 				{
-					Object data = datas[i];
-					String[] propertyNames = propertyNamess[i];
-					PropertyPath[] propertyPaths = toPropertyPaths(propertyNames, null);
-
-					propertyValuess[i] = loadPropertyValues(cn, model, data, propertyPaths);
+					Row row = rows[i];
+					String[] columnNames = columnNamess[i];
+					columnValuess[i] = loadColumnValues(cn, table, row, columnNames);
 				}
 
-				return propertyValuess;
+				return columnValuess;
 			}
 		}.execute();
 
-		return propertyValuess;
+		return columnValuess;
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/downloadSinglePropertyValueFile")
-	public void downloadSinglePropertyValueFile(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping(value = "/{schemaId}/{tableName}/downloadColumnValue")
+	public void downloadColumnValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
+			@PathVariable("tableName") String tableName, @RequestParam("columnName") final String columnName)
 			throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
+		final Row row = paramMapToRow(request, getParamMap(request, "data"));
 
-		Object[] propValueInfo = new ReturnSchemaConnTableExecutor<Object[]>(request, response, springModel, schemaId,
+		Object columnValue = new ReturnSchemaConnTableExecutor<Object>(request, response, springModel, schemaId,
 				tableName, true)
 		{
 			@Override
-			protected Object[] execute(HttpServletRequest request, HttpServletResponse response,
+			protected Object execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
 				Connection cn = getConnection();
 
-				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
+				Row getRow = persistenceManager.get(cn, null, table, row, buildSqlParamValueMapper(),
+						getDataGetRowMapper());
 
-				List<Object> resultList = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
-
-				return new Object[] { resultList == null || resultList.isEmpty() ? null : resultList.get(0),
-						propertyPathInfo.getPropertyTail().getName() };
+				return (getRow == null ? null : getRow.get(columnName));
 			}
 		}.execute();
 
-		Object propValue = propValueInfo[0];
-		String propValueFileName = (String) propValueInfo[1];
-
 		response.setCharacterEncoding("utf-8");
-		response.setHeader("Content-Disposition", "attachment; filename=" + propValueFileName + "");
+		response.setHeader("Content-Disposition", "attachment; filename=" + columnName + "");
 
 		InputStream in = null;
 		OutputStream out = null;
 
 		try
 		{
-			if (propValue == null)
+			out = response.getOutputStream();
+			
+			if (!StringUtil.isEmpty(columnValue))
 			{
-
-			}
-			else
-			{
-				if (propValue instanceof File)
-				{
-					in = new FileInputStream((File) propValue);
-				}
-				else if (propValue instanceof byte[])
-				{
-					in = new ByteArrayInputStream((byte[]) propValue);
-				}
+				if (columnValue instanceof String)
+					in = IOUtil.getInputStream(getDataGetRowMapper().getBigBinaryFile((String) columnValue));
+				else if (columnValue instanceof byte[])
+					in = new ByteArrayInputStream((byte[]) columnValue);
 				else
 					throw new IllegalArgumentException(
-							"The property value [" + propertyPath + "] of [" + tableName + "] is not download-able");
-
-				out = response.getOutputStream();
-
-				byte[] buffer = new byte[1024];
-
-				int readLen = 0;
-				while ((readLen = in.read(buffer)) > 0)
-					out.write(buffer, 0, readLen);
+							"Table '" + tableName + "' column '" + columnValue + "' 's value is not downloadable");
+				
+				IOUtil.write(in, out);
 			}
 		}
 		finally
 		{
-			close(out);
-			close(in);
+			IOUtil.close(in);
+			IOUtil.close(out);
 		}
 	}
 
@@ -784,7 +750,7 @@ public class DataController extends AbstractSchemaConnTableController
 	public FileInfo fileUpload(HttpServletRequest request, @RequestParam("file") MultipartFile multipartFile)
 			throws Throwable
 	{
-		File file = FileUtil.generateUniqueFile(this.blobFileManagerDirectory);
+		File file = FileUtil.generateUniqueFile(buildSqlParamValueMapper().getFilePathValueDirectory());
 
 		multipartFile.transferTo(file);
 
@@ -793,34 +759,12 @@ public class DataController extends AbstractSchemaConnTableController
 		return fileInfo;
 	}
 
-	@RequestMapping(value = "/file/download")
-	public void fileDownload(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("file") String fileName) throws Throwable
-	{
-		response.setCharacterEncoding(RESPONSE_ENCODING);
-		response.setHeader("Content-Disposition", "attachment; filename=" + fileName + "");
-
-		OutputStream out = null;
-
-		try
-		{
-			out = response.getOutputStream();
-
-			File file = FileUtil.getFile(this.blobFileManagerDirectory, fileName);
-			IOUtil.write(file, out);
-		}
-		finally
-		{
-			IOUtil.close(out);
-		}
-	}
-
 	@RequestMapping(value = "/file/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public FileInfo fileDelete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") String fileName) throws Throwable
 	{
-		File file = FileUtil.getFile(this.blobFileManagerDirectory, fileName);
+		File file = FileUtil.getFile(buildSqlParamValueMapper().getFilePathValueDirectory(), fileName);
 
 		FileInfo fileInfo = FileUtil.getFileInfo(file);
 
@@ -829,77 +773,46 @@ public class DataController extends AbstractSchemaConnTableController
 		return fileInfo;
 	}
 
-	protected Object[] convertToPropertyValues(Model model, Object data, String[] propertyNames,
-			Object[] propertyValueSources, Property[] properties)
+	protected Row buildRow(String[] names, Object[] values)
 	{
-		Object[] propertyValues = new Object[propertyNames.length];
+		Row row = new Row();
 
-		for (int i = 0; i < propertyNames.length; i++)
+		if (!StringUtil.isEmpty(names))
 		{
-			PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, PropertyPath.valueOf(propertyNames[i]),
-					data);
-
-			Property tailProperty = propertyPathInfo.getPropertyTail();
-
-			propertyValues[i] = modelDataConverter.convertToPropertyValue(data, model, propertyValueSources[i],
-					tailProperty);
-
-			properties[i] = tailProperty;
+			for (int i = 0; i < names.length; i++)
+				row.put(names[i], values[i]);
 		}
 
-		return propertyValues;
+		return row;
 	}
 
 	/**
-	 * 获取给定对象的多个属性值。
+	 * 获取给定表的多个列值。
 	 * 
 	 * @param cn
-	 * @param model
-	 * @param data
-	 * @param propertyPaths
+	 * @param table
+	 * @param row
+	 * @param columnNames
 	 * @return
 	 * @throws Throwable
 	 */
-	protected Object[] loadPropertyValues(Connection cn, Model model, Object data, PropertyPath[] propertyPaths)
+	protected Object[] loadColumnValues(Connection cn, Table table, Row row, String[] columnNames)
 			throws Throwable
 	{
-		if (propertyPaths == null || propertyPaths.length == 0)
+		if (columnNames == null || columnNames.length == 0)
 			return null;
 
-		Object[] propertyValues = new Object[propertyPaths.length];
+		Object[] columnValues = new Object[columnNames.length];
 
-		// 一个属性，仅查询属性值
-		if (propertyPaths.length == 1)
+		Row getRow = persistenceManager.get(cn, null, table, row, buildSqlParamValueMapper(), getDataGetRowMapper());
+
+		if (getRow != null)
 		{
-			PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPaths[0], data);
-
-			List<Object> myPropertyValues = persistenceManager.getPropValueByParam(cn, model, data, propertyPathInfo);
-
-			Object propertyValue = null;
-
-			if (myPropertyValues != null && myPropertyValues.size() > 0)
-				propertyValue = myPropertyValues.get(0);
-
-			propertyValues[0] = propertyValue;
-		}
-		// 多个属性，则直接查询对象，再获取
-		else
-		{
-			List<Object> dataList = persistenceManager.getByParam(cn, model, data);
-
-			if (dataList != null && dataList.size() > 0)
-			{
-				data = dataList.get(0);
-
-				for (int i = 0; i < propertyPaths.length; i++)
-				{
-					PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPaths[i], data);
-					propertyValues[i] = propertyPathInfo.getValueTail();
-				}
-			}
+			for (int i = 0; i < columnNames.length; i++)
+				columnValues[i] = getRow.get(columnNames[i]);
 		}
 
-		return propertyValues;
+		return columnValues;
 	}
 
 	@Override
@@ -920,7 +833,7 @@ public class DataController extends AbstractSchemaConnTableController
 		return new Row[0];
 	}
 
-	protected SqlParamValueMapper buildSqlParamValueMapper()
+	protected ConversionSqlParamValueMapper buildSqlParamValueMapper()
 	{
 		return buildSqlParamValueMapper(null);
 	}
@@ -931,7 +844,7 @@ public class DataController extends AbstractSchemaConnTableController
 	 *            允许为{@code null}
 	 * @return
 	 */
-	protected SqlParamValueMapper buildSqlParamValueMapper(ExpressionEvaluationContext evaluationContext)
+	protected ConversionSqlParamValueMapper buildSqlParamValueMapper(ExpressionEvaluationContext evaluationContext)
 	{
 		if (evaluationContext == null)
 			evaluationContext = new ExpressionEvaluationContext();
@@ -985,11 +898,6 @@ public class DataController extends AbstractSchemaConnTableController
 	protected void setGridPageAttributes(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, Schema schema, Table table)
 	{
-		springModel.addAttribute("queryLeftClobLengthOnReading", this.queryLeftClobLengthOnReading);
-
-		if (model.hasFeature(NotEditable.class))
-			springModel.addAttribute("readonly", true);
-
 		// 编辑表格需要表单属性
 		setFormPageAttributes(request, springModel);
 	}
@@ -1008,7 +916,7 @@ public class DataController extends AbstractSchemaConnTableController
 		springModel.addAttribute("sqlDateFormat", this.sqlDateFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("sqlTimestampFormat", this.sqlTimestampFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("sqlTimeFormat", this.sqlTimeFormatter.getParsePatternDesc(locale));
-		springModel.addAttribute("filePropertyLabelValue", this.blobToFilePlaceholderName);
+		springModel.addAttribute("queryRowMapper", getDataQueryRowMapper());
 
 		if (!containsAttributes(request, springModel, KEY_IS_CLIENT_PAGE_DATA))
 		{

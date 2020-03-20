@@ -16,15 +16,14 @@ import org.datagear.connection.DriverNotFoundException;
 import org.datagear.connection.EstablishConnectionException;
 import org.datagear.connection.URLNotAcceptedException;
 import org.datagear.connection.UnsupportedGetConnectionException;
-import org.datagear.dbinfo.DatabaseInfoResolverException;
-import org.datagear.dbinfo.TableNotExistsException;
-import org.datagear.dbmodel.DatabaseModelResolverException;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.impl.SaveSchemaUrlPermissionDeniedException;
+import org.datagear.meta.resolver.DBMetaResolverException;
+import org.datagear.meta.resolver.TableNotFoundException;
 import org.datagear.persistence.PersistenceException;
-import org.datagear.persistence.UnsupportedDialectException;
-import org.datagear.persistence.support.SqlExpressionErrorException;
-import org.datagear.persistence.support.VariableExpressionErrorException;
+import org.datagear.persistence.support.UnsupportedDialectException;
+import org.datagear.persistence.support.expression.SqlExpressionErrorException;
+import org.datagear.persistence.support.expression.VariableExpressionErrorException;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.IllegalSourceValueException;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
@@ -217,34 +216,23 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(DatabaseInfoResolverException.class)
+	@ExceptionHandler(DBMetaResolverException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handleDbmodelDatabaseInfoResolverException(HttpServletRequest request, HttpServletResponse response,
-			DatabaseInfoResolverException exception)
+			DBMetaResolverException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DatabaseInfoResolverException.class), exception,
+		setOperationMessageForThrowable(request, buildMessageCode(DBMetaResolverException.class), exception,
 				true);
 
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(DatabaseModelResolverException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleDbmodelDatabaseModelResolverException(HttpServletRequest request, HttpServletResponse response,
-			DatabaseModelResolverException exception)
-	{
-		setOperationMessageForThrowable(request, buildMessageCode(DatabaseModelResolverException.class), exception,
-				true);
-
-		return getErrorView(request, response);
-	}
-
-	@ExceptionHandler(TableNotExistsException.class)
+	@ExceptionHandler(TableNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public String handleDbmodelTableNotExistsException(HttpServletRequest request, HttpServletResponse response,
-			TableNotExistsException exception)
+	public String handleDbmodelTableNotFoundException(HttpServletRequest request, HttpServletResponse response,
+			TableNotFoundException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(TableNotExistsException.class), exception, false,
+		setOperationMessageForThrowable(request, buildMessageCode(TableNotFoundException.class), exception, false,
 				exception.getTableName());
 
 		return getErrorView(request, response);
