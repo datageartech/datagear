@@ -180,6 +180,62 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		return getDataTypes(cn, metaData);
 	}
 
+	@Override
+	public List<String[]> getImportTables(Connection cn, String... tableNames)
+	{
+		List<String[]> importTabless = new ArrayList<>(tableNames.length);
+
+		DatabaseMetaData metaData = getDatabaseMetaData(cn);
+		String schema = getSchema(cn, metaData);
+
+		for (int i = 0; i < tableNames.length; i++)
+		{
+			String[] importTables = null;
+
+			if (StringUtil.isEmpty(tableNames[i]))
+				importTables = EMPTY_STRING_ARRAY;
+			else
+			{
+				// 处理重复表
+				for (int k = 0; i < i; k++)
+				{
+					if (tableNames[k].equals(tableNames[i]))
+					{
+						importTables = importTabless.get(k);
+						break;
+					}
+				}
+
+				if (importTables == null)
+				{
+					ImportKey[] importKeys = getImportedKeys(cn, metaData, schema, tableNames[i]);
+
+					if (importKeys == null || importKeys.length == 0)
+						importTables = EMPTY_STRING_ARRAY;
+					else
+					{
+						List<String> importedTableList = new ArrayList<>(2);
+
+						for (int j = 0; j < importKeys.length; j++)
+						{
+							String primaryTable = importKeys[j].getPrimaryTableName();
+
+							if (!importedTableList.contains(primaryTable))
+								importedTableList.add(primaryTable);
+						}
+
+						importTables = new String[importedTableList.size()];
+						importedTableList.toArray(importTables);
+					}
+				}
+			}
+
+			importTabless.add(importTables);
+		}
+
+		return importTabless;
+	}
+
 	/**
 	 * @param cn
 	 * @param metaData

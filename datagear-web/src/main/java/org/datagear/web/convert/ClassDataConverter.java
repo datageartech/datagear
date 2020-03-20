@@ -10,12 +10,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.model.Model;
-import org.datagear.model.support.PropertyPath;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.ui.Model;
 
 /**
  * {@linkplain Class}数据转换器。
@@ -45,11 +44,9 @@ public class ClassDataConverter extends AbstractDataConverter
 	 */
 	public <T> T convert(Object obj, Class<T> type) throws ConverterException
 	{
-		RefContext refContext = new RefContext();
+		T target = convertObj(null, obj, type);
 
-		T target = convertObj(null, obj, type, refContext);
-
-		handleLazyRefs(target, refContext);
+		handleLazyRefs(target);
 
 		return target;
 	}
@@ -64,11 +61,7 @@ public class ClassDataConverter extends AbstractDataConverter
 	 */
 	public <T> T[] convertToArray(Object obj, Class<T> type) throws ConverterException
 	{
-		RefContext refContext = new RefContext();
-
-		T[] target = convertObjToArray(null, obj, type, refContext);
-
-		handleLazyRefs(target, refContext);
+		T[] target = convertObjToArray(null, obj, type);
 
 		return target;
 	}
@@ -85,11 +78,7 @@ public class ClassDataConverter extends AbstractDataConverter
 	public <T> Collection<T> convertToCollection(Object obj, Class<T> type, Class<? extends Collection> collectionType)
 			throws ConverterException
 	{
-		RefContext refContext = new RefContext();
-
-		Collection<T> target = convertObjToCollection(null, obj, type, collectionType, refContext);
-
-		handleLazyRefs(target, refContext);
+		Collection<T> target = convertObjToCollection(null, obj, type, collectionType);
 
 		return target;
 	}
@@ -105,8 +94,7 @@ public class ClassDataConverter extends AbstractDataConverter
 	 * @throws ConverterException
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> T convertObj(String namePath, Object obj, Class<T> type, RefContext refContext)
-			throws ConverterException
+	protected <T> T convertObj(String namePath, Object obj, Class<T> type) throws ConverterException
 	{
 		if (obj == null)
 		{
@@ -122,9 +110,9 @@ public class ClassDataConverter extends AbstractDataConverter
 			T target = null;
 
 			if (type.isArray())
-				target = (T) convertMapToArray(namePath, map, type.getComponentType(), refContext);
+				target = (T) convertMapToArray(namePath, map, type.getComponentType());
 			else
-				target = convertMap(namePath, map, type, refContext);
+				target = convertMap(namePath, map, type);
 
 			return target;
 		}
@@ -204,7 +192,7 @@ public class ClassDataConverter extends AbstractDataConverter
 			{
 				Class<?> elementType = propertyTypeDescriptor.getElementTypeDescriptor().getType();
 
-				Object value = convertObjToArray(myFullPropertyPath, rawValue, elementType, refContext);
+				Object value = convertObjToArray(myFullPropertyPath, rawValue, elementType);
 
 				beanWrapper.setPropertyValue(propName, value);
 			}
@@ -214,14 +202,14 @@ public class ClassDataConverter extends AbstractDataConverter
 
 				@SuppressWarnings("rawtypes")
 				Object value = convertObjToCollection(myFullPropertyPath, rawValue, elementType,
-						(Class<? extends Collection>) propertyTypeDescriptor.getType(), refContext);
+						(Class<? extends Collection>) propertyTypeDescriptor.getType());
 
 				beanWrapper.setPropertyValue(propName, value);
 			}
 			else
 			{
 				Class<?> propertyType = propertyTypeDescriptor.getType();
-				Object value = convertObj(myFullPropertyPath, rawValue, propertyType, refContext);
+				Object value = convertObj(myFullPropertyPath, rawValue, propertyType);
 
 				if (value == null)
 				{
@@ -264,11 +252,11 @@ public class ClassDataConverter extends AbstractDataConverter
 		{
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			collection = convertMapToCollection(namePath, map, type, collectionType, refContext);
+			collection = convertMapToCollection(namePath, map, type, collectionType);
 		}
 		else if (objClass.isArray())
 		{
-			collection = convertArrayToCollection(namePath, (Object[]) obj, type, collectionType, refContext);
+			collection = convertArrayToCollection(namePath, (Object[]) obj, type, collectionType);
 		}
 		else if (Collection.class.isAssignableFrom(objClass))
 		{
@@ -322,7 +310,7 @@ public class ClassDataConverter extends AbstractDataConverter
 		{
 			Object src = entry.getValue();
 
-			T element = convertObj(concatPropertyPath(namePath, entry.getKey()), src, type, refContext);
+			T element = convertObj(concatPropertyPath(namePath, entry.getKey()), src, type);
 
 			re.add(element);
 		}
@@ -405,13 +393,11 @@ public class ClassDataConverter extends AbstractDataConverter
 	 * @param namePath
 	 * @param obj
 	 * @param type
-	 * @param refContext
 	 * @return
 	 * @throws ConverterException
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> T[] convertObjToArray(String namePath, Object obj, Class<T> type, RefContext refContext)
-			throws ConverterException
+	protected <T> T[] convertObjToArray(String namePath, Object obj, Class<T> type) throws ConverterException
 	{
 		if (obj == null)
 			return null;
@@ -422,16 +408,16 @@ public class ClassDataConverter extends AbstractDataConverter
 		{
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			T[] array = convertMapToArray(namePath, map, type, refContext);
+			T[] array = convertMapToArray(namePath, map, type);
 			return array;
 		}
 		else if (objClass.isArray())
 		{
-			return convertArrayToArray(namePath, (Object[]) obj, type, refContext);
+			return convertArrayToArray(namePath, (Object[]) obj, type);
 		}
 		else if (Collection.class.isAssignableFrom(objClass))
 		{
-			return convertCollectionToArray(namePath, (Collection<Object>) obj, type, refContext);
+			return convertCollectionToArray(namePath, (Collection<Object>) obj, type);
 		}
 		else
 			return (T[]) convertSimpleObj(obj, type, namePath);
@@ -476,7 +462,7 @@ public class ClassDataConverter extends AbstractDataConverter
 		{
 			Object src = entry.getValue();
 
-			T element = convertObj(concatPropertyPath(namePath, entry.getKey()), src, type, refContext);
+			T element = convertObj(concatPropertyPath(namePath, entry.getKey()), src, type);
 
 			re[index++] = element;
 		}
@@ -538,37 +524,6 @@ public class ClassDataConverter extends AbstractDataConverter
 		}
 
 		return re;
-	}
-
-	/**
-	 * 处理延迟引用。
-	 * 
-	 * @param obj
-	 * @param refContext
-	 */
-	protected void handleLazyRefs(Object obj, RefContext refContext)
-	{
-		if (obj == null)
-			return;
-
-		if (!refContext.hasLazyRefs())
-			return;
-
-		Map<String, String> lazyRefs = refContext.getLazyRefs();
-
-		for (Map.Entry<String, String> entry : lazyRefs.entrySet())
-		{
-			String refValue = entry.getValue();
-
-			Object target = resolveRefTarget(refContext, refValue);
-
-			if (target != null)
-			{
-				PropertyPath propertyPath = PropertyPath.valueOf(entry.getKey());
-
-				setValue(obj, propertyPath, target);
-			}
-		}
 	}
 
 	/**

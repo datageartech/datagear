@@ -19,7 +19,6 @@ import org.datagear.connection.DriverEntityManager;
 import org.datagear.connection.DriverEntityManagerException;
 import org.datagear.connection.DriverLibraryInfo;
 import org.datagear.connection.XmlDriverEntityManager;
-import org.datagear.dbinfo.TableInfo;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;

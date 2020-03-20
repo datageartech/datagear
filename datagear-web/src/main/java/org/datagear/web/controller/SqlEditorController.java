@@ -12,17 +12,19 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.derby.impl.sql.execute.ColumnInfo;
 import org.datagear.connection.ConnectionSource;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
-import org.datagear.dbinfo.TableInfo;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
+import org.datagear.meta.Column;
+import org.datagear.meta.SimpleTable;
+import org.datagear.meta.Table;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.KeywordMatcher;
+import org.datagear.web.util.TableCache;
 import org.datagear.web.util.WebUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,31 +40,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping("/sqlEditor")
-public class SqlEditorController extends AbstractSchemaConnController
+public class SqlEditorController extends AbstractSchemaConnTableController
 {
-	@Autowired
-	private DatabaseInfoResolver databaseInfoResolver;
-
 	public SqlEditorController()
 	{
 		super();
 	}
 
 	public SqlEditorController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, DatabaseInfoResolver databaseInfoResolver)
+			SchemaService schemaService, ConnectionSource connectionSource, DBMetaResolver dbMetaResolver,
+			TableCache tableCache)
 	{
-		super(messageSource, classDataConverter, schemaService, connectionSource);
-		this.databaseInfoResolver = databaseInfoResolver;
-	}
-
-	public DatabaseInfoResolver getDatabaseInfoResolver()
-	{
-		return databaseInfoResolver;
-	}
-
-	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
-	{
-		this.databaseInfoResolver = databaseInfoResolver;
+		super(messageSource, classDataConverter, schemaService, connectionSource, dbMetaResolver, tableCache);
 	}
 
 	@RequestMapping(value = "/{schemaId}/findTableNames", produces = CONTENT_TYPE_JSON)
@@ -73,25 +62,25 @@ public class SqlEditorController extends AbstractSchemaConnController
 	{
 		final User user = WebUtils.getUser(request, response);
 
-		TableInfo[] tableInfos = new ReturnSchemaConnExecutor<TableInfo[]>(request, response, springModel, schemaId,
-				true)
+		List<SimpleTable> tables = new ReturnSchemaConnExecutor<List<SimpleTable>>(request, response, springModel,
+				schemaId, true)
 		{
 			@Override
-			protected TableInfo[] execute(HttpServletRequest request, HttpServletResponse response,
+			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
-
-				return getDatabaseInfoResolver().getTableInfos(getConnection());
+				return getDbMetaResolver().getSimpleTables(getConnection());
 			}
+
 		}.execute();
 
-		List<TableInfo> tableInfoList = SchemaController.findByKeyword(tableInfos, keyword);
-		Collections.sort(tableInfoList, SchemaController.TABLE_INFO_SORT_BY_NAME_COMPARATOR);
+		List<SimpleTable> keywordTables = SchemaController.findByKeyword(tables, keyword);
+		Collections.sort(keywordTables, SchemaController.TABLE_SORT_BY_NAME_COMPARATOR);
 
-		List<String> tableNames = new ArrayList<String>();
+		List<String> tableNames = new ArrayList<>();
 
-		for (TableInfo tableInfo : tableInfoList)
+		for (SimpleTable tableInfo : keywordTables)
 			tableNames.add(tableInfo.getName());
 
 		return tableNames;
@@ -106,25 +95,26 @@ public class SqlEditorController extends AbstractSchemaConnController
 	{
 		final User user = WebUtils.getUser(request, response);
 
-		ColumnInfo[] columnInfos = new ReturnSchemaConnExecutor<ColumnInfo[]>(request, response, springModel, schemaId,
-				true)
+		Table tableObj = new ReturnSchemaConnTableExecutor<Table>(request, response, springModel, schemaId, table, true)
 		{
 			@Override
-			protected ColumnInfo[] execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema) throws Throwable
+			protected Table execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Exception
 			{
 				checkReadTableDataPermission(schema, user);
 
-				return getDatabaseInfoResolver().getColumnInfos(getConnection(), table);
+				return table;
 			}
 		}.execute();
 
-		List<ColumnInfo> columnInfoList = findByKeyword(columnInfos, keyword);
-		Collections.sort(columnInfoList, COLUMNINFO_INFO_SORT_BY_NAME_COMPARATOR);
+		Column[] columns = tableObj.getColumns();
 
-		List<String> columnNames = new ArrayList<String>();
+		List<Column> keywordColumns = findByKeyword(columns, keyword);
+		Collections.sort(keywordColumns, COLUMN_SORT_BY_NAME_COMPARATOR);
 
-		for (ColumnInfo columnInfo : columnInfoList)
+		List<String> columnNames = new ArrayList<>();
+
+		for (Column columnInfo : keywordColumns)
 			columnNames.add(columnInfo.getName());
 
 		return columnNames;
@@ -137,23 +127,22 @@ public class SqlEditorController extends AbstractSchemaConnController
 	 * @param columnNameKeyword
 	 * @return
 	 */
-	public static List<ColumnInfo> findByKeyword(ColumnInfo[] columnInfos, String columnNameKeyword)
+	public static List<Column> findByKeyword(Column[] columnInfos, String columnNameKeyword)
 	{
-		return KeywordMatcher.<ColumnInfo> match(columnInfos, columnNameKeyword,
-				new KeywordMatcher.MatchValue<ColumnInfo>()
-				{
-					@Override
-					public String[] get(ColumnInfo t)
-					{
-						return new String[] { t.getName() };
-					}
-				});
+		return KeywordMatcher.<Column> match(columnInfos, columnNameKeyword, new KeywordMatcher.MatchValue<Column>()
+		{
+			@Override
+			public String[] get(Column t)
+			{
+				return new String[] { t.getName() };
+			}
+		});
 	}
 
-	public static Comparator<ColumnInfo> COLUMNINFO_INFO_SORT_BY_NAME_COMPARATOR = new Comparator<ColumnInfo>()
+	public static Comparator<Column> COLUMN_SORT_BY_NAME_COMPARATOR = new Comparator<Column>()
 	{
 		@Override
-		public int compare(ColumnInfo o1, ColumnInfo o2)
+		public int compare(Column o1, Column o2)
 		{
 			return o1.getName().compareTo(o2.getName());
 		}

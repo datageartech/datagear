@@ -300,7 +300,7 @@ public class JdbcUtil
 			DatabaseMetaData metaData = cn.getMetaData();
 			return metaData.getURL();
 		}
-		catch (Throwable t)
+		catch (SQLException t)
 		{
 			return null;
 		}
@@ -320,9 +320,30 @@ public class JdbcUtil
 			DatabaseMetaData metaData = cn.getMetaData();
 			return metaData.getUserName();
 		}
-		catch (Throwable t)
+		catch (SQLException t)
 		{
 			return null;
+		}
+	}
+
+	/**
+	 * 设置{@linkplain Statement#setFetchSize(int)}。
+	 * 
+	 * @param st
+	 * @param fetchSize
+	 * @return
+	 */
+	@JDBCCompatiblity("避免有驱动程序不支持此方法而抛出异常")
+	public static boolean setFetchSizeIfSupports(Statement st, int fetchSize)
+	{
+		try
+		{
+			st.setFetchSize(fetchSize);
+			return true;
+		}
+		catch (SQLException e)
+		{
+			return false;
 		}
 	}
 }

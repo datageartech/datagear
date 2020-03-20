@@ -23,7 +23,7 @@
 		<slf4j-log4j12.version>1.7.9</slf4j-log4j12.version>
 		<log4j.version>1.2.17</log4j.version>
 		<javax.json.version>1.0.4</javax.json.version>
-		<guava.version>19.0</guava.version>
+		<guava.version>28.2-jre</guava.version>
 		<fastjson.version>1.2.35</fastjson.version>
 		<freemarker.version>2.3.28</freemarker.version>
 		<maven-antrun-plugin.version>1.4</maven-antrun-plugin.version>

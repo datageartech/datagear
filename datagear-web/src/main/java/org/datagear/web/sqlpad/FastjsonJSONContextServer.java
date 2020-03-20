@@ -194,7 +194,7 @@ public class FastjsonJSONContextServer implements JSONContext.Server
 
 	protected SerializerFeature[] inflateSerializerFeatureForCometd(SerializerFeature[] serializerFeatures)
 	{
-		List<SerializerFeature> list = new ArrayList<SerializerFeature>();
+		List<SerializerFeature> list = new ArrayList<>();
 
 		if (serializerFeatures != null)
 		{
@@ -202,8 +202,7 @@ public class FastjsonJSONContextServer implements JSONContext.Server
 				list.add(serializerFeature);
 		}
 
-		// 开启循环引用的话，查询结果消息（SqlpadCometdService.SqlSuccessMessageData.modelSqlResult）中
-		// 会带有“$...”循环引用路径标识，但是在cometd的JSON处理后，它并不是正确的引用路径标识，这会
+		// 开启循环引用的话，查询结果消息中可能会带有“$...”循环引用路径标识，但是在cometd的JSON处理后，它并不是正确的引用路径标识，这会
 		// 导致浏览器端解析出问题，从而导致cometd通讯失败。
 		list.add(SerializerFeature.DisableCircularReferenceDetect);
 

@@ -5,48 +5,36 @@
 package org.datagear.web.controller;
 
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
-import org.datagear.dbmodel.CachedDbModelFactory;
-import org.datagear.dbmodel.ModelSqlSelectService;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
-import org.datagear.model.Model;
-import org.datagear.model.Property;
-import org.datagear.model.features.NotEditable;
-import org.datagear.model.support.MU;
-import org.datagear.model.support.PropertyPath;
-import org.datagear.model.support.PropertyPathInfo;
-import org.datagear.persistence.Dialect;
+import org.datagear.meta.Table;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceManager;
-import org.datagear.persistence.QueryColumnMetaInfo;
-import org.datagear.persistence.QueryResultMetaInfo;
-import org.datagear.persistence.columnconverter.LOBConversionContext;
-import org.datagear.persistence.columnconverter.LOBConversionContext.LOBConversionSetting;
-import org.datagear.persistence.support.ExpressionEvaluationContext;
-import org.datagear.persistence.support.PMU;
-import org.datagear.persistence.support.PMU.IdentifierReplaceSource;
-import org.datagear.persistence.support.SelectOptions;
-import org.datagear.persistence.support.SqlExpressionSyntaxErrorException;
-import org.datagear.persistence.support.VariableExpressionSyntaxErrorException;
+import org.datagear.persistence.Row;
+import org.datagear.persistence.SqlParamValueMapper;
+import org.datagear.persistence.support.ConversionSqlParamValueMapper;
+import org.datagear.persistence.support.DefaultLOBRowMapper;
+import org.datagear.persistence.support.expression.ExpressionEvaluationContext;
+import org.datagear.persistence.support.expression.SqlExpressionSyntaxErrorException;
+import org.datagear.persistence.support.expression.VariableExpressionSyntaxErrorException;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -59,15 +47,14 @@ import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
 import org.datagear.web.format.SqlTimestampFormatter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
-import org.datagear.web.util.ModelUtils;
+import org.datagear.web.util.TableCache;
 import org.datagear.web.util.WebUtils;
-import org.datagear.web.vo.PropertyPathDisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -82,7 +69,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Controller
 @RequestMapping("/data")
-public class DataController extends AbstractSchemaModelConnController
+public class DataController extends AbstractSchemaConnTableController
 {
 	public static final String PARAM_IGNORE_DUPLICATION = "ignoreDuplication";
 
@@ -100,18 +87,13 @@ public class DataController extends AbstractSchemaModelConnController
 	private PersistenceManager persistenceManager;
 
 	@Autowired
-	private SelectOptions selectOptions;
+	private DefaultLOBRowMapper dataGetRowMapper;
+
+	@Autowired
+	private DefaultLOBRowMapper dataQueryRowMapper;
 
 	@Autowired
 	private ModelDataConverter modelDataConverter;
-
-	@Autowired
-	@Qualifier("blobFileManagerDirectory")
-	private File blobFileManagerDirectory;
-
-	@Autowired
-	@Qualifier("blobToFilePlaceholderName")
-	private String blobToFilePlaceholderName;
 
 	@Autowired
 	private DateFormatter dateFormatter;
@@ -125,26 +107,23 @@ public class DataController extends AbstractSchemaModelConnController
 	@Autowired
 	private SqlTimeFormatter sqlTimeFormatter;
 
-	private int queryLeftClobLengthOnReading = ModelSqlSelectService.DEFAULT_CLOB_LEFT_LEFTH;
-
 	public DataController()
 	{
 		super();
 	}
 
 	public DataController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, CachedDbModelFactory cachedDbModelFactory,
-			PersistenceManager persistenceManager, SelectOptions selectOptions, ModelDataConverter modelDataConverter,
-			File blobFileManagerDirectory, String blobToFilePlaceholderName, DateFormatter dateFormatter,
+			SchemaService schemaService, ConnectionSource connectionSource, DBMetaResolver dbMetaResolver,
+			TableCache tableCache, PersistenceManager persistenceManager, DefaultLOBRowMapper dataGetRowMapper,
+			DefaultLOBRowMapper dataQueryRowMapper, ModelDataConverter modelDataConverter, DateFormatter dateFormatter,
 			SqlDateFormatter sqlDateFormatter, SqlTimestampFormatter sqlTimestampFormatter,
 			SqlTimeFormatter sqlTimeFormatter)
 	{
-		super(messageSource, classDataConverter, schemaService, connectionSource, cachedDbModelFactory);
+		super(messageSource, classDataConverter, schemaService, connectionSource, dbMetaResolver, tableCache);
 		this.persistenceManager = persistenceManager;
-		this.selectOptions = selectOptions;
+		this.dataGetRowMapper = dataGetRowMapper;
+		this.dataQueryRowMapper = dataQueryRowMapper;
 		this.modelDataConverter = modelDataConverter;
-		this.blobFileManagerDirectory = blobFileManagerDirectory;
-		this.blobToFilePlaceholderName = blobToFilePlaceholderName;
 		this.dateFormatter = dateFormatter;
 		this.sqlDateFormatter = sqlDateFormatter;
 		this.sqlTimestampFormatter = sqlTimestampFormatter;
@@ -161,14 +140,24 @@ public class DataController extends AbstractSchemaModelConnController
 		this.persistenceManager = persistenceManager;
 	}
 
-	public SelectOptions getSelectOptions()
+	public DefaultLOBRowMapper getDataGetRowMapper()
 	{
-		return selectOptions;
+		return dataGetRowMapper;
 	}
 
-	public void setSelectOptions(SelectOptions selectOptions)
+	public void setDataGetRowMapper(DefaultLOBRowMapper dataGetRowMapper)
 	{
-		this.selectOptions = selectOptions;
+		this.dataGetRowMapper = dataGetRowMapper;
+	}
+
+	public DefaultLOBRowMapper getDataQueryRowMapper()
+	{
+		return dataQueryRowMapper;
+	}
+
+	public void setDataQueryRowMapper(DefaultLOBRowMapper dataQueryRowMapper)
+	{
+		this.dataQueryRowMapper = dataQueryRowMapper;
 	}
 
 	public ModelDataConverter getModelDataConverter()
@@ -179,26 +168,6 @@ public class DataController extends AbstractSchemaModelConnController
 	public void setModelDataConverter(ModelDataConverter modelDataConverter)
 	{
 		this.modelDataConverter = modelDataConverter;
-	}
-
-	public File getBlobFileManagerDirectory()
-	{
-		return blobFileManagerDirectory;
-	}
-
-	public void setBlobFileManagerDirectory(File blobFileManagerDirectory)
-	{
-		this.blobFileManagerDirectory = blobFileManagerDirectory;
-	}
-
-	public String getBlobToFilePlaceholderName()
-	{
-		return blobToFilePlaceholderName;
-	}
-
-	public void setBlobToFilePlaceholderName(String blobToFilePlaceholderName)
-	{
-		this.blobToFilePlaceholderName = blobToFilePlaceholderName;
 	}
 
 	public DateFormatter getDateFormatter()
@@ -241,16 +210,6 @@ public class DataController extends AbstractSchemaModelConnController
 		this.sqlTimeFormatter = sqlTimeFormatter;
 	}
 
-	public int getQueryLeftClobLengthOnReading()
-	{
-		return queryLeftClobLengthOnReading;
-	}
-
-	public void setQueryLeftClobLengthOnReading(int queryLeftClobLengthOnReading)
-	{
-		this.queryLeftClobLengthOnReading = queryLeftClobLengthOnReading;
-	}
-
 	@RequestMapping("/{schemaId}/{tableName}/query")
 	public String query(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
@@ -259,27 +218,16 @@ public class DataController extends AbstractSchemaModelConnController
 	{
 		final User user = WebUtils.getUser(request, response);
 
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
-				Connection cn = getConnection();
-
-				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
-				QueryResultMetaInfo queryResultMetaInfo = persistenceManager.getQueryResultMetaInfo(cn, model);
-
-				springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(
-						getPropertyPathDisplayNames(request, queryResultMetaInfo, true, dialect)));
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, WebUtils.getLocale(request)));
-				springModel.addAttribute(KEY_TITLE_DISPLAY_DESC,
-						ModelUtils.displayDesc(model, WebUtils.getLocale(request)));
-
-				setGridPageAttributes(request, response, springModel, schema, model);
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
+				setGridPageAttributes(request, response, springModel, schema, table);
 			}
 		}.execute();
 
@@ -288,89 +236,29 @@ public class DataController extends AbstractSchemaModelConnController
 
 	@RequestMapping(value = "/{schemaId}/{tableName}/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public PagingData<Object> queryData(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<Row> queryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 		final PagingQuery pagingQuery = getPagingQuery(request);
 
-		ReturnSchemaModelConnExecutor<PagingData<Object>> executor = new ReturnSchemaModelConnExecutor<PagingData<Object>>(
+		ReturnSchemaConnTableExecutor<PagingData<Row>> executor = new ReturnSchemaConnTableExecutor<PagingData<Row>>(
 				request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
-			protected PagingData<Object> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+			protected PagingData<Row> execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
-				Connection cn = getConnection();
-
-				LOBConversionContext.set(buildQueryLobConversionSetting());
-
-				if (pagingQuery.hasCondition())
-				{
-					Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
-					QueryResultMetaInfo queryResultMetaInfo = persistenceManager.getQueryResultMetaInfo(cn, model);
-					List<PropertyPathDisplayName> propertyPathDisplayNames = getPropertyPathDisplayNames(request,
-							queryResultMetaInfo, false, dialect);
-
-					String condition = PMU.replaceIdentifier(dialect, pagingQuery.getCondition(),
-							new PropertyPathIdentifierReplaceSource(propertyPathDisplayNames), true);
-
-					pagingQuery.setCondition(condition);
-				}
-
-				PagingData<Object> pagingData = persistenceManager.query(cn, model, pagingQuery);
-
-				LOBConversionContext.remove();
-
+				PagingData<Row> pagingData = persistenceManager.pagingQuery(getConnection(), null, table, pagingQuery,
+						getDataQueryRowMapper());
 				return pagingData;
 			}
 		};
 
 		return executor.execute();
-	}
-
-	protected static class PropertyPathIdentifierReplaceSource implements IdentifierReplaceSource
-	{
-		private List<PropertyPathDisplayName> propertyPathDisplayNames;
-
-		public PropertyPathIdentifierReplaceSource()
-		{
-			super();
-		}
-
-		public PropertyPathIdentifierReplaceSource(List<PropertyPathDisplayName> propertyPathDisplayNames)
-		{
-			super();
-			this.propertyPathDisplayNames = propertyPathDisplayNames;
-		}
-
-		public List<PropertyPathDisplayName> getPropertyPathDisplayNames()
-		{
-			return propertyPathDisplayNames;
-		}
-
-		public void setPropertyPathDisplayNames(List<PropertyPathDisplayName> propertyPathDisplayNames)
-		{
-			this.propertyPathDisplayNames = propertyPathDisplayNames;
-		}
-
-		@Override
-		public String replace(String identifier)
-		{
-			if (this.propertyPathDisplayNames == null)
-				return null;
-
-			for (PropertyPathDisplayName propertyPathDisplayName : this.propertyPathDisplayNames)
-			{
-				if (identifier.equalsIgnoreCase(propertyPathDisplayName.getDisplayName()))
-					return propertyPathDisplayName.getPropertyPath();
-			}
-
-			return null;
-		}
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/add")
@@ -379,17 +267,16 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
 				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, WebUtils.getLocale(request)));
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
 				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, true);
 				springModel.addAttribute("submitAction", "saveAdd");
 			}
@@ -430,29 +317,21 @@ public class DataController extends AbstractSchemaModelConnController
 			org.springframework.ui.Model springModel, String schemaId, String tableName) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
+		final Row row = paramMapToRow(request, getParamMap(request, "data"));
 
-		Object data = new ReturnSchemaModelConnExecutor<Object>(request, response, springModel, schemaId, tableName,
-				false)
+		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
-			protected Object execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+			protected void execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-				persistenceManager.insert(cn, model, data);
-
-				return data;
+				persistenceManager.insert(getConnection(), null, table, row, buildSqlParamValueMapper());
 			}
 		}.execute();
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(data);
-
 		return responseEntity;
 	}
 
@@ -474,20 +353,17 @@ public class DataController extends AbstractSchemaModelConnController
 			BatchHandleErrorMode batchHandleErrorMode) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
+		final Row row = paramMapToRow(request, getParamMap(request, "data"));
 
 		ResponseEntity<OperationMessage> batchResponseEntity = new BatchReturnExecutor(request, response, springModel,
 				schemaId, tableName, batchCount, batchHandleErrorMode)
 		{
 			@Override
-			protected void doBatchUnit(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model, Connection cn,
-					Dialect dialect, String table, ExpressionEvaluationContext context) throws Throwable
+			protected void doBatchUnit(HttpServletRequest request, HttpServletResponse response, Model springModel,
+					Schema schema, Table table, Connection cn, ExpressionEvaluationContext context) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
-
-				Object data = modelDataConverter.convert(dataParam, model);
-				persistenceManager.insert(cn, dialect, table, model, data, context);
+				persistenceManager.insert(cn, null, table, row, buildSqlParamValueMapper(context));
 			}
 		}.execute();
 
@@ -500,39 +376,33 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamObj(request, "data");
+		final Row row = paramMapToRow(request, getParamMap(request, "data"));
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
 				Connection cn = getConnection();
 
-				Object data = modelDataConverter.convert(dataParam, model);
+				Row myRow = row;
 
 				if (isLoadPageData)
 				{
-					LOBConversionContext.set(buildGetLobConversionSetting());
+					myRow = persistenceManager.get(cn, null, table, row, buildSqlParamValueMapper(),
+							getDataGetRowMapper());
 
-					List<Object> resultList = persistenceManager.getByParam(cn, model, data);
-
-					LOBConversionContext.remove();
-
-					if (resultList == null || resultList.isEmpty())
+					if (myRow == null)
 						throw new RecordNotFoundException();
-
-					data = resultList.get(0);
 				}
 
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(myRow));
 				springModel.addAttribute("titleOperationMessageKey", "edit");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, WebUtils.getLocale(request)));
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
 				springModel.addAttribute("submitAction", "saveEdit");
 			}
 		}.execute();
@@ -551,30 +421,28 @@ public class DataController extends AbstractSchemaModelConnController
 			throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Object originalDataParam = getParamObj(request, "originalData");
-		final Object dataParam = getParamMap(request, "data");
+		final Row originalRow = paramMapToRow(request, getParamMap(request, "originalData"));
+		final Row updateRow = paramMapToRow(request, getParamMap(request, "data"));
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(
+		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
 				request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
 				Connection cn = getConnection();
 
-				Object originalData = modelDataConverter.convert(originalDataParam, model);
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				int count = persistenceManager.update(cn, model, originalData, data, false);
+				int count = persistenceManager.update(cn, null, table, originalRow, updateRow,
+						buildSqlParamValueMapper());
 
 				checkDuplicateRecord(1, count, ignoreDuplication);
 
 				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(request,
 						count);
-				responseEntity.getBody().setData(data);
+				responseEntity.getBody().setData(updateRow);
 
 				return responseEntity;
 			}
@@ -592,24 +460,20 @@ public class DataController extends AbstractSchemaModelConnController
 			throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamObj(request, "data");
+		final Row[] rows = paramToRows(request, getParamObj(request, "data"));
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(
+		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
 				request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
-				Connection cn = getConnection();
+				int count = persistenceManager.delete(getConnection(), table, rows);
 
-				Object[] datas = modelDataConverter.convertToArray(dataParam, model);
-
-				int count = persistenceManager.delete(cn, model, datas);
-
-				checkDuplicateRecord(datas.length, count, ignoreDuplication);
+				checkDuplicateRecord(rows.length, count, ignoreDuplication);
 
 				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteCountResponseEntity(
 						request, count);
@@ -628,39 +492,33 @@ public class DataController extends AbstractSchemaModelConnController
 			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamObj(request, "data");
+		final Row row = paramMapToRow(request, getParamMap(request, "data"));
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
 				Connection cn = getConnection();
 
-				Object data = modelDataConverter.convert(dataParam, model);
+				Row myRow = row;
 
 				if (isLoadPageData)
 				{
-					LOBConversionContext.set(buildGetLobConversionSetting());
+					myRow = persistenceManager.get(cn, null, table, row, buildSqlParamValueMapper(),
+							getDataGetRowMapper());
 
-					List<Object> resultList = persistenceManager.getByParam(cn, model, data);
-
-					LOBConversionContext.remove();
-
-					if (resultList == null || resultList.isEmpty())
+					if (myRow == null)
 						throw new RecordNotFoundException();
-
-					data = resultList.get(0);
 				}
 
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
+				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(myRow));
 				springModel.addAttribute("titleOperationMessageKey", "view");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, WebUtils.getLocale(request)));
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
 				springModel.addAttribute("readonly", true);
 			}
 		}.execute();
@@ -700,12 +558,12 @@ public class DataController extends AbstractSchemaModelConnController
 		final Object[][] updatePropertyValueParamss = (updatesParam == null ? null
 				: getClassDataConverter().convertToArray(updatePropertyValuessParam, Object[].class));
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(
+		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
 				request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
 			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
 
@@ -780,110 +638,28 @@ public class DataController extends AbstractSchemaModelConnController
 		return responseEntity;
 	}
 
-	@RequestMapping("/{schemaId}/{tableName}/selectPropValue")
-	public String selectPropValue(HttpServletRequest request, HttpServletResponse response,
+	@RequestMapping("/{schemaId}/{tableName}/select")
+	public String select(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath,
-			@RequestParam(value = "page", required = false) Integer page,
+			@PathVariable("tableName") String tableName, @RequestParam(value = "page", required = false) Integer page,
 			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
 
-		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
-
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
+		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
-
-				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
-				QueryResultMetaInfo queryResultMetaInfo = persistenceManager
-						.getQueryPropValueSourceQueryResultMetaInfo(cn, model, data, propertyPathInfo);
-
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
-				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute(KEY_CONDITION_SOURCE, WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(
-						getPropertyPathDisplayNames(request, queryResultMetaInfo, true, dialect)));
-
-				boolean isMultipleSelect = false;
-				if (request.getParameter("multiple") != null)
-					isMultipleSelect = true;
-				else
-					isMultipleSelect = MU.isMultipleProperty(propertyPathInfo.getPropertyTail());
-
-				springModel.addAttribute("isMultipleSelect", isMultipleSelect);
-
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-
-				setGridPageAttributes(request, response, springModel, schema, model);
+				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
+				setGridPageAttributes(request, response, springModel, schema, table);
 			}
 		}.execute();
 
-		return "/data/data_select_prop_value";
-	}
-
-	@RequestMapping(value = "/{schemaId}/{tableName}/selectPropValueData", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public PagingData<Object> selectPropValueData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final PagingQuery pagingQuery = getPagingQuery(request);
-
-		PagingData<Object> propValueSourcePagingData = new ReturnSchemaModelConnExecutor<PagingData<Object>>(request,
-				response, springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected PagingData<Object> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-
-				LOBConversionContext.set(buildQueryLobConversionSetting());
-
-				if (pagingQuery.hasCondition())
-				{
-					Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
-					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
-							.getQueryPropValueSourceQueryResultMetaInfo(cn, model, data, propertyPathInfo);
-					List<PropertyPathDisplayName> propertyPathDisplayNames = getPropertyPathDisplayNames(request,
-							queryResultMetaInfo, false, dialect);
-
-					String condition = PMU.replaceIdentifier(dialect, pagingQuery.getCondition(),
-							new PropertyPathIdentifierReplaceSource(propertyPathDisplayNames), true);
-
-					pagingQuery.setCondition(condition);
-				}
-
-				PagingData<Object> pagingData = persistenceManager.queryPropValueSource(cn, model, data,
-						propertyPathInfo, pagingQuery);
-
-				LOBConversionContext.remove();
-
-				return pagingData;
-			}
-		}.execute();
-
-		return propValueSourcePagingData;
+		return "/data/data_grid";
 	}
 
 	@RequestMapping(value = "/{schemaId}/{tableName}/getPropertyValuess", produces = CONTENT_TYPE_JSON)
@@ -897,12 +673,12 @@ public class DataController extends AbstractSchemaModelConnController
 		Object propertyNamesParam = getParamMap(request, "propertyNamess");
 		final String[][] propertyNamess = getClassDataConverter().convertToArray(propertyNamesParam, String[].class);
 
-		Object[][] propertyValuess = new ReturnSchemaModelConnExecutor<Object[][]>(request, response, springModel,
+		Object[][] propertyValuess = new ReturnSchemaConnTableExecutor<Object[][]>(request, response, springModel,
 				schemaId, tableName, true)
 		{
 			@Override
 			protected Object[][] execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
@@ -928,939 +704,6 @@ public class DataController extends AbstractSchemaModelConnController
 		return propertyValuess;
 	}
 
-	@RequestMapping(value = "/{schemaId}/{tableName}/getPropertyPropertyValuess", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public Object[][] getPropertyPropertyValuess(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPathParam)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPath = PropertyPath.valueOf(propertyPathParam);
-		final Object propertyValuesParam = getParamMap(request, "propertyValues");
-		Object propertyPropertyNamesParam = getParamMap(request, "propertyPropertyNamess");
-
-		final String[][] propertyPropertyNamess = getClassDataConverter().convertToArray(propertyPropertyNamesParam,
-				String[].class);
-
-		Object[][] propertyPropertyValuess = new ReturnSchemaModelConnExecutor<Object[][]>(request, response,
-				springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected Object[][] execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-				Model propertyModel = propertyPathInfo.getModelTail();
-				Object[] propertyValues = modelDataConverter.convertToArray(propertyValuesParam, propertyModel);
-
-				Object[][] propertyPropertyValuess = new Object[propertyValues.length][];
-
-				for (int i = 0; i < propertyValues.length; i++)
-				{
-					Object propertyValue = propertyValues[i];
-					propertyPathInfo.setValueTail(propertyValue);
-
-					String[] propertyPropertyNames = propertyPropertyNamess[i];
-					PropertyPath[] propertyPaths = toPropertyPaths(propertyPropertyNames, propertyPath);
-
-					propertyPropertyValuess[i] = loadPropertyValues(cn, model, data, propertyPaths);
-				}
-
-				return propertyPropertyValuess;
-			}
-		}.execute();
-
-		return propertyPropertyValuess;
-	}
-
-	@RequestMapping("/{schemaId}/{tableName}/addSinglePropValue")
-	public String addSinglePropValue(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-
-		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
-
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
-				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, true);
-				springModel.addAttribute("submitAction", "saveSinglePropValue");
-			}
-		}.execute();
-
-		setFormPageAttributes(request, springModel);
-
-		return "/data/data_prop_value_form";
-	}
-
-	@RequestMapping("/{schemaId}/{tableName}/editSinglePropValue")
-	public String editSinglePropValue(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final Object propertyValueParam = getParamMap(request, "propertyValue");
-		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
-		final boolean isLoadPageData = isLoadPageDataRequest(request);
-
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				PropertyPathInfo propertyPathInfo = null;
-
-				if (propertyValueParam != null)
-				{
-					propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
-
-					// 这里不应该使用convertToPropertyValue，因为它会添加双向关联，导致页面引用混乱，再保存时又会导致转换混乱
-					Object propertyValue = modelDataConverter.convert(propertyValueParam,
-							propertyPathInfo.getModelTail());
-
-					springModel.addAttribute("propertyValue",
-							WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(propertyValue));
-				}
-
-				if (isLoadPageData)
-				{
-					if (propertyPathInfo == null)
-						propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-
-					LOBConversionContext.set(buildGetLobConversionSetting());
-
-					List<Object> resultList = persistenceManager.getPropValueByParam(getConnection(), model, data,
-							propertyPathInfo);
-
-					Object originalPropertyValue = (resultList == null || resultList.isEmpty() ? null
-							: resultList.get(0));
-
-					// 设置最新原始属性值，因为受SelectOptions的影响，select到页面的data对象超过级联的属性值不会加载
-					propertyPathInfo.setValueTail(originalPropertyValue);
-
-					springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, (originalPropertyValue == null ? true : false));
-				}
-
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
-				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("titleOperationMessageKey", "edit");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-				springModel.addAttribute("submitAction", "saveSinglePropValue");
-			}
-		}.execute();
-
-		setFormPageAttributes(request, springModel);
-
-		return "/data/data_prop_value_form";
-	}
-
-	@RequestMapping(value = "/{schemaId}/{tableName}/saveSinglePropValue", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> saveSinglePropValue(HttpServletRequest request,
-			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPath,
-			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final Object propValueParam = getParamMap(request, "propertyValue");
-
-		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(
-				request, response, springModel, schemaId, tableName, false)
-		{
-			@Override
-			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-
-				Object propValue = modelDataConverter.convertToPropertyValue(propertyPathInfo.getOwnerObjTail(),
-						propertyPathInfo.getOwnerModelTail(), propValueParam, propertyPathInfo.getPropertyTail());
-
-				int count = persistenceManager.updateSinglePropValue(cn, model, data, propertyPathInfo, propValue);
-				if (count == 0)
-					count = persistenceManager.insertSinglePropValue(cn, model, data, propertyPathInfo, propValue);
-
-				checkDuplicateRecord(1, count, ignoreDuplication);
-
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(request,
-						count);
-				responseEntity.getBody().setData(propValue);
-
-				return responseEntity;
-			}
-		}.execute();
-
-		return responseEntity;
-	}
-
-	@RequestMapping("/{schemaId}/{tableName}/viewSinglePropValue")
-	public String viewSinglePropValue(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final Object propertyValueParam = getParamMap(request, "propertyValue");
-		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
-		final boolean isLoadPageData = isLoadPageDataRequest(request);
-
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				Object propertyValue = null;
-				PropertyPathInfo propertyPathInfo = null;
-
-				if (isLoadPageData)
-				{
-					if (propertyPathInfo == null)
-						propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
-
-					LOBConversionContext.set(buildGetLobConversionSetting());
-
-					List<Object> resultList = persistenceManager.getPropValueByParam(getConnection(), model, data,
-							propertyPathInfo);
-
-					Object originalPropertyValue = (resultList == null || resultList.isEmpty() ? null
-							: resultList.get(0));
-
-					// 设置最新原始属性值，因为受SelectOptions的影响，select到页面的data对象超过级联的属性值不会加载
-					propertyPathInfo.setValueTail(originalPropertyValue);
-
-					// 忽略参数传递属性值
-					propertyValue = originalPropertyValue;
-
-					if (originalPropertyValue == null)
-						springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, true);
-				}
-				else if (propertyValueParam != null)
-				{
-					if (propertyPathInfo == null)
-						propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-
-					propertyValue = modelDataConverter.convert(propertyValueParam, propertyPathInfo.getModelTail());
-				}
-
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
-				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("propertyValue",
-						WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(propertyValue));
-				springModel.addAttribute("readonly", true);
-				springModel.addAttribute("titleOperationMessageKey", "view");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-			}
-		}.execute();
-
-		setFormPageAttributes(request, springModel);
-
-		return "/data/data_prop_value_form";
-	}
-
-	@RequestMapping("/{schemaId}/{tableName}/editMultiplePropValue")
-	public String editMultiplePropValue(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
-		final boolean isLoadPageData = isLoadPageDataRequest(request);
-
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
-
-				if (isLoadPageData)
-				{
-					Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
-					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
-							.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
-
-					springModel.addAttribute(KEY_CONDITION_SOURCE,
-							WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(
-									getPropertyPathDisplayNames(request, queryResultMetaInfo, true, dialect)));
-				}
-
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
-				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("titleOperationMessageKey", "edit");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-				springModel.addAttribute("isPrivateProperty", ModelUtils.isPrivatePropertyTail(propertyPathInfo));
-
-				setGridPageAttributes(request, response, springModel, schema, model);
-			}
-		}.execute();
-
-		return "/data/data_prop_value_grid";
-	}
-
-	@RequestMapping(value = "/{schemaId}/{tableName}/queryMultiplePropValueData", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public PagingData<Object> queryMultiplePropValueData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-
-		final PagingQuery pagingQuery = getPagingQuery(request);
-
-		PagingData<Object> pagingPropValue = new ReturnSchemaModelConnExecutor<PagingData<Object>>(request, response,
-				springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected PagingData<Object> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-
-				LOBConversionContext.set(buildQueryLobConversionSetting());
-
-				if (pagingQuery.hasCondition())
-				{
-					Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
-					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
-							.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
-					List<PropertyPathDisplayName> propertyPathDisplayNames = getPropertyPathDisplayNames(request,
-							queryResultMetaInfo, false, dialect);
-
-					String condition = PMU.replaceIdentifier(dialect, pagingQuery.getCondition(),
-							new PropertyPathIdentifierReplaceSource(propertyPathDisplayNames), true);
-
-					pagingQuery.setCondition(condition);
-				}
-
-				PagingData<Object> pagingData = persistenceManager.queryMultiplePropValue(cn, model, data,
-						propertyPathInfo, pagingQuery, true);
-
-				LOBConversionContext.remove();
-
-				return pagingData;
-			}
-		}.execute();
-
-		return pagingPropValue;
-	}
-
-	@RequestMapping("/{schemaId}/{tableName}/viewMultiplePropValue")
-	public String viewMultiplePropValue(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
-		final boolean isLoadPageData = isLoadPageDataRequest(request);
-
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
-
-				if (isLoadPageData)
-				{
-					Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
-					QueryResultMetaInfo queryResultMetaInfo = persistenceManager
-							.getQueryMultiplePropValueQueryResultMetaInfo(cn, model, data, propertyPathInfo, true);
-
-					springModel.addAttribute(KEY_CONDITION_SOURCE,
-							WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(
-									getPropertyPathDisplayNames(request, queryResultMetaInfo, true, dialect)));
-				}
-
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
-				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("readonly", true);
-				springModel.addAttribute("titleOperationMessageKey", "view");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-				springModel.addAttribute("isPrivateProperty", ModelUtils.isPrivatePropertyTail(propertyPathInfo));
-
-				setGridPageAttributes(request, response, springModel, schema, model);
-			}
-		}.execute();
-
-		return "/data/data_prop_value_grid";
-	}
-
-	@RequestMapping("/{schemaId}/{tableName}/addMultiplePropValueElement")
-	public String addMultiplePropValueElement(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
-
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
-				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("titleOperationMessageKey", "add");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, true);
-				springModel.addAttribute("submitAction", "saveAddMultiplePropValueElement");
-			}
-		}.execute();
-
-		setFormPageAttributes(request, springModel);
-
-		return "/data/data_prop_value_form";
-	}
-
-	@RequestMapping(value = "/{schemaId}/{tableName}/saveAddMultiplePropValueElement", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAddMultiplePropValueElement(HttpServletRequest request,
-			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPath,
-			@RequestParam(value = "batchCount", required = false) Integer batchCount,
-			@RequestParam(value = "batchHandleErrorMode", required = false) BatchHandleErrorMode batchHandleErrorMode)
-			throws Throwable
-	{
-		if (batchCount != null && batchCount >= 0)
-			return saveAddMultiplePropValueElementBatch(request, response, springModel, schemaId, tableName,
-					propertyPath, batchCount, batchHandleErrorMode);
-		else
-			return saveAddMultiplePropValueElementSingle(request, response, springModel, schemaId, tableName,
-					propertyPath);
-	}
-
-	protected ResponseEntity<OperationMessage> saveAddMultiplePropValueElementSingle(HttpServletRequest request,
-			HttpServletResponse response, org.springframework.ui.Model springModel, String schemaId, String tableName,
-			final String propertyPath) throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final Object propValueElementParam = getParamMap(request, "propertyValue");
-
-		Object propValueElement = new ReturnSchemaModelConnExecutor<Object>(request, response, springModel, schemaId,
-				tableName, false)
-		{
-			@Override
-			protected Object execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-
-				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
-						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
-						propertyPathInfo.getPropertyTail());
-
-				persistenceManager.insertMultiplePropValueElement(cn, model, data, propertyPathInfo,
-						new Object[] { propValueElement });
-
-				return propValueElement;
-			}
-		}.execute();
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(propValueElement);
-
-		return responseEntity;
-	}
-
-	protected ResponseEntity<OperationMessage> saveAddMultiplePropValueElementBatch(HttpServletRequest request,
-			HttpServletResponse response, org.springframework.ui.Model springModel, String schemaId, String tableName,
-			final String propertyPath, int batchCount, BatchHandleErrorMode batchHandleErrorMode) throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final Object propValueElementParam = getParamMap(request, "propertyValue");
-
-		ResponseEntity<OperationMessage> batchResponseEntity = new BatchReturnExecutor(request, response, springModel,
-				schemaId, tableName, batchCount, batchHandleErrorMode)
-		{
-			@Override
-			protected void doBatchUnit(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model, Connection cn,
-					Dialect dialect, String table, ExpressionEvaluationContext context) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-
-				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
-						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
-						propertyPathInfo.getPropertyTail());
-
-				persistenceManager.insertMultiplePropValueElement(cn, dialect, model, data, propertyPathInfo,
-						propValueElement, context);
-			}
-		}.execute();
-
-		return batchResponseEntity;
-	}
-
-	@RequestMapping(value = "/{schemaId}/{tableName}/saveAddMultiplePropValueElements", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> saveAddMultiplePropValueElements(HttpServletRequest request,
-			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPath) throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final Object propValueElementsParam = getParamMap(request, "propValueElements");
-
-		int count = new ReturnSchemaModelConnExecutor<Integer>(request, response, springModel, schemaId, tableName,
-				false)
-		{
-			@Override
-			protected Integer execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-
-				Object[] propValueElements = PMU.toArray(modelDataConverter.convertToPropertyValue(
-						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(),
-						propValueElementsParam, propertyPathInfo.getPropertyTail()));
-
-				persistenceManager.insertMultiplePropValueElement(cn, model, data, propertyPathInfo, propValueElements);
-
-				return 1;
-			}
-		}.execute();
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(count);
-
-		return responseEntity;
-	}
-
-	@RequestMapping("/{schemaId}/{tableName}/editMultiplePropValueElement")
-	public String editMultiplePropValueElement(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
-		final boolean isLoadPageData = isLoadPageDataRequest(request);
-
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				if (isLoadPageData)
-				{
-					PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
-
-					LOBConversionContext.set(buildGetLobConversionSetting());
-
-					List<Object> resultList = persistenceManager.getMultiplePropValueElementByParam(cn, model, data,
-							propertyPathInfo, propertyPathInfo.getValueTail());
-
-					Object originalPropertyValueElement = (resultList == null || resultList.isEmpty() ? null
-							: resultList.get(0));
-
-					if (originalPropertyValueElement == null)
-						throw new RecordNotFoundException();
-
-					// 设置最新原始属性值，因为受SelectOptions的影响，select到页面的data对象超过级联的属性值不会加载
-					propertyPathInfo.setValueTail(originalPropertyValueElement);
-				}
-
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
-				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("titleOperationMessageKey", "edit");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-				springModel.addAttribute("submitAction", "saveEditMultiplePropValueElement");
-			}
-		}.execute();
-
-		setFormPageAttributes(request, springModel);
-
-		return "/data/data_prop_value_form";
-	}
-
-	@RequestMapping(value = "/{schemaId}/{tableName}/saveEditMultiplePropValueElement", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditMultiplePropValueElement(HttpServletRequest request,
-			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPath,
-			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final Object propValueElementParam = getParamMap(request, "propertyValue");
-
-		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(
-				request, response, springModel, schemaId, tableName, false)
-		{
-			@Override
-			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-
-				Object propValueElement = modelDataConverter.convertToPropertyValueElement(
-						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(), propValueElementParam,
-						propertyPathInfo.getPropertyTail());
-
-				int count = persistenceManager.updateMultiplePropValueElement(cn, model, data, propertyPathInfo,
-						propValueElement);
-
-				checkDuplicateRecord(1, count, ignoreDuplication);
-
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(request,
-						count);
-				responseEntity.getBody().setData(propValueElement);
-
-				return responseEntity;
-			}
-		}.execute();
-
-		return responseEntity;
-	}
-
-	@RequestMapping(value = "/{schemaId}/{tableName}/deleteMultiplePropValueElements", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> deleteMultiplePropValueElements(HttpServletRequest request,
-			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPath,
-			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final Object propValueElementsParam = getParamMap(request, "propValueElements");
-
-		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(
-				request, response, springModel, schemaId, tableName, false)
-		{
-			@Override
-			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkDeleteTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-
-				Object[] propValueElements = PMU.toArray(modelDataConverter.convertToPropertyValue(
-						propertyPathInfo.getOwnerObjTail(), propertyPathInfo.getOwnerModelTail(),
-						propValueElementsParam, propertyPathInfo.getPropertyTail()));
-
-				int count = persistenceManager.deleteMultiplePropValueElement(cn, model, data, propertyPathInfo,
-						propValueElements);
-
-				checkDuplicateRecord(propValueElements.length, count, ignoreDuplication);
-
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageDeleteCountResponseEntity(
-						request, count);
-				responseEntity.getBody().setData(count);
-
-				return responseEntity;
-			}
-		}.execute();
-
-		return responseEntity;
-	}
-
-	/**
-	 * 混合保存多元属性值，包括添加、修改、删除。
-	 * 
-	 * @param request
-	 * @param response
-	 * @param springModel
-	 * @param schemaId
-	 * @param tableName
-	 * @param propertyPathParam
-	 * @return
-	 * @throws Throwable
-	 */
-	@RequestMapping(value = "/{schemaId}/{tableName}/saveMultiplePropertyValueElementss", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<OperationMessage> saveMultiplePropertyValuess(HttpServletRequest request,
-			HttpServletResponse response, org.springframework.ui.Model springModel,
-			@PathVariable("schemaId") String schemaId, @PathVariable("tableName") String tableName,
-			@RequestParam("propertyPath") final String propertyPathParam) throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPath = PropertyPath.valueOf(propertyPathParam);
-
-		final Object updatesParam = getParamMap(request, "updates");
-		final Object updatePropertyNamessParam = getParamMap(request, "updatePropertyNamess");
-		final Object updatePropertyValuessParam = getParamMap(request, "updatePropertyValuess");
-		final Object addsParam = getParamMap(request, "adds");
-		final Object deletesParam = getParamMap(request, "deletes");
-
-		final String[][] updatePropertyNamess = (updatesParam == null ? null
-				: getClassDataConverter().convertToArray(updatePropertyNamessParam, String[].class));
-
-		final Object[][] updatePropertyValueParamss = (updatesParam == null ? null
-				: getClassDataConverter().convertToArray(updatePropertyValuessParam, Object[].class));
-
-		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>(
-				request, response, springModel, schemaId, tableName, false)
-		{
-			@Override
-			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkEditTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-				PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPath, data);
-				Model modelTail = propertyPathInfo.getModelTail();
-
-				Object updates = modelDataConverter.convertToPropertyValue(propertyPathInfo.getOwnerObjTail(),
-						propertyPathInfo.getOwnerModelTail(), updatesParam, propertyPathInfo.getPropertyTail());
-
-				propertyPathInfo.setValueTail(updates);
-
-				Object[] adds = modelDataConverter.convertToArray(addsParam, modelTail);
-				Object[] deletes = modelDataConverter.convertToArray(deletesParam, modelTail);
-
-				int expectedUpdateCount = 0;
-				int expectedAddCount = (adds == null ? 0 : adds.length);
-				int expectedDeleteCount = (deletes == null ? 0 : deletes.length);
-
-				if (expectedDeleteCount > 0)
-					checkDeleteTableDataPermission(schema, user);
-
-				if (updates instanceof Object[])
-					expectedUpdateCount = ((Object[]) updates).length;
-				else if (updates instanceof Collection<?>)
-					expectedUpdateCount = ((Collection<?>) updates).size();
-
-				int acutalUpdateCount = 0, actualAddCount = 0, actualDeleteCount = 0;
-
-				if (updates != null)
-				{
-					for (int i = 0; i < updatePropertyValueParamss.length; i++)
-					{
-						PropertyPath myPropertyPath = PropertyPath
-								.valueOf(PropertyPath.concatElementIndex(propertyPathParam, i));
-						PropertyPathInfo myPropertyPathInfo = PropertyPathInfo.valueOf(model, myPropertyPath, data);
-
-						String[] updatePropertyNames = updatePropertyNamess[i];
-						Object[] updatePropertyValueParams = updatePropertyValueParamss[i];
-
-						Property[] updatePropertyProperties = new Property[updatePropertyNames.length];
-						Object[] updatePropertyPropertyValues = convertToPropertyValues(modelTail,
-								myPropertyPathInfo.getValueTail(), updatePropertyNames, updatePropertyValueParams,
-								updatePropertyProperties);
-
-						Object updateObj = MU.clone(model, myPropertyPathInfo.getValueTail());
-						MU.setPropertyValues(model, updateObj, updatePropertyProperties, updatePropertyPropertyValues);
-
-						int myUpdateCount = persistenceManager.updateMultiplePropValueElement(cn, model, data,
-								myPropertyPathInfo, updatePropertyProperties, updateObj);
-
-						if (myUpdateCount > 0)
-							acutalUpdateCount += myUpdateCount;
-					}
-				}
-
-				propertyPathInfo.setValueTail(null);
-
-				if (adds != null && adds.length > 0)
-				{
-					int myAddCount = persistenceManager.insertMultiplePropValueElement(cn, model, data,
-							propertyPathInfo, adds);
-
-					if (myAddCount > 0)
-						actualAddCount += myAddCount;
-				}
-
-				if (deletes != null && deletes.length > 0)
-				{
-					int myDeleteCount = persistenceManager.deleteMultiplePropValueElement(cn, model, data,
-							propertyPathInfo, deletes);
-
-					if (myDeleteCount > 0)
-						actualDeleteCount += myDeleteCount;
-				}
-
-				OperationMessage operationMessage = buildOperationMessageSuccess(request,
-						buildMessageCode("savessSuccess"), expectedUpdateCount, acutalUpdateCount, expectedAddCount,
-						actualAddCount, expectedDeleteCount, actualDeleteCount);
-
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageResponseEntity(HttpStatus.OK,
-						operationMessage);
-
-				return responseEntity;
-			}
-		}.execute();
-
-		return responseEntity;
-	}
-
-	@RequestMapping("/{schemaId}/{tableName}/viewMultiplePropValueElement")
-	public String viewMultiplePropValueElement(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("propertyPath") final String propertyPath)
-			throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-		final Object dataParam = getParamMap(request, "data");
-		final PropertyPath propertyPathObj = PropertyPath.valueOf(propertyPath);
-		final boolean isLoadPageData = isLoadPageDataRequest(request);
-
-		new VoidSchemaModelConnExecutor(request, response, springModel, schemaId, tableName, true)
-		{
-			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
-
-				Connection cn = getConnection();
-
-				Object data = modelDataConverter.convert(dataParam, model);
-
-				if (isLoadPageData)
-				{
-					PropertyPathInfo propertyPathInfo = PropertyPathInfo.valueOf(model, propertyPathObj, data);
-
-					LOBConversionContext.set(buildGetLobConversionSetting());
-
-					List<Object> resultList = persistenceManager.getMultiplePropValueElementByParam(cn, model, data,
-							propertyPathInfo, propertyPathInfo.getValueTail());
-
-					if (resultList == null || resultList.isEmpty())
-						throw new RecordNotFoundException();
-
-					propertyPathInfo.setValueTail(resultList.get(0));
-				}
-
-				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(data));
-				springModel.addAttribute("propertyPath", propertyPath);
-				springModel.addAttribute("readonly", true);
-				springModel.addAttribute("titleOperationMessageKey", "view");
-				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME,
-						ModelUtils.displayName(model, propertyPathObj, WebUtils.getLocale(request)));
-			}
-		}.execute();
-
-		setFormPageAttributes(request, springModel);
-
-		return "/data/data_prop_value_form";
-	}
-
 	@RequestMapping(value = "/{schemaId}/{tableName}/downloadSinglePropertyValueFile")
 	public void downloadSinglePropertyValueFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
@@ -1870,12 +713,12 @@ public class DataController extends AbstractSchemaModelConnController
 		final User user = WebUtils.getUser(request, response);
 		final Object dataParam = getParamMap(request, "data");
 
-		Object[] propValueInfo = new ReturnSchemaModelConnExecutor<Object[]>(request, response, springModel, schemaId,
+		Object[] propValueInfo = new ReturnSchemaConnTableExecutor<Object[]>(request, response, springModel, schemaId,
 				tableName, true)
 		{
 			@Override
 			protected Object[] execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
@@ -2059,102 +902,46 @@ public class DataController extends AbstractSchemaModelConnController
 		return propertyValues;
 	}
 
-	protected PropertyPath[] toPropertyPaths(String[] propertyPaths, PropertyPath parent)
-	{
-		if (propertyPaths == null)
-			return null;
-
-		PropertyPath[] propertyPathsArry = new PropertyPath[propertyPaths.length];
-
-		for (int i = 0; i < propertyPaths.length; i++)
-		{
-			PropertyPath propertyPath = PropertyPath.valueOf(propertyPaths[i]);
-
-			if (parent != null)
-				propertyPath = parent.concat(propertyPath);
-
-			propertyPathsArry[i] = propertyPath;
-		}
-
-		return propertyPathsArry;
-	}
-
 	@Override
 	protected String buildMessageCode(String code)
 	{
 		return super.buildMessageCode("data", code);
 	}
 
-	/**
-	 * 获取{@linkplain QueryResultMetaInfo}的{@linkplain PropertyPathDisplayName}列表。
-	 * 
-	 * @param request
-	 * @param queryResultMetaInfo
-	 * @param quote
-	 * @param dialect
-	 * @return
-	 */
-	protected List<PropertyPathDisplayName> getPropertyPathDisplayNames(HttpServletRequest request,
-			QueryResultMetaInfo queryResultMetaInfo, boolean quote, Dialect dialect)
+	protected Row paramMapToRow(HttpServletRequest request, Map<String, ?> paramMap)
 	{
-		List<PropertyPathDisplayName> propertyPathDisplayNames = new ArrayList<PropertyPathDisplayName>();
+		// TODO
+		return new Row();
+	}
 
-		List<QueryColumnMetaInfo> queryColumnMetaInfos = queryResultMetaInfo.getQueryColumnMetaInfos();
-		for (QueryColumnMetaInfo queryColumnMetaInfo : queryColumnMetaInfos)
-		{
-			PropertyPathDisplayName propertyPathDisplayName = new PropertyPathDisplayName();
+	protected Row[] paramToRows(HttpServletRequest request, Object param)
+	{
+		// TODO
+		return new Row[0];
+	}
 
-			String propertyPath = queryColumnMetaInfo.getPropertyPath();
-			String displayName = ModelUtils.displayName(queryResultMetaInfo.getModel(),
-					PropertyPath.valueOf(propertyPath), WebUtils.getLocale(request), ".", false);
-
-			if (quote)
-				displayName = dialect.quote(displayName);
-
-			propertyPathDisplayName.setPropertyPath(propertyPath);
-			propertyPathDisplayName.setDisplayName(displayName);
-
-			propertyPathDisplayNames.add(propertyPathDisplayName);
-		}
-
-		return propertyPathDisplayNames;
+	protected SqlParamValueMapper buildSqlParamValueMapper()
+	{
+		return buildSqlParamValueMapper(null);
 	}
 
 	/**
-	 * 构建用于查询多条数据的{@linkplain LOBConversionSetting}。
 	 * 
+	 * @param evaluationContext
+	 *            允许为{@code null}
 	 * @return
 	 */
-	protected LOBConversionSetting buildQueryLobConversionSetting()
+	protected SqlParamValueMapper buildSqlParamValueMapper(ExpressionEvaluationContext evaluationContext)
 	{
-		File blobToFilePlaceholder = new File(this.blobFileManagerDirectory, this.blobToFilePlaceholderName);
+		if (evaluationContext == null)
+			evaluationContext = new ExpressionEvaluationContext();
 
-		return new LOBConversionSetting(blobToFilePlaceholder, ModelSqlSelectService.DEFAULT_BLOB_TO_BYTES_PLACEHOLDER,
-				this.queryLeftClobLengthOnReading);
-	}
-
-	/**
-	 * 构建用于获取单条数据的的{@linkplain LOBConversionSetting}。
-	 * 
-	 * @return
-	 */
-	protected LOBConversionSetting buildGetLobConversionSetting()
-	{
-		File blobToFilePlaceholder = new File(this.blobFileManagerDirectory, this.blobToFilePlaceholderName);
-
-		return new LOBConversionSetting(blobToFilePlaceholder, ModelSqlSelectService.DEFAULT_BLOB_TO_BYTES_PLACEHOLDER);
-	}
-
-	/**
-	 * 获取{@linkplain Property}。
-	 * 
-	 * @param model
-	 * @param propertyPath
-	 * @return
-	 */
-	protected Property getProperty(Model model, String propertyPath)
-	{
-		return model.getProperty(propertyPath);
+		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
+		// TODO 设置
+		// mapper.setConversionService(conversionService);
+		// mapper.setFilePathValueDirectory(filePathValueDirectory);
+		mapper.setExpressionEvaluationContext(evaluationContext);
+		return mapper;
 	}
 
 	protected void checkDuplicateRecord(int expectedCount, int actualCount, Boolean ignoreDuplication)
@@ -2196,7 +983,7 @@ public class DataController extends AbstractSchemaModelConnController
 	 * @param springModel
 	 */
 	protected void setGridPageAttributes(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, Schema schema, Model model)
+			org.springframework.ui.Model springModel, Schema schema, Table table)
 	{
 		springModel.addAttribute("queryLeftClobLengthOnReading", this.queryLeftClobLengthOnReading);
 
@@ -2255,31 +1042,12 @@ public class DataController extends AbstractSchemaModelConnController
 	}
 
 	/**
-	 * 关闭{@linkplain Closeable}。
-	 * 
-	 * @param closeable
-	 */
-	protected void close(Closeable closeable)
-	{
-		if (closeable == null)
-			return;
-
-		try
-		{
-			closeable.close();
-		}
-		catch (IOException e)
-		{
-		}
-	}
-
-	/**
 	 * 批量执行器。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected abstract class BatchReturnExecutor extends ReturnSchemaModelConnExecutor<ResponseEntity<OperationMessage>>
+	protected abstract class BatchReturnExecutor extends ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>
 	{
 		private int batchCount;
 
@@ -2319,16 +1087,14 @@ public class DataController extends AbstractSchemaModelConnController
 
 		@Override
 		protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Model model) throws Throwable
+				org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 		{
 			Connection cn = getConnection();
 
-			List<BatchUnitResult> batchResults = new ArrayList<BatchUnitResult>();
+			List<BatchUnitResult> batchResults = new ArrayList<>();
 			int successCount = 0;
 			int failCount = 0;
 
-			Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
-			String table = persistenceManager.getTableName(model);
 			ExpressionEvaluationContext context = new ExpressionEvaluationContext();
 
 			int index = 0;
@@ -2337,7 +1103,7 @@ public class DataController extends AbstractSchemaModelConnController
 			{
 				try
 				{
-					doBatchUnit(request, response, springModel, schema, model, cn, dialect, table, context);
+					doBatchUnit(request, response, springModel, schema, table, cn, context);
 
 					BatchUnitResult batchUnitResult = new BatchUnitResult(index);
 					batchResults.add(batchUnitResult);
@@ -2474,16 +1240,14 @@ public class DataController extends AbstractSchemaModelConnController
 		 * @param response
 		 * @param springModel
 		 * @param schema
-		 * @param model
-		 * @param cn
-		 * @param dialect
 		 * @param table
+		 * @param cn
 		 * @param context
 		 * @throws Throwable
 		 */
 		protected abstract void doBatchUnit(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Model model, Connection cn, Dialect dialect,
-				String table, ExpressionEvaluationContext context) throws Throwable;
+				org.springframework.ui.Model springModel, Schema schema, Table table, Connection cn,
+				ExpressionEvaluationContext context) throws Throwable;
 	}
 
 	/**

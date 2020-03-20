@@ -190,6 +190,20 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 		this.bigBinaryDirectory = bigBinaryDirectory;
 	}
 
+	/**
+	 * 获取指定文件名的大二进制文件对象。
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public File getBigBinaryFile(String fileName)
+	{
+		if (this.bigBinaryDirectory == null)
+			throw new IllegalStateException("this.bigBinaryDirectory must be set");
+
+		return FileUtil.getFile(this.bigBinaryDirectory, fileName);
+	}
+
 	@Override
 	protected Object mapColumnLONGVARCHAR(Connection cn, Table table, ResultSet rs, int rowIndex, Column column)
 			throws Throwable

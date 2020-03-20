@@ -108,4 +108,13 @@ public interface DBMetaResolver
 	 * @throws DBMetaResolverException
 	 */
 	List<DataType> getDataTypes(Connection cn) throws DBMetaResolverException;
+
+	/**
+	 * 获取导入键表名洌表。
+	 * 
+	 * @param cn
+	 * @param tableNames
+	 * @return
+	 */
+	List<String[]> getImportTables(Connection cn, String... tableNames);
 }

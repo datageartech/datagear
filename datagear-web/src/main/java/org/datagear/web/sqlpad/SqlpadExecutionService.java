@@ -21,15 +21,14 @@ import java.util.concurrent.Executors;
 import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
-import org.datagear.dbmodel.DatabaseModelResolver;
-import org.datagear.dbmodel.ModelSqlSelectService;
-import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.util.SchemaConnectionSupport;
-import org.datagear.model.Model;
-import org.datagear.util.IDUtil;
+import org.datagear.persistence.RowMapper;
+import org.datagear.persistence.support.PersistenceSupport;
+import org.datagear.persistence.support.SqlSelectManager;
+import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.datagear.web.controller.SqlpadController.SqlpadFileDirectory;
@@ -42,7 +41,7 @@ import org.springframework.context.NoSuchMessageException;
  * @author datagear@163.com
  *
  */
-public class SqlpadExecutionService
+public class SqlpadExecutionService extends PersistenceSupport
 {
 	private ConnectionSource connectionSource;
 
@@ -50,11 +49,11 @@ public class SqlpadExecutionService
 
 	private SqlpadCometdService sqlpadCometdService;
 
-	private DatabaseModelResolver databaseModelResolver;
-
 	private SqlHistoryService sqlHistoryService;
 
-	private ModelSqlSelectService modelSqlSelectService = new ModelSqlSelectService();
+	private SqlSelectManager sqlSelectManager;
+
+	private RowMapper sqlSelectResultRowMapper = null;
 
 	private SqlPermissionChecker sqlPermissionChecker = new SqlPermissionChecker();
 
@@ -62,7 +61,7 @@ public class SqlpadExecutionService
 
 	private ExecutorService _executorService = Executors.newCachedThreadPool();
 
-	private ConcurrentMap<String, SqlpadExecutionRunnable> _sqlpadExecutionRunnableMap = new ConcurrentHashMap<String, SqlpadExecutionRunnable>();
+	private ConcurrentMap<String, SqlpadExecutionRunnable> _sqlpadExecutionRunnableMap = new ConcurrentHashMap<>();
 
 	public SqlpadExecutionService()
 	{
@@ -70,15 +69,15 @@ public class SqlpadExecutionService
 	}
 
 	public SqlpadExecutionService(ConnectionSource connectionSource, MessageSource messageSource,
-			SqlpadCometdService sqlpadCometdService, DatabaseModelResolver databaseModelResolver,
-			SqlHistoryService sqlHistoryService)
+			SqlpadCometdService sqlpadCometdService, SqlHistoryService sqlHistoryService,
+			SqlSelectManager sqlSelectManager)
 	{
 		super();
 		this.connectionSource = connectionSource;
 		this.messageSource = messageSource;
 		this.sqlpadCometdService = sqlpadCometdService;
-		this.databaseModelResolver = databaseModelResolver;
 		this.sqlHistoryService = sqlHistoryService;
+		this.sqlSelectManager = sqlSelectManager;
 	}
 
 	public ConnectionSource getConnectionSource()
@@ -111,16 +110,6 @@ public class SqlpadExecutionService
 		this.sqlpadCometdService = sqlpadCometdService;
 	}
 
-	public DatabaseModelResolver getDatabaseModelResolver()
-	{
-		return databaseModelResolver;
-	}
-
-	public void setDatabaseModelResolver(DatabaseModelResolver databaseModelResolver)
-	{
-		this.databaseModelResolver = databaseModelResolver;
-	}
-
 	public SqlHistoryService getSqlHistoryService()
 	{
 		return sqlHistoryService;
@@ -131,14 +120,24 @@ public class SqlpadExecutionService
 		this.sqlHistoryService = sqlHistoryService;
 	}
 
-	public ModelSqlSelectService getModelSqlSelectService()
+	public SqlSelectManager getSqlSelectManager()
 	{
-		return modelSqlSelectService;
+		return sqlSelectManager;
 	}
 
-	public void setModelSqlSelectService(ModelSqlSelectService modelSqlSelectService)
+	public void setSqlSelectManager(SqlSelectManager sqlSelectManager)
 	{
-		this.modelSqlSelectService = modelSqlSelectService;
+		this.sqlSelectManager = sqlSelectManager;
+	}
+
+	public RowMapper getSqlSelectResultRowMapper()
+	{
+		return sqlSelectResultRowMapper;
+	}
+
+	public void setSqlSelectResultRowMapper(RowMapper sqlSelectResultRowMapper)
+	{
+		this.sqlSelectResultRowMapper = sqlSelectResultRowMapper;
 	}
 
 	public SqlPermissionChecker getSqlPermissionChecker()
@@ -507,7 +506,7 @@ public class SqlpadExecutionService
 			SQLExecutionStat sqlExecutionStat = new SQLExecutionStat(totalCount);
 			SqlpadFileDirectory sqlpadFileDirectory = SqlpadFileDirectory.valueOf(this.sqlpadFileDirectory);
 
-			List<String> sqlHistories = new ArrayList<String>();
+			List<String> sqlHistories = new ArrayList<>();
 
 			try
 			{
@@ -759,14 +758,11 @@ public class SqlpadExecutionService
 			{
 				ResultSet rs = st.getResultSet();
 
-				Model model = SqlpadExecutionService.this.databaseModelResolver.resolve(cn, rs, IDUtil.uuid());
-
-				ModelSqlResult modelSqlResult = SqlpadExecutionService.this.modelSqlSelectService.select(cn, sql, rs,
-						model, 1, this.resultsetFetchSize);
-				modelSqlResult.setSql(null);
+				SqlSelectResult sqlSelectResult = SqlpadExecutionService.this.sqlSelectManager.select(cn, sql, rs, 1,
+						this.resultsetFetchSize, SqlpadExecutionService.this.sqlSelectResultRowMapper);
 
 				this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
-						sqlStatementIndex, modelSqlResult);
+						sqlStatementIndex, sqlSelectResult);
 			}
 			else
 			{
@@ -813,10 +809,8 @@ public class SqlpadExecutionService
 			// 某些查询SQL语句并不支持ResultSet.TYPE_SCROLL_*（比如SQLServer的聚集列存储索引），
 			// 而这里调用的结果集都是从第一行开始，不会用到ResultSet.TYPE_SCROLL_*特性，
 			// 因而采用ResultSet.TYPE_FORWARD_ONLY，避免遇到上述情况而抛出异常
-			// return ModelSqlSelectService.createScrollableSelectStatement(cn);
-
-			Statement st = cn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			st.setFetchSize(this.resultsetFetchSize);
+			Statement st = createUpdateStatement(cn);
+			JdbcUtil.setFetchSizeIfSupports(st, resultsetFetchSize);
 
 			return st;
 		}

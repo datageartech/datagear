@@ -217,14 +217,14 @@ readonly 是否只读操作，允许为null
 		po.element(".sql-result-refresh-button").button("disable");
 		
 		var table = po.sqlTableElement();
-		var returnModel = !$.isDatatTable(table);
-		var initDataTable = returnModel;
+		var returnMeta = !$.isDatatTable(table);
+		var initDataTable = returnMeta;
 		
 		var data =
 		{
 			"sql" : po.sqlPreviewOptions.sql,
 			"startRow" : po.sqlPreviewOptions.startRow,
-			"returnModel" : returnModel
+			"returnMeta" : returnMeta
 		};
 		
 		$.ajax(

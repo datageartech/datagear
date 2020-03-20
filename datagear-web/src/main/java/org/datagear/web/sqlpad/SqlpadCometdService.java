@@ -8,7 +8,7 @@ import org.cometd.bayeux.MarkedReference;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.server.AbstractService;
-import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
+import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SQLExecutionStat;
@@ -78,14 +78,14 @@ public class SqlpadCometdService extends AbstractService
 	 * @param channel
 	 * @param sqlStatement
 	 * @param sqlStatementIndex
-	 * @param modelSqlResult
+	 * @param sqlSelectResult
 	 */
 	public void sendSqlSuccessMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex,
-			ModelSqlResult modelSqlResult)
+			SqlSelectResult sqlSelectResult)
 	{
 		SqlSuccessMessageData sqlSuccessMessageData = new SqlSuccessMessageData(sqlStatement, sqlStatementIndex,
 				SqlResultType.RESULT_SET);
-		sqlSuccessMessageData.setModelSqlResult(modelSqlResult);
+		sqlSuccessMessageData.setSqlSelectResult(sqlSelectResult);
 
 		channel.publish(getServerSession(), sqlSuccessMessageData);
 	}
@@ -368,7 +368,7 @@ public class SqlpadCometdService extends AbstractService
 		/** 更新数目 */
 		private int updateCount = -1;
 
-		private ModelSqlResult modelSqlResult;
+		private SqlSelectResult sqlSelectResult;
 
 		public SqlSuccessMessageData()
 		{
@@ -423,14 +423,14 @@ public class SqlpadCometdService extends AbstractService
 			this.updateCount = updateCount;
 		}
 
-		public ModelSqlResult getModelSqlResult()
+		public SqlSelectResult getSqlSelectResult()
 		{
-			return modelSqlResult;
+			return sqlSelectResult;
 		}
 
-		public void setModelSqlResult(ModelSqlResult modelSqlResult)
+		public void setSqlSelectResult(SqlSelectResult sqlSelectResult)
 		{
-			this.modelSqlResult = modelSqlResult;
+			this.sqlSelectResult = sqlSelectResult;
 		}
 	}
 

@@ -7,11 +7,6 @@ package org.datagear.web.json.fastjson;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.datagear.persistence.collection.SizeOnlyCollection;
-import org.datagear.persistence.collection.SizeOnlyList;
-import org.datagear.persistence.collection.SizeOnlyQueue;
-import org.datagear.persistence.collection.SizeOnlySet;
-
 import com.alibaba.fastjson.serializer.ObjectSerializer;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -26,9 +21,9 @@ import com.alibaba.fastjson.support.config.FastJsonConfig;
 public class FastJsonConfigFactory
 {
 	private static final SerializerFeature[] SERIALIZER_FEATURES = new SerializerFeature[] {
-			SerializerFeature.QuoteFieldNames };
+			SerializerFeature.QuoteFieldNames, SerializerFeature.DisableCircularReferenceDetect };
 
-	private Map<Class<?>, ObjectSerializer> objectSerializerMap = new HashMap<Class<?>, ObjectSerializer>();
+	private Map<Class<?>, ObjectSerializer> objectSerializerMap = new HashMap<>();
 
 	public FastJsonConfigFactory()
 	{
@@ -53,10 +48,6 @@ public class FastJsonConfigFactory
 		this.objectSerializerMap.put(java.sql.Timestamp.class, new LocaleSqlTimestampSerializer());
 		this.objectSerializerMap.put(java.util.Date.class, new LocaleDateSerializer());
 		this.objectSerializerMap.put(Class.class, new ClassSerializer(true));
-		this.objectSerializerMap.put(SizeOnlyList.class, new SizeOnlyCollectionSerializer());
-		this.objectSerializerMap.put(SizeOnlySet.class, new SizeOnlyCollectionSerializer());
-		this.objectSerializerMap.put(SizeOnlyQueue.class, new SizeOnlyCollectionSerializer());
-		this.objectSerializerMap.put(SizeOnlyCollection.class, new SizeOnlyCollectionSerializer());
 	}
 
 	public Map<Class<?>, ObjectSerializer> getObjectSerializerMap()
@@ -71,7 +62,7 @@ public class FastJsonConfigFactory
 
 	public void setObjectSerializerStringMap(Map<String, ObjectSerializer> objectSerializerStringMap)
 	{
-		Map<Class<?>, ObjectSerializer> objectSerializerMap = new HashMap<Class<?>, ObjectSerializer>();
+		Map<Class<?>, ObjectSerializer> objectSerializerMap = new HashMap<>();
 
 		for (Map.Entry<String, ObjectSerializer> entry : objectSerializerStringMap.entrySet())
 		{

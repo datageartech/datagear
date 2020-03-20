@@ -64,12 +64,12 @@ import org.datagear.dataexchange.support.JsonDataImportOption;
 import org.datagear.dataexchange.support.SqlDataExport;
 import org.datagear.dataexchange.support.SqlDataExportOption;
 import org.datagear.dataexchange.support.SqlDataImport;
-import org.datagear.dbinfo.DatabaseInfoResolver;
-import org.datagear.dbinfo.TableInfo;
-import org.datagear.dbinfo.TableType;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
+import org.datagear.meta.SimpleTable;
+import org.datagear.meta.TableType;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
@@ -129,7 +129,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	private DataExchangeCometdService dataExchangeCometdService;
 
 	@Autowired
-	private DatabaseInfoResolver databaseInfoResolver;
+	private DBMetaResolver dbMetaResolver;
 
 	public DataExchangeController()
 	{
@@ -139,13 +139,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public DataExchangeController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource,
 			DataExchangeService<DataExchange> dataExchangeService, File tempDataExchangeRootDirectory,
-			DataExchangeCometdService dataExchangeCometdService, DatabaseInfoResolver databaseInfoResolver)
+			DataExchangeCometdService dataExchangeCometdService, DBMetaResolver dbMetaResolver)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
 		this.dataExchangeService = dataExchangeService;
 		this.tempDataExchangeRootDirectory = tempDataExchangeRootDirectory;
 		this.dataExchangeCometdService = dataExchangeCometdService;
-		this.databaseInfoResolver = databaseInfoResolver;
+		this.dbMetaResolver = dbMetaResolver;
 	}
 
 	public DataExchangeService<DataExchange> getDataExchangeService()
@@ -178,14 +178,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 		this.dataExchangeCometdService = dataExchangeCometdService;
 	}
 
-	public DatabaseInfoResolver getDatabaseInfoResolver()
+	public DBMetaResolver getDbMetaResolver()
 	{
-		return databaseInfoResolver;
+		return dbMetaResolver;
 	}
 
-	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
+	public void setDbMetaResolver(DBMetaResolver dbMetaResolver)
 	{
-		this.databaseInfoResolver = databaseInfoResolver;
+		this.dbMetaResolver = dbMetaResolver;
 	}
 
 	@RequestMapping("/{schemaId}/import")
@@ -327,7 +327,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
 
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchangeIds.length);
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
@@ -444,7 +444,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
 
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchangeIds.length);
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
@@ -591,7 +591,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
 
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchangeIds.length);
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
@@ -721,7 +721,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		resolveSubDataExchangeDependencies(subDataExchanges, numbers, dependentNumbers);
 
-		Set<SubDataExchange> subDataExchangeSet = new HashSet<SubDataExchange>(subDataExchangeIds.length);
+		Set<SubDataExchange> subDataExchangeSet = new HashSet<>(subDataExchangeIds.length);
 		Collections.addAll(subDataExchangeSet, subDataExchanges);
 
 		BatchDataExchange batchDataExchange = buildBatchDataExchange(connectionFactory, subDataExchangeSet,
@@ -844,14 +844,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 			}
 		}.execute();
 
-		List<String> initSqlList = new ArrayList<String>();
-		
+		List<String> initSqlList = new ArrayList<>();
+
 		String[] initSqls = request.getParameterValues("initSqls");
 		if (initSqls == null)
 			initSqls = new String[0];
 		else
 			initSqlList.addAll(Arrays.asList(initSqls));
-		
+
 		String initScript = request.getParameter("initScript");
 		if (!StringUtil.isEmpty(initScript))
 		{
@@ -868,7 +868,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 					initSqlList.add(sqlst.getSql());
 			}
 		}
-		
+
 		springModel.addAttribute("initSqls", initSqlList);
 
 		return "/dataexchange/export";
@@ -942,7 +942,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		Locale locale = getLocale(request);
 
-		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+		Set<SubDataExchange> subDataExchanges = new HashSet<>();
 
 		for (int i = 0; i < subDataExchangeIds.length; i++)
 		{
@@ -1050,7 +1050,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		Locale locale = getLocale(request);
 
-		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+		Set<SubDataExchange> subDataExchanges = new HashSet<>();
 
 		for (int i = 0; i < subDataExchangeIds.length; i++)
 		{
@@ -1166,7 +1166,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		Locale locale = getLocale(request);
 
-		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+		Set<SubDataExchange> subDataExchanges = new HashSet<>();
 
 		for (int i = 0; i < subDataExchangeIds.length; i++)
 		{
@@ -1288,7 +1288,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		Locale locale = getLocale(request);
 
-		Set<SubDataExchange> subDataExchanges = new HashSet<SubDataExchange>();
+		Set<SubDataExchange> subDataExchanges = new HashSet<>();
 
 		for (int i = 0; i < subDataExchangeIds.length; i++)
 		{
@@ -1405,14 +1405,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 		if (tableNames == null || tableNames.length == 0)
 			return;
 
-		String[][] importedTables = this.databaseInfoResolver.getImportedTables(cn, tableNames);
+		List<String[]> importTabless = this.dbMetaResolver.getImportTables(cn, tableNames);
 
 		for (int i = 0; i < dependentNumbers.length; i++)
 		{
 			if (!inflateFlag.equals(dependentNumbers[i]))
 				continue;
 
-			String[] myImportTables = importedTables[i];
+			String[] myImportTables = importTabless.get(i);
 
 			if (myImportTables == null || myImportTables.length == 0)
 				dependentNumbers[i] = "";
@@ -1464,7 +1464,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 			String[] myDependentNumbers = dependentNumber.split(",");
 
-			Set<SubDataExchange> myDependencies = new HashSet<SubDataExchange>();
+			Set<SubDataExchange> myDependencies = new HashSet<>();
 
 			for (int j = 0; j < myDependentNumbers.length; j++)
 			{
@@ -1491,7 +1491,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	protected List<DataImportFileInfo> uploadImportFile(HttpServletRequest request, HttpServletResponse response,
 			String schemaId, String dataExchangeId, MultipartFile multipartFile, FileFilter fileFilter) throws Exception
 	{
-		List<DataImportFileInfo> fileInfos = new ArrayList<DataImportFileInfo>();
+		List<DataImportFileInfo> fileInfos = new ArrayList<>();
 
 		File directory = getTempDataExchangeDirectory(dataExchangeId, true);
 
@@ -1565,7 +1565,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	protected Map<String, String> buildSubDataExchangeFileNameMap(String[] subDataExchangeIds, String[] fileNames)
 	{
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 
 		for (int i = 0; i < subDataExchangeIds.length; i++)
 			map.put(subDataExchangeIds[i], fileNames[i]);
@@ -1591,19 +1591,19 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public List<String> getAllTableNames(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
-		TableInfo[] tableInfos = new ReturnSchemaConnExecutor<TableInfo[]>(request, response, springModel, schemaId,
-				true)
+		List<SimpleTable> tables = new ReturnSchemaConnExecutor<List<SimpleTable>>(request, response, springModel,
+				schemaId, true)
 		{
 			@Override
-			protected TableInfo[] execute(HttpServletRequest request, HttpServletResponse response,
+			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
-				return getDatabaseInfoResolver().getTableInfos(getConnection());
+				return getDbMetaResolver().getSimpleTables(getConnection());
 			}
 
 		}.execute();
 
-		List<String> tableNames = excludeViewNames(tableInfos);
+		List<String> tableNames = excludeViewNames(tables);
 		Collections.sort(tableNames);
 
 		return tableNames;
@@ -1647,14 +1647,14 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	protected List<String> excludeViewNames(TableInfo[] tableInfos)
+	protected List<String> excludeViewNames(List<SimpleTable> tables)
 	{
-		List<String> list = new ArrayList<String>(tableInfos.length);
+		List<String> list = new ArrayList<>(tables.size());
 
-		for (TableInfo tableInfo : tableInfos)
+		for (SimpleTable table : tables)
 		{
-			if (TableType.TABLE.equals(tableInfo.getType()))
-				list.add(tableInfo.getName());
+			if (TableType.TABLE.equals(table.getType()))
+				list.add(table.getName());
 		}
 
 		return list;
@@ -1699,7 +1699,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 			if (map == null)
 			{
-				map = new Hashtable<String, BatchDataExchangeInfo>();
+				map = new Hashtable<>();
 				session.setAttribute(KEY_SESSION_BatchDataExchangeInfoMap, map);
 			}
 		}
@@ -1828,7 +1828,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	 */
 	protected List<String> getAvailableCharsetNames()
 	{
-		List<String> charsetNames = new ArrayList<String>();
+		List<String> charsetNames = new ArrayList<>();
 
 		Map<String, Charset> map = Charset.availableCharsets();
 		Set<String> names = map.keySet();

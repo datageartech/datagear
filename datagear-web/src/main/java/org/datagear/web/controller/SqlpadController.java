@@ -9,7 +9,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,11 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
-import org.datagear.dbinfo.ColumnInfo;
-import org.datagear.dbinfo.DatabaseInfoResolver;
-import org.datagear.dbmodel.DatabaseModelResolver;
-import org.datagear.dbmodel.ModelSqlSelectService;
-import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SqlHistory;
 import org.datagear.management.domain.User;
@@ -30,6 +24,9 @@ import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.persistence.support.DefaultLOBRowMapper;
+import org.datagear.persistence.support.SqlSelectManager;
+import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
@@ -43,7 +40,6 @@ import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionService.CommitMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.ExceptionHandleMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
-import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -70,16 +66,13 @@ public class SqlpadController extends AbstractSchemaConnController
 	public static final int DEFAULT_SQL_RESULTSET_FETCH_SIZE = 20;
 
 	@Autowired
-	private ModelSqlSelectService modelSqlSelectService;
+	private SqlSelectManager sqlSelectManager;
 
 	@Autowired
-	private DatabaseModelResolver databaseModelResolver;
+	private DefaultLOBRowMapper sqlpadSelectRowMapper;
 
 	@Autowired
 	private SqlpadExecutionService sqlpadExecutionService;
-
-	@Autowired
-	private DatabaseInfoResolver databaseInfoResolver;
 
 	@Autowired
 	private SqlHistoryService sqlHistoryService;
@@ -94,38 +87,36 @@ public class SqlpadController extends AbstractSchemaConnController
 	}
 
 	public SqlpadController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, ModelSqlSelectService modelSqlSelectService,
-			DatabaseModelResolver databaseModelResolver, SqlpadExecutionService sqlpadExecutionService,
-			DatabaseInfoResolver databaseInfoResolver, SqlHistoryService sqlHistoryService,
-			File tempSqlpadRootDirectory)
+			SchemaService schemaService, ConnectionSource connectionSource, SqlSelectManager sqlSelectManager,
+			DefaultLOBRowMapper sqlpadSelectRowMapper, SqlpadExecutionService sqlpadExecutionService,
+			SqlHistoryService sqlHistoryService, File tempSqlpadRootDirectory)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
-		this.modelSqlSelectService = modelSqlSelectService;
-		this.databaseModelResolver = databaseModelResolver;
+		this.sqlSelectManager = sqlSelectManager;
+		this.sqlpadSelectRowMapper = sqlpadSelectRowMapper;
 		this.sqlpadExecutionService = sqlpadExecutionService;
-		this.databaseInfoResolver = databaseInfoResolver;
 		this.sqlHistoryService = sqlHistoryService;
 		this.tempSqlpadRootDirectory = tempSqlpadRootDirectory;
 	}
 
-	public ModelSqlSelectService getModelSqlSelectService()
+	public SqlSelectManager getSqlSelectManager()
 	{
-		return modelSqlSelectService;
+		return sqlSelectManager;
 	}
 
-	public void setModelSqlSelectService(ModelSqlSelectService modelSqlSelectService)
+	public void setSqlSelectManager(SqlSelectManager sqlSelectManager)
 	{
-		this.modelSqlSelectService = modelSqlSelectService;
+		this.sqlSelectManager = sqlSelectManager;
 	}
 
-	public DatabaseModelResolver getDatabaseModelResolver()
+	public DefaultLOBRowMapper getSqlpadSelectRowMapper()
 	{
-		return databaseModelResolver;
+		return sqlpadSelectRowMapper;
 	}
 
-	public void setDatabaseModelResolver(DatabaseModelResolver databaseModelResolver)
+	public void setSqlpadSelectRowMapper(DefaultLOBRowMapper sqlpadSelectRowMapper)
 	{
-		this.databaseModelResolver = databaseModelResolver;
+		this.sqlpadSelectRowMapper = sqlpadSelectRowMapper;
 	}
 
 	public SqlpadExecutionService getSqlpadExecutionService()
@@ -136,16 +127,6 @@ public class SqlpadController extends AbstractSchemaConnController
 	public void setSqlpadExecutionService(SqlpadExecutionService sqlpadExecutionService)
 	{
 		this.sqlpadExecutionService = sqlpadExecutionService;
-	}
-
-	public DatabaseInfoResolver getDatabaseInfoResolver()
-	{
-		return databaseInfoResolver;
-	}
-
-	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
-	{
-		this.databaseInfoResolver = databaseInfoResolver;
 	}
 
 	public SqlHistoryService getSqlHistoryService()
@@ -193,7 +174,7 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		springModel.addAttribute("sqlpadId", sqlpadId);
 		springModel.addAttribute("sqlpadChannelId", sqlpadChannelId);
-		springModel.addAttribute("sqlResultFullLoadingLobMaxRow", this.modelSqlSelectService.getFullLoadingLobMaxRow());
+		springModel.addAttribute("sqlResultReadActualLobRows", this.sqlpadSelectRowMapper.getReadActualLobRows());
 		springModel.addAttribute("initSql", initSql);
 
 		return "/sqlpad/sqlpad";
@@ -264,12 +245,12 @@ public class SqlpadController extends AbstractSchemaConnController
 
 	@RequestMapping(value = "/{schemaId}/select", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ModelSqlResult select(HttpServletRequest request, HttpServletResponse response,
+	public SqlSelectResult select(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("sql") final String sql,
 			@RequestParam(value = "startRow", required = false) Integer startRow,
 			@RequestParam(value = "fetchSize", required = false) Integer fetchSize,
-			@RequestParam(value = "returnModel", required = false) Boolean returnModel) throws Throwable
+			@RequestParam(value = "returnMeta", required = false) Boolean returnMeta) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 
@@ -277,8 +258,8 @@ public class SqlpadController extends AbstractSchemaConnController
 			startRow = 1;
 		if (fetchSize == null)
 			fetchSize = DEFAULT_SQL_RESULTSET_FETCH_SIZE;
-		if (returnModel == null)
-			returnModel = false;
+		if (returnMeta == null)
+			returnMeta = false;
 
 		if (fetchSize < 1)
 			fetchSize = 1;
@@ -288,26 +269,26 @@ public class SqlpadController extends AbstractSchemaConnController
 		final int startRowFinal = startRow;
 		final int fetchSizeFinal = fetchSize;
 
-		ModelSqlResult modelSqlResult = new ReturnSchemaConnExecutor<ModelSqlResult>(request, response, springModel,
-				schemaId, true)
+		SqlSelectResult result = new ReturnSchemaConnExecutor<SqlSelectResult>(request, response, springModel, schemaId,
+				true)
 		{
 			@Override
-			protected ModelSqlResult execute(HttpServletRequest request, HttpServletResponse response,
+			protected SqlSelectResult execute(HttpServletRequest request, HttpServletResponse response,
 					Model springModel, Schema schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
-				ModelSqlResult modelSqlResult = modelSqlSelectService.select(getConnection(), sql, startRowFinal,
-						fetchSizeFinal, databaseModelResolver);
+				SqlSelectResult result = getSqlSelectManager().select(getConnection(), sql, startRowFinal,
+						fetchSizeFinal, getSqlpadSelectRowMapper());
 
-				return modelSqlResult;
+				return result;
 			}
 		}.execute();
 
-		if (!Boolean.TRUE.equals(returnModel))
-			modelSqlResult.setModel(null);
+		if (!Boolean.TRUE.equals(returnMeta))
+			result.setTable(null);
 
-		return modelSqlResult;
+		return result;
 	}
 
 	@RequestMapping("/{schemaId}/downloadResultField")
@@ -315,11 +296,10 @@ public class SqlpadController extends AbstractSchemaConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("value") String value) throws Throwable
 	{
-		File directory = this.modelSqlSelectService.getBlobFileManagerDirectory();
-		File blobFile = new File(directory, value);
+		File blobFile = this.getSqlpadSelectRowMapper().getBigBinaryFile(value);
 
 		if (!blobFile.exists())
-			throw new FileNotFoundException("BLOB");
+			throw new FileNotFoundException(value);
 
 		response.setCharacterEncoding("utf-8");
 		response.setHeader("Content-Disposition", "attachment; filename=BLOB");
@@ -379,35 +359,6 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		return fileInfo;
 	}
-
-	/**
-	 * 根据列名称关键字查询{@linkplain ColumnInfo}列表。
-	 * 
-	 * @param columnInfos
-	 * @param columnNameKeyword
-	 * @return
-	 */
-	public static List<ColumnInfo> findByKeyword(ColumnInfo[] columnInfos, String columnNameKeyword)
-	{
-		return KeywordMatcher.<ColumnInfo> match(columnInfos, columnNameKeyword,
-				new KeywordMatcher.MatchValue<ColumnInfo>()
-				{
-					@Override
-					public String[] get(ColumnInfo t)
-					{
-						return new String[] { t.getName() };
-					}
-				});
-	}
-
-	public static Comparator<ColumnInfo> COLUMNINFO_INFO_SORT_BY_NAME_COMPARATOR = new Comparator<ColumnInfo>()
-	{
-		@Override
-		public int compare(ColumnInfo o1, ColumnInfo o2)
-		{
-			return o1.getName().compareTo(o2.getName());
-		}
-	};
 
 	protected String generateSqlpadId(HttpServletRequest request, HttpServletResponse response)
 	{
@@ -531,7 +482,7 @@ public class SqlpadController extends AbstractSchemaConnController
 		{
 			if (this._absolutePathMap == null)
 			{
-				this._absolutePathMap = new HashMap<String, String>();
+				this._absolutePathMap = new HashMap<>();
 
 				File[] children = this.directory.listFiles();
 

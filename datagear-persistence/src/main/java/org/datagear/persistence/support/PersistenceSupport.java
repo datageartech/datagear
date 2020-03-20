@@ -134,38 +134,14 @@ public class PersistenceSupport extends JdbcSupport
 	public List<Row> executeListQuery(Connection cn, Table table, Sql sql, int resultSetType, int startRow, int count,
 			RowMapper mapper) throws PersistenceException
 	{
-		if (startRow < 1)
-			startRow = 1;
-
-		List<Row> resultList = new ArrayList<>();
-
 		QueryResultSet qrs = null;
 
 		try
 		{
 			qrs = executeQuery(cn, sql, resultSetType);
-
 			ResultSet rs = qrs.getResultSet();
 
-			if (count >= 0 && startRow > 1)
-				forwardBefore(rs, startRow);
-
-			int endRow = (count >= 0 ? startRow + count : -1);
-
-			int rowIndex = startRow;
-			while (rs.next())
-			{
-				if (endRow >= 0 && rowIndex >= endRow)
-					break;
-
-				Row row = mapToRow(cn, table, rs, rowIndex, mapper);
-
-				resultList.add(row);
-
-				rowIndex++;
-			}
-
-			return resultList;
+			return mapToRows(cn, table, rs, startRow, count, mapper);
 		}
 		catch (SQLException e)
 		{
@@ -175,6 +151,51 @@ public class PersistenceSupport extends JdbcSupport
 		{
 			QueryResultSet.close(qrs);
 		}
+	}
+
+	/**
+	 * 将结果集映射至{@linkplain Row}洌表。
+	 * 
+	 * @param cn
+	 * @param table
+	 * @param rs
+	 * @param startRow
+	 *            起始行，以{@code 1}开头
+	 * @param count
+	 *            映射行数，{@code -1}表示全部
+	 * @param mapper
+	 *            允许为{@code null}
+	 * @return
+	 * @throws RowMapperException
+	 * @throws SQLException
+	 */
+	protected List<Row> mapToRows(Connection cn, Table table, ResultSet rs, int startRow, int count, RowMapper mapper)
+			throws RowMapperException, SQLException
+	{
+		if (startRow < 1)
+			startRow = 1;
+
+		List<Row> resultList = new ArrayList<>();
+
+		if (count >= 0 && startRow > 1)
+			forwardBefore(rs, startRow);
+
+		int endRow = (count >= 0 ? startRow + count : -1);
+
+		int rowIndex = startRow;
+		while (rs.next())
+		{
+			if (endRow >= 0 && rowIndex >= endRow)
+				break;
+
+			Row row = mapToRow(cn, table, rs, rowIndex, mapper);
+
+			resultList.add(row);
+
+			rowIndex++;
+		}
+
+		return resultList;
 	}
 
 	/**

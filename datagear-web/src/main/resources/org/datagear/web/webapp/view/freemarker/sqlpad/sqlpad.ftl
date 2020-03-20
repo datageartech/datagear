@@ -181,7 +181,7 @@ Schema schema 数据库，不允许为null
 	po.schemaId = "${schema.id}";
 	po.sqlpadId = "${sqlpadId}";
 	po.sqlpadChannelId = "${sqlpadChannelId}";
-	po.sqlResultFullLoadingLobMaxRow = parseInt("${sqlResultFullLoadingLobMaxRow}");
+	po.sqlResultReadActualLobRows = parseInt("${sqlResultReadActualLobRows}");
 	
 	po.resultMessageElement = po.element("#${pageId}-resultMessage");
 	po.sqlResultTabs = po.element("#${pageId}-sqlResultTabs");
@@ -756,7 +756,7 @@ Schema schema 数据库，不允许为null
 						}
 						else if($.model.isLongTextJdbcType(property))
 						{
-							if(rowIndex < po.sqlResultFullLoadingLobMaxRow)
+							if(rowIndex < po.sqlResultReadActualLobRows)
 							{
 								return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' class='view-sql-result-long-text-link'>"
 										+ renderValue
@@ -767,7 +767,7 @@ Schema schema 数据库，不允许为null
 						}
 						else if($.model.isBinaryJdbcType(property))
 						{
-							if(rowIndex < po.sqlResultFullLoadingLobMaxRow)
+							if(rowIndex < po.sqlResultReadActualLobRows)
 							{
 								return "<a href='${contextPath}/sqlpad/"+po.schemaId+"/downloadResultField?sqlpadId="+po.sqlpadId+"&value="+encodeURIComponent(data)+"'>"
 										+ renderValue + "</a>";

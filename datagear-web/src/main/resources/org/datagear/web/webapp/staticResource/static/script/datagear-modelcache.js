@@ -32,7 +32,7 @@
 			if(typeof(contextPath) == "string")
 				url = contextPath;
 			
-			url = url + "/schema/" + encodeURIComponent(schemaId) +"/model/" + encodeURIComponent(tableName);
+			url = url + "/schema/" + encodeURIComponent(schemaId) +"/table/" + encodeURIComponent(tableName);
 			
 			if(reload)
 				url = url +"?reload=1";

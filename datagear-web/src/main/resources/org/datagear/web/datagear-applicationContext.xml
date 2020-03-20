@@ -430,9 +430,6 @@
 	<bean id="changelogResolver" class="org.datagear.web.util.ChangelogResolver" />
 	
 	<!-- cometd配置开始 -->
-	<!--
-	<bean id="bayeuxJsonContext" class="org.cometd.server.JacksonJSONContextServer" />
-	-->
 	<bean id="bayeuxJsonContext" class="org.datagear.web.sqlpad.FastjsonJSONContextServer">
 		<property name="serializeConfig" ref="serializeConfig" />
 		<property name="serializerFeatures" ref="serializerFeatures" />

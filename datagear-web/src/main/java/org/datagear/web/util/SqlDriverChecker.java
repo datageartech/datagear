@@ -11,8 +11,8 @@ import java.sql.Statement;
 import org.datagear.connection.AbstractDriverChecker;
 import org.datagear.connection.ConnectionOption;
 import org.datagear.connection.DriverChecker;
-import org.datagear.dbinfo.DatabaseInfoResolver;
-import org.datagear.dbinfo.TableInfo;
+import org.datagear.meta.SimpleTable;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.util.JdbcUtil;
 
 /**
@@ -23,27 +23,27 @@ import org.datagear.util.JdbcUtil;
  */
 public class SqlDriverChecker extends AbstractDriverChecker
 {
-	private DatabaseInfoResolver databaseInfoResolver;
+	private DBMetaResolver dbMetaResolver;
 
 	public SqlDriverChecker()
 	{
 		super();
 	}
 
-	public SqlDriverChecker(DatabaseInfoResolver databaseInfoResolver)
+	public SqlDriverChecker(DBMetaResolver dbMetaResolver)
 	{
 		super();
-		this.databaseInfoResolver = databaseInfoResolver;
+		this.dbMetaResolver = dbMetaResolver;
 	}
 
-	public DatabaseInfoResolver getDatabaseInfoResolver()
+	public DBMetaResolver getDbMetaResolver()
 	{
-		return databaseInfoResolver;
+		return dbMetaResolver;
 	}
 
-	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
+	public void setDbMetaResolver(DBMetaResolver dbMetaResolver)
 	{
-		this.databaseInfoResolver = databaseInfoResolver;
+		this.dbMetaResolver = dbMetaResolver;
 	}
 
 	@Override
@@ -55,13 +55,13 @@ public class SqlDriverChecker extends AbstractDriverChecker
 		{
 			cn = getConnection(driver, connectionOption);
 
-			TableInfo tableInfo = this.databaseInfoResolver.getRandomTableInfo(cn);
+			SimpleTable simpleTable = this.dbMetaResolver.getRandomSimpleTable(cn);
 
 			// 如果不包含任何表，则可认为校验通过
-			if (tableInfo == null)
+			if (simpleTable == null)
 				return true;
 
-			executeSelectCountSqlTest(cn, tableInfo.getName());
+			executeSelectCountSqlTest(cn, simpleTable.getName());
 
 			return true;
 		}

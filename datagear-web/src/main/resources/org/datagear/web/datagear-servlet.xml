@@ -15,7 +15,6 @@
     
     <context:component-scan base-package="org.datagear.web.controller"/>
     
-    <!--jackson无法处理循环引用，因而改用fastjson-->
 	<bean id="fastJsonHttpMessageConverter" class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
 		<property name="fastJsonConfig" ref="fastJsonConfig" />
 	</bean>

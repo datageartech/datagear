@@ -119,6 +119,13 @@ public class GenericDBMetaResolver implements DBMetaResolver
 		return resolver.getDataTypes(cn);
 	}
 
+	@Override
+	public List<String[]> getImportTables(Connection cn, String... tableNames)
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.getImportTables(cn, tableNames);
+	}
+
 	/**
 	 * 获取支持指定{@linkplain Connection}的{@linkplain DevotedDBMetaResolver}。
 	 * 

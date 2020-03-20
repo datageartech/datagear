@@ -5,7 +5,7 @@
 package org.datagear.web.controller;
 
 import java.sql.Connection;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -14,13 +14,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.connection.ConnectionSource;
-import org.datagear.dbinfo.DatabaseInfoResolver;
-import org.datagear.dbinfo.TableInfo;
-import org.datagear.dbmodel.CachedDbModelFactory;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
-import org.datagear.model.Model;
+import org.datagear.meta.SimpleTable;
+import org.datagear.meta.Table;
+import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -30,8 +29,8 @@ import org.datagear.util.JdbcUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.KeywordMatcher;
+import org.datagear.web.util.TableCache;
 import org.datagear.web.util.WebUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -48,12 +47,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping("/schema")
-public class SchemaController extends AbstractSchemaModelConnController
+public class SchemaController extends AbstractSchemaConnTableController
 {
 	public static final String COOKIE_PAGINATION_SIZE = "SCHEMA_PAGINATION_PAGE_SIZE";
-
-	@Autowired
-	private DatabaseInfoResolver databaseInfoResolver;
 
 	public SchemaController()
 	{
@@ -61,22 +57,10 @@ public class SchemaController extends AbstractSchemaModelConnController
 	}
 
 	public SchemaController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, CachedDbModelFactory cachedDbModelFactory,
-			DatabaseInfoResolver databaseInfoResolver)
+			SchemaService schemaService, ConnectionSource connectionSource, DBMetaResolver dbMetaResolver,
+			TableCache tableCache)
 	{
-		super(messageSource, classDataConverter, schemaService, connectionSource, cachedDbModelFactory);
-
-		this.databaseInfoResolver = databaseInfoResolver;
-	}
-
-	public DatabaseInfoResolver getDatabaseInfoResolver()
-	{
-		return databaseInfoResolver;
-	}
-
-	public void setDatabaseInfoResolver(DatabaseInfoResolver databaseInfoResolver)
-	{
-		this.databaseInfoResolver = databaseInfoResolver;
+		super(messageSource, classDataConverter, schemaService, connectionSource, dbMetaResolver, tableCache);
 	}
 
 	@RequestMapping("/add")
@@ -159,7 +143,7 @@ public class SchemaController extends AbstractSchemaModelConnController
 		// 如果URL或者用户变更了，则需要清除缓存
 		if (updated && old != null
 				&& (!schema.getUrl().equals(old.getUrl()) || !schema.getUser().equals(old.getUser())))
-			getCachedDbModelFactory().removeCachedModel(schema.getId());
+			getTableCache().invalidate(schema.getId());
 
 		return buildOperationMessageSaveSuccessResponseEntity(request);
 	}
@@ -199,7 +183,7 @@ public class SchemaController extends AbstractSchemaModelConnController
 
 			// 清除缓存
 			if (deleted)
-				getCachedDbModelFactory().removeCachedModel(id);
+				getTableCache().invalidate(id);
 		}
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
@@ -243,9 +227,9 @@ public class SchemaController extends AbstractSchemaModelConnController
 	{
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
-		
+
 		Connection cn = null;
-		
+
 		try
 		{
 			cn = getSchemaConnection(schema);
@@ -277,55 +261,55 @@ public class SchemaController extends AbstractSchemaModelConnController
 
 	@RequestMapping(value = "/{schemaId}/pagingQueryTable", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public PagingData<TableInfo> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
+	public PagingData<SimpleTable> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
 	{
 		PagingQuery pagingQuery = getPagingQuery(request, COOKIE_PAGINATION_SIZE);
 
-		TableInfo[] tableInfos = new ReturnSchemaConnExecutor<TableInfo[]>(request, response, springModel, schemaId,
-				true)
+		List<SimpleTable> tables = new ReturnSchemaConnExecutor<List<SimpleTable>>(request, response, springModel,
+				schemaId, true)
 		{
 			@Override
-			protected TableInfo[] execute(HttpServletRequest request, HttpServletResponse response,
+			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
-				return getDatabaseInfoResolver().getTableInfos(getConnection());
+				return getDbMetaResolver().getSimpleTables(getConnection());
 			}
 
 		}.execute();
 
-		sortByTableName(tableInfos);
+		sortByTableName(tables);
 
-		List<TableInfo> keywordTableInfos = findByKeyword(tableInfos, pagingQuery.getKeyword());
+		List<SimpleTable> keywordTables = findByKeyword(tables, pagingQuery.getKeyword());
 
-		PagingData<TableInfo> pagingData = new PagingData<TableInfo>(pagingQuery.getPage(), keywordTableInfos.size(),
+		PagingData<SimpleTable> pagingData = new PagingData<>(pagingQuery.getPage(), keywordTables.size(),
 				pagingQuery.getPageSize());
 
-		keywordTableInfos = keywordTableInfos.subList(pagingData.getStartIndex(), pagingData.getEndIndex());
+		keywordTables = keywordTables.subList(pagingData.getStartIndex(), pagingData.getEndIndex());
 
-		pagingData.setItems(keywordTableInfos);
+		pagingData.setItems(keywordTables);
 
 		return pagingData;
 	}
 
-	@RequestMapping(value = "/{schemaId}/model/{tableName}", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/{schemaId}/table/{tableName}", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Model getModel(HttpServletRequest request, HttpServletResponse response,
+	public Table getTable(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName,
 			@RequestParam(value = "reload", required = false) Boolean forceReload) throws Throwable
 	{
 		if (Boolean.TRUE.equals(forceReload))
-			getCachedDbModelFactory().removeCachedModel(schemaId, tableName);
+			getTableCache().invalidate(schemaId, tableName);
 
-		ReturnSchemaModelConnExecutor<Model> executor = new ReturnSchemaModelConnExecutor<Model>(request, response,
+		ReturnSchemaConnTableExecutor<Table> executor = new ReturnSchemaConnTableExecutor<Table>(request, response,
 				springModel, schemaId, tableName, true)
 		{
 			@Override
-			protected Model execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Model model) throws Exception
+			protected Table execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Exception
 			{
-				return model;
+				return table;
 			}
 		};
 
@@ -342,54 +326,47 @@ public class SchemaController extends AbstractSchemaModelConnController
 	{
 		if (schemas != null && !schemas.isEmpty())
 		{
-			String anonymouseUser = getMessage(request, "anonymousUser");
-
 			for (Schema schema : schemas)
 			{
 				// 清除密码，避免传输至客户端引起安全问题。
 				schema.clearPassword();
-
-				User createUser = schema.getCreateUser();
-
-				if (createUser != null && createUser.isAnonymous())
-					createUser.setRealName(anonymouseUser);
 			}
 		}
 	}
 
 	/**
-	 * 将{@linkplain TableInfo}数组按照{@linkplain TableInfo#getName()}排序。
+	 * 将{@linkplain SimpleTable}数组按照{@linkplain SimpleTable#getName()}排序。
 	 * 
-	 * @param tableInfos
+	 * @param tables
 	 */
-	public static void sortByTableName(TableInfo[] tableInfos)
+	public static void sortByTableName(List<SimpleTable> tables)
 	{
-		Arrays.<TableInfo> sort(tableInfos, TABLE_INFO_SORT_BY_NAME_COMPARATOR);
+		Collections.sort(tables, TABLE_SORT_BY_NAME_COMPARATOR);
 	}
 
 	/**
 	 * 根据表名称关键字查询{@linkplain TableInfo}列表。
 	 * 
-	 * @param tableInfos
+	 * @param tables
 	 * @param tableNameKeyword
 	 * @return
 	 */
-	public static List<TableInfo> findByKeyword(TableInfo[] tableInfos, String tableNameKeyword)
+	public static List<SimpleTable> findByKeyword(List<SimpleTable> tables, String tableNameKeyword)
 	{
-		return KeywordMatcher.<TableInfo> match(tableInfos, tableNameKeyword, new KeywordMatcher.MatchValue<TableInfo>()
+		return KeywordMatcher.<SimpleTable> match(tables, tableNameKeyword, new KeywordMatcher.MatchValue<SimpleTable>()
 		{
 			@Override
-			public String[] get(TableInfo t)
+			public String[] get(SimpleTable t)
 			{
 				return new String[] { t.getName() };
 			}
 		});
 	}
 
-	public static Comparator<TableInfo> TABLE_INFO_SORT_BY_NAME_COMPARATOR = new Comparator<TableInfo>()
+	public static Comparator<SimpleTable> TABLE_SORT_BY_NAME_COMPARATOR = new Comparator<SimpleTable>()
 	{
 		@Override
-		public int compare(TableInfo o1, TableInfo o2)
+		public int compare(SimpleTable o1, SimpleTable o2)
 		{
 			return o1.getName().compareTo(o2.getName());
 		}

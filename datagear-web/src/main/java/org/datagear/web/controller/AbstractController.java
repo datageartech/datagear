@@ -16,7 +16,6 @@ import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Paging;
 import org.datagear.persistence.PagingQuery;
-import org.datagear.persistence.PersistenceManager;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
@@ -251,7 +250,7 @@ public abstract class AbstractController
 	 */
 	protected Map<String, ?> getParamMap(HttpServletRequest request, String param)
 	{
-		Map<String, String[]> filteredParam = new HashMap<String, String[]>();
+		Map<String, String[]> filteredParam = new HashMap<>();
 
 		int paramLen = param.length();
 
@@ -344,7 +343,7 @@ public abstract class AbstractController
 	protected ResponseEntity<OperationMessage> buildOperationMessageSuccessEmptyResponseEntity()
 	{
 		OperationMessage operationMessage = OperationMessage.valueOfSuccess("success", "");
-		return new ResponseEntity<OperationMessage>(operationMessage, HttpStatus.OK);
+		return new ResponseEntity<>(operationMessage, HttpStatus.OK);
 	}
 
 	/**
@@ -374,10 +373,7 @@ public abstract class AbstractController
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "saveFail.zeroCount");
 
-		else if (saveCount == PersistenceManager.PERSISTENCE_UNCHANGED)
-			return buildOperationMessageSuccessResponseEntity(request, "saveSuccess.noChange", saveCount);
-		else
-			return buildOperationMessageSuccessResponseEntity(request, "saveSuccess");
+		return buildOperationMessageSuccessResponseEntity(request, "saveSuccess");
 	}
 
 	/**
@@ -427,7 +423,7 @@ public abstract class AbstractController
 			String code, Object... messageArgs)
 	{
 		OperationMessage operationMessage = buildOperationMessageSuccess(request, code, messageArgs);
-		return new ResponseEntity<OperationMessage>(operationMessage, HttpStatus.OK);
+		return new ResponseEntity<>(operationMessage, HttpStatus.OK);
 	}
 
 	/**
@@ -443,7 +439,7 @@ public abstract class AbstractController
 			HttpStatus httpStatus, String code, Object... messageArgs)
 	{
 		OperationMessage operationMessage = buildOperationMessageFail(request, code, messageArgs);
-		return new ResponseEntity<OperationMessage>(operationMessage, httpStatus);
+		return new ResponseEntity<>(operationMessage, httpStatus);
 	}
 
 	/**
@@ -456,7 +452,7 @@ public abstract class AbstractController
 	protected ResponseEntity<OperationMessage> buildOperationMessageResponseEntity(HttpStatus httpStatus,
 			OperationMessage operationMessage)
 	{
-		return new ResponseEntity<OperationMessage>(operationMessage, httpStatus);
+		return new ResponseEntity<>(operationMessage, httpStatus);
 	}
 
 	/**

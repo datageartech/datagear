@@ -16,20 +16,17 @@ import org.datagear.analysis.DataType;
 import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.SqlDataSetSupport;
 import org.datagear.connection.ConnectionSource;
-import org.datagear.dbmodel.DatabaseModelResolver;
-import org.datagear.dbmodel.ModelSqlSelectService;
-import org.datagear.dbmodel.ModelSqlSelectService.ModelSqlResult;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlDataSetEntityService;
-import org.datagear.model.Model;
-import org.datagear.model.Property;
+import org.datagear.meta.Column;
+import org.datagear.meta.Table;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
-import org.datagear.persistence.features.ColumnName;
-import org.datagear.persistence.features.JdbcType;
+import org.datagear.persistence.support.SqlSelectManager;
+import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.ClassDataConverter;
@@ -66,10 +63,7 @@ public class DataSetController extends AbstractSchemaConnController
 	private SqlDataSetEntityService sqlDataSetEntityService;
 
 	@Autowired
-	private ModelSqlSelectService modelSqlSelectService;
-
-	@Autowired
-	private DatabaseModelResolver databaseModelResolver;
+	private SqlSelectManager sqlSelectManager;
 
 	private SqlDataSetSupport sqlDataSetSupport = new SqlDataSetSupport();
 
@@ -80,14 +74,11 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public DataSetController(MessageSource messageSource, ClassDataConverter classDataConverter,
 			SchemaService schemaService, ConnectionSource connectionSource,
-			SqlDataSetEntityService sqlDataSetEntityService, ModelSqlSelectService modelSqlSelectService,
-			DatabaseModelResolver databaseModelResolver)
+			SqlDataSetEntityService sqlDataSetEntityService, SqlSelectManager sqlSelectManager)
 	{
 		super(messageSource, classDataConverter, schemaService, connectionSource);
 		this.sqlDataSetEntityService = sqlDataSetEntityService;
-		this.modelSqlSelectService = modelSqlSelectService;
-		this.databaseModelResolver = databaseModelResolver;
-
+		this.sqlSelectManager = sqlSelectManager;
 	}
 
 	public SqlDataSetEntityService getSqlDataSetEntityService()
@@ -100,24 +91,14 @@ public class DataSetController extends AbstractSchemaConnController
 		this.sqlDataSetEntityService = sqlDataSetEntityService;
 	}
 
-	public ModelSqlSelectService getModelSqlSelectService()
+	public SqlSelectManager getSqlSelectManager()
 	{
-		return modelSqlSelectService;
+		return sqlSelectManager;
 	}
 
-	public void setModelSqlSelectService(ModelSqlSelectService modelSqlSelectService)
+	public void setSqlSelectManager(SqlSelectManager sqlSelectManager)
 	{
-		this.modelSqlSelectService = modelSqlSelectService;
-	}
-
-	public DatabaseModelResolver getDatabaseModelResolver()
-	{
-		return databaseModelResolver;
-	}
-
-	public void setDatabaseModelResolver(DatabaseModelResolver databaseModelResolver)
-	{
-		this.databaseModelResolver = databaseModelResolver;
+		this.sqlSelectManager = sqlSelectManager;
 	}
 
 	public SqlDataSetSupport getSqlDataSetSupport()
@@ -236,7 +217,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public List<SqlDataSetEntity> getByIds(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestParam("id") String[] ids)
 	{
-		List<SqlDataSetEntity> dataSets = new ArrayList<SqlDataSetEntity>();
+		List<SqlDataSetEntity> dataSets = new ArrayList<>();
 
 		if (!isEmpty(ids))
 		{
@@ -312,22 +293,22 @@ public class DataSetController extends AbstractSchemaConnController
 
 	@RequestMapping(value = "/sqlPreview/{schemaId}", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public DataSetModelSqlResult sqlPreview(HttpServletRequest request, HttpServletResponse response,
+	public DataSetSqlSelectResult sqlPreview(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("sql") final String sql, @RequestParam(value = "startRow", required = false) Integer startRow,
 			@RequestParam(value = "fetchSize", required = false) Integer fetchSize,
-			@RequestParam(value = "returnModel", required = false) Boolean returnModel) throws Throwable
+			@RequestParam(value = "returnMeta", required = false) Boolean returnMeta) throws Throwable
 	{
-		DataSetModelSqlResult modelSqlResult = executeSelect(request, response, springModel, schemaId, sql, startRow,
+		DataSetSqlSelectResult result = executeSelect(request, response, springModel, schemaId, sql, startRow,
 				fetchSize);
 
-		if (!Boolean.TRUE.equals(returnModel))
-			modelSqlResult.setModel(null);
+		if (!Boolean.TRUE.equals(returnMeta))
+			result.setTable(null);
 
-		return modelSqlResult;
+		return result;
 	}
 
-	protected DataSetModelSqlResult executeSelect(HttpServletRequest request, HttpServletResponse response,
+	protected DataSetSqlSelectResult executeSelect(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, String schemaId, final String sql, Integer startRow,
 			Integer fetchSize) throws Throwable
 	{
@@ -346,23 +327,22 @@ public class DataSetController extends AbstractSchemaConnController
 		final int startRowFinal = startRow;
 		final int fetchSizeFinal = fetchSize;
 
-		DataSetModelSqlResult modelSqlResult = new ReturnSchemaConnExecutor<DataSetModelSqlResult>(request, response,
+		DataSetSqlSelectResult modelSqlResult = new ReturnSchemaConnExecutor<DataSetSqlSelectResult>(request, response,
 				springModel, schemaId, true)
 		{
 			@Override
-			protected DataSetModelSqlResult execute(HttpServletRequest request, HttpServletResponse response,
+			protected DataSetSqlSelectResult execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
 				try
 				{
-					ModelSqlResult modelSqlResult = modelSqlSelectService.select(getConnection(), sql, startRowFinal,
-							fetchSizeFinal, databaseModelResolver);
+					SqlSelectResult result = sqlSelectManager.select(getConnection(), sql, startRowFinal,
+							fetchSizeFinal);
+					List<DataSetProperty> dataSetProperties = resolveDataSetProperties(result.getTable(), null);
 
-					List<DataSetProperty> dataSetProperties = resolveDataSetProperties(modelSqlResult.getModel(), null);
-
-					return new DataSetModelSqlResult(modelSqlResult, dataSetProperties);
+					return new DataSetSqlSelectResult(result, dataSetProperties);
 				}
 				catch (SQLException e)
 				{
@@ -387,7 +367,7 @@ public class DataSetController extends AbstractSchemaConnController
 		if (dataSetPropertyNames == null)
 			return;
 
-		List<DataSetProperty> dataSetProperties = new ArrayList<DataSetProperty>(dataSetPropertyNames.length);
+		List<DataSetProperty> dataSetProperties = new ArrayList<>(dataSetPropertyNames.length);
 
 		for (int i = 0; i < dataSetPropertyNames.length; i++)
 		{
@@ -406,37 +386,26 @@ public class DataSetController extends AbstractSchemaConnController
 	/**
 	 * 解析{@linkplain DataSetProperty}列表。
 	 * 
-	 * @param model
+	 * @param table
 	 * @param labels
 	 *            {@linkplain DataSetProperty#getLabel()}数组，允许为{@code null}或任意长度的数组
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<DataSetProperty> resolveDataSetProperties(Model model, String[] labels) throws Throwable
+	protected List<DataSetProperty> resolveDataSetProperties(Table table, String[] labels) throws Throwable
 	{
-		Property[] properties = model.getProperties();
+		Column[] properties = table.getColumns();
 
-		List<DataSetProperty> dataSetProperties = new ArrayList<DataSetProperty>(
-				properties == null ? 0 : properties.length);
+		List<DataSetProperty> dataSetProperties = new ArrayList<>(properties == null ? 0 : properties.length);
 
 		if (properties != null)
 		{
 			for (int i = 0; i < properties.length; i++)
 			{
-				Property property = properties[i];
+				Column column = properties[i];
 
-				ColumnName columnName = property.getFeature(ColumnName.class);
-
-				if (columnName == null)
-					throw new UnsupportedOperationException("Column name can not be resolved");
-
-				JdbcType jdbcType = property.getFeature(JdbcType.class);
-
-				if (jdbcType == null)
-					throw new UnsupportedOperationException("Jdbc type can not be resolved");
-
-				DataSetProperty dataSetProperty = new DataSetProperty(columnName.getValue(),
-						sqlDataSetSupport.toDataType(jdbcType.getValue()));
+				DataSetProperty dataSetProperty = new DataSetProperty(column.getName(),
+						sqlDataSetSupport.toDataType(column.getType()));
 
 				if (labels != null && labels.length > i)
 					dataSetProperty.setLabel(labels[i]);
@@ -469,19 +438,19 @@ public class DataSetController extends AbstractSchemaConnController
 			throw new IllegalInputException();
 	}
 
-	public static class DataSetModelSqlResult extends ModelSqlResult
+	public static class DataSetSqlSelectResult extends SqlSelectResult
 	{
 		private List<DataSetProperty> dataSetProperties;
 
-		public DataSetModelSqlResult()
+		public DataSetSqlSelectResult()
 		{
 			super();
 		}
 
-		public DataSetModelSqlResult(ModelSqlResult modelSqlResult, List<DataSetProperty> dataSetProperties)
+		public DataSetSqlSelectResult(SqlSelectResult modelSqlResult, List<DataSetProperty> dataSetProperties)
 		{
-			super(modelSqlResult.getSql(), modelSqlResult.getModel(), modelSqlResult.getStartRow(),
-					modelSqlResult.getFetchSize(), modelSqlResult.getDatas());
+			super(modelSqlResult.getSql(), modelSqlResult.getTable(), modelSqlResult.getStartRow(),
+					modelSqlResult.getFetchSize(), modelSqlResult.getRows());
 			this.dataSetProperties = dataSetProperties;
 		}
 
