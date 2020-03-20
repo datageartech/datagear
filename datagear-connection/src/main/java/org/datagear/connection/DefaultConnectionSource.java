@@ -46,11 +46,11 @@ public class DefaultConnectionSource implements ConnectionSource
 
 	private PropertiesProcessor propertiesProcessor = null;
 
-	private ConcurrentMap<String, PreferedDriverEntityResult> urlPreferedDriverEntityMap = new ConcurrentHashMap<String, PreferedDriverEntityResult>();
+	private ConcurrentMap<String, PreferedDriverEntityResult> urlPreferedDriverEntityMap = new ConcurrentHashMap<>();
 
 	private volatile long driverEntityManagerLastModified = -1;
 
-	private HashMap<Driver, DriverBasicDataSource> _dataSourceMap = new HashMap<Driver, DriverBasicDataSource>();
+	private HashMap<DataSourceKey, DriverBasicDataSource> _dataSourceMap = new HashMap<>();
 
 	private ReadWriteLock _dataSourceMapLock = new ReentrantReadWriteLock();
 
@@ -129,7 +129,7 @@ public class DefaultConnectionSource implements ConnectionSource
 				{
 					dataSource.close();
 				}
-				catch(Throwable t)
+				catch (Throwable t)
 				{
 					LOGGER.warn("Close data source exception:", t);
 				}
@@ -192,8 +192,8 @@ public class DefaultConnectionSource implements ConnectionSource
 
 		Connection preferedConnection = null;
 
-		List<DriverEntityDriver> accepted = new ArrayList<DriverEntityDriver>();
-		List<DriverEntityDriver> checked = new ArrayList<DriverEntityDriver>();
+		List<DriverEntityDriver> accepted = new ArrayList<>();
+		List<DriverEntityDriver> checked = new ArrayList<>();
 
 		findOrderedAcceptedAndCheckedDriverEntityDrivers(connectionOption, accepted, checked);
 
@@ -384,11 +384,13 @@ public class DefaultConnectionSource implements ConnectionSource
 	{
 		DriverBasicDataSource dataSource = null;
 
+		DataSourceKey dataSourceKey = new DataSourceKey(driver, url, properties);
+
 		Lock readLock = this._dataSourceMapLock.readLock();
 		try
 		{
 			readLock.lock();
-			dataSource = this._dataSourceMap.get(driver);
+			dataSource = this._dataSourceMap.get(dataSourceKey);
 		}
 		finally
 		{
@@ -402,7 +404,7 @@ public class DefaultConnectionSource implements ConnectionSource
 			{
 				writeLock.lock();
 				dataSource = createDataSource(driver, url, properties);
-				this._dataSourceMap.put(driver, dataSource);
+				this._dataSourceMap.put(dataSourceKey, dataSource);
 			}
 			finally
 			{
@@ -533,6 +535,98 @@ public class DefaultConnectionSource implements ConnectionSource
 		public void setDriver(Driver driver)
 		{
 			this.driver = driver;
+		}
+	}
+
+	protected static class DataSourceKey
+	{
+		private Driver driver;
+
+		private String url;
+
+		private Properties properties;
+
+		public DataSourceKey(Driver driver, String url, Properties properties)
+		{
+			super();
+			this.driver = driver;
+			this.url = url;
+			this.properties = properties;
+		}
+
+		public Driver getDriver()
+		{
+			return driver;
+		}
+
+		protected void setDriver(Driver driver)
+		{
+			this.driver = driver;
+		}
+
+		public String getUrl()
+		{
+			return url;
+		}
+
+		protected void setUrl(String url)
+		{
+			this.url = url;
+		}
+
+		public Properties getProperties()
+		{
+			return properties;
+		}
+
+		protected void setProperties(Properties properties)
+		{
+			this.properties = properties;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((driver == null) ? 0 : driver.hashCode());
+			result = prime * result + ((properties == null) ? 0 : properties.hashCode());
+			result = prime * result + ((url == null) ? 0 : url.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DataSourceKey other = (DataSourceKey) obj;
+			if (driver == null)
+			{
+				if (other.driver != null)
+					return false;
+			}
+			else if (!driver.equals(other.driver))
+				return false;
+			if (properties == null)
+			{
+				if (other.properties != null)
+					return false;
+			}
+			else if (!properties.equals(other.properties))
+				return false;
+			if (url == null)
+			{
+				if (other.url != null)
+					return false;
+			}
+			else if (!url.equals(other.url))
+				return false;
+			return true;
 		}
 	}
 
