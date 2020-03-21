@@ -7,15 +7,11 @@ package org.datagear.web.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.Schema;
-import org.datagear.management.service.SchemaService;
 import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.TableCache;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 
 /**
  * 抽象数据库表连接控制器。
@@ -34,15 +30,6 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 	public AbstractSchemaConnTableController()
 	{
 		super();
-	}
-
-	public AbstractSchemaConnTableController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, DBMetaResolver dbMetaResolver,
-			TableCache tableCache)
-	{
-		super(messageSource, classDataConverter, schemaService, connectionSource);
-		this.dbMetaResolver = dbMetaResolver;
-		this.tableCache = tableCache;
 	}
 
 	public DBMetaResolver getDbMetaResolver()

@@ -26,11 +26,9 @@ import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.util.i18n.Label;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 
 /**
  * 抽象插件相关的控制器。
@@ -46,13 +44,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	public AbstractChartPluginAwareController()
 	{
 		super();
-	}
-
-	public AbstractChartPluginAwareController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager)
-	{
-		super(messageSource, classDataConverter);
-		this.directoryHtmlChartPluginManager = directoryHtmlChartPluginManager;
 	}
 
 	public DirectoryHtmlChartPluginManager getDirectoryHtmlChartPluginManager()

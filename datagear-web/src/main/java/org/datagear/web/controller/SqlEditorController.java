@@ -13,19 +13,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.derby.impl.sql.execute.ColumnInfo;
-import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
-import org.datagear.management.service.SchemaService;
 import org.datagear.meta.Column;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
-import org.datagear.meta.resolver.DBMetaResolver;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.KeywordMatcher;
-import org.datagear.web.util.TableCache;
 import org.datagear.web.util.WebUtils;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,13 +39,6 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 	public SqlEditorController()
 	{
 		super();
-	}
-
-	public SqlEditorController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, DBMetaResolver dbMetaResolver,
-			TableCache tableCache)
-	{
-		super(messageSource, classDataConverter, schemaService, connectionSource, dbMetaResolver, tableCache);
 	}
 
 	@RequestMapping(value = "/{schemaId}/findTableNames", produces = CONTENT_TYPE_JSON)

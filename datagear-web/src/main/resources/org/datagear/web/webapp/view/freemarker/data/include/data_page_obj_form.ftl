@@ -38,40 +38,40 @@ po.isClientPageData = undefined;
 	
 	po.propertySubmitHandler = function(property, propValue)
 	{
-		po.form().modelform("propValue", property.name, propValue);
+		po.form().tableform("propValue", property.name, propValue);
 	};
 	
 	po.propertyAfterSaveHandler = function(property, propValue)
 	{
-		po.form().modelform("propValue", property.name, propValue);
+		po.form().tableform("propValue", property.name, propValue);
 		
 		if(!po.data)
 			po.data = {};
 		
-		$.model.propertyValue(po.data, property.name, propValue);
+		$.meta.propertyValue(po.data, property.name, propValue);
 	};
 	
 	po.propertyDataTableAjaxSuccess = function(property, propertyValue, propertyValuePagingData)
 	{
-		if(!$.model.isMultipleProperty(property))
+		if(!$.meta.isMultipleProperty(property))
 			return;
 		
-		var formPropertyValue = po.form().modelform("propValue", property.name);
-		if(formPropertyValue == null || $.model.isSizeOnlyCollection(formPropertyValue))
-			po.form().modelform("propValue", property.name, $.model.toSizeOnlyCollection(propertyValuePagingData.total));
+		var formPropertyValue = po.form().tableform("propValue", property.name);
+		if(formPropertyValue == null || $.meta.isSizeOnlyCollection(formPropertyValue))
+			po.form().tableform("propValue", property.name, $.meta.toSizeOnlyCollection(propertyValuePagingData.total));
 		
 		if(!po.data)
 			po.data = {};
 		
-		var propertyValue = $.model.propertyValue(po.data, property.name);
-		if(propertyValue == null || $.model.isSizeOnlyCollection(propertyValue))
-			$.model.propertyValue(po.data, property.name, $.model.toSizeOnlyCollection(propertyValuePagingData.total));
+		var propertyValue = $.meta.propertyValue(po.data, property.name);
+		if(propertyValue == null || $.meta.isSizeOnlyCollection(propertyValue))
+			$.meta.propertyValue(po.data, property.name, $.meta.toSizeOnlyCollection(propertyValuePagingData.total));
 	};
 	
 	po.isPropertyActionClientSubmit = function(property)
 	{
 		//单元属性值都不即时保存
-		return (!$.model.isMultipleProperty(property) ? true : po.isClientPageData);
+		return (!$.meta.isMultipleProperty(property) ? true : po.isClientPageData);
 	};
 	
 	//属性操作选项函数
@@ -80,7 +80,7 @@ po.isClientPageData = undefined;
 		var requestParams =
 		{
 			//如果页面是客户端数据则传递最新表单数据，因为不需要根据初始数据到服务端数据库查找
-			"data" : (po.isClientPageData ? po.form().modelform("data") : po.data),
+			"data" : (po.isClientPageData ? po.form().tableform("data") : po.data),
 			"propertyPath" : $.propertyPath.escapePropertyName(property.name),
 			"propertyValue" : (po.isClientPageData ? null : propertyValue),
 			"isClientPageData" : po.isClientPageData
@@ -183,12 +183,12 @@ po.isClientPageData = undefined;
 		po.open(po.url("viewMultiplePropValue"), options);
 	};
 	
-	po.downloadColumnValue = function(property)
+	po.columnValueDownloadUrl = function(property)
 	{
 		var options = po.buildPropertyActionOptions(property);
 		options.target="_file";
 		
-		po.open(po.url("downloadColumnValue"), options);
+		po.open(po.url("columnValueDownloadUrl"), options);
 	};
 	
 	po.refreshParent = function()

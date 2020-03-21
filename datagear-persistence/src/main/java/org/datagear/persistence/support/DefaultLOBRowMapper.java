@@ -53,8 +53,20 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 
 	public static final String BINARY_ENCODER_NONE = "none";
 
-	/** 读取真实LOB数据的最大行数，-1表示全部 */
-	private int readActualLobRows = -1;
+	/** 读取真实CLOB数据的最大行数，-1表示全部 */
+	private int readActualClobRows = -1;
+
+	/** 读取真实BLOB数据的最大行数，-1表示全部 */
+	private int readActualBlobRows = -1;
+
+	/** 大二进制不返回byte[]而写入文件的父目录 */
+	private File blobDirectory = null;
+
+	/** 二进制编码 */
+	private String binaryEncoder = BINARY_ENCODER_NONE;
+
+	/** HEX编码开头 */
+	private String binaryHexEncoderHeader = "0x";
 
 	/** BLOB占位符字符串 */
 	private String blobPlaceholder = DEFAULT_BLOB_PLACEHOLDER;
@@ -65,75 +77,104 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 	/** SQLXML占位符字符串 */
 	private String sqlXmlPlaceholder = DEFAULT_SQL_XML_PLACEHOLDER;
 
-	/** 二进制编码 */
-	private String binaryEncoder = BINARY_ENCODER_NONE;
-
-	/** HEX编码开头 */
-	private String binaryHexEncoderHeader = "0x";
-
-	/** 大二进制不返回byte[]而写入文件的父目录 */
-	private File bigBinaryDirectory = null;
-
 	public DefaultLOBRowMapper()
 	{
 	}
 
-	public boolean isReadActualLobAll()
+	public int getReadActualClobRows()
 	{
-		return this.readActualLobRows < 0;
-	}
-
-	public boolean isReadActualLobRow(int rowIndex)
-	{
-		return (isReadActualLobAll() || rowIndex <= this.readActualLobRows);
-	}
-
-	public int getReadActualLobRows()
-	{
-		return readActualLobRows;
+		return readActualClobRows;
 	}
 
 	/**
-	 * 设置读取真实LOB数据的最大行数，超过这个行数的将被占位符字符串替代，-1表示全部。
+	 * 设置读取真实CLOB数据的最大行数，超过这个行数的将被占位符字符串替代，-1表示全部。
 	 * <p>
 	 * 默认为{@code -1}。
 	 * </p>
 	 * 
 	 * @param readActualLobRows
 	 */
-	public void setReadActualLobRows(int readActualLobRows)
+	public void setReadActualClobRows(int readActualClobRows)
 	{
-		this.readActualLobRows = readActualLobRows;
+		this.readActualClobRows = readActualClobRows;
 	}
 
-	public String getBlobPlaceholder()
+	public boolean isReadActualClobAll()
 	{
-		return blobPlaceholder;
+		return this.readActualClobRows < 0;
 	}
 
-	public void setBlobPlaceholder(String blobPlaceholder)
+	public boolean isReadActualClobRow(int rowIndex)
 	{
-		this.blobPlaceholder = blobPlaceholder;
+		return (isReadActualClobAll() || rowIndex <= this.readActualClobRows);
 	}
 
-	public String getClobPlaceholder()
+	public int getReadActualBlobRows()
 	{
-		return clobPlaceholder;
+		return readActualBlobRows;
 	}
 
-	public void setClobPlaceholder(String clobPlaceholder)
+	/**
+	 * 设置读取真实BLOB数据的最大行数，超过这个行数的将被占位符字符串替代，-1表示全部。
+	 * <p>
+	 * 默认为{@code -1}。
+	 * </p>
+	 * 
+	 * @param readActualBlobRows
+	 */
+	public void setReadActualBlobRows(int readActualBlobRows)
 	{
-		this.clobPlaceholder = clobPlaceholder;
+		this.readActualBlobRows = readActualBlobRows;
 	}
 
-	public String getSqlXmlPlaceholder()
+	public boolean isReadActualBlobAll()
 	{
-		return sqlXmlPlaceholder;
+		return this.readActualBlobRows < 0;
 	}
 
-	public void setSqlXmlPlaceholder(String sqlXmlPlaceholder)
+	public boolean isReadActualBlobRow(int rowIndex)
 	{
-		this.sqlXmlPlaceholder = sqlXmlPlaceholder;
+		return (isReadActualBlobAll() || rowIndex <= this.readActualBlobRows);
+	}
+
+	public boolean hasBlobDirectory()
+	{
+		return (this.blobDirectory != null);
+	}
+
+	public File getBlobDirectory()
+	{
+		return blobDirectory;
+	}
+
+	/**
+	 * 设置BLOB数据的写入为文件的父目录，为{@code null}，则BLOB数据直接返回{@code byte[]}。
+	 * <p>
+	 * 设置后，映射结果值将是这个目录下的文件名字符串。
+	 * </p>
+	 * <p>
+	 * 默认为{@code null}。
+	 * </p>
+	 * 
+	 * @param blobDirectory
+	 */
+	public void setBlobDirectory(File blobDirectory)
+	{
+		this.blobDirectory = blobDirectory;
+	}
+
+	/**
+	 * 获取指定文件名的BLOB文件对象。
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	public File getBlobFile(String fileName)
+	{
+		if (this.blobDirectory == null)
+			throw new IllegalStateException("this.bigBinaryDirectory must be set");
+
+		return FileUtil.getFile(this.blobDirectory, fileName);
 	}
 
 	public String getBinaryEncoder()
@@ -164,44 +205,34 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 		this.binaryHexEncoderHeader = binaryHexEncoderHeader;
 	}
 
-	public boolean hasBigBinaryDirectory()
+	public String getBlobPlaceholder()
 	{
-		return (this.bigBinaryDirectory != null);
+		return blobPlaceholder;
 	}
 
-	public File getBigBinaryDirectory()
+	public void setBlobPlaceholder(String blobPlaceholder)
 	{
-		return bigBinaryDirectory;
+		this.blobPlaceholder = blobPlaceholder;
 	}
 
-	/**
-	 * 设置大二进制数据的写入为文件的父目录，为{@code null}，则大二进制数据直接返回{@code byte[]}。
-	 * <p>
-	 * 设置后，映射结果值将是这个目录下的文件名字符串。
-	 * </p>
-	 * <p>
-	 * 默认为{@code null}。
-	 * </p>
-	 * 
-	 * @param bigBinaryDirectory
-	 */
-	public void setBigBinaryDirectory(File bigBinaryDirectory)
+	public String getClobPlaceholder()
 	{
-		this.bigBinaryDirectory = bigBinaryDirectory;
+		return clobPlaceholder;
 	}
 
-	/**
-	 * 获取指定文件名的大二进制文件对象。
-	 * 
-	 * @param fileName
-	 * @return
-	 */
-	public File getBigBinaryFile(String fileName)
+	public void setClobPlaceholder(String clobPlaceholder)
 	{
-		if (this.bigBinaryDirectory == null)
-			throw new IllegalStateException("this.bigBinaryDirectory must be set");
+		this.clobPlaceholder = clobPlaceholder;
+	}
 
-		return FileUtil.getFile(this.bigBinaryDirectory, fileName);
+	public String getSqlXmlPlaceholder()
+	{
+		return sqlXmlPlaceholder;
+	}
+
+	public void setSqlXmlPlaceholder(String sqlXmlPlaceholder)
+	{
+		this.sqlXmlPlaceholder = sqlXmlPlaceholder;
 	}
 
 	@Override
@@ -318,7 +349,7 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 	{
 		try
 		{
-			if (isReadActualLobRow(rowIndex))
+			if (isReadActualClobRow(rowIndex))
 				return IOUtil.readString(value, false);
 			else
 				return placeholder;
@@ -334,12 +365,12 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 	{
 		try
 		{
-			if (isReadActualLobRow(rowIndex))
+			if (isReadActualBlobRow(rowIndex))
 			{
-				if (this.bigBinaryDirectory != null)
+				if (hasBlobDirectory())
 				{
 					String fileName = IDUtil.uuid();
-					File file = FileUtil.getFile(this.bigBinaryDirectory, fileName);
+					File file = FileUtil.getFile(this.blobDirectory, fileName);
 
 					IOUtil.write(value, file);
 					return fileName;

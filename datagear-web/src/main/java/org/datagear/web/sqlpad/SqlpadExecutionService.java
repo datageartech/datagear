@@ -487,6 +487,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			{
 				cn = getSchemaConnection(this.schema);
 				JdbcUtil.setAutoCommitIfSupports(cn, false);
+				JdbcUtil.setReadonlyIfSupports(cn, false);
 				st = createStatement(cn);
 			}
 			catch (Throwable t)

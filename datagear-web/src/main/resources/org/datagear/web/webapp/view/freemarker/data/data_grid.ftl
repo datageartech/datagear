@@ -77,7 +77,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 <script type="text/javascript">
 (function(po)
 {
-	po.conditionSource = $.unref(<@writeJson var=conditionSource />);
+	po.conditionSource = <@writeJson var=conditionSource />;
 	
 	$.initButtons(po.element(".operation"));
 	
@@ -93,7 +93,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 	if(!po.canReadTableData(${schema.dataPermission}))
 		po.element("input[name=viewButton]").attr("disabled", "disabled").hide();
 	
-	po.onModel(function(model)
+	po.onTable(function(model)
 	{
 		<#if !readonly>
 		po.element("input[name=addButton]").click(function()

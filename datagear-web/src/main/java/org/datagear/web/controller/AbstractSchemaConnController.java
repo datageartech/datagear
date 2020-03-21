@@ -22,10 +22,8 @@ import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.util.SchemaConnectionSupport;
 import org.datagear.util.JdbcUtil;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 
 /**
  * 抽象{@linkplain Schema}连接控制器。
@@ -46,14 +44,6 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	public AbstractSchemaConnController()
 	{
 		super();
-	}
-
-	public AbstractSchemaConnController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource)
-	{
-		super(messageSource, classDataConverter);
-		this.schemaService = schemaService;
-		this.connectionSource = connectionSource;
 	}
 
 	public SchemaService getSchemaService()
@@ -465,6 +455,7 @@ public abstract class AbstractSchemaConnController extends AbstractController
 		}
 
 		// @Override
+		@Override
 		public Logger getParentLogger() throws SQLFeatureNotSupportedException
 		{
 			throw new SQLFeatureNotSupportedException();

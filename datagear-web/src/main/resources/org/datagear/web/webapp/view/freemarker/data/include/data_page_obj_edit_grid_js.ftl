@@ -37,7 +37,7 @@ data_page_obj_edit_grid_html.ftl
 		po.superPropertySubmitHandler(property, propValue);
 		
 		if(po.isSubmitWhenPropertySubmit)
-			po.form().modelform("submit");
+			po.form().tableform("submit");
 	};
 	
 	po.superPropertyDataTableAjaxSuccess = po.propertyDataTableAjaxSuccess;
@@ -45,7 +45,7 @@ data_page_obj_edit_grid_html.ftl
 	{
 		po.superPropertyDataTableAjaxSuccess(property, propertyValue, propertyValuePagingData);
 		
-		if(!$.model.isMultipleProperty(property))
+		if(!$.meta.isMultipleProperty(property))
 			return;
 		
 		var singleRow = $.getDataTableRowIfSingle(po.currentCellIndexes);
@@ -54,9 +54,9 @@ data_page_obj_edit_grid_html.ftl
 		if(singleRow != null && !po.gridPage.isClientDataRow(po.currentDataTable, singleRow))
 		{
 			var originalData = po.gridPage.originalRowData(po.currentDataTable, singleRow);
-			var originalPropertyValue = $.model.propertyValue(originalData, property.name);
+			var originalPropertyValue = $.meta.propertyValue(originalData, property.name);
 			
-			if(propertyValuePagingData.total == $.model.getSizeOnlyCollectionSize(originalPropertyValue))
+			if(propertyValuePagingData.total == $.meta.getSizeOnlyCollectionSize(originalPropertyValue))
 				return;
 			
 			var myColumn = $.getDataTableColumn(po.currentDataTable.settings(), property.name);
@@ -70,21 +70,21 @@ data_page_obj_edit_grid_html.ftl
 			else
 				$myCell.html(propertyValuePagingData.total);
 			
-			if(originalPropertyValue == null || $.model.isSizeOnlyCollection(originalPropertyValue))
+			if(originalPropertyValue == null || $.meta.isSizeOnlyCollection(originalPropertyValue))
 			{
-				$.model.propertyValue(originalData, property.name, $.model.toSizeOnlyCollection(propertyValuePagingData.total));
+				$.meta.propertyValue(originalData, property.name, $.meta.toSizeOnlyCollection(propertyValuePagingData.total));
 				
 				//原表格的单元格也要更新
 				var dataTable = po.gridPage.table().DataTable();
 				var cell = dataTable.cell({ "row" : singleRow, "column" : myColumn });
-				cell.data($.model.toSizeOnlyCollection(propertyValuePagingData.total));
+				cell.data($.meta.toSizeOnlyCollection(propertyValuePagingData.total));
 			}
 			
 			var tableRowData = po.currentDataTable.row(singleRow).data();
-			var tableRowPropertyValue = $.model.propertyValue(tableRowData, property.name);
+			var tableRowPropertyValue = $.meta.propertyValue(tableRowData, property.name);
 			
-			if(tableRowPropertyValue == null || $.model.isSizeOnlyCollection(tableRowPropertyValue))
-				$.model.propertyValue(tableRowData, property.name, $.model.toSizeOnlyCollection(propertyValuePagingData.total));
+			if(tableRowPropertyValue == null || $.meta.isSizeOnlyCollection(tableRowPropertyValue))
+				$.meta.propertyValue(tableRowData, property.name, $.meta.toSizeOnlyCollection(propertyValuePagingData.total));
 		}
 	}
 	
@@ -122,15 +122,15 @@ data_page_obj_edit_grid_html.ftl
 			else
 			{
 				//集合属性值单元格修改了（多选编辑后），那么仅开启客户端数据模式，仅可添加、编辑、删除客户端集合属性值元素
-				if($.model.isMultipleProperty(property))
+				if($.meta.isMultipleProperty(property))
 				{
-					$.model.propertyValue(data, property, myCell.data());
+					$.meta.propertyValue(data, property, myCell.data());
 					isClientPageData = true;
 				}
 				else
 				{
 					actionParam["data"]["propertyValue"] = myCell.data();
-					var propertyValue = $.model.propertyValue(data, property);
+					var propertyValue = $.meta.propertyValue(data, property);
 					//XXX 此处处理逻辑有缺陷，如果多选编辑了服务端单元属性值对象的集合属性值，然后再单选编辑时，单元属性值对象的集合属性值页面将仅会显示服务端数据
 					isClientPageData = !propertyValue;
 				}
@@ -378,7 +378,7 @@ data_page_obj_edit_grid_html.ftl
 			{
 				po.editCellOnSelect = true;
 				
-				var rowData = $.model.instance(po.editGridModel);
+				var rowData = $.meta.instance(po.editGridModel);
 				
 				var editDataTable = po.editTable().DataTable();
 				var row = editDataTable.row.add(rowData);
@@ -581,7 +581,7 @@ data_page_obj_edit_grid_html.ftl
 		
 		for(var pi in propertyIndexesMap)
 		{
-			var property = $.model.getProperty(model, parseInt(pi));
+			var property = $.meta.getProperty(model, parseInt(pi));
 			
 			var pindexes = propertyIndexesMap[pi];
 			var pindex0 = pindexes[0];
@@ -615,7 +615,7 @@ data_page_obj_edit_grid_html.ftl
 				}
 				
 				if(allColumnValueEquals)
-					$.model.propertyValue(data, property.name, propertyValue0);
+					$.meta.propertyValue(data, property.name, propertyValue0);
 			}
 		}
 		
@@ -654,8 +654,8 @@ data_page_obj_edit_grid_html.ftl
 								{
 									var needFetchPropertyName = needFetchPropertyNames[j];
 									
-									$.model.propertyValue(data, needFetchPropertyName, fetchedPropertyValue);
-									$.model.propertyValue(needFetchRowData, needFetchPropertyName, fetchedPropertyValue);
+									$.meta.propertyValue(data, needFetchPropertyName, fetchedPropertyValue);
+									$.meta.propertyValue(needFetchRowData, needFetchPropertyName, fetchedPropertyValue);
 									
 									var myColumn = $.getDataTableColumn(settings, needFetchPropertyName);
 									var myCell = editDataTable.cell({ "row" : needFetchRow, "column" : myColumn });
@@ -729,12 +729,12 @@ data_page_obj_edit_grid_html.ftl
 		
 		if(singlePropertyIndex != null)
 		{
-			var property = $.model.getProperty(po.editGridModel, parseInt(singlePropertyIndex));
+			var property = $.meta.getProperty(po.editGridModel, parseInt(singlePropertyIndex));
 			
-			isHideFormPage = $.model.isMultipleProperty(property);
+			isHideFormPage = $.meta.isMultipleProperty(property);
 			
 			if(!isHideFormPage)
-				isHideFormPage = $.model.isCompositeProperty(property);
+				isHideFormPage = $.meta.isCompositeProperty(property);
 		}
 		
 		po.editGridFormPage.data = data;
@@ -747,8 +747,8 @@ data_page_obj_edit_grid_html.ftl
 		var $formPanel = po.editGridFormPage.element(".form-panel");
 		var $form = po.editGridFormPage.form();
 		
-		if($form.isModelform())
-			$form.modelform("destroy");
+		if($form.isTableform())
+			$form.tableform("destroy");
 		
 		$formPage.appendTo(po.dataTableParent(editDataTable));
 		
@@ -769,11 +769,11 @@ data_page_obj_edit_grid_html.ftl
 			$form.removeClass("hide-form-label");
 		}
 		
-		$form.modelform(
+		$form.tableform(
 		{
 			model : po.editGridModel,
 			data : data,
-			renderProperty : function(property, propertyIndex)
+			renderColumn : function(property, propertyIndex)
 			{
 				var propertyIndexesMap = po.editGridFormPage.currentPropertyIndexesMap;
 				
@@ -783,7 +783,7 @@ data_page_obj_edit_grid_html.ftl
 			{
 				var $this = $(this);
 				
-				var data = $this.modelform("data");
+				var data = $this.tableform("data");
 				var propertyIndexesMap = po.editGridFormPage.currentPropertyIndexesMap;
 				
 				var editDataTable = po.editTable().DataTable();
@@ -824,16 +824,21 @@ data_page_obj_edit_grid_html.ftl
 			},
 			filePropertyUploadURL : "${contextPath}/data/file/upload",
 			filePropertyDeleteURL : "${contextPath}/data/file/delete",
-			downloadColumnValue : function(property)
+			columnValueDownloadUrl : function(property)
 			{
-				po.editGridFormPage.downloadColumnValue(property);
+				po.editGridFormPage.columnValueDownloadUrl(property);
 			},
 			validationRequiredAsAdd : false,
 			labels : po.editGridFormPage.formLabels,
 			dateFormat : "${sqlDateFormat}",
 			timestampFormat : "${sqlTimestampFormat}",
 			timeFormat : "${sqlTimeFormat}",
-			filePropertyLabelValue : "${filePropertyLabelValue}"
+			lobValuePlaceholders:
+			{
+				blobPlaceholder: "${formDefaultLOBRowMapper.blobPlaceholder}",
+				clobPlaceholder: "${formDefaultLOBRowMapper.clobPlaceholder}",
+				sqlXmlPlaceholder: "${formDefaultLOBRowMapper.sqlXmlPlaceholder}"
+			}
 		});
 		
 		$formPage.position({ my : "left top", at : "left bottom", of : $editFormCell, within : $table});
@@ -841,7 +846,7 @@ data_page_obj_edit_grid_html.ftl
 		if(singlePropertyIndex != null || focus)
 		{
 			//激活第一个属性
-			$form.modelform("activeProperty");
+			$form.tableform("activeProperty");
 		}
 	};
 	
@@ -851,7 +856,7 @@ data_page_obj_edit_grid_html.ftl
 		var $formPage = po.editGridFormPage.element();
 		var $form = po.editGridFormPage.form();
 		
-		if($form.isModelform())
+		if($form.isTableform())
 		{
 			$formPage.hide();
 			
@@ -859,7 +864,7 @@ data_page_obj_edit_grid_html.ftl
 				$formPage.removeClass("focus");
 			
 			//不销毁表单，因为isSubmitWhenPropertySubmit逻辑有可能多次关闭表单面板
-			//$form.modelform("destroy");
+			//$form.tableform("destroy");
 			
 			$formPage.appendTo(po.element(".foot"));
 		}
@@ -880,18 +885,18 @@ data_page_obj_edit_grid_html.ftl
 		for(var pi in propertyIndexesMap)
 		{
 			var pindexes = propertyIndexesMap[pi];
-			var property = $.model.getProperty(model, parseInt(pi));
-			var propertyValue = $.model.propertyValue(data, property.name);
+			var property = $.meta.getProperty(model, parseInt(pi));
+			var propertyValue = $.meta.propertyValue(data, property.name);
 			
 			for(var i=0; i<pindexes.length; i++)
 			{
 				var index = pindexes[i];
 				
 				var originalRowData = po.originalRowData(editDataTable, index.row);
-				var originalCellValue = $.model.propertyValue(originalRowData, property);
+				var originalCellValue = $.meta.propertyValue(originalRowData, property);
 				var myPropertyValue = propertyValue;
 				
-				if($.model.isMultipleProperty(property))
+				if($.meta.isMultipleProperty(property))
 				{
 					//只允许集合属性值在初始值的基础上添加，因此当为null时即是恢复为初始值
 					if(!myPropertyValue || ($.isArray(myPropertyValue) && myPropertyValue.length == 0))
@@ -907,8 +912,8 @@ data_page_obj_edit_grid_html.ftl
 					changed = false;
 				else
 				{
-					if($.model.isShowableValue(myPropertyValue))
-						myPropertyValue = $.model.getShowableRawValue(myPropertyValue);
+					if($.meta.isShowableValue(myPropertyValue))
+						myPropertyValue = $.meta.getShowableRawValue(myPropertyValue);
 					
 					if(myPropertyValue == originalCellValue)
 						changed = false;
@@ -922,7 +927,7 @@ data_page_obj_edit_grid_html.ftl
 						if((ovType == "object" || ovType == "array") && $.type(myPropertyValue) == ovType)
 						{
 							changed = !$.deepEquals(originalCellValue, myPropertyValue, 
-											$.model.findMappedByWith(property));
+											$.meta.findMappedByWith(property));
 						}
 					}
 				}
@@ -935,10 +940,10 @@ data_page_obj_edit_grid_html.ftl
 					storeCellValues.push($.deepClone(propertyValue));
 					
 					//多元属性值单元格显示“[原始元素个数]+[新加元素个数]”
-					if($.model.isMultipleProperty(property) && !po.isClientDataRow(editDataTable, index.row) && $.isArray(myPropertyValue))
+					if($.meta.isMultipleProperty(property) && !po.isClientDataRow(editDataTable, index.row) && $.isArray(myPropertyValue))
 					{
-						var originalLen = $.model.getMultiplePropertyValueLength(originalCellValue);
-						var newLen = $.model.getMultiplePropertyValueLength(myPropertyValue);
+						var originalLen = $.meta.getMultiplePropertyValueLength(originalCellValue);
+						var newLen = $.meta.getMultiplePropertyValueLength(myPropertyValue);
 						
 						storeCellHtmls.push("<span class='original-size'>"+originalLen+"</span>+<span class='add-size'>"+newLen+"</span>");
 					}
@@ -1022,8 +1027,8 @@ data_page_obj_edit_grid_html.ftl
 				if(originalRowData)
 				{
 					var propertyIndex = $.getDataTableCellPropertyIndex(settings, index);
-					var property = $.model.getProperty(model, propertyIndex);
-					var originalCellValue = $.model.propertyValue(originalRowData, property);
+					var property = $.meta.getProperty(model, propertyIndex);
+					var originalCellValue = $.meta.propertyValue(originalRowData, property);
 					
 					this.data((originalCellValue == undefined ? null : originalCellValue));
 				}
@@ -1182,7 +1187,7 @@ data_page_obj_edit_grid_html.ftl
 				var myModifiedCellIndex = myModifiedCellIndexes[i];
 				
 				var updatePropertyIndex = $.getDataTableCellPropertyIndex(editDataTableSettings, myModifiedCellIndex);
-				var updatePropertyName = $.model.getProperty(po.editGridModel, updatePropertyIndex).name;
+				var updatePropertyName = $.meta.getProperty(po.editGridModel, updatePropertyIndex).name;
 				var updatePropertyValue = editDataTable.cell(myModifiedCellIndex).data();
 				
 				//jquery会将null参数转化为空字符串，某些情况时不合逻辑，这里使用后台null转换占位值

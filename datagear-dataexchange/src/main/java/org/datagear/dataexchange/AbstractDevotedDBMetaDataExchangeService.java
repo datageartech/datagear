@@ -35,12 +35,12 @@ public abstract class AbstractDevotedDBMetaDataExchangeService<T extends DataExc
 		this.dbMetaResolver = dbMetaResolver;
 	}
 
-	public DBMetaResolver getDBMetaResolver()
+	public DBMetaResolver getDbMetaResolver()
 	{
 		return dbMetaResolver;
 	}
 
-	public void setDBMetaResolver(DBMetaResolver dbMetaResolver)
+	public void setDbMetaResolver(DBMetaResolver dbMetaResolver)
 	{
 		this.dbMetaResolver = dbMetaResolver;
 	}

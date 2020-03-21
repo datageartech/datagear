@@ -33,24 +33,6 @@
     	</property>
     </bean>
     
-    <bean id="blobToFilePlaceholderFileContent" class="org.datagear.web.util.DirectoryFactory.FileContent">
-    	<property name="name" value="[BLOB]" />
-		<property name="content" value="BLOB-PLACEHOLDER" />
-		<property name="encoding" value="UTF-8" />
-    </bean>
-    
-    <bean id="blobFileManagerDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
-    	<property name="directoryName" value="${directory.blob}" />
-    	<property name="initFileContents">
-    		<list>
-    			<ref bean="blobToFilePlaceholderFileContent" />
-    		</list>
-    	</property>
-    </bean>
-    <bean id="blobFileManagerDirectory" factory-bean="blobFileManagerDirectoryFactory" factory-method="getDirectory" />
-    
-    <bean id="blobToFilePlaceholderName" factory-bean="blobToFilePlaceholderFileContent" factory-method="getName" />
-    
     <bean id="driverEntityManagerRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
     	<property name="directoryName" value="${directory.driver}" />
     </bean>
@@ -60,21 +42,6 @@
     	<property name="directoryName" value="${directory.temp}" />
     </bean>
     <bean id="tempDirectory" factory-bean="tempDirectoryFactory" factory-method="getDirectory" />
-    
-    <bean id="tempDriverLibraryRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
-    	<property name="directoryName" value="${directory.temp.driverEntity}" />
-    </bean>
-    <bean id="tempDriverLibraryRootDirectory" factory-bean="tempDriverLibraryRootDirectoryFactory" factory-method="getDirectory" />
-    
-    <bean id="tempDataExchangeRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
-    	<property name="directoryName" value="${directory.temp.dataExchange}" />
-    </bean>
-    <bean id="tempDataExchangeRootDirectory" factory-bean="tempDataExchangeRootDirectoryFactory" factory-method="getDirectory" />
-    
-    <bean id="tempSqlpadRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
-    	<property name="directoryName" value="${directory.temp.sqlpad}" />
-    </bean>
-    <bean id="tempSqlpadRootDirectory" factory-bean="tempSqlpadRootDirectoryFactory" factory-method="getDirectory" />
     
     <bean id="chartPluginRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
     	<property name="directoryName" value="${directory.chartPlugin}" />
@@ -104,14 +71,7 @@
 		<property name="mapperLocations" value="classpath*:org/datagear/management/mapper/*.xml" />
 	</bean>
 	
-	<bean id="databaseInfoResolver" class="org.datagear.dbinfo.GenericDatabaseInfoResolver">
-		<property name="devotedDatabaseInfoResolvers">
-			<list>
-				<bean class="org.datagear.dbinfo.support.MySqlDevotedDatabaseInfoResolver" />
-				<bean class="org.datagear.dbinfo.WildcardDevotedDatabaseInfoResolver" />
-			</list>
-		</property>
-	</bean>
+	<bean id="dbMetaResolver" class="org.datagear.meta.resolver.GenericDBMetaResolver" />
 	
 	<bean id="driverEntityManager" class="org.datagear.connection.XmlDriverEntityManager" destroy-method="releaseAll">
 		<constructor-arg ref="driverEntityManagerRootDirectory" />
@@ -125,7 +85,7 @@
 		<property name="driverEntityManager" ref="driverEntityManager" />
 		<property name="driverChecker">
 			<bean class="org.datagear.web.util.SqlDriverChecker">
-				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+				<property name="dbMetaResolver" ref="dbMetaResolver" />
 			</bean>
 		</property>
 		<property name="propertiesProcessor">
@@ -140,106 +100,14 @@
 		</property>
 	</bean>
 	
-	<bean id="primitiveModelSource" class="org.datagear.dbmodel.DatabasePrimitiveModelSource" />
-	<bean id="primitiveModelResolver" class="org.datagear.dbmodel.TypeMapPrimitiveModelResolver">
-		<property name="primitiveModelSource" ref="primitiveModelSource" />
-	</bean>
-	
-	<bean id="columnConverterResolver" class="org.datagear.dbmodel.TypeMapColumnConverterResolver">
-		<property name="literalColumnConverterMap">
-			<map>
-				<entry key="BINARY">
-					<bean class="org.datagear.persistence.columnconverter.BytesColumnConverter">
-						<property name="directory" ref="blobFileManagerDirectory" />
-					</bean>
-				</entry>
-				<entry key="BLOB">
-					<bean class="org.datagear.persistence.columnconverter.BlobColumnConverter">
-						<property name="directory" ref="blobFileManagerDirectory" />
-					</bean>
-				</entry>
-				<entry key="CLOB">
-					<bean class="org.datagear.persistence.columnconverter.ClobColumnConverter">
-						<property name="directory" ref="blobFileManagerDirectory" />
-					</bean>
-				</entry>
-				<entry key="LONGNVARCHAR">
-					<bean class="org.datagear.persistence.columnconverter.StringColumnConverter">
-						<property name="directory" ref="blobFileManagerDirectory" />
-					</bean>
-				</entry>
-				<entry key="LONGVARBINARY">
-					<bean class="org.datagear.persistence.columnconverter.BytesColumnConverter">
-						<property name="directory" ref="blobFileManagerDirectory" />
-					</bean>
-				</entry>
-				<entry key="LONGVARCHAR">
-					<bean class="org.datagear.persistence.columnconverter.StringColumnConverter">
-						<property name="directory" ref="blobFileManagerDirectory" />
-					</bean>
-				</entry>
-				<entry key="NCLOB">
-					<bean class="org.datagear.persistence.columnconverter.ClobColumnConverter">
-						<property name="directory" ref="blobFileManagerDirectory" />
-					</bean>
-				</entry>
-				<entry key="VARBINARY">
-					<bean class="org.datagear.persistence.columnconverter.BytesColumnConverter">
-						<property name="directory" ref="blobFileManagerDirectory" />
-					</bean>
-				</entry>
-			</map>
-		</property>
-	</bean>
-	
-	<bean id="modelNameResolver" class="org.datagear.dbmodel.IdentifierModelNameResolver" />
-	
-	<bean id="databaseModelResolver" class="org.datagear.dbmodel.GenericDatabaseModelResolver">
-		<property name="devotedDatabaseModelResolvers">
-			<list>
-				<bean class="org.datagear.dbmodel.WildcardDevotedDatabaseModelResolver">
-					<property name="databaseInfoResolver" ref="databaseInfoResolver" />
-					<property name="primitiveModelResolver" ref="primitiveModelResolver" />
-					<property name="columnConverterResolver" ref="columnConverterResolver" />
-					<property name="conversionService" ref="conversionService" />
-					<property name="modelNameResolver" ref="modelNameResolver" />
-				</bean>
-			</list>
-		</property>
-	</bean>
-	
-	<bean id="cachedDbModelFactory" class="org.datagear.web.util.CachedDbModelFactoryImpl" init-method="init">
-		<property name="databaseModelResolver" ref="databaseModelResolver" />
-		<property name="modelNameResolver" ref="modelNameResolver" />
-	</bean>
+	<bean id="tableCache" class="org.datagear.web.util.TableCache" init-method="init" />
 	
 	<bean id="dialectSource" class="org.datagear.persistence.support.DefaultDialectSource">
-		<property name="databaseInfoResolver" ref="databaseInfoResolver" />
-		<property name="dialectBuilders">
-			<list>
-				<bean class="org.datagear.persistence.support.dialect.MysqlDialectBuilder" />
-				<bean class="org.datagear.persistence.support.dialect.OracleDialectBuilder" />
-				<bean class="org.datagear.persistence.support.dialect.SqlServerDialectBuilder" />
-			</list>
-		</property>
+		<property name="dbMetaResolver" ref="dbMetaResolver" />
 	</bean>
-	
-	<bean id="selectOptions" class="org.datagear.persistence.support.SelectOptions" />
-	
-	<bean id="variableExpressionResolver" class="org.datagear.persistence.support.VariableExpressionResolver" />
-	
-	<bean id="sqlExpressionResolver" class="org.datagear.persistence.support.SqlExpressionResolver" />
 	
 	<bean id="persistenceManager" class="org.datagear.persistence.support.DefaultPersistenceManager">
 		<property name="dialectSource" ref="dialectSource" />
-		<property name="conversionService" ref="conversionService" />
-		<property name="variableExpressionResolver" ref="variableExpressionResolver" />
-		<property name="sqlExpressionResolver" ref="sqlExpressionResolver" />
-		<property name="selectPersistenceOperation">
-			<bean class="org.datagear.persistence.support.SelectPersistenceOperation">
-				<property name="selectOptions" ref="selectOptions" />
-			</bean>
-		</property>
 	</bean>
 	
 	<bean id="schemaService" class="org.datagear.management.service.impl.SchemaServiceImpl">
@@ -367,13 +235,6 @@
 	<bean id="dateFormatter" class="org.datagear.web.format.DateFormatter" />
     
     <bean id="conversionService" class="org.datagear.web.convert.CustomFormattingConversionServiceFactoryBean">
-    	<property name="converters">
-    		<set>
-    			<bean class="org.datagear.web.convert.StringToFileConverter">
-    				<property name="directory" ref="blobFileManagerDirectory" />
-    			</bean>
-    		</set>
-    	</property>
     	<property name="formatters">
     		<set>
     			<ref bean="sqlDateFormatter" />
@@ -384,18 +245,6 @@
     	</property>
     </bean>
     
-    <bean id ="modelDataConverter" class="org.datagear.web.convert.ModelDataConverter">
-		<property name="conversionService" ref="conversionService" />
-		<property name="variableExpressionResolver" ref="variableExpressionResolver" />
-		<property name="sqlExpressionResolver" ref="sqlExpressionResolver" />
-	</bean>
-	
-    <bean id ="classDataConverter" class="org.datagear.web.convert.ClassDataConverter">
-		<property name="conversionService" ref="conversionService" />
-		<property name="variableExpressionResolver" ref="variableExpressionResolver" />
-		<property name="sqlExpressionResolver" ref="sqlExpressionResolver" />
-	</bean>
-	
 	<bean id="localeDateSerializer" class="org.datagear.web.json.fastjson.LocaleDateSerializer">
 		<property name="dateFormatter" ref="dateFormatter" />
 	</bean>
@@ -408,10 +257,6 @@
 	<bean id="localeSqlTimestampSerializer" class="org.datagear.web.json.fastjson.LocaleSqlTimestampSerializer">
 		<property name="sqlTimestampFormatter" ref="sqlTimestampFormatter" />
 	</bean>
-	<bean id="fileSerializer" class="org.datagear.web.json.fastjson.FileSerializer">
-		<property name="directory" ref="blobFileManagerDirectory" />
-		<property name="deleteHeadSeparator" value="true" />
-	</bean>
 	<bean id="fastJsonConfigFactory" class="org.datagear.web.json.fastjson.FastJsonConfigFactory">
 		<property name="objectSerializerStringMap">
 			<map>
@@ -419,7 +264,6 @@
 				<entry key="java.sql.Date" value-ref="localeSqlDateSerializer" />
 				<entry key="java.sql.Time" value-ref="localeSqlTimeSerializer" />
 				<entry key="java.sql.Timestamp" value-ref="localeSqlTimestampSerializer" />
-				<entry key="java.io.File" value-ref="fileSerializer" />
 			</map>
 		</property>
 	</bean>
@@ -464,10 +308,8 @@
 	</bean>
 	<!-- cometd配置结束 -->
 	
-	<bean id="modelSqlSelectService" class="org.datagear.dbmodel.ModelSqlSelectService">
-		<property name="blobFileManagerDirectory" ref="blobFileManagerDirectory" />
-		<property name="blobToFilePlaceholderName" ref="blobToFilePlaceholderName" />
-		<property name="fullLoadingLobMaxRow" value="3" />
+	<bean id="sqlSelectManager" class="org.datagear.persistence.support.SqlSelectManager">
+		<property name="dbMetaResolver" ref="dbMetaResolver" />
 	</bean>
 	
 	<bean id="sqlpadCometdService" class="org.datagear.web.sqlpad.SqlpadCometdService">
@@ -478,36 +320,35 @@
     	<property name="connectionSource" ref="connectionSource" />
     	<property name="messageSource" ref="messageSource" />
     	<property name="sqlpadCometdService" ref="sqlpadCometdService" />
-    	<property name="databaseModelResolver" ref="databaseModelResolver" />
     	<property name="sqlHistoryService" ref="sqlHistoryService" />
-    	<property name="modelSqlSelectService" ref="modelSqlSelectService" />
+    	<property name="sqlSelectManager" ref="sqlSelectManager" />
     </bean>
     
     <bean id="dataExchangeService" class="org.datagear.dataexchange.GenericDataExchangeService">
     	<property name="devotedDataExchangeServices">
     		<list>
     			<bean class="org.datagear.dataexchange.support.CsvDataImportService">
-    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    				<property name="dbMetaResolver" ref="dbMetaResolver" />
     			</bean>
     			<bean class="org.datagear.dataexchange.support.CsvDataExportService">
-    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    				<property name="dbMetaResolver" ref="dbMetaResolver" />
     			</bean>
     			<bean class="org.datagear.dataexchange.support.SqlDataImportService">
     			</bean>
     			<bean class="org.datagear.dataexchange.support.SqlDataExportService">
-    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    				<property name="dbMetaResolver" ref="dbMetaResolver" />
     			</bean>
     			<bean class="org.datagear.dataexchange.support.ExcelDataImportService">
-    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    				<property name="dbMetaResolver" ref="dbMetaResolver" />
     			</bean>
     			<bean class="org.datagear.dataexchange.support.ExcelDataExportService">
-    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    				<property name="dbMetaResolver" ref="dbMetaResolver" />
     			</bean>
     			<bean class="org.datagear.dataexchange.support.JsonDataImportService">
-    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    				<property name="dbMetaResolver" ref="dbMetaResolver" />
     			</bean>
     			<bean class="org.datagear.dataexchange.support.JsonDataExportService">
-    				<property name="databaseInfoResolver" ref="databaseInfoResolver" />
+    				<property name="dbMetaResolver" ref="dbMetaResolver" />
     			</bean>
     			<bean class="org.datagear.dataexchange.BatchDataExchangeService" destroy-method="shutdown">
     				<property name="subDataExchangeService" ref="dataExchangeService" />
@@ -522,21 +363,6 @@
     
 	<!-- 定时任务开始 -->
 	
-	<!-- 删除过期的BLOB文件 -->
-	<bean id="deleteExpiredBlobJob" class="org.datagear.web.scheduling.DeleteExpiredFileJob">
-		<property name="directory" ref="blobFileManagerDirectory" />
-		<property name="ignoreFileName" ref="blobToFilePlaceholderName" />
-		<property name="expireThresholdMinutes" value="60" />
-	</bean>
-	<bean id="deleteExpiredBlobJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="deleteExpiredBlobJob" />
-		<property name="targetMethod" value="delete" />
-	</bean>
-	<bean id="deleteExpiredBlobJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-		<property name="jobDetail" ref="deleteExpiredBlobJobDetail" />
-		<property name="cronExpression" value="0 0,30 * * * ?" /><!-- 每半小时 -->
-	</bean>
-	
 	<!-- 删除临时文件 -->
 	<bean id="deleteTempFileJob" class="org.datagear.web.scheduling.DeleteExpiredFileJob">
 		<property name="directory" ref="tempDirectory" />
@@ -550,11 +376,9 @@
 		<property name="jobDetail" ref="deleteTempFileJobDetail" />
 		<property name="cronExpression" value="0 0 1 * * ?" /><!-- 每天凌晨1点 -->
 	</bean>
-	
 	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
 			<list>
-				<ref bean="deleteExpiredBlobJobCronTrigger" />
 				<ref bean="deleteTempFileJobCronTrigger" />
 			</list>
 		</property>

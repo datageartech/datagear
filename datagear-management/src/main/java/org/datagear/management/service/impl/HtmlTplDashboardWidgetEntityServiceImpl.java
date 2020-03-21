@@ -12,7 +12,7 @@ import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.support.html.HtmlRenderContext;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetFmkRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
@@ -48,7 +48,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 			AuthorizationService authorizationService)
 	{
 		super(sqlSessionFactory);
-		this.htmlTplDashboardWidgetRenderer = (HtmlTplDashboardWidgetFmkRenderer<HtmlRenderContext>) htmlTplDashboardWidgetRenderer;
+		this.htmlTplDashboardWidgetRenderer = (HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext>) htmlTplDashboardWidgetRenderer;
 		this.authorizationService = authorizationService;
 	}
 
@@ -58,7 +58,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 			AuthorizationService authorizationService)
 	{
 		super(sqlSessionTemplate);
-		this.htmlTplDashboardWidgetRenderer = (HtmlTplDashboardWidgetFmkRenderer<HtmlRenderContext>) htmlTplDashboardWidgetRenderer;
+		this.htmlTplDashboardWidgetRenderer = (HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext>) htmlTplDashboardWidgetRenderer;
 		this.authorizationService = authorizationService;
 	}
 

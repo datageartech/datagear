@@ -46,7 +46,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 
 	public DefaultDialectSource()
 	{
-		super();
+		this(null);
 	}
 
 	public DefaultDialectSource(DBMetaResolver dbMetaResolver)

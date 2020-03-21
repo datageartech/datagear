@@ -52,12 +52,6 @@ public class AuthorizationController extends AbstractController
 		super();
 	}
 
-	public AuthorizationController(AuthorizationService authorizationService)
-	{
-		super();
-		this.authorizationService = authorizationService;
-	}
-
 	public AuthorizationService getAuthorizationService()
 	{
 		return authorizationService;

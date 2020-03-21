@@ -63,10 +63,10 @@ boolean isMultipleSelect 是否多选，默认为false
 <script type="text/javascript">
 (function(po)
 {
-	po.data = ($.unref(<@writeJson var=data />) || {});
+	po.data = (<@writeJson var=data /> || {});
 	po.propertyPath = "${propertyPath?js_string}";
 	po.isMultipleSelect = ${isMultipleSelect?c};
-	po.conditionSource = $.unref(<@writeJson var=conditionSource />);
+	po.conditionSource = <@writeJson var=conditionSource />;
 	
 	$.initButtons(po.element(".operation"));
 	
@@ -79,14 +79,14 @@ boolean isMultipleSelect 是否多选，默认为false
 	if(!po.canReadTableData(${schema.dataPermission}))
 		po.element("input[name=viewButton]").attr("disabled", "disabled").hide();
 	
-	po.onModel(function(model)
+	po.onTable(function(model)
 	{
-		var propertyInfo = $.model.getTailPropertyInfo(model, po.propertyPath);
+		var propertyInfo = $.meta.getTailPropertyInfo(model, po.propertyPath);
 		var property = propertyInfo.property;
 		var propertyModel = property.model;
-		var propertyModelTableName = $.model.featureTableName(propertyModel);
+		var propertyModelTableName = $.meta.featureTableName(propertyModel);
 		
-		po.mappedByWith = $.model.findMappedByWith(property);
+		po.mappedByWith = $.meta.findMappedByWith(property);
 
 		po.dataTableAjaxParamParent = po.dataTableAjaxParam;
 		po.dataTableAjaxParam = function()
@@ -137,7 +137,7 @@ boolean isMultipleSelect 是否多选，默认为false
 		{
 			var options =
 			{
-				"data" : { "ignorePropertyName" : $.model.findMappedByWith(property) },
+				"data" : { "ignorePropertyName" : $.meta.findMappedByWith(property) },
 				"pageParam" :
 				{
 					"afterSave" : function(data)

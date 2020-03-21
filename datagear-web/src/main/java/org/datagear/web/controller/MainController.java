@@ -34,11 +34,13 @@ public class MainController extends AbstractController
 {
 	public static final String LATEST_VERSION_SCRIPT_LOCATION = Global.WEB_SITE + "/latest-version.js";
 
+	@Value("${disableRegister}")
 	private boolean disableRegister = false;
 
 	@Autowired
 	private ChangelogResolver changelogResolver;
 
+	@Value("${disableDetectNewVersion}")
 	private boolean disableDetectNewVersion;
 
 	public MainController()
@@ -46,18 +48,11 @@ public class MainController extends AbstractController
 		super();
 	}
 
-	public MainController(ChangelogResolver changelogResolver)
-	{
-		super();
-		this.changelogResolver = changelogResolver;
-	}
-
 	public boolean isDisableRegister()
 	{
 		return disableRegister;
 	}
 
-	@Value("${disableRegister}")
 	public void setDisableRegister(boolean disableRegister)
 	{
 		this.disableRegister = disableRegister;
@@ -68,7 +63,6 @@ public class MainController extends AbstractController
 		return disableDetectNewVersion;
 	}
 
-	@Value("${disableDetectNewVersion}")
 	public void setDisableDetectNewVersion(boolean disableDetectNewVersion)
 	{
 		this.disableDetectNewVersion = disableDetectNewVersion;

@@ -37,7 +37,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.cometd.bayeux.server.ServerChannel;
-import org.datagear.connection.ConnectionSource;
 import org.datagear.dataexchange.BatchDataExchange;
 import org.datagear.dataexchange.BatchDataExchangeResult;
 import org.datagear.dataexchange.DataExchange;
@@ -66,7 +65,6 @@ import org.datagear.dataexchange.support.SqlDataExportOption;
 import org.datagear.dataexchange.support.SqlDataImport;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
-import org.datagear.management.service.SchemaService;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.TableType;
 import org.datagear.meta.resolver.DBMetaResolver;
@@ -89,11 +87,8 @@ import org.datagear.web.cometd.dataexchange.CometdSubDataImportListener;
 import org.datagear.web.cometd.dataexchange.CometdSubTextDataExportListener;
 import org.datagear.web.cometd.dataexchange.CometdSubTextValueDataImportListener;
 import org.datagear.web.cometd.dataexchange.DataExchangeCometdService;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -122,30 +117,17 @@ public class DataExchangeController extends AbstractSchemaConnController
 	private DataExchangeService<DataExchange> dataExchangeService;
 
 	@Autowired
-	@Qualifier("tempDataExchangeRootDirectory")
-	private File tempDataExchangeRootDirectory;
-
-	@Autowired
 	private DataExchangeCometdService dataExchangeCometdService;
 
 	@Autowired
 	private DBMetaResolver dbMetaResolver;
 
+	@Autowired
+	private File tempDirectory;
+
 	public DataExchangeController()
 	{
 		super();
-	}
-
-	public DataExchangeController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource,
-			DataExchangeService<DataExchange> dataExchangeService, File tempDataExchangeRootDirectory,
-			DataExchangeCometdService dataExchangeCometdService, DBMetaResolver dbMetaResolver)
-	{
-		super(messageSource, classDataConverter, schemaService, connectionSource);
-		this.dataExchangeService = dataExchangeService;
-		this.tempDataExchangeRootDirectory = tempDataExchangeRootDirectory;
-		this.dataExchangeCometdService = dataExchangeCometdService;
-		this.dbMetaResolver = dbMetaResolver;
 	}
 
 	public DataExchangeService<DataExchange> getDataExchangeService()
@@ -156,16 +138,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public void setDataExchangeService(DataExchangeService<DataExchange> dataExchangeService)
 	{
 		this.dataExchangeService = dataExchangeService;
-	}
-
-	public File getTempDataExchangeRootDirectory()
-	{
-		return tempDataExchangeRootDirectory;
-	}
-
-	public void setTempDataExchangeRootDirectory(File tempDataExchangeRootDirectory)
-	{
-		this.tempDataExchangeRootDirectory = tempDataExchangeRootDirectory;
 	}
 
 	public DataExchangeCometdService getDataExchangeCometdService()
@@ -186,6 +158,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	public void setDbMetaResolver(DBMetaResolver dbMetaResolver)
 	{
 		this.dbMetaResolver = dbMetaResolver;
+	}
+
+	public File getTempDirectory()
+	{
+		return tempDirectory;
+	}
+
+	public void setTempDirectory(File tempDirectory)
+	{
+		this.tempDirectory = tempDirectory;
 	}
 
 	@RequestMapping("/{schemaId}/import")
@@ -1780,21 +1762,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	protected File getTempDataExchangeDirectory(String dataExchangeId, boolean notNull)
 	{
-		File directory = FileUtil.getFile(this.tempDataExchangeRootDirectory, dataExchangeId);
-
-		if (notNull && !directory.exists())
-			directory.mkdirs();
-
+		File directory = FileUtil.getDirectory(getDataExchangeTmpDirectory(), dataExchangeId, true);
 		return directory;
 	}
 
 	protected File getTempDataExchangeLogDirectory(String dataExchangeId, boolean notNull)
 	{
-		File directory = FileUtil.getFile(this.tempDataExchangeRootDirectory, dataExchangeId + "_logs");
-
-		if (notNull && !directory.exists())
-			directory.mkdirs();
-
+		File directory = FileUtil.getDirectory(getDataExchangeTmpDirectory(), dataExchangeId + "_logs", true);
 		return directory;
 	}
 
@@ -1806,8 +1780,13 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 	protected File getExportFileZip(String dataExchangeId)
 	{
-		File file = FileUtil.getFile(this.tempDataExchangeRootDirectory, dataExchangeId + ".zip");
+		File file = FileUtil.getFile(getDataExchangeTmpDirectory(), dataExchangeId + ".zip");
 		return file;
+	}
+
+	protected File getDataExchangeTmpDirectory()
+	{
+		return FileUtil.getDirectory(this.tempDirectory, "dataExchange", true);
 	}
 
 	/**

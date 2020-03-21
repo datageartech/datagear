@@ -8,7 +8,7 @@
 		if(propertyValue == null)
 			return true;
 		
-		return !$.model.isLongTextJdbcType(property);
+		return !$.meta.isLongTextJdbcType(property);
 	};
 	
 	//所有单元属性值是否已完全获取
@@ -22,7 +22,7 @@
 		for(var i=0; i<properties.length; i++)
 		{
 			var property = properties[i];
-			var propertyValue = $.model.propertyValue(data, property);
+			var propertyValue = $.meta.propertyValue(data, property);
 			
 			if(!po.isSinglePrimitivePropertyValueFullyFetched(model, property, propertyValue))
 				return false;

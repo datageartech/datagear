@@ -11,24 +11,26 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
-import org.datagear.management.service.SchemaService;
 import org.datagear.meta.Table;
-import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.Row;
+import org.datagear.persistence.RowMapper;
+import org.datagear.persistence.SqlParamValueMapper;
 import org.datagear.persistence.support.ConversionSqlParamValueMapper;
 import org.datagear.persistence.support.DefaultLOBRowMapper;
 import org.datagear.persistence.support.expression.ExpressionEvaluationContext;
@@ -39,18 +41,14 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.ClassDataConverter;
-import org.datagear.web.convert.ConverterException;
-import org.datagear.web.convert.ModelDataConverter;
 import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
 import org.datagear.web.format.SqlTimestampFormatter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
-import org.datagear.web.util.TableCache;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
+import org.springframework.core.convert.ConversionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -87,13 +85,7 @@ public class DataController extends AbstractSchemaConnTableController
 	private PersistenceManager persistenceManager;
 
 	@Autowired
-	private DefaultLOBRowMapper dataGetRowMapper;
-
-	@Autowired
-	private DefaultLOBRowMapper dataQueryRowMapper;
-
-	@Autowired
-	private ModelDataConverter modelDataConverter;
+	private File tempDirectory;
 
 	@Autowired
 	private DateFormatter dateFormatter;
@@ -112,24 +104,6 @@ public class DataController extends AbstractSchemaConnTableController
 		super();
 	}
 
-	public DataController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, DBMetaResolver dbMetaResolver,
-			TableCache tableCache, PersistenceManager persistenceManager, DefaultLOBRowMapper dataGetRowMapper,
-			DefaultLOBRowMapper dataQueryRowMapper, ModelDataConverter modelDataConverter, DateFormatter dateFormatter,
-			SqlDateFormatter sqlDateFormatter, SqlTimestampFormatter sqlTimestampFormatter,
-			SqlTimeFormatter sqlTimeFormatter)
-	{
-		super(messageSource, classDataConverter, schemaService, connectionSource, dbMetaResolver, tableCache);
-		this.persistenceManager = persistenceManager;
-		this.dataGetRowMapper = dataGetRowMapper;
-		this.dataQueryRowMapper = dataQueryRowMapper;
-		this.modelDataConverter = modelDataConverter;
-		this.dateFormatter = dateFormatter;
-		this.sqlDateFormatter = sqlDateFormatter;
-		this.sqlTimestampFormatter = sqlTimestampFormatter;
-		this.sqlTimeFormatter = sqlTimeFormatter;
-	}
-
 	public PersistenceManager getPersistenceManager()
 	{
 		return persistenceManager;
@@ -140,34 +114,14 @@ public class DataController extends AbstractSchemaConnTableController
 		this.persistenceManager = persistenceManager;
 	}
 
-	public DefaultLOBRowMapper getDataGetRowMapper()
+	public File getTempDirectory()
 	{
-		return dataGetRowMapper;
+		return tempDirectory;
 	}
 
-	public void setDataGetRowMapper(DefaultLOBRowMapper dataGetRowMapper)
+	public void setTempDirectory(File tempDirectory)
 	{
-		this.dataGetRowMapper = dataGetRowMapper;
-	}
-
-	public DefaultLOBRowMapper getDataQueryRowMapper()
-	{
-		return dataQueryRowMapper;
-	}
-
-	public void setDataQueryRowMapper(DefaultLOBRowMapper dataQueryRowMapper)
-	{
-		this.dataQueryRowMapper = dataQueryRowMapper;
-	}
-
-	public ModelDataConverter getModelDataConverter()
-	{
-		return modelDataConverter;
-	}
-
-	public void setModelDataConverter(ModelDataConverter modelDataConverter)
-	{
-		this.modelDataConverter = modelDataConverter;
+		this.tempDirectory = tempDirectory;
 	}
 
 	public DateFormatter getDateFormatter()
@@ -227,6 +181,7 @@ public class DataController extends AbstractSchemaConnTableController
 				checkReadTableDataPermission(schema, user);
 
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
+				springModel.addAttribute(KEY_TITLE_DISPLAY_DESC, table.getComment());
 				setGridPageAttributes(request, response, springModel, schema, table);
 			}
 		}.execute();
@@ -243,6 +198,8 @@ public class DataController extends AbstractSchemaConnTableController
 		final User user = WebUtils.getUser(request, response);
 		final PagingQuery pagingQuery = getPagingQuery(request);
 
+		final DefaultLOBRowMapper rowMapper = buildQueryDefaultLOBRowMapper();
+
 		ReturnSchemaConnTableExecutor<PagingData<Row>> executor = new ReturnSchemaConnTableExecutor<PagingData<Row>>(
 				request, response, springModel, schemaId, tableName, true)
 		{
@@ -253,7 +210,7 @@ public class DataController extends AbstractSchemaConnTableController
 				checkReadTableDataPermission(schema, user);
 
 				PagingData<Row> pagingData = persistenceManager.pagingQuery(getConnection(), null, table, pagingQuery,
-						getDataQueryRowMapper());
+						rowMapper);
 				return pagingData;
 			}
 		};
@@ -292,32 +249,24 @@ public class DataController extends AbstractSchemaConnTableController
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName,
+			@RequestParam("data") JsonObject rowJson,
 			@RequestParam(value = "batchCount", required = false) Integer batchCount,
 			@RequestParam(value = "batchHandleErrorMode", required = false) BatchHandleErrorMode batchHandleErrorMode)
 			throws Throwable
 	{
+		Row row = convertToRow(rowJson);
+
 		if (batchCount != null && batchCount >= 0)
-			return saveAddBatch(request, response, springModel, schemaId, tableName, batchCount, batchHandleErrorMode);
+			return saveAddBatch(request, response, springModel, schemaId, tableName, row, batchCount,
+					batchHandleErrorMode);
 		else
-			return saveAddSingle(request, response, springModel, schemaId, tableName);
+			return saveAddSingle(request, response, springModel, schemaId, tableName, row);
 	}
 
-	/**
-	 * 单个添加。
-	 * 
-	 * @param request
-	 * @param response
-	 * @param springModel
-	 * @param schemaId
-	 * @param tableName
-	 * @return
-	 * @throws Throwable
-	 */
 	protected ResponseEntity<OperationMessage> saveAddSingle(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, String schemaId, String tableName) throws Throwable
+			org.springframework.ui.Model springModel, String schemaId, String tableName, Row row) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row row = paramMapToRow(request, getParamMap(request, "data"));
 
 		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, false)
 		{
@@ -326,8 +275,7 @@ public class DataController extends AbstractSchemaConnTableController
 					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
-
-				persistenceManager.insert(getConnection(), null, table, row, buildSqlParamValueMapper());
+				persistenceManager.insert(getConnection(), null, table, row, buildSaveSqlParamValueMapper());
 			}
 		}.execute();
 
@@ -335,35 +283,22 @@ public class DataController extends AbstractSchemaConnTableController
 		return responseEntity;
 	}
 
-	/**
-	 * 批量添加。
-	 * 
-	 * @param request
-	 * @param response
-	 * @param springModel
-	 * @param schemaId
-	 * @param tableName
-	 * @param batchCount
-	 * @param batchHandleErrorMode
-	 * @return
-	 * @throws Throwable
-	 */
 	protected ResponseEntity<OperationMessage> saveAddBatch(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, String schemaId, String tableName, int batchCount,
+			org.springframework.ui.Model springModel, String schemaId, String tableName, Row row, int batchCount,
 			BatchHandleErrorMode batchHandleErrorMode) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row row = paramMapToRow(request, getParamMap(request, "data"));
 
 		ResponseEntity<OperationMessage> batchResponseEntity = new BatchReturnExecutor(request, response, springModel,
 				schemaId, tableName, batchCount, batchHandleErrorMode)
 		{
 			@Override
 			protected void doBatchUnit(HttpServletRequest request, HttpServletResponse response, Model springModel,
-					Schema schema, Table table, Connection cn, ExpressionEvaluationContext context) throws Throwable
+					Schema schema, Table table, Connection cn, Dialect dialect,
+					ConversionSqlParamValueMapper paramValueMapper) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
-				persistenceManager.insert(cn, null, table, row, buildSqlParamValueMapper(context));
+				persistenceManager.insert(cn, dialect, table, row, paramValueMapper);
 			}
 		}.execute();
 
@@ -373,11 +308,13 @@ public class DataController extends AbstractSchemaConnTableController
 	@RequestMapping("/{schemaId}/{tableName}/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName) throws Throwable
+			@PathVariable("tableName") String tableName, @RequestParam("data") JsonObject rowJson) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row row = paramMapToRow(request, getParamMap(request, "data"));
+		final Row row = convertToRow(rowJson);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
+
+		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
 
 		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -393,8 +330,8 @@ public class DataController extends AbstractSchemaConnTableController
 
 				if (isLoadPageData)
 				{
-					myRow = persistenceManager.get(cn, null, table, row, buildSqlParamValueMapper(),
-							getDataGetRowMapper());
+					myRow = persistenceManager.get(cn, null, table, row, buildConditionSqlParamValueMapper(),
+							rowMapper);
 
 					if (myRow == null)
 						throw new RecordNotFoundException();
@@ -417,12 +354,14 @@ public class DataController extends AbstractSchemaConnTableController
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName,
+			@RequestParam("originalData") JsonObject originRowJson,
+			@RequestParam("data") JsonObject updateRowJson,
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
 			throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row originalRow = paramMapToRow(request, getParamMap(request, "originalData"));
-		final Row updateRow = paramMapToRow(request, getParamMap(request, "data"));
+		final Row originalRow = convertToRow(originRowJson);
+		final Row updateRow = convertToRow(updateRowJson);
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
 				request, response, springModel, schemaId, tableName, false)
@@ -436,7 +375,7 @@ public class DataController extends AbstractSchemaConnTableController
 				Connection cn = getConnection();
 
 				int count = persistenceManager.update(cn, null, table, originalRow, updateRow,
-						buildSqlParamValueMapper());
+						buildSaveSqlParamValueMapper());
 
 				checkDuplicateRecord(1, count, ignoreDuplication);
 
@@ -456,11 +395,12 @@ public class DataController extends AbstractSchemaConnTableController
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName,
+			@RequestParam("data") JsonArray deleteRowJson,
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
 			throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row[] rows = paramToRows(request, getParamObj(request, "data"));
+		final Row[] rows = convertToRows(deleteRowJson);
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
 				request, response, springModel, schemaId, tableName, false)
@@ -489,11 +429,14 @@ public class DataController extends AbstractSchemaConnTableController
 	@RequestMapping("/{schemaId}/{tableName}/view")
 	public String view(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName) throws Throwable
+			@PathVariable("tableName") String tableName,
+			@RequestParam("data") JsonObject rowJson) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row row = paramMapToRow(request, getParamMap(request, "data"));
+		final Row row = convertToRow(rowJson);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
+
+		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
 
 		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, true)
 		{
@@ -509,8 +452,8 @@ public class DataController extends AbstractSchemaConnTableController
 
 				if (isLoadPageData)
 				{
-					myRow = persistenceManager.get(cn, null, table, row, buildSqlParamValueMapper(),
-							getDataGetRowMapper());
+					myRow = persistenceManager.get(cn, null, table, row, buildConditionSqlParamValueMapper(),
+							rowMapper);
 
 					if (myRow == null)
 						throw new RecordNotFoundException();
@@ -543,20 +486,17 @@ public class DataController extends AbstractSchemaConnTableController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> savess(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName) throws Throwable
+			@PathVariable("tableName") String tableName,
+			@RequestParam(value = "originUpdates", required = false) JsonArray originUpdatesJson,
+			@RequestParam(value = "targetUpdates", required = false) JsonArray targetUpdatesJson,
+			@RequestParam(value = "adds", required = false) JsonArray addsJson,
+			@RequestParam(value = "deletes", required = false) JsonArray deletesJson) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row[] updateOriginRows = paramToRows(request, getParamObj(request, "updates"));
-		final Object updatePropertyNamessParam = getParamMap(request, "updatePropertyNamess");
-		final Object updatePropertyValuessParam = getParamMap(request, "updatePropertyValuess");
-		final Row[] addRows = paramToRows(request, getParamObj(request, "adds"));
-		final Row[] deleteRows = paramToRows(request, getParamObj(request, "deletes"));
-
-		final String[][] updateColumnNamess = (StringUtil.isEmpty(updateOriginRows) ? null
-				: getClassDataConverter().convertToArray(updatePropertyNamessParam, String[].class));
-
-		final Object[][] updateColumnValuess = (StringUtil.isEmpty(updateOriginRows) ? null
-				: getClassDataConverter().convertToArray(updatePropertyValuessParam, Object[].class));
+		final Row[] updateOriginRows = convertToRows(originUpdatesJson);
+		final Row[] updateTargetRows = convertToRows(targetUpdatesJson);
+		final Row[] addRows = convertToRows(addsJson);
+		final Row[] deleteRows = convertToRows(deletesJson);
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
 				request, response, springModel, schemaId, tableName, false)
@@ -577,7 +517,7 @@ public class DataController extends AbstractSchemaConnTableController
 				if (expectedDeleteCount > 0)
 					checkDeleteTableDataPermission(schema, user);
 
-				ConversionSqlParamValueMapper paramValueMapper = buildSqlParamValueMapper();
+				ConversionSqlParamValueMapper paramValueMapper = buildSaveSqlParamValueMapper();
 
 				int acutalUpdateCount = 0, actualAddCount = 0, actualDeleteCount = 0;
 
@@ -585,14 +525,10 @@ public class DataController extends AbstractSchemaConnTableController
 				{
 					for (int i = 0; i < updateOriginRows.length; i++)
 					{
-						String[] updateColumnNames = updateColumnNamess[i];
-						Object[] updateColumnValues = updateColumnValuess[i];
-
-						Row updateRow = buildRow(updateColumnNames, updateColumnValues);
+						Row updateRow = updateTargetRows[i];
 
 						int myUpdateCount = persistenceManager.update(cn, dialect, table, updateOriginRows[i],
-								updateRow,
-								paramValueMapper);
+								updateRow, paramValueMapper);
 						acutalUpdateCount += myUpdateCount;
 					}
 				}
@@ -652,33 +588,44 @@ public class DataController extends AbstractSchemaConnTableController
 
 	@RequestMapping(value = "/{schemaId}/{tableName}/getColumnValuess", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public Object[][] getColumnValuess(HttpServletRequest request, HttpServletResponse response,
+	public List<List<Object>> getColumnValuess(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName) throws Throwable
+			@PathVariable("tableName") String tableName,
+			@RequestParam("datas") JsonArray rowsJson,
+			@RequestParam("columnNamess") JsonArray columnNamessJson) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row[] rows = paramToRows(request, getParamMap(request, "datas"));
-		Object columnNamessParam = getParamMap(request, "columnNamess");
-		final String[][] columnNamess = getClassDataConverter().convertToArray(columnNamessParam, String[].class);
+		final Row[] rows = convertToRows(rowsJson);
 
-		Object[][] columnValuess = new ReturnSchemaConnTableExecutor<Object[][]>(request, response, springModel,
+		final ConversionSqlParamValueMapper paramValueMapper = buildConditionSqlParamValueMapper();
+
+		final DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
+		rowMapper.setReadActualClobRows(-1);
+		rowMapper.setReadActualBlobRows(0);
+		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_HEX);
+
+		List<List<Object>> columnValuess = new ReturnSchemaConnTableExecutor<List<List<Object>>>(request, response,
+				springModel,
 				schemaId, tableName, true)
 		{
 			@Override
-			protected Object[][] execute(HttpServletRequest request, HttpServletResponse response,
+			protected List<List<Object>> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
 
 				Connection cn = getConnection();
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
 
-				Object[][] columnValuess = new Object[rows.length][];
+				List<List<Object>> columnValuess = new ArrayList<List<Object>>(rows.length);
 
 				for (int i = 0; i < rows.length; i++)
 				{
 					Row row = rows[i];
-					String[] columnNames = columnNamess[i];
-					columnValuess[i] = loadColumnValues(cn, table, row, columnNames);
+					@SuppressWarnings("unchecked")
+					List<String> columnNames = (List<String>) columnNamessJson.get(i);
+					columnValuess
+							.add(loadColumnValues(cn, dialect, table, row, columnNames, paramValueMapper, rowMapper));
 				}
 
 				return columnValuess;
@@ -691,11 +638,18 @@ public class DataController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/{schemaId}/{tableName}/downloadColumnValue")
 	public void downloadColumnValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("columnName") final String columnName)
+			@PathVariable("tableName") String tableName,
+			@RequestParam("data") JsonObject rowJson, @RequestParam("columnName") final String columnName)
 			throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row row = paramMapToRow(request, getParamMap(request, "data"));
+		final Row row = convertToRow(rowJson);
+
+		final DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
+		rowMapper.setReadActualClobRows(0);
+		rowMapper.setReadActualBlobRows(1);
+		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_NONE);
+		rowMapper.setBlobDirectory(getDataBlobTmpDirectory());
 
 		Object columnValue = new ReturnSchemaConnTableExecutor<Object>(request, response, springModel, schemaId,
 				tableName, true)
@@ -708,9 +662,8 @@ public class DataController extends AbstractSchemaConnTableController
 
 				Connection cn = getConnection();
 
-				Row getRow = persistenceManager.get(cn, null, table, row, buildSqlParamValueMapper(),
-						getDataGetRowMapper());
-
+				Row getRow = persistenceManager.get(cn, null, table, row, buildConditionSqlParamValueMapper(),
+						rowMapper);
 				return (getRow == null ? null : getRow.get(columnName));
 			}
 		}.execute();
@@ -728,7 +681,7 @@ public class DataController extends AbstractSchemaConnTableController
 			if (!StringUtil.isEmpty(columnValue))
 			{
 				if (columnValue instanceof String)
-					in = IOUtil.getInputStream(getDataGetRowMapper().getBigBinaryFile((String) columnValue));
+					in = IOUtil.getInputStream(rowMapper.getBlobFile((String) columnValue));
 				else if (columnValue instanceof byte[])
 					in = new ByteArrayInputStream((byte[]) columnValue);
 				else
@@ -750,7 +703,7 @@ public class DataController extends AbstractSchemaConnTableController
 	public FileInfo fileUpload(HttpServletRequest request, @RequestParam("file") MultipartFile multipartFile)
 			throws Throwable
 	{
-		File file = FileUtil.generateUniqueFile(buildSqlParamValueMapper().getFilePathValueDirectory());
+		File file = FileUtil.generateUniqueFile(buildSaveSqlParamValueMapper().getFilePathValueDirectory());
 
 		multipartFile.transferTo(file);
 
@@ -764,7 +717,7 @@ public class DataController extends AbstractSchemaConnTableController
 	public FileInfo fileDelete(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") String fileName) throws Throwable
 	{
-		File file = FileUtil.getFile(buildSqlParamValueMapper().getFilePathValueDirectory(), fileName);
+		File file = FileUtil.getFile(buildSaveSqlParamValueMapper().getFilePathValueDirectory(), fileName);
 
 		FileInfo fileInfo = FileUtil.getFileInfo(file);
 
@@ -773,7 +726,31 @@ public class DataController extends AbstractSchemaConnTableController
 		return fileInfo;
 	}
 
-	protected Row buildRow(String[] names, Object[] values)
+	protected Row convertToRow(Map<String, ?> map)
+	{
+		if (map == null)
+			return null;
+		else if (map instanceof Row)
+			return (Row) map;
+		else
+			return new Row(map);
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Row[] convertToRows(List<?> list)
+	{
+		if (list == null)
+			return null;
+
+		Row[] rows = new Row[list.size()];
+
+		for (int i = 0; i < list.size(); i++)
+			rows[i] = convertToRow((Map<String, ?>) list.get(i));
+
+		return rows;
+	}
+
+	protected Row convertToRow(String[] names, Object[] values)
 	{
 		Row row = new Row();
 
@@ -788,28 +765,23 @@ public class DataController extends AbstractSchemaConnTableController
 
 	/**
 	 * 获取给定表的多个列值。
-	 * 
-	 * @param cn
-	 * @param table
-	 * @param row
-	 * @param columnNames
-	 * @return
-	 * @throws Throwable
 	 */
-	protected Object[] loadColumnValues(Connection cn, Table table, Row row, String[] columnNames)
+	@SuppressWarnings("unchecked")
+	protected List<Object> loadColumnValues(Connection cn, Dialect dialect, Table table, Row row,
+			List<String> columnNames, SqlParamValueMapper paramValueMapper, RowMapper rowMapper)
 			throws Throwable
 	{
-		if (columnNames == null || columnNames.length == 0)
-			return null;
+		if (StringUtil.isEmpty(columnNames))
+			return Collections.EMPTY_LIST;
 
-		Object[] columnValues = new Object[columnNames.length];
+		List<Object> columnValues = new ArrayList<Object>(columnNames.size());
 
-		Row getRow = persistenceManager.get(cn, null, table, row, buildSqlParamValueMapper(), getDataGetRowMapper());
+		Row getRow = persistenceManager.get(cn, dialect, table, row, paramValueMapper, rowMapper);
 
 		if (getRow != null)
 		{
-			for (int i = 0; i < columnNames.length; i++)
-				columnValues[i] = getRow.get(columnNames[i]);
+			for (int i = 0; i < columnNames.size(); i++)
+				columnValues.add(getRow.get(columnNames.get(i)));
 		}
 
 		return columnValues;
@@ -821,40 +793,48 @@ public class DataController extends AbstractSchemaConnTableController
 		return super.buildMessageCode("data", code);
 	}
 
-	protected Row paramMapToRow(HttpServletRequest request, Map<String, ?> paramMap)
+	protected DefaultLOBRowMapper buildQueryDefaultLOBRowMapper()
 	{
-		// TODO
-		return new Row();
+		DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
+		rowMapper.setReadActualClobRows(0);
+		rowMapper.setReadActualBlobRows(0);
+		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_HEX);
+
+		return rowMapper;
 	}
 
-	protected Row[] paramToRows(HttpServletRequest request, Object param)
+	protected DefaultLOBRowMapper buildFormDefaultLOBRowMapper()
 	{
-		// TODO
-		return new Row[0];
+		DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
+		rowMapper.setReadActualClobRows(1);
+		rowMapper.setReadActualBlobRows(0);
+		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_HEX);
+
+		return rowMapper;
 	}
 
-	protected ConversionSqlParamValueMapper buildSqlParamValueMapper()
+	protected ConversionSqlParamValueMapper buildSaveSqlParamValueMapper()
 	{
-		return buildSqlParamValueMapper(null);
-	}
-
-	/**
-	 * 
-	 * @param evaluationContext
-	 *            允许为{@code null}
-	 * @return
-	 */
-	protected ConversionSqlParamValueMapper buildSqlParamValueMapper(ExpressionEvaluationContext evaluationContext)
-	{
-		if (evaluationContext == null)
-			evaluationContext = new ExpressionEvaluationContext();
-
 		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
-		// TODO 设置
-		// mapper.setConversionService(conversionService);
-		// mapper.setFilePathValueDirectory(filePathValueDirectory);
-		mapper.setExpressionEvaluationContext(evaluationContext);
+		mapper.setConversionService(getConversionService());
+		mapper.setFilePathValueDirectory(getDataBlobTmpDirectory());
+		mapper.setExpressionEvaluationContext(new ExpressionEvaluationContext());
+
 		return mapper;
+	}
+
+	protected ConversionSqlParamValueMapper buildConditionSqlParamValueMapper()
+	{
+		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
+		mapper.setConversionService(getConversionService());
+		mapper.setFilePathValueDirectory(getDataBlobTmpDirectory());
+
+		return mapper;
+	}
+
+	protected File getDataBlobTmpDirectory()
+	{
+		return FileUtil.getDirectory(this.tempDirectory, "data", true);
 	}
 
 	protected void checkDuplicateRecord(int expectedCount, int actualCount, Boolean ignoreDuplication)
@@ -898,6 +878,8 @@ public class DataController extends AbstractSchemaConnTableController
 	protected void setGridPageAttributes(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, Schema schema, Table table)
 	{
+		springModel.addAttribute("queryDefaultLOBRowMapper", buildQueryDefaultLOBRowMapper());
+
 		// 编辑表格需要表单属性
 		setFormPageAttributes(request, springModel);
 	}
@@ -916,7 +898,7 @@ public class DataController extends AbstractSchemaConnTableController
 		springModel.addAttribute("sqlDateFormat", this.sqlDateFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("sqlTimestampFormat", this.sqlTimestampFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("sqlTimeFormat", this.sqlTimeFormatter.getParsePatternDesc(locale));
-		springModel.addAttribute("queryRowMapper", getDataQueryRowMapper());
+		springModel.addAttribute("formDefaultLOBRowMapper", buildFormDefaultLOBRowMapper());
 
 		if (!containsAttributes(request, springModel, KEY_IS_CLIENT_PAGE_DATA))
 		{
@@ -1003,7 +985,9 @@ public class DataController extends AbstractSchemaConnTableController
 			int successCount = 0;
 			int failCount = 0;
 
-			ExpressionEvaluationContext context = new ExpressionEvaluationContext();
+			Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
+			ConversionSqlParamValueMapper paramValueMapper = buildSaveSqlParamValueMapper();
+			ExpressionEvaluationContext evaluationContext = paramValueMapper.getExpressionEvaluationContext();
 
 			int index = 0;
 
@@ -1011,7 +995,7 @@ public class DataController extends AbstractSchemaConnTableController
 			{
 				try
 				{
-					doBatchUnit(request, response, springModel, schema, table, cn, context);
+					doBatchUnit(request, response, springModel, schema, table, cn, dialect, paramValueMapper);
 
 					BatchUnitResult batchUnitResult = new BatchUnitResult(index);
 					batchResults.add(batchUnitResult);
@@ -1041,8 +1025,8 @@ public class DataController extends AbstractSchemaConnTableController
 				}
 				finally
 				{
-					context.clearCachedValue();
-					context.incrementVariableIndex();
+					evaluationContext.clearCachedValue();
+					evaluationContext.incrementVariableIndex();
 				}
 			}
 
@@ -1109,7 +1093,7 @@ public class DataController extends AbstractSchemaConnTableController
 		 */
 		protected boolean isBatchBreakException(Exception e)
 		{
-			if (e instanceof ConverterException)
+			if (e instanceof ConversionException)
 				return true;
 
 			// 变量表达式语法错误
@@ -1143,19 +1127,10 @@ public class DataController extends AbstractSchemaConnTableController
 
 		/**
 		 * 执行批处理单元。
-		 * 
-		 * @param request
-		 * @param response
-		 * @param springModel
-		 * @param schema
-		 * @param table
-		 * @param cn
-		 * @param context
-		 * @throws Throwable
 		 */
 		protected abstract void doBatchUnit(HttpServletRequest request, HttpServletResponse response,
-				org.springframework.ui.Model springModel, Schema schema, Table table, Connection cn,
-				ExpressionEvaluationContext context) throws Throwable;
+				org.springframework.ui.Model springModel, Schema schema, Table table, Connection cn, Dialect dialect,
+				ConversionSqlParamValueMapper paramValueMapper) throws Throwable;
 	}
 
 	/**

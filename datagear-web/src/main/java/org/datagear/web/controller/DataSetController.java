@@ -15,11 +15,9 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataType;
 import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.SqlDataSetSupport;
-import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
-import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlDataSetEntityService;
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
@@ -29,10 +27,8 @@ import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -70,15 +66,6 @@ public class DataSetController extends AbstractSchemaConnController
 	public DataSetController()
 	{
 		super();
-	}
-
-	public DataSetController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource,
-			SqlDataSetEntityService sqlDataSetEntityService, SqlSelectManager sqlSelectManager)
-	{
-		super(messageSource, classDataConverter, schemaService, connectionSource);
-		this.sqlDataSetEntityService = sqlDataSetEntityService;
-		this.sqlSelectManager = sqlSelectManager;
 	}
 
 	public SqlDataSetEntityService getSqlDataSetEntityService()

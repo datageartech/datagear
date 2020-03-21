@@ -754,7 +754,7 @@ Schema schema 数据库，不允许为null
 						{
 							return renderValue;
 						}
-						else if($.model.isLongTextJdbcType(property))
+						else if($.meta.isLongTextJdbcType(property))
 						{
 							if(rowIndex < po.sqlResultReadActualLobRows)
 							{
@@ -765,7 +765,7 @@ Schema schema 数据库，不允许为null
 							else
 								return renderValue;
 						}
-						else if($.model.isBinaryJdbcType(property))
+						else if($.meta.isBinaryJdbcType(property))
 						{
 							if(rowIndex < po.sqlResultReadActualLobRows)
 							{
@@ -775,7 +775,7 @@ Schema schema 数据库，不允许为null
 							else
 								return renderValue;
 						}
-						else if($.model.isStringJdbcType(property))
+						else if($.meta.isStringJdbcType(property))
 						{
 							if(data != renderValue)
 							{

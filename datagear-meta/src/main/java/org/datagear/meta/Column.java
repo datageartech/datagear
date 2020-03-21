@@ -49,6 +49,9 @@ public class Column implements Serializable
 	/*** 是否可用于排序的 */
 	private boolean sortable = false;
 
+	/** 列在表中的顺序 */
+	private int position = 1;
+
 	public Column()
 	{
 		super();
@@ -191,6 +194,16 @@ public class Column implements Serializable
 		this.sortable = sortable;
 	}
 
+	public int getPosition()
+	{
+		return position;
+	}
+
+	public void setPosition(int position)
+	{
+		this.position = position;
+	}
+
 	@Override
 	public String toString()
 	{
@@ -198,6 +211,6 @@ public class Column implements Serializable
 				+ size
 				+ ", decimalDigits=" + decimalDigits + ", nullable=" + nullable + ", comment=" + comment
 				+ ", defaultValue=" + defaultValue + ", autoincrement=" + autoincrement + ", searchableType="
-				+ searchableType + ", sortable=" + this.sortable + "]";
+				+ searchableType + ", sortable=" + this.sortable + ", position=" + this.position + "]";
 	}
 }

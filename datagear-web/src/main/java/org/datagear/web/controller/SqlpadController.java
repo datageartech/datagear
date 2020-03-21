@@ -16,11 +16,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SqlHistory;
 import org.datagear.management.domain.User;
-import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -35,15 +33,12 @@ import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionService.CommitMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.ExceptionHandleMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -69,34 +64,19 @@ public class SqlpadController extends AbstractSchemaConnController
 	private SqlSelectManager sqlSelectManager;
 
 	@Autowired
-	private DefaultLOBRowMapper sqlpadSelectRowMapper;
-
-	@Autowired
 	private SqlpadExecutionService sqlpadExecutionService;
 
 	@Autowired
 	private SqlHistoryService sqlHistoryService;
 
 	@Autowired
-	@Qualifier("tempSqlpadRootDirectory")
-	private File tempSqlpadRootDirectory;
+	private File tempDirectory;
+
+	private int sqlResultReadActualLobRows = 3;
 
 	public SqlpadController()
 	{
 		super();
-	}
-
-	public SqlpadController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, SqlSelectManager sqlSelectManager,
-			DefaultLOBRowMapper sqlpadSelectRowMapper, SqlpadExecutionService sqlpadExecutionService,
-			SqlHistoryService sqlHistoryService, File tempSqlpadRootDirectory)
-	{
-		super(messageSource, classDataConverter, schemaService, connectionSource);
-		this.sqlSelectManager = sqlSelectManager;
-		this.sqlpadSelectRowMapper = sqlpadSelectRowMapper;
-		this.sqlpadExecutionService = sqlpadExecutionService;
-		this.sqlHistoryService = sqlHistoryService;
-		this.tempSqlpadRootDirectory = tempSqlpadRootDirectory;
 	}
 
 	public SqlSelectManager getSqlSelectManager()
@@ -107,16 +87,6 @@ public class SqlpadController extends AbstractSchemaConnController
 	public void setSqlSelectManager(SqlSelectManager sqlSelectManager)
 	{
 		this.sqlSelectManager = sqlSelectManager;
-	}
-
-	public DefaultLOBRowMapper getSqlpadSelectRowMapper()
-	{
-		return sqlpadSelectRowMapper;
-	}
-
-	public void setSqlpadSelectRowMapper(DefaultLOBRowMapper sqlpadSelectRowMapper)
-	{
-		this.sqlpadSelectRowMapper = sqlpadSelectRowMapper;
 	}
 
 	public SqlpadExecutionService getSqlpadExecutionService()
@@ -139,14 +109,24 @@ public class SqlpadController extends AbstractSchemaConnController
 		this.sqlHistoryService = sqlHistoryService;
 	}
 
-	public File getTempSqlpadRootDirectory()
+	public File getTempDirectory()
 	{
-		return tempSqlpadRootDirectory;
+		return tempDirectory;
 	}
 
-	public void setTempSqlpadRootDirectory(File tempSqlpadRootDirectory)
+	public void setTempDirectory(File tempDirectory)
 	{
-		this.tempSqlpadRootDirectory = tempSqlpadRootDirectory;
+		this.tempDirectory = tempDirectory;
+	}
+
+	public int getSqlResultReadActualLobRows()
+	{
+		return sqlResultReadActualLobRows;
+	}
+
+	public void setSqlResultReadActualLobRows(int sqlResultReadActualLobRows)
+	{
+		this.sqlResultReadActualLobRows = sqlResultReadActualLobRows;
 	}
 
 	@RequestMapping("/{schemaId}")
@@ -174,7 +154,7 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		springModel.addAttribute("sqlpadId", sqlpadId);
 		springModel.addAttribute("sqlpadChannelId", sqlpadChannelId);
-		springModel.addAttribute("sqlResultReadActualLobRows", this.sqlpadSelectRowMapper.getReadActualLobRows());
+		springModel.addAttribute("sqlResultReadActualLobRows", this.sqlResultReadActualLobRows);
 		springModel.addAttribute("initSql", initSql);
 
 		return "/sqlpad/sqlpad";
@@ -226,7 +206,7 @@ public class SqlpadController extends AbstractSchemaConnController
 		List<SqlStatement> sqlStatements = sqlScriptParser.parseAll();
 
 		this.sqlpadExecutionService.submit(user, schema, sqlpadId,
-				FileUtil.getDirectory(this.tempSqlpadRootDirectory, sqlpadId), sqlStatements, commitMode,
+				FileUtil.getDirectory(getSqlpadTmpDirectory(), sqlpadId), sqlStatements, commitMode,
 				exceptionHandleMode, overTimeThreashold, resultsetFetchSize, WebUtils.getLocale(request));
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
@@ -279,7 +259,7 @@ public class SqlpadController extends AbstractSchemaConnController
 				checkReadTableDataPermission(schema, user);
 
 				SqlSelectResult result = getSqlSelectManager().select(getConnection(), sql, startRowFinal,
-						fetchSizeFinal, getSqlpadSelectRowMapper());
+						fetchSizeFinal, buildDefaultLOBRowMapper());
 
 				return result;
 			}
@@ -296,7 +276,7 @@ public class SqlpadController extends AbstractSchemaConnController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@RequestParam("sqlpadId") String sqlpadId, @RequestParam("value") String value) throws Throwable
 	{
-		File blobFile = this.getSqlpadSelectRowMapper().getBigBinaryFile(value);
+		File blobFile = buildDefaultLOBRowMapper().getBlobFile(value);
 
 		if (!blobFile.exists())
 			throw new FileNotFoundException(value);
@@ -351,13 +331,34 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		checkDeleteTableDataPermission(schema, user);
 
-		SqlpadFileDirectory directory = SqlpadFileDirectory.valueOf(this.tempSqlpadRootDirectory, sqlpadId);
+		SqlpadFileDirectory directory = SqlpadFileDirectory.valueOf(getSqlpadTmpDirectory(), sqlpadId);
 		File file = directory.createFileFor(multipartFile.getOriginalFilename());
 		multipartFile.transferTo(file);
 
 		FileInfo fileInfo = new FileInfo(file.getName(), file.length());
 
 		return fileInfo;
+	}
+
+	protected DefaultLOBRowMapper buildDefaultLOBRowMapper()
+	{
+		DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
+		rowMapper.setReadActualClobRows(this.sqlResultReadActualLobRows);
+		rowMapper.setReadActualBlobRows(this.sqlResultReadActualLobRows);
+		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_HEX);
+		rowMapper.setBlobDirectory(getSqlpadBlobTmpDirectory());
+
+		return rowMapper;
+	}
+
+	protected File getSqlpadTmpDirectory()
+	{
+		return FileUtil.getDirectory(this.tempDirectory, "sqlpad", true);
+	}
+
+	protected File getSqlpadBlobTmpDirectory()
+	{
+		return FileUtil.getDirectory(this.tempDirectory, "sqlpadblob", true);
 	}
 
 	protected String generateSqlpadId(HttpServletRequest request, HttpServletResponse response)

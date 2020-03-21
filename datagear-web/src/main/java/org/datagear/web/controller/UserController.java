@@ -15,10 +15,8 @@ import org.datagear.management.service.UserService;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -45,14 +43,6 @@ public class UserController extends AbstractController
 	public UserController()
 	{
 		super();
-	}
-
-	public UserController(MessageSource messageSource, ClassDataConverter classDataConverter, UserService userService,
-			SchemaService schemaService)
-	{
-		super(messageSource, classDataConverter);
-		this.userService = userService;
-		this.schemaService = schemaService;
 	}
 
 	public UserService getUserService()

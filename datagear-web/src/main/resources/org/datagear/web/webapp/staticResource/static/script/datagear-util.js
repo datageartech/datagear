@@ -8,7 +8,7 @@
  * 依赖:
  * jquery.js
  * jquery-ui.js
- * datagear-model.js
+ * datagear-meta.js
  */
 
 (function($, undefined)
@@ -709,7 +709,7 @@
 			if(text == null)
 				return "";
 			
-			return $.model.escapeHtml(text);
+			return $.meta.escapeHtml(text);
 		},
 		
 		/**
@@ -735,12 +735,12 @@
 		},
 		
 		/**
-		 * 为DataTables转义属性名。
+		 * 为DataTables转义列名。
 		 * 参考jquery.dataTables.js的_fnSplitObjNotation函数。
 		 */
-		escapePropertyNameForDataTables : function(propertyName)
+		escapeColumnNameForDataTables : function(columnName)
 		{
-			return propertyName;
+			return columnName;
 			
 			/* 后台dbmodel已经限定了propertyName不会包含特殊字符，不再需要此逻辑
 			var pn = "";
@@ -762,11 +762,11 @@
 		},
 		
 		/**
-		 * 反转义由escapePropertyNameForDataTables转义的属性名。
+		 * 反转义由escapeColumnNameForDataTables转义的列名。
 		 */
-		unescapePropertyNameForDataTables : function(propertyName)
+		unescapeColumnNameForDataTables : function(columnName)
 		{
-			return propertyName;
+			return columnName;
 			
 			/* 后台dbmodel已经限定了propertyName不会包含特殊字符，不再需要此逻辑
 			var pn = "";
@@ -826,42 +826,33 @@
 		/**
 		 * 构建Datatables组件的“columns”选项值。
 		 * 
-		 * @param model 必选，模型
+		 * @param table 必选，表
 		 * @param options 选项，格式为：
 		 * 			{
-		 * 				//可选，忽略的属性名称
-		 * 				ignorePropertyNames : undefined,
-		 *				
 		 * 				//可选，字符串最大显示长度
 		 * 				stringDisplayThreshold : 47,
 		 * 
 		 * 				//可选，单元格渲染后置处理函数
-		 * 				postRender : function(data, type, rowData, meta, rowIndex, renderValue, model, property, thisColumn){}
+		 * 				postRender : function(data, type, rowData, meta, rowIndex, renderValue, table, column, dtColumn){}
 		 * 			}
 		 * @returns {Array}
 		 */
-		buildDataTablesColumns : function(model, options)
+		buildDataTablesColumns : function(table, options)
 		{
 			options = $.extend({ stringDisplayThreshold : 47 }, options);
 			
-			var properties = model.properties;
+			var columns = table.columns;
 			
-			var columns = [];
-			for(var i=0; i<properties.length; i++)
+			var dtColumns = [];
+			for(var i=0; i<columns.length; i++)
 			{
-				var property = properties[i];
-				var propName = property.name;
+				var column = columns[i];
 				
-				if($.model.containsOrEquals(options.ignorePropertyNames, propName))
-					continue;
-				
-				var notReadable = $.model.hasFeatureNotReadable(property);
-				
-				columns.push(
+				dtColumns.push(
 				{
-					title: $.model.displayInfoHtml(property, "a"),
-					data: $.escapePropertyNameForDataTables(propName),
-					propertyIndex: i,
+					title: $.meta.displayInfoHtml(column, "a"),
+					data: $.escapeColumnNameForDataTables(column.name),
+					columnIndex: i,
 					options : options,
 					render: function(data, type, row, meta)
 					{
@@ -869,15 +860,15 @@
 						
 						var _this = meta.settings.aoColumns[meta.col];
 						
-						var propertyIndex = _this.propertyIndex;
-						var property = model.properties[propertyIndex];
+						var columnIndex = _this.columnIndex;
+						var column = table.columns[columnIndex];
 						
-						renderValue = $.model.tokenProperty(property, data);
+						renderValue = (data ? data+"" : "");
 						renderValue = $.truncateIf(renderValue, "...", _this.options.stringDisplayThreshold);
 						renderValue = $.escapeHtml(renderValue);
 						
 						//解决当所有属性值都为null时，行渲染会很细问题
-						if(propertyIndex == 0 && renderValue == "")
+						if(columnIndex == 0 && renderValue == "")
 							renderValue = " ";
 						
 						if(_this.options.postRender)
@@ -886,19 +877,18 @@
 							if(rowIndex.length)
 								rowIndex = rowIndex[0];
 							
-							return _this.options.postRender(data, type, row, meta, rowIndex, renderValue, model, property, _this);
+							return _this.options.postRender(data, type, row, meta, rowIndex, renderValue, table, column, _this);
 						}
 						else
 							return renderValue;
 					},
 					defaultContent: "",
-					orderable: !notReadable,
-					searchable: !notReadable,
-					className: (notReadable ? "ui-state-disabled" : "")
+					orderable: column.sortable,
+					searchable: true
 				});
 			}
 			
-			return columns;
+			return dtColumns;
 		},
 		
 		/**
@@ -908,7 +898,7 @@
 		{
 			var columnMetas = this.getDataTableColumnMetas(settings);
 			
-			var escapedName = $.escapePropertyNameForDataTables(propertyName);
+			var escapedName = $.escapeColumnNameForDataTables(propertyName);
 			
 			for(var i=0; i<columnMetas.length; i++)
 			{
@@ -954,12 +944,12 @@
 		{
 			var columnMetas = this.getDataTableColumnMetas(settings);
 			
-			var propertyIndex = columnMetas[cellIndex.column].propertyIndex;
+			var columnIndex = columnMetas[cellIndex.column].columnIndex;
 			
-			if(propertyIndex == undefined)
+			if(columnIndex == undefined)
 				throw new Error("Not valid column index ["+columnIndex+"] for getting column property");
 			
-			return propertyIndex;
+			return columnIndex;
 		},
 		
 		/**
@@ -969,20 +959,20 @@
 		{
 			var columnMetas = this.getDataTableColumnMetas(settings);
 			
-			var propertyIndexesMap = {};
+			var columnIndexesMap = {};
 			for(var i=0; i<cellIndexes.length; i++)
 			{
 				var index = cellIndexes[i];
-				var propertyIndex = columnMetas[index.column].propertyIndex;
+				var columnIndex = columnMetas[index.column].columnIndex;
 				
-				if(propertyIndex == undefined)
+				if(columnIndex == undefined)
 					throw new Error("Not valid column index ["+columnIndex+"] for getting column property");
 				
-				var indexes = (propertyIndexesMap[propertyIndex] || (propertyIndexesMap[propertyIndex] = []));
+				var indexes = (columnIndexesMap[columnIndex] || (columnIndexesMap[columnIndex] = []));
 				indexes.push(index);
 			}
 			
-			return propertyIndexesMap;
+			return columnIndexesMap;
 		},
 		
 		/**
@@ -1670,7 +1660,7 @@
 		    	{
 		    		key = keys[length];
 		    		
-		    		if($.model.containsOrEquals(ignorePropertyNames, key))
+		    		if($.meta.containsOrEquals(ignorePropertyNames, key))
 		    			continue;
 		    		
 		    		if (!(b.hasOwnProperty(key) && $.deepEquals(a[key], b[key], null, aStack, bStack)))
@@ -2784,366 +2774,6 @@
 		}
 	});
 	
-	//定义fastjson输出的循环引用恢复函数
-	$.extend(
-	{
-		//引用对象的引用属性名
-		REF_NAME : "$ref",
-		
-		//引用根对象
-		REF_VALUE_ROOT : "$",
-		
-		//引用上级对象
-		REF_VALUE_PARENT : "..",
-		
-		//引用对象自身
-		REF_VALUE_THIS : "@",
-		
-		//引用路径前缀
-		REF_VALUE_PATH_PREFIX : "$",
-		
-		//$.unref处理标识
-		UNREF_FLAG : "___DATA_GEAR_ZY_UNREF_FLAG___",
-		
-		/**
-		 * 复制对象。
-		 */
-		deepClone : function(obj)
-		{
-			return this.unref(this.ref(obj));
-		},
-		
-		/**
-		 * 复制对象，并将对象内的重复引用替换为引用路径，格式为：{ $.REF_NAME : $.REF_VALUE... }。
-		 * 
-		 * param obj
-		 */
-		ref : function(obj)
-		{
-			return $._ref(null, null, obj, $.REF_VALUE_PATH_PREFIX, []);
-		},
-		
-		/**
-		 * 复制参数对象，并将参数值内的重复引用替换为“$ref”。
-		 * 
-		 * @param param 参数对象
-		 */
-		refParam : function(param)
-		{
-			if(typeof(param) == "object")
-			{
-				//数组
-				if(Array.isArray(param))
-				{
-					var copyParam = [];
-					
-					for(var i=0; i<param.length; i++)
-					{
-						copyParam[i] = $.ref(param[i]);
-					}
-					
-					param = copyParam;
-				}
-				else
-				{
-					var copyParam = {};
-					
-					for(var propName in param)
-					{
-						var propValue = param[propName];
-						
-						copyParam[propName] = $.ref(propValue);
-					}
-					
-					param = copyParam;
-				}
-			}
-			
-			return param;
-		},
-		
-		_ref : function(root, parent, obj, path, objPathArray)
-		{
-			var refObj = undefined;
-			
-			if(obj && typeof(obj) == "object" && !obj[$.REF_NAME])
-			{
-				if(obj == root)
-				{
-					refObj = {};
-					refObj[$.REF_NAME] = $.REF_VALUE_ROOT;
-				}
-				else if(obj == parent)
-				{
-					refObj = {};
-					refObj[$.REF_NAME] = $.REF_VALUE_PARENT;
-				}
-				else
-				{
-					for(var i=0; i<objPathArray.length; i++)
-					{
-						if(objPathArray[i].obj == obj)
-						{
-							refObj = {};
-							refObj[$.REF_NAME] = objPathArray[i].path;
-							break;
-						}
-					}
-				}
-				
-				if(!refObj)
-				{
-					var myObjPath = { "obj" : obj, "path" : path };
-					objPathArray.push(myObjPath);
-					
-					//数组
-					if(Array.isArray(obj))
-					{
-						var copyArray = [];
-						
-						for(var i=0; i<obj.length; i++)
-						{
-							var element = obj[i];
-							
-							copyArray[i] = $._ref((root ? root : obj), obj, element, $.propertyPath.concatElementIndex(path, i), objPathArray);
-						}
-						
-						refObj = copyArray;
-					}
-					else
-					{
-						var copyObj = {};
-						
-						for(var propName in obj)
-						{
-							var propValue = obj[propName];
-							
-							if(propValue == obj)
-							{
-								propValue = {};
-								propValue[$.REF_NAME] = $.REF_VALUE_THIS;
-							}
-							else
-								propValue = $._ref((root ? root : obj), obj, propValue, $.propertyPath.concatPropertyName(path, propName), objPathArray);
-							
-							copyObj[propName] = propValue;
-						}
-						
-						refObj = copyObj;
-					}
-				}
-			}
-			
-			return (refObj ? refObj : obj);
-		},
-
-		/**
-		 * 判断给定对象是否包含重复引用。
-		 */
-		isRef : function(obj)
-		{
-			return $._isRef(obj, []);
-		},
-		
-		_isRef : function(obj, objArray)
-		{
-			if(obj && typeof(obj) == "object")
-			{
-				for(var i=0; i<objArray.length; i++)
-				{
-					if(objArray[i] == obj)
-						return true;
-				}
-				
-				objArray.push(obj);
-				
-				//数组
-				if(Array.isArray(obj))
-				{
-					for(var i=0; i<obj.length; i++)
-					{
-						var element = obj[i];
-						
-						if($._isRef(element, objArray))
-							return true;
-					}
-				}
-				else
-				{
-					for(var propName in obj)
-					{
-						var propValue = obj[propName];
-						
-						if($._isRef(propValue, objArray))
-							return true;
-					}
-				}
-			}
-			
-			return false;
-		},
-		
-		/**
-		 * 恢复由$.ref函数替换的的“$ref”引用。
-		 * 
-		 * @param obj
-		 */
-		unref: function(obj)
-		{
-			$._unref(obj, null, obj);
-			$._removeUnrefFlag(obj);
-			
-			return obj;
-		},
-		
-		/**
-		 * 重定向对象中的fastjson关联（'$ref'属性值），这会在所有层级的对象上添加$.UNREF_FLAG属性。
-		 * 
-		 * @param root
-		 * @param parent
-		 * @param obj
-		 */
-		_unref: function(root, parent, obj)
-		{
-			if(root == undefined)
-				return undefined;
-			
-			var objType=typeof(obj);
-			
-			if(obj && objType == "object")
-			{
-				//数组
-				if(Array.isArray(obj))
-				{
-					for(var i=0; i<obj.length; i++)
-					{
-						var ele=obj[i];
-						
-						var ref=(ele ? ele[$.REF_NAME] : undefined);
-						
-						if(ref != undefined)
-						{
-							val = $._unrefValue(root, parent, obj, ref);
-							obj[i] = val;
-						}
-						else
-						{
-							var newEle=$._unref(root, obj, ele);
-							
-							if(newEle != ele)
-								obj[i] = newEle;
-						}
-					}
-				}
-				//对象
-				else
-				{
-					if(obj[$.UNREF_FLAG])
-						return;
-					else
-						obj[$.UNREF_FLAG]=true;
-					
-					for(var p in obj)
-					{
-						var val=obj[p];
-						
-						if(!val)
-							continue;
-						
-						var ref=val[$.REF_NAME];
-						
-						if(ref != undefined)
-						{
-							val = $._unrefValue(root, parent, obj, ref);
-							obj[p] = val;
-						}
-						else
-						{
-							var newVal=$._unref(root, obj, val);
-							
-							if(newVal != val)
-								obj[p] = newVal;
-						}
-					}
-				}
-			}
-			
-			return obj;
-		},
-		
-		/**
-		 * 恢复“$ref”的值
-		 */
-		_unrefValue : function(root, parent, _this, ref)
-		{
-			var val = undefined;
-			
-			if(ref == $.REF_VALUE_ROOT)
-			{
-				val=root;
-			}
-			else if(ref == $.REF_VALUE_PARENT)
-			{
-				val = parent;
-			}
-			else if(ref == $.REF_VALUE_THIS)
-			{
-				val = _this;
-			}
-			else if(ref.indexOf($.REF_VALUE_PATH_PREFIX) == 0)
-			{
-				val=eval("root"+ref.substring(1));
-			}
-			else
-				throw new Error("Unknown '"+$.REF_NAME+"' value '"+ref+"'");
-			
-			return val;
-		},
-		
-		/**
-		 * 移除对象中的$.UNREF_FLAG标记。
-		 * 
-		 * @param obj
-		 */
-		_removeUnrefFlag: function(obj)
-		{
-			if(obj == undefined)
-				return;
-			
-			var objType=typeof(obj);
-			
-			if(objType == "object")
-			{
-				//数组
-				if(obj.length != undefined)
-				{
-					for(var i=0; i<obj.length; i++)
-					{
-						$._removeUnrefFlag(obj[i]);
-					}
-				}
-				//对象
-				else
-				{
-					if(obj[$.UNREF_FLAG] == undefined)
-						return;
-					
-					delete obj[$.UNREF_FLAG];
-					
-					for(var p in obj)
-					{
-						var val=obj[p];
-						
-						if(!val)
-							continue;
-						
-						$._removeUnrefFlag(val);
-					}
-				}
-			}
-		}
-	});
-	
 	/**
 	 * 获取响应的JSON对象。
 	 * 如果响应不是JSON格式，则返回null。
@@ -3293,33 +2923,6 @@
 			}
 		}
 	};
-	
-	$.ajaxSetup(
-	{
-		global : true,
-		cache : false,
-		converters : 
-		{
-			"* text": window.String,
-			"text html": true,
-			"text json": function(data)
-			{
-				data=$.unref(jQuery.parseJSON(data));
-				
-				return data;
-			},
-			"text xml": jQuery.parseXML
-		},
-		
-		//避免ajax深度复制参数数据
-		flatOptions : {
-			context : true,
-			url : true,
-			data : true,
-			type : true,
-			success : true
-		}
-	});
 	
 	$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError)
 	{

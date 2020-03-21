@@ -25,11 +25,8 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.KeywordMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -56,20 +53,11 @@ public class DriverEntityController extends AbstractController
 	private DriverEntityManager driverEntityManager;
 
 	@Autowired
-	@Qualifier("tempDriverLibraryRootDirectory")
-	private File tempDriverLibraryRootDirectory;
+	private File tempDirectory;
 
 	public DriverEntityController()
 	{
 		super();
-	}
-
-	public DriverEntityController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			DriverEntityManager driverEntityManager, File tempDriverLibraryRootDirectory)
-	{
-		super(messageSource, classDataConverter);
-		this.driverEntityManager = driverEntityManager;
-		this.tempDriverLibraryRootDirectory = tempDriverLibraryRootDirectory;
 	}
 
 	public DriverEntityManager getDriverEntityManager()
@@ -82,14 +70,14 @@ public class DriverEntityController extends AbstractController
 		this.driverEntityManager = driverEntityManager;
 	}
 
-	public File getTempDriverLibraryRootDirectory()
+	public File getTempDirectory()
 	{
-		return tempDriverLibraryRootDirectory;
+		return tempDirectory;
 	}
 
-	public void setTempDriverLibraryRootDirectory(File tempDriverLibraryRootDirectory)
+	public void setTempDirectory(File tempDirectory)
 	{
-		this.tempDriverLibraryRootDirectory = tempDriverLibraryRootDirectory;
+		this.tempDirectory = tempDirectory;
 	}
 
 	@ExceptionHandler(IllegalImportDriverEntityFileFormatException.class)
@@ -494,22 +482,19 @@ public class DriverEntityController extends AbstractController
 
 	protected File getTempDriverLibraryDirectoryNotNull(String driverEntityId)
 	{
-		File directory = new File(this.tempDriverLibraryRootDirectory, driverEntityId);
-
-		if (!directory.exists())
-			directory.mkdirs();
-
+		File directory = FileUtil.getDirectory(getDriverEntityTmpDirectory(), driverEntityId, true);
 		return directory;
 	}
 
 	protected File getTempImportDirectory(String importId, boolean notNull)
 	{
-		File directory = new File(this.tempDriverLibraryRootDirectory, importId);
-
-		if (notNull && !directory.exists())
-			directory.mkdirs();
-
+		File directory = FileUtil.getDirectory(getDriverEntityTmpDirectory(), importId, notNull);
 		return directory;
+	}
+
+	protected File getDriverEntityTmpDirectory()
+	{
+		return FileUtil.getDirectory(this.tempDirectory, "driverEntity", true);
 	}
 
 	/**

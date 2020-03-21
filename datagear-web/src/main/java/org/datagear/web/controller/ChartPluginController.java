@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderStyle;
-import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
@@ -30,10 +29,8 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,13 +56,6 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	public ChartPluginController()
 	{
 		super();
-	}
-
-	public ChartPluginController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager, File tempDirectory)
-	{
-		super(messageSource, classDataConverter, directoryHtmlChartPluginManager);
-		this.tempDirectory = tempDirectory;
 	}
 
 	public File getTempDirectory()

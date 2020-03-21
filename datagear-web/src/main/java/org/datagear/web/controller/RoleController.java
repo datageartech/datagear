@@ -17,9 +17,7 @@ import org.datagear.management.service.RoleUserService;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.ClassDataConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,14 +43,6 @@ public class RoleController extends AbstractController
 	public RoleController()
 	{
 		super();
-	}
-
-	public RoleController(MessageSource messageSource, ClassDataConverter classDataConverter, RoleService roleService,
-			RoleUserService roleUserService)
-	{
-		super(messageSource, classDataConverter);
-		this.roleService = roleService;
-		this.roleUserService = roleUserService;
 	}
 
 	public RoleService getRoleService()

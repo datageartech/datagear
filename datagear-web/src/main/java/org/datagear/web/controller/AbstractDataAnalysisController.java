@@ -21,14 +21,12 @@ import javax.servlet.http.HttpSession;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
-import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
+import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.util.StringUtil;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.WebUtils;
-import org.springframework.context.MessageSource;
 
 /**
  * 抽象数据分析控制器。
@@ -41,11 +39,6 @@ public class AbstractDataAnalysisController extends AbstractController
 	public AbstractDataAnalysisController()
 	{
 		super();
-	}
-
-	public AbstractDataAnalysisController(MessageSource messageSource, ClassDataConverter classDataConverter)
-	{
-		super(messageSource, classDataConverter);
 	}
 
 	protected RenderStyle resolveRenderStyle(HttpServletRequest request)

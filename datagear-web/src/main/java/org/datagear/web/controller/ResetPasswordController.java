@@ -49,13 +49,6 @@ public class ResetPasswordController extends AbstractController
 		super();
 	}
 
-	public ResetPasswordController(UserService userService, File resetPasswordCheckFileDirectory)
-	{
-		super();
-		this.userService = userService;
-		this.resetPasswordCheckFileDirectory = resetPasswordCheckFileDirectory;
-	}
-
 	public UserService getUserService()
 	{
 		return userService;

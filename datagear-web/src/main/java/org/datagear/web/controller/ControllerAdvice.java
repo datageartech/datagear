@@ -25,12 +25,12 @@ import org.datagear.persistence.support.UnsupportedDialectException;
 import org.datagear.persistence.support.expression.SqlExpressionErrorException;
 import org.datagear.persistence.support.expression.VariableExpressionErrorException;
 import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.IllegalSourceValueException;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -126,13 +126,12 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(IllegalSourceValueException.class)
+	@ExceptionHandler(ConversionException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleControllerIllegalSourceValueException(HttpServletRequest request, HttpServletResponse response,
-			IllegalSourceValueException exception)
+	public String handleControllerConversionException(HttpServletRequest request, HttpServletResponse response,
+			ConversionException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(IllegalSourceValueException.class), exception, false,
-				exception.getSourceValue(), exception.getTargetType().getName());
+		setOperationMessageForThrowable(request, buildMessageCode(ConversionException.class), exception, false);
 
 		return getErrorView(request, response);
 	}

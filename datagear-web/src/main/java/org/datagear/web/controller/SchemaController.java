@@ -13,13 +13,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
-import org.datagear.management.service.SchemaService;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
-import org.datagear.meta.resolver.DBMetaResolver;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -27,11 +24,8 @@ import org.datagear.persistence.Query;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.ClassDataConverter;
 import org.datagear.web.util.KeywordMatcher;
-import org.datagear.web.util.TableCache;
 import org.datagear.web.util.WebUtils;
-import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,13 +48,6 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public SchemaController()
 	{
 		super();
-	}
-
-	public SchemaController(MessageSource messageSource, ClassDataConverter classDataConverter,
-			SchemaService schemaService, ConnectionSource connectionSource, DBMetaResolver dbMetaResolver,
-			TableCache tableCache)
-	{
-		super(messageSource, classDataConverter, schemaService, connectionSource, dbMetaResolver, tableCache);
 	}
 
 	@RequestMapping("/add")

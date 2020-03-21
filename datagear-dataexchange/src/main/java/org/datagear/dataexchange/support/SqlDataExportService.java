@@ -188,7 +188,7 @@ public class SqlDataExportService extends AbstractDevotedDBMetaDataExchangeServi
 		out.write('(');
 		out.write(LINE_SEPARATOR);
 
-		PrimaryKey primaryKey = getDBMetaResolver().getPrimaryKey(cn, dataExchange.getTableName());
+		PrimaryKey primaryKey = getDbMetaResolver().getPrimaryKey(cn, dataExchange.getTableName());
 		List<String> filterPkNames = filterPrimaryColumnNames(primaryKey, columns);
 
 		for (int i = 0, len = columns.size(); i < len; i++)

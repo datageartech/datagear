@@ -85,16 +85,6 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		super();
 	}
 
-	public ChartController(HtmlChartWidgetEntityService htmlChartWidgetEntityService,
-			ChartPluginManager chartPluginManager,
-			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer)
-	{
-		super();
-		this.htmlChartWidgetEntityService = htmlChartWidgetEntityService;
-		this.chartPluginManager = chartPluginManager;
-		this.chartShowHtmlTplDashboardWidgetHtmlRenderer = chartShowHtmlTplDashboardWidgetHtmlRenderer;
-	}
-
 	public HtmlChartWidgetEntityService getHtmlChartWidgetEntityService()
 	{
 		return htmlChartWidgetEntityService;

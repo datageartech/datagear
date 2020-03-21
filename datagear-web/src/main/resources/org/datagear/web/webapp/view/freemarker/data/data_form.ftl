@@ -44,7 +44,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 <script type="text/javascript">
 (function(po)
 {
-	po.data = $.unref(<@writeJson var=data />);
+	po.data = <@writeJson var=data />;
 	po.readonly = ${readonly?c};
 	po.submitAction = "${submitAction?js_string}";
 	po.isClientPageData = ${isClientPageData?c};
@@ -53,19 +53,17 @@ boolean batchSet 是否开启批量执行功能，默认为false
 	if(!po.isClientPageData && po.data == null)
 		po.isClientPageData = true;
 	
-	po.onModel(function(model)
+	po.onTable(function(table)
 	{
-		po.form().modelform(
+		po.form().tableform(
 		{
-			model : model,
-			ignorePropertyNames : "${ignorePropertyName?js_string}",
-			//不能直接使用po.data，因为po.data作为原始数据，不应该被表单编辑变更
-			data : $.deepClone(po.data),
+			table : table,
+			data : po.data,
 			readonly : po.readonly,
 			submit : function()
 			{
-				var formData = $(this).modelform("data");
-				var formParam = $(this).modelform("param");
+				var formData = $(this).tableform("data");
+				var formParam = $(this).tableform("param");
 				
 				var close = true;
 				
@@ -74,7 +72,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 				{
 					close = (po.pageParamCall("submit", formData, formParam) != false);
 					
-					if(close && !$(this).modelform("isDialogPinned"))
+					if(close && !$(this).tableform("isDialogPinned"))
 						po.close();
 				}
 				//否则，POST至后台
@@ -87,15 +85,15 @@ boolean batchSet 是否开启批量执行功能，默认为false
 					{
 						beforeSend : function()
 						{
-							$(thisForm).modelform("disableOperation");
+							$(thisForm).tableform("disableOperation");
 						},
 						success : function(operationMessage)
 						{
 							var $form = $(thisForm);
-							var batchSubmit = $form.modelform("isBatchSubmit");
-							var isDialogPinned = $form.modelform("isDialogPinned");
+							var batchSubmit = $form.tableform("isBatchSubmit");
+							var isDialogPinned = $form.tableform("isDialogPinned");
 							
-							$form.modelform("enableOperation");
+							$form.tableform("enableOperation");
 							
 							po.refreshParent();
 							
@@ -116,9 +114,9 @@ boolean batchSet 是否开启批量执行功能，默认为false
 						error : function()
 						{
 							var $form = $(thisForm);
-							var batchSubmit = $form.modelform("isBatchSubmit");
+							var batchSubmit = $form.tableform("isBatchSubmit");
 							
-							$form.modelform("enableOperation");
+							$form.tableform("enableOperation");
 							
 							if(batchSubmit)
 								po.refreshParent();
@@ -158,9 +156,9 @@ boolean batchSet 是否开启批量执行功能，默认为false
 			},
 			filePropertyUploadURL : "${contextPath}/data/file/upload",
 			filePropertyDeleteURL : "${contextPath}/data/file/delete",
-			downloadColumnValue : function(property)
+			columnValueDownloadUrl : function(property)
 			{
-				po.downloadColumnValue(property);
+				po.columnValueDownloadUrl(property);
 			},
 			validationRequiredAsAdd : ("saveAdd" == po.submitAction),
 			batchSet : po.batchSet,
@@ -168,7 +166,12 @@ boolean batchSet 是否开启批量执行功能，默认为false
 			dateFormat : "${sqlDateFormat}",
 			timestampFormat : "${sqlTimestampFormat}",
 			timeFormat : "${sqlTimeFormat}",
-			filePropertyLabelValue : "${filePropertyLabelValue}"
+			lobValuePlaceholders:
+			{
+				blobPlaceholder: "${formDefaultLOBRowMapper.blobPlaceholder}",
+				clobPlaceholder: "${formDefaultLOBRowMapper.clobPlaceholder}",
+				sqlXmlPlaceholder: "${formDefaultLOBRowMapper.sqlXmlPlaceholder}"
+			}
 		});
 	});
 })

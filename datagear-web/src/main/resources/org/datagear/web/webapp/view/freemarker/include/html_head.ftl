@@ -43,10 +43,9 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/cometd-2.9.1/jquery.cometd-reload.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/clipboard-2.0.4/clipboard.min.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-pagination.js" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-model.js" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-modelcache.js" type="text/javascript"></script>
+<script src="${contextPath}/static/script/datagear-meta.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-util.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-jquery-override.js" type="text/javascript"></script>
-<script src="${contextPath}/static/script/datagear-modelform.js" type="text/javascript"></script>
+<script src="${contextPath}/static/script/datagear-tableform.js" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-schema-url-builder.js" type="text/javascript"></script>
 </#if>

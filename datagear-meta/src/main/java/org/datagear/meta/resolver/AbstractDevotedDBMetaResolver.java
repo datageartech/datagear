@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.sql.SQLNonTransientException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.datagear.meta.Column;
@@ -413,6 +415,8 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 					break;
 			}
 
+			sortColumns(columns);
+
 			return columns.toArray(new Column[columns.size()]);
 		}
 		catch (SQLException e)
@@ -759,6 +763,11 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		return false;
 	}
 
+	protected void sortColumns(List<Column> columns)
+	{
+		Collections.sort(columns, COLUMN_SORT_COMPARATOR);
+	}
+
 	protected DataType readDataType(ResultSet rs)
 	{
 		try
@@ -909,4 +918,13 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		}
 	}
 
+	protected static final Comparator<Column> COLUMN_SORT_COMPARATOR = new Comparator<Column>()
+	{
+		@Override
+		public int compare(Column o1, Column o2)
+		{
+			Integer p1 = o1.getPosition();
+			return p1.compareTo(o2.getPosition());
+		}
+	};
 }

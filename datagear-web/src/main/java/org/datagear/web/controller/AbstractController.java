@@ -4,10 +4,9 @@
 
 package org.datagear.web.controller;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
+import javax.json.JsonStructure;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,15 +15,17 @@ import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Paging;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.ClassDataConverter;
+import org.datagear.web.convert.StringToJsonConverter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -62,18 +63,13 @@ public abstract class AbstractController
 	private MessageSource messageSource;
 
 	@Autowired
-	private ClassDataConverter classDataConverter;
+	private ConversionService conversionService;
+
+	private StringToJsonConverter stringToJsonConverter = new StringToJsonConverter();
 
 	public AbstractController()
 	{
 		super();
-	}
-
-	public AbstractController(MessageSource messageSource, ClassDataConverter classDataConverter)
-	{
-		super();
-		this.messageSource = messageSource;
-		this.classDataConverter = classDataConverter;
 	}
 
 	public MessageSource getMessageSource()
@@ -86,14 +82,24 @@ public abstract class AbstractController
 		this.messageSource = messageSource;
 	}
 
-	public ClassDataConverter getClassDataConverter()
+	public ConversionService getConversionService()
 	{
-		return classDataConverter;
+		return conversionService;
 	}
 
-	public void setClassDataConverter(ClassDataConverter classDataConverter)
+	public void setConversionService(ConversionService conversionService)
 	{
-		this.classDataConverter = classDataConverter;
+		this.conversionService = conversionService;
+	}
+
+	public StringToJsonConverter getStringToJsonConverter()
+	{
+		return stringToJsonConverter;
+	}
+
+	public void setStringToJsonConverter(StringToJsonConverter stringToJsonConverter)
+	{
+		this.stringToJsonConverter = stringToJsonConverter;
 	}
 
 	/**
@@ -178,7 +184,7 @@ public abstract class AbstractController
 		String keyword = request.getParameter("keyword");
 		String condition = request.getParameter("condition");
 		String notLike = request.getParameter("notLike");
-		Object ordersParam = getParamObj(request, "order");
+		String order = request.getParameter("order");
 
 		Integer page = null;
 		Integer pageSize = null;
@@ -224,10 +230,8 @@ public abstract class AbstractController
 		if (pageSize == null)
 			pageSize = Paging.DEFAULT_PAGE_SIZE;
 
-		Order[] orders = null;
-
-		if (ordersParam != null)
-			orders = this.classDataConverter.convertToArray(ordersParam, Order.class);
+		JsonStructure ordersJson = convertStringToJson(order);
+		Order[] orders = convertJsonStructure(ordersJson, Order[].class);
 
 		PagingQuery pagingQuery = new PagingQuery(page, pageSize, keyword, condition);
 
@@ -237,78 +241,14 @@ public abstract class AbstractController
 		return pagingQuery;
 	}
 
-	/**
-	 * 获取参数映射表。
-	 * <p>
-	 * 它查找以{@code param + '.'}、{@code param + '['}、 {@code param + '('}
-	 * 开头的所有参数，将它们归入一个映射表，然后返回。
-	 * </p>
-	 * 
-	 * @param request
-	 * @param param
-	 * @return
-	 */
-	protected Map<String, ?> getParamMap(HttpServletRequest request, String param)
+	protected JsonStructure convertStringToJson(String s)
 	{
-		Map<String, String[]> filteredParam = new HashMap<>();
-
-		int paramLen = param.length();
-
-		Map<String, String[]> paramMap = request.getParameterMap();
-
-		for (Map.Entry<String, String[]> entry : paramMap.entrySet())
-		{
-			String name = entry.getKey();
-			String[] pvalue = entry.getValue();
-
-			if (name.length() <= paramLen || !name.startsWith(param))
-				continue;
-
-			boolean put;
-
-			char nextChar = name.charAt(paramLen);
-
-			// javaBean
-			if (nextChar == '.')
-			{
-				name = name.substring(paramLen + 1);
-				put = true;
-			}
-			// array, map
-			else if (nextChar == '[' || nextChar == '(')
-			{
-				name = name.substring(paramLen);
-				put = true;
-			}
-			else
-				put = false;
-
-			if (put)
-				filteredParam.put(name, pvalue);
-		}
-
-		return (filteredParam.isEmpty() ? null : filteredParam);
+		return this.stringToJsonConverter.convertToJsonStructure(s);
 	}
 
-	/**
-	 * 获取参数对象。
-	 * <p>
-	 * 如果参数中没有直接包含参数值，它还会查找以{@code param + '.'}、{@code param + '['}、
-	 * {@code param + '('}开头的所有参数，将它们归入一个映射表，然后返回。
-	 * </p>
-	 * 
-	 * @param request
-	 * @param param
-	 * @return
-	 */
-	protected Object getParamObj(HttpServletRequest request, String param)
+	protected <T> T convertJsonStructure(JsonStructure jsonStructure, Class<T> type)
 	{
-		String[] pstrs = request.getParameterValues(param);
-
-		if (pstrs != null)
-			return pstrs;
-
-		return getParamMap(request, param);
+		return this.conversionService.convert(jsonStructure, type);
 	}
 
 	/**
@@ -368,12 +308,14 @@ public abstract class AbstractController
 		if (saveCount > 0)
 			return buildOperationMessageSuccessResponseEntity(request, "saveSuccess.withCount", saveCount);
 
-		// XXX JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑
-		// else if (saveCount == 0)
+		@JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
+		// if (saveCount == 0)
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "saveFail.zeroCount");
 
-		return buildOperationMessageSuccessResponseEntity(request, "saveSuccess");
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessResponseEntity(request,
+				"saveSuccess");
+		return responseEntity;
 	}
 
 	/**
@@ -401,13 +343,14 @@ public abstract class AbstractController
 		if (deleteCount > 0)
 			return buildOperationMessageSuccessResponseEntity(request, "deleteSuccess.withCount", deleteCount);
 
-		// XXX JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑
-		// else if (deleteCount == 0)
+		@JDBCCompatiblity("JDBC兼容问题，某些驱动不能正确返回更新记录数，比如Hive jdbc始终返回0，所以这里暂时禁用此逻辑")
+		// if (deleteCount == 0)
 		// return buildOperationMessageFailResponseEntity(request,
 		// HttpStatus.BAD_REQUEST, "deleteFail.zeroCount");
 
-		else
-			return buildOperationMessageSuccessResponseEntity(request, "deleteSuccess");
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessResponseEntity(request,
+				"deleteSuccess");
+		return responseEntity;
 	}
 
 	/**

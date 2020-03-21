@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetFmkRenderer;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.util.StringUtil;
 
 import com.alibaba.fastjson.JSON;
@@ -55,7 +55,7 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRen
 	}
 
 	public HtmlTplDashboardWidgetEntity(String id, String template,
-			HtmlTplDashboardWidgetFmkRenderer<HtmlRenderContext> renderer, String name, User createUser)
+			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> renderer, String name, User createUser)
 	{
 		super(id, template, renderer);
 		this.name = name;

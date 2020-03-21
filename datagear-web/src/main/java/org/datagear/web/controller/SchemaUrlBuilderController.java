@@ -50,13 +50,6 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 		super();
 	}
 
-	public SchemaUrlBuilderController(ServletContext servletContext, File schemaUrlBuilderScriptFile)
-	{
-		super();
-		this.servletContext = servletContext;
-		this.schemaUrlBuilderScriptFile = schemaUrlBuilderScriptFile;
-	}
-
 	public ServletContext getServletContext()
 	{
 		return servletContext;

@@ -32,12 +32,12 @@
 		},
 		
 		/**
-		 * 对指定表名的模型执行操作。
+		 * 对指定表执行操作。
 		 *
 		 * @param tableName 可选，操作对应的表名，默认是当前表名
 		 * @param callback 操作函数，格式为：function(model){ ... }
 		 */
-		onModel : function(tableName, callback)
+		onTable : function(tableName, callback)
 		{
 			if(!callback)
 			{
@@ -45,7 +45,7 @@
 				tableName = this.tableName;
 			}
 			
-			$.model.on(this.schemaId, tableName, callback);
+			$.meta.on(this.schemaId, tableName, callback);
 		},
 		
 		/**

@@ -83,14 +83,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		super();
 	}
 
-	public DashboardController(HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService,
-			File tempDirectory)
-	{
-		super();
-		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
-		this.tempDirectory = tempDirectory;
-	}
-
 	public HtmlTplDashboardWidgetEntityService getHtmlTplDashboardWidgetEntityService()
 	{
 		return htmlTplDashboardWidgetEntityService;
