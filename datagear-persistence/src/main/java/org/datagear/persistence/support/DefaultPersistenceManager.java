@@ -212,7 +212,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 				Row row = rows[i];
 				for (int j = 0; j < columns.length; j++)
 				{
-					Column column = columns[i];
+					Column column = columns[j];
 					String name = column.getName();
 					Object value = row.get(name);
 
@@ -502,15 +502,15 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		Column[] columns = table.getColumns();
 		for (int i = 0; i < columns.length; i++)
 		{
-			int jdbcTypeValue = columns[i].getType();
+			int type = columns[i].getType();
 
-			if (Types.BIGINT == jdbcTypeValue || Types.BIT == jdbcTypeValue || Types.BOOLEAN == jdbcTypeValue
-					|| Types.CHAR == jdbcTypeValue || Types.DATE == jdbcTypeValue || Types.DECIMAL == jdbcTypeValue
-					|| Types.DOUBLE == jdbcTypeValue || Types.FLOAT == jdbcTypeValue || Types.INTEGER == jdbcTypeValue
-					|| Types.NULL == jdbcTypeValue || Types.NUMERIC == jdbcTypeValue || Types.REAL == jdbcTypeValue
-					|| Types.SMALLINT == jdbcTypeValue || Types.TIME == jdbcTypeValue
-					|| Types.TIMESTAMP == jdbcTypeValue || Types.TINYINT == jdbcTypeValue
-					|| Types.VARCHAR == jdbcTypeValue)
+			if (Types.BIGINT == type || Types.BIT == type || Types.BOOLEAN == type
+					|| Types.CHAR == type || Types.DATE == type || Types.DECIMAL == type
+					|| Types.DOUBLE == type || Types.FLOAT == type || Types.INTEGER == type
+					|| Types.NULL == type || Types.NUMERIC == type || Types.REAL == type
+					|| Types.SMALLINT == type || Types.TIME == type || Types.TIME_WITH_TIMEZONE == type
+					|| Types.TIMESTAMP == type || Types.TIMESTAMP_WITH_TIMEZONE == type
+					|| Types.TINYINT == type || Types.VARCHAR == type)
 				re.add(columns[i]);
 		}
 

@@ -105,10 +105,11 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 		{
 			po.executeOnSelect(function(row)
 			{
-				var data = {"data" : row};
+				var data = $.meta.uniqueRecordData(table, row);
 				
 				po.open(po.url("edit"),
 				{
+					contentType: $.CONTENT_TYPE_JSON,
 					data : data,
 					pinTitleButton : true
 				});
@@ -124,10 +125,11 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 				{
 					"confirm" : function()
 					{
-						var data = {"data" : rows};
+						var data = $.meta.uniqueRecordData(table, rows);
 						
 						po.ajaxSubmitForHandleDuplication(po.url("delete"), data, "<@spring.message code='delete.continueIgnoreDuplicationTemplate' />",
 						{
+							contentType: $.CONTENT_TYPE_JSON,
 							"success" : function()
 							{
 								po.refresh();
@@ -143,10 +145,11 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 		{
 			po.executeOnSelect(function(row)
 			{
-				var data = {"data" : row};
+				var data = $.meta.uniqueRecordData(table, row);
 				
 				po.open(po.url("view"),
 				{
+					contentType: $.CONTENT_TYPE_JSON,
 					data : data
 				});
 			});

@@ -79,8 +79,10 @@ public class ExpressionEvaluationContext
 	 */
 	public Object getCachedValue(NameExpression expression)
 	{
-		String cacheKey = getCachedValueKey(expression);
+		if (!expression.hasName())
+			throw new IllegalArgumentException("The [expression] must has name");
 
+		String cacheKey = getCachedValueKey(expression);
 		return this.valueCache.get(cacheKey);
 	}
 
@@ -90,11 +92,15 @@ public class ExpressionEvaluationContext
 	 * @param expression
 	 * @param value
 	 */
-	public void putCachedValue(NameExpression expression, Object value)
+	public boolean putCachedValue(NameExpression expression, Object value)
 	{
-		String cacheKey = getCachedValueKey(expression);
+		if (!expression.hasName())
+			return false;
 
+		String cacheKey = getCachedValueKey(expression);
 		this.valueCache.put(cacheKey, value);
+
+		return true;
 	}
 
 	/**
@@ -152,9 +158,6 @@ public class ExpressionEvaluationContext
 	 */
 	protected String getCachedValueKey(NameExpression expression)
 	{
-		if (!expression.hasName())
-			throw new IllegalArgumentException("The [expression] must has name");
-
 		return expression.getStartIdentifier() + expression.getName() + expression.getEndIdentifier();
 	}
 }

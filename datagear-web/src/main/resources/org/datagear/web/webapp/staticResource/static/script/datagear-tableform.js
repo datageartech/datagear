@@ -273,9 +273,9 @@
 		},
 		
 		/**
-		 * 获取除数据以外的参数对象，比如options.batchCountParamName、options.batchHandleErrorModeParamName参数。
+		 * 获取批量处理参数：{batchCount: ..., batchHandleErrorMode: ...}。
 		 */
-		param : function()
+		batchParam: function()
 		{
 			var options = this.options;
 			

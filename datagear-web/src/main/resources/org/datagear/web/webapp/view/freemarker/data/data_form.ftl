@@ -63,14 +63,14 @@ boolean batchSet 是否开启批量执行功能，默认为false
 			submit : function()
 			{
 				var formData = $(this).tableform("data");
-				var formParam = $(this).tableform("param");
+				var batchParam = $(this).tableform("batchParam");
 				
 				var close = true;
 				
 				//父页面定义了submit回调函数，则优先执行
 				if(po.pageParam("submit"))
 				{
-					close = (po.pageParamCall("submit", formData, formParam) != false);
+					close = (po.pageParamCall("submit", formData, batchParam) != false);
 					
 					if(close && !$(this).tableform("isDialogPinned"))
 						po.close();
@@ -80,11 +80,11 @@ boolean batchSet 是否开启批量执行功能，默认为false
 				{
 					var thisForm = this;
 					var url = po.url(po.submitAction);
-					if(formParam && formParam.batchCount)
+					if(batchParam && batchParam.batchCount)
 					{
-						url = $.addParam(url, "batchCount", formParam.batchCount);
-						if(formParam && formParam.batchHandleErrorMode)
-							url = $.addParam(url, "batchHandleErrorMode", formParam.batchHandleErrorMode);
+						url = $.addParam(url, "batchCount", batchParam.batchCount);
+						if(batchParam.batchHandleErrorMode)
+							url = $.addParam(url, "batchHandleErrorMode", batchParam.batchHandleErrorMode);
 					}
 					var param = (po.data ? {"data" : formData, "originalData" : po.data} : formData);
 					

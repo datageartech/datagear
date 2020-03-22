@@ -77,7 +77,7 @@
 							{
 								$.closeTip();
 								
-								po.ajaxSubmitForHandleDuplication(action, data, messageTemplate, ajaxOptions, true);
+								po.ajaxSubmitForHandleDuplication(url, data, messageTemplate, ajaxOptions, true);
 							},
 							"cancel" : function()
 							{

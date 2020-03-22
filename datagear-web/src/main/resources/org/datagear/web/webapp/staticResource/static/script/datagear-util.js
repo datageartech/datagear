@@ -82,33 +82,32 @@
 						pinTitleButton : false,
 						modal : true,
 						classes: { "ui-dialog": "ui-corner-all ui-widget-shadow" }
-					}, options);
-				
-				var ajaxOptions =
-				{
-					data : (options.data ? options.data : undefined),
-					success : function(data, textStatus, jqXHR)
-					{
-						var container=$(options.target ? options.target : document.body);
-						
-						var $dialog = $("<div id='dialog-"+new Date().getTime()+"' class='dialog-content-container'></div>").appendTo(container);
-						
-						if(options.pageParam)
-							$.pageParam($dialog, options.pageParam);
-						
-						$._dialog($dialog, options);
-						$dialog.html(data);
-						
-						if(!options.title)
-						{
-							var title = $("> title", $dialog).text();
-							$dialog.dialog( "option", "title", title);
-						}
 					},
-					type : "POST"
-				};
+					options,
+					{
+						data : (options.data ? options.data : undefined),
+						success : function(data, textStatus, jqXHR)
+						{
+							var container=$(options.target ? options.target : document.body);
+							
+							var $dialog = $("<div id='dialog-"+new Date().getTime()+"' class='dialog-content-container'></div>").appendTo(container);
+							
+							if(options.pageParam)
+								$.pageParam($dialog, options.pageParam);
+							
+							$._dialog($dialog, options);
+							$dialog.html(data);
+							
+							if(!options.title)
+							{
+								var title = $("> title", $dialog).text();
+								$dialog.dialog( "option", "title", title);
+							}
+						},
+						type : "POST"
+					});
 				
-				$.ajax(url, ajaxOptions);
+				$.ajax(url, options);
 			}
 		},
 		
@@ -2969,7 +2968,7 @@
 		if(originalOptions.contentType != $.CONTENT_TYPE_JSON)
 			return;
 		
-		if(originalOptions.data && $.isPlainObject(originalOptions.data))
+		if(originalOptions.data)
 			options.data = JSON.stringify(originalOptions.data);
 	});
 	

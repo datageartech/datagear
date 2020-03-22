@@ -20,6 +20,7 @@ import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.impl.SaveSchemaUrlPermissionDeniedException;
 import org.datagear.meta.resolver.DBMetaResolverException;
 import org.datagear.meta.resolver.TableNotFoundException;
+import org.datagear.persistence.NonUniqueResultException;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.support.UnsupportedDialectException;
 import org.datagear.persistence.support.expression.SqlExpressionErrorException;
@@ -187,6 +188,16 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(SqlExpressionErrorException.class),
 				exception.getCause(), true, exception.getExpression().getContent());
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(NonUniqueResultException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handlePersistenceNonUniqueResultException(HttpServletRequest request, HttpServletResponse response,
+			NonUniqueResultException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(NonUniqueResultException.class), exception, false);
 
 		return getErrorView(request, response);
 	}

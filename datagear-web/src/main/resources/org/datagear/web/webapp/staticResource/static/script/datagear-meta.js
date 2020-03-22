@@ -125,6 +125,55 @@
 			return data;
 		},
 		
+		/**
+		 * 尽量获取能够唯一确定记录的数据对象。
+		 */
+		uniqueRecordData: function(table, row)
+		{
+			var columnNames;
+			
+			if(table.primaryKey)
+				columnNames = table.primaryKey.columnNames;
+			else if(table.uniqueKeys && table.uniqueKeys.length > 0)
+				columnNames = table.uniqueKeys[0].columnNames;
+			else
+			{
+				columnNames = [];
+				var Types = this.typeEnum;
+				for(var i=0; i<table.columns.length; i++)
+				{
+					var column = table.columns[i];
+					var type = column.type;
+					if (Types.BIGINT == type || Types.BIT == type || Types.BOOLEAN == type
+							|| Types.CHAR == type || Types.DATE == type || Types.DECIMAL == type
+							|| Types.DOUBLE == type || Types.FLOAT == type || Types.INTEGER == type
+							|| Types.NULL == type || Types.NUMERIC == type || Types.REAL == type
+							|| Types.SMALLINT == type || Types.TIME == type || Types.TIME_WITH_TIMEZONE == type
+							|| Types.TIMESTAMP == type || Types.TIMESTAMP_WITH_TIMEZONE == type
+							|| Types.TINYINT == type || Types.VARCHAR == type)
+						columnNames.push(column.name);
+				}
+			}
+			
+			var re = [];
+			
+			var rows = ($.isArray(row) ? row : [row]);
+			for(var i=0; i<rows.length; i++)
+			{
+				var data = {};
+				var myRow = rows[i];
+				for(var j=0; j<columnNames.length; j++)
+				{
+					var name = columnNames[j];
+					data[name] = myRow[name];
+				}
+				
+				re.push(data);
+			}
+			
+			return ($.isArray(row) ? re : re[0]);
+		},
+		
 		isBinaryColumn: function(column)
 		{
 			var type = column.type;

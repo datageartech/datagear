@@ -194,11 +194,11 @@ public class DataController extends AbstractSchemaConnTableController
 	@ResponseBody
 	public PagingData<Row> queryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			@PathVariable("tableName") String tableName, @RequestBody(required = false) PagingQuery paramData)
 			throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, paramData);
 
 		final DefaultLOBRowMapper rowMapper = buildQueryDefaultLOBRowMapper();
 
@@ -253,9 +253,9 @@ public class DataController extends AbstractSchemaConnTableController
 			@PathVariable("tableName") String tableName,
 			@RequestParam(value = "batchCount", required = false) Integer batchCount,
 			@RequestParam(value = "batchHandleErrorMode", required = false) BatchHandleErrorMode batchHandleErrorMode,
-			@RequestBody Map<String, ?> rowMap) throws Throwable
+			@RequestBody Map<String, ?> paramData) throws Throwable
 	{
-		Row row = convertToRow(rowMap);
+		Row row = convertToRow(paramData);
 
 		if (batchCount != null && batchCount >= 0)
 			return saveAddBatch(request, response, springModel, schemaId, tableName, row, batchCount,
@@ -309,10 +309,10 @@ public class DataController extends AbstractSchemaConnTableController
 	@RequestMapping("/{schemaId}/{tableName}/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("data") JsonObject rowJson) throws Throwable
+			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> paramData) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row row = convertToRow(rowJson);
+		final Row row = convertToRow(paramData);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
@@ -350,18 +350,19 @@ public class DataController extends AbstractSchemaConnTableController
 		return "/data/data_form";
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/{schemaId}/{tableName}/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("originalData") JsonObject originRowJson,
-			@RequestParam("data") JsonObject updateRowJson,
-			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
+			@PathVariable("tableName") String tableName,
+			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication,
+			@RequestBody Map<String, ?> paramData)
 			throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row originalRow = convertToRow(originRowJson);
-		final Row updateRow = convertToRow(updateRowJson);
+		final Row originalRow = convertToRow((Map<String, ?>) paramData.get("originalData"));
+		final Row updateRow = convertToRow((Map<String, ?>) paramData.get("data"));
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
 				request, response, springModel, schemaId, tableName, false)
@@ -394,12 +395,13 @@ public class DataController extends AbstractSchemaConnTableController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("data") JsonArray deleteRowJson,
-			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
+			@PathVariable("tableName") String tableName,
+			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication,
+			@RequestBody List<Map<String, ?>> paramData)
 			throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row[] rows = convertToRows(deleteRowJson);
+		final Row[] rows = convertToRows(paramData);
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
 				request, response, springModel, schemaId, tableName, false)
@@ -428,10 +430,10 @@ public class DataController extends AbstractSchemaConnTableController
 	@RequestMapping("/{schemaId}/{tableName}/view")
 	public String view(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("data") JsonObject rowJson) throws Throwable
+			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> paramData) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row row = convertToRow(rowJson);
+		final Row row = convertToRow(paramData);
 		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
@@ -751,6 +753,19 @@ public class DataController extends AbstractSchemaConnTableController
 			return null;
 
 		return new Row(map);
+	}
+
+	protected Row[] convertToRows(List<? extends Map<String, ?>> list)
+	{
+		if (list == null)
+			return null;
+
+		Row[] rows = new Row[list.size()];
+
+		for (int i = 0; i < list.size(); i++)
+			rows[i] = convertToRow((list.get(i)));
+
+		return rows;
 	}
 
 	protected Row convertToRow(JsonObject json)
