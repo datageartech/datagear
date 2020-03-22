@@ -79,9 +79,16 @@ boolean batchSet 是否开启批量执行功能，默认为false
 				else
 				{
 					var thisForm = this;
-					var param = $.extend(formParam, {"data" : formData, "originalData" : po.data});
+					var url = po.url(po.submitAction);
+					if(formParam && formParam.batchCount)
+					{
+						url = $.addParam(url, "batchCount", formParam.batchCount);
+						if(formParam && formParam.batchHandleErrorMode)
+							url = $.addParam(url, "batchHandleErrorMode", formParam.batchHandleErrorMode);
+					}
+					var param = (po.data ? {"data" : formData, "originalData" : po.data} : formData);
 					
-					po.ajaxSubmitForHandleDuplication(po.submitAction, param, "<@spring.message code='save.continueIgnoreDuplicationTemplate' />",
+					po.ajaxSubmitForHandleDuplication(url, param, "<@spring.message code='save.continueIgnoreDuplicationTemplate' />",
 					{
 						beforeSend : function()
 						{
@@ -126,52 +133,17 @@ boolean batchSet 是否开启批量执行功能，默认为false
 				
 				return false;
 			},
-			addSinglePropertyValue : function(property)
-			{
-				po.addSinglePropertyValue(property);
-			},
-			editSinglePropertyValue : function(property, propertyValue)
-			{
-				po.editSinglePropertyValue(property, propertyValue);
-			},
-			deleteSinglePropertyValue : function(property, propertyValue)
-			{
-				po.deleteSinglePropertyValue(property, propertyValue);
-			},
-			selectSinglePropertyValue : function(property, propertyValue)
-			{
-				po.selectSinglePropertyValue(property, propertyValue);
-			},
-			viewSinglePropertyValue : function(property, propertyValue)
-			{
-				po.viewSinglePropertyValue(property, propertyValue);
-			},
-			editMultiplePropertyValue : function(property, propertyValue)
-			{
-				po.editMultiplePropertyValue(property, propertyValue);
-			},
-			viewMultiplePropertyValue : function(property, propertyValue)
-			{
-				po.viewMultiplePropertyValue(property, propertyValue);
-			},
-			filePropertyUploadURL : "${contextPath}/data/file/upload",
-			filePropertyDeleteURL : "${contextPath}/data/file/delete",
-			columnValueDownloadUrl : function(property)
-			{
-				po.columnValueDownloadUrl(property);
-			},
+			selectColumnValue : function(column, columnValue){ throw new Error("TODO"); },
+			viewColumnValue: function(column, columnValue){ throw new Error("TODO"); },
+			downloadColumnValue: po.downloadColumnValue,
+			fileUploadUrl : "${contextPath}/data/uploadFile",
+			fileDeleteUrl : "${contextPath}/data/deleteFile",
 			validationRequiredAsAdd : ("saveAdd" == po.submitAction),
 			batchSet : po.batchSet,
 			labels : po.formLabels,
 			dateFormat : "${sqlDateFormat}",
 			timestampFormat : "${sqlTimestampFormat}",
-			timeFormat : "${sqlTimeFormat}",
-			lobValuePlaceholders:
-			{
-				blobPlaceholder: "${formDefaultLOBRowMapper.blobPlaceholder}",
-				clobPlaceholder: "${formDefaultLOBRowMapper.clobPlaceholder}",
-				sqlXmlPlaceholder: "${formDefaultLOBRowMapper.sqlXmlPlaceholder}"
-			}
+			timeFormat : "${sqlTimeFormat}"
 		});
 	});
 })

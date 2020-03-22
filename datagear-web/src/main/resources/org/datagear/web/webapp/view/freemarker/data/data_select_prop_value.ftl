@@ -187,7 +187,7 @@ boolean isMultipleSelect 是否多选，默认为false
 		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(po.conditionSource);
 		po.initConditionPanel();
 		po.initPagination();
-		po.initModelDataTableAjax(po.url("selectPropValueData"), propertyModel);
+		po.initDataTableAjax(po.url("selectPropValueData"), propertyModel);
 		po.bindResizeDataTable();
 	});
 })

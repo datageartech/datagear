@@ -573,12 +573,36 @@
 		 * @param url 待添加参数的URL
 		 * @param name 待添加的参数名
 		 * @param value 待添加的参数值
+		 * @param multiple 允许重名，可选，默认为false
 		 */
-		addParam : function(url, name, value)
+		addParam : function(url, name, value, multiple)
 		{
-			var f = (url.indexOf('?') < 0 ? "?" : "&" );
+			name = encodeURIComponent(name);
+			value = encodeURIComponent(value);
 			
-			url = url + f + name + "=" + value;
+			var qidx = url.indexOf('?');
+			
+			if(multiple == true || qidx < 0)
+			{
+				var f = (qidx < 0 ? "?" : "&");
+				url = url + f + name + "=" + value;
+				return url;
+			}
+			else
+			{
+				var keyword = name+"=";
+				var start = url.indexOf(keyword, qidx+1);
+				if(start >= 0)
+				{
+					var head = url.substring(0, start);
+					start = start+keyword.length;
+					var end = url.indexOf("&", start);
+					var tail = (end >= 0 ? url.substr(end) : "");
+					url = head + tail;
+				}
+				
+				url += "&" + name +"=" + value;
+			}
 			
 			return url;
 		},
@@ -715,20 +739,32 @@
 		/**
 		 * 将传入参数转义为路径。
 		 * 
-		 * @param elements 必选，路径元素
+		 * @param args 路径元素，元素为true或false，可控制下一个元素是否转义
 		 */
-		toPath : function(elements)
+		toPath : function(args)
 		{
 			var re="";
 			
+			var encode = true;
 			for(var i=0; i< arguments.length; i++)
 			{
-				element = encodeURIComponent(arguments[i]);
+				var element = arguments[i];
 				
-				if(re.charAt(re.length - 1) != "/")
+				//设置下一个元素是否转义
+				if(element === true || element === false)
+				{
+					encode = element;
+					continue;
+				}
+				
+				if(encode)
+					element = encodeURIComponent(element);
+				
+				if(re && re.charAt(re.length - 1) != "/")
 					re += "/";
 				
 				re += element;
+				encode=true;
 			}
 			
 			return re;
@@ -2923,6 +2959,19 @@
 			}
 		}
 	};
+	
+	/**JSON内容类型常量*/
+	$.CONTENT_TYPE_JSON = "application/json";
+	
+	//如果请求内容类型是JSON，则自动将请求数据对象转换为JSON内容
+	$.ajaxPrefilter(function( options, originalOptions, jqXHR )
+	{
+		if(originalOptions.contentType != $.CONTENT_TYPE_JSON)
+			return;
+		
+		if(originalOptions.data && $.isPlainObject(originalOptions.data))
+			options.data = JSON.stringify(originalOptions.data);
+	});
 	
 	$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError)
 	{

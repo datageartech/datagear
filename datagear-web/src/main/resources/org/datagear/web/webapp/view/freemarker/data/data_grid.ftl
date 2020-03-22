@@ -2,7 +2,7 @@
 <#include "../include/html_doctype.ftl">
 <#--
 Schema schema 数据库，不允许为null
-Model model 模型，不允许为null
+Table table 模型，不允许为null
 String titleDisplayName 页面展示名称，默认为""
 String titleDisplayDesc 页面展示描述，默认为""
 boolean readonly 是否只读操作，默认为false
@@ -93,7 +93,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 	if(!po.canReadTableData(${schema.dataPermission}))
 		po.element("input[name=viewButton]").attr("disabled", "disabled").hide();
 	
-	po.onTable(function(model)
+	po.onTable(function(table)
 	{
 		<#if !readonly>
 		po.element("input[name=addButton]").click(function()
@@ -126,7 +126,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 					{
 						var data = {"data" : rows};
 						
-						po.ajaxSubmitForHandleDuplication("delete", data, "<@spring.message code='delete.continueIgnoreDuplicationTemplate' />",
+						po.ajaxSubmitForHandleDuplication(po.url("delete"), data, "<@spring.message code='delete.continueIgnoreDuplicationTemplate' />",
 						{
 							"success" : function()
 							{
@@ -155,12 +155,12 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(po.conditionSource);
 		po.initConditionPanel();
 		po.initPagination();
-		po.initModelDataTableAjax(po.url("queryData"), model);
+		po.initDataTableAjax(po.url("queryData"), table);
 		po.bindResizeDataTable();
 		
 		<#if !readonly>
 		if(po.canEditTableData(${schema.dataPermission}))
-			po.initEditGrid(model);
+			po.initEditGrid(table);
 		else
 		{
 			po.elementEditGridSwitch().checkboxradio().checkboxradio("disable");

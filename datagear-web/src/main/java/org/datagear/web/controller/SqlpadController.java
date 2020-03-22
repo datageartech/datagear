@@ -43,6 +43,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -309,11 +310,11 @@ public class SqlpadController extends AbstractSchemaConnController
 	@RequestMapping(value = "/{schemaId}/sqlHistoryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<SqlHistory> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-
-		PagingQuery pagingQuery = getPagingQuery(request, null);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		return this.sqlHistoryService.pagingQueryByUserId(schemaId, user.getId(), pagingQuery);
 	}

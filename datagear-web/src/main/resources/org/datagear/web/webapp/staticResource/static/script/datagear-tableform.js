@@ -56,24 +56,20 @@
 			//必选
 			viewColumnValue: function(column, columnValue){ throw new Error("TODO"); },
 			
-			//"readonly=false"时必须，文件列值上传地址
-			columnValueUploadUrl : "",
+			//必选
+			downloadColumnValue: function(column, columnValue){ throw new Error("TODO"); },
+			
+			//"readonly=false"时必须，文件上传地址
+			fileUploadUrl : "",
 			
 			//可选，文件列值上传时的文件参数名
 			columnValueUploadParamName : "file",
 			
-			//"readonly=false"时必须，文件列值下载地址
-			columnValueDownloadUrl : "",
-			
-			//"readonly=false"时必须，文件列值删除地址
-			columnValueDeleteUrl : "",
+			//"readonly=false"时必须，文件删除地址
+			fileDeleteUrl : "",
 			
 			//可选，文件列值删除时的文件参数名
 			columnValueDeleteParamName : "file",
-			
-			//可选，文件列值是否采用可展示值对象，而非基本文件名称值
-			//详细信息对象格式参考：$.meta.toShowableValue
-			fileColumnReturnShowableValue : true,
 			
 			//可选，使用文本域而非文本框的长度阀值
 			asTextareaLength : 101,
@@ -97,6 +93,9 @@
 			//可选，SQL时间格式
 			sqlTimeFormat : "",
 			
+			//可选，文件列值标签
+			fileValueLabel: "[BLOB]",
+			
 			//可选，是否开启批量设置
 			batchSet : false,
 			
@@ -108,14 +107,6 @@
 			
 			//batchSet=true时必选，批量执行出错处理方式枚举
 			batchHandleErrorModeEnum : ["IGNORE", "ABORT", "ROLLBACK"],
-			
-			//可选，文件列值默认展示标签值
-			lobValuePlaceholders:
-			{
-				blobPlaceholder: "[BLOB]",
-				clobPlaceholder: "[CLOB]",
-				sqlXmlPlaceholder: "[SQLXML]"
-			},
 			
 			//可选，标签
 			labels :
@@ -637,9 +628,7 @@
 					.html(options.labels.downloadFile)
 					.appendTo(valuediv);
 				
-				var rawValue = $.meta.getShowableRawValue(columnValue);
-				
-				if(!rawValue)
+				if(!$.meta.valueOfLabeledValue(columnValue))
 					fileDownloadButton.attr("disabled", true);
 				
 				fileDownloadButton.button();
@@ -649,7 +638,7 @@
 		    		var myColumnName = $(this).attr("__columnName");
 					var myColumnInfo = _this._getColumnInfo(myColumnName);
 					
-	    			_this.options.columnValueDownloadUrl.call(_this.element, myColumnInfo.column,
+	    			_this.options.downloadColumnValue.call(_this.element, myColumnInfo.column,
 							myColumnInfo.columnValue);
 				});
 			}
@@ -662,7 +651,6 @@
 					{
 						var columnName = $(this).attr("__columnName");
 						var columnWidget = _this._columnWidgets[columnName];
-						
 						columnWidget.setValue(null);
 					}
 				});
@@ -680,7 +668,7 @@
 				{
 					__columnName : columnName,
 					__columnValue : columnValue,
-					url : options.columnValueUploadUrl,
+					url : options.fileUploadUrl,
 					paramName : options.columnValueUploadParamName,
 					success : function(serverFileInfo, textStatus, jqXHR)
 					{
@@ -690,7 +678,7 @@
 						var columnValue = this.__columnValue;
 						var columnWidget = _this._columnWidgets[columnName];
 						
-						columnWidget.setValue($.meta.toShowableValue(serverFileInfo.name, clientFileName), true);
+						columnWidget.setValue($.meta.toLabeledValue(serverFileInfo.name, clientFileName), true);
 						
 						$.fileuploadsuccessHandlerForUploadInfo(fileInfoDiv);
 						
@@ -707,8 +695,7 @@
 							{
 								var param = {};
 								param[options.columnValueDeleteParamName] = serverFileInfo.name;
-								
-								$.post(options.columnValueDeleteUrl, param);
+								$.post(options.fileDeleteUrl, param);
 							}
 						});
 					}
@@ -737,20 +724,17 @@
 			    		var action = $(ui.item).attr("value");
 			    		var myColumnName = $(ui.item.element).attr("__columnName");
 						var myColumnInfo = _this._getColumnInfo(myColumnName);
+						var myColumnWidget = myColumnInfo.columnWidget;
 						
 			    		if("download" == action)
 			    		{
-			    			var rawValue = $.meta.getShowableRawValue(myColumnInfo.columnValue);
-			    			
-			    			if(rawValue)
-			    				_this.options.columnValueDownloadUrl.call(_this.element, myColumnInfo.column,
+			    			var value = $.meta.valueOfLabeledValue(myColumnInfo.columnValue);
+			    			if(value)
+			    				_this.options.downloadColumnValue.call(_this.element, myColumnInfo.column,
 										myColumnInfo.columnValue);
 			    		}
 			    		else if("del" == action)
-			    		{
-			    			_this.options.deleteSingleColumnValue.call(_this.element, myColumnInfo.column,
-									myColumnInfo.columnValue);
-			    		}
+			    			myColumnWidget.setValue(null);
 			    	}
 				});
 				
@@ -766,38 +750,21 @@
 			
 			columnWidget.getValue = function()
 			{
-				if(options.fileColumnReturnShowableValue)
-				{
-					var value = $(this.fileInputHidden).val();
-					var labelValue = (value ? options.fileColumnLabelValue : "");
-					
-					return $.meta.toShowableValue(value, labelValue);
-				}
-				else
-					return $(this.fileInputHidden).val();
+				return $(this.fileInputHidden).val();
 			};
-			columnWidget.setValue = function(value, reserveFileInfo)
+			columnWidget.setValue = function(value, retainFileInfo)
 			{
-				if(value && options.fileColumnLabelValue != null && !$.meta.isShowableValue(value))
-					value = $.meta.toShowableValue(value, options.fileColumnLabelValue);
+				if(value && options.fileValueLabel != null && !$.meta.isLabeledValue(value))
+					value = $.meta.toLabeledValue(value, options.fileValueLabel);
 				
-				var rawValue = $.meta.getShowableRawValue(value);
-				var labelValue = $.meta.getShowableLabelValue(value);
+				var label = $.meta.labelOfLabeledValue(value);
+				value = ($.meta.valueOfLabeledValue(value) || "");
 				
-				$(this.fileInputHidden).val(rawValue ? rawValue : "");
+				$(this.fileInputHidden).val(value);
+				$(this.fileInputShow).val(label ? label : value);
 				
-				if(labelValue)
-					$(this.fileInputShow).val(labelValue);
-				else
-					$(this.fileInputShow).val((rawValue ? rawValue : ""));
-				
-				if(this.fileInfoDiv)
-				{
-					if(reserveFileInfo)
-						;
-					else
-						$(this.fileInfoDiv).empty();
-				}
+				if(this.fileInfoDiv && !retainFileInfo)
+					$(this.fileInfoDiv).empty();
 			};
 			columnWidget.active = function()
 			{
@@ -859,7 +826,7 @@
 		    		var myColumnName = $(this).attr("__columnName");
 					var myColumnInfo = _this._getColumnInfo(myColumnName);
 					
-					_this.options.selectSingleColumnValue.call(_this.element, myColumnInfo.column,
+					_this.options.selectColumnValue.call(_this.element, myColumnInfo.column,
 							myColumnInfo.columnValue);
 				});
 			}

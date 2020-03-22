@@ -47,6 +47,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -171,7 +172,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		if (!dashboard.isTemplate(templateName))
 		{
-			List<String> templates = new ArrayList<String>();
+			List<String> templates = new ArrayList<>();
 
 			if (!isEmpty(dashboard.getTemplates()))
 				templates.addAll(Arrays.asList(dashboard.getTemplates()));
@@ -203,7 +204,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (save)
 			saveTemplateContent(dashboard, templateName, templateContent);
 
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new HashMap<>();
 		data.put("id", dashboard.getId());
 		data.put("templateName", templateName);
 		data.put("templates", dashboard.getTemplates());
@@ -236,7 +237,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		this.htmlTplDashboardWidgetEntityService.update(user, widget);
 
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new HashMap<>();
 		data.put("id", id);
 		data.put("templates", templates);
 
@@ -259,7 +260,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		if (widget == null)
 			throw new RecordNotFoundException();
 
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new HashMap<>();
 		data.put("id", id);
 		data.put("templateName", templateName);
 		data.put("templateContent", readTemplateContent(widget, templateName));
@@ -277,7 +278,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
 
 		if (dashboard == null)
-			return new ArrayList<String>(0);
+			return new ArrayList<>(0);
 
 		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
@@ -335,7 +336,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		String uploadFilePath = FileUtil.getRelativePath(this.tempDirectory, file);
 
-		Map<String, Object> results = new HashMap<String, Object>();
+		Map<String, Object> results = new HashMap<>();
 		results.put("uploadFilePath", uploadFilePath);
 		results.put("fileName", fileName);
 
@@ -395,7 +396,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		String dasboardName = "";
 		String dashboardFileName = "";
-		List<String> templates = new ArrayList<String>();
+		List<String> templates = new ArrayList<>();
 
 		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
 
@@ -455,7 +456,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		dasboardName = FileUtil.deleteExtension(fileName);
 
-		Map<String, Object> results = new HashMap<String, Object>();
+		Map<String, Object> results = new HashMap<>();
 
 		results.put("dashboardName", dasboardName);
 		results.put("template", HtmlTplDashboardWidgetEntity.concatTemplates(templates));
@@ -574,11 +575,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<HtmlTplDashboardWidgetEntity> pagingQueryData(HttpServletRequest request,
-			HttpServletResponse response, final org.springframework.ui.Model springModel) throws Exception
+			HttpServletResponse response, final org.springframework.ui.Model springModel,
+			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-
-		PagingQuery pagingQuery = getPagingQuery(request);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 		String dataFilter = getDataFilterValue(request);
 
 		PagingData<HtmlTplDashboardWidgetEntity> pagingData = this.htmlTplDashboardWidgetEntityService.pagingQuery(user,

@@ -20,6 +20,7 @@ import org.datagear.web.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -162,12 +163,12 @@ public class RoleController extends AbstractController
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<Role> queryData(HttpServletRequest request, HttpServletResponse response) throws Exception
+	public List<Role> queryData(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
-		PagingQuery pagingQuery = getPagingQuery(request, null);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		List<Role> roles = this.roleService.query(pagingQuery);
-
 		return roles;
 	}
 
@@ -188,14 +189,15 @@ public class RoleController extends AbstractController
 	@RequestMapping(value = "/user/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<RoleUser> userQueryData(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("roleId") String roleId) throws Exception
+			@RequestParam("roleId") String roleId, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			throws Exception
 	{
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+
 		Role role = this.roleService.getById(roleId);
 
 		if (role == null)
 			throw new RecordNotFoundException();
-
-		PagingQuery pagingQuery = getPagingQuery(request, null);
 
 		List<RoleUser> roleUsers = this.roleUserService.queryForRole(role, pagingQuery);
 

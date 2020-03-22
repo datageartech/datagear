@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -183,15 +184,15 @@ public class AuthorizationController extends AbstractController
 	@RequestMapping(value = "/{resourceType}/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<Authorization> queryData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @PathVariable("resourceType") String resourceType) throws Exception
+			org.springframework.ui.Model model, @PathVariable("resourceType") String resourceType,
+			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		ResourceMeta resourceMeta = setResourceMetaAttribute(model, resourceType);
 		setAuthorizationQueryContext(request, resourceMeta);
 		String assignedResource = getAssignedResource(request);
-
-		PagingQuery pagingQuery = getPagingQuery(request, null);
 
 		List<Authorization> authorizations = null;
 
@@ -246,7 +247,7 @@ public class AuthorizationController extends AbstractController
 		{
 			PermissionMeta permissionMeta = permissionMetas[i];
 
-			permissionLabels[i] = new EnumValueLabel<Integer>(permissionMeta.getPermission(),
+			permissionLabels[i] = new EnumValueLabel<>(permissionMeta.getPermission(),
 					getMessage(request, permissionMeta.getPermissionLabel()));
 		}
 		context.setPermissionLabels(permissionLabels);

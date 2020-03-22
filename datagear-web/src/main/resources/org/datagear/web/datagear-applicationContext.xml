@@ -234,16 +234,7 @@
 	<bean id="sqlTimestampFormatter" class="org.datagear.web.format.SqlTimestampFormatter" />
 	<bean id="dateFormatter" class="org.datagear.web.format.DateFormatter" />
     
-    <bean id="conversionService" class="org.datagear.web.convert.CustomFormattingConversionServiceFactoryBean">
-    	<property name="formatters">
-    		<set>
-    			<ref bean="sqlDateFormatter" />
-    			<ref bean="sqlTimeFormatter" />
-    			<ref bean="sqlTimestampFormatter" />
-    			<ref bean="dateFormatter" />
-    		</set>
-    	</property>
-    </bean>
+    <bean id="conversionService" class="org.datagear.web.convert.CustomFormattingConversionServiceFactoryBean" />
     
 	<bean id="localeDateSerializer" class="org.datagear.web.json.fastjson.LocaleDateSerializer">
 		<property name="dateFormatter" ref="dateFormatter" />

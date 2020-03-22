@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -190,12 +191,12 @@ public class UserController extends AbstractController
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<User> queryData(HttpServletRequest request, HttpServletResponse response) throws Exception
+	public List<User> queryData(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
-		PagingQuery pagingQuery = getPagingQuery(request, null);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		List<User> users = this.userService.query(pagingQuery);
-
 		return users;
 	}
 

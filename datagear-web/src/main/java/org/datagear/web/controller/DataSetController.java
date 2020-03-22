@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -265,11 +266,11 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<SqlDataSetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel) throws Exception
+			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-
-		PagingQuery pagingQuery = getPagingQuery(request, WebUtils.COOKIE_PAGINATION_SIZE);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 		String dataFilter = getDataFilterValue(request);
 
 		PagingData<SqlDataSetEntity> pagingData = this.sqlDataSetEntityService.pagingQuery(user, pagingQuery,

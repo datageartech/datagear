@@ -103,11 +103,12 @@ page_js_obj.jsp
 				else
 					myData = po.dataTableAjaxParam;
 				
-				var param = $.extend({ "order" : nameOrder }, myData);
+				var param = $.extend({ "orders" : nameOrder }, myData);
 				
 				$.ajax(
 				{
 					url : url,
+					contentType: $.CONTENT_TYPE_JSON,
 					dataType : "json",
 					type : "POST",
 					data : param,
@@ -155,7 +156,7 @@ page_js_obj.jsp
 		return po.buildDataTableSettings(settings);
 	};
 	
-	po.TABLE_CHECK_COLUMN_PROPERTY_NAME = "___DATA_GEAR_ZY_CHECK_COLUMN_PROPERTY___";
+	po.TABLE_CHECK_COLUMN_NAME = "_DATA_GEAR_TABLE_CHECK_COLUMN";
 	
 	/**
 	 * 构建表格选项。
@@ -165,7 +166,7 @@ page_js_obj.jsp
 	{
 		var newColumns = [
 				{
-					title : "<@spring.message code='select' />", data : po.TABLE_CHECK_COLUMN_PROPERTY_NAME, defaultContent: "", width : "3em",
+					title : "<@spring.message code='select' />", data : po.TABLE_CHECK_COLUMN_NAME, defaultContent: "", width : "3em",
 					orderable : false, render : po.renderCheckColumn, className : "column-check"
 				}
 			];

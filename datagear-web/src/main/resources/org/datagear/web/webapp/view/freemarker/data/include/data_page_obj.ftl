@@ -28,7 +28,7 @@
 			if(!tableName)
 				tableName = this.tableName;
 			
-			return contextPath + $.toPath("data", this.schemaId, tableName, action) + (param ? "?" + param : "");
+			return $.toPath(false, contextPath, "data", this.schemaId, tableName, action) + (param ? "?" + param : "");
 		},
 		
 		/**
@@ -51,7 +51,7 @@
 		/**
 		 * 提交可处理重复记录的请求。
 		 */
-		ajaxSubmitForHandleDuplication : function(action, data, messageTemplate, ajaxOptions, ignoreDuplication)
+		ajaxSubmitForHandleDuplication : function(url, data, messageTemplate, ajaxOptions, ignoreDuplication)
 		{
 			var errorCallback = function(jqXHR, textStatus, errorThrown)
 			{
@@ -90,14 +90,10 @@
 				return callResult;
 			};
 			
-			var url;
-			
 			if(ignoreDuplication)
-				url = po.url("", action, "ignoreDuplication=true");
-			else
-				url = po.url(action);
+				url = $.addParam(url, "ignoreDuplication", "true");
 			
-			var options = $.extend({}, ajaxOptions, { data : data, error : errorCallback, type : "POST" });
+			var options = $.extend({ contentType: $.CONTENT_TYPE_JSON }, ajaxOptions, { data : data, error : errorCallback, type : "POST" });
 			
 			$.ajax(url, options);
 		}

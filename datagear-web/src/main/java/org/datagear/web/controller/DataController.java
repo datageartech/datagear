@@ -41,6 +41,7 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
+import org.datagear.web.convert.StringToJsonConverter;
 import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
@@ -54,6 +55,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -167,8 +169,7 @@ public class DataController extends AbstractSchemaConnTableController
 	@RequestMapping("/{schemaId}/{tableName}/query")
 	public String query(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam(value = "page", required = false) Integer page,
-			@RequestParam(value = "pageSize", required = false) Integer pageSize) throws Throwable
+			@PathVariable("tableName") String tableName) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 
@@ -193,10 +194,11 @@ public class DataController extends AbstractSchemaConnTableController
 	@ResponseBody
 	public PagingData<Row> queryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName) throws Throwable
+			@PathVariable("tableName") String tableName, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final PagingQuery pagingQuery = getPagingQuery(request);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		final DefaultLOBRowMapper rowMapper = buildQueryDefaultLOBRowMapper();
 
@@ -249,12 +251,11 @@ public class DataController extends AbstractSchemaConnTableController
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName,
-			@RequestParam("data") JsonObject rowJson,
 			@RequestParam(value = "batchCount", required = false) Integer batchCount,
-			@RequestParam(value = "batchHandleErrorMode", required = false) BatchHandleErrorMode batchHandleErrorMode)
-			throws Throwable
+			@RequestParam(value = "batchHandleErrorMode", required = false) BatchHandleErrorMode batchHandleErrorMode,
+			@RequestBody Map<String, ?> rowMap) throws Throwable
 	{
-		Row row = convertToRow(rowJson);
+		Row row = convertToRow(rowMap);
 
 		if (batchCount != null && batchCount >= 0)
 			return saveAddBatch(request, response, springModel, schemaId, tableName, row, batchCount,
@@ -353,8 +354,7 @@ public class DataController extends AbstractSchemaConnTableController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName,
-			@RequestParam("originalData") JsonObject originRowJson,
+			@PathVariable("tableName") String tableName, @RequestParam("originalData") JsonObject originRowJson,
 			@RequestParam("data") JsonObject updateRowJson,
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
 			throws Throwable
@@ -394,8 +394,7 @@ public class DataController extends AbstractSchemaConnTableController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName,
-			@RequestParam("data") JsonArray deleteRowJson,
+			@PathVariable("tableName") String tableName, @RequestParam("data") JsonArray deleteRowJson,
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication)
 			throws Throwable
 	{
@@ -429,8 +428,7 @@ public class DataController extends AbstractSchemaConnTableController
 	@RequestMapping("/{schemaId}/{tableName}/view")
 	public String view(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName,
-			@RequestParam("data") JsonObject rowJson) throws Throwable
+			@PathVariable("tableName") String tableName, @RequestParam("data") JsonObject rowJson) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 		final Row row = convertToRow(rowJson);
@@ -590,8 +588,7 @@ public class DataController extends AbstractSchemaConnTableController
 	@ResponseBody
 	public List<List<Object>> getColumnValuess(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName,
-			@RequestParam("datas") JsonArray rowsJson,
+			@PathVariable("tableName") String tableName, @RequestParam("datas") JsonArray rowsJson,
 			@RequestParam("columnNamess") JsonArray columnNamessJson) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
@@ -605,8 +602,7 @@ public class DataController extends AbstractSchemaConnTableController
 		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_HEX);
 
 		List<List<Object>> columnValuess = new ReturnSchemaConnTableExecutor<List<List<Object>>>(request, response,
-				springModel,
-				schemaId, tableName, true)
+				springModel, schemaId, tableName, true)
 		{
 			@Override
 			protected List<List<Object>> execute(HttpServletRequest request, HttpServletResponse response,
@@ -617,7 +613,7 @@ public class DataController extends AbstractSchemaConnTableController
 				Connection cn = getConnection();
 				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
 
-				List<List<Object>> columnValuess = new ArrayList<List<Object>>(rows.length);
+				List<List<Object>> columnValuess = new ArrayList<>(rows.length);
 
 				for (int i = 0; i < rows.length; i++)
 				{
@@ -638,9 +634,8 @@ public class DataController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/{schemaId}/{tableName}/downloadColumnValue")
 	public void downloadColumnValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName,
-			@RequestParam("data") JsonObject rowJson, @RequestParam("columnName") final String columnName)
-			throws Throwable
+			@PathVariable("tableName") String tableName, @RequestParam("data") JsonObject rowJson,
+			@RequestParam("columnName") final String columnName) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 		final Row row = convertToRow(rowJson);
@@ -677,7 +672,7 @@ public class DataController extends AbstractSchemaConnTableController
 		try
 		{
 			out = response.getOutputStream();
-			
+
 			if (!StringUtil.isEmpty(columnValue))
 			{
 				if (columnValue instanceof String)
@@ -687,7 +682,7 @@ public class DataController extends AbstractSchemaConnTableController
 				else
 					throw new IllegalArgumentException(
 							"Table '" + tableName + "' column '" + columnValue + "' 's value is not downloadable");
-				
+
 				IOUtil.write(in, out);
 			}
 		}
@@ -698,9 +693,9 @@ public class DataController extends AbstractSchemaConnTableController
 		}
 	}
 
-	@RequestMapping(value = "/file/upload", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public FileInfo fileUpload(HttpServletRequest request, @RequestParam("file") MultipartFile multipartFile)
+	public FileInfo uploadFile(HttpServletRequest request, @RequestParam("file") MultipartFile multipartFile)
 			throws Throwable
 	{
 		File file = FileUtil.generateUniqueFile(buildSaveSqlParamValueMapper().getFilePathValueDirectory());
@@ -712,9 +707,33 @@ public class DataController extends AbstractSchemaConnTableController
 		return fileInfo;
 	}
 
-	@RequestMapping(value = "/file/delete", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/downloadFile")
+	public void downloadFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("file") String fileName) throws Throwable
+	{
+		response.setCharacterEncoding(RESPONSE_ENCODING);
+		response.setHeader("Content-Disposition", "attachment; filename=" + fileName + "");
+
+		OutputStream out = null;
+
+		try
+		{
+			out = response.getOutputStream();
+
+			File file = FileUtil.getFile(buildSaveSqlParamValueMapper().getFilePathValueDirectory(), fileName);
+
+			if (file.exists())
+				IOUtil.write(file, out);
+		}
+		finally
+		{
+			IOUtil.close(out);
+		}
+	}
+
+	@RequestMapping(value = "/deleteFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public FileInfo fileDelete(HttpServletRequest request, HttpServletResponse response,
+	public FileInfo deleteFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") String fileName) throws Throwable
 	{
 		File file = FileUtil.getFile(buildSaveSqlParamValueMapper().getFilePathValueDirectory(), fileName);
@@ -730,22 +749,32 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		if (map == null)
 			return null;
-		else if (map instanceof Row)
-			return (Row) map;
-		else
-			return new Row(map);
+
+		return new Row(map);
+	}
+
+	protected Row convertToRow(JsonObject json)
+	{
+		Map<String, Object> map = StringToJsonConverter.toStringValueMap(json);
+
+		if (map == null)
+			return null;
+
+		return new Row(map);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Row[] convertToRows(List<?> list)
+	protected Row[] convertToRows(JsonArray json)
 	{
+		List<Object> list = StringToJsonConverter.toStringValueList(json);
+
 		if (list == null)
 			return null;
 
 		Row[] rows = new Row[list.size()];
 
 		for (int i = 0; i < list.size(); i++)
-			rows[i] = convertToRow((Map<String, ?>) list.get(i));
+			rows[i] = new Row(((Map<String, ?>) list.get(i)));
 
 		return rows;
 	}
@@ -768,13 +797,12 @@ public class DataController extends AbstractSchemaConnTableController
 	 */
 	@SuppressWarnings("unchecked")
 	protected List<Object> loadColumnValues(Connection cn, Dialect dialect, Table table, Row row,
-			List<String> columnNames, SqlParamValueMapper paramValueMapper, RowMapper rowMapper)
-			throws Throwable
+			List<String> columnNames, SqlParamValueMapper paramValueMapper, RowMapper rowMapper) throws Throwable
 	{
 		if (StringUtil.isEmpty(columnNames))
 			return Collections.EMPTY_LIST;
 
-		List<Object> columnValues = new ArrayList<Object>(columnNames.size());
+		List<Object> columnValues = new ArrayList<>(columnNames.size());
 
 		Row getRow = persistenceManager.get(cn, dialect, table, row, paramValueMapper, rowMapper);
 

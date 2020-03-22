@@ -47,6 +47,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -195,7 +196,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			this.htmlChartWidgetEntityService.update(user, entity);
 		}
 
-		Map<String, Object> data = new HashMap<String, Object>();
+		Map<String, Object> data = new HashMap<>();
 		data.put("id", entity.getId());
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
@@ -267,11 +268,11 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<HtmlChartWidgetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel) throws Exception
+			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-
-		PagingQuery pagingQuery = getPagingQuery(request);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 		String dataFilter = getDataFilterValue(request);
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
@@ -384,7 +385,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		String id = chart.getId();
 
 		String htmlTitle = chart.getName();
-		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<HtmlRenderContext>(id,
+		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<>(id,
 				this.chartShowHtmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
 						"  position:absolute;\n  left:1em;\n  right:1em;\n  top:1em;\n  bottom:1em;\n  margin:0 0;\n  width:auto;\n  height:auto;\n",
 						new String[] { id }),
@@ -447,7 +448,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (isEmpty(chartDataSetIndexes))
 			return;
 
-		List<ChartDataSet> chartDataSets = new ArrayList<ChartDataSet>();
+		List<ChartDataSet> chartDataSets = new ArrayList<>();
 
 		for (String chartDataSetIndex : chartDataSetIndexes)
 		{
@@ -459,7 +460,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			SqlDataSetEntity sqlDataSet = new SqlDataSetEntity();
 			sqlDataSet.setId(dataSetId);
 
-			Map<String, Set<String>> propertySigns = new HashMap<String, Set<String>>();
+			Map<String, Set<String>> propertySigns = new HashMap<>();
 
 			String[] propertySignIndexes = request
 					.getParameterValues("chartDataSet_" + chartDataSetIndex + "_propertySignIndex");
@@ -479,7 +480,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 					if (!isEmpty(signs))
 					{
-						Set<String> signSet = new HashSet<String>();
+						Set<String> signSet = new HashSet<>();
 						for (String sign : signs)
 							signSet.add(sign);
 

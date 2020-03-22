@@ -374,6 +374,7 @@ ${detectNewVersionScript}
 				{
 					"data" :
 					{
+						contentType: $.CONTENT_TYPE_JSON,
 						"type" : "POST",
 						"url" : function(node)
 						{
@@ -382,7 +383,7 @@ ${detectNewVersionScript}
 								return contextPath+"/schema/list";
 							else if(po.isSchemaNode(node))
 							{
-								return contextPath + $.toPath("schema", node.id, "pagingQueryTable");
+								return $.toPath(false, contextPath, "schema", node.id, "pagingQueryTable");
 							}
 						},
 						"data" : function(node)
@@ -426,7 +427,7 @@ ${detectNewVersionScript}
 					tabTitle += "<@spring.message code='bracketLeft' />" + tableInfo.comment + "<@spring.message code='bracketRight' />";
 				tabTitle += "<@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
     			
-				var tabUrl = contextPath + $.toPath("data", schema.id, tableInfo.name, "query");
+				var tabUrl = $.toPath(false, contextPath, "data", schema.id, tableInfo.name, "query");
 				
 				po.activeWorkTab(po.toMainTabIdForSchemaName(schema.id, tableInfo.name), data.node.text, tabTitle, tabUrl, schema);
 			}
@@ -446,8 +447,9 @@ ${detectNewVersionScript}
 					var param = po.getSearchSchemaFormDataForTable();
 					param = $.extend({}, data.node.original.nextPageInfo, param);
 					
-					$.ajax(contextPath+$.toPath("schema", schemaId, "pagingQueryTable"),
+					$.ajax($.toPath(false, contextPath, "schema", schemaId, "pagingQueryTable"),
 					{
+						contentType: $.CONTENT_TYPE_JSON,
 						data : param,
 						success : function(pagingData)
 						{
@@ -887,7 +889,7 @@ ${detectNewVersionScript}
 					
 					var schemaId = selNode.original.id;
 					
-					po.open(contextPath+$.toPath("schema", ($item.hasClass("schema-operation-edit") ? "edit" : "view"))+"?id="+encodeURIComponent(schemaId), 
+					po.open($.toPath(false, contextPath, "schema", ($item.hasClass("schema-operation-edit") ? "edit" : "view"))+"?id="+encodeURIComponent(schemaId), 
 					{
 						"pageParam" :
 						{
@@ -963,7 +965,7 @@ ${detectNewVersionScript}
 					        	    var prelia = $("> li > a[href='#"+tabId+"']", uiTabsNav);
 					        	    if(prelia.length > 0)
 					        	    {
-					        	    	$.get(contextPath + $.toPath("data", schemaId, tableName, "query"), function(data)
+					        	    	$.get($.toPath(false, contextPath, "data", schemaId, tableName, "query"), function(data)
 					        	    	{
 					        	    	    uiTabsNav.show();
 					        	    	    

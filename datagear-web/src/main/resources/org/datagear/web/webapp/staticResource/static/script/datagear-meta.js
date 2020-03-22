@@ -80,7 +80,7 @@
 			else
 				obj[column] = value;
 		},
-
+		
 		/**
 		 * 如果列导入外键，则返回ImportKey对象，否则返回false。
 		 */
@@ -101,80 +101,6 @@
 			return false;
 		},
 		
-		/**
-		 * 判断给定属性是否是ID属性。
-		 */
-		isIdProperty : function(model, property)
-		{
-			var idProperties = (model.idProperties ? model.idProperties : undefined);
-			
-			if(!idProperties)
-				return false;
-			
-			for(var i=0; i< idProperties.length; i++)
-			{
-				if(idProperties[i] == property)
-					return true;
-			}
-			
-			return false;
-		},
-		
-		/**
-		 * 获取/设置对象ID属性值。
-		 * 
-		 * @param model 必选，表
-		 * @param obj 必选，对象或者数组
-		 * @parma id 可选
-		 */
-		id : function(model, obj, id)
-		{
-			var idProperties = model.idProperties;
-			
-			if(!idProperties)
-				throw new Error("Table ["+model.name+"] is not entity Table");
-			
-			var isArray = (obj.length != undefined);
-			
-			if(!obj.length)
-				obj = [obj];
-			
-			if(id == undefined)
-			{
-				var re = [];
-				
-				for(var i=0; i<idProperties.length; i++)
-				{
-					var propName = idProperties[i].name;
-					
-					for(var j=0; j<obj.length; j++)
-					{
-						if(!re[j])
-							re[j] = {};
-						
-						re[j][propName] = this.propertyValue(obj[j], propName);
-					}
-				}
-				
-				return (isArray ? re : re[0]);
-			}
-			else
-			{
-				if(!id.length)
-					id = [id];
-				
-				for(var i=0; i<idProperties.length; i++)
-				{
-					var propName = idProperties[i].name;
-					
-					for(var j=0; j<obj.length; j++)
-						this.propertyValue(obj[j], propName, id[j][propName]);
-				}
-				
-				return id;
-			}
-		},
-
 		/**
 		 * 创建指定表的实例对象。
 		 * 
@@ -297,7 +223,7 @@
 			
 			return epn;
 		},
-
+		
 		/**
 		 * 获取展示HTML。
 		 * 
@@ -306,53 +232,41 @@
 		 */
 		displayInfoHtml : function(tableOrColumn, tagName)
 		{
-			if(!tagName)
-				tagName = "span";
-			
-			var displayName = tableOrColumn.name;
-			var displayDesc = (tableOrColumn.comment || "");
-			
-			var label = "<"+tagName+" class='display-info" + "' title='"+this.escapeHtml(displayDesc)+"'>"+this.escapeHtml(displayName)+"</"+tagName+">";
-			
-			return label;
+			tagName = (tagName || "span");
+			return "<"+tagName+" class='display-info" + "' title='"+this.escapeHtml(tableOrColumn.comment || "")+"'>"
+						+this.escapeHtml(tableOrColumn.name)+"</"+tagName+">";
 		},
 		
 		/**
-		 * 是否是可展示值对象。
+		 * 是否是标签值对象：{value: ..., label: "..."}。
 		 */
-		isShowableValue : function(value)
+		isLabeledValue : function(value)
 		{
-			return $.isPlainObject(value) && value.hasOwnProperty("value") && value.hasOwnProperty("labelValue");
+			return $.isPlainObject(value) && value.hasOwnProperty("value") && value.hasOwnProperty("label");
 		},
 		
 		/**
-		 * 构建可展示值对象。
+		 * 构建标签值对象。
 		 */
-		toShowableValue : function(value, labelValue)
+		toLabeledValue : function(value, label)
 		{
-			return { "value" : value, "labelValue" : labelValue };
+			return { "value" : value, "label" : label };
 		},
 		
 		/**
-		 * 获取可展示值对象的原始值。
+		 * 获取标签值对象的值。
 		 */
-		getShowableRawValue : function(value)
+		valueOfLabeledValue : function(value)
 		{
-			if(this.isShowableValue(value))
-				return value.value;
-			else
-				return value;
+			return (this.isLabeledValue(value) ? value.value : value);
 		},
 		
 		/**
-		 * 获取可展示值对象的标签值。
+		 * 获取标签值对象的标签。
 		 */
-		getShowableLabelValue : function(value)
+		labelOfLabeledValue : function(value)
 		{
-			if(this.isShowableValue(value))
-				return value.labelValue;
-			else
-				return undefined;
+			return (this.isLabeledValue(value) ? value.label : undefined);
 		}
 	});
 	

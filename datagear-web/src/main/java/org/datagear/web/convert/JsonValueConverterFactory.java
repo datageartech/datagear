@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.json.JsonArray;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
-import javax.json.JsonStructure;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
@@ -18,23 +20,23 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
 /**
- * {@linkplain JsonStructure}转换器工厂。
+ * {@linkplain JsonValue}转换器工厂。
  * 
  * @author datagear@163.com
  *
  * @param <S>
  * @param <T>
  */
-public class JsonStructureConverterFactory<S extends JsonStructure, R> implements ConverterFactory<S, R>
+public class JsonValueConverterFactory<S extends JsonValue, R> implements ConverterFactory<S, R>
 {
 	private ConversionService conversionService;
 
-	public JsonStructureConverterFactory()
+	public JsonValueConverterFactory()
 	{
 		super();
 	}
 
-	public JsonStructureConverterFactory(ConversionService conversionService)
+	public JsonValueConverterFactory(ConversionService conversionService)
 	{
 		super();
 		this.conversionService = conversionService;
@@ -53,7 +55,7 @@ public class JsonStructureConverterFactory<S extends JsonStructure, R> implement
 	@Override
 	public <T extends R> Converter<S, T> getConverter(Class<T> targetType)
 	{
-		return new JsonStructureConverter<T>(targetType);
+		return new JsonStructureConverter<>(targetType);
 	}
 
 	protected class JsonStructureConverter<T> implements Converter<S, T>
@@ -88,14 +90,19 @@ public class JsonStructureConverterFactory<S extends JsonStructure, R> implement
 			if (source == null)
 				return null;
 
-			if (source instanceof JsonObject)
+			if (source instanceof JsonString)
+				return (T) conversionService.convert(((JsonString) source).getString(),
+						TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(targetType));
+			else if (source instanceof JsonNumber)
+				return (T) conversionService.convert(((JsonNumber) source).toString(),
+						TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(targetType));
+			else if (source instanceof JsonObject)
 				return (T) convertJsonObject((JsonObject) source, targetType);
 			else if (source instanceof JsonArray)
 				return (T) convertJSONArray((JsonArray) source, targetType);
 			else
 				throw new ConversionFailedException(TypeDescriptor.forObject(source),
-						TypeDescriptor.valueOf(targetType), source,
-						new UnsupportedOperationException());
+						TypeDescriptor.valueOf(targetType), source, new UnsupportedOperationException());
 		}
 
 		protected Object convertJsonObject(JsonObject jsonObject, Class<?> targetType)

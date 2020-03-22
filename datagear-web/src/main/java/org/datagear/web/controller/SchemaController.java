@@ -29,6 +29,7 @@ import org.datagear.web.util.WebUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -195,11 +196,11 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public List<Schema> queryData(HttpServletRequest request, HttpServletResponse response) throws Exception
+	public List<Schema> queryData(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-
-		PagingQuery pagingQuery = getPagingQuery(request, null);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		List<Schema> schemas = getSchemaService().query(user, pagingQuery);
 		processForUI(request, schemas);
@@ -249,9 +250,10 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/{schemaId}/pagingQueryTable", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<SimpleTable> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId) throws Throwable
+			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Throwable
 	{
-		PagingQuery pagingQuery = getPagingQuery(request, COOKIE_PAGINATION_SIZE);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam, COOKIE_PAGINATION_SIZE);
 
 		List<SimpleTable> tables = new ReturnSchemaConnExecutor<List<SimpleTable>>(request, response, springModel,
 				schemaId, true)

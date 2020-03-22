@@ -6,14 +6,11 @@ package org.datagear.web.controller;
 
 import java.util.Locale;
 
-import javax.json.JsonStructure;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.service.DataPermissionEntityService;
-import org.datagear.persistence.Order;
-import org.datagear.persistence.Paging;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
@@ -157,98 +154,49 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 获取{@linkplain PagingQuery}。
+	 * 检查并完善{@linkplain PagingQuery}。
 	 * 
 	 * @param request
+	 * @param pagingQuery
 	 * @return
-	 * @throws Exception
 	 */
-	protected PagingQuery getPagingQuery(HttpServletRequest request) throws Exception
+	protected PagingQuery inflatePagingQuery(HttpServletRequest request, PagingQuery pagingQuery)
 	{
-		return getPagingQuery(request, WebUtils.COOKIE_PAGINATION_SIZE);
+		return inflatePagingQuery(request, pagingQuery, WebUtils.COOKIE_PAGINATION_SIZE);
 	}
 
 	/**
-	 * 获取{@linkplain PagingQuery}。
+	 * 检查并完善{@linkplain PagingQuery}。
 	 * 
 	 * @param request
+	 * @param pagingQuery
 	 * @param cookiePaginationSize
 	 *            允许为{@code null}
 	 * @return
-	 * @throws Exception
 	 */
-	protected PagingQuery getPagingQuery(HttpServletRequest request, String cookiePaginationSize) throws Exception
+	protected PagingQuery inflatePagingQuery(HttpServletRequest request, PagingQuery pagingQuery,
+			String cookiePaginationSize)
 	{
-		String pageStr = request.getParameter("page");
-		String pageSizeStr = request.getParameter("pageSize");
-		String keyword = request.getParameter("keyword");
-		String condition = request.getParameter("condition");
-		String notLike = request.getParameter("notLike");
-		String order = request.getParameter("order");
+		if (pagingQuery != null)
+			return pagingQuery;
 
-		Integer page = null;
-		Integer pageSize = null;
+		pagingQuery = new PagingQuery();
 
-		if (pageStr != null && !pageStr.isEmpty())
-		{
-			try
-			{
-				page = Integer.parseInt(pageStr);
-			}
-			catch (Exception e)
-			{
-			}
-		}
-
-		if (pageSizeStr != null && !pageSizeStr.isEmpty())
-		{
-			try
-			{
-				pageSize = Integer.parseInt(pageSizeStr);
-			}
-			catch (Exception e)
-			{
-			}
-		}
-
-		if (page == null)
-			page = 1;
-
-		if (pageSize == null && cookiePaginationSize != null)
+		if (!isEmpty(cookiePaginationSize))
 		{
 			try
 			{
 				String pss = WebUtils.getCookieValue(request, cookiePaginationSize);
-				if (pss != null)
-					pageSize = Integer.parseInt(pss);
+
+				if (!isEmpty(pss))
+					pagingQuery.setPageSize(Integer.parseInt(pss));
 			}
 			catch (Exception e)
 			{
 			}
 		}
 
-		if (pageSize == null)
-			pageSize = Paging.DEFAULT_PAGE_SIZE;
-
-		JsonStructure ordersJson = convertStringToJson(order);
-		Order[] orders = convertJsonStructure(ordersJson, Order[].class);
-
-		PagingQuery pagingQuery = new PagingQuery(page, pageSize, keyword, condition);
-
-		pagingQuery.setNotLike(notLike != null && !notLike.isEmpty());
-		pagingQuery.setOrders(orders);
-
 		return pagingQuery;
-	}
-
-	protected JsonStructure convertStringToJson(String s)
-	{
-		return this.stringToJsonConverter.convertToJsonStructure(s);
-	}
-
-	protected <T> T convertJsonStructure(JsonStructure jsonStructure, Class<T> type)
-	{
-		return this.conversionService.convert(jsonStructure, type);
 	}
 
 	/**

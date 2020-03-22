@@ -88,13 +88,8 @@ data_page_obj_edit_grid_html.ftl
 		}
 	}
 	
-	po.isPropertyActionClientSubmit = function(property)
-	{
-		return true;
-	};
-	
-	po.superBuildPropertyActionOptions = po.buildPropertyActionOptions;
-	po.buildPropertyActionOptions = function(property, propertyValue, extraRequestParams, extraPageParams)
+	po.superBuildPropertyActionOptions = po.buildColumnActionOptions;
+	po.buildColumnActionOptions = function(property, propertyValue, extraRequestParams, extraPageParams)
 	{
 		var actionParam = po.superBuildPropertyActionOptions(property, propertyValue,
 								extraRequestParams, extraPageParams);
@@ -311,7 +306,7 @@ data_page_obj_edit_grid_html.ftl
 		var editTableDatas = $.makeArray(dataTable.data());
 		for(var i=0; i<editTableDatas.length; i++)
 		{
-			editTableDatas[po.TABLE_CHECK_COLUMN_PROPERTY_NAME] = undefined;
+			editTableDatas[po.TABLE_CHECK_COLUMN_NAME] = undefined;
 		}
 		
 		return editTableDatas;
@@ -823,22 +818,16 @@ data_page_obj_edit_grid_html.ftl
 				po.editGridFormPage.viewMultiplePropertyValue(property, propertyValue);
 			},
 			filePropertyUploadURL : "${contextPath}/data/file/upload",
-			filePropertyDeleteURL : "${contextPath}/data/file/delete",
-			columnValueDownloadUrl : function(property)
+			filePropertyDeleteURL : "${contextPath}/data/deleteFile",
+			downloadColumnValue : function(property)
 			{
-				po.editGridFormPage.columnValueDownloadUrl(property);
+				po.editGridFormPage.downloadColumnValue(property);
 			},
 			validationRequiredAsAdd : false,
 			labels : po.editGridFormPage.formLabels,
 			dateFormat : "${sqlDateFormat}",
 			timestampFormat : "${sqlTimestampFormat}",
-			timeFormat : "${sqlTimeFormat}",
-			lobValuePlaceholders:
-			{
-				blobPlaceholder: "${formDefaultLOBRowMapper.blobPlaceholder}",
-				clobPlaceholder: "${formDefaultLOBRowMapper.clobPlaceholder}",
-				sqlXmlPlaceholder: "${formDefaultLOBRowMapper.sqlXmlPlaceholder}"
-			}
+			timeFormat : "${sqlTimeFormat}"
 		});
 		
 		$formPage.position({ my : "left top", at : "left bottom", of : $editFormCell, within : $table});
@@ -912,8 +901,8 @@ data_page_obj_edit_grid_html.ftl
 					changed = false;
 				else
 				{
-					if($.meta.isShowableValue(myPropertyValue))
-						myPropertyValue = $.meta.getShowableRawValue(myPropertyValue);
+					if($.meta.isLabeledValue(myPropertyValue))
+						myPropertyValue = $.meta.valueOfLabeledValue(myPropertyValue);
 					
 					if(myPropertyValue == originalCellValue)
 						changed = false;

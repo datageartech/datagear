@@ -45,7 +45,7 @@
 	/**
 	 * 构建Model的ajax数据表格。
 	 */
-	po.initModelDataTableAjax = function(url, model, ignorePropertyNames)
+	po.initDataTableAjax = function(url, model, ignorePropertyNames)
 	{
 		var columns = $.buildDataTablesColumns(model, {"ignorePropertyNames" : ignorePropertyNames});
 		var settings = po.buildDataTableSettingsAjax(columns, url);

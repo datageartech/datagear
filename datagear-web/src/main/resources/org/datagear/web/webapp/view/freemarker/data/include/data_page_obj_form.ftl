@@ -36,159 +36,30 @@ po.isClientPageData = undefined;
 		}
 	};
 	
-	po.propertySubmitHandler = function(property, propValue)
+	po.selectColumnValue = function(column, value)
 	{
-		po.form().tableform("propValue", property.name, propValue);
+		
 	};
 	
-	po.propertyAfterSaveHandler = function(property, propValue)
+	po.viewColumnValue = function(column, value)
 	{
-		po.form().tableform("propValue", property.name, propValue);
 		
-		if(!po.data)
-			po.data = {};
-		
-		$.meta.propertyValue(po.data, property.name, propValue);
 	};
 	
-	po.propertyDataTableAjaxSuccess = function(property, propertyValue, propertyValuePagingData)
+	po.downloadColumnValue = function(column, value)
 	{
-		if(!$.meta.isMultipleProperty(property))
-			return;
-		
-		var formPropertyValue = po.form().tableform("propValue", property.name);
-		if(formPropertyValue == null || $.meta.isSizeOnlyCollection(formPropertyValue))
-			po.form().tableform("propValue", property.name, $.meta.toSizeOnlyCollection(propertyValuePagingData.total));
-		
-		if(!po.data)
-			po.data = {};
-		
-		var propertyValue = $.meta.propertyValue(po.data, property.name);
-		if(propertyValue == null || $.meta.isSizeOnlyCollection(propertyValue))
-			$.meta.propertyValue(po.data, property.name, $.meta.toSizeOnlyCollection(propertyValuePagingData.total));
-	};
-	
-	po.isPropertyActionClientSubmit = function(property)
-	{
-		//单元属性值都不即时保存
-		return (!$.meta.isMultipleProperty(property) ? true : po.isClientPageData);
-	};
-	
-	//属性操作选项函数
-	po.buildPropertyActionOptions = function(property, propertyValue, extraRequestParams, extraPageParams)
-	{
-		var requestParams =
-		{
-			//如果页面是客户端数据则传递最新表单数据，因为不需要根据初始数据到服务端数据库查找
-			"data" : (po.isClientPageData ? po.form().tableform("data") : po.data),
-			"propertyPath" : $.propertyPath.escapePropertyName(property.name),
-			"propertyValue" : (po.isClientPageData ? null : propertyValue),
-			"isClientPageData" : po.isClientPageData
-		};
-		
-		var pageParams = {};
-		
-		if(extraRequestParams)
-			$.extend(requestParams, extraRequestParams);
-		
-		//单元属性值都不即时保存
-		var clientSubmit = po.isPropertyActionClientSubmit(property);
-		
-		if(clientSubmit)
-		{
-			$.extend(pageParams,
-			{
-				"submit" : function(propertyValue)
-				{
-					po.propertySubmitHandler(property, propertyValue);
-				}
-			});
-		}
-		else
-		{
-			$.extend(pageParams,
-			{
-				"afterSave" : function(propertyValue)
-				{
-					po.propertyAfterSaveHandler(property, propertyValue);
-				},
-				"dataTableAjaxSuccess" : function(propertyValuePagingData)
-				{
-					po.propertyDataTableAjaxSuccess(property, propertyValue, propertyValuePagingData);
-				}
-			});
-		}
-		
-		if(extraPageParams)
-			$.extend(pageParams, extraPageParams);
-		
-		var actionParam =
-		{
-			"data" : requestParams,
-			"pageParam" : pageParams
-		}
-		
-		return actionParam;
-	};
-	
-	po.addSinglePropertyValue = function(property)
-	{
-		var options = po.buildPropertyActionOptions(property);
-		options.pinTitleButton=true;
+		var url;
+		var options = {target: "_file"};
 		
 		if(po.isClientPageData)
-			po.open(po.url("addSinglePropValue"), options);
+		{
+			url = "${contextPath}/data/downloadFile";
+			options.data = {file : value};
+		}
 		else
-			//服务端数据始终使用editSinglePropValue请求，因为受SelectOptions的影响，页面数据对象超过级联的属性值没有加载，无法判断是add还是edit
-			po.open(po.url("editSinglePropValue"), options);
-	};
-	
-	po.editSinglePropertyValue = function(property, propertyValue)
-	{
-		var options = po.buildPropertyActionOptions(property, propertyValue);
-		options.pinTitleButton=true;
+			url = po.url("downloadColumnValue");
 		
-		po.open(po.url("editSinglePropValue"), options);
-	};
-	
-	po.deleteSinglePropertyValue = function(property, propertyValue)
-	{
-		po.propertySubmitHandler(property, null);
-	};
-	
-	po.selectSinglePropertyValue = function(property, propertyValue)
-	{
-		var options = po.buildPropertyActionOptions(property, propertyValue);
-		$.setGridPageHeightOption(options);
-		po.open(po.url("selectPropValue"), options);
-	};
-	
-	po.viewSinglePropertyValue = function(property, propertyValue)
-	{
-		var options = po.buildPropertyActionOptions(property, propertyValue);
-		po.open(po.url("viewSinglePropValue"), options);
-	};
-	
-	po.editMultiplePropertyValue = function(property, propertyValue)
-	{
-		var options = po.buildPropertyActionOptions(property, propertyValue);
-		$.setGridPageHeightOption(options);
-		po.open(po.url("editMultiplePropValue"), options);
-	};
-	
-	po.viewMultiplePropertyValue = function(property, propertyValue)
-	{
-		var options = po.buildPropertyActionOptions(property, propertyValue);
-		$.setGridPageHeightOption(options);
-		po.open(po.url("viewMultiplePropValue"), options);
-	};
-	
-	po.columnValueDownloadUrl = function(property)
-	{
-		var options = po.buildPropertyActionOptions(property);
-		options.target="_file";
-		
-		po.open(po.url("columnValueDownloadUrl"), options);
+		po.open(url, options);
 	};
 	
 	po.refreshParent = function()
