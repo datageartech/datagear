@@ -181,7 +181,8 @@ Schema schema 数据库，不允许为null
 	po.schemaId = "${schema.id}";
 	po.sqlpadId = "${sqlpadId}";
 	po.sqlpadChannelId = "${sqlpadChannelId}";
-	po.sqlResultReadActualLobRows = parseInt("${sqlResultReadActualLobRows}");
+	po.sqlResultReadActualBlobRows = parseInt("${sqlResultRowMapper.readActualBlobRows}");
+	po.sqlResultBlobPlaceholder = "${sqlResultRowMapper.blobPlaceholder?js_string}";
 	
 	po.resultMessageElement = po.element("#${pageId}-resultMessage");
 	po.sqlResultTabs = po.element("#${pageId}-sqlResultTabs");
@@ -391,7 +392,7 @@ Schema schema 数据库，不允许为null
 				if(!tabId)
 					tabId = po.genSqlResultTabId();
 				
-				po.renderSqlResultTab(tabId, msgData.sqlStatement.sql, msgData.modelSqlResult, (po.executingSqlCount == 1));
+				po.renderSqlResultTab(tabId, msgData.sqlStatement.sql, msgData.sqlSelectResult, (po.executingSqlCount == 1));
 				
 				$("<a href='javascript:void(0);' class='sql-result-link link' />")
 					.html("<@spring.message code='sqlpad.viewResult' />")
@@ -591,7 +592,7 @@ Schema schema 数据库，不允许为null
 		return tabId + "-form";
 	};
 	
-	po.renderSqlResultTab = function(tabId, sql, modelSqlResult, active)
+	po.renderSqlResultTab = function(tabId, sql, sqlSelectResult, active)
 	{
 		var tabsNav = po.getTabsNav(po.sqlResultTabs);
 		var tab = po.getTabsTabByTabId(po.sqlResultTabs, tabsNav, tabId);
@@ -638,7 +639,7 @@ Schema schema 数据库，不允许为null
 	    }
 	    
 		var table = $("<table width='100%' class='hover stripe'></table>").attr("id", po.getSqlResultTabPanelTableId(tabId)).appendTo(tabPanel);
-		po.initSqlResultDataTable(tabId, table, sql, modelSqlResult);
+		po.initSqlResultDataTable(tabId, table, sql, sqlSelectResult);
 		
 		$("<div class='no-more-data-flag ui-widget ui-widget-content' />")
 			.attr("title", "<@spring.message code='sqlpad.noMoreData' />").appendTo(tabPanel);
@@ -652,10 +653,10 @@ Schema schema 数据库，不允许为null
 	    
 	    $("<input name='sqlpadId' type='hidden' />").val(po.sqlpadId).appendTo(form);
 	    $("<textarea name='sql' />").val(sql).appendTo(form);
-	    $("<input name='startRow' type='hidden' />").val(modelSqlResult.nextStartRow).appendTo(form);
-	    $("<input name='fetchSize' type='hidden' />").val(modelSqlResult.fetchSize).appendTo(form);
+	    $("<input name='startRow' type='hidden' />").val(sqlSelectResult.nextStartRow).appendTo(form);
+	    $("<input name='fetchSize' type='hidden' />").val(sqlSelectResult.fetchSize).appendTo(form);
 
-	    if(modelSqlResult.datas == null || modelSqlResult.datas.length < modelSqlResult.fetchSize)
+	    if(sqlSelectResult.rows == null || sqlSelectResult.rows.length < sqlSelectResult.fetchSize)
 	    {
 	    	form.attr("no-more-data", "1");
 	    	$(".no-more-data-flag", tabPanel).show();
@@ -681,18 +682,18 @@ Schema schema 数据库，不允许为null
 	   					var fetchSize = po.getResultsetFetchSize(po.element("#settingForm"));
 	   					$("input[name='fetchSize']", $form).val(fetchSize);
 	   				},
-	   				success : function(modelSqlResult, statusText, xhr, $form)
+	   				success : function(sqlSelectResult, statusText, xhr, $form)
 	   				{
-	   					$("input[name='startRow']", $form).val(modelSqlResult.nextStartRow);
+	   					$("input[name='startRow']", $form).val(sqlSelectResult.nextStartRow);
 	   					
 	   					var tabId = $form.attr("tab-id");
 	   					var tabPanel = po.getTabsTabPanelByTabId(po.sqlResultTabs, tabId);
 	   					
 	   					var dataTable = po.element("#" + po.getSqlResultTabPanelTableId(tabId), tabPanel).DataTable();
 	   					
-	   					$.addDataTableData(dataTable, modelSqlResult.datas, modelSqlResult.startRow-1);
+	   					$.addDataTableData(dataTable, sqlSelectResult.rows, sqlSelectResult.startRow-1);
 	   					
-	   					if(modelSqlResult.datas.length < modelSqlResult.fetchSize)
+	   					if(sqlSelectResult.rows.length < sqlSelectResult.fetchSize)
 	   					{
 	   						$form.attr("no-more-data", "1");
 	   						$(".no-more-data-flag", tabPanel).show();
@@ -743,66 +744,48 @@ Schema schema 数据库，不允许为null
 		panel.show().position({ my : "left bottom", at : "left top-5", of : target});
 	};
 	
-	po.initSqlResultDataTable = function(tabId, $table, sql, modelSqlResult)
+	po.initSqlResultDataTable = function(tabId, $table, sql, sqlSelectResult)
 	{
-		var model = modelSqlResult.model;
-		var columns = $.buildDataTablesColumns(model,
+		var dtColumns = $.buildDataTablesColumns(sqlSelectResult.table,
 				{
-					postRender : function(data, type, rowData, meta, rowIndex, renderValue, model, property, thisColumn)
+					postRender : function(data, type, rowData, meta, rowIndex, renderValue, table, column, thisColumn)
 					{
 						if(!data)
-						{
 							return renderValue;
-						}
-						else if($.meta.isLongTextJdbcType(property))
+						
+						if($.meta.isBlobColumn(column))
 						{
-							if(rowIndex < po.sqlResultReadActualLobRows)
-							{
-								return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' class='view-sql-result-long-text-link'>"
-										+ renderValue
-										+ "<span style='display:none;'>"+$.escapeHtml(data)+"</span>" + "</a>";
-							}
-							else
-								return renderValue;
-						}
-						else if($.meta.isBinaryJdbcType(property))
-						{
-							if(rowIndex < po.sqlResultReadActualLobRows)
+							if(rowIndex < po.sqlResultReadActualBlobRows)
 							{
 								return "<a href='${contextPath}/sqlpad/"+po.schemaId+"/downloadResultField?sqlpadId="+po.sqlpadId+"&value="+encodeURIComponent(data)+"'>"
-										+ renderValue + "</a>";
+										+ $.escapeHtml(po.sqlResultBlobPlaceholder) + "</a>";
 							}
 							else
 								return renderValue;
 						}
-						else if($.meta.isStringJdbcType(property))
+						else if(data != renderValue)
 						{
-							if(data != renderValue)
-							{
-								return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' class='view-sql-result-long-text-link'>"
-										+ renderValue
-										+ "<span style='display:none;'>"+$.escapeHtml(data)+"</span>" + "</a>";
-							}
-							else
-								return renderValue;
+							return "<a href='javascript:void(0);' onclick='${pageId}.viewSqlResultLongText(this)' class='view-sql-result-long-text-link'>"
+									+ renderValue
+									+ "<span style='display:none;'>"+$.escapeHtml(data)+"</span>" + "</a>";
 						}
 						else
 							return renderValue;
 					}
 				});
 		
-		var newColumns = [
+		var newDtColumns = [
 			{
 				title : "<@spring.message code='rowNumber' />", data : "", defaultContent: "",
 				render : po.renderRowNumberColumn, className : "column-row-number", width : "5em"
 			}
 		];
-		newColumns = newColumns.concat(columns);
+		newDtColumns = newDtColumns.concat(dtColumns);
 		
 		var settings =
 		{
-			"columns" : newColumns,
-			"data" : (modelSqlResult.datas ? modelSqlResult.datas : []),
+			"columns" : newDtColumns,
+			"data" : (sqlSelectResult.rows ? sqlSelectResult.rows : []),
 			"scrollX": true,
 			"autoWidth": true,
 			"scrollY" : po.calSqlResultTableHeight(tabId),

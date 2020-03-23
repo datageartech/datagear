@@ -4,7 +4,6 @@
 
 package org.datagear.web.sqlpad;
 
-import java.io.File;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -22,10 +21,8 @@ import org.cometd.bayeux.server.ServerChannel;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.management.domain.Schema;
-import org.datagear.management.domain.User;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.util.SchemaConnectionSupport;
-import org.datagear.persistence.RowMapper;
 import org.datagear.persistence.support.PersistenceSupport;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.persistence.support.SqlSelectResult;
@@ -52,8 +49,6 @@ public class SqlpadExecutionService extends PersistenceSupport
 	private SqlHistoryService sqlHistoryService;
 
 	private SqlSelectManager sqlSelectManager;
-
-	private RowMapper sqlSelectResultRowMapper = null;
 
 	private SqlPermissionChecker sqlPermissionChecker = new SqlPermissionChecker();
 
@@ -130,16 +125,6 @@ public class SqlpadExecutionService extends PersistenceSupport
 		this.sqlSelectManager = sqlSelectManager;
 	}
 
-	public RowMapper getSqlSelectResultRowMapper()
-	{
-		return sqlSelectResultRowMapper;
-	}
-
-	public void setSqlSelectResultRowMapper(RowMapper sqlSelectResultRowMapper)
-	{
-		this.sqlSelectResultRowMapper = sqlSelectResultRowMapper;
-	}
-
 	public SqlPermissionChecker getSqlPermissionChecker()
 	{
 		return sqlPermissionChecker;
@@ -163,29 +148,18 @@ public class SqlpadExecutionService extends PersistenceSupport
 	/**
 	 * 提交SQL执行。
 	 * 
-	 * @param user
-	 * @param schema
-	 * @param sqlpadId
-	 * @param sqlpadFileDirectory
-	 * @param sqlStatements
-	 * @param commitMode
-	 * @param exceptionHandleMode
-	 * @param overTimeThreashold
-	 * @param resultsetFetchSize
-	 * @param locale
+	 * @param submit
 	 * @return
 	 */
-	public boolean submit(User user, Schema schema, String sqlpadId, File sqlpadFileDirectory,
-			List<SqlStatement> sqlStatements, CommitMode commitMode, ExceptionHandleMode exceptionHandleMode,
-			int overTimeThreashold, int resultsetFetchSize, Locale locale)
+	public boolean submit(SqlpadExecutionSubmit submit)
 	{
-		String sqlpadChannelId = getSqlpadChannelId(sqlpadId);
+		String sqlpadChannelId = getSqlpadChannelId(submit.getSqlpadId());
 
-		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(user, schema, sqlpadId,
-				sqlpadFileDirectory, sqlpadChannelId, sqlpadCometdService, sqlStatements, commitMode,
-				exceptionHandleMode, overTimeThreashold, resultsetFetchSize, locale);
+		SqlpadExecutionRunnable sqlpadExecutionRunnable = new SqlpadExecutionRunnable(submit, sqlpadChannelId,
+				sqlpadCometdService);
 
-		SqlpadExecutionRunnable old = this._sqlpadExecutionRunnableMap.putIfAbsent(sqlpadId, sqlpadExecutionRunnable);
+		SqlpadExecutionRunnable old = this._sqlpadExecutionRunnableMap.putIfAbsent(submit.getSqlpadId(),
+				sqlpadExecutionRunnable);
 
 		if (old != null)
 			return false;
@@ -276,33 +250,11 @@ public class SqlpadExecutionService extends PersistenceSupport
 	 * @author datagear@163.com
 	 *
 	 */
-	protected class SqlpadExecutionRunnable implements Runnable
+	protected class SqlpadExecutionRunnable extends SqlpadExecutionSubmit implements Runnable
 	{
-		private User user;
-
-		private Schema schema;
-
-		private String sqlpadId;
-
-		private File sqlpadFileDirectory;
-
 		private String sqlpadChannelId;
 
 		private SqlpadCometdService sqlpadCometdService;
-
-		private List<SqlStatement> sqlStatements;
-
-		private CommitMode commitMode;
-
-		private ExceptionHandleMode exceptionHandleMode;
-
-		/** 超时分钟数 */
-		private int overTimeThreashold;
-
-		/** 结果集页大小 */
-		private int resultsetFetchSize;
-
-		private Locale locale;
 
 		/** 发送给此Runnable的SQL命令 */
 		private volatile SqlCommand sqlCommand;
@@ -314,64 +266,12 @@ public class SqlpadExecutionService extends PersistenceSupport
 			super();
 		}
 
-		public SqlpadExecutionRunnable(User user, Schema schema, String sqlpadId, File sqlpadFileDirectory,
-				String sqlpadChannelId, SqlpadCometdService sqlpadCometdService, List<SqlStatement> sqlStatements,
-				CommitMode commitMode, ExceptionHandleMode exceptionHandleMode, int overTimeThreashold,
-				int resultsetFetchSize, Locale locale)
+		public SqlpadExecutionRunnable(SqlpadExecutionSubmit submit, String sqlpadChannelId,
+				SqlpadCometdService sqlpadCometdService)
 		{
-			super();
-			this.user = user;
-			this.schema = schema;
-			this.sqlpadId = sqlpadId;
-			this.sqlpadFileDirectory = sqlpadFileDirectory;
+			super(submit);
 			this.sqlpadChannelId = sqlpadChannelId;
 			this.sqlpadCometdService = sqlpadCometdService;
-			this.sqlStatements = sqlStatements;
-			this.commitMode = commitMode;
-			this.exceptionHandleMode = exceptionHandleMode;
-			this.overTimeThreashold = overTimeThreashold;
-			this.resultsetFetchSize = resultsetFetchSize;
-			this.locale = locale;
-		}
-
-		public User getUser()
-		{
-			return user;
-		}
-
-		public void setUser(User user)
-		{
-			this.user = user;
-		}
-
-		public Schema getSchema()
-		{
-			return schema;
-		}
-
-		public void setSchema(Schema schema)
-		{
-			this.schema = schema;
-		}
-
-		public String getSqlpadId()
-		{
-			return sqlpadId;
-		}
-
-		public void setSqlpadId(String sqlpadId)
-		{
-			this.sqlpadId = sqlpadId;
-		}
-
-		public File getSqlpadFileDirectory()
-		{
-			return sqlpadFileDirectory;
-		}
-
-		public void setSqlpadFileDirectory(File sqlpadFileDirectory)
-		{
-			this.sqlpadFileDirectory = sqlpadFileDirectory;
 		}
 
 		public String getSqlpadChannelId()
@@ -392,66 +292,6 @@ public class SqlpadExecutionService extends PersistenceSupport
 		public void setSqlpadCometdService(SqlpadCometdService sqlpadCometdService)
 		{
 			this.sqlpadCometdService = sqlpadCometdService;
-		}
-
-		public List<SqlStatement> getSqlStatements()
-		{
-			return sqlStatements;
-		}
-
-		public void setSqlStatements(List<SqlStatement> sqlStatements)
-		{
-			this.sqlStatements = sqlStatements;
-		}
-
-		public CommitMode getCommitMode()
-		{
-			return commitMode;
-		}
-
-		public void setCommitMode(CommitMode commitMode)
-		{
-			this.commitMode = commitMode;
-		}
-
-		public ExceptionHandleMode getExceptionHandleMode()
-		{
-			return exceptionHandleMode;
-		}
-
-		public void setExceptionHandleMode(ExceptionHandleMode exceptionHandleMode)
-		{
-			this.exceptionHandleMode = exceptionHandleMode;
-		}
-
-		public int getOverTimeThreashold()
-		{
-			return overTimeThreashold;
-		}
-
-		public void setOverTimeThreashold(int overTimeThreashold)
-		{
-			this.overTimeThreashold = overTimeThreashold;
-		}
-
-		public int getResultsetFetchSize()
-		{
-			return resultsetFetchSize;
-		}
-
-		public void setResultsetFetchSize(int resultsetFetchSize)
-		{
-			this.resultsetFetchSize = resultsetFetchSize;
-		}
-
-		public Locale getLocale()
-		{
-			return locale;
-		}
-
-		public void setLocale(Locale locale)
-		{
-			this.locale = locale;
 		}
 
 		public SqlCommand getSqlCommand()
@@ -481,11 +321,11 @@ public class SqlpadExecutionService extends PersistenceSupport
 			Connection cn = null;
 			Statement st = null;
 
-			this.sqlpadCometdService.sendStartMessage(this._sqlpadServerChannel, this.sqlStatements.size());
+			this.sqlpadCometdService.sendStartMessage(this._sqlpadServerChannel, getSqlStatements().size());
 
 			try
 			{
-				cn = getSchemaConnection(this.schema);
+				cn = getSchemaConnection(getSchema());
 				JdbcUtil.setAutoCommitIfSupports(cn, false);
 				JdbcUtil.setReadonlyIfSupports(cn, false);
 				st = createStatement(cn);
@@ -493,19 +333,19 @@ public class SqlpadExecutionService extends PersistenceSupport
 			catch (Throwable t)
 			{
 				this.sqlpadCometdService.sendExceptionMessage(_sqlpadServerChannel, t,
-						getMessage(this.locale, "sqlpad.executionConnectionException"), false);
+						getMessage(getLocale(), "sqlpad.executionConnectionException"), false);
 
 				this.sqlpadCometdService.sendFinishMessage(this._sqlpadServerChannel);
 
-				_sqlpadExecutionRunnableMap.remove(this.sqlpadId);
+				_sqlpadExecutionRunnableMap.remove(getSqlpadId());
 
 				return;
 			}
 
 			long startTime = System.currentTimeMillis();
-			int totalCount = this.sqlStatements.size();
+			int totalCount = getSqlStatements().size();
 			SQLExecutionStat sqlExecutionStat = new SQLExecutionStat(totalCount);
-			SqlpadFileDirectory sqlpadFileDirectory = SqlpadFileDirectory.valueOf(this.sqlpadFileDirectory);
+			SqlpadFileDirectory sqlpadFileDirectory = SqlpadFileDirectory.valueOf(getSqlpadFileDirectory());
 
 			List<String> sqlHistories = new ArrayList<>();
 
@@ -516,12 +356,13 @@ public class SqlpadExecutionService extends PersistenceSupport
 					if (handleSqlCommandInExecution(cn, true, sqlExecutionStat))
 						break;
 
-					SqlStatement sqlStatement = sqlStatements.get(i);
+					SqlStatement sqlStatement = getSqlStatements().get(i);
 
-					if (!SqlpadExecutionService.this.sqlPermissionChecker.hasPermission(user, schema, sqlStatement))
+					if (!SqlpadExecutionService.this.sqlPermissionChecker.hasPermission(getUser(), getSchema(),
+							sqlStatement))
 					{
 						this.sqlpadCometdService.sendSqlExceptionMessage(_sqlpadServerChannel, sqlStatement, i,
-								getMessage(this.locale, "sqlpad.executionSQLPermissionDenied"));
+								getMessage(getLocale(), "sqlpad.executionSQLPermissionDenied"));
 
 						sqlExecutionStat.increaseExceptionCount();
 					}
@@ -539,9 +380,9 @@ public class SqlpadExecutionService extends PersistenceSupport
 							sqlExecutionStat.increaseExceptionCount();
 
 							this.sqlpadCometdService.sendSqlExceptionMessage(_sqlpadServerChannel, sqlStatement, i, e,
-									getMessage(this.locale, "sqlpad.executionSQLException", e.getMessage()));
+									getMessage(getLocale(), "sqlpad.executionSQLException", e.getMessage()));
 
-							if (ExceptionHandleMode.IGNORE.equals(this.exceptionHandleMode))
+							if (ExceptionHandleMode.IGNORE.equals(getExceptionHandleMode()))
 								;
 							else
 							{
@@ -555,10 +396,10 @@ public class SqlpadExecutionService extends PersistenceSupport
 					;
 				else
 				{
-					if (CommitMode.AUTO.equals(this.commitMode))
+					if (CommitMode.AUTO.equals(getCommitMode()))
 					{
 						if (sqlExecutionStat.getExceptionCount() > 0
-								&& ExceptionHandleMode.ROLLBACK.equals(this.exceptionHandleMode))
+								&& ExceptionHandleMode.ROLLBACK.equals(getExceptionHandleMode()))
 							this.sqlCommand = SqlCommand.ROLLBACK;
 						else
 							this.sqlCommand = SqlCommand.COMMIT;
@@ -570,7 +411,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			catch (Throwable t)
 			{
 				this.sqlpadCometdService.sendExceptionMessage(_sqlpadServerChannel, t,
-						getMessage(this.locale, "sqlpad.executionErrorOccure"), true);
+						getMessage(getLocale(), "sqlpad.executionErrorOccure"), true);
 			}
 			finally
 			{
@@ -581,11 +422,11 @@ public class SqlpadExecutionService extends PersistenceSupport
 
 				this.sqlpadCometdService.sendFinishMessage(this._sqlpadServerChannel, sqlExecutionStat);
 
-				_sqlpadExecutionRunnableMap.remove(this.sqlpadId);
+				_sqlpadExecutionRunnableMap.remove(getSqlpadId());
 			}
 
 			if (!sqlHistories.isEmpty())
-				SqlpadExecutionService.this.sqlHistoryService.addForRemain(this.schema.getId(), this.user.getId(),
+				SqlpadExecutionService.this.sqlHistoryService.addForRemain(getSchema().getId(), getUser().getId(),
 						sqlHistories);
 		}
 
@@ -611,19 +452,19 @@ public class SqlpadExecutionService extends PersistenceSupport
 				hasPaused = true;
 
 				if (sendMessageIfPause)
-					sendSqlCommandMessage(this.sqlCommand, this.overTimeThreashold);
+					sendSqlCommandMessage(this.sqlCommand, getOverTimeThreashold());
 
 				long waitStartTime = System.currentTimeMillis();
 
 				while (SqlCommand.PAUSE.equals(this.sqlCommand)
-						&& (System.currentTimeMillis() - waitStartTime) <= this.overTimeThreashold * 60 * 1000)
+						&& (System.currentTimeMillis() - waitStartTime) <= getOverTimeThreashold() * 60 * 1000)
 					sleepForSqlCommand();
 
 				// 暂停超时
 				if (SqlCommand.PAUSE.equals(this.sqlCommand))
 				{
 					this.sqlpadCometdService.sendTextMessage(this._sqlpadServerChannel,
-							getMessage(this.locale, "sqlpad.pauseOverTime"));
+							getMessage(getLocale(), "sqlpad.pauseOverTime"));
 
 					this.sqlCommand = SqlCommand.RESUME;
 				}
@@ -690,12 +531,12 @@ public class SqlpadExecutionService extends PersistenceSupport
 			long waitStartTime = System.currentTimeMillis();
 
 			while (!SqlCommand.COMMIT.equals(this.sqlCommand) && !SqlCommand.ROLLBACK.equals(this.sqlCommand)
-					&& (System.currentTimeMillis() - waitStartTime) <= this.overTimeThreashold * 60 * 1000)
+					&& (System.currentTimeMillis() - waitStartTime) <= getOverTimeThreashold() * 60 * 1000)
 			{
 				if (!sendWatingMessage)
 				{
 					this.sqlpadCometdService.sendTextMessage(this._sqlpadServerChannel,
-							getMessage(this.locale, "sqlpad.waitingForCommitOrRollback", this.overTimeThreashold),
+							getMessage(getLocale(), "sqlpad.waitingForCommitOrRollback", getOverTimeThreashold()),
 							"message-content-highlight", sqlExecutionStat);
 
 					sendWatingMessage = true;
@@ -708,7 +549,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			if (!SqlCommand.COMMIT.equals(this.sqlCommand) && !SqlCommand.ROLLBACK.equals(this.sqlCommand))
 			{
 				this.sqlpadCometdService.sendTextMessage(this._sqlpadServerChannel,
-						getMessage(this.locale, "sqlpad.waitOverTime"));
+						getMessage(getLocale(), "sqlpad.waitOverTime"));
 
 				this.sqlCommand = (sqlExecutionStat.getExceptionCount() > 0 ? SqlCommand.ROLLBACK : SqlCommand.COMMIT);
 			}
@@ -760,7 +601,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 				ResultSet rs = st.getResultSet();
 
 				SqlSelectResult sqlSelectResult = SqlpadExecutionService.this.sqlSelectManager.select(cn, sql, rs, 1,
-						this.resultsetFetchSize, SqlpadExecutionService.this.sqlSelectResultRowMapper);
+						getResultsetFetchSize(), getResultsetRowMapper());
 
 				this.sqlpadCometdService.sendSqlSuccessMessage(this._sqlpadServerChannel, sqlStatement,
 						sqlStatementIndex, sqlSelectResult);
@@ -795,7 +636,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			String messageKey = "sqlpad.SqlCommand." + sqlCommand.toString() + ".ok";
 
 			this.sqlpadCometdService.sendSqlCommandMessage(this._sqlpadServerChannel, sqlCommand,
-					getMessage(this.locale, messageKey, messageArgs));
+					getMessage(getLocale(), messageKey, messageArgs));
 		}
 
 		/**
@@ -811,7 +652,7 @@ public class SqlpadExecutionService extends PersistenceSupport
 			// 而这里调用的结果集都是从第一行开始，不会用到ResultSet.TYPE_SCROLL_*特性，
 			// 因而采用ResultSet.TYPE_FORWARD_ONLY，避免遇到上述情况而抛出异常
 			Statement st = createUpdateStatement(cn);
-			JdbcUtil.setFetchSizeIfSupports(st, resultsetFetchSize);
+			JdbcUtil.setFetchSizeIfSupports(st, getResultsetFetchSize());
 
 			return st;
 		}

@@ -232,13 +232,13 @@ readonly 是否只读操作，允许为null
 			type : "POST",
 			url : po.url("sqlPreview/" + po.sqlPreviewOptions.schemaId),
 			data : data,
-			success : function(modelSqlResult)
+			success : function(sqlResult)
 			{
 				po.element("textarea[name='sql']").val(data.sql);
 				
 				var $dspWrapper = po.element("#${pageId}-dataSetProperties");
 				$dspWrapper.empty();
-				var dataSetProperties = (modelSqlResult.dataSetProperties || []);
+				var dataSetProperties = (sqlResult.dataSetProperties || []);
 				for(var i=0; i< dataSetProperties.length; i++)
 				{
 					var dsp = dataSetProperties[i];
@@ -246,14 +246,13 @@ readonly 是否只读操作，允许为null
 					$("<input type='hidden'>").attr("name", "dataSetPropertyTypes").val(dsp.type).appendTo($dspWrapper);
 				}
 				
-				po.sqlPreviewOptions.startRow = modelSqlResult.startRow;
-				po.sqlPreviewOptions.nextStartRow = modelSqlResult.nextStartRow;
-				po.sqlPreviewOptions.fetchSize = modelSqlResult.fetchSize;
+				po.sqlPreviewOptions.startRow = sqlResult.startRow;
+				po.sqlPreviewOptions.nextStartRow = sqlResult.nextStartRow;
+				po.sqlPreviewOptions.fetchSize = sqlResult.fetchSize;
 				
 				if(initDataTable)
 				{
-					var model = modelSqlResult.model;
-					var columns = $.buildDataTablesColumns(model);
+					var columns = $.buildDataTablesColumns(sqlResult.table);
 					
 					var newColumns = [
 						{
@@ -266,7 +265,7 @@ readonly 是否只读操作，允许为null
 					var settings =
 					{
 						"columns" : newColumns,
-						"data" : (modelSqlResult.datas ? modelSqlResult.datas : []),
+						"data" : (sqlResult.rows ? sqlResult.rows : []),
 						"scrollX": true,
 						"scrollY" : po.calSqlResultTableHeight(),
 						"autoWidth": true,
@@ -287,10 +286,10 @@ readonly 是否只读操作，允许为null
 				else
 				{
 					var dataTable = table.DataTable();
-					$.addDataTableData(dataTable, modelSqlResult.datas, modelSqlResult.startRow-1);
+					$.addDataTableData(dataTable, sqlResult.rows, sqlResult.startRow-1);
 				}
 				
-				if(modelSqlResult.datas.length < modelSqlResult.fetchSize)
+				if(sqlResult.rows.length < sqlResult.fetchSize)
 				{
 					po.sqlPreviewOptions.noMoreData = true;
 					po.element(".no-more-data-flag").show();

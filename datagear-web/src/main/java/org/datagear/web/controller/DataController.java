@@ -81,7 +81,7 @@ public class DataController extends AbstractSchemaConnTableController
 
 	public static final String KEY_TITLE_DISPLAY_DESC = "titleDisplayDesc";
 
-	public static final String KEY_CONDITION_SOURCE = "conditionSource";
+	public static final String KEY_SQL_IDENTIFIER_QUOTE = "sqlIdentifierQuote";
 
 	@Autowired
 	private PersistenceManager persistenceManager;
@@ -181,8 +181,11 @@ public class DataController extends AbstractSchemaConnTableController
 			{
 				checkReadTableDataPermission(schema, user);
 
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
+
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
 				springModel.addAttribute(KEY_TITLE_DISPLAY_DESC, table.getComment());
+				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 				setGridPageAttributes(request, response, springModel, schema, table);
 			}
 		}.execute();
@@ -357,8 +360,7 @@ public class DataController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName,
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication,
-			@RequestBody Map<String, ?> paramData)
-			throws Throwable
+			@RequestBody Map<String, ?> paramData) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 		final Row originalRow = convertToRow((Map<String, ?>) paramData.get("originalData"));
@@ -397,8 +399,7 @@ public class DataController extends AbstractSchemaConnTableController
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName,
 			@RequestParam(value = PARAM_IGNORE_DUPLICATION, required = false) final Boolean ignoreDuplication,
-			@RequestBody List<Map<String, ?>> paramData)
-			throws Throwable
+			@RequestBody List<Map<String, ?>> paramData) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 		final Row[] rows = convertToRows(paramData);
@@ -578,7 +579,10 @@ public class DataController extends AbstractSchemaConnTableController
 			{
 				checkReadTableDataPermission(schema, user);
 
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(getConnection());
+
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
+				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 				springModel.addAttribute(KEY_SELECTONLY, true);
 				setGridPageAttributes(request, response, springModel, schema, table);
 			}

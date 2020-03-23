@@ -152,7 +152,7 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 				column.setTypeName(resultSetMetaData.getColumnTypeName(i));
 				column.setSize(resultSetMetaData.getPrecision(i));
 				column.setDecimalDigits(resultSetMetaData.getScale(i));
-				column.setNullable(DatabaseMetaData.columnNoNulls == resultSetMetaData.isNullable(i));
+				column.setNullable(DatabaseMetaData.columnNoNulls != resultSetMetaData.isNullable(i));
 				column.setAutoincrement(resultSetMetaData.isAutoIncrement(i));
 
 				columnInfos[i - 1] = column;
@@ -264,7 +264,7 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 
 				if (simpleTable != null)
 				{
-					postProcessSimpleTable(cn, metaData, schema, simpleTable);
+					simpleTable = postProcessSimpleTable(cn, metaData, schema, simpleTable);
 					simpleTables.add(simpleTable);
 				}
 			}
@@ -318,9 +318,10 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 			return null;
 	}
 
-	protected void postProcessSimpleTable(Connection cn, DatabaseMetaData metaData, String schema,
+	protected SimpleTable postProcessSimpleTable(Connection cn, DatabaseMetaData metaData, String schema,
 			SimpleTable simpleTable) throws SQLException
 	{
+		return simpleTable;
 	}
 
 	protected List<DataType> getDataTypes(Connection cn, DatabaseMetaData metaData) throws DBMetaResolverException
@@ -372,6 +373,13 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		table.setUniqueKeys(getUniqueKeys(cn, metaData, schema, tableName));
 		table.setImportKeys(getImportKeys(cn, metaData, schema, tableName));
 
+		table = postProcessTable(cn, metaData, schema, table);
+
+		return table;
+	}
+
+	protected Table postProcessTable(Connection cn, DatabaseMetaData metaData, String schema, Table table)
+	{
 		return table;
 	}
 
@@ -409,8 +417,8 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 			while (rs.next())
 			{
 				Column column = readColumn(cn, metaData, schema, tableName, rs);
-				if (addColumn(columns, column))
-					postProcessColumn(cn, metaData, schema, tableName, column);
+				column = postProcessColumn(cn, metaData, schema, tableName, column);
+				addColumn(columns, column);
 
 				if (count != null && columns.size() == count)
 					break;
@@ -450,12 +458,14 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 			column.setTypeName(rs.getString("TYPE_NAME"));
 			column.setSize(rs.getInt("COLUMN_SIZE"));
 			column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
-			column.setNullable(DatabaseMetaData.columnNoNulls == rs.getInt("NULLABLE"));
+			column.setNullable(DatabaseMetaData.columnNoNulls != rs.getInt("NULLABLE"));
 			column.setComment(rs.getString("REMARKS"));
 			column.setDefaultValue(rs.getString("COLUMN_DEF"));
 			column.setAutoincrement("yes".equalsIgnoreCase(rs.getString("IS_AUTOINCREMENT")));
 			resolveSortable(cn, metaData, schema, tableName, column);
 			resolveSearchableType(cn, metaData, schema, tableName, column);
+
+			resolveDefaultValue(column);
 
 			return column;
 		}
@@ -463,6 +473,27 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		{
 			return null;
 		}
+	}
+
+	protected void resolveDefaultValue(Column column)
+	{
+		if (!column.hasDefaultValue())
+			return;
+
+		String value = column.getDefaultValue();
+		int len = value.length();
+
+		// 移除开头和结尾的引号
+		if (len >= 2 && ((value.charAt(0) == '\'' && value.charAt(len - 1) == '\'')
+				|| (value.charAt(0) == '"' && value.charAt(len - 1) == '"')))
+		{
+			value = (len == 2 ? "" : value.substring(1, value.length() - 1));
+			column.setDefaultValue(value);
+		}
+
+		if (StringUtil.isEmpty(value))
+			return;
+
 	}
 
 	@JDBCCompatiblity("很多驱动程序的值为SearchableType.ALL但实际并不支持LIKE语法（比如：PostgreSQL JDBC 42.2.5），"
@@ -496,9 +527,10 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		column.setSortable(sortable);
 	}
 
-	protected void postProcessColumn(Connection cn, DatabaseMetaData metaData, String schema, String tableName,
+	protected Column postProcessColumn(Connection cn, DatabaseMetaData metaData, String schema, String tableName,
 			Column column) throws SQLException
 	{
+		return column;
 	}
 
 	protected ResultSet getColumnResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,

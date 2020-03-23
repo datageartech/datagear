@@ -5,13 +5,15 @@ Schema schema 数据库，不允许为null
 Table table 模型，不允许为null
 String titleDisplayName 页面展示名称，默认为""
 String titleDisplayDesc 页面展示描述，默认为""
-selectonly 是否选择操作，允许为null
+boolean selectonly 是否选择操作，允许为null
+boolean isMultipleSelect 是否多选，默认为false
 boolean readonly 是否只读操作，默认为false
 List PropertyPathDisplayName conditionSource 可用的查询条件列表，不允许为null
 -->
 <#assign titleDisplayName=(titleDisplayName!'')>
 <#assign titleDisplayDesc=(titleDisplayDesc!'')>
 <#assign selectonly=(selectonly!false)>
+<#assign isMultipleSelect=(isMultipleSelect!false)>
 <#assign readonly=(readonly!false)>
 <#if selectonly>
 <#assign readonly=true>
@@ -89,7 +91,8 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 <script type="text/javascript">
 (function(po)
 {
-	po.conditionSource = <@writeJson var=conditionSource />;
+	po.sqlIdentifierQuote = "${sqlIdentifierQuote?js_string}";
+	po.isMultipleSelect = ${isMultipleSelect?c};
 	
 	$.initButtons(po.element(".operation"));
 	
@@ -153,6 +156,36 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 		});
 		</#if>
 		
+		po.element("input[name=confirmButton]").click(function()
+		{
+			if(po.isMultipleSelect)
+			{
+				po.executeOnSelects(function(rows)
+				{
+					var close = po.pageParamCall("submit", rows);
+					
+					if(close == undefined)
+						close = true;
+					
+					if(close && !$.isDialogPinned($.getInDialog(po.element())))
+						po.close();
+				});
+			}
+			else
+			{
+				po.executeOnSelect(function(row)
+				{
+					var close = po.pageParamCall("submit", row);
+					
+					if(close == undefined)
+						close = true;
+					
+					if(close && !$.isDialogPinned($.getInDialog(po.element())))
+						po.close();
+				});
+			}
+		});
+		
 		po.element("input[name=viewButton]").click(function()
 		{
 			po.executeOnSelect(function(row)
@@ -167,7 +200,7 @@ List PropertyPathDisplayName conditionSource 可用的查询条件列表，不�
 			});
 		});
 		
-		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(po.conditionSource);
+		po.conditionAutocompleteSource = $.buildSearchConditionAutocompleteSource(table, po.sqlIdentifierQuote);
 		po.initConditionPanel();
 		po.initPagination();
 		po.initDataTableAjax(po.url("queryData"), table);

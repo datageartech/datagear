@@ -329,13 +329,19 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				else if (value instanceof String)
 				{
 					String v = (String) value;
-					paramValue = getInputStreamIfFilePath(table, column, v);
 
-					if (paramValue == null)
-						paramValue = getIfBytesValue(table, column, v);
+					if (StringUtil.isEmpty(v))
+						paramValue = null;
+					else
+					{
+						paramValue = getInputStreamIfFilePath(table, column, v);
 
-					if (paramValue == null)
-						sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, InputStream.class);
+						if (paramValue == null)
+							paramValue = getIfBytesValue(table, column, v);
+
+						if (paramValue == null)
+							sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, InputStream.class);
+					}
 				}
 				else
 					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, InputStream.class);
@@ -410,13 +416,19 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				else if (value instanceof String)
 				{
 					String v = (String) value;
-					paramValue = getInputStreamIfFilePath(table, column, v);
 
-					if (paramValue == null)
-						paramValue = getIfBytesValue(table, column, v);
+					if (StringUtil.isEmpty(v))
+						paramValue = null;
+					else
+					{
+						paramValue = getInputStreamIfFilePath(table, column, v);
 
-					if (paramValue == null)
-						sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Blob.class);
+						if (paramValue == null)
+							paramValue = getIfBytesValue(table, column, v);
+
+						if (paramValue == null)
+							sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Blob.class);
+					}
 				}
 				else
 					sqlParamValue = mapToSqlParamValueExt(cn, table, column, value, Blob.class);

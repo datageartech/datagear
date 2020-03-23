@@ -1432,21 +1432,15 @@
 		
 		/**
 		 * 构建查询条件Autocomplete组件的“source”选项值。
-		 * 
-		 * @param propertyPathDisplayNames
 		 */
-		buildSearchConditionAutocompleteSource : function(propertyPathDisplayNames)
+		buildSearchConditionAutocompleteSource : function(table, sqlIdentifierQuote)
 		{
 			var source = [];
 			
-			if(!propertyPathDisplayNames)
-				return source;
-			
-			for(var i=0; i<propertyPathDisplayNames.length; i++)
+			for(var i=0; i<table.columns.length; i++)
 			{
-				var ppdn = propertyPathDisplayNames[i];
-				
-				source.push({label : ppdn.displayName, value : ppdn.displayName, propertyPath : ppdn.propertyPath});
+				var column = table.columns[i];
+				source.push({label : column.name, value : sqlIdentifierQuote + column.name + sqlIdentifierQuote});
 			}
 			
 			return source;

@@ -37,13 +37,13 @@ import org.datagear.web.sqlpad.SqlpadExecutionService;
 import org.datagear.web.sqlpad.SqlpadExecutionService.CommitMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.ExceptionHandleMode;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
+import org.datagear.web.sqlpad.SqlpadExecutionSubmit;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -155,7 +155,7 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		springModel.addAttribute("sqlpadId", sqlpadId);
 		springModel.addAttribute("sqlpadChannelId", sqlpadChannelId);
-		springModel.addAttribute("sqlResultReadActualLobRows", this.sqlResultReadActualLobRows);
+		springModel.addAttribute("sqlResultRowMapper", buildDefaultLOBRowMapper());
 		springModel.addAttribute("initSql", initSql);
 
 		return "/sqlpad/sqlpad";
@@ -206,9 +206,12 @@ public class SqlpadController extends AbstractSchemaConnController
 
 		List<SqlStatement> sqlStatements = sqlScriptParser.parseAll();
 
-		this.sqlpadExecutionService.submit(user, schema, sqlpadId,
+		SqlpadExecutionSubmit submit = new SqlpadExecutionSubmit(user, schema, sqlpadId,
 				FileUtil.getDirectory(getSqlpadTmpDirectory(), sqlpadId), sqlStatements, commitMode,
-				exceptionHandleMode, overTimeThreashold, resultsetFetchSize, WebUtils.getLocale(request));
+				exceptionHandleMode, overTimeThreashold, resultsetFetchSize, buildDefaultLOBRowMapper(),
+				WebUtils.getLocale(request));
+
+		this.sqlpadExecutionService.submit(submit);
 
 		return buildOperationMessageSuccessEmptyResponseEntity();
 	}
@@ -311,7 +314,7 @@ public class SqlpadController extends AbstractSchemaConnController
 	@ResponseBody
 	public PagingData<SqlHistory> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Throwable
+			PagingQuery pagingQueryParam) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);

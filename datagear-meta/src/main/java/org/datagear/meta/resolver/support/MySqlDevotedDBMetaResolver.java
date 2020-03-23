@@ -36,10 +36,11 @@ public class MySqlDevotedDBMetaResolver extends AbstractConnectionDevotedDBMetaR
 	}
 
 	@Override
-	protected void postProcessSimpleTable(Connection cn, DatabaseMetaData metaData, String schema,
+	protected SimpleTable postProcessSimpleTable(Connection cn, DatabaseMetaData metaData, String schema,
 			SimpleTable simpleTable) throws SQLException
 	{
 		resolveTableComment(simpleTable);
+		return simpleTable;
 	}
 
 	protected void resolveTableComment(SimpleTable st)
