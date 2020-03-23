@@ -42,24 +42,37 @@ po.isClientPageData = undefined;
 		if(!importKey)
 			return;
 		
-		var ptable = importKey.primaryTableName;
+		var thisForm = this;
+		
 		var options =
 		{
 			pageParam :
 			{
 				submit : function(data)
 				{
-					alert("TODO");
+					var myobj = $.meta.fromImportKeyPrimary(importKey, data);
+					$(thisForm).tableform("data", myobj);
 				}
 			}
 		};
 		$.setGridPageHeightOption(options);
-		po.open(po.url(ptable, "select"), options);
+		po.open(po.url(importKey.primaryTableName, "select"), options);
 	};
 	
 	po.viewColumnValue = function(table, column, value)
 	{
+		var importKey = $.meta.columnImportKey(table, column);
+		if(!importKey)
+			return;
 		
+		var myobj = $(this).tableform("data");
+		var pobj = $.meta.toImportKeyPrimary(importKey, myobj);
+		var options =
+		{
+			contentType: $.CONTENT_TYPE_JSON,
+			data: pobj
+		};
+		po.open(po.url(importKey.primaryTableName, "view"), options);
 	};
 	
 	po.downloadColumnValue = function(table, column, value)

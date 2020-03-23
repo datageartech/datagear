@@ -93,8 +93,8 @@
 			//可选，SQL时间格式
 			sqlTimeFormat : "",
 			
-			//可选，文件列值标签
-			fileValueLabel: "[BLOB]",
+			//二进制数据前缀
+			binaryPrefix : { hex: "hex:", base64: "base64:", file: "file:" },
 			
 			//可选，是否开启批量设置
 			batchSet : false,
@@ -209,8 +209,11 @@
 		
 		/**
 		 * 获取/设置表单对象。
+		 * 
+		 * @param data
+		 * @param setPartial 设置部分列值，可选，默认为false
 		 */
-		data : function(data)
+		data : function(data, setPartial)
 		{
 			var columns = this.options.table.columns;
 			
@@ -243,6 +246,10 @@
 						continue;
 					
 					var columnValue = $.meta.columnValue(data, columnName);
+					
+					if(setPartial == true && columnValue == undefined)
+						continue;
+					
 					this._columnWidgets[columnName].setValue(columnValue);
 				}
 			}
@@ -456,7 +463,7 @@
 				if(columnImportKey)
 					this._renderImportKeyColumnFormElement(column, columnValue, itemdiv, labeldiv, valuediv, columnWidget, columnImportKey);
 				else if($.meta.isBinaryColumn(column))
-					this._renderFileFormElement(column, columnValue, itemdiv, labeldiv, valuediv, columnWidget);
+					this._renderBinaryFormElement(column, columnValue, itemdiv, labeldiv, valuediv, columnWidget);
 				else
 					this._renderSimpleInputFormElement(column, columnValue, itemdiv, labeldiv, valuediv, columnWidget);
 			}
@@ -601,9 +608,9 @@
 		},
 		
 		/**
-		 * 渲染文件上传表单元素。
+		 * 渲染二进制表单元素。
 		 */
-		_renderFileFormElement : function(column, columnValue, itemdiv, labeldiv, valuediv, columnWidget)
+		_renderBinaryFormElement : function(column, columnValue, itemdiv, labeldiv, valuediv, columnWidget)
 		{
 			valuediv.addClass("file-value");
 			
@@ -612,13 +619,13 @@
 			var table = options.table;
 			var columnName = column.name;
 			
-			var fileInputShowName = "showNameOf" + columnName;
+			var labelInputName = $.uid("lableInput" + columnName);
 			
-			var fileInputHidden = $("<input type='hidden' />").attr("name", columnName)
+			var binaryHiddenInput = $("<input type='hidden' />").attr("name", columnName)
 				.val("").appendTo(valuediv);
 			
-			var fileInputShow = $("<input type='text' class='ui-widget ui-widget-content file-input-show' />").attr("name", fileInputShowName)
-				.val("").attr("__columnName", columnName).appendTo(valuediv).attr("readonly", "readonly");
+			var binaryLabelInput = $("<input type='text' class='ui-widget ui-widget-content binary-label-input' />").attr("name", labelInputName)
+				.val("").attr("__columnName", columnName).appendTo(valuediv);
 			
 			var fileDownloadButton = null;
 			var fileInput = null;
@@ -645,17 +652,6 @@
 			}
 			else
 			{
-				fileInputShow.keydown(function(event)
-				{
-					//Backspace删除列值
-					if(event.keyCode == $.ui.keyCode.BACKSPACE)
-					{
-						var columnName = $(this).attr("__columnName");
-						var columnWidget = _this._columnWidgets[columnName];
-						columnWidget.setValue(null);
-					}
-				});
-				
 				var actionGroup = $("<div class='column-action-group' />").appendTo(valuediv);
 				
 				var fileUploadButton = $("<div class='fileinput-button' />").appendTo(actionGroup);
@@ -679,7 +675,7 @@
 						var columnValue = this.__columnValue;
 						var columnWidget = _this._columnWidgets[columnName];
 						
-						columnWidget.setValue($.meta.toLabeledValue(serverFileInfo.name, clientFileName), true);
+						columnWidget.setValue($.meta.toLabeledValue(options.binaryPrefix.file + serverFileInfo.name, clientFileName), true);
 						
 						$.fileuploadsuccessHandlerForUploadInfo(fileInfoDiv);
 						
@@ -687,7 +683,7 @@
 						.appendTo(fileInfoDiv)
 						.click(function()
 						{
-							var serverFileName = fileInputHidden.val();
+							var serverFileName = binaryHiddenInput.val();
 							
 							//恢复初值
 							columnWidget.setValue(columnValue);
@@ -744,25 +740,33 @@
 				columnWidget.fileInfoDiv = fileInfoDiv[0];
 			}
 			
-			columnWidget.fileInputHidden = fileInputHidden[0];
-			columnWidget.fileInputShow = fileInputShow[0];
+			columnWidget.binaryHiddenInput = binaryHiddenInput[0];
+			columnWidget.binaryLabelInput = binaryLabelInput[0];
 			columnWidget.fileDownloadButtonElement = (fileDownloadButton ? fileDownloadButton[0] : null);
 			columnWidget.fileInputElement = (fileInput ? fileInput[0] : null);
 			
 			columnWidget.getValue = function()
 			{
-				return $(this.fileInputHidden).val();
+				var labelVal = $(this.binaryLabelInput).val();
+				
+				if(!labelVal)
+					return "";
+				
+				if(labelVal.indexOf(options.binaryPrefix.hex) == 0 || labelVal.indexOf(options.binaryPrefix.base64) == 0)
+					return labelVal;
+				
+				return $(this.binaryHiddenInput).val();
 			};
 			columnWidget.setValue = function(value, retainFileInfo)
 			{
-				if(value && options.fileValueLabel != null && !$.meta.isLabeledValue(value))
-					value = $.meta.toLabeledValue(value, options.fileValueLabel);
+				if(value && !$.meta.isLabeledValue(value))
+					value = $.meta.toLabeledValue(value, value);
 				
 				var label = $.meta.labelOfLabeledValue(value);
 				value = ($.meta.valueOfLabeledValue(value) || "");
 				
-				$(this.fileInputHidden).val(value);
-				$(this.fileInputShow).val(label ? label : value);
+				$(this.binaryHiddenInput).val(value);
+				$(this.binaryLabelInput).val(label ? label : value);
 				
 				if(this.fileInfoDiv && !retainFileInfo)
 					$(this.fileInfoDiv).empty();
@@ -778,7 +782,7 @@
 			
 			columnWidget.setValue(columnValue);
 			
-			this._addValidatorRequired(column, fileInputShowName);
+			this._addValidatorRequired(column, labelInputName);
 		},
 		
 		/**

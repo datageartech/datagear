@@ -114,6 +114,56 @@
 		},
 		
 		/**
+		 * 获取导入键的本表对象。
+		 * 
+		 * @param importKey
+		 * @param primaryObj 主表对象
+		 */
+		fromImportKeyPrimary: function(importKey, primaryObj)
+		{
+			var re = {};
+			
+			var primaryNames = importKey.primaryColumnNames;
+			var myNames = importKey.columnNames;
+			
+			for(var i=0; i<primaryNames.length; i++)
+			{
+				var value = primaryObj[primaryNames[i]];
+				if(value == undefined)
+					value = null;
+				
+				re[myNames[i]] = value;
+			}
+			
+			return re;
+		},
+		
+		/**
+		 * 获取导入键的主表对象。
+		 * 
+		 * @param importKey
+		 * @param obj 本表对象
+		 */
+		toImportKeyPrimary: function(importKey, obj)
+		{
+			var re = {};
+			
+			var myNames = importKey.columnNames;
+			var primaryNames = importKey.primaryColumnNames;
+			
+			for(var i=0; i<myNames.length; i++)
+			{
+				var value = obj[myNames[i]];
+				if(value == undefined)
+					value = null;
+				
+				re[primaryNames[i]] = value;
+			}
+			
+			return re;
+		},
+		
+		/**
 		 * 创建指定表的实例对象。
 		 * 
 		 * @param table 表

@@ -128,7 +128,7 @@ form .form-content .form-item .form-item-value textarea{
 	width: 60%;
 	height: 5em;
 }
-form .form-content .form-item .form-item-value .file-input-show{/*文件展示文本*/
+form .form-content .form-item .form-item-value .binary-label-input{/*二进制标签输入框*/
 }
 form .form-content .form-item label.error{
 	color: red;
