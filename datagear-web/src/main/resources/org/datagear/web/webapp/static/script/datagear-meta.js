@@ -28,20 +28,32 @@
 	$.extend($meta,
 	{
 		/**
-		 * 获取指定列。
+		 * 获取指定列/列数组。
 		 * 
 		 * @param table
-		 * @param index 列索引、列名称
+		 * @param index 列索引、列名称、数组
 		 */
 		column : function(table, index)
 		{
-			if(typeof(index) == "string")
-				index = this.columnIndex(table, index);
-
-			if(index < 0)
-				throw new Error("No column for ["+index+"]");
+			var isArray = $.isArray(index);
 			
-			return table.columns[index];
+			var re = [];
+			var indexes = (isArray ? index : [index]);
+			
+			for(var i=0; i<indexes.length; i++)
+			{
+				index = indexes[i];
+				
+				if(typeof(index) == "string")
+					index = this.columnIndex(table, index);
+	
+				if(index < 0)
+					throw new Error("No column for ["+index+"]");
+				
+				re.push(table.columns[index]);
+			}
+			
+			return (isArray ? re : re[0]);
 		},
 		
 		/**
@@ -94,7 +106,7 @@
 			for(var i=0; i<table.importKeys.length; i++)
 			{
 				var importKey = table.importKeys[i];
-				if($.inArray(name, importKey.primaryColumnNames))
+				if($.inArray(name, importKey.columnNames) > -1)
 					return importKey;
 			}
 			
@@ -130,15 +142,15 @@
 		 */
 		uniqueRecordData: function(table, row)
 		{
-			var columnNames;
+			var columns;
 			
 			if(table.primaryKey)
-				columnNames = table.primaryKey.columnNames;
+				columns = this.column(table, table.primaryKey.columnNames);
 			else if(table.uniqueKeys && table.uniqueKeys.length > 0)
-				columnNames = table.uniqueKeys[0].columnNames;
+				columns = this.column(table, table.uniqueKeys[0].columnNames);
 			else
 			{
-				columnNames = [];
+				columns = [];
 				var Types = this.typeEnum;
 				for(var i=0; i<table.columns.length; i++)
 				{
@@ -151,7 +163,7 @@
 							|| Types.SMALLINT == type || Types.TIME == type || Types.TIME_WITH_TIMEZONE == type
 							|| Types.TIMESTAMP == type || Types.TIMESTAMP_WITH_TIMEZONE == type
 							|| Types.TINYINT == type || Types.VARCHAR == type)
-						columnNames.push(column.name);
+						columns.push(column);
 				}
 			}
 			
@@ -162,10 +174,10 @@
 			{
 				var data = {};
 				var myRow = rows[i];
-				for(var j=0; j<columnNames.length; j++)
+				for(var j=0; j<columns.length; j++)
 				{
-					var name = columnNames[j];
-					data[name] = myRow[name];
+					var name = columns[j].name;
+					data[name] = (myRow[name] == null ? null : myRow[name]);
 				}
 				
 				re.push(data);

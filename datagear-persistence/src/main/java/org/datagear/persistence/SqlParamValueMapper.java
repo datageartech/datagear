@@ -20,6 +20,9 @@ public interface SqlParamValueMapper
 {
 	/**
 	 * 映射。
+	 * <p>
+	 * 注意：此方法不应返回{@code null}，返回的{@linkplain SqlParamValue#getValue()}允许为{@code null}。
+	 * </p>
 	 * 
 	 * @param cn
 	 * @param table

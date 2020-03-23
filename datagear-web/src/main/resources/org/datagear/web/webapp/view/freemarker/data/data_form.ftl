@@ -86,7 +86,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 						if(batchParam.batchHandleErrorMode)
 							url = $.addParam(url, "batchHandleErrorMode", batchParam.batchHandleErrorMode);
 					}
-					var param = (po.data ? {"data" : formData, "originalData" : po.data} : formData);
+					var param = (po.isClientPageData ? formData : {"data" : formData, "originalData" : po.data});
 					
 					po.ajaxSubmitForHandleDuplication(url, param, "<@spring.message code='save.continueIgnoreDuplicationTemplate' />",
 					{
@@ -108,8 +108,8 @@ boolean batchSet 是否开启批量执行功能，默认为false
 								;
 							else
 							{
-								//如果有初值，则更新为后台已保存值（编辑时）；如果没有初值，则不更新（添加时）
-								if(po.data)
+								//更新操作成功后要更新页面初始数据，确保再次提交正确
+								if(!po.isClientPageData)
 									po.data = operationMessage.data;
 								
 								close = (po.pageParamCall("afterSave", operationMessage.data) != false);
@@ -133,8 +133,8 @@ boolean batchSet 是否开启批量执行功能，默认为false
 				
 				return false;
 			},
-			selectColumnValue : function(column, columnValue){ throw new Error("TODO"); },
-			viewColumnValue: function(column, columnValue){ throw new Error("TODO"); },
+			selectColumnValue : po.selectColumnValue,
+			viewColumnValue: po.viewColumnValue,
 			downloadColumnValue: po.downloadColumnValue,
 			fileUploadUrl : "${contextPath}/data/uploadFile",
 			fileDeleteUrl : "${contextPath}/data/deleteFile",

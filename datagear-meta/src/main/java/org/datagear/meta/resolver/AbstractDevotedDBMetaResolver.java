@@ -210,7 +210,7 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 
 				if (importTables == null)
 				{
-					ImportKey[] importKeys = getImportedKeys(cn, metaData, schema, tableNames[i]);
+					ImportKey[] importKeys = getImportKeys(cn, metaData, schema, tableNames[i]);
 
 					if (importKeys == null || importKeys.length == 0)
 						importTables = EMPTY_STRING_ARRAY;
@@ -370,6 +370,7 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		table.setColumns(getColumns(cn, metaData, schema, tableName, null));
 		table.setPrimaryKey(getPrimaryKey(cn, metaData, schema, tableName));
 		table.setUniqueKeys(getUniqueKeys(cn, metaData, schema, tableName));
+		table.setImportKeys(getImportKeys(cn, metaData, schema, tableName));
 
 		return table;
 	}
@@ -641,7 +642,7 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		return uniqueKeys;
 	}
 
-	protected ImportKey[] getImportedKeys(Connection cn, DatabaseMetaData metaData, String schema, String tableName)
+	protected ImportKey[] getImportKeys(Connection cn, DatabaseMetaData metaData, String schema, String tableName)
 			throws DBMetaResolverException
 	{
 		ImportKey[] importKeys = null;

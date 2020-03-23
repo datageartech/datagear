@@ -5,7 +5,6 @@
 package org.datagear.persistence.support;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -25,7 +24,6 @@ import org.datagear.persistence.Query;
 import org.datagear.persistence.Row;
 import org.datagear.persistence.RowMapper;
 import org.datagear.persistence.SqlParamValueMapper;
-import org.datagear.util.JdbcUtil;
 import org.datagear.util.Sql;
 import org.datagear.util.SqlParamValue;
 import org.datagear.util.StringUtil;
@@ -186,47 +184,18 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		// 用于避免SQL参数转换中出现异常导致已转换的资源无法释放
 		ReleasableRegistry releasableRegistry = createReleasableRegistry();
 
-		Sql sql = Sql.valueOf().sql("DELETE FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")
-				.delimit(" AND ");
-
-		Column[] columns = getUniqueRecordColumns(table);
-
-		for (int i = 0; i < columns.length; i++)
-		{
-			Column column = columns[i];
-			String name = column.getName();
-
-			sql.sqld(quote(dialect, name) + "=?");
-		}
-
-		PreparedStatement pst = null;
-
 		try
 		{
-			pst = createUpdatePreparedStatement(cn, sql.getSqlValue());
-
 			int count = 0;
 
 			for (int i = 0; i < rows.length; i++)
 			{
 				Row row = rows[i];
-				for (int j = 0; j < columns.length; j++)
-				{
-					Column column = columns[j];
-					String name = column.getName();
-					Object value = row.get(name);
 
-					SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper,
-							releasableRegistry);
+				Sql sql = Sql.valueOf().sql("DELETE FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ");
+				sql.sql(buildUniqueRecordCondition(cn, dialect, table, row, mapper, releasableRegistry));
+				count += executeUpdate(cn, sql);
 
-					sql.param(sqlParamValue);
-				}
-
-				setParamValues(cn, pst, sql);
-				count += pst.executeUpdate();
-
-				sql.clearParam();
-				pst.clearParameters();
 				releasableRegistry.releaseClear();
 			}
 
@@ -238,7 +207,6 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		}
 		finally
 		{
-			JdbcUtil.closeStatement(pst);
 			releasableRegistry.release();
 		}
 	}
@@ -271,31 +239,20 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		// 用于避免SQL参数转换中出现异常导致已转换的资源无法释放
 		ReleasableRegistry releasableRegistry = createReleasableRegistry();
 
-		Sql sql = Sql.valueOf().sql("SELECT * FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ")
-				.delimit(" AND ");
-
-		Column[] columns = getUniqueRecordColumns(table);
+		Sql sql = Sql.valueOf().sql("SELECT * FROM ").sql(quote(dialect, table.getName())).sql(" WHERE ");
 
 		try
 		{
-			for (int i = 0; i < columns.length; i++)
-			{
-				Column column = columns[i];
-				String name = column.getName();
-				Object value = param.get(name);
-
-				SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, sqlParamValueMapper,
-						releasableRegistry);
-
-				sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
-			}
+			sql.sql(buildUniqueRecordCondition(cn, dialect, table, param, sqlParamValueMapper, releasableRegistry));
 
 			List<Row> rows = executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, rowMapper);
 
-			if (rows.size() > 1)
+			if(rows.size() == 1)
+				return rows.get(0);
+			else if(rows.size() < 1)
+				return null;
+			else
 				throw new NonUniqueResultException();
-
-			return rows.get(0);
 		}
 		finally
 		{
@@ -459,7 +416,10 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper, releasableRegistry);
 
-			sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
+			if (sqlParamValue.hasValue())
+				sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
+			else
+				sql.sqld(quote(dialect, name) + " IS NULL");
 		}
 
 		return sql;

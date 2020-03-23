@@ -579,6 +579,7 @@ public class DataController extends AbstractSchemaConnTableController
 				checkReadTableDataPermission(schema, user);
 
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
+				springModel.addAttribute(KEY_SELECTONLY, true);
 				setGridPageAttributes(request, response, springModel, schema, table);
 			}
 		}.execute();

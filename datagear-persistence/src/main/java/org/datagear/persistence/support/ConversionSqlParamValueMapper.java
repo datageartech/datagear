@@ -179,7 +179,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 			throws SqlParamValueMapperException
 	{
 		if (value == null)
-			return null;
+			return createSqlParamValue(column, null);
 
 		try
 		{

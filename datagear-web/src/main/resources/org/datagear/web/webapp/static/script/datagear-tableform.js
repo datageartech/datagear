@@ -51,13 +51,13 @@
 			reset : function(){},
 			
 			//"readonly=false"时必须
-			selectColumnValue : function(column, columnValue){ throw new Error("TODO"); },
+			selectColumnValue : function(table, column, columnValue){ throw new Error("TODO"); },
 			
 			//必选
-			viewColumnValue: function(column, columnValue){ throw new Error("TODO"); },
+			viewColumnValue: function(table, column, columnValue){ throw new Error("TODO"); },
 			
 			//必选
-			downloadColumnValue: function(column, columnValue){ throw new Error("TODO"); },
+			downloadColumnValue: function(table, column, columnValue){ throw new Error("TODO"); },
 			
 			//"readonly=false"时必须，文件上传地址
 			fileUploadUrl : "",
@@ -609,6 +609,7 @@
 			
 			var _this = this;
 			var options = this.options;
+			var table = options.table;
 			var columnName = column.name;
 			
 			var fileInputShowName = "showNameOf" + columnName;
@@ -638,7 +639,7 @@
 		    		var myColumnName = $(this).attr("__columnName");
 					var myColumnInfo = _this._getColumnInfo(myColumnName);
 					
-	    			_this.options.downloadColumnValue.call(_this.element, myColumnInfo.column,
+	    			_this.options.downloadColumnValue.call(_this.element, table, myColumnInfo.column,
 							myColumnInfo.columnValue);
 				});
 			}
@@ -730,7 +731,7 @@
 			    		{
 			    			var value = $.meta.valueOfLabeledValue(myColumnInfo.columnValue);
 			    			if(value)
-			    				_this.options.downloadColumnValue.call(_this.element, myColumnInfo.column,
+			    				_this.options.downloadColumnValue.call(_this.element, table, myColumnInfo.column,
 										myColumnInfo.columnValue);
 			    		}
 			    		else if("del" == action)
@@ -811,7 +812,7 @@
 			    		var myColumnName = $(this).attr("__columnName");
 						var myColumnInfo = _this._getColumnInfo(myColumnName);
 						
-						_this.options.viewColumnValue.call(_this.element, myColumnInfo.column,
+						_this.options.viewColumnValue.call(_this.element, table, myColumnInfo.column,
 								myColumnInfo.columnValue);
 					});
 				}
@@ -826,18 +827,21 @@
 		    		var myColumnName = $(this).attr("__columnName");
 					var myColumnInfo = _this._getColumnInfo(myColumnName);
 					
-					_this.options.selectColumnValue.call(_this.element, myColumnInfo.column,
+					_this.options.selectColumnValue.call(_this.element, table, myColumnInfo.column,
 							myColumnInfo.columnValue);
 				});
 			}
 			
 			columnWidget.textinput = textinput[0];
 			columnWidget.buttonElement = buttonElement[0];
-			
+
+			columnWidget.getValue = function()
+			{
+				return $(this.textinput).val();
+			};
 			columnWidget.setValue = function(value)
 			{
 				$(this.textinput).val(value);
-				this.value = value;
 			};
 			columnWidget.active = function()
 			{
