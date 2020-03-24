@@ -7,13 +7,12 @@ page_js_obj.jsp
 <script type="text/javascript">
 (function(po)
 {
-	po.table = function(){ return this.element("#${pageId}-table"); };
+	po.elementTable = function(){ return this.element("#${pageId}-table"); };
 	
 	//计算表格高度
 	po.calTableHeight = function()
 	{
 		var height =  po.element("> .content").height() - 50;
-		
 		return height;
 	};
 	
@@ -92,7 +91,7 @@ page_js_obj.jsp
 				
 				for(var i=0; i<data.order.length; i++)
 				{
-					var name = $.unescapeColumnNameForDataTables(data.columns[data.order[i].column].data);
+					var name = $.unescapeColumnNameForDataTable(data.columns[data.order[i].column].data);
 					nameOrder[i] = { "name" : name, "type" : data.order[i].dir };
 				}
 				
@@ -329,7 +328,7 @@ page_js_obj.jsp
 	po.initDataTable = function(tableSettings, $table)
 	{
 		if($table == undefined)
-			$table = po.table();
+			$table = po.elementTable();
 		
 		$table.dataTable(tableSettings);
 		
@@ -361,19 +360,19 @@ page_js_obj.jsp
 	
 	po.refresh = function()
 	{
-		po.table().DataTable().draw();
+		po.elementTable().DataTable().draw();
 	};
 	
 	po.setTableData = function(data, dataTable)
 	{
-		dataTable = (dataTable || po.table().DataTable());
+		dataTable = (dataTable || po.elementTable().DataTable());
 		$.setDataTableData(dataTable, data);
 	};
 	
 	//单选处理函数
 	po.executeOnSelect = function(callback)
 	{
-		var rows = po.table().DataTable().rows('.selected');
+		var rows = po.elementTable().DataTable().rows('.selected');
 		var rowsData = po.getRowsData(rows);
 		
 		if(!rowsData || rowsData.length != 1)
@@ -387,7 +386,7 @@ page_js_obj.jsp
 	//多选处理函数
 	po.executeOnSelects = function(callback)
 	{
-		var rows = po.table().DataTable().rows('.selected');
+		var rows = po.elementTable().DataTable().rows('.selected');
 		var rowsData = po.getRowsData(rows);
 		
 		if(!rowsData || rowsData.length < 1)
@@ -401,7 +400,7 @@ page_js_obj.jsp
 	//获取选中数据
 	po.getSelectedData = function()
 	{
-		var rows = po.table().DataTable().rows('.selected');
+		var rows = po.elementTable().DataTable().rows('.selected');
 		var rowsData = po.getRowsData(rows);
 		
 		return (rowsData || []);
@@ -410,7 +409,7 @@ page_js_obj.jsp
 	po.getRowsData = function(rows)
 	{
 		if(rows == undefined)
-			rows = po.table().DataTable().rows();
+			rows = po.elementTable().DataTable().rows();
 		
 		var tableRowsData = rows.data();
 		
@@ -424,7 +423,7 @@ page_js_obj.jsp
 	po.getRowsIndex = function(rows)
 	{
 		if(rows == undefined)
-			rows = po.table().DataTable().rows();
+			rows = po.elementTable().DataTable().rows();
 			
 		var indexes = rows.indexes();
 		
@@ -433,7 +432,7 @@ page_js_obj.jsp
 	
 	po.addRowData = function(data)
 	{
-		var table = po.table().DataTable();
+		var table = po.elementTable().DataTable();
 		
 		if($.isArray(data))
 			table.rows.add(data).draw();
@@ -443,7 +442,7 @@ page_js_obj.jsp
 	
 	po.setRowData = function(rowIndex, data)
 	{
-		var table = po.table().DataTable();
+		var table = po.elementTable().DataTable();
 		
 		if(rowIndex.length != undefined)
 		{
@@ -458,7 +457,7 @@ page_js_obj.jsp
 	
 	po.deleteRow = function(rowIndex)
 	{
-		var table = po.table().DataTable();
+		var table = po.elementTable().DataTable();
 		
 		if(rowIndex.length != undefined)
 		{
@@ -470,12 +469,12 @@ page_js_obj.jsp
 	
 	po.deleteAllRow = function()
 	{
-		po.table().DataTable().rows().remove();
+		po.elementTable().DataTable().rows().remove();
 	};
 	
 	po.deleteSelectedRows = function()
 	{
-		var dataTable = po.table().DataTable();
+		var dataTable = po.elementTable().DataTable();
 		
 		var indexes = dataTable.rows('.selected').indexes();
 		dataTable.rows(indexes).remove().draw();
@@ -485,13 +484,13 @@ page_js_obj.jsp
 	po.dataTableParent = function(dataTable)
 	{
 		if(!dataTable)
-			dataTable = po.table().DataTable();
+			dataTable = po.elementTable().DataTable();
 		
 		var $tableParent = $(dataTable.table().body()).parent().parent();
 		return $tableParent;
 	};
 	
-	po.expectedResizeDataTableElements = [po.table()[0]];
+	po.expectedResizeDataTableElements = [po.elementTable()[0]];
 	
 	po.calChangedDataTableHeight = function()
 	{

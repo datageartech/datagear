@@ -15,7 +15,6 @@ import org.springframework.format.support.FormattingConversionServiceFactoryBean
  * <ul>
  * <li>{@linkplain StringToArrayConverter}</li>
  * <li>{@linkplain StringToJsonConverter}</li>
- * <li>{@linkplain JsonValueConverterFactory}</li>
  * </ul>
  * 
  * @author datagear@163.com
@@ -34,32 +33,37 @@ public class CustomFormattingConversionServiceFactoryBean extends FormattingConv
 		FormattingConversionService conversionService = super.getObject();
 
 		conversionService.addConverter(new StringToArrayConverter(conversionService));
-//		conversionService.addConverter(new StringToJsonConverter());
-//		conversionService.addConverterFactory(new JsonValueConverterFactory<JsonStructure, Object>(conversionService)
-//		{
-//			{
-//			}
-//		});
-//		conversionService.addConverterFactory(new JsonValueConverterFactory<JsonObject, Object>(conversionService)
-//		{
-//			{
-//			}
-//		});
-//		conversionService.addConverterFactory(new JsonValueConverterFactory<JsonArray, Object>(conversionService)
-//		{
-//			{
-//			}
-//		});
-//		conversionService.addConverterFactory(new JsonValueConverterFactory<JsonString, Object>(conversionService)
-//		{
-//			{
-//			}
-//		});
-//		conversionService.addConverterFactory(new JsonValueConverterFactory<JsonNumber, Object>(conversionService)
-//		{
-//			{
-//			}
-//		});
+		conversionService.addConverter(new StringToJsonConverter());
+		// conversionService.addConverterFactory(new
+		// JsonValueConverterFactory<JsonStructure, Object>(conversionService)
+		// {
+		// {
+		// }
+		// });
+		// conversionService.addConverterFactory(new
+		// JsonValueConverterFactory<JsonObject, Object>(conversionService)
+		// {
+		// {
+		// }
+		// });
+		// conversionService.addConverterFactory(new
+		// JsonValueConverterFactory<JsonArray, Object>(conversionService)
+		// {
+		// {
+		// }
+		// });
+		// conversionService.addConverterFactory(new
+		// JsonValueConverterFactory<JsonString, Object>(conversionService)
+		// {
+		// {
+		// }
+		// });
+		// conversionService.addConverterFactory(new
+		// JsonValueConverterFactory<JsonNumber, Object>(conversionService)
+		// {
+		// {
+		// }
+		// });
 
 		conversionService.addFormatter(new SqlDateFormatter());
 		conversionService.addFormatter(new SqlTimeFormatter());

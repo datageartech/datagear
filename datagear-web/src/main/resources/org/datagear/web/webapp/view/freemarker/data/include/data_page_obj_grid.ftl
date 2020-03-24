@@ -1,53 +1,45 @@
+<#--
+表格功能JS片段。
+
+依赖：
+
+
+变量：
+//查询结果的行映射器，非null
+DefaultLOBRowMapper queryDefaultLOBRowMapper
+
+-->
 <#include "../../include/page_obj_grid.ftl">
 <script type="text/javascript">
 (function(po)
 {
-	//单元基本属性值是否已完全获取，如果不是单元基本属性，也将返回true（为了提高表格数据读取效率，后台对CLOB类的属性值仅会读取前段）
-	po.isSinglePrimitivePropertyValueFullyFetched = function(model, property, propertyValue)
-	{
-		if(propertyValue == null)
-			return true;
-		
-		return !$.meta.isLongTextJdbcType(property);
-	};
+	po.blobPlaceholder = "${queryDefaultLOBRowMapper.blobPlaceholder?js_string}";
+	po.clobPlaceholder = "${queryDefaultLOBRowMapper.clobPlaceholder?js_string}";
+	po.sqlXmlPlaceholder = "${queryDefaultLOBRowMapper.sqlXmlPlaceholder?js_string}";
 	
-	//所有单元属性值是否已完全获取
-	po.isAllSinglePrimitivePropertyValueFullyFetched = function(model, data)
+	po.isPlaceholderColumnValue = function(column, value)
 	{
-		if(!data)
+		if(!value)
+			return false;
+		
+		if($.meta.isBlobColumn(column) && po.blobPlaceholder == value)
 			return true;
 		
-		var properties = model.properties;
+		if($.meta.isClobColumn(column) && po.clobPlaceholder == value)
+			return true;
 		
-		for(var i=0; i<properties.length; i++)
-		{
-			var property = properties[i];
-			var propertyValue = $.meta.propertyValue(data, property);
-			
-			if(!po.isSinglePrimitivePropertyValueFullyFetched(model, property, propertyValue))
-				return false;
-		}
+		if($.meta.isSqlxmlColumn(column) && po.sqlXmlPlaceholder == value)
+			return true;
 		
-		return true;
+		return false;
 	};
 	
 	/**
-	 * 构建Model的本地数据表格。
+	 * 构建ajax数据表格。
 	 */
-	po.initModelDataTableLocal = function(model, data, ignorePropertyNames)
+	po.initDataTableAjax = function(url, table)
 	{
-		var columns = $.buildDataTablesColumns(model, {"ignorePropertyNames" : ignorePropertyNames});
-		var settings = po.buildDataTableSettingsLocal(columns, data);
-		
-		po.initDataTable(settings);
-	};
-	
-	/**
-	 * 构建Model的ajax数据表格。
-	 */
-	po.initDataTableAjax = function(url, model, ignorePropertyNames)
-	{
-		var columns = $.buildDataTablesColumns(model, {"ignorePropertyNames" : ignorePropertyNames});
+		var columns = $.buildDataTablesColumns(table);
 		var settings = po.buildDataTableSettingsAjax(columns, url);
 		
 		po.initDataTable(settings);

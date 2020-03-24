@@ -2,9 +2,9 @@
 <#include "../include/html_doctype.ftl">
 <#--
 Schema schema 数据库，不允许为null
-Model model 模型，不允许为null
+Table table 表，不允许为null
 Object data 初始数据，允许null
-boolean isClientPageData 初始数据是否是客户端数据，默认为false
+boolean dataIsClient 初始数据是否是客户端数据，默认为false
 String titleOperationMessageKey 标题操作标签I18N关键字，不允许null
 String titleDisplayName 页面展示名称，默认为""
 String submitAction 提交活动，po.pageParam().submit(...)未定义时，不允许为null
@@ -12,7 +12,7 @@ boolean readonly 是否只读操作，默认为false
 String ignorePropertyName 忽略表单渲染和处理的属性名，默认为""
 boolean batchSet 是否开启批量执行功能，默认为false
 -->
-<#assign isClientPageData=(isClientPageData!false)>
+<#assign dataIsClient=(dataIsClient!false)>
 <#assign titleDisplayName=(titleDisplayName!'')>
 <#assign submitAction=(submitAction!'#')>
 <#assign readonly=(readonly!false)>
@@ -45,13 +45,13 @@ boolean batchSet 是否开启批量执行功能，默认为false
 (function(po)
 {
 	po.data = <@writeJson var=data />;
+	po.dataIsClient = ${dataIsClient?c};
 	po.readonly = ${readonly?c};
 	po.submitAction = "${submitAction?js_string}";
-	po.isClientPageData = ${isClientPageData?c};
 	po.batchSet = ${batchSet?c};
 	
-	if(!po.isClientPageData && po.data == null)
-		po.isClientPageData = true;
+	if(!po.dataIsClient && po.data == null)
+		po.dataIsClient = true;
 	
 	po.onTable(function(table)
 	{
@@ -86,7 +86,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 						if(batchParam.batchHandleErrorMode)
 							url = $.addParam(url, "batchHandleErrorMode", batchParam.batchHandleErrorMode);
 					}
-					var param = (po.isClientPageData ? formData : {"data" : formData, "originalData" : po.data});
+					var param = (po.dataIsClient ? formData : {"data" : formData, "originalData" : po.data});
 					
 					po.ajaxSubmitForHandleDuplication(url, param, "<@spring.message code='save.continueIgnoreDuplicationTemplate' />",
 					{
@@ -109,7 +109,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 							else
 							{
 								//更新操作成功后要更新页面初始数据，确保再次提交正确
-								if(!po.isClientPageData)
+								if(!po.dataIsClient)
 									po.data = operationMessage.data;
 								
 								close = (po.pageParamCall("afterSave", operationMessage.data) != false);

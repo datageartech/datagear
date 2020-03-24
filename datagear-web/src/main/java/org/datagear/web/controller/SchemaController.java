@@ -251,7 +251,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@ResponseBody
 	public PagingData<SimpleTable> pagingQueryTable(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			PagingQuery pagingQueryParam) throws Throwable
+			@RequestBody PagingQuery pagingQueryParam) throws Throwable
 	{
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam, COOKIE_PAGINATION_SIZE);
 

@@ -374,6 +374,8 @@ ${detectNewVersionScript}
 				{
 					"data" :
 					{
+						contentType: $.CONTENT_TYPE_JSON,
+						type: "POST",
 						"url" : function(node)
 						{
 							//根节点
@@ -447,6 +449,8 @@ ${detectNewVersionScript}
 					
 					$.ajax($.toPath(false, contextPath, "schema", schemaId, "pagingQueryTable"),
 					{
+						contentType: $.CONTENT_TYPE_JSON,
+						type: "POST",
 						data : param,
 						success : function(pagingData)
 						{

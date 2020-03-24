@@ -17,7 +17,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	
 	po.getSubDataExchangeDataTable = function()
 	{
-		return po.table().DataTable();
+		return po.elementTable().DataTable();
 	};
 
 	po.getDataExchangeProgressEle = function()
@@ -60,7 +60,7 @@ po.subDataExchangeStatusColumnIndex 子数据交换表格中状态列索引
 	po.adjustDataTable = function()
 	{
 		po.getSubDataExchangeDataTable().columns.adjust();
-		$.updateDataTableHeight(po.table(), po.calTableHeight());
+		$.updateDataTableHeight(po.elementTable(), po.calTableHeight());
 	};
 
 	po.renderColumn = function(data, type, row, meta)

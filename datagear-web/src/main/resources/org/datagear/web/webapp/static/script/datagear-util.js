@@ -303,21 +303,24 @@
 			
 			$form.attr("action", url).attr("target", options.target);
 			
-			var param = $.param(options.data);
-			
-			//XXX $.param会将" "转换为"+"，而这里的decodeURIComponent并不会将"+"恢复为" "，因此需要在这里预先转换
-			param = param.replace(/\+/g, " ");
-			
-			var paramArray = param.split("&");
-			
-			for(var i=0; i<paramArray.length; i++)
+			if(options.data)
 			{
-				var paramPair = paramArray[i].split("=");
+				var param = $.param(options.data);
 				
-				var name = decodeURIComponent(paramPair[0]);
-				var value = decodeURIComponent(paramPair[1]);
-
-				$("<input type='hidden' />").attr("name", name).attr("value", value).appendTo($form);
+				//XXX $.param会将" "转换为"+"，而这里的decodeURIComponent并不会将"+"恢复为" "，因此需要在这里预先转换
+				param = param.replace(/\+/g, " ");
+				
+				var paramArray = param.split("&");
+				
+				for(var i=0; i<paramArray.length; i++)
+				{
+					var paramPair = paramArray[i].split("=");
+					
+					var name = decodeURIComponent(paramPair[0]);
+					var value = decodeURIComponent(paramPair[1]);
+	
+					$("<input type='hidden' />").attr("name", name).attr("value", value).appendTo($form);
+				}
 			}
 			
 			$form[0].submit();
@@ -566,6 +569,11 @@
 			return re;
 		},
 		
+		toJsonString: function(obj)
+		{
+			return JSON.stringify(obj);
+		},
+		
 		/**
 		 * 给URL添加参数。
 		 * 
@@ -773,7 +781,7 @@
 		 * 为DataTables转义列名。
 		 * 参考jquery.dataTables.js的_fnSplitObjNotation函数。
 		 */
-		escapeColumnNameForDataTables : function(columnName)
+		escapeColumnNameForDataTable : function(columnName)
 		{
 			return columnName;
 			
@@ -797,9 +805,9 @@
 		},
 		
 		/**
-		 * 反转义由escapeColumnNameForDataTables转义的列名。
+		 * 反转义由escapeColumnNameForDataTable转义的列名。
 		 */
-		unescapeColumnNameForDataTables : function(columnName)
+		unescapeColumnNameForDataTable : function(columnName)
 		{
 			return columnName;
 			
@@ -886,7 +894,7 @@
 				dtColumns.push(
 				{
 					title: $.meta.displayInfoHtml(column, "a"),
-					data: $.escapeColumnNameForDataTables(column.name),
+					data: $.escapeColumnNameForDataTable(column.name),
 					columnIndex: i,
 					options : options,
 					render: function(data, type, row, meta)
@@ -896,9 +904,10 @@
 						var _this = meta.settings.aoColumns[meta.col];
 						
 						var columnIndex = _this.columnIndex;
-						var column = table.columns[columnIndex];
+						var column = $.meta.column(table, columnIndex);
 						
-						renderValue = (data ? data+"" : "");
+						renderValue = $.meta.labelOfLabeledValue(data);
+						renderValue = (renderValue == undefined ? data : renderValue);
 						renderValue = $.truncateIf(renderValue, "...", _this.options.stringDisplayThreshold);
 						renderValue = $.escapeHtml(renderValue);
 						
@@ -927,19 +936,17 @@
 		},
 		
 		/**
-		 * 获取指定属性名的列号。
+		 * 获取指定列名在DataTable中的列号。
 		 */
-		getDataTableColumn : function(settings, propertyName)
+		getDataTableColumn : function(settings, columnName)
 		{
-			var columnMetas = this.getDataTableColumnMetas(settings);
+			var columnInfos = this.getDataTableColumnInfos(settings);
 			
-			var escapedName = $.escapeColumnNameForDataTables(propertyName);
+			var escapedName = $.escapeColumnNameForDataTable(columnName);
 			
-			for(var i=0; i<columnMetas.length; i++)
+			for(var i=0; i<columnInfos.length; i++)
 			{
-				var columnMeta = columnMetas[i];
-				
-				if(escapedName == columnMeta.data)
+				if(escapedName == columnInfos[i].data)
 					return i;
 			}
 			
@@ -973,41 +980,32 @@
 		},
 		
 		/**
-		 * 根据单元格索引获取对应的模型属性索引
+		 * 获取单元格索引对应的列名
 		 */
-		getDataTableCellPropertyIndex : function(settings, cellIndex)
+		getDataTableCellName : function(settings, cellIndex)
 		{
-			var columnMetas = this.getDataTableColumnMetas(settings);
-			
-			var columnIndex = columnMetas[cellIndex.column].columnIndex;
-			
-			if(columnIndex == undefined)
-				throw new Error("Not valid column index ["+columnIndex+"] for getting column property");
-			
-			return columnIndex;
+			var columnInfos = this.getDataTableColumnInfos(settings);
+			return $.unescapeColumnNameForDataTable(columnInfos[cellIndex.column].data);
 		},
 		
 		/**
-		 * 根据单元格索引获取对应的模型属性索引-单元格索引数组映射表。
+		 * 获取单元格索引数组的列名-单元格索引数组映射表。
 		 */
-		getDataTableCellPropertyIndexesMap : function(settings, cellIndexes)
+		getDataTableColumnNameCellIndexes : function(settings, cellIndexes)
 		{
-			var columnMetas = this.getDataTableColumnMetas(settings);
+			var columnInfos = this.getDataTableColumnInfos(settings);
 			
-			var columnIndexesMap = {};
+			var nameIndexes = {};
 			for(var i=0; i<cellIndexes.length; i++)
 			{
 				var index = cellIndexes[i];
-				var columnIndex = columnMetas[index.column].columnIndex;
+				var columnName = $.unescapeColumnNameForDataTable(columnInfos[index.column].data);
 				
-				if(columnIndex == undefined)
-					throw new Error("Not valid column index ["+columnIndex+"] for getting column property");
-				
-				var indexes = (columnIndexesMap[columnIndex] || (columnIndexesMap[columnIndex] = []));
+				var indexes = (nameIndexes[columnName] || (nameIndexes[columnName] = []));
 				indexes.push(index);
 			}
 			
-			return columnIndexesMap;
+			return nameIndexes;
 		},
 		
 		/**
@@ -1053,23 +1051,23 @@
 		},
 		
 		/**
-		 * 获取DataTable的列元信息。
+		 * 获取DataTable的列信息。
 		 */
-		getDataTableColumnMetas : function(settings)
+		getDataTableColumnInfos : function(settings)
 		{
-			var columnMetas = undefined;
+			var columnInfos = undefined;
 			
 			//column.render函数中的结构
 			if(settings.aoColumns)
-				columnMetas = settings.aoColumns;
+				columnInfos = settings.aoColumns;
 			//.DataTable().settings()结构
 			else if(settings[0])
-				columnMetas = settings[0].aoColumns;
+				columnInfos = settings[0].aoColumns;
 			//构造DataTable前的设置
 			else if(settings.columns)
-				columnMetas =  settings.columns;
+				columnInfos =  settings.columns;
 			
-			return columnMetas;
+			return columnInfos;
 		},
 		
 		/**
@@ -2963,7 +2961,7 @@
 			return;
 		
 		if(originalOptions.data)
-			options.data = JSON.stringify(originalOptions.data);
+			options.data = $.toJsonString(originalOptions.data);
 	});
 	
 	$(document).ajaxError(function(event, jqXHR, ajaxSettings, thrownError)

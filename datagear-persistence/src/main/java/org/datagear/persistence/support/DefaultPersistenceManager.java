@@ -92,11 +92,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 				Object value = row.get(name);
 
-				if (value == null && column.isAutoincrement())
+				if (value == null)
 					continue;
-
-				if (value == null && column.hasDefaultValue())
-					value = column.getDefaultValue();
 
 				SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper, releasableRegistry);
 
@@ -247,9 +244,9 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 			List<Row> rows = executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, rowMapper);
 
-			if(rows.size() == 1)
+			if (rows.size() == 1)
 				return rows.get(0);
-			else if(rows.size() < 1)
+			else if (rows.size() < 1)
 				return null;
 			else
 				throw new NonUniqueResultException();
@@ -464,13 +461,12 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		{
 			int type = columns[i].getType();
 
-			if (Types.BIGINT == type || Types.BIT == type || Types.BOOLEAN == type
-					|| Types.CHAR == type || Types.DATE == type || Types.DECIMAL == type
-					|| Types.DOUBLE == type || Types.FLOAT == type || Types.INTEGER == type
-					|| Types.NULL == type || Types.NUMERIC == type || Types.REAL == type
-					|| Types.SMALLINT == type || Types.TIME == type || Types.TIME_WITH_TIMEZONE == type
-					|| Types.TIMESTAMP == type || Types.TIMESTAMP_WITH_TIMEZONE == type
-					|| Types.TINYINT == type || Types.VARCHAR == type)
+			if (Types.BIGINT == type || Types.BIT == type || Types.BOOLEAN == type || Types.CHAR == type
+					|| Types.DATE == type || Types.DECIMAL == type || Types.DOUBLE == type || Types.FLOAT == type
+					|| Types.BINARY == type || Types.VARBINARY == type || Types.INTEGER == type || Types.NULL == type
+					|| Types.NUMERIC == type || Types.REAL == type || Types.SMALLINT == type || Types.TIME == type
+					|| Types.TIME_WITH_TIMEZONE == type || Types.TIMESTAMP == type
+					|| Types.TIMESTAMP_WITH_TIMEZONE == type || Types.TINYINT == type || Types.VARCHAR == type)
 				re.add(columns[i]);
 		}
 

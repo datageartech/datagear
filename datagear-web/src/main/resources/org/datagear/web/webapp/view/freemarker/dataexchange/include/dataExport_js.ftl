@@ -213,7 +213,7 @@ dataExchange_js.ftl
 	
 	po.initDataExportDataTable = function()
 	{
-		po.expectedResizeDataTableElements = [po.table()[0]];
+		po.expectedResizeDataTableElements = [po.elementTable()[0]];
 		
 		var tableSettings = po.buildDataTableSettingsLocal(po.dataExportTableColumns, [], {"order": []});
 
@@ -286,13 +286,13 @@ dataExchange_js.ftl
 			});
 		});
 		
-		po.table().on("click", ".input-in-table", function(event)
+		po.elementTable().on("click", ".input-in-table", function(event)
 		{
 			//阻止行选中
 			event.stopPropagation();
 		});
 		
-		po.table().on("click", ".exchange-result-icon", function(event)
+		po.elementTable().on("click", ".exchange-result-icon", function(event)
 		{
 			//阻止行选中
 			event.stopPropagation();

@@ -6,8 +6,8 @@ data_page_obj.ftl
 依赖变量：
 //初始数据，由主页面定义，允许为null
 po.data = undefined;
-//初始表单数据是否是客户端数据
-po.isClientPageData = undefined;
+//初始数据是否是客户端数据，由主页面定义
+po.dataIsClient = true;
 -->
 <#include "../../include/page_obj_form.ftl">
 <script type="text/javascript">
@@ -77,18 +77,23 @@ po.isClientPageData = undefined;
 	
 	po.downloadColumnValue = function(table, column, value)
 	{
+		if(!value)
+			return;
+		
 		var url;
 		var options = {target: "_file"};
 		
-		if(po.isClientPageData)
+		if($.meta.isBinaryColumnValueFile(value))
 		{
-			url = "${contextPath}/data/downloadFile";
-			options.data = {file : value};
+			url = $.addParam("${contextPath}/data/downloadFile", "file", $.meta.binaryColumnValueFileContent(value));
+			po.open(url, options);
 		}
-		else
+		else if(po.data && !po.dataIsClient)
+		{
 			url = po.url("downloadColumnValue");
-		
-		po.open(url, options);
+			options.data = { data: $.toJsonString($.meta.uniqueRecordData(table, po.data)), columnName: column.name };
+			po.open(url, options);
+		}
 	};
 	
 	po.refreshParent = function()

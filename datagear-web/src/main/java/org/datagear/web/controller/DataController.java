@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
+import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PagingData;
@@ -73,9 +74,7 @@ public class DataController extends AbstractSchemaConnTableController
 {
 	public static final String PARAM_IGNORE_DUPLICATION = "ignoreDuplication";
 
-	public static final String PARAM_IS_LOAD_PAGE_DATA = "isLoadPageData";
-
-	public static final String KEY_IS_CLIENT_PAGE_DATA = "isClientPageData";
+	public static final String KEY_DATA_IS_CLIENT = "dataIsClient";
 
 	public static final String KEY_TITLE_DISPLAY_NAME = "titleDisplayName";
 
@@ -240,7 +239,7 @@ public class DataController extends AbstractSchemaConnTableController
 
 				springModel.addAttribute("titleOperationMessageKey", "add");
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
-				springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, true);
+				springModel.addAttribute(KEY_DATA_IS_CLIENT, true);
 				springModel.addAttribute("submitAction", "saveAdd");
 			}
 		}.execute();
@@ -317,7 +316,6 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		final User user = WebUtils.getUser(request, response);
 		final Row row = convertToRow(paramData);
-		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
 
@@ -331,16 +329,11 @@ public class DataController extends AbstractSchemaConnTableController
 
 				Connection cn = getConnection();
 
-				Row myRow = row;
+				Row myRow = persistenceManager.get(cn, null, table, row, buildConditionSqlParamValueMapper(),
+						rowMapper);
 
-				if (isLoadPageData)
-				{
-					myRow = persistenceManager.get(cn, null, table, row, buildConditionSqlParamValueMapper(),
-							rowMapper);
-
-					if (myRow == null)
-						throw new RecordNotFoundException();
-				}
+				if (myRow == null)
+					throw new RecordNotFoundException();
 
 				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(myRow));
 				springModel.addAttribute("titleOperationMessageKey", "edit");
@@ -376,9 +369,11 @@ public class DataController extends AbstractSchemaConnTableController
 			{
 				checkEditTableDataPermission(schema, user);
 
+				Row myUpdateRow = removeBlobPlacehoderValue(table, updateRow);
+
 				Connection cn = getConnection();
 
-				int count = persistenceManager.update(cn, null, table, originalRow, updateRow,
+				int count = persistenceManager.update(cn, null, table, originalRow, myUpdateRow,
 						buildSaveSqlParamValueMapper());
 
 				checkDuplicateRecord(1, count, ignoreDuplication);
@@ -436,7 +431,6 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		final User user = WebUtils.getUser(request, response);
 		final Row row = convertToRow(paramData);
-		final boolean isLoadPageData = isLoadPageDataRequest(request);
 
 		final DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
 
@@ -450,16 +444,11 @@ public class DataController extends AbstractSchemaConnTableController
 
 				Connection cn = getConnection();
 
-				Row myRow = row;
+				Row myRow = persistenceManager.get(cn, null, table, row, buildConditionSqlParamValueMapper(),
+						rowMapper);
 
-				if (isLoadPageData)
-				{
-					myRow = persistenceManager.get(cn, null, table, row, buildConditionSqlParamValueMapper(),
-							rowMapper);
-
-					if (myRow == null)
-						throw new RecordNotFoundException();
-				}
+				if (myRow == null)
+					throw new RecordNotFoundException();
 
 				springModel.addAttribute("data", WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(myRow));
 				springModel.addAttribute("titleOperationMessageKey", "view");
@@ -800,17 +789,36 @@ public class DataController extends AbstractSchemaConnTableController
 		return rows;
 	}
 
-	protected Row convertToRow(String[] names, Object[] values)
+	protected Row removeBlobPlacehoderValue(Table table, Row row)
 	{
-		Row row = new Row();
+		if (row == null || row.isEmpty())
+			return row;
 
-		if (!StringUtil.isEmpty(names))
+		Column[] bcs = table.getBinaryColumns();
+
+		if (StringUtil.isEmpty(bcs))
+			return row;
+
+		DefaultLOBRowMapper rowMapper = buildFormDefaultLOBRowMapper();
+
+		Row reRow = new Row();
+
+		for (Map.Entry<String, Object> entry : row.entrySet())
 		{
-			for (int i = 0; i < names.length; i++)
-				row.put(names[i], values[i]);
+			boolean isBc = false;
+			for (Column bc : bcs)
+			{
+				if (bc.getName().equals(entry.getKey()))
+					isBc = true;
+			}
+
+			if (isBc && rowMapper.getBlobPlaceholder().equals(entry.getValue()))
+				;
+			else
+				reRow.put(entry.getKey(), entry.getValue());
 		}
 
-		return row;
+		return reRow;
 	}
 
 	/**
@@ -899,23 +907,9 @@ public class DataController extends AbstractSchemaConnTableController
 	 * @param request
 	 * @return
 	 */
-	protected boolean isClientPageDataRequest(HttpServletRequest request)
+	protected boolean dataIsClientRequest(HttpServletRequest request)
 	{
-		return WebUtils.getBooleanValue(request, KEY_IS_CLIENT_PAGE_DATA, false);
-	}
-
-	/**
-	 * 是否是加载页面数据请求。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	protected boolean isLoadPageDataRequest(HttpServletRequest request)
-	{
-		if (isClientPageDataRequest(request))
-			return false;
-
-		return WebUtils.getBooleanValue(request, PARAM_IS_LOAD_PAGE_DATA, true);
+		return WebUtils.getBooleanValue(request, KEY_DATA_IS_CLIENT, false);
 	}
 
 	/**
@@ -949,10 +943,10 @@ public class DataController extends AbstractSchemaConnTableController
 		springModel.addAttribute("sqlTimeFormat", this.sqlTimeFormatter.getParsePatternDesc(locale));
 		springModel.addAttribute("formDefaultLOBRowMapper", buildFormDefaultLOBRowMapper());
 
-		if (!containsAttributes(request, springModel, KEY_IS_CLIENT_PAGE_DATA))
+		if (!containsAttributes(request, springModel, KEY_DATA_IS_CLIENT))
 		{
-			boolean isClientPageData = WebUtils.getBooleanValue(request, KEY_IS_CLIENT_PAGE_DATA, false);
-			springModel.addAttribute(KEY_IS_CLIENT_PAGE_DATA, isClientPageData);
+			boolean dataIsClient = WebUtils.getBooleanValue(request, KEY_DATA_IS_CLIENT, false);
+			springModel.addAttribute(KEY_DATA_IS_CLIENT, dataIsClient);
 		}
 
 		if (!containsAttributes(request, springModel, "batchSet"))

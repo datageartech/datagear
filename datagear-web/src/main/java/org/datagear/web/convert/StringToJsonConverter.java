@@ -25,6 +25,12 @@ import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * 字符串/数组至{@linkplain JsonStructure}转换器。
+ * <p>
+ * 此类用于为Spring MVC扩展如下支持：
+ * </p>
+ * <p>
+ * <code>@RequestParam("...") JsonObject json</code>
+ * </p>
  * 
  * @author datagear@163.com
  *

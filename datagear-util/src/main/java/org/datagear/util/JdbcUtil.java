@@ -26,6 +26,29 @@ public class JdbcUtil
 	}
 
 	/**
+	 * 是否是二进制SQL类型。
+	 * 
+	 * @param sqlType
+	 * @return
+	 */
+	public static boolean isBinaryType(int sqlType)
+	{
+		switch (sqlType)
+		{
+			case Types.BINARY:
+			case Types.VARBINARY:
+			case Types.LONGVARBINARY:
+			case Types.BLOB:
+
+				return true;
+
+			default:
+
+				return false;
+		}
+	}
+
+	/**
 	 * 将字符串转换为指定SQL类型的数值。
 	 * <p>
 	 * 如果{@code str}不合法、或者{@code sqlType}不是数值类型，将返回{@code null}。
@@ -234,7 +257,8 @@ public class JdbcUtil
 	 * 是否只读。
 	 * 
 	 * @param cn
-	 * @param defaultValue 出现异常时的默认值
+	 * @param defaultValue
+	 *            出现异常时的默认值
 	 * @return
 	 */
 	public static boolean isReadonlyIfSupports(Connection cn, boolean defaultValue)
@@ -243,7 +267,7 @@ public class JdbcUtil
 		{
 			return cn.isReadOnly();
 		}
-		catch(SQLException e)
+		catch (SQLException e)
 		{
 			return defaultValue;
 		}

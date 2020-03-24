@@ -156,7 +156,7 @@ dataExchange_js.ftl
 	
 	po.initDataImportDataTable = function()
 	{
-		po.expectedResizeDataTableElements = [po.table()[0]];
+		po.expectedResizeDataTableElements = [po.elementTable()[0]];
 		
 		var tableSettings = po.buildDataTableSettingsLocal(po.dataImportTableColumns, [], {"order": []});
 		
@@ -165,7 +165,7 @@ dataExchange_js.ftl
 		po.initDataTable(tableSettings);
 		po.bindResizeDataTable();
 		
-		po.table().on("click", ".table-dependent-number-input", function(event)
+		po.elementTable().on("click", ".table-dependent-number-input", function(event)
 		{
 			//阻止行选中
 			event.stopPropagation();
@@ -215,7 +215,7 @@ dataExchange_js.ftl
 			po.updateDataExchangePageStatus("edit");
 		});
 		
-		po.table().on("click", ".exchange-result-icon", function(event)
+		po.elementTable().on("click", ".exchange-result-icon", function(event)
 		{
 			//阻止行选中
 			event.stopPropagation();

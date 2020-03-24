@@ -206,13 +206,13 @@
 				{
 					var column = table.columns[i];
 					var type = column.type;
-					if (Types.BIGINT == type || Types.BIT == type || Types.BOOLEAN == type
-							|| Types.CHAR == type || Types.DATE == type || Types.DECIMAL == type
-							|| Types.DOUBLE == type || Types.FLOAT == type || Types.INTEGER == type
-							|| Types.NULL == type || Types.NUMERIC == type || Types.REAL == type
-							|| Types.SMALLINT == type || Types.TIME == type || Types.TIME_WITH_TIMEZONE == type
-							|| Types.TIMESTAMP == type || Types.TIMESTAMP_WITH_TIMEZONE == type
-							|| Types.TINYINT == type || Types.VARCHAR == type)
+					//与DefaultPersistenceManager.getColumnsMaybeUniqueRecord(Table)保持一致
+					if (Types.BIGINT == type || Types.BIT == type || Types.BOOLEAN == type || Types.CHAR == type
+							|| Types.DATE == type || Types.DECIMAL == type || Types.DOUBLE == type || Types.FLOAT == type
+							|| Types.BINARY == type || Types.VARBINARY == type || Types.INTEGER == type || Types.NULL == type
+							|| Types.NUMERIC == type || Types.REAL == type || Types.SMALLINT == type || Types.TIME == type
+							|| Types.TIME_WITH_TIMEZONE == type || Types.TIMESTAMP == type
+							|| Types.TIMESTAMP_WITH_TIMEZONE == type || Types.TINYINT == type || Types.VARCHAR == type)
 						columns.push(column);
 				}
 			}
@@ -235,6 +235,39 @@
 			
 			return ($.isArray(row) ? re : re[0]);
 		},
+		
+		isBinaryColumnValueHex: function(value)
+		{
+			value = this.valueOfLabeledValue(value);
+			return (value ? value.indexOf(this.binaryColumnValueHexPrefix) == 0 : false);
+		},
+		
+		binaryColumnValueHexPrefix: "hex:",
+		
+		isBinaryColumnValueBase64: function(value)
+		{
+			value = this.valueOfLabeledValue(value);
+			return (value ? value.indexOf(this.binaryColumnValueBase64Prefix) == 0 : false);
+		},
+		
+		binaryColumnValueBase64Prefix: "base64:",
+		
+		isBinaryColumnValueFile: function(value)
+		{
+			value = this.valueOfLabeledValue(value);
+			return (value ? value.indexOf(this.binaryColumnValueFilePrefix) == 0 : false);
+		},
+		
+		binaryColumnValueFileContent: function(value)
+		{
+			if(!this.isBinaryColumnValueFile(value))
+				return value;
+			
+			value = this.valueOfLabeledValue(value);
+			return value.substr(this.binaryColumnValueFilePrefix.length);
+		},
+		
+		binaryColumnValueFilePrefix: "file:",
 		
 		isBinaryColumn: function(column)
 		{
@@ -269,8 +302,13 @@
 			
 			return (type == this.typeEnum.LONGVARCHAR
 						|| type == this.typeEnum.CLOB
-						|| type == this.typeEnum.LONGNVARCHAR
-						|| type == this.typeEnum.SQLXML);
+						|| type == this.typeEnum.LONGNVARCHAR);
+		},
+		
+		isSqlxmlColumn: function(column)
+		{
+			var type = column.type;
+			return (type == this.typeEnum.SQLXML);
 		},
 		
 		isDateColumn: function(column)

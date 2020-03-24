@@ -4,7 +4,11 @@
 
 package org.datagear.meta;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import org.datagear.util.JdbcUtil;
 
 /**
  * 表。
@@ -138,6 +142,24 @@ public class Table extends AbstractTable
 			columns[i] = getColumn(names[i]);
 
 		return columns;
+	}
+
+	/**
+	 * 获取所有二进制列。
+	 * 
+	 * @return 返回空数组表示没有。
+	 */
+	public Column[] getBinaryColumns()
+	{
+		List<Column> bcs = new ArrayList<>(1);
+
+		for (Column column : this.columns)
+		{
+			if (JdbcUtil.isBinaryType(column.getType()))
+				bcs.add(column);
+		}
+
+		return bcs.toArray(new Column[bcs.size()]);
 	}
 
 	@Override

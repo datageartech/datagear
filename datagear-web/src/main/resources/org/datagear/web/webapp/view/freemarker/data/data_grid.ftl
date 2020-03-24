@@ -8,7 +8,6 @@ String titleDisplayDesc 页面展示描述，默认为""
 boolean selectonly 是否选择操作，允许为null
 boolean isMultipleSelect 是否多选，默认为false
 boolean readonly 是否只读操作，默认为false
-List PropertyPathDisplayName conditionSource 可用的查询条件列表，不允许为null
 -->
 <#assign titleDisplayName=(titleDisplayName!'')>
 <#assign titleDisplayDesc=(titleDisplayDesc!'')>

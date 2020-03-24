@@ -29,8 +29,8 @@
 			//必选，表
 			table : undefined,
 			
-			//可选，是否渲染指定列，此设置优先级低于ignoreColumnNames
-			renderColumn : function(column, columnIndex)
+			//可选，是否渲染指定列
+			renderColumn : function(column)
 			{
 				return true;
 			},
@@ -93,8 +93,8 @@
 			//可选，SQL时间格式
 			sqlTimeFormat : "",
 			
-			//二进制数据前缀
-			binaryPrefix : { hex: "hex:", base64: "base64:", file: "file:" },
+			//如果二进制列值刚上传了文件，是否返回标签值对象
+			binaryFileReturnLabeledValue: false,
 			
 			//可选，是否开启批量设置
 			batchSet : false,
@@ -225,11 +225,12 @@
 				{
 					var column = columns[i];
 					var columnName = column.name;
+					var columnWidget = this._columnWidgets[columnName];
 					
-					if(this._isIgnoreColumnName(column, i))
+					if(this._isIgnoreColumnName(column) || !columnWidget)
 						continue;
 					
-					var columnValue = this._columnWidgets[columnName].getValue();
+					var columnValue = columnWidget.getValue();
 					$.meta.columnValue(data, columnName, columnValue);
 				}
 				
@@ -241,8 +242,9 @@
 				{
 					var column = columns[i];
 					var columnName = column.name;
+					var columnWidget = this._columnWidgets[columnName];
 					
-					if(this._isIgnoreColumnName(column, i))
+					if(this._isIgnoreColumnName(column) || !columnWidget)
 						continue;
 					
 					var columnValue = $.meta.columnValue(data, columnName);
@@ -250,7 +252,7 @@
 					if(setPartial == true && columnValue == undefined)
 						continue;
 					
-					this._columnWidgets[columnName].setValue(columnValue);
+					columnWidget.setValue(columnValue);
 				}
 			}
 		},
@@ -263,9 +265,11 @@
 		 */
 		columnValue : function(columnName, columnValue)
 		{
+			var columnWidget = this._columnWidgets[columnName];
+			
 			if(arguments.length == 1)
 			{
-				var re = this._columnWidgets[columnName].getValue();
+				var re = (columnWidget ? columnWidget.getValue() : undefined);
 				
 				//这里不能直接返回undefined，jquery-ui会处理undefined而返回jquery-ui元素
 				return (re == undefined ? null : re);
@@ -274,8 +278,10 @@
 			{
 				var column = $.meta.column(this.options.table, columnName);
 				
-				if(!this._isIgnoreColumnName(column, columnIndex))
-					this._columnWidgets[columnName].setValue(columnValue);
+				if(this._isIgnoreColumnName(column) || !columnWidget)
+					continue;
+				
+				columnWidget.setValue(columnValue);
 			}
 		},
 		
@@ -431,7 +437,7 @@
 				var column = columns[i];
 				var columnName = column.name;
 				
-				if(this._isIgnoreColumnName(column, i))
+				if(this._isIgnoreColumnName(column))
 					continue;
 				
 				var itemdiv = $("<div class='form-item' />").appendTo($formContent);
@@ -675,7 +681,7 @@
 						var columnValue = this.__columnValue;
 						var columnWidget = _this._columnWidgets[columnName];
 						
-						columnWidget.setValue($.meta.toLabeledValue(options.binaryPrefix.file + serverFileInfo.name, clientFileName), true);
+						columnWidget.setValue($.meta.toLabeledValue($.meta.binaryColumnValueFilePrefix + serverFileInfo.name, clientFileName), true);
 						
 						$.fileuploadsuccessHandlerForUploadInfo(fileInfoDiv);
 						
@@ -752,10 +758,15 @@
 				if(!labelVal)
 					return "";
 				
-				if(labelVal.indexOf(options.binaryPrefix.hex) == 0 || labelVal.indexOf(options.binaryPrefix.base64) == 0)
+				if($.meta.isBinaryColumnValueHex(labelVal) || $.meta.isBinaryColumnValueBase64(labelVal))
 					return labelVal;
 				
-				return $(this.binaryHiddenInput).val();
+				var hiddenVal = $(this.binaryHiddenInput).val();
+				
+				if(options.binaryFileReturnLabeledValue && hiddenVal && labelVal && hiddenVal != labelVal)
+					return $.meta.toLabeledValue(hiddenVal, labelVal);
+				
+				return hiddenVal;
 			};
 			columnWidget.setValue = function(value, retainFileInfo)
 			{
@@ -773,11 +784,7 @@
 			};
 			columnWidget.active = function()
 			{
-				if(this.fileDownloadButtonElement)
-					$(this.fileDownloadButtonElement).focus();
-				
-				if(this.fileInputElement)
-					$(this.fileInputElement).focus();
+				$(this.binaryLabelInput).focus();
 			};
 			
 			columnWidget.setValue(columnValue);
@@ -849,7 +856,7 @@
 			};
 			columnWidget.active = function()
 			{
-				$(this.buttonElement).focus().click();
+				$(this.textinput).focus();
 			};
 			
 			this._addValidatorRequired(column, columnName);
@@ -874,9 +881,9 @@
 		/**
 		 * 判断列是否是忽略列。
 		 */
-		_isIgnoreColumnName : function(column, columnIndex)
+		_isIgnoreColumnName : function(column)
 		{
-			return (this.options.renderColumn.call(this, column, columnIndex) == false);
+			return (this.options.renderColumn.call(this, column) == false);
 		},
 		
 		/**
