@@ -28,6 +28,9 @@ public class Table extends AbstractTable
 	/** 导入外键 */
 	private ImportKey[] importKeys;
 
+	/** 表是否只读 */
+	private boolean readonly = false;
+
 	public Table()
 	{
 		super();
@@ -92,6 +95,16 @@ public class Table extends AbstractTable
 	public void setImportKeys(ImportKey[] importKeys)
 	{
 		this.importKeys = importKeys;
+	}
+
+	public boolean isReadonly()
+	{
+		return readonly;
+	}
+
+	public void setReadonly(boolean readonly)
+	{
+		this.readonly = readonly;
 	}
 
 	/**

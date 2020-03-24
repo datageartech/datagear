@@ -104,6 +104,12 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 	@Override
 	public Table getTable(Connection cn, String tableName) throws DBMetaResolverException
 	{
+		@JDBCCompatiblity("如果cn为readonly，某些驱动程序的DatabaseMetaData.isReadOnly()也将为true（比如：Postgresql JDBC 42.2.5），"
+				+ "这会导致解析Table.readonly不正确，因此这里设为false，以保证解析正确")
+		boolean readonly = JdbcUtil.isReadonlyIfSupports(cn, true);
+		if (readonly)
+			JdbcUtil.setReadonlyIfSupports(cn, false);
+
 		DatabaseMetaData metaData = getDatabaseMetaData(cn);
 		String schema = getSchema(cn, metaData);
 
@@ -357,6 +363,8 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 	protected Table getTable(Connection cn, DatabaseMetaData metaData, String schema, String tableName)
 			throws DBMetaResolverException
 	{
+		boolean readonly = resolveTableReadonly(cn);
+
 		List<SimpleTable> simpleTables = getSimpleTables(cn, metaData, schema, tableName);
 
 		if (simpleTables == null || simpleTables.isEmpty())
@@ -372,10 +380,31 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		table.setPrimaryKey(getPrimaryKey(cn, metaData, schema, tableName));
 		table.setUniqueKeys(getUniqueKeys(cn, metaData, schema, tableName));
 		table.setImportKeys(getImportKeys(cn, metaData, schema, tableName));
+		table.setReadonly(readonly);
 
 		table = postProcessTable(cn, metaData, schema, table);
 
 		return table;
+	}
+
+	protected boolean resolveTableReadonly(Connection cn)
+	{
+		@JDBCCompatiblity("如果cn为readonly，某些驱动程序的DatabaseMetaData.isReadOnly()也将为true（比如：Postgresql JDBC 42.2.5），"
+				+ "这会导致解析Table.readonly不正确，因此这里尝试设为false，来测试数据库是否为只读")
+		boolean cnReadonly = JdbcUtil.isReadonlyIfSupports(cn, true);
+		if (cnReadonly)
+			JdbcUtil.setReadonlyIfSupports(cn, false);
+
+		try
+		{
+			// 数据库是否只读
+			boolean dbReadonly = cn.getMetaData().isReadOnly();
+			return dbReadonly;
+		}
+		catch(SQLException e)
+		{
+			return false;
+		}
 	}
 
 	protected Table postProcessTable(Connection cn, DatabaseMetaData metaData, String schema, Table table)
