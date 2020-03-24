@@ -473,21 +473,19 @@ public class DataController extends AbstractSchemaConnTableController
 	 * @return
 	 * @throws Throwable
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/{schemaId}/{tableName}/savess", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> savess(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
 			@PathVariable("tableName") String tableName,
-			@RequestParam(value = "originUpdates", required = false) JsonArray originUpdatesJson,
-			@RequestParam(value = "targetUpdates", required = false) JsonArray targetUpdatesJson,
-			@RequestParam(value = "adds", required = false) JsonArray addsJson,
-			@RequestParam(value = "deletes", required = false) JsonArray deletesJson) throws Throwable
+			@RequestBody Map<String, ?> params) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row[] updateOriginRows = convertToRows(originUpdatesJson);
-		final Row[] updateTargetRows = convertToRows(targetUpdatesJson);
-		final Row[] addRows = convertToRows(addsJson);
-		final Row[] deleteRows = convertToRows(deletesJson);
+		final Row[] updateOriginRows = convertToRows((List<Map<String, ?>>) params.get("updateOrigins"));
+		final Row[] updateTargetRows = convertToRows((List<Map<String, ?>>) params.get("updateTargets"));
+		final Row[] addRows = convertToRows((List<Map<String, ?>>) params.get("adds"));
+		final Row[] deleteRows = convertToRows((List<Map<String, ?>>) params.get("deletes"));
 
 		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
 				request, response, springModel, schemaId, tableName, false)
@@ -581,15 +579,17 @@ public class DataController extends AbstractSchemaConnTableController
 		return "/data/data_grid";
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/{schemaId}/{tableName}/getColumnValuess", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<List<Object>> getColumnValuess(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("datas") JsonArray rowsJson,
-			@RequestParam("columnNamess") JsonArray columnNamessJson) throws Throwable
+			@PathVariable("tableName") String tableName,
+			@RequestBody Map<String, ?> params) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row[] rows = convertToRows(rowsJson);
+		final Row[] rows = convertToRows((List<Map<String, ?>>) params.get("datas"));
+		final List<List<String>> columnNamess = (List<List<String>>) params.get("columnNamess");
 
 		final ConversionSqlParamValueMapper paramValueMapper = buildConditionSqlParamValueMapper();
 
@@ -615,8 +615,7 @@ public class DataController extends AbstractSchemaConnTableController
 				for (int i = 0; i < rows.length; i++)
 				{
 					Row row = rows[i];
-					@SuppressWarnings("unchecked")
-					List<String> columnNames = (List<String>) columnNamessJson.get(i);
+					List<String> columnNames = columnNamess.get(i);
 					columnValuess
 							.add(loadColumnValues(cn, dialect, table, row, columnNames, paramValueMapper, rowMapper));
 				}

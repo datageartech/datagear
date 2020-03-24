@@ -416,6 +416,31 @@
 		labelOfLabeledValue : function(value)
 		{
 			return (this.isLabeledValue(value) ? value.label : undefined);
+		},
+		
+		/**
+		 * 移除对象/数组的标签值对象特性。
+		 */
+		removeLabeledValueFeature : function(data)
+		{
+			if(!data)
+				return;
+			
+			var datas = ($.isArray(data) ? data : [data]);
+			
+			for(var i=0; i<datas.length; i++)
+			{
+				var ele = datas[i];
+				for(var p in ele)
+				{
+					var v = ele[p];
+					var vv = this.valueOfLabeledValue(v);
+					if(vv !== v)
+						ele[p] = vv;
+				}
+			}
+			
+			return data;
 		}
 	});
 	

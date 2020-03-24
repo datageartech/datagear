@@ -177,10 +177,7 @@ data_page_obj_edit_grid_html.ftl
 	po.getEditGridInitDatas = function(dataTable)
 	{
 		var editTableDatas = $.makeArray(dataTable.data());
-		for(var i=0; i<editTableDatas.length; i++)
-			editTableDatas[po.TABLE_CHECK_COLUMN_NAME] = undefined;
-		
-		return editTableDatas;
+		return po.removeCheckColumnProperty(editTableDatas);
 	};
 	
 	po.initEditGridDataTable = function($editTable, dataTable)
@@ -412,7 +409,7 @@ data_page_obj_edit_grid_html.ftl
 	//判断单元格是否需要从服务端加载数据
 	po.needFetchColumnValue = function(editDataTable, cellIndex, column, columnValue)
 	{
-		if(columnValue == null)
+		if(!columnValue)
 			return false;
 		
 		var re = ($.meta.isClobColumn(column) || $.meta.isSqlxmlColumn(column));
@@ -516,9 +513,10 @@ data_page_obj_edit_grid_html.ftl
 	{
 		var options =
 		{
+			"contentType" : $.CONTENT_TYPE_JSON,
 			"type" : "POST",
 			"url" : po.url("getColumnValuess"),
-			"data" : { "datas" : needFetchRowDatas, "columnNamess" : needFetchColumnNamess },
+			"data" : { "datas" : $.meta.uniqueRecordData(po.editGridMetaTable, needFetchRowDatas), "columnNamess" : needFetchColumnNamess },
 			"success" : function(columnValueFetchedss)
 			{
 				if(columnValueFetchedss)
@@ -543,7 +541,7 @@ data_page_obj_edit_grid_html.ftl
 									var needFetchColumnName = needFetchColumnNames[j];
 									
 									$.meta.columnValue(data.formData, needFetchColumnName, columnValueFetched);
-									$.meta.propertyValue(needFetchRowData, needFetchColumnName, columnValueFetched);
+									$.meta.columnValue(needFetchRowData, needFetchColumnName, columnValueFetched);
 									
 									var myColumn = $.getDataTableColumn(settings, needFetchColumnName);
 									var myCell = editDataTable.cell({ "row" : needFetchRow, "column" : myColumn });
@@ -940,13 +938,13 @@ data_page_obj_edit_grid_html.ftl
 	
 	po.buildAjaxSaveEditCellOptions = function(editDataTable, modifiedCells, addRows, deleteRows)
 	{
-		var updates = [];
-		var updatePropertyIndexess = [];
-		var updatePropertyNamess = [];
-		var updatePropertyValuess = [];
+		var updateOrigins = [];
+		var updateTargets = [];
 		var updateCellIndexess = [];
 		var adds  = $.makeArray(addRows.data());
 		var deletes = [];
+		
+		var settings = editDataTable.settings();
 		
 		var modifiedRowIndexesMap = $.getDataTableRowIndexesMap(modifiedCells.indexes());
 		var editDataTableSettings = editDataTable.settings();
@@ -963,34 +961,23 @@ data_page_obj_edit_grid_html.ftl
 			if($row.hasClass("add-row") || $row.hasClass("delete-row"))
 				continue;
 			
-			updates.push(po.originalRowData(editDataTable, rowIndex));
-
-			var updatePropertyIndexes = [];
-			var updatePropertyNames = [];
-			var updatePropertyValues = [];
+			updateOrigins.push(po.originalRowData(editDataTable, rowIndex));
+			
+			var updateTarget = {};
 			var updateCellIndexes = [];
 			
 			for(var i = 0; i<myModifiedCellIndexes.length; i++)
 			{
 				var myModifiedCellIndex = myModifiedCellIndexes[i];
 				
-				var updatePropertyIndex = $.getDataTableCellName(editDataTableSettings, myModifiedCellIndex);
-				var updatePropertyName = $.meta.getProperty(po.editGridMetaTable, updatePropertyIndex).name;
-				var updatePropertyValue = editDataTable.cell(myModifiedCellIndex).data();
+				var updateColumnName = $.getDataTableCellName(settings, myModifiedCellIndex);
+				var updateColumnValue = editDataTable.cell(myModifiedCellIndex).data();
 				
-				//jquery会将null参数转化为空字符串，某些情况时不合逻辑，这里使用后台null转换占位值
-				if(updatePropertyValue == null)
-					updatePropertyValue = "___DATA_GEAR_ZY_NULL_VALUE_PLACE_HOLDER___";
-				
-				updatePropertyIndexes.push(updatePropertyIndex);
-				updatePropertyNames.push(updatePropertyName);
-				updatePropertyValues.push(updatePropertyValue);
+				updateTarget[updateColumnName] = updateColumnValue;
 				updateCellIndexes.push(myModifiedCellIndex);
 			}
 			
-			updatePropertyIndexess.push(updatePropertyIndexes);
-			updatePropertyNamess.push(updatePropertyNames);
-			updatePropertyValuess.push(updatePropertyValues);
+			updateTargets.push(updateTarget);
 			updateCellIndexess.push(updateCellIndexes);
 		}
 		
@@ -1002,15 +989,15 @@ data_page_obj_edit_grid_html.ftl
 		
 		var options =
 		{
+			"contentType" : $.CONTENT_TYPE_JSON,
 			"type" : "POST",
 			"url" : po.url("savess"),
 			"data" :
 			{
-				"updates" : updates,
-				"updatePropertyNamess" : updatePropertyNamess,
-				"updatePropertyValuess" : updatePropertyValuess,
-				"adds" : adds,
-				"deletes" : deletes
+				"updateOrigins" : $.meta.uniqueRecordData(po.editGridMetaTable, updateOrigins),
+				"updateTargets" : $.meta.removeLabeledValueFeature(updateTargets),
+				"adds" : po.removeCheckColumnProperty($.meta.removeLabeledValueFeature(adds)),
+				"deletes" : $.meta.uniqueRecordData(po.editGridMetaTable, deletes)
 			},
 			"beforeSend" : function()
 			{
@@ -1023,7 +1010,7 @@ data_page_obj_edit_grid_html.ftl
 			"success" : function(operationMessage)
 			{
 				po.ajaxSaveEditCellSuccessHandler(editDataTable, modifiedCells, addRows, deleteRows,
-						updates, updatePropertyIndexess, updatePropertyNamess, updatePropertyValuess, updateCellIndexess,
+						updateOrigins, updateTargets, updateCellIndexess,
 						adds, deletes, operationMessage);
 			}
 		};
@@ -1032,7 +1019,7 @@ data_page_obj_edit_grid_html.ftl
 	};
 	
 	po.ajaxSaveEditCellSuccessHandler = function(editDataTable, modifiedCells, addRows, deleteRows,
-			updateDatas, updatePropertyIndexess, updatePropertyNamess, updatePropertyValuess, updateCellIndexess,
+			updateOrigins, updateTargets, updateCellIndexess,
 			addDatas, deleteDatas, operationMessage)
 	{
 		po.clearEditGrid(editDataTable, modifiedCells, addRows, deleteRows, true);

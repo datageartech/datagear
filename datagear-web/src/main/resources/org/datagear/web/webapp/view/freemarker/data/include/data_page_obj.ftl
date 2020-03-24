@@ -96,7 +96,7 @@
 			var options = $.extend({ contentType: $.CONTENT_TYPE_JSON }, ajaxOptions, { data : data, error : errorCallback, type : "POST" });
 			
 			$.ajax(url, options);
-		}
+		},
 	};
 	
 	$.extend(po, dpo);

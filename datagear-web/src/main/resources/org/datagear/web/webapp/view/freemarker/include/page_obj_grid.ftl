@@ -155,7 +155,27 @@ page_js_obj.jsp
 		return po.buildDataTableSettings(settings);
 	};
 	
-	po.TABLE_CHECK_COLUMN_NAME = "_DATA_GEAR_TABLE_CHECK_COLUMN";
+	po.removeCheckColumnProperty = function(data)
+	{
+		if(!data)
+			return;
+		
+		var datas = ($.isArray(data) ? data : [data]);
+		
+		for(var i=0; i<datas.length; i++)
+		{
+			var ele = datas[i];
+			for(var p in ele)
+			{
+				if(p == po.TABLE_CHECK_COLUMN_NAME)
+					delete ele[p];
+			}
+		}
+		
+		return data;
+	};
+	
+	po.TABLE_CHECK_COLUMN_NAME = "___DATA_GEAR_CHECK_COLUMN";
 	
 	/**
 	 * 构建表格选项。
