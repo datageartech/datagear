@@ -38,6 +38,9 @@ public class NameExpressionResolver extends ExpressionResolver
 
 	/**
 	 * 解析{@linkplain NameExpression}。
+	 * <p>
+	 * 如果不包含表达式，将返回空列表。
+	 * </p>
 	 * 
 	 * @param source
 	 * @return
@@ -52,6 +55,9 @@ public class NameExpressionResolver extends ExpressionResolver
 
 	/**
 	 * 解析{@linkplain NameExpression}。
+	 * <p>
+	 * 如果不包含表达式，将返回空列表。
+	 * </p>
 	 * 
 	 * @param source
 	 * @return

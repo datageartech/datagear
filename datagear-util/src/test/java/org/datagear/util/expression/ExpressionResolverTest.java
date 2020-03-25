@@ -212,9 +212,9 @@ public class ExpressionResolverTest
 			String source = "pr\\e\\${fix${content}suffix";
 			List<Expression> expressions = expressionResolver.resolve(source);
 
-			List<?> values = Arrays.asList("a");
+			List<?> values = Arrays.asList("--");
 
-			Assert.assertEquals("pr\\e${fixasuffix", expressionResolver.evaluate(source, expressions, values, ""));
+			Assert.assertEquals("pr\\e${fix--suffix", expressionResolver.evaluate(source, expressions, values, ""));
 		}
 	}
 
@@ -239,6 +239,12 @@ public class ExpressionResolverTest
 			String e = expressionResolver.unescape("pre\\afi\\x");
 
 			Assert.assertEquals("pre\\afi\\x", e);
+		}
+
+		{
+			String e = expressionResolver.unescape("prefix-cont\\ent\\}0}");
+
+			Assert.assertEquals("prefix-cont\\ent\\}0}", e);
 		}
 	}
 

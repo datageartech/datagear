@@ -8,19 +8,13 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.sql.Connection;
 import java.util.List;
 
 import org.datagear.meta.Table;
-import org.datagear.meta.resolver.GenericDBMetaResolver;
-import org.datagear.persistence.DialectSource;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.persistence.PersistenceTestSupport;
 import org.datagear.persistence.Row;
-import org.datagear.util.JdbcUtil;
-import org.datagear.util.test.DBTestSupport;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -29,32 +23,14 @@ import org.junit.Test;
  * @author datagear@163.com
  *
  */
-public class DefaultPersistenceManagerTest extends DBTestSupport
+public class DefaultPersistenceManagerTest extends PersistenceTestSupport
 {
-	private GenericDBMetaResolver genericDBMetaResolver;
 	private DefaultPersistenceManager defaultPersistenceManager;
-
-	private Connection connection;
 
 	public DefaultPersistenceManagerTest()
 	{
 		super();
-
-		this.genericDBMetaResolver = new GenericDBMetaResolver();
-		DialectSource dialectSource = new DefaultDialectSource(genericDBMetaResolver);
 		this.defaultPersistenceManager = new DefaultPersistenceManager(dialectSource);
-	}
-
-	@Before
-	public void init() throws Exception
-	{
-		this.connection = getConnection();
-	}
-
-	@After
-	public void destroy()
-	{
-		JdbcUtil.closeConnection(this.connection);
 	}
 
 	@Test

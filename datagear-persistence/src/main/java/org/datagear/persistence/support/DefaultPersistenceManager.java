@@ -10,11 +10,13 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectSource;
+import org.datagear.persistence.LiteralSqlParamValue;
 import org.datagear.persistence.NonUniqueResultException;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -98,7 +100,11 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 				SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper, releasableRegistry);
 
 				sql.sqld(quote(dialect, name));
-				valueSql.sqld("?").param(sqlParamValue);
+
+				if (sqlParamValue instanceof LiteralSqlParamValue)
+					valueSql.sqld(addBracketIfSelectSql(((LiteralSqlParamValue) sqlParamValue).getValue()));
+				else
+					valueSql.sqld("?").param(sqlParamValue);
 			}
 
 			sql.sql(")");
@@ -146,7 +152,11 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 				SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper, releasableRegistry);
 
-				sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
+				if (sqlParamValue instanceof LiteralSqlParamValue)
+					sql.sqld(quote(dialect, name) + "="
+							+ addBracketIfSelectSql(((LiteralSqlParamValue) sqlParamValue).getValue()));
+				else
+					sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
 			}
 
 			sql.sql(" WHERE ").sql(buildUniqueRecordCondition(cn, dialect, table, origin, mapper, releasableRegistry));
@@ -413,7 +423,10 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper, releasableRegistry);
 
-			if (sqlParamValue.hasValue())
+			if (sqlParamValue instanceof LiteralSqlParamValue)
+				sql.sqld(quote(dialect, name) + "="
+						+ addBracketIfSelectSql(((LiteralSqlParamValue) sqlParamValue).getValue()));
+			else if (sqlParamValue.hasValue())
 				sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
 			else
 				sql.sqld(quote(dialect, name) + " IS NULL");
@@ -520,4 +533,34 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		return new ReleasableRegistry();
 	}
+
+	/**
+	 * 如果是“SELECT”语句，则在前后添加括号：<code>(SELECT ...)</code>
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	protected String addBracketIfSelectSql(String sql)
+	{
+		if (!isSelectSql(sql))
+			return sql;
+
+		return "(" + sql + ")";
+	}
+
+	/**
+	 * 判断给定SQL语句是否是“SELECT”语句。
+	 * 
+	 * @param sql
+	 * @return
+	 */
+	protected boolean isSelectSql(String sql)
+	{
+		if (sql == null || sql.isEmpty())
+			return false;
+
+		return Pattern.matches(SELECT_SQL_REGEX, sql);
+	}
+
+	protected static final String SELECT_SQL_REGEX = "^\\s*((?i)select)\\s+\\S+[\\s\\S]*$";
 }

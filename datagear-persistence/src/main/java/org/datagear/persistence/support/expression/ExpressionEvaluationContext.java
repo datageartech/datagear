@@ -7,8 +7,6 @@ package org.datagear.persistence.support.expression;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.datagear.util.expression.ExpressionResolver;
-
 /**
  * {@linkplain NameExpression}计算上下文。
  * <p>
@@ -56,38 +54,60 @@ public class ExpressionEvaluationContext
 	}
 
 	/**
-	 * 是否包含指定{@linkplain NameExpression}的缓存值。
+	 * 获取缓存关键字。
 	 * 
 	 * @param expression
+	 * 
 	 * @return
 	 */
-	public boolean containsCachedValue(NameExpression expression)
+	public String getCachedKey(NameExpression expression)
 	{
-		if (!expression.hasName())
-			return false;
+		// 为了使ExpressionResolver.DEFAULT_START_IDENTIFIER_DOLLAR、
+		// ExpressionResolver.DEFAULT_START_IDENTIFIER_SHARP的表达式能使用同一个计算上下文，
+		// 所以这里生成"${...}"、"#{...}"格式的关键字。
 
-		String cacheKey = getCachedValueKey(expression);
-
-		return this.valueCache.containsKey(cacheKey);
+		String key = (expression.hasName() ? expression.getName() : expression.getContent());
+		return expression.getStartIdentifier() + key + expression.getEndIdentifier();
 	}
 
 	/**
-	 * 获取指定{@linkplain NameExpression}的缓存值。
+	 * 是否包含指定关键字的缓存值。
 	 * 
-	 * @param expression
+	 * @param key
 	 * @return
 	 */
-	public Object getCachedValue(NameExpression expression)
+	public boolean containsCachedValue(String key)
 	{
-		if (!expression.hasName())
-			throw new IllegalArgumentException("The [expression] must has name");
+		return this.valueCache.containsKey(key);
+	}
 
-		String cacheKey = getCachedValueKey(expression);
-		return this.valueCache.get(cacheKey);
+	/**
+	 * 获取指定关键字的缓存值。
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public Object getCachedValue(String key)
+	{
+		return this.valueCache.get(key);
+	}
+
+	/**
+	 * 将指定关键字的值加入缓存。
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	public void putCachedValue(String key, Object value)
+	{
+		this.valueCache.put(key, value);
 	}
 
 	/**
 	 * 将指定{@linkplain NameExpression}的值加入缓存。
+	 * <p>
+	 * 注意：只有{@linkplain NameExpression#hasName()}才可加入。
+	 * </p>
 	 * 
 	 * @param expression
 	 * @param value
@@ -97,8 +117,8 @@ public class ExpressionEvaluationContext
 		if (!expression.hasName())
 			return false;
 
-		String cacheKey = getCachedValueKey(expression);
-		this.valueCache.put(cacheKey, value);
+		String key = getCachedKey(expression);
+		this.valueCache.put(key, value);
 
 		return true;
 	}
@@ -142,22 +162,5 @@ public class ExpressionEvaluationContext
 		setVariableIndex(v);
 
 		return v;
-	}
-
-	/**
-	 * 获取缓存值关键字。
-	 * <p>
-	 * 为了使{@linkplain ExpressionResolver#DEFAULT_START_IDENTIFIER_DOLLAR}、
-	 * {@linkplain ExpressionResolver#DEFAULT_START_IDENTIFIER_SHARP}的表达式能使用同一个{@linkplain ExpressionEvaluationContext}，
-	 * 此方法会生成<code>"${...}"</code>、<code>"#{...}"</code>格式的关键字。
-	 * </p>
-	 * 
-	 * @param expression
-	 * 
-	 * @return
-	 */
-	protected String getCachedValueKey(NameExpression expression)
-	{
-		return expression.getStartIdentifier() + expression.getName() + expression.getEndIdentifier();
 	}
 }

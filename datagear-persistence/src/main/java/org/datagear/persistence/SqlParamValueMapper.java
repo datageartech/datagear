@@ -21,6 +21,9 @@ public interface SqlParamValueMapper
 	/**
 	 * 映射。
 	 * <p>
+	 * 此方法的返回值可能是{@linkplain LiteralSqlParamValue}。
+	 * </p>
+	 * <p>
 	 * 注意：此方法不应返回{@code null}，返回的{@linkplain SqlParamValue#getValue()}允许为{@code null}。
 	 * </p>
 	 * 

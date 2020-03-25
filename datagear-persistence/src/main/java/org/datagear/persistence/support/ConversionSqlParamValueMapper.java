@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.commons.codec.binary.Hex;
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
+import org.datagear.persistence.LiteralSqlParamValue;
 import org.datagear.persistence.SqlParamValueMapper;
 import org.datagear.persistence.SqlParamValueMapperException;
 import org.datagear.persistence.support.expression.ExpressionEvaluationContext;
@@ -184,7 +185,12 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		try
 		{
 			if (value instanceof String)
+			{
 				value = evalExpressionIf(cn, table, column, (String) value);
+
+				if (value instanceof SqlParamValue)
+					return (SqlParamValue) value;
+			}
 
 			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value);
 			return sqlParamValue;
@@ -749,11 +755,11 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	 * @param cn
 	 * @param table
 	 * @param column
-	 * @param value
+	 * @param value  表达式计算结果或者{@linkplain SqlParamValue}对象
 	 * @return
 	 * @throws Throwable
 	 */
-	protected String evalExpressionIf(Connection cn, Table table, Column column, String value) throws Throwable
+	protected Object evalExpressionIf(Connection cn, Table table, Column column, String value) throws Throwable
 	{
 		if (!hasExpressionEvaluationContext())
 			return value;
@@ -762,22 +768,42 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 
 		String evaluatedPropValue = value;
 
-		if (variableExpressions != null && !variableExpressions.isEmpty())
+		if (!variableExpressions.isEmpty())
 			evaluatedPropValue = evaluateVariableExpressions(value, variableExpressions,
 					this.expressionEvaluationContext);
 
 		List<NameExpression> sqlExpressions = this.sqlExpressionResolver.resolveNameExpressions(evaluatedPropValue);
 
-		if (sqlExpressions != null && !sqlExpressions.isEmpty())
-			evaluatedPropValue = evaluateSqlExpressions(cn, evaluatedPropValue, sqlExpressions,
-					this.expressionEvaluationContext);
+		if (!sqlExpressions.isEmpty())
+		{
+			boolean isLiteralSql = false;
+			
+			if(sqlExpressions.size() == 1)
+			{
+				NameExpression sqlExpression = sqlExpressions.get(0);
+				if(sqlExpression.getStartIndex() == 0 && sqlExpression.getEndIndex() == evaluatedPropValue.length())
+				{
+					String expressionValue = sqlExpression.getContent();
+					String expressionKey = this.expressionEvaluationContext.getCachedKey(sqlExpression);
+					if (this.expressionEvaluationContext.containsCachedValue(expressionKey))
+						expressionValue = (String) this.expressionEvaluationContext.getCachedValue(expressionKey);
+
+					return new LiteralSqlParamValue(expressionValue, column.getType());
+				}
+			}
+
+			if (!isLiteralSql)
+			{
+				evaluatedPropValue = evaluateSqlExpressions(cn, evaluatedPropValue, sqlExpressions,
+						this.expressionEvaluationContext);
+			}
+		}
 
 		// 如果没有执行计算，则需要处理可能的转义表达式
-		if (evaluatedPropValue == value)
-		{
+		if (variableExpressions.isEmpty())
 			evaluatedPropValue = this.variableExpressionResolver.unescape(evaluatedPropValue);
+		if (sqlExpressions.isEmpty())
 			evaluatedPropValue = this.sqlExpressionResolver.unescape(evaluatedPropValue);
-		}
 
 		return evaluatedPropValue;
 	}
@@ -801,9 +827,10 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		{
 			NameExpression expression = expressions.get(i);
 
-			if (expressionEvaluationContext.containsCachedValue(expression))
+			String expressionKey = expressionEvaluationContext.getCachedKey(expression);
+			if (expressionEvaluationContext.containsCachedValue(expressionKey))
 			{
-				Object value = expressionEvaluationContext.getCachedValue(expression);
+				Object value = expressionEvaluationContext.getCachedValue(expressionKey);
 				expressionValues.add(value);
 			}
 			else
@@ -872,9 +899,10 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		{
 			NameExpression expression = expressions.get(i);
 
-			if (expressionEvaluationContext.containsCachedValue(expression))
+			String expressionKey = expressionEvaluationContext.getCachedKey(expression);
+			if (expressionEvaluationContext.containsCachedValue(expressionKey))
 			{
-				Object value = expressionEvaluationContext.getCachedValue(expression);
+				Object value = expressionEvaluationContext.getCachedValue(expressionKey);
 				expressionValues.add(value);
 			}
 			else
