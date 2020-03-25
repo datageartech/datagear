@@ -20,7 +20,6 @@ import org.datagear.meta.Table;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
-import org.datagear.persistence.Query;
 import org.datagear.util.IDUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.web.OperationMessage;
@@ -233,15 +232,15 @@ public class SchemaController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/list", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<Schema> list(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam(value = "keyword", required = false) String keyword)
+			@RequestBody PagingQuery pagingQueryParam)
 	{
+		PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam, COOKIE_PAGINATION_SIZE);
+
 		User user = WebUtils.getUser(request, response);
 
-		Query query = new Query();
-		query.setKeyword(keyword);
-		query.setOrders(Order.valueOf("title", Order.ASC));
+		pagingQuery.setOrders(Order.valueOf("title", Order.ASC));
 
-		List<Schema> schemas = getSchemaService().query(user, query);
+		List<Schema> schemas = getSchemaService().query(user, pagingQuery);
 		processForUI(request, schemas);
 
 		return schemas;

@@ -22,6 +22,7 @@ import org.datagear.meta.resolver.DBMetaResolverException;
 import org.datagear.meta.resolver.TableNotFoundException;
 import org.datagear.persistence.NonUniqueResultException;
 import org.datagear.persistence.PersistenceException;
+import org.datagear.persistence.SqlParamValueMapperException;
 import org.datagear.persistence.support.UnsupportedDialectException;
 import org.datagear.persistence.support.expression.SqlExpressionErrorException;
 import org.datagear.persistence.support.expression.VariableExpressionErrorException;
@@ -171,7 +172,7 @@ public class ControllerAdvice extends AbstractController
 	}
 
 	@ExceptionHandler(VariableExpressionErrorException.class)
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handlePersistenceVariableExpressionErrorException(HttpServletRequest request,
 			HttpServletResponse response, VariableExpressionErrorException exception)
 	{
@@ -182,12 +183,23 @@ public class ControllerAdvice extends AbstractController
 	}
 
 	@ExceptionHandler(SqlExpressionErrorException.class)
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handlePersistenceSqlExpressionErrorException(HttpServletRequest request, HttpServletResponse response,
 			SqlExpressionErrorException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(SqlExpressionErrorException.class),
 				exception.getCause(), true, exception.getExpression().getContent());
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(SqlParamValueMapperException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handlePersistenceNonUniqueResultException(HttpServletRequest request, HttpServletResponse response,
+			SqlParamValueMapperException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(SqlParamValueMapperException.class), exception, true,
+				exception.getColumn().getName());
 
 		return getErrorView(request, response);
 	}
@@ -231,8 +243,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleDbmodelDatabaseInfoResolverException(HttpServletRequest request, HttpServletResponse response,
 			DBMetaResolverException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DBMetaResolverException.class), exception,
-				true);
+		setOperationMessageForThrowable(request, buildMessageCode(DBMetaResolverException.class), exception, true);
 
 		return getErrorView(request, response);
 	}

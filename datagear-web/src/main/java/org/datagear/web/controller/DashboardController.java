@@ -35,13 +35,13 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
+import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -576,14 +576,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@ResponseBody
 	public PagingData<HtmlTplDashboardWidgetEntity> pagingQueryData(HttpServletRequest request,
 			HttpServletResponse response, final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
-		String dataFilter = getDataFilterValue(request);
+		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlTplDashboardWidgetEntity> pagingData = this.htmlTplDashboardWidgetEntityService.pagingQuery(user,
-				pagingQuery, dataFilter);
+				pagingQuery, pagingQuery.getDataFilter());
 
 		return pagingData;
 	}

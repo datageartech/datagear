@@ -22,12 +22,12 @@ import org.datagear.management.service.SqlDataSetEntityService;
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.IDUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
+import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -266,15 +266,14 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<SqlDataSetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
-			throws Exception
+			final org.springframework.ui.Model springModel,
+			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
-		String dataFilter = getDataFilterValue(request);
+		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<SqlDataSetEntity> pagingData = this.sqlDataSetEntityService.pagingQuery(user, pagingQuery,
-				dataFilter);
+				pagingQuery.getDataFilter());
 
 		return pagingData;
 	}

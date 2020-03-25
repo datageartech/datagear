@@ -25,6 +25,7 @@ import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
+import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -106,7 +108,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			IOUtil.close(out);
 		}
 
-		List<HtmlChartPluginVO> pluginInfos = new ArrayList<HtmlChartPluginVO>();
+		List<HtmlChartPluginVO> pluginInfos = new ArrayList<>();
 
 		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
 
@@ -124,7 +126,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		{
 		}
 
-		Map<String, Object> results = new HashMap<String, Object>();
+		Map<String, Object> results = new HashMap<>();
 		results.put("pluginFileName", pluginFileName);
 		results.put("pluginInfos", pluginInfos);
 
@@ -187,10 +189,12 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/queryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<HtmlChartPluginVO> queryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel,
-			@RequestParam(value = "keyword", required = false) String keyword) throws Exception
+			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			throws Exception
 	{
-		return findHtmlChartPluginVOs(request, keyword);
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+
+		return findHtmlChartPluginVOs(request, pagingQuery.getKeyword());
 	}
 
 	@RequestMapping(value = "/icon/{pluginId}", produces = CONTENT_TYPE_JSON)

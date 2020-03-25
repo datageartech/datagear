@@ -19,60 +19,25 @@ public class UnsupportedSqlParamValueMapperException extends SqlParamValueMapper
 {
 	private static final long serialVersionUID = 1L;
 
-	private Table table;
-
-	private Column column;
-
-	private transient Object value;
-
-	public UnsupportedSqlParamValueMapperException()
-	{
-		super();
-	}
-
 	public UnsupportedSqlParamValueMapperException(Table table, Column column, Object value)
 	{
-		super();
-		this.table = table;
-		this.column = column;
-		this.value = value;
+		super(table, column, value);
 	}
 
 	public UnsupportedSqlParamValueMapperException(Table table, Column column, Object value, Throwable cause)
 	{
-		super(cause);
-		this.table = table;
-		this.column = column;
-		this.value = value;
+		super(table, column, value, cause);
 	}
 
-	public Table getTable()
+	public UnsupportedSqlParamValueMapperException(Table table, Column column, Object value, String message)
 	{
-		return table;
+		super(table, column, value, message);
 	}
 
-	protected void setTable(Table table)
+	public UnsupportedSqlParamValueMapperException(Table table, Column column, Object value, String message,
+			Throwable cause)
 	{
-		this.table = table;
+		super(table, column, value, message, cause);
 	}
 
-	public Column getColumn()
-	{
-		return column;
-	}
-
-	protected void setColumn(Column column)
-	{
-		this.column = column;
-	}
-
-	public Object getValue()
-	{
-		return value;
-	}
-
-	protected void setValue(Object value)
-	{
-		this.value = value;
-	}
 }

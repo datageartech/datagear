@@ -195,7 +195,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		}
 		catch (Throwable t)
 		{
-			throw new SqlParamValueMapperException(t);
+			throw new SqlParamValueMapperException(table, column, value, t);
 		}
 	}
 
@@ -597,7 +597,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 
 		// 映射目标不允许是字符串，所以这里抛出异常
 		if (!file.exists())
-			throw new SqlParamValueMapperException("File [" + value + "] not found");
+			throw new SqlParamValueMapperException(table, column, value, "File [" + value + "] not found");
 
 		return IOUtil.getInputStream(file);
 	}

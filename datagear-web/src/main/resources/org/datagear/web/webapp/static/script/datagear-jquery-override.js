@@ -3,15 +3,12 @@
  */
 
 /**
- * 重写jquery、jquery-ui函数。
+ * 重写jquery函数。
  * 
  * 依赖:
  * jquery.js
- * jquery-ui.js
- * datagear-util.js
  */
-
-(function($, undefined)
+(function(jQuery, undefined)
 {
 	//*************重写jQuery.param函数******************
 	//jQuery.param对于对象属性，也会序列化为“obj[property-name]”的参数名，不符合后台处理习惯
@@ -22,7 +19,7 @@
 	rCRLF = /\r?\n/g,
 	rsubmitterTypes = /^(?:submit|button|image|reset|file)$/i,
 	rsubmittable = /^(?:input|select|textarea|keygen)/i;
-	
+
 	function buildParams( prefix, obj, traditional, add ) {
 		var name;
 	
@@ -46,18 +43,16 @@
 					);
 				}
 			} );
+	
 		} else if ( !traditional && jQuery.type( obj ) === "object" ) {
 	
 			// Serialize object item.
 			for ( name in obj ) {
-				
 				//XXX 原内容（“///”移除后）
 				///buildParams( prefix + "[" + name + "]", obj[ name ], traditional, add );
 				//XXX 原内容
 				//XXX 替换内容
-				//将param[name]格式的参数名修改为param.name格式
-				var value = obj[ name ];
-				buildParams(prefix + "." + name, obj[ name ], traditional, add );
+				buildParams( prefix + "." + name, obj[ name ], traditional, add );
 				//XXX 替换内容
 			}
 	
@@ -70,8 +65,7 @@
 	
 	// Serialize an array of form elements or a set of
 	// key/values into a query string
-	$.param = function( a, traditional ) {
-		
+	jQuery.param = function( a, traditional ) {
 		var prefix,
 			s = [],
 			add = function( key, value ) {
@@ -106,6 +100,7 @@
 		// Return the resulting serialization
 		return s.join( "&" ).replace( r20, "+" );
 	};
+	
 	//*************重写jQuery.param函数******************
 })
 (jQuery);

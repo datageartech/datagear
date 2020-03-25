@@ -19,6 +19,7 @@ import org.datagear.web.convert.StringToJsonConverter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
+import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.NoSuchMessageException;
@@ -50,7 +51,7 @@ public abstract class AbstractController
 
 	public static final String KEY_SELECTONLY = "selectonly";
 
-	public static final String DATA_FILTER_PARAM = "dataFilter";
+	public static final String DATA_FILTER_PARAM = DataFilterPagingQuery.PROPERTY_DATA_FILTER;
 
 	public static final String DATA_FILTER_COOKIE = "DATA_FILTER_SEARCH";
 
@@ -100,14 +101,32 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 获取数据查询过滤值。
+	 * 检查并补充{@linkplain DataFilterPagingQuery#getDataFilter()}。
 	 * 
 	 * @param request
+	 * @param pagingQuery
 	 * @return
 	 */
-	protected String getDataFilterValue(HttpServletRequest request)
+	protected DataFilterPagingQuery inflateDataFilterPagingQuery(HttpServletRequest request,
+			DataFilterPagingQuery pagingQuery)
 	{
-		String value = request.getParameter(DATA_FILTER_PARAM);
+		return inflateDataFilterPagingQuery(request, pagingQuery, WebUtils.COOKIE_PAGINATION_SIZE);
+	}
+
+	/**
+	 * 检查并补充{@linkplain DataFilterPagingQuery#getDataFilter()}。
+	 * 
+	 * @param request
+	 * @param pagingQuery
+	 * @param cookiePaginationSize
+	 * @return
+	 */
+	protected DataFilterPagingQuery inflateDataFilterPagingQuery(HttpServletRequest request,
+			DataFilterPagingQuery pagingQuery, String cookiePaginationSize)
+	{
+		inflatePagingQuery(request, pagingQuery, cookiePaginationSize);
+
+		String value = pagingQuery.getDataFilter();
 
 		if (isEmpty(value))
 			value = WebUtils.getCookieValue(request, DATA_FILTER_COOKIE);
@@ -121,7 +140,9 @@ public abstract class AbstractController
 		else
 			value = DataPermissionEntityService.DATA_FILTER_VALUE_MINE;
 
-		return value;
+		pagingQuery.setDataFilter(value);
+
+		return pagingQuery;
 	}
 
 	/**
@@ -154,7 +175,7 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 检查并完善{@linkplain PagingQuery}。
+	 * 检查并补充{@linkplain PagingQuery}。
 	 * 
 	 * @param request
 	 * @param pagingQuery
@@ -166,7 +187,7 @@ public abstract class AbstractController
 	}
 
 	/**
-	 * 检查并完善{@linkplain PagingQuery}。
+	 * 检查并补充{@linkplain PagingQuery}。
 	 * 
 	 * @param request
 	 * @param pagingQuery
