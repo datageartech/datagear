@@ -49,7 +49,7 @@ public abstract class AbstractController
 
 	public static final String KEY_READONLY = "readonly";
 
-	public static final String KEY_SELECTONLY = "selectonly";
+	public static final String KEY_SELECT_OPERATION = "selectOperation";
 
 	public static final String DATA_FILTER_PARAM = DataFilterPagingQuery.PROPERTY_DATA_FILTER;
 

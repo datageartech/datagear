@@ -257,7 +257,7 @@ public class DataSetController extends AbstractSchemaConnController
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.selectDataSet");
-		model.addAttribute(KEY_SELECTONLY, true);
+		model.addAttribute(KEY_SELECT_OPERATION, true);
 		setIsMultipleSelectAttribute(request, model);
 
 		return "/analysis/dataSet/dataSet_grid";

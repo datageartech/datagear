@@ -5,24 +5,21 @@ Schema schema 数据库，不允许为null
 Table table 模型，不允许为null
 String titleDisplayName 页面展示名称，默认为""
 String titleDisplayDesc 页面展示描述，默认为""
-boolean selectonly 是否选择操作，允许为null
+boolean selectOperation 是否选择操作，允许为null
 boolean isMultipleSelect 是否多选，默认为false
 boolean readonly 是否只读操作，默认为false
 -->
 <#assign titleDisplayName=(titleDisplayName!'')>
 <#assign titleDisplayDesc=(titleDisplayDesc!'')>
-<#assign selectonly=(selectonly!false)>
+<#assign selectOperation=(selectOperation!false)>
 <#assign isMultipleSelect=(isMultipleSelect!false)>
 <#assign readonly=(readonly!false)>
-<#if selectonly>
-<#assign readonly=true>
-</#if>
 <html>
 <head>
 <#include "../include/html_head.ftl">
 <title>
 	<#include "../include/html_title_app_name.ftl">
-	<#if selectonly>
+	<#if selectOperation>
 	<@spring.message code='select' />
 	<#else>
 	<@spring.message code='query' />
@@ -49,16 +46,20 @@ boolean readonly 是否只读操作，默认为false
 			<#include "include/data_page_obj_searchform_html.ftl">
 		</div>
 		<div class="operation">
-			<#if selectonly>
+			<#if selectOperation>
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
 			</#if>
 			<#if readonly>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<#if !selectOperation>
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<#if !selectOperation>
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				</#if>
 			</#if>
 		</div>
 	</div>
@@ -155,6 +156,7 @@ boolean readonly 是否只读操作，默认为false
 		});
 		</#if>
 		
+		<#if selectOperation>
 		po.element("input[name=confirmButton]").click(function()
 		{
 			if(po.isMultipleSelect)
@@ -184,6 +186,7 @@ boolean readonly 是否只读操作，默认为false
 				});
 			}
 		});
+		</#if>
 		
 		po.element("input[name=viewButton]").click(function()
 		{

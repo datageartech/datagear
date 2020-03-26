@@ -32,8 +32,8 @@ import org.datagear.util.StringUtil;
  * 默认地，对于二进制类型，返回{@code byte[]}；对于大字符类型，返回{@linkplain String}；其他，返回默认值。
  * </p>
  * <p>
- * 可以通过{@linkplain #setReadActualLobRows(int)}、{@linkplain #setBinaryEncoder(String)}、
- * {@linkplain #setBigBinaryDirectory(File)}来控制映射格式。
+ * 可以通过{@linkplain #setReadActualBlobRows(int)}、{@linkplain #setReadActualClobRows(int)}、{@linkplain #setBinaryEncoder(String)}、
+ * {@linkplain #setBlobDirectory(File)}来控制映射格式。
  * </p>
  * 
  * @author datagear@163.com

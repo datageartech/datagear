@@ -188,7 +188,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "schema.selectSchema");
-		model.addAttribute(KEY_SELECTONLY, true);
+		model.addAttribute(KEY_SELECT_OPERATION, true);
 
 		return "/schema/schema_grid";
 	}

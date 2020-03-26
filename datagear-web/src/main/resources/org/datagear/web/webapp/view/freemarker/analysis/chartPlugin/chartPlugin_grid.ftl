@@ -2,9 +2,9 @@
 <#include "../../include/html_doctype.ftl">
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
-selectonly 是否选择操作，允许为null
+selectOperation 是否选择操作，允许为null
 -->
-<#assign selectonly=(selectonly!false)>
+<#assign selectOperation=(selectOperation!false)>
 <html>
 <head>
 <#include "../../include/html_head.ftl">
@@ -20,7 +20,7 @@ selectonly 是否选择操作，允许为null
 			<#include "../../include/page_obj_searchform.html.ftl">
 		</div>
 		<div class="operation">
-			<#if selectonly>
+			<#if selectOperation>
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
@@ -56,7 +56,7 @@ selectonly 是否选择操作，允许为null
 		return "${contextPath}/analysis/chartPlugin/" + action;
 	};
 
-	<#if !selectonly>
+	<#if !selectOperation>
 	po.element("input[name=uploadButton]").click(function()
 	{
 		po.open(po.url("upload"),

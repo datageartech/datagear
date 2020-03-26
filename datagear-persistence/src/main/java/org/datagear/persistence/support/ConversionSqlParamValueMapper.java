@@ -44,7 +44,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 /**
  * 支持类型转换的{@linkplain SqlParamValueMapper}。
  * <p>
- * 对于LOB、二进制类型，此类支持文件路径（{@code "file:..."}）、Hex编码（{@code "hex:..."}）、Base64（{@code "base64:..."}）编码格式的字符串原值，<br>
+ * 对于LOB、二进制类型，此类支持文件路径（{@code "file:..."}）、Hex编码（{@code "hex:..."}）、Base64编码（{@code "base64:..."}）格式的字符串原值，<br>
  * 如果设置了{@linkplain #setFilePathValueDirectory(File)}，则文件路径限制为其子路径。
  * </p>
  * <p>

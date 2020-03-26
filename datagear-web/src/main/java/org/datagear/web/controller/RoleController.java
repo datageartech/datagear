@@ -156,7 +156,7 @@ public class RoleController extends AbstractController
 	public String select(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "role.selectRole");
-		model.addAttribute(KEY_SELECTONLY, true);
+		model.addAttribute(KEY_SELECT_OPERATION, true);
 
 		return "/role/role_grid";
 	}
