@@ -49,6 +49,34 @@ public class JdbcUtil
 	}
 
 	/**
+	 * 是否是文本SQL类型。
+	 * 
+	 * @param sqlType
+	 * @return
+	 */
+	public static boolean isTextType(int sqlType)
+	{
+		switch (sqlType)
+		{
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.CLOB:
+			case Types.NCHAR:
+			case Types.NVARCHAR:
+			case Types.LONGNVARCHAR:
+			case Types.NCLOB:
+			case Types.SQLXML:
+
+				return true;
+
+			default:
+
+				return false;
+		}
+	}
+
+	/**
 	 * 将字符串转换为指定SQL类型的数值。
 	 * <p>
 	 * 如果{@code str}不合法、或者{@code sqlType}不是数值类型，将返回{@code null}。

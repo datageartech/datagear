@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.datagear.util.StringUtil;
+
 /**
  * 字符串表达式处理器。
  * <p>
@@ -88,10 +90,39 @@ public class ExpressionResolver
 	 */
 	public boolean isExpression(String source)
 	{
-		if (source == null || source.isEmpty())
+		if (StringUtil.isEmpty(source))
 			return false;
 
 		return (resolveNextExpression(source, 0) != null);
+	}
+
+	/**
+	 * 是否是严格的表达式字符串。
+	 * <p>
+	 * 严格表达式字符串以{@linkplain #getStartIdentifier()}开头，以{@linkplain #getEndIdentifier()}结尾。
+	 * </p>
+	 * 
+	 * @param source
+	 * @return
+	 */
+	public boolean isExpressionStrict(String source)
+	{
+		if (StringUtil.isEmpty(source))
+			return false;
+
+		return source.startsWith(this.startIdentifier) && source.endsWith(this.endIdentifier);
+	}
+
+	/**
+	 * 指定{@code expression}是否是严格表达式。
+	 * 
+	 * @param source
+	 * @param expression
+	 * @return
+	 */
+	public boolean isExpressionStrict(String source, Expression expression)
+	{
+		return expression.getStartIndex() == 0 && expression.getEndIndex() == source.length();
 	}
 
 	/**
@@ -108,22 +139,16 @@ public class ExpressionResolver
 		if (source == null || source.isEmpty())
 			return Collections.emptyList();
 
-		List<Expression> expressions = null;
+		List<Expression> expressions = new ArrayList<Expression>(3);
 
 		Expression next = null;
 		int startIndex = 0;
 
 		while ((next = resolveNextExpression(source, startIndex)) != null)
 		{
-			if (expressions == null)
-				expressions = new ArrayList<Expression>();
-
 			expressions.add(next);
 			startIndex = next.getEndIndex();
 		}
-
-		if (expressions == null)
-			expressions = Collections.emptyList();
 
 		return expressions;
 	}

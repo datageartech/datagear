@@ -554,7 +554,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	 * @param sql
 	 * @return
 	 */
-	protected boolean isSelectSql(String sql)
+	public static boolean isSelectSql(String sql)
 	{
 		if (sql == null || sql.isEmpty())
 			return false;

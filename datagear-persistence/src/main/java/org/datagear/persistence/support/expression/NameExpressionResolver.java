@@ -71,6 +71,17 @@ public class NameExpressionResolver extends ExpressionResolver
 	}
 
 	/**
+	 * 解析第一个{@linkplain NameExpression}。
+	 * 
+	 * @param source
+	 * @return
+	 */
+	public NameExpression resolveFirstNameExpression(String source)
+	{
+		return (NameExpression) super.resolveFirst(source);
+	}
+
+	/**
 	 * 判断对象是否是表达式字符串。
 	 * <p>
 	 * 如果对象不是字符串，将返回{@code false}。

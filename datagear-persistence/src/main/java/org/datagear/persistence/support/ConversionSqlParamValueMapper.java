@@ -55,8 +55,10 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * 对于基本类型转换，应该设置{@linkplain #setConversionService(ConversionService)}。
  * </p>
  * <p>
- * 如果设置了{@linkplain #setExpressionEvaluationContext(ExpressionEvaluationContext)}，此类可支持变量表达式<code>"#{...}"</code>、
- * SQL表达式<code>"${select...}"</code>的字符串原值。
+ * 如果设置了{@linkplain #setEnableSqlExpression(boolean)}（默认为{@code true}），此类可支持SQL表达式<code>"${...}"</code>的字符串原值。
+ * </p>
+ * <p>
+ * 如果设置了{@linkplain #setEnableVariableExpression(boolean)}（默认为{@code true}），此类可支持变量表达式<code>"#{...}"</code>的字符串原值。
  * </p>
  * 
  * @author datagear@163.com
@@ -77,6 +79,18 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	protected static final SqlExpressionResolver DEFAULT_SQL_EXPRESSION_RESOLVER = new SqlExpressionResolver();
 	protected static final SpelExpressionParser DEFAULT_SPEL_EXPRESSION_PARSER = new SpelExpressionParser();
 
+	/** 用于支持基本类型转换的转换服务类 */
+	private ConversionService conversionService = null;
+
+	/** 文件路径值所在的目录 */
+	private File filePathValueDirectory = null;
+
+	/** 是否开启SQL表达式特性 */
+	private boolean enableSqlExpression = true;
+
+	/** 是否开启变量表达式特性 */
+	private boolean enableVariableExpression = true;
+
 	/** 变量表达式解析器 */
 	private VariableExpressionResolver variableExpressionResolver = DEFAULT_VARIABLE_EXPRESSION_RESOLVER;
 
@@ -86,48 +100,12 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	/** 变量表达式计算器 */
 	private SpelExpressionParser spelExpressionParser = DEFAULT_SPEL_EXPRESSION_PARSER;
 
-	/** 用于支持基本类型转换的转换服务类 */
-	private ConversionService conversionService = null;
-
-	/** 文件路径值所在的目录 */
-	private File filePathValueDirectory = null;
-
 	/** 表达式计算上下文 */
-	private ExpressionEvaluationContext expressionEvaluationContext = null;
+	private ExpressionEvaluationContext expressionEvaluationContext = new ExpressionEvaluationContext();
 
 	public ConversionSqlParamValueMapper()
 	{
 		super();
-	}
-
-	public VariableExpressionResolver getVariableExpressionResolver()
-	{
-		return variableExpressionResolver;
-	}
-
-	public void setVariableExpressionResolver(VariableExpressionResolver variableExpressionResolver)
-	{
-		this.variableExpressionResolver = variableExpressionResolver;
-	}
-
-	public SqlExpressionResolver getSqlExpressionResolver()
-	{
-		return sqlExpressionResolver;
-	}
-
-	public void setSqlExpressionResolver(SqlExpressionResolver sqlExpressionResolver)
-	{
-		this.sqlExpressionResolver = sqlExpressionResolver;
-	}
-
-	public SpelExpressionParser getSpelExpressionParser()
-	{
-		return spelExpressionParser;
-	}
-
-	public void setSpelExpressionParser(SpelExpressionParser spelExpressionParser)
-	{
-		this.spelExpressionParser = spelExpressionParser;
 	}
 
 	public boolean hasConversionService()
@@ -160,9 +138,54 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		this.filePathValueDirectory = filePathValueDirectory;
 	}
 
-	public boolean hasExpressionEvaluationContext()
+	public boolean isEnableSqlExpression()
 	{
-		return (this.expressionEvaluationContext != null);
+		return enableSqlExpression;
+	}
+
+	public void setEnableSqlExpression(boolean enableSqlExpression)
+	{
+		this.enableSqlExpression = enableSqlExpression;
+	}
+
+	public boolean isEnableVariableExpression()
+	{
+		return enableVariableExpression;
+	}
+
+	public void setEnableVariableExpression(boolean enableVariableExpression)
+	{
+		this.enableVariableExpression = enableVariableExpression;
+	}
+
+	public VariableExpressionResolver getVariableExpressionResolver()
+	{
+		return variableExpressionResolver;
+	}
+
+	public void setVariableExpressionResolver(VariableExpressionResolver variableExpressionResolver)
+	{
+		this.variableExpressionResolver = variableExpressionResolver;
+	}
+
+	public SqlExpressionResolver getSqlExpressionResolver()
+	{
+		return sqlExpressionResolver;
+	}
+
+	public void setSqlExpressionResolver(SqlExpressionResolver sqlExpressionResolver)
+	{
+		this.sqlExpressionResolver = sqlExpressionResolver;
+	}
+
+	public SpelExpressionParser getSpelExpressionParser()
+	{
+		return spelExpressionParser;
+	}
+
+	public void setSpelExpressionParser(SpelExpressionParser spelExpressionParser)
+	{
+		this.spelExpressionParser = spelExpressionParser;
 	}
 
 	public ExpressionEvaluationContext getExpressionEvaluationContext()
@@ -184,13 +207,10 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 
 		try
 		{
-			if (value instanceof String)
-			{
-				value = evalExpressionIf(cn, table, column, (String) value);
+			value = resolveExpressionIf(cn, table, column, value);
 
-				if (value instanceof SqlParamValue)
-					return (SqlParamValue) value;
-			}
+			if (value instanceof SqlParamValue)
+				return (SqlParamValue) value;
 
 			SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value);
 			return sqlParamValue;
@@ -202,6 +222,225 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		catch (Throwable t)
 		{
 			throw new SqlParamValueMapperException(table, column, value, t);
+		}
+	}
+
+	/**
+	 * 处理可能的表达式。
+	 * <p>
+	 * 可能返回{@linkplain LiteralSqlParamValue}。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param table
+	 * @param column
+	 * @param value
+	 * @return
+	 * @throws Throwable
+	 */
+	protected Object resolveExpressionIf(Connection cn, Table table, Column column, Object value) throws Throwable
+	{
+		if (!(value instanceof String))
+			return value;
+
+		String valueStr = (String) value;
+		Object result = valueStr;
+
+		if (this.enableVariableExpression)
+		{
+			List<NameExpression> expressions = this.variableExpressionResolver.resolveNameExpressions(valueStr);
+
+			if (!expressions.isEmpty())
+				result = evaluateVariableExpressions(cn, table, column, valueStr, expressions,
+						this.expressionEvaluationContext);
+			else
+				result = this.variableExpressionResolver.unescape(valueStr);
+		}
+
+		if (this.enableSqlExpression && (result instanceof String))
+		{
+			valueStr = (String)result;
+
+			List<NameExpression> expressions = this.sqlExpressionResolver.resolveNameExpressions(valueStr);
+
+			if (!expressions.isEmpty())
+				result = evaluateSqlExpressions(cn, table, column, valueStr, expressions,
+						this.expressionEvaluationContext);
+			else
+				result = this.sqlExpressionResolver.unescape(valueStr);
+		}
+
+		return result;
+	}
+
+	/**
+	 * 计算变量表达式列值。
+	 * 
+	 * @param cn
+	 * @param table
+	 * @param column
+	 * @param value
+	 * @param expressions
+	 * @param expressionEvaluationContext
+	 * @return
+	 * @throws Throwable
+	 */
+	protected String evaluateVariableExpressions(Connection cn, Table table, Column column, String value,
+			List<NameExpression> expressions,
+			ExpressionEvaluationContext expressionEvaluationContext) throws Throwable
+	{
+		List<Object> expressionValues = new ArrayList<>(expressions.size());
+
+		for (int i = 0, len = expressions.size(); i < len; i++)
+		{
+			NameExpression expression = expressions.get(i);
+
+			String expressionKey = expressionEvaluationContext.getCachedKey(expression);
+			if (expressionEvaluationContext.containsCachedValue(expressionKey))
+			{
+				Object expValue = expressionEvaluationContext.getCachedValue(expressionKey);
+				expressionValues.add(expValue);
+			}
+			else
+			{
+				evaluateVariableExpression(cn, table, column, value, expression, expressionEvaluationContext,
+						expressionValues);
+			}
+		}
+
+		String evaluated = this.variableExpressionResolver.evaluate(value, expressions, expressionValues, "");
+
+		return evaluated;
+	}
+
+	protected Object evaluateVariableExpression(Connection cn, Table table, Column column, String value,
+			NameExpression expression,
+			ExpressionEvaluationContext expressionEvaluationContext, List<Object> expressionValues) throws Throwable
+	{
+		org.springframework.expression.Expression spelExpression = null;
+
+		try
+		{
+			spelExpression = this.spelExpressionParser.parseExpression(expression.getContent());
+		}
+		catch(Exception e)
+		{
+			// 如果是表达式不合法，且列是文本类型，则不处理
+			if (JdbcUtil.isTextType(column.getType()))
+				return expression.toString();
+			else
+				throw new VariableExpressionSyntaxErrorException(expression, e);
+		}
+
+		try
+		{
+			Object expValue = spelExpression.getValue(expressionEvaluationContext.getVariableExpressionBean());
+
+			expressionValues.add(expValue);
+			expressionEvaluationContext.putCachedValue(expression, expValue);
+
+			return expValue;
+		}
+		catch(Exception e)
+		{
+			throw new VariableExpressionErrorException(expression, e);
+		}
+	}
+
+	/**
+	 * 计算SQL表达式的值。
+	 * <p>
+	 * 可能返回{@linkplain LiteralSqlParamValue}。
+	 * </p>
+	 */
+	protected Object evaluateSqlExpressions(Connection cn, Table table, Column column, String value,
+			List<NameExpression> expressions, ExpressionEvaluationContext expressionEvaluationContext) throws Throwable
+	{
+		// 如果value是严格表达式，那么直接返回LiteralSqlParamValue
+		if (expressions.size() == 1)
+		{
+			NameExpression expression = expressions.get(0);
+			if (this.sqlExpressionResolver.isExpressionStrict(value, expression))
+			{
+				String sql;
+				
+				String expressionKey = expressionEvaluationContext.getCachedKey(expression);
+				if (expressionEvaluationContext.containsCachedValue(expressionKey))
+					sql = (String) expressionEvaluationContext.getCachedValue(expressionKey);
+				else
+				{
+					sql = expression.getContent();
+					expressionEvaluationContext.putCachedValue(expression, sql);
+				}
+
+				return new LiteralSqlParamValue(sql, column.getType());
+			}
+		}
+
+		List<Object> expressionValues = new ArrayList<>(expressions.size());
+	
+		for (int i = 0, len = expressions.size(); i < len; i++)
+		{
+			NameExpression expression = expressions.get(i);
+			String sql;
+
+			String expressionKey = expressionEvaluationContext.getCachedKey(expression);
+			if (expressionEvaluationContext.containsCachedValue(expressionKey))
+				sql = (String) expressionEvaluationContext.getCachedValue(expressionKey);
+			else
+			{
+				sql = expression.getContent();
+				expressionEvaluationContext.putCachedValue(expression, sql);
+			}
+
+			Object sqlValue = evaluateSqlExpressionResultIfSelect(cn, table, column, expression, sql);
+			expressionValues.add(sqlValue);
+		}
+	
+		String evaluated = this.sqlExpressionResolver.evaluate(value, expressions, expressionValues, "");
+	
+		return evaluated;
+	}
+
+	protected Object evaluateSqlExpressionResultIfSelect(Connection cn, Table table, Column column,
+			NameExpression expression, String sql)
+			throws Throwable
+	{
+		if (!DefaultPersistenceManager.isSelectSql(sql))
+			return sql;
+
+		Statement st = null;
+		ResultSet rs = null;
+		try
+		{
+			st = createQueryStatement(cn, ResultSet.TYPE_FORWARD_ONLY);
+			rs = st.executeQuery(sql);
+	
+			Object value = null;
+	
+			if (rs.next())
+				value = rs.getObject(1);
+
+			return value;
+		}
+		catch (SQLNonTransientException e)
+		{
+			if (JdbcUtil.isTextType(column.getType()))
+				return sql;
+			else
+				throw new SqlExpressionSyntaxErrorException(expression, e);
+		}
+		catch (SQLException e)
+		{
+			if (JdbcUtil.isTextType(column.getType()))
+				return sql;
+			else
+				throw new SqlExpressionErrorException(expression, e);
+		}
+		finally
+		{
+			JdbcUtil.closeResultSet(rs);
+			JdbcUtil.closeStatement(st);
 		}
 	}
 
@@ -749,223 +988,4 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		return Base64.getDecoder().decode(value);
 	}
 
-	/**
-	 * 如果{@linkplain #hasExpressionEvaluationContext()}则计算表达式。
-	 * 
-	 * @param cn
-	 * @param table
-	 * @param column
-	 * @param value  表达式计算结果或者{@linkplain SqlParamValue}对象
-	 * @return
-	 * @throws Throwable
-	 */
-	protected Object evalExpressionIf(Connection cn, Table table, Column column, String value) throws Throwable
-	{
-		if (!hasExpressionEvaluationContext())
-			return value;
-
-		List<NameExpression> variableExpressions = this.variableExpressionResolver.resolveNameExpressions(value);
-
-		String evaluatedPropValue = value;
-
-		if (!variableExpressions.isEmpty())
-			evaluatedPropValue = evaluateVariableExpressions(value, variableExpressions,
-					this.expressionEvaluationContext);
-
-		List<NameExpression> sqlExpressions = this.sqlExpressionResolver.resolveNameExpressions(evaluatedPropValue);
-
-		if (!sqlExpressions.isEmpty())
-		{
-			boolean isLiteralSql = false;
-			
-			if(sqlExpressions.size() == 1)
-			{
-				NameExpression sqlExpression = sqlExpressions.get(0);
-				if(sqlExpression.getStartIndex() == 0 && sqlExpression.getEndIndex() == evaluatedPropValue.length())
-				{
-					String expressionValue = sqlExpression.getContent();
-					String expressionKey = this.expressionEvaluationContext.getCachedKey(sqlExpression);
-					if (this.expressionEvaluationContext.containsCachedValue(expressionKey))
-						expressionValue = (String) this.expressionEvaluationContext.getCachedValue(expressionKey);
-
-					return new LiteralSqlParamValue(expressionValue, column.getType());
-				}
-			}
-
-			if (!isLiteralSql)
-			{
-				evaluatedPropValue = evaluateSqlExpressions(cn, evaluatedPropValue, sqlExpressions,
-						this.expressionEvaluationContext);
-			}
-		}
-
-		// 如果没有执行计算，则需要处理可能的转义表达式
-		if (variableExpressions.isEmpty())
-			evaluatedPropValue = this.variableExpressionResolver.unescape(evaluatedPropValue);
-		if (sqlExpressions.isEmpty())
-			evaluatedPropValue = this.sqlExpressionResolver.unescape(evaluatedPropValue);
-
-		return evaluatedPropValue;
-	}
-
-	/**
-	 * 计算给定变量表达式的值。
-	 * 
-	 * @param source
-	 *            变量表达式字符串
-	 * @param expressions
-	 * @param expressionEvaluationContext
-	 * @return
-	 * @throws Throwable
-	 */
-	protected String evaluateVariableExpressions(String source, List<NameExpression> expressions,
-			ExpressionEvaluationContext expressionEvaluationContext) throws Throwable
-	{
-		List<Object> expressionValues = new ArrayList<>();
-
-		for (int i = 0, len = expressions.size(); i < len; i++)
-		{
-			NameExpression expression = expressions.get(i);
-
-			String expressionKey = expressionEvaluationContext.getCachedKey(expression);
-			if (expressionEvaluationContext.containsCachedValue(expressionKey))
-			{
-				Object value = expressionEvaluationContext.getCachedValue(expressionKey);
-				expressionValues.add(value);
-			}
-			else
-			{
-				evaluateVariableExpression(expression, expressionEvaluationContext, expressionValues);
-			}
-		}
-
-		String evaluated = this.variableExpressionResolver.evaluate(source, expressions, expressionValues, "");
-
-		return evaluated;
-	}
-
-	/**
-	 * 计算变量表达式值。
-	 * 
-	 * @param expression
-	 * @param expressionEvaluationContext
-	 * @param expressionValues
-	 * @throws Throwable
-	 */
-	protected void evaluateVariableExpression(NameExpression expression,
-			ExpressionEvaluationContext expressionEvaluationContext, List<Object> expressionValues) throws Throwable
-	{
-		org.springframework.expression.Expression spelExpression = null;
-
-		try
-		{
-			spelExpression = this.spelExpressionParser.parseExpression(expression.getContent());
-		}
-		catch (Exception e)
-		{
-			throw new VariableExpressionSyntaxErrorException(expression, e);
-		}
-
-		try
-		{
-			Object value = spelExpression.getValue(expressionEvaluationContext.getVariableExpressionBean());
-
-			expressionValues.add(value);
-			expressionEvaluationContext.putCachedValue(expression, value);
-		}
-		catch (Exception e)
-		{
-			throw new VariableExpressionErrorException(expression, e);
-		}
-	}
-
-	/**
-	 * 计算给定SQL表达式的值。
-	 * 
-	 * @param cn
-	 * @param source
-	 *            SQL表达式字符串
-	 * @param expressions
-	 * @param expressionEvaluationContext
-	 * @return
-	 * @throws Throwable
-	 */
-	protected String evaluateSqlExpressions(Connection cn, String source, List<NameExpression> expressions,
-			ExpressionEvaluationContext expressionEvaluationContext) throws Throwable
-	{
-		List<Object> expressionValues = new ArrayList<>();
-
-		for (int i = 0, len = expressions.size(); i < len; i++)
-		{
-			NameExpression expression = expressions.get(i);
-
-			String expressionKey = expressionEvaluationContext.getCachedKey(expression);
-			if (expressionEvaluationContext.containsCachedValue(expressionKey))
-			{
-				Object value = expressionEvaluationContext.getCachedValue(expressionKey);
-				expressionValues.add(value);
-			}
-			else
-			{
-				evaluateSqlExpression(cn, expression, expressionEvaluationContext, expressionValues);
-			}
-		}
-
-		String evaluated = this.sqlExpressionResolver.evaluate(source, expressions, expressionValues, "");
-
-		return evaluated;
-	}
-
-	/**
-	 * 作为SQL表达式求值。
-	 * 
-	 * @param cn
-	 * @param dialect
-	 * @param expression
-	 * @param expressionEvaluationContext
-	 * @param expressionValues
-	 * @throws Throwable
-	 */
-	protected void evaluateSqlExpression(Connection cn, NameExpression expression,
-			ExpressionEvaluationContext expressionEvaluationContext, List<Object> expressionValues) throws Throwable
-	{
-		Statement st = null;
-		ResultSet rs = null;
-		try
-		{
-			st = createQueryStatement(cn, ResultSet.TYPE_FORWARD_ONLY);
-			rs = st.executeQuery(expression.getContent());
-
-			Object value = null;
-
-			if (rs.next())
-				value = rs.getObject(1);
-
-			expressionValues.add(value);
-			expressionEvaluationContext.putCachedValue(expression, value);
-		}
-		catch (SQLNonTransientException e)
-		{
-			throw new SqlExpressionSyntaxErrorException(expression, e);
-		}
-		catch (SQLException e)
-		{
-			throw new SqlExpressionErrorException(expression, e);
-		}
-		finally
-		{
-			JdbcUtil.closeResultSet(rs);
-			JdbcUtil.closeStatement(st);
-		}
-	}
-
-	protected boolean isVariableExpression(Object obj)
-	{
-		return this.variableExpressionResolver.isExpression(obj);
-	}
-
-	protected boolean isSqlExpression(Object obj)
-	{
-		return this.sqlExpressionResolver.isExpression(obj);
-	}
 }

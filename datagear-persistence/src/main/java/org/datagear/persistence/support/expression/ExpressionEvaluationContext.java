@@ -22,7 +22,7 @@ public class ExpressionEvaluationContext
 	public static final String VARIABLE_INDEX = "index";
 
 	/** 值缓存 */
-	private Map<String, Object> valueCache = new HashMap<String, Object>();
+	private Map<String, Object> valueCache = new HashMap<String, Object>(3);
 
 	/** 变量表达式求值Bean */
 	private VariableExpressionBean variableExpressionBean = new VariableExpressionBean();
