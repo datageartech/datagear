@@ -34,9 +34,9 @@ import org.datagear.persistence.RowMapper;
 import org.datagear.persistence.SqlParamValueMapper;
 import org.datagear.persistence.support.ConversionSqlParamValueMapper;
 import org.datagear.persistence.support.DefaultLOBRowMapper;
+import org.datagear.persistence.support.SqlParamValueSqlExpressionSyntaxException;
+import org.datagear.persistence.support.SqlParamValueVariableExpressionSyntaxException;
 import org.datagear.persistence.support.expression.ExpressionEvaluationContext;
-import org.datagear.persistence.support.expression.SqlExpressionSyntaxErrorException;
-import org.datagear.persistence.support.expression.VariableExpressionSyntaxErrorException;
 import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -279,7 +279,7 @@ public class DataController extends AbstractSchemaConnTableController
 					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
-				persistenceManager.insert(getConnection(), null, table, row, buildSaveSqlParamValueMapper());
+				persistenceManager.insert(getConnection(), null, table, row, buildSaveSingleSqlParamValueMapper());
 			}
 		}.execute();
 
@@ -374,7 +374,7 @@ public class DataController extends AbstractSchemaConnTableController
 				Connection cn = getConnection();
 
 				int count = persistenceManager.update(cn, null, table, originalRow, myUpdateRow,
-						buildSaveSqlParamValueMapper());
+						buildSaveSingleSqlParamValueMapper());
 
 				checkDuplicateRecord(1, count, ignoreDuplication);
 
@@ -478,8 +478,7 @@ public class DataController extends AbstractSchemaConnTableController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> savess(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName,
-			@RequestBody Map<String, ?> params) throws Throwable
+			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> params) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 		final Row[] updateOriginRows = convertToRows((List<Map<String, ?>>) params.get("updateOrigins"));
@@ -506,7 +505,7 @@ public class DataController extends AbstractSchemaConnTableController
 				if (expectedDeleteCount > 0)
 					checkDeleteTableDataPermission(schema, user);
 
-				ConversionSqlParamValueMapper paramValueMapper = buildSaveSqlParamValueMapper();
+				ConversionSqlParamValueMapper paramValueMapper = buildSaveSingleSqlParamValueMapper();
 
 				int acutalUpdateCount = 0, actualAddCount = 0, actualDeleteCount = 0;
 
@@ -584,8 +583,7 @@ public class DataController extends AbstractSchemaConnTableController
 	@ResponseBody
 	public List<List<Object>> getColumnValuess(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName,
-			@RequestBody Map<String, ?> params) throws Throwable
+			@PathVariable("tableName") String tableName, @RequestBody Map<String, ?> params) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 		final Row[] rows = convertToRows((List<Map<String, ?>>) params.get("datas"));
@@ -694,7 +692,7 @@ public class DataController extends AbstractSchemaConnTableController
 	public FileInfo uploadFile(HttpServletRequest request, @RequestParam("file") MultipartFile multipartFile)
 			throws Throwable
 	{
-		File file = FileUtil.generateUniqueFile(buildSaveSqlParamValueMapper().getFilePathValueDirectory());
+		File file = FileUtil.generateUniqueFile(buildSaveSingleSqlParamValueMapper().getFilePathValueDirectory());
 
 		multipartFile.transferTo(file);
 
@@ -716,7 +714,7 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			out = response.getOutputStream();
 
-			File file = FileUtil.getFile(buildSaveSqlParamValueMapper().getFilePathValueDirectory(), fileName);
+			File file = FileUtil.getFile(buildSaveSingleSqlParamValueMapper().getFilePathValueDirectory(), fileName);
 
 			if (file.exists())
 				IOUtil.write(file, out);
@@ -732,7 +730,7 @@ public class DataController extends AbstractSchemaConnTableController
 	public FileInfo deleteFile(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("file") String fileName) throws Throwable
 	{
-		File file = FileUtil.getFile(buildSaveSqlParamValueMapper().getFilePathValueDirectory(), fileName);
+		File file = FileUtil.getFile(buildSaveSingleSqlParamValueMapper().getFilePathValueDirectory(), fileName);
 
 		FileInfo fileInfo = FileUtil.getFileInfo(file);
 
@@ -869,12 +867,25 @@ public class DataController extends AbstractSchemaConnTableController
 		return rowMapper;
 	}
 
-	protected ConversionSqlParamValueMapper buildSaveSqlParamValueMapper()
+	protected ConversionSqlParamValueMapper buildSaveSingleSqlParamValueMapper()
 	{
 		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
 		mapper.setConversionService(getConversionService());
 		mapper.setFilePathValueDirectory(getDataBlobTmpDirectory());
-		mapper.setExpressionEvaluationContext(new ExpressionEvaluationContext());
+		mapper.setEnableSqlExpression(true);
+		// 单个保存操作不开启变量表达式，避免不必要的输入转义
+		mapper.setEnableVariableExpression(false);
+
+		return mapper;
+	}
+
+	protected ConversionSqlParamValueMapper buildSaveBatchSqlParamValueMapper()
+	{
+		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
+		mapper.setConversionService(getConversionService());
+		mapper.setFilePathValueDirectory(getDataBlobTmpDirectory());
+		mapper.setEnableSqlExpression(true);
+		mapper.setEnableVariableExpression(true);
 
 		return mapper;
 	}
@@ -1028,7 +1039,7 @@ public class DataController extends AbstractSchemaConnTableController
 			int failCount = 0;
 
 			Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
-			ConversionSqlParamValueMapper paramValueMapper = buildSaveSqlParamValueMapper();
+			ConversionSqlParamValueMapper paramValueMapper = buildSaveBatchSqlParamValueMapper();
 			ExpressionEvaluationContext evaluationContext = paramValueMapper.getExpressionEvaluationContext();
 
 			int index = 0;
@@ -1139,11 +1150,11 @@ public class DataController extends AbstractSchemaConnTableController
 				return true;
 
 			// 变量表达式语法错误
-			if (e instanceof VariableExpressionSyntaxErrorException)
+			if (e instanceof SqlParamValueVariableExpressionSyntaxException)
 				return true;
 
 			// SQL语法错误
-			if (e instanceof SqlExpressionSyntaxErrorException)
+			if (e instanceof SqlParamValueSqlExpressionSyntaxException)
 				return true;
 
 			return false;

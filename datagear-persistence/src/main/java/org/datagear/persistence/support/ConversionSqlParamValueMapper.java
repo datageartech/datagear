@@ -31,12 +31,8 @@ import org.datagear.persistence.SqlParamValueMapper;
 import org.datagear.persistence.SqlParamValueMapperException;
 import org.datagear.persistence.support.expression.ExpressionEvaluationContext;
 import org.datagear.persistence.support.expression.NameExpression;
-import org.datagear.persistence.support.expression.SqlExpressionErrorException;
 import org.datagear.persistence.support.expression.SqlExpressionResolver;
-import org.datagear.persistence.support.expression.SqlExpressionSyntaxErrorException;
-import org.datagear.persistence.support.expression.VariableExpressionErrorException;
 import org.datagear.persistence.support.expression.VariableExpressionResolver;
-import org.datagear.persistence.support.expression.VariableExpressionSyntaxErrorException;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
@@ -259,7 +255,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 
 		if (this.enableSqlExpression && (result instanceof String))
 		{
-			valueStr = (String)result;
+			valueStr = (String) result;
 
 			List<NameExpression> expressions = this.sqlExpressionResolver.resolveNameExpressions(valueStr);
 
@@ -286,8 +282,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	 * @throws Throwable
 	 */
 	protected String evaluateVariableExpressions(Connection cn, Table table, Column column, String value,
-			List<NameExpression> expressions,
-			ExpressionEvaluationContext expressionEvaluationContext) throws Throwable
+			List<NameExpression> expressions, ExpressionEvaluationContext expressionEvaluationContext) throws Throwable
 	{
 		List<Object> expressionValues = new ArrayList<>(expressions.size());
 
@@ -314,37 +309,44 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	}
 
 	protected Object evaluateVariableExpression(Connection cn, Table table, Column column, String value,
-			NameExpression expression,
-			ExpressionEvaluationContext expressionEvaluationContext, List<Object> expressionValues) throws Throwable
+			NameExpression expression, ExpressionEvaluationContext expressionEvaluationContext,
+			List<Object> expressionValues) throws Throwable
 	{
+		Object expValue;
+
 		org.springframework.expression.Expression spelExpression = null;
 
 		try
 		{
 			spelExpression = this.spelExpressionParser.parseExpression(expression.getContent());
 		}
-		catch(Exception e)
+		catch (Throwable t)
 		{
-			// 如果是表达式不合法，且列是文本类型，则不处理
+			// 如果是表达式不合法，且列是文本类型，则忽略计算
 			if (JdbcUtil.isTextType(column.getType()))
-				return expression.toString();
+				expValue = expression.toString();
 			else
-				throw new VariableExpressionSyntaxErrorException(expression, e);
+				throw new SqlParamValueVariableExpressionSyntaxException(table, column, value, expression.getContent(),
+						t);
 		}
 
 		try
 		{
-			Object expValue = spelExpression.getValue(expressionEvaluationContext.getVariableExpressionBean());
-
-			expressionValues.add(expValue);
-			expressionEvaluationContext.putCachedValue(expression, expValue);
-
-			return expValue;
+			expValue = spelExpression.getValue(expressionEvaluationContext.getVariableExpressionBean());
 		}
-		catch(Exception e)
+		catch (Throwable t)
 		{
-			throw new VariableExpressionErrorException(expression, e);
+			// 如果是表达式不合法，且列是文本类型，则忽略计算
+			if (JdbcUtil.isTextType(column.getType()))
+				expValue = expression.toString();
+			else
+				throw new SqlParamValueVariableExpressionException(table, column, value, expression.getContent(), t);
 		}
+
+		expressionValues.add(expValue);
+		expressionEvaluationContext.putCachedValue(expression, expValue);
+
+		return expValue;
 	}
 
 	/**
@@ -356,14 +358,14 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 	protected Object evaluateSqlExpressions(Connection cn, Table table, Column column, String value,
 			List<NameExpression> expressions, ExpressionEvaluationContext expressionEvaluationContext) throws Throwable
 	{
-		// 如果value是严格表达式，那么直接返回LiteralSqlParamValue
+		// 如果value是严格SQL表达式，那么直接返回LiteralSqlParamValue
 		if (expressions.size() == 1)
 		{
 			NameExpression expression = expressions.get(0);
 			if (this.sqlExpressionResolver.isExpressionStrict(value, expression))
 			{
 				String sql;
-				
+
 				String expressionKey = expressionEvaluationContext.getCachedKey(expression);
 				if (expressionEvaluationContext.containsCachedValue(expressionKey))
 					sql = (String) expressionEvaluationContext.getCachedValue(expressionKey);
@@ -378,7 +380,7 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		}
 
 		List<Object> expressionValues = new ArrayList<>(expressions.size());
-	
+
 		for (int i = 0, len = expressions.size(); i < len; i++)
 		{
 			NameExpression expression = expressions.get(i);
@@ -393,21 +395,20 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 				expressionEvaluationContext.putCachedValue(expression, sql);
 			}
 
-			Object sqlValue = evaluateSqlExpressionResultIfSelect(cn, table, column, expression, sql);
+			Object sqlValue = evaluateSqlExpressionResultIfSelect(cn, table, column, value, expression, sql);
 			expressionValues.add(sqlValue);
 		}
-	
+
 		String evaluated = this.sqlExpressionResolver.evaluate(value, expressions, expressionValues, "");
-	
+
 		return evaluated;
 	}
 
-	protected Object evaluateSqlExpressionResultIfSelect(Connection cn, Table table, Column column,
-			NameExpression expression, String sql)
-			throws Throwable
+	protected Object evaluateSqlExpressionResultIfSelect(Connection cn, Table table, Column column, String value,
+			NameExpression expression, String sql) throws Throwable
 	{
 		if (!DefaultPersistenceManager.isSelectSql(sql))
-			return sql;
+			return expression.toString();
 
 		Statement st = null;
 		ResultSet rs = null;
@@ -415,27 +416,27 @@ public class ConversionSqlParamValueMapper extends AbstractSqlParamValueMapper
 		{
 			st = createQueryStatement(cn, ResultSet.TYPE_FORWARD_ONLY);
 			rs = st.executeQuery(sql);
-	
-			Object value = null;
-	
-			if (rs.next())
-				value = rs.getObject(1);
 
-			return value;
+			Object sqlResult = null;
+
+			if (rs.next())
+				sqlResult = rs.getObject(1);
+
+			return sqlResult;
 		}
 		catch (SQLNonTransientException e)
 		{
 			if (JdbcUtil.isTextType(column.getType()))
 				return sql;
 			else
-				throw new SqlExpressionSyntaxErrorException(expression, e);
+				throw new SqlParamValueSqlExpressionSyntaxException(table, column, value, sql, e);
 		}
 		catch (SQLException e)
 		{
 			if (JdbcUtil.isTextType(column.getType()))
 				return sql;
 			else
-				throw new SqlExpressionErrorException(expression, e);
+				throw new SqlParamValueSqlExpressionException(table, column, value, sql, e);
 		}
 		finally
 		{

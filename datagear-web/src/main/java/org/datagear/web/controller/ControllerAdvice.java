@@ -23,9 +23,9 @@ import org.datagear.meta.resolver.TableNotFoundException;
 import org.datagear.persistence.NonUniqueResultException;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.SqlParamValueMapperException;
+import org.datagear.persistence.support.SqlParamValueSqlExpressionException;
+import org.datagear.persistence.support.SqlParamValueVariableExpressionException;
 import org.datagear.persistence.support.UnsupportedDialectException;
-import org.datagear.persistence.support.expression.SqlExpressionErrorException;
-import org.datagear.persistence.support.expression.VariableExpressionErrorException;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
@@ -171,24 +171,24 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(VariableExpressionErrorException.class)
+	@ExceptionHandler(SqlParamValueVariableExpressionException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handlePersistenceVariableExpressionErrorException(HttpServletRequest request,
-			HttpServletResponse response, VariableExpressionErrorException exception)
+	public String handlePersistenceSqlParamValueVariableExpressionException(HttpServletRequest request,
+			HttpServletResponse response, SqlParamValueVariableExpressionException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(VariableExpressionErrorException.class),
-				exception.getCause(), false, exception.getExpression().getContent());
+		setOperationMessageForThrowable(request, buildMessageCode(SqlParamValueVariableExpressionException.class),
+				exception.getCause(), false, exception.getExpression());
 
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(SqlExpressionErrorException.class)
+	@ExceptionHandler(SqlParamValueSqlExpressionException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handlePersistenceSqlExpressionErrorException(HttpServletRequest request, HttpServletResponse response,
-			SqlExpressionErrorException exception)
+	public String handlePersistenceSqlParamValueSqlExpressionException(HttpServletRequest request,
+			HttpServletResponse response, SqlParamValueSqlExpressionException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(SqlExpressionErrorException.class),
-				exception.getCause(), true, exception.getExpression().getContent());
+		setOperationMessageForThrowable(request, buildMessageCode(SqlParamValueSqlExpressionException.class),
+				exception.getCause(), true, exception.getExpression());
 
 		return getErrorView(request, response);
 	}
