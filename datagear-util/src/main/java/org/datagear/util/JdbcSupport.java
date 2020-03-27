@@ -1137,6 +1137,41 @@ public class JdbcSupport
 	}
 
 	/**
+	 * 获取列名。
+	 * 
+	 * @param metaData
+	 * @param column
+	 *            以{@code 1}开头
+	 * @return
+	 * @throws SQLException
+	 */
+	public String getColumnName(ResultSetMetaData metaData, int column) throws SQLException
+	{
+		String columnName = metaData.getColumnLabel(column);
+		if (StringUtil.isEmpty(columnName))
+			columnName = metaData.getColumnName(column);
+
+		return columnName;
+	}
+
+	/**
+	 * 获取列类型。
+	 * 
+	 * @param metaData
+	 * @param column
+	 *            以{@code 1}开头
+	 * @return
+	 * @throws SQLException
+	 */
+	public SqlType getColumnSqlType(ResultSetMetaData metaData, int column) throws SQLException
+	{
+		int type = metaData.getColumnType(column);
+		String typeName = metaData.getColumnTypeName(column);
+
+		return new SqlType(type, typeName);
+	}
+
+	/**
 	 * SQL插入操作的自动生成结果。
 	 * 
 	 * @author datagear@163.com

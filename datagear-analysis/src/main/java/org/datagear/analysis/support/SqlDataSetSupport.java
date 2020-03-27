@@ -29,7 +29,7 @@ import org.datagear.analysis.support.ParameterSqlResolver.ParameterSql;
 import org.datagear.util.JdbcSupport;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.QueryResultSet;
-import org.datagear.util.StringUtil;
+import org.datagear.util.SqlType;
 
 /**
  * SQL数据集支持类。
@@ -263,7 +263,8 @@ public class SqlDataSetSupport extends JdbcSupport
 				DataSetProperty property = properties.get(i);
 				int rsColumn = rsColumns[i];
 
-				Object value = resolveDataValue(cn, rs, rsColumn, rsMeta.getColumnType(rsColumn), property.getType());
+				Object value = resolveDataValue(cn, rs, rsColumn, getColumnSqlType(rsMeta, rsColumn),
+						property.getType());
 
 				row.put(property.getName(), value);
 			}
@@ -326,14 +327,16 @@ public class SqlDataSetSupport extends JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	public Object resolveDataValue(Connection cn, ResultSet rs, int column, int sqlType, DataType dataType)
+	public Object resolveDataValue(Connection cn, ResultSet rs, int column, SqlType sqlType, DataType dataType)
 			throws SQLException
 	{
 		Object value = null;
 
+		int type = sqlType.getType();
+
 		if (DataType.isString(dataType))
 		{
-			switch (sqlType)
+			switch (type)
 			{
 				case Types.CHAR:
 				case Types.NCHAR:
@@ -345,12 +348,12 @@ public class SqlDataSetSupport extends JdbcSupport
 				}
 
 				default:
-					throw new UnsupportedSqlTypeException(sqlType);
+					throw new SqlDataSetUnsupportedSqlTypeException(sqlType);
 			}
 		}
 		else if (DataType.isBoolean(dataType))
 		{
-			switch (sqlType)
+			switch (type)
 			{
 				case Types.BIT:
 				case Types.BIGINT:
@@ -369,12 +372,12 @@ public class SqlDataSetSupport extends JdbcSupport
 				}
 
 				default:
-					throw new UnsupportedSqlTypeException(sqlType);
+					throw new SqlDataSetUnsupportedSqlTypeException(sqlType);
 			}
 		}
 		else if (DataType.isInteger(dataType))
 		{
-			switch (sqlType)
+			switch (type)
 			{
 				case Types.BIGINT:
 				{
@@ -412,12 +415,12 @@ public class SqlDataSetSupport extends JdbcSupport
 				}
 
 				default:
-					throw new UnsupportedSqlTypeException(sqlType);
+					throw new SqlDataSetUnsupportedSqlTypeException(sqlType);
 			}
 		}
 		else if (DataType.isDecimal(dataType))
 		{
-			switch (sqlType)
+			switch (type)
 			{
 				case Types.BIGINT:
 				{
@@ -455,12 +458,12 @@ public class SqlDataSetSupport extends JdbcSupport
 				}
 
 				default:
-					throw new UnsupportedSqlTypeException(sqlType);
+					throw new SqlDataSetUnsupportedSqlTypeException(sqlType);
 			}
 		}
 		else if (DataType.isDate(dataType))
 		{
-			switch (sqlType)
+			switch (type)
 			{
 				case Types.DATE:
 				{
@@ -469,12 +472,12 @@ public class SqlDataSetSupport extends JdbcSupport
 				}
 
 				default:
-					throw new UnsupportedSqlTypeException(sqlType);
+					throw new SqlDataSetUnsupportedSqlTypeException(sqlType);
 			}
 		}
 		else if (DataType.isTime(dataType))
 		{
-			switch (sqlType)
+			switch (type)
 			{
 				case Types.TIME:
 				{
@@ -483,12 +486,12 @@ public class SqlDataSetSupport extends JdbcSupport
 				}
 
 				default:
-					throw new UnsupportedSqlTypeException(sqlType);
+					throw new SqlDataSetUnsupportedSqlTypeException(sqlType);
 			}
 		}
 		else if (DataType.isTimestamp(dataType))
 		{
-			switch (sqlType)
+			switch (type)
 			{
 				case Types.TIMESTAMP:
 				{
@@ -497,7 +500,7 @@ public class SqlDataSetSupport extends JdbcSupport
 				}
 
 				default:
-					throw new UnsupportedSqlTypeException(sqlType);
+					throw new SqlDataSetUnsupportedSqlTypeException(sqlType);
 			}
 		}
 		else
@@ -526,11 +529,8 @@ public class SqlDataSetSupport extends JdbcSupport
 
 		for (int i = 1; i <= columnCount; i++)
 		{
-			String columnName = metaData.getColumnLabel(i);
-			if (StringUtil.isEmpty(columnName))
-				columnName = metaData.getColumnName(i);
-
-			int sqlType = metaData.getColumnType(i);
+			String columnName = getColumnName(metaData, i);
+			SqlType sqlType = getColumnSqlType(metaData, i);
 
 			DataType dataType = toDataType(sqlType);
 
@@ -554,11 +554,13 @@ public class SqlDataSetSupport extends JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	public DataType toDataType(int sqlType) throws SQLException
+	public DataType toDataType(SqlType sqlType) throws SQLException
 	{
 		DataType dataType = null;
 
-		switch (sqlType)
+		int type = sqlType.getType();
+
+		switch (type)
 		{
 			case Types.CHAR:
 			case Types.NCHAR:
@@ -614,7 +616,7 @@ public class SqlDataSetSupport extends JdbcSupport
 			}
 
 			default:
-				throw new UnsupportedSqlTypeException(sqlType);
+				throw new SqlDataSetUnsupportedSqlTypeException(sqlType);
 		}
 
 		return dataType;

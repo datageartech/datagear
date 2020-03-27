@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.support.UnsupportedSqlTypeException;
+import org.datagear.analysis.support.SqlDataSetUnsupportedSqlTypeException;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverClassFormatErrorException;
 import org.datagear.connection.DriverEntityManagerException;
@@ -334,12 +334,13 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(UnsupportedSqlTypeException.class)
+	@ExceptionHandler(SqlDataSetUnsupportedSqlTypeException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleAnalysisUnsupportedSqlTypeException(HttpServletRequest request, HttpServletResponse response,
-			UnsupportedSqlTypeException exception)
+	public String handleAnalysisSqlDataSetUnsupportedSqlTypeException(HttpServletRequest request,
+			HttpServletResponse response, SqlDataSetUnsupportedSqlTypeException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedSqlTypeException.class), exception, false);
+		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetUnsupportedSqlTypeException.class),
+				exception, false, exception.getSqlType().getTypeName());
 		return getErrorView(request, response);
 	}
 

@@ -8,6 +8,7 @@
 package org.datagear.analysis.support;
 
 import org.datagear.analysis.DataSetException;
+import org.datagear.util.SqlType;
 
 /**
  * 不支持指定SQL类型异常。
@@ -15,42 +16,42 @@ import org.datagear.analysis.DataSetException;
  * @author datagear@163.com
  *
  */
-public class UnsupportedSqlTypeException extends DataSetException
+public class SqlDataSetUnsupportedSqlTypeException extends DataSetException
 {
 	private static final long serialVersionUID = 1L;
 
-	private int sqlType;
+	private SqlType sqlType;
 
-	public UnsupportedSqlTypeException(int sqlType)
+	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType)
 	{
 		super();
 		this.sqlType = sqlType;
 	}
 
-	public UnsupportedSqlTypeException(int sqlType, String message)
+	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType, String message)
 	{
 		super(message);
 		this.sqlType = sqlType;
 	}
 
-	public UnsupportedSqlTypeException(int sqlType, Throwable cause)
+	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType, Throwable cause)
 	{
 		super(cause);
 		this.sqlType = sqlType;
 	}
 
-	public UnsupportedSqlTypeException(int sqlType, String message, Throwable cause)
+	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType, String message, Throwable cause)
 	{
 		super(message, cause);
 		this.sqlType = sqlType;
 	}
 
-	public int getSqlType()
+	public SqlType getSqlType()
 	{
 		return sqlType;
 	}
 
-	protected void setSqlType(int sqlType)
+	protected void setSqlType(SqlType sqlType)
 	{
 		this.sqlType = sqlType;
 	}

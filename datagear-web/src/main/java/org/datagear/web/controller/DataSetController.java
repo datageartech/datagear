@@ -25,6 +25,7 @@ import org.datagear.persistence.PagingData;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.IDUtil;
+import org.datagear.util.SqlType;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.DataFilterPagingQuery;
@@ -392,7 +393,7 @@ public class DataSetController extends AbstractSchemaConnController
 				Column column = properties[i];
 
 				DataSetProperty dataSetProperty = new DataSetProperty(column.getName(),
-						sqlDataSetSupport.toDataType(column.getType()));
+						sqlDataSetSupport.toDataType(new SqlType(column.getType(), column.getTypeName())));
 
 				if (labels != null && labels.length > i)
 					dataSetProperty.setLabel(labels[i]);
