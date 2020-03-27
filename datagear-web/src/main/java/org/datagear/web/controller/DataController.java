@@ -272,18 +272,21 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		final User user = WebUtils.getUser(request, response);
 
-		new VoidSchemaConnTableExecutor(request, response, springModel, schemaId, tableName, false)
+		Row savedRow = new ReturnSchemaConnTableExecutor<Row>(request, response, springModel, schemaId, tableName,
+				false)
 		{
 			@Override
-			protected void execute(HttpServletRequest request, HttpServletResponse response,
+			protected Row execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
-				persistenceManager.insert(getConnection(), null, table, row, buildSaveSingleSqlParamValueMapper());
+				return persistenceManager.insert(getConnection(), null, table, row,
+						buildSaveSingleSqlParamValueMapper());
 			}
 		}.execute();
 
 		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
+		responseEntity.getBody().setData(savedRow);
 		return responseEntity;
 	}
 
@@ -525,8 +528,8 @@ public class DataController extends AbstractSchemaConnTableController
 				{
 					for (int i = 0; i < addRows.length; i++)
 					{
-						int myAddCount = persistenceManager.insert(cn, dialect, table, addRows[i], paramValueMapper);
-						actualAddCount += myAddCount;
+						persistenceManager.insert(cn, dialect, table, addRows[i], paramValueMapper);
+						actualAddCount += 1;
 					}
 				}
 

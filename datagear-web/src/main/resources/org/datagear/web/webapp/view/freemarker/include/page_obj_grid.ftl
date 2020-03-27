@@ -68,6 +68,23 @@ page_js_obj.jsp
 		
 		return false;
 	};
+
+	/**
+	 * 调用页面参数对象的"select"函数。
+	 * @param closeDefault 默认是否关闭
+	 * @param arg... 可选，函数参数
+	 */
+	po.pageParamCallSelect = function(closeDefault, arg)
+	{
+		var close = po.pageParamApply("select", $.makeArray(arguments).slice(1));
+		if(close !== true && close !== false)
+			close = closeDefault;
+		
+		if(close && !po.isDialogPinned())
+			po.close();
+		
+		return close;
+	};
 	
 	/**
 	 * 构建ajax数据表格选项。

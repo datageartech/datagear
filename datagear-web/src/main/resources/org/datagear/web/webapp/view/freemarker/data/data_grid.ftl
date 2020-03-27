@@ -163,26 +163,14 @@ boolean readonly 是否只读操作，默认为false
 			{
 				po.executeOnSelects(function(rows)
 				{
-					var close = po.pageParamCall("submit", rows);
-					
-					if(close == undefined)
-						close = true;
-					
-					if(close && !$.isDialogPinned($.getInDialog(po.element())))
-						po.close();
+					po.pageParamCallSelect(false, rows);
 				});
 			}
 			else
 			{
 				po.executeOnSelect(function(row)
 				{
-					var close = po.pageParamCall("submit", row);
-					
-					if(close == undefined)
-						close = true;
-					
-					if(close && !$.isDialogPinned($.getInDialog(po.element())))
-						po.close();
+					po.pageParamCallSelect(true, row);
 				});
 			}
 		});

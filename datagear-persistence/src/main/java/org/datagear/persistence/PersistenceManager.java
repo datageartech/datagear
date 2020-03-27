@@ -29,10 +29,10 @@ public interface PersistenceManager
 	 * @param cn
 	 * @param table
 	 * @param row
-	 * @return
+	 * @return 保存的行对象，可能包含自动生成列值
 	 * @throws PersistenceException
 	 */
-	int insert(Connection cn, Table table, Row row) throws PersistenceException;
+	Row insert(Connection cn, Table table, Row row) throws PersistenceException;
 
 	/**
 	 * 插入行对象。
@@ -44,10 +44,10 @@ public interface PersistenceManager
 	 * @param row
 	 * @param mapper
 	 *            允许为{@code null}
-	 * @return
+	 * @return 保存的行对象，可能包含自动生成列值
 	 * @throws PersistenceException
 	 */
-	int insert(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper)
+	Row insert(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper)
 			throws PersistenceException;
 
 	/**
@@ -166,11 +166,14 @@ public interface PersistenceManager
 	 * 获取行对象。
 	 * 
 	 * @param cn
-	 * @param dialect             允许为{@code null}
+	 * @param dialect
+	 *            允许为{@code null}
 	 * @param table
 	 * @param param
-	 * @param sqlParamValueMapper 允许为{@code null}
-	 * @param rowMapper           允许为{@code null}
+	 * @param sqlParamValueMapper
+	 *            允许为{@code null}
+	 * @param rowMapper
+	 *            允许为{@code null}
 	 * @return
 	 * @throws NonUniqueResultException
 	 * @throws PersistenceException

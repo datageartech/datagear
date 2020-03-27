@@ -126,10 +126,7 @@
 			{
 				success : function()
 				{
-					var close = (po.pageParamCall("afterSave")  != false);
-					
-					if(close)
-						po.close();
+					po.pageParamCallAfterSave(true);
 				}
 			});
 		},

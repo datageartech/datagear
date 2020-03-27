@@ -378,9 +378,10 @@ readonly 是否只读操作，允许为null
 		{
 			pageParam :
 			{
-				submit : function(dataSets)
+				select : function(dataSets)
 				{
 					po.addDataSet(dataSets);
+					return true;
 				}
 			}
 		};
@@ -585,10 +586,7 @@ readonly 是否只读操作，允许为null
 					var chart = response.data;
 					po.element("input[name='id']").val(chart.id);
 					
-					var close = (po.pageParamCall("afterSave")  == true);
-					
-					if(close)
-						po.close();
+					po.pageParamCallAfterSave(true);
 					
 					if(po.previewAfterSave)
 						window.open(po.url("show/"+chart.id+"/"), chart.id);

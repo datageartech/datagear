@@ -53,7 +53,7 @@
 		{
 			pageParam :
 			{
-				submit : function(users)
+				select : function(users)
 				{
 					var data = {role : po.role, users : users};
 					

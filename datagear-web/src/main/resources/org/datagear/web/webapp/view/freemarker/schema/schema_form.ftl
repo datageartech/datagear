@@ -153,7 +153,7 @@ readonly 是否只读操作，允许为null
 		{
 			pageParam :
 			{
-				submit : function(driverEntity)
+				select : function(driverEntity)
 				{
 					po.element("input[name='driverEntity.id']").val(driverEntity.id);
 					po.element("#driverEntityText").val(driverEntity.displayText);
@@ -219,10 +219,7 @@ readonly 是否只读操作，允许为null
 					if(po._STATE_TEST_CONNECTION == true)
 						return;
 					
-					var close = (po.pageParamCall("afterSave")  != false);
-					
-					if(close)
-						po.close();
+					po.pageParamCallAfterSave(true);
 				},
 				complete: function()
 				{

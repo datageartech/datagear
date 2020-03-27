@@ -132,7 +132,7 @@ readonly 是否只读操作，允许为null
 		{
 			pageParam :
 			{
-				submit : function(schema)
+				select : function(schema)
 				{
 					po.element("input[name='schemaConnectionFactory.schema.title']").val(schema.title);
 					po.element("input[name='schemaConnectionFactory.schema.id']").val(schema.id);
@@ -346,10 +346,7 @@ readonly 是否只读操作，允许为null
 			{
 				success : function()
 				{
-					var close = (po.pageParamCall("afterSave")  != false);
-					
-					if(close)
-						po.close();
+					po.pageParamCallAfterSave(true);
 				}
 			});
 		},

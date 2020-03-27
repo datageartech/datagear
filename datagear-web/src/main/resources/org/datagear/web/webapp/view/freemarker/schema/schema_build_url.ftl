@@ -139,9 +139,7 @@ preview 是否是预览请求，允许为null
 			<#if preview>
 			po.element(".url-preview").text(url);
 			<#else>
-			var close = (po.pageParamCall("setSchemaUrl", url)  != false);
-			
-			if(close)
+			if(po.pageParamCall("setSchemaUrl", url)  != false);
 				po.close();
 			</#if>
 			

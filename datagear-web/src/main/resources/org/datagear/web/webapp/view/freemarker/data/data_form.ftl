@@ -65,71 +65,53 @@ boolean batchSet 是否开启批量执行功能，默认为false
 				var formData = $(this).tableform("data");
 				var batchParam = $(this).tableform("batchParam");
 				
-				var close = true;
+				var thisForm = this;
+				var url = po.url(po.submitAction);
+				if(batchParam && batchParam.batchCount)
+				{
+					url = $.addParam(url, "batchCount", batchParam.batchCount);
+					if(batchParam.batchHandleErrorMode)
+						url = $.addParam(url, "batchHandleErrorMode", batchParam.batchHandleErrorMode);
+				}
+				var param = (po.dataIsClient ? formData : {"data" : formData, "originalData" : po.data});
 				
-				//父页面定义了submit回调函数，则优先执行
-				if(po.pageParam("submit"))
+				po.ajaxSubmitForHandleDuplication(url, param, "<@spring.message code='save.continueIgnoreDuplicationTemplate' />",
 				{
-					close = (po.pageParamCall("submit", formData, batchParam) != false);
-					
-					if(close && !$(this).tableform("isDialogPinned"))
-						po.close();
-				}
-				//否则，POST至后台
-				else
-				{
-					var thisForm = this;
-					var url = po.url(po.submitAction);
-					if(batchParam && batchParam.batchCount)
+					beforeSend : function()
 					{
-						url = $.addParam(url, "batchCount", batchParam.batchCount);
-						if(batchParam.batchHandleErrorMode)
-							url = $.addParam(url, "batchHandleErrorMode", batchParam.batchHandleErrorMode);
-					}
-					var param = (po.dataIsClient ? formData : {"data" : formData, "originalData" : po.data});
-					
-					po.ajaxSubmitForHandleDuplication(url, param, "<@spring.message code='save.continueIgnoreDuplicationTemplate' />",
+						$(thisForm).tableform("disableOperation");
+					},
+					success : function(operationMessage)
 					{
-						beforeSend : function()
+						var $form = $(thisForm);
+						var batchSubmit = $form.tableform("isBatchSubmit");
+						
+						$form.tableform("enableOperation");
+						
+						po.refreshParent();
+						
+						if(batchSubmit)
+							po.pageParamCallAfterSave(true);
+						else
 						{
-							$(thisForm).tableform("disableOperation");
-						},
-						success : function(operationMessage)
-						{
-							var $form = $(thisForm);
-							var batchSubmit = $form.tableform("isBatchSubmit");
-							var isDialogPinned = $form.tableform("isDialogPinned");
+							//更新操作成功后要更新页面初始数据，确保再次提交正确
+							if(!po.dataIsClient)
+								po.data = operationMessage.data;
 							
-							$form.tableform("enableOperation");
-							
-							po.refreshParent();
-							
-							if(batchSubmit)
-								;
-							else
-							{
-								//更新操作成功后要更新页面初始数据，确保再次提交正确
-								if(!po.dataIsClient)
-									po.data = operationMessage.data;
-								
-								close = (po.pageParamCall("afterSave", operationMessage.data) != false);
-								
-								if(close && !isDialogPinned)
-									po.close();
-							}
-						},
-						error : function()
-						{
-							var $form = $(thisForm);
-							var batchSubmit = $form.tableform("isBatchSubmit");
-							
-							$form.tableform("enableOperation");
-							
-							if(batchSubmit)
-								po.refreshParent();
+							po.pageParamCallAfterSave(true, operationMessage.data);
 						}
-					});
-				}
+					},
+					error : function()
+					{
+						var $form = $(thisForm);
+						var batchSubmit = $form.tableform("isBatchSubmit");
+						
+						$form.tableform("enableOperation");
+						
+						if(batchSubmit)
+							po.refreshParent();
+					}
+				});
 				
 				return false;
 			},

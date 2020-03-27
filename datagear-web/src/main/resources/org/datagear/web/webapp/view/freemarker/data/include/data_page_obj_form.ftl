@@ -48,7 +48,7 @@ po.dataIsClient = true;
 		{
 			pageParam :
 			{
-				submit : function(data)
+				select : function(data)
 				{
 					var myobj = $.meta.fromImportKeyPrimary(importKey, data);
 					$(thisForm).tableform("data", myobj);

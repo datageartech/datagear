@@ -148,14 +148,7 @@ selectOperation 是否选择操作，允许为null
 	{
 		po.executeOnSelect(function(row)
 		{
-			var close = po.pageParamCall("submit", row);
-			
-			//单选默认关闭
-			if(close == undefined)
-				close = true;
-			
-			if(close)
-				po.close();
+			po.pageParamCallSelect(true, row);
 		});
 	});
 	

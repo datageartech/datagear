@@ -223,7 +223,7 @@ readonly 是否只读操作，允许为null
 		{
 			pageParam :
 			{
-				submit : function(res)
+				select : function(res)
 				{
 					po.element("input[name='resource']").val(res.${resourceMeta.selectResourceIdField});
 					po.element("input[name='resourceNameForEntity']").val(res.${resourceMeta.selectResourceNameField});
@@ -243,7 +243,7 @@ readonly 是否只读操作，允许为null
 		{
 			pageParam :
 			{
-				submit : function(user)
+				select : function(user)
 				{
 					po.element("input[name='principal']").val(user.id);
 					po.element("input[name='principalNameUser']").val(user.nameLabel);
@@ -262,7 +262,7 @@ readonly 是否只读操作，允许为null
 		{
 			pageParam :
 			{
-				submit : function(role)
+				select : function(role)
 				{
 					po.element("input[name='principal']").val(role.id);
 					po.element("input[name='principalNameRole']").val(role.name);
@@ -313,10 +313,7 @@ readonly 是否只读操作，允许为null
 			{
 				success : function()
 				{
-					var close = (po.pageParamCall("afterSave")  != false);
-					
-					if(close)
-						po.close();
+					po.pageParamCallAfterSave(true);
 				}
 			});
 		},

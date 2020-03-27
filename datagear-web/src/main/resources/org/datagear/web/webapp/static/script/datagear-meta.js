@@ -181,7 +181,10 @@
 					continue;
 				
 				//如果没有默认值，明确赋值为null，避免某些页面逻辑错误（比如DataTable的cell().data()会取值为""空字符串）
-				data[column.name] = (column.defaultValue != undefined ? column.defaultValue : null);
+				data[column.name] = null;
+				
+				//不设置默认值了，因为默认值可能仅是数据库级的标识，比如Mysql的"CURRENT_TIMESTAMP"
+				//data[column.name] = (column.defaultValue != undefined ? column.defaultValue : null);
 			}
 			
 			return data;

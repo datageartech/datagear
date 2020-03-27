@@ -815,9 +815,10 @@ readonly 是否只读操作，允许为null
 		{
 			pageParam :
 			{
-				submit : function(charts)
+				select : function(charts)
 				{
 					po.insertChartCode(charts);
+					return true;
 				}
 			}
 		};
@@ -889,12 +890,7 @@ readonly 是否只读操作，允许为null
 					var dashboard = response.data;
 					po.element("input[name='id']").val(dashboard.id);
 					po.templates = dashboard.templates;
-					
-					var close = (po.pageParamCall("afterSave")  == true);
-					
-					if(!close)
-						po.refreshDashboardResources();
-					
+
 					if(po.showAfterSave)
 					{
 						var showUrl = po.url("show/"+dashboard.id+"/");
@@ -905,8 +901,9 @@ readonly 是否只读操作，允许为null
 						window.open(showUrl, showUrl);
 					}
 					
-					if(close)
-						po.close();
+					var close = po.pageParamCallAfterSave(false);
+					if(!close)
+						po.refreshDashboardResources();
 				},
 				complete: function()
 				{

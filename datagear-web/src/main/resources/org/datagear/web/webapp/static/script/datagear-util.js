@@ -139,39 +139,24 @@
 		 * 如果没有页面参数或者指定的函数，返回undefined。
 		 * 
 		 * @param $dom 必选，任意dom元素
-		 * @param args... 可选，页面参数是函数时，函数参数；页面参数是对象时，[函数名, 函数参数]
+		 * @param functionName 可选，如果页面参数是对象，则指定页面对象的函数名
+		 * @param argArray 可选，函数参数数组
 		 */
-		pageParamCall : function($dom, args)
+		pageParamCall : function($dom, functionName, argArray)
 		{
 			var pageParam = $.pageParam($dom);
 			
-			//没有页面参数
+			//无页面参数
 			if(!pageParam)
-			{
 				return undefined;
-			}
+			
 			//页面参数是函数
-			else if($.isFunction(pageParam))
-			{
-				var pargs = $.makeArray(arguments).slice(1);
-				
-				pageParam.apply(window, pargs);
-			}
+			if($.isFunction(pageParam))
+				return pageParam.apply(window, arguments[1]);
+			
 			//页面参数是对象
-			else
-			{
-				if(arguments.length < 2)
-					throw new Error("The function name in the page param object to be call should be set");
-				
-				var fun = pageParam[arguments[1]];
-				
-				if(fun == undefined)
-					return undefined;
-				
-				var pargs = $.makeArray(arguments).slice(2);
-				
-				return fun.apply(pageParam, pargs);
-			}
+			var fun = pageParam[arguments[1]];
+			return (fun == undefined ? undefined : fun.apply(pageParam, arguments[2]));
 		},
 		
 		/**

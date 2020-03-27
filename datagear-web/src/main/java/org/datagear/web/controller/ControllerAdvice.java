@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.support.UnsupportedSqlTypeException;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverClassFormatErrorException;
 import org.datagear.connection.DriverEntityManagerException;
@@ -238,23 +239,23 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(DBMetaResolverException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleDbmodelDatabaseInfoResolverException(HttpServletRequest request, HttpServletResponse response,
-			DBMetaResolverException exception)
-	{
-		setOperationMessageForThrowable(request, buildMessageCode(DBMetaResolverException.class), exception, true);
-
-		return getErrorView(request, response);
-	}
-
 	@ExceptionHandler(TableNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public String handleDbmodelTableNotFoundException(HttpServletRequest request, HttpServletResponse response,
+	public String handleMetaTableNotFoundException(HttpServletRequest request, HttpServletResponse response,
 			TableNotFoundException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(TableNotFoundException.class), exception, false,
 				exception.getTableName());
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(DBMetaResolverException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleMetaDBMetaResolverException(HttpServletRequest request, HttpServletResponse response,
+			DBMetaResolverException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(DBMetaResolverException.class), exception, true);
 
 		return getErrorView(request, response);
 	}
@@ -330,6 +331,15 @@ public class ControllerAdvice extends AbstractController
 		setOperationMessageForThrowable(request, buildMessageCode(EstablishConnectionException.class),
 				exception.getCause(), true);
 
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(UnsupportedSqlTypeException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisUnsupportedSqlTypeException(HttpServletRequest request, HttpServletResponse response,
+			UnsupportedSqlTypeException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedSqlTypeException.class), exception, false);
 		return getErrorView(request, response);
 	}
 

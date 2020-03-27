@@ -111,6 +111,13 @@ var ${pageId} =
 		}
 	},
 	
+	/*页面所在的对话框是否钉住*/
+	isDialogPinned: function()
+	{
+		var myDialog = $.getInDialog(this.element());
+		return (myDialog.length < 1 ? false : $.isDialogPinned(myDialog));
+	},
+	
 	/**
 	 * 获取此页面参数对象。
 	 * @param name 可选，页面参数对象属性名
@@ -128,13 +135,24 @@ var ${pageId} =
 	},
 	
 	/**
-	 * 调用页面参数对象函数，参考$.pageParamCall。
+	 * 调用页面参数对象指定函数。
+	 * @param functionName 必选
+	 * @param arg,... 可选，函数参数
 	 */
-	pageParamCall : function(args)
+	pageParamCall : function(functionName, arg)
 	{
-		args = [this.element()].concat($.makeArray(arguments));
-		
-		return $.pageParamCall.apply($, args);
+		var argArray = (arg == undefined ? undefined : $.makeArray(arguments).slice(1));
+		return $.pageParamCall(this.element(), functionName, argArray);
+	},
+	
+	/**
+	 * 调用页面参数对象指定函数。
+	 * @param functionName 必选
+	 * @param argArray 可选，函数参数
+	 */
+	pageParamApply : function(functionName, argArray)
+	{
+		return $.pageParamCall(this.element(), functionName, argArray);
 	},
 	
 	/**
