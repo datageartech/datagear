@@ -380,6 +380,9 @@ readonly 是否只读操作，允许为null
 			{
 				select : function(dataSets)
 				{
+					if(!$.isArray(dataSets))
+						dataSets = [dataSets];
+					
 					po.addDataSet(dataSets);
 					return true;
 				}

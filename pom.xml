@@ -40,7 +40,6 @@
 		<module>datagear-web</module>
 		<module>datagear-webapp</module>
 		<module>datagear-webappembd</module>
-    	<module>datagear-deprecated</module>
 	</modules>
 	
 	<dependencies>

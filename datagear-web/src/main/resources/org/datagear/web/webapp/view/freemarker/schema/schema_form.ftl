@@ -214,12 +214,12 @@ readonly 是否只读操作，允许为null
 			
 			$form.ajaxSubmit(
 			{
-				success : function()
+				success : function(operationMessage)
 				{
 					if(po._STATE_TEST_CONNECTION == true)
 						return;
 					
-					po.pageParamCallAfterSave(true);
+					po.pageParamCallAfterSave(true, operationMessage.data);
 				},
 				complete: function()
 				{

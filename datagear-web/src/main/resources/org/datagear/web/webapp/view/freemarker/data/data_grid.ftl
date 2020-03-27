@@ -113,7 +113,21 @@ boolean readonly 是否只读操作，默认为false
 		<#if !readonly>
 		po.element("input[name=addButton]").click(function()
 		{
-			po.open(po.url("", "add", "batchSet=true"), { pinTitleButton : true });
+			var options=
+			{
+				pinTitleButton: true,
+				<#if selectOperation>
+				pageParam:
+				{
+					afterSave: function(row)
+					{
+						po.pageParamCallSelect(true, row);
+					}
+				}
+				</#if>
+			};
+			
+			po.open(po.url("", "add", "batchSet=true"), options);
 		});
 		
 		po.element("input[name=editButton]").click(function()

@@ -3,9 +3,11 @@
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
+boolean readonly 是否只读操作，默认为false
 -->
 <#assign selectOperation=(selectOperation!false)>
 <#assign isMultipleSelect=(isMultipleSelect!false)>
+<#assign readonly=(readonly!false)>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -23,12 +25,18 @@ selectOperation 是否选择操作，允许为null
 		<div class="operation">
 			<#if selectOperation>
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
+			</#if>
+			<#if readonly>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<#if !selectOperation>
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<#if !selectOperation>
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				</#if>
 			</#if>
 		</div>
 	</div>
@@ -58,41 +66,31 @@ selectOperation 是否选择操作，允许为null
 		return "${contextPath}/user/" + action;
 	};
 	
-	<#if !selectOperation>
-		po.element("input[name=addButton]").click(function()
+	po.element("input[name=addButton]").click(function()
+	{
+		po.open(po.url("add"),
 		{
-			po.open(po.url("add"),
+			<#if selectOperation>
+			pageParam:
 			{
-				pageParam :
+				afterSave: function(data)
 				{
-					afterSave : function()
-					{
-						po.refresh();
-					}
+					po.pageParamCallSelect(true, data);
 				}
-			});
+			}
+			</#if>
 		});
-		
-		po.element("input[name=editButton]").click(function()
+	});
+	
+	po.element("input[name=editButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
 		{
-			po.executeOnSelect(function(row)
-			{
-				var data = {"id" : row.id};
-				
-				po.open(po.url("edit"),
-				{
-					data : data,
-					pageParam :
-					{
-						afterSave : function()
-						{
-							po.refresh();
-						}
-					}
-				});
-			});
+			var data = {"id" : row.id};
+			
+			po.open(po.url("edit"), { data : data });
 		});
-	</#if>
+	});
 
 	po.element("input[name=viewButton]").click(function()
 	{
@@ -107,35 +105,32 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	<#if !selectOperation>
-		po.element("input[name=deleteButton]").click(
-		function()
+	po.element("input[name=deleteButton]").click(
+	function()
+	{
+		po.executeOnSelects(function(rows)
 		{
-			po.executeOnSelects(function(rows)
+			po.confirm("<@spring.message code='user.confirmDelete' />",
 			{
-				po.confirm("<@spring.message code='user.confirmDelete' />",
+				"confirm" : function()
 				{
-					"confirm" : function()
+					var data = $.getPropertyParamString(rows, "id");
+					
+					$.post(po.url("delete"), data, function()
 					{
-						var data = $.getPropertyParamString(rows, "id");
-						
-						$.post(po.url("delete"), data, function()
-						{
-							po.refresh();
-						});
-					}
-				});
+						po.refresh();
+					});
+				}
 			});
 		});
-	</#if>
+	});
 	
-	<#if selectOperation>
 	po.element("input[name=confirmButton]").click(function()
 	{
 		<#if isMultipleSelect>
 		po.executeOnSelects(function(rows)
 		{
-			po.pageParamCallSelect(false, rows);
+			po.pageParamCallSelect(true, rows);
 		});
 		<#else>
 		po.executeOnSelect(function(row)
@@ -144,7 +139,6 @@ selectOperation 是否选择操作，允许为null
 		});
 		</#if>
 	});
-	</#if>
 	
 	po.buildTableColumValueOption = function(title, data, hidden)
 	{

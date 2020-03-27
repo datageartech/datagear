@@ -89,7 +89,7 @@ public class RoleController extends AbstractController
 
 		this.roleService.add(role);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return buildOperationMessageSaveSuccessResponseEntity(request, role);
 	}
 
 	@RequestMapping("/edit")
@@ -115,7 +115,7 @@ public class RoleController extends AbstractController
 
 		this.roleService.update(role);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return buildOperationMessageSaveSuccessResponseEntity(request, role);
 	}
 
 	@RequestMapping("/view")

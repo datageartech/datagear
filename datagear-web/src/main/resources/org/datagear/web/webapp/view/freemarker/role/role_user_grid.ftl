@@ -55,6 +55,9 @@
 			{
 				select : function(users)
 				{
+					if(!$.isArray(users))
+						users = [users];
+					
 					var data = {role : po.role, users : users};
 					
 					$.post(po.url("saveAdd"), data, function()

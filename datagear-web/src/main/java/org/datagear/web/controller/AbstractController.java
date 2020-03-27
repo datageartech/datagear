@@ -267,6 +267,21 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 构建“保存成功”操作消息对应的{@linkplain ResponseEntity}。
+	 * 
+	 * @return
+	 */
+	protected ResponseEntity<OperationMessage> buildOperationMessageSaveSuccessResponseEntity(
+			HttpServletRequest request, Object data)
+	{
+		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSuccessResponseEntity(request,
+				"saveSuccess");
+		responseEntity.getBody().setData(data);
+
+		return responseEntity;
+	}
+
+	/**
 	 * 构建保存操作消息对应的{@linkplain ResponseEntity}。
 	 * 
 	 * @return

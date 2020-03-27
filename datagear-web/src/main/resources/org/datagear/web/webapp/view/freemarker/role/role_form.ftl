@@ -87,9 +87,9 @@ readonly 是否只读操作，允许为null
 		{
 			$(form).ajaxSubmit(
 			{
-				success : function()
+				success : function(operationMessage)
 				{
-					po.pageParamCallAfterSave(true);
+					po.pageParamCallAfterSave(true, operationMessage.data);
 				}
 			});
 		},

@@ -59,16 +59,7 @@ selectOperation 是否选择操作，允许为null
 	<#if !selectOperation>
 	po.element("input[name=uploadButton]").click(function()
 	{
-		po.open(po.url("upload"),
-		{
-			pageParam :
-			{
-				afterSave : function()
-				{
-					po.refresh();
-				}
-			}
-		});
+		po.open(po.url("upload"));
 	});
 	
 	po.element("input[name=downloadButton]").click(function()

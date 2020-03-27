@@ -7,6 +7,7 @@ Object data 初始数据，允许null
 boolean dataIsClient 初始数据是否是客户端数据，默认为false
 String titleOperationMessageKey 标题操作标签I18N关键字，不允许null
 String titleDisplayName 页面展示名称，默认为""
+String titleDisplayDesc 页面展示描述，默认为""
 String submitAction 提交活动，po.pageParam().submit(...)未定义时，不允许为null
 boolean readonly 是否只读操作，默认为false
 String ignorePropertyName 忽略表单渲染和处理的属性名，默认为""
@@ -14,6 +15,7 @@ boolean batchSet 是否开启批量执行功能，默认为false
 -->
 <#assign dataIsClient=(dataIsClient!false)>
 <#assign titleDisplayName=(titleDisplayName!'')>
+<#assign titleDisplayDesc=(titleDisplayDesc!'')>
 <#assign submitAction=(submitAction!'#')>
 <#assign readonly=(readonly!false)>
 <#assign ignorePropertyName=(ignorePropertyName!'')>
@@ -26,6 +28,14 @@ boolean batchSet 是否开启批量执行功能，默认为false
 	<@spring.message code='${titleOperationMessageKey}' />
 	<@spring.message code='titleSeparator' />
 	${titleDisplayName?html}
+	<#if titleDisplayDesc != ''>
+	<@spring.message code='bracketLeft' />
+	${titleDisplayDesc?html}
+	<@spring.message code='bracketRight' />
+	</#if>
+	<@spring.message code='bracketLeft' />
+	${schema.title?html}
+	<@spring.message code='bracketRight' />
 </title>
 </head>
 <body>
@@ -87,8 +97,6 @@ boolean batchSet 是否开启批量执行功能，默认为false
 						var batchSubmit = $form.tableform("isBatchSubmit");
 						
 						$form.tableform("enableOperation");
-						
-						po.refreshParent();
 						
 						if(batchSubmit)
 							po.pageParamCallAfterSave(true);

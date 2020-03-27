@@ -3,8 +3,10 @@
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
+boolean readonly 是否只读操作，默认为false
 -->
 <#assign selectOperation=(selectOperation!false)>
+<#assign readonly=(readonly!false)>
 <html>
 <head>
 <#include "../include/html_head.ftl">
@@ -22,12 +24,18 @@ selectOperation 是否选择操作，允许为null
 		<div class="operation">
 			<#if selectOperation>
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
+			</#if>
+			<#if readonly>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<#if !selectOperation>
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<#if !selectOperation>
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				</#if>
 			</#if>
 		</div>
 	</div>
@@ -57,18 +65,19 @@ selectOperation 是否选择操作，允许为null
 		return "${contextPath}/schema/" + action;
 	};
 	
-	<#if !selectOperation>
 	po.element("input[name=addButton]").click(function()
 	{
 		po.open(po.url("add"),
 		{
-			pageParam :
+			<#if selectOperation>
+			pageParam:
 			{
-				afterSave : function()
+				afterSave: function(data)
 				{
-					po.refresh();
+					po.pageParamCallSelect(true, data);
 				}
 			}
+			</#if>
 		});
 	});
 	
@@ -78,17 +87,7 @@ selectOperation 是否选择操作，允许为null
 		{
 			var data = {"id" : row.id};
 			
-			po.open(po.url("edit"),
-			{
-				data : data,
-				pageParam :
-				{
-					afterSave : function()
-					{
-						po.refresh();
-					}
-				}
-			});
+			po.open(po.url("edit"), { data : data });
 		});
 	});
 	
@@ -111,7 +110,6 @@ selectOperation 是否选择操作，允许为null
 			});
 		});
 	});
-	</#if>
 	
 	po.element("input[name=viewButton]").click(function()
 	{
@@ -126,7 +124,6 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	<#if selectOperation>
 	po.element("input[name=confirmButton]").click(function()
 	{
 		po.executeOnSelect(function(row)
@@ -134,7 +131,6 @@ selectOperation 是否选择操作，允许为null
 			po.pageParamCallSelect(true, row);
 		});
 	});
-	</#if>
 	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),

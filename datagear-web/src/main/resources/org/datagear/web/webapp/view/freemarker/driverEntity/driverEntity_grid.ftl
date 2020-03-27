@@ -64,28 +64,21 @@ selectOperation 是否选择操作，允许为null
 		{
 			po.open(po.url("add"),
 			{
-				pageParam :
+				<#if selectOperation>
+				pageParam:
 				{
-					afterSave : function()
+					afterSave: function(data)
 					{
-						po.refresh();
+						po.pageParamCallSelect(true, data);
 					}
 				}
+				</#if>
 			});
 		});
 		
 		po.element("input[name=importButton]").click(function()
 		{
-			po.open(po.url("import"),
-			{
-				pageParam :
-				{
-					afterSave : function()
-					{
-						po.refresh();
-					}
-				}
-			});
+			po.open(po.url("import"));
 		});
 
 		po.element("input[name=exportButton]").click(function()
@@ -104,17 +97,7 @@ selectOperation 是否选择操作，允许为null
 			{
 				var data = {"id" : row.id};
 				
-				po.open(po.url("edit"),
-				{
-					data : data,
-					pageParam :
-					{
-						afterSave : function()
-						{
-							po.refresh();
-						}
-					}
-				});
+				po.open(po.url("edit"), { data : data });
 			});
 		});
 	</#if>

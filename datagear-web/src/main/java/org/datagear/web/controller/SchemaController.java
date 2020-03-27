@@ -94,7 +94,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		getSchemaService().add(user, schema);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return buildOperationMessageSaveSuccessResponseEntity(request, schema);
 	}
 
 	@RequestMapping("/edit")
@@ -132,7 +132,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 				&& (!schema.getUrl().equals(old.getUrl()) || !schema.getUser().equals(old.getUser())))
 			getTableCache().invalidate(schema.getId());
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return buildOperationMessageSaveSuccessResponseEntity(request, schema);
 	}
 
 	@RequestMapping("/view")

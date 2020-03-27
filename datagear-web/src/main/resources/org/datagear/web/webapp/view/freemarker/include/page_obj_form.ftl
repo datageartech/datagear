@@ -11,6 +11,19 @@ page_js_obj.jsp
 	{
 		return this.element("#${pageId}-form");
 	};
+
+	po.refreshParent = function()
+	{
+		var poParent = po.parent();
+		if(poParent && poParent.refresh && $.isFunction(poParent.refresh))
+		{
+			try
+			{
+				poParent.refresh();
+			}
+			catch(e){}
+		}
+	};
 	
 	/**
 	 * 调用页面参数对象的"afterSave"函数。
@@ -19,6 +32,8 @@ page_js_obj.jsp
 	 */
 	po.pageParamCallAfterSave = function(closeDefault, arg)
 	{
+		po.refreshParent();
+		
 		var close = po.pageParamApply("afterSave", $.makeArray(arguments).slice(1));
 		if(close !== true && close !== false)
 			close = closeDefault;

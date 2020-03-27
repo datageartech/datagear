@@ -51,7 +51,7 @@ po.dataIsClient = true;
 				select : function(data)
 				{
 					var myobj = $.meta.fromImportKeyPrimary(importKey, data);
-					$(thisForm).tableform("data", myobj);
+					$(thisForm).tableform("data", myobj, true);
 				}
 			}
 		};
@@ -93,19 +93,6 @@ po.dataIsClient = true;
 			url = po.url("downloadColumnValue");
 			options.data = { data: $.toJsonString($.meta.uniqueRecordData(table, po.data)), columnName: column.name };
 			po.open(url, options);
-		}
-	};
-	
-	po.refreshParent = function()
-	{
-		var poParent = po.parent();
-		if(poParent && poParent.refresh && $.isFunction(poParent.refresh))
-		{
-			try
-			{
-				poParent.refresh();
-			}
-			catch(e){}
 		}
 	};
 })

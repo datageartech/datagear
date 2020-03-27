@@ -285,9 +285,7 @@ public class DataController extends AbstractSchemaConnTableController
 			}
 		}.execute();
 
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(savedRow);
-		return responseEntity;
+		return buildOperationMessageSaveSuccessResponseEntity(request, savedRow);
 	}
 
 	protected ResponseEntity<OperationMessage> saveAddBatch(HttpServletRequest request, HttpServletResponse response,
@@ -363,11 +361,11 @@ public class DataController extends AbstractSchemaConnTableController
 		final Row originalRow = convertToRow((Map<String, ?>) paramData.get("originalData"));
 		final Row updateRow = convertToRow((Map<String, ?>) paramData.get("data"));
 
-		ResponseEntity<OperationMessage> responseEntity = new ReturnSchemaConnTableExecutor<ResponseEntity<OperationMessage>>(
+		Row updatedRow = new ReturnSchemaConnTableExecutor<Row>(
 				request, response, springModel, schemaId, tableName, false)
 		{
 			@Override
-			protected ResponseEntity<OperationMessage> execute(HttpServletRequest request, HttpServletResponse response,
+			protected Row execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
 			{
 				checkEditTableDataPermission(schema, user);
@@ -381,15 +379,11 @@ public class DataController extends AbstractSchemaConnTableController
 
 				checkDuplicateRecord(1, count, ignoreDuplication);
 
-				ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveCountResponseEntity(request,
-						count);
-				responseEntity.getBody().setData(updateRow);
-
-				return responseEntity;
+				return myUpdateRow;
 			}
 		}.execute();
 
-		return responseEntity;
+		return buildOperationMessageSaveSuccessResponseEntity(request, updatedRow);
 	}
 
 	@RequestMapping(value = "/{schemaId}/{tableName}/delete", produces = CONTENT_TYPE_JSON)
