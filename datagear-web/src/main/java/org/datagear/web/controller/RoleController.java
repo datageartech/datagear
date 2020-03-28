@@ -137,7 +137,7 @@ public class RoleController extends AbstractController
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("id") String[] ids)
+			@RequestBody String[] ids)
 	{
 		this.roleService.deleteByIds(ids);
 
@@ -231,7 +231,7 @@ public class RoleController extends AbstractController
 	@RequestMapping(value = "user/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> userDelete(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("id") String[] roleUserIds)
+			@RequestBody String[] roleUserIds)
 	{
 		this.roleUserService.deleteByIds(roleUserIds);
 

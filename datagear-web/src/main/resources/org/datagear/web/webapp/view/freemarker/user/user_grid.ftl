@@ -110,18 +110,7 @@ boolean readonly 是否只读操作，默认为false
 	{
 		po.executeOnSelects(function(rows)
 		{
-			po.confirm("<@spring.message code='user.confirmDelete' />",
-			{
-				"confirm" : function()
-				{
-					var data = $.getPropertyParamString(rows, "id");
-					
-					$.post(po.url("delete"), data, function()
-					{
-						po.refresh();
-					});
-				}
-			});
+			po.confirmDeleteEntities(po.url("delete"), rows);
 		});
 	});
 	

@@ -58,7 +58,6 @@ selectOperation 是否选择操作，允许为null
 		return "${contextPath}/role/" + action;
 	};
 	
-	<#if !selectOperation>
 	po.element("input[name=addButton]").click(function()
 	{
 		po.open(po.url("add"),
@@ -99,7 +98,6 @@ selectOperation 是否选择操作，允许为null
 			po.open(po.url("user/query"), options);
 		});
 	});
-	</#if>
 	
 	po.element("input[name=viewButton]").click(function()
 	{
@@ -114,27 +112,14 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	<#if !selectOperation>
-		po.element("input[name=deleteButton]").click(
-		function()
+	po.element("input[name=deleteButton]").click(
+	function()
+	{
+		po.executeOnSelects(function(rows)
 		{
-			po.executeOnSelects(function(rows)
-			{
-				po.confirm("<@spring.message code='role.confirmDelete' />",
-				{
-					"confirm" : function()
-					{
-						var data = $.getPropertyParamString(rows, "id");
-						
-						$.post(po.url("delete"), data, function()
-						{
-							po.refresh();
-						});
-					}
-				});
-			});
+			po.confirmDeleteEntities(po.url("delete"), rows);
 		});
-	</#if>
+	});
 	
 	po.element("input[name=confirmButton]").click(function()
 	{

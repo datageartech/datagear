@@ -560,6 +560,92 @@
 		},
 		
 		/**
+		 * 表单数据转JSON对象。
+		 * @param form 表单对象、名称/值对象数组
+		 * @param simple 是否当做简单名称而不处理"a.b"格式的属性路径名称，可选，默认为false
+		 */
+		formToJson: function(form, simple)
+		{
+			simple = (simple || false);
+			var array = ($.isArray(form) ? form : $(form).serializeArray());
+			
+			var json = {};
+			
+			array.each(function()
+			{
+				var name = this.name;
+				var value = this.value;
+				
+				if(simple)
+					json[name] = value;
+				else
+				{
+					var names = name.split(".");
+					var parent = json;
+					for(var i=0; i<names.length; i++)
+					{
+						if(i == names.length - 1)
+							parent[names[i]] = value;
+						else
+						{
+							var myParent = parent[names[i]];
+							if(!myParent)
+								myParent = (parent[names[i]] = {});
+							parent = myParent;
+						}
+					}
+				}
+			});
+			
+			return json;
+		},
+		
+		/**
+		 * 拷贝对象。
+		 * 
+		 * @param obj 对象、对象数组
+		 * @param names 仅拷贝的属性名/数组，可选
+		 */
+		copyObject: function(obj, names)
+		{
+			var isArray = $.isArray(obj);
+			var array = (isArray? obj : [obj]);
+			if(names)
+				names = ($.isArray(names) ? names : [names]);
+			
+			var re=[];
+			for(var i=0; i<array.length; i++)
+			{
+				re[i] = {};
+				for(var p in array[i])
+				{
+					if(!names || $.inArray(p, names) >= 0)
+						re[i][p] = array[i][p];
+				}
+			}
+			
+			return (isArray? re : re[0]);
+		},
+		
+		/**
+		 * 获取对象/对象数组指定名称属性值。
+		 * 
+		 * @param obj 对象、对象数组
+		 * @param name 属性名
+		 */
+		propertyValue: function(obj, name)
+		{
+			var isArray = $.isArray(obj);
+			var array = (isArray? obj : [obj]);
+			
+			var re = [];
+			for(var i=0; i<array.length; i++)
+				re[i] = array[i][name];
+			
+			return (isArray? re : re[0]);
+		},
+		
+		/**
 		 * 给URL添加参数。
 		 * 
 		 * @param url 待添加参数的URL
@@ -1492,6 +1578,30 @@
 			}
 			
 			return parseInt(value) + factor[count];
+		},
+		
+		/**
+		 * 提交JSON数据。
+		 */
+		postJson: function(url, data, success)
+		{
+			$.ajax(
+			{
+				contentType: $.CONTENT_TYPE_JSON,
+				type : "POST",
+				url : url,
+				data : data,
+				success : success
+			});
+		},
+		
+		/**
+		 * ajax提交JSON数据。
+		 */
+		ajaxJson: function(options)
+		{
+			options.contentType = $.CONTENT_TYPE_JSON;
+			$.ajax(options);
 		},
 		
 		/**

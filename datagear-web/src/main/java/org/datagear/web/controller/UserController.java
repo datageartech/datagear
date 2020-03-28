@@ -162,7 +162,7 @@ public class UserController extends AbstractController
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("id") String[] ids)
+			@RequestBody String[] ids)
 	{
 		this.userService.deleteByIds(ids);
 

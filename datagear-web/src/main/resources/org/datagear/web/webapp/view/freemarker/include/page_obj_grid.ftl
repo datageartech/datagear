@@ -86,6 +86,20 @@ page_js_obj.jsp
 		return close;
 	};
 	
+	po.confirmDeleteEntities = function(url, rows, idPropertyName)
+	{
+		po.confirm("<@spring.message code='confirmDelete' />",
+		{
+			"confirm" : function()
+			{
+				$.postJson(url, $.propertyValue(rows, (idPropertyName || "id")), function()
+				{
+					po.refresh();
+				});
+			}
+		});
+	};
+	
 	/**
 	 * 构建ajax数据表格选项。
 	 * 此ajax选项支持两个回调函数：
@@ -121,10 +135,9 @@ page_js_obj.jsp
 				
 				var param = $.extend({ "orders" : nameOrder }, myData);
 				
-				$.ajax(
+				$.ajaxJson(
 				{
 					url : url,
-					contentType: $.CONTENT_TYPE_JSON,
 					dataType : "json",
 					type : "POST",
 					data : param,

@@ -56,7 +56,6 @@ selectOperation 是否选择操作，允许为null
 		return "${contextPath}/analysis/chartPlugin/" + action;
 	};
 
-	<#if !selectOperation>
 	po.element("input[name=uploadButton]").click(function()
 	{
 		po.open(po.url("upload"));
@@ -78,21 +77,9 @@ selectOperation 是否选择操作，允许为null
 	{
 		po.executeOnSelects(function(rows)
 		{
-			po.confirm("<@spring.message code='confirmDelete' />",
-			{
-				"confirm" : function()
-				{
-					var data = $.getPropertyParamString(rows, "id");
-					
-					$.post(po.url("delete"), data, function()
-					{
-						po.refresh();
-					});
-				}
-			});
+			po.confirmDeleteEntities(po.url("delete"), rows);
 		});
 	});
-	</#if>
 	
 	var columnIcon = $.buildDataTablesColumnSimpleOption("<@spring.message code='chartPlugin.icon' />", "iconUrl", true);
 	columnIcon.render = function(data, type, row, meta)

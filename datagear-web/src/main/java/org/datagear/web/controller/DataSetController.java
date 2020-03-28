@@ -229,7 +229,7 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("id") String[] ids)
+			@RequestBody String[] ids)
 	{
 		User user = WebUtils.getUser(request, response);
 

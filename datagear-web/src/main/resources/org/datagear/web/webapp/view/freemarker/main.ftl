@@ -447,9 +447,8 @@ ${detectNewVersionScript}
 					var param = po.getSearchSchemaFormDataForTable();
 					param = $.extend({}, data.node.original.nextPageInfo, param);
 					
-					$.ajax($.toPath(false, contextPath, "schema", schemaId, "pagingQueryTable"),
+					$.ajaxJson($.toPath(false, contextPath, "schema", schemaId, "pagingQueryTable"),
 					{
-						contentType: $.CONTENT_TYPE_JSON,
 						type: "POST",
 						data : param,
 						success : function(pagingData)
@@ -910,20 +909,15 @@ ${detectNewVersionScript}
 					{
 						"confirm" : function()
 						{
-							var schemaIdParam = "";
+							var schemas = [];
 							
 							for(var i=0; i<selNodes.length; i++)
 							{
 								if(po.isSchemaNode(selNodes[i]))
-								{
-									if(schemaIdParam != "")
-										schemaIdParam += "&";
-									
-									schemaIdParam += "id=" + selNodes[i].original.id;
-								}
+									schemas.push(selNodes[i].original);
 							}
 							
-							$.post(contextPath+"/schema/delete", schemaIdParam, function()
+							$.postJson(contextPath+"/schema/delete", $.propertyValue(schemas, "id"), function()
 							{
 								jstree.refresh(true);
 							});

@@ -78,18 +78,7 @@
 	{
 		po.executeOnSelects(function(rows)
 		{
-			po.confirm("<@spring.message code='confirmDelete' />",
-			{
-				"confirm" : function()
-				{
-					var data = $.getPropertyParamObjArray(rows, "id");
-					
-					$.post(po.url("delete"), data, function()
-					{
-						po.refresh();
-					});
-				}
-			});
+			po.confirmDeleteEntities(po.url("delete"), rows);
 		});
 	});
 	

@@ -162,7 +162,7 @@ public class AuthorizationController extends AbstractController
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @PathVariable("resourceType") String resourceType,
-			@RequestParam("id") String[] ids)
+			@RequestBody String[] ids)
 	{
 		setResourceMetaAttribute(model, resourceType);
 		this.authorizationService.deleteByIds(WebUtils.getUser(request, response), ids);

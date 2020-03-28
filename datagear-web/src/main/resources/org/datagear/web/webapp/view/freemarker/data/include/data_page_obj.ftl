@@ -93,9 +93,9 @@
 			if(ignoreDuplication)
 				url = $.addParam(url, "ignoreDuplication", "true");
 			
-			var options = $.extend({ contentType: $.CONTENT_TYPE_JSON }, ajaxOptions, { data : data, error : errorCallback, type : "POST" });
+			var options = $.extend({}, ajaxOptions, { data : data, error : errorCallback, type : "POST" });
 			
-			$.ajax(url, options);
+			$.ajaxJson(url, options);
 		},
 	};
 	

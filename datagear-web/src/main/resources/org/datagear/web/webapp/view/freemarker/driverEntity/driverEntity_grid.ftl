@@ -59,48 +59,46 @@ selectOperation 是否选择操作，允许为null
 		return "${contextPath}/driverEntity/" + action;
 	};
 	
-	<#if !selectOperation>
-		po.element("input[name=addButton]").click(function()
+	po.element("input[name=addButton]").click(function()
+	{
+		po.open(po.url("add"),
 		{
-			po.open(po.url("add"),
+			<#if selectOperation>
+			pageParam:
 			{
-				<#if selectOperation>
-				pageParam:
+				afterSave: function(data)
 				{
-					afterSave: function(data)
-					{
-						po.pageParamCallSelect(true, data);
-					}
+					po.pageParamCallSelect(true, data);
 				}
-				</#if>
-			});
+			}
+			</#if>
 		});
-		
-		po.element("input[name=importButton]").click(function()
-		{
-			po.open(po.url("import"));
-		});
+	});
+	
+	po.element("input[name=importButton]").click(function()
+	{
+		po.open(po.url("import"));
+	});
 
-		po.element("input[name=exportButton]").click(function()
-		{
-			var selectedDatas = po.getSelectedData();
-			var param = $.getPropertyParamString(selectedDatas, "id");
-			
-			var options = {target : "_file"};
-			
-			po.open(po.url("export?"+param), options);
-		});
+	po.element("input[name=exportButton]").click(function()
+	{
+		var selectedDatas = po.getSelectedData();
+		var param = $.getPropertyParamString(selectedDatas, "id");
 		
-		po.element("input[name=editButton]").click(function()
+		var options = {target : "_file"};
+		
+		po.open(po.url("export?"+param), options);
+	});
+	
+	po.element("input[name=editButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
 		{
-			po.executeOnSelect(function(row)
-			{
-				var data = {"id" : row.id};
-				
-				po.open(po.url("edit"), { data : data });
-			});
+			var data = {"id" : row.id};
+			
+			po.open(po.url("edit"), { data : data });
 		});
-	</#if>
+	});
 
 	po.element("input[name=viewButton]").click(function()
 	{
@@ -115,27 +113,14 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	<#if !selectOperation>
-		po.element("input[name=deleteButton]").click(
-		function()
+	po.element("input[name=deleteButton]").click(
+	function()
+	{
+		po.executeOnSelects(function(rows)
 		{
-			po.executeOnSelects(function(rows)
-			{
-				po.confirm("<@spring.message code='driverEntity.confirmDelete' />",
-				{
-					"confirm" : function()
-					{
-						var data = $.getPropertyParamString(rows, "id");
-						
-						$.post(po.url("delete"), data, function()
-						{
-							po.refresh();
-						});
-					}
-				});
-			});
+			po.confirmDeleteEntities(po.url("delete"), rows);
 		});
-	</#if>
+	});
 	
 	po.element("input[name=confirmButton]").click(function()
 	{

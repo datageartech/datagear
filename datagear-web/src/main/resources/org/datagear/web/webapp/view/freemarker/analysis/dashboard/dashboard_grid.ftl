@@ -67,7 +67,6 @@ selectOperation 是否选择操作，允许为null
 		return "${contextPath}/analysis/dashboard/" + action;
 	};
 
-	<#if !selectOperation>
 	po.element("input[name=addButton]").click(function()
 	{
 		po.open(po.url("add"),
@@ -115,7 +114,6 @@ selectOperation 是否选择操作，允许为null
 					+"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent(row.id), options);
 		});
 	});
-	</#if>
 	
 	po.element("input[name=viewButton]").click(function()
 	{
@@ -139,29 +137,15 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	<#if !selectOperation>
-		po.element("input[name=deleteButton]").click(
-		function()
+	po.element("input[name=deleteButton]").click(
+	function()
+	{
+		po.executeOnSelects(function(rows)
 		{
-			po.executeOnSelects(function(rows)
-			{
-				po.confirm("<@spring.message code='confirmDelete' />",
-				{
-					"confirm" : function()
-					{
-						var data = $.getPropertyParamString(rows, "id");
-						
-						$.post(po.url("delete"), data, function()
-						{
-							po.refresh();
-						});
-					}
-				});
-			});
+			po.confirmDeleteEntities(po.url("delete"), rows);
 		});
-	</#if>
+	});
 	
-	<#if selectOperation>
 	po.element("input[name=confirmButton]").click(function()
 	{
 		po.executeOnSelect(function(row)
@@ -169,7 +153,6 @@ selectOperation 是否选择操作，允许为null
 			po.pageParamCallSelect(true, row);
 		});
 	});
-	</#if>
 	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='id' />"), "id"),

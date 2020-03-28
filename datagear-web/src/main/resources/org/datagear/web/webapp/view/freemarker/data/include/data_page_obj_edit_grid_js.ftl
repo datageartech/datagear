@@ -513,7 +513,6 @@ data_page_obj_edit_grid_html.ftl
 	{
 		var options =
 		{
-			"contentType" : $.CONTENT_TYPE_JSON,
 			"type" : "POST",
 			"url" : po.url("getColumnValuess"),
 			"data" : { "datas" : $.meta.uniqueRecordData(po.editGridMetaTable, needFetchRowDatas), "columnNamess" : needFetchColumnNamess },
@@ -595,7 +594,7 @@ data_page_obj_edit_grid_html.ftl
 			
 			var fetchAjaxOptions = po.buildEditCellFetchColumnValuessAjaxOptions(editDataTable, indexes, focus, columnNameCellIndexes, data,
 					needFetchRows, needFetchRowDatas, needFetchColumnNamess);
-			$.ajax(fetchAjaxOptions);
+			$.ajaxJson(fetchAjaxOptions);
 		}
 		else
 			po.showEditCellPanel(editDataTable, indexes, columnNameCellIndexes, data, focus);
@@ -914,7 +913,7 @@ data_page_obj_edit_grid_html.ftl
 			else
 			{
 				var ajaxOptions = po.buildAjaxSaveEditCellOptions(editDataTable, modifiedCells, addRows, deleteRows);
-				$.ajax(ajaxOptions);
+				$.ajaxJson(ajaxOptions);
 			}
 		};
 		
@@ -989,7 +988,6 @@ data_page_obj_edit_grid_html.ftl
 		
 		var options =
 		{
-			"contentType" : $.CONTENT_TYPE_JSON,
 			"type" : "POST",
 			"url" : po.url("savess"),
 			"data" :
