@@ -444,7 +444,14 @@
 				var labeldiv=$("<div class='form-item-label' />").appendTo(itemdiv);
 				var valuediv=$("<div class='form-item-value' />").appendTo(itemdiv);
 				
-				$("<label />").html(columnName).attr("title", (column.comment || columnName)).appendTo(labeldiv);
+				var $label = $("<label />").html(columnName).attr("title", (column.comment || columnName)).appendTo(labeldiv);
+				
+				if(!$.meta.supportsColumn(column))
+				{
+					$label.addClass("ui-state-disabled");
+					$("<input type='text' />").addClass("ui-state-disabled").appendTo(valuediv);
+					continue;
+				}
 				
 				var columnValue = $.meta.columnValue(data, columnName);
 				

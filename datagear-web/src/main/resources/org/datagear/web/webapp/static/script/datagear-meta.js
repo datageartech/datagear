@@ -15,8 +15,8 @@
 	if(!$meta.schemaTableCache)
 		$meta.schemaTableCache = {};
 	
-	//java.sql.Types
-	$meta.typeEnum=
+	//PersistenceSupport.supportsSqlType支持的SQL类型
+	$meta.Types=
 	{
 		TINYINT: -6, SMALLINT: 5, INTEGER: 4, BIGINT: -5, REAL: 7, FLOAT: 6,
 		DOUBLE: 8, DECIMAL: 3, NUMERIC: 2, BIT: -7, BOOLEAN: 16, CHAR: 1,
@@ -204,7 +204,7 @@
 			else
 			{
 				columns = [];
-				var Types = this.typeEnum;
+				var Types = this.Types;
 				for(var i=0; i<table.columns.length; i++)
 				{
 					var column = table.columns[i];
@@ -272,69 +272,85 @@
 		
 		binaryColumnValueFilePrefix: "file:",
 		
+		/**
+		 * 是否支持指定列的持久化操作，参考PersistenceSupport.supportsSqlType(）。
+		 */
+		supportsColumn: function(column)
+		{
+			var type = column.type;
+			
+			for(var p in this.Types)
+			{
+				if(this.Types[p] == type)
+					return true;
+			}
+			
+			return false;
+		},
+		
 		isBinaryColumn: function(column)
 		{
 			var type = column.type;
 			
-			return (type == this.typeEnum.BINARY
-						|| type == this.typeEnum.VARBINARY || this.isBlobColumn(column));
+			return (type == this.Types.BINARY
+						|| type == this.Types.VARBINARY || this.isBlobColumn(column));
 		},
 		
 		isBlobColumn: function(column)
 		{
 			var type = column.type;
 			
-			return (type == this.typeEnum.LONGVARBINARY
-						|| type == this.typeEnum.BLOB);
+			return (type == this.Types.LONGVARBINARY
+						|| type == this.Types.BLOB);
 		},
 		
 		isTextColumn: function(column)
 		{
 			var type = column.type;
 			
-			return (type == this.typeEnum.CHAR || type == this.typeEnum.VARCHAR
-					 || type == this.typeEnum.LONGVARCHAR || type == this.typeEnum.CLOB
-					 || type == this.typeEnum.NCHAR || type == this.typeEnum.NVARCHAR
-					 || type == this.typeEnum.LONGNVARCHAR|| type == this.typeEnum.NCLOB
-					 || type == this.typeEnum.SQLXML);
+			return (type == this.Types.CHAR || type == this.Types.VARCHAR
+					 || type == this.Types.LONGVARCHAR || type == this.Types.CLOB
+					 || type == this.Types.NCHAR || type == this.Types.NVARCHAR
+					 || type == this.Types.LONGNVARCHAR|| type == this.Types.NCLOB
+					 || type == this.Types.SQLXML);
 		},
 		
 		isClobColumn: function(column)
 		{
 			var type = column.type;
 			
-			return (type == this.typeEnum.LONGVARCHAR
-						|| type == this.typeEnum.CLOB
-						|| type == this.typeEnum.LONGNVARCHAR);
+			return (type == this.Types.LONGVARCHAR
+						|| type == this.Types.CLOB
+						|| type == this.Types.LONGNVARCHAR);
 		},
 		
 		isSqlxmlColumn: function(column)
 		{
 			var type = column.type;
-			return (type == this.typeEnum.SQLXML);
+			return (type == this.Types.SQLXML);
 		},
 		
 		isDateColumn: function(column)
 		{
-			return (column.type == this.typeEnum.DATE);
+			return (column.type == this.Types.DATE);
 		},
 
 		isTimeColumn: function(column)
 		{
 			var type = column.type;
-			return (type == this.typeEnum.TIME || type == this.typeEnum.TIME_WITH_TIMEZONE);
+			return (type == this.Types.TIME || type == this.Types.TIME_WITH_TIMEZONE);
 		},
 
 		isTimestampColumn: function(column)
 		{
 			var type = column.type;
-			return (type == this.typeEnum.TIMESTAMP || type == this.typeEnum.TIMESTAMP_WITH_TIMEZONE);
+			return (type == this.Types.TIMESTAMP || type == this.Types.TIMESTAMP_WITH_TIMEZONE);
 		},
 		
 		isBooleanColumn: function(column)
 		{
 			var type = column.type;
-			return (type == this.typeEnum.BIT || type == this.typeEnum.BOOLEAN);
+			return (type == this.Types.BIT || type == this.Types.BOOLEAN);
 		},
 		
 		/**

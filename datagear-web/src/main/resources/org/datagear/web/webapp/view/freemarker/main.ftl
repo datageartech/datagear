@@ -449,7 +449,6 @@ ${detectNewVersionScript}
 					
 					$.ajaxJson($.toPath(false, contextPath, "schema", schemaId, "pagingQueryTable"),
 					{
-						type: "POST",
 						data : param,
 						success : function(pagingData)
 						{

@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -89,6 +90,17 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@ExceptionHandler(HttpMessageNotReadableException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleControllerHttpMessageNotReadableException(HttpServletRequest request,
+			HttpServletResponse response, HttpMessageNotReadableException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(HttpMessageNotReadableException.class), exception,
+				false);
+
+		return getErrorView(request, response);
+	}
+
 	@ExceptionHandler(IllegalInputException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handleControllerIllegalInputException(HttpServletRequest request, HttpServletResponse response,
@@ -104,7 +116,8 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerIllegalArgumentException(HttpServletRequest request, HttpServletResponse response,
 			IllegalArgumentException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(IllegalArgumentException.class), exception, false);
+		setOperationMessageForInternalServerError(request, buildMessageCode(IllegalArgumentException.class),
+				exception);
 
 		return getErrorView(request, response);
 	}
@@ -220,7 +233,8 @@ public class ControllerAdvice extends AbstractController
 	public String handlePersistenceUnsupportedDialectException(HttpServletRequest request, HttpServletResponse response,
 			UnsupportedDialectException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedDialectException.class), exception, false);
+		setOperationMessageForInternalServerError(request, buildMessageCode(UnsupportedDialectException.class),
+				exception);
 
 		return getErrorView(request, response);
 	}
@@ -234,7 +248,7 @@ public class ControllerAdvice extends AbstractController
 			setOperationMessageForThrowable(request, buildMessageCode(PersistenceException.class), exception.getCause(),
 					true);
 		else
-			setOperationMessageForThrowable(request, buildMessageCode(PersistenceException.class), exception, true);
+			setOperationMessageForInternalServerError(request, buildMessageCode(PersistenceException.class), exception);
 
 		return getErrorView(request, response);
 	}
@@ -369,12 +383,16 @@ public class ControllerAdvice extends AbstractController
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String handleThrowable(HttpServletRequest request, HttpServletResponse response, Throwable t)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(Throwable.class), t, false, t.getMessage());
-
-		if (LOGGER.isErrorEnabled())
-			LOGGER.error("Controller exception", t);
+		setOperationMessageForInternalServerError(request, buildMessageCode(Throwable.class), t);
 
 		return getErrorView(request, response);
+	}
+
+	protected void setOperationMessageForInternalServerError(HttpServletRequest request, String messageCode,
+			Throwable t)
+	{
+		setOperationMessageForThrowable(request, messageCode, t, false, t.getMessage());
+		LOGGER.error("", t);
 	}
 
 	/**

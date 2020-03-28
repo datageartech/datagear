@@ -931,7 +931,7 @@
 		{
 			return "<a title='"+$.escapeHtml(titleTip)+"'>"+$.escapeHtml(titleName)+"</a>";
 		},
-
+		
 		buildDataTablesColumnTitleSearchable : function(titleName)
 		{
 			return "<a class='column-searchable'>"+$.escapeHtml(titleName)+"</a>";
@@ -962,11 +962,14 @@
 			{
 				var column = columns[i];
 				
+				var disable = !$.meta.supportsColumn(column);
+				
 				dtColumns.push(
 				{
 					title: $.meta.displayInfoHtml(column, "a"),
 					data: $.escapeColumnNameForDataTable(column.name),
 					columnIndex: i,
+					columnName: column.name,
 					options : options,
 					render: function(data, type, row, meta)
 					{
@@ -999,7 +1002,8 @@
 					},
 					defaultContent: "",
 					orderable: column.sortable,
-					searchable: true
+					searchable: true,
+					className: (disable ? "ui-state-disabled" : "")
 				});
 			}
 			
@@ -1013,11 +1017,9 @@
 		{
 			var columnInfos = this.getDataTableColumnInfos(settings);
 			
-			var escapedName = $.escapeColumnNameForDataTable(columnName);
-			
 			for(var i=0; i<columnInfos.length; i++)
 			{
-				if(escapedName == columnInfos[i].data)
+				if(columnName == columnInfos[i].data || columnName == columnInfos[i].columnName)
 					return i;
 			}
 			
@@ -1056,7 +1058,9 @@
 		getDataTableCellName : function(settings, cellIndex)
 		{
 			var columnInfos = this.getDataTableColumnInfos(settings);
-			return $.unescapeColumnNameForDataTable(columnInfos[cellIndex.column].data);
+			var dtColumn = columnInfos[cellIndex.column];
+			
+			return (dtColumn.columnName || dtColumn.data);
 		},
 		
 		/**
@@ -1070,7 +1074,7 @@
 			for(var i=0; i<cellIndexes.length; i++)
 			{
 				var index = cellIndexes[i];
-				var columnName = $.unescapeColumnNameForDataTable(columnInfos[index.column].data);
+				var columnName = (columnInfos[index.column].columnName || columnInfos[index.column].data);
 				
 				var indexes = (nameIndexes[columnName] || (nameIndexes[columnName] = []));
 				indexes.push(index);
@@ -1597,11 +1601,25 @@
 		
 		/**
 		 * ajax提交JSON数据。
+		 * 
+		 * @param url 可选
+		 * @param options 必选
 		 */
-		ajaxJson: function(options)
+		ajaxJson: function(url, options)
 		{
-			options.contentType = $.CONTENT_TYPE_JSON;
-			$.ajax(options);
+			if(options == undefined)
+			{
+				options = url;
+				options.contentType = $.CONTENT_TYPE_JSON;
+				options.type = "POST";
+				$.ajax(options);
+			}
+			else
+			{
+				options.contentType = $.CONTENT_TYPE_JSON;
+				options.type = "POST";
+				$.ajax(url, options);
+			}
 		},
 		
 		/**

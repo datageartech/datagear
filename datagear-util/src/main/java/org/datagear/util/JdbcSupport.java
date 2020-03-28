@@ -855,7 +855,7 @@ public class JdbcSupport
 	protected Object setParamValueExt(Connection cn, PreparedStatement st, int paramIndex, SqlParamValue paramValue)
 			throws SQLException
 	{
-		throw new UnsupportedOperationException("Set JDBC [" + paramValue.getType() + "] type value is not supported");
+		throw new UnsupportedOperationException("Set JDBC type [" + paramValue.getType() + "] value is not supported");
 	}
 
 	protected void write(File file, OutputStream out) throws SQLException

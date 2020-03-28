@@ -91,6 +91,11 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			for (int i = 0; i < columns.length; i++)
 			{
 				Column column = columns[i];
+				
+				// 忽略不支持的列，避免程序不可用
+				if(!supportsColumn(column))
+					continue;
+				
 				String name = column.getName();
 				Object value = row.get(name);
 
@@ -162,6 +167,11 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			for (int i = 0; i < columns.length; i++)
 			{
 				Column column = columns[i];
+
+				// 忽略不支持的列，避免程序不可用
+				if (!supportsColumn(column))
+					continue;
+
 				String name = column.getName();
 
 				if (!update.containsKey(name))

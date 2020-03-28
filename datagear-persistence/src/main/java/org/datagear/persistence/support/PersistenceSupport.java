@@ -7,6 +7,7 @@ package org.datagear.persistence.support;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -281,8 +282,13 @@ public class PersistenceSupport extends JdbcSupport
 				Column[] columns = table.getColumns();
 				for (int i = 0; i < columns.length; i++)
 				{
-					Object value = getColumnValue(cn, rs, columns[i].getName(), columns[i].getType());
-					row.put(columns[i].getName(), value);
+					Column column = columns[i];
+
+					if (!supportsColumn(column))
+						continue;
+
+					Object value = getColumnValue(cn, rs, column);
+					row.put(column.getName(), value);
 				}
 			}
 			catch (SQLException e)
@@ -302,5 +308,62 @@ public class PersistenceSupport extends JdbcSupport
 	public SqlParamValue createSqlParamValue(Column column, Object value)
 	{
 		return new SqlParamValue(value, column.getType());
+	}
+
+	/**
+	 * 是否指定指定列的持久化操作。
+	 * 
+	 * @param column
+	 * @return
+	 */
+	public boolean supportsColumn(Column column)
+	{
+		return supportsSqlType(column.getType());
+	}
+
+	/**
+	 * 是否指定指定SQL类型的持久化操作。
+	 * 
+	 * @param sqlType
+	 * @return
+	 */
+	public boolean supportsSqlType(int sqlType)
+	{
+		switch (sqlType)
+		{
+			case Types.TINYINT:
+			case Types.SMALLINT:
+			case Types.INTEGER:
+			case Types.BIGINT:
+			case Types.REAL:
+			case Types.FLOAT:
+			case Types.DOUBLE:
+			case Types.DECIMAL:
+			case Types.NUMERIC:
+			case Types.BIT:
+			case Types.BOOLEAN:
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.BINARY:
+			case Types.VARBINARY:
+			case Types.LONGVARBINARY:
+			case Types.DATE:
+			case Types.TIME:
+			case Types.TIME_WITH_TIMEZONE:
+			case Types.TIMESTAMP:
+			case Types.TIMESTAMP_WITH_TIMEZONE:
+			case Types.CLOB:
+			case Types.BLOB:
+			case Types.NCHAR:
+			case Types.NVARCHAR:
+			case Types.LONGNVARCHAR:
+			case Types.NCLOB:
+			case Types.SQLXML:
+				return true;
+
+			default:
+				return false;
+		}
 	}
 }
