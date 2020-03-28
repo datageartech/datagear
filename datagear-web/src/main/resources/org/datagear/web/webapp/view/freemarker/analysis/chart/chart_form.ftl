@@ -384,7 +384,6 @@ readonly 是否只读操作，允许为null
 						dataSets = [dataSets];
 					
 					po.addDataSet(dataSets);
-					return true;
 				}
 			}
 		};
@@ -589,7 +588,7 @@ readonly 是否只读操作，允许为null
 					var chart = response.data;
 					po.element("input[name='id']").val(chart.id);
 					
-					po.pageParamCallAfterSave(true);
+					po.pageParamCallAfterSave(true, response.data);
 					
 					if(po.previewAfterSave)
 						window.open(po.url("show/"+chart.id+"/"), chart.id);

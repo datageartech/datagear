@@ -120,14 +120,14 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
-		dataSet.setCreateUser(user);
+		dataSet.setCreateUser(User.copyWithoutPassword(user));
 		inflateDataSetProperties(request, dataSet);
 
 		checkSaveEntity(dataSet);
 
 		this.sqlDataSetEntityService.add(user, dataSet);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/edit")
@@ -163,7 +163,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		this.sqlDataSetEntityService.update(user, dataSet);
 
-		return buildOperationMessageSaveSuccessResponseEntity(request);
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
 	}
 
 	@RequestMapping("/view")

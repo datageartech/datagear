@@ -817,6 +817,9 @@ readonly 是否只读操作，允许为null
 			{
 				select : function(charts)
 				{
+					if(!$.isArray(charts))
+						charts = [charts];
+					
 					po.insertChartCode(charts);
 					return true;
 				}

@@ -90,7 +90,7 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		schema.setId(IDUtil.randomIdOnTime20());
 		schema.setCreateTime(new Date());
-		schema.setCreateUser(WebUtils.getUser(request, response));
+		schema.setCreateUser(User.copyWithoutPassword(user));
 
 		getSchemaService().add(user, schema);
 
@@ -123,9 +123,11 @@ public class SchemaController extends AbstractSchemaConnTableController
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
 
+		User user = WebUtils.getUser(request, response);
+
 		Schema old = getSchemaService().getById(schema.getId());
 
-		boolean updated = getSchemaService().update(WebUtils.getUser(request, response), schema);
+		boolean updated = getSchemaService().update(user, schema);
 
 		// 如果URL或者用户变更了，则需要清除缓存
 		if (updated && old != null

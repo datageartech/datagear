@@ -179,10 +179,12 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		User user = WebUtils.getUser(request, response);
 
+		HtmlChartPlugin<HtmlRenderContext> paramPlugin = entity.getHtmlChartPlugin();
+
 		if (isEmpty(entity.getId()))
 		{
 			entity.setId(IDUtil.randomIdOnTime20());
-			entity.setCreateUser(user);
+			entity.setCreateUser(User.copyWithoutPassword(user));
 			inflateHtmlChartWidgetEntity(entity, request);
 
 			checkSaveEntity(entity);
@@ -196,13 +198,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			this.htmlChartWidgetEntityService.update(user, entity);
 		}
 
-		Map<String, Object> data = new HashMap<>();
-		data.put("id", entity.getId());
-
-		ResponseEntity<OperationMessage> responseEntity = buildOperationMessageSaveSuccessResponseEntity(request);
-		responseEntity.getBody().setData(data);
-
-		return responseEntity;
+		// 返回参数不应该完全加载插件对象
+		entity.setHtmlChartPlugin(paramPlugin);
+		return buildOperationMessageSaveSuccessResponseEntity(request, entity);
 	}
 
 	@RequestMapping("/view")

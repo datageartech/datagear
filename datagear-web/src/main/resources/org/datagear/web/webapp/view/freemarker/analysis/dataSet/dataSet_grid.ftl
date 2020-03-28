@@ -3,9 +3,11 @@
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 selectOperation 是否选择操作，允许为null
+boolean readonly 是否只读操作，默认为false
 -->
 <#assign selectOperation=(selectOperation!false)>
 <#assign isMultipleSelect=(isMultipleSelect!false)>
+<#assign readonly=(readonly!false)>
 <#assign SqlDataSetEntity=statics['org.datagear.management.domain.SqlDataSetEntity']>
 <html>
 <head>
@@ -25,15 +27,21 @@ selectOperation 是否选择操作，允许为null
 		<div class="operation">
 			<#if selectOperation>
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
+			</#if>
+			<#if readonly>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<#if !selectOperation>
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
+				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
+				<#if !selectOperation>
 				<#if !(currentUser.anonymous)>
 				<input name="shareButton" type="button" value="<@spring.message code='share' />" />
 				</#if>
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
+				</#if>
 			</#if>
 		</div>
 	</div>
@@ -66,7 +74,6 @@ selectOperation 是否选择操作，允许为null
 		return "${contextPath}/analysis/dataSet/" + action;
 	};
 
-	<#if !selectOperation>
 	po.element("input[name=addButton]").click(function()
 	{
 		po.open(po.url("add"),
@@ -109,7 +116,6 @@ selectOperation 是否选择操作，允许为null
 					+"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent(row.id), options);
 		});
 	});
-	</#if>
 	
 	po.element("input[name=viewButton]").click(function()
 	{
@@ -124,35 +130,32 @@ selectOperation 是否选择操作，允许为null
 		});
 	});
 	
-	<#if !selectOperation>
-		po.element("input[name=deleteButton]").click(
-		function()
+	po.element("input[name=deleteButton]").click(
+	function()
+	{
+		po.executeOnSelects(function(rows)
 		{
-			po.executeOnSelects(function(rows)
+			po.confirm("<@spring.message code='confirmDelete' />",
 			{
-				po.confirm("<@spring.message code='confirmDelete' />",
+				"confirm" : function()
 				{
-					"confirm" : function()
+					var data = $.getPropertyParamString(rows, "id");
+					
+					$.post(po.url("delete"), data, function()
 					{
-						var data = $.getPropertyParamString(rows, "id");
-						
-						$.post(po.url("delete"), data, function()
-						{
-							po.refresh();
-						});
-					}
-				});
+						po.refresh();
+					});
+				}
 			});
 		});
-	</#if>
+	});
 	
-	<#if selectOperation>
 	po.element("input[name=confirmButton]").click(function()
 	{
 		<#if isMultipleSelect>
 		po.executeOnSelects(function(rows)
 		{
-			po.pageParamCallSelect(false, rows);
+			po.pageParamCallSelect(true, rows);
 		});
 		<#else>
 		po.executeOnSelect(function(row)
@@ -161,7 +164,6 @@ selectOperation 是否选择操作，允许为null
 		});
 		</#if>
 	});
-	</#if>
 	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),

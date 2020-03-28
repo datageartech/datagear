@@ -344,9 +344,9 @@ readonly 是否只读操作，允许为null
 		{
 			$(form).ajaxSubmit(
 			{
-				success : function()
+				success : function(response)
 				{
-					po.pageParamCallAfterSave(true);
+					po.pageParamCallAfterSave(true, response.data);
 				}
 			});
 		},
