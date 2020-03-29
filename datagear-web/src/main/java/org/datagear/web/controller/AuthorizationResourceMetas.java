@@ -653,7 +653,7 @@ public class AuthorizationResourceMetas
 
 		public static PermissionMeta valueOfDelete()
 		{
-			return valueOfEdit(Authorization.PERMISSION_DELETE_START);
+			return valueOfDelete(Authorization.PERMISSION_DELETE_START);
 		}
 
 		public static PermissionMeta valueOfDelete(int permission)
@@ -663,7 +663,7 @@ public class AuthorizationResourceMetas
 
 		public static PermissionMeta valueOfNone()
 		{
-			return valueOfEdit(Authorization.PERMISSION_NONE_START);
+			return valueOfNone(Authorization.PERMISSION_NONE_START);
 		}
 
 		public static PermissionMeta valueOfNone(int permission)
