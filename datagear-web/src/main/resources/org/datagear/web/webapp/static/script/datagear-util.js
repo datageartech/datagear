@@ -561,43 +561,160 @@
 		
 		/**
 		 * 表单数据转JSON对象。
-		 * @param form 表单对象、名称/值对象数组
-		 * @param simple 是否当做简单名称而不处理"a.b"格式的属性路径名称，可选，默认为false
+		 * @param form 表单元素、名称/值对象数组，名称支持“a.b[0].c”格式的属性路径
 		 */
-		formToJson: function(form, simple)
+		formToJson: function(form)
 		{
-			simple = (simple || false);
 			var array = ($.isArray(form) ? form : $(form).serializeArray());
 			
 			var json = {};
+			var KeyForArray = $.uid("__KEY_FOR_ARRAY_");
 			
-			array.each(function()
+			$(array).each(function()
 			{
 				var name = this.name;
 				var value = this.value;
 				
-				if(simple)
-					json[name] = value;
-				else
+				var names = $.splitPropertyPath(name);
+				var parent = json;
+				for(var i=0; i<names.length; i++)
 				{
-					var names = name.split(".");
-					var parent = json;
-					for(var i=0; i<names.length; i++)
+					var name = names[i];
+					var isEleKey = (name.length > 2 && name.charAt(0) == '[' && name.charAt(name.length-1) == ']');
+					if(isEleKey)
+						name = name.substring(1, name.length-1);
+					
+					if(i == names.length - 1)
 					{
-						if(i == names.length - 1)
-							parent[names[i]] = value;
+						//数组元素
+						if(isEleKey)
+						{
+							if(parent[KeyForArray] == undefined)
+								parent[KeyForArray] = true;
+							
+							parent[name] = value;
+						}
 						else
 						{
-							var myParent = parent[names[i]];
-							if(!myParent)
-								myParent = (parent[names[i]] = {});
-							parent = myParent;
+							var preValue = parent[name];
+							
+							if(preValue == undefined)
+								parent[name] = value;
+							else
+							{
+								//末尾允许重名并设为数组，以支持同名表单项
+								if($.isArray(preValue))
+									preValue.push(value);
+								else
+								{
+									parent[name] = [];
+									parent[name].push(preValue);
+									parent[name].push(value);
+								}
+							}
 						}
+					}
+					else
+					{
+						if(isEleKey && parent[KeyForArray] == undefined)
+							parent[KeyForArray] = true;
+							
+						var myParent = parent[name];
+						if(!myParent)
+							myParent = (parent[name] = {});
+						parent = myParent;
 					}
 				}
 			});
 			
-			return json;
+			return $._convertKeyForArrayObj(json, KeyForArray);
+		},
+
+		/**
+		 * 拆分属性路径字符串为数组。
+		 * @str 属性路径字符串，格式为："a.b[0].c"，拆分为：["a", "b", "[0]", "c"]
+		 */
+		splitPropertyPath: function(str)
+		{
+			var array = [];
+			
+			var ele = "";
+			for(var i=0; i<str.length; i++)
+			{
+				var c = str.charAt(i);
+				
+				if(c == '\\')
+				{
+					if((i + 1) < str.length)
+						ele += str.charAt(i+1);
+					i+=1;
+				}
+				else if(c == '.')
+				{
+					if(ele)
+						array.push(ele);
+					ele = "";
+				}
+				else if(c == '[')
+				{
+					if(ele)
+						array.push(ele);
+					ele = c;
+				}
+				else if(c == ']')
+				{
+					if(ele)
+						array.push(ele+c);
+					ele = "";
+				}
+				else
+					ele += c;
+			}
+			
+			if(ele)
+				array.push(ele);
+			
+			return array;
+		},
+		
+		_convertKeyForArrayObj(obj, keyForArray)
+		{
+			if(!$.isPlainObject(obj))
+				return obj;
+			
+			var isArrayObj = obj[keyForArray];
+			var ps = (isArrayObj ? [] : undefined);
+			
+			for(var p in obj)
+			{
+				if(p == keyForArray)
+					continue;
+				
+				if(isArrayObj)
+					ps.push(p);
+				
+				obj[p] = $._convertKeyForArrayObj(obj[p], keyForArray);
+			}
+			
+			if(!isArrayObj)
+				return obj;
+			
+			ps.sort(function(a, b)
+			{
+				if(a.length > b.length)
+					return 1;
+				else if(a.length < b.length)
+					return -1;
+				else
+					return (a < b ? -1 : 1);
+			});
+			
+			var re = [];
+			
+			for(var i=0; i<ps.length; i++)
+				re.push(obj[ps[i]]);
+			
+			return re;
 		},
 		
 		/**
@@ -854,25 +971,7 @@
 		 */
 		escapeColumnNameForDataTable : function(columnName)
 		{
-			return columnName;
-			
-			/* 后台dbmodel已经限定了propertyName不会包含特殊字符，不再需要此逻辑
-			var pn = "";
-			
-			for(var i=0; i<propertyName.length; i++)
-			{
-				var c = propertyName.charAt(i);
-				
-				if(c == '.')
-				{
-					pn += "\\" + c;
-				}
-				else
-					pn += c;
-			}
-			
-			return pn;
-			*/
+			return columnName.replace(".", "\\.");
 		},
 		
 		/**
@@ -880,33 +979,7 @@
 		 */
 		unescapeColumnNameForDataTable : function(columnName)
 		{
-			return columnName;
-			
-			/* 后台dbmodel已经限定了propertyName不会包含特殊字符，不再需要此逻辑
-			var pn = "";
-			
-			for(var i=0; i<propertyName.length; i++)
-			{
-				var c = propertyName.charAt(i);
-				
-				if(c == '\\')
-				{
-					var cin = ((i + 1) < propertyName.length ? propertyName.charAt(i + 1) : 0);
-					
-					if(cin == '.')
-					{
-						i += 1;
-						pn += cin;
-					}
-					else
-						pn += c;
-				}
-				else
-					pn += c;
-			}
-			
-			return pn;
-			*/
+			return columnName.replace("\\.", ".");
 		},
 		
 		buildDataTablesColumnSimpleOption : function(title, data, hidden)
@@ -2868,49 +2941,6 @@
 				token.value = token.value + chars.join("");
 				token.endIndex = sql.length;
 			}
-		}
-	});
-	
-	
-	$.fn.extend(
-	{
-		/**
-		 * 两次点击执行。
-		 * @param callback 必选，第二次点击处理函数
-		 * @param  firstCallback 可选，第一次点击处理函数
-		 */
-		secondClick : function(callback, firstCallback)
-		{
-			$(this).click(function()
-			{
-				var __this = $(this);
-				
-				//第二次点击
-				if(__this.hasClass("second-click-first"))
-				{
-					__this.removeClass("ui-state-active second-click-first");
-					
-					callback.call(__this);
-				}
-				else
-				{
-					var success = true;
-					
-					if(firstCallback)
-						success = firstCallback.call(__this);
-					
-					if(success != false)
-						__this.addClass("ui-state-active second-click-first");
-				}
-			})
-			.hover(function(){}, 
-			function()
-			{
-				var __this = $(this);
-				
-				if(__this.hasClass("second-click-first"))
-					$(this).removeClass("ui-state-active second-click-first");
-			});
 		}
 	});
 	
