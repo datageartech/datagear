@@ -58,6 +58,7 @@ boolean readonly 是否只读操作，默认为false
 				</#if>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<#if !selectOperation>
+				<input name="exportButton" type="button" value="<@spring.message code='export' />" />
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 				</#if>
 			</#if>
@@ -106,11 +107,13 @@ boolean readonly 是否只读操作，默认为false
 		po.element("input[name=deleteButton]").attr("disabled", "disabled").hide();
 	
 	if(!po.canReadTableData(${schema.dataPermission}))
+	{
 		po.element("input[name=viewButton]").attr("disabled", "disabled").hide();
+		po.element("input[name=exportButton]").attr("disabled", "disabled").hide();
+	}
 	
 	po.onTable(function(table)
 	{
-		<#if !readonly>
 		po.element("input[name=addButton]").click(function()
 		{
 			var options=
@@ -168,9 +171,7 @@ boolean readonly 是否只读操作，默认为false
 				});
 			});
 		});
-		</#if>
 		
-		<#if selectOperation>
 		po.element("input[name=confirmButton]").click(function()
 		{
 			if(po.isMultipleSelect)
@@ -188,7 +189,6 @@ boolean readonly 是否只读操作，默认为false
 				});
 			}
 		});
-		</#if>
 		
 		po.element("input[name=viewButton]").click(function()
 		{
@@ -201,6 +201,19 @@ boolean readonly 是否只读操作，默认为false
 					contentType: $.CONTENT_TYPE_JSON,
 					data : data
 				});
+			});
+		});
+		
+		po.element("input[name=exportButton]").click(function()
+		{
+			var query = po.getSearchParam();
+			query["orders"] = po.getOrdersOnName();
+			
+			$.postJson(po.url("getQuerySql"), query, function(response)
+			{
+				var options = {data: {"initSqls": response.sql}};
+				$.setGridPageHeightOption(options);
+				po.open("${contextPath}/dataexchange/"+po.schemaId+"/export", options);
 			});
 		});
 		

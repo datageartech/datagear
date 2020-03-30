@@ -55,7 +55,7 @@ Schema schema 数据库，不允许为null
 				<h3><@spring.message code='dataExport.selectAndExportData' /></h3>
 				<div>
 					<div class="form-item form-item-table-head form-item-add page-status-aware-show edit-status-show">
-						<div class="form-item-value">
+						<div class="form-item-value margin-left-none">
 							<div id="${pageId}-add-group">
 								<button type="button" class="table-add-item-button edit-state-aware ui-corner-left"><@spring.message code='add' /></button>
 								<select id="${pageId}-add-group-select">
@@ -65,7 +65,7 @@ Schema schema 数据库，不允许为null
 						</div>
 					</div>
 					<div class="form-item form-item-table-head form-item-progress page-status-aware-show exchange-status-show finish-status-show">
-						<div class="form-item-value">
+						<div class="form-item-value margin-left-none">
 							<label><@spring.message code='dataExport.exportProgress' /></label>
 							<div id="${pageId}-progress"></div>
 							<div id="${pageId}-progress-percent" class="progress-percent"></div>

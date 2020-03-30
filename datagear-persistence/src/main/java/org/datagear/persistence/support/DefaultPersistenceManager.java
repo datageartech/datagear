@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.datagear.connection.ConnectionOption;
 import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
@@ -30,6 +31,8 @@ import org.datagear.persistence.SqlParamValueMapper;
 import org.datagear.util.Sql;
 import org.datagear.util.SqlParamValue;
 import org.datagear.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 默认{@linkplain PersistenceManager}。
@@ -39,6 +42,8 @@ import org.datagear.util.StringUtil;
  */
 public class DefaultPersistenceManager extends PersistenceSupport implements PersistenceManager
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPersistenceManager.class);
+
 	private DialectSource dialectSource;
 
 	public DefaultPersistenceManager()
@@ -91,11 +96,11 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			for (int i = 0; i < columns.length; i++)
 			{
 				Column column = columns[i];
-				
+
 				// 忽略不支持的列，避免程序不可用
-				if(!supportsColumn(column))
+				if (!supportsColumn(column))
 					continue;
-				
+
 				String name = column.getName();
 				Object value = row.get(name);
 
@@ -308,7 +313,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
-		Sql sql = buildQuerySql(cn, dialect, table, query);
+		Sql sql = buildQuerySql(cn, dialect, table, query, true);
 		return executeListQuery(cn, table, sql, ResultSet.TYPE_FORWARD_ONLY, mapper);
 	}
 
@@ -324,7 +329,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	{
 		dialect = getDialect(cn, dialect);
 
-		Sql queryView = buildQuerySql(cn, dialect, table, pagingQuery);
+		Sql queryView = buildQuerySql(cn, dialect, table, pagingQuery, true);
 
 		long total = queryCount(cn, queryView);
 
@@ -349,13 +354,35 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 		// 内存分页
 		if (query == null)
+		{
+			if (LOGGER.isWarnEnabled())
+				LOGGER.warn("memory pagination will be used for [{}]", ConnectionOption.valueOf(cn));
+
 			query = dialect.toOrderSql(queryView, pagingQuery.getOrders());
+		}
 
 		rows = executeListQuery(cn, table, query, ResultSet.TYPE_SCROLL_INSENSITIVE, startRow, count, mapper);
 
 		pagingData.setItems(rows);
 
 		return pagingData;
+	}
+
+	@Override
+	public String getQuerySql(Connection cn, Table table, Query query)
+	{
+		return getQuerySql(cn, null, table, query);
+	}
+
+	@Override
+	public String getQuerySql(Connection cn, Dialect dialect, Table table, Query query)
+	{
+		dialect = getDialect(cn, dialect);
+
+		Sql sql = buildQuerySql(cn, dialect, table, query, false);
+		sql = dialect.toOrderSql(sql, query.getOrders());
+
+		return sql.getSqlValue();
 	}
 
 	protected long queryCount(Connection cn, Sql query)
@@ -367,10 +394,17 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		return re;
 	}
 
-	protected Sql buildQuerySql(Connection cn, Dialect dialect, Table table, Query query)
+	protected Sql buildQuerySql(Connection cn, Dialect dialect, Table table, Query query, boolean parameterized)
 	{
-		Sql sql = Sql.valueOf().sql("SELECT * FROM ").sql(quote(dialect, table.getName()));
-		Sql condition = buildQueryCondition(cn, dialect, table, query);
+		Sql sql = Sql.valueOf().sql("SELECT ").delimit(",");
+
+		Column[] columns = table.getColumns();
+		for (int i = 0; i < columns.length; i++)
+			sql.sqld(quote(dialect, columns[i].getName()));
+
+		sql.sql(" FROM ");
+		sql.sql(quote(dialect, table.getName()));
+		Sql condition = buildQueryCondition(cn, dialect, table, query, parameterized);
 
 		if (!Sql.isEmpty(condition))
 		{
@@ -388,9 +422,10 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	 * @param dialect
 	 * @param table
 	 * @param query
+	 * @param parameterized
 	 * @return 返回{@code null}表示无条件
 	 */
-	protected Sql buildQueryCondition(Connection cn, Dialect dialect, Table table, Query query)
+	protected Sql buildQueryCondition(Connection cn, Dialect dialect, Table table, Query query, boolean parameterized)
 	{
 		if (query == null)
 			return null;
@@ -401,7 +436,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		String conditionStr = (query.hasCondition() ? query.getCondition().trim() : null);
 		boolean hasCondition = !StringUtil.isEmpty(conditionStr);
 
-		Sql keywordCondition = dialect.toKeywordQueryCondition(table, query);
+		Sql keywordCondition = dialect.toKeywordQueryCondition(table, query, parameterized);
 
 		if (!hasCondition)
 		{

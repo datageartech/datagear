@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.datagear.persistence.Dialect;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.persistence.PersistenceManager;
+import org.datagear.persistence.Query;
 import org.datagear.persistence.Row;
 import org.datagear.persistence.RowMapper;
 import org.datagear.persistence.SqlParamValueMapper;
@@ -223,6 +225,36 @@ public class DataController extends AbstractSchemaConnTableController
 		return executor.execute();
 	}
 
+	@RequestMapping(value = "/{schemaId}/{tableName}/getQuerySql", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, ?> getQuerySql(HttpServletRequest request, HttpServletResponse response,
+			final org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
+			@PathVariable("tableName") String tableName, @RequestBody(required = false) Query paramData)
+			throws Throwable
+	{
+		final User user = WebUtils.getUser(request, response);
+		final Query query = (paramData == null ? new Query() : paramData);
+
+		String sql = new ReturnSchemaConnTableExecutor<String>(request, response, springModel, schemaId, tableName,
+				true)
+		{
+			@Override
+			protected String execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema, Table table) throws Throwable
+			{
+				checkReadTableDataPermission(schema, user);
+
+				return persistenceManager.getQuerySql(getConnection(), table, query);
+			}
+		}.execute();
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("query", query);
+		map.put("sql", sql);
+
+		return map;
+	}
+
 	@RequestMapping("/{schemaId}/{tableName}/add")
 	public String add(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
@@ -361,8 +393,8 @@ public class DataController extends AbstractSchemaConnTableController
 		final Row originalRow = convertToRow((Map<String, ?>) paramData.get("originalData"));
 		final Row updateRow = convertToRow((Map<String, ?>) paramData.get("data"));
 
-		Row updatedRow = new ReturnSchemaConnTableExecutor<Row>(
-				request, response, springModel, schemaId, tableName, false)
+		Row updatedRow = new ReturnSchemaConnTableExecutor<Row>(request, response, springModel, schemaId, tableName,
+				false)
 		{
 			@Override
 			protected Row execute(HttpServletRequest request, HttpServletResponse response,
@@ -1256,7 +1288,6 @@ public class DataController extends AbstractSchemaConnTableController
 		{
 			return getClass().getSimpleName() + " [index=" + index + ", errorMessage=" + errorMessage + "]";
 		}
-
 	}
 
 	/**

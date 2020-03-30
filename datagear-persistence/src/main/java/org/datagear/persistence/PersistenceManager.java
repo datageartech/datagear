@@ -236,4 +236,26 @@ public interface PersistenceManager
 	 */
 	PagingData<Row> pagingQuery(Connection cn, Dialect dialect, Table table, PagingQuery pagingQuery, RowMapper mapper)
 			throws PersistenceException;
+
+	/**
+	 * 获取查询SQL语句。
+	 * 
+	 * @param cn
+	 * @param table
+	 * @param query
+	 * @return
+	 */
+	String getQuerySql(Connection cn, Table table, Query query);
+
+	/**
+	 * 获取查询SQL语句。
+	 * 
+	 * @param cn
+	 * @param dialect
+	 *            允许为{@code null}
+	 * @param table
+	 * @param query
+	 * @return
+	 */
+	String getQuerySql(Connection cn, Dialect dialect, Table table, Query query);
 }

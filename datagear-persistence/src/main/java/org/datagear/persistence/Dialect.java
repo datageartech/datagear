@@ -101,15 +101,18 @@ public interface Dialect
 	 * @param table
 	 * @param query
 	 *            此次查询
+	 * @param parameterized
+	 *            是否参数化条件，如果为{@code false}，将返回原生的SQL语句（不包含{@code "?"}参数化标识）
 	 * @return
 	 */
-	Sql toKeywordQueryCondition(Table table, Query query);
+	Sql toKeywordQueryCondition(Table table, Query query, boolean parameterized);
 
 	/**
-	 * 构建排序SQL。
+	 * 构建排序SQL，格式为：{@code "... ORDER BY ..."}。
 	 * 
 	 * @param query
 	 * @param orders
+	 *            允许为{@code null}
 	 * @return
 	 */
 	Sql toOrderSql(Sql query, Order[] orders);

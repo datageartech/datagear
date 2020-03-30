@@ -1098,6 +1098,17 @@
 			
 			return -1;
 		},
+
+		/**
+		 * 获取列名
+		 */
+		getDataTableColumnName : function(settings, column)
+		{
+			var columnInfos = this.getDataTableColumnInfos(settings);
+			var dtColumn = columnInfos[column];
+			
+			return (dtColumn.columnName || dtColumn.data);
+		},
 		
 		/**
 		 * 获取DataTable列数。
@@ -1130,10 +1141,7 @@
 		 */
 		getDataTableCellName : function(settings, cellIndex)
 		{
-			var columnInfos = this.getDataTableColumnInfos(settings);
-			var dtColumn = columnInfos[cellIndex.column];
-			
-			return (dtColumn.columnName || dtColumn.data);
+			return $.getDataTableColumnName(settings, cellIndex.column);
 		},
 		
 		/**
@@ -1447,7 +1455,7 @@
 		 */
 		setGridPageHeightOption : function(options)
 		{
-			options.height = $(window).height() * 0.75;
+			options.height = $(window).height() * 0.8;
 		},
 		
 		updateDataTableHeight : function(dataTableElements, height, adjustWidth)
@@ -1900,7 +1908,7 @@
 				
 				if(c == "\\" || c == "/" || c == ":" || c == "*"
 					 || c == "?" || c == "\"" || c == "'" || c == "<"
-						 || c == ">" || c == "|")
+						 || c == ">" || c == "|" || c == "`")
 					continue;
 				
 				re += c;

@@ -100,6 +100,24 @@ page_js_obj.jsp
 		});
 	};
 	
+	po.getOrdersOnName = function($table)
+	{
+		$table = ($table || po.elementTable());
+		var dataTable = $table.DataTable();
+		var settings = dataTable.settings();
+		var orders = dataTable.order();
+		
+		var nameOrder = [];
+		
+		for(var i=0; i<orders.length; i++)
+		{
+			var name = $.getDataTableColumnName(settings, orders[i][0]);
+			nameOrder[i] = { "name" : name, "type" : orders[i][1] };
+		}
+		
+		return nameOrder;
+	};
+	
 	/**
 	 * 构建ajax数据表格选项。
 	 * 此ajax选项支持两个回调函数：
@@ -122,7 +140,7 @@ page_js_obj.jsp
 				
 				for(var i=0; i<data.order.length; i++)
 				{
-					var name = $.unescapeColumnNameForDataTable(data.columns[data.order[i].column].data);
+					var name = $.getDataTableColumnName(settings, data.order[i].column);
 					nameOrder[i] = { "name" : name, "type" : data.order[i].dir };
 				}
 				
@@ -188,7 +206,7 @@ page_js_obj.jsp
 	po.removeCheckColumnProperty = function(data)
 	{
 		if(!data)
-			return;
+			return data;
 		
 		var datas = ($.isArray(data) ? data : [data]);
 		

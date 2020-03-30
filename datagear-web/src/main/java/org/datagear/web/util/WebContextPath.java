@@ -29,7 +29,7 @@ public class WebContextPath
 	public void setSubContextPath(String subContextPath)
 	{
 		if (!isValidSubContextPath(subContextPath))
-			throw new IllegalArgumentException("[extPath] must be start with '/' and not end with '/'");
+			throw new IllegalArgumentException("[subContextPath] must be start with '/' and not end with '/'");
 
 		this.subContextPath = subContextPath;
 	}

@@ -4,7 +4,6 @@
 
 package org.datagear.util;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -77,71 +76,27 @@ public class JdbcUtil
 	}
 
 	/**
-	 * 将字符串转换为指定SQL类型的数值。
-	 * <p>
-	 * 如果{@code str}不合法、或者{@code sqlType}不是数值类型，将返回{@code null}。
-	 * </p>
+	 * 是否数值类型。
 	 * 
 	 * @param sqlType
 	 * @return
 	 */
-	public static Number parseToNumber(String str, int sqlType)
+	public static boolean isNumberType(int sqlType)
 	{
-		BigDecimal number = null;
-
 		switch (sqlType)
 		{
-			case Types.NUMERIC:
-			case Types.DECIMAL:
-			{
-				return toBigDecimal(str);
-			}
 			case Types.TINYINT:
 			case Types.SMALLINT:
 			case Types.INTEGER:
-			{
-				number = toBigDecimal(str);
-				return (number == null ? null : number.intValue());
-			}
 			case Types.BIGINT:
-			{
-				number = toBigDecimal(str);
-				return (number == null ? null : number.longValue());
-			}
 			case Types.REAL:
 			case Types.FLOAT:
-			{
-				number = toBigDecimal(str);
-				return (number == null ? null : number.floatValue());
-			}
 			case Types.DOUBLE:
-			{
-				number = toBigDecimal(str);
-				return (number == null ? null : number.doubleValue());
-			}
+			case Types.DECIMAL:
+			case Types.NUMERIC:
+				return true;
 			default:
-				return null;
-		}
-	}
-
-	/**
-	 * 转换为{@code BigDecimal}。
-	 * <p>
-	 * 如果不合法，将返回{@code null}。
-	 * </p>
-	 * 
-	 * @param str
-	 * @return
-	 */
-	protected static BigDecimal toBigDecimal(String str)
-	{
-		try
-		{
-			return new BigDecimal(str);
-		}
-		catch (Throwable t)
-		{
-			return null;
+				return false;
 		}
 	}
 

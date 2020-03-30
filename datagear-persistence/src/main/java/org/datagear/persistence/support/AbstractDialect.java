@@ -4,13 +4,15 @@
 
 package org.datagear.persistence.support;
 
+import java.math.BigDecimal;
+import java.sql.Types;
+
 import org.datagear.meta.Column;
 import org.datagear.meta.SearchableType;
 import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.Query;
-import org.datagear.util.JdbcUtil;
 import org.datagear.util.Sql;
 
 /**
@@ -84,7 +86,7 @@ public abstract class AbstractDialect extends PersistenceSupport implements Dial
 	}
 
 	@Override
-	public Sql toKeywordQueryCondition(Table table, Query query)
+	public Sql toKeywordQueryCondition(Table table, Query query, boolean parameterized)
 	{
 		Sql sql = Sql.valueOf();
 
@@ -115,7 +117,7 @@ public abstract class AbstractDialect extends PersistenceSupport implements Dial
 			}
 			else
 			{
-				Number number = JdbcUtil.parseToNumber(query.getKeyword(), column.getType());
+				Number number = parseToNumber(query.getKeyword(), column.getType());
 
 				if (number != null)
 				{
@@ -129,7 +131,11 @@ public abstract class AbstractDialect extends PersistenceSupport implements Dial
 				if (!sql.isEmpty())
 					sql.sql(joinOpt);
 
-				sql.sql(quote(column.getName()) + myOperator + "?", createSqlParamValue(column, myKeyword));
+				if (parameterized)
+					sql.sql(quote(column.getName()) + myOperator + "?", createSqlParamValue(column, myKeyword));
+				else
+					sql.sql(quote(column.getName()) + myOperator
+							+ (myKeyword instanceof Number ? query.getKeyword() : "'" + myKeyword + "'"));
 			}
 		}
 
@@ -178,7 +184,7 @@ public abstract class AbstractDialect extends PersistenceSupport implements Dial
 	 */
 	protected boolean isEmptySql(Sql sql)
 	{
-		return sql == null || sql.isEmpty();
+		return Sql.isEmpty(sql);
 	}
 
 	/**
@@ -198,5 +204,156 @@ public abstract class AbstractDialect extends PersistenceSupport implements Dial
 			return "%" + keyword + "%";
 
 		return keyword;
+	}
+
+	/**
+	 * 将字符串转换为指定SQL类型的数值。
+	 * <p>
+	 * 如果{@code str}不合法、或者{@code sqlType}不是数值类型，将返回{@code null}。
+	 * </p>
+	 * 
+	 * @param sqlType
+	 * @return
+	 */
+	protected Number parseToNumber(String str, int sqlType)
+	{
+		switch (sqlType)
+		{
+			case Types.TINYINT:
+			case Types.SMALLINT:
+			case Types.INTEGER:
+			{
+				Integer value = parseInteger(str);
+				return (value == null ? null : value.intValue());
+			}
+			case Types.BIGINT:
+			{
+				Long value = parseLong(str);
+				return (value == null ? null : value.longValue());
+			}
+			case Types.REAL:
+			case Types.FLOAT:
+			{
+				Float value = parseFloat(str);
+				return (value == null ? null : value.floatValue());
+			}
+			case Types.DOUBLE:
+			{
+				Double value = parseDouble(str);
+				return (value == null ? null : value.doubleValue());
+			}
+			case Types.NUMERIC:
+			case Types.DECIMAL:
+			{
+				return toBigDecimal(str);
+			}
+			default:
+				return null;
+		}
+	}
+
+	/**
+	 * 转换为{@code Integer}。
+	 * <p>
+	 * 如果不合法，将返回{@code null}。
+	 * </p>
+	 * 
+	 * @param str
+	 * @return
+	 */
+	protected Integer parseInteger(String str)
+	{
+		try
+		{
+			return new Integer(str);
+		}
+		catch (Throwable t)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * 转换为{@code Long}。
+	 * <p>
+	 * 如果不合法，将返回{@code null}。
+	 * </p>
+	 * 
+	 * @param str
+	 * @return
+	 */
+	protected Long parseLong(String str)
+	{
+		try
+		{
+			return new Long(str);
+		}
+		catch (Throwable t)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * 转换为{@code Float}。
+	 * <p>
+	 * 如果不合法，将返回{@code null}。
+	 * </p>
+	 * 
+	 * @param str
+	 * @return
+	 */
+	protected Float parseFloat(String str)
+	{
+		try
+		{
+			return new Float(str);
+		}
+		catch (Throwable t)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * 转换为{@code Double}。
+	 * <p>
+	 * 如果不合法，将返回{@code null}。
+	 * </p>
+	 * 
+	 * @param str
+	 * @return
+	 */
+	protected Double parseDouble(String str)
+	{
+		try
+		{
+			return new Double(str);
+		}
+		catch (Throwable t)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * 转换为{@code BigDecimal}。
+	 * <p>
+	 * 如果不合法，将返回{@code null}。
+	 * </p>
+	 * 
+	 * @param str
+	 * @return
+	 */
+	protected BigDecimal toBigDecimal(String str)
+	{
+		try
+		{
+			return new BigDecimal(str);
+		}
+		catch (Throwable t)
+		{
+			return null;
+		}
 	}
 }
