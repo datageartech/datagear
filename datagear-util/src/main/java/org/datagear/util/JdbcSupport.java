@@ -681,7 +681,7 @@ public class JdbcSupport
 				else if (value instanceof String)
 				{
 					Clob clob = cn.createClob();
-					clob.setString(0, (String) value);
+					clob.setString(1, (String) value);
 
 					st.setClob(paramIndex, clob);
 					value = clob;
@@ -691,7 +691,7 @@ public class JdbcSupport
 				else if (value instanceof InputStream)
 				{
 					Clob clob = cn.createClob();
-					OutputStream out = clob.setAsciiStream(0);
+					OutputStream out = clob.setAsciiStream(1);
 					write((InputStream) value, out);
 
 					st.setClob(paramIndex, clob);
@@ -700,7 +700,7 @@ public class JdbcSupport
 				else if (value instanceof File)
 				{
 					Clob clob = cn.createClob();
-					OutputStream out = clob.setAsciiStream(0);
+					OutputStream out = clob.setAsciiStream(1);
 					write((File) value, out);
 
 					st.setClob(paramIndex, clob);
@@ -719,7 +719,7 @@ public class JdbcSupport
 				else if (value instanceof byte[])
 				{
 					Blob blob = cn.createBlob();
-					blob.setBytes(0, (byte[]) value);
+					blob.setBytes(1, (byte[]) value);
 
 					st.setBlob(paramIndex, blob);
 					value = blob;
@@ -759,7 +759,7 @@ public class JdbcSupport
 				else if (value instanceof String)
 				{
 					NClob nClob = cn.createNClob();
-					nClob.setString(0, (String) value);
+					nClob.setString(1, (String) value);
 
 					st.setNClob(paramIndex, nClob);
 					value = nClob;
@@ -769,7 +769,7 @@ public class JdbcSupport
 				else if (value instanceof InputStream)
 				{
 					NClob nClob = cn.createNClob();
-					OutputStream out = nClob.setAsciiStream(0);
+					OutputStream out = nClob.setAsciiStream(1);
 					write((InputStream) value, out);
 
 					st.setNClob(paramIndex, nClob);
@@ -778,7 +778,7 @@ public class JdbcSupport
 				else if (value instanceof File)
 				{
 					NClob nClob = cn.createNClob();
-					OutputStream out = nClob.setAsciiStream(0);
+					OutputStream out = nClob.setAsciiStream(1);
 					write((File) value, out);
 
 					st.setNClob(paramIndex, nClob);
