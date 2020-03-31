@@ -7,6 +7,7 @@
  */
 package org.datagear.persistence.support;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
@@ -32,8 +33,8 @@ import org.datagear.util.StringUtil;
  * 默认地，对于二进制类型，返回{@code byte[]}；对于大字符类型，返回{@linkplain String}；其他，返回默认值。
  * </p>
  * <p>
- * 可以通过{@linkplain #setReadActualBlobRows(int)}、{@linkplain #setReadActualClobRows(int)}、{@linkplain #setBinaryEncoder(String)}、
- * {@linkplain #setBlobDirectory(File)}来控制映射格式。
+ * 可以通过{@linkplain #setReadActualBinaryRows(int)}、{@linkplain #setReadActualClobRows(int)}、{@linkplain #setBinaryEncoder(String)}、
+ * {@linkplain #setBinaryDirectory(File)}来控制映射格式。
  * </p>
  * 
  * @author datagear@163.com
@@ -41,7 +42,7 @@ import org.datagear.util.StringUtil;
  */
 public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 {
-	public static final String DEFAULT_BLOB_PLACEHOLDER = "[BLOB]";
+	public static final String DEFAULT_BINARY_PLACEHOLDER = "[BLOB]";
 
 	public static final String DEFAULT_CLOB_PLACEHOLDER = "[CLOB]";
 
@@ -56,20 +57,20 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 	/** 读取真实CLOB数据的最大行数，-1表示全部 */
 	private int readActualClobRows = -1;
 
-	/** 读取真实BLOB数据的最大行数，-1表示全部 */
-	private int readActualBlobRows = -1;
+	/** 读取真实二进制数据的最大行数，-1表示全部 */
+	private int readActualBinaryRows = -1;
 
-	/** 大二进制不返回byte[]而写入文件的父目录 */
-	private File blobDirectory = null;
+	/** 二进制不返回byte[]而写入文件的父目录 */
+	private File binaryDirectory = null;
 
-	/** 二进制编码 */
+	/** 二进制读取为byte[]后的编码 */
 	private String binaryEncoder = BINARY_ENCODER_NONE;
 
 	/** HEX编码开头 */
 	private String binaryHexEncoderHeader = "0x";
 
-	/** BLOB占位符字符串 */
-	private String blobPlaceholder = DEFAULT_BLOB_PLACEHOLDER;
+	/** 二进制占位符字符串 */
+	private String binaryPlaceholder = DEFAULT_BINARY_PLACEHOLDER;
 
 	/** CLOB占位符字符串 */
 	private String clobPlaceholder = DEFAULT_CLOB_PLACEHOLDER;
@@ -109,46 +110,46 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 		return (isReadActualClobAll() || rowIndex <= this.readActualClobRows);
 	}
 
-	public int getReadActualBlobRows()
+	public int getReadActualBinaryRows()
 	{
-		return readActualBlobRows;
+		return readActualBinaryRows;
 	}
 
 	/**
-	 * 设置读取真实BLOB数据的最大行数，超过这个行数的将被占位符字符串替代，-1表示全部。
+	 * 设置读取真实二进制数据的最大行数，超过这个行数的将被占位符字符串替代，-1表示全部。
 	 * <p>
 	 * 默认为{@code -1}。
 	 * </p>
 	 * 
-	 * @param readActualBlobRows
+	 * @param readActualBinaryRows
 	 */
-	public void setReadActualBlobRows(int readActualBlobRows)
+	public void setReadActualBinaryRows(int readActualBinaryRows)
 	{
-		this.readActualBlobRows = readActualBlobRows;
+		this.readActualBinaryRows = readActualBinaryRows;
 	}
 
-	public boolean isReadActualBlobAll()
+	public boolean isReadActualBinaryAll()
 	{
-		return this.readActualBlobRows < 0;
+		return this.readActualBinaryRows < 0;
 	}
 
-	public boolean isReadActualBlobRow(int rowIndex)
+	public boolean isReadActualBinaryRow(int rowIndex)
 	{
-		return (isReadActualBlobAll() || rowIndex <= this.readActualBlobRows);
+		return (isReadActualBinaryAll() || rowIndex <= this.readActualBinaryRows);
 	}
 
-	public boolean hasBlobDirectory()
+	public boolean hasBinaryDirectory()
 	{
-		return (this.blobDirectory != null);
+		return (this.binaryDirectory != null);
 	}
 
-	public File getBlobDirectory()
+	public File getBinaryDirectory()
 	{
-		return blobDirectory;
+		return binaryDirectory;
 	}
 
 	/**
-	 * 设置BLOB数据的写入为文件的父目录，为{@code null}，则BLOB数据直接返回{@code byte[]}。
+	 * 设置二进制数据写入为文件的父目录，为{@code null}，则二进制数据直接返回{@code byte[]}。
 	 * <p>
 	 * 设置后，映射结果值将是这个目录下的文件名字符串。
 	 * </p>
@@ -156,25 +157,25 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 	 * 默认为{@code null}。
 	 * </p>
 	 * 
-	 * @param blobDirectory
+	 * @param binaryDirectory
 	 */
-	public void setBlobDirectory(File blobDirectory)
+	public void setBinaryDirectory(File binaryDirectory)
 	{
-		this.blobDirectory = blobDirectory;
+		this.binaryDirectory = binaryDirectory;
 	}
 
 	/**
-	 * 获取指定文件名的BLOB文件对象。
+	 * 获取指定文件名的二进制文件对象。
 	 * 
 	 * @param fileName
 	 * @return
 	 */
 	public File getBlobFile(String fileName)
 	{
-		if (this.blobDirectory == null)
+		if (this.binaryDirectory == null)
 			throw new IllegalStateException("this.bigBinaryDirectory must be set");
 
-		return FileUtil.getFile(this.blobDirectory, fileName);
+		return FileUtil.getFile(this.binaryDirectory, fileName);
 	}
 
 	public String getBinaryEncoder()
@@ -205,14 +206,14 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 		this.binaryHexEncoderHeader = binaryHexEncoderHeader;
 	}
 
-	public String getBlobPlaceholder()
+	public String getBinaryPlaceholder()
 	{
-		return blobPlaceholder;
+		return binaryPlaceholder;
 	}
 
-	public void setBlobPlaceholder(String blobPlaceholder)
+	public void setBinaryPlaceholder(String binaryPlaceholder)
 	{
-		this.blobPlaceholder = blobPlaceholder;
+		this.binaryPlaceholder = binaryPlaceholder;
 	}
 
 	public String getClobPlaceholder()
@@ -259,7 +260,9 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 		if (isNullValue(rs, value))
 			return null;
 
-		return encodeBytesToStringIf(value);
+		ByteArrayInputStream in = new ByteArrayInputStream(value);
+
+		return mapColumnForInputStreamValue(cn, table, rs, rowIndex, column, in, this.binaryPlaceholder);
 	}
 
 	@Override
@@ -274,7 +277,7 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 			return null;
 		}
 
-		return mapColumnForLargeInputStreamValue(cn, table, rs, rowIndex, column, value, this.blobPlaceholder);
+		return mapColumnForInputStreamValue(cn, table, rs, rowIndex, column, value, this.binaryPlaceholder);
 	}
 
 	@Override
@@ -300,7 +303,7 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 			return null;
 
 		InputStream in = value.getBinaryStream();
-		return mapColumnForLargeInputStreamValue(cn, table, rs, rowIndex, column, in, this.blobPlaceholder);
+		return mapColumnForInputStreamValue(cn, table, rs, rowIndex, column, in, this.binaryPlaceholder);
 	}
 
 	@Override
@@ -360,17 +363,17 @@ public class DefaultLOBRowMapper extends AbstractLOBRowMapper
 		}
 	}
 
-	protected Object mapColumnForLargeInputStreamValue(Connection cn, Table table, ResultSet rs, int rowIndex,
-			Column column, InputStream value, String placeholder) throws Throwable
+	protected Object mapColumnForInputStreamValue(Connection cn, Table table, ResultSet rs, int rowIndex, Column column,
+			InputStream value, String placeholder) throws Throwable
 	{
 		try
 		{
-			if (isReadActualBlobRow(rowIndex))
+			if (isReadActualBinaryRow(rowIndex))
 			{
-				if (hasBlobDirectory())
+				if (hasBinaryDirectory())
 				{
 					String fileName = IDUtil.uuid();
-					File file = FileUtil.getFile(this.blobDirectory, fileName);
+					File file = FileUtil.getFile(this.binaryDirectory, fileName);
 
 					IOUtil.write(value, file);
 					return fileName;

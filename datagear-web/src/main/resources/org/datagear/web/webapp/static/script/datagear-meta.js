@@ -273,7 +273,7 @@
 		binaryColumnValueFilePrefix: "file:",
 		
 		/**
-		 * 是否支持指定列的持久化操作，参考PersistenceSupport.supportsSqlType(）。
+		 * 是否支持指定列的持久化操作，参考PersistenceSupport.supportsSqlType()。
 		 */
 		supportsColumn: function(column)
 		{
@@ -292,16 +292,8 @@
 		{
 			var type = column.type;
 			
-			return (type == this.Types.BINARY
-						|| type == this.Types.VARBINARY || this.isBlobColumn(column));
-		},
-		
-		isBlobColumn: function(column)
-		{
-			var type = column.type;
-			
-			return (type == this.Types.LONGVARBINARY
-						|| type == this.Types.BLOB);
+			return (type == this.Types.BINARY || type == this.Types.VARBINARY
+						|| type == this.Types.LONGVARBINARY || type == this.Types.BLOB);
 		},
 		
 		isTextColumn: function(column)

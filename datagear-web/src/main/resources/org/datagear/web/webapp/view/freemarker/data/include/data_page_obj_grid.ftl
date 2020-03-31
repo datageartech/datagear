@@ -13,7 +13,7 @@ DefaultLOBRowMapper queryDefaultLOBRowMapper
 <script type="text/javascript">
 (function(po)
 {
-	po.blobPlaceholder = "${queryDefaultLOBRowMapper.blobPlaceholder?js_string}";
+	po.binaryPlaceholder = "${queryDefaultLOBRowMapper.binaryPlaceholder?js_string}";
 	po.clobPlaceholder = "${queryDefaultLOBRowMapper.clobPlaceholder?js_string}";
 	po.sqlXmlPlaceholder = "${queryDefaultLOBRowMapper.sqlXmlPlaceholder?js_string}";
 	
@@ -22,7 +22,7 @@ DefaultLOBRowMapper queryDefaultLOBRowMapper
 		if(!value)
 			return false;
 		
-		if($.meta.isBlobColumn(column) && po.blobPlaceholder == value)
+		if($.meta.isBinaryColumn(column) && po.binaryPlaceholder == value)
 			return true;
 		
 		if($.meta.isClobColumn(column) && po.clobPlaceholder == value)

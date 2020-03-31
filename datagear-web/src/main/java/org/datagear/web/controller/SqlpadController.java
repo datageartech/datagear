@@ -348,9 +348,9 @@ public class SqlpadController extends AbstractSchemaConnController
 	{
 		DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
 		rowMapper.setReadActualClobRows(this.sqlResultReadActualLobRows);
-		rowMapper.setReadActualBlobRows(this.sqlResultReadActualLobRows);
+		rowMapper.setReadActualBinaryRows(this.sqlResultReadActualLobRows);
 		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_HEX);
-		rowMapper.setBlobDirectory(getSqlpadBlobTmpDirectory());
+		rowMapper.setBinaryDirectory(getSqlpadBinaryTmpDirectory());
 
 		return rowMapper;
 	}
@@ -360,9 +360,9 @@ public class SqlpadController extends AbstractSchemaConnController
 		return FileUtil.getDirectory(this.tempDirectory, "sqlpad", true);
 	}
 
-	protected File getSqlpadBlobTmpDirectory()
+	protected File getSqlpadBinaryTmpDirectory()
 	{
-		return FileUtil.getDirectory(this.tempDirectory, "sqlpadblob", true);
+		return FileUtil.getDirectory(this.tempDirectory, "sqlpadbinary", true);
 	}
 
 	protected String generateSqlpadId(HttpServletRequest request, HttpServletResponse response)

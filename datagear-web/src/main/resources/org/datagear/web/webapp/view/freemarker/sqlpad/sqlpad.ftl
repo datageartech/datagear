@@ -181,8 +181,8 @@ Schema schema 数据库，不允许为null
 	po.schemaId = "${schema.id}";
 	po.sqlpadId = "${sqlpadId}";
 	po.sqlpadChannelId = "${sqlpadChannelId}";
-	po.sqlResultReadActualBlobRows = parseInt("${sqlResultRowMapper.readActualBlobRows}");
-	po.sqlResultBlobPlaceholder = "${sqlResultRowMapper.blobPlaceholder?js_string}";
+	po.sqlResultReadActualBinaryRows = parseInt("${sqlResultRowMapper.readActualBinaryRows}");
+	po.sqlResultBinaryPlaceholder = "${sqlResultRowMapper.binaryPlaceholder?js_string}";
 	
 	po.resultMessageElement = po.element("#${pageId}-resultMessage");
 	po.sqlResultTabs = po.element("#${pageId}-sqlResultTabs");
@@ -753,12 +753,12 @@ Schema schema 数据库，不允许为null
 						if(!data)
 							return renderValue;
 						
-						if($.meta.isBlobColumn(column))
+						if($.meta.isBinaryColumn(column))
 						{
-							if(rowIndex < po.sqlResultReadActualBlobRows)
+							if(rowIndex < po.sqlResultReadActualBinaryRows)
 							{
 								return "<a href='${contextPath}/sqlpad/"+po.schemaId+"/downloadResultField?sqlpadId="+po.sqlpadId+"&value="+encodeURIComponent(data)+"'>"
-										+ $.escapeHtml(po.sqlResultBlobPlaceholder) + "</a>";
+										+ $.escapeHtml(po.sqlResultBinaryPlaceholder) + "</a>";
 							}
 							else
 								return renderValue;

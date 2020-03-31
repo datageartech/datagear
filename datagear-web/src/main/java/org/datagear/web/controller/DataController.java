@@ -622,7 +622,7 @@ public class DataController extends AbstractSchemaConnTableController
 
 		final DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
 		rowMapper.setReadActualClobRows(-1);
-		rowMapper.setReadActualBlobRows(0);
+		rowMapper.setReadActualBinaryRows(0);
 		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_HEX);
 
 		List<List<Object>> columnValuess = new ReturnSchemaConnTableExecutor<List<List<Object>>>(request, response,
@@ -665,9 +665,9 @@ public class DataController extends AbstractSchemaConnTableController
 
 		final DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
 		rowMapper.setReadActualClobRows(0);
-		rowMapper.setReadActualBlobRows(1);
+		rowMapper.setReadActualBinaryRows(1);
 		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_NONE);
-		rowMapper.setBlobDirectory(getDataBlobTmpDirectory());
+		rowMapper.setBinaryDirectory(getDataBinaryTmpDirectory());
 
 		Object columnValue = new ReturnSchemaConnTableExecutor<Object>(request, response, springModel, schemaId,
 				tableName, true)
@@ -838,7 +838,7 @@ public class DataController extends AbstractSchemaConnTableController
 					isBc = true;
 			}
 
-			if (isBc && rowMapper.getBlobPlaceholder().equals(entry.getValue()))
+			if (isBc && rowMapper.getBinaryPlaceholder().equals(entry.getValue()))
 				;
 			else
 				reRow.put(entry.getKey(), entry.getValue());
@@ -880,7 +880,7 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
 		rowMapper.setReadActualClobRows(0);
-		rowMapper.setReadActualBlobRows(0);
+		rowMapper.setReadActualBinaryRows(0);
 		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_HEX);
 
 		return rowMapper;
@@ -890,7 +890,7 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
 		rowMapper.setReadActualClobRows(1);
-		rowMapper.setReadActualBlobRows(0);
+		rowMapper.setReadActualBinaryRows(0);
 		rowMapper.setBinaryEncoder(DefaultLOBRowMapper.BINARY_ENCODER_HEX);
 
 		return rowMapper;
@@ -900,7 +900,7 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
 		mapper.setConversionService(getConversionService());
-		mapper.setFilePathValueDirectory(getDataBlobTmpDirectory());
+		mapper.setFilePathValueDirectory(getDataBinaryTmpDirectory());
 		mapper.setEnableSqlExpression(true);
 		// 单个保存操作不开启变量表达式，避免不必要的输入转义
 		mapper.setEnableVariableExpression(false);
@@ -912,7 +912,7 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
 		mapper.setConversionService(getConversionService());
-		mapper.setFilePathValueDirectory(getDataBlobTmpDirectory());
+		mapper.setFilePathValueDirectory(getDataBinaryTmpDirectory());
 		mapper.setEnableSqlExpression(true);
 		mapper.setEnableVariableExpression(true);
 
@@ -923,12 +923,12 @@ public class DataController extends AbstractSchemaConnTableController
 	{
 		ConversionSqlParamValueMapper mapper = new ConversionSqlParamValueMapper();
 		mapper.setConversionService(getConversionService());
-		mapper.setFilePathValueDirectory(getDataBlobTmpDirectory());
+		mapper.setFilePathValueDirectory(getDataBinaryTmpDirectory());
 
 		return mapper;
 	}
 
-	protected File getDataBlobTmpDirectory()
+	protected File getDataBinaryTmpDirectory()
 	{
 		return FileUtil.getDirectory(this.tempDirectory, "data", true);
 	}
