@@ -21,9 +21,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.commons.dbcp.ConnectionFactory;
-import org.apache.commons.dbcp.DriverConnectionFactory;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.dbcp2.ConnectionFactory;
+import org.apache.commons.dbcp2.DriverConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -640,21 +640,25 @@ public class DefaultConnectionSource implements ConnectionSource
 	{
 		private Driver driver;
 
+		private Properties connectionProperties;
+
 		public DriverBasicDataSource(Driver driver, String url, Properties properties)
 		{
 			super();
 			this.driver = driver;
 			super.setDriverClassName(driver.getClass().getName());
 			super.setUrl(url);
-			super.connectionProperties = properties;
+			this.connectionProperties = properties;
 		}
 
-		protected Driver getDriver()
+		@Override
+		public Driver getDriver()
 		{
 			return driver;
 		}
 
-		protected void setDriver(Driver driver)
+		@Override
+		public void setDriver(Driver driver)
 		{
 			this.driver = driver;
 		}
@@ -662,7 +666,7 @@ public class DefaultConnectionSource implements ConnectionSource
 		@Override
 		protected ConnectionFactory createConnectionFactory() throws SQLException
 		{
-			return new DriverConnectionFactory(driver, url, connectionProperties);
+			return new DriverConnectionFactory(driver, getUrl(), this.connectionProperties);
 		}
 	}
 }

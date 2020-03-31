@@ -18,7 +18,7 @@
 		<hamcrest.version>2.2</hamcrest.version>
 		<spring.version>4.3.26.RELEASE</spring.version>
 		<spring.security.version>3.2.10.RELEASE</spring.security.version>
-		<DBCP.version>1.4</DBCP.version><!-- 更高版本的不兼容JDBC 4.0 -->
+		<DBCP.version>2.7.0</DBCP.version>
 		<slf4j.version>1.7.9</slf4j.version>
 		<slf4j-log4j12.version>1.7.9</slf4j-log4j12.version>
 		<log4j.version>1.2.17</log4j.version>

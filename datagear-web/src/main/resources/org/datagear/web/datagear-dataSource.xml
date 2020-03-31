@@ -17,7 +17,7 @@
     	<property name="createIfInexistence" value="false" />
     </bean>
     
-    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
 		<property name="driverClassName">
 			<value>org.apache.derby.jdbc.EmbeddedDriver</value>
 		</property>

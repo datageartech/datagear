@@ -144,29 +144,30 @@ public class Table extends AbstractTable
 		return columns;
 	}
 
-	/**
-	 * 获取所有二进制列。
-	 * 
-	 * @return 返回空数组表示没有。
-	 */
-	public Column[] getBinaryColumns()
-	{
-		List<Column> bcs = new ArrayList<>(1);
-
-		for (Column column : this.columns)
-		{
-			if (JdbcUtil.isBinaryType(column.getType()))
-				bcs.add(column);
-		}
-
-		return bcs.toArray(new Column[bcs.size()]);
-	}
-
 	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", comment=" + getComment()
 				+ ", columns=" + Arrays.toString(columns) + ", primaryKey=" + primaryKey + ", uniqueKeys="
 				+ Arrays.toString(uniqueKeys) + ", importKeys=" + Arrays.toString(importKeys) + "]";
+	}
+
+	/**
+	 * 获取所有二进制列。
+	 * 
+	 * @return 返回空数组表示没有。
+	 */
+	public static Column[] getBinaryColumns(Table table)
+	{
+		List<Column> bcs = new ArrayList<>(1);
+
+		Column[] columns = table.getColumns();
+		for (Column column : columns)
+		{
+			if (JdbcUtil.isBinaryType(column.getType()))
+				bcs.add(column);
+		}
+
+		return bcs.toArray(new Column[bcs.size()]);
 	}
 }

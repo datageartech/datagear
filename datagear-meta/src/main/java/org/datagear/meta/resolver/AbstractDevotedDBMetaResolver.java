@@ -10,12 +10,13 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.SQLNonTransientException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.meta.Column;
 import org.datagear.meta.DataType;
@@ -28,6 +29,7 @@ import org.datagear.meta.Table;
 import org.datagear.meta.TableType;
 import org.datagear.meta.UniqueKey;
 import org.datagear.util.JDBCCompatiblity;
+import org.datagear.util.JdbcSupport;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
@@ -39,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaResolver
+public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implements DevotedDBMetaResolver
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDevotedDBMetaResolver.class);
 
@@ -261,12 +263,13 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		try
 		{
 			rs = getTableResulSet(cn, metaData, schema, tableNamePattern, TABLE_TYPES);
+			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			List<SimpleTable> simpleTables = new ArrayList<>();
 
 			while (rs.next())
 			{
-				SimpleTable simpleTable = readSimpleTable(cn, metaData, schema, rs);
+				SimpleTable simpleTable = readSimpleTable(cn, metaData, schema, mrs);
 
 				if (simpleTable != null)
 				{
@@ -290,21 +293,21 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 	/**
 	 * @return 返回{@code null}表示未读取到
 	 */
-	protected SimpleTable readSimpleTable(Connection cn, DatabaseMetaData metaData, String schema, ResultSet rs)
+	protected SimpleTable readSimpleTable(Connection cn, DatabaseMetaData metaData, String schema, MetaResultSet rs)
 	{
 		try
 		{
-			String name = rs.getString("TABLE_NAME");
-			TableType type = toTableType(rs.getString("TABLE_TYPE"));
+			String name = rs.getString("TABLE_NAME", null);
+			TableType type = toTableType(rs.getString("TABLE_TYPE", ""));
 
 			if (StringUtil.isEmpty(name) || StringUtil.isEmpty(type))
 			{
-				LOGGER.warn("Invalid table row : name={}, type={}", name, type);
+				LOGGER.warn("invalid table : name={}, type={}", name, type);
 				return null;
 			}
 
 			SimpleTable simpleTable = new SimpleTable(name, type);
-			simpleTable.setComment(rs.getString("REMARKS"));
+			simpleTable.setComment(rs.getString("REMARKS", ""));
 
 			return simpleTable;
 		}
@@ -339,10 +342,11 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		try
 		{
 			rs = getDataTypeResultSet(cn, metaData);
+			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			while (rs.next())
 			{
-				DataType dataType = readDataType(rs);
+				DataType dataType = readDataType(mrs);
 
 				if (dataType != null)
 					dataTypes.add(dataType);
@@ -401,7 +405,7 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 			boolean dbReadonly = cn.getMetaData().isReadOnly();
 			return dbReadonly;
 		}
-		catch(SQLException e)
+		catch (SQLException e)
 		{
 			return false;
 		}
@@ -440,12 +444,13 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		try
 		{
 			rs = getColumnResulSet(cn, metaData, schema, tableName);
+			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			List<Column> columns = new ArrayList<>();
 
 			while (rs.next())
 			{
-				Column column = readColumn(cn, metaData, schema, tableName, rs);
+				Column column = readColumn(cn, metaData, schema, tableName, mrs);
 				column = postProcessColumn(cn, metaData, schema, tableName, column);
 				addColumn(columns, column);
 
@@ -470,27 +475,32 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 	/**
 	 * @return 返回{@code null}表示未读取到
 	 */
-	protected Column readColumn(Connection cn, DatabaseMetaData metaData, String schema, String tableName, ResultSet rs)
+	protected Column readColumn(Connection cn, DatabaseMetaData metaData, String schema, String tableName,
+			MetaResultSet rs)
 	{
 		try
 		{
-			String name = rs.getString("COLUMN_NAME");
+			String name = rs.getString("COLUMN_NAME", null);
+			Integer type = rs.getInt("DATA_TYPE", null);
 
-			if (StringUtil.isEmpty(name))
+			if (StringUtil.isEmpty(name) || type == null)
 			{
-				LOGGER.warn("Invalid column row : name={}", name);
+				LOGGER.warn("invalid column : name={}, type={}", name, type);
 				return null;
 			}
 
-			Column column = new Column(name, rs.getInt("DATA_TYPE"));
+			Column column = new Column(name, type);
 
-			column.setTypeName(rs.getString("TYPE_NAME"));
-			column.setSize(rs.getInt("COLUMN_SIZE"));
-			column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
-			column.setNullable(DatabaseMetaData.columnNoNulls != rs.getInt("NULLABLE"));
-			column.setComment(rs.getString("REMARKS"));
-			column.setDefaultValue(rs.getString("COLUMN_DEF"));
-			column.setAutoincrement("yes".equalsIgnoreCase(rs.getString("IS_AUTOINCREMENT")));
+			column.setTypeName(rs.getString("TYPE_NAME", ""));
+			column.setSize(rs.getInt("COLUMN_SIZE", 0));
+			column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS", 0));
+			column.setNullable(
+					DatabaseMetaData.columnNoNulls != rs.getInt("NULLABLE", DatabaseMetaData.columnNullable));
+			column.setComment(rs.getString("REMARKS", ""));
+			column.setDefaultValue(rs.getString("COLUMN_DEF", null));
+			column.setAutoincrement("yes".equalsIgnoreCase(rs.getString("IS_AUTOINCREMENT", "no")));
+			column.setPosition(rs.getInt("ORDINAL_POSITION", 1));
+
 			resolveSortable(cn, metaData, schema, tableName, column);
 			resolveSearchableType(cn, metaData, schema, tableName, column);
 
@@ -586,15 +596,17 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		try
 		{
 			rs = getPrimaryKeyResulSet(cn, metaData, schema, tableName);
+			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			List<String> columnNames = new ArrayList<>();
 			String keyName = null;
 
 			while (rs.next())
 			{
-				String columnName = rs.getString("COLUMN_NAME");
+				String columnName = mrs.getString("COLUMN_NAME", null);
+
 				if (StringUtil.isEmpty(keyName))
-					keyName = rs.getString("PK_NAME");
+					keyName = mrs.getString("PK_NAME", "");
 
 				addName(columnNames, columnName);
 			}
@@ -607,18 +619,13 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 
 			return primaryKey;
 		}
-		catch (SQLNonTransientException e)
-		{
-			@JDBCCompatiblity("当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常")
-			SQLNonTransientException e1 = e;
-
-			LOGGER.warn("return null primary key object for exception", e1);
-
-			return null;
-		}
 		catch (SQLException e)
 		{
-			throw new DBMetaResolverException(e);
+			LOGGER.warn("return null primary key object for exception", e);
+
+			@JDBCCompatiblity("当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常")
+			PrimaryKey nullPrimaryKey = null;
+			return nullPrimaryKey;
 		}
 		finally
 		{
@@ -647,13 +654,12 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		try
 		{
 			rs = getUniqueKeyResulSet(cn, metaData, schema, tableName);
+			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			while (rs.next())
 			{
-				String keyName = rs.getString("INDEX_NAME");
-				if (keyName == null)
-					keyName = "";
-				String columnName = rs.getString("COLUMN_NAME");
+				String keyName = mrs.getString("INDEX_NAME", "");
+				String columnName = mrs.getString("COLUMN_NAME", null);
 
 				int myIndex = keyNames.indexOf(keyName);
 				List<String> keyColumnNames = null;
@@ -670,18 +676,13 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 				addName(keyColumnNames, columnName);
 			}
 		}
-		catch (SQLNonTransientException e)
-		{
-			@JDBCCompatiblity("当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常")
-			SQLNonTransientException e1 = e;
-
-			LOGGER.warn("return null primary key object for exception", e1);
-
-			return null;
-		}
 		catch (SQLException e)
 		{
-			throw new DBMetaResolverException(e);
+			LOGGER.warn("return null primary key object for exception", e);
+
+			@JDBCCompatiblity("当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常")
+			UniqueKey[] nullUniqueKeys = null;
+			return nullUniqueKeys;
 		}
 		finally
 		{
@@ -718,15 +719,14 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		try
 		{
 			rs = getImportKeyResulSet(cn, metaData, schema, tableName);
+			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			while (rs.next())
 			{
-				String keyName = rs.getString("FK_NAME");
-				if (keyName == null)
-					keyName = "";
+				String keyName = mrs.getString("FK_NAME", "");
 
-				String columnName = rs.getString("FKCOLUMN_NAME");
-				String primaryColumnName = rs.getString("PKCOLUMN_NAME");
+				String columnName = mrs.getString("FKCOLUMN_NAME", null);
+				String primaryColumnName = mrs.getString("PKCOLUMN_NAME", null);
 
 				int myIndex = keyNames.indexOf(keyName);
 				List<String> columnNames = null;
@@ -735,7 +735,7 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 				if (myIndex < 0)
 				{
 					keyNames.add(keyName);
-					primaryTableNames.add(rs.getString("PKTABLE_NAME"));
+					primaryTableNames.add(mrs.getString("PKTABLE_NAME", ""));
 
 					columnNames = new ArrayList<>();
 					columnNamess.add(columnNames);
@@ -753,18 +753,13 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 				addName(primaryColumnNames, primaryColumnName);
 			}
 		}
-		catch (SQLNonTransientException e)
-		{
-			@JDBCCompatiblity("当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常")
-			SQLNonTransientException e1 = e;
-
-			LOGGER.warn("return null import key object for exception", e1);
-
-			return null;
-		}
 		catch (SQLException e)
 		{
-			throw new DBMetaResolverException(e);
+			LOGGER.warn("return null import key object for exception", e);
+
+			@JDBCCompatiblity("当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常")
+			ImportKey[] nullImportKeys = null;
+			return nullImportKeys;
 		}
 		finally
 		{
@@ -830,18 +825,20 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		Collections.sort(columns, COLUMN_SORT_COMPARATOR);
 	}
 
-	protected DataType readDataType(ResultSet rs)
+	protected DataType readDataType(MetaResultSet rs)
 	{
 		try
 		{
-			String name = rs.getString("TYPE_NAME");
-			if (StringUtil.isEmpty(name))
+			String name = rs.getString("TYPE_NAME", null);
+			Integer type = rs.getInt("DATA_TYPE", null);
+
+			if (StringUtil.isEmpty(name) || type == null)
 			{
-				LOGGER.warn("Invalid data type row : name={}", name);
+				LOGGER.warn("invalid data type : name={}, type={}", name, type);
 				return null;
 			}
 
-			DataType column = new DataType(name, rs.getInt("DATA_TYPE"));
+			DataType column = new DataType(name, type);
 
 			return column;
 		}
@@ -884,10 +881,11 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 		try
 		{
 			rs = getTableResulSet(cn, metaData, schema, null, TABLE_TYPES);
+			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			while (rs.next())
 			{
-				simpleTable = readSimpleTable(cn, metaData, schema, rs);
+				simpleTable = readSimpleTable(cn, metaData, schema, mrs);
 
 				if (simpleTable != null)
 					return simpleTable;
@@ -989,4 +987,96 @@ public abstract class AbstractDevotedDBMetaResolver implements DevotedDBMetaReso
 			return p1.compareTo(o2.getPosition());
 		}
 	};
+
+	/**
+	 * 元信息结果集。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	@JDBCCompatiblity("某些驱动程序的元信息结果集并不符合JDBC规范，比如字段名缺失、不匹配等等，所以这里特别封装此类")
+	protected static class MetaResultSet
+	{
+		private ResultSet resultSet;
+		private Map<String, Integer> _nameColumnIndexMap = new HashMap<>();
+
+		public MetaResultSet(ResultSet resultSet)
+		{
+			super();
+			this.resultSet = resultSet;
+		}
+
+		/**
+		 * 获取列值。
+		 * 
+		 * @param name
+		 * @param defaultValue
+		 * @return
+		 * @throws SQLException
+		 */
+		public String getString(String name, String defaultValue) throws SQLException
+		{
+			int columnIndex = getColumnIndexAndCache(this.resultSet, name);
+
+			if (columnIndex < 1)
+				return defaultValue;
+
+			String value = this.resultSet.getString(columnIndex);
+
+			return (value == null || this.resultSet.wasNull() ? defaultValue : value);
+		}
+
+		/**
+		 * 获取列值。
+		 * 
+		 * @param name
+		 * @param defaultValue
+		 * @return
+		 * @throws SQLException
+		 */
+		public Integer getInt(String name, Integer defaultValue) throws SQLException
+		{
+			int columnIndex = getColumnIndexAndCache(this.resultSet, name);
+
+			if (columnIndex < 1)
+				return defaultValue;
+
+			int value = this.resultSet.getInt(columnIndex);
+
+			return (this.resultSet.wasNull() ? defaultValue : value);
+		}
+
+		protected int getColumnIndexAndCache(ResultSet rs, String name) throws SQLException
+		{
+			Integer columnIndex = this._nameColumnIndexMap.get(name);
+			if (columnIndex == null)
+			{
+				columnIndex = getColumnIndex(rs, name);
+				this._nameColumnIndexMap.put(name, columnIndex);
+			}
+
+			return columnIndex;
+		}
+
+		protected int getColumnIndex(ResultSet rs, String name) throws SQLException
+		{
+			ResultSetMetaData meta = rs.getMetaData();
+			int columnCount = meta.getColumnCount();
+
+			for (int i = 1; i <= columnCount; i++)
+			{
+				@JDBCCompatiblity("这里列名忽略大小写比较，避免不规范的驱动程序")
+				String columnName = meta.getColumnName(i);
+				if (columnName.equalsIgnoreCase(name))
+					return i;
+			}
+
+			return -1;
+		}
+
+		public static MetaResultSet valueOf(ResultSet rs)
+		{
+			return new MetaResultSet(rs);
+		}
+	}
 }
