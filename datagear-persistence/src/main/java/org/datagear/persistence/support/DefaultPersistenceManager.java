@@ -356,7 +356,7 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		if (query == null)
 		{
 			if (LOGGER.isWarnEnabled())
-				LOGGER.warn("memory pagination will be used for [{}]", ConnectionOption.valueOf(cn));
+				LOGGER.warn("memory pagination will be used for [{}]", ConnectionOption.valueOfNonNull(cn));
 
 			query = dialect.toOrderSql(queryView, pagingQuery.getOrders());
 		}

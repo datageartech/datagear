@@ -6,10 +6,10 @@ package org.datagear.connection;
 
 import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
 
 import org.datagear.util.JdbcUtil;
+import org.datagear.util.StringUtil;
 
 /**
  * JDBC连接选项。
@@ -197,21 +197,38 @@ public class ConnectionOption implements Serializable
 
 	/**
 	 * 构建{@linkplain ConnectionOption}实例。
+	 * 
+	 * @param cn
+	 * @return 返回{@code null}表示无法构建
+	 */
+	public static ConnectionOption valueOf(Connection cn)
+	{
+		String url = JdbcUtil.getURLIfSupports(cn);
+		String username = JdbcUtil.getUserNameIfSupports(cn);
+
+		if (StringUtil.isEmpty(url))
+			return null;
+
+		if (StringUtil.isEmpty(username))
+			username = "";
+
+		return new ConnectionOption(url, username);
+	}
+
+	/**
+	 * 构建{@linkplain ConnectionOption}实例。
 	 * <p>
-	 * 如果在从{@linkplain Connection}中获取连接信息时出现{@linkplain SQLException}
-	 * ，此方法将返回一个所有属性都为{@code null}的实例。
+	 * 如果无法构建，此方法将返回一个所有属性都为空的实例。
 	 * </p>
 	 * 
 	 * @param cn
 	 * @return
 	 */
-	public static ConnectionOption valueOf(Connection cn)
+	public static ConnectionOption valueOfNonNull(Connection cn)
 	{
-		ConnectionOption connectionOption = new ConnectionOption();
+		ConnectionOption connectionOption = valueOf(cn);
 
-		connectionOption.setUrl(JdbcUtil.getURLIfSupports(cn));
-		connectionOption.setUser(JdbcUtil.getUserNameIfSupports(cn));
-
-		return connectionOption;
+		return (connectionOption == null ?
+				new ConnectionOption("") : connectionOption);
 	}
 }

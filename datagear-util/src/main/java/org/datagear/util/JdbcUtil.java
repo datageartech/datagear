@@ -250,7 +250,7 @@ public class JdbcUtil
 		{
 			return cn.isReadOnly();
 		}
-		catch (SQLException e)
+		catch(Throwable e)
 		{
 			return defaultValue;
 		}
@@ -272,7 +272,7 @@ public class JdbcUtil
 
 			return true;
 		}
-		catch (SQLException e)
+		catch(Throwable e)
 		{
 			return false;
 		}
@@ -294,8 +294,7 @@ public class JdbcUtil
 
 			return true;
 		}
-		// 避免有驱动程序不支持此方法而抛出异常
-		catch (SQLException e)
+		catch(Throwable e)
 		{
 			return false;
 		}
@@ -315,7 +314,7 @@ public class JdbcUtil
 			DatabaseMetaData metaData = cn.getMetaData();
 			return metaData.getURL();
 		}
-		catch (SQLException t)
+		catch(Throwable t)
 		{
 			return null;
 		}
@@ -335,7 +334,7 @@ public class JdbcUtil
 			DatabaseMetaData metaData = cn.getMetaData();
 			return metaData.getUserName();
 		}
-		catch (SQLException t)
+		catch(Throwable t)
 		{
 			return null;
 		}
@@ -356,9 +355,89 @@ public class JdbcUtil
 			st.setFetchSize(fetchSize);
 			return true;
 		}
-		catch (SQLException e)
+		catch(Throwable e)
 		{
 			return false;
+		}
+	}
+
+	/**
+	 * 获取{@linkplain DatabaseMetaData#getDatabaseProductName()}。
+	 * 
+	 * @param cn
+	 * @return 返回{@code null}表示不支持
+	 */
+	@JDBCCompatiblity("避免有驱动程序不支持此方法而抛出异常")
+	public static String getDatabaseProductNameIfSupports(Connection cn)
+	{
+		try
+		{
+			DatabaseMetaData metaData = cn.getMetaData();
+			return metaData.getDatabaseProductName();
+		}
+		catch(Throwable e)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * 获取{@linkplain DatabaseMetaData#getDatabaseProductVersion()}。
+	 * 
+	 * @param cn
+	 * @return 返回{@code null}表示不支持
+	 */
+	@JDBCCompatiblity("避免有驱动程序不支持此方法而抛出异常")
+	public static String getDatabaseProductVersionIfSupports(Connection cn)
+	{
+		try
+		{
+			DatabaseMetaData metaData = cn.getMetaData();
+			return metaData.getDatabaseProductVersion();
+		}
+		catch(Throwable e)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * 获取{@linkplain DatabaseMetaData#getDatabaseMajorVersion()}。
+	 * 
+	 * @param cn
+	 * @return 返回{@code null}表示不支持
+	 */
+	@JDBCCompatiblity("避免有驱动程序不支持此方法而抛出异常")
+	public static Integer getDatabaseMajorVersionIfSupports(Connection cn)
+	{
+		try
+		{
+			DatabaseMetaData metaData = cn.getMetaData();
+			return metaData.getDatabaseMajorVersion();
+		}
+		catch(Throwable e)
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * 获取{@linkplain DatabaseMetaData#getDatabaseMinorVersion()}。
+	 * 
+	 * @param cn
+	 * @return 返回{@code null}表示不支持
+	 */
+	@JDBCCompatiblity("避免有驱动程序不支持此方法而抛出异常")
+	public static Integer getDatabaseMinorVersionIfSupports(Connection cn)
+	{
+		try
+		{
+			DatabaseMetaData metaData = cn.getMetaData();
+			return metaData.getDatabaseMinorVersion();
+		}
+		catch(Throwable e)
+		{
+			return null;
 		}
 	}
 }

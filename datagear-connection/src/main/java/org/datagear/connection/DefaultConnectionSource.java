@@ -46,11 +46,11 @@ public class DefaultConnectionSource implements ConnectionSource
 
 	private PropertiesProcessor propertiesProcessor = null;
 
-	private ConcurrentMap<String, PreferedDriverEntityResult> urlPreferedDriverEntityMap = new ConcurrentHashMap<>();
+	private ConcurrentMap<String, PreferedDriverEntityResult> _urlPreferedDriverEntityMap = new ConcurrentHashMap<>();
 
-	private volatile long driverEntityManagerLastModified = -1;
+	private volatile long _driverEntityManagerLastModified = -1;
 
-	private HashMap<DataSourceKey, DriverBasicDataSource> _dataSourceMap = new HashMap<>();
+	private HashMap<ConnectionIdentity, DriverBasicDataSource> _dataSourceMap = new HashMap<>();
 
 	private ReadWriteLock _dataSourceMapLock = new ReentrantReadWriteLock();
 
@@ -155,15 +155,15 @@ public class DefaultConnectionSource implements ConnectionSource
 	protected Connection getPreferredConnection(ConnectionOption connectionOption)
 			throws UnsupportedGetConnectionException, ConnectionSourceException
 	{
-		if (this.driverEntityManager.getLastModified() > this.driverEntityManagerLastModified)
+		if (this.driverEntityManager.getLastModified() > this._driverEntityManagerLastModified)
 		{
-			this.driverEntityManagerLastModified = this.driverEntityManager.getLastModified();
-			this.urlPreferedDriverEntityMap.clear();
+			this._driverEntityManagerLastModified = this.driverEntityManager.getLastModified();
+			this._urlPreferedDriverEntityMap.clear();
 		}
 
 		String url = connectionOption.getUrl();
 
-		PreferedDriverEntityResult preferedDriverEntityResult = this.urlPreferedDriverEntityMap.get(url);
+		PreferedDriverEntityResult preferedDriverEntityResult = this._urlPreferedDriverEntityMap.get(url);
 
 		if (preferedDriverEntityResult != null)
 		{
@@ -211,7 +211,7 @@ public class DefaultConnectionSource implements ConnectionSource
 			{
 				preferedConnection = getConnection(driverEntityDriver.getDriver(), connectionOption);
 
-				this.urlPreferedDriverEntityMap.put(connectionOption.getUrl(),
+				this._urlPreferedDriverEntityMap.put(connectionOption.getUrl(),
 						new PreferedDriverEntityResult(driverEntity));
 
 				break;
@@ -221,8 +221,7 @@ public class DefaultConnectionSource implements ConnectionSource
 				if (i == len - 1)
 				{
 					// 使用最后一个最为首选，这样下次获取时，可以使用缓存中的它，直接抛出异常供上层应用知晓，不用再查找一次
-					this.urlPreferedDriverEntityMap.put(connectionOption.getUrl(),
-							new PreferedDriverEntityResult(driverEntity));
+					this._urlPreferedDriverEntityMap.put(url, new PreferedDriverEntityResult(driverEntity));
 
 					// 抛出最后一个异常，供上层应用知晓
 					throw e;
@@ -239,7 +238,7 @@ public class DefaultConnectionSource implements ConnectionSource
 
 		if (preferedConnection == null)
 		{
-			this.urlPreferedDriverEntityMap.put(connectionOption.getUrl(), new PreferedDriverEntityResult());
+			this._urlPreferedDriverEntityMap.put(url, new PreferedDriverEntityResult());
 
 			throw new UnsupportedGetConnectionException(connectionOption);
 		}
@@ -384,13 +383,13 @@ public class DefaultConnectionSource implements ConnectionSource
 	{
 		DriverBasicDataSource dataSource = null;
 
-		DataSourceKey dataSourceKey = new DataSourceKey(driver, url, properties);
+		ConnectionIdentity connectionIdentity = ConnectionIdentity.valueOf(url, properties);
 
 		Lock readLock = this._dataSourceMapLock.readLock();
 		try
 		{
 			readLock.lock();
-			dataSource = this._dataSourceMap.get(dataSourceKey);
+			dataSource = this._dataSourceMap.get(connectionIdentity);
 		}
 		finally
 		{
@@ -404,7 +403,7 @@ public class DefaultConnectionSource implements ConnectionSource
 			{
 				writeLock.lock();
 				dataSource = createDataSource(driver, url, properties);
-				this._dataSourceMap.put(dataSourceKey, dataSource);
+				this._dataSourceMap.put(connectionIdentity, dataSource);
 			}
 			finally
 			{
@@ -535,98 +534,6 @@ public class DefaultConnectionSource implements ConnectionSource
 		public void setDriver(Driver driver)
 		{
 			this.driver = driver;
-		}
-	}
-
-	protected static class DataSourceKey
-	{
-		private Driver driver;
-
-		private String url;
-
-		private Properties properties;
-
-		public DataSourceKey(Driver driver, String url, Properties properties)
-		{
-			super();
-			this.driver = driver;
-			this.url = url;
-			this.properties = properties;
-		}
-
-		public Driver getDriver()
-		{
-			return driver;
-		}
-
-		protected void setDriver(Driver driver)
-		{
-			this.driver = driver;
-		}
-
-		public String getUrl()
-		{
-			return url;
-		}
-
-		protected void setUrl(String url)
-		{
-			this.url = url;
-		}
-
-		public Properties getProperties()
-		{
-			return properties;
-		}
-
-		protected void setProperties(Properties properties)
-		{
-			this.properties = properties;
-		}
-
-		@Override
-		public int hashCode()
-		{
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((driver == null) ? 0 : driver.hashCode());
-			result = prime * result + ((properties == null) ? 0 : properties.hashCode());
-			result = prime * result + ((url == null) ? 0 : url.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			DataSourceKey other = (DataSourceKey) obj;
-			if (driver == null)
-			{
-				if (other.driver != null)
-					return false;
-			}
-			else if (!driver.equals(other.driver))
-				return false;
-			if (properties == null)
-			{
-				if (other.properties != null)
-					return false;
-			}
-			else if (!properties.equals(other.properties))
-				return false;
-			if (url == null)
-			{
-				if (other.url != null)
-					return false;
-			}
-			else if (!url.equals(other.url))
-				return false;
-			return true;
 		}
 	}
 

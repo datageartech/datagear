@@ -139,7 +139,7 @@ public class GenericDBMetaResolver implements DBMetaResolver
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolver(cn);
 
 		if (resolver == null)
-			throw new UnsupportedDBMetaResolverException(ConnectionOption.valueOf(cn));
+			throw new UnsupportedDBMetaResolverException(ConnectionOption.valueOfNonNull(cn));
 
 		return resolver;
 	}

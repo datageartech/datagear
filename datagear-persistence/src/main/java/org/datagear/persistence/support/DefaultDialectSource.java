@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.datagear.connection.ConnectionIdentity;
 import org.datagear.connection.ConnectionOption;
+import org.datagear.connection.DatabaseIdentity;
 import org.datagear.meta.Column;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.resolver.DBMetaResolver;
@@ -25,7 +27,6 @@ import org.datagear.persistence.Order;
 import org.datagear.persistence.support.dialect.MysqlDialectBuilder;
 import org.datagear.persistence.support.dialect.OracleDialectBuilder;
 import org.datagear.persistence.support.dialect.SqlServerDialectBuilder;
-import org.datagear.util.JdbcUtil;
 import org.datagear.util.Sql;
 
 /**
@@ -42,7 +43,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 
 	private boolean detection = true;
 
-	private ConcurrentMap<String, DialectBuilder> dialectBuilderCache = new ConcurrentHashMap<>();
+	private ConcurrentMap<Object, DialectBuilder> dialectBuilderCache = new ConcurrentHashMap<>();
 
 	public DefaultDialectSource()
 	{
@@ -110,7 +111,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 				return detectiveDialect;
 		}
 
-		throw new UnsupportedDialectException(ConnectionOption.valueOf(cn));
+		throw new UnsupportedDialectException(ConnectionOption.valueOfNonNull(cn));
 	}
 
 	/**
@@ -124,9 +125,9 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 	{
 		try
 		{
-			String cacheKey = getDialectCacheKey(cn);
+			Object cacheKey = getDialectBuilderCacheKey(cn);
 
-			DialectBuilder cached = this.dialectBuilderCache.get(cacheKey);
+			DialectBuilder cached = (cacheKey == null ? null : this.dialectBuilderCache.get(cacheKey));
 
 			if (cached != null)
 				return cached.build(cn);
@@ -149,7 +150,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 							{
 								dialect = dialectBuilder.build(cn);
 							}
-							catch (Exception e)
+							catch(Throwable e)
 							{
 								dialect = null;
 							}
@@ -162,7 +163,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 									if (testDialectToPagingSql(cn, databaseMetaData, testInfo, dialect))
 										combinedDialectBuilder.setToPagingQuerySqlDialectBuilder(dialectBuilder);
 								}
-								catch (Exception e)
+								catch(Throwable e)
 								{
 								}
 							}
@@ -170,7 +171,8 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 					}
 				}
 
-				this.dialectBuilderCache.putIfAbsent(cacheKey, combinedDialectBuilder);
+				if (cacheKey != null)
+					this.dialectBuilderCache.putIfAbsent(cacheKey, combinedDialectBuilder);
 
 				return combinedDialectBuilder.build(cn);
 			}
@@ -181,12 +183,25 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 		}
 	}
 
-	protected String getDialectCacheKey(Connection cn) throws SQLException
+	/**
+	 * 获取连接的缓存KEY。
+	 * 
+	 * @param cn
+	 * @return 返回{@code null}表示无法构建
+	 */
+	protected Object getDialectBuilderCacheKey(Connection cn)
 	{
-		String key = JdbcUtil.getURLIfSupports(cn);
+		// 先使用数据库级的关键字，因为数据库级的Dialect都相同
+		Object key = DatabaseIdentity.valueOf(cn);
 
+		// 否则，采用连接级的关键字
 		if (key == null)
-			key = cn.getClass().getName();
+		{
+			ConnectionOption connectionOption = ConnectionOption.valueOf(cn);
+
+			if (connectionOption != null)
+				key = ConnectionIdentity.valueOf(connectionOption);
+		}
 
 		return key;
 	}
@@ -235,7 +250,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 		String columnName = identifierQuote + testInfo.getOrderColumnName() + identifierQuote;
 
 		Sql query = Sql.valueOf();
-		query.sql("SELECT * FROM ").sql(tableQuote);
+		query.sql("SELECT ").sql(columnName).sql(" FROM ").sql(tableQuote);
 
 		Order[] orders = Order.asArray(Order.valueOf(columnName, Order.ASC));
 
