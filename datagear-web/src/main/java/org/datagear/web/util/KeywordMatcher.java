@@ -31,7 +31,7 @@ public class KeywordMatcher
 		if (keywordInfo == null)
 			return list;
 
-		List<T> result = new ArrayList<T>();
+		List<T> result = new ArrayList<>();
 
 		for (T obj : list)
 		{
@@ -57,7 +57,7 @@ public class KeywordMatcher
 		if (keywordInfo == null)
 			return Arrays.asList(array);
 
-		List<T> result = new ArrayList<T>();
+		List<T> result = new ArrayList<>();
 
 		for (T obj : array)
 		{
@@ -230,7 +230,7 @@ public class KeywordMatcher
 		 * 提取关键字匹配值。
 		 * 
 		 * @param t
-		 * @return
+		 * @return 返回{@code null}表示不能匹配
 		 */
 		String[] get(T t);
 	}

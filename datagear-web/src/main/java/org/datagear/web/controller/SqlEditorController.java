@@ -62,8 +62,10 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 
 		}.execute();
 
+		tables = SchemaController.filterTables(tables);
+		SchemaController.sortByTableName(tables);
+
 		List<SimpleTable> keywordTables = SchemaController.findByKeyword(tables, keyword);
-		Collections.sort(keywordTables, SchemaController.TABLE_SORT_BY_NAME_COMPARATOR);
 
 		List<String> tableNames = new ArrayList<>();
 

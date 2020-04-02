@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.datagear.connection.ConnectionOption;
 import org.datagear.meta.Column;
 import org.datagear.meta.DataType;
 import org.datagear.meta.Database;
@@ -45,11 +46,8 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDevotedDBMetaResolver.class);
 
-	public static final String TABLE_TYPE_TABLE = "TABLE";
-
-	public static final String TABLE_TYPE_VIEW = "VIEW";
-
-	protected static final String[] TABLE_TYPES = { TABLE_TYPE_TABLE, TABLE_TYPE_VIEW };
+	protected static final String[] DEFAULT_TABLE_TYPES = { TableType.TABLE, TableType.VIEW, TableType.SYSTEM_TABLE,
+			TableType.GLOBAL_TEMPORARY, TableType.LOCAL_TEMPORARY, TableType.ALIAS, TableType.SYNONYM };
 
 	protected static final String[] EMPTY_STRING_ARRAY = new String[0];
 
@@ -247,6 +245,49 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	}
 
 	/**
+	 * 获取表类型。
+	 * <p>
+	 * 如果查不到，{@linkplain #DEFAULT_TABLE_TYPES}将返回
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param metaData
+	 * @return
+	 */
+	protected String[] getTableTypes(Connection cn, DatabaseMetaData metaData)
+	{
+		String[] types = null;
+
+		ResultSet rs = null;
+		try
+		{
+			List<String> typeList = new ArrayList<>();
+			rs = metaData.getTableTypes();
+
+			while (rs.next())
+				typeList.add(rs.getString(1));
+
+			types = typeList.toArray(new String[typeList.size()]);
+		}
+		catch (SQLException e)
+		{
+			LOGGER.warn("can not get table types :", e);
+		}
+		finally
+		{
+			JdbcUtil.closeResultSet(rs);
+		}
+
+		if (types == null || types.length == 0)
+		{
+			LOGGER.warn("no table types found for {}, the default will return", ConnectionOption.valueOfNonNull(cn));
+			return DEFAULT_TABLE_TYPES;
+		}
+
+		return types;
+	}
+
+	/**
 	 * @param cn
 	 * @param metaData
 	 * @param schema
@@ -260,9 +301,11 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	{
 		ResultSet rs = null;
 
+		String[] tableTypes = getTableTypes(cn, metaData);
+
 		try
 		{
-			rs = getTableResulSet(cn, metaData, schema, tableNamePattern, TABLE_TYPES);
+			rs = getTableResulSet(cn, metaData, schema, tableNamePattern, tableTypes);
 			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			List<SimpleTable> simpleTables = new ArrayList<>();
@@ -298,7 +341,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		try
 		{
 			String name = rs.getString("TABLE_NAME", null);
-			TableType type = toTableType(rs.getString("TABLE_TYPE", ""));
+			String type = TableType.toTableType(rs.getString("TABLE_TYPE", ""));
 
 			if (StringUtil.isEmpty(name) || StringUtil.isEmpty(type))
 			{
@@ -315,16 +358,6 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		{
 			return null;
 		}
-	}
-
-	protected TableType toTableType(String type)
-	{
-		if (TABLE_TYPE_TABLE.equalsIgnoreCase(type))
-			return TableType.TABLE;
-		else if (TABLE_TYPE_VIEW.equalsIgnoreCase(type))
-			return TableType.VIEW;
-		else
-			return null;
 	}
 
 	protected SimpleTable postProcessSimpleTable(Connection cn, DatabaseMetaData metaData, String schema,
@@ -876,11 +909,13 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	{
 		SimpleTable simpleTable = null;
 
+		String[] tableTypes = getTableTypes(cn, metaData);
+
 		ResultSet rs = null;
 
 		try
 		{
-			rs = getTableResulSet(cn, metaData, schema, null, TABLE_TYPES);
+			rs = getTableResulSet(cn, metaData, schema, null, tableTypes);
 			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			while (rs.next())
@@ -941,7 +976,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 			try
 			{
 				String dbUserName = databaseMetaData.getUserName();
-				rs = getTableResulSet(cn, databaseMetaData, dbUserName, null, TABLE_TYPES);
+				rs = getTableResulSet(cn, databaseMetaData, dbUserName, null, getTableTypes(cn, databaseMetaData));
 
 				if (rs.next())
 					schema = dbUserName;

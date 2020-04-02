@@ -1635,7 +1635,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 
 		for (SimpleTable table : tables)
 		{
-			if (TableType.TABLE.equals(table.getType()))
+			if (TableType.isUserDataEntityTableType(table.getType()))
 				list.add(table.getName());
 		}
 

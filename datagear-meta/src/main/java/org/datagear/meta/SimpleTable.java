@@ -19,7 +19,7 @@ public class SimpleTable extends AbstractTable
 		super();
 	}
 
-	public SimpleTable(String name, TableType type)
+	public SimpleTable(String name, String type)
 	{
 		super(name, type);
 	}

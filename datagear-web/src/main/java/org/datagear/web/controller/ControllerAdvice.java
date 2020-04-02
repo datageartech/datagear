@@ -24,6 +24,7 @@ import org.datagear.meta.resolver.TableNotFoundException;
 import org.datagear.persistence.NonUniqueResultException;
 import org.datagear.persistence.PersistenceException;
 import org.datagear.persistence.SqlParamValueMapperException;
+import org.datagear.persistence.support.NoColumnDefinedException;
 import org.datagear.persistence.support.SqlParamValueSqlExpressionException;
 import org.datagear.persistence.support.SqlParamValueVariableExpressionException;
 import org.datagear.persistence.support.UnsupportedDialectException;
@@ -116,8 +117,7 @@ public class ControllerAdvice extends AbstractController
 	public String handleControllerIllegalArgumentException(HttpServletRequest request, HttpServletResponse response,
 			IllegalArgumentException exception)
 	{
-		setOperationMessageForInternalServerError(request, buildMessageCode(IllegalArgumentException.class),
-				exception);
+		setOperationMessageForInternalServerError(request, buildMessageCode(IllegalArgumentException.class), exception);
 
 		return getErrorView(request, response);
 	}
@@ -224,6 +224,17 @@ public class ControllerAdvice extends AbstractController
 			NonUniqueResultException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(NonUniqueResultException.class), exception, false);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(NoColumnDefinedException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handlePersistenceNoColumnDefinedException(HttpServletRequest request, HttpServletResponse response,
+			NoColumnDefinedException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(NoColumnDefinedException.class), exception, false,
+				exception.getTableName());
 
 		return getErrorView(request, response);
 	}

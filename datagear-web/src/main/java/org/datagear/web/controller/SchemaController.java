@@ -5,6 +5,7 @@
 package org.datagear.web.controller;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -17,6 +18,7 @@ import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
+import org.datagear.meta.TableType;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
@@ -268,6 +270,8 @@ public class SchemaController extends AbstractSchemaConnTableController
 
 		}.execute();
 
+		tables = filterTables(tables);
+
 		sortByTableName(tables);
 
 		List<SimpleTable> keywordTables = findByKeyword(tables, pagingQuery.getKeyword());
@@ -322,6 +326,19 @@ public class SchemaController extends AbstractSchemaConnTableController
 				schema.clearPassword();
 			}
 		}
+	}
+
+	public static List<SimpleTable> filterTables(List<SimpleTable> simpleTables)
+	{
+		List<SimpleTable> re = new ArrayList<>(simpleTables.size());
+
+		for (SimpleTable simpleTable : simpleTables)
+		{
+			if (TableType.isUserDataTableType(simpleTable.getType()))
+				re.add(simpleTable);
+		}
+
+		return re;
 	}
 
 	/**

@@ -40,10 +40,28 @@ public class Table extends AbstractTable
 		super();
 	}
 
-	public Table(String name, TableType type, Column[] columns)
+	public Table(String name, String type)
+	{
+		this(name, type, null);
+	}
+
+	public Table(String name, String type, Column[] columns)
 	{
 		super(name, type);
-		this.columns = columns;
+		this.columns = (columns == null ? new Column[0] : columns);
+	}
+
+	/**
+	 * 是否有列。
+	 * <p>
+	 * 对于某些NewSql数据库（比如Elasticsearch）可能存在没有定义列的表。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public boolean hasColumn()
+	{
+		return (this.columns != null && this.columns.length > 0);
 	}
 
 	public Column[] getColumns()
@@ -53,7 +71,7 @@ public class Table extends AbstractTable
 
 	public void setColumns(Column[] columns)
 	{
-		this.columns = columns;
+		this.columns = (columns == null ? new Column[0] : columns);
 	}
 
 	public boolean hasPrimaryKey()

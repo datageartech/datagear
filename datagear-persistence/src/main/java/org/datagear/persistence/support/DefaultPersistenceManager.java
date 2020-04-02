@@ -78,6 +78,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	public Row insert(Connection cn, Dialect dialect, Table table, Row row, SqlParamValueMapper mapper)
 			throws PersistenceException
 	{
+		checkValidTable(table);
+
 		dialect = getDialect(cn, dialect);
 
 		// 用于避免SQL参数转换中出现异常导致已转换的资源无法释放
@@ -158,6 +160,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	public int update(Connection cn, Dialect dialect, Table table, Row origin, Row update, SqlParamValueMapper mapper)
 			throws PersistenceException
 	{
+		checkValidTable(table);
+
 		dialect = getDialect(cn, dialect);
 
 		// 用于避免SQL参数转换中出现异常导致已转换的资源无法释放
@@ -220,6 +224,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	public int delete(Connection cn, Dialect dialect, Table table, Row[] rows, SqlParamValueMapper mapper)
 			throws PersistenceException
 	{
+		checkValidTable(table);
+
 		dialect = getDialect(cn, dialect);
 
 		// 用于避免SQL参数转换中出现异常导致已转换的资源无法释放
@@ -261,6 +267,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	@Override
 	public int delete(Connection cn, Dialect dialect, Table table, Query query) throws PersistenceException
 	{
+		checkValidTable(table);
+
 		// TODO
 		throw new UnsupportedOperationException("TODO");
 	}
@@ -275,6 +283,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	public Row get(Connection cn, Dialect dialect, Table table, Row param, SqlParamValueMapper sqlParamValueMapper,
 			RowMapper rowMapper) throws NonUniqueResultException, PersistenceException
 	{
+		checkValidTable(table);
+
 		dialect = getDialect(cn, dialect);
 
 		// 用于避免SQL参数转换中出现异常导致已转换的资源无法释放
@@ -311,6 +321,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	public List<Row> query(Connection cn, Dialect dialect, Table table, Query query, RowMapper mapper)
 			throws PersistenceException
 	{
+		checkValidTable(table);
+
 		dialect = getDialect(cn, dialect);
 
 		Sql sql = buildQuerySql(cn, dialect, table, query, true);
@@ -327,6 +339,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	public PagingData<Row> pagingQuery(Connection cn, Dialect dialect, Table table, PagingQuery pagingQuery,
 			RowMapper mapper) throws PersistenceException
 	{
+		checkValidTable(table);
+
 		dialect = getDialect(cn, dialect);
 
 		Sql queryView = buildQuerySql(cn, dialect, table, pagingQuery, true);
@@ -377,6 +391,8 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 	@Override
 	public String getQuerySql(Connection cn, Dialect dialect, Table table, Query query)
 	{
+		checkValidTable(table);
+
 		dialect = getDialect(cn, dialect);
 
 		Sql sql = buildQuerySql(cn, dialect, table, query, false);
@@ -610,6 +626,12 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 			return sql;
 
 		return "(" + sql + ")";
+	}
+
+	protected void checkValidTable(Table table)
+	{
+		if (!table.hasColumn())
+			throw new NoColumnDefinedException(table.getName());
 	}
 
 	/**

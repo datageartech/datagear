@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.management.domain.Schema;
 import org.datagear.meta.Table;
 import org.datagear.meta.resolver.DBMetaResolver;
+import org.datagear.persistence.support.NoColumnDefinedException;
 import org.datagear.web.util.TableCache;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -89,6 +90,9 @@ public abstract class AbstractSchemaConnTableController extends AbstractSchemaCo
 				table = getDbMetaResolver().getTable(getConnection(), this.tableName);
 				getTableCache().put(schema.getId(), table);
 			}
+
+			if (!table.hasColumn())
+				throw new NoColumnDefinedException(table.getName());
 
 			springModel.addAttribute("table", table);
 

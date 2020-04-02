@@ -20,7 +20,7 @@ public class AbstractTable implements Serializable
 	private String name;
 
 	/** 类型 */
-	private TableType type;
+	private String type;
 
 	/** 描述 */
 	private String comment;
@@ -30,7 +30,7 @@ public class AbstractTable implements Serializable
 		super();
 	}
 
-	public AbstractTable(String name, TableType type)
+	public AbstractTable(String name, String type)
 	{
 		super();
 		this.name = name;
@@ -47,12 +47,12 @@ public class AbstractTable implements Serializable
 		this.name = name;
 	}
 
-	public TableType getType()
+	public String getType()
 	{
 		return type;
 	}
 
-	public void setType(TableType type)
+	public void setType(String type)
 	{
 		this.type = type;
 	}
