@@ -26,6 +26,7 @@ import org.datagear.persistence.DialectSource;
 import org.datagear.persistence.Order;
 import org.datagear.persistence.support.dialect.MysqlDialectBuilder;
 import org.datagear.persistence.support.dialect.OracleDialectBuilder;
+import org.datagear.persistence.support.dialect.PostgresqlDialectBuilder;
 import org.datagear.persistence.support.dialect.SqlServerDialectBuilder;
 import org.datagear.util.Sql;
 
@@ -57,6 +58,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 		this.dialectBuilders = new ArrayList<>();
 
 		this.dialectBuilders.add(new MysqlDialectBuilder());
+		this.dialectBuilders.add(new PostgresqlDialectBuilder());
 		this.dialectBuilders.add(new OracleDialectBuilder());
 		this.dialectBuilders.add(new SqlServerDialectBuilder());
 	}
@@ -150,7 +152,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 							{
 								dialect = dialectBuilder.build(cn);
 							}
-							catch(Throwable e)
+							catch (Throwable e)
 							{
 								dialect = null;
 							}
@@ -163,7 +165,7 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 									if (testDialectToPagingSql(cn, databaseMetaData, testInfo, dialect))
 										combinedDialectBuilder.setToPagingQuerySqlDialectBuilder(dialectBuilder);
 								}
-								catch(Throwable e)
+								catch (Throwable e)
 								{
 								}
 							}
@@ -244,15 +246,10 @@ public class DefaultDialectSource extends PersistenceSupport implements DialectS
 	protected boolean testDialectToPagingSql(Connection cn, DatabaseMetaData databaseMetaData, TestInfo testInfo,
 			Dialect dialect) throws Exception
 	{
-		String identifierQuote = databaseMetaData.getIdentifierQuoteString();
+		Sql query = Sql.valueOf().sql("SELECT ").sql(dialect.quote(testInfo.getOrderColumnName())).sql(" FROM ")
+				.sql(dialect.quote(testInfo.getTableName()));
 
-		String tableQuote = identifierQuote + testInfo.getTableName() + identifierQuote;
-		String columnName = identifierQuote + testInfo.getOrderColumnName() + identifierQuote;
-
-		Sql query = Sql.valueOf();
-		query.sql("SELECT ").sql(columnName).sql(" FROM ").sql(tableQuote);
-
-		Order[] orders = Order.asArray(Order.valueOf(columnName, Order.ASC));
+		Order[] orders = Order.asArray(Order.valueOf(testInfo.getOrderColumnName(), Order.ASC));
 
 		Sql pagingQuerySql = dialect.toPagingQuerySql(query, orders, 1, 5);
 
