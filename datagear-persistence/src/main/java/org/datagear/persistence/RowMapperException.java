@@ -10,7 +10,7 @@ package org.datagear.persistence;
  * @author datagear@163.com
  *
  */
-public class RowMapperException extends RuntimeException
+public class RowMapperException extends PersistenceException
 {
 	private static final long serialVersionUID = 1L;
 
