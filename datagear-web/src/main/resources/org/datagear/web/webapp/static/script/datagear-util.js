@@ -1019,6 +1019,9 @@
 		 * 				//可选，字符串最大显示长度
 		 * 				stringDisplayThreshold : 47,
 		 * 
+		 * 				//关键字查询列数
+		 * 				keywordQueryColumnCount : undefined,
+		 * 
 		 * 				//可选，单元格渲染后置处理函数
 		 * 				postRender : function(data, type, rowData, meta, rowIndex, renderValue, table, column, dtColumn){}
 		 * 			}
@@ -1026,7 +1029,7 @@
 		 */
 		buildDataTablesColumns : function(table, options)
 		{
-			options = $.extend({ stringDisplayThreshold : 47 }, options);
+			options = $.extend({ stringDisplayThreshold : 47, keywordQueryColumnCount: -1 }, options);
 			
 			var columns = table.columns;
 			
@@ -1036,10 +1039,11 @@
 				var column = columns[i];
 				
 				var disable = !$.meta.supportsColumn(column);
+				var isKeywordSearchCol = (i < options.keywordQueryColumnCount && $.meta.isKeywordSearchColumn(column));
 				
 				dtColumns.push(
 				{
-					title: $.meta.displayInfoHtml(column, "a"),
+					title: $.meta.displayInfoHtml(column, "a", (isKeywordSearchCol ? "keyword-search-column" : "")),
 					data: $.escapeColumnNameForDataTable(column.name),
 					columnIndex: i,
 					columnName: column.name,

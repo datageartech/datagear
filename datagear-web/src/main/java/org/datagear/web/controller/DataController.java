@@ -188,7 +188,7 @@ public class DataController extends AbstractSchemaConnTableController
 				springModel.addAttribute(KEY_TITLE_DISPLAY_DESC, table.getComment());
 				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 				springModel.addAttribute("readonly", table.isReadonly());
-				setGridPageAttributes(request, response, springModel, schema, table);
+				setGridPageAttributes(request, response, springModel, schema, table, dialect);
 			}
 		}.execute();
 
@@ -600,7 +600,7 @@ public class DataController extends AbstractSchemaConnTableController
 				springModel.addAttribute(KEY_TITLE_DISPLAY_NAME, table.getName());
 				springModel.addAttribute(KEY_SQL_IDENTIFIER_QUOTE, dialect.getIdentifierQuote());
 				springModel.addAttribute(KEY_SELECT_OPERATION, true);
-				setGridPageAttributes(request, response, springModel, schema, table);
+				setGridPageAttributes(request, response, springModel, schema, table, dialect);
 			}
 		}.execute();
 
@@ -958,9 +958,10 @@ public class DataController extends AbstractSchemaConnTableController
 	 * @param springModel
 	 */
 	protected void setGridPageAttributes(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, Schema schema, Table table)
+			org.springframework.ui.Model springModel, Schema schema, Table table, Dialect dialect)
 	{
 		springModel.addAttribute("queryDefaultLOBRowMapper", buildQueryDefaultLOBRowMapper());
+		springModel.addAttribute("keywordQueryColumnCount", dialect.getKeywordQueryColumnCount());
 
 		// 编辑表格需要表单属性
 		setFormPageAttributes(request, springModel);

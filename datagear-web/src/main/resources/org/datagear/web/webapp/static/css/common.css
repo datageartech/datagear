@@ -396,8 +396,7 @@ table.dataTable thead th,
 table.dataTable tfoot th{
 	font-weight: normal;
 }
-table.dataTable thead .display-info-token,
-table.dataTable thead .column-searchable{
+table.dataTable thead .keyword-search-column{
 	font-weight: bold;
 }
 table.dataTable .column-check{

@@ -288,6 +288,28 @@
 			return false;
 		},
 		
+		isNumberColumn: function(column)
+		{
+			var Types = this.Types;
+			var sqlType = column.type;
+			
+			switch (sqlType)
+			{
+				case Types.TINYINT:
+				case Types.SMALLINT:
+				case Types.INTEGER:
+				case Types.BIGINT:
+				case Types.REAL:
+				case Types.FLOAT:
+				case Types.DOUBLE:
+				case Types.DECIMAL:
+				case Types.NUMERIC:
+					return true;
+				default:
+					return false;
+			}
+		},
+		
 		isBinaryColumn: function(column)
 		{
 			var type = column.type;
@@ -354,6 +376,15 @@
 		},
 		
 		/**
+		 * 是否支持关键字查询的列。
+		 */
+		isKeywordSearchColumn: function(column)
+		{
+			return (column.searchableType == "ONLY_LIKE" || column.searchableType == "ALL"
+						|| this.isNumberColumn(column));
+		},
+		
+		/**
 		 * 将属性名按照HTML规范转义。
 		 */
 		escapeHtml : function(text)
@@ -389,11 +420,12 @@
 		 * 
 		 * @param tableOrColumn
 		 * @param tagName 可选，HTML标签名
+		 * @param className 可选，自定义样式类名
 		 */
-		displayInfoHtml : function(tableOrColumn, tagName)
+		displayInfoHtml : function(tableOrColumn, tagName, className)
 		{
 			tagName = (tagName || "span");
-			return "<"+tagName+" class='display-info" + "' title='"+this.escapeHtml(tableOrColumn.comment || "")+"'>"
+			return "<"+tagName+" class='display-info " + (className ? className : "") + "' title='"+this.escapeHtml(tableOrColumn.comment || "")+"'>"
 						+this.escapeHtml(tableOrColumn.name)+"</"+tagName+">";
 		},
 		

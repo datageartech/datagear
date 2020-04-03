@@ -7,7 +7,8 @@
 变量：
 //查询结果的行映射器，非null
 DefaultLOBRowMapper queryDefaultLOBRowMapper
-
+//关键字查询列数，非null
+int keywordQueryColumnCount
 -->
 <#include "../../include/page_obj_grid.ftl">
 <script type="text/javascript">
@@ -16,6 +17,7 @@ DefaultLOBRowMapper queryDefaultLOBRowMapper
 	po.binaryPlaceholder = "${queryDefaultLOBRowMapper.binaryPlaceholder?js_string}";
 	po.clobPlaceholder = "${queryDefaultLOBRowMapper.clobPlaceholder?js_string}";
 	po.sqlXmlPlaceholder = "${queryDefaultLOBRowMapper.sqlXmlPlaceholder?js_string}";
+	po.keywordQueryColumnCount = parseInt("${keywordQueryColumnCount?js_string}");
 	
 	po.isPlaceholderColumnValue = function(column, value)
 	{
@@ -39,7 +41,7 @@ DefaultLOBRowMapper queryDefaultLOBRowMapper
 	 */
 	po.initDataTableAjax = function(url, table)
 	{
-		var columns = $.buildDataTablesColumns(table);
+		var columns = $.buildDataTablesColumns(table, {keywordQueryColumnCount: po.keywordQueryColumnCount});
 		var settings = po.buildDataTableSettingsAjax(columns, url);
 		
 		po.initDataTable(settings);
