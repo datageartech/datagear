@@ -170,6 +170,12 @@
 					<property name="name" value="dashboardFactory" />
 					<property name="content" value="&lt;script type='text/javascript' res-name='dashboardFactory' src='$CONTEXTPATH/static/script/datagear-dashboardFactory.js'&gt;&lt;/script&gt;" />
 				</bean>
+				
+				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
+					<property name="name" value="chartSupport" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='chartSupport' src='$CONTEXTPATH/static/script/datagear-chartSupport.js'&gt;&lt;/script&gt;" />
+				</bean>
+				
 				<!-- @deprecated 此模块已被datagear-chartFactory.js代替，未来版本会移除 -->
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="chart-util" />

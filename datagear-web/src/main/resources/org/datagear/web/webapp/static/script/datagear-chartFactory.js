@@ -856,7 +856,7 @@
 					}
 				},
 				"symbolSize" : 4,
-				"symbol" : "circle",
+				"symbol" : "emptyCircle",
 				"smooth" : false
 			},
 			"radar" : {
