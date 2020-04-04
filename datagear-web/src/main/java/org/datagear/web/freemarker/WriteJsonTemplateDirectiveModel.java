@@ -128,14 +128,11 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 	/**
 	 * 将对象包装为{@linkplain WrapperTemplateModel}，这样就可以使用此类对应的指令，并且能够处理循环引用对象。
 	 * 
-	 * @param obj
+	 * @param obj 允许为{@code null}
 	 * @return
 	 */
 	public static TemplateModel toWriteJsonTemplateModel(Object obj)
 	{
-		if (obj == null)
-			return null;
-
 		return new SimpleWrapperTemplateModel(obj);
 	}
 

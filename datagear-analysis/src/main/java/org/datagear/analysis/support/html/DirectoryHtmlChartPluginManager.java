@@ -13,6 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 import java.util.zip.ZipOutputStream;
 
+import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.RenderContext;
@@ -235,6 +236,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		if (file.isDirectory())
 		{
 			HtmlChartPlugin<?> myPlugin = this.htmlChartPluginLoader.load(file);
+			inflateCagetory(myPlugin);
 
 			if (myPlugin != null)
 			{
@@ -255,6 +257,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		else if (this.htmlChartPluginLoader.isHtmlChartPluginZip(file))
 		{
 			HtmlChartPlugin<?> myPlugin = this.htmlChartPluginLoader.loadZip(file);
+			inflateCagetory(myPlugin);
 
 			if (myPlugin != null)
 			{
@@ -505,6 +508,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		try
 		{
 			HtmlChartPlugin<?> plugin = this.htmlChartPluginLoader.loadFile(file);
+			inflateCagetory(plugin);
 			return registerHtmlChartPlugin(plugin, file);
 		}
 		catch (Throwable t)
@@ -553,6 +557,36 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 			return true;
 
 		return super.canReplaceForSameId(my, myVersion, old, oldVersion);
+	}
+
+	protected boolean inflateCagetory(HtmlChartPlugin<?> plugin)
+	{
+		if (plugin == null)
+			return false;
+
+		Category category = plugin.getCategory();
+
+		if (category == null)
+			return false;
+
+		if (category.hasNameLabel())
+			return false;
+
+		Map<String, ? extends ChartPlugin<?>> map = getChartPluginMap();
+
+		for (ChartPlugin<?> chartPlugin : map.values())
+		{
+			Category myCategory = chartPlugin.getCategory();
+
+			if (myCategory != null && myCategory.hasNameLabel()
+					&& myCategory.getName() != null && myCategory.getName().equals(category.getName()))
+			{
+				plugin.setCategory(myCategory);
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

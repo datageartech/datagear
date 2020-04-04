@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartProperty;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.PropertyType;
@@ -43,44 +43,50 @@ public class JsonChartPluginPropertiesResolverTest
 			InputStream jsonInputStream = getClass().getClassLoader()
 					.getResourceAsStream("org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest.json");
 
-			Map<String, Object> properties = jsonChartPluginPropertiesResolver
-					.resolveChartPluginProperties(jsonInputStream, "UTF-8");
+			TestChartPlugin chartPlugin = new TestChartPlugin();
+			jsonChartPluginPropertiesResolver.resolveChartPluginProperties(chartPlugin, jsonInputStream, "UTF-8");
 
-			Assert.assertEquals("pie-chart", properties.get(ChartPlugin.PROPERTY_ID));
+			Assert.assertEquals("pie-chart", chartPlugin.getId());
+			Assert.assertNotNull(chartPlugin.getNameLabel());
+			Assert.assertNotNull(chartPlugin.getDescLabel());
+			Assert.assertNotNull(chartPlugin.getManualLabel());
+			Assert.assertNotNull(chartPlugin.getIcons());
+			Assert.assertNotNull(chartPlugin.getChartProperties());
+			Assert.assertNotNull(chartPlugin.getDataSigns());
+			Assert.assertEquals("0.1.0", chartPlugin.getVersion());
+			Assert.assertEquals(2, chartPlugin.getOrder());
+			Assert.assertNotNull(chartPlugin.getCategory());
 
 			{
-				Label nameLabel = (Label) properties.get(ChartPlugin.PROPERTY_NAME_LABEL);
+				Label nameLabel = chartPlugin.getNameLabel();
 				Assert.assertEquals("饼图", nameLabel.getValue());
 				Assert.assertEquals("pie chart", nameLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("饼图中文", nameLabel.getValue(Label.toLocale("zh")));
 			}
 
 			{
-				Label descLabel = (Label) properties.get(ChartPlugin.PROPERTY_DESC_LABEL);
+				Label descLabel = chartPlugin.getDescLabel();
 				Assert.assertEquals("饼图描述", descLabel.getValue());
 				Assert.assertEquals("pie chart desc", descLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("饼图描述中文", descLabel.getValue(Label.toLocale("zh")));
 			}
 
 			{
-				Label manualLabel = (Label) properties.get(ChartPlugin.PROPERTY_MANUAL_LABEL);
+				Label manualLabel = chartPlugin.getManualLabel();
 				Assert.assertEquals("饼图指南", manualLabel.getValue());
 				Assert.assertEquals("pie chart manual", manualLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("饼图指南中文", manualLabel.getValue(Label.toLocale("zh")));
 			}
 
 			{
-				@SuppressWarnings("unchecked")
-				Map<RenderStyle, LocationIcon> icons = (Map<RenderStyle, LocationIcon>) properties
-						.get(ChartPlugin.PROPERTY_ICONS);
+				@SuppressWarnings({ "unchecked", "rawtypes" })
+				Map<RenderStyle, LocationIcon> icons = (Map) chartPlugin.getIcons();
 
 				Assert.assertEquals("icon-0.png", icons.get(RenderStyle.LIGHT).getLocation());
 				Assert.assertEquals("icon-1.png", icons.get(RenderStyle.DARK).getLocation());
 			}
 
-			@SuppressWarnings("unchecked")
-			List<ChartProperty> chartProperties = (List<ChartProperty>) properties
-					.get(ChartPlugin.PROPERTY_CHART_PROPERTIES);
+			List<ChartProperty> chartProperties = chartPlugin.getChartProperties();
 
 			{
 				ChartProperty chartProperty = chartProperties.get(0);
@@ -134,8 +140,7 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals(constraintsExpected, constraints);
 			}
 
-			@SuppressWarnings("unchecked")
-			List<DataSign> dataSigns = (List<DataSign>) properties.get(ChartPlugin.PROPERTY_DATA_SIGNS);
+			List<DataSign> dataSigns = chartPlugin.getDataSigns();
 
 			{
 				DataSign dataSign = dataSigns.get(0);
@@ -172,32 +177,15 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("Y value desc", descLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("Y值描述中文", descLabel.getValue(Label.toLocale("zh")));
 			}
+
+			{
+				Category category = chartPlugin.getCategory();
+				Assert.assertEquals("line", category.getName());
+				Assert.assertEquals("nameLabel", category.getNameLabel().getValue());
+				Assert.assertEquals("descLabel", category.getDescLabel().getValue());
+				Assert.assertEquals(41, category.getOrder());
+			}
 		}
-	}
-
-	@Test
-	public void setChartPluginPropertiesTest() throws IOException
-	{
-		InputStream jsonInputStream = getClass().getClassLoader()
-				.getResourceAsStream("org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest.json");
-
-		Map<String, Object> properties = jsonChartPluginPropertiesResolver.resolveChartPluginProperties(jsonInputStream,
-				"UTF-8");
-
-		TestChartPlugin chartPlugin = new TestChartPlugin();
-
-		this.jsonChartPluginPropertiesResolver.setChartPluginProperties(chartPlugin, properties);
-
-		Assert.assertNotNull(chartPlugin.getId());
-
-		Assert.assertNotNull(chartPlugin.getNameLabel());
-		Assert.assertNotNull(chartPlugin.getDescLabel());
-		Assert.assertNotNull(chartPlugin.getManualLabel());
-		Assert.assertNotNull(chartPlugin.getIcons());
-		Assert.assertNotNull(chartPlugin.getChartProperties());
-		Assert.assertNotNull(chartPlugin.getDataSigns());
-		Assert.assertEquals("0.1.0", chartPlugin.getVersion());
-		Assert.assertEquals(2, chartPlugin.getOrder());
 	}
 
 	private static class TestChartPlugin extends AbstractChartPlugin<RenderContext>

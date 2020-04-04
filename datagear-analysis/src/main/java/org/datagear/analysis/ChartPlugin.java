@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.util.i18n.Label;
+import org.datagear.util.i18n.Labeled;
 
 /**
  * 图表插件。
@@ -20,34 +21,29 @@ import org.datagear.util.i18n.Label;
  *
  * @param <T>
  */
-public interface ChartPlugin<T extends RenderContext> extends Identifiable
+public interface ChartPlugin<T extends RenderContext> extends Identifiable, Labeled
 {
 	String PROPERTY_ID = "id";
-	String PROPERTY_NAME_LABEL = "nameLabel";
-	String PROPERTY_DESC_LABEL = "descLabel";
+	String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
+	String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 	String PROPERTY_MANUAL_LABEL = "manualLabel";
 	String PROPERTY_ICONS = "icons";
 	String PROPERTY_CHART_PROPERTIES = "chartProperties";
 	String PROPERTY_DATA_SIGNS = "dataSigns";
 	String PROPERTY_VERSION = "version";
 	String PROPERTY_ORDER = "order";
+	String PROPERTY_CATEGORY = "category";
 
 	/**
 	 * 获取名称标签。
-	 * 
-	 * @return
-	 */
-	Label getNameLabel();
-
-	/**
-	 * 获取描述标签。
 	 * <p>
-	 * 返回{@code null}表示无描述标签。
+	 * 此方法不应返回{@code null}。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	Label getDescLabel();
+	@Override
+	Label getNameLabel();
 
 	/**
 	 * 获取使用指南标签。
@@ -146,4 +142,11 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable
 	 * @return
 	 */
 	int getOrder();
+
+	/**
+	 * 获取所属类别。
+	 * 
+	 * @return 返回{@code null}表示无类别
+	 */
+	Category getCategory();
 }

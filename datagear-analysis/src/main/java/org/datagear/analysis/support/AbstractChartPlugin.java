@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
+import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartProperty;
 import org.datagear.analysis.DataSign;
@@ -44,6 +45,8 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 
 	private int order = 0;
 
+	private Category category;
+
 	public AbstractChartPlugin()
 	{
 	}
@@ -60,6 +63,7 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 		return nameLabel;
 	}
 
+	@Override
 	public void setNameLabel(Label nameLabel)
 	{
 		this.nameLabel = nameLabel;
@@ -71,6 +75,7 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 		return descLabel;
 	}
 
+	@Override
 	public void setDescLabel(Label descLabel)
 	{
 		this.descLabel = descLabel;
@@ -183,4 +188,14 @@ public abstract class AbstractChartPlugin<T extends RenderContext> extends Abstr
 		this.order = order;
 	}
 
+	@Override
+	public Category getCategory()
+	{
+		return category;
+	}
+
+	public void setCategory(Category category)
+	{
+		this.category = category;
+	}
 }

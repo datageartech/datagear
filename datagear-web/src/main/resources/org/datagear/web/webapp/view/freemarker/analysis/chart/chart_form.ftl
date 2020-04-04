@@ -32,9 +32,11 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='chart.htmlChartPlugin' /></label>
 				</div>
 				<div class="form-item-value">
-					<ul class="chart-plugin-list ui-widget ui-helper-clearfix">
-					</ul>
 					<input type="text" name="htmlChartPlugin.id" class="ui-widget ui-widget-content" value="${(chart.htmlChartPlugin.id)!''?html}" style="display:none" />
+					<div class="chart-plugin input ui-widget ui-widget-content"></div>
+					<#if !readonly>
+					<button class="selectChartPluginButton" type="button"><@spring.message code='select' /></button>
+					</#if>
 				</div>
 			</div>
 			<div class="form-item">
@@ -110,8 +112,26 @@ readonly 是否只读操作，允许为null
 		return "${contextPath}/analysis/chart/" + action;
 	};
 	
+	po.chartPluginVO = <@writeJson var=chartPluginVO />;
 	po.chartDataSets = <@writeJson var=chartDataSets />;
-	po.chartPluginVOs = <@writeJson var=pluginVOs />;
+	
+	po.element(".selectChartPluginButton").click(function()
+	{
+		var options =
+		{
+			pageParam :
+			{
+				select : function(chartPlugin)
+				{
+					po.initChartPlugin(chartPlugin);
+				}
+			}
+		};
+		
+		$.setGridPageHeightOption(options);
+		
+		po.open("${contextPath}/analysis/chartPlugin/select", options);
+	});
 	
 	po.element("input[name='updateIntervalRadio']").on("change", function()
 	{
@@ -181,25 +201,9 @@ readonly 是否只读操作，允许为null
 	
 	po.updateIntervalValue(${(chart.updateInterval)!"-1"});
 	
-	po.getChartPlugin = function(id)
-	{
-		if(!po.chartPluginVOs)
-			return;
-		
-		for(var i=0; i<po.chartPluginVOs.length; i++)
-		{
-			var cp = po.chartPluginVOs[i];
-			if(cp.id == id)
-				return cp;
-		}
-		
-		return null;
-	};
-	
 	po.getCurrentChartPlugin = function()
 	{
-		var id = po.element("input[name='htmlChartPlugin.id']").val();
-		return po.getChartPlugin(id);
+		return po.chartPluginVO;
 	};
 	
 	po.dataSignLabel = function(dataSign)
@@ -207,52 +211,26 @@ readonly 是否只读操作，允许为null
 		return (dataSign.nameLabel && dataSign.nameLabel.value ? dataSign.nameLabel.value : dataSign.name);
 	};
 	
-	po.initChartPluginList = function()
+	po.initChartPlugin = function(chartPluginVO)
 	{
-		if(!po.chartPluginVOs)
+		if(!chartPluginVO)
 			return;
 		
-		var $wapper = po.element(".chart-plugin-list");
+		po.chartPluginVO = chartPluginVO;
+		po.element("input[name='htmlChartPlugin.id']").val(chartPluginVO.id);
+		
+		var $wapper = po.element(".chart-plugin");
 		$wapper.empty();
 		
-		for(var i=0; i<po.chartPluginVOs.length; i++)
+		if(chartPluginVO.iconUrl)
 		{
-			var cp = po.chartPluginVOs[i];
-			
-			var $li = $("<li class='ui-state-default ui-corner-all' />")
-						.attr("chart-plugin-id", cp.id).attr("title", cp.nameLabel.value)
-						.appendTo($wapper);
-			
-			if(cp.iconUrl)
-				$("<a class='plugin-icon'>&nbsp;</a>").css("background-image", "url(${contextPath}/"+cp.iconUrl+")").appendTo($li);
-			else
-				$("<a class='plugin-name'></a>").text(cp.nameLabel.value).appendTo($li);
+			$wapper.removeClass("no-icon");
+			$("<div class='plugin-icon'></div>").css("background-image", "url(${contextPath}/"+chartPluginVO.iconUrl+")").appendTo($wapper);
 		}
+		else
+			$wapper.addClass("no-icon");
 		
-		var currentPluginId = po.element("input[name='htmlChartPlugin.id']").val();
-		
-		po.element(".chart-plugin-list li")
-			.hover(function(){ $(this).addClass("ui-state-hover"); },
-				function(){ $(this).removeClass("ui-state-hover"); })
-			.click(function()
-			{
-				<#if !readonly>
-				var $this = $(this);
-				
-				po.element("input[name='htmlChartPlugin.id']").val($this.attr("chart-plugin-id"));
-
-				po.element(".chart-plugin-list li").removeClass("ui-state-active");
-				$this.addClass("ui-state-active");
-				</#if>
-			})
-			.each(function()
-			{
-				var $this = $(this);
-				
-				var myPluginId = $this.attr("chart-plugin-id");
-				if(myPluginId == currentPluginId)
-					$this.addClass("ui-state-active");
-			});
+		$("<div class='plugin-name' />").text(chartPluginVO.nameLabel.value).appendTo($wapper);
 	};
 	
 	po.initChartDataSets = function()
@@ -588,7 +566,7 @@ readonly 是否只读操作，允许为null
 					var chart = response.data;
 					po.element("input[name='id']").val(chart.id);
 					
-					po.pageParamCallAfterSave(true, response.data);
+					po.pageParamCallAfterSave(false, response.data);
 					
 					if(po.previewAfterSave)
 						window.open(po.url("show/"+chart.id+"/"), chart.id);
@@ -618,7 +596,7 @@ readonly 是否只读操作，允许为null
 	});
 	</#if>
 	
-	po.initChartPluginList();
+	po.initChartPlugin(po.chartPluginVO);
 	po.initChartDataSets();
 })
 (${pageId});

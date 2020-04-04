@@ -14,6 +14,7 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartPlugin;
@@ -22,6 +23,8 @@ import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.AbstractChartPlugin;
+import org.datagear.analysis.support.CategorizationResolver;
+import org.datagear.analysis.support.CategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderContext;
@@ -41,6 +44,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	@Autowired
 	private DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager;
 
+	private CategorizationResolver categorizationResolver = new CategorizationResolver();
+
 	public AbstractChartPluginAwareController()
 	{
 		super();
@@ -54,6 +59,53 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	public void setDirectoryHtmlChartPluginManager(DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager)
 	{
 		this.directoryHtmlChartPluginManager = directoryHtmlChartPluginManager;
+	}
+
+	public CategorizationResolver getCategorizationResolver()
+	{
+		return categorizationResolver;
+	}
+
+	public void setCategorizationResolver(CategorizationResolver categorizationResolver)
+	{
+		this.categorizationResolver = categorizationResolver;
+	}
+
+	protected List<Categorization> resolveCategorizations(List<HtmlChartPluginVO> chartPluginVOs)
+	{
+		return this.categorizationResolver.resolve(chartPluginVOs);
+	}
+
+	/**
+	 * 根据ID获取。
+	 * 
+	 * @param request
+	 * @param id
+	 * @return 返回{@code null}表示未找到
+	 */
+	protected HtmlChartPluginVO getHtmlChartPluginVO(HttpServletRequest request, String id)
+	{
+		List<ChartPlugin<HtmlRenderContext>> plugins = getDirectoryHtmlChartPluginManager()
+				.getAll(HtmlRenderContext.class);
+
+		if (plugins == null)
+			return null;
+
+		for (ChartPlugin<HtmlRenderContext> plugin : plugins)
+		{
+			if (plugin instanceof HtmlChartPlugin<?>)
+			{
+				HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = (HtmlChartPlugin<HtmlRenderContext>) plugin;
+				if (htmlChartPlugin.getId().equals(id))
+				{
+					Locale locale = WebUtils.getLocale(request);
+					RenderStyle renderStyle = resolveRenderStyle(request);
+					return toHtmlChartPluginVO(htmlChartPlugin, renderStyle, locale);
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -97,6 +149,14 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 				});
 	}
 
+	protected HtmlChartPluginVO toHtmlChartPluginVO(HttpServletRequest request, HtmlChartPlugin<?> chartPlugin)
+	{
+		Locale locale = WebUtils.getLocale(request);
+		RenderStyle renderStyle = resolveRenderStyle(request);
+
+		return toHtmlChartPluginVO(chartPlugin, renderStyle, locale);
+	}
+
 	protected HtmlChartPluginVO toHtmlChartPluginVO(HtmlChartPlugin<?> chartPlugin, RenderStyle renderStyle,
 			Locale locale)
 	{
@@ -113,8 +173,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		if (pluginVO.isHasIcon())
 			pluginVO.setIconUrl(resolveIconUrl(chartPlugin));
 
-		pluginVO.setVersion(chartPlugin.getVersion());
-
 		List<DataSign> dataSigns = chartPlugin.getDataSigns();
 		if (dataSigns != null)
 		{
@@ -130,6 +188,19 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			}
 
 			pluginVO.setDataSigns(dataSignVOs);
+		}
+
+		pluginVO.setVersion(chartPlugin.getVersion());
+		pluginVO.setOrder(chartPlugin.getOrder());
+
+		Category category = chartPlugin.getCategory();
+		if (category != null)
+		{
+			Category categoryVO = new Category(category.getName());
+			categoryVO.setNameLabel(toConcreteLabel(category.getNameLabel(), locale));
+			categoryVO.setDescLabel(toConcreteLabel(category.getDescLabel(), locale));
+			categoryVO.setOrder(category.getOrder());
+			pluginVO.setCategory(categoryVO);
 		}
 
 		return pluginVO;

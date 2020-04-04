@@ -133,17 +133,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
 
-		List<HtmlChartPluginVO> pluginVOs = findHtmlChartPluginVOs(request, null);
-
-		if (pluginVOs.size() > 0)
-		{
-			String defaultChartPluginId = pluginVOs.get(0).getId();
-			chart.setHtmlChartPlugin((HtmlChartPlugin<HtmlRenderContext>) this.chartPluginManager
-					.<HtmlRenderContext> get(defaultChartPluginId));
-		}
-
 		model.addAttribute("chart", chart);
-		model.addAttribute("pluginVOs", toWriteJsonTemplateModel(pluginVOs));
+		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(null));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.addChart");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -161,11 +152,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (chart == null)
 			throw new RecordNotFoundException();
 
-		List<HtmlChartPluginVO> pluginVOs = findHtmlChartPluginVOs(request, null);
+		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
+				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
+				: null);
 
 		model.addAttribute("chart", chart);
+		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(chartPluginVO));
 		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(chart.getChartDataSets()));
-		model.addAttribute("pluginVOs", toWriteJsonTemplateModel(pluginVOs));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.editChart");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -214,11 +207,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (chart == null)
 			throw new RecordNotFoundException();
 
-		List<HtmlChartPluginVO> pluginVOs = findHtmlChartPluginVOs(request, null);
+		HtmlChartPluginVO chartPluginVO = (chart.getPlugin() != null
+				? getHtmlChartPluginVO(request, chart.getPlugin().getId())
+				: null);
 
 		model.addAttribute("chart", chart);
+		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(chartPluginVO));
 		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(chart.getChartDataSets()));
-		model.addAttribute("pluginVOs", toWriteJsonTemplateModel(pluginVOs));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.viewChart");
 		model.addAttribute(KEY_READONLY, true);
 

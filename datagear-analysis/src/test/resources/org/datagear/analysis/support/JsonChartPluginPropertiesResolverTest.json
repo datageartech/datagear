@@ -143,5 +143,12 @@
 		}
 	],
 	version : "0.1.0",
-	order : 2
+	order : 2,
+	category :
+	{
+		name : 'line',
+		nameLabel : "nameLabel",
+		descLabel : "descLabel",
+		order: 41
+	}
 }

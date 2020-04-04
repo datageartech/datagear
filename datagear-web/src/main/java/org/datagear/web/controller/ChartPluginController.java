@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderStyle;
+import org.datagear.analysis.support.CategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
@@ -195,6 +196,31 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
 
 		return findHtmlChartPluginVOs(request, pagingQuery.getKeyword());
+	}
+
+	@RequestMapping("/select")
+	public String select(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		List<HtmlChartPluginVO> htmlChartPluginVOs = findHtmlChartPluginVOs(request, null);
+		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginVOs);
+
+		model.addAttribute("categorizations", toWriteJsonTemplateModel(categorizations));
+
+		return "/analysis/chartPlugin/chartPlugin_select";
+	}
+
+	@RequestMapping(value = "/selectData", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<Categorization> selectData(HttpServletRequest request, HttpServletResponse response,
+			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			throws Exception
+	{
+		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
+
+		List<HtmlChartPluginVO> htmlChartPluginVOs = findHtmlChartPluginVOs(request, pagingQuery.getKeyword());
+		List<Categorization> categorizations = resolveCategorizations(htmlChartPluginVOs);
+
+		return categorizations;
 	}
 
 	@RequestMapping(value = "/icon/{pluginId}", produces = CONTENT_TYPE_JSON)

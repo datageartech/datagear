@@ -372,14 +372,10 @@ public class HtmlChartPluginLoader
 			if (!StringUtil.isEmpty(jsDefContent.getPluginJson())
 					&& !StringUtil.isEmpty(jsDefContent.getPluginChartRenderer()))
 			{
-				Map<String, Object> properties = this.jsonChartPluginPropertiesResolver
-						.resolveChartPluginProperties(jsDefContent.getPluginJson());
-
 				plugin = createHtmlChartPlugin();
 
-				this.jsonChartPluginPropertiesResolver.setChartPluginProperties(plugin, properties);
+				this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(plugin, jsDefContent.getPluginJson());
 				plugin.setChartRenderer(new StringJsChartRenderer(jsDefContent.getPluginChartRenderer()));
-
 				plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
 
 				if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))

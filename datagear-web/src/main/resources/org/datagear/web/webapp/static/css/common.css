@@ -1982,6 +1982,79 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding-right: 0.5em;
 }
 
+.page-grid-chartPlugin-select{}
+.page-grid-chartPlugin-select .chart-plugin-nav{
+	position: absolute;
+	top: 0.5em;
+	left: 0.1em;
+	bottom: 0;
+	width: 25%;
+	padding: 1em;
+	overflow: auto;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+.page-grid-chartPlugin-select .chart-plugin-nav .ui-menu{
+	border: none;
+}
+.page-grid-chartPlugin-select .chart-plugin-nav .ui-menu li .ui-menu-item-wrapper {
+    display: block;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    margin: 0 0;
+}
+.page-grid-chartPlugin-select .chart-plugin-content{
+	position: absolute;
+	top: 0.5em;
+	left: 27%;
+	bottom: 0;
+	right: 0.1em;
+	overflow: auto;
+}
+.page-grid-chartPlugin-select .chart-plugin-content ul{
+	list-style: none;
+	padding: 0 0;
+	margin: 0 0;
+}
+.page-grid-chartPlugin-select .chart-plugin-content ul .category-header{
+	padding: 0.5em 0 0.5em 0.5em;
+}
+.page-grid-chartPlugin-select .chart-plugin-content ul ul{
+	padding: 0.5em 0.5em;
+}
+.page-grid-chartPlugin-select .chart-plugin-content ul ul li{
+	display: inline-block;
+	width: 25%;
+	min-width: 100px;
+	height: 120px;
+	margin: 0 0; 
+	position: relative;
+}
+.page-grid-chartPlugin-select .chart-plugin-content ul ul li .plugin-item{
+	position: absolute;
+	top: 0.5em;
+	left: 0.5em;
+	right: 0.5em;
+	bottom: 0.5em;
+	cursor: pointer;
+    background: none;
+}
+.page-grid-chartPlugin-select .chart-plugin-content ul ul li .plugin-item.ui-state-active{
+	border-width: 2px;
+	color: inherit;
+}
+.page-grid-chartPlugin-select .chart-plugin-content ul ul li .plugin-item .plugin-name{
+	text-align: center;
+	position: absolute;
+	width: 100%;
+	bottom: 0;
+	overflow: hidden;
+}
+.page-grid-chartPlugin-select .chart-plugin-content ul ul li .plugin-item.no-icon .plugin-name{
+	bottom: 50%;
+	margin-bottom: -0.5em;
+}
 
 .page-form-dataSet{}
 .page-form-dataSet .sql-editor-wrapper{
@@ -2036,30 +2109,35 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	display: block;
 }
 
-.page-form-chart .chart-plugin-list{
-	margin: 0 0;
-	padding:  0 0;
-}
-.page-form-chart .chart-plugin-list > li{
-	margin: 5px 10px 5px 0px;
-	position: relative;
-	padding: 2px 2px;
-	cursor: pointer;
-	float: left;
-	list-style: none;
-}
-.page-form-chart .chart-plugin-list > li a{
+.page-form-chart .chart-plugin{
 	display: inline-block;
-	margin: 5px 5px;
-	height: 20px;
+	height: 70px;
+	min-width: 100px;
+	position: relative;
+	overflow: hidden;
 }
-.page-form-chart .chart-plugin-list > li a.plugin-icon{
-	width: 20px;
+.page-form-chart form .form-content .form-item .form-item-value .input.chart-plugin{
+	width: 40%;
+}
+.page-form-chart .chart-plugin .plugin-icon{
+	position: absolute;
+	left: 5px;
+	top: 5px;
+	bottom: 5px;
+	width: 60px;
+	height: 60px;
 	background-repeat: no-repeat;
 	background-size: 100% 100%;
 }
-.page-form-chart .chart-plugin-list > li a.plugin-name{
-	margin: 5px 0.8em;
+.page-form-chart .chart-plugin .plugin-name{
+	text-align: center;
+	position: absolute;
+	left: 70px;
+	bottom: 50%;
+	margin-bottom: -0.5em;
+}
+.page-form-chart .chart-plugin.no-icon .plugin-name{
+	left: 5px;
 }
 .page-form-chart .data-set-wrapper{
 	display: inline-block;

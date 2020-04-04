@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.datagear.util.i18n.Label;
+import org.datagear.util.i18n.AbstractLabeled;
+import org.datagear.util.i18n.Labeled;
 
 /**
  * 数据标记。
@@ -23,15 +24,15 @@ import org.datagear.util.i18n.Label;
  * @author datagear@163.com
  *
  */
-public class DataSign implements Serializable
+public class DataSign extends AbstractLabeled implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_REQUIRED = "required";
 	public static final String PROPERTY_MULTIPLE = "multiple";
-	public static final String PROPERTY_NAME_LABEL = "nameLabel";
-	public static final String PROPERTY_DESC_LABEL = "descLabel";
+	public static final String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
+	public static final String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 
 	/** 名称 */
 	private String name;
@@ -41,12 +42,6 @@ public class DataSign implements Serializable
 
 	/** 数据集是否可有多个此标记 */
 	private boolean multiple;
-
-	/** 名称标签 */
-	private Label nameLabel;
-
-	/** 描述标签 */
-	private Label descLabel;
 
 	public DataSign()
 	{
@@ -91,41 +86,11 @@ public class DataSign implements Serializable
 		this.multiple = multiple;
 	}
 
-	public boolean hasNameLabel()
-	{
-		return (this.nameLabel != null);
-	}
-
-	public Label getNameLabel()
-	{
-		return nameLabel;
-	}
-
-	public void setNameLabel(Label nameLabel)
-	{
-		this.nameLabel = nameLabel;
-	}
-
-	public boolean hasDescLabel()
-	{
-		return (this.descLabel != null);
-	}
-
-	public Label getDescLabel()
-	{
-		return descLabel;
-	}
-
-	public void setDescLabel(Label descLabel)
-	{
-		this.descLabel = descLabel;
-	}
-
 	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + name + ", required=" + required + ", multiple="
-				+ multiple + ", nameLabel=" + nameLabel + ", descLabel=" + descLabel + "]";
+				+ multiple + ", nameLabel=" + getNameLabel() + ", descLabel=" + getDescLabel() + "]";
 	}
 
 	public static List<DataSign> toDataSigns(List<String> labelValues, Locale locale)

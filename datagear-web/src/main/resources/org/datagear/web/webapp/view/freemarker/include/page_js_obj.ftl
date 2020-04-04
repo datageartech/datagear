@@ -165,6 +165,43 @@ var ${pageId} =
 		options = (options || {});
 		options = $.extend({}, options, {confirmText : "<@spring.message code='confirm' />", cancelText : "<@spring.message code='cancel' />", title : "<@spring.message code='operationConfirm' />"});
 		$.confirm(content, options);
+	},
+	
+	/**
+	 * 调用页面参数对象的"select"函数。
+	 * @param closeDefault 默认是否关闭
+	 * @param arg... 可选，函数参数
+	 */
+	pageParamCallSelect : function(closeDefault, arg)
+	{
+		var close = this.pageParamApply("select", $.makeArray(arguments).slice(1));
+		if(close !== true && close !== false)
+			close = closeDefault;
+		
+		if(close && !this.isDialogPinned())
+			this.close();
+		
+		return close;
+	},
+	
+	/**
+	 * 调用页面参数对象的"afterSave"函数。
+	 * @param closeDefault 默认是否关闭
+	 * @param arg... 可选，函数参数
+	 */
+	pageParamCallAfterSave : function(closeDefault, arg)
+	{
+		if(this.refreshParent)
+			this.refreshParent();
+		
+		var close = this.pageParamApply("afterSave", $.makeArray(arguments).slice(1));
+		if(close !== true && close !== false)
+			close = closeDefault;
+		
+		if(close && !this.isDialogPinned())
+			this.close();
+		
+		return close;
 	}
 };
 </script>
