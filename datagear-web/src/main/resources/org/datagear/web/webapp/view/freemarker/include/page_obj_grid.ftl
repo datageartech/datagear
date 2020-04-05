@@ -30,9 +30,13 @@ page_js_obj.jsp
 		
 		if(po.searchParam)
 			$.extend(param, po.searchParam);
+		else if(po.getSearchParam)
+			$.extend(param, po.getSearchParam());
 		
 		if(po.pagingParam)
 			$.extend(param, po.pagingParam);
+		else if(po.getPagingParam)
+			$.extend(param, po.getPagingParam());
 		
 		return param;
 	};
@@ -127,12 +131,7 @@ page_js_obj.jsp
 					nameOrder[i] = { "name" : name, "type" : data.order[i].dir };
 				}
 				
-				var myData = undefined;
-				
-				if($.isFunction(po.dataTableAjaxParam))
-					myData = po.dataTableAjaxParam();
-				else
-					myData = po.dataTableAjaxParam;
+				var myData = po.dataTableAjaxParam();
 				
 				var param = $.extend({ "orders" : nameOrder }, myData);
 				
