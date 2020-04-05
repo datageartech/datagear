@@ -73,12 +73,12 @@
 		for(var i=0; i<categorizations.length; i++)
 		{
 			var category = categorizations[i].category;
-			var href = (category.name ? "${pageId}-category-"+category.name : "${pageId}-uncategorized");
+			var categoryId = (category.name ? "${pageId}-category-"+category.name : "${pageId}-uncategorized");
 			var label = (category.name ? (category.nameLabel && category.nameLabel.value ? category.nameLabel.value : category.name)
 							: "<@spring.message code='chartPlugin.uncategorized' />");
 			
-			var $li = $("<li />").appendTo($navul);
-			$("<a />").attr("href", "#"+href).html(label).appendTo($li);
+			var $li = $("<li />").attr("categoryId", categoryId).appendTo($navul);
+			$("<a />").html(label).appendTo($li);
 		}
 		
 		for(var i=0; i<categorizations.length; i++)
@@ -86,12 +86,12 @@
 			var category = categorizations[i].category;
 			var chartPlugins = categorizations[i].chartPlugins;
 			
-			var href = (category.name ? "${pageId}-category-"+category.name : "${pageId}-uncategorized");
+			var categoryId = (category.name ? "${pageId}-category-"+category.name : "${pageId}-uncategorized");
 			var label = (category.name ? (category.nameLabel && category.nameLabel.value ? category.nameLabel.value : category.name)
 							: "<@spring.message code='chartPlugin.uncategorized' />");
 			
-			var $li = $("<li />").appendTo($contentul);
-			$("<div class='category-header ui-widget-header ui-corner-all' />").attr("id", href).html(label).appendTo($li);
+			var $li = $("<li />").attr("id", categoryId).appendTo($contentul);
+			$("<div class='category-header ui-widget-header ui-corner-all' />").html(label).appendTo($li);
 			
 			var $liul = $("<ul />").appendTo($li);
 			
@@ -116,10 +116,10 @@
 			select: function(event, ui)
 			{
 				var item = $(ui.item);
-				$("li.item-selected", this).removeClass("item-selected");
-				item.addClass("item-selected");
 				
-				return false;
+				var $category = po.element("#" + item.attr("categoryId"));
+				var top = $category.position().top;
+				po.element(".chart-plugin-content").animate({scrollTop:top},'fast');
 			}
 		});
 		
