@@ -124,6 +124,7 @@ readonly 是否只读操作，允许为null
 				select : function(chartPlugin)
 				{
 					po.initChartPlugin(chartPlugin);
+					po.element(".sign-item-values").empty();
 				}
 			}
 		};

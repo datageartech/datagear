@@ -91,7 +91,7 @@ public class CategorizationResolver
 		@Override
 		public int compare(Categorization o1, Categorization o2)
 		{
-			return o2.getCategory().getOrder() - o1.getCategory().getOrder();
+			return o1.getCategory().getOrder() - o2.getCategory().getOrder();
 		}
 	};
 
