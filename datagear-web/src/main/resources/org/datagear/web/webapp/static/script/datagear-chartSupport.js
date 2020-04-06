@@ -29,11 +29,11 @@
 	
 	//折线图
 	
-	chartSupport.lineRender = function(chart, xvalueSign, yvalueSign, options)
+	chartSupport.lineRender = function(chart, coordSign, valueSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
-		var xp = chart.dataSetPropertyOfSign(chartDataSet, xvalueSign);
-		var yp = chart.dataSetPropertyOfSign(chartDataSet, yvalueSign);
+		var xp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+		var yp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
 		options = $.extend(true,
 		{
@@ -72,7 +72,7 @@
 		chart.echartsInit(options);
 	};
 	
-	chartSupport.lineUpdate = function(chart, results, xvalueSign, yvalueSign)
+	chartSupport.lineUpdate = function(chart, results, coordSign, valueSign)
 	{
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -83,7 +83,7 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			var dataSetName = chart.dataSetName(chartDataSet);
-			var properties = [chart.dataSetPropertyOfSign(chartDataSet, xvalueSign), chart.dataSetPropertyOfSign(chartDataSet, yvalueSign)];
+			var properties = [chart.dataSetPropertyOfSign(chartDataSet, coordSign), chart.dataSetPropertyOfSign(chartDataSet, valueSign)];
 			var result = chart.resultAt(results, i);
 			var data = chart.resultRowArrays(result, properties);
 			
@@ -101,7 +101,8 @@
 	{
 		var chartDataSet = chart.chartDataSetFirst();
 		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+		var vps = (options && options.stackBar ? chart.dataSetPropertiesOfSign(chartDataSet, valueSign)
+					: [chart.dataSetPropertyOfSign(chartDataSet, valueSign)]);
 		
 		options = $.extend(true,
 		{
@@ -139,6 +140,7 @@
 		options);
 		
 		chartSupport.optionSeries0(chart, options);
+		chart.extValue("stackBar", (options && options.stackBar));
 		
 		chart.echartsInit(options);
 	};
@@ -163,7 +165,8 @@
 				xAxisData = chart.resultColumnArrays(result, cp);
 			}
 			
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+			var vps = (chart.extValue("stackBar") ? chart.dataSetPropertiesOfSign(chartDataSet, valueSign)
+						: [chart.dataSetPropertyOfSign(chartDataSet, valueSign)]);
 			
 			for(var j=0; j<vps.length; j++)
 			{
@@ -194,7 +197,8 @@
 	{
 		var chartDataSet = chart.chartDataSetFirst();
 		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+		var vps = (options && options.stackBar ? chart.dataSetPropertiesOfSign(chartDataSet, valueSign)
+					: [chart.dataSetPropertyOfSign(chartDataSet, valueSign)]);
 		
 		options = $.extend(true,
 		{
@@ -232,6 +236,7 @@
 		options);
 		
 		chartSupport.optionSeries0(chart, options);
+		chart.extValue("stackBar", (options && options.stackBar));
 		
 		chart.echartsInit(options);
 	};
@@ -256,7 +261,8 @@
 				yAxisData = chart.resultColumnArrays(result, cp);
 			}
 			
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+			var vps = (chart.extValue("stackBar") ? chart.dataSetPropertiesOfSign(chartDataSet, valueSign)
+						: [chart.dataSetPropertyOfSign(chartDataSet, valueSign)]);
 			
 			for(var j=0; j<vps.length; j++)
 			{

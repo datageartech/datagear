@@ -12,12 +12,13 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.Scanner;
 
+import javax.sql.DataSource;
+
 import org.datagear.util.IOUtil;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * Derby数据库SQL客户端。
@@ -38,11 +39,12 @@ public class DerbySqlClient
 					"classpath:org/datagear/web/datagear-propertyConfigurer.xml",
 					"classpath:org/datagear/web/datagear-dataSource.xml");
 
-			DriverManagerDataSource dataSource = applicationContext.getBean(DriverManagerDataSource.class);
+			DataSource dataSource = applicationContext.getBean(DataSource.class);
+			cn = dataSource.getConnection();
 
 			println("*****************************************");
 			println("Derby SQL client");
-			println("URL :" + dataSource.getUrl());
+			println("URL :" + JdbcUtil.getURLIfSupports(cn));
 			println("*****************************************");
 			println();
 			println("Print SQL for executing single sql");
@@ -50,7 +52,6 @@ public class DerbySqlClient
 			println("Print [exist] for exist");
 
 			Scanner scanner = new Scanner(System.in);
-			cn = dataSource.getConnection();
 
 			while (scanner.hasNextLine())
 			{
@@ -114,6 +115,9 @@ public class DerbySqlClient
 
 	protected static void executeSql(Connection cn, String sql)
 	{
+		if (sql.endsWith(";"))
+			sql = sql.substring(0, sql.length() - 1);
+
 		Statement st = null;
 
 		try
