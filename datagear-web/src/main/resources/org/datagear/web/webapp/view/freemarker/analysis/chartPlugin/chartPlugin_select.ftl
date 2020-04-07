@@ -106,8 +106,8 @@
 				
 				if(chartPlugin.iconUrl)
 					$("<div class='plugin-icon'>&nbsp;</div>").css("background-image", "url(${contextPath}/"+chartPlugin.iconUrl+")").appendTo($item);
-				else
-					$("<div class='plugin-name'></div>").text(chartPlugin.nameLabel.value).appendTo($item);
+				
+				$("<div class='plugin-name'></div>").text(chartPlugin.nameLabel.value).appendTo($item);
 			}
 		}
 		

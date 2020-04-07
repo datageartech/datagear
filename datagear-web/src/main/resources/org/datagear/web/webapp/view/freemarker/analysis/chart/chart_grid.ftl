@@ -84,7 +84,7 @@ boolean readonly 是否只读操作，默认为false
 			{
 				afterSave: function(data)
 				{
-					po.pageParamCallSelect(true, data);
+					return po.pageParamCallSelect(true, data);
 				}
 			}
 			</#if>

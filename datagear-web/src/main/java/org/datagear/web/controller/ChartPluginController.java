@@ -223,7 +223,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		return categorizations;
 	}
 
-	@RequestMapping(value = "/icon/{pluginId}", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/icon/{pluginId:.+}", produces = CONTENT_TYPE_JSON)
 	public void getPluginIcon(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			@PathVariable("pluginId") String pluginId) throws Exception
 	{

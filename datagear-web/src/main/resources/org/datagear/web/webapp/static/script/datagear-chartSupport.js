@@ -850,5 +850,77 @@
 		
 		$(".dg-chart-label-pending", $parent).remove();
 	};
+	
+	//自定义
+	
+	chartSupport.customAsyncRender = function(chart)
+	{
+		var customRenderer = chartSupport.customGetCustomRenderer(chart);
+		
+		if(!customRenderer || customRenderer.asyncRender == undefined)
+			return false;
+		
+		if(typeof(customRenderer.asyncRender) == "function")
+			return customRenderer.asyncRender(chart);
+		
+		return (customRenderer.asyncRender == true);
+	};
+	
+	chartSupport.customRender = function(chart)
+	{
+		var customRenderer = chartSupport.customGetCustomRenderer(chart);
+		
+		if(customRenderer)
+			customRenderer.render(chart);
+	};
+	
+	chartSupport.customAsyncUpdate = function(chart, results)
+	{
+		var customRenderer = chartSupport.customGetCustomRenderer(chart);
+		
+		if(!customRenderer || customRenderer.asyncUpdate == undefined)
+			return false;
+		
+		if(typeof(customRenderer.asyncUpdate) == "function")
+			return customRenderer.asyncUpdate(chart, results);
+		
+		return (customRenderer.asyncUpdate == true);
+	};
+	
+	chartSupport.customUpdate = function(chart, results)
+	{
+		var customRenderer = chartSupport.customGetCustomRenderer(chart);
+		
+		if(customRenderer)
+			customRenderer.update(chart, results);
+	};
+	
+	chartSupport.customGetCustomRenderer = function(chart)
+	{
+		var customRenderer = chart.extValue("customRenderer");
+		
+		if(customRenderer == "_undefined")
+			return undefined;
+		
+		if(customRenderer)
+			return customRenderer;
+		
+		var $element = chart.elementJquery();
+		var customRendererVar = $element.attr("dg-chart-renderer");
+		
+		if(!customRendererVar)
+			$element.html("The 'dg-chart-renderer' attribute must be set for this custom chart");
+		else
+		{
+			customRenderer = chartFactory.evalSilently(customRendererVar);
+			
+			if(!customRenderer)
+				$element.html("No chart renderer var '"+customRendererVar+"' defined for this custom chart");
+		}
+		
+		chart.extValue("customRenderer", (customRenderer || "_undefined"));
+		
+		return customRenderer;
+	};
 })
 (this);
