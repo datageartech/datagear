@@ -124,7 +124,6 @@ readonly 是否只读操作，允许为null
 				select : function(chartPlugin)
 				{
 					po.initChartPlugin(chartPlugin);
-					//po.element(".sign-item-values").empty();
 				}
 			}
 		};
@@ -232,6 +231,30 @@ readonly 是否只读操作，允许为null
 			$wapper.addClass("no-icon");
 		
 		$("<div class='plugin-name' />").text(chartPluginVO.nameLabel.value).appendTo($wapper);
+		
+		//更新数据标记
+		var dataSigns = (chartPluginVO.dataSigns || []);
+		po.element(".sign-value").each(function()
+		{
+			var $this = $(this);
+			
+			var mySignName = $("input[type='hidden']", $this).val();
+			var myDataSign = null;
+			
+			for(var i=0; i<dataSigns.length; i++)
+			{
+				if(dataSigns[i].name == mySignName)
+				{
+					myDataSign = dataSigns[i];
+					break;
+				}
+			}
+			
+			if(!myDataSign)
+				$this.remove();
+			else
+				$(".sign-value-label", $this).text(po.dataSignLabel(myDataSign));
+		});
 	};
 	
 	po.initChartDataSets = function()
