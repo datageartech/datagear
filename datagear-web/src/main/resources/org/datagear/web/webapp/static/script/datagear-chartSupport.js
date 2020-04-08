@@ -18,13 +18,30 @@
 {
 	var chartSupport = (global.chartSupport || (global.chartSupport = {}));
 	
-	chartSupport.optionSeries0 = function(chart, options)
+	/**
+	 * 获取/设置选项series模板
+	 * 
+	 * @param chart 图表对象
+	 * @param options 要设置的options、要获取的series元素索引
+	 */
+	chartSupport.optionSeriesTemplate = function(chart, options)
 	{
+		//获取series数组
 		if(options == undefined)
-			return chart.extValue("chartOptionSeries0");
-		
-		var series0 = (options.series[0] || {});
-		chart.extValue("chartOptionSeries0", series0);
+		{
+			return chart.extValue("chartOptionSeriesTemplate");
+		}
+		//获取series元素
+		else if(typeof(options) == "number")
+		{
+			var template = chart.extValue("chartOptionSeriesTemplate");
+			var index = (template.length > options ? options : 0);
+			
+			return (template[index] ? template[index] : {});
+		}
+		//设置series数组
+		else
+			chart.extValue("chartOptionSeriesTemplate", (options.series || []));
 	};
 	
 	//折线图
@@ -35,7 +52,7 @@
 		var xp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
 		var yp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
-		options = $.extend(true,
+		options = chart.options($.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -65,11 +82,11 @@
 				data: []
 			}]
 		},
-		options);
+		options));
 		
-		chartSupport.optionSeries0(chart, options);
+		chartSupport.optionSeriesTemplate(chart, options);
 		
-		chart.echartsInit(options);
+		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.lineUpdate = function(chart, results, coordSign, valueSign)
@@ -88,7 +105,7 @@
 			var data = chart.resultRowArrays(result, properties);
 			
 			legendData[i] = dataSetName;
-			series[i] = $.extend({}, chartSupport.optionSeries0(chart), {name: dataSetName, data: data});
+			series[i] = $.extend({}, chartSupport.optionSeriesTemplate(chart, i), {name: dataSetName, data: data});
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
@@ -104,7 +121,7 @@
 		var vps = (options && options.stackBar ? chart.dataSetPropertiesOfSign(chartDataSet, valueSign)
 					: [chart.dataSetPropertyOfSign(chartDataSet, valueSign)]);
 		
-		options = $.extend(true,
+		options = chart.options($.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -137,12 +154,12 @@
 				data: []
 			}]
 		},
-		options);
+		options));
 		
-		chartSupport.optionSeries0(chart, options);
+		chartSupport.optionSeriesTemplate(chart, options);
 		chart.extValue("stackBar", (options && options.stackBar));
 		
-		chart.echartsInit(options);
+		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.barUpdate = function(chart, results, coordSign, valueSign)
@@ -183,7 +200,7 @@
 				var data = chart.resultColumnArrays(result, vp);
 				
 				legendData.push(legendName);
-				series.push($.extend({}, chartSupport.optionSeries0(chart), {name: legendName, stack: "stack-"+i, data: data}));
+				series.push($.extend({}, chartSupport.optionSeriesTemplate(chart, i*vps.length+j), {name: legendName, stack: "stack-"+i, data: data}));
 			}
 		}
 		
@@ -200,7 +217,7 @@
 		var vps = (options && options.stackBar ? chart.dataSetPropertiesOfSign(chartDataSet, valueSign)
 					: [chart.dataSetPropertyOfSign(chartDataSet, valueSign)]);
 		
-		options = $.extend(true,
+		options = chart.options($.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -233,12 +250,12 @@
 				data: []
 			}]
 		},
-		options);
+		options));
 		
-		chartSupport.optionSeries0(chart, options);
+		chartSupport.optionSeriesTemplate(chart, options);
 		chart.extValue("stackBar", (options && options.stackBar));
 		
-		chart.echartsInit(options);
+		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.barHorizontalUpdate = function(chart, results, coordSign, valueSign)
@@ -279,7 +296,7 @@
 				var data = chart.resultColumnArrays(result, vp);
 				
 				legendData.push(legendName);
-				series.push($.extend({}, chartSupport.optionSeries0(chart), {name: legendName, stack: "stack-"+i, data: data}));
+				series.push($.extend({}, chartSupport.optionSeriesTemplate(chart, i*vps.length+j), {name: legendName, stack: "stack-"+i, data: data}));
 			}
 		}
 		
@@ -291,7 +308,7 @@
 	
 	chartSupport.pieRender = function(chart, coordSign, valueSign, options)
 	{
-		options = $.extend(true,
+		options = chart.options($.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -316,11 +333,11 @@
 				}
 			]
 		},
-		options);
+		options));
 		
-		chartSupport.optionSeries0(chart, options);
+		chartSupport.optionSeriesTemplate(chart, options);
 		
-		chart.echartsInit(options);
+		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.pieUpdate = function(chart, results, coordSign, valueSign)
@@ -348,7 +365,7 @@
 			seriesData = seriesData.concat(nvv);
 		}
 		
-		var series = [ $.extend({}, chartSupport.optionSeries0(chart), {name: seriesName, data: seriesData}) ];
+		var series = [ $.extend({}, chartSupport.optionSeriesTemplate(chart, 0), {name: seriesName, data: seriesData}) ];
 		
 		var options = { legend: { data: legendData }, series: series };
 		chart.echartsOptions(options);
@@ -358,7 +375,7 @@
 	
 	chartSupport.gaugeRender = function(chart, valueSign, minSign, maxSign, options)
 	{
-		options = $.extend(true,
+		options = chart.options($.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -377,9 +394,9 @@
 				}
 			]
 		},
-		options);
+		options));
 		
-		chart.echartsInit(options);
+		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.gaugeUpdate = function(chart, results, valueSign, minSign, maxSign)
@@ -416,7 +433,7 @@
 		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
-		options = $.extend(true,
+		options = chart.options($.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -437,18 +454,20 @@
 				name: chart.dataSetPropertyLabel(vp),
 				nameGap: 5
 			},
+			//最大数据标记像素数
+			symbolSizeMax: undefined,
 			series: [{
 				name: "",
 				type: "scatter",
-				symbolSize: 10,
 				data: []
 			}]
 		},
-		options);
+		options));
 		
-		chartSupport.optionSeries0(chart, options);
+		chartSupport.optionSeriesTemplate(chart, options);
+		chart.extValue("scatterSymbolSizeMax", options.symbolSizeMax);
 		
-		chart.echartsInit(options);
+		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.scatterUpdate = function(chart, results, coordSign, valueSign)
@@ -458,6 +477,14 @@
 		var legendData = [];
 		var series = [];
 		
+		var min = undefined, max = undefined;
+		var symbolSizeMax = chart.extValue("scatterSymbolSizeMax");
+		if(!symbolSizeMax)//根据图表元素尺寸自动计算
+		{
+			var chartEle = chart.elementJquery();
+			symbolSizeMax =parseInt(Math.min(chartEle.width(), chartEle.height())/6);
+		}
+		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
@@ -466,9 +493,26 @@
 			var result = chart.resultAt(results, i);
 			var data = chart.resultRowArrays(result, properties);
 			
+			for(var j=0; j<data.length; j++)
+			{
+				min = (min == undefined ? data[j][1] : Math.min(min, data[j][1]));
+				max = (max == undefined ? data[j][1] : Math.max(max, data[j][1]));
+			}
+			
 			legendData[i] = dataSetName;
-			series[i] = $.extend({}, chartSupport.optionSeries0(chart), {name: dataSetName, data: data});
+			series[i] = $.extend({}, chartSupport.optionSeriesTemplate(chart, i),
+					{
+						name: dataSetName, data: data,
+						symbolSize: function(value)
+						{
+							var size = parseInt((value[1]-min)/(max-min)*symbolSizeMax);
+							return (size < 4 ? 4 : size);
+						}
+					});
 		}
+		
+		if(max <= min)
+			max = min + 1;
 		
 		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
@@ -478,7 +522,7 @@
 	
 	chartSupport.radarRender = function(chart, nameSign, coordSign, valueSign, maxSign, options)
 	{
-		options = $.extend(true,
+		options = chart.options($.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -504,11 +548,11 @@
 				data: []
 			}]
 		},
-		options);
+		options));
 		
-		chartSupport.optionSeries0(chart, options);
+		chartSupport.optionSeriesTemplate(chart, options);
 		
-		chart.echartsInit(options);
+		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.radarUpdate = function(chart, results, nameSign, coordSign, valueSign, maxSign)
@@ -552,7 +596,7 @@
 			
 			for(var j=0; j<nv.length; j++)
 			{
-				series.push($.extend({}, chartSupport.optionSeries0(chart), {data: [{name: nv[j], value: dvpv[j]}]}));
+				series.push($.extend({}, chartSupport.optionSeriesTemplate(chart, i*nv.length+j), {data: [{name: nv[j], value: dvpv[j]}]}));
 			}
 		}
 		
@@ -564,7 +608,7 @@
 	
 	chartSupport.funnelRender = function(chart, coordSign, valueSign, options)
 	{
-		options = $.extend(true,
+		options = chart.options($.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -597,11 +641,11 @@
 		        }
 			]
 		},
-		options);
+		options));
 
-		chartSupport.optionSeries0(chart, options);
+		chartSupport.optionSeriesTemplate(chart, options);
 		
-		chart.echartsInit(options);
+		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.funnelUpdate = function(chart, results, coordSign, valueSign)
@@ -642,7 +686,7 @@
 				max = v;
 		}
 		
-		var series = [$.extend({}, chartSupport.optionSeries0(chart), {name: seriesName, min: min, max: max, data: seriesData })];
+		var series = [$.extend({}, chartSupport.optionSeriesTemplate(chart, 0), {name: seriesName, min: min, max: max, data: seriesData })];
 		
 		var options = { legend: { data: legendData }, series: series };
 		chart.echartsOptions(options);
@@ -652,7 +696,7 @@
 	
 	chartSupport.mapRender = function(chart, coordSign, valueSign, options)
 	{
-		options = $.extend(true,
+		options = chart.options($.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -683,9 +727,8 @@
 				}
 			]
 		},
-		options);
+		options));
 		
-		options = chart.options(options);
 		var map = chartSupport.mapOptionMapName(options);
 		
 		if(chart.echartsMapRegistered(map))
@@ -767,14 +810,14 @@
 	
 	chartSupport.labelRender = function(chart, coordSign, valueSign, options)
 	{
-		options = $.extend(true,
+		options = chart.options($.extend(true,
 		{
 			valueFirst: false,    //是否标签值在前
 			showName: true        //是否绘制标签名
 		},
-		options);
+		options));
 		
-		chart.extValue("options", chart.options(options));
+		chart.extValue("options", options);
 	};
 	
 	chartSupport.labelUpdate = function(chart, results, coordSign, valueSign)
