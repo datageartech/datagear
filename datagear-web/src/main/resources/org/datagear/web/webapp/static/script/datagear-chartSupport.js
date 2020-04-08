@@ -44,13 +44,31 @@
 			chart.extValue("chartOptionSeriesTemplate", (options.series || []));
 	};
 	
+	/**
+	 * 指定数据集属性数据是否字符串类型。
+	 */
+	chartSupport.isDataTypeString = function(dataSetProperty)
+	{
+		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
+		return (dataType == "STRING");
+	};
+	
+	/**
+	 * 指定数据集属性数据是否数值类型。
+	 */
+	chartSupport.isDataTypeNumber = function(dataSetProperty)
+	{
+		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
+		return (dataType == "INTEGER" || dataType == "DECIMAL");
+	};
+	
 	//折线图
 	
 	chartSupport.lineRender = function(chart, coordSign, valueSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
-		var xp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-		var yp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
 		options = chart.options($.extend(true,
 		{
@@ -66,15 +84,15 @@
 				data: []
 			},
 			xAxis: {
-				name: chart.dataSetPropertyLabel(xp),
+				name: chart.dataSetPropertyLabel(cp),
 				nameGap: 5,
-				type: "category",
+				type: (chartSupport.isDataTypeNumber(cp) ? "value" : "category"),
 				boundaryGap: false
 			},
 			yAxis: {
-				name: chart.dataSetPropertyLabel(yp),
+				name: chart.dataSetPropertyLabel(vp),
 				nameGap: 5,
-				type: "value",
+				type: "value"
 			},
 			series: [{
 				name: "",
@@ -448,11 +466,14 @@
 			},
 			xAxis: {
 				name: chart.dataSetPropertyLabel(cp),
-				nameGap: 5
+				nameGap: 5,
+				type: (chartSupport.isDataTypeNumber(cp) ? "value" : "category"),
+				boundaryGap: !chartSupport.isDataTypeNumber(cp)
 			},
 			yAxis: {
 				name: chart.dataSetPropertyLabel(vp),
-				nameGap: 5
+				nameGap: 5,
+				type: "value"
 			},
 			//最大数据标记像素数
 			symbolSizeMax: undefined,
@@ -482,7 +503,7 @@
 		if(!symbolSizeMax)//根据图表元素尺寸自动计算
 		{
 			var chartEle = chart.elementJquery();
-			symbolSizeMax =parseInt(Math.min(chartEle.width(), chartEle.height())/6);
+			symbolSizeMax =parseInt(Math.min(chartEle.width(), chartEle.height())/8);
 		}
 		
 		for(var i=0; i<chartDataSets.length; i++)
