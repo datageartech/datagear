@@ -274,14 +274,17 @@
 		
 		var $ele = this.elementJquery();
 		
-		var optsStrGlobal = $(document.body).attr("dg-chart-options");
-		var optsStr = $ele.attr("dg-chart-options");
+		var optsStrGlobal = ($(document.body).attr("dg-chart-options") || "");
+		var optsStr = ($ele.attr("dg-chart-options") || "");
 		
 		if(optsStrGlobal)
 			options = $.extend(true, options, chartFactory.evalSilently(optsStrGlobal, {}));
 		
 		if(optsStr)
 			options = $.extend(true, options, chartFactory.evalSilently(optsStr, {}));
+		
+		this._prevReadOptionsGlobal = optsStrGlobal;
+		this._prevReadOptions = optsStr;
 		
 		return options;
 	};
@@ -345,6 +348,19 @@
 		chartTheme._BODY_THEME = bodyTheme;
 		
 		return chartTheme;
+	};
+	
+	/**
+	 * 获取/设置图表元素上的"dg-chart-map"属性值。
+	 * 
+	 * @param value 设置操作时的值
+	 */
+	chartBase.map = function(value)
+	{
+		if(value == undefined)
+			return this.elementJquery().attr("dg-chart-map");
+		else
+			this.elementJquery().attr("dg-chart-map", value);
 	};
 	
 	/**

@@ -740,7 +740,7 @@
 				{
 					name: "",
 					type: "map",
-					map: "china",
+					map: (chart.map() || "china"),
 					label: {
 						show: true
 					},
@@ -751,6 +751,9 @@
 		options));
 		
 		var map = chartSupport.mapOptionMapName(options);
+		
+		chart.extValue("mapPresetMap", map);
+		chart.map(map);
 		
 		if(chart.echartsMapRegistered(map))
 		{
@@ -806,6 +809,22 @@
 		var options = { visualMap: {min, min, max: max}, series: [ {name: seriesName, data: seriesData } ] };
 		options = chart.optionsModified(options);
 		var map = chartSupport.mapOptionMapName(options);
+		
+		if(!map)
+		{
+			var eleMap = chart.map();
+			if(eleMap && eleMap != chart.extValue("mapPresetMap"))
+			{
+				options.series[0].map = eleMap;
+				map = eleMap;
+			}
+		}
+		
+		if(map)
+		{
+			chart.extValue("mapPresetMap", map);
+			chart.map(map);
+		}
 		
 		if(!map || chart.echartsMapRegistered(map))
 		{

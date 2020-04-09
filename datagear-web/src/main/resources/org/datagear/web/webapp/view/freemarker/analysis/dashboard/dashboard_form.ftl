@@ -173,17 +173,19 @@ readonly 是否只读操作，允许为null
 	{
 		po.templateEditorCompletions = [
 			{name: "dg-chart-widget", value: "dg-chart-widget", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-widget' />", tagNames: ["div"]},
-			{name: "dg-chart-options", value: "dg-chart-options", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-options' />", tagNames: ["div","body"]},
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", tagNames: ["div"]},
+				{name: "dg-chart-map", value: "dg-chart-map", caption: "",
+					meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map' />", tagNames: ["div"]},
 			{name: "dg-chart-renderer", value: "dg-chart-renderer", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-renderer' />", tagNames: ["div"]},
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-renderer' />", tagNames: ["div"]},
 			{name: "dg-chart-theme", value: "dg-chart-theme", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-theme' />", tagNames: ["body"]},
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-theme' />", tagNames: ["body"]},
 			{name: "dg-chart-map-urls", value: "dg-chart-map-urls", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.chart-map-urls' />", tagNames: ["body"]},
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map-urls' />", tagNames: ["body"]},
+			{name: "dg-chart-options", value: "dg-chart-options", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-options' />", tagNames: ["div","body"]},
 			{name: "dg-echarts-theme", value: "dg-echarts-theme", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.echarts-theme' />", tagNames: ["body"]}
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", tagNames: ["body"]}
 		];
 		
 		po.templateEditorCompleters =
