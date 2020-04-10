@@ -1031,37 +1031,29 @@
 			},
 			"candlestick" : {
 				"itemStyle" : {
-					"normal" : {
-						"color" : chartTheme.graphColors[0],
-						"color0" : chartTheme.graphColors[1],
-						"borderColor" : chartTheme.borderColor,
-						"borderColor0" : chartTheme.axisColor,
-						"borderWidth" : 1
-					}
+					"color" : chartTheme.graphColors[0],
+					"color0" : chartTheme.graphColors[1],
+					"borderColor" : chartTheme.graphColors[0],
+					"borderColor0" : chartTheme.graphColors[1],
+					"borderWidth" : 1
 				}
 			},
 			"graph" : {
 				"itemStyle" : {
-					"normal" : {
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.borderColor
-					}
+					"borderWidth" : 0,
+					"borderColor" : chartTheme.borderColor
 				},
 				"lineStyle" : {
-					"normal" : {
-						"width" : 1,
-						"color" : chartTheme.axisScaleLineColor
-					}
+					"width" : 1,
+					"color" : chartTheme.axisScaleLineColor
 				},
 				"symbolSize" : 4,
 				"symbol" : "circle",
 				"smooth" : false,
 				"color" : chartTheme.graphColors,
 				"label" : {
-					"normal" : {
-						"textStyle" : {
-							"color" : chartTheme.color
-						}
+					"textStyle" : {
+						"color" : chartTheme.color
 					}
 				}
 			},

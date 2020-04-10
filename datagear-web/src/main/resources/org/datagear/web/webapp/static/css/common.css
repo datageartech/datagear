@@ -1989,7 +1989,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	left: 0.1em;
 	bottom: 0;
 	width: 25%;
-	padding: 1em;
+	padding: 0.5em 0.5em;
 	overflow: auto;
 	box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -2000,9 +2000,12 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .page-grid-chartPlugin-select .chart-plugin-nav .ui-menu li .ui-menu-item-wrapper {
     display: block;
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
     margin: 0 0;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
 .page-grid-chartPlugin-select .chart-plugin-content{
 	position: absolute;

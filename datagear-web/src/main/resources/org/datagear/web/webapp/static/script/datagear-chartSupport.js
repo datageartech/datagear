@@ -1013,6 +1013,87 @@
 			});
 		}
 	};
+
+	//K线图
+	
+	chartSupport.candlestickRender = function(chart, coordSign, openSign, closeSign, minSign, maxSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+		
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			legend:
+			{
+				data: []
+			},
+			xAxis: {
+				name: chart.dataSetPropertyLabel(cp),
+				nameGap: 5,
+				type: "category",
+				boundaryGap: true,
+				splitLine: {show:false},
+				data: []
+			},
+			yAxis: {
+				name: "",
+				nameGap: 5,
+				type: "value"
+			},
+			series: [{
+				name: "",
+				type: "k",
+				data: []
+			}]
+		},
+		options));
+		
+		chartSupport.optionSeriesTemplate(chart, options);
+		
+		chart.echartsInit(options, false);
+	};
+	
+	chartSupport.candlestickUpdate = function(chart, results, coordSign, openSign, closeSign, minSign, maxSign)
+	{
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
+		var legendData = [];
+		var xAxisData = [];
+		var series = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var dataSetName = chart.dataSetName(chartDataSet);
+			var result = chart.resultAt(results, i);
+			
+			if(i == 0)
+			{
+				var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+				xAxisData = chart.resultColumnArrays(result, cp);
+			}
+			
+			var data = chart.resultRowArrays(result,
+					[
+						chart.dataSetPropertyOfSign(chartDataSet, openSign),
+						chart.dataSetPropertyOfSign(chartDataSet, closeSign),
+						chart.dataSetPropertyOfSign(chartDataSet, minSign),
+						chart.dataSetPropertyOfSign(chartDataSet, maxSign)
+					]);
+			
+			series.push($.extend({}, chartSupport.optionSeriesTemplate(chart, i), {name: dataSetName, data: data}));
+		}
+		
+		var options = { legend: {data: legendData}, xAxis : { data : xAxisData }, series: series };
+		chart.echartsOptions(options);
+	};
 	
 	//标签卡
 	
