@@ -77,7 +77,7 @@
 		    },
 			tooltip:
 			{
-				trigger: "item"
+				trigger: "axis"
 			},
 			legend:
 			{
@@ -486,7 +486,9 @@
 		options));
 		
 		chartSupport.optionSeriesTemplate(chart, options);
-		chart.extValue("scatterSymbolSizeMax", options.symbolSizeMax);
+		
+		if(options.symbolSizeMax)
+			chartSupport.scatterSymbolSizeMax(chart, options.symbolSizeMax);
 		
 		chart.echartsInit(options, false);
 	};
@@ -499,12 +501,7 @@
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chart.extValue("scatterSymbolSizeMax");
-		if(!symbolSizeMax)//根据图表元素尺寸自动计算
-		{
-			var chartEle = chart.elementJquery();
-			symbolSizeMax =parseInt(Math.min(chartEle.width(), chartEle.height())/8);
-		}
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -518,6 +515,9 @@
 			{
 				min = (min == undefined ? data[j][1] : Math.min(min, data[j][1]));
 				max = (max == undefined ? data[j][1] : Math.max(max, data[j][1]));
+				
+				if(max <= min)
+					max = min + 1;
 			}
 			
 			legendData[i] = dataSetName;
@@ -526,17 +526,49 @@
 						name: dataSetName, data: data,
 						symbolSize: function(value)
 						{
-							var size = parseInt((value[1]-min)/(max-min)*symbolSizeMax);
-							return (size < 4 ? 4 : size);
+							return chartSupport.scatterEvalSymbolSize(value[1], min, max, symbolSizeMax);
 						}
 					});
 		}
 		
-		if(max <= min)
-			max = min + 1;
-		
 		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
+	};
+	
+	/**
+	 * 获取、设置最大数据标记像素数
+	 * @param chart
+	 * @param symbolSizeMax 为数值时，设置操作；为undefined、{ratio:0.125}时，获取操作
+	 */
+	chartSupport.scatterSymbolSizeMax = function(chart, symbolSizeMax)
+	{
+		if(typeof(symbolSizeMax) == "number")
+			chart.extValue("scatterSymbolSizeMax", symbolSizeMax);
+		else
+		{
+			var ratio = (symbolSizeMax && symbolSizeMax.ratio ? symbolSizeMax.ratio : 0.125);
+			
+			symbolSizeMax = chart.extValue("scatterSymbolSizeMax");
+			
+			//根据图表元素尺寸自动计算
+			if(!symbolSizeMax)
+			{
+				var chartEle = chart.elementJquery();
+				symbolSizeMax =parseInt(Math.min(chartEle.width(), chartEle.height())*ratio);
+			}
+			
+			return symbolSizeMax;
+		}
+	};
+	
+	//计算散点大小
+	chartSupport.scatterEvalSymbolSize = function(value, minValue, maxValue, symbolSizeMax, symbolSizeMin)
+	{
+		if(symbolSizeMin == undefined)
+			symbolSizeMin = 4;
+		
+		var size = parseInt((value-minValue)/(maxValue-minValue)*symbolSizeMax);
+		return (size < symbolSizeMin ? symbolSizeMin : size);
 	};
 	
 	//雷达图
@@ -750,7 +782,7 @@
 		},
 		options));
 		
-		var map = chartSupport.mapOptionMapName(options);
+		var map = options.series[0].map;
 		
 		chart.extValue("mapPresetMap", map);
 		chart.map(map);
@@ -808,7 +840,8 @@
 		
 		var options = { visualMap: {min, min, max: max}, series: [ {name: seriesName, data: seriesData } ] };
 		options = chart.optionsModified(options);
-		var map = chartSupport.mapOptionMapName(options);
+		
+		var map = options.series[0].map;
 		
 		if(!map)
 		{
@@ -841,9 +874,144 @@
 		}
 	};
 	
-	chartSupport.mapOptionMapName = function(options)
+	//散点值地图
+	
+	chartSupport.mapScatterRender = function(chart, coordSign, coordLongitudeSign, coordLatitudeSign, valueSign, options)
 	{
-		return ((options && options.series && options.series.length > 0) ? options.series[0].map : undefined);
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item",
+				formatter: function (params)
+				{
+					return params.name + "<br/>" + params.value[2];
+				}
+			},
+			geo:
+			{
+				roam: true,
+				map: (chart.map() || "china")
+			},
+			//最大数据标记像素数
+			symbolSizeMax: undefined,
+			series:
+			[
+				{
+					name: "",
+					type: "scatter",
+					coordinateSystem: "geo",
+					data: []
+				}
+			]
+		},
+		options));
+		
+		var map = options.geo.map;
+		
+		chart.extValue("mapPresetMap", map);
+		chart.map(map);
+		if(options.symbolSizeMax)
+			chartSupport.scatterSymbolSizeMax(chart, options.symbolSizeMax);
+		chartSupport.optionSeriesTemplate(chart, options);
+		
+		if(chart.echartsMapRegistered(map))
+		{
+			chart.echartsInit(options, false);
+			chart.statusPreUpdate(true);
+		}
+		else
+		{
+			chart.echartsMapLoad(map, function()
+			{
+				chart.echartsInit(options, false);
+				chart.statusPreUpdate(true);
+			});
+		}
+	};
+	
+	chartSupport.mapScatterUpdate = function(chart, results, coordSign, coordLongitudeSign, coordLatitudeSign, valueSign)
+	{
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
+		var legendData = [];
+		var series = [];
+		
+		var min = undefined, max = undefined;
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, {ratio:0.1});
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var dataSetName = chart.dataSetName(chartDataSet);
+			var valueProperties =
+			[
+				chart.dataSetPropertyOfSign(chartDataSet, coordLongitudeSign),
+				chart.dataSetPropertyOfSign(chartDataSet, coordLatitudeSign),
+				chart.dataSetPropertyOfSign(chartDataSet, valueSign)
+			];
+			var result = chart.resultAt(results, i);
+			var data = chart.resultNameValueObjects(result, chart.dataSetPropertyOfSign(chartDataSet, coordSign), valueProperties);
+			
+			for(var j=0; j<data.length; j++)
+			{
+				var dv = data[j].value;
+				
+				min = (min == undefined ? dv[2] : Math.min(min, dv[2]));
+				max = (max == undefined ? dv[2] : Math.max(max, dv[2]));
+				
+				if(max <= min)
+					max = min + 1;
+			}
+			
+			legendData[i] = dataSetName;
+			series[i] = $.extend({}, chartSupport.optionSeriesTemplate(chart, i),
+					{
+						name: dataSetName, data: data,
+						symbolSize: function(value)
+						{
+							return chartSupport.scatterEvalSymbolSize(value[2], min, max, symbolSizeMax);
+						}
+					});
+		}
+		
+		var options = { legend: {data: legendData}, series: series };
+		options = chart.optionsModified(options);
+		
+		var map = (options.geo ? options.geo.map : undefined);
+		
+		if(!map)
+		{
+			var eleMap = chart.map();
+			if(eleMap && eleMap != chart.extValue("mapPresetMap"))
+			{
+				options.geo = {map: eleMap};
+				map = eleMap;
+			}
+		}
+		
+		if(map)
+		{
+			chart.extValue("mapPresetMap", map);
+			chart.map(map);
+		}
+		
+		if(!map || chart.echartsMapRegistered(map))
+		{
+			chart.echartsOptions(options, false);
+			chart.statusUpdated(true);
+		}
+		else
+		{
+			chart.echartsMapLoad(map, function()
+			{
+				chart.echartsOptions(options, false);
+				chart.statusUpdated(true);
+			});
+		}
 	};
 	
 	//标签卡
