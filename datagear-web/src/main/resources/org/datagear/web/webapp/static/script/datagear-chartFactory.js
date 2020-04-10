@@ -709,7 +709,7 @@
 	 * 
 	 * @param result 数据集结果对象、对象数组
 	 * @param nameProperty 名称属性对象、属性名
-	 * @param valueProperty 值属性对象、属性名
+	 * @param valueProperty 值属性对象、属性名、数组
 	 * @param row 行索引，以0开始，可选，默认为0
 	 * @param count 获取结果数据的最多行数，可选，默认为全部
 	 * @return [{name: ..., value: ...}, ...]
@@ -729,17 +729,37 @@
 			getCount = count;
 		
 		nameProperty = (nameProperty.name || nameProperty);
-		valueProperty = (valueProperty.name || valueProperty);
 		
-		for(var i=row; i< getCount; i++)
+		if(valueProperty.length)
 		{
-			var obj =
+			for(var i=row; i< getCount; i++)
 			{
-				"name" : datas[i][nameProperty],
-				"value" : datas[i][valueProperty]
-			};
+				var name = datas[i][nameProperty];
+				var value = [];
+				
+				for(var j=0; j<valueProperty.length; j++)
+				{
+					var vn = (valueProperty[j].name || valueProperty[j]);
+					value[j] = datas[i][vn];
+				}
+				
+				re.push({ "name" : name, "value" : value });
+			}
+		}
+		else
+		{
+			valueProperty = (valueProperty.name || valueProperty);
 			
-			re.push(obj);
+			for(var i=row; i< getCount; i++)
+			{
+				var obj =
+				{
+					"name" : datas[i][nameProperty],
+					"value" : datas[i][valueProperty]
+				};
+				
+				re.push(obj);
+			}
 		}
 		
 		return re;
@@ -929,7 +949,9 @@
 			"scatter" : {
 				"itemStyle" : {
 					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor
+					"borderColor" : chartTheme.borderColor,
+					"shadowBlur" : 10,
+					"shadowColor" : chartTheme.borderColor
 				},
 				"emphasis" : {
 					"itemStyle" : {
