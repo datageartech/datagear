@@ -279,7 +279,7 @@
 				var column = $.meta.column(this.options.table, columnName);
 				
 				if(this._isIgnoreColumnName(column) || !columnWidget)
-					continue;
+					return;
 				
 				columnWidget.setValue(columnValue);
 			}
