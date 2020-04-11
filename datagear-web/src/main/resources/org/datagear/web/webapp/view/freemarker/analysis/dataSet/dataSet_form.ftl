@@ -320,9 +320,9 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("dataSetSqlPreviewRequired", function(value, element)
 	{
-		var previewSql = po.element("textarea[name='sql']").val();
-		var editorSql = po.sqlEditor.getValue();
-		return previewSql == editorSql;
+		value = value.replace(/\s/g, '');
+		var editorSql = po.sqlEditor.getValue().replace(/\s/g, '');
+		return value == editorSql;
 	});
 	
 	po.form().validate(
