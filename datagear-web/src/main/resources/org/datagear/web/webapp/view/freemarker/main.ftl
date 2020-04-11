@@ -205,7 +205,7 @@ ${detectNewVersionScript}
 		return (tableInfo.type == "VIEW");
 	};
 	
-	po.tableToJstreeNode = function(table)
+	po.tableToJstreeNode = function(schema, table)
 	{
 		var text = table.name;
 		
@@ -220,15 +220,15 @@ ${detectNewVersionScript}
 		if(table.comment)
 			atitle += "<@spring.message code='bracketLeft' />" + table.comment + "<@spring.message code='bracketRight' />";
 		
-		table.a_attr = { "title" :  atitle};
+		table.a_attr = { "href": $.toPath(false, contextPath, "data", schema.id, table.name, "query"), "title" :  atitle};
 		
 		return table;
 	};
 	
-	po.tableToJstreeNodes = function(tables)
+	po.tableToJstreeNodes = function(schema, tables)
 	{
 		for(var i=0; i<tables.length; i++)
-			po.tableToJstreeNode(tables[i]);
+			po.tableToJstreeNode(schema, tables[i]);
 		
 		return tables;
 	};
@@ -260,9 +260,9 @@ ${detectNewVersionScript}
 		return (original.nextPageInfo != undefined);
 	};
 
-	po.toJstreeNodePagingData = function(pagingData)
+	po.toJstreeNodePagingData = function(schema, pagingData)
 	{
-		po.tableToJstreeNodes(pagingData.items);
+		po.tableToJstreeNodes(schema, pagingData.items);
 		
 		//添加下一页节点
 		if(pagingData.page < pagingData.pages)
@@ -372,37 +372,32 @@ ${detectNewVersionScript}
 			{
 				"core" :
 				{
-					"data" :
+					"data" : function(node, callback)
 					{
-						contentType: $.CONTENT_TYPE_JSON,
-						type: "POST",
-						"url" : function(node)
+						//根节点
+						if(node.id == "#")
 						{
-							//根节点
-							if(node.id == "#")
-								return contextPath+"/schema/list";
-							else if(po.isSchemaNode(node))
+							$.ajaxJson(contextPath+"/schema/list",
 							{
-								return $.toPath(false, contextPath, "schema", node.id, "pagingQueryTable");
-							}
-						},
-						"data" : function(node)
+								data: po.getSearchSchemaFormDataForSchema(),
+								success: function(schemas)
+								{
+									po.schemaToJstreeNodes(schemas);
+									callback.call(this, schemas);
+								}
+							});
+						}
+						else if(po.isSchemaNode(node))
 						{
-							if(node.id == "#")
-								return po.getSearchSchemaFormDataForSchema();
-							else if(po.isSchemaNode(node))
-								return po.getSearchSchemaFormDataForTable();
-						},
-						"success" : function(data, textStatus, jqXHR)
-						{
-							var url = this.url;
-							
-							if(url.indexOf("/schema/list") > -1)
-								po.schemaToJstreeNodes(data);
-							else if(url.indexOf("/pagingQueryTable") > -1)
+							$.ajaxJson($.toPath(false, contextPath, "schema", node.id, "pagingQueryTable"),
 							{
-								po.toJstreeNodePagingData(data);
-							}
+								data: po.getSearchSchemaFormDataForTable(),
+								success: function(pagingData)
+								{
+									po.toJstreeNodePagingData(node.original, pagingData);
+									callback.call(this, pagingData);
+								}
+							});
 						}
 					},
 					"themes" : {"dots": false, icons: true},
@@ -453,7 +448,7 @@ ${detectNewVersionScript}
 						success : function(pagingData)
 						{
 							tree.delete_node(data.node);
-							po.toJstreeNodePagingData(pagingData);
+							po.toJstreeNodePagingData(schemaNode.original, pagingData);
 							
 							var nodes = pagingData.items;
 							
@@ -510,30 +505,14 @@ ${detectNewVersionScript}
 			
 			var $node = tree.get_node(data.node, true);
 			
-			var tabId = "dataAnalysis-";
+			var tabId = $node.attr("tabId");
 			var tabName = $node.text();
-			var tabUrl = "${contextPath}/analysis/";
-			
-			if($node.hasClass("item-dataset"))
-			{
-				tabId += "dataset";
-				tabUrl += "dataSet/pagingQuery";
-			}
-			else if($node.hasClass("item-chart"))
-			{
-				tabId += "chart";
-				tabUrl += "chart/pagingQuery";
-			}
-			else if($node.hasClass("item-dashboard"))
-			{
-				tabId += "dashboard";
-				tabUrl += "dashboard/pagingQuery";
-			}
+			var tabUrl = $("a", $node).attr("href");
 			
 			po.activeWorkTab(po.toMainTabId(tabId), tabName, "", tabUrl);
 		});
 	};
-
+	
 	po.evalSchemaTreeSelState = function(jstree, selNodes)
 	{
 		var state=
@@ -1316,9 +1295,21 @@ ${detectNewVersionScript}
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
 				<div class="dataAnalysis-panel-content">
 					<ul>
-						<li class="item-dataset"><@spring.message code='main.dataAnalysis.dataSet' /></li>
-						<li class="item-chart"><@spring.message code='main.dataAnalysis.chart' /></li>
-						<li class="item-dashboard"><@spring.message code='main.dataAnalysis.dashboard' /></li>
+						<li class="item-dataset" tabId="dataAnalysis-dataSet">
+							<a href="${contextPath}/analysis/dataSet/pagingQuery">
+								<@spring.message code='main.dataAnalysis.dataSet' />
+							</a>
+						</li>
+						<li class="item-chart" tabId="dataAnalysis-chart">
+							<a href="${contextPath}/analysis/chart/pagingQuery">
+								<@spring.message code='main.dataAnalysis.chart' />
+							</a>
+						</li>
+						<li class="item-dashboard" tabId="dataAnalysis-dashboard">
+							<a href="${contextPath}/analysis/dashboard/pagingQuery">
+								<@spring.message code='main.dataAnalysis.dashboard' />
+							</a>
+						</li>
 					</ul>
 				</div>
 			</div>
