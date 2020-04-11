@@ -62,6 +62,28 @@
 		return (dataType == "INTEGER" || dataType == "DECIMAL");
 	};
 	
+	/**
+	 * 为源数组追加不重复的元素。
+	 * 
+	 * @param sourceArray
+	 * @param append 追加元素、数组
+	 */
+	chartSupport.appendDistinct = function(sourceArray, append)
+	{
+		if(append == undefined)
+			return sourceArray;
+		
+		append = ($.isArray(append) ? append : [append]);
+		
+		for(var i=0; i<append.length; i++)
+		{
+			if($.inArray(append[i], sourceArray) < 0)
+				sourceArray.push(append[i]);
+		}
+		
+		return sourceArray;
+	};
+	
 	//折线图
 	
 	chartSupport.lineRender = function(chart, coordSign, valueSign, options)
@@ -1092,6 +1114,122 @@
 		}
 		
 		var options = { legend: {data: legendData}, xAxis : { data : xAxisData }, series: series };
+		chart.echartsOptions(options);
+	};
+	
+	//热力图
+	
+	chartSupport.heatmapRender = function(chart, coordSign, coord2Sign, valueSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+		var c2p = chart.dataSetPropertyOfSign(chartDataSet, coord2Sign);
+		
+		var chartEle = chart.elementJquery();
+		var vmItemWidth = parseInt(chartEle.height()/20);
+			
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			grid: { bottom: vmItemWidth + 20 },
+			legend:
+			{
+				data: []
+			},
+			xAxis: {
+				name: chart.dataSetPropertyLabel(cp),
+				nameGap: 5,
+				type: "category",
+				data: []
+			},
+			yAxis: {
+				name: chart.dataSetPropertyLabel(c2p),
+				nameGap: 5,
+				type: "category",
+				data: []
+			},
+			visualMap:
+			{
+				min: 0,
+				max: 100,
+				text: ["高", "低"],
+				realtime: true,
+				calculable: true,
+				orient: "horizontal",
+		        left: "center",
+		        itemWidth: vmItemWidth,
+		        itemHeight: parseInt(chartEle.width()/8),
+		        bottom: 0
+			},
+			series: [{
+				name: "",
+				type: "heatmap",
+				label: {show:true},
+				emphasis: { itemStyle: { shadowBlur: 5 } },
+				data: []
+			}]
+		},
+		options));
+
+		chartSupport.optionSeriesTemplate(chart, options);
+		
+		chart.echartsInit(options, false);
+	};
+	
+	chartSupport.heatmapUpdate = function(chart, results, coordSign, coord2Sign, valueSign)
+	{
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
+		var xAxisData = [];
+		var yAxisData = [];
+		var seriesName = "";
+		var seriesData = [];
+		var min = undefined, max=undefined;
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			seriesName = chart.dataSetName(chartDataSet);
+			var result = chart.resultAt(results, i);
+			
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+			var c2p = chart.dataSetPropertyOfSign(chartDataSet, coord2Sign);
+			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+			
+			var data = chart.resultRowArrays(result, [
+								chart.dataSetPropertyOfSign(chartDataSet, coordSign),
+								chart.dataSetPropertyOfSign(chartDataSet, coord2Sign),
+								chart.dataSetPropertyOfSign(chartDataSet, valueSign)
+							]);
+			
+			for(var i=0; i<data.length; i++)
+			{
+				chartSupport.appendDistinct(xAxisData, data[i][0]);
+				chartSupport.appendDistinct(yAxisData, data[i][1]);
+				
+				min = (min == undefined ? data[i][2] : Math.min(min, data[i][2]));
+				max = (max == undefined ? data[i][2] : Math.max(max, data[i][2]));
+			}
+			
+			seriesData = seriesData.concat(data);
+		}
+		
+		if(min == undefined)
+			min = 0;
+		if(max == undefined)
+			max = 1;
+		if(max < min)
+			max = min + 1;
+		
+		var series = [ $.extend({}, chartSupport.optionSeriesTemplate(chart, 0), { name: seriesName, data: seriesData }) ];
+		
+		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
 		chart.echartsOptions(options);
 	};
 	
