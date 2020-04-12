@@ -1,1 +1,1 @@
-java -cp classes;lib/* org.datagear.dbinfo.DatabaseMetaDataPrinter
+java -cp classes;lib/* org.datagear.meta.resolver.DatabaseMetaDataPrinter
