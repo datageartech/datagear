@@ -32,4 +32,20 @@ public class DerbyFunctionSupport
 
 		return source.replace(oldStr, newStr);
 	}
+
+	/**
+	 * 字符串正则表达式替换。
+	 * 
+	 * @param source
+	 * @param regex
+	 * @param target
+	 * @return
+	 */
+	public static String replaceRegex(String source, String regex, String target)
+	{
+		if (source == null)
+			return null;
+
+		return source.replaceAll(regex, target);
+	}
 }
