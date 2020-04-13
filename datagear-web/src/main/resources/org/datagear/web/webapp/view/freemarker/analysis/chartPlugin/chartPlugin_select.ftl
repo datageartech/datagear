@@ -105,7 +105,7 @@
 								.attr("chart-plugin-id", chartPlugin.id).attr("title", chartPlugin.nameLabel.value).appendTo($liulli);
 				
 				if(chartPlugin.iconUrl)
-					$("<div class='plugin-icon'>&nbsp;</div>").css("background-image", "url(${contextPath}/"+chartPlugin.iconUrl+")").appendTo($item);
+					$("<div class='plugin-icon'>&nbsp;</div>").css("background-image", "url(${contextPath}"+chartPlugin.iconUrl+")").appendTo($item);
 				
 				$("<div class='plugin-name'></div>").text(chartPlugin.nameLabel.value).appendTo($item);
 			}

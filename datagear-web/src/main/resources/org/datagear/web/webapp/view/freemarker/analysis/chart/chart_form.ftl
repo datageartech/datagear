@@ -225,7 +225,7 @@ readonly 是否只读操作，允许为null
 		if(chartPluginVO.iconUrl)
 		{
 			$wapper.removeClass("no-icon");
-			$("<div class='plugin-icon'></div>").css("background-image", "url(${contextPath}/"+chartPluginVO.iconUrl+")").appendTo($wapper);
+			$("<div class='plugin-icon'></div>").css("background-image", "url(${contextPath}"+chartPluginVO.iconUrl+")").appendTo($wapper);
 		}
 		else
 			$wapper.addClass("no-icon");

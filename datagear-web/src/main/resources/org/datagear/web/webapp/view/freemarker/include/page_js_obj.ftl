@@ -202,6 +202,25 @@ var ${pageId} =
 			this.close();
 		
 		return close;
+	},
+	
+	/**
+	 * 连接contextPath路径。
+	 * @param pathNode 可变路径节点，不需要加“/”
+	 */
+	concatContextPath : function(pathNode)
+	{
+		var path = "${contextPath}";
+		
+		for(var i=0; i< arguments.length; i++)
+		{
+			if(path == "" || path.charAt(path.length - 1) != "/")
+				path += "/";
+			
+			path += encodeURIComponent(arguments[i]);
+		}
+		
+		return path;
 	}
 };
 </script>

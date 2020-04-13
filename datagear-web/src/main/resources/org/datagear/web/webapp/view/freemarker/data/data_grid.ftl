@@ -130,7 +130,9 @@ boolean readonly 是否只读操作，默认为false
 				</#if>
 			};
 			
-			po.open(po.url("", "add", "batchSet=true"), options);
+			var url = po.url("add");
+			url = $.addParam(url, "batchSet", "true");
+			po.open(url, options);
 		});
 		
 		po.element("input[name=editButton]").click(function()

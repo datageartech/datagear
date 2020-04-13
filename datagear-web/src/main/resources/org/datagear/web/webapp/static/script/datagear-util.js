@@ -932,40 +932,6 @@
 		},
 		
 		/**
-		 * 将传入参数转义为路径。
-		 * 
-		 * @param args 路径元素，元素为true或false，可控制下一个元素是否转义
-		 */
-		toPath : function(args)
-		{
-			var re="";
-			
-			var encode = true;
-			for(var i=0; i< arguments.length; i++)
-			{
-				var element = arguments[i];
-				
-				//设置下一个元素是否转义
-				if(element === true || element === false)
-				{
-					encode = element;
-					continue;
-				}
-				
-				if(encode)
-					element = encodeURIComponent(element);
-				
-				if(re && re.charAt(re.length - 1) != "/")
-					re += "/";
-				
-				re += element;
-				encode=true;
-			}
-			
-			return re;
-		},
-		
-		/**
 		 * 为DataTables转义列名。
 		 * 参考jquery.dataTables.js的_fnSplitObjNotation函数。
 		 */

@@ -220,7 +220,7 @@ ${detectNewVersionScript}
 		if(table.comment)
 			atitle += "<@spring.message code='bracketLeft' />" + table.comment + "<@spring.message code='bracketRight' />";
 		
-		table.a_attr = { "href": $.toPath(false, contextPath, "data", schema.id, table.name, "query"), "title" :  atitle};
+		table.a_attr = { "href": po.concatContextPath("data", schema.id, table.name, "query"), "title" :  atitle};
 		
 		return table;
 	};
@@ -389,7 +389,7 @@ ${detectNewVersionScript}
 						}
 						else if(po.isSchemaNode(node))
 						{
-							$.ajaxJson($.toPath(false, contextPath, "schema", node.id, "pagingQueryTable"),
+							$.ajaxJson(po.concatContextPath("schema", node.id, "pagingQueryTable"),
 							{
 								data: po.getSearchSchemaFormDataForTable(),
 								success: function(pagingData)
@@ -422,7 +422,7 @@ ${detectNewVersionScript}
 					tabTitle += "<@spring.message code='bracketLeft' />" + tableInfo.comment + "<@spring.message code='bracketRight' />";
 				tabTitle += "<@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";
     			
-				var tabUrl = $.toPath(false, contextPath, "data", schema.id, tableInfo.name, "query");
+				var tabUrl = po.concatContextPath("data", schema.id, tableInfo.name, "query");
 				
 				po.activeWorkTab(po.toMainTabIdForSchemaName(schema.id, tableInfo.name), data.node.text, tabTitle, tabUrl, schema);
 			}
@@ -442,7 +442,7 @@ ${detectNewVersionScript}
 					var param = po.getSearchSchemaFormDataForTable();
 					param = $.extend({}, data.node.original.nextPageInfo, param);
 					
-					$.ajaxJson($.toPath(false, contextPath, "schema", schemaId, "pagingQueryTable"),
+					$.ajaxJson(po.concatContextPath("schema", schemaId, "pagingQueryTable"),
 					{
 						data : param,
 						success : function(pagingData)
@@ -867,7 +867,9 @@ ${detectNewVersionScript}
 					
 					var schemaId = selNode.original.id;
 					
-					po.open($.toPath(false, contextPath, "schema", ($item.hasClass("schema-operation-edit") ? "edit" : "view"))+"?id="+encodeURIComponent(schemaId), 
+					var url = po.concatContextPath("schema", ($item.hasClass("schema-operation-edit") ? "edit" : "view"));
+					url = $.addParam(url, "id", schemaId);
+					po.open(url, 
 					{
 						"pageParam" :
 						{
@@ -938,7 +940,7 @@ ${detectNewVersionScript}
 					        	    var prelia = $("> li > a[href='#"+tabId+"']", uiTabsNav);
 					        	    if(prelia.length > 0)
 					        	    {
-					        	    	$.get($.toPath(false, contextPath, "data", schemaId, tableName, "query"), function(data)
+					        	    	$.get(po.concatContextPath("data", schemaId, tableName, "query"), function(data)
 					        	    	{
 					        	    	    uiTabsNav.show();
 					        	    	    
