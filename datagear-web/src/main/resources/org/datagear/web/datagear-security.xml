@@ -54,6 +54,8 @@
 		<intercept-url pattern="${subContextPath}/schemaUrlBuilder/previewScriptCode" access="ROLE_ADMIN" />
 		
 		<!-- 图表插件管理 -->
+		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/select" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/selectData" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
 		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/icon/*" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
 		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/**" access="ROLE_ADMIN" />
 		
