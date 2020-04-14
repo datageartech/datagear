@@ -19,6 +19,37 @@
 	var chartSupport = (global.chartSupport || (global.chartSupport = {}));
 	
 	/**
+	 * 获取/设置初始options。
+	 */
+	chartSupport.initOptions = function(chart, options)
+	{
+		if(options == undefined)
+			return (chart.extValue("initOptions") || {});
+		else
+			chart.extValue("initOptions", options);
+	};
+	
+	/**
+	 * 合并指定索引的series元素对象，如果索引不对，则返回前一个合并。
+	 */
+	chartSupport.optionsSeries = function(options, index, mergeEle)
+	{
+		var seriesLen = (options && options.series ? (options.series.length || 0) : 0);
+		
+		if(!seriesLen)
+			return {};
+		
+		index = (index < seriesLen ? index : seriesLen - 1);
+		
+		var ele = (options.series[index] || {});
+		
+		if(mergeEle == undefined)
+			return ele;
+		
+		return $.extend({}, ele, mergeEle);
+	};
+	
+	/**
 	 * 获取/设置选项series模板
 	 * 
 	 * @param chart 图表对象
@@ -90,7 +121,8 @@
 	{
 		var chartDataSet = chart.chartDataSetFirst();
 		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+		var stack = (options && options.stack);//是否堆叠
 		
 		options = chart.options($.extend(true,
 		{
@@ -112,7 +144,7 @@
 				boundaryGap: false
 			},
 			yAxis: {
-				name: chart.dataSetPropertyLabel(vp),
+				name: (vps.length == 1 ? chart.dataSetPropertyLabel(vps[0]) : ""),
 				nameGap: 5,
 				type: "value"
 			},
@@ -124,14 +156,16 @@
 		},
 		options));
 		
-		chartSupport.optionSeriesTemplate(chart, options);
+		chartSupport.initOptions(chart, options);
 		
 		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.lineUpdate = function(chart, results, coordSign, valueSign)
 	{
+		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
+		var stack = (initOptions && initOptions.stack);//是否堆叠
 		
 		var legendData = [];
 		var series = [];
@@ -140,12 +174,29 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			var dataSetName = chart.dataSetName(chartDataSet);
-			var properties = [chart.dataSetPropertyOfSign(chartDataSet, coordSign), chart.dataSetPropertyOfSign(chartDataSet, valueSign)];
 			var result = chart.resultAt(results, i);
-			var data = chart.resultRowArrays(result, properties);
 			
-			legendData[i] = dataSetName;
-			series[i] = $.extend({}, chartSupport.optionSeriesTemplate(chart, i), {name: dataSetName, data: data});
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+			
+			for(var j=0; j<vps.length; j++)
+			{
+				var legendName = dataSetName;
+				if(chartDataSets.length > 1 && vps.length > 1)
+					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vps[j]);
+				else if(vps.length > 1)
+					legendName = chart.dataSetPropertyLabel(vps[j]);
+				
+				var data = chart.resultRowArrays(result, [cp, vps[j]]);
+				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, {name: legendName, data: data});
+				
+				//折线图按数据集分组展示没有效果，所以都使用同一个堆叠
+				if(stack)
+					mySeries.stack = "stack";
+				
+				legendData.push(legendName);
+				series.push(mySeries);
+			}
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
@@ -158,8 +209,9 @@
 	{
 		var chartDataSet = chart.chartDataSetFirst();
 		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-		var vps = (options && options.stackBar ? chart.dataSetPropertiesOfSign(chartDataSet, valueSign)
-					: [chart.dataSetPropertyOfSign(chartDataSet, valueSign)]);
+		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+		var stack = (options && options.stack);//是否堆叠
+		var horizontal = (options && options.horizontal);//是否横向
 		
 		options = chart.options($.extend(true,
 		{
@@ -178,8 +230,7 @@
 				name: chart.dataSetPropertyLabel(cp),
 				nameGap: 5,
 				type: "category",
-				boundaryGap: true,
-				data: []
+				boundaryGap: true
 			},
 			yAxis: {
 				name: (vps.length == 1 ? chart.dataSetPropertyLabel(vps[0]) : ""),
@@ -189,25 +240,34 @@
 			series: [{
 				name: "",
 				type: "bar",
-				stack: "",
-				label: { show: (vps.length > 1) },
+				label: { show: stack },
 				data: []
 			}]
 		},
 		options));
 		
-		chartSupport.optionSeriesTemplate(chart, options);
-		chart.extValue("stackBar", (options && options.stackBar));
+		if(horizontal)
+		{
+			var xAxisTmp = options.xAxis;
+			options.xAxis = options.yAxis;
+			options.yAxis = xAxisTmp;
+		}
+		
+		chartSupport.initOptions(chart, options);
 		
 		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.barUpdate = function(chart, results, coordSign, valueSign)
 	{
+		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
+		var stack = (initOptions && initOptions.stack);//是否堆叠
+		var horizontal = (initOptions && initOptions.horizontal);//是否横向
+		//是否按数据集分组堆叠
+		var stackGroup = (!initOptions || initOptions.stackGroup == undefined ? true : initOptions.stackGroup);
 		
 		var legendData = [];
-		var xAxisData = [];
 		var series = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -216,35 +276,29 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
-			if(i == 0)
-			{
-				var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-				xAxisData = chart.resultColumnArrays(result, cp);
-			}
-			
-			var vps = (chart.extValue("stackBar") ? chart.dataSetPropertiesOfSign(chartDataSet, valueSign)
-						: [chart.dataSetPropertyOfSign(chartDataSet, valueSign)]);
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 			
 			for(var j=0; j<vps.length; j++)
 			{
-				var vp = vps[j];
-				
-				var legendName = "";
+				var legendName = dataSetName;
 				if(chartDataSets.length > 1 && vps.length > 1)
-					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vp);
-				else if(chartDataSets.length > 1)
-					legendName = dataSetName;
+					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vps[j]);
 				else if(vps.length > 1)
-					legendName = chart.dataSetPropertyLabel(vp);
+					legendName = chart.dataSetPropertyLabel(vps[j]);
 				
-				var data = chart.resultColumnArrays(result, vp);
+				var data = chart.resultRowArrays(result, (horizontal ? [vps[j], cp] : [cp, vps[j]]));
+				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, {name: legendName, data: data});
+				
+				if(stack)
+					mySeries.stack = (stackGroup ? "stack-"+i : "stack");
 				
 				legendData.push(legendName);
-				series.push($.extend({}, chartSupport.optionSeriesTemplate(chart, i*vps.length+j), {name: legendName, stack: "stack-"+i, data: data}));
+				series.push(mySeries);
 			}
 		}
 		
-		var options = { legend: {data: legendData}, xAxis : { data : xAxisData }, series: series };
+		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
 	};
 	
@@ -252,96 +306,15 @@
 	
 	chartSupport.barHorizontalRender = function(chart, coordSign, valueSign, options)
 	{
-		var chartDataSet = chart.chartDataSetFirst();
-		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-		var vps = (options && options.stackBar ? chart.dataSetPropertiesOfSign(chartDataSet, valueSign)
-					: [chart.dataSetPropertyOfSign(chartDataSet, valueSign)]);
+		options = (options || {});
+		options.horizontal = true;
 		
-		options = chart.options($.extend(true,
-		{
-			title: {
-		        text: chart.nameNonNull()
-		    },
-			tooltip:
-			{
-				trigger: "item"
-			},
-			legend:
-			{
-				data: []
-			},
-			xAxis: {
-				name: (vps.length == 1 ? chart.dataSetPropertyLabel(vps[0]) : ""),
-				nameGap: 5,
-				type: "value"
-			},
-			yAxis: {
-				name: chart.dataSetPropertyLabel(cp),
-				nameGap: 5,
-				type: "category",
-				boundaryGap: true,
-				data: []
-			},
-			series: [{
-				name: "",
-				type: "bar",
-				stack: "",
-				label: { show: (vps.length > 1) },
-				data: []
-			}]
-		},
-		options));
-		
-		chartSupport.optionSeriesTemplate(chart, options);
-		chart.extValue("stackBar", (options && options.stackBar));
-		
-		chart.echartsInit(options, false);
+		chartSupport.barRender(chart, coordSign, valueSign, options);
 	};
 	
 	chartSupport.barHorizontalUpdate = function(chart, results, coordSign, valueSign)
 	{
-		var chartDataSets = chart.chartDataSetsNonNull();
-		
-		var legendData = [];
-		var yAxisData = [];
-		var series = [];
-		
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
-			var result = chart.resultAt(results, i);
-			
-			if(i == 0)
-			{
-				var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-				yAxisData = chart.resultColumnArrays(result, cp);
-			}
-			
-			var vps = (chart.extValue("stackBar") ? chart.dataSetPropertiesOfSign(chartDataSet, valueSign)
-						: [chart.dataSetPropertyOfSign(chartDataSet, valueSign)]);
-			
-			for(var j=0; j<vps.length; j++)
-			{
-				var vp = vps[j];
-				
-				var legendName = "";
-				if(chartDataSets.length > 1 && vps.length > 1)
-					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vp);
-				else if(chartDataSets.length > 1)
-					legendName = dataSetName;
-				else if(vps.length > 1)
-					legendName = chart.dataSetPropertyLabel(vp);
-				
-				var data = chart.resultColumnArrays(result, vp);
-				
-				legendData.push(legendName);
-				series.push($.extend({}, chartSupport.optionSeriesTemplate(chart, i*vps.length+j), {name: legendName, stack: "stack-"+i, data: data}));
-			}
-		}
-		
-		var options = { legend: {data: legendData}, yAxis : { data : yAxisData }, series: series };
-		chart.echartsOptions(options);
+		chartSupport.barUpdate(chart, results, coordSign, valueSign);
 	};
 	
 	//饼图
@@ -374,14 +347,15 @@
 			]
 		},
 		options));
-		
-		chartSupport.optionSeriesTemplate(chart, options);
+
+		chartSupport.initOptions(chart, options);
 		
 		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.pieUpdate = function(chart, results, coordSign, valueSign)
 	{
+		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 
 		var legendData = [];
@@ -405,7 +379,7 @@
 			seriesData = seriesData.concat(nvv);
 		}
 		
-		var series = [ $.extend({}, chartSupport.optionSeriesTemplate(chart, 0), {name: seriesName, data: seriesData}) ];
+		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, data: seriesData}) ];
 		
 		var options = { legend: { data: legendData }, series: series };
 		chart.echartsOptions(options);
@@ -507,50 +481,62 @@
 		},
 		options));
 		
-		chartSupport.optionSeriesTemplate(chart, options);
-		
-		if(options.symbolSizeMax)
-			chartSupport.scatterSymbolSizeMax(chart, options.symbolSizeMax);
+		chartSupport.initOptions(chart, options);
 		
 		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.scatterUpdate = function(chart, results, coordSign, valueSign)
 	{
+		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var legendData = [];
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart);
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
 			var dataSetName = chart.dataSetName(chartDataSet);
-			var properties = [chart.dataSetPropertyOfSign(chartDataSet, coordSign), chart.dataSetPropertyOfSign(chartDataSet, valueSign)];
 			var result = chart.resultAt(results, i);
-			var data = chart.resultRowArrays(result, properties);
 			
-			for(var j=0; j<data.length; j++)
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+			
+			for(var j=0; j<vps.length; j++)
 			{
-				min = (min == undefined ? data[j][1] : Math.min(min, data[j][1]));
-				max = (max == undefined ? data[j][1] : Math.max(max, data[j][1]));
+				var legendName = dataSetName;
+				if(chartDataSets.length > 1 && vps.length > 1)
+					legendName = dataSetName +"-" + chart.dataSetPropertyLabel(vps[j]);
+				else if(vps.length > 1)
+					legendName = chart.dataSetPropertyLabel(vps[j]);
 				
-				if(max <= min)
-					max = min + 1;
-			}
-			
-			legendData[i] = dataSetName;
-			series[i] = $.extend({}, chartSupport.optionSeriesTemplate(chart, i),
-					{
-						name: dataSetName, data: data,
-						symbolSize: function(value)
+				var data = chart.resultRowArrays(result, [cp, vps[j]]);
+				
+				for(var k=0; k<data.length; k++)
+				{
+					min = (min == undefined ? data[k][1] : Math.min(min, data[k][1]));
+					max = (max == undefined ? data[k][1] : Math.max(max, data[k][1]));
+					
+					if(max <= min)
+						max = min + 1;
+				}
+				
+				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j,
 						{
-							return chartSupport.scatterEvalSymbolSize(value[1], min, max, symbolSizeMax);
-						}
-					});
+							name: legendName, data: data,
+							symbolSize: function(value)
+							{
+								return chartSupport.scatterEvalSymbolSize(value[1], min, max, symbolSizeMax);
+							}
+						});
+				
+				legendData.push(legendName);
+				series.push(mySeries);
+			}
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
@@ -558,29 +544,24 @@
 	};
 	
 	/**
-	 * 获取、设置最大数据标记像素数
+	 * 获取散点图最大数据标记像素数
 	 * @param chart
-	 * @param symbolSizeMax 为数值时，设置操作；为undefined、{ratio:0.125}时，获取操作
+	 * @param options
+	 * @param 可选，自动获取的比率
 	 */
-	chartSupport.scatterSymbolSizeMax = function(chart, symbolSizeMax)
+	chartSupport.scatterSymbolSizeMax = function(chart, options, ratio)
 	{
-		if(typeof(symbolSizeMax) == "number")
-			chart.extValue("scatterSymbolSizeMax", symbolSizeMax);
-		else
+		var symbolSizeMax = (options ? options.symbolSizeMax : undefined);
+		ratio = (ratio == undefined ? 0.125 : ratio);
+		
+		//根据图表元素尺寸自动计算
+		if(!symbolSizeMax)
 		{
-			var ratio = (symbolSizeMax && symbolSizeMax.ratio ? symbolSizeMax.ratio : 0.125);
-			
-			symbolSizeMax = chart.extValue("scatterSymbolSizeMax");
-			
-			//根据图表元素尺寸自动计算
-			if(!symbolSizeMax)
-			{
-				var chartEle = chart.elementJquery();
-				symbolSizeMax =parseInt(Math.min(chartEle.width(), chartEle.height())*ratio);
-			}
-			
-			return symbolSizeMax;
+			var chartEle = chart.elementJquery();
+			symbolSizeMax =parseInt(Math.min(chartEle.width(), chartEle.height())*ratio);
 		}
+		
+		return symbolSizeMax;
 	};
 	
 	//计算散点大小
@@ -625,13 +606,14 @@
 		},
 		options));
 		
-		chartSupport.optionSeriesTemplate(chart, options);
+		chartSupport.initOptions(chart, options);
 		
 		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.radarUpdate = function(chart, results, nameSign, coordSign, valueSign, maxSign)
 	{
+		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var legendData = [];
@@ -671,7 +653,7 @@
 			
 			for(var j=0; j<nv.length; j++)
 			{
-				series.push($.extend({}, chartSupport.optionSeriesTemplate(chart, i*nv.length+j), {data: [{name: nv[j], value: dvpv[j]}]}));
+				series.push(chartSupport.optionsSeries(initOptions, i*nv.length+j, {data: [{name: nv[j], value: dvpv[j]}]}));
 			}
 		}
 		
@@ -718,13 +700,14 @@
 		},
 		options));
 
-		chartSupport.optionSeriesTemplate(chart, options);
+		chartSupport.initOptions(chart, options);
 		
 		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.funnelUpdate = function(chart, results, coordSign, valueSign)
 	{
+		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 
 		var legendData = [];
@@ -761,7 +744,7 @@
 				max = v;
 		}
 		
-		var series = [$.extend({}, chartSupport.optionSeriesTemplate(chart, 0), {name: seriesName, min: min, max: max, data: seriesData })];
+		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, min: min, max: max, data: seriesData }) ];
 		
 		var options = { legend: { data: legendData }, series: series };
 		chart.echartsOptions(options);
@@ -936,9 +919,7 @@
 		
 		chart.extValue("mapPresetMap", map);
 		chart.map(map);
-		if(options.symbolSizeMax)
-			chartSupport.scatterSymbolSizeMax(chart, options.symbolSizeMax);
-		chartSupport.optionSeriesTemplate(chart, options);
+		chartSupport.initOptions(chart, options);
 		
 		if(chart.echartsMapRegistered(map))
 		{
@@ -957,13 +938,14 @@
 	
 	chartSupport.mapScatterUpdate = function(chart, results, coordSign, coordLongitudeSign, coordLatitudeSign, valueSign)
 	{
+		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var legendData = [];
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, {ratio:0.1});
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions, 0.1);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -990,7 +972,7 @@
 			}
 			
 			legendData[i] = dataSetName;
-			series[i] = $.extend({}, chartSupport.optionSeriesTemplate(chart, i),
+			series[i] = chartSupport.optionsSeries(initOptions, i,
 					{
 						name: dataSetName, data: data,
 						symbolSize: function(value)
@@ -1077,13 +1059,14 @@
 		},
 		options));
 		
-		chartSupport.optionSeriesTemplate(chart, options);
+		chartSupport.initOptions(chart, options);
 		
 		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.candlestickUpdate = function(chart, results, coordSign, openSign, closeSign, minSign, maxSign)
 	{
+		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var legendData = [];
@@ -1110,7 +1093,7 @@
 						chart.dataSetPropertyOfSign(chartDataSet, maxSign)
 					]);
 			
-			series.push($.extend({}, chartSupport.optionSeriesTemplate(chart, i), {name: dataSetName, data: data}));
+			series.push(chartSupport.optionsSeries(initOptions, i, {name: dataSetName, data: data}));
 		}
 		
 		var options = { legend: {data: legendData}, xAxis : { data : xAxisData }, series: series };
@@ -1177,13 +1160,14 @@
 		},
 		options));
 
-		chartSupport.optionSeriesTemplate(chart, options);
+		chartSupport.initOptions(chart, options);
 		
 		chart.echartsInit(options, false);
 	};
 	
 	chartSupport.heatmapUpdate = function(chart, results, coordSign, coord2Sign, valueSign)
 	{
+		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var xAxisData = [];
@@ -1227,7 +1211,7 @@
 		if(max < min)
 			max = min + 1;
 		
-		var series = [ $.extend({}, chartSupport.optionSeriesTemplate(chart, 0), { name: seriesName, data: seriesData }) ];
+		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData }) ];
 		
 		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
 		chart.echartsOptions(options);
@@ -1244,15 +1228,15 @@
 		},
 		options));
 		
-		chart.extValue("options", options);
+		chartSupport.initOptions(chart, options);
 	};
 	
 	chartSupport.labelUpdate = function(chart, results, coordSign, valueSign)
 	{
-		var options = chart.extValue("options");
+		var options = chartSupport.initOptions(chart);
 		var valueFirst = options.valueFirst;
 		var showName = options.showName;
-		var options = chart.optionsModified(options);
+		options = chart.optionsModified(options);
 		var clear = (valueFirst != options.valueFirst || showName != options.showName);
 		
 		var chartDataSets = chart.chartDataSetsNonNull();
