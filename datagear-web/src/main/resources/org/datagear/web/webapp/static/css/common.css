@@ -2247,23 +2247,37 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	display: none;
 	padding: 0.3em 0.3em;
 	width: 40%;
-	height: 70%;
+	height: 100%;
 }
 .page-form-chart .data-sign-select-panel .select-panel-head{
 	padding: 0.3em 0.1em;
 }
 .page-form-chart .data-sign-select-panel .select-panel-content{
 	position: absolute;
-	left: 0.41em;
-	right: 0.41em;
+	left: 0;
+	right: 0;
 	top: 3em;
+	bottom: 0;
+}
+.page-form-chart .data-sign-select-panel .select-panel-content .content-left{
+	position: absolute;
+	left: 1em;
+	right: 1em;
+	top: 0;
 	bottom: 0.5em;
-	padding: 0.5em 0.5em;
-	overflow-y: auto;
+	overflow: auto;
+}
+.page-form-chart .data-sign-select-panel .select-panel-content .content-right{
+	position: absolute;
+	left: 40%;
+	right: 1.7em;
+	top: 0;
+	padding-left: 1em;
+	overflow: auto;
 }
 .page-form-chart .data-sign-select-panel .select-panel-content .data-sign-item{
-	margin-right: 1em;
 	margin-bottom: 0.41em;
+	width: 40%;
 }
 .page-form-chart .form-item-value-chartDataSet{
 	position: relative;

@@ -52,7 +52,10 @@ readonly 是否只读操作，允许为null
 					</#if>
 					<div class='data-sign-select-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
 						<div class="select-panel-head ui-widget-header ui-corner-all"><@spring.message code='chart.selectDataSign' /></div>
-						<div class="select-panel-content"></div>
+						<div class="select-panel-content">
+							<div class="content-left"></div>
+							<div class="content-right minor">sdf</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -209,6 +212,11 @@ readonly 是否只读操作，允许为null
 	po.dataSignLabel = function(dataSign)
 	{
 		return (dataSign.nameLabel && dataSign.nameLabel.value ? dataSign.nameLabel.value : dataSign.name);
+	};
+
+	po.dataSignDescLabel = function(dataSign)
+	{
+		return (dataSign.descLabel && dataSign.descLabel.value ? dataSign.descLabel.value : "");
 	};
 	
 	po.initChartPlugin = function(chartPluginVO)
@@ -430,23 +438,38 @@ readonly 是否只读操作，允许为null
 		
 		var $itemSigns = $this.closest(".item-signs");
 		var $panel = po.element(".data-sign-select-panel");
-		var $panelContent = po.element("> .select-panel-content", $panel);
-		$panelContent.empty();
+		var $contentLeft = po.element(".content-left", $panel);
+		var $contentRight = po.element(".content-right", $panel);
+		$contentLeft.empty();
+		$contentRight.empty();
 		
 		for(var i=0; i<dataSigns.length; i++)
 		{
 			var dataSign = dataSigns[i];
 			
+			var $item = $("<div class='data-sign-select-item' />").appendTo($contentLeft);
+			
 			var $button = $("<button type='button' class='data-sign-item ui-button ui-corner-all' />")
 				.attr("value", dataSign.name)
+				.attr("dataSignDesc", po.dataSignDescLabel(dataSign))
 				.attr("dataSignMultiple", dataSign.multiple)
-				.text(po.dataSignLabel(dataSign)).appendTo($panelContent);
+				.text(po.dataSignLabel(dataSign))
+				.appendTo($item);
+			
+			$button.hover(function()
+			{
+				$contentRight.html($(this).attr("dataSignDesc"));
+			},
+			function()
+			{
+				$contentRight.empty();
+			});
 			
 			po.updatePropertySignButtonEnable($button, $itemSigns);
 		}
 		
 		$panel.show();
-		$panel.position({ my : "left top", at : "right bottom+3", of : $this});
+		$panel.position({ my : "left center", at : "right+10 center", of : $this});
 		
 		po._currentPropertySignItemParent = $(".sign-item-values", $this.closest(".item-signs-item"));
 	})
@@ -463,6 +486,8 @@ readonly 是否只读操作，允许为null
 		var $this = $(this);
 		po.addPropertySignItem(po._currentPropertySignItemParent, $this.val(), $this.text());
 		po.updatePropertySignButtonEnable($this, po._currentPropertySignItemParent.closest(".item-signs"));
+		
+		po.element(".data-sign-select-panel").hide();
 	});
 	
 	po.updatePropertySignButtonEnable = function($button, $itemSigns)

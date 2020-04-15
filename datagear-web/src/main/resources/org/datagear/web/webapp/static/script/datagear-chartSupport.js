@@ -1041,7 +1041,7 @@
 			xAxis: {
 				name: chart.dataSetPropertyLabel(cp),
 				nameGap: 5,
-				type: "category",
+				type: (chartSupport.isDataTypeNumber(cp) ? "value" : "category"),
 				boundaryGap: true,
 				splitLine: {show:false},
 				data: []
