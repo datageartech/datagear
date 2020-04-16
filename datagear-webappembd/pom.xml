@@ -76,9 +76,9 @@
 						</goals>
 						<configuration>
 							<outputDirectory>${dist.target.dir}/lib</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
 							<overWriteReleases>true</overWriteReleases>
 							<excludeTransitive>false</excludeTransitive>
+							<excludeGroupIds>org.hamcrest, junit, mysql</excludeGroupIds>
 						</configuration>
 					</execution>
 				</executions>
