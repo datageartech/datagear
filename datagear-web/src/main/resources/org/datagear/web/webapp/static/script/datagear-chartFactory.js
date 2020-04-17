@@ -901,13 +901,18 @@
 				"splitLine" : { "lineStyle" : { "color" : chartTheme.axisScaleLineColor } },
 				"splitArea" : { "areaStyle" : { "color" : [ chartTheme.axisScaleLineColor, chartTheme.backgroundColor ] } },
 				"itemStyle" : {
-					"normal" : {
-						"borderWidth" : 1
-					}
+					"borderWidth" : 1
 				},
 				"lineStyle" : {
-					"normal" : {
-						"width" : 2
+					"width" : 2
+				},
+				"emphasis" :
+				{
+					"lineStyle" : {
+						"width" : 4,
+						"shadowBlur" : 5,
+						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.axisColor
 					}
 				},
 				"symbolSize" : 4,
@@ -1011,8 +1016,11 @@
 	                    "fontSize" : 20
 	                },
 					"itemStyle" : {
-						"barBorderWidth" : 0,
-						"barBorderColor" : chartTheme.axisColor
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.axisColor,
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.axisColor
 					}
 				}
 			},
@@ -1024,8 +1032,11 @@
 				},
 				"emphasis" : {
 					"itemStyle" : {
-						"barBorderWidth" : 0,
-						"barBorderColor" : chartTheme.axisColor
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.axisColor,
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.axisColor
 					}
 				}
 			},
