@@ -7,7 +7,14 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -25,6 +32,7 @@ import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
+import org.datagear.web.util.DriverInfo;
 import org.datagear.web.util.KeywordMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -56,6 +64,9 @@ public class DriverEntityController extends AbstractController
 	@Autowired
 	private File tempDirectory;
 
+	private List<String> commonDriverClassNames = Collections
+			.unmodifiableList(DriverInfo.getDriverClassNames(DriverInfo.getCommonInDriverInfos()));
+
 	public DriverEntityController()
 	{
 		super();
@@ -79,6 +90,16 @@ public class DriverEntityController extends AbstractController
 	public void setTempDirectory(File tempDirectory)
 	{
 		this.tempDirectory = tempDirectory;
+	}
+
+	public List<String> getCommonDriverClassNames()
+	{
+		return commonDriverClassNames;
+	}
+
+	public void setCommonDriverClassNames(List<String> commonDriverClassNames)
+	{
+		this.commonDriverClassNames = commonDriverClassNames;
 	}
 
 	@ExceptionHandler(IllegalImportDriverEntityFileFormatException.class)
@@ -321,10 +342,13 @@ public class DriverEntityController extends AbstractController
 
 	@RequestMapping(value = "/uploadDriverFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public FileInfo[] uploadDriverFile(HttpServletRequest request, @RequestParam("id") String id,
+	public Map<String, Object> uploadDriverFile(HttpServletRequest request, @RequestParam("id") String id,
 			@RequestParam("file") MultipartFile multipartFile) throws Exception
 	{
 		FileInfo[] fileInfos;
+		List<String> driverClassNames = new ArrayList<>();
+
+		String originalFilename = multipartFile.getOriginalFilename();
 
 		DriverEntity driverEntity = this.driverEntityManager.get(id);
 
@@ -334,7 +358,7 @@ public class DriverEntityController extends AbstractController
 
 			try
 			{
-				this.driverEntityManager.addDriverLibrary(driverEntity, multipartFile.getOriginalFilename(), in);
+				this.driverEntityManager.addDriverLibrary(driverEntity, originalFilename, in);
 			}
 			finally
 			{
@@ -347,14 +371,20 @@ public class DriverEntityController extends AbstractController
 		else
 		{
 			File directory = getTempDriverLibraryDirectoryNotNull(id);
-			File tempFile = getTempDriverLibraryFile(directory, multipartFile.getOriginalFilename());
+			File tempFile = getTempDriverLibraryFile(directory, originalFilename);
 
 			multipartFile.transferTo(tempFile);
+
+			resolveDriverClassNames(tempFile, driverClassNames);
 
 			fileInfos = FileUtil.getFileInfos(directory);
 		}
 
-		return fileInfos;
+		Map<String, Object> map = new HashMap<>();
+		map.put("fileInfos", fileInfos);
+		map.put("driverClassNames", driverClassNames);
+
+		return map;
 	}
 
 	@RequestMapping(value = "/downloadDriverFile")
@@ -457,6 +487,38 @@ public class DriverEntityController extends AbstractController
 	protected String buildMessageCode(String code)
 	{
 		return buildMessageCode("driverEntity", code);
+	}
+
+	protected void resolveDriverClassNames(File file, List<String> driverClassNames)
+	{
+		if (!FileUtil.isExtension(file, "jar"))
+			return;
+
+		ZipFile zipFile = null;
+		try
+		{
+			zipFile = new ZipFile(file);
+			Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
+
+			while (enumeration.hasMoreElements())
+			{
+				String name = enumeration.nextElement().getName();
+				if (FileUtil.isExtension(name, DriverInfo.DRIVER_CLASS_FILE_SUFFIX))
+				{
+					String className = DriverInfo.toDriverClassName(name);
+
+					if (this.commonDriverClassNames.contains(className))
+						driverClassNames.add(className);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+		}
+		finally
+		{
+			IOUtil.close(zipFile);
+		}
 	}
 
 	protected FileInfo[] toFileInfos(List<DriverLibraryInfo> driverLibraryInfos)

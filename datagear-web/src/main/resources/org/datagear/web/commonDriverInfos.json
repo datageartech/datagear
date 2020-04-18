@@ -1,0 +1,137 @@
+[
+	{
+		"name": "MySQL",
+		"driverClassNames": ["com.mysql.cj.jdbc.Driver", "com.mysql.jdbc.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:mysql://{host}:{port}/{name}",
+			"defaultValue": {"port": "3306"}
+		}
+	},
+	{
+		"name": "PostgreSQL",
+		"driverClassNames": ["org.postgresql.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:postgresql://{host}:{port}/{name}",
+			"defaultValue": {"port": "5432"}
+		}
+	},
+	{
+		"name": "Oracle",
+		"driverClassNames": ["oracle.jdbc.driver.OracleDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:oracle:thin:@{host}:{port}/{name}",
+			"defaultValue": {"port": "1521"}
+		}
+	},
+	{
+		"name": "SQL Server",
+		"driverClassNames": ["com.microsoft.sqlserver.jdbc.SQLServerDriver", "com.microsoft.jdbc.sqlserver.SQLServerDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:sqlserver://{host}:{port};DatabaseName={name}",
+			"defaultValue": {"port": "1433"}
+		}
+	},
+	{
+		"name": "DB2",
+		"driverClassNames": ["com.ibm.db2.jdbc.net.DB2Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:db2://{host}:{port}/{name}",
+			"defaultValue": {"port": "50000"}
+		}
+	},
+	{
+		"name": "Sybase",
+		"driverClassNames": ["com.sybase.jdbc3.jdbc.SybDriver", "com.sybase.jdbc2.jdbc.SybDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:sybase:Tds:{host}:{port}/{name}",
+			"defaultValue": {"port": "5000"}
+		}
+	},
+	{
+		"name": "Elasticsearch",
+		"driverClassNames": ["org.elasticsearch.xpack.sql.jdbc.EsDriver", "org.elasticsearch.xpack.sql.jdbc.jdbc.JdbcDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:es://http://{host}:{port}",
+			"defaultValue": {"port": "9200"}
+		}
+	},
+	{
+		"name": "Hive",
+		"driverClassNames": ["org.apache.hive.jdbc.HiveDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:hive2://{host}:{port}/{name}",
+			"defaultValue": {"port": "10000", "name": "default"}
+		}
+	},
+	{
+		"name": "Kylin",
+		"driverClassNames": ["org.apache.kylin.jdbc.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:kylin://{host}:{port}/{name}",
+			"defaultValue": {"port": "7070"}
+		}
+	},
+	{
+		"name": "Presto",
+		"driverClassNames": ["com.facebook.presto.jdbc.PrestoDriver", "io.prestosql.jdbc.PrestoDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:presto://{host}:{port}/{name}",
+			"defaultValue": {}
+		}
+	},
+	{
+		"name": "Impala",
+		"driverClassNames": ["com.cloudera.impala.jdbc41.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:impala://{host}:{port}/{name}",
+			"defaultValue": {}
+		}
+	},
+	{
+		"name": "Phoenix",
+		"driverClassNames": ["org.apache.phoenix.jdbc.PhoenixDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:phoenix://{host}:{port}/{name}",
+			"defaultValue": {}
+		}
+	},
+	{
+		"name": "Drill",
+		"driverClassNames": ["org.apache.drill.jdbc.Driver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:drill:zk={host}:{port}/{name}",
+			"defaultValue": {"port": "2181"}
+		}
+	},
+	{
+		"name": "Derby",
+		"driverClassNames": ["org.apache.derby.jdbc.ClientDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:derby://{host}:{port}/{name}",
+			"defaultValue": {"port": "1527"}
+		}
+	},
+	{
+		"name": "SQLite",
+		"driverClassNames": ["org.sqlite.JDBC"],
+		"urlTemplate":
+		{
+			"template": "jdbc:sqlite:{host}",
+			"defaultValue": {}
+		}
+	}
+]

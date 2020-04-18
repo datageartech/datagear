@@ -28,6 +28,21 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
+					<label><@spring.message code='driverEntity.driverFiles' /></label>
+				</div>
+				<div class="form-item-value">
+					<div class="ui-widget ui-widget-content input driver-files">
+					</div>
+					<#if !readonly>
+					<div class="driver-upload-parent">
+						<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
+						<div class="upload-file-info"></div>
+					</div>
+					</#if>
+				</div>
+			</div>
+			<div class="form-item">
+				<div class="form-item-label">
 					<label><@spring.message code='driverEntity.driverClassName' /></label>
 				</div>
 				<div class="form-item-value">
@@ -40,21 +55,6 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item-value">
 					<textarea name="displayDesc" class="ui-widget ui-widget-content">${(driverEntity.displayDescMore)!''?html}</textarea>
-				</div>
-			</div>
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='driverEntity.driverFiles' /></label>
-				</div>
-				<div class="form-item-value">
-					<div class="ui-widget ui-widget-content input driver-files">
-					</div>
-					<#if !readonly>
-					<div class="driver-upload-parent">
-						<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
-						<div class="upload-file-info"></div>
-					</div>
-					</#if>
 				</div>
 			</div>
 		</div>
@@ -152,11 +152,19 @@ readonly 是否只读操作，允许为null
 	{
 		url : po.url("uploadDriverFile"),
 		paramName : "file",
-		success : function(serverFileInfos, textStatus, jqXHR)
+		success : function(response, textStatus, jqXHR)
 		{
+			var serverFileInfos = response.fileInfos;
+			var driverClassNames = response.driverClassNames;
+			
 			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), true);
 			
 			po.renderDriverFiles(serverFileInfos);
+			
+			var $driverClassName = po.element("input[name='driverClassName']");
+			
+			if(driverClassNames && driverClassNames.length > 0 && !$driverClassName.val())
+				$driverClassName.val(driverClassNames[0]);
 			
 			$.tipSuccess("<@spring.message code='uploadSuccess' />");
 		}
