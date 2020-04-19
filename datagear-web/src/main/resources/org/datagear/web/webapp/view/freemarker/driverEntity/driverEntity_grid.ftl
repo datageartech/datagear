@@ -24,8 +24,10 @@ selectOperation 是否选择操作，允许为null
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
+				<#--
 				<input name="importButton" type="button" value="<@spring.message code='import' />" />
 				<input name="exportButton" type="button" value="<@spring.message code='export' />" />
+				-->
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
