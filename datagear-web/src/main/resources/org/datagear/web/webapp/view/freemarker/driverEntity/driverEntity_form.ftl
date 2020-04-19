@@ -33,6 +33,7 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-value">
 					<div class="ui-widget ui-widget-content input driver-files">
 					</div>
+					<input type="text" name="driverFilePlaceholder" style="display:none;" />
 					<#if !readonly>
 					<div class="driver-upload-parent">
 						<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
@@ -178,16 +179,25 @@ readonly 是否只读操作，允许为null
 		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
 
+	$.validator.addMethod("driverFileRequired", function(value, element)
+	{
+		var $df = po.element("input[name='driverLibraryName']");
+		return ($df.length > 0);
+	});
+	
 	po.form().validate(
 	{
+		ignore : "",
 		rules :
 		{
 			displayName : "required",
+			driverFilePlaceholder : "driverFileRequired",
 			driverClassName : "required"
 		},
 		messages :
 		{
 			displayName : "<@spring.message code='validation.required' />",
+			driverFilePlaceholder : "<@spring.message code='validation.required' />",
 			driverClassName : "<@spring.message code='validation.required' />"
 		},
 		submitHandler : function(form)
