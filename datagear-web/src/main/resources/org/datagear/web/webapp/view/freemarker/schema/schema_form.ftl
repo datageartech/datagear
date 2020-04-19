@@ -107,6 +107,7 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item-value">
 					<button class="test-connection-button" type="button"><@spring.message code='schema.testConnection' /></button>
+					<span class="test-connection-tip minor" style="display:none;"><@spring.message code='schema.testConnectionTip' /></span>
 				</div>
 			</div>
 			</#if>
@@ -128,8 +129,6 @@ readonly 是否只读操作，允许为null
 	po.driverEntityFormItemValue = function(){ return this.element("#driverEntityFormItemValue"); };
 	po.schemaDriverEntityFormItem = function(){ return this.element("#schemaDriverEntityFormItem"); };
 	po.isDriverEntityEmpty = (po.element("input[name='driverEntity.id']").val() == "");
-	
-	<#if !readonly>
 	
 	po.element("#schemaBuildUrlHelp").click(function()
 	{
@@ -186,6 +185,8 @@ readonly 是否只读操作，允许为null
 	po.element(".test-connection-button").click(function()
 	{
 		po._STATE_TEST_CONNECTION = true;
+		$(this).addClass("ui-state-disabled");
+		po.element(".test-connection-tip").show();
 		po.form().submit();
 	});
 	
@@ -227,6 +228,8 @@ readonly 是否只读操作，允许为null
 					{
 						$form.attr("action", originAction);
 						po._STATE_TEST_CONNECTION = false;
+						po.element(".test-connection-button").removeClass("ui-state-disabled");
+						po.element(".test-connection-tip").hide();
 					}
 				}
 			});
@@ -236,14 +239,12 @@ readonly 是否只读操作，允许为null
 			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
-	</#if>
 	
 	$.initButtons(po.element());
 	
 	if(po.isDriverEntityEmpty)
 		po.schemaDriverEntityFormItem().hide();
 	
-	<#if !readonly>
 	$("#schemaAdvancedSet", po.page).button(
 	{
 		icon: (po.schemaDriverEntityFormItem().is(":hidden") ? "ui-icon-triangle-1-s" : "ui-icon-triangle-1-n"),
@@ -264,7 +265,6 @@ readonly 是否只读操作，允许为null
 			$(this).button("option", "icon", "ui-icon-triangle-1-s");
 		}
 	});
-	</#if>
 })
 (${pageId});
 </script>
