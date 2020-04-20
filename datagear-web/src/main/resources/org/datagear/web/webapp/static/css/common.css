@@ -1983,6 +1983,12 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 
 .page-grid-chartPlugin-select{}
+.page-grid-chartPlugin-select.page-grid .content{
+	bottom: 0;
+}
+.page-grid-chartPlugin-select.page-grid .foot{
+	display: none;
+}
 .page-grid-chartPlugin-select .chart-plugin-nav{
 	position: absolute;
 	top: 0.5em;
