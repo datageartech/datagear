@@ -149,9 +149,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 			{
 				Column column = new Column();
 
-				String columnName = resultSetMetaData.getColumnLabel(i);
-				if (columnName == null || columnName.isEmpty())
-					columnName = resultSetMetaData.getColumnName(i);
+				String columnName = getColumnName(resultSetMetaData, i);
 
 				column.setName(columnName);
 				column.setType(resultSetMetaData.getColumnType(i));
@@ -1030,7 +1028,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	 *
 	 */
 	@JDBCCompatiblity("某些驱动程序的元信息结果集并不符合JDBC规范，比如字段名缺失、不匹配等等，所以这里特别封装此类")
-	protected static class MetaResultSet
+	protected static class MetaResultSet extends JdbcSupport
 	{
 		private ResultSet resultSet;
 		private Map<String, Integer> _nameColumnIndexMap = new HashMap<>();
@@ -1101,7 +1099,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 			for (int i = 1; i <= columnCount; i++)
 			{
 				@JDBCCompatiblity("这里列名忽略大小写比较，避免不规范的驱动程序")
-				String columnName = meta.getColumnName(i);
+				String columnName = getColumnName(meta, i);
 				if (columnName.equalsIgnoreCase(name))
 					return i;
 			}

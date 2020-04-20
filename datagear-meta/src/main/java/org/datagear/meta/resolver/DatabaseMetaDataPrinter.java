@@ -432,7 +432,7 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 			if (i > 1)
 				print(", ");
 
-			print(rsMeta.getColumnLabel(i));
+			print(getColumnName(rsMeta, i));
 		}
 		println("");
 		println("------------------------------");

@@ -299,7 +299,7 @@ public class SqlDataSetSupport extends JdbcSupport
 
 			for (int j = 1; j <= rsColumnCount; j++)
 			{
-				if (pname.equalsIgnoreCase(rsMeta.getColumnLabel(j)))
+				if (pname.equalsIgnoreCase(getColumnName(rsMeta, j)))
 				{
 					myIndex = j;
 					break;

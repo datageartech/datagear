@@ -15,6 +15,7 @@ import java.util.Scanner;
 import javax.sql.DataSource;
 
 import org.datagear.util.IOUtil;
+import org.datagear.util.JdbcSupport;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.SqlScriptParser;
 import org.datagear.util.SqlScriptParser.SqlStatement;
@@ -26,9 +27,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author datagear@163.com
  *
  */
-public class DerbySqlClient
+public class DerbySqlClient extends JdbcSupport
 {
-	public static void main(String[] args) throws Exception
+	public DerbySqlClient()
+	{
+		super();
+	}
+
+	public void run() throws Exception
 	{
 		ClassPathXmlApplicationContext applicationContext = null;
 		Connection cn = null;
@@ -113,7 +119,7 @@ public class DerbySqlClient
 		}
 	}
 
-	protected static void executeSql(Connection cn, String sql)
+	protected void executeSql(Connection cn, String sql)
 	{
 		if (sql.endsWith(";"))
 			sql = sql.substring(0, sql.length() - 1);
@@ -140,7 +146,7 @@ public class DerbySqlClient
 
 				for (int i = 1; i <= columnCount; i++)
 				{
-					String columnLabel = metaData.getColumnLabel(i);
+					String columnLabel = getColumnName(metaData, i);
 
 					if (i > 1)
 						print(", ");
@@ -177,7 +183,7 @@ public class DerbySqlClient
 		}
 	}
 
-	protected static void print(Object o)
+	protected void print(Object o)
 	{
 		String str = "NULL";
 
@@ -191,7 +197,7 @@ public class DerbySqlClient
 		System.out.print(str);
 	}
 
-	protected static void println(Object o)
+	protected void println(Object o)
 	{
 		String str = "NULL";
 
@@ -205,8 +211,13 @@ public class DerbySqlClient
 		System.out.println(str);
 	}
 
-	protected static void println()
+	protected void println()
 	{
 		System.out.println();
+	}
+
+	public static void main(String[] args) throws Exception
+	{
+		new DerbySqlClient().run();
 	}
 }
