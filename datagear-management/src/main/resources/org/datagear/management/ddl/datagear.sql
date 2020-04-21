@@ -285,3 +285,9 @@ WHERE HCW_ID IN (SELECT HCW_ID FROM DATAGEAR_HTML_CHART_WIDGET WHERE HCW_PLUGIN_
 
 --扩充SQL字段
 ALTER TABLE DATAGEAR_SQL_DATA_SET ALTER COLUMN DS_SQL SET DATA TYPE VARCHAR(10000);
+
+
+-----------------------------------------
+--version[1.8.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
