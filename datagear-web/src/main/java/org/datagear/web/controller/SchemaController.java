@@ -14,6 +14,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.connection.DriverEntity;
+import org.datagear.connection.DriverEntityManager;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.User;
 import org.datagear.meta.SimpleTable;
@@ -27,6 +29,7 @@ import org.datagear.util.JdbcUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,9 +50,22 @@ public class SchemaController extends AbstractSchemaConnTableController
 {
 	public static final String COOKIE_PAGINATION_SIZE = "SCHEMA_PAGINATION_PAGE_SIZE";
 
+	@Autowired
+	private DriverEntityManager driverEntityManager;
+
 	public SchemaController()
 	{
 		super();
+	}
+
+	public DriverEntityManager getDriverEntityManager()
+	{
+		return driverEntityManager;
+	}
+
+	public void setDriverEntityManager(DriverEntityManager driverEntityManager)
+	{
+		this.driverEntityManager = driverEntityManager;
 	}
 
 	@RequestMapping("/add")
@@ -218,6 +234,13 @@ public class SchemaController extends AbstractSchemaConnTableController
 	{
 		if (isBlank(schema.getTitle()) || isBlank(schema.getUrl()))
 			throw new IllegalInputException();
+
+		// 用户选定驱动程序时
+		if (!isEmpty(schema.getDriverEntity()) && !isEmpty(schema.getDriverEntity().getId()))
+		{
+			DriverEntity driverEntity = this.driverEntityManager.get(schema.getDriverEntity().getId());
+			schema.setDriverEntity(driverEntity);
+		}
 
 		Connection cn = null;
 
