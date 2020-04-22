@@ -185,8 +185,6 @@ readonly 是否只读操作，允许为null
 	po.element(".test-connection-button").click(function()
 	{
 		po._STATE_TEST_CONNECTION = true;
-		$(this).addClass("ui-state-disabled");
-		po.element(".test-connection-tip").show();
 		po.form().submit();
 	});
 	
@@ -222,13 +220,21 @@ readonly 是否只读操作，允许为null
 					
 					po.pageParamCallAfterSave(true, operationMessage.data);
 				},
+				beforeSend: function()
+				{
+					if(po._STATE_TEST_CONNECTION == true)
+					{
+						po.element(".test-connection-button, input[type='submit']").addClass("ui-state-disabled");
+						po.element(".test-connection-tip").show();
+					}
+				},
 				complete: function()
 				{
 					if(po._STATE_TEST_CONNECTION == true)
 					{
 						$form.attr("action", originAction);
 						po._STATE_TEST_CONNECTION = false;
-						po.element(".test-connection-button").removeClass("ui-state-disabled");
+						po.element(".test-connection-button, input[type='submit']").removeClass("ui-state-disabled");
 						po.element(".test-connection-tip").hide();
 					}
 				}
