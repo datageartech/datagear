@@ -130,7 +130,7 @@
 		"driverClassNames": ["org.sqlite.JDBC"],
 		"urlTemplate":
 		{
-			"template": "jdbc:sqlite:{host}",
+			"template": "jdbc:sqlite:{name}",
 			"defaultValue": {}
 		}
 	}

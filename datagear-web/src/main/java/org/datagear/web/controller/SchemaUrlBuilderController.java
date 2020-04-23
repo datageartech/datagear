@@ -6,9 +6,10 @@ package org.datagear.web.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
+import org.datagear.web.util.DriverInfo;
+import org.datagear.web.util.DriverInfo.DefaultValue;
+import org.datagear.web.util.DriverInfo.UrlTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.ServletContextAware;
+
+import com.alibaba.fastjson.JSON;
 
 /**
  * 模式JDBC连接URL构建器控制器。
@@ -35,15 +41,11 @@ import org.springframework.web.context.ServletContextAware;
 @RequestMapping("/schemaUrlBuilder")
 public class SchemaUrlBuilderController extends AbstractController implements ServletContextAware
 {
-	public static final String BUILT_IN_DB_URL_BUILDER_CLASS_PATH = "org/datagear/web/builtInDbUrlBuilder.js";
-
 	public static final String DB_URL_BUILDER_ENCODING = "UTF-8";
 
 	private ServletContext servletContext;
 
 	private File schemaUrlBuilderScriptFile;
-
-	private volatile String _builtInDbUrlBuilderScript = null;
 
 	public SchemaUrlBuilderController()
 	{
@@ -100,6 +102,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 			@RequestParam(value = "scriptCode", required = false) String scriptCode) throws IOException
 	{
 		request.setAttribute("scriptCode", scriptCode);
+		request.setAttribute("builtInBuildersJson", getBuiltInUrlBuildersJson());
 		request.setAttribute("preview", true);
 
 		return "/schema/schema_build_url";
@@ -110,6 +113,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 			throws IOException
 	{
 		request.setAttribute("scriptCode", getUrlBuilderScript());
+		request.setAttribute("builtInBuildersJson", getBuiltInUrlBuildersJson());
 		request.setAttribute("url", url);
 
 		return "/schema/schema_build_url";
@@ -140,10 +144,6 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	protected String getUrlBuilderScript() throws IOException
 	{
 		String script = getCustomUrlBuilderScript();
-
-		if (script == null || script.isEmpty())
-			script = getBuiltInUrlBuilderScript();
-
 		return script;
 	}
 
@@ -163,20 +163,63 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 		return IOUtil.readString(reader, true);
 	}
 
-	/**
-	 * 获取内置脚本。
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	protected String getBuiltInUrlBuilderScript() throws IOException
+	protected String getBuiltInUrlBuildersJson()
 	{
-		if (this._builtInDbUrlBuilderScript == null)
+		List<DbTypeUrlTemplate> builtInNameUrlTemplates = getBuiltInDbTypeUrlTemplates();
+		return JSON.toJSONString(builtInNameUrlTemplates);
+	}
+
+	protected List<DbTypeUrlTemplate> getBuiltInDbTypeUrlTemplates()
+	{
+		List<DbTypeUrlTemplate> dbTypeUrlTemplates = new ArrayList<>();
+
+		List<DriverInfo> driverInfos = DriverInfo.getCommonInDriverInfos();
+		if (driverInfos != null)
 		{
-			InputStream in = getClass().getClassLoader().getResourceAsStream(BUILT_IN_DB_URL_BUILDER_CLASS_PATH);
-			this._builtInDbUrlBuilderScript = IOUtil.readString(in, DB_URL_BUILDER_ENCODING, true);
+			for (DriverInfo driverInfo : driverInfos)
+			{
+				UrlTemplate urlTemplate = driverInfo.getUrlTemplate();
+
+				if (isEmpty(driverInfo.getName()) || isEmpty(urlTemplate) || isEmpty(urlTemplate.getTemplate()))
+					continue;
+
+				DbTypeUrlTemplate nt = new DbTypeUrlTemplate(driverInfo.getName(), urlTemplate.getTemplate());
+
+				if (urlTemplate.getDefaultValue() != null)
+					nt.setDefaultValue(new DefaultValue(urlTemplate.getDefaultValue()));
+
+				dbTypeUrlTemplates.add(nt);
+			}
 		}
 
-		return this._builtInDbUrlBuilderScript;
+		return dbTypeUrlTemplates;
+	}
+
+	public static class DbTypeUrlTemplate extends UrlTemplate
+	{
+		private static final long serialVersionUID = 1L;
+
+		private String dbType = "";
+
+		public DbTypeUrlTemplate()
+		{
+			super();
+		}
+
+		public DbTypeUrlTemplate(String dbType, String template)
+		{
+			super(template);
+			this.dbType = dbType;
+		}
+
+		public String getDbType()
+		{
+			return dbType;
+		}
+
+		public void setDbType(String dbType)
+		{
+			this.dbType = dbType;
+		}
 	}
 }

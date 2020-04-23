@@ -167,6 +167,8 @@
 	 */
 	schemaUrlBuilder.add = function(builder)
 	{
+		var re = [];
+		
 		var order = 0;
 		
 		for(var i= 0; i<arguments.length; i++)
@@ -187,10 +189,13 @@
 					
 					$.schemaUrlBuilder.builders[myBuilder.dbType] = myBuilder;
 					
+					re.push(myBuilder);
 					order++;
 				}
 			}
 		}
+		
+		return re;
 	};
 	
 	/**

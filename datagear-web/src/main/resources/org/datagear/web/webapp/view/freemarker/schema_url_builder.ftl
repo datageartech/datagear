@@ -27,10 +27,7 @@
    template : "...{host}...{port}...{name}...",
    
    //<@spring.message code='schemaUrlBuilder.scriptCodeNote.optional' /><@spring.message code='comma' /><@spring.message code='schemaUrlBuilder.scriptCodeNote.defaultValue' />
-   defaultValue : { host : "...", port : "...", name : "" },
-   
-   //<@spring.message code='schemaUrlBuilder.scriptCodeNote.optional' /><@spring.message code='comma' /><@spring.message code='schemaUrlBuilder.scriptCodeNote.order' />
-   order : 6
+   defaultValue : { host : "...", port : "...", name : "" }
 }</pre>
 					<span><@spring.message code='schemaUrlBuilder.scriptCodeNote.1' /></span>
 					</div>

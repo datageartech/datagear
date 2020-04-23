@@ -12,7 +12,10 @@ preview 是否是预览请求，允许为null
 <body>
 <div id="${pageId}" class="page-form page-form-buildSchemaUrl">
 	<div id="dbUrlBuilderScriptCode" style="display: none;">
-		$.schemaUrlBuilder.add(${scriptCode!'null'?js_string});
+		${scriptCode!''?html}
+	</div>
+	<div class="builtInBuildersJson" style="display: none;">
+		${builtInBuildersJson!''?html}
 	</div>
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
@@ -64,41 +67,112 @@ preview 是否是预览请求，允许为null
 <script type="text/javascript">
 (function(po)
 {
-	po.dbTypeSelect = function(){ return po.element("select[name='dbType']"); };
+	po.dbTypeSelect = po.element("select[name='dbType']");
 
+	$.initButtons(po.element());
+	
 	po.initUrl = "${url!''?js_string}";
 	
-	$("input:submit, input:button, input:reset, button", po.page).button();
-	
 	$.schemaUrlBuilder.clear();
-	var scriptCode = po.element("#dbUrlBuilderScriptCode").text();
-	try
-	{
-		eval(scriptCode);
-	}
-	catch(e)
-	{
-		$.tipError("<@spring.message code='schema.loadUrlBuilderScriptError' /><@spring.message code='colon' />" + e.message);
-	}
 	
-	var builderInfos = $.schemaUrlBuilder.list();
-	for(var i=0; i<builderInfos.length; i++)
+	po.initBuilderSelect = function()
 	{
-		var builderInfo = builderInfos[i];
-		$("<option>").attr("value", builderInfo.dbType).html(builderInfo.dbDesc).appendTo(po.dbTypeSelect());
-	}
-	
-	po.dbTypeSelect().selectmenu(
-	{
-		"classes" : { "ui-selectmenu-button" : "schema-build-url-dbtype-select" },
-		change : function(event, ui)
+		var customBuilders = [];
+		var buildInBuilders = [];
+		
+		try
 		{
-			var dbType = ui.item.value;
+			var scriptCode = po.element("#dbUrlBuilderScriptCode").text();
+			var builtInBuildersJson = po.element(".builtInBuildersJson").text();
 			
-			var defaultUrlInfo = $.schemaUrlBuilder.defaultValue(dbType);
-			po.setFormUrlValue(defaultUrlInfo);
+			if(builtInBuildersJson)
+				buildInBuilders = eval("$.schemaUrlBuilder.add(" + builtInBuildersJson+");");
+			
+			if(scriptCode)
+				customBuilders = eval("$.schemaUrlBuilder.add(" + scriptCode+");");
 		}
-	});
+		catch(e)
+		{
+			$.tipError("<@spring.message code='schema.loadUrlBuilderScriptError' /><@spring.message code='colon' />" + e.message);
+		}
+		
+		if(customBuilders.length <= 0)
+			customBuilders = (buildInBuilders.length <= 4 ? buildInBuilders : buildInBuilders.slice(0, 4));
+		
+		if(customBuilders.length > 0)
+		{
+			var optgrp = $("<optgroup />").attr("label", "<@spring.message code='schema.schemaBuildUrl.common' />")
+				.appendTo(po.dbTypeSelect);
+			for(var i=0; i<customBuilders.length; i++)
+			{
+				var builder = customBuilders[i];
+				$("<option />").attr("value", builder.dbType).attr("title", builder.dbType)
+					.html((builder.dbDesc || builder.dbType)).appendTo(optgrp);
+			}
+		}
+		
+		var allBuilders = buildInBuilders.concat([]);
+	
+		for(var i=0; i<customBuilders.length; i++)
+		{
+			var builder = customBuilders[i];
+			var contains = false;
+			
+			for(var j=0; j<buildInBuilders.length; j++)
+			{
+				if(builder.dbType == buildInBuilders[j].dbType)
+				{
+					contains=true;
+					break;
+				}
+			}
+			
+			if(!contains)
+				allBuilders.push(builder);
+		}
+		
+		if(allBuilders.length > 0)
+		{
+			allBuilders.sort(function(ba, bb)
+			{
+				if(ba.dbType < bb.dbType)
+					return -1;
+				else if(ba.dbType > bb.dbType)
+					return 1;
+				else
+					return 0;
+			});
+			
+			var optgrp = $("<optgroup />").attr("label", "<@spring.message code='schema.schemaBuildUrl.all' />")
+				.appendTo(po.dbTypeSelect);
+			for(var i=0; i<allBuilders.length; i++)
+			{
+				var builder = allBuilders[i];
+				$("<option />").attr("value", builder.dbType).attr("title", builder.dbType)
+					.html((builder.dbDesc || builder.dbType)).appendTo(optgrp);
+			}
+		}
+		
+		po.dbTypeSelect.selectmenu(
+		{
+			"classes" :
+			{
+				"ui-selectmenu-button" : "schema-build-url-dbtype-select ",
+				"ui-selectmenu-menu" : "schema-build-url-dbtype-selectmenu ui-widget ui-widget-content ui-widget-shadow"
+			},
+			change : function(event, ui)
+			{
+				var dbType = ui.item.value;
+				
+				var defaultUrlInfo = $.schemaUrlBuilder.defaultValue(dbType);
+				po.setFormUrlValue(defaultUrlInfo);
+			},
+			open: function(event, ui)
+			{
+				$(".schema-build-url-dbtype-selectmenu .ui-menu").css("width", "100%");
+			}
+		});
+	}
 	
 	po.setFormUrlValue = function(value)
 	{
@@ -116,7 +190,7 @@ preview 是否是预览请求，允许为null
 	
 	po.buildFormUrl = function()
 	{
-		var dbType = po.dbTypeSelect().val();
+		var dbType = po.dbTypeSelect.val();
 		
 		var value = {};
 		
@@ -151,6 +225,8 @@ preview 是否是预览请求，允许为null
 		}
 	});
 	
+	po.initBuilderSelect();
+	
 	var initUrlValue = undefined;
 	
 	if(po.initUrl)
@@ -159,14 +235,14 @@ preview 是否是预览请求，允许为null
 		
 		if(urlInfo != null)
 		{
-			po.dbTypeSelect().val(urlInfo.dbType);
-			po.dbTypeSelect().selectmenu("refresh");
+			po.dbTypeSelect.val(urlInfo.dbType);
+			po.dbTypeSelect.selectmenu("refresh");
 			initUrlValue = urlInfo.value;
 		}
 	}
 	
 	if(!initUrlValue)
-		initUrlValue = $.schemaUrlBuilder.defaultValue(po.dbTypeSelect().val());
+		initUrlValue = $.schemaUrlBuilder.defaultValue(po.dbTypeSelect.val());
 	
 	po.setFormUrlValue(initUrlValue);
 })

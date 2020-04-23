@@ -1298,6 +1298,18 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	height: 2em;
 	font-weight: bold;
 }
+.schema-build-url-dbtype-selectmenu{
+	width: 70%;
+	padding: 0.5em 0.5em;
+}
+.schema-build-url-dbtype-selectmenu .ui-menu{
+	border-width: 0;
+}
+.schema-build-url-dbtype-selectmenu .ui-menu .ui-menu-item{
+	display: inline-block;
+	width: 33.3%;
+	overflow: hidden;
+}
 
 .page-form-schemaUrlBuilder .form-item-value-scriptCode{
 	display: block;

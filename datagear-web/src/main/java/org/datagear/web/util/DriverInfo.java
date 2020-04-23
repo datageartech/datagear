@@ -260,6 +260,14 @@ public class DriverInfo implements Serializable
 			super();
 		}
 
+		public DefaultValue(DefaultValue defaultValue)
+		{
+			super();
+			this.host = defaultValue.host;
+			this.port = defaultValue.port;
+			this.name = defaultValue.name;
+		}
+
 		public String getHost()
 		{
 			return host;
