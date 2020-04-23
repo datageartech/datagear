@@ -586,6 +586,30 @@
 	};
 	
 	/**
+	 * 获取数据集结果的行对象数组。
+	 * @param result 数据集结果对象
+	 */
+	chartBase.resultDatas = function(result)
+	{
+		return (result && result.datas ? result.datas : []);
+	};
+	
+	/**
+	 * 获取数据集结果的行对象指定属性值。
+	 * 
+	 * @param rowObj 行对象
+	 * @param property 属性对象、属性名
+	 */
+	chartBase.resultRowCell = function(rowObj, property)
+	{
+		if(!rowObj || !property)
+			return undefined;
+		
+		var name = (property.name || property);
+		return rowObj[name];
+	};
+	
+	/**
 	 * 将数据集结果的行对象按照指定properties顺序转换为行值数组。
 	 * 
 	 * @param result 数据集结果对象、对象数组

@@ -1217,6 +1217,130 @@
 		chart.echartsOptions(options);
 	};
 	
+	//树图
+	chartSupport.treeRender = function(chart, nameSign, idSign, parentSign, valueSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			series: [{
+				name: "",
+				data: [],
+				type: "tree",
+				label:
+				{
+					position: "left",
+					verticalAlign: "middle",
+					align: "right"
+                },
+                leaves:
+                {
+                	label:
+                	{
+                		position: "right",
+                		verticalAlign: "middle",
+                		align: "left"
+                	}
+                },
+                expandAndCollapse: true
+			}]
+		},
+		options));
+		
+		chartSupport.initOptions(chart, options);
+		
+		chart.echartsInit(options, false);
+	};
+	
+	chartSupport.treeUpdate = function(chart, results, nameSign, idSign, parentSign, valueSign)
+	{
+		var initOptions= chartSupport.initOptions(chart);
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
+		var seriesName = "";
+		var seriesData = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var result = chart.resultAt(results, i);
+			
+			if(i == 0)
+				seriesName = chart.dataSetName(chartDataSet);
+
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+			var ip = (chart.dataSetPropertyOfSign(chartDataSet, idSign) || np);
+			var pp = chart.dataSetPropertyOfSign(chartDataSet, parentSign);
+			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+			
+			var data = chart.resultDatas(result);
+			
+			for(var i=0; i<data.length; i++)
+			{
+				var node = {};
+				node.id = chart.resultRowCell(data[i], ip);
+				node.name = chart.resultRowCell(data[i], np);
+				node.parent = chart.resultRowCell(data[i], pp);
+				if(vp)
+					node.value = chart.resultRowCell(data[i], vp);
+				
+				var added = false;
+				for(var j=0; j<seriesData.length; j++)
+				{
+					if(chartSupport.treeAppendNode(seriesData[j], node))
+					{
+						added = true;
+						break;
+					}
+				}
+				
+				if(!added)
+					seriesData.push(node);
+			}
+			
+			seriesData = seriesData.concat(data);
+		}
+		
+		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData }) ];
+		
+		var options = { series: series };
+		chart.echartsOptions(options);
+	};
+	
+	chartSupport.treeAppendNode = function(treeNode, node)
+	{
+		if(!treeNode)
+			return false;
+		
+		if(node.parent == treeNode.id)
+		{
+			if(!treeNode.children)
+				treeNode.children = [];
+			
+			treeNode.children.push(node);
+			return true;
+		}
+		
+		if(!treeNode.children)
+			return false;
+		
+		for(var i=0; i<treeNode.children.length; i++)
+		{
+			if(chartSupport.treeAppendNode(treeNode.children[i], node))
+				return true;
+		}
+		
+		return false;
+	};
+	
 	//标签卡
 	
 	chartSupport.labelRender = function(chart, coordSign, valueSign, options)
