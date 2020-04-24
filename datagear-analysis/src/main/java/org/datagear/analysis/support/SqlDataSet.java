@@ -96,7 +96,7 @@ public class SqlDataSet extends AbstractDataSet
 
 		try
 		{
-			return getDataSet(cn, this.sql, paramValues);
+			return getResult(cn, this.sql, paramValues);
 		}
 		finally
 		{
@@ -118,7 +118,7 @@ public class SqlDataSet extends AbstractDataSet
 	 * @param paramValues
 	 * @return
 	 */
-	protected DataSetResult getDataSet(Connection cn, String sql, Map<String, ?> paramValues) throws DataSetException
+	protected DataSetResult getResult(Connection cn, String sql, Map<String, ?> paramValues) throws DataSetException
 	{
 		List<String> paramNames = getSqlDataSetSupport().resolveParams(sql);
 		List<DataSetParam> dataSetParams = null;

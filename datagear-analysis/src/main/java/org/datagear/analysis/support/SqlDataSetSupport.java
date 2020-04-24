@@ -506,6 +506,9 @@ public class SqlDataSetSupport extends JdbcSupport
 		else
 			throw new UnsupportedOperationException();
 
+		if (rs.wasNull())
+			value = null;
+
 		return value;
 	}
 
