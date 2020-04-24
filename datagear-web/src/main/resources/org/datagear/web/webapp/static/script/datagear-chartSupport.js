@@ -1299,7 +1299,12 @@
 				node.name = chart.resultRowCell(data[i], np);
 				node.parent = chart.resultRowCell(data[i], pp);
 				if(vp)
+				{
 					node.value = chart.resultRowCell(data[i], vp);
+					//标识节点值需要动态计算
+					if(node.value == null || node.value == 0)
+						node._evalValue = true;
+				}
 				
 				var added = false;
 				for(var j=0; j<seriesData.length; j++)
@@ -1346,7 +1351,8 @@
 				data: [],
 				itemStyle:
 				{
-					borderColorSaturation: 0
+					borderWidth: 1,
+					borderColor: chartTheme.backgroundColor
 				},
 				breadcrumb:
 				{
@@ -1383,6 +1389,14 @@
 				treeNode.children = [];
 			
 			treeNode.children.push(node);
+			
+			//动态计算父节点的值
+			if(treeNode._evalValue && typeof(node.value) == "number")
+			{
+				var treeNodeValue = (treeNode.value || 0);
+				treeNode.value = treeNodeValue + node.value;
+			}
+			
 			return true;
 		}
 		
@@ -1392,7 +1406,16 @@
 		for(var i=0; i<treeNode.children.length; i++)
 		{
 			if(chartSupport.treeAppendNode(treeNode.children[i], node))
+			{
+				//动态计算treeNode的值
+				if(treeNode._evalValue && typeof(treeNode.children[i].value) == "number")
+				{
+					var treeNodeValue = (treeNode.value || 0);
+					treeNode.value = treeNodeValue + treeNode.children[i].value;
+				}
+				
 				return true;
+			}
 		}
 		
 		return false;
