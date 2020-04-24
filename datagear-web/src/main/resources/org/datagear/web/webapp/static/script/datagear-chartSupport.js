@@ -1218,9 +1218,11 @@
 	};
 	
 	//树图
-	chartSupport.treeRender = function(chart, nameSign, idSign, parentSign, valueSign, options)
+	chartSupport.treeRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
+		//echarts主题没找到tree的定义方式，先在这里直接设置
+		var chartTheme = (chart.theme() || {});
 		
 		options = chart.options($.extend(true,
 		{
@@ -1239,7 +1241,8 @@
 				{
 					position: "left",
 					verticalAlign: "middle",
-					align: "right"
+					align: "right",
+					color: chartTheme.color
                 },
                 leaves:
                 {
@@ -1250,6 +1253,12 @@
                 		align: "left"
                 	}
                 },
+                left: "16%",
+                right: "16%",
+                top: "12%",
+                bottom: "12%",
+                orient: "LR",
+                lineStyle: { color: chartTheme.axisScaleLineColor},
                 expandAndCollapse: true
 			}]
 		},
@@ -1260,7 +1269,7 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.treeUpdate = function(chart, results, nameSign, idSign, parentSign, valueSign)
+	chartSupport.treeUpdate = function(chart, results, idSign, nameSign, parentSign, valueSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -1313,6 +1322,54 @@
 		
 		var options = { series: series };
 		chart.echartsOptions(options);
+	};
+	
+	//矩形树图
+	chartSupport.treemapRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		//echarts主题没找到tree的定义方式，先在这里直接设置
+		var chartTheme = (chart.theme() || {});
+		
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			series: [{
+				name: "",
+				type: "treemap",
+				data: [],
+				itemStyle:
+				{
+					borderColorSaturation: 0
+				},
+				breadcrumb:
+				{
+					itemStyle:
+					{
+						color: chartTheme.backgroundColor,
+						borderColor: chartTheme.borderColor,
+						shadowBlur: 0,
+						textStyle: { color: chartTheme.color }
+					}
+				}
+			}]
+		},
+		options));
+		
+		chartSupport.initOptions(chart, options);
+		
+		chart.echartsInit(options, false);
+	};
+	
+	chartSupport.treemapUpdate = function(chart, results, idSign, nameSign, parentSign, valueSign)
+	{
+		chartSupport.treeUpdate(chart, results, idSign, nameSign, parentSign, valueSign)
 	};
 	
 	chartSupport.treeAppendNode = function(treeNode, node)

@@ -33,7 +33,7 @@ public class SimpleDashboardThemeSource implements DashboardThemeSource
 
 	public static final DashboardTheme THEME_DARK = new DashboardTheme("#EEE", "#000", "#333",
 			new ChartTheme("#EEE", "transparent", "#333", "#EEE", "#BBB", "#AAA", "#555",
-					new String[] { "#5EF6FE", "#91CA8C", "#EA7E53", "#24666C", "#73A373", "#019DA2", "#EEDD78",
+					new String[] { "#00CDCD", "#91CA8C", "#EA7E53", "#24666C", "#73A373", "#019DA2", "#EEDD78",
 							"#73B9BC", "#7289AB", "#12CDD2" },
 					new String[] { "#58A52D", "#FFD700", "#FF4500" }, new Theme("#EEE", "#444", "#333"),
 					new Theme("#FFF", "#1E90FF", "#333")));
@@ -76,7 +76,7 @@ public class SimpleDashboardThemeSource implements DashboardThemeSource
 
 	public static Map<RenderStyle, DashboardTheme> getDefaultDashboardThemes()
 	{
-		Map<RenderStyle, DashboardTheme> dashboardThemes = new HashMap<RenderStyle, DashboardTheme>();
+		Map<RenderStyle, DashboardTheme> dashboardThemes = new HashMap<>();
 
 		dashboardThemes.put(RenderStyle.LIGHT, THEME_LIGHT);
 		dashboardThemes.put(RenderStyle.DARK, THEME_DARK);
