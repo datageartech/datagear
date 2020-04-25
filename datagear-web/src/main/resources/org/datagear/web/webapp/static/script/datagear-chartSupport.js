@@ -1351,7 +1351,7 @@
 				data: [],
 				itemStyle:
 				{
-					borderWidth: 1,
+					borderWidth: 0.5,
 					borderColor: chartTheme.backgroundColor
 				},
 				breadcrumb:
