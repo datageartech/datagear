@@ -242,38 +242,47 @@
     
     <bean id="conversionService" class="org.datagear.web.convert.CustomFormattingConversionServiceFactoryBean" />
     
-	<bean id="localeDateSerializer" class="org.datagear.web.json.fastjson.LocaleDateSerializer">
+	<bean id="localeDateSerializer" class="org.datagear.web.json.jackson.LocaleDateSerializer">
 		<property name="dateFormatter" ref="dateFormatter" />
 	</bean>
-	<bean id="localeSqlDateSerializer" class="org.datagear.web.json.fastjson.LocaleSqlDateSerializer">
+	<bean id="localeSqlDateSerializer" class="org.datagear.web.json.jackson.LocaleSqlDateSerializer">
 		<property name="sqlDateFormatter" ref="sqlDateFormatter" />
 	</bean>
-	<bean id="localeSqlTimeSerializer" class="org.datagear.web.json.fastjson.LocaleSqlTimeSerializer">
+	<bean id="localeSqlTimeSerializer" class="org.datagear.web.json.jackson.LocaleSqlTimeSerializer">
 		<property name="sqlTimeFormatter" ref="sqlTimeFormatter" />
 	</bean>
-	<bean id="localeSqlTimestampSerializer" class="org.datagear.web.json.fastjson.LocaleSqlTimestampSerializer">
+	<bean id="localeSqlTimestampSerializer" class="org.datagear.web.json.jackson.LocaleSqlTimestampSerializer">
 		<property name="sqlTimestampFormatter" ref="sqlTimestampFormatter" />
 	</bean>
-	<bean id="fastJsonConfigFactory" class="org.datagear.web.json.fastjson.FastJsonConfigFactory">
-		<property name="objectSerializerStringMap">
-			<map>
-				<entry key="java.util.Date" value-ref="localeDateSerializer" />
-				<entry key="java.sql.Date" value-ref="localeSqlDateSerializer" />
-				<entry key="java.sql.Time" value-ref="localeSqlTimeSerializer" />
-				<entry key="java.sql.Timestamp" value-ref="localeSqlTimestampSerializer" />
-			</map>
+	
+	<bean id="objectMapperFactory" class="org.datagear.web.json.jackson.ObjectMapperFactory">
+		<property name="jsonSerializerConfigs">
+			<list>
+				<bean class="org.datagear.web.json.jackson.ObjectMapperFactory.JsonSerializerConfig">
+					<property name="serializeType" value="java.util.Date" />
+					<property name="jsonSerializer" ref="localeDateSerializer" />
+				</bean>
+				<bean class="org.datagear.web.json.jackson.ObjectMapperFactory.JsonSerializerConfig">
+					<property name="serializeType" value="java.sql.Date" />
+					<property name="jsonSerializer" ref="localeSqlDateSerializer" />
+				</bean>
+				<bean class="org.datagear.web.json.jackson.ObjectMapperFactory.JsonSerializerConfig">
+					<property name="serializeType" value="java.sql.Time" />
+					<property name="jsonSerializer" ref="localeSqlTimeSerializer" />
+				</bean>
+				<bean class="org.datagear.web.json.jackson.ObjectMapperFactory.JsonSerializerConfig">
+					<property name="serializeType" value="java.sql.Timestamp" />
+					<property name="jsonSerializer" ref="localeSqlTimestampSerializer" />
+				</bean>
+			</list>
 		</property>
 	</bean>
-	<bean id="serializeConfig" factory-bean="fastJsonConfigFactory" factory-method="getSerializeConfig" />
-	<bean id="fastJsonConfig" factory-bean="fastJsonConfigFactory" factory-method="getFastJsonConfig" />
-	<bean id="serializerFeatures" factory-bean="fastJsonConfigFactory" factory-method="getSerializerFeatures" />
 	
 	<bean id="changelogResolver" class="org.datagear.web.util.ChangelogResolver" />
 	
 	<!-- cometd配置开始 -->
-	<bean id="bayeuxJsonContext" class="org.datagear.web.sqlpad.FastjsonJSONContextServer">
-		<property name="serializeConfig" ref="serializeConfig" />
-		<property name="serializerFeatures" ref="serializerFeatures" />
+	<bean id="bayeuxJsonContext" class="org.datagear.web.cometd.CustomJacksonJSONContextServer">
+		<property name="objectMapperFactory" ref="objectMapperFactory" />
 	</bean>
 	
 	<bean id="bayeuxServerFactory" class="org.datagear.web.util.BayeuxServerFactory">

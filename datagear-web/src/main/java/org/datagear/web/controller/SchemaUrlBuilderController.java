@@ -15,6 +15,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.support.JsonSupport;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
@@ -28,8 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.ServletContextAware;
-
-import com.alibaba.fastjson.JSON;
 
 /**
  * 模式JDBC连接URL构建器控制器。
@@ -166,7 +165,7 @@ public class SchemaUrlBuilderController extends AbstractController implements Se
 	protected String getBuiltInUrlBuildersJson()
 	{
 		List<DbTypeUrlTemplate> builtInNameUrlTemplates = getBuiltInDbTypeUrlTemplates();
-		return JSON.toJSONString(builtInNameUrlTemplates);
+		return JsonSupport.generate(builtInNameUrlTemplates, "[]");
 	}
 
 	protected List<DbTypeUrlTemplate> getBuiltInDbTypeUrlTemplates()

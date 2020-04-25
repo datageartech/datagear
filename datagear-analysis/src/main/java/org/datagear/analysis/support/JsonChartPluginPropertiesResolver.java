@@ -39,8 +39,6 @@ import org.datagear.analysis.constraint.Required;
 import org.datagear.util.IOUtil;
 import org.datagear.util.i18n.Label;
 
-import com.alibaba.fastjson.JSON;
-
 /**
  * JSON {@linkplain ChartPlugin}属性解析器。
  * <p>
@@ -73,7 +71,7 @@ public class JsonChartPluginPropertiesResolver
 {
 	private PropertyTypeValueConverter propertyTypeValueConverter = new PropertyTypeValueConverter();
 
-	private ConcurrentMap<String, Locale> _localeCache = new ConcurrentHashMap<String, Locale>();
+	private ConcurrentMap<String, Locale> _localeCache = new ConcurrentHashMap<>();
 
 	public JsonChartPluginPropertiesResolver()
 	{
@@ -118,11 +116,12 @@ public class JsonChartPluginPropertiesResolver
 	 * 
 	 * @param chartPlugin
 	 * @param json
+	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(AbstractChartPlugin<?> chartPlugin, String json)
+	public void resolveChartPluginProperties(AbstractChartPlugin<?> chartPlugin, String json) throws IOException
 	{
 		@SuppressWarnings("unchecked")
-		Map<String, Object> properties = (Map<String, Object>) JSON.parse(json);
+		Map<String, Object> properties = JsonSupport.parseNonStardand(json, Map.class);
 		resolveChartPluginProperties(chartPlugin, properties);
 	}
 
@@ -198,7 +197,7 @@ public class JsonChartPluginPropertiesResolver
 			Object localeValuesObj = map.get(Label.PROPERTY_LOCALE_VALUES);
 			if (localeValuesObj != null)
 			{
-				Map<Locale, String> localeValues = new HashMap<Locale, String>();
+				Map<Locale, String> localeValues = new HashMap<>();
 
 				@SuppressWarnings("unchecked")
 				Map<String, String> stringLocaleValues = (Map<String, String>) localeValuesObj;
@@ -237,14 +236,14 @@ public class JsonChartPluginPropertiesResolver
 			return null;
 		else if (obj instanceof String)
 		{
-			Map<RenderStyle, Icon> icons = new HashMap<RenderStyle, Icon>();
+			Map<RenderStyle, Icon> icons = new HashMap<>();
 			icons.put(RenderStyle.LIGHT, convertToIcon(obj));
 
 			return icons;
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
-			Map<RenderStyle, Icon> icons = new HashMap<RenderStyle, Icon>();
+			Map<RenderStyle, Icon> icons = new HashMap<>();
 
 			Map<?, ?> map = (Map<?, ?>) obj;
 
@@ -332,7 +331,7 @@ public class JsonChartPluginPropertiesResolver
 		{
 			Object[] array = (Object[]) obj;
 
-			List<ChartProperty> chartProperties = new ArrayList<ChartProperty>();
+			List<ChartProperty> chartProperties = new ArrayList<>();
 
 			for (Object ele : array)
 			{
@@ -443,7 +442,7 @@ public class JsonChartPluginPropertiesResolver
 			@SuppressWarnings("unchecked")
 			Map<String, ?> map = (Map<String, ?>) obj;
 
-			Set<Constraint> constraints = new HashSet<Constraint>();
+			Set<Constraint> constraints = new HashSet<>();
 
 			for (Map.Entry<String, ?> entry : map.entrySet())
 			{
@@ -547,7 +546,7 @@ public class JsonChartPluginPropertiesResolver
 		{
 			Object[] array = (Object[]) obj;
 
-			List<DataSign> dataSigns = new ArrayList<DataSign>();
+			List<DataSign> dataSigns = new ArrayList<>();
 
 			for (Object ele : array)
 			{
@@ -680,7 +679,7 @@ public class JsonChartPluginPropertiesResolver
 			{
 				return Integer.parseInt((String) obj);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				return defaultValue;
 			}

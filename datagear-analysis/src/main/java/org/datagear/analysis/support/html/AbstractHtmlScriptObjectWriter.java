@@ -6,14 +6,15 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Type;
 import java.util.Map;
 
-import com.alibaba.fastjson.serializer.JSONSerializer;
-import com.alibaba.fastjson.serializer.ObjectSerializer;
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.SerializeWriter;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.datagear.analysis.support.JsonSupport;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 /**
  * 抽象HTML脚本对象输出流。
@@ -23,13 +24,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
  */
 public abstract class AbstractHtmlScriptObjectWriter
 {
-	private static final SerializerFeature[] DEFAULT_SERIALIZER_FEATURES = new SerializerFeature[] {
-			SerializerFeature.QuoteFieldNames, SerializerFeature.WriteEnumUsingName,
-			SerializerFeature.DisableCircularReferenceDetect };
-
-	private SerializerFeature[] serializerFeatures = DEFAULT_SERIALIZER_FEATURES;
-
-	private SerializeConfig serializeConfig = new SerializeConfig();
+	private ObjectMapper objectMapper;
 
 	/** 换行符 */
 	private String newLine = HtmlChartPlugin.HTML_NEW_LINE;
@@ -37,27 +32,25 @@ public abstract class AbstractHtmlScriptObjectWriter
 	public AbstractHtmlScriptObjectWriter()
 	{
 		super();
-		initSerializeConfig(this.serializeConfig);
+
+		this.objectMapper = JsonSupport.create();
+		JsonSupport.setWriteJsonFeatures(this.objectMapper);
+		JsonSupport.disableAutoCloseTargetFeature(objectMapper);
+
+		SimpleModule module = new SimpleModule(RefObjectSerializer.class.getSimpleName());
+		module.addSerializer(RefHtmlRenderContext.class, new RefObjectSerializer());
+		module.addSerializer(RefHtmlChartPlugin.class, new RefObjectSerializer());
+		this.objectMapper.registerModule(module);
 	}
 
-	public SerializerFeature[] getSerializerFeatures()
+	public ObjectMapper getObjectMapper()
 	{
-		return serializerFeatures;
+		return objectMapper;
 	}
 
-	public void setSerializerFeatures(SerializerFeature[] serializerFeatures)
+	public void setObjectMapper(ObjectMapper objectMapper)
 	{
-		this.serializerFeatures = serializerFeatures;
-	}
-
-	protected SerializeConfig getSerializeConfig()
-	{
-		return serializeConfig;
-	}
-
-	public void setSerializeConfig(SerializeConfig serializeConfig)
-	{
-		this.serializeConfig = serializeConfig;
+		this.objectMapper = objectMapper;
 	}
 
 	public String getNewLine()
@@ -70,13 +63,6 @@ public abstract class AbstractHtmlScriptObjectWriter
 		this.newLine = newLine;
 	}
 
-	protected void initSerializeConfig(SerializeConfig serializeConfig)
-	{
-		RefObjectSerializer refHtmlRenderContextSerializer = new RefObjectSerializer();
-		serializeConfig.put(RefHtmlRenderContext.class, refHtmlRenderContextSerializer);
-		serializeConfig.put(RefHtmlChartPlugin.class, refHtmlRenderContextSerializer);
-	}
-
 	/**
 	 * 写JSON对象。
 	 * 
@@ -86,17 +72,7 @@ public abstract class AbstractHtmlScriptObjectWriter
 	 */
 	protected void writeJsonObject(Writer out, Object object) throws IOException
 	{
-		SerializeWriter serializeWriter = new SerializeWriter(out, this.serializerFeatures);
-		JSONSerializer serializer = new JSONSerializer(serializeWriter, this.serializeConfig);
-
-		try
-		{
-			serializer.write(object);
-		}
-		finally
-		{
-			serializeWriter.flush();
-		}
+		this.objectMapper.writeValue(out, object);
 	}
 
 	/**
@@ -121,21 +97,23 @@ public abstract class AbstractHtmlScriptObjectWriter
 		String getRefName();
 	}
 
-	protected static class RefObjectSerializer implements ObjectSerializer
+	protected static class RefObjectSerializer extends JsonSerializer<JsonRefObject>
 	{
-		@Override
-		public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features)
-				throws IOException
+		public RefObjectSerializer()
 		{
-			String refName = null;
+			super();
+		}
 
-			if (object != null)
+		@Override
+		public void serialize(JsonRefObject value, JsonGenerator gen, SerializerProvider serializers) throws IOException
+		{
+			if (value == null)
+				serializers.defaultSerializeNull(gen);
+			else
 			{
-				JsonRefObject jsonRefObject = (JsonRefObject) object;
-				refName = jsonRefObject.getRefName();
+				String refName = value.getRefName();
+				gen.writeRawValue(refName);
 			}
-
-			serializer.getWriter().append(refName);
 		}
 	}
 

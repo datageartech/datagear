@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
-import com.alibaba.fastjson.serializer.JSONSerializer;
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.SerializeWriter;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.datagear.analysis.support.JsonSupport;
+import org.datagear.web.json.jackson.ObjectMapperFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import freemarker.core.Environment;
 import freemarker.ext.util.WrapperTemplateModel;
@@ -30,39 +30,33 @@ import freemarker.template.utility.DeepUnwrap;
  */
 public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 {
-	private SerializeConfig serializeConfig;
-	private SerializerFeature[] serializerFeatures;
+	private ObjectMapperFactory objectMapperFactory;
+
+	private ObjectMapper _objectMapper;
 
 	public WriteJsonTemplateDirectiveModel()
 	{
 		super();
 	}
 
-	public WriteJsonTemplateDirectiveModel(SerializeConfig serializeConfig, SerializerFeature[] serializerFeatures)
+	public WriteJsonTemplateDirectiveModel(ObjectMapperFactory objectMapperFactory)
 	{
 		super();
-		this.serializeConfig = serializeConfig;
-		this.serializerFeatures = serializerFeatures;
+		this.objectMapperFactory = objectMapperFactory;
+		this._objectMapper = this.objectMapperFactory.getObjectMapper();
+		JsonSupport.disableAutoCloseTargetFeature(this._objectMapper);
 	}
 
-	public SerializeConfig getSerializeConfig()
+	public ObjectMapperFactory getObjectMapperFactory()
 	{
-		return serializeConfig;
+		return objectMapperFactory;
 	}
 
-	public void setSerializeConfig(SerializeConfig serializeConfig)
+	public void setObjectMapperFactory(ObjectMapperFactory objectMapperFactory)
 	{
-		this.serializeConfig = serializeConfig;
-	}
-
-	public SerializerFeature[] getSerializerFeatures()
-	{
-		return serializerFeatures;
-	}
-
-	public void setSerializerFeatures(SerializerFeature[] serializerFeatures)
-	{
-		this.serializerFeatures = serializerFeatures;
+		this.objectMapperFactory = objectMapperFactory;
+		this._objectMapper = this.objectMapperFactory.getObjectMapper();
+		JsonSupport.disableAutoCloseTargetFeature(this._objectMapper);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -73,9 +67,6 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 		if (params.size() != 1)
 			throw new TemplateModelException("The directive only allow one parameter.");
 
-		SerializeWriter serializeWriter = new SerializeWriter(env.getOut(), this.serializerFeatures);
-		JSONSerializer serializer = new JSONSerializer(serializeWriter, this.serializeConfig);
-
 		@SuppressWarnings("unchecked")
 		Collection<TemplateModel> args = ((Map<String, TemplateModel>) params).values();
 
@@ -85,7 +76,7 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 
 			try
 			{
-				serializer.write(obj);
+				this._objectMapper.writeValue(env.getOut(), obj);
 			}
 			catch (Throwable t)
 			{
@@ -93,10 +84,6 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 					throw (IOException) t;
 				else
 					throw new TemplateException(t, env);
-			}
-			finally
-			{
-				serializer.close();
 			}
 		}
 	}
@@ -128,7 +115,8 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 	/**
 	 * 将对象包装为{@linkplain WrapperTemplateModel}，这样就可以使用此类对应的指令，并且能够处理循环引用对象。
 	 * 
-	 * @param obj 允许为{@code null}
+	 * @param obj
+	 *            允许为{@code null}
 	 * @return
 	 */
 	public static TemplateModel toWriteJsonTemplateModel(Object obj)

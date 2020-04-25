@@ -22,6 +22,7 @@ import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.ChartWidget;
+import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
@@ -32,8 +33,6 @@ import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SqlDataSetEntityService;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
-
-import com.alibaba.fastjson.JSON;
 
 /**
  * {@linkplain HtmlChartWidgetEntityService}实现类。
@@ -46,8 +45,6 @@ public class HtmlChartWidgetEntityServiceImpl
 		implements HtmlChartWidgetEntityService
 {
 	protected static final String SQL_NAMESPACE = HtmlChartWidgetEntity.class.getName();
-
-	protected static final String DATA_SIGN_SPLITTER = "__DSSP__";
 
 	private ChartPluginManager chartPluginManager;
 
@@ -250,7 +247,7 @@ public class HtmlChartWidgetEntityServiceImpl
 
 		List<WidgetDataSetRelation> relations = selectListMybatis("getDataSetRelations", sqlParams);
 
-		List<ChartDataSet> chartDataSets = new ArrayList<ChartDataSet>(relations.size());
+		List<ChartDataSet> chartDataSets = new ArrayList<>(relations.size());
 
 		for (int i = 0; i < relations.size(); i++)
 		{
@@ -284,18 +281,20 @@ public class HtmlChartWidgetEntityServiceImpl
 		return chartDataSet;
 	}
 
+	@SuppressWarnings("unchecked")
 	protected Map<String, Set<String>> toPropertySigns(String json)
 	{
-		Map<String, Set<String>> propertySigns = new HashMap<String, Set<String>>();
+		Map<String, Set<String>> propertySigns = new HashMap<>();
 
 		if (!StringUtil.isEmpty(json))
 		{
-			@SuppressWarnings("unchecked")
-			Map<String, Object> jsonMap = (Map<String, Object>) JSON.parse(json);
+			Map<String, Object> jsonMap = JsonSupport.parse(json, Map.class, null);
+			if (jsonMap == null)
+				jsonMap = new HashMap<>();
 
 			for (Map.Entry<String, Object> entry : jsonMap.entrySet())
 			{
-				Set<String> signs = new HashSet<String>();
+				Set<String> signs = new HashSet<>();
 
 				Object valueObj = entry.getValue();
 
@@ -303,7 +302,6 @@ public class HtmlChartWidgetEntityServiceImpl
 					signs.add((String) valueObj);
 				else if (valueObj instanceof Collection<?>)
 				{
-					@SuppressWarnings("unchecked")
 					Collection<String> valueCollection = (Collection<String>) valueObj;
 					signs.addAll(valueCollection);
 				}
@@ -332,7 +330,7 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	protected List<WidgetDataSetRelation> getWidgetDataSetRelations(HtmlChartWidgetEntity obj)
 	{
-		List<WidgetDataSetRelation> list = new ArrayList<WidgetDataSetRelation>();
+		List<WidgetDataSetRelation> list = new ArrayList<>();
 
 		if (obj == null)
 			return list;
@@ -348,7 +346,9 @@ public class HtmlChartWidgetEntityServiceImpl
 
 			String propertySignsJson = "";
 			if (chartDataSet.hasPropertySign())
-				propertySignsJson = JSON.toJSONString(chartDataSet.getPropertySigns());
+			{
+				propertySignsJson = JsonSupport.generate(chartDataSet.getPropertySigns(), "");
+			}
 
 			WidgetDataSetRelation relation = new WidgetDataSetRelation(obj.getId(), chartDataSet.getDataSet().getId(),
 					i + 1);

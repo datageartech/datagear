@@ -9,14 +9,12 @@ package org.datagear.management.domain;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
+import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.util.StringUtil;
-
-import com.alibaba.fastjson.JSON;
 
 /**
  * {@linkplain HtmlTplDashboardWidget}实体。
@@ -119,7 +117,7 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRen
 		if (templates == null)
 			return "[]";
 
-		return JSON.toJSONString(templates);
+		return JsonSupport.generate(templates, "[]");
 	}
 
 	/**
@@ -139,8 +137,11 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRen
 			setTemplates(splitTemplates(json));
 		else
 		{
-			List<String> templates = JSON.parseArray(json, String.class);
-			setTemplates(templates.toArray(new String[templates.size()]));
+			String[] templates = JsonSupport.parse(json, String[].class, null);
+			if (templates == null)
+				templates = new String[0];
+
+			setTemplates(templates);
 		}
 	}
 

@@ -15,8 +15,10 @@
     
     <context:component-scan base-package="org.datagear.web.controller"/>
     
-	<bean id="fastJsonHttpMessageConverter" class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
-		<property name="fastJsonConfig" ref="fastJsonConfig" />
+    <bean id="objectMapper" factory-bean="objectMapperFactory" factory-method="getObjectMapper" />
+    
+	<bean id="httpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="objectMapper" ref="objectMapper" />
 	</bean>
 	
 	<bean id="handlerMapping" class="org.datagear.web.util.SubContextPathRequestMappingHandlerMapping">
@@ -32,7 +34,7 @@
 	<bean id="handlerAdapter" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
 		<property name="messageConverters">
 			<list>
-				<ref bean="fastJsonHttpMessageConverter" />
+				<ref bean="httpMessageConverter" />
 			</list>
 		</property>
 		<property name="webBindingInitializer">
@@ -43,8 +45,7 @@
 	</bean>
 	
 	<bean id="writeJsonTemplateDirectiveModel" class="org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel">
-		<property name="serializeConfig" ref="serializeConfig" />
-		<property name="serializerFeatures" ref="serializerFeatures" />
+		<property name="objectMapperFactory" ref="objectMapperFactory" />
 	</bean>
 	
 	<bean id="freeMarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">

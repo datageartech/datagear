@@ -14,11 +14,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.datagear.analysis.support.JsonSupport;
 import org.datagear.util.IOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.alibaba.fastjson.JSON;
 
 /**
  * 数据库JDBC驱动信息。
@@ -173,7 +172,8 @@ public class DriverInfo implements Serializable
 			in = DriverInfo.class.getClassLoader().getResourceAsStream("org/datagear/web/commonDriverInfos.json");
 			String json = IOUtil.readString(in, "UTF-8", false);
 
-			driverInfos = JSON.parseArray(json, DriverInfo.class);
+			DriverInfo[] driverInfoAry = JsonSupport.parseNonStardand(json, DriverInfo[].class);
+			driverInfos = Arrays.asList(driverInfoAry);
 		}
 		catch (Exception e)
 		{

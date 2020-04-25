@@ -1,6 +1,6 @@
 {
-	id : 'pie-chart',
-	nameLabel :
+	id : "pie-chart",
+	"nameLabel" :
 	{
 		value : '饼图',
 		localeValues :
