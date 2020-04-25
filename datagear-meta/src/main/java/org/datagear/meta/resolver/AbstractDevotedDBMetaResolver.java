@@ -888,7 +888,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	protected ResultSet getUniqueKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
 			String tableName) throws SQLException
 	{
-		return databaseMetaData.getIndexInfo(cn.getCatalog(), getSchema(cn, databaseMetaData), tableName, true, false);
+		return databaseMetaData.getIndexInfo(cn.getCatalog(), schema, tableName, true, false);
 	}
 
 	protected ResultSet getImportKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
