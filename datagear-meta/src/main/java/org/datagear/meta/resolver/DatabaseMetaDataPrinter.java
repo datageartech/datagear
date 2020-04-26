@@ -5,6 +5,8 @@
 package org.datagear.meta.resolver;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -13,10 +15,19 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.datagear.connection.ConnectionOption;
+import org.datagear.connection.ConnectionSource;
+import org.datagear.connection.DefaultConnectionSource;
+import org.datagear.connection.DriverEntity;
+import org.datagear.connection.DriverEntityManager;
+import org.datagear.connection.DriverEntityManagerException;
+import org.datagear.connection.DriverLibraryInfo;
 import org.datagear.connection.PathDriverFactory;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -54,9 +65,7 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 		registerActionInfo("print_getUniqueKeys", "catalog", "schema", "table");
 	}
 
-	private PathDriverFactory pathDriverFactory;
-
-	private String driverClassName;
+	private ConnectionSource connectionSource;
 
 	private String url;
 
@@ -69,42 +78,23 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 		super();
 	}
 
-	public DatabaseMetaDataPrinter(File driverPath, String driverClassName, String url, String user, String password)
-	{
-		this(new PathDriverFactory(driverPath), driverClassName, url, user, password);
-	}
-
-	public DatabaseMetaDataPrinter(PathDriverFactory pathDriverFactory, String driverClassName, String url, String user,
-			String password)
+	public DatabaseMetaDataPrinter(ConnectionSource connectionSource, String url, String user, String password)
 	{
 		super();
-		this.pathDriverFactory = pathDriverFactory;
-		this.driverClassName = driverClassName;
+		this.connectionSource = connectionSource;
 		this.url = url;
 		this.user = user;
 		this.password = password;
-
-		this.pathDriverFactory.init();
 	}
 
-	public PathDriverFactory getPathDriverFactory()
+	public ConnectionSource getConnectionSource()
 	{
-		return pathDriverFactory;
+		return connectionSource;
 	}
 
-	public void setPathDriverFactory(PathDriverFactory pathDriverFactory)
+	public void setConnectionSource(ConnectionSource connectionSource)
 	{
-		this.pathDriverFactory = pathDriverFactory;
-	}
-
-	public String getDriverClassName()
-	{
-		return driverClassName;
-	}
-
-	public void setDriverClassName(String driverClassName)
-	{
-		this.driverClassName = driverClassName;
+		this.connectionSource = connectionSource;
 	}
 
 	public String getUrl()
@@ -253,14 +243,9 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 
 			DatabaseMetaData metaData = cn.getMetaData();
 
-			List<String> tableTypeList = new ArrayList<>();
-			ResultSet tableTypes = metaData.getTableTypes();
-			while (tableTypes.next())
-				tableTypeList.add(tableTypes.getString(1));
+			String[] tableTypes = getTableTypes(cn, metaData);
 
-			String[] tableTypeArray = tableTypeList.toArray(new String[tableTypeList.size()]);
-
-			ResultSet rs = metaData.getTables(catalog, schema, "%", tableTypeArray);
+			ResultSet rs = getTableResulSet(cn, metaData, catalog, schema, null, tableTypes);
 
 			printlnData("getTables", rs);
 		}
@@ -281,7 +266,7 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 
 			DatabaseMetaData metaData = cn.getMetaData();
 
-			ResultSet rs = metaData.getPrimaryKeys(catalog, schema, table);
+			ResultSet rs = getPrimaryKeyResulSet(cn, metaData, catalog, schema, table);
 
 			printlnData("getPrimaryKeys", rs);
 		}
@@ -302,7 +287,7 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 
 			DatabaseMetaData metaData = cn.getMetaData();
 
-			ResultSet rs = metaData.getColumns(catalog, schema, table, "%");
+			ResultSet rs = getColumnResulSet(cn, metaData, catalog, schema, table);
 
 			printlnData("getColumns", rs);
 		}
@@ -344,7 +329,7 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 
 			DatabaseMetaData metaData = cn.getMetaData();
 
-			ResultSet rs = metaData.getImportedKeys(catalog, schema, table);
+			ResultSet rs = getImportKeyResulSet(cn, metaData, catalog, schema, table);
 
 			printlnData("getImportedKeys", rs);
 		}
@@ -365,7 +350,7 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 
 			DatabaseMetaData metaData = cn.getMetaData();
 
-			ResultSet rs = metaData.getIndexInfo(catalog, schema, table, true, false);
+			ResultSet rs = getUniqueKeyResulSet(cn, metaData, catalog, schema, table);
 
 			printlnData("getUniqueKeys", rs);
 		}
@@ -386,16 +371,15 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 	protected String getSchema(Connection cn, String schema) throws Exception
 	{
 		if (schema == null || schema.isEmpty())
-			schema = getSchema(cn, cn.getMetaData());
+			schema = cn.getSchema();
 
 		return schema;
 	}
 
 	protected Connection getConnection() throws Exception
 	{
-		Driver driver = this.pathDriverFactory.getDriver(this.driverClassName);
 		ConnectionOption connectionOption = ConnectionOption.valueOf(this.url, this.user, this.password);
-		return driver.connect(this.url, connectionOption.getProperties());
+		return this.connectionSource.getConnection(connectionOption);
 	}
 
 	protected void printlnData(String label, Object data) throws Exception
@@ -494,7 +478,11 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 		println("Please input the jdbc connection password :");
 		password = scanner.nextLine();
 
-		DatabaseMetaDataPrinter printer = new DatabaseMetaDataPrinter(driverPath, driverClassName, url, user, password);
+		DriverEntity driverEntity = new DriverEntity("driverEntity", driverClassName);
+		SingleDriverEntityManager driverEntityManager = new SingleDriverEntityManager(driverPath, driverEntity);
+		ConnectionSource connectionSource = new DefaultConnectionSource(driverEntityManager);
+
+		DatabaseMetaDataPrinter printer = new DatabaseMetaDataPrinter(connectionSource, url, user, password);
 
 		String actionIndexStr = null;
 
@@ -555,6 +543,8 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 			}
 		}
 
+		println("Bye!");
+
 		IOUtil.close(scanner);
 	}
 
@@ -608,6 +598,168 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 		public void setActionMethodArgNames(String[] actionMethodArgNames)
 		{
 			this.actionMethodArgNames = actionMethodArgNames;
+		}
+	}
+
+	protected static class SingleDriverEntityManager implements DriverEntityManager
+	{
+		private File driverPath;
+
+		private DriverEntity driverEntity;
+
+		private PathDriverFactory _pathDriverFactory;
+
+		public SingleDriverEntityManager()
+		{
+			super();
+		}
+
+		public SingleDriverEntityManager(File driverPath, DriverEntity driverEntity)
+		{
+			super();
+			this.driverPath = driverPath;
+			this.driverEntity = driverEntity;
+			this._pathDriverFactory = new PathDriverFactory(this.driverPath);
+			this._pathDriverFactory.init();
+		}
+
+		public File getDriverPath()
+		{
+			return driverPath;
+		}
+
+		public void setDriverPath(File driverPath)
+		{
+			this.driverPath = driverPath;
+			this._pathDriverFactory = new PathDriverFactory(this.driverPath);
+			this._pathDriverFactory.init();
+		}
+
+		public DriverEntity getDriverEntity()
+		{
+			return driverEntity;
+		}
+
+		public void setDriverEntity(DriverEntity driverEntity)
+		{
+			this.driverEntity = driverEntity;
+		}
+
+		@Override
+		public void add(DriverEntity... driverEntities) throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean[] update(DriverEntity... driverEntities) throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DriverEntity get(String id) throws DriverEntityManagerException
+		{
+			if (!this.driverEntity.getId().equals(id))
+				throw new IllegalArgumentException();
+
+			return this.driverEntity;
+		}
+
+		@Override
+		public void delete(String... ids) throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<DriverEntity> getAll() throws DriverEntityManagerException
+		{
+			return Arrays.asList(this.driverEntity);
+		}
+
+		@Override
+		public long getLastModified() throws DriverEntityManagerException
+		{
+			return 0;
+		}
+
+		@Override
+		public void addDriverLibrary(DriverEntity driverEntity, String libraryName, InputStream in)
+				throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean[] deleteDriverLibrary(DriverEntity driverEntity, String... libraryName)
+				throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean deleteDriverLibrary(DriverEntity driverEntity) throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public InputStream getDriverLibrary(DriverEntity driverEntity, String libraryName)
+				throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void readDriverLibrary(DriverEntity driverEntity, String libraryName, OutputStream out)
+				throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<DriverLibraryInfo> getDriverLibraryInfos(DriverEntity driverEntity)
+				throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Driver getDriver(DriverEntity driverEntity) throws DriverEntityManagerException
+		{
+			return this._pathDriverFactory.getDriver(driverEntity.getDriverClassName());
+		}
+
+		@Override
+		public void release(DriverEntity driverEntity) throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void releaseAll()
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void exportToZip(ZipOutputStream out, String... ids) throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+
+		}
+
+		@Override
+		public void importFromZip(ZipInputStream in, String... ids) throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<DriverEntity> readDriverEntitiesFromZip(ZipInputStream in) throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
 		}
 	}
 }

@@ -4,6 +4,7 @@
 
 package org.datagear.web.controller;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,6 +19,7 @@ import org.datagear.management.domain.User;
 import org.datagear.meta.Column;
 import org.datagear.meta.SimpleTable;
 import org.datagear.meta.Table;
+import org.datagear.meta.TableType;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
 import org.springframework.stereotype.Controller;
@@ -57,12 +59,15 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
-				return getDbMetaResolver().getSimpleTables(getConnection());
+
+				Connection cn = getConnection();
+
+				List<SimpleTable> tables = getDbMetaResolver().getSimpleTables(cn);
+				return TableType.filterUserDataTables(cn, getDbMetaResolver(), tables);
 			}
 
 		}.execute();
 
-		tables = SchemaController.filterTables(tables);
 		SchemaController.sortByTableName(tables);
 
 		List<SimpleTable> keywordTables = SchemaController.findByKeyword(tables, keyword);

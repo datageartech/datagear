@@ -4,7 +4,11 @@
 
 package org.datagear.meta;
 
-import org.datagear.util.JDBCCompatiblity;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.datagear.meta.resolver.DBMetaResolver;
 
 /**
  * 表类型。
@@ -31,12 +35,6 @@ public class TableType
 
 	public static final String SYNONYM = "SYNONYM";
 
-	/** 索引，PostgreSQL-9.6中存在此类型 */
-	public static final String INDEX = "INDEX";
-
-	/** 序列，PostgreSQL-9.6中存在此类型 */
-	public static final String SEQUENCE = "SEQUENCE";
-
 	/**
 	 * 规范化表类型。
 	 * 
@@ -59,47 +57,51 @@ public class TableType
 			return TableType.ALIAS;
 		else if (TableType.SYNONYM.equalsIgnoreCase(tableType))
 			return TableType.SYNONYM;
-		else if (TableType.INDEX.equalsIgnoreCase(tableType))
-			return TableType.INDEX;
-		else if (TableType.SEQUENCE.equalsIgnoreCase(tableType))
-			return TableType.SEQUENCE;
 		else
 			return tableType;
 	}
 
 	/**
-	 * 是否是用户数据表类型。
+	 * 过滤用户数据表。
 	 * 
-	 * @param tableType
+	 * @param cn
+	 * @param dbMetaResolver
+	 * @param tables
 	 * @return
 	 */
-	@JDBCCompatiblity("每个数据库都有各自不同的表类型命名，所以这里只能是尽量排除")
-	public static boolean isUserDataTableType(String tableType)
+	public static List<SimpleTable> filterUserDataTables(Connection cn, DBMetaResolver dbMetaResolver,
+			List<SimpleTable> tables)
 	{
-		if (SYSTEM_TABLE.equalsIgnoreCase(tableType) || GLOBAL_TEMPORARY.equalsIgnoreCase(tableType)
-				|| LOCAL_TEMPORARY.equalsIgnoreCase(tableType) || INDEX.equalsIgnoreCase(tableType)
-				|| SEQUENCE.equalsIgnoreCase(tableType))
-			return false;
+		List<SimpleTable> re = new ArrayList<>(tables.size());
 
-		return true;
+		for (SimpleTable table : tables)
+		{
+			if (dbMetaResolver.isUserDataTable(cn, table))
+				re.add(table);
+		}
+
+		return re;
 	}
 
 	/**
-	 * 是否是用户数据表实体类型。
+	 * 过滤用户数据实体表。
 	 * 
-	 * @param tableType
+	 * @param cn
+	 * @param dbMetaResolver
+	 * @param tables
 	 * @return
 	 */
-	@JDBCCompatiblity("每个数据库都有各自不同的表类型命名，所以这里只能是尽量排除")
-	public static boolean isUserDataEntityTableType(String tableType)
+	public static List<SimpleTable> filterUserDataEntityTables(Connection cn, DBMetaResolver dbMetaResolver,
+			List<SimpleTable> tables)
 	{
-		if (!isUserDataTableType(tableType))
-			return false;
+		List<SimpleTable> re = new ArrayList<>(tables.size());
 
-		if (VIEW.equalsIgnoreCase(tableType) || ALIAS.equalsIgnoreCase(tableType)
-				|| SYNONYM.equalsIgnoreCase(tableType))
-			return false;
+		for (SimpleTable table : tables)
+		{
+			if (dbMetaResolver.isUserDataEntityTable(cn, table))
+				re.add(table);
+		}
 
-		return true;
+		return re;
 	}
 }

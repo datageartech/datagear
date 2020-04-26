@@ -1580,12 +1580,15 @@ public class DataExchangeController extends AbstractSchemaConnController
 			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
-				return getDbMetaResolver().getSimpleTables(getConnection());
+				Connection cn = getConnection();
+
+				List<SimpleTable> tables = getDbMetaResolver().getSimpleTables(cn);
+				return TableType.filterUserDataEntityTables(cn, getDbMetaResolver(), tables);
 			}
 
 		}.execute();
 
-		List<String> tableNames = excludeViewNames(tables);
+		List<String> tableNames = toTableNames(tables);
 		Collections.sort(tableNames);
 
 		return tableNames;
@@ -1629,15 +1632,12 @@ public class DataExchangeController extends AbstractSchemaConnController
 		}
 	}
 
-	protected List<String> excludeViewNames(List<SimpleTable> tables)
+	protected List<String> toTableNames(List<SimpleTable> tables)
 	{
 		List<String> list = new ArrayList<>(tables.size());
 
 		for (SimpleTable table : tables)
-		{
-			if (TableType.isUserDataEntityTableType(table.getType()))
-				list.add(table.getName());
-		}
+			list.add(table.getName());
 
 		return list;
 	}

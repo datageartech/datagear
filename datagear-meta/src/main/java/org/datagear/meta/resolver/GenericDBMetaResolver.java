@@ -78,6 +78,20 @@ public class GenericDBMetaResolver implements DBMetaResolver
 	}
 
 	@Override
+	public boolean isUserDataTable(Connection cn, SimpleTable table) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.isUserDataTable(cn, table);
+	}
+
+	@Override
+	public boolean isUserDataEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException
+	{
+		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);
+		return resolver.isUserDataEntityTable(cn, table);
+	}
+
+	@Override
 	public Table getTable(Connection cn, String tableName) throws DBMetaResolverException
 	{
 		DevotedDBMetaResolver resolver = doGetDevotedDBMetaResolverNotNull(cn);

@@ -200,11 +200,6 @@ ${detectNewVersionScript}
 		return (original.name != undefined && original.type != undefined);
 	};
 	
-	po.isTableView = function(tableInfo)
-	{
-		return (tableInfo.type == "VIEW");
-	};
-	
 	po.tableToJstreeNode = function(schema, table)
 	{
 		var text = table.name;
@@ -212,11 +207,9 @@ ${detectNewVersionScript}
 		table.text = $.escapeHtml(text);
 		table.children = false;
 		
-		var licss = (po.isTableView(table) ? "view-node" : "table-node");
-		table.li_attr = { "class" : licss };
+		table.li_attr = { "class" : "table-node" };
 		
-		var atitle = (po.isTableView(table) ? "<@spring.message code='main.tableType.view' />" : "<@spring.message code='main.tableType.table' />")
-					+"<@spring.message code='colon' />" + table.name;
+		var atitle = table.type +"<@spring.message code='colon' />" + table.name;
 		if(table.comment)
 			atitle += "<@spring.message code='bracketLeft' />" + table.comment + "<@spring.message code='bracketRight' />";
 		
@@ -417,7 +410,7 @@ ${detectNewVersionScript}
 				var schema = tree.get_node(data.node.parent).original;
 				var tableInfo = data.node.original;
 				
-	        	var tabTitle = (po.isTableView(tableInfo) ? "<@spring.message code='main.tableType.view' />" : "<@spring.message code='main.tableType.table' />") + "<@spring.message code='colon' />" + tableInfo.name;
+	        	var tabTitle = tableInfo.type + "<@spring.message code='colon' />" + tableInfo.name;
 				if(tableInfo.comment)
 					tabTitle += "<@spring.message code='bracketLeft' />" + tableInfo.comment + "<@spring.message code='bracketRight' />";
 				tabTitle += "<@spring.message code='bracketLeft' />" + schema.title + "<@spring.message code='bracketRight' />";

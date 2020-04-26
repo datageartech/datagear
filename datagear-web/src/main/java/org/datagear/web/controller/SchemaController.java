@@ -5,7 +5,6 @@
 package org.datagear.web.controller;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -288,12 +287,13 @@ public class SchemaController extends AbstractSchemaConnTableController
 			protected List<SimpleTable> execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
-				return getDbMetaResolver().getSimpleTables(getConnection());
+				Connection cn = getConnection();
+
+				List<SimpleTable> tables = getDbMetaResolver().getSimpleTables(cn);
+				return TableType.filterUserDataTables(cn, getDbMetaResolver(), tables);
 			}
 
 		}.execute();
-
-		tables = filterTables(tables);
 
 		sortByTableName(tables);
 
@@ -349,19 +349,6 @@ public class SchemaController extends AbstractSchemaConnTableController
 				schema.clearPassword();
 			}
 		}
-	}
-
-	public static List<SimpleTable> filterTables(List<SimpleTable> simpleTables)
-	{
-		List<SimpleTable> re = new ArrayList<>(simpleTables.size());
-
-		for (SimpleTable simpleTable : simpleTables)
-		{
-			if (TableType.isUserDataTableType(simpleTable.getType()))
-				re.add(simpleTable);
-		}
-
-		return re;
 	}
 
 	/**

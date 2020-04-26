@@ -43,12 +43,41 @@ public interface DBMetaResolver
 
 	/**
 	 * 随机获取一个{@linkplain SimpleTable}。
+	 * <p>
+	 * 返回表的{@linkplain #isUserEntityDataTable(SimpleTable)}应为{@code true}。
+	 * </p>
 	 * 
 	 * @param cn
 	 * @return 可能返回{@code null}
 	 * @throws DBMetaResolverException
 	 */
 	SimpleTable getRandomSimpleTable(Connection cn) throws DBMetaResolverException;
+
+	/**
+	 * 是否是用户数据表。
+	 * <p>
+	 * 用户数据表是用户可创建，且包含数据的表。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param table
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	boolean isUserDataTable(Connection cn, SimpleTable table) throws DBMetaResolverException;
+
+	/**
+	 * 是否是用户数据实体表。
+	 * <p>
+	 * 用户数据实体表是用户可创建，且真实存储数据的表（非视图、别名、同义词）。
+	 * </p>
+	 * 
+	 * @param cn
+	 * @param table
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
+	boolean isUserDataEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException;
 
 	/**
 	 * 获取指定名称的{@linkplain Table}。

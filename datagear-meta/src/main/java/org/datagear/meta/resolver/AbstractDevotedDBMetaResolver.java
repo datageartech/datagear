@@ -4,7 +4,6 @@
 
 package org.datagear.meta.resolver;
 
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -65,7 +64,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 			Database databaseInfo = new Database();
 
-			databaseInfo.setCatalog(cn.getCatalog());
+			databaseInfo.setCatalog(getCatalog(cn));
 			databaseInfo.setSchema(getSchema(cn, metaData));
 
 			databaseInfo.setUrl(metaData.getURL());
@@ -86,19 +85,61 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	@Override
 	public List<SimpleTable> getSimpleTables(Connection cn) throws DBMetaResolverException
 	{
+		String catalog = getCatalog(cn);
 		DatabaseMetaData metaData = getDatabaseMetaData(cn);
 		String schema = getSchema(cn, metaData);
 
-		return getSimpleTables(cn, metaData, schema, null);
+		return getSimpleTables(cn, metaData, catalog, schema, null);
 	}
 
 	@Override
 	public SimpleTable getRandomSimpleTable(Connection cn) throws DBMetaResolverException
 	{
+		String catalog = getCatalog(cn);
 		DatabaseMetaData metaData = getDatabaseMetaData(cn);
 		String schema = getSchema(cn, metaData);
 
-		return getRandomSimpleTable(cn, metaData, schema);
+		return getRandomSimpleTable(cn, metaData, catalog, schema);
+	}
+
+	@Override
+	public boolean isUserDataTable(Connection cn, SimpleTable table) throws DBMetaResolverException
+	{
+		String type = table.getType();
+
+		if (type == null)
+			return false;
+
+		if (TableType.SYSTEM_TABLE.equalsIgnoreCase(type) || TableType.LOCAL_TEMPORARY.equalsIgnoreCase(type)
+				|| TableType.GLOBAL_TEMPORARY.equalsIgnoreCase(type))
+			return false;
+
+		@JDBCCompatiblity("各驱动的命名各有不同，所以这里采用子串匹配方式")
+
+		String typeUpper = type.toUpperCase();
+
+		if (typeUpper.indexOf(TableType.TABLE) > -1 || typeUpper.indexOf(TableType.VIEW) > -1
+				|| typeUpper.indexOf(TableType.ALIAS) > -1 || typeUpper.indexOf(TableType.SYNONYM) > -1)
+			return true;
+
+		return false;
+	}
+
+	@Override
+	public boolean isUserDataEntityTable(Connection cn, SimpleTable table) throws DBMetaResolverException
+	{
+		if (!isUserDataTable(cn, table))
+			return false;
+
+		@JDBCCompatiblity("各驱动的命名各有不同，所以这里采用子串匹配方式")
+
+		String typeUpper = table.getType().toUpperCase();
+
+		if (typeUpper.indexOf(TableType.VIEW) > -1 || typeUpper.indexOf(TableType.ALIAS) > -1
+				|| typeUpper.indexOf(TableType.SYNONYM) > -1)
+			return false;
+
+		return true;
 	}
 
 	@Override
@@ -110,28 +151,31 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		if (readonly)
 			JdbcUtil.setReadonlyIfSupports(cn, false);
 
+		String catalog = getCatalog(cn);
 		DatabaseMetaData metaData = getDatabaseMetaData(cn);
 		String schema = getSchema(cn, metaData);
 
-		return getTable(cn, metaData, schema, tableName);
+		return getTable(cn, metaData, catalog, schema, tableName);
 	}
 
 	@Override
 	public Column[] getColumns(Connection cn, String tableName) throws DBMetaResolverException
 	{
+		String catalog = getCatalog(cn);
 		DatabaseMetaData metaData = getDatabaseMetaData(cn);
 		String schema = getSchema(cn, metaData);
 
-		return getColumns(cn, metaData, schema, tableName, null);
+		return getColumns(cn, metaData, schema, catalog, tableName, null);
 	}
 
 	@Override
 	public Column getRandomColumn(Connection cn, String tableName) throws DBMetaResolverException
 	{
+		String catalog = getCatalog(cn);
 		DatabaseMetaData metaData = getDatabaseMetaData(cn);
 		String schema = getSchema(cn, metaData);
 
-		Column[] columns = getColumns(cn, metaData, schema, tableName, 1);
+		Column[] columns = getColumns(cn, metaData, catalog, schema, tableName, 1);
 
 		return (columns == null || columns.length < 1 ? null : columns[0]);
 	}
@@ -173,10 +217,11 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	@Override
 	public PrimaryKey getPrimaryKey(Connection cn, String tableName) throws DBMetaResolverException
 	{
+		String catalog = getCatalog(cn);
 		DatabaseMetaData metaData = getDatabaseMetaData(cn);
 		String schema = getSchema(cn, metaData);
 
-		return getPrimaryKey(cn, metaData, schema, tableName);
+		return getPrimaryKey(cn, metaData, catalog, schema, tableName);
 	}
 
 	@Override
@@ -191,6 +236,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	{
 		List<String[]> importTabless = new ArrayList<>(tableNames.length);
 
+		String catalog = getCatalog(cn);
 		DatabaseMetaData metaData = getDatabaseMetaData(cn);
 		String schema = getSchema(cn, metaData);
 
@@ -214,7 +260,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 				if (importTables == null)
 				{
-					ImportKey[] importKeys = getImportKeys(cn, metaData, schema, tableNames[i]);
+					ImportKey[] importKeys = getImportKeys(cn, metaData, catalog, schema, tableNames[i]);
 
 					if (importKeys == null || importKeys.length == 0)
 						importTables = EMPTY_STRING_ARRAY;
@@ -294,7 +340,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	 * @return
 	 * @throws DBMetaResolverException
 	 */
-	protected List<SimpleTable> getSimpleTables(Connection cn, DatabaseMetaData metaData, String schema,
+	protected List<SimpleTable> getSimpleTables(Connection cn, DatabaseMetaData metaData, String catalog, String schema,
 			String tableNamePattern) throws DBMetaResolverException
 	{
 		ResultSet rs = null;
@@ -303,14 +349,14 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 		try
 		{
-			rs = getTableResulSet(cn, metaData, schema, tableNamePattern, tableTypes);
+			rs = getTableResulSet(cn, metaData, catalog, schema, tableNamePattern, tableTypes);
 			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			List<SimpleTable> simpleTables = new ArrayList<>();
 
 			while (rs.next())
 			{
-				SimpleTable simpleTable = readSimpleTable(cn, metaData, schema, mrs);
+				SimpleTable simpleTable = readSimpleTable(cn, metaData, catalog, schema, mrs);
 
 				if (simpleTable != null)
 				{
@@ -334,7 +380,8 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	/**
 	 * @return 返回{@code null}表示未读取到
 	 */
-	protected SimpleTable readSimpleTable(Connection cn, DatabaseMetaData metaData, String schema, MetaResultSet rs)
+	protected SimpleTable readSimpleTable(Connection cn, DatabaseMetaData metaData, String catalog, String schema,
+			MetaResultSet rs)
 	{
 		try
 		{
@@ -395,12 +442,12 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		}
 	}
 
-	protected Table getTable(Connection cn, DatabaseMetaData metaData, String schema, String tableName)
+	protected Table getTable(Connection cn, DatabaseMetaData metaData, String catalog, String schema, String tableName)
 			throws DBMetaResolverException
 	{
 		boolean readonly = resolveTableReadonly(cn);
 
-		List<SimpleTable> simpleTables = getSimpleTables(cn, metaData, schema, tableName);
+		List<SimpleTable> simpleTables = getSimpleTables(cn, metaData, catalog, schema, tableName);
 
 		if (simpleTables == null || simpleTables.isEmpty())
 			throw new TableNotFoundException(tableName);
@@ -411,10 +458,10 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		table.setName(simpleTable.getName());
 		table.setType(simpleTable.getType());
 		table.setComment(simpleTable.getComment());
-		table.setColumns(getColumns(cn, metaData, schema, tableName, null));
-		table.setPrimaryKey(getPrimaryKey(cn, metaData, schema, tableName));
-		table.setUniqueKeys(getUniqueKeys(cn, metaData, schema, tableName));
-		table.setImportKeys(getImportKeys(cn, metaData, schema, tableName));
+		table.setColumns(getColumns(cn, metaData, catalog, schema, tableName, null));
+		table.setPrimaryKey(getPrimaryKey(cn, metaData, catalog, schema, tableName));
+		table.setUniqueKeys(getUniqueKeys(cn, metaData, catalog, schema, tableName));
+		table.setImportKeys(getImportKeys(cn, metaData, catalog, schema, tableName));
 		table.setReadonly(readonly);
 
 		table = postProcessTable(cn, metaData, schema, table);
@@ -447,13 +494,25 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		return table;
 	}
 
-	protected ResultSet getTableResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
-			String tableNamePattern, String[] tableTypes) throws SQLException
+	/**
+	 * 
+	 * @param cn
+	 * @param databaseMetaData
+	 * @param catalog
+	 * @param schema
+	 * @param tableNamePattern
+	 *            为{@code null}或空则查询全部
+	 * @param tableTypes
+	 * @return
+	 * @throws SQLException
+	 */
+	protected ResultSet getTableResulSet(Connection cn, DatabaseMetaData databaseMetaData, String catalog,
+			String schema, String tableNamePattern, String[] tableTypes) throws SQLException
 	{
 		if (tableNamePattern == null || tableNamePattern.isEmpty())
 			tableNamePattern = "%";
 
-		return databaseMetaData.getTables(cn.getCatalog(), schema, tableNamePattern, tableTypes);
+		return databaseMetaData.getTables(catalog, schema, tableNamePattern, tableTypes);
 	}
 
 	/**
@@ -467,14 +526,14 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	 * @return
 	 * @throws DBMetaResolverException
 	 */
-	protected Column[] getColumns(Connection cn, DatabaseMetaData metaData, String schema, String tableName,
-			Integer count) throws DBMetaResolverException
+	protected Column[] getColumns(Connection cn, DatabaseMetaData metaData, String catalog, String schema,
+			String tableName, Integer count) throws DBMetaResolverException
 	{
 		ResultSet rs = null;
 
 		try
 		{
-			rs = getColumnResulSet(cn, metaData, schema, tableName);
+			rs = getColumnResulSet(cn, metaData, catalog, schema, tableName);
 			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			List<Column> columns = new ArrayList<>();
@@ -603,10 +662,10 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		return column;
 	}
 
-	protected ResultSet getColumnResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
-			String tableName) throws SQLException
+	protected ResultSet getColumnResulSet(Connection cn, DatabaseMetaData databaseMetaData, String catalog,
+			String schema, String tableName) throws SQLException
 	{
-		return databaseMetaData.getColumns(cn.getCatalog(), schema, tableName, "%");
+		return databaseMetaData.getColumns(catalog, schema, tableName, "%");
 	}
 
 	/**
@@ -618,15 +677,15 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	 * @return 返回{@code null}表示无主键。
 	 * @throws DBMetaResolverException
 	 */
-	protected PrimaryKey getPrimaryKey(Connection cn, DatabaseMetaData metaData, String schema, String tableName)
-			throws DBMetaResolverException
+	protected PrimaryKey getPrimaryKey(Connection cn, DatabaseMetaData metaData, String catalog, String schema,
+			String tableName) throws DBMetaResolverException
 	{
 		PrimaryKey primaryKey = null;
 
 		ResultSet rs = null;
 		try
 		{
-			rs = getPrimaryKeyResulSet(cn, metaData, schema, tableName);
+			rs = getPrimaryKeyResulSet(cn, metaData, catalog, schema, tableName);
 			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			List<String> columnNames = new ArrayList<>();
@@ -672,8 +731,8 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 	 * @return 返回{@code null}表示无唯一键
 	 * @throws DBMetaResolverException
 	 */
-	protected UniqueKey[] getUniqueKeys(Connection cn, DatabaseMetaData metaData, String schema, String tableName)
-			throws DBMetaResolverException
+	protected UniqueKey[] getUniqueKeys(Connection cn, DatabaseMetaData metaData, String catalog, String schema,
+			String tableName) throws DBMetaResolverException
 	{
 		UniqueKey[] uniqueKeys = null;
 
@@ -684,7 +743,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 		try
 		{
-			rs = getUniqueKeyResulSet(cn, metaData, schema, tableName);
+			rs = getUniqueKeyResulSet(cn, metaData, catalog, schema, tableName);
 			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			while (rs.next())
@@ -735,8 +794,8 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		return uniqueKeys;
 	}
 
-	protected ImportKey[] getImportKeys(Connection cn, DatabaseMetaData metaData, String schema, String tableName)
-			throws DBMetaResolverException
+	protected ImportKey[] getImportKeys(Connection cn, DatabaseMetaData metaData, String catalog, String schema,
+			String tableName) throws DBMetaResolverException
 	{
 		ImportKey[] importKeys = null;
 
@@ -749,7 +808,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 		try
 		{
-			rs = getImportKeyResulSet(cn, metaData, schema, tableName);
+			rs = getImportKeyResulSet(cn, metaData, catalog, schema, tableName);
 			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			while (rs.next())
@@ -879,22 +938,22 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		}
 	}
 
-	protected ResultSet getPrimaryKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
-			String tableName) throws SQLException
+	protected ResultSet getPrimaryKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String catalog,
+			String schema, String tableName) throws SQLException
 	{
-		return databaseMetaData.getPrimaryKeys(cn.getCatalog(), schema, tableName);
+		return databaseMetaData.getPrimaryKeys(catalog, schema, tableName);
 	}
 
-	protected ResultSet getUniqueKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
-			String tableName) throws SQLException
+	protected ResultSet getUniqueKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String catalog,
+			String schema, String tableName) throws SQLException
 	{
-		return databaseMetaData.getIndexInfo(cn.getCatalog(), schema, tableName, true, false);
+		return databaseMetaData.getIndexInfo(catalog, schema, tableName, true, false);
 	}
 
-	protected ResultSet getImportKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String schema,
-			String tableName) throws SQLException
+	protected ResultSet getImportKeyResulSet(Connection cn, DatabaseMetaData databaseMetaData, String catalog,
+			String schema, String tableName) throws SQLException
 	{
-		return databaseMetaData.getImportedKeys(cn.getCatalog(), schema, tableName);
+		return databaseMetaData.getImportedKeys(catalog, schema, tableName);
 	}
 
 	protected ResultSet getDataTypeResultSet(Connection cn, DatabaseMetaData databaseMetaData) throws SQLException
@@ -902,7 +961,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		return databaseMetaData.getTypeInfo();
 	}
 
-	protected SimpleTable getRandomSimpleTable(Connection cn, DatabaseMetaData metaData, String schema)
+	protected SimpleTable getRandomSimpleTable(Connection cn, DatabaseMetaData metaData, String catalog, String schema)
 			throws DBMetaResolverException
 	{
 		SimpleTable simpleTable = null;
@@ -913,14 +972,14 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 		try
 		{
-			rs = getTableResulSet(cn, metaData, schema, null, tableTypes);
+			rs = getTableResulSet(cn, metaData, catalog, schema, null, tableTypes);
 			MetaResultSet mrs = MetaResultSet.valueOf(rs);
 
 			while (rs.next())
 			{
-				simpleTable = readSimpleTable(cn, metaData, schema, mrs);
+				simpleTable = readSimpleTable(cn, metaData, catalog, schema, mrs);
 
-				if (simpleTable != null)
+				if (simpleTable != null && isUserDataTable(cn, simpleTable))
 					return simpleTable;
 			}
 
@@ -948,67 +1007,54 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		}
 	}
 
+	/**
+	 * 获取当前连接的catalog。
+	 * 
+	 * @param cn
+	 * @return
+	 * @throws SQLException
+	 */
+	protected String getCatalog(Connection cn) throws DBMetaResolverException
+	{
+		try
+		{
+			return cn.getCatalog();
+		}
+		catch (SQLException e)
+		{
+			throw new DBMetaResolverException(e);
+		}
+	}
+
+	/**
+	 * 获取当前连接的schema。
+	 * 
+	 * @param cn
+	 * @param databaseMetaData
+	 * @return
+	 * @throws DBMetaResolverException
+	 */
 	protected String getSchema(Connection cn, DatabaseMetaData databaseMetaData) throws DBMetaResolverException
 	{
-		// 在JDBC4.0（JDK1.6）中需要将其设置为null，才符合DatabaseMetaData.getTables(...)等接口的参数要求
-		String schema = null;
+		String schema;
 
-		// JDBC4.1（JDK1.7）才有Connection.getSchema()接口，为了兼容性，本应用采用了JDBC4.0（JDK1.6）
-		// 这里为了能支持JDBC4.1的的驱动，先采用反射方式获取
-		if (GET_SCHEMA_METHOD_JDBC41 != null)
+		try
 		{
-			try
-			{
-				schema = (String) GET_SCHEMA_METHOD_JDBC41.invoke(cn, new Object[0]);
-			}
-			catch (Exception e)
-			{
-			}
+			@JDBCCompatiblity("JDBC4.1（JDK1.7）才有Connection.getSchema()接口，为了兼容JDBC4.0（JDK1.6），"
+					+ "所以这里捕获Throwable，避免出现底层java.lang.Error")
+			String mySchema = cn.getSchema();
+			schema = mySchema;
 		}
-
-		// 测试使用连接用户名是否可行
-		if (schema == null)
+		catch (Throwable e)
 		{
-			ResultSet rs = null;
+			LOGGER.warn("current schema will be set to null for error:", e);
 
-			try
-			{
-				String dbUserName = databaseMetaData.getUserName();
-				rs = getTableResulSet(cn, databaseMetaData, dbUserName, null, getTableTypes(cn, databaseMetaData));
-
-				if (rs.next())
-					schema = dbUserName;
-			}
-			catch (SQLException e)
-			{
-			}
-			finally
-			{
-				JdbcUtil.closeResultSet(rs);
-			}
+			@JDBCCompatiblity("在JDBC4.0（JDK1.6）中需要将其设置为null，才符合DatabaseMetaData.getTables(...)等接口的参数要求")
+			String mySchema = null;
+			schema = mySchema;
 		}
 
 		return schema;
-	}
-
-	protected static Method GET_SCHEMA_METHOD_JDBC41 = null;
-	static
-	{
-		Method[] methods = Connection.class.getMethods();
-
-		for (Method method : methods)
-		{
-			if ("getSchema".equals(method.getName()))
-			{
-				Class<?>[] parameterTypes = method.getParameterTypes();
-
-				if (parameterTypes == null || parameterTypes.length == 0)
-				{
-					GET_SCHEMA_METHOD_JDBC41 = method;
-					break;
-				}
-			}
-		}
 	}
 
 	protected static final Comparator<Column> COLUMN_SORT_COMPARATOR = new Comparator<Column>()
