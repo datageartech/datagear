@@ -1221,8 +1221,6 @@
 	chartSupport.treeRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
-		//echarts主题没找到tree的定义方式，先在这里直接设置
-		var chartTheme = (chart.theme() || {});
 		
 		options = chart.options($.extend(true,
 		{
@@ -1241,8 +1239,7 @@
 				{
 					position: "left",
 					verticalAlign: "middle",
-					align: "right",
-					color: chartTheme.color
+					align: "right"
                 },
                 leaves:
                 {
@@ -1258,7 +1255,6 @@
                 top: "12%",
                 bottom: "12%",
                 orient: "LR",
-                lineStyle: { color: chartTheme.axisScaleLineColor},
                 expandAndCollapse: true
 			}]
 		},
@@ -1272,6 +1268,93 @@
 	chartSupport.treeUpdate = function(chart, results, idSign, nameSign, parentSign, valueSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
+		
+		var mySeries = chartSupport.buildTreeNodeSeries(chart, results, idSign, nameSign, parentSign, valueSign);
+		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
+		
+		var options = { series: series };
+		chart.echartsOptions(options);
+	};
+	
+	//矩形树图
+	chartSupport.treemapRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			series: [{
+				name: "",
+				type: "treemap",
+				data: []
+			}]
+		},
+		options));
+		
+		chartSupport.initOptions(chart, options);
+		
+		chart.echartsInit(options, false);
+	};
+	
+	chartSupport.treemapUpdate = function(chart, results, idSign, nameSign, parentSign, valueSign)
+	{
+		var initOptions= chartSupport.initOptions(chart);
+		
+		var mySeries = chartSupport.buildTreeNodeSeries(chart, results, idSign, nameSign, parentSign, valueSign);
+		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
+		
+		var options = { series: series };
+		chart.echartsOptions(options);
+	};
+
+	//旭日图
+	
+	chartSupport.sunburstRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			series: [{
+				name: "",
+				type: "sunburst",
+				data: []
+			}]
+		},
+		options));
+		
+		chartSupport.initOptions(chart, options);
+		
+		chart.echartsInit(options, false);
+	};
+	
+	chartSupport.sunburstUpdate = function(chart, results, idSign, nameSign, parentSign, valueSign)
+	{
+		var initOptions= chartSupport.initOptions(chart);
+		
+		var mySeries = chartSupport.buildTreeNodeSeries(chart, results, idSign, nameSign, parentSign, valueSign);
+		var series = [ chartSupport.optionsSeries(initOptions, 0, mySeries) ];
+		
+		var options = { series: series };
+		chart.echartsOptions(options);
+	};
+	
+	chartSupport.buildTreeNodeSeries = function(chart, results, idSign, nameSign, parentSign, valueSign)
+	{
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var seriesName = "";
@@ -1301,9 +1384,7 @@
 				if(vp)
 				{
 					node.value = chart.resultRowCell(data[i], vp);
-					//标识节点值需要动态计算
-					if(node.value == null || node.value == 0)
-						node._evalValue = true;
+					chartSupport.treeNodeEvalValueMark(node);
 				}
 				
 				var added = false;
@@ -1319,63 +1400,16 @@
 				if(!added)
 					seriesData.push(node);
 			}
-			
-			seriesData = seriesData.concat(data);
 		}
 		
-		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData }) ];
-		
-		var options = { series: series };
-		chart.echartsOptions(options);
+		return { name: seriesName, data: seriesData };
 	};
 	
-	//矩形树图
-	chartSupport.treemapRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
+	chartSupport.treeNodeEvalValueMark = function(node)
 	{
-		var chartDataSet = chart.chartDataSetFirst();
-		//echarts主题没找到tree的定义方式，先在这里直接设置
-		var chartTheme = (chart.theme() || {});
-		
-		options = chart.options($.extend(true,
-		{
-			title: {
-		        text: chart.nameNonNull()
-		    },
-			tooltip:
-			{
-				trigger: "item"
-			},
-			series: [{
-				name: "",
-				type: "treemap",
-				data: [],
-				itemStyle:
-				{
-					borderWidth: 0.5,
-					borderColor: chartTheme.backgroundColor
-				},
-				breadcrumb:
-				{
-					itemStyle:
-					{
-						color: chartTheme.backgroundColor,
-						borderColor: chartTheme.borderColor,
-						shadowBlur: 0,
-						textStyle: { color: chartTheme.color }
-					}
-				}
-			}]
-		},
-		options));
-		
-		chartSupport.initOptions(chart, options);
-		
-		chart.echartsInit(options, false);
-	};
-	
-	chartSupport.treemapUpdate = function(chart, results, idSign, nameSign, parentSign, valueSign)
-	{
-		chartSupport.treeUpdate(chart, results, idSign, nameSign, parentSign, valueSign)
+		//标识节点值需要动态计算
+		if(node.value == null || node.value == 0)
+			node._evalValue = true;
 	};
 	
 	chartSupport.treeAppendNode = function(treeNode, node)

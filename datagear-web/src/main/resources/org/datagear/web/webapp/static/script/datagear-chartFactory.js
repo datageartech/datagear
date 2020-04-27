@@ -1073,6 +1073,63 @@
 					"borderWidth" : 1
 				}
 			},
+			"tree":
+			{
+				"label":
+				{
+					"color": chartTheme.color
+				},
+				"lineStyle": { "color": chartTheme.axisScaleLineColor },
+				"emphasis" :
+				{
+					"itemStyle" : {
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.axisColor,
+					}
+				}
+			},
+			"treemap":
+			{
+				"itemStyle" :
+				{
+					"borderWidth": 0.5,
+					"borderColor": chartTheme.backgroundColor
+				},
+				"emphasis" :
+				{
+					"itemStyle" : {
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.axisColor,
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.axisColor
+					}
+				},
+				"breadcrumb":
+				{
+					"itemStyle":
+					{
+						"color": chartTheme.backgroundColor,
+						"borderColor": chartTheme.borderColor,
+						"shadowBlur": 0,
+						"textStyle": { color: chartTheme.color }
+					}
+				}
+			},
+			"sunburst":
+			{
+				"emphasis" :
+				{
+					"itemStyle" : {
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.axisColor,
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.axisColor
+					}
+				}
+			},
 			"graph" : {
 				"itemStyle" : {
 					"borderWidth" : 0,
