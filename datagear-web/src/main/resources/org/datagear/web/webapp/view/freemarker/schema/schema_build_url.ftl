@@ -97,7 +97,7 @@ preview 是否是预览请求，允许为null
 		}
 		
 		if(customBuilders.length <= 0)
-			customBuilders = (buildInBuilders.length <= 4 ? buildInBuilders : buildInBuilders.slice(0, 4));
+			customBuilders = (buildInBuilders.length <= 3 ? buildInBuilders : buildInBuilders.slice(0, 3));
 		
 		if(customBuilders.length > 0)
 		{
