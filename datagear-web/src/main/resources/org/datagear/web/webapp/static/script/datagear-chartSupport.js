@@ -1455,6 +1455,140 @@
 		return false;
 	};
 	
+	//桑基图
+
+	chartSupport.sankeyRender = function(chart, nameSign, nameTargetSign, valueSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			series: [{
+				name: "",
+				type: "sankey",
+				data: [],
+				links: [],
+				left: "16%",
+                right: "16%",
+                top: "12%",
+                bottom: "12%",
+		        focusNodeAdjacency: 'allEdges'
+			}]
+		},
+		options));
+		
+		//自适应条目宽度和间隔
+		var chartEle = chart.elementJquery();
+		var orient = options.series[0].orient;
+		
+		var nodeWidth = options.series[0].nodeWidth;
+		if(nodeWidth == null)
+		{
+			var totalWidth = (orient == "vertical" ? chartEle.height() : chartEle.width());
+			nodeWidth = parseInt(totalWidth * 5/100);
+			nodeWidth = (nodeWidth < 4 ? 4: nodeWidth);
+			options.series[0].nodeWidth = nodeWidth;
+		}
+		
+		var nodeGap = options.series[0].nodeGap;
+		if(nodeGap == null)
+		{
+			var totalWidth = (orient == "vertical" ? chartEle.width() : chartEle.height());
+			nodeGap = parseInt(totalWidth * 2/100);
+			nodeGap = (nodeWidth < 1 ? 1: nodeGap);
+			options.series[0].nodeGap = nodeGap;
+		}
+		
+		chartSupport.initOptions(chart, options);
+		
+		chart.echartsInit(options, false);
+	};
+	
+	chartSupport.sankeyUpdate = function(chart, results, nameSign, nameTargetSign, valueSign)
+	{
+		var initOptions= chartSupport.initOptions(chart);
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
+		var seriesName = "";
+		var seriesLinks = [];
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var result = chart.resultAt(results, i);
+			
+			if(i == 0)
+				seriesName = chart.dataSetName(chartDataSet);
+			
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+			var tp = chart.dataSetPropertyOfSign(chartDataSet, nameTargetSign);
+			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+			
+			var data = chart.resultDatas(result);
+			
+			for(var i=0; i<data.length; i++)
+			{
+				var link = {};
+				link.source = chart.resultRowCell(data[i], np);
+				link.target = chart.resultRowCell(data[i], tp);
+				link.value = chart.resultRowCell(data[i], vp);
+				
+				seriesLinks.push(link);
+			}
+		}
+		
+		var seriesData = chartSupport.getDatasFromLinks(seriesLinks);
+		
+		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData, links: seriesLinks }) ];
+		
+		var options = { series: series };
+		chart.echartsOptions(options);
+	};
+	
+	//由{source: ..., target: ...}关系数组提取为{name:...}数组。
+	chartSupport.getDatasFromLinks = function(links)
+	{
+		var datas = [];
+		
+		for(var i = 0; i<links.length; i++)
+		{
+			var link = links[i];
+			
+			if(!chartSupport.arrayContainsName(datas, link.source))
+				datas.push({ name: link.source });
+		}
+
+		for(var i = 0; i<links.length; i++)
+		{
+			var link = links[i];
+			
+			if(!chartSupport.arrayContainsName(datas, link.target))
+				datas.push({ name: link.target });
+		}
+		
+		return datas;
+	};
+	
+	chartSupport.arrayContainsName = function(array, name)
+	{
+		for(var i=0; i<array.length; i++)
+		{
+			var myName = (typeof(array[i].name) != undefined ? array[i].name : array[i]);
+			
+			if(name == myName)
+				return true;
+		}
+		
+		return false;
+	};
+	
 	//标签卡
 	
 	chartSupport.labelRender = function(chart, coordSign, valueSign, options)

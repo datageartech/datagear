@@ -1014,14 +1014,28 @@
 				}
 			},
 			"sankey" : {
+				"label":
+				{
+					"color": chartTheme.color
+				},
 				"itemStyle" : {
 					"borderWidth" : 0,
 					"borderColor" : chartTheme.borderColor
+				},
+				"lineStyle":
+				{
+					"color": chartTheme.axisScaleLineColor,
+					"opacity": 0.7
 				},
 				"emphasis" : {
 					"itemStyle" : {
 						"borderWidth" : 0,
 						"borderColor" : chartTheme.axisColor
+					},
+					"lineStyle":
+					{
+						"color": chartTheme.borderColor,
+						"opacity": 1
 					}
 				}
 			},
@@ -1119,9 +1133,15 @@
 			},
 			"sunburst":
 			{
+				"itemStyle" :
+				{
+					"borderWidth" : 1,
+					"borderColor" : chartTheme.borderColor
+				},
 				"emphasis" :
 				{
-					"itemStyle" : {
+					"itemStyle" :
+					{
 						"shadowBlur" : 10,
 						"shadowOffsetX" : 0,
 						"shadowColor" : chartTheme.axisColor,
