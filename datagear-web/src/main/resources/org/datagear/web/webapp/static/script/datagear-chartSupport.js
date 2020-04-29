@@ -97,9 +97,10 @@
 	 * 为源数组追加不重复的元素。
 	 * 
 	 * @param sourceArray
-	 * @param append 追加元素、数组
+	 * @param append 追加元素、数组，可以是基本类型、对象类型
+	 * @param distinctPropertyName 当是对象类型时，用于指定判断重复的属性名
 	 */
-	chartSupport.appendDistinct = function(sourceArray, append)
+	chartSupport.appendDistinct = function(sourceArray, append, distinctPropertyName)
 	{
 		if(append == undefined)
 			return sourceArray;
@@ -108,7 +109,21 @@
 		
 		for(var i=0; i<append.length; i++)
 		{
-			if($.inArray(append[i], sourceArray) < 0)
+			var contains = false;
+			
+			for(var j=0; j<sourceArray.length; j++)
+			{
+				var sv = (distinctPropertyName != undefined ? sourceArray[j][distinctPropertyName] : sourceArray[j]);
+				var av = (distinctPropertyName != undefined ? append[i][distinctPropertyName] : append[i]);
+				
+				if(sv == av)
+				{
+					contains = true;
+					break;
+				}
+			}
+			
+			if(!contains)
 				sourceArray.push(append[i]);
 		}
 		
@@ -1457,7 +1472,7 @@
 	
 	//桑基图
 
-	chartSupport.sankeyRender = function(chart, nameSign, nameTargetSign, valueSign, options)
+	chartSupport.sankeyRender = function(chart, sourceNameSign, sourceValueSign, targetNameSign, targetValueSign, valueSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
 		
@@ -1473,6 +1488,7 @@
 			series: [{
 				name: "",
 				type: "sankey",
+		        layout: 'none',
 				data: [],
 				links: [],
 				left: "16%",
@@ -1511,12 +1527,13 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.sankeyUpdate = function(chart, results, nameSign, nameTargetSign, valueSign)
+	chartSupport.sankeyUpdate = function(chart, results, sourceNameSign, sourceValueSign, targetNameSign, targetValueSign, valueSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var seriesName = "";
+		var seriesData = [];
 		var seriesLinks = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -1527,66 +1544,39 @@
 			if(i == 0)
 				seriesName = chart.dataSetName(chartDataSet);
 			
-			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
-			var tp = chart.dataSetPropertyOfSign(chartDataSet, nameTargetSign);
+			var snp = chart.dataSetPropertyOfSign(chartDataSet, sourceNameSign);
+			var svp = chart.dataSetPropertyOfSign(chartDataSet, sourceValueSign);
+			var tnp = chart.dataSetPropertyOfSign(chartDataSet, targetNameSign);
+			var tvp = chart.dataSetPropertyOfSign(chartDataSet, targetValueSign);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 			
 			var data = chart.resultDatas(result);
 			
 			for(var i=0; i<data.length; i++)
 			{
+				var sd = { name: chart.resultRowCell(data[i], snp) };
+				var td = { name: chart.resultRowCell(data[i], tnp) };
+				
+				if(svp)
+					sd.value = chart.resultRowCell(data[i], svp);
+				if(tvp)
+					td.value = chart.resultRowCell(data[i], tvp);
+				
 				var link = {};
-				link.source = chart.resultRowCell(data[i], np);
-				link.target = chart.resultRowCell(data[i], tp);
+				link.source = sd.name;
+				link.target = td.name;
 				link.value = chart.resultRowCell(data[i], vp);
 				
+				chartSupport.appendDistinct(seriesData, sd, "name");
+				chartSupport.appendDistinct(seriesData, td, "name");
 				seriesLinks.push(link);
 			}
 		}
-		
-		var seriesData = chartSupport.getDatasFromLinks(seriesLinks);
 		
 		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData, links: seriesLinks }) ];
 		
 		var options = { series: series };
 		chart.echartsOptions(options);
-	};
-	
-	//由{source: ..., target: ...}关系数组提取为{name:...}数组。
-	chartSupport.getDatasFromLinks = function(links)
-	{
-		var datas = [];
-		
-		for(var i = 0; i<links.length; i++)
-		{
-			var link = links[i];
-			
-			if(!chartSupport.arrayContainsName(datas, link.source))
-				datas.push({ name: link.source });
-		}
-
-		for(var i = 0; i<links.length; i++)
-		{
-			var link = links[i];
-			
-			if(!chartSupport.arrayContainsName(datas, link.target))
-				datas.push({ name: link.target });
-		}
-		
-		return datas;
-	};
-	
-	chartSupport.arrayContainsName = function(array, name)
-	{
-		for(var i=0; i<array.length; i++)
-		{
-			var myName = (typeof(array[i].name) != undefined ? array[i].name : array[i]);
-			
-			if(name == myName)
-				return true;
-		}
-		
-		return false;
 	};
 	
 	//标签卡

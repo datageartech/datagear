@@ -1136,17 +1136,15 @@
 				"itemStyle" :
 				{
 					"borderWidth" : 1,
-					"borderColor" : chartTheme.borderColor
+					"borderColor" : chartTheme.backgroundColor
 				},
 				"emphasis" :
 				{
 					"itemStyle" :
 					{
 						"shadowBlur" : 10,
-						"shadowOffsetX" : 0,
 						"shadowColor" : chartTheme.axisColor,
-						"borderWidth" : 0,
-						"borderColor" : chartTheme.axisColor
+						"borderColor" : chartTheme.borderColor
 					}
 				}
 			},
