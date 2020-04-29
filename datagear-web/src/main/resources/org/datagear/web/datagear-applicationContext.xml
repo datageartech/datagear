@@ -160,7 +160,7 @@
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="echarts" />
-					<property name="content" value="&lt;script type='text/javascript' res-name='echarts' src='$CONTEXTPATH/static/script/echarts-4.6.0/echarts.js?v=$VERSION'&gt;&lt;/script&gt;" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='echarts' src='$CONTEXTPATH/static/script/echarts-4.7.0/echarts.min.js?v=$VERSION'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="chartFactory" />
