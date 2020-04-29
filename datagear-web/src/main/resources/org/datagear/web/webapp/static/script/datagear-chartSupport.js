@@ -1579,6 +1579,128 @@
 		chart.echartsOptions(options);
 	};
 	
+	//词云图
+	
+	chartSupport.wordcloudRender = function(chart, nameSign, valueSign, options)
+	{
+		//不支持在echarts主题中设置样式，只能在这里设置
+		var chartTheme = (chart.theme() || {});
+		
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			//自定义由低到高值域颜色映射
+			colorRange: chartTheme.graphRangeColors,
+			//自定义由低到高值渐变色数组，如果不设置，将由colorRange自动计算
+			colorGradients: undefined,
+			series:
+			[
+				{
+					type: "wordCloud",
+					shape: "circle",
+					data: [],
+					"textStyle":
+					{
+						"normal":{},
+						"emphasis":
+						{
+							"shadowBlur" : 10,
+							"shadowColor" : chartTheme.axisColor,
+						}
+					}
+				}
+			]
+		},
+		options));
+		
+		var chartEle = chart.elementJquery();
+		
+		//自适应字体大小
+		var sizeRange = options.series[0].sizeRange;
+		if(sizeRange == null)
+		{
+			var chartSize = Math.min(chartEle.height(), chartEle.width());
+			sizeRange = [parseInt(chartSize * 1/40), parseInt(chartSize * 1/8)];
+			sizeRange[0] = (sizeRange[0] < 6 ? 6: sizeRange[0]);
+			options.series[0].sizeRange = sizeRange;
+		}
+		
+		//计算渐变色
+		var colorRange = options.colorRange;
+		if(colorRange != null)
+		{
+			var colorGradients = [];
+			for(var i=0; i<colorRange.length; i++)
+			{
+				var fromColor = colorRange[i];
+				var toColor = ((i+1) < colorRange.length ? colorRange[i+1] : null);
+				
+				if(!toColor)
+					break;
+				
+				colorGradients = colorGradients.concat(chartFactory.evalGradientColors(fromColor, toColor, 5));
+			}
+			
+			options.colorGradients = colorGradients;
+		}
+		
+		chartSupport.initOptions(chart, options);
+		
+		chart.echartsInit(options, false);
+	};
+	
+	chartSupport.wordcloudUpdate = function(chart, results, nameSign, valueSign)
+	{
+		var initOptions= chartSupport.initOptions(chart);
+		var chartDataSets = chart.chartDataSetsNonNull();
+
+		var seriesName = "";
+		var seriesData = [];
+		var min = undefined, max=undefined;
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var result = chart.resultAt(results, i);
+
+			var data = chart.resultNameValueObjects(result, chart.dataSetPropertyOfSign(chartDataSet, nameSign),
+					chart.dataSetPropertyOfSign(chartDataSet, valueSign));
+			
+			for(var i=0; i<data.length; i++)
+			{
+				min = (min == undefined ? data[i].value : Math.min(min, data[i].value));
+				max = (max == undefined ? data[i].value : Math.max(max, data[i].value));
+			}
+			
+			seriesData = seriesData.concat(data);
+		}
+		
+		if(min >= max)
+			min = max - 1;
+		
+		//映射颜色值
+		var colorGradients = initOptions.colorGradients;
+		if(colorGradients)
+		{
+			for(var i=0; i<seriesData.length; i++)
+			{
+				var colorIndex = parseInt((seriesData[i].value-min)/(max-min) * (colorGradients.length-1));
+				seriesData[i].textStyle = { "normal":{ "color": colorGradients[colorIndex] } };
+			}
+		}
+		
+		var series = [ chartSupport.optionsSeries(initOptions, 0, {name: seriesName, data: seriesData}) ];
+		
+		var options = { series: series };
+		chart.echartsOptions(options);
+	};
+	
 	//标签卡
 	
 	chartSupport.labelRender = function(chart, coordSign, valueSign, options)

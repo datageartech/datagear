@@ -163,6 +163,10 @@
 					<property name="content" value="&lt;script type='text/javascript' res-name='echarts' src='$CONTEXTPATH/static/script/echarts-4.7.0/echarts.min.js?v=$VERSION'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
+					<property name="name" value="echarts-wordcloud" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='echarts-wordcloud' src='$CONTEXTPATH/static/script/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js?v=$VERSION'&gt;&lt;/script&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="chartFactory" />
 					<property name="content" value="&lt;script type='text/javascript' res-name='chartFactory' src='$CONTEXTPATH/static/script/datagear-chartFactory.js?v=$VERSION'&gt;&lt;/script&gt;" />
 				</bean>

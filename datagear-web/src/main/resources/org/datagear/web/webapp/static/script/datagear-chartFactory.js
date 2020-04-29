@@ -1637,9 +1637,9 @@
 		{
 			var color = {};
 			
-			color.r = start.r + (end.r - start.r)/count*i;
-			color.g = start.g + (end.g - start.g)/count*i;
-			color.b = start.b + (end.b - start.b)/count*i;
+			color.r = parseInt(start.r + (end.r - start.r)/count*i);
+			color.g = parseInt(start.g + (end.g - start.g)/count*i);
+			color.b = parseInt(start.b + (end.b - start.b)/count*i);
 			
 			if(rgb)
 				color = "rgb("+color.r+","+color.g+","+color.b+")";
