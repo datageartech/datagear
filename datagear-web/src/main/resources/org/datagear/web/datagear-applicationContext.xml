@@ -156,7 +156,7 @@
 			<list>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="jquery" />
-					<property name="content" value="&lt;script type='text/javascript' res-name='jquery' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.js?v=$VERSION'&gt;&lt;/script&gt;" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='jquery' src='$CONTEXTPATH/static/script/jquery/jquery-1.12.4.min.js?v=$VERSION'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="echarts" />

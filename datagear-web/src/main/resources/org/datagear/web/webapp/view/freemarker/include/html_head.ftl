@@ -19,18 +19,18 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/css/common.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link id="css_common" href="${contextPath}/static/theme/<@spring.theme code='theme' />/common.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 
-<script src="${contextPath}/static/script/jquery/jquery-1.12.4.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/jquery-ui-1.12.1/jquery-ui.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/jquery/jquery-1.12.4.min.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/jquery-ui-1.12.1/jquery-ui.min.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/jquery.layout-1.4.0/jquery.layout.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/jstree-3.3.7/jstree.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/jstree-3.3.7/jstree.min.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/DataTables-1.10.18/datatables.min.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/jquery.form-3.51.0/jquery.form.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/jquery.form-3.51.0/jquery.form.min.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/jQuery-File-Upload-9.21.0/jquery.iframe-transport.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/jQuery-File-Upload-9.21.0/jquery.fileupload.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/jquery.cookie-1.4.1/jquery.cookie.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/jquery-validation-1.17.0/jquery.validate.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/jquery-validation-1.17.0/additional-methods.js?v=${_hh_Version}" type="text/javascript"></script>
-<script src="${contextPath}/static/script/jquery.steps-1.1.0/jquery.steps.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/jquery-validation-1.17.0/jquery.validate.min.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/jquery-validation-1.17.0/additional-methods.min.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/jquery.steps-1.1.0/jquery.steps.min.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/textarea-helper-0.3.1/textarea-helper.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/ace.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/mode-sql.js?v=${_hh_Version}" type="text/javascript"></script>
