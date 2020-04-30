@@ -76,7 +76,18 @@ dataExchange_js.ftl
 		if(!query)
 			return "";
 		
-		return $.toValidFileName(po.resolveTableName(query)) + (suffix ? suffix : "");
+		var tableName = po.resolveTableName(query);
+		
+		if(!tableName)
+		{
+			if(!po.dftExportFileNameSeq)
+				po.dftExportFileNameSeq = 1;
+			
+			tableName = po.dftExportFileNameSeq+"";
+			po.dftExportFileNameSeq += 1;
+		}
+		
+		return $.toValidFileName(tableName) + (suffix ? suffix : "");
 	};
 	
 	po.resolveTableName = function(query)
@@ -128,7 +139,7 @@ dataExchange_js.ftl
 					data = "";
 				
 				return "<input type='hidden' name='subDataExchangeIds' value='"+$.escapeHtml(row.subDataExchangeId)+"' />"
-						+ "<input type='text' name='queries' value='"+$.escapeHtml(data)+"' class='query-input input-in-table ui-widget ui-widget-content' style='width:90%' />";
+						+ "<textarea name='queries' class='query-input input-in-table ui-widget ui-widget-content' style='width:90%'>"+$.escapeHtml(data)+"</textarea>";
 			},
 			defaultContent: "",
 			width : "50%",

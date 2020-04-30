@@ -120,13 +120,12 @@ Schema schema 数据库，不允许为null
 {
 	po.element(".binaryFormatSetButtonHex").attr("value", "0x"+"$"+"{Hex}");
 	
-	po.toExportFileNameSuper = po.toExportFileName;
-	
 	po.postBuildSubDataExchange = function(subDataExchange)
 	{
-		subDataExchange.tableName = po.toExportFileNameSuper(subDataExchange.query);
+		subDataExchange.tableName = po.resolveTableName(subDataExchange.query);
 	};
-	
+
+	po.toExportFileNameSuper = po.toExportFileName;
 	po.toExportFileName = function(query)
 	{
 		return po.toExportFileNameSuper(query, ".json");
