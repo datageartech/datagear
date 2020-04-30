@@ -63,6 +63,7 @@ readonly 是否只读操作，允许为null
 							<div class="operation-result">
 								<button type="button" class="sql-result-more-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
 								<button type="button" class="sql-result-refresh-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
+								<button type="button" class="sql-result-export-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.exportSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-ne"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.exportSqlResult' /></button>
 							</div>
 						</div>
 						<div class="sql-result-table-wrapper minor-dataTable">
@@ -190,6 +191,19 @@ readonly 是否只读操作，允许为null
 	{
 		po.sqlPreviewOptions.startRow = 1;
 		po.sqlPreview();
+	});
+
+	po.element(".sql-result-export-button").click(function()
+	{
+		var schemaId = schemaId = po.element("input[name='schemaConnectionFactory.schema.id']").val();
+		var sql = po.sqlEditor.getValue();
+		
+		if(!schemaId || !sql)
+			return;
+		
+		var options = {data: {"initSqls": sql}};
+		$.setGridPageHeightOption(options);
+		po.open("${contextPath}/dataexchange/"+schemaId+"/export", options);
 	});
 	
 	po.renderRowNumberColumn = function(data, type, row, meta)
