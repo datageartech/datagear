@@ -43,6 +43,8 @@ public abstract class AbstractController
 
 	public static final String CONTENT_TYPE_HTML = "text/html;";
 
+	public static final String CONTENT_TYPE_CSS = "text/css;";
+
 	public static final String KEY_TITLE_MESSAGE_KEY = "titleMessageKey";
 
 	public static final String KEY_FORM_ACTION = "formAction";

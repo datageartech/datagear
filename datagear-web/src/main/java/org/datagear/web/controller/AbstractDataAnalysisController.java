@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
@@ -71,12 +72,29 @@ public class AbstractDataAnalysisController extends AbstractController
 		return RenderStyle.LIGHT;
 	}
 
-	protected HtmlRenderContext createHtmlRenderContext(HttpServletRequest request, WebContext webContext, Writer out)
+	protected HtmlRenderContext createHtmlRenderContext(HttpServletRequest request, WebContext webContext,
+			RenderStyle renderStyle, Writer out)
 	{
 		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(webContext, out);
-		HtmlRenderAttributes.setRenderStyle(renderContext, resolveRenderStyle(request));
+		HtmlRenderAttributes.setRenderStyle(renderContext, renderStyle);
 
 		return renderContext;
+	}
+
+	protected void setDashboardThemeAttribute(HttpSession session, DashboardTheme theme)
+	{
+		session.setAttribute(AbstractDataAnalysisController.class.getSimpleName(), theme);
+	}
+
+	/**
+	 * 获取{@linkplain DashboardTheme}，没有则返回{@code null}。
+	 * 
+	 * @param session
+	 * @return
+	 */
+	protected DashboardTheme getDashboardThemeAttribute(HttpSession session)
+	{
+		return (DashboardTheme) session.getAttribute(AbstractDataAnalysisController.class.getSimpleName());
 	}
 
 	/**

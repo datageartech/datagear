@@ -22,7 +22,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
@@ -389,10 +391,15 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		Writer out = response.getWriter();
 
-		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), out);
+		RenderStyle renderStyle = resolveRenderStyle(request);
+		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), renderStyle,
+				out);
+		DashboardTheme dashboardTheme = getChartShowHtmlTplDashboardWidgetHtmlRenderer()
+				.inflateDashboardTheme(renderContext, renderStyle);
 		AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler(
 				getMessage(request, "chart.show.htmlTitlePrefix", getMessage(request, "app.name")));
 		HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+		setDashboardThemeAttribute(request.getSession(), dashboardTheme);
 
 		HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 

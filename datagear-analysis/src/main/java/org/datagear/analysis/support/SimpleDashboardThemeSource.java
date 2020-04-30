@@ -24,8 +24,8 @@ import org.datagear.analysis.Theme;
  */
 public class SimpleDashboardThemeSource implements DashboardThemeSource
 {
-	public static final DashboardTheme THEME_LIGHT = new DashboardTheme("#333", "#FFF", "#C5C5C5",
-			new ChartTheme("#333", "transparent", "#ADADAD", "#333", "#666", "#888", "#CFCFCF",
+	public static final DashboardTheme THEME_LIGHT = new DashboardTheme("#333", "#FFF", "#F5F5F5",
+			new ChartTheme("#333", "transparent", "#F5F5F5", "#333", "#666", "#888", "#CFCFCF",
 					new String[] { "#2EC7C9", "#B6A2DE", "#FFB980", "#97B552", "#D87A80", "#8D98B3", "#E5CF0D",
 							"#5AB1EF", "#95706D", "#DC69AA" },
 					new String[] { "#58A52D", "#FFD700", "#FF4500" }, new Theme("#333", "#DDD", "#C5C5C5"),

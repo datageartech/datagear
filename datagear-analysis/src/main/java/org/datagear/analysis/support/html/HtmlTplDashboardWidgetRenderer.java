@@ -507,6 +507,52 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
+	 * 设置必要的{@linkplain RenderStyle}。
+	 * <p>
+	 * 如果已设置，则返回；否则，设置默认并返回。
+	 * </p>
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public RenderStyle inflateRenderStyle(HtmlRenderContext renderContext)
+	{
+		RenderStyle renderStyle = HtmlRenderAttributes.getRenderStyle(renderContext);
+
+		if (renderStyle == null)
+		{
+			renderStyle = RenderStyle.LIGHT;
+			HtmlRenderAttributes.setRenderStyle(renderContext, renderStyle);
+		}
+
+		return renderStyle;
+	}
+
+	/**
+	 * 设置必要的{@linkplain DashboardTheme}。
+	 * <p>
+	 * 如果已设置，则返回；否则，设置默认并返回。
+	 * </p>
+	 * 
+	 * @param renderContext
+	 * @param renderStyle
+	 */
+	public DashboardTheme inflateDashboardTheme(HtmlRenderContext renderContext, RenderStyle renderStyle)
+	{
+		DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
+
+		if (dashboardTheme == null)
+		{
+			dashboardTheme = getDashboardTheme(renderStyle);
+			HtmlRenderAttributes.setDashboardTheme(renderContext, dashboardTheme);
+		}
+
+		HtmlRenderAttributes.setChartTheme(renderContext, dashboardTheme.getChartTheme());
+
+		return dashboardTheme;
+	}
+
+	/**
 	 * 渲染{@linkplain Dashboard}。
 	 * 
 	 * @param renderContext
@@ -519,7 +565,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 			throws RenderException
 	{
 		RenderStyle renderStyle = inflateRenderStyle(renderContext);
-		inflateDashboardAndChartTheme(renderContext, renderStyle);
+		inflateDashboardTheme(renderContext, renderStyle);
 
 		HtmlTplDashboard dashboard = createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -623,46 +669,15 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		return getTemplateDashboardWidgetResManager().getTemplateWriter(dashboardWidget, template);
 	}
 
-	/**
-	 * 设置必要的{@linkplain RenderStyle}。
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	protected RenderStyle inflateRenderStyle(HtmlRenderContext renderContext)
+	protected DashboardTheme getDashboardTheme(RenderStyle renderStyle)
 	{
-		RenderStyle renderStyle = HtmlRenderAttributes.getRenderStyle(renderContext);
-
-		if (renderStyle == null)
-		{
-			renderStyle = RenderStyle.LIGHT;
-			HtmlRenderAttributes.setRenderStyle(renderContext, renderStyle);
-		}
-
-		return renderStyle;
-	}
-
-	/**
-	 * 设置必要的{@linkplain DashboardTheme}和{@linkplain ChartTheme}。
-	 * 
-	 * @param renderContext
-	 * @param renderStyle
-	 */
-	protected void inflateDashboardAndChartTheme(HtmlRenderContext renderContext, RenderStyle renderStyle)
-	{
-		DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
+		DashboardTheme dashboardTheme = (renderStyle == null ? null
+				: this.dashboardThemeSource.getDashboardTheme(renderStyle));
 
 		if (dashboardTheme == null)
-		{
-			dashboardTheme = this.dashboardThemeSource.getDashboardTheme(renderStyle);
+			dashboardTheme = this.dashboardThemeSource.getDashboardTheme();
 
-			if (dashboardTheme == null)
-				dashboardTheme = this.dashboardThemeSource.getDashboardTheme();
-
-			HtmlRenderAttributes.setDashboardTheme(renderContext, dashboardTheme);
-		}
-
-		HtmlRenderAttributes.setChartTheme(renderContext, dashboardTheme.getChartTheme());
+		return dashboardTheme;
 	}
 
 	/**

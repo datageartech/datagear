@@ -1701,94 +1701,6 @@
 		chart.echartsOptions(options);
 	};
 	
-	//标签卡
-	
-	chartSupport.labelRender = function(chart, coordSign, valueSign, options)
-	{
-		options = chart.options($.extend(true,
-		{
-			valueFirst: false,    //是否标签值在前
-			showName: true        //是否绘制标签名
-		},
-		options));
-		
-		chartSupport.initOptions(chart, options);
-	};
-	
-	chartSupport.labelUpdate = function(chart, results, coordSign, valueSign)
-	{
-		var options = chartSupport.initOptions(chart);
-		var valueFirst = options.valueFirst;
-		var showName = options.showName;
-		options = chart.optionsModified(options);
-		var clear = (valueFirst != options.valueFirst || showName != options.showName);
-		
-		var chartDataSets = chart.chartDataSetsNonNull();
-		
-		var $parent = chart.elementJquery();
-		
-		if(clear)
-			$(".dg-chart-label", $parent).empty();
-		else
-			$(".dg-chart-label", $parent).addClass("dg-chart-label-pending");
-		
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
-			var result = chart.resultAt(results, i);
-			
-			var cps = chart.dataSetPropertiesOfSign(chartDataSet, coordSign);
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
-			var cv = (cps.length > 0 ? chart.resultRowArrays(result, cps) : [] );
-			var vv = chart.resultRowArrays(result, vps);
-			
-			for(var j=0; j<vv.length; j++)
-			{
-				var vvj = vv[j];
-				
-				for(var k=0; k<vvj.length; k++)
-				{
-					var cssName = "dg-chart-label-"+i+"-"+j+"-"+k;
-					var name = (cv.length > j && cv[j].length > k ? cv[j][k] : chart.dataSetPropertyLabel(vps[k]));
-					var value = vv[j][k];
-					
-					var $label = $("."+ cssName, $parent);
-					if($label.length == 0)
-						$label = $("<div class='dg-chart-label dg-chart-label-"+i+" dg-chart-label-"+i+"-"+j+" "+cssName+"'></div>").appendTo($parent);
-					else
-						$label.removeClass("dg-chart-label-pending");
-					
-					var $labelName = $(".label-name", $label);
-					var $labelValue = $(".label-value", $label);
-					
-					if(options.showName)
-					{
-						if(options.valueFirst && $labelValue.length == 0)
-							$labelValue = $("<div class='label-value'></div>").appendTo($label);
-						
-						if($labelName.length == 0)
-							$labelName = $("<div class='label-name'></div>").appendTo($label);
-						
-						if(!options.valueFirst && $labelValue.length == 0)
-							$labelValue = $("<div class='label-value'></div>").appendTo($label);
-					}
-					else
-					{
-						if($labelValue.length == 0)
-							$labelValue = $("<div class='label-value'></div>").appendTo($label);
-					}
-					
-					if(options.showName)
-						$labelName.html(name);
-					$labelValue.html(value);
-				}
-			}
-		}
-		
-		$(".dg-chart-label-pending", $parent).remove();
-	};
-	
 	//表格
 	
 	chartSupport.tableRender = function(chart, columnSign, options)
@@ -1797,19 +1709,6 @@
 		var cps = chart.dataSetPropertiesOfSign(chartDataSet, columnSign);
 		if(!cps || cps.length == 0)
 			cps =(chartDataSet && chartDataSet.dataSet ? (chartDataSet.dataSet.properties || []) : []);
-		
-		var chartEle = chart.elementJquery();
-		
-		var table = $(">table", chartEle);
-		if(table.length == 0)
-			table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartEle);
-		
-		var tableId = table.attr("id");
-		if(!tableId)
-		{
-			tableId = chart.id+"-table";
-			table.attr("id", tableId);
-		}
 		
 		var columns = [];
 		
@@ -1827,8 +1726,13 @@
 			columns.push(column);
 		}
 		
+		var chartEle = chart.elementJquery();
+		chartEle.addClass("dg-chart-table");
+		
 		options = chart.options($.extend(true,
 		{
+			//自定义图表标题设置项
+			"title": { "show": true },
 			"columns" : columns,
 			"data" : [],
 			"scrollX": true,
@@ -1848,14 +1752,22 @@
 		},
 		options));
 		
+		if(!options.title || !options.title.show)
+			chartEle.addClass("dg-hide-title");
+		
+		var chartTitle = $("<div class='dg-chart-table-title' />").html(chart.nameNonNull()).appendTo(chartEle);
+		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(chartEle);
+		var table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartContent);
+		var tableId = chart.id+"-table";
+		table.attr("id", tableId);
+		
 		table.dataTable(options);
 		
 		var dataTable = table.DataTable();
 		var tableHeader = $(dataTable.table().header()).closest(".dataTables_scrollHead");
 		var tableBody = $(dataTable.table().body()).closest(".dataTables_scrollBody");
 		var tableToolbar = $(dataTable.table().body()).closest(".dataTables_scrollBody");
-		tableBody.css("height", chartEle.height() - tableHeader.outerHeight());
-
+		tableBody.css("height", chartContent.height() - tableHeader.outerHeight());
 		
 		chart.extValue("tableId", tableId);
 		chartSupport.initOptions(chart, options);
@@ -1910,6 +1822,97 @@
 		
 		if(!notDraw)
 			dataTable.draw();
+	};
+
+	//标签卡
+	
+	chartSupport.labelRender = function(chart, coordSign, valueSign, options)
+	{
+		var chartEle = chart.elementJquery();
+		chartEle.addClass("dg-chart-label");
+		
+		options = chart.options($.extend(true,
+		{
+			valueFirst: false,    //是否标签值在前
+			showName: true        //是否绘制标签名
+		},
+		options));
+		
+		chartSupport.initOptions(chart, options);
+	};
+	
+	chartSupport.labelUpdate = function(chart, results, coordSign, valueSign)
+	{
+		var options = chartSupport.initOptions(chart);
+		var valueFirst = options.valueFirst;
+		var showName = options.showName;
+		options = chart.optionsModified(options);
+		var clear = (valueFirst != options.valueFirst || showName != options.showName);
+		
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
+		var $parent = chart.elementJquery();
+		
+		if(clear)
+			$(".dg-chart-label-item", $parent).empty();
+		else
+			$(".dg-chart-label-item", $parent).addClass("dg-chart-label-item-pending");
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var dataSetName = chart.dataSetName(chartDataSet);
+			var result = chart.resultAt(results, i);
+			
+			var cps = chart.dataSetPropertiesOfSign(chartDataSet, coordSign);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+			var cv = (cps.length > 0 ? chart.resultRowArrays(result, cps) : [] );
+			var vv = chart.resultRowArrays(result, vps);
+			
+			for(var j=0; j<vv.length; j++)
+			{
+				var vvj = vv[j];
+				
+				for(var k=0; k<vvj.length; k++)
+				{
+					var cssName = "dg-chart-label-item-"+i+"-"+j+"-"+k;
+					var name = (cv.length > j && cv[j].length > k ? cv[j][k] : chart.dataSetPropertyLabel(vps[k]));
+					var value = vv[j][k];
+					
+					var $label = $("."+ cssName, $parent);
+					if($label.length == 0)
+						$label = $("<div class='dg-chart-label-item dg-chart-label-item-"+i+" dg-chart-label-item-"+i+"-"+j+" "+cssName+"'></div>").appendTo($parent);
+					else
+						$label.removeClass("dg-chart-label-item-pending");
+					
+					var $labelName = $(".label-name", $label);
+					var $labelValue = $(".label-value", $label);
+					
+					if(options.showName)
+					{
+						if(options.valueFirst && $labelValue.length == 0)
+							$labelValue = $("<div class='label-value'></div>").appendTo($label);
+						
+						if($labelName.length == 0)
+							$labelName = $("<div class='label-name'></div>").appendTo($label);
+						
+						if(!options.valueFirst && $labelValue.length == 0)
+							$labelValue = $("<div class='label-value'></div>").appendTo($label);
+					}
+					else
+					{
+						if($labelValue.length == 0)
+							$labelValue = $("<div class='label-value'></div>").appendTo($label);
+					}
+					
+					if(options.showName)
+						$labelName.html(name);
+					$labelValue.html(value);
+				}
+			}
+		}
+		
+		$(".dg-chart-label-item-pending", $parent).remove();
 	};
 	
 	//自定义

@@ -921,9 +921,9 @@
 			},
 			"radar" : {
 				"name" : { "textStyle" : { "color" : chartTheme.legendColor } },
-				"axisLine" : { "lineStyle" : { "color" : chartTheme.borderColor } },
+				"axisLine" : { "lineStyle" : { "color" : chartTheme.axisScaleLineColor } },
 				"splitLine" : { "lineStyle" : { "color" : chartTheme.axisScaleLineColor } },
-				"splitArea" : { "areaStyle" : { "color" : [ chartTheme.axisScaleLineColor, chartTheme.backgroundColor ] } },
+				"splitArea" : { "areaStyle" : { "color" : [ chartTheme.borderColor, chartTheme.backgroundColor ] } },
 				"itemStyle" : {
 					"borderWidth" : 1
 				},
@@ -1034,7 +1034,7 @@
 					},
 					"lineStyle":
 					{
-						"color": chartTheme.borderColor,
+						"color": chartTheme.axisScaleLineColor,
 						"opacity": 1
 					}
 				}

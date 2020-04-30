@@ -21,7 +21,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.ChartTheme;
+import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
@@ -698,10 +701,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 			Writer out = response.getWriter();
 
-			HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), out);
+			RenderStyle renderStyle = resolveRenderStyle(request);
+			HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), renderStyle,
+					out);
+			DashboardTheme dashboardTheme = getHtmlTplDashboardWidgetEntityService().getHtmlTplDashboardWidgetRenderer()
+					.inflateDashboardTheme(renderContext, renderStyle);
 			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler(
 					getMessage(request, "dashboard.show.htmlTitlePrefix", getMessage(request, "app.name")));
 			HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+			setDashboardThemeAttribute(request.getSession(), dashboardTheme);
 
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext, template);
 
@@ -712,6 +720,76 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		{
 			ChartWidgetSourceContext.remove();
 		}
+	}
+
+	/**
+	 * 看板样式。
+	 * <p>
+	 * 根据当前渲染风格动态生成看板样式。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping("/showStyle")
+	public void showStyle(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model) throws Exception
+	{
+		// 不缓存
+		response.setDateHeader("Expires", -1);
+		response.setHeader("Cache-Control", "no-cache");
+		response.setHeader("Pragma", "no-cache");
+		response.setContentType(CONTENT_TYPE_CSS);
+		Writer out = response.getWriter();
+
+		StringBuilder style = new StringBuilder();
+		DashboardTheme dashboardTheme = getDashboardThemeAttribute(request.getSession());
+		ChartTheme chartTheme = (dashboardTheme == null ? null : dashboardTheme.getChartTheme());
+
+		if (chartTheme != null)
+		{
+			// 表格行
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable tbody tr{\n");
+			style.append("background:" + chartTheme.getBackgroundColor() + ";\n");
+			style.append("}\n");
+			
+			// 表格奇数行
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody tr.odd,\n"
+					+ " .dg-chart-table .dg-chart-table-content table.dataTable.display tbody tr.odd{\n");
+			style.append("background:" + chartTheme.getBorderColor() + ";\n");
+			style.append("}\n");
+
+			// 表格选中、悬浮，拷贝自/src/main/resources/org/datagear/web/webapp/static/theme/lightness/common.css
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr.hover,\n");
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr:hover,\n");
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody tr:hover {\n");
+			style.append("	background-color: " + chartTheme.getAxisScaleLineColor() + ";\n");
+			style.append("}\n");
+
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr.hover.selected,\n");
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable tbody > tr.selected,\n");
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable tbody > tr > .selected,\n");
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd.selected,\n");
+			style.append(
+					".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd > .selected,\n");
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd.selected,\n");
+			style.append(
+					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd > .selected,\n");
+			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr.selected:hover,\n");
+			style.append(
+					".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr > .selected:hover,\n");
+			style.append(
+					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.selected:hover,\n");
+			style.append(
+					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr > .selected:hover {\n");
+			style.append("	background-color: " + chartTheme.getHighlightTheme().getBackgroundColor() + ";\n");
+			style.append("	color: " + chartTheme.getHighlightTheme().getColor() + ";\n");
+			style.append("}\n");
+		}
+
+		out.write(style.toString());
 	}
 
 	/**

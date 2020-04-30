@@ -1,0 +1,59 @@
+/*
+ * Copyright 2018 datagear.tech. All Rights Reserved.
+ */
+
+@CHARSET "UTF-8";
+
+.dg-chart-table{
+	position: relative;
+}
+
+.dg-chart-table .dg-chart-table-title{
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	padding-top: 0.1em;
+	padding-bottom: 0.1em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	font-size: 1.1em;
+	font-weight: bold;
+	text-align: center;
+}
+
+.dg-chart-table .dg-chart-table-content{
+	position: absolute;
+	left: 0.1em;
+	top: 1.6em;
+	right: 0.1em;
+	bottom: 0.1em;
+}
+
+.dg-chart-table.dg-hide-title .dg-chart-table-title{
+	display: none;
+}
+
+.dg-chart-table.dg-hide-title .dg-chart-table-content{
+	top: 0.1em;
+}
+
+.dg-chart-table .dg-chart-table-content table.dataTable thead th,
+.dg-chart-table .dg-chart-table-content table.dataTable thead td,
+.dg-chart-table .dg-chart-table-content table.dataTable tbody th,
+.dg-chart-table .dg-chart-table-content table.dataTable tbody td{
+	padding: 0.5em 0.8em;
+	text-align: left;
+	white-space: nowrap;
+}
+
+.dg-chart-label .dg-chart-label-item .label-name{
+	text-align: center;
+}
+
+.dg-chart-label .dg-chart-label-item .label-value{
+	text-align: center;
+	font-size: 1.5em;
+	font-weight: bold;
+}
