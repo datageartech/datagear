@@ -1789,6 +1789,129 @@
 		$(".dg-chart-label-pending", $parent).remove();
 	};
 	
+	//表格
+	
+	chartSupport.tableRender = function(chart, columnSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		var cps = chart.dataSetPropertiesOfSign(chartDataSet, columnSign);
+		if(!cps || cps.length == 0)
+			cps =(chartDataSet && chartDataSet.dataSet ? (chartDataSet.dataSet.properties || []) : []);
+		
+		var chartEle = chart.elementJquery();
+		
+		var table = $(">table", chartEle);
+		if(table.length == 0)
+			table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartEle);
+		
+		var tableId = table.attr("id");
+		if(!tableId)
+		{
+			tableId = chart.id+"-table";
+			table.attr("id", tableId);
+		}
+		
+		var columns = [];
+		
+		for(var i=0; i<cps.length; i++)
+		{
+			var column =
+			{
+				title: chart.dataSetPropertyLabel(cps[i]),
+				data: cps[i].name,
+				defaultContent: "",
+				orderable: true,
+				searchable: false
+			};
+			
+			columns.push(column);
+		}
+		
+		options = chart.options($.extend(true,
+		{
+			"columns" : columns,
+			"data" : [],
+			"scrollX": true,
+			"autoWidth": true,
+			"scrollY" : chartEle.height(),
+	        "scrollCollapse": false,
+			"paging" : false,
+			"searching" : false,
+			"info": false,
+			"select" : { style : 'os' },
+			"dom": "t",
+			"language":
+		    {
+				"emptyTable": "",
+				"zeroRecords" : ""
+			}
+		},
+		options));
+		
+		table.dataTable(options);
+		
+		var dataTable = table.DataTable();
+		var tableHeader = $(dataTable.table().header()).closest(".dataTables_scrollHead");
+		var tableBody = $(dataTable.table().body()).closest(".dataTables_scrollBody");
+		var tableToolbar = $(dataTable.table().body()).closest(".dataTables_scrollBody");
+		tableBody.css("height", chartEle.height() - tableHeader.outerHeight());
+
+		
+		chart.extValue("tableId", tableId);
+		chartSupport.initOptions(chart, options);
+	};
+	
+	chartSupport.tableUpdate = function(chart, results, options)
+	{
+		var initOptions = chartSupport.initOptions(chart);
+		var chartDataSets = chart.chartDataSetsNonNull();
+		var tableId = chart.extValue("tableId");
+		var dataTable = $("#" + tableId).DataTable();
+		
+		var datas = [];
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var result = chart.resultAt(results, i);
+			
+			if(result.datas)
+				datas = datas.concat(result.datas);
+		}
+		
+		chartSupport.tableAddDataTableData(dataTable, datas, 0, false);
+	};
+	
+	chartSupport.tableAddDataTableData = function(dataTable, datas, startRowIndex, notDraw)
+	{
+		var rows = dataTable.rows();
+		var removeRowIndexes = [];
+		var dataIndex = 0;
+		
+		if(startRowIndex != null)
+		{
+			rows.every(function(rowIndex)
+			{
+				if(rowIndex < startRowIndex)
+					return;
+				
+				if(dataIndex >= datas.length)
+					removeRowIndexes.push(rowIndex);
+				else
+					this.data(datas[dataIndex]);
+				
+				dataIndex++;
+			});
+		}
+		
+		for(; dataIndex<datas.length; dataIndex++)
+			var row = dataTable.row.add(datas[dataIndex]);
+		
+		dataTable.rows(removeRowIndexes).remove();
+		
+		if(!notDraw)
+			dataTable.draw();
+	};
+	
 	//自定义
 	
 	chartSupport.customAsyncRender = function(chart)

@@ -174,7 +174,14 @@
 					<property name="name" value="dashboardFactory" />
 					<property name="content" value="&lt;script type='text/javascript' res-name='dashboardFactory' src='$CONTEXTPATH/static/script/datagear-dashboardFactory.js?v=$VERSION'&gt;&lt;/script&gt;" />
 				</bean>
-				
+				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
+					<property name="name" value="dataTableStyle" />
+					<property name="content" value="&lt;link type='text/css' res-name='dataTableStyle' href='$CONTEXTPATH/static/css/DataTables-1.10.18/datatables.min.css?v=$VERSION'  rel='stylesheet' /&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
+					<property name="name" value="dataTable" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='dataTable' src='$CONTEXTPATH/static/script/DataTables-1.10.18/datatables.min.js?v=$VERSION'&gt;&lt;/script&gt;" />
+				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="chartSupport" />
 					<property name="content" value="&lt;script type='text/javascript' res-name='chartSupport' src='$CONTEXTPATH/static/script/datagear-chartSupport.js?v=$VERSION'&gt;&lt;/script&gt;" />
