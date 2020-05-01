@@ -1151,19 +1151,24 @@
 			"graph" : {
 				"itemStyle" : {
 					"borderWidth" : 0,
-					"borderColor" : chartTheme.borderColor
+					"borderColor" : chartTheme.borderColor,
+					"shadowBlur" : 10,
+					"shadowColor" : chartTheme.borderColor
 				},
 				"lineStyle" : {
-					"width" : 1,
-					"color" : chartTheme.axisScaleLineColor
+                    "color": "source",
+                    curveness: 0.3
 				},
-				"symbolSize" : 4,
-				"symbol" : "circle",
-				"smooth" : false,
-				"color" : chartTheme.graphColors,
 				"label" : {
-					"textStyle" : {
-						"color" : chartTheme.color
+					"color" : chartTheme.color
+				},
+				"emphasis" : {
+					"itemStyle" : {
+						"borderWidth" : 0,
+						"borderColor" : chartTheme.axisColor
+					},
+					"lineStyle" : {
+						width: 3
 					}
 				}
 			},

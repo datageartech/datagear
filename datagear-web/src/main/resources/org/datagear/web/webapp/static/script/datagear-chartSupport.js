@@ -94,40 +94,26 @@
 	};
 	
 	/**
-	 * 为源数组追加不重复的元素。
+	 * 为源数组追加不重复的元素，返回追加索引或重复元素索引。
 	 * 
 	 * @param sourceArray
-	 * @param append 追加元素、数组，可以是基本类型、对象类型
+	 * @param append 追加元素，可以是基本类型、对象类型
 	 * @param distinctPropertyName 当是对象类型时，用于指定判断重复的属性名
 	 */
 	chartSupport.appendDistinct = function(sourceArray, append, distinctPropertyName)
 	{
-		if(append == undefined)
-			return sourceArray;
-		
-		append = ($.isArray(append) ? append : [append]);
-		
-		for(var i=0; i<append.length; i++)
+		for(var i=0; i<sourceArray.length; i++)
 		{
-			var contains = false;
+			var sv = (distinctPropertyName != undefined ? sourceArray[i][distinctPropertyName] : sourceArray[i]);
+			var av = (distinctPropertyName != undefined ? append[distinctPropertyName] : append);
 			
-			for(var j=0; j<sourceArray.length; j++)
-			{
-				var sv = (distinctPropertyName != undefined ? sourceArray[j][distinctPropertyName] : sourceArray[j]);
-				var av = (distinctPropertyName != undefined ? append[i][distinctPropertyName] : append[i]);
-				
-				if(sv == av)
-				{
-					contains = true;
-					break;
-				}
-			}
-			
-			if(!contains)
-				sourceArray.push(append[i]);
+			if(sv == av)
+				return i;
 		}
 		
-		return sourceArray;
+		sourceArray.push(append);
+		
+		return (sourceArray.length - 1);
 	};
 	
 	//折线图
@@ -488,6 +474,8 @@
 			},
 			//最大数据标记像素数
 			symbolSizeMax: undefined,
+			//最小数据标记像素数
+			symbolSizeMin: undefined,
 			series: [{
 				name: "",
 				type: "scatter",
@@ -511,6 +499,7 @@
 		
 		var min = undefined, max = undefined;
 		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
+		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -545,7 +534,7 @@
 							name: legendName, data: data,
 							symbolSize: function(value)
 							{
-								return chartSupport.scatterEvalSymbolSize(value[1], min, max, symbolSizeMax);
+								return chartSupport.scatterEvalSymbolSize(value[1], min, max, symbolSizeMax, symbolSizeMin);
 							}
 						});
 				
@@ -577,6 +566,26 @@
 		}
 		
 		return symbolSizeMax;
+	};
+
+	/**
+	 * 获取散点图最小数据标记像素数
+	 * @param chart
+	 * @param options
+	 * @param symbolSizeMax
+	 */
+	chartSupport.scatterSymbolSizeMin = function(chart, options, symbolSizeMax)
+	{
+		var symbolSizeMin = (options ? options.symbolSizeMin : undefined);
+		
+		if(!symbolSizeMin)
+		{
+			symbolSizeMin = parseInt(symbolSizeMax/5);
+			if(symbolSizeMin < 4)
+				symbolSizeMin = 4;
+		}
+		
+		return symbolSizeMin;
 	};
 	
 	//计算散点大小
@@ -961,6 +970,7 @@
 		
 		var min = undefined, max = undefined;
 		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions, 0.1);
+		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
@@ -992,7 +1002,7 @@
 						name: dataSetName, data: data,
 						symbolSize: function(value)
 						{
-							return chartSupport.scatterEvalSymbolSize(value[2], min, max, symbolSizeMax);
+							return chartSupport.scatterEvalSymbolSize(value[2], min, max, symbolSizeMax, symbolSizeMin);
 						}
 					});
 		}
@@ -1576,6 +1586,180 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData, links: seriesLinks }) ];
 		
 		var options = { series: series };
+		chart.echartsOptions(options);
+	};
+	
+	//关系图
+	
+	chartSupport.graphRender = function(chart, sourceIdSign, sourceNameSign, sourceCategorySign, sourceValueSign,
+			targetIdSign, targetNameSign, targetCategorySign, targetValueSign, valueSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			//最大数据标记像素数
+			symbolSizeMax: undefined,
+			//最大数据标记像素数
+			symbolSizeMin: undefined,
+			series: [{
+				name: "",
+				type: "graph",
+		        layout: 'force',
+				data: [],
+				links: [],
+				legendHoverLink: true,
+                focusNodeAdjacency: true,
+                draggable: true,
+				label: { position: "right" },
+				roam: true,
+				left: "12%",
+                right: "12%",
+                top: "20%",
+                bottom: "12%",
+			}]
+		},
+		options));
+		
+		chartSupport.initOptions(chart, options);
+		
+		chart.echartsInit(options, false);
+	};
+
+	chartSupport.graphUpdate = function(chart, results, sourceIdSign, sourceNameSign, sourceCategorySign, sourceValueSign,
+			targetIdSign, targetNameSign, targetCategorySign, targetValueSign, valueSign)
+	{
+		var initOptions= chartSupport.initOptions(chart);
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
+		var legendData = [];
+		var seriesName = "";
+		var categories = [];
+		var seriesData = [];
+		var seriesLinks = [];
+		
+		var min = undefined, max = undefined;
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions, 0.1);
+		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var result = chart.resultAt(results, i);
+			
+			if(i == 0)
+				seriesName = chart.dataSetName(chartDataSet);
+			
+			var sip = chart.dataSetPropertyOfSign(chartDataSet, sourceIdSign);
+			var snp = chart.dataSetPropertyOfSign(chartDataSet, sourceNameSign);
+			var scp = chart.dataSetPropertyOfSign(chartDataSet, sourceCategorySign);
+			var svp = chart.dataSetPropertyOfSign(chartDataSet, sourceValueSign);
+			var tip = chart.dataSetPropertyOfSign(chartDataSet, targetIdSign);
+			var tnp = chart.dataSetPropertyOfSign(chartDataSet, targetNameSign);
+			var tcp = chart.dataSetPropertyOfSign(chartDataSet, targetCategorySign);
+			var tvp = chart.dataSetPropertyOfSign(chartDataSet, targetValueSign);
+			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+			
+			var data = chart.resultDatas(result);
+			
+			for(var i=0; i<data.length; i++)
+			{
+				var sd = { id: chart.resultRowCell(data[i], sip), name: chart.resultRowCell(data[i], snp) };
+				var td = { id: chart.resultRowCell(data[i], tip), name: chart.resultRowCell(data[i], tnp) };
+				
+				if(scp)
+				{
+					var category = chart.resultRowCell(data[i], scp);
+					if(category)
+					{
+						sd.category = chartSupport.appendDistinct(categories, {name: category}, "name");
+						chartSupport.appendDistinct(legendData, category);
+					}
+				}
+				if(svp)
+				{
+					sd.value = chart.resultRowCell(data[i], svp);
+					
+					min = (min == undefined ? sd.value : Math.min(min, sd.value));
+					max = (max == undefined ? sd.value : Math.max(max, sd.value));
+				}
+				if(tcp)
+				{
+					var category = chart.resultRowCell(data[i], tcp);
+					if(category)
+					{
+						td.category = chartSupport.appendDistinct(categories, {name: category}, "name");
+						chartSupport.appendDistinct(legendData, category);
+					}
+				}
+				if(tvp)
+				{
+					td.value = chart.resultRowCell(data[i], tvp);
+					
+					min = (min == undefined ? td.value : Math.min(min, td.value));
+					max = (max == undefined ? td.value : Math.max(max, td.value));
+				}
+				
+				var sidx = chartSupport.appendDistinct(seriesData, sd, "id");
+				var tidx = chartSupport.appendDistinct(seriesData, td, "id");
+
+				//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引，所以这里直接使用数据索引
+				var link = {};
+				link.source = sidx;
+				link.target = tidx;
+				
+				if(vp)
+					link.value = chart.resultRowCell(data[i], vp);
+				
+				seriesLinks.push(link);
+			}
+		}
+		
+		if(min != undefined && max != undefined && min >= max)
+			min = max - 1;
+		
+		if(min == undefined && max == undefined && symbolSizeMin < 10)
+			symbolSizeMin = 10;
+		
+		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
+		
+		//自动计算散点大小
+		if(series[0].symbolSize == null)
+		{
+			series[0].symbolSize = function(value, params)
+			{
+				if(value && value.length > 0)
+					value = value[0];
+				
+				if(!value)
+					return symbolSizeMin;
+				
+				return chartSupport.scatterEvalSymbolSize(value, min, max, symbolSizeMax, symbolSizeMin);
+			};
+		}
+		
+		if(series[0].layout == "force")
+		{
+			if(!series[0].force)
+				series[0].force = {};
+			
+			//自动计算散点间距
+			if(series[0].force.edgeLength == null)
+				series[0].force.edgeLength = parseInt(symbolSizeMax*1.5);
+			
+			//自动计算散点稀疏度
+			if(series[0].force.repulsion == null)
+				series[0].force.repulsion = parseInt(symbolSizeMax*2);
+		}
+		
+		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
 	};
 	
