@@ -529,18 +529,124 @@
 						max = min + 1;
 				}
 				
-				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j,
-						{
-							name: legendName, data: data,
-							symbolSize: function(value)
-							{
-								return chartSupport.scatterEvalSymbolSize(value[1], min, max, symbolSizeMax, symbolSizeMin);
-							}
-						});
+				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, { name: legendName, data: data });
 				
 				legendData.push(legendName);
 				series.push(mySeries);
 			}
+		}
+		
+		for(var i=0; i<series.length; i++)
+		{
+			series[i].symbolSize = function(value)
+			{
+				return chartSupport.scatterEvalSymbolSize(value[1], min, max, symbolSizeMax, symbolSizeMin);
+			};
+		}
+		
+		var options = { legend: {data: legendData}, series: series };
+		chart.echartsOptions(options);
+	};
+
+	//坐标散点图
+	
+	chartSupport.scatterCoordRender = function(chart, coordSign, coord2Sign, valueSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+		var c2p = chart.dataSetPropertyOfSign(chartDataSet, coord2Sign);
+		
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			legend:
+			{
+				data: []
+			},
+			xAxis: {
+				name: chart.dataSetPropertyLabel(cp),
+				nameGap: 5,
+				type: (chartSupport.isDataTypeNumber(cp) ? "value" : "category"),
+				boundaryGap: !chartSupport.isDataTypeNumber(cp)
+			},
+			yAxis: {
+				name: chart.dataSetPropertyLabel(c2p),
+				nameGap: 5,
+				type: "value"
+			},
+			//最大数据标记像素数
+			symbolSizeMax: undefined,
+			//最小数据标记像素数
+			symbolSizeMin: undefined,
+			series: [{
+				name: "",
+				type: "scatter",
+				data: []
+			}]
+		},
+		options));
+		
+		chartSupport.initOptions(chart, options);
+		
+		chart.echartsInit(options, false);
+	};
+	
+	chartSupport.scatterCoordUpdate = function(chart, results, coordSign, coord2Sign, valueSign)
+	{
+		var initOptions= chartSupport.initOptions(chart);
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
+		var legendData = [];
+		var series = [];
+		
+		var min = undefined, max = undefined;
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
+		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var dataSetName = chart.dataSetName(chartDataSet);
+			var result = chart.resultAt(results, i);
+			
+			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+			var c2p = chart.dataSetPropertyOfSign(chartDataSet, coord2Sign);
+			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+			
+			var data = (vp ? chart.resultRowArrays(result, [cp, c2p, vp]) : chart.resultRowArrays(result, [cp, c2p]));
+			
+			if(vp)
+			{
+				for(var j=0; j<data.length; j++)
+				{
+					min = (min == undefined ? data[j][2] : Math.min(min, data[j][2]));
+					max = (max == undefined ? data[j][2] : Math.max(max, data[j][2]));
+				}
+			}
+			
+			var mySeries = chartSupport.optionsSeries(initOptions, i, { name: dataSetName, data: data });
+			legendData.push(dataSetName);
+			series.push(mySeries);
+		}
+		
+		if(max <= min)
+			max = min + 1;
+		
+		for(var i=0; i<series.length; i++)
+		{
+			series[i].symbolSize = function(value)
+			{
+				if(!value || value.length < 3)
+					return symbolSizeMin;
+				
+				return chartSupport.scatterEvalSymbolSize(value[2], min, max, symbolSizeMax, symbolSizeMin);
+			};
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
@@ -556,7 +662,7 @@
 	chartSupport.scatterSymbolSizeMax = function(chart, options, ratio)
 	{
 		var symbolSizeMax = (options ? options.symbolSizeMax : undefined);
-		ratio = (ratio == undefined ? 0.125 : ratio);
+		ratio = (ratio == undefined ? 0.1 : ratio);
 		
 		//根据图表元素尺寸自动计算
 		if(!symbolSizeMax)
@@ -574,15 +680,16 @@
 	 * @param options
 	 * @param symbolSizeMax
 	 */
-	chartSupport.scatterSymbolSizeMin = function(chart, options, symbolSizeMax)
+	chartSupport.scatterSymbolSizeMin = function(chart, options, symbolSizeMax, ratio)
 	{
 		var symbolSizeMin = (options ? options.symbolSizeMin : undefined);
+		ratio = (ratio == undefined ? 0.125 : ratio);
 		
 		if(!symbolSizeMin)
 		{
-			symbolSizeMin = parseInt(symbolSizeMax/5);
-			if(symbolSizeMin < 4)
-				symbolSizeMin = 4;
+			symbolSizeMin = parseInt(symbolSizeMax * ratio);
+			if(symbolSizeMin < 6)
+				symbolSizeMin = 6;
 		}
 		
 		return symbolSizeMin;
@@ -969,7 +1076,7 @@
 		var series = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions, 0.1);
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
 		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
