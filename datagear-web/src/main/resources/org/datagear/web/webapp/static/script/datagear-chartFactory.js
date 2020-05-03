@@ -1157,7 +1157,7 @@
 				},
 				"lineStyle" : {
                     "color": "source",
-                    curveness: 0.3
+                    "curveness": 0.3
 				},
 				"label" : {
 					"color" : chartTheme.color
@@ -1168,7 +1168,7 @@
 						"borderColor" : chartTheme.axisColor
 					},
 					"lineStyle" : {
-						width: 3
+						"width": 4
 					}
 				}
 			},

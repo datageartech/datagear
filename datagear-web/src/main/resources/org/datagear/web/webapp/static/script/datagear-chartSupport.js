@@ -524,9 +524,6 @@
 				{
 					min = (min == undefined ? data[k][1] : Math.min(min, data[k][1]));
 					max = (max == undefined ? data[k][1] : Math.max(max, data[k][1]));
-					
-					if(max <= min)
-						max = min + 1;
 				}
 				
 				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, { name: legendName, data: data });
@@ -535,6 +532,9 @@
 				series.push(mySeries);
 			}
 		}
+		
+		if(min != null && max != null && max <= min)
+			max = min + 1;
 		
 		for(var i=0; i<series.length; i++)
 		{
@@ -547,7 +547,7 @@
 		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
 	};
-
+	
 	//坐标散点图
 	
 	chartSupport.scatterCoordRender = function(chart, coordSign, coord2Sign, valueSign, options)
@@ -635,14 +635,14 @@
 			series.push(mySeries);
 		}
 		
-		if(max <= min)
+		if(min != null && max != null && max <= min)
 			max = min + 1;
 		
 		for(var i=0; i<series.length; i++)
 		{
 			series[i].symbolSize = function(value)
 			{
-				if(!value || value.length < 3)
+				if(value == null || value.length < 3)
 					return symbolSizeMin;
 				
 				return chartSupport.scatterEvalSymbolSize(value[2], min, max, symbolSizeMax, symbolSizeMin);
@@ -883,6 +883,80 @@
 	
 	//地图
 	
+	chartSupport.mapInitChart = function(chart, options)
+	{
+		var map = (options.geo ? options.geo.map : undefined);
+		if(map == undefined)
+			map = (options.series && options.series.length > 0 ? options.series[0].map : undefined);
+		
+		if(!map)
+			throw new Error("[map] option must be set");
+		
+		chart.extValue("mapPresetMap", map);
+		chart.map(map);
+		chartSupport.initOptions(chart, options);
+		
+		if(chart.echartsMapRegistered(map))
+		{
+			chart.echartsInit(options, false);
+			chart.statusPreUpdate(true);
+		}
+		else
+		{
+			chart.echartsMapLoad(map, function()
+			{
+				chart.echartsInit(options, false);
+				chart.statusPreUpdate(true);
+			});
+		}
+	};
+	
+	chartSupport.mapUpdateChart = function(chart, initOptions, updateOptions)
+	{
+		var map = undefined;
+		//地图作为坐标系，而非图表series
+		var isGeo = (initOptions.geo);
+		
+		if(isGeo)
+			map = (updateOptions.geo ? updateOptions.geo.map : undefined);
+		else
+			map = (updateOptions.series && updateOptions.series.length > 0 ? updateOptions.series[0].map : undefined);
+		
+		if(!map)
+		{
+			var eleMap = chart.map();
+			if(eleMap && eleMap != chart.extValue("mapPresetMap"))
+			{
+				if(isGeo)
+					updateOptions.geo.map = eleMap;
+				else
+					updateOptions.series[0].map = eleMap;
+				
+				map = eleMap;
+			}
+		}
+		
+		if(map)
+		{
+			chart.extValue("mapPresetMap", map);
+			chart.map(map);
+		}
+		
+		if(!map || chart.echartsMapRegistered(map))
+		{
+			chart.echartsOptions(updateOptions, false);
+			chart.statusUpdated(true);
+		}
+		else
+		{
+			chart.echartsMapLoad(map, function()
+			{
+				chart.echartsOptions(updateOptions, false);
+				chart.statusUpdated(true);
+			});
+		}
+	};
+	
 	chartSupport.mapRender = function(chart, coordSign, valueSign, options)
 	{
 		options = chart.options($.extend(true,
@@ -918,28 +992,12 @@
 		},
 		options));
 		
-		var map = options.series[0].map;
-		
-		chart.extValue("mapPresetMap", map);
-		chart.map(map);
-		
-		if(chart.echartsMapRegistered(map))
-		{
-			chart.echartsInit(options, false);
-			chart.statusPreUpdate(true);
-		}
-		else
-		{
-			chart.echartsMapLoad(map, function()
-			{
-				chart.echartsInit(options, false);
-				chart.statusPreUpdate(true);
-			});
-		}
+		chartSupport.mapInitChart(chart, options);
 	};
 	
 	chartSupport.mapUpdate = function(chart, results, coordSign, valueSign)
 	{
+		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
 		var min = Number.MAX_VALUE;
@@ -977,37 +1035,7 @@
 		var options = { visualMap: {min, min, max: max}, series: [ {name: seriesName, data: seriesData } ] };
 		options = chart.optionsModified(options);
 		
-		var map = options.series[0].map;
-		
-		if(!map)
-		{
-			var eleMap = chart.map();
-			if(eleMap && eleMap != chart.extValue("mapPresetMap"))
-			{
-				options.series[0].map = eleMap;
-				map = eleMap;
-			}
-		}
-		
-		if(map)
-		{
-			chart.extValue("mapPresetMap", map);
-			chart.map(map);
-		}
-		
-		if(!map || chart.echartsMapRegistered(map))
-		{
-			chart.echartsOptions(options, false);
-			chart.statusUpdated(true);
-		}
-		else
-		{
-			chart.echartsMapLoad(map, function()
-			{
-				chart.echartsOptions(options, false);
-				chart.statusUpdated(true);
-			});
-		}
+		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
 	
 	//散点值地图
@@ -1034,6 +1062,8 @@
 			},
 			//最大数据标记像素数
 			symbolSizeMax: undefined,
+			//最小数据标记像素数
+			symbolSizeMin: undefined,
 			series:
 			[
 				{
@@ -1046,25 +1076,7 @@
 		},
 		options));
 		
-		var map = options.geo.map;
-		
-		chart.extValue("mapPresetMap", map);
-		chart.map(map);
-		chartSupport.initOptions(chart, options);
-		
-		if(chart.echartsMapRegistered(map))
-		{
-			chart.echartsInit(options, false);
-			chart.statusPreUpdate(true);
-		}
-		else
-		{
-			chart.echartsMapLoad(map, function()
-			{
-				chart.echartsInit(options, false);
-				chart.statusPreUpdate(true);
-			});
-		}
+		chartSupport.mapInitChart(chart, options);
 	};
 	
 	chartSupport.mapScatterUpdate = function(chart, results, coordSign, coordLongitudeSign, coordLatitudeSign, valueSign)
@@ -1083,13 +1095,13 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			var dataSetName = chart.dataSetName(chartDataSet);
+			var result = chart.resultAt(results, i);
 			var valueProperties =
 			[
 				chart.dataSetPropertyOfSign(chartDataSet, coordLongitudeSign),
 				chart.dataSetPropertyOfSign(chartDataSet, coordLatitudeSign),
 				chart.dataSetPropertyOfSign(chartDataSet, valueSign)
 			];
-			var result = chart.resultAt(results, i);
 			var data = chart.resultNameValueObjects(result, chart.dataSetPropertyOfSign(chartDataSet, coordSign), valueProperties);
 			
 			for(var j=0; j<data.length; j++)
@@ -1098,58 +1110,203 @@
 				
 				min = (min == undefined ? dv[2] : Math.min(min, dv[2]));
 				max = (max == undefined ? dv[2] : Math.max(max, dv[2]));
-				
-				if(max <= min)
-					max = min + 1;
 			}
 			
 			legendData[i] = dataSetName;
-			series[i] = chartSupport.optionsSeries(initOptions, i,
+			series[i] = chartSupport.optionsSeries(initOptions, i, { name: dataSetName, data: data });
+		}
+
+		if(min != null && max != null && max <= min)
+			max = min + 1;
+
+		for(var i=0; i<series.length; i++)
+		{
+			series[i].symbolSize = function(value)
+			{
+				if(value && value.length > 2)
+					value = value[2];
+				
+				if(value == null)
+					return symbolSizeMin;
+				
+				return chartSupport.scatterEvalSymbolSize(value, min, max, symbolSizeMax, symbolSizeMin);
+			};
+		}
+
+		var options = { legend: {data: legendData}, series: series };
+		options = chart.optionsModified(options);
+		
+		chartSupport.mapUpdateChart(chart, initOptions, options);
+	};
+	
+	//关系地图
+	
+	chartSupport.mapGraphRender = function(chart, sourceIdSign, sourceLongitudeSign, sourceLatitudeSign, sourceNameSign, sourceCategorySign, sourceValueSign,
+			targetIdSign, targetLongitudeSign, targetLatitudeSign, targetNameSign, targetCategorySign, targetValueSign, options)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		
+		options = chart.options($.extend(true,
+		{
+			title: {
+		        text: chart.nameNonNull()
+		    },
+			tooltip:
+			{
+				trigger: "item"
+			},
+			geo:
+			{
+				roam: true,
+				map: (chart.map() || "china")
+			},
+			//最大数据标记像素数
+			symbolSizeMax: undefined,
+			//最大数据标记像素数
+			symbolSizeMin: undefined,
+			series: [{
+				name: "",
+				type: "graph",
+		        layout: "none",
+		        coordinateSystem: "geo",
+				data: [],
+				links: [],
+				legendHoverLink: true,
+                focusNodeAdjacency: true,
+				label: { position: "right" }
+			}]
+		},
+		options));
+		
+		chartSupport.mapInitChart(chart, options);
+	};
+
+	chartSupport.mapGraphUpdate = function(chart, results, sourceIdSign, sourceLongitudeSign, sourceLatitudeSign, sourceNameSign, sourceCategorySign, sourceValueSign,
+			targetIdSign, targetLongitudeSign, targetLatitudeSign, targetNameSign, targetCategorySign, targetValueSign)
+	{
+		var initOptions= chartSupport.initOptions(chart);
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
+		var legendData = [];
+		var seriesName = "";
+		var categories = [];
+		var seriesData = [];
+		var seriesLinks = [];
+		
+		var min = undefined, max = undefined;
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
+		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var chartDataSet = chartDataSets[i];
+			var result = chart.resultAt(results, i);
+			
+			if(i == 0)
+				seriesName = chart.dataSetName(chartDataSet);
+			
+			var sip = chart.dataSetPropertyOfSign(chartDataSet, sourceIdSign);
+			var slop = chart.dataSetPropertyOfSign(chartDataSet, sourceLongitudeSign);
+			var slap = chart.dataSetPropertyOfSign(chartDataSet, sourceLatitudeSign);
+			var snp = chart.dataSetPropertyOfSign(chartDataSet, sourceNameSign);
+			var scp = chart.dataSetPropertyOfSign(chartDataSet, sourceCategorySign);
+			var svp = chart.dataSetPropertyOfSign(chartDataSet, sourceValueSign);
+			var tip = chart.dataSetPropertyOfSign(chartDataSet, targetIdSign);
+			var tlop = chart.dataSetPropertyOfSign(chartDataSet, targetLongitudeSign);
+			var tlap = chart.dataSetPropertyOfSign(chartDataSet, targetLatitudeSign);
+			var tnp = chart.dataSetPropertyOfSign(chartDataSet, targetNameSign);
+			var tcp = chart.dataSetPropertyOfSign(chartDataSet, targetCategorySign);
+			var tvp = chart.dataSetPropertyOfSign(chartDataSet, targetValueSign);
+			
+			var data = chart.resultDatas(result);
+			
+			for(var i=0; i<data.length; i++)
+			{
+				var sd = { name: chart.resultRowCell(data[i], snp), value: [ chart.resultRowCell(data[i], slop), chart.resultRowCell(data[i], slap) ] };
+				var td = { name: chart.resultRowCell(data[i], tnp), value: [ chart.resultRowCell(data[i], tlop), chart.resultRowCell(data[i], tlap) ] };
+				
+				if(sip)
+					sd.id = chart.resultRowCell(data[i], sip);
+				
+				if(scp)
+				{
+					var category = chart.resultRowCell(data[i], scp);
+					if(category)
 					{
-						name: dataSetName, data: data,
-						symbolSize: function(value)
-						{
-							return chartSupport.scatterEvalSymbolSize(value[2], min, max, symbolSizeMax, symbolSizeMin);
-						}
-					});
+						sd.category = chartSupport.appendDistinct(categories, {name: category}, "name");
+						chartSupport.appendDistinct(legendData, category);
+					}
+				}
+				
+				if(svp)
+				{
+					var sv = chart.resultRowCell(data[i], svp);
+					sd.value.push(sv);
+					
+					min = (min == undefined ? sv : Math.min(min, sv));
+					max = (max == undefined ? sv : Math.max(max, sv));
+				}
+				
+				if(tip)
+					td.id = chart.resultRowCell(data[i], tip);
+				
+				if(tcp)
+				{
+					var category = chart.resultRowCell(data[i], tcp);
+					if(category)
+					{
+						td.category = chartSupport.appendDistinct(categories, {name: category}, "name");
+						chartSupport.appendDistinct(legendData, category);
+					}
+				}
+				
+				if(tvp)
+				{
+					var tv = chart.resultRowCell(data[i], tvp);
+					td.value.push(tv);
+					
+					min = (min == undefined ? tv : Math.min(min, tv));
+					max = (max == undefined ? tv : Math.max(max, tv));
+				}
+				
+				var sidx = chartSupport.appendDistinct(seriesData, sd, (sip ? "id" : "name"));
+				var tidx = chartSupport.appendDistinct(seriesData, td, (tip ? "id" : "name"));
+
+				//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引，所以这里直接使用数据索引
+				var link = {};
+				link.source = sidx;
+				link.target = tidx;
+				
+				seriesLinks.push(link);
+			}
+		}
+		
+		if(min != null && max != null && max <= min)
+			max = min + 1;
+		
+		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, categories: categories, data: seriesData, links: seriesLinks }) ];
+		
+		//自动计算散点大小
+		if(series[0].symbolSize == null)
+		{
+			series[0].symbolSize = function(value, params)
+			{
+				if(value && value.length > 2)
+					value = value[2];
+				
+				if(value == null)
+					return symbolSizeMin;
+				
+				return chartSupport.scatterEvalSymbolSize(value, min, max, symbolSizeMax, symbolSizeMin);
+			};
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
 		options = chart.optionsModified(options);
 		
-		var map = (options.geo ? options.geo.map : undefined);
-		
-		if(!map)
-		{
-			var eleMap = chart.map();
-			if(eleMap && eleMap != chart.extValue("mapPresetMap"))
-			{
-				options.geo = {map: eleMap};
-				map = eleMap;
-			}
-		}
-		
-		if(map)
-		{
-			chart.extValue("mapPresetMap", map);
-			chart.map(map);
-		}
-		
-		if(!map || chart.echartsMapRegistered(map))
-		{
-			chart.echartsOptions(options, false);
-			chart.statusUpdated(true);
-		}
-		else
-		{
-			chart.echartsMapLoad(map, function()
-			{
-				chart.echartsOptions(options, false);
-				chart.statusUpdated(true);
-			});
-		}
+		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
-
+	
 	//K线图
 	
 	chartSupport.candlestickRender = function(chart, coordSign, openSign, closeSign, minSign, maxSign, options)
@@ -1605,7 +1762,7 @@
 			series: [{
 				name: "",
 				type: "sankey",
-		        layout: 'none',
+		        layout: "none",
 				data: [],
 				links: [],
 				left: "16%",
@@ -1719,7 +1876,7 @@
 			series: [{
 				name: "",
 				type: "graph",
-		        layout: 'force',
+		        layout: "force",
 				data: [],
 				links: [],
 				legendHoverLink: true,
@@ -1753,7 +1910,7 @@
 		var seriesLinks = [];
 		
 		var min = undefined, max = undefined;
-		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions, 0.1);
+		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
 		var symbolSizeMin = chartSupport.scatterSymbolSizeMin(chart, initOptions, symbolSizeMax);
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -1854,7 +2011,7 @@
 				if(value && value.length > 0)
 					value = value[0];
 				
-				if(!value)
+				if(value == null)
 					return symbolSizeMin;
 				
 				return chartSupport.scatterEvalSymbolSize(value, min, max, symbolSizeMax, symbolSizeMin);
