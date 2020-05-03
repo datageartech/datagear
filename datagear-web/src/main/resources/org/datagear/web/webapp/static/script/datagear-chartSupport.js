@@ -1671,8 +1671,11 @@
 			
 			for(var i=0; i<data.length; i++)
 			{
-				var sd = { id: chart.resultRowCell(data[i], sip), name: chart.resultRowCell(data[i], snp) };
-				var td = { id: chart.resultRowCell(data[i], tip), name: chart.resultRowCell(data[i], tnp) };
+				var sd = { name: chart.resultRowCell(data[i], snp) };
+				var td = { name: chart.resultRowCell(data[i], tnp) };
+				
+				if(sip)
+					sd.id = chart.resultRowCell(data[i], sip);
 				
 				if(scp)
 				{
@@ -1683,6 +1686,7 @@
 						chartSupport.appendDistinct(legendData, category);
 					}
 				}
+				
 				if(svp)
 				{
 					sd.value = chart.resultRowCell(data[i], svp);
@@ -1690,6 +1694,10 @@
 					min = (min == undefined ? sd.value : Math.min(min, sd.value));
 					max = (max == undefined ? sd.value : Math.max(max, sd.value));
 				}
+				
+				if(tip)
+					td.id = chart.resultRowCell(data[i], tip);
+				
 				if(tcp)
 				{
 					var category = chart.resultRowCell(data[i], tcp);
@@ -1699,6 +1707,7 @@
 						chartSupport.appendDistinct(legendData, category);
 					}
 				}
+				
 				if(tvp)
 				{
 					td.value = chart.resultRowCell(data[i], tvp);
@@ -1707,8 +1716,8 @@
 					max = (max == undefined ? td.value : Math.max(max, td.value));
 				}
 				
-				var sidx = chartSupport.appendDistinct(seriesData, sd, "id");
-				var tidx = chartSupport.appendDistinct(seriesData, td, "id");
+				var sidx = chartSupport.appendDistinct(seriesData, sd, (sip ? "id" : "name"));
+				var tidx = chartSupport.appendDistinct(seriesData, td, (tip ? "id" : "name"));
 
 				//如果使用id值表示关系，对于数值型id，echarts会误当做数据索引，所以这里直接使用数据索引
 				var link = {};
