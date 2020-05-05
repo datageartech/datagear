@@ -22,6 +22,7 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.ParameterSqlResolver.ParameterSql;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.QueryResultSet;
+import org.datagear.util.Sql;
 import org.datagear.util.resource.ConnectionFactory;
 
 /**
@@ -45,6 +46,8 @@ public class SqlDataSet extends AbstractDataSet
 	private ConnectionFactory connectionFactory;
 
 	private String sql;
+
+	private SqlDataSetSqlResolver sqlDataSetSqlResolver;
 
 	public SqlDataSet()
 	{
@@ -79,6 +82,16 @@ public class SqlDataSet extends AbstractDataSet
 		this.sql = sql;
 	}
 
+	public SqlDataSetSqlResolver getSqlDataSetSqlResolver()
+	{
+		return sqlDataSetSqlResolver;
+	}
+
+	public void setSqlDataSetSqlResolver(SqlDataSetSqlResolver sqlDataSetSqlResolver)
+	{
+		this.sqlDataSetSqlResolver = sqlDataSetSqlResolver;
+	}
+
 	@Override
 	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
 	{
@@ -94,9 +107,16 @@ public class SqlDataSet extends AbstractDataSet
 			throw new SqlDataSetConnectionException(e);
 		}
 
+		String sql = this.sql;
+		if (this.sqlDataSetSqlResolver != null)
+		{
+			Sql sqlObj = this.sqlDataSetSqlResolver.resolve(this, paramValues);
+			sql = sqlObj.getSqlValue();
+		}
+
 		try
 		{
-			return getResult(cn, this.sql, paramValues);
+			return getResult(cn, sql, paramValues);
 		}
 		finally
 		{
@@ -150,7 +170,7 @@ public class SqlDataSet extends AbstractDataSet
 		try
 		{
 			qrs = getSqlDataSetSupport().buildQueryResultSet(cn, sql, dataSetParams, paramValues);
-			return toDataSet(cn, qrs.getResultSet());
+			return toDataSetResult(cn, qrs.getResultSet());
 		}
 		catch (SQLException e)
 		{
@@ -171,7 +191,7 @@ public class SqlDataSet extends AbstractDataSet
 	 * @return
 	 * @throws SQLException
 	 */
-	public DataSetResult toDataSet(Connection cn, ResultSet rs) throws SQLException
+	public DataSetResult toDataSetResult(Connection cn, ResultSet rs) throws SQLException
 	{
 		List<Map<String, ?>> datas = getSqlDataSetSupport().resolveDatas(cn, rs, getProperties());
 		MapDataSetResult result = new MapDataSetResult(datas);

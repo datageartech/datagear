@@ -59,7 +59,7 @@ public class SqlDataSetTest extends DBTestSupport
 				}
 			}
 
-			String sql = "SELECT ID, NAME FROM T_ACCOUNT WHERE ID = #{id} AND NAME != #{name}";
+			String sql = "SELECT ID, NAME FROM T_ACCOUNT <#if id??>WHERE ID = ${id} AND NAME != '${name}'</#if>";
 
 			List<DataSetProperty> dataSetProperties = Arrays.asList(new DataSetProperty("ID", DataType.INTEGER),
 					new DataSetProperty("NAME", DataType.STRING));
@@ -68,32 +68,12 @@ public class SqlDataSetTest extends DBTestSupport
 
 			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetProperties, connectionFactory, sql);
 			sqlDataSet.setParams(dataSetParams);
+			sqlDataSet.setSqlDataSetSqlResolver(new SqlDataSetFmkSqlResolver());
 
 			{
 				Map<String, Object> dataSetParamValues = new HashMap<String, Object>();
-				dataSetParamValues.put("id", recordId);
+				dataSetParamValues.put("id", recordId + "");
 				dataSetParamValues.put("name", "name-for-test");
-
-				DataSetResult dataSetResult = sqlDataSet.getResult(dataSetParamValues);
-
-				@SuppressWarnings("unchecked")
-				List<Map<String, ?>> datas = (List<Map<String, ?>>) dataSetResult.getDatas();
-
-				Assert.assertEquals(1, datas.size());
-
-				{
-					Map<String, ?> row = datas.get(0);
-
-					Assert.assertEquals(2, row.size());
-					Assert.assertEquals(Long.toString(recordId), row.get("ID").toString());
-					Assert.assertEquals(recordName, row.get("NAME"));
-				}
-			}
-
-			{
-				Map<String, Object> dataSetParamValues = new HashMap<String, Object>();
-				dataSetParamValues.put("id", recordId);
-				dataSetParamValues.put("name", "${(SELECT 'name-for-test' FROM T_ACCOUNT WHERE ID=" + recordId + ")}");
 
 				DataSetResult dataSetResult = sqlDataSet.getResult(dataSetParamValues);
 
