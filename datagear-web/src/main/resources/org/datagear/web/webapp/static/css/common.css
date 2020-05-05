@@ -587,7 +587,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 
 /*提示框*/
 .ui-tooltip{
-	max-width: unset;/*取消宽度限制*/
+	max-width: 80%;
 }
 .ui-tooltip .ui-tooltip-content a{
 	font-weight: bold;
@@ -604,7 +604,6 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .ui-tooltip .ui-tooltip-content .content{
 	padding-left:0.5em;
 	padding-right:0.5em;
-	white-space: nowrap;
 }
 .ui-tooltip .ui-tooltip-content .content .content-value{
 	display: inline-block;
