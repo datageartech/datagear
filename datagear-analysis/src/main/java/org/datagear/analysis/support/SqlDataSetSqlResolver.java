@@ -6,10 +6,11 @@ package org.datagear.analysis.support;
 
 import java.util.Map;
 
-import org.datagear.util.Sql;
-
 /**
- * {@linkplain SqlDataSet}至{@linkplain Sql}解析器。
+ * {@linkplain SqlDataSet}的SQL语句解析器。
+ * <p>
+ * 比如，当{@linkplain SqlDataSet#getSql()}是某种模板语言时。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -24,5 +25,5 @@ public interface SqlDataSetSqlResolver
 	 * @return
 	 * @throws SqlDataSetSqlResolverException
 	 */
-	Sql resolve(SqlDataSet sqlDataSet, Map<String, ?> dataSetParamValues) throws SqlDataSetSqlResolverException;
+	String resolve(SqlDataSet sqlDataSet, Map<String, ?> dataSetParamValues) throws SqlDataSetSqlResolverException;
 }

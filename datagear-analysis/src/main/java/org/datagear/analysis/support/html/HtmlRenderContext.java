@@ -61,7 +61,10 @@ public interface HtmlRenderContext extends RenderContext
 		private String dashboardIdParam = "dashboardId";
 
 		/** 更新看板数据的图表集参数名 */
-		private String chartsIdParam = "chartsId";
+		private String chartIdsParam = "chartsId";
+
+		/** 更新看板数据的图表集参数值的参数名 */
+		private String chartsParamValuesParam = "chartsParamValues";
 
 		public WebContext()
 		{
@@ -105,22 +108,32 @@ public interface HtmlRenderContext extends RenderContext
 			this.dashboardIdParam = dashboardIdParam;
 		}
 
-		public String getChartsIdParam()
+		public String getChartIdsParam()
 		{
-			return chartsIdParam;
+			return chartIdsParam;
 		}
 
-		public void setChartsIdParam(String chartsIdParam)
+		public void setChartIdsParam(String chartIdsParam)
 		{
-			this.chartsIdParam = chartsIdParam;
+			this.chartIdsParam = chartIdsParam;
+		}
+
+		public String getChartsParamValuesParam()
+		{
+			return chartsParamValuesParam;
+		}
+
+		public void setChartsParamValuesParam(String chartsParamValuesParam)
+		{
+			this.chartsParamValuesParam = chartsParamValuesParam;
 		}
 
 		@Override
 		public String toString()
 		{
 			return getClass().getSimpleName() + " [contextPath=" + contextPath + ", updateDashboardURL="
-					+ updateDashboardURL + ", dashboardIdParam=" + dashboardIdParam + ", chartsIdParam=" + chartsIdParam
-					+ "]";
+					+ updateDashboardURL + ", dashboardIdParam=" + dashboardIdParam + ", chartIdsParam=" + chartIdsParam
+					+ ", chartsParamValuesParam=" + chartsParamValuesParam + "]";
 		}
 	}
 }

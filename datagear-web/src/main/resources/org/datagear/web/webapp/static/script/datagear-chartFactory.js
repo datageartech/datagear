@@ -416,12 +416,31 @@
 	chartBase.paramValue = function(name, value)
 	{
 		if(value == undefined)
-			return (this.params ? this.params[name] : undefined);
+			return (this.paramValueMap ? this.paramValueMap[name] : undefined);
 		else
 		{
-			if(!this.params)
-				this.params = {};
-			this.params[name] = value;
+			if(!this.paramValueMap)
+				this.paramValueMap = {};
+			this.paramValueMap[name] = value;
+		}
+	};
+	
+	/**
+	 * 获取图表所有参数值/设置图表多个参数值。
+	 * 
+	 * @param paramValues 要设置的多个参数值，可选，不设置则执行获取操作
+	 */
+	chartBase.paramValues = function(paramValues)
+	{
+		if(!this.paramValueMap)
+			this.paramValueMap = {};
+		
+		if(paramValues == undefined)
+			return this.paramValueMap;
+		else
+		{
+			for(var name in paramValues)
+				this.paramValueMap[name] = paramValues[name];
 		}
 	};
 	

@@ -9,10 +9,13 @@ package org.datagear.web.controller;
 
 import java.io.Serializable;
 import java.io.Writer;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -108,8 +111,7 @@ public class AbstractDataAnalysisController extends AbstractController
 	 * @param id
 	 * @return
 	 */
-	protected String resolveDashboardResName(HttpServletRequest request, HttpServletResponse response,
-			String id)
+	protected String resolveDashboardResName(HttpServletRequest request, HttpServletResponse response, String id)
 	{
 		String pathInfo = request.getPathInfo();
 
@@ -130,14 +132,18 @@ public class AbstractDataAnalysisController extends AbstractController
 	 * @param response
 	 * @param model
 	 * @param webContext
+	 * @param dashboardParams
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	protected Map<String, DataSetResult[]> getDashboardData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, WebContext webContext) throws Exception
+			org.springframework.ui.Model model, WebContext webContext, Map<String, ?> dashboardParams) throws Exception
 	{
-		String dashboardId = request.getParameter(webContext.getDashboardIdParam());
-		String[] chartsId = request.getParameterValues(webContext.getChartsIdParam());
+		String dashboardId = (String) dashboardParams.get(webContext.getDashboardIdParam());
+		Collection<String> chartIds = (Collection<String>) dashboardParams.get(webContext.getChartIdsParam());
+		Map<String, Map<String, ?>> chartsParamValues = (Map<String, Map<String, ?>>) dashboardParams
+				.get(webContext.getChartsParamValuesParam());
 
 		if (StringUtil.isEmpty(dashboardId))
 			throw new IllegalInputException();
@@ -149,12 +155,18 @@ public class AbstractDataAnalysisController extends AbstractController
 		if (dashboard == null)
 			throw new RecordNotFoundException();
 
-		Map<String, ?> dataSetParamValues = new HashMap<String, Object>();
-
-		if (chartsId == null || chartsId.length == 0)
-			return dashboard.getDataSetResults(dataSetParamValues);
+		if (chartIds == null || chartIds.isEmpty())
+			return dashboard.getDataSetResults();
 		else
-			return dashboard.getDataSetResults(Arrays.asList(chartsId), dataSetParamValues);
+		{
+			if (chartsParamValues == null)
+				chartsParamValues = Collections.EMPTY_MAP;
+
+			Set<String> chartIdSet = new HashSet<>(chartIds.size());
+			chartIdSet.addAll(chartIds);
+
+			return dashboard.getDataSetResults(chartIdSet, chartsParamValues);
+		}
 	}
 
 	protected SessionHtmlTplDashboardManager getSessionHtmlTplDashboardManagerNotNull(HttpServletRequest request)
@@ -198,7 +210,7 @@ public class AbstractDataAnalysisController extends AbstractController
 		public synchronized void put(HtmlTplDashboard dashboard)
 		{
 			if (this.htmlTplDashboards == null)
-				this.htmlTplDashboards = new HashMap<String, HtmlTplDashboard>();
+				this.htmlTplDashboards = new HashMap<>();
 
 			this.htmlTplDashboards.put(dashboard.getId(), dashboard);
 		}

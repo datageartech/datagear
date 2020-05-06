@@ -7,10 +7,11 @@
  */
 package org.datagear.analysis;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 看板。
@@ -98,22 +99,26 @@ public class Dashboard extends AbstractIdentifiable
 	}
 
 	/**
-	 * 获取此看板的所有数据集结果。
+	 * 获取此看板所有无需参数的图表的数据集结果。
 	 * 
-	 * @param dataSetParamValues
 	 * @return
 	 * @throws DataSetException
 	 */
-	public Map<String, DataSetResult[]> getDataSetResults(Map<String, ?> dataSetParamValues) throws DataSetException
+	public Map<String, DataSetResult[]> getDataSetResults() throws DataSetException
 	{
-		Map<String, DataSetResult[]> resultsMap = new HashMap<String, DataSetResult[]>();
+		Map<String, DataSetResult[]> resultsMap = new HashMap<>();
 
 		if (this.charts == null || this.charts.isEmpty())
 			return resultsMap;
 
+		Map<String, Object> dataSetParams = new HashMap<>();
+
 		for (Chart chart : this.charts)
 		{
-			DataSetResult[] results = chart.getDataSetResults(dataSetParamValues);
+			if (!chart.isReadyForDataSetResults(dataSetParams))
+				continue;
+
+			DataSetResult[] results = chart.getDataSetResults(dataSetParams);
 
 			if (results != null)
 				resultsMap.put(chart.getId(), results);
@@ -126,14 +131,15 @@ public class Dashboard extends AbstractIdentifiable
 	 * 获取此看板指定图表ID集的数据集结果。
 	 * 
 	 * @param chartIds
-	 * @param dataSetParamValues
+	 * @param dataSetParamValuess
 	 * @return
 	 * @throws DataSetException
 	 */
-	public Map<String, DataSetResult[]> getDataSetResults(Collection<String> chartIds,
-			Map<String, ?> dataSetParamValues) throws DataSetException
+	@SuppressWarnings("unchecked")
+	public Map<String, DataSetResult[]> getDataSetResults(Set<String> chartIds,
+			Map<String, Map<String, ?>> dataSetParamValuess) throws DataSetException
 	{
-		Map<String, DataSetResult[]> resultsMap = new HashMap<String, DataSetResult[]>();
+		Map<String, DataSetResult[]> resultsMap = new HashMap<>();
 
 		if (this.charts == null || this.charts.isEmpty())
 			return resultsMap;
@@ -143,10 +149,13 @@ public class Dashboard extends AbstractIdentifiable
 			if (!chartIds.contains(chart.getId()))
 				continue;
 
-			DataSetResult[] results = chart.getDataSetResults(dataSetParamValues);
+			Map<String, ?> myParamValues = (dataSetParamValuess == null ? null
+					: dataSetParamValuess.get(chart.getId()));
+			if (myParamValues == null)
+				myParamValues = Collections.EMPTY_MAP;
 
-			if (results != null)
-				resultsMap.put(chart.getId(), results);
+			DataSetResult[] results = chart.getDataSetResults(myParamValues);
+			resultsMap.put(chart.getId(), results);
 		}
 
 		return resultsMap;

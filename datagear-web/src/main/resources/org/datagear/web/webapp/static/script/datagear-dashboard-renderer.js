@@ -269,7 +269,7 @@
 		if(charts && charts.length)
 		{
 			for(var i=0; i<charts.length; i++)
-				data += "&" + webContext.chartsIdParam +"=" + encodeURIComponent(charts[i].id);
+				data += "&" + webContext.chartIdsParam +"=" + encodeURIComponent(charts[i].id);
 		}
 		
 		return data;

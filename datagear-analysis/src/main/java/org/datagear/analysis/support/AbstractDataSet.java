@@ -7,7 +7,6 @@
  */
 package org.datagear.analysis.support;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +120,23 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		return getDataNameAndTypeByName(this.exports, name);
 	}
 
+	@Override
+	public boolean isReady(Map<String, ?> paramValues)
+	{
+		if (!hasParam())
+			return true;
+
+		List<DataSetParam> params = getParams();
+
+		for (DataSetParam param : params)
+		{
+			if (param.isRequired() && !paramValues.containsKey(param.getName()))
+				return false;
+		}
+
+		return true;
+	}
+
 	/**
 	 * 获取输出值集。
 	 * 
@@ -134,7 +150,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		if (!hasExport())
 			return null;
 
-		Map<String, Object> exportValues = new HashMap<String, Object>();
+		Map<String, Object> exportValues = new HashMap<>();
 
 		for (DataSetExport expt : this.exports)
 		{
@@ -143,39 +159,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 
 		return exportValues;
-	}
-
-	/**
-	 * 获取指定名称的{@linkplain DataSetParam}，找不到将抛出{@linkplain DataSetParamNotFountException}。
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public DataSetParam getParamNotNull(String name) throws DataSetParamNotFountException
-	{
-		DataSetParam dataSetParam = getParam(name);
-
-		if (dataSetParam == null)
-			throw new DataSetParamNotFountException(name);
-
-		return dataSetParam;
-	}
-
-	/**
-	 * 获取指定名称列表的{@linkplain DataSetParam}列表，找不到将抛出{@linkplain DataSetParamNotFountException}。
-	 * 
-	 * @param names
-	 * @return
-	 * @throws DataSetParamNotFountException
-	 */
-	public List<DataSetParam> getDataSetParamsNotNull(List<String> names) throws DataSetParamNotFountException
-	{
-		List<DataSetParam> dataSetParams = new ArrayList<DataSetParam>(names.size());
-
-		for (String name : names)
-			dataSetParams.add(getParamNotNull(name));
-
-		return dataSetParams;
 	}
 
 	/**

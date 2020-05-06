@@ -7,14 +7,10 @@
  */
 package org.datagear.analysis.support;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,13 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataType;
-import org.datagear.analysis.support.ParameterSqlResolver.ParameterSql;
 import org.datagear.util.JdbcSupport;
-import org.datagear.util.JdbcUtil;
-import org.datagear.util.QueryResultSet;
 import org.datagear.util.SqlType;
 
 /**
@@ -39,202 +31,9 @@ import org.datagear.util.SqlType;
  */
 public class SqlDataSetSupport extends JdbcSupport
 {
-	protected static final ParameterSqlResolver PARAMETER_SQL_RESOLVER = new ParameterSqlResolver();
-
 	public SqlDataSetSupport()
 	{
 		super();
-	}
-
-	/**
-	 * 构建{@linkplain QueryResultSet}。
-	 * 
-	 * @param cn
-	 * @param sql
-	 * @param dataSetParams
-	 *            允许为{@code null}
-	 * @param paramValues
-	 *            当{@code dataSetParams}为{@code null}时，允许为{@code null}
-	 * @return
-	 * @throws SQLException
-	 */
-	public QueryResultSet buildQueryResultSet(Connection cn, String sql, List<DataSetParam> dataSetParams,
-			Map<String, ?> paramValues) throws SQLException
-	{
-		Statement st = null;
-		ResultSet rs = null;
-
-		try
-		{
-			if (dataSetParams == null || dataSetParams.isEmpty())
-			{
-				st = createQueryStatement(cn, ResultSet.TYPE_FORWARD_ONLY);
-				rs = st.executeQuery(sql);
-			}
-			else
-			{
-				PreparedStatement pst = createQueryPreparedStatement(cn, sql, ResultSet.TYPE_FORWARD_ONLY);
-				setPreparedStatementParams(pst, dataSetParams, paramValues);
-
-				st = pst;
-				rs = pst.executeQuery();
-			}
-		}
-		catch (SQLException e)
-		{
-			JdbcUtil.closeResultSet(rs);
-			JdbcUtil.closeStatement(st);
-
-			throw e;
-		}
-
-		return new QueryResultSet(st, rs);
-	}
-
-	/**
-	 * 设置参数值。
-	 * 
-	 * @param pst
-	 * @param params
-	 * @param paramValues
-	 * @throws SQLException
-	 */
-	public void setPreparedStatementParams(PreparedStatement pst, List<DataSetParam> params, Map<String, ?> paramValues)
-			throws SQLException, DataSetException
-	{
-		for (int i = 0, len = params.size(); i < len; i++)
-		{
-			DataSetParam dataSetParam = params.get(i);
-			Object value = paramValues.get(dataSetParam.getName());
-			if (value == null)
-				value = dataSetParam.getDefaultValue();
-
-			if (value == null && dataSetParam.isRequired())
-				throw new DataSetParamValueRequiredException(dataSetParam.getName());
-
-			setPreparedStatementParam(pst, i + 1, dataSetParam, value);
-		}
-	}
-
-	/**
-	 * 设置参数值。
-	 * 
-	 * @param pst
-	 * @param parameterIndex
-	 * @param dataSetParam
-	 * @param paramValue
-	 * @throws SQLException
-	 * @throws DataSetException
-	 */
-	public void setPreparedStatementParam(PreparedStatement pst, int parameterIndex, DataSetParam dataSetParam,
-			Object paramValue) throws SQLException, DataSetException
-	{
-		DataType dataType = dataSetParam.getType();
-
-		if (DataType.isString(dataType))
-		{
-			String value = null;
-
-			if (paramValue == null)
-				;
-			else if (paramValue instanceof String)
-				value = (String) paramValue;
-			else
-				throw new DataSetException("Type [" + paramValue.getClass().getName() + "] for [" + DataType.STRING
-						+ "] is not supported");
-
-			if (paramValue == null)
-				pst.setNull(parameterIndex, Types.VARCHAR);
-			else
-				pst.setString(parameterIndex, value);
-		}
-		else if (DataType.isBoolean(dataType))
-		{
-			boolean value = false;
-
-			if (paramValue == null)
-				;
-			else if (paramValue instanceof Boolean)
-				value = ((Boolean) paramValue).booleanValue();
-			else
-				throw new DataSetException("Type [" + paramValue.getClass().getName() + "] for [" + DataType.BOOLEAN
-						+ "] is not supported");
-
-			if (paramValue == null)
-				pst.setNull(parameterIndex, Types.BOOLEAN);
-			else
-				pst.setBoolean(parameterIndex, value);
-		}
-		else if (DataType.isInteger(dataType))
-		{
-			if (paramValue == null)
-				pst.setNull(parameterIndex, Types.INTEGER);
-			else if (paramValue instanceof BigInteger)
-				pst.setBigDecimal(parameterIndex, new BigDecimal((BigInteger) paramValue));
-			else if (paramValue instanceof Long)
-				pst.setLong(parameterIndex, (Long) paramValue);
-			else if (paramValue instanceof Number)
-				pst.setInt(parameterIndex, ((Number) paramValue).intValue());
-			else
-				throw new DataSetException("Type [" + paramValue.getClass().getName() + "] for [" + DataType.INTEGER
-						+ "] is not supported");
-		}
-		else if (DataType.isDecimal(dataType))
-		{
-			if (paramValue == null)
-				pst.setNull(parameterIndex, Types.DECIMAL);
-			else if (paramValue instanceof BigDecimal)
-				pst.setBigDecimal(parameterIndex, (BigDecimal) paramValue);
-			else if (paramValue instanceof BigInteger)
-				pst.setBigDecimal(parameterIndex, new BigDecimal((BigInteger) paramValue));
-			else if (paramValue instanceof Double)
-				pst.setDouble(parameterIndex, (Double) paramValue);
-			else if (paramValue instanceof Float)
-				pst.setFloat(parameterIndex, (Float) paramValue);
-			else if (paramValue instanceof Number)
-				pst.setDouble(parameterIndex, ((Number) paramValue).doubleValue());
-			else
-				throw new DataSetException("Type [" + paramValue.getClass().getName() + "] for [" + DataType.DECIMAL
-						+ "] is not supported");
-		}
-		else if (DataType.isDate(dataType))
-		{
-			if (paramValue == null)
-				pst.setNull(parameterIndex, Types.DATE);
-			else if (paramValue instanceof java.sql.Date)
-				pst.setDate(parameterIndex, (java.sql.Date) paramValue);
-			else if (paramValue instanceof java.util.Date)
-				pst.setDate(parameterIndex, new java.sql.Date(((java.util.Date) paramValue).getTime()));
-			else
-				throw new DataSetException(
-						"Type [" + paramValue.getClass().getName() + "] for [" + DataType.DATE + "] is not supported");
-		}
-		else if (DataType.isTime(dataType))
-		{
-			if (paramValue == null)
-				pst.setNull(parameterIndex, Types.TIME);
-			else if (paramValue instanceof java.sql.Time)
-				pst.setTime(parameterIndex, (java.sql.Time) paramValue);
-			else if (paramValue instanceof java.util.Date)
-				pst.setTime(parameterIndex, new java.sql.Time(((java.util.Date) paramValue).getTime()));
-			else
-				throw new DataSetException(
-						"Type [" + paramValue.getClass().getName() + "] for [" + DataType.TIME + "] is not supported");
-		}
-		else if (DataType.isTimestamp(dataType))
-		{
-			if (paramValue == null)
-				pst.setNull(parameterIndex, Types.TIMESTAMP);
-			else if (paramValue instanceof java.sql.Timestamp)
-				pst.setTimestamp(parameterIndex, (java.sql.Timestamp) paramValue);
-			else if (paramValue instanceof java.util.Date)
-				pst.setTimestamp(parameterIndex, new java.sql.Timestamp(((java.util.Date) paramValue).getTime()));
-			else
-				throw new DataSetException(
-						"Type [" + paramValue.getClass().getName() + "] for [" + DataType.TIME + "] is not supported");
-		}
-		else
-			throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -623,34 +422,6 @@ public class SqlDataSetSupport extends JdbcSupport
 		}
 
 		return dataType;
-	}
-
-	/**
-	 * 解析SQL语句参数名列表。
-	 * 
-	 * @param sql
-	 * @return
-	 */
-	public List<String> resolveParams(String sql)
-	{
-		return getParameterSqlResolver().resolve(sql);
-	}
-
-	/**
-	 * 解析{@linkplain ParameterSql}。
-	 * 
-	 * @param sql
-	 * @param paramValues
-	 * @return
-	 */
-	public ParameterSql evalParameterSql(String sql, Map<String, ?> paramValues)
-	{
-		return getParameterSqlResolver().evaluate(sql, paramValues);
-	}
-
-	protected ParameterSqlResolver getParameterSqlResolver()
-	{
-		return PARAMETER_SQL_RESOLVER;
 	}
 
 	protected DataSetProperty createDataSetProperty()

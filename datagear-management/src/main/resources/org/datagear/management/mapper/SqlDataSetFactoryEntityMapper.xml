@@ -30,11 +30,11 @@
 	<insert id="insertParamPO">
 		INSERT INTO DATAGEAR_DATA_SET_PAR
 			(
-			PAR_DS_ID, PAR_NAME, PAR_TYPE, PAR_REQUIRED, PAR_DEFAULT_VALUE, PAR_ORDER
+			PAR_DS_ID, PAR_NAME, PAR_TYPE, PAR_REQUIRED, PAR_DESC, PAR_ORDER
 			)
 		VALUES
 			(
-			#{dataSetId}, #{child.name}, #{child.type}, #{child.required}, #{child.defaultValue, jdbcType=VARCHAR}, #{order}
+			#{dataSetId}, #{child.name}, #{child.type}, #{child.required}, #{child.desc, jdbcType=VARCHAR}, #{order}
 			)
 	</insert>
 	
@@ -112,7 +112,7 @@
 			PAR_NAME AS ${_iq_}child.name${_iq_},
 			PAR_TYPE AS ${_iq_}child.type${_iq_},
 			PAR_REQUIRED AS ${_iq_}child.required${_iq_},
-			PAR_DEFAULT_VALUE AS ${_iq_}child.defaultValue${_iq_},
+			PAR_DESC AS ${_iq_}child.desc${_iq_},
 			PAR_ORDER AS ${_iq_}order${_iq_}
 		FROM
 			DATAGEAR_DATA_SET_PAR

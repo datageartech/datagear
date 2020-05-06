@@ -63,7 +63,7 @@ public class SqlDataSetTest extends DBTestSupport
 
 			List<DataSetProperty> dataSetProperties = Arrays.asList(new DataSetProperty("ID", DataType.INTEGER),
 					new DataSetProperty("NAME", DataType.STRING));
-			List<DataSetParam> dataSetParams = Arrays.asList(new DataSetParam("id", DataType.INTEGER, true),
+			List<DataSetParam> dataSetParams = Arrays.asList(new DataSetParam("id", DataType.STRING, true),
 					new DataSetParam("name", DataType.STRING, true));
 
 			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetProperties, connectionFactory, sql);
@@ -71,8 +71,8 @@ public class SqlDataSetTest extends DBTestSupport
 			sqlDataSet.setSqlDataSetSqlResolver(new SqlDataSetFmkSqlResolver());
 
 			{
-				Map<String, Object> dataSetParamValues = new HashMap<String, Object>();
-				dataSetParamValues.put("id", recordId + "");
+				Map<String, Object> dataSetParamValues = new HashMap<>();
+				dataSetParamValues.put("id", Long.toString(recordId));
 				dataSetParamValues.put("name", "name-for-test");
 
 				DataSetResult dataSetResult = sqlDataSet.getResult(dataSetParamValues);

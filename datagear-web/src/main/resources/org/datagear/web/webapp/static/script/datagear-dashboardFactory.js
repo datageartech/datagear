@@ -153,8 +153,10 @@
 			var dashboard = this;
 			
 			$.ajax({
+				contentType : "application/json",
+				type : "POST",
 				url : webContext.updateDashboardURL,
-				data : data,
+				data : JSON.stringify(data),
 				success : function(resultsMap)
 				{
 					dashboard.updateCharts(resultsMap);
@@ -315,12 +317,22 @@
 	{
 		var webContext = this.renderContext.webContext;
 		
-		var data = webContext.dashboardIdParam + "=" + encodeURIComponent(this.id);
+		var data = {};
+		data[webContext.dashboardIdParam] = this.id;
 		
 		if(charts && charts.length)
 		{
+			var chartIds = [];
+			var chartsParamValues = {};
+			
 			for(var i=0; i<charts.length; i++)
-				data += "&" + webContext.chartsIdParam +"=" + encodeURIComponent(charts[i].id);
+			{
+				chartIds[i] = charts[i].id;
+				chartsParamValues[charts[i].id] = charts[i].paramValues();
+			}
+			
+			data[webContext.chartIdsParam] = chartIds;
+			data[webContext.chartsParamValuesParam] = chartsParamValues;
 		}
 		
 		return data;

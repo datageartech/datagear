@@ -16,10 +16,8 @@ import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetResult;
-import org.datagear.analysis.support.ParameterSqlResolver.ParameterSql;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.QueryResultSet;
 import org.datagear.util.Sql;
@@ -28,12 +26,7 @@ import org.datagear.util.resource.ConnectionFactory;
 /**
  * SQL {@linkplain DataSet}。
  * <p>
- * 它的{@linkplain #setSql(String)}中可以包含<code>#{parameter}</code>格式的参数（<code>parameter</code>必须是在{@linkplain #getParams()}中预定义的），
- * 在{@linkplain #getResult(Map)}中会被替换为具体的参数值。
- * </p>
- * <p>
- * 它的{@linkplain DataSetParam#getDefaultValue()}值、{@linkplain #getResult(Map)}方法参数的映射值可以是{@linkplain ParameterSqlResolver#isLiteralParamValue(String)
- * 字面参数值}，具体参考{@linkplain ParameterSqlResolver#evaluate(String, Map)}。
+ * 此类的{@linkplain #getSqlDataSetSqlResolver()}默认为{@linkplain SqlDataSetFmkSqlResolver}，{@linkplain #getSql()}支持<code>Freemarker</code>模板语言。
  * </p>
  * 
  * @author datagear@163.com
@@ -41,13 +34,15 @@ import org.datagear.util.resource.ConnectionFactory;
  */
 public class SqlDataSet extends AbstractDataSet
 {
+	protected static final SqlDataSetSqlResolver SQL_DATA_SET_SQL_RESOLVER = new SqlDataSetFmkSqlResolver();
+
 	protected static final SqlDataSetSupport SQL_DATA_SET_SUPPORT = new SqlDataSetSupport();
 
 	private ConnectionFactory connectionFactory;
 
 	private String sql;
 
-	private SqlDataSetSqlResolver sqlDataSetSqlResolver;
+	private SqlDataSetSqlResolver sqlDataSetSqlResolver = SQL_DATA_SET_SQL_RESOLVER;
 
 	public SqlDataSet()
 	{
@@ -82,6 +77,11 @@ public class SqlDataSet extends AbstractDataSet
 		this.sql = sql;
 	}
 
+	public boolean hasSqlDataSetSqlResolver()
+	{
+		return (this.sqlDataSetSqlResolver != null);
+	}
+
 	public SqlDataSetSqlResolver getSqlDataSetSqlResolver()
 	{
 		return sqlDataSetSqlResolver;
@@ -95,6 +95,14 @@ public class SqlDataSet extends AbstractDataSet
 	@Override
 	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
 	{
+		if (paramValues == null)
+			paramValues = new HashMap<>(0);
+
+		String sql = getSql();
+
+		if (hasSqlDataSetSqlResolver())
+			sql = getSqlDataSetSqlResolver().resolve(this, paramValues);
+
 		Connection cn = null;
 
 		try
@@ -107,16 +115,9 @@ public class SqlDataSet extends AbstractDataSet
 			throw new SqlDataSetConnectionException(e);
 		}
 
-		String sql = this.sql;
-		if (this.sqlDataSetSqlResolver != null)
-		{
-			Sql sqlObj = this.sqlDataSetSqlResolver.resolve(this, paramValues);
-			sql = sqlObj.getSqlValue();
-		}
-
 		try
 		{
-			return getResult(cn, sql, paramValues);
+			return getResult(cn, sql);
 		}
 		finally
 		{
@@ -131,55 +132,31 @@ public class SqlDataSet extends AbstractDataSet
 	}
 
 	/**
-	 * 获取指定SQL的{@linkplain DataSetResult}。
+	 * 获取{@linkplain DataSetResult}。
 	 * 
 	 * @param cn
 	 * @param sql
 	 * @param paramValues
 	 * @return
 	 */
-	protected DataSetResult getResult(Connection cn, String sql, Map<String, ?> paramValues) throws DataSetException
+	protected DataSetResult getResult(Connection cn, String sql) throws DataSetException
 	{
-		List<String> paramNames = getSqlDataSetSupport().resolveParams(sql);
-		List<DataSetParam> dataSetParams = null;
-
-		if (!paramNames.isEmpty())
-		{
-			HashMap<String, Object> myParamValues = new HashMap<>();
-			if (paramValues != null)
-				myParamValues.putAll(paramValues);
-
-			dataSetParams = getDataSetParamsNotNull(paramNames);
-			for (DataSetParam dataSetParam : dataSetParams)
-			{
-				if (!myParamValues.containsKey(dataSetParam.getName()) && dataSetParam.hasDefaultValue())
-					myParamValues.put(dataSetParam.getName(), dataSetParam.getDefaultValue());
-			}
-
-			ParameterSql parameterSql = getSqlDataSetSupport().evalParameterSql(sql, myParamValues);
-
-			sql = parameterSql.getSql();
-			paramNames = parameterSql.getParameterNames();
-			dataSetParams = getDataSetParamsNotNull(paramNames);
-			parameterSql.addParameterValues(myParamValues);
-			paramValues = myParamValues;
-		}
+		Sql sqlObj = Sql.valueOf(sql);
 
 		QueryResultSet qrs = null;
 
 		try
 		{
-			qrs = getSqlDataSetSupport().buildQueryResultSet(cn, sql, dataSetParams, paramValues);
+			qrs = getSqlDataSetSupport().executeQuery(cn, sqlObj, ResultSet.TYPE_FORWARD_ONLY);
 			return toDataSetResult(cn, qrs.getResultSet());
 		}
 		catch (SQLException e)
 		{
-			throw new DataSetException(e);
+			throw new SqlDataSetSqlExecutionException(sql, e);
 		}
 		finally
 		{
-			if (qrs != null)
-				qrs.close();
+			QueryResultSet.close(qrs);
 		}
 	}
 

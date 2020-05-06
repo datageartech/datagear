@@ -77,10 +77,18 @@ public interface DataSet extends Identifiable
 	DataSetExport getExport(String name);
 
 	/**
+	 * 给定的参数映射表是否是为{@linkplain #getResult(Map)}准备好的。
+	 * 
+	 * @param paramValues
+	 * @return
+	 */
+	boolean isReady(Map<String, ?> paramValues);
+
+	/**
 	 * 获取{@linkplain DataSetResult}。
 	 * 
 	 * @param paramValues
-	 *            由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}
+	 *            由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}，允许为{@code null}
 	 * @return
 	 * @throws DataSetException
 	 */

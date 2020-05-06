@@ -18,8 +18,8 @@ public class DataSetParam extends DataNameAndType
 	/** 是否必须 */
 	private boolean required;
 
-	/** 默认值 */
-	private Object defaultValue;
+	/** 参数描述 */
+	private String desc;
 
 	public DataSetParam()
 	{
@@ -42,25 +42,25 @@ public class DataSetParam extends DataNameAndType
 		this.required = required;
 	}
 
-	public boolean hasDefaultValue()
+	public boolean hasDesc()
 	{
-		return (this.defaultValue != null);
+		return (this.desc != null && !this.desc.isEmpty());
 	}
 
-	public Object getDefaultValue()
+	public String getDesc()
 	{
-		return defaultValue;
+		return desc;
 	}
 
-	public void setDefaultValue(Object defaultValue)
+	public void setDesc(String desc)
 	{
-		this.defaultValue = defaultValue;
+		this.desc = desc;
 	}
 
 	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", required=" + required
-				+ ", defaultValue=" + defaultValue + "]";
+				+ "]";
 	}
 }

@@ -19,8 +19,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.datagear.util.Sql;
-
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -29,7 +27,10 @@ import freemarker.template.TemplateException;
 /**
  * Freemarker SQL模板{@linkplain SqlDataSetSqlResolver}。
  * <p>
- * 它将{@linkplain SqlDataSet#getSql()}作为Freemarker模板处理。
+ * 此类将{@linkplain SqlDataSet#getSql()}当作Freemarker模板语言，并返回处理后的SQL语句。
+ * </p>
+ * <p>
+ * 注意：为了提高效率，如果{@linkplain SqlDataSet#hasParam()}为{@code false}，此类将直接返回{@linkplain SqlDataSet#getSql()}而不做模板语言处理。
  * </p>
  * 
  * @author datagear@163.com
@@ -49,6 +50,7 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 		this.dataSetTemplateLoader.setCapacity(cacheCapacity);
 		this.configuration = new Configuration(Configuration.VERSION_2_3_30);
 		this.configuration.setTemplateLoader(this.dataSetTemplateLoader);
+		setSqlTemplateStandardConfig(this.configuration);
 		this.configuration.setCacheStorage(new freemarker.cache.MruCacheStorage(0, cacheCapacity));
 	}
 
@@ -73,14 +75,28 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 	public void setConfiguration(Configuration configuration)
 	{
 		this.configuration = configuration;
+		setSqlTemplateStandardConfig(this.configuration);
 
 		if (this.dataSetTemplateLoader != null)
 			this.configuration.setTemplateLoader(this.dataSetTemplateLoader);
 	}
 
-	@Override
-	public Sql resolve(SqlDataSet sqlDataSet, Map<String, ?> dataSetParamValues) throws SqlDataSetSqlResolverException
+	public void setSqlTemplateStandardConfig(Configuration configuration)
 	{
+		// 插值语法规范设置为："${...}"
+		configuration.setInterpolationSyntax(Configuration.DOLLAR_INTERPOLATION_SYNTAX);
+
+		// 标签语法规范设置为：<#if>...</#if>
+		configuration.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
+	}
+
+	@Override
+	public String resolve(SqlDataSet sqlDataSet, Map<String, ?> dataSetParamValues)
+			throws SqlDataSetSqlResolverException
+	{
+		if (!needHandleAsTemplate(sqlDataSet))
+			return sqlDataSet.getSql();
+
 		this.dataSetTemplateLoader.updateTemplate(sqlDataSet);
 
 		String sql = null;
@@ -92,21 +108,26 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 			template.process(dataSetParamValues, out);
 			sql = out.toString();
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
 			throw new SqlDataSetSqlResolverException(e);
 		}
-		catch(TemplateException e)
+		catch (TemplateException e)
 		{
 			throw new SqlDataSetSqlResolverException(e);
 		}
 
-		return Sql.valueOf(sql);
+		return sql;
+	}
+
+	protected boolean needHandleAsTemplate(SqlDataSet sqlDataSet)
+	{
+		return sqlDataSet.hasParam();
 	}
 
 	public static class SqlDataSetTemplateLoader implements TemplateLoader
 	{
-		private Map<String, SqlDataSetTemplateSource> sqlDataSetTemplateSources = new HashMap<String, SqlDataSetTemplateSource>();
+		private Map<String, SqlDataSetTemplateSource> sqlDataSetTemplateSources = new HashMap<>();
 
 		private int capacity = 500;
 
@@ -148,7 +169,8 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 		 * 将{@linkplain SqlDataSet#getSql()}更新为Freemarker模板。
 		 * 
 		 * @param sqlDataSet
-		 * @return true 更新成功；false 未更新，因为{@linkplain SqlDataSet#getSql()}自上次以来未修改
+		 * @return true 更新成功；false
+		 *         未更新，因为{@linkplain SqlDataSet#getSql()}自上次以来未修改
 		 */
 		public boolean updateTemplate(SqlDataSet sqlDataSet)
 		{
@@ -176,14 +198,14 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 
 				long currentTime = System.currentTimeMillis();
 				long expiredTime = currentTime - this.expiredSeconds * 1000;
-				
+
 				SqlDataSetTemplateSource sts = new SqlDataSetTemplateSource(sqlDataSet, currentTime);
 				this.sqlDataSetTemplateSources.put(templateName, sts);
 
 				if (this.sqlDataSetTemplateSources.size() >= this.capacity)
 				{
 					Collection<SqlDataSetTemplateSource> stss = this.sqlDataSetTemplateSources.values();
-					List<SqlDataSetTemplateSource> list = new ArrayList<SqlDataSetTemplateSource>(stss.size());
+					List<SqlDataSetTemplateSource> list = new ArrayList<>(stss.size());
 					list.addAll(stss);
 					Collections.sort(list, MRU_COMPARATOR);
 
@@ -192,10 +214,12 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 					int count = 0;
 					for (SqlDataSetTemplateSource ele : list)
 					{
-						if(count > this.capacity || ele.getLastModified() < expiredTime)
+						if (count > this.capacity || ele.getLastModified() < expiredTime)
 							break;
 
 						this.sqlDataSetTemplateSources.put(templateName, ele);
+
+						count++;
 					}
 				}
 

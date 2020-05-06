@@ -35,8 +35,7 @@ public class Chart extends ChartDefinition
 		this.renderContext = renderContext;
 	}
 
-	public Chart(ChartDefinition chartDefinition, ChartPlugin<?> plugin,
-			RenderContext renderContext)
+	public Chart(ChartDefinition chartDefinition, ChartPlugin<?> plugin, RenderContext renderContext)
 	{
 		super(chartDefinition.getId(), chartDefinition.getName(), chartDefinition.getChartDataSets());
 		setProperties(chartDefinition.getProperties());
@@ -65,6 +64,28 @@ public class Chart extends ChartDefinition
 	public void setPlugin(ChartPlugin<?> plugin)
 	{
 		this.plugin = plugin;
+	}
+
+	/**
+	 * 是否已准备齐全执行{@linkplain #getDataSetResults(Map)}的参数。
+	 * 
+	 * @param dataSetParamValues
+	 * @return
+	 */
+	public boolean isReadyForDataSetResults(Map<String, ?> dataSetParamValues)
+	{
+		ChartDataSet[] chartDataSets = getChartDataSets();
+
+		if (chartDataSets == null || chartDataSets.length == 0)
+			return true;
+
+		for (ChartDataSet chartDataSet : chartDataSets)
+		{
+			if (!chartDataSet.getDataSet().isReady(dataSetParamValues))
+				return false;
+		}
+
+		return true;
 	}
 
 	/**

@@ -734,8 +734,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @throws Exception
 	 */
 	@RequestMapping("/showStyle")
-	public void showStyle(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model) throws Exception
+	public void showStyle(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
+			throws Exception
 	{
 		// 不缓存
 		response.setDateHeader("Expires", -1);
@@ -754,7 +754,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			style.append(".dg-chart-table .dg-chart-table-content table.dataTable tbody tr{\n");
 			style.append("background:" + chartTheme.getBackgroundColor() + ";\n");
 			style.append("}\n");
-			
+
 			// 表格奇数行
 			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody tr.odd,\n"
 					+ " .dg-chart-table .dg-chart-table-content table.dataTable.display tbody tr.odd{\n");
@@ -804,10 +804,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, DataSetResult[]> showData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model) throws Exception
+			org.springframework.ui.Model model, @RequestBody Map<String, ?> paramData) throws Exception
 	{
 		WebContext webContext = createWebContext(request);
-		return getDashboardData(request, response, model, webContext);
+		return getDashboardData(request, response, model, webContext, paramData);
 	}
 
 	/**

@@ -355,10 +355,10 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@RequestMapping(value = "/showData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, DataSetResult[]> showData(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model) throws Exception
+			org.springframework.ui.Model model, @RequestBody Map<String, ?> paramData) throws Exception
 	{
 		WebContext webContext = createWebContext(request);
-		return getDashboardData(request, response, model, webContext);
+		return getDashboardData(request, response, model, webContext, paramData);
 	}
 
 	/**
@@ -392,8 +392,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		Writer out = response.getWriter();
 
 		RenderStyle renderStyle = resolveRenderStyle(request);
-		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), renderStyle,
-				out);
+		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), renderStyle, out);
 		DashboardTheme dashboardTheme = getChartShowHtmlTplDashboardWidgetHtmlRenderer()
 				.inflateDashboardTheme(renderContext, renderStyle);
 		AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler(
