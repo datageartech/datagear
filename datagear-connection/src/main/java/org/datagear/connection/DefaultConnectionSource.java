@@ -175,7 +175,7 @@ public class DefaultConnectionSource implements ConnectionSource
 				Connection preferedConnection = getConnection(preferedDriver, connectionOption);
 
 				if (LOGGER.isDebugEnabled())
-					LOGGER.debug("Got prefered connection by cached [" + preferedDriverEntity + "] for ["
+					LOGGER.debug("Get prefered connection by cached [" + preferedDriverEntity + "] for ["
 							+ connectionOption + "]");
 
 				return preferedConnection;
@@ -183,7 +183,7 @@ public class DefaultConnectionSource implements ConnectionSource
 			else
 			{
 				if (LOGGER.isDebugEnabled())
-					LOGGER.debug("Got null connection by cached no-prefered " + DriverEntity.class.getSimpleName()
+					LOGGER.debug("Get null connection by cached no-prefered " + DriverEntity.class.getSimpleName()
 							+ " for [" + connectionOption + "]");
 
 				throw new UnsupportedGetConnectionException(connectionOption);
@@ -228,9 +228,8 @@ public class DefaultConnectionSource implements ConnectionSource
 				}
 				else
 				{
-					if (LOGGER.isDebugEnabled())
-						LOGGER.debug(
-								"Getting connection with [" + driverEntity + "]  for [" + connectionOption + "] error",
+					if (LOGGER.isErrorEnabled())
+						LOGGER.error("Get connection with [" + driverEntity + "]  for [" + connectionOption + "] error",
 								e);
 				}
 			}
@@ -271,8 +270,8 @@ public class DefaultConnectionSource implements ConnectionSource
 			}
 			catch (Throwable t)
 			{
-				if (LOGGER.isDebugEnabled())
-					LOGGER.debug("Getting Driver with [" + driverEntity + "] for getting prefered connection for ["
+				if (LOGGER.isErrorEnabled())
+					LOGGER.error("Get Driver with [" + driverEntity + "] for getting prefered connection for ["
 							+ connectionOption + "] error", t);
 			}
 
@@ -286,8 +285,8 @@ public class DefaultConnectionSource implements ConnectionSource
 				}
 				catch (Throwable t)
 				{
-					if (LOGGER.isDebugEnabled())
-						LOGGER.debug("Checking if url accepted with [" + driverEntity
+					if (LOGGER.isErrorEnabled())
+						LOGGER.error("Check if url accepted with [" + driverEntity
 								+ "] for getting prefered connection for [" + connectionOption + "] error", t);
 				}
 
@@ -304,8 +303,8 @@ public class DefaultConnectionSource implements ConnectionSource
 					}
 					catch (Throwable t)
 					{
-						if (LOGGER.isDebugEnabled())
-							LOGGER.debug("checking if [" + driverEntity
+						if (LOGGER.isErrorEnabled())
+							LOGGER.error("Check if [" + driverEntity
 									+ "] 's driver checked for getting prefered connection for [" + connectionOption
 									+ "] error", t);
 					}
