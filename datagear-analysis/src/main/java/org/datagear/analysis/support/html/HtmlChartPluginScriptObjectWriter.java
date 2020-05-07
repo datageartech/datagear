@@ -105,7 +105,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 			super(plugin.getId(), plugin.getNameLabel());
 			setDescLabel(plugin.getDescLabel());
 			setManualLabel(plugin.getManualLabel());
-			setChartProperties(plugin.getChartProperties());
+			setChartParams(plugin.getChartParams());
 			setDataSigns(plugin.getDataSigns());
 			setVersion(plugin.getVersion());
 			setOrder(plugin.getOrder());

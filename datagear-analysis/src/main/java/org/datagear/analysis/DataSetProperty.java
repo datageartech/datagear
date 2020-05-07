@@ -10,16 +10,20 @@ package org.datagear.analysis;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.util.StringUtil;
 
 /**
- * 数据集属性元信息。
+ * 数据集属性信息。
+ * <p>
+ * 此类描述{@linkplain DataSet#getResult(Map)}返回的{@linkplain DataSetResult#getDatas()}元素的属性信息。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class DataSetProperty extends DataNameAndType implements Serializable
+public class DataSetProperty extends AbstractDataNameType implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 

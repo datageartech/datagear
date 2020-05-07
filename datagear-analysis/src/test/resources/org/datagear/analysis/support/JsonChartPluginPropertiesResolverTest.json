@@ -32,7 +32,7 @@
 		'LIGHT' :  'icon-0.png',
 		'DARK' :  'icon-1.png'
 	},
-	chartProperties :
+	chartParams :
 	[
   		{
 			name : 'title',
@@ -65,7 +65,7 @@
 		},
 		{
 			name : 'interval',
-			type : 'NUMBER',
+			type : 'INTEGER',
 			nameLabel :
 			{
 				value : '间隔',

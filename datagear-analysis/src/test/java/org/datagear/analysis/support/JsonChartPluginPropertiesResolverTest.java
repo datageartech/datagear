@@ -2,26 +2,18 @@ package org.datagear.analysis.support;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.ChartProperty;
+import org.datagear.analysis.ChartParam;
 import org.datagear.analysis.DataSign;
-import org.datagear.analysis.PropertyType;
+import org.datagear.analysis.DataType;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
-import org.datagear.analysis.constraint.Constraint;
-import org.datagear.analysis.constraint.Max;
-import org.datagear.analysis.constraint.MaxLength;
-import org.datagear.analysis.constraint.Min;
-import org.datagear.analysis.constraint.MinLength;
-import org.datagear.analysis.constraint.Required;
 import org.datagear.util.i18n.Label;
 import org.junit.Assert;
 import org.junit.Test;
@@ -51,7 +43,7 @@ public class JsonChartPluginPropertiesResolverTest
 			Assert.assertNotNull(chartPlugin.getDescLabel());
 			Assert.assertNotNull(chartPlugin.getManualLabel());
 			Assert.assertNotNull(chartPlugin.getIcons());
-			Assert.assertNotNull(chartPlugin.getChartProperties());
+			Assert.assertNotNull(chartPlugin.getChartParams());
 			Assert.assertNotNull(chartPlugin.getDataSigns());
 			Assert.assertEquals("0.1.0", chartPlugin.getVersion());
 			Assert.assertEquals(2, chartPlugin.getOrder());
@@ -86,58 +78,40 @@ public class JsonChartPluginPropertiesResolverTest
 				Assert.assertEquals("icon-1.png", icons.get(RenderStyle.DARK).getLocation());
 			}
 
-			List<ChartProperty> chartProperties = chartPlugin.getChartProperties();
+			List<ChartParam> chartParams = chartPlugin.getChartParams();
 
 			{
-				ChartProperty chartProperty = chartProperties.get(0);
+				ChartParam chartParam = chartParams.get(0);
 
-				Assert.assertEquals("title", chartProperty.getName());
-				Assert.assertEquals(PropertyType.STRING, chartProperty.getType());
-				Assert.assertEquals("pie chart", chartProperty.getDefaultValue());
+				Assert.assertEquals("title", chartParam.getName());
+				Assert.assertEquals(DataType.STRING, chartParam.getType());
 
-				Label nameLabel = chartProperty.getNameLabel();
+				Label nameLabel = chartParam.getNameLabel();
 				Assert.assertEquals("标题", nameLabel.getValue());
 				Assert.assertEquals("title", nameLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("标题中文", nameLabel.getValue(Label.toLocale("zh")));
 
-				Label descLabel = chartProperty.getDescLabel();
+				Label descLabel = chartParam.getDescLabel();
 				Assert.assertEquals("标题描述", descLabel.getValue());
 				Assert.assertEquals("title desc", descLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("标题描述中文", descLabel.getValue(Label.toLocale("zh")));
-
-				Set<Constraint> constraints = chartProperty.getConstraints();
-				Set<Constraint> constraintsExpected = new HashSet<Constraint>();
-				constraintsExpected.add(new Required(true));
-				constraintsExpected.add(new MaxLength(20));
-				constraintsExpected.add(new MinLength(10));
-
-				Assert.assertEquals(constraintsExpected, constraints);
 			}
 
 			{
-				ChartProperty chartProperty = chartProperties.get(1);
+				ChartParam chartParam = chartParams.get(1);
 
-				Assert.assertEquals("interval", chartProperty.getName());
-				Assert.assertEquals(PropertyType.NUMBER, chartProperty.getType());
-				Assert.assertEquals(5, ((Number) chartProperty.getDefaultValue()).intValue());
+				Assert.assertEquals("interval", chartParam.getName());
+				Assert.assertEquals(DataType.INTEGER, chartParam.getType());
 
-				Label nameLabel = chartProperty.getNameLabel();
+				Label nameLabel = chartParam.getNameLabel();
 				Assert.assertEquals("间隔", nameLabel.getValue());
 				Assert.assertEquals("interval", nameLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("间隔中文", nameLabel.getValue(Label.toLocale("zh")));
 
-				Label descLabel = chartProperty.getDescLabel();
+				Label descLabel = chartParam.getDescLabel();
 				Assert.assertEquals("间隔描述", descLabel.getValue());
 				Assert.assertEquals("interval desc", descLabel.getValue(Label.toLocale("en")));
 				Assert.assertEquals("间隔描述中文", descLabel.getValue(Label.toLocale("zh")));
-
-				Set<Constraint> constraints = chartProperty.getConstraints();
-				Set<Constraint> constraintsExpected = new HashSet<Constraint>();
-				constraintsExpected.add(new Required(false));
-				constraintsExpected.add(new Max(30));
-				constraintsExpected.add(new Min(5));
-
-				Assert.assertEquals(constraintsExpected, constraints);
 			}
 
 			List<DataSign> dataSigns = chartPlugin.getDataSigns();

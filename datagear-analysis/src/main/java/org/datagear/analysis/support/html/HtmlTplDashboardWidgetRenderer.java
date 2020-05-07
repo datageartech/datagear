@@ -732,7 +732,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 				"HtmlChartWidgetForWidgetGetException", ChartDefinition.EMPTY_CHART_DATA_SET,
 				this.htmlChartPluginForWidgetGetException);
 
-		widget.setProperty(PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION,
+		widget.setChartParamValue(PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION,
 				"Chart '" + (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
 
 		return widget;
@@ -744,7 +744,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 				"HtmlChartWidgetForWidgetNotFound", ChartDefinition.EMPTY_CHART_DATA_SET,
 				this.htmlChartPluginForWidgetNotFound);
 
-		widget.setProperty(PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND,
+		widget.setChartParamValue(PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND,
 				"Chart '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
 
 		return widget;
@@ -756,7 +756,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 				"HtmlChartWidgetForWidgetPluginNull", ChartDefinition.EMPTY_CHART_DATA_SET,
 				this.htmlChartPluginForWidgetPluginNull);
 
-		widget.setProperty(PROPERTY_VALUE_FOR_PLUGIN_NULL,
+		widget.setChartParamValue(PROPERTY_VALUE_FOR_PLUGIN_NULL,
 				"Chart plugin for rendering chart '" + chartWidget.getName() + "' not found");
 
 		return widget;

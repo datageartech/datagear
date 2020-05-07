@@ -18,7 +18,7 @@ import java.io.Serializable;
  * @author datagear@163.com
  *
  */
-public abstract class DataSetExport extends DataNameAndType implements Serializable
+public abstract class DataSetExport extends AbstractDataNameType implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 

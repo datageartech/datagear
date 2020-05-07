@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
-import org.datagear.analysis.DataNameAndType;
+import org.datagear.analysis.DataNameType;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetExport;
@@ -73,7 +73,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	@Override
 	public DataSetProperty getProperty(String name)
 	{
-		return getDataNameAndTypeByName(this.properties, name);
+		return getDataNameTypeByName(this.properties, name);
 	}
 
 	public boolean hasParam()
@@ -95,7 +95,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	@Override
 	public DataSetParam getParam(String name)
 	{
-		return getDataNameAndTypeByName(this.params, name);
+		return getDataNameTypeByName(this.params, name);
 	}
 
 	public boolean hasExport()
@@ -117,7 +117,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	@Override
 	public DataSetExport getExport(String name)
 	{
-		return getDataNameAndTypeByName(this.exports, name);
+		return getDataNameTypeByName(this.exports, name);
 	}
 
 	@Override
@@ -162,7 +162,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 获取指定名称的{@linkplain DataNameAndType}对象，没找到则返回{@code null}。
+	 * 获取指定名称的{@linkplain DataNameType}对象，没找到则返回{@code null}。
 	 * 
 	 * @param <T>
 	 * @param list
@@ -170,7 +170,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @param name
 	 * @return
 	 */
-	protected <T extends DataNameAndType> T getDataNameAndTypeByName(List<T> list, String name)
+	protected <T extends DataNameType> T getDataNameTypeByName(List<T> list, String name)
 	{
 		if (list != null)
 		{

@@ -21,8 +21,8 @@ public class ChartDefinition extends AbstractIdentifiable
 {
 	public static final String PROPERTY_NAME = "name";
 	public static final String PROPERTY_CHARTDATASETS = "chartDataSets";
-	public static final String PROPERTY_PROPERTIES = "properties";
-	public static final String PROPERTY_PARAMS = "params";
+	public static final String PROPERTY_CHART_PARAM_VALUES = "chartParamValues";
+	public static final String PROPERTY_DATA_SET_PARAM_VALUES = "dataSetParamValues";
 	public static final String PROPERTY_UPDATE_INTERVAL = "updateInterval";
 
 	public static final ChartDataSet[] EMPTY_CHART_DATA_SET = new ChartDataSet[0];
@@ -33,11 +33,11 @@ public class ChartDefinition extends AbstractIdentifiable
 	/** 图表数据集 */
 	private ChartDataSet[] chartDataSets = EMPTY_CHART_DATA_SET;
 
-	/** 图表属性映射表 */
-	private Map<String, Object> properties = new HashMap<String, Object>();
+	/** 图表参数值映射表 */
+	private Map<String, Object> chartParamValues = new HashMap<>();
 
-	/** 图表数据集参数映射表 */
-	private Map<String, Object> params = new HashMap<String, Object>();
+	/** 数据集参数值映射表 */
+	private Map<String, Object> dataSetParamValues = new HashMap<>();
 
 	/** 图表更新间隔毫秒数 */
 	private int updateInterval = -1;
@@ -74,24 +74,24 @@ public class ChartDefinition extends AbstractIdentifiable
 		this.chartDataSets = chartDataSets;
 	}
 
-	public Map<String, Object> getProperties()
+	public Map<String, Object> getChartParamValues()
 	{
-		return properties;
+		return chartParamValues;
 	}
 
-	public void setProperties(Map<String, Object> properties)
+	public void setChartParamValues(Map<String, Object> chartParamValues)
 	{
-		this.properties = properties;
+		this.chartParamValues = chartParamValues;
 	}
 
-	public Map<String, Object> getParams()
+	public Map<String, Object> getDataSetParamValues()
 	{
-		return params;
+		return dataSetParamValues;
 	}
 
-	public void setParams(Map<String, Object> params)
+	public void setDataSetParamValues(Map<String, Object> dataSetParamValues)
 	{
-		this.params = params;
+		this.dataSetParamValues = dataSetParamValues;
 	}
 
 	/**
@@ -110,49 +110,49 @@ public class ChartDefinition extends AbstractIdentifiable
 	}
 
 	/**
-	 * 获取图表属性。
+	 * 获取图表参数值。
 	 * 
 	 * @param name
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T getProperty(String name)
+	public <T> T getChartParamValue(String name)
 	{
-		return (T) this.properties.get(name);
+		return (T) this.chartParamValues.get(name);
 	}
 
 	/**
-	 * 设置图表属性。
+	 * 设置图表参数值。
 	 * 
 	 * @param name
 	 * @param value
 	 */
-	public void setProperty(String name, Object value)
+	public void setChartParamValue(String name, Object value)
 	{
-		this.properties.put(name, value);
+		this.chartParamValues.put(name, value);
 	}
 
 	/**
-	 * 获取图表数据集参数。
+	 * 获取图表数据集参数值。
 	 * 
 	 * @param name
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T getParam(String name)
+	public <T> T getDataSetParamValue(String name)
 	{
-		return (T) this.params.get(name);
+		return (T) this.dataSetParamValues.get(name);
 	}
 
 	/**
-	 * 设置图表数据集参数。
+	 * 设置图表数据集参数值。
 	 * 
 	 * @param name
 	 * @param value
 	 */
-	public void setParam(String name, Object value)
+	public void setDataSetParamValue(String name, Object value)
 	{
-		this.params.put(name, value);
+		this.dataSetParamValues.put(name, value);
 	}
 
 	@Override
@@ -172,8 +172,8 @@ public class ChartDefinition extends AbstractIdentifiable
 		to.setId(from.getId());
 		to.setName(from.name);
 		to.setChartDataSets(from.chartDataSets);
-		to.setProperties(from.properties);
-		to.setParams(from.params);
+		to.setChartParamValues(from.chartParamValues);
+		to.setDataSetParamValues(from.dataSetParamValues);
 		to.setUpdateInterval(from.updateInterval);
 	}
 }

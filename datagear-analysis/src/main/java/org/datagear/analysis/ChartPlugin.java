@@ -28,7 +28,7 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable, Labe
 	String PROPERTY_DESC_LABEL = Labeled.PROPERTY_DESC_LABEL;
 	String PROPERTY_MANUAL_LABEL = "manualLabel";
 	String PROPERTY_ICONS = "icons";
-	String PROPERTY_CHART_PROPERTIES = "chartProperties";
+	String PROPERTY_CHART_PARAMS = "chartParams";
 	String PROPERTY_DATA_SIGNS = "dataSigns";
 	String PROPERTY_VERSION = "version";
 	String PROPERTY_ORDER = "order";
@@ -74,22 +74,22 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable, Labe
 	Icon getIcon(RenderStyle renderStyle);
 
 	/**
-	 * 获取{@linkplain ChartProperty}列表。
+	 * 获取{@linkplain ChartParam}列表。
 	 * <p>
 	 * 返回{@code null}表示没有。
 	 * </p>
 	 * 
 	 * @return
 	 */
-	List<ChartProperty> getChartProperties();
+	List<ChartParam> getChartParams();
 
 	/**
-	 * 获取指定名称的{@linkplain ChartProperty}，没有找到则返回{@code null}。
+	 * 获取指定名称的{@linkplain ChartParam}，没有找到则返回{@code null}。
 	 * 
 	 * @param name
 	 * @return
 	 */
-	ChartProperty getChartProperty(String name);
+	ChartParam getChartParam(String name);
 
 	/**
 	 * 获取{@linkplain DataSign}列表。
