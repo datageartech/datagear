@@ -147,8 +147,7 @@ public class Dashboard extends AbstractIdentifiable
 			if (!chartIds.contains(chart.getId()))
 				continue;
 
-			Map<String, ?> myParamValues = (dataSetParamValuess == null ? null
-					: dataSetParamValuess.get(chart.getId()));
+			Map<String, ?> myParamValues = dataSetParamValuess.get(chart.getId());
 			if (myParamValues == null)
 				myParamValues = Collections.EMPTY_MAP;
 

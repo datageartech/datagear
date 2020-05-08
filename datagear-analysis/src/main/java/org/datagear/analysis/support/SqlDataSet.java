@@ -10,7 +10,6 @@ package org.datagear.analysis.support;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,8 +40,6 @@ public class SqlDataSet extends AbstractDataSet
 	private ConnectionFactory connectionFactory;
 
 	private String sql;
-
-	private SqlDataSetSqlResolver sqlDataSetSqlResolver = SQL_DATA_SET_SQL_RESOLVER;
 
 	public SqlDataSet()
 	{
@@ -77,30 +74,12 @@ public class SqlDataSet extends AbstractDataSet
 		this.sql = sql;
 	}
 
-	public boolean hasSqlDataSetSqlResolver()
-	{
-		return (this.sqlDataSetSqlResolver != null);
-	}
-
-	public SqlDataSetSqlResolver getSqlDataSetSqlResolver()
-	{
-		return sqlDataSetSqlResolver;
-	}
-
-	public void setSqlDataSetSqlResolver(SqlDataSetSqlResolver sqlDataSetSqlResolver)
-	{
-		this.sqlDataSetSqlResolver = sqlDataSetSqlResolver;
-	}
-
 	@Override
 	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
 	{
-		if (paramValues == null)
-			paramValues = new HashMap<>(0);
-
 		String sql = getSql();
 
-		if (hasSqlDataSetSqlResolver())
+		if (getSqlDataSetSqlResolver() != null)
 			sql = getSqlDataSetSqlResolver().resolve(this, paramValues);
 
 		Connection cn = null;
@@ -129,6 +108,11 @@ public class SqlDataSet extends AbstractDataSet
 			{
 			}
 		}
+	}
+
+	protected SqlDataSetSqlResolver getSqlDataSetSqlResolver()
+	{
+		return SQL_DATA_SET_SQL_RESOLVER;
 	}
 
 	/**

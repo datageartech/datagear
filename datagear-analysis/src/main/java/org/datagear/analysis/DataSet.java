@@ -84,8 +84,7 @@ public interface DataSet extends Identifiable
 	/**
 	 * 获取{@linkplain DataSetResult}。
 	 * 
-	 * @param paramValues
-	 *            由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}，允许为{@code null}
+	 * @param paramValues 由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}
 	 * @return
 	 * @throws DataSetException
 	 */
