@@ -68,7 +68,6 @@ public class SqlDataSetTest extends DBTestSupport
 
 			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetProperties, connectionFactory, sql);
 			sqlDataSet.setParams(dataSetParams);
-			sqlDataSet.setSqlDataSetSqlResolver(new SqlDataSetFmkSqlResolver());
 
 			{
 				Map<String, Object> dataSetParamValues = new HashMap<>();

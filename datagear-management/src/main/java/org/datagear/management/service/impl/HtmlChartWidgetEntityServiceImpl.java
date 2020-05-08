@@ -344,11 +344,7 @@ public class HtmlChartWidgetEntityServiceImpl
 		{
 			ChartDataSet chartDataSet = chartDataSets[i];
 
-			String propertySignsJson = "";
-			if (chartDataSet.hasPropertySign())
-			{
-				propertySignsJson = JsonSupport.generate(chartDataSet.getPropertySigns(), "");
-			}
+			String propertySignsJson = JsonSupport.generate(chartDataSet.getPropertySigns(), "");
 
 			WidgetDataSetRelation relation = new WidgetDataSetRelation(obj.getId(), chartDataSet.getDataSet().getId(),
 					i + 1);

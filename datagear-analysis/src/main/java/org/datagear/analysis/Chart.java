@@ -37,7 +37,6 @@ public class Chart extends ChartDefinition
 	{
 		super(chartDefinition.getId(), chartDefinition.getName(), chartDefinition.getChartDataSets());
 		setChartParamValues(chartDefinition.getChartParamValues());
-		setDataSetParamValues(chartDefinition.getDataSetParamValues());
 		setUpdateInterval(chartDefinition.getUpdateInterval());
 
 		this.plugin = plugin;

@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -142,7 +143,7 @@ public class AbstractDataAnalysisController extends AbstractController
 	{
 		String dashboardId = (String) dashboardParams.get(webContext.getDashboardIdParam());
 		Collection<String> chartIds = (Collection<String>) dashboardParams.get(webContext.getChartIdsParam());
-		Map<String, Map<String, ?>> chartsParamValues = (Map<String, Map<String, ?>>) dashboardParams
+		Map<String, ? extends List<? extends Map<String, ?>>> chartsParamValues = (Map<String, ? extends List<? extends Map<String, ?>>>) dashboardParams
 				.get(webContext.getChartsParamValuesParam());
 
 		if (StringUtil.isEmpty(dashboardId))

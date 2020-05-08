@@ -99,28 +99,21 @@ public class Dashboard extends AbstractIdentifiable
 	}
 
 	/**
-	 * 获取此看板所有无需参数的图表的数据集结果。
+	 * 获取此看板所有图表的默认数据集结果。
 	 * 
-	 * @return
+	 * @return 返回映射表的值数组元素可能为{@code null}，具体参考{@linkplain ChartDefinition#getDataSetResults()}
 	 * @throws DataSetException
 	 */
+	@SuppressWarnings("unchecked")
 	public Map<String, DataSetResult[]> getDataSetResults() throws DataSetException
 	{
+		if (this.charts == null || this.charts.isEmpty())
+			return Collections.EMPTY_MAP;
+
 		Map<String, DataSetResult[]> resultsMap = new HashMap<>();
 
-		if (this.charts == null || this.charts.isEmpty())
-			return resultsMap;
-
 		for (Chart chart : this.charts)
-		{
-			if (!chart.isReadyForDataSetResults())
-				continue;
-
-			DataSetResult[] results = chart.getDataSetResults();
-
-			if (results != null)
-				resultsMap.put(chart.getId(), results);
-		}
+			resultsMap.put(chart.getId(), chart.getDataSetResults());
 
 		return resultsMap;
 	}
@@ -133,9 +126,8 @@ public class Dashboard extends AbstractIdentifiable
 	 * @return
 	 * @throws DataSetException
 	 */
-	@SuppressWarnings("unchecked")
 	public Map<String, DataSetResult[]> getDataSetResults(Set<String> chartIds,
-			Map<String, Map<String, ?>> dataSetParamValuess) throws DataSetException
+			Map<String, ? extends List<? extends Map<String, ?>>> dataSetParamValuess) throws DataSetException
 	{
 		Map<String, DataSetResult[]> resultsMap = new HashMap<>();
 
@@ -147,9 +139,7 @@ public class Dashboard extends AbstractIdentifiable
 			if (!chartIds.contains(chart.getId()))
 				continue;
 
-			Map<String, ?> myParamValues = dataSetParamValuess.get(chart.getId());
-			if (myParamValues == null)
-				myParamValues = Collections.EMPTY_MAP;
+			List<? extends Map<String, ?>> myParamValues = dataSetParamValuess.get(chart.getId());
 
 			DataSetResult[] results = chart.getDataSetResults(myParamValues);
 			resultsMap.put(chart.getId(), results);

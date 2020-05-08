@@ -328,7 +328,12 @@
 			for(var i=0; i<charts.length; i++)
 			{
 				chartIds[i] = charts[i].id;
-				chartsParamValues[charts[i].id] = charts[i].paramValues();
+				var chartDataSets = (charts[i].chartDataSets || []);
+				var myParamValuess = [];
+				for(var j=0; j<chartDataSets.length; j++)
+					myParamValuess.push({});
+				
+				chartsParamValues[charts[i].id] = myParamValuess;
 			}
 			
 			data[webContext.chartIdsParam] = chartIds;

@@ -9,6 +9,7 @@
 package org.datagear.analysis;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,9 +36,6 @@ public class ChartDefinition extends AbstractIdentifiable
 
 	/** 图表参数值映射表 */
 	private Map<String, Object> chartParamValues = new HashMap<>();
-
-	/** 数据集参数值映射表 */
-	private Map<String, Object> dataSetParamValues = new HashMap<>();
 
 	/** 图表更新间隔毫秒数 */
 	private int updateInterval = -1;
@@ -84,16 +82,6 @@ public class ChartDefinition extends AbstractIdentifiable
 		this.chartParamValues = chartParamValues;
 	}
 
-	public Map<String, Object> getDataSetParamValues()
-	{
-		return dataSetParamValues;
-	}
-
-	public void setDataSetParamValues(Map<String, Object> dataSetParamValues)
-	{
-		this.dataSetParamValues = dataSetParamValues;
-	}
-
 	/**
 	 * 获取图表更新间隔毫秒数。
 	 * 
@@ -133,83 +121,28 @@ public class ChartDefinition extends AbstractIdentifiable
 	}
 
 	/**
-	 * 获取图表数据集参数值。
+	 * 获取指定索引的默认{@linkplain DataSetResult}。
 	 * 
-	 * @param name
-	 * @return
+	 * @param index
+	 * @return 如果{@linkplain ChartDataSet#isResultReady()}为{@code false}，将返回{@code null}。
+	 * @throws DataSetException
 	 */
-	@SuppressWarnings("unchecked")
-	public <T> T getDataSetParamValue(String name)
+	public DataSetResult getDataSetResult(int index) throws DataSetException
 	{
-		return (T) this.dataSetParamValues.get(name);
+		if (this.chartDataSets[index].isResultReady())
+			return this.chartDataSets[index].getResult();
+		else
+			return null;
 	}
 
 	/**
-	 * 设置图表数据集参数值。
+	 * 获取默认{@linkplain DataSetResult}数组。
 	 * 
-	 * @param name
-	 * @param value
-	 */
-	public void setDataSetParamValue(String name, Object value)
-	{
-		this.dataSetParamValues.put(name, value);
-	}
-
-	/**
-	 * {@linkplain #getDataSetParamValues()}是否满足执行{@linkplain #getDataSetResults()}。
-	 * 
-	 * @return
-	 */
-	public boolean isReadyForDataSetResults()
-	{
-		return isReadyForDataSetResults(this.dataSetParamValues);
-	}
-
-	/**
-	 * 给定参数集是否满足执行{@linkplain #getDataSetResults(Map)}。
-	 * 
-	 * @param dataSetParamValues
-	 * @return
-	 */
-	public boolean isReadyForDataSetResults(Map<String, ?> dataSetParamValues)
-	{
-		if (this.chartDataSets == null || this.chartDataSets.length == 0)
-			return true;
-
-		for (ChartDataSet chartDataSet : this.chartDataSets)
-		{
-			if (!chartDataSet.getDataSet().isReady(dataSetParamValues))
-				return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * 获取此图表的所有{@linkplain DataSetResult}。
-	 * </p>
-	 * 调用此方法前应该确保{@linkplain #isReadyForDataSetResults()}返回{@code true}。
-	 * </p>
-	 * 
-	 * @return
+	 * @return 如果{@linkplain #getChartDataSets()}指定索引的{@linkplain ChartDataSet#isResultReady()}为{@code false}，
+	 *         返回数组对应元素将为{@code null}。
 	 * @throws DataSetException
 	 */
 	public DataSetResult[] getDataSetResults() throws DataSetException
-	{
-		return getDataSetResults(this.dataSetParamValues);
-	}
-
-	/**
-	 * 获取此图表的所有{@linkplain DataSetResult}。
-	 * </p>
-	 * 调用此方法前应该确保{@linkplain #isReadyForDataSetResults(Map)}返回{@code true}。
-	 * </p>
-	 * 
-	 * @param dataSetParamValues
-	 * @return
-	 * @throws DataSetException
-	 */
-	public DataSetResult[] getDataSetResults(Map<String, ?> dataSetParamValues) throws DataSetException
 	{
 		if (this.chartDataSets == null || this.chartDataSets.length == 0)
 			return new DataSetResult[0];
@@ -217,7 +150,51 @@ public class ChartDefinition extends AbstractIdentifiable
 		DataSetResult[] results = new DataSetResult[this.chartDataSets.length];
 
 		for (int i = 0; i < this.chartDataSets.length; i++)
-			results[i] = this.chartDataSets[i].getDataSet().getResult(dataSetParamValues);
+			results[i] = getDataSetResult(i);
+
+		return results;
+	}
+
+	/**
+	 * 获取指定索引和参数的{@linkplain DataSetResult}。
+	 * 
+	 * @param index
+	 * @param dataSetParamValues 允许为{@code null}
+	 * @return 如果{@code dataSetParamValues}为{@code null}，或者{@linkplain ChartDataSet#isResultReady(Map)}为{@code false}，将返回{@code null}。
+	 * @throws DataSetException
+	 */
+	public DataSetResult getDataSetResult(int index, Map<String, ?> dataSetParamValues) throws DataSetException
+	{
+		if (dataSetParamValues == null)
+			return null;
+		else if (this.chartDataSets[index].isResultReady(dataSetParamValues))
+			return this.chartDataSets[index].getResult(dataSetParamValues);
+		else
+			return null;
+	}
+
+	/**
+	 * 获取指定参数的{@linkplain DataSetResult}数组。
+	 * 
+	 * @param dataSetParamValuess 允许为{@code null}
+	 * @return 如果{@code dataSetParamValuess}指定元素为{@code null}，
+	 *         或者{@linkplain #getChartDataSets()}指定索引的{@linkplain ChartDataSet#isResultReady(Map)}为{@code false}，返回数组对应元素将为{@code null}。
+	 * @throws DataSetException
+	 */
+	public DataSetResult[] getDataSetResults(List<? extends Map<String, ?>> dataSetParamValuess) throws DataSetException
+	{
+		if (this.chartDataSets == null || this.chartDataSets.length == 0)
+			return new DataSetResult[0];
+
+		DataSetResult[] results = new DataSetResult[this.chartDataSets.length];
+
+		int pvSize = (dataSetParamValuess == null ? 0 : dataSetParamValuess.size());
+
+		for (int i = 0; i < this.chartDataSets.length; i++)
+		{
+			Map<String, ?> dataSetParamValues = (i >= pvSize ? null : dataSetParamValuess.get(i));
+			results[i] = getDataSetResult(i, dataSetParamValues);
+		}
 
 		return results;
 	}
@@ -240,7 +217,6 @@ public class ChartDefinition extends AbstractIdentifiable
 		to.setName(from.name);
 		to.setChartDataSets(from.chartDataSets);
 		to.setChartParamValues(from.chartParamValues);
-		to.setDataSetParamValues(from.dataSetParamValues);
 		to.setUpdateInterval(from.updateInterval);
 	}
 }

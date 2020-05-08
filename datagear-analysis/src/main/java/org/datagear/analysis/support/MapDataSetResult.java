@@ -7,11 +7,12 @@
  */
 package org.datagear.analysis.support;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetResult;
 
 /**
  * 映射表{@linkplain DataSetResult}。
@@ -26,7 +27,8 @@ public class MapDataSetResult implements DataSetResult
 {
 	private List<Map<String, ?>> datas;
 
-	private Map<String, ?> exportValues;
+	@SuppressWarnings("unchecked")
+	private Map<String, ?> exportValues = Collections.EMPTY_MAP;
 
 	public MapDataSetResult()
 	{
@@ -58,11 +60,6 @@ public class MapDataSetResult implements DataSetResult
 			return null;
 
 		return ((Map<String, Object>) data).get(name);
-	}
-
-	public boolean hasExportValue()
-	{
-		return (this.exportValues != null && !this.exportValues.isEmpty());
 	}
 
 	@Override
