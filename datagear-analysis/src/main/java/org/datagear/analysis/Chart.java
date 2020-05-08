@@ -8,8 +8,6 @@
 
 package org.datagear.analysis;
 
-import java.util.Map;
-
 /**
  * 图表。
  * 
@@ -64,52 +62,5 @@ public class Chart extends ChartDefinition
 	public void setPlugin(ChartPlugin<?> plugin)
 	{
 		this.plugin = plugin;
-	}
-
-	/**
-	 * 是否已准备齐全执行{@linkplain #getDataSetResults(Map)}的参数。
-	 * 
-	 * @param dataSetParamValues
-	 * @return
-	 */
-	public boolean isReadyForDataSetResults(Map<String, ?> dataSetParamValues)
-	{
-		ChartDataSet[] chartDataSets = getChartDataSets();
-
-		if (chartDataSets == null || chartDataSets.length == 0)
-			return true;
-
-		for (ChartDataSet chartDataSet : chartDataSets)
-		{
-			if (!chartDataSet.getDataSet().isReady(dataSetParamValues))
-				return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * 获取此图表的所有{@linkplain DataSetResult}。
-	 * 
-	 * @param dataSetParamValues
-	 * @return
-	 * @throws DataSetException
-	 */
-	public DataSetResult[] getDataSetResults(Map<String, ?> dataSetParamValues) throws DataSetException
-	{
-		ChartDataSet[] chartDataSets = getChartDataSets();
-
-		if (chartDataSets == null || chartDataSets.length == 0)
-			return new DataSetResult[0];
-
-		DataSetResult[] dataSets = new DataSetResult[chartDataSets.length];
-
-		for (int i = 0; i < chartDataSets.length; i++)
-		{
-			DataSetResult dataSetResult = chartDataSets[i].getDataSet().getResult(dataSetParamValues);
-			dataSets[i] = dataSetResult;
-		}
-
-		return dataSets;
 	}
 }

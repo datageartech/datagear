@@ -111,14 +111,12 @@ public class Dashboard extends AbstractIdentifiable
 		if (this.charts == null || this.charts.isEmpty())
 			return resultsMap;
 
-		Map<String, Object> dataSetParams = new HashMap<>();
-
 		for (Chart chart : this.charts)
 		{
-			if (!chart.isReadyForDataSetResults(dataSetParams))
+			if (!chart.isReadyForDataSetResults())
 				continue;
 
-			DataSetResult[] results = chart.getDataSetResults(dataSetParams);
+			DataSetResult[] results = chart.getDataSetResults();
 
 			if (results != null)
 				resultsMap.put(chart.getId(), results);

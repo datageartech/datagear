@@ -155,6 +155,73 @@ public class ChartDefinition extends AbstractIdentifiable
 		this.dataSetParamValues.put(name, value);
 	}
 
+	/**
+	 * {@linkplain #getDataSetParamValues()}是否满足执行{@linkplain #getDataSetResults()}。
+	 * 
+	 * @return
+	 */
+	public boolean isReadyForDataSetResults()
+	{
+		return isReadyForDataSetResults(this.dataSetParamValues);
+	}
+
+	/**
+	 * 给定参数集是否满足执行{@linkplain #getDataSetResults(Map)}。
+	 * 
+	 * @param dataSetParamValues
+	 * @return
+	 */
+	public boolean isReadyForDataSetResults(Map<String, ?> dataSetParamValues)
+	{
+		if (this.chartDataSets == null || this.chartDataSets.length == 0)
+			return true;
+
+		for (ChartDataSet chartDataSet : this.chartDataSets)
+		{
+			if (!chartDataSet.getDataSet().isReady(dataSetParamValues))
+				return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * 获取此图表的所有{@linkplain DataSetResult}。
+	 * </p>
+	 * 调用此方法前应该确保{@linkplain #isReadyForDataSetResults()}返回{@code true}。
+	 * </p>
+	 * 
+	 * @return
+	 * @throws DataSetException
+	 */
+	public DataSetResult[] getDataSetResults() throws DataSetException
+	{
+		return getDataSetResults(this.dataSetParamValues);
+	}
+
+	/**
+	 * 获取此图表的所有{@linkplain DataSetResult}。
+	 * </p>
+	 * 调用此方法前应该确保{@linkplain #isReadyForDataSetResults(Map)}返回{@code true}。
+	 * </p>
+	 * 
+	 * @param dataSetParamValues
+	 * @return
+	 * @throws DataSetException
+	 */
+	public DataSetResult[] getDataSetResults(Map<String, ?> dataSetParamValues) throws DataSetException
+	{
+		if (this.chartDataSets == null || this.chartDataSets.length == 0)
+			return new DataSetResult[0];
+
+		DataSetResult[] results = new DataSetResult[this.chartDataSets.length];
+
+		for (int i = 0; i < this.chartDataSets.length; i++)
+			results[i] = this.chartDataSets[i].getDataSet().getResult(dataSetParamValues);
+
+		return results;
+	}
+
 	@Override
 	public String toString()
 	{
