@@ -19,7 +19,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DashboardTheme;
@@ -34,6 +33,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
+import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
@@ -446,7 +446,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (isEmpty(chartDataSetIndexes))
 			return;
 
-		List<ChartDataSet> chartDataSets = new ArrayList<>();
+		List<ChartDataSetVO> chartDataSets = new ArrayList<>();
 
 		for (String chartDataSetIndex : chartDataSetIndexes)
 		{
@@ -487,14 +487,14 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 				}
 			}
 
-			ChartDataSet chartDataSet = new ChartDataSet();
+			ChartDataSetVO chartDataSet = new ChartDataSetVO();
 			chartDataSet.setDataSet(sqlDataSet);
 			chartDataSet.setPropertySigns(propertySigns);
 
 			chartDataSets.add(chartDataSet);
 		}
 
-		entity.setChartDataSets(chartDataSets.toArray(new ChartDataSet[chartDataSets.size()]));
+		entity.setChartDataSets(chartDataSets.toArray(new ChartDataSetVO[chartDataSets.size()]));
 	}
 
 	protected void checkSaveEntity(HtmlChartWidgetEntity chart)

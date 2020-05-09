@@ -11,11 +11,15 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartWidget;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.util.i18n.Label;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * HTML {@linkplain ChartWidget}实体。
@@ -30,6 +34,8 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 
 	/** 授权资源类型 */
 	public static final String AUTHORIZATION_RESOURCE_TYPE = "Chart";
+
+	protected static final ChartDataSetVO[] EMPTY_CHART_DATA_VO_SET = new ChartDataSetVO[0];
 
 	/** 创建用户 */
 	private User createUser;
@@ -46,17 +52,32 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 	public HtmlChartWidgetEntity()
 	{
 		super();
-		super.setChartDataSets(new ChartDataSet[0]);
+		super.setChartDataSets(EMPTY_CHART_DATA_VO_SET);
 		this.createTime = new Date();
 	}
 
-	public HtmlChartWidgetEntity(String id, String name, ChartDataSet[] chartDataSets,
-			HtmlChartPlugin<HtmlRenderContext> chartPlugin,
-			User createUser)
+	public HtmlChartWidgetEntity(String id, String name, ChartDataSetVO[] chartDataSets,
+			HtmlChartPlugin<HtmlRenderContext> chartPlugin, User createUser)
 	{
 		super(id, name, chartDataSets, chartPlugin);
+		super.setChartDataSets(EMPTY_CHART_DATA_VO_SET);
 		this.createUser = createUser;
 		this.createTime = new Date();
+	}
+
+	@Override
+	public ChartDataSetVO[] getChartDataSets()
+	{
+		return (ChartDataSetVO[]) super.getChartDataSets();
+	}
+
+	@Override
+	public void setChartDataSets(ChartDataSet[] chartDataSets)
+	{
+		if (chartDataSets != null && !(chartDataSets instanceof ChartDataSetVO[]))
+			throw new IllegalArgumentException();
+
+		super.setChartDataSets(chartDataSets);
 	}
 
 	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPlugin()
@@ -111,6 +132,13 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 	public void setChartPluginName(String chartPluginName)
 	{
 		this.chartPluginName = chartPluginName;
+	}
+
+	@JsonIgnore
+	@Override
+	public DataSetResult[] getDataSetResults() throws DataSetException
+	{
+		return super.getDataSetResults();
 	}
 
 	public void updateChartPluginName(Locale locale)

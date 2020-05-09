@@ -25,6 +25,7 @@ import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderContext;
+import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
@@ -247,20 +248,20 @@ public class HtmlChartWidgetEntityServiceImpl
 
 		List<WidgetDataSetRelation> relations = selectListMybatis("getDataSetRelations", sqlParams);
 
-		List<ChartDataSet> chartDataSets = new ArrayList<>(relations.size());
+		List<ChartDataSetVO> chartDataSets = new ArrayList<>(relations.size());
 
 		for (int i = 0; i < relations.size(); i++)
 		{
-			ChartDataSet chartDataSet = toChartDataSet(relations.get(i), forAnalysis);
+			ChartDataSetVO chartDataSet = toChartDataSet(relations.get(i), forAnalysis);
 
 			if (chartDataSet != null)
 				chartDataSets.add(chartDataSet);
 		}
 
-		widget.setChartDataSets(chartDataSets.toArray(new ChartDataSet[chartDataSets.size()]));
+		widget.setChartDataSets(chartDataSets.toArray(new ChartDataSetVO[chartDataSets.size()]));
 	}
 
-	protected ChartDataSet toChartDataSet(WidgetDataSetRelation relation, boolean forAnalysis)
+	protected ChartDataSetVO toChartDataSet(WidgetDataSetRelation relation, boolean forAnalysis)
 	{
 		if (relation == null || StringUtil.isEmpty(relation.getDataSetId()))
 			return null;
@@ -275,7 +276,7 @@ public class HtmlChartWidgetEntityServiceImpl
 		if (dataSet == null)
 			return null;
 
-		ChartDataSet chartDataSet = new ChartDataSet(dataSet);
+		ChartDataSetVO chartDataSet = new ChartDataSetVO(dataSet);
 		chartDataSet.setPropertySigns(toPropertySigns(relation.getPropertySignsJson()));
 
 		return chartDataSet;
