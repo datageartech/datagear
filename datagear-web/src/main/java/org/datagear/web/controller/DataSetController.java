@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataType;
-import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.SqlDataSetSupport;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SqlDataSetEntity;
@@ -49,8 +47,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class DataSetController extends AbstractSchemaConnController
 {
 	public static final int DEFAULT_SQL_RESULTSET_FETCH_SIZE = 20;
-
-	public static final String DATA_SET_PROPERTY_LABELS_SPLITTER = ",";
 
 	static
 	{
@@ -115,13 +111,12 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/saveAdd", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAdd(HttpServletRequest request, HttpServletResponse response,
-			SqlDataSetEntity dataSet)
+			@RequestBody SqlDataSetEntity dataSet)
 	{
 		User user = WebUtils.getUser(request, response);
 
 		dataSet.setId(IDUtil.randomIdOnTime20());
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
-		inflateDataSetProperties(request, dataSet);
 
 		checkSaveEntity(dataSet);
 
@@ -142,8 +137,8 @@ public class DataSetController extends AbstractSchemaConnController
 			throw new RecordNotFoundException();
 
 		model.addAttribute("dataSet", dataSet);
-		model.addAttribute("dataSetPropertyLabelsText",
-				DataSetProperty.concatLabels(dataSet.getProperties(), DATA_SET_PROPERTY_LABELS_SPLITTER));
+		model.addAttribute("dataSetProperties", toWriteJsonTemplateModel(dataSet.getProperties()));
+		model.addAttribute("dataSetParams", toWriteJsonTemplateModel(dataSet.getParams()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.editDataSet");
 		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
 
@@ -153,11 +148,9 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
-			SqlDataSetEntity dataSet)
+			@RequestBody SqlDataSetEntity dataSet)
 	{
 		User user = WebUtils.getUser(request, response);
-
-		inflateDataSetProperties(request, dataSet);
 
 		checkSaveEntity(dataSet);
 
@@ -178,8 +171,8 @@ public class DataSetController extends AbstractSchemaConnController
 			throw new RecordNotFoundException();
 
 		model.addAttribute("dataSet", dataSet);
-		model.addAttribute("dataSetPropertyLabelsText",
-				DataSetProperty.concatLabels(dataSet.getProperties(), DATA_SET_PROPERTY_LABELS_SPLITTER));
+		model.addAttribute("dataSetProperties", toWriteJsonTemplateModel(dataSet.getProperties()));
+		model.addAttribute("dataSetParams", toWriteJsonTemplateModel(dataSet.getParams()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.viewDataSet");
 		model.addAttribute(KEY_READONLY, true);
 
@@ -340,35 +333,6 @@ public class DataSetController extends AbstractSchemaConnController
 		}.execute();
 
 		return modelSqlResult;
-	}
-
-	protected void inflateDataSetProperties(HttpServletRequest request, AbstractDataSet dataSet)
-	{
-		String labelsText = request.getParameter("dataSetPropertyLabelsText");
-		if (labelsText == null)
-			labelsText = "";
-
-		String[] dataSetPropertyNames = request.getParameterValues("dataSetPropertyNames");
-		String[] dataSetPropertyTypes = request.getParameterValues("dataSetPropertyTypes");
-		String[] dataSetPropertyLabels = DataSetProperty.splitLabels(labelsText, DATA_SET_PROPERTY_LABELS_SPLITTER);
-
-		if (dataSetPropertyNames == null)
-			return;
-
-		List<DataSetProperty> dataSetProperties = new ArrayList<>(dataSetPropertyNames.length);
-
-		for (int i = 0; i < dataSetPropertyNames.length; i++)
-		{
-			DataSetProperty dataSetProperty = new DataSetProperty(dataSetPropertyNames[i],
-					Enum.valueOf(DataType.class, dataSetPropertyTypes[i]));
-
-			if (dataSetPropertyLabels != null && dataSetPropertyLabels.length > i)
-				dataSetProperty.setLabel(dataSetPropertyLabels[i]);
-
-			dataSetProperties.add(dataSetProperty);
-		}
-
-		dataSet.setProperties(dataSetProperties);
 	}
 
 	/**

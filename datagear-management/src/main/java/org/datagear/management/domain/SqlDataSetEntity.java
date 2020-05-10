@@ -27,6 +27,8 @@ public class SqlDataSetEntity extends SqlDataSet implements CreateUserEntity<Str
 	/** 授权资源类型 */
 	public static final String AUTHORIZATION_RESOURCE_TYPE = "DataSet";
 
+	public static final String PROPERTY_LABELS_SPLITTER = ",";
+
 	/** 创建用户 */
 	private User createUser;
 
@@ -107,5 +109,26 @@ public class SqlDataSetEntity extends SqlDataSet implements CreateUserEntity<Str
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	public void setPropertyLabelsText(String text)
+	{
+		String[] labels = DataSetProperty.splitLabels(text, PROPERTY_LABELS_SPLITTER);
+
+		if (labels == null || labels.length == 0)
+			return;
+
+		List<DataSetProperty> properties = getProperties();
+
+		for (int i = 0; i < properties.size(); i++)
+		{
+			if (i < labels.length)
+				properties.get(i).setLabel(labels[i]);
+		}
+	}
+
+	public String getPropertyLabelsText()
+	{
+		return DataSetProperty.concatLabels(getProperties(), PROPERTY_LABELS_SPLITTER);
 	}
 }

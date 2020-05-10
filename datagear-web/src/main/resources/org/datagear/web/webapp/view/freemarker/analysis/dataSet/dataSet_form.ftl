@@ -15,18 +15,10 @@ readonly 是否只读操作，允许为null
 </head>
 <body>
 <div id="${pageId}" class="page-form page-form-dataSet">
-	<form id="${pageId}-form" action="${contextPath}/analysis/dataSet/${formAction}" method="POST">
+	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(dataSet.id)!''?html}" />
-			<div id="${pageId}-dataSetProperties" style="display: none;">
-				<#if (dataSet.properties)??>
-				<#list dataSet.properties as p>
-					<input type='hidden' name='dataSetPropertyNames' value="${p.name?html}" />
-					<input type='hidden' name='dataSetPropertyTypes' value="${p.type?html}" />
-				</#list>
-				</#if>
-			</div>
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='dataSet.name' /></label>
@@ -57,17 +49,28 @@ readonly 是否只读操作，允许为null
 						<div id="${pageId}-sql-editor" class="sql-editor"></div>
 					</div>
 					<#if !readonly>
-					<div class="sql-preview-wrapper">
-						<div class="operation">
-							<button type="button" class="sql-preview-button" title="<@spring.message code='dataSet.sqlPreviewButtonTip' />"><@spring.message code='preview' /></button>
-							<div class="operation-result">
+					<div class="sql-operation-wrapper">
+						<ul>
+							<li><a href="#${pageId}-sql-params">参数</a></li>
+							<li>
+								<a href="#${pageId}-sql-result"><@spring.message code='preview' /></a>
+							</li>
+						</ul>
+						<div id="${pageId}-sql-params" class="sql-params-table-wrapper minor-dataTable">
+							<div class="operation">
+								<button type="button" class="sql-add-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+								<button type="button" class="sql-del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-minus"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
+							</div>
+							<table id="${pageId}-sql-params-table" width='100%' height="100%" class='hover stripe'></table>
+						</div>
+						<div id="${pageId}-sql-result" class="sql-result-table-wrapper minor-dataTable">
+							<div class="operation">
+								<button type="button" class="sql-preview-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.sqlPreviewButtonTip' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='preview' /></button>
 								<button type="button" class="sql-result-more-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
 								<button type="button" class="sql-result-refresh-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
 								<button type="button" class="sql-result-export-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.exportSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-ne"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.exportSqlResult' /></button>
 							</div>
-						</div>
-						<div class="sql-result-table-wrapper minor-dataTable">
-							<table id="${pageId}-sql-table" width='100%' height="100%" class='hover stripe'></table>
+							<table id="${pageId}-sql-result-table" width='100%' height="100%" class='hover stripe'></table>
 							<div class='no-more-data-flag ui-widget ui-widget-content' title="<@spring.message code='dataSet.noMoreData' />"></div>
 						</div>
 					</div>
@@ -79,7 +82,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSet.propertyLabelsText' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="dataSetPropertyLabelsText" class="ui-widget ui-widget-content" value="${(dataSetPropertyLabelsText)!''?html}" placeholder="<@spring.message code='dataSet.propertyLabelsTextSplitByComma' />" />
+					<input type="text" name="propertyLabelsText" class="ui-widget ui-widget-content" value="${(dataSet.propertyLabelsText)!''?html}" placeholder="<@spring.message code='dataSet.propertyLabelsTextSplitByComma' />" />
 				</div>
 			</div>
 		</div>
@@ -98,10 +101,13 @@ readonly 是否只读操作，允许为null
 <script type="text/javascript">
 (function(po)
 {
+	po.dataSetProperties = <@writeJson var=dataSetProperties />;
+	po.dataSetParams = <@writeJson var=dataSetParams />;
+	
 	$.initButtons(po.element());
-	var sqlEditorHeight = $(window).height()/10*3;
+	var sqlEditorHeight = parseInt($(window).height()/11*5);
 	po.element(".sql-editor-wrapper").height(sqlEditorHeight);
-	po.element(".sql-preview-wrapper").height(sqlEditorHeight);
+	po.element(".sql-operation-wrapper").height(sqlEditorHeight);
 	po.element(".form-item-value-sql").height(sqlEditorHeight + 25);
 	
 	po.url = function(action)
@@ -119,12 +125,140 @@ readonly 是否只读操作，允许为null
 	    bindKey: "Ctrl-ENTER",
 	    exec: function(editor)
 	    {
-	    	po.element(".sql-preview-button").click();
+	    	var activeIndex = po.element(".sql-operation-wrapper").tabs("option", "active");
+	    	
+	    	if(activeIndex == 1)
+	    		po.element(".sql-preview-button").click();
+	    	else
+	    		po.element(".sql-operation-wrapper").tabs("option", "active", 1);
 	    }
 	});
 	<#if readonly>
 	po.sqlEditor.setReadOnly(true);
 	</#if>
+	
+	po.isSqlModified = function(textareaValue, editorValue)
+	{
+		if(textareaValue == undefined)
+			textareaValue = po.element("textarea[name='sql']").val();
+		if(editorValue == undefined)
+			editorValue = po.sqlEditor.getValue();
+		
+		textareaValue = textareaValue.replace(/\s/g, '');
+		editorValue = editorValue.replace(/\s/g, '');
+		
+		return textareaValue != editorValue;
+	};
+	
+	po.sqlParamsTableElement = function()
+	{
+		return po.element("#${pageId}-sql-params-table");
+	};
+	
+	po.sqlResultTableElement = function()
+	{
+		return po.element("#${pageId}-sql-result-table");
+	};
+	
+	po.calSqlOperationTableHeight = function()
+	{
+		return po.element(".sql-result-table-wrapper").height() - 30;
+	};
+	
+	po.element(".sql-operation-wrapper").tabs(
+	{
+		activate: function(event, ui)
+		{
+			if(ui.newPanel.hasClass("sql-result-table-wrapper")
+					&& (po.isSqlModified() || !po.sqlResultTableElement().hasClass("sql-result-table-inited")))
+				po.element(".sql-preview-button").click();
+		}
+	});
+	
+	po.sqlParamsTableElement().dataTable(
+	{
+		"columns" :
+		[
+			$.dataTableUtil.buildCheckCloumn("<@spring.message code='select' />"),
+			{
+				title: "名称",
+				data: "name",
+				render: function(data, type, row, meta)
+				{
+					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamName input-in-table' />";
+				},
+				width: "30%",
+				defaultContent: "",
+				orderable: true
+			},
+			{
+				title: "类型",
+				data: "type",
+				render: function(data, type, row, meta)
+				{
+					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamType input-in-table' />";
+				},
+				width: "20%",
+				defaultContent: "",
+				orderable: true
+			},
+			{
+				title: "必填",
+				data: "required",
+				render: function(data, type, row, meta)
+				{
+					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamRequired input-in-table' />";
+				},
+				width: "20%",
+				defaultContent: "",
+				orderable: true
+			},
+			{
+				title: "描述",
+				data: "desc",
+				render: function(data, type, row, meta)
+				{
+					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamDesc input-in-table' />";
+				},
+				width: "30%",
+				defaultContent: "",
+				orderable: true
+			}
+		],
+		data: po.dataSetParams,
+		"scrollX": true,
+		"scrollY" : po.calSqlOperationTableHeight(),
+		"autoWidth": true,
+        "scrollCollapse": true,
+		"paging" : false,
+		"searching" : false,
+		"ordering": false,
+		"fixedColumns": { leftColumns: 1 },
+		"select" : { style : 'os' },
+	    "language":
+	    {
+			"emptyTable": "",
+			"zeroRecords" : ""
+		}
+	});
+	
+	$.dataTableUtil.bindCheckColumnEvent(po.sqlParamsTableElement().DataTable());
+	
+	po.element(".sql-add-param-button").click(function()
+	{
+		po.sqlParamsTableElement().DataTable().row.add({ name: "", type: "STRING", required: true, desc: "" }).draw();
+	});
+	
+	po.element(".sql-del-param-button").click(function()
+	{
+		$.dataTableUtil.deleteSelectedRows(po.sqlParamsTableElement().DataTable());
+	});
+	
+	po.sqlParamsTableElement().on("click", ".input-in-table", function(event)
+	{
+		//阻止行选中
+		event.stopPropagation();
+	});
 	
 	<#if !readonly>
 	po.element(".select-schema-button").click(function()
@@ -146,11 +280,6 @@ readonly 是否只读操作，允许为null
 		po.open("${contextPath}/schema/select", options);
 	});
 	
-	po.sqlTableElement = function()
-	{
-		return po.element("#${pageId}-sql-table");
-	};
-	
 	po.sqlPreviewOptions =
 	{
 		sql : "",
@@ -165,7 +294,7 @@ readonly 是否只读操作，允许为null
 		
 		po.element(".operation-result").hide();
 		
-		var table = po.sqlTableElement();
+		var table = po.sqlResultTableElement();
 		if($.isDatatTable(table))
 		{
 			table.DataTable().destroy();
@@ -216,11 +345,6 @@ readonly 是否只读操作，允许为null
 		return row + 1;
 	};
 	
-	po.calSqlResultTableHeight = function()
-	{
-		return po.element(".sql-result-table-wrapper").height() - 30;
-	};
-	
 	po.sqlPreview = function()
 	{
 		if(!po.sqlPreviewOptions.schemaId || !po.sqlPreviewOptions.sql)
@@ -230,7 +354,7 @@ readonly 是否只读操作，允许为null
 		po.element(".sql-result-more-button").button("disable");
 		po.element(".sql-result-refresh-button").button("disable");
 		
-		var table = po.sqlTableElement();
+		var table = po.sqlResultTableElement();
 		var returnMeta = !$.isDatatTable(table);
 		var initDataTable = returnMeta;
 		
@@ -250,15 +374,7 @@ readonly 是否只读操作，允许为null
 			{
 				po.element("textarea[name='sql']").val(data.sql);
 				
-				var $dspWrapper = po.element("#${pageId}-dataSetProperties");
-				$dspWrapper.empty();
-				var dataSetProperties = (sqlResult.dataSetProperties || []);
-				for(var i=0; i< dataSetProperties.length; i++)
-				{
-					var dsp = dataSetProperties[i];
-					$("<input type='hidden'>").attr("name", "dataSetPropertyNames").val(dsp.name).appendTo($dspWrapper);
-					$("<input type='hidden'>").attr("name", "dataSetPropertyTypes").val(dsp.type).appendTo($dspWrapper);
-				}
+				po.dataSetProperties = (sqlResult.dataSetProperties || []);
 				
 				po.sqlPreviewOptions.startRow = sqlResult.startRow;
 				po.sqlPreviewOptions.nextStartRow = sqlResult.nextStartRow;
@@ -281,7 +397,7 @@ readonly 是否只读操作，允许为null
 						"columns" : newColumns,
 						"data" : (sqlResult.rows ? sqlResult.rows : []),
 						"scrollX": true,
-						"scrollY" : po.calSqlResultTableHeight(),
+						"scrollY" : po.calSqlOperationTableHeight(),
 						"autoWidth": true,
 				        "scrollCollapse": true,
 						"paging" : false,
@@ -295,6 +411,7 @@ readonly 是否只读操作，允许为null
 						}
 					};
 					
+					table.addClass("sql-result-table-inited");
 					table.dataTable(settings);
 				}
 				else
@@ -334,9 +451,7 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("dataSetSqlPreviewRequired", function(value, element)
 	{
-		value = value.replace(/\s/g, '');
-		var editorSql = po.sqlEditor.getValue().replace(/\s/g, '');
-		return value == editorSql;
+		return !po.isSqlModified(value);
 	});
 	
 	po.form().validate(
@@ -356,12 +471,37 @@ readonly 是否只读操作，允许为null
 		},
 		submitHandler : function(form)
 		{
-			$(form).ajaxSubmit(
+			var formData = $.formToJson(form);
+			formData["properties"] = po.dataSetProperties;
+			
+			var params = [];
+			
+			po.element(".dataSetParamName").each(function(i)
 			{
-				success : function(response)
-				{
-					po.pageParamCallAfterSave(true, response.data);
-				}
+				params[i] = {};
+				params[i]["name"] = $(this).val();
+			});
+			po.element(".dataSetParamType").each(function(i)
+			{
+				params[i]["type"] = $(this).val();
+			});
+			po.element(".dataSetParamRequired").each(function(i)
+			{
+				params[i]["required"] = $(this).val();
+			});
+			po.element(".dataSetParamDesc").each(function(i)
+			{
+				params[i]["desc"] = $(this).val();
+			});
+			
+			formData["params"] = params;
+
+			console.dir(formData);
+			
+			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,
+			function(response)
+			{
+				po.pageParamCallAfterSave(true, response.data);
 			});
 		},
 		errorPlacement : function(error, element)

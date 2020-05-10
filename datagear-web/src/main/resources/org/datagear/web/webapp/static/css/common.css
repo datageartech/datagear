@@ -2097,43 +2097,61 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	width: 100%;
 	height: 100%;
 }
-.page-form-dataSet .sql-preview-wrapper{
+.page-form-dataSet .sql-operation-wrapper{
 	position: relative;
 	display: inline-block;
 	width: 48%;
 	height: 10em;
 	vertical-align: top;
 }
-.page-form-dataSet .sql-preview-wrapper .operation{
-	position: relative;
+.page-form-dataSet .sql-operation-wrapper.ui-widget.ui-widget-content{
+	border: 0;
 }
-.page-form-dataSet .sql-preview-wrapper .operation .operation-result{
+.page-form-dataSet .sql-operation-wrapper.ui-tabs{
+	margin: 0 0;
+	padding: 0 0;
+}
+.page-form-dataSet .sql-operation-wrapper.ui-tabs .ui-tabs-nav{
+	border: 0;
+	background: none;
+	opacity: 0.8;
+	filter: Alpha(Opacity=80);
+}
+.page-form-dataSet .sql-operation-wrapper.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+}
+.page-form-dataSet .sql-operation-wrapper.ui-tabs .ui-tabs-panel{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 2.2em;
+	bottom: 0px;
+	padding: 0 0;
+}
+.page-form-dataSet .sql-operation-wrapper .operation{
 	position: absolute;
 	right: 0px;
 	bottom: 0px;
-	display: none;
+	top: -1.5em;
 }
-.page-form-dataSet .sql-preview-wrapper .operation .operation-result .ui-button.ui-button-icon-only{
+.page-form-dataSet .sql-operation-wrapper .operation .ui-button.ui-button-icon-only{
 	height: 1.2em;
 	width: 2.5em;
 	vertical-align: top;
 	border: 0px;
 }
-.page-form-dataSet .sql-preview-wrapper .sql-result-table-wrapper{
+.page-form-dataSet .sql-operation-wrapper .sql-result-table-wrapper .no-more-data-flag{
 	position: absolute;
-	left: 0px;
-	right: 0px;
-	top: 2.5em;
-	bottom: 0px;
-}
-.page-form-dataSet .sql-preview-wrapper .sql-result-table-wrapper .no-more-data-flag{
-	position: absolute;
-	bottom: 0px;
+	bottom: -2px;
 	width: 100%;
 	height: 0px;
 	border-top-width: 2px;
 	border-bottom-width: 2px;
 	display: none;
+}
+.page-form-dataSet .sql-operation-wrapper .input-in-table{
+	width: 90%!important;
 }
 .page-form-dataSet .form-item-value-sql .error{
 	display: block;

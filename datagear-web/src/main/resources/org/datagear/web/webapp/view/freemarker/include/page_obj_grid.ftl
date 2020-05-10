@@ -18,7 +18,7 @@ page_js_obj.jsp
 	
 	po.renderCheckColumn = function(data, type, row, meta)
 	{
-		return "<div class='ui-widget ui-widget-content ui-corner-all checkbox'><span class='ui-icon ui-icon-check'></span></div>";
+		return $.dataTableUtil.renderCheckColumn(data, type, row, meta);
 	};
 	
 	/**
@@ -89,20 +89,8 @@ page_js_obj.jsp
 	
 	po.getOrdersOnName = function($table)
 	{
-		$table = ($table || po.elementTable());
-		var dataTable = $table.DataTable();
-		var settings = dataTable.settings();
-		var orders = dataTable.order();
-		
-		var nameOrder = [];
-		
-		for(var i=0; i<orders.length; i++)
-		{
-			var name = $.getDataTableColumnName(settings, orders[i][0]);
-			nameOrder[i] = { "name" : name, "type" : orders[i][1] };
-		}
-		
-		return nameOrder;
+		var dataTable = ($table || po.elementTable()).DataTable();
+		return $.dataTableUtil.getOrdersOnName(dataTable);
 	};
 	
 	/**
@@ -187,25 +175,10 @@ page_js_obj.jsp
 	
 	po.removeCheckColumnProperty = function(data)
 	{
-		if(!data)
-			return data;
-		
-		var datas = ($.isArray(data) ? data : [data]);
-		
-		for(var i=0; i<datas.length; i++)
-		{
-			var ele = datas[i];
-			for(var p in ele)
-			{
-				if(p == po.TABLE_CHECK_COLUMN_NAME)
-					delete ele[p];
-			}
-		}
-		
-		return data;
+		return $.dataTableUtil.removeCheckColumnProperty(data);
 	};
 	
-	po.TABLE_CHECK_COLUMN_NAME = "___DATA_GEAR_CHECK_COLUMN";
+	po.TABLE_CHECK_COLUMN_NAME = $.dataTableUtil.TABLE_CHECK_COLUMN_NAME;
 	
 	/**
 	 * 构建表格选项。
@@ -213,19 +186,13 @@ page_js_obj.jsp
 	 */
 	po.buildDataTableSettings = function(settings)
 	{
-		var newColumns = [
-				{
-					title : "<@spring.message code='select' />", data : po.TABLE_CHECK_COLUMN_NAME, defaultContent: "", width : "3em",
-					orderable : false, render : po.renderCheckColumn, className : "column-check"
-				}
-			];
+		var newColumns = [ $.dataTableUtil.buildCheckCloumn("<@spring.message code='select' />") ];
 		newColumns = newColumns.concat(settings.columns);
 		
 		var orderColumn = 1;
 		for(; orderColumn < newColumns.length; orderColumn++)
 		{
 			var column = newColumns[orderColumn];
-			
 			if(column.visible == null || column.visible)
 				break;
 		}
@@ -245,127 +212,6 @@ page_js_obj.jsp
 		    {
 				"emptyTable": "<@spring.message code='dataTables.noData' />",
 				"zeroRecords" : "<@spring.message code='dataTables.zeroRecords' />"
-			},
-			"createdRow": function(row, data, dataIndex)
-			{
-				var $table = this;
-				
-				$(".column-check", row).click(function(event)
-				{
-					event.stopPropagation();
-					
-					var dataTable = $table.DataTable();
-					
-					var $tr = $(this).closest("tr");
-					var isSelected = $tr.hasClass("selected");
-					
-					if(event.shiftKey)
-					{
-						var myIndex = $tr.index();
-						
-						var rangeStart = -1;
-						var rangeEnd = -1;
-						
-						var $preTr;
-						
-						var test = $tr.prevUntil(":not(.selected)");
-						
-						if(isSelected)
-							$preTr = $tr.prevUntil(":not(.selected)").last();
-						else
-							$preTr = $tr.prevAll(".selected:first");
-						
-						if($preTr.length > 0)
-						{
-							rangeStart = $preTr.index();
-							rangeEnd = myIndex + 1;
-						}
-						else
-						{
-							var $nextTr;
-							
-							if(isSelected)
-								$nextTr = $tr.nextUntil(":not(.selected)").last();
-							else
-								$nextTr = $tr.nextAll(".selected:first");
-							
-							if($nextTr.length > 0)
-							{
-								rangeStart = myIndex;
-								rangeEnd = $nextTr.index() + 1;
-							}
-							else
-							{
-								rangeStart = myIndex;
-								rangeEnd = myIndex + 1;
-							}
-						}
-						
-						var selectedIndexes = [];
-						
-						for(var i=rangeStart; i<rangeEnd; i++)
-							selectedIndexes.push(i);
-						
-						if(isSelected)
-							dataTable.rows(selectedIndexes).deselect();
-						else
-							dataTable.rows(selectedIndexes).select();
-					}
-					else
-					{
-						if(isSelected)
-							dataTable.row($tr).deselect();
-						else
-						{
-							dataTable.row($tr).select();
-						}
-					}
-				})
-				//固定选择列后hover效果默认不能同步，需要自己实现
-				.hover(
-				function(event)
-				{
-					var $tableContainer = $($table.DataTable().table().container());
-					
-					var rowIndex = $(this).parent().index() + 1;
-					po.element(".dataTable", $tableContainer).each(function()
-					{
-						$("tr:eq("+rowIndex+")", this).addClass("hover");
-					});
-				},
-				function(event)
-				{
-					var rowIndex = $(this).parent().index() + 1;
-					var $tableContainer = $($table.DataTable().table().container());
-					
-					po.element(".dataTable", $tableContainer).each(function()
-					{
-						$("tr:eq("+rowIndex+")", this).removeClass("hover");
-					});
-				});
-				
-				//固定选择列后hover效果默认不能同步，需要自己实现
-				$(row).hover(
-				function(event)
-				{
-					var rowIndex = $(this).index() + 1;
-					var $tableContainer = $($table.DataTable().table().container());
-					
-					po.element(".dataTable", $tableContainer).each(function()
-					{
-						$("tr:eq("+rowIndex+")", this).addClass("hover");
-					});
-				},
-				function()
-				{
-					var rowIndex = $(this).index() + 1;
-					var $tableContainer = $($table.DataTable().table().container());
-					
-					po.element(".dataTable", $tableContainer).each(function()
-					{
-						$("tr:eq("+rowIndex+")", this).removeClass("hover");
-					});
-				});
 			}
 		},
 		settings);
@@ -381,31 +227,7 @@ page_js_obj.jsp
 			$table = po.elementTable();
 		
 		$table.dataTable(tableSettings);
-		
-		var dataTable = $table.DataTable();
-		
-		$(".column-check", $(dataTable.table().header())).click(function()
-		{
-			var $this = $(this);
-			var checked = $this.hasClass("all-checked");
-			
-			var rows = $table.DataTable().rows();
-			
-			if(checked)
-			{
-				rows.deselect();
-				$this.removeClass("all-checked");
-			}
-			else
-			{
-				rows.select();
-				$this.addClass("all-checked");
-			}
-		});
-		
-		//不加这一行，对话框中的初始空数据客户端表格添加记录后表头“选择”点击不起作用
-		if(tableSettings.fixedColumns)
-			dataTable.fixedColumns().relayout();
+		$.dataTableUtil.bindCheckColumnEvent($table.DataTable());
 	};
 	
 	po.refresh = function()
@@ -422,122 +244,62 @@ page_js_obj.jsp
 	//单选处理函数
 	po.executeOnSelect = function(callback)
 	{
-		var rows = po.elementTable().DataTable().rows('.selected');
-		var rowsData = po.getRowsData(rows);
-		
-		if(!rowsData || rowsData.length != 1)
-			$.tipInfo("<@spring.message code='pleaseSelectOnlyOneRow' />");
-		else
-		{
-			callback.call(po, rowsData[0], po.getRowsIndex(rows)[0]);
-		}
+		$.dataTableUtil.executeOnSelect(po.elementTable().DataTable(), "<@spring.message code='pleaseSelectOnlyOneRow' />",
+		function(row, rowIndex){ callback.call(po, row, rowIndex); });
 	};
 	
 	//多选处理函数
 	po.executeOnSelects = function(callback)
 	{
-		var rows = po.elementTable().DataTable().rows('.selected');
-		var rowsData = po.getRowsData(rows);
-		
-		if(!rowsData || rowsData.length < 1)
-			$.tipInfo("<@spring.message code='pleaseSelectAtLeastOneRow' />");
-		else
-		{
-			callback.call(po, rowsData, po.getRowsIndex(rows));
-		}
+		$.dataTableUtil.executeOnSelects(po.elementTable().DataTable(), "<@spring.message code='pleaseSelectAtLeastOneRow' />",
+		function(rows, rowIndexes){ callback.call(po, rows, rowIndexes); });
 	};
 	
 	//获取选中数据
 	po.getSelectedData = function()
 	{
-		var rows = po.elementTable().DataTable().rows('.selected');
-		var rowsData = po.getRowsData(rows);
-		
-		return (rowsData || []);
+		$.dataTableUtil.getSelectedData(po.elementTable().DataTable());
 	};
 	
 	po.getRowsData = function(rows)
 	{
-		if(rows == undefined)
-			rows = po.elementTable().DataTable().rows();
-		
-		var tableRowsData = rows.data();
-		
-		var rowsData = [];
-		for(var i=0; i<tableRowsData.length; i++)
-			rowsData[i] = tableRowsData[i];
-		
-		return rowsData;
+		return $.dataTableUtil.getRowsData(po.elementTable().DataTable());
 	};
 	
 	po.getRowsIndex = function(rows)
 	{
-		if(rows == undefined)
-			rows = po.elementTable().DataTable().rows();
-			
-		var indexes = rows.indexes();
-		
-		return indexes;
+		return $.dataTableUtil.getRowsIndex(po.elementTable().DataTable());
 	};
 	
 	po.addRowData = function(data)
 	{
-		var table = po.elementTable().DataTable();
-		
-		if($.isArray(data))
-			table.rows.add(data).draw();
-		else
-			table.row.add(data).draw();
+		$.dataTableUtil.addRowData(po.elementTable().DataTable(), data);
 	};
 	
 	po.setRowData = function(rowIndex, data)
 	{
-		var table = po.elementTable().DataTable();
-		
-		if(rowIndex.length != undefined)
-		{
-			for(var i=0; i< rowIndex.length; i++)
-			{
-				table.row(rowIndex[i]).data(data[i]).draw();
-			}
-		}
-		else
-			table.row(rowIndex).data(data).draw();
+		$.dataTableUtil.setRowData(po.elementTable().DataTable(), rowIndex, data);
 	};
 	
 	po.deleteRow = function(rowIndex)
 	{
-		var table = po.elementTable().DataTable();
-		
-		if(rowIndex.length != undefined)
-		{
-			table.rows(rowIndex).remove().draw();
-		}
-		else
-			table.row(rowIndex).remove().draw();
+		$.dataTableUtil.deleteRow(po.elementTable().DataTable(), rowIndex);
 	};
 	
 	po.deleteAllRow = function()
 	{
-		po.elementTable().DataTable().rows().remove();
+		$.dataTableUtil.deleteAllRow(po.elementTable().DataTable());
 	};
 	
 	po.deleteSelectedRows = function()
 	{
-		var dataTable = po.elementTable().DataTable();
-		
-		var indexes = dataTable.rows('.selected').indexes();
-		dataTable.rows(indexes).remove().draw();
+		$.dataTableUtil.deleteSelectedRows(po.elementTable().DataTable());
 	};
 	
 	//获取表格元素的父元素
 	po.dataTableParent = function(dataTable)
 	{
-		if(!dataTable)
-			dataTable = po.elementTable().DataTable();
-		
-		var $tableParent = $(dataTable.table().body()).parent().parent();
-		return $tableParent;
+		return $.dataTableUtil.dataTableParent(dataTable || po.elementTable().DataTable());
 	};
 	
 	po.expectedResizeDataTableElements = [po.elementTable()[0]];

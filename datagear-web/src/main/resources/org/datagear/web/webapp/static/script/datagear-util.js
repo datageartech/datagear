@@ -1939,6 +1939,299 @@
 		}
 	});
 	
+	//DataTable常用函数
+	$.dataTableUtil = ($.dataTableUtil || {});
+	$.extend($.dataTableUtil,
+	{
+		renderCheckColumn: function(data, type, row, meta)
+		{
+			return "<div class='ui-widget ui-widget-content ui-corner-all checkbox'><span class='ui-icon ui-icon-check'></span></div>";
+		},
+		
+		getOrdersOnName: function(dataTable)
+		{
+			var settings = dataTable.settings();
+			var orders = dataTable.order();
+			
+			var nameOrder = [];
+			
+			for(var i=0; i<orders.length; i++)
+			{
+				var name = $.getDataTableColumnName(settings, orders[i][0]);
+				nameOrder[i] = { "name" : name, "type" : orders[i][1] };
+			}
+			
+			return nameOrder;
+		},
+		
+		TABLE_CHECK_COLUMN_NAME: "___DATA_GEAR_CHECK_COLUMN",
+		
+		removeCheckColumnProperty: function(data)
+		{
+			if(!data)
+				return data;
+			
+			var datas = ($.isArray(data) ? data : [data]);
+			
+			for(var i=0; i<datas.length; i++)
+			{
+				var ele = datas[i];
+				for(var p in ele)
+				{
+					if(p == $.dataTableUtil.TABLE_CHECK_COLUMN_NAME)
+						delete ele[p];
+				}
+			}
+			
+			return data;
+		},
+		
+		buildCheckCloumn: function(title)
+		{
+			var column=
+			{
+				title : title, data : $.dataTableUtil.TABLE_CHECK_COLUMN_NAME,
+				defaultContent: "", width : "3em", orderable : false, render : $.dataTableUtil.renderCheckColumn, className : "column-check"
+			};
+			
+			return column;
+		},
+		
+		bindCheckColumnEvent: function(dataTable)
+		{
+			//表头选中框
+			$(".column-check", $(dataTable.table().header())).click(function()
+			{
+				var $this = $(this);
+				var checked = $this.hasClass("all-checked");
+				
+				var rows = dataTable.rows();
+				
+				if(checked)
+				{
+					rows.deselect();
+					$this.removeClass("all-checked");
+				}
+				else
+				{
+					rows.select();
+					$this.addClass("all-checked");
+				}
+			});
+			
+			var settins = dataTable.settings();
+			
+			//不加这一行，对话框中的初始空数据客户端表格添加记录后表头“选择”点击不起作用
+			if(settins.fixedColumns)
+				dataTable.fixedColumns().relayout();
+			
+			//行选中框
+			$(dataTable.table().body()).on("click", ".column-check", function(event)
+			{
+				event.stopPropagation();
+				
+				var $tr = $(this).closest("tr");
+				var isSelected = $tr.hasClass("selected");
+				
+				if(event.shiftKey)
+				{
+					var myIndex = $tr.index();
+					
+					var rangeStart = -1;
+					var rangeEnd = -1;
+					
+					var $preTr;
+					
+					var test = $tr.prevUntil(":not(.selected)");
+					
+					if(isSelected)
+						$preTr = $tr.prevUntil(":not(.selected)").last();
+					else
+						$preTr = $tr.prevAll(".selected:first");
+					
+					if($preTr.length > 0)
+					{
+						rangeStart = $preTr.index();
+						rangeEnd = myIndex + 1;
+					}
+					else
+					{
+						var $nextTr;
+						
+						if(isSelected)
+							$nextTr = $tr.nextUntil(":not(.selected)").last();
+						else
+							$nextTr = $tr.nextAll(".selected:first");
+						
+						if($nextTr.length > 0)
+						{
+							rangeStart = myIndex;
+							rangeEnd = $nextTr.index() + 1;
+						}
+						else
+						{
+							rangeStart = myIndex;
+							rangeEnd = myIndex + 1;
+						}
+					}
+					
+					var selectedIndexes = [];
+					
+					for(var i=rangeStart; i<rangeEnd; i++)
+						selectedIndexes.push(i);
+					
+					if(isSelected)
+						dataTable.rows(selectedIndexes).deselect();
+					else
+						dataTable.rows(selectedIndexes).select();
+				}
+				else
+				{
+					if(isSelected)
+						dataTable.row($tr).deselect();
+					else
+					{
+						dataTable.row($tr).select();
+					}
+				}
+			})
+			//固定选择列后hover效果默认不能同步，需要自己实现
+			.on("mouseover mouseout", ".column-check",
+			function(event)
+			{
+				var $tableContainer = $(dataTable.table().container());
+				var rowIndex = $(this).parent().index() + 1;
+				
+				$(".dataTable", $tableContainer).each(function()
+				{
+					if(event.type == "mouseover")
+						$("tr:eq("+rowIndex+")", this).addClass("hover");
+					else
+						$("tr:eq("+rowIndex+")", this).removeClass("hover");
+				});
+			});
+			
+			//固定选择列后hover效果默认不能同步，需要自己实现
+			$(dataTable.table().body()).on("mouseover mouseout", "tr",
+			function(event)
+			{
+				var rowIndex = $(this).index() + 1;
+				var $tableContainer = $(dataTable.table().container());
+				
+				$(".dataTable", $tableContainer).each(function()
+				{
+					if(event.type == "mouseover")
+						$("tr:eq("+rowIndex+")", this).addClass("hover");
+					else
+						$("tr:eq("+rowIndex+")", this).removeClass("hover");
+				});
+			}); 
+		},
+		
+		executeOnSelect: function(dataTable, illegalTip, callback)
+		{
+			var rows = dataTable.rows('.selected');
+			var rowsData = $.dataTableUtil.getRowsData(dataTable, rows);
+			
+			if(!rowsData || rowsData.length != 1)
+				$.tipInfo(illegalTip);
+			else
+			{
+				callback(rowsData[0], $.dataTableUtil.getRowsIndex(dataTable, rows)[0]);
+			}
+		},
+		
+		executeOnSelects: function(dataTable, illegalTip, callback)
+		{
+			var rows = dataTable.rows('.selected');
+			var rowsData = $.dataTableUtil.getRowsData(dataTable, rows);
+			
+			if(!rowsData || rowsData.length < 1)
+				$.tipInfo(illegalTip);
+			else
+			{
+				callback(rowsData, $.dataTableUtil.getRowsIndex(dataTable, rows));
+			}
+		},
+		
+		getSelectedData: function(dataTable)
+		{
+			var rows = dataTable.rows('.selected');
+			var rowsData = $.dataTableUtil.getRowsData(dataTable, rows);
+			
+			return (rowsData || []);
+		},
+		
+		getRowsData: function(dataTable, rows)
+		{
+			if(rows == undefined)
+				rows = dataTable.rows();
+			
+			var tableRowsData = rows.data();
+			
+			var rowsData = [];
+			for(var i=0; i<tableRowsData.length; i++)
+				rowsData[i] = tableRowsData[i];
+			
+			return rowsData;
+		},
+		
+		getRowsIndex: function(dataTable, rows)
+		{
+			if(rows == undefined)
+				rows = dataTable.rows();
+			
+			var indexes = rows.indexes();
+			return indexes;
+		},
+		
+		addRowData: function(dataTable, data)
+		{
+			if($.isArray(data))
+				dataTable.rows.add(data).draw();
+			else
+				dataTable.row.add(data).draw();
+		},
+		
+		setRowData: function(dataTable, rowIndex, data)
+		{
+			if(rowIndex.length != undefined)
+			{
+				for(var i=0; i< rowIndex.length; i++)
+				{
+					dataTable.row(rowIndex[i]).data(data[i]).draw();
+				}
+			}
+			else
+				dataTable.row(rowIndex).data(data).draw();
+		},
+		
+		deleteRow: function(dataTable, rowIndex)
+		{
+			if(rowIndex.length != undefined)
+				dataTable.rows(rowIndex).remove().draw();
+			else
+				dataTable.row(rowIndex).remove().draw();
+		},
+		
+		deleteAllRow: function(dataTable)
+		{
+			dataTable.rows().remove();
+		},
+		
+		deleteSelectedRows: function(dataTable)
+		{
+			var indexes = dataTable.rows('.selected').indexes();
+			dataTable.rows(indexes).remove().draw();
+		},
+		
+		dataTableParent: function(dataTable)
+		{
+			var $tableParent = $(dataTable.table().body()).parent().parent();
+			return $tableParent;
+		}
+	});
+	
 	//SQL工作台SQL自动补全支持函数
 	$.sqlAutocomplete = ($.sqlAutocomplete || {});
 	$.extend($.sqlAutocomplete,
