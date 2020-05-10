@@ -157,10 +157,6 @@ public class SqlDataSet extends AbstractDataSet
 		List<Map<String, ?>> datas = getSqlDataSetSupport().resolveDatas(cn, rs, getProperties());
 		MapDataSetResult result = new MapDataSetResult(datas);
 
-		Map<String, ?> exportValues = getExportValues(result);
-
-		result.setExportValues(exportValues);
-
 		return result;
 	}
 

@@ -13,7 +13,6 @@ import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetExport;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.SqlDataSet;
@@ -180,10 +179,6 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 		List<DataSetParamPO> paramPOs = selectListMybatis("getParamPOs", sqlParams);
 		List<DataSetParam> dataSetParams = DataSetParamPO.to(paramPOs);
 		obj.setParams(dataSetParams);
-
-		List<DataSetExportPO> exportPOs = selectListMybatis("getExportPOs", sqlParams);
-		List<DataSetExport> dataSetExports = DataSetExportPO.to(exportPOs);
-		obj.setExports(dataSetExports);
 	}
 
 	@Override
@@ -202,7 +197,6 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 	{
 		saveDataSetPropertyPOs(entity);
 		saveDataSetParamPOs(entity);
-		saveDataSetExportPOs(entity);
 	}
 
 	protected void saveDataSetPropertyPOs(SqlDataSet entity)
@@ -228,19 +222,6 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 		{
 			for (DataSetParamPO relation : pos)
 				insertMybatis("insertParamPO", relation);
-		}
-	}
-
-	protected void saveDataSetExportPOs(SqlDataSet entity)
-	{
-		deleteMybatis("deleteExportPOs", entity.getId());
-
-		List<DataSetExportPO> pos = DataSetExportPO.from(entity);
-
-		if (!pos.isEmpty())
-		{
-			for (DataSetExportPO relation : pos)
-				insertMybatis("insertExportPO", relation);
 		}
 	}
 
@@ -385,49 +366,6 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 				for (int i = 0; i < params.size(); i++)
 				{
 					DataSetParamPO po = new DataSetParamPO(dataSet.getId(), params.get(i), i);
-					pos.add(po);
-				}
-			}
-
-			return pos;
-		}
-	}
-
-	public static class DataSetExportPO extends DataSetChildPO<DataSetExport>
-	{
-		public DataSetExportPO()
-		{
-			super();
-		}
-
-		public DataSetExportPO(String dataSetId, DataSetExport child, int order)
-		{
-			super(dataSetId, child, order);
-		}
-
-		@Override
-		public DataSetExport getChild()
-		{
-			return super.getChild();
-		}
-
-		@Override
-		public void setChild(DataSetExport child)
-		{
-			super.setChild(child);
-		}
-
-		public static List<DataSetExportPO> from(DataSet dataSet)
-		{
-			List<DataSetExportPO> pos = new ArrayList<DataSetExportPO>();
-
-			List<DataSetExport> exports = dataSet.getExports();
-
-			if (exports != null)
-			{
-				for (int i = 0; i < exports.size(); i++)
-				{
-					DataSetExportPO po = new DataSetExportPO(dataSet.getId(), exports.get(i), i);
 					pos.add(po);
 				}
 			}

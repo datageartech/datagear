@@ -73,11 +73,6 @@ public class ChartDataSet
 		this.propertySigns = propertySigns;
 	}
 
-	public boolean hasAlias()
-	{
-		return (this.alias != null && !this.alias.isEmpty());
-	}
-
 	/**
 	 * 获取数据集别名。
 	 * <p>

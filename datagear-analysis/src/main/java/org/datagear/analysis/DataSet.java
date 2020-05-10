@@ -56,24 +56,6 @@ public interface DataSet extends Identifiable
 	DataSetParam getParam(String name);
 
 	/**
-	 * 获取输出列表。
-	 * <p>
-	 * 返回{@code null}或空列表，表示没有。
-	 * </p>
-	 * 
-	 * @return
-	 */
-	List<DataSetExport> getExports();
-
-	/**
-	 * 获取指定名称的输出，没有则返回{@code null}。
-	 * 
-	 * @param name
-	 * @return
-	 */
-	DataSetExport getExport(String name);
-
-	/**
 	 * 给定的参数映射表是否可用于{@linkplain #getResult(Map)}。
 	 * 
 	 * @param paramValues

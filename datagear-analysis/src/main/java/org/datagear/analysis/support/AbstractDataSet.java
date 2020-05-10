@@ -7,18 +7,15 @@
  */
 package org.datagear.analysis.support;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.AbstractIdentifiable;
 import org.datagear.analysis.DataNameType;
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetException;
-import org.datagear.analysis.DataSetExport;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataSetResult;
 
 /**
  * 抽象{@linkplain DataSet}。
@@ -32,9 +29,8 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 
 	private List<DataSetProperty> properties;
 
-	private List<DataSetParam> params;
-
-	private List<DataSetExport> exports;
+	@SuppressWarnings("unchecked")
+	private List<DataSetParam> params = Collections.EMPTY_LIST;
 
 	public AbstractDataSet()
 	{
@@ -98,28 +94,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		return getDataNameTypeByName(this.params, name);
 	}
 
-	public boolean hasExport()
-	{
-		return (this.exports != null && !this.exports.isEmpty());
-	}
-
-	@Override
-	public List<DataSetExport> getExports()
-	{
-		return exports;
-	}
-
-	public void setExports(List<DataSetExport> exports)
-	{
-		this.exports = exports;
-	}
-
-	@Override
-	public DataSetExport getExport(String name)
-	{
-		return getDataNameTypeByName(this.exports, name);
-	}
-
 	@Override
 	public boolean isReady(Map<String, ?> paramValues)
 	{
@@ -135,30 +109,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 
 		return true;
-	}
-
-	/**
-	 * 获取输出值集。
-	 * 
-	 * @param meta
-	 * @param datas
-	 * @return
-	 * @throws DataSetException
-	 */
-	protected Map<String, ?> getExportValues(DataSetResult dataSetResult) throws DataSetException
-	{
-		if (!hasExport())
-			return null;
-
-		Map<String, Object> exportValues = new HashMap<>();
-
-		for (DataSetExport expt : this.exports)
-		{
-			Object value = expt.getExportValue(this, dataSetResult);
-			exportValues.put(expt.getName(), value);
-		}
-
-		return exportValues;
 	}
 
 	/**

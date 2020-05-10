@@ -7,7 +7,6 @@
  */
 package org.datagear.analysis.support;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -26,9 +25,6 @@ import org.datagear.analysis.DataSetResult;
 public class MapDataSetResult implements DataSetResult
 {
 	private List<Map<String, ?>> datas;
-
-	@SuppressWarnings("unchecked")
-	private Map<String, ?> exportValues = Collections.EMPTY_MAP;
 
 	public MapDataSetResult()
 	{
@@ -60,16 +56,5 @@ public class MapDataSetResult implements DataSetResult
 			return null;
 
 		return ((Map<String, Object>) data).get(name);
-	}
-
-	@Override
-	public Map<String, ?> getExportValues()
-	{
-		return exportValues;
-	}
-
-	public void setExportValues(Map<String, ?> exportValues)
-	{
-		this.exportValues = exportValues;
 	}
 }

@@ -91,6 +91,8 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		{
 			super(new JsonDataSet(chartDataSet.getDataSet()));
 			setPropertySigns(chartDataSet.getPropertySigns());
+			setAlias(chartDataSet.getAlias());
+			setParamValues(chartDataSet.getParamValues());
 		}
 
 		public static JsonChartDataSet[] valuesOf(ChartDataSet[] chartDataSets)
@@ -113,7 +115,6 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		{
 			super(dataSet.getId(), dataSet.getName(), dataSet.getProperties());
 			setParams(dataSet.getParams());
-			setExports(dataSet.getExports());
 		}
 
 		@Override

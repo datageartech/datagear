@@ -38,17 +38,6 @@
 			)
 	</insert>
 	
-	<insert id="insertExportPO">
-		INSERT INTO DATAGEAR_DATA_SET_EXPT
-			(
-			EXPT_DS_ID, EXPT_NAME, EXPT_TYPE, PROP_ORDER
-			)
-		VALUES
-			(
-			#{dataSetId}, #{child.name}, #{child.type}, #{order}
-			)
-	</insert>
-	
 	<update id="update">
 		UPDATE DATAGEAR_SQL_DATA_SET SET
 			DS_NAME = #{entity.name},
@@ -74,12 +63,6 @@
 		DELETE FROM DATAGEAR_DATA_SET_PAR
 		WHERE
 			PAR_DS_ID = #{dataSetId}
-	</delete>
-	
-	<delete id="deleteExportPOs">
-		DELETE FROM DATAGEAR_DATA_SET_EXPT
-		WHERE
-			EXPT_DS_ID = #{dataSetId}
 	</delete>
 	
 	<select id="getById" resultType="org.datagear.management.domain.SqlDataSetEntity">
@@ -120,20 +103,6 @@
 			PAR_DS_ID = #{dataSetId}
 		ORDER BY
 			PAR_ORDER ASC
-	</select>
-	
-	<select id="getExportPOs" resultType="org.datagear.management.service.impl.SqlDataSetEntityServiceImpl$DataSetExportPO">
-		SELECT
-			EXPT_DS_ID AS ${_iq_}dataSetId${_iq_},
-			EXPT_NAME AS ${_iq_}child.name${_iq_},
-			EXPT_TYPE AS ${_iq_}child.type${_iq_},
-			EXPT_ORDER AS ${_iq_}order${_iq_}
-		FROM
-			DATAGEAR_DATA_SET_EXPT
-		WHERE
-			EXPT_DS_ID = #{dataSetId}
-		ORDER BY
-			EXPT_ORDER ASC
 	</select>
 	
 	<select id="getDataIdPermissions" resultType="org.datagear.management.domain.DataIdPermission">
