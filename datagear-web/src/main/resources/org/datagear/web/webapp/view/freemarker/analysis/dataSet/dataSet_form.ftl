@@ -61,7 +61,7 @@ readonly 是否只读操作，允许为null
 								<button type="button" class="sql-add-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 								<button type="button" class="sql-del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-minus"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
 							</div>
-							<table id="${pageId}-sql-params-table" width='100%' height="100%" class='hover stripe'></table>
+							<table id="${pageId}-sql-params-table" width='100%' class='hover stripe'></table>
 						</div>
 						<div id="${pageId}-sql-result" class="sql-result-table-wrapper minor-dataTable">
 							<div class="operation">
@@ -70,7 +70,7 @@ readonly 是否只读操作，允许为null
 								<button type="button" class="sql-result-refresh-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
 								<button type="button" class="sql-result-export-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.exportSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-ne"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.exportSqlResult' /></button>
 							</div>
-							<table id="${pageId}-sql-result-table" width='100%' height="100%" class='hover stripe'></table>
+							<table id="${pageId}-sql-result-table" width='100%' class='hover stripe'></table>
 							<div class='no-more-data-flag ui-widget ui-widget-content' title="<@spring.message code='dataSet.noMoreData' />"></div>
 						</div>
 					</div>
@@ -207,7 +207,12 @@ readonly 是否只读操作，允许为null
 				data: "required",
 				render: function(data, type, row, meta)
 				{
-					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamRequired input-in-table' />";
+					data = data + "";
+					
+					return "<select class='dataSetParamRequired input-in-table'>"
+							+"<option value='true' "+(data != "false" ? "selected='selected'" : "")+"><@spring.message code='yes' /></option>"
+							+"<option value='false' "+(data == "false" ? "selected='selected'" : "")+"><@spring.message code='no' /></option>"
+							+"</select>";
 				},
 				width: "20%",
 				defaultContent: "",
@@ -227,9 +232,9 @@ readonly 是否只读操作，允许为null
 		],
 		data: po.dataSetParams,
 		"scrollX": true,
-		"scrollY" : po.calSqlOperationTableHeight(),
 		"autoWidth": true,
-        "scrollCollapse": true,
+		"scrollY" : po.calSqlOperationTableHeight(),
+        "scrollCollapse": false,
 		"paging" : false,
 		"searching" : false,
 		"ordering": false,
@@ -260,6 +265,31 @@ readonly 是否只读操作，允许为null
 		event.stopPropagation();
 	});
 	
+	po.getFormDataSetParams = function()
+	{
+		var params = [];
+		
+		po.element(".dataSetParamName").each(function(i)
+		{
+			params[i] = {};
+			params[i]["name"] = $(this).val();
+		});
+		po.element(".dataSetParamType").each(function(i)
+		{
+			params[i]["type"] = $(this).val();
+		});
+		po.element(".dataSetParamRequired").each(function(i)
+		{
+			params[i]["required"] = $(this).val();
+		});
+		po.element(".dataSetParamDesc").each(function(i)
+		{
+			params[i]["desc"] = $(this).val();
+		});
+		
+		return params;
+	};
+	
 	<#if !readonly>
 	po.element(".select-schema-button").click(function()
 	{
@@ -282,7 +312,9 @@ readonly 是否只读操作，允许为null
 	
 	po.sqlPreviewOptions =
 	{
+		schemaId: "",
 		sql : "",
+		paramValues: {},
 		startRow : 1
 	};
 	
@@ -360,15 +392,16 @@ readonly 是否只读操作，允许为null
 		
 		var data =
 		{
-			"sql" : po.sqlPreviewOptions.sql,
-			"startRow" : po.sqlPreviewOptions.startRow,
-			"returnMeta" : returnMeta
+			schemaId: po.sqlPreviewOptions.schemaId,
+			sql: po.sqlPreviewOptions.sql,
+			paramValues: po.sqlPreviewOptions.paramValues,
+			startRow: po.sqlPreviewOptions.startRow,
+			returnMeta: returnMeta
 		};
 		
-		$.ajax(
+		$.ajaxJson(
 		{
-			type : "POST",
-			url : po.url("sqlPreview/" + po.sqlPreviewOptions.schemaId),
+			url : po.url("sqlPreview"),
 			data : data,
 			success : function(sqlResult)
 			{
@@ -397,9 +430,9 @@ readonly 是否只读操作，允许为null
 						"columns" : newColumns,
 						"data" : (sqlResult.rows ? sqlResult.rows : []),
 						"scrollX": true,
-						"scrollY" : po.calSqlOperationTableHeight(),
 						"autoWidth": true,
-				        "scrollCollapse": true,
+						"scrollY" : po.calSqlOperationTableHeight(),
+				        "scrollCollapse": false,
 						"paging" : false,
 						"searching" : false,
 						"ordering": false,
@@ -473,29 +506,8 @@ readonly 是否只读操作，允许为null
 		{
 			var formData = $.formToJson(form);
 			formData["properties"] = po.dataSetProperties;
+			formData["params"] = po.getFormDataSetParams();
 			
-			var params = [];
-			
-			po.element(".dataSetParamName").each(function(i)
-			{
-				params[i] = {};
-				params[i]["name"] = $(this).val();
-			});
-			po.element(".dataSetParamType").each(function(i)
-			{
-				params[i]["type"] = $(this).val();
-			});
-			po.element(".dataSetParamRequired").each(function(i)
-			{
-				params[i]["required"] = $(this).val();
-			});
-			po.element(".dataSetParamDesc").each(function(i)
-			{
-				params[i]["desc"] = $(this).val();
-			});
-			
-			formData["params"] = params;
-
 			console.dir(formData);
 			
 			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,

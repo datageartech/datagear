@@ -6,13 +6,17 @@ package org.datagear.web.controller;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.SqlDataSetSupport;
+import org.datagear.analysis.support.TemplateSqlResolver;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
@@ -30,7 +34,6 @@ import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -272,28 +275,28 @@ public class DataSetController extends AbstractSchemaConnController
 		return pagingData;
 	}
 
-	@RequestMapping(value = "/sqlPreview/{schemaId}", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/sqlPreview", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public DataSetSqlSelectResult sqlPreview(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@RequestParam("sql") final String sql, @RequestParam(value = "startRow", required = false) Integer startRow,
-			@RequestParam(value = "fetchSize", required = false) Integer fetchSize,
-			@RequestParam(value = "returnMeta", required = false) Boolean returnMeta) throws Throwable
+			org.springframework.ui.Model springModel, @RequestBody SqlDataSetPreview sqlDataSetPreview) throws Throwable
 	{
-		DataSetSqlSelectResult result = executeSelect(request, response, springModel, schemaId, sql, startRow,
-				fetchSize);
+		DataSetSqlSelectResult result = executeSelect(request, response, springModel, sqlDataSetPreview);
 
-		if (!Boolean.TRUE.equals(returnMeta))
+		if (!Boolean.TRUE.equals(sqlDataSetPreview.getReturnMeta()))
 			result.setTable(null);
 
 		return result;
 	}
 
 	protected DataSetSqlSelectResult executeSelect(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, String schemaId, final String sql, Integer startRow,
-			Integer fetchSize) throws Throwable
+			org.springframework.ui.Model springModel, SqlDataSetPreview sqlDataSetPreview) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
+
+		String schemaId = sqlDataSetPreview.getSchemaId();
+		String sql = sqlDataSetPreview.getSql();
+		Integer startRow = sqlDataSetPreview.getStartRow();
+		Integer fetchSize = sqlDataSetPreview.getFetchSize();
 
 		if (startRow == null)
 			startRow = 1;
@@ -305,6 +308,7 @@ public class DataSetController extends AbstractSchemaConnController
 		if (fetchSize > 1000)
 			fetchSize = 1000;
 
+		final String sqlFinal = getTemplateSqlResolver().resolve(sql, sqlDataSetPreview.getParamValues());
 		final int startRowFinal = startRow;
 		final int fetchSizeFinal = fetchSize;
 
@@ -319,7 +323,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 				try
 				{
-					SqlSelectResult result = sqlSelectManager.select(getConnection(), sql, startRowFinal,
+					SqlSelectResult result = sqlSelectManager.select(getConnection(), sqlFinal, startRowFinal,
 							fetchSizeFinal);
 					List<DataSetProperty> dataSetProperties = resolveDataSetProperties(result.getTable(), null);
 
@@ -333,6 +337,11 @@ public class DataSetController extends AbstractSchemaConnController
 		}.execute();
 
 		return modelSqlResult;
+	}
+
+	protected TemplateSqlResolver getTemplateSqlResolver()
+	{
+		return SqlDataSet.TEMPLATE_SQL_RESOLVER;
 	}
 
 	/**
@@ -414,6 +423,94 @@ public class DataSetController extends AbstractSchemaConnController
 		public void setDataSetProperties(List<DataSetProperty> dataSetProperties)
 		{
 			this.dataSetProperties = dataSetProperties;
+		}
+	}
+
+	public static class SqlDataSetPreview
+	{
+		private String schemaId;
+
+		private String sql;
+
+		@SuppressWarnings("unchecked")
+		private Map<String, Object> paramValues = Collections.EMPTY_MAP;
+
+		private Integer startRow;
+
+		private Integer fetchSize;
+
+		private Boolean returnMeta;
+
+		public SqlDataSetPreview()
+		{
+			super();
+		}
+
+		public SqlDataSetPreview(String schemaId, String sql)
+		{
+			super();
+			this.schemaId = schemaId;
+			this.sql = sql;
+		}
+
+		public String getSchemaId()
+		{
+			return schemaId;
+		}
+
+		public void setSchemaId(String schemaId)
+		{
+			this.schemaId = schemaId;
+		}
+
+		public String getSql()
+		{
+			return sql;
+		}
+
+		public void setSql(String sql)
+		{
+			this.sql = sql;
+		}
+
+		public Map<String, Object> getParamValues()
+		{
+			return paramValues;
+		}
+
+		public void setParamValues(Map<String, Object> paramValues)
+		{
+			this.paramValues = paramValues;
+		}
+
+		public Integer getStartRow()
+		{
+			return startRow;
+		}
+
+		public void setStartRow(Integer startRow)
+		{
+			this.startRow = startRow;
+		}
+
+		public Integer getFetchSize()
+		{
+			return fetchSize;
+		}
+
+		public void setFetchSize(Integer fetchSize)
+		{
+			this.fetchSize = fetchSize;
+		}
+
+		public Boolean getReturnMeta()
+		{
+			return returnMeta;
+		}
+
+		public void setReturnMeta(Boolean returnMeta)
+		{
+			this.returnMeta = returnMeta;
 		}
 	}
 }
