@@ -25,7 +25,10 @@ import org.datagear.util.resource.ConnectionFactory;
 /**
  * SQL {@linkplain DataSet}。
  * <p>
- * 此类的{@linkplain #getSqlDataSetSqlResolver()}默认为{@linkplain SqlDataSetFmkSqlResolver}，{@linkplain #getSql()}支持<code>Freemarker</code>模板语言。
+ * 此类的{@linkplain #getSql()}支持<code>Freemarker</code>模板语言。
+ * </p>
+ * <p>
+ * 注意：为了提高效率，如果{@linkplain #hasParam()}为{@code false}，此类不会将{@linkplain #getSql()}当作做模板语言处理。
  * </p>
  * 
  * @author datagear@163.com
@@ -33,7 +36,7 @@ import org.datagear.util.resource.ConnectionFactory;
  */
 public class SqlDataSet extends AbstractDataSet
 {
-	protected static final SqlDataSetSqlResolver SQL_DATA_SET_SQL_RESOLVER = new SqlDataSetFmkSqlResolver();
+	public static final TemplateSqlResolver TEMPLATE_SQL_RESOLVER = new TemplateFmkSqlResolver();
 
 	protected static final SqlDataSetSupport SQL_DATA_SET_SUPPORT = new SqlDataSetSupport();
 
@@ -77,10 +80,7 @@ public class SqlDataSet extends AbstractDataSet
 	@Override
 	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
 	{
-		String sql = getSql();
-
-		if (getSqlDataSetSqlResolver() != null)
-			sql = getSqlDataSetSqlResolver().resolve(this, paramValues);
+		String sql = resolveTemplateSql(paramValues);
 
 		Connection cn = null;
 
@@ -110,19 +110,14 @@ public class SqlDataSet extends AbstractDataSet
 		}
 	}
 
-	protected SqlDataSetSqlResolver getSqlDataSetSqlResolver()
+	protected String resolveTemplateSql(Map<String, ?> paramValues)
 	{
-		return SQL_DATA_SET_SQL_RESOLVER;
+		if (!hasParam())
+			return getSql();
+
+		return TEMPLATE_SQL_RESOLVER.resolve(getSql(), paramValues);
 	}
 
-	/**
-	 * 获取{@linkplain DataSetResult}。
-	 * 
-	 * @param cn
-	 * @param sql
-	 * @param paramValues
-	 * @return
-	 */
 	protected DataSetResult getResult(Connection cn, String sql) throws DataSetException
 	{
 		Sql sqlObj = Sql.valueOf(sql);
@@ -144,14 +139,6 @@ public class SqlDataSet extends AbstractDataSet
 		}
 	}
 
-	/**
-	 * 将{@linkplain ResultSet}转换为{@linkplain DataSetResult}。
-	 * 
-	 * @param cn
-	 * @param rs
-	 * @return
-	 * @throws SQLException
-	 */
 	public DataSetResult toDataSetResult(Connection cn, ResultSet rs) throws SQLException
 	{
 		List<Map<String, ?>> datas = getSqlDataSetSupport().resolveDatas(cn, rs, getProperties());

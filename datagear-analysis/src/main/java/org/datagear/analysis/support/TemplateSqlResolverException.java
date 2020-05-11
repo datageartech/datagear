@@ -7,31 +7,31 @@ package org.datagear.analysis.support;
 import org.datagear.analysis.DataSetException;
 
 /**
- * {@linkplain SqlDataSetSqlResolver}异常。
+ * {@linkplain TemplateSqlResolver}异常。
  * 
  * @author datagear@163.com
  *
  */
-public class SqlDataSetSqlResolverException extends DataSetException
+public class TemplateSqlResolverException extends DataSetException
 {
 	private static final long serialVersionUID = 1L;
 
-	public SqlDataSetSqlResolverException()
+	public TemplateSqlResolverException()
 	{
 		super();
 	}
 
-	public SqlDataSetSqlResolverException(String message)
+	public TemplateSqlResolverException(String message)
 	{
 		super(message);
 	}
 
-	public SqlDataSetSqlResolverException(Throwable cause)
+	public TemplateSqlResolverException(Throwable cause)
 	{
 		super(cause);
 	}
 
-	public SqlDataSetSqlResolverException(String message, Throwable cause)
+	public TemplateSqlResolverException(String message, Throwable cause)
 	{
 		super(message, cause);
 	}

@@ -25,24 +25,21 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 /**
- * Freemarker SQL模板{@linkplain SqlDataSetSqlResolver}。
+ * Freemarker {@linkplain TemplateSqlResolver}。
  * <p>
- * 此类将{@linkplain SqlDataSet#getSql()}当作Freemarker模板语言，并返回处理后的SQL语句。
- * </p>
- * <p>
- * 注意：为了提高效率，如果{@linkplain SqlDataSet#hasParam()}为{@code false}，此类将直接返回{@linkplain SqlDataSet#getSql()}而不做模板语言处理。
+ * 此类可解析由Freemarker编写的SQL语句。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
+public class TemplateFmkSqlResolver implements TemplateSqlResolver
 {
 	private SqlDataSetTemplateLoader dataSetTemplateLoader;
 
 	private Configuration configuration;
 
-	public SqlDataSetFmkSqlResolver()
+	public TemplateFmkSqlResolver()
 	{
 		super();
 		int cacheCapacity = 500;
@@ -91,33 +88,29 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 	}
 
 	@Override
-	public String resolve(SqlDataSet sqlDataSet, Map<String, ?> dataSetParamValues)
-			throws SqlDataSetSqlResolverException
+	public String resolve(String sql, Map<String, ?> values) throws TemplateSqlResolverException
 	{
-		if (!needHandleAsTemplate(sqlDataSet))
-			return sqlDataSet.getSql();
+		this.dataSetTemplateLoader.updateTemplate(sql);
 
-		this.dataSetTemplateLoader.updateTemplate(sqlDataSet);
-
-		String sql = null;
+		String re = null;
 
 		try
 		{
-			Template template = this.configuration.getTemplate(this.dataSetTemplateLoader.getTemplateName(sqlDataSet));
+			Template template = this.configuration.getTemplate(sql);
 			StringWriter out = new StringWriter();
-			template.process(dataSetParamValues, out);
-			sql = out.toString();
+			template.process(values, out);
+			re = out.toString();
 		}
 		catch (IOException e)
 		{
-			throw new SqlDataSetSqlResolverException(e);
+			throw new TemplateSqlResolverException(e);
 		}
 		catch (TemplateException e)
 		{
-			throw new SqlDataSetSqlResolverException(e);
+			throw new TemplateSqlResolverException(e);
 		}
 
-		return sql;
+		return re;
 	}
 
 	protected boolean needHandleAsTemplate(SqlDataSet sqlDataSet)
@@ -166,24 +159,21 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 		}
 
 		/**
-		 * 将{@linkplain SqlDataSet#getSql()}更新为Freemarker模板。
+		 * 将给定SQL更新为Freemarker模板。
 		 * 
-		 * @param sqlDataSet
-		 * @return true 更新成功；false
-		 *         未更新，因为{@linkplain SqlDataSet#getSql()}自上次以来未修改
+		 * @param sql
+		 * @return true 更新成功；false 未更新，因为{@code sql}自上次以来未修改
 		 */
-		public boolean updateTemplate(SqlDataSet sqlDataSet)
+		public boolean updateTemplate(String sql)
 		{
-			String templateName = getTemplateName(sqlDataSet);
-
 			Lock readLock = this._lock.readLock();
 
 			try
 			{
 				readLock.lock();
 
-				SqlDataSetTemplateSource sts = this.sqlDataSetTemplateSources.get(templateName);
-				if (sts != null && sts.getSql().equals(sqlDataSet.getSql()))
+				SqlDataSetTemplateSource sts = this.sqlDataSetTemplateSources.get(sql);
+				if (sts != null)
 					return false;
 			}
 			finally
@@ -199,8 +189,8 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 				long currentTime = System.currentTimeMillis();
 				long expiredTime = currentTime - this.expiredSeconds * 1000;
 
-				SqlDataSetTemplateSource sts = new SqlDataSetTemplateSource(sqlDataSet, currentTime);
-				this.sqlDataSetTemplateSources.put(templateName, sts);
+				SqlDataSetTemplateSource sts = new SqlDataSetTemplateSource(sql, currentTime);
+				this.sqlDataSetTemplateSources.put(sql, sts);
 
 				if (this.sqlDataSetTemplateSources.size() >= this.capacity)
 				{
@@ -217,7 +207,7 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 						if (count > this.capacity || ele.getLastModified() < expiredTime)
 							break;
 
-						this.sqlDataSetTemplateSources.put(templateName, ele);
+						this.sqlDataSetTemplateSources.put(sql, ele);
 
 						count++;
 					}
@@ -267,23 +257,15 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 
 		protected static class SqlDataSetTemplateSource
 		{
-			private final String name;
-
 			private final String sql;
 
 			private final long lastModified;
 
-			public SqlDataSetTemplateSource(SqlDataSet sqlDataSet, long lastModified)
+			public SqlDataSetTemplateSource(String sql, long lastModified)
 			{
 				super();
-				this.name = sqlDataSet.getId();
-				this.sql = sqlDataSet.getSql();
+				this.sql = sql;
 				this.lastModified = lastModified;
-			}
-
-			public String getName()
-			{
-				return name;
 			}
 
 			public String getSql()
@@ -301,7 +283,7 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 			{
 				final int prime = 31;
 				int result = 1;
-				result = prime * result + ((name == null) ? 0 : name.hashCode());
+				result = prime * result + ((sql == null) ? 0 : sql.hashCode());
 				return result;
 			}
 
@@ -315,12 +297,12 @@ public class SqlDataSetFmkSqlResolver implements SqlDataSetSqlResolver
 				if (getClass() != obj.getClass())
 					return false;
 				SqlDataSetTemplateSource other = (SqlDataSetTemplateSource) obj;
-				if (name == null)
+				if (sql == null)
 				{
-					if (other.name != null)
+					if (other.sql != null)
 						return false;
 				}
-				else if (!name.equals(other.name))
+				else if (!sql.equals(other.sql))
 					return false;
 				return true;
 			}
