@@ -2132,7 +2132,6 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-dataSet .sql-operation-wrapper .operation{
 	position: absolute;
 	right: 0px;
-	bottom: 0px;
 	top: -1.5em;
 }
 .page-form-dataSet .sql-operation-wrapper .operation .ui-button.ui-button-icon-only{
@@ -2155,6 +2154,13 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .page-form-dataSet .form-item-value-sql .error{
 	display: block;
+}
+.page-form-dataSet .sql-param-value-panel{
+	position: absolute;
+	display: none;
+	padding: 0.5em 0.5em;
+	max-height: 60%;
+	overflow: auto;
 }
 
 .page-form-chart .chart-plugin{

@@ -65,6 +65,7 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div id="${pageId}-sql-result" class="sql-result-table-wrapper minor-dataTable">
 							<div class="operation">
+								<button type="button" class="sql-setParamValue-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.setSqlParamValue' />"><span class="ui-button-icon ui-icon ui-icon-comment"></span><span class="ui-button-icon-space"> </span><@spring.message code='dataSet.setSqlParamValue' /></button>
 								<button type="button" class="sql-preview-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.sqlPreviewButtonTip' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='preview' /></button>
 								<button type="button" class="sql-result-more-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
 								<button type="button" class="sql-result-refresh-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
@@ -94,6 +95,12 @@ readonly 是否只读操作，允许为null
 			</#if>
 		</div>
 	</form>
+	<div class="sql-param-value-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<div class="ui-widget-header ui-corner-all"><@spring.message code='dataSet.setSqlParamValue' /></div>
+		<div class="sql-param-value-panel-content">
+			
+		</div>
+	</div>
 </div>
 <#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
@@ -317,6 +324,17 @@ readonly 是否只读操作，允许为null
 		paramValues: {},
 		startRow : 1
 	};
+	
+	po.element(".sql-setParamValue-button").click(function()
+	{
+		var $this = $(this);
+		var dataSetParams = po.getFormDataSetParams();
+		var $panel = po.element(".sql-param-value-panel");
+		
+		chartForm.renderDataSetParamValueForm($(".sql-param-value-panel-content", $panel), dataSetParams);
+		$panel.show();
+		$panel.position({ my : "right top", at : "right bottom", of : $this});
+	});
 	
 	po.element(".sql-preview-button").click(function()
 	{

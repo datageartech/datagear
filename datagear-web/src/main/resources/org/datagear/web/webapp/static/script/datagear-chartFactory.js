@@ -1766,45 +1766,5 @@
 	
 	/**图表状态：完成update*/
 	chartFactory.STATUS_UPDATED = "UPDATED";
-	
-	/**
-	 * 渲染图表参数值表单
-	 * 
-	 * @param $parent
-	 * @param dataSetParams
-	 * @param options
-	 * 			{
-	 * 				paramValues: {...}      //初始参数值
-	 * 			}
-	 * @return 表单DOM元素
-	 */
-	chartFactory.renderDataSetParamValueForm = function($parent, dataSetParams, options)
-	{
-		options = (options || {});
-		
-		var paramValues = (options.paramValues || {});
-		var $form = ($parent.is("form") ? $parent : $(">form", $parent));
-		if($form.length == 0)
-			$form = $("<form />").appendTo($parent);
-		else
-			$form.empty();
-		
-		$form.addClass("data-set-param-value-form");
-		
-		for(var i=0; i<dataSetParams.length; i++)
-		{
-			var dsp = dataSetParams[i];
-			
-			var $item = $("<div class='form-item' />").appendTo($form);
-			
-			var $labelDiv = $("<div class='form-item-label' />").appendTo($item);
-			$("<label />").html(dsp.name).appendTo($labelDiv);
-			
-			var $valueDiv = $("<div class='form-item-value' />").appendTo($item);
-			$("<input type='text' />").attr(name, dsp.name).attr("value", (paramValues[dsp.name] || "")).appendTo($valueDiv);
-		}
-		
-		return $form[0];
-	};
 })
 (this);
