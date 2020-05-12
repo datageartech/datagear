@@ -23,37 +23,90 @@
 	 * @param dataSetParams
 	 * @param options
 	 * 			{
-	 * 				paramValues: {...}      //初始参数值
+	 * 				submit: function(){}    //可选，提交处理函数
+	 * 				paramValues: {...}      //可选，初始参数值
+	 * 				submitText: "..."       //可选，提交按钮文本内容
 	 * 			}
 	 * @return 表单DOM元素
 	 */
 	chartForm.renderDataSetParamValueForm = function($parent, dataSetParams, options)
 	{
-		options = (options || {});
-		
+		options = $.extend({ submitText: "确定" }, (options || {}));
 		var paramValues = (options.paramValues || {});
-		var $form = ($parent.is("form") ? $parent : $(">form", $parent));
-		if($form.length == 0)
-			$form = $("<form />").appendTo($parent);
-		else
-			$form.empty();
+		
+		$parent.empty();
+		var $form = $("<form />").appendTo($parent);
 		
 		$form.addClass("data-set-param-value-form");
+		
+		$("<div class='dspv-head' />").appendTo($form);
+		var $content = $("<div class='dspv-content' />").appendTo($form);
+		var $foot = $("<div class='dspv-foot' />").appendTo($form);
 		
 		for(var i=0; i<dataSetParams.length; i++)
 		{
 			var dsp = dataSetParams[i];
 			
-			var $item = $("<div class='form-item' />").appendTo($form);
+			var $item = $("<div class='form-item' />").appendTo($content);
 			
 			var $labelDiv = $("<div class='form-item-label' />").appendTo($item);
 			$("<label />").html(dsp.name).appendTo($labelDiv);
 			
 			var $valueDiv = $("<div class='form-item-value' />").appendTo($item);
-			$("<input type='text' />").attr("name", dsp.name).attr("value", (paramValues[dsp.name] || "")).appendTo($valueDiv);
+			var $input = $("<input type='text' class='ui-widget ui-widget-content' />").attr("name", dsp.name)
+							.attr("value", (paramValues[dsp.name] || "")).appendTo($valueDiv);
+			
+			if((dsp.required+"") == "true")
+				$input.attr("validation-required", "true");
 		}
 		
+		$("<button type='submit' class='ui-button ui-corner-all ui-widget' />").html(options.submitText).appendTo($foot);
+		
+		$form.submit(function()
+		{
+			var validationOk = true;
+			
+			var $requireds = $("input[validation-required]", this);
+			$requireds.each(function()
+			{
+				var $this = $(this);
+				if($this.val() == "")
+				{
+					$this.addClass("validation-required");
+					validationOk = false;
+				}
+				else
+					$this.removeClass("validation-required");
+			});
+			
+			if(!validationOk)
+				return false;
+			
+			if(options.submit)
+				return (options.submit.apply(this) == true);
+			else
+				return false;
+		});
+		
 		return $form[0];
+	};
+	
+	chartForm.deleteEmptyDataSetParamValue = function(paramValueObj)
+	{
+		if(!paramValueObj)
+			return paramValueObj;
+		
+		var re = {};
+		
+		for(var name in paramValueObj)
+		{
+			if(paramValueObj[name] == "")
+				continue;
+			
+			re[name] = paramValueObj[name];
+		}
+		
+		return re;
 	};
 })
 (this);

@@ -57,3 +57,22 @@
 	font-size: 1.5em;
 	font-weight: bold;
 }
+
+.data-set-param-value-form{}
+.data-set-param-value-form .dspv-content{
+	padding: 0.3em 0.3em;
+}
+.data-set-param-value-form .dspv-content .form-item{
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+}
+.data-set-param-value-form .dspv-content .form-item .form-item-label{
+	padding-bottom: 0.1em;
+}
+.data-set-param-value-form .dspv-content .validation-required{
+	border-color: red;
+}
+.data-set-param-value-form .dspv-foot{
+	padding-top: 0.3em;
+	text-align: center;
+}

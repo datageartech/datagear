@@ -17,6 +17,7 @@ var contextPath="${contextPath}";
 <link id="css_ace" href="${contextPath}/static/theme/<@spring.theme code='theme' />/ace-21.02.19/ace.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/datagear-pagination.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/common.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/css/analysis.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link id="css_common" href="${contextPath}/static/theme/<@spring.theme code='theme' />/common.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 
 <script src="${contextPath}/static/script/jquery/jquery-1.12.4.min.js?v=${_hh_Version}" type="text/javascript"></script>

@@ -188,7 +188,7 @@
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="dashboardStyle" />
-					<property name="content" value="&lt;link type='text/css' res-name='dashboardStyle' href='$CONTEXTPATH/static/css/dashboard.css?v=$VERSION'  rel='stylesheet' /&gt;" />
+					<property name="content" value="&lt;link type='text/css' res-name='dashboardStyle' href='$CONTEXTPATH/static/css/analysis.css?v=$VERSION'  rel='stylesheet' /&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="dashboardStyleTheme" />

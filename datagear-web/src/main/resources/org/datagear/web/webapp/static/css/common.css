@@ -2162,6 +2162,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	max-height: 60%;
 	overflow: auto;
 }
+.page-form-dataSet .sql-param-value-panel .ui-widget-header{
+	padding: 0.3em 0.1em;
+}
 
 .page-form-chart .chart-plugin{
 	display: inline-block;

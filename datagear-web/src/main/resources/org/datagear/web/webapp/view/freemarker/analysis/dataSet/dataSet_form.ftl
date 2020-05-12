@@ -59,7 +59,7 @@ readonly 是否只读操作，允许为null
 						<div id="${pageId}-sql-params" class="sql-params-table-wrapper minor-dataTable">
 							<div class="operation">
 								<button type="button" class="sql-add-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
-								<button type="button" class="sql-del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-minus"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
+								<button type="button" class="sql-del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
 							</div>
 							<table id="${pageId}-sql-params-table" width='100%' class='hover stripe'></table>
 						</div>
@@ -176,9 +176,22 @@ readonly 是否只读操作，允许为null
 	{
 		activate: function(event, ui)
 		{
-			if(ui.newPanel.hasClass("sql-result-table-wrapper")
-					&& (po.isSqlModified() || !po.sqlResultTableElement().hasClass("sql-result-table-inited")))
+			var isSqlResultTab = (ui.newPanel && ui.newPanel.hasClass("sql-result-table-wrapper"));
+			
+			if(isSqlResultTab)
+			{
+				if(po.hasFormDataSetParam())
+					po.element(".sql-setParamValue-button").show();
+				else
+					po.element(".sql-setParamValue-button").hide();
+			}
+			
+			if(isSqlResultTab && (po.isSqlModified() || !po.sqlResultTableElement().hasClass("sql-result-table-inited")))
+			{
+				//避免设置参数面板被隐藏
+				event.stopPropagation();
 				po.element(".sql-preview-button").click();
+			}
 		}
 	});
 	
@@ -192,7 +205,7 @@ readonly 是否只读操作，允许为null
 				data: "name",
 				render: function(data, type, row, meta)
 				{
-					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamName input-in-table' />";
+					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamName input-in-table ui-widget ui-widget-content' />";
 				},
 				width: "30%",
 				defaultContent: "",
@@ -203,7 +216,7 @@ readonly 是否只读操作，允许为null
 				data: "type",
 				render: function(data, type, row, meta)
 				{
-					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamType input-in-table' />";
+					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamType input-in-table ui-widget ui-widget-content' />";
 				},
 				width: "20%",
 				defaultContent: "",
@@ -216,7 +229,7 @@ readonly 是否只读操作，允许为null
 				{
 					data = data + "";
 					
-					return "<select class='dataSetParamRequired input-in-table'>"
+					return "<select class='dataSetParamRequired input-in-table ui-widget ui-widget-content'>"
 							+"<option value='true' "+(data != "false" ? "selected='selected'" : "")+"><@spring.message code='yes' /></option>"
 							+"<option value='false' "+(data == "false" ? "selected='selected'" : "")+"><@spring.message code='no' /></option>"
 							+"</select>";
@@ -230,7 +243,7 @@ readonly 是否只读操作，允许为null
 				data: "desc",
 				render: function(data, type, row, meta)
 				{
-					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamDesc input-in-table' />";
+					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamDesc input-in-table ui-widget ui-widget-content' />";
 				},
 				width: "30%",
 				defaultContent: "",
@@ -239,7 +252,7 @@ readonly 是否只读操作，允许为null
 		],
 		data: po.dataSetParams,
 		"scrollX": true,
-		"autoWidth": true,
+		"autoWidth": false,
 		"scrollY" : po.calSqlOperationTableHeight(),
         "scrollCollapse": false,
 		"paging" : false,
@@ -271,6 +284,12 @@ readonly 是否只读操作，允许为null
 		//阻止行选中
 		event.stopPropagation();
 	});
+	
+	po.hasFormDataSetParam = function()
+	{
+		var $names = po.element(".dataSetParamName");
+		return ($names.length > 0);
+	};
 	
 	po.getFormDataSetParams = function()
 	{
@@ -325,22 +344,60 @@ readonly 是否只读操作，允许为null
 		startRow : 1
 	};
 	
+	po.element(".sql-param-value-panel").draggable({ handle : ".ui-widget-header" });
+	
 	po.element(".sql-setParamValue-button").click(function()
 	{
-		var $this = $(this);
-		var dataSetParams = po.getFormDataSetParams();
+		if(!po.hasFormDataSetParam())
+		{
+			$.tipInfo("<@spring.message code='dataSet.noSqlParamDefined' />");
+			return;
+		}
+		
 		var $panel = po.element(".sql-param-value-panel");
 		
-		chartForm.renderDataSetParamValueForm($(".sql-param-value-panel-content", $panel), dataSetParams);
+		chartForm.renderDataSetParamValueForm($(".sql-param-value-panel-content", $panel), po.getFormDataSetParams(),
+		{
+			submit: function()
+			{
+				po.sqlPreviewOptions.schemaId = po.element("input[name='schemaConnectionFactory.schema.id']").val();
+				po.sqlPreviewOptions.sql = po.sqlEditor.getValue();
+				po.sqlPreviewOptions.paramValues = chartForm.deleteEmptyDataSetParamValue($.formToJson(this));
+				po.sqlPreviewOptions.startRow = 1;
+				po.sqlPreview();
+			},
+			submitText: "<@spring.message code='confirm' />"
+		});
+		
 		$panel.show();
-		$panel.position({ my : "right top", at : "right bottom", of : $this});
+		$panel.position({ my : "right top", at : "left top", of : po.element("#${pageId}-sql-result")});
 	});
 	
-	po.element(".sql-preview-button").click(function()
+	$(po.element()).on("click", function(event)
+	{
+		var $target = $(event.target);
+		
+		var $pvp = po.element(".sql-param-value-panel");
+		if(!$pvp.is(":hidden"))
+		{
+			if($target.closest(".sql-param-value-panel, .sql-setParamValue-button").length == 0)
+				$pvp.hide();
+		}
+	});
+	
+	po.element(".sql-preview-button").click(function(event)
 	{
 		var sql = po.sqlEditor.getValue();
 		if(!sql)
 			return;
+		
+		if(po.hasFormDataSetParam())
+		{
+			//避免设置参数面板被隐藏
+			event.stopPropagation();
+			po.element(".sql-setParamValue-button").click();
+			return;
+		}
 		
 		po.element(".operation-result").hide();
 		
@@ -525,8 +582,6 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.dataSetProperties;
 			formData["params"] = po.getFormDataSetParams();
-			
-			console.dir(formData);
 			
 			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,
 			function(response)
