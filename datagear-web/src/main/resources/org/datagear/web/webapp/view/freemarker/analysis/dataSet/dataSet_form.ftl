@@ -122,7 +122,8 @@ readonly 是否只读操作，允许为null
 		return "${contextPath}/analysis/dataSet/" + action;
 	};
 	
-	po.getSqlEditorSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };
+	po.getDataSetSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };
+	
 	po.initSqlEditor();
 	var cursor = po.sqlEditor.getCursorPosition();
 	po.sqlEditor.session.insert(cursor, po.element("textarea[name='sql']").val());
@@ -346,6 +347,19 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".sql-param-value-panel").draggable({ handle : ".ui-widget-header" });
 	
+	po.showDataSetParamValuePanel = function(formOptions)
+	{
+		formOptions = $.extend({ submitText: "<@spring.message code='confirm' />" }, formOptions);
+		
+		var $panel = po.element(".sql-param-value-panel");
+		
+		chartForm.renderDataSetParamValueForm($(".sql-param-value-panel-content", $panel),
+				po.getFormDataSetParams(), formOptions);
+		
+		$panel.show();
+		$panel.position({ my : "right top", at : "left top", of : po.element("#${pageId}-sql-result")});
+	};
+	
 	po.element(".sql-setParamValue-button").click(function()
 	{
 		if(!po.hasFormDataSetParam())
@@ -354,23 +368,17 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		
-		var $panel = po.element(".sql-param-value-panel");
-		
-		chartForm.renderDataSetParamValueForm($(".sql-param-value-panel-content", $panel), po.getFormDataSetParams(),
+		po.showDataSetParamValuePanel(
 		{
 			submit: function()
 			{
-				po.sqlPreviewOptions.schemaId = po.element("input[name='schemaConnectionFactory.schema.id']").val();
+				po.sqlPreviewOptions.schemaId = po.getDataSetSchemaId();
 				po.sqlPreviewOptions.sql = po.sqlEditor.getValue();
 				po.sqlPreviewOptions.paramValues = chartForm.deleteEmptyDataSetParamValue($.formToJson(this));
 				po.sqlPreviewOptions.startRow = 1;
 				po.sqlPreview();
-			},
-			submitText: "<@spring.message code='confirm' />"
+			}
 		});
-		
-		$panel.show();
-		$panel.position({ my : "right top", at : "left top", of : po.element("#${pageId}-sql-result")});
 	});
 	
 	$(po.element()).on("click", function(event)
@@ -398,6 +406,8 @@ readonly 是否只读操作，允许为null
 			po.element(".sql-setParamValue-button").click();
 			return;
 		}
+		else
+			po.sqlPreviewOptions.paramValues = {};
 		
 		po.element(".operation-result").hide();
 		
@@ -408,8 +418,8 @@ readonly 是否只读操作，允许为null
 			table.empty();
 		}
 		
-		po.sqlPreviewOptions.schemaId = po.element("input[name='schemaConnectionFactory.schema.id']").val();
-		po.sqlPreviewOptions.sql = po.sqlEditor.getValue();
+		po.sqlPreviewOptions.schemaId = po.getDataSetSchemaId();
+		po.sqlPreviewOptions.sql = sql;
 		po.sqlPreviewOptions.startRow = 1;
 		po.sqlPreview();
 	});
@@ -429,17 +439,45 @@ readonly 是否只读操作，允许为null
 		po.sqlPreview();
 	});
 
-	po.element(".sql-result-export-button").click(function()
+	po.element(".sql-result-export-button").click(function(event)
 	{
-		var schemaId = schemaId = po.element("input[name='schemaConnectionFactory.schema.id']").val();
+		var schemaId = po.getDataSetSchemaId();
 		var sql = po.sqlEditor.getValue();
 		
 		if(!schemaId || !sql)
 			return;
 		
-		var options = {data: {"initSqls": sql}};
-		$.setGridPageHeightOption(options);
-		po.open("${contextPath}/dataexchange/"+schemaId+"/export", options);
+		if(po.hasFormDataSetParam())
+		{
+			//避免设置参数面板被隐藏
+			event.stopPropagation();
+			po.showDataSetParamValuePanel(
+			{
+				submit: function()
+				{
+					var paramValues = chartForm.deleteEmptyDataSetParamValue($.formToJson(this));
+					
+					var data =
+					{
+						sql: sql,
+						paramValues: paramValues
+					};
+					
+					$.postJson(po.url("resolveSql"), data, function(sql)
+					{
+						var options = {data: {"initSqls": sql}};
+						$.setGridPageHeightOption(options);
+						po.open("${contextPath}/dataexchange/"+schemaId+"/export", options);
+					});
+				}
+			});
+		}
+		else
+		{
+			var options = {data: {"initSqls": sql}};
+			$.setGridPageHeightOption(options);
+			po.open("${contextPath}/dataexchange/"+schemaId+"/export", options);
+		}
 	});
 	
 	po.renderRowNumberColumn = function(data, type, row, meta)
