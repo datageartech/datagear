@@ -65,7 +65,6 @@ readonly 是否只读操作，允许为null
 						</div>
 						<div id="${pageId}-sql-result" class="sql-result-table-wrapper minor-dataTable">
 							<div class="operation">
-								<button type="button" class="sql-setParamValue-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.setSqlParamValue' />"><span class="ui-button-icon ui-icon ui-icon-comment"></span><span class="ui-button-icon-space"> </span><@spring.message code='dataSet.setSqlParamValue' /></button>
 								<button type="button" class="sql-preview-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.sqlPreviewButtonTip' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='preview' /></button>
 								<button type="button" class="sql-result-more-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
 								<button type="button" class="sql-result-refresh-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
@@ -122,7 +121,8 @@ readonly 是否只读操作，允许为null
 		return "${contextPath}/analysis/dataSet/" + action;
 	};
 	
-	po.getSqlEditorSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };
+	po.getDataSetSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };
+	
 	po.initSqlEditor();
 	var cursor = po.sqlEditor.getCursorPosition();
 	po.sqlEditor.session.insert(cursor, po.element("textarea[name='sql']").val());
@@ -177,15 +177,6 @@ readonly 是否只读操作，允许为null
 		activate: function(event, ui)
 		{
 			var isSqlResultTab = (ui.newPanel && ui.newPanel.hasClass("sql-result-table-wrapper"));
-			
-			if(isSqlResultTab)
-			{
-				if(po.hasFormDataSetParam())
-					po.element(".sql-setParamValue-button").show();
-				else
-					po.element(".sql-setParamValue-button").hide();
-			}
-			
 			if(isSqlResultTab && (po.isSqlModified() || !po.sqlResultTableElement().hasClass("sql-result-table-inited")))
 			{
 				//避免设置参数面板被隐藏
@@ -346,32 +337,23 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".sql-param-value-panel").draggable({ handle : ".ui-widget-header" });
 	
-	po.element(".sql-setParamValue-button").click(function()
+	po.showDataSetParamValuePanel = function(formOptions)
 	{
-		if(!po.hasFormDataSetParam())
-		{
-			$.tipInfo("<@spring.message code='dataSet.noSqlParamDefined' />");
-			return;
-		}
-		
 		var $panel = po.element(".sql-param-value-panel");
 		
-		chartForm.renderDataSetParamValueForm($(".sql-param-value-panel-content", $panel), po.getFormDataSetParams(),
+		formOptions = $.extend(
 		{
-			submit: function()
-			{
-				po.sqlPreviewOptions.schemaId = po.element("input[name='schemaConnectionFactory.schema.id']").val();
-				po.sqlPreviewOptions.sql = po.sqlEditor.getValue();
-				po.sqlPreviewOptions.paramValues = chartForm.deleteEmptyDataSetParamValue($.formToJson(this));
-				po.sqlPreviewOptions.startRow = 1;
-				po.sqlPreview();
-			},
-			submitText: "<@spring.message code='confirm' />"
-		});
+			submitText: "<@spring.message code='confirm' />",
+			paramValues: $.formToJson(chartForm.getDataSetParamValueForm($panel))
+		},
+		formOptions);
+		
+		chartForm.renderDataSetParamValueForm($(".sql-param-value-panel-content", $panel),
+				po.getFormDataSetParams(), formOptions);
 		
 		$panel.show();
 		$panel.position({ my : "right top", at : "left top", of : po.element("#${pageId}-sql-result")});
-	});
+	};
 	
 	$(po.element()).on("click", function(event)
 	{
@@ -380,7 +362,7 @@ readonly 是否只读操作，允许为null
 		var $pvp = po.element(".sql-param-value-panel");
 		if(!$pvp.is(":hidden"))
 		{
-			if($target.closest(".sql-param-value-panel, .sql-setParamValue-button").length == 0)
+			if($target.closest(".sql-param-value-panel").length == 0)
 				$pvp.hide();
 		}
 	});
@@ -395,11 +377,30 @@ readonly 是否只读操作，允许为null
 		{
 			//避免设置参数面板被隐藏
 			event.stopPropagation();
-			po.element(".sql-setParamValue-button").click();
+			
+			po.showDataSetParamValuePanel(
+			{
+				submit: function()
+				{
+					var table = po.sqlResultTableElement();
+					if($.isDatatTable(table))
+					{
+						table.DataTable().destroy();
+						table.empty();
+					}
+					
+					po.sqlPreviewOptions.schemaId = po.getDataSetSchemaId();
+					po.sqlPreviewOptions.sql = po.sqlEditor.getValue();
+					po.sqlPreviewOptions.paramValues = chartForm.deleteEmptyDataSetParamValue($.formToJson(this));
+					po.sqlPreviewOptions.startRow = 1;
+					po.sqlPreview();
+				}
+			});
+			
 			return;
 		}
-		
-		po.element(".operation-result").hide();
+		else
+			po.sqlPreviewOptions.paramValues = {};
 		
 		var table = po.sqlResultTableElement();
 		if($.isDatatTable(table))
@@ -408,8 +409,8 @@ readonly 是否只读操作，允许为null
 			table.empty();
 		}
 		
-		po.sqlPreviewOptions.schemaId = po.element("input[name='schemaConnectionFactory.schema.id']").val();
-		po.sqlPreviewOptions.sql = po.sqlEditor.getValue();
+		po.sqlPreviewOptions.schemaId = po.getDataSetSchemaId();
+		po.sqlPreviewOptions.sql = sql;
 		po.sqlPreviewOptions.startRow = 1;
 		po.sqlPreview();
 	});
@@ -429,17 +430,45 @@ readonly 是否只读操作，允许为null
 		po.sqlPreview();
 	});
 
-	po.element(".sql-result-export-button").click(function()
+	po.element(".sql-result-export-button").click(function(event)
 	{
-		var schemaId = schemaId = po.element("input[name='schemaConnectionFactory.schema.id']").val();
+		var schemaId = po.getDataSetSchemaId();
 		var sql = po.sqlEditor.getValue();
 		
 		if(!schemaId || !sql)
 			return;
 		
-		var options = {data: {"initSqls": sql}};
-		$.setGridPageHeightOption(options);
-		po.open("${contextPath}/dataexchange/"+schemaId+"/export", options);
+		if(po.hasFormDataSetParam())
+		{
+			//避免设置参数面板被隐藏
+			event.stopPropagation();
+			po.showDataSetParamValuePanel(
+			{
+				submit: function()
+				{
+					var paramValues = chartForm.deleteEmptyDataSetParamValue($.formToJson(this));
+					
+					var data =
+					{
+						sql: sql,
+						paramValues: paramValues
+					};
+					
+					$.postJson(po.url("resolveSql"), data, function(sql)
+					{
+						var options = {data: {"initSqls": sql}};
+						$.setGridPageHeightOption(options);
+						po.open("${contextPath}/dataexchange/"+schemaId+"/export", options);
+					});
+				}
+			});
+		}
+		else
+		{
+			var options = {data: {"initSqls": sql}};
+			$.setGridPageHeightOption(options);
+			po.open("${contextPath}/dataexchange/"+schemaId+"/export", options);
+		}
 	});
 	
 	po.renderRowNumberColumn = function(data, type, row, meta)
@@ -539,7 +568,6 @@ readonly 是否只读操作，允许为null
 					po.element(".no-more-data-flag").hide();
 				}
 				
-				po.element(".operation-result").show();
 				po.sqlEditor.focus();
 			},
 			complete : function()

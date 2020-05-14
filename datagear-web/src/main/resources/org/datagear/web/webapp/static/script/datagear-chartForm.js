@@ -91,6 +91,11 @@
 		return $form[0];
 	};
 	
+	chartForm.getDataSetParamValueForm = function($parent)
+	{
+		return $(".data-set-param-value-form", $parent);
+	};
+	
 	chartForm.deleteEmptyDataSetParamValue = function(paramValueObj)
 	{
 		if(!paramValueObj)

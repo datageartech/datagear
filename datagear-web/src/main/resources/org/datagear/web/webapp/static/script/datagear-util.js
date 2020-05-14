@@ -561,11 +561,13 @@
 		
 		/**
 		 * 表单数据转JSON对象。
-		 * @param form 表单元素、名称/值对象数组，名称支持“a.b[0].c”格式的属性路径
+		 * @param form 表单元素、表单JQuery对象、名称/值对象数组，名称支持“a.b[0].c”格式的属性路径
 		 */
 		formToJson: function(form)
 		{
-			var array = ($.isArray(form) ? form : $(form).serializeArray());
+			var $form = $(form);
+			
+			var array = ($form.is("form") ? $form.serializeArray() : form);
 			
 			var json = {};
 			var KeyForArray = $.uid("__KEY_FOR_ARRAY_");

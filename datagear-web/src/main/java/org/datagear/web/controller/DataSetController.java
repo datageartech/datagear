@@ -288,6 +288,14 @@ public class DataSetController extends AbstractSchemaConnController
 		return result;
 	}
 
+	@RequestMapping(value = "/resolveSql", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String resolveSql(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestBody ResolveSqlParam resolveSqlParam) throws Throwable
+	{
+		return resolveSql(resolveSqlParam.getSql(), resolveSqlParam.getParamValues());
+	}
+
 	protected DataSetSqlSelectResult executeSelect(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, SqlDataSetPreview sqlDataSetPreview) throws Throwable
 	{
@@ -308,7 +316,7 @@ public class DataSetController extends AbstractSchemaConnController
 		if (fetchSize > 1000)
 			fetchSize = 1000;
 
-		final String sqlFinal = getTemplateSqlResolver().resolve(sql, sqlDataSetPreview.getParamValues());
+		final String sqlFinal = resolveSql(sql, sqlDataSetPreview.getParamValues());
 		final int startRowFinal = startRow;
 		final int fetchSizeFinal = fetchSize;
 
@@ -337,6 +345,11 @@ public class DataSetController extends AbstractSchemaConnController
 		}.execute();
 
 		return modelSqlResult;
+	}
+
+	protected String resolveSql(String sql, Map<String, ?> paramValues)
+	{
+		return getTemplateSqlResolver().resolve(sql, paramValues);
 	}
 
 	protected TemplateSqlResolver getTemplateSqlResolver()
@@ -511,6 +524,44 @@ public class DataSetController extends AbstractSchemaConnController
 		public void setReturnMeta(Boolean returnMeta)
 		{
 			this.returnMeta = returnMeta;
+		}
+	}
+
+	public static class ResolveSqlParam
+	{
+		private String sql;
+		private Map<String, Object> paramValues;
+
+		public ResolveSqlParam()
+		{
+			super();
+		}
+
+		public ResolveSqlParam(String sql, Map<String, Object> paramValues)
+		{
+			super();
+			this.sql = sql;
+			this.paramValues = paramValues;
+		}
+
+		public String getSql()
+		{
+			return sql;
+		}
+
+		public void setSql(String sql)
+		{
+			this.sql = sql;
+		}
+
+		public Map<String, Object> getParamValues()
+		{
+			return paramValues;
+		}
+
+		public void setParamValues(Map<String, Object> paramValues)
+		{
+			this.paramValues = paramValues;
 		}
 	}
 }
