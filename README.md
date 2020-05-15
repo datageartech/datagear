@@ -64,3 +64,10 @@ SQL工作台
 	
 	（windows环境）
 	startup.bat
+
+## 调试
+	
+	1. 将datagear以maven工程导入至IDE工具；
+	2. 将datagear-webapp作为Web应用添加至servlet容器（比如Tomcat）；
+	3. 以调试模式运行Servlet容器。
+	
