@@ -1,5 +1,6 @@
 <#include "../../include/import_global.ftl">
 <#include "../../include/html_doctype.ftl">
+<#assign DataType=statics['org.datagear.analysis.DataSetParam$DataType']>
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 formAction 表单提交action，允许为null
@@ -207,9 +208,15 @@ readonly 是否只读操作，允许为null
 				data: "type",
 				render: function(data, type, row, meta)
 				{
-					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamType input-in-table ui-widget ui-widget-content' />";
+					data = (data || "${DataType.STRING}");
+					
+					return "<select class='dataSetParamType input-in-table ui-widget ui-widget-content'>"
+							+"<option value='${DataType.STRING}' "+(data == "${DataType.STRING}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.STRING' /></option>"
+							+"<option value='${DataType.BOOLEAN}' "+(data == "${DataType.BOOLEAN}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.BOOLEAN' /></option>"
+							+"<option value='${DataType.NUMBER}' "+(data == "${DataType.NUMBER}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.NUMBER' /></option>"
+							+"</select>";
 				},
-				width: "20%",
+				width: "30%",
 				defaultContent: "",
 				orderable: true
 			},

@@ -16,6 +16,14 @@
 {
 	var chartForm = (global.chartForm || (global.chartForm = {}));
 	
+	//org.datagear.analysis.DataSetParam.DataType
+	chartForm.DataSetParamDataType =
+	{
+		STRING: "STRING",
+		BOOLEAN: "BOOLEAN",
+		NUMBER: "NUMBER"
+	};
+	
 	/**
 	 * 渲染数据集参数值表单。
 	 * 
@@ -53,8 +61,24 @@
 			$("<label />").html(dsp.name).appendTo($labelDiv);
 			
 			var $valueDiv = $("<div class='form-item-value' />").appendTo($item);
-			var $input = $("<input type='text' class='ui-widget ui-widget-content' />").attr("name", dsp.name)
-							.attr("value", (paramValues[dsp.name] || "")).appendTo($valueDiv);
+			
+			var $input;
+			
+			if(chartForm.DataSetParamDataType.BOOLEAN == dsp.type)
+			{
+				$input = $("<select class='ui-widget ui-widget-content' />").attr("name", dsp.name).appendTo($valueDiv);
+				var $opt0 = $("<option value='true' />").html("是").appendTo($input);
+				var $opt1 = $("<option value='false' />").html("否").appendTo($input);
+				
+				var value = (paramValues[dsp.name]+"" || "true");
+				
+				(value == "false" ? $opt1 : $opt0).attr("selected", "selected");
+			}
+			else
+			{
+				$input = $("<input type='text' class='ui-widget ui-widget-content' />").attr("name", dsp.name)
+								.attr("value", (paramValues[dsp.name] || "")).appendTo($valueDiv);
+			}
 			
 			if((dsp.required+"") == "true")
 				$input.attr("validation-required", "true");

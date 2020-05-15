@@ -69,6 +69,9 @@
 .data-set-param-value-form .dspv-content .form-item .form-item-label{
 	padding-bottom: 0.1em;
 }
+.data-set-param-value-form .dspv-content .form-item .form-item-value select{
+	width: 100%;
+}
 .data-set-param-value-form .dspv-content .validation-required{
 	border-color: red;
 }
