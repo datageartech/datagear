@@ -34,12 +34,14 @@
 	 * 				submit: function(){}    //可选，提交处理函数
 	 * 				paramValues: {...}      //可选，初始参数值
 	 * 				submitText: "..."       //可选，提交按钮文本内容
+	 * 				yesText: "..."       //可选，"是"选项文本内容
+	 * 				noText: "..."       //可选，"否"选项文本内容
 	 * 			}
 	 * @return 表单DOM元素
 	 */
 	chartForm.renderDataSetParamValueForm = function($parent, dataSetParams, options)
 	{
-		options = $.extend({ submitText: "确定" }, (options || {}));
+		options = $.extend({ submitText: "确定", yesText: "是", noText: "否" }, (options || {}));
 		var paramValues = (options.paramValues || {});
 		
 		$parent.empty();
@@ -67,8 +69,8 @@
 			if(chartForm.DataSetParamDataType.BOOLEAN == dsp.type)
 			{
 				$input = $("<select class='ui-widget ui-widget-content' />").attr("name", dsp.name).appendTo($valueDiv);
-				var $opt0 = $("<option value='true' />").html("是").appendTo($input);
-				var $opt1 = $("<option value='false' />").html("否").appendTo($input);
+				var $opt0 = $("<option value='true' />").html(options.yesText).appendTo($input);
+				var $opt1 = $("<option value='false' />").html(options.noText).appendTo($input);
 				
 				var value = (paramValues[dsp.name]+"" || "true");
 				

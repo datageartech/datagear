@@ -2149,6 +2149,22 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	border-bottom-width: 2px;
 	display: none;
 }
+.page-form-dataSet .sql-operation-wrapper .sql-result-table-wrapper .sql-result-sql{
+	position: absolute;
+	display: none;
+    bottom: -4em;
+    height: 3.5em;
+    right: 0;
+    left: 0;
+}
+.page-form-dataSet .sql-operation-wrapper .sql-result-table-wrapper .sql-result-sql textarea{
+	width: 100%;
+	height: 100%;
+	margin: 0 0;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
 .page-form-dataSet .sql-operation-wrapper .input-in-table{
 	width: 90%!important;
 }

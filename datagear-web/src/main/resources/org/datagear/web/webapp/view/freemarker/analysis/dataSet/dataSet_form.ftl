@@ -73,6 +73,7 @@ readonly 是否只读操作，允许为null
 							</div>
 							<table id="${pageId}-sql-result-table" width='100%' class='hover stripe'></table>
 							<div class='no-more-data-flag ui-widget ui-widget-content' title="<@spring.message code='dataSet.noMoreData' />"></div>
+							<div class="sql-result-sql"><textarea class="ui-widget ui-widget-content ui-corner-all"></textarea></div>
 						</div>
 					</div>
 					</#if>
@@ -193,7 +194,7 @@ readonly 是否只读操作，允许为null
 		[
 			$.dataTableUtil.buildCheckCloumn("<@spring.message code='select' />"),
 			{
-				title: "名称",
+				title: "<@spring.message code='dataSet.DataSetParam.name' />",
 				data: "name",
 				render: function(data, type, row, meta)
 				{
@@ -204,7 +205,7 @@ readonly 是否只读操作，允许为null
 				orderable: true
 			},
 			{
-				title: "类型",
+				title: "<@spring.message code='dataSet.DataSetParam.type' />",
 				data: "type",
 				render: function(data, type, row, meta)
 				{
@@ -221,7 +222,7 @@ readonly 是否只读操作，允许为null
 				orderable: true
 			},
 			{
-				title: "必填",
+				title: "<@spring.message code='dataSet.DataSetParam.required' />",
 				data: "required",
 				render: function(data, type, row, meta)
 				{
@@ -237,7 +238,7 @@ readonly 是否只读操作，允许为null
 				orderable: true
 			},
 			{
-				title: "描述",
+				title: "<@spring.message code='dataSet.DataSetParam.desc' />",
 				data: "desc",
 				render: function(data, type, row, meta)
 				{
@@ -351,6 +352,8 @@ readonly 是否只读操作，允许为null
 		formOptions = $.extend(
 		{
 			submitText: "<@spring.message code='confirm' />",
+			yesText: "<@spring.message code='yes' />",
+			noText: "<@spring.message code='no' />",
 			paramValues: $.formToJson(chartForm.getDataSetParamValueForm($panel))
 		},
 		formOptions);
@@ -557,6 +560,14 @@ readonly 是否只读操作，允许为null
 					
 					table.addClass("sql-result-table-inited");
 					table.dataTable(settings);
+					
+					if(po.hasFormDataSetParam())
+					{
+						po.element(".sql-result-sql textarea").val(sqlResult.sql);
+						po.element(".sql-result-sql").show();
+					}
+					else
+						po.element(".sql-result-sql").hide();
 				}
 				else
 				{
