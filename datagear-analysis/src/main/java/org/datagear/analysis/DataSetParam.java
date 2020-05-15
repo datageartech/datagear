@@ -26,7 +26,7 @@ public class DataSetParam extends AbstractDataNameType
 		super();
 	}
 
-	public DataSetParam(String name, DataType type, boolean required)
+	public DataSetParam(String name, String type, boolean required)
 	{
 		super(name, type);
 		this.required = required;
@@ -62,5 +62,23 @@ public class DataSetParam extends AbstractDataNameType
 	{
 		return getClass().getSimpleName() + " [name=" + getName() + ", type=" + getType() + ", required=" + required
 				+ "]";
+	}
+
+	/**
+	 * {@linkplain DataSetParam#getType()}枚举。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class DataType
+	{
+		/** 字符串 */
+		public static final String STRING = "STRING";
+
+		/** 布尔值 */
+		public static final String BOOLEAN = "BOOLEAN";
+
+		/** 整数 */
+		public static final String NUMBER = "NUMBER";
 	}
 }

@@ -27,5 +27,5 @@ public interface DataNameType
 	 * 
 	 * @return
 	 */
-	DataType getType();
+	String getType();
 }

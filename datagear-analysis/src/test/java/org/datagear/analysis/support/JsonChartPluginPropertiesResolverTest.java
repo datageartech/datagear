@@ -10,7 +10,6 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.ChartParam;
 import org.datagear.analysis.DataSign;
-import org.datagear.analysis.DataType;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
@@ -84,7 +83,7 @@ public class JsonChartPluginPropertiesResolverTest
 				ChartParam chartParam = chartParams.get(0);
 
 				Assert.assertEquals("title", chartParam.getName());
-				Assert.assertEquals(DataType.STRING, chartParam.getType());
+				Assert.assertEquals(ChartParam.DataType.STRING, chartParam.getType());
 
 				Label nameLabel = chartParam.getNameLabel();
 				Assert.assertEquals("标题", nameLabel.getValue());
@@ -101,7 +100,7 @@ public class JsonChartPluginPropertiesResolverTest
 				ChartParam chartParam = chartParams.get(1);
 
 				Assert.assertEquals("interval", chartParam.getName());
-				Assert.assertEquals(DataType.INTEGER, chartParam.getType());
+				Assert.assertEquals(ChartParam.DataType.NUMBER, chartParam.getType());
 
 				Label nameLabel = chartParam.getNameLabel();
 				Assert.assertEquals("间隔", nameLabel.getValue());

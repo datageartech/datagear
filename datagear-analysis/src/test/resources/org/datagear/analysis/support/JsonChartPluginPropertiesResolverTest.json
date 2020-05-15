@@ -65,7 +65,7 @@
 		},
 		{
 			name : 'interval',
-			type : 'INTEGER',
+			type : 'NUMBER',
 			nameLabel :
 			{
 				value : '间隔',

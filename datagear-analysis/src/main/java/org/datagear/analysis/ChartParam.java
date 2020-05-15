@@ -31,7 +31,7 @@ public class ChartParam extends AbstractLabeled implements DataNameType, Seriali
 	private String name;
 
 	/** 类型 */
-	private DataType type;
+	private String type;
 
 	/** 是否必须 */
 	private boolean required;
@@ -40,7 +40,7 @@ public class ChartParam extends AbstractLabeled implements DataNameType, Seriali
 	{
 	}
 
-	public ChartParam(String name, DataType type, boolean required)
+	public ChartParam(String name, String type, boolean required)
 	{
 		super();
 		this.name = name;
@@ -60,12 +60,12 @@ public class ChartParam extends AbstractLabeled implements DataNameType, Seriali
 	}
 
 	@Override
-	public DataType getType()
+	public String getType()
 	{
 		return type;
 	}
 
-	public void setType(DataType type)
+	public void setType(String type)
 	{
 		this.type = type;
 	}
@@ -84,5 +84,23 @@ public class ChartParam extends AbstractLabeled implements DataNameType, Seriali
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name=" + name + ", type=" + type + "]";
+	}
+
+	/**
+	 * {@linkplain ChartParam#getType()}枚举。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class DataType
+	{
+		/** 字符串 */
+		public static final String STRING = "STRING";
+
+		/** 布尔值 */
+		public static final String BOOLEAN = "BOOLEAN";
+
+		/** 整数 */
+		public static final String NUMBER = "NUMBER";
 	}
 }

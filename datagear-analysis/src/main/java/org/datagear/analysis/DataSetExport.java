@@ -27,7 +27,7 @@ public abstract class DataSetExport extends AbstractDataNameType implements Seri
 		super();
 	}
 
-	public DataSetExport(String name, DataType type)
+	public DataSetExport(String name, String type)
 	{
 		super(name, type);
 	}

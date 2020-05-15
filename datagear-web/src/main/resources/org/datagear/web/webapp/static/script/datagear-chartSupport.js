@@ -18,6 +18,18 @@
 {
 	var chartSupport = (global.chartSupport || (global.chartSupport = {}));
 	
+	//org.datagear.analysis.DataSetProperty.DataType
+	chartSupport.DataSetPropertyDataType =
+	{
+		STRING: "STRING",
+		BOOLEAN: "BOOLEAN",
+		INTEGER: "INTEGER",
+		DECIMAL: "DECIMAL",
+		DATE: "DATE",
+		TIME: "TIME",
+		TIMESTAMP: "TIMESTAMP"
+	};
+	
 	/**
 	 * 获取/设置初始options。
 	 */
@@ -81,7 +93,7 @@
 	chartSupport.isDataTypeString = function(dataSetProperty)
 	{
 		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
-		return (dataType == "STRING");
+		return (dataType == chartSupport.DataSetPropertyDataType.STRING);
 	};
 	
 	/**
@@ -90,7 +102,7 @@
 	chartSupport.isDataTypeNumber = function(dataSetProperty)
 	{
 		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
-		return (dataType == "INTEGER" || dataType == "DECIMAL");
+		return (dataType == chartSupport.DataSetPropertyDataType.INTEGER || dataType == chartSupport.DataSetPropertyDataType.DECIMAL);
 	};
 	
 	/**

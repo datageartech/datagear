@@ -7,8 +7,6 @@
  */
 package org.datagear.analysis.support;
 
-import org.datagear.analysis.DataType;
-
 /**
  * 数据值转换异常。
  * 
@@ -21,30 +19,30 @@ public class DataValueConvertionException extends RuntimeException
 
 	private Object source;
 
-	private DataType type;
+	private String type;
 
-	public DataValueConvertionException(Object source, DataType type)
+	public DataValueConvertionException(Object source, String type)
 	{
 		super();
 		this.type = type;
 		this.source = source;
 	}
 
-	public DataValueConvertionException(Object source, DataType type, String message)
+	public DataValueConvertionException(Object source, String type, String message)
 	{
 		super(message);
 		this.type = type;
 		this.source = source;
 	}
 
-	public DataValueConvertionException(Object source, DataType type, Throwable cause)
+	public DataValueConvertionException(Object source, String type, Throwable cause)
 	{
 		super(cause);
 		this.type = type;
 		this.source = source;
 	}
 
-	public DataValueConvertionException(Object source, DataType type, String message, Throwable cause)
+	public DataValueConvertionException(Object source, String type, String message, Throwable cause)
 	{
 		super(message, cause);
 		this.type = type;
@@ -61,12 +59,12 @@ public class DataValueConvertionException extends RuntimeException
 		this.source = source;
 	}
 
-	public DataType getType()
+	public String getType()
 	{
 		return type;
 	}
 
-	protected void setType(DataType type)
+	protected void setType(String type)
 	{
 		this.type = type;
 	}

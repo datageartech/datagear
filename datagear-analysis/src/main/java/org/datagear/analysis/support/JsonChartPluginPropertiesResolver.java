@@ -25,7 +25,6 @@ import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartParam;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.DataSign;
-import org.datagear.analysis.DataType;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.util.IOUtil;
@@ -366,11 +365,7 @@ public class JsonChartPluginPropertiesResolver
 			ChartParam chartParam = createChartParam();
 			chartParam.setName(name);
 
-			DataType type = convertToDataType(map.get(ChartParam.PROPERTY_TYPE));
-			if (type == null)
-				type = DataType.STRING;
-
-			chartParam.setType(type);
+			chartParam.setType(convertToChartParamDataType(map.get(ChartParam.PROPERTY_TYPE)));
 			chartParam.setNameLabel(convertToLabel(map.get(ChartParam.PROPERTY_NAME_LABEL)));
 			chartParam.setDescLabel(convertToLabel(map.get(ChartParam.PROPERTY_DESC_LABEL)));
 
@@ -381,15 +376,12 @@ public class JsonChartPluginPropertiesResolver
 					+ ChartParam.class.getName() + "] is not supported");
 	}
 
-	/**
-	 * 将对象转换为{@linkplain DataType}。
-	 * 
-	 * @param obj
-	 * @return
-	 */
-	protected DataType convertToDataType(Object obj)
+	protected String convertToChartParamDataType(Object obj)
 	{
-		return convertToEnum(obj, DataType.class);
+		if (obj instanceof String)
+			return (String) obj;
+		else
+			return ChartParam.DataType.STRING;
 	}
 
 	/**

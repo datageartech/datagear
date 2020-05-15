@@ -379,7 +379,7 @@ public class DataSetController extends AbstractSchemaConnController
 				Column column = properties[i];
 
 				DataSetProperty dataSetProperty = new DataSetProperty(column.getName(),
-						sqlDataSetSupport.toDataType(new SqlType(column.getType(), column.getTypeName())));
+						sqlDataSetSupport.toPropertyDataType(new SqlType(column.getType(), column.getTypeName())));
 
 				if (labels != null && labels.length > i)
 					dataSetProperty.setLabel(labels[i]);

@@ -11,12 +11,12 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetExport;
-import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataType;
+import org.datagear.analysis.DataSetProperty.DataType;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.util.StringUtil;
 
 /**
@@ -75,7 +75,7 @@ public class MacroDataSetExport extends DataSetExport
 	{
 	}
 
-	public MacroDataSetExport(String name, DataType type, String macro)
+	public MacroDataSetExport(String name, String type, String macro)
 	{
 		super(name, type);
 		this.macro = macro;

@@ -16,8 +16,8 @@ import java.util.Map;
 
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetProperty.DataType;
 import org.datagear.analysis.DataSetResult;
-import org.datagear.analysis.DataType;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.SimpleConnectionFactory;
 import org.junit.Assert;

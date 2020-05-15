@@ -19,14 +19,14 @@ public abstract class AbstractDataNameType implements DataNameType
 	private String name;
 
 	/** 类型 */
-	private DataType type;
+	private String type;
 
 	public AbstractDataNameType()
 	{
 		super();
 	}
 
-	public AbstractDataNameType(String name, DataType type)
+	public AbstractDataNameType(String name, String type)
 	{
 		super();
 		this.name = name;
@@ -45,12 +45,12 @@ public abstract class AbstractDataNameType implements DataNameType
 	}
 
 	@Override
-	public DataType getType()
+	public String getType()
 	{
 		return type;
 	}
 
-	public void setType(DataType type)
+	public void setType(String type)
 	{
 		this.type = type;
 	}

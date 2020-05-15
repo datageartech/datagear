@@ -19,7 +19,7 @@ import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataType;
+import org.datagear.analysis.DataSetProperty.DataType;
 import org.datagear.util.JdbcSupport;
 import org.datagear.util.SqlType;
 
@@ -37,7 +37,7 @@ public class SqlDataSetSupport extends JdbcSupport
 	}
 
 	/**
-	 * 解析数据。
+	 * 解析结果数据。
 	 * 
 	 * @param cn
 	 * @param rs
@@ -45,7 +45,7 @@ public class SqlDataSetSupport extends JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<Map<String, ?>> resolveDatas(Connection cn, ResultSet rs, List<DataSetProperty> properties)
+	public List<Map<String, ?>> resolveResultDatas(Connection cn, ResultSet rs, List<DataSetProperty> properties)
 			throws SQLException
 	{
 		List<Map<String, ?>> datas = new ArrayList<>();
@@ -62,7 +62,7 @@ public class SqlDataSetSupport extends JdbcSupport
 				DataSetProperty property = properties.get(i);
 				int rsColumn = rsColumns[i];
 
-				Object value = resolveDataValue(cn, rs, rsColumn, getColumnSqlType(rsMeta, rsColumn),
+				Object value = resolvePropertyDataValue(cn, rs, rsColumn, getColumnSqlType(rsMeta, rsColumn),
 						property.getType());
 
 				row.put(property.getName(), value);
@@ -126,7 +126,7 @@ public class SqlDataSetSupport extends JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	public Object resolveDataValue(Connection cn, ResultSet rs, int column, SqlType sqlType, DataType dataType)
+	public Object resolvePropertyDataValue(Connection cn, ResultSet rs, int column, SqlType sqlType, String dataType)
 			throws SQLException
 	{
 		Object value = null;
@@ -334,7 +334,7 @@ public class SqlDataSetSupport extends JdbcSupport
 			String columnName = getColumnName(metaData, i);
 			SqlType sqlType = getColumnSqlType(metaData, i);
 
-			DataType dataType = toDataType(sqlType);
+			String dataType = toPropertyDataType(sqlType);
 
 			DataSetProperty property = createDataSetProperty();
 			property.setName(columnName);
@@ -350,15 +350,15 @@ public class SqlDataSetSupport extends JdbcSupport
 	}
 
 	/**
-	 * 由SQL类型转换为{@linkplain DataType}。
+	 * 由SQL类型转换为{@linkplain DataSetProperty#getType()}。
 	 * 
 	 * @param sqlType
 	 * @return
 	 * @throws SQLException
 	 */
-	public DataType toDataType(SqlType sqlType) throws SQLException
+	public String toPropertyDataType(SqlType sqlType) throws SQLException
 	{
-		DataType dataType = null;
+		String dataType = null;
 
 		int type = sqlType.getType();
 
