@@ -10,7 +10,6 @@ package org.datagear.management.domain;
 import java.util.Date;
 import java.util.Locale;
 
-import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.ChartWidget;
@@ -65,19 +64,14 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 		this.createTime = new Date();
 	}
 
-	@Override
-	public ChartDataSetVO[] getChartDataSets()
+	public ChartDataSetVO[] getChartDataSetVOs()
 	{
 		return (ChartDataSetVO[]) super.getChartDataSets();
 	}
 
-	@Override
-	public void setChartDataSets(ChartDataSet[] chartDataSets)
+	public void setChartDataSetVOs(ChartDataSetVO[] chartDataSetVOs)
 	{
-		if (chartDataSets != null && !(chartDataSets instanceof ChartDataSetVO[]))
-			throw new IllegalArgumentException();
-
-		super.setChartDataSets(chartDataSets);
+		super.setChartDataSets(chartDataSetVOs);
 	}
 
 	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPlugin()

@@ -562,8 +562,9 @@
 		/**
 		 * 表单数据转JSON对象。
 		 * @param form 表单元素、表单JQuery对象、名称/值对象数组，名称支持“a.b[0].c”格式的属性路径
+		 * @param ignores 忽略的表单项名称，可选
 		 */
-		formToJson: function(form)
+		formToJson: function(form, ignores)
 		{
 			var $form = $(form);
 			
@@ -575,6 +576,10 @@
 			$(array).each(function()
 			{
 				var name = this.name;
+				
+				if(ignores && ignores.length > 0 && $.inArray(name, ignores) >= 0)
+					return;
+				
 				var value = this.value;
 				
 				var names = $.splitPropertyPath(name);

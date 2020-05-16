@@ -10,6 +10,7 @@ package org.datagear.management.domain;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.support.SqlDataSet;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -29,6 +30,16 @@ public class ChartDataSetVO extends ChartDataSet
 	public ChartDataSetVO(DataSet dataSet)
 	{
 		super(dataSet);
+	}
+
+	public SqlDataSet getSqlDataSet()
+	{
+		return (SqlDataSet) super.getDataSet();
+	}
+
+	public void setSqlDataSet(SqlDataSet sqlDataSet)
+	{
+		super.setDataSet(sqlDataSet);
 	}
 
 	@JsonIgnore

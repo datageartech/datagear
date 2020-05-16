@@ -49,7 +49,6 @@ readonly 是否只读操作，允许为null
 					<div class="sql-editor-wrapper ui-widget ui-widget-content">
 						<div id="${pageId}-sql-editor" class="sql-editor"></div>
 					</div>
-					<#if !readonly>
 					<div class="sql-operation-wrapper">
 						<ul>
 							<li><a href="#${pageId}-sql-params">参数</a></li>
@@ -76,7 +75,6 @@ readonly 是否只读操作，允许为null
 							<div class="sql-result-sql"><textarea class="ui-widget ui-widget-content ui-corner-all"></textarea></div>
 						</div>
 					</div>
-					</#if>
 				</div>
 			</div>
 			<div class="form-item">
@@ -313,7 +311,6 @@ readonly 是否只读操作，允许为null
 		return params;
 	};
 	
-	<#if !readonly>
 	po.element(".select-schema-button").click(function()
 	{
 		var options =
@@ -645,7 +642,6 @@ readonly 是否只读操作，允许为null
 			error.appendTo(element.closest(".form-item-value"));
 		}
 	});
-	</#if>
 })
 (${pageId});
 </script>

@@ -7,13 +7,9 @@ package org.datagear.web.controller;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -33,9 +29,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
-import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
-import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.persistence.PagingData;
@@ -170,7 +164,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@RequestMapping(value = "/save", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> save(HttpServletRequest request, HttpServletResponse response,
-			HtmlChartWidgetEntity entity)
+			@RequestBody HtmlChartWidgetEntity entity)
 	{
 		User user = WebUtils.getUser(request, response);
 
@@ -435,66 +429,6 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 			entity.setHtmlChartPlugin(htmlChartPlugin);
 		}
-
-		inflateChartDataSets(entity, request);
-	}
-
-	protected void inflateChartDataSets(HtmlChartWidgetEntity entity, HttpServletRequest request)
-	{
-		String[] chartDataSetIndexes = request.getParameterValues("chartDataSetIndex");
-
-		if (isEmpty(chartDataSetIndexes))
-			return;
-
-		List<ChartDataSetVO> chartDataSets = new ArrayList<>();
-
-		for (String chartDataSetIndex : chartDataSetIndexes)
-		{
-			String dataSetId = request.getParameter("chartDataSet_" + chartDataSetIndex + "_dataSetId");
-
-			if (isEmpty(dataSetId))
-				continue;
-
-			SqlDataSetEntity sqlDataSet = new SqlDataSetEntity();
-			sqlDataSet.setId(dataSetId);
-
-			Map<String, Set<String>> propertySigns = new HashMap<>();
-
-			String[] propertySignIndexes = request
-					.getParameterValues("chartDataSet_" + chartDataSetIndex + "_propertySignIndex");
-
-			if (!isEmpty(propertySignIndexes))
-			{
-				for (String propertySignIndex : propertySignIndexes)
-				{
-					String propertyName = request.getParameter(
-							"chartDataSet_" + chartDataSetIndex + "_propertySign_" + propertySignIndex + "_name");
-
-					if (isEmpty(propertyName))
-						continue;
-
-					String[] signs = request.getParameterValues(
-							"chartDataSet_" + chartDataSetIndex + "_propertySign_" + propertySignIndex + "_value");
-
-					if (!isEmpty(signs))
-					{
-						Set<String> signSet = new HashSet<>();
-						for (String sign : signs)
-							signSet.add(sign);
-
-						propertySigns.put(propertyName, signSet);
-					}
-				}
-			}
-
-			ChartDataSetVO chartDataSet = new ChartDataSetVO();
-			chartDataSet.setDataSet(sqlDataSet);
-			chartDataSet.setPropertySigns(propertySigns);
-
-			chartDataSets.add(chartDataSet);
-		}
-
-		entity.setChartDataSets(chartDataSets.toArray(new ChartDataSetVO[chartDataSets.size()]));
 	}
 
 	protected void checkSaveEntity(HtmlChartWidgetEntity chart)
