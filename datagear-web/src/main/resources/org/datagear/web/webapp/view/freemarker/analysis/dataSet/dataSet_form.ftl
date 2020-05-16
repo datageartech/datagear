@@ -257,8 +257,8 @@ readonly 是否只读操作，允许为null
 		"select" : { style : 'os' },
 	    "language":
 	    {
-			"emptyTable": "",
-			"zeroRecords" : ""
+			"emptyTable": "<@spring.message code='dataTables.noData' />",
+			"zeroRecords" : "<@spring.message code='dataTables.zeroRecords' />"
 		}
 	});
 	

@@ -96,6 +96,10 @@ readonly 是否只读操作，允许为null
 			</#if>
 		</div>
 	</form>
+	<div class="data-set-param-value-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<div class="ui-widget-header ui-corner-all"><@spring.message code='chart.setDataSetParamValue' /></div>
+		<div class="data-set-param-value-panel-content"></div>
+	</div>
 </div>
 <#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
@@ -273,6 +277,9 @@ readonly 是否只读操作，允许为null
 		{
 			var dataSetId = po.element(".chartDataSetId", this).val();
 			var propertySigns = {};
+			var alias = po.element(".chartDataSetAlias", this).val();
+			var dataSetParams = (po.element(".dataSetParamValueButton", this).data("dataSetParams") || []);
+			var paramValues = (po.element(".dataSetParamValueButton", this).data("paramValues") || {});
 			
 			po.element(".item-signs-item", this).each(function()
 			{
@@ -287,11 +294,45 @@ readonly 是否只读操作，允许为null
 				propertySigns[signName] = signValues;
 			});
 			
-			re.push({ "sqlDataSet": { "id": dataSetId }, "propertySigns": propertySigns });
+			re.push({ "sqlDataSet": { "id": dataSetId, "params": dataSetParams }, "propertySigns": propertySigns, "alias": alias, "paramValues": paramValues });
 		});
 		
 		return re;
 	};
+
+	po.element(".data-set-param-value-panel").draggable({ handle : ".ui-widget-header" });
+	
+	po.showDataSetParamValuePanel = function($paramValueButton, formOptions)
+	{
+		var $panel = po.element(".data-set-param-value-panel");
+		
+		formOptions = $.extend(
+		{
+			submitText: "<@spring.message code='confirm' />",
+			yesText: "<@spring.message code='yes' />",
+			noText: "<@spring.message code='no' />",
+			paramValues: $paramValueButton.data("paramValues")
+		},
+		formOptions);
+		
+		chartForm.renderDataSetParamValueForm($(".data-set-param-value-panel-content", $panel),
+				$paramValueButton.data("dataSetParams"), formOptions);
+		
+		$panel.show();
+		$panel.position({ my : "left top", at : "right top", of : $paramValueButton});
+	};
+	
+	$(po.element()).on("click", function(event)
+	{
+		var $target = $(event.target);
+		
+		var $pvp = po.element(".data-set-param-value-panel");
+		if(!$pvp.is(":hidden"))
+		{
+			if($target.closest(".data-set-param-value-panel, .dataSetParamValueButton").length == 0)
+				$pvp.hide();
+		}
+	});
 	
 	po.initChartDataSets = function()
 	{
@@ -320,6 +361,33 @@ readonly 是否只读操作，允许为null
 		$("<div class='delete-icon''><span class=' ui-icon ui-icon-close'>&nbsp;</span></div>")
 			.attr("title", "<@spring.message code='delete' />").appendTo($head);
 		</#if>
+		
+		var $aliasDiv = $("<div class='item-alias ui-widget ui-widget-content' />").appendTo($item);
+		$("<div class='alias-label' />").html("<@spring.message code='chart.chartDataSet.alias' />")
+			.attr("title", "<@spring.message code='chart.chartDataSet.alias.desc' />").appendTo($aliasDiv);
+		$("<input type='text' class='chartDataSetAlias ui-widget ui-widget-content' />")
+			.attr("value", (chartDataSet.alias || "")).appendTo($aliasDiv);
+		
+		if(dataSet.params && dataSet.params.length > 0)
+		{
+			var $pvButton = $("<button type='button' class='dataSetParamValueButton ui-button ui-corner-all ui-widget'><@spring.message code='chart.chartDataSet.paramValue' /></button>")
+								.appendTo($aliasDiv);
+			$pvButton.data("dataSetParams", dataSet.params).data("paramValues", (chartDataSet.paramValues || {}));
+			
+			$pvButton.click(function(event)
+			{
+				var $this = $(this);
+				po.showDataSetParamValuePanel($this,
+				{
+					submit: function()
+					{
+						$this.data("paramValues", chartForm.deleteEmptyDataSetParamValue($.formToJson(this)));
+						po.element(".data-set-param-value-panel").hide();
+					},
+					readonly: <#if readonly>true<#else>false</#if>
+				});
+			});
+		}
 		
 		var $signs = $("<div class='item-signs' />").appendTo($item);
 		for(var i=0; i<dataSetProperties.length; i++)

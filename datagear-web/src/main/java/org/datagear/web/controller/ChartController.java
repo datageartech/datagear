@@ -21,6 +21,7 @@ import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
@@ -29,6 +30,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
+import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
@@ -75,6 +77,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@Qualifier("chartShowHtmlTplDashboardWidgetHtmlRenderer")
 	private HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer;
 
+	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
+
 	private ServletContext servletContext;
 
 	public ChartController()
@@ -111,6 +115,16 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer)
 	{
 		this.chartShowHtmlTplDashboardWidgetHtmlRenderer = chartShowHtmlTplDashboardWidgetHtmlRenderer;
+	}
+
+	public DataSetParamValueConverter getDataSetParamValueConverter()
+	{
+		return dataSetParamValueConverter;
+	}
+
+	public void setDataSetParamValueConverter(DataSetParamValueConverter dataSetParamValueConverter)
+	{
+		this.dataSetParamValueConverter = dataSetParamValueConverter;
 	}
 
 	public ServletContext getServletContext()
@@ -428,6 +442,20 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 					.get(htmlChartPlugin.getId());
 
 			entity.setHtmlChartPlugin(htmlChartPlugin);
+		}
+
+		ChartDataSetVO[] chartDataSetVOs = entity.getChartDataSetVOs();
+		if (chartDataSetVOs != null)
+		{
+			for (ChartDataSetVO vo : chartDataSetVOs)
+			{
+				if (vo.getSqlDataSet().hasParam())
+				{
+					Map<String, Object> paramValues = getDataSetParamValueConverter().convert(vo.getParamValues(),
+							vo.getSqlDataSet().getParams());
+					vo.setParamValues(paramValues);
+				}
+			}
 		}
 	}
 

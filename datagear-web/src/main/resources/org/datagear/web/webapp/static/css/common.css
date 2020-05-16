@@ -2240,6 +2240,32 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-chart .data-set-wrapper .data-set-item .item-head{
 	padding: 0.2em 0.2em;
 }
+.page-form-chart .data-set-wrapper .data-set-item .item-alias{
+	padding: 0.4em 0.2em;
+	margin-bottom: 0.5em;
+	border-left-width: 0;
+	border-top-width: 0;
+	border-right-width: 0;
+	border-bottom-width: 1px;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-alias .alias-label{
+	display: inline-block;
+	padding-left: 0.2em;
+	width: 30%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-alias input{
+	width: 40%!important;
+}
+.page-form-chart .data-set-wrapper .data-set-item .item-alias button{
+	float: right;
+	border: 0;
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+	margin-right: 0.3em;
+}
 .page-form-chart .data-set-wrapper .data-set-item .item-signs{
 	margin-top: 0.3em;
 	padding: 0 0.3em;
@@ -2356,6 +2382,20 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	position: absolute;
 	left: 60%;
 	margin-left: 0.3em;
+}
+.page-form-chart .data-set-param-value-panel{
+	position: absolute;
+	display: none;
+	padding: 0.5em 0.5em;
+	max-height: 60%;
+	overflow: auto;
+}
+.page-form-chart .data-set-param-value-panel .ui-widget-header{
+	padding: 0.3em 0.1em;
+}
+.page-form-chart .data-set-param-value-panel .data-set-param-value-panel-content .dspv-content{
+	max-height: 14em;
+	overflow: auto;
 }
 
 .page-grid-chartPlugin{

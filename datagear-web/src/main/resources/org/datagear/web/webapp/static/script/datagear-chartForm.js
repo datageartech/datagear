@@ -31,17 +31,18 @@
 	 * @param dataSetParams
 	 * @param options
 	 * 			{
-	 * 				submit: function(){}    //可选，提交处理函数
-	 * 				paramValues: {...}      //可选，初始参数值
-	 * 				submitText: "..."       //可选，提交按钮文本内容
-	 * 				yesText: "..."       //可选，"是"选项文本内容
-	 * 				noText: "..."       //可选，"否"选项文本内容
+	 * 				submit: function(){},    	//可选，提交处理函数
+	 * 				paramValues: {...},     	//可选，初始参数值
+	 * 				readonly: false,			//可选，是否只读
+	 * 				submitText: "...",       	//可选，提交按钮文本内容
+	 * 				yesText: "...",       		//可选，"是"选项文本内容
+	 * 				noText: "...",       		//可选，"否"选项文本内容
 	 * 			}
 	 * @return 表单DOM元素
 	 */
 	chartForm.renderDataSetParamValueForm = function($parent, dataSetParams, options)
 	{
-		options = $.extend({ submitText: "确定", yesText: "是", noText: "否" }, (options || {}));
+		options = $.extend({ submitText: "确定", readonly: false, yesText: "是", noText: "否" }, (options || {}));
 		var paramValues = (options.paramValues || {});
 		
 		$parent.empty();
@@ -92,10 +93,14 @@
 				$input.attr("validation-required", "true");
 		}
 		
-		$("<button type='submit' class='ui-button ui-corner-all ui-widget' />").html(options.submitText).appendTo($foot);
+		if(!options.readonly)
+			$("<button type='submit' class='ui-button ui-corner-all ui-widget' />").html(options.submitText).appendTo($foot);
 		
 		$form.submit(function()
 		{
+			if(options.readonly)
+				return false;
+			
 			var validationOk = true;
 			
 			var $requireds = $("input[validation-required]", this);

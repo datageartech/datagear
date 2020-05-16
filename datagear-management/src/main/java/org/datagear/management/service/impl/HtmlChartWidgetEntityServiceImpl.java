@@ -9,6 +9,7 @@ package org.datagear.management.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -278,6 +279,8 @@ public class HtmlChartWidgetEntityServiceImpl
 
 		ChartDataSetVO chartDataSet = new ChartDataSetVO(dataSet);
 		chartDataSet.setPropertySigns(toPropertySigns(relation.getPropertySignsJson()));
+		chartDataSet.setAlias(relation.getAlias());
+		chartDataSet.setParamValues(toParamValues(relation.getParamValuesJson()));
 
 		return chartDataSet;
 	}
@@ -285,42 +288,55 @@ public class HtmlChartWidgetEntityServiceImpl
 	@SuppressWarnings("unchecked")
 	protected Map<String, Set<String>> toPropertySigns(String json)
 	{
+		if (StringUtil.isEmpty(json))
+			return Collections.EMPTY_MAP;
+
 		Map<String, Set<String>> propertySigns = new HashMap<>();
 
-		if (!StringUtil.isEmpty(json))
+		Map<String, Object> jsonMap = JsonSupport.parse(json, Map.class, null);
+		if (jsonMap == null)
+			jsonMap = Collections.EMPTY_MAP;
+
+		for (Map.Entry<String, Object> entry : jsonMap.entrySet())
 		{
-			Map<String, Object> jsonMap = JsonSupport.parse(json, Map.class, null);
-			if (jsonMap == null)
-				jsonMap = new HashMap<>();
+			Set<String> signs = new HashSet<>();
 
-			for (Map.Entry<String, Object> entry : jsonMap.entrySet())
+			Object valueObj = entry.getValue();
+
+			if (valueObj instanceof String)
+				signs.add((String) valueObj);
+			else if (valueObj instanceof Collection<?>)
 			{
-				Set<String> signs = new HashSet<>();
-
-				Object valueObj = entry.getValue();
-
-				if (valueObj instanceof String)
-					signs.add((String) valueObj);
-				else if (valueObj instanceof Collection<?>)
-				{
-					Collection<String> valueCollection = (Collection<String>) valueObj;
-					signs.addAll(valueCollection);
-				}
-				else if (valueObj instanceof Object[])
-				{
-					Object[] valueArray = (Object[]) valueObj;
-					for (Object value : valueArray)
-					{
-						if (value instanceof String)
-							signs.add((String) value);
-					}
-				}
-
-				propertySigns.put(entry.getKey(), signs);
+				Collection<String> valueCollection = (Collection<String>) valueObj;
+				signs.addAll(valueCollection);
 			}
+			else if (valueObj instanceof Object[])
+			{
+				Object[] valueArray = (Object[]) valueObj;
+				for (Object value : valueArray)
+				{
+					if (value instanceof String)
+						signs.add((String) value);
+				}
+			}
+
+			propertySigns.put(entry.getKey(), signs);
 		}
 
 		return propertySigns;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Map<String, Object> toParamValues(String json)
+	{
+		if (StringUtil.isEmpty(json))
+			return Collections.EMPTY_MAP;
+
+		Map<String, Object> paramValues = JsonSupport.parse(json, Map.class, null);
+		if (paramValues == null)
+			paramValues = Collections.EMPTY_MAP;
+
+		return paramValues;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -346,10 +362,13 @@ public class HtmlChartWidgetEntityServiceImpl
 			ChartDataSet chartDataSet = chartDataSets[i];
 
 			String propertySignsJson = JsonSupport.generate(chartDataSet.getPropertySigns(), "");
+			String paramValuesJson = JsonSupport.generate(chartDataSet.getParamValues(), "");
 
 			WidgetDataSetRelation relation = new WidgetDataSetRelation(obj.getId(), chartDataSet.getDataSet().getId(),
 					i + 1);
 			relation.setPropertySignsJson(propertySignsJson);
+			relation.setAlias(chartDataSet.getAlias());
+			relation.setParamValuesJson(paramValuesJson);
 
 			list.add(relation);
 		}
@@ -364,6 +383,10 @@ public class HtmlChartWidgetEntityServiceImpl
 		private String dataSetId;
 
 		private String propertySignsJson;
+
+		private String alias;
+
+		private String paramValuesJson;
 
 		private int order;
 
@@ -408,6 +431,26 @@ public class HtmlChartWidgetEntityServiceImpl
 		public void setPropertySignsJson(String propertySignsJson)
 		{
 			this.propertySignsJson = propertySignsJson;
+		}
+
+		public String getAlias()
+		{
+			return alias;
+		}
+
+		public void setAlias(String alias)
+		{
+			this.alias = alias;
+		}
+
+		public String getParamValuesJson()
+		{
+			return paramValuesJson;
+		}
+
+		public void setParamValuesJson(String paramValuesJson)
+		{
+			this.paramValuesJson = paramValuesJson;
 		}
 
 		public int getOrder()

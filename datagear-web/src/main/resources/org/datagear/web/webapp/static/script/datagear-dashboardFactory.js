@@ -331,7 +331,7 @@
 				var chartDataSets = (charts[i].chartDataSets || []);
 				var myParamValuess = [];
 				for(var j=0; j<chartDataSets.length; j++)
-					myParamValuess.push({});
+					myParamValuess.push(chartDataSets[j].paramValues || {});
 				
 				chartsParamValues[charts[i].id] = myParamValuess;
 			}

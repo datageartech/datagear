@@ -502,6 +502,9 @@
 		if(!chartDataSet)
 			return "";
 		
+		if(chartDataSet.alias)
+			return chartDataSet.alias;
+		
 		var dataSet = (chartDataSet.dataSet || chartDataSet);
 		
 		return (dataSet ? (dataSet.name || "") : "");
