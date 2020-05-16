@@ -38,6 +38,8 @@ public class SqlDataSetEntity extends SqlDataSet implements CreateUserEntity<Str
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
+	private transient String _propertyLabelsText;
+
 	public SqlDataSetEntity()
 	{
 		super();
@@ -111,24 +113,44 @@ public class SqlDataSetEntity extends SqlDataSet implements CreateUserEntity<Str
 		this.dataPermission = dataPermission;
 	}
 
+	@Override
+	public void setProperties(List<DataSetProperty> properties)
+	{
+		super.setProperties(properties);
+		
+		if(this._propertyLabelsText != null)
+			setPropertyLabelsText(properties, this._propertyLabelsText);
+	}
+
 	public void setPropertyLabelsText(String text)
 	{
-		String[] labels = DataSetProperty.splitLabels(text, PROPERTY_LABELS_SPLITTER);
-
-		if (labels == null || labels.length == 0)
-			return;
-
 		List<DataSetProperty> properties = getProperties();
-
-		for (int i = 0; i < properties.size(); i++)
+		
+		if(properties == null || properties.isEmpty())
+			this._propertyLabelsText = text;
+		else
 		{
-			if (i < labels.length)
-				properties.get(i).setLabel(labels[i]);
+			this._propertyLabelsText = null;
+			setPropertyLabelsText(properties, text);
 		}
 	}
 
 	public String getPropertyLabelsText()
 	{
 		return DataSetProperty.concatLabels(getProperties(), PROPERTY_LABELS_SPLITTER);
+	}
+
+	protected void setPropertyLabelsText(List<DataSetProperty> properties, String text)
+	{
+		String[] labels = DataSetProperty.splitLabels(text, PROPERTY_LABELS_SPLITTER);
+
+		if (labels == null || labels.length == 0)
+			return;
+
+		for (int i = 0; i < Math.min(labels.length, properties.size()); i++)
+		{
+			if (i < labels.length)
+				properties.get(i).setLabel(labels[i]);
+		}
 	}
 }
