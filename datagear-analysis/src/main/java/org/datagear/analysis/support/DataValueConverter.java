@@ -7,7 +7,12 @@
  */
 package org.datagear.analysis.support;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.datagear.analysis.DataNameType;
 
 /**
  * 数据值转换器。
@@ -18,6 +23,38 @@ import java.util.regex.Pattern;
 public abstract class DataValueConverter
 {
 	public static final Pattern PATTERN_DECIMAL_NUMBER = Pattern.compile("^[^\\.]+\\.[^\\.]+$");
+	
+	/**
+	 * 转换数据值映射表。
+	 * 
+	 * @param nameValues
+	 * @param dataNameTypes
+	 * @return
+	 * @throws DataValueConvertionException
+	 */
+	public Map<String, Object> convert(Map<String, ?> nameValues, Collection<? extends DataNameType> dataNameTypes)
+			throws DataValueConvertionException
+	{
+		if (nameValues == null)
+			return null;
+
+		Map<String, Object> re = new HashMap<>(nameValues);
+
+		for (DataNameType dnt : dataNameTypes)
+		{
+			String name = dnt.getName();
+
+			if (!nameValues.containsKey(name))
+				continue;
+
+			Object value = nameValues.get(name);
+			value = convert(value, dnt.getType());
+
+			re.put(name, value);
+		}
+
+		return re;
+	}
 
 	/**
 	 * 转换数据值。

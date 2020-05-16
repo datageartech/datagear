@@ -72,7 +72,8 @@
 .data-set-param-value-form .dspv-content .form-item .form-item-value select{
 	width: 100%;
 }
-.data-set-param-value-form .dspv-content .validation-required{
+.data-set-param-value-form .dspv-content .validation-required,
+.data-set-param-value-form .dspv-content .validation-number{
 	border-color: red;
 }
 .data-set-param-value-form .dspv-foot{

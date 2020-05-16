@@ -98,9 +98,7 @@ readonly 是否只读操作，允许为null
 	</form>
 	<div class="sql-param-value-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 		<div class="ui-widget-header ui-corner-all"><@spring.message code='dataSet.setSqlParamValue' /></div>
-		<div class="sql-param-value-panel-content">
-			
-		</div>
+		<div class="sql-param-value-panel-content"></div>
 	</div>
 </div>
 <#include "../../include/page_js_obj.ftl" >
@@ -213,8 +211,8 @@ readonly 是否只读操作，允许为null
 					
 					return "<select class='dataSetParamType input-in-table ui-widget ui-widget-content'>"
 							+"<option value='${DataType.STRING}' "+(data == "${DataType.STRING}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.STRING' /></option>"
-							+"<option value='${DataType.BOOLEAN}' "+(data == "${DataType.BOOLEAN}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.BOOLEAN' /></option>"
 							+"<option value='${DataType.NUMBER}' "+(data == "${DataType.NUMBER}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.NUMBER' /></option>"
+							+"<option value='${DataType.BOOLEAN}' "+(data == "${DataType.BOOLEAN}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.BOOLEAN' /></option>"
 							+"</select>";
 				},
 				width: "30%",
@@ -338,7 +336,8 @@ readonly 是否只读操作，允许为null
 	po.sqlPreviewOptions =
 	{
 		schemaId: "",
-		sql : "",
+		sql: "",
+		dataSetParams: [],
 		paramValues: {},
 		startRow : 1
 	};
@@ -401,6 +400,7 @@ readonly 是否只读操作，允许为null
 					
 					po.sqlPreviewOptions.schemaId = po.getDataSetSchemaId();
 					po.sqlPreviewOptions.sql = po.sqlEditor.getValue();
+					po.sqlPreviewOptions.dataSetParams = po.getFormDataSetParams();
 					po.sqlPreviewOptions.paramValues = chartForm.deleteEmptyDataSetParamValue($.formToJson(this));
 					po.sqlPreviewOptions.startRow = 1;
 					po.sqlPreview();
@@ -410,7 +410,10 @@ readonly 是否只读操作，允许为null
 			return;
 		}
 		else
+		{
+			po.sqlPreviewOptions.dataSetParams = [];
 			po.sqlPreviewOptions.paramValues = {};
+		}
 		
 		var table = po.sqlResultTableElement();
 		if($.isDatatTable(table))
@@ -461,6 +464,7 @@ readonly 是否只读操作，允许为null
 					var data =
 					{
 						sql: sql,
+						dataSetParams: po.getFormDataSetParams(),
 						paramValues: paramValues
 					};
 					
@@ -508,6 +512,7 @@ readonly 是否只读操作，允许为null
 		{
 			schemaId: po.sqlPreviewOptions.schemaId,
 			sql: po.sqlPreviewOptions.sql,
+			dataSetParams: po.sqlPreviewOptions.dataSetParams,
 			paramValues: po.sqlPreviewOptions.paramValues,
 			startRow: po.sqlPreviewOptions.startRow,
 			returnMeta: returnMeta

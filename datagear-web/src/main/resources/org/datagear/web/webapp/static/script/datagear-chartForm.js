@@ -60,7 +60,10 @@
 			var $item = $("<div class='form-item' />").appendTo($content);
 			
 			var $labelDiv = $("<div class='form-item-label' />").appendTo($item);
-			$("<label />").html(dsp.name).appendTo($labelDiv);
+			var $label = $("<label />").html(dsp.name).appendTo($labelDiv);
+			
+			if(dsp.desc)
+				$label.attr("title", dsp.desc);
 			
 			var $valueDiv = $("<div class='form-item-value' />").appendTo($item);
 			
@@ -80,6 +83,9 @@
 			{
 				$input = $("<input type='text' class='ui-widget ui-widget-content' />").attr("name", dsp.name)
 								.attr("value", (paramValues[dsp.name] || "")).appendTo($valueDiv);
+				
+				if(chartForm.DataSetParamDataType.NUMBER == dsp.type)
+					$input.attr("validation-number", "true");
 			}
 			
 			if((dsp.required+"") == "true")
@@ -103,6 +109,23 @@
 				}
 				else
 					$this.removeClass("validation-required");
+			});
+			
+			var $numbers = $("input[validation-number]", this);
+			var regexNumber = /^-?\d+\.?\d*$/;
+			$numbers.each(function()
+			{
+				var $this = $(this);
+				var val = $this.val();
+				var valid = (val == "" ? true : regexNumber.test(val));
+				
+				if(!valid)
+				{
+					$this.addClass("validation-number");
+					validationOk = false;
+				}
+				else
+					$this.removeClass("validation-number");
 			});
 			
 			if(!validationOk)

@@ -6,6 +6,7 @@ package org.datagear.web.controller;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.SqlDataSetSupport;
 import org.datagear.analysis.support.TemplateSqlResolver;
@@ -64,6 +67,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 	private SqlDataSetSupport sqlDataSetSupport = new SqlDataSetSupport();
 
+	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
+
 	public DataSetController()
 	{
 		super();
@@ -97,6 +102,16 @@ public class DataSetController extends AbstractSchemaConnController
 	public void setSqlDataSetSupport(SqlDataSetSupport sqlDataSetSupport)
 	{
 		this.sqlDataSetSupport = sqlDataSetSupport;
+	}
+
+	public DataSetParamValueConverter getDataSetParamValueConverter()
+	{
+		return dataSetParamValueConverter;
+	}
+
+	public void setDataSetParamValueConverter(DataSetParamValueConverter dataSetParamValueConverter)
+	{
+		this.dataSetParamValueConverter = dataSetParamValueConverter;
 	}
 
 	@RequestMapping("/add")
@@ -293,7 +308,8 @@ public class DataSetController extends AbstractSchemaConnController
 	public String resolveSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody ResolveSqlParam resolveSqlParam) throws Throwable
 	{
-		return resolveSql(resolveSqlParam.getSql(), resolveSqlParam.getParamValues());
+		return resolveSql(resolveSqlParam.getSql(), resolveSqlParam.getParamValues(),
+				resolveSqlParam.getDataSetParams());
 	}
 
 	protected DataSetSqlSelectResult executeSelect(HttpServletRequest request, HttpServletResponse response,
@@ -316,7 +332,8 @@ public class DataSetController extends AbstractSchemaConnController
 		if (fetchSize > 1000)
 			fetchSize = 1000;
 
-		final String sqlFinal = resolveSql(sql, sqlDataSetPreview.getParamValues());
+		final String sqlFinal = resolveSql(sql, sqlDataSetPreview.getParamValues(),
+				sqlDataSetPreview.getDataSetParams());
 		final int startRowFinal = startRow;
 		final int fetchSizeFinal = fetchSize;
 
@@ -347,9 +364,10 @@ public class DataSetController extends AbstractSchemaConnController
 		return modelSqlResult;
 	}
 
-	protected String resolveSql(String sql, Map<String, ?> paramValues)
+	protected String resolveSql(String sql, Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
 	{
-		return getTemplateSqlResolver().resolve(sql, paramValues);
+		Map<String, ?> converted = getDataSetParamValueConverter().convert(paramValues, dataSetParams);
+		return getTemplateSqlResolver().resolve(sql, converted);
 	}
 
 	protected TemplateSqlResolver getTemplateSqlResolver()
@@ -446,6 +464,9 @@ public class DataSetController extends AbstractSchemaConnController
 		private String sql;
 
 		@SuppressWarnings("unchecked")
+		private List<DataSetParam> dataSetParams = Collections.EMPTY_LIST;
+
+		@SuppressWarnings("unchecked")
 		private Map<String, Object> paramValues = Collections.EMPTY_MAP;
 
 		private Integer startRow;
@@ -484,6 +505,16 @@ public class DataSetController extends AbstractSchemaConnController
 		public void setSql(String sql)
 		{
 			this.sql = sql;
+		}
+
+		public List<DataSetParam> getDataSetParams()
+		{
+			return dataSetParams;
+		}
+
+		public void setDataSetParams(List<DataSetParam> dataSetParams)
+		{
+			this.dataSetParams = dataSetParams;
 		}
 
 		public Map<String, Object> getParamValues()
@@ -530,18 +561,22 @@ public class DataSetController extends AbstractSchemaConnController
 	public static class ResolveSqlParam
 	{
 		private String sql;
-		private Map<String, Object> paramValues;
+
+		@SuppressWarnings("unchecked")
+		private List<DataSetParam> dataSetParams = Collections.EMPTY_LIST;
+
+		@SuppressWarnings("unchecked")
+		private Map<String, Object> paramValues = Collections.EMPTY_MAP;
 
 		public ResolveSqlParam()
 		{
 			super();
 		}
 
-		public ResolveSqlParam(String sql, Map<String, Object> paramValues)
+		public ResolveSqlParam(String sql)
 		{
 			super();
 			this.sql = sql;
-			this.paramValues = paramValues;
 		}
 
 		public String getSql()
@@ -552,6 +587,16 @@ public class DataSetController extends AbstractSchemaConnController
 		public void setSql(String sql)
 		{
 			this.sql = sql;
+		}
+
+		public List<DataSetParam> getDataSetParams()
+		{
+			return dataSetParams;
+		}
+
+		public void setDataSetParams(List<DataSetParam> dataSetParams)
+		{
+			this.dataSetParams = dataSetParams;
 		}
 
 		public Map<String, Object> getParamValues()

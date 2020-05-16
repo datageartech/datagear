@@ -2181,6 +2181,10 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-dataSet .sql-param-value-panel .ui-widget-header{
 	padding: 0.3em 0.1em;
 }
+.page-form-dataSet .sql-param-value-panel .sql-param-value-panel-content .dspv-content{
+	max-height: 14em;
+	overflow: auto;
+}
 
 .page-form-chart .chart-plugin{
 	display: inline-block;
