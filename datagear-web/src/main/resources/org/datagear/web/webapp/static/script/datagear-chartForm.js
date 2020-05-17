@@ -37,6 +37,7 @@
 	 * 				submitText: "...",       	//可选，提交按钮文本内容
 	 * 				yesText: "...",       		//可选，"是"选项文本内容
 	 * 				noText: "...",       		//可选，"否"选项文本内容
+	 * 				render: function(){}		//可选，渲染后回调函数
 	 * 			}
 	 * @return 表单DOM元素
 	 */
@@ -73,12 +74,13 @@
 			if(chartForm.DataSetParamDataType.BOOLEAN == dsp.type)
 			{
 				$input = $("<select class='ui-widget ui-widget-content' />").attr("name", dsp.name).appendTo($valueDiv);
-				var $opt0 = $("<option value='true' />").html(options.yesText).appendTo($input);
-				var $opt1 = $("<option value='false' />").html(options.noText).appendTo($input);
+				var $optNull = $("<option value='' />").html("").appendTo($input);
+				var $optTrue = $("<option value='true' />").html(options.yesText).appendTo($input);
+				var $optFalse = $("<option value='false' />").html(options.noText).appendTo($input);
 				
-				var value = (paramValues[dsp.name]+"" || "true");
-				
-				(value == "false" ? $opt1 : $opt0).attr("selected", "selected");
+				var value = paramValues[dsp.name];
+				var $optSelected = (!value ? $optNull : ((value+"") == "false" ? $optFalse : $optTrue));
+				$optSelected.attr("selected", "selected");
 			}
 			else
 			{
@@ -103,7 +105,7 @@
 			
 			var validationOk = true;
 			
-			var $requireds = $("input[validation-required]", this);
+			var $requireds = $("[validation-required]", this);
 			$requireds.each(function()
 			{
 				var $this = $(this);
@@ -116,7 +118,7 @@
 					$this.removeClass("validation-required");
 			});
 			
-			var $numbers = $("input[validation-number]", this);
+			var $numbers = $("[validation-number]", this);
 			var regexNumber = /^-?\d+\.?\d*$/;
 			$numbers.each(function()
 			{
@@ -142,12 +144,20 @@
 				return false;
 		});
 		
+		if(options.render)
+			options.render.apply($form[0]);
+		
 		return $form[0];
 	};
 	
 	chartForm.getDataSetParamValueForm = function($parent)
 	{
 		return $(".data-set-param-value-form", $parent);
+	};
+	
+	chartForm.getDataSetParamValueFormFoot = function(form)
+	{
+		return $(".dspv-foot", form);
 	};
 	
 	chartForm.deleteEmptyDataSetParamValue = function(paramValueObj)

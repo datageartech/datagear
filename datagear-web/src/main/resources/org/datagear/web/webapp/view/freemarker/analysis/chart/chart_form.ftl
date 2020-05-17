@@ -384,7 +384,20 @@ readonly 是否只读操作，允许为null
 						$this.data("paramValues", chartForm.deleteEmptyDataSetParamValue($.formToJson(this)));
 						po.element(".data-set-param-value-panel").hide();
 					},
-					readonly: <#if readonly>true<#else>false</#if>
+					readonly: <#if readonly>true<#else>false</#if>,
+					render: function()
+					{
+						<#if !readonly>
+						var $foot = chartForm.getDataSetParamValueFormFoot(this);
+						var $button = $(" <button type='button' class='ui-button ui-corner-all ui-widget' style='margin-left:1em;' />")
+										.html("<@spring.message code='clear' />").attr("title", "<@spring.message code='chart.chartDataSet.clearParamValueTip' />").appendTo($foot);
+						$button.click(function()
+						{
+							$this.data("paramValues", {});
+							po.element(".data-set-param-value-panel").hide();
+						});
+						</#if>
+					}
 				});
 			});
 		}

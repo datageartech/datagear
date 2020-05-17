@@ -84,6 +84,9 @@ public abstract class DataValueConverter
 		{
 			String str = (String) value;
 
+			if (str.isEmpty())
+				return null;
+
 			try
 			{
 				if (isDecimalNumberString(str))
@@ -129,7 +132,11 @@ public abstract class DataValueConverter
 		if (value instanceof String)
 		{
 			String str = (String) value;
-			return str.equalsIgnoreCase("true") || str.equals("1");
+
+			if (str.isEmpty())
+				return null;
+			else
+				return str.equalsIgnoreCase("true") || str.equals("1");
 		}
 
 		return (Boolean) convertExt(value, booleanType);
