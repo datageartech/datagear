@@ -9,6 +9,7 @@ package org.datagear.web.controller;
 
 import java.io.Serializable;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -22,9 +23,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.datagear.analysis.Chart;
+import org.datagear.analysis.ChartDataSet;
+import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
+import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderStyle;
+import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
@@ -41,9 +47,21 @@ import org.datagear.web.util.WebUtils;
  */
 public class AbstractDataAnalysisController extends AbstractController
 {
+	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
+
 	public AbstractDataAnalysisController()
 	{
 		super();
+	}
+
+	public DataSetParamValueConverter getDataSetParamValueConverter()
+	{
+		return dataSetParamValueConverter;
+	}
+
+	public void setDataSetParamValueConverter(DataSetParamValueConverter dataSetParamValueConverter)
+	{
+		this.dataSetParamValueConverter = dataSetParamValueConverter;
 	}
 
 	protected RenderStyle resolveRenderStyle(HttpServletRequest request)
@@ -166,7 +184,7 @@ public class AbstractDataAnalysisController extends AbstractController
 			Set<String> chartIdSet = new HashSet<>(chartIds.size());
 			chartIdSet.addAll(chartIds);
 
-			return dashboard.getDataSetResults(chartIdSet, chartsParamValues);
+			return dashboard.getDataSetResults(chartIdSet, convertChartsParamValues(dashboard, chartsParamValues));
 		}
 	}
 
@@ -187,6 +205,40 @@ public class AbstractDataAnalysisController extends AbstractController
 		}
 
 		return dashboardManager;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected Map<String, List<? extends Map<String, ?>>> convertChartsParamValues(Dashboard dashboard,
+			Map<String, ? extends List<? extends Map<String, ?>>> chartsParamValues)
+	{
+		if (chartsParamValues == null)
+			return Collections.EMPTY_MAP;
+
+		Map<String, List<? extends Map<String, ?>>> re = new HashMap<String, List<? extends Map<String, ?>>>();
+
+		for (Map.Entry<String, ? extends List<? extends Map<String, ?>>> entry : chartsParamValues.entrySet())
+		{
+			Chart chart = dashboard.getChart(entry.getKey());
+			ChartDataSet[] chartDataSets = chart.getChartDataSets();
+
+			if (chartDataSets == null || chartDataSets.length == 0)
+				re.put(entry.getKey(), Collections.EMPTY_LIST);
+			else
+			{
+				List<? extends Map<String, ?>> paramValuess = entry.getValue();
+				List<Map<String, ?>> converteds = new ArrayList<Map<String, ?>>();
+
+				for (int i = 0; i < chartDataSets.length; i++)
+				{
+					List<DataSetParam> dataSetParams = chartDataSets[i].getDataSet().getParams();
+					converteds.add(getDataSetParamValueConverter().convert(paramValuess.get(i), dataSetParams));
+				}
+
+				re.put(entry.getKey(), converteds);
+			}
+		}
+
+		return re;
 	}
 
 	protected static class SessionHtmlTplDashboardManager implements Serializable

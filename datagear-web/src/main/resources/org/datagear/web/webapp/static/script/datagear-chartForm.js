@@ -73,7 +73,7 @@
 			
 			if(chartForm.DataSetParamDataType.BOOLEAN == dsp.type)
 			{
-				$input = $("<select class='ui-widget ui-widget-content' />").attr("name", dsp.name).appendTo($valueDiv);
+				$input = $("<select class='form-input ui-widget ui-widget-content' />").attr("name", dsp.name).appendTo($valueDiv);
 				var $optNull = $("<option value='' />").html("").appendTo($input);
 				var $optTrue = $("<option value='true' />").html(options.yesText).appendTo($input);
 				var $optFalse = $("<option value='false' />").html(options.noText).appendTo($input);
@@ -84,7 +84,7 @@
 			}
 			else
 			{
-				$input = $("<input type='text' class='ui-widget ui-widget-content' />").attr("name", dsp.name)
+				$input = $("<input type='text' class='form-input ui-widget ui-widget-content' />").attr("name", dsp.name)
 								.attr("value", (paramValues[dsp.name] || "")).appendTo($valueDiv);
 				
 				if(chartForm.DataSetParamDataType.NUMBER == dsp.type)
@@ -103,37 +103,7 @@
 			if(options.readonly)
 				return false;
 			
-			var validationOk = true;
-			
-			var $requireds = $("[validation-required]", this);
-			$requireds.each(function()
-			{
-				var $this = $(this);
-				if($this.val() == "")
-				{
-					$this.addClass("validation-required");
-					validationOk = false;
-				}
-				else
-					$this.removeClass("validation-required");
-			});
-			
-			var $numbers = $("[validation-number]", this);
-			var regexNumber = /^-?\d+\.?\d*$/;
-			$numbers.each(function()
-			{
-				var $this = $(this);
-				var val = $this.val();
-				var valid = (val == "" ? true : regexNumber.test(val));
-				
-				if(!valid)
-				{
-					$this.addClass("validation-number");
-					validationOk = false;
-				}
-				else
-					$this.removeClass("validation-number");
-			});
+			var validationOk = chartForm.validateDataSetParamValueForm(this);
 			
 			if(!validationOk)
 				return false;
@@ -148,6 +118,85 @@
 			options.render.apply($form[0]);
 		
 		return $form[0];
+	};
+	
+	/**
+	 * 验证数据集参数值表单。
+	 * 
+	 * @param form
+	 * @return true 验证通过；false 验证不通过
+	 */
+	chartForm.validateDataSetParamValueForm = function(form)
+	{
+		var validationOk = true;
+		
+		var $requireds = $("[validation-required]", form);
+		$requireds.each(function()
+		{
+			var $this = $(this);
+			if($this.val() == "")
+			{
+				$this.addClass("validation-required");
+				validationOk = false;
+			}
+			else
+				$this.removeClass("validation-required");
+		});
+		
+		var $numbers = $("[validation-number]", form);
+		var regexNumber = /^-?\d+\.?\d*$/;
+		$numbers.each(function()
+		{
+			var $this = $(this);
+			var val = $this.val();
+			var valid = (val == "" ? true : regexNumber.test(val));
+			
+			if(!valid)
+			{
+				$this.addClass("validation-number");
+				validationOk = false;
+			}
+			else
+				$this.removeClass("validation-number");
+		});
+		
+		return validationOk;
+	};
+	
+	chartForm.getDataSetParamValueObj = function(form)
+	{
+		var $form = $(form);
+
+		var array = $form.serializeArray();
+		
+		var re = {};
+		
+		$(array).each(function()
+		{
+			var name = this.name;
+			var value = this.value;
+			
+			if(!value)
+				return;
+			
+			if(re[name] == undefined)
+				re[name] = value;
+			else
+			{
+				var prev = re[name];
+				
+				if($.isArray(prev))
+					prev.push(value);
+				else
+				{
+					prev = [ prev ];
+					re[name] = prev;
+					prev.push(value);
+				}
+			}
+		});
+		
+		return re;
 	};
 	
 	chartForm.getDataSetParamValueForm = function($parent)
@@ -176,6 +225,168 @@
 		}
 		
 		return re;
+	};
+	
+	chartForm.bindChartSettingPanelEvent = function(chart)
+	{
+		var hasParam = false;
+		var chartDataSets = chart.chartDataSetsNonNull();
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var params = chartDataSets[i].dataSet.params;
+			hasParam = (params && params.length > 0);
+			
+			if(hasParam)
+				break;
+		}
+		
+		if(!hasParam)
+			return false;
+		
+		chart.elementJquery().hover(
+		function(event)
+		{
+			if(!chart.statusPreRender() || !chart.statusRendering())
+				chartForm.showChartSettingBox(chart);
+		},
+		function(event)
+		{
+			chartForm.hideChartSettingBox(chart);
+		});
+		
+		return true;
+	};
+	
+	chartForm.showChartSettingBox = function(chart)
+	{
+		var $chart = chart.elementJquery();
+		var $box = $(".dg-chart-setting-box", $chart);
+		
+		if($box.length <= 0)
+		{
+			$box = $("<div class='dg-chart-setting-box' />").appendTo($chart);
+			var $button = $("<button type='button' class='dg-chart-setting-button ui-button ui-corner-all ui-widget' />").html("设置").appendTo($box);
+			chartFactory.setTooltipThemeStyle($button, chart);
+			
+			$button.click(function()
+			{
+				chartForm.openChartSettingPanel(chart, $box);
+			});
+			
+			$box.hover(function(){}, function()
+			{
+				chartForm.closeChartSettingPanel(chart);
+			});
+		}
+		
+		$box.show();
+	};
+	
+	chartForm.hideChartSettingBox = function(chart)
+	{
+		$(".dg-chart-setting-box", chart.elementJquery()).hide();
+	};
+	
+	/**
+	 * 打开图表设置面板。
+	 */
+	chartForm.openChartSettingPanel = function(chart, $parent)
+	{
+		var $chart = chart.elementJquery();
+		$parent = ($parent || $chart);
+		
+		var $panel = $(".dg-chart-setting-panel", $parent);
+		
+		if($panel.length <= 0)
+		{
+			$panel = $("<div class='dg-chart-setting-panel' />").appendTo($parent);
+			chartFactory.setTooltipThemeStyle($panel, chart);
+			
+			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html("设置图表参数值").appendTo($panel);
+			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").css("max-height", parseInt($(window).height()/2)).appendTo($panel);
+			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
+			
+			var chartDataSets = chart.chartDataSetsNonNull();
+			
+			for(var i=0; i<chartDataSets.length; i++)
+			{
+				var params = chartDataSets[i].dataSet.params;
+				
+				if(!params || params.length == 0)
+					continue;
+				
+				var formTitle = chart.dataSetName(chartDataSets[i]);
+				if(formTitle != chartDataSets[i].dataSet.name)
+					formTitle += " - "+chartDataSets[i].dataSet.name;
+				
+				var $fp = $("<div class='dg-param-value-form-wrapper' />").data("chartDataSetIndex", i).appendTo($panelContent);
+				chartFactory.setTooltipThemeStyle($fp, chart);
+				var $head = $("<div class='dg-param-value-form-head' />").html(formTitle).appendTo($fp);
+				var $content = $("<div class='dg-param-value-form-content' />").appendTo($fp);
+				chartForm.renderDataSetParamValueForm($content, params,
+				{
+					submit: function()
+					{
+						$("button", $panelFoot).click();
+					},
+					paramValues: chartDataSets[i].paramValues,
+					render: function()
+					{
+						$("input, select, button", this).each(function()
+						{
+							chartFactory.setTooltipThemeStyle($(this), chart);
+						});
+						
+						chartForm.getDataSetParamValueFormFoot(this).hide();
+					}
+				});
+			}
+			
+			var $button = $("<button type='button' class='ui-button ui-corner-all ui-widget' />").html("确定").appendTo($panelFoot);
+			chartFactory.setTooltipThemeStyle($button, chart);
+			$button.click(function()
+			{
+				var validateOk = true;
+				var paramValuesMap = {};
+				
+				$(".dg-param-value-form-wrapper", $panelContent).each(function()
+				{
+					if(!validateOk)
+						return;
+					
+					var $this = $(this);
+					
+					var $form = chartForm.getDataSetParamValueForm($this);
+					
+					if(!chartForm.validateDataSetParamValueForm($form))
+						validateOk = false;
+					else
+					{
+						var myIndex = $this.data("chartDataSetIndex");
+						var myParamValues = chartForm.getDataSetParamValueObj($form);
+						paramValuesMap[myIndex] = myParamValues;
+					}
+				});
+				
+				if(validateOk)
+				{
+					for(var index in paramValuesMap)
+						chartDataSets[index].paramValues = paramValuesMap[index];
+					
+					chart.statusPreUpdate(true);
+				}
+			});
+		}
+		
+		$panel.show();
+	};
+	
+	/**
+	 * 关闭图表设置面板。
+	 */
+	chartForm.closeChartSettingPanel = function(chart)
+	{
+		$(".dg-chart-setting-panel", chart.elementJquery()).hide();
 	};
 })
 (this);

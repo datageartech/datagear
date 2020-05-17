@@ -70,6 +70,24 @@
 		chart.statusPreRender(true);
 	};
 	
+	/**图表状态：准备render*/
+	chartFactory.STATUS_PRE_RENDER = "PRE_RENDER";
+	
+	/**图表状态：正在render*/
+	chartFactory.STATUS_RENDERING = "RENDERING";
+	
+	/**图表状态：准备update*/
+	chartFactory.STATUS_PRE_UPDATE = "PRE_UPDATE";
+	
+	/**图表状态：正在update*/
+	chartFactory.STATUS_UPDATING = "UPDATING";
+	
+	/**图表状态：完成update*/
+	chartFactory.STATUS_UPDATED = "UPDATED";
+	
+	//用于标识图表元素的CSS名
+	chartFactory.CHART_DISTINCT_CSS_NAME = "dg-chart-distinct-css";
+	
 	//----------------------------------------
 	// chartBase start
 	//----------------------------------------
@@ -79,6 +97,8 @@
 	 */
 	chartBase.render = function()
 	{
+		this.elementJquery().addClass(chartFactory.CHART_DISTINCT_CSS_NAME);
+		
 		this.statusRendering(true);
 		
 		var async = this.isAsyncRender();
@@ -91,6 +111,9 @@
 			else
 				this.statusPreUpdate(true);
 		}
+		
+		if(chartForm && chartForm.bindChartSettingPanelEvent)
+			chartForm.bindChartSettingPanelEvent(this);
 	};
 	
 	/**
@@ -1738,6 +1761,22 @@
 	};
 	
 	/**
+	 * 将元素设置为图表提示主题样式。
+	 */
+	chartFactory.setTooltipThemeStyle = function($ele, chart)
+	{
+		var chartTheme = chart.theme();
+		var tooltipTheme = (chartTheme && chartTheme.tooltipTheme ? chartTheme.tooltipTheme : undefined);
+		
+		if(!tooltipTheme)
+			return false;
+		
+		$ele.css("background-color", tooltipTheme.backgroundColor)
+			.css("border-color", tooltipTheme.borderColor)
+			.css("color", tooltipTheme.color);
+	};
+	
+	/**
 	 * 记录异常日志。
 	 * 
 	 * @param exception 异常对象
@@ -1754,20 +1793,5 @@
 				console.info(exception);
 		}
 	};
-	
-	/**图表状态：准备render*/
-	chartFactory.STATUS_PRE_RENDER = "PRE_RENDER";
-	
-	/**图表状态：正在render*/
-	chartFactory.STATUS_RENDERING = "RENDERING";
-	
-	/**图表状态：准备update*/
-	chartFactory.STATUS_PRE_UPDATE = "PRE_UPDATE";
-	
-	/**图表状态：正在update*/
-	chartFactory.STATUS_UPDATING = "UPDATING";
-	
-	/**图表状态：完成update*/
-	chartFactory.STATUS_UPDATED = "UPDATED";
 })
 (this);

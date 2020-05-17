@@ -21,7 +21,6 @@ import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
-import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
@@ -77,8 +76,6 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@Qualifier("chartShowHtmlTplDashboardWidgetHtmlRenderer")
 	private HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer;
 
-	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
-
 	private ServletContext servletContext;
 
 	public ChartController()
@@ -115,16 +112,6 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer)
 	{
 		this.chartShowHtmlTplDashboardWidgetHtmlRenderer = chartShowHtmlTplDashboardWidgetHtmlRenderer;
-	}
-
-	public DataSetParamValueConverter getDataSetParamValueConverter()
-	{
-		return dataSetParamValueConverter;
-	}
-
-	public void setDataSetParamValueConverter(DataSetParamValueConverter dataSetParamValueConverter)
-	{
-		this.dataSetParamValueConverter = dataSetParamValueConverter;
 	}
 
 	public ServletContext getServletContext()

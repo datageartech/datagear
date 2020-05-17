@@ -74,9 +74,76 @@
 }
 .data-set-param-value-form .dspv-content .validation-required,
 .data-set-param-value-form .dspv-content .validation-number{
-	border-color: red;
+	border-color: red!important;
 }
 .data-set-param-value-form .dspv-foot{
 	padding-top: 0.3em;
 	text-align: center;
+}
+
+.dg-chart-setting-box{
+	position: absolute;
+	right: 0.1em;
+	top: 0.1em;
+}
+.dg-chart-setting-box .dg-chart-setting-panel,
+.dg-chart-setting-box button{
+	border-bottom-right-radius: 3px;
+	border-bottom-left-radius: 3px;
+	border-top-right-radius: 3px;
+	border-top-left-radius: 3px;
+}
+.dg-chart-setting-box .dg-chart-setting-button{
+	opacity: 0.8;
+	filter: Alpha(Opacity=80);
+	font-size: 0.8em!important;
+	padding: 0.1em 0.2em!important;
+	margin: 0 0!important;
+}
+.dg-chart-setting-box .dg-chart-setting-panel{
+	position: absolute;
+	right: 0;
+	border-width: 1px;
+	border-style: solid;
+	padding: 0.5em 0.8em;
+}
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head{
+	font-weight: bold;
+	font-size: 1.1em;
+}
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-content{
+	overflow: auto;
+}
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot{
+	padding-top: 0.6em;
+	text-align: center;
+}
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button{
+	padding-left: 2em;
+	padding-right: 2em;
+}
+.dg-chart-setting-box .dg-chart-setting-panel .dg-param-value-form-wrapper{
+	border-width: 1px;
+	border-style: solid;
+	padding: 0.3em 0.3em;
+	margin: 0.5em 0;
+}
+.dg-chart-setting-box .dg-chart-setting-panel .dg-param-value-form-head{
+	font-weight: bold;
+	max-width: 20em;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.dg-chart-setting-box .dg-chart-setting-panel .data-set-param-value-form input,
+.dg-chart-setting-box .dg-chart-setting-panel .data-set-param-value-form select,
+.dg-chart-setting-box .dg-chart-setting-panel .data-set-param-value-form button{
+	font-size: 1em;
+	border-width: 1px;
+	border-style: solid;
+	padding: 0.1em 0.1em;
+}
+.dg-chart-setting-box .dg-chart-setting-panel button{
+	padding: 0.4em 0.8em;
+	white-space: nowrap;
+	font-size: 1em;
 }
