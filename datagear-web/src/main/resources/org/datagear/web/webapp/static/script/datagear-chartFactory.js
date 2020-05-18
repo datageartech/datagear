@@ -1427,11 +1427,11 @@
 				"textStyle" : { color: chartTheme.tooltipTheme.color },
 				"axisPointer" : {
 					"lineStyle" : {
-						"color" : chartTheme.tooltipTheme.borderColor,
+						"color" : chartTheme.axisColor,
 						"width" : "1"
 					},
 					"crossStyle" : {
-						"color" : chartTheme.tooltipTheme.borderColor,
+						"color" : chartTheme.axisColor,
 						"width" : "1"
 					}
 				}
