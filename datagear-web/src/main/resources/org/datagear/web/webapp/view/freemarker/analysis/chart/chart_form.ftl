@@ -381,12 +381,15 @@ readonly 是否只读操作，允许为null
 				{
 					submit: function()
 					{
-						$this.data("paramValues", chartForm.deleteEmptyDataSetParamValue($.formToJson(this)));
+						$this.data("paramValues", chartForm.getDataSetParamValueObj(this));
 						po.element(".data-set-param-value-panel").hide();
 					},
 					readonly: <#if readonly>true<#else>false</#if>,
 					render: function()
 					{
+						$("select, input", this).addClass("ui-widget ui-widget-content");
+						$("button", this).addClass("ui-button ui-corner-all ui-widget");
+						
 						<#if !readonly>
 						var $foot = chartForm.getDataSetParamValueFormFoot(this);
 						var $button = $(" <button type='button' class='ui-button ui-corner-all ui-widget' style='margin-left:1em;' />")

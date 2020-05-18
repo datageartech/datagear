@@ -24,6 +24,16 @@
 		NUMBER: "NUMBER"
 	};
 	
+	chartForm.labels = (chartForm.labels ||
+	{
+		confirm: "确定",
+		yes: "是",
+		no: "否",
+		set: "设置",
+		colon: "：",
+		setChartParamValue: "设置图表参数值"
+	});
+	
 	/**
 	 * 渲染数据集参数值表单。
 	 * 
@@ -43,37 +53,37 @@
 	 */
 	chartForm.renderDataSetParamValueForm = function($parent, dataSetParams, options)
 	{
-		options = $.extend({ submitText: "确定", readonly: false, yesText: "是", noText: "否" }, (options || {}));
+		options = $.extend({ submitText: chartForm.labels.confirm, readonly: false, yesText: chartForm.labels.yes, noText: chartForm.labels.no }, (options || {}));
 		var paramValues = (options.paramValues || {});
 		
 		$parent.empty();
 		var $form = $("<form />").appendTo($parent);
 		
-		$form.addClass("data-set-param-value-form");
+		$form.addClass("dg-dspv-form");
 		
-		$("<div class='dspv-head' />").appendTo($form);
-		var $content = $("<div class='dspv-content' />").appendTo($form);
-		var $foot = $("<div class='dspv-foot' />").appendTo($form);
+		$("<div class='dg-dspv-form-head' />").appendTo($form);
+		var $content = $("<div class='dg-dspv-form-content' />").appendTo($form);
+		var $foot = $("<div class='dg-dspv-form-foot' />").appendTo($form);
 		
 		for(var i=0; i<dataSetParams.length; i++)
 		{
 			var dsp = dataSetParams[i];
 			
-			var $item = $("<div class='form-item' />").appendTo($content);
+			var $item = $("<div class='dg-dspv-form-item' />").appendTo($content);
 			
-			var $labelDiv = $("<div class='form-item-label' />").appendTo($item);
-			var $label = $("<label />").html(dsp.name).appendTo($labelDiv);
+			var $labelDiv = $("<div class='dg-dspv-form-item-label' />").appendTo($item);
+			var $label = $("<label />").html(dsp.name+chartForm.labels.colon).appendTo($labelDiv);
 			
 			if(dsp.desc)
 				$label.attr("title", dsp.desc);
 			
-			var $valueDiv = $("<div class='form-item-value' />").appendTo($item);
+			var $valueDiv = $("<div class='dg-dspv-form-item-value' />").appendTo($item);
 			
 			var $input;
 			
 			if(chartForm.DataSetParamDataType.BOOLEAN == dsp.type)
 			{
-				$input = $("<select class='form-input ui-widget ui-widget-content' />").attr("name", dsp.name).appendTo($valueDiv);
+				$input = $("<select class='dg-dspv-form-input' />").attr("name", dsp.name).appendTo($valueDiv);
 				var $optNull = $("<option value='' />").html("").appendTo($input);
 				var $optTrue = $("<option value='true' />").html(options.yesText).appendTo($input);
 				var $optFalse = $("<option value='false' />").html(options.noText).appendTo($input);
@@ -84,19 +94,19 @@
 			}
 			else
 			{
-				$input = $("<input type='text' class='form-input ui-widget ui-widget-content' />").attr("name", dsp.name)
+				$input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dsp.name)
 								.attr("value", (paramValues[dsp.name] || "")).appendTo($valueDiv);
 				
 				if(chartForm.DataSetParamDataType.NUMBER == dsp.type)
-					$input.attr("validation-number", "true");
+					$input.attr("dg-validation-number", "true");
 			}
 			
 			if((dsp.required+"") == "true")
-				$input.attr("validation-required", "true");
+				$input.attr("dg-validation-required", "true");
 		}
 		
 		if(!options.readonly)
-			$("<button type='submit' class='ui-button ui-corner-all ui-widget' />").html(options.submitText).appendTo($foot);
+			$("<button type='submit' />").html(options.submitText).appendTo($foot);
 		
 		$form.submit(function()
 		{
@@ -130,20 +140,20 @@
 	{
 		var validationOk = true;
 		
-		var $requireds = $("[validation-required]", form);
+		var $requireds = $("[dg-validation-required]", form);
 		$requireds.each(function()
 		{
 			var $this = $(this);
 			if($this.val() == "")
 			{
-				$this.addClass("validation-required");
+				$this.addClass("dg-validation-required");
 				validationOk = false;
 			}
 			else
-				$this.removeClass("validation-required");
+				$this.removeClass("dg-validation-required");
 		});
 		
-		var $numbers = $("[validation-number]", form);
+		var $numbers = $("[dg-validation-number]", form);
 		var regexNumber = /^-?\d+\.?\d*$/;
 		$numbers.each(function()
 		{
@@ -153,11 +163,11 @@
 			
 			if(!valid)
 			{
-				$this.addClass("validation-number");
+				$this.addClass("dg-validation-number");
 				validationOk = false;
 			}
 			else
-				$this.removeClass("validation-number");
+				$this.removeClass("dg-validation-number");
 		});
 		
 		return validationOk;
@@ -201,30 +211,22 @@
 	
 	chartForm.getDataSetParamValueForm = function($parent)
 	{
-		return $(".data-set-param-value-form", $parent);
+		return $(".dg-dspv-form", $parent);
+	};
+
+	chartForm.getDataSetParamValueFormHead = function(form)
+	{
+		return $(".dg-dspv-form-head", form);
+	};
+	
+	chartForm.getDataSetParamValueFormContent = function(form)
+	{
+		return $(".dg-dspv-form-content", form);
 	};
 	
 	chartForm.getDataSetParamValueFormFoot = function(form)
 	{
-		return $(".dspv-foot", form);
-	};
-	
-	chartForm.deleteEmptyDataSetParamValue = function(paramValueObj)
-	{
-		if(!paramValueObj)
-			return paramValueObj;
-		
-		var re = {};
-		
-		for(var name in paramValueObj)
-		{
-			if(paramValueObj[name] == "")
-				continue;
-			
-			re[name] = paramValueObj[name];
-		}
-		
-		return re;
+		return $(".dg-dspv-form-foot", form);
 	};
 	
 	chartForm.bindChartSettingPanelEvent = function(chart)
@@ -265,7 +267,7 @@
 		if($box.length <= 0)
 		{
 			$box = $("<div class='dg-chart-setting-box' />").appendTo($chart);
-			var $button = $("<button type='button' class='dg-chart-setting-button ui-button ui-corner-all ui-widget' />").html("设置").appendTo($box);
+			var $button = $("<button type='button' class='dg-chart-setting-button' />").html(chartForm.labels.set).appendTo($box);
 			chartFactory.setTooltipThemeStyle($button, chart);
 			
 			$button.click(function()
@@ -302,8 +304,8 @@
 			$panel = $("<div class='dg-chart-setting-panel' />").appendTo($parent);
 			chartFactory.setTooltipThemeStyle($panel, chart);
 			
-			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html("设置图表参数值").appendTo($panel);
-			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").css("max-height", parseInt($(window).height()/2)).appendTo($panel);
+			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartForm.labels.setChartParamValue).appendTo($panel);
+			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").css("max-height", parseInt($chart.height()/2)).appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
 			
 			var chartDataSets = chart.chartDataSetsNonNull();
@@ -342,7 +344,7 @@
 				});
 			}
 			
-			var $button = $("<button type='button' class='ui-button ui-corner-all ui-widget' />").html("确定").appendTo($panelFoot);
+			var $button = $("<button type='button' />").html(chartForm.labels.confirm).appendTo($panelFoot);
 			chartFactory.setTooltipThemeStyle($button, chart);
 			$button.click(function()
 			{
@@ -373,6 +375,7 @@
 					for(var index in paramValuesMap)
 						chartDataSets[index].paramValues = paramValuesMap[index];
 					
+					chartForm.closeChartSettingPanel(chart);
 					chart.statusPreUpdate(true);
 				}
 			});

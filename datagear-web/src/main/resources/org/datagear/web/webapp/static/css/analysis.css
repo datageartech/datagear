@@ -4,10 +4,10 @@
 
 @CHARSET "UTF-8";
 
+/*表格图表*/
 .dg-chart-table{
 	position: relative;
 }
-
 .dg-chart-table .dg-chart-table-title{
 	position: absolute;
 	left: 0;
@@ -22,7 +22,6 @@
 	font-weight: bold;
 	text-align: center;
 }
-
 .dg-chart-table .dg-chart-table-content{
 	position: absolute;
 	left: 0.1em;
@@ -30,15 +29,12 @@
 	right: 0.1em;
 	bottom: 0.1em;
 }
-
 .dg-chart-table.dg-hide-title .dg-chart-table-title{
 	display: none;
 }
-
 .dg-chart-table.dg-hide-title .dg-chart-table-content{
 	top: 0.1em;
 }
-
 .dg-chart-table .dg-chart-table-content table.dataTable thead th,
 .dg-chart-table .dg-chart-table-content table.dataTable thead td,
 .dg-chart-table .dg-chart-table-content table.dataTable tbody th,
@@ -48,39 +44,44 @@
 	white-space: nowrap;
 }
 
+/*标签图表*/
+.dg-chart-label{
+	position: relative;
+}
 .dg-chart-label .dg-chart-label-item .label-name{
 	text-align: center;
 }
-
 .dg-chart-label .dg-chart-label-item .label-value{
 	text-align: center;
 	font-size: 1.5em;
 	font-weight: bold;
 }
 
-.data-set-param-value-form{}
-.data-set-param-value-form .dspv-content{
+/*数据集参数值表单*/
+.dg-dspv-form{}
+.dg-dspv-form .dg-dspv-form-content{
 	padding: 0.3em 0.3em;
 }
-.data-set-param-value-form .dspv-content .form-item{
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item{
 	padding-top: 0.2em;
 	padding-bottom: 0.2em;
 }
-.data-set-param-value-form .dspv-content .form-item .form-item-label{
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-label{
 	padding-bottom: 0.1em;
 }
-.data-set-param-value-form .dspv-content .form-item .form-item-value select{
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value select{
 	width: 100%;
 }
-.data-set-param-value-form .dspv-content .validation-required,
-.data-set-param-value-form .dspv-content .validation-number{
+.dg-dspv-form .dg-dspv-form-content .dg-validation-required,
+.dg-dspv-form .dg-dspv-form-content .dg-validation-number{
 	border-color: red!important;
 }
-.data-set-param-value-form .dspv-foot{
+.dg-dspv-form .dg-dspv-form-foot{
 	padding-top: 0.3em;
 	text-align: center;
 }
 
+/*图表展示页面设置框*/
 .dg-chart-setting-box{
 	position: absolute;
 	right: 0.1em;
@@ -109,18 +110,28 @@
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head{
 	font-weight: bold;
-	font-size: 1.1em;
+	white-space: nowrap;
+	padding-bottom: 0.41em;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-content{
 	overflow: auto;
+	font-size: 0.9em;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot{
-	padding-top: 0.6em;
+	padding-top: 0.41em;
 	text-align: center;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button{
 	padding-left: 2em;
 	padding-right: 2em;
+}
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button:hover{
+	opacity: 0.8;
+	filter: Alpha(Opacity=80);
+}
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button:active{
+	opacity: 1;
+	filter: Alpha(Opacity=100);
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-param-value-form-wrapper{
 	border-width: 1px;
@@ -134,13 +145,13 @@
 	overflow: hidden;
 	white-space: nowrap;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .data-set-param-value-form input,
-.dg-chart-setting-box .dg-chart-setting-panel .data-set-param-value-form select,
-.dg-chart-setting-box .dg-chart-setting-panel .data-set-param-value-form button{
+.dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form input,
+.dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form select,
+.dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form button{
 	font-size: 1em;
 	border-width: 1px;
 	border-style: solid;
-	padding: 0.1em 0.1em;
+	padding: 0.2em 0.1em;
 }
 .dg-chart-setting-box .dg-chart-setting-panel button{
 	padding: 0.4em 0.8em;

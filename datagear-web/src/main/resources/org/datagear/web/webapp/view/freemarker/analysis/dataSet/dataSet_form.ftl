@@ -350,7 +350,12 @@ readonly 是否只读操作，允许为null
 			submitText: "<@spring.message code='confirm' />",
 			yesText: "<@spring.message code='yes' />",
 			noText: "<@spring.message code='no' />",
-			paramValues: $.formToJson(chartForm.getDataSetParamValueForm($panel))
+			paramValues: chartForm.getDataSetParamValueObj(chartForm.getDataSetParamValueForm($panel)),
+			render: function()
+			{
+				$("select, input", this).addClass("ui-widget ui-widget-content");
+				$("button", this).addClass("ui-button ui-corner-all ui-widget");
+			}
 		},
 		formOptions);
 		
@@ -398,7 +403,7 @@ readonly 是否只读操作，允许为null
 					po.sqlPreviewOptions.schemaId = po.getDataSetSchemaId();
 					po.sqlPreviewOptions.sql = po.sqlEditor.getValue();
 					po.sqlPreviewOptions.dataSetParams = po.getFormDataSetParams();
-					po.sqlPreviewOptions.paramValues = chartForm.deleteEmptyDataSetParamValue($.formToJson(this));
+					po.sqlPreviewOptions.paramValues = chartForm.getDataSetParamValueObj(this);
 					po.sqlPreviewOptions.startRow = 1;
 					po.sqlPreview();
 				}
@@ -456,7 +461,7 @@ readonly 是否只读操作，允许为null
 			{
 				submit: function()
 				{
-					var paramValues = chartForm.deleteEmptyDataSetParamValue($.formToJson(this));
+					var paramValues = chartForm.getDataSetParamValueObj(this);
 					
 					var data =
 					{
