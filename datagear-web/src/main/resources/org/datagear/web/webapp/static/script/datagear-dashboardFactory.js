@@ -119,7 +119,12 @@
 			var chart = charts[i];
 			
 			if(chart.statusPreRender())
+			{
 				this.renderChart(chart, i);
+				
+				if(global.chartForm && global.chartForm.bindChartSettingPanelEvent)
+					global.chartForm.bindChartSettingPanelEvent(chart);
+			}
 		}
 		
 		var preUpdates = [];
@@ -128,6 +133,10 @@
 		for(var i=0; i<charts.length; i++)
 		{
 			var chart = charts[i];
+			
+			if(!chart.isDataSetParamValueReady())
+				continue;
+			
 			var updateInterval = chart.updateIntervalNonNull();
 			
 			if(chart.statusPreUpdate() || (chart.statusUpdated() && updateInterval > -1))

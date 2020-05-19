@@ -100,6 +100,8 @@
 	font-size: 0.8em!important;
 	padding: 0.1em 0.2em!important;
 	margin: 0 0!important;
+	border-width: 1px;
+	border-style: solid;
 }
 .dg-chart-setting-box .dg-chart-setting-panel{
 	position: absolute;
@@ -124,6 +126,8 @@
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button{
 	padding-left: 2em;
 	padding-right: 2em;
+	border-width: 1px;
+	border-style: solid;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button:hover{
 	opacity: 0.8;

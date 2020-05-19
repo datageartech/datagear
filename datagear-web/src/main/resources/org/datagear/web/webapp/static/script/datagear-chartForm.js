@@ -31,7 +31,7 @@
 		no: "否",
 		set: "设置",
 		colon: "：",
-		setChartParamValue: "设置图表参数值"
+		setDataSetParamValue: "设置数据集参数值"
 	});
 	
 	/**
@@ -231,30 +231,27 @@
 	
 	chartForm.bindChartSettingPanelEvent = function(chart)
 	{
-		var hasParam = false;
-		var chartDataSets = chart.chartDataSetsNonNull();
-		for(var i=0; i<chartDataSets.length; i++)
-		{
-			var params = chartDataSets[i].dataSet.params;
-			hasParam = (params && params.length > 0);
-			
-			if(hasParam)
-				break;
-		}
-		
-		if(!hasParam)
+		if(!chart.hasDataSetParam())
 			return false;
 		
-		chart.elementJquery().hover(
-		function(event)
+		var $chart = chart.elementJquery();
+		
+		if(!$chart.attr("bindChartSettingPanelEvent"))
 		{
-			if(!chart.statusPreRender() || !chart.statusRendering())
-				chartForm.showChartSettingBox(chart);
-		},
-		function(event)
-		{
-			chartForm.hideChartSettingBox(chart);
-		});
+			$chart.attr("bindChartSettingPanelEvent", "1").hover(
+			function(event)
+			{
+				if(!chart.statusPreRender() || !chart.statusRendering())
+					chartForm.showChartSettingBox(chart);
+			},
+			function(event)
+			{
+				chartForm.hideChartSettingBox(chart);
+			});
+		}
+		
+		if(!chart.isDataSetParamValueReady())
+			chartForm.showChartSettingBox(chart);
 		
 		return true;
 	};
@@ -304,7 +301,7 @@
 			$panel = $("<div class='dg-chart-setting-panel' />").appendTo($parent);
 			chartFactory.setTooltipThemeStyle($panel, chart);
 			
-			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartForm.labels.setChartParamValue).appendTo($panel);
+			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartForm.labels.setDataSetParamValue).appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").css("max-height", parseInt($chart.height()/2)).appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
 			
@@ -319,7 +316,7 @@
 				
 				var formTitle = chart.dataSetName(chartDataSets[i]);
 				if(formTitle != chartDataSets[i].dataSet.name)
-					formTitle += " - "+chartDataSets[i].dataSet.name;
+					formTitle += " ("+chartDataSets[i].dataSet.name+")";
 				
 				var $fp = $("<div class='dg-param-value-form-wrapper' />").data("chartDataSetIndex", i).appendTo($panelContent);
 				chartFactory.setTooltipThemeStyle($fp, chart);

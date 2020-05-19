@@ -86,7 +86,7 @@
 	chartFactory.STATUS_UPDATED = "UPDATED";
 	
 	//用于标识图表元素的CSS名
-	chartFactory.CHART_DISTINCT_CSS_NAME = "dg-chart-distinct-css";
+	chartFactory.CHART_DISTINCT_CSS_NAME = "dg-chart-for-distinction";
 	
 	//----------------------------------------
 	// chartBase start
@@ -111,9 +111,6 @@
 			else
 				this.statusPreUpdate(true);
 		}
-		
-		if(chartForm && chartForm.bindChartSettingPanelEvent)
-			chartForm.bindChartSettingPanelEvent(this);
 	};
 	
 	/**
@@ -247,6 +244,56 @@
 			return (this._status || chartFactory.STATUS_PRE_RENDER);
 		else
 			this._status = (status || chartFactory.STATUS_PRE_RENDER);
+	};
+	
+	/**
+	 * 此图表是否有带参数的数据集。
+	 */
+	chartBase.hasDataSetParam = function()
+	{
+		var re = false;
+		
+		var chartDataSets = this.chartDataSetsNonNull();
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var params = chartDataSets[i].dataSet.params;
+			re = (params && params.length > 0);
+			
+			if(re)
+				break;
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 图表的所有/指定数据集参数值是否齐备。
+	 * 
+	 * @param chartDataSet 指定图表数据集，如果不设置，则取所有
+	 */
+	chartBase.isDataSetParamValueReady = function(chartDataSet)
+	{
+		var chartDataSets = (chartDataSet ? [ chartDataSet ] : this.chartDataSetsNonNull());
+		
+		for(var i=0; i<chartDataSets.length; i++)
+		{
+			var dataSet = chartDataSets[i].dataSet;
+			
+			if(!dataSet.params || dataSet.params.length == 0)
+				continue;
+			
+			var paramValues = (chartDataSets[i].paramValues || {});
+			
+			for(var j=0; j<dataSet.params.length; j++)
+			{
+				var dsp = dataSet.params[j];
+				
+				if((dsp.required+"") == "true" && paramValues[dsp.name] == null)
+					return false;
+			}
+		}
+		
+		return true;
 	};
 	
 	/**
