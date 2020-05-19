@@ -58,8 +58,10 @@ readonly 是否只读操作，允许为null
 						</ul>
 						<div id="${pageId}-sql-params" class="sql-params-table-wrapper minor-dataTable">
 							<div class="operation">
+								<#if !readonly>
 								<button type="button" class="sql-add-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 								<button type="button" class="sql-del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
+								</#if>
 							</div>
 							<table id="${pageId}-sql-params-table" width='100%' class='hover stripe'></table>
 						</div>
