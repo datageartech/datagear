@@ -30,6 +30,7 @@
 		yes: "是",
 		no: "否",
 		set: "设置",
+		openOrCloseSetPanel: "打开/关闭设置面板",
 		colon: "：",
 		setDataSetParamValue: "设置数据集参数值"
 	});
@@ -246,7 +247,8 @@
 			},
 			function(event)
 			{
-				chartForm.hideChartSettingBox(chart);
+				if(chartForm.isChartSettingPanelClosed(chart))
+					chartForm.hideChartSettingBox(chart);
 			});
 		}
 		
@@ -264,17 +266,16 @@
 		if($box.length <= 0)
 		{
 			$box = $("<div class='dg-chart-setting-box' />").appendTo($chart);
-			var $button = $("<button type='button' class='dg-chart-setting-button' />").html(chartForm.labels.set).appendTo($box);
+			var $button = $("<button type='button' class='dg-chart-setting-button' />")
+					.html(chartForm.labels.set).attr("title", chartForm.labels.openOrCloseSetPanel).appendTo($box);
 			chartFactory.setTooltipThemeStyle($button, chart);
 			
 			$button.click(function()
 			{
-				chartForm.openChartSettingPanel(chart, $box);
-			});
-			
-			$box.hover(function(){}, function()
-			{
-				chartForm.closeChartSettingPanel(chart);
+				if(chartForm.isChartSettingPanelClosed(chart))
+					chartForm.openChartSettingPanel(chart, $box);
+				else
+					chartForm.closeChartSettingPanel(chart);
 			});
 		}
 		
@@ -387,6 +388,13 @@
 	chartForm.closeChartSettingPanel = function(chart)
 	{
 		$(".dg-chart-setting-panel", chart.elementJquery()).hide();
+	};
+	
+	chartForm.isChartSettingPanelClosed = function(chart)
+	{
+		var $panel = $(".dg-chart-setting-panel", chart.elementJquery());
+		
+		return ($panel.length == 0 || $panel.is(":hidden"));
 	};
 })
 (this);
