@@ -51,20 +51,9 @@ readonly 是否只读操作，允许为null
 					</div>
 					<div class="sql-operation-wrapper">
 						<ul>
+							<li><a href="#${pageId}-sql-result"><@spring.message code='preview' /></a></li>
 							<li><a href="#${pageId}-sql-params">参数</a></li>
-							<li>
-								<a href="#${pageId}-sql-result"><@spring.message code='preview' /></a>
-							</li>
 						</ul>
-						<div id="${pageId}-sql-params" class="sql-params-table-wrapper minor-dataTable">
-							<div class="operation">
-								<#if !readonly>
-								<button type="button" class="sql-add-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
-								<button type="button" class="sql-del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
-								</#if>
-							</div>
-							<table id="${pageId}-sql-params-table" width='100%' class='hover stripe'></table>
-						</div>
 						<div id="${pageId}-sql-result" class="sql-result-table-wrapper minor-dataTable">
 							<div class="operation">
 								<button type="button" class="sql-preview-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.sqlPreviewButtonTip' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='preview' /></button>
@@ -75,6 +64,15 @@ readonly 是否只读操作，允许为null
 							<table id="${pageId}-sql-result-table" width='100%' class='hover stripe'></table>
 							<div class='no-more-data-flag ui-widget ui-widget-content' title="<@spring.message code='dataSet.noMoreData' />"></div>
 							<div class="sql-result-sql"><textarea class="ui-widget ui-widget-content ui-corner-all"></textarea></div>
+						</div>
+						<div id="${pageId}-sql-params" class="sql-params-table-wrapper minor-dataTable">
+							<div class="operation">
+								<#if !readonly>
+								<button type="button" class="sql-add-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+								<button type="button" class="sql-del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
+								</#if>
+							</div>
+							<table id="${pageId}-sql-params-table" width='100%' class='hover stripe'></table>
 						</div>
 					</div>
 				</div>
@@ -134,10 +132,10 @@ readonly 是否只读操作，允许为null
 	    {
 	    	var activeIndex = po.element(".sql-operation-wrapper").tabs("option", "active");
 	    	
-	    	if(activeIndex == 1)
+	    	if(activeIndex == 0)
 	    		po.element(".sql-preview-button").click();
 	    	else
-	    		po.element(".sql-operation-wrapper").tabs("option", "active", 1);
+	    		po.element(".sql-operation-wrapper").tabs("option", "active", 0);
 	    }
 	});
 	<#if readonly>
@@ -183,6 +181,8 @@ readonly 是否只读操作，允许为null
 				event.stopPropagation();
 				po.element(".sql-preview-button").click();
 			}
+			else
+				po.sqlParamsTableElement().DataTable().columns.adjust();
 		}
 	});
 	
@@ -259,8 +259,8 @@ readonly 是否只读操作，允许为null
 		"select" : { style : 'os' },
 	    "language":
 	    {
-			"emptyTable": "<@spring.message code='dataTables.noData' />",
-			"zeroRecords" : "<@spring.message code='dataTables.zeroRecords' />"
+			"emptyTable": "<@spring.message code='dataSet.noDataSetParamDefined' />",
+			"zeroRecords" : "<@spring.message code='dataSet.noDataSetParamDefined' />"
 		}
 	});
 	
