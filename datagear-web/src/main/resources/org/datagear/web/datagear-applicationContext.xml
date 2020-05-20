@@ -198,17 +198,6 @@
 					<property name="name" value="dashboardStyleTheme" />
 					<property name="content" value="&lt;link type='text/css' res-name='dashboardStyleTheme' href='$CONTEXTPATH/analysis/dashboard/showStyle?v=$VERSION'  rel='stylesheet' /&gt;" />
 				</bean>
-				
-				<!-- @deprecated 此模块已被datagear-chartFactory.js代替，未来版本会移除 -->
-				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
-					<property name="name" value="chart-util" />
-					<property name="content" value="&lt;script type='text/javascript' deprecated='use chartFactory' res-name='chart-util' src='$CONTEXTPATH/static/script/datagear-chart-util.js?v=$VERSION'&gt;&lt;/script&gt;" />
-				</bean>
-				<!-- @deprecated 此模块已被datagear-dashboardFactory.js代替，未来版本会移除 -->
-				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
-					<property name="name" value="dashboard-renderer" />
-					<property name="content" value="&lt;script type='text/javascript' deprecated='use dashboardFactory' res-name='dashboard-renderer' src='$CONTEXTPATH/static/script/datagear-dashboard-renderer.js?v=$VERSION'&gt;&lt;/script&gt;" />
-				</bean>
 			</list>
 		</property>
 		<property name="templateDashboardWidgetResManager" ref="templateDashboardWidgetResManager" />
