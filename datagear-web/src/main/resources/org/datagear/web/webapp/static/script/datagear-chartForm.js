@@ -277,6 +277,15 @@
 				else
 					chartForm.closeChartSettingPanel(chart);
 			});
+			
+			$chart.click(function(event)
+			{
+				if(!chartForm.isChartSettingPanelClosed(chart))
+				{
+					if($(event.target).closest(".dg-chart-setting-box").length == 0)
+						chartForm.closeChartSettingPanel(chart);
+				}
+			});
 		}
 		
 		$box.show();
@@ -388,6 +397,14 @@
 	chartForm.closeChartSettingPanel = function(chart)
 	{
 		$(".dg-chart-setting-panel", chart.elementJquery()).hide();
+	};
+	
+	/**
+	 * 获取图表设置面板。
+	 */
+	chartForm.getChartSettingPanel = function(chart)
+	{
+		return $(".dg-chart-setting-panel", chart.elementJquery());
 	};
 	
 	chartForm.isChartSettingPanelClosed = function(chart)
