@@ -8,7 +8,7 @@
 
 package org.datagear.analysis;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,9 +21,8 @@ import java.util.Map;
 public class ChartDefinition extends AbstractIdentifiable
 {
 	public static final String PROPERTY_NAME = "name";
-	public static final String PROPERTY_CHARTDATASETS = "chartDataSets";
-	public static final String PROPERTY_CHART_PARAM_VALUES = "chartParamValues";
-	public static final String PROPERTY_DATA_SET_PARAM_VALUES = "dataSetParamValues";
+	public static final String PROPERTY_CHART_DATASETS = "chartDataSets";
+	public static final String PROPERTY_CHART_PARAM_VALUES = "paramValues";
 	public static final String PROPERTY_UPDATE_INTERVAL = "updateInterval";
 
 	public static final ChartDataSet[] EMPTY_CHART_DATA_SET = new ChartDataSet[0];
@@ -35,7 +34,8 @@ public class ChartDefinition extends AbstractIdentifiable
 	private ChartDataSet[] chartDataSets = EMPTY_CHART_DATA_SET;
 
 	/** 图表参数值映射表 */
-	private Map<String, Object> chartParamValues = new HashMap<>();
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> paramValues = Collections.EMPTY_MAP;
 
 	/** 图表更新间隔毫秒数 */
 	private int updateInterval = -1;
@@ -72,14 +72,14 @@ public class ChartDefinition extends AbstractIdentifiable
 		this.chartDataSets = chartDataSets;
 	}
 
-	public Map<String, Object> getChartParamValues()
+	public Map<String, Object> getParamValues()
 	{
-		return chartParamValues;
+		return paramValues;
 	}
 
-	public void setChartParamValues(Map<String, Object> chartParamValues)
+	public void setParamValues(Map<String, Object> paramValues)
 	{
-		this.chartParamValues = chartParamValues;
+		this.paramValues = paramValues;
 	}
 
 	/**
@@ -95,29 +95,6 @@ public class ChartDefinition extends AbstractIdentifiable
 	public void setUpdateInterval(int updateInterval)
 	{
 		this.updateInterval = updateInterval;
-	}
-
-	/**
-	 * 获取图表参数值。
-	 * 
-	 * @param name
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> T getChartParamValue(String name)
-	{
-		return (T) this.chartParamValues.get(name);
-	}
-
-	/**
-	 * 设置图表参数值。
-	 * 
-	 * @param name
-	 * @param value
-	 */
-	public void setChartParamValue(String name, Object value)
-	{
-		this.chartParamValues.put(name, value);
 	}
 
 	/**
@@ -159,7 +136,8 @@ public class ChartDefinition extends AbstractIdentifiable
 	 * 获取指定索引和参数的{@linkplain DataSetResult}。
 	 * 
 	 * @param index
-	 * @param dataSetParamValues 允许为{@code null}
+	 * @param dataSetParamValues
+	 *            允许为{@code null}
 	 * @return 如果{@code dataSetParamValues}为{@code null}，或者{@linkplain ChartDataSet#isResultReady(Map)}为{@code false}，将返回{@code null}。
 	 * @throws DataSetException
 	 */
@@ -176,7 +154,8 @@ public class ChartDefinition extends AbstractIdentifiable
 	/**
 	 * 获取指定参数的{@linkplain DataSetResult}数组。
 	 * 
-	 * @param dataSetParamValuess 允许为{@code null}
+	 * @param dataSetParamValuess
+	 *            允许为{@code null}
 	 * @return 如果{@code dataSetParamValuess}指定元素为{@code null}，
 	 *         或者{@linkplain #getChartDataSets()}指定索引的{@linkplain ChartDataSet#isResultReady(Map)}为{@code false}，返回数组对应元素将为{@code null}。
 	 * @throws DataSetException
@@ -216,7 +195,7 @@ public class ChartDefinition extends AbstractIdentifiable
 		to.setId(from.getId());
 		to.setName(from.name);
 		to.setChartDataSets(from.chartDataSets);
-		to.setChartParamValues(from.chartParamValues);
+		to.setParamValues(from.paramValues);
 		to.setUpdateInterval(from.updateInterval);
 	}
 }

@@ -12,7 +12,9 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
@@ -732,8 +734,11 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 				"HtmlChartWidgetForWidgetGetException", ChartDefinition.EMPTY_CHART_DATA_SET,
 				this.htmlChartPluginForWidgetGetException);
 
-		widget.setChartParamValue(PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION,
+		Map<String, Object> paramValues = new HashMap<>();
+		paramValues.put(PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION,
 				"Chart '" + (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
+
+		widget.setParamValues(paramValues);
 
 		return widget;
 	}
@@ -744,8 +749,11 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 				"HtmlChartWidgetForWidgetNotFound", ChartDefinition.EMPTY_CHART_DATA_SET,
 				this.htmlChartPluginForWidgetNotFound);
 
-		widget.setChartParamValue(PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND,
+		Map<String, Object> paramValues = new HashMap<>();
+		paramValues.put(PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND,
 				"Chart '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
+
+		widget.setParamValues(paramValues);
 
 		return widget;
 	}
@@ -756,8 +764,11 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 				"HtmlChartWidgetForWidgetPluginNull", ChartDefinition.EMPTY_CHART_DATA_SET,
 				this.htmlChartPluginForWidgetPluginNull);
 
-		widget.setChartParamValue(PROPERTY_VALUE_FOR_PLUGIN_NULL,
+		Map<String, Object> paramValues = new HashMap<>();
+		paramValues.put(PROPERTY_VALUE_FOR_PLUGIN_NULL,
 				"Chart plugin for rendering chart '" + chartWidget.getName() + "' not found");
+
+		widget.setParamValues(paramValues);
 
 		return widget;
 	}
