@@ -269,10 +269,12 @@
 	/**
 	 * 图表的所有/指定数据集参数值是否齐备。
 	 * 
-	 * @param chartDataSet 指定图表数据集，如果不设置，则取所有
+	 * @param chartDataSet 指定图表数据集或其索引，如果不设置，则取所有
 	 */
 	chartBase.isDataSetParamValueReady = function(chartDataSet)
 	{
+		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
 		var chartDataSets = (chartDataSet ? [ chartDataSet ] : this.chartDataSetsNonNull());
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -294,6 +296,48 @@
 		}
 		
 		return true;
+	};
+	
+	/**
+	 * 获取指定数据集参数值集。
+	 * 
+	 * @param chartDataSet 指定图表数据集或其索引
+	 */
+	chartBase.getDataSetParamValues = function(chartDataSet)
+	{
+		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
+		return chartDataSet.paramValues;
+	};
+	
+	/**
+	 * 设置指定数据集参数值集。
+	 * 
+	 * @param chartDataSet 指定图表数据集或其索引
+	 */
+	chartBase.setDataSetParamValues = function(chartDataSet, paramValues)
+	{
+		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
+		if(chartDataSet._originalParamValues == undefined)
+			chartDataSet._originalParamValues = chartDataSet.paramValues;
+		
+		chartDataSet.paramValues = paramValues;
+	};
+	
+	/**
+	 * 重置指定数据集参数值集。
+	 * 
+	 * @param chartDataSet 指定图表数据集或其索引
+	 */
+	chartBase.resetDataSetParamValues = function(chartDataSet)
+	{
+		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
+		if(chartDataSet._originalParamValues == undefined)
+			return;
+		
+		chartDataSet.paramValues = chartDataSet._originalParamValues;
 	};
 	
 	/**
@@ -457,61 +501,6 @@
 			return renderContext.attributes[attrName];
 		else
 			return renderContext.attributes[attrName] = attrValue;
-	};
-	
-	/**
-	 * 获取/设置图表属性值。
-	 * 
-	 * @param name 属性名
-	 * @param value 要设置的属性值，可选，不设置则执行获取操作
-	 */
-	chartBase.propertyValue = function(name, value)
-	{
-		if(value == undefined)
-			return (this.properties ? this.properties[name] : undefined);
-		else
-		{
-			if(!this.properties)
-				this.properties = {};
-			this.properties[name] = value;
-		}
-	};
-
-	/**
-	 * 获取/设置图表参数值。
-	 * 
-	 * @param name 参数名
-	 * @param value 要设置的参数值，可选，不设置则执行获取操作
-	 */
-	chartBase.paramValue = function(name, value)
-	{
-		if(value == undefined)
-			return (this.paramValueMap ? this.paramValueMap[name] : undefined);
-		else
-		{
-			if(!this.paramValueMap)
-				this.paramValueMap = {};
-			this.paramValueMap[name] = value;
-		}
-	};
-	
-	/**
-	 * 获取图表所有参数值/设置图表多个参数值。
-	 * 
-	 * @param paramValues 要设置的多个参数值，可选，不设置则执行获取操作
-	 */
-	chartBase.paramValues = function(paramValues)
-	{
-		if(!this.paramValueMap)
-			this.paramValueMap = {};
-		
-		if(paramValues == undefined)
-			return this.paramValueMap;
-		else
-		{
-			for(var name in paramValues)
-				this.paramValueMap[name] = paramValues[name];
-		}
 	};
 	
 	/**

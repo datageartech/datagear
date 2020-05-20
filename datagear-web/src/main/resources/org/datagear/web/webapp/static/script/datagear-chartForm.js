@@ -356,7 +356,7 @@
 			$button.click(function()
 			{
 				var validateOk = true;
-				var paramValuesMap = {};
+				var paramValuess = [];
 				
 				$(".dg-param-value-form-wrapper", $panelContent).each(function()
 				{
@@ -373,14 +373,14 @@
 					{
 						var myIndex = $this.data("chartDataSetIndex");
 						var myParamValues = chartForm.getDataSetParamValueObj($form);
-						paramValuesMap[myIndex] = myParamValues;
+						paramValuess.push({ index : myIndex, paramValues: myParamValues });
 					}
 				});
 				
 				if(validateOk)
 				{
-					for(var index in paramValuesMap)
-						chartDataSets[index].paramValues = paramValuesMap[index];
+					for(var i=0; i<paramValuess.length; i++)
+						chart.setDataSetParamValues(paramValuess[i].index, paramValuess[i].paramValues);
 					
 					chartForm.closeChartSettingPanel(chart);
 					chart.statusPreUpdate(true);
