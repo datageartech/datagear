@@ -16,6 +16,8 @@ import org.datagear.analysis.RenderException;
 import org.datagear.analysis.TemplateDashboard;
 import org.datagear.analysis.TemplateDashboardWidget;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * {@linkplain HtmlTplDashboard} JS对象输出流。
  * 
@@ -86,6 +88,20 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 		public JsonTemplateDashboardWidget(TemplateDashboardWidget<?> dashboardWidget)
 		{
 			super(dashboardWidget.getId(), dashboardWidget.getTemplates());
+		}
+
+		@JsonIgnore
+		@Override
+		public String getFirstTemplate()
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@JsonIgnore
+		@Override
+		public int getTemplateCount()
+		{
+			throw new UnsupportedOperationException();
 		}
 
 		@Override

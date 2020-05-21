@@ -18,6 +18,8 @@ import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.AbstractDataSet;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * {@linkplain HtmlChart} JS脚本对象输出流。
  * 
@@ -83,6 +85,13 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 			setElementId(htmlChart.getElementId());
 			setVarName(htmlChart.getVarName());
 		}
+
+		@JsonIgnore
+		@Override
+		public DataSetResult[] getDataSetResults() throws DataSetException
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	protected static class JsonChartDataSet extends ChartDataSet
@@ -93,6 +102,13 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 			setPropertySigns(chartDataSet.getPropertySigns());
 			setAlias(chartDataSet.getAlias());
 			setParamValues(chartDataSet.getParamValues());
+		}
+
+		@JsonIgnore
+		@Override
+		public boolean isResultReady()
+		{
+			throw new UnsupportedOperationException();
 		}
 
 		public static JsonChartDataSet[] valuesOf(ChartDataSet[] chartDataSets)
