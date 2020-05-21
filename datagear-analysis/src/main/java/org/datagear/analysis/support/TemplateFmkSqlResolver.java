@@ -85,6 +85,9 @@ public class TemplateFmkSqlResolver implements TemplateSqlResolver
 
 		// 标签语法规范设置为：<#if>...</#if>
 		configuration.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
+
+		// 数值插值设置为SQL标准格式
+		configuration.setNumberFormat("0.########");
 	}
 
 	@Override
