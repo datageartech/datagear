@@ -268,7 +268,10 @@ readonly 是否只读操作，允许为null
 	
 	po.element(".sql-add-param-button").click(function()
 	{
-		po.sqlParamsTableElement().DataTable().row.add({ name: "", type: "STRING", required: true, desc: "" }).draw();
+		var selectionRange = po.sqlEditor.getSelectionRange();
+		var selectText = (po.sqlEditor.session.getTextRange(selectionRange) || "");
+		
+		po.sqlParamsTableElement().DataTable().row.add({ name: selectText, type: "${DataType.STRING}", required: true, desc: "" }).draw();
 	});
 	
 	po.element(".sql-del-param-button").click(function()
