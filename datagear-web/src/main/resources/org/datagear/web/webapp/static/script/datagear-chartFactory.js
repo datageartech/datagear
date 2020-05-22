@@ -1034,6 +1034,7 @@
 						"barBorderWidth" : 0,
 						"shadowBlur" : 10,
 						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.axisColor,
 				        "shadowOffsetY" : 0,
 						"barBorderColor" : chartTheme.axisColor
 					}
@@ -1060,13 +1061,16 @@
 				"itemStyle" : {
 					"borderWidth" : 0,
 					"borderColor" : chartTheme.borderColor,
-					"shadowBlur" : 10,
-					"shadowColor" : chartTheme.borderColor
+					"shadowBlur" : 2,
+					"shadowColor" : chartTheme.axisColor
 				},
 				"emphasis" : {
 					"itemStyle" : {
 						"borderWidth" : 0,
-						"borderColor" : chartTheme.axisColor
+						"borderColor" : chartTheme.axisColor,
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.axisColor
 					}
 				}
 			},
@@ -1166,6 +1170,13 @@
 					"borderColor" : chartTheme.graphColors[0],
 					"borderColor0" : chartTheme.graphColors[1],
 					"borderWidth" : 1
+				},
+				"emphasis" : {
+					"itemStyle" : {
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.axisColor
+					}
 				}
 			},
 			"tree":
@@ -1233,8 +1244,8 @@
 				"itemStyle" : {
 					"borderWidth" : 0,
 					"borderColor" : chartTheme.borderColor,
-					"shadowBlur" : 10,
-					"shadowColor" : chartTheme.borderColor
+					"shadowBlur" : 2,
+					"shadowColor" : chartTheme.axisColor
 				},
 				"lineStyle" : {
                     "color": "source",
@@ -1246,7 +1257,10 @@
 				"emphasis" : {
 					"itemStyle" : {
 						"borderWidth" : 0,
-						"borderColor" : chartTheme.axisColor
+						"borderColor" : chartTheme.axisColor,
+						"shadowBlur" : 10,
+						"shadowOffsetX" : 0,
+						"shadowColor" : chartTheme.axisColor
 					},
 					"lineStyle" : {
 						"width": 4
