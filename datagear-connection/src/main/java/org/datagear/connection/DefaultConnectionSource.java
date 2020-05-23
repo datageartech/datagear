@@ -9,23 +9,26 @@ import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbcp2.ConnectionFactory;
 import org.apache.commons.dbcp2.DriverConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 
 /**
  * 默认{@linkplain ConnectionSource}实现。
@@ -46,23 +49,25 @@ public class DefaultConnectionSource implements ConnectionSource
 
 	private PropertiesProcessor propertiesProcessor = null;
 
+	private Cache<ConnectionIdentity, DriverBasicDataSource> driverBasicDataSourceCache;
+
 	private ConcurrentMap<String, PreferedDriverEntityResult> _urlPreferedDriverEntityMap = new ConcurrentHashMap<>();
 
 	private volatile long _driverEntityManagerLastModified = -1;
 
-	private HashMap<ConnectionIdentity, DriverBasicDataSource> _dataSourceMap = new HashMap<>();
-
-	private ReadWriteLock _dataSourceMapLock = new ReentrantReadWriteLock();
-
 	public DefaultConnectionSource()
 	{
-		super();
+		this(null);
 	}
 
 	public DefaultConnectionSource(DriverEntityManager driverEntityManager)
 	{
 		super();
 		this.driverEntityManager = driverEntityManager;
+		this.driverBasicDataSourceCache = CacheBuilder.newBuilder()
+				.maximumSize(50).expireAfterAccess(60 * 24, TimeUnit.MINUTES)
+				.removalListener(new DriverBasicDataSourceRemovalListener())
+				.build();
 	}
 
 	public DriverEntityManager getDriverEntityManager()
@@ -95,6 +100,25 @@ public class DefaultConnectionSource implements ConnectionSource
 		this.propertiesProcessor = propertiesProcessor;
 	}
 
+	protected Cache<ConnectionIdentity, DriverBasicDataSource> getDriverBasicDataSourceCache()
+	{
+		return driverBasicDataSourceCache;
+	}
+
+	/**
+	 * 设置内置数据源缓存。
+	 * <p>
+	 * 注意：设置的缓存应该已注册{@linkplain DriverBasicDataSourceRemovalListener}。
+	 * </p>
+	 * 
+	 * @param driverBasicDataSourceCache
+	 */
+	protected void setDriverBasicDataSourceCache(
+			Cache<ConnectionIdentity, DriverBasicDataSource> driverBasicDataSourceCache)
+	{
+		this.driverBasicDataSourceCache = driverBasicDataSourceCache;
+	}
+
 	@Override
 	public Connection getConnection(DriverEntity driverEntity, ConnectionOption connectionOption)
 			throws ConnectionSourceException
@@ -118,29 +142,7 @@ public class DefaultConnectionSource implements ConnectionSource
 	 */
 	public void close()
 	{
-		Lock writeLock = this._dataSourceMapLock.writeLock();
-		try
-		{
-			writeLock.lock();
-			Collection<DriverBasicDataSource> dataSources = this._dataSourceMap.values();
-			for (DriverBasicDataSource dataSource : dataSources)
-			{
-				try
-				{
-					dataSource.close();
-				}
-				catch (Throwable t)
-				{
-					LOGGER.warn("Close data source exception:", t);
-				}
-			}
-
-			this._dataSourceMap.clear();
-		}
-		finally
-		{
-			writeLock.unlock();
-		}
+		this.driverBasicDataSourceCache.invalidateAll();
 	}
 
 	/**
@@ -368,7 +370,7 @@ public class DefaultConnectionSource implements ConnectionSource
 		{
 			return getConnection(driver, connectionOption.getUrl(), properties);
 		}
-		catch (SQLException e)
+		catch(SQLException | ExecutionException e)
 		{
 			throw new EstablishConnectionException(connectionOption, e);
 		}
@@ -378,44 +380,32 @@ public class DefaultConnectionSource implements ConnectionSource
 		}
 	}
 
-	protected Connection getConnection(Driver driver, String url, Properties properties) throws SQLException
+	protected Connection getConnection(Driver driver, String url, Properties properties)
+			throws ExecutionException, SQLException
 	{
-		DriverBasicDataSource dataSource = null;
-
 		ConnectionIdentity connectionIdentity = ConnectionIdentity.valueOf(url, properties);
 
-		Lock readLock = this._dataSourceMapLock.readLock();
-		try
+		DriverBasicDataSource dataSource = this.driverBasicDataSourceCache.get(connectionIdentity,
+				new Callable<DriverBasicDataSource>()
 		{
-			readLock.lock();
-			dataSource = this._dataSourceMap.get(connectionIdentity);
-		}
-		finally
-		{
-			readLock.unlock();
-		}
-
-		if (dataSource == null)
-		{
-			Lock writeLock = this._dataSourceMapLock.writeLock();
-			try
-			{
-				writeLock.lock();
-				dataSource = createDataSource(driver, url, properties);
-				this._dataSourceMap.put(connectionIdentity, dataSource);
-			}
-			finally
-			{
-				writeLock.unlock();
-			}
-		}
+					@Override
+					public DriverBasicDataSource call() throws Exception
+					{
+						return createDataSource(driver, url, properties);
+					}
+		});
 
 		return dataSource.getConnection();
 	}
 
 	protected DriverBasicDataSource createDataSource(Driver driver, String url, Properties properties)
 	{
-		return new DriverBasicDataSource(driver, url, properties);
+		DriverBasicDataSource re = new DriverBasicDataSource(driver, url, properties);
+		
+		if(LOGGER.isInfoEnabled())
+			LOGGER.info("Create internal data source for {}", ConnectionIdentity.valueOf(url, properties));
+		
+		return re;
 	}
 
 	protected String toDriverString(Driver driver)
@@ -573,6 +563,35 @@ public class DefaultConnectionSource implements ConnectionSource
 		protected ConnectionFactory createConnectionFactory() throws SQLException
 		{
 			return new DriverConnectionFactory(driver, getUrl(), this.connectionProperties);
+		}
+	}
+
+	/**
+	 * {@linkplain DriverBasicDataSource}缓存移除监听器。
+	 * <p>
+	 * 它负责调用{@linkplain DriverBasicDataSource#clone()}。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class DriverBasicDataSourceRemovalListener
+			implements RemovalListener<ConnectionIdentity, DriverBasicDataSource>
+	{
+		@Override
+		public void onRemoval(RemovalNotification<ConnectionIdentity, DriverBasicDataSource> notification)
+		{
+			try
+			{
+				notification.getValue().close();
+
+				if (LOGGER.isInfoEnabled())
+					LOGGER.info("Close internal data source for {}", notification.getKey());
+			}
+			catch(SQLException e)
+			{
+				LOGGER.error("Close internal data source exception:", e);
+			}
 		}
 	}
 }
