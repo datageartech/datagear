@@ -80,6 +80,7 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 		return tableNames;
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/{schemaId}/findColumnNames", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public List<String> findColumnNames(HttpServletRequest request, HttpServletResponse response,
@@ -89,17 +90,29 @@ public class SqlEditorController extends AbstractSchemaConnTableController
 	{
 		final User user = WebUtils.getUser(request, response);
 
-		Table tableObj = new ReturnSchemaConnTableExecutor<Table>(request, response, springModel, schemaId, table, true)
-		{
-			@Override
-			protected Table execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema, Table table) throws Exception
-			{
-				checkReadTableDataPermission(schema, user);
+		Table tableObj = null;
 
-				return table;
-			}
-		}.execute();
+		try
+		{
+			tableObj = new ReturnSchemaConnTableExecutor<Table>(request, response, springModel, schemaId, table, true)
+			{
+				@Override
+				protected Table execute(HttpServletRequest request, HttpServletResponse response,
+						org.springframework.ui.Model springModel, Schema schema, Table table) throws Exception
+				{
+					checkReadTableDataPermission(schema, user);
+
+					return table;
+				}
+			}.execute();
+		}
+		catch (Throwable t)
+		{
+			// 避免出现TableNotFoundException导致界面出现错误提示
+		}
+
+		if (tableObj == null)
+			return Collections.EMPTY_LIST;
 
 		Column[] columns = tableObj.getColumns();
 
