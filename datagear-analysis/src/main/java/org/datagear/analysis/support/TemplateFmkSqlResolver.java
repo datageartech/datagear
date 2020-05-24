@@ -8,16 +8,13 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
@@ -41,10 +38,13 @@ public class TemplateFmkSqlResolver implements TemplateSqlResolver
 
 	public TemplateFmkSqlResolver()
 	{
+		this(100);
+	}
+
+	public TemplateFmkSqlResolver(int cacheCapacity)
+	{
 		super();
-		int cacheCapacity = 500;
-		this.dataSetTemplateLoader = new SqlDataSetTemplateLoader();
-		this.dataSetTemplateLoader.setCapacity(cacheCapacity);
+		this.dataSetTemplateLoader = new SqlDataSetTemplateLoader(cacheCapacity);
 		this.configuration = new Configuration(Configuration.VERSION_2_3_30);
 		this.configuration.setTemplateLoader(this.dataSetTemplateLoader);
 		setSqlTemplateStandardConfig(this.configuration);
@@ -88,13 +88,16 @@ public class TemplateFmkSqlResolver implements TemplateSqlResolver
 
 		// 数值插值设置为SQL标准格式
 		configuration.setNumberFormat("0.########");
+
+		// 由于此类的模板策略是直接使用SQL语句作为模板名和模板内容，如果此方法设置为true，
+		// 下面的SqlDataSetTemplateLoader.findTemplateSource(String)的参数SQL会被加上Locale后缀导致逻辑出错，
+		// 因此这里必须设置为false
+		configuration.setLocalizedLookup(false);
 	}
 
 	@Override
 	public String resolve(String sql, Map<String, ?> values) throws TemplateSqlResolverException
 	{
-		this.dataSetTemplateLoader.updateTemplate(sql);
-
 		String re = null;
 
 		try
@@ -116,112 +119,27 @@ public class TemplateFmkSqlResolver implements TemplateSqlResolver
 		return re;
 	}
 
-	protected boolean needHandleAsTemplate(SqlDataSet sqlDataSet)
-	{
-		return sqlDataSet.hasParam();
-	}
-
 	public static class SqlDataSetTemplateLoader implements TemplateLoader
 	{
-		private Map<String, SqlDataSetTemplateSource> sqlDataSetTemplateSources = new HashMap<>();
+		private Cache<String, SqlDataSetTemplateSource> sqlDataSetTemplateCache;
 
-		private int capacity = 500;
-
-		private int expiredSeconds = 60 * 10;
-
-		private ReadWriteLock _lock = new ReentrantReadWriteLock();
-
-		public SqlDataSetTemplateLoader()
+		public SqlDataSetTemplateLoader(int cacheCapacity)
 		{
 			super();
+
+			this.sqlDataSetTemplateCache = CacheBuilder.newBuilder()
+					.maximumSize(cacheCapacity).expireAfterAccess(60 * 24, TimeUnit.MINUTES)
+					.build();
 		}
 
-		public int getCapacity()
+		protected Cache<String, SqlDataSetTemplateSource> getSqlDataSetTemplateCache()
 		{
-			return capacity;
+			return sqlDataSetTemplateCache;
 		}
 
-		public void setCapacity(int capacity)
+		protected void setSqlDataSetTemplateCache(Cache<String, SqlDataSetTemplateSource> sqlDataSetTemplateCache)
 		{
-			this.capacity = capacity;
-		}
-
-		public int getExpiredSeconds()
-		{
-			return expiredSeconds;
-		}
-
-		public void setExpiredSeconds(int expiredSeconds)
-		{
-			this.expiredSeconds = expiredSeconds;
-		}
-
-		public String getTemplateName(SqlDataSet sqlDataSet)
-		{
-			return sqlDataSet.getId();
-		}
-
-		/**
-		 * 将给定SQL更新为Freemarker模板。
-		 * 
-		 * @param sql
-		 * @return true 更新成功；false 未更新，因为{@code sql}自上次以来未修改
-		 */
-		public boolean updateTemplate(String sql)
-		{
-			Lock readLock = this._lock.readLock();
-
-			try
-			{
-				readLock.lock();
-
-				SqlDataSetTemplateSource sts = this.sqlDataSetTemplateSources.get(sql);
-				if (sts != null)
-					return false;
-			}
-			finally
-			{
-				readLock.unlock();
-			}
-
-			Lock writeLock = this._lock.writeLock();
-			try
-			{
-				writeLock.lock();
-
-				long currentTime = System.currentTimeMillis();
-				long expiredTime = currentTime - this.expiredSeconds * 1000;
-
-				SqlDataSetTemplateSource sts = new SqlDataSetTemplateSource(sql, currentTime);
-				this.sqlDataSetTemplateSources.put(sql, sts);
-
-				if (this.sqlDataSetTemplateSources.size() >= this.capacity)
-				{
-					Collection<SqlDataSetTemplateSource> stss = this.sqlDataSetTemplateSources.values();
-					List<SqlDataSetTemplateSource> list = new ArrayList<>(stss.size());
-					list.addAll(stss);
-					Collections.sort(list, MRU_COMPARATOR);
-
-					this.sqlDataSetTemplateSources.clear();
-
-					int count = 0;
-					for (SqlDataSetTemplateSource ele : list)
-					{
-						if (count > this.capacity || ele.getLastModified() < expiredTime)
-							break;
-
-						this.sqlDataSetTemplateSources.put(sql, ele);
-
-						count++;
-					}
-				}
-
-				return true;
-			}
-			finally
-			{
-				writeLock.unlock();
-			}
+			this.sqlDataSetTemplateCache = sqlDataSetTemplateCache;
 		}
 
 		@Override
@@ -230,19 +148,22 @@ public class TemplateFmkSqlResolver implements TemplateSqlResolver
 		}
 
 		@Override
-		public Object findTemplateSource(String name) throws IOException
+		public Object findTemplateSource(String sql) throws IOException
 		{
-			Lock readLock = this._lock.readLock();
-
 			try
 			{
-				readLock.lock();
-
-				return this.sqlDataSetTemplateSources.get(name);
+				return this.sqlDataSetTemplateCache.get(sql, new Callable<SqlDataSetTemplateSource>()
+				{
+					@Override
+					public SqlDataSetTemplateSource call() throws Exception
+					{
+						return new SqlDataSetTemplateSource(sql, System.currentTimeMillis());
+					}
+				});
 			}
-			finally
+			catch(ExecutionException e)
 			{
-				readLock.unlock();
+				throw new IOException("find template source in cache exception", e);
 			}
 		}
 
@@ -310,14 +231,5 @@ public class TemplateFmkSqlResolver implements TemplateSqlResolver
 				return true;
 			}
 		}
-
-		private static final Comparator<SqlDataSetTemplateSource> MRU_COMPARATOR = new Comparator<SqlDataSetTemplateSource>()
-		{
-			@Override
-			public int compare(SqlDataSetTemplateSource o1, SqlDataSetTemplateSource o2)
-			{
-				return (0 - (int) (o1.getLastModified() - o2.getLastModified()));
-			}
-		};
 	}
 }
