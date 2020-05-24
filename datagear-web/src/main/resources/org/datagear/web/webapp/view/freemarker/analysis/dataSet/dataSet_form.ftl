@@ -121,6 +121,7 @@ readonly 是否只读操作，允许为null
 	
 	po.getDataSetSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };
 	
+	po.getSqlEditorSchemaId = function(){ return po.getDataSetSchemaId(); };
 	po.initSqlEditor();
 	var cursor = po.sqlEditor.getCursorPosition();
 	po.sqlEditor.session.insert(cursor, po.element("textarea[name='sql']").val());
