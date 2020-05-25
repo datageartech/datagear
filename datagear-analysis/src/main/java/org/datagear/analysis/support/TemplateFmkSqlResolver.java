@@ -38,7 +38,7 @@ public class TemplateFmkSqlResolver implements TemplateSqlResolver
 
 	public TemplateFmkSqlResolver()
 	{
-		this(100);
+		this(500);
 	}
 
 	public TemplateFmkSqlResolver(int cacheCapacity)
@@ -127,9 +127,8 @@ public class TemplateFmkSqlResolver implements TemplateSqlResolver
 		{
 			super();
 
-			this.sqlDataSetTemplateCache = CacheBuilder.newBuilder()
-					.maximumSize(cacheCapacity).expireAfterAccess(60 * 24, TimeUnit.MINUTES)
-					.build();
+			this.sqlDataSetTemplateCache = CacheBuilder.newBuilder().maximumSize(cacheCapacity)
+					.expireAfterAccess(60 * 24, TimeUnit.MINUTES).build();
 		}
 
 		protected Cache<String, SqlDataSetTemplateSource> getSqlDataSetTemplateCache()
@@ -161,7 +160,7 @@ public class TemplateFmkSqlResolver implements TemplateSqlResolver
 					}
 				});
 			}
-			catch(ExecutionException e)
+			catch (ExecutionException e)
 			{
 				throw new IOException("find template source in cache exception", e);
 			}
