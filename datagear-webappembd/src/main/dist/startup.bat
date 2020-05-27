@@ -1,1 +1,1 @@
-java -cp lib\datagear-webappembd-1.8.0.jar;lib\javax.servlet-3.0.0.v201112011016.jar;lib\jetty-all-8.1.22.v20160922.jar;lib\log4j-1.2.17.jar;lib\slf4j-api-1.7.9.jar;lib\slf4j-log4j12-1.7.9.jar org.datagear.webappembd.App
+java -cp lib\datagear-webappembd-1.8.1.jar;lib\javax.servlet-3.0.0.v201112011016.jar;lib\jetty-all-8.1.22.v20160922.jar;lib\log4j-1.2.17.jar;lib\slf4j-api-1.7.9.jar;lib\slf4j-log4j12-1.7.9.jar org.datagear.webappembd.App

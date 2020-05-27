@@ -305,3 +305,9 @@ ALTER TABLE DATAGEAR_HCW_DS ADD COLUMN DS_ALIAS VARCHAR(100);
 
 --添加图表数据集参数值列
 ALTER TABLE DATAGEAR_HCW_DS ADD COLUMN DS_PARAM_VALUES VARCHAR(1000);
+
+
+-----------------------------------------
+--version[1.8.1], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
