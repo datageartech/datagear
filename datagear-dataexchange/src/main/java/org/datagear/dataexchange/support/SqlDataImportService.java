@@ -39,6 +39,7 @@ public class SqlDataImportService extends AbstractDevotedDataExchangeService<Sql
 
 		Connection cn = context.getConnection();
 		JdbcUtil.setAutoCommitIfSupports(cn, false);
+		JdbcUtil.setReadonlyIfSupports(cn, false);
 
 		Statement st = cn.createStatement();
 

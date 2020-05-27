@@ -83,6 +83,7 @@ public class ExcelDataImportService extends AbstractDevotedDBMetaDataExchangeSer
 
 		Connection cn = context.getConnection();
 		JdbcUtil.setAutoCommitIfSupports(cn, false);
+		JdbcUtil.setReadonlyIfSupports(cn, false);
 
 		if (dataExchange.isXls())
 			importXls(dataExchange, importContext, cn);

@@ -58,6 +58,8 @@ public class CsvDataImportService extends AbstractDevotedDBMetaDataExchangeServi
 
 		Connection cn = context.getConnection();
 		JdbcUtil.setAutoCommitIfSupports(cn, false);
+		JdbcUtil.setReadonlyIfSupports(cn, false);
+
 		PreparedStatement st = null;
 
 		List<Column> rawColumns = null;

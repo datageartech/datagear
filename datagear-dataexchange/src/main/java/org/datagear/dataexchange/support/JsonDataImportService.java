@@ -82,6 +82,7 @@ public class JsonDataImportService extends AbstractDevotedDBMetaDataExchangeServ
 
 		Connection cn = context.getConnection();
 		JdbcUtil.setAutoCommitIfSupports(cn, false);
+		JdbcUtil.setReadonlyIfSupports(cn, false);
 
 		JsonParser p = Json.createParser(jsonReader);
 
