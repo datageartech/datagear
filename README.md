@@ -3,7 +3,7 @@
 DataGear是一款数据管理与可视化分析平台，使用Java语言开发，采用浏览器/服务器架构，支持多种数据库，
 主要功能包括数据管理、SQL工作台、数据导入/导出、数据集管理、图表管理、看板管理等。
 
-## [DataGear 1.7.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
+## [DataGear 1.8.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
 ## 官网
 
@@ -17,29 +17,29 @@ DataGear是一款数据管理与可视化分析平台，使用Java语言开发�
 
 数据管理
 
-![界面图片](screenshot/1-datamanage.png)
+![界面图片](screenshot/datamanage.png)
 
 SQL工作台
 
-![界面图片](screenshot/2-sqlpad.png)
+![界面图片](screenshot/sqlpad.png)
 
 数据导入
 
-![界面图片](screenshot/3-dataimport.png)
+![界面图片](screenshot/dataimport.png)
 
 数据导出
 
-![界面图片](screenshot/4-dataexport.png)
+![界面图片](screenshot/dataexport.png)
 
 图表
 
-![界面图片](screenshot/5-chart.png)
+![界面图片](screenshot/chart.png)
 
 看板
 
-![界面图片](screenshot/6-dashboard.png)
+![界面图片](screenshot/dashboard-simple.png)
 
-![界面图片](screenshot/6-dashboard-darkblue.png)
+![界面图片](screenshot/dashboard-darkblue.png)
 
 ## 依赖
 
