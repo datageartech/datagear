@@ -34,6 +34,8 @@ public class MainController extends AbstractController
 {
 	public static final String LATEST_VERSION_SCRIPT_LOCATION = Global.WEB_SITE + "/latest-version.js";
 
+	public static final String COOKIE_DETECT_NEW_VERSION_RESOLVED = "DETECT_NEW_VERSION_RESOLVED";
+
 	@Value("${disableRegister}")
 	private boolean disableRegister = false;
 
@@ -91,8 +93,7 @@ public class MainController extends AbstractController
 		request.setAttribute("disableRegister", this.disableRegister);
 		request.setAttribute("currentUser", User.copyWithoutPassword(WebUtils.getUser(request, response)));
 		request.setAttribute("currentVersion", Global.VERSION);
-		request.setAttribute("disableDetectNewVersion", disableDetectNewVersion);
-		request.setAttribute("detectNewVersionScript", resolveDetectNewVersionScript(request, response));
+		resolveDetectNewVersionScript(request, response);
 
 		return "/main";
 	}
@@ -118,7 +119,7 @@ public class MainController extends AbstractController
 		{
 		}
 
-		List<VersionContent> versionChangelogs = new ArrayList<VersionContent>();
+		List<VersionContent> versionChangelogs = new ArrayList<>();
 
 		if (version != null)
 		{
@@ -150,11 +151,25 @@ public class MainController extends AbstractController
 		return "/change_theme_data";
 	}
 
-	protected String resolveDetectNewVersionScript(HttpServletRequest request, HttpServletResponse response)
+	protected void resolveDetectNewVersionScript(HttpServletRequest request, HttpServletResponse response)
 	{
-		if (this.disableDetectNewVersion)
-			return "";
+		boolean disable = this.disableDetectNewVersion;
+		String script = "";
 
-		return "<script src=\"" + LATEST_VERSION_SCRIPT_LOCATION + "\" type=\"text/javascript\"></script>";
+		if (!disable)
+		{
+			String resolved = WebUtils.getCookieValue(request, COOKIE_DETECT_NEW_VERSION_RESOLVED);
+			disable = "true".equalsIgnoreCase(resolved);
+		}
+
+		if (!disable)
+		{
+			script = "<script src=\"" + LATEST_VERSION_SCRIPT_LOCATION + "\" type=\"text/javascript\"></script>";
+			// 每12小时检测一次
+			WebUtils.setCookie(request, response, COOKIE_DETECT_NEW_VERSION_RESOLVED, "true", 60 * 60 * 12);
+		}
+
+		request.setAttribute("disableDetectNewVersion", disable);
+		request.setAttribute("detectNewVersionScript", script);
 	}
 }
