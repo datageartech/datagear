@@ -1178,10 +1178,8 @@ ${detectNewVersionScript}
 		
 		po.bindTabsMenuHiddenEvent(po.mainTabs);
 		
-		<#if !disableDetectNewVersion>
 		if(po.newVersionDetected())
 			$(".new-version-tip").css("display", "inline-block");
-		</#if>
 	});
 })
 (${pageId});

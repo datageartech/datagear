@@ -169,7 +169,6 @@ public class MainController extends AbstractController
 			WebUtils.setCookie(request, response, COOKIE_DETECT_NEW_VERSION_RESOLVED, "true", 60 * 60 * 12);
 		}
 
-		request.setAttribute("disableDetectNewVersion", disable);
 		request.setAttribute("detectNewVersionScript", script);
 	}
 }
