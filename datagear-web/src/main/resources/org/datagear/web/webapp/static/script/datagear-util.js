@@ -978,9 +978,12 @@
 			return "<a title='"+$.escapeHtml(titleTip)+"'>"+$.escapeHtml(titleName)+"</a>";
 		},
 		
+		/**
+		 * 构建可通过关键字查询的列标题
+		 */
 		buildDataTablesColumnTitleSearchable : function(titleName)
 		{
-			return "<a class='column-searchable'>"+$.escapeHtml(titleName)+"</a>";
+			return "<a class='keyword-search-column'>"+$.escapeHtml(titleName)+"</a>";
 		},
 		
 		/**
