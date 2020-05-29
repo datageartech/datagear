@@ -10,7 +10,10 @@ package org.datagear.analysis.support.html;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
+import java.util.Map;
 
+import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.TemplateDashboard;
@@ -81,6 +84,14 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 
 			setCharts(Collections.EMPTY_LIST);
 		}
+
+		@JsonIgnore
+		@Override
+		public Map<String, DataSetResult[]> getDataSetResults() throws DataSetException
+		{
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 	protected static class JsonTemplateDashboardWidget extends TemplateDashboardWidget<RenderContext>

@@ -448,19 +448,23 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		writeScriptStartTag(out);
 		writeNewLine(out);
 
-		writeHtmlTplDashboardJSVar(renderContext, out, dashboard);
-
 		out.write("(function(){");
 		writeNewLine(out);
+
+		writeHtmlTplDashboardJSVar(renderContext, out, dashboard);
 
 		writeHtmlChartScripts(renderContext, dashboard, dashboardInfo);
 		writeHtmlTplDashboardJSInit(out, dashboard);
 		writeHtmlTplDashboardJSFactoryInit(out, dashboard, dashboardInfo.getDashboardFactoryVar());
 
-		out.write("})();");
+		out.write("window." + dashboardVar + "=" + dashboardVar + ";");
 		writeNewLine(out);
 
+		writeNewLine(out);
 		writeHtmlTplDashboardJSRender(out, dashboard);
+
+		out.write("})();");
+		writeNewLine(out);
 
 		writeScriptEndTag(out);
 		writeNewLine(out);
@@ -472,7 +476,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		List<Chart> charts = dashboard.getCharts();
 		if (charts == null)
 		{
-			charts = new ArrayList<Chart>();
+			charts = new ArrayList<>();
 			dashboard.setCharts(charts);
 		}
 
@@ -516,7 +520,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	protected List<String> writeHtmlChartPluginScripts(T renderContext,
 			List<HtmlChartWidget<HtmlRenderContext>> htmlChartWidgets) throws IOException
 	{
-		List<String> pluginVarNames = new ArrayList<String>(htmlChartWidgets.size());
+		List<String> pluginVarNames = new ArrayList<>(htmlChartWidgets.size());
 
 		for (int i = 0; i < htmlChartWidgets.size(); i++)
 		{
@@ -552,7 +556,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	protected List<HtmlChartWidget<HtmlRenderContext>> getHtmlChartWidgets(HtmlRenderContext renderContext,
 			List<ChartInfo> chartInfos)
 	{
-		List<HtmlChartWidget<HtmlRenderContext>> list = new ArrayList<HtmlChartWidget<HtmlRenderContext>>();
+		List<HtmlChartWidget<HtmlRenderContext>> list = new ArrayList<>();
 
 		if (chartInfos == null)
 			return list;
@@ -827,7 +831,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		/** 内置导入排除项 */
 		private String importExclude;
 		/** 图表信息 */
-		private List<ChartInfo> chartInfos = new ArrayList<ChartInfo>();
+		private List<ChartInfo> chartInfos = new ArrayList<>();
 
 		public DashboardInfo()
 		{
