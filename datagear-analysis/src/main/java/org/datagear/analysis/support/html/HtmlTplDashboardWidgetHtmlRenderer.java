@@ -484,7 +484,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		if (chartInfos != null)
 		{
 			List<HtmlChartWidget<HtmlRenderContext>> chartWidgets = getHtmlChartWidgets(renderContext, chartInfos);
-			List<String> chartPluginVarNames = writeHtmlChartPluginScripts(renderContext, chartWidgets);
+			List<String> chartPluginVarNames = writeHtmlChartPluginScriptsResolveImport(renderContext, chartWidgets);
 
 			HtmlChartPluginRenderOption option = new HtmlChartPluginRenderOption();
 			option.setNotWriteChartElement(true);
@@ -515,42 +515,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 			// 移除内部设置的属性
 			HtmlChartPluginRenderOption.removeOption(renderContext);
 		}
-	}
-
-	protected List<String> writeHtmlChartPluginScripts(T renderContext,
-			List<HtmlChartWidget<HtmlRenderContext>> htmlChartWidgets) throws IOException
-	{
-		List<String> pluginVarNames = new ArrayList<>(htmlChartWidgets.size());
-
-		for (int i = 0; i < htmlChartWidgets.size(); i++)
-		{
-			String pluginVarName = null;
-
-			HtmlChartWidget<HtmlRenderContext> widget = htmlChartWidgets.get(i);
-			HtmlChartPlugin<HtmlRenderContext> plugin = widget.getPlugin();
-
-			for (int j = 0; j < i; j++)
-			{
-				HtmlChartWidget<HtmlRenderContext> myWidget = htmlChartWidgets.get(j);
-				HtmlChartPlugin<HtmlRenderContext> myPlugin = myWidget.getPlugin();
-
-				if (myPlugin.getId().equals(plugin.getId()))
-				{
-					pluginVarName = pluginVarNames.get(j);
-					break;
-				}
-			}
-
-			if (pluginVarName == null)
-			{
-				pluginVarName = HtmlRenderAttributes.generateChartPluginVarName(renderContext);
-				getHtmlChartPluginScriptObjectWriter().write(renderContext.getWriter(), plugin, pluginVarName);
-			}
-
-			pluginVarNames.add(pluginVarName);
-		}
-
-		return pluginVarNames;
 	}
 
 	protected List<HtmlChartWidget<HtmlRenderContext>> getHtmlChartWidgets(HtmlRenderContext renderContext,

@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +27,8 @@ import org.datagear.analysis.support.CategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
+import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
+import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -56,6 +59,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@Autowired
 	private File tempDirectory;
 
+	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = new HtmlChartPluginScriptObjectWriter();
+
 	public ChartPluginController()
 	{
 		super();
@@ -69,6 +74,17 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	public void setTempDirectory(File tempDirectory)
 	{
 		this.tempDirectory = tempDirectory;
+	}
+
+	public HtmlChartPluginScriptObjectWriter getHtmlChartPluginScriptObjectWriter()
+	{
+		return htmlChartPluginScriptObjectWriter;
+	}
+
+	public void setHtmlChartPluginScriptObjectWriter(
+			HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter)
+	{
+		this.htmlChartPluginScriptObjectWriter = htmlChartPluginScriptObjectWriter;
 	}
 
 	@RequestMapping("/upload")
@@ -256,5 +272,60 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		{
 			IOUtil.close(iconIn);
 		}
+	}
+
+	@RequestMapping("/chartPluginManager.js")
+	public void getChartPluginManagerJs(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest)
+			throws Exception
+	{
+		List<ChartPlugin<HtmlRenderContext>> plugins = getDirectoryHtmlChartPluginManager()
+				.getAll(HtmlRenderContext.class);
+
+		List<HtmlChartPlugin<?>> htmlChartPlugins = new ArrayList<HtmlChartPlugin<?>>(plugins.size());
+		long lastModified = -1;
+
+		if (plugins != null)
+		{
+			for (ChartPlugin<HtmlRenderContext> plugin : plugins)
+			{
+				if (plugin instanceof HtmlChartPlugin<?>)
+				{
+					HtmlChartPlugin<?> htmlChartPlugin = (HtmlChartPlugin<?>) plugin;
+
+					htmlChartPlugins.add(htmlChartPlugin);
+					lastModified = Math.max(lastModified, htmlChartPlugin.getLastModified());
+				}
+			}
+		}
+		
+		if (webRequest.checkNotModified(lastModified))
+			return;
+
+		response.setContentType(CONTENT_TYPE_JAVASCRIPT);
+
+		PrintWriter out = response.getWriter();
+
+		out.println("(function(global)");
+		out.println("{");
+
+		out.println("var chartPluginManager = (global.chartPluginManager || (global.chartPluginManager = {}));");
+		out.println("chartPluginManager.plugins = (chartPluginManager.plugins || {});");
+		
+		out.println();
+		out.println("chartPluginManager.get = function(id){ return this.plugins[id]; };");
+		out.println();
+
+		for (int i = 0, len = htmlChartPlugins.size(); i < len; i++)
+		{
+			HtmlChartPlugin<?> plugin = htmlChartPlugins.get(i);
+			String pluginVar = "plugin" + i;
+
+			this.htmlChartPluginScriptObjectWriter.write(out, plugin, pluginVar);
+
+			out.println("chartPluginManager.plugins[\"" + WebUtils.escapeJavaScriptStringValue(plugin.getId())
+					+ "\"] = " + pluginVar + ";");
+		}
+
+		out.println("})(this);");
 	}
 }

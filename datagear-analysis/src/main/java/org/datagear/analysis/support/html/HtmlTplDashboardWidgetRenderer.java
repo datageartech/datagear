@@ -163,6 +163,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	/** 默认看板变量名 */
 	private String defaultDashboardVar = DEFAULT_DASHBOARD_VAR;
 
+	private ImportHtmlChartPluginVarNameResolver importHtmlChartPluginVarNameResolver;
+
 	/** 换行符 */
 	private String newLine = HtmlChartPlugin.HTML_NEW_LINE;
 
@@ -393,6 +395,17 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	public void setDefaultDashboardVar(String defaultDashboardVar)
 	{
 		this.defaultDashboardVar = defaultDashboardVar;
+	}
+
+	public ImportHtmlChartPluginVarNameResolver getImportHtmlChartPluginVarNameResolver()
+	{
+		return importHtmlChartPluginVarNameResolver;
+	}
+
+	public void setImportHtmlChartPluginVarNameResolver(
+			ImportHtmlChartPluginVarNameResolver importHtmlChartPluginVarNameResolver)
+	{
+		this.importHtmlChartPluginVarNameResolver = importHtmlChartPluginVarNameResolver;
 	}
 
 	public String getNewLine()
@@ -977,6 +990,79 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
+	 * 写{@linkplain HtmlChartPlugin} JS脚本，并返回对应的变量名列表。
+	 * <p>
+	 * 如果{@linkplain #getImportHtmlChartPluginVarNameResolver()}不为{@code null}，此方法不会写{@linkplain HtmlChartPlugin}
+	 * JS脚本，而仅返回导入变量名列表。
+	 * </p>
+	 * 
+	 * @param renderContext
+	 * @param htmlChartWidgets
+	 * @return
+	 * @throws IOException
+	 */
+	protected List<String> writeHtmlChartPluginScriptsResolveImport(T renderContext,
+			List<HtmlChartWidget<HtmlRenderContext>> htmlChartWidgets) throws IOException
+	{
+		if(this.importHtmlChartPluginVarNameResolver == null)
+			return writeHtmlChartPluginScripts(renderContext, htmlChartWidgets);
+
+		List<String> pluginVarNames = new ArrayList<>(htmlChartWidgets.size());
+
+		for (HtmlChartWidget<?> widget : htmlChartWidgets)
+		{
+			String importVarName = this.importHtmlChartPluginVarNameResolver.resolve(widget);
+			pluginVarNames.add(importVarName);
+		}
+		
+		return pluginVarNames;
+	}
+
+	/**
+	 * 写{@linkplain HtmlChartPlugin} JS脚本，并返回对应的变量名列表。
+	 * 
+	 * @param renderContext
+	 * @param htmlChartWidgets
+	 * @return
+	 * @throws IOException
+	 */
+	protected List<String> writeHtmlChartPluginScripts(T renderContext,
+			List<HtmlChartWidget<HtmlRenderContext>> htmlChartWidgets) throws IOException
+	{
+		List<String> pluginVarNames = new ArrayList<>(htmlChartWidgets.size());
+
+		for (int i = 0; i < htmlChartWidgets.size(); i++)
+		{
+			String pluginVarName = null;
+
+			HtmlChartWidget<HtmlRenderContext> widget = htmlChartWidgets.get(i);
+			HtmlChartPlugin<HtmlRenderContext> plugin = widget.getPlugin();
+
+			for (int j = 0; j < i; j++)
+			{
+				HtmlChartWidget<HtmlRenderContext> myWidget = htmlChartWidgets.get(j);
+				HtmlChartPlugin<HtmlRenderContext> myPlugin = myWidget.getPlugin();
+
+				if (myPlugin.getId().equals(plugin.getId()))
+				{
+					pluginVarName = pluginVarNames.get(j);
+					break;
+				}
+			}
+
+			if (pluginVarName == null)
+			{
+				pluginVarName = HtmlRenderAttributes.generateChartPluginVarName(renderContext);
+				getHtmlChartPluginScriptObjectWriter().write(renderContext.getWriter(), plugin, pluginVarName);
+			}
+
+			pluginVarNames.add(pluginVarName);
+		}
+
+		return pluginVarNames;
+	}
+
+	/**
 	 * 写{@linkplain HtmlChart}。
 	 * 
 	 * @param chartWidget
@@ -1441,6 +1527,66 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		public String handle(String rawTitle)
 		{
 			return this.prefix + rawTitle;
+		}
+	}
+
+	/**
+	 * 引入{@linkplain HtmlChartPlugin}变量名处理器。
+	 * <p>
+	 * 为了避免每次渲染{@linkplain HtmlTplDashboard}时都内联渲染{@linkplain HtmlChartPlugin}对象，
+	 * 通常会将所有{@linkplain HtmlChartPlugin}对象独立渲染，而在渲染{@linkplain HtmlTplDashboard}时引入，
+	 * 此类即为此提供支持，用于获取引入{@linkplain HtmlChartPlugin}对象的变量名。
+	 * </p>
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static interface ImportHtmlChartPluginVarNameResolver
+	{
+		/**
+		 * 获取引入变量名。
+		 * <p>
+		 * 例如：<code>"chartPluginManager.get('...')"</code>
+		 * </p>
+		 * 
+		 * @param chartWidget
+		 * @return
+		 */
+		String resolve(HtmlChartWidget<?> chartWidget);
+	}
+
+	public static class TemplateImportHtmlChartPluginVarNameResolver implements ImportHtmlChartPluginVarNameResolver
+	{
+		public static final String PLACEHOLDER_CHART_PLUGIN_ID = "$CHART_PLUGIN_ID";
+
+		private String template;
+
+		public TemplateImportHtmlChartPluginVarNameResolver()
+		{
+			super();
+		}
+
+		public TemplateImportHtmlChartPluginVarNameResolver(String template)
+		{
+			super();
+			this.template = template;
+		}
+
+		public String getTemplate()
+		{
+			return template;
+		}
+
+		public void setTemplate(String template)
+		{
+			this.template = template;
+		}
+
+		@Override
+		public String resolve(HtmlChartWidget<?> chartWidget)
+		{
+			String chartPluginId = chartWidget.getPlugin().getId();
+			return this.template.replace(PLACEHOLDER_CHART_PLUGIN_ID, chartPluginId);
 		}
 	}
 }

@@ -57,6 +57,7 @@
 		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/select" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
 		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/selectData" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
 		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/icon/*" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/chartPluginManager.js" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
 		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/**" access="ROLE_ADMIN" />
 		
 		<intercept-url pattern="${subContextPath}/login/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />

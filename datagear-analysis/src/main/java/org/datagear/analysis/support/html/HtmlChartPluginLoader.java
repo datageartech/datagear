@@ -345,55 +345,6 @@ public class HtmlChartPluginLoader
 		return null;
 	}
 
-	/**
-	 * 从指定目录加载单个{@linkplain HtmlChartPlugin}，返回{@code null}表示文件不合法。
-	 * 
-	 * @param directory
-	 * @return
-	 * @throws HtmlChartPluginLoadException
-	 */
-	protected HtmlChartPlugin<?> loadSingleForDirectory(File directory) throws HtmlChartPluginLoadException
-	{
-		File chartFile = new File(directory, FILE_NAME_PLUGIN);
-
-		if (!chartFile.exists())
-			return null;
-
-		HtmlChartPlugin<?> plugin = null;
-
-		Reader chartIn = null;
-
-		try
-		{
-			chartIn = IOUtil.getReader(chartFile, this.encoding);
-
-			JsDefContent jsDefContent = this.htmlChartPluginJsDefResolver.resolve(chartIn);
-
-			if (!StringUtil.isEmpty(jsDefContent.getPluginJson())
-					&& !StringUtil.isEmpty(jsDefContent.getPluginChartRenderer()))
-			{
-				plugin = createHtmlChartPlugin();
-
-				this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(plugin, jsDefContent.getPluginJson());
-				plugin.setChartRenderer(new StringJsChartRenderer(jsDefContent.getPluginChartRenderer()));
-				plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
-
-				if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))
-					plugin = null;
-			}
-		}
-		catch (Exception e)
-		{
-			throw new HtmlChartPluginLoadException(e);
-		}
-		finally
-		{
-			IOUtil.close(chartIn);
-		}
-
-		return plugin;
-	}
-
 	protected HtmlChartPlugin<?> loadSingleForZip(File zip) throws HtmlChartPluginLoadException
 	{
 		ZipInputStream in = null;
@@ -437,6 +388,59 @@ public class HtmlChartPluginLoader
 		{
 			throw new HtmlChartPluginLoadException(e);
 		}
+	}
+
+	/**
+	 * 从指定目录加载单个{@linkplain HtmlChartPlugin}，返回{@code null}表示文件不合法。
+	 * 
+	 * @param directory
+	 * @return
+	 * @throws HtmlChartPluginLoadException
+	 */
+	protected HtmlChartPlugin<?> loadSingleForDirectory(File directory) throws HtmlChartPluginLoadException
+	{
+		File chartFile = new File(directory, FILE_NAME_PLUGIN);
+	
+		if (!chartFile.exists())
+			return null;
+	
+		HtmlChartPlugin<?> plugin = null;
+	
+		Reader chartIn = null;
+	
+		try
+		{
+			chartIn = IOUtil.getReader(chartFile, this.encoding);
+	
+			JsDefContent jsDefContent = this.htmlChartPluginJsDefResolver.resolve(chartIn);
+	
+			if (!StringUtil.isEmpty(jsDefContent.getPluginJson())
+					&& !StringUtil.isEmpty(jsDefContent.getPluginChartRenderer()))
+			{
+				plugin = createHtmlChartPlugin();
+	
+				this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(plugin, jsDefContent.getPluginJson());
+				plugin.setChartRenderer(new StringJsChartRenderer(jsDefContent.getPluginChartRenderer()));
+				plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
+	
+				if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))
+					plugin = null;
+			}
+		}
+		catch (Exception e)
+		{
+			throw new HtmlChartPluginLoadException(e);
+		}
+		finally
+		{
+			IOUtil.close(chartIn);
+		}
+
+		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱
+		if (plugin != null)
+			plugin.setLastModified(System.currentTimeMillis());
+	
+		return plugin;
 	}
 
 	protected Map<RenderStyle, Icon> toBytesIconsInDirectory(File directory, Map<RenderStyle, Icon> icons)

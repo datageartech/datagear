@@ -68,6 +68,9 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	/** 图表HTML元素标签名 */
 	private String elementTagName = "div";
 
+	/** 上次修改时间 */
+	private long lastModified = -1;
+
 	/** 图表脚本换行符 */
 	private String newLine = HTML_NEW_LINE;
 
@@ -100,6 +103,21 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	public void setElementTagName(String elementTagName)
 	{
 		this.elementTagName = elementTagName;
+	}
+
+	/**
+	 * 获取上次修改时间。
+	 * 
+	 * @return -1 表示未修改
+	 */
+	public long getLastModified()
+	{
+		return lastModified;
+	}
+
+	public void setLastModified(long lastModified)
+	{
+		this.lastModified = lastModified;
 	}
 
 	public String getNewLine()
