@@ -29,6 +29,8 @@ import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
 import org.datagear.analysis.support.html.HtmlRenderContext;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -59,6 +61,9 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@Autowired
 	private File tempDirectory;
 
+	@Autowired
+	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
+
 	private HtmlChartPluginScriptObjectWriter htmlChartPluginScriptObjectWriter = new HtmlChartPluginScriptObjectWriter();
 
 	public ChartPluginController()
@@ -74,6 +79,17 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	public void setTempDirectory(File tempDirectory)
 	{
 		this.tempDirectory = tempDirectory;
+	}
+
+	public HtmlTplDashboardWidgetEntityService getHtmlTplDashboardWidgetEntityService()
+	{
+		return htmlTplDashboardWidgetEntityService;
+	}
+
+	public void setHtmlTplDashboardWidgetEntityService(
+			HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService)
+	{
+		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
 	}
 
 	public HtmlChartPluginScriptObjectWriter getHtmlChartPluginScriptObjectWriter()
@@ -298,6 +314,13 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			}
 		}
 		
+		HtmlTplDashboardWidgetRenderer<?> renderer = getHtmlTplDashboardWidgetEntityService()
+				.getHtmlTplDashboardWidgetRenderer();
+
+		HtmlChartPlugin<?> htmlChartPluginForGetWidgetException = renderer.getHtmlChartPluginForGetWidgetException();
+		htmlChartPlugins.add(htmlChartPluginForGetWidgetException);
+		lastModified = Math.max(lastModified, htmlChartPluginForGetWidgetException.getLastModified());
+
 		if (webRequest.checkNotModified(lastModified))
 			return;
 

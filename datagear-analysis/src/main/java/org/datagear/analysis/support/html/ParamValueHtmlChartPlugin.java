@@ -12,28 +12,28 @@ import org.datagear.util.StringUtil;
 import org.datagear.util.i18n.Label;
 
 /**
- * 仅渲染指定内容值的{@linkplain HtmlChartPlugin}。
+ * 仅渲染指定图表参数值的{@linkplain HtmlChartPlugin}。
  * <p>
- * 它使用{@linkplain ChartDefinition#getChartParamValue(String)}获取{@linkplain #getPropertyName()}的值，并将其作为图表内容渲染。
+ * 它从{@linkplain ChartDefinition#getParamValues()}获取{@linkplain #getChartParamName()}的值，并将其作为图表内容渲染。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class ValueHtmlChartPlugin<T extends HtmlRenderContext> extends HtmlChartPlugin<T>
+public class ParamValueHtmlChartPlugin<T extends HtmlRenderContext> extends HtmlChartPlugin<T>
 {
 	private String chartParamName;
 
-	public ValueHtmlChartPlugin()
+	public ParamValueHtmlChartPlugin()
 	{
 		super();
 	}
 
-	public ValueHtmlChartPlugin(String id, String chartParamName)
+	public ParamValueHtmlChartPlugin(String id, String chartParamName)
 	{
 		super();
 		super.setId(id);
-		super.setNameLabel(new Label("ValueHtmlChartPlugin"));
+		super.setNameLabel(new Label(ParamValueHtmlChartPlugin.class.getSimpleName()));
 		super.setChartRenderer(buildJsChartRenderer(chartParamName));
 		this.chartParamName = chartParamName;
 	}

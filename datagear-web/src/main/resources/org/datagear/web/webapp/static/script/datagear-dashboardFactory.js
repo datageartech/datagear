@@ -121,9 +121,6 @@
 			if(chart.statusPreRender())
 			{
 				this.renderChart(chart, i);
-				
-				if(global.chartForm && global.chartForm.bindChartSettingPanelEvent)
-					global.chartForm.bindChartSettingPanelEvent(chart);
 			}
 		}
 		
@@ -193,13 +190,25 @@
 	 */
 	dashboardBase.renderChart = function(chart, chartIndex)
 	{
-		var doRender = true;
-		
-		if(this.listener && this.listener.onRenderChart)
-			doRender=this.listener.onRenderChart(this, chart, chartIndex);
-		
-		if(doRender != false)
-			this.doRenderChart(chart, chartIndex)
+		try
+		{
+			var doRender = true;
+			
+			if(this.listener && this.listener.onRenderChart)
+				doRender=this.listener.onRenderChart(this, chart, chartIndex);
+			
+			if(doRender != false)
+			{
+				this.doRenderChart(chart, chartIndex);
+				
+				if(global.chartForm && global.chartForm.bindChartSettingPanelEvent)
+					global.chartForm.bindChartSettingPanelEvent(chart);
+			}
+		}
+		catch(e)
+		{
+			global.chartFactory.logException(e);
+		}
 	};
 	
 	/**
@@ -233,14 +242,7 @@
 			
 			var results = resultsMap[chartId];
 			
-			try
-			{
-				this.updateChart(chart, results);
-			}
-			catch(e)
-			{
-				global.chartFactory.logException(e);
-			}
+			this.updateChart(chart, results);
 		}
 	};
 	
@@ -252,13 +254,20 @@
 	 */
 	dashboardBase.updateChart = function(chart, results)
 	{
-		var doUpdate = true;
-		
-		if(this.listener && this.listener.onUpdateChart)
-			doUpdate=this.listener.onUpdateChart(this, chart, results);
-		
-		if(doUpdate != false)
-			this.doUpdateChart(chart, results);
+		try
+		{
+			var doUpdate = true;
+			
+			if(this.listener && this.listener.onUpdateChart)
+				doUpdate=this.listener.onUpdateChart(this, chart, results);
+			
+			if(doUpdate != false)
+				this.doUpdateChart(chart, results);
+		}
+		catch(e)
+		{
+			global.chartFactory.logException(e);
+		}
 	};
 	
 	/**

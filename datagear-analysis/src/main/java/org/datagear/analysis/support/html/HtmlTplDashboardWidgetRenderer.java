@@ -97,12 +97,6 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	public static final String DEFAULT_DASHBOARD_VAR = "dashboard";
 
-	public static final String PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION = "targetHtmlChartWidgetGetExceptionMessage";
-
-	public static final String PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND = "targetHtmlChartWidgetNotFoundMessage";
-
-	public static final String PROPERTY_VALUE_FOR_PLUGIN_NULL = "targetHtmlChartWidgePluginNullMessage";
-
 	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
 
 	private ChartWidgetSource chartWidgetSource;
@@ -115,17 +109,9 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	private HtmlTplDashboardScriptObjectWriter htmlTplDashboardScriptObjectWriter = new HtmlTplDashboardScriptObjectWriter();
 
-	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetGetException = new ValueHtmlChartPlugin<>(
-			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForWidgetGetException",
-			PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION);
-
-	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetNotFound = new ValueHtmlChartPlugin<>(
-			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForWidgetNotFound",
-			PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND);
-
-	private HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetPluginNull = new ValueHtmlChartPlugin<>(
-			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForWidgetPluginNull",
-			PROPERTY_VALUE_FOR_PLUGIN_NULL);
+	private ParamValueHtmlChartPlugin<HtmlRenderContext> htmlChartPluginForGetWidgetException = new ParamValueHtmlChartPlugin<>(
+			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForGetWidgetException",
+			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForGetWidgetExceptionMsg");
 
 	/** 内置导入内容 */
 	private List<HtmlTplDashboardImport> dashboardImports;
@@ -245,36 +231,15 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		this.htmlTplDashboardScriptObjectWriter = htmlTplDashboardScriptObjectWriter;
 	}
 
-	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForWidgetGetException()
+	public ParamValueHtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForGetWidgetException()
 	{
-		return htmlChartPluginForWidgetGetException;
+		return htmlChartPluginForGetWidgetException;
 	}
 
-	public void setHtmlChartPluginForWidgetGetException(
-			HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetGetException)
+	public void setHtmlChartPluginForGetWidgetException(
+			ParamValueHtmlChartPlugin<HtmlRenderContext> htmlChartPluginForGetWidgetException)
 	{
-		this.htmlChartPluginForWidgetGetException = htmlChartPluginForWidgetGetException;
-	}
-
-	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForWidgetNotFound()
-	{
-		return htmlChartPluginForWidgetNotFound;
-	}
-
-	public void setHtmlChartPluginForWidgetNotFound(HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetNotFound)
-	{
-		this.htmlChartPluginForWidgetNotFound = htmlChartPluginForWidgetNotFound;
-	}
-
-	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForWidgetPluginNull()
-	{
-		return htmlChartPluginForWidgetPluginNull;
-	}
-
-	public void setHtmlChartPluginForWidgetPluginNull(
-			HtmlChartPlugin<HtmlRenderContext> htmlChartPluginForWidgetPluginNull)
-	{
-		this.htmlChartPluginForWidgetPluginNull = htmlChartPluginForWidgetPluginNull;
+		this.htmlChartPluginForGetWidgetException = htmlChartPluginForGetWidgetException;
 	}
 
 	public List<HtmlTplDashboardImport> getDashboardImports()
@@ -745,10 +710,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	{
 		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<>(IDUtil.uuid(),
 				"HtmlChartWidgetForWidgetGetException", ChartDefinition.EMPTY_CHART_DATA_SET,
-				this.htmlChartPluginForWidgetGetException);
+				this.htmlChartPluginForGetWidgetException);
 
 		Map<String, Object> paramValues = new HashMap<>();
-		paramValues.put(PROPERTY_VALUE_FOR_WIDGET_GET_EXCEPTION,
+		paramValues.put(this.htmlChartPluginForGetWidgetException.getChartParamName(),
 				"Chart '" + (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception : " + t.getMessage());
 
 		widget.setParamValues(paramValues);
@@ -760,10 +725,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	{
 		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<>(IDUtil.uuid(),
 				"HtmlChartWidgetForWidgetNotFound", ChartDefinition.EMPTY_CHART_DATA_SET,
-				this.htmlChartPluginForWidgetNotFound);
+				this.htmlChartPluginForGetWidgetException);
 
 		Map<String, Object> paramValues = new HashMap<>();
-		paramValues.put(PROPERTY_VALUE_FOR_WIDGET_NOT_FOUND,
+		paramValues.put(this.htmlChartPluginForGetWidgetException.getChartParamName(),
 				"Chart '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
 
 		widget.setParamValues(paramValues);
@@ -775,10 +740,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	{
 		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<>(IDUtil.uuid(),
 				"HtmlChartWidgetForWidgetPluginNull", ChartDefinition.EMPTY_CHART_DATA_SET,
-				this.htmlChartPluginForWidgetPluginNull);
+				this.htmlChartPluginForGetWidgetException);
 
 		Map<String, Object> paramValues = new HashMap<>();
-		paramValues.put(PROPERTY_VALUE_FOR_PLUGIN_NULL,
+		paramValues.put(this.htmlChartPluginForGetWidgetException.getChartParamName(),
 				"Chart plugin for rendering chart '" + chartWidget.getName() + "' not found");
 
 		widget.setParamValues(paramValues);
@@ -1538,8 +1503,12 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 引入{@linkplain HtmlChartPlugin}变量名处理器。
 	 * <p>
 	 * 为了避免每次渲染{@linkplain HtmlTplDashboard}时都内联渲染{@linkplain HtmlChartPlugin}对象，
-	 * 通常会将所有{@linkplain HtmlChartPlugin}对象独立渲染，而在渲染{@linkplain HtmlTplDashboard}时引入，
+	 * 通常会将所有{@linkplain HtmlChartPlugin}对象独立渲染，而在渲染{@linkplain HtmlTplDashboard}时仅引入，
 	 * 此类即为此提供支持，用于获取引入{@linkplain HtmlChartPlugin}对象的变量名。
+	 * </p>
+	 * <p>
+	 * 注意：{@linkplain HtmlTplDashboardWidgetRenderer#getHtmlChartPluginForGetWidgetException()}
+	 * 也应该加入独立渲染的{@linkplain HtmlChartPlugin}集合。
 	 * </p>
 	 * 
 	 * @author datagear@163.com
