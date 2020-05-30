@@ -789,24 +789,28 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	/**
 	 * 写{@linkplain HtmlTplDashboard} JS变量：
 	 * <p>
-	 * <code>var dashboard = {...};</code>
+	 * <code>
+	 * <pre>
+	 * var [tmpRenderContextVarName] = {...};
+	 * var [dashboardVarName] = {...};
+	 * </pre>
+	 * </code>
 	 * </p>
 	 * 
 	 * @param renderContext
 	 * @param out
 	 * @param dashboard
+	 * @param tmpRenderContextVarName
 	 * @throws IOException
 	 */
-	protected void writeHtmlTplDashboardJSVar(HtmlRenderContext renderContext, Writer out, HtmlTplDashboard dashboard)
+	protected void writeHtmlTplDashboardJSVar(HtmlRenderContext renderContext, Writer out, HtmlTplDashboard dashboard,
+			String tmpRenderContextVarName)
 			throws IOException
 	{
 		if (StringUtil.isEmpty(dashboard.getVarName()))
 			throw new IllegalArgumentException();
 
-		String tmpRenderContextVarName = HtmlRenderAttributes
-				.generateRenderContextVarName(Long.toHexString(System.currentTimeMillis()));
 		getHtmlRenderContextScriptObjectWriter().writeNoAttributes(out, renderContext, tmpRenderContextVarName);
-
 		getHtmlTplDashboardScriptObjectWriter().write(out, dashboard, tmpRenderContextVarName);
 	}
 

@@ -437,11 +437,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	protected void writeHtmlTplDashboardScript(T renderContext, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
 			throws IOException
 	{
-		String dashboardVar = dashboardInfo.getDashboardVar();
-		if (StringUtil.isEmpty(dashboardVar))
-			dashboardVar = getDefaultDashboardVar();
+		String globalDashboardVar = dashboardInfo.getDashboardVar();
+		if (StringUtil.isEmpty(globalDashboardVar))
+			globalDashboardVar = getDefaultDashboardVar();
 
-		dashboard.setVarName(dashboardVar);
+		String tmpRenderContextVarName = HtmlRenderAttributes.generateRenderContextVarName(renderContext);
+		String localDashboardVarName = HtmlRenderAttributes.generateDashboardVarName(renderContext);
+
+		dashboard.setVarName(localDashboardVarName);
 
 		Writer out = renderContext.getWriter();
 
@@ -451,13 +454,13 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		out.write("(function(){");
 		writeNewLine(out);
 
-		writeHtmlTplDashboardJSVar(renderContext, out, dashboard);
+		writeHtmlTplDashboardJSVar(renderContext, out, dashboard, tmpRenderContextVarName);
 
 		writeHtmlChartScripts(renderContext, dashboard, dashboardInfo);
 		writeHtmlTplDashboardJSInit(out, dashboard);
 		writeHtmlTplDashboardJSFactoryInit(out, dashboard, dashboardInfo.getDashboardFactoryVar());
 
-		out.write("window." + dashboardVar + "=" + dashboardVar + ";");
+		out.write("window." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);
 
 		writeNewLine(out);
