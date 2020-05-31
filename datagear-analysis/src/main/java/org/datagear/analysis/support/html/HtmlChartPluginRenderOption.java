@@ -48,6 +48,9 @@ public class HtmlChartPluginRenderOption implements Serializable
 	/** 是否不输出调用渲染函数 */
 	private boolean notWriteInvoke = false;
 
+	/** 写入图表JSON对象而非JS对象 */
+	private boolean writeChartJson = false;
+
 	public HtmlChartPluginRenderOption()
 	{
 		super();
@@ -217,6 +220,21 @@ public class HtmlChartPluginRenderOption implements Serializable
 		this.notWriteInvoke = notWriteInvoke;
 	}
 
+	public boolean isWriteChartJson()
+	{
+		return writeChartJson;
+	}
+
+	/**
+	 * 设置写入图表JSON对象而非JS对象。
+	 * 
+	 * @param writeChartJson
+	 */
+	public void setWriteChartJson(boolean writeChartJson)
+	{
+		this.writeChartJson = writeChartJson;
+	}
+
 	@Override
 	public String toString()
 	{
@@ -224,7 +242,8 @@ public class HtmlChartPluginRenderOption implements Serializable
 				+ notWriteChartElement + ", pluginVarName=" + pluginVarName + ", notWritePluginObject="
 				+ notWritePluginObject + ", chartVarName=" + chartVarName + ", renderContextVarName="
 				+ renderContextVarName + ", notWriteRenderContextObject=" + notWriteRenderContextObject
-				+ ", notWriteScriptTag=" + notWriteScriptTag + ", notWriteInvoke=" + notWriteInvoke + "]";
+				+ ", notWriteScriptTag=" + notWriteScriptTag + ", notWriteInvoke=" + notWriteInvoke
+				+ ", writeChartJson=" + writeChartJson + "]";
 	}
 
 	/**

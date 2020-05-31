@@ -224,8 +224,12 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	{
 		Writer out = renderContext.getWriter();
 
-		getHtmlChartScriptObjectWriter().write(out, chart, optionInitialized.getRenderContextVarName(),
-				optionInitialized.getPluginVarName());
+		if (optionInitialized.isWriteChartJson())
+			getHtmlChartScriptObjectWriter().writeJson(out, chart, optionInitialized.getRenderContextVarName(),
+					optionInitialized.getPluginVarName());
+		else
+			getHtmlChartScriptObjectWriter().write(out, chart, optionInitialized.getRenderContextVarName(),
+					optionInitialized.getPluginVarName());
 
 		if (!optionInitialized.isNotWriteInvoke())
 		{
@@ -306,6 +310,7 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 			option.setNotWriteRenderContextObject(false);
 			option.setNotWriteScriptTag(false);
 			option.setNotWriteInvoke(false);
+			option.setWriteChartJson(false);
 		}
 
 		String chartElementId = option.getChartElementId();

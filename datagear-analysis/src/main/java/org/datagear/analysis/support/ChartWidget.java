@@ -11,6 +11,7 @@ import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
+import org.datagear.util.IDUtil;
 
 /**
  * 图表部件。
@@ -81,10 +82,6 @@ public class ChartWidget<T extends RenderContext> extends ChartDefinition
 
 	/**
 	 * 生成图表ID。
-	 * <p>
-	 * 同一个渲染上下文内，允许多次使用同一个{@linkplain ChartWidget}，
-	 * 为了保证{@linkplain Chart#getId()}不重复，所以这里要生成新的ID。
-	 * </p>
 	 * 
 	 * @param renderContext
 	 * @return
@@ -92,13 +89,6 @@ public class ChartWidget<T extends RenderContext> extends ChartDefinition
 	 */
 	protected String generateChartId(T renderContext) throws RenderException
 	{
-		String key = "chartIndex-" + getId();
-		Integer index = renderContext.getAttribute(key);
-		if (index == null)
-			index = 0;
-
-		renderContext.setAttribute(key, index + 1);
-
-		return getId() + "-" + index.toString();
+		return IDUtil.uuid();
 	}
 }

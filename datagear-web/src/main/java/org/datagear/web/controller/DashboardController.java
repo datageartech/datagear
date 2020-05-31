@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -21,11 +22,15 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
+import org.datagear.analysis.support.ChartWidget;
+import org.datagear.analysis.support.ChartWidgetSource;
+import org.datagear.analysis.support.html.HtmlChartPluginRenderOption;
 import org.datagear.analysis.support.html.HtmlRenderAttributes;
 import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
@@ -742,54 +747,51 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		response.setHeader("Cache-Control", "no-cache");
 		response.setHeader("Pragma", "no-cache");
 		response.setContentType(CONTENT_TYPE_CSS);
-		Writer out = response.getWriter();
+		PrintWriter out = response.getWriter();
 
-		StringBuilder style = new StringBuilder();
 		DashboardTheme dashboardTheme = getDashboardThemeAttribute(request.getSession());
 		ChartTheme chartTheme = (dashboardTheme == null ? null : dashboardTheme.getChartTheme());
 
 		if (chartTheme != null)
 		{
 			// 表格行
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable tbody tr{\n");
-			style.append("background:" + chartTheme.getBackgroundColor() + ";\n");
-			style.append("}\n");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable tbody tr{");
+			out.println("	background:" + chartTheme.getBackgroundColor() + ";");
+			out.println("}");
 
 			// 表格奇数行
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody tr.odd,\n"
-					+ " .dg-chart-table .dg-chart-table-content table.dataTable.display tbody tr.odd{\n");
-			style.append("background:" + chartTheme.getBorderColor() + ";\n");
-			style.append("}\n");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody tr.odd,"
+					+ " .dg-chart-table .dg-chart-table-content table.dataTable.display tbody tr.odd{");
+			out.println("	background:" + chartTheme.getBorderColor() + ";");
+			out.println("}");
 
 			// 表格选中、悬浮，拷贝自/src/main/resources/org/datagear/web/webapp/static/theme/lightness/common.css
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr.hover,\n");
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr:hover,\n");
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody tr:hover {\n");
-			style.append("	background-color: " + chartTheme.getAxisScaleLineColor() + ";\n");
-			style.append("}\n");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr.hover,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr:hover,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody tr:hover {");
+			out.println("	background-color: " + chartTheme.getAxisScaleLineColor() + ";");
+			out.println("}");
 
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr.hover.selected,\n");
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable tbody > tr.selected,\n");
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable tbody > tr > .selected,\n");
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd.selected,\n");
-			style.append(
-					".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd > .selected,\n");
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd.selected,\n");
-			style.append(
-					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd > .selected,\n");
-			style.append(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr.selected:hover,\n");
-			style.append(
-					".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr > .selected:hover,\n");
-			style.append(
-					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.selected:hover,\n");
-			style.append(
-					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr > .selected:hover {\n");
-			style.append("	background-color: " + chartTheme.getHighlightTheme().getBackgroundColor() + ";\n");
-			style.append("	color: " + chartTheme.getHighlightTheme().getColor() + ";\n");
-			style.append("}\n");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr.hover.selected,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable tbody > tr.selected,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable tbody > tr > .selected,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd.selected,");
+			out.println(
+					".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd > .selected,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd.selected,");
+			out.println(
+					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd > .selected,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr.selected:hover,");
+			out.println(
+					".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr > .selected:hover,");
+			out.println(
+					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.selected:hover,");
+			out.println(
+					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr > .selected:hover {");
+			out.println("	background-color: " + chartTheme.getHighlightTheme().getBackgroundColor() + ";");
+			out.println("	color: " + chartTheme.getHighlightTheme().getColor() + ";");
+			out.println("}");
 		}
-
-		out.write(style.toString());
 	}
 
 	/**
@@ -808,6 +810,74 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		WebContext webContext = createWebContext(request);
 		return getDashboardData(request, response, model, webContext, paramData);
+	}
+
+	/**
+	 * 动态加载看板图表。
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param dashbaordId
+	 * @throws Throwable
+	 */
+	@RequestMapping(value = "/loadChart", produces = CONTENT_TYPE_JSON)
+	public void loadChart(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@RequestParam("dashboardId") String dashboardId, @RequestParam("chartWidgetId") String chartWidgetId,
+			@RequestParam("chartElementId") String chartElementId)
+			throws Throwable
+	{
+		SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
+		HtmlTplDashboard dashboard = dashboardManager.get(dashboardId);
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
+
+		HtmlTplDashboardWidgetEntity dashboardWidget = (HtmlTplDashboardWidgetEntity) dashboard.getWidget();
+
+		// 确保看板创建用户对看板模板内定义的图表有权限
+		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(dashboardWidget.getCreateUser()));
+
+		ChartWidgetSource chartWidgetSource = getHtmlTplDashboardWidgetEntityService()
+				.getHtmlTplDashboardWidgetRenderer().getChartWidgetSource();
+
+		ChartWidget<HtmlRenderContext> chartWidget = chartWidgetSource.getChartWidget(chartWidgetId);
+
+		if (chartWidget == null)
+			throw new RecordNotFoundException();
+
+		// 不缓存
+		response.setContentType(CONTENT_TYPE_JSON);
+		PrintWriter out = response.getWriter();
+
+		RenderStyle renderStyle = resolveRenderStyle(request);
+		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), renderStyle,
+				out);
+
+		HtmlChartPluginRenderOption renderOption = new HtmlChartPluginRenderOption();
+		renderOption.setChartElementId(chartElementId);
+		renderOption.setNotWriteChartElement(true);
+		renderOption.setPluginVarName(
+				"{\"id\": \"" + WebUtils.escapeJavaScriptStringValue(chartWidget.getPlugin().getId()) + "\"}");
+		renderOption.setNotWritePluginObject(true);
+		renderOption.setChartVarName("undefined");
+		renderOption.setRenderContextVarName("{}");
+		renderOption.setNotWriteRenderContextObject(true);
+		renderOption.setNotWriteScriptTag(true);
+		renderOption.setNotWriteInvoke(true);
+		renderOption.setWriteChartJson(true);
+		HtmlChartPluginRenderOption.setOption(renderContext, renderOption);
+
+		Chart chart = chartWidget.render(renderContext);
+
+		synchronized (dashboard)
+		{
+			List<Chart> charts = dashboard.getCharts();
+			List<Chart> newCharts = (charts == null || charts.isEmpty() ? new ArrayList<Chart>()
+					: new ArrayList<Chart>(charts));
+			newCharts.add(chart);
+			dashboard.setCharts(newCharts);
+		}
 	}
 
 	/**

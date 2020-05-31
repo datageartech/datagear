@@ -68,6 +68,36 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	}
 
 	/**
+	 * 将{@linkplain HtmlChart}的JSON对象写入输出流。
+	 * <p>
+	 * 格式为：
+	 * </p>
+	 * <code>
+	 * <pre>
+	 * {
+	 * 	...,
+	 * 	renderContext : [renderContextVarName],
+	 * 	plugin : [pluginVarName],
+	 * 	...
+	 * }
+	 * <pre>
+	 * </code>
+	 * 
+	 * @param out
+	 * @param chart
+	 * @param renderContextVarName
+	 * @param pluginVarName
+	 * @throws IOException
+	 */
+	public void writeJson(Writer out, HtmlChart chart, String renderContextVarName, String pluginVarName)
+			throws IOException
+	{
+		chart = new JsonHtmlChart(chart, renderContextVarName, pluginVarName);
+
+		writeJsonObject(out, chart);
+	}
+
+	/**
 	 * 支持JSON输出的{@linkplain HtmlChart}。
 	 * 
 	 * @author datagear@163.com
