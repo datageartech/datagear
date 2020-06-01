@@ -128,6 +128,18 @@
 		return (sourceArray.length - 1);
 	};
 	
+	/**
+	 * 销毁图表的echarts对象。
+	 */
+	chartSupport.destroyChartEcharts = function(chart)
+	{
+		var echartsInstance = chart.echartsInstance();
+		if(echartsInstance && !echartsInstance.isDisposed())
+			echartsInstance.dispose();
+		
+		chart.echartsInstance(null);
+	};
+	
 	//折线图
 	
 	chartSupport.lineRender = function(chart, coordSign, valueSign, options)
@@ -214,6 +226,11 @@
 		
 		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
+	};
+	
+	chartSupport.lineDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
 	};
 	
 	//柱状图
@@ -314,6 +331,11 @@
 		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
 	};
+
+	chartSupport.barDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//横向柱状图
 	
@@ -328,6 +350,11 @@
 	chartSupport.barHorizontalUpdate = function(chart, results, coordSign, valueSign)
 	{
 		chartSupport.barUpdate(chart, results, coordSign, valueSign);
+	};
+	
+	chartSupport.barHorizontalDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
 	};
 	
 	//饼图
@@ -397,6 +424,11 @@
 		var options = { legend: { data: legendData }, series: series };
 		chart.echartsOptions(options);
 	};
+
+	chartSupport.pieDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//仪表盘
 	
@@ -450,6 +482,11 @@
 			]};
 		
 		chart.echartsOptions(options);
+	};
+
+	chartSupport.gaugeDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
 	};
 	
 	//散点图
@@ -559,6 +596,11 @@
 		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
 	};
+
+	chartSupport.scatterDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//坐标散点图
 	
@@ -663,6 +705,11 @@
 		
 		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
+	};
+
+	chartSupport.scatterCoordDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
 	};
 	
 	/**
@@ -803,6 +850,11 @@
 		var options = { legend: {data: legendData}, radar: {indicator: indicatorData}, series: series };
 		chart.echartsOptions(options);
 	};
+
+	chartSupport.radarDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//漏斗图
 	
@@ -891,6 +943,11 @@
 		
 		var options = { legend: { data: legendData }, series: series };
 		chart.echartsOptions(options);
+	};
+
+	chartSupport.funnelDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
 	};
 	
 	//地图
@@ -1049,6 +1106,11 @@
 		
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
+
+	chartSupport.mapDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//散点值地图
 	
@@ -1149,6 +1211,11 @@
 		options = chart.optionsModified(options);
 		
 		chartSupport.mapUpdateChart(chart, initOptions, options);
+	};
+
+	chartSupport.mapScatterDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
 	};
 	
 	//关系地图
@@ -1318,6 +1385,11 @@
 		
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
+
+	chartSupport.mapGraphDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//K线图
 	
@@ -1399,6 +1471,11 @@
 		
 		var options = { legend: {data: legendData}, xAxis : { data : xAxisData }, series: series };
 		chart.echartsOptions(options);
+	};
+
+	chartSupport.candlestickDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
 	};
 	
 	//热力图
@@ -1517,6 +1594,11 @@
 		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
 		chart.echartsOptions(options);
 	};
+
+	chartSupport.heatmapDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//树图
 	chartSupport.treeRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
@@ -1576,6 +1658,11 @@
 		var options = { series: series };
 		chart.echartsOptions(options);
 	};
+
+	chartSupport.treeDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//矩形树图
 	chartSupport.treemapRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
@@ -1615,6 +1702,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.treemapDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
+
 	//旭日图
 	
 	chartSupport.sunburstRender = function(chart, idSign, nameSign, parentSign, valueSign, options)
@@ -1652,6 +1744,11 @@
 		
 		var options = { series: series };
 		chart.echartsOptions(options);
+	};
+
+	chartSupport.sunburstDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
 	};
 	
 	chartSupport.buildTreeNodeSeries = function(chart, results, idSign, nameSign, parentSign, valueSign)
@@ -1864,6 +1961,11 @@
 		var options = { series: series };
 		chart.echartsOptions(options);
 	};
+
+	chartSupport.sankeyDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//关系图
 	
@@ -2047,6 +2149,11 @@
 		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
 	};
+
+	chartSupport.graphDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//词云图
 	
@@ -2169,6 +2276,11 @@
 		var options = { series: series };
 		chart.echartsOptions(options);
 	};
+
+	chartSupport.wordcloudDestroy = function(chart)
+	{
+		chartSupport.destroyChartEcharts(chart);
+	};
 	
 	//表格
 	
@@ -2247,7 +2359,7 @@
 		var initOptions = chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		var tableId = chart.extValue("tableId");
-		var dataTable = $("#" + tableId).DataTable();
+		var dataTable = $("#" + tableId, chart.elementJquery()).DataTable();
 		
 		var datas = [];
 		for(var i=0; i<chartDataSets.length; i++)
@@ -2260,6 +2372,15 @@
 		}
 		
 		chartSupport.tableAddDataTableData(dataTable, datas, 0, false);
+	};
+	
+	chartSupport.tableDestroy = function(chart)
+	{
+		var chartEle = chart.elementJquery();
+		chartEle.removeClass("dg-chart-table");
+		chartEle.removeClass("dg-hide-title");
+		$(".dg-chart-table-title", chartEle).remove();
+		$(".dg-chart-table-content", chartEle).remove();
 	};
 	
 	chartSupport.tableAddDataTableData = function(dataTable, datas, startRowIndex, notDraw)
@@ -2384,6 +2505,16 @@
 		$(".dg-chart-label-item-pending", $parent).remove();
 	};
 	
+	chartSupport.labelDestroy = function(chart)
+	{
+		var chartEle = chart.elementJquery();
+		chartEle.removeClass("dg-chart-label");
+		$(".dg-chart-label-item", chartEle).each(function()
+		{
+			$(this).remove();
+		});
+	};
+	
 	//自定义
 	
 	chartSupport.customAsyncRender = function(chart)
@@ -2426,6 +2557,14 @@
 		
 		if(customRenderer)
 			customRenderer.update(chart, results);
+	};
+	
+	chartSupport.customDestroy = function(chart)
+	{
+		var customRenderer = chartSupport.customGetCustomRenderer(chart);
+		
+		if(customRenderer && customRenderer.destroy)
+			customRenderer.destroy(chart);
 	};
 	
 	chartSupport.customGetCustomRenderer = function(chart)

@@ -70,6 +70,16 @@
 		chart.statusPreRender(true);
 	};
 	
+	/**
+	 * 判断指定HTML元素是否是图表组件。
+	 * 
+	 * @param element DOM元素、Jquery对象
+	 */
+	chartFactory.isChartElement = function(element)
+	{
+		return $(element).hasClass(chartFactory.CHART_DISTINCT_CSS_NAME);
+	};
+	
 	/**图表状态：准备render*/
 	chartFactory.STATUS_PRE_RENDER = "PRE_RENDER";
 	
@@ -85,7 +95,10 @@
 	/**图表状态：完成update*/
 	chartFactory.STATUS_UPDATED = "UPDATED";
 	
-	//用于标识图表元素的CSS名
+	/**图表状态：已销毁*/
+	chartFactory.STATUS_DESTROYED = "DESTROYED";
+	
+	/**用于标识图表元素的CSS名*/
 	chartFactory.CHART_DISTINCT_CSS_NAME = "dg-chart-for-distinction";
 	
 	//----------------------------------------
@@ -94,9 +107,13 @@
 	
 	/**
 	 * 渲染图表。
+	 * 注意：只有this.statusPreRender()为true，此方法才会执行。
 	 */
 	chartBase.render = function()
 	{
+		if(!this.statusPreRender())
+			return false;
+		
 		this.elementJquery().addClass(chartFactory.CHART_DISTINCT_CSS_NAME);
 		
 		this.statusRendering(true);
@@ -105,32 +122,49 @@
 		var re = this.plugin.chartRenderer.render(this);
 		
 		if(!async)
-		{
-			if(re === false)
-				this.statusPreRender(true);
-			else
-				this.statusPreUpdate(true);
-		}
+			this.statusPreUpdate(true);
 	};
 	
 	/**
 	 * 更新图表。
+	 * 注意：只有this.statusPreUpdate()或者this.statusUpdated()为true，此方法才会执行。
 	 * 
 	 * @param results 图表数据集结果
 	 */
 	chartBase.update = function(results)
 	{
+		if(!this.statusPreUpdate() && !this.statusUpdated())
+			return false;
+		
 		this.statusUpdating(true);
 		
 		var async = this.isAsyncUpdate(results);
 		var re = this.plugin.chartRenderer.update(this, results);
 		
 		if(!async)
+			this.statusUpdated(true);
+	};
+	
+	/**
+	 * 销毁图表，释放图表占用的资源、恢复图表HTML元素初值。
+	 */
+	chartBase.destroy = function()
+	{
+		this.statusDestroyed(true);
+		this.elementJquery().removeClass(chartFactory.CHART_DISTINCT_CSS_NAME);
+		
+		if(this.plugin.chartRenderer.destroy)
+			this.plugin.chartRenderer.destroy(this);
+		else
 		{
-			if(re === false)
-				this.statusPreUpdate(true);
-			else
-				this.statusUpdated(true);
+			var echartsInstance = this.echartsInstance();
+			if(echartsInstance && !echartsInstance.isDisposed())
+			{
+				echartsInstance.dispose();
+				this.echartsInstance(null);
+			}
+			
+			this.elementJquery().empty();
 		}
 	};
 	
@@ -169,7 +203,7 @@
 	};
 	
 	/**
-	 * 图表是否可为/设置为：准备render。
+	 * 图表是否为/设置为：准备render。
 	 * 
 	 * @param set undefined时判断状态，否则，设置状态。
 	 */
@@ -182,7 +216,7 @@
 	};
 	
 	/**
-	 * 图表是否可为/设置为：正在render。
+	 * 图表是否为/设置为：正在render。
 	 * 
 	 * @param set undefined时判断状态，否则，设置状态。
 	 */
@@ -195,7 +229,7 @@
 	};
 	
 	/**
-	 * 图表是否可为/设置为：准备update。
+	 * 图表是否为/设置为：准备update。
 	 * 
 	 * @param set undefined时判断状态，否则，设置状态。
 	 */
@@ -208,7 +242,7 @@
 	};
 	
 	/**
-	 * 图表是否可为/设置为：正在update。
+	 * 图表是否为/设置为：正在update。
 	 * 
 	 * @param set undefined时判断状态，否则，设置状态。
 	 */
@@ -221,7 +255,7 @@
 	};
 	
 	/**
-	 * 图表是否可为/设置为：完成update。
+	 * 图表是否为/设置为：完成update。
 	 * 
 	 * @param set undefined时判断状态，否则，设置状态。
 	 */
@@ -231,6 +265,19 @@
 			return (this.status() == chartFactory.STATUS_UPDATED);
 		else
 			this.status(chartFactory.STATUS_UPDATED);
+	};
+	
+	/**
+	 * 图表是否为/设置为：已销毁。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusDestroyed = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_DESTROYED);
+		else
+			this.status(chartFactory.STATUS_DESTROYED);
 	};
 	
 	/**
@@ -901,17 +948,22 @@
 		var instance = echarts.init(this.element(), this.echartsThemeName());
 		instance.setOption(options);
 		
-		this._echartsInstance = instance;
+		this.echartsInstance(instance);
 		
 		return instance;
 	};
 	
 	/**
-	 * 获取echarts实例对象。
+	 * 获取/设置echarts实例对象。
+	 * 
+	 * @param instance 要设置的echarts实例
 	 */
-	chartBase.echartsInstance = function()
+	chartBase.echartsInstance = function(instance)
 	{
-		return this._echartsInstance;
+		if(instance != undefined)
+			this._echartsInstance = instance;
+		else
+			return this._echartsInstance;
 	};
 	
 	/**

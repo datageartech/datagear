@@ -239,23 +239,44 @@
 		
 		if(!$chart.attr("bindChartSettingPanelEvent"))
 		{
-			$chart.attr("bindChartSettingPanelEvent", "1").hover(
-			function(event)
+			$chart.attr("bindChartSettingPanelEvent", "1");
+			
+			var mouseenterHandler = function(event)
 			{
-				if(!chart.statusPreRender() || !chart.statusRendering())
+				if(!chart.statusPreRender() && !chart.statusRendering())
 					chartForm.showChartSettingBox(chart);
-			},
-			function(event)
+			};
+			var mouseleaveHandler = function(event)
 			{
 				if(chartForm.isChartSettingPanelClosed(chart))
 					chartForm.hideChartSettingBox(chart);
-			});
+			};
+			
+			$chart.mouseenter(mouseenterHandler).mouseleave(mouseleaveHandler);
+			
+			$chart.data("chartSettingPanel-mouseenterHandler", mouseenterHandler);
+			$chart.data("chartSettingPanel-mouseleaveHandler", mouseleaveHandler);
 		}
 		
 		if(!chart.isDataSetParamValueReady())
 			chartForm.showChartSettingBox(chart);
 		
 		return true;
+	};
+	
+	chartForm.unbindChartSettingPanelEvent = function(chart)
+	{
+		var $chart = chart.elementJquery();
+		var mouseenterHandler = $chart.data("chartSettingPanel-mouseenterHandler");
+		var mouseleaveHandler = $chart.data("chartSettingPanel-mouseleaveHandler");
+		
+		$chart.removeAttr("bindChartSettingPanelEvent");
+		if(mouseenterHandler)
+			$chart.off("mouseenter", mouseenterHandler);
+		if(mouseleaveHandler)
+			$chart.off("mouseleave", mouseleaveHandler);
+		
+		$(".dg-chart-setting-box", $chart).remove();
 	};
 	
 	chartForm.showChartSettingBox = function(chart)

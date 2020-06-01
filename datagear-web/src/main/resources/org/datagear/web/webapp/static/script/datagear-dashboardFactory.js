@@ -316,7 +316,7 @@
 	/**
 	 * 获取图表，没有则返回undefined。
 	 * 
-	 * @param chartInfo 图表信息：图表HTML元素ID、图表ID
+	 * @param chartInfo 图表信息：图表HTML元素ID、图表ID、图表索引
 	 */
 	dashboardBase.getChart = function(chartInfo)
 	{
@@ -340,10 +340,11 @@
 	/**
 	 * 删除图表。
 	 * 
-	 * @param chartInfo 图表对象、图表HTML元素ID、图表ID
+	 * @param chartInfo 图表对象、图表HTML元素ID、图表ID、图表索引
+	 * @param notDestory 选填参数，是否不销毁图表，默认为false
 	 * @return 移除的图表对象或者undefined
 	 */
-	dashboardBase.removeChart = function(chartInfo)
+	dashboardBase.removeChart = function(chartInfo, notDestory)
 	{
 		var newCharts = (this.charts ? [].concat(this.charts) : []);
 		var index = this.getChartIndex(chartInfo, newCharts);
@@ -354,13 +355,36 @@
 		var removeds = newCharts.splice(index, 1);
 		this.charts = newCharts;
 		
+		if(notDestory != true)
+			this.destroyChart(removeds[0]);
+		
 		return removeds[0];
+	};
+	
+	/**
+	 * 销毁图表。
+	 * 
+	 * @param chart 图表对象
+	 */
+	dashboardBase.destroyChart = function(chart)
+	{
+		try
+		{
+			if(global.chartForm && global.chartForm.unbindChartSettingPanelEvent)
+				global.chartForm.unbindChartSettingPanelEvent(chart);
+		}
+		catch(e)
+		{
+			global.chartFactory.logException(e);
+		}
+		
+		chart.destroy();
 	};
 	
 	/**
 	 * 获取图表索引号。
 	 * 
-	 * @param chartInfo 图表信息：图表对象、图表HTML元素ID、图表ID
+	 * @param chartInfo 图表信息：图表对象、图表HTML元素ID、图表ID、图表索引
 	 * @param charts 选填，查找的图表数组，如果不设置，则取this.charts
 	 */
 	dashboardBase.getChartIndex = function(chartInfo, charts)
@@ -373,9 +397,10 @@
 		
 		for(var i=0; i<charts.length; i++)
 		{
-			if(this.charts[i] === chartInfo
+			if(charts[i] === chartInfo
 					|| charts[i].elementId === chartInfo
-					|| charts[i].id === chartInfo)
+					|| charts[i].id === chartInfo
+					|| i === chartInfo)
 				return i;
 		}
 		
@@ -431,14 +456,25 @@
 	
 	/**
 	 * 异步加载图表。
+	 * 如果指定的HTML元素已经是图表组件，则不加载图表而直接返回false。
 	 * 
-	 * @param chartWidgetId 图表部件ID
-	 * @param chartElementId 图表HTML元素ID
+	 * @param element 用于渲染图表的HTML元素、Jquery对象
+	 * @param chartWidgetId 要加载的图表部件ID
 	 * @param ajaxOptions 选填参数，参数格式可以是ajax配置项：{...}、也可以是图表加载成功回调函数：function(chart){ ... }。
 	 * 					  如果ajax配置项的success函数、图表加载成功回调函数返回false，则后续不会自动调用dashboardBase.addChart函数。
 	 */
-	dashboardBase.loadChart = function(chartWidgetId, chartElementId, ajaxOptions)
+	dashboardBase.loadChart = function(element, chartWidgetId, ajaxOptions)
 	{
+		if(global.chartFactory.isChartElement(element))
+			return false;
+		
+		var chartElementId = $(element).attr("id");
+		if(!chartElementId)
+		{
+			chartElementId = "chart" + new Date().getTime();
+			$(element).attr("id", chartElementId);
+		}
+		
 		var webContext = this.renderContext.webContext;
 		var loadChartConfig = dashboardFactory.loadChartConfig;
 		var _this = this;
@@ -469,7 +505,7 @@
 				if(!msg)
 					msg = textStatus;
 				
-				$("#" + chartElementId).html(msg);
+				$(element).html(msg);
 			}
 		},
 		ajaxOptions);
@@ -506,7 +542,7 @@
 	 */
 	dashboardBase.initLoadedChart = function(chart)
 	{
-		chart.plugin = chartPluginManager.get(chart.plugin.id);
+		chart.plugin = global.chartPluginManager.get(chart.plugin.id);
 		chart.renderContext = this.renderContext;
 		dashboardFactory.initChart(chart);
 	};

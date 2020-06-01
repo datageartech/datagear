@@ -24,8 +24,9 @@ import java.io.Reader;
  * <code>
  * <pre>
  * {
+ * 	...,
  * 	render : function(chart){ ... },
- * 	update : function(chart, results){ ... }
+ * 	...
  * }
  * </pre>
  * </code>
@@ -37,9 +38,6 @@ public interface JsChartRenderer
 {
 	/** JS图表渲染器的渲染函数名 */
 	public static final String RENDER_FUNCTION_NAME = "render";
-
-	/** JS图表渲染器的更新函数名 */
-	public static final String UPDATE_FUNCTION_NAME = "update";
 
 	/**
 	 * 获取JS图表渲染器对象代码输入流。
