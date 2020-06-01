@@ -42,7 +42,17 @@
 			return;
 		
 		for(var i=0; i<dashboard.charts.length; i++)
-			global.chartFactory.init(dashboard.charts[i]);
+			this.initChart(dashboard.charts[i]);
+	};
+	
+	/**
+	 * 初始化指定图表。
+	 * 
+	 * @param chart 图表对象
+	 */
+	dashboardFactory.initChart = function(chart)
+	{
+		global.chartFactory.init(chart);
 	};
 	
 	/**
@@ -306,7 +316,7 @@
 	/**
 	 * 获取图表，没有则返回undefined。
 	 * 
-	 * @param chartInfo 图表信息：图表元素ID、图表ID
+	 * @param chartInfo 图表信息：图表HTML元素ID、图表ID
 	 */
 	dashboardBase.getChart = function(chartInfo)
 	{
@@ -316,20 +326,56 @@
 	};
 	
 	/**
+	 * 添加图表。
+	 * 如果chart.statusPreRender()返回true，那么它将被立即渲染。
+	 * 
+	 * @param chart 图表对象
+	 */
+	dashboardBase.addChart = function(chart)
+	{
+		var charts = (this.charts || []);
+		this.charts = charts.concat(chart);
+	};
+	
+	/**
+	 * 删除图表。
+	 * 
+	 * @param chartInfo 图表对象、图表HTML元素ID、图表ID
+	 * @return 移除的图表对象或者undefined
+	 */
+	dashboardBase.removeChart = function(chartInfo)
+	{
+		var newCharts = (this.charts ? [].concat(this.charts) : []);
+		var index = this.getChartIndex(chartInfo, newCharts);
+		
+		if(index < 0)
+			return undefined;
+		
+		var removeds = newCharts.splice(index, 1);
+		this.charts = newCharts;
+		
+		return removeds[0];
+	};
+	
+	/**
 	 * 获取图表索引号。
 	 * 
-	 * @param chartInfo 图表信息：图表对象、图表元素ID、图表ID
+	 * @param chartInfo 图表信息：图表对象、图表HTML元素ID、图表ID
+	 * @param charts 选填，查找的图表数组，如果不设置，则取this.charts
 	 */
-	dashboardBase.getChartIndex = function(chartInfo)
+	dashboardBase.getChartIndex = function(chartInfo, charts)
 	{
-		if(!this.charts)
+		if(charts == undefined)
+			charts = this.charts;
+		
+		if(!charts)
 			return -1;
 		
-		for(var i=0; i<this.charts.length; i++)
+		for(var i=0; i<charts.length; i++)
 		{
 			if(this.charts[i] === chartInfo
-					|| this.charts[i].elementId === chartInfo
-					|| this.charts[i].id === chartInfo)
+					|| charts[i].elementId === chartInfo
+					|| charts[i].id === chartInfo)
 				return i;
 		}
 		
@@ -389,7 +435,7 @@
 	 * @param chartWidgetId 图表部件ID
 	 * @param chartElementId 图表HTML元素ID
 	 * @param ajaxOptions 选填参数，参数格式可以是ajax配置项：{...}、也可以是图表加载成功回调函数：function(chart){ ... }。
-	 * 					  如果ajax配置项的success函数、图表加载成功回调函数返回false，则后续不会自动调用dashboardBase.initLoadedChart函数。
+	 * 					  如果ajax配置项的success函数、图表加载成功回调函数返回false，则后续不会自动调用dashboardBase.addChart函数。
 	 */
 	dashboardBase.loadChart = function(chartWidgetId, chartElementId, ajaxOptions)
 	{
@@ -432,8 +478,8 @@
 		{
 			myAjaxOptions.success = function(chart, textStatus, jqXHR)
 			{
-				_this.inflateLoadedChart(chart);
 				_this.initLoadedChart(chart);
+				_this.addChart(chart);
 			};
 		}
 		else
@@ -442,11 +488,11 @@
 			
 			myAjaxOptions.success = function(chart, textStatus, jqXHR)
 			{
-				_this.inflateLoadedChart(chart);
+				_this.initLoadedChart(chart);
 				var re = successHandler.call(this, chart, textStatus, jqXHR);
 				
 				if(re != false)
-					_this.initLoadedChart(chart);
+					_this.addChart(chart);
 			};
 		}
 		
@@ -454,27 +500,15 @@
 	};
 	
 	/**
-	 * 填充异步加载的图表。
+	 * 初始化异步加载的图表。
 	 * 
 	 * @param chart 图表JSON对象
 	 */
-	dashboardBase.inflateLoadedChart = function(chart)
+	dashboardBase.initLoadedChart = function(chart)
 	{
 		chart.plugin = chartPluginManager.get(chart.plugin.id);
 		chart.renderContext = this.renderContext;
-	};
-	
-	/**
-	 * 初始化异步加载的图表，将其加入看板对象，准备渲染。
-	 * 
-	 * @param chart 图表对象
-	 */
-	dashboardBase.initLoadedChart = function(chart)
-	{
-		global.chartFactory.init(chart);
-		
-		var charts = (this.charts || []);
-		this.charts = charts.concat([ chart ]);
+		dashboardFactory.initChart(chart);
 	};
 	
 	//----------------------------------------
