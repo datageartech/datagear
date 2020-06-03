@@ -7,6 +7,7 @@
  */
 package org.datagear.web.controller;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
+import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.util.StringUtil;
 import org.datagear.web.util.WebUtils;
 
@@ -63,6 +65,73 @@ public class AbstractDataAnalysisController extends AbstractController
 	public void setDataSetParamValueConverter(DataSetParamValueConverter dataSetParamValueConverter)
 	{
 		this.dataSetParamValueConverter = dataSetParamValueConverter;
+	}
+
+	protected RenderContext createHtmlRenderContext(HttpServletRequest request, HttpServletResponse response,
+			HtmlTplDashboardRenderAttr renderAttr,
+			WebContext webContext, HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer) throws IOException
+	{
+		RenderContext renderContext = new DefaultRenderContext(resolveParamValues(request));
+
+		Writer out = response.getWriter();
+		RenderStyle renderStyle = resolveRenderStyle(request);
+		renderAttr.inflate(renderContext, out, webContext);
+		renderAttr.setRenderStyle(renderContext, renderStyle);
+
+		DashboardTheme dashboardTheme = htmlTplDashboardWidgetRenderer.inflateDashboardTheme(renderContext, renderAttr,
+				renderStyle);
+
+		renderAttr.setIgnoreRenderAttrs(renderContext,
+				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getHtmlTitleHandlerName(),
+						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
+
+		setDashboardThemeAttribute(request.getSession(), dashboardTheme);
+
+		return renderContext;
+	}
+
+	protected HtmlTplDashboardRenderAttr createHtmlTplDashboardRenderAttr()
+	{
+		return new HtmlTplDashboardRenderAttr();
+	}
+
+	protected void setDashboardThemeAttribute(HttpSession session, DashboardTheme theme)
+	{
+		session.setAttribute(AbstractDataAnalysisController.class.getSimpleName(), theme);
+	}
+
+	/**
+	 * 获取{@linkplain DashboardTheme}，没有则返回{@code null}。
+	 * 
+	 * @param session
+	 * @return
+	 */
+	protected DashboardTheme getDashboardThemeAttribute(HttpSession session)
+	{
+		return (DashboardTheme) session.getAttribute(AbstractDataAnalysisController.class.getSimpleName());
+	}
+
+	protected Map<String, ?> resolveParamValues(HttpServletRequest request)
+	{
+		Map<String, Object> paramValues = new HashMap<String, Object>();
+
+		Map<String, String[]> origin = request.getParameterMap();
+
+		for (Map.Entry<String, String[]> entry : origin.entrySet())
+		{
+			String name = entry.getKey();
+			String[] values = entry.getValue();
+
+			if (values == null || values.length == 0)
+				continue;
+
+			if (values.length == 1)
+				paramValues.put(name, values[0]);
+			else
+				paramValues.put(name, values);
+		}
+
+		return paramValues;
 	}
 
 	protected RenderStyle resolveRenderStyle(HttpServletRequest request)
@@ -93,41 +162,6 @@ public class AbstractDataAnalysisController extends AbstractController
 		}
 
 		return RenderStyle.LIGHT;
-	}
-
-	protected RenderContext createHtmlRenderContext(HttpServletRequest request, HtmlTplDashboardRenderAttr renderAttr,
-			Writer out, WebContext webContext, RenderStyle renderStyle)
-	{
-		RenderContext renderContext = new DefaultRenderContext();
-		renderAttr.inflate(renderContext, out, webContext);
-		renderAttr.setRenderStyle(renderContext, renderStyle);
-
-		renderAttr.setIgnoreRenderAttrs(renderContext,
-				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getHtmlTitleHandlerName(),
-						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
-
-		return renderContext;
-	}
-
-	protected HtmlTplDashboardRenderAttr createHtmlTplDashboardRenderAttr()
-	{
-		return new HtmlTplDashboardRenderAttr();
-	}
-
-	protected void setDashboardThemeAttribute(HttpSession session, DashboardTheme theme)
-	{
-		session.setAttribute(AbstractDataAnalysisController.class.getSimpleName(), theme);
-	}
-
-	/**
-	 * 获取{@linkplain DashboardTheme}，没有则返回{@code null}。
-	 * 
-	 * @param session
-	 * @return
-	 */
-	protected DashboardTheme getDashboardThemeAttribute(HttpSession session)
-	{
-		return (DashboardTheme) session.getAttribute(AbstractDataAnalysisController.class.getSimpleName());
 	}
 
 	/**
