@@ -12,13 +12,14 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DashboardThemeSource;
@@ -30,6 +31,7 @@ import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
 import org.datagear.analysis.support.SimpleDashboardThemeSource;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
@@ -37,6 +39,9 @@ import org.datagear.util.StringUtil;
 
 /**
  * 抽象{@linkplain HtmlTplDashboardWidget}渲染器。
+ * <p>
+ * 注意：此类{@linkplain #render(RenderContext, HtmlTplDashboardWidget, String)}的{@linkplain RenderContext}必须符合{@linkplain HtmlTplDashboardRenderAttr#inflate(RenderContext, Writer, WebContext)}规范。
+ * </p>
  * <p>
  * 此类的{@linkplain #writeHtmlTplDashboardJSFactoryInit(Writer, HtmlTplDashboard, String)}方法的JS看板渲染逻辑为：
  * </p>
@@ -64,7 +69,7 @@ import org.datagear.util.StringUtil;
  * </p>
  * <p>
  * 此类的{@linkplain #getHtmlTplDashboardImports()}的{@linkplain HtmlTplDashboardImport#getContent()}可以包含{@linkplain #getContextPathPlaceholder()}占位符，
- * 在渲染时，占位符会被替换为实际的{@linkplain HtmlRenderContext#getContextPath()}。
+ * 在渲染时，占位符会被替换为{@linkplain HtmlTplDashboardRenderAttr#getWebContext(RenderContext)}的{@linkplain WebContext#getContextPath()}。
  * </p>
  * <p>
  * 此类的{@linkplain #getHtmlTplDashboardImports()}的{@linkplain HtmlTplDashboardImport#getContent()}可以包含{@linkplain #getVersionPlaceholder()}占位符，
@@ -79,7 +84,7 @@ import org.datagear.util.StringUtil;
  *
  * @param <T>
  */
-public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext> extends TextParserSupport
+public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 {
 	public static final String DEFAULT_CONTEXT_PATH_PLACE_HOLDER = "$CONTEXTPATH";
 
@@ -109,7 +114,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	private HtmlTplDashboardScriptObjectWriter htmlTplDashboardScriptObjectWriter = new HtmlTplDashboardScriptObjectWriter();
 
-	private ParamValueHtmlChartPlugin<HtmlRenderContext> htmlChartPluginForGetWidgetException = new ParamValueHtmlChartPlugin<>(
+	private ParamValueHtmlChartPlugin htmlChartPluginForGetWidgetException = new ParamValueHtmlChartPlugin(
 			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForGetWidgetException",
 			StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "HtmlChartPluginForGetWidgetExceptionMsg");
 
@@ -231,13 +236,12 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		this.htmlTplDashboardScriptObjectWriter = htmlTplDashboardScriptObjectWriter;
 	}
 
-	public ParamValueHtmlChartPlugin<HtmlRenderContext> getHtmlChartPluginForGetWidgetException()
+	public ParamValueHtmlChartPlugin getHtmlChartPluginForGetWidgetException()
 	{
 		return htmlChartPluginForGetWidgetException;
 	}
 
-	public void setHtmlChartPluginForGetWidgetException(
-			ParamValueHtmlChartPlugin<HtmlRenderContext> htmlChartPluginForGetWidgetException)
+	public void setHtmlChartPluginForGetWidgetException(ParamValueHtmlChartPlugin htmlChartPluginForGetWidgetException)
 	{
 		this.htmlChartPluginForGetWidgetException = htmlChartPluginForGetWidgetException;
 	}
@@ -487,6 +491,45 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	}
 
 	/**
+	 * 渲染{@linkplain Dashboard}。
+	 * 
+	 * @param renderContext
+	 * @param dashboardWidget
+	 * @param template
+	 * @return
+	 * @throws RenderException
+	 */
+	public HtmlTplDashboard render(RenderContext renderContext, HtmlTplDashboardWidget dashboardWidget, String template)
+			throws RenderException
+	{
+		HtmlTplDashboardRenderAttr renderAttr = getHtmlTplDashboardRenderAttrNonNull(renderContext);
+		RenderStyle renderStyle = inflateRenderStyle(renderContext, renderAttr);
+		inflateDashboardTheme(renderContext, renderAttr, renderStyle);
+
+		HtmlTplDashboard dashboard = createHtmlTplDashboard(renderContext, dashboardWidget, template);
+
+		try
+		{
+			renderHtmlTplDashboard(renderContext, renderAttr, dashboard);
+		}
+		catch (RenderException e)
+		{
+			throw e;
+		}
+		catch (Throwable t)
+		{
+			throw new RenderException(t);
+		}
+
+		return dashboard;
+	}
+
+	protected HtmlTplDashboardRenderAttr getHtmlTplDashboardRenderAttrNonNull(RenderContext renderContext)
+	{
+		return HtmlTplDashboardRenderAttr.getNonNull(renderContext);
+	}
+
+	/**
 	 * 设置必要的{@linkplain RenderStyle}。
 	 * <p>
 	 * 如果已设置，则返回；否则，设置默认并返回。
@@ -495,14 +538,14 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param renderContext
 	 * @return
 	 */
-	public RenderStyle inflateRenderStyle(HtmlRenderContext renderContext)
+	public RenderStyle inflateRenderStyle(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr)
 	{
-		RenderStyle renderStyle = HtmlRenderAttributes.getRenderStyle(renderContext);
+		RenderStyle renderStyle = renderAttr.getRenderStyle(renderContext);
 
 		if (renderStyle == null)
 		{
 			renderStyle = RenderStyle.LIGHT;
-			HtmlRenderAttributes.setRenderStyle(renderContext, renderStyle);
+			renderAttr.setRenderStyle(renderContext, renderStyle);
 		}
 
 		return renderStyle;
@@ -517,52 +560,18 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param renderContext
 	 * @param renderStyle
 	 */
-	public DashboardTheme inflateDashboardTheme(HtmlRenderContext renderContext, RenderStyle renderStyle)
+	public DashboardTheme inflateDashboardTheme(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+			RenderStyle renderStyle)
 	{
-		DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
+		DashboardTheme dashboardTheme = renderAttr.getDashboardTheme(renderContext);
 
 		if (dashboardTheme == null)
 		{
 			dashboardTheme = getDashboardTheme(renderStyle);
-			HtmlRenderAttributes.setDashboardTheme(renderContext, dashboardTheme);
+			renderAttr.setDashboardTheme(renderContext, dashboardTheme);
 		}
-
-		HtmlRenderAttributes.setChartTheme(renderContext, dashboardTheme.getChartTheme());
 
 		return dashboardTheme;
-	}
-
-	/**
-	 * 渲染{@linkplain Dashboard}。
-	 * 
-	 * @param renderContext
-	 * @param dashboardWidget
-	 * @param template
-	 * @return
-	 * @throws RenderException
-	 */
-	public HtmlTplDashboard render(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget, String template)
-			throws RenderException
-	{
-		RenderStyle renderStyle = inflateRenderStyle(renderContext);
-		inflateDashboardTheme(renderContext, renderStyle);
-
-		HtmlTplDashboard dashboard = createHtmlTplDashboard(renderContext, dashboardWidget, template);
-
-		try
-		{
-			renderHtmlTplDashboard(renderContext, dashboard);
-		}
-		catch (RenderException e)
-		{
-			throw e;
-		}
-		catch (Throwable t)
-		{
-			throw new RenderException(t);
-		}
-
-		return dashboard;
 	}
 
 	/**
@@ -573,7 +582,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @return
 	 * @throws IOException
 	 */
-	public String readTemplateContent(HtmlTplDashboardWidget<T> dashboardWidget, String template) throws IOException
+	public String readTemplateContent(HtmlTplDashboardWidget dashboardWidget, String template) throws IOException
 	{
 		Reader reader = getTemplateReaderNotNull(dashboardWidget, template);
 
@@ -588,7 +597,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param templateContent
 	 * @throws IOException
 	 */
-	public void saveTemplateContent(HtmlTplDashboardWidget<T> dashboardWidget, String template, String templateContent)
+	public void saveTemplateContent(HtmlTplDashboardWidget dashboardWidget, String template, String templateContent)
 			throws IOException
 	{
 		Writer writer = null;
@@ -614,37 +623,23 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	public abstract String simpleTemplateContent(String htmlCharset, String... chartWidgetId);
 
 	/**
-	 * 渲染{@linkplain Dashboard}。
+	 * 渲染{@linkplain HtmlTplDashboard}。
 	 * 
 	 * @param renderContext
+	 * @param renderAttr
 	 * @param dashboard
 	 * @throws Throwable
 	 */
-	protected abstract void renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard) throws Throwable;
+	protected abstract void renderHtmlTplDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+			HtmlTplDashboard dashboard) throws Throwable;
 
-	/**
-	 * 获取{@linkplain HtmlTplDashboardWidget}的模板输入流。
-	 * 
-	 * @param dashboardWidget
-	 * @param template
-	 * @return
-	 * @throws IOException
-	 */
-	protected Reader getTemplateReaderNotNull(HtmlTplDashboardWidget<?> dashboardWidget, String template)
+	protected Reader getTemplateReaderNotNull(HtmlTplDashboardWidget dashboardWidget, String template)
 			throws IOException
 	{
 		return getTemplateDashboardWidgetResManager().getTemplateReader(dashboardWidget, template);
 	}
 
-	/**
-	 * 获取{@linkplain HtmlTplDashboardWidget}的模板输入流。
-	 * 
-	 * @param dashboardWidget
-	 * @param template
-	 * @return
-	 * @throws IOException
-	 */
-	protected Writer getTemplateWriter(HtmlTplDashboardWidget<?> dashboardWidget, String template) throws IOException
+	protected Writer getTemplateWriter(HtmlTplDashboardWidget dashboardWidget, String template) throws IOException
 	{
 		return getTemplateDashboardWidgetResManager().getTemplateWriter(dashboardWidget, template);
 	}
@@ -679,8 +674,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param id
 	 * @return
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected HtmlChartWidget<HtmlRenderContext> getHtmlChartWidgetForRender(HtmlRenderContext renderContext, String id)
+	protected HtmlChartWidget getHtmlChartWidgetForRender(RenderContext renderContext, String id)
 	{
 		ChartWidget chartWidget = null;
 
@@ -702,15 +696,13 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		if (chartWidget.getPlugin() == null)
 			chartWidget = createHtmlChartWidgetForPluginNull(chartWidget);
 
-		return (HtmlChartWidget<HtmlRenderContext>) chartWidget;
+		return (HtmlChartWidget) chartWidget;
 	}
 
-	protected HtmlChartWidget<HtmlRenderContext> createHtmlChartWidgetForGetException(String exceptionWidgetId,
-			Throwable t)
+	protected HtmlChartWidget createHtmlChartWidgetForGetException(String exceptionWidgetId, Throwable t)
 	{
-		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<>(IDUtil.uuid(),
-				"HtmlChartWidgetForWidgetGetException", ChartDefinition.EMPTY_CHART_DATA_SET,
-				this.htmlChartPluginForGetWidgetException);
+		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetGetException",
+				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put(this.htmlChartPluginForGetWidgetException.getChartParamName(),
@@ -721,11 +713,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		return widget;
 	}
 
-	protected HtmlChartWidget<HtmlRenderContext> createHtmlChartWidgetForNotFound(String notFoundWidgetId)
+	protected HtmlChartWidget createHtmlChartWidgetForNotFound(String notFoundWidgetId)
 	{
-		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<>(IDUtil.uuid(),
-				"HtmlChartWidgetForWidgetNotFound", ChartDefinition.EMPTY_CHART_DATA_SET,
-				this.htmlChartPluginForGetWidgetException);
+		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetNotFound",
+				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put(this.htmlChartPluginForGetWidgetException.getChartParamName(),
@@ -736,11 +727,10 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		return widget;
 	}
 
-	protected HtmlChartWidget<HtmlRenderContext> createHtmlChartWidgetForPluginNull(ChartWidget<?> chartWidget)
+	protected HtmlChartWidget createHtmlChartWidgetForPluginNull(ChartWidget chartWidget)
 	{
-		HtmlChartWidget<HtmlRenderContext> widget = new HtmlChartWidget<>(IDUtil.uuid(),
-				"HtmlChartWidgetForWidgetPluginNull", ChartDefinition.EMPTY_CHART_DATA_SET,
-				this.htmlChartPluginForGetWidgetException);
+		HtmlChartWidget widget = new HtmlChartWidget(IDUtil.uuid(), "HtmlChartWidgetForWidgetPluginNull",
+				ChartDefinition.EMPTY_CHART_DATA_SET, this.htmlChartPluginForGetWidgetException);
 
 		Map<String, Object> paramValues = new HashMap<>();
 		paramValues.put(this.htmlChartPluginForGetWidgetException.getChartParamName(),
@@ -756,21 +746,21 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * <p>
 	 * <code>
 	 * <pre>
-	 * var [tmpRenderContextVarName] = {...};
-	 * var [dashboardVarName] = {...};
+	 * var [tmpRenderContextVarName] = {};
+	 * var [dashboardVarName] = {..., renderContext: [tmpRenderContextVarName], ...};
 	 * </pre>
 	 * </code>
 	 * </p>
 	 * 
 	 * @param renderContext
+	 * @param renderAttr
 	 * @param out
 	 * @param dashboard
 	 * @param tmpRenderContextVarName
 	 * @throws IOException
 	 */
-	protected void writeHtmlTplDashboardJSVar(HtmlRenderContext renderContext, Writer out, HtmlTplDashboard dashboard,
-			String tmpRenderContextVarName)
-			throws IOException
+	protected void writeHtmlTplDashboardJSVar(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+			Writer out, HtmlTplDashboard dashboard, String tmpRenderContextVarName) throws IOException
 	{
 		if (StringUtil.isEmpty(dashboard.getVarName()))
 			throw new IllegalArgumentException();
@@ -784,8 +774,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * <p>
 	 * <code>
 	 * <pre>
-	 * var tmpRenderContext = {...};
-	 * dashboard.renderContext.attributes = renderContext.attributes;
+	 * var [tmpRenderContext] = { attributes: {...} };
+	 * dashboard.renderContext.attributes = [tmpRenderContext].attributes;
 	 * ...
 	 * dashboard.charts.push(...);
 	 * ...
@@ -794,34 +784,26 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * </code>
 	 * </p>
 	 * 
+	 * @param renderContext
+	 * @param renderAttr
 	 * @param out
 	 * @param dashboard
+	 * @param tmpRenderContextVarName
 	 * @throws IOException
 	 */
-	protected void writeHtmlTplDashboardJSInit(Writer out, HtmlTplDashboard dashboard) throws IOException
+	protected void writeHtmlTplDashboardJSInit(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+			Writer out, HtmlTplDashboard dashboard, String tmpRenderContextVarName) throws IOException
 	{
 		String varName = dashboard.getVarName();
 
 		if (StringUtil.isEmpty(varName))
 			throw new IllegalArgumentException();
 
-		HtmlRenderContext renderContext = dashboard.getRenderContext();
-
-		String tmpRenderContextVar = HtmlRenderAttributes.generateRenderContextVarName(renderContext);
-
-		ChartTheme chartTheme = HtmlRenderAttributes.removeChartTheme(renderContext);
-
-		getHtmlRenderContextScriptObjectWriter().writeOnlyAttributes(out, renderContext, tmpRenderContextVar);
+		getHtmlRenderContextScriptObjectWriter().write(out, renderContext, tmpRenderContextVarName,
+				getHtmlRenderContextIgnoreAttrs(renderContext, renderAttr, out, dashboard));
 		out.write(varName + "." + Dashboard.PROPERTY_RENDER_CONTEXT + "." + RenderContext.PROPERTY_ATTRIBUTES + " = "
-				+ tmpRenderContextVar + "." + RenderContext.PROPERTY_ATTRIBUTES + ";");
+				+ tmpRenderContextVarName + "." + RenderContext.PROPERTY_ATTRIBUTES + ";");
 		writeNewLine(out);
-		out.write(varName + "." + Dashboard.PROPERTY_RENDER_CONTEXT + "." + RenderContext.PROPERTY_ATTRIBUTES + "."
-				+ HtmlRenderAttributes.CHART_THEME + " = " + tmpRenderContextVar + "."
-				+ RenderContext.PROPERTY_ATTRIBUTES + "." + HtmlRenderAttributes.DASHBOARD_THEME + "."
-				+ DashboardTheme.PROPERTY_CHART_THEME + ";");
-		writeNewLine(out);
-
-		HtmlRenderAttributes.setChartTheme(renderContext, chartTheme);
 
 		List<Chart> charts = dashboard.getCharts();
 		if (charts != null)
@@ -844,6 +826,13 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		}
 	}
 
+	protected Collection<String> getHtmlRenderContextIgnoreAttrs(RenderContext renderContext,
+			HtmlTplDashboardRenderAttr renderAttr, Writer out, HtmlTplDashboard dashboard)
+	{
+		Collection<String> ignores = renderAttr.getIgnoreRenderAttrs(renderContext);
+		return (ignores != null ? ignores : Arrays.asList(renderAttr.getHtmlWriterName()));
+	}
+
 	/**
 	 * 写{@linkplain HtmlTplDashboard} JS工厂初始化代码：
 	 * <p>
@@ -854,14 +843,17 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * </code>
 	 * </p>
 	 * 
+	 * @param renderContext
+	 * @param renderAttr
 	 * @param out
 	 * @param dashboard
 	 * @param dashboardFactoryVar
 	 *            如果为{@code null}，则使用{@linkplain #getDefaultDashboardFactoryVar()}
 	 * @throws IOException
 	 */
-	protected void writeHtmlTplDashboardJSFactoryInit(Writer out, HtmlTplDashboard dashboard,
-			String dashboardFactoryVar) throws IOException
+	protected void writeHtmlTplDashboardJSFactoryInit(RenderContext renderContext,
+			HtmlTplDashboardRenderAttr renderAttr, Writer out, HtmlTplDashboard dashboard, String dashboardFactoryVar)
+			throws IOException
 	{
 		String varName = dashboard.getVarName();
 
@@ -890,11 +882,14 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * </code>
 	 * </p>
 	 * 
+	 * @param renderContext
+	 * @param renderAttr
 	 * @param out
 	 * @param dashboard
 	 * @throws IOException
 	 */
-	protected void writeHtmlTplDashboardJSRender(Writer out, HtmlTplDashboard dashboard) throws IOException
+	protected void writeHtmlTplDashboardJSRender(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+			Writer out, HtmlTplDashboard dashboard) throws IOException
 	{
 		String varName = dashboard.getVarName();
 
@@ -921,14 +916,16 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 写看板导入项。
 	 * 
 	 * @param renderContext
+	 * @param renderAttr
+	 * @param out
 	 * @param dashboard
 	 * @param importExclude
 	 * @throws IOException
 	 */
-	protected void writeDashboardImport(HtmlRenderContext renderContext, HtmlTplDashboard dashboard,
-			String importExclude) throws IOException
+	protected void writeDashboardImport(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
+			HtmlTplDashboard dashboard, String importExclude) throws IOException
 	{
-		Writer out = renderContext.getWriter();
+		WebContext webContext = renderAttr.getWebContext(renderContext);
 
 		List<String> excludes = StringUtil.splitWithTrim(importExclude, ",");
 
@@ -941,8 +938,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 				if (excludes.contains(name))
 					continue;
 
-				String content = replaceContextPathPlaceholder(impt.getContent(),
-						renderContext.getWebContext().getContextPath());
+				String content = replaceContextPathPlaceholder(impt.getContent(), webContext.getContextPath());
 
 				content = replaceVersionPlaceholder(content, Global.VERSION);
 
@@ -954,7 +950,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		if (!excludes.contains(this.themeImportName))
 		{
 			writeNewLine(out);
-			writeDashboardThemeStyle(renderContext, dashboard, out);
+			writeDashboardThemeStyle(renderContext, renderAttr, out, dashboard,
+					renderAttr.getDashboardTheme(renderContext));
 		}
 	}
 
@@ -966,24 +963,27 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * </p>
 	 * 
 	 * @param renderContext
+	 * @param renderAttr
+	 * @param out
 	 * @param htmlChartWidgets
 	 * @return
 	 * @throws IOException
 	 */
-	protected List<String> writeHtmlChartPluginScriptsResolveImport(T renderContext,
-			List<HtmlChartWidget<HtmlRenderContext>> htmlChartWidgets) throws IOException
+	protected List<String> writeHtmlChartPluginScriptsResolveImport(RenderContext renderContext,
+			HtmlTplDashboardRenderAttr renderAttr, Writer out, List<HtmlChartWidget> htmlChartWidgets)
+			throws IOException
 	{
-		if(this.importHtmlChartPluginVarNameResolver == null)
-			return writeHtmlChartPluginScripts(renderContext, htmlChartWidgets);
+		if (this.importHtmlChartPluginVarNameResolver == null)
+			return writeHtmlChartPluginScripts(renderContext, renderAttr, out, htmlChartWidgets);
 
 		List<String> pluginVarNames = new ArrayList<>(htmlChartWidgets.size());
 
-		for (HtmlChartWidget<?> widget : htmlChartWidgets)
+		for (HtmlChartWidget widget : htmlChartWidgets)
 		{
 			String importVarName = this.importHtmlChartPluginVarNameResolver.resolve(widget);
 			pluginVarNames.add(importVarName);
 		}
-		
+
 		return pluginVarNames;
 	}
 
@@ -991,12 +991,15 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 写{@linkplain HtmlChartPlugin} JS脚本，并返回对应的变量名列表。
 	 * 
 	 * @param renderContext
+	 * @param renderAttr
+	 * @param out
 	 * @param htmlChartWidgets
 	 * @return
 	 * @throws IOException
 	 */
-	protected List<String> writeHtmlChartPluginScripts(T renderContext,
-			List<HtmlChartWidget<HtmlRenderContext>> htmlChartWidgets) throws IOException
+	protected List<String> writeHtmlChartPluginScripts(RenderContext renderContext,
+			HtmlTplDashboardRenderAttr renderAttr, Writer out, List<HtmlChartWidget> htmlChartWidgets)
+			throws IOException
 	{
 		List<String> pluginVarNames = new ArrayList<>(htmlChartWidgets.size());
 
@@ -1004,13 +1007,13 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		{
 			String pluginVarName = null;
 
-			HtmlChartWidget<HtmlRenderContext> widget = htmlChartWidgets.get(i);
-			HtmlChartPlugin<HtmlRenderContext> plugin = widget.getPlugin();
+			HtmlChartWidget widget = htmlChartWidgets.get(i);
+			HtmlChartPlugin plugin = widget.getPlugin();
 
 			for (int j = 0; j < i; j++)
 			{
-				HtmlChartWidget<HtmlRenderContext> myWidget = htmlChartWidgets.get(j);
-				HtmlChartPlugin<HtmlRenderContext> myPlugin = myWidget.getPlugin();
+				HtmlChartWidget myWidget = htmlChartWidgets.get(j);
+				HtmlChartPlugin myPlugin = myWidget.getPlugin();
 
 				if (myPlugin.getId().equals(plugin.getId()))
 				{
@@ -1021,8 +1024,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 			if (pluginVarName == null)
 			{
-				pluginVarName = HtmlRenderAttributes.generateChartPluginVarName(renderContext);
-				getHtmlChartPluginScriptObjectWriter().write(renderContext.getWriter(), plugin, pluginVarName);
+				pluginVarName = renderAttr.genChartPluginVarName(Integer.toString(i));
+				getHtmlChartPluginScriptObjectWriter().write(out, plugin, pluginVarName);
 			}
 
 			pluginVarNames.add(pluginVarName);
@@ -1033,13 +1036,12 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 
 	/**
 	 * 写{@linkplain HtmlChart}。
-	 * 
-	 * @param chartWidget
+	 *
 	 * @param renderContext
+	 * @param chartWidget
 	 * @return
 	 */
-	protected HtmlChart writeHtmlChart(HtmlChartWidget<HtmlRenderContext> chartWidget, HtmlRenderContext renderContext)
-			throws RenderException
+	protected HtmlChart writeHtmlChart(RenderContext renderContext, HtmlChartWidget chartWidget) throws RenderException
 	{
 		return chartWidget.render(renderContext);
 	}
@@ -1048,16 +1050,16 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * 写看板主题样式。
 	 * 
 	 * @param renderContext
-	 * @param dashboard
 	 * @param out
+	 * @param dashboard
+	 * @param dashboardTheme
+	 *            为{@code null}则什么也不写
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean writeDashboardThemeStyle(HtmlRenderContext renderContext, HtmlTplDashboard dashboard, Writer out)
-			throws IOException
+	protected boolean writeDashboardThemeStyle(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+			Writer out, HtmlTplDashboard dashboard, DashboardTheme dashboardTheme) throws IOException
 	{
-		DashboardTheme dashboardTheme = HtmlRenderAttributes.getDashboardTheme(renderContext);
-
 		if (dashboardTheme == null)
 			return false;
 
@@ -1430,8 +1432,8 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 	 * @param template
 	 * @return
 	 */
-	protected HtmlTplDashboard createHtmlTplDashboard(T renderContext, HtmlTplDashboardWidget<T> dashboardWidget,
-			String template)
+	protected HtmlTplDashboard createHtmlTplDashboard(RenderContext renderContext,
+			HtmlTplDashboardWidget dashboardWidget, String template)
 	{
 		HtmlTplDashboard dashboard = new HtmlTplDashboard();
 
@@ -1525,7 +1527,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		 * @param chartWidget
 		 * @return
 		 */
-		String resolve(HtmlChartWidget<?> chartWidget);
+		String resolve(HtmlChartWidget chartWidget);
 	}
 
 	public static class TemplateImportHtmlChartPluginVarNameResolver implements ImportHtmlChartPluginVarNameResolver
@@ -1556,7 +1558,7 @@ public abstract class HtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext
 		}
 
 		@Override
-		public String resolve(HtmlChartWidget<?> chartWidget)
+		public String resolve(HtmlChartWidget chartWidget)
 		{
 			String chartPluginId = chartWidget.getPlugin().getId();
 			return this.template.replace(PLACEHOLDER_CHART_PLUGIN_ID, chartPluginId);

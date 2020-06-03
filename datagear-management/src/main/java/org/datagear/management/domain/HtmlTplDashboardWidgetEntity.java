@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.datagear.analysis.support.JsonSupport;
-import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.util.StringUtil;
@@ -22,7 +21,7 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRenderContext>
+public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 		implements CreateUserEntity<String>, DataPermissionEntity<String>
 {
 	private static final long serialVersionUID = 1L;
@@ -52,8 +51,8 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget<HtmlRen
 		this.createTime = new Date();
 	}
 
-	public HtmlTplDashboardWidgetEntity(String id, String template,
-			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> renderer, String name, User createUser)
+	public HtmlTplDashboardWidgetEntity(String id, String template, HtmlTplDashboardWidgetHtmlRenderer renderer,
+			String name, User createUser)
 	{
 		super(id, template, renderer);
 		this.name = name;

@@ -100,7 +100,7 @@ public class DirectoryHtmlChartPluginManagerInitializer
 		{
 			loadHtmlChartPlugins(this.classpathPattern);
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			if (LOGGER.isErrorEnabled())
 				LOGGER.error("Load built-in " + HtmlChartPlugin.class.getSimpleName() + "s error :", t);
@@ -134,10 +134,10 @@ public class DirectoryHtmlChartPluginManagerInitializer
 			}
 		}
 
-		Set<HtmlChartPlugin<?>> plugins = this.directoryHtmlChartPluginManager.upload(tmpDirectory);
+		Set<HtmlChartPlugin> plugins = this.directoryHtmlChartPluginManager.upload(tmpDirectory);
 
-		Set<String> pluginIds = new HashSet<String>();
-		for (HtmlChartPlugin<?> plugin : plugins)
+		Set<String> pluginIds = new HashSet<>();
+		for (HtmlChartPlugin plugin : plugins)
 			pluginIds.add(plugin.getId());
 
 		if (LOGGER.isInfoEnabled())

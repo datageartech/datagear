@@ -76,7 +76,7 @@ public class JsonChartPluginPropertiesResolver
 	 * @param chartPlugin
 	 * @param properties
 	 */
-	public void resolveChartPluginProperties(AbstractChartPlugin<?> chartPlugin, Map<String, ?> properties)
+	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, Map<String, ?> properties)
 	{
 		chartPlugin.setId((String) properties.get(ChartPlugin.PROPERTY_ID));
 		chartPlugin.setNameLabel(convertToLabel(properties.get(ChartPlugin.PROPERTY_NAME_LABEL)));
@@ -97,7 +97,7 @@ public class JsonChartPluginPropertiesResolver
 	 * @param json
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(AbstractChartPlugin<?> chartPlugin, String json) throws IOException
+	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, String json) throws IOException
 	{
 		@SuppressWarnings("unchecked")
 		Map<String, Object> properties = JsonSupport.parseNonStardand(json, Map.class);
@@ -111,7 +111,7 @@ public class JsonChartPluginPropertiesResolver
 	 * @param jsonReader
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(AbstractChartPlugin<?> chartPlugin, Reader jsonReader) throws IOException
+	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, Reader jsonReader) throws IOException
 	{
 		String json = null;
 
@@ -139,7 +139,7 @@ public class JsonChartPluginPropertiesResolver
 	 * @param encoding
 	 * @throws IOException
 	 */
-	public void resolveChartPluginProperties(AbstractChartPlugin<?> chartPlugin, InputStream in, String encoding)
+	public void resolveChartPluginProperties(AbstractChartPlugin chartPlugin, InputStream in, String encoding)
 			throws IOException
 	{
 		Reader reader = IOUtil.getReader(in, encoding);

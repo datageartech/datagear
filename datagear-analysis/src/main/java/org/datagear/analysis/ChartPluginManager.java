@@ -19,7 +19,7 @@ public interface ChartPluginManager
 	 * 
 	 * @param chartPlugin
 	 */
-	void register(ChartPlugin<?> chartPlugin);
+	void register(ChartPlugin chartPlugin);
 
 	/**
 	 * 移除指定ID的{@linkplain ChartPlugin}。
@@ -27,7 +27,7 @@ public interface ChartPluginManager
 	 * @param ids
 	 * @return 被移除的{@linkplain ChartPlugin}或者{@code null}。
 	 */
-	ChartPlugin<?>[] remove(String... ids);
+	ChartPlugin[] remove(String... ids);
 
 	/**
 	 * 获取指定ID的{@linkplain ChartPlugin}。
@@ -35,18 +35,18 @@ public interface ChartPluginManager
 	 * @param id
 	 * @return
 	 */
-	<T extends RenderContext> ChartPlugin<T> get(String id);
+	ChartPlugin get(String id);
 
 	/**
-	 * 获取支持指定类型{@linkplain RenderContext}的所有{@linkplain ChartPlugin}。
+	 * 获取指定类型的所有{@linkplain ChartPlugin}。
 	 * <p>
 	 * 返回结果将根据{@linkplain ChartPlugin#getOrder()}进行排序，越小越靠前。
 	 * </p>
 	 * 
-	 * @param renderContextType
+	 * @param chartPluginType
 	 * @return
 	 */
-	<T extends RenderContext> List<ChartPlugin<T>> getAll(Class<? extends T> renderContextType);
+	<T extends ChartPlugin> List<T> getAll(Class<? super T> chartPluginType);
 
 	/**
 	 * 获取所有{@linkplain ChartPlugin}。
@@ -56,5 +56,5 @@ public interface ChartPluginManager
 	 * 
 	 * @return
 	 */
-	List<ChartPlugin<?>> getAll();
+	List<ChartPlugin> getAll();
 }

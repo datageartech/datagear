@@ -30,7 +30,7 @@ public class HtmlChart extends Chart
 		super();
 	}
 
-	public HtmlChart(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin<?> plugin,
+	public HtmlChart(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin plugin,
 			RenderContext renderContext, String elementId, String varName)
 	{
 		super(id, name, chartDataSets, plugin, renderContext);
@@ -38,8 +38,8 @@ public class HtmlChart extends Chart
 		this.varName = varName;
 	}
 
-	public HtmlChart(ChartDefinition chartDefinition, ChartPlugin<?> plugin, RenderContext renderContext,
-			String elementId, String varName)
+	public HtmlChart(ChartDefinition chartDefinition, ChartPlugin plugin, RenderContext renderContext, String elementId,
+			String varName)
 	{
 		super(chartDefinition, plugin, renderContext);
 		this.elementId = elementId;
@@ -47,30 +47,15 @@ public class HtmlChart extends Chart
 	}
 
 	@Override
-	public HtmlRenderContext getRenderContext()
+	public HtmlChartPlugin getPlugin()
 	{
-		return (HtmlRenderContext) super.getRenderContext();
+		return (HtmlChartPlugin) super.getPlugin();
 	}
 
 	@Override
-	public void setRenderContext(RenderContext renderContext)
+	public void setPlugin(ChartPlugin plugin)
 	{
-		if (renderContext != null && !(renderContext instanceof HtmlRenderContext))
-			throw new IllegalArgumentException();
-
-		super.setRenderContext(renderContext);
-	}
-
-	@Override
-	public HtmlChartPlugin<?> getPlugin()
-	{
-		return (HtmlChartPlugin<?>) super.getPlugin();
-	}
-
-	@Override
-	public void setPlugin(ChartPlugin<?> plugin)
-	{
-		if (plugin != null && !(plugin instanceof HtmlChartPlugin<?>))
+		if (plugin != null && !(plugin instanceof HtmlChartPlugin))
 			throw new IllegalArgumentException();
 
 		super.setPlugin(plugin);

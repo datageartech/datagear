@@ -34,7 +34,7 @@ public interface TemplateDashboardWidgetResManager
 	 * @return
 	 * @throws IOException
 	 */
-	Reader getTemplateReader(TemplateDashboardWidget<?> widget, String template) throws IOException;
+	Reader getTemplateReader(TemplateDashboardWidget widget, String template) throws IOException;
 
 	/**
 	 * 获取指定模板的输出流。
@@ -44,14 +44,17 @@ public interface TemplateDashboardWidgetResManager
 	 * @return
 	 * @throws IOException
 	 */
-	Writer getTemplateWriter(TemplateDashboardWidget<?> widget, String template) throws IOException;
+	Writer getTemplateWriter(TemplateDashboardWidget widget, String template) throws IOException;
 
 	/**
 	 * 获取指定名称资源的输入流。
 	 * 
-	 * @param id       {@linkplain TemplateDashboardWidget#getId()}
-	 * @param name     资源名称
-	 * @param encoding 资源编码，为{@code null}或空则使用默认编码
+	 * @param id
+	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 * @param name
+	 *            资源名称
+	 * @param encoding
+	 *            资源编码，为{@code null}或空则使用默认编码
 	 * @return
 	 * @throws IOException
 	 */
@@ -60,9 +63,12 @@ public interface TemplateDashboardWidgetResManager
 	/**
 	 * 获取指定名称资源的输出流。
 	 * 
-	 * @param id       {@linkplain TemplateDashboardWidget#getId()}
-	 * @param name     资源名称
-	 * @param encoding 资源编码，为{@code null}或空则使用默认编码
+	 * @param id
+	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 * @param name
+	 *            资源名称
+	 * @param encoding
+	 *            资源编码，为{@code null}或空则使用默认编码
 	 * @return
 	 * @throws IOException
 	 */
@@ -71,8 +77,10 @@ public interface TemplateDashboardWidgetResManager
 	/**
 	 * 获取指定名称资源的输入流。
 	 * 
-	 * @param id       {@linkplain TemplateDashboardWidget#getId()}
-	 * @param name     资源名称
+	 * @param id
+	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 * @param name
+	 *            资源名称
 	 * @return
 	 * @throws IOException
 	 */
@@ -81,8 +89,10 @@ public interface TemplateDashboardWidgetResManager
 	/**
 	 * 获取指定名称资源的输出流。
 	 * 
-	 * @param id       {@linkplain TemplateDashboardWidget#getId()}
-	 * @param name     资源名称
+	 * @param id
+	 *            {@linkplain TemplateDashboardWidget#getId()}
+	 * @param name
+	 *            资源名称
 	 * @return
 	 * @throws IOException
 	 */
@@ -94,7 +104,8 @@ public interface TemplateDashboardWidgetResManager
 	 * 拷入后，目录下所有子文件的相对路径名（比如：<code>some-file.txt</code>、<code>some-directory/some-file.png</code>），即可作为此类的资源名称使用。
 	 * </p>
 	 * 
-	 * @param id        {@linkplain Dashboard#getId()}
+	 * @param id
+	 *            {@linkplain Dashboard#getId()}
 	 * @param directory
 	 * @throws IOException
 	 */
@@ -103,8 +114,10 @@ public interface TemplateDashboardWidgetResManager
 	/**
 	 * 是否包含指定名称的资源。
 	 * 
-	 * @param id   {@linkplain Dashboard#getId()}
-	 * @param name 资源名称
+	 * @param id
+	 *            {@linkplain Dashboard#getId()}
+	 * @param name
+	 *            资源名称
 	 * @return
 	 */
 	boolean containsResource(String id, String name);

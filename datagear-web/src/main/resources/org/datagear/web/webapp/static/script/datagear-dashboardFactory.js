@@ -29,6 +29,10 @@
 		this.initCharts(dashboard);
 		$.extend(dashboard, this.dashboardBase);
 		this.initListener(dashboard);
+		
+		//渲染看板内图表时需要chartTheme
+		var dashboardTheme = dashboard.renderContextAttr("dashboardTheme");
+		dashboard.renderContextAttr("chartTheme", dashboardTheme.chartTheme);
 	};
 	
 	/**
@@ -170,7 +174,7 @@
 		}
 		else
 		{
-			var webContext = this.renderContext.webContext;
+			var webContext = this.renderContextAttr("webContext");
 			
 			var data = this.buildUpdateDashboardAjaxData(preUpdates);
 			
@@ -426,7 +430,7 @@
 	 */
 	dashboardBase.buildUpdateDashboardAjaxData = function(charts)
 	{
-		var webContext = this.renderContext.webContext;
+		var webContext = this.renderContextAttr("webContext");
 		
 		var data = {};
 		data[webContext.dashboardIdParam] = this.id;
@@ -475,7 +479,7 @@
 			$(element).attr("id", chartElementId);
 		}
 		
-		var webContext = this.renderContext.webContext;
+		var webContext = this.renderContextAttr("webContext");
 		var loadChartConfig = dashboardFactory.loadChartConfig;
 		var _this = this;
 		
@@ -545,6 +549,22 @@
 		chart.plugin = global.chartPluginManager.get(chart.plugin.id);
 		chart.renderContext = this.renderContext;
 		dashboardFactory.initChart(chart);
+	};
+
+	/**
+	 * 获取/设置渲染上下文的属性值。
+	 * 
+	 * @param attrName
+	 * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
+	 */
+	dashboardBase.renderContextAttr = function(attrName, attrValue)
+	{
+		var renderContext = this.renderContext;
+		
+		if(attrValue == undefined)
+			return renderContext.attributes[attrName];
+		else
+			return renderContext.attributes[attrName] = attrValue;
 	};
 	
 	//----------------------------------------

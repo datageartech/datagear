@@ -7,9 +7,9 @@
  */
 package org.datagear.analysis.support.html;
 
+import org.datagear.analysis.DashboardWidget;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboard;
-import org.datagear.analysis.TemplateDashboardWidget;
 
 /**
  * HTML模板看板。
@@ -26,26 +26,26 @@ public class HtmlTplDashboard extends TemplateDashboard
 		super();
 	}
 
-	public HtmlTplDashboard(String id, String template, HtmlRenderContext renderContext,
-			TemplateDashboardWidget<?> dashboardWidget, String varName)
+	public HtmlTplDashboard(String id, String template, RenderContext renderContext,
+			HtmlTplDashboardWidget dashboardWidget, String varName)
 	{
 		super(id, template, renderContext, dashboardWidget);
 		this.varName = varName;
 	}
 
 	@Override
-	public HtmlRenderContext getRenderContext()
+	public HtmlTplDashboardWidget getWidget()
 	{
-		return (HtmlRenderContext) super.getRenderContext();
+		return (HtmlTplDashboardWidget) super.getWidget();
 	}
 
 	@Override
-	public void setRenderContext(RenderContext renderContext)
+	public void setWidget(DashboardWidget widget)
 	{
-		if (renderContext != null && !(renderContext instanceof HtmlRenderContext))
+		if (widget != null && !(widget instanceof HtmlTplDashboardWidget))
 			throw new IllegalArgumentException();
 
-		super.setRenderContext(renderContext);
+		super.setWidget(widget);
 	}
 
 	public String getVarName()

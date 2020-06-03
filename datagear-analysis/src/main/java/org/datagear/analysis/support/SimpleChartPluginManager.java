@@ -11,7 +11,6 @@ import java.util.List;
 
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
-import org.datagear.analysis.RenderContext;
 
 /**
  * 简单{@linkplain ChartPluginManager}。
@@ -30,31 +29,31 @@ public class SimpleChartPluginManager extends AbstractChartPluginManager
 	}
 
 	@Override
-	public void register(ChartPlugin<?> chartPlugin)
+	public void register(ChartPlugin chartPlugin)
 	{
 		registerChartPlugin(chartPlugin);
 	}
 
 	@Override
-	public ChartPlugin<?>[] remove(String... ids)
+	public ChartPlugin[] remove(String... ids)
 	{
 		return removeChartPlugins(ids);
 	}
 
 	@Override
-	public <T extends RenderContext> ChartPlugin<T> get(String id)
+	public ChartPlugin get(String id)
 	{
 		return getChartPlugin(id);
 	}
 
 	@Override
-	public <T extends RenderContext> List<ChartPlugin<T>> getAll(Class<? extends T> renderContextType)
+	public <T extends ChartPlugin> List<T> getAll(Class<? super T> chartPluginType)
 	{
-		return findChartPlugins(renderContextType);
+		return findChartPlugins(chartPluginType);
 	}
 
 	@Override
-	public List<ChartPlugin<?>> getAll()
+	public List<ChartPlugin> getAll()
 	{
 		return getAllChartPlugins();
 	}

@@ -111,7 +111,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 			ChartDefinition.copy(htmlChart, this);
 			setChartDataSets(JsonChartDataSet.valuesOf(htmlChart.getChartDataSets()));
 			setPlugin(new RefHtmlChartPlugin(pluginVarName));
-			setRenderContext(new RefHtmlRenderContext(renderContextVarName));
+			setRenderContext(new RefRenderContext(renderContextVarName));
 			setElementId(htmlChart.getElementId());
 			setVarName(htmlChart.getVarName());
 		}

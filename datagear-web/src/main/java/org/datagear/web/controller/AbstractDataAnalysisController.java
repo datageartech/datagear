@@ -10,6 +10,7 @@ package org.datagear.web.controller;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -29,13 +30,13 @@ import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.DataSetParamValueConverter;
-import org.datagear.analysis.support.html.DefaultHtmlRenderContext;
-import org.datagear.analysis.support.html.HtmlRenderAttributes;
-import org.datagear.analysis.support.html.HtmlRenderContext;
-import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
+import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.util.StringUtil;
 import org.datagear.web.util.WebUtils;
 
@@ -94,13 +95,23 @@ public class AbstractDataAnalysisController extends AbstractController
 		return RenderStyle.LIGHT;
 	}
 
-	protected HtmlRenderContext createHtmlRenderContext(HttpServletRequest request, WebContext webContext,
-			RenderStyle renderStyle, Writer out)
+	protected RenderContext createHtmlRenderContext(HttpServletRequest request, HtmlTplDashboardRenderAttr renderAttr,
+			Writer out, WebContext webContext, RenderStyle renderStyle)
 	{
-		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(webContext, out);
-		HtmlRenderAttributes.setRenderStyle(renderContext, renderStyle);
+		RenderContext renderContext = new DefaultRenderContext();
+		renderAttr.inflate(renderContext, out, webContext);
+		renderAttr.setRenderStyle(renderContext, renderStyle);
+
+		renderAttr.setIgnoreRenderAttrs(renderContext,
+				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getHtmlTitleHandlerName(),
+						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
 
 		return renderContext;
+	}
+
+	protected HtmlTplDashboardRenderAttr createHtmlTplDashboardRenderAttr()
+	{
+		return new HtmlTplDashboardRenderAttr();
 	}
 
 	protected void setDashboardThemeAttribute(HttpSession session, DashboardTheme theme)
@@ -214,7 +225,7 @@ public class AbstractDataAnalysisController extends AbstractController
 		if (chartsParamValues == null)
 			return Collections.EMPTY_MAP;
 
-		Map<String, List<? extends Map<String, ?>>> re = new HashMap<String, List<? extends Map<String, ?>>>();
+		Map<String, List<? extends Map<String, ?>>> re = new HashMap<>();
 
 		for (Map.Entry<String, ? extends List<? extends Map<String, ?>>> entry : chartsParamValues.entrySet())
 		{
@@ -226,7 +237,7 @@ public class AbstractDataAnalysisController extends AbstractController
 			else
 			{
 				List<? extends Map<String, ?>> paramValuess = entry.getValue();
-				List<Map<String, ?>> converteds = new ArrayList<Map<String, ?>>();
+				List<Map<String, ?>> converteds = new ArrayList<>();
 
 				for (int i = 0; i < chartDataSets.length; i++)
 				{

@@ -35,12 +35,12 @@ public class CategorizationResolver
 	 * @param chartPlugins
 	 * @return 最后一个元素包含所有未分组的{@linkplain ChartPlugin}
 	 */
-	public List<Categorization> resolve(List<? extends ChartPlugin<?>> chartPlugins)
+	public List<Categorization> resolve(List<? extends ChartPlugin> chartPlugins)
 	{
-		List<Categorization> categorizations = new ArrayList<Categorization>();
-		List<ChartPlugin<?>> uncategorizeds = new ArrayList<ChartPlugin<?>>();
+		List<Categorization> categorizations = new ArrayList<>();
+		List<ChartPlugin> uncategorizeds = new ArrayList<>();
 
-		for (ChartPlugin<?> chartPlugin : chartPlugins)
+		for (ChartPlugin chartPlugin : chartPlugins)
 		{
 			Category category = chartPlugin.getCategory();
 
@@ -102,7 +102,7 @@ public class CategorizationResolver
 	{
 		private Category category;
 
-		private List<ChartPlugin<?>> chartPlugins = new ArrayList<ChartPlugin<?>>(5);
+		private List<ChartPlugin> chartPlugins = new ArrayList<>(5);
 
 		public Categorization()
 		{
@@ -125,17 +125,17 @@ public class CategorizationResolver
 			this.category = category;
 		}
 
-		public List<ChartPlugin<?>> getChartPlugins()
+		public List<ChartPlugin> getChartPlugins()
 		{
 			return chartPlugins;
 		}
 
-		public void setChartPlugins(List<ChartPlugin<?>> chartPlugins)
+		public void setChartPlugins(List<ChartPlugin> chartPlugins)
 		{
 			this.chartPlugins = chartPlugins;
 		}
 
-		public void addChartPlugin(ChartPlugin<?> chartPlugin)
+		public void addChartPlugin(ChartPlugin chartPlugin)
 		{
 			this.chartPlugins.add(chartPlugin);
 		}

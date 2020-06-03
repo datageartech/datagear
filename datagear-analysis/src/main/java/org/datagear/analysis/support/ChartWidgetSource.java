@@ -4,8 +4,6 @@
 
 package org.datagear.analysis.support;
 
-import org.datagear.analysis.RenderContext;
-
 /**
  * {@linkplain ChartWidget}源。
  * 
@@ -21,5 +19,5 @@ public interface ChartWidgetSource
 	 * @return
 	 * @throws Throwable
 	 */
-	<T extends RenderContext> ChartWidget<T> getChartWidget(String id) throws Throwable;
+	ChartWidget getChartWidget(String id) throws Throwable;
 }

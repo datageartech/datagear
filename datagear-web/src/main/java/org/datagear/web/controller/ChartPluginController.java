@@ -28,7 +28,6 @@ import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
 import org.datagear.analysis.support.html.HtmlChartPluginScriptObjectWriter;
-import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingQuery;
@@ -150,9 +149,9 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		try
 		{
-			Set<HtmlChartPlugin<?>> loaded = loader.loads(zipFile);
+			Set<HtmlChartPlugin> loaded = loader.loads(zipFile);
 
-			for (HtmlChartPlugin<?> chartPlugin : loaded)
+			for (HtmlChartPlugin chartPlugin : loaded)
 				pluginInfos.add(toHtmlChartPluginVO(chartPlugin, renderStyle, locale));
 		}
 		catch (HtmlChartPluginLoadException e)
@@ -176,7 +175,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		File tmpFile = FileUtil.getFile(this.tempDirectory, pluginFileName);
 
-		Set<HtmlChartPlugin<?>> uploads = getDirectoryHtmlChartPluginManager().upload(tmpFile);
+		Set<HtmlChartPlugin> uploads = getDirectoryHtmlChartPluginManager().upload(tmpFile);
 
 		return buildOperationMessageSuccessResponseEntity(request, "chartPlugin.upload.finish", uploads.size());
 	}
@@ -259,7 +258,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	public void getPluginIcon(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest,
 			@PathVariable("pluginId") String pluginId) throws Exception
 	{
-		ChartPlugin<?> chartPlugin = getDirectoryHtmlChartPluginManager().get(pluginId);
+		ChartPlugin chartPlugin = getDirectoryHtmlChartPluginManager().get(pluginId);
 
 		if (chartPlugin == null)
 			throw new FileNotFoundException();
@@ -294,30 +293,24 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	public void getChartPluginManagerJs(HttpServletRequest request, HttpServletResponse response, WebRequest webRequest)
 			throws Exception
 	{
-		List<ChartPlugin<HtmlRenderContext>> plugins = getDirectoryHtmlChartPluginManager()
-				.getAll(HtmlRenderContext.class);
+		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
 
-		List<HtmlChartPlugin<?>> htmlChartPlugins = new ArrayList<HtmlChartPlugin<?>>(plugins.size());
+		List<HtmlChartPlugin> htmlChartPlugins = new ArrayList<>(plugins.size());
 		long lastModified = -1;
 
 		if (plugins != null)
 		{
-			for (ChartPlugin<HtmlRenderContext> plugin : plugins)
+			for (HtmlChartPlugin plugin : plugins)
 			{
-				if (plugin instanceof HtmlChartPlugin<?>)
-				{
-					HtmlChartPlugin<?> htmlChartPlugin = (HtmlChartPlugin<?>) plugin;
-
-					htmlChartPlugins.add(htmlChartPlugin);
-					lastModified = Math.max(lastModified, htmlChartPlugin.getLastModified());
-				}
+				htmlChartPlugins.add(plugin);
+				lastModified = Math.max(lastModified, plugin.getLastModified());
 			}
 		}
-		
-		HtmlTplDashboardWidgetRenderer<?> renderer = getHtmlTplDashboardWidgetEntityService()
+
+		HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
 				.getHtmlTplDashboardWidgetRenderer();
 
-		HtmlChartPlugin<?> htmlChartPluginForGetWidgetException = renderer.getHtmlChartPluginForGetWidgetException();
+		HtmlChartPlugin htmlChartPluginForGetWidgetException = renderer.getHtmlChartPluginForGetWidgetException();
 		htmlChartPlugins.add(htmlChartPluginForGetWidgetException);
 		lastModified = Math.max(lastModified, htmlChartPluginForGetWidgetException.getLastModified());
 
@@ -333,14 +326,14 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 		out.println("var chartPluginManager = (global.chartPluginManager || (global.chartPluginManager = {}));");
 		out.println("chartPluginManager.plugins = (chartPluginManager.plugins || {});");
-		
+
 		out.println();
 		out.println("chartPluginManager.get = function(id){ return this.plugins[id]; };");
 		out.println();
 
 		for (int i = 0, len = htmlChartPlugins.size(); i < len; i++)
 		{
-			HtmlChartPlugin<?> plugin = htmlChartPlugins.get(i);
+			HtmlChartPlugin plugin = htmlChartPlugins.get(i);
 			String pluginVar = "plugin" + i;
 
 			this.htmlChartPluginScriptObjectWriter.write(out, plugin, pluginVar);

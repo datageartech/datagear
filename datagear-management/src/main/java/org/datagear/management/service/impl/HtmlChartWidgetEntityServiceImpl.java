@@ -18,14 +18,11 @@ import java.util.Set;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.ChartDataSet;
-import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
-import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
@@ -108,9 +105,8 @@ public class HtmlChartWidgetEntityServiceImpl
 		this.authorizationService = authorizationService;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends RenderContext> ChartWidget<T> getChartWidget(String id) throws Throwable
+	public ChartWidget getChartWidget(String id) throws Throwable
 	{
 		ChartWidgetSourceContext context = ChartWidgetSourceContext.get();
 
@@ -127,7 +123,7 @@ public class HtmlChartWidgetEntityServiceImpl
 		setHtmlChartPlugin(entity, true);
 		setChartDataSets(entity, true);
 
-		return (ChartWidget<T>) entity;
+		return entity;
 	}
 
 	@Override
@@ -223,11 +219,11 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	protected void setHtmlChartPlugin(HtmlChartWidgetEntity obj, boolean forAnalysis)
 	{
-		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = obj.getHtmlChartPlugin();
+		HtmlChartPlugin htmlChartPlugin = obj.getHtmlChartPlugin();
 
 		if (htmlChartPlugin != null)
 		{
-			HtmlChartPlugin<HtmlRenderContext> full = getHtmlChartPlugin(htmlChartPlugin.getId());
+			HtmlChartPlugin full = getHtmlChartPlugin(htmlChartPlugin.getId());
 
 			if (forAnalysis)
 				obj.setHtmlChartPlugin(full);
@@ -339,10 +335,9 @@ public class HtmlChartWidgetEntityServiceImpl
 		return paramValues;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected HtmlChartPlugin<HtmlRenderContext> getHtmlChartPlugin(String id)
+	protected HtmlChartPlugin getHtmlChartPlugin(String id)
 	{
-		return (HtmlChartPlugin<HtmlRenderContext>) (ChartPlugin) this.chartPluginManager.get(id);
+		return (HtmlChartPlugin) this.chartPluginManager.get(id);
 	}
 
 	protected List<WidgetDataSetRelation> getWidgetDataSetRelations(HtmlChartWidgetEntity obj)

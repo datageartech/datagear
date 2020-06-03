@@ -16,8 +16,6 @@ import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.TemplateDashboard;
-import org.datagear.analysis.TemplateDashboardWidget;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -79,7 +77,7 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 		@SuppressWarnings("unchecked")
 		public JsonHtmlTplDashboard(HtmlTplDashboard dashboard, String renderContextVarName)
 		{
-			super(dashboard.getId(), dashboard.getTemplate(), new RefHtmlRenderContext(renderContextVarName),
+			super(dashboard.getId(), dashboard.getTemplate(), new RefRenderContext(renderContextVarName),
 					new JsonTemplateDashboardWidget(dashboard.getWidget()), dashboard.getVarName());
 
 			setCharts(Collections.EMPTY_LIST);
@@ -94,11 +92,11 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 
 	}
 
-	protected static class JsonTemplateDashboardWidget extends TemplateDashboardWidget<RenderContext>
+	protected static class JsonTemplateDashboardWidget extends HtmlTplDashboardWidget
 	{
-		public JsonTemplateDashboardWidget(TemplateDashboardWidget<?> dashboardWidget)
+		public JsonTemplateDashboardWidget(HtmlTplDashboardWidget dashboardWidget)
 		{
-			super(dashboardWidget.getId(), dashboardWidget.getTemplates());
+			super(dashboardWidget.getId(), dashboardWidget.getTemplates(), null);
 		}
 
 		@JsonIgnore
@@ -116,7 +114,7 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 		}
 
 		@Override
-		protected TemplateDashboard renderTemplate(RenderContext renderContext, String template) throws RenderException
+		protected HtmlTplDashboard renderTemplate(RenderContext renderContext, String template) throws RenderException
 		{
 			throw new UnsupportedOperationException();
 		}

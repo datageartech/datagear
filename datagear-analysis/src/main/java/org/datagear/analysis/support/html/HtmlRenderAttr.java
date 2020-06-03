@@ -6,9 +6,13 @@ package org.datagear.analysis.support.html;
 
 import java.io.Serializable;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Locale;
 
 import org.datagear.analysis.RenderContext;
+import org.datagear.analysis.RenderException;
+import org.datagear.util.Global;
+import org.datagear.util.StringUtil;
 
 /**
  * HTML渲染上下文属性定义类。
@@ -25,6 +29,9 @@ public abstract class HtmlRenderAttr implements Serializable
 
 	/** 属性名：地区 */
 	private String localeName = "locale";
+
+	/** 属性名：忽略输出的属性集名 */
+	private String ignoreRenderAttrsName = "ignoreRenderAttrs";
 
 	public HtmlRenderAttr()
 	{
@@ -49,6 +56,32 @@ public abstract class HtmlRenderAttr implements Serializable
 	public void setLocaleName(String localeName)
 	{
 		this.localeName = localeName;
+	}
+
+	public String getIgnoreRenderAttrsName()
+	{
+		return ignoreRenderAttrsName;
+	}
+
+	public void setIgnoreRenderAttrsName(String ignoreRenderAttrsName)
+	{
+		this.ignoreRenderAttrsName = ignoreRenderAttrsName;
+	}
+
+	/**
+	 * 获取HTML输出流，没有则返回{@code null}。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public Writer getHtmlWriterNonNull(RenderContext renderContext)
+	{
+		Writer out = renderContext.getAttribute(this.htmlWriterName);
+
+		if (out == null)
+			throw new RenderException("The [" + this.htmlWriterName + "] attribute must be set");
+
+		return out;
 	}
 
 	/**
@@ -115,5 +148,163 @@ public abstract class HtmlRenderAttr implements Serializable
 	public Locale removeLocale(RenderContext renderContext)
 	{
 		return renderContext.removeAttribute(this.localeName);
+	}
+
+	/**
+	 * 获取忽略渲染的{@linkplain RenderContext#getAttribute(String)}集合，没有则返回{@code null}。
+	 * 
+	 * @param renderContext
+	 * @return
+	 */
+	public Collection<String> getIgnoreRenderAttrs(RenderContext renderContext)
+	{
+		return renderContext.getAttribute(this.ignoreRenderAttrsName);
+	}
+
+	/**
+	 * 设置忽略渲染的{@linkplain RenderContext#getAttribute(String)}集合。
+	 * 
+	 * @param renderContext
+	 * @param ignoreRenderAttrs
+	 */
+	public void setIgnoreRenderAttrs(RenderContext renderContext, Collection<String> ignoreRenderAttrs)
+	{
+		renderContext.setAttribute(this.ignoreRenderAttrsName, ignoreRenderAttrs);
+	}
+
+	/**
+	 * 移除忽略渲染的{@linkplain RenderContext#getAttribute(String)}集合。
+	 * 
+	 * @param renderContext
+	 * @return 移除对象
+	 */
+	public Collection<String> removeIgnoreRenderAttrs(RenderContext renderContext)
+	{
+		return renderContext.removeAttribute(this.ignoreRenderAttrsName);
+	}
+
+	/**
+	 * 生成默认{@linkplain RenderContext}变量名。
+	 * 
+	 * @param suffix
+	 * @return
+	 */
+	public String genRenderContextVarName()
+	{
+		return genRenderContextVarName(null);
+	}
+
+	/**
+	 * 生成{@linkplain RenderContext}变量名。
+	 * 
+	 * @param suffix
+	 * @return
+	 */
+	public String genRenderContextVarName(String suffix)
+	{
+		if (suffix == null)
+			suffix = "";
+
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "RenderContext" + suffix;
+	}
+
+	/**
+	 * 生成默认图表插件变量名。
+	 * 
+	 * @return
+	 */
+	public String genChartPluginVarName()
+	{
+		return genChartPluginVarName(null);
+	}
+
+	/**
+	 * 生成图表插件变量名。
+	 * 
+	 * @param suffix
+	 *            允许为{@code null}
+	 * @return
+	 */
+	public String genChartPluginVarName(String suffix)
+	{
+		if (suffix == null)
+			suffix = "";
+
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "ChartPlugin" + suffix;
+	}
+
+	/**
+	 * 生成默认图表HTML元素ID。
+	 * 
+	 * @return
+	 */
+	public String genChartElementId()
+	{
+		return genChartElementId(null);
+	}
+
+	/**
+	 * 生成图表HTML元素ID。
+	 * 
+	 * @param suffix
+	 *            允许为{@code null}
+	 * @return
+	 */
+	public String genChartElementId(String suffix)
+	{
+		if (suffix == null)
+			suffix = "";
+
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "ChartElement" + suffix;
+	}
+
+	/**
+	 * 生成默认图表变量名。
+	 * 
+	 * @return
+	 */
+	public String genChartVarName()
+	{
+		return genChartVarName(null);
+	}
+
+	/**
+	 * 生成图表变量名。
+	 * 
+	 * @param suffix
+	 *            允许为{@code null}
+	 * @return
+	 */
+	public String genChartVarName(String suffix)
+	{
+		if (suffix == null)
+			suffix = "";
+
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Chart" + suffix;
+	}
+
+	/**
+	 * 生成默认看板变量名。
+	 * 
+	 * @return
+	 */
+	public String genDashboardVarName()
+	{
+		return genDashboardVarName(null);
+	}
+
+	/**
+	 * 生成看板变量名。
+	 * 
+	 * @param suffix
+	 *            允许为{@code null}
+	 * @return
+	 */
+	public String genDashboardVarName(String suffix)
+	{
+		if (suffix == null)
+			suffix = "";
+
+		return StringUtil.firstLowerCase(Global.PRODUCT_NAME_EN) + "Dashboard" + suffix;
 	}
 }

@@ -87,13 +87,13 @@ public class LoadHtmlChartPluginBean
 	/**
 	 * 加载。
 	 */
-	public Set<HtmlChartPlugin<?>> load()
+	public Set<HtmlChartPlugin> load()
 	{
-		Set<HtmlChartPlugin<?>> plugins = this.htmlChartPluginLoader.loads(this.directory);
+		Set<HtmlChartPlugin> plugins = this.htmlChartPluginLoader.loads(this.directory);
 
 		if (plugins != null)
 		{
-			for (HtmlChartPlugin<?> plugin : plugins)
+			for (HtmlChartPlugin plugin : plugins)
 				this.chartPluginManager.register(plugin);
 		}
 

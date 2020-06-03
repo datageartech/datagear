@@ -209,7 +209,7 @@ public class HtmlChartPluginLoader
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	public HtmlChartPlugin<?> load(File directory) throws HtmlChartPluginLoadException
+	public HtmlChartPlugin load(File directory) throws HtmlChartPluginLoadException
 	{
 		return loadSingleForDirectory(directory);
 	}
@@ -221,7 +221,7 @@ public class HtmlChartPluginLoader
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	public HtmlChartPlugin<?> loadZip(File zip) throws HtmlChartPluginLoadException
+	public HtmlChartPlugin loadZip(File zip) throws HtmlChartPluginLoadException
 	{
 		return loadSingleForZip(zip);
 	}
@@ -233,7 +233,7 @@ public class HtmlChartPluginLoader
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	public HtmlChartPlugin<?> loadZip(ZipInputStream in) throws HtmlChartPluginLoadException
+	public HtmlChartPlugin loadZip(ZipInputStream in) throws HtmlChartPluginLoadException
 	{
 		return loadSingleForZip(in);
 	}
@@ -245,9 +245,9 @@ public class HtmlChartPluginLoader
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	public HtmlChartPlugin<?> loadFile(File file) throws HtmlChartPluginLoadException
+	public HtmlChartPlugin loadFile(File file) throws HtmlChartPluginLoadException
 	{
-		HtmlChartPlugin<?> plugin = null;
+		HtmlChartPlugin plugin = null;
 
 		if (file.isDirectory())
 			plugin = loadSingleForDirectory(file);
@@ -269,15 +269,15 @@ public class HtmlChartPluginLoader
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	public Set<HtmlChartPlugin<?>> loads(File file) throws HtmlChartPluginLoadException
+	public Set<HtmlChartPlugin> loads(File file) throws HtmlChartPluginLoadException
 	{
-		Set<HtmlChartPlugin<?>> plugins = new HashSet<HtmlChartPlugin<?>>();
+		Set<HtmlChartPlugin> plugins = new HashSet<>();
 
 		if (file.isDirectory())
 		{
 			if (isHtmlChartPluginDirectory(file))
 			{
-				HtmlChartPlugin<?> plugin = load(file);
+				HtmlChartPlugin plugin = load(file);
 
 				if (plugin != null)
 					plugins.add(plugin);
@@ -288,7 +288,7 @@ public class HtmlChartPluginLoader
 
 				for (File child : children)
 				{
-					HtmlChartPlugin<?> plugin = loadFile(child);
+					HtmlChartPlugin plugin = loadFile(child);
 
 					if (plugin != null)
 						plugins.add(plugin);
@@ -299,7 +299,7 @@ public class HtmlChartPluginLoader
 		{
 			if (isHtmlChartPluginZip(file))
 			{
-				HtmlChartPlugin<?> plugin = loadZip(file);
+				HtmlChartPlugin plugin = loadZip(file);
 
 				if (plugin != null)
 					plugins.add(plugin);
@@ -327,7 +327,7 @@ public class HtmlChartPluginLoader
 
 				for (File child : children)
 				{
-					HtmlChartPlugin<?> plugin = loadFile(child);
+					HtmlChartPlugin plugin = loadFile(child);
 
 					if (plugin != null)
 						plugins.add(plugin);
@@ -340,12 +340,12 @@ public class HtmlChartPluginLoader
 		return plugins;
 	}
 
-	protected HtmlChartPlugin<?> loadFileExt(File file) throws HtmlChartPluginLoadException
+	protected HtmlChartPlugin loadFileExt(File file) throws HtmlChartPluginLoadException
 	{
 		return null;
 	}
 
-	protected HtmlChartPlugin<?> loadSingleForZip(File zip) throws HtmlChartPluginLoadException
+	protected HtmlChartPlugin loadSingleForZip(File zip) throws HtmlChartPluginLoadException
 	{
 		ZipInputStream in = null;
 
@@ -370,7 +370,7 @@ public class HtmlChartPluginLoader
 		}
 	}
 
-	protected HtmlChartPlugin<?> loadSingleForZip(ZipInputStream in) throws HtmlChartPluginLoadException
+	protected HtmlChartPlugin loadSingleForZip(ZipInputStream in) throws HtmlChartPluginLoadException
 	{
 		try
 		{
@@ -378,7 +378,7 @@ public class HtmlChartPluginLoader
 
 			IOUtil.unzip(in, tmpDirectory);
 
-			HtmlChartPlugin<?> chartPlugin = loadSingleForDirectory(tmpDirectory);
+			HtmlChartPlugin chartPlugin = loadSingleForDirectory(tmpDirectory);
 
 			FileUtil.deleteFile(tmpDirectory);
 
@@ -397,32 +397,33 @@ public class HtmlChartPluginLoader
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	protected HtmlChartPlugin<?> loadSingleForDirectory(File directory) throws HtmlChartPluginLoadException
+	protected HtmlChartPlugin loadSingleForDirectory(File directory) throws HtmlChartPluginLoadException
 	{
 		File chartFile = new File(directory, FILE_NAME_PLUGIN);
-	
+
 		if (!chartFile.exists())
 			return null;
-	
-		HtmlChartPlugin<?> plugin = null;
-	
+
+		HtmlChartPlugin plugin = null;
+
 		Reader chartIn = null;
-	
+
 		try
 		{
 			chartIn = IOUtil.getReader(chartFile, this.encoding);
-	
+
 			JsDefContent jsDefContent = this.htmlChartPluginJsDefResolver.resolve(chartIn);
-	
+
 			if (!StringUtil.isEmpty(jsDefContent.getPluginJson())
 					&& !StringUtil.isEmpty(jsDefContent.getPluginChartRenderer()))
 			{
 				plugin = createHtmlChartPlugin();
-	
-				this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(plugin, jsDefContent.getPluginJson());
+
+				this.jsonChartPluginPropertiesResolver.resolveChartPluginProperties(plugin,
+						jsDefContent.getPluginJson());
 				plugin.setChartRenderer(new StringJsChartRenderer(jsDefContent.getPluginChartRenderer()));
 				plugin.setIcons(toBytesIconsInDirectory(directory, plugin.getIcons()));
-	
+
 				if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))
 					plugin = null;
 			}
@@ -439,7 +440,7 @@ public class HtmlChartPluginLoader
 		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱
 		if (plugin != null)
 			plugin.setLastModified(System.currentTimeMillis());
-	
+
 		return plugin;
 	}
 
@@ -449,7 +450,7 @@ public class HtmlChartPluginLoader
 		if (icons == null || icons.isEmpty())
 			return icons;
 
-		Map<RenderStyle, Icon> bytesIcons = new HashMap<RenderStyle, Icon>();
+		Map<RenderStyle, Icon> bytesIcons = new HashMap<>();
 
 		for (Map.Entry<RenderStyle, Icon> entry : icons.entrySet())
 		{
@@ -521,8 +522,8 @@ public class HtmlChartPluginLoader
 		return FileUtil.isExtension(file, "zip");
 	}
 
-	protected HtmlChartPlugin<?> createHtmlChartPlugin()
+	protected HtmlChartPlugin createHtmlChartPlugin()
 	{
-		return new HtmlChartPlugin<HtmlRenderContext>();
+		return new HtmlChartPlugin();
 	}
 }

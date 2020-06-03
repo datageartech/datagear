@@ -13,7 +13,7 @@ package org.datagear.analysis;
  * @author datagear@163.com
  *
  */
-public interface DashboardWidget<T extends RenderContext> extends Identifiable
+public interface DashboardWidget extends Identifiable
 {
 	/**
 	 * 渲染{@linkplain Dashboard}。
@@ -22,5 +22,5 @@ public interface DashboardWidget<T extends RenderContext> extends Identifiable
 	 * @return
 	 * @throws RenderException
 	 */
-	Dashboard render(T renderContext) throws RenderException;
+	Dashboard render(RenderContext renderContext) throws RenderException;
 }

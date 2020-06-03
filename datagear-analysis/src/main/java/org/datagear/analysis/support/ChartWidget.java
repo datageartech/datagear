@@ -22,27 +22,27 @@ import org.datagear.util.IDUtil;
  * @author datagear@163.com
  *
  */
-public class ChartWidget<T extends RenderContext> extends ChartDefinition
+public class ChartWidget extends ChartDefinition
 {
-	private ChartPlugin<T> plugin;
+	private ChartPlugin plugin;
 
 	public ChartWidget()
 	{
 		super();
 	}
 
-	public ChartWidget(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin<T> plugin)
+	public ChartWidget(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin plugin)
 	{
 		super(id, name, chartDataSets);
 		this.plugin = plugin;
 	}
 
-	public ChartPlugin<T> getPlugin()
+	public ChartPlugin getPlugin()
 	{
 		return plugin;
 	}
 
-	public void setPlugin(ChartPlugin<T> plugin)
+	public void setPlugin(ChartPlugin plugin)
 	{
 		this.plugin = plugin;
 	}
@@ -56,7 +56,7 @@ public class ChartWidget<T extends RenderContext> extends ChartDefinition
 	 */
 	public void setPlugin(ChartPluginManager chartPluginManager, String chartPluginId)
 	{
-		ChartPlugin<T> chartPlugin = chartPluginManager.get(chartPluginId);
+		ChartPlugin chartPlugin = chartPluginManager.get(chartPluginId);
 		setPlugin(chartPlugin);
 	}
 
@@ -67,12 +67,12 @@ public class ChartWidget<T extends RenderContext> extends ChartDefinition
 	 * @return
 	 * @throws RenderException
 	 */
-	public Chart render(T renderContext) throws RenderException
+	public Chart render(RenderContext renderContext) throws RenderException
 	{
 		return this.plugin.renderChart(renderContext, buildChartDefinition(renderContext));
 	}
 
-	protected ChartDefinition buildChartDefinition(T renderContext) throws RenderException
+	protected ChartDefinition buildChartDefinition(RenderContext renderContext) throws RenderException
 	{
 		ChartDefinition chartDefinition = new ChartDefinition();
 		ChartDefinition.copy(this, chartDefinition);
@@ -87,7 +87,7 @@ public class ChartWidget<T extends RenderContext> extends ChartDefinition
 	 * @return
 	 * @throws RenderException
 	 */
-	protected String generateChartId(T renderContext) throws RenderException
+	protected String generateChartId(RenderContext renderContext) throws RenderException
 	{
 		return IDUtil.uuid();
 	}

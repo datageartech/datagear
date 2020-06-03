@@ -26,15 +26,17 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartTheme;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.analysis.support.html.HtmlChartPluginRenderOption;
-import org.datagear.analysis.support.html.HtmlRenderAttributes;
-import org.datagear.analysis.support.html.HtmlRenderContext;
-import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
+import org.datagear.analysis.support.DefaultRenderContext;
+import org.datagear.analysis.support.html.HtmlChartRenderAttr;
+import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
@@ -132,7 +134,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		dashboard.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
 
-		HtmlTplDashboardWidgetRenderer<HtmlRenderContext> renderer = getHtmlTplDashboardWidgetEntityService()
+		HtmlTplDashboardWidgetRenderer renderer = getHtmlTplDashboardWidgetEntityService()
 				.getHtmlTplDashboardWidgetRenderer();
 
 		String templateContent = renderer.simpleTemplateContent(dashboard.getTemplateEncoding());
@@ -704,16 +706,17 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			response.setCharacterEncoding(responseEncoding);
 			response.setContentType(CONTENT_TYPE_HTML);
 
+			HtmlTplDashboardRenderAttr renderAttr = createHtmlTplDashboardRenderAttr();
 			Writer out = response.getWriter();
-
 			RenderStyle renderStyle = resolveRenderStyle(request);
-			HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), renderStyle,
-					out);
+			RenderContext renderContext = createHtmlRenderContext(request, renderAttr, out, createWebContext(request),
+					renderStyle);
 			DashboardTheme dashboardTheme = getHtmlTplDashboardWidgetEntityService().getHtmlTplDashboardWidgetRenderer()
-					.inflateDashboardTheme(renderContext, renderStyle);
+					.inflateDashboardTheme(renderContext, renderAttr, renderStyle);
 			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler(
 					getMessage(request, "dashboard.show.htmlTitlePrefix", getMessage(request, "app.name")));
-			HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+
 			setDashboardThemeAttribute(request.getSession(), dashboardTheme);
 
 			HtmlTplDashboard dashboard = dashboardWidget.render(renderContext, template);
@@ -776,16 +779,12 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			out.println(".dg-chart-table .dg-chart-table-content table.dataTable tbody > tr.selected,");
 			out.println(".dg-chart-table .dg-chart-table-content table.dataTable tbody > tr > .selected,");
 			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd.selected,");
-			out.println(
-					".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd > .selected,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd > .selected,");
 			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd.selected,");
-			out.println(
-					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd > .selected,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd > .selected,");
 			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr.selected:hover,");
-			out.println(
-					".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr > .selected:hover,");
-			out.println(
-					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.selected:hover,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr > .selected:hover,");
+			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.selected:hover,");
 			out.println(
 					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr > .selected:hover {");
 			out.println("	background-color: " + chartTheme.getHighlightTheme().getBackgroundColor() + ";");
@@ -824,8 +823,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@RequestMapping(value = "/loadChart", produces = CONTENT_TYPE_JSON)
 	public void loadChart(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("dashboardId") String dashboardId, @RequestParam("chartWidgetId") String chartWidgetId,
-			@RequestParam("chartElementId") String chartElementId)
-			throws Throwable
+			@RequestParam("chartElementId") String chartElementId) throws Throwable
 	{
 		SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
 		HtmlTplDashboard dashboard = dashboardManager.get(dashboardId);
@@ -841,40 +839,34 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		ChartWidgetSource chartWidgetSource = getHtmlTplDashboardWidgetEntityService()
 				.getHtmlTplDashboardWidgetRenderer().getChartWidgetSource();
 
-		ChartWidget<HtmlRenderContext> chartWidget = chartWidgetSource.getChartWidget(chartWidgetId);
+		ChartWidget chartWidget = chartWidgetSource.getChartWidget(chartWidgetId);
 
 		if (chartWidget == null)
 			throw new RecordNotFoundException();
 
 		// 不缓存
 		response.setContentType(CONTENT_TYPE_JSON);
+
+		RenderContext renderContext = new DefaultRenderContext();
+		HtmlChartRenderAttr renderAttr = new HtmlChartRenderAttr();
 		PrintWriter out = response.getWriter();
-
-		RenderStyle renderStyle = resolveRenderStyle(request);
-		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), renderStyle,
-				out);
-
-		HtmlChartPluginRenderOption renderOption = new HtmlChartPluginRenderOption();
-		renderOption.setChartElementId(chartElementId);
+		HtmlChartRenderOption renderOption = new HtmlChartRenderOption(chartElementId,
+				"{\"id\": \"" + WebUtils.escapeJavaScriptStringValue(chartWidget.getPlugin().getId()) + "\"}",
+				"undefined", "{}");
 		renderOption.setNotWriteChartElement(true);
-		renderOption.setPluginVarName(
-				"{\"id\": \"" + WebUtils.escapeJavaScriptStringValue(chartWidget.getPlugin().getId()) + "\"}");
 		renderOption.setNotWritePluginObject(true);
-		renderOption.setChartVarName("undefined");
-		renderOption.setRenderContextVarName("{}");
 		renderOption.setNotWriteRenderContextObject(true);
 		renderOption.setNotWriteScriptTag(true);
 		renderOption.setNotWriteInvoke(true);
 		renderOption.setWriteChartJson(true);
-		HtmlChartPluginRenderOption.setOption(renderContext, renderOption);
+		renderAttr.inflate(renderContext, out, renderOption);
 
 		Chart chart = chartWidget.render(renderContext);
 
 		synchronized (dashboard)
 		{
 			List<Chart> charts = dashboard.getCharts();
-			List<Chart> newCharts = (charts == null || charts.isEmpty() ? new ArrayList<Chart>()
-					: new ArrayList<Chart>(charts));
+			List<Chart> newCharts = (charts == null || charts.isEmpty() ? new ArrayList<>() : new ArrayList<>(charts));
 			newCharts.add(chart);
 			dashboard.setCharts(newCharts);
 		}

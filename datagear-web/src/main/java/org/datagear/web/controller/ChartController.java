@@ -15,17 +15,16 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
-import org.datagear.analysis.support.html.HtmlRenderAttributes;
-import org.datagear.analysis.support.html.HtmlRenderContext;
-import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
+import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
@@ -74,7 +73,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 	@Autowired
 	@Qualifier("chartShowHtmlTplDashboardWidgetHtmlRenderer")
-	private HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer;
+	private HtmlTplDashboardWidgetHtmlRenderer chartShowHtmlTplDashboardWidgetHtmlRenderer;
 
 	private ServletContext servletContext;
 
@@ -103,13 +102,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		this.chartPluginManager = chartPluginManager;
 	}
 
-	public HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> getChartShowHtmlTplDashboardWidgetHtmlRenderer()
+	public HtmlTplDashboardWidgetHtmlRenderer getChartShowHtmlTplDashboardWidgetHtmlRenderer()
 	{
 		return chartShowHtmlTplDashboardWidgetHtmlRenderer;
 	}
 
 	public void setChartShowHtmlTplDashboardWidgetHtmlRenderer(
-			HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext> chartShowHtmlTplDashboardWidgetHtmlRenderer)
+			HtmlTplDashboardWidgetHtmlRenderer chartShowHtmlTplDashboardWidgetHtmlRenderer)
 	{
 		this.chartShowHtmlTplDashboardWidgetHtmlRenderer = chartShowHtmlTplDashboardWidgetHtmlRenderer;
 	}
@@ -169,7 +168,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		User user = WebUtils.getUser(request, response);
 
-		HtmlChartPlugin<HtmlRenderContext> paramPlugin = entity.getHtmlChartPlugin();
+		HtmlChartPlugin paramPlugin = entity.getHtmlChartPlugin();
 
 		if (isEmpty(entity.getId()))
 		{
@@ -374,7 +373,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		String id = chart.getId();
 
 		String htmlTitle = chart.getName();
-		HtmlTplDashboardWidget<HtmlRenderContext> dashboardWidget = new HtmlTplDashboardWidget<>(id,
+		HtmlTplDashboardWidget dashboardWidget = new HtmlTplDashboardWidget(id,
 				this.chartShowHtmlTplDashboardWidgetHtmlRenderer.simpleTemplateContent("UTF-8", htmlTitle,
 						"  position:absolute;\n  left:1em;\n  right:1em;\n  top:1em;\n  bottom:1em;\n  margin:0 0;\n  width:auto;\n  height:auto;\n",
 						new String[] { id }),
@@ -384,15 +383,17 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		response.setCharacterEncoding(responseEncoding);
 		response.setContentType(CONTENT_TYPE_HTML);
 
+		HtmlTplDashboardRenderAttr renderAttr = createHtmlTplDashboardRenderAttr();
 		Writer out = response.getWriter();
-
 		RenderStyle renderStyle = resolveRenderStyle(request);
-		HtmlRenderContext renderContext = createHtmlRenderContext(request, createWebContext(request), renderStyle, out);
+		RenderContext renderContext = createHtmlRenderContext(request, renderAttr, out, createWebContext(request),
+				renderStyle);
 		DashboardTheme dashboardTheme = getChartShowHtmlTplDashboardWidgetHtmlRenderer()
-				.inflateDashboardTheme(renderContext, renderStyle);
+				.inflateDashboardTheme(renderContext, renderAttr, renderStyle);
 		AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler(
 				getMessage(request, "chart.show.htmlTitlePrefix", getMessage(request, "app.name")));
-		HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+		renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
+
 		setDashboardThemeAttribute(request.getSession(), dashboardTheme);
 
 		HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
@@ -418,15 +419,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			entity.updateChartPluginName(locale);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void inflateHtmlChartWidgetEntity(HtmlChartWidgetEntity entity, HttpServletRequest request)
 	{
-		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = entity.getHtmlChartPlugin();
+		HtmlChartPlugin htmlChartPlugin = entity.getHtmlChartPlugin();
 
 		if (htmlChartPlugin != null)
 		{
-			htmlChartPlugin = (HtmlChartPlugin<HtmlRenderContext>) (ChartPlugin) this.chartPluginManager
-					.get(htmlChartPlugin.getId());
+			htmlChartPlugin = (HtmlChartPlugin) this.chartPluginManager.get(htmlChartPlugin.getId());
 
 			entity.setHtmlChartPlugin(htmlChartPlugin);
 		}

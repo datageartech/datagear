@@ -14,8 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.datagear.analysis.Chart;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.ChartWidgetSource;
+import org.datagear.analysis.support.DefaultRenderContext;
+import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
@@ -64,7 +67,7 @@ import org.datagear.util.StringUtil;
  *
  * @param <T>
  */
-public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> extends HtmlTplDashboardWidgetRenderer<T>
+public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRenderer
 {
 	public static final String DEFAULT_DASHBOARD_SET_TAG_NAME = "html";
 
@@ -226,14 +229,14 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 	}
 
 	@Override
-	protected void renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard) throws Throwable
+	protected void renderHtmlTplDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+			HtmlTplDashboard dashboard) throws Throwable
 	{
-		HtmlTplDashboardWidget<?> dashboardWidget = (HtmlTplDashboardWidget<?>) dashboard.getWidget();
-		Reader in = getTemplateReaderNotNull(dashboardWidget, dashboard.getTemplate());
+		Reader in = getTemplateReaderNotNull(dashboard.getWidget(), dashboard.getTemplate());
 
 		try
 		{
-			renderHtmlTplDashboard(renderContext, dashboard, in);
+			renderHtmlTplDashboard(renderContext, renderAttr, dashboard, in);
 		}
 		finally
 		{
@@ -241,21 +244,12 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		}
 	}
 
-	/**
-	 * 渲染{@linkplain HtmlTplDashboard}。
-	 * 
-	 * @param renderContext
-	 * @param dashboard
-	 * @param in
-	 * @return
-	 * @throws Exception
-	 */
-	protected DashboardInfo renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard, Reader in)
-			throws Exception
+	protected DashboardInfo renderHtmlTplDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+			HtmlTplDashboard dashboard, Reader in) throws Exception
 	{
-		Writer out = renderContext.getWriter();
+		Writer out = renderAttr.getHtmlWriterNonNull(renderContext);
 
-		HtmlTitleHandler htmlTitleHandler = HtmlRenderAttributes.removeHtmlTitleHandler(renderContext);
+		HtmlTitleHandler htmlTitleHandler = renderAttr.getHtmlTitleHandler(renderContext);
 
 		boolean resolvedDashboardInfo = false;
 		boolean wroteDashboardImport = false;
@@ -309,7 +303,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 						readToTagEnd(in, out);
 
 					if (!wroteDashboardImport)
-						writeDashboardImport(renderContext, dashboard, dashboardInfo);
+						writeDashboardImport(renderContext, renderAttr, out, dashboard, dashboardInfo);
 				}
 				// <title
 				else if (inHeadTag && "title".equalsIgnoreCase(tagName))
@@ -370,8 +364,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 						clear(valueCache);
 						clear(tagContentCache);
 
-						last = resolveDashboardChartInfo(renderContext, dashboard, in, last, tagContentCache, nameCache,
-								valueCache, dashboardInfo);
+						last = resolveDashboardChartInfo(renderContext, renderAttr, dashboard, in, last,
+								tagContentCache, nameCache, valueCache, dashboardInfo);
 
 						append(out, tagContentCache);
 					}
@@ -381,7 +375,7 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 				{
 					if (!wroteDashboardScript)
 					{
-						writeHtmlTplDashboardScript(renderContext, dashboard, dashboardInfo);
+						writeHtmlTplDashboardScript(renderContext, renderAttr, out, dashboard, dashboardInfo);
 						wroteDashboardScript = true;
 					}
 
@@ -407,46 +401,27 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 				out.write(c);
 		}
 
-		HtmlRenderAttributes.setHtmlTitleHandler(renderContext, htmlTitleHandler);
-
 		return dashboardInfo;
 	}
 
-	/**
-	 * 写看板导入项。
-	 * 
-	 * @param renderContext
-	 * @param dashboard
-	 * @param dashboardInfo
-	 * @throws IOException
-	 */
-	protected void writeDashboardImport(T renderContext, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
-			throws IOException
+	protected void writeDashboardImport(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
+			HtmlTplDashboard dashboard, DashboardInfo dashboardInfo) throws IOException
 	{
-		writeDashboardImport(renderContext, dashboard, dashboardInfo.getImportExclude());
+		writeDashboardImport(renderContext, renderAttr, out, dashboard, dashboardInfo.getImportExclude());
 	}
 
-	/**
-	 * 写HTML看板脚本。
-	 * 
-	 * @param renderContext
-	 * @param dashboard
-	 * @param dashboardInfo
-	 * @throws IOException
-	 */
-	protected void writeHtmlTplDashboardScript(T renderContext, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
-			throws IOException
+	protected void writeHtmlTplDashboardScript(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+			Writer out, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo) throws IOException
 	{
 		String globalDashboardVar = dashboardInfo.getDashboardVar();
 		if (StringUtil.isEmpty(globalDashboardVar))
 			globalDashboardVar = getDefaultDashboardVar();
 
-		String tmpRenderContextVarName = HtmlRenderAttributes.generateRenderContextVarName(renderContext);
-		String localDashboardVarName = HtmlRenderAttributes.generateDashboardVarName(renderContext);
+		String tmp0RenderContextVarName = renderAttr.genRenderContextVarName("Tmp0");
+		String tmp1RenderContextVarName = renderAttr.genRenderContextVarName("Tmp1");
+		String localDashboardVarName = renderAttr.genDashboardVarName("Tmp");
 
 		dashboard.setVarName(localDashboardVarName);
-
-		Writer out = renderContext.getWriter();
 
 		writeScriptStartTag(out);
 		writeNewLine(out);
@@ -454,17 +429,18 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		out.write("(function(){");
 		writeNewLine(out);
 
-		writeHtmlTplDashboardJSVar(renderContext, out, dashboard, tmpRenderContextVarName);
+		writeHtmlTplDashboardJSVar(renderContext, renderAttr, out, dashboard, tmp0RenderContextVarName);
 
-		writeHtmlChartScripts(renderContext, dashboard, dashboardInfo);
-		writeHtmlTplDashboardJSInit(out, dashboard);
-		writeHtmlTplDashboardJSFactoryInit(out, dashboard, dashboardInfo.getDashboardFactoryVar());
+		writeHtmlChartScripts(renderContext, renderAttr, out, dashboard, dashboardInfo);
+		writeHtmlTplDashboardJSInit(renderContext, renderAttr, out, dashboard, tmp1RenderContextVarName);
+		writeHtmlTplDashboardJSFactoryInit(renderContext, renderAttr, out, dashboard,
+				dashboardInfo.getDashboardFactoryVar());
 
 		out.write("window." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);
 
 		writeNewLine(out);
-		writeHtmlTplDashboardJSRender(out, dashboard);
+		writeHtmlTplDashboardJSRender(renderContext, renderAttr, out, dashboard);
 
 		out.write("})();");
 		writeNewLine(out);
@@ -473,8 +449,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		writeNewLine(out);
 	}
 
-	protected void writeHtmlChartScripts(T renderContext, HtmlTplDashboard dashboard, DashboardInfo dashboardInfo)
-			throws IOException
+	protected void writeHtmlChartScripts(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr, Writer out,
+			HtmlTplDashboard dashboard, DashboardInfo dashboardInfo) throws IOException
 	{
 		List<Chart> charts = dashboard.getCharts();
 		if (charts == null)
@@ -486,44 +462,41 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		List<ChartInfo> chartInfos = dashboardInfo.getChartInfos();
 		if (chartInfos != null)
 		{
-			List<HtmlChartWidget<HtmlRenderContext>> chartWidgets = getHtmlChartWidgets(renderContext, chartInfos);
-			List<String> chartPluginVarNames = writeHtmlChartPluginScriptsResolveImport(renderContext, chartWidgets);
+			List<HtmlChartWidget> chartWidgets = getHtmlChartWidgets(renderContext, chartInfos);
+			List<String> chartPluginVarNames = writeHtmlChartPluginScriptsResolveImport(renderContext, renderAttr, out,
+					chartWidgets);
 
-			HtmlChartPluginRenderOption option = new HtmlChartPluginRenderOption();
-			option.setNotWriteChartElement(true);
-			option.setNotWriteScriptTag(true);
-			option.setNotWriteInvoke(true);
-			option.setNotWritePluginObject(true);
-			option.setNotWriteRenderContextObject(true);
-			option.setRenderContextVarName(dashboard.getVarName() + ".renderContext");
+			RenderContext chartRenderContext = new DefaultRenderContext(renderContext);
+			HtmlChartRenderAttr chartRenderAttr = new HtmlChartRenderAttr();
 
-			HtmlChartPluginRenderOption.setOption(renderContext, option);
+			HtmlChartRenderOption chartRenderOption = new HtmlChartRenderOption(chartRenderAttr);
+			chartRenderOption.setNotWriteChartElement(true);
+			chartRenderOption.setNotWriteScriptTag(true);
+			chartRenderOption.setNotWriteInvoke(true);
+			chartRenderOption.setNotWritePluginObject(true);
+			chartRenderOption.setNotWriteRenderContextObject(true);
+			chartRenderOption.setRenderContextVarName(dashboard.getVarName() + ".renderContext");
+
+			chartRenderAttr.inflate(chartRenderContext, out, chartRenderOption);
 
 			for (int i = 0; i < chartInfos.size(); i++)
 			{
 				ChartInfo chartInfo = chartInfos.get(i);
-				HtmlChartWidget<HtmlRenderContext> chartWidget = chartWidgets.get(i);
+				HtmlChartWidget chartWidget = chartWidgets.get(i);
 
-				option.setChartElementId(chartInfo.getElementId());
+				chartRenderOption.setChartElementId(chartInfo.getElementId());
+				chartRenderOption.setPluginVarName(chartPluginVarNames.get(i));
+				chartRenderOption.setChartVarName(chartRenderAttr.genChartVarName(Integer.toString(i)));
 
-				String chartVarName = HtmlRenderAttributes.generateChartVarName(renderContext);
-
-				option.setPluginVarName(chartPluginVarNames.get(i));
-				option.setChartVarName(chartVarName);
-
-				HtmlChart chart = writeHtmlChart(chartWidget, renderContext);
+				HtmlChart chart = writeHtmlChart(chartRenderContext, chartWidget);
 				charts.add(chart);
 			}
-
-			// 移除内部设置的属性
-			HtmlChartPluginRenderOption.removeOption(renderContext);
 		}
 	}
 
-	protected List<HtmlChartWidget<HtmlRenderContext>> getHtmlChartWidgets(HtmlRenderContext renderContext,
-			List<ChartInfo> chartInfos)
+	protected List<HtmlChartWidget> getHtmlChartWidgets(RenderContext renderContext, List<ChartInfo> chartInfos)
 	{
-		List<HtmlChartWidget<HtmlRenderContext>> list = new ArrayList<>();
+		List<HtmlChartWidget> list = new ArrayList<>();
 
 		if (chartInfos == null)
 			return list;
@@ -582,23 +555,9 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		return c;
 	}
 
-	/**
-	 * 解析{@linkplain DashboardInfo#getChartInfos()}。
-	 * 
-	 * @param renderContext
-	 * @param dashboard
-	 * @param in
-	 * @param last
-	 * @param cache
-	 * @param attrName
-	 * @param attrValue
-	 * @param dashboardInfo
-	 * @return
-	 * @throws IOException
-	 */
-	protected int resolveDashboardChartInfo(T renderContext, HtmlTplDashboard dashboard, Reader in, int last,
-			StringBuilder cache, StringBuilder attrName, StringBuilder attrValue, DashboardInfo dashboardInfo)
-			throws IOException
+	protected int resolveDashboardChartInfo(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+			HtmlTplDashboard dashboard, Reader in, int last, StringBuilder cache, StringBuilder attrName,
+			StringBuilder attrValue, DashboardInfo dashboardInfo) throws IOException
 	{
 		ChartInfo chartInfo = null;
 
@@ -636,7 +595,8 @@ public class HtmlTplDashboardWidgetHtmlRenderer<T extends HtmlRenderContext> ext
 		// 元素没有定义“id”属性
 		if (chartInfo != null && StringUtil.isEmpty(chartInfo.getElementId()))
 		{
-			String elementId = HtmlRenderAttributes.generateChartElementId(renderContext);
+			int chartIndex = dashboardInfo.getChartInfos().size();
+			String elementId = renderAttr.genChartElementId(Integer.toString(chartIndex));
 
 			chartInfo.setElementId(elementId);
 

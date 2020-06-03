@@ -7,46 +7,53 @@
  */
 package org.datagear.analysis.support.html;
 
+import java.io.Writer;
+
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.ChartWidget;
+import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 
 /**
  * HTML {@linkplain ChartWidget}。
+ * <p>
+ * 注意：此类{@linkplain #render(RenderContext)}的{@linkplain RenderContext}必须符合{@linkplain HtmlChartRenderAttr#inflate(RenderContext, Writer, HtmlChartRenderOption)}规范。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class HtmlChartWidget<T extends HtmlRenderContext> extends ChartWidget<T>
+public class HtmlChartWidget extends ChartWidget
 {
 	public HtmlChartWidget()
 	{
 		super();
 	}
 
-	public HtmlChartWidget(String id, String name, ChartDataSet[] chartDataSets, HtmlChartPlugin<T> plugin)
+	public HtmlChartWidget(String id, String name, ChartDataSet[] chartDataSets, HtmlChartPlugin plugin)
 	{
 		super(id, name, chartDataSets, plugin);
 	}
 
 	@Override
-	public HtmlChartPlugin<T> getPlugin()
+	public HtmlChartPlugin getPlugin()
 	{
-		return (HtmlChartPlugin<T>) super.getPlugin();
+		return (HtmlChartPlugin) super.getPlugin();
 	}
 
 	@Override
-	public void setPlugin(ChartPlugin<T> plugin)
+	public void setPlugin(ChartPlugin plugin)
 	{
-		if (plugin != null && !(plugin instanceof HtmlChartPlugin<?>))
+		if (plugin != null && !(plugin instanceof HtmlChartPlugin))
 			throw new IllegalArgumentException();
 
 		super.setPlugin(plugin);
 	}
 
 	@Override
-	public HtmlChart render(T renderContext) throws RenderException
+	public HtmlChart render(RenderContext renderContext) throws RenderException
 	{
 		HtmlChart chart = (HtmlChart) super.render(renderContext);
 

@@ -20,7 +20,7 @@ import org.datagear.util.i18n.Label;
  * @author datagear@163.com
  *
  */
-public class ParamValueHtmlChartPlugin<T extends HtmlRenderContext> extends HtmlChartPlugin<T>
+public class ParamValueHtmlChartPlugin extends HtmlChartPlugin
 {
 	private String chartParamName;
 

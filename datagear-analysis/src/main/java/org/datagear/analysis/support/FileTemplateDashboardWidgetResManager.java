@@ -94,7 +94,7 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	}
 
 	@Override
-	public Reader getTemplateReader(TemplateDashboardWidget<?> widget, String template) throws IOException
+	public Reader getTemplateReader(TemplateDashboardWidget widget, String template) throws IOException
 	{
 		if (this.templateAsContent)
 		{
@@ -112,7 +112,7 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	}
 
 	@Override
-	public Writer getTemplateWriter(TemplateDashboardWidget<?> widget, String template) throws IOException
+	public Writer getTemplateWriter(TemplateDashboardWidget widget, String template) throws IOException
 	{
 		if (this.templateAsContent)
 			throw new UnsupportedOperationException();
@@ -168,12 +168,12 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 		File directory = FileUtil.getDirectory(this.rootDirectory, id, false);
 
 		if (!directory.exists())
-			return new ArrayList<String>(0);
+			return new ArrayList<>(0);
 
-		List<File> files = new ArrayList<File>();
+		List<File> files = new ArrayList<>();
 		listAllDescendentFiles(directory, files);
 
-		List<String> resources = new ArrayList<String>(files.size());
+		List<String> resources = new ArrayList<>(files.size());
 
 		for (File file : files)
 		{
@@ -235,7 +235,7 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	 * @param template
 	 * @return
 	 */
-	protected String getResourceNameForTemplate(TemplateDashboardWidget<?> widget, String template)
+	protected String getResourceNameForTemplate(TemplateDashboardWidget widget, String template)
 	{
 		return template;
 	}

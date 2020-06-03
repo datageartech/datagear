@@ -35,7 +35,7 @@ public class HtmlChartPluginLoaderTest
 		File directory = new File(
 				"src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin01");
 
-		HtmlChartPlugin<?> plugin = this.htmlChartPluginLoader.load(directory);
+		HtmlChartPlugin plugin = this.htmlChartPluginLoader.load(directory);
 		Assert.assertEquals("plugin01", plugin.getId());
 	}
 
@@ -45,7 +45,7 @@ public class HtmlChartPluginLoaderTest
 		File file = new File(
 				"src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin03.zip");
 
-		HtmlChartPlugin<?> plugin = this.htmlChartPluginLoader.loadZip(file);
+		HtmlChartPlugin plugin = this.htmlChartPluginLoader.loadZip(file);
 		Assert.assertEquals("plugin03", plugin.getId());
 	}
 
@@ -54,9 +54,9 @@ public class HtmlChartPluginLoaderTest
 	{
 		File directory = new File("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders");
 
-		Set<HtmlChartPlugin<?>> plugins = this.htmlChartPluginLoader.loads(directory);
+		Set<HtmlChartPlugin> plugins = this.htmlChartPluginLoader.loads(directory);
 
-		List<HtmlChartPlugin<?>> list = new ArrayList<HtmlChartPlugin<?>>();
+		List<HtmlChartPlugin> list = new ArrayList<>();
 		list.addAll(plugins);
 
 		AbstractChartPluginManager.sort(list);
@@ -64,7 +64,7 @@ public class HtmlChartPluginLoaderTest
 		Assert.assertEquals(4, list.size());
 
 		{
-			HtmlChartPlugin<?> plugin = list.get(0);
+			HtmlChartPlugin plugin = list.get(0);
 			Assert.assertEquals("plugin04", plugin.getId());
 
 			Map<RenderStyle, Icon> icons = plugin.getIcons();
@@ -73,7 +73,7 @@ public class HtmlChartPluginLoaderTest
 		}
 
 		{
-			HtmlChartPlugin<?> plugin = list.get(1);
+			HtmlChartPlugin plugin = list.get(1);
 			Assert.assertEquals("plugin03", plugin.getId());
 
 			Map<RenderStyle, Icon> icons = plugin.getIcons();
@@ -82,7 +82,7 @@ public class HtmlChartPluginLoaderTest
 		}
 
 		{
-			HtmlChartPlugin<?> plugin = list.get(2);
+			HtmlChartPlugin plugin = list.get(2);
 			Assert.assertEquals("plugin02", plugin.getId());
 
 			Map<RenderStyle, Icon> icons = plugin.getIcons();
@@ -91,7 +91,7 @@ public class HtmlChartPluginLoaderTest
 		}
 
 		{
-			HtmlChartPlugin<?> plugin = list.get(3);
+			HtmlChartPlugin plugin = list.get(3);
 			Assert.assertEquals("plugin01", plugin.getId());
 
 			Map<RenderStyle, Icon> icons = plugin.getIcons();

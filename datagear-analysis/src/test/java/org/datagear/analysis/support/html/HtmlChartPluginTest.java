@@ -9,12 +9,10 @@ package org.datagear.analysis.support.html;
 
 import java.io.File;
 import java.io.StringWriter;
-import java.util.Locale;
 
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.RenderStyle;
-import org.datagear.analysis.support.SimpleDashboardThemeSource;
-import org.datagear.analysis.support.html.HtmlRenderContext.WebContext;
+import org.datagear.analysis.support.DefaultRenderContext;
+import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,33 +30,33 @@ public class HtmlChartPluginTest
 	@Test
 	public void renderChartTest() throws Throwable
 	{
-		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = createHtmlChartPlugin();
+		HtmlChartPlugin htmlChartPlugin = createHtmlChartPlugin();
 
+		DefaultRenderContext renderContext = new DefaultRenderContext();
+		HtmlChartRenderAttr renderAttr = new HtmlChartRenderAttr();
 		StringWriter stringWriter = new StringWriter();
-		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), stringWriter);
-		HtmlRenderAttributes.setRenderStyle(renderContext, RenderStyle.DARK);
-		HtmlRenderAttributes.setChartTheme(renderContext, SimpleDashboardThemeSource.THEME_LIGHT.getChartTheme());
-		HtmlRenderAttributes.setLocale(renderContext, Locale.getDefault());
+		HtmlChartRenderOption renderOption = new HtmlChartRenderOption(renderAttr);
+		renderAttr.inflate(renderContext, stringWriter, renderOption);
 
 		htmlChartPlugin.renderChart(renderContext, new ChartDefinition());
 
 		String html = getHtmlWithPrint(stringWriter);
 
-		Assert.assertTrue(html.contains("<div id=\"" + HtmlRenderAttributes.generateChartElementId("1") + "\"></div>"));
-		Assert.assertTrue(html.contains("(" + HtmlRenderAttributes.generateChartVarName("4") + ");"));
+		Assert.assertTrue(html.contains("<div id=\"" + renderOption.getChartElementId() + "\"></div>"));
+		Assert.assertTrue(html.contains("(" + renderOption.getChartVarName() + ");"));
 	}
 
 	@Test
 	public void renderChartTest_setChartRenderContextVarName() throws Throwable
 	{
-		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = createHtmlChartPlugin();
+		HtmlChartPlugin htmlChartPlugin = createHtmlChartPlugin();
 
+		DefaultRenderContext renderContext = new DefaultRenderContext();
+		HtmlChartRenderAttr renderAttr = new HtmlChartRenderAttr();
 		StringWriter stringWriter = new StringWriter();
-		DefaultHtmlRenderContext renderContext = new DefaultHtmlRenderContext(new WebContext("", ""), stringWriter);
-
-		HtmlChartPluginRenderOption option = new HtmlChartPluginRenderOption();
-		option.setRenderContextVarName("chartRenderContext");
-		HtmlChartPluginRenderOption.setOption(renderContext, option);
+		HtmlChartRenderOption renderOption = new HtmlChartRenderOption(renderAttr);
+		renderOption.setRenderContextVarName("chartRenderContext");
+		renderAttr.inflate(renderContext, stringWriter, renderOption);
 
 		htmlChartPlugin.renderChart(renderContext, new ChartDefinition());
 
@@ -67,13 +65,11 @@ public class HtmlChartPluginTest
 		Assert.assertTrue(html.contains("\"renderContext\":chartRenderContext"));
 	}
 
-	public static HtmlChartPlugin<HtmlRenderContext> createHtmlChartPlugin() throws Exception
+	public static HtmlChartPlugin createHtmlChartPlugin() throws Exception
 	{
 		File directory = new File("src/test/resources/org/datagear/analysis/support/html/HtmlChartPluginTest");
 
-		@SuppressWarnings("unchecked")
-		HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = (HtmlChartPlugin<HtmlRenderContext>) new HtmlChartPluginLoader()
-				.load(directory);
+		HtmlChartPlugin htmlChartPlugin = new HtmlChartPluginLoader().load(directory);
 
 		return htmlChartPlugin;
 	}

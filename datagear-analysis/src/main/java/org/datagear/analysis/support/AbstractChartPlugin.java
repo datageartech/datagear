@@ -16,7 +16,6 @@ import org.datagear.analysis.ChartParam;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
-import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.util.i18n.Label;
 
@@ -26,8 +25,7 @@ import org.datagear.util.i18n.Label;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractChartPlugin<T extends RenderContext> extends AbstractIdentifiable
-		implements ChartPlugin<T>
+public abstract class AbstractChartPlugin extends AbstractIdentifiable implements ChartPlugin
 {
 	private Label nameLabel;
 

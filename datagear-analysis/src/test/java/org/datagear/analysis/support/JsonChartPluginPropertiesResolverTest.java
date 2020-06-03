@@ -161,7 +161,7 @@ public class JsonChartPluginPropertiesResolverTest
 		}
 	}
 
-	private static class TestChartPlugin extends AbstractChartPlugin<RenderContext>
+	private static class TestChartPlugin extends AbstractChartPlugin
 	{
 		public TestChartPlugin()
 		{

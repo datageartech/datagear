@@ -16,7 +16,6 @@ import java.util.zip.ZipOutputStream;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
-import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.ConcurrentChartPluginManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -46,9 +45,9 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 	private long readCheckForReloadTimeThreashold = (LOGGER.isDebugEnabled() ? 0 : 5 * 60 * 1000);
 
-	private Map<String, String> pluginIdFileNameMap = new HashMap<String, String>();
+	private Map<String, String> pluginIdFileNameMap = new HashMap<>();
 
-	private Map<String, FileCheckTime> fileNameCheckTimeMap = new HashMap<String, FileCheckTime>();
+	private Map<String, FileCheckTime> fileNameCheckTimeMap = new HashMap<>();
 
 	private volatile long _prevReadCheckForReloadTime = 0;
 
@@ -141,7 +140,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	}
 
 	@Override
-	public <T extends RenderContext> ChartPlugin<T> get(String id)
+	public ChartPlugin get(String id)
 	{
 		readCheckForReload();
 
@@ -149,7 +148,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	}
 
 	@Override
-	public <T extends RenderContext> List<ChartPlugin<T>> getAll(Class<? extends T> renderContextType)
+	public <T extends ChartPlugin> List<T> getAll(Class<? super T> renderContextType)
 	{
 		readCheckForReload();
 
@@ -157,7 +156,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	}
 
 	@Override
-	public List<ChartPlugin<?>> getAll()
+	public List<ChartPlugin> getAll()
 	{
 		readCheckForReload();
 
@@ -175,9 +174,9 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 * @return
 	 * @throws IOException
 	 */
-	public Set<HtmlChartPlugin<?>> upload(File file) throws IOException
+	public Set<HtmlChartPlugin> upload(File file) throws IOException
 	{
-		Set<HtmlChartPlugin<?>> ids = new HashSet<HtmlChartPlugin<?>>();
+		Set<HtmlChartPlugin> ids = new HashSet<>();
 
 		WriteLock writeLock = lock.writeLock();
 
@@ -228,14 +227,14 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		}
 	}
 
-	protected void upload(File file, Set<HtmlChartPlugin<?>> plugins, int depth) throws IOException
+	protected void upload(File file, Set<HtmlChartPlugin> plugins, int depth) throws IOException
 	{
 		if (depth > 1 || !file.exists())
 			return;
 
 		if (file.isDirectory())
 		{
-			HtmlChartPlugin<?> myPlugin = this.htmlChartPluginLoader.load(file);
+			HtmlChartPlugin myPlugin = this.htmlChartPluginLoader.load(file);
 			inflateCagetory(myPlugin);
 
 			if (myPlugin != null)
@@ -256,7 +255,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		}
 		else if (this.htmlChartPluginLoader.isHtmlChartPluginZip(file))
 		{
-			HtmlChartPlugin<?> myPlugin = this.htmlChartPluginLoader.loadZip(file);
+			HtmlChartPlugin myPlugin = this.htmlChartPluginLoader.loadZip(file);
 			inflateCagetory(myPlugin);
 
 			if (myPlugin != null)
@@ -283,8 +282,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		}
 	}
 
-	protected HtmlChartPlugin<?> registerForUpload(HtmlChartPlugin<?> uploadPlugin, File uploadPluginFile)
-			throws IOException
+	protected HtmlChartPlugin registerForUpload(HtmlChartPlugin uploadPlugin, File uploadPluginFile) throws IOException
 	{
 		if (!isLegalChartPlugin(uploadPlugin))
 			return null;
@@ -302,7 +300,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		else
 		{
 			String loadedPluginId = getFilePluginId(pluginFileName);
-			ChartPlugin<?> loadedPlugin = (loadedPluginId == null ? null : getChartPlugin(loadedPluginId));
+			ChartPlugin loadedPlugin = (loadedPluginId == null ? null : getChartPlugin(loadedPluginId));
 
 			// 同名文件不是插件，则删除它并拷入新文件
 			if (loadedPlugin == null)
@@ -338,9 +336,9 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	}
 
 	@Override
-	protected ChartPlugin<?> removeChartPlugin(String id)
+	protected ChartPlugin removeChartPlugin(String id)
 	{
-		ChartPlugin<?> plugin = super.removeChartPlugin(id);
+		ChartPlugin plugin = super.removeChartPlugin(id);
 		deletePluginFile(id);
 
 		return plugin;
@@ -413,7 +411,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 */
 	protected void checkForReload()
 	{
-		List<FileCheckTime> reloads = new ArrayList<FileCheckTime>();
+		List<FileCheckTime> reloads = new ArrayList<>();
 
 		// 是否有删除插件文件，如果有删除，那么全部重新加载
 		boolean hasDelete = false;
@@ -503,11 +501,11 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 *            {@linkplain #directory}目录下的一个文件
 	 * @return
 	 */
-	protected HtmlChartPlugin<?> loadAndRegisterHtmlChartPlugin(File file)
+	protected HtmlChartPlugin loadAndRegisterHtmlChartPlugin(File file)
 	{
 		try
 		{
-			HtmlChartPlugin<?> plugin = this.htmlChartPluginLoader.loadFile(file);
+			HtmlChartPlugin plugin = this.htmlChartPluginLoader.loadFile(file);
 			inflateCagetory(plugin);
 			return registerHtmlChartPlugin(plugin, file);
 		}
@@ -530,7 +528,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 *            {@linkplain #directory}目录下的一个文件
 	 * @return
 	 */
-	protected HtmlChartPlugin<?> registerHtmlChartPlugin(HtmlChartPlugin<?> plugin, File file)
+	protected HtmlChartPlugin registerHtmlChartPlugin(HtmlChartPlugin plugin, File file)
 	{
 		String fileName = file.getName();
 
@@ -550,7 +548,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	}
 
 	@Override
-	protected boolean canReplaceForSameId(ChartPlugin<?> my, Version myVersion, ChartPlugin<?> old, Version oldVersion)
+	protected boolean canReplaceForSameId(ChartPlugin my, Version myVersion, ChartPlugin old, Version oldVersion)
 	{
 		// 调试模式下总替换
 		if (LOGGER.isDebugEnabled())
@@ -559,7 +557,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		return super.canReplaceForSameId(my, myVersion, old, oldVersion);
 	}
 
-	protected boolean inflateCagetory(HtmlChartPlugin<?> plugin)
+	protected boolean inflateCagetory(HtmlChartPlugin plugin)
 	{
 		if (plugin == null)
 			return false;
@@ -572,14 +570,14 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		if (category.hasNameLabel())
 			return false;
 
-		Map<String, ? extends ChartPlugin<?>> map = getChartPluginMap();
+		Map<String, ChartPlugin> map = getChartPluginMap();
 
-		for (ChartPlugin<?> chartPlugin : map.values())
+		for (ChartPlugin chartPlugin : map.values())
 		{
 			Category myCategory = chartPlugin.getCategory();
 
-			if (myCategory != null && myCategory.hasNameLabel()
-					&& myCategory.getName() != null && myCategory.getName().equals(category.getName()))
+			if (myCategory != null && myCategory.hasNameLabel() && myCategory.getName() != null
+					&& myCategory.getName().equals(category.getName()))
 			{
 				plugin.setCategory(myCategory);
 				return true;
@@ -626,15 +624,15 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	}
 
 	@Override
-	protected boolean isLegalChartPlugin(ChartPlugin<?> chartPlugin)
+	protected boolean isLegalChartPlugin(ChartPlugin chartPlugin)
 	{
 		boolean legal = super.isLegalChartPlugin(chartPlugin);
 
 		if (legal)
 		{
-			if (chartPlugin instanceof HtmlChartPlugin<?>)
+			if (chartPlugin instanceof HtmlChartPlugin)
 			{
-				HtmlChartPlugin<?> htmlChartPlugin = (HtmlChartPlugin<?>) chartPlugin;
+				HtmlChartPlugin htmlChartPlugin = (HtmlChartPlugin) chartPlugin;
 
 				if (htmlChartPlugin.getChartRenderer() == null)
 					legal = false;

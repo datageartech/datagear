@@ -17,9 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
-import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.AbstractChartPlugin;
@@ -27,7 +27,6 @@ import org.datagear.analysis.support.CategorizationResolver;
 import org.datagear.analysis.support.CategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
-import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.util.i18n.Label;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
@@ -85,23 +84,18 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 */
 	protected HtmlChartPluginVO getHtmlChartPluginVO(HttpServletRequest request, String id)
 	{
-		List<ChartPlugin<HtmlRenderContext>> plugins = getDirectoryHtmlChartPluginManager()
-				.getAll(HtmlRenderContext.class);
+		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
 
 		if (plugins == null)
 			return null;
 
-		for (ChartPlugin<HtmlRenderContext> plugin : plugins)
+		for (HtmlChartPlugin plugin : plugins)
 		{
-			if (plugin instanceof HtmlChartPlugin<?>)
+			if (plugin.getId().equals(id))
 			{
-				HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = (HtmlChartPlugin<HtmlRenderContext>) plugin;
-				if (htmlChartPlugin.getId().equals(id))
-				{
-					Locale locale = WebUtils.getLocale(request);
-					RenderStyle renderStyle = resolveRenderStyle(request);
-					return toHtmlChartPluginVO(htmlChartPlugin, renderStyle, locale);
-				}
+				Locale locale = WebUtils.getLocale(request);
+				RenderStyle renderStyle = resolveRenderStyle(request);
+				return toHtmlChartPluginVO(plugin, renderStyle, locale);
 			}
 		}
 
@@ -117,24 +111,17 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 */
 	protected List<HtmlChartPluginVO> findHtmlChartPluginVOs(HttpServletRequest request, String keyword)
 	{
-		List<HtmlChartPluginVO> pluginViews = new ArrayList<HtmlChartPluginVO>();
+		List<HtmlChartPluginVO> pluginViews = new ArrayList<>();
 
-		List<ChartPlugin<HtmlRenderContext>> plugins = getDirectoryHtmlChartPluginManager()
-				.getAll(HtmlRenderContext.class);
+		List<HtmlChartPlugin> plugins = getDirectoryHtmlChartPluginManager().getAll(HtmlChartPlugin.class);
 
 		if (plugins != null)
 		{
 			Locale locale = WebUtils.getLocale(request);
 			RenderStyle renderStyle = resolveRenderStyle(request);
 
-			for (ChartPlugin<HtmlRenderContext> plugin : plugins)
-			{
-				if (plugin instanceof HtmlChartPlugin<?>)
-				{
-					HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin = (HtmlChartPlugin<HtmlRenderContext>) plugin;
-					pluginViews.add(toHtmlChartPluginVO(htmlChartPlugin, renderStyle, locale));
-				}
-			}
+			for (HtmlChartPlugin plugin : plugins)
+				pluginViews.add(toHtmlChartPluginVO(plugin, renderStyle, locale));
 		}
 
 		return KeywordMatcher.<HtmlChartPluginVO> match(pluginViews, keyword,
@@ -149,7 +136,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 				});
 	}
 
-	protected HtmlChartPluginVO toHtmlChartPluginVO(HttpServletRequest request, HtmlChartPlugin<?> chartPlugin)
+	protected HtmlChartPluginVO toHtmlChartPluginVO(HttpServletRequest request, HtmlChartPlugin chartPlugin)
 	{
 		Locale locale = WebUtils.getLocale(request);
 		RenderStyle renderStyle = resolveRenderStyle(request);
@@ -157,8 +144,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		return toHtmlChartPluginVO(chartPlugin, renderStyle, locale);
 	}
 
-	protected HtmlChartPluginVO toHtmlChartPluginVO(HtmlChartPlugin<?> chartPlugin, RenderStyle renderStyle,
-			Locale locale)
+	protected HtmlChartPluginVO toHtmlChartPluginVO(HtmlChartPlugin chartPlugin, RenderStyle renderStyle, Locale locale)
 	{
 		HtmlChartPluginVO pluginVO = new HtmlChartPluginVO();
 
@@ -176,11 +162,10 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		List<DataSign> dataSigns = chartPlugin.getDataSigns();
 		if (dataSigns != null)
 		{
-			List<DataSign> dataSignVOs = new ArrayList<DataSign>(dataSigns.size());
+			List<DataSign> dataSignVOs = new ArrayList<>(dataSigns.size());
 			for (DataSign dataSign : dataSigns)
 			{
-				DataSign view = new DataSign(dataSign.getName(), dataSign.isRequired(),
-						dataSign.isMultiple());
+				DataSign view = new DataSign(dataSign.getName(), dataSign.isRequired(), dataSign.isMultiple());
 				view.setNameLabel(toConcreteLabel(dataSign.getNameLabel(), locale));
 				view.setDescLabel(toConcreteLabel(dataSign.getDescLabel(), locale));
 
@@ -218,7 +203,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		return new Label(value);
 	}
 
-	protected String resolveIconUrl(HtmlChartPlugin<?> plugin)
+	protected String resolveIconUrl(HtmlChartPlugin plugin)
 	{
 		return "/analysis/chartPlugin/icon/" + plugin.getId();
 	}
@@ -229,7 +214,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class HtmlChartPluginVO extends AbstractChartPlugin<HtmlRenderContext> implements Serializable
+	public static class HtmlChartPluginVO extends AbstractChartPlugin implements Serializable
 	{
 		private static final long serialVersionUID = 1L;
 
@@ -268,8 +253,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		}
 
 		@Override
-		public Chart renderChart(HtmlRenderContext renderContext, ChartDefinition chartDefinition)
-				throws RenderException
+		public Chart renderChart(RenderContext renderContext, ChartDefinition chartDefinition) throws RenderException
 		{
 			throw new UnsupportedOperationException();
 		}

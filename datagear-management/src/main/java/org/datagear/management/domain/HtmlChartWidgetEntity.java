@@ -15,7 +15,6 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartWidget;
-import org.datagear.analysis.support.html.HtmlRenderContext;
 import org.datagear.util.i18n.Label;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -26,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author datagear@163.com
  *
  */
-public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
+public class HtmlChartWidgetEntity extends HtmlChartWidget
 		implements CreateUserEntity<String>, DataPermissionEntity<String>
 {
 	private static final long serialVersionUID = 1L;
@@ -55,8 +54,8 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 		this.createTime = new Date();
 	}
 
-	public HtmlChartWidgetEntity(String id, String name, ChartDataSetVO[] chartDataSets,
-			HtmlChartPlugin<HtmlRenderContext> chartPlugin, User createUser)
+	public HtmlChartWidgetEntity(String id, String name, ChartDataSetVO[] chartDataSets, HtmlChartPlugin chartPlugin,
+			User createUser)
 	{
 		super(id, name, chartDataSets, chartPlugin);
 		super.setChartDataSets(EMPTY_CHART_DATA_VO_SET);
@@ -74,12 +73,12 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 		super.setChartDataSets(chartDataSetVOs);
 	}
 
-	public HtmlChartPlugin<HtmlRenderContext> getHtmlChartPlugin()
+	public HtmlChartPlugin getHtmlChartPlugin()
 	{
 		return getPlugin();
 	}
 
-	public void setHtmlChartPlugin(HtmlChartPlugin<HtmlRenderContext> htmlChartPlugin)
+	public void setHtmlChartPlugin(HtmlChartPlugin htmlChartPlugin)
 	{
 		setPlugin(htmlChartPlugin);
 	}
@@ -138,7 +137,7 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget<HtmlRenderContext>
 	public void updateChartPluginName(Locale locale)
 	{
 		String name = null;
-		HtmlChartPlugin<HtmlRenderContext> plugin = getHtmlChartPlugin();
+		HtmlChartPlugin plugin = getHtmlChartPlugin();
 
 		if (plugin != null)
 		{

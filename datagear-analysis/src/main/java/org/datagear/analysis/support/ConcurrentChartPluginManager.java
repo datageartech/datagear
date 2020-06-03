@@ -14,7 +14,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
-import org.datagear.analysis.RenderContext;
 
 /**
  * 并发{@linkplain ChartPluginManager}。
@@ -35,7 +34,7 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	}
 
 	@Override
-	public void register(ChartPlugin<?> chartPlugin)
+	public void register(ChartPlugin chartPlugin)
 	{
 		WriteLock writeLock = this.lock.writeLock();
 
@@ -52,7 +51,7 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	}
 
 	@Override
-	public ChartPlugin<?>[] remove(String... ids)
+	public ChartPlugin[] remove(String... ids)
 	{
 		WriteLock writeLock = this.lock.writeLock();
 
@@ -69,7 +68,7 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	}
 
 	@Override
-	public <T extends RenderContext> ChartPlugin<T> get(String id)
+	public ChartPlugin get(String id)
 	{
 		ReadLock readLock = this.lock.readLock();
 
@@ -86,7 +85,7 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	}
 
 	@Override
-	public <T extends RenderContext> List<ChartPlugin<T>> getAll(Class<? extends T> renderContextType)
+	public <T extends ChartPlugin> List<T> getAll(Class<? super T> chartPluginType)
 	{
 		ReadLock readLock = this.lock.readLock();
 
@@ -94,7 +93,7 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 		{
 			readLock.lock();
 
-			return findChartPlugins(renderContextType);
+			return findChartPlugins(chartPluginType);
 		}
 		finally
 		{
@@ -103,7 +102,7 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	}
 
 	@Override
-	public List<ChartPlugin<?>> getAll()
+	public List<ChartPlugin> getAll()
 	{
 		ReadLock readLock = this.lock.readLock();
 

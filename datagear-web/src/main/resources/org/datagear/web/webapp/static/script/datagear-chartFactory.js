@@ -525,16 +525,6 @@
 	};
 	
 	/**
-	 * 获取图表渲染风格，没有则返回undefined。
-	 * 
-	 * @return "..."
-	 */
-	chartBase.renderStyle = function()
-	{
-		return this.renderContextAttr("renderStyle");
-	};
-	
-	/**
 	 * 获取/设置图表渲染上下文的属性值。
 	 * 
 	 * @param attrName
@@ -1645,7 +1635,8 @@
 		
 		url = (url || name);
 		
-		var contextPath = this.renderContext.webContext.contextPath;
+		var webContext = this.renderContextAttr("webContext");
+		var contextPath = (webContext ? webContext.contextPath : undefined);
 		
 		if(contextPath && url.indexOf("/") == 0 && url.indexOf(contextPath) != 0)
 			url = contextPath + url;

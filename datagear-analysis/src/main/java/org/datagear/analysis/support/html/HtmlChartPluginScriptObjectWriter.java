@@ -51,7 +51,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 * @param varName
 	 * @throws IOException
 	 */
-	public void write(Writer out, HtmlChartPlugin<?> plugin, String varName) throws IOException
+	public void write(Writer out, HtmlChartPlugin plugin, String varName) throws IOException
 	{
 		JsonChartPlugin jsonPlugin = new JsonChartPlugin(plugin);
 
@@ -70,7 +70,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 * @param chart
 	 * @throws IOException
 	 */
-	protected void writeHtmlChartRenderer(Writer out, HtmlChartPlugin<?> plugin, String varName) throws IOException
+	protected void writeHtmlChartRenderer(Writer out, HtmlChartPlugin plugin, String varName) throws IOException
 	{
 		out.write(varName + "." + HtmlChartPlugin.PROPERTY_CHART_RENDERER + "=");
 		writeNewLine(out);
@@ -98,9 +98,9 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class JsonChartPlugin extends AbstractChartPlugin<RenderContext>
+	public static class JsonChartPlugin extends AbstractChartPlugin
 	{
-		public JsonChartPlugin(HtmlChartPlugin<?> plugin)
+		public JsonChartPlugin(HtmlChartPlugin plugin)
 		{
 			super(plugin.getId(), plugin.getNameLabel());
 			setDescLabel(plugin.getDescLabel());

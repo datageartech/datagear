@@ -29,7 +29,6 @@ public class DirectoryHtmlChartPluginManagerTest
 	{
 		super();
 
-
 	}
 
 	@Test
@@ -60,22 +59,22 @@ public class DirectoryHtmlChartPluginManagerTest
 
 		directoryHtmlChartPluginManager.init();
 
-		ChartPlugin<?> plugin = directoryHtmlChartPluginManager.get("test");
+		ChartPlugin plugin = directoryHtmlChartPluginManager.get("test");
 
 		assertNotNull(plugin);
 		assertEquals("0.1.0", plugin.getVersion());
 
 		{
-			Set<HtmlChartPlugin<?>> uploaded = directoryHtmlChartPluginManager.upload(uploadDirectory);
+			Set<HtmlChartPlugin> uploaded = directoryHtmlChartPluginManager.upload(uploadDirectory);
 			plugin = directoryHtmlChartPluginManager.get("test");
-	
+
 			assertEquals(1, uploaded.size());
 			assertNotNull(plugin);
 			assertEquals("0.1.1", plugin.getVersion());
 		}
 
 		{
-			Set<HtmlChartPlugin<?>> uploaded = directoryHtmlChartPluginManager.upload(uploadDirectory);
+			Set<HtmlChartPlugin> uploaded = directoryHtmlChartPluginManager.upload(uploadDirectory);
 			plugin = directoryHtmlChartPluginManager.get("test");
 
 			assertEquals(0, uploaded.size());

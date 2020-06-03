@@ -49,7 +49,7 @@ public abstract class AbstractTemplateDashboardWidgetResManager implements Templ
 		return IOUtil.getWriter(out, encoding);
 	}
 
-	protected String getTemplateEncodingWithDefault(TemplateDashboardWidget<?> widget)
+	protected String getTemplateEncodingWithDefault(TemplateDashboardWidget widget)
 	{
 		String encoding = widget.getTemplateEncoding();
 

@@ -16,7 +16,7 @@ public class TemplateDashboard extends Dashboard
 		super();
 	}
 
-	public TemplateDashboard(String id, String template, RenderContext renderContext, TemplateDashboardWidget<?> widget)
+	public TemplateDashboard(String id, String template, RenderContext renderContext, TemplateDashboardWidget widget)
 	{
 		super(id, renderContext, widget);
 		this.template = template;
@@ -33,15 +33,15 @@ public class TemplateDashboard extends Dashboard
 	}
 
 	@Override
-	public TemplateDashboardWidget<?> getWidget()
+	public TemplateDashboardWidget getWidget()
 	{
-		return (TemplateDashboardWidget<?>) super.getWidget();
+		return (TemplateDashboardWidget) super.getWidget();
 	}
 
 	@Override
-	public void setWidget(DashboardWidget<?> widget)
+	public void setWidget(DashboardWidget widget)
 	{
-		if (widget != null && !(widget instanceof TemplateDashboardWidget<?>))
+		if (widget != null && !(widget instanceof TemplateDashboardWidget))
 			throw new IllegalArgumentException();
 
 		super.setWidget(widget);

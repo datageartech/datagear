@@ -16,10 +16,8 @@ import java.util.Map;
 
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
-import org.datagear.analysis.RenderContext;
 import org.datagear.util.StringUtil;
 import org.datagear.util.version.Version;
-import org.springframework.core.GenericTypeResolver;
 
 /**
  * 抽象{@linkplain ChartPluginManager}。
@@ -29,34 +27,21 @@ import org.springframework.core.GenericTypeResolver;
  */
 public abstract class AbstractChartPluginManager implements ChartPluginManager
 {
-	private Map<String, ChartPlugin<?>> chartPluginMap = new HashMap<String, ChartPlugin<?>>();
-
-	private Map<String, Class<?>> renderContextTypeMap = new HashMap<String, Class<?>>();
+	private Map<String, ChartPlugin> chartPluginMap = new HashMap<>();
 
 	public AbstractChartPluginManager()
 	{
 		super();
 	}
 
-	protected Map<String, ? extends ChartPlugin<?>> getChartPluginMap()
+	protected Map<String, ChartPlugin> getChartPluginMap()
 	{
 		return chartPluginMap;
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void setChartPluginMap(Map<String, ? extends ChartPlugin<?>> chartPluginMap)
+	protected void setChartPluginMap(Map<String, ChartPlugin> chartPluginMap)
 	{
-		this.chartPluginMap = (Map<String, ChartPlugin<?>>) chartPluginMap;
-	}
-
-	protected Map<String, Class<?>> getRenderContextTypeMap()
-	{
-		return renderContextTypeMap;
-	}
-
-	protected void setRenderContextTypeMap(Map<String, Class<?>> renderContextTypeMap)
-	{
-		this.renderContextTypeMap = renderContextTypeMap;
+		this.chartPluginMap = chartPluginMap;
 	}
 
 	/**
@@ -68,22 +53,18 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * @param chartPlugin
 	 * @return
 	 */
-	protected boolean registerChartPlugin(ChartPlugin<?> chartPlugin)
+	protected boolean registerChartPlugin(ChartPlugin chartPlugin)
 	{
 		checkLegalChartPlugin(chartPlugin);
 
 		boolean put = true;
 
-		ChartPlugin<?> prev = this.chartPluginMap.get(chartPlugin.getId());
+		ChartPlugin prev = this.chartPluginMap.get(chartPlugin.getId());
 		if (prev != null)
 			put = canReplaceForSameId(chartPlugin, prev);
 
 		if (put)
-		{
 			this.chartPluginMap.put(chartPlugin.getId(), chartPlugin);
-			this.renderContextTypeMap.put(chartPlugin.getId(),
-					resolveChartPluginRenderContextType(chartPlugin.getClass()));
-		}
 
 		return put;
 	}
@@ -93,9 +74,9 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * 
 	 * @param id
 	 */
-	protected ChartPlugin<?>[] removeChartPlugins(String[] ids)
+	protected ChartPlugin[] removeChartPlugins(String[] ids)
 	{
-		ChartPlugin<?>[] removed = new ChartPlugin<?>[ids.length];
+		ChartPlugin[] removed = new ChartPlugin[ids.length];
 
 		for (int i = 0; i < ids.length; i++)
 			removed[i] = removeChartPlugin(ids[i]);
@@ -108,9 +89,8 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * 
 	 * @param id
 	 */
-	protected ChartPlugin<?> removeChartPlugin(String id)
+	protected ChartPlugin removeChartPlugin(String id)
 	{
-		this.renderContextTypeMap.remove(id);
 		return this.chartPluginMap.remove(id);
 	}
 
@@ -120,7 +100,6 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	protected void removeAllChartPlugins()
 	{
 		this.chartPluginMap.clear();
-		this.renderContextTypeMap.clear();
 	}
 
 	/**
@@ -129,30 +108,31 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * @param id
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	protected <T extends RenderContext> ChartPlugin<T> getChartPlugin(String id)
+	protected ChartPlugin getChartPlugin(String id)
 	{
-		return (ChartPlugin<T>) this.chartPluginMap.get(id);
+		return this.chartPluginMap.get(id);
 	}
 
 	/**
-	 * 查找支持指定类型{@linkplain RenderContext}的所有{@linkplain ChartPlugin}。
+	 * 查找指定类型的所有{@linkplain ChartPlugin}。
 	 * <p>
 	 * 返回列表已使用{@linkplain #sortChartPlugins(List)}排序。
 	 * </p>
 	 * 
-	 * @param renderContextType
+	 * @param chartPluginType
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends RenderContext> List<ChartPlugin<T>> findChartPlugins(Class<? extends T> renderContextType)
+	protected <T extends ChartPlugin> List<T> findChartPlugins(Class<? super T> chartPluginType)
 	{
-		List<ChartPlugin<T>> reChartPlugins = new ArrayList<ChartPlugin<T>>();
+		List<T> reChartPlugins = new ArrayList<>();
 
-		for (Map.Entry<String, Class<?>> entry : this.renderContextTypeMap.entrySet())
+		for (Map.Entry<String, ChartPlugin> entry : this.chartPluginMap.entrySet())
 		{
-			if (entry.getValue().isAssignableFrom(renderContextType))
-				reChartPlugins.add((ChartPlugin<T>) this.chartPluginMap.get(entry.getKey()));
+			ChartPlugin plugin = entry.getValue();
+
+			if (chartPluginType.isAssignableFrom(plugin.getClass()))
+				reChartPlugins.add((T) plugin);
 		}
 
 		sortChartPlugins(reChartPlugins);
@@ -168,9 +148,9 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * 
 	 * @return
 	 */
-	protected List<ChartPlugin<?>> getAllChartPlugins()
+	protected List<ChartPlugin> getAllChartPlugins()
 	{
-		List<ChartPlugin<?>> reChartPlugins = new ArrayList<ChartPlugin<?>>();
+		List<ChartPlugin> reChartPlugins = new ArrayList<>();
 
 		reChartPlugins.addAll(this.chartPluginMap.values());
 
@@ -179,48 +159,7 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 		return reChartPlugins;
 	}
 
-	/**
-	 * 解析{@linkplain ChartPlugin}可支持的{@linkplain RenderContext}类型列表。
-	 * 
-	 * @param chartPlugins
-	 * @return
-	 */
-	protected List<Class<? extends RenderContext>> resolveChartPluginRenderContextTypes(
-			List<? extends ChartPlugin<?>> chartPlugins)
-	{
-		List<Class<? extends RenderContext>> renderContextTypes = new ArrayList<Class<? extends RenderContext>>(
-				chartPlugins.size());
-
-		for (ChartPlugin<?> chartPlugin : chartPlugins)
-		{
-			Class<? extends RenderContext> renderContextType = resolveChartPluginRenderContextType(
-					chartPlugin.getClass());
-
-			renderContextTypes.add(renderContextType);
-		}
-
-		return renderContextTypes;
-	}
-
-	/**
-	 * 解析指定{@linkplain ChartPlugin}类所支持的{@linkplain RenderContext}类型。
-	 * 
-	 * @param chartPluginType
-	 * @return
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected Class<? extends RenderContext> resolveChartPluginRenderContextType(
-			Class<? extends ChartPlugin> chartPluginType)
-	{
-		Class<?> renderContextType = GenericTypeResolver.resolveTypeArgument(chartPluginType, ChartPlugin.class);
-
-		if (renderContextType == null)
-			renderContextType = RenderContext.class;
-
-		return (Class<? extends RenderContext>) renderContextType;
-	}
-
-	protected void sortChartPlugins(List<? extends ChartPlugin<?>> chartPlugins)
+	protected void sortChartPlugins(List<? extends ChartPlugin> chartPlugins)
 	{
 		sort(chartPlugins);
 	}
@@ -230,12 +169,12 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * 
 	 * @param chartPlugins
 	 */
-	public static void sort(List<? extends ChartPlugin<?>> chartPlugins)
+	public static void sort(List<? extends ChartPlugin> chartPlugins)
 	{
-		Collections.sort(chartPlugins, new Comparator<ChartPlugin<?>>()
+		Collections.sort(chartPlugins, new Comparator<ChartPlugin>()
 		{
 			@Override
-			public int compare(ChartPlugin<?> o1, ChartPlugin<?> o2)
+			public int compare(ChartPlugin o1, ChartPlugin o2)
 			{
 				return Integer.valueOf(o1.getOrder()).compareTo(o2.getOrder());
 			}
@@ -250,7 +189,7 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 *            允许为{@code null}
 	 * @return
 	 */
-	protected boolean canReplaceForSameId(ChartPlugin<?> my, ChartPlugin<?> old)
+	protected boolean canReplaceForSameId(ChartPlugin my, ChartPlugin old)
 	{
 		if (old == null)
 			return true;
@@ -296,7 +235,7 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * @param oldVersion
 	 * @return
 	 */
-	protected boolean canReplaceForSameId(ChartPlugin<?> my, Version myVersion, ChartPlugin<?> old, Version oldVersion)
+	protected boolean canReplaceForSameId(ChartPlugin my, Version myVersion, ChartPlugin old, Version oldVersion)
 	{
 		boolean replace = false;
 
@@ -319,7 +258,7 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * @param chartPlugin
 	 * @throws IllegalArgumentException
 	 */
-	protected void checkLegalChartPlugin(ChartPlugin<?> chartPlugin) throws IllegalArgumentException
+	protected void checkLegalChartPlugin(ChartPlugin chartPlugin) throws IllegalArgumentException
 	{
 		if (!isLegalChartPlugin(chartPlugin))
 			throw new IllegalArgumentException("[" + chartPlugin + "] is illegal");
@@ -331,7 +270,7 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 	 * @param chartPlugin
 	 * @return
 	 */
-	protected boolean isLegalChartPlugin(ChartPlugin<?> chartPlugin)
+	protected boolean isLegalChartPlugin(ChartPlugin chartPlugin)
 	{
 		if (chartPlugin == null)
 			return false;

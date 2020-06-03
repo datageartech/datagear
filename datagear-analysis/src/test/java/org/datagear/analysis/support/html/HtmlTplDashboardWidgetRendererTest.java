@@ -9,6 +9,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.StringReader;
 
+import org.datagear.analysis.RenderContext;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -20,7 +21,7 @@ import org.junit.Test;
  */
 public class HtmlTplDashboardWidgetRendererTest
 {
-	private HtmlTplDashboardWidgetRenderer<HtmlRenderContext> renderer = new TestHtmlTplDashboardWidgetRenderer<HtmlRenderContext>();
+	private HtmlTplDashboardWidgetRenderer renderer = new TestHtmlTplDashboardWidgetRenderer();
 
 	@Test
 	public void resolveCharsetTest() throws Exception
@@ -96,7 +97,7 @@ public class HtmlTplDashboardWidgetRendererTest
 		}
 	}
 
-	private class TestHtmlTplDashboardWidgetRenderer<T extends HtmlRenderContext> extends HtmlTplDashboardWidgetRenderer<T>
+	private class TestHtmlTplDashboardWidgetRenderer extends HtmlTplDashboardWidgetRenderer
 	{
 		@Override
 		public String simpleTemplateContent(String htmlCharset, String... chartWidgetId)
@@ -105,7 +106,8 @@ public class HtmlTplDashboardWidgetRendererTest
 		}
 
 		@Override
-		protected void renderHtmlTplDashboard(T renderContext, HtmlTplDashboard dashboard) throws Throwable
+		protected void renderHtmlTplDashboard(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
+				HtmlTplDashboard dashboard) throws Throwable
 		{
 		}
 	}

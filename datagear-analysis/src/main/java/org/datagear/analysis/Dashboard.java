@@ -28,7 +28,7 @@ public class Dashboard extends AbstractIdentifiable
 
 	private RenderContext renderContext;
 
-	private DashboardWidget<?> widget;
+	private DashboardWidget widget;
 
 	private List<Chart> charts;
 
@@ -37,7 +37,7 @@ public class Dashboard extends AbstractIdentifiable
 		super();
 	}
 
-	public Dashboard(String id, RenderContext renderContext, DashboardWidget<?> widget)
+	public Dashboard(String id, RenderContext renderContext, DashboardWidget widget)
 	{
 		super(id);
 		this.renderContext = renderContext;
@@ -54,12 +54,12 @@ public class Dashboard extends AbstractIdentifiable
 		this.renderContext = renderContext;
 	}
 
-	public DashboardWidget<?> getWidget()
+	public DashboardWidget getWidget()
 	{
 		return widget;
 	}
 
-	public void setWidget(DashboardWidget<?> widget)
+	public void setWidget(DashboardWidget widget)
 	{
 		this.widget = widget;
 	}

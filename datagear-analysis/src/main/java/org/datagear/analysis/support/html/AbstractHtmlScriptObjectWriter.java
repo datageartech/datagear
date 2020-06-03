@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.support.JsonSupport;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -38,7 +39,7 @@ public abstract class AbstractHtmlScriptObjectWriter
 		JsonSupport.disableAutoCloseTargetFeature(objectMapper);
 
 		SimpleModule module = new SimpleModule(RefObjectSerializer.class.getSimpleName());
-		module.addSerializer(RefHtmlRenderContext.class, new RefObjectSerializer());
+		module.addSerializer(RefRenderContext.class, new RefObjectSerializer());
 		module.addSerializer(RefHtmlChartPlugin.class, new RefObjectSerializer());
 		this.objectMapper.registerModule(module);
 	}
@@ -117,11 +118,11 @@ public abstract class AbstractHtmlScriptObjectWriter
 		}
 	}
 
-	protected static class RefHtmlRenderContext implements HtmlRenderContext, JsonRefObject
+	protected static class RefRenderContext implements RenderContext, JsonRefObject
 	{
 		private String refName;
 
-		public RefHtmlRenderContext(String refName)
+		public RefRenderContext(String refName)
 		{
 			super();
 			this.refName = refName;
@@ -162,27 +163,9 @@ public abstract class AbstractHtmlScriptObjectWriter
 		{
 			return null;
 		}
-
-		@Override
-		public WebContext getWebContext()
-		{
-			return null;
-		}
-
-		@Override
-		public Writer getWriter()
-		{
-			return null;
-		}
-
-		@Override
-		public int nextSequence()
-		{
-			return 0;
-		}
 	}
 
-	protected static class RefHtmlChartPlugin extends HtmlChartPlugin<HtmlRenderContext> implements JsonRefObject
+	protected static class RefHtmlChartPlugin extends HtmlChartPlugin implements JsonRefObject
 	{
 		private String refName;
 

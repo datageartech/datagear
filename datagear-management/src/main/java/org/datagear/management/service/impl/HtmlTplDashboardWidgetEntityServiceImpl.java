@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
-import org.datagear.analysis.support.html.HtmlRenderContext;
-import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
@@ -33,7 +31,7 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 {
 	protected static final String SQL_NAMESPACE = HtmlTplDashboardWidgetEntity.class.getName();
 
-	private HtmlTplDashboardWidgetRenderer<HtmlRenderContext> htmlTplDashboardWidgetRenderer;
+	private HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer;
 
 	private AuthorizationService authorizationService;
 
@@ -42,34 +40,29 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 		super();
 	}
 
-	@SuppressWarnings("unchecked")
 	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory,
-			HtmlTplDashboardWidgetRenderer<? extends HtmlRenderContext> htmlTplDashboardWidgetRenderer,
-			AuthorizationService authorizationService)
+			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer, AuthorizationService authorizationService)
 	{
 		super(sqlSessionFactory);
-		this.htmlTplDashboardWidgetRenderer = (HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext>) htmlTplDashboardWidgetRenderer;
+		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
 		this.authorizationService = authorizationService;
 	}
 
-	@SuppressWarnings("unchecked")
 	public HtmlTplDashboardWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate,
-			HtmlTplDashboardWidgetRenderer<? extends HtmlRenderContext> htmlTplDashboardWidgetRenderer,
-			AuthorizationService authorizationService)
+			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer, AuthorizationService authorizationService)
 	{
 		super(sqlSessionTemplate);
-		this.htmlTplDashboardWidgetRenderer = (HtmlTplDashboardWidgetHtmlRenderer<HtmlRenderContext>) htmlTplDashboardWidgetRenderer;
+		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
 		this.authorizationService = authorizationService;
 	}
 
 	@Override
-	public HtmlTplDashboardWidgetRenderer<HtmlRenderContext> getHtmlTplDashboardWidgetRenderer()
+	public HtmlTplDashboardWidgetRenderer getHtmlTplDashboardWidgetRenderer()
 	{
 		return htmlTplDashboardWidgetRenderer;
 	}
 
-	public void setHtmlTplDashboardWidgetRenderer(
-			HtmlTplDashboardWidgetRenderer<HtmlRenderContext> htmlTplDashboardWidgetRenderer)
+	public void setHtmlTplDashboardWidgetRenderer(HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer)
 	{
 		this.htmlTplDashboardWidgetRenderer = htmlTplDashboardWidgetRenderer;
 	}

@@ -20,8 +20,7 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public abstract class TemplateDashboardWidget<T extends RenderContext> extends AbstractIdentifiable
-		implements DashboardWidget<T>
+public abstract class TemplateDashboardWidget extends AbstractIdentifiable implements DashboardWidget
 {
 	public static final String DEFAULT_TEMPLATE_ENCODING = "UTF-8";
 
@@ -113,7 +112,7 @@ public abstract class TemplateDashboardWidget<T extends RenderContext> extends A
 		if (this.templates == null || this.templates.length == 0)
 			return;
 
-		List<String> list = new ArrayList<String>(this.templates.length);
+		List<String> list = new ArrayList<>(this.templates.length);
 
 		for (String t : this.templates)
 		{
@@ -125,7 +124,7 @@ public abstract class TemplateDashboardWidget<T extends RenderContext> extends A
 	}
 
 	@Override
-	public TemplateDashboard render(T renderContext) throws RenderException
+	public TemplateDashboard render(RenderContext renderContext) throws RenderException
 	{
 		String template = getFirstTemplate();
 
@@ -145,7 +144,8 @@ public abstract class TemplateDashboardWidget<T extends RenderContext> extends A
 	 * @throws IllegalArgumentException
 	 *             {@code template}不是模板时
 	 */
-	public TemplateDashboard render(T renderContext, String template) throws RenderException, IllegalArgumentException
+	public TemplateDashboard render(RenderContext renderContext, String template)
+			throws RenderException, IllegalArgumentException
 	{
 		if (!isTemplate(template))
 			throw new IllegalArgumentException("[" + template + "] is not template");
@@ -161,5 +161,6 @@ public abstract class TemplateDashboardWidget<T extends RenderContext> extends A
 	 * @return
 	 * @throws RenderException
 	 */
-	protected abstract TemplateDashboard renderTemplate(T renderContext, String template) throws RenderException;
+	protected abstract TemplateDashboard renderTemplate(RenderContext renderContext, String template)
+			throws RenderException;
 }

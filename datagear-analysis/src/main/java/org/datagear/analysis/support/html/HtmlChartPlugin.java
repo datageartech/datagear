@@ -9,18 +9,20 @@ package org.datagear.analysis.support.html;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.Collection;
 
-import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.AbstractChartPlugin;
-import org.datagear.util.StringUtil;
+import org.datagear.analysis.support.html.HtmlChartRenderAttr.HtmlChartRenderOption;
 import org.datagear.util.i18n.Label;
 
 /**
  * HTML图表插件。
  * <p>
- * 此类将图表代码（HTML、JavaScript）输出至{@linkplain HtmlRenderContext#getWriter()}。
+ * 此类将图表代码（HTML、JavaScript）输出至{@linkplain HtmlRenderAttr#getHtmlWriter(RenderContext)}。
  * </p>
  * <p>
  * 输出格式为：
@@ -45,13 +47,16 @@ import org.datagear.util.i18n.Label;
  * </pre>
  * </code>
  * <p>
- * {@linkplain HtmlChartPluginRenderOption}可自定义上述输出内容。
+ * {@linkplain HtmlChartRenderAttr#getRenderOption(RenderContext)}可自定义上述输出内容。
+ * </p>
+ * <p>
+ * 注意：此类{@linkplain #renderChart(RenderContext, ChartDefinition)}的{@linkplain RenderContext}必须符合{@linkplain HtmlChartRenderAttr#inflate(RenderContext, Writer, HtmlChartRenderOption)}规范。
  * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartPlugin<T>
+public class HtmlChartPlugin extends AbstractChartPlugin
 {
 	public static final String PROPERTY_CHART_RENDERER = "chartRenderer";
 
@@ -131,16 +136,18 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 	}
 
 	@Override
-	public Chart renderChart(T renderContext, ChartDefinition chartDefinition) throws RenderException
+	public HtmlChart renderChart(RenderContext renderContext, ChartDefinition chartDefinition) throws RenderException
 	{
-		HtmlChartPluginRenderOption option = getOptionInitialized(renderContext);
+		HtmlChartRenderAttr renderAttr = getHtmlChartRenderAttrNonNull(renderContext);
+		Writer out = renderAttr.getHtmlWriterNonNull(renderContext);
+		HtmlChartRenderOption option = renderAttr.getRenderOptionNonNull(renderContext);
 
 		HtmlChart chart = createHtmlChart(renderContext, chartDefinition, option);
 
 		try
 		{
-			writeChartElement(renderContext, option);
-			writeScript(renderContext, chart, option);
+			writeChartElement(renderContext, renderAttr, out, option);
+			writeScript(renderContext, renderAttr, out, chart, option);
 		}
 		catch (IOException e)
 		{
@@ -150,80 +157,81 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		return chart;
 	}
 
-	protected HtmlChart createHtmlChart(T renderContext, ChartDefinition chartDefinition,
-			HtmlChartPluginRenderOption option)
+	protected HtmlChart createHtmlChart(RenderContext renderContext, ChartDefinition chartDefinition,
+			HtmlChartRenderOption option)
 	{
-		return new HtmlChart(chartDefinition, this, renderContext,
-				option.getChartElementId(), option.getChartVarName());
+		return new HtmlChart(chartDefinition, this, renderContext, option.getChartElementId(),
+				option.getChartVarName());
 	}
 
-	protected boolean writeChartElement(T renderContext, HtmlChartPluginRenderOption option) throws IOException
+	protected boolean writeChartElement(RenderContext renderContext, HtmlChartRenderAttr renderAttr, Writer out,
+			HtmlChartRenderOption option) throws IOException
 	{
 		if (option.isNotWriteChartElement())
 			return false;
 
-		Writer writer = renderContext.getWriter();
-
-		writer.write("<" + this.elementTagName + " id=\"" + option.getChartElementId() + "\">");
-		writer.write("</" + this.elementTagName + ">");
-		writeNewLine(writer);
+		out.write("<" + this.elementTagName + " id=\"" + option.getChartElementId() + "\">");
+		out.write("</" + this.elementTagName + ">");
+		writeNewLine(out);
 
 		return true;
 	}
 
-	protected void writeScript(T renderContext, HtmlChart chart, HtmlChartPluginRenderOption optionInitialized)
-			throws IOException
+	protected void writeScript(RenderContext renderContext, HtmlChartRenderAttr renderAttr, Writer out, HtmlChart chart,
+			HtmlChartRenderOption optionInitialized) throws IOException
 	{
-		Writer out = renderContext.getWriter();
-
 		if (!optionInitialized.isNotWriteScriptTag())
 		{
-			writeScriptStartTag(renderContext);
+			writeScriptStartTag(renderContext, out);
 			writeNewLine(out);
 		}
 
-		writePluginJsObject(renderContext, chart, optionInitialized);
-		writeRenderContextJsObject(renderContext, chart, optionInitialized);
-		writeChartJsObject(renderContext, chart, optionInitialized);
+		writePluginJsObject(renderContext, renderAttr, out, chart, optionInitialized);
+		writeRenderContextJsObject(renderContext, renderAttr, out, chart, optionInitialized);
+		writeChartJsObject(renderContext, renderAttr, out, chart, optionInitialized);
 
 		if (!optionInitialized.isNotWriteScriptTag())
 		{
-			writeScriptEndTag(renderContext);
+			writeScriptEndTag(renderContext, out);
 			writeNewLine(out);
 		}
 	}
 
-	protected boolean writePluginJsObject(T renderContext, HtmlChart chart,
-			HtmlChartPluginRenderOption optionInitialized) throws IOException
+	protected boolean writePluginJsObject(RenderContext renderContext, HtmlChartRenderAttr renderAttr, Writer out,
+			HtmlChart chart, HtmlChartRenderOption optionInitialized) throws IOException
 	{
 		if (optionInitialized.isNotWritePluginObject())
 			return false;
 
-		Writer out = renderContext.getWriter();
-		HtmlChartPlugin<?> plugin = chart.getPlugin();
+		HtmlChartPlugin plugin = chart.getPlugin();
 
 		getHtmlChartPluginScriptObjectWriter().write(out, plugin, optionInitialized.getPluginVarName());
 
 		return true;
 	}
 
-	protected boolean writeRenderContextJsObject(T renderContext, HtmlChart chart,
-			HtmlChartPluginRenderOption optionInitialized) throws IOException
+	protected boolean writeRenderContextJsObject(RenderContext renderContext, HtmlChartRenderAttr renderAttr,
+			Writer out, HtmlChart chart, HtmlChartRenderOption optionInitialized) throws IOException
 	{
 		if (optionInitialized.isNotWriteRenderContextObject())
 			return false;
 
-		Writer out = renderContext.getWriter();
-		getHtmlRenderContextScriptObjectWriter().write(out, renderContext, optionInitialized.getRenderContextVarName());
+		getHtmlRenderContextScriptObjectWriter().write(out, renderContext, optionInitialized.getRenderContextVarName(),
+				getHtmlRenderContextIgnoreAttrs(renderContext, renderAttr, out, chart));
 
 		return true;
 	}
 
-	protected void writeChartJsObject(T renderContext, HtmlChart chart, HtmlChartPluginRenderOption optionInitialized)
-			throws IOException
+	protected Collection<String> getHtmlRenderContextIgnoreAttrs(RenderContext renderContext,
+			HtmlChartRenderAttr renderAttr, Writer out, HtmlChart chart)
 	{
-		Writer out = renderContext.getWriter();
+		Collection<String> ignores = renderAttr.getIgnoreRenderAttrs(renderContext);
+		return (ignores != null ? ignores : Arrays.asList(renderAttr.getHtmlWriterName()));
+	}
 
+	protected void writeChartJsObject(RenderContext renderContext, HtmlChartRenderAttr renderAttr, Writer out,
+			HtmlChart chart, HtmlChartRenderOption optionInitialized) throws IOException
+	{
 		if (optionInitialized.isWriteChartJson())
 			getHtmlChartScriptObjectWriter().writeJson(out, chart, optionInitialized.getRenderContextVarName(),
 					optionInitialized.getPluginVarName());
@@ -254,98 +262,23 @@ public class HtmlChartPlugin<T extends HtmlRenderContext> extends AbstractChartP
 		return HTML_CHART_SCRIPT_OBJECT_WRITER;
 	}
 
-	/**
-	 * 写脚本开始标签。
-	 * 
-	 * @param renderContext
-	 * @throws IOException
-	 */
-	protected void writeScriptStartTag(T renderContext) throws IOException
+	protected void writeScriptStartTag(RenderContext renderContext, Writer out) throws IOException
 	{
-		renderContext.getWriter().write("<script type=\"text/javascript\">");
+		out.write("<script type=\"text/javascript\">");
 	}
 
-	/**
-	 * 写脚本结束标签。
-	 * 
-	 * @param renderContext
-	 * @throws IOException
-	 */
-	protected void writeScriptEndTag(T renderContext) throws IOException
+	protected void writeScriptEndTag(RenderContext renderContext, Writer out) throws IOException
 	{
-		renderContext.getWriter().write("</script>");
+		out.write("</script>");
 	}
 
-	/**
-	 * 写换行符。
-	 * 
-	 * @param out
-	 * @throws IOException
-	 */
 	protected void writeNewLine(Writer out) throws IOException
 	{
 		out.write(getNewLine());
 	}
 
-	/**
-	 * 获取已初始化的{@linkplain HtmlChartPluginRenderOption}。
-	 * <p>
-	 * 它的{@linkplain HtmlChartPluginRenderOption#getChartElementId()}、
-	 * {@linkplain HtmlChartPluginRenderOption#getPluginVarName()}、
-	 * {@linkplain HtmlChartPluginRenderOption#getRenderContextVarName()}、
-	 * {@linkplain HtmlChartPluginRenderOption#getChartVarName()}都是已初始化的。
-	 * </p>
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	protected HtmlChartPluginRenderOption getOptionInitialized(T renderContext)
+	protected HtmlChartRenderAttr getHtmlChartRenderAttrNonNull(RenderContext renderContext)
 	{
-		HtmlChartPluginRenderOption option = HtmlChartPluginRenderOption.getOption(renderContext);
-		if (option == null)
-		{
-			option = new HtmlChartPluginRenderOption();
-			option.setNotWriteChartElement(false);
-			option.setNotWritePluginObject(false);
-			option.setNotWriteRenderContextObject(false);
-			option.setNotWriteScriptTag(false);
-			option.setNotWriteInvoke(false);
-			option.setWriteChartJson(false);
-		}
-
-		String chartElementId = option.getChartElementId();
-		String pluginVarName = option.getPluginVarName();
-		String renderContextVarName = option.getRenderContextVarName();
-		String chartVarName = option.getChartVarName();
-
-		if (option.isNotWriteChartElement() && StringUtil.isEmpty(chartElementId))
-			throw new RenderException(
-					"[" + HtmlChartPluginRenderOption.class.getSimpleName() + ".elementId] must be set");
-
-		if (StringUtil.isEmpty(chartElementId))
-		{
-			chartElementId = HtmlRenderAttributes.generateChartElementId(renderContext);
-			option.setChartElementId(chartElementId);
-		}
-
-		if (StringUtil.isEmpty(pluginVarName))
-		{
-			pluginVarName = HtmlRenderAttributes.generateChartPluginVarName(renderContext);
-			option.setPluginVarName(pluginVarName);
-		}
-
-		if (StringUtil.isEmpty(renderContextVarName))
-		{
-			renderContextVarName = HtmlRenderAttributes.generateRenderContextVarName(renderContext);
-			option.setRenderContextVarName(renderContextVarName);
-		}
-
-		if (StringUtil.isEmpty(chartVarName))
-		{
-			chartVarName = HtmlRenderAttributes.generateChartVarName(renderContext);
-			option.setChartVarName(chartVarName);
-		}
-
-		return option;
+		return HtmlChartRenderAttr.getNonNull(renderContext);
 	}
 }

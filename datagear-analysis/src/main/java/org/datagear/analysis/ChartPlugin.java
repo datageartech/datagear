@@ -19,9 +19,8 @@ import org.datagear.util.i18n.Labeled;
  * 
  * @author datagear@163.com
  *
- * @param <T>
  */
-public interface ChartPlugin<T extends RenderContext> extends Identifiable, Labeled
+public interface ChartPlugin extends Identifiable, Labeled
 {
 	String PROPERTY_ID = "id";
 	String PROPERTY_NAME_LABEL = Labeled.PROPERTY_NAME_LABEL;
@@ -117,8 +116,7 @@ public interface ChartPlugin<T extends RenderContext> extends Identifiable, Labe
 	 * @return
 	 * @throws RenderException
 	 */
-	Chart renderChart(T renderContext, ChartDefinition chartDefinition)
-			throws RenderException;
+	Chart renderChart(RenderContext renderContext, ChartDefinition chartDefinition) throws RenderException;
 
 	/**
 	 * 获取版本号。

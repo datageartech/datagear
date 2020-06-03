@@ -16,7 +16,7 @@ package org.datagear.analysis;
  */
 public class Chart extends ChartDefinition
 {
-	private ChartPlugin<?> plugin;
+	private ChartPlugin plugin;
 
 	private RenderContext renderContext;
 
@@ -25,15 +25,14 @@ public class Chart extends ChartDefinition
 		super();
 	}
 
-	public Chart(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin<?> plugin,
-			RenderContext renderContext)
+	public Chart(String id, String name, ChartDataSet[] chartDataSets, ChartPlugin plugin, RenderContext renderContext)
 	{
 		super(id, name, chartDataSets);
 		this.plugin = plugin;
 		this.renderContext = renderContext;
 	}
 
-	public Chart(ChartDefinition chartDefinition, ChartPlugin<?> plugin, RenderContext renderContext)
+	public Chart(ChartDefinition chartDefinition, ChartPlugin plugin, RenderContext renderContext)
 	{
 		super(chartDefinition.getId(), chartDefinition.getName(), chartDefinition.getChartDataSets());
 		setParamValues(chartDefinition.getParamValues());
@@ -53,12 +52,12 @@ public class Chart extends ChartDefinition
 		this.renderContext = renderContext;
 	}
 
-	public ChartPlugin<?> getPlugin()
+	public ChartPlugin getPlugin()
 	{
 		return plugin;
 	}
 
-	public void setPlugin(ChartPlugin<?> plugin)
+	public void setPlugin(ChartPlugin plugin)
 	{
 		this.plugin = plugin;
 	}

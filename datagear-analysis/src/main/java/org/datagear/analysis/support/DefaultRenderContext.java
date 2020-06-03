@@ -15,21 +15,28 @@ import org.datagear.analysis.RenderContext;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractRenderContext implements RenderContext
+public class DefaultRenderContext implements RenderContext
 {
-	private Map<String, Object> attributes;
+	private Map<String, Object> attributes = new HashMap<>();
 
-	public AbstractRenderContext()
+	public DefaultRenderContext()
 	{
 		super();
-		this.attributes = new HashMap<String, Object>();
 	}
 
-	@SuppressWarnings("unchecked")
-	public AbstractRenderContext(Map<String, ?> attributes)
+	public DefaultRenderContext(Map<String, ?> attributes)
 	{
 		super();
-		this.attributes = (Map<String, Object>) attributes;
+		this.attributes.putAll(attributes);
+	}
+
+	public DefaultRenderContext(RenderContext renderContext)
+	{
+		super();
+
+		Map<String, ?> attributes = renderContext.getAttributes();
+		if (attributes != null)
+			this.attributes.putAll(attributes);
 	}
 
 	public void setAttributes(Map<String, Object> attributes)
@@ -47,7 +54,7 @@ public abstract class AbstractRenderContext implements RenderContext
 	@Override
 	public <T> T getAttribute(String name)
 	{
-		return (T) (this.attributes == null ? null : this.attributes.get(name));
+		return (T) this.attributes.get(name);
 	}
 
 	@Override
