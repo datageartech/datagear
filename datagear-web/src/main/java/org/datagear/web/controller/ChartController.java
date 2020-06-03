@@ -396,7 +396,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
 		String contextPath = getWebContextPath(request).get(request);
-		return new WebContext(contextPath, contextPath + "/analysis/chart/showData");
+		return new WebContext(contextPath, contextPath + "/analysis/chart/showData",
+				contextPath + "/analysis/dashboard/loadChart");
 	}
 
 	protected void setChartPluginNames(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)

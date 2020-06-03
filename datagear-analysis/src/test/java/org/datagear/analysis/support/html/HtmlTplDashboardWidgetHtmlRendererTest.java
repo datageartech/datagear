@@ -75,7 +75,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		RenderContext renderContext = new DefaultRenderContext();
 		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 		StringWriter out = new StringWriter();
-		renderAttr.inflate(renderContext, out, new WebContext("", ""));
+		renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
 
 		HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 
@@ -97,7 +97,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -126,7 +126,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -155,7 +155,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -184,7 +184,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -212,7 +212,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -258,7 +258,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -302,7 +302,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
 
 			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler("prefix-");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
@@ -321,7 +321,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
 
 			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler("prefix-");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);

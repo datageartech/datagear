@@ -309,25 +309,20 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 		/** 更新看板数据的URL */
 		private String updateDashboardURL;
 
-		/** 更新看板数据的的看板ID参数名 */
-		private String dashboardIdParam = "dashboardId";
-
-		/** 更新看板数据的图表集参数名 */
-		private String chartIdsParam = "chartsId";
-
-		/** 更新看板数据的图表集参数值的参数名 */
-		private String chartsParamValuesParam = "chartsParamValues";
+		/** 异步加载看板图表的URL */
+		private String loadChartURL;
 
 		public WebContext()
 		{
 			super();
 		}
 
-		public WebContext(String contextPath, String updateDashboardURL)
+		public WebContext(String contextPath, String updateDashboardURL, String loadChartURL)
 		{
 			super();
 			this.contextPath = contextPath;
 			this.updateDashboardURL = updateDashboardURL;
+			this.loadChartURL = loadChartURL;
 		}
 
 		public String getContextPath()
@@ -350,42 +345,21 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 			this.updateDashboardURL = updateDashboardURL;
 		}
 
-		public String getDashboardIdParam()
+		public String getLoadChartURL()
 		{
-			return dashboardIdParam;
+			return loadChartURL;
 		}
 
-		public void setDashboardIdParam(String dashboardIdParam)
+		public void setLoadChartURL(String loadChartURL)
 		{
-			this.dashboardIdParam = dashboardIdParam;
-		}
-
-		public String getChartIdsParam()
-		{
-			return chartIdsParam;
-		}
-
-		public void setChartIdsParam(String chartIdsParam)
-		{
-			this.chartIdsParam = chartIdsParam;
-		}
-
-		public String getChartsParamValuesParam()
-		{
-			return chartsParamValuesParam;
-		}
-
-		public void setChartsParamValuesParam(String chartsParamValuesParam)
-		{
-			this.chartsParamValuesParam = chartsParamValuesParam;
+			this.loadChartURL = loadChartURL;
 		}
 
 		@Override
 		public String toString()
 		{
 			return getClass().getSimpleName() + " [contextPath=" + contextPath + ", updateDashboardURL="
-					+ updateDashboardURL + ", dashboardIdParam=" + dashboardIdParam + ", chartIdsParam=" + chartIdsParam
-					+ ", chartsParamValuesParam=" + chartsParamValuesParam + "]";
+					+ updateDashboardURL + ", loadChartURL=" + loadChartURL + "]";
 		}
 	}
 }

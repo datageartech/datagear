@@ -73,6 +73,15 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/analysis/dashboard")
 public class DashboardController extends AbstractDataAnalysisController implements ServletContextAware
 {
+	/** 加载看板图表参数：看板ID */
+	public static final String LOAD_CHART_PARAM_DASHBOARD_ID = "dashboardId";
+
+	/** 加载看板图表参数：图表部件ID */
+	public static final String LOAD_CHART_PARAM_CHART_WIDGET_ID = "chartWidgetId";
+
+	/** 加载看板图表参数：图表HTML元素ID */
+	public static final String LOAD_CHART_PARAM_CHART_ELEMENT_ID = "chartElementId";
+
 	static
 	{
 		AuthorizationResourceMetas.registerForShare(HtmlTplDashboardWidgetEntity.AUTHORIZATION_RESOURCE_TYPE,
@@ -805,7 +814,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	}
 
 	/**
-	 * 动态加载看板图表。
+	 * 加载看板图表。
 	 * 
 	 * @param request
 	 * @param response
@@ -815,8 +824,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 */
 	@RequestMapping(value = "/loadChart", produces = CONTENT_TYPE_JSON)
 	public void loadChart(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
-			@RequestParam("dashboardId") String dashboardId, @RequestParam("chartWidgetId") String chartWidgetId,
-			@RequestParam("chartElementId") String chartElementId) throws Throwable
+			@RequestParam(LOAD_CHART_PARAM_DASHBOARD_ID) String dashboardId,
+			@RequestParam(LOAD_CHART_PARAM_CHART_WIDGET_ID) String chartWidgetId,
+			@RequestParam(LOAD_CHART_PARAM_CHART_ELEMENT_ID) String chartElementId) throws Throwable
 	{
 		SessionHtmlTplDashboardManager dashboardManager = getSessionHtmlTplDashboardManagerNotNull(request);
 		HtmlTplDashboard dashboard = dashboardManager.get(dashboardId);
@@ -931,7 +941,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
 		String contextPath = getWebContextPath(request).get(request);
-		return new WebContext(contextPath, contextPath + "/analysis/dashboard/showData");
+		return new WebContext(contextPath, contextPath + "/analysis/dashboard/showData",
+				contextPath + "/analysis/dashboard/loadChart");
 	}
 
 	protected void checkSaveEntity(HtmlTplDashboardWidgetEntity widget)

@@ -102,12 +102,30 @@
 		
 		$.extend(global.chartFactory.echartsMapURLs, mapUrls);
 	};
+
+	/**
+	 * 更新看板数据配置，需与后台保持一致。
+	 */
+	dashboardFactory.updateDashboardConfig = (dashboardFactory.updateDashboardConfig ||
+			{
+				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_DASHBOARD_ID
+				dashboardIdParamName: "dashboardId",
+				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_CHART_IDS
+				chartIdsParamName: "chartIds",
+				//org.datagear.web.controller.AbstractDataAnalysisController.UPDATE_DASHBOARD_PARAM_CHARTS_PARAM_VALUES
+				chartsParamValuesParamName: "chartsParamValues"
+			});
 	
+	/**
+	 * 异步加载图表配置，需与后台保持一致。
+	 */
 	dashboardFactory.loadChartConfig = (dashboardFactory.loadChartConfig ||
 			{
-				url: "/analysis/dashboard/loadChart",
+				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_DASHBOARD_ID
 				dashboardIdParamName: "dashboardId",
+				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_WIDGET_ID
 				chartWidgetIdParamName: "chartWidgetId",
+				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_ELEMENT_ID
 				chartElementIdParamName: "chartElementId"
 			});
 	
@@ -430,10 +448,10 @@
 	 */
 	dashboardBase.buildUpdateDashboardAjaxData = function(charts)
 	{
-		var webContext = this.renderContextAttr("webContext");
+		var updateDashboardConfig = dashboardFactory.updateDashboardConfig;
 		
 		var data = {};
-		data[webContext.dashboardIdParam] = this.id;
+		data[updateDashboardConfig.dashboardIdParamName] = this.id;
 		
 		if(charts && charts.length)
 		{
@@ -451,8 +469,8 @@
 				chartsParamValues[charts[i].id] = myParamValuess;
 			}
 			
-			data[webContext.chartIdsParam] = chartIds;
-			data[webContext.chartsParamValuesParam] = chartsParamValues;
+			data[updateDashboardConfig.chartIdsParamName] = chartIds;
+			data[updateDashboardConfig.chartsParamValuesParamName] = chartsParamValues;
 		}
 		
 		return data;
@@ -501,7 +519,7 @@
 		
 		var myAjaxOptions = $.extend(
 		{
-			url: webContext.contextPath + dashboardFactory.loadChartConfig.url,
+			url: webContext.loadChartURL,
 			data: data,
 			error: function(jqXHR, textStatus, errorThrown)
 			{

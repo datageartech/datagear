@@ -48,8 +48,17 @@ import org.datagear.web.util.WebUtils;
  * @author datagear@163.com
  *
  */
-public class AbstractDataAnalysisController extends AbstractController
+public abstract class AbstractDataAnalysisController extends AbstractController
 {
+	/** 更新看板数据请求的看板ID参数名 */
+	public static final String UPDATE_DASHBOARD_PARAM_DASHBOARD_ID = "dashboardId";
+
+	/** 更新看板数据请求的图表集参数名 */
+	public static final String UPDATE_DASHBOARD_PARAM_CHART_IDS = "chartIds";
+
+	/** 更新看板数据请求的图表集参数值的参数名 */
+	public static final String UPDATE_DASHBOARD_PARAM_CHARTS_PARAM_VALUES = "chartsParamValues";
+
 	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
 
 	public AbstractDataAnalysisController()
@@ -204,10 +213,10 @@ public class AbstractDataAnalysisController extends AbstractController
 	protected Map<String, DataSetResult[]> getDashboardData(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, WebContext webContext, Map<String, ?> dashboardParams) throws Exception
 	{
-		String dashboardId = (String) dashboardParams.get(webContext.getDashboardIdParam());
-		Collection<String> chartIds = (Collection<String>) dashboardParams.get(webContext.getChartIdsParam());
+		String dashboardId = (String) dashboardParams.get(UPDATE_DASHBOARD_PARAM_DASHBOARD_ID);
+		Collection<String> chartIds = (Collection<String>) dashboardParams.get(UPDATE_DASHBOARD_PARAM_CHART_IDS);
 		Map<String, ? extends List<? extends Map<String, ?>>> chartsParamValues = (Map<String, ? extends List<? extends Map<String, ?>>>) dashboardParams
-				.get(webContext.getChartsParamValuesParam());
+				.get(UPDATE_DASHBOARD_PARAM_CHARTS_PARAM_VALUES);
 
 		if (StringUtil.isEmpty(dashboardId))
 			throw new IllegalInputException();
