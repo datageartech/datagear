@@ -12,6 +12,18 @@
  * 运行时依赖:
  *   jquery.js
  *   datagear-chartFactory.js
+ * 
+ * 
+ * 此看板工厂支持为<body>元素添加"dg-dashboard-listener"来指定看板监听器JS对象名，看板监听器格式为：
+ * {
+ *   onRender: function(dashboard){ ... },
+ *   onRenderChart: function(dashboard, chart){ ... },
+ *   onUpdateChart: function(dashboard, chart, results){ ... }
+ * }
+ * 
+ * 此看板监听器支持为<body>元素添加"dg-chart-map-urls"来扩展或替换内置地图，格式为：
+ * {customMap:'map/custom.json', china: 'map/myChina.json'}
+ * 
  */
 (function(global)
 {
@@ -159,9 +171,7 @@
 			var chart = charts[i];
 			
 			if(chart.statusPreRender())
-			{
-				this.renderChart(chart, i);
-			}
+				this.renderChart(chart);
 		}
 		
 		var preUpdates = [];
@@ -240,20 +250,19 @@
 	 * 渲染指定图表。
 	 * 
 	 * @param chart 图表对象
-	 * @param chartIndex 图表索引
 	 */
-	dashboardBase.renderChart = function(chart, chartIndex)
+	dashboardBase.renderChart = function(chart)
 	{
 		try
 		{
 			var doRender = true;
 			
 			if(this.listener && this.listener.onRenderChart)
-				doRender=this.listener.onRenderChart(this, chart, chartIndex);
+				doRender=this.listener.onRenderChart(this, chart);
 			
 			if(doRender != false)
 			{
-				this.doRenderChart(chart, chartIndex);
+				this.doRenderChart(chart);
 				
 				if(global.chartForm && global.chartForm.bindChartSettingPanelEvent)
 					global.chartForm.bindChartSettingPanelEvent(chart);
@@ -269,9 +278,8 @@
 	 * 执行渲染指定图表。
 	 * 
 	 * @param chart 图表对象
-	 * @param chartIndex 图表索引
 	 */
-	dashboardBase.doRenderChart = function(chart, chartIndex)
+	dashboardBase.doRenderChart = function(chart)
 	{
 		return chart.render();
 	};

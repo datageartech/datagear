@@ -13,7 +13,18 @@
  *   jquery.js
  *   echarts.js
  * 
- * 此模块和dashboardFactory.js一起可以支持异步图表插件，示例如下：
+ * 
+ * 此图表工厂支持为<body>、<div>图表元素添加"dg-chart-options"属性来设置图表选项，格式为：
+ * { title: { show: false },... }
+ * 
+ * 此图表工厂支持为<body>元素添加"dg-chart-theme"属性来设置图表主题，格式为：
+ * { color:'...', backgroundColor:'...', ... }
+ * 
+ * 此图表工厂支持为<div>图表元素添加"dg-chart-map"属性来设置地图图表的地图名。
+ * 
+ * 此图表工厂支持为<body>元素添加"dg-echarts-theme"属性来设置Echarts主题名。
+ * 
+ * 此图表工厂和dashboardFactory.js一起可以支持异步图表插件，示例如下：
  * {
  *   //声明render函数是否为异步，默认为false
  *   asyncRender: true || false || function(chart){ return true || false },
