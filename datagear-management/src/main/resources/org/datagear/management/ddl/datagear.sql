@@ -311,3 +311,9 @@ ALTER TABLE DATAGEAR_HCW_DS ADD COLUMN DS_PARAM_VALUES VARCHAR(1000);
 --version[1.8.1], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
+
+
+-----------------------------------------
+--version[1.9.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
