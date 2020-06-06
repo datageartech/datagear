@@ -14,15 +14,18 @@
  *   datagear-chartFactory.js
  * 
  * 
- * 此看板工厂支持为<body>元素添加"dg-dashboard-listener"来指定看板监听器JS对象名，看板监听器格式为：
+ * 此看板工厂支持为<body>元素添加"dg-dashboard-listener"属性，用于指定看板监听器JS对象名，看板监听器格式为：
  * {
  *   onRender: function(dashboard){ ... },
  *   onRenderChart: function(dashboard, chart){ ... },
  *   onUpdateChart: function(dashboard, chart, results){ ... }
  * }
  * 
- * 此看板监听器支持为<body>元素添加"dg-chart-map-urls"来扩展或替换内置地图，格式为：
+ * 此看板工厂支持为<body>元素添加"dg-chart-map-urls"属性，用于扩展或替换内置地图，格式为：
  * {customMap:'map/custom.json', china: 'map/myChina.json'}
+ * 
+ * 此看板工厂支持为<div>图表元素添加"dg-disable-chart-setting"属性，用于禁用图表交互设置功能，
+ * 值为"true"表示禁用，其他表示启用。
  * 
  */
 (function(global)
@@ -263,9 +266,7 @@
 			if(doRender != false)
 			{
 				this.doRenderChart(chart);
-				
-				if(global.chartForm && global.chartForm.bindChartSettingPanelEvent)
-					global.chartForm.bindChartSettingPanelEvent(chart);
+				this.renderChartSetting(chart);
 			}
 		}
 		catch(e)
@@ -282,6 +283,26 @@
 	dashboardBase.doRenderChart = function(chart)
 	{
 		return chart.render();
+	};
+	
+	/**
+	 * 渲染图表设置表单。
+	 */
+	dashboardBase.renderChartSetting = function(chart)
+	{
+		var $chart = chart.elementJquery();
+		
+		//禁用设置表单，比如当不想让用户交互设置图表参数时
+		if($chart.attr("dg-disable-chart-setting") == "true")
+			return false;
+		
+		if(global.chartForm && global.chartForm.bindChartSettingPanelEvent)
+		{
+			global.chartForm.bindChartSettingPanelEvent(chart);
+			return true;
+		}
+		
+		return false;
 	};
 	
 	/**
@@ -400,8 +421,7 @@
 	{
 		try
 		{
-			if(global.chartForm && global.chartForm.unbindChartSettingPanelEvent)
-				global.chartForm.unbindChartSettingPanelEvent(chart);
+			this.destroyChartSetting(chart);
 		}
 		catch(e)
 		{
@@ -409,6 +429,20 @@
 		}
 		
 		chart.destroy();
+	};
+	
+	/**
+	 * 销毁图表设置表单。
+	 */
+	dashboardBase.destroyChartSetting = function(chart)
+	{
+		if(global.chartForm && global.chartForm.unbindChartSettingPanelEvent)
+		{
+			global.chartForm.unbindChartSettingPanelEvent(chart);
+			return true;
+		}
+		
+		return false;
 	};
 	
 	/**
