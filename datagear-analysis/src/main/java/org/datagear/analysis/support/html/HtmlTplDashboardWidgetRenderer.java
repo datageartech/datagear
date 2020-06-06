@@ -872,12 +872,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	 * <p>
 	 * <code>
 	 * <pre>
-	 * if(typeof(jQuery) != "undefined")
-	 * 	jQuery(document).ready(function(){ dashboard.render(); });
-	 * else if(typeof($) != "undefined")
-	 * 	$(document).ready(function(){ dashboard.render(); });
-	 * else
-	 * 	window.onload = function(){ dashboard.render(); };
+	 * [dashboard].render();
 	 * </pre>
 	 * </code>
 	 * </p>
@@ -896,19 +891,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		if (StringUtil.isEmpty(varName))
 			throw new IllegalArgumentException();
 
-		out.write("if(typeof(jQuery) != \"undefined\")");
-		writeNewLine(out);
-		out.write("  jQuery(document).ready(function(){ " + varName + "." + this.dashboardRenderFuncName + "(); });");
-		writeNewLine(out);
-
-		out.write("else if(typeof($) != \"undefined\")");
-		writeNewLine(out);
-		out.write("  $(document).ready(function(){ " + varName + "." + this.dashboardRenderFuncName + "(); });");
-		writeNewLine(out);
-
-		out.write("else");
-		writeNewLine(out);
-		out.write("  window.onload = function(){ " + varName + "." + this.dashboardRenderFuncName + "(); };");
+		out.write(varName + "." + this.dashboardRenderFuncName + "();");
 		writeNewLine(out);
 	}
 

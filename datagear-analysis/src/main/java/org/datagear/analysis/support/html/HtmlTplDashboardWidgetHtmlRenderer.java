@@ -439,7 +439,6 @@ public class HtmlTplDashboardWidgetHtmlRenderer extends HtmlTplDashboardWidgetRe
 		out.write("window." + globalDashboardVar + "=" + localDashboardVarName + ";");
 		writeNewLine(out);
 
-		writeNewLine(out);
 		writeHtmlTplDashboardJSRender(renderContext, renderAttr, out, dashboard);
 
 		out.write("})();");
