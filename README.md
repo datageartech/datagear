@@ -32,9 +32,9 @@ DataGear是一款数据管理与可视化分析平台，使用Java语言开发�
 
 ## 交流
 
-留言板：[http://www.datagear.tech/messageboard](http://www.datagear.tech/messageboard/)
-
 QQ群：[916083747](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)
+
+留言板：[http://www.datagear.tech/messageboard](http://www.datagear.tech/messageboard/)
 
 ## 界面
 
