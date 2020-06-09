@@ -24,7 +24,7 @@
  * 此看板工厂支持为<body>元素添加"dg-chart-map-urls"属性，用于扩展或替换内置地图，格式为：
  * {customMap:'map/custom.json', china: 'map/myChina.json'}
  * 
- * 此看板工厂支持为<div>图表元素添加"dg-disable-chart-setting"属性，用于禁用图表交互设置功能，
+ * 此看板工厂支持为<div>图表元素添加"dg-chart-disable-setting"属性，用于禁用图表交互设置功能，
  * 值为"true"表示禁用，其他表示启用。
  * 
  */
@@ -293,7 +293,7 @@
 		var $chart = chart.elementJquery();
 		
 		//禁用设置表单，比如当不想让用户交互设置图表参数时
-		if($chart.attr("dg-disable-chart-setting") == "true")
+		if($chart.attr("dg-chart-disable-setting") == "true")
 			return false;
 		
 		if(global.chartForm && global.chartForm.bindChartSettingPanelEvent)

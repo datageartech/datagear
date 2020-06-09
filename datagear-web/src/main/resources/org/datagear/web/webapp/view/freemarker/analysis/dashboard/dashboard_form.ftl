@@ -174,8 +174,8 @@ readonly 是否只读操作，允许为null
 		po.templateEditorCompletions = [
 			{name: "dg-chart-widget", value: "dg-chart-widget", caption: "",
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", tagNames: ["div"]},
-				{name: "dg-chart-map", value: "dg-chart-map", caption: "",
-					meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map' />", tagNames: ["div"]},
+			{name: "dg-chart-map", value: "dg-chart-map", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map' />", tagNames: ["div"]},
 			{name: "dg-chart-renderer", value: "dg-chart-renderer", caption: "",
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-renderer' />", tagNames: ["div"]},
 			{name: "dg-chart-theme", value: "dg-chart-theme", caption: "",
@@ -185,7 +185,11 @@ readonly 是否只读操作，允许为null
 			{name: "dg-chart-options", value: "dg-chart-options", caption: "",
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-options' />", tagNames: ["div","body"]},
 			{name: "dg-echarts-theme", value: "dg-echarts-theme", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", tagNames: ["body"]}
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", tagNames: ["body"]},
+			{name: "dg-dashboard-listener", value: "dg-dashboard-listener", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-listener' />", tagNames: ["body"]},
+			{name: "dg-chart-disable-setting", value: "dg-chart-disable-setting=\"true\"", caption: "dg-chart-dis..ting",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-disable-setting' />", tagNames: ["div"]}
 		];
 		
 		po.templateEditorCompleters =
