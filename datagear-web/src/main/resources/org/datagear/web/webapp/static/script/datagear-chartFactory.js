@@ -355,6 +355,19 @@
 		
 		return true;
 	};
+
+	/**
+	 * 获取指定数据集单个参数值。
+	 * 
+	 * @param chartDataSet 指定图表数据集或其索引
+	 * @param name 参数名
+	 */
+	chartBase.getDataSetParamValue = function(chartDataSet, name)
+	{
+		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
+		return (chartDataSet.paramValues ? chartDataSet.paramValues[name] : undefined);
+	};
 	
 	/**
 	 * 获取指定数据集参数值集。
@@ -372,15 +385,46 @@
 	 * 设置指定数据集参数值集。
 	 * 
 	 * @param chartDataSet 指定图表数据集或其索引
+	 * @param paramValues 参数值集对象
 	 */
 	chartBase.setDataSetParamValues = function(chartDataSet, paramValues)
 	{
 		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
+		if(chartDataSet.paramValues == undefined)
+			chartDataSet.paramValues = {};
+		
 		if(chartDataSet._originalParamValues == undefined)
 			chartDataSet._originalParamValues = chartDataSet.paramValues;
 		
 		chartDataSet.paramValues = paramValues;
+	};
+	
+	/**
+	 * 设置指定数据集单个参数值。
+	 * 
+	 * @param chartDataSet 指定图表数据集或其索引
+	 * @param paramName 参数名
+	 * @param paramValue 参数值
+	 */
+	chartBase.setDataSetParamValue = function(chartDataSet, paramName, paramValue)
+	{
+		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
+		if(chartDataSet.paramValues == undefined)
+			chartDataSet.paramValues = {};
+		
+		if(chartDataSet._originalParamValues == undefined)
+		{
+			chartDataSet._originalParamValues = chartDataSet.paramValues;
+			
+			var paramValues = {};
+			if(chartDataSet._originalParamValues)
+				$.extend(paramValues, chartDataSet._originalParamValues);
+			chartDataSet.paramValues = paramValues;
+		}
+		
+		chartDataSet.paramValues[paramName] = paramValue;
 	};
 	
 	/**
