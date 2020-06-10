@@ -355,76 +355,66 @@
 		
 		return true;
 	};
-
+	
 	/**
-	 * 获取指定数据集单个参数值。
+	 * 获取/设置指定数据集单个参数值。
 	 * 
 	 * @param chartDataSet 指定图表数据集或其索引
 	 * @param name 参数名
+	 * @param value 要设置的参数值，不设置则执行获取操作
 	 */
-	chartBase.getDataSetParamValue = function(chartDataSet, name)
+	chartBase.dataSetParamValue = function(chartDataSet, name, value)
 	{
 		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
-		return (chartDataSet.paramValues ? chartDataSet.paramValues[name] : undefined);
+		if(chartDataSet.paramValues == null)
+			chartDataSet.paramValues = {};
+		
+		if(chartDataSet._originalParamValues == null)
+			chartDataSet._originalParamValues = $.extend({}, chartDataSet.paramValues);
+		
+		if(value == undefined)
+			return chartDataSet.paramValues[name];
+		else
+			chartDataSet.paramValues[name] = value;
 	};
 	
 	/**
-	 * 获取指定数据集参数值集。
+	 * 获取/设置指定数据集参数值集。
 	 * 
 	 * @param chartDataSet 指定图表数据集或其索引
+	 * @param paramValuesObj 要设置的参数值集对象，不设置则执行获取操作
+	 */
+	chartBase.dataSetParamValues = function(chartDataSet, paramValuesObj)
+	{
+		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
+		if(chartDataSet.paramValues == null)
+			chartDataSet.paramValues = {};
+		
+		if(chartDataSet._originalParamValues == null)
+			chartDataSet._originalParamValues = $.extend({}, chartDataSet.paramValues);
+		
+		if(paramValuesObj == undefined)
+			return chartDataSet.paramValues;
+		else
+			chartDataSet.paramValues = paramValuesObj;
+	};
+	
+	/**
+	 * 已弃用，请使用dataSetParamValues函数。
 	 */
 	chartBase.getDataSetParamValues = function(chartDataSet)
 	{
-		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
-		
-		return chartDataSet.paramValues;
+		return this.dataSetParamValues(chartDataSet);
 	};
 	
 	/**
-	 * 设置指定数据集参数值集。
-	 * 
-	 * @param chartDataSet 指定图表数据集或其索引
-	 * @param paramValues 参数值集对象
+	 * 已弃用，请使用dataSetParamValues函数。
 	 */
-	chartBase.setDataSetParamValues = function(chartDataSet, paramValues)
+	chartBase.setDataSetParamValues = function(chartDataSet, paramValuesObj)
 	{
-		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
-		
-		if(chartDataSet.paramValues == undefined)
-			chartDataSet.paramValues = {};
-		
-		if(chartDataSet._originalParamValues == undefined)
-			chartDataSet._originalParamValues = chartDataSet.paramValues;
-		
-		chartDataSet.paramValues = paramValues;
-	};
-	
-	/**
-	 * 设置指定数据集单个参数值。
-	 * 
-	 * @param chartDataSet 指定图表数据集或其索引
-	 * @param paramName 参数名
-	 * @param paramValue 参数值
-	 */
-	chartBase.setDataSetParamValue = function(chartDataSet, paramName, paramValue)
-	{
-		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
-		
-		if(chartDataSet.paramValues == undefined)
-			chartDataSet.paramValues = {};
-		
-		if(chartDataSet._originalParamValues == undefined)
-		{
-			chartDataSet._originalParamValues = chartDataSet.paramValues;
-			
-			var paramValues = {};
-			if(chartDataSet._originalParamValues)
-				$.extend(paramValues, chartDataSet._originalParamValues);
-			chartDataSet.paramValues = paramValues;
-		}
-		
-		chartDataSet.paramValues[paramName] = paramValue;
+		this.dataSetParamValues(chartDataSet, paramValuesObj);
 	};
 	
 	/**
@@ -436,10 +426,10 @@
 	{
 		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
 		
-		if(chartDataSet._originalParamValues == undefined)
+		if(chartDataSet._originalParamValues == null)
 			return;
 		
-		chartDataSet.paramValues = chartDataSet._originalParamValues;
+		chartDataSet.paramValues = $.extend({}, chartDataSet._originalParamValues);
 	};
 	
 	/**
@@ -961,7 +951,7 @@
 		
 		return re;
 	};
-
+	
 	/**
 	 * 获取数据集结果指定属性、指定行的单元格值，没有则返回undefined。
 	 * 
@@ -1052,11 +1042,297 @@
 	};
 	
 	/**
+	 * 指定名称的echarts地图是否已经注册过而无需再加载。
+	 * 
+	 * @param name echarts地图名称
+	 */
+	chartBase.echartsMapRegistered = function(name)
+	{
+		return (echarts.getMap(name) != null);
+	};
+	
+	/**
+	 * 获取echarts指定名称的地图JSON地址，如果找不到，则直接将name作为地址返回。
+	 * 
+	 * @param name echarts地图名称
+	 */
+	chartBase.echartsMapURL = function(name)
+	{
+		var url = chartFactory.echartsMapURLs[name];
+		
+		if(!url && typeof(chartFactory.echartsMapURLs.mapURL) == "function")
+			url = chartFactory.echartsMapURLs.mapURL(name);
+		
+		url = (url || name);
+		
+		var webContext = this.renderContextAttr("webContext");
+		var contextPath = (webContext ? webContext.contextPath : undefined);
+		
+		if(contextPath && url.indexOf("/") == 0 && url.indexOf(contextPath) != 0)
+			url = contextPath + url;
+		
+		return url;
+	};
+	
+	/**
+	 * 加载指定名称的echarts地图JSON，并在完成后执行回调函数。
+	 * 注意：如果地图图表插件的render/update函数中调用此函数，应该首先设置插件的asyncRender/asyncUpdate，
+	 * 并在callback中调用chart.statusPreUpdate()/chart.statusUpdated()，具体参考此文件顶部的注释。
+	 * 
+	 * @param name echarts地图名称
+	 * @param callback 完成回调函数：function(){ ... }
+	 */
+	chartBase.echartsMapLoad = function(name, callback)
+	{
+		var url = this.echartsMapURL(name);
+		$.getJSON(url, function(geoJson)
+		{
+			echarts.registerMap(name, geoJson);
+			
+			if(callback)
+				callback();
+		});
+	};
+
+	/**
 	 * 构建echarts主题。
 	 * 
 	 * @param chartTheme 图表主题
 	 */
 	chartBase.echartsBuildTheme = function(chartTheme)
+	{
+		return chartFactory.buildEchartsTheme(chartTheme);
+	};
+	
+	//----------------------------------------
+	// chartBase end
+	//----------------------------------------
+	
+	/**
+	 * 执行JS代码。
+	 * 
+	 * @param str JS代码
+	 * @param defaultValue 默认返回值，可选，默认为：undefined
+	 */
+	chartFactory.evalSilently = function(str, defaultValue)
+	{
+		var re = undefined;
+		
+		try
+		{
+			re = Function("return ("+str+");")();
+		}
+		catch(e)
+		{
+			this.logException(e);
+		}
+		
+		return (re || defaultValue);
+	};
+	
+	/**
+	 * 解析JSON。
+	 * 如果参数不合法，将返回空对象：{}。
+	 */
+	chartFactory.parseJSONSilently = function(str)
+	{
+		if(!str)
+			return {};
+		
+		try
+		{
+			if(typeof($) != "undefined" && $.parseJSON)
+				return $.parseJSON(str);
+			else
+				return JSON.parse(str);
+		}
+		catch(e)
+		{
+			this.logException(e);
+		}
+		
+		return {};
+	};
+	
+	/**
+	 * 将不符合JSON规范的字符串定义规范化：属性名添加双引号、或将属性名单引号替换为双引号。
+	 */
+	chartFactory.trimJSONString = function(str)
+	{
+		if(!str)
+			return str;
+		
+		//替换单引号为双引号
+		var str1 = "";
+		for(var i=0; i<str.length;i++)
+		{
+			var c = str.charAt(i);
+			
+			if(c == '\\')
+			{
+				str1 += c;
+				i = i+1;
+				str1 += str.charAt(i);
+			}
+			else if(c == '\'')
+				str1 += '"';
+			else
+				str1 += c;
+		}
+		
+		str = str1;
+		
+		//属性名匹配表达式
+		var reg = /([{,]\s*)([^\:\s]*)(\s*:)/g;
+		
+		return str.replace(reg, function(token, prefix, name, suffix)
+		{
+			var len = name.length;
+			
+			if(len > 1 && name.charAt(0) == '"' && name.charAt(len-1) == '"')
+				return token;
+			else if(len > 1 && name.charAt(0) == '\'' && name.charAt(len-1) == '\'')
+			{
+				name = '"' + name.substring(1, len-1) + '"';
+				return prefix + name + suffix;
+			}
+			else
+				return prefix + '"' + name + '"' + suffix;
+		});
+	};
+	
+	/**
+	 * 计算渐变颜色。
+	 * 
+	 * @param start 起始颜色
+	 * @param end 终止颜色
+	 * @param count 计算数目
+	 * @param rgb true 返回"rgb(...)"格式；fasle 返回"#FFFFFF"格式，默认为false
+	 */
+	chartFactory.evalGradientColors = function(start, end, count, rgb)
+	{
+		var colors = [];
+		
+		start = this.parseColor(start);
+		end = this.parseColor(end);
+		
+		for(var i=0; i<count; i++)
+		{
+			var color = {};
+			
+			color.r = parseInt(start.r + (end.r - start.r)/count*i);
+			color.g = parseInt(start.g + (end.g - start.g)/count*i);
+			color.b = parseInt(start.b + (end.b - start.b)/count*i);
+			
+			if(rgb)
+				color = "rgb("+color.r+","+color.g+","+color.b+")";
+			else
+			{
+				var r = new Number(color.r).toString(16);
+				var g = new Number(color.g).toString(16);
+				var b = new Number(color.b).toString(16);
+				
+				color = "#" + (r.length == 1 ? "0"+r : r)
+							 + (g.length == 1 ? "0"+g : g)
+							  + (b.length == 1 ? "0"+b : b);
+			}
+			
+			colors.push(color);
+		}
+		
+		return colors;
+	};
+	
+	/**
+	 * 解析颜色对象。
+	 * 将颜色字符串解析为{r: number, g: number, b: number}格式的对象。
+	 * 
+	 * @param color 颜色字符串，格式为："#FFF"、"#FFFFFF"、"rgb(255,255,255)"
+	 */
+	chartFactory.parseColor = function(color)
+	{
+		var re = {r: 0, g: 0, b: 0};
+		
+		if(!color)
+			return re;
+		
+		// #FFF、#FFFFFF
+		if(color.charAt(0) == '#')
+		{
+			color = color.substring(1);
+			
+			if(color.length == 3)
+				color = color + color;
+			
+			if(color.length >= 2)
+				re.r = parseInt(color.substr(0, 2), 16);
+			if(color.length >= 4)
+				re.g = parseInt(color.substr(2, 2), 16);
+			if(color.length >= 6)
+				re.b = parseInt(color.substr(4, 2), 16);
+		}
+		// rgb()
+		else
+		{
+			var si = color.indexOf("(");
+			var ei = (si >= 0 ? color.indexOf(")", si+1) : -1);
+			
+			if(ei > si)
+			{
+				color = color.substring(si+1, ei).split(",");
+				
+				if(color.length >= 1)
+					re.r = parseInt(color[0]);
+				if(color.length >= 2)
+					re.g = parseInt(color[1]);
+				if(color.length >= 3)
+					re.b = parseInt(color[2]);
+			}
+		}
+		
+		return re;
+	};
+	
+	/**
+	 * 将元素设置为图表提示主题样式。
+	 */
+	chartFactory.setTooltipThemeStyle = function($ele, chart)
+	{
+		var chartTheme = chart.theme();
+		var tooltipTheme = (chartTheme && chartTheme.tooltipTheme ? chartTheme.tooltipTheme : undefined);
+		
+		if(!tooltipTheme)
+			return false;
+		
+		$ele.css("background-color", tooltipTheme.backgroundColor)
+			.css("border-color", tooltipTheme.borderColor)
+			.css("color", tooltipTheme.color);
+	};
+	
+	/**
+	 * 记录异常日志。
+	 * 
+	 * @param exception 异常对象
+	 */
+	chartFactory.logException = function(exception)
+	{
+		if(typeof console != "undefined")
+		{
+			if(console.error)
+				console.error(exception);
+			else if(console.warn)
+				console.warn(exception);
+			else if(console.info)
+				console.info(exception);
+		}
+	};
+	
+	/**
+	 * 由图表主题构建echarts主题。
+	 * 
+	 * @param chartTheme 图表主题对象：org.datagear.analysis.ChartTheme
+	 */
+	chartFactory.buildEchartsTheme = function(chartTheme)
 	{
 		//@deprecated 用于兼容1.5.0版本的chartTheme结构，未来版本会移除
 		if(chartTheme.colorSecond)
@@ -1664,282 +1940,6 @@
 		};
 		
 		return theme;
-	};
-	
-	/**
-	 * 指定名称的echarts地图是否已经注册过而无需再加载。
-	 * 
-	 * @param name echarts地图名称
-	 */
-	chartBase.echartsMapRegistered = function(name)
-	{
-		return (echarts.getMap(name) != null);
-	};
-	
-	/**
-	 * 获取echarts指定名称的地图JSON地址，如果找不到，则直接将name作为地址返回。
-	 * 
-	 * @param name echarts地图名称
-	 */
-	chartBase.echartsMapURL = function(name)
-	{
-		var url = chartFactory.echartsMapURLs[name];
-		
-		if(!url && typeof(chartFactory.echartsMapURLs.mapURL) == "function")
-			url = chartFactory.echartsMapURLs.mapURL(name);
-		
-		url = (url || name);
-		
-		var webContext = this.renderContextAttr("webContext");
-		var contextPath = (webContext ? webContext.contextPath : undefined);
-		
-		if(contextPath && url.indexOf("/") == 0 && url.indexOf(contextPath) != 0)
-			url = contextPath + url;
-		
-		return url;
-	};
-	
-	/**
-	 * 加载指定名称的echarts地图JSON，并在完成后执行回调函数。
-	 * 注意：如果地图图表插件的render/update函数中调用此函数，应该首先设置插件的asyncRender/asyncUpdate，
-	 * 并在callback中调用chart.statusPreUpdate()/chart.statusUpdated()，具体参考此文件顶部的注释。
-	 * 
-	 * @param name echarts地图名称
-	 * @param callback 完成回调函数：function(){ ... }
-	 */
-	chartBase.echartsMapLoad = function(name, callback)
-	{
-		var url = this.echartsMapURL(name);
-		$.getJSON(url, function(geoJson)
-		{
-			echarts.registerMap(name, geoJson);
-			
-			if(callback)
-				callback();
-		});
-	};
-	
-	//----------------------------------------
-	// chartBase end
-	//----------------------------------------
-	
-	/**
-	 * 执行JS代码。
-	 * 
-	 * @param str JS代码
-	 * @param defaultValue 默认返回值，可选，默认为：undefined
-	 */
-	chartFactory.evalSilently = function(str, defaultValue)
-	{
-		var re = undefined;
-		
-		try
-		{
-			re = Function("return ("+str+");")();
-		}
-		catch(e)
-		{
-			this.logException(e);
-		}
-		
-		return (re || defaultValue);
-	};
-	
-	/**
-	 * 解析JSON。
-	 * 如果参数不合法，将返回空对象：{}。
-	 */
-	chartFactory.parseJSONSilently = function(str)
-	{
-		if(!str)
-			return {};
-		
-		try
-		{
-			if(typeof($) != "undefined" && $.parseJSON)
-				return $.parseJSON(str);
-			else
-				return JSON.parse(str);
-		}
-		catch(e)
-		{
-			this.logException(e);
-		}
-		
-		return {};
-	};
-	
-	/**
-	 * 将不符合JSON规范的字符串定义规范化：属性名添加双引号、或将属性名单引号替换为双引号。
-	 */
-	chartFactory.trimJSONString = function(str)
-	{
-		if(!str)
-			return str;
-		
-		//替换单引号为双引号
-		var str1 = "";
-		for(var i=0; i<str.length;i++)
-		{
-			var c = str.charAt(i);
-			
-			if(c == '\\')
-			{
-				str1 += c;
-				i = i+1;
-				str1 += str.charAt(i);
-			}
-			else if(c == '\'')
-				str1 += '"';
-			else
-				str1 += c;
-		}
-		
-		str = str1;
-		
-		//属性名匹配表达式
-		var reg = /([{,]\s*)([^\:\s]*)(\s*:)/g;
-		
-		return str.replace(reg, function(token, prefix, name, suffix)
-		{
-			var len = name.length;
-			
-			if(len > 1 && name.charAt(0) == '"' && name.charAt(len-1) == '"')
-				return token;
-			else if(len > 1 && name.charAt(0) == '\'' && name.charAt(len-1) == '\'')
-			{
-				name = '"' + name.substring(1, len-1) + '"';
-				return prefix + name + suffix;
-			}
-			else
-				return prefix + '"' + name + '"' + suffix;
-		});
-	};
-	
-	/**
-	 * 计算渐变颜色。
-	 * 
-	 * @param start 起始颜色
-	 * @param end 终止颜色
-	 * @param count 计算数目
-	 * @param rgb true 返回"rgb(...)"格式；fasle 返回"#FFFFFF"格式，默认为false
-	 */
-	chartFactory.evalGradientColors = function(start, end, count, rgb)
-	{
-		var colors = [];
-		
-		start = this.parseColor(start);
-		end = this.parseColor(end);
-		
-		for(var i=0; i<count; i++)
-		{
-			var color = {};
-			
-			color.r = parseInt(start.r + (end.r - start.r)/count*i);
-			color.g = parseInt(start.g + (end.g - start.g)/count*i);
-			color.b = parseInt(start.b + (end.b - start.b)/count*i);
-			
-			if(rgb)
-				color = "rgb("+color.r+","+color.g+","+color.b+")";
-			else
-			{
-				var r = new Number(color.r).toString(16);
-				var g = new Number(color.g).toString(16);
-				var b = new Number(color.b).toString(16);
-				
-				color = "#" + (r.length == 1 ? "0"+r : r)
-							 + (g.length == 1 ? "0"+g : g)
-							  + (b.length == 1 ? "0"+b : b);
-			}
-			
-			colors.push(color);
-		}
-		
-		return colors;
-	};
-	
-	/**
-	 * 解析颜色对象。
-	 * 将颜色字符串解析为{r: number, g: number, b: number}格式的对象。
-	 * 
-	 * @param color 颜色字符串，格式为："#FFF"、"#FFFFFF"、"rgb(255,255,255)"
-	 */
-	chartFactory.parseColor = function(color)
-	{
-		var re = {r: 0, g: 0, b: 0};
-		
-		if(!color)
-			return re;
-		
-		// #FFF、#FFFFFF
-		if(color.charAt(0) == '#')
-		{
-			color = color.substring(1);
-			
-			if(color.length == 3)
-				color = color + color;
-			
-			if(color.length >= 2)
-				re.r = parseInt(color.substr(0, 2), 16);
-			if(color.length >= 4)
-				re.g = parseInt(color.substr(2, 2), 16);
-			if(color.length >= 6)
-				re.b = parseInt(color.substr(4, 2), 16);
-		}
-		// rgb()
-		else
-		{
-			var si = color.indexOf("(");
-			var ei = (si >= 0 ? color.indexOf(")", si+1) : -1);
-			
-			if(ei > si)
-			{
-				color = color.substring(si+1, ei).split(",");
-				
-				if(color.length >= 1)
-					re.r = parseInt(color[0]);
-				if(color.length >= 2)
-					re.g = parseInt(color[1]);
-				if(color.length >= 3)
-					re.b = parseInt(color[2]);
-			}
-		}
-		
-		return re;
-	};
-	
-	/**
-	 * 将元素设置为图表提示主题样式。
-	 */
-	chartFactory.setTooltipThemeStyle = function($ele, chart)
-	{
-		var chartTheme = chart.theme();
-		var tooltipTheme = (chartTheme && chartTheme.tooltipTheme ? chartTheme.tooltipTheme : undefined);
-		
-		if(!tooltipTheme)
-			return false;
-		
-		$ele.css("background-color", tooltipTheme.backgroundColor)
-			.css("border-color", tooltipTheme.borderColor)
-			.css("color", tooltipTheme.color);
-	};
-	
-	/**
-	 * 记录异常日志。
-	 * 
-	 * @param exception 异常对象
-	 */
-	chartFactory.logException = function(exception)
-	{
-		if(typeof console != "undefined")
-		{
-			if(console.error)
-				console.error(exception);
-			else if(console.warn)
-				console.warn(exception);
-			else if(console.info)
-				console.info(exception);
-		}
 	};
 })
 (this);
