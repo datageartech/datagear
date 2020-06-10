@@ -140,6 +140,17 @@
 		chart.echartsInstance(null);
 	};
 	
+	/**
+	 * 调整图表的echarts尺寸。
+	 */
+	chartSupport.resizeChartEcharts = function(chart)
+	{
+		var echartsInstance = chart.echartsInstance();
+		
+		if(echartsInstance)
+			echartsInstance.resize();
+	};
+	
 	//折线图
 	
 	chartSupport.lineRender = function(chart, coordSign, valueSign, options)
@@ -226,6 +237,11 @@
 		
 		var options = { legend: {data: legendData}, series: series };
 		chart.echartsOptions(options);
+	};
+	
+	chartSupport.lineResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
 	};
 	
 	chartSupport.lineDestroy = function(chart)
@@ -332,6 +348,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.barResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.barDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -350,6 +371,11 @@
 	chartSupport.barHorizontalUpdate = function(chart, results, coordSign, valueSign)
 	{
 		chartSupport.barUpdate(chart, results, coordSign, valueSign);
+	};
+
+	chartSupport.barHorizontalResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
 	};
 	
 	chartSupport.barHorizontalDestroy = function(chart)
@@ -425,6 +451,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.pieResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.pieDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -484,6 +515,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.gaugeResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.gaugeDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -597,6 +633,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.scatterResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.scatterDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -707,6 +748,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.scatterCoordResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.scatterCoordDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -851,6 +897,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.radarResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.radarDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -945,6 +996,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.funnelResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.funnelDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -1107,6 +1163,11 @@
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
 
+	chartSupport.mapResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.mapDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -1213,6 +1274,11 @@
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
 
+	chartSupport.mapScatterResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.mapScatterDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -1386,6 +1452,11 @@
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
 
+	chartSupport.mapGraphResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.mapGraphDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -1473,6 +1544,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.candlestickResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.candlestickDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -1595,6 +1671,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.heatmapResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.heatmapDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -1658,7 +1739,12 @@
 		var options = { series: series };
 		chart.echartsOptions(options);
 	};
-
+	
+	chartSupport.treeResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.treeDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -1700,6 +1786,11 @@
 		
 		var options = { series: series };
 		chart.echartsOptions(options);
+	};
+
+	chartSupport.treemapResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
 	};
 
 	chartSupport.treemapDestroy = function(chart)
@@ -1746,6 +1837,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.sunburstResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.sunburstDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -1962,6 +2058,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.sankeyResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.sankeyDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -2150,6 +2251,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.graphResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.graphDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -2277,6 +2383,11 @@
 		chart.echartsOptions(options);
 	};
 
+	chartSupport.wordcloudResize = function(chart)
+	{
+		chartSupport.resizeChartEcharts(chart);
+	};
+	
 	chartSupport.wordcloudDestroy = function(chart)
 	{
 		chartSupport.destroyChartEcharts(chart);
@@ -2345,10 +2456,7 @@
 		table.dataTable(options);
 		
 		var dataTable = table.DataTable();
-		var tableHeader = $(dataTable.table().header()).closest(".dataTables_scrollHead");
-		var tableBody = $(dataTable.table().body()).closest(".dataTables_scrollBody");
-		var tableToolbar = $(dataTable.table().body()).closest(".dataTables_scrollBody");
-		tableBody.css("height", chartContent.height() - tableHeader.outerHeight());
+		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
 		
 		chart.extValue("tableId", tableId);
 		chartSupport.initOptions(chart, options);
@@ -2374,6 +2482,16 @@
 		chartSupport.tableAddDataTableData(dataTable, datas, 0, false);
 	};
 	
+	chartSupport.tableResize = function(chart)
+	{
+		var chartEle = chart.elementJquery();
+		var chartContent = $(".dg-chart-table-content", chartEle);
+		var tableId = chart.extValue("tableId");
+		var dataTable = $("#" + tableId, chartEle).DataTable();
+		
+		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
+	};
+	
 	chartSupport.tableDestroy = function(chart)
 	{
 		var chartEle = chart.elementJquery();
@@ -2381,6 +2499,13 @@
 		chartEle.removeClass("dg-hide-title");
 		$(".dg-chart-table-title", chartEle).remove();
 		$(".dg-chart-table-content", chartEle).remove();
+	};
+	
+	chartSupport.tableEvalDataTableBodyHeight = function($chartContent, dataTable)
+	{
+		var tableHeader = $(dataTable.table().header()).closest(".dataTables_scrollHead");
+		var tableBody = $(dataTable.table().body()).closest(".dataTables_scrollBody");
+		tableBody.css("height", $chartContent.height() - tableHeader.outerHeight());
 	};
 	
 	chartSupport.tableAddDataTableData = function(dataTable, datas, startRowIndex, notDraw)
@@ -2504,6 +2629,11 @@
 		
 		$(".dg-chart-label-item-pending", $parent).remove();
 	};
+
+	chartSupport.labelResize = function(chart)
+	{
+		
+	};
 	
 	chartSupport.labelDestroy = function(chart)
 	{
@@ -2557,6 +2687,14 @@
 		
 		if(customRenderer)
 			customRenderer.update(chart, results);
+	};
+
+	chartSupport.customResize = function(chart)
+	{
+		var customRenderer = chartSupport.customGetCustomRenderer(chart);
+		
+		if(customRenderer && customRenderer.resize)
+			customRenderer.resize(chart);
 	};
 	
 	chartSupport.customDestroy = function(chart)

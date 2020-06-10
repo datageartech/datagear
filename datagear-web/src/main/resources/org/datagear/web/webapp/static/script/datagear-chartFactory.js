@@ -157,6 +157,21 @@
 	};
 	
 	/**
+	 * 重新调整图表尺寸。
+	 */
+	chartBase.resize = function()
+	{
+		if(this.plugin.chartRenderer.resize)
+			this.plugin.chartRenderer.resize(this);
+		else
+		{
+			var echartsInstance = this.echartsInstance();
+			if(echartsInstance)
+				echartsInstance.resize();
+		}
+	};
+	
+	/**
 	 * 销毁图表，释放图表占用的资源、恢复图表HTML元素初值。
 	 */
 	chartBase.destroy = function()

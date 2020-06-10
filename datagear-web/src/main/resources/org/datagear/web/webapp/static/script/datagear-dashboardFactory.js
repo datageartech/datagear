@@ -413,6 +413,32 @@
 	};
 	
 	/**
+	 * 重新调整指定图表尺寸。
+	 * 
+	 * @param chartInfo 图表对象、图表HTML元素ID、图表ID、图表索引
+	 */
+	dashboardBase.resizeChart = function(chartInfo)
+	{
+		var chart = this.getChart(chartInfo);
+		
+		if(!chart)
+			return false;
+		
+		chart.resize();
+	};
+	
+	/**
+	 * 重新调整所有图表尺寸。
+	 */
+	dashboardBase.resizeAllCharts = function()
+	{
+		var charts = (this.charts || []);
+		
+		for(var i=0; i<charts.length; i++)
+			charts[i].resize();
+	};
+	
+	/**
 	 * 销毁图表。
 	 * 
 	 * @param chart 图表对象
