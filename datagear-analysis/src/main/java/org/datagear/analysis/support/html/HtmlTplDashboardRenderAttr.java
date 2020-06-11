@@ -9,7 +9,6 @@ import java.io.Writer;
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.HtmlTitleHandler;
 
 /**
@@ -30,9 +29,6 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	/** 属性名：Web上下文 */
 	private String webContextName = "webContext";
 
-	/** 属性名：渲染风格 */
-	private String renderStyleName = "renderStyle";
-
 	/** 属性名：看板主题 */
 	private String dashboardThemeName = "dashboardTheme";
 
@@ -52,16 +48,6 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	public void setWebContextName(String webContextName)
 	{
 		this.webContextName = webContextName;
-	}
-
-	public String getRenderStyleName()
-	{
-		return renderStyleName;
-	}
-
-	public void setRenderStyleName(String renderStyleName)
-	{
-		this.renderStyleName = renderStyleName;
 	}
 
 	public String getDashboardThemeName()
@@ -134,36 +120,19 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	}
 
 	/**
-	 * 获取{@linkplain RenderStyle}，没有则返回{@code null}。
+	 * 获取{@linkplain DashboardTheme}。
 	 * 
 	 * @param renderContext
 	 * @return
 	 */
-	public RenderStyle getRenderStyle(RenderContext renderContext)
+	public DashboardTheme getDashboardThemeNonNull(RenderContext renderContext)
 	{
-		return renderContext.getAttribute(this.renderStyleName);
-	}
+		DashboardTheme dashboardTheme = renderContext.getAttribute(this.dashboardThemeName);
 
-	/**
-	 * 设置{@linkplain RenderStyle}。
-	 * 
-	 * @param renderContext
-	 * @param renderStyle
-	 */
-	public void setRenderStyle(RenderContext renderContext, RenderStyle renderStyle)
-	{
-		renderContext.setAttribute(this.renderStyleName, renderStyle);
-	}
+		if (dashboardTheme == null)
+			throw new RenderException("The [" + this.dashboardThemeName + "] attribute must be set");
 
-	/**
-	 * 移除{@linkplain RenderStyle}。
-	 * 
-	 * @param renderContext
-	 * @return 移除对象
-	 */
-	public RenderStyle removeRenderStyle(RenderContext renderContext)
-	{
-		return renderContext.removeAttribute(this.renderStyleName);
+		return dashboardTheme;
 	}
 
 	/**
@@ -238,12 +207,15 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 	 * @param renderContext
 	 * @param htmlWriter
 	 * @param webContext
+	 * @param dashboardTheme
 	 */
-	public void inflate(RenderContext renderContext, Writer htmlWriter, WebContext webContext)
+	public void inflate(RenderContext renderContext, Writer htmlWriter, WebContext webContext,
+			DashboardTheme dashboardTheme)
 	{
 		HtmlTplDashboardRenderAttr.set(renderContext, this);
 		setHtmlWriter(renderContext, htmlWriter);
 		setWebContext(renderContext, webContext);
+		setDashboardTheme(renderContext, dashboardTheme);
 	}
 
 	/**

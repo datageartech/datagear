@@ -735,7 +735,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	/**
 	 * 看板样式。
 	 * <p>
-	 * 根据当前渲染风格动态生成看板样式。
+	 * 根据{@linkplain DashboardTheme}动态生成看板样式。
 	 * </p>
 	 * 
 	 * @param request
@@ -744,55 +744,22 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	 * @throws Exception
 	 */
 	@RequestMapping("/showStyle")
-	public void showStyle(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
-			throws Exception
+	public String showStyle(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model) throws Exception
 	{
 		// 不缓存
 		response.setDateHeader("Expires", -1);
 		response.setHeader("Cache-Control", "no-cache");
 		response.setHeader("Pragma", "no-cache");
 		response.setContentType(CONTENT_TYPE_CSS);
-		PrintWriter out = response.getWriter();
 
-		DashboardTheme dashboardTheme = getDashboardThemeAttribute(request.getSession());
-		ChartTheme chartTheme = (dashboardTheme == null ? null : dashboardTheme.getChartTheme());
+		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
+		ChartTheme chartTheme = dashboardTheme.getChartTheme();
 
-		if (chartTheme != null)
-		{
-			// 表格行
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable tbody tr{");
-			out.println("	background:" + chartTheme.getBackgroundColor() + ";");
-			out.println("}");
+		model.addAttribute("dashboardTheme", dashboardTheme);
+		model.addAttribute("chartTheme", chartTheme);
 
-			// 表格奇数行
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody tr.odd,"
-					+ " .dg-chart-table .dg-chart-table-content table.dataTable.display tbody tr.odd{");
-			out.println("	background:" + chartTheme.getBorderColor() + ";");
-			out.println("}");
-
-			// 表格选中、悬浮，拷贝自/src/main/resources/org/datagear/web/webapp/static/theme/lightness/common.css
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr.hover,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr:hover,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody tr:hover {");
-			out.println("	background-color: " + chartTheme.getAxisScaleLineColor() + ";");
-			out.println("}");
-
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody tr.hover.selected,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable tbody > tr.selected,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable tbody > tr > .selected,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd.selected,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.stripe tbody > tr.odd > .selected,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd.selected,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.odd > .selected,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr.selected:hover,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.hover tbody > tr > .selected:hover,");
-			out.println(".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr.selected:hover,");
-			out.println(
-					".dg-chart-table .dg-chart-table-content table.dataTable.display tbody > tr > .selected:hover {");
-			out.println("	background-color: " + chartTheme.getHighlightTheme().getBackgroundColor() + ";");
-			out.println("	color: " + chartTheme.getHighlightTheme().getColor() + ";");
-			out.println("}");
-		}
+		return "/analysis/dashboard/dashboard_style";
 	}
 
 	/**

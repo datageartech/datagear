@@ -17,11 +17,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
+import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.AbstractChartPlugin;
 import org.datagear.analysis.support.CategorizationResolver;
 import org.datagear.analysis.support.CategorizationResolver.Categorization;
@@ -94,8 +94,8 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 			if (plugin.getId().equals(id))
 			{
 				Locale locale = WebUtils.getLocale(request);
-				RenderStyle renderStyle = resolveRenderStyle(request);
-				return toHtmlChartPluginVO(plugin, renderStyle, locale);
+				String themeName = resolveChartPluginIconThemeName(request);
+				return toHtmlChartPluginVO(plugin, themeName, locale);
 			}
 		}
 
@@ -118,10 +118,10 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		if (plugins != null)
 		{
 			Locale locale = WebUtils.getLocale(request);
-			RenderStyle renderStyle = resolveRenderStyle(request);
+			String themeName = resolveChartPluginIconThemeName(request);
 
 			for (HtmlChartPlugin plugin : plugins)
-				pluginViews.add(toHtmlChartPluginVO(plugin, renderStyle, locale));
+				pluginViews.add(toHtmlChartPluginVO(plugin, themeName, locale));
 		}
 
 		return KeywordMatcher.<HtmlChartPluginVO> match(pluginViews, keyword,
@@ -139,12 +139,12 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	protected HtmlChartPluginVO toHtmlChartPluginVO(HttpServletRequest request, HtmlChartPlugin chartPlugin)
 	{
 		Locale locale = WebUtils.getLocale(request);
-		RenderStyle renderStyle = resolveRenderStyle(request);
+		String themeName = resolveChartPluginIconThemeName(request);
 
-		return toHtmlChartPluginVO(chartPlugin, renderStyle, locale);
+		return toHtmlChartPluginVO(chartPlugin, themeName, locale);
 	}
 
-	protected HtmlChartPluginVO toHtmlChartPluginVO(HtmlChartPlugin chartPlugin, RenderStyle renderStyle, Locale locale)
+	protected HtmlChartPluginVO toHtmlChartPluginVO(HtmlChartPlugin chartPlugin, String themeName, Locale locale)
 	{
 		HtmlChartPluginVO pluginVO = new HtmlChartPluginVO();
 
@@ -154,7 +154,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		pluginVO.setDescLabel(toConcreteLabel(chartPlugin.getDescLabel(), locale));
 		pluginVO.setManualLabel(toConcreteLabel(chartPlugin.getManualLabel(), locale));
 
-		Icon icon = chartPlugin.getIcon(renderStyle);
+		Icon icon = chartPlugin.getIcon(themeName);
 		pluginVO.setHasIcon(icon != null);
 		if (pluginVO.isHasIcon())
 			pluginVO.setIconUrl(resolveIconUrl(chartPlugin));
@@ -189,6 +189,12 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		}
 
 		return pluginVO;
+	}
+
+	protected String resolveChartPluginIconThemeName(HttpServletRequest request)
+	{
+		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
+		return dashboardTheme.getName();
 	}
 
 	protected Label toConcreteLabel(Label label, Locale locale)

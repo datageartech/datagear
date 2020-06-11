@@ -19,7 +19,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.datagear.analysis.Icon;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.BytesIcon;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 import org.datagear.analysis.support.LocationIcon;
@@ -444,15 +443,14 @@ public class HtmlChartPluginLoader
 		return plugin;
 	}
 
-	protected Map<RenderStyle, Icon> toBytesIconsInDirectory(File directory, Map<RenderStyle, Icon> icons)
-			throws IOException
+	protected Map<String, Icon> toBytesIconsInDirectory(File directory, Map<String, Icon> icons) throws IOException
 	{
 		if (icons == null || icons.isEmpty())
 			return icons;
 
-		Map<RenderStyle, Icon> bytesIcons = new HashMap<>();
+		Map<String, Icon> bytesIcons = new HashMap<>();
 
-		for (Map.Entry<RenderStyle, Icon> entry : icons.entrySet())
+		for (Map.Entry<String, Icon> entry : icons.entrySet())
 		{
 			Icon icon = entry.getValue();
 

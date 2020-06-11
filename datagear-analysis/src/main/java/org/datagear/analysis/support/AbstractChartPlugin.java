@@ -16,7 +16,6 @@ import org.datagear.analysis.ChartParam;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.util.i18n.Label;
 
 /**
@@ -33,7 +32,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 
 	private Label manualLabel;
 
-	private Map<RenderStyle, Icon> icons;
+	private Map<String, Icon> icons;
 
 	private List<ChartParam> chartParams;
 
@@ -91,23 +90,23 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 	}
 
 	@Override
-	public Map<RenderStyle, Icon> getIcons()
+	public Map<String, Icon> getIcons()
 	{
 		return icons;
 	}
 
-	public void setIcons(Map<RenderStyle, Icon> icons)
+	public void setIcons(Map<String, Icon> icons)
 	{
 		this.icons = icons;
 	}
 
 	@Override
-	public Icon getIcon(RenderStyle renderStyle)
+	public Icon getIcon(String themeName)
 	{
-		Icon icon = (this.icons == null ? null : this.icons.get(renderStyle));
+		Icon icon = (this.icons == null ? null : this.icons.get(themeName));
 
-		if (icon == null && !RenderStyle.LIGHT.equals(renderStyle))
-			icon = getIcon(RenderStyle.LIGHT);
+		if (icon == null && !DEFAULT_ICON_THEME_NAME.equals(themeName))
+			icon = getIcon(DEFAULT_ICON_THEME_NAME);
 
 		return icon;
 	}

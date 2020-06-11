@@ -26,7 +26,6 @@ import org.datagear.analysis.ChartParam;
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.util.IOUtil;
 import org.datagear.util.i18n.Label;
 
@@ -209,34 +208,31 @@ public class JsonChartPluginPropertiesResolver
 	 * @param obj
 	 * @return
 	 */
-	protected Map<RenderStyle, Icon> convertToIcons(Object obj)
+	protected Map<String, Icon> convertToIcons(Object obj)
 	{
 		if (obj == null)
 			return null;
 		else if (obj instanceof String)
 		{
-			Map<RenderStyle, Icon> icons = new HashMap<>();
-			icons.put(RenderStyle.LIGHT, convertToIcon(obj));
+			Map<String, Icon> icons = new HashMap<>();
+			icons.put(ChartPlugin.DEFAULT_ICON_THEME_NAME, convertToIcon(obj));
 
 			return icons;
 		}
 		else if (obj instanceof Map<?, ?>)
 		{
-			Map<RenderStyle, Icon> icons = new HashMap<>();
+			Map<String, Icon> icons = new HashMap<>();
 
 			Map<?, ?> map = (Map<?, ?>) obj;
 
 			for (Map.Entry<?, ?> entry : map.entrySet())
 			{
 				Object key = entry.getKey();
-				RenderStyle renderStyle = convertToRenderStyle(key);
 
-				if (renderStyle == null)
-					continue;
-
+				String themeName = (key instanceof String ? (String) key : key.toString());
 				Icon icon = convertToIcon(entry.getValue());
 
-				icons.put(renderStyle, icon);
+				icons.put(themeName, icon);
 			}
 
 			return icons;
@@ -283,17 +279,6 @@ public class JsonChartPluginPropertiesResolver
 		else
 			throw new UnsupportedOperationException("Convert object of type [" + obj.getClass().getName() + "] to ["
 					+ Icon.class.getName() + "] is not supported");
-	}
-
-	/**
-	 * 将对象转换为{@linkplain RenderStyle}。
-	 * 
-	 * @param obj
-	 * @return
-	 */
-	protected RenderStyle convertToRenderStyle(Object obj)
-	{
-		return convertToEnum(obj, RenderStyle.class);
 	}
 
 	/**

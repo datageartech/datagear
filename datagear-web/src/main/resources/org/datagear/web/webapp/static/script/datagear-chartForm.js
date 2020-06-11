@@ -289,7 +289,6 @@
 			$box = $("<div class='dg-chart-setting-box' />").appendTo($chart);
 			var $button = $("<button type='button' class='dg-chart-setting-button' />")
 					.html(chartForm.labels.set).attr("title", chartForm.labels.openOrCloseSetPanel).appendTo($box);
-			chartFactory.setTooltipThemeStyle($button, chart);
 			
 			$button.click(function()
 			{
@@ -330,7 +329,6 @@
 		if($panel.length <= 0)
 		{
 			$panel = $("<div class='dg-chart-setting-panel' />").appendTo($parent);
-			chartFactory.setTooltipThemeStyle($panel, chart);
 			
 			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartForm.labels.setDataSetParamValue).appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").css("max-height", parseInt($chart.height()/2)).appendTo($panel);
@@ -350,7 +348,6 @@
 					formTitle += " ("+chartDataSets[i].dataSet.name+")";
 				
 				var $fp = $("<div class='dg-param-value-form-wrapper' />").data("chartDataSetIndex", i).appendTo($panelContent);
-				chartFactory.setTooltipThemeStyle($fp, chart);
 				var $head = $("<div class='dg-param-value-form-head' />").html(formTitle).appendTo($fp);
 				var $content = $("<div class='dg-param-value-form-content' />").appendTo($fp);
 				chartForm.renderDataSetParamValueForm($content, params,
@@ -362,18 +359,12 @@
 					paramValues: chartDataSets[i].paramValues,
 					render: function()
 					{
-						$("input, select, button", this).each(function()
-						{
-							chartFactory.setTooltipThemeStyle($(this), chart);
-						});
-						
 						chartForm.getDataSetParamValueFormFoot(this).hide();
 					}
 				});
 			}
 			
 			var $button = $("<button type='button' />").html(chartForm.labels.confirm).appendTo($panelFoot);
-			chartFactory.setTooltipThemeStyle($button, chart);
 			$button.click(function()
 			{
 				var validateOk = true;

@@ -23,10 +23,10 @@ public interface DashboardThemeSource
 	DashboardTheme getDashboardTheme();
 
 	/**
-	 * 获取指定{@linkplain RenderStyle}的{@linkplain DashboardTheme}，没有则返回{@code null}。
+	 * 获取指定名称的{@linkplain DashboardTheme}，没有则返回{@code null}。
 	 * 
-	 * @param renderStyle
+	 * @param themeName
 	 * @return
 	 */
-	DashboardTheme getDashboardTheme(RenderStyle renderStyle);
+	DashboardTheme getDashboardTheme(String themeName);
 }

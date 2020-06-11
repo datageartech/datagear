@@ -19,6 +19,9 @@ public class Theme implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	/** 主题名称 */
+	private String name;
+
 	/** 前景色 */
 	private String color;
 
@@ -36,12 +39,23 @@ public class Theme implements Serializable
 		super();
 	}
 
-	public Theme(String color, String backgroundColor, String borderColor)
+	public Theme(String name, String color, String backgroundColor, String borderColor)
 	{
 		super();
+		this.name = name;
 		this.color = color;
 		this.backgroundColor = backgroundColor;
 		this.borderColor = borderColor;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
 	}
 
 	public String getColor()
@@ -87,8 +101,7 @@ public class Theme implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [color=" + color + ", backgroundColor=" + backgroundColor
-				+ ", borderColor=" + borderColor
-				+ ", borderWidth=" + borderWidth + "]";
+		return getClass().getSimpleName() + " [name= " + this.name + ", color=" + color + ", backgroundColor="
+				+ backgroundColor + ", borderColor=" + borderColor + ", borderWidth=" + borderWidth + "]";
 	}
 }

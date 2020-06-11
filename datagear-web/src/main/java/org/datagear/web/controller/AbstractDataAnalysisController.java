@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,12 +28,13 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
+import org.datagear.analysis.DashboardThemeSource;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.DefaultRenderContext;
+import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlTplDashboard;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
@@ -59,7 +59,11 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 更新看板数据请求的图表集参数值的参数名 */
 	public static final String UPDATE_DASHBOARD_PARAM_CHARTS_PARAM_VALUES = "chartsParamValues";
 
+	public static final String DASHBOARD_THEME_NAME_PARAM = "theme";
+
 	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
+
+	private DashboardThemeSource dashboardThemeSource = new SimpleDashboardThemeSource();
 
 	public AbstractDataAnalysisController()
 	{
@@ -76,25 +80,29 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		this.dataSetParamValueConverter = dataSetParamValueConverter;
 	}
 
+	public DashboardThemeSource getDashboardThemeSource()
+	{
+		return dashboardThemeSource;
+	}
+
+	public void setDashboardThemeSource(DashboardThemeSource dashboardThemeSource)
+	{
+		this.dashboardThemeSource = dashboardThemeSource;
+	}
+
 	protected RenderContext createHtmlRenderContext(HttpServletRequest request, HttpServletResponse response,
-			HtmlTplDashboardRenderAttr renderAttr,
-			WebContext webContext, HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer) throws IOException
+			HtmlTplDashboardRenderAttr renderAttr, WebContext webContext,
+			HtmlTplDashboardWidgetRenderer htmlTplDashboardWidgetRenderer) throws IOException
 	{
 		RenderContext renderContext = new DefaultRenderContext(resolveParamValues(request));
 
 		Writer out = response.getWriter();
-		RenderStyle renderStyle = resolveRenderStyle(request);
-		renderAttr.inflate(renderContext, out, webContext);
-		renderAttr.setRenderStyle(renderContext, renderStyle);
-
-		DashboardTheme dashboardTheme = htmlTplDashboardWidgetRenderer.inflateDashboardTheme(renderContext, renderAttr,
-				renderStyle);
+		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
+		renderAttr.inflate(renderContext, out, webContext, dashboardTheme);
 
 		renderAttr.setIgnoreRenderAttrs(renderContext,
 				Arrays.asList(renderAttr.getHtmlWriterName(), renderAttr.getHtmlTitleHandlerName(),
 						renderAttr.getIgnoreRenderAttrsName(), HtmlTplDashboardRenderAttr.ATTR_NAME));
-
-		setDashboardThemeAttribute(request.getSession(), dashboardTheme);
 
 		return renderContext;
 	}
@@ -104,25 +112,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return new HtmlTplDashboardRenderAttr();
 	}
 
-	protected void setDashboardThemeAttribute(HttpSession session, DashboardTheme theme)
-	{
-		session.setAttribute(AbstractDataAnalysisController.class.getSimpleName(), theme);
-	}
-
-	/**
-	 * 获取{@linkplain DashboardTheme}，没有则返回{@code null}。
-	 * 
-	 * @param session
-	 * @return
-	 */
-	protected DashboardTheme getDashboardThemeAttribute(HttpSession session)
-	{
-		return (DashboardTheme) session.getAttribute(AbstractDataAnalysisController.class.getSimpleName());
-	}
-
 	protected Map<String, ?> resolveParamValues(HttpServletRequest request)
 	{
-		Map<String, Object> paramValues = new HashMap<String, Object>();
+		Map<String, Object> paramValues = new HashMap<>();
 
 		Map<String, String[]> origin = request.getParameterMap();
 
@@ -143,34 +135,18 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		return paramValues;
 	}
 
-	protected RenderStyle resolveRenderStyle(HttpServletRequest request)
+	protected DashboardTheme resolveDashboardTheme(HttpServletRequest request)
 	{
-		String style = request.getParameter("renderStyle");
+		String theme = request.getParameter(DASHBOARD_THEME_NAME_PARAM);
 
-		if (!StringUtil.isEmpty(style))
-		{
-			EnumSet<RenderStyle> enumSet = EnumSet.allOf(RenderStyle.class);
+		if (StringUtil.isEmpty(theme))
+			theme = WebUtils.getTheme(request);
 
-			for (RenderStyle e : enumSet)
-			{
-				if (e.name().equalsIgnoreCase(style))
-					return e;
-			}
-		}
-		else
-		{
-			String theme = WebUtils.getTheme(request);
+		DashboardTheme dashboardTheme = this.dashboardThemeSource.getDashboardTheme(theme);
+		if (dashboardTheme == null)
+			dashboardTheme = this.dashboardThemeSource.getDashboardTheme();
 
-			if (!StringUtil.isEmpty(theme))
-			{
-				theme = theme.toLowerCase();
-
-				if (theme.indexOf("dark") > -1)
-					return RenderStyle.DARK;
-			}
-		}
-
-		return RenderStyle.LIGHT;
+		return dashboardTheme;
 	}
 
 	/**

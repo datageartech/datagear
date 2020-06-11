@@ -33,6 +33,9 @@ public interface ChartPlugin extends Identifiable, Labeled
 	String PROPERTY_ORDER = "order";
 	String PROPERTY_CATEGORY = "category";
 
+	/** 默认图标主题名 */
+	String DEFAULT_ICON_THEME_NAME = "default";
+
 	/**
 	 * 获取名称标签。
 	 * <p>
@@ -62,15 +65,15 @@ public interface ChartPlugin extends Identifiable, Labeled
 	 * 
 	 * @return
 	 */
-	Map<RenderStyle, Icon> getIcons();
+	Map<String, Icon> getIcons();
 
 	/**
-	 * 获取指定风格的图标，没有找到则返回{@code null}。
+	 * 获取指定主题名称的图标，没有找到则获取{@linkplain #DEFAULT_ICON_THEME_NAME}对应的图标，没有找到则返回{@code null}。
 	 * 
-	 * @param renderStyle
+	 * @param themeName
 	 * @return
 	 */
-	Icon getIcon(RenderStyle renderStyle);
+	Icon getIcon(String themeName);
 
 	/**
 	 * 获取{@linkplain ChartParam}列表。

@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.Icon;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.CategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoadException;
@@ -145,14 +144,14 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
 
 		Locale locale = WebUtils.getLocale(request);
-		RenderStyle renderStyle = resolveRenderStyle(request);
+		String themeName = resolveChartPluginIconThemeName(request);
 
 		try
 		{
 			Set<HtmlChartPlugin> loaded = loader.loads(zipFile);
 
 			for (HtmlChartPlugin chartPlugin : loaded)
-				pluginInfos.add(toHtmlChartPluginVO(chartPlugin, renderStyle, locale));
+				pluginInfos.add(toHtmlChartPluginVO(chartPlugin, themeName, locale));
 		}
 		catch (HtmlChartPluginLoadException e)
 		{
@@ -263,8 +262,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		if (chartPlugin == null)
 			throw new FileNotFoundException();
 
-		RenderStyle renderStyle = resolveRenderStyle(request);
-		Icon icon = chartPlugin.getIcon(renderStyle);
+		String themeName = resolveChartPluginIconThemeName(request);
+		Icon icon = chartPlugin.getIcon(themeName);
 
 		if (icon == null)
 			throw new FileNotFoundException();

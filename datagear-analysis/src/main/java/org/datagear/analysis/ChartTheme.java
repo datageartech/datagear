@@ -51,11 +51,11 @@ public class ChartTheme extends Theme implements Serializable
 	{
 	}
 
-	public ChartTheme(String color, String backgroundColor, String borderColor, String titleColor, String legendColor,
-			String axisColor, String axisScaleLineColor, String[] graphColors, String[] graphRangeColors,
-			Theme tooltipTheme, Theme highlightTheme)
+	public ChartTheme(String name, String color, String backgroundColor, String borderColor, String titleColor,
+			String legendColor, String axisColor, String axisScaleLineColor, String[] graphColors,
+			String[] graphRangeColors, Theme tooltipTheme, Theme highlightTheme)
 	{
-		super(color, backgroundColor, borderColor);
+		super(name, color, backgroundColor, borderColor);
 		this.titleColor = titleColor;
 		this.legendColor = legendColor;
 		this.axisColor = axisColor;

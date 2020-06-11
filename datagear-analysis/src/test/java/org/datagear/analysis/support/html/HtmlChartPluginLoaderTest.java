@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.Icon;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.support.AbstractChartPluginManager;
 import org.junit.Assert;
 import org.junit.Test;
@@ -67,36 +67,36 @@ public class HtmlChartPluginLoaderTest
 			HtmlChartPlugin plugin = list.get(0);
 			Assert.assertEquals("plugin04", plugin.getId());
 
-			Map<RenderStyle, Icon> icons = plugin.getIcons();
-			Assert.assertNotNull(icons.get(RenderStyle.LIGHT));
-			Assert.assertNotNull(icons.get(RenderStyle.DARK));
+			Map<String, Icon> icons = plugin.getIcons();
+			Assert.assertNotNull(icons.get("light"));
+			Assert.assertNotNull(icons.get("dark"));
 		}
 
 		{
 			HtmlChartPlugin plugin = list.get(1);
 			Assert.assertEquals("plugin03", plugin.getId());
 
-			Map<RenderStyle, Icon> icons = plugin.getIcons();
-			Assert.assertNotNull(icons.get(RenderStyle.LIGHT));
-			Assert.assertNotNull(icons.get(RenderStyle.DARK));
+			Map<String, Icon> icons = plugin.getIcons();
+			Assert.assertNotNull(icons.get("light"));
+			Assert.assertNotNull(icons.get("dark"));
 		}
 
 		{
 			HtmlChartPlugin plugin = list.get(2);
 			Assert.assertEquals("plugin02", plugin.getId());
 
-			Map<RenderStyle, Icon> icons = plugin.getIcons();
-			Assert.assertNotNull(icons.get(RenderStyle.LIGHT));
-			Assert.assertNotNull(icons.get(RenderStyle.DARK));
+			Map<String, Icon> icons = plugin.getIcons();
+			Assert.assertNotNull(icons.get("light"));
+			Assert.assertNotNull(icons.get("dark"));
 		}
 
 		{
 			HtmlChartPlugin plugin = list.get(3);
 			Assert.assertEquals("plugin01", plugin.getId());
 
-			Map<RenderStyle, Icon> icons = plugin.getIcons();
-			Assert.assertNotNull(icons.get(RenderStyle.LIGHT));
-			Assert.assertNotNull(icons.get(RenderStyle.DARK));
+			Map<String, Icon> icons = plugin.getIcons();
+			Assert.assertEquals(1, icons.size());
+			Assert.assertNotNull(icons.get(ChartPlugin.DEFAULT_ICON_THEME_NAME));
 		}
 	}
 }

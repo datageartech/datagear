@@ -17,6 +17,7 @@ import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.DefaultRenderContext;
 import org.datagear.analysis.support.FileTemplateDashboardWidgetResManager;
 import org.datagear.analysis.support.SimpleChartWidgetSource;
+import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.ChartInfo;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetHtmlRenderer.DashboardInfo;
@@ -75,7 +76,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 		RenderContext renderContext = new DefaultRenderContext();
 		HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 		StringWriter out = new StringWriter();
-		renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
+		renderAttr.inflate(renderContext, out, new WebContext("", "", ""), SimpleDashboardThemeSource.THEME_LIGHT);
 
 		HtmlTplDashboard dashboard = dashboardWidget.render(renderContext);
 
@@ -97,7 +98,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""), SimpleDashboardThemeSource.THEME_LIGHT);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -126,7 +127,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""), SimpleDashboardThemeSource.THEME_LIGHT);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -155,7 +156,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""), SimpleDashboardThemeSource.THEME_LIGHT);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -184,7 +185,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""), SimpleDashboardThemeSource.THEME_LIGHT);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -212,7 +213,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""), SimpleDashboardThemeSource.THEME_LIGHT);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -258,7 +259,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""), SimpleDashboardThemeSource.THEME_LIGHT);
 
 			HtmlTplDashboard dashboard = this.renderer.createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -302,7 +303,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""), SimpleDashboardThemeSource.THEME_LIGHT);
 
 			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler("prefix-");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);
@@ -321,7 +322,7 @@ public class HtmlTplDashboardWidgetHtmlRendererTest
 			RenderContext renderContext = new DefaultRenderContext();
 			HtmlTplDashboardRenderAttr renderAttr = new HtmlTplDashboardRenderAttr();
 			StringWriter out = new StringWriter();
-			renderAttr.inflate(renderContext, out, new WebContext("", "", ""));
+			renderAttr.inflate(renderContext, out, new WebContext("", "", ""), SimpleDashboardThemeSource.THEME_LIGHT);
 
 			AddPrefixHtmlTitleHandler htmlTitleHandler = new AddPrefixHtmlTitleHandler("prefix-");
 			renderAttr.setHtmlTitleHandler(renderContext, htmlTitleHandler);

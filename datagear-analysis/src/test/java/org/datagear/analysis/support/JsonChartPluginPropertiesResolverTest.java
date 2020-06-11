@@ -12,7 +12,6 @@ import org.datagear.analysis.ChartParam;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.util.i18n.Label;
 import org.junit.Assert;
 import org.junit.Test;
@@ -71,10 +70,10 @@ public class JsonChartPluginPropertiesResolverTest
 
 			{
 				@SuppressWarnings({ "unchecked", "rawtypes" })
-				Map<RenderStyle, LocationIcon> icons = (Map) chartPlugin.getIcons();
+				Map<String, LocationIcon> icons = (Map) chartPlugin.getIcons();
 
-				Assert.assertEquals("icon-0.png", icons.get(RenderStyle.LIGHT).getLocation());
-				Assert.assertEquals("icon-1.png", icons.get(RenderStyle.DARK).getLocation());
+				Assert.assertEquals("icon-0.png", icons.get("LIGHT").getLocation());
+				Assert.assertEquals("icon-1.png", icons.get("DARK").getLocation());
 			}
 
 			List<ChartParam> chartParams = chartPlugin.getChartParams();

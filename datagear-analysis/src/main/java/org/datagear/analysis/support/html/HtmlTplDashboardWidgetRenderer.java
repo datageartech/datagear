@@ -22,15 +22,12 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.DashboardTheme;
-import org.datagear.analysis.DashboardThemeSource;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
-import org.datagear.analysis.RenderStyle;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
 import org.datagear.analysis.Theme;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.ChartWidgetSource;
-import org.datagear.analysis.support.SimpleDashboardThemeSource;
 import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.util.Global;
 import org.datagear.util.IDUtil;
@@ -76,6 +73,10 @@ import org.datagear.util.StringUtil;
  * 在渲染时，占位符会被替换为{@linkplain Global#VERSION}（可用于支持版本更新时浏览器缓存更新）。
  * </p>
  * <p>
+ * 此类的{@linkplain #getHtmlTplDashboardImports()}的{@linkplain HtmlTplDashboardImport#getContent()}可以包含{@linkplain #getThemeNamePlaceholder()}占位符，
+ * 在渲染时，占位符会被替换为{@linkplain DashboardTheme#getName()}。
+ * </p>
+ * <p>
  * 此类的{@linkplain #getExtDashboardInitScript()}可以包含{@linkplain #getDashboardVarPlaceholder()}占位符，
  * 在渲染时，占位符会被替换为实际的{@linkplain HtmlTplDashboard#getVarName()}。
  * </p>
@@ -89,6 +90,8 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	public static final String DEFAULT_CONTEXT_PATH_PLACE_HOLDER = "$CONTEXTPATH";
 
 	public static final String DEFAULT_VERSION_PLACE_HOLDER = "$VERSION";
+
+	public static final String DEFAULT_THEME_NAME_PLACE_HOLDER = "$THEME";
 
 	public static final String DEFAULT_DASHBOARD_VAR_PLACE_HOLDER = "$DASHBOARD";
 
@@ -105,8 +108,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	private TemplateDashboardWidgetResManager templateDashboardWidgetResManager;
 
 	private ChartWidgetSource chartWidgetSource;
-
-	private DashboardThemeSource dashboardThemeSource = new SimpleDashboardThemeSource();
 
 	private HtmlRenderContextScriptObjectWriter htmlRenderContextScriptObjectWriter = new HtmlRenderContextScriptObjectWriter();
 
@@ -126,6 +127,9 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 	/** 应用版本号占位符 */
 	private String versionPlaceholder = DEFAULT_VERSION_PLACE_HOLDER;
+
+	/** 主题名占位符 */
+	private String themeNamePlaceholder = DEFAULT_THEME_NAME_PLACE_HOLDER;
 
 	/** 扩展看板初始化脚本 */
 	private String extDashboardInitScript;
@@ -191,16 +195,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	public void setChartWidgetSource(ChartWidgetSource chartWidgetSource)
 	{
 		this.chartWidgetSource = chartWidgetSource;
-	}
-
-	public DashboardThemeSource getDashboardThemeSource()
-	{
-		return dashboardThemeSource;
-	}
-
-	public void setDashboardThemeSource(DashboardThemeSource dashboardThemeSource)
-	{
-		this.dashboardThemeSource = dashboardThemeSource;
 	}
 
 	public HtmlRenderContextScriptObjectWriter getHtmlRenderContextScriptObjectWriter()
@@ -274,6 +268,16 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	public void setVersionPlaceholder(String versionPlaceholder)
 	{
 		this.versionPlaceholder = versionPlaceholder;
+	}
+
+	public String getThemeNamePlaceholder()
+	{
+		return themeNamePlaceholder;
+	}
+
+	public void setThemeNamePlaceholder(String themeNamePlaceholder)
+	{
+		this.themeNamePlaceholder = themeNamePlaceholder;
 	}
 
 	public String getExtDashboardInitScript()
@@ -503,8 +507,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 			throws RenderException
 	{
 		HtmlTplDashboardRenderAttr renderAttr = getHtmlTplDashboardRenderAttrNonNull(renderContext);
-		RenderStyle renderStyle = inflateRenderStyle(renderContext, renderAttr);
-		inflateDashboardTheme(renderContext, renderAttr, renderStyle);
 
 		HtmlTplDashboard dashboard = createHtmlTplDashboard(renderContext, dashboardWidget, template);
 
@@ -527,51 +529,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	protected HtmlTplDashboardRenderAttr getHtmlTplDashboardRenderAttrNonNull(RenderContext renderContext)
 	{
 		return HtmlTplDashboardRenderAttr.getNonNull(renderContext);
-	}
-
-	/**
-	 * 设置必要的{@linkplain RenderStyle}。
-	 * <p>
-	 * 如果已设置，则返回；否则，设置默认并返回。
-	 * </p>
-	 * 
-	 * @param renderContext
-	 * @return
-	 */
-	public RenderStyle inflateRenderStyle(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr)
-	{
-		RenderStyle renderStyle = renderAttr.getRenderStyle(renderContext);
-
-		if (renderStyle == null)
-		{
-			renderStyle = RenderStyle.LIGHT;
-			renderAttr.setRenderStyle(renderContext, renderStyle);
-		}
-
-		return renderStyle;
-	}
-
-	/**
-	 * 设置必要的{@linkplain DashboardTheme}。
-	 * <p>
-	 * 如果已设置，则返回；否则，设置默认并返回。
-	 * </p>
-	 * 
-	 * @param renderContext
-	 * @param renderStyle
-	 */
-	public DashboardTheme inflateDashboardTheme(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-			RenderStyle renderStyle)
-	{
-		DashboardTheme dashboardTheme = renderAttr.getDashboardTheme(renderContext);
-
-		if (dashboardTheme == null)
-		{
-			dashboardTheme = getDashboardTheme(renderStyle);
-			renderAttr.setDashboardTheme(renderContext, dashboardTheme);
-		}
-
-		return dashboardTheme;
 	}
 
 	/**
@@ -642,17 +599,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	protected Writer getTemplateWriter(HtmlTplDashboardWidget dashboardWidget, String template) throws IOException
 	{
 		return getTemplateDashboardWidgetResManager().getTemplateWriter(dashboardWidget, template);
-	}
-
-	protected DashboardTheme getDashboardTheme(RenderStyle renderStyle)
-	{
-		DashboardTheme dashboardTheme = (renderStyle == null ? null
-				: this.dashboardThemeSource.getDashboardTheme(renderStyle));
-
-		if (dashboardTheme == null)
-			dashboardTheme = this.dashboardThemeSource.getDashboardTheme();
-
-		return dashboardTheme;
 	}
 
 	/**
@@ -909,6 +855,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 			HtmlTplDashboard dashboard, String importExclude) throws IOException
 	{
 		WebContext webContext = renderAttr.getWebContext(renderContext);
+		DashboardTheme dashboardTheme = renderAttr.getDashboardThemeNonNull(renderContext);
 
 		List<String> excludes = StringUtil.splitWithTrim(importExclude, ",");
 
@@ -922,8 +869,8 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 					continue;
 
 				String content = replaceContextPathPlaceholder(impt.getContent(), webContext.getContextPath());
-
 				content = replaceVersionPlaceholder(content, Global.VERSION);
+				content = replaceThemeNamePlaceholder(content, dashboardTheme.getName());
 
 				writeNewLine(out);
 				out.write(content);
@@ -933,8 +880,7 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 		if (!excludes.contains(this.themeImportName))
 		{
 			writeNewLine(out);
-			writeDashboardThemeStyle(renderContext, renderAttr, out, dashboard,
-					renderAttr.getDashboardTheme(renderContext));
+			writeDashboardThemeStyle(renderContext, renderAttr, out, dashboard);
 		}
 	}
 
@@ -1035,16 +981,13 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	 * @param renderContext
 	 * @param out
 	 * @param dashboard
-	 * @param dashboardTheme
-	 *            为{@code null}则什么也不写
 	 * @return
 	 * @throws IOException
 	 */
 	protected boolean writeDashboardThemeStyle(RenderContext renderContext, HtmlTplDashboardRenderAttr renderAttr,
-			Writer out, HtmlTplDashboard dashboard, DashboardTheme dashboardTheme) throws IOException
+			Writer out, HtmlTplDashboard dashboard) throws IOException
 	{
-		if (dashboardTheme == null)
-			return false;
+		DashboardTheme dashboardTheme = renderAttr.getDashboardThemeNonNull(renderContext);
 
 		out.write("<style type=\"text/css\">");
 		writeNewLine(out);
@@ -1148,6 +1091,24 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 			version = "";
 
 		return str.replace(getVersionPlaceholder(), version);
+	}
+
+	/**
+	 * 替换字符串中的主题名占位符为真实的主题名。
+	 * 
+	 * @param str
+	 * @param themeName
+	 * @return
+	 */
+	protected String replaceThemeNamePlaceholder(String str, String themeName)
+	{
+		if (StringUtil.isEmpty(str))
+			return str;
+
+		if (themeName == null)
+			themeName = "";
+
+		return str.replace(getThemeNamePlaceholder(), themeName);
 	}
 
 	/**
