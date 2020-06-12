@@ -55,3 +55,6 @@
 	border-color: ${chartTheme.tooltipTheme.borderColor};
 	color: ${chartTheme.tooltipTheme.color};
 }
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button:hover{
+	border-color: ${chartTheme.tooltipTheme.color};
+}

@@ -2326,7 +2326,7 @@
 				if(!toColor)
 					break;
 				
-				colorGradients = colorGradients.concat(chartFactory.evalGradientColors(fromColor, toColor, 5));
+				colorGradients = colorGradients.concat(chartFactory.evalGradualColors(fromColor, toColor, 5));
 			}
 			
 			options.colorGradients = colorGradients;

@@ -44,10 +44,6 @@
 		this.initCharts(dashboard);
 		$.extend(dashboard, this.dashboardBase);
 		this.initListener(dashboard);
-		
-		//渲染看板内图表时需要chartTheme
-		var dashboardTheme = dashboard.renderContextAttr("dashboardTheme");
-		dashboard.renderContextAttr("chartTheme", dashboardTheme.chartTheme);
 	};
 	
 	/**
@@ -59,6 +55,11 @@
 	{
 		if(!dashboard || !dashboard.charts)
 			return;
+		
+		var dashboardTheme = global.chartFactory.renderContextAttr(dashboard.renderContext, "dashboardTheme");
+		global.chartFactory.renderContextAttr(dashboard.renderContext,
+				global.chartFactory.renderContextAttrs.chartTheme,
+				dashboardTheme.chartTheme);
 		
 		for(var i=0; i<dashboard.charts.length; i++)
 			this.initChart(dashboard.charts[i]);
@@ -645,12 +646,7 @@
 	 */
 	dashboardBase.renderContextAttr = function(attrName, attrValue)
 	{
-		var renderContext = this.renderContext;
-		
-		if(attrValue == undefined)
-			return renderContext.attributes[attrName];
-		else
-			return renderContext.attributes[attrName] = attrValue;
+		return global.chartFactory.renderContextAttr(this.renderContext, attrName, attrValue);
 	};
 	
 	//----------------------------------------

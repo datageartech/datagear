@@ -19,6 +19,9 @@ public class Theme implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	/** 透明颜色值常量 */
+	public static final String COLOR_TRANSPARENT = "transparent";
+
 	/** 主题名称 */
 	private String name;
 
@@ -27,6 +30,9 @@ public class Theme implements Serializable
 
 	/** 背景色 */
 	private String backgroundColor;
+
+	/** 实际背景色 */
+	private String actualBackgroundColor;
 
 	/** 边框颜色 */
 	private String borderColor;
@@ -41,10 +47,16 @@ public class Theme implements Serializable
 
 	public Theme(String name, String color, String backgroundColor, String borderColor)
 	{
+		this(name, color, backgroundColor, backgroundColor, borderColor);
+	}
+
+	public Theme(String name, String color, String backgroundColor, String actualBackgroundColor, String borderColor)
+	{
 		super();
 		this.name = name;
 		this.color = color;
 		this.backgroundColor = backgroundColor;
+		this.setActualBackgroundColor(actualBackgroundColor);
 		this.borderColor = borderColor;
 	}
 
@@ -68,6 +80,14 @@ public class Theme implements Serializable
 		this.color = color;
 	}
 
+	/**
+	 * 获取背景色。
+	 * <p>
+	 * 背景色可能是透明色{@linkplain #COLOR_TRANSPARENT}。
+	 * </p>
+	 * 
+	 * @return
+	 */
 	public String getBackgroundColor()
 	{
 		return backgroundColor;
@@ -76,6 +96,34 @@ public class Theme implements Serializable
 	public void setBackgroundColor(String backgroundColor)
 	{
 		this.backgroundColor = backgroundColor;
+	}
+
+	/**
+	 * 获取实际背景色。
+	 * <p>
+	 * 实际背景色不会是透明色{@linkplain #COLOR_TRANSPARENT}。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	public String getActualBackgroundColor()
+	{
+		return actualBackgroundColor;
+	}
+
+	/**
+	 * 设置实际背景色。
+	 * 
+	 * @param actualBackgroundColor
+	 * @throws IllegalArgumentException
+	 *             当参数为{@linkplain #COLOR_TRANSPARENT}时
+	 */
+	public void setActualBackgroundColor(String actualBackgroundColor) throws IllegalArgumentException
+	{
+		if (COLOR_TRANSPARENT.equals(actualBackgroundColor))
+			throw new IllegalArgumentException("[actualBackgroundColor] must not be '" + COLOR_TRANSPARENT + "'");
+
+		this.actualBackgroundColor = actualBackgroundColor;
 	}
 
 	public String getBorderColor()
@@ -102,6 +150,7 @@ public class Theme implements Serializable
 	public String toString()
 	{
 		return getClass().getSimpleName() + " [name= " + this.name + ", color=" + color + ", backgroundColor="
-				+ backgroundColor + ", borderColor=" + borderColor + ", borderWidth=" + borderWidth + "]";
+				+ backgroundColor + ", actualBackgroundColor=" + actualBackgroundColor + ", borderColor=" + borderColor
+				+ ", borderWidth=" + borderWidth + "]";
 	}
 }
