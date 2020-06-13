@@ -11,6 +11,7 @@
  * 
  * 运行时依赖:
  *   jquery.js
+ *   datagear-chartFactory.js
  */
 (function(global)
 {
@@ -289,6 +290,7 @@
 			$box = $("<div class='dg-chart-setting-box' />").appendTo($chart);
 			var $button = $("<button type='button' class='dg-chart-setting-button' />")
 					.html(chartForm.labels.set).attr("title", chartForm.labels.openOrCloseSetPanel).appendTo($box);
+			chartForm.setWidgetStyle($button, chart);
 			
 			$button.click(function()
 			{
@@ -329,6 +331,7 @@
 		if($panel.length <= 0)
 		{
 			$panel = $("<div class='dg-chart-setting-panel' />").appendTo($parent);
+			chartForm.setWidgetStyle($panel, chart, {shadow:true});
 			
 			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartForm.labels.setDataSetParamValue).appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").css("max-height", parseInt($chart.height()/2)).appendTo($panel);
@@ -348,6 +351,7 @@
 					formTitle += " ("+chartDataSets[i].dataSet.name+")";
 				
 				var $fp = $("<div class='dg-param-value-form-wrapper' />").data("chartDataSetIndex", i).appendTo($panelContent);
+				chartForm.setWidgetStyle($fp, chart);
 				var $head = $("<div class='dg-param-value-form-head' />").html(formTitle).appendTo($fp);
 				var $content = $("<div class='dg-param-value-form-content' />").appendTo($fp);
 				chartForm.renderDataSetParamValueForm($content, params,
@@ -359,12 +363,18 @@
 					paramValues: chartDataSets[i].paramValues,
 					render: function()
 					{
+						$("input, select, button, textarea", this).each(function()
+						{
+							chartForm.setWidgetStyle($(this), chart);
+						});
+						
 						chartForm.getDataSetParamValueFormFoot(this).hide();
 					}
 				});
 			}
 			
 			var $button = $("<button type='button' />").html(chartForm.labels.confirm).appendTo($panelFoot);
+			chartForm.setPrimaryButtonStyle($button, chart);
 			$button.click(function()
 			{
 				var validateOk = true;
@@ -424,6 +434,43 @@
 		var $panel = $(".dg-chart-setting-panel", chart.elementJquery());
 		
 		return ($panel.length == 0 || $panel.is(":hidden"));
+	};
+	
+	chartForm.setWidgetStyle = function($widget, chart, options)
+	{
+		options = (options || { shadow: false });
+		
+		var chartFactory = global.chartFactory;
+		var chartTheme = chart.theme();
+		
+		var color = chartFactory.getGradualColor(chartTheme, 1);
+		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
+		var borderColor = chartFactory.getGradualColor(chartTheme, 0.4);
+		var shadowColor = chartFactory.getGradualColor(chartTheme, 0.9);
+		
+		$widget.css("color", color);
+		$widget.css("background-color", bgColor);
+		$widget.css("border-color", borderColor);
+		
+		if(options.shadow)
+		{
+			$widget.css("box-shadow", "0px 0px 6px "+shadowColor);
+			$widget.css("-webkit-box-shadow", "0px 0px 6px "+shadowColor);
+		}
+	};
+
+	chartForm.setPrimaryButtonStyle = function($button, chart)
+	{
+		var chartFactory = global.chartFactory;
+		var chartTheme = chart.theme();
+		
+		var color = chartFactory.getGradualColor(chartTheme, 1);
+		var bgColor = chartFactory.getGradualColor(chartTheme, 0.2);
+		var borderColor = chartFactory.getGradualColor(chartTheme, 0.5);
+		
+		$button.css("color", color);
+		$button.css("background-color", bgColor);
+		$button.css("border-color", borderColor);
 	};
 })
 (this);

@@ -152,7 +152,9 @@
 		if(!this.statusPreRender())
 			return false;
 		
-		this.elementJquery().addClass(chartFactory.CHART_DISTINCT_CSS_NAME);
+		var $chart = this.elementJquery();
+		$chart.addClass(chartFactory.CHART_DISTINCT_CSS_NAME);
+		chartFactory.setThemeStyle($chart, this.theme());
 		
 		this.statusRendering(true);
 		
@@ -585,7 +587,15 @@
 			return chartTheme;
 		
 		if(bodyTheme)
-			$.extend(true, chartTheme, chartFactory.evalSilently(bodyTheme, {}));
+		{
+			var bodyThemeObj = chartFactory.evalSilently(bodyTheme, {});
+			
+			//允许自定义图表主题不设置actualBackgroundColor
+			if(!bodyThemeObj.actualBackgroundColor && bodyThemeObj.backgroundColor != "transparent")
+				bodyThemeObj.actualBackgroundColor = bodyThemeObj.backgroundColor;
+			
+			$.extend(true, chartTheme, bodyThemeObj);
+		}
 		
 		chartTheme._BODY_THEME = bodyTheme;
 		
@@ -1229,6 +1239,43 @@
 	};
 	
 	/**
+	 * 为元素设置主题样式。
+	 * 
+	 * @param element HTML元素、Jquery对象
+	 * @param theme 主题对象
+	 */
+	chartFactory.setThemeStyle = function(element, theme)
+	{
+		return this.setStyles(element, theme);
+	};
+	
+	/**
+	 * 为元素设置样式集。
+	 * 
+	 * @param element HTML元素、Jquery对象
+	 * @param stylesObj 样式对象，格式为：{ color: "...", backgroundColor: "...", fontSize: "...", ...  }
+	 * @return 旧样式集对象
+	 */
+	chartFactory.setStyles = function(element, stylesObj)
+	{
+		var olds = {};
+
+		if(element.length > 0)
+			element = element[0];
+	
+		if(stylesObj && element.style != undefined)
+		{	
+			for(var p in stylesObj)
+			{
+				olds[p] = element.style[p];
+				element.style[p] = stylesObj[p];
+			}
+		}
+		
+		return olds;
+	};
+	
+	/**
 	 * 获取主题指定因子的渐变色。
 	 * 
 	 * @param theme
@@ -1240,15 +1287,6 @@
 		
 		if(!gcs || gcs.length == 0)
 		{
-			//兼容1.8.1版本没有Theme.actualBackgroundColor的情况
-			if(!theme.actualBackgroundColor)
-			{
-				if(theme.backgroundColor != "transparent")
-					theme.actualBackgroundColor = theme.backgroundColor;
-				else
-					theme.actualBackgroundColor = "#FFF";
-			}
-			
 			gcs = this.evalGradualColors(theme.actualBackgroundColor, theme.color, 20);
 			theme._GRADUAL_COLORS = gcs;
 		}

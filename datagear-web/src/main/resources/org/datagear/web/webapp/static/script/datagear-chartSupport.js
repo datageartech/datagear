@@ -2266,7 +2266,7 @@
 	chartSupport.wordcloudRender = function(chart, nameSign, valueSign, options)
 	{
 		//不支持在echarts主题中设置样式，只能在这里设置
-		var chartTheme = (chart.theme() || {});
+		var chartTheme = chart.theme();
 		
 		options = chart.options($.extend(true,
 		{
@@ -2397,6 +2397,8 @@
 	
 	chartSupport.tableRender = function(chart, columnSign, options)
 	{
+		var chartTheme = chart.theme();
+		
 		var chartDataSet = chart.chartDataSetFirst();
 		var cps = chart.dataSetPropertiesOfSign(chartDataSet, columnSign);
 		if(!cps || cps.length == 0)
@@ -2421,10 +2423,59 @@
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-table");
 		
-		options = chart.options($.extend(true,
+		//表格图表样式设置项
+		var chartOptions = chart.options($.extend(true,
 		{
-			//自定义图表标题设置项
-			"title": { "show": true },
+			//标题样式
+			"title":
+			{
+				"show": true,
+				"color": chartTheme.titleColor,
+				"backgroundColor": chartTheme.backgroundColor
+			},
+			//表格
+			"table":
+			{
+				//表头样式
+				"header":
+				{
+					"color": chartTheme.titleColor,
+					"backgroundColor": chartTheme.backgroundColor
+				},
+				//行
+				"row":
+				{
+					//偶数行样式
+					"odd":
+					{
+						"color": chartTheme.color,
+						"backgroundColor": global.chartFactory.getGradualColor(chartTheme, 0.1)
+					},
+					//奇数行样式
+					"even":
+					{
+						"color": chartTheme.color,
+						"backgroundColor": chartTheme.backgroundColor
+					},
+					//悬浮行样式
+					"hover":
+					{
+						"color": chartTheme.color,
+						"backgroundColor": global.chartFactory.getGradualColor(chartTheme, 0.2)
+					},
+					//选中行样式
+					"selected":
+					{
+						"color": chartTheme.highlightTheme.color,
+						"backgroundColor": chartTheme.highlightTheme.backgroundColor
+					}
+				}
+			}
+		},
+		options));
+		
+		options = $.extend({}, chartOptions,
+		{
 			"columns" : columns,
 			"data" : [],
 			"scrollX": true,
@@ -2441,13 +2492,13 @@
 				"emptyTable": "",
 				"zeroRecords" : ""
 			}
-		},
-		options));
+		});
 		
 		if(!options.title || !options.title.show)
 			chartEle.addClass("dg-hide-title");
 		
 		var chartTitle = $("<div class='dg-chart-table-title' />").html(chart.nameNonNull()).appendTo(chartEle);
+		global.chartFactory.setStyles(chartTitle, chartOptions.title);
 		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(chartEle);
 		var table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartContent);
 		var tableId = chart.id+"-table";
@@ -2456,6 +2507,54 @@
 		table.dataTable(options);
 		
 		var dataTable = table.DataTable();
+		
+		dataTable.on("draw", function()
+		{
+			var rowNodes = $(this).DataTable().rows().nodes();
+			$(rowNodes).each(function()
+			{
+				chartSupport.setTableRowStyle(this, chartOptions);
+			});
+		})
+		.on("select", function(e, dt, type, indexes )
+		{
+			if(type === 'row')
+			{
+				var rowNodes = dt.rows(indexes).nodes();
+				$(rowNodes).each(function(index)
+				{
+					global.chartFactory.setStyles(this, chartOptions.table.row.selected);
+				});
+			}
+		})
+		.on("deselect", function(e, dt, type, indexes )
+		{
+			if(type === 'row')
+			{
+				var rowNodes = dt.rows(indexes).nodes();
+				$(rowNodes).each(function(index)
+				{
+					chartSupport.setTableRowStyle(this, chartOptions);
+				});
+			}
+		});
+
+		$("tr", dataTable.table().header()).each(function()
+		{
+			global.chartFactory.setStyles(this, chartOptions.table.header);
+		});
+		
+		$(dataTable.table().body()).on("mouseenter", "tr", function()
+		{
+			if(!$(this).hasClass("selected"))
+				global.chartFactory.setStyles(this, chartOptions.table.row.hover);
+		})
+		.on("mouseleave", "tr", function()
+		{
+			if(!$(this).hasClass("selected"))
+				chartSupport.setTableRowStyle(this, chartOptions);
+		});
+		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
 		
 		chart.extValue("tableId", tableId);
@@ -2501,6 +2600,17 @@
 		$(".dg-chart-table-content", chartEle).remove();
 	};
 	
+	chartSupport.setTableRowStyle = function(rowElement, chartOptions)
+	{
+		if($(rowElement).hasClass("odd"))
+			global.chartFactory.setStyles(rowElement, chartOptions.table.row.odd);
+		else
+			global.chartFactory.setStyles(rowElement, chartOptions.table.row.even);
+		
+		if($(rowElement).hasClass("selected"))
+			var oldStyleObj = global.chartFactory.setStyles(rowElement, chartOptions.table.row.selected);
+	};
+	
 	chartSupport.tableEvalDataTableBodyHeight = function($chartContent, dataTable)
 	{
 		var tableHeader = $(dataTable.table().header()).closest(".dataTables_scrollHead");
@@ -2543,13 +2653,27 @@
 	
 	chartSupport.labelRender = function(chart, coordSign, valueSign, options)
 	{
+		var chartTheme = chart.theme();
+		
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-label");
 		
 		options = chart.options($.extend(true,
 		{
-			valueFirst: false,    //是否标签值在前
-			showName: true        //是否绘制标签名
+			//是否标签值在前
+			"valueFirst": false,
+			"label":
+			{
+				//标签名样式，这里不必添加默认样式，因为图表元素已设置
+				"name":
+				{
+					"show": true
+				},
+				//标签值样式，这里不必添加默认样式，因为图表元素已设置
+				"value":
+				{
+				}
+			}
 		},
 		options));
 		
@@ -2603,7 +2727,7 @@
 					var $labelName = $(".label-name", $label);
 					var $labelValue = $(".label-value", $label);
 					
-					if(options.showName)
+					if(options.label.name.show)
 					{
 						if(options.valueFirst && $labelValue.length == 0)
 							$labelValue = $("<div class='label-value'></div>").appendTo($label);
@@ -2620,9 +2744,14 @@
 							$labelValue = $("<div class='label-value'></div>").appendTo($label);
 					}
 					
-					if(options.showName)
+					if(options.label.name.show)
+					{
 						$labelName.html(name);
+						global.chartFactory.setStyles($labelName, options.label.name);
+					}
+					
 					$labelValue.html(value);
+					global.chartFactory.setStyles($labelValue, options.label.value);
 				}
 			}
 		}

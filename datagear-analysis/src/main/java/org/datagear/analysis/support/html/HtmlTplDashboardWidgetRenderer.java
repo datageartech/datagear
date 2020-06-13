@@ -73,10 +73,6 @@ import org.datagear.util.StringUtil;
  * 在渲染时，占位符会被替换为{@linkplain Global#VERSION}（可用于支持版本更新时浏览器缓存更新）。
  * </p>
  * <p>
- * 此类的{@linkplain #getHtmlTplDashboardImports()}的{@linkplain HtmlTplDashboardImport#getContent()}可以包含{@linkplain #getThemeNamePlaceholder()}占位符，
- * 在渲染时，占位符会被替换为{@linkplain DashboardTheme#getName()}。
- * </p>
- * <p>
  * 此类的{@linkplain #getExtDashboardInitScript()}可以包含{@linkplain #getDashboardVarPlaceholder()}占位符，
  * 在渲染时，占位符会被替换为实际的{@linkplain HtmlTplDashboard#getVarName()}。
  * </p>
@@ -90,8 +86,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	public static final String DEFAULT_CONTEXT_PATH_PLACE_HOLDER = "$CONTEXTPATH";
 
 	public static final String DEFAULT_VERSION_PLACE_HOLDER = "$VERSION";
-
-	public static final String DEFAULT_THEME_NAME_PLACE_HOLDER = "$THEME";
 
 	public static final String DEFAULT_DASHBOARD_VAR_PLACE_HOLDER = "$DASHBOARD";
 
@@ -127,9 +121,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 	/** 应用版本号占位符 */
 	private String versionPlaceholder = DEFAULT_VERSION_PLACE_HOLDER;
-
-	/** 主题名占位符 */
-	private String themeNamePlaceholder = DEFAULT_THEME_NAME_PLACE_HOLDER;
 
 	/** 扩展看板初始化脚本 */
 	private String extDashboardInitScript;
@@ -268,16 +259,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 	public void setVersionPlaceholder(String versionPlaceholder)
 	{
 		this.versionPlaceholder = versionPlaceholder;
-	}
-
-	public String getThemeNamePlaceholder()
-	{
-		return themeNamePlaceholder;
-	}
-
-	public void setThemeNamePlaceholder(String themeNamePlaceholder)
-	{
-		this.themeNamePlaceholder = themeNamePlaceholder;
 	}
 
 	public String getExtDashboardInitScript()
@@ -855,7 +836,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 			HtmlTplDashboard dashboard, String importExclude) throws IOException
 	{
 		WebContext webContext = renderAttr.getWebContext(renderContext);
-		DashboardTheme dashboardTheme = renderAttr.getDashboardThemeNonNull(renderContext);
 
 		List<String> excludes = StringUtil.splitWithTrim(importExclude, ",");
 
@@ -870,7 +850,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 
 				String content = replaceContextPathPlaceholder(impt.getContent(), webContext.getContextPath());
 				content = replaceVersionPlaceholder(content, Global.VERSION);
-				content = replaceThemeNamePlaceholder(content, dashboardTheme.getName());
 
 				writeNewLine(out);
 				out.write(content);
@@ -1091,24 +1070,6 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 			version = "";
 
 		return str.replace(getVersionPlaceholder(), version);
-	}
-
-	/**
-	 * 替换字符串中的主题名占位符为真实的主题名。
-	 * 
-	 * @param str
-	 * @param themeName
-	 * @return
-	 */
-	protected String replaceThemeNamePlaceholder(String str, String themeName)
-	{
-		if (StringUtil.isEmpty(str))
-			return str;
-
-		if (themeName == null)
-			themeName = "";
-
-		return str.replace(getThemeNamePlaceholder(), themeName);
 	}
 
 	/**

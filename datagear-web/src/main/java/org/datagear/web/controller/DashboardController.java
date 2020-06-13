@@ -22,8 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.Chart;
-import org.datagear.analysis.ChartTheme;
-import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
@@ -730,36 +728,6 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		{
 			ChartWidgetSourceContext.remove();
 		}
-	}
-
-	/**
-	 * 看板样式。
-	 * <p>
-	 * 根据{@linkplain DashboardTheme}动态生成看板样式。
-	 * </p>
-	 * 
-	 * @param request
-	 * @param response
-	 * @param model
-	 * @throws Exception
-	 */
-	@RequestMapping("/showStyle")
-	public String showStyle(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model) throws Exception
-	{
-		// 不缓存
-		response.setDateHeader("Expires", -1);
-		response.setHeader("Cache-Control", "no-cache");
-		response.setHeader("Pragma", "no-cache");
-		response.setContentType(CONTENT_TYPE_CSS);
-
-		DashboardTheme dashboardTheme = resolveDashboardTheme(request);
-		ChartTheme chartTheme = dashboardTheme.getChartTheme();
-
-		model.addAttribute("dashboardTheme", dashboardTheme);
-		model.addAttribute("chartTheme", chartTheme);
-
-		return "/analysis/dashboard/dashboard_style";
 	}
 
 	/**
