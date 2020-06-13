@@ -176,20 +176,20 @@ readonly 是否只读操作，允许为null
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-widget' />", tagNames: ["div"]},
 			{name: "dg-chart-map", value: "dg-chart-map", caption: "",
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map' />", tagNames: ["div"]},
-			{name: "dg-chart-renderer", value: "dg-chart-renderer", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-renderer' />", tagNames: ["div"]},
 			{name: "dg-chart-theme", value: "dg-chart-theme", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-theme' />", tagNames: ["body"]},
-			{name: "dg-chart-map-urls", value: "dg-chart-map-urls", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map-urls' />", tagNames: ["body"]},
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-theme' />", tagNames: ["body", "div"]},
 			{name: "dg-chart-options", value: "dg-chart-options", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-options' />", tagNames: ["div","body"]},
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-options' />", tagNames: ["body","div"]},
 			{name: "dg-echarts-theme", value: "dg-echarts-theme", caption: "",
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", tagNames: ["body"]},
 			{name: "dg-dashboard-listener", value: "dg-dashboard-listener", caption: "",
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-listener' />", tagNames: ["body"]},
+			{name: "dg-chart-map-urls", value: "dg-chart-map-urls", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map-urls' />", tagNames: ["body"]},
 			{name: "dg-chart-disable-setting", value: "dg-chart-disable-setting=\"true\"", caption: "dg-chart-dis..ting",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-disable-setting' />", tagNames: ["div"]}
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-disable-setting' />", tagNames: ["div"]},
+			{name: "dg-chart-renderer", value: "dg-chart-renderer", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-renderer' />", tagNames: ["div"]}
 		];
 		
 		po.templateEditorCompleters =

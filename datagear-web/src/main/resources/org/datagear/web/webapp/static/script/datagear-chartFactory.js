@@ -14,10 +14,10 @@
  *   echarts.js
  * 
  * 
- * 此图表工厂支持为<body>、<div>图表元素添加"dg-chart-options"属性来设置图表选项，格式为：
+ * 此图表工厂支持为<body>元素、<div>图表元素添加"dg-chart-options"属性来设置图表选项，格式为：
  * { title: { show: false },... }
  * 
- * 此图表工厂支持为<body>元素添加"dg-chart-theme"属性来设置图表主题，格式为：
+ * 此图表工厂支持为<body>元素、<div>图表元素添加"dg-chart-theme"属性来设置图表主题，格式为：
  * { color:'...', backgroundColor:'...', ... }
  * 
  * 此图表工厂支持为<div>图表元素添加"dg-chart-map"属性来设置地图图表的地图名。
@@ -574,30 +574,54 @@
 	
 	/**
 	 * 获取图表主题。
-	 * 它读取body元素上的"dg-chart-theme"属性值作为自定义主题。
+	 * 它会依次读取body元素、图表div元素上的"dg-chart-theme"属性值作为自定义主题。
 	 * 
 	 * @return {...}
 	 */
 	chartBase.theme = function()
 	{
-		var chartTheme = this.renderContextAttr(chartFactory.renderContextAttrs.chartTheme);
-		var bodyTheme = ($(document.body).attr("dg-chart-theme") || "");
+		var chartTheme = this._CHART_THEME;
 		
-		if(chartTheme._BODY_THEME == bodyTheme)
+		if(chartTheme)
 			return chartTheme;
 		
-		if(bodyTheme)
+		var $body = $(document.body);
+		
+		chartTheme = $body.data("dgGlobalChartTheme");
+		
+		if(!chartTheme)
 		{
-			var bodyThemeObj = chartFactory.evalSilently(bodyTheme, {});
+			chartTheme = this.renderContextAttr(chartFactory.renderContextAttrs.chartTheme);
 			
-			//允许自定义图表主题不设置actualBackgroundColor
-			if(!bodyThemeObj.actualBackgroundColor && bodyThemeObj.backgroundColor != "transparent")
-				bodyThemeObj.actualBackgroundColor = bodyThemeObj.backgroundColor;
+			var bodyThemeValue = $(document.body).attr("dg-chart-theme");
+			if(bodyThemeValue)
+			{
+				var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
+				
+				//允许自定义图表主题不设置actualBackgroundColor
+				if(!bodyThemeObj.actualBackgroundColor && bodyThemeObj.backgroundColor != "transparent")
+					bodyThemeObj.actualBackgroundColor = bodyThemeObj.backgroundColor;
+				
+				chartTheme = $.extend(true, {}, chartTheme, bodyThemeObj);
+			}
 			
-			$.extend(true, chartTheme, bodyThemeObj);
+			$body.data("dgGlobalChartTheme", chartTheme);
 		}
 		
-		chartTheme._BODY_THEME = bodyTheme;
+		var eleThemeValue = this.elementJquery().attr("dg-chart-theme");
+		
+		if(eleThemeValue)
+		{
+			var eleThemeObj = chartFactory.evalSilently(eleThemeValue, {});
+			
+			//允许自定义图表主题不设置actualBackgroundColor
+			if(!eleThemeObj.actualBackgroundColor && eleThemeObj.backgroundColor != "transparent")
+				eleThemeObj.actualBackgroundColor = eleThemeObj.backgroundColor;
+			
+			chartTheme = $.extend(true, {}, chartTheme, eleThemeObj);
+		}
+		
+		this._CHART_THEME = chartTheme;
 		
 		return chartTheme;
 	};
