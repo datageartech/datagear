@@ -22,7 +22,7 @@
  * 
  * 此图表工厂支持为<div>图表元素添加"dg-chart-map"属性来设置地图图表的地图名。
  * 
- * 此图表工厂支持为<body>元素添加"dg-echarts-theme"属性来设置Echarts主题名。
+ * 此图表工厂支持为<body>元素、<div>图表元素添加"dg-echarts-theme"属性来设置图表Echarts主题名。
  * 
  * 此图表工厂和dashboardFactory.js一起可以支持异步图表插件，示例如下：
  * {
@@ -574,7 +574,7 @@
 	
 	/**
 	 * 获取图表主题。
-	 * 它会依次读取body元素、图表div元素上的"dg-chart-theme"属性值作为自定义主题。
+	 * 它会读取body元素、图表div元素上的"dg-chart-theme"属性值作为自定义主题。
 	 * 
 	 * @return {...}
 	 */
@@ -585,9 +585,7 @@
 		if(chartTheme)
 			return chartTheme;
 		
-		var $body = $(document.body);
-		
-		chartTheme = $body.data("dgGlobalChartTheme");
+		chartTheme = chartFactory._GLOBAL_CHART_THEME;
 		
 		if(!chartTheme)
 		{
@@ -613,7 +611,7 @@
 				chartTheme = $.extend(true, {}, chartTheme, bodyThemeObj);
 			}
 			
-			$body.data("dgGlobalChartTheme", chartTheme);
+			chartFactory._GLOBAL_CHART_THEME = chartTheme;
 		}
 		
 		var eleThemeValue = this.elementJquery().attr("dg-chart-theme");
@@ -1090,23 +1088,53 @@
 	};
 	
 	/**
-	 * 获取图表的echarts主题名，如果没有，此方法将注册默认图表主题。
-	 * 它读取body元素上的"dg-echarts-theme"属性值，作为当前echarts主题名。
+	 * 获取图表的echarts主题名。
+	 * 它读取body元素、图表div元素上的"dg-echarts-theme"属性值，作为当前echarts主题名。
 	 */
 	chartBase.echartsThemeName = function()
 	{
-		var themeName = $(document.body).attr("dg-echarts-theme");
+		var themeName = this._ECHARTS_THEME_NAME;
 		
 		if(themeName)
 			return themeName;
 		
-		var chartTheme = this.theme();
+		themeName = this.elementJquery().attr("dg-echarts-theme");
 		
-		themeName = "themeByChartTheme";
+		if(!themeName)
+			themeName = $(document.body).attr("dg-echarts-theme");
 		
-		var theme = this.echartsBuildTheme(chartTheme);
-		echarts.registerTheme(themeName, theme);
-		$(document.body).attr("dg-echarts-theme", themeName);
+		//无自定义echarts主题，则从ChartTheme构建
+		if(!themeName)
+		{
+			var chartTheme = this.theme();
+			
+			//全局Echarts主题
+			if(chartTheme === chartFactory._GLOBAL_CHART_THEME)
+			{
+				themeName = "globalThemeFromChartTheme";
+				
+				if(!chartFactory._GLOBAL_ECHARTS_THEME_REGISTERED)
+				{
+					var globalEchartsTheme = this.echartsBuildTheme(chartTheme);
+					echarts.registerTheme(themeName, globalEchartsTheme);
+					chartFactory._GLOBAL_ECHARTS_THEME_REGISTERED = true;
+				}
+			}
+			//图表级Echarts主题
+			else
+			{
+				themeName = this.elementId+"ThemeFromChartTheme";
+				
+				if(!this._ECHARTS_THEME_REGISTERED)
+				{
+					var localEchartsTheme = this.echartsBuildTheme(chartTheme);
+					echarts.registerTheme(themeName, localEchartsTheme);
+					chartFactory._ECHARTS_THEME_REGISTERED = true;
+				}
+			}
+		}
+		
+		this._ECHARTS_THEME_NAME = themeName;
 	    
 	    return themeName;
 	};
