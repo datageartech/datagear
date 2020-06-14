@@ -598,7 +598,15 @@
 			{
 				var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
 				
-				//允许自定义图表主题不设置actualBackgroundColor
+				//兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
+				if(bodyThemeObj.colorSecond)
+				{
+					bodyThemeObj.color = bodyThemeObj.colorSecond;
+					bodyThemeObj.titleColor = bodyThemeObj.color;
+					bodyThemeObj.legendColor = bodyThemeObj.colorSecond;
+				}
+				
+				//允许自定义ChartTheme不设置actualBackgroundColor
 				if(!bodyThemeObj.actualBackgroundColor && bodyThemeObj.backgroundColor != "transparent")
 					bodyThemeObj.actualBackgroundColor = bodyThemeObj.backgroundColor;
 				
@@ -614,7 +622,7 @@
 		{
 			var eleThemeObj = chartFactory.evalSilently(eleThemeValue, {});
 			
-			//允许自定义图表主题不设置actualBackgroundColor
+			//允许自定义ChartTheme不设置actualBackgroundColor
 			if(!eleThemeObj.actualBackgroundColor && eleThemeObj.backgroundColor != "transparent")
 				eleThemeObj.actualBackgroundColor = eleThemeObj.backgroundColor;
 			
@@ -1082,7 +1090,7 @@
 	};
 	
 	/**
-	 * 获取当前echarts主题名，如果没有，此方法将注册默认图表主题。
+	 * 获取图表的echarts主题名，如果没有，此方法将注册默认图表主题。
 	 * 它读取body元素上的"dg-echarts-theme"属性值，作为当前echarts主题名。
 	 */
 	chartBase.echartsThemeName = function()
@@ -1443,21 +1451,20 @@
 	 */
 	chartFactory.buildEchartsTheme = function(chartTheme)
 	{
-		//用于兼容1.5.0版本的chartTheme结构，未来版本会移除
-		if(chartTheme.colorSecond)
-		{
-			chartTheme.color = chartTheme.colorSecond;
-			chartTheme.titleColor = chartTheme.color;
-			chartTheme.legendColor = chartTheme.colorSecond;
-			chartTheme.axisColor = chartTheme.colorThird;
-			chartTheme.axisScaleLineColor = chartTheme.colorFourth;
-		}
-		
+		var axisColor = this.getGradualColor(chartTheme, 0.6);
+		var axisScaleLineColor = this.getGradualColor(chartTheme, 0.4);
 		var areaColor0 = this.getGradualColor(chartTheme, 0.15);
 		var areaBorderColor0 = this.getGradualColor(chartTheme, 0.3);
 		var areaColor1 = this.getGradualColor(chartTheme, 0.25);
 		var areaBorderColor1 = this.getGradualColor(chartTheme, 0.5);
 		var shadowColor = this.getGradualColor(chartTheme, 0.9);
+		
+		//兼容1.8.1版本有ChartTheme.axisColor的结构
+		if(chartTheme.axisColor)
+			axisColor = chartTheme.axisColor;
+		//兼容1.8.1版本有ChartTheme.axisScaleLineColor的结构
+		if(chartTheme.axisScaleLineColor)
+			axisScaleLineColor = chartTheme.axisScaleLineColor;
 		
 		var theme =
 		{
@@ -1806,32 +1813,32 @@
 				"axisLine" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"axisTick" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"axisLabel" : {
 					"show" : true,
 					"textStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
 						"type" : "dotted",
-						"color" : [ chartTheme.axisScaleLineColor ]
+						"color" : [ axisScaleLineColor ]
 					}
 				},
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.axisScaleLineColor ]
+						"color" : [ axisScaleLineColor ]
 					}
 				}
 			},
@@ -1839,32 +1846,32 @@
 				"axisLine" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"axisTick" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"axisLabel" : {
 					"show" : true,
 					"textStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
 						"type" : "dotted",
-						"color" : [ chartTheme.axisScaleLineColor ]
+						"color" : [ axisScaleLineColor ]
 					}
 				},
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.axisScaleLineColor ]
+						"color" : [ axisScaleLineColor ]
 					}
 				}
 			},
@@ -1872,32 +1879,32 @@
 				"axisLine" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"axisTick" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"axisLabel" : {
 					"show" : true,
 					"textStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
 						"type" : "dotted",
-						"color" : [ chartTheme.axisScaleLineColor ]
+						"color" : [ axisScaleLineColor ]
 					}
 				},
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.axisScaleLineColor ]
+						"color" : [ axisScaleLineColor ]
 					}
 				}
 			},
@@ -1905,32 +1912,32 @@
 				"axisLine" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"axisTick" : {
 					"show" : true,
 					"lineStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"axisLabel" : {
 					"show" : true,
 					"textStyle" : {
-						"color" : chartTheme.axisColor
+						"color" : axisColor
 					}
 				},
 				"splitLine" : {
 					"show" : true,
 					"lineStyle" : {
 						"type" : "dotted",
-						"color" : [ chartTheme.axisScaleLineColor ]
+						"color" : [ axisScaleLineColor ]
 					}
 				},
 				"splitArea" : {
 					"show" : false,
 					"areaStyle" : {
-						"color" : [ chartTheme.axisScaleLineColor ]
+						"color" : [ axisScaleLineColor ]
 					}
 				}
 			},
@@ -1940,7 +1947,7 @@
 						"borderColor" : chartTheme.borderColor
 					},
 					"emphasis" : {
-						"borderColor" : chartTheme.axisColor
+						"borderColor" : axisColor
 					}
 				}
 			},
@@ -1958,25 +1965,25 @@
 				"textStyle" : {
 					"color" : chartTheme.legendColor
 				},
-				"inactiveColor" : chartTheme.axisScaleLineColor
+				"inactiveColor" : axisScaleLineColor
 			},
 			"tooltip" : {
 				"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
 				"textStyle" : { color: chartTheme.tooltipTheme.color },
 				"axisPointer" : {
 					"lineStyle" : {
-						"color" : chartTheme.axisColor,
+						"color" : axisColor,
 						"width" : "1"
 					},
 					"crossStyle" : {
-						"color" : chartTheme.axisColor,
+						"color" : axisColor,
 						"width" : "1"
 					}
 				}
 			},
 			"timeline" : {
 				"lineStyle" : {
-					"color" : chartTheme.axisColor,
+					"color" : axisColor,
 					"width" : 1
 				},
 				"itemStyle" : {
@@ -2007,7 +2014,7 @@
 				"label" : {
 					"normal" : {
 						"textStyle" : {
-							"color" : chartTheme.axisColor
+							"color" : axisColor
 						}
 					},
 					"emphasis" : {
@@ -2025,29 +2032,29 @@
 				"backgroundColor" : "transparent",
 				"textStyle" :
 				{
-					"color" : chartTheme.axisColor
+					"color" : axisColor
 				}
 			},
 			"dataZoom" : {
 				"backgroundColor" : "transparent",
-				"dataBackgroundColor" : chartTheme.axisScaleLineColor,
-				"fillerColor" : chartTheme.axisScaleLineColor,
-				"handleColor" : chartTheme.axisScaleLineColor,
+				"dataBackgroundColor" : axisScaleLineColor,
+				"fillerColor" : axisScaleLineColor,
+				"handleColor" : axisScaleLineColor,
 				"handleSize" : "100%",
 				"textStyle" : {
-					"color" : chartTheme.axisColor
+					"color" : axisColor
 				}
 			},
 			"markPoint" : {
 				"label" : {
 					"normal" : {
 						"textStyle" : {
-							"color" : chartTheme.axisColor
+							"color" : axisColor
 						}
 					},
 					"emphasis" : {
 						"textStyle" : {
-							"color" : chartTheme.axisColor
+							"color" : axisColor
 						}
 					}
 				}

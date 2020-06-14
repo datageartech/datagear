@@ -2293,7 +2293,7 @@
 						"emphasis":
 						{
 							"shadowBlur" : 10,
-							"shadowColor" : chartTheme.axisColor,
+							"shadowColor" : global.chartFactory.getGradualColor(chartTheme, 0.9),
 						}
 					}
 				}
