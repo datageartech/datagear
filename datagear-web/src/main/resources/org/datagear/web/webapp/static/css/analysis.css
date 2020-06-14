@@ -24,10 +24,10 @@
 }
 .dg-chart-table .dg-chart-table-content{
 	position: absolute;
-	left: 0.1em;
+	left: 1px;
 	top: 1.6em;
-	right: 0.1em;
-	bottom: 0.1em;
+	right: 1px;
+	bottom: 1px;
 }
 .dg-chart-table.dg-hide-title .dg-chart-table-title{
 	display: none;
