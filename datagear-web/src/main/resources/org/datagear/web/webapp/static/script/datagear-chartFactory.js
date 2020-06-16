@@ -1417,6 +1417,18 @@
 		if(!color)
 			return re;
 		
+		//是颜色名称，则通过元素css函数转换
+		if((color.charAt(0) != '#') && (color.indexOf("(") < 0))
+		{
+			var $colorEle = $("#chartFactoryEleForConvertColor");
+			if($colorEle.length == 0)
+				$colorEle = $("<div id='chartFactoryEleForConvertColor' style='position:absolute;left:0;bottom:0;width:0;height:0;'></div>")
+								.appendTo(document.body);
+			
+			$colorEle.css("color", color);
+			color = $colorEle.css("color");
+		}
+		
 		// #FFF、#FFFFFF
 		if(color.charAt(0) == '#')
 		{
@@ -1479,8 +1491,8 @@
 	 */
 	chartFactory.buildEchartsTheme = function(chartTheme)
 	{
-		var axisColor = this.getGradualColor(chartTheme, 0.6);
-		var axisScaleLineColor = this.getGradualColor(chartTheme, 0.4);
+		var axisColor = this.getGradualColor(chartTheme, 0.8);
+		var axisScaleLineColor = this.getGradualColor(chartTheme, 0.6);
 		var areaColor0 = this.getGradualColor(chartTheme, 0.15);
 		var areaBorderColor0 = this.getGradualColor(chartTheme, 0.3);
 		var areaColor1 = this.getGradualColor(chartTheme, 0.25);
