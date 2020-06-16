@@ -104,28 +104,70 @@
 		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
 		return (dataType == chartSupport.DataSetPropertyDataType.INTEGER || dataType == chartSupport.DataSetPropertyDataType.DECIMAL);
 	};
+
+	/**
+	 * 提取对象/对象数组的指定属性值。
+	 * 
+	 * @param source 对象、对象数组
+	 * @param propertyName 属性名
+	 * @return 输性值、属性值数组
+	 */
+	chartSupport.extractPropertyValue = function(source, propertyName)
+	{
+		if(!$.isArray(source))
+			return (source ? source[propertyName] : undefined);
+		
+		var re = [];
+		
+		for(var i=0; i<source.length; i++)
+			re[i] = source[i][propertyName];
+		
+		return re;
+	};
 	
 	/**
-	 * 为源数组追加不重复的元素，返回追加索引或重复元素索引。
+	 * 为源数组追加不重复的元素。
 	 * 
 	 * @param sourceArray
-	 * @param append 追加元素，可以是基本类型、对象类型
+	 * @param append 追加元素、数组，可以是基本类型、对象类型
 	 * @param distinctPropertyName 当是对象类型时，用于指定判断重复的属性名
+	 * @returns 追加的或重复元素的索引、或者索引数组
 	 */
 	chartSupport.appendDistinct = function(sourceArray, append, distinctPropertyName)
 	{
-		for(var i=0; i<sourceArray.length; i++)
+		var isArray = $.isArray(append);
+		
+		if(!isArray)
+			append = [ append ];
+		
+		var indexes = [];
+		
+		for(var i=0; i<append.length; i++)
 		{
-			var sv = (distinctPropertyName != undefined ? sourceArray[i][distinctPropertyName] : sourceArray[i]);
-			var av = (distinctPropertyName != undefined ? append[distinctPropertyName] : append);
+			var av = (distinctPropertyName != undefined ? append[i][distinctPropertyName] : append[i]);
+			var foundIdx = -1;
 			
-			if(sv == av)
-				return i;
+			for(var j=0; j<sourceArray.length; j++)
+			{
+				var sv = (distinctPropertyName != undefined ? sourceArray[j][distinctPropertyName] : sourceArray[j]);
+				
+				if(sv == av)
+				{
+					foundIdx = j;
+					break;
+				}
+			}
+			
+			if(foundIdx > -1)
+				indexes[i] = foundIdx;
+			else
+			{
+				sourceArray.push(append[i]);
+				indexes[i] = (sourceArray.length - 1);
+			}
 		}
 		
-		sourceArray.push(append);
-		
-		return (sourceArray.length - 1);
+		return (isArray ? indexes : indexes[0]);
 	};
 	
 	/**
@@ -203,7 +245,10 @@
 		var chartDataSets = chart.chartDataSetsNonNull();
 		var stack = (initOptions && initOptions.stack);//是否堆叠
 		
+		var isCategory = (initOptions.xAxis.type == "category");
+		
 		var legendData = [];
+		var xAxisData = [];
 		var series = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -232,10 +277,25 @@
 				
 				legendData.push(legendName);
 				series.push(mySeries);
+				
+				//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
+				if(isCategory)
+				{
+					if(xAxisData.length == 0)
+						xAxisData = chart.resultRowArrays(result, cp);
+					else
+					{
+						var xAxisDataMy = chart.resultRowArrays(result, cp);
+						chartSupport.appendDistinct(xAxisData, xAxisDataMy);
+					}
+				}
 			}
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		if(isCategory)
+			options.xAxis = {data: xAxisData};
+		
 		chart.echartsOptions(options);
 	};
 	
@@ -308,12 +368,15 @@
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
-		var stack = (initOptions && initOptions.stack);//是否堆叠
-		var horizontal = (initOptions && initOptions.horizontal);//是否横向
+		var stack = initOptions.stack;//是否堆叠
+		var horizontal = initOptions.horizontal;//是否横向
 		//是否按数据集分组堆叠
-		var stackGroup = (!initOptions || initOptions.stackGroup == undefined ? true : initOptions.stackGroup);
+		var stackGroup = initOptions.stackGroup == undefined ? true : initOptions.stackGroup;
+		
+		var isCategory = ((horizontal ? initOptions.yAxis.type : initOptions.xAxis.type) == "category");
 		
 		var legendData = [];
+		var axisData = [];
 		var series = [];
 		
 		for(var i=0; i<chartDataSets.length; i++)
@@ -341,10 +404,30 @@
 				
 				legendData.push(legendName);
 				series.push(mySeries);
+				
+				//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
+				if(isCategory)
+				{
+					if(axisData.length == 0)
+						axisData = chart.resultRowArrays(result, cp);
+					else
+					{
+						var axisDataMy = chart.resultRowArrays(result, cp);
+						chartSupport.appendDistinct(axisData, axisDataMy);
+					}
+				}
 			}
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		if(isCategory)
+		{
+			if(horizontal)
+				options.yAxis = {data: axisData};
+			else
+				options.xAxis = {data: axisData};
+		}
+		
 		chart.echartsOptions(options);
 	};
 
@@ -579,7 +662,10 @@
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
+		var isCategory = (initOptions.xAxis.type == "category");
+		
 		var legendData = [];
+		var xAxisData = [];
 		var series = [];
 		
 		var min = undefined, max = undefined;
@@ -615,6 +701,18 @@
 				
 				legendData.push(legendName);
 				series.push(mySeries);
+				
+				//类目轴需要设置data，不然图表刷新数据有变化时，类目轴坐标不能自动更新
+				if(isCategory)
+				{
+					if(xAxisData.length == 0)
+						xAxisData = chart.resultRowArrays(result, cp);
+					else
+					{
+						var xAxisDataMy = chart.resultRowArrays(result, cp);
+						chartSupport.appendDistinct(xAxisData, xAxisDataMy);
+					}
+				}
 			}
 		}
 		
@@ -630,6 +728,9 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		if(isCategory)
+			options.xAxis = {data: xAxisData};
+		
 		chart.echartsOptions(options);
 	};
 
