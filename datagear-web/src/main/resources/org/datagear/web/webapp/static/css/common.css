@@ -2357,17 +2357,29 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	bottom: 0.5em;
 	overflow: auto;
 }
+.page-form-chart .data-sign-select-panel .select-panel-content .content-left .data-sign-disabled{
+	opacity: 0.5;
+	filter: Alpha(Opacity=50);
+}
 .page-form-chart .data-sign-select-panel .select-panel-content .content-right{
 	position: absolute;
 	left: 40%;
-	right: 2em;
+	right: 1em;
 	top: 0;
-	padding-left: 1em;
+	padding: 0.5em 0.5em;
 	overflow: auto;
+	display: none;
+	font-size: 0.9em;
+}
+.page-form-chart .data-sign-select-panel .select-panel-content .content-right .data-sign-label{
+	font-weight: bold;
+}
+.page-form-chart .data-sign-select-panel .select-panel-content .content-right .data-sign-desc{
+	padding-top: 0.5em;
+	padding-left: 0.5em;
 }
 .page-form-chart .data-sign-select-panel .select-panel-content .data-sign-item{
 	margin-bottom: 0.41em;
-	width: 40%;
 }
 .page-form-chart .form-item-value-chartDataSet{
 	position: relative;

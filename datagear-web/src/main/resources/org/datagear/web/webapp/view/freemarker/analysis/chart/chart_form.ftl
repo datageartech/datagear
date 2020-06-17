@@ -54,7 +54,10 @@ readonly 是否只读操作，允许为null
 						<div class="select-panel-head ui-widget-header ui-corner-all"><@spring.message code='chart.selectDataSign' /></div>
 						<div class="select-panel-content">
 							<div class="content-left"></div>
-							<div class="content-right minor">sdf</div>
+							<div class="content-right ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
+								<div class="data-sign-label"></div>
+								<div class="data-sign-desc"></div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -215,7 +218,7 @@ readonly 是否只读操作，允许为null
 	
 	po.dataSignLabel = function(dataSign)
 	{
-		return (dataSign.nameLabel && dataSign.nameLabel.value ? dataSign.nameLabel.value : dataSign.name);
+		return (dataSign.nameLabel && dataSign.nameLabel.value ? dataSign.nameLabel.value + " (" + dataSign.name +")" : dataSign.name);
 	};
 
 	po.dataSignDescLabel = function(dataSign)
@@ -528,7 +531,8 @@ readonly 是否只读操作，允许为null
 		var $contentLeft = po.element(".content-left", $panel);
 		var $contentRight = po.element(".content-right", $panel);
 		$contentLeft.empty();
-		$contentRight.empty();
+		$(".data-sign-label", $contentRight).empty();
+		$(".data-sign-desc", $contentRight).empty();
 		
 		for(var i=0; i<dataSigns.length; i++)
 		{
@@ -545,11 +549,17 @@ readonly 是否只读操作，允许为null
 			
 			$button.hover(function()
 			{
-				$contentRight.html($(this).attr("dataSignDesc"));
+				var $thisBtn = $(this);
+				
+				$(".data-sign-label", $contentRight).text($thisBtn.text());
+				$(".data-sign-desc", $contentRight).text($thisBtn.attr("dataSignDesc"));
+				$contentRight.show();
 			},
 			function()
 			{
-				$contentRight.empty();
+				$(".data-sign-label", $contentRight).empty();
+				$(".data-sign-desc", $contentRight).empty();
+				$contentRight.hide();
 			});
 			
 			po.updatePropertySignButtonEnable($button, $itemSigns);
@@ -571,6 +581,10 @@ readonly 是否只读操作，允许为null
 			return;
 		
 		var $this = $(this);
+		
+		if($this.hasClass("data-sign-disabled"))
+			return;
+		
 		po.addPropertySignItem(po._currentPropertySignItemParent, $this.val(), $this.text());
 		po.updatePropertySignButtonEnable($this, po._currentPropertySignItemParent.closest(".item-signs"));
 		
@@ -592,14 +606,14 @@ readonly 是否只读操作，允许为null
 		{
 			if(setSigns[i] == $button.val())
 			{
-				$button.addClass("ui-state-disabled");
+				$button.addClass("data-sign-disabled");
 				break;
 			}
 		}
 	};
 	
-	po.element(".data-set-wrapper").sortable();
-
+	po.element(".data-set-wrapper").sortable({ handle: ".item-head" });
+	
 	po.previewAfterSave = false;
 	
 	po.element("button[name=saveAndShow]").click(function()
