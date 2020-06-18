@@ -195,10 +195,10 @@
 	
 	//折线图
 	
-	chartSupport.lineRender = function(chart, coordSign, valueSign, options)
+	chartSupport.lineRender = function(chart, nameSign, valueSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
-		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		var stack = (options && options.stack);//是否堆叠
 		
@@ -216,9 +216,9 @@
 				data: []
 			},
 			xAxis: {
-				name: chart.dataSetPropertyLabel(cp),
+				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: (chartSupport.isDataTypeNumber(cp) ? "value" : "category"),
+				type: (chartSupport.isDataTypeNumber(np) ? "value" : "category"),
 				boundaryGap: false
 			},
 			yAxis: {
@@ -239,7 +239,7 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.lineUpdate = function(chart, results, coordSign, valueSign)
+	chartSupport.lineUpdate = function(chart, results, nameSign, valueSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -257,7 +257,7 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
-			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 			
 			for(var j=0; j<vps.length; j++)
@@ -268,7 +268,7 @@
 				else if(vps.length > 1)
 					legendName = chart.dataSetPropertyLabel(vps[j]);
 				
-				var data = chart.resultRowArrays(result, [cp, vps[j]]);
+				var data = chart.resultRowArrays(result, [np, vps[j]]);
 				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, {name: legendName, data: data});
 				
 				//折线图按数据集分组展示没有效果，所以都使用同一个堆叠
@@ -282,10 +282,10 @@
 				if(isCategory)
 				{
 					if(xAxisData.length == 0)
-						xAxisData = chart.resultRowArrays(result, cp);
+						xAxisData = chart.resultRowArrays(result, np);
 					else
 					{
-						var xAxisDataMy = chart.resultRowArrays(result, cp);
+						var xAxisDataMy = chart.resultRowArrays(result, np);
 						chartSupport.appendDistinct(xAxisData, xAxisDataMy);
 					}
 				}
@@ -311,10 +311,10 @@
 	
 	//柱状图
 	
-	chartSupport.barRender = function(chart, coordSign, valueSign, options)
+	chartSupport.barRender = function(chart, nameSign, valueSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
-		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		var stack = (options && options.stack);//是否堆叠
 		var horizontal = (options && options.horizontal);//是否横向
@@ -333,7 +333,7 @@
 				data: []
 			},
 			xAxis: {
-				name: chart.dataSetPropertyLabel(cp),
+				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
 				type: "category",
 				boundaryGap: true
@@ -364,7 +364,7 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.barUpdate = function(chart, results, coordSign, valueSign)
+	chartSupport.barUpdate = function(chart, results, nameSign, valueSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -385,7 +385,7 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
-			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 			
 			for(var j=0; j<vps.length; j++)
@@ -396,7 +396,7 @@
 				else if(vps.length > 1)
 					legendName = chart.dataSetPropertyLabel(vps[j]);
 				
-				var data = chart.resultRowArrays(result, (horizontal ? [vps[j], cp] : [cp, vps[j]]));
+				var data = chart.resultRowArrays(result, (horizontal ? [vps[j], np] : [np, vps[j]]));
 				var mySeries = chartSupport.optionsSeries(initOptions, i*vps.length+j, {name: legendName, data: data});
 				
 				if(stack)
@@ -409,10 +409,10 @@
 				if(isCategory)
 				{
 					if(axisData.length == 0)
-						axisData = chart.resultRowArrays(result, cp);
+						axisData = chart.resultRowArrays(result, np);
 					else
 					{
-						var axisDataMy = chart.resultRowArrays(result, cp);
+						var axisDataMy = chart.resultRowArrays(result, np);
 						chartSupport.appendDistinct(axisData, axisDataMy);
 					}
 				}
@@ -443,17 +443,17 @@
 	
 	//横向柱状图
 	
-	chartSupport.barHorizontalRender = function(chart, coordSign, valueSign, options)
+	chartSupport.barHorizontalRender = function(chart, nameSign, valueSign, options)
 	{
 		options = (options || {});
 		options.horizontal = true;
 		
-		chartSupport.barRender(chart, coordSign, valueSign, options);
+		chartSupport.barRender(chart, nameSign, valueSign, options);
 	};
 	
-	chartSupport.barHorizontalUpdate = function(chart, results, coordSign, valueSign)
+	chartSupport.barHorizontalUpdate = function(chart, results, nameSign, valueSign)
 	{
-		chartSupport.barUpdate(chart, results, coordSign, valueSign);
+		chartSupport.barUpdate(chart, results, nameSign, valueSign);
 	};
 
 	chartSupport.barHorizontalResize = function(chart)
@@ -468,7 +468,7 @@
 	
 	//饼图
 	
-	chartSupport.pieRender = function(chart, coordSign, valueSign, options)
+	chartSupport.pieRender = function(chart, nameSign, valueSign, options)
 	{
 		options = chart.options($.extend(true,
 		{
@@ -502,7 +502,7 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.pieUpdate = function(chart, results, coordSign, valueSign)
+	chartSupport.pieUpdate = function(chart, results, nameSign, valueSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -517,12 +517,12 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 
-			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-			var cpv = chart.resultColumnArrays(result, cp);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+			var npv = chart.resultColumnArrays(result, np);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
-			var nvv = chart.resultNameValueObjects(result, cp, vp);
+			var nvv = chart.resultNameValueObjects(result, np, vp);
 			
-			legendData = legendData.concat(cpv);
+			legendData = legendData.concat(npv);
 			if(i == 0)
 				seriesName = dataSetName;
 			seriesData = seriesData.concat(nvv);
@@ -610,10 +610,10 @@
 	
 	//散点图
 	
-	chartSupport.scatterRender = function(chart, coordSign, valueSign, options)
+	chartSupport.scatterRender = function(chart, nameSign, valueSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
-		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
 		options = chart.options($.extend(true,
@@ -630,10 +630,10 @@
 				data: []
 			},
 			xAxis: {
-				name: chart.dataSetPropertyLabel(cp),
+				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: (chartSupport.isDataTypeNumber(cp) ? "value" : "category"),
-				boundaryGap: !chartSupport.isDataTypeNumber(cp)
+				type: (chartSupport.isDataTypeNumber(np) ? "value" : "category"),
+				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
 			yAxis: {
 				name: chart.dataSetPropertyLabel(vp),
@@ -657,7 +657,7 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.scatterUpdate = function(chart, results, coordSign, valueSign)
+	chartSupport.scatterUpdate = function(chart, results, nameSign, valueSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -678,7 +678,7 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
-			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 			
 			for(var j=0; j<vps.length; j++)
@@ -689,7 +689,7 @@
 				else if(vps.length > 1)
 					legendName = chart.dataSetPropertyLabel(vps[j]);
 				
-				var data = chart.resultRowArrays(result, [cp, vps[j]]);
+				var data = chart.resultRowArrays(result, [np, vps[j]]);
 				
 				for(var k=0; k<data.length; k++)
 				{
@@ -706,10 +706,10 @@
 				if(isCategory)
 				{
 					if(xAxisData.length == 0)
-						xAxisData = chart.resultRowArrays(result, cp);
+						xAxisData = chart.resultRowArrays(result, np);
 					else
 					{
-						var xAxisDataMy = chart.resultRowArrays(result, cp);
+						var xAxisDataMy = chart.resultRowArrays(result, np);
 						chartSupport.appendDistinct(xAxisData, xAxisDataMy);
 					}
 				}
@@ -746,11 +746,11 @@
 	
 	//坐标散点图
 	
-	chartSupport.scatterCoordRender = function(chart, coordSign, coord2Sign, valueSign, options)
+	chartSupport.scatterCoordRender = function(chart, nameSign, valueSign, weightSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
-		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-		var c2p = chart.dataSetPropertyOfSign(chartDataSet, coord2Sign);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
 		options = chart.options($.extend(true,
 		{
@@ -766,13 +766,13 @@
 				data: []
 			},
 			xAxis: {
-				name: chart.dataSetPropertyLabel(cp),
+				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: (chartSupport.isDataTypeNumber(cp) ? "value" : "category"),
-				boundaryGap: !chartSupport.isDataTypeNumber(cp)
+				type: (chartSupport.isDataTypeNumber(np) ? "value" : "category"),
+				boundaryGap: !chartSupport.isDataTypeNumber(np)
 			},
 			yAxis: {
-				name: chart.dataSetPropertyLabel(c2p),
+				name: chart.dataSetPropertyLabel(vp),
 				nameGap: 5,
 				type: "value"
 			},
@@ -793,7 +793,7 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.scatterCoordUpdate = function(chart, results, coordSign, coord2Sign, valueSign)
+	chartSupport.scatterCoordUpdate = function(chart, results, nameSign, valueSign, weightSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -811,13 +811,13 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
-			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-			var c2p = chart.dataSetPropertyOfSign(chartDataSet, coord2Sign);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+			var wp = chart.dataSetPropertyOfSign(chartDataSet, weightSign);
 			
-			var data = (vp ? chart.resultRowArrays(result, [cp, c2p, vp]) : chart.resultRowArrays(result, [cp, c2p]));
+			var data = (wp ? chart.resultRowArrays(result, [np, vp, wp]) : chart.resultRowArrays(result, [np, vp]));
 			
-			if(vp)
+			if(wp)
 			{
 				for(var j=0; j<data.length; j++)
 				{
@@ -913,7 +913,7 @@
 	
 	//雷达图
 	
-	chartSupport.radarRender = function(chart, nameSign, coordSign, valueSign, maxSign, options)
+	chartSupport.radarRender = function(chart, itemSign, nameSign, valueSign, maxSign, options)
 	{
 		options = chart.options($.extend(true,
 		{
@@ -948,7 +948,7 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.radarUpdate = function(chart, results, nameSign, coordSign, valueSign, maxSign)
+	chartSupport.radarUpdate = function(chart, results, itemSign, nameSign, valueSign, maxSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -963,13 +963,13 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
-			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
-			var nv = chart.resultColumnArrays(result, np);
-			legendData = legendData.concat(nv);
+			var ip = chart.dataSetPropertyOfSign(chartDataSet, itemSign);
+			var iv = chart.resultColumnArrays(result, ip);
+			legendData = legendData.concat(iv);
 			
 			if(i == 0)
 			{
-				var dnp = chart.dataSetPropertiesOfSign(chartDataSet, coordSign);
+				var dnp = chart.dataSetPropertiesOfSign(chartDataSet, nameSign);
 				var dnpv = chart.resultRowArrays(result, dnp, 0, 1);
 				dnpv = (dnpv.length > 0 ? dnpv[0] : []);
 				var dmp = chart.dataSetPropertiesOfSign(chartDataSet, maxSign);
@@ -988,9 +988,9 @@
 			var dvp = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 			var dvpv = chart.resultRowArrays(result, dvp);
 			
-			for(var j=0; j<nv.length; j++)
+			for(var j=0; j<iv.length; j++)
 			{
-				series.push(chartSupport.optionsSeries(initOptions, i*nv.length+j, {data: [{name: nv[j], value: dvpv[j]}]}));
+				series.push(chartSupport.optionsSeries(initOptions, i*iv.length+j, {data: [{name: iv[j], value: dvpv[j]}]}));
 			}
 		}
 		
@@ -1010,7 +1010,7 @@
 	
 	//漏斗图
 	
-	chartSupport.funnelRender = function(chart, coordSign, valueSign, options)
+	chartSupport.funnelRender = function(chart, nameSign, valueSign, options)
 	{
 		options = chart.options($.extend(true,
 		{
@@ -1052,7 +1052,7 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.funnelUpdate = function(chart, results, coordSign, valueSign)
+	chartSupport.funnelUpdate = function(chart, results, nameSign, valueSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -1069,12 +1069,12 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 
-			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-			var cpv = chart.resultColumnArrays(result, cp);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+			var npv = chart.resultColumnArrays(result, np);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
-			var nvv = chart.resultNameValueObjects(result, cp, vp);
+			var nvv = chart.resultNameValueObjects(result, np, vp);
 			
-			legendData = legendData.concat(cpv);
+			legendData = legendData.concat(npv);
 			if(i == 0)
 				seriesName = dataSetName;
 			seriesData = seriesData.concat(nvv);
@@ -1183,7 +1183,7 @@
 		}
 	};
 	
-	chartSupport.mapRender = function(chart, coordSign, valueSign, options)
+	chartSupport.mapRender = function(chart, nameSign, valueSign, options)
 	{
 		options = chart.options($.extend(true,
 		{
@@ -1221,7 +1221,7 @@
 		chartSupport.mapInitChart(chart, options);
 	};
 	
-	chartSupport.mapUpdate = function(chart, results, coordSign, valueSign)
+	chartSupport.mapUpdate = function(chart, results, nameSign, valueSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -1237,9 +1237,9 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 
-			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
-			var nvv = chart.resultNameValueObjects(result, cp, vp);
+			var nvv = chart.resultNameValueObjects(result, np, vp);
 			
 			if(i == 0)
 				seriesName = dataSetName;
@@ -1276,7 +1276,7 @@
 	
 	//散点值地图
 	
-	chartSupport.mapScatterRender = function(chart, coordSign, coordLongitudeSign, coordLatitudeSign, valueSign, options)
+	chartSupport.mapScatterRender = function(chart, nameSign, longitudeSign, latitudeSign, valueSign, options)
 	{
 		options = chart.options($.extend(true,
 		{
@@ -1315,7 +1315,7 @@
 		chartSupport.mapInitChart(chart, options);
 	};
 	
-	chartSupport.mapScatterUpdate = function(chart, results, coordSign, coordLongitudeSign, coordLatitudeSign, valueSign)
+	chartSupport.mapScatterUpdate = function(chart, results, nameSign, longitudeSign, latitudeSign, valueSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -1334,11 +1334,11 @@
 			var result = chart.resultAt(results, i);
 			var valueProperties =
 			[
-				chart.dataSetPropertyOfSign(chartDataSet, coordLongitudeSign),
-				chart.dataSetPropertyOfSign(chartDataSet, coordLatitudeSign),
+				chart.dataSetPropertyOfSign(chartDataSet, longitudeSign),
+				chart.dataSetPropertyOfSign(chartDataSet, latitudeSign),
 				chart.dataSetPropertyOfSign(chartDataSet, valueSign)
 			];
-			var data = chart.resultNameValueObjects(result, chart.dataSetPropertyOfSign(chartDataSet, coordSign), valueProperties);
+			var data = chart.resultNameValueObjects(result, chart.dataSetPropertyOfSign(chartDataSet, nameSign), valueProperties);
 			
 			for(var j=0; j<data.length; j++)
 			{
@@ -1565,10 +1565,10 @@
 	
 	//K线图
 	
-	chartSupport.candlestickRender = function(chart, coordSign, openSign, closeSign, minSign, maxSign, options)
+	chartSupport.candlestickRender = function(chart, nameSign, openSign, closeSign, minSign, maxSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
-		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		
 		options = chart.options($.extend(true,
 		{
@@ -1584,9 +1584,9 @@
 				data: []
 			},
 			xAxis: {
-				name: chart.dataSetPropertyLabel(cp),
+				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
-				type: (chartSupport.isDataTypeNumber(cp) ? "value" : "category"),
+				type: (chartSupport.isDataTypeNumber(np) ? "value" : "category"),
 				boundaryGap: true,
 				splitLine: {show:false},
 				data: []
@@ -1609,7 +1609,7 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.candlestickUpdate = function(chart, results, coordSign, openSign, closeSign, minSign, maxSign)
+	chartSupport.candlestickUpdate = function(chart, results, nameSign, openSign, closeSign, minSign, maxSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -1626,8 +1626,8 @@
 			
 			if(i == 0)
 			{
-				var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-				xAxisData = chart.resultColumnArrays(result, cp);
+				var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+				xAxisData = chart.resultColumnArrays(result, np);
 			}
 			
 			var data = chart.resultRowArrays(result,
@@ -1657,11 +1657,11 @@
 	
 	//热力图
 	
-	chartSupport.heatmapRender = function(chart, coordSign, coord2Sign, valueSign, options)
+	chartSupport.heatmapRender = function(chart, nameSign, valueSign, weightSign, options)
 	{
 		var chartDataSet = chart.chartDataSetFirst();
-		var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-		var c2p = chart.dataSetPropertyOfSign(chartDataSet, coord2Sign);
+		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
+		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
 		var chartEle = chart.elementJquery();
 		var vmItemWidth = parseInt(chartEle.height()/20);
@@ -1681,13 +1681,13 @@
 				data: []
 			},
 			xAxis: {
-				name: chart.dataSetPropertyLabel(cp),
+				name: chart.dataSetPropertyLabel(np),
 				nameGap: 5,
 				type: "category",
 				data: []
 			},
 			yAxis: {
-				name: chart.dataSetPropertyLabel(c2p),
+				name: chart.dataSetPropertyLabel(vp),
 				nameGap: 5,
 				type: "category",
 				data: []
@@ -1720,7 +1720,7 @@
 		chart.echartsInit(options, false);
 	};
 	
-	chartSupport.heatmapUpdate = function(chart, results, coordSign, coord2Sign, valueSign)
+	chartSupport.heatmapUpdate = function(chart, results, nameSign, valueSign, weightSign)
 	{
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
@@ -1737,15 +1737,11 @@
 			seriesName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
-			var cp = chart.dataSetPropertyOfSign(chartDataSet, coordSign);
-			var c2p = chart.dataSetPropertyOfSign(chartDataSet, coord2Sign);
+			var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
+			var wp = chart.dataSetPropertyOfSign(chartDataSet, weightSign);
 			
-			var data = chart.resultRowArrays(result, [
-								chart.dataSetPropertyOfSign(chartDataSet, coordSign),
-								chart.dataSetPropertyOfSign(chartDataSet, coord2Sign),
-								chart.dataSetPropertyOfSign(chartDataSet, valueSign)
-							]);
+			var data = chart.resultRowArrays(result, [ np, vp, wp ]);
 			
 			for(var i=0; i<data.length; i++)
 			{
@@ -2752,7 +2748,7 @@
 
 	//标签卡
 	
-	chartSupport.labelRender = function(chart, coordSign, valueSign, options)
+	chartSupport.labelRender = function(chart, nameSign, valueSign, options)
 	{
 		var chartTheme = chart.theme();
 		
@@ -2781,7 +2777,7 @@
 		chartSupport.initOptions(chart, options);
 	};
 	
-	chartSupport.labelUpdate = function(chart, results, coordSign, valueSign)
+	chartSupport.labelUpdate = function(chart, results, nameSign, valueSign)
 	{
 		var options = chartSupport.initOptions(chart);
 		var valueFirst = options.valueFirst;
@@ -2804,9 +2800,9 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
-			var cps = chart.dataSetPropertiesOfSign(chartDataSet, coordSign);
+			var nps = chart.dataSetPropertiesOfSign(chartDataSet, nameSign);
 			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
-			var cv = (cps.length > 0 ? chart.resultRowArrays(result, cps) : [] );
+			var cv = (nps.length > 0 ? chart.resultRowArrays(result, nps) : [] );
 			var vv = chart.resultRowArrays(result, vps);
 			
 			for(var j=0; j<vv.length; j++)
