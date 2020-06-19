@@ -507,9 +507,9 @@
 	dashboardBase.chartUpdateTime = function(chart, updateTime)
 	{
 		if(updateTime == undefined)
-			return chart._update_time;
+			return chart._updateTime;
 		
-		chart._update_time = updateTime;
+		chart._updateTime = updateTime;
 	};
 	
 	/**

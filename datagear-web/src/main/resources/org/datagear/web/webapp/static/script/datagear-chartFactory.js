@@ -176,6 +176,8 @@
 		if(!this.statusPreUpdate() && !this.statusUpdated())
 			return false;
 		
+		this._updateResults = results;
+		
 		this.statusUpdating(true);
 		
 		var async = this.isAsyncUpdate(results);
@@ -183,6 +185,14 @@
 		
 		if(!async)
 			this.statusUpdated(true);
+	};
+	
+	/**
+	 * 获取用于上次更新图表的结果数据，没有则返回undefined。
+	 */
+	chartBase.getUpdateResults = function()
+	{
+		return this._updateResults;
 	};
 	
 	/**
@@ -580,7 +590,7 @@
 	 */
 	chartBase.theme = function()
 	{
-		var chartTheme = this._CHART_THEME;
+		var chartTheme = this._chartTheme;
 		
 		if(chartTheme)
 			return chartTheme;
@@ -627,7 +637,7 @@
 			chartTheme = $.extend(true, {}, chartTheme, eleThemeObj);
 		}
 		
-		this._CHART_THEME = chartTheme;
+		this._chartTheme = chartTheme;
 		
 		return chartTheme;
 	};
@@ -1093,7 +1103,7 @@
 	 */
 	chartBase.echartsThemeName = function()
 	{
-		var themeName = this._ECHARTS_THEME_NAME;
+		var themeName = this._echartsThemeName;
 		
 		if(themeName)
 			return themeName;
@@ -1125,16 +1135,16 @@
 			{
 				themeName = this.elementId+"ThemeFromChartTheme";
 				
-				if(!this._ECHARTS_THEME_REGISTERED)
+				if(!this._echartsThemeRegistered)
 				{
 					var localEchartsTheme = this.echartsBuildTheme(chartTheme);
 					echarts.registerTheme(themeName, localEchartsTheme);
-					chartFactory._ECHARTS_THEME_REGISTERED = true;
+					this._echartsThemeRegistered = true;
 				}
 			}
 		}
 		
-		this._ECHARTS_THEME_NAME = themeName;
+		this._echartsThemeName = themeName;
 	    
 	    return themeName;
 	};
