@@ -188,7 +188,7 @@
 	};
 	
 	/**
-	 * 获取用于上次更新图表的结果数据，没有则返回undefined。
+	 * 获取用于此次更新图表的结果数据，没有则返回undefined。
 	 */
 	chartBase.getUpdateResults = function()
 	{
@@ -231,6 +231,94 @@
 			
 			this.elementJquery().empty();
 		}
+	};
+
+	/**
+	 * 绑定"click"事件处理函数。
+	 * 
+	 * @param handler 事件处理函数：function(data){}
+	 */
+	chartBase.onClick = function(handler)
+	{
+		this.on("click", handler);
+	};
+	
+	/**
+	 * 绑定"dblclick"事件处理函数。
+	 * 
+	 * @param handler 事件处理函数：function(data){}
+	 */
+	chartBase.onDblclick = function(handler)
+	{
+		this.on("dblclick", handler);
+	};
+	
+	/**
+	 * 绑定"mousedown"事件处理函数。
+	 * 
+	 * @param handler 事件处理函数：function(data){}
+	 */
+	chartBase.onMousedown = function(handler)
+	{
+		this.on("mousedown", handler);
+	};
+	
+	/**
+	 * 绑定"mouseup"事件处理函数。
+	 * 
+	 * @param handler 事件处理函数：function(data){}
+	 */
+	chartBase.onMouseup = function(handler)
+	{
+		this.on("mouseup", handler);
+	};
+	
+	/**
+	 * 绑定"mouseover"事件处理函数。
+	 * 
+	 * @param handler 事件处理函数：function(data){}
+	 */
+	chartBase.onMouseover = function(handler)
+	{
+		this.on("mouseover", handler);
+	};
+	
+	/**
+	 * 绑定"mouseout"事件处理函数。
+	 * 
+	 * @param handler 事件处理函数：function(data){}
+	 */
+	chartBase.onMouseout = function(handler)
+	{
+		this.on("mouseout", handler);
+	};
+	
+	/**
+	 * 绑定事件处理函数。
+	 * 
+	 * @param eventName 事件名称：click、dblclick、mousedown、mouseup、mouseover、mouseout
+	 * @param handler 事件处理函数：function(data){}
+	 */
+	chartBase.on = function(eventName, handler)
+	{
+		if(this.plugin.chartRenderer.on)
+			this.plugin.chartRenderer.on(this, eventName, handler);
+		else
+			throw new Error("Chart plugin ["+this.plugin.id+"] 's [chartRenderer.on] undefined");
+	};
+	
+	/**
+	 * 解绑事件处理函数。
+	 * 
+	 * @param eventName 事件名称：click、dblclick、mousedown、mouseup、mouseover、mouseout
+	 * @param handler 可选，解绑的事件处理函数，不设置则解绑所有此事件的处理函数
+	 */
+	chartBase.off = function(eventName, handler)
+	{
+		if(this.plugin.chartRenderer.off)
+			this.plugin.chartRenderer.off(this, eventName, handler);
+		else
+			throw new Error("Chart plugin ["+this.plugin.id+"] 's [chartRenderer.off] undefined");
 	};
 	
 	/**
@@ -1565,7 +1653,7 @@
 						"shadowColor" : shadowColor
 					}
 				},
-				"symbolSize" : 4,
+				"symbolSize" : 6,
 				"symbol" : "circle",
 				"smooth" : false
 			},
