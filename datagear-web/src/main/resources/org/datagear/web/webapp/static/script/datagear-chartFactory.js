@@ -36,7 +36,7 @@
  *       ...;
  *       
  *       //将图表状态设置为已完成render
- *       chart.statusPreUpdate();
+ *       chart.statusRendered(true);
  *     });
  *   },
  *   
@@ -50,7 +50,7 @@
  *       ...;
  *       
  *       //将图表状态设置为已完成update
- *       chart.statusUpdated();
+ *       chart.statusUpdated(true);
  *     });
  *   }
  * }
@@ -124,6 +124,9 @@
 	/**图表状态：正在render*/
 	chartFactory.STATUS_RENDERING = "RENDERING";
 	
+	/**图表状态：完成render*/
+	chartFactory.STATUS_RENDERED = "RENDERED";
+	
 	/**图表状态：准备update*/
 	chartFactory.STATUS_PRE_UPDATE = "PRE_UPDATE";
 	
@@ -162,18 +165,18 @@
 		var re = this.plugin.chartRenderer.render(this);
 		
 		if(!async)
-			this.statusPreUpdate(true);
+			this.statusRendered(true);
 	};
 	
 	/**
 	 * 更新图表。
-	 * 注意：只有this.statusPreUpdate()或者this.statusUpdated()为true，此方法才会执行。
+	 * 注意：只有this.statusRendered()或者this.statusPreUpdate()或者this.statusUpdated()为true，此方法才会执行。
 	 * 
 	 * @param results 图表数据集结果
 	 */
 	chartBase.update = function(results)
 	{
-		if(!this.statusPreUpdate() && !this.statusUpdated())
+		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
 			return false;
 		
 		this._updateResults = results;
@@ -188,7 +191,7 @@
 	};
 	
 	/**
-	 * 获取用于此次更新图表的结果数据，没有则返回undefined。
+	 * 获取用于此次更新图表的结果数据，没有则返回null。
 	 */
 	chartBase.getUpdateResults = function()
 	{
@@ -231,6 +234,144 @@
 			
 			this.elementJquery().empty();
 		}
+	};
+	
+	/**
+	 * 图表的render方法是否是异步的。
+	 */
+	chartBase.isAsyncRender = function()
+	{
+		var chartRenderer = this.plugin.chartRenderer;
+		
+		if(chartRenderer.asyncRender == undefined)
+			return false;
+		
+		if(typeof(chartRenderer.asyncRender) == "function")
+			return chartRenderer.asyncRender(this);
+		
+		return (chartRenderer.asyncRender == true);
+	};
+	
+	/**
+	 * 图表的update方法是否是异步的。
+	 * 
+	 * @param results 图表数据集结果
+	 */
+	chartBase.isAsyncUpdate = function(results)
+	{
+		var chartRenderer = this.plugin.chartRenderer;
+		
+		if(chartRenderer.asyncUpdate == undefined)
+			return false;
+		
+		if(typeof(chartRenderer.asyncUpdate) == "function")
+			return chartRenderer.asyncUpdate(this, results);
+		
+		return (chartRenderer.asyncUpdate == true);
+	};
+	
+	/**
+	 * 图表是否为/设置为：准备render。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusPreRender = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_PRE_RENDER);
+		else
+			this.status(chartFactory.STATUS_PRE_RENDER);
+	};
+	
+	/**
+	 * 图表是否为/设置为：正在render。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusRendering = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_RENDERING);
+		else
+			this.status(chartFactory.STATUS_RENDERING);
+	};
+	
+	/**
+	 * 图表是否为/设置为：完成render。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusRendered = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_RENDERED);
+		else
+			this.status(chartFactory.STATUS_RENDERED);
+	};
+	
+	/**
+	 * 图表是否为/设置为：准备update。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusPreUpdate = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_PRE_UPDATE);
+		else
+			this.status(chartFactory.STATUS_PRE_UPDATE);
+	};
+	
+	/**
+	 * 图表是否为/设置为：正在update。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusUpdating = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_UPDATING);
+		else
+			this.status(chartFactory.STATUS_UPDATING);
+	};
+	
+	/**
+	 * 图表是否为/设置为：完成update。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusUpdated = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_UPDATED);
+		else
+			this.status(chartFactory.STATUS_UPDATED);
+	};
+	
+	/**
+	 * 图表是否为/设置为：已销毁。
+	 * 
+	 * @param set undefined时判断状态，否则，设置状态。
+	 */
+	chartBase.statusDestroyed = function(set)
+	{
+		if(set == undefined)
+			return (this.status() == chartFactory.STATUS_DESTROYED);
+		else
+			this.status(chartFactory.STATUS_DESTROYED);
+	};
+	
+	/**
+	 * 获取/设置图表状态。
+	 * 
+	 * @param status 要设置的状态，可选，不设置则执行获取操作
+	 */
+	chartBase.status = function(status)
+	{
+		if(status == undefined)
+			return (this._status || chartFactory.STATUS_PRE_RENDER);
+		else
+			this._status = (status || chartFactory.STATUS_PRE_RENDER);
 	};
 
 	/**
@@ -319,131 +460,6 @@
 			this.plugin.chartRenderer.off(this, eventName, handler);
 		else
 			throw new Error("Chart plugin ["+this.plugin.id+"] 's [chartRenderer.off] undefined");
-	};
-	
-	/**
-	 * 图表的render方法是否是异步的。
-	 */
-	chartBase.isAsyncRender = function()
-	{
-		var chartRenderer = this.plugin.chartRenderer;
-		
-		if(chartRenderer.asyncRender == undefined)
-			return false;
-		
-		if(typeof(chartRenderer.asyncRender) == "function")
-			return chartRenderer.asyncRender(this);
-		
-		return (chartRenderer.asyncRender == true);
-	};
-	
-	/**
-	 * 图表的update方法是否是异步的。
-	 * 
-	 * @param results 图表数据集结果
-	 */
-	chartBase.isAsyncUpdate = function(results)
-	{
-		var chartRenderer = this.plugin.chartRenderer;
-		
-		if(chartRenderer.asyncUpdate == undefined)
-			return false;
-		
-		if(typeof(chartRenderer.asyncUpdate) == "function")
-			return chartRenderer.asyncUpdate(this, results);
-		
-		return (chartRenderer.asyncUpdate == true);
-	};
-	
-	/**
-	 * 图表是否为/设置为：准备render。
-	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
-	 */
-	chartBase.statusPreRender = function(set)
-	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_PRE_RENDER);
-		else
-			this.status(chartFactory.STATUS_PRE_RENDER);
-	};
-	
-	/**
-	 * 图表是否为/设置为：正在render。
-	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
-	 */
-	chartBase.statusRendering = function(set)
-	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_RENDERING);
-		else
-			this.status(chartFactory.STATUS_RENDERING);
-	};
-	
-	/**
-	 * 图表是否为/设置为：准备update。
-	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
-	 */
-	chartBase.statusPreUpdate = function(set)
-	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_PRE_UPDATE);
-		else
-			this.status(chartFactory.STATUS_PRE_UPDATE);
-	};
-	
-	/**
-	 * 图表是否为/设置为：正在update。
-	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
-	 */
-	chartBase.statusUpdating = function(set)
-	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_UPDATING);
-		else
-			this.status(chartFactory.STATUS_UPDATING);
-	};
-	
-	/**
-	 * 图表是否为/设置为：完成update。
-	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
-	 */
-	chartBase.statusUpdated = function(set)
-	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_UPDATED);
-		else
-			this.status(chartFactory.STATUS_UPDATED);
-	};
-	
-	/**
-	 * 图表是否为/设置为：已销毁。
-	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
-	 */
-	chartBase.statusDestroyed = function(set)
-	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_DESTROYED);
-		else
-			this.status(chartFactory.STATUS_DESTROYED);
-	};
-	
-	/**
-	 * 获取/设置图表状态。
-	 * 
-	 * @param status 要设置的状态，可选，不设置则执行获取操作
-	 */
-	chartBase.status = function(status)
-	{
-		if(status == undefined)
-			return (this._status || chartFactory.STATUS_PRE_RENDER);
-		else
-			this._status = (status || chartFactory.STATUS_PRE_RENDER);
 	};
 	
 	/**

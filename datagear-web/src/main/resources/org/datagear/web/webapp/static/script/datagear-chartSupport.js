@@ -1719,14 +1719,14 @@
 		if(chart.echartsMapRegistered(map))
 		{
 			chart.echartsInit(options, false);
-			chart.statusPreUpdate(true);
+			chart.statusRendered(true);
 		}
 		else
 		{
 			chart.echartsMapLoad(map, function()
 			{
 				chart.echartsInit(options, false);
-				chart.statusPreUpdate(true);
+				chart.statusRendered(true);
 			});
 		}
 	};

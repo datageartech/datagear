@@ -157,6 +157,9 @@
 	/*图表状态：渲染出错*/
 	dashboardFactory.CHART_STATUS_RENDER_ERROR = "RENDER_ERROR";
 	
+	/*图表状态：更新出错*/
+	dashboardFactory.CHART_STATUS_UPDATE_ERROR = "UPDATE_ERROR";
+	
 	//----------------------------------------
 	// dashboardBase start
 	//----------------------------------------
@@ -207,7 +210,7 @@
 			
 			var updateInterval = chart.updateIntervalNonNull();
 			
-			if(chart.statusPreUpdate() || (chart.statusUpdated() && updateInterval > -1))
+			if(chart.statusRendered() || chart.statusPreUpdate() || (chart.statusUpdated() && updateInterval > -1))
 			{
 				var prevUpdateTime = this.chartUpdateTime(chart);
 				
@@ -261,7 +264,8 @@
 						global.chartFactory.logException(e);
 					}
 					
-					dashboard.doHandleCharts();
+					//请求出错则10秒后再尝试，避免请求出错后频繁地再次发送请求
+					setTimeout(function(){ dashboard.doHandleCharts(); }, 1000*10);
 				}
 			});
 		}
@@ -378,6 +382,9 @@
 		}
 		catch(e)
 		{
+			//设置为更新出错状态，避免更新失败后会doHandleCharts中会无限尝试更新
+			chart.status(dashboardFactory.CHART_STATUS_UPDATE_ERROR);
+			
 			global.chartFactory.logException(e);
 		}
 	};
