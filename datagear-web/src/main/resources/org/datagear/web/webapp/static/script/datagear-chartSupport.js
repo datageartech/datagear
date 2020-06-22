@@ -104,7 +104,7 @@
 		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
 		return (dataType == chartSupport.DataSetPropertyDataType.INTEGER || dataType == chartSupport.DataSetPropertyDataType.DECIMAL);
 	};
-
+	
 	/**
 	 * 提取对象/对象数组的指定属性值。
 	 * 
@@ -219,7 +219,12 @@
 		if($.isArray(chartData))
 		{
 			for(var i=0; i<chartData.length; i++)
-				chartData[i]["__dataGearChartDataOrigin"] = { chartDataSetIndex : chartDataSetIndex, resultDataIndex: resultDataIndex+i };
+			{
+				chartData[i]["__dataGearChartDataOrigin"] =
+				{
+					chartDataSetIndex : chartDataSetIndex, resultDataIndex: resultDataIndex+i
+				};
+			}
 		}
 		else
 			chartData["__dataGearChartDataOrigin"] = { chartDataSetIndex : chartDataSetIndex, resultDataIndex: resultDataIndex };
@@ -234,7 +239,8 @@
 	 * @param dataIndexEnd 图表系列数据结束索引
 	 * @param resultDataIndexStart 可选，数据结果起始索引，默认为0
 	 */
-	chartSupport.setChartDataRangeOrigin = function(chart, seriesIndex, dataIndexStart, dataIndexEnd, chartDataSetIndex, resultDataIndexStart)
+	chartSupport.setChartDataRangeOrigin = function(chart, seriesIndex, dataIndexStart, dataIndexEnd,
+			chartDataSetIndex, resultDataIndexStart)
 	{
 		var originObj = chart.extValue("chartDataRangeOrigin");
 		if(originObj == null)
@@ -251,7 +257,8 @@
 		}
 		
 		ary.push({ dataIndexStart: dataIndexStart, dataIndexEnd: dataIndexEnd,
-					chartDataSetIndex: chartDataSetIndex, resultDataIndexStart: (resultDataIndexStart == undefined ? 0 : resultDataIndexStart) });
+					chartDataSetIndex: chartDataSetIndex,
+					resultDataIndexStart: (resultDataIndexStart == undefined ? 0 : resultDataIndexStart) });
 	};
 
 	/**
@@ -397,6 +404,9 @@
 		if(!chartDataOrigin)
 		{
 			chartEvent["originalData"] = null;
+			chartEvent["originalChartDataSetIndex"] = null;
+			chartEvent["originalResultDataIndex"] = null;
+			
 			return;
 		}
 		
@@ -532,7 +542,6 @@
 	chartSupport.lineUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		var stack = (initOptions && initOptions.stack);//是否堆叠
@@ -696,7 +705,6 @@
 	chartSupport.barUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		var stack = initOptions.stack;//是否堆叠
@@ -850,7 +858,6 @@
 	chartSupport.pieUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 
@@ -959,7 +966,6 @@
 	chartSupport.gaugeUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var chartDataSet = chart.chartDataSetFirst();
 		var result = chart.resultFirst(results);
 		
@@ -1080,7 +1086,6 @@
 	chartSupport.scatterUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -1255,7 +1260,6 @@
 	chartSupport.scatterCoordUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -1451,7 +1455,6 @@
 	chartSupport.radarUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -1610,7 +1613,6 @@
 	chartSupport.funnelUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -1818,7 +1820,6 @@
 	chartSupport.mapUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -1956,7 +1957,6 @@
 	chartSupport.mapScatterUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -2072,9 +2072,11 @@
 			targetIdSign, targetLongitudeSign, targetLatitudeSign, targetNameSign, targetCategorySign, targetValueSign, options)
 	{
 		chartSupport.chartSignNameMap(chart, { sourceId: sourceIdSign, sourceLongitude: sourceLongitudeSign,
-			sourceLatitude: sourceLatitudeSign, sourceName: sourceNameSign, sourceCategory: sourceCategorySign, sourceValue: sourceValueSign,
+			sourceLatitude: sourceLatitudeSign, sourceName: sourceNameSign, sourceCategory: sourceCategorySign,
+			sourceValue: sourceValueSign,
 			targetId: targetIdSign, targetLongitude: targetLongitudeSign,
-			targetLatitude: targetLatitudeSign, targetName: targetNameSign, targetCategory: targetCategorySign, targetValue: targetValueSign });
+			targetLatitude: targetLatitudeSign, targetName: targetNameSign, targetCategory: targetCategorySign,
+			targetValue: targetValueSign });
 		
 		var chartDataSet = chart.chartDataSetFirst();
 		
@@ -2116,7 +2118,6 @@
 	chartSupport.mapGraphUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -2392,7 +2393,6 @@
 	chartSupport.candlestickUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -2543,7 +2543,6 @@
 	chartSupport.heatmapUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -3088,7 +3087,6 @@
 	chartSupport.sankeyUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -3280,7 +3278,6 @@
 	chartSupport.graphUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
@@ -3590,7 +3587,6 @@
 	chartSupport.wordcloudUpdate = function(chart, results)
 	{
 		var signNameMap = chartSupport.chartSignNameMap(chart);
-		
 		var initOptions= chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
 
@@ -3682,6 +3678,8 @@
 	
 	chartSupport.tableRender = function(chart, columnSign, options)
 	{
+		chartSupport.chartSignNameMap(chart, { column: columnSign });
+		
 		var chartTheme = chart.theme();
 		
 		var chartDataSet = chart.chartDataSetFirst();
@@ -3885,6 +3883,16 @@
 		$(".dg-chart-table-content", chartEle).remove();
 	};
 	
+	chartSupport.tableOn = function(chart, eventName, handler)
+	{
+		//TODO
+	};
+	
+	chartSupport.tableOff = function(chart, eventName, handler)
+	{
+		//TODO
+	};
+	
 	chartSupport.setTableRowStyle = function(rowElement, chartOptions)
 	{
 		if($(rowElement).hasClass("odd"))
@@ -3938,6 +3946,8 @@
 	
 	chartSupport.labelRender = function(chart, nameSign, valueSign, options)
 	{
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		
 		var chartTheme = chart.theme();
 		
 		var chartEle = chart.elementJquery();
@@ -3965,8 +3975,9 @@
 		chartSupport.initOptions(chart, options);
 	};
 	
-	chartSupport.labelUpdate = function(chart, results, nameSign, valueSign)
+	chartSupport.labelUpdate = function(chart, results)
 	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
 		var options = chartSupport.initOptions(chart);
 		var valueFirst = options.valueFirst;
 		var showName = options.showName;
@@ -3988,8 +3999,8 @@
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
-			var nps = chart.dataSetPropertiesOfSign(chartDataSet, nameSign);
-			var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
+			var nps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.name);
+			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
 			var cv = (nps.length > 0 ? chart.resultRowArrays(result, nps) : [] );
 			var vv = chart.resultRowArrays(result, vps);
 			
@@ -4059,6 +4070,16 @@
 		});
 	};
 	
+	chartSupport.labelOn = function(chart, eventName, handler)
+	{
+		//TODO
+	};
+	
+	chartSupport.labelOff = function(chart, eventName, handler)
+	{
+		//TODO
+	};
+	
 	//自定义
 	
 	chartSupport.customAsyncRender = function(chart)
@@ -4117,6 +4138,16 @@
 		
 		if(customRenderer && customRenderer.destroy)
 			customRenderer.destroy(chart);
+	};
+	
+	chartSupport.customOn = function(chart, eventName, handler)
+	{
+		//TODO
+	};
+	
+	chartSupport.customOff = function(chart, eventName, handler)
+	{
+		//TODO
 	};
 	
 	chartSupport.customGetCustomRenderer = function(chart)
