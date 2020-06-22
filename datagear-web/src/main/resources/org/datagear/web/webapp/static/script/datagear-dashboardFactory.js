@@ -14,21 +14,8 @@
  *   datagear-chartFactory.js
  * 
  * 
- * 此看板工厂支持为<body>元素添加"dg-dashboard-listener"属性，用于指定看板监听器JS对象名，看板监听器格式为：
- * {
- *   //可选，渲染看板后置回调函数
- *   render: function(dashboard){ ... },
- *   //可选，渲染图表后置回调函数
- *   renderChart: function(dashboard, chart){ ... },
- *   //可选，更新图表数据后置回调函数
- *   updateChart: function(dashboard, chart, results){ ... },
- *   //可选，渲染看板前置回调函数，返回false将阻止渲染看板
- *   onRender: function(dashboard){ ... },
- *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
- *   onRenderChart: function(dashboard, chart){ ... },
- *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
- *   onUpdateChart: function(dashboard, chart, results){ ... }
- * }
+ * 此看板工厂支持为<body>元素添加"dg-dashboard-listener"属性，用于指定看板监听器JS对象名，
+ * 看板监听器格式参考dashboardBase.listener()函数说明。
  * 
  * 此看板工厂支持为<body>元素添加"dg-chart-map-urls"属性，用于扩展或替换内置地图，格式为：
  * {customMap:'map/custom.json', china: 'map/myChina.json'}
@@ -50,61 +37,8 @@
 	dashboardFactory.init = function(dashboard)
 	{
 		this.initEchartsMapURLs();
-		this.initCharts(dashboard);
 		$.extend(dashboard, this.dashboardBase);
-		this.initListener(dashboard);
-	};
-	
-	/**
-	 * 初始化看板的所有图表。
-	 * 
-	 * @param dashboard 看板对象
-	 */
-	dashboardFactory.initCharts = function(dashboard)
-	{
-		if(!dashboard || !dashboard.charts)
-			return;
-		
-		var dashboardTheme = global.chartFactory.renderContextAttr(dashboard.renderContext, "dashboardTheme");
-		global.chartFactory.renderContextAttr(dashboard.renderContext,
-				global.chartFactory.renderContextAttrs.chartTheme,
-				dashboardTheme.chartTheme);
-		
-		for(var i=0; i<dashboard.charts.length; i++)
-			this.initChart(dashboard.charts[i]);
-	};
-	
-	/**
-	 * 初始化指定图表。
-	 * 
-	 * @param chart 图表对象
-	 */
-	dashboardFactory.initChart = function(chart)
-	{
-		global.chartFactory.init(chart);
-	};
-	
-	/**
-	 * 初始化看板的监听器。
-	 * 它将body元素的"dg-dashboard-listener"属性值设置为看板的监听器。
-	 * 
-	 * @param dashboard 看板对象
-	 */
-	dashboardFactory.initListener = function(dashboard)
-	{
-		if(!dashboard || dashboard.listener)
-			return;
-		
-		var listener = $(document.body).attr("dg-dashboard-listener");
-		
-		if(listener)
-			listener = global.chartFactory.evalSilently(listener);
-		//@deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
-		else if(typeof(dashboardRenderer) != "undefined")
-			listener = dashboardRenderer.listener;
-		
-		if(listener)
-			dashboard.listener = listener;
+		dashboard.init();
 	};
 	
 	/**
@@ -165,21 +99,140 @@
 	//----------------------------------------
 	
 	/**
+	 * 看板初始化。
+	 */
+	dashboardBase.init = function()
+	{
+		this.initListener();
+		this.initCharts();
+	};
+	
+	/**
+	 * 初始化看板的监听器。
+	 * 它将body元素的"dg-dashboard-listener"属性值设置为看板的监听器。
+	 */
+	dashboardBase.initListener = function()
+	{
+		var listener = $(document.body).attr("dg-dashboard-listener");
+		
+		if(listener)
+			listener = global.chartFactory.evalSilently(listener);
+		//@deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
+		else if(typeof(dashboardRenderer) != "undefined")
+			listener = dashboardRenderer.listener;
+		
+		if(listener)
+			this.listener(listener);
+	};
+	
+	/**
+	 * 获取/设置看板监听器。
+	 * 看板监听器格式为：
+	 * {
+	 *   //可选，渲染看板完成回调函数
+	 *   render: function(dashboard){ ... },
+	 *   //可选，渲染图表完成回调函数
+	 *   renderChart: function(dashboard, chart){ ... },
+	 *   //可选，更新图表数据完成回调函数
+	 *   updateChart: function(dashboard, chart, results){ ... },
+	 *   //可选，渲染看板前置回调函数，返回false将阻止渲染看板
+	 *   onRender: function(dashboard){ ... },
+	 *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
+	 *   onRenderChart: function(dashboard, chart){ ... },
+	 *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
+	 *   onUpdateChart: function(dashboard, chart, results){ ... }
+	 * }
+	 * 
+	 * @param listener 可选，要设置的监听器对象，没有则执行获取操作
+	 */
+	dashboardBase.listener = function(listener)
+	{
+		if(listener == undefined)
+			return this._listener;
+		
+		this._listener = listener;
+		
+		//需要同步设置全局图表监听器
+		var chartListener = this.getDelegateChartListener();
+		
+		var dashboard = this;
+		
+		if(listener && listener.renderChart)
+			chartListener.render = function(chart){ listener.renderChart(dashboard, chart); };
+		else
+			chartListener.render = undefined;
+		
+		if(listener && listener.updateChart)
+			chartListener.update = function(chart, results){ listener.updateChart(dashboard, chart, results); };
+		else
+			chartListener.update = undefined;
+		
+		if(listener && listener.onRenderChart)
+			chartListener.onRender = function(chart){ return listener.onRenderChart(dashboard, chart); };
+		else
+			chartListener.onRender = undefined;
+		
+		if(listener && listener.onUpdateChart)
+			chartListener.onUpdate = function(chart, results){ return listener.onUpdateChart(dashboard, chart, results); };
+		else
+			chartListener.onUpdate = undefined;
+	};
+	
+	/**
+	 * 获取看板的代理图表监听器。
+	 * 为了确保任意时刻设置看板监听器（dashboard.listener(...)）都能传递至图表，所以此方法应始终返回不为null且引用不变的对象。
+	 */
+	dashboardBase.getDelegateChartListener = function()
+	{
+		var chartListener = (this._delegateChartListener || (this._delegateChartListener = {}));
+		return chartListener;
+	};
+	
+	/**
+	 * 初始化看板的所有图表。
+	 */
+	dashboardBase.initCharts = function()
+	{
+		if(!this.charts)
+			return;
+		
+		var dashboardTheme = global.chartFactory.renderContextAttr(this.renderContext, "dashboardTheme");
+		global.chartFactory.renderContextAttr(this.renderContext, global.chartFactory.renderContextAttrs.chartTheme,
+				dashboardTheme.chartTheme);
+		
+		for(var i=0; i<this.charts.length; i++)
+			this.initChart(this.charts[i]);
+	};
+	
+	/**
+	 * 初始化看板的单个图表。
+	 */
+	dashboardBase.initChart = function(chart)
+	{
+		global.chartFactory.init(chart);
+		
+		//如果图表没有定义监听器，则使用代理看板监听器
+		if(!chart.listener())
+			chart.listener(this.getDelegateChartListener());
+	};
+	
+	/**
 	 * 渲染看板。
 	 */
 	dashboardBase.render = function()
 	{
 		var doRender = true;
 		
-		if(this.listener && this.listener.onRender)
-		  doRender=this.listener.onRender(this);
+		var listener = this.listener();
+		if(listener && listener.onRender)
+		  doRender = listener.onRender(this);
 		
 		if(doRender != false)
 		{
 			this.doHandleCharts();
 			
-			if(this.listener && this.listener.render)
-				  this.listener.render(this);
+			if(listener && listener.render)
+				  listener.render(this);
 		}
 	};
 	
@@ -280,19 +333,8 @@
 	{
 		try
 		{
-			var doRender = true;
-			
-			if(this.listener && this.listener.onRenderChart)
-				doRender=this.listener.onRenderChart(this, chart);
-			
-			if(doRender != false)
-			{
-				this.doRenderChart(chart);
-				this.renderChartSetting(chart);
-				
-				if(this.listener && this.listener.renderChart)
-					this.listener.renderChart(this, chart);
-			}
+			this.doRenderChart(chart);
+			this.renderChartSetting(chart);
 		}
 		catch(e)
 		{
@@ -367,18 +409,7 @@
 	{
 		try
 		{
-			var doUpdate = true;
-			
-			if(this.listener && this.listener.onUpdateChart)
-				doUpdate=this.listener.onUpdateChart(this, chart, results);
-			
-			if(doUpdate != false)
-			{
-				this.doUpdateChart(chart, results);
-				
-				if(this.listener && this.listener.updateChart)
-					this.listener.updateChart(this, chart, results);
-			}
+			this.doUpdateChart(chart, results);
 		}
 		catch(e)
 		{
@@ -670,7 +701,7 @@
 	{
 		chart.plugin = global.chartPluginManager.get(chart.plugin.id);
 		chart.renderContext = this.renderContext;
-		dashboardFactory.initChart(chart);
+		this.initChart(chart);
 	};
 
 	/**

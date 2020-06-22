@@ -89,8 +89,7 @@
 	chartFactory.init = function(chart)
 	{
 		$.extend(chart, this.chartBase);
-		
-		chart.statusPreRender(true);
+		chart.init();
 	};
 	
 	/**
@@ -147,6 +146,62 @@
 	//----------------------------------------
 	
 	/**
+	 * 初始化图表。
+	 */
+	chartBase.init = function()
+	{
+		this.initListener();
+		
+		//最后才设置为可渲染状态
+		this.statusPreRender(true);
+	};
+	
+	/**
+	 * 初始化图表监听器。
+	 * 此方法依次从<div>图表元素、<body>元素的"dg-chart-listener"属性获取监听器对象。
+	 */
+	chartBase.initListener = function()
+	{
+		var $chart = this.elementJquery();
+		
+		var listenerStr = $chart.attr("dg-chart-listener");
+		if(!listenerStr)
+			listenerStr = $(document.body).attr("dg-chart-listener");
+		
+		if(listenerStr)
+		{
+			var listener = chartFactory.evalSilently(listenerStr);
+			
+			if(listener)
+				this.listener(listener);
+		}
+	};
+	
+	/**
+	 * 获取/设置图表监听器。
+	 * 图表监听器格式为：
+	 * {
+	 *   //渲染图表完成回调函数
+	 *   render: function(chart){ ... },
+	 *   //更新图表数据完成回调函数
+	 *   update: function(chart, results){ ... },
+	 *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
+	 *   onRender: function(chart){ ... },
+	 *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
+	 *   onUpdate: function(chart, results){ ... },
+	 * }
+	 * 
+	 * @param listener 可选，要设置的监听器对象，没有则执行获取操作
+	 */
+	chartBase.listener = function(listener)
+	{
+		if(listener == undefined)
+			return this._listener;
+		else
+			this._listener = listener;
+	};
+	
+	/**
 	 * 渲染图表。
 	 * 注意：只有this.statusPreRender()为true，此方法才会执行。
 	 */
@@ -161,11 +216,21 @@
 		
 		this.statusRendering(true);
 		
-		var async = this.isAsyncRender();
-		var re = this.plugin.chartRenderer.render(this);
+		var doRender = true;
 		
-		if(!async)
-			this.statusRendered(true);
+		var listener = this.listener();
+		if(listener && listener.onRender)
+		  doRender = listener.onRender(this);
+		
+		if(doRender != false)
+		{
+			var async = this.isAsyncRender();
+			
+			this.plugin.chartRenderer.render(this);
+			
+			if(!async)
+				this.statusRendered(true);
+		}
 	};
 	
 	/**
@@ -179,15 +244,24 @@
 		if(!this.statusRendered() && !this.statusPreUpdate() && !this.statusUpdated())
 			return false;
 		
-		this._updateResults = results;
-		
 		this.statusUpdating(true);
 		
-		var async = this.isAsyncUpdate(results);
-		var re = this.plugin.chartRenderer.update(this, results);
+		var doUpdate = true;
 		
-		if(!async)
-			this.statusUpdated(true);
+		var listener = this.listener();
+		if(listener && listener.onUpdate)
+			doUpdate = listener.onUpdate(this, results);
+		
+		if(doUpdate != false)
+		{
+			this._updateResults = results;
+			
+			var async = this.isAsyncUpdate(results);
+			this.plugin.chartRenderer.update(this, results);
+			
+			if(!async)
+				this.statusUpdated(true);
+		}
 	};
 	
 	/**
@@ -273,107 +347,127 @@
 	/**
 	 * 图表是否为/设置为：准备render。
 	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
+	 * @param set 可选，为true时设置状态；否则，判断状态
 	 */
 	chartBase.statusPreRender = function(set)
 	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_PRE_RENDER);
-		else
+		if(set)
 			this.status(chartFactory.STATUS_PRE_RENDER);
+		else
+			return (this.status() == chartFactory.STATUS_PRE_RENDER);
 	};
 	
 	/**
 	 * 图表是否为/设置为：正在render。
 	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
+	 * @param set 可选，为true时设置状态；否则，判断状态
 	 */
 	chartBase.statusRendering = function(set)
 	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_RENDERING);
-		else
+		if(set)
 			this.status(chartFactory.STATUS_RENDERING);
+		else
+			return (this.status() == chartFactory.STATUS_RENDERING);
 	};
 	
 	/**
 	 * 图表是否为/设置为：完成render。
 	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * @param callListener 可选，当set为true时，是否调用图表监听器的render回调函数，默认为true
 	 */
-	chartBase.statusRendered = function(set)
+	chartBase.statusRendered = function(set, callListener)
 	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_RENDERED);
-		else
+		if(set)
+		{
 			this.status(chartFactory.STATUS_RENDERED);
+			
+			if(callListener != false)
+			{
+				var listener = this.listener();
+				if(listener && listener.render)
+				  listener.render(this);
+			}
+		}
+		else
+			return (this.status() == chartFactory.STATUS_RENDERED);
 	};
 	
 	/**
 	 * 图表是否为/设置为：准备update。
 	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
+	 * @param set 可选，为true时设置状态；否则，判断状态
 	 */
 	chartBase.statusPreUpdate = function(set)
 	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_PRE_UPDATE);
-		else
+		if(set)
 			this.status(chartFactory.STATUS_PRE_UPDATE);
+		else
+			return (this.status() == chartFactory.STATUS_PRE_UPDATE);
 	};
 	
 	/**
 	 * 图表是否为/设置为：正在update。
 	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
+	 * @param set 可选，为true时设置状态；否则，判断状态
 	 */
 	chartBase.statusUpdating = function(set)
 	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_UPDATING);
-		else
+		if(set)
 			this.status(chartFactory.STATUS_UPDATING);
+		else
+			return (this.status() == chartFactory.STATUS_UPDATING);
 	};
 	
 	/**
 	 * 图表是否为/设置为：完成update。
 	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
+	 * @param set 可选，为true时设置状态；否则，判断状态
+	 * @param callListener 可选，当set为true时，是否调用图表监听器的update回调函数，默认为true
 	 */
-	chartBase.statusUpdated = function(set)
+	chartBase.statusUpdated = function(set, callListener)
 	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_UPDATED);
-		else
+		if(set)
+		{
 			this.status(chartFactory.STATUS_UPDATED);
+			
+			if(callListener != false)
+			{
+				var listener = this.listener();
+				if(listener && listener.update)
+				  listener.update(this, this.getUpdateResults());
+			}
+		}
+		else
+			return (this.status() == chartFactory.STATUS_UPDATED);
 	};
 	
 	/**
 	 * 图表是否为/设置为：已销毁。
 	 * 
-	 * @param set undefined时判断状态，否则，设置状态。
+	 * @param set 可选，为true时设置状态；否则，判断状态
 	 */
 	chartBase.statusDestroyed = function(set)
 	{
-		if(set == undefined)
-			return (this.status() == chartFactory.STATUS_DESTROYED);
-		else
+		if(set)
 			this.status(chartFactory.STATUS_DESTROYED);
+		else
+			return (this.status() == chartFactory.STATUS_DESTROYED);
 	};
 	
 	/**
 	 * 获取/设置图表状态。
 	 * 
-	 * @param status 要设置的状态，可选，不设置则执行获取操作
+	 * @param status 可选，要设置的状态，不设置则执行获取操作
 	 */
 	chartBase.status = function(status)
 	{
 		if(status == undefined)
-			return (this._status || chartFactory.STATUS_PRE_RENDER);
+			return this._status;
 		else
-			this._status = (status || chartFactory.STATUS_PRE_RENDER);
+			this._status = status;
 	};
-
+	
 	/**
 	 * 绑定"click"事件处理函数。
 	 * 
