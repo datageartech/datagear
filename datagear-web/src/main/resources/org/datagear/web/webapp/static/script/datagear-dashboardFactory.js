@@ -16,8 +16,17 @@
  * 
  * 此看板工厂支持为<body>元素添加"dg-dashboard-listener"属性，用于指定看板监听器JS对象名，看板监听器格式为：
  * {
+ *   //可选，渲染看板后置回调函数
+ *   render: function(dashboard){ ... },
+ *   //可选，渲染图表后置回调函数
+ *   renderChart: function(dashboard, chart){ ... },
+ *   //可选，更新图表数据后置回调函数
+ *   updateChart: function(dashboard, chart, results){ ... },
+ *   //可选，渲染看板前置回调函数，返回false将阻止渲染看板
  *   onRender: function(dashboard){ ... },
+ *   //可选，渲染图表前置回调函数，返回false将阻止渲染图表
  *   onRenderChart: function(dashboard, chart){ ... },
+ *   //可选，更新图表数据前置回调函数，返回false将阻止更新图表数据
  *   onUpdateChart: function(dashboard, chart, results){ ... }
  * }
  * 
@@ -145,6 +154,9 @@
 				chartElementIdParamName: "chartElementId"
 			});
 	
+	/*图表状态：渲染出错*/
+	dashboardFactory.CHART_STATUS_RENDER_ERROR = "RENDER_ERROR";
+	
 	//----------------------------------------
 	// dashboardBase start
 	//----------------------------------------
@@ -160,7 +172,12 @@
 		  doRender=this.listener.onRender(this);
 		
 		if(doRender != false)
+		{
 			this.doHandleCharts();
+			
+			if(this.listener && this.listener.render)
+				  this.listener.render(this);
+		}
 	};
 	
 	/**
@@ -268,10 +285,16 @@
 			{
 				this.doRenderChart(chart);
 				this.renderChartSetting(chart);
+				
+				if(this.listener && this.listener.renderChart)
+					this.listener.renderChart(this, chart);
 			}
 		}
 		catch(e)
 		{
+			//设置为渲染出错状态，避免渲染失败后会doHandleCharts中会无限尝试渲染
+			chart.status(dashboardFactory.CHART_STATUS_RENDER_ERROR);
+			
 			global.chartFactory.logException(e);
 		}
 	};
@@ -346,7 +369,12 @@
 				doUpdate=this.listener.onUpdateChart(this, chart, results);
 			
 			if(doUpdate != false)
+			{
 				this.doUpdateChart(chart, results);
+				
+				if(this.listener && this.listener.updateChart)
+					this.listener.updateChart(this, chart, results);
+			}
 		}
 		catch(e)
 		{
