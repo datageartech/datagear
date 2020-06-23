@@ -147,7 +147,7 @@
 	 */
 	dashboardBase.listener = function(listener)
 	{
-		if(listener == undefined)
+		if(listener === undefined)
 			return this._listener;
 		
 		this._listener = listener;
@@ -546,7 +546,7 @@
 	 */
 	dashboardBase.getChartIndex = function(chartInfo, charts)
 	{
-		if(charts == undefined)
+		if(charts === undefined)
 			charts = this.charts;
 		
 		if(!charts)
@@ -572,7 +572,7 @@
 	 */
 	dashboardBase.chartUpdateTime = function(chart, updateTime)
 	{
-		if(updateTime == undefined)
+		if(updateTime === undefined)
 			return chart._updateTime;
 		
 		chart._updateTime = updateTime;

@@ -20,6 +20,8 @@
  * 此图表工厂支持为<body>元素、<div>图表元素添加"dg-chart-theme"属性来设置图表主题，格式为：
  * { color:'...', backgroundColor:'...', ... }
  * 
+ * 此图表工厂支持为<body>元素、<div>图表元素添加"dg-chart-listener"属性来设置图表监听器，格式参考chartBase.listener函数参数说明。
+ * 
  * 此图表工厂支持为<div>图表元素添加"dg-chart-map"属性来设置地图图表的地图名。
  * 
  * 此图表工厂支持为<body>元素、<div>图表元素添加"dg-echarts-theme"属性来设置图表Echarts主题名。
@@ -101,7 +103,7 @@
 	 */
 	chartFactory.renderContextAttr = function(renderContext, attrName, attrValue)
 	{
-		if(attrValue == undefined)
+		if(attrValue === undefined)
 			return renderContext.attributes[attrName];
 		else
 			return renderContext.attributes[attrName] = attrValue;
@@ -195,7 +197,7 @@
 	 */
 	chartBase.listener = function(listener)
 	{
-		if(listener == undefined)
+		if(listener === undefined)
 			return this._listener;
 		else
 			this._listener = listener;
@@ -462,7 +464,7 @@
 	 */
 	chartBase.status = function(status)
 	{
-		if(status == undefined)
+		if(status === undefined)
 			return this._status;
 		else
 			this._status = status;
@@ -531,13 +533,13 @@
 	/**
 	 * 绑定事件处理函数。
 	 * 
-	 * @param eventName 事件名称：click、dblclick、mousedown、mouseup、mouseover、mouseout
-	 * @param handler 事件处理函数：function(data){}
+	 * @param eventType 事件类型：click、dblclick、mousedown、mouseup、mouseover、mouseout
+	 * @param handler 事件处理函数：function(chartEvent){ ... }
 	 */
-	chartBase.on = function(eventName, handler)
+	chartBase.on = function(eventType, handler)
 	{
 		if(this.plugin.chartRenderer.on)
-			this.plugin.chartRenderer.on(this, eventName, handler);
+			this.plugin.chartRenderer.on(this, eventType, handler);
 		else
 			throw new Error("Chart plugin ["+this.plugin.id+"] 's [chartRenderer.on] undefined");
 	};
@@ -545,13 +547,13 @@
 	/**
 	 * 解绑事件处理函数。
 	 * 
-	 * @param eventName 事件名称：click、dblclick、mousedown、mouseup、mouseover、mouseout
-	 * @param handler 可选，解绑的事件处理函数，不设置则解绑所有此事件的处理函数
+	 * @param eventType 事件类型：click、dblclick、mousedown、mouseup、mouseover、mouseout
+	 * @param handler 可选，解绑的事件处理函数，不设置则解绑所有此事件类型的处理函数
 	 */
-	chartBase.off = function(eventName, handler)
+	chartBase.off = function(eventType, handler)
 	{
 		if(this.plugin.chartRenderer.off)
-			this.plugin.chartRenderer.off(this, eventName, handler);
+			this.plugin.chartRenderer.off(this, eventType, handler);
 		else
 			throw new Error("Chart plugin ["+this.plugin.id+"] 's [chartRenderer.off] undefined");
 	};
@@ -847,7 +849,7 @@
 	 */
 	chartBase.map = function(value)
 	{
-		if(value == undefined)
+		if(value === undefined)
 			return this.elementJquery().attr("dg-chart-map");
 		else
 			this.elementJquery().attr("dg-chart-map", value);
@@ -873,7 +875,7 @@
 	 */
 	chartBase.extValue = function(name, value)
 	{
-		if(value == undefined)
+		if(value === undefined)
 			return (this._extValues ? this._extValues[name] : undefined);
 		else
 		{
@@ -1274,10 +1276,10 @@
 	 */
 	chartBase.echartsInstance = function(instance)
 	{
-		if(instance != undefined)
-			this._echartsInstance = instance;
-		else
+		if(instance === undefined)
 			return this._echartsInstance;
+		else
+			this._echartsInstance = instance;
 	};
 	
 	/**
@@ -1412,6 +1414,182 @@
 	//----------------------------------------
 	// chartBase end
 	//----------------------------------------
+	
+	/**图表事件的图表类型：Echarts*/
+	chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS = "echarts";
+	
+	/**图表事件的图表类型：HTML*/
+	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
+	
+	/**
+	 * 创建Echarts图表的事件对象。
+	 * 
+	 * @param eventType 事件类型
+	 * @param echartsEventParams echarts事件处理函数的参数对象
+	 */
+	chartFactory.newChartEventEcharts = function(eventType, echartsEventParams)
+	{
+		var event =
+		{
+			"type": eventType,
+			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS,
+			"eventOrign": echartsEventParams
+		};
+		
+		return event;
+	};
+	
+	/**
+	 * 创建HTML图表的事件对象。
+	 * 
+	 * @param eventType 事件类型
+	 * @param htmlEvent HTML事件对象
+	 */
+	chartFactory.newChartEventHtml = function(eventType, htmlEvent)
+	{
+		var event =
+		{
+			"type": eventType,
+			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_HTML,
+			"eventOrign": htmlEvent
+		};
+		
+		return event;
+	};
+	
+	/**
+	 * 获取/设置图表事件对象的数据属性值（chartEvent.data）。
+	 * 
+	 * @param chartEvent 图表事件对象
+	 * @param data 可选
+	 */
+	chartFactory.chartEventData = function(chartEvent, data)
+	{
+		if(data === undefined)
+			return chartEvent["data"];
+		else
+			chartEvent["data"] = data;
+	};
+	
+	/**
+	 * 获取/设置图表事件对象的数据原始信息属性值（（chartEvent.dataOrigin））。
+	 * 数据原始信息对象格式为：
+	 * {
+	 *   //数据集结果数据
+	 *   data: ...,
+	 *   //图表数据集索引
+	 *   chartDataSetIndex: ...,
+	 *   //图表数据集结果索引
+	 *   resultDataIndex: ...
+	 * }
+	 * 
+	 * @param chartEvent 图表事件对象
+	 * @param dataOrigin 可选
+	 */
+	chartFactory.chartEventDataOrigin = function(chartEvent, dataOrigin)
+	{
+		if(dataOrigin === undefined)
+			return chartEvent["dataOrigin"];
+		else
+			chartEvent["dataOrigin"] = dataOrigin;
+	};
+	
+	/**
+	 * 设置图表事件对象的数据原始信息属性值详细（（chartEvent.dataOrigin））。
+	 * 
+	 * @param chartEvent 图表事件对象
+	 * @param data 数据集结果数据
+	 * @param chartDataSetIndex 图表数据集索引
+	 * @param resultDataIndex 图表数据集结果索引
+	 */
+	chartFactory.chartEventDataOriginDetail = function(chartEvent, data, chartDataSetIndex, resultDataIndex)
+	{
+		var dataOrigin = 
+		{
+			"data": data,
+			"chartDataSetIndex": chartDataSetIndex,
+			"resultDataIndex": resultDataIndex
+		};
+		
+		chartFactory.chartEventDataOrigin(chartEvent, dataOrigin);
+	};
+	
+	/**
+	 * 绑定图表事件处理函数代理。
+	 * 图表事件处理通常内部组件处理函数代理（比如Echarts），并在代理函数中调用图表事件处理函数。
+	 * 
+	 * @param chart
+	 * @param eventType
+	 * @param eventHanlder 图表事件处理函数：function(chartEvent){ ... }
+	 * @param eventHandlerDelegation 图表事件处理函数代理，负责构建chartEvent对象并调用eventHanlder
+	 * @param delegationBinder 代理事件绑定器，格式为：{ bind: function(chart, eventType, eventHandlerDelegation){ ... } }
+	 */
+	chartFactory.bindChartEventHandlerDelegation = function(chart, eventType, eventHanlder,
+			eventHandlerDelegation, delegationBinder)
+	{
+		var delegations = chart.extValue("eventHandlerDelegations");
+		if(delegations == null)
+		{
+			delegations = [];
+			chart.extValue("eventHandlerDelegations", delegations);
+		}
+		
+		delegationBinder.bind(chart, eventType, eventHandlerDelegation);
+		
+		delegations.push({ eventType: eventType , eventHanlder: eventHanlder, eventHandlerDelegation: eventHandlerDelegation });
+	};
+	
+	/**
+	 * 为图表解绑事件处理函数代理。
+	 * 
+	 * @param chart
+	 * @param eventType 事件类型
+	 * @param eventHanlder 可选，要解绑的图表事件处理函数，不设置则解除所有指定事件类型的处理函数
+	 * @param delegationUnbinder 代理事件解绑器，格式为：{ unbind: function(chart, eventType, eventHandlerDelegation){ ... } }
+	 */
+	chartFactory.unbindChartEventHandlerDelegation = function(chart, eventType, eventHanlder, delegationUnbinder)
+	{
+		if(delegationUnbinder == undefined)
+		{
+			delegationUnbinder = eventHanlder;
+			eventHanlder = undefined;
+		}
+		
+		var delegations = chart.extValue("eventHandlerDelegations");
+		
+		if(delegations == null)
+			return;
+		
+		var unbindCount = 0;
+		
+		for(var i=0; i<delegations.length; i++)
+		{
+			var eh = delegations[i];
+			var unbind = false;
+			
+			if(eventType == eh.eventType)
+				unbind = (eventHanlder == undefined || (eh.eventHanlder == eventHanlder));
+			
+			if(unbind)
+			{
+				delegationUnbinder.unbind(chart, eventType, eh.eventHandlerDelegation);
+				delegations[i] = null;
+				unbindCount++;
+			}
+		}
+		
+		if(unbindCount > 0)
+		{
+			var delegationsTmp = [];
+			for(var i=0; i<delegations.length; i++)
+			{
+				if(delegations[i] != null)
+					delegationsTmp.push(delegations[i]);
+			}
+			
+			chart.extValue("eventHandlerDelegations", delegationsTmp);
+		}
+	};
 	
 	/**
 	 * 执行JS代码。
