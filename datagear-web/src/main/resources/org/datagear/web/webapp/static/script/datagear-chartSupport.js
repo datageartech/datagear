@@ -201,8 +201,10 @@
 			chart.extValue("signNameMap", signNameMap);
 	};
 	
+	chartSupport.KEY_CHART_ORIGINAL_DATA_INFO = "__dataGearChartOriginalDataInfo";
+	
 	/**
-	 * 设置图表数据对象的原始信息。
+	 * 设置图表数据对象的原始数据信息。
 	 * 
 	 * @param chartData 图表数据对象、对象数组
 	 * @param chartDataSetIndex 原始图表数据集索引
@@ -220,18 +222,18 @@
 		{
 			for(var i=0; i<chartData.length; i++)
 			{
-				chartData[i]["__dataGearChartOriginalDataInfo"] =
+				chartData[i][chartSupport.KEY_CHART_ORIGINAL_DATA_INFO] =
 				{
 					chartDataSetIndex : chartDataSetIndex, resultDataIndex: resultDataIndex+i
 				};
 			}
 		}
 		else
-			chartData["__dataGearChartOriginalDataInfo"] = { chartDataSetIndex : chartDataSetIndex, resultDataIndex: resultDataIndex };
+			chartData[chartSupport.KEY_CHART_ORIGINAL_DATA_INFO] = { chartDataSetIndex : chartDataSetIndex, resultDataIndex: resultDataIndex };
 	};
-
+	
 	/**
-	 * 获取图表数据对象的原始信息。
+	 * 获取图表数据对象的原始数据信息。
 	 * 
 	 * @param chartData 图表数据对象
 	 */
@@ -240,7 +242,21 @@
 		if(!chartData)
 			return undefined;
 		
-		return chartData["__dataGearChartOriginalDataInfo"];
+		return chartData[chartSupport.KEY_CHART_ORIGINAL_DATA_INFO];
+	};
+	
+	/**
+	 * 获取/设置HTML元素的图表原始数据信息。
+	 */
+	chartSupport.chartOriginalDataInfoHtml = function($dom, chartDataSetIndex, resultDataIndex)
+	{
+		if(chartDataSetIndex === undefined && resultDataIndex === undefined)
+			return $dom.data(chartSupport.KEY_CHART_ORIGINAL_DATA_INFO);
+		else
+			$dom.data(chartSupport.KEY_CHART_ORIGINAL_DATA_INFO,
+					{
+						chartDataSetIndex : chartDataSetIndex, resultDataIndex: resultDataIndex
+					});
 	};
 	
 	/**
@@ -349,30 +365,30 @@
 	
 	chartSupport.setChartEventOriginalDataForEchartsRange = function(chartEvent, chart, echartsEventParams)
 	{
-		var originInfo = this.getChartOriginalDataInfoForRangeEcharts(chart, echartsEventParams);
-		this.setChartEventOriginalDataByInfo(chartEvent, chart, originInfo);
+		var originDataInfo = this.getChartOriginalDataInfoForRangeEcharts(chart, echartsEventParams);
+		this.setChartEventOriginalDataByInfo(chartEvent, chart, originDataInfo);
 	};
 	
 	chartSupport.setChartEventOriginalDataForChartData = function(chartEvent, chart, chartData)
 	{
-		var originInfo = chartSupport.getChartOriginalDataInfo(chartData);
-		this.setChartEventOriginalDataByInfo(chartEvent, chart, originInfo);
+		var originDataInfo = chartSupport.getChartOriginalDataInfo(chartData);
+		this.setChartEventOriginalDataByInfo(chartEvent, chart, originDataInfo);
 	};
 	
-	chartSupport.setChartEventOriginalDataByInfo = function(chartEvent, chart, originInfo)
+	chartSupport.setChartEventOriginalDataByInfo = function(chartEvent, chart, originDataInfo)
 	{
-		if(!originInfo)
+		if(!originDataInfo)
 		{
 			chartFactory.chartEventOriginalData(chartEvent, null);
 			return;
 		}
 		
-		var resultDatas = chart.resultDatas(chart.resultAt(chart.getUpdateResults(), originInfo.chartDataSetIndex));
+		var resultDatas = chart.resultDatas(chart.resultAt(chart.getUpdateResults(), originDataInfo.chartDataSetIndex));
 		
 		chartFactory.chartEventOriginalDataDetail(chartEvent,
-				resultDatas[originInfo.resultDataIndex],
-				originInfo.chartDataSetIndex,
-				originInfo.resultDataIndex
+				resultDatas[originDataInfo.resultDataIndex],
+				originDataInfo.chartDataSetIndex,
+				originDataInfo.resultDataIndex
 			);
 	};
 	
@@ -3568,10 +3584,7 @@
 		
 		var chartTheme = chart.theme();
 		
-		var chartDataSet = chart.chartDataSetFirst();
-		var cps = chart.dataSetPropertiesOfSign(chartDataSet, columnSign);
-		if(!cps || cps.length == 0)
-			cps =(chartDataSet && chartDataSet.dataSet ? (chartDataSet.dataSet.properties || []) : []);
+		var cps = chartSupport.tableGetColumnProperties(chart, columnSign);
 		
 		var columns = [];
 		
@@ -3682,7 +3695,7 @@
 			var rowNodes = $(this).DataTable().rows().nodes();
 			$(rowNodes).each(function()
 			{
-				chartSupport.setTableRowStyle(this, chartOptions);
+				chartSupport.tableSetTableRowStyle(this, chartOptions);
 			});
 		})
 		.on("select", function(e, dt, type, indexes )
@@ -3703,11 +3716,11 @@
 				var rowNodes = dt.rows(indexes).nodes();
 				$(rowNodes).each(function(index)
 				{
-					chartSupport.setTableRowStyle(this, chartOptions);
+					chartSupport.tableSetTableRowStyle(this, chartOptions);
 				});
 			}
 		});
-
+		
 		$("tr", dataTable.table().header()).each(function()
 		{
 			global.chartFactory.setStyles(this, chartOptions.table.header);
@@ -3721,12 +3734,12 @@
 		.on("mouseleave", "tr", function()
 		{
 			if(!$(this).hasClass("selected"))
-				chartSupport.setTableRowStyle(this, chartOptions);
+				chartSupport.tableSetTableRowStyle(this, chartOptions);
 		});
 		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
 		
-		chart.extValue("tableId", tableId);
+		chart.extValue("chartTableId", tableId);
 		chartSupport.initOptions(chart, options);
 	};
 	
@@ -3734,8 +3747,7 @@
 	{
 		var initOptions = chartSupport.initOptions(chart);
 		var chartDataSets = chart.chartDataSetsNonNull();
-		var tableId = chart.extValue("tableId");
-		var dataTable = $("#" + tableId, chart.elementJquery()).DataTable();
+		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		
 		var datas = [];
 		for(var i=0; i<chartDataSets.length; i++)
@@ -3744,7 +3756,15 @@
 			var result = chart.resultAt(results, i);
 			
 			if(result.datas)
-				datas = datas.concat(result.datas);
+			{
+				//复制，避免污染原始数据
+				for(var j =0; j< result.datas.length; j++)
+				{
+					var data = $.extend({}, result.datas[j]);
+					chartSupport.setChartOriginalDataInfo(data, i);
+					datas.push(data);
+				}
+			}
 		}
 		
 		chartSupport.tableAddDataTableData(dataTable, datas, 0, false);
@@ -3752,10 +3772,8 @@
 	
 	chartSupport.tableResize = function(chart)
 	{
-		var chartEle = chart.elementJquery();
-		var chartContent = $(".dg-chart-table-content", chartEle);
-		var tableId = chart.extValue("tableId");
-		var dataTable = $("#" + tableId, chartEle).DataTable();
+		var chartContent = $(".dg-chart-table-content", chart.element());
+		var dataTable = chartSupport.tableGetChartDataTable(chart);
 		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
 	};
@@ -3771,15 +3789,81 @@
 	
 	chartSupport.tableOn = function(chart, eventType, handler)
 	{
-		//TODO
+		var htmlHandler = function(htmlEvent)
+		{
+			var rowElement = this;
+			var chartEvent = chartFactory.newChartEventHtml(eventType, htmlEvent);
+			chartSupport.tableSetChartEventData(chart, chartEvent, htmlEvent, rowElement);
+			handler.call(chart, chartEvent);
+		};
+		
+		chartFactory.bindChartEventHandlerDelegation(chart, eventType, handler, htmlHandler,
+				chartSupport.tableChartEventDelegationEventBinder);
 	};
 	
 	chartSupport.tableOff = function(chart, eventType, handler)
 	{
-		//TODO
+		chartFactory.unbindChartEventHandlerDelegation(chart, eventType, handler,
+				chartSupport.tableChartEventDelegationEventBinder);
 	};
 	
-	chartSupport.setTableRowStyle = function(rowElement, chartOptions)
+	chartSupport.tableSetChartEventData = function(chart, chartEvent, htmlEvent, rowElement)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var dataTable = chartSupport.tableGetChartDataTable(chart);
+		
+		var chartData = dataTable.row(rowElement).data();
+		var originalDataInfo = chartSupport.getChartOriginalDataInfo(chartData);
+		
+		var data = {};
+		
+		if(chartData)
+		{
+			var columnData = [];
+			
+			var cps = chartSupport.tableGetColumnProperties(chart, signNameMap.column);
+			for(var i=0; i<cps.length; i++)
+				columnData[i] = chartData[cps[i].name];
+			
+			data[signNameMap.column] = columnData;
+		}
+		
+		chartFactory.chartEventData(chartEvent, data);
+		chartSupport.setChartEventOriginalDataByInfo(chartEvent, chart, originalDataInfo);
+	};
+	
+	chartSupport.tableChartEventDelegationEventBinder =
+	{
+		bind: function(chart, eventType, delegateEventHandler)
+		{
+			var dataTable = chartSupport.tableGetChartDataTable(chart);
+			$(dataTable.table().body()).on(eventType, "tr", delegateEventHandler);
+		},
+		unbind: function(chart, eventType, delegateEventHandler)
+		{
+			var dataTable = chartSupport.tableGetChartDataTable(chart);
+			$(dataTable.table().body()).off(eventType, "tr", delegateEventHandler);
+		}
+	};
+	
+	chartSupport.tableGetChartDataTable = function(chart)
+	{
+		var tableId = chart.extValue("chartTableId");
+		return $("#" + tableId, chart.element()).DataTable();
+	};
+	
+	chartSupport.tableGetColumnProperties = function(chart, columnSign)
+	{
+		var chartDataSet = chart.chartDataSetFirst();
+		var cps = chart.dataSetPropertiesOfSign(chartDataSet, columnSign);
+		if(!cps || cps.length == 0)
+			cps =(chartDataSet && chartDataSet.dataSet ? (chartDataSet.dataSet.properties || []) : []);
+		
+		return cps;
+	};
+	
+	chartSupport.tableSetTableRowStyle = function(rowElement, chartOptions)
 	{
 		if($(rowElement).hasClass("odd"))
 			global.chartFactory.setStyles(rowElement, chartOptions.table.row.odd);
@@ -3887,7 +3971,7 @@
 			
 			var nps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.name);
 			var vps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
-			var cv = (nps.length > 0 ? chart.resultRowArrays(result, nps) : [] );
+			var nv = (nps.length > 0 ? chart.resultRowArrays(result, nps) : [] );
 			var vv = chart.resultRowArrays(result, vps);
 			
 			for(var j=0; j<vv.length; j++)
@@ -3897,7 +3981,7 @@
 				for(var k=0; k<vvj.length; k++)
 				{
 					var cssName = "dg-chart-label-item-"+i+"-"+j+"-"+k;
-					var name = (cv.length > j && cv[j].length > k ? cv[j][k] : chart.dataSetPropertyLabel(vps[k]));
+					var name = (nv.length > j && nv[j].length > k ? nv[j][k] : undefined);
 					var value = vv[j][k];
 					
 					var $label = $("."+ cssName, $parent);
@@ -3905,6 +3989,9 @@
 						$label = $("<div class='dg-chart-label-item dg-chart-label-item-"+i+" dg-chart-label-item-"+i+"-"+j+" "+cssName+"'></div>").appendTo($parent);
 					else
 						$label.removeClass("dg-chart-label-item-pending");
+					
+					$label.data("_dgChartLabelChartData", { name: name, value: value });
+					chartSupport.chartOriginalDataInfoHtml($label, i, j);
 					
 					var $labelName = $(".label-name", $label);
 					var $labelValue = $(".label-value", $label);
@@ -3928,7 +4015,7 @@
 					
 					if(options.label.name.show)
 					{
-						$labelName.html(name);
+						$labelName.html(name || chart.dataSetPropertyLabel(vps[k]));
 						global.chartFactory.setStyles($labelName, options.label.name);
 					}
 					
@@ -3960,21 +4047,42 @@
 	{
 		var htmlHandler = function(htmlEvent)
 		{
+			var $label = $(this);
 			var chartEvent = chartFactory.newChartEventHtml(eventType, htmlEvent);
+			chartSupport.labelSetChartEventData(chart, chartEvent, htmlEvent, $label);
 			handler.call(chart, chartEvent);
 		};
 		
 		chartFactory.bindChartEventHandlerDelegation(chart, eventType, handler, htmlHandler,
-				chartSupport.chartEventDelegationEventBinderLabel);
+				chartSupport.labelChartEventDelegationEventBinder);
 	};
 	
 	chartSupport.labelOff = function(chart, eventType, handler)
 	{
 		chartFactory.unbindChartEventHandlerDelegation(chart, eventType, handler,
-				chartSupport.chartEventDelegationEventBinderLabel);
+				chartSupport.labelChartEventDelegationEventBinder);
 	};
 	
-	chartSupport.chartEventDelegationEventBinderLabel =
+	chartSupport.labelSetChartEventData = function(chart, chartEvent, htmlEvent, $label)
+	{
+		var signNameMap = chartSupport.chartSignNameMap(chart);
+		
+		var originalDataInfo = chartSupport.chartOriginalDataInfoHtml($label);
+		var chartData = $label.data("_dgChartLabelChartData");
+		
+		var data = {};
+		
+		if(chartData)
+		{
+			data[signNameMap.name] = chartData.name;
+			data[signNameMap.value] = chartData.value;
+		}
+		
+		chartFactory.chartEventData(chartEvent, data);
+		chartSupport.setChartEventOriginalDataByInfo(chartEvent, chart, originalDataInfo);
+	};
+	
+	chartSupport.labelChartEventDelegationEventBinder =
 	{
 		bind: function(chart, eventType, delegateEventHandler)
 		{
