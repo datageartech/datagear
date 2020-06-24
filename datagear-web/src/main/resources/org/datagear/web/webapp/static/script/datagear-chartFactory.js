@@ -1458,7 +1458,7 @@
 	};
 	
 	/**
-	 * 获取/设置图表事件对象的数据属性值（chartEvent.data）。
+	 * 获取/设置图表事件对象的数据（chartEvent.data）。
 	 * 
 	 * @param chartEvent 图表事件对象
 	 * @param data 可选
@@ -1472,16 +1472,7 @@
 	};
 	
 	/**
-	 * 获取/设置图表事件对象的数据原始信息属性值（（chartEvent.originalData））。
-	 * 数据原始信息对象格式为：
-	 * {
-	 *   //数据集结果数据
-	 *   data: ...,
-	 *   //图表数据集索引
-	 *   chartDataSetIndex: ...,
-	 *   //图表数据集结果索引
-	 *   resultDataIndex: ...
-	 * }
+	 * 获取/设置图表事件对象的原始数据（（chartEvent.originalData））。
 	 * 
 	 * @param chartEvent 图表事件对象
 	 * @param originalData 可选
@@ -1492,6 +1483,34 @@
 			return chartEvent["originalData"];
 		else
 			chartEvent["originalData"] = originalData;
+	};
+	
+	/**
+	 * 获取/设置图表事件对象的原始图表数据集索引（（chartEvent.originalChartDataSetIndex））。
+	 * 
+	 * @param chartEvent 图表事件对象
+	 * @param originalChartDataSetIndex 可选
+	 */
+	chartFactory.chartEventOriginalChartDataSetIndex = function(chartEvent, originalChartDataSetIndex)
+	{
+		if(originalChartDataSetIndex === undefined)
+			return chartEvent["originalChartDataSetIndex"];
+		else
+			chartEvent["originalChartDataSetIndex"] = originalChartDataSetIndex;
+	};
+	
+	/**
+	 * 获取/设置图表事件对象的原始结果数据索引（（chartEvent.originalResultDataIndex））。
+	 * 
+	 * @param chartEvent 图表事件对象
+	 * @param originalResultDataIndex 可选
+	 */
+	chartFactory.chartEventOriginalResultDataIndex = function(chartEvent, originalResultDataIndex)
+	{
+		if(originalResultDataIndex === undefined)
+			return chartEvent["originalResultDataIndex"];
+		else
+			chartEvent["originalResultDataIndex"] = originalResultDataIndex;
 	};
 	
 	/**

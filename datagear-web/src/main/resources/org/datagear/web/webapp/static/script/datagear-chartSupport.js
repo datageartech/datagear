@@ -380,16 +380,17 @@
 		if(!originDataInfo)
 		{
 			chartFactory.chartEventOriginalData(chartEvent, null);
+			chartFactory.chartEventOriginalChartDataSetIndex(chartEvent, null);
+			chartFactory.chartEventOriginalResultDataIndex(chartEvent, null);
 			return;
 		}
 		
 		var resultDatas = chart.resultDatas(chart.resultAt(chart.getUpdateResults(), originDataInfo.chartDataSetIndex));
+		var originalData = resultDatas[originDataInfo.resultDataIndex];
 		
-		chartFactory.chartEventOriginalDataDetail(chartEvent,
-				resultDatas[originDataInfo.resultDataIndex],
-				originDataInfo.chartDataSetIndex,
-				originDataInfo.resultDataIndex
-			);
+		chartFactory.chartEventOriginalData(chartEvent, originalData);
+		chartFactory.chartEventOriginalChartDataSetIndex(chartEvent, originDataInfo.chartDataSetIndex);
+		chartFactory.chartEventOriginalResultDataIndex(chartEvent, originDataInfo.resultDataIndex);
 	};
 	
 	//折线图
@@ -3981,7 +3982,7 @@
 				for(var k=0; k<vvj.length; k++)
 				{
 					var cssName = "dg-chart-label-item-"+i+"-"+j+"-"+k;
-					var name = (nv.length > j && nv[j].length > k ? nv[j][k] : undefined);
+					var name = (nv.length > j && nv[j].length > k ? nv[j][k] : chart.dataSetPropertyLabel(vps[k]));
 					var value = vv[j][k];
 					
 					var $label = $("."+ cssName, $parent);
@@ -4015,7 +4016,7 @@
 					
 					if(options.label.name.show)
 					{
-						$labelName.html(name || chart.dataSetPropertyLabel(vps[k]));
+						$labelName.html(name);
 						global.chartFactory.setStyles($labelName, options.label.name);
 					}
 					
