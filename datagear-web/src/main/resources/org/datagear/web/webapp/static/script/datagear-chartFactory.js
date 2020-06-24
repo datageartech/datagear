@@ -1433,7 +1433,7 @@
 		{
 			"type": eventType,
 			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS,
-			"eventOrign": echartsEventParams
+			"originalEvent": echartsEventParams
 		};
 		
 		return event;
@@ -1451,7 +1451,7 @@
 		{
 			"type": eventType,
 			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_HTML,
-			"eventOrign": htmlEvent
+			"originalEvent": htmlEvent
 		};
 		
 		return event;
@@ -1472,7 +1472,7 @@
 	};
 	
 	/**
-	 * 获取/设置图表事件对象的数据原始信息属性值（（chartEvent.dataOrigin））。
+	 * 获取/设置图表事件对象的数据原始信息属性值（（chartEvent.originalData））。
 	 * 数据原始信息对象格式为：
 	 * {
 	 *   //数据集结果数据
@@ -1484,34 +1484,34 @@
 	 * }
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param dataOrigin 可选
+	 * @param originalData 可选
 	 */
-	chartFactory.chartEventDataOrigin = function(chartEvent, dataOrigin)
+	chartFactory.chartEventOriginalData = function(chartEvent, originalData)
 	{
-		if(dataOrigin === undefined)
-			return chartEvent["dataOrigin"];
+		if(originalData === undefined)
+			return chartEvent["originalData"];
 		else
-			chartEvent["dataOrigin"] = dataOrigin;
+			chartEvent["originalData"] = originalData;
 	};
 	
 	/**
-	 * 设置图表事件对象的数据原始信息属性值详细（（chartEvent.dataOrigin））。
+	 * 设置图表事件对象的数据原始信息属性值详细（（chartEvent.originalData））。
 	 * 
 	 * @param chartEvent 图表事件对象
 	 * @param data 数据集结果数据
 	 * @param chartDataSetIndex 图表数据集索引
 	 * @param resultDataIndex 图表数据集结果索引
 	 */
-	chartFactory.chartEventDataOriginDetail = function(chartEvent, data, chartDataSetIndex, resultDataIndex)
+	chartFactory.chartEventOriginalDataDetail = function(chartEvent, data, chartDataSetIndex, resultDataIndex)
 	{
-		var dataOrigin = 
+		var originalData = 
 		{
 			"data": data,
 			"chartDataSetIndex": chartDataSetIndex,
 			"resultDataIndex": resultDataIndex
 		};
 		
-		chartFactory.chartEventDataOrigin(chartEvent, dataOrigin);
+		chartFactory.chartEventOriginalData(chartEvent, originalData);
 	};
 	
 	/**
