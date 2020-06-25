@@ -4,7 +4,7 @@
 
 /**
  * 图表工厂，用于初始化图表对象，为图表对象添加功能函数。
- * 全局变量名：window.chartFactory。
+ * 全局变量名：window.chartFactory
  * 
  * 加载时依赖：
  *   无

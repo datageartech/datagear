@@ -4,7 +4,7 @@
 
 /**
  * 图表表单库。
- * 全局变量名：window.chartFactory.chartForm。
+ * 全局变量名：window.chartFactory.chartForm
  * 
  * 加载时依赖：
  *   无

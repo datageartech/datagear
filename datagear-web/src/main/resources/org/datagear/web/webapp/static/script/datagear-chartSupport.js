@@ -4,7 +4,7 @@
 
 /**
  * 图表支持库。
- * 全局变量名：window.chartSupport。
+ * 全局变量名：window.chartFactory.chartSupport
  * 
  * 加载时依赖：
  *   无
@@ -16,7 +16,11 @@
  */
 (function(global)
 {
-	var chartSupport = (global.chartSupport || (global.chartSupport = {}));
+	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
+	var chartSupport = (chartFactory.chartSupport || (chartFactory.chartSupport = {}));
+	
+	//@deprecated 兼容1.8.1版本的window.chartSupport变量名，未来版本会移除
+	global.chartSupport = chartSupport;
 	
 	//org.datagear.analysis.DataSetProperty.DataType
 	chartSupport.DataSetPropertyDataType =
