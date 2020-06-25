@@ -207,7 +207,7 @@
 		<property name="chartWidgetSource" ref="htmlChartWidgetEntityService" />
 		<property name="importHtmlChartPluginVarNameResolver">
 			<bean class="org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.TemplateImportHtmlChartPluginVarNameResolver">
-				<property name="template" value="chartPluginManager.get('$CHART_PLUGIN_ID')" />
+				<property name="template" value="chartFactory.chartPluginManager.get('$CHART_PLUGIN_ID')" />
 			</bean>
 		</property>
 	</bean>

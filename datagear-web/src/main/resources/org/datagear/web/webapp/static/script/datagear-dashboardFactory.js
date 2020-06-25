@@ -699,11 +699,11 @@
 	 */
 	dashboardBase.initLoadedChart = function(chart)
 	{
-		chart.plugin = global.chartPluginManager.get(chart.plugin.id);
+		chart.plugin = global.chartFactory.chartPluginManager.get(chart.plugin.id);
 		chart.renderContext = this.renderContext;
 		this.initChart(chart);
 	};
-
+	
 	/**
 	 * 获取/设置渲染上下文的属性值。
 	 * 

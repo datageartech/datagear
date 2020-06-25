@@ -323,8 +323,14 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		out.println("(function(global)");
 		out.println("{");
 
-		out.println("var chartPluginManager = (global.chartPluginManager || (global.chartPluginManager = {}));");
+		out.println("var chartFactory = (global.chartFactory || (global.chartFactory = {}));");
+		out.println(
+				"var chartPluginManager = (chartFactory.chartPluginManager || (chartFactory.chartPluginManager = {}));");
 		out.println("chartPluginManager.plugins = (chartPluginManager.plugins || {});");
+
+		out.println();
+		out.println("//@deprecated 兼容1.8.1版本的window.chartPluginManager变量名，未来版本会移除");
+		out.println("global.chartPluginManager = chartPluginManager;");
 
 		out.println();
 		out.println("chartPluginManager.get = function(id){ return this.plugins[id]; };");
