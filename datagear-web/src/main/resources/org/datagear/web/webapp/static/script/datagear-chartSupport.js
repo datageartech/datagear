@@ -339,8 +339,15 @@
 		return this.getChartOriginalDataInfoForRange(chart, echartsEventParams.seriesIndex, echartsEventParams.dataIndex);
 	}
 	
-	chartSupport.bindChartEventHandlerDelegationEcharts = function(chart, eventType, chartEventHanlder, echartsEventHandler)
+	chartSupport.bindChartEventHandlerDelegationEcharts = function(chart, eventType, chartEventHanlder, chartEventDataSetter)
 	{
+		var echartsEventHandler = function(params)
+		{
+			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
+			chartEventDataSetter(chart, chartEvent, params);
+			chartEventHanlder.call(chart, chartEvent);
+		};
+		
 		chartFactory.bindChartEventHandlerDelegation(chart, eventType, chartEventHanlder, echartsEventHandler,
 				chartSupport.chartEventDelegationEventBinderEcharts);
 	};
@@ -518,14 +525,8 @@
 	
 	chartSupport.lineOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.lineSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.lineSetChartEventData);
 	};
 	
 	chartSupport.lineOff = function(chart, eventType, handler)
@@ -688,14 +689,8 @@
 	
 	chartSupport.barOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.barSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.barSetChartEventData);
 	};
 	
 	chartSupport.barOff = function(chart, eventType, handler)
@@ -806,14 +801,8 @@
 	
 	chartSupport.pieOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.pieSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.pieSetChartEventData);
 	};
 	
 	chartSupport.pieOff = function(chart, eventType, handler)
@@ -904,14 +893,8 @@
 
 	chartSupport.gaugeOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.gaugeSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.gaugeSetChartEventData);
 	};
 	
 	chartSupport.gaugeOff = function(chart, eventType, handler)
@@ -1079,14 +1062,8 @@
 
 	chartSupport.scatterOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.scatterSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.scatterSetChartEventData);
 	};
 	
 	chartSupport.scatterOff = function(chart, eventType, handler)
@@ -1232,14 +1209,8 @@
 
 	chartSupport.scatterCoordOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.scatterCoordSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.scatterCoordSetChartEventData);
 	};
 	
 	chartSupport.scatterCoordOff = function(chart, eventType, handler)
@@ -1425,14 +1396,8 @@
 
 	chartSupport.radarOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.radarSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.radarSetChartEventData);
 	};
 	
 	chartSupport.radarOff = function(chart, eventType, handler)
@@ -1574,14 +1539,8 @@
 
 	chartSupport.funnelOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.funnelSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.funnelSetChartEventData);
 	};
 	
 	chartSupport.funnelOff = function(chart, eventType, handler)
@@ -1779,14 +1738,8 @@
 
 	chartSupport.mapOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.mapSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.mapSetChartEventData);
 	};
 	
 	chartSupport.mapOff = function(chart, eventType, handler)
@@ -1935,14 +1888,8 @@
 
 	chartSupport.mapScatterOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.mapScatterSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.mapScatterSetChartEventData);
 	};
 	
 	chartSupport.mapScatterOff = function(chart, eventType, handler)
@@ -2175,14 +2122,8 @@
 	
 	chartSupport.mapGraphOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.mapGraphSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.mapGraphSetChartEventData);
 	};
 	
 	chartSupport.mapGraphOff = function(chart, eventType, handler)
@@ -2338,14 +2279,8 @@
 	
 	chartSupport.candlestickOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.candlestickSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.candlestickSetChartEventData);
 	};
 	
 	chartSupport.candlestickOff = function(chart, eventType, handler)
@@ -2510,14 +2445,8 @@
 
 	chartSupport.heatmapOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.heatmapSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.heatmapSetChartEventData);
 	};
 	
 	chartSupport.heatmapOff = function(chart, eventType, handler)
@@ -2613,14 +2542,8 @@
 
 	chartSupport.treeOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.treeSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.treeSetChartEventData);
 	};
 	
 	chartSupport.treeOff = function(chart, eventType, handler)
@@ -2696,14 +2619,8 @@
 
 	chartSupport.treemapOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.treemapSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.treemapSetChartEventData);
 	};
 	
 	chartSupport.treemapOff = function(chart, eventType, handler)
@@ -2786,14 +2703,8 @@
 
 	chartSupport.sunburstOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.sunburstSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.sunburstSetChartEventData);
 	};
 	
 	chartSupport.sunburstOff = function(chart, eventType, handler)
@@ -3074,14 +2985,7 @@
 
 	chartSupport.sankeyOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.sankeySetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, chartSupport.sankeySetChartEventData);
 	};
 	
 	chartSupport.sankeyOff = function(chart, eventType, handler)
@@ -3348,14 +3252,8 @@
 
 	chartSupport.graphOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.graphSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.graphSetChartEventData);
 	};
 	
 	chartSupport.graphOff = function(chart, eventType, handler)
@@ -3548,14 +3446,8 @@
 	
 	chartSupport.wordcloudOn = function(chart, eventType, handler)
 	{
-		var echartsHandler = function(params)
-		{
-			var chartEvent = chartFactory.newChartEventEcharts(eventType, params);
-			chartSupport.wordcloudSetChartEventData(chart, chartEvent, params);
-			handler.call(chart, chartEvent);
-		};
-		
-		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler, echartsHandler);
+		chartSupport.bindChartEventHandlerDelegationEcharts(chart, eventType, handler,
+				chartSupport.wordcloudSetChartEventData);
 	};
 	
 	chartSupport.wordcloudOff = function(chart, eventType, handler)
@@ -3762,7 +3654,7 @@
 				for(var j =0; j< result.datas.length; j++)
 				{
 					var data = $.extend({}, result.datas[j]);
-					chartSupport.setChartOriginalDataInfo(data, i);
+					chartSupport.setChartOriginalDataInfo(data, i, j);
 					datas.push(data);
 				}
 			}
