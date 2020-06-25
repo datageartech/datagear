@@ -415,7 +415,7 @@
 		var vps = chart.dataSetPropertiesOfSign(chartDataSet, valueSign);
 		var stack = (options && options.stack);//是否堆叠
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -445,11 +445,12 @@
 				data: []
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.lineUpdate = function(chart, results)
@@ -564,7 +565,7 @@
 		var stack = (options && options.stack);//是否堆叠
 		var horizontal = (options && options.horizontal);//是否横向
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -595,7 +596,8 @@
 				data: []
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		if(horizontal)
 		{
@@ -606,7 +608,7 @@
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.barUpdate = function(chart, results)
@@ -724,7 +726,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -749,11 +751,12 @@
 				}
 			]
 		},
-		options));
+		chart.options(),
+		options);
 
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.pieUpdate = function(chart, results)
@@ -834,7 +837,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { value: valueSign, min: minSign, max: maxSign });
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -853,9 +856,10 @@
 				}
 			]
 		},
-		options));
+		chart.options(),
+		options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.gaugeUpdate = function(chart, results)
@@ -931,7 +935,7 @@
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -965,11 +969,12 @@
 				data: []
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.scatterUpdate = function(chart, results)
@@ -1099,7 +1104,7 @@
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		var vp = chart.dataSetPropertyOfSign(chartDataSet, valueSign);
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -1133,11 +1138,12 @@
 				data: []
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.scatterCoordUpdate = function(chart, results)
@@ -1296,7 +1302,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { item: itemSign, name: nameSign, value: valueSign, max: maxSign });
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -1322,11 +1328,12 @@
 				data: []
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.radarUpdate = function(chart, results)
@@ -1441,7 +1448,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -1474,11 +1481,12 @@
 		        }
 			]
 		},
-		options));
+		chart.options(),
+		options);
 
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.funnelUpdate = function(chart, results)
@@ -1583,14 +1591,14 @@
 		
 		if(chart.echartsMapRegistered(map))
 		{
-			chart.echartsInit(options, false);
+			chart.echartsInit(options);
 			chart.statusRendered(true);
 		}
 		else
 		{
 			chart.echartsMapLoad(map, function()
 			{
-				chart.echartsInit(options, false);
+				chart.echartsInit(options);
 				chart.statusRendered(true);
 			});
 		}
@@ -1629,14 +1637,14 @@
 		
 		if(!map || chart.echartsMapRegistered(map))
 		{
-			chart.echartsOptions(updateOptions, false);
+			chart.echartsOptions(updateOptions);
 			chart.statusUpdated(true);
 		}
 		else
 		{
 			chart.echartsMapLoad(map, function()
 			{
-				chart.echartsOptions(updateOptions, false);
+				chart.echartsOptions(updateOptions);
 				chart.statusUpdated(true);
 			});
 		}
@@ -1646,7 +1654,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -1677,7 +1685,8 @@
 				}
 			]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.mapInitChart(chart, options);
 	};
@@ -1725,11 +1734,10 @@
 		}
 		
 		var options = { visualMap: {min, min, max: max}, series: [ {name: seriesName, data: seriesData } ] };
-		options = chart.optionsModified(options);
 		
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
-
+	
 	chartSupport.mapResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
@@ -1776,7 +1784,7 @@
 	{
 		chartSupport.chartSignNameMap(chart, { name: nameSign, longitude: longitudeSign, latitude: latitudeSign, value: valueSign });
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -1808,7 +1816,8 @@
 				}
 			]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.mapInitChart(chart, options);
 	};
@@ -1875,7 +1884,6 @@
 		}
 
 		var options = { legend: {data: legendData}, series: series };
-		options = chart.optionsModified(options);
 		
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
@@ -1933,7 +1941,7 @@
 		
 		var chartDataSet = chart.chartDataSetFirst();
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -1963,7 +1971,8 @@
 				label: { position: "right" }
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.mapInitChart(chart, options);
 	};
@@ -2107,7 +2116,6 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
-		options = chart.optionsModified(options);
 		
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 		
@@ -2198,7 +2206,7 @@
 		var chartDataSet = chart.chartDataSetFirst();
 		var np = chart.dataSetPropertyOfSign(chartDataSet, nameSign);
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -2230,11 +2238,12 @@
 				data: []
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.candlestickUpdate = function(chart, results)
@@ -2325,7 +2334,7 @@
 		var chartEle = chart.elementJquery();
 		var vmItemWidth = parseInt(chartEle.height()/20);
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -2374,11 +2383,12 @@
 				data: []
 			}]
 		},
-		options));
-
+		chart.options(),
+		options);
+		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.heatmapUpdate = function(chart, results)
@@ -2480,7 +2490,7 @@
 		
 		var chartDataSet = chart.chartDataSetFirst();
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -2516,11 +2526,12 @@
                 expandAndCollapse: true
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.treeUpdate = function(chart, results)
@@ -2578,7 +2589,7 @@
 		
 		var chartDataSet = chart.chartDataSetFirst();
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -2593,11 +2604,12 @@
 				data: []
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.treemapUpdate = function(chart, results)
@@ -2662,7 +2674,7 @@
 		
 		var chartDataSet = chart.chartDataSetFirst();
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -2677,11 +2689,12 @@
 				data: []
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.sunburstUpdate = function(chart, results)
@@ -2850,7 +2863,7 @@
 		
 		var chartDataSet = chart.chartDataSetFirst();
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -2872,7 +2885,8 @@
 		        focusNodeAdjacency: 'allEdges'
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		//自适应条目宽度和间隔
 		var chartEle = chart.elementJquery();
@@ -2898,7 +2912,7 @@
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.sankeyUpdate = function(chart, results)
@@ -3049,7 +3063,7 @@
 		
 		var chartDataSet = chart.chartDataSetFirst();
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -3079,11 +3093,12 @@
                 bottom: "12%",
 			}]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.graphUpdate = function(chart, results)
@@ -3320,7 +3335,7 @@
 		//不支持在echarts主题中设置样式，只能在这里设置
 		var chartTheme = chart.theme();
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			title: {
 		        text: chart.nameNonNull()
@@ -3351,7 +3366,8 @@
 				}
 			]
 		},
-		options));
+		chart.options(),
+		options);
 		
 		var chartEle = chart.elementJquery();
 		
@@ -3386,7 +3402,7 @@
 		
 		chartSupport.initOptions(chart, options);
 		
-		chart.echartsInit(options, false);
+		chart.echartsInit(options);
 	};
 	
 	chartSupport.wordcloudUpdate = function(chart, results)
@@ -3503,7 +3519,7 @@
 		chartEle.addClass("dg-chart-table");
 		
 		//表格图表样式设置项
-		var chartOptions = chart.options($.extend(true,
+		var chartOptions = $.extend(true,
 		{
 			//标题样式
 			"title":
@@ -3551,7 +3567,8 @@
 				}
 			}
 		},
-		options));
+		chart.options(),
+		options);
 		
 		options = $.extend({}, chartOptions,
 		{
@@ -3820,7 +3837,7 @@
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-label");
 		
-		options = chart.options($.extend(true,
+		options = $.extend(true,
 		{
 			//是否标签值在前
 			"valueFirst": false,
@@ -3837,7 +3854,8 @@
 				}
 			}
 		},
-		options));
+		chart.options(),
+		options);
 		
 		chartSupport.initOptions(chart, options);
 	};
@@ -3848,7 +3866,6 @@
 		var options = chartSupport.initOptions(chart);
 		var valueFirst = options.valueFirst;
 		var showName = options.showName;
-		options = chart.optionsModified(options);
 		var clear = (valueFirst != options.valueFirst || showName != options.showName);
 		
 		var chartDataSets = chart.chartDataSetsNonNull();

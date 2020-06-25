@@ -14,17 +14,17 @@
  *   echarts.js
  * 
  * 
- * 此图表工厂支持为<body>元素、<div>图表元素添加"dg-chart-options"属性来设置图表选项，格式为：
+ * 此图表工厂支持为<body>元素、图表元素添加"dg-chart-options"属性来设置图表选项，格式为：
  * { title: { show: false },... }
  * 
- * 此图表工厂支持为<body>元素、<div>图表元素添加"dg-chart-theme"属性来设置图表主题，格式为：
+ * 此图表工厂支持为<body>元素、图表元素添加"dg-chart-theme"属性来设置图表主题，格式为：
  * { color:'...', backgroundColor:'...', ... }
  * 
- * 此图表工厂支持为<body>元素、<div>图表元素添加"dg-chart-listener"属性来设置图表监听器，格式参考chartBase.listener函数参数说明。
+ * 此图表工厂支持为<body>元素、图表元素添加"dg-chart-listener"属性来设置图表监听器，格式参考chartBase.listener函数参数说明。
  * 
- * 此图表工厂支持为<div>图表元素添加"dg-chart-map"属性来设置地图图表的地图名。
+ * 此图表工厂支持为图表元素添加"dg-chart-map"属性来设置地图图表的地图名。
  * 
- * 此图表工厂支持为<body>元素、<div>图表元素添加"dg-echarts-theme"属性来设置图表Echarts主题名。
+ * 此图表工厂支持为<body>元素、图表元素添加"dg-echarts-theme"属性来设置图表Echarts主题名。
  * 
  * 此图表工厂和dashboardFactory.js一起可以支持异步图表插件，示例如下：
  * {
@@ -152,15 +152,98 @@
 	 */
 	chartBase.init = function()
 	{
+		this.initOptions();
+		this.initTheme();
 		this.initListener();
+		this.initMap();
+		this.initEchartsThemeName();
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
 	};
 	
 	/**
+	 * 初始化图表设置项。
+	 * 此方法依次从<body>元素、图表元素的"dg-chart-options"属性读取、合并图表设置项。
+	 */
+	chartBase.initOptions = function()
+	{
+		var options = {};
+		
+		var $ele = this.elementJquery();
+		
+		var bodyOptions = $(document.body).attr("dg-chart-options");
+		var eleOptions = $ele.attr("dg-chart-options");
+		
+		if(bodyOptions)
+			options = $.extend(true, options, chartFactory.evalSilently(bodyOptions, {}));
+		
+		if(eleOptions)
+			options = $.extend(true, options, chartFactory.evalSilently(eleOptions, {}));
+		
+		this.options(options);
+	};
+	
+	/**
+	 * 初始化图表主题。
+	 * 此方法依次从图表renderContext.chartTheme、<body>元素、图表元素的"dg-chart-theme"属性读取、合并图表主题。
+	 * 
+	 * @return {...}
+	 */
+	chartBase.initTheme = function()
+	{
+		var theme = chartFactory.GLOBAL_CHART_THEME;
+		
+		if(!theme)
+		{
+			theme = this.renderContextAttr(chartFactory.renderContextAttrs.chartTheme);
+			
+			if(!theme)
+				throw new Error("The chart render context 's ["+chartFactory.renderContextAttrs.chartTheme+"] must be defined");
+			
+			theme = $.extend(true, {}, theme);
+			
+			var bodyThemeValue = $(document.body).attr("dg-chart-theme");
+			if(bodyThemeValue)
+			{
+				var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
+				
+				//兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
+				if(bodyThemeObj.colorSecond)
+				{
+					bodyThemeObj.color = bodyThemeObj.colorSecond;
+					bodyThemeObj.titleColor = bodyThemeObj.color;
+					bodyThemeObj.legendColor = bodyThemeObj.colorSecond;
+				}
+				
+				//允许自定义ChartTheme不设置actualBackgroundColor
+				if(!bodyThemeObj.actualBackgroundColor && bodyThemeObj.backgroundColor != "transparent")
+					bodyThemeObj.actualBackgroundColor = bodyThemeObj.backgroundColor;
+				
+				theme = $.extend(true, theme, bodyThemeObj);
+			}
+			
+			chartFactory.GLOBAL_CHART_THEME = theme;
+		}
+		
+		var eleThemeValue = this.elementJquery().attr("dg-chart-theme");
+		if(eleThemeValue)
+		{
+			var eleThemeObj = chartFactory.evalSilently(eleThemeValue, {});
+			
+			//允许自定义ChartTheme不设置actualBackgroundColor
+			if(!eleThemeObj.actualBackgroundColor && eleThemeObj.backgroundColor != "transparent")
+				eleThemeObj.actualBackgroundColor = eleThemeObj.backgroundColor;
+			
+			theme = $.extend(true, {}, theme, eleThemeObj);
+		}
+		
+		this.theme(theme);
+	};
+	
+	/**
 	 * 初始化图表监听器。
-	 * 此方法依次从<div>图表元素、<body>元素的"dg-chart-listener"属性获取监听器对象。
+	 * 此方法依次从图表元素、<body>元素的"dg-chart-listener"属性获取监听器对象。
 	 */
 	chartBase.initListener = function()
 	{
@@ -177,6 +260,60 @@
 			if(listener)
 				this.listener(listener);
 		}
+	};
+	
+	/**
+	 * 初始化图表的地图名。
+	 * 此方法从图表元素的"dg-chart-map"属性获取图表地图名。
+	 */
+	chartBase.initMap = function()
+	{
+		var map = this.elementJquery().attr("dg-chart-map");
+		
+		if(map)
+			this.map(map);
+	};
+	
+	/**
+	 * 初始化图表的echarts主题名。
+	 * 此方法依次从图表元素、<body>元素的"dg-echarts-theme"属性获取echarts主题名。
+	 */
+	chartBase.initEchartsThemeName = function()
+	{
+		var themeName = this.elementJquery().attr("dg-echarts-theme");
+		
+		if(!themeName)
+			themeName = $(document.body).attr("dg-echarts-theme");
+		
+		this.echartsThemeName(themeName);
+	};
+	
+	/**
+	 * 获取/设置图表设置项。
+	 * 图表设置项格式为：{ ... }
+	 * 
+	 * @param options 可选，要设置的图表设置项，没有则执行获取操作
+	 */
+	chartBase.options = function(options)
+	{
+		if(options === undefined)
+			return this._options;
+		else
+			this._options = options;
+	};
+	
+	/**
+	 * 获取/设置图表主题。
+	 * 图表主题格式参考：org.datagear.analysis.ChartTheme
+	 * 
+	 * @param theme 可选，要设置的图表主题，没有则执行获取操作
+	 */
+	chartBase.theme = function(theme)
+	{
+		if(theme === undefined)
+			return this._theme;
+		else
+			this._theme = theme;
 	};
 	
 	/**
@@ -201,6 +338,34 @@
 			return this._listener;
 		else
 			this._listener = listener;
+	};
+	
+	/**
+	 * 获取/设置图表地图名。
+	 * 此方法用于为地图类图表提供支持，如果不是地图类图表，则不必设置此项。
+	 * 
+	 * @param map 可选，要设置的地图名，没有则执行获取操作
+	 */
+	chartBase.map = function(map)
+	{
+		if(map === undefined)
+			return this._map;
+		else
+			this._map = map;
+	};
+	
+	/**
+	 * 获取/设置图表的echarts主题名。
+	 * 此方法用于为echarts图表提供支持，如果不是echarts图表，则不必设置此项。
+	 * 
+	 * @param themeName 可选，要设置的且已注册的echarts主题名，没有则执行获取操作
+	 */
+	chartBase.echartsThemeName = function(themeName)
+	{
+		if(themeName === undefined)
+			return this._echartsThemeName;
+		else
+			this._echartsThemeName = themeName;
 	};
 	
 	/**
@@ -720,140 +885,6 @@
 		
 		return -1;
 	},
-
-	/**
-	 * 获取图表设置项。
-	 * 它读取图表DOM元素和body元素上的"dg-chart-options"属性定义的图表设置项。
-	 * 
-	 * @param options 初始设置项，可选，默认为：{}
-	 * @return {...}
-	 */
-	chartBase.options = function(options)
-	{
-		options = (options || {});
-		
-		var $ele = this.elementJquery();
-		
-		var optsStrGlobal = ($(document.body).attr("dg-chart-options") || "");
-		var optsStr = ($ele.attr("dg-chart-options") || "");
-		
-		if(optsStrGlobal)
-			options = $.extend(true, options, chartFactory.evalSilently(optsStrGlobal, {}));
-		
-		if(optsStr)
-			options = $.extend(true, options, chartFactory.evalSilently(optsStr, {}));
-		
-		this._prevReadOptionsGlobal = optsStrGlobal;
-		this._prevReadOptions = optsStr;
-		
-		return options;
-	};
-	
-	/**
-	 * 获取更改的图表设置项。
-	 * 它检查图表DOM元素和body元素上的"dg-chart-options"属性值，如果有更改，才读取，否则，返回空对象{}或者options。
-	 * 
-	 * @param options 初始设置项，可选，默认为：{}
-	 * @return {...}
-	 */
-	chartBase.optionsModified = function(options)
-	{
-		options = (options || {});
-		
-		var $ele = this.elementJquery();
-		
-		var optsStrGlobal = ($(document.body).attr("dg-chart-options") || "");
-		var optsStr = ($ele.attr("dg-chart-options") || "");
-		
-		if(this._prevReadOptionsGlobal != optsStrGlobal)
-		{
-			if(optsStrGlobal)
-				options = $.extend(true, options, chartFactory.evalSilently(optsStrGlobal, {}));
-			this._prevReadOptionsGlobal = optsStrGlobal;
-		}
-		
-		if(this._prevReadOptions != optsStr)
-		{
-			if(optsStr)
-				options = $.extend(true, options, chartFactory.evalSilently(optsStr, {}));
-			this._prevReadOptions = optsStr;
-		}
-		
-		return options;
-	};
-	
-	/**
-	 * 获取图表主题。
-	 * 它会读取body元素、图表div元素上的"dg-chart-theme"属性值作为自定义主题。
-	 * 
-	 * @return {...}
-	 */
-	chartBase.theme = function()
-	{
-		var chartTheme = this._chartTheme;
-		
-		if(chartTheme)
-			return chartTheme;
-		
-		chartTheme = chartFactory._GLOBAL_CHART_THEME;
-		
-		if(!chartTheme)
-		{
-			chartTheme = this.renderContextAttr(chartFactory.renderContextAttrs.chartTheme);
-			
-			var bodyThemeValue = $(document.body).attr("dg-chart-theme");
-			if(bodyThemeValue)
-			{
-				var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
-				
-				//兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
-				if(bodyThemeObj.colorSecond)
-				{
-					bodyThemeObj.color = bodyThemeObj.colorSecond;
-					bodyThemeObj.titleColor = bodyThemeObj.color;
-					bodyThemeObj.legendColor = bodyThemeObj.colorSecond;
-				}
-				
-				//允许自定义ChartTheme不设置actualBackgroundColor
-				if(!bodyThemeObj.actualBackgroundColor && bodyThemeObj.backgroundColor != "transparent")
-					bodyThemeObj.actualBackgroundColor = bodyThemeObj.backgroundColor;
-				
-				chartTheme = $.extend(true, {}, chartTheme, bodyThemeObj);
-			}
-			
-			chartFactory._GLOBAL_CHART_THEME = chartTheme;
-		}
-		
-		var eleThemeValue = this.elementJquery().attr("dg-chart-theme");
-		
-		if(eleThemeValue)
-		{
-			var eleThemeObj = chartFactory.evalSilently(eleThemeValue, {});
-			
-			//允许自定义ChartTheme不设置actualBackgroundColor
-			if(!eleThemeObj.actualBackgroundColor && eleThemeObj.backgroundColor != "transparent")
-				eleThemeObj.actualBackgroundColor = eleThemeObj.backgroundColor;
-			
-			chartTheme = $.extend(true, {}, chartTheme, eleThemeObj);
-		}
-		
-		this._chartTheme = chartTheme;
-		
-		return chartTheme;
-	};
-	
-	/**
-	 * 获取/设置图表元素上的"dg-chart-map"属性值。
-	 * 
-	 * @param value 设置操作时的值
-	 */
-	chartBase.map = function(value)
-	{
-		if(value === undefined)
-			return this.elementJquery().attr("dg-chart-map");
-		else
-			this.elementJquery().attr("dg-chart-map", value);
-	};
 	
 	/**
 	 * 获取/设置图表渲染上下文的属性值。
@@ -1250,18 +1281,14 @@
 	};
 	
 	/**
-	 * 初始化Echarts对象。
+	 * Echarts图表支持函数：初始化图表的Echarts对象。
 	 * 
 	 * @param options echarts设置项
-	 * @param customized 是否为options扩展自定义设置项，可选，默认为true
 	 * @return echarts实例对象
 	 */
-	chartBase.echartsInit = function(options, customized)
+	chartBase.echartsInit = function(options)
 	{
-		if(customized != false)
-			options = this.options(options);
-		
-		var instance = echarts.init(this.element(), this.echartsThemeName());
+		var instance = echarts.init(this.element(), this.echartsGetRegisteredThemeName());
 		instance.setOption(options);
 		
 		this.echartsInstance(instance);
@@ -1270,9 +1297,9 @@
 	};
 	
 	/**
-	 * 获取/设置echarts实例对象。
+	 * Echarts图表支持函数：获取/设置图表的Echarts实例对象。
 	 * 
-	 * @param instance 要设置的echarts实例
+	 * @param instance 可选，要设置的echarts实例，不设置则执行获取操作
 	 */
 	chartBase.echartsInstance = function(instance)
 	{
@@ -1283,74 +1310,50 @@
 	};
 	
 	/**
-	 * 设置echarts实例的选项值。
+	 * Echarts图表支持函数：设置图表的Echarts实例的选项值。
 	 * 
 	 * @param options
-	 * @param checkModified 是否检查并合并元素上的配置项变更，默认为true
 	 */
-	chartBase.echartsOptions = function(options, checkModified)
+	chartBase.echartsOptions = function(options)
 	{
-		if(checkModified != false)
-			options = this.optionsModified(options);
-		
 		var instance = this.echartsInstance();
 		instance.setOption(options);
 	};
 	
 	/**
-	 * 获取图表的echarts主题名。
-	 * 它读取body元素、图表div元素上的"dg-echarts-theme"属性值，作为当前echarts主题名。
+	 * Echarts图表支持函数：获取用于此图表的且已注册的Echarts主题名。
 	 */
-	chartBase.echartsThemeName = function()
+	chartBase.echartsGetRegisteredThemeName = function()
 	{
-		var themeName = this._echartsThemeName;
+		var themeName = this.echartsThemeName();
 		
-		if(themeName)
-			return themeName;
-		
-		themeName = this.elementJquery().attr("dg-echarts-theme");
-		
-		if(!themeName)
-			themeName = $(document.body).attr("dg-echarts-theme");
-		
-		//无自定义echarts主题，则从ChartTheme构建
+		//从ChartTheme构建echarts主题
 		if(!themeName)
 		{
 			var chartTheme = this.theme();
 			
-			//全局Echarts主题
-			if(chartTheme === chartFactory._GLOBAL_CHART_THEME)
+			if(!chartTheme._registeredEchartsThemeName)
 			{
-				themeName = "globalThemeFromChartTheme";
-				
-				if(!chartFactory._GLOBAL_ECHARTS_THEME_REGISTERED)
+				var seq = chartFactory._registeredEchartsThemeNameSeqNext;
+				if(seq == null)
 				{
-					var globalEchartsTheme = this.echartsBuildTheme(chartTheme);
-					echarts.registerTheme(themeName, globalEchartsTheme);
-					chartFactory._GLOBAL_ECHARTS_THEME_REGISTERED = true;
+					seq = 0;
+					chartFactory._registeredEchartsThemeNameSeqNext = seq + 1;
 				}
-			}
-			//图表级Echarts主题
-			else
-			{
-				themeName = this.elementId+"ThemeFromChartTheme";
 				
-				if(!this._echartsThemeRegistered)
-				{
-					var localEchartsTheme = this.echartsBuildTheme(chartTheme);
-					echarts.registerTheme(themeName, localEchartsTheme);
-					this._echartsThemeRegistered = true;
-				}
+				chartTheme._registeredEchartsThemeName = "themeNameByChartTheme-" + seq;
+				var echartsTheme = chartFactory.buildEchartsTheme(chartTheme);
+				echarts.registerTheme(chartTheme._registeredEchartsThemeName, echartsTheme);
 			}
+			
+			themeName = chartTheme._registeredEchartsThemeName;
 		}
 		
-		this._echartsThemeName = themeName;
-	    
 	    return themeName;
 	};
 	
 	/**
-	 * 指定名称的echarts地图是否已经注册过而无需再加载。
+	 * Echarts图表支持函数：判断指定名称的echarts地图是否已经注册过而无需再加载。
 	 * 
 	 * @param name echarts地图名称
 	 */
@@ -1360,7 +1363,7 @@
 	};
 	
 	/**
-	 * 获取echarts指定名称的地图JSON地址，如果找不到，则直接将name作为地址返回。
+	 * Echarts图表支持函数：获取echarts指定名称的地图JSON地址，如果找不到，则直接将name作为地址返回。
 	 * 
 	 * @param name echarts地图名称
 	 */
@@ -1382,12 +1385,12 @@
 	};
 	
 	/**
-	 * 加载指定名称的echarts地图JSON，并在完成后执行回调函数。
+	 * Echarts图表支持函数：加载指定名称的echarts地图JSON，并在完成后执行回调函数。
 	 * 注意：如果地图图表插件的render/update函数中调用此函数，应该首先设置插件的asyncRender/asyncUpdate，
 	 * 并在callback中调用chart.statusPreUpdate()/chart.statusUpdated()，具体参考此文件顶部的注释。
 	 * 
 	 * @param name echarts地图名称
-	 * @param callback 完成回调函数：function(){ ... }
+	 * @param callback 完成回调函数：function(name){ ... }
 	 */
 	chartBase.echartsMapLoad = function(name, callback)
 	{
@@ -1397,18 +1400,8 @@
 			echarts.registerMap(name, geoJson);
 			
 			if(callback)
-				callback();
+				callback(name);
 		});
-	};
-
-	/**
-	 * 构建echarts主题。
-	 * 
-	 * @param chartTheme 图表主题
-	 */
-	chartBase.echartsBuildTheme = function(chartTheme)
-	{
-		return chartFactory.buildEchartsTheme(chartTheme);
 	};
 	
 	//----------------------------------------
