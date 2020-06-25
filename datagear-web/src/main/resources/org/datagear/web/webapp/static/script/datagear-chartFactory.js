@@ -473,7 +473,7 @@
 	/**
 	 * 绑定"click"事件处理函数。
 	 * 
-	 * @param handler 事件处理函数：function(data){}
+	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
 	chartBase.onClick = function(handler)
 	{
@@ -483,7 +483,7 @@
 	/**
 	 * 绑定"dblclick"事件处理函数。
 	 * 
-	 * @param handler 事件处理函数：function(data){}
+	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
 	chartBase.onDblclick = function(handler)
 	{
@@ -493,7 +493,7 @@
 	/**
 	 * 绑定"mousedown"事件处理函数。
 	 * 
-	 * @param handler 事件处理函数：function(data){}
+	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
 	chartBase.onMousedown = function(handler)
 	{
@@ -503,7 +503,7 @@
 	/**
 	 * 绑定"mouseup"事件处理函数。
 	 * 
-	 * @param handler 事件处理函数：function(data){}
+	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
 	chartBase.onMouseup = function(handler)
 	{
@@ -513,7 +513,7 @@
 	/**
 	 * 绑定"mouseover"事件处理函数。
 	 * 
-	 * @param handler 事件处理函数：function(data){}
+	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
 	chartBase.onMouseover = function(handler)
 	{
@@ -523,7 +523,7 @@
 	/**
 	 * 绑定"mouseout"事件处理函数。
 	 * 
-	 * @param handler 事件处理函数：function(data){}
+	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
 	chartBase.onMouseout = function(handler)
 	{

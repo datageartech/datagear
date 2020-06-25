@@ -366,9 +366,9 @@
 		if($chart.attr("dg-chart-disable-setting") == "true")
 			return false;
 		
-		if(global.chartForm && global.chartForm.bindChartSettingPanelEvent)
+		if(global.chartFactory.chartForm && global.chartFactory.chartForm.bindChartSettingPanelEvent)
 		{
-			global.chartForm.bindChartSettingPanelEvent(chart);
+			global.chartFactory.chartForm.bindChartSettingPanelEvent(chart);
 			return true;
 		}
 		
@@ -529,9 +529,9 @@
 	 */
 	dashboardBase.destroyChartSetting = function(chart)
 	{
-		if(global.chartForm && global.chartForm.unbindChartSettingPanelEvent)
+		if(global.chartFactory.chartForm && global.chartFactory.chartForm.unbindChartSettingPanelEvent)
 		{
-			global.chartForm.unbindChartSettingPanelEvent(chart);
+			global.chartFactory.chartForm.unbindChartSettingPanelEvent(chart);
 			return true;
 		}
 		

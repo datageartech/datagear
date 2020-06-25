@@ -356,7 +356,7 @@ readonly 是否只读操作，允许为null
 			submitText: "<@spring.message code='confirm' />",
 			yesText: "<@spring.message code='yes' />",
 			noText: "<@spring.message code='no' />",
-			paramValues: chartForm.getDataSetParamValueObj(chartForm.getDataSetParamValueForm($panel)),
+			paramValues: chartFactory.chartForm.getDataSetParamValueObj(chartFactory.chartForm.getDataSetParamValueForm($panel)),
 			render: function()
 			{
 				$("select, input", this).addClass("ui-widget ui-widget-content");
@@ -365,7 +365,7 @@ readonly 是否只读操作，允许为null
 		},
 		formOptions);
 		
-		chartForm.renderDataSetParamValueForm($(".sql-param-value-panel-content", $panel),
+		chartFactory.chartForm.renderDataSetParamValueForm($(".sql-param-value-panel-content", $panel),
 				po.getFormDataSetParams(), formOptions);
 		
 		$panel.show();
@@ -409,7 +409,7 @@ readonly 是否只读操作，允许为null
 					po.sqlPreviewOptions.schemaId = po.getDataSetSchemaId();
 					po.sqlPreviewOptions.sql = po.sqlEditor.getValue();
 					po.sqlPreviewOptions.dataSetParams = po.getFormDataSetParams();
-					po.sqlPreviewOptions.paramValues = chartForm.getDataSetParamValueObj(this);
+					po.sqlPreviewOptions.paramValues = chartFactory.chartForm.getDataSetParamValueObj(this);
 					po.sqlPreviewOptions.startRow = 1;
 					po.sqlPreview();
 				}
@@ -467,7 +467,7 @@ readonly 是否只读操作，允许为null
 			{
 				submit: function()
 				{
-					var paramValues = chartForm.getDataSetParamValueObj(this);
+					var paramValues = chartFactory.chartForm.getDataSetParamValueObj(this);
 					
 					var data =
 					{

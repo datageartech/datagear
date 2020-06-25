@@ -4,7 +4,7 @@
 
 /**
  * 图表表单库。
- * 全局变量名：window.chartForm。
+ * 全局变量名：window.chartFactory.chartForm。
  * 
  * 加载时依赖：
  *   无
@@ -15,7 +15,11 @@
  */
 (function(global)
 {
-	var chartForm = (global.chartForm || (global.chartForm = {}));
+	var chartFactory = (global.chartFactory || (global.chartFactory = {}));
+	var chartForm = (chartFactory.chartForm || (chartFactory.chartForm = {}));
+	
+	//@deprecated 兼容1.8.1版本的window.chartForm变量名，未来版本会移除
+	global.chartForm = chartForm;
 	
 	//org.datagear.analysis.DataSetParam.DataType
 	chartForm.DataSetParamDataType =
@@ -458,7 +462,7 @@
 			$widget.css("-webkit-box-shadow", "0px 0px 6px "+shadowColor);
 		}
 	};
-
+	
 	chartForm.setPrimaryButtonStyle = function($button, chart)
 	{
 		var chartFactory = global.chartFactory;
