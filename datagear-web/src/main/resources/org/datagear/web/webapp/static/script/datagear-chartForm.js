@@ -95,7 +95,7 @@
 				var $optFalse = $("<option value='false' />").html(options.noText).appendTo($input);
 				
 				var value = paramValues[dsp.name];
-				var $optSelected = (!value ? $optNull : ((value+"") == "false" ? $optFalse : $optTrue));
+				var $optSelected = (value == null ? $optNull : ((value+"") == "false" ? $optFalse : $optTrue));
 				$optSelected.attr("selected", "selected");
 			}
 			else
