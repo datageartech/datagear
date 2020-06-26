@@ -1578,20 +1578,23 @@
 	
 	chartSupport.mapInitChart = function(chart, options)
 	{
+		//坐标系地图
 		var map = (options.geo ? options.geo.map : undefined);
+		
+		//数据系列地图
 		if(map == undefined)
 			map = (options.series && options.series.length > 0 ? options.series[0].map : undefined);
 		
 		if(!map)
 			throw new Error("[map] option must be set");
 		
-		chart.extValue("mapPresetMap", map);
-		chart.map(map);
 		chartSupport.initOptions(chart, options);
 		
 		if(chart.echartsMapRegistered(map))
 		{
 			chart.echartsInit(options);
+			chart.extValue("presetMap", map);
+			
 			chart.statusRendered(true);
 		}
 		else
@@ -1599,6 +1602,8 @@
 			chart.echartsMapLoad(map, function()
 			{
 				chart.echartsInit(options);
+				chart.extValue("presetMap", map);
+				
 				chart.statusRendered(true);
 			});
 		}
@@ -1617,27 +1622,41 @@
 		
 		if(!map)
 		{
-			var eleMap = chart.map();
-			if(eleMap && eleMap != chart.extValue("mapPresetMap"))
+			var currentMap = chart.map();
+			var presetMap = chart.extValue("presetMap");
+			
+			//通过chart.map(...)设置了新的地图
+			if(currentMap && currentMap != presetMap)
 			{
 				if(isGeo)
-					updateOptions.geo.map = eleMap;
+				{
+					if(!updateOptions.geo)
+						updateOptions.geo = {};
+					
+					updateOptions.geo.map = currentMap;
+				}
 				else
-					updateOptions.series[0].map = eleMap;
+				{
+					if(!updateOptions.series)
+						updateOptions.series = [];
+					if(updateOptions.series.length == 0)
+						updateOptions.series[0] = {};
+					
+					updateOptions.series[0].map = currentMap;
+				}
 				
-				map = eleMap;
+				map = currentMap;
 			}
 		}
 		
-		if(map)
-		{
-			chart.extValue("mapPresetMap", map);
-			chart.map(map);
-		}
-		
+		//没有更新地图、或者更新的地图已注册
 		if(!map || chart.echartsMapRegistered(map))
 		{
 			chart.echartsOptions(updateOptions);
+			
+			if(map)
+				chart.extValue("presetMap", map);
+			
 			chart.statusUpdated(true);
 		}
 		else
@@ -1645,6 +1664,8 @@
 			chart.echartsMapLoad(map, function()
 			{
 				chart.echartsOptions(updateOptions);
+				chart.extValue("presetMap", map);
+				
 				chart.statusUpdated(true);
 			});
 		}

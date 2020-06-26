@@ -36,22 +36,22 @@
 	 */
 	dashboardFactory.init = function(dashboard)
 	{
-		this.initEchartsMapURLs();
+		this.initMapURLs();
 		$.extend(dashboard, this.dashboardBase);
 		dashboard.init();
 	};
 	
 	/**
-	 * 初始化chartFactory.echartsMapURLs。
+	 * 初始化chartFactory.mapURLs。
 	 * 它将body元素的"dg-chart-map-urls"属性值设置为自定义地图JSON地址映射表。
 	 */
-	dashboardFactory.initEchartsMapURLs = function()
+	dashboardFactory.initMapURLs = function()
 	{
 		for(var i=0; i<this.builtInEchartsMaps.length; i++)
 		{
 			var urlNames = this.builtInEchartsMaps[i];
 			for(var j=0; j<urlNames.names.length; j++)
-				global.chartFactory.echartsMapURLs[urlNames.names[j]] = this.builtInEchartsMapBaseURL + urlNames.url;
+				global.chartFactory.mapURLs[urlNames.names[j]] = this.builtInEchartsMapBaseURL + urlNames.url;
 		}
 		
 		var mapUrls = $(document.body).attr("dg-chart-map-urls");
@@ -59,9 +59,9 @@
 		if(mapUrls)
 			mapUrls = global.chartFactory.evalSilently(mapUrls);
 		
-		$.extend(global.chartFactory.echartsMapURLs, mapUrls);
+		$.extend(global.chartFactory.mapURLs, mapUrls);
 	};
-
+	
 	/**
 	 * 更新看板数据配置，需与后台保持一致。
 	 */

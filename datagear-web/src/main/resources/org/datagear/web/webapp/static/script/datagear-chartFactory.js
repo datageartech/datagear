@@ -63,13 +63,25 @@
 	var chartBase = (chartFactory.chartBase || (chartFactory.chartBase = {}));
 	
 	/**
-	 * echarts地图名称及其JSON地址映射表，如果页面有地图图表，应该设置这个对象。
-	 * 例如：{"china" : "/map/china.json", "beijing" : "map/beijing.json", , "shanghai" : "../map/shanghai.json"}
-	 * 此对象也可以定义一个名为"mapURL"的函数属性，用于获取没有名称对应的地址，格式为：function(name){ return "..."; }
-	 * 具体参考下面的chartBase.echartsMapURL函数
+	 * 地图类图表的地图名称与其地图数据地址映射表，用于为chartBase.mapURL函数提供支持。
+	 * 此映射表默认为空，用户可以填充它以扩展地图名映射。
+	 * 映射表格式示例：
+	 * {
+	 *   //绝对路径映射
+	 *   china: "/map/china.json",
+	 *   //相对路径映射
+	 *   beijing: "map/beijing.json",
+	 *   //相对路径映射
+	 *   shanghai: "../map/shanghai.json",
+	 *   //自定义映射逻辑函数，用于处理未设置对应关系的映射
+	 *   mapURL: function(name)
+	 *   {
+	 *     return "...";
+	 *   }
+	 * }
 	 */
-	if(!chartFactory.echartsMapURLs)
-		chartFactory.echartsMapURLs = {};
+	if(!chartFactory.mapURLs)
+		chartFactory.mapURLs = {};
 	
 	/**
 	 * 图表使用的渲染上下文属性名。
@@ -1281,6 +1293,29 @@
 	};
 	
 	/**
+	 * 获取指定地图名对应的地图数据地址。
+	 * 此方法先从chartFactory.mapURLs查找对应的地址，如果没有，则直接返回name作为地址。
+	 * 
+	 * @param name 地图名称
+	 */
+	chartBase.mapURL = function(name)
+	{
+		var url = chartFactory.mapURLs[name];
+		
+		if(!url && typeof(chartFactory.mapURLs.mapURL) == "function")
+			url = chartFactory.mapURLs.mapURL(name);
+		
+		url = (url || name);
+		
+		var contextPath = this.renderContextAttr(chartFactory.renderContextAttrs.webContext).contextPath;
+		
+		if(contextPath && url.indexOf("/") == 0 && url.indexOf(contextPath) != 0)
+			url = contextPath + url;
+		
+		return url;
+	};
+	
+	/**
 	 * Echarts图表支持函数：初始化图表的Echarts对象。
 	 * 
 	 * @param options echarts设置项
@@ -1363,28 +1398,6 @@
 	};
 	
 	/**
-	 * Echarts图表支持函数：获取echarts指定名称的地图JSON地址，如果找不到，则直接将name作为地址返回。
-	 * 
-	 * @param name echarts地图名称
-	 */
-	chartBase.echartsMapURL = function(name)
-	{
-		var url = chartFactory.echartsMapURLs[name];
-		
-		if(!url && typeof(chartFactory.echartsMapURLs.mapURL) == "function")
-			url = chartFactory.echartsMapURLs.mapURL(name);
-		
-		url = (url || name);
-		
-		var contextPath = this.renderContextAttr(chartFactory.renderContextAttrs.webContext).contextPath;
-		
-		if(contextPath && url.indexOf("/") == 0 && url.indexOf(contextPath) != 0)
-			url = contextPath + url;
-		
-		return url;
-	};
-	
-	/**
 	 * Echarts图表支持函数：加载指定名称的echarts地图JSON，并在完成后执行回调函数。
 	 * 注意：如果地图图表插件的render/update函数中调用此函数，应该首先设置插件的asyncRender/asyncUpdate，
 	 * 并在callback中调用chart.statusPreUpdate()/chart.statusUpdated()，具体参考此文件顶部的注释。
@@ -1394,7 +1407,7 @@
 	 */
 	chartBase.echartsMapLoad = function(name, callback)
 	{
-		var url = this.echartsMapURL(name);
+		var url = this.mapURL(name);
 		$.getJSON(url, function(geoJson)
 		{
 			echarts.registerMap(name, geoJson);
@@ -1504,26 +1517,6 @@
 			return chartEvent["originalResultDataIndex"];
 		else
 			chartEvent["originalResultDataIndex"] = originalResultDataIndex;
-	};
-	
-	/**
-	 * 设置图表事件对象的数据原始信息属性值详细（（chartEvent.originalData））。
-	 * 
-	 * @param chartEvent 图表事件对象
-	 * @param data 数据集结果数据
-	 * @param chartDataSetIndex 图表数据集索引
-	 * @param resultDataIndex 图表数据集结果索引
-	 */
-	chartFactory.chartEventOriginalDataDetail = function(chartEvent, data, chartDataSetIndex, resultDataIndex)
-	{
-		var originalData = 
-		{
-			"data": data,
-			"chartDataSetIndex": chartDataSetIndex,
-			"resultDataIndex": resultDataIndex
-		};
-		
-		chartFactory.chartEventOriginalData(chartEvent, originalData);
 	};
 	
 	/**
