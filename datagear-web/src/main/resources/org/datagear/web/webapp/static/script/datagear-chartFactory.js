@@ -1371,12 +1371,12 @@
 			{
 				var seq = (chartFactory._registeredEchartsThemeNameSeqNext != null ?
 						chartFactory._registeredEchartsThemeNameSeqNext : 0);
+				chartFactory._registeredEchartsThemeNameSeqNext = seq + 1;
 				
 				chartTheme._registeredEchartsThemeName = "themeNameByChartTheme-" + seq;
+				
 				var echartsTheme = chartFactory.buildEchartsTheme(chartTheme);
 				echarts.registerTheme(chartTheme._registeredEchartsThemeName, echartsTheme);
-				
-				chartFactory._registeredEchartsThemeNameSeqNext = seq + 1;
 			}
 			
 			themeName = chartTheme._registeredEchartsThemeName;
