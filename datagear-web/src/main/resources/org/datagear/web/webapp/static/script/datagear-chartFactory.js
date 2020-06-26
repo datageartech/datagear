@@ -1400,7 +1400,7 @@
 	/**
 	 * Echarts图表支持函数：加载指定名称的echarts地图JSON，并在完成后执行回调函数。
 	 * 注意：如果地图图表插件的render/update函数中调用此函数，应该首先设置插件的asyncRender/asyncUpdate，
-	 * 并在callback中调用chart.statusPreUpdate()/chart.statusUpdated()，具体参考此文件顶部的注释。
+	 * 并在callback中调用chart.statusRendered(true)/chart.statusUpdated(true)，具体参考此文件顶部的注释。
 	 * 
 	 * @param name echarts地图名称
 	 * @param callback 完成回调函数：function(name){ ... }
