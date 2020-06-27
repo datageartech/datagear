@@ -804,7 +804,7 @@
 		if(chartDataSet._originalParamValues == null)
 			chartDataSet._originalParamValues = $.extend({}, chartDataSet.paramValues);
 		
-		if(value == undefined)
+		if(value === undefined)
 			return chartDataSet.paramValues[name];
 		else
 			chartDataSet.paramValues[name] = value;
@@ -826,7 +826,7 @@
 		if(chartDataSet._originalParamValues == null)
 			chartDataSet._originalParamValues = $.extend({}, chartDataSet.paramValues);
 		
-		if(paramValuesObj == undefined)
+		if(paramValuesObj === undefined)
 			return chartDataSet.paramValues;
 		else
 			chartDataSet.paramValues = paramValuesObj;
