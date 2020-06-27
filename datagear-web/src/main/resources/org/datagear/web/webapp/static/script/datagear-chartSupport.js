@@ -175,6 +175,23 @@
 	};
 	
 	/**
+	 * 查找数组中第一个不为null的元素值，如果未找到，则返回undefined。
+	 */
+	chartSupport.findNonNull = function(array)
+	{
+		if(!array)
+			return undefined;
+		
+		for(var i=0; i<array.length; i++)
+		{
+			if(array[i] != null)
+				return array[i];
+		}
+		
+		return undefined;
+	};
+	
+	/**
 	 * 销毁图表的echarts对象。
 	 */
 	chartSupport.destroyChartEcharts = function(chart)
@@ -1671,9 +1688,9 @@
 		}
 	};
 	
-	chartSupport.mapRender = function(chart, nameSign, valueSign, options)
+	chartSupport.mapRender = function(chart, nameSign, valueSign, mapSign, options)
 	{
-		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign });
+		chartSupport.chartSignNameMap(chart, { name: nameSign, value: valueSign, map: mapSign });
 		
 		options = $.extend(true,
 		{
@@ -1724,19 +1741,32 @@
 		var max = Number.MIN_VALUE;
 		var seriesName = "";
 		var seriesData = [];
-
+		var map = undefined;
+		
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
-
+			
+			//取任一不为空的地图名列值
+			if(!map)
+			{
+				var mp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.map);
+				if(mp)
+				{
+					var maps = chart.resultColumnArrays(result, mp);
+					map = chartSupport.findNonNull(maps);
+				}
+			}
+			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
 			var vp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.value);
 			var nvv = chart.resultNameValueObjects(result, np, vp);
-
+			
 			if(i == 0)
 				seriesName = dataSetName;
+			
 			seriesData = seriesData.concat(nvv);
 			
 			chartSupport.setChartOriginalDataInfoRange(chart, 0, seriesData.length - nvv.length, seriesData.length, i);
@@ -1755,6 +1785,9 @@
 		}
 		
 		var options = { visualMap: {min, min, max: max}, series: [ {name: seriesName, data: seriesData } ] };
+		
+		if(map)
+			options.series[0].map = map;
 		
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
@@ -1801,9 +1834,10 @@
 	
 	//散点值地图
 	
-	chartSupport.mapScatterRender = function(chart, nameSign, longitudeSign, latitudeSign, valueSign, options)
+	chartSupport.mapScatterRender = function(chart, nameSign, longitudeSign, latitudeSign, valueSign, mapSign, options)
 	{
-		chartSupport.chartSignNameMap(chart, { name: nameSign, longitude: longitudeSign, latitude: latitudeSign, value: valueSign });
+		chartSupport.chartSignNameMap(chart, { name: nameSign, longitude: longitudeSign, latitude: latitudeSign,
+			value: valueSign, map: mapSign });
 		
 		options = $.extend(true,
 		{
@@ -1853,6 +1887,7 @@
 		
 		var legendData = [];
 		var series = [];
+		var map = undefined;
 		
 		var min = undefined, max = undefined;
 		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
@@ -1863,6 +1898,17 @@
 			var chartDataSet = chartDataSets[i];
 			var dataSetName = chart.dataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
+			
+			//取任一不为空的地图名列值
+			if(!map)
+			{
+				var mp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.map);
+				if(mp)
+				{
+					var maps = chart.resultColumnArrays(result, mp);
+					map = chartSupport.findNonNull(maps);
+				}
+			}
 			
 			var lop = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.longitude);
 			var lap = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.latitude);
@@ -1905,6 +1951,9 @@
 		}
 
 		var options = { legend: {data: legendData}, series: series };
+		
+		if(map)
+			options.geo = { map: map };
 		
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 	};
@@ -1951,14 +2000,14 @@
 	//关系地图
 	
 	chartSupport.mapGraphRender = function(chart, sourceIdSign, sourceLongitudeSign, sourceLatitudeSign, sourceNameSign, sourceCategorySign, sourceValueSign,
-			targetIdSign, targetLongitudeSign, targetLatitudeSign, targetNameSign, targetCategorySign, targetValueSign, options)
+			targetIdSign, targetLongitudeSign, targetLatitudeSign, targetNameSign, targetCategorySign, targetValueSign, mapSign, options)
 	{
 		chartSupport.chartSignNameMap(chart, { sourceId: sourceIdSign, sourceLongitude: sourceLongitudeSign,
 			sourceLatitude: sourceLatitudeSign, sourceName: sourceNameSign, sourceCategory: sourceCategorySign,
 			sourceValue: sourceValueSign,
 			targetId: targetIdSign, targetLongitude: targetLongitudeSign,
 			targetLatitude: targetLatitudeSign, targetName: targetNameSign, targetCategory: targetCategorySign,
-			targetValue: targetValueSign });
+			targetValue: targetValueSign, map: mapSign });
 		
 		var chartDataSet = chart.chartDataSetFirst();
 		
@@ -2011,6 +2060,7 @@
 		var categories = [];
 		var seriesData = [];
 		var seriesLinks = [];
+		var map = undefined;
 		
 		var min = undefined, max = undefined;
 		var symbolSizeMax = chartSupport.scatterSymbolSizeMax(chart, initOptions);
@@ -2020,6 +2070,17 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			var result = chart.resultAt(results, i);
+			
+			//取任一不为空的地图名列值
+			if(!map)
+			{
+				var mp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.map);
+				if(mp)
+				{
+					var maps = chart.resultColumnArrays(result, mp);
+					map = chartSupport.findNonNull(maps);
+				}
+			}
 			
 			if(i == 0)
 				seriesName = chart.dataSetName(chartDataSet);
@@ -2137,6 +2198,9 @@
 		}
 		
 		var options = { legend: {data: legendData}, series: series };
+		
+		if(map)
+			options.geo = { map: map };
 		
 		chartSupport.mapUpdateChart(chart, initOptions, options);
 		
