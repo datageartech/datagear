@@ -192,6 +192,30 @@
 	};
 	
 	/**
+	 * 校正对象的"min"、"max"属性值。
+	 */
+	chartSupport.checkMinAndMax = function(obj, defaultMin, defaultMax)
+	{
+		if(!obj)
+			return;
+		
+		if(defaultMin == null)
+			defaultMin = 0;
+		if(defaultMax == null)
+			defaultMax = 100;
+		
+		if(obj.min == null && obj.max == null)
+		{
+			obj.min = defaultMin;
+			obj.max = defaultMax;
+		}
+		else if(obj.min == null || obj.min >= obj.max)
+			obj.min = obj.max - 1;
+		else if(obj.max == null || obj.max <= obj.min)
+			obj.max = obj.min + 1;
+	};
+	
+	/**
 	 * 销毁图表的echarts对象。
 	 */
 	chartSupport.destroyChartEcharts = function(chart)
@@ -1737,8 +1761,8 @@
 		
 		chartSupport.clearChartOriginalDataInfoRange(chart);
 		
-		var min = Number.MAX_VALUE;
-		var max = Number.MIN_VALUE;
+		var min = undefined;
+		var max = undefined;
 		var seriesName = "";
 		var seriesData = [];
 		var map = undefined;
@@ -1776,15 +1800,14 @@
 				for(var j=0; j<nvv.length; j++)
 				{
 					var val = nvv[j].value;
-					if(val < min)
-						min = val;
-					else if(val > max)
-						max = val;
+					min = (min == undefined ? val : Math.min(min, val));
+					max = (max == undefined ? val : Math.max(max, val));
 				}
 			}
 		}
 		
 		var options = { visualMap: {min, min, max: max}, series: [ {name: seriesName, data: seriesData } ] };
+		chartSupport.checkMinAndMax(options.visualMap);
 		
 		if(map)
 			options.series[0].map = map;
@@ -2529,6 +2552,8 @@
 		var series = [ chartSupport.optionsSeries(initOptions, 0, { name: seriesName, data: seriesData }) ];
 		
 		var options = { xAxis: { data: xAxisData }, yAxis: { data: yAxisData }, visualMap: {min: min, max: max}, series: series };
+		chartSupport.checkMinAndMax(options.visualMap);
+		
 		chart.echartsOptions(options);
 	};
 	
