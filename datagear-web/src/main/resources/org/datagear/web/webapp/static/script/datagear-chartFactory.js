@@ -790,13 +790,24 @@
 	/**
 	 * 获取/设置指定数据集单个参数值。
 	 * 
-	 * @param chartDataSet 指定图表数据集或其索引
-	 * @param name 参数名
+	 * @param chartDataSet 指定图表数据集对象、图表数据集索引
+	 * @param name 参数名、参数索引
 	 * @param value 要设置的参数值，不设置则执行获取操作
 	 */
 	chartBase.dataSetParamValue = function(chartDataSet, name, value)
 	{
 		chartDataSet = (typeof(chartDataSet) == "number" ? this.chartDataSets[chartDataSet] : chartDataSet);
+		
+		//参数索引
+		if(typeof(name) == "number")
+		{
+			var dataSet = chartDataSet.dataSet;
+			
+			if(!dataSet.params || dataSet.params.length <= name)
+				throw new Error("No chart data set param defined for index: "+name);
+			
+			name = dataSet.params[name].name;
+		}
 		
 		if(chartDataSet.paramValues == null)
 			chartDataSet.paramValues = {};

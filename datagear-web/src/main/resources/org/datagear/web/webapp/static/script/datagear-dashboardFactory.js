@@ -87,6 +87,9 @@
 				//org.datagear.web.controller.DashboardController.LOAD_CHART_PARAM_CHART_ELEMENT_ID
 				chartElementIdParamName: "chartElementId"
 			});
+
+	/*图表状态：需要参数值*/
+	dashboardFactory.CHART_STATUS_PARAM_VALUE_REQUIRED = "PARAM_VALUE_REQUIRED";
 	
 	/*图表状态：渲染出错*/
 	dashboardFactory.CHART_STATUS_RENDER_ERROR = "RENDER_ERROR";
@@ -258,8 +261,9 @@
 		{
 			var chart = charts[i];
 			
+			//标记为需要参数输入，避免参数准备好时会自动更新，实际应该由API控制是否更新
 			if(!chart.isDataSetParamValueReady())
-				continue;
+				chart.status(dashboardFactory.CHART_STATUS_PARAM_VALUE_REQUIRED);
 			
 			var updateInterval = chart.updateIntervalNonNull();
 			

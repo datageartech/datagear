@@ -214,6 +214,23 @@
 		
 		return re;
 	};
+
+	chartForm.setDataSetParamValueObj = function(form, paramValueObj)
+	{
+		paramValueObj = (paramValueObj || {});
+		
+		$(".dg-dspv-form-input", form).each(function()
+		{
+			var $this = $(this);
+			var name = $this.attr("name");
+			
+			if(name)
+			{
+				var value = (paramValueObj[name] || "");
+				$this.val(value+"");
+			}
+		});
+	};
 	
 	chartForm.getDataSetParamValueForm = function($parent)
 	{
@@ -330,6 +347,8 @@
 		var $chart = chart.elementJquery();
 		$parent = ($parent || $chart);
 		
+		var chartDataSets = chart.chartDataSetsNonNull();
+		
 		var $panel = $(".dg-chart-setting-panel", $parent);
 		
 		if($panel.length <= 0)
@@ -340,8 +359,6 @@
 			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartForm.labels.setDataSetParamValue).appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").css("max-height", parseInt($chart.height()/2)).appendTo($panel);
 			var $panelFoot = $("<div class='dg-chart-setting-panel-foot' />").appendTo($panel);
-			
-			var chartDataSets = chart.chartDataSetsNonNull();
 			
 			for(var i=0; i<chartDataSets.length; i++)
 			{
@@ -411,6 +428,16 @@
 					chartForm.closeChartSettingPanel(chart);
 					chart.statusPreUpdate(true);
 				}
+			});
+		}
+		else
+		{
+			$(".dg-param-value-form-wrapper", $panel).each(function()
+			{
+				var chartDataSetIndex = $(this).data("chartDataSetIndex");
+				var $form = chartForm.getDataSetParamValueForm(this);
+				
+				chartForm.setDataSetParamValueObj($form, chartDataSets[chartDataSetIndex].paramValues);
 			});
 		}
 		
