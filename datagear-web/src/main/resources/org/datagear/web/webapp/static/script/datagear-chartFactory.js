@@ -12,6 +12,7 @@
  * 运行时依赖:
  *   jquery.js
  *   echarts.js
+ *   datagear-chartForm.js
  * 
  * 
  * 此图表工厂支持为<body>元素、图表元素添加"dg-chart-options"属性来设置图表选项，格式为：
@@ -25,6 +26,9 @@
  * 此图表工厂支持为图表元素添加"dg-chart-map"属性来设置地图图表的地图名。
  * 
  * 此图表工厂支持为<body>元素、图表元素添加"dg-echarts-theme"属性来设置图表Echarts主题名。
+ * 
+ * 此图表工厂支持为图表元素添加"dg-chart-disable-setting"属性，用于禁用图表交互设置功能，
+ * 值为"true"表示禁用，其他表示启用。
  * 
  * 此图表工厂和dashboardFactory.js一起可以支持异步图表插件，示例如下：
  * {
@@ -169,6 +173,7 @@
 		this.initListener();
 		this.initMap();
 		this.initEchartsThemeName();
+		this.initDisableSetting();
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
@@ -299,6 +304,16 @@
 		
 		this.echartsThemeName(themeName);
 	};
+
+	/**
+	 * 初始化图表是否禁用交互设置。
+	 * 此方法从图表元素的"dg-chart-disable-setting"属性获取是否禁用值。
+	 */
+	chartBase.initDisableSetting = function()
+	{
+		var disableSetting = this.elementJquery().attr("dg-chart-disable-setting");
+		this.disableSetting(disableSetting == "true");
+	};
 	
 	/**
 	 * 获取/设置图表设置项。
@@ -379,6 +394,19 @@
 		else
 			this._echartsThemeName = themeName;
 	};
+
+	/**
+	 * 获取/设置图表是否禁用交互设置。
+	 * 
+	 * @param disable 可选，是否禁用图表交互设置，没有则执行获取操作
+	 */
+	chartBase.disableSetting = function(disable)
+	{
+		if(disable === undefined)
+			return (this._disableSetting === true);
+		else
+			this._disableSetting = disable;
+	};
 	
 	/**
 	 * 渲染图表。
@@ -406,10 +434,22 @@
 			var async = this.isAsyncRender();
 			
 			this.plugin.chartRenderer.render(this);
+			this.renderSetting();
 			
 			if(!async)
 				this.statusRendered(true);
 		}
+	};
+	
+	/**
+	 * 渲染图表交互设置表单。
+	 */
+	chartBase.renderSetting = function()
+	{
+		if(this.disableSetting())
+			return false;
+		
+		chartFactory.chartForm.bindChartSettingPanelEvent(this);
 	};
 	
 	/**
@@ -487,6 +527,16 @@
 			
 			this.elementJquery().empty();
 		}
+		
+		this.destroySetting();
+	};
+	
+	/**
+	 * 销毁图表交互设置。
+	 */
+	chartBase.destroySetting = function()
+	{
+		chartFactory.chartForm.unbindChartSettingPanelEvent(this);
 	};
 	
 	/**
