@@ -34,9 +34,38 @@
 	 */
 	dashboardFactory.init = function(dashboard)
 	{
+		this.extendChartBase();
 		this.initMapURLs();
 		$.extend(dashboard, this.dashboardBase);
 		dashboard.init();
+	};
+	
+	/**
+	 * 扩展chartFactory.chartBase
+	 */
+	dashboardFactory.extendChartBase = function()
+	{
+		var chartBase = global.chartFactory.chartBase;
+		
+		if(chartBase.initLinks)
+			return false;
+		
+		chartBase._initSuper = chartBase.init;
+		chartBase._postProcessRenderedSuper = chartBase._postProcessRendered;
+		
+		$.extend(chartBase, chartBaseExt);
+		
+		chartBase.init = function()
+		{
+			this.initLinks();
+			this._initSuper();
+		};
+		
+		chartBase._postProcessRendered = function()
+		{
+			this._bindLinksEventHanders();
+			this._postProcessRenderedSuper();
+		};
 	};
 	
 	/**
@@ -122,17 +151,17 @@
 	 * 获取/设置初始图表联动设置对象数组。
 	 * 联动设置对象格式为：
 	 * {
-	 *   //可选，联动触发事件类型，默认为"click"
-	 *   eventType: "...",
+	 *   //可选，联动触发事件类型，事件类型数组，默认为"click"
+	 *   eventType: "..."、["...", ...],
 	 *   
 	 *   //必选，联动目标图表元素ID、ID数组
-	 *   target: "..."、["...", "...", ...],
+	 *   target: "..."、["...", ...],
 	 *   
-	 *   //必选，联动参数映射表
-	 *   param:
+	 *   //必选，联动数据参数映射表
+	 *   data:
 	 *   {
 	 *     //ChartEvent对象的"data"、"orginalData"对象的属性名 : 目标数据集参数的映射索引、映射索引数组
-	 *     "..." : 映射索引、[ 映射索引, 映射索引, ... ],
+	 *     "..." : 映射索引、[ 映射索引, ... ],
 	 *     ...
 	 *   }
 	 * }
@@ -146,13 +175,13 @@
 	 *   dataSet: ...,
 	 *   
 	 *   //必选，目标图表数据集的参数数组索引/参数名
-	 *   name: ...,
+	 *   param: ...,
 	 *   
 	 *   //可选，自定义源值至目标值处理函数
-	 *   value: function(sourceValue, sourceObj, chartEvent){ return ...; }
+	 *   value: function(sourceValue, chartEvent){ return ...; }
 	 * }
 	 * 
-	 * 或者，可简写为上述映射索引对象的"name"属性值
+	 * 或者，可简写为上述映射索引对象的"param"属性值
 	 * 
 	 * @param links 可选，要设置的图表联动设置对象、数组，没有则执行获取操作。
 	 */
@@ -174,7 +203,115 @@
 	 */
 	chartBaseExt._bindLinksEventHanders = function()
 	{
+		var links = this.links();
 		
+		if(!links || links.length == 0)
+			return false;
+		
+		var eventTypes = this._resolveLinksEventTypes(links);
+		var _thisChart = this;
+		
+		for(var i=0; i<eventTypes.length; i++)
+		{
+			this.on(eventTypes[i], function(chartEvent)
+			{
+				_thisChart._handleChartEventyForLink(chartEvent);
+			});
+		}
+	};
+	
+	chartBaseExt._handleChartEventyForLink = function(chartEvent)
+	{
+		var links = this.links();
+		
+		if(!links || links.length == 0)
+			return false;
+		
+		var dashboard = this.dashboard;
+		var targetCharts = [];
+		
+		for(var i=0; i<links.length; i++)
+		{
+			var link = links[i];
+			
+			if(!this._linkContainsEventType(link, chartEvent.type))
+				continue;
+			
+			var chartEventData = global.chartFactory.chartEventData(chartEvent);
+			var chartEventOriginalData = global.chartFactory.chartEventOriginalData(chartEvent);
+			
+			var myTargetCharts = [];
+			
+			var targets = link.target;
+			if(!$.isArray(targets))
+				targets = [ targets ];
+			
+			for(var j=0; j<targets.length; j++)
+			{
+				myTargetCharts[j] = dashboard.getChart(targets[j]);
+				targetCharts.push(myTargetCharts[j]);
+			}
+			
+			for(var name in link.data)
+			{
+				var dataValue = chartEventData[name];
+				if(dataValue === undefined)
+					dataValue = chartEventOriginalData[name];
+				
+				var indexes = link.data[name];
+				if(!$.isArray(indexes))
+					indexes = [ indexes ];
+				
+				for(var j=0; j<indexes.length; j++)
+				{
+					var indexObj = indexes[j];
+					var indexObjType = typeof(indexObj);
+					
+					if(indexObjType == "number" || indexObjType == "string")
+						indexObj = { chart: 0, dataSet: 0, param: indexObj };
+					
+					var paramValue = (indexObj.value ? indexObj.value(dataValue, chartEvent) : dataValue);
+					myTargetCharts[indexObj.chart].dataSetParamValue(indexObj.dataSet, indexObj.param, paramValue);
+				}
+			}
+		}
+		
+		for(var i=0; i<targetCharts.length; i++)
+			targetCharts[i].statusPreUpdate(true);
+	};
+	
+	chartBaseExt._resolveLinksEventTypes = function(links)
+	{
+		var eventTypes = [];
+		
+		for(var i=0; i<links.length; i++)
+		{
+			var myEventTypes = (links[i].eventType || "click");
+			if(!$.isArray(myEventTypes))
+				myEventTypes = [ myEventTypes ];
+			
+			for(var j=0; j<myEventTypes.length; j++)
+			{
+				if($.inArray(myEventTypes[j], eventTypes) < 0)
+					eventTypes.push(myEventTypes[j]);
+			}
+		}
+		
+		return eventTypes;
+	};
+	
+	chartBaseExt._linkContainsEventType = function(link, eventType)
+	{
+		if(!link.eventType)
+		{
+			return (eventType == "click");
+		}
+		else if($.isArray(link.eventType))
+		{
+			return ($.inArray(eventType, link.eventType) >= 0);
+		}
+		else
+			return (link.eventType == eventType);
 	};
 	
 	//----------------------------------------
@@ -296,6 +433,8 @@
 	 */
 	dashboardBase.initChart = function(chart)
 	{
+		chart.dashboard = this;
+		
 		global.chartFactory.init(chart);
 		
 		//如果图表没有定义监听器，则使用代理看板监听器
