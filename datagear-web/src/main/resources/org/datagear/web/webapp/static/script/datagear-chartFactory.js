@@ -30,6 +30,8 @@
  * 此图表工厂支持为图表元素添加"dg-chart-disable-setting"属性，用于禁用图表交互设置功能，
  * 值为"true"表示禁用，其他表示启用。
  * 
+ * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数，具体参考chartBase.initEventHandlers函数说明。
+ * 
  * 此图表工厂和dashboardFactory.js一起可以支持异步图表插件，示例如下：
  * {
  *   //声明render函数是否为异步，默认为false
@@ -174,6 +176,7 @@
 		this.initMap();
 		this.initEchartsThemeName();
 		this.initDisableSetting();
+		this.initEventHandlers();
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
@@ -316,7 +319,40 @@
 	};
 	
 	/**
-	 * 获取/设置图表设置项。
+	 * 初始化图表事件处理函数。
+	 * 此方法从图表元素的所有以"dg-chart-on-"开头的属性获取事件处理函数。
+	 * 例如：
+	 * dg-chart-on-click="clickHandler" 						定义"click"事件处理函数；
+	 * dg-chart-on-mouseover="function(chartEvent){ ... }"		定义"mouseover"事件处理函数。
+	 */
+	chartBase.initEventHandlers = function()
+	{
+		var dom = this.element();
+		var attrs = dom.attributes;
+		
+		var ehs = [];
+		
+		var prefix = "dg-chart-on-";
+		
+		for(var i=0; i<attrs.length; i++)
+		{
+			var an = attrs[i];
+			
+			if(an.nodeName.indexOf(prefix) == 0 && an.nodeName.length > prefix.length)
+			{
+				var eventType = an.nodeName.substr(prefix.length);
+				var eventHandler = chartFactory.evalSilently(an.nodeValue);
+				
+				if(eventHandler)
+					ehs.push({ eventType: eventType, eventHandler: eventHandler });
+			}
+		}
+		
+		this.eventHandlers(ehs);
+	};
+	
+	/**
+	 * 获取/设置初始图表设置项。
 	 * 图表设置项格式为：{ ... }
 	 * 
 	 * @param options 可选，要设置的图表设置项，没有则执行获取操作
@@ -330,7 +366,7 @@
 	};
 	
 	/**
-	 * 获取/设置图表主题。
+	 * 获取/设置初始图表主题。
 	 * 图表主题格式参考：org.datagear.analysis.ChartTheme
 	 * 
 	 * @param theme 可选，要设置的图表主题，没有则执行获取操作
@@ -344,7 +380,7 @@
 	};
 	
 	/**
-	 * 获取/设置图表监听器。
+	 * 获取/设置初始图表监听器。
 	 * 图表监听器格式为：
 	 * {
 	 *   //渲染图表完成回调函数
@@ -368,7 +404,7 @@
 	};
 	
 	/**
-	 * 获取/设置图表地图名。
+	 * 获取/设置初始图表地图名。
 	 * 此方法用于为地图类图表提供支持，如果不是地图类图表，则不必设置此项。
 	 * 
 	 * @param map 可选，要设置的地图名，没有则执行获取操作
@@ -382,7 +418,7 @@
 	};
 	
 	/**
-	 * 获取/设置图表的echarts主题名。
+	 * 获取/设置初始图表的echarts主题名。
 	 * 此方法用于为echarts图表提供支持，如果不是echarts图表，则不必设置此项。
 	 * 
 	 * @param themeName 可选，要设置的且已注册的echarts主题名，没有则执行获取操作
@@ -396,7 +432,7 @@
 	};
 
 	/**
-	 * 获取/设置图表是否禁用交互设置。
+	 * 获取/设置初始图表是否禁用交互设置。
 	 * 
 	 * @param disable 可选，是否禁用图表交互设置，没有则执行获取操作
 	 */
@@ -406,6 +442,20 @@
 			return (this._disableSetting === true);
 		else
 			this._disableSetting = disable;
+	};
+	
+	/**
+	 * 获取/设置初始图表事件处理函数数组。
+	 * 
+	 * @param eventHandlers 可选，要设置的初始事件处理函数数组，没有则执行获取操作。数组元素格式为：
+	 * 						{ eventType: "...", eventHandler: function(chartEvent){ ... } }
+	 */
+	chartBase.eventHandlers = function(eventHandlers)
+	{
+		if(eventHandlers === undefined)
+			return this._eventHandlers;
+		else
+			this._eventHandlers = eventHandlers;
 	};
 	
 	/**
@@ -433,8 +483,7 @@
 		{
 			var async = this.isAsyncRender();
 			
-			this.plugin.chartRenderer.render(this);
-			this.renderSetting();
+			this.doRender();
 			
 			if(!async)
 				this.statusRendered(true);
@@ -442,14 +491,39 @@
 	};
 	
 	/**
-	 * 渲染图表交互设置表单。
+	 * 调用图表插件的render函数，执行渲染。
 	 */
-	chartBase.renderSetting = function()
+	chartBase.doRender = function()
+	{
+		this.plugin.chartRenderer.render(this);
+	};
+	
+	/**
+	 * 渲染图表交互设置表单。
+	 * 注意：此方法应该在statusRendered中调用，而不应在doRender中调用，因为它可能是异步方法。
+	 */
+	chartBase._renderSetting = function()
 	{
 		if(this.disableSetting())
 			return false;
 		
 		chartFactory.chartForm.bindChartSettingPanelEvent(this);
+	};
+	
+	/**
+	 * 绑定初始图表事件处理函数。
+	 * 注意：此方法应该在statusRendered中调用，而不应在doRender中调用，因为它可能是异步方法。
+	 */
+	chartBase._bindEventHandlers = function()
+	{
+		var ehs = this.eventHandlers();
+		
+		for(var i=0; i<ehs.length; i++)
+		{
+			var eh = ehs[i];
+			
+			this.on(eh.eventType, eh.eventHandler);
+		}
 	};
 	
 	/**
@@ -528,13 +602,13 @@
 			this.elementJquery().empty();
 		}
 		
-		this.destroySetting();
+		this._destroySetting();
 	};
 	
 	/**
 	 * 销毁图表交互设置。
 	 */
-	chartBase.destroySetting = function()
+	chartBase._destroySetting = function()
 	{
 		chartFactory.chartForm.unbindChartSettingPanelEvent(this);
 	};
@@ -603,16 +677,19 @@
 	 * 图表是否为/设置为：完成render。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
-	 * @param callListener 可选，当set为true时，是否调用图表监听器的render回调函数，默认为true
+	 * @param postProcess 可选，当set为true时，是否执行渲染后置操作，比如渲染交互设置表单、绑定初始事件、调用监听器、，默认为true
 	 */
-	chartBase.statusRendered = function(set, callListener)
+	chartBase.statusRendered = function(set, postProcess)
 	{
 		if(set)
 		{
 			this.status(chartFactory.STATUS_RENDERED);
 			
-			if(callListener != false)
+			if(postProcess != false)
 			{
+				this._renderSetting();
+				this._bindEventHandlers();
+				
 				var listener = this.listener();
 				if(listener && listener.render)
 				  listener.render(this);
@@ -652,15 +729,15 @@
 	 * 图表是否为/设置为：完成update。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
-	 * @param callListener 可选，当set为true时，是否调用图表监听器的update回调函数，默认为true
+	 * @param postProcess 可选，当set为true时，是否执行更新后置操作，比如调用监听器、，默认为true
 	 */
-	chartBase.statusUpdated = function(set, callListener)
+	chartBase.statusUpdated = function(set, postProcess)
 	{
 		if(set)
 		{
 			this.status(chartFactory.STATUS_UPDATED);
 			
-			if(callListener != false)
+			if(postProcess != false)
 			{
 				var listener = this.listener();
 				if(listener && listener.update)
@@ -1671,7 +1748,7 @@
 		}
 		catch(e)
 		{
-			this.logException(e);
+			chartFactory.logException(e);
 		}
 		
 		return (re || defaultValue);
@@ -1695,7 +1772,7 @@
 		}
 		catch(e)
 		{
-			this.logException(e);
+			chartFactory.logException(e);
 		}
 		
 		return {};
