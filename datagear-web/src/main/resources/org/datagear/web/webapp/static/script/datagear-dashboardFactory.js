@@ -25,6 +25,7 @@
 {
 	var dashboardFactory = (global.dashboardFactory || (global.dashboardFactory = {}));
 	var dashboardBase = (dashboardFactory.dashboardBase || (dashboardFactory.dashboardBase = {}));
+	var chartBaseExt = (dashboardFactory.chartBaseExt || (dashboardFactory.chartBaseExt = {}));
 	
 	/**
 	 * 初始化指定看板对象。
@@ -93,6 +94,92 @@
 	
 	/*图表状态：更新出错*/
 	dashboardFactory.CHART_STATUS_UPDATE_ERROR = "UPDATE_ERROR";
+	
+	//----------------------------------------
+	// chartBaseExt start
+	//----------------------------------------
+	
+	/**
+	 * 初始化图表联动设置。
+	 * 此方法从图表元素的"dg-chart-link"属性获取联动设置。
+	 */
+	chartBaseExt.initLinks = function()
+	{
+		var links = this.elementJquery().attr("dg-chart-link");
+		
+		if(!links)
+			return;
+		
+		links = chartFactory.evalSilently(links);
+		
+		if(!links)
+			return;
+		
+		this.links(links);
+	};
+	
+	/**
+	 * 获取/设置初始图表联动设置对象数组。
+	 * 联动设置对象格式为：
+	 * {
+	 *   //可选，联动触发事件类型，默认为"click"
+	 *   eventType: "...",
+	 *   
+	 *   //必选，联动目标图表元素ID、ID数组
+	 *   target: "..."、["...", "...", ...],
+	 *   
+	 *   //必选，联动参数映射表
+	 *   param:
+	 *   {
+	 *     //ChartEvent对象的"data"、"orginalData"对象的属性名 : 目标数据集参数的映射索引、映射索引数组
+	 *     "..." : 映射索引、[ 映射索引, 映射索引, ... ],
+	 *     ...
+	 *   }
+	 * }
+	 * 
+	 * 映射索引对象格式为：
+	 * {
+	 *   //可选，目标图表在target中的索引数值，默认为：0
+	 *   chart: ...,
+	 *   
+	 *   //可选，目标图表数据集数组的索引数值，默认为：0
+	 *   dataSet: ...,
+	 *   
+	 *   //必选，目标图表数据集的参数数组索引/参数名
+	 *   name: ...,
+	 *   
+	 *   //可选，自定义源值至目标值处理函数
+	 *   value: function(sourceValue, sourceObj, chartEvent){ return ...; }
+	 * }
+	 * 
+	 * 或者，可简写为上述映射索引对象的"name"属性值
+	 * 
+	 * @param links 可选，要设置的图表联动设置对象、数组，没有则执行获取操作。
+	 */
+	chartBaseExt.links = function(links)
+	{
+		if(links === undefined)
+			return this._links;
+		else
+		{
+			if(links && !$.isArray(links))
+				links = [ links ];
+			
+			this._links = links;
+		}
+	};
+	
+	/**
+	 * 为初始图表联动设置绑定事件处理函数。
+	 */
+	chartBaseExt._bindLinksEventHanders = function()
+	{
+		
+	};
+	
+	//----------------------------------------
+	// chartBaseExt end
+	//----------------------------------------
 	
 	//----------------------------------------
 	// dashboardBase start

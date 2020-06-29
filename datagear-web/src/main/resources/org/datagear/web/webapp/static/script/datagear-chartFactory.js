@@ -686,17 +686,23 @@
 			this.status(chartFactory.STATUS_RENDERED);
 			
 			if(postProcess != false)
-			{
-				this._renderSetting();
-				this._bindEventHandlers();
-				
-				var listener = this.listener();
-				if(listener && listener.render)
-				  listener.render(this);
-			}
+				this._postProcessRendered();
 		}
 		else
 			return (this.status() == chartFactory.STATUS_RENDERED);
+	};
+	
+	/**
+	 * 执行渲染完成后置处理。
+	 */
+	chartBase._postProcessRendered = function()
+	{
+		this._renderSetting();
+		this._bindEventHandlers();
+		
+		var listener = this.listener();
+		if(listener && listener.render)
+		  listener.render(this);
 	};
 	
 	/**
@@ -738,14 +744,20 @@
 			this.status(chartFactory.STATUS_UPDATED);
 			
 			if(postProcess != false)
-			{
-				var listener = this.listener();
-				if(listener && listener.update)
-				  listener.update(this, this.getUpdateResults());
-			}
+				this._postProcessUpdated();
 		}
 		else
 			return (this.status() == chartFactory.STATUS_UPDATED);
+	};
+	
+	/**
+	 * 执行更新完成后置处理。
+	 */
+	chartBase._postProcessUpdated = function()
+	{
+		var listener = this.listener();
+		if(listener && listener.update)
+		  listener.update(this, this.getUpdateResults());
 	};
 	
 	/**
