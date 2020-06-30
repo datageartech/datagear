@@ -288,12 +288,12 @@
 			if(!this._isLinkContainsEventType(link, chartEvent.type))
 				continue;
 			
-			var chartEventData = global.chartFactory.chartEventData(chartEvent);
+			var chartEventData = this.eventData(chartEvent);
 			
 			if(chartEventData == null)
 				throw new Error("[chartEvent.data] must be defined");
 			
-			var chartEventOriginalData = global.chartFactory.chartEventOriginalData(chartEvent);
+			var chartEventOriginalData = this.eventOriginalData(chartEvent);
 			
 			var myTargetCharts = [];
 			

@@ -160,6 +160,12 @@
 	
 	/**用于标识图表元素的CSS名*/
 	chartFactory.CHART_DISTINCT_CSS_NAME = "dg-chart-for-distinction";
+
+	/**图表事件的图表类型：Echarts*/
+	chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS = "echarts";
+	
+	/**图表事件的图表类型：HTML*/
+	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
 	
 	//----------------------------------------
 	// chartBase start
@@ -1572,23 +1578,13 @@
 		});
 	};
 	
-	//----------------------------------------
-	// chartBase end
-	//----------------------------------------
-	
-	/**图表事件的图表类型：Echarts*/
-	chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS = "echarts";
-	
-	/**图表事件的图表类型：HTML*/
-	chartFactory.CHART_EVENT_CHART_TYPE_HTML = "html";
-	
 	/**
-	 * 创建Echarts图表的事件对象。
+	 * 图表事件支持函数：创建Echarts图表的事件对象。
 	 * 
 	 * @param eventType 事件类型
 	 * @param echartsEventParams echarts事件处理函数的参数对象
 	 */
-	chartFactory.newChartEventEcharts = function(eventType, echartsEventParams)
+	chartBase.eventNewEcharts = function(eventType, echartsEventParams)
 	{
 		var event =
 		{
@@ -1601,12 +1597,12 @@
 	};
 	
 	/**
-	 * 创建HTML图表的事件对象。
+	 * 图表事件支持函数：创建HTML图表的事件对象。
 	 * 
 	 * @param eventType 事件类型
 	 * @param htmlEvent HTML事件对象
 	 */
-	chartFactory.newChartEventHtml = function(eventType, htmlEvent)
+	chartBase.eventNewHtml = function(eventType, htmlEvent)
 	{
 		var event =
 		{
@@ -1619,12 +1615,12 @@
 	};
 	
 	/**
-	 * 获取/设置图表事件对象的数据（chartEvent.data）。
+	 * 图表事件支持函数：获取/设置图表事件对象的数据（chartEvent.data）。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param data 可选
+	 * @param data 可选，要设置的数据对象
 	 */
-	chartFactory.chartEventData = function(chartEvent, data)
+	chartBase.eventData = function(chartEvent, data)
 	{
 		if(data === undefined)
 			return chartEvent["data"];
@@ -1633,12 +1629,12 @@
 	};
 	
 	/**
-	 * 获取/设置图表事件对象的原始数据（（chartEvent.originalData））。
+	 * 图表事件支持函数：获取/设置图表事件对象的原始数据（chartEvent.originalData）。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalData 可选
+	 * @param originalData 可选，要设置的原始数据对象
 	 */
-	chartFactory.chartEventOriginalData = function(chartEvent, originalData)
+	chartBase.eventOriginalData = function(chartEvent, originalData)
 	{
 		if(originalData === undefined)
 			return chartEvent["originalData"];
@@ -1647,12 +1643,12 @@
 	};
 	
 	/**
-	 * 获取/设置图表事件对象的原始图表数据集索引（（chartEvent.originalChartDataSetIndex））。
+	 * 图表事件支持函数：获取/设置图表事件对象的原始数据对应的图表数据集索引（（chartEvent.originalChartDataSetIndex））。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalChartDataSetIndex 可选
+	 * @param originalChartDataSetIndex 可选，要设置的图表数据集索引数值
 	 */
-	chartFactory.chartEventOriginalChartDataSetIndex = function(chartEvent, originalChartDataSetIndex)
+	chartBase.eventOriginalChartDataSetIndex = function(chartEvent, originalChartDataSetIndex)
 	{
 		if(originalChartDataSetIndex === undefined)
 			return chartEvent["originalChartDataSetIndex"];
@@ -1661,12 +1657,12 @@
 	};
 	
 	/**
-	 * 获取/设置图表事件对象的原始结果数据索引（（chartEvent.originalResultDataIndex））。
+	 * 图表事件支持函数：获取/设置图表事件对象的原始数据对应的结果数据索引（（chartEvent.originalResultDataIndex））。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalResultDataIndex 可选
+	 * @param originalResultDataIndex 可选，要设置的结果数据索引数值
 	 */
-	chartFactory.chartEventOriginalResultDataIndex = function(chartEvent, originalResultDataIndex)
+	chartBase.eventOriginalResultDataIndex = function(chartEvent, originalResultDataIndex)
 	{
 		if(originalResultDataIndex === undefined)
 			return chartEvent["originalResultDataIndex"];
@@ -1675,39 +1671,37 @@
 	};
 	
 	/**
-	 * 绑定图表事件处理函数代理。
-	 * 图表事件处理通常内部组件处理函数代理（比如Echarts），并在代理函数中调用图表事件处理函数。
+	 * 图表事件支持函数：绑定图表事件处理函数代理。
+	 * 图表事件处理通常由内部组件的事件处理函数代理（比如Echarts），并在代理函数中调用图表事件处理函数。
 	 * 
-	 * @param chart
 	 * @param eventType
 	 * @param eventHanlder 图表事件处理函数：function(chartEvent){ ... }
 	 * @param eventHandlerDelegation 图表事件处理函数代理，负责构建chartEvent对象并调用eventHanlder
 	 * @param delegationBinder 代理事件绑定器，格式为：{ bind: function(chart, eventType, eventHandlerDelegation){ ... } }
 	 */
-	chartFactory.bindChartEventHandlerDelegation = function(chart, eventType, eventHanlder,
+	chartBase.eventBindHandlerDelegation = function(eventType, eventHanlder,
 			eventHandlerDelegation, delegationBinder)
 	{
-		var delegations = chart.extValue("eventHandlerDelegations");
+		var delegations = this.extValue("eventHandlerDelegations");
 		if(delegations == null)
 		{
 			delegations = [];
-			chart.extValue("eventHandlerDelegations", delegations);
+			this.extValue("eventHandlerDelegations", delegations);
 		}
 		
-		delegationBinder.bind(chart, eventType, eventHandlerDelegation);
+		delegationBinder.bind(this, eventType, eventHandlerDelegation);
 		
 		delegations.push({ eventType: eventType , eventHanlder: eventHanlder, eventHandlerDelegation: eventHandlerDelegation });
 	};
 	
 	/**
-	 * 为图表解绑事件处理函数代理。
+	 * 图表事件支持函数：为图表解绑事件处理函数代理。
 	 * 
-	 * @param chart
 	 * @param eventType 事件类型
 	 * @param eventHanlder 可选，要解绑的图表事件处理函数，不设置则解除所有指定事件类型的处理函数
 	 * @param delegationUnbinder 代理事件解绑器，格式为：{ unbind: function(chart, eventType, eventHandlerDelegation){ ... } }
 	 */
-	chartFactory.unbindChartEventHandlerDelegation = function(chart, eventType, eventHanlder, delegationUnbinder)
+	chartBase.eventUnbindHandlerDelegation = function(eventType, eventHanlder, delegationUnbinder)
 	{
 		if(delegationUnbinder == undefined)
 		{
@@ -1715,7 +1709,7 @@
 			eventHanlder = undefined;
 		}
 		
-		var delegations = chart.extValue("eventHandlerDelegations");
+		var delegations = this.extValue("eventHandlerDelegations");
 		
 		if(delegations == null)
 			return;
@@ -1732,7 +1726,7 @@
 			
 			if(unbind)
 			{
-				delegationUnbinder.unbind(chart, eventType, eh.eventHandlerDelegation);
+				delegationUnbinder.unbind(this, eventType, eh.eventHandlerDelegation);
 				delegations[i] = null;
 				unbindCount++;
 			}
@@ -1747,9 +1741,14 @@
 					delegationsTmp.push(delegations[i]);
 			}
 			
-			chart.extValue("eventHandlerDelegations", delegationsTmp);
+			this.extValue("eventHandlerDelegations", delegationsTmp);
 		}
 	};
+	
+	
+	//----------------------------------------
+	// chartBase end
+	//----------------------------------------
 	
 	/**
 	 * 执行JS代码。
