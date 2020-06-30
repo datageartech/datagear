@@ -186,6 +186,8 @@ readonly 是否只读操作，允许为null
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-map-urls' />", tagNames: ["body"]},
 			{name: "dg-chart-listener", value: "dg-chart-listener", caption: "",
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-listener' />", tagNames: ["body", "div"]},
+			{name: "dg-chart-link", value: "dg-chart-link", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-link' />", tagNames: ["div"]},
 			{name: "dg-chart-disable-setting", value: "dg-chart-disable-setting=\"true\"", caption: "dg-chart-dis..ting",
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-chart-disable-setting' />", tagNames: ["div"]},
 			{name: "dg-chart-renderer", value: "dg-chart-renderer", caption: "",
@@ -214,6 +216,10 @@ readonly 是否只读操作，允许为null
 						for(var i=0; i<po.templateEditorCompletions.length; i++)
 						{
 							var comp = po.templateEditorCompletions[i];
+							
+							if(prefix && comp.name.indexOf(prefix) != 0)
+								continue;
+							
 							if(!comp.tagNames || $.inArray(tagName, comp.tagNames) > -1)
 								completions.push(comp);
 						}
