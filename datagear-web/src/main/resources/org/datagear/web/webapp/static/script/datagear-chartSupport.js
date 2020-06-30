@@ -1640,7 +1640,7 @@
 		}
 		else
 		{
-			chart.echartsMapLoad(map, function()
+			chart.echartsLoadMap(map, function()
 			{
 				chart.echartsInit(options);
 				chart.extValue("presetMap", map);
@@ -1702,7 +1702,7 @@
 		}
 		else
 		{
-			chart.echartsMapLoad(map, function()
+			chart.echartsLoadMap(map, function()
 			{
 				chart.echartsOptions(updateOptions);
 				chart.extValue("presetMap", map);

@@ -1557,15 +1557,18 @@
 	 * @param name echarts地图名称
 	 * @param callback 完成回调函数：function(name){ ... }
 	 */
-	chartBase.echartsMapLoad = function(name, callback)
+	chartBase.echartsLoadMap = function(name, callback)
 	{
 		var url = this.mapURL(name);
+		
+		var thisChart = this;
+		
 		$.getJSON(url, function(geoJson)
 		{
 			echarts.registerMap(name, geoJson);
 			
 			if(callback)
-				callback(name);
+				callback.call(thisChart, name);
 		});
 	};
 	
