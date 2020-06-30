@@ -499,35 +499,8 @@
 	};
 	
 	/**
-	 * 渲染图表交互设置表单。
-	 * 注意：此方法应该在statusRendered中调用，而不应在doRender中调用，因为它可能是异步方法。
-	 */
-	chartBase._renderSetting = function()
-	{
-		if(this.disableSetting())
-			return false;
-		
-		chartFactory.chartForm.bindChartSettingPanelEvent(this);
-	};
-	
-	/**
-	 * 绑定初始图表事件处理函数。
-	 * 注意：此方法应该在statusRendered中调用，而不应在doRender中调用，因为它可能是异步方法。
-	 */
-	chartBase._bindEventHandlers = function()
-	{
-		var ehs = this.eventHandlers();
-		
-		for(var i=0; i<ehs.length; i++)
-		{
-			var eh = ehs[i];
-			
-			this.on(eh.eventType, eh.eventHandler);
-		}
-	};
-	
-	/**
 	 * 更新图表。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 注意：只有this.statusRendered()或者this.statusPreUpdate()或者this.statusUpdated()为true，此方法才会执行。
 	 * 
 	 * @param results 图表数据集结果
@@ -567,6 +540,7 @@
 	
 	/**
 	 * 重新调整图表尺寸。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 */
 	chartBase.resize = function()
 	{
@@ -706,6 +680,28 @@
 	};
 	
 	/**
+	 * 渲染图表交互设置表单。
+	 */
+	chartBase._renderSetting = function()
+	{
+		if(this.disableSetting())
+			return false;
+		
+		chartFactory.chartForm.bindChartSettingPanelEvent(this);
+	};
+	
+	/**
+	 * 绑定初始图表事件处理函数。
+	 */
+	chartBase._bindEventHandlers = function()
+	{
+		var ehs = this.eventHandlers();
+		
+		for(var i=0; i<ehs.length; i++)
+			this.on(ehs[i].eventType, ehs[i].eventHandler);
+	};
+	
+	/**
 	 * 图表是否为/设置为：准备update。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
@@ -788,6 +784,7 @@
 	
 	/**
 	 * 绑定"click"事件处理函数。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -798,6 +795,7 @@
 	
 	/**
 	 * 绑定"dblclick"事件处理函数。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -808,6 +806,7 @@
 	
 	/**
 	 * 绑定"mousedown"事件处理函数。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -818,6 +817,7 @@
 	
 	/**
 	 * 绑定"mouseup"事件处理函数。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -828,6 +828,7 @@
 	
 	/**
 	 * 绑定"mouseover"事件处理函数。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -838,6 +839,7 @@
 	
 	/**
 	 * 绑定"mouseout"事件处理函数。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -848,6 +850,7 @@
 	
 	/**
 	 * 绑定事件处理函数。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param eventType 事件类型：click、dblclick、mousedown、mouseup、mouseover、mouseout
 	 * @param handler 事件处理函数：function(chartEvent){ ... }
@@ -862,6 +865,7 @@
 	
 	/**
 	 * 解绑事件处理函数。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param eventType 事件类型：click、dblclick、mousedown、mouseup、mouseover、mouseout
 	 * @param handler 可选，解绑的事件处理函数，不设置则解绑所有此事件类型的处理函数
@@ -1495,7 +1499,7 @@
 	};
 	
 	/**
-	 * Echarts图表支持函数：设置图表的Echarts实例的选项值。
+	 * Echarts图表支持函数：设置图表的Echarts实例的选项。
 	 * 
 	 * @param options
 	 */

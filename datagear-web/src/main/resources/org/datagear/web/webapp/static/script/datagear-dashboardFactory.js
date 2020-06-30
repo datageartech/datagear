@@ -41,7 +41,7 @@
 	};
 	
 	/**
-	 * 扩展chartFactory.chartBase
+	 * 为chartFactory.chartBase扩展dashboardFactory.chartBaseExt。
 	 */
 	dashboardFactory.extendChartBase = function()
 	{
@@ -63,7 +63,7 @@
 		
 		chartBase._postProcessRendered = function()
 		{
-			this._bindLinksEventHanders();
+			this.bindLinksEventHanders(this.links());
 			this._postProcessRenderedSuper();
 		};
 	};
@@ -151,7 +151,7 @@
 	 * 获取/设置初始图表联动设置对象数组。
 	 * 联动设置对象格式为：
 	 * {
-	 *   //可选，联动触发事件类型，事件类型数组，默认为"click"
+	 *   //可选，联动触发事件类型、事件类型数组，默认为"click"
 	 *   eventType: "..."、["...", ...],
 	 *   
 	 *   //必选，联动目标图表元素ID、ID数组
@@ -161,7 +161,7 @@
 	 *   data:
 	 *   {
 	 *     //ChartEvent对象的"data"、"orginalData"对象的属性名 : 目标数据集参数的映射索引、映射索引数组
-	 *     "..." : 映射索引、[ 映射索引, ... ],
+	 *     "..." : 映射索引对象、[ 映射索引对象, ... ],
 	 *     ...
 	 *   }
 	 * }
@@ -174,7 +174,7 @@
 	 *   //可选，目标图表数据集数组的索引数值，默认为：0
 	 *   dataSet: ...,
 	 *   
-	 *   //必选，目标图表数据集的参数数组索引/参数名
+	 *   //可选，目标图表数据集的参数数组索引/参数名，默认为：0
 	 *   param: ...,
 	 *   
 	 *   //可选，自定义源值至目标值处理函数
@@ -199,87 +199,47 @@
 	};
 	
 	/**
-	 * 为初始图表联动设置绑定事件处理函数。
+	 * 为指定图表联动设置绑定事件处理函数。
+	 * 注意：此函数在图表渲染完成后才可调用。
+	 * 
+	 * @param links 图表联动设置对象、数组，格式参考chartBaseExt.links函数说明
+	 * @return 绑定的事件处理函数对象数组，格式为：[ { eventType: "...", eventHandler: function(chartEvent){ ... } }, ... ]
 	 */
-	chartBaseExt._bindLinksEventHanders = function()
+	chartBaseExt.bindLinksEventHanders = function(links)
 	{
-		var links = this.links();
+		if(!links)
+			return [];
 		
-		if(!links || links.length == 0)
-			return false;
+		if(!$.isArray(links))
+			links = [ links ];
+		
+		var ehs = [];
 		
 		var eventTypes = this._resolveLinksEventTypes(links);
 		var _thisChart = this;
 		
 		for(var i=0; i<eventTypes.length; i++)
 		{
-			this.on(eventTypes[i], function(chartEvent)
+			var eh =
 			{
-				_thisChart._handleChartEventyForLink(chartEvent);
-			});
-		}
-	};
-	
-	chartBaseExt._handleChartEventyForLink = function(chartEvent)
-	{
-		var links = this.links();
-		
-		if(!links || links.length == 0)
-			return false;
-		
-		var dashboard = this.dashboard;
-		var targetCharts = [];
-		
-		for(var i=0; i<links.length; i++)
-		{
-			var link = links[i];
-			
-			if(!this._linkContainsEventType(link, chartEvent.type))
-				continue;
-			
-			var chartEventData = global.chartFactory.chartEventData(chartEvent);
-			var chartEventOriginalData = global.chartFactory.chartEventOriginalData(chartEvent);
-			
-			var myTargetCharts = [];
-			
-			var targets = link.target;
-			if(!$.isArray(targets))
-				targets = [ targets ];
-			
-			for(var j=0; j<targets.length; j++)
-			{
-				myTargetCharts[j] = dashboard.getChart(targets[j]);
-				targetCharts.push(myTargetCharts[j]);
-			}
-			
-			for(var name in link.data)
-			{
-				var dataValue = chartEventData[name];
-				if(dataValue === undefined)
-					dataValue = chartEventOriginalData[name];
-				
-				var indexes = link.data[name];
-				if(!$.isArray(indexes))
-					indexes = [ indexes ];
-				
-				for(var j=0; j<indexes.length; j++)
+				eventType: eventTypes[i],
+				eventHandler: function(chartEvent)
 				{
-					var indexObj = indexes[j];
-					var indexObjType = typeof(indexObj);
-					
-					if(indexObjType == "number" || indexObjType == "string")
-						indexObj = { chart: 0, dataSet: 0, param: indexObj };
-					
-					var paramValue = (indexObj.value ? indexObj.value(dataValue, chartEvent) : dataValue);
-					myTargetCharts[indexObj.chart].dataSetParamValue(indexObj.dataSet, indexObj.param, paramValue);
+					_thisChart.handleChartEventLink(chartEvent, links);
 				}
-			}
+			};
+			
+			this.on(eh.eventType, eh.eventHandler);
+			
+			ehs.push(eh);
 		}
 		
-		for(var i=0; i<targetCharts.length; i++)
-			targetCharts[i].statusPreUpdate(true);
+		return ehs;
 	};
 	
+	/**
+	 * 解析不重复的联动设置事件类型数组。
+	 */
 	chartBaseExt._resolveLinksEventTypes = function(links)
 	{
 		var eventTypes = [];
@@ -300,7 +260,94 @@
 		return eventTypes;
 	};
 	
-	chartBaseExt._linkContainsEventType = function(link, eventType)
+	/**
+	 * 处理指定图表事件的图表联动操作。
+	 * 此方法根据图表联动设置对象，将图表事件数据传递至目标图表数据集参数值，然后请求刷新图表数据。
+	 * 
+	 * @param chartEvent 图表事件对象
+	 * @param links 图表联动设置对象、数组，格式参考chartBaseExt.links函数说明
+	 */
+	chartBaseExt.handleChartEventLink = function(chartEvent, links)
+	{
+		if(!links)
+			return false;
+		
+		if(!$.isArray(links))
+			links = [ links ];
+		
+		var dashboard = this.dashboard;
+		var targetCharts = [];
+		
+		for(var i=0; i<links.length; i++)
+		{
+			var link = links[i];
+			
+			if(chartEvent.type == null)
+				throw new Error("[chartEvent.type] must be defined");
+			
+			if(!this._isLinkContainsEventType(link, chartEvent.type))
+				continue;
+			
+			var chartEventData = global.chartFactory.chartEventData(chartEvent);
+			
+			if(chartEventData == null)
+				throw new Error("[chartEvent.data] must be defined");
+			
+			var chartEventOriginalData = global.chartFactory.chartEventOriginalData(chartEvent);
+			
+			var myTargetCharts = [];
+			
+			var targets = ($.isArray(link.target) ? link.target : [ link.target ]);
+			
+			for(var j=0; j<targets.length; j++)
+			{
+				myTargetCharts[j] = dashboard.getChart(targets[j]);
+				targetCharts.push(myTargetCharts[j]);
+			}
+			
+			for(var name in link.data)
+			{
+				var dataValue = chartEventData[name];
+				if(dataValue === undefined && chartEventOriginalData != null)
+					dataValue = chartEventOriginalData[name];
+				
+				var indexes = link.data[name];
+				if(!$.isArray(indexes))
+					indexes = [ indexes ];
+				
+				for(var j=0; j<indexes.length; j++)
+				{
+					var indexObj = indexes[j];
+					var indexObjType = typeof(indexObj);
+					
+					var chartIdx = 0;
+					var dataSetIdx = 0;
+					var param = 0;
+					var paramValue = null;
+					
+					if(indexObjType == "number" || indexObjType == "string")
+					{
+						param = indexObj;
+						paramValue = dataValue;
+					}
+					else
+					{
+						chartIdx = (indexObj.chart != null ? indexObj.chart : 0);
+						dataSetIdx = (indexObj.dataSet != null ? indexObj.dataSet : 0);
+						param = (indexObj.param != null ? indexObj.param : 0);
+						paramValue = (indexObj.value ? indexObj.value(dataValue, chartEvent) : dataValue);
+					}
+					
+					myTargetCharts[chartIdx].dataSetParamValue(dataSetIdx, param, paramValue);
+				}
+			}
+		}
+		
+		for(var i=0; i<targetCharts.length; i++)
+			targetCharts[i].statusPreUpdate(true);
+	};
+	
+	chartBaseExt._isLinkContainsEventType = function(link, eventType)
 	{
 		if(!link.eventType)
 		{
