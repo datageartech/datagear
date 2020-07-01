@@ -426,7 +426,7 @@
 						chart.setDataSetParamValues(paramValuess[i].index, paramValuess[i].paramValues);
 					
 					chartForm.closeChartSettingPanel(chart);
-					chart.statusPreUpdate(true);
+					chart.refreshData();
 				}
 			});
 		}

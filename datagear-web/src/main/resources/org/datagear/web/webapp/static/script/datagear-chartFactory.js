@@ -30,7 +30,7 @@
  * 此图表工厂支持为图表元素添加"dg-chart-disable-setting"属性，用于禁用图表交互设置功能，
  * 值为"true"表示禁用，其他表示启用。
  * 
- * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数，具体参考chartBase.initEventHandlers函数说明。
+ * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数，具体参考chartBase._initEventHandlers函数说明。
  * 
  * 此图表工厂和dashboardFactory.js一起可以支持异步图表插件，示例如下：
  * {
@@ -176,13 +176,17 @@
 	 */
 	chartBase.init = function()
 	{
-		this.initOptions();
-		this.initTheme();
-		this.initListener();
-		this.initMap();
-		this.initEchartsThemeName();
-		this.initDisableSetting();
-		this.initEventHandlers();
+		if(this._inited == true)
+			throw new Error("Chart has been initialized");
+		this._inited = true;
+		
+		this._initOptions();
+		this._initTheme();
+		this._initListener();
+		this._initMap();
+		this._initEchartsThemeName();
+		this._initDisableSetting();
+		this._initEventHandlers();
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
@@ -192,7 +196,7 @@
 	 * 初始化图表设置项。
 	 * 此方法依次从<body>元素、图表元素的"dg-chart-options"属性读取、合并图表设置项。
 	 */
-	chartBase.initOptions = function()
+	chartBase._initOptions = function()
 	{
 		var options = {};
 		
@@ -216,7 +220,7 @@
 	 * 
 	 * @return {...}
 	 */
-	chartBase.initTheme = function()
+	chartBase._initTheme = function()
 	{
 		var theme = chartFactory.GLOBAL_CHART_THEME;
 		
@@ -271,7 +275,7 @@
 	 * 初始化图表监听器。
 	 * 此方法依次从图表元素、<body>元素的"dg-chart-listener"属性获取监听器对象。
 	 */
-	chartBase.initListener = function()
+	chartBase._initListener = function()
 	{
 		var $chart = this.elementJquery();
 		
@@ -292,7 +296,7 @@
 	 * 初始化图表的地图名。
 	 * 此方法从图表元素的"dg-chart-map"属性获取图表地图名。
 	 */
-	chartBase.initMap = function()
+	chartBase._initMap = function()
 	{
 		var map = this.elementJquery().attr("dg-chart-map");
 		
@@ -304,7 +308,7 @@
 	 * 初始化图表的echarts主题名。
 	 * 此方法依次从图表元素、<body>元素的"dg-echarts-theme"属性获取echarts主题名。
 	 */
-	chartBase.initEchartsThemeName = function()
+	chartBase._initEchartsThemeName = function()
 	{
 		var themeName = this.elementJquery().attr("dg-echarts-theme");
 		
@@ -318,7 +322,7 @@
 	 * 初始化图表是否禁用交互设置。
 	 * 此方法从图表元素的"dg-chart-disable-setting"属性获取是否禁用值。
 	 */
-	chartBase.initDisableSetting = function()
+	chartBase._initDisableSetting = function()
 	{
 		var disableSetting = this.elementJquery().attr("dg-chart-disable-setting");
 		this.disableSetting(disableSetting == "true");
@@ -331,7 +335,7 @@
 	 * dg-chart-on-click="clickHandler" 						定义"click"事件处理函数；
 	 * dg-chart-on-mouseover="function(chartEvent){ ... }"		定义"mouseover"事件处理函数。
 	 */
-	chartBase.initEventHandlers = function()
+	chartBase._initEventHandlers = function()
 	{
 		var dom = this.element();
 		var attrs = dom.attributes;
@@ -466,11 +470,11 @@
 	
 	/**
 	 * 渲染图表。
-	 * 注意：只有this.statusPreRender()为true，此方法才会执行。
+	 * 注意：只有this.statusPreRender()或者statusDestroyed()为true，此方法才会执行。
 	 */
 	chartBase.render = function()
 	{
-		if(!this.statusPreRender())
+		if(!this.statusPreRender() && !this.statusDestroyed())
 			return false;
 		
 		var $chart = this.elementJquery();
@@ -494,6 +498,8 @@
 			if(!async)
 				this.statusRendered(true);
 		}
+		
+		return true;
 	};
 	
 	/**
@@ -546,10 +552,11 @@
 	
 	/**
 	 * 重新调整图表尺寸。
-	 * 注意：此函数在图表渲染完成后才可调用。
 	 */
 	chartBase.resize = function()
 	{
+		this._assertActive();
+		
 		if(this.plugin.chartRenderer.resize)
 			this.plugin.chartRenderer.resize(this);
 		else
@@ -565,6 +572,8 @@
 	 */
 	chartBase.destroy = function()
 	{
+		this._assertActive();
+		
 		this.statusDestroyed(true);
 		this.elementJquery().removeClass(chartFactory.CHART_DISTINCT_CSS_NAME);
 		
@@ -628,6 +637,25 @@
 	};
 	
 	/**
+	 * 图表是否是活跃的，即已完成渲染且未被销毁。
+	 */
+	chartBase.isActive = function()
+	{
+		return (this._isActive == true);
+	};
+	
+	/**
+	 * 断言图表是活跃的。
+	 */
+	chartBase._assertActive = function()
+	{
+		if(this.isActive())
+			return;
+		
+		throw new Error("Chart is not active");
+	};
+	
+	/**
 	 * 图表是否为/设置为：准备render。
 	 * 
 	 * @param set 可选，为true时设置状态；否则，判断状态
@@ -663,6 +691,7 @@
 	{
 		if(set)
 		{
+			this._isActive = true;
 			this.status(chartFactory.STATUS_RENDERED);
 			
 			if(postProcess != false)
@@ -770,7 +799,10 @@
 	chartBase.statusDestroyed = function(set)
 	{
 		if(set)
+		{
+			this._isActive = false;
 			this.status(chartFactory.STATUS_DESTROYED);
+		}
 		else
 			return (this.status() == chartFactory.STATUS_DESTROYED);
 	};
@@ -790,7 +822,6 @@
 	
 	/**
 	 * 绑定"click"事件处理函数。
-	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -801,7 +832,6 @@
 	
 	/**
 	 * 绑定"dblclick"事件处理函数。
-	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -812,7 +842,6 @@
 	
 	/**
 	 * 绑定"mousedown"事件处理函数。
-	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -823,7 +852,6 @@
 	
 	/**
 	 * 绑定"mouseup"事件处理函数。
-	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -834,7 +862,6 @@
 	
 	/**
 	 * 绑定"mouseover"事件处理函数。
-	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -845,7 +872,6 @@
 	
 	/**
 	 * 绑定"mouseout"事件处理函数。
-	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param handler 事件处理函数：function(chartEvent){}
 	 */
@@ -856,13 +882,14 @@
 	
 	/**
 	 * 绑定事件处理函数。
-	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param eventType 事件类型：click、dblclick、mousedown、mouseup、mouseover、mouseout
 	 * @param handler 事件处理函数：function(chartEvent){ ... }
 	 */
 	chartBase.on = function(eventType, handler)
 	{
+		this._assertActive();
+		
 		if(this.plugin.chartRenderer.on)
 			this.plugin.chartRenderer.on(this, eventType, handler);
 		else
@@ -878,6 +905,8 @@
 	 */
 	chartBase.off = function(eventType, handler)
 	{
+		this._assertActive();
+		
 		if(this.plugin.chartRenderer.off)
 			this.plugin.chartRenderer.off(this, eventType, handler);
 		else
@@ -1672,6 +1701,8 @@
 	
 	/**
 	 * 图表事件支持函数：绑定图表事件处理函数代理。
+	 * 注意：此函数在图表渲染完成后才可调用。
+	 * 
 	 * 图表事件处理通常由内部组件的事件处理函数代理（比如Echarts），并在代理函数中调用图表事件处理函数。
 	 * 
 	 * @param eventType
@@ -1682,6 +1713,8 @@
 	chartBase.eventBindHandlerDelegation = function(eventType, eventHanlder,
 			eventHandlerDelegation, delegationBinder)
 	{
+		this._assertActive();
+		
 		var delegations = this.extValue("eventHandlerDelegations");
 		if(delegations == null)
 		{
@@ -1696,6 +1729,7 @@
 	
 	/**
 	 * 图表事件支持函数：为图表解绑事件处理函数代理。
+	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param eventType 事件类型
 	 * @param eventHanlder 可选，要解绑的图表事件处理函数，不设置则解除所有指定事件类型的处理函数
@@ -1703,6 +1737,8 @@
 	 */
 	chartBase.eventUnbindHandlerDelegation = function(eventType, eventHanlder, delegationUnbinder)
 	{
+		this._assertActive();
+		
 		if(delegationUnbinder == undefined)
 		{
 			delegationUnbinder = eventHanlder;

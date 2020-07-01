@@ -49,7 +49,7 @@
 	{
 		var chartBase = global.chartFactory.chartBase;
 		
-		if(chartBase.initLinks)
+		if(chartBase._initLinks)
 			return false;
 		
 		chartBase._initSuper = chartBase.init;
@@ -59,7 +59,7 @@
 		
 		chartBase.init = function()
 		{
-			this.initLinks();
+			this._initLinks();
 			this._initSuper();
 		};
 		
@@ -134,7 +134,7 @@
 	 * 初始化图表联动设置。
 	 * 此方法从图表元素的"dg-chart-link"属性获取联动设置。
 	 */
-	chartBaseExt.initLinks = function()
+	chartBaseExt._initLinks = function()
 	{
 		var links = this.elementJquery().attr("dg-chart-link");
 		
@@ -202,13 +202,14 @@
 	
 	/**
 	 * 为指定图表联动设置绑定事件处理函数。
-	 * 注意：此函数在图表渲染完成后才可调用。
 	 * 
 	 * @param links 图表联动设置对象、数组，格式参考chartBaseExt.links函数说明
 	 * @return 绑定的事件处理函数对象数组，格式为：[ { eventType: "...", eventHandler: function(chartEvent){ ... } }, ... ]
 	 */
 	chartBaseExt.bindLinksEventHanders = function(links)
 	{
+		this._assertActive();
+		
 		if(!links)
 			return [];
 		
@@ -346,7 +347,7 @@
 		}
 		
 		for(var i=0; i<targetCharts.length; i++)
-			targetCharts[i].statusPreUpdate(true);
+			targetCharts[i].refreshData();
 	};
 	
 	chartBaseExt._isLinkContainsEventType = function(link, eventType)
@@ -361,6 +362,16 @@
 		}
 		else
 			return (link.eventType == eventType);
+	};
+	
+	/**
+	 * 从服务端获取并刷新图表数据。
+	 */
+	chartBaseExt.refreshData = function()
+	{
+		this._assertActive();
+		
+		this.statusPreUpdate(true);
 	};
 	
 	//----------------------------------------
@@ -681,18 +692,22 @@
 		{
 			var chart = charts[i];
 			
-			//标记为需要参数输入，避免参数准备好时会自动更新，实际应该由API控制是否更新
-			if(!chart.isDataSetParamValueReady())
-				chart.status(dashboardFactory.CHART_STATUS_PARAM_VALUE_REQUIRED);
-			
 			var updateInterval = chart.updateIntervalNonNull();
 			
 			if(chart.statusRendered() || chart.statusPreUpdate() || (chart.statusUpdated() && updateInterval > -1))
 			{
-				var prevUpdateTime = this._chartUpdateTime(chart);
-				
-				if(prevUpdateTime == null || (prevUpdateTime + updateInterval) <= time)
-					preUpdates.push(chart);
+				//标记为需要参数输入，避免参数准备好时会自动更新，实际应该由API控制是否更新
+				if(!chart.isDataSetParamValueReady())
+				{
+					chart.status(dashboardFactory.CHART_STATUS_PARAM_VALUE_REQUIRED);
+				}
+				else
+				{
+					var prevUpdateTime = this._chartUpdateTime(chart);
+					
+					if(prevUpdateTime == null || (prevUpdateTime + updateInterval) <= time)
+						preUpdates.push(chart);
+				}
 			}
 		}
 		
