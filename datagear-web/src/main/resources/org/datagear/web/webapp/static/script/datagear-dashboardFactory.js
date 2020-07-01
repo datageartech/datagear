@@ -20,6 +20,8 @@
  * 此看板工厂支持为<body>元素添加"dg-chart-map-urls"属性，用于扩展或替换内置地图，格式为：
  * {customMap:'map/custom.json', china: 'map/myChina.json'}
  * 
+ * 此看板工厂支持为图表元素添加"dg-chart-link"属性，用于设置图表联动，具体格式参考chartBaseExt.links函数说明。
+ * 
  */
 (function(global)
 {
@@ -370,19 +372,23 @@
 	//----------------------------------------
 	
 	/**
-	 * 看板初始化。
+	 * 初始化看板。
 	 */
 	dashboardBase.init = function()
 	{
-		this.initListener();
-		this.initCharts();
+		if(this._inited == true)
+			throw new Error("Dashboard has been initialized");
+		this._inited = true;
+		
+		this._initListener();
+		this._initCharts();
 	};
 	
 	/**
 	 * 初始化看板的监听器。
 	 * 它将body元素的"dg-dashboard-listener"属性值设置为看板的监听器。
 	 */
-	dashboardBase.initListener = function()
+	dashboardBase._initListener = function()
 	{
 		var listener = $(document.body).attr("dg-dashboard-listener");
 		
@@ -397,7 +403,37 @@
 	};
 	
 	/**
-	 * 获取/设置看板监听器。
+	 * 初始化看板的所有图表。
+	 */
+	dashboardBase._initCharts = function()
+	{
+		if(!this.charts)
+			return;
+		
+		var dashboardTheme = global.chartFactory.renderContextAttr(this.renderContext, "dashboardTheme");
+		global.chartFactory.renderContextAttr(this.renderContext, global.chartFactory.renderContextAttrs.chartTheme,
+				dashboardTheme.chartTheme);
+		
+		for(var i=0; i<this.charts.length; i++)
+			this._initChart(this.charts[i]);
+	};
+	
+	/**
+	 * 初始化看板的单个图表。
+	 */
+	dashboardBase._initChart = function(chart)
+	{
+		chart.dashboard = this;
+		
+		global.chartFactory.init(chart);
+		
+		//如果图表没有定义监听器，则使用代理看板监听器
+		if(!chart.listener())
+			chart.listener(this._getDelegateChartListener());
+	};
+	
+	/**
+	 * 获取/设置初始看板监听器。
 	 * 看板监听器格式为：
 	 * {
 	 *   //可选，渲染看板完成回调函数
@@ -424,7 +460,7 @@
 		this._listener = listener;
 		
 		//需要同步设置全局图表监听器
-		var chartListener = this.getDelegateChartListener();
+		var chartListener = this._getDelegateChartListener();
 		
 		var dashboard = this;
 		
@@ -453,235 +489,10 @@
 	 * 获取看板的代理图表监听器。
 	 * 为了确保任意时刻设置看板监听器（dashboard.listener(...)）都能传递至图表，所以此方法应始终返回不为null且引用不变的对象。
 	 */
-	dashboardBase.getDelegateChartListener = function()
+	dashboardBase._getDelegateChartListener = function()
 	{
 		var chartListener = (this._delegateChartListener || (this._delegateChartListener = {}));
 		return chartListener;
-	};
-	
-	/**
-	 * 初始化看板的所有图表。
-	 */
-	dashboardBase.initCharts = function()
-	{
-		if(!this.charts)
-			return;
-		
-		var dashboardTheme = global.chartFactory.renderContextAttr(this.renderContext, "dashboardTheme");
-		global.chartFactory.renderContextAttr(this.renderContext, global.chartFactory.renderContextAttrs.chartTheme,
-				dashboardTheme.chartTheme);
-		
-		for(var i=0; i<this.charts.length; i++)
-			this.initChart(this.charts[i]);
-	};
-	
-	/**
-	 * 初始化看板的单个图表。
-	 */
-	dashboardBase.initChart = function(chart)
-	{
-		chart.dashboard = this;
-		
-		global.chartFactory.init(chart);
-		
-		//如果图表没有定义监听器，则使用代理看板监听器
-		if(!chart.listener())
-			chart.listener(this.getDelegateChartListener());
-	};
-	
-	/**
-	 * 渲染看板。
-	 */
-	dashboardBase.render = function()
-	{
-		var doRender = true;
-		
-		var listener = this.listener();
-		if(listener && listener.onRender)
-		  doRender = listener.onRender(this);
-		
-		if(doRender != false)
-		{
-			this.doHandleCharts();
-			
-			if(listener && listener.render)
-				  listener.render(this);
-		}
-	};
-	
-	/**
-	 * 处理看板所有图表，根据其状态执行render或者update。
-	 */
-	dashboardBase.doHandleCharts = function()
-	{
-		var charts = (this.charts || []);
-		
-		for(var i=0; i<charts.length; i++)
-		{
-			var chart = charts[i];
-			
-			if(chart.statusPreRender())
-				this.renderChart(chart);
-		}
-		
-		var preUpdates = [];
-		var time = new Date().getTime();
-		
-		for(var i=0; i<charts.length; i++)
-		{
-			var chart = charts[i];
-			
-			//标记为需要参数输入，避免参数准备好时会自动更新，实际应该由API控制是否更新
-			if(!chart.isDataSetParamValueReady())
-				chart.status(dashboardFactory.CHART_STATUS_PARAM_VALUE_REQUIRED);
-			
-			var updateInterval = chart.updateIntervalNonNull();
-			
-			if(chart.statusRendered() || chart.statusPreUpdate() || (chart.statusUpdated() && updateInterval > -1))
-			{
-				var prevUpdateTime = this.chartUpdateTime(chart);
-				
-				if(prevUpdateTime == null || (prevUpdateTime + updateInterval) <= time)
-					preUpdates.push(chart);
-			}
-		}
-		
-		if(preUpdates.length == 0)
-		{
-			var dashboard = this;
-			setTimeout(function(){ dashboard.doHandleCharts(); }, 1);
-		}
-		else
-		{
-			var webContext = this.renderContextAttr("webContext");
-			
-			var data = this.buildUpdateDashboardAjaxData(preUpdates);
-			
-			var dashboard = this;
-			
-			$.ajax({
-				contentType : "application/json",
-				type : "POST",
-				url : webContext.updateDashboardURL,
-				data : JSON.stringify(data),
-				success : function(resultsMap)
-				{
-					try
-					{
-						dashboard.updateCharts(resultsMap);
-					}
-					catch(e)
-					{
-						global.chartFactory.logException(e);
-					}
-					
-					dashboard.doHandleCharts();
-				},
-				error : function()
-				{
-					var updateTime = new Date().getTime();
-					
-					try
-					{
-						for(var i=0; i<dashboard.charts.length; i++)
-							dashboard.chartUpdateTime(dashboard.charts[i], updateTime);
-					}
-					catch(e)
-					{
-						global.chartFactory.logException(e);
-					}
-					
-					//请求出错则10秒后再尝试，避免请求出错后频繁地再次发送请求
-					setTimeout(function(){ dashboard.doHandleCharts(); }, 1000*10);
-				}
-			});
-		}
-	};
-	
-	/**
-	 * 渲染指定图表。
-	 * 
-	 * @param chart 图表对象
-	 */
-	dashboardBase.renderChart = function(chart)
-	{
-		try
-		{
-			this.doRenderChart(chart);
-		}
-		catch(e)
-		{
-			//设置为渲染出错状态，避免渲染失败后会doHandleCharts中会无限尝试渲染
-			chart.status(dashboardFactory.CHART_STATUS_RENDER_ERROR);
-			
-			global.chartFactory.logException(e);
-		}
-	};
-	
-	/**
-	 * 执行渲染指定图表。
-	 * 
-	 * @param chart 图表对象
-	 */
-	dashboardBase.doRenderChart = function(chart)
-	{
-		return chart.render();
-	};
-	
-	/**
-	 * 更新看板的图表数据。
-	 * 
-	 * @param resultsMap 图表ID - 图表数据集结果数组
-	 */
-	dashboardBase.updateCharts = function(resultsMap)
-	{
-		var updateTime = new Date().getTime();
-		
-		for(var chartId in resultsMap)
-		{
-			var chart = this.getChart(chartId);
-			
-			if(!chart)
-				continue;
-			
-			this.chartUpdateTime(chart, updateTime);
-			
-			var results = resultsMap[chartId];
-			
-			this.updateChart(chart, results);
-		}
-	};
-	
-	/**
-	 * 更新指定图表。
-	 * 
-	 * @param chart 图表对象
-	 * @param results 图表数据集结果数组
-	 */
-	dashboardBase.updateChart = function(chart, results)
-	{
-		try
-		{
-			this.doUpdateChart(chart, results);
-		}
-		catch(e)
-		{
-			//设置为更新出错状态，避免更新失败后会doHandleCharts中会无限尝试更新
-			chart.status(dashboardFactory.CHART_STATUS_UPDATE_ERROR);
-			
-			global.chartFactory.logException(e);
-		}
-	};
-	
-	/**
-	 * 更新指定图表。
-	 * 
-	 * @param chart 图表对象
-	 * @param results 图表数据集结果数组
-	 */
-	dashboardBase.doUpdateChart = function(chart, results)
-	{
-		return chart.update(results);
 	};
 	
 	/**
@@ -697,8 +508,7 @@
 	};
 	
 	/**
-	 * 添加图表。
-	 * 如果chart.statusPreRender()返回true，那么它将被立即渲染。
+	 * 添加已经初始化的图表。
 	 * 
 	 * @param chart 图表对象
 	 */
@@ -727,9 +537,14 @@
 		this.charts = newCharts;
 		
 		if(notDestory != true)
-			this.destroyChart(removeds[0]);
+			this._destroyChart(removeds[0]);
 		
 		return removeds[0];
+	};
+	
+	dashboardBase._destroyChart = function(chart)
+	{
+		chart.destroy();
 	};
 	
 	/**
@@ -759,16 +574,6 @@
 	};
 	
 	/**
-	 * 销毁图表。
-	 * 
-	 * @param chart 图表对象
-	 */
-	dashboardBase.destroyChart = function(chart)
-	{
-		chart.destroy();
-	};
-	
-	/**
 	 * 获取图表索引号。
 	 * 
 	 * @param chartInfo 图表信息：图表对象、图表HTML元素ID、图表ID、图表索引
@@ -795,12 +600,241 @@
 	};
 	
 	/**
-	 * 获取/设置图表更新时间。
+	 * 获取/设置渲染上下文的属性值。
 	 * 
-	 * @param chart
-	 * @param updateTime 要设置的更新时间
+	 * @param attrName
+	 * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
 	 */
-	dashboardBase.chartUpdateTime = function(chart, updateTime)
+	dashboardBase.renderContextAttr = function(attrName, attrValue)
+	{
+		return global.chartFactory.renderContextAttr(this.renderContext, attrName, attrValue);
+	};
+	
+	/**
+	 * 渲染看板。
+	 */
+	dashboardBase.render = function()
+	{
+		if(this._rendered == true)
+			throw new Error("Dashboard has been rendered");
+		this._rendered = true;
+		
+		var doRender = true;
+		
+		var listener = this.listener();
+		if(listener && listener.onRender)
+		  doRender = listener.onRender(this);
+		
+		if(doRender != false)
+		{
+			this.startHandleCharts();
+			
+			if(listener && listener.render)
+				  listener.render(this);
+		}
+	};
+	
+	/**
+	 * 开始处理看板所有图表，循环查看它们的状态，执行render或者update。
+	 */
+	dashboardBase.startHandleCharts = function()
+	{
+		if(this._doHandleChartsSwitch == true)
+			return false;
+		
+		this._doHandleChartsSwitch = true;
+		this._doHandleCharts();
+		
+		return true;
+	};
+	
+	/**
+	 * 停止处理看板所有图表。
+	 */
+	dashboardBase.stopHandleCharts = function()
+	{
+		this._doHandleChartsSwitch = false;
+	};
+	
+	/**
+	 * 开始循环处理看板所有图表，根据其状态执行render或者update。
+	 */
+	dashboardBase._doHandleCharts = function()
+	{
+		if(this._doHandleChartsSwitch != true)
+			return;
+		
+		var charts = (this.charts || []);
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			var chart = charts[i];
+			
+			if(chart.statusPreRender())
+				this._renderChart(chart);
+		}
+		
+		var preUpdates = [];
+		var time = new Date().getTime();
+		
+		for(var i=0; i<charts.length; i++)
+		{
+			var chart = charts[i];
+			
+			//标记为需要参数输入，避免参数准备好时会自动更新，实际应该由API控制是否更新
+			if(!chart.isDataSetParamValueReady())
+				chart.status(dashboardFactory.CHART_STATUS_PARAM_VALUE_REQUIRED);
+			
+			var updateInterval = chart.updateIntervalNonNull();
+			
+			if(chart.statusRendered() || chart.statusPreUpdate() || (chart.statusUpdated() && updateInterval > -1))
+			{
+				var prevUpdateTime = this._chartUpdateTime(chart);
+				
+				if(prevUpdateTime == null || (prevUpdateTime + updateInterval) <= time)
+					preUpdates.push(chart);
+			}
+		}
+		
+		if(preUpdates.length == 0)
+		{
+			var dashboard = this;
+			setTimeout(function(){ dashboard._doHandleCharts(); }, 1);
+		}
+		else
+		{
+			var webContext = this.renderContextAttr("webContext");
+			
+			var data = this._buildUpdateDashboardAjaxData(preUpdates);
+			
+			var dashboard = this;
+			
+			$.ajax({
+				contentType : "application/json",
+				type : "POST",
+				url : webContext.updateDashboardURL,
+				data : JSON.stringify(data),
+				success : function(resultsMap)
+				{
+					try
+					{
+						dashboard._updateCharts(resultsMap);
+					}
+					catch(e)
+					{
+						global.chartFactory.logException(e);
+					}
+					
+					dashboard._doHandleCharts();
+				},
+				error : function()
+				{
+					var updateTime = new Date().getTime();
+					
+					try
+					{
+						for(var i=0; i<dashboard.charts.length; i++)
+							dashboard._chartUpdateTime(dashboard.charts[i], updateTime);
+					}
+					catch(e)
+					{
+						global.chartFactory.logException(e);
+					}
+					
+					//请求出错则10秒后再尝试，避免请求出错后频繁地再次发送请求
+					setTimeout(function(){ dashboard._doHandleCharts(); }, 1000*10);
+				}
+			});
+		}
+	};
+	
+	/**
+	 * 渲染指定图表。
+	 * 
+	 * @param chart 图表对象
+	 */
+	dashboardBase._renderChart = function(chart)
+	{
+		try
+		{
+			this._doRenderChart(chart);
+		}
+		catch(e)
+		{
+			//设置为渲染出错状态，避免渲染失败后会_doHandleCharts中会无限尝试渲染
+			chart.status(dashboardFactory.CHART_STATUS_RENDER_ERROR);
+			
+			global.chartFactory.logException(e);
+		}
+	};
+	
+	/**
+	 * 执行渲染指定图表。
+	 * 
+	 * @param chart 图表对象
+	 */
+	dashboardBase._doRenderChart = function(chart)
+	{
+		return chart.render();
+	};
+	
+	/**
+	 * 更新看板的图表数据。
+	 * 
+	 * @param resultsMap 图表ID - 图表数据集结果数组
+	 */
+	dashboardBase._updateCharts = function(resultsMap)
+	{
+		var updateTime = new Date().getTime();
+		
+		for(var chartId in resultsMap)
+		{
+			var chart = this.getChart(chartId);
+			
+			if(!chart)
+				continue;
+			
+			this._chartUpdateTime(chart, updateTime);
+			
+			var results = resultsMap[chartId];
+			
+			this._updateChart(chart, results);
+		}
+	};
+	
+	/**
+	 * 更新指定图表。
+	 * 
+	 * @param chart 图表对象
+	 * @param results 图表数据集结果数组
+	 */
+	dashboardBase._updateChart = function(chart, results)
+	{
+		try
+		{
+			this._doUpdateChart(chart, results);
+		}
+		catch(e)
+		{
+			//设置为更新出错状态，避免更新失败后会_doHandleCharts中会无限尝试更新
+			chart.status(dashboardFactory.CHART_STATUS_UPDATE_ERROR);
+			
+			global.chartFactory.logException(e);
+		}
+	};
+	
+	/**
+	 * 更新指定图表。
+	 * 
+	 * @param chart 图表对象
+	 * @param results 图表数据集结果数组
+	 */
+	dashboardBase._doUpdateChart = function(chart, results)
+	{
+		return chart.update(results);
+	};
+	
+	dashboardBase._chartUpdateTime = function(chart, updateTime)
 	{
 		if(updateTime === undefined)
 			return chart._updateTime;
@@ -811,7 +845,7 @@
 	/**
 	 * 构建更新看板的ajax请求数据。
 	 */
-	dashboardBase.buildUpdateDashboardAjaxData = function(charts)
+	dashboardBase._buildUpdateDashboardAjaxData = function(charts)
 	{
 		var updateDashboardConfig = dashboardFactory.updateDashboardConfig;
 		
@@ -901,7 +935,7 @@
 		{
 			myAjaxOptions.success = function(chart, textStatus, jqXHR)
 			{
-				_this.initLoadedChart(chart);
+				_this._initLoadedChart(chart);
 				_this.addChart(chart);
 			};
 		}
@@ -911,7 +945,7 @@
 			
 			myAjaxOptions.success = function(chart, textStatus, jqXHR)
 			{
-				_this.initLoadedChart(chart);
+				_this._initLoadedChart(chart);
 				var re = successHandler.call(this, chart, textStatus, jqXHR);
 				
 				if(re != false)
@@ -927,22 +961,11 @@
 	 * 
 	 * @param chart 图表JSON对象
 	 */
-	dashboardBase.initLoadedChart = function(chart)
+	dashboardBase._initLoadedChart = function(chart)
 	{
 		chart.plugin = global.chartFactory.chartPluginManager.get(chart.plugin.id);
 		chart.renderContext = this.renderContext;
-		this.initChart(chart);
-	};
-	
-	/**
-	 * 获取/设置渲染上下文的属性值。
-	 * 
-	 * @param attrName
-	 * @param attrValue 要设置的属性值，可选，不设置则执行获取操作
-	 */
-	dashboardBase.renderContextAttr = function(attrName, attrValue)
-	{
-		return global.chartFactory.renderContextAttr(this.renderContext, attrName, attrValue);
+		this._initChart(chart);
 	};
 	
 	//----------------------------------------
