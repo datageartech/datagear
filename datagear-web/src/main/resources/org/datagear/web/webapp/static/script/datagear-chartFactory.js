@@ -471,6 +471,9 @@
 	/**
 	 * 渲染图表。
 	 * 注意：只有this.statusPreRender()或者statusDestroyed()为true，此方法才会执行。
+	 * 注意：
+	 * 从render()开始产生的新扩展图表属性值都应该使用extValue()函数设置/获取，
+	 * 因为图表会在destroy()中清除extValue()设置的所有值，之后允许重新render()。
 	 */
 	chartBase.render = function()
 	{
@@ -532,7 +535,7 @@
 		
 		if(doUpdate != false)
 		{
-			this._updateResults = results;
+			this.extValue("_updateResults", results);
 			
 			var async = this.isAsyncUpdate(results);
 			this.plugin.chartRenderer.update(this, results);
@@ -547,7 +550,7 @@
 	 */
 	chartBase.getUpdateResults = function()
 	{
-		return this._updateResults;
+		return this.extValue("_updateResults");
 	};
 	
 	/**
@@ -592,6 +595,9 @@
 		}
 		
 		this._destroySetting();
+		
+		//最后清空扩展属性值，因为上面逻辑可能会使用到
+		this._extValues = {};
 	};
 	
 	/**
@@ -1099,8 +1105,7 @@
 	};
 	
 	/**
-	 * 获取/设置扩展值。
-	 * 图表插件渲染器可以用此函数在render()、update()间传递数据，避免与图表本身的属性命名冲突。
+	 * 获取/设置扩展属性值。
 	 * 
 	 * @param name 扩展名
 	 * @param value 要设置的扩展值，可选，不设置则执行获取操作
@@ -1528,9 +1533,9 @@
 	chartBase.echartsInstance = function(instance)
 	{
 		if(instance === undefined)
-			return this._echartsInstance;
+			return this.extValue("_echartsInstance");
 		else
-			this._echartsInstance = instance;
+			this.extValue("_echartsInstance", instance);
 	};
 	
 	/**

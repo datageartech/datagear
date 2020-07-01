@@ -852,9 +852,9 @@
 	dashboardBase._chartUpdateTime = function(chart, updateTime)
 	{
 		if(updateTime === undefined)
-			return chart._updateTime;
-		
-		chart._updateTime = updateTime;
+			return chart.extValue("_updateTime");
+		else
+			chart.extValue("_updateTime", updateTime);
 	};
 	
 	/**
