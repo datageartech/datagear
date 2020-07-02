@@ -22,6 +22,8 @@
  * 
  * 此看板工厂支持为图表元素添加"dg-chart-link"属性，用于设置图表联动，具体格式参考chartBaseExt.links函数说明。
  * 
+ * 此看板工厂支持为<body>元素、图表元素添加"dg-chart-auto-resize"属性，用于设置图表是否自动调整大小。
+ * 
  */
 (function(global)
 {
@@ -60,6 +62,7 @@
 		chartBase.init = function()
 		{
 			this._initLinks();
+			this._initAutoResize();
 			this._initSuper();
 		};
 		
@@ -148,6 +151,20 @@
 		
 		this.links(links);
 	};
+
+	/**
+	 * 初始化图表自动调整大小设置。
+	 * 此方法从body元素、图表元素的"dg-chart-auto-resize"属性获取联动设置。
+	 */
+	chartBaseExt._initAutoResize = function()
+	{
+		var autoResize = this.elementJquery().attr("dg-chart-auto-resize");
+		
+		if(autoResize == null)
+			autoResize = $(document.body).attr("dg-chart-auto-resize");
+		
+		this.autoResize(autoResize == "true");
+	};
 	
 	/**
 	 * 获取/设置初始图表联动设置对象数组。
@@ -198,6 +215,19 @@
 			
 			this._links = links;
 		}
+	};
+	
+	/**
+	 * 获取/设置图表是否自动调整大小。
+	 * 
+	 * @param autoResize 可选，设置为是否自动调整大小，没有则执行获取操作。
+	 */
+	chartBaseExt.autoResize = function(autoResize)
+	{
+		if(autoResize === undefined)
+			return (this._autoResize == true);
+		else
+			this._autoResize = autoResize;
 	};
 	
 	/**
@@ -392,6 +422,7 @@
 		this._inited = true;
 		
 		this._initListener();
+		this._initChartResizeHandler();
 		this._initCharts();
 	};
 	
@@ -441,6 +472,31 @@
 		//如果图表没有定义监听器，则使用代理看板监听器
 		if(!chart.listener())
 			chart.listener(this._getDelegateChartListener());
+	};
+	
+	/**
+	 * 初始化自动调整图表大小处理器。
+	 */
+	dashboardBase._initChartResizeHandler = function()
+	{
+		var thisDashboard = this;
+		
+		$(window).resize(function()
+		{
+			setTimeout(function()
+			{
+				var charts = (thisDashboard.charts || []);
+				
+				for(var i =0; i<charts.length; i++)
+				{
+					var chart = charts[i];
+					
+					if(chart.autoResize() && chart.isActive())
+						chart.resize();
+				}
+			},
+			100);
+		});
 	};
 	
 	/**
