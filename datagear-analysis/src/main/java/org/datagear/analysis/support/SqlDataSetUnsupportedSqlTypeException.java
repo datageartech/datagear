@@ -22,28 +22,40 @@ public class SqlDataSetUnsupportedSqlTypeException extends DataSetException
 
 	private SqlType sqlType;
 
+	private String columnName;
+
 	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType)
 	{
 		super();
 		this.sqlType = sqlType;
 	}
 
-	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType, String message)
+	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType, String columnName)
+	{
+		super();
+		this.sqlType = sqlType;
+		this.columnName = columnName;
+	}
+
+	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType, String columnName, String message)
 	{
 		super(message);
 		this.sqlType = sqlType;
+		this.columnName = columnName;
 	}
 
-	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType, Throwable cause)
+	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType, String columnName, Throwable cause)
 	{
 		super(cause);
 		this.sqlType = sqlType;
+		this.columnName = columnName;
 	}
 
-	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType, String message, Throwable cause)
+	public SqlDataSetUnsupportedSqlTypeException(SqlType sqlType, String columnName, String message, Throwable cause)
 	{
 		super(message, cause);
 		this.sqlType = sqlType;
+		this.columnName = columnName;
 	}
 
 	public SqlType getSqlType()
@@ -54,5 +66,20 @@ public class SqlDataSetUnsupportedSqlTypeException extends DataSetException
 	protected void setSqlType(SqlType sqlType)
 	{
 		this.sqlType = sqlType;
+	}
+
+	public boolean hasColumnName()
+	{
+		return (this.columnName != null && !this.columnName.isEmpty());
+	}
+
+	public String getColumnName()
+	{
+		return columnName;
+	}
+
+	protected void setColumnName(String columnName)
+	{
+		this.columnName = columnName;
 	}
 }

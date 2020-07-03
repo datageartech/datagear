@@ -193,6 +193,7 @@ DataGear版本更新日志
 改进：图表编辑页面显示数据标记名，用于为图表事件数据结构标识提供参考；
 改进：简化图表主题结构，移除axisColor、axisScaleLineColor属性，添加actualBackgroundColor属性；
 改进：重构看板JS对象、图表JS对象的API，用于支持看板个性化开发；
+改进：数据集预览查询结果中存在不支持的数据类型时给出友好的提示；
 改进：看板页面window.chartSupport迁移至window.chartFactory.chartSupport，前者将在未来版本移除；
 改进：看板页面window.chartPluginManager迁移至window.chartFactory.chartPluginManager，前者将在未来版本移除；
 改进：看板页面window.chartForm迁移至window.chartFactory.chartForm，前者将在未来版本移除；

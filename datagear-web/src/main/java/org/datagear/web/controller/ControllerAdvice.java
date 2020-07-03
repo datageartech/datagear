@@ -364,8 +364,12 @@ public class ControllerAdvice extends AbstractController
 	public String handleAnalysisSqlDataSetUnsupportedSqlTypeException(HttpServletRequest request,
 			HttpServletResponse response, SqlDataSetUnsupportedSqlTypeException exception)
 	{
+		String msgArg = exception.getSqlType().getTypeName();
+		if (exception.hasColumnName())
+			msgArg = msgArg + " (" + exception.getColumnName() + ")";
+
 		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetUnsupportedSqlTypeException.class),
-				exception, false, exception.getSqlType().getTypeName());
+				exception, false, msgArg);
 		return getErrorView(request, response);
 	}
 

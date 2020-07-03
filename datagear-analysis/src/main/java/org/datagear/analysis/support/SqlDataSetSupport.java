@@ -334,7 +334,7 @@ public class SqlDataSetSupport extends JdbcSupport
 			String columnName = getColumnName(metaData, i);
 			SqlType sqlType = getColumnSqlType(metaData, i);
 
-			String dataType = toPropertyDataType(sqlType);
+			String dataType = toPropertyDataType(sqlType, columnName);
 
 			DataSetProperty property = createDataSetProperty();
 			property.setName(columnName);
@@ -353,10 +353,12 @@ public class SqlDataSetSupport extends JdbcSupport
 	 * 由SQL类型转换为{@linkplain DataSetProperty#getType()}。
 	 * 
 	 * @param sqlType
+	 * @param columnName
+	 *            允许为{@code null}，列名称
 	 * @return
 	 * @throws SQLException
 	 */
-	public String toPropertyDataType(SqlType sqlType) throws SQLException
+	public String toPropertyDataType(SqlType sqlType, String columnName) throws SQLException
 	{
 		String dataType = null;
 
@@ -418,7 +420,7 @@ public class SqlDataSetSupport extends JdbcSupport
 			}
 
 			default:
-				throw new SqlDataSetUnsupportedSqlTypeException(sqlType);
+				throw new SqlDataSetUnsupportedSqlTypeException(sqlType, columnName);
 		}
 
 		return dataType;
