@@ -176,7 +176,7 @@
 	 *   //必选，联动目标图表元素ID、ID数组
 	 *   target: "..."、["...", ...],
 	 *   
-	 *   //必选，联动数据参数映射表
+	 *   //可选，联动数据参数映射表
 	 *   data:
 	 *   {
 	 *     //ChartEvent对象的"data"、"orginalData"对象的属性名 : 目标数据集参数的映射索引、映射索引数组
@@ -323,7 +323,8 @@
 			
 			var chartEventData = this.eventData(chartEvent);
 			
-			if(chartEventData == null)
+			//如果定义了link.data，那么chartEventData不允许为null
+			if(link.data != null && chartEventData == null)
 				throw new Error("[chartEvent.data] must be defined");
 			
 			var chartEventOriginalData = this.eventOriginalData(chartEvent);
@@ -338,13 +339,15 @@
 				targetCharts.push(myTargetCharts[j]);
 			}
 			
-			for(var name in link.data)
+			var linkData = (link.data || {});
+			
+			for(var name in linkData)
 			{
 				var dataValue = chartEventData[name];
 				if(dataValue === undefined && chartEventOriginalData != null)
 					dataValue = chartEventOriginalData[name];
 				
-				var indexes = link.data[name];
+				var indexes = linkData[name];
 				if(!$.isArray(indexes))
 					indexes = [ indexes ];
 				
