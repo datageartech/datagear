@@ -465,6 +465,7 @@
 	 */
 	dashboardBase._initChart = function(chart)
 	{
+		chart.renderContext = this.renderContext;
 		chart.dashboard = this;
 		
 		global.chartFactory.init(chart);
@@ -575,6 +576,14 @@
 	};
 	
 	/**
+	 * 获取所有图表数组。
+	 */
+	dashboardBase.getAllCharts = function()
+	{
+		return (this.charts || []);
+	};
+	
+	/**
 	 * 添加已经初始化的图表。
 	 * 
 	 * @param chart 图表对象
@@ -590,7 +599,7 @@
 	 * 
 	 * @param chartInfo 图表对象、图表HTML元素ID、图表ID、图表索引
 	 * @param notDestory 选填参数，是否不销毁图表，默认为false
-	 * @return 移除的图表对象或者undefined
+	 * @return 移除的图表对象，或者图表未找到时为undefined
 	 */
 	dashboardBase.removeChart = function(chartInfo, notDestory)
 	{
@@ -702,7 +711,17 @@
 	};
 	
 	/**
-	 * 开始处理看板所有图表，循环查看它们的状态，执行render或者update。
+	 * 是否正在监视处理看板图表。
+	 */
+	dashboardBase.isHandlingCharts = function()
+	{
+		return (this._doHandleChartsSwitch == true);
+	};
+	
+	/**
+	 * 开始监视处理看板图表，循环查看它们的状态，执行相应操作：
+	 * 如果isWaitForRender(chart)，则执行chart.render()；
+	 * 如果isWaitForUpdate(chart)且图表的所有数据集参数值都齐备，则执行chart.update()。
 	 */
 	dashboardBase.startHandleCharts = function()
 	{
@@ -716,11 +735,40 @@
 	};
 	
 	/**
-	 * 停止处理看板所有图表。
+	 * 停止监视处理看板图表。
 	 */
 	dashboardBase.stopHandleCharts = function()
 	{
 		this._doHandleChartsSwitch = false;
+	};
+	
+	/**
+	 * 给定图表是否在等待渲染。
+	 * 等待渲染的判断条件：
+	 * chart.statusPreRender()为true。
+	 * 
+	 * @param chart 图表对象
+	 */
+	dashboardBase.isWaitForRender = function(chart)
+	{
+		return chart.statusPreRender();
+	};
+	
+	/**
+	 * 给定图表是否在等待更新数据。
+	 * 等待更新数据的判断条件：
+	 * chart.statusRendered()为true
+	 * 或者
+	 * chart.statusPreUpdate()为true
+	 * 或者
+	 * chart.statusUpdated()为true且图表设置了定时刷新间隔。
+	 * 
+	 * @param chart 图表对象
+	 */
+	dashboardBase.isWaitForUpdate = function(chart)
+	{
+		return (chart.statusRendered() || chart.statusPreUpdate()
+				|| (chart.statusUpdated() && chart.updateIntervalNonNull() > -1));
 	};
 	
 	/**
@@ -737,7 +785,7 @@
 		{
 			var chart = charts[i];
 			
-			if(chart.statusPreRender())
+			if(this.isWaitForRender(chart))
 				this._renderChart(chart);
 		}
 		
@@ -748,17 +796,16 @@
 		{
 			var chart = charts[i];
 			
-			var updateInterval = chart.updateIntervalNonNull();
-			
-			if(chart.statusRendered() || chart.statusPreUpdate() || (chart.statusUpdated() && updateInterval > -1))
+			if(this.isWaitForUpdate(chart))
 			{
-				//标记为需要参数输入，避免参数准备好时会自动更新，实际应该由API控制是否更新
+				//标记为需要参数输入，避免参数准备好时会立即自动更新，实际应该由API控制是否更新
 				if(!chart.isDataSetParamValueReady())
 				{
 					chart.status(dashboardFactory.CHART_STATUS_PARAM_VALUE_REQUIRED);
 				}
 				else
 				{
+					var updateInterval = chart.updateIntervalNonNull();
 					var prevUpdateTime = this._chartUpdateTime(chart);
 					
 					if(prevUpdateTime == null || (prevUpdateTime + updateInterval) <= time)
@@ -1035,7 +1082,6 @@
 	dashboardBase._initLoadedChart = function(chart)
 	{
 		chart.plugin = global.chartFactory.chartPluginManager.get(chart.plugin.id);
-		chart.renderContext = this.renderContext;
 		this._initChart(chart);
 	};
 	

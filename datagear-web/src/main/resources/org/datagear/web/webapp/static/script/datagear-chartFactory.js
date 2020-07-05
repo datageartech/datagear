@@ -32,10 +32,34 @@
  * 
  * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数，具体参考chartBase._initEventHandlers函数说明。
  * 
+ * 此图表工厂要求图表插件的图表渲染器（chartRenderer）格式为：
+ * {
+ *   //可选，渲染图表函数是否是异步函数，默认为false
+ *   asyncRender: true、false、function(chart){ ...; return true 或者 false; }
+ *   //必选，渲染图表函数
+ *   render: function(chart){ ... },
+ *   //可选，更新图表数据函数是否是异步函数，默认为false
+ *   asyncUpdate: true、false、function(chart, results){ ...; return true 或者 false; }
+ *   //必选，更新图表数据函数
+ *   //results 要更新的图表数据
+ *   update: function(chart, results){ ... },
+ *   //可选，调整图表尺寸函数
+ *   resize: function(chart){ ... },
+ *   //可选，绑定图表事件处理函数
+ *   //eventType 事件类型，比如："click"、"mouseover"等
+ *   //handler 图表事件处理函数，格式为：function(chartEvent){ ... }
+ *   on: function(chart, eventType, handler){ ... },
+ *   //可选，解绑图表事件处理函数
+ *   //eventType 事件类型
+ *   //handler 图表事件处理函数引用
+ *   off: function(chart, eventType, handler){ ... },
+ *   //可选，销毁图表函数
+ *   destroy: function(chart){ ... }
+ * }
+ * 
  * 此图表工厂和dashboardFactory.js一起可以支持异步图表插件，示例如下：
  * {
- *   //声明render函数是否为异步，默认为false
- *   asyncRender: true || false || function(chart){ return true || false },
+ *   asyncRender: true,
  *   
  *   render: function(chart)
  *   {
@@ -48,8 +72,7 @@
  *     });
  *   },
  *   
- *   //声明update函数是否为异步，默认为false
- *   asyncUpdate: true || false || function(chart, results){ return true || false },
+ *   asyncUpdate: true,
  *   
  *   update: function(chart, results)
  *   {
@@ -1620,9 +1643,11 @@
 	 */
 	chartBase.eventNewEcharts = function(eventType, echartsEventParams)
 	{
+		var thisChart = this;
 		var event =
 		{
 			"type": eventType,
+			"chart": thisChart,
 			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_ECHARTS,
 			"originalEvent": echartsEventParams
 		};
@@ -1638,9 +1663,11 @@
 	 */
 	chartBase.eventNewHtml = function(eventType, htmlEvent)
 	{
+		var thisChart = this;
 		var event =
 		{
 			"type": eventType,
+			"chart": thisChart,
 			"chartType": chartFactory.CHART_EVENT_CHART_TYPE_HTML,
 			"originalEvent": htmlEvent
 		};
