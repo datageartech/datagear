@@ -561,11 +561,20 @@
 			this.extValue("_updateResults", results);
 			
 			var async = this.isAsyncUpdate(results);
-			this.plugin.chartRenderer.update(this, results);
+			
+			this.doUpdate(results);
 			
 			if(!async)
 				this.statusUpdated(true);
 		}
+	};
+	
+	/**
+	 * 调用图表插件的update函数，执行更新数据。
+	 */
+	chartBase.doUpdate = function(results)
+	{
+		this.plugin.chartRenderer.update(this, results);
 	};
 	
 	/**
