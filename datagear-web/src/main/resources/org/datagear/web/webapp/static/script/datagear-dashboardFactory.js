@@ -601,10 +601,10 @@
 	 * 删除图表。
 	 * 
 	 * @param chartInfo 图表对象、图表HTML元素ID、图表ID、图表索引
-	 * @param notDestory 选填参数，是否不销毁图表，默认为false
+	 * @param doDestory 选填参数，是否销毁图表，默认为true
 	 * @return 移除的图表对象，或者图表未找到时为undefined
 	 */
-	dashboardBase.removeChart = function(chartInfo, notDestory)
+	dashboardBase.removeChart = function(chartInfo, doDestory)
 	{
 		var newCharts = (this.charts ? [].concat(this.charts) : []);
 		var index = this.getChartIndex(chartInfo, newCharts);
@@ -615,7 +615,7 @@
 		var removeds = newCharts.splice(index, 1);
 		this.charts = newCharts;
 		
-		if(notDestory != true)
+		if(doDestory != false)
 			this._destroyChart(removeds[0]);
 		
 		return removeds[0];

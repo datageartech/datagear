@@ -367,7 +367,7 @@
 				if(!params || params.length == 0)
 					continue;
 				
-				var formTitle = chart.dataSetName(chartDataSets[i]);
+				var formTitle = chart.chartDataSetName(chartDataSets[i]);
 				if(formTitle != chartDataSets[i].dataSet.name)
 					formTitle += " ("+chartDataSets[i].dataSet.name+")";
 				

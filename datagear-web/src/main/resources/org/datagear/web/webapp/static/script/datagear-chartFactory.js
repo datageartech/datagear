@@ -1184,11 +1184,11 @@
 	};
 	
 	/**
-	 * 获取指定图表数据集的名称，它不会返回null。
+	 * 获取指定图表数据集对象名称，它不会返回null。
 	 * 
 	 * @param chartDataSet 图表数据集对象
 	 */
-	chartBase.dataSetName = function(chartDataSet)
+	chartBase.chartDataSetName = function(chartDataSet)
 	{
 		if(!chartDataSet)
 			return "";
@@ -1549,7 +1549,7 @@
 	 */
 	chartBase.echartsInit = function(options)
 	{
-		var instance = echarts.init(this.element(), this.echartsGetRegisteredThemeName());
+		var instance = echarts.init(this.element(), this._echartsGetRegisteredThemeName());
 		instance.setOption(options);
 		
 		this.echartsInstance(instance);
@@ -1584,7 +1584,7 @@
 	/**
 	 * Echarts图表支持函数：获取用于此图表的且已注册的Echarts主题名。
 	 */
-	chartBase.echartsGetRegisteredThemeName = function()
+	chartBase._echartsGetRegisteredThemeName = function()
 	{
 		var themeName = this.echartsThemeName();
 		

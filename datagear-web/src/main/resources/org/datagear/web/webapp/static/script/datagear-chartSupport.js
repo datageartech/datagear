@@ -512,7 +512,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -673,7 +673,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -815,7 +815,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -911,7 +911,7 @@
 		
 		chartSupport.clearChartOriginalDataInfoRange(chart);
 		
-		var seriesName = chart.dataSetName(chartDataSet);
+		var seriesName = chart.chartDataSetName(chartDataSet);
 		
 		var minp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.min);
 		var maxp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.max);
@@ -1039,7 +1039,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -1205,7 +1205,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -1392,7 +1392,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			var ip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.item);
@@ -1547,7 +1547,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -1770,7 +1770,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			//取任一不为空的地图名列值
@@ -1919,7 +1919,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			//取任一不为空的地图名列值
@@ -2106,7 +2106,7 @@
 			}
 			
 			if(i == 0)
-				seriesName = chart.dataSetName(chartDataSet);
+				seriesName = chart.chartDataSetName(chartDataSet);
 			
 			var sip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceId);
 			var slop = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceLongitude);
@@ -2368,7 +2368,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			var data = chart.resultNameValueObjects(result, chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name),
@@ -2516,7 +2516,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			seriesName = chart.dataSetName(chartDataSet);
+			seriesName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
@@ -2870,7 +2870,7 @@
 			var result = chart.resultAt(results, i);
 			
 			if(i == 0)
-				seriesName = chart.dataSetName(chartDataSet);
+				seriesName = chart.chartDataSetName(chartDataSet);
 			
 			var np = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.name);
 			var ip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.id);
@@ -3041,7 +3041,7 @@
 			var result = chart.resultAt(results, i);
 			
 			if(i == 0)
-				seriesName = chart.dataSetName(chartDataSet);
+				seriesName = chart.chartDataSetName(chartDataSet);
 			
 			var snp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceName);
 			var svp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceValue);
@@ -3233,7 +3233,7 @@
 			var result = chart.resultAt(results, i);
 			
 			if(i == 0)
-				seriesName = chart.dataSetName(chartDataSet);
+				seriesName = chart.chartDataSetName(chartDataSet);
 			
 			var sip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceId);
 			var snp = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.sourceName);
@@ -3990,7 +3990,7 @@
 		for(var i=0; i<chartDataSets.length; i++)
 		{
 			var chartDataSet = chartDataSets[i];
-			var dataSetName = chart.dataSetName(chartDataSet);
+			var dataSetName = chart.chartDataSetName(chartDataSet);
 			var result = chart.resultAt(results, i);
 			
 			var nps = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.name);
