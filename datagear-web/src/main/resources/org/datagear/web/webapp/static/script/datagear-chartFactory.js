@@ -952,9 +952,9 @@
 	};
 	
 	/**
-	 * 此图表是否有带参数的数据集。
+	 * 判断此图表是否有参数化数据集。
 	 */
-	chartBase.hasDataSetParam = function()
+	chartBase.hasParamDataSet = function()
 	{
 		var re = false;
 		

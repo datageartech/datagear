@@ -254,7 +254,7 @@
 	
 	chartForm.bindChartSettingPanelEvent = function(chart)
 	{
-		if(!chart.hasDataSetParam())
+		if(!chart.hasParamDataSet())
 			return false;
 		
 		var $chart = chart.elementJquery();
