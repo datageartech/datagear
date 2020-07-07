@@ -567,6 +567,8 @@
 			if(!async)
 				this.statusUpdated(true);
 		}
+		
+		return true;
 	};
 	
 	/**
@@ -700,7 +702,7 @@
 	 */
 	chartBase.statusPreRender = function(set)
 	{
-		if(set)
+		if(set === true)
 			this.status(chartFactory.STATUS_PRE_RENDER);
 		else
 			return (this.status() == chartFactory.STATUS_PRE_RENDER);
@@ -713,7 +715,7 @@
 	 */
 	chartBase.statusRendering = function(set)
 	{
-		if(set)
+		if(set === true)
 			this.status(chartFactory.STATUS_RENDERING);
 		else
 			return (this.status() == chartFactory.STATUS_RENDERING);
@@ -727,7 +729,7 @@
 	 */
 	chartBase.statusRendered = function(set, postProcess)
 	{
-		if(set)
+		if(set === true)
 		{
 			this._isActive = true;
 			this.status(chartFactory.STATUS_RENDERED);
@@ -781,7 +783,7 @@
 	 */
 	chartBase.statusPreUpdate = function(set)
 	{
-		if(set)
+		if(set === true)
 			this.status(chartFactory.STATUS_PRE_UPDATE);
 		else
 			return (this.status() == chartFactory.STATUS_PRE_UPDATE);
@@ -794,7 +796,7 @@
 	 */
 	chartBase.statusUpdating = function(set)
 	{
-		if(set)
+		if(set === true)
 			this.status(chartFactory.STATUS_UPDATING);
 		else
 			return (this.status() == chartFactory.STATUS_UPDATING);
@@ -808,7 +810,7 @@
 	 */
 	chartBase.statusUpdated = function(set, postProcess)
 	{
-		if(set)
+		if(set === true)
 		{
 			this.status(chartFactory.STATUS_UPDATED);
 			
@@ -836,7 +838,7 @@
 	 */
 	chartBase.statusDestroyed = function(set)
 	{
-		if(set)
+		if(set === true)
 		{
 			this._isActive = false;
 			this.status(chartFactory.STATUS_DESTROYED);
@@ -853,7 +855,7 @@
 	chartBase.status = function(status)
 	{
 		if(status === undefined)
-			return this._status;
+			return (this._status || "");
 		else
 			this._status = status;
 	};

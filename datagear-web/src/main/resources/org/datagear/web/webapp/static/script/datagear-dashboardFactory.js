@@ -302,6 +302,8 @@
 	 */
 	chartBaseExt.handleChartEventLink = function(chartEvent, links)
 	{
+		this._assertActive();
+		
 		if(!links)
 			return false;
 		
