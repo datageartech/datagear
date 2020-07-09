@@ -171,7 +171,7 @@
 	 * 联动设置对象格式为：
 	 * {
 	 *   //可选，联动触发事件类型、事件类型数组，默认为"click"
-	 *   eventType: "..."、["...", ...],
+	 *   trigger: "..."、["...", ...],
 	 *   
 	 *   //必选，联动目标图表元素ID、ID数组
 	 *   target: "..."、["...", ...],
@@ -248,14 +248,14 @@
 		
 		var ehs = [];
 		
-		var eventTypes = this._resolveLinksEventTypes(links);
+		var triggers = this._resolveLinksTriggers(links);
 		var _thisChart = this;
 		
-		for(var i=0; i<eventTypes.length; i++)
+		for(var i=0; i<triggers.length; i++)
 		{
 			var eh =
 			{
-				eventType: eventTypes[i],
+				eventType: triggers[i],
 				eventHandler: function(chartEvent)
 				{
 					_thisChart.handleChartEventLink(chartEvent, links);
@@ -271,26 +271,26 @@
 	};
 	
 	/**
-	 * 解析不重复的联动设置事件类型数组。
+	 * 解析不重复的联动设置触发事件数组。
 	 */
-	chartBaseExt._resolveLinksEventTypes = function(links)
+	chartBaseExt._resolveLinksTriggers = function(links)
 	{
-		var eventTypes = [];
+		var triggers = [];
 		
 		for(var i=0; i<links.length; i++)
 		{
-			var myEventTypes = (links[i].eventType || "click");
-			if(!$.isArray(myEventTypes))
-				myEventTypes = [ myEventTypes ];
+			var myTriggers = (links[i].trigger || "click");
+			if(!$.isArray(myTriggers))
+				myTriggers = [ myTriggers ];
 			
-			for(var j=0; j<myEventTypes.length; j++)
+			for(var j=0; j<myTriggers.length; j++)
 			{
-				if($.inArray(myEventTypes[j], eventTypes) < 0)
-					eventTypes.push(myEventTypes[j]);
+				if($.inArray(myTriggers[j], triggers) < 0)
+					triggers.push(myTriggers[j]);
 			}
 		}
 		
-		return eventTypes;
+		return triggers;
 	};
 	
 	/**
@@ -317,10 +317,7 @@
 		{
 			var link = links[i];
 			
-			if(chartEvent.type == null)
-				throw new Error("[chartEvent.type] must be defined");
-			
-			if(!this._isLinkContainsEventType(link, chartEvent.type))
+			if(!this._isLinkTriggerableByEvent(link, chartEvent))
 				continue;
 			
 			var chartEventData = this.eventData(chartEvent);
@@ -385,18 +382,25 @@
 			targetCharts[i].refreshData();
 	};
 	
-	chartBaseExt._isLinkContainsEventType = function(link, eventType)
+	chartBaseExt._isLinkTriggerableByEvent = function(link, chartEvent)
 	{
-		if(!link.eventType)
+		var eventType = chartEvent.type;
+		
+		if(!eventType)
 		{
+			return false;
+		}
+		else if(!link.trigger)
+		{
+			//默认为点击事件
 			return (eventType == "click");
 		}
-		else if($.isArray(link.eventType))
+		else if($.isArray(link.trigger))
 		{
-			return ($.inArray(eventType, link.eventType) >= 0);
+			return ($.inArray(eventType, link.trigger) >= 0);
 		}
 		else
-			return (link.eventType == eventType);
+			return (link.trigger == eventType);
 	};
 	
 	/**
