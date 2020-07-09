@@ -27,7 +27,7 @@
  * 
  * 此图表工厂支持为<body>元素、图表元素添加"dg-echarts-theme"属性来设置图表Echarts主题名。
  * 
- * 此图表工厂支持为图表元素添加"dg-chart-disable-setting"属性，用于禁用图表交互设置功能，
+ * 此图表工厂支持为<body>元素、图表元素添加"dg-chart-disable-setting"属性，用于禁用图表交互设置功能，
  * 值为"true"表示禁用，其他表示启用。
  * 
  * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数，具体参考chartBase._initEventHandlers函数说明。
@@ -348,6 +348,10 @@
 	chartBase._initDisableSetting = function()
 	{
 		var disableSetting = this.elementJquery().attr("dg-chart-disable-setting");
+		
+		if(!disableSetting)
+			disableSetting = $(document.body).attr("dg-chart-disable-setting");
+		
 		this.disableSetting(disableSetting == "true");
 	};
 	
