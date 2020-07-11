@@ -4124,7 +4124,7 @@
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart);
 		
-		if(!customRenderer || customRenderer.asyncRender == undefined)
+		if(customRenderer.asyncRender == undefined)
 			return false;
 		
 		if(typeof(customRenderer.asyncRender) == "function")
@@ -4136,16 +4136,14 @@
 	chartSupport.customRender = function(chart)
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart);
-		
-		if(customRenderer)
-			customRenderer.render(chart);
+		customRenderer.render(chart);
 	};
 	
 	chartSupport.customAsyncUpdate = function(chart, results)
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart);
 		
-		if(!customRenderer || customRenderer.asyncUpdate == undefined)
+		if(customRenderer.asyncUpdate == undefined)
 			return false;
 		
 		if(typeof(customRenderer.asyncUpdate) == "function")
@@ -4157,16 +4155,14 @@
 	chartSupport.customUpdate = function(chart, results)
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart);
-		
-		if(customRenderer)
-			customRenderer.update(chart, results);
+		customRenderer.update(chart, results);
 	};
 
 	chartSupport.customResize = function(chart)
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart);
 		
-		if(customRenderer && customRenderer.resize)
+		if(customRenderer.resize)
 			customRenderer.resize(chart);
 	};
 	
@@ -4174,7 +4170,7 @@
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart);
 		
-		if(customRenderer && customRenderer.destroy)
+		if(customRenderer.destroy)
 			customRenderer.destroy(chart);
 	};
 	
@@ -4182,7 +4178,7 @@
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart);
 		
-		if(customRenderer && customRenderer.on)
+		if(customRenderer.on)
 			customRenderer.on(chart, eventType, handler);
 		else
 			throw new Error("Custom renderer 's [on] undefined");
@@ -4192,7 +4188,7 @@
 	{
 		var customRenderer = chartSupport.customGetCustomRenderer(chart);
 		
-		if(customRenderer && customRenderer.off)
+		if(customRenderer.off)
 			customRenderer.off(chart, eventType, handler);
 		else
 			throw new Error("Custom renderer 's [off] undefined");
@@ -4200,28 +4196,10 @@
 	
 	chartSupport.customGetCustomRenderer = function(chart)
 	{
-		var customRenderer = chart.extValue("customRenderer");
+		var customRenderer = chart.customChartRenderer();
 		
-		if(customRenderer == "_undefined")
-			return undefined;
-		
-		if(customRenderer)
-			return customRenderer;
-		
-		var $element = chart.elementJquery();
-		var customRendererVar = $element.attr("dg-chart-renderer");
-		
-		if(!customRendererVar)
-			$element.html("The 'dg-chart-renderer' attribute must be set for this custom chart");
-		else
-		{
-			customRenderer = chartFactory.evalSilently(customRendererVar);
-			
-			if(!customRenderer)
-				$element.html("No chart renderer var '"+customRendererVar+"' defined for this custom chart");
-		}
-		
-		chart.extValue("customRenderer", (customRenderer || "_undefined"));
+		if(customRenderer == null)
+			throw new Error("Custom chart renderer undefined");
 		
 		return customRenderer;
 	};

@@ -32,6 +32,8 @@
  * 
  * 此图表工厂支持为图表元素添加"dg-chart-on-*"属性来设置图表事件处理函数，具体参考chartBase._initEventHandlers函数说明。
  * 
+ * 此图表工厂支持为图表元素添加"dg-chart-renderer"属性来自定义、扩展图表渲染器，具体参考chartBase._initCustomChartRenderer函数说明。
+ * 
  * 此图表工厂要求图表插件的图表渲染器（chartRenderer）格式为：
  * {
  *   //可选，渲染图表函数是否是异步函数，默认为false
@@ -210,6 +212,7 @@
 		this._initEchartsThemeName();
 		this._initDisableSetting();
 		this._initEventHandlers();
+		this._initCustomChartRenderer();
 		
 		//最后才设置为可渲染状态
 		this.statusPreRender(true);
@@ -389,6 +392,23 @@
 	};
 	
 	/**
+	 * 初始化自定义图表渲染器。
+	 * 此方法从图表元素的"dg-chart-renderer"属性获取自定义图表渲染器。
+	 */
+	chartBase._initCustomChartRenderer = function()
+	{
+		var chartRenderer = this.elementJquery().attr("dg-chart-renderer");
+		
+		if(chartRenderer)
+		{
+			chartRenderer = chartFactory.evalSilently(chartRenderer);
+			
+			if(chartRenderer)
+				this.customChartRenderer(chartRenderer);
+		}
+	};
+	
+	/**
 	 * 获取/设置初始图表设置项。
 	 * 图表设置项格式为：{ ... }
 	 * 
@@ -496,6 +516,19 @@
 	};
 	
 	/**
+	 * 获取/设置自定义图表渲染器。
+	 * 
+	 * @param customChartRenderer 可选，要设置的自定义图表渲染器，自定义图表渲染器允许仅定义要重写的内置图表插件渲染器函数
+	 */
+	chartBase.customChartRenderer = function(customChartRenderer)
+	{
+		if(customChartRenderer === undefined)
+			return this._customChartRenderer;
+		else
+			this._customChartRenderer = customChartRenderer;
+	};
+	
+	/**
 	 * 渲染图表。
 	 * 注意：只有this.statusPreRender()或者statusDestroyed()为true，此方法才会执行。
 	 * 注意：
@@ -533,11 +566,18 @@
 	};
 	
 	/**
-	 * 调用图表插件的render函数，执行渲染。
+	 * 调用底层图表渲染器的render函数，执行渲染。
 	 */
 	chartBase.doRender = function()
 	{
-		this.plugin.chartRenderer.render(this);
+		if(this._customChartRenderer && this._customChartRenderer.render)
+		{
+			this._customChartRenderer.render(this);
+		}
+		else
+		{
+			this.plugin.chartRenderer.render(this);
+		}
 	};
 	
 	/**
@@ -580,7 +620,14 @@
 	 */
 	chartBase.doUpdate = function(results)
 	{
-		this.plugin.chartRenderer.update(this, results);
+		if(this._customChartRenderer && this._customChartRenderer.update)
+		{
+			this._customChartRenderer.update(this, results);
+		}
+		else
+		{
+			this.plugin.chartRenderer.update(this, results);
+		}
 	};
 	
 	/**
@@ -598,8 +645,14 @@
 	{
 		this._assertActive();
 		
-		if(this.plugin.chartRenderer.resize)
+		if(this._customChartRenderer && this._customChartRenderer.resize)
+		{
+			this._customChartRenderer.resize(this);
+		}
+		else if(this.plugin.chartRenderer.resize)
+		{
 			this.plugin.chartRenderer.resize(this);
+		}
 		else
 		{
 			var echartsInstance = this.echartsInstance();
@@ -618,8 +671,14 @@
 		this.statusDestroyed(true);
 		this.elementJquery().removeClass(chartFactory.CHART_DISTINCT_CSS_NAME);
 		
-		if(this.plugin.chartRenderer.destroy)
+		if(this._customChartRenderer && this._customChartRenderer.destroy)
+		{
+			this._customChartRenderer.destroy(this);
+		}
+		else if(this.plugin.chartRenderer.destroy)
+		{
 			this.plugin.chartRenderer.destroy(this);
+		}
 		else
 		{
 			var echartsInstance = this.echartsInstance();
@@ -651,15 +710,21 @@
 	 */
 	chartBase.isAsyncRender = function()
 	{
-		var chartRenderer = this.plugin.chartRenderer;
+		if(this._customChartRenderer && this._customChartRenderer.asyncRender !== undefined)
+		{
+			if(typeof(this._customChartRenderer.asyncRender) == "function")
+				return this._customChartRenderer.asyncRender(this);
+			
+			return (this._customChartRenderer.asyncRender == true);
+		}
 		
-		if(chartRenderer.asyncRender == undefined)
+		if(this.plugin.chartRenderer.asyncRender == undefined)
 			return false;
 		
-		if(typeof(chartRenderer.asyncRender) == "function")
-			return chartRenderer.asyncRender(this);
+		if(typeof(this.plugin.chartRenderer.asyncRender) == "function")
+			return this.plugin.chartRenderer.asyncRender(this);
 		
-		return (chartRenderer.asyncRender == true);
+		return (this.plugin.chartRenderer.asyncRender == true);
 	};
 	
 	/**
@@ -669,15 +734,21 @@
 	 */
 	chartBase.isAsyncUpdate = function(results)
 	{
-		var chartRenderer = this.plugin.chartRenderer;
+		if(this._customChartRenderer && this._customChartRenderer.asyncUpdate !== undefined)
+		{
+			if(typeof(this._customChartRenderer.asyncUpdate) == "function")
+				return this._customChartRenderer.asyncUpdate(this, results);
+			
+			return (this._customChartRenderer.asyncUpdate == true);
+		}
 		
-		if(chartRenderer.asyncUpdate == undefined)
+		if(this.plugin.chartRenderer.asyncUpdate == undefined)
 			return false;
 		
-		if(typeof(chartRenderer.asyncUpdate) == "function")
-			return chartRenderer.asyncUpdate(this, results);
+		if(typeof(this.plugin.chartRenderer.asyncUpdate) == "function")
+			return this.plugin.chartRenderer.asyncUpdate(this, results);
 		
-		return (chartRenderer.asyncUpdate == true);
+		return (this.plugin.chartRenderer.asyncUpdate == true);
 	};
 	
 	/**
@@ -934,8 +1005,14 @@
 	{
 		this._assertActive();
 		
-		if(this.plugin.chartRenderer.on)
+		if(this._customChartRenderer && this._customChartRenderer.on)
+		{
+			this._customChartRenderer.on(this, eventType, handler);
+		}
+		else if(this.plugin.chartRenderer.on)
+		{
 			this.plugin.chartRenderer.on(this, eventType, handler);
+		}
 		else
 			throw new Error("Chart plugin ["+this.plugin.id+"] 's [chartRenderer.on] undefined");
 	};
@@ -951,8 +1028,14 @@
 	{
 		this._assertActive();
 		
-		if(this.plugin.chartRenderer.off)
+		if(this._customChartRenderer && this._customChartRenderer.off)
+		{
+			this._customChartRenderer.off(this, eventType, handler);
+		}
+		else if(this.plugin.chartRenderer.off)
+		{
 			this.plugin.chartRenderer.off(this, eventType, handler);
+		}
 		else
 			throw new Error("Chart plugin ["+this.plugin.id+"] 's [chartRenderer.off] undefined");
 	};
