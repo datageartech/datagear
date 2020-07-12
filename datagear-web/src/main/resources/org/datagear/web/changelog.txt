@@ -190,11 +190,12 @@ DataGear版本更新日志
 修复：修复某些图表在添加了多数据集后渲染报错的BUG；
 修复：修复基本地图图表在某些情况下未正确映射数值颜色的BUG；
 修复：修复折线图、柱状图、散点图刷新数据时类目轴没有同步更新的BUG；
-改进：重构看板JS对象、图表JS对象的API，用于支持个性化扩展看板；
 改进：看板页面图表元素的"dg-chart-renderer"属性支持为任意类型图表自定义图表渲染器；
-改进：图表编辑页面显示数据标记名，用于为图表事件数据结构标识提供参考；
+改进：重新设计图表主题功能，现在所有内置图表都支持"dg-chart-theme"自定义主题；
 改进：简化图表主题结构，移除axisColor、axisScaleLineColor属性，添加actualBackgroundColor属性；
+改进：图表编辑页面显示数据标记英文名，用于为图表事件数据结构标识提供参考；
 改进：数据集预览查询结果中存在不支持的数据类型时给出友好的提示；
+改进：重构看板JS对象、图表JS对象的API，用于支持个性化扩展看板；
 改进：看板页面window.chartSupport迁移至window.chartFactory.chartSupport，前者将在未来版本移除；
 改进：看板页面window.chartPluginManager迁移至window.chartFactory.chartPluginManager，前者将在未来版本移除；
 改进：看板页面window.chartForm迁移至window.chartFactory.chartForm，前者将在未来版本移除；
