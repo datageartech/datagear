@@ -425,3 +425,9 @@ WHERE HCW_ID IN (SELECT HCW_ID FROM DATAGEAR_HTML_CHART_WIDGET WHERE HCW_PLUGIN_
 
 UPDATE DATAGEAR_HCW_DS SET DS_PROPERTY_SIGNS=DATAGEAR_REPLACEREGEX(DS_PROPERTY_SIGNS, '\["[^\]]*coord[^\]]*"\]', '["name"]')
 WHERE HCW_ID IN (SELECT HCW_ID FROM DATAGEAR_HTML_CHART_WIDGET WHERE HCW_PLUGIN_ID='org.datagear.chart.label.valueFirst');
+
+
+-----------------------------------------
+--version[1.10.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+

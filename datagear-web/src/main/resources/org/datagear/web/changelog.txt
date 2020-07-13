@@ -199,3 +199,9 @@ DataGear版本更新日志
 改进：看板页面window.chartSupport迁移至window.chartFactory.chartSupport，前者将在未来版本移除；
 改进：看板页面window.chartPluginManager迁移至window.chartFactory.chartPluginManager，前者将在未来版本移除；
 改进：看板页面window.chartForm迁移至window.chartFactory.chartForm，前者将在未来版本移除；
+
+
+-----------------------------------------
+--v1.10.0
+-----------------------------------------
+
