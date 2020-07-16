@@ -29,6 +29,19 @@
 		NUMBER: "NUMBER"
 	};
 	
+	//org.datagear.analysis.DataSetParam.InputType
+	chartForm.DataSetParamInputType =
+	{
+		TEXT: "text",
+		SELECT: "select",
+		DATE: "date",
+		TIME: "time",
+		DATETIME: "datetime",
+		RADIO: "radio",
+		CHECKBOX: "checkbox",
+		TEXTAREA: "textarea"
+	};
+	
 	chartForm.labels = (chartForm.labels ||
 	{
 		confirm: "确定",
@@ -61,6 +74,7 @@
 	{
 		options = $.extend({ submitText: chartForm.labels.confirm, readonly: false, yesText: chartForm.labels.yes, noText: chartForm.labels.no }, (options || {}));
 		var paramValues = (options.paramValues || {});
+		var InputType = chartForm.DataSetParamInputType;
 		
 		$parent.empty();
 		var $form = $("<form />").appendTo($parent);
@@ -74,6 +88,7 @@
 		for(var i=0; i<dataSetParams.length; i++)
 		{
 			var dsp = dataSetParams[i];
+			var value = paramValues[dsp.name];
 			
 			var $item = $("<div class='dg-dspv-form-item' />").appendTo($content);
 			
@@ -85,30 +100,50 @@
 			
 			var $valueDiv = $("<div class='dg-dspv-form-item-value' />").appendTo($item);
 			
-			var $input;
-			
-			if(chartForm.DataSetParamDataType.BOOLEAN == dsp.type)
+			if(dsp.type == chartForm.DataSetParamDataType.BOOLEAN)
 			{
-				$input = $("<select class='dg-dspv-form-input' />").attr("name", dsp.name).appendTo($valueDiv);
-				var $optNull = $("<option value='' />").html("").appendTo($input);
-				var $optTrue = $("<option value='true' />").html(options.yesText).appendTo($input);
-				var $optFalse = $("<option value='false' />").html(options.noText).appendTo($input);
+				if(!dsp.inputPayload)
+					dsp.inputPayload = [ { name: options.yesText, value: "true" }, { name: options.noText, value: "false" } ];
 				
-				var value = paramValues[dsp.name];
-				var $optSelected = (value == null ? $optNull : ((value+"") == "false" ? $optFalse : $optTrue));
-				$optSelected.attr("selected", "selected");
+				if(dsp.inputType == InputType.RADIO)
+					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value);
+				else if(dsp.inputType == InputType.CHECKBOX)
+					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value);
+				else
+					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value);
 			}
-			else
+			else if(dsp.type == chartForm.DataSetParamDataType.STRING)
 			{
-				$input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dsp.name)
-								.attr("value", (paramValues[dsp.name] || "")).appendTo($valueDiv);
-				
-				if(chartForm.DataSetParamDataType.NUMBER == dsp.type)
-					$input.attr("dg-validation-number", "true");
+				if(dsp.inputType == InputType.SELECT)
+					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value);
+				else if(dsp.inputType == InputType.DATE)
+					chartForm.renderDataSetParamValueFormInputDate($valueDiv, dsp, value);
+				else if(dsp.inputType == InputType.TIME)
+					chartForm.renderDataSetParamValueFormInputTime($valueDiv, dsp, value);
+				else if(dsp.inputType == InputType.DATETIME)
+					chartForm.renderDataSetParamValueFormInputDateTime($valueDiv, dsp, value);
+				else if(dsp.inputType == InputType.RADIO)
+					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value);
+				else if(dsp.inputType == InputType.CHECKBOX)
+					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value);
+				else if(dsp.inputType == InputType.TEXTAREA)
+					chartForm.renderDataSetParamValueFormInputTextarea($valueDiv, dsp, value);
+				else
+					chartForm.renderDataSetParamValueFormInputText($valueDiv, dsp, value);
 			}
-			
-			if((dsp.required+"") == "true")
-				$input.attr("dg-validation-required", "true");
+			else if(dsp.type == chartForm.DataSetParamDataType.NUMBER)
+			{
+				if(dsp.inputType == InputType.SELECT)
+					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value);
+				else if(dsp.inputType == InputType.RADIO)
+					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value);
+				else if(dsp.inputType == InputType.CHECKBOX)
+					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value);
+				else if(dsp.inputType == InputType.TEXTAREA)
+					chartForm.renderDataSetParamValueFormInputTextarea($valueDiv, dsp, value);
+				else
+					chartForm.renderDataSetParamValueFormInputText($valueDiv, dsp, value);
+			}
 		}
 		
 		if(!options.readonly)
@@ -134,6 +169,154 @@
 			options.render.apply($form[0]);
 		
 		return $form[0];
+	};
+	
+	//渲染输入项：文本框
+	chartForm.renderDataSetParamValueFormInputText = function($parent, dataSetParam, value)
+	{
+		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
+			.attr("value", (value || "")).appendTo($parent);
+		
+		if((dataSetParam.required+"") == "true")
+			$input.attr("dg-validation-required", "true");
+		
+		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
+			$input.attr("dg-validation-number", "true");
+	};
+	
+	//渲染输入项：下拉框
+	//dataSetParam.inputPayload格式应该为：[ {name: '...', value: ...}, ... ]
+	chartForm.renderDataSetParamValueFormInputSelect = function($parent, dataSetParam, value)
+	{
+		var options = (dataSetParam.inputPayload ? global.chartFactory.evalSilently(dataSetParam.inputPayload, []) : []);
+		
+		var $input = $("<select class='dg-dspv-form-input' />").attr("name", dataSetParam.name).appendTo($parent);
+		
+		for(var i=0; i<options.length; i++)
+		{
+			var $opt = $("<option />").attr("value", options[i].value).html(options[i].name).appendTo($input);
+			
+			if(value == options[i].value)
+				$opt.attr("selected", "selected");
+		}
+		
+		if((dataSetParam.required+"") == "true")
+			$input.attr("dg-validation-required", "true");
+		
+		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
+			$input.attr("dg-validation-number", "true");
+	};
+	
+	//渲染输入项：日期框
+	chartForm.renderDataSetParamValueFormInputDate = function($parent, dataSetParam, value)
+	{
+		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
+			.attr("value", (value || "")).appendTo($parent);
+		
+		if((dataSetParam.required+"") == "true")
+			$input.attr("dg-validation-required", "true");
+		
+		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
+			$input.attr("dg-validation-number", "true");
+	};
+	
+	//渲染输入项：时间框
+	chartForm.renderDataSetParamValueFormInputTime = function($parent, dataSetParam, value)
+	{
+		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
+			.attr("value", (value || "")).appendTo($parent);
+		
+		if((dataSetParam.required+"") == "true")
+			$input.attr("dg-validation-required", "true");
+		
+		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
+			$input.attr("dg-validation-number", "true");
+	};
+	
+	//渲染输入项：日期时间框
+	chartForm.renderDataSetParamValueFormInputDateTime = function($parent, dataSetParam, value)
+	{
+		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
+			.attr("value", (value || "")).appendTo($parent);
+		
+		if((dataSetParam.required+"") == "true")
+			$input.attr("dg-validation-required", "true");
+		
+		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
+			$input.attr("dg-validation-number", "true");
+	};
+	
+	//渲染输入项：单选框
+	//dataSetParam.inputPayload格式应该为：[ {name: '...', value: ...}, ... ]
+	chartForm.renderDataSetParamValueFormInputRadio = function($parent, dataSetParam, value)
+	{
+		var options = (dataSetParam.inputPayload ? global.chartFactory.evalSilently(dataSetParam.inputPayload, []) : []);
+		
+		for(var i=0; i<options.length; i++)
+		{
+			var eleId = chartForm.nextElementId();
+			
+			var $input = $("<input type='radio' class='dg-dspv-form-input' />")
+				.attr("id", eleId).attr("name", dataSetParam.name).attr("value", options[i].value).appendTo($parent);
+			
+			$("<label />").attr("for", eleId).html(options[i].name).appendTo($parent);
+			
+			if(value == options[i].value)
+				$input.attr("checked", "checked");
+			
+			if((dataSetParam.required+"") == "true")
+				$input.attr("dg-validation-required", "true");
+			
+			if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
+				$input.attr("dg-validation-number", "true");
+		}
+	};
+	
+	//渲染输入项：复选框
+	//dataSetParam.inputPayload格式应该为：[ {name: '...', value: ...}, ... ]
+	chartForm.renderDataSetParamValueFormInputCheckbox = function($parent, dataSetParam, value)
+	{
+		var options = (dataSetParam.inputPayload ? global.chartFactory.evalSilently(dataSetParam.inputPayload, []) : []);
+		
+		for(var i=0; i<options.length; i++)
+		{
+			var eleId = chartForm.nextElementId();
+			
+			var $input = $("<input type='checkbox' class='dg-dspv-form-input' />")
+				.attr("id", eleId).attr("name", dataSetParam.name).attr("value", options[i].value).appendTo($parent);
+			
+			$("<label />").attr("for", eleId).html(options[i].name).appendTo($parent);
+			
+			if(value == options[i].value)
+				$input.attr("checked", "checked");
+			
+			if((dataSetParam.required+"") == "true")
+				$input.attr("dg-validation-required", "true");
+			
+			if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
+				$input.attr("dg-validation-number", "true");
+		}
+	};
+	
+	//渲染输入项：文本域
+	chartForm.renderDataSetParamValueFormInputTextarea = function($parent, dataSetParam, value)
+	{
+		var $input = $("<textarea type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name).appendTo($parent);
+		$input.val(value || "");
+		
+		if((dataSetParam.required+"") == "true")
+			$input.attr("dg-validation-required", "true");
+		
+		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
+			$input.attr("dg-validation-number", "true");
+	};
+	
+	chartForm.nextElementId = function()
+	{
+		var nextIdSeq = (chartForm._nextElementIdSeq != null ? chartForm._nextElementIdSeq : 0);
+		chartForm._nextElementIdSeq = nextIdSeq + 1;
+		
+		return "dg-chartFormEleId-" + nextIdSeq;
 	};
 	
 	/**
