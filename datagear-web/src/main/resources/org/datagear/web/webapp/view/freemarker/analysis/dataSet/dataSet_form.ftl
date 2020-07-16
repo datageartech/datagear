@@ -1,6 +1,7 @@
 <#include "../../include/import_global.ftl">
 <#include "../../include/html_doctype.ftl">
 <#assign DataType=statics['org.datagear.analysis.DataSetParam$DataType']>
+<#assign InputType=statics['org.datagear.analysis.DataSetParam$InputType']>
 <#--
 titleMessageKey 标题标签I18N关键字，不允许null
 formAction 表单提交action，允许为null
@@ -72,7 +73,7 @@ readonly 是否只读操作，允许为null
 								<button type="button" class="sql-del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
 								</#if>
 							</div>
-							<table id="${pageId}-sql-params-table" width='100%' class='hover stripe'></table>
+							<table id="${pageId}-sql-params-table" class='hover stripe'></table>
 						</div>
 					</div>
 				</div>
@@ -183,7 +184,9 @@ readonly 是否只读操作，允许为null
 				po.element(".sql-preview-button").click();
 			}
 			else
-				po.sqlParamsTableElement().DataTable().columns.adjust();
+			{
+				po.sqlParamsTableElement().DataTable().columns.adjust().fixedColumns().relayout();
+			}
 		}
 	});
 	
@@ -199,7 +202,7 @@ readonly 是否只读操作，允许为null
 				{
 					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamName input-in-table ui-widget ui-widget-content' />";
 				},
-				width: "30%",
+				width: "8em",
 				defaultContent: "",
 				orderable: true
 			},
@@ -216,7 +219,7 @@ readonly 是否只读操作，允许为null
 							+"<option value='${DataType.BOOLEAN}' "+(data == "${DataType.BOOLEAN}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.BOOLEAN' /></option>"
 							+"</select>";
 				},
-				width: "30%",
+				width: "6em",
 				defaultContent: "",
 				orderable: true
 			},
@@ -232,7 +235,7 @@ readonly 是否只读操作，允许为null
 							+"<option value='false' "+(data == "false" ? "selected='selected'" : "")+"><@spring.message code='no' /></option>"
 							+"</select>";
 				},
-				width: "20%",
+				width: "4em",
 				defaultContent: "",
 				orderable: true
 			},
@@ -243,14 +246,47 @@ readonly 是否只读操作，允许为null
 				{
 					return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetParamDesc input-in-table ui-widget ui-widget-content' />";
 				},
-				width: "30%",
+				width: "6em",
+				defaultContent: "",
+				orderable: true
+			},
+			{
+				title: "<@spring.message code='dataSet.DataSetParam.inputType' />",
+				data: "inputType",
+				render: function(data, type, row, meta)
+				{
+					data = (data || "${InputType.TEXT}");
+					
+					return "<select class='dataSetParamInputType input-in-table ui-widget ui-widget-content'>"
+							+"<option value='${InputType.TEXT}' "+(data == "${InputType.TEXT}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.TEXT' /></option>"
+							+"<option value='${InputType.SELECT}' "+(data == "${InputType.SELECT}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.SELECT' /></option>"
+							+"<option value='${InputType.DATE}' "+(data == "${InputType.DATE}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.DATE' /></option>"
+							+"<option value='${InputType.TIME}' "+(data == "${InputType.TIME}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.TIME' /></option>"
+							+"<option value='${InputType.DATETIME}' "+(data == "${InputType.DATETIME}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.DATETIME' /></option>"
+							+"<option value='${InputType.RADIO}' "+(data == "${InputType.RADIO}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.RADIO' /></option>"
+							+"<option value='${InputType.CHECKBOX}' "+(data == "${InputType.CHECKBOX}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.CHECKBOX' /></option>"
+							+"<option value='${InputType.TEXTAREA}' "+(data == "${InputType.TEXTAREA}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.TEXTAREA' /></option>"
+							+"</select>";
+				},
+				width: "6em",
+				defaultContent: "",
+				orderable: true
+			},
+			{
+				title: "<@spring.message code='dataSet.DataSetParam.inputPayload' />",
+				data: "inputPayload",
+				render: function(data, type, row, meta)
+				{
+					return "<textarea class='dataSetParamInputPayload input-in-table ui-widget ui-widget-content' style='height:2em;margin-top:0.2em;margin-bottom:0.2em;'>"+$.escapeHtml(data)+"</textarea>";
+				},
+				width: "20em",
 				defaultContent: "",
 				orderable: true
 			}
 		],
 		data: po.dataSetParams,
 		"scrollX": true,
-		"autoWidth": false,
+		"autoWidth": true,
 		"scrollY" : po.calSqlOperationTableHeight(),
         "scrollCollapse": false,
 		"paging" : false,
@@ -312,6 +348,14 @@ readonly 是否只读操作，允许为null
 		po.element(".dataSetParamDesc").each(function(i)
 		{
 			params[i]["desc"] = $(this).val();
+		});
+		po.element(".dataSetParamInputType").each(function(i)
+		{
+			params[i]["inputType"] = $(this).val();
+		});
+		po.element(".dataSetParamInputPayload").each(function(i)
+		{
+			params[i]["inputPayload"] = $(this).val();
 		});
 		
 		return params;

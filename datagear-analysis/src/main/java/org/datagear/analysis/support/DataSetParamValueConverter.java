@@ -24,7 +24,7 @@ public class DataSetParamValueConverter extends DataValueConverter
 	}
 
 	@Override
-	public Object convert(Object value, String type) throws DataValueConvertionException
+	protected Object convertValue(Object value, String type) throws DataValueConvertionException
 	{
 		if (DataType.STRING.equals(type))
 			return convertToString(value, DataType.STRING);

@@ -7,8 +7,10 @@
  */
 package org.datagear.analysis.support;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -23,7 +25,7 @@ import org.datagear.analysis.DataNameType;
 public abstract class DataValueConverter
 {
 	public static final Pattern PATTERN_DECIMAL_NUMBER = Pattern.compile("^[^\\.]+\\.[^\\.]+$");
-	
+
 	/**
 	 * 转换数据值映射表。
 	 * 
@@ -60,17 +62,73 @@ public abstract class DataValueConverter
 	 * 转换数据值。
 	 * 
 	 * @param value
+	 *            待转换的数据值、数据值数组、数据值集合。
+	 * @param type
+	 *            目标类型
+	 * @return 转换结果对象，当{@code value}是数组时，返回{@code Object[]}；当{@code value}是{@linkplain Collection}时，返回{@linkplain List}。
+	 * @throws DataValueConvertionException
+	 */
+	public Object convert(Object value, String type) throws DataValueConvertionException
+	{
+		if (value == null)
+		{
+			return convertValue(value, type);
+		}
+		else if (value instanceof Object[])
+		{
+			Object[] src = (Object[]) value;
+			return convertArray(src, type);
+		}
+		else if (value instanceof Collection<?>)
+		{
+			@SuppressWarnings("unchecked")
+			Collection<Object> src = (Collection<Object>) value;
+			return convertCollection(src, type);
+		}
+		else
+			return convertValue(value, type);
+	}
+
+	protected Object convertArray(Object[] values, String type) throws DataValueConvertionException
+	{
+		if (values == null)
+			throw new IllegalArgumentException("[values] must not be null");
+
+		Object[] target = new Object[values.length];
+
+		for (int i = 0; i < values.length; i++)
+		{
+			target[i] = convertValue(values[i], type);
+		}
+
+		return target;
+	}
+
+	protected Object convertCollection(Collection<?> values, String type) throws DataValueConvertionException
+	{
+		if (values == null)
+			throw new IllegalArgumentException("[values] must not be null");
+
+		List<Object> target = new ArrayList<>(values.size());
+
+		for (Object ele : values)
+		{
+			target.add(convertValue(ele, type));
+		}
+
+		return target;
+	}
+
+	/**
+	 * 转换数据值。
+	 * 
+	 * @param value
+	 *            要转换的数据值，不会是数组，可能为{@code null}
 	 * @param type
 	 * @return
 	 * @throws DataValueConvertionException
 	 */
-	public abstract Object convert(Object value, String type) throws DataValueConvertionException;
-
-	protected Object convertExt(Object value, String type) throws DataValueConvertionException
-	{
-		throw new DataValueConvertionException(value, type,
-				"Convert [" + value + "] to type [" + type + "] is not supported");
-	}
+	protected abstract Object convertValue(Object value, String type) throws DataValueConvertionException;
 
 	protected Number convertToNumber(Object value, String numberType)
 	{
@@ -101,7 +159,7 @@ public abstract class DataValueConverter
 						return re.longValue();
 				}
 			}
-			catch(NumberFormatException e)
+			catch (NumberFormatException e)
 			{
 				throw new DataValueConvertionException(value, numberType, e);
 			}
@@ -140,6 +198,12 @@ public abstract class DataValueConverter
 		}
 
 		return (Boolean) convertExt(value, booleanType);
+	}
+
+	protected Object convertExt(Object value, String type) throws DataValueConvertionException
+	{
+		throw new DataValueConvertionException(value, type,
+				"Convert [" + value + "] to type [" + type + "] is not supported");
 	}
 
 	protected boolean isDecimalNumberString(String str)
