@@ -182,3 +182,70 @@
 	white-space: nowrap;
 	font-size: 1em;
 }
+
+/*datetimepicker组件扩展样式*/
+.xdsoft_datetimepicker .xdsoft_calendar td,
+.xdsoft_datetimepicker .xdsoft_calendar th{
+	background: none;
+    border-width: 0;
+}
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{
+	background: none;
+}
+.xdsoft_datetimepicker .xdsoft_month{
+	width: 60px;
+    margin-left: 20px;
+    text-decoration: underline;
+}
+.xdsoft_datetimepicker .xdsoft_year{
+	text-decoration: underline;
+}
+.xdsoft_datetimepicker .xdsoft_label i,
+.xdsoft_datetimepicker .xdsoft_next,
+.xdsoft_datetimepicker .xdsoft_prev,
+.xdsoft_datetimepicker .xdsoft_today_button{
+	background: none;
+}
+.xdsoft_datetimepicker .xdsoft_prev:before,
+.xdsoft_datetimepicker .xdsoft_next:before,
+.xdsoft_datetimepicker .xdsoft_today_button:before{
+    left: 0;
+    position: absolute;
+    top: 50%;
+    margin-top: -0.5em;
+    font-weight: bold;
+}
+.xdsoft_datetimepicker .xdsoft_prev:before{
+	content: "<";
+}
+.xdsoft_datetimepicker .xdsoft_next:before{
+	content: ">";
+}
+.xdsoft_datetimepicker .xdsoft_today_button:before{
+	content: ".";
+    font-size: 40px;
+    top: 3px;
+    left: 0px;
+}
+.xdsoft_timepicker .xdsoft_prev:before{
+	content: "<";
+	left: 50%;
+    top: 0;
+    margin-left: -0.5em;
+	transform:rotate(90deg);
+	-ms-transform:rotate(90deg);
+	-moz-transform:rotate(90deg);
+	-webkit-transform:rotate(90deg);
+	-o-transform:rotate(90deg);
+}
+.xdsoft_timepicker .xdsoft_next:before{
+	content: ">";
+	left: 50%;
+    top: 0;
+    margin-left: -0.5em;
+	transform:rotate(90deg);
+	-ms-transform:rotate(90deg);
+	-moz-transform:rotate(90deg);
+	-webkit-transform:rotate(90deg);
+	-o-transform:rotate(90deg);
+}

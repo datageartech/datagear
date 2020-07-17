@@ -160,6 +160,10 @@
 					<property name="content" value="&lt;link type='text/css' res-name='dataTableStyle' href='$CONTEXTPATH/static/css/DataTables-1.10.18/datatables.min.css?v=$VERSION'  rel='stylesheet' /&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
+					<property name="name" value="datetimepickerStyle" />
+					<property name="content" value="&lt;link type='text/css' res-name='datetimepickerStyle' href='$CONTEXTPATH/static/script/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css?v=$VERSION'  rel='stylesheet' /&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="dashboardStyle" />
 					<property name="content" value="&lt;link type='text/css' res-name='dashboardStyle' href='$CONTEXTPATH/static/css/analysis.css?v=$VERSION'  rel='stylesheet' /&gt;" />
 				</bean>
@@ -178,16 +182,20 @@
 					<property name="content" value="&lt;script type='text/javascript' res-name='echarts-wordcloud' src='$CONTEXTPATH/static/script/echarts-wordcloud-1.1.2/echarts-wordcloud.min.js?v=$VERSION'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
+					<property name="name" value="dataTable" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='dataTable' src='$CONTEXTPATH/static/script/DataTables-1.10.18/datatables.min.js?v=$VERSION'&gt;&lt;/script&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
+					<property name="name" value="datetimepicker" />
+					<property name="content" value="&lt;script type='text/javascript' res-name='datetimepicker' src='$CONTEXTPATH/static/script/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js?v=$VERSION'&gt;&lt;/script&gt;" />
+				</bean>
+				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="chartFactory" />
 					<property name="content" value="&lt;script type='text/javascript' res-name='chartFactory' src='$CONTEXTPATH/static/script/datagear-chartFactory.js?v=$VERSION'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="dashboardFactory" />
 					<property name="content" value="&lt;script type='text/javascript' res-name='dashboardFactory' src='$CONTEXTPATH/static/script/datagear-dashboardFactory.js?v=$VERSION'&gt;&lt;/script&gt;" />
-				</bean>
-				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
-					<property name="name" value="dataTable" />
-					<property name="content" value="&lt;script type='text/javascript' res-name='dataTable' src='$CONTEXTPATH/static/script/DataTables-1.10.18/datatables.min.js?v=$VERSION'&gt;&lt;/script&gt;" />
 				</bean>
 				<bean class="org.datagear.analysis.support.html.HtmlTplDashboardImport">
 					<property name="name" value="chartSupport" />

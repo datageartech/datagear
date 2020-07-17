@@ -53,6 +53,15 @@
 		setDataSetParamValue: "设置数据集参数值"
 	});
 	
+	//datetimepicker组件I18N配置
+	chartForm.datetimepickerI18n = (chartForm.datetimepickerI18n ||
+	{
+		zh:
+		{
+			months: ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"]
+		}
+	});
+	
 	/**
 	 * 渲染数据集参数值表单。
 	 * 
@@ -255,6 +264,15 @@
 		
 		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
+		
+		chartForm.datetimepickerSetLocaleIf();
+		$input.datetimepicker(
+		{
+			format: "Y-m-d",
+			timepicker: false,
+			lang: "zh",
+			i18n: chartForm.datetimepickerI18n
+		});
 	};
 	
 	/**
@@ -274,6 +292,16 @@
 		
 		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
+		
+		chartForm.datetimepickerSetLocaleIf();
+		$input.datetimepicker(
+		{
+			format: "H:i:s",
+			datepicker: false,
+			step:10,
+			lang: "zh",
+			i18n: chartForm.datetimepickerI18n
+		});
 	};
 	
 	/**
@@ -293,6 +321,15 @@
 		
 		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
+		
+		chartForm.datetimepickerSetLocaleIf();
+		$input.datetimepicker(
+		{
+			format: "Y-m-d H:i:s",
+			step:10,
+			lang: "zh",
+			i18n: chartForm.datetimepickerI18n
+		});
 	};
 	
 	/**
@@ -401,6 +438,15 @@
 		chartForm._nextElementIdSeq = nextIdSeq + 1;
 		
 		return "dg-chartFormEleId-" + nextIdSeq;
+	};
+	
+	chartForm.datetimepickerSetLocaleIf = function()
+	{
+		if(chartForm._datetimepickerSetLocale == true)
+			return;
+		
+		$.datetimepicker.setLocale('zh');
+		chartForm._datetimepickerSetLocale = true;
 	};
 	
 	chartForm.evalDataSetParamInputPayload = function(dataSetParam, defaultValue)
