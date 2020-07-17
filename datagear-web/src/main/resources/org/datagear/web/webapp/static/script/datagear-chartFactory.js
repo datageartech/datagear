@@ -2178,6 +2178,40 @@
 	};
 	
 	/**
+	 * 创建CSS样式表。
+	 * 
+	 * @param id 样式表元素ID
+	 * @param cssText 样式文本
+	 */
+	chartFactory.createStyleSheet = function(id, cssText)
+	{
+	    var head = (document.head || document.getElementsByTagName("head")[0]);
+	    var style = document.createElement("style");
+	    head.appendChild(style);
+	    
+	    style.id = id;
+	    style.type = "text/css";
+	    
+	    // 旧版IE
+	    if (style.styleSheet)
+	    	style.styleSheet.cssText = cssText;
+	    else
+	    	style.appendChild(document.createTextNode(cssText));
+	};
+	
+	/**
+	 * 判断给定CSS样式表是否已创建。
+	 * 
+	 * @param id 样式表元素ID
+	 */
+	chartFactory.isStyleSheetCreated = function(id)
+	{
+		var style = document.getElementById(id);
+		
+		return (style != null && style.type == "text/css");
+	};
+	
+	/**
 	 * 记录异常日志。
 	 * 
 	 * @param exception 异常对象
