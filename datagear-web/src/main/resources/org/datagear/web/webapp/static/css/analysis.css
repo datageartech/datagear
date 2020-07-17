@@ -66,15 +66,26 @@
 	padding: 0.3em 0.3em;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item{
-	padding-top: 0.2em;
-	padding-bottom: 0.2em;
+	padding-top: 0.35em;
+	padding-bottom: 0.35em;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-label{
-	padding-bottom: 0.1em;
+	padding-bottom: 0.2em;
+}
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-input-wrapper{
+	white-space: nowrap;
+	display: inline-block;
+	padding-right: 0.5em;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value input[type=text],
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value textarea,
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value select{
 	width: 100%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding: 0.3em 0.3em;
+	border-radius: 3px;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-validation-required,
 .dg-dspv-form .dg-dspv-form-content .dg-validation-number{
@@ -112,7 +123,9 @@
 	right: 0;
 	border-width: 1px;
 	border-style: solid;
-	padding: 0.5em 0.8em;
+	padding: 0.41em 0.8em;
+	user-select: text;
+	-webkit-user-select: text;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head{
 	font-weight: bold;
@@ -122,6 +135,7 @@
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-content{
 	overflow: auto;
 	font-size: 0.9em;
+	max-width: 41em;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot{
 	padding-top: 0.41em;
@@ -144,22 +158,24 @@
 .dg-chart-setting-box .dg-chart-setting-panel .dg-param-value-form-wrapper{
 	border-width: 1px;
 	border-style: solid;
-	padding: 0.3em 0.3em;
+	padding: 0.5em 0.5em;
 	margin: 0.5em 0;
+	border-radius: 3px;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-param-value-form-head{
 	font-weight: bold;
-	max-width: 20em;
 	overflow: hidden;
 	white-space: nowrap;
+	padding: 0.2em 0em;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form input,
 .dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form select,
+.dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form textarea
 .dg-chart-setting-box .dg-chart-setting-panel .dg-dspv-form button{
 	font-size: 1em;
 	border-width: 1px;
 	border-style: solid;
-	padding: 0.2em 0.1em;
+	padding: 0.3em 0;
 }
 .dg-chart-setting-box .dg-chart-setting-panel button{
 	padding: 0.4em 0.8em;
