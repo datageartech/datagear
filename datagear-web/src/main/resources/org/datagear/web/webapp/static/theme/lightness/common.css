@@ -183,3 +183,67 @@ table.dataTable.display tbody > tr > .selected:hover {
 .page-sqlpad .content .content-result .execution-message .message-content-highlight{
 	color: #0000f0;
 }
+
+/*datetimepicker*/
+/*主体*/
+.xdsoft_datetimepicker{
+	color: #333333;
+	background: #ffffff;
+	border-color: #DDDDDD;
+	box-shadow: 0px 0px 6px #666666;
+	-webkit-box-shadow: 0px 0px 6px #666666;
+}
+/*前景色*/
+.xdsoft_datetimepicker .xdsoft_calendar td,
+.xdsoft_datetimepicker .xdsoft_calendar th{
+	color: #333333;
+}
+/*按钮*/
+.xdsoft_datetimepicker .xdsoft_label i,
+.xdsoft_datetimepicker .xdsoft_next,
+.xdsoft_datetimepicker .xdsoft_prev,
+.xdsoft_datetimepicker .xdsoft_today_button{
+	color: #333333;
+}
+/*年、月*/
+.xdsoft_datetimepicker .xdsoft_label{
+	background: #ffffff;
+}
+/*年、月下拉框*/
+.xdsoft_datetimepicker .xdsoft_label>.xdsoft_select{
+	color: #333333;
+	background: #ffffff;
+	border-color: #DDDDDD;
+	box-shadow: 0px 0px 6px #666666;
+	-webkit-box-shadow: 0px 0px 6px #666666;
+}
+/*时间框*/
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box{
+	border-color: #DDDDDD;
+}
+/*时间条目*/
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{
+	color: #333333;
+	border-color: #DDDDDD;
+}
+/*悬停*/
+.xdsoft_datetimepicker .xdsoft_calendar td:hover,
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div:hover,
+.xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option:hover{
+	color: #333333 !important;
+	background: #DDD !important;
+}
+/*今天*/
+.xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today{
+	color: #333333;
+	font-weight: bold;
+}
+/*选中*/
+.xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_default,
+.xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current,
+.xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current{
+	color: #ffffff;
+	background-color: #007FFF;
+	box-shadow: none;
+	-webkit-box-shadow: none;
+}

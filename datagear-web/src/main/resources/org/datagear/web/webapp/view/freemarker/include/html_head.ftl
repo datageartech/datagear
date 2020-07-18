@@ -14,6 +14,7 @@ var contextPath="${contextPath}";
 <link href="${contextPath}/static/css/jQuery-File-Upload-9.21.0/jquery.fileupload.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/jquery.steps-1.1.0/jquery.steps.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/ace-21.02.19/ace.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
+<link href="${contextPath}/static/script/jquery-datetimepicker-2.5.20/jquery.datetimepicker.min.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link id="css_ace" href="${contextPath}/static/theme/<@spring.theme code='theme' />/ace-21.02.19/ace.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/datagear-pagination.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
 <link href="${contextPath}/static/css/common.css?v=${_hh_Version}" type="text/css" rel="stylesheet" />
@@ -50,5 +51,7 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/datagear-jquery-override.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-tableform.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-schema-url-builder.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/datagear-chartFactory.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/datagear-chartForm.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js?v=${_hh_Version}" type="text/javascript"></script>
 </#if>

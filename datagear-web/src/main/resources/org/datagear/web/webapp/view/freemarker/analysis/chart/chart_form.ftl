@@ -390,7 +390,7 @@ readonly 是否只读操作，允许为null
 					readonly: <#if readonly>true<#else>false</#if>,
 					render: function()
 					{
-						$("select, input", this).addClass("ui-widget ui-widget-content");
+						$("select, input, textarea", this).addClass("ui-widget ui-widget-content");
 						$("button", this).addClass("ui-button ui-corner-all ui-widget");
 						
 						<#if !readonly>

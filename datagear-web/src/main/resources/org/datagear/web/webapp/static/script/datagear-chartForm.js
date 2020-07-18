@@ -69,7 +69,7 @@
 	 * @param dataSetParams
 	 * @param options
 	 * 			{
-	 *              chartTheme: {...},          //必选，渲染表单所使用的图表主题
+	 *              chartTheme: {...}           //可选，用于支持渲染表单样式的图表主题
 	 * 				submit: function(){},    	//可选，提交处理函数
 	 * 				paramValues: {...},     	//可选，初始参数值
 	 * 				readonly: false,			//可选，是否只读
@@ -116,43 +116,43 @@
 					dsp.inputPayload = [ { name: options.yesText, value: "true" }, { name: options.noText, value: "false" } ];
 				
 				if(dsp.inputType == InputType.RADIO)
-					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value, options.chartTheme);
 				else
-					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value, options.chartTheme);
 			}
 			else if(dsp.type == chartForm.DataSetParamDataType.STRING)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.DATE)
-					chartForm.renderDataSetParamValueFormInputDate($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputDate($valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.TIME)
-					chartForm.renderDataSetParamValueFormInputTime($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputTime($valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.DATETIME)
-					chartForm.renderDataSetParamValueFormInputDateTime($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputDateTime($valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.RADIO)
-					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					chartForm.renderDataSetParamValueFormInputTextarea($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputTextarea($valueDiv, dsp, value, options.chartTheme);
 				else
-					chartForm.renderDataSetParamValueFormInputText($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputText($valueDiv, dsp, value, options.chartTheme);
 			}
 			else if(dsp.type == chartForm.DataSetParamDataType.NUMBER)
 			{
 				if(dsp.inputType == InputType.SELECT)
-					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.RADIO)
-					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value, options.chartTheme);
 				else if(dsp.inputType == InputType.TEXTAREA)
-					chartForm.renderDataSetParamValueFormInputTextarea($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputTextarea($valueDiv, dsp, value, options.chartTheme);
 				else
-					chartForm.renderDataSetParamValueFormInputText($valueDiv, dsp, options, value);
+					chartForm.renderDataSetParamValueFormInputText($valueDiv, dsp, value, options.chartTheme);
 			}
 		}
 		
@@ -186,10 +186,10 @@
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
-	 * @param formOptions
 	 * @param value 可选
+	 * @param chartTheme 可选
 	 */
-	chartForm.renderDataSetParamValueFormInputText = function($parent, dataSetParam, formOptions, value)
+	chartForm.renderDataSetParamValueFormInputText = function($parent, dataSetParam, value, chartTheme)
 	{
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
@@ -213,10 +213,10 @@
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
-	 * @param formOptions
 	 * @param value 可选
+	 * @param chartTheme 可选
 	 */
-	chartForm.renderDataSetParamValueFormInputSelect = function($parent, dataSetParam, formOptions, value)
+	chartForm.renderDataSetParamValueFormInputSelect = function($parent, dataSetParam, value, chartTheme)
 	{
 		var payload = chartForm.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -255,10 +255,10 @@
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
-	 * @param formOptions
 	 * @param value 可选
+	 * @param chartTheme 可选
 	 */
-	chartForm.renderDataSetParamValueFormInputDate = function($parent, dataSetParam, formOptions, value)
+	chartForm.renderDataSetParamValueFormInputDate = function($parent, dataSetParam, value, chartTheme)
 	{
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
@@ -269,16 +269,12 @@
 		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartForm.datetimepickerSetLocaleIf();
-		chartForm.datetimepickerCreateStyleSheetIf(formOptions.chartTheme);
-		$input.datetimepicker(
+		chartForm.datetimepicker($input,
 		{
 			format: "Y-m-d",
 			timepicker: false,
-			lang: "zh",
-			//inline: true,
-			i18n: chartForm.datetimepickerI18n
-		});
+		},
+		chartTheme);
 	};
 	
 	/**
@@ -286,10 +282,10 @@
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
-	 * @param formOptions
 	 * @param value 可选
+	 * @param chartTheme 可选
 	 */
-	chartForm.renderDataSetParamValueFormInputTime = function($parent, dataSetParam, formOptions, value)
+	chartForm.renderDataSetParamValueFormInputTime = function($parent, dataSetParam, value, chartTheme)
 	{
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
@@ -300,17 +296,13 @@
 		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartForm.datetimepickerSetLocaleIf();
-		chartForm.datetimepickerCreateStyleSheetIf(formOptions.chartTheme);
-		$input.datetimepicker(
+		chartForm.datetimepicker($input,
 		{
 			format: "H:i:s",
 			datepicker: false,
 			step:10,
-			lang: "zh",
-			//inline: true,
-			i18n: chartForm.datetimepickerI18n
-		});
+		},
+		chartTheme);
 	};
 	
 	/**
@@ -318,10 +310,10 @@
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
-	 * @param formOptions
 	 * @param value 可选
+	 * @param chartTheme 可选
 	 */
-	chartForm.renderDataSetParamValueFormInputDateTime = function($parent, dataSetParam, formOptions, value)
+	chartForm.renderDataSetParamValueFormInputDateTime = function($parent, dataSetParam, value, chartTheme)
 	{
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
@@ -332,16 +324,12 @@
 		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartForm.datetimepickerSetLocaleIf();
-		chartForm.datetimepickerCreateStyleSheetIf(formOptions.chartTheme);
-		$input.datetimepicker(
+		chartForm.datetimepicker($input,
 		{
 			format: "Y-m-d H:i:s",
-			step:10,
-			lang: "zh",
-			//inline: true,
-			i18n: chartForm.datetimepickerI18n
-		});
+			step:10
+		},
+		chartTheme);
 	};
 	
 	/**
@@ -354,10 +342,10 @@
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
-	 * @param formOptions
 	 * @param value 可选
+	 * @param chartTheme 可选
 	 */
-	chartForm.renderDataSetParamValueFormInputRadio = function($parent, dataSetParam, formOptions, value)
+	chartForm.renderDataSetParamValueFormInputRadio = function($parent, dataSetParam, value, chartTheme)
 	{
 		var opts = chartForm.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -393,10 +381,10 @@
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
-	 * @param formOptions
 	 * @param value 可选，值、值数组
+	 * @param chartTheme 可选
 	 */
-	chartForm.renderDataSetParamValueFormInputCheckbox = function($parent, dataSetParam, formOptions, value)
+	chartForm.renderDataSetParamValueFormInputCheckbox = function($parent, dataSetParam, value, chartTheme)
 	{
 		var opts = chartForm.evalDataSetParamInputPayload(dataSetParam, []);
 		
@@ -432,10 +420,10 @@
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
-	 * @param formOptions
 	 * @param value 可选
+	 * @param chartTheme 可选
 	 */
-	chartForm.renderDataSetParamValueFormInputTextarea = function($parent, dataSetParam, formOptions, value)
+	chartForm.renderDataSetParamValueFormInputTextarea = function($parent, dataSetParam, value, chartTheme)
 	{
 		var $input = $("<textarea class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.text(value || "").appendTo($parent);
@@ -455,16 +443,41 @@
 		return "dg-chartFormEleId-" + nextIdSeq;
 	};
 	
-	chartForm.datetimepickerSetLocaleIf = function()
+	chartForm.datetimepicker = function($input, datetimepickerOptions, chartTheme)
 	{
-		if(chartForm._datetimepickerSetLocale == true)
-			return;
+		if(chartForm._datetimepickerSetLocale !== true)
+		{
+			$.datetimepicker.setLocale('zh');
+			chartForm._datetimepickerSetLocale = true;
+		}
 		
-		$.datetimepicker.setLocale('zh');
-		chartForm._datetimepickerSetLocale = true;
+		if(chartTheme)
+		{
+			var containerId = (chartTheme._datetimepickerContainerId || (chartTheme._datetimepickerContainerId = chartForm.nextElementId()));
+			var container = document.getElementById(containerId);
+			if(!container)
+				container = $("<div class='dg-dspv-datetimepicker-container' />").attr("id", containerId).appendTo(document.body);
+			
+			chartForm.datetimepickerCreateStyleSheetIf(chartTheme, "#"+containerId);
+		}
+		
+		datetimepickerOptions = $.extend(
+		{
+			parentID: (chartTheme ? "#"+containerId : document.body),
+			i18n: chartForm.datetimepickerI18n
+		},
+		datetimepickerOptions);
+		
+		$input.datetimepicker(datetimepickerOptions);
 	};
 	
-	chartForm.datetimepickerCreateStyleSheetIf = function(chartTheme)
+	/**
+	 * 创建与指定图表主题匹配的datetimepicker组件样式表。
+	 * 
+	 * @param chartTheme
+	 * @param qualifier 样式限定名
+	 */
+	chartForm.datetimepickerCreateStyleSheetIf = function(chartTheme, qualifier)
 	{
 		var styleId = (chartTheme._datetimepickerStyleSheetId || (chartTheme._datetimepickerStyleSheetId = chartForm.nextElementId()));
 		
@@ -477,40 +490,69 @@
 		var shadowColor = chartFactory.getGradualColor(chartTheme, 0.9);
 		
 		var cssText =
-			".xdsoft_datetimepicker{"
+			//主体
+			qualifier + " .xdsoft_datetimepicker{"
 			+"  color: "+color+";"
 			+"  background: "+bgColor+";"
 			+"  border-color: "+borderColor+";"
 			+"  box-shadow: 0px 0px 6px "+shadowColor+";"
 			+"  -webkit-box-shadow: 0px 0px 6px "+shadowColor+";"
-			+"}"
-			+".xdsoft_datetimepicker .xdsoft_calendar td,"
-			+".xdsoft_datetimepicker .xdsoft_calendar th{"
+			+"} "
+			//前景色
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td,"
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar th{"
 			+"  color: "+color+";"
-			+"}"
-			+".xdsoft_datetimepicker .xdsoft_label i,"
-			+".xdsoft_datetimepicker .xdsoft_next,"
-			+".xdsoft_datetimepicker .xdsoft_prev,"
-			+".xdsoft_datetimepicker .xdsoft_today_button{"
+			+"} "
+			//按钮
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_label i,"
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_next,"
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_prev,"
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_today_button{"
 			+"  color:"+color+";"
-			+"}"
-			+".xdsoft_datetimepicker .xdsoft_label{"
+			+"} "
+			//年、月
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_label{"
 			+"  background: "+bgColor+";"
-			+"}"
-			+".xdsoft_datetimepicker .xdsoft_label>.xdsoft_select{"
+			+"} "
+			//年、月下拉框
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select{"
 			+"  color: "+color+";"
 			+"  background: "+bgColor+";"
 			+"  border-color: "+borderColor+";"
 			+"  box-shadow: 0px 0px 6px "+shadowColor+";"
 			+"  -webkit-box-shadow: 0px 0px 6px "+shadowColor+";"
-			+"}"
-			+".xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box{"
+			+"} "
+			//时间框
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box{"
 			+"  border-color: "+borderColor+";"
-			+"}"
-			+".xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{"
+			+"} "
+			//时间条目
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{"
 			+"  color: "+color+";"
 			+"  border-color: "+borderColor+";"
-			+"}";
+			+"} "
+			//悬停
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td:hover,"
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div:hover,"
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option:hover{"
+			+"  color: "+chartTheme.tooltipTheme.color+" !important;"
+			+"  background: "+chartTheme.tooltipTheme.backgroundColor+" !important;"
+			+"} "
+			//今天
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today{"
+			+"  color: "+color+";"
+			+"  font-weight: bold;"
+			+"} "
+			//选中
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_default,"
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current,"
+			+qualifier + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current{"
+			+"  color: "+chartTheme.highlightTheme.color+";"
+			+"  background: "+chartTheme.highlightTheme.backgroundColor+";"
+			+"  box-shadow: none;"
+			+"  -webkit-box-shadow: none;"
+			+"} "
+			;
 		
 		global.chartFactory.createStyleSheet(styleId, cssText);
 		

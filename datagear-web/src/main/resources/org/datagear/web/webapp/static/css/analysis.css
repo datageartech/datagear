@@ -231,7 +231,7 @@
 	content: "<";
 	left: 50%;
     top: 0;
-    margin-left: -0.5em;
+    margin-left: -0.4em;
 	transform:rotate(90deg);
 	-ms-transform:rotate(90deg);
 	-moz-transform:rotate(90deg);
@@ -242,7 +242,7 @@
 	content: ">";
 	left: 50%;
     top: 0;
-    margin-left: -0.5em;
+    margin-left: -0.4em;
 	transform:rotate(90deg);
 	-ms-transform:rotate(90deg);
 	-moz-transform:rotate(90deg);
