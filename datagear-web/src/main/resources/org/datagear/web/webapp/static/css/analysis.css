@@ -72,20 +72,25 @@
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-label{
 	padding-bottom: 0.2em;
 }
-.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-input-wrapper{
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-radio-wrapper,
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-checkbox-wrapper{
 	white-space: nowrap;
 	display: inline-block;
 	padding-right: 0.5em;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value input[type=text],
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value textarea,
-.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value select{
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value select,
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-inputs-wrapper{
 	width: 100%;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	padding: 0.3em 0.3em;
 	border-radius: 3px;
+}
+.dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-inputs-wrapper{
+	border: 1px solid transparent;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-validation-required,
 .dg-dspv-form .dg-dspv-form-content .dg-validation-number{
@@ -181,6 +186,10 @@
 	padding: 0.4em 0.8em;
 	white-space: nowrap;
 	font-size: 1em;
+}
+.dg-chart-setting-box .dg-chart-setting-panel button.dg-param-value-form-invalid{
+	border-color: red!important;
+	color: red!important;
 }
 
 /*datetimepicker组件扩展样式*/

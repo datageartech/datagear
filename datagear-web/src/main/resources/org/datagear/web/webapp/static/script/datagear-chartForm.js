@@ -65,9 +65,9 @@
 	/**
 	 * 渲染数据集参数值表单。
 	 * 
-	 * @param $parent
-	 * @param dataSetParams
-	 * @param options
+	 * @param $parent 用于渲染表单的父元素
+	 * @param dataSetParams 数据集参数集，格式参考：org.datagear.analysis.DataSetParam
+	 * @param options 渲染配置项，格式为：
 	 * 			{
 	 *              chartTheme: {...}           //可选，用于支持渲染表单样式的图表主题
 	 * 				submit: function(){},    	//可选，提交处理函数
@@ -253,6 +253,11 @@
 	/**
 	 * 渲染输入项：日期框
 	 * 
+	 * dataSetParam.inputPayload格式可以为：
+	 * null、空字符串
+	 * 或者
+	 * { ... }  //datetimepicker配置选项
+	 * 
 	 * @param $parent
 	 * @param dataSetParam
 	 * @param value 可选
@@ -260,6 +265,14 @@
 	 */
 	chartForm.renderDataSetParamValueFormInputDate = function($parent, dataSetParam, value, chartTheme)
 	{
+		var options = chartForm.evalDataSetParamInputPayload(dataSetParam, {});
+		options = $.extend(
+		{
+			format: "Y-m-d",
+			timepicker: false,
+		},
+		options);
+		
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
 		
@@ -269,16 +282,16 @@
 		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartForm.datetimepicker($input,
-		{
-			format: "Y-m-d",
-			timepicker: false,
-		},
-		chartTheme);
+		chartForm.datetimepicker($input, options, chartTheme);
 	};
 	
 	/**
 	 * 渲染输入项：时间框
+	 * 
+	 * dataSetParam.inputPayload格式可以为：
+	 * null、空字符串
+	 * 或者
+	 * { ... }  //datetimepicker配置选项
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -287,6 +300,15 @@
 	 */
 	chartForm.renderDataSetParamValueFormInputTime = function($parent, dataSetParam, value, chartTheme)
 	{
+		var options = chartForm.evalDataSetParamInputPayload(dataSetParam, {});
+		options = $.extend(
+		{
+			format: "H:i:s",
+			datepicker: false,
+			step:10,
+		},
+		options);
+		
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
 		
@@ -296,17 +318,16 @@
 		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartForm.datetimepicker($input,
-		{
-			format: "H:i:s",
-			datepicker: false,
-			step:10,
-		},
-		chartTheme);
+		chartForm.datetimepicker($input, options, chartTheme);
 	};
 	
 	/**
 	 * 渲染输入项：日期时间框
+	 * 
+	 * dataSetParam.inputPayload格式可以为：
+	 * null、空字符串
+	 * 或者
+	 * { ... }  //datetimepicker配置选项
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -315,6 +336,14 @@
 	 */
 	chartForm.renderDataSetParamValueFormInputDateTime = function($parent, dataSetParam, value, chartTheme)
 	{
+		var options = chartForm.evalDataSetParamInputPayload(dataSetParam, {});
+		options = $.extend(
+		{
+			format: "Y-m-d H:i:s",
+			step:10
+		},
+		options);
+		
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
 		
@@ -324,12 +353,7 @@
 		if(chartForm.DataSetParamDataType.NUMBER == dataSetParam.type)
 			$input.attr("dg-validation-number", "true");
 		
-		chartForm.datetimepicker($input,
-		{
-			format: "Y-m-d H:i:s",
-			step:10
-		},
-		chartTheme);
+		chartForm.datetimepicker($input, options, chartTheme);
 	};
 	
 	/**
@@ -349,11 +373,13 @@
 	{
 		var opts = chartForm.evalDataSetParamInputPayload(dataSetParam, []);
 		
+		var $inputsWrapper = $("<div class='dg-dspv-form-inputs-wrapper' />").appendTo($parent);
+		
 		for(var i=0; i<opts.length; i++)
 		{
 			var eleId = chartForm.nextElementId();
 			
-			var $wrapper = $("<div class='dg-dspv-form-input-wrapper' />").appendTo($parent);
+			var $wrapper = $("<div class='dg-dspv-form-radio-wrapper' />").appendTo($inputsWrapper);
 			
 			var $input = $("<input type='radio' class='dg-dspv-form-input' />")
 				.attr("id", eleId).attr("name", dataSetParam.name).attr("value", opts[i].value).appendTo($wrapper);
@@ -393,11 +419,13 @@
 		else
 			value = (value.length != undefined ? value : [ value ]);
 		
+		var $inputsWrapper = $("<div class='dg-dspv-form-inputs-wrapper' />").appendTo($parent);
+		
 		for(var i=0; i<opts.length; i++)
 		{
 			var eleId = chartForm.nextElementId();
 			
-			var $wrapper = $("<div class='dg-dspv-form-input-wrapper' />").appendTo($parent);
+			var $wrapper = $("<div class='dg-dspv-form-checkbox-wrapper' />").appendTo($inputsWrapper);
 			
 			var $input = $("<input type='checkbox' class='dg-dspv-form-input' />")
 				.attr("id", eleId).attr("name", dataSetParam.name).attr("value", opts[i].value).appendTo($wrapper);
@@ -568,7 +596,7 @@
 	};
 	
 	/**
-	 * 验证数据集参数值表单。
+	 * 校验数据集参数值表单的必填项、数值项。
 	 * 
 	 * @param form
 	 * @return true 验证通过；false 验证不通过
@@ -577,34 +605,97 @@
 	{
 		var validationOk = true;
 		
-		var $requireds = $("[dg-validation-required]", form);
-		$requireds.each(function()
+		var $itemValue = $(".dg-dspv-form-item-value", form);
+		
+		$itemValue.each(function()
 		{
-			var $this = $(this);
-			if($this.val() == "")
+			var $required = $("[dg-validation-required]", this);
+			
+			if($required.length == 0)
+				return;
+			
+			var type = $required.attr("type");
+			
+			if(type == "checkbox" || type == "radio")
 			{
-				$this.addClass("dg-validation-required");
-				validationOk = false;
+				var checkeds = $required.filter(":checked");
+				if(checkeds.length == 0)
+				{
+					$(".dg-dspv-form-inputs-wrapper", this).addClass("dg-validation-required");
+					validationOk = false;
+				}
+				else
+					$(".dg-dspv-form-inputs-wrapper", this).removeClass("dg-validation-required");
 			}
 			else
-				$this.removeClass("dg-validation-required");
+			{
+				var val = $required.val();
+				
+				if(!val || val == "" || val.length == 0)
+				{
+					$required.addClass("dg-validation-required");
+					validationOk = false;
+				}
+				else
+					$required.removeClass("dg-validation-required");
+			}
 		});
 		
-		var $numbers = $("[dg-validation-number]", form);
 		var regexNumber = /^-?\d+\.?\d*$/;
-		$numbers.each(function()
+		
+		$itemValue.each(function()
 		{
-			var $this = $(this);
-			var val = $this.val();
-			var valid = (val == "" ? true : regexNumber.test(val));
+			var $number = $("[dg-validation-number]", this);
 			
-			if(!valid)
+			if($number.length == 0)
+				return;
+			
+			var type = $number.attr("type");
+			
+			if(type == "checkbox" || type == "radio")
 			{
-				$this.addClass("dg-validation-number");
-				validationOk = false;
+				var checkeds = $number.filter(":checked");
+				var myValid = true;
+				
+				for(var i=0; i<checkeds.length; i++)
+				{
+					if(!myValid)
+						break;
+					
+					var val = $(this).attr("value");
+					myValid = (val == "" ? true : regexNumber.test(val));
+				}
+				
+				if(!myValid)
+				{
+					$(".dg-dspv-form-inputs-wrapper", this).addClass("dg-validation-number");
+					validationOk = false;
+				}
+				else
+					$(".dg-dspv-form-inputs-wrapper", this).removeClass("dg-validation-number");
 			}
 			else
-				$this.removeClass("dg-validation-number");
+			{
+				var val = $number.val();
+				val = ($.isArray(val) ? val: [ val ]);
+				var myValid = true;
+				
+				for(var i=0; i<val.length; i++)
+				{
+					if(!myValid)
+						break;
+					
+					myValid = (val[i] == "" ? true : regexNumber.test(val[i]));
+				}
+				
+				if(!myValid)
+				{
+					$number.addClass("dg-validation-number");
+					validationOk = false;
+				}
+				else
+					$number.removeClass("dg-validation-number");
+			}
 		});
 		
 		return validationOk;
@@ -884,6 +975,7 @@
 			chartForm.setPrimaryButtonStyle($button, chart);
 			$button.click(function()
 			{
+				var $thisButton = $(this);
 				var validateOk = true;
 				var paramValuess = [];
 				
@@ -908,12 +1000,16 @@
 				
 				if(validateOk)
 				{
+					$thisButton.removeClass("dg-param-value-form-invalid");
+					
 					for(var i=0; i<paramValuess.length; i++)
 						chart.setDataSetParamValues(paramValuess[i].index, paramValuess[i].paramValues);
 					
 					chartForm.closeChartSettingPanel(chart);
 					chart.refreshData();
 				}
+				else
+					$thisButton.addClass("dg-param-value-form-invalid");
 			});
 			
 			$panelContent.css("width", $chart.width()*3/4);

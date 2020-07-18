@@ -2175,7 +2175,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	position: absolute;
 	display: none;
 	padding: 0.5em 0.5em;
-	max-height: 60%;
+	max-height: 80%;
 	overflow: auto;
 }
 .page-form-dataSet .sql-param-value-panel .ui-widget-header{
