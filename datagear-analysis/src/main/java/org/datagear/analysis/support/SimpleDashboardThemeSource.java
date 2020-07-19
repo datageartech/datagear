@@ -39,6 +39,12 @@ public class SimpleDashboardThemeSource implements DashboardThemeSource
 					new Theme("darkChartTooltip", "#EEE", "#444", "#555"),
 					new Theme("darkChartHighlight", "#FFF", "#1E90FF", "#555")));
 
+	static
+	{
+		THEME_LIGHT.getChartTheme().setGradient(20);
+		THEME_DARK.getChartTheme().setGradient(10);
+	}
+
 	private List<DashboardTheme> dashboardThemes;
 
 	public SimpleDashboardThemeSource()

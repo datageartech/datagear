@@ -112,15 +112,20 @@
 			
 			if(dsp.type == chartForm.DataSetParamDataType.BOOLEAN)
 			{
+				var defaultSelOpts = undefined;
+				
 				if(!dsp.inputPayload)
-					dsp.inputPayload = [ { name: options.yesText, value: "true" }, { name: options.noText, value: "false" } ];
+					defaultSelOpts = [ { name: options.yesText, value: "true" }, { name: options.noText, value: "false" } ];
+				
+				//XXX 上面不应将defaultSelOpts对象赋值给dsp.inputPayload，因为dsp.inputPayload应是字符串类型，
+				//图表编辑保存时会将dsp传输至后台而进行类型转换，如果赋值，则会报错
 				
 				if(dsp.inputType == InputType.RADIO)
-					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value, options.chartTheme);
+					chartForm.renderDataSetParamValueFormInputRadio($valueDiv, dsp, value, options.chartTheme, defaultSelOpts);
 				else if(dsp.inputType == InputType.CHECKBOX)
-					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value, options.chartTheme);
+					chartForm.renderDataSetParamValueFormInputCheckbox($valueDiv, dsp, value, options.chartTheme, defaultSelOpts);
 				else
-					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value, options.chartTheme);
+					chartForm.renderDataSetParamValueFormInputSelect($valueDiv, dsp, value, options.chartTheme, defaultSelOpts);
 			}
 			else if(dsp.type == chartForm.DataSetParamDataType.STRING)
 			{
@@ -215,10 +220,14 @@
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param chartTheme 可选
+	 * @param defaultSelOpts 可选，默认下拉框选项集
 	 */
-	chartForm.renderDataSetParamValueFormInputSelect = function($parent, dataSetParam, value, chartTheme)
+	chartForm.renderDataSetParamValueFormInputSelect = function($parent, dataSetParam, value, chartTheme, defaultSelOpts)
 	{
 		var payload = chartForm.evalDataSetParamInputPayload(dataSetParam, []);
+		
+		if(defaultSelOpts && payload && payload.length == 0)
+			payload = defaultSelOpts;
 		
 		if($.isArray(payload))
 			payload = { multiple: false, options: payload };
@@ -368,10 +377,14 @@
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param chartTheme 可选
+	 * @param defaultSelOpts 可选，默认下拉框选项集
 	 */
-	chartForm.renderDataSetParamValueFormInputRadio = function($parent, dataSetParam, value, chartTheme)
+	chartForm.renderDataSetParamValueFormInputRadio = function($parent, dataSetParam, value, chartTheme, defaultSelOpts)
 	{
 		var opts = chartForm.evalDataSetParamInputPayload(dataSetParam, []);
+		
+		if(defaultSelOpts && opts && opts.length == 0)
+			opts = defaultSelOpts;
 		
 		var $inputsWrapper = $("<div class='dg-dspv-form-inputs-wrapper' />").appendTo($parent);
 		
@@ -409,10 +422,14 @@
 	 * @param dataSetParam
 	 * @param value 可选，值、值数组
 	 * @param chartTheme 可选
+	 * @param defaultSelOpts 可选，默认下拉框选项集
 	 */
-	chartForm.renderDataSetParamValueFormInputCheckbox = function($parent, dataSetParam, value, chartTheme)
+	chartForm.renderDataSetParamValueFormInputCheckbox = function($parent, dataSetParam, value, chartTheme, defaultSelOpts)
 	{
 		var opts = chartForm.evalDataSetParamInputPayload(dataSetParam, []);
+		
+		if(defaultSelOpts && opts && opts.length == 0)
+			opts = defaultSelOpts;
 		
 		if(value == null)
 			value = [];
@@ -508,9 +525,9 @@
 		
 		var color = chartFactory.getGradualColor(chartTheme, 1);
 		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
-		var borderColor = chartFactory.getGradualColor(chartTheme, 0.4);
+		var borderColor = chartFactory.getGradualColor(chartTheme, 0.3);
 		var shadowColor = chartFactory.getGradualColor(chartTheme, 0.9);
-		var hoverColor = chartFactory.getGradualColor(chartTheme, 0.2);
+		var hoverColor = chartFactory.getGradualColor(chartTheme, 0.3);
 		
 		var cssText =
 			//主体

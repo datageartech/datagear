@@ -264,7 +264,7 @@
 			{
 				var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
 				
-				//兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
+				//@deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
 				if(bodyThemeObj.colorSecond)
 				{
 					bodyThemeObj.color = bodyThemeObj.colorSecond;
@@ -272,9 +272,7 @@
 					bodyThemeObj.legendColor = bodyThemeObj.colorSecond;
 				}
 				
-				//允许自定义ChartTheme不设置actualBackgroundColor
-				if(!bodyThemeObj.actualBackgroundColor && bodyThemeObj.backgroundColor != "transparent")
-					bodyThemeObj.actualBackgroundColor = bodyThemeObj.backgroundColor;
+				this._inflateTheme(bodyThemeObj);
 				
 				theme = $.extend(true, theme, bodyThemeObj);
 			}
@@ -287,14 +285,43 @@
 		{
 			var eleThemeObj = chartFactory.evalSilently(eleThemeValue, {});
 			
-			//允许自定义ChartTheme不设置actualBackgroundColor
-			if(!eleThemeObj.actualBackgroundColor && eleThemeObj.backgroundColor != "transparent")
-				eleThemeObj.actualBackgroundColor = eleThemeObj.backgroundColor;
+			this._inflateTheme(eleThemeObj);
 			
 			theme = $.extend(true, {}, theme, eleThemeObj);
 		}
 		
 		this.theme(theme);
+	};
+	
+	/**
+	 * 填充自定义图表主题，自动设置未定义的颜色。
+	 */
+	chartBase._inflateTheme = function(theme)
+	{
+		if(theme.backgroundColor)
+		{
+			//允许自定义ChartTheme不设置actualBackgroundColor
+			if(!theme.actualBackgroundColor && theme.backgroundColor != "transparent")
+				theme.actualBackgroundColor = theme.backgroundColor;
+		}
+		
+		if(theme.color)
+		{
+			if(!theme.titleColor)
+				theme.titleColor = theme.color;
+			
+			if(!theme.legendColor)
+				theme.legendColor = theme.legendColor;
+		}
+		
+		if(theme.color && theme.actualBackgroundColor)
+		{
+			if(!theme.legendColor)
+				theme.legendColor = chartFactory.getGradualColor(theme, 0.8);
+			
+			if(!theme.borderColor)
+				theme.borderColor = chartFactory.getGradualColor(theme, 0.3);
+		}
 	};
 	
 	/**
@@ -2010,6 +2037,14 @@
 	};
 	
 	/**
+	 * 将对象转换为JSON字符串。
+	 */
+	chartFactory.toJSONString = function(obj)
+	{
+		return JSON.stringify(obj);
+	};
+	
+	/**
 	 * 为元素设置主题样式。
 	 * 
 	 * @param element HTML元素、Jquery对象
@@ -2054,12 +2089,12 @@
 	 */
 	chartFactory.getGradualColor = function(theme, factor)
 	{
-		var gcs = theme._GRADUAL_COLORS;
+		var gcs = theme._gradualColors;
 		
 		if(!gcs || gcs.length == 0)
 		{
-			gcs = this.evalGradualColors(theme.actualBackgroundColor, theme.color, 20);
-			theme._GRADUAL_COLORS = gcs;
+			gcs = this.evalGradualColors(theme.actualBackgroundColor, theme.color, (theme.gradient || 10));
+			theme._gradualColors = gcs;
 		}
 		
 		var index = parseInt((gcs.length-1) * factor);
@@ -2074,7 +2109,7 @@
 	};
 	
 	/**
-	 * 计算渐变颜色。
+	 * 计算起始颜色和终止颜色之间的渐变颜色数组，数组中不包含起始颜色和结束颜色。
 	 * 
 	 * @param start 起始颜色
 	 * @param end 终止颜色
@@ -2088,7 +2123,7 @@
 		start = this.parseColor(start);
 		end = this.parseColor(end);
 		
-		for(var i=0; i<count; i++)
+		for(var i=1; i<=count; i++)
 		{
 			var color = {};
 			
@@ -2255,10 +2290,10 @@
 		var areaBorderColor1 = this.getGradualColor(chartTheme, 0.5);
 		var shadowColor = this.getGradualColor(chartTheme, 0.9);
 		
-		//兼容1.8.1版本有ChartTheme.axisColor的结构
+		//@deprecated 兼容1.8.1版本有ChartTheme.axisColor的结构
 		if(chartTheme.axisColor)
 			axisColor = chartTheme.axisColor;
-		//兼容1.8.1版本有ChartTheme.axisScaleLineColor的结构
+		//@deprecated 兼容1.8.1版本有ChartTheme.axisScaleLineColor的结构
 		if(chartTheme.axisScaleLineColor)
 			axisScaleLineColor = chartTheme.axisScaleLineColor;
 		

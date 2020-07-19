@@ -3654,7 +3654,7 @@
 					"odd":
 					{
 						"color": chartTheme.color,
-						"backgroundColor": global.chartFactory.getGradualColor(chartTheme, 0.1)
+						"backgroundColor": global.chartFactory.getGradualColor(chartTheme, 0)
 					},
 					//奇数行样式
 					"even":

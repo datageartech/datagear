@@ -40,6 +40,9 @@ public class Theme implements Serializable
 	/** 边框宽度 */
 	private String borderWidth = "0";
 
+	/** 背景色至前景色的渐变跨度 */
+	private int gradient = 10;
+
 	public Theme()
 	{
 		super();
@@ -146,11 +149,21 @@ public class Theme implements Serializable
 		this.borderWidth = borderWidth;
 	}
 
+	public int getGradient()
+	{
+		return gradient;
+	}
+
+	public void setGradient(int gradient)
+	{
+		this.gradient = gradient;
+	}
+
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [name= " + this.name + ", color=" + color + ", backgroundColor="
+		return getClass().getSimpleName() + " [name=" + name + ", color=" + color + ", backgroundColor="
 				+ backgroundColor + ", actualBackgroundColor=" + actualBackgroundColor + ", borderColor=" + borderColor
-				+ ", borderWidth=" + borderWidth + "]";
+				+ ", borderWidth=" + borderWidth + ", gradient=" + gradient + "]";
 	}
 }
