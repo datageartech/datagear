@@ -2212,6 +2212,17 @@
 	};
 	
 	/**
+	 * 生成一个新的页面元素ID。
+	 */
+	chartFactory.nextElementId = function()
+	{
+		var nextIdSeq = (this._nextElementIdSeq != null ? this._nextElementIdSeq : 0);
+		this._nextElementIdSeq = nextIdSeq + 1;
+		
+		return "dataGearClientEleId-" + nextIdSeq;
+	};
+	
+	/**
 	 * 记录异常日志。
 	 * 
 	 * @param exception 异常对象

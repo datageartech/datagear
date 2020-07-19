@@ -377,7 +377,7 @@
 		
 		for(var i=0; i<opts.length; i++)
 		{
-			var eleId = chartForm.nextElementId();
+			var eleId = global.chartFactory.nextElementId();
 			
 			var $wrapper = $("<div class='dg-dspv-form-radio-wrapper' />").appendTo($inputsWrapper);
 			
@@ -423,7 +423,7 @@
 		
 		for(var i=0; i<opts.length; i++)
 		{
-			var eleId = chartForm.nextElementId();
+			var eleId = global.chartFactory.nextElementId();
 			
 			var $wrapper = $("<div class='dg-dspv-form-checkbox-wrapper' />").appendTo($inputsWrapper);
 			
@@ -463,14 +463,6 @@
 			$input.attr("dg-validation-number", "true");
 	};
 	
-	chartForm.nextElementId = function()
-	{
-		var nextIdSeq = (chartForm._nextElementIdSeq != null ? chartForm._nextElementIdSeq : 0);
-		chartForm._nextElementIdSeq = nextIdSeq + 1;
-		
-		return "dg-chartFormEleId-" + nextIdSeq;
-	};
-	
 	chartForm.datetimepicker = function($input, datetimepickerOptions, chartTheme)
 	{
 		if(chartForm._datetimepickerSetLocale !== true)
@@ -481,7 +473,8 @@
 		
 		if(chartTheme)
 		{
-			var containerId = (chartTheme._datetimepickerContainerId || (chartTheme._datetimepickerContainerId = chartForm.nextElementId()));
+			var containerId = (chartTheme._datetimepickerContainerId
+					|| (chartTheme._datetimepickerContainerId = global.chartFactory.nextElementId()));
 			var container = document.getElementById(containerId);
 			if(!container)
 				container = $("<div class='dg-dspv-datetimepicker-container' />").attr("id", containerId).appendTo(document.body);
@@ -507,7 +500,8 @@
 	 */
 	chartForm.datetimepickerCreateStyleSheetIf = function(chartTheme, qualifier)
 	{
-		var styleId = (chartTheme._datetimepickerStyleSheetId || (chartTheme._datetimepickerStyleSheetId = chartForm.nextElementId()));
+		var styleId = (chartTheme._datetimepickerStyleSheetId
+				|| (chartTheme._datetimepickerStyleSheetId = global.chartFactory.nextElementId()));
 		
 		if(global.chartFactory.isStyleSheetCreated(styleId))
 			return false;
@@ -516,6 +510,7 @@
 		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
 		var borderColor = chartFactory.getGradualColor(chartTheme, 0.4);
 		var shadowColor = chartFactory.getGradualColor(chartTheme, 0.9);
+		var hoverColor = chartFactory.getGradualColor(chartTheme, 0.2);
 		
 		var cssText =
 			//主体
@@ -563,8 +558,8 @@
 			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td:hover,"
 			+qualifier + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div:hover,"
 			+qualifier + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option:hover{"
-			+"  color: "+chartTheme.tooltipTheme.color+" !important;"
-			+"  background: "+chartTheme.tooltipTheme.backgroundColor+" !important;"
+			+"  color: "+color+" !important;"
+			+"  background: "+hoverColor+" !important;"
 			+"} "
 			//今天
 			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today{"
