@@ -2181,6 +2181,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-dataSet .sql-param-value-panel .ui-widget-header{
 	padding: 0.3em 0.1em;
 }
+.page-form-dataSet .sql-param-value-panel .sql-param-value-panel-content{
+	padding-top: 0.41em;
+}
 .page-form-dataSet .sql-param-value-panel .sql-param-value-panel-content .dg-dspv-form-content{
 	max-height: 14em;
 	overflow: auto;
@@ -2399,11 +2402,14 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	position: absolute;
 	display: none;
 	padding: 0.5em 0.5em;
-	max-height: 60%;
+	max-height: 80%;
 	overflow: auto;
 }
 .page-form-chart .data-set-param-value-panel .ui-widget-header{
 	padding: 0.3em 0.1em;
+}
+.page-form-chart .data-set-param-value-panel .data-set-param-value-panel-content{
+	padding-top: 0.41em;
 }
 .page-form-chart .data-set-param-value-panel .data-set-param-value-panel-content .dg-dspv-form-content{
 	max-height: 14em;

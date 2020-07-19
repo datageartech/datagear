@@ -322,7 +322,7 @@ readonly 是否只读操作，允许为null
 				$paramValueButton.data("dataSetParams"), formOptions);
 		
 		$panel.show();
-		$panel.position({ my : "left top", at : "right top", of : $paramValueButton});
+		$panel.position({ my : "left center", at : "right top", of : $paramValueButton});
 	};
 	
 	$(po.element()).on("click", function(event)
