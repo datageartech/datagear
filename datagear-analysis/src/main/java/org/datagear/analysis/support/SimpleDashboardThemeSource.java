@@ -39,10 +39,19 @@ public class SimpleDashboardThemeSource implements DashboardThemeSource
 					new Theme("darkChartTooltip", "#EEE", "#444", "#555"),
 					new Theme("darkChartHighlight", "#FFF", "#1E90FF", "#555")));
 
+	public static final DashboardTheme THEME_GREEN = new DashboardTheme("green", "#FFFFFF", "#285C00", "#72B42D",
+			new ChartTheme("greenChart", "#FFFFFF", "transparent", "#285C00", "#72B42D", "#FFFFFF", "#DDDDDD",
+					new String[] { "#2EC7C9", "#B6A2DE", "#FFB980", "#97B552", "#D87A80", "#8D98B3", "#E5CF0D",
+							"#5AB1EF", "#95706D", "#DC69AA" },
+					new String[] { "#58A52D", "#FFD700", "#FF4500" },
+					new Theme("greenChartTooltip", "#FFFFFF", "#3C8009", "#72B42D"),
+					new Theme("greenChartHighlight", "#FFF", "#1E90FF", "#555")));
+
 	static
 	{
 		THEME_LIGHT.getChartTheme().setGradient(20);
 		THEME_DARK.getChartTheme().setGradient(10);
+		THEME_GREEN.getChartTheme().setGradient(10);
 	}
 
 	private List<DashboardTheme> dashboardThemes;
@@ -53,6 +62,7 @@ public class SimpleDashboardThemeSource implements DashboardThemeSource
 		this.dashboardThemes = new ArrayList<>();
 		this.dashboardThemes.add(THEME_LIGHT);
 		this.dashboardThemes.add(THEME_DARK);
+		this.dashboardThemes.add(THEME_GREEN);
 	}
 
 	public SimpleDashboardThemeSource(List<DashboardTheme> dashboardThemes)
