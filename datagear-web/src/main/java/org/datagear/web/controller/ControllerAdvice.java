@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.support.SqlDataSetUnsupportedSqlTypeException;
+import org.datagear.analysis.support.TemplateSqlResolverException;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverClassFormatErrorException;
 import org.datagear.connection.DriverEntityManagerException;
@@ -355,6 +356,17 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(EstablishConnectionException.class),
 				exception.getCause(), true);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(TemplateSqlResolverException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisSqlDataSetTemplateSqlResolverException(HttpServletRequest request,
+			HttpServletResponse response, TemplateSqlResolverException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(TemplateSqlResolverException.class), exception, false,
+				exception.getMessage());
 
 		return getErrorView(request, response);
 	}
