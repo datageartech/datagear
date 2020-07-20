@@ -214,6 +214,7 @@
 .xdsoft_datetimepicker .xdsoft_prev,
 .xdsoft_datetimepicker .xdsoft_today_button{
 	background: none;
+	position: relative;
 }
 .xdsoft_datetimepicker .xdsoft_prev:before,
 .xdsoft_datetimepicker .xdsoft_next:before,
@@ -231,10 +232,7 @@
 	content: ">";
 }
 .xdsoft_datetimepicker .xdsoft_today_button:before{
-	content: ".";
-    font-size: 40px;
-    top: 3px;
-    left: 0px;
+	content: "#";
 }
 .xdsoft_timepicker .xdsoft_prev:before{
 	content: "<";

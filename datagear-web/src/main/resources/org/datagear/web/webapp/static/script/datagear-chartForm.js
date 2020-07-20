@@ -501,6 +501,8 @@
 		
 		datetimepickerOptions = $.extend(
 		{
+			//inline应该为false，为true的话下面的datetimepickerCreateStyleSheetIf函数创建的样式将不起作用
+			inline: false,
 			parentID: (chartTheme ? "#"+containerId : document.body),
 			i18n: chartForm.datetimepickerI18n
 		},
