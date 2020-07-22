@@ -24,17 +24,11 @@ import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
  */
 public class EnumThemeChangeInterceptor extends ThemeChangeInterceptor
 {
-	private List<String> themes;
+	private List<String> themes = Themes.THEMES;
 
 	public EnumThemeChangeInterceptor()
 	{
 		super();
-	}
-
-	public EnumThemeChangeInterceptor(List<String> themes)
-	{
-		super();
-		this.themes = themes;
 	}
 
 	public List<String> getThemes()

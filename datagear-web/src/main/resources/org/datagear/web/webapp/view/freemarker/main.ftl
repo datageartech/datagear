@@ -1,6 +1,7 @@
 <#include "include/import_global.ftl">
 <#include "include/html_doctype.ftl">
 <#assign Global=statics['org.datagear.util.Global']>
+<#assign Themes=statics['org.datagear.web.util.Themes']>
 <html>
 <head>
 <#include "include/html_head.ftl">
@@ -1212,9 +1213,9 @@ ${detectNewVersionScript}
 					</#if>
 					<li class=""><a href="javascript:void(0);"><@spring.message code='main.changeTheme' /></a>
 						<ul class="ui-widget-shadow">
-							<li class="theme-item" theme="lightness"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.lightness' /><span class="ui-widget ui-widget-content theme-sample theme-sample-lightness"></span></a></li>
-							<li class="theme-item" theme="dark"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.dark' /><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span></a></li>
-							<li class="theme-item" theme="green"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
+							<li class="theme-item" theme="${Themes.LIGHT}"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.light' /><span class="ui-widget ui-widget-content theme-sample theme-sample-light"></span></a></li>
+							<li class="theme-item" theme="${Themes.DARK}"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.dark' /><span class="ui-widget ui-widget-content theme-sample theme-sample-dark"></span></a></li>
+							<li class="theme-item" theme="${Themes.GREEN}"><a href="javascript:void(0);"><@spring.message code='main.changeTheme.green' /><span class="ui-widget ui-widget-content theme-sample theme-sample-green"></span></a></li>
 						</ul>
 					</li>
 					<li><a href="javascript:void(0);"><@spring.message code='help' /><span class="new-version-tip"></span></a>

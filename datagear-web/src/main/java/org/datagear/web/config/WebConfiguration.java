@@ -106,12 +106,7 @@ public class WebConfiguration
 	@Bean
 	public EnumThemeChangeInterceptor themeChangeInterceptor()
 	{
-		List<String> themes = new ArrayList<>();
-		themes.add("lightness");
-		themes.add("dark");
-		themes.add("green");
-
-		EnumThemeChangeInterceptor bean = new EnumThemeChangeInterceptor(themes);
+		EnumThemeChangeInterceptor bean = new EnumThemeChangeInterceptor();
 
 		return bean;
 	}
