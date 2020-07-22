@@ -2109,7 +2109,7 @@
 	};
 	
 	/**
-	 * 计算起始颜色和终止颜色之间的渐变颜色数组，数组中不包含起始颜色和结束颜色。
+	 * 计算起始颜色和终止颜色之间的渐变颜色数组，数组中不包含起始颜色、但包含结束颜色。
 	 * 
 	 * @param start 起始颜色
 	 * @param end 终止颜色
@@ -2254,7 +2254,7 @@
 		var nextIdSeq = (this._nextElementIdSeq != null ? this._nextElementIdSeq : 0);
 		this._nextElementIdSeq = nextIdSeq + 1;
 		
-		return "dataGearClientEleId-" + nextIdSeq;
+		return "dataGearClientElement" + nextIdSeq;
 	};
 	
 	/**

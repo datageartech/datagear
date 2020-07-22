@@ -394,6 +394,7 @@ readonly 是否只读操作，允许为null
 	po.showDataSetParamValuePanel = function(formOptions)
 	{
 		var $panel = po.element(".sql-param-value-panel");
+		var $panelContent = $(".sql-param-value-panel-content", $panel);
 		
 		formOptions = $.extend(
 		{
@@ -409,7 +410,9 @@ readonly 是否只读操作，允许为null
 		},
 		formOptions);
 		
-		chartFactory.chartForm.renderDataSetParamValueForm($(".sql-param-value-panel-content", $panel),
+		$panelContent.empty();
+		
+		chartFactory.chartForm.renderDataSetParamValueForm($panelContent,
 				po.getFormDataSetParams(), formOptions);
 		
 		$panel.show();

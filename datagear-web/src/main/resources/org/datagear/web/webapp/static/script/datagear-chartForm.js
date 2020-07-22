@@ -65,7 +65,7 @@
 	/**
 	 * 渲染数据集参数值表单。
 	 * 
-	 * @param $parent 用于渲染表单的父元素
+	 * @param $parent 用于渲染表单的父元素，如果不是<form>元素，此函数将会自动新建<form>子元素
 	 * @param dataSetParams 数据集参数集，格式参考：org.datagear.analysis.DataSetParam
 	 * @param options 渲染配置项，格式为：
 	 * 			{
@@ -82,14 +82,25 @@
 	 */
 	chartForm.renderDataSetParamValueForm = function($parent, dataSetParams, options)
 	{
-		options = $.extend({ submitText: chartForm.labels.confirm, readonly: false, yesText: chartForm.labels.yes, noText: chartForm.labels.no }, (options || {}));
+		options = $.extend(
+		{
+			submitText: chartForm.labels.confirm,
+			readonly: false,
+			yesText: chartForm.labels.yes,
+			noText: chartForm.labels.no
+		},
+		(options || {}));
+		
 		var paramValues = (options.paramValues || {});
 		var InputType = chartForm.DataSetParamInputType;
 		
-		$parent.empty();
-		var $form = $("<form />").appendTo($parent);
+		var $form = ($parent.is("form") ? $parent : $("<form />").appendTo($parent));
 		
 		$form.addClass("dg-dspv-form");
+		
+		//创建表单样式表
+		if(options.chartTheme)
+			chartForm.setDataSetParamValueFormStyle($form, options.chartTheme);
 		
 		$("<div class='dg-dspv-form-head' />").appendTo($form);
 		var $content = $("<div class='dg-dspv-form-content' />").appendTo($form);
@@ -184,6 +195,51 @@
 			options.render.apply($form[0]);
 		
 		return $form[0];
+	};
+	
+	chartForm.setDataSetParamValueFormStyle = function($form, chartTheme)
+	{
+		var styleClassName = chartTheme._dataSetParamValueFormStyleClassName;
+		if(!styleClassName)
+		{
+			styleClassName = global.chartFactory.nextElementId();
+			chartTheme._dataSetParamValueFormStyleClassName = styleClassName;
+		}
+		
+		$form.addClass(styleClassName);
+		
+		var styleId = (chartTheme._dataSetParamValueFormStyleSheetId
+				|| (chartTheme._dataSetParamValueFormStyleSheetId = global.chartFactory.nextElementId()));
+		
+		if(global.chartFactory.isStyleSheetCreated(styleId))
+			return false;
+		
+		var qualifier = "." + styleClassName;
+		
+		var color = chartFactory.getGradualColor(chartTheme, 1);
+		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
+		var borderColor = chartFactory.getGradualColor(chartTheme, 0.5);
+		var hoverColor = chartFactory.getGradualColor(chartTheme, 0.3);
+		
+		var cssText =
+			qualifier + ".dg-dspv-form{"
+			+"  color: "+color+";"
+			+"  background: "+bgColor+";"
+			+"  border-color: "+borderColor+";"
+			+"} "
+			+qualifier + ".dg-dspv-form .dg-dspv-form-item-value input,"
+			+qualifier + ".dg-dspv-form .dg-dspv-form-item-value textarea,"
+			+qualifier + ".dg-dspv-form .dg-dspv-form-item-value select,"
+			+qualifier + ".dg-dspv-form .dg-dspv-form-item-value .input{"
+			+"  color: "+color+";"
+			+"  background: "+bgColor+";"
+			+"  border-color: "+borderColor+";"
+			+"} "
+			;
+		
+		global.chartFactory.createStyleSheet(styleId, cssText);
+		
+		return true;
 	};
 	
 	/**
@@ -496,12 +552,12 @@
 			if(!container)
 				container = $("<div class='dg-dspv-datetimepicker-container' />").attr("id", containerId).appendTo(document.body);
 			
-			chartForm.datetimepickerCreateStyleSheetIf(chartTheme, "#"+containerId);
+			chartForm.datetimepickerSetStyle("#"+containerId, chartTheme);
 		}
 		
 		datetimepickerOptions = $.extend(
 		{
-			//inline应该为false，为true的话下面的datetimepickerCreateStyleSheetIf函数创建的样式将不起作用
+			//inline应该为false，为true的话下面的datetimepickerSetStyle函数创建的样式将不起作用
 			inline: false,
 			parentID: (chartTheme ? "#"+containerId : document.body),
 			i18n: chartForm.datetimepickerI18n
@@ -514,10 +570,10 @@
 	/**
 	 * 创建与指定图表主题匹配的datetimepicker组件样式表。
 	 * 
+	 * @param parentSelector datetimepicker组件所在的父元素CSS选择器
 	 * @param chartTheme
-	 * @param qualifier 样式限定名
 	 */
-	chartForm.datetimepickerCreateStyleSheetIf = function(chartTheme, qualifier)
+	chartForm.datetimepickerSetStyle = function(parentSelector, chartTheme)
 	{
 		var styleId = (chartTheme._datetimepickerStyleSheetId
 				|| (chartTheme._datetimepickerStyleSheetId = global.chartFactory.nextElementId()));
@@ -533,7 +589,7 @@
 		
 		var cssText =
 			//主体
-			qualifier + " .xdsoft_datetimepicker{"
+			parentSelector + " .xdsoft_datetimepicker{"
 			+"  color: "+color+";"
 			+"  background: "+bgColor+";"
 			+"  border-color: "+borderColor+";"
@@ -541,23 +597,23 @@
 			+"  -webkit-box-shadow: 0px 0px 6px "+shadowColor+";"
 			+"} "
 			//前景色
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td,"
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar th{"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td,"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar th{"
 			+"  color: "+color+";"
 			+"} "
 			//按钮
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_label i,"
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_next,"
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_prev,"
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_today_button{"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_label i,"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_next,"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_prev,"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_today_button{"
 			+"  color:"+color+";"
 			+"} "
 			//年、月
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_label{"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_label{"
 			+"  background: "+bgColor+";"
 			+"} "
 			//年、月下拉框
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select{"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select{"
 			+"  color: "+color+";"
 			+"  background: "+bgColor+";"
 			+"  border-color: "+borderColor+";"
@@ -565,30 +621,30 @@
 			+"  -webkit-box-shadow: 0px 0px 6px "+shadowColor+";"
 			+"} "
 			//时间框
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box{"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box{"
 			+"  border-color: "+borderColor+";"
 			+"} "
 			//时间条目
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div{"
 			+"  color: "+color+";"
 			+"  border-color: "+borderColor+";"
 			+"} "
 			//悬停
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td:hover,"
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div:hover,"
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option:hover{"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td:hover,"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div:hover,"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option:hover{"
 			+"  color: "+color+" !important;"
 			+"  background: "+hoverColor+" !important;"
 			+"} "
 			//今天
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today{"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today{"
 			+"  color: "+color+";"
 			+"  font-weight: bold;"
 			+"} "
 			//选中
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_default,"
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current,"
-			+qualifier + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current{"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_default,"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current,"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current{"
 			+"  color: "+chartTheme.highlightTheme.color+";"
 			+"  background: "+chartTheme.highlightTheme.backgroundColor+";"
 			+"  box-shadow: none;"
@@ -899,14 +955,16 @@
 		if($box.length <= 0)
 		{
 			$box = $("<div class='dg-chart-setting-box' />").appendTo($chart);
+			
+			chartForm.setChartSettingBoxStyle($box, chart.theme());
+			
 			var $button = $("<button type='button' class='dg-chart-setting-button' />")
 					.html(chartForm.labels.set).attr("title", chartForm.labels.openOrCloseSetPanel).appendTo($box);
-			chartForm.setWidgetStyle($button, chart);
 			
 			$button.click(function()
 			{
 				if(chartForm.isChartSettingPanelClosed(chart))
-					chartForm.openChartSettingPanel(chart, $box);
+					chartForm.openChartSettingPanel($box, chart);
 				else
 					chartForm.closeChartSettingPanel(chart);
 			});
@@ -929,22 +987,74 @@
 		$(".dg-chart-setting-box", chart.elementJquery()).hide();
 	};
 	
+	chartForm.setChartSettingBoxStyle = function($box, chartTheme)
+	{
+		var styleClassName = chartTheme._chartSettingBoxStyleClassName;
+		if(!styleClassName)
+		{
+			styleClassName = global.chartFactory.nextElementId();
+			chartTheme._chartSettingBoxStyleClassName = styleClassName;
+		}
+		
+		$box.addClass(styleClassName);
+		
+		var styleId = (chartTheme._chartSettingBoxStyleSheetId
+				|| (chartTheme._chartSettingBoxStyleSheetId = global.chartFactory.nextElementId()));
+		
+		if(global.chartFactory.isStyleSheetCreated(styleId))
+			return false;
+		
+		var qualifier = "." + styleClassName;
+		
+		var color = chartFactory.getGradualColor(chartTheme, 1);
+		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
+		var borderColor = chartFactory.getGradualColor(chartTheme, 0.5);
+		var shadowColor = chartFactory.getGradualColor(chartTheme, 0.9);
+		
+		var cssText =
+			qualifier + ".dg-chart-setting-box .dg-chart-setting-button{"
+			+"  color: "+color+";"
+			+"  background: "+bgColor+";"
+			+"  border-color: "+borderColor+";"
+			+"} "
+			+qualifier + ".dg-chart-setting-box .dg-chart-setting-panel{"
+			+"  color: "+color+";"
+			+"  background: "+bgColor+";"
+			+"  border-color: "+borderColor+";"
+			+"  box-shadow: 0px 0px 6px "+shadowColor+";"
+			+"  -webkit-box-shadow: 0px 0px 6px "+shadowColor+";"
+			+"} "
+			+qualifier + ".dg-chart-setting-box .dg-chart-setting-panel .dg-param-value-form-wrapper{"
+			+"  color: "+color+";"
+			+"  background: "+bgColor+";"
+			+"  border-color: "+borderColor+";"
+			+"} "
+			+qualifier + ".dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button{"
+			+"  color: "+color+";"
+			+"  background: "+chartFactory.getGradualColor(chartTheme, 0.2)+";"
+			+"  border-color: "+borderColor+";"
+			+"} "
+			;
+		
+		global.chartFactory.createStyleSheet(styleId, cssText);
+		
+		return true;
+	};
+	
 	/**
 	 * 打开图表设置面板。
 	 */
-	chartForm.openChartSettingPanel = function(chart, $parent)
+	chartForm.openChartSettingPanel = function($box, chart)
 	{
 		var $chart = chart.elementJquery();
-		$parent = ($parent || $chart);
 		
 		var chartDataSets = chart.chartDataSetsNonNull();
 		
-		var $panel = $(".dg-chart-setting-panel", $parent);
+		var $panel = $(".dg-chart-setting-panel", $box);
 		
 		if($panel.length <= 0)
 		{
-			$panel = $("<div class='dg-chart-setting-panel' />").appendTo($parent);
-			chartForm.setWidgetStyle($panel, chart, {shadow:true});
+			$panel = $("<div class='dg-chart-setting-panel' />").appendTo($box);
 			
 			var $panelHead = $("<div class='dg-chart-setting-panel-head' />").html(chartForm.labels.setDataSetParamValue).appendTo($panel);
 			var $panelContent = $("<div class='dg-chart-setting-panel-content' />").appendTo($panel);
@@ -962,7 +1072,6 @@
 					formTitle += " ("+chartDataSets[i].dataSet.name+")";
 				
 				var $fp = $("<div class='dg-param-value-form-wrapper' />").data("chartDataSetIndex", i).appendTo($panelContent);
-				chartForm.setWidgetStyle($fp, chart);
 				var $head = $("<div class='dg-param-value-form-head' />").html(formTitle).appendTo($fp);
 				var $content = $("<div class='dg-param-value-form-content' />").appendTo($fp);
 				chartForm.renderDataSetParamValueForm($content, params,
@@ -975,18 +1084,12 @@
 					paramValues: chartDataSets[i].paramValues,
 					render: function()
 					{
-						$("input, select, button, textarea", this).each(function()
-						{
-							chartForm.setWidgetStyle($(this), chart);
-						});
-						
 						chartForm.getDataSetParamValueFormFoot(this).hide();
 					}
 				});
 			}
 			
 			var $button = $("<button type='button' />").html(chartForm.labels.confirm).appendTo($panelFoot);
-			chartForm.setPrimaryButtonStyle($button, chart);
 			$button.click(function()
 			{
 				var $thisButton = $(this);
@@ -1064,43 +1167,6 @@
 		var $panel = $(".dg-chart-setting-panel", chart.elementJquery());
 		
 		return ($panel.length == 0 || $panel.is(":hidden"));
-	};
-	
-	chartForm.setWidgetStyle = function($widget, chart, options)
-	{
-		options = (options || { shadow: false });
-		
-		var chartFactory = global.chartFactory;
-		var chartTheme = chart.theme();
-		
-		var color = chartFactory.getGradualColor(chartTheme, 1);
-		var bgColor = chartFactory.getGradualColor(chartTheme, 0);
-		var borderColor = chartFactory.getGradualColor(chartTheme, 0.4);
-		var shadowColor = chartFactory.getGradualColor(chartTheme, 0.9);
-		
-		$widget.css("color", color);
-		$widget.css("background-color", bgColor);
-		$widget.css("border-color", borderColor);
-		
-		if(options.shadow)
-		{
-			$widget.css("box-shadow", "0px 0px 6px "+shadowColor);
-			$widget.css("-webkit-box-shadow", "0px 0px 6px "+shadowColor);
-		}
-	};
-	
-	chartForm.setPrimaryButtonStyle = function($button, chart)
-	{
-		var chartFactory = global.chartFactory;
-		var chartTheme = chart.theme();
-		
-		var color = chartFactory.getGradualColor(chartTheme, 1);
-		var bgColor = chartFactory.getGradualColor(chartTheme, 0.2);
-		var borderColor = chartFactory.getGradualColor(chartTheme, 0.5);
-		
-		$button.css("color", color);
-		$button.css("background-color", bgColor);
-		$button.css("border-color", borderColor);
 	};
 })
 (this);
