@@ -774,8 +774,14 @@
 	chartForm.getDataSetParamValueObj = function(form)
 	{
 		var $form = $(form);
-
 		var array = $form.serializeArray();
+		
+		var namesOfArray = {};
+		$("input[type='checkbox'], select[multiple]", $form).each(function()
+		{
+			var name = $(this).attr("name");
+			namesOfArray[name] = true;
+		});
 		
 		var re = {};
 		
@@ -784,11 +790,11 @@
 			var name = this.name;
 			var value = this.value;
 			
-			if(!value)
-				return;
-			
-			if(re[name] == undefined)
-				re[name] = value;
+			if(re[name] === undefined)
+			{
+				//XXX 如果是多选输入项，即使单值也应该设为数组
+				re[name] = (namesOfArray[name] ? [ value ] : value);
+			}
 			else
 			{
 				var prev = re[name];
