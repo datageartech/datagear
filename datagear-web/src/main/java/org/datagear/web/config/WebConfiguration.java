@@ -16,7 +16,7 @@ import java.util.Properties;
 import org.datagear.web.freemarker.CustomFreeMarkerView;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
-import org.datagear.web.util.EnumThemeChangeInterceptor;
+import org.datagear.web.util.EnumCookieThemeResolver;
 import org.datagear.web.util.SubContextPathRequestMappingHandlerMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +31,7 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
-import org.springframework.web.servlet.theme.CookieThemeResolver;
+import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
@@ -104,10 +104,9 @@ public class WebConfiguration
 	}
 
 	@Bean
-	public EnumThemeChangeInterceptor themeChangeInterceptor()
+	public ThemeChangeInterceptor themeChangeInterceptor()
 	{
-		EnumThemeChangeInterceptor bean = new EnumThemeChangeInterceptor();
-
+		ThemeChangeInterceptor bean = new ThemeChangeInterceptor();
 		return bean;
 	}
 
@@ -200,13 +199,9 @@ public class WebConfiguration
 	}
 
 	@Bean
-	public CookieThemeResolver themeResolver()
+	public EnumCookieThemeResolver themeResolver()
 	{
-		CookieThemeResolver bean = new CookieThemeResolver();
-		bean.setDefaultThemeName(this.themeChangeInterceptor().getThemes().get(0));
-		bean.setCookieName("THEME");
-		bean.setCookieMaxAge(60 * 60 * 24 * 365);
-
+		EnumCookieThemeResolver bean = new EnumCookieThemeResolver();
 		return bean;
 	}
 

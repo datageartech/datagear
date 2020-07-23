@@ -15,17 +15,39 @@ import java.util.List;
  * 
  * @author datagear@163.com
  */
-public interface Themes
+public class Themes
 {
 	/** 浅色 */
-	String LIGHT = "light";
+	public static final String LIGHT = "light";
 
 	/** 暗色 */
-	String DARK = "dark";
+	public static final String DARK = "dark";
 
 	/** 绿色 */
-	String GREEN = "green";
+	public static final String GREEN = "green";
 
 	/** 所有主题列表 */
-	List<String> THEMES = Arrays.asList(LIGHT, DARK, GREEN);
+	public static final List<String> THEMES = Arrays.asList(LIGHT, DARK, GREEN);
+
+	/**
+	 * 校验并规范主题。
+	 * <p>
+	 * 如果给定主题名合法，返回之；否则，返回{@linkplain #LIGHT}。
+	 * </p>
+	 * 
+	 * @param theme
+	 * @return
+	 */
+	public static String trimTheme(String theme)
+	{
+		for (String enumTheme : THEMES)
+		{
+			if (enumTheme.equalsIgnoreCase(theme))
+			{
+				return enumTheme;
+			}
+		}
+
+		return LIGHT;
+	}
 }

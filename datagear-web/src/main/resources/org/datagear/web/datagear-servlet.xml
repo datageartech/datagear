@@ -80,12 +80,10 @@
 	<bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">
 		<property name="basenamePrefix" value="org.datagear.web.theme." />
 	</bean>
-	<bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver">
-		<property name="defaultThemeName" value="light" />
-		<property name="cookieName" value="THEME" />
-		<property name="cookieMaxAge" value="157680000" />
-	</bean>
-	<bean id="themeChangeInterceptor" class="org.datagear.web.util.EnumThemeChangeInterceptor" />
+	
+	<bean id="themeResolver" class="org.datagear.web.util.EnumCookieThemeResolver" />
+	
+	<bean id="themeChangeInterceptor" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
 	
 	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver" />
 	
