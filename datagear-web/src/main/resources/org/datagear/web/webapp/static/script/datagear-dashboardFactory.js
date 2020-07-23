@@ -12,6 +12,7 @@
  * 运行时依赖:
  *   jquery.js
  *   datagear-chartFactory.js
+ *   datagear-chartForm.js
  * 
  * 
  * 此看板工厂支持为<body>元素添加"dg-dashboard-listener"属性，用于指定看板监听器JS对象名，
@@ -128,6 +129,17 @@
 	
 	/*图表状态：更新出错*/
 	dashboardFactory.CHART_STATUS_UPDATE_ERROR = "UPDATE_ERROR";
+	
+	/**
+	 * 看板使用的渲染上下文属性名。
+	 */
+	dashboardFactory.renderContextAttrs =
+	{
+		//必须，看板主题，org.datagear.analysis.DashboardTheme
+		dashboardTheme: "dashboardTheme",
+		//必须，Web上下文，org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext
+		webContext: "webContext"
+	};
 	
 	//----------------------------------------
 	// chartBaseExt start
@@ -431,6 +443,7 @@
 		this._inited = true;
 		
 		this._initListener();
+		this._initForm();
 		this._initChartResizeHandler();
 		this._initCharts();
 	};
@@ -454,6 +467,22 @@
 	};
 	
 	/**
+	 * 初始化看板表单。
+	 * 它将看板页面内的所有<form dg-form-config="...">元素构建为看板表单。
+	 */
+	dashboardBase._initForm = function()
+	{
+		var $forms = $("form[dg-form-config]", document.body);
+		
+		var _this = this;
+		
+		$forms.each(function()
+		{
+			_this.inflateForm(this);
+		});
+	};
+	
+	/**
 	 * 初始化看板的所有图表。
 	 */
 	dashboardBase._initCharts = function()
@@ -461,8 +490,8 @@
 		if(!this.charts)
 			return;
 		
-		var dashboardTheme = global.chartFactory.renderContextAttr(this.renderContext, "dashboardTheme");
-		global.chartFactory.renderContextAttr(this.renderContext, global.chartFactory.renderContextAttrs.chartTheme,
+		var dashboardTheme = this.renderContextAttr(dashboardFactory.renderContextAttrs.dashboardTheme);
+		this.renderContextAttr(global.chartFactory.renderContextAttrs.chartTheme,
 				dashboardTheme.chartTheme);
 		
 		for(var i=0; i<this.charts.length; i++)
@@ -570,6 +599,34 @@
 	{
 		var chartListener = (this._delegateChartListener || (this._delegateChartListener = {}));
 		return chartListener;
+	};
+	
+	/**
+	 * 构建看板表单。
+	 * 
+	 * @param form 要构建的表单元素、Jquery对象
+	 * @param config 可选，表单配置对象，默认为表单元素的"dg-form-config"属性值
+	 * @param link 可选，表单图表联动配置，默认为表单元素的"dg-form-link"属性值
+	 */
+	dashboardBase.inflateForm = function(form, config, link)
+	{
+		form = $(form);
+		
+		form.addClass("dg-dashboard-form");
+		
+		if(!config)
+			config = global.chartFactory.evalSilently(form.attr("dg-form-config"), {});
+		if(!link)
+			link = global.chartFactory.evalSilently(form.attr("dg-form-link"), {});
+		
+		if($.isArray(config))
+			config = { items: config };
+		
+		var dashboardTheme = this.renderContextAttr(dashboardFactory.renderContextAttrs.dashboardTheme);
+		
+		global.chartFactory.chartForm.renderDataSetParamValueForm(form, config.items,
+				{ chartTheme: dashboardTheme.chartTheme }
+			);
 	};
 	
 	/**
@@ -837,7 +894,7 @@
 		}
 		else
 		{
-			var webContext = this.renderContextAttr("webContext");
+			var webContext = this.renderContextAttr(dashboardFactory.renderContextAttrs.webContext);
 			
 			var data = this._buildUpdateDashboardAjaxData(preUpdates);
 			
@@ -1030,7 +1087,7 @@
 			$(element).attr("id", chartElementId);
 		}
 		
-		var webContext = this.renderContextAttr("webContext");
+		var webContext = this.renderContextAttr(dashboardFactory.renderContextAttrs.webContext);
 		var loadChartConfig = dashboardFactory.loadChartConfig;
 		var _this = this;
 		
