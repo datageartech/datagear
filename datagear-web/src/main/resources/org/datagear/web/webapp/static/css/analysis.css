@@ -63,7 +63,7 @@
 /*数据集参数值表单*/
 .dg-dspv-form{}
 .dg-dspv-form .dg-dspv-form-content{
-	padding: 0.3em 0.3em;
+	padding: 0.41em 0.41em;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item{
 	padding-top: 0.35em;
@@ -76,7 +76,7 @@
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-checkbox-wrapper{
 	white-space: nowrap;
 	display: inline-block;
-	padding-right: 0.5em;
+	padding-right: 0.41em;
 }
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value input[type=text],
 .dg-dspv-form .dg-dspv-form-content .dg-dspv-form-item .dg-dspv-form-item-value textarea,
@@ -104,7 +104,7 @@
 }
 .dg-dspv-form button,
 .dg-dspv-form .button{
-	padding: 0.4em 2em;
+	padding: 0.41em 2em;
 	border-radius: 3px;
 	border-width: 1px;
 	border-style: solid;
@@ -264,6 +264,9 @@
 .dg-dashboard-form.dg-dspv-form .dg-dspv-form-item-value select[multiple] option{
     background: transparent !important;
 }
+.dg-dashboard-form.dg-dspv-form .dg-dspv-form-content{
+	padding: 0 0;
+}
 /*单行表单：dg-inline*/
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-head,
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-content,
@@ -272,8 +275,10 @@
 	display: inline;
 }
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-item{
+	padding-right: 0.8em;
+}
+.dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-foot{
 	padding-left: 0.41em;
-	padding-right: 0.41em;
 }
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-item .dg-dspv-form-item-label,
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-item .dg-dspv-form-item-value{

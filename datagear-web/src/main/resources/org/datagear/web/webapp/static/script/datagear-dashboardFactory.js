@@ -603,12 +603,35 @@
 	
 	/**
 	 * 构建看板表单。
+	 * 表单配置对象格式为：
+	 * {
+	 *   //必选，表单输入项对象数组
+	 *   items: [ 表单输输入项对象, ... ],
+	 *   //可选，表单提交操作时执行的联动图表设置
+	 *   link: 表单联动设置对象,
+	 *   //可选，表单提交按钮文本
+	 *   submitText: "..."
+	 * }
+	 * 表单输输入项对象格式为：
+	 * {
+	 *   //必选，输入项名称
+	 *   name: "...",
+	 *   //可选，输入项标签
+	 *   label: "...",
+	 *   //可选，输入项类型，参考chartForm.DataSetParamDataType，默认值为：chartForm.DataSetParamDataType.STRING
+	 *   type: "...",
+	 *   //可选，是否必须，默认为false
+	 *   required: true || false,
+	 *   //可选，输入框类型，参考chartForm.DataSetParamInputType，默认值为：chartForm.DataSetParamInputType.TEXT
+	 *   inputType: "...",
+	 *   //可选，输入框配置，参考chartForm.renderDataSetParamValueForm函数说明
+	 *   inputPayload: ...
+	 * }
 	 * 
 	 * @param form 要构建的表单元素、Jquery对象
 	 * @param config 可选，表单配置对象，默认为表单元素的"dg-form-config"属性值
-	 * @param link 可选，表单图表联动配置，默认为表单元素的"dg-form-link"属性值
 	 */
-	dashboardBase.inflateForm = function(form, config, link)
+	dashboardBase.inflateForm = function(form, config)
 	{
 		form = $(form);
 		
@@ -616,17 +639,26 @@
 		
 		if(!config)
 			config = global.chartFactory.evalSilently(form.attr("dg-form-config"), {});
-		if(!link)
-			link = global.chartFactory.evalSilently(form.attr("dg-form-link"), {});
 		
-		if($.isArray(config))
-			config = { items: config };
+		var items = [];
+		
+		for(var i=0; i<config.items.length; i++)
+		{
+			var item = config.items[i];
+			
+			if(typeof(item) == "string")
+				item = { name: item };
+			
+			if(!item.type)
+				item.type = global.chartFactory.chartForm.DataSetParamDataType.STRING;
+			
+			items.push(item);
+		}
 		
 		var dashboardTheme = this.renderContextAttr(dashboardFactory.renderContextAttrs.dashboardTheme);
+		config.chartTheme = dashboardTheme.chartTheme;
 		
-		global.chartFactory.chartForm.renderDataSetParamValueForm(form, config.items,
-				{ chartTheme: dashboardTheme.chartTheme }
-			);
+		global.chartFactory.chartForm.renderDataSetParamValueForm(form, items, config);
 	};
 	
 	/**

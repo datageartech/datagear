@@ -66,7 +66,7 @@
 	 * 渲染数据集参数值表单。
 	 * 
 	 * @param $parent 用于渲染表单的父元素，如果不是<form>元素，此函数将会自动新建<form>子元素
-	 * @param dataSetParams 数据集参数集，格式参考：org.datagear.analysis.DataSetParam
+	 * @param dataSetParams 数据集参数集，格式参考：org.datagear.analysis.DataSetParam，也可附加"label"属性，用于定义输入项标签
 	 * @param options 渲染配置项，格式为：
 	 * 			{
 	 *              chartTheme: {...}           //可选，用于支持渲染表单样式的图表主题
@@ -74,6 +74,7 @@
 	 * 				paramValues: {...},     	//可选，初始参数值
 	 * 				readonly: false,			//可选，是否只读
 	 * 				submitText: "...",       	//可选，提交按钮文本内容
+	 *              labelColon: "..."           //可选，标签冒号值
 	 * 				yesText: "...",       		//可选，"是"选项文本内容
 	 * 				noText: "...",       		//可选，"否"选项文本内容
 	 * 				render: function(){}		//可选，渲染后回调函数
@@ -85,6 +86,7 @@
 		options = $.extend(
 		{
 			submitText: chartForm.labels.confirm,
+			labelColon: chartForm.labels.colon,
 			readonly: false,
 			yesText: chartForm.labels.yes,
 			noText: chartForm.labels.no
@@ -109,12 +111,13 @@
 		for(var i=0; i<dataSetParams.length; i++)
 		{
 			var dsp = dataSetParams[i];
+			var labelText = (dsp.label ? dsp.label : dsp.name) + options.labelColon;
 			var value = paramValues[dsp.name];
 			
 			var $item = $("<div class='dg-dspv-form-item' />").appendTo($content);
 			
 			var $labelDiv = $("<div class='dg-dspv-form-item-label' />").appendTo($item);
-			var $label = $("<label />").html(dsp.name+chartForm.labels.colon).appendTo($labelDiv);
+			var $label = $("<label />").html(labelText).appendTo($labelDiv);
 			
 			if(dsp.desc)
 				$label.attr("title", dsp.desc);
