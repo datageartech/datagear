@@ -197,22 +197,7 @@
 	 *   }
 	 * }
 	 * 
-	 * 映射索引对象格式为：
-	 * {
-	 *   //可选，目标图表在target中的索引数值，默认为：0
-	 *   chart: ...,
-	 *   
-	 *   //可选，目标图表数据集数组的索引数值，默认为：0
-	 *   dataSet: ...,
-	 *   
-	 *   //可选，目标图表数据集的参数数组索引/参数名，默认为：0
-	 *   param: ...,
-	 *   
-	 *   //可选，自定义源值至目标值处理函数
-	 *   value: function(sourceValue, chartEvent){ return ...; }
-	 * }
-	 * 
-	 * 或者，可简写为上述映射索引对象的"param"属性值
+	 * 映射索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的context参数为图表事件对象（chartEvent）对象
 	 * 
 	 * @param links 可选，要设置的图表联动设置对象、数组，没有则执行获取操作。
 	 */
@@ -325,6 +310,20 @@
 		var dashboard = this.dashboard;
 		var targetCharts = [];
 		
+		var batchSource =
+		{
+			data: this.eventData(chartEvent),
+			originalData: this.eventOriginalData(chartEvent),
+			getValue: function(name)
+			{
+				var val = this.data[name];
+				if(val === undefined && this.originalData != null)
+					val = this.originalData[name];
+				
+				return val;
+			}
+		};
+		
 		for(var i=0; i<links.length; i++)
 		{
 			var link = links[i];
@@ -332,61 +331,12 @@
 			if(!this._isLinkTriggerableByEvent(link, chartEvent))
 				continue;
 			
-			var chartEventData = this.eventData(chartEvent);
+			var myTargetCharts = dashboard.batchSetDataSetParamValues(batchSource, link, chartEvent);
 			
-			//如果定义了link.data，那么chartEventData不允许为null
-			if(link.data != null && chartEventData == null)
-				throw new Error("[chartEvent.data] must be defined");
-			
-			var chartEventOriginalData = this.eventOriginalData(chartEvent);
-			
-			var myTargetCharts = [];
-			
-			var targets = ($.isArray(link.target) ? link.target : [ link.target ]);
-			
-			for(var j=0; j<targets.length; j++)
+			for(var j=0; j<myTargetCharts.length; j++)
 			{
-				myTargetCharts[j] = dashboard.getChart(targets[j]);
-				targetCharts.push(myTargetCharts[j]);
-			}
-			
-			var linkData = (link.data || {});
-			
-			for(var name in linkData)
-			{
-				var dataValue = chartEventData[name];
-				if(dataValue === undefined && chartEventOriginalData != null)
-					dataValue = chartEventOriginalData[name];
-				
-				var indexes = linkData[name];
-				if(!$.isArray(indexes))
-					indexes = [ indexes ];
-				
-				for(var j=0; j<indexes.length; j++)
-				{
-					var indexObj = indexes[j];
-					var indexObjType = typeof(indexObj);
-					
-					var chartIdx = 0;
-					var dataSetIdx = 0;
-					var param = 0;
-					var paramValue = null;
-					
-					if(indexObjType == "number" || indexObjType == "string")
-					{
-						param = indexObj;
-						paramValue = dataValue;
-					}
-					else
-					{
-						chartIdx = (indexObj.chart != null ? indexObj.chart : 0);
-						dataSetIdx = (indexObj.dataSet != null ? indexObj.dataSet : 0);
-						param = (indexObj.param != null ? indexObj.param : 0);
-						paramValue = (indexObj.value ? indexObj.value(dataValue, chartEvent) : dataValue);
-					}
-					
-					myTargetCharts[chartIdx].dataSetParamValue(dataSetIdx, param, paramValue);
-				}
+				if($.inArray(myTargetCharts[j], targetCharts) < 0)
+					targetCharts.push(myTargetCharts[j]);
 			}
 		}
 		
@@ -651,7 +601,7 @@
 	 * 
 	 * 映射索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的context参数为表单数据对象
 	 * 
-	 * @param form 要构建的表单元素、Jquery对象，表单结构允许灵活自定义，具体参考chartForm.renderDataSetParamValueForm
+	 * @param form 要构建的<form>表单元素、Jquery对象，表单结构允许灵活自定义，具体参考chartForm.renderDataSetParamValueForm
 	 * @param config 可选，表单配置对象，默认为表单元素的"dg-form-config"属性值
 	 */
 	dashboardBase.inflateForm = function(form, config)
