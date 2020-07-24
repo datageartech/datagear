@@ -65,19 +65,19 @@
 	/**
 	 * 渲染数据集参数值表单。
 	 * 
-	 * @param $parent 用于渲染表单的父元素，如果不是<form>元素，此函数将会自动新建<form>子元素
+	 * @param $parent 用于渲染表单的父元素，如果不是<form>元素，此函数将会自动新建<form>子元素，<form>元素结构也允许预先自定义
 	 * @param dataSetParams 数据集参数集，格式参考：org.datagear.analysis.DataSetParam，也可附加"label"属性，用于定义输入项标签
 	 * @param options 渲染配置项，格式为：
 	 * 			{
-	 *              chartTheme: {...}           //可选，用于支持渲染表单样式的图表主题
-	 * 				submit: function(){},    	//可选，提交处理函数
-	 * 				paramValues: {...},     	//可选，初始参数值
-	 * 				readonly: false,			//可选，是否只读
-	 * 				submitText: "...",       	//可选，提交按钮文本内容
-	 *              labelColon: "..."           //可选，标签冒号值
-	 * 				yesText: "...",       		//可选，"是"选项文本内容
-	 * 				noText: "...",       		//可选，"否"选项文本内容
-	 * 				render: function(){}		//可选，渲染后回调函数
+	 *              chartTheme: {...}              //可选，用于支持渲染表单样式的图表主题
+	 * 				submit: function(formData){},  //可选，提交处理函数
+	 * 				paramValues: {...},     	   //可选，初始参数值
+	 * 				readonly: false,			   //可选，是否只读
+	 * 				submitText: "...",       	   //可选，提交按钮文本内容
+	 *              labelColon: "..."              //可选，标签冒号值
+	 * 				yesText: "...",       		   //可选，"是"选项文本内容
+	 * 				noText: "...",       		   //可选，"否"选项文本内容
+	 * 				render: function(){}		   //可选，渲染后回调函数
 	 * 			}
 	 * @return 表单DOM元素
 	 */
@@ -104,9 +104,17 @@
 		if(options.chartTheme)
 			chartForm.setDataSetParamValueFormStyle($form, options.chartTheme);
 		
-		$("<div class='dg-dspv-form-head' />").appendTo($form);
-		var $content = $("<div class='dg-dspv-form-content' />").appendTo($form);
-		var $foot = $("<div class='dg-dspv-form-foot' />").appendTo($form);
+		var $head = $(".dg-dspv-form-head", $form);
+		var $content = $(".dg-dspv-form-content", $form);
+		var $foot = $(".dg-dspv-form-foot", $form);
+		
+		//允许自定义了表单结构
+		if($head.length == 0)
+			$head = $("<div class='dg-dspv-form-head' />").prependTo($form);
+		if($content.length == 0)
+			$content = $("<div class='dg-dspv-form-content' />").appendTo($form);
+		if($foot.length == 0)
+			$foot = $("<div class='dg-dspv-form-foot' />").appendTo($form);
 		
 		for(var i=0; i<dataSetParams.length; i++)
 		{
@@ -176,7 +184,13 @@
 		}
 		
 		if(!options.readonly)
-			$("<button type='submit' />").html(options.submitText).appendTo($foot);
+		{
+			var $submitBtn = $("[type='submit']", $foot);
+			
+			//允许自定义提交按钮
+			if($submitBtn.length == 0)
+				$submitBtn = $("<button type='submit' />").html(options.submitText).appendTo($foot);
+		}
 		
 		$form.submit(function()
 		{
@@ -185,17 +199,25 @@
 			
 			var validationOk = chartForm.validateDataSetParamValueForm(this);
 			
+			if(validationOk)
+				$("[type=submit]", $foot).removeClass("dg-form-invalid");
+			else
+				$("[type=submit]", $foot).addClass("dg-form-invalid");
+			
 			if(!validationOk)
 				return false;
 			
 			if(options.submit)
-				return (options.submit.apply(this) == true);
+			{
+				var formData = chartForm.getDataSetParamValueObj(this);
+				return (options.submit.call(this, formData) == true);
+			}
 			else
 				return false;
 		});
 		
 		if(options.render)
-			options.render.apply($form[0]);
+			options.render.call($form[0]);
 		
 		return $form[0];
 	};
@@ -240,12 +262,16 @@
 			+"  border-color: "+borderColor+";"
 			+"} "
 			+qualifier + ".dg-dspv-form button,"
+			+qualifier + ".dg-dspv-form input[type=button],"
+			+qualifier + ".dg-dspv-form input[type=submit],"
 			+qualifier + ".dg-dspv-form .button{"
 			+"  color: "+color+";"
 			+"  background: "+chartFactory.getGradualColor(chartTheme, 0.1)+";"
 			+"  border-color: "+borderColor+";"
 			+"} "
 			+qualifier + ".dg-dspv-form button:hover,"
+			+qualifier + ".dg-dspv-form input[type=button]:hover,"
+			+qualifier + ".dg-dspv-form input[type=submit]:hover,"
 			+qualifier + ".dg-dspv-form .button:hover{"
 			+"  background: "+chartFactory.getGradualColor(chartTheme, 0.3)+";"
 			+"} "

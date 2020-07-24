@@ -103,11 +103,17 @@
 	text-align: center;
 }
 .dg-dspv-form button,
+.dg-dspv-form input[type=button],
+.dg-dspv-form input[type=submit],
 .dg-dspv-form .button{
 	padding: 0.41em 2em;
 	border-radius: 3px;
 	border-width: 1px;
 	border-style: solid;
+}
+.dg-dspv-form .dg-form-invalid{
+	border-color: red!important;
+	color: red!important;
 }
 
 /*图表展示页面设置框*/
@@ -155,7 +161,9 @@
 	padding-top: 0.41em;
 	text-align: center;
 }
-.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button{
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot button,
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot input[type=button],
+.dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot input[type=submit]{
 	padding-left: 2em;
 	padding-right: 2em;
 	border-width: 1px;
@@ -183,12 +191,16 @@
 	border-style: solid;
 	padding: 0.3em 0;
 }
-.dg-chart-setting-box .dg-chart-setting-panel button{
+.dg-chart-setting-box .dg-chart-setting-panel button,
+.dg-chart-setting-box .dg-chart-setting-panel input[type=submit],
+.dg-chart-setting-box .dg-chart-setting-panel input[type=button]{
 	padding: 0.4em 0.8em;
 	white-space: nowrap;
 	font-size: 1em;
 }
-.dg-chart-setting-box .dg-chart-setting-panel button.dg-param-value-form-invalid{
+.dg-chart-setting-box .dg-chart-setting-panel button.dg-param-value-form-invalid,
+.dg-chart-setting-box .dg-chart-setting-panel input[type=submit].dg-param-value-form-invalid,
+.dg-chart-setting-box .dg-chart-setting-panel input[type=button].dg-param-value-form-invalid{
 	border-color: red!important;
 	color: red!important;
 }

@@ -512,15 +512,13 @@ readonly 是否只读操作，允许为null
 			event.stopPropagation();
 			po.showDataSetParamValuePanel(
 			{
-				submit: function()
+				submit: function(formData)
 				{
-					var paramValues = chartFactory.chartForm.getDataSetParamValueObj(this);
-					
 					var data =
 					{
 						sql: sql,
 						dataSetParams: po.getFormDataSetParams(),
-						paramValues: paramValues
+						paramValues: formData
 					};
 					
 					$.postJson(po.url("resolveSql"), data, function(sql)

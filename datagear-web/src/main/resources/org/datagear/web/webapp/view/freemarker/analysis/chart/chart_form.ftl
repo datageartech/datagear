@@ -385,9 +385,9 @@ readonly 是否只读操作，允许为null
 				var $this = $(this);
 				po.showDataSetParamValuePanel($this,
 				{
-					submit: function()
+					submit: function(formData)
 					{
-						$this.data("paramValues", chartFactory.chartForm.getDataSetParamValueObj(this));
+						$this.data("paramValues", formData);
 						po.element(".data-set-param-value-panel").hide();
 					},
 					readonly: <#if readonly>true<#else>false</#if>,
