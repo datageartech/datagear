@@ -326,6 +326,16 @@
 	padding-left: 0.41em;
 	padding-right: 0.41em;
 }
+/*五列表单：dg-col-5*/
+.dg-dashboard-form.dg-dspv-form.dg-col-5 .dg-dspv-form-item{
+	display: inline-block;
+	width: 20%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding-left: 0.41em;
+	padding-right: 0.41em;
+}
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-item .dg-dspv-form-item-label,
 .dg-dashboard-form.dg-dspv-form.dg-inline .dg-dspv-form-item .dg-dspv-form-item-value{
 	display: inline-block;
