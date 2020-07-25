@@ -9,6 +9,7 @@ import static org.hamcrest.collection.ArrayMatching.arrayContaining;
 import static org.hamcrest.collection.ArrayMatching.hasItemInArray;
 import static org.hamcrest.core.IsIterableContaining.hasItem;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.sql.Connection;
@@ -77,5 +78,17 @@ public class GenericDBMetaResolverTest extends DBTestSupport
 			assertThat(table.getUniqueKeys(),
 					hasItemInArray(hasProperty("columnNames", arrayContaining(equalToIgnoringCase("ACCOUNT_ID")))));
 		}
+	}
+
+	@Test
+	public void getColumnsTest() throws Exception
+	{
+		Column[] columns = this.genericDBMetaResolver.getColumns(this.connection, "T_ACCOUNT");
+
+		assertEquals(4, columns.length);
+		assertThat(columns[0].getName(), equalToIgnoringCase("ID"));
+		assertThat(columns[1].getName(), equalToIgnoringCase("NAME"));
+		assertThat(columns[2].getName(), equalToIgnoringCase("HEAD_IMG"));
+		assertThat(columns[3].getName(), equalToIgnoringCase("INTRODUCTION"));
 	}
 }

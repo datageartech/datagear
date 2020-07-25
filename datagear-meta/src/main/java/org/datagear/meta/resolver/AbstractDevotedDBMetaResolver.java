@@ -165,7 +165,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		DatabaseMetaData metaData = getDatabaseMetaData(cn);
 		String schema = getSchema(cn, metaData);
 
-		return getColumns(cn, metaData, schema, catalog, tableName, null);
+		return getColumns(cn, metaData, catalog, schema, tableName, null);
 	}
 
 	@Override
