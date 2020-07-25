@@ -25,6 +25,8 @@
  * 
  * 此看板工厂支持为<body>元素、图表元素添加"dg-chart-auto-resize"属性，用于设置图表是否自动调整大小。
  * 
+ * 此看板工厂支持将页面内的<form dg-form-config>元素构建为看板表单，具体参考dashboardBase._initForms函数说明。
+ * 
  */
 (function(global)
 {
@@ -393,7 +395,7 @@
 		this._inited = true;
 		
 		this._initListener();
-		this._initForm();
+		this._initForms();
 		this._initChartResizeHandler();
 		this._initCharts();
 	};
@@ -420,7 +422,7 @@
 	 * 初始化看板表单。
 	 * 它将看板页面内的所有<form dg-form-config="...">元素构建为看板表单。
 	 */
-	dashboardBase._initForm = function()
+	dashboardBase._initForms = function()
 	{
 		var $forms = $("form[dg-form-config]", document.body);
 		
