@@ -689,8 +689,8 @@
 	 * 
 	 * 表单配置对象格式为：
 	 * {
-	 *   //必选，表单输入项对象数组
-	 *   items: [ 表单输输入项对象, ... ],
+	 *   //必选，表单输入项对象、数组
+	 *   items: 表单输输入项对象 或者 [ 表单输输入项对象, ... ],
 	 *   //可选，表单提交操作时执行的联动图表设置
 	 *   link: 图表联动设置对象,
 	 *   //可选，表单提交按钮文本
@@ -786,9 +786,13 @@
 		var items = [];
 		var defaultValues = {};
 		
-		for(var i=0; i<config.items.length; i++)
+		var sourceItems = (config.items || []);
+		if(!$.isArray(sourceItems))
+			sourceItems = [ sourceItems ];
+		
+		for(var i=0; i<sourceItems.length; i++)
 		{
-			var item = config.items[i];
+			var item = sourceItems[i];
 			
 			if(typeof(item) == "string")
 				item = { name: item };
@@ -1252,14 +1256,14 @@
 	 * }
 	 * 或者，可简写为上述映射索引对象的"param"属性值
 	 * 
-	 * @param source 源参数值对象，格式为：{ ... : ..., ...} 或者 { getValue: function(name){ return ...; } }
+	 * @param sourceData 源参数值对象，格式为：{ ... : ..., ...} 或者 { getValue: function(name){ return ...; } }
 	 * @param batchSet 批量设置对象
-	 * @param context 可选，用于传递给映射索引对象的value函数的context参数，默认为source
+	 * @param context 可选，用于传递给映射索引对象的value函数的context参数，默认为sourceData
 	 * @return 批量设置的图表对象数组
 	 */
-	dashboardBase.batchSetDataSetParamValues = function(source, batchSet, context)
+	dashboardBase.batchSetDataSetParamValues = function(sourceData, batchSet, context)
 	{
-		context = (context === undefined ? source : context);
+		context = (context === undefined ? sourceData : context);
 		
 		var targetCharts = [];
 		
@@ -1268,11 +1272,11 @@
 			targetCharts[i] = this.getChart(targets[i]);
 		
 		var map = (batchSet.data || {});
-		var hasGetValueFunc = (typeof(source.getValue) == "function");
+		var hasGetValueFunc = (typeof(sourceData.getValue) == "function");
 		
 		for(var name in map)
 		{
-			var dataValue = (hasGetValueFunc ? source.getValue(name) : source[name]);
+			var dataValue = (hasGetValueFunc ? sourceData.getValue(name) : sourceData[name]);
 			
 			var indexes = map[name];
 			if(!$.isArray(indexes))
