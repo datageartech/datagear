@@ -194,12 +194,12 @@
 	 *   data:
 	 *   {
 	 *     //ChartEvent对象的"data"、"orginalData"对象的属性名 : 目标数据集参数的映射索引、映射索引数组
-	 *     "..." : 映射索引对象、[ 映射索引对象, ... ],
+	 *     "..." : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
 	 *     ...
 	 *   }
 	 * }
 	 * 
-	 * 映射索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，
+	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，
 	 * 其中value函数的sourceValueContext参数为图表事件对象（chartEvent）对象。
 	 * 
 	 * @param links 可选，要设置的图表联动设置对象、数组，没有则执行获取操作。
@@ -715,7 +715,7 @@
 	 *   //可选，输入框配置，参考chartForm.renderDataSetParamValueForm函数说明
 	 *   inputPayload: ...,
 	 *   //可选，输入项的联动数据映射设置
-	 *   link: 映射索引对象、[ 映射索引对象, ... ]
+	 *   link: 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ]
 	 * }
 	 * 或者，简写为其name属性值。
 	 * 
@@ -726,13 +726,12 @@
 	 *   //可选，联动数据参数映射表
 	 *   data:
 	 *   {
-	 *     //表单输入项名称 : 目标数据集参数的映射索引、映射索引数组
-	 *     "..." : 映射索引对象、[ 映射索引对象, ... ],
+	 *     表单输入项名称 : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
 	 *     ...
 	 * }
-	 * 或者，简写为其target属性值。
+	 * 或者，简写为图表联动设置对象的target属性值。
 	 * 
-	 * 映射索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为表单数据对象。
+	 * 图表数据集参数索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的sourceValueContext参数为：表单数据对象、表单DOM对象。
 	 * 
 	 * @param form 要渲染的<form>表单元素、Jquery对象，表单结构允许灵活自定义，具体参考chartForm.renderDataSetParamValueForm
 	 * @param config 可选，表单配置对象，默认为表单元素的"dg-dashboard-form"属性值
@@ -753,11 +752,12 @@
 		{
 			submit: function(formData)
 			{
-				var batchSet = form.data(bindBatchSetName);
+				var thisForm = this;
+				var batchSet = $(thisForm).data(bindBatchSetName);
 				
 				if(batchSet)
 				{
-					var charts = _thisDashboard.batchSetDataSetParamValues(formData, batchSet);
+					var charts = _thisDashboard.batchSetDataSetParamValues(formData, batchSet, [ formData, thisForm ]);
 					
 					for(var i=0; i<charts.length; i++)
 						charts[i].refreshData();
@@ -1235,14 +1235,14 @@
 	 *   //可选，要设置的参数值映射表，没有则不设置任何参数值
 	 *   data:
 	 *   {
-	 *     源参数名 : 目标参数索引对象、[ 目标参数索引对象, ... ],
+	 *     源参数名 : 图表数据集参数索引对象、[ 图表数据集参数索引对象, ... ],
 	 *     ...
 	 *   }
 	 * }
 	 * 
-	 * 目标参数索引对象用于定位目标图表数据集参数，格式为：
+	 * 图表数据集参数索引对象用于确定源参数值要设置到的目标图表数据集参数，格式为：
 	 * {
-	 *   //可选，目标图表在批量设置对象的target中的索引数值，默认为：0
+	 *   //可选，目标图表在批量设置对象的target数组中的索引数值，默认为：0
 	 *   chart: ...,
 	 *   
 	 *   //可选，目标图表数据集数组的索引数值，默认为：0
@@ -1253,14 +1253,14 @@
 	 *   
 	 *   //可选，自定义源参数值处理函数，返回要设置的目标参数值
 	 *   //sourceValue 源参数值
-	 *   //sourceValueContext 值上下文对象
+	 *   //sourceValueContext 源参数值上下文对象
 	 *   value: function(sourceValue, sourceValueContext){ return ...; }
 	 * }
-	 * 或者，可简写为上述映射索引对象的"param"属性值
+	 * 或者，可简写为上述图表数据集参数索引对象的"param"属性值
 	 * 
 	 * @param sourceData 源参数值对象，格式为：{ 源参数名 : 源参数值, ...} 或者 { getValue: function(name){ return ...; } }
 	 * @param batchSet 批量设置对象
-	 * @param sourceValueContext 可选，传递给映射索引对象的value函数sourceValueContext参数的对象，默认为sourceData
+	 * @param sourceValueContext 可选，传递给图表数据集参数索引对象的value函数sourceValueContext参数的对象，如果为数组，则传递多个参数，默认为sourceData
 	 * @return 批量设置的图表对象数组
 	 */
 	dashboardBase.batchSetDataSetParamValues = function(sourceData, batchSet, sourceValueContext)
@@ -1275,6 +1275,9 @@
 		
 		var map = (batchSet.data || {});
 		var hasGetValueFunc = (typeof(sourceData.getValue) == "function");
+		
+		var sourceValueContextArgs = [ "place-holder-for-source-value" ];
+		sourceValueContextArgs = sourceValueContextArgs.concat($.isArray(sourceValueContext) ? sourceValueContext : [ sourceValueContext ]);
 		
 		for(var name in map)
 		{
@@ -1304,7 +1307,14 @@
 					chartIdx = (indexObj.chart != null ? indexObj.chart : 0);
 					dataSetIdx = (indexObj.dataSet != null ? indexObj.dataSet : 0);
 					param = (indexObj.param != null ? indexObj.param : 0);
-					paramValue = (indexObj.value ? indexObj.value(dataValue, sourceValueContext) : dataValue);
+					
+					if(indexObj.value)
+					{
+						sourceValueContextArgs[0] = dataValue;
+						paramValue = indexObj.value.apply(indexObj, sourceValueContextArgs);
+					}
+					else
+						paramValue = dataValue;
 				}
 				
 				targetCharts[chartIdx].dataSetParamValue(dataSetIdx, param, paramValue);
