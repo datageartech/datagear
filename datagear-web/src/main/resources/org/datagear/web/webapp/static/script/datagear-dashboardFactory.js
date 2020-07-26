@@ -430,7 +430,7 @@
 		
 		$forms.each(function()
 		{
-			_this.inflateForm(this);
+			_this.renderForm(this);
 		});
 	};
 	
@@ -551,143 +551,6 @@
 	{
 		var chartListener = (this._delegateChartListener || (this._delegateChartListener = {}));
 		return chartListener;
-	};
-	
-	/**
-	 * 构建看板表单。
-	 * 看板表单提交时会自动将表单输入值设置为目标图表的数据集参数值，并刷新图表。
-	 * 
-	 * 表单配置对象格式为：
-	 * {
-	 *   //必选，表单输入项对象数组
-	 *   items: [ 表单输输入项对象, ... ],
-	 *   //可选，表单提交操作时执行的联动图表设置
-	 *   link: 图表联动设置对象,
-	 *   //可选，表单提交按钮文本
-	 *   submitText: "..."
-	 * }
-	 * 
-	 * 表单输输入项对象格式为：
-	 * {
-	 *   //必选，输入项名称
-	 *   name: "...",
-	 *   //可选，默认值
-	 *   value: ...,
-	 *   //可选，输入项标签
-	 *   label: "...",
-	 *   //可选，输入项类型，参考chartForm.DataSetParamDataType，默认值为：chartForm.DataSetParamDataType.STRING
-	 *   type: "...",
-	 *   //可选，是否必须，默认为false
-	 *   required: true || false,
-	 *   //可选，输入框类型，参考chartForm.DataSetParamInputType，默认值为：chartForm.DataSetParamInputType.TEXT
-	 *   inputType: "...",
-	 *   //可选，输入框配置，参考chartForm.renderDataSetParamValueForm函数说明
-	 *   inputPayload: ...,
-	 *   //可选，输入项的联动数据映射设置
-	 *   link: 映射索引对象、[ 映射索引对象, ... ]
-	 * }
-	 * 或者，简写为其name属性值。
-	 * 
-	 * 图表联动设置对象格式为：
-	 * {
-	 *   //必选，联动目标图表元素ID、ID数组
-	 *   target: "..."、["...", ...],
-	 *   //可选，联动数据参数映射表
-	 *   data:
-	 *   {
-	 *     //表单输入项名称 : 目标数据集参数的映射索引、映射索引数组
-	 *     "..." : 映射索引对象、[ 映射索引对象, ... ],
-	 *     ...
-	 * }
-	 * 或者，简写为其target属性值。
-	 * 
-	 * 映射索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的context参数为表单数据对象
-	 * 
-	 * @param form 要构建的<form>表单元素、Jquery对象，表单结构允许灵活自定义，具体参考chartForm.renderDataSetParamValueForm
-	 * @param config 可选，表单配置对象，默认为表单元素的"dg-form-config"属性值
-	 */
-	dashboardBase.inflateForm = function(form, config)
-	{
-		form = $(form);
-		
-		form.addClass("dg-dashboard-form");
-		
-		if(!config)
-			config = global.chartFactory.evalSilently(form.attr("dg-form-config"), {});
-		
-		var _thisDashboard = this;
-		var bindBatchSetName = "dataGearBatchSet";
-		
-		config = $.extend(
-		{
-			submit: function(formData)
-			{
-				var batchSet = form.data(bindBatchSetName);
-				
-				if(batchSet)
-				{
-					var charts = _thisDashboard.batchSetDataSetParamValues(formData, batchSet);
-					
-					for(var i=0; i<charts.length; i++)
-						charts[i].refreshData();
-				}
-			}
-		},
-		config);
-		
-		//构建用于批量设置数据集参数值的对象
-		var batchSet = undefined;
-		if(config.link)
-		{
-			var link = config.link;
-			
-			//转换简写格式
-			if(typeof(link) == "string" || $.isArray(link))
-				link = { target: link };
-			
-			batchSet =
-			{
-				target: link.target,
-				//新构建data对象，因为可能会在下面被修改
-				data: (link.data ? $.extend({}, link.data) : {})
-			};
-		}
-		
-		var items = [];
-		var defaultValues = {};
-		
-		for(var i=0; i<config.items.length; i++)
-		{
-			var item = config.items[i];
-			
-			if(typeof(item) == "string")
-				item = { name: item };
-			else
-				//确保不影响初始对象
-				item = $.extend({}, item);
-			
-			if(!item.type)
-				item.type = global.chartFactory.chartForm.DataSetParamDataType.STRING;
-			
-			items.push(item);
-			
-			if(item.value != null)
-				defaultValues[item.name] = item.value;
-			
-			//合并输入项的link设置
-			if(item.link != null && batchSet && batchSet.data)
-				batchSet.data[item.name] = item.link;
-		}
-		
-		if(batchSet)
-			form.data(bindBatchSetName, batchSet);
-		
-		config.paramValues = defaultValues;
-		
-		var dashboardTheme = this.renderContextAttr(dashboardFactory.renderContextAttrs.dashboardTheme);
-		config.chartTheme = dashboardTheme.chartTheme;
-		
-		global.chartFactory.chartForm.renderDataSetParamValueForm(form, items, config);
 	};
 	
 	/**
@@ -818,6 +681,143 @@
 	dashboardBase.renderContextAttr = function(attrName, attrValue)
 	{
 		return global.chartFactory.renderContextAttr(this.renderContext, attrName, attrValue);
+	};
+	
+	/**
+	 * 渲染看板表单。
+	 * 看板表单提交时会自动将表单输入值设置为目标图表的数据集参数值，并刷新图表。
+	 * 
+	 * 表单配置对象格式为：
+	 * {
+	 *   //必选，表单输入项对象数组
+	 *   items: [ 表单输输入项对象, ... ],
+	 *   //可选，表单提交操作时执行的联动图表设置
+	 *   link: 图表联动设置对象,
+	 *   //可选，表单提交按钮文本
+	 *   submitText: "..."
+	 * }
+	 * 
+	 * 表单输输入项对象格式为：
+	 * {
+	 *   //必选，输入项名称
+	 *   name: "...",
+	 *   //可选，默认值
+	 *   value: ...,
+	 *   //可选，输入项标签
+	 *   label: "...",
+	 *   //可选，输入项类型，参考chartForm.DataSetParamDataType，默认值为：chartForm.DataSetParamDataType.STRING
+	 *   type: "...",
+	 *   //可选，是否必须，默认为false
+	 *   required: true || false,
+	 *   //可选，输入框类型，参考chartForm.DataSetParamInputType，默认值为：chartForm.DataSetParamInputType.TEXT
+	 *   inputType: "...",
+	 *   //可选，输入框配置，参考chartForm.renderDataSetParamValueForm函数说明
+	 *   inputPayload: ...,
+	 *   //可选，输入项的联动数据映射设置
+	 *   link: 映射索引对象、[ 映射索引对象, ... ]
+	 * }
+	 * 或者，简写为其name属性值。
+	 * 
+	 * 图表联动设置对象格式为：
+	 * {
+	 *   //必选，联动目标图表元素ID、ID数组
+	 *   target: "..."、["...", ...],
+	 *   //可选，联动数据参数映射表
+	 *   data:
+	 *   {
+	 *     //表单输入项名称 : 目标数据集参数的映射索引、映射索引数组
+	 *     "..." : 映射索引对象、[ 映射索引对象, ... ],
+	 *     ...
+	 * }
+	 * 或者，简写为其target属性值。
+	 * 
+	 * 映射索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的context参数为表单数据对象
+	 * 
+	 * @param form 要渲染的<form>表单元素、Jquery对象，表单结构允许灵活自定义，具体参考chartForm.renderDataSetParamValueForm
+	 * @param config 可选，表单配置对象，默认为表单元素的"dg-form-config"属性值
+	 */
+	dashboardBase.renderForm = function(form, config)
+	{
+		form = $(form);
+		
+		form.addClass("dg-dashboard-form");
+		
+		if(!config)
+			config = global.chartFactory.evalSilently(form.attr("dg-form-config"), {});
+		
+		var _thisDashboard = this;
+		var bindBatchSetName = "dataGearBatchSet";
+		
+		config = $.extend(
+		{
+			submit: function(formData)
+			{
+				var batchSet = form.data(bindBatchSetName);
+				
+				if(batchSet)
+				{
+					var charts = _thisDashboard.batchSetDataSetParamValues(formData, batchSet);
+					
+					for(var i=0; i<charts.length; i++)
+						charts[i].refreshData();
+				}
+			}
+		},
+		config);
+		
+		//构建用于批量设置数据集参数值的对象
+		var batchSet = undefined;
+		if(config.link)
+		{
+			var link = config.link;
+			
+			//转换简写格式
+			if(typeof(link) == "string" || $.isArray(link))
+				link = { target: link };
+			
+			batchSet =
+			{
+				target: link.target,
+				//新构建data对象，因为可能会在下面被修改
+				data: (link.data ? $.extend({}, link.data) : {})
+			};
+		}
+		
+		var items = [];
+		var defaultValues = {};
+		
+		for(var i=0; i<config.items.length; i++)
+		{
+			var item = config.items[i];
+			
+			if(typeof(item) == "string")
+				item = { name: item };
+			else
+				//确保不影响初始对象
+				item = $.extend({}, item);
+			
+			if(!item.type)
+				item.type = global.chartFactory.chartForm.DataSetParamDataType.STRING;
+			
+			items.push(item);
+			
+			if(item.value != null)
+				defaultValues[item.name] = item.value;
+			
+			//合并输入项的link设置
+			if(item.link != null && batchSet && batchSet.data)
+				batchSet.data[item.name] = item.link;
+		}
+		
+		if(batchSet)
+			form.data(bindBatchSetName, batchSet);
+		
+		config.paramValues = defaultValues;
+		
+		var dashboardTheme = this.renderContextAttr(dashboardFactory.renderContextAttrs.dashboardTheme);
+		config.chartTheme = dashboardTheme.chartTheme;
+		
+		global.chartFactory.chartForm.renderDataSetParamValueForm(form, items, config);
 	};
 	
 	/**
