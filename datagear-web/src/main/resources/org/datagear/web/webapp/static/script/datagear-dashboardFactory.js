@@ -25,7 +25,7 @@
  * 
  * 此看板工厂支持为<body>元素、图表元素添加"dg-chart-auto-resize"属性，用于设置图表是否自动调整大小。
  * 
- * 此看板工厂支持将页面内的<form dg-form-config>元素构建为看板表单，具体参考dashboardBase._initForms函数说明。
+ * 此看板工厂支持将页面内的<form dg-dashboard-form>元素构建为看板表单，具体参考dashboardBase._initForms函数说明。
  * 
  */
 (function(global)
@@ -420,11 +420,11 @@
 	
 	/**
 	 * 初始化看板表单。
-	 * 它将看板页面内的所有<form dg-form-config="...">元素构建为看板表单。
+	 * 它将看板页面内的所有<form dg-dashboard-form="...">元素构建为看板表单。
 	 */
 	dashboardBase._initForms = function()
 	{
-		var $forms = $("form[dg-form-config]", document.body);
+		var $forms = $("form[dg-dashboard-form]", document.body);
 		
 		var _this = this;
 		
@@ -734,7 +734,7 @@
 	 * 映射索引对象格式参考dashboardBase.batchSetDataSetParamValues函数相关说明，其中value函数的context参数为表单数据对象
 	 * 
 	 * @param form 要渲染的<form>表单元素、Jquery对象，表单结构允许灵活自定义，具体参考chartForm.renderDataSetParamValueForm
-	 * @param config 可选，表单配置对象，默认为表单元素的"dg-form-config"属性值
+	 * @param config 可选，表单配置对象，默认为表单元素的"dg-dashboard-form"属性值
 	 */
 	dashboardBase.renderForm = function(form, config)
 	{
@@ -743,7 +743,7 @@
 		form.addClass("dg-dashboard-form");
 		
 		if(!config)
-			config = global.chartFactory.evalSilently(form.attr("dg-form-config"), {});
+			config = global.chartFactory.evalSilently(form.attr("dg-dashboard-form"), {});
 		
 		var _thisDashboard = this;
 		var bindBatchSetName = "dataGearBatchSet";

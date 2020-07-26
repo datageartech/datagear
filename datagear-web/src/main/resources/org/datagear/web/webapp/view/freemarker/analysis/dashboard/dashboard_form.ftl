@@ -198,8 +198,8 @@ readonly 是否只读操作，允许为null
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-echarts-theme' />", tagNames: ["body", "div"]},
 			{name: "dg-dashboard-listener", value: "dg-dashboard-listener", caption: "",
 				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-listener' />", tagNames: ["body"]},
-			{name: "dg-form-config", value: "dg-form-config", caption: "",
-				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-form-config' />", tagNames: ["form"]}
+			{name: "dg-dashboard-form", value: "dg-dashboard-form", caption: "",
+				meta: "<@spring.message code='dashboard.templateEditor.autoComplete.dg-dashboard-form' />", tagNames: ["form"]}
 		];
 		
 		po.templateEditorCompleters =
