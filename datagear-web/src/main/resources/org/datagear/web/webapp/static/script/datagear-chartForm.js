@@ -816,11 +816,11 @@
 		var $form = $(form);
 		var array = $form.serializeArray();
 		
-		var namesOfArray = {};
+		var multipleValNames = {};
 		$("input[type='checkbox'], select[multiple]", $form).each(function()
 		{
 			var name = $(this).attr("name");
-			namesOfArray[name] = true;
+			multipleValNames[name] = true;
 		});
 		
 		var re = {};
@@ -830,13 +830,27 @@
 			var name = this.name;
 			var value = this.value;
 			
+			//XXX 如果是null值，无论是否多值输入项，都应该忽略
+			//XXX 切勿修改此处逻辑，因为可能会影响参数化数据集的SQL语句逻辑
+			if(value == null)
+				return;
+			
+			//XXX 对于没有填写的空值，当是单值输入框时忽略，多值输入框时保留
+			//XXX 切勿修改此处逻辑，因为可能会影响参数化数据集的SQL语句逻辑
+			if(value == "" && !multipleValNames[name])
+				return;
+			
 			if(re[name] === undefined)
 			{
-				//XXX 如果是多选输入项，即使单值也应该设为数组
-				re[name] = (namesOfArray[name] ? [ value ] : value);
+				//XXX 如果是多值输入项，即使单值也应该设为数组
+				//XXX 切勿修改此处逻辑，因为可能会影响参数化数据集的SQL语句逻辑
+				re[name] = (multipleValNames[name] ? [ value ] : value);
 			}
 			else
 			{
+				//XXX 如果有多个同名的单值输入框，则将值转换为数组
+				//XXX 切勿修改此处逻辑，因为可能会影响参数化数据集的SQL语句逻辑
+				
 				var prev = re[name];
 				
 				if($.isArray(prev))
@@ -844,8 +858,8 @@
 				else
 				{
 					prev = [ prev ];
-					re[name] = prev;
 					prev.push(value);
+					re[name] = prev;
 				}
 			}
 		});
