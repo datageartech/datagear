@@ -436,3 +436,9 @@ ALTER TABLE DATAGEAR_DATA_SET_PAR ADD COLUMN PAR_INPUT_TYPE VARCHAR(50);
 
 --添加数据集参数输入框载荷
 ALTER TABLE DATAGEAR_DATA_SET_PAR ADD COLUMN PAR_INPUT_PAYLOAD VARCHAR(1000);
+
+
+-----------------------------------------
+--version[1.11.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
