@@ -61,6 +61,8 @@ SQL工作台
 
 ![界面图片](screenshot/chart.png)
 
+图表-数据集参数
+
 ![界面图片](screenshot/chart-interaction.png)
 
 看板
