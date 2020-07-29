@@ -61,11 +61,21 @@ SQL工作台
 
 ![界面图片](screenshot/chart.png)
 
+![界面图片](screenshot/chart-interaction.png)
+
 看板
 
 ![界面图片](screenshot/dashboard-simple.png)
 
 ![界面图片](screenshot/dashboard-darkblue.png)
+
+看板-图表联动
+
+![界面图片](screenshot/dashboard-map-chart-link.gif)
+
+看板-表单
+
+![界面图片](screenshot/dashboard-form.gif)
 
 ## 依赖
 
