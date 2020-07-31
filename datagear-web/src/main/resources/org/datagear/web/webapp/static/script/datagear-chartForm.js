@@ -308,9 +308,14 @@
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串
 	 * 或者
-	 * [ { name: '...', value: ... }, ... ]
+	 * "[ 待选项名值对象, ... ]"、
+	 * "{ multiple: true | false, options: [ 待选项名值对象, ... ] }"  //数据集定义功能时
 	 * 或者
-	 * { multiple: true | false, options: [ { name: '...', value: ... }, ... ] }
+	 * [ 待选项名值对象, ... ]、
+	 * { multiple: true | false, options: [ 待选项名值对象, ... ] }    //看板表单功能时
+	 * 
+	 * 其中，待选项名值对象格式允许为：
+	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -342,9 +347,18 @@
 		
 		for(var i=0; i<opts.length; i++)
 		{
-			var $opt = $("<option />").attr("value", opts[i].value).html(opts[i].name).appendTo($input);
+			var opt = opts[i];
 			
-			if(chartForm.containsValueForString(value, opts[i].value))
+			var optName = (opt.name != null ? opt.name : opt.value);
+			var optVal = (opt.value != null ? opt.value : opt.name);
+			if(optName == null)
+				optName = opt;
+			if(optVal == null)
+				optVal = opt;
+			
+			var $opt = $("<option />").attr("value", optVal).html(optName).appendTo($input);
+			
+			if(chartForm.containsValueForString(value, optVal))
 				$opt.attr("selected", "selected");
 		}
 		
@@ -359,9 +373,11 @@
 	 * 渲染输入项：日期框
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
-	 * null、空字符串
+	 * null、空字符串、
 	 * 或者
-	 * { ... }  //datetimepicker配置选项
+	 * "{ ... }"  //datetimepicker配置选项JSON字符串，数据集定义功能时
+	 * 或者
+	 * { ... }    //datetimepicker配置选项对象，看板表单功能时
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -394,9 +410,11 @@
 	 * 渲染输入项：时间框
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
-	 * null、空字符串
+	 * null、空字符串、
 	 * 或者
-	 * { ... }  //datetimepicker配置选项
+	 * "{ ... }"  //datetimepicker配置选项JSON字符串，数据集定义功能时
+	 * 或者
+	 * { ... }    //datetimepicker配置选项对象，看板表单功能时
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -430,9 +448,11 @@
 	 * 渲染输入项：日期时间框
 	 * 
 	 * dataSetParam.inputPayload格式可以为：
-	 * null、空字符串
+	 * null、空字符串、
 	 * 或者
-	 * { ... }  //datetimepicker配置选项
+	 * "{ ... }"  //datetimepicker配置选项JSON字符串，数据集定义功能时
+	 * 或者
+	 * { ... }    //datetimepicker配置选项对象，看板表单功能时
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
@@ -467,13 +487,18 @@
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串
 	 * 或者
-	 * [ { name: '...', value: ... }, ... ]
+	 * "[ 待选项名值对象, ... ]"  //数据集定义功能时
+	 * 或者
+	 * [ 待选项名值对象, ... ]    //看板表单功能时
+	 * 
+	 * 其中，待选项名值对象格式允许为：
+	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
 	 * @param value 可选
 	 * @param chartTheme 可选
-	 * @param defaultSelOpts 可选，默认下拉框选项集
+	 * @param defaultSelOpts 可选，默认单选框选项集
 	 */
 	chartForm.renderDataSetParamValueFormInputRadio = function($parent, dataSetParam, value, chartTheme, defaultSelOpts)
 	{
@@ -486,16 +511,25 @@
 		
 		for(var i=0; i<opts.length; i++)
 		{
+			var opt = opts[i];
+			
+			var optName = (opt.name != null ? opt.name : opt.value);
+			var optVal = (opt.value != null ? opt.value : opt.name);
+			if(optName == null)
+				optName = opt;
+			if(optVal == null)
+				optVal = opt;
+			
 			var eleId = global.chartFactory.nextElementId();
 			
 			var $wrapper = $("<div class='dg-dspv-form-radio-wrapper' />").appendTo($inputsWrapper);
 			
 			var $input = $("<input type='radio' class='dg-dspv-form-input' />")
-				.attr("id", eleId).attr("name", dataSetParam.name).attr("value", opts[i].value).appendTo($wrapper);
+				.attr("id", eleId).attr("name", dataSetParam.name).attr("value", optVal).appendTo($wrapper);
 			
-			$("<label />").attr("for", eleId).html(opts[i].name).appendTo($wrapper);
+			$("<label />").attr("for", eleId).html(optName).appendTo($wrapper);
 			
-			if((value+"") == (opts[i].value+""))
+			if((value+"") == (optVal+""))
 				$input.attr("checked", "checked");
 			
 			if((dataSetParam.required+"") == "true")
@@ -512,13 +546,18 @@
 	 * dataSetParam.inputPayload格式可以为：
 	 * null、空字符串
 	 * 或者
-	 * [ { name: '...', value: ... }, ... ]
+	 * "[ 待选项名值对象, ... ]"  //数据集定义功能时
+	 * 或者
+	 * [ 待选项名值对象, ... ]    //看板表单功能时
+	 * 
+	 * 其中，待选项名值对象格式允许为：
+	 * { name: "...", value: ... }、{name: "..."}、{value: ...}、"..."
 	 * 
 	 * @param $parent
 	 * @param dataSetParam
 	 * @param value 可选，值、值数组
 	 * @param chartTheme 可选
-	 * @param defaultSelOpts 可选，默认下拉框选项集
+	 * @param defaultSelOpts 可选，默认复选框选项集
 	 */
 	chartForm.renderDataSetParamValueFormInputCheckbox = function($parent, dataSetParam, value, chartTheme, defaultSelOpts)
 	{
@@ -536,16 +575,25 @@
 		
 		for(var i=0; i<opts.length; i++)
 		{
+			var opt = opts[i];
+			
+			var optName = (opt.name != null ? opt.name : opt.value);
+			var optVal = (opt.value != null ? opt.value : opt.name);
+			if(optName == null)
+				optName = opt;
+			if(optVal == null)
+				optVal = opt;
+			
 			var eleId = global.chartFactory.nextElementId();
 			
 			var $wrapper = $("<div class='dg-dspv-form-checkbox-wrapper' />").appendTo($inputsWrapper);
 			
 			var $input = $("<input type='checkbox' class='dg-dspv-form-input' />")
-				.attr("id", eleId).attr("name", dataSetParam.name).attr("value", opts[i].value).appendTo($wrapper);
+				.attr("id", eleId).attr("name", dataSetParam.name).attr("value", optVal).appendTo($wrapper);
 			
-			$("<label />").attr("for", eleId).html(opts[i].name).appendTo($wrapper);
+			$("<label />").attr("for", eleId).html(optName).appendTo($wrapper);
 			
-			if(chartForm.containsValueForString(value, opts[i].value))
+			if(chartForm.containsValueForString(value, optVal))
 				$input.attr("checked", "checked");
 			
 			if((dataSetParam.required+"") == "true")
