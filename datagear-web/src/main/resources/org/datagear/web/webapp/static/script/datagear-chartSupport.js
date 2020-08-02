@@ -3607,24 +3607,6 @@
 		
 		var chartTheme = chart.theme();
 		
-		var cps = chartSupport.tableGetColumnProperties(chart, columnSign);
-		
-		var columns = [];
-		
-		for(var i=0; i<cps.length; i++)
-		{
-			var column =
-			{
-				title: chart.dataSetPropertyLabel(cps[i]),
-				data: cps[i].name,
-				defaultContent: "",
-				orderable: true,
-				searchable: false
-			};
-			
-			columns.push(column);
-		}
-		
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-table");
 		
@@ -3634,6 +3616,7 @@
 			//标题样式
 			"title":
 			{
+				"text": chart.nameNonNull(),
 				"show": true,
 				"color": chartTheme.titleColor,
 				"backgroundColor": chartTheme.backgroundColor
@@ -3674,11 +3657,36 @@
 						"color": chartTheme.highlightTheme.color,
 						"backgroundColor": chartTheme.highlightTheme.backgroundColor
 					}
+				},
+				//单元格内容渲染函数
+				renderValue: function(value, type, row, meta)
+				{
+					return value;
 				}
 			}
 		},
 		chart.options(),
 		options);
+		
+		var cps = chartSupport.tableGetColumnProperties(chart, columnSign);
+		var columns = [];
+		for(var i=0; i<cps.length; i++)
+		{
+			var column =
+			{
+				title: chart.dataSetPropertyLabel(cps[i]),
+				data: cps[i].name,
+				defaultContent: "",
+				orderable: true,
+				searchable: false,
+				render: function(value, type, row, meta)
+				{
+					return chartOptions.table.renderValue(value, type, row, meta);
+				}
+			};
+			
+			columns.push(column);
+		}
 		
 		options = $.extend({}, chartOptions,
 		{
@@ -3703,7 +3711,7 @@
 		if(!options.title || !options.title.show)
 			chartEle.addClass("dg-hide-title");
 		
-		var chartTitle = $("<div class='dg-chart-table-title' />").html(chart.nameNonNull()).appendTo(chartEle);
+		var chartTitle = $("<div class='dg-chart-table-title' />").html(chartOptions.title.text).appendTo(chartEle);
 		global.chartFactory.setStyles(chartTitle, chartOptions.title);
 		var chartContent = $("<div class='dg-chart-table-content' />").appendTo(chartEle);
 		var table = $("<table width='100%' class='hover stripe'></table>").appendTo(chartContent);

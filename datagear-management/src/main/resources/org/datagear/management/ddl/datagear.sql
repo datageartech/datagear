@@ -439,6 +439,10 @@ ALTER TABLE DATAGEAR_DATA_SET_PAR ADD COLUMN PAR_INPUT_PAYLOAD VARCHAR(1000);
 
 
 -----------------------------------------
+--version[1.10.1], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
+-----------------------------------------
 --version[1.11.0], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
