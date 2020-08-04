@@ -57,28 +57,28 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 	 */
 	public void write(Writer out, HtmlTplDashboard dashboard, String renderContextVarName) throws IOException
 	{
-		JsonHtmlTplDashboard jsonHtmlTplDashboard = new JsonHtmlTplDashboard(dashboard, renderContextVarName);
+		HtmlTplDashboardJson htmlTplDashboardJson = new HtmlTplDashboardJson(dashboard, renderContextVarName);
 
 		out.write("var " + dashboard.getVarName() + "=");
 		writeNewLine(out);
-		writeJsonObject(out, jsonHtmlTplDashboard);
+		writeJsonObject(out, htmlTplDashboardJson);
 		out.write(";");
 		writeNewLine(out);
 	}
 
 	/**
-	 * 可输出JSON的{@linkplain HtmlTplDashboard}。
+	 * 用于输出JSON的{@linkplain HtmlTplDashboard}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class JsonHtmlTplDashboard extends HtmlTplDashboard
+	protected static class HtmlTplDashboardJson extends HtmlTplDashboard
 	{
 		@SuppressWarnings("unchecked")
-		public JsonHtmlTplDashboard(HtmlTplDashboard dashboard, String renderContextVarName)
+		public HtmlTplDashboardJson(HtmlTplDashboard dashboard, String renderContextVarName)
 		{
 			super(dashboard.getId(), dashboard.getTemplate(), new RefRenderContext(renderContextVarName),
-					new JsonTemplateDashboardWidget(dashboard.getWidget()), dashboard.getVarName());
+					new TemplateDashboardWidgetJson(dashboard.getWidget()), dashboard.getVarName());
 
 			setCharts(Collections.EMPTY_LIST);
 		}
@@ -89,12 +89,17 @@ public class HtmlTplDashboardScriptObjectWriter extends AbstractHtmlScriptObject
 		{
 			throw new UnsupportedOperationException();
 		}
-
 	}
 
-	protected static class JsonTemplateDashboardWidget extends HtmlTplDashboardWidget
+	/**
+	 * 用于输出JSON的{@linkplain HtmlTplDashboardWidget}。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class TemplateDashboardWidgetJson extends HtmlTplDashboardWidget
 	{
-		public JsonTemplateDashboardWidget(HtmlTplDashboardWidget dashboardWidget)
+		public TemplateDashboardWidgetJson(HtmlTplDashboardWidget dashboardWidget)
 		{
 			super(dashboardWidget.getId(), dashboardWidget.getTemplates(), null);
 		}

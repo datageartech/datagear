@@ -53,7 +53,7 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	 */
 	public void write(Writer out, HtmlChartPlugin plugin, String varName) throws IOException
 	{
-		JsonChartPlugin jsonPlugin = new JsonChartPlugin(plugin);
+		HtmlChartPluginJson jsonPlugin = new HtmlChartPluginJson(plugin);
 
 		out.write("var " + varName + "=");
 		writeNewLine(out);
@@ -93,14 +93,14 @@ public class HtmlChartPluginScriptObjectWriter extends AbstractHtmlScriptObjectW
 	}
 
 	/**
-	 * 可输出为JSON的{@linkplain ChartPlugin}。
+	 * 用于输出JSON的{@linkplain ChartPlugin}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	public static class JsonChartPlugin extends AbstractChartPlugin
+	protected static class HtmlChartPluginJson extends AbstractChartPlugin
 	{
-		public JsonChartPlugin(HtmlChartPlugin plugin)
+		public HtmlChartPluginJson(HtmlChartPlugin plugin)
 		{
 			super(plugin.getId(), plugin.getNameLabel());
 			setDescLabel(plugin.getDescLabel());

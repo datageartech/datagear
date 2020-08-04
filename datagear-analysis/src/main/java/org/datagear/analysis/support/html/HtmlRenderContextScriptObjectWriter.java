@@ -76,11 +76,11 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 	public void write(Writer out, RenderContext renderContext, String varName, Collection<String> ignoreAttrs)
 			throws IOException
 	{
-		JsonRenderContext jsonRenderContext = new JsonRenderContext(renderContext, ignoreAttrs);
+		RenderContextJson renderContextJson = new RenderContextJson(renderContext, ignoreAttrs);
 
 		out.write("var " + varName + "=");
 		writeNewLine(out);
-		writeJsonObject(out, jsonRenderContext);
+		writeJsonObject(out, renderContextJson);
 		out.write(";");
 		writeNewLine(out);
 	}
@@ -103,7 +103,7 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 	 */
 	public void writeNoAttributes(Writer out, RenderContext renderContext, String varName) throws IOException
 	{
-		JsonNoAttributesRenderContext jsonRenderContext = new JsonNoAttributesRenderContext(renderContext);
+		NoAttributesRenderContextJson jsonRenderContext = new NoAttributesRenderContextJson(renderContext);
 
 		out.write("var " + varName + "=");
 		writeJsonObject(out, jsonRenderContext);
@@ -112,20 +112,20 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 	}
 
 	/**
-	 * 可输出为JSON的{@linkplain RenderContext}。
+	 * 用于输出JSON的{@linkplain RenderContext}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class JsonRenderContext extends DefaultRenderContext
+	protected static class RenderContextJson extends DefaultRenderContext
 	{
-		public JsonRenderContext(RenderContext renderContext)
+		public RenderContextJson(RenderContext renderContext)
 		{
 			this(renderContext, null);
 		}
 
 		@SuppressWarnings("unchecked")
-		public JsonRenderContext(RenderContext renderContext, Collection<String> ignoreAttrs)
+		public RenderContextJson(RenderContext renderContext, Collection<String> ignoreAttrs)
 		{
 			super();
 			setAttributes((Map<String, Object>) renderContext.getAttributes());
@@ -139,14 +139,14 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 	}
 
 	/**
-	 * 可输出为JSON且{@linkplain RenderContext#getAttributes()}为空的{@linkplain RenderContext}。
+	 * 用于输出JSON且{@linkplain RenderContext#getAttributes()}为空的{@linkplain RenderContext}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class JsonNoAttributesRenderContext extends DefaultRenderContext
+	protected static class NoAttributesRenderContextJson extends DefaultRenderContext
 	{
-		public JsonNoAttributesRenderContext(RenderContext renderContext)
+		public NoAttributesRenderContextJson(RenderContext renderContext)
 		{
 			super();
 			super.setAttributes(null);
@@ -178,14 +178,14 @@ public class HtmlRenderContextScriptObjectWriter extends AbstractHtmlScriptObjec
 	}
 
 	/**
-	 * 可输出为JSON且仅带有{@linkplain RenderContext#getAttributes()}的{@linkplain RenderContext}。
+	 * 用于输出JSON且仅带有{@linkplain RenderContext#getAttributes()}的{@linkplain RenderContext}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class JsonOnlyAttributesRenderContext extends DefaultRenderContext
+	protected static class OnlyAttributesRenderContextJson extends DefaultRenderContext
 	{
-		public JsonOnlyAttributesRenderContext(RenderContext renderContext)
+		public OnlyAttributesRenderContextJson(RenderContext renderContext)
 		{
 			super(renderContext.getAttributes());
 		}

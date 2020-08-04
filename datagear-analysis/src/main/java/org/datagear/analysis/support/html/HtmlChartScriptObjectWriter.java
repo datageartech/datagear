@@ -58,7 +58,7 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	 */
 	public void write(Writer out, HtmlChart chart, String renderContextVarName, String pluginVarName) throws IOException
 	{
-		chart = new JsonHtmlChart(chart, renderContextVarName, pluginVarName);
+		chart = new HtmlChartJson(chart, renderContextVarName, pluginVarName);
 
 		out.write("var " + chart.getVarName() + "=");
 		writeNewLine(out);
@@ -92,24 +92,24 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 	public void writeJson(Writer out, HtmlChart chart, String renderContextVarName, String pluginVarName)
 			throws IOException
 	{
-		chart = new JsonHtmlChart(chart, renderContextVarName, pluginVarName);
+		chart = new HtmlChartJson(chart, renderContextVarName, pluginVarName);
 
 		writeJsonObject(out, chart);
 	}
 
 	/**
-	 * 支持JSON输出的{@linkplain HtmlChart}。
+	 * 用于输出JSON的{@linkplain HtmlChart}。
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
-	protected static class JsonHtmlChart extends HtmlChart
+	protected static class HtmlChartJson extends HtmlChart
 	{
-		public JsonHtmlChart(HtmlChart htmlChart, String renderContextVarName, String pluginVarName)
+		public HtmlChartJson(HtmlChart htmlChart, String renderContextVarName, String pluginVarName)
 		{
 			super();
 			ChartDefinition.copy(htmlChart, this);
-			setChartDataSets(JsonChartDataSet.valuesOf(htmlChart.getChartDataSets()));
+			setChartDataSets(ChartDataSetJson.valuesOf(htmlChart.getChartDataSets()));
 			setPlugin(new RefHtmlChartPlugin(pluginVarName));
 			setRenderContext(new RefRenderContext(renderContextVarName));
 			setElementId(htmlChart.getElementId());
@@ -124,11 +124,17 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 		}
 	}
 
-	protected static class JsonChartDataSet extends ChartDataSet
+	/**
+	 * 用于输出JSON的{@linkplain ChartDataSet}。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class ChartDataSetJson extends ChartDataSet
 	{
-		public JsonChartDataSet(ChartDataSet chartDataSet)
+		public ChartDataSetJson(ChartDataSet chartDataSet)
 		{
-			super(new JsonDataSet(chartDataSet.getDataSet()));
+			super(new DataSetJson(chartDataSet.getDataSet()));
 			setPropertySigns(chartDataSet.getPropertySigns());
 			setAlias(chartDataSet.getAlias());
 			setParamValues(chartDataSet.getParamValues());
@@ -141,23 +147,29 @@ public class HtmlChartScriptObjectWriter extends AbstractHtmlScriptObjectWriter
 			throw new UnsupportedOperationException();
 		}
 
-		public static JsonChartDataSet[] valuesOf(ChartDataSet[] chartDataSets)
+		public static ChartDataSetJson[] valuesOf(ChartDataSet[] chartDataSets)
 		{
 			if (chartDataSets == null)
 				return null;
 
-			JsonChartDataSet[] jsonDataSets = new JsonChartDataSet[chartDataSets.length];
+			ChartDataSetJson[] jsonDataSets = new ChartDataSetJson[chartDataSets.length];
 
 			for (int i = 0; i < chartDataSets.length; i++)
-				jsonDataSets[i] = new JsonChartDataSet(chartDataSets[i]);
+				jsonDataSets[i] = new ChartDataSetJson(chartDataSets[i]);
 
 			return jsonDataSets;
 		}
 	}
 
-	protected static class JsonDataSet extends AbstractDataSet
+	/**
+	 * 用于输出JSON的{@linkplain DataSet}。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	protected static class DataSetJson extends AbstractDataSet
 	{
-		public JsonDataSet(DataSet dataSet)
+		public DataSetJson(DataSet dataSet)
 		{
 			super(dataSet.getId(), dataSet.getName(), dataSet.getProperties());
 			setParams(dataSet.getParams());
