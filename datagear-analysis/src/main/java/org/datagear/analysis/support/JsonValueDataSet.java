@@ -15,34 +15,34 @@ import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetResult;
 
 /**
- * JSON字符串数据集。
+ * JSON字符串值数据集。
  * 
  * @author datagear@163.com
  *
  */
-public class JsonStringDataSet extends AbstractJsonDataSet
+public class JsonValueDataSet extends AbstractJsonDataSet
 {
-	private String json;
+	private String value;
 
-	public JsonStringDataSet()
+	public JsonValueDataSet()
 	{
 		super();
 	}
 
-	public JsonStringDataSet(String id, String name, List<DataSetProperty> properties, String json)
+	public JsonValueDataSet(String id, String name, List<DataSetProperty> properties, String value)
 	{
 		super(id, name, properties);
-		this.json = json;
+		this.value = value;
 	}
 
-	public String getJson()
+	public String getValue()
 	{
-		return json;
+		return value;
 	}
 
-	public void setJson(String json)
+	public void setValue(String value)
 	{
-		this.json = json;
+		this.value = value;
 	}
 
 	@Override
