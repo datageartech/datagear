@@ -19,6 +19,8 @@ import org.datagear.analysis.DataSetProperty;
  */
 public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet
 {
+	public static final JsonDataSetSupport JSON_DATA_SET_SUPPORT = new JsonDataSetSupport();
+
 	public AbstractJsonDataSet()
 	{
 		super();
@@ -27,5 +29,10 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet
 	public AbstractJsonDataSet(String id, String name, List<DataSetProperty> properties)
 	{
 		super(id, name, properties);
+	}
+
+	protected JsonDataSetSupport getJsonDataSetSupport()
+	{
+		return JSON_DATA_SET_SUPPORT;
 	}
 }
