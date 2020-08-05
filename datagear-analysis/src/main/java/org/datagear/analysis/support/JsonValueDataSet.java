@@ -16,6 +16,9 @@ import org.datagear.analysis.DataSetResult;
 
 /**
  * JSON字符串值数据集。
+ * <p>
+ * 此类的{@linkplain #getValue()}支持<code>Freemarker</code>模板语言。
+ * </p>
  * 
  * @author datagear@163.com
  *

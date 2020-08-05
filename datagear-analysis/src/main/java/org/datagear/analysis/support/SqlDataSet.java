@@ -27,17 +27,12 @@ import org.datagear.util.resource.ConnectionFactory;
  * <p>
  * 此类的{@linkplain #getSql()}支持<code>Freemarker</code>模板语言。
  * </p>
- * <p>
- * 注意：为了提高效率，如果{@linkplain #hasParam()}为{@code false}，此类不会将{@linkplain #getSql()}当作做模板语言处理。
- * </p>
  * 
  * @author datagear@163.com
  *
  */
-public class SqlDataSet extends AbstractDataSet
+public class SqlDataSet extends AbstractFmkTemplateDataSet
 {
-	public static final TemplateSqlResolver TEMPLATE_SQL_RESOLVER = new TemplateFmkSqlResolver();
-
 	protected static final SqlDataSetSupport SQL_DATA_SET_SUPPORT = new SqlDataSetSupport();
 
 	private ConnectionFactory connectionFactory;
@@ -80,7 +75,7 @@ public class SqlDataSet extends AbstractDataSet
 	@Override
 	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
 	{
-		String sql = resolveTemplateSql(paramValues);
+		String sql = resolveTemplate(getSql(), paramValues);
 
 		Connection cn = null;
 
@@ -108,14 +103,6 @@ public class SqlDataSet extends AbstractDataSet
 			{
 			}
 		}
-	}
-
-	protected String resolveTemplateSql(Map<String, ?> paramValues)
-	{
-		if (!hasParam())
-			return getSql();
-
-		return TEMPLATE_SQL_RESOLVER.resolve(getSql(), paramValues);
 	}
 
 	protected DataSetResult getResult(Connection cn, String sql) throws DataSetException

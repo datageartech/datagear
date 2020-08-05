@@ -17,7 +17,7 @@ import org.datagear.analysis.DataSetProperty;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractJsonDataSet extends AbstractDataSet
+public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet
 {
 	public AbstractJsonDataSet()
 	{

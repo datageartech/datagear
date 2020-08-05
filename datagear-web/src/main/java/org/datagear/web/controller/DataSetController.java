@@ -16,10 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.support.AbstractFmkTemplateDataSet;
+import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetParamValueConverter;
-import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.SqlDataSetSupport;
-import org.datagear.analysis.support.TemplateSqlResolver;
+import org.datagear.analysis.support.TemplateContext;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
@@ -367,12 +368,12 @@ public class DataSetController extends AbstractSchemaConnController
 	protected String resolveSql(String sql, Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
 	{
 		Map<String, ?> converted = getDataSetParamValueConverter().convert(paramValues, dataSetParams);
-		return getTemplateSqlResolver().resolve(sql, converted);
+		return getDataSetFmkTemplateResolver().resolve(sql, new TemplateContext(converted));
 	}
 
-	protected TemplateSqlResolver getTemplateSqlResolver()
+	protected DataSetFmkTemplateResolver getDataSetFmkTemplateResolver()
 	{
-		return SqlDataSet.TEMPLATE_SQL_RESOLVER;
+		return AbstractFmkTemplateDataSet.TEMPLATE_RESOLVER;
 	}
 
 	/**
