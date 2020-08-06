@@ -3681,7 +3681,18 @@
 				searchable: false,
 				render: function(value, type, row, meta)
 				{
-					return chartOptions.table.renderValue(value, type, row, meta);
+					//单元格展示绘制
+					if(type == "display")
+					{
+						var rowIndex = meta.row;
+						var columnIndex = meta.col;
+						var name = columns[columnIndex].data;
+						
+						return chartOptions.table.renderValue(value, name, rowIndex, columnIndex, row, meta);
+					}
+					//其他绘制，比如排序
+					else
+						return value;
 				}
 			};
 			
