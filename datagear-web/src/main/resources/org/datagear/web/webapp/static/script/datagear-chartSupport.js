@@ -3663,7 +3663,10 @@
 				{
 					return value;
 				}
-			}
+			},
+			
+			//DataTable图表配置项
+			"ordering": false
 		},
 		chart.options(),
 		options);
