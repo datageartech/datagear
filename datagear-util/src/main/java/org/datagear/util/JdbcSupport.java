@@ -30,6 +30,7 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,17 +95,31 @@ public class JdbcSupport
 	{
 		LOGGER.debug("execute {}, resultSetType={}", sql, resultSetType);
 
-		PreparedStatement pst = null;
+		Statement st = null;
 		ResultSet rs = null;
-		List<Object> setParams = null;
+		@SuppressWarnings("unchecked")
+		List<Object> setParams = Collections.EMPTY_LIST;
 
 		try
 		{
-			pst = createQueryPreparedStatement(cn, sql.getSqlValue(), resultSetType);
-			setParams = setParamValues(cn, pst, sql);
-			rs = pst.executeQuery();
+			@JDBCCompatiblity("如果没有参数，则不必采用预编译方式，避免某些驱动对预编译功能支持有问题")
+			boolean hasParamValue = sql.hasParamValue();
 
-			return new QueryResultSet(pst, rs, setParams);
+			if (hasParamValue)
+			{
+				PreparedStatement pst = createQueryPreparedStatement(cn, sql.getSqlValue(), resultSetType);
+				st = pst;
+				setParams = setParamValues(cn, pst, sql);
+				rs = pst.executeQuery();
+			}
+			else
+			{
+				Statement stt = createQueryStatement(cn, resultSetType);
+				st = stt;
+				rs = stt.executeQuery(sql.getSqlValue());
+			}
+
+			return new QueryResultSet(st, rs, setParams);
 		}
 		catch (SQLSyntaxErrorException | SQLDataException | SQLTimeoutException | SQLWarning e)
 		{
@@ -116,20 +131,22 @@ public class JdbcSupport
 		{
 			@JDBCCompatiblity("某些不支持ResultSet.TYPE_SCROLL_*的驱动程序不是在创建PreparedStatemen时报错，"
 					+ "而是在执行SQL的时候（比如SQLServer的聚集列存储索引），所以在这里检查，必要时降级重新执行查询")
-			int actualResultSetType = pst.getResultSetType();
 
-			if (ResultSet.TYPE_FORWARD_ONLY == actualResultSetType)
+			// pst此时可能为null
+			Integer actualResultSetType = (st != null ? st.getResultSetType() : null);
+
+			if (actualResultSetType != null && actualResultSetType == ResultSet.TYPE_FORWARD_ONLY)
 			{
 				IOUtil.closeIf(setParams);
 				JdbcUtil.closeResultSet(rs);
-				JdbcUtil.closeStatement(pst);
+				JdbcUtil.closeStatement(st);
 
 				throw e;
 			}
 			else
 			{
 				JdbcUtil.closeResultSet(rs);
-				JdbcUtil.closeStatement(pst);
+				JdbcUtil.closeStatement(st);
 
 				LOGGER.debug("query is downgraded to [ResultSet.TYPE_FORWARD_ONLY] for exception :", e);
 

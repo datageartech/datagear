@@ -60,6 +60,16 @@ public class Sql implements Serializable
 	}
 
 	/**
+	 * 判断是否有SQL参数。
+	 * 
+	 * @return
+	 */
+	public boolean hasParamValue()
+	{
+		return (this.paramValues != null && !this.paramValues.isEmpty());
+	}
+
+	/**
 	 * 获取{@linkplain SqlParamValue}列表。
 	 * 
 	 * @return
