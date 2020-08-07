@@ -411,9 +411,11 @@
 		
 		if(listener)
 			listener = global.chartFactory.evalSilently(listener);
+		
 		//@deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
 		else if(typeof(dashboardRenderer) != "undefined")
 			listener = dashboardRenderer.listener;
+		//@deprecated 用于兼容1.5.0版本的dashboardRenderer设计，未来版本会移除
 		
 		if(listener)
 			this.listener(listener);
@@ -973,6 +975,27 @@
 				data : JSON.stringify(data),
 				success : function(resultsMap)
 				{
+					//@deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
+					if(resultsMap)
+					{
+						for(var chartId in resultsMap)
+						{
+							var results = (resultsMap[chartId] || []);
+							for(var i=0; i<results.length; i++)
+							{
+								if(results[i] && results[i].data != null)
+								{
+									var resultDatas = results[i].data;
+									if(resultDatas != null && !$.isArray(resultDatas))
+										resultDatas = [ resultDatas ];
+									
+									results[i].datas = resultDatas;
+								}
+							}
+						}
+					}
+					//@deprecated 用于兼容1.10.1版本的DataSetResult.datas结构，未来版本会移除
+					
 					try
 					{
 						dashboard._updateCharts(resultsMap);

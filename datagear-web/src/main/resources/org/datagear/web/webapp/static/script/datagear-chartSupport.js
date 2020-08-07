@@ -3800,16 +3800,14 @@
 		{
 			var chartDataSet = chartDataSets[i];
 			var result = chart.resultAt(results, i);
+			var resultDatas = chart.resultDatas(result);
 			
-			if(result.datas)
+			//复制，避免污染原始数据
+			for(var j=0; j<resultDatas.length; j++)
 			{
-				//复制，避免污染原始数据
-				for(var j =0; j< result.datas.length; j++)
-				{
-					var data = $.extend({}, result.datas[j]);
-					chartSupport.setChartOriginalDataInfo(data, i, j);
-					datas.push(data);
-				}
+				var data = $.extend({}, resultDatas[j]);
+				chartSupport.setChartOriginalDataInfo(data, i, j);
+				datas.push(data);
 			}
 		}
 		

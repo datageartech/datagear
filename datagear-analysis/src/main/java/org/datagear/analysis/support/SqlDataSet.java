@@ -129,7 +129,7 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet
 	public DataSetResult toDataSetResult(Connection cn, ResultSet rs) throws SQLException
 	{
 		List<Map<String, ?>> datas = getSqlDataSetSupport().resolveResultDatas(cn, rs, getProperties());
-		MapDataSetResult result = new MapDataSetResult(datas);
+		DataSetResult result = new DataSetResult(datas);
 
 		return result;
 	}
