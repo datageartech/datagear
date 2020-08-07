@@ -16,6 +16,7 @@ import org.datagear.connection.DriverClassFormatErrorException;
 import org.datagear.connection.DriverEntityManagerException;
 import org.datagear.connection.DriverNotFoundException;
 import org.datagear.connection.EstablishConnectionException;
+import org.datagear.connection.PathDriverFactoryException;
 import org.datagear.connection.URLNotAcceptedException;
 import org.datagear.connection.UnsupportedGetConnectionException;
 import org.datagear.management.service.PermissionDeniedException;
@@ -301,7 +302,19 @@ public class ControllerAdvice extends AbstractController
 	public String handleConnectionDriverEntityManagerException(HttpServletRequest request, HttpServletResponse response,
 			DriverEntityManagerException exception)
 	{
-		setOperationMessageForThrowable(request, buildMessageCode(DriverEntityManagerException.class), exception, true);
+		setOperationMessageForThrowable(request, buildMessageCode(DriverEntityManagerException.class), exception, true,
+				exception.getMessage());
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(PathDriverFactoryException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleConnectionPathDriverFactoryException(HttpServletRequest request, HttpServletResponse response,
+			PathDriverFactoryException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(PathDriverFactoryException.class), exception, true,
+				exception.getMessage());
 
 		return getErrorView(request, response);
 	}
