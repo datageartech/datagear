@@ -8,6 +8,7 @@
 package org.datagear.analysis.support;
 
 import java.io.IOException;
+import java.io.Reader;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -139,6 +140,30 @@ public class JsonSupport
 		{
 			return defaultValue;
 		}
+	}
+
+	/**
+	 * 解析非标准JSON。
+	 * 
+	 * @param <T>
+	 * @param reader
+	 * @param type
+	 * @return
+	 * @throws IOException
+	 */
+	public static <T> T parseNonStardand(Reader reader, Class<T> type) throws IOException
+	{
+		return OBJECT_MAPPER_NON_STARDAND.readValue(reader, type);
+	}
+
+	public static ObjectMapper getObjectMapper()
+	{
+		return OBJECT_MAPPER;
+	}
+
+	public static ObjectMapper getObjectMapperNonStardand()
+	{
+		return OBJECT_MAPPER_NON_STARDAND;
 	}
 
 	/**

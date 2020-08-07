@@ -45,7 +45,7 @@ public class SqlDataSetSupport extends JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<Map<String, ?>> resolveResultDatas(Connection cn, ResultSet rs, List<DataSetProperty> properties)
+	public List<Map<String, ?>> resolveResultData(Connection cn, ResultSet rs, List<DataSetProperty> properties)
 			throws SQLException
 	{
 		List<Map<String, ?>> datas = new ArrayList<>();

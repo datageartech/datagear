@@ -2,18 +2,19 @@
  * Copyright (c) 2018 datagear.tech. All Rights Reserved.
  */
 
-/**
- * 
- */
 package org.datagear.analysis.support;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.List;
-import java.util.Map;
 
 import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetResult;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 /**
  * JSON {@linkplain DataSet}支持类。
@@ -29,56 +30,119 @@ public class JsonDataSetSupport extends JsonSupport
 	}
 
 	/**
-	 * 解析结果数据。
+	 * 解析JSON数据。
 	 * 
 	 * @param jsonValue
 	 * @return
-	 * @throws IOException
+	 * @throws DataSetException
 	 */
-	public List<Map<String, ?>> resolveResultDatas(String jsonValue) throws IOException
-	{
-		return resolveResultDatas(jsonValue, null);
-	}
-
-	/**
-	 * 解析结果数据。
-	 * 
-	 * @param jsonValue
-	 * @param path
-	 *            结果数据属性路径，为{@code null}表示使用原始数据
-	 * @return
-	 * @throws IOException
-	 */
-	public List<Map<String, ?>> resolveResultDatas(String jsonValue, String path) throws IOException
+	public Object resolveValue(String jsonValue) throws DataSetException
 	{
 		StringReader reader = new StringReader(jsonValue);
-		return resolveResultDatas(reader, path);
+		return resolveValue(reader);
 	}
 
 	/**
-	 * 解析结果数据。
+	 * 解析JSON数据。
 	 * 
 	 * @param jsonReader
 	 * @return
-	 * @throws IOException
+	 * @throws DataSetException
 	 */
-	public List<Map<String, ?>> resolveResultDatas(Reader jsonReader) throws IOException
-	{
-		return resolveResultDatas(jsonReader, null);
-	}
-
-	/**
-	 * 解析结果数据。
-	 * 
-	 * @param jsonReader
-	 * @param path
-	 *            结果数据属性路径，为{@code null}表示使用原始数据
-	 * @return
-	 * @throws IOException
-	 */
-	public List<Map<String, ?>> resolveResultDatas(Reader jsonReader, String path) throws IOException
+	public Object resolveValue(Reader jsonReader) throws DataSetException
 	{
 		// TODO
 		return null;
+	}
+
+	/**
+	 * 解析数据集结果数据。
+	 * 
+	 * @param jsonValue
+	 * @return
+	 * @throws DataSetException
+	 * @throws UnsupportedResultDataException
+	 */
+	public Object resolveResultData(String jsonValue) throws DataSetException, UnsupportedResultDataException
+	{
+		StringReader reader = new StringReader(jsonValue);
+		return resolveResultData(reader);
+	}
+
+	/**
+	 * 解析数据集结果数据。
+	 * 
+	 * @param reader
+	 * @return
+	 * @throws DataSetException
+	 * @throws UnsupportedResultDataException
+	 */
+	public Object resolveResultData(Reader reader) throws DataSetException, UnsupportedResultDataException
+	{
+		JsonNode jsonNode = null;
+
+		try
+		{
+			jsonNode = getObjectMapperNonStardand().readTree(reader);
+		}
+		catch (Throwable t)
+		{
+			throw new DataSetException(t);
+		}
+
+		if (!isLegalResultDataJsonNode(jsonNode))
+			throw new UnsupportedResultDataException("Result data must be object or object array");
+
+		if (jsonNode == null)
+			return null;
+
+		Object data = null;
+
+		try
+		{
+			data = getObjectMapperNonStardand().treeToValue(jsonNode, Object.class);
+		}
+		catch (Throwable t)
+		{
+			throw new DataSetException(t);
+		}
+
+		return data;
+	}
+
+	/**
+	 * 是否是合法的数据集结果数据{@linkplain JsonNode}。
+	 * <p>
+	 * 参考{@linkplain DataSetResult#getData()}说明。
+	 * </p>
+	 * 
+	 * @param jsonNode
+	 * @return
+	 */
+	public boolean isLegalResultDataJsonNode(JsonNode jsonNode)
+	{
+		if (jsonNode == null || jsonNode.isNull())
+			return true;
+
+		if (jsonNode instanceof ValueNode)
+			return false;
+
+		if (jsonNode instanceof ArrayNode)
+		{
+			ArrayNode arrayNode = (ArrayNode) jsonNode;
+
+			for (int i = 0; i < arrayNode.size(); i++)
+			{
+				JsonNode eleNode = arrayNode.get(i);
+
+				if (eleNode == null || eleNode.isNull())
+					continue;
+
+				if (!(eleNode instanceof ObjectNode))
+					return false;
+			}
+		}
+
+		return true;
 	}
 }

@@ -31,8 +31,7 @@ public class DataSetResult
 	/**
 	 * 获取数据对象。
 	 * <p>
-	 * 数据对象应是所属{@linkplain DataSet#getProperties()}所描述结构的普通JavaBean、
-	 * {@linkplain Map}对象，或者是它们的数组、集合。
+	 * 数据对象应是普通JavaBean、 {@linkplain Map}对象，或者是它们的数组、集合。
 	 * </p>
 	 * 
 	 * @return 数据对象，为{@code null}表示无数据
