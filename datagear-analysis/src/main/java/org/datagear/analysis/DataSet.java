@@ -25,7 +25,7 @@ public interface DataSet extends Identifiable
 	/**
 	 * 获取属性列表。
 	 * 
-	 * @return
+	 * @return 属性列表，为{@code null}或空列表，表示没有任何属性
 	 */
 	List<DataSetProperty> getProperties();
 
@@ -66,7 +66,8 @@ public interface DataSet extends Identifiable
 	/**
 	 * 获取{@linkplain DataSetResult}。
 	 * 
-	 * @param paramValues 由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}
+	 * @param paramValues
+	 *            由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}
 	 * @return
 	 * @throws DataSetException
 	 */
