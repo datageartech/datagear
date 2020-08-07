@@ -24,6 +24,9 @@ public interface DataSet extends Identifiable
 
 	/**
 	 * 获取属性列表。
+	 * <p>
+	 * 属性列表描述{@linkplain #getResult(Map)}返回的{@linkplain DataSetResult#getData()}的对象结构。
+	 * </p>
 	 * 
 	 * @return
 	 */
@@ -66,7 +69,8 @@ public interface DataSet extends Identifiable
 	/**
 	 * 获取{@linkplain DataSetResult}。
 	 * 
-	 * @param paramValues 由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}
+	 * @param paramValues
+	 *            由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}
 	 * @return
 	 * @throws DataSetException
 	 */

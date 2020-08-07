@@ -271,6 +271,7 @@
 					bodyThemeObj.titleColor = bodyThemeObj.color;
 					bodyThemeObj.legendColor = bodyThemeObj.colorSecond;
 				}
+				//@deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
 				
 				this._inflateTheme(bodyThemeObj);
 				
@@ -1413,14 +1414,34 @@
 	{
 		return (!results || results.length <= index ? undefined : results[index]);
 	};
+
+	/**
+	 * 获取数据集结果的数据对象。
+	 * 
+	 * @param result 数据集结果对象
+	 * @return
+	 */
+	chartBase.resultData = function(result)
+	{
+		return (result ? result.data : undefined);
+	};
 	
 	/**
-	 * 获取数据集结果的行对象数组。
+	 * 获取数据集结果的数据对象数组。
+	 * 如果result.data是数组，则直接返回；否则，返回：[ result.data ]。
+	 * 
 	 * @param result 数据集结果对象
+	 * @return 不会为null的数组
 	 */
 	chartBase.resultDatas = function(result)
 	{
-		return (result && result.datas ? result.datas : []);
+		if(result == null || result.data == null)
+			return [];
+		
+		if($.isArray(result.data))
+			return result.data;
+		
+		return [ result.data ];
 	};
 	
 	/**
@@ -1441,7 +1462,7 @@
 	/**
 	 * 将数据集结果的行对象按照指定properties顺序转换为行值数组。
 	 * 
-	 * @param result 数据集结果对象、对象数组
+	 * @param result 数据集结果对象
 	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
 	 * @param row 行索引，可选，默认为0
 	 * @param count 获取的最多行数，可选，默认为全部
@@ -1454,7 +1475,7 @@
 		if(!result || !properties)
 			return re;
 		
-		var datas = (result.length != undefined ? result : (result.datas || []));
+		var datas = this.resultDatas(result);
 		
 		row = (row || 0);
 		var getCount = datas.length;
@@ -1502,7 +1523,7 @@
 	/**
 	 * 将数据集结果的行对象按照指定properties顺序转换为列值数组。
 	 * 
-	 * @param result 数据集结果对象、对象数组
+	 * @param result 数据集结果对象
 	 * @param properties 数据集属性对象数组、属性名数组、属性对象、属性名
 	 * @param row 行索引，以0开始，可选，默认为0
 	 * @param count 获取的最多行数，可选，默认为全部
@@ -1515,7 +1536,7 @@
 		if(!result || !properties)
 			return re;
 		
-		var datas = (result.length != undefined ? result : (result.datas || []));
+		var datas = this.resultDatas(result);
 		
 		row = (row || 0);
 		var getCount = datas.length;
@@ -1574,7 +1595,7 @@
 		if(!result || !nameProperty || !valueProperty)
 			return re;
 		
-		var datas = (result.length != undefined ? result : (result.datas || []));
+		var datas = this.resultDatas(result);
 		
 		row = (row || 0);
 		var getCount = datas.length;
@@ -2293,9 +2314,12 @@
 		//@deprecated 兼容1.8.1版本有ChartTheme.axisColor的结构
 		if(chartTheme.axisColor)
 			axisColor = chartTheme.axisColor;
+		//@deprecated 兼容1.8.1版本有ChartTheme.axisColor的结构
+		
 		//@deprecated 兼容1.8.1版本有ChartTheme.axisScaleLineColor的结构
 		if(chartTheme.axisScaleLineColor)
 			axisScaleLineColor = chartTheme.axisScaleLineColor;
+		//@deprecated 兼容1.8.1版本有ChartTheme.axisScaleLineColor的结构
 		
 		var theme =
 		{

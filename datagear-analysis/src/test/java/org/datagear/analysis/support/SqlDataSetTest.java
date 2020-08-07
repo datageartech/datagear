@@ -77,7 +77,7 @@ public class SqlDataSetTest extends DBTestSupport
 				DataSetResult dataSetResult = sqlDataSet.getResult(dataSetParamValues);
 
 				@SuppressWarnings("unchecked")
-				List<Map<String, ?>> datas = (List<Map<String, ?>>) dataSetResult.getDatas();
+				List<Map<String, ?>> datas = (List<Map<String, ?>>) dataSetResult.getData();
 
 				Assert.assertEquals(1, datas.size());
 

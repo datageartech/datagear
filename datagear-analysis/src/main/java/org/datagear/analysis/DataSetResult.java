@@ -4,7 +4,7 @@
 
 package org.datagear.analysis;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * 数据集结果。
@@ -12,22 +12,38 @@ import java.util.List;
  * @author datagear@163.com
  *
  */
-public interface DataSetResult
+public class DataSetResult
 {
-	/**
-	 * 获取数据列表。
-	 * 
-	 * @return
-	 */
-	List<?> getDatas();
+	/** 结果数据对象 */
+	private Object data;
+
+	public DataSetResult()
+	{
+		super();
+	}
+
+	public DataSetResult(Object data)
+	{
+		super();
+		this.data = data;
+	}
 
 	/**
-	 * 获取{@linkplain #getDatas()}中单条数据指定名称的属性值。
+	 * 获取数据对象。
+	 * <p>
+	 * 数据对象应是所属{@linkplain DataSet#getProperties()}所描述结构的普通JavaBean、
+	 * {@linkplain Map}对象，或者是它们的数组、集合。
+	 * </p>
 	 * 
-	 * @param data
-	 * @param name
-	 * @return
-	 * @throws DataSetException
+	 * @return 数据对象，为{@code null}表示无数据
 	 */
-	Object getDataPropertyValue(Object data, String name) throws DataSetException;
+	public Object getData()
+	{
+		return this.data;
+	}
+
+	public void setData(Object data)
+	{
+		this.data = data;
+	}
 }
