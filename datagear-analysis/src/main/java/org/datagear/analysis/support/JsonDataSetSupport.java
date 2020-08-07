@@ -51,8 +51,14 @@ public class JsonDataSetSupport extends JsonSupport
 	 */
 	public Object resolveValue(Reader jsonReader) throws DataSetException
 	{
-		// TODO
-		return null;
+		try
+		{
+			return parseNonStardand(jsonReader, Object.class);
+		}
+		catch(Throwable t)
+		{
+			throw new DataSetException(t);
+		}
 	}
 
 	/**

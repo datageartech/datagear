@@ -35,6 +35,9 @@ public abstract class AbstractFmkTemplateDataSet extends AbstractDataSet
 
 	protected String resolveTemplate(String template, Map<String, ?> paramValues)
 	{
+		if (template == null)
+			return null;
+
 		return TEMPLATE_RESOLVER.resolve(template, paramValues);
 	}
 }

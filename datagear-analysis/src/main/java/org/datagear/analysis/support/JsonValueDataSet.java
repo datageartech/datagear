@@ -51,6 +51,10 @@ public class JsonValueDataSet extends AbstractJsonDataSet
 	@Override
 	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
 	{
-		return null;
+		String json = resolveTemplate(this.value, paramValues);
+
+		Object data = getJsonDataSetSupport().resolveResultData(json);
+
+		return new DataSetResult(data);
 	}
 }
