@@ -90,6 +90,15 @@
 		}
 	},
 	{
+		"name": "ClickHouse",
+		"driverClassNames": ["ru.yandex.clickhouse.ClickHouseDriver"],
+		"urlTemplate":
+		{
+			"template": "jdbc:clickhouse://{host}:{port}/{name}",
+			"defaultValue": {"port": "8123"}
+		}
+	},
+	{
 		"name": "Impala",
 		"driverClassNames": ["com.cloudera.impala.jdbc41.Driver"],
 		"urlTemplate":
