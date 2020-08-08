@@ -8,7 +8,7 @@ boolean readonly 是否只读操作，默认为false
 <#assign selectOperation=(selectOperation!false)>
 <#assign isMultipleSelect=(isMultipleSelect!false)>
 <#assign readonly=(readonly!false)>
-<#assign SqlDataSetEntity=statics['org.datagear.management.domain.SqlDataSetEntity']>
+<#assign DataSetEntity=statics['org.datagear.management.domain.DataSetEntity']>
 <html>
 <head>
 <#include "../../include/html_head.ftl">
@@ -31,7 +31,18 @@ boolean readonly 是否只读操作，默认为false
 			<#if readonly>
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
-				<input name="addButton" type="button" value="<@spring.message code='add' />" />
+				<div class="add-button-wrapper">
+					<button class="add-button" type="button">
+						<@spring.message code='add' />
+						<span class="ui-icon ui-icon-triangle-1-s"></span>
+					</button>
+					<div class="add-button-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+						<ul class="add-button-list">
+							<li addURL="addForSql"><div><@spring.message code='dataSet.dataSetType.SQL' /></div></li>
+							<li addURL="addForJsonValue-TODO"><div><@spring.message code='dataSet.dataSetType.JSON_VALUE' /></div></li>
+						</ul>
+					</div>
+				</div>
 				<#if !selectOperation>
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				</#if>
@@ -66,28 +77,44 @@ boolean readonly 是否只读操作，默认为false
 {
 	$.initButtons(po.element(".operation"));
 	po.initDataFilter();
-	
+
 	po.currentUser = <@writeJson var=currentUser />;
+	
+	po.element(".add-button-list").menu(
+	{
+		select: function(event, ui)
+		{
+			var item = $(ui.item);
+			
+			var addURL = item.attr("addURL");
+			
+			po.open(po.url(addURL),
+			{
+				<#if selectOperation>
+				pageParam:
+				{
+					afterSave: function(data)
+					{
+						po.pageParamCallSelect(true, data);
+					}
+				}
+				</#if>
+			});
+		}
+	});
 	
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/dataSet/" + action;
 	};
 
-	po.element("input[name=addButton]").click(function()
+	po.element(".add-button").click(function()
 	{
-		po.open(po.url("add"),
-		{
-			<#if selectOperation>
-			pageParam:
-			{
-				afterSave: function(data)
-				{
-					po.pageParamCallSelect(true, data);
-				}
-			}
-			</#if>
-		});
+		po.element(".add-button-panel").toggle();
+	});
+	po.element(".add-button-wrapper").hover(function(){}, function()
+	{
+		po.element(".add-button-panel").hide();
 	});
 	
 	po.element("input[name=editButton]").click(function()
@@ -112,7 +139,7 @@ boolean readonly 是否只读操作，默认为false
 			
 			var options = {};
 			$.setGridPageHeightOption(options);
-			po.open(contextPath+"/authorization/${SqlDataSetEntity.AUTHORIZATION_RESOURCE_TYPE}/query?"
+			po.open(contextPath+"/authorization/${DataSetEntity.AUTHORIZATION_RESOURCE_TYPE}/query?"
 					+"${statics['org.datagear.web.controller.AuthorizationController'].PARAM_ASSIGNED_RESOURCE}="+encodeURIComponent(row.id), options);
 		});
 	});
@@ -154,11 +181,21 @@ boolean readonly 是否只读操作，默认为false
 		</#if>
 	});
 	
+	var dataSetTypeColumn = $.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.dataSetType' />", "dataSetType");
+	dataSetTypeColumn.render = function(data)
+	{
+		if("${DataSetEntity.DATA_SET_TYPE_SQL}" == data)
+			return "<@spring.message code='dataSet.dataSetType.SQL' />";
+		else if("${DataSetEntity.DATA_SET_TYPE_JSON_VALUE}" == data)
+			return "<@spring.message code='dataSet.dataSetType.JSON_VALUE' />";
+		else
+			return "";
+	};
+	
 	var tableColumns = [
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.name' />"), "name"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.dataSource' />", "connectionFactory.schema.title"),
-		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.sql' />", "sql"),
+		dataSetTypeColumn,
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createUser' />", "createUser.realName"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createTime' />", "createTime")
 	];

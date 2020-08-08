@@ -2086,6 +2086,24 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	margin-bottom: -0.5em;
 }
 
+.page-grid-dataSet{}
+.page-grid-dataSet .add-button-wrapper{
+	display: inline-block;
+	position: relative;
+}
+.page-grid-dataSet .add-button-wrapper .add-button-panel{
+	position: absolute;
+	display: none;
+	padding: 0.2em 0.2em;
+}
+.page-grid-dataSet .add-button-wrapper .add-button-panel .add-button-list{
+	white-space: nowrap;
+	text-align: left;
+}
+.page-grid-dataSet .add-button-wrapper .add-button-panel .add-button-list.ui-widget-content{
+	border-width: 0;
+}
+
 .page-form-dataSet{}
 .page-form-dataSet .sql-editor-wrapper{
 	display: inline-block;

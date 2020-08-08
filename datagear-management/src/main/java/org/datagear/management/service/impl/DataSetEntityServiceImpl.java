@@ -15,27 +15,28 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.connection.ConnectionSource;
+import org.datagear.management.domain.DataSetEntity;
 import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetEntity;
+import org.datagear.management.domain.SummaryDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
+import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
-import org.datagear.management.service.SqlDataSetEntityService;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
- * {@linkplain SqlDataSetEntityService}实现类。
+ * {@linkplain DataSetEntityService}实现类。
  * 
  * @author datagear@163.com
  *
  */
-public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntityService<String, SqlDataSetEntity>
-		implements SqlDataSetEntityService
+public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntityService<String, DataSetEntity>
+		implements DataSetEntityService
 {
-	protected static final String SQL_NAMESPACE = SqlDataSetEntity.class.getName();
+	protected static final String SQL_NAMESPACE = DataSetEntity.class.getName();
 
 	private ConnectionSource connectionSource;
 
@@ -43,12 +44,12 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 
 	private AuthorizationService authorizationService;
 
-	public SqlDataSetEntityServiceImpl()
+	public DataSetEntityServiceImpl()
 	{
 		super();
 	}
 
-	public SqlDataSetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, ConnectionSource connectionSource,
+	public DataSetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, ConnectionSource connectionSource,
 			SchemaService schemaService, AuthorizationService authorizationService)
 	{
 		super(sqlSessionFactory);
@@ -57,7 +58,7 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 		this.authorizationService = authorizationService;
 	}
 
-	public SqlDataSetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, ConnectionSource connectionSource,
+	public DataSetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, ConnectionSource connectionSource,
 			SchemaService schemaService, AuthorizationService authorizationService)
 	{
 		super(sqlSessionTemplate);
@@ -97,22 +98,36 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 	}
 
 	@Override
-	public SqlDataSet getSqlDataSet(String id)
+	public DataSet getDataSet(String id)
 	{
-		SqlDataSetEntity entity = getById(id);
+		DataSetEntity entity = getById(id);
 
-		SchemaConnectionFactory connectionFactory = entity.getConnectionFactory();
+		if (entity instanceof SqlDataSetEntity)
+		{
+			SqlDataSetEntity sqlDataSetEntity = (SqlDataSetEntity) entity;
 
-		connectionFactory.setSchema(this.schemaService.getById(connectionFactory.getSchema().getId()));
-		connectionFactory.setConnectionSource(this.connectionSource);
+			SchemaConnectionFactory connectionFactory = sqlDataSetEntity.getConnectionFactory();
+
+			connectionFactory.setSchema(this.schemaService.getById(connectionFactory.getSchema().getId()));
+			connectionFactory.setConnectionSource(this.connectionSource);
+		}
 
 		return entity;
 	}
 
 	@Override
-	protected boolean add(SqlDataSetEntity entity, Map<String, Object> params)
+	protected boolean add(DataSetEntity entity, Map<String, Object> params)
 	{
+		if (entity instanceof SummaryDataSetEntity)
+			throw new IllegalArgumentException();
+
 		boolean success = super.add(entity, params);
+
+		if (success)
+		{
+			if (entity instanceof SqlDataSetEntity)
+				success = addSqlDataSetEntity((SqlDataSetEntity) entity);
+		}
 
 		if (success)
 			saveDataSetChildren(entity);
@@ -120,15 +135,40 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 		return success;
 	}
 
-	@Override
-	protected boolean update(SqlDataSetEntity entity, Map<String, Object> params)
+	protected boolean addSqlDataSetEntity(SqlDataSetEntity entity)
 	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("insertSqlDataSetEntity", params) > 0);
+	}
+
+	@Override
+	protected boolean update(DataSetEntity entity, Map<String, Object> params)
+	{
+		if (entity instanceof SummaryDataSetEntity)
+			throw new IllegalArgumentException();
+
 		boolean success = super.update(entity, params);
+
+		if (success)
+		{
+			if (entity instanceof SqlDataSetEntity)
+				success = updateSqlDataSetEntity((SqlDataSetEntity) entity);
+		}
 
 		if (success)
 			saveDataSetChildren(entity);
 
 		return success;
+	}
+
+	protected boolean updateSqlDataSetEntity(SqlDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("updateSqlDataSetEntity", params) > 0);
 	}
 
 	@Override
@@ -138,9 +178,9 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 	}
 
 	@Override
-	public SqlDataSetEntity getByStringId(User user, String id) throws PermissionDeniedException
+	public DataSetEntity getByStringId(User user, String id) throws PermissionDeniedException
 	{
-		return super.getById(user, id);
+		return getById(user, id);
 	}
 
 	@Override
@@ -157,17 +197,20 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 	}
 
 	@Override
-	protected void postProcessSelects(List<SqlDataSetEntity> list)
+	protected void postProcessSelects(List<DataSetEntity> list)
 	{
 		// XXX 查询操作仅用于展示，不必完全加载
 		// super.postProcessSelects(list);
 	}
 
 	@Override
-	protected void postProcessSelect(SqlDataSetEntity obj)
+	protected DataSetEntity postProcessSelect(DataSetEntity obj)
 	{
 		if (obj == null)
-			return;
+			return null;
+
+		if (DataSetEntity.DATA_SET_TYPE_SQL.equals(obj.getDataSetType()))
+			obj = getSqlDataSetEntityById(obj.getId());
 
 		Map<String, Object> sqlParams = buildParamMapWithIdentifierQuoteParameter();
 		sqlParams.put("dataSetId", obj.getId());
@@ -179,6 +222,18 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 		List<DataSetParamPO> paramPOs = selectListMybatis("getParamPOs", sqlParams);
 		List<DataSetParam> dataSetParams = DataSetParamPO.to(paramPOs);
 		obj.setParams(dataSetParams);
+
+		return obj;
+	}
+
+	protected SqlDataSetEntity getSqlDataSetEntityById(String id)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("id", id);
+
+		SqlDataSetEntity entity = selectOneMybatis("getSqlDataSetEntityById", params);
+
+		return entity;
 	}
 
 	@Override
@@ -193,13 +248,13 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 		return SQL_NAMESPACE;
 	}
 
-	protected void saveDataSetChildren(SqlDataSet entity)
+	protected void saveDataSetChildren(DataSetEntity entity)
 	{
 		saveDataSetPropertyPOs(entity);
 		saveDataSetParamPOs(entity);
 	}
 
-	protected void saveDataSetPropertyPOs(SqlDataSet entity)
+	protected void saveDataSetPropertyPOs(DataSetEntity entity)
 	{
 		deleteMybatis("deletePropertyPOs", entity.getId());
 
@@ -212,7 +267,7 @@ public class SqlDataSetEntityServiceImpl extends AbstractMybatisDataPermissionEn
 		}
 	}
 
-	protected void saveDataSetParamPOs(SqlDataSet entity)
+	protected void saveDataSetParamPOs(DataSetEntity entity)
 	{
 		deleteMybatis("deleteParamPOs", entity.getId());
 

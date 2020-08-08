@@ -209,7 +209,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		params.put("param", param);
 
 		T entity = selectOneMybatis("get", params);
-		postProcessSelect(entity);
+		entity = postProcessSelect(entity);
 
 		return entity;
 	}
@@ -346,7 +346,7 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	/**
 	 * 后置处理查询结果列表。
 	 * <p>
-	 * 次方法对每一个元素调用{@linkplain #postProcessSelect(Object)}。
+	 * 此方法对每一个元素调用{@linkplain #postProcessSelect(Object)}。
 	 * </p>
 	 * 
 	 * @param list
@@ -356,8 +356,12 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 		if (list == null)
 			return;
 
-		for (T e : list)
-			postProcessSelect(e);
+		for (int i = 0; i < list.size(); i++)
+		{
+			T ele = list.get(i);
+			ele = postProcessSelect(ele);
+			list.set(i, ele);
+		}
 	}
 
 	/**
@@ -367,10 +371,11 @@ public abstract class AbstractMybatisService<T> extends SqlSessionDaoSupport
 	 * </p>
 	 * 
 	 * @param obj
+	 * @return
 	 */
-	protected void postProcessSelect(T obj)
+	protected T postProcessSelect(T obj)
 	{
-
+		return obj;
 	}
 
 	/**

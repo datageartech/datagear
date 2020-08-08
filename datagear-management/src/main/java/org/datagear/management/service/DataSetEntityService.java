@@ -7,16 +7,17 @@
  */
 package org.datagear.management.service;
 
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.support.SqlDataSet;
-import org.datagear.management.domain.SqlDataSetEntity;
+import org.datagear.management.domain.DataSetEntity;
 
 /**
- * {@linkplain SqlDataSetEntity}业务服务接口。
+ * {@linkplain DataSetEntity}业务服务接口。
  * 
  * @author datagear@163.com
  *
  */
-public interface SqlDataSetEntityService extends DataPermissionEntityService<String, SqlDataSetEntity>
+public interface DataSetEntityService extends DataPermissionEntityService<String, DataSetEntity>
 {
 	/**
 	 * 获取可用于执行分析的{@linkplain SqlDataSet}。
@@ -24,5 +25,5 @@ public interface SqlDataSetEntityService extends DataPermissionEntityService<Str
 	 * @param id
 	 * @return
 	 */
-	SqlDataSet getSqlDataSet(String id);
+	DataSet getDataSet(String id);
 }

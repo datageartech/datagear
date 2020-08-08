@@ -11,16 +11,15 @@ import java.util.Date;
 import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.support.SqlDataSet;
-import org.datagear.util.resource.ConnectionFactory;
+import org.datagear.analysis.support.JsonValueDataSet;
 
 /**
- * {@linkplain SqlDataSet}实体。
+ * {@linkplain JsonValueDataSet}实体。
  * 
  * @author datagear@163.com
  *
  */
-public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
+public class JsonValueDataSetEntity extends JsonValueDataSet implements DataSetEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -35,50 +34,24 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
 
 	private transient String _propertyLabelsText;
 
-	public SqlDataSetEntity()
+	public JsonValueDataSetEntity()
 	{
 		super();
 		this.createTime = new Date();
 	}
 
-	public SqlDataSetEntity(String id, String name, List<DataSetProperty> properties,
-			SchemaConnectionFactory connectionFactory,
-			String sql, User createUser)
+	public JsonValueDataSetEntity(String id, String name, List<DataSetProperty> properties, String value,
+			User createUser)
 	{
-		super(id, name, properties, connectionFactory, sql);
+		super(id, name, properties, value);
 		this.createTime = new Date();
 		this.createUser = createUser;
 	}
 
 	@Override
-	public SchemaConnectionFactory getConnectionFactory()
-	{
-		return (SchemaConnectionFactory) super.getConnectionFactory();
-	}
-
-	@Override
-	public void setConnectionFactory(ConnectionFactory connectionFactory)
-	{
-		if (connectionFactory != null && !(connectionFactory instanceof SchemaConnectionFactory))
-			throw new IllegalArgumentException();
-
-		super.setConnectionFactory(connectionFactory);
-	}
-
-	public SchemaConnectionFactory getSchemaConnectionFactory()
-	{
-		return getConnectionFactory();
-	}
-
-	public void setSchemaConnectionFactory(SchemaConnectionFactory schemaConnectionFactory)
-	{
-		setConnectionFactory(schemaConnectionFactory);
-	}
-
-	@Override
 	public String getDataSetType()
 	{
-		return DataSetEntity.DATA_SET_TYPE_SQL;
+		return DataSetEntity.DATA_SET_TYPE_JSON_VALUE;
 	}
 
 	@Override

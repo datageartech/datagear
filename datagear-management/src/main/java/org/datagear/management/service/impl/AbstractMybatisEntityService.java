@@ -102,7 +102,7 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 		params.put("id", id);
 
 		T entity = selectOneMybatis("getById", params);
-		postProcessSelect(entity);
+		entity = postProcessSelect(entity);
 
 		return entity;
 	}

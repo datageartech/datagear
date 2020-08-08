@@ -140,7 +140,7 @@
 		<property name="resourceServices">
 			<list>
 				<ref bean="schemaService" />
-				<ref bean="sqlDataSetEntityService" />
+				<ref bean="dataSetEntityService" />
 				<ref bean="htmlChartWidgetEntityService" />
 				<ref bean="htmlTplDashboardWidgetEntityService" />
 			</list>
@@ -220,7 +220,7 @@
 		</property>
 	</bean>
 	
-	<bean id="sqlDataSetEntityService" class="org.datagear.management.service.impl.SqlDataSetEntityServiceImpl">
+	<bean id="dataSetEntityService" class="org.datagear.management.service.impl.DataSetEntityServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 		<property name="connectionSource" ref="connectionSource" />
 		<property name="schemaService" ref="schemaService" />
@@ -237,7 +237,7 @@
 	<bean id="htmlChartWidgetEntityService" class="org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 		<property name="chartPluginManager" ref="directoryHtmlChartPluginManager" />
-		<property name="sqlDataSetEntityService" ref="sqlDataSetEntityService" />
+		<property name="dataSetEntityService" ref="dataSetEntityService" />
 		<property name="authorizationService" ref="authorizationService" />
 	</bean>
 	

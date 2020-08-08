@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="org.datagear.management.domain.SqlDataSetEntity">
+<mapper namespace="org.datagear.management.domain.DataSetEntity">
 
 	<insert id="insert">
-		INSERT INTO DATAGEAR_SQL_DATA_SET
+		INSERT INTO DATAGEAR_DATA_SET
 			(
-			DS_ID, DS_NAME, DS_SCHEMA_ID, DS_SQL,
-			DS_CREATE_USER_ID, DS_CREATE_TIME
+			DS_ID, DS_NAME, DS_TYPE, DS_CREATE_USER_ID, DS_CREATE_TIME
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.name}, #{entity.schemaConnectionFactory.schema.id}, #{entity.sql},
-			#{entity.createUser.id}, #{entity.createTime}
+			#{entity.id}, #{entity.name}, #{entity.dataSetType}, #{entity.createUser.id}, #{entity.createTime}
+			)
+	</insert>
+	
+	<insert id="insertSqlDataSetEntity">
+		INSERT INTO DATAGEAR_DATA_SET_SQL
+			(
+			DS_ID, DS_SCHEMA_ID, DS_SQL
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.schemaConnectionFactory.schema.id}, #{entity.sql}
 			)
 	</insert>
 	
@@ -41,8 +50,14 @@
 	</insert>
 	
 	<update id="update">
-		UPDATE DATAGEAR_SQL_DATA_SET SET
-			DS_NAME = #{entity.name},
+		UPDATE DATAGEAR_DATA_SET SET
+			DS_NAME = #{entity.name}
+		WHERE
+			DS_ID = #{entity.id}
+	</update>
+	
+	<update id="updateSqlDataSetEntity">
+		UPDATE DATAGEAR_DATA_SET_SQL SET
 			DS_SCHEMA_ID = #{entity.schemaConnectionFactory.schema.id},
 			DS_SQL = #{entity.sql}
 		WHERE
@@ -50,7 +65,7 @@
 	</update>
 	
 	<delete id="deleteById">
-		DELETE FROM DATAGEAR_SQL_DATA_SET
+		DELETE FROM DATAGEAR_DATA_SET
 		WHERE
 			DS_ID = #{id}
 	</delete>
@@ -67,7 +82,7 @@
 			PAR_DS_ID = #{dataSetId}
 	</delete>
 	
-	<select id="getById" resultType="org.datagear.management.domain.SqlDataSetEntity">
+	<select id="getById" resultType="org.datagear.management.domain.SummaryDataSetEntity">
 		SELECT
 			T.*
 		FROM
@@ -76,7 +91,25 @@
 			T.${_iq_}id${_iq_} = #{id}
 	</select>
 	
-	<select id="getPropertyPOs" resultType="org.datagear.management.service.impl.SqlDataSetEntityServiceImpl$DataSetPropertyPO">
+	<select id="getSqlDataSetEntityById" resultType="org.datagear.management.domain.SqlDataSetEntity">
+		SELECT
+			T1.*,
+			T2.DS_SCHEMA_ID AS ${_iq_}schemaConnectionFactory.schema.id${_iq_},
+			T3.SCHEMA_TITLE AS ${_iq_}schemaConnectionFactory.schema.title${_iq_},
+			T2.DS_SQL AS ${_iq_}sql${_iq_}
+		FROM
+			(SELECT * FROM (<include refid="queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
+		INNER JOIN
+			DATAGEAR_DATA_SET_SQL T2
+		ON
+			T1.${_iq_}id${_iq_} = T2.DS_ID
+		INNER JOIN
+			DATAGEAR_SCHEMA T3
+		ON
+			T2.DS_SCHEMA_ID = T3.SCHEMA_ID
+	</select>
+	
+	<select id="getPropertyPOs" resultType="org.datagear.management.service.impl.DataSetEntityServiceImpl$DataSetPropertyPO">
 		SELECT
 			PROP_DS_ID AS ${_iq_}dataSetId${_iq_},
 			PROP_NAME AS ${_iq_}child.name${_iq_},
@@ -91,7 +124,7 @@
 			PROP_ORDER ASC
 	</select>
 	
-	<select id="getParamPOs" resultType="org.datagear.management.service.impl.SqlDataSetEntityServiceImpl$DataSetParamPO">
+	<select id="getParamPOs" resultType="org.datagear.management.service.impl.DataSetEntityServiceImpl$DataSetParamPO">
 		SELECT
 			PAR_DS_ID AS ${_iq_}dataSetId${_iq_},
 			PAR_NAME AS ${_iq_}child.name${_iq_},
@@ -123,7 +156,7 @@
 			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
 	</select>
 	
-	<select id="query" resultType="org.datagear.management.domain.SqlDataSetEntity">
+	<select id="query" resultType="org.datagear.management.domain.SummaryDataSetEntity">
 		SELECT
 			T.*
 		FROM
@@ -142,7 +175,7 @@
 			<include refid="queryCondition" />
 	</select>
 	
-	<select id="pagingQuery" resultType="org.datagear.management.domain.SqlDataSetEntity">
+	<select id="pagingQuery" resultType="org.datagear.management.domain.SummaryDataSetEntity">
 		<include refid="common.pagingQueryHead" />
 			SELECT
 				T.*
@@ -181,25 +214,19 @@
 			A.DS_ID AS DP_AUTH_DATA_ID,
 			A.DS_CREATE_USER_ID AS DP_AUTH_DATA_CREATOR_ID
 		FROM
-			DATAGEAR_SQL_DATA_SET A
+			DATAGEAR_DATA_SET A
 	</sql>
 	
 	<sql id="queryView">
 		SELECT
 			A.DS_ID AS ${_iq_}id${_iq_},
 			A.DS_NAME AS ${_iq_}name${_iq_},
-			B.SCHEMA_ID AS ${_iq_}schemaConnectionFactory.schema.id${_iq_},
-			B.SCHEMA_TITLE AS ${_iq_}schemaConnectionFactory.schema.title${_iq_},
-			A.DS_SQL AS ${_iq_}sql${_iq_},
+			A.DS_TYPE AS ${_iq_}dataSetType${_iq_},
 			A.DS_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			<include refid="common.fieldsForCreateUser" />,
 			A.DS_CREATE_TIME AS ${_iq_}createTime${_iq_}
 		FROM
-			DATAGEAR_SQL_DATA_SET A
-		INNER JOIN
-			DATAGEAR_SCHEMA B
-		ON
-			A.DS_SCHEMA_ID = B.SCHEMA_ID
+			DATAGEAR_DATA_SET A
 		LEFT JOIN
 			DATAGEAR_USER USR
 		ON

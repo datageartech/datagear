@@ -27,9 +27,9 @@ import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
+import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
-import org.datagear.management.service.SqlDataSetEntityService;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -47,7 +47,7 @@ public class HtmlChartWidgetEntityServiceImpl
 
 	private ChartPluginManager chartPluginManager;
 
-	private SqlDataSetEntityService sqlDataSetEntityService;
+	private DataSetEntityService dataSetEntityService;
 
 	private AuthorizationService authorizationService;
 
@@ -57,21 +57,21 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	public HtmlChartWidgetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, ChartPluginManager chartPluginManager,
-			SqlDataSetEntityService sqlDataSetEntityService, AuthorizationService authorizationService)
+			DataSetEntityService dataSetEntityService, AuthorizationService authorizationService)
 	{
 		super(sqlSessionFactory);
 		this.chartPluginManager = chartPluginManager;
-		this.sqlDataSetEntityService = sqlDataSetEntityService;
+		this.dataSetEntityService = dataSetEntityService;
 		this.authorizationService = authorizationService;
 	}
 
 	public HtmlChartWidgetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate,
-			ChartPluginManager chartPluginManager, SqlDataSetEntityService sqlDataSetEntityService,
+			ChartPluginManager chartPluginManager, DataSetEntityService dataSetEntityService,
 			AuthorizationService authorizationService)
 	{
 		super(sqlSessionTemplate);
 		this.chartPluginManager = chartPluginManager;
-		this.sqlDataSetEntityService = sqlDataSetEntityService;
+		this.dataSetEntityService = dataSetEntityService;
 		this.authorizationService = authorizationService;
 	}
 
@@ -85,14 +85,14 @@ public class HtmlChartWidgetEntityServiceImpl
 		this.chartPluginManager = chartPluginManager;
 	}
 
-	public SqlDataSetEntityService getSqlDataSetEntityService()
+	public DataSetEntityService getDataSetEntityService()
 	{
-		return sqlDataSetEntityService;
+		return dataSetEntityService;
 	}
 
-	public void setSqlDataSetEntityService(SqlDataSetEntityService sqlDataSetEntityService)
+	public void setDataSetEntityService(DataSetEntityService dataSetEntityService)
 	{
-		this.sqlDataSetEntityService = sqlDataSetEntityService;
+		this.dataSetEntityService = dataSetEntityService;
 	}
 
 	public AuthorizationService getAuthorizationService()
@@ -196,13 +196,15 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@Override
-	protected void postProcessSelect(HtmlChartWidgetEntity obj)
+	protected HtmlChartWidgetEntity postProcessSelect(HtmlChartWidgetEntity obj)
 	{
 		if (obj == null)
-			return;
+			return null;
 
 		setHtmlChartPlugin(obj, false);
 		setChartDataSets(obj, false);
+
+		return obj;
 	}
 
 	@Override
@@ -266,9 +268,9 @@ public class HtmlChartWidgetEntityServiceImpl
 		DataSet dataSet = null;
 
 		if (forAnalysis)
-			dataSet = this.sqlDataSetEntityService.getSqlDataSet(relation.getDataSetId());
+			dataSet = this.dataSetEntityService.getDataSet(relation.getDataSetId());
 		else
-			dataSet = this.sqlDataSetEntityService.getById(relation.getDataSetId());
+			dataSet = this.dataSetEntityService.getById(relation.getDataSetId());
 
 		if (dataSet == null)
 			return null;

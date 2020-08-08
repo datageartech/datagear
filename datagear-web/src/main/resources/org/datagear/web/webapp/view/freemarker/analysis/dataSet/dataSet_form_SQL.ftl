@@ -13,7 +13,9 @@ readonly 是否只读操作，允许为null
 <html>
 <head>
 <#include "../../include/html_head.ftl">
-<title><#include "../../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
+<title><#include "../../include/html_title_app_name.ftl">
+	<@spring.message code='${titleMessageKey}' /> - <@spring.message code='dataSet.dataSetType.SQL' />
+</title>
 </head>
 <body>
 <div id="${pageId}" class="page-form page-form-dataSet">
@@ -80,7 +82,7 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='dataSet.propertyLabelsText' /></label>
+					<label><@spring.message code='dataSet.propertyLabelsText.SQL' /></label>
 				</div>
 				<div class="form-item-value">
 					<input type="text" name="propertyLabelsText" class="ui-widget ui-widget-content" value="${(dataSet.propertyLabelsText)!''?html}" placeholder="<@spring.message code='dataSet.propertyLabelsTextSplitByComma' />" />

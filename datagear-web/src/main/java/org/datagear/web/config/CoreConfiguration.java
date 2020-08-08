@@ -52,7 +52,7 @@ import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.RoleService;
 import org.datagear.management.service.RoleUserService;
 import org.datagear.management.service.SchemaService;
-import org.datagear.management.service.SqlDataSetEntityService;
+import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.service.impl.AuthorizationServiceImpl;
@@ -61,7 +61,7 @@ import org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceI
 import org.datagear.management.service.impl.RoleServiceImpl;
 import org.datagear.management.service.impl.RoleUserServiceImpl;
 import org.datagear.management.service.impl.SchemaServiceImpl;
-import org.datagear.management.service.impl.SqlDataSetEntityServiceImpl;
+import org.datagear.management.service.impl.DataSetEntityServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserPasswordEncoder;
 import org.datagear.management.service.impl.UserServiceImpl;
@@ -381,9 +381,9 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public SqlDataSetEntityService sqlDataSetEntityService() throws Exception
+	public DataSetEntityService dataSetEntityService() throws Exception
 	{
-		SqlDataSetEntityServiceImpl bean = new SqlDataSetEntityServiceImpl(this.sqlSessionFactory().getObject(),
+		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory().getObject(),
 				this.connectionSource(), this.schemaService(), this.authorizationService());
 		return bean;
 	}
@@ -416,7 +416,7 @@ public class CoreConfiguration implements InitializingBean
 	{
 		HtmlChartWidgetEntityServiceImpl bean = new HtmlChartWidgetEntityServiceImpl(
 				this.sqlSessionFactory().getObject(), this.directoryHtmlChartPluginManager(),
-				this.sqlDataSetEntityService(), this.authorizationService());
+				this.dataSetEntityService(), this.authorizationService());
 
 		return bean;
 	}
@@ -756,7 +756,7 @@ public class CoreConfiguration implements InitializingBean
 			List<DataPermissionEntityService<?, ?>> resourceServices = this.authorizationResourceServices();
 
 			resourceServices.add(this.schemaService());
-			resourceServices.add(this.sqlDataSetEntityService());
+			resourceServices.add(this.dataSetEntityService());
 			resourceServices.add(this.htmlChartWidgetEntityService());
 			resourceServices.add(this.htmlTplDashboardWidgetEntityService());
 		}

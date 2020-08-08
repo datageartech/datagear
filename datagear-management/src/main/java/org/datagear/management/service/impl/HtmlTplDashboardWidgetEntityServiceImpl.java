@@ -138,11 +138,6 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	}
 
 	@Override
-	protected void postProcessSelect(HtmlTplDashboardWidgetEntity obj)
-	{
-	}
-
-	@Override
 	protected void checkInput(HtmlTplDashboardWidgetEntity entity)
 	{
 		if (isBlank(entity.getId()) || isEmpty(entity.getTemplates()))
