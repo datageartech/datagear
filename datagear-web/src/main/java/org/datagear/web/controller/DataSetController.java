@@ -324,14 +324,10 @@ public class DataSetController extends AbstractSchemaConnController
 
 	@RequestMapping(value = "/sqlPreview", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public DataSetSqlSelectResult sqlPreview(HttpServletRequest request, HttpServletResponse response,
+	public DataSetPreviewResult sqlPreview(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody SqlDataSetPreview sqlDataSetPreview) throws Throwable
 	{
-		DataSetSqlSelectResult result = executeSelect(request, response, springModel, sqlDataSetPreview);
-
-		if (!Boolean.TRUE.equals(sqlDataSetPreview.getReturnMeta()))
-			result.setTable(null);
-
+		DataSetPreviewResult result = executeSelect(request, response, springModel, sqlDataSetPreview);
 		return result;
 	}
 
@@ -349,7 +345,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return "/analysis/dataSet/dataSet_form_" + dataSetType;
 	}
 
-	protected DataSetSqlSelectResult executeSelect(HttpServletRequest request, HttpServletResponse response,
+	protected DataSetPreviewResult executeSelect(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, SqlDataSetPreview sqlDataSetPreview) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
@@ -374,11 +370,11 @@ public class DataSetController extends AbstractSchemaConnController
 		final int startRowFinal = startRow;
 		final int fetchSizeFinal = fetchSize;
 
-		DataSetSqlSelectResult modelSqlResult = new ReturnSchemaConnExecutor<DataSetSqlSelectResult>(request, response,
+		DataSetPreviewResult modelSqlResult = new ReturnSchemaConnExecutor<DataSetPreviewResult>(request, response,
 				springModel, schemaId, true)
 		{
 			@Override
-			protected DataSetSqlSelectResult execute(HttpServletRequest request, HttpServletResponse response,
+			protected DataSetPreviewResult execute(HttpServletRequest request, HttpServletResponse response,
 					org.springframework.ui.Model springModel, Schema schema) throws Throwable
 			{
 				checkReadTableDataPermission(schema, user);
@@ -389,7 +385,7 @@ public class DataSetController extends AbstractSchemaConnController
 							fetchSizeFinal);
 					List<DataSetProperty> dataSetProperties = resolveDataSetProperties(result.getTable(), null);
 
-					return new DataSetSqlSelectResult(result, dataSetProperties);
+					return new DataSetPreviewResult(result, dataSetProperties);
 				}
 				catch (SQLException e)
 				{
@@ -480,20 +476,73 @@ public class DataSetController extends AbstractSchemaConnController
 			throw new IllegalInputException();
 	}
 
-	public static class DataSetSqlSelectResult extends SqlSelectResult
+	/**
+	 * 数据集预览结果。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class DataSetPreviewResult
 	{
+		/** 已完成解析的预览源 */
+		private String resolvedSource;
+
+		/** 预览数据 */
+		private Object data;
+
+		/** 由后台解析的属性集 */
 		private List<DataSetProperty> dataSetProperties;
 
-		public DataSetSqlSelectResult()
+		/** 由后台解析的预览结果表结构 */
+		private Table table;
+
+		/** 分页预览的起始行 */
+		private Integer startRow;
+
+		/** 分页预览的页大小 */
+		private Integer fetchSize;
+
+		public DataSetPreviewResult()
 		{
 			super();
 		}
 
-		public DataSetSqlSelectResult(SqlSelectResult modelSqlResult, List<DataSetProperty> dataSetProperties)
+		public DataSetPreviewResult(String resolvedSource, Object data)
 		{
-			super(modelSqlResult.getSql(), modelSqlResult.getTable(), modelSqlResult.getStartRow(),
-					modelSqlResult.getFetchSize(), modelSqlResult.getRows());
+			super();
+			this.resolvedSource = resolvedSource;
+			this.data = data;
+		}
+
+		public DataSetPreviewResult(SqlSelectResult modelSqlResult, List<DataSetProperty> dataSetProperties)
+		{
+			super();
+			this.resolvedSource = modelSqlResult.getSql();
+			this.data = modelSqlResult.getRows();
 			this.dataSetProperties = dataSetProperties;
+			this.table = modelSqlResult.getTable();
+			this.startRow = modelSqlResult.getStartRow();
+			this.fetchSize = modelSqlResult.getFetchSize();
+		}
+
+		public String getResolvedSource()
+		{
+			return resolvedSource;
+		}
+
+		public void setResolvedSource(String resolvedSource)
+		{
+			this.resolvedSource = resolvedSource;
+		}
+
+		public Object getData()
+		{
+			return data;
+		}
+
+		public void setData(Object data)
+		{
+			this.data = data;
 		}
 
 		public List<DataSetProperty> getDataSetProperties()
@@ -505,14 +554,40 @@ public class DataSetController extends AbstractSchemaConnController
 		{
 			this.dataSetProperties = dataSetProperties;
 		}
+
+		public Table getTable()
+		{
+			return table;
+		}
+
+		public void setTable(Table table)
+		{
+			this.table = table;
+		}
+
+		public Integer getStartRow()
+		{
+			return startRow;
+		}
+
+		public void setStartRow(Integer startRow)
+		{
+			this.startRow = startRow;
+		}
+
+		public Integer getFetchSize()
+		{
+			return fetchSize;
+		}
+
+		public void setFetchSize(Integer fetchSize)
+		{
+			this.fetchSize = fetchSize;
+		}
 	}
 
-	public static class SqlDataSetPreview
+	public static class AbstractDataSetPreview
 	{
-		private String schemaId;
-
-		private String sql;
-
 		@SuppressWarnings("unchecked")
 		private List<DataSetParam> dataSetParams = Collections.EMPTY_LIST;
 
@@ -523,38 +598,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		private Integer fetchSize;
 
-		private Boolean returnMeta;
-
-		public SqlDataSetPreview()
+		public AbstractDataSetPreview()
 		{
 			super();
-		}
-
-		public SqlDataSetPreview(String schemaId, String sql)
-		{
-			super();
-			this.schemaId = schemaId;
-			this.sql = sql;
-		}
-
-		public String getSchemaId()
-		{
-			return schemaId;
-		}
-
-		public void setSchemaId(String schemaId)
-		{
-			this.schemaId = schemaId;
-		}
-
-		public String getSql()
-		{
-			return sql;
-		}
-
-		public void setSql(String sql)
-		{
-			this.sql = sql;
 		}
 
 		public List<DataSetParam> getDataSetParams()
@@ -596,15 +642,44 @@ public class DataSetController extends AbstractSchemaConnController
 		{
 			this.fetchSize = fetchSize;
 		}
+	}
 
-		public Boolean getReturnMeta()
+	public static class SqlDataSetPreview extends AbstractDataSetPreview
+	{
+		private String schemaId;
+
+		private String sql;
+
+		public SqlDataSetPreview()
 		{
-			return returnMeta;
+			super();
 		}
 
-		public void setReturnMeta(Boolean returnMeta)
+		public SqlDataSetPreview(String schemaId, String sql)
 		{
-			this.returnMeta = returnMeta;
+			super();
+			this.schemaId = schemaId;
+			this.sql = sql;
+		}
+
+		public String getSchemaId()
+		{
+			return schemaId;
+		}
+
+		public void setSchemaId(String schemaId)
+		{
+			this.schemaId = schemaId;
+		}
+
+		public String getSql()
+		{
+			return sql;
+		}
+
+		public void setSql(String sql)
+		{
+			this.sql = sql;
 		}
 	}
 

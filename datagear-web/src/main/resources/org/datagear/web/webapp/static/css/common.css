@@ -2105,41 +2105,41 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 
 .page-form-dataSet{}
-.page-form-dataSet .sql-editor-wrapper{
+.page-form-dataSet .workspace-editor-wrapper{
 	display: inline-block;
 	width: 50%;
 	height: 10em;
 	margin-right: 0.3em;
 }
-.page-form-dataSet .sql-editor-wrapper .sql-editor{
+.page-form-dataSet .workspace-editor-wrapper .workspace-editor{
 	width: 100%;
 	height: 100%;
 }
-.page-form-dataSet .sql-operation-wrapper{
+.page-form-dataSet .workspace-operation-wrapper{
 	position: relative;
 	display: inline-block;
 	width: 48%;
 	height: 10em;
 	vertical-align: top;
 }
-.page-form-dataSet .sql-operation-wrapper.ui-widget.ui-widget-content{
+.page-form-dataSet .workspace-operation-wrapper.ui-widget.ui-widget-content{
 	border: 0;
 }
-.page-form-dataSet .sql-operation-wrapper.ui-tabs{
+.page-form-dataSet .workspace-operation-wrapper.ui-tabs{
 	margin: 0 0;
 	padding: 0 0;
 }
-.page-form-dataSet .sql-operation-wrapper.ui-tabs .ui-tabs-nav{
+.page-form-dataSet .workspace-operation-wrapper.ui-tabs .ui-tabs-nav{
 	border: 0;
 	background: none;
 	opacity: 0.8;
 	filter: Alpha(Opacity=80);
 }
-.page-form-dataSet .sql-operation-wrapper.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
+.page-form-dataSet .workspace-operation-wrapper.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
 	padding-top: 0.2em;
 	padding-bottom: 0.2em;
 }
-.page-form-dataSet .sql-operation-wrapper.ui-tabs .ui-tabs-panel{
+.page-form-dataSet .workspace-operation-wrapper.ui-tabs .ui-tabs-panel{
 	position: absolute;
 	left: 0px;
 	right: 0px;
@@ -2147,18 +2147,18 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	bottom: 0px;
 	padding: 0 0;
 }
-.page-form-dataSet .sql-operation-wrapper .operation{
+.page-form-dataSet .workspace-operation-wrapper .operation{
 	position: absolute;
 	right: 0px;
 	top: -1.5em;
 }
-.page-form-dataSet .sql-operation-wrapper .operation .ui-button.ui-button-icon-only{
+.page-form-dataSet .workspace-operation-wrapper .operation .ui-button.ui-button-icon-only{
 	height: 1.2em;
 	width: 2.5em;
 	vertical-align: top;
 	border: 0px;
 }
-.page-form-dataSet .sql-operation-wrapper .sql-result-table-wrapper .no-more-data-flag{
+.page-form-dataSet .workspace-operation-wrapper .preview-result-table-wrapper .no-more-data-flag{
 	position: absolute;
 	bottom: -2px;
 	width: 100%;
@@ -2167,7 +2167,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	border-bottom-width: 2px;
 	display: none;
 }
-.page-form-dataSet .sql-operation-wrapper .sql-result-table-wrapper .sql-result-sql{
+.page-form-dataSet .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source{
 	position: absolute;
 	display: none;
     bottom: -4em;
@@ -2175,7 +2175,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
     right: 0;
     left: 0;
 }
-.page-form-dataSet .sql-operation-wrapper .sql-result-table-wrapper .sql-result-sql textarea{
+.page-form-dataSet .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source textarea{
 	width: 100%;
 	height: 100%;
 	margin: 0 0;
@@ -2183,26 +2183,26 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-form-dataSet .sql-operation-wrapper .input-in-table{
+.page-form-dataSet .workspace-operation-wrapper .input-in-table{
 	width: 90%!important;
 }
-.page-form-dataSet .form-item-value-sql .error{
+.page-form-dataSet .form-item-value-workspace .error{
 	display: block;
 }
-.page-form-dataSet .sql-param-value-panel{
+.page-form-dataSet .preview-param-value-panel{
 	position: absolute;
 	display: none;
 	padding: 0.5em 0.5em;
 	max-height: 80%;
 	overflow: auto;
 }
-.page-form-dataSet .sql-param-value-panel .ui-widget-header{
+.page-form-dataSet .preview-param-value-panel .ui-widget-header{
 	padding: 0.3em 0.1em;
 }
-.page-form-dataSet .sql-param-value-panel .sql-param-value-panel-content{
+.page-form-dataSet .preview-param-value-panel .preview-param-value-panel-content{
 	padding-top: 0.41em;
 }
-.page-form-dataSet .sql-param-value-panel .sql-param-value-panel-content .dg-dspv-form-content{
+.page-form-dataSet .preview-param-value-panel .preview-param-value-panel-content .dg-dspv-form-content{
 	max-height: 14em;
 	overflow: auto;
 }

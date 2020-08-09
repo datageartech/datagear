@@ -22,48 +22,40 @@ readonly 是否只读操作，允许为null
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
-			<input type="hidden" name="id" value="${(dataSet.id)!''?html}" />
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='dataSet.name' /></label>
-				</div>
-				<div class="form-item-value">
-					<input type="text" name="name" value="${(dataSet.name)!''?html}" class="ui-widget ui-widget-content" />
-				</div>
-			</div>
+			<#include "include/dataSet_form_html_name.ftl">
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='dataSet.json' /></label>
 				</div>
-				<div class="form-item-value form-item-value-sql">
+				<div class="form-item-value form-item-value-workspace">
 					<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
-					<div class="sql-editor-wrapper ui-widget ui-widget-content">
-						<div id="${pageId}-sql-editor" class="sql-editor"></div>
+					<div class="workspace-editor-wrapper ui-widget ui-widget-content">
+						<div id="${pageId}-sql-editor" class="workspace-editor"></div>
 					</div>
-					<div class="sql-operation-wrapper">
+					<div class="workspace-operation-wrapper">
 						<ul>
-							<li><a href="#${pageId}-sql-result"><@spring.message code='preview' /></a></li>
-							<li><a href="#${pageId}-sql-params">参数</a></li>
+							<li><a href="#${pageId}-previewResult"><@spring.message code='preview' /></a></li>
+							<li><a href="#${pageId}-dataSetParams"><@spring.message code='dataSet.param' /></a></li>
 						</ul>
-						<div id="${pageId}-sql-result" class="sql-result-table-wrapper minor-dataTable">
+						<div id="${pageId}-previewResult" class="preview-result-table-wrapper minor-dataTable">
 							<div class="operation">
-								<button type="button" class="sql-preview-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.sqlPreviewButtonTip' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='preview' /></button>
-								<button type="button" class="sql-result-more-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
-								<button type="button" class="sql-result-refresh-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
-								<button type="button" class="sql-result-export-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.exportSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-ne"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.exportSqlResult' /></button>
+								<button type="button" class="preview-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.previewButtonTip' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='preview' /></button>
+								<button type="button" class="more-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
+								<button type="button" class="refresh-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
+								<button type="button" class="export-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.exportSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-ne"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.exportSqlResult' /></button>
 							</div>
-							<table id="${pageId}-sql-result-table" width='100%' class='hover stripe'></table>
+							<table id="${pageId}-previewResult-table" width='100%' class='hover stripe'></table>
 							<div class='no-more-data-flag ui-widget ui-widget-content' title="<@spring.message code='dataSet.noMoreData' />"></div>
-							<div class="sql-result-sql"><textarea class="ui-widget ui-widget-content ui-corner-all"></textarea></div>
+							<div class="result-resolved-source"><textarea class="ui-widget ui-widget-content ui-corner-all"></textarea></div>
 						</div>
-						<div id="${pageId}-sql-params" class="sql-params-table-wrapper minor-dataTable">
+						<div id="${pageId}-dataSetParams" class="params-table-wrapper minor-dataTable">
 							<div class="operation">
 								<#if !readonly>
-								<button type="button" class="sql-add-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
-								<button type="button" class="sql-del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
+								<button type="button" class="add-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+								<button type="button" class="del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
 								</#if>
 							</div>
-							<table id="${pageId}-sql-params-table" class='hover stripe'></table>
+							<table id="${pageId}-dataSetParams-table" class='hover stripe'></table>
 						</div>
 					</div>
 				</div>
@@ -85,14 +77,15 @@ readonly 是否只读操作，允许为null
 			</#if>
 		</div>
 	</form>
-	<div class="sql-param-value-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
-		<div class="ui-widget-header ui-corner-all"><@spring.message code='dataSet.setSqlParamValue' /></div>
-		<div class="sql-param-value-panel-content"></div>
+	<div class="preview-param-value-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
+		<div class="ui-widget-header ui-corner-all"><@spring.message code='dataSet.setParamValue' /></div>
+		<div class="preview-param-value-panel-content"></div>
 	</div>
 </div>
 <#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <#include "../../include/page_obj_sqlEditor.ftl">
+<#include "include/dataSet_form_js.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -100,10 +93,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
-	var sqlEditorHeight = parseInt($(window).height()/11*5);
-	po.element(".sql-editor-wrapper").height(sqlEditorHeight);
-	po.element(".sql-operation-wrapper").height(sqlEditorHeight);
-	po.element(".form-item-value-sql").height(sqlEditorHeight + 25);
+	po.initWorkspaceHeight();
 	
 	po.url = function(action)
 	{
@@ -122,12 +112,12 @@ readonly 是否只读操作，允许为null
 	    bindKey: "Ctrl-ENTER",
 	    exec: function(editor)
 	    {
-	    	var activeIndex = po.element(".sql-operation-wrapper").tabs("option", "active");
+	    	var activeIndex = po.element(".workspace-operation-wrapper").tabs("option", "active");
 	    	
 	    	if(activeIndex == 0)
-	    		po.element(".sql-preview-button").click();
+	    		po.element(".preview-button").click();
 	    	else
-	    		po.element(".sql-operation-wrapper").tabs("option", "active", 0);
+	    		po.element(".workspace-operation-wrapper").tabs("option", "active", 0);
 	    }
 	});
 	<#if readonly>
@@ -149,29 +139,29 @@ readonly 是否只读操作，允许为null
 	
 	po.sqlParamsTableElement = function()
 	{
-		return po.element("#${pageId}-sql-params-table");
+		return po.element("#${pageId}-dataSetParams-table");
 	};
 	
 	po.sqlResultTableElement = function()
 	{
-		return po.element("#${pageId}-sql-result-table");
+		return po.element("#${pageId}-previewResult-table");
 	};
 	
 	po.calSqlOperationTableHeight = function()
 	{
-		return po.element(".sql-result-table-wrapper").height() - 30;
+		return po.element(".preview-result-table-wrapper").height() - 30;
 	};
 	
-	po.element(".sql-operation-wrapper").tabs(
+	po.element(".workspace-operation-wrapper").tabs(
 	{
 		activate: function(event, ui)
 		{
-			var isSqlResultTab = (ui.newPanel && ui.newPanel.hasClass("sql-result-table-wrapper"));
-			if(isSqlResultTab && (po.isSqlModified() || !po.sqlResultTableElement().hasClass("sql-result-table-inited")))
+			var isSqlResultTab = (ui.newPanel && ui.newPanel.hasClass("preview-result-table-wrapper"));
+			if(isSqlResultTab && (po.isSqlModified() || !po.sqlResultTableElement().hasClass("preview-result-table-inited")))
 			{
 				//避免设置参数面板被隐藏
 				event.stopPropagation();
-				po.element(".sql-preview-button").click();
+				po.element(".preview-button").click();
 			}
 			else
 			{
@@ -293,7 +283,7 @@ readonly 是否只读操作，允许为null
 	
 	$.dataTableUtil.bindCheckColumnEvent(po.sqlParamsTableElement().DataTable());
 	
-	po.element(".sql-add-param-button").click(function()
+	po.element(".add-param-button").click(function()
 	{
 		var selectionRange = po.sqlEditor.getSelectionRange();
 		var selectText = (po.sqlEditor.session.getTextRange(selectionRange) || "");
@@ -301,7 +291,7 @@ readonly 是否只读操作，允许为null
 		po.sqlParamsTableElement().DataTable().row.add({ name: selectText, type: "${DataType.STRING}", required: true, desc: "" }).draw();
 	});
 	
-	po.element(".sql-del-param-button").click(function()
+	po.element(".del-param-button").click(function()
 	{
 		$.dataTableUtil.deleteSelectedRows(po.sqlParamsTableElement().DataTable());
 	});
@@ -379,12 +369,12 @@ readonly 是否只读操作，允许为null
 		startRow : 1
 	};
 	
-	po.element(".sql-param-value-panel").draggable({ handle : ".ui-widget-header" });
+	po.element(".preview-param-value-panel").draggable({ handle : ".ui-widget-header" });
 	
 	po.showDataSetParamValuePanel = function(formOptions)
 	{
-		var $panel = po.element(".sql-param-value-panel");
-		var $panelContent = $(".sql-param-value-panel-content", $panel);
+		var $panel = po.element(".preview-param-value-panel");
+		var $panelContent = $(".preview-param-value-panel-content", $panel);
 		
 		formOptions = $.extend(
 		{
@@ -406,22 +396,22 @@ readonly 是否只读操作，允许为null
 				po.getFormDataSetParams(), formOptions);
 		
 		$panel.show();
-		$panel.position({ my : "right top", at : "left top", of : po.element("#${pageId}-sql-result")});
+		$panel.position({ my : "right top", at : "left top", of : po.element("#${pageId}-previewResult")});
 	};
 	
 	$(po.element()).on("click", function(event)
 	{
 		var $target = $(event.target);
 		
-		var $pvp = po.element(".sql-param-value-panel");
+		var $pvp = po.element(".preview-param-value-panel");
 		if(!$pvp.is(":hidden"))
 		{
-			if($target.closest(".sql-param-value-panel").length == 0)
+			if($target.closest(".preview-param-value-panel").length == 0)
 				$pvp.hide();
 		}
 	});
 	
-	po.element(".sql-preview-button").click(function(event)
+	po.element(".preview-button").click(function(event)
 	{
 		var sql = po.sqlEditor.getValue();
 		if(!sql)
@@ -473,7 +463,7 @@ readonly 是否只读操作，允许为null
 		po.sqlPreview();
 	});
 	
-	po.element(".sql-result-more-button").click(function()
+	po.element(".more-button").click(function()
 	{
 		if(po.sqlPreviewOptions.noMoreData)
 			return;
@@ -482,13 +472,13 @@ readonly 是否只读操作，允许为null
 		po.sqlPreview();
 	});
 
-	po.element(".sql-result-refresh-button").click(function()
+	po.element(".refresh-button").click(function()
 	{
 		po.sqlPreviewOptions.startRow = 1;
 		po.sqlPreview();
 	});
 
-	po.element(".sql-result-export-button").click(function(event)
+	po.element(".export-button").click(function(event)
 	{
 		var schemaId = po.getDataSetSchemaId();
 		var sql = po.sqlEditor.getValue();
@@ -543,9 +533,9 @@ readonly 是否只读操作，允许为null
 		if(!po.sqlPreviewOptions.schemaId || !po.sqlPreviewOptions.sql)
 			return;
 		
-		po.element(".sql-preview-button").button("disable");
-		po.element(".sql-result-more-button").button("disable");
-		po.element(".sql-result-refresh-button").button("disable");
+		po.element(".preview-button").button("disable");
+		po.element(".more-button").button("disable");
+		po.element(".refresh-button").button("disable");
 		
 		var table = po.sqlResultTableElement();
 		var returnMeta = !$.isDatatTable(table);
@@ -606,16 +596,16 @@ readonly 是否只读操作，允许为null
 						}
 					};
 					
-					table.addClass("sql-result-table-inited");
+					table.addClass("preview-result-table-inited");
 					table.dataTable(settings);
 					
 					if(po.hasFormDataSetParam())
 					{
-						po.element(".sql-result-sql textarea").val(sqlResult.sql);
-						po.element(".sql-result-sql").show();
+						po.element(".result-resolved-source textarea").val(sqlResult.sql);
+						po.element(".result-resolved-source").show();
 					}
 					else
-						po.element(".sql-result-sql").hide();
+						po.element(".result-resolved-source").hide();
 				}
 				else
 				{
@@ -638,9 +628,9 @@ readonly 是否只读操作，允许为null
 			},
 			complete : function()
 			{
-				po.element(".sql-preview-button").button("enable");
-				po.element(".sql-result-more-button").button("enable");
-				po.element(".sql-result-refresh-button").button("enable");
+				po.element(".preview-button").button("enable");
+				po.element(".more-button").button("enable");
+				po.element(".refresh-button").button("enable");
 			}
 		});
 	};
