@@ -528,7 +528,7 @@ po.previewOptions.url = "...";
 					$.addDataTableData(dataTable, tableData, (previewResponse.startRow ? previewResponse.startRow-1 : 0));
 				}
 				
-				if(previewResponse.paging && tableData.length >= previewResponse.fetchSize)
+				if(po.previewOptions.paging && tableData.length >= previewResponse.fetchSize)
 				{
 					po.previewOptions._noMoreData = false;
 					po.element(".no-more-data-flag").hide();

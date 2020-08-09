@@ -42,32 +42,7 @@ readonly 是否只读操作，允许为null
 					<div class="workspace-editor-wrapper ui-widget ui-widget-content">
 						<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
 					</div>
-					<div class="workspace-operation-wrapper">
-						<ul class="workspace-operation-nav">
-							<li class="operation-preview"><a href="#${pageId}-previewResult"><@spring.message code='preview' /></a></li>
-							<li class="operation-params"><a href="#${pageId}-dataSetParams"><@spring.message code='dataSet.param' /></a></li>
-						</ul>
-						<div id="${pageId}-previewResult" class="preview-result-table-wrapper minor-dataTable">
-							<div class="operation">
-								<button type="button" class="preview-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.previewButtonTip' />"><span class="ui-button-icon ui-icon ui-icon-play"></span><span class="ui-button-icon-space"> </span><@spring.message code='preview' /></button>
-								<button type="button" class="more-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.loadMoreData' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.loadMoreData' /></button>
-								<button type="button" class="refresh-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='dataSet.refreshSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-refresh"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.refreshSqlResult' /></button>
-								<button type="button" class="export-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='sqlpad.exportSqlResult' />"><span class="ui-button-icon ui-icon ui-icon-arrowthick-1-ne"></span><span class="ui-button-icon-space"> </span><@spring.message code='sqlpad.exportSqlResult' /></button>
-							</div>
-							<table id="${pageId}-previewResult-table" width='100%' class='hover stripe'></table>
-							<div class='no-more-data-flag ui-widget ui-widget-content' title="<@spring.message code='dataSet.noMoreData' />"></div>
-							<div class="result-resolved-source"><textarea class="ui-widget ui-widget-content ui-corner-all"></textarea></div>
-						</div>
-						<div id="${pageId}-dataSetParams" class="params-table-wrapper minor-dataTable">
-							<div class="operation">
-								<#if !readonly>
-								<button type="button" class="add-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
-								<button type="button" class="del-param-button ui-button ui-corner-all ui-widget ui-button-icon-only" title="<@spring.message code='delete' />"><span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-icon-space"> </span><@spring.message code='delete' /></button>
-								</#if>
-							</div>
-							<table id="${pageId}-dataSetParams-table" class='hover stripe'></table>
-						</div>
-					</div>
+					<#include "include/dataSet_form_html_wow.ftl" >
 				</div>
 			</div>
 			<div class="form-item">
@@ -206,29 +181,32 @@ readonly 是否只读操作，允许为null
 			{
 				submit: function(formData)
 				{
-					var data =
-					{
-						sql: sql,
-						dataSetParams: po.getFormDataSetParams(),
-						paramValues: formData
-					};
-					
-					$.postJson(po.url("resolveSql"), data, function(sql)
-					{
-						var options = {data: {"initSqls": sql}};
-						$.setGridPageHeightOption(options);
-						po.open("${contextPath}/dataexchange/"+schemaId+"/export", options);
-					});
+					po.exportDataSetData(schemaId, sql, po.getFormDataSetParams(), formData);
 				}
 			});
 		}
 		else
 		{
+			po.exportDataSetData(schemaId, sql);
+		}
+	});
+	
+	po.exportDataSetData = function(schemaId, sql, dataSetParams, paramValues)
+	{
+		var data =
+		{
+			sql: sql,
+			dataSetParams: (dataSetParams || []),
+			paramValues: (paramValues || {})
+		};
+		
+		$.postJson(po.url("resolveSql"), data, function(sql)
+		{
 			var options = {data: {"initSqls": sql}};
 			$.setGridPageHeightOption(options);
 			po.open("${contextPath}/dataexchange/"+schemaId+"/export", options);
-		}
-	});
+		});
+	};
 	
 	$.validator.addMethod("dataSetSqlRequired", function(value, element)
 	{
