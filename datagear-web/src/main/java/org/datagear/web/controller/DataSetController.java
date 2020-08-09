@@ -322,9 +322,9 @@ public class DataSetController extends AbstractSchemaConnController
 		return pagingData;
 	}
 
-	@RequestMapping(value = "/sqlPreview", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/previewSql", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public DataSetPreviewResult sqlPreview(HttpServletRequest request, HttpServletResponse response,
+	public DataSetPreviewResult previewSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody SqlDataSetPreview sqlDataSetPreview) throws Throwable
 	{
 		DataSetPreviewResult result = executeSelect(request, response, springModel, sqlDataSetPreview);

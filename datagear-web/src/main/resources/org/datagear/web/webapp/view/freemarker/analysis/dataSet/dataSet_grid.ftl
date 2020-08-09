@@ -39,7 +39,7 @@ boolean readonly 是否只读操作，默认为false
 					<div class="add-button-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 						<ul class="add-button-list">
 							<li addURL="addForSql"><div><@spring.message code='dataSet.dataSetType.SQL' /></div></li>
-							<li addURL="addForJsonValue-TODO"><div><@spring.message code='dataSet.dataSetType.JSON_VALUE' /></div></li>
+							<li addURL="addForJsonValue"><div><@spring.message code='dataSet.dataSetType.JSON_VALUE' /></div></li>
 						</ul>
 					</div>
 				</div>
