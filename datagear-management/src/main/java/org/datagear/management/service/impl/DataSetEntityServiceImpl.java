@@ -17,6 +17,7 @@ import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.DataSetEntity;
+import org.datagear.management.domain.JsonValueDataSetEntity;
 import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.SummaryDataSetEntity;
@@ -127,6 +128,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		{
 			if (entity instanceof SqlDataSetEntity)
 				success = addSqlDataSetEntity((SqlDataSetEntity) entity);
+			else if (entity instanceof JsonValueDataSetEntity)
+				success = addJsonValueDataSetEntity((JsonValueDataSetEntity) entity);
 		}
 
 		if (success)
@@ -143,6 +146,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		return (updateMybatis("insertSqlDataSetEntity", params) > 0);
 	}
 
+	protected boolean addJsonValueDataSetEntity(JsonValueDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("insertJsonValueDataSetEntity", params) > 0);
+	}
+
 	@Override
 	protected boolean update(DataSetEntity entity, Map<String, Object> params)
 	{
@@ -155,6 +166,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		{
 			if (entity instanceof SqlDataSetEntity)
 				success = updateSqlDataSetEntity((SqlDataSetEntity) entity);
+			else if (entity instanceof JsonValueDataSetEntity)
+				success = updateJsonValueDataSetEntity((JsonValueDataSetEntity) entity);
 		}
 
 		if (success)
@@ -169,6 +182,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("entity", entity);
 
 		return (updateMybatis("updateSqlDataSetEntity", params) > 0);
+	}
+
+	protected boolean updateJsonValueDataSetEntity(JsonValueDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("updateJsonValueDataSetEntity", params) > 0);
 	}
 
 	@Override
@@ -211,6 +232,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 		if (DataSetEntity.DATA_SET_TYPE_SQL.equals(obj.getDataSetType()))
 			obj = getSqlDataSetEntityById(obj.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_JsonValue.equals(obj.getDataSetType()))
+			obj = getJsonValueDataSetEntityById(obj.getId());
 
 		Map<String, Object> sqlParams = buildParamMapWithIdentifierQuoteParameter();
 		sqlParams.put("dataSetId", obj.getId());
@@ -232,6 +255,16 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("id", id);
 
 		SqlDataSetEntity entity = selectOneMybatis("getSqlDataSetEntityById", params);
+
+		return entity;
+	}
+
+	protected JsonValueDataSetEntity getJsonValueDataSetEntityById(String id)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("id", id);
+
+		JsonValueDataSetEntity entity = selectOneMybatis("getJsonValueDataSetEntityById", params);
 
 		return entity;
 	}

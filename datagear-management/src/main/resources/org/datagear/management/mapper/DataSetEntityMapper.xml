@@ -25,6 +25,17 @@
 			)
 	</insert>
 	
+	<insert id="insertJsonValueDataSetEntity">
+		INSERT INTO DATAGEAR_DATA_SET_JSON_VALUE
+			(
+			DS_ID, DS_VALUE
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.value}
+			)
+	</insert>
+	
 	<insert id="insertPropertyPO">
 		INSERT INTO DATAGEAR_DATA_SET_PROP
 			(
@@ -60,6 +71,13 @@
 		UPDATE DATAGEAR_DATA_SET_SQL SET
 			DS_SCHEMA_ID = #{entity.schemaConnectionFactory.schema.id},
 			DS_SQL = #{entity.sql}
+		WHERE
+			DS_ID = #{entity.id}
+	</update>
+	
+	<update id="updateJsonValueDataSetEntity">
+		UPDATE DATAGEAR_DATA_SET_JSON_VALUE SET
+			DS_VALUE = #{entity.value}
 		WHERE
 			DS_ID = #{entity.id}
 	</update>
@@ -107,6 +125,18 @@
 			DATAGEAR_SCHEMA T3
 		ON
 			T2.DS_SCHEMA_ID = T3.SCHEMA_ID
+	</select>
+	
+	<select id="getJsonValueDataSetEntityById" resultType="org.datagear.management.domain.JsonValueDataSetEntity">
+		SELECT
+			T1.*,
+			T2.DS_VALUE AS ${_iq_}value${_iq_}
+		FROM
+			(SELECT * FROM (<include refid="queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
+		INNER JOIN
+			DATAGEAR_DATA_SET_JSON_VALUE T2
+		ON
+			T1.${_iq_}id${_iq_} = T2.DS_ID
 	</select>
 	
 	<select id="getPropertyPOs" resultType="org.datagear.management.service.impl.DataSetEntityServiceImpl$DataSetPropertyPO">

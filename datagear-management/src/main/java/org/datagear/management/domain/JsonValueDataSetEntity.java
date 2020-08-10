@@ -49,7 +49,7 @@ public class JsonValueDataSetEntity extends JsonValueDataSet implements DataSetE
 	@Override
 	public String getDataSetType()
 	{
-		return DataSetEntity.DATA_SET_TYPE_JSON_VALUE;
+		return DataSetEntity.DATA_SET_TYPE_JsonValue;
 	}
 
 	@Override

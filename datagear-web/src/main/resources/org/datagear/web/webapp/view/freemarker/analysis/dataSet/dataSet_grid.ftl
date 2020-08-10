@@ -39,7 +39,7 @@ boolean readonly 是否只读操作，默认为false
 					<div class="add-button-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 						<ul class="add-button-list">
 							<li addURL="addForSql"><div><@spring.message code='dataSet.dataSetType.SQL' /></div></li>
-							<li addURL="addForJsonValue"><div><@spring.message code='dataSet.dataSetType.JSON_VALUE' /></div></li>
+							<li addURL="addForJsonValue"><div><@spring.message code='dataSet.dataSetType.JsonValue' /></div></li>
 						</ul>
 					</div>
 				</div>
@@ -188,8 +188,8 @@ boolean readonly 是否只读操作，默认为false
 	{
 		if("${DataSetEntity.DATA_SET_TYPE_SQL}" == data)
 			return "<@spring.message code='dataSet.dataSetType.SQL' />";
-		else if("${DataSetEntity.DATA_SET_TYPE_JSON_VALUE}" == data)
-			return "<@spring.message code='dataSet.dataSetType.JSON_VALUE' />";
+		else if("${DataSetEntity.DATA_SET_TYPE_JsonValue}" == data)
+			return "<@spring.message code='dataSet.dataSetType.JsonValue' />";
 		else
 			return "";
 	};

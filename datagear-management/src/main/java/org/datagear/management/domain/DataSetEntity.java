@@ -26,7 +26,7 @@ public interface DataSetEntity extends DataSet, CreateUserEntity<String>, DataPe
 	String DATA_SET_TYPE_SQL = "SQL";
 
 	/** 数据集类型：JSON值 */
-	String DATA_SET_TYPE_JSON_VALUE = "JSON_VALUE";
+	String DATA_SET_TYPE_JsonValue = "JsonValue";
 
 	/**
 	 * 设置名称。

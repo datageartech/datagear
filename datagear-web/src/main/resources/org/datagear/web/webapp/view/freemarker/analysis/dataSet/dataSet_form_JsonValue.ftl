@@ -12,7 +12,7 @@ readonly 是否只读操作，允许为null
 <head>
 <#include "../../include/html_head.ftl">
 <title><#include "../../include/html_title_app_name.ftl">
-	<@spring.message code='${titleMessageKey}' /> - <@spring.message code='dataSet.dataSetType.JSON_VALUE' />
+	<@spring.message code='${titleMessageKey}' /> - <@spring.message code='dataSet.dataSetType.JsonValue' />
 </title>
 </head>
 <body>

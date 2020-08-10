@@ -191,19 +191,33 @@ public class DataSetController extends AbstractSchemaConnController
 		model.addAttribute("dataSetProperties", toWriteJsonTemplateModel(dataSet.getProperties()));
 		model.addAttribute("dataSetParams", toWriteJsonTemplateModel(dataSet.getParams()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.editDataSet");
-		model.addAttribute(KEY_FORM_ACTION, "saveEdit");
+		model.addAttribute(KEY_FORM_ACTION, "saveEditFor" + dataSet.getDataSetType());
 
 		return buildFormView(dataSet.getDataSetType());
 	}
 
-	@RequestMapping(value = "/saveEdit", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_SQL, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEdit(HttpServletRequest request, HttpServletResponse response,
+	public ResponseEntity<OperationMessage> saveEditForSql(HttpServletRequest request, HttpServletResponse response,
 			@RequestBody SqlDataSetEntity dataSet)
 	{
 		User user = WebUtils.getUser(request, response);
 
 		checkSaveSqlDataSetEntity(dataSet);
+
+		this.dataSetEntityService.update(user, dataSet);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
+	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonValue, produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEditForJsonValue(HttpServletRequest request,
+			HttpServletResponse response, @RequestBody JsonValueDataSetEntity dataSet)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		checkSaveJsonValueDataSetEntity(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
 
