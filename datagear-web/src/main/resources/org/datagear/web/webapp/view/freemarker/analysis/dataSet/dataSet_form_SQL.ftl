@@ -113,13 +113,13 @@ readonly 是否只读操作，允许为null
 	
 	po.initWorkspaceTabs();
 	
-	po.initDataSetPropertiesTable(po.dataSetProperties);
-	
-	po.getAddParamName = function()
+	po.getAddPropertyName = function()
 	{
 		var selectionRange = po.sqlEditor.getSelectionRange();
 		return (po.sqlEditor.session.getTextRange(selectionRange) || "");
 	};
+	po.initDataSetPropertiesTable(po.dataSetProperties);
+	
 	po.initDataSetParamsTable(po.dataSetParams);
 	
 	po.initPreviewParamValuePanel();

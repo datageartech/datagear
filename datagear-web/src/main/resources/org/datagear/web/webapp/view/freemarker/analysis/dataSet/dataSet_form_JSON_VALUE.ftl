@@ -76,13 +76,13 @@ readonly 是否只读操作，允许为null
 	
 	po.initWorkspaceTabs();
 
-	po.initDataSetPropertiesTable(po.dataSetProperties);
-	
-	po.getAddParamName = function()
+	po.getAddPropertyName = function()
 	{
 		var selectionRange = po.jsonEditor.getSelectionRange();
 		return (po.jsonEditor.session.getTextRange(selectionRange) || "");
 	};
+	po.initDataSetPropertiesTable(po.dataSetProperties);
+	
 	po.initDataSetParamsTable(po.dataSetParams);
 	
 	po.initPreviewParamValuePanel();
@@ -107,14 +107,9 @@ readonly 是否只读操作，允许为null
 		if(!this.data.value)
 			return false;
 	};
-	po.previewOptions.buildTablesColumns = function(previewResponse)
-	{
-		return $.buildDataTablesColumns(previewResponse.table);
-	};
 	po.previewOptions.success = function(previewResponse)
 	{
 		po.element("textarea[name='value']").val(this.data.value);
-		po.dataSetProperties = (previewResponse.dataSetProperties || []);
 		po.jsonEditor.focus();
 	};
 	
@@ -137,17 +132,22 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
-			"value" : {"dataSetJsonValueRequired": true, "dataSetJsonValuePreviewRequired": true}
+			"value" : {"dataSetJsonValueRequired": true, "dataSetJsonValuePreviewRequired": true, "dataSetPropertiesRequired": true}
 		},
 		messages :
 		{
 			"name" : "<@spring.message code='validation.required' />",
-			"value" : {"dataSetJsonValueRequired": "<@spring.message code='validation.required' />", "dataSetJsonValuePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"}
+			"value" :
+			{
+				"dataSetJsonValueRequired": "<@spring.message code='validation.required' />",
+				"dataSetJsonValuePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
+				"dataSetPropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
+			}
 		},
 		submitHandler : function(form)
 		{
 			var formData = $.formToJson(form);
-			formData["properties"] = po.dataSetProperties;
+			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
 			
 			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,

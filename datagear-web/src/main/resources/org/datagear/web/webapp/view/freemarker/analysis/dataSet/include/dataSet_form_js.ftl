@@ -108,17 +108,23 @@ po.previewOptions.url = "...";
 				else if(ui.newPanel.hasClass("params-table-wrapper"))
 				{
 					var dataTable = po.dataSetParamsTableElement().DataTable();
-					dataTable.fixedColumns().relayout();
 					dataTable.columns.adjust();
+					dataTable.fixedColumns().relayout();
 				}
 				else if(ui.newPanel.hasClass("properties-table-wrapper"))
 				{
 					var dataTable = po.dataSetPropertiesTableElement().DataTable();
-					dataTable.fixedColumns().relayout();
 					dataTable.columns.adjust();
+					dataTable.fixedColumns().relayout();
 				}
 			}
 		});
+	};
+
+	//获取用于添加数据集属性的名
+	po.getAddPropertyName = function()
+	{
+		return "";
 	};
 	
 	po.initDataSetPropertiesTable = function(initDataSetProperties, hideTabIfNone)
@@ -195,7 +201,9 @@ po.previewOptions.url = "...";
 		
 		po.element(".add-property-button").click(function()
 		{
-			po.dataSetPropertiesTableElement().DataTable().row.add({ name: "", type: "${PropertyDataType.STRING}", required: true, desc: "" }).draw();
+			var name = (po.getAddPropertyName() || "");
+			
+			po.dataSetPropertiesTableElement().DataTable().row.add({ name: name, type: "${PropertyDataType.STRING}", label: "" }).draw();
 		});
 		
 		po.element(".del-property-button").click(function()
@@ -252,6 +260,8 @@ po.previewOptions.url = "...";
 	
 	po.updateFormDataSetProperties = function(dataSetProperties)
 	{
+		dataSetProperties = (dataSetProperties || []);
+		
 		var dataTable = po.dataSetPropertiesTableElement().DataTable();
 		$.addDataTableData(dataTable, dataSetProperties, 0);
 	};
@@ -259,7 +269,7 @@ po.previewOptions.url = "...";
 	//获取用于添加数据集参数的参数名
 	po.getAddParamName = function()
 	{
-		return "";
+		return po.getAddPropertyName();
 	};
 	
 	po.initDataSetParamsTable = function(initDataSetParams)
@@ -506,7 +516,10 @@ po.previewOptions.url = "...";
 		//预览请求前置回调函数，返回false阻止
 		beforeRequest: function(){},
 		//预览响应构建表格列数组
-		buildTablesColumns: function(previewResponse){},
+		buildTablesColumns: function(previewResponse)
+		{
+			return po.buildDataSetPropertiesColumns(previewResponse.dataSetProperties);
+		},
 		//预览请求成功回调函数
 		success: function(previewResponse){}
 	};
@@ -700,7 +713,7 @@ po.previewOptions.url = "...";
 				
 				po.previewOptions.success(previewResponse);
 			},
-			complete : function()
+			complete: function()
 			{
 				$buttons.each(function()
 				{
@@ -718,6 +731,25 @@ po.previewOptions.url = "...";
 			row = row[0];
 		
 		return row + 1;
+	};
+	
+	po.buildDataSetPropertiesColumns = function(dataSetProperties)
+	{
+		dataSetProperties = (dataSetProperties || []);
+		
+		var columns = [];
+		
+		for(var i=0; i<dataSetProperties.length; i++)
+		{
+			columns[i] =
+			{
+				title: dataSetProperties[i].name,
+				data: dataSetProperties[i].name,
+				defaultContent: "",
+			};
+		}
+		
+		return columns;
 	};
 	
 	$.validator.addMethod("dataSetPropertiesRequired", function(value, element)

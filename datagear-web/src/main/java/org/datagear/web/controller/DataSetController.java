@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.AbstractFmkTemplateDataSet;
+import org.datagear.analysis.support.AbstractJsonDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.SqlDataSetSupport;
@@ -336,8 +337,21 @@ public class DataSetController extends AbstractSchemaConnController
 	public String resolveSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody ResolveSqlParam resolveSqlParam) throws Throwable
 	{
-		return resolveSql(resolveSqlParam.getSql(), resolveSqlParam.getParamValues(),
+		return resolveFmkSource(resolveSqlParam.getSql(), resolveSqlParam.getParamValues(),
 				resolveSqlParam.getDataSetParams());
+	}
+
+	@RequestMapping(value = "/previewJsonValue", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public DataSetPreviewResult previewJsonValue(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestBody JsonValueDataSetPreview preivew) throws Throwable
+	{
+		String json = resolveFmkSource(preivew.getValue(), preivew.getParamValues(), preivew.getDataSetParams());
+		Object data = AbstractJsonDataSet.JSON_DATA_SET_SUPPORT.resolveResultData(json);
+
+		DataSetPreviewResult result = new DataSetPreviewResult(json, data);
+
+		return result;
 	}
 
 	protected String buildFormView(String dataSetType)
@@ -365,7 +379,7 @@ public class DataSetController extends AbstractSchemaConnController
 		if (fetchSize > 1000)
 			fetchSize = 1000;
 
-		final String sqlFinal = resolveSql(sql, sqlDataSetPreview.getParamValues(),
+		final String sqlFinal = resolveFmkSource(sql, sqlDataSetPreview.getParamValues(),
 				sqlDataSetPreview.getDataSetParams());
 		final int startRowFinal = startRow;
 		final int fetchSizeFinal = fetchSize;
@@ -397,10 +411,10 @@ public class DataSetController extends AbstractSchemaConnController
 		return modelSqlResult;
 	}
 
-	protected String resolveSql(String sql, Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
+	protected String resolveFmkSource(String source, Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
 	{
 		Map<String, ?> converted = getDataSetParamValueConverter().convert(paramValues, dataSetParams);
-		return getDataSetFmkTemplateResolver().resolve(sql, new TemplateContext(converted));
+		return getDataSetFmkTemplateResolver().resolve(source, new TemplateContext(converted));
 	}
 
 	protected DataSetFmkTemplateResolver getDataSetFmkTemplateResolver()
@@ -680,6 +694,32 @@ public class DataSetController extends AbstractSchemaConnController
 		public void setSql(String sql)
 		{
 			this.sql = sql;
+		}
+	}
+
+	public static class JsonValueDataSetPreview extends AbstractDataSetPreview
+	{
+		private String value;
+
+		public JsonValueDataSetPreview()
+		{
+			super();
+		}
+
+		public JsonValueDataSetPreview(String value)
+		{
+			super();
+			this.value = value;
+		}
+
+		public String getValue()
+		{
+			return value;
+		}
+
+		public void setValue(String value)
+		{
+			this.value = value;
 		}
 	}
 
