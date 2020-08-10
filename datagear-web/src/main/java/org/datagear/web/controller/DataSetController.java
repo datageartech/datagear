@@ -348,8 +348,10 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		String json = resolveFmkSource(preivew.getValue(), preivew.getParamValues(), preivew.getDataSetParams());
 		Object data = AbstractJsonDataSet.JSON_DATA_SET_SUPPORT.resolveResultData(json);
+		List<DataSetProperty> dataSetProperties = AbstractJsonDataSet.JSON_DATA_SET_SUPPORT
+				.resolveDataSetProperties(data);
 
-		DataSetPreviewResult result = new DataSetPreviewResult(json, data);
+		DataSetPreviewResult result = new DataSetPreviewResult(json, data, dataSetProperties);
 
 		return result;
 	}
@@ -526,6 +528,14 @@ public class DataSetController extends AbstractSchemaConnController
 			super();
 			this.resolvedSource = resolvedSource;
 			this.data = data;
+		}
+
+		public DataSetPreviewResult(String resolvedSource, Object data, List<DataSetProperty> dataSetProperties)
+		{
+			super();
+			this.resolvedSource = resolvedSource;
+			this.data = data;
+			this.dataSetProperties = dataSetProperties;
 		}
 
 		public DataSetPreviewResult(SqlSelectResult modelSqlResult, List<DataSetProperty> dataSetProperties)

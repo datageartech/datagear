@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.support.SqlDataSetUnsupportedSqlTypeException;
 import org.datagear.analysis.support.TemplateResolverException;
+import org.datagear.analysis.support.UnsupportedJsonResultDataException;
+import org.datagear.analysis.support.UnsupportedResultDataException;
 import org.datagear.connection.ConnectionSourceException;
 import org.datagear.connection.DriverClassFormatErrorException;
 import org.datagear.connection.DriverEntityManagerException;
@@ -373,17 +375,6 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(TemplateResolverException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleAnalysisSqlDataSetTemplateResolverException(HttpServletRequest request,
-			HttpServletResponse response, TemplateResolverException exception)
-	{
-		setOperationMessageForThrowable(request, buildMessageCode(TemplateResolverException.class), exception, false,
-				exception.getMessage());
-
-		return getErrorView(request, response);
-	}
-
 	@ExceptionHandler(SqlDataSetUnsupportedSqlTypeException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handleAnalysisSqlDataSetUnsupportedSqlTypeException(HttpServletRequest request,
@@ -395,6 +386,39 @@ public class ControllerAdvice extends AbstractController
 
 		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetUnsupportedSqlTypeException.class),
 				exception, false, msgArg);
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(TemplateResolverException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisTemplateResolverException(HttpServletRequest request, HttpServletResponse response,
+			TemplateResolverException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(TemplateResolverException.class), exception, false,
+				exception.getMessage());
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(UnsupportedResultDataException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisUnsupportedResultDataException(HttpServletRequest request, HttpServletResponse response,
+			UnsupportedResultDataException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedResultDataException.class), exception,
+				false, exception.getMessage());
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(UnsupportedJsonResultDataException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisUnsupportedJsonResultDataException(HttpServletRequest request,
+			HttpServletResponse response, UnsupportedJsonResultDataException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedJsonResultDataException.class), exception,
+				false);
+
 		return getErrorView(request, response);
 	}
 

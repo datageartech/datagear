@@ -27,11 +27,13 @@
 	{
 		STRING: "STRING",
 		BOOLEAN: "BOOLEAN",
+		NUMBER: "NUMBER",
 		INTEGER: "INTEGER",
 		DECIMAL: "DECIMAL",
 		DATE: "DATE",
 		TIME: "TIME",
-		TIMESTAMP: "TIMESTAMP"
+		TIMESTAMP: "TIMESTAMP",
+		UNKNOWN: "UNKNOWN"
 	};
 	
 	/**
@@ -106,7 +108,9 @@
 	chartSupport.isDataTypeNumber = function(dataSetProperty)
 	{
 		var dataType = (dataSetProperty ? (dataSetProperty.type || dataSetProperty) : "");
-		return (dataType == chartSupport.DataSetPropertyDataType.INTEGER || dataType == chartSupport.DataSetPropertyDataType.DECIMAL);
+		return (dataType == chartSupport.DataSetPropertyDataType.NUMBER
+				|| dataType == chartSupport.DataSetPropertyDataType.INTEGER
+				|| dataType == chartSupport.DataSetPropertyDataType.DECIMAL);
 	};
 	
 	/**

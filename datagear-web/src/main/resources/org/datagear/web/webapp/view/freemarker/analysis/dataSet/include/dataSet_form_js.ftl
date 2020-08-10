@@ -156,12 +156,14 @@ po.previewOptions.url = "...";
 						
 						return "<select class='dataSetPropertyType input-in-table ui-widget ui-widget-content'>"
 								+"<option value='${PropertyDataType.STRING}' "+(data == "${PropertyDataType.STRING}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.STRING' /></option>"
+								+"<option value='${PropertyDataType.NUMBER}' "+(data == "${PropertyDataType.NUMBER}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.NUMBER' /></option>"
 								+"<option value='${PropertyDataType.INTEGER}' "+(data == "${PropertyDataType.INTEGER}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.INTEGER' /></option>"
 								+"<option value='${PropertyDataType.DECIMAL}' "+(data == "${PropertyDataType.DECIMAL}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.DECIMAL' /></option>"
 								+"<option value='${PropertyDataType.DATE}' "+(data == "${PropertyDataType.DATE}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.DATE' /></option>"
 								+"<option value='${PropertyDataType.TIME}' "+(data == "${PropertyDataType.TIME}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.TIME' /></option>"
 								+"<option value='${PropertyDataType.TIMESTAMP}' "+(data == "${PropertyDataType.TIMESTAMP}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.TIMESTAMP' /></option>"
 								+"<option value='${PropertyDataType.BOOLEAN}' "+(data == "${PropertyDataType.BOOLEAN}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.BOOLEAN' /></option>"
+								+"<option value='${PropertyDataType.UNKNOWN}' "+(data == "${PropertyDataType.UNKNOWN}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.UNKNOWN' /></option>"
 								+"</select>";
 					},
 					width: "6em",

@@ -122,6 +122,9 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 		/** 布尔值 */
 		public static final String BOOLEAN = "BOOLEAN";
 
+		/** 数值，可能是整数或者小数 */
+		public static final String NUMBER = "NUMBER";
+
 		/** 整数 */
 		public static final String INTEGER = "INTEGER";
 
@@ -136,6 +139,9 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 
 		/** 时间戳 */
 		public static final String TIMESTAMP = "TIMESTAMP";
+
+		/** 未知类型 */
+		public static final String UNKNOWN = "UNKNOWN";
 
 		/**
 		 * 是否是{@linkplain #STRING}。
@@ -157,6 +163,17 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 		public static boolean isBoolean(String dataType)
 		{
 			return BOOLEAN.equals(dataType);
+		}
+
+		/**
+		 * 是否是{@linkplain #NUMBER}。
+		 * 
+		 * @param dataType
+		 * @return
+		 */
+		public static boolean isNumber(String dataType)
+		{
+			return NUMBER.equals(dataType);
 		}
 
 		/**
@@ -182,14 +199,14 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 		}
 
 		/**
-		 * 是否是{@linkplain #INTEGER}或{@linkplain DECIMAL}。
+		 * 是否是数值型的。
 		 * 
 		 * @param dataType
 		 * @return
 		 */
-		public static boolean isNumber(String dataType)
+		public static boolean isNumberic(String dataType)
 		{
-			return isInteger(dataType) || isDecimal(dataType);
+			return (isNumber(dataType) || isInteger(dataType) || isDecimal(dataType));
 		}
 
 		/**
@@ -223,6 +240,17 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 		public static boolean isTimestamp(String dataType)
 		{
 			return TIMESTAMP.equals(dataType);
+		}
+
+		/**
+		 * 是否是{@linkplain #UNKNOWN}。
+		 * 
+		 * @param dataType
+		 * @return
+		 */
+		public static boolean isUnknown(String dataType)
+		{
+			return UNKNOWN.equals(dataType);
 		}
 
 		/**
@@ -377,6 +405,35 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 				return (Timestamp) value;
 			else
 				return new Timestamp(date.getTime());
+		}
+
+		/**
+		 * 解析对象的数据类型。
+		 * 
+		 * @param obj
+		 * @return
+		 */
+		public static String resolveDataType(Object obj)
+		{
+			if (obj instanceof String)
+				return STRING;
+			else if (obj instanceof Boolean)
+				return BOOLEAN;
+			else if (obj instanceof Byte || obj instanceof Short || obj instanceof Integer || obj instanceof Long
+					|| obj instanceof BigInteger)
+				return INTEGER;
+			else if (obj instanceof Float || obj instanceof Double || obj instanceof BigDecimal)
+				return DECIMAL;
+			else if (obj instanceof Number)
+				return NUMBER;
+			else if (obj instanceof java.sql.Time)
+				return TIME;
+			else if (obj instanceof java.sql.Timestamp)
+				return TIMESTAMP;
+			else if (obj instanceof java.sql.Date || obj instanceof java.util.Date)
+				return DATE;
+			else
+				return UNKNOWN;
 		}
 	}
 }
