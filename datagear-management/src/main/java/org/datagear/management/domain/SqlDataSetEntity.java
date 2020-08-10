@@ -33,8 +33,6 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
-	private transient String _propertyLabelsText;
-
 	public SqlDataSetEntity()
 	{
 		super();
@@ -42,8 +40,7 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
 	}
 
 	public SqlDataSetEntity(String id, String name, List<DataSetProperty> properties,
-			SchemaConnectionFactory connectionFactory,
-			String sql, User createUser)
+			SchemaConnectionFactory connectionFactory, String sql, User createUser)
 	{
 		super(id, name, properties, connectionFactory, sql);
 		this.createTime = new Date();
@@ -122,34 +119,5 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
-	}
-
-	@Override
-	public void setProperties(List<DataSetProperty> properties)
-	{
-		super.setProperties(properties);
-		
-		if(this._propertyLabelsText != null)
-			DataSetEntity.setPropertyLabelsText(properties, this._propertyLabelsText);
-	}
-
-	@Override
-	public void setPropertyLabelsText(String text)
-	{
-		List<DataSetProperty> properties = getProperties();
-		
-		if(properties == null || properties.isEmpty())
-			this._propertyLabelsText = text;
-		else
-		{
-			this._propertyLabelsText = null;
-			DataSetEntity.setPropertyLabelsText(properties, text);
-		}
-	}
-
-	@Override
-	public String getPropertyLabelsText()
-	{
-		return DataSetEntity.getPropertyLabelsText(getProperties());
 	}
 }

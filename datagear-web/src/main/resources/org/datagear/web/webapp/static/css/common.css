@@ -2186,7 +2186,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-dataSet .workspace-operation-wrapper .input-in-table{
 	width: 90%!important;
 }
-.page-form-dataSet .form-item-value-workspace .error{
+.page-form-dataSet .form-item-workspace .error{
 	display: block;
 }
 .page-form-dataSet .preview-param-value-panel{
@@ -2194,6 +2194,8 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	display: none;
 	padding: 0.5em 0.5em;
 	max-height: 80%;
+	min-width: 30%;
+	max-width: 60%;
 	overflow: auto;
 }
 .page-form-dataSet .preview-param-value-panel .ui-widget-header{

@@ -21,24 +21,16 @@ readonly 是否只读操作，允许为null
 		<div class="form-head"></div>
 		<div class="form-content">
 			<#include "include/dataSet_form_html_name.ftl">
-			<div class="form-item">
+			<div class="form-item form-item-workspace">
 				<div class="form-item-label">
 					<label><@spring.message code='dataSet.json' /></label>
 				</div>
-				<div class="form-item-value form-item-value-workspace">
+				<div class="form-item-value">
 					<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''?html}</textarea>
 					<div class="workspace-editor-wrapper ui-widget ui-widget-content">
 						<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
 					</div>
 					<#include "include/dataSet_form_html_wow.ftl" >
-				</div>
-			</div>
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='dataSet.propertyLabelsText.JSON_VALUE' /></label>
-				</div>
-				<div class="form-item-value">
-					<input type="text" name="propertyLabelsText" class="ui-widget ui-widget-content" value="${(dataSet.propertyLabelsText)!''?html}" placeholder="<@spring.message code='dataSet.propertyLabelsTextSplitByComma' />" />
 				</div>
 			</div>
 		</div>
@@ -82,16 +74,14 @@ readonly 是否只读操作，允许为null
 	
 	po.initWorkspaceEditor(po.jsonEditor, po.element("textarea[name='value']").val());
 	
-	po.isWorkspaceModified = function()
-	{
-		return po.isValueModified();
-	};
 	po.initWorkspaceTabs();
+
+	po.initDataSetPropertiesTable(po.dataSetProperties);
 	
 	po.getAddParamName = function()
 	{
-		var selectionRange = po.sqlEditor.getSelectionRange();
-		return (po.sqlEditor.session.getTextRange(selectionRange) || "");
+		var selectionRange = po.jsonEditor.getSelectionRange();
+		return (po.jsonEditor.session.getTextRange(selectionRange) || "");
 	};
 	po.initDataSetParamsTable(po.dataSetParams);
 	

@@ -5,13 +5,12 @@
 page_js_obj.ftl
 
 变量：
-//工作空间内容是否已有变更，不允许为null
-po.isWorkspaceModified = function(){ return true | false; }
 //预览URL，不允许为null
 po.previewOptions.url = "...";
 -->
-<#assign DataType=statics['org.datagear.analysis.DataSetParam$DataType']>
-<#assign InputType=statics['org.datagear.analysis.DataSetParam$InputType']>
+<#assign PropertyDataType=statics['org.datagear.analysis.DataSetProperty$DataType']>
+<#assign ParamDataType=statics['org.datagear.analysis.DataSetParam$DataType']>
+<#assign ParamInputType=statics['org.datagear.analysis.DataSetParam$InputType']>
 <script type="text/javascript">
 (function(po)
 {
@@ -30,12 +29,17 @@ po.previewOptions.url = "...";
 	
 	po.dataSetParamsTableElement = function()
 	{
-		return po.element("#${pageId}-dataSetParams-table");
+		return po.element("#${pageId}-dataSetParamsTable");
 	};
 	
 	po.previewResultTableElement = function()
 	{
-		return po.element("#${pageId}-previewResult-table");
+		return po.element("#${pageId}-previewResultTable");
+	};
+	
+	po.dataSetPropertiesTableElement = function()
+	{
+		return po.element("#${pageId}-dataSetPropertiesTable");
 	};
 	
 	po.calWorkspaceOperationTableHeight = function()
@@ -45,12 +49,27 @@ po.previewOptions.url = "...";
 	
 	po.initWorkspaceHeight = function()
 	{
-		var editorHeight = parseInt($(window).height()/11*5);
+		var height = $(window).height();
+		//减去上下留白
+		height = height - height/10;
+		//减去对话框标题高度
+		if($.isInDialog(po.element()))
+			height = height - 41;
+		//减去其他表单元素高度
+		height = height - po.element(".form-head").outerHeight(true);
+		po.element(".form-content > .form-item:not(.form-item-workspace)").each(function()
+		{
+			height = height - $(this).outerHeight(true);
+		});
+		height = height - po.element(".form-foot").outerHeight(true);
+		//减去杂项高度
+		height = height - 41 - 10;
+		
 		var errorInfoHeight = 25;
 		
-		po.element(".workspace-editor-wrapper").height(editorHeight);
-		po.element(".workspace-operation-wrapper").height(editorHeight);
-		po.element(".form-item-value-workspace").height(editorHeight + errorInfoHeight);
+		po.element(".form-item-workspace .form-item-value").height(height);
+		po.element(".workspace-editor-wrapper").height(height - errorInfoHeight);
+		po.element(".workspace-operation-wrapper").height(height - errorInfoHeight);
 	};
 	
 	po.initWorkspaceEditor = function(editor, initValue)
@@ -67,13 +86,8 @@ po.previewOptions.url = "...";
 		    exec: function(editor)
 		    {
 		    	var $operationWrapper = po.element(".workspace-operation-wrapper");
-		    	var activeIndex = $operationWrapper.tabs("option", "active");
-		    	var $activeLi = $(".workspace-operation-nav > li:eq("+activeIndex+")", $operationWrapper);
-		    	
-		    	if($activeLi.hasClass("operation-preview"))
-		    		po.element(".preview-button").click();
-		    	else
-		    		$operationWrapper.tabs("option", "active", 0);
+	    		$operationWrapper.tabs("option", "active", 0);
+	    		po.element(".preview-button").click();
 		    }
 		});
 		
@@ -88,20 +102,158 @@ po.previewOptions.url = "...";
 		{
 			activate: function(event, ui)
 			{
-				var isPreviewResultTab = (ui.newPanel && ui.newPanel.hasClass("preview-result-table-wrapper"));
-				if(isPreviewResultTab
-						&& (po.isWorkspaceModified() || !po.previewResultTableElement().hasClass("preview-result-table-inited")))
+				if(ui.newPanel.hasClass("preview-result-table-wrapper"))
 				{
-					//避免设置参数面板被隐藏
-					event.stopPropagation();
-					po.element(".preview-button").click();
 				}
-				else
+				else if(ui.newPanel.hasClass("params-table-wrapper"))
 				{
-					po.dataSetParamsTableElement().DataTable().columns.adjust().fixedColumns().relayout();
+					var dataTable = po.dataSetParamsTableElement().DataTable();
+					dataTable.fixedColumns().relayout();
+					dataTable.columns.adjust();
+				}
+				else if(ui.newPanel.hasClass("properties-table-wrapper"))
+				{
+					var dataTable = po.dataSetPropertiesTableElement().DataTable();
+					dataTable.fixedColumns().relayout();
+					dataTable.columns.adjust();
 				}
 			}
 		});
+	};
+	
+	po.initDataSetPropertiesTable = function(initDataSetProperties, hideTabIfNone)
+	{
+		hideTabIfNone = (hideTabIfNone === undefined ? true : hideTabIfNone);
+		
+		po.dataSetPropertiesTableElement().dataTable(
+		{
+			"columns" :
+			[
+				$.dataTableUtil.buildCheckCloumn("<@spring.message code='select' />"),
+				{
+					title: "<@spring.message code='dataSet.DataSetProperty.name' />",
+					data: "name",
+					render: function(data, type, row, meta)
+					{
+						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetPropertyName input-in-table ui-widget ui-widget-content' />";
+					},
+					width: "8em",
+					defaultContent: "",
+					orderable: true
+				},
+				{
+					title: "<@spring.message code='dataSet.DataSetProperty.type' />",
+					data: "type",
+					render: function(data, type, row, meta)
+					{
+						data = (data || "${PropertyDataType.STRING}");
+						
+						return "<select class='dataSetPropertyType input-in-table ui-widget ui-widget-content'>"
+								+"<option value='${PropertyDataType.STRING}' "+(data == "${PropertyDataType.STRING}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.STRING' /></option>"
+								+"<option value='${PropertyDataType.INTEGER}' "+(data == "${PropertyDataType.INTEGER}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.INTEGER' /></option>"
+								+"<option value='${PropertyDataType.DECIMAL}' "+(data == "${PropertyDataType.DECIMAL}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.DECIMAL' /></option>"
+								+"<option value='${PropertyDataType.DATE}' "+(data == "${PropertyDataType.DATE}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.DATE' /></option>"
+								+"<option value='${PropertyDataType.TIME}' "+(data == "${PropertyDataType.TIME}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.TIME' /></option>"
+								+"<option value='${PropertyDataType.TIMESTAMP}' "+(data == "${PropertyDataType.TIMESTAMP}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.TIMESTAMP' /></option>"
+								+"<option value='${PropertyDataType.BOOLEAN}' "+(data == "${PropertyDataType.BOOLEAN}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetProperty.DataType.BOOLEAN' /></option>"
+								+"</select>";
+					},
+					width: "6em",
+					defaultContent: "",
+					orderable: true
+				},
+				{
+					title: "<@spring.message code='dataSet.DataSetProperty.label' />",
+					data: "label",
+					render: function(data, type, row, meta)
+					{
+						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetPropertyLabel input-in-table ui-widget ui-widget-content' />";
+					},
+					width: "8em",
+					defaultContent: "",
+					orderable: true
+				}
+			],
+			data: (initDataSetProperties || []),
+			"scrollX": true,
+			"autoWidth": true,
+			"scrollY" : po.calWorkspaceOperationTableHeight(),
+	        "scrollCollapse": false,
+			"paging" : false,
+			"searching" : false,
+			"ordering": false,
+			"fixedColumns": { leftColumns: 1 },
+			"select" : { style : 'os' },
+		    "language":
+		    {
+				"emptyTable": "<@spring.message code='dataSet.noDataSetPropertyDefined' />",
+				"zeroRecords" : "<@spring.message code='dataSet.noDataSetPropertyDefined' />"
+			}
+		});
+		
+		$.dataTableUtil.bindCheckColumnEvent(po.dataSetPropertiesTableElement().DataTable());
+		
+		po.element(".add-property-button").click(function()
+		{
+			po.dataSetPropertiesTableElement().DataTable().row.add({ name: "", type: "${PropertyDataType.STRING}", required: true, desc: "" }).draw();
+		});
+		
+		po.element(".del-property-button").click(function()
+		{
+			$.dataTableUtil.deleteSelectedRows(po.dataSetPropertiesTableElement().DataTable());
+		});
+		
+		po.dataSetPropertiesTableElement().on("click", ".input-in-table", function(event)
+		{
+			//阻止行选中
+			event.stopPropagation();
+		});
+		
+		if(hideTabIfNone && (initDataSetProperties == null || initDataSetProperties.length == 0))
+			po.hideDataSetPropertiesTab();
+	};
+	
+	po.showDataSetPropertiesTab = function()
+	{
+		po.element(".workspace-operation-nav .operation-properties").show();
+	};
+	
+	po.hideDataSetPropertiesTab = function()
+	{
+		po.element(".workspace-operation-nav .operation-properties").hide();
+	};
+	
+	po.hasFormDataSetProperty = function()
+	{
+		var $names = po.element(".properties-table-wrapper .dataSetPropertyName");
+		return ($names.length > 0);
+	};
+	
+	po.getFormDataSetProperties = function()
+	{
+		var properties = [];
+		
+		po.element(".properties-table-wrapper .dataSetPropertyName").each(function(i)
+		{
+			properties[i] = {};
+			properties[i]["name"] = $(this).val();
+		});
+		po.element(".properties-table-wrapper .dataSetPropertyType").each(function(i)
+		{
+			properties[i]["type"] = $(this).val();
+		});
+		po.element(".properties-table-wrapper .dataSetPropertyLabel").each(function(i)
+		{
+			properties[i]["label"] = $(this).val();
+		});
+		
+		return properties;
+	};
+	
+	po.updateFormDataSetProperties = function(dataSetProperties)
+	{
+		var dataTable = po.dataSetPropertiesTableElement().DataTable();
+		$.addDataTableData(dataTable, dataSetProperties, 0);
 	};
 	
 	//获取用于添加数据集参数的参数名
@@ -133,12 +285,12 @@ po.previewOptions.url = "...";
 					data: "type",
 					render: function(data, type, row, meta)
 					{
-						data = (data || "${DataType.STRING}");
+						data = (data || "${ParamDataType.STRING}");
 						
 						return "<select class='dataSetParamType input-in-table ui-widget ui-widget-content'>"
-								+"<option value='${DataType.STRING}' "+(data == "${DataType.STRING}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.STRING' /></option>"
-								+"<option value='${DataType.NUMBER}' "+(data == "${DataType.NUMBER}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.NUMBER' /></option>"
-								+"<option value='${DataType.BOOLEAN}' "+(data == "${DataType.BOOLEAN}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.BOOLEAN' /></option>"
+								+"<option value='${ParamDataType.STRING}' "+(data == "${ParamDataType.STRING}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.STRING' /></option>"
+								+"<option value='${ParamDataType.NUMBER}' "+(data == "${ParamDataType.NUMBER}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.NUMBER' /></option>"
+								+"<option value='${ParamDataType.BOOLEAN}' "+(data == "${ParamDataType.BOOLEAN}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.DataType.BOOLEAN' /></option>"
 								+"</select>";
 					},
 					width: "6em",
@@ -177,17 +329,17 @@ po.previewOptions.url = "...";
 					data: "inputType",
 					render: function(data, type, row, meta)
 					{
-						data = (data || "${InputType.TEXT}");
+						data = (data || "${ParamInputType.TEXT}");
 						
 						return "<select class='dataSetParamInputType input-in-table ui-widget ui-widget-content'>"
-								+"<option value='${InputType.TEXT}' "+(data == "${InputType.TEXT}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.TEXT' /></option>"
-								+"<option value='${InputType.SELECT}' "+(data == "${InputType.SELECT}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.SELECT' /></option>"
-								+"<option value='${InputType.DATE}' "+(data == "${InputType.DATE}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.DATE' /></option>"
-								+"<option value='${InputType.TIME}' "+(data == "${InputType.TIME}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.TIME' /></option>"
-								+"<option value='${InputType.DATETIME}' "+(data == "${InputType.DATETIME}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.DATETIME' /></option>"
-								+"<option value='${InputType.RADIO}' "+(data == "${InputType.RADIO}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.RADIO' /></option>"
-								+"<option value='${InputType.CHECKBOX}' "+(data == "${InputType.CHECKBOX}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.CHECKBOX' /></option>"
-								+"<option value='${InputType.TEXTAREA}' "+(data == "${InputType.TEXTAREA}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.TEXTAREA' /></option>"
+								+"<option value='${ParamInputType.TEXT}' "+(data == "${ParamInputType.TEXT}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.TEXT' /></option>"
+								+"<option value='${ParamInputType.SELECT}' "+(data == "${ParamInputType.SELECT}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.SELECT' /></option>"
+								+"<option value='${ParamInputType.DATE}' "+(data == "${ParamInputType.DATE}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.DATE' /></option>"
+								+"<option value='${ParamInputType.TIME}' "+(data == "${ParamInputType.TIME}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.TIME' /></option>"
+								+"<option value='${ParamInputType.DATETIME}' "+(data == "${ParamInputType.DATETIME}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.DATETIME' /></option>"
+								+"<option value='${ParamInputType.RADIO}' "+(data == "${ParamInputType.RADIO}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.RADIO' /></option>"
+								+"<option value='${ParamInputType.CHECKBOX}' "+(data == "${ParamInputType.CHECKBOX}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.CHECKBOX' /></option>"
+								+"<option value='${ParamInputType.TEXTAREA}' "+(data == "${ParamInputType.TEXTAREA}" ? "selected='selected'" : "")+"><@spring.message code='dataSet.DataSetParam.InputType.TEXTAREA' /></option>"
 								+"</select>";
 					},
 					width: "6em",
@@ -229,7 +381,7 @@ po.previewOptions.url = "...";
 		{
 			var name = (po.getAddParamName() || "");
 			
-			po.dataSetParamsTableElement().DataTable().row.add({ name: name, type: "${DataType.STRING}", required: true, desc: "" }).draw();
+			po.dataSetParamsTableElement().DataTable().row.add({ name: name, type: "${ParamDataType.STRING}", required: true, desc: "" }).draw();
 		});
 		
 		po.element(".del-param-button").click(function()
@@ -246,7 +398,7 @@ po.previewOptions.url = "...";
 
 	po.hasFormDataSetParam = function()
 	{
-		var $names = po.element(".dataSetParamName");
+		var $names = po.element(".params-table-wrapper .dataSetParamName");
 		return ($names.length > 0);
 	};
 	
@@ -254,28 +406,28 @@ po.previewOptions.url = "...";
 	{
 		var params = [];
 		
-		po.element(".dataSetParamName").each(function(i)
+		po.element(".params-table-wrapper .dataSetParamName").each(function(i)
 		{
 			params[i] = {};
 			params[i]["name"] = $(this).val();
 		});
-		po.element(".dataSetParamType").each(function(i)
+		po.element(".params-table-wrapper .dataSetParamType").each(function(i)
 		{
 			params[i]["type"] = $(this).val();
 		});
-		po.element(".dataSetParamRequired").each(function(i)
+		po.element(".params-table-wrapper .dataSetParamRequired").each(function(i)
 		{
 			params[i]["required"] = $(this).val();
 		});
-		po.element(".dataSetParamDesc").each(function(i)
+		po.element(".params-table-wrapper .dataSetParamDesc").each(function(i)
 		{
 			params[i]["desc"] = $(this).val();
 		});
-		po.element(".dataSetParamInputType").each(function(i)
+		po.element(".params-table-wrapper .dataSetParamInputType").each(function(i)
 		{
 			params[i]["inputType"] = $(this).val();
 		});
-		po.element(".dataSetParamInputPayload").each(function(i)
+		po.element(".params-table-wrapper .dataSetParamInputPayload").each(function(i)
 		{
 			params[i]["inputPayload"] = $(this).val();
 		});
@@ -286,7 +438,7 @@ po.previewOptions.url = "...";
 	po.initPreviewParamValuePanel = function()
 	{
 		po.element(".preview-param-value-panel").draggable({ handle : ".ui-widget-header" });
-	
+		
 		$(po.element()).on("click", function(event)
 		{
 			var $target = $(event.target);
@@ -325,7 +477,7 @@ po.previewOptions.url = "...";
 				po.getFormDataSetParams(), formOptions);
 		
 		$panel.show();
-		$panel.position({ my : "right top", at : "left top", of : po.element("#${pageId}-previewResult")});
+		$panel.position({ my : "right top", at : "left+5 top", of : po.element(".workspace-operation-wrapper")});
 	};
 	
 	//预览设置项
@@ -464,7 +616,14 @@ po.previewOptions.url = "...";
 			data : po.previewOptions.data,
 			success : function(previewResponse)
 			{
-				//previewResponse: { data: ..., resolvedSource: "...", startRow: ..., nextStartRow: ..., fetchSize: ... }
+				//previewResponse:
+				//{
+				//	data: ..., resolvedSource: "...", dataSetProperties: [...],
+				//	startRow: ..., nextStartRow: ..., fetchSize: ...
+				//}
+				
+				po.updateFormDataSetProperties(previewResponse.dataSetProperties);
+				po.showDataSetPropertiesTab();
 				
 				var tableData = (previewResponse.data || []);
 				if(!$.isArray(tableData))
@@ -560,6 +719,11 @@ po.previewOptions.url = "...";
 		
 		return row + 1;
 	};
+	
+	$.validator.addMethod("dataSetPropertiesRequired", function(value, element)
+	{
+		return po.hasFormDataSetProperty();
+	});
 })
 (${pageId});
 </script>

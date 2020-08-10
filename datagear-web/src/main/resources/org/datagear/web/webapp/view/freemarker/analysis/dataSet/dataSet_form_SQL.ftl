@@ -33,24 +33,16 @@ readonly 是否只读操作，允许为null
 					</#if>
 				</div>
 			</div>
-			<div class="form-item">
+			<div class="form-item form-item-workspace">
 				<div class="form-item-label">
 					<label><@spring.message code='dataSet.sql' /></label>
 				</div>
-				<div class="form-item-value form-item-value-workspace">
+				<div class="form-item-value">
 					<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
 					<div class="workspace-editor-wrapper ui-widget ui-widget-content">
 						<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
 					</div>
 					<#include "include/dataSet_form_html_wow.ftl" >
-				</div>
-			</div>
-			<div class="form-item">
-				<div class="form-item-label">
-					<label><@spring.message code='dataSet.propertyLabelsText.SQL' /></label>
-				</div>
-				<div class="form-item-value">
-					<input type="text" name="propertyLabelsText" class="ui-widget ui-widget-content" value="${(dataSet.propertyLabelsText)!''?html}" placeholder="<@spring.message code='dataSet.propertyLabelsTextSplitByComma' />" />
 				</div>
 			</div>
 		</div>
@@ -119,11 +111,9 @@ readonly 是否只读操作，允许为null
 	
 	po.initWorkspaceEditor(po.sqlEditor, po.element("textarea[name='sql']").val());
 	
-	po.isWorkspaceModified = function()
-	{
-		return po.isSqlModified();
-	};
 	po.initWorkspaceTabs();
+	
+	po.initDataSetPropertiesTable(po.dataSetProperties);
 	
 	po.getAddParamName = function()
 	{
@@ -164,7 +154,6 @@ readonly 是否只读操作，允许为null
 	po.previewOptions.success = function(previewResponse)
 	{
 		po.element("textarea[name='sql']").val(this.data.sql);
-		po.dataSetProperties = (previewResponse.dataSetProperties || []);
 		po.sqlEditor.focus();
 	};
 	
@@ -231,18 +220,23 @@ readonly 是否只读操作，允许为null
 		{
 			"name" : "required",
 			"schemaConnectionFactory.schema.title" : "required",
-			"sql" : {"dataSetSqlRequired": true, "dataSetSqlPreviewRequired": true}
+			"sql" : {"dataSetSqlRequired": true, "dataSetSqlPreviewRequired": true, "dataSetPropertiesRequired": true}
 		},
 		messages :
 		{
 			"name" : "<@spring.message code='validation.required' />",
 			"schemaConnectionFactory.schema.title" : "<@spring.message code='validation.required' />",
-			"sql" : {"dataSetSqlRequired": "<@spring.message code='validation.required' />", "dataSetSqlPreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />"}
+			"sql" :
+			{
+				"dataSetSqlRequired": "<@spring.message code='validation.required' />",
+				"dataSetSqlPreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
+				"dataSetPropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
+			}
 		},
 		submitHandler : function(form)
 		{
 			var formData = $.formToJson(form);
-			formData["properties"] = po.dataSetProperties;
+			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
 			
 			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,

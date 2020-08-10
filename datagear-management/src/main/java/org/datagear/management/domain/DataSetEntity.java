@@ -22,8 +22,6 @@ public interface DataSetEntity extends DataSet, CreateUserEntity<String>, DataPe
 	/** 授权资源类型 */
 	String AUTHORIZATION_RESOURCE_TYPE = "DataSet";
 
-	String PROPERTY_LABELS_SPLITTER = ",";
-
 	/** 数据集类型：SQL */
 	String DATA_SET_TYPE_SQL = "SQL";
 
@@ -78,49 +76,4 @@ public interface DataSetEntity extends DataSet, CreateUserEntity<String>, DataPe
 	 * @param createTime
 	 */
 	void setCreateTime(Date createTime);
-
-	/**
-	 * 获取属性集的标签文本表示形式。
-	 * 
-	 * @return
-	 */
-	String getPropertyLabelsText();
-
-	/**
-	 * 设置属性集的标签文本表示形式。
-	 * 
-	 * @param text
-	 */
-	void setPropertyLabelsText(String text);
-
-	/**
-	 * 获取属性集的标签文本表示形式。
-	 * 
-	 * @param properties
-	 * @return
-	 */
-	public static String getPropertyLabelsText(List<DataSetProperty> properties)
-	{
-		return DataSetProperty.concatLabels(properties, PROPERTY_LABELS_SPLITTER);
-	}
-
-	/**
-	 * 设置属性集的标签文本表示形式。
-	 * 
-	 * @param properties
-	 * @param text
-	 */
-	public static void setPropertyLabelsText(List<DataSetProperty> properties, String text)
-	{
-		String[] labels = DataSetProperty.splitLabels(text, PROPERTY_LABELS_SPLITTER);
-
-		if (labels == null || labels.length == 0)
-			return;
-
-		for (int i = 0; i < Math.min(labels.length, properties.size()); i++)
-		{
-			if (i < labels.length)
-				properties.get(i).setLabel(labels[i]);
-		}
-	}
 }

@@ -15,8 +15,6 @@ import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.AbstractDataSet;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * 概要数据集实体。
  * 
@@ -96,19 +94,6 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
-	}
-
-	@Override
-	public void setPropertyLabelsText(String text)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@JsonIgnore
-	@Override
-	public String getPropertyLabelsText()
-	{
-		throw new UnsupportedOperationException();
 	}
 
 	@Override

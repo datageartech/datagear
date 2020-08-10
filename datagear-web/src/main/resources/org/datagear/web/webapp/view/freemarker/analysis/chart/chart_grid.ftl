@@ -98,7 +98,7 @@ boolean readonly 是否只读操作，默认为false
 		{
 			var data = {"id" : row.id};
 			
-			po.open(po.url("edit"), { data : data });
+			po.open(po.url("edit"), { width: "85%", data : data });
 		});
 	});
 	
@@ -127,6 +127,7 @@ boolean readonly 是否只读操作，默认为false
 			
 			po.open(po.url("view"),
 			{
+				width: "85%",
 				data : data
 			});
 		});
