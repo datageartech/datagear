@@ -71,6 +71,7 @@ selectOperation 是否选择操作，允许为null
 	{
 		po.open(po.url("add"),
 		{
+			width: "85%",
 			<#if selectOperation>
 			pageParam:
 			{

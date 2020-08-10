@@ -37,6 +37,8 @@ var contextPath="${contextPath}";
 <script src="${contextPath}/static/script/ace-21.02.19/ace.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/mode-sql.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/mode-html.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/ace-21.02.19/mode-json.js?v=${_hh_Version}" type="text/javascript"></script>
+<script src="${contextPath}/static/script/ace-21.02.19/mode-javascript.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/ace-21.02.19/ext-language_tools.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/cometd-2.9.1/cometd.js?v=${_hh_Version}" type="text/javascript"></script>
 <script src="${contextPath}/static/script/cometd-2.9.1/AckExtension.js?v=${_hh_Version}" type="text/javascript"></script>

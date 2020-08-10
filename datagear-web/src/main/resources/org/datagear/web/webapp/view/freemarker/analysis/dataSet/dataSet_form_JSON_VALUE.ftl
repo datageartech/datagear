@@ -75,9 +75,9 @@ readonly 是否只读操作，允许为null
 	};
 	
 	var languageTools = ace.require("ace/ext/language_tools");
-	//var JsonMode = ace.require("ace/mode/json").Mode;
+	var JsonMode = ace.require("ace/mode/json").Mode;
 	po.jsonEditor = ace.edit("${pageId}-workspaceEditor");
-	//po.jsonEditor.session.setMode(new JsonMode());
+	po.jsonEditor.session.setMode(new JsonMode());
 	po.jsonEditor.setShowPrintMargin(false);
 	
 	po.initWorkspaceEditor(po.jsonEditor, po.element("textarea[name='value']").val());

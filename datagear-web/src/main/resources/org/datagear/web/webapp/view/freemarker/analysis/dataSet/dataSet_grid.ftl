@@ -90,6 +90,7 @@ boolean readonly 是否只读操作，默认为false
 			
 			po.open(po.url(addURL),
 			{
+				width: "85%",
 				<#if selectOperation>
 				pageParam:
 				{
