@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.TemplateDashboardWidgetResManager;
@@ -427,10 +428,12 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		{
 			for (ChartDataSetVO vo : chartDataSetVOs)
 			{
-				if (vo.getSqlDataSet().hasParam())
+				List<DataSetParam> params = vo.getDataSet().getParams();
+
+				if (params != null && !params.isEmpty())
 				{
 					Map<String, Object> paramValues = getDataSetParamValueConverter().convert(vo.getParamValues(),
-							vo.getSqlDataSet().getParams());
+							params);
 					vo.setParamValues(paramValues);
 				}
 			}

@@ -11,12 +11,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.support.AbstractDataSet;
 
 /**
- * 概要数据集实体。
+ * 概要{@linkplain DataSetEntity}。
+ * <p>
+ * 此类不表示任何具体的{@linkplain DataSet}实现，仅用于表示{@linkplain DataSetEntity}结构。
+ * </p>
  * 
  * @author datagear@163.com
  *

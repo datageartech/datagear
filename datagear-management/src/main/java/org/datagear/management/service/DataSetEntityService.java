@@ -8,7 +8,6 @@
 package org.datagear.management.service;
 
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.management.domain.DataSetEntity;
 
 /**
@@ -20,7 +19,7 @@ import org.datagear.management.domain.DataSetEntity;
 public interface DataSetEntityService extends DataPermissionEntityService<String, DataSetEntity>
 {
 	/**
-	 * 获取可用于执行分析的{@linkplain SqlDataSet}。
+	 * 获取可用于执行分析的{@linkplain DataSet}。
 	 * 
 	 * @param id
 	 * @return

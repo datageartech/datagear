@@ -10,7 +10,6 @@ package org.datagear.management.domain;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetResult;
-import org.datagear.analysis.support.SqlDataSet;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -32,14 +31,14 @@ public class ChartDataSetVO extends ChartDataSet
 		super(dataSet);
 	}
 
-	public SqlDataSet getSqlDataSet()
+	/**
+	 * 设置{@linkplain SummaryDataSetEntity}，仅用于保存操作。
+	 * 
+	 * @param dataSetEntity
+	 */
+	public void setSummaryDataSetEntity(SummaryDataSetEntity dataSetEntity)
 	{
-		return (SqlDataSet) super.getDataSet();
-	}
-
-	public void setSqlDataSet(SqlDataSet sqlDataSet)
-	{
-		super.setDataSet(sqlDataSet);
+		super.setDataSet(dataSetEntity);
 	}
 
 	@JsonIgnore

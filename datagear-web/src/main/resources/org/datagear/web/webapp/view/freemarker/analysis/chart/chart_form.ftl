@@ -297,7 +297,7 @@ readonly 是否只读操作，允许为null
 				propertySigns[signName] = signValues;
 			});
 			
-			re.push({ "sqlDataSet": { "id": dataSetId, "params": dataSetParams }, "propertySigns": propertySigns, "alias": alias, "paramValues": paramValues });
+			re.push({ "summaryDataSetEntity": { "id": dataSetId, "params": dataSetParams }, "propertySigns": propertySigns, "alias": alias, "paramValues": paramValues });
 		});
 		
 		return re;
