@@ -4,6 +4,8 @@
 
 package org.datagear.analysis.support;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetResult;
+import org.datagear.util.IOUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -78,6 +81,35 @@ public class JsonDataSetSupport extends JsonSupport
 	{
 		StringReader reader = new StringReader(jsonValue);
 		return resolveResultData(reader);
+	}
+
+	/**
+	 * 解析数据集结果数据。
+	 * 
+	 * @param file
+	 * @param encoding
+	 * @return
+	 * @throws DataSetException
+	 * @throws UnsupportedJsonResultDataException
+	 */
+	public Object resolveResultData(File file, String encoding)
+			throws DataSetException, UnsupportedJsonResultDataException
+	{
+		Reader reader = null;
+
+		try
+		{
+			reader = IOUtil.getReader(file, encoding);
+			return resolveResultData(reader);
+		}
+		catch(IOException e)
+		{
+			throw new DataSetException(e);
+		}
+		finally
+		{
+			IOUtil.close(reader);
+		}
 	}
 
 	/**
