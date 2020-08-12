@@ -23,6 +23,7 @@ import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.SqlDataSetSupport;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.management.domain.DataSetEntity;
+import org.datagear.management.domain.JsonFileDataSetEntity;
 import org.datagear.management.domain.JsonValueDataSetEntity;
 import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SqlDataSetEntity;
@@ -176,6 +177,35 @@ public class DataSetController extends AbstractSchemaConnController
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
 	}
 
+	@RequestMapping("/addForJsonFile")
+	public String addForJsonFile(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		JsonFileDataSetEntity dataSet = new JsonFileDataSetEntity();
+
+		model.addAttribute("dataSet", dataSet);
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
+		model.addAttribute(KEY_FORM_ACTION, "saveAddForJsonFile");
+
+		return buildFormView(dataSet.getDataSetType());
+	}
+
+	@RequestMapping(value = "/saveAddForJsonFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveAddForJsonFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody JsonFileDataSetEntity dataSet)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		dataSet.setId(IDUtil.randomIdOnTime20());
+		dataSet.setCreateUser(User.copyWithoutPassword(user));
+
+		checkSaveJsonFileDataSetEntity(dataSet);
+
+		this.dataSetEntityService.add(user, dataSet);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
 	@RequestMapping("/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
@@ -218,6 +248,20 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		checkSaveJsonValueDataSetEntity(dataSet);
+
+		this.dataSetEntityService.update(user, dataSet);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
+	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEditForJsonFile(HttpServletRequest request,
+			HttpServletResponse response, @RequestBody JsonFileDataSetEntity dataSet)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		checkSaveJsonFileDataSetEntity(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
 
@@ -370,6 +414,24 @@ public class DataSetController extends AbstractSchemaConnController
 		return result;
 	}
 
+	@RequestMapping(value = "/previewJsonFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public DataSetPreviewResult previewJsonFile(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestBody JsonFileDataSetEntityPreview preview)
+			throws Throwable
+	{
+		JsonFileDataSetEntity dataSet = preview.getDataSet();
+
+		getDataSetEntityService().inflateJsonFileDataSetEntity(dataSet);
+		Object data = dataSet.getResult(preview.getParamValues());
+		List<DataSetProperty> dataSetProperties = AbstractJsonDataSet.JSON_DATA_SET_SUPPORT
+				.resolveDataSetProperties(data);
+
+		DataSetPreviewResult result = new DataSetPreviewResult(dataSet.getFileName(), data, dataSetProperties);
+
+		return result;
+	}
+
 	protected String buildFormView(String dataSetType)
 	{
 		return "/analysis/dataSet/dataSet_form_" + dataSetType;
@@ -503,6 +565,17 @@ public class DataSetController extends AbstractSchemaConnController
 		checkSaveEntity(dataSet);
 
 		if (isEmpty(dataSet.getValue()))
+			throw new IllegalInputException();
+	}
+
+	protected void checkSaveJsonFileDataSetEntity(JsonFileDataSetEntity dataSet)
+	{
+		checkSaveEntity(dataSet);
+
+		if (isEmpty(dataSet.getFileName()))
+			throw new IllegalInputException();
+
+		if (isEmpty(dataSet.getDisplayName()))
 			throw new IllegalInputException();
 	}
 
@@ -744,6 +817,46 @@ public class DataSetController extends AbstractSchemaConnController
 		public void setValue(String value)
 		{
 			this.value = value;
+		}
+	}
+
+	public static class JsonFileDataSetEntityPreview
+	{
+		private JsonFileDataSetEntity dataSet;
+
+		@SuppressWarnings("unchecked")
+		private Map<String, Object> paramValues = Collections.EMPTY_MAP;
+
+		public JsonFileDataSetEntityPreview()
+		{
+			super();
+		}
+
+		public JsonFileDataSetEntityPreview(JsonFileDataSetEntity dataSet, Map<String, Object> paramValues)
+		{
+			super();
+			this.dataSet = dataSet;
+			this.paramValues = paramValues;
+		}
+
+		public JsonFileDataSetEntity getDataSet()
+		{
+			return dataSet;
+		}
+
+		public void setDataSet(JsonFileDataSetEntity dataSet)
+		{
+			this.dataSet = dataSet;
+		}
+
+		public Map<String, Object> getParamValues()
+		{
+			return paramValues;
+		}
+
+		public void setParamValues(Map<String, Object> paramValues)
+		{
+			this.paramValues = paramValues;
 		}
 	}
 

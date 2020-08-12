@@ -47,21 +47,21 @@ import org.datagear.dataexchange.support.SqlDataImportService;
 import org.datagear.management.dbversion.DbVersionManager;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
+import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.RoleService;
 import org.datagear.management.service.RoleUserService;
 import org.datagear.management.service.SchemaService;
-import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.service.UserService;
 import org.datagear.management.service.impl.AuthorizationServiceImpl;
+import org.datagear.management.service.impl.DataSetEntityServiceImpl;
 import org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.RoleServiceImpl;
 import org.datagear.management.service.impl.RoleUserServiceImpl;
 import org.datagear.management.service.impl.SchemaServiceImpl;
-import org.datagear.management.service.impl.DataSetEntityServiceImpl;
 import org.datagear.management.service.impl.SqlHistoryServiceImpl;
 import org.datagear.management.service.impl.UserPasswordEncoder;
 import org.datagear.management.service.impl.UserServiceImpl;
@@ -227,6 +227,12 @@ public class CoreConfiguration implements InitializingBean
 		return createDirectory(environment.getProperty("directory.resetPasswordCheckFile"), true);
 	}
 
+	@Bean
+	public File dataSetResourceRootDirectory() throws IOException
+	{
+		return createDirectory(environment.getProperty("directory.dataSetResource"), true);
+	}
+
 	protected File createDirectory(String directoryName, boolean createIfInexistence) throws IOException
 	{
 		DirectoryFactory bean = new DirectoryFactory();
@@ -384,7 +390,8 @@ public class CoreConfiguration implements InitializingBean
 	public DataSetEntityService dataSetEntityService() throws Exception
 	{
 		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory().getObject(),
-				this.connectionSource(), this.schemaService(), this.authorizationService());
+				this.connectionSource(), this.schemaService(), this.authorizationService(),
+				this.dataSetResourceRootDirectory());
 		return bean;
 	}
 

@@ -40,6 +40,7 @@ boolean readonly 是否只读操作，默认为false
 						<ul class="add-button-list">
 							<li addURL="addForSql"><div><@spring.message code='dataSet.dataSetType.SQL' /></div></li>
 							<li addURL="addForJsonValue"><div><@spring.message code='dataSet.dataSetType.JsonValue' /></div></li>
+							<li addURL="addForJsonFile"><div><@spring.message code='dataSet.dataSetType.JsonFile' /></div></li>
 						</ul>
 					</div>
 				</div>
@@ -190,6 +191,8 @@ boolean readonly 是否只读操作，默认为false
 			return "<@spring.message code='dataSet.dataSetType.SQL' />";
 		else if("${DataSetEntity.DATA_SET_TYPE_JsonValue}" == data)
 			return "<@spring.message code='dataSet.dataSetType.JsonValue' />";
+		else if("${DataSetEntity.DATA_SET_TYPE_JsonFile}" == data)
+			return "<@spring.message code='dataSet.dataSetType.JsonFile' />";
 		else
 			return "";
 	};

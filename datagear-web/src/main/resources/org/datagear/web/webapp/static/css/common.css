@@ -2208,6 +2208,14 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	max-height: 14em;
 	overflow: auto;
 }
+.page-form-dataSet-jsonFile{}
+.page-form-dataSet-jsonFile .form-item-workspace .form-item-label{
+	vertical-align:top;
+	margin-top: 0.3em;
+}
+.page-form-dataSet-jsonFile .form-item-workspace .form-item-value .file-display-name{
+	width: 60% !important;
+}
 
 .page-form-chart .chart-plugin{
 	display: inline-block;

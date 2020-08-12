@@ -7,6 +7,7 @@
  */
 package org.datagear.management.service.impl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.DataSetEntity;
+import org.datagear.management.domain.JsonFileDataSetEntity;
 import org.datagear.management.domain.JsonValueDataSetEntity;
 import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetEntity;
@@ -26,6 +28,7 @@ import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
+import org.datagear.util.FileUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -45,27 +48,34 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	private AuthorizationService authorizationService;
 
+	/** 数据集资源文件存储根目录 */
+	private File dataSetResourceRootDirectory;
+
+	private File _dataSetJsonFileDirectory;
+
 	public DataSetEntityServiceImpl()
 	{
 		super();
 	}
 
 	public DataSetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, ConnectionSource connectionSource,
-			SchemaService schemaService, AuthorizationService authorizationService)
+			SchemaService schemaService, AuthorizationService authorizationService, File dataSetResourceRootDirectory)
 	{
 		super(sqlSessionFactory);
 		this.connectionSource = connectionSource;
 		this.schemaService = schemaService;
 		this.authorizationService = authorizationService;
+		setDataSetResourceRootDirectory(dataSetResourceRootDirectory);
 	}
 
 	public DataSetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, ConnectionSource connectionSource,
-			SchemaService schemaService, AuthorizationService authorizationService)
+			SchemaService schemaService, AuthorizationService authorizationService, File dataSetResourceRootDirectory)
 	{
 		super(sqlSessionTemplate);
 		this.connectionSource = connectionSource;
 		this.schemaService = schemaService;
 		this.authorizationService = authorizationService;
+		setDataSetResourceRootDirectory(dataSetResourceRootDirectory);
 	}
 
 	public ConnectionSource getConnectionSource()
@@ -98,6 +108,24 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.authorizationService = authorizationService;
 	}
 
+	public File getDataSetResourceRootDirectory()
+	{
+		return dataSetResourceRootDirectory;
+	}
+
+	public void setDataSetResourceRootDirectory(File dataSetResourceRootDirectory)
+	{
+		this.dataSetResourceRootDirectory = dataSetResourceRootDirectory;
+		this._dataSetJsonFileDirectory = FileUtil.getDirectory(this.dataSetResourceRootDirectory,
+				DataSetEntity.DATA_SET_TYPE_JsonFile, true);
+	}
+
+	@Override
+	public File getDataSetJsonFileDirectory()
+	{
+		return _dataSetJsonFileDirectory;
+	}
+
 	@Override
 	public DataSet getDataSet(String id)
 	{
@@ -117,6 +145,12 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	@Override
+	public void inflateJsonFileDataSetEntity(JsonFileDataSetEntity entity)
+	{
+		entity.setDirectory(getDataSetJsonFileDirectory());
+	}
+
+	@Override
 	protected boolean add(DataSetEntity entity, Map<String, Object> params)
 	{
 		if (entity instanceof SummaryDataSetEntity)
@@ -130,6 +164,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 				success = addSqlDataSetEntity((SqlDataSetEntity) entity);
 			else if (entity instanceof JsonValueDataSetEntity)
 				success = addJsonValueDataSetEntity((JsonValueDataSetEntity) entity);
+			else if (entity instanceof JsonFileDataSetEntity)
+				success = addJsonFileDataSetEntity((JsonFileDataSetEntity) entity);
 		}
 
 		if (success)
@@ -154,6 +190,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		return (updateMybatis("insertJsonValueDataSetEntity", params) > 0);
 	}
 
+	protected boolean addJsonFileDataSetEntity(JsonFileDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("insertJsonFileDataSetEntity", params) > 0);
+	}
+
 	@Override
 	protected boolean update(DataSetEntity entity, Map<String, Object> params)
 	{
@@ -168,6 +212,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 				success = updateSqlDataSetEntity((SqlDataSetEntity) entity);
 			else if (entity instanceof JsonValueDataSetEntity)
 				success = updateJsonValueDataSetEntity((JsonValueDataSetEntity) entity);
+			else if (entity instanceof JsonFileDataSetEntity)
+				success = updateJsonFileDataSetEntity((JsonFileDataSetEntity) entity);
 		}
 
 		if (success)
@@ -190,6 +236,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("entity", entity);
 
 		return (updateMybatis("updateJsonValueDataSetEntity", params) > 0);
+	}
+
+	protected boolean updateJsonFileDataSetEntity(JsonFileDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("updateJsonFileDataSetEntity", params) > 0);
 	}
 
 	@Override
@@ -234,6 +288,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			obj = getSqlDataSetEntityById(obj.getId());
 		else if (DataSetEntity.DATA_SET_TYPE_JsonValue.equals(obj.getDataSetType()))
 			obj = getJsonValueDataSetEntityById(obj.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(obj.getDataSetType()))
+			obj = getJsonFileDataSetEntityById(obj.getId());
 
 		Map<String, Object> sqlParams = buildParamMapWithIdentifierQuoteParameter();
 		sqlParams.put("dataSetId", obj.getId());
@@ -265,6 +321,19 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("id", id);
 
 		JsonValueDataSetEntity entity = selectOneMybatis("getJsonValueDataSetEntityById", params);
+
+		return entity;
+	}
+
+	protected JsonFileDataSetEntity getJsonFileDataSetEntityById(String id)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("id", id);
+
+		JsonFileDataSetEntity entity = selectOneMybatis("getJsonFileDataSetEntityById", params);
+
+		if (entity != null)
+			entity.setDirectory(getDataSetJsonFileDirectory());
 
 		return entity;
 	}
@@ -364,7 +433,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 		public static <T> List<T> to(List<? extends DataSetChildPO<T>> pos)
 		{
-			List<T> childs = new ArrayList<T>();
+			List<T> childs = new ArrayList<>();
 
 			if (pos != null)
 			{
@@ -402,7 +471,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 		public static List<DataSetPropertyPO> from(DataSet dataSet)
 		{
-			List<DataSetPropertyPO> pos = new ArrayList<DataSetPropertyPO>();
+			List<DataSetPropertyPO> pos = new ArrayList<>();
 
 			List<DataSetProperty> properties = dataSet.getProperties();
 
@@ -445,7 +514,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 		public static List<DataSetParamPO> from(DataSet dataSet)
 		{
-			List<DataSetParamPO> pos = new ArrayList<DataSetParamPO>();
+			List<DataSetParamPO> pos = new ArrayList<>();
 
 			List<DataSetParam> params = dataSet.getParams();
 

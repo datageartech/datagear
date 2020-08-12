@@ -58,6 +58,11 @@
     </bean>
     <bean id="resetPasswordCheckFileDirectory" factory-bean="resetPasswordCheckFileDirectoryFactory" factory-method="getDirectory" />
 	
+    <bean id="dataSetResourceRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
+    	<property name="directoryName" value="${directory.dataSetResource}" />
+    </bean>
+    <bean id="dataSetResourceRootDirectory" factory-bean="dataSetResourceRootDirectoryFactory" factory-method="getDirectory" />
+	
     <bean id="dbVersionManager" class="org.datagear.management.dbversion.DbVersionManager" init-method="upgrade">
     	<property name="dataSource" ref="dataSource" />
     </bean>
@@ -225,6 +230,7 @@
 		<property name="connectionSource" ref="connectionSource" />
 		<property name="schemaService" ref="schemaService" />
 		<property name="authorizationService" ref="authorizationService" />
+		<property name="dataSetResourceRootDirectory" ref="dataSetResourceRootDirectory" />
 	</bean>
 	
 	<bean id="directoryHtmlChartPluginManager" class="org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager">

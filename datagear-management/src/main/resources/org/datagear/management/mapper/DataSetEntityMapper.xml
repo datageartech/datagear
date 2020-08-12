@@ -36,6 +36,17 @@
 			)
 	</insert>
 	
+	<insert id="insertJsonFileDataSetEntity">
+		INSERT INTO DATAGEAR_DATA_SET_JSON_FILE
+			(
+			DS_ID, DS_FILE_NAME, DS_DISPLAY_NAME
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.fileName}, #{entity.displayName}
+			)
+	</insert>
+	
 	<insert id="insertPropertyPO">
 		INSERT INTO DATAGEAR_DATA_SET_PROP
 			(
@@ -78,6 +89,14 @@
 	<update id="updateJsonValueDataSetEntity">
 		UPDATE DATAGEAR_DATA_SET_JSON_VALUE SET
 			DS_VALUE = #{entity.value}
+		WHERE
+			DS_ID = #{entity.id}
+	</update>
+	
+	<update id="updateJsonFileDataSetEntity">
+		UPDATE DATAGEAR_DATA_SET_JSON_FILE SET
+			DS_FILE_NAME = #{entity.fileName},
+			DS_DISPLAY_NAME = #{entity.displayName}
 		WHERE
 			DS_ID = #{entity.id}
 	</update>
@@ -135,6 +154,19 @@
 			(SELECT * FROM (<include refid="queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
 		INNER JOIN
 			DATAGEAR_DATA_SET_JSON_VALUE T2
+		ON
+			T1.${_iq_}id${_iq_} = T2.DS_ID
+	</select>
+	
+	<select id="getJsonFileDataSetEntityById" resultType="org.datagear.management.domain.JsonFileDataSetEntity">
+		SELECT
+			T1.*,
+			T2.DS_FILE_NAME AS ${_iq_}fileName${_iq_},
+			T2.DS_DISPLAY_NAME AS ${_iq_}displayName${_iq_}
+		FROM
+			(SELECT * FROM (<include refid="queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
+		INNER JOIN
+			DATAGEAR_DATA_SET_JSON_FILE T2
 		ON
 			T1.${_iq_}id${_iq_} = T2.DS_ID
 	</select>
