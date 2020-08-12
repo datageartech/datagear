@@ -2216,6 +2216,13 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-dataSet-jsonFile .form-item-workspace .form-item-value .file-display-name{
 	width: 60% !important;
 }
+.page-form-dataSet-jsonFile .form-item-workspace .form-item-value .fileinput-wrapper{
+	margin-top: 0.41em;
+}
+.page-form-dataSet-jsonFile .encoding-selectmenu-menu .ui-menu{
+	max-height: 14em;
+	overflow: auto;
+}
 
 .page-form-chart .chart-plugin{
 	display: inline-block;

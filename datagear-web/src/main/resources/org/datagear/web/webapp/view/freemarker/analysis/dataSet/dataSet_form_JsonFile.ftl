@@ -21,6 +21,18 @@ readonly 是否只读操作，允许为null
 		<div class="form-head"></div>
 		<div class="form-content">
 			<#include "include/dataSet_form_html_name.ftl">
+			<div class="form-item">
+				<div class="form-item-label">
+					<label><@spring.message code='dataSet.jsonFileEncoding' /></label>
+				</div>
+				<div class="form-item-value">
+					<select name="encoding">
+						<#list availableCharsetNames as item>
+						<option value="${item}" <#if item == dataSet.encoding>selected="selected"</#if>>${item}</option>
+						</#list>
+					</select>
+				</div>
+			</div>
 			<div class="form-item form-item-workspace">
 				<div class="form-item-label">
 					<label><@spring.message code='dataSet.jsonFile' /></label>
@@ -30,8 +42,10 @@ readonly 是否只读操作，允许为null
 					<div class="workspace-editor-wrapper">
 						<input type="text" name="displayName" value="${(dataSet.displayName)!''?html}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
 						<input type="hidden"  id="${pageId}-workspaceEditor" value="${(dataSet.fileName)!''?html}" />
-						<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
-						<div class="upload-file-info"></div>
+						<div class="fileinput-wrapper">
+							<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
+							<div class="upload-file-info"></div>
+						</div>
 					</div>
 					<#include "include/dataSet_form_html_wow.ftl" >
 				</div>
@@ -57,6 +71,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
+	po.element("select[name='encoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	po.initWorkspaceHeight();
 	
 	po.fileNameEditorValue = function(value)
@@ -69,7 +84,7 @@ readonly 是否只读操作，允许为null
 			$editor.val(value);
 	};
 	
-	po.isValueModified = function(inputValue, editorValue)
+	po.isFileNameModified = function(inputValue, editorValue)
 	{
 		if(inputValue == undefined)
 			inputValue = po.element("input[name='fileName']").val();
@@ -115,15 +130,33 @@ readonly 是否只读操作，允许为null
 	
 	po.initPreviewOperations();
 	
-	$.validator.addMethod("dataSetJsonFileRequired", function(value, element)
+	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
+
+	po.element(".fileinput-button").fileupload(
 	{
-		var value = po.fileNameEditorValue();
-		return value.length > 0;
+		url : po.url("uploadJsonFile"),
+		paramName : "file",
+		success : function(uploadResult, textStatus, jqXHR)
+		{
+			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
+			po.element("input[name='displayName']").val(uploadResult.displayName);
+			po.element("#${pageId}-workspaceEditor").val(uploadResult.fileName);
+		}
+	})
+	.bind('fileuploadadd', function (e, data)
+	{
+		po.element("input[name='displayName']").val("");
+		po.form().validate().resetForm();
+		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
+	})
+	.bind('fileuploadprogressall', function (e, data)
+	{
+		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
 	
 	$.validator.addMethod("dataSetJsonFilePreviewRequired", function(value, element)
 	{
-		return !po.isValueModified(value);
+		return !po.isFileNameModified();
 	});
 	
 	po.form().validate(
@@ -132,14 +165,14 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
-			"fileName" : {"dataSetJsonFileRequired": true, "dataSetJsonFilePreviewRequired": true, "dataSetPropertiesRequired": true}
+			"displayName" : {"required": true, "dataSetJsonFilePreviewRequired": true, "dataSetPropertiesRequired": true}
 		},
 		messages :
 		{
 			"name" : "<@spring.message code='validation.required' />",
-			"fileName" :
+			"displayName" :
 			{
-				"dataSetJsonFileRequired": "<@spring.message code='validation.required' />",
+				"required": "<@spring.message code='validation.required' />",
 				"dataSetJsonFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
 				"dataSetPropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
 			}

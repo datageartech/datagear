@@ -1800,29 +1800,6 @@ public class DataExchangeController extends AbstractSchemaConnController
 		return "/dataexchange/channel/" + dataExchangeId;
 	}
 
-	/**
-	 * 获取可用字符集名称。
-	 * 
-	 * @return
-	 */
-	protected List<String> getAvailableCharsetNames()
-	{
-		List<String> charsetNames = new ArrayList<>();
-
-		Map<String, Charset> map = Charset.availableCharsets();
-		Set<String> names = map.keySet();
-		for (String name : names)
-		{
-			// 排除未在IANA注册的字符集
-			if (name.startsWith("x-") || name.startsWith("X-"))
-				continue;
-
-			charsetNames.add(name);
-		}
-
-		return charsetNames;
-	}
-
 	public static class DataImportFileInfo extends FileInfo
 	{
 		private static final long serialVersionUID = 1L;

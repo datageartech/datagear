@@ -183,6 +183,7 @@ public class DataSetController extends AbstractSchemaConnController
 		JsonFileDataSetEntity dataSet = new JsonFileDataSetEntity();
 
 		model.addAttribute("dataSet", dataSet);
+		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
 		model.addAttribute(KEY_FORM_ACTION, "saveAddForJsonFile");
 
