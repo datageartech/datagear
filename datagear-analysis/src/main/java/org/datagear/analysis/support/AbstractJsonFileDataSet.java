@@ -21,7 +21,7 @@ import org.datagear.analysis.DataSetResult;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
+public abstract class AbstractJsonFileDataSet extends AbstractJsonSourceDataSet
 {
 	public static final String DEFAULT_ENCODING = "UTF-8";
 
@@ -47,9 +47,9 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 	{
 		this.encoding = encoding;
 	}
-	
+
 	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
+	protected DataSetResult getOrginalResult(Map<String, ?> paramValues) throws DataSetException
 	{
 		File jsonFile = getJsonFile(paramValues);
 		Object data = getJsonDataSetSupport().resolveResultData(jsonFile, getEncoding());
