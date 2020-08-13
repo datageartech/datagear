@@ -53,9 +53,9 @@ public class DerbySqlClient extends JdbcSupport
 			println("URL :" + JdbcUtil.getURLIfSupports(cn));
 			println("*****************************************");
 			println();
-			println("Print SQL for executing single sql");
-			println("Print @<sql-file-path> for executing sql scripts");
-			println("Print [exist] for exist");
+			println("Print SQL for executing single sql, example: SELECT * FROM DATAGEAR_VERSION");
+			println("Print @<sql-file-path> for executing UTF-8 sql scripts, example: @/home/tmp.sql");
+			println("Print [exit] for exit");
 
 			Scanner scanner = new Scanner(System.in);
 
