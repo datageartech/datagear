@@ -109,3 +109,15 @@ SQL工作台
 	2. 将datagear-webapp作为Web应用添加至servlet容器（比如Tomcat）；
 	3. 以调试模式运行Servlet容器。
 	
+## 调试注意
+
+在调试开发分支前（目前时master），建议先备份DataGear工作目录（[用户主目录]/.datagear），
+因为开发分支程序启动时会修改DataGear工作目录，可能会导致先前使用的正式版程序、以及后续发布的正式版程序无法正常启动。
+
+调试时，系统仅会在第一次启动时升级内置数据库（Derby），如果遇到内置数据库访问异常，需要查看
+
+	datagear-management/src/main/resources/org/datagear/management/ddl/datagear.sql
+
+文件，从中查找需要更新的SQL语句，手动更新至内置数据库。
+
+系统自带了一个可用于为内置数据库执行SQL语句的简单工具类`org.datagear.web.util.DerbySqlClient`，可以在IDE中直接运行。注意：运行前需要先停止DataGear程序。
