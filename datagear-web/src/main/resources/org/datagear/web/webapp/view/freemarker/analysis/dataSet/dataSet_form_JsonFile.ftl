@@ -38,6 +38,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSet.jsonFile' /></label>
 				</div>
 				<div class="form-item-value">
+					<input type="hidden" name="originalFileName" value="${(dataSet.fileName)!''?html}" />
 					<input type="hidden" name="fileName" value="${(dataSet.fileName)!''?html}" />
 					<div class="workspace-editor-wrapper">
 						<input type="text" name="displayName" value="${(dataSet.displayName)!''?html}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
@@ -134,7 +135,7 @@ readonly 是否只读操作，允许为null
 
 	po.element(".fileinput-button").fileupload(
 	{
-		url : po.url("uploadJsonFile"),
+		url : po.url("uploadFile"),
 		paramName : "file",
 		success : function(uploadResult, textStatus, jqXHR)
 		{

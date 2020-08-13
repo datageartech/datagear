@@ -4,10 +4,13 @@
 
 package org.datagear.web.controller;
 
+import java.io.File;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +37,9 @@ import org.datagear.meta.Table;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.persistence.support.SqlSelectResult;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.util.SqlType;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
@@ -46,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 数据集控制器。
@@ -69,6 +75,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 	@Autowired
 	private SqlSelectManager sqlSelectManager;
+
+	@Autowired
+	private File tempDirectory;
 
 	private SqlDataSetSupport sqlDataSetSupport = new SqlDataSetSupport();
 
@@ -107,6 +116,16 @@ public class DataSetController extends AbstractSchemaConnController
 	public void setSqlDataSetSupport(SqlDataSetSupport sqlDataSetSupport)
 	{
 		this.sqlDataSetSupport = sqlDataSetSupport;
+	}
+
+	public File getTempDirectory()
+	{
+		return tempDirectory;
+	}
+
+	public void setTempDirectory(File tempDirectory)
+	{
+		this.tempDirectory = tempDirectory;
 	}
 
 	public DataSetParamValueConverter getDataSetParamValueConverter()
@@ -267,6 +286,34 @@ public class DataSetController extends AbstractSchemaConnController
 		this.dataSetEntityService.update(user, dataSet);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
+	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, Object> uploadFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam("file") MultipartFile multipartFile) throws Exception
+	{
+		File directory = getTempDataSetDirectory();
+		String displayName = multipartFile.getOriginalFilename();
+		File tmpFile = FileUtil.generateUniqueFile(directory, FileUtil.getExtension(displayName));
+		String fileName = tmpFile.getName();
+
+		InputStream in = null;
+		try
+		{
+			in = multipartFile.getInputStream();
+			IOUtil.write(in, tmpFile);
+		}
+		finally
+		{
+			IOUtil.close(in);
+		}
+
+		Map<String, Object> results = new HashMap<>();
+		results.put("fileName", fileName);
+		results.put("displayName", displayName);
+
+		return results;
 	}
 
 	@RequestMapping("/view")
@@ -488,6 +535,11 @@ public class DataSetController extends AbstractSchemaConnController
 		}.execute();
 
 		return modelSqlResult;
+	}
+
+	protected File getTempDataSetDirectory()
+	{
+		return FileUtil.getDirectory(this.tempDirectory, "dataSet", true);
 	}
 
 	protected String resolveFmkSource(String source, Map<String, ?> paramValues, Collection<DataSetParam> dataSetParams)
