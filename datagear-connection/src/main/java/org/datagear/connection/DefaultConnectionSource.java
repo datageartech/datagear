@@ -19,9 +19,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.dbcp2.ConnectionFactory;
 import org.apache.commons.dbcp2.DriverConnectionFactory;
+import org.datagear.util.JDBCCompatiblity;
+import org.datagear.util.JdbcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +53,7 @@ public class DefaultConnectionSource implements ConnectionSource
 
 	private PropertiesProcessor propertiesProcessor = null;
 
-	private Cache<ConnectionIdentity, DriverBasicDataSource> driverBasicDataSourceCache;
+	private Cache<ConnectionIdentity, InternalDataSourceHolder> internalDataSourceCache;
 
 	private ConcurrentMap<String, PreferedDriverEntityResult> _urlPreferedDriverEntityMap = new ConcurrentHashMap<>();
 
@@ -64,10 +68,9 @@ public class DefaultConnectionSource implements ConnectionSource
 	{
 		super();
 		this.driverEntityManager = driverEntityManager;
-		this.driverBasicDataSourceCache = CacheBuilder.newBuilder()
-				.maximumSize(50).expireAfterAccess(60 * 24, TimeUnit.MINUTES)
-				.removalListener(new DriverBasicDataSourceRemovalListener())
-				.build();
+		this.internalDataSourceCache = CacheBuilder.newBuilder().maximumSize(50)
+				.expireAfterAccess(60 * 24, TimeUnit.MINUTES)
+				.removalListener(new DriverBasicDataSourceRemovalListener()).build();
 	}
 
 	public DriverEntityManager getDriverEntityManager()
@@ -100,23 +103,23 @@ public class DefaultConnectionSource implements ConnectionSource
 		this.propertiesProcessor = propertiesProcessor;
 	}
 
-	protected Cache<ConnectionIdentity, DriverBasicDataSource> getDriverBasicDataSourceCache()
+	protected Cache<ConnectionIdentity, InternalDataSourceHolder> getInternalDataSourceCache()
 	{
-		return driverBasicDataSourceCache;
+		return this.internalDataSourceCache;
 	}
 
 	/**
 	 * 设置内置数据源缓存。
 	 * <p>
-	 * 注意：设置的缓存应该已注册{@linkplain DriverBasicDataSourceRemovalListener}。
+	 * 注意：设置的缓存应自己注册{@linkplain RemovalListener}负责关闭内置数据源。
 	 * </p>
 	 * 
 	 * @param driverBasicDataSourceCache
 	 */
-	protected void setDriverBasicDataSourceCache(
-			Cache<ConnectionIdentity, DriverBasicDataSource> driverBasicDataSourceCache)
+	protected void setInternalDataSourceCache(
+			Cache<ConnectionIdentity, InternalDataSourceHolder> internalDataSourceCache)
 	{
-		this.driverBasicDataSourceCache = driverBasicDataSourceCache;
+		this.internalDataSourceCache = internalDataSourceCache;
 	}
 
 	@Override
@@ -142,7 +145,7 @@ public class DefaultConnectionSource implements ConnectionSource
 	 */
 	public void close()
 	{
-		this.driverBasicDataSourceCache.invalidateAll();
+		this.internalDataSourceCache.invalidateAll();
 	}
 
 	/**
@@ -370,7 +373,7 @@ public class DefaultConnectionSource implements ConnectionSource
 		{
 			return getConnection(driver, connectionOption.getUrl(), properties);
 		}
-		catch(SQLException | ExecutionException e)
+		catch (SQLException | ExecutionException e)
 		{
 			throw new EstablishConnectionException(connectionOption, e);
 		}
@@ -381,30 +384,106 @@ public class DefaultConnectionSource implements ConnectionSource
 	}
 
 	protected Connection getConnection(Driver driver, String url, Properties properties)
-			throws ExecutionException, SQLException
+			throws ExecutionException, SQLException, Throwable
 	{
 		ConnectionIdentity connectionIdentity = ConnectionIdentity.valueOf(url, properties);
 
-		DriverBasicDataSource dataSource = this.driverBasicDataSourceCache.get(connectionIdentity,
-				new Callable<DriverBasicDataSource>()
-		{
-					@Override
-					public DriverBasicDataSource call() throws Exception
-					{
-						return createDataSource(driver, url, properties);
-					}
-		});
+		Connection connection = null;
+		InternalDataSourceHolder dataSourceHolder = null;
 
-		return dataSource.getConnection();
+		try
+		{
+			dataSourceHolder = this.internalDataSourceCache.get(connectionIdentity,
+					new Callable<InternalDataSourceHolder>()
+					{
+						@Override
+						public InternalDataSourceHolder call() throws Exception
+						{
+							DataSource dataSource = createInternalDataSource(driver, url, properties);
+							InternalDataSourceHolder holder = new InternalDataSourceHolder();
+							holder.setDataSource(dataSource);
+
+							return holder;
+						}
+					});
+
+			// 底层数据源无法支持此驱动时将会创建一个getDataSource()为null的InternalDataSourceHolder
+			if (!dataSourceHolder.hasDataSource())
+			{
+				connection = getConnectionWithoutInternalDataSource(driver, url, properties);
+
+				LOGGER.debug("Got a connection without internal DataSource for {}, "
+						+ "because the internal DataSource can not support this driver", connectionIdentity);
+			}
+			else
+			{
+				connection = dataSourceHolder.getDataSource().getConnection();
+
+				LOGGER.debug("Got a connection from the internal DataSource for {}", connectionIdentity);
+			}
+		}
+		catch (Throwable t)
+		{
+			@JDBCCompatiblity("底层数据源可能会存在无法兼容驱动程序而抛出异常的情况（比如老版本的Hive1.2.2驱动不支持Connection.isValid()方法，而DBCP2会用到它）"
+					+ "，所以在这里采取降级策略：抛弃底层数据源，改为直接新建连接。"
+					+ "需要注意的是，这里的异常也可能是由其他原因导致的（比如连接参数错误等），因此，只有在直接新建连接成功之后，才能断定是底层数据源不兼容的问题。")
+
+			boolean throwByDataSource = (dataSourceHolder != null && dataSourceHolder.hasDataSource());
+
+			if (!throwByDataSource)
+			{
+				throw t;
+			}
+			else
+			{
+				LOGGER.debug("Get connection from the internal DataSource failed for {}, "
+						+ "now try without internal DataSource", connectionIdentity, t);
+
+				JdbcUtil.closeConnection(connection);
+
+				try
+				{
+					connection = getConnectionWithoutInternalDataSource(driver, url, properties);
+
+					InternalDataSourceHolder nonDataSourceHolder = new InternalDataSourceHolder();
+					nonDataSourceHolder.setDataSource(null);
+					this.internalDataSourceCache.invalidate(connectionIdentity);
+					this.internalDataSourceCache.put(connectionIdentity, nonDataSourceHolder);
+
+					LOGGER.debug(
+							"Get connection success without internal DataSource for {}, "
+									+ "the internal DataSource does exactly not support this driver",
+							connectionIdentity);
+				}
+				catch (Throwable e)
+				{
+					LOGGER.debug(
+							"Get connection fail without internal DataSource for {}, "
+									+ "the internal DataSource is not sure if support this driver",
+							connectionIdentity, e);
+
+					JdbcUtil.closeConnection(connection);
+
+					throw t;
+				}
+			}
+		}
+
+		return connection;
 	}
 
-	protected DriverBasicDataSource createDataSource(Driver driver, String url, Properties properties)
+	protected Connection getConnectionWithoutInternalDataSource(Driver driver, String url, Properties properties)
+			throws Throwable
+	{
+		return driver.connect(url, properties);
+	}
+
+	protected DataSource createInternalDataSource(Driver driver, String url, Properties properties)
 	{
 		DriverBasicDataSource re = new DriverBasicDataSource(driver, url, properties);
-		
-		if(LOGGER.isInfoEnabled())
-			LOGGER.info("Create internal data source for {}", ConnectionIdentity.valueOf(url, properties));
-		
+
+		LOGGER.info("Create internal data source for {}", ConnectionIdentity.valueOf(url, properties));
+
 		return re;
 	}
 
@@ -569,29 +648,84 @@ public class DefaultConnectionSource implements ConnectionSource
 	/**
 	 * {@linkplain DriverBasicDataSource}缓存移除监听器。
 	 * <p>
-	 * 它负责调用{@linkplain DriverBasicDataSource#clone()}。
+	 * 它负责调用{@linkplain DriverBasicDataSource#close()}。
 	 * </p>
 	 * 
 	 * @author datagear@163.com
 	 *
 	 */
 	protected static class DriverBasicDataSourceRemovalListener
-			implements RemovalListener<ConnectionIdentity, DriverBasicDataSource>
+			implements RemovalListener<ConnectionIdentity, InternalDataSourceHolder>
 	{
 		@Override
-		public void onRemoval(RemovalNotification<ConnectionIdentity, DriverBasicDataSource> notification)
+		public void onRemoval(RemovalNotification<ConnectionIdentity, InternalDataSourceHolder> notification)
 		{
+			InternalDataSourceHolder holder = notification.getValue();
+
+			if (!holder.hasDataSource())
+				return;
+
+			DataSource dataSource = holder.getDataSource();
+
+			if (!(dataSource instanceof DriverBasicDataSource))
+				throw new UnsupportedOperationException(
+						"This " + DriverBasicDataSourceRemovalListener.class.getSimpleName() + " only support "
+								+ DriverBasicDataSource.class.getSimpleName());
+
 			try
 			{
-				notification.getValue().close();
+				((DriverBasicDataSource) dataSource).close();
 
 				if (LOGGER.isInfoEnabled())
 					LOGGER.info("Close internal data source for {}", notification.getKey());
 			}
-			catch(SQLException e)
+			catch (SQLException e)
 			{
 				LOGGER.error("Close internal data source exception:", e);
 			}
+		}
+	}
+
+	/**
+	 * 内置数据源持有类。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 * @param <T>
+	 */
+	protected static class InternalDataSourceHolder
+	{
+		/** 内置数据源 */
+		private DataSource dataSource = null;
+
+		public InternalDataSourceHolder()
+		{
+			super();
+		}
+
+		/**
+		 * 是否持有数据源。
+		 * 
+		 * @return
+		 */
+		public boolean hasDataSource()
+		{
+			return (this.dataSource != null);
+		}
+
+		/**
+		 * 获取数据源实例。
+		 * 
+		 * @return 可能为{@code null}
+		 */
+		public DataSource getDataSource()
+		{
+			return dataSource;
+		}
+
+		public void setDataSource(DataSource dataSource)
+		{
+			this.dataSource = dataSource;
 		}
 	}
 }
