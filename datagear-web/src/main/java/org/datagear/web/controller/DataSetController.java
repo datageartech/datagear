@@ -5,6 +5,7 @@
 package org.datagear.web.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,10 +20,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractFmkTemplateDataSet;
 import org.datagear.analysis.support.AbstractJsonDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetParamValueConverter;
+import org.datagear.analysis.support.JsonDirectoryFileDataSet;
 import org.datagear.analysis.support.SqlDataSetSupport;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.management.domain.DataSetEntity;
@@ -212,7 +215,7 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/saveAddForJsonFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveAddForJsonFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestBody JsonFileDataSetEntity dataSet)
+			@RequestBody JsonFileDataSetEntity dataSet) throws Throwable
 	{
 		User user = WebUtils.getUser(request, response);
 
@@ -222,6 +225,7 @@ public class DataSetController extends AbstractSchemaConnController
 		checkSaveJsonFileDataSetEntity(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
+		copyToJsonFileDataSetEntityDirectoryIf(dataSet, "");
 
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
 	}
@@ -242,6 +246,9 @@ public class DataSetController extends AbstractSchemaConnController
 		model.addAttribute("dataSetParams", toWriteJsonTemplateModel(dataSet.getParams()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.editDataSet");
 		model.addAttribute(KEY_FORM_ACTION, "saveEditFor" + dataSet.getDataSetType());
+
+		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType()))
+			model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -277,13 +284,15 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_JsonFile, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveEditForJsonFile(HttpServletRequest request,
-			HttpServletResponse response, @RequestBody JsonFileDataSetEntity dataSet)
+			HttpServletResponse response, @RequestBody JsonFileDataSetEntity dataSet,
+			@RequestParam("originalFileName") String originalFileName) throws Throwable
 	{
 		User user = WebUtils.getUser(request, response);
 
 		checkSaveJsonFileDataSetEntity(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
+		copyToJsonFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
 	}
@@ -332,6 +341,9 @@ public class DataSetController extends AbstractSchemaConnController
 		model.addAttribute("dataSetParams", toWriteJsonTemplateModel(dataSet.getParams()));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.viewDataSet");
 		model.addAttribute(KEY_READONLY, true);
+
+		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType()))
+			model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 
 		return buildFormView(dataSet.getDataSetType());
 	}
@@ -387,6 +399,9 @@ public class DataSetController extends AbstractSchemaConnController
 		{
 			String id = ids[i];
 			this.dataSetEntityService.deleteById(user, id);
+
+			File dataSetDirectory = getDataSetEntityService().getDataSetDirectory(id);
+			FileUtil.deleteFile(dataSetDirectory);
 		}
 
 		return buildOperationMessageDeleteSuccessResponseEntity(request);
@@ -468,16 +483,47 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model springModel, @RequestBody JsonFileDataSetEntityPreview preview)
 			throws Throwable
 	{
-		JsonFileDataSetEntity dataSet = preview.getDataSet();
+		JsonDirectoryFileDataSet dataSet = preview.getDataSet();
+		setJsonDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
-		getDataSetEntityService().inflateJsonFileDataSetEntity(dataSet);
-		Object data = dataSet.getResult(preview.getParamValues());
-		List<DataSetProperty> dataSetProperties = AbstractJsonDataSet.JSON_DATA_SET_SUPPORT
-				.resolveDataSetProperties(data);
+		ResolvedDataSetResult result = dataSet.resolve(preview.getParamValues());
 
-		DataSetPreviewResult result = new DataSetPreviewResult(dataSet.getFileName(), data, dataSetProperties);
+		DataSetPreviewResult previewResult = new DataSetPreviewResult("", result.getResult().getData(),
+				result.getProperties());
 
-		return result;
+		return previewResult;
+	}
+
+	protected boolean copyToJsonFileDataSetEntityDirectoryIf(JsonFileDataSetEntity entity, String originalFileName)
+			throws IOException
+	{
+		String fileName = entity.getFileName();
+
+		if (isEmpty(entity.getId()))
+			return false;
+
+		if (!isEmpty(originalFileName) && originalFileName.equals(fileName))
+			return false;
+
+		File dataSetDirectory = getDataSetEntityService().getDataSetDirectory(entity.getId());
+		FileUtil.clearDirectory(dataSetDirectory);
+
+		File tmpFile = FileUtil.getFile(getTempDataSetDirectory(), fileName);
+		File entityFile = FileUtil.getFile(dataSetDirectory, fileName);
+
+		IOUtil.copy(tmpFile, entityFile, false);
+
+		return true;
+	}
+
+	protected void setJsonDirectoryFileDataSetDirectory(JsonDirectoryFileDataSet dataSet, String originalFileName)
+	{
+		String fileName = dataSet.getFileName();
+
+		if (!isEmpty(dataSet.getId()) && !isEmpty(originalFileName) && originalFileName.equals(fileName))
+			dataSet.setDirectory(getDataSetEntityService().getDataSetDirectory(dataSet.getId()));
+		else
+			dataSet.setDirectory(getTempDataSetDirectory());
 	}
 
 	protected String buildFormView(String dataSetType)
@@ -875,7 +921,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static class JsonFileDataSetEntityPreview
 	{
-		private JsonFileDataSetEntity dataSet;
+		private JsonDirectoryFileDataSet dataSet;
+
+		private String originalFileName;
 
 		@SuppressWarnings("unchecked")
 		private Map<String, Object> paramValues = Collections.EMPTY_MAP;
@@ -885,21 +933,24 @@ public class DataSetController extends AbstractSchemaConnController
 			super();
 		}
 
-		public JsonFileDataSetEntityPreview(JsonFileDataSetEntity dataSet, Map<String, Object> paramValues)
-		{
-			super();
-			this.dataSet = dataSet;
-			this.paramValues = paramValues;
-		}
-
-		public JsonFileDataSetEntity getDataSet()
+		public JsonDirectoryFileDataSet getDataSet()
 		{
 			return dataSet;
 		}
 
-		public void setDataSet(JsonFileDataSetEntity dataSet)
+		public void setDataSet(JsonDirectoryFileDataSet dataSet)
 		{
 			this.dataSet = dataSet;
+		}
+
+		public String getOriginalFileName()
+		{
+			return originalFileName;
+		}
+
+		public void setOriginalFileName(String originalFileName)
+		{
+			this.originalFileName = originalFileName;
 		}
 
 		public Map<String, Object> getParamValues()

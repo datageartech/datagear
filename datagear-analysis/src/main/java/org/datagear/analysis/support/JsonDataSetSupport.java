@@ -42,9 +42,10 @@ public class JsonDataSetSupport extends JsonSupport
 	 * 
 	 * @param jsonValue
 	 * @return
+	 * @throws DataSetSourceParseException
 	 * @throws DataSetException
 	 */
-	public Object resolveValue(String jsonValue) throws DataSetException
+	public Object resolveValue(String jsonValue) throws DataSetSourceParseException, DataSetException
 	{
 		StringReader reader = new StringReader(jsonValue);
 		return resolveValue(reader);
@@ -55,9 +56,10 @@ public class JsonDataSetSupport extends JsonSupport
 	 * 
 	 * @param jsonReader
 	 * @return
+	 * @throws DataSetSourceParseException
 	 * @throws DataSetException
 	 */
-	public Object resolveValue(Reader jsonReader) throws DataSetException
+	public Object resolveValue(Reader jsonReader) throws DataSetSourceParseException, DataSetException
 	{
 		try
 		{
@@ -74,10 +76,12 @@ public class JsonDataSetSupport extends JsonSupport
 	 * 
 	 * @param jsonValue
 	 * @return
-	 * @throws DataSetException
+	 * @throws DataSetSourceParseException
 	 * @throws UnsupportedJsonResultDataException
+	 * @throws DataSetException
 	 */
-	public Object resolveResultData(String jsonValue) throws DataSetException, UnsupportedJsonResultDataException
+	public Object resolveResultData(String jsonValue)
+			throws DataSetSourceParseException, UnsupportedJsonResultDataException, DataSetException
 	{
 		StringReader reader = new StringReader(jsonValue);
 		return resolveResultData(reader);
@@ -89,11 +93,12 @@ public class JsonDataSetSupport extends JsonSupport
 	 * @param file
 	 * @param encoding
 	 * @return
-	 * @throws DataSetException
+	 * @throws DataSetSourceParseException
 	 * @throws UnsupportedJsonResultDataException
+	 * @throws DataSetException
 	 */
 	public Object resolveResultData(File file, String encoding)
-			throws DataSetException, UnsupportedJsonResultDataException
+			throws DataSetSourceParseException, UnsupportedJsonResultDataException, DataSetException
 	{
 		Reader reader = null;
 
@@ -102,7 +107,7 @@ public class JsonDataSetSupport extends JsonSupport
 			reader = IOUtil.getReader(file, encoding);
 			return resolveResultData(reader);
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
 			throw new DataSetException(e);
 		}
@@ -117,10 +122,12 @@ public class JsonDataSetSupport extends JsonSupport
 	 * 
 	 * @param reader
 	 * @return
-	 * @throws DataSetException
+	 * @throws DataSetSourceParseException
 	 * @throws UnsupportedJsonResultDataException
+	 * @throws DataSetException
 	 */
-	public Object resolveResultData(Reader reader) throws DataSetException, UnsupportedJsonResultDataException
+	public Object resolveResultData(Reader reader)
+			throws DataSetSourceParseException, UnsupportedJsonResultDataException, DataSetException
 	{
 		JsonNode jsonNode = null;
 
@@ -130,7 +137,7 @@ public class JsonDataSetSupport extends JsonSupport
 		}
 		catch (Throwable t)
 		{
-			throw new DataSetException(t);
+			throw new DataSetSourceParseException(t);
 		}
 
 		if (!isLegalResultDataJsonNode(jsonNode))

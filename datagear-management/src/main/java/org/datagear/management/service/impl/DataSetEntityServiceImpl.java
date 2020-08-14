@@ -48,10 +48,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 	private AuthorizationService authorizationService;
 
-	/** 数据集资源文件存储根目录 */
-	private File dataSetResourceRootDirectory;
-
-	private File _dataSetJsonFileDirectory;
+	/** 数据集文件存储根目录 */
+	private File dataSetRootDirectory;
 
 	public DataSetEntityServiceImpl()
 	{
@@ -59,23 +57,23 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	public DataSetEntityServiceImpl(SqlSessionFactory sqlSessionFactory, ConnectionSource connectionSource,
-			SchemaService schemaService, AuthorizationService authorizationService, File dataSetResourceRootDirectory)
+			SchemaService schemaService, AuthorizationService authorizationService, File dataSetRootDirectory)
 	{
 		super(sqlSessionFactory);
 		this.connectionSource = connectionSource;
 		this.schemaService = schemaService;
 		this.authorizationService = authorizationService;
-		setDataSetResourceRootDirectory(dataSetResourceRootDirectory);
+		setDataSetRootDirectory(dataSetRootDirectory);
 	}
 
 	public DataSetEntityServiceImpl(SqlSessionTemplate sqlSessionTemplate, ConnectionSource connectionSource,
-			SchemaService schemaService, AuthorizationService authorizationService, File dataSetResourceRootDirectory)
+			SchemaService schemaService, AuthorizationService authorizationService, File dataSetRootDirectory)
 	{
 		super(sqlSessionTemplate);
 		this.connectionSource = connectionSource;
 		this.schemaService = schemaService;
 		this.authorizationService = authorizationService;
-		setDataSetResourceRootDirectory(dataSetResourceRootDirectory);
+		setDataSetRootDirectory(dataSetRootDirectory);
 	}
 
 	public ConnectionSource getConnectionSource()
@@ -108,22 +106,20 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		this.authorizationService = authorizationService;
 	}
 
-	public File getDataSetResourceRootDirectory()
+	public File getDataSetRootDirectory()
 	{
-		return dataSetResourceRootDirectory;
+		return dataSetRootDirectory;
 	}
 
-	public void setDataSetResourceRootDirectory(File dataSetResourceRootDirectory)
+	public void setDataSetRootDirectory(File dataSetRootDirectory)
 	{
-		this.dataSetResourceRootDirectory = dataSetResourceRootDirectory;
-		this._dataSetJsonFileDirectory = FileUtil.getDirectory(this.dataSetResourceRootDirectory,
-				DataSetEntity.DATA_SET_TYPE_JsonFile, true);
+		this.dataSetRootDirectory = dataSetRootDirectory;
 	}
 
 	@Override
-	public File getDataSetJsonFileDirectory()
+	public File getDataSetDirectory(String dataSetId)
 	{
-		return _dataSetJsonFileDirectory;
+		return FileUtil.getDirectory(getDataSetRootDirectory(), dataSetId);
 	}
 
 	@Override
@@ -142,12 +138,6 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		}
 
 		return entity;
-	}
-
-	@Override
-	public void inflateJsonFileDataSetEntity(JsonFileDataSetEntity entity)
-	{
-		entity.setDirectory(getDataSetJsonFileDirectory());
 	}
 
 	@Override
@@ -291,14 +281,17 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		else if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(obj.getDataSetType()))
 			obj = getJsonFileDataSetEntityById(obj.getId());
 
-		Map<String, Object> sqlParams = buildParamMapWithIdentifierQuoteParameter();
-		sqlParams.put("dataSetId", obj.getId());
+		if (obj == null)
+			return null;
 
-		List<DataSetPropertyPO> propertyPOs = selectListMybatis("getPropertyPOs", sqlParams);
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("dataSetId", obj.getId());
+
+		List<DataSetPropertyPO> propertyPOs = selectListMybatis("getPropertyPOs", params);
 		List<DataSetProperty> dataSetProperties = DataSetPropertyPO.to(propertyPOs);
 		obj.setProperties(dataSetProperties);
 
-		List<DataSetParamPO> paramPOs = selectListMybatis("getParamPOs", sqlParams);
+		List<DataSetParamPO> paramPOs = selectListMybatis("getParamPOs", params);
 		List<DataSetParam> dataSetParams = DataSetParamPO.to(paramPOs);
 		obj.setParams(dataSetParams);
 
@@ -333,7 +326,7 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		JsonFileDataSetEntity entity = selectOneMybatis("getJsonFileDataSetEntityById", params);
 
 		if (entity != null)
-			entity.setDirectory(getDataSetJsonFileDirectory());
+			entity.setDirectory(getDataSetDirectory(id));
 
 		return entity;
 	}

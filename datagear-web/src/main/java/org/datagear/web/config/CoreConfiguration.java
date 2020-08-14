@@ -228,9 +228,9 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public File dataSetResourceRootDirectory() throws IOException
+	public File dataSetRootDirectory() throws IOException
 	{
-		return createDirectory(environment.getProperty("directory.dataSetResource"), true);
+		return createDirectory(environment.getProperty("directory.dataSet"), true);
 	}
 
 	protected File createDirectory(String directoryName, boolean createIfInexistence) throws IOException
@@ -391,7 +391,7 @@ public class CoreConfiguration implements InitializingBean
 	{
 		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory().getObject(),
 				this.connectionSource(), this.schemaService(), this.authorizationService(),
-				this.dataSetResourceRootDirectory());
+				this.dataSetRootDirectory());
 		return bean;
 	}
 

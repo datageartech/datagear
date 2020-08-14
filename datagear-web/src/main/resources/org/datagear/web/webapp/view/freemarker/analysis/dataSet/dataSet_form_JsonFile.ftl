@@ -38,7 +38,7 @@ readonly 是否只读操作，允许为null
 					<label><@spring.message code='dataSet.jsonFile' /></label>
 				</div>
 				<div class="form-item-value">
-					<input type="hidden" name="originalFileName" value="${(dataSet.fileName)!''?html}" />
+					<input type="hidden" id="${pageId}-originalFileName" value="${(dataSet.fileName)!''?html}" />
 					<input type="hidden" name="fileName" value="${(dataSet.fileName)!''?html}" />
 					<div class="workspace-editor-wrapper">
 						<input type="text" name="displayName" value="${(dataSet.displayName)!''?html}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
@@ -111,22 +111,31 @@ readonly 是否只读操作，允许为null
 		if(!fileName)
 			return false;
 		
-		this.data.fileName = fileName;
+		this.data.dataSet = {};
+		this.data.dataSet.id = po.element("input[name='id']").val();
+		this.data.dataSet.name = po.element("input[name='name']").val();
+		this.data.dataSet.encoding = po.element("select[name='encoding']").val();
+		this.data.dataSet.fileName = fileName;
+		this.data.originalFileName = po.element("#${pageId}-originalFileName").val();
 	};
 	po.previewOptions.beforeMore = function()
 	{
-		if(!this.data.fileName)
+		if(!this.data.dataSet || !this.data.dataSet.fileName)
 			return false;
 	};
 	po.previewOptions.beforeRefresh = function()
 	{
-		if(!this.data.fileName)
+		if(!this.data.dataSet || !this.data.dataSet.fileName)
 			return false;
+	};
+	po.previewOptions.beforeRequest = function()
+	{
+		this.data.dataSet.params = this.data.dataSetParams;
+		this.data.dataSetParams = undefined;
 	};
 	po.previewOptions.success = function(previewResponse)
 	{
-		po.element("input[name='fileName']").val(this.data.fileName);
-		po.jsonEditor.focus();
+		po.element("input[name='fileName']").val(this.data.dataSet.fileName);
 	};
 	
 	po.initPreviewOperations();
@@ -184,7 +193,9 @@ readonly 是否只读操作，允许为null
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
 			
-			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,
+			var originalFileName = po.element("#${pageId}-originalFileName").val();
+			
+			$.postJson("${contextPath}/analysis/dataSet/${formAction}?originalFileName="+originalFileName, formData,
 			function(response)
 			{
 				po.pageParamCallAfterSave(true, response.data);

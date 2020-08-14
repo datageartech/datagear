@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.support.DataSetSourceParseException;
 import org.datagear.analysis.support.SqlDataSetUnsupportedSqlTypeException;
 import org.datagear.analysis.support.TemplateResolverException;
 import org.datagear.analysis.support.UnsupportedJsonResultDataException;
@@ -418,6 +419,17 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(UnsupportedJsonResultDataException.class), exception,
 				false);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(DataSetSourceParseException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisDataSetSourceParseException(HttpServletRequest request, HttpServletResponse response,
+			DataSetSourceParseException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(DataSetSourceParseException.class), exception, false,
+				exception.getMessage());
 
 		return getErrorView(request, response);
 	}

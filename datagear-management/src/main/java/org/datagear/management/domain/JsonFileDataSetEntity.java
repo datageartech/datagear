@@ -10,30 +10,19 @@ package org.datagear.management.domain;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.support.AbstractJsonFileDataSet;
-import org.datagear.util.FileUtil;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.datagear.analysis.support.JsonDirectoryFileDataSet;
 
 /**
- * {@linkplain AbstractJsonFileDataSet}实体。
+ * {@linkplain JsonDirectoryFileDataSet}实体。
  * 
  * @author datagear@163.com
  *
  */
-public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements DataSetEntity
+public class JsonFileDataSetEntity extends JsonDirectoryFileDataSet implements DataSetEntity
 {
 	private static final long serialVersionUID = 1L;
-
-	/** JSON文件所在的目录 */
-	private File directory;
-
-	/** JSON文件名 */
-	private String fileName;
 
 	/** 展示名 */
 	private String displayName;
@@ -56,34 +45,10 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Da
 	public JsonFileDataSetEntity(String id, String name, List<DataSetProperty> properties, File directory,
 			String fileName, String displayName, User createUser)
 	{
-		super(id, name, properties);
-		this.directory = directory;
-		this.fileName = fileName;
+		super(id, name, properties, directory, fileName);
 		this.displayName = displayName;
 		this.createTime = new Date();
 		this.createUser = createUser;
-	}
-
-	@JsonIgnore
-	public File getDirectory()
-	{
-		return directory;
-	}
-
-	@JsonIgnore
-	public void setDirectory(File directory)
-	{
-		this.directory = directory;
-	}
-
-	public String getFileName()
-	{
-		return fileName;
-	}
-
-	public void setFileName(String fileName)
-	{
-		this.fileName = fileName;
 	}
 
 	public String getDisplayName()
@@ -143,13 +108,5 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Da
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
-	}
-
-	@Override
-	protected File getJsonFile(Map<String, ?> paramValues) throws DataSetException
-	{
-		String fileName = resolveTemplate(this.fileName, paramValues);
-		File jsonFile = FileUtil.getFile(directory, fileName);
-		return jsonFile;
 	}
 }

@@ -11,7 +11,6 @@ import java.io.File;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.management.domain.DataSetEntity;
-import org.datagear.management.domain.JsonFileDataSetEntity;
 
 /**
  * {@linkplain DataSetEntity}业务服务接口。
@@ -30,16 +29,10 @@ public interface DataSetEntityService extends DataPermissionEntityService<String
 	DataSet getDataSet(String id);
 
 	/**
-	 * 获取{@linkplain JsonFileDataSetEntity#getDirectory()}。
+	 * 获取指定ID的文件存储目录。
 	 * 
+	 * @param dataSetId
 	 * @return
 	 */
-	File getDataSetJsonFileDirectory();
-
-	/**
-	 * 设置{@linkplain JsonFileDataSetEntity}，使其具备执行分析的条件。
-	 * 
-	 * @param entity
-	 */
-	void inflateJsonFileDataSetEntity(JsonFileDataSetEntity entity);
+	File getDataSetDirectory(String dataSetId);
 }
