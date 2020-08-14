@@ -27,6 +27,10 @@ public interface DataSet extends Identifiable
 	 * <p>
 	 * 属性列表描述{@linkplain #getResult(Map)}返回的{@linkplain DataSetResult#getData()}的对象结构。
 	 * </p>
+	 * <p>
+	 * 属性列表并不一定与{@linkplain DataSetResult#getData()}的对象结构严格一致，
+	 * 通常是{@linkplain DataSetResult#getData()}对象包含相同、或者更多的属性。
+	 * </p>
 	 * 
 	 * @return
 	 */

@@ -32,6 +32,12 @@ public class JsonValueDataSet extends AbstractJsonDataSet
 		super();
 	}
 
+	public JsonValueDataSet(String id, String name, String value)
+	{
+		super(id, name);
+		this.value = value;
+	}
+
 	public JsonValueDataSet(String id, String name, List<DataSetProperty> properties, String value)
 	{
 		super(id, name, properties);

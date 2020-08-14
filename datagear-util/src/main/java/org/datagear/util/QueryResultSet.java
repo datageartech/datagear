@@ -90,6 +90,9 @@ public class QueryResultSet
 
 	/**
 	 * 关闭。
+	 * <p>
+	 * 此方法不会抛出任何{@linkplain Throwable}。
+	 * </p>
 	 */
 	public void close()
 	{
@@ -100,6 +103,12 @@ public class QueryResultSet
 		JdbcUtil.closeStatement(this.statement);
 	}
 
+	/**
+	 * 关闭。
+	 * <p>
+	 * 此方法不会抛出任何{@linkplain Throwable}。
+	 * </p>
+	 */
 	public static void close(QueryResultSet qrs)
 	{
 		if (qrs != null)

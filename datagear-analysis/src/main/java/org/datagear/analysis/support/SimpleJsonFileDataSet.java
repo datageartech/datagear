@@ -27,6 +27,12 @@ public class SimpleJsonFileDataSet extends AbstractJsonFileDataSet
 		super();
 	}
 
+	public SimpleJsonFileDataSet(String id, String name, File file)
+	{
+		super(id, name);
+		this.file = file;
+	}
+
 	public SimpleJsonFileDataSet(String id, String name, List<DataSetProperty> properties, File file)
 	{
 		super(id, name, properties);

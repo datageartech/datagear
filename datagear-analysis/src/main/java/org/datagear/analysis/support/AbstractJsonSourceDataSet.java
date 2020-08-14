@@ -32,6 +32,11 @@ public abstract class AbstractJsonSourceDataSet extends AbstractJsonDataSet
 		super();
 	}
 
+	public AbstractJsonSourceDataSet(String id, String name)
+	{
+		super(id, name);
+	}
+
 	public AbstractJsonSourceDataSet(String id, String name, List<DataSetProperty> properties)
 	{
 		super(id, name, properties);
