@@ -2158,15 +2158,6 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	vertical-align: top;
 	border: 0px;
 }
-.page-form-dataSet .workspace-operation-wrapper .preview-result-table-wrapper .no-more-data-flag{
-	position: absolute;
-	bottom: -2px;
-	width: 100%;
-	height: 0px;
-	border-top-width: 2px;
-	border-bottom-width: 2px;
-	display: none;
-}
 .page-form-dataSet .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source{
 	position: absolute;
 	display: none;
@@ -2207,6 +2198,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-dataSet .preview-param-value-panel .preview-param-value-panel-content .dg-dspv-form-content{
 	max-height: 14em;
 	overflow: auto;
+}
+.page-form-dataSet .form-foot-placeholder{
+	height: 2.5em;
 }
 .page-form-dataSet-jsonFile{}
 .page-form-dataSet-jsonFile .form-item-workspace .form-item-label{

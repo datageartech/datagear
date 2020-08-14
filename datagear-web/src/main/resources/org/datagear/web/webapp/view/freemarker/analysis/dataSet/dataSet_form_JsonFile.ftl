@@ -57,6 +57,8 @@ readonly 是否只读操作，允许为null
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
 			&nbsp;&nbsp;
 			<input type="reset" value="<@spring.message code='reset' />" />
+			<#else>
+			<div class="form-foot-placeholder">&nbsp;<div>
 			</#if>
 		</div>
 	</form>
@@ -111,27 +113,14 @@ readonly 是否只读操作，允许为null
 		if(!fileName)
 			return false;
 		
-		this.data.dataSet = {};
-		this.data.dataSet.id = po.element("input[name='id']").val();
-		this.data.dataSet.name = po.element("input[name='name']").val();
 		this.data.dataSet.encoding = po.element("select[name='encoding']").val();
 		this.data.dataSet.fileName = fileName;
 		this.data.originalFileName = po.element("#${pageId}-originalFileName").val();
-	};
-	po.previewOptions.beforeMore = function()
-	{
-		if(!this.data.dataSet || !this.data.dataSet.fileName)
-			return false;
 	};
 	po.previewOptions.beforeRefresh = function()
 	{
 		if(!this.data.dataSet || !this.data.dataSet.fileName)
 			return false;
-	};
-	po.previewOptions.beforeRequest = function()
-	{
-		this.data.dataSet.params = this.data.dataSetParams;
-		this.data.dataSetParams = undefined;
 	};
 	po.previewOptions.success = function(previewResponse)
 	{

@@ -10,6 +10,7 @@ package org.datagear.analysis.support;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,14 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 	public SqlDataSet()
 	{
 		super();
+	}
+
+	@SuppressWarnings("unchecked")
+	public SqlDataSet(String id, String name, ConnectionFactory connectionFactory, String sql)
+	{
+		super(id, name, Collections.EMPTY_LIST);
+		this.connectionFactory = connectionFactory;
+		this.sql = sql;
 	}
 
 	public SqlDataSet(String id, String name, List<DataSetProperty> properties, ConnectionFactory connectionFactory,
@@ -87,7 +96,7 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 	}
 
 	@Override
-	public ResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
+	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
 	{
 		return getResolvedDataSetResult(paramValues, null);
 	}
@@ -100,7 +109,7 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 	 * @return
 	 * @throws DataSetException
 	 */
-	protected ResolvedDataSetResult getResolvedDataSetResult(Map<String, ?> paramValues,
+	protected TemplateResolvedDataSetResult getResolvedDataSetResult(Map<String, ?> paramValues,
 			List<DataSetProperty> properties) throws DataSetException
 	{
 		String sql = resolveTemplate(getSql(), paramValues);
@@ -132,7 +141,7 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 			List<Map<String, ?>> data = getSqlDataSetSupport().resolveResultData(cn, rs, properties);
 			DataSetResult result = new DataSetResult(data);
 
-			return new ResolvedDataSetResult(result, properties);
+			return new TemplateResolvedDataSetResult(result, properties, sql);
 		}
 		catch (SQLException e)
 		{

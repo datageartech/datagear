@@ -265,7 +265,30 @@ po.previewOptions.url = "...";
 		dataSetProperties = (dataSetProperties || []);
 		
 		var dataTable = po.dataSetPropertiesTableElement().DataTable();
-		$.addDataTableData(dataTable, dataSetProperties, 0);
+		var prevProperties = $.dataTableUtil.getRowsData(dataTable);
+		
+		if(!prevProperties || prevProperties.length == 0)
+			$.addDataTableData(dataTable, dataSetProperties, 0);
+		else
+		{
+			for(var i=0; i<dataSetProperties.length; i++)
+			{
+				var dsp = dataSetProperties[i];
+				
+				var exists = false;
+				for(var j=0; j<prevProperties.length; j++)
+				{
+					if(prevProperties[j].name == dsp.name)
+					{
+						exists = true;
+						break;
+					}
+				}
+				
+				if(!exists)
+					$.dataTableUtil.addRowData(dataTable, dsp);
+			}
+		}
 	};
 	
 	//获取用于添加数据集参数的参数名
@@ -497,22 +520,14 @@ po.previewOptions.url = "...";
 	{
 		//预览请求URL，必须设置
 		url: null,
-		//是否分页预览
-		paging: false,
 		//预览请求参数数据
 		data:
 		{
-			dataSetParams: [],
-			paramValues: {},
-			//分页预览时的起始行
-			startRow: undefined,
-			//分页预览时的页大小
-			fetchSize: undefined,
+			dataSet: {},
+			paramValues: {}
 		},
 		//预览操作前置回调函数，返回false阻止
 		beforePreview: function(){},
-		//分页时更多操作前置回调函数，返回false阻止
-		beforeMore: function(){},
 		//刷新操作前置回调函数，返回false阻止
 		beforeRefresh: function(){},
 		//预览请求前置回调函数，返回false阻止
@@ -520,7 +535,7 @@ po.previewOptions.url = "...";
 		//预览响应构建表格列数组
 		buildTablesColumns: function(previewResponse)
 		{
-			return po.buildDataSetPropertiesColumns(previewResponse.dataSetProperties);
+			return po.buildDataSetPropertiesColumns(previewResponse.properties);
 		},
 		//预览请求成功回调函数
 		success: function(previewResponse){}
@@ -543,8 +558,8 @@ po.previewOptions.url = "...";
 			if(po.previewOptions.beforePreview() == false)
 				return;
 			
-			if(po.previewOptions.paging)
-				po.previewOptions.data.startRow = 1;
+			po.previewOptions.data.dataSet.id = po.element("input[name='id']").val();
+			po.previewOptions.data.dataSet.name = po.element("input[name='name']").val();
 			
 			if(po.hasFormDataSetParam())
 			{
@@ -557,7 +572,7 @@ po.previewOptions.url = "...";
 					{
 						po.destroyPreviewResultTable();
 						
-						po.previewOptions.data.dataSetParams = po.getFormDataSetParams();
+						po.previewOptions.data.dataSet.params = po.getFormDataSetParams();
 						po.previewOptions.data.paramValues = chartFactory.chartForm.getDataSetParamValueObj(this);
 						
 						po.executePreview();
@@ -568,44 +583,17 @@ po.previewOptions.url = "...";
 			{
 				po.destroyPreviewResultTable();
 				
-				po.previewOptions.data.dataSetParams = [];
+				po.previewOptions.data.dataSet.params = [];
 				po.previewOptions.data.paramValues = {};
 				
 				po.executePreview();
 			}
 		});
 		
-		if(po.previewOptions.paging)
-		{
-			po.element(".preview-result-table-wrapper .more-button").click(function()
-			{
-				if(!po.previewOptions.paging)
-					return;
-
-				if(po.previewOptions._noMoreData)
-					return;
-				
-				if(!po.previewOptions._nextStartRow)
-					return;
-				
-				if(po.previewOptions.beforeMore() == false)
-					return;
-				
-				po.previewOptions.data.startRow = po.previewOptions._nextStartRow;
-				
-				po.executePreview();
-			});
-		}
-		else
-			po.element(".preview-result-table-wrapper .more-button").hide();
-		
 		po.element(".preview-result-table-wrapper .refresh-button").click(function()
 		{
 			if(po.previewOptions.beforeRefresh() == false)
 				return;
-			
-			if(po.previewOptions.paging)
-				po.previewOptions.data.startRow = 1;
 			
 			po.executePreview();
 		});
@@ -631,25 +619,12 @@ po.previewOptions.url = "...";
 			data : po.previewOptions.data,
 			success : function(previewResponse)
 			{
-				//previewResponse:
-				//{
-				//	data: ..., resolvedSource: "...", dataSetProperties: [...],
-				//	startRow: ..., nextStartRow: ..., fetchSize: ...
-				//}
-				
-				po.updateFormDataSetProperties(previewResponse.dataSetProperties);
+				po.updateFormDataSetProperties(previewResponse.properties);
 				po.showDataSetPropertiesTab();
 				
-				var tableData = (previewResponse.data || []);
+				var tableData = (previewResponse.result.data || []);
 				if(!$.isArray(tableData))
 					tableData = [ tableData ];
-				
-				if(po.previewOptions.paging)
-				{
-					po.previewOptions.data.startRow = previewResponse.startRow;
-					po.previewOptions.data.fetchSize = previewResponse.fetchSize;
-					po.previewOptions._nextStartRow = previewResponse.startRow + previewResponse.fetchSize;
-				}
 				
 				if(initDataTable)
 				{
@@ -685,9 +660,9 @@ po.previewOptions.url = "...";
 					table.addClass("preview-result-table-inited");
 					table.dataTable(settings);
 					
-					if(previewResponse.resolvedSource)
+					if(previewResponse.templateResult)
 					{
-						po.element(".result-resolved-source textarea").val(previewResponse.resolvedSource);
+						po.element(".result-resolved-source textarea").val(previewResponse.templateResult);
 						po.element(".result-resolved-source").show();
 					}
 					else
@@ -699,18 +674,7 @@ po.previewOptions.url = "...";
 				else
 				{
 					var dataTable = table.DataTable();
-					$.addDataTableData(dataTable, tableData, (previewResponse.startRow ? previewResponse.startRow-1 : 0));
-				}
-				
-				if(po.previewOptions.paging && tableData.length >= previewResponse.fetchSize)
-				{
-					po.previewOptions._noMoreData = false;
-					po.element(".no-more-data-flag").hide();
-				}
-				else
-				{
-					po.previewOptions._noMoreData = true;
-					po.element(".no-more-data-flag").show();
+					$.addDataTableData(dataTable, tableData, 0);
 				}
 				
 				po.previewOptions.success(previewResponse);

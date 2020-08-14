@@ -7,7 +7,6 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,20 +17,24 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractFmkTemplateDataSet;
-import org.datagear.analysis.support.AbstractJsonDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.JsonDirectoryFileDataSet;
+import org.datagear.analysis.support.JsonValueDataSet;
+import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.SqlDataSetSupport;
 import org.datagear.analysis.support.TemplateContext;
+import org.datagear.analysis.support.TemplateResolvedDataSetResult;
 import org.datagear.management.domain.DataSetEntity;
 import org.datagear.management.domain.JsonFileDataSetEntity;
 import org.datagear.management.domain.JsonValueDataSetEntity;
 import org.datagear.management.domain.Schema;
+import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.DataSetEntityService;
@@ -39,7 +42,6 @@ import org.datagear.meta.Column;
 import org.datagear.meta.Table;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.support.SqlSelectManager;
-import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
@@ -446,10 +448,32 @@ public class DataSetController extends AbstractSchemaConnController
 
 	@RequestMapping(value = "/previewSql", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public DataSetPreviewResult previewSql(HttpServletRequest request, HttpServletResponse response,
+	public TemplateResolvedDataSetResult previewSql(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody SqlDataSetPreview sqlDataSetPreview) throws Throwable
 	{
-		DataSetPreviewResult result = executeSelect(request, response, springModel, sqlDataSetPreview);
+		final User user = WebUtils.getUser(request, response);
+
+		String schemaId = sqlDataSetPreview.getSchemaId();
+
+		TemplateResolvedDataSetResult result = new ReturnSchemaConnExecutor<TemplateResolvedDataSetResult>(request,
+				response, springModel, schemaId, true)
+		{
+			@Override
+			protected TemplateResolvedDataSetResult execute(HttpServletRequest request, HttpServletResponse response,
+					org.springframework.ui.Model springModel, Schema schema) throws Throwable
+			{
+				checkReadTableDataPermission(schema, user);
+
+				SqlDataSet dataSet = sqlDataSetPreview.getDataSet();
+				SchemaConnectionFactory connectionFactory = new SchemaConnectionFactory(getConnectionSource(), schema);
+				dataSet.setConnectionFactory(connectionFactory);
+
+				TemplateResolvedDataSetResult result = dataSet.resolve(sqlDataSetPreview.getParamValues());
+
+				return result;
+			}
+		}.execute();
+
 		return result;
 	}
 
@@ -464,23 +488,19 @@ public class DataSetController extends AbstractSchemaConnController
 
 	@RequestMapping(value = "/previewJsonValue", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public DataSetPreviewResult previewJsonValue(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @RequestBody JsonValueDataSetPreview preivew) throws Throwable
+	public TemplateResolvedDataSetResult previewJsonValue(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestBody JsonValueDataSetPreview preview) throws Throwable
 	{
-		String json = resolveFmkSource(preivew.getValue(), preivew.getParamValues(), preivew.getDataSetParams());
-		Object data = AbstractJsonDataSet.JSON_DATA_SET_SUPPORT.resolveResultData(json);
-		List<DataSetProperty> dataSetProperties = AbstractJsonDataSet.JSON_DATA_SET_SUPPORT
-				.resolveDataSetProperties(data);
-
-		DataSetPreviewResult result = new DataSetPreviewResult(json, data, dataSetProperties);
+		JsonValueDataSet dataSet = preview.getDataSet();
+		TemplateResolvedDataSetResult result = dataSet.resolve(preview.getParamValues());
 
 		return result;
 	}
 
 	@RequestMapping(value = "/previewJsonFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public DataSetPreviewResult previewJsonFile(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @RequestBody JsonFileDataSetEntityPreview preview)
+	public ResolvedDataSetResult previewJsonFile(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestBody JsonDirectoryFileDataSetPreview preview)
 			throws Throwable
 	{
 		JsonDirectoryFileDataSet dataSet = preview.getDataSet();
@@ -488,10 +508,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 		ResolvedDataSetResult result = dataSet.resolve(preview.getParamValues());
 
-		DataSetPreviewResult previewResult = new DataSetPreviewResult("", result.getResult().getData(),
-				result.getProperties());
-
-		return previewResult;
+		return result;
 	}
 
 	protected boolean copyToJsonFileDataSetEntityDirectoryIf(JsonFileDataSetEntity entity, String originalFileName)
@@ -529,58 +546,6 @@ public class DataSetController extends AbstractSchemaConnController
 	protected String buildFormView(String dataSetType)
 	{
 		return "/analysis/dataSet/dataSet_form_" + dataSetType;
-	}
-
-	protected DataSetPreviewResult executeSelect(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, SqlDataSetPreview sqlDataSetPreview) throws Throwable
-	{
-		final User user = WebUtils.getUser(request, response);
-
-		String schemaId = sqlDataSetPreview.getSchemaId();
-		String sql = sqlDataSetPreview.getSql();
-		Integer startRow = sqlDataSetPreview.getStartRow();
-		Integer fetchSize = sqlDataSetPreview.getFetchSize();
-
-		if (startRow == null)
-			startRow = 1;
-		if (fetchSize == null)
-			fetchSize = DEFAULT_SQL_RESULTSET_FETCH_SIZE;
-
-		if (fetchSize < 1)
-			fetchSize = 1;
-		if (fetchSize > 1000)
-			fetchSize = 1000;
-
-		final String sqlFinal = resolveFmkSource(sql, sqlDataSetPreview.getParamValues(),
-				sqlDataSetPreview.getDataSetParams());
-		final int startRowFinal = startRow;
-		final int fetchSizeFinal = fetchSize;
-
-		DataSetPreviewResult modelSqlResult = new ReturnSchemaConnExecutor<DataSetPreviewResult>(request, response,
-				springModel, schemaId, true)
-		{
-			@Override
-			protected DataSetPreviewResult execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
-
-				try
-				{
-					SqlSelectResult result = sqlSelectManager.select(getConnection(), sqlFinal, startRowFinal,
-							fetchSizeFinal);
-					List<DataSetProperty> dataSetProperties = resolveDataSetProperties(result.getTable(), null);
-
-					return new DataSetPreviewResult(result, dataSetProperties);
-				}
-				catch (SQLException e)
-				{
-					throw new UserSQLException(e);
-				}
-			}
-		}.execute();
-
-		return modelSqlResult;
 	}
 
 	protected File getTempDataSetDirectory()
@@ -678,149 +643,26 @@ public class DataSetController extends AbstractSchemaConnController
 			throw new IllegalInputException();
 	}
 
-	/**
-	 * 数据集预览结果。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class DataSetPreviewResult
+	public static class AbstractDataSetPreview<T extends DataSet>
 	{
-		/** 已完成解析的预览源 */
-		private String resolvedSource;
-
-		/** 预览数据 */
-		private Object data;
-
-		/** 由后台解析的属性集 */
-		private List<DataSetProperty> dataSetProperties;
-
-		/** 由后台解析的预览结果表结构 */
-		private Table table;
-
-		/** 分页预览的起始行 */
-		private Integer startRow;
-
-		/** 分页预览的页大小 */
-		private Integer fetchSize;
-
-		public DataSetPreviewResult()
-		{
-			super();
-		}
-
-		public DataSetPreviewResult(String resolvedSource, Object data)
-		{
-			super();
-			this.resolvedSource = resolvedSource;
-			this.data = data;
-		}
-
-		public DataSetPreviewResult(String resolvedSource, Object data, List<DataSetProperty> dataSetProperties)
-		{
-			super();
-			this.resolvedSource = resolvedSource;
-			this.data = data;
-			this.dataSetProperties = dataSetProperties;
-		}
-
-		public DataSetPreviewResult(SqlSelectResult modelSqlResult, List<DataSetProperty> dataSetProperties)
-		{
-			super();
-			this.resolvedSource = modelSqlResult.getSql();
-			this.data = modelSqlResult.getRows();
-			this.dataSetProperties = dataSetProperties;
-			this.table = modelSqlResult.getTable();
-			this.startRow = modelSqlResult.getStartRow();
-			this.fetchSize = modelSqlResult.getFetchSize();
-		}
-
-		public String getResolvedSource()
-		{
-			return resolvedSource;
-		}
-
-		public void setResolvedSource(String resolvedSource)
-		{
-			this.resolvedSource = resolvedSource;
-		}
-
-		public Object getData()
-		{
-			return data;
-		}
-
-		public void setData(Object data)
-		{
-			this.data = data;
-		}
-
-		public List<DataSetProperty> getDataSetProperties()
-		{
-			return dataSetProperties;
-		}
-
-		public void setDataSetProperties(List<DataSetProperty> dataSetProperties)
-		{
-			this.dataSetProperties = dataSetProperties;
-		}
-
-		public Table getTable()
-		{
-			return table;
-		}
-
-		public void setTable(Table table)
-		{
-			this.table = table;
-		}
-
-		public Integer getStartRow()
-		{
-			return startRow;
-		}
-
-		public void setStartRow(Integer startRow)
-		{
-			this.startRow = startRow;
-		}
-
-		public Integer getFetchSize()
-		{
-			return fetchSize;
-		}
-
-		public void setFetchSize(Integer fetchSize)
-		{
-			this.fetchSize = fetchSize;
-		}
-	}
-
-	public static class AbstractDataSetPreview
-	{
-		@SuppressWarnings("unchecked")
-		private List<DataSetParam> dataSetParams = Collections.EMPTY_LIST;
+		private T dataSet;
 
 		@SuppressWarnings("unchecked")
 		private Map<String, Object> paramValues = Collections.EMPTY_MAP;
-
-		private Integer startRow;
-
-		private Integer fetchSize;
 
 		public AbstractDataSetPreview()
 		{
 			super();
 		}
 
-		public List<DataSetParam> getDataSetParams()
+		public T getDataSet()
 		{
-			return dataSetParams;
+			return dataSet;
 		}
 
-		public void setDataSetParams(List<DataSetParam> dataSetParams)
+		public void setDataSet(T dataSet)
 		{
-			this.dataSetParams = dataSetParams;
+			this.dataSet = dataSet;
 		}
 
 		public Map<String, Object> getParamValues()
@@ -832,44 +674,15 @@ public class DataSetController extends AbstractSchemaConnController
 		{
 			this.paramValues = paramValues;
 		}
-
-		public Integer getStartRow()
-		{
-			return startRow;
-		}
-
-		public void setStartRow(Integer startRow)
-		{
-			this.startRow = startRow;
-		}
-
-		public Integer getFetchSize()
-		{
-			return fetchSize;
-		}
-
-		public void setFetchSize(Integer fetchSize)
-		{
-			this.fetchSize = fetchSize;
-		}
 	}
 
-	public static class SqlDataSetPreview extends AbstractDataSetPreview
+	public static class SqlDataSetPreview extends AbstractDataSetPreview<SqlDataSet>
 	{
 		private String schemaId;
-
-		private String sql;
 
 		public SqlDataSetPreview()
 		{
 			super();
-		}
-
-		public SqlDataSetPreview(String schemaId, String sql)
-		{
-			super();
-			this.schemaId = schemaId;
-			this.sql = sql;
 		}
 
 		public String getSchemaId()
@@ -881,19 +694,9 @@ public class DataSetController extends AbstractSchemaConnController
 		{
 			this.schemaId = schemaId;
 		}
-
-		public String getSql()
-		{
-			return sql;
-		}
-
-		public void setSql(String sql)
-		{
-			this.sql = sql;
-		}
 	}
 
-	public static class JsonValueDataSetPreview extends AbstractDataSetPreview
+	public static class JsonValueDataSetPreview extends AbstractDataSetPreview<JsonValueDataSet>
 	{
 		private String value;
 
@@ -919,28 +722,13 @@ public class DataSetController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class JsonFileDataSetEntityPreview
+	public static class JsonDirectoryFileDataSetPreview extends AbstractDataSetPreview<JsonDirectoryFileDataSet>
 	{
-		private JsonDirectoryFileDataSet dataSet;
-
 		private String originalFileName;
 
-		@SuppressWarnings("unchecked")
-		private Map<String, Object> paramValues = Collections.EMPTY_MAP;
-
-		public JsonFileDataSetEntityPreview()
+		public JsonDirectoryFileDataSetPreview()
 		{
 			super();
-		}
-
-		public JsonDirectoryFileDataSet getDataSet()
-		{
-			return dataSet;
-		}
-
-		public void setDataSet(JsonDirectoryFileDataSet dataSet)
-		{
-			this.dataSet = dataSet;
 		}
 
 		public String getOriginalFileName()
@@ -951,16 +739,6 @@ public class DataSetController extends AbstractSchemaConnController
 		public void setOriginalFileName(String originalFileName)
 		{
 			this.originalFileName = originalFileName;
-		}
-
-		public Map<String, Object> getParamValues()
-		{
-			return paramValues;
-		}
-
-		public void setParamValues(Map<String, Object> paramValues)
-		{
-			this.paramValues = paramValues;
 		}
 	}
 

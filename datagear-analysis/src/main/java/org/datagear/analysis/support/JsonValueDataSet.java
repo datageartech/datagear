@@ -63,4 +63,17 @@ public class JsonValueDataSet extends AbstractJsonDataSet
 
 		return new DataSetResult(data);
 	}
+
+	@Override
+	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
+	{
+		String json = resolveTemplate(this.value, paramValues);
+
+		Object data = getJsonDataSetSupport().resolveResultData(json);
+		DataSetResult result = new DataSetResult(data);
+
+		List<DataSetProperty> properties = getJsonDataSetSupport().resolveDataSetProperties(result.getData());
+
+		return new TemplateResolvedDataSetResult(result, properties, json);
+	}
 }

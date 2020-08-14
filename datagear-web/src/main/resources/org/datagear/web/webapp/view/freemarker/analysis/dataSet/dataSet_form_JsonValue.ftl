@@ -39,6 +39,8 @@ readonly 是否只读操作，允许为null
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
 			&nbsp;&nbsp;
 			<input type="reset" value="<@spring.message code='reset' />" />
+			<#else>
+			<div class="form-foot-placeholder">&nbsp;<div>
 			</#if>
 		</div>
 	</form>
@@ -95,21 +97,16 @@ readonly 是否只读操作，允许为null
 		if(!value)
 			return false;
 		
-		this.data.value = value;
-	};
-	po.previewOptions.beforeMore = function()
-	{
-		if(!this.data.value)
-			return false;
+		this.data.dataSet.value = value;
 	};
 	po.previewOptions.beforeRefresh = function()
 	{
-		if(!this.data.value)
+		if(!this.data.dataSet || !this.data.dataSet.value)
 			return false;
 	};
 	po.previewOptions.success = function(previewResponse)
 	{
-		po.element("textarea[name='value']").val(this.data.value);
+		po.element("textarea[name='value']").val(this.data.dataSet.value);
 		po.jsonEditor.focus();
 	};
 	

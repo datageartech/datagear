@@ -51,6 +51,8 @@ readonly 是否只读操作，允许为null
 			<input type="submit" value="<@spring.message code='save' />" class="recommended" />
 			&nbsp;&nbsp;
 			<input type="reset" value="<@spring.message code='reset' />" />
+			<#else>
+			<div class="form-foot-placeholder">&nbsp;<div>
 			</#if>
 		</div>
 	</form>
@@ -125,7 +127,6 @@ readonly 是否只读操作，允许为null
 	po.initPreviewParamValuePanel();
 	
 	po.previewOptions.url = po.url("previewSql");
-	po.previewOptions.paging = true;
 	po.previewOptions.beforePreview = function()
 	{
 		var schemaId = po.getDataSetSchemaId();
@@ -134,26 +135,17 @@ readonly 是否只读操作，允许为null
 		if(!schemaId || !sql)
 			return false;
 		
+		this.data.dataSet.sql = sql;
 		this.data.schemaId = schemaId;
-		this.data.sql = sql;
-	};
-	po.previewOptions.beforeMore = function()
-	{
-		if(!this.data.schemaId || !this.data.sql)
-			return false;
 	};
 	po.previewOptions.beforeRefresh = function()
 	{
-		if(!this.data.schemaId || !this.data.sql)
+		if(!this.data.dataSet || !this.data.dataSet.sql || !this.data.schemaId)
 			return false;
-	};
-	po.previewOptions.buildTablesColumns = function(previewResponse)
-	{
-		return $.buildDataTablesColumns(previewResponse.table);
 	};
 	po.previewOptions.success = function(previewResponse)
 	{
-		po.element("textarea[name='sql']").val(this.data.sql);
+		po.element("textarea[name='sql']").val(this.data.dataSet.sql);
 		po.sqlEditor.focus();
 	};
 	
