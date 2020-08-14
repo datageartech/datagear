@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
-import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractFmkTemplateDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver;
@@ -27,7 +26,6 @@ import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.JsonDirectoryFileDataSet;
 import org.datagear.analysis.support.JsonValueDataSet;
 import org.datagear.analysis.support.SqlDataSet;
-import org.datagear.analysis.support.SqlDataSetSupport;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
 import org.datagear.management.domain.DataSetEntity;
@@ -38,14 +36,10 @@ import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.DataSetEntityService;
-import org.datagear.meta.Column;
-import org.datagear.meta.Table;
 import org.datagear.persistence.PagingData;
-import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
-import org.datagear.util.SqlType;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.DataFilterPagingQuery;
@@ -68,8 +62,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/analysis/dataSet")
 public class DataSetController extends AbstractSchemaConnController
 {
-	public static final int DEFAULT_SQL_RESULTSET_FETCH_SIZE = 20;
-
 	static
 	{
 		AuthorizationResourceMetas.registerForShare(SqlDataSetEntity.AUTHORIZATION_RESOURCE_TYPE, "dataSet");
@@ -79,12 +71,7 @@ public class DataSetController extends AbstractSchemaConnController
 	private DataSetEntityService dataSetEntityService;
 
 	@Autowired
-	private SqlSelectManager sqlSelectManager;
-
-	@Autowired
 	private File tempDirectory;
-
-	private SqlDataSetSupport sqlDataSetSupport = new SqlDataSetSupport();
 
 	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
 
@@ -101,26 +88,6 @@ public class DataSetController extends AbstractSchemaConnController
 	public void setDataSetEntityService(DataSetEntityService dataSetEntityService)
 	{
 		this.dataSetEntityService = dataSetEntityService;
-	}
-
-	public SqlSelectManager getSqlSelectManager()
-	{
-		return sqlSelectManager;
-	}
-
-	public void setSqlSelectManager(SqlSelectManager sqlSelectManager)
-	{
-		this.sqlSelectManager = sqlSelectManager;
-	}
-
-	public SqlDataSetSupport getSqlDataSetSupport()
-	{
-		return sqlDataSetSupport;
-	}
-
-	public void setSqlDataSetSupport(SqlDataSetSupport sqlDataSetSupport)
-	{
-		this.sqlDataSetSupport = sqlDataSetSupport;
 	}
 
 	public File getTempDirectory()
@@ -449,11 +416,11 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/previewSql", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public TemplateResolvedDataSetResult previewSql(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @RequestBody SqlDataSetPreview sqlDataSetPreview) throws Throwable
+			org.springframework.ui.Model springModel, @RequestBody SqlDataSetPreview preview) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
 
-		String schemaId = sqlDataSetPreview.getSchemaId();
+		String schemaId = preview.getSchemaId();
 
 		TemplateResolvedDataSetResult result = new ReturnSchemaConnExecutor<TemplateResolvedDataSetResult>(request,
 				response, springModel, schemaId, true)
@@ -464,11 +431,14 @@ public class DataSetController extends AbstractSchemaConnController
 			{
 				checkReadTableDataPermission(schema, user);
 
-				SqlDataSet dataSet = sqlDataSetPreview.getDataSet();
+				SqlDataSet dataSet = preview.getDataSet();
 				SchemaConnectionFactory connectionFactory = new SchemaConnectionFactory(getConnectionSource(), schema);
 				dataSet.setConnectionFactory(connectionFactory);
 
-				TemplateResolvedDataSetResult result = dataSet.resolve(sqlDataSetPreview.getParamValues());
+				Map<String, Object> convertedParamValues = getDataSetParamValueConverter()
+						.convert(preview.getParamValues(), dataSet.getParams());
+
+				TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
 
 				return result;
 			}
@@ -492,7 +462,11 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model springModel, @RequestBody JsonValueDataSetPreview preview) throws Throwable
 	{
 		JsonValueDataSet dataSet = preview.getDataSet();
-		TemplateResolvedDataSetResult result = dataSet.resolve(preview.getParamValues());
+
+		Map<String, Object> convertedParamValues = getDataSetParamValueConverter()
+				.convert(preview.getParamValues(), dataSet.getParams());
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
 
 		return result;
 	}
@@ -506,7 +480,10 @@ public class DataSetController extends AbstractSchemaConnController
 		JsonDirectoryFileDataSet dataSet = preview.getDataSet();
 		setJsonDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
-		ResolvedDataSetResult result = dataSet.resolve(preview.getParamValues());
+		Map<String, Object> convertedParamValues = getDataSetParamValueConverter()
+				.convert(preview.getParamValues(), dataSet.getParams());
+
+		ResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
 
 		return result;
 	}
@@ -562,40 +539,6 @@ public class DataSetController extends AbstractSchemaConnController
 	protected DataSetFmkTemplateResolver getDataSetFmkTemplateResolver()
 	{
 		return AbstractFmkTemplateDataSet.TEMPLATE_RESOLVER;
-	}
-
-	/**
-	 * 解析{@linkplain DataSetProperty}列表。
-	 * 
-	 * @param table
-	 * @param labels
-	 *            {@linkplain DataSetProperty#getLabel()}数组，允许为{@code null}或任意长度的数组
-	 * @return
-	 * @throws Throwable
-	 */
-	protected List<DataSetProperty> resolveDataSetProperties(Table table, String[] labels) throws Throwable
-	{
-		Column[] properties = table.getColumns();
-
-		List<DataSetProperty> dataSetProperties = new ArrayList<>(properties == null ? 0 : properties.length);
-
-		if (properties != null)
-		{
-			for (int i = 0; i < properties.length; i++)
-			{
-				Column column = properties[i];
-
-				DataSetProperty dataSetProperty = new DataSetProperty(column.getName(), sqlDataSetSupport
-						.toPropertyDataType(new SqlType(column.getType(), column.getTypeName()), column.getName()));
-
-				if (labels != null && labels.length > i)
-					dataSetProperty.setLabel(labels[i]);
-
-				dataSetProperties.add(dataSetProperty);
-			}
-		}
-
-		return dataSetProperties;
 	}
 
 	protected void checkSaveEntity(DataSetEntity dataSet)
