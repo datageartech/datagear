@@ -145,7 +145,6 @@ readonly 是否只读操作，允许为null
 	.bind('fileuploadadd', function (e, data)
 	{
 		po.element("input[name='displayName']").val("");
-		po.form().validate().resetForm();
 		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	})
 	.bind('fileuploadprogressall', function (e, data)
