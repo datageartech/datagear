@@ -15,7 +15,7 @@
 					<label><@spring.message code='about.app.name' /></label>
 				</div>
 				<div class="form-item-value">
-					<@spring.message code='app.name' />
+					<@spring.message code='app.fullName' />
 				</div>
 			</div>
 			<div class="form-item">
