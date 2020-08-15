@@ -43,10 +43,12 @@ readonly 是否只读操作，允许为null
 					<div class="workspace-editor-wrapper">
 						<input type="text" name="displayName" value="${(dataSet.displayName)!''?html}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
 						<input type="hidden"  id="${pageId}-workspaceEditor" value="${(dataSet.fileName)!''?html}" />
+						<#if !readonly>
 						<div class="fileinput-wrapper">
 							<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
 							<div class="upload-file-info"></div>
 						</div>
+						</#if>
 					</div>
 					<#include "include/dataSet_form_html_wow.ftl" >
 				</div>
@@ -58,7 +60,7 @@ readonly 是否只读操作，允许为null
 			&nbsp;&nbsp;
 			<input type="reset" value="<@spring.message code='reset' />" />
 			<#else>
-			<div class="form-foot-placeholder">&nbsp;<div>
+			<div class="form-foot-placeholder">&nbsp;</div>
 			</#if>
 		</div>
 	</form>

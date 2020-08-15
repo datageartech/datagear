@@ -52,7 +52,7 @@ readonly 是否只读操作，允许为null
 			&nbsp;&nbsp;
 			<input type="reset" value="<@spring.message code='reset' />" />
 			<#else>
-			<div class="form-foot-placeholder">&nbsp;<div>
+			<div class="form-foot-placeholder">&nbsp;</div>
 			</#if>
 		</div>
 	</form>
