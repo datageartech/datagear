@@ -703,14 +703,29 @@ po.previewOptions.url = "...";
 	{
 		dataSetProperties = (dataSetProperties || []);
 		
+		var firstColumnIndex = null;
 		var columns = [];
-		
 		for(var i=0; i<dataSetProperties.length; i++)
 		{
 			columns[i] =
 			{
 				title: dataSetProperties[i].name,
-				data: dataSetProperties[i].name,
+				//XXX 这里data不能直接使用dataSetProperties[i].name，
+				//因为其中可能包含特殊字符（比如：'.'），而导致值无法展示
+				data: function(row, type, setValue, meta)
+				{
+					//XXX DataTables-1.10.18这里有BUG，meta.col初值为1而非0，所以这里特殊处理
+					if(firstColumnIndex == null)
+						firstColumnIndex = meta.col;
+					var colIndex = (firstColumnIndex == 1 ? meta.col - 1 : meta.col);
+					
+					var name = dataSetProperties[colIndex].name;
+					
+					if(setValue === undefined)
+						return row[name];
+					else
+						row[name] = setValue;
+				},
 				defaultContent: "",
 			};
 		}
