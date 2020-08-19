@@ -500,3 +500,9 @@ CREATE TABLE DATAGEAR_DATA_SET_JSON_FILE
 );
 
 ALTER TABLE DATAGEAR_DATA_SET_JSON_FILE ADD FOREIGN KEY (DS_ID) REFERENCES DATAGEAR_DATA_SET (DS_ID) ON DELETE CASCADE;
+
+
+-----------------------------------------
+--version[1.11.1], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
