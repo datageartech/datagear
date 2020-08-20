@@ -2177,6 +2177,10 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-dataSet .workspace-operation-wrapper .input-in-table{
 	width: 90%!important;
 }
+.page-form-dataSet .workspace-operation-wrapper .input-in-table.readonly{
+	border: none;
+	background: none;
+}
 .page-form-dataSet .form-item-workspace .error{
 	display: block;
 }

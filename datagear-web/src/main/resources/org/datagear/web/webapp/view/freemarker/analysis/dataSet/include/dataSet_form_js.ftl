@@ -5,6 +5,8 @@
 page_js_obj.ftl
 
 变量：
+//自上次预览后，预览值是否已修改，不允许为null
+po.isPreviewValueModified = function(){ return true || false; };
 //预览URL，不允许为null
 po.previewOptions.url = "...";
 -->
@@ -17,6 +19,11 @@ po.previewOptions.url = "...";
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/dataSet/" + action;
+	};
+	
+	po.isPreviewValueModified = function()
+	{
+		return true;
 	};
 	
 	po.isModifiedIgnoreBlank = function(sourceVal, targetVal)
@@ -113,6 +120,9 @@ po.previewOptions.url = "...";
 				}
 				else if(ui.newPanel.hasClass("properties-table-wrapper"))
 				{
+					if(ui.newTab.hasClass("ui-state-highlight"))
+						ui.newTab.removeClass("ui-state-highlight");
+					
 					var dataTable = po.dataSetPropertiesTableElement().DataTable();
 					dataTable.columns.adjust();
 					dataTable.fixedColumns().relayout();
@@ -127,10 +137,8 @@ po.previewOptions.url = "...";
 		return "";
 	};
 	
-	po.initDataSetPropertiesTable = function(initDataSetProperties, hideTabIfNone)
+	po.initDataSetPropertiesTable = function(initDataSetProperties)
 	{
-		hideTabIfNone = (hideTabIfNone === undefined ? true : hideTabIfNone);
-		
 		po.dataSetPropertiesTableElement().dataTable(
 		{
 			"columns" :
@@ -141,7 +149,10 @@ po.previewOptions.url = "...";
 					data: "name",
 					render: function(data, type, row, meta)
 					{
-						return "<input type='text' value='"+$.escapeHtml(data)+"' class='dataSetPropertyName input-in-table ui-widget ui-widget-content' />";
+						var manual = row.manual;
+						return "<input type='text' value='"+$.escapeHtml(data)+"'"
+							+" class='dataSetPropertyName input-in-table "+(manual ? "manual" : "readonly")+" ui-widget ui-widget-content'"
+							+" "+(manual ? "" : "readonly='readonly'")+" />";
 					},
 					width: "8em",
 					defaultContent: "",
@@ -203,9 +214,15 @@ po.previewOptions.url = "...";
 		
 		po.element(".add-property-button").click(function()
 		{
-			var name = (po.getAddPropertyName() || "");
+			var rowData =
+			{
+				name: (po.getAddPropertyName() || ""),
+				type: "${PropertyDataType.STRING}",
+				label: "",
+				manual: true
+			};
 			
-			po.dataSetPropertiesTableElement().DataTable().row.add({ name: name, type: "${PropertyDataType.STRING}", label: "" }).draw();
+			po.dataSetPropertiesTableElement().DataTable().row.add(rowData).draw();
 		});
 		
 		po.element(".del-property-button").click(function()
@@ -218,19 +235,6 @@ po.previewOptions.url = "...";
 			//阻止行选中
 			event.stopPropagation();
 		});
-		
-		if(hideTabIfNone && (initDataSetProperties == null || initDataSetProperties.length == 0))
-			po.hideDataSetPropertiesTab();
-	};
-	
-	po.showDataSetPropertiesTab = function()
-	{
-		po.element(".workspace-operation-nav .operation-properties").show();
-	};
-	
-	po.hideDataSetPropertiesTab = function()
-	{
-		po.element(".workspace-operation-nav .operation-properties").hide();
 	};
 	
 	po.hasFormDataSetProperty = function()
@@ -239,14 +243,19 @@ po.previewOptions.url = "...";
 		return ($names.length > 0);
 	};
 	
-	po.getFormDataSetProperties = function()
+	po.getFormDataSetProperties = function(manualInfoReturn)
 	{
+		manualInfoReturn = (manualInfoReturn == true ? true : false);
+		
 		var properties = [];
 		
 		po.element(".properties-table-wrapper .dataSetPropertyName").each(function(i)
 		{
 			properties[i] = {};
-			properties[i]["name"] = $(this).val();
+			var $this = $(this);
+			properties[i]["name"] = $this.val();
+			if(manualInfoReturn)
+				properties[i]["manual"] = $this.hasClass("manual");
 		});
 		po.element(".properties-table-wrapper .dataSetPropertyType").each(function(i)
 		{
@@ -263,22 +272,40 @@ po.previewOptions.url = "...";
 	po.updateFormDataSetProperties = function(dataSetProperties)
 	{
 		dataSetProperties = (dataSetProperties || []);
+		var prevProperties = po.getFormDataSetProperties(true);
+		var updateProperties = [];
 		
-		var dataTable = po.dataSetPropertiesTableElement().DataTable();
-		var prevProperties = $.dataTableUtil.getRowsData(dataTable);
-		
-		if(!prevProperties || prevProperties.length == 0)
-			$.addDataTableData(dataTable, dataSetProperties, 0);
-		else
+		//添加后台自动解析的属性
+		for(var i=0; i<dataSetProperties.length; i++)
 		{
-			for(var i=0; i<dataSetProperties.length; i++)
+			var prev = null;
+			
+			for(var j=0; j<prevProperties.length; j++)
 			{
-				var dsp = dataSetProperties[i];
-				
-				var exists = false;
-				for(var j=0; j<prevProperties.length; j++)
+				if(dataSetProperties[i].name == prevProperties[j].name)
 				{
-					if(prevProperties[j].name == dsp.name)
+					prev = prevProperties[j];
+					break;
+				}
+			}
+			
+			//添加同名的旧属性，因为用户可能已编辑；否则，添加新属性
+			if(prev != null)
+				updateProperties.push(prev);
+			else
+				updateProperties.push(dataSetProperties[i]);
+		}
+		
+		//添加用户手动添加的属性
+		for(var i=0; i<prevProperties.length; i++)
+		{
+			if(prevProperties[i].manual == true)
+			{
+				var exists = false;
+				
+				for(var j=0; j<updateProperties.length; j++)
+				{
+					if(prevProperties[i].name == updateProperties[j].name)
 					{
 						exists = true;
 						break;
@@ -286,9 +313,13 @@ po.previewOptions.url = "...";
 				}
 				
 				if(!exists)
-					$.dataTableUtil.addRowData(dataTable, dsp);
+					updateProperties.push(prevProperties[i]);
 			}
 		}
+		
+		$.addDataTableData(po.dataSetPropertiesTableElement().DataTable(), updateProperties, 0);
+		
+		po.element(".operation-properties").addClass("ui-state-highlight");
 	};
 	
 	//获取用于添加数据集参数的参数名
@@ -619,8 +650,10 @@ po.previewOptions.url = "...";
 			data : po.previewOptions.data,
 			success : function(previewResponse)
 			{
-				po.updateFormDataSetProperties(previewResponse.properties);
-				po.showDataSetPropertiesTab();
+				//如果工作区内容已变更才更新属性，防止上次保存后的属性被刷新
+				//属性表单内容为空也更新，比如用户删除了所有属性时
+				if(po.isPreviewValueModified() || !po.hasFormDataSetProperty())
+					po.updateFormDataSetProperties(previewResponse.properties);
 				
 				var tableData = (previewResponse.result.data || []);
 				if(!$.isArray(tableData))

@@ -57,6 +57,11 @@ readonly 是否只读操作，允许为null
 	
 	$.initButtons(po.element());
 	po.initWorkspaceHeight();
+
+	po.isPreviewValueModified = function()
+	{
+		return po.isValueModified();
+	};
 	
 	po.isValueModified = function(textareaValue, editorValue)
 	{

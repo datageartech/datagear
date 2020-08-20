@@ -77,6 +77,11 @@ readonly 是否只读操作，允许为null
 	po.initWorkspaceHeight();
 	
 	po.getDataSetSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };
+
+	po.isPreviewValueModified = function()
+	{
+		return po.isSqlModified();
+	};
 	
 	po.isSqlModified = function(textareaValue, editorValue)
 	{

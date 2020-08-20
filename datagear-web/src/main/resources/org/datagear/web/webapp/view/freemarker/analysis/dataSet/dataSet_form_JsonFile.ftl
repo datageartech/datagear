@@ -89,6 +89,11 @@ readonly 是否只读操作，允许为null
 			$editor.val(value);
 	};
 	
+	po.isPreviewValueModified = function()
+	{
+		return po.isFileNameModified();
+	};
+	
 	po.isFileNameModified = function(inputValue, editorValue)
 	{
 		if(inputValue == undefined)
