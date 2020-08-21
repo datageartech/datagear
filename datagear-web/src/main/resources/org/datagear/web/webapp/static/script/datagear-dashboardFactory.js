@@ -45,6 +45,11 @@
 		this.initMapURLs();
 		$.extend(dashboard, this.dashboardBase);
 		dashboard.init();
+		
+		//开启心跳，避免会话超时
+		var heartbeatURL = global.chartFactory.renderContextAttr(dashboard.renderContext,
+				global.chartFactory.renderContextAttrs.webContext).extraValues.heartbeatURL;
+		this.startHeartBeat(heartbeatURL);
 	};
 	
 	/**
@@ -95,6 +100,64 @@
 			mapUrls = global.chartFactory.evalSilently(mapUrls);
 		
 		$.extend(global.chartFactory.mapURLs, mapUrls);
+	};
+	
+	/**
+	 * 开始执行心跳请求。
+	 * @param heartbeatURL 心跳URL，可选，初次调用时需设置
+	 */
+	dashboardFactory.startHeartBeat = function(heartbeatURL)
+	{
+		if(this._heartbeatStatus == "run")
+			return false;
+		
+		this._heartbeatStatus = "run";
+		
+		this.heartbeatURL = (heartbeatURL == undefined ? this.heartbeatURL : heartbeatURL);
+		this._heartBeatAjaxRequestTimeout();
+		
+		return true;
+	};
+	
+	/**
+	 * 停止执行心跳请求。
+	 */
+	dashboardFactory.stopHeartBeat = function()
+	{
+		this._heartbeatStatus = "stop";
+		
+		if(this._heartbeatTimeoutId != null)
+			clearTimeout(this._heartbeatTimeoutId);
+	};
+	
+	dashboardFactory._heartBeatAjaxRequestTimeout = function()
+	{
+		var interval = (this.heartbeatInterval || 1000*60*5);
+		
+		var _thisFactory = this;
+		
+		this._heartbeatTimeoutId = setTimeout(function()
+		{
+			if(_thisFactory._heartbeatStatus == "run")
+			{
+				var url = _thisFactory.heartbeatURL;
+				
+				if(url == null)
+					throw new Error("[dashboardFactory.heartbeatURL] must be set");
+				
+				$.ajax({
+					type : "GET",
+					cache: false,
+					url : url,
+					complete : function()
+					{
+						if(_thisFactory._heartbeatStatus == "run")
+							_thisFactory._heartBeatAjaxRequestTimeout();
+					}
+				});
+			}
+		},
+		interval);
 	};
 	
 	/**

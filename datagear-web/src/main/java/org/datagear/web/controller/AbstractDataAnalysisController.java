@@ -61,6 +61,9 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 
 	public static final String DASHBOARD_THEME_NAME_PARAM = "themeName";
 
+	/** 看板心跳URL名 */
+	public static final String DASHBOARD_HEARTBEAT_URL_NAME = "heartbeatURL";
+
 	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
 
 	private DashboardThemeSource dashboardThemeSource = new SimpleDashboardThemeSource();
@@ -269,6 +272,14 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 		}
 
 		return re;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void addHeartBeatValue(WebContext webContext)
+	{
+		String heartbeatURL = webContext.getContextPath() + "/analysis/dashboard/heartbeat";
+
+		((Map<String, Object>) webContext.getExtraValues()).put(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
 	}
 
 	protected static class SessionHtmlTplDashboardManager implements Serializable

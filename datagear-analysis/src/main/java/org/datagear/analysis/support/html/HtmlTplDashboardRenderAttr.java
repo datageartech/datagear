@@ -5,6 +5,8 @@
 package org.datagear.analysis.support.html;
 
 import java.io.Writer;
+import java.util.Collections;
+import java.util.Map;
 
 import org.datagear.analysis.DashboardTheme;
 import org.datagear.analysis.RenderContext;
@@ -284,6 +286,10 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 		/** 异步加载看板图表的URL */
 		private String loadChartURL;
 
+		/** 其他Web上下文信息 */
+		@SuppressWarnings("unchecked")
+		private Map<String, ?> extraValues = Collections.EMPTY_MAP;
+
 		public WebContext()
 		{
 			super();
@@ -327,11 +333,21 @@ public class HtmlTplDashboardRenderAttr extends HtmlRenderAttr
 			this.loadChartURL = loadChartURL;
 		}
 
+		public Map<String, ?> getExtraValues()
+		{
+			return extraValues;
+		}
+
+		public void setExtraValues(Map<String, ?> extraValues)
+		{
+			this.extraValues = extraValues;
+		}
+
 		@Override
 		public String toString()
 		{
 			return getClass().getSimpleName() + " [contextPath=" + contextPath + ", updateDashboardURL="
-					+ updateDashboardURL + ", loadChartURL=" + loadChartURL + "]";
+					+ updateDashboardURL + ", loadChartURL=" + loadChartURL + ", extraValues=" + extraValues + "]";
 		}
 	}
 }

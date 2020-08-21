@@ -811,6 +811,29 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	}
 
 	/**
+	 * 看板心跳。
+	 * <p>
+	 * 看板页面有停留较长时间再操作的场景，此时可能会因为会话超时导致操作失败，所以这里添加心跳请求，避免会话超时。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param model
+	 * @param dashbaordId
+	 * @throws Throwable
+	 */
+	@RequestMapping(value = "/heartbeat", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public Map<String, Object> heartbeat(HttpServletRequest request, HttpServletResponse response) throws Throwable
+	{
+		Map<String, Object> data = new HashMap<>();
+		data.put("heartbeat", true);
+		data.put("time", System.currentTimeMillis());
+
+		return data;
+	}
+
+	/**
 	 * 解析HTML模板的字符编码。
 	 * 
 	 * @param templateIn
@@ -876,8 +899,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
 		String contextPath = getWebContextPath(request).get(request);
-		return new WebContext(contextPath, contextPath + "/analysis/dashboard/showData",
+		WebContext webContext = new WebContext(contextPath, contextPath + "/analysis/dashboard/showData",
 				contextPath + "/analysis/dashboard/loadChart");
+
+		webContext.setExtraValues(new HashMap<String, Object>());
+		addHeartBeatValue(webContext);
+
+		return webContext;
 	}
 
 	protected void checkSaveEntity(HtmlTplDashboardWidgetEntity widget)

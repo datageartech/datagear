@@ -6,6 +6,7 @@ package org.datagear.web.controller;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -397,8 +398,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
 		String contextPath = getWebContextPath(request).get(request);
-		return new WebContext(contextPath, contextPath + "/analysis/chart/showData",
+		WebContext webContext = new WebContext(contextPath, contextPath + "/analysis/chart/showData",
 				contextPath + "/analysis/dashboard/loadChart");
+
+		webContext.setExtraValues(new HashMap<String, Object>());
+		addHeartBeatValue(webContext);
+
+		return webContext;
 	}
 
 	protected void setChartPluginNames(HttpServletRequest request, List<HtmlChartWidgetEntity> entities)
