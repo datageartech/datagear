@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.analysis.support.DataSetSourceParseException;
+import org.datagear.analysis.support.SqlDataSetConnectionException;
 import org.datagear.analysis.support.SqlDataSetSqlExecutionException;
 import org.datagear.analysis.support.SqlDataSetUnsupportedSqlTypeException;
 import org.datagear.analysis.support.TemplateResolverException;
@@ -446,6 +447,17 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@ExceptionHandler(SqlDataSetConnectionException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisSqlDataSetConnectionException(HttpServletRequest request,
+			HttpServletResponse response, SqlDataSetConnectionException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetConnectionException.class), exception,
+				false, exception.getMessage());
+
+		return getErrorView(request, response);
+	}
+
 	@ExceptionHandler(SaveSchemaUrlPermissionDeniedException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handleServicePermissionDeniedException(HttpServletRequest request, HttpServletResponse response,
@@ -479,7 +491,7 @@ public class ControllerAdvice extends AbstractController
 	protected void setOperationMessageForInternalServerError(HttpServletRequest request, String messageCode,
 			Throwable t)
 	{
-		setOperationMessageForThrowable(request, messageCode, t, false, t.getMessage());
+		setOperationMessageForThrowable(request, messageCode, t, true, t.getMessage());
 		LOGGER.error("", t);
 	}
 
