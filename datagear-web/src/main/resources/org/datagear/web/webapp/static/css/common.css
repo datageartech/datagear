@@ -2484,10 +2484,10 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 .page-form-dashboard{
 	position: relative;
 }
-.page-form-dashboard.max-template-editor form .form-content .form-item .form-item-label{
+.page-form-dashboard.max-template-editor-left form .form-content .form-item .form-item-label{
 	width: 0;
 }
-.page-form-dashboard.max-template-editor form .form-content .form-item .form-item-value{
+.page-form-dashboard.max-template-editor-left form .form-content .form-item .form-item-value{
 	width: 100%;
 }
 .page-form-dashboard .form-item-value-template{
@@ -2509,7 +2509,18 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	left: 0;
 	top: 0;
 	bottom: 0;
-	right: 14.5em;
+	right: 14.6em;
+}
+.page-form-dashboard .template-editor-wrapper .template-control-parent{
+	position: absolute;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: 14em;
+	white-space: nowrap;
+}
+.page-form-dashboard.max-template-editor-right  .template-editor-wrapper .template-control-parent .resource-button-wrapper{
+	display: none;
 }
 .page-form-dashboard .template-editor-wrapper .template-editor-parent .template-editor{
 	position: absolute;
@@ -2522,14 +2533,17 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	position: absolute;
 	right: 0;
 	top: 0;
-	width: 14em;
+	width: 100%;
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper{
 	position: absolute;
 	right: 0;
 	top: 3em;
 	bottom: 0;
-	width: 14em;
+	width: 100%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-head{
 	font-weight: normal;
@@ -2542,6 +2556,7 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	position: relative;
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-title{
+	display: inline-block;
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper{
 	position: absolute;
@@ -2634,14 +2649,19 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 }
 .page-form-dashboard .form-item-value-template .resize-editor-wrapper{
 	position: absolute;
-	left: -0.7em;
-	top: -0.5em;
 	display: inline-block;
 	z-index: 10;
+	top: -0.6em;
+}
+.page-form-dashboard .form-item-value-template .resize-editor-wrapper.resize-left{
+	left: -0.6em;
+}
+.page-form-dashboard .form-item-value-template .resize-editor-wrapper.resize-right{
+	right: -0.6em;
 }
 .page-form-dashboard .form-item-value-template .resize-editor-wrapper .ui-button.ui-button-icon-only{
-	width: 1.4em;
-	height: 1.4em;
+	width: 1.2em;
+	height: 1.2em;
 	padding: 0.3em 0.3em;
 	border: 0;
 }

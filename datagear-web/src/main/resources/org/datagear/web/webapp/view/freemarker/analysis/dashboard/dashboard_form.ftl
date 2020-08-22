@@ -44,58 +44,63 @@ readonly 是否只读操作，允许为null
 					<div class="template-editor-wrapper">
 						<div class="template-editor-parent ui-widget ui-widget-content">
 							<div id="${pageId}-template-editor" class="template-editor"></div>
-						</div>
-						<#if !readonly>
-						<div class="insert-chart-button-wrapper">
-							<button type="button" class="insert-chart-button"><@spring.message code='dashboard.insertChart' /></button>
-						</div>
-						</#if>
-						<div class="dashboard-resource-wrapper ui-widget ui-widget-content ui-corner-all">
-							<div class="resource-head ui-widget ui-widget-content">
-								<div class="resource-title">
-									<@spring.message code='dashboard.dashboardResource' />
-								</div>
-								<#if !readonly>
-								<div class="resource-button-wrapper">
-									<button type='button' class='edit-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editTemplateContent' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
-									<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
-									<button type='button' class='copy-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
-									<button type='button' class='delete-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
-									<div class="resource-more-button-wrapper">
-										<span class="resource-more-icon ui-icon ui-icon-caret-1-s"></span>
-										<div class="resource-more-button-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow">
-											<button type='button' class='as-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
-											<button type='button' class='as-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
-											<button type='button' class='as-template-first-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
-											<button type='button' class='refresh-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='refresh' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
-										</div>
-									</div>
-								</div>
-								</#if>
+							<div class="resize-editor-wrapper resize-left">
+								<button type='button' class='resize-editor-button resize-editor-button-left ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='expandOrCollapse' />"><span class='ui-icon ui-icon-arrowstop-1-w'></span><span class='ui-button-icon-space'></span></button>
 							</div>
-							<div class="resource-content"></div>
-							<div class='add-resource-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
-								<div class="add-resource-panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.addResource' /></div>
-								<div class="add-resource-panel-content">
-									<div class="content-item">
-										<div class="fileinput-button ui-button ui-corner-all ui-widget" title="<@spring.message code='dashboard.import.desc' />">
-											<@spring.message code='select' /><input type="file" class="ignore">
-										</div>
-										<div class="upload-file-info"></div>
-									</div>
-									<div class="content-item">
-										<input type="text" name="" value="" class="add-resource-name-input ui-widget ui-widget-content" />
-										<input type="hidden" value="" class="resource-uploadFilePath" />
-									</div>
-								</div>
-								<div class="add-resource-panel-foot">
-									<button type="button" class="save-resource-button"><@spring.message code='confirm' /></button>
-								</div>
+							<div class="resize-editor-wrapper resize-right">
+								<button type='button' class='resize-editor-button resize-editor-button-right ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='expandOrCollapse' />"><span class='ui-icon ui-icon-arrowstop-1-e'></span><span class='ui-button-icon-space'></span></button>
 							</div>
 						</div>
-					</div>
-					<div class="resize-editor-wrapper">
-						<button type='button' class='resize-editor-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='expandOrCollapse' />"><span class='ui-icon ui-icon-arrowstop-1-w'></span><span class='ui-button-icon-space'></span></button>
+						<div class="template-control-parent">
+							<#if !readonly>
+							<div class="insert-chart-button-wrapper">
+								<button type="button" class="insert-chart-button"><@spring.message code='dashboard.insertChart' /></button>
+							</div>
+							</#if>
+							<div class="dashboard-resource-wrapper ui-widget ui-widget-content ui-corner-all">
+								<div class="resource-head ui-widget ui-widget-content">
+									<div class="resource-title">
+										<@spring.message code='dashboard.dashboardResource' />
+									</div>
+									<#if !readonly>
+									<div class="resource-button-wrapper">
+										<button type='button' class='edit-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.editTemplateContent' />"><span class='ui-icon ui-icon-pencil'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' class='add-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.addResource' />"><span class='ui-icon ui-icon-plus'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' class='copy-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.copyResourceNameToClipboard' />"><span class='ui-icon ui-icon-copy'></span><span class='ui-button-icon-space'></span></button>
+										<button type='button' class='delete-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='delete' />"><span class='ui-icon ui-icon-close'></span><span class='ui-button-icon-space'></span></button>
+										<div class="resource-more-button-wrapper">
+											<span class="resource-more-icon ui-icon ui-icon-caret-1-s"></span>
+											<div class="resource-more-button-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow">
+												<button type='button' class='as-template-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.resourceAsTemplate' />"><span class='ui-icon ui-icon-arrow-1-n'></span><span class='ui-button-icon-space'></span></button>
+												<button type='button' class='as-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.templateAsNormalResource' />"><span class='ui-icon ui-icon-arrow-1-s'></span><span class='ui-button-icon-space'></span></button>
+												<button type='button' class='as-template-first-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='dashboard.asFirstTemplate' />"><span class='ui-icon ui-icon-arrowstop-1-n'></span><span class='ui-button-icon-space'></span></button>
+												<button type='button' class='refresh-resource-button resource-button ui-button ui-corner-all ui-widget ui-button-icon-only' title="<@spring.message code='refresh' />"><span class='ui-icon ui-icon-refresh'></span><span class='ui-button-icon-space'></span></button>
+											</div>
+										</div>
+									</div>
+									</#if>
+								</div>
+								<div class="resource-content"></div>
+								<div class='add-resource-panel ui-widget ui-widget-content ui-corner-all ui-front ui-widget-shadow'>
+									<div class="add-resource-panel-head ui-widget-header ui-corner-all"><@spring.message code='dashboard.addResource' /></div>
+									<div class="add-resource-panel-content">
+										<div class="content-item">
+											<div class="fileinput-button ui-button ui-corner-all ui-widget" title="<@spring.message code='dashboard.import.desc' />">
+												<@spring.message code='select' /><input type="file" class="ignore">
+											</div>
+											<div class="upload-file-info"></div>
+										</div>
+										<div class="content-item">
+											<input type="text" name="" value="" class="add-resource-name-input ui-widget ui-widget-content" />
+											<input type="hidden" value="" class="resource-uploadFilePath" />
+										</div>
+									</div>
+									<div class="add-resource-panel-foot">
+										<button type="button" class="save-resource-button"><@spring.message code='confirm' /></button>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -487,20 +492,47 @@ readonly 是否只读操作，允许为null
 		$this.removeClass("ui-state-default");
 	});
 	
-	po.element(".resize-editor-button").click(function()
+	po.element(".resize-editor-button-left").click(function()
 	{
 		var $ele = po.element();
 		var $icon = $(".ui-icon", this);
 		
-		if($ele.hasClass("max-template-editor"))
+		if($ele.hasClass("max-template-editor-left"))
 		{
-			$ele.removeClass("max-template-editor");
+			$ele.removeClass("max-template-editor-left");
 			$icon.removeClass("ui-icon-arrowstop-1-e").addClass("ui-icon-arrowstop-1-w");
 		}
 		else
 		{
-			$ele.addClass("max-template-editor");
+			$ele.addClass("max-template-editor-left");
 			$icon.removeClass("ui-icon-arrowstop-1-w").addClass("ui-icon-arrowstop-1-e");
+		}
+	});
+
+	po.element(".resize-editor-button-right").click(function()
+	{
+		var $ele = po.element();
+		var $icon = $(".ui-icon", this);
+		
+		if($ele.hasClass("max-template-editor-right"))
+		{
+			po.element(".template-control-parent").css("width", "");
+			po.element(".template-editor-parent").css("right", "");
+			
+			$ele.removeClass("max-template-editor-right");
+			$icon.removeClass("ui-icon-arrowstop-1-w").addClass("ui-icon-arrowstop-1-e");
+		}
+		else
+		{
+			var width = po.element(".insert-chart-button").outerWidth(true);
+			if(!width)//查看操作时没有插入图表按钮
+				width = po.element(".dashboard-resource-wrapper .resource-title").outerWidth(true) + 41;
+			
+			po.element(".template-control-parent").css("width", width);
+			po.element(".template-editor-parent").css("right", width+10);
+			
+			$ele.addClass("max-template-editor-right");
+			$icon.removeClass("ui-icon-arrowstop-1-e").addClass("ui-icon-arrowstop-1-w");
 		}
 	});
 	
@@ -942,7 +974,10 @@ readonly 是否只读操作，允许为null
 	</#if>
 	
 	if(po.getDashboardId())
-		po.element(".resize-editor-button").click();
+	{
+		po.element(".resize-editor-button-left").click();
+		po.element(".resize-editor-button-right").click();
+	}
 	
 	po.initTemplateEditor();
 	po.refreshDashboardResources();
