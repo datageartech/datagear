@@ -2535,6 +2535,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	top: 0;
 	width: 100%;
 }
+.page-form-dashboard .template-editor-wrapper .insert-chart-button-wrapper .ui-button{
+	margin-right: 0;
+}
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper{
 	position: absolute;
 	right: 0;
@@ -2584,6 +2587,9 @@ table.dataTable tbody tr .column-check .row-data-state .ui-icon{
 	padding: 0.2em 0.2em;
 	top: 1.3em;
 	right: -0.5px;
+}
+.page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel button{
+	display: block;
 }
 .page-form-dashboard .template-editor-wrapper .dashboard-resource-wrapper .resource-button-wrapper .resource-more-button-wrapper .resource-more-button-panel button{
 	margin: 0.2em 0.2em;
