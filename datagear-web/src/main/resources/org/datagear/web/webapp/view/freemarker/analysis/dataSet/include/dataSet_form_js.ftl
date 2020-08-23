@@ -417,7 +417,7 @@ po.previewOptions.url = "...";
 					data: "inputPayload",
 					render: function(data, type, row, meta)
 					{
-						return "<textarea class='dataSetParamInputPayload input-in-table ui-widget ui-widget-content' style='height:2em;margin-top:0.2em;margin-bottom:0.2em;'>"+$.escapeHtml(data)+"</textarea>";
+						return "<textarea class='dataSetParamInputPayload input-in-table ui-widget ui-widget-content' style='height:2em;'>"+$.escapeHtml(data)+"</textarea>";
 					},
 					width: "20em",
 					defaultContent: "",
