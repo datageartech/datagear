@@ -18,7 +18,8 @@ import org.datagear.management.domain.DataSetEntity;
  * @author datagear@163.com
  *
  */
-public interface DataSetEntityService extends DataPermissionEntityService<String, DataSetEntity>
+public interface DataSetEntityService
+		extends DataPermissionEntityService<String, DataSetEntity>, CreateUserEntityService
 {
 	/**
 	 * 获取可用于执行分析的{@linkplain DataSet}。

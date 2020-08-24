@@ -78,6 +78,13 @@
 			DS_ID = #{entity.id}
 	</update>
 	
+	<update id="updateCreateUserId">
+		UPDATE DATAGEAR_DATA_SET SET
+			DS_CREATE_USER_ID = #{newUserId}
+		WHERE
+			DS_CREATE_USER_ID = #{oldUserId}
+	</update>
+	
 	<update id="updateSqlDataSetEntity">
 		UPDATE DATAGEAR_DATA_SET_SQL SET
 			DS_SCHEMA_ID = #{entity.schemaConnectionFactory.schema.id},

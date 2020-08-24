@@ -12,17 +12,8 @@ import org.datagear.management.domain.Schema;
  * @author datagear@163.com
  *
  */
-public interface SchemaService extends DataPermissionEntityService<String, Schema>
+public interface SchemaService extends DataPermissionEntityService<String, Schema>, CreateUserEntityService
 {
-	/**
-	 * 更新创建用户ID。
-	 * 
-	 * @param oldUserId
-	 * @param newUserId
-	 * @return
-	 */
-	int updateCreateUserId(String oldUserId, String newUserId);
-
 	/**
 	 * 删除指定用户ID的{@linkplain Schema}。
 	 * 

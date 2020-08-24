@@ -36,6 +36,13 @@
 			HCW_ID = #{entity.id}
 	</update>
 	
+	<update id="updateCreateUserId">
+		UPDATE DATAGEAR_HTML_CHART_WIDGET SET
+			HCW_CREATE_USER_ID = #{newUserId}
+		WHERE
+			HCW_CREATE_USER_ID = #{oldUserId}
+	</update>
+	
 	<delete id="deleteById">
 		DELETE FROM DATAGEAR_HTML_CHART_WIDGET
 		WHERE

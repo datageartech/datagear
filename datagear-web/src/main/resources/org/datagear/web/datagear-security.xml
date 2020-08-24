@@ -91,7 +91,14 @@
 	</beans:bean>
 	
 	<beans:bean id="authenticationSuccessHandler" class="org.datagear.web.security.AuthenticationSuccessHandlerImpl">
-		<beans:property name="schemaService" ref="schemaService" />
+		<beans:property name="createUserEntityServices">
+			<beans:list>
+				<beans:ref bean="schemaService" />
+				<beans:ref bean="dataSetEntityService" />
+				<beans:ref bean="htmlChartWidgetEntityService" />
+				<beans:ref bean="htmlTplDashboardWidgetEntityService" />
+			</beans:list>
+		</beans:property>
 	</beans:bean>
 	
 </beans:beans>

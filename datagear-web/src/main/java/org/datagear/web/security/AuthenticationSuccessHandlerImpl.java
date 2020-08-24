@@ -5,13 +5,14 @@
 package org.datagear.web.security;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
-import org.datagear.management.service.SchemaService;
+import org.datagear.management.service.CreateUserEntityService;
 import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
 import org.springframework.security.core.Authentication;
@@ -25,46 +26,40 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
  */
 public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler
 {
-	private SchemaService schemaService;
+	private List<CreateUserEntityService> createUserEntityServices;
 
 	public AuthenticationSuccessHandlerImpl()
 	{
 		super();
 	}
 
-	public AuthenticationSuccessHandlerImpl(SchemaService schemaService)
+	public List<CreateUserEntityService> getCreateUserEntityServices()
 	{
-		super();
-		this.schemaService = schemaService;
+		return createUserEntityServices;
 	}
 
-	public SchemaService getSchemaService()
+	public void setCreateUserEntityServices(List<CreateUserEntityService> createUserEntityServices)
 	{
-		return schemaService;
-	}
-
-	public void setSchemaService(SchemaService schemaService)
-	{
-		this.schemaService = schemaService;
+		this.createUserEntityServices = createUserEntityServices;
 	}
 
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException
 	{
-		mergeAnonymousUserSchema(request, response, authentication);
+		mergeAnonymousUserEntities(request, response, authentication);
 
 		response.sendRedirect(WebContextPath.getWebContextPath(request).concat(request, "/"));
 	}
 
 	/**
-	 * 将匿名用户的{@linkplain Schema}迁移至登录用户上。
+	 * 将匿名用户的数据迁移至登录用户上。
 	 * 
 	 * @param request
 	 * @param response
 	 * @param loginUser
 	 */
-	protected void mergeAnonymousUserSchema(HttpServletRequest request, HttpServletResponse response,
+	protected void mergeAnonymousUserEntities(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication)
 	{
 		User loginUser = WebUtils.getUser(authentication);
@@ -72,9 +67,21 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 		if (loginUser == null)
 			return;
 
+		// 不迁移至管理员用户上
+		if (loginUser.isAdmin())
+			return;
+
 		String anonymousUserId = WebUtils.getCookieValue(request, WebUtils.COOKIE_USER_ID_ANONYMOUS);
 
 		if (anonymousUserId != null && !anonymousUserId.isEmpty())
-			this.schemaService.updateCreateUserId(anonymousUserId, loginUser.getId());
+		{
+			if (this.createUserEntityServices != null)
+			{
+				for (CreateUserEntityService service : this.createUserEntityServices)
+				{
+					service.updateCreateUserId(anonymousUserId, loginUser.getId());
+				}
+			}
+		}
 	}
 }

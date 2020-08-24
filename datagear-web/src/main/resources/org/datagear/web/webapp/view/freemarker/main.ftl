@@ -173,7 +173,7 @@ ${detectNewVersionScript}
 			if(po.currentUser.id == schema.createUser.id)
 			{
 				if(tempSchema)
-					schema.text += " <span class='ui-icon ui-icon-notice' title='<@spring.message code='main.tempSchema' />'></span>";
+					schema.text += " <span class='ui-icon ui-icon-notice' title='<@spring.message code='main.anonymousDataTip' />'></span>";
 			}
 			else
 			{
@@ -1292,16 +1292,25 @@ ${detectNewVersionScript}
 						<li class="item-dataset" tabId="dataAnalysis-dataSet">
 							<a href="${contextPath}/analysis/dataSet/pagingQuery">
 								<@spring.message code='main.dataAnalysis.dataSet' />
+								<#if currentUser.anonymous>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />"></span>
+								</#if>
 							</a>
 						</li>
 						<li class="item-chart" tabId="dataAnalysis-chart">
 							<a href="${contextPath}/analysis/chart/pagingQuery">
 								<@spring.message code='main.dataAnalysis.chart' />
+								<#if currentUser.anonymous>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />"></span>
+								</#if>
 							</a>
 						</li>
 						<li class="item-dashboard" tabId="dataAnalysis-dashboard">
 							<a href="${contextPath}/analysis/dashboard/pagingQuery">
 								<@spring.message code='main.dataAnalysis.dashboard' />
+								<#if currentUser.anonymous>
+								<span class="ui-icon ui-icon-notice" title="<@spring.message code='main.anonymousDataTip' />"></span>
+								</#if>
 							</a>
 						</li>
 					</ul>

@@ -19,7 +19,7 @@ import org.datagear.management.domain.User;
  *
  */
 public interface HtmlTplDashboardWidgetEntityService
-		extends DataPermissionEntityService<String, HtmlTplDashboardWidgetEntity>
+		extends DataPermissionEntityService<String, HtmlTplDashboardWidgetEntity>, CreateUserEntityService
 {
 	/**
 	 * 获取渲染器。

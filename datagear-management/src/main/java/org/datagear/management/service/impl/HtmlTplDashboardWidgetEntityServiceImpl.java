@@ -101,6 +101,17 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	}
 
 	@Override
+	public int updateCreateUserId(String oldUserId, String newUserId)
+	{
+		Map<String, Object> params = buildParamMap();
+		addIdentifierQuoteParameter(params);
+		params.put("oldUserId", oldUserId);
+		params.put("newUserId", newUserId);
+
+		return updateMybatis("updateCreateUserId", params);
+	}
+
+	@Override
 	protected boolean add(HtmlTplDashboardWidgetEntity entity, Map<String, Object> params)
 	{
 		boolean success = super.add(entity, params);

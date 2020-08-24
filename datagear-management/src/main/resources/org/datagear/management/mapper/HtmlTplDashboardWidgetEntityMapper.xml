@@ -25,6 +25,13 @@
 			HD_ID = #{entity.id}
 	</update>
 	
+	<update id="updateCreateUserId">
+		UPDATE DATAGEAR_HTML_DASHBOARD SET
+			HD_CREATE_USER_ID = #{newUserId}
+		WHERE
+			HD_CREATE_USER_ID = #{oldUserId}
+	</update>
+	
 	<delete id="deleteById">
 		DELETE FROM DATAGEAR_HTML_DASHBOARD
 		WHERE

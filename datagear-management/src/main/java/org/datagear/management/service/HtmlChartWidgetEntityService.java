@@ -18,7 +18,7 @@ import org.datagear.management.domain.User;
  *
  */
 public interface HtmlChartWidgetEntityService
-		extends DataPermissionEntityService<String, HtmlChartWidgetEntity>, ChartWidgetSource
+		extends DataPermissionEntityService<String, HtmlChartWidgetEntity>, ChartWidgetSource, CreateUserEntityService
 {
 	/**
 	 * {@linkplain ChartWidgetSource}上下文。
