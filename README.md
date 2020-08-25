@@ -83,6 +83,10 @@ SQL工作台
 
 ![界面图片](screenshot/dashboard-time-series-chart.gif)
 
+看板-钻取
+
+![界面图片](screenshot/dashboard-map-chart-hierarchy.gif)
+
 看板-表单
 
 ![界面图片](screenshot/dashboard-form.gif)
