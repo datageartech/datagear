@@ -506,3 +506,9 @@ ALTER TABLE DATAGEAR_DATA_SET_JSON_FILE ADD FOREIGN KEY (DS_ID) REFERENCES DATAG
 --version[1.11.1], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
+
+
+-----------------------------------------
+--version[1.12.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
