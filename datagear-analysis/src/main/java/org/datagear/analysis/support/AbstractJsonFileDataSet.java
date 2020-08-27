@@ -63,6 +63,9 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 
 	/**
 	 * 获取JSON文件。
+	 * <p>
+	 * 实现方法应该返回实例级不变的文件。
+	 * </p>
 	 * 
 	 * @param paramValues
 	 * @return

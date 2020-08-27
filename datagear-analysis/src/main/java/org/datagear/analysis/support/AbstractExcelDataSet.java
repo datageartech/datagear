@@ -12,12 +12,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.analysis.support.RangeExpResolver.IndexRange;
 import org.datagear.util.FileUtil;
+import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 
 /**
  * 抽象Excel数据集。
@@ -31,6 +39,9 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 
 	public static final String EXTENSION_XLS = "xls";
 
+	protected static final RangeExpResolver RANGE_EXP_RESOLVER = RangeExpResolver
+			.valueOf(RangeExpResolver.RANGE_SPLITTER_CHAR, RangeExpResolver.RANGE_GROUP_SPLITTER_CHAR);
+
 	/** 是否强制作为xls文件处理 */
 	private boolean forceXls = false;
 
@@ -42,6 +53,8 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 
 	/** 数据列范围表达式 */
 	private String dataColumnExp = null;
+
+	private transient List<IndexRange> _dataRowRanges = null;
 
 	public AbstractExcelDataSet()
 	{
@@ -102,7 +115,8 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	/**
 	 * 设置作为标题行的行号。
 	 * 
-	 * @param titleRow 行号，小于{@code 1}则表示无标题行。
+	 * @param titleRow
+	 *            行号，小于{@code 1}则表示无标题行。
 	 */
 	public void setTitleRow(int titleRow)
 	{
@@ -124,12 +138,31 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	 * {@code "3-15"} ：第3至15行 <br>
 	 * {@code "1,4,8-15"}：第1、4、8至15行
 	 * </p>
+	 * <p>
+	 * 标题行（{@linkplain #getTitleRow()}）将自动被排除。
+	 * </p>
+	 * <p>
+	 * 注意：行号以{@code 1}开始计数。
+	 * </p>
 	 * 
-	 * @param dataRowExp 表达式，为{@code null}、{@code ""}则不限定
+	 * @param dataRowExp
+	 *            表达式，为{@code null}、{@code ""}则不限定
 	 */
 	public void setDataRowExp(String dataRowExp)
 	{
 		this.dataRowExp = dataRowExp;
+
+		if (!StringUtil.isEmpty(dataRowExp))
+		{
+			try
+			{
+				this._dataRowRanges = getRangeExpResolver().resolveIndex(this.dataRowExp);
+			}
+			catch (NumberFormatException e)
+			{
+				throw new DataSetException(e);
+			}
+		}
 	}
 
 	public String getDataColumnExp()
@@ -148,7 +181,8 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	 * {@code "A,C,E-H"}：第A、C、E至H列
 	 * </p>
 	 * 
-	 * @param dataColumnExp 表达式，为{@code null}、{@code ""}则不限定
+	 * @param dataColumnExp
+	 *            表达式，为{@code null}、{@code ""}则不限定
 	 */
 	public void setDataColumnExp(String dataColumnExp)
 	{
@@ -177,7 +211,8 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	 * 解析Excel结果。
 	 * 
 	 * @param paramValues
-	 * @param properties  允许为{@code null}，此时会自动解析
+	 * @param properties
+	 *            允许为{@code null}，此时会自动解析
 	 * @return
 	 * @throws DataSetException
 	 */
@@ -201,14 +236,59 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	 * 
 	 * @param paramValues
 	 * @param file
-	 * @param properties  允许为{@code null}，此时会自动解析
+	 * @param properties
+	 *            允许为{@code null}，此时会自动解析
 	 * @return
 	 * @throws DataSetException
 	 */
 	protected ResolvedDataSetResult resolveResultForXls(Map<String, ?> paramValues, File file,
 			List<DataSetProperty> properties) throws DataSetException
 	{
-		return null;
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> data = Collections.EMPTY_LIST;
+
+		POIFSFileSystem poifs = null;
+
+		try
+		{
+			poifs = new POIFSFileSystem(file, true);
+			HSSFWorkbook wb = new HSSFWorkbook(poifs.getRoot(), true);
+
+			HSSFSheet sheet = wb.getSheetAt(0);
+
+			int rowIdx = 0;
+			for (Row row : sheet)
+			{
+				if (isDataRow(rowIdx))
+				{
+					int cellIdx = 0;
+
+					for (Cell cell : row)
+					{
+						if (isDataColumn(cellIdx))
+						{
+							// TODO
+						}
+					}
+				}
+
+				rowIdx++;
+			}
+		}
+		catch (DataSetException e)
+		{
+			throw e;
+		}
+		catch (Throwable t)
+		{
+			throw new DataSetSourceParseException(t);
+		}
+		finally
+		{
+			IOUtil.close(poifs);
+		}
+
+		return new ResolvedDataSetResult(new DataSetResult(data), properties);
 	}
 
 	/**
@@ -216,7 +296,8 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	 * 
 	 * @param paramValues
 	 * @param file
-	 * @param properties  允许为{@code null}，此时会自动解析
+	 * @param properties
+	 *            允许为{@code null}，此时会自动解析
 	 * @return
 	 * @throws DataSetException
 	 */
@@ -227,16 +308,41 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	}
 
 	/**
-	 * 获取Excel文件。
-	 * <p>
-	 * 实现方法应该返回实例级不变的文件。
-	 * </p>
+	 * 是否数据行。
 	 * 
-	 * @param paramValues
+	 * @param rowIndex
+	 *            行索引（以{@code 0}计数）
 	 * @return
-	 * @throws DataSetException
 	 */
-	protected abstract File getExcelFile(Map<String, ?> paramValues) throws DataSetException;
+	protected boolean isDataRow(int rowIndex)
+	{
+		int row = rowIndex + 1;
+
+		if (hasTitleRow() && row == getTitleRow())
+			return false;
+
+		if (this._dataRowRanges == null || this._dataRowRanges.isEmpty())
+			return true;
+
+		for (int i = 0; i < this._dataRowRanges.size(); i++)
+			if (this._dataRowRanges.get(i).inRange(row))
+				return true;
+
+		return false;
+	}
+
+	/**
+	 * 是否数据列。
+	 * 
+	 * @param columnIndex
+	 *            列索引（以{@code 0}计数）
+	 * @return
+	 */
+	protected boolean isDataColumn(int columnIndex)
+	{
+		// TODO
+		return true;
+	}
 
 	/**
 	 * 给定Excel文件是否是老版本的{@code .xls}文件。
@@ -251,4 +357,22 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 
 		return FileUtil.isExtension(file, EXTENSION_XLS);
 	}
+
+	protected RangeExpResolver getRangeExpResolver()
+	{
+		return RANGE_EXP_RESOLVER;
+	}
+
+	/**
+	 * 获取Excel文件。
+	 * <p>
+	 * 实现方法应该返回实例级不变的文件。
+	 * </p>
+	 * 
+	 * @param paramValues
+	 * @return
+	 * @throws DataSetException
+	 */
+	protected abstract File getExcelFile(Map<String, ?> paramValues) throws DataSetException;
+
 }
