@@ -507,8 +507,10 @@ ALTER TABLE DATAGEAR_DATA_SET_JSON_FILE ADD FOREIGN KEY (DS_ID) REFERENCES DATAG
 -----------------------------------------
 
 
-
 -----------------------------------------
 --version[1.12.0], DO NOT EDIT THIS LINE!
 -----------------------------------------
+
+--JSON文件数据集添加编码字段
+ALTER TABLE DATAGEAR_DATA_SET_JSON_FILE ADD COLUMN DS_FILE_ENCODING VARCHAR(50);
 
