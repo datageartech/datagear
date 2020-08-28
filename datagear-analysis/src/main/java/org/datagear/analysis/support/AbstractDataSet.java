@@ -112,6 +112,17 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
+	 * 解析属性类型。
+	 * 
+	 * @param value
+	 * @return
+	 */
+	protected String resolveDataType(Object value)
+	{
+		return DataSetProperty.DataType.resolveDataType(value);
+	}
+
+	/**
 	 * 获取指定名称的{@linkplain DataNameType}对象，没找到则返回{@code null}。
 	 * 
 	 * @param <T>

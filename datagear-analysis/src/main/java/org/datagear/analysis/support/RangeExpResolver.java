@@ -404,12 +404,12 @@ public class RangeExpResolver
 		}
 
 		/**
-		 * 判断给定索引数值是否在此索引范围内。
+		 * 是否包含给定索引数值。
 		 * 
 		 * @param index
 		 * @return
 		 */
-		public boolean inRange(int index)
+		public boolean includes(int index)
 		{
 			if (this.from > -1 && index < this.from)
 				return false;
@@ -451,6 +451,15 @@ public class RangeExpResolver
 		public String toString()
 		{
 			return getClass().getSimpleName() + " [from=" + from + ", to=" + to + "]";
+		}
+
+		public static boolean includes(List<IndexRange> indexRanges, int index)
+		{
+			for (int i = 0; i < indexRanges.size(); i++)
+				if (indexRanges.get(i).includes(index))
+					return true;
+
+			return false;
 		}
 	}
 }

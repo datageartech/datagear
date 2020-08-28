@@ -73,8 +73,7 @@ public class JsonDirectoryFileDataSet extends AbstractJsonFileDataSet
 	@Override
 	protected File getJsonFile(Map<String, ?> paramValues) throws DataSetException
 	{
-		String fileName = resolveTemplate(this.fileName, paramValues);
-		File jsonFile = FileUtil.getFile(directory, fileName);
+		File jsonFile = FileUtil.getFile(this.directory, this.fileName);
 		return jsonFile;
 	}
 }
