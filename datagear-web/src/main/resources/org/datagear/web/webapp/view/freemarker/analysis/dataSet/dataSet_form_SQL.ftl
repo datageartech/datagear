@@ -33,17 +33,19 @@ readonly 是否只读操作，允许为null
 					</#if>
 				</div>
 			</div>
-			<div class="form-item form-item-workspace">
-				<div class="form-item-label">
-					<label><@spring.message code='dataSet.sql' /></label>
-				</div>
-				<div class="form-item-value">
-					<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
-					<div class="workspace-editor-wrapper ui-widget ui-widget-content">
-						<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
+			<div class="workspace">
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dataSet.sql' /></label>
 					</div>
-					<#include "include/dataSet_form_html_wow.ftl" >
+					<div class="form-item-value">
+						<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
+						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
+							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
+						</div>
+					</div>
 				</div>
+				<#include "include/dataSet_form_html_wow.ftl" >
 			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">

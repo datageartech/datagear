@@ -18,6 +18,7 @@ import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.DataSetEntity;
+import org.datagear.management.domain.ExcelDataSetEntity;
 import org.datagear.management.domain.JsonFileDataSetEntity;
 import org.datagear.management.domain.JsonValueDataSetEntity;
 import org.datagear.management.domain.SchemaConnectionFactory;
@@ -167,6 +168,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 				success = addJsonValueDataSetEntity((JsonValueDataSetEntity) entity);
 			else if (entity instanceof JsonFileDataSetEntity)
 				success = addJsonFileDataSetEntity((JsonFileDataSetEntity) entity);
+			else if (entity instanceof ExcelDataSetEntity)
+				success = addExcelDataSetEntity((ExcelDataSetEntity) entity);
 		}
 
 		if (success)
@@ -199,6 +202,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		return (updateMybatis("insertJsonFileDataSetEntity", params) > 0);
 	}
 
+	protected boolean addExcelDataSetEntity(ExcelDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("insertExcelDataSetEntity", params) > 0);
+	}
+
 	@Override
 	protected boolean update(DataSetEntity entity, Map<String, Object> params)
 	{
@@ -215,6 +226,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 				success = updateJsonValueDataSetEntity((JsonValueDataSetEntity) entity);
 			else if (entity instanceof JsonFileDataSetEntity)
 				success = updateJsonFileDataSetEntity((JsonFileDataSetEntity) entity);
+			else if (entity instanceof ExcelDataSetEntity)
+				success = updateExcelDataSetEntity((ExcelDataSetEntity) entity);
 		}
 
 		if (success)
@@ -245,6 +258,14 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("entity", entity);
 
 		return (updateMybatis("updateJsonFileDataSetEntity", params) > 0);
+	}
+
+	protected boolean updateExcelDataSetEntity(ExcelDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("updateExcelDataSetEntity", params) > 0);
 	}
 
 	@Override
@@ -291,6 +312,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			obj = getJsonValueDataSetEntityById(obj.getId());
 		else if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(obj.getDataSetType()))
 			obj = getJsonFileDataSetEntityById(obj.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_Excel.equals(obj.getDataSetType()))
+			obj = getExcelDataSetEntityById(obj.getId());
 
 		if (obj == null)
 			return null;
@@ -335,6 +358,19 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("id", id);
 
 		JsonFileDataSetEntity entity = selectOneMybatis("getJsonFileDataSetEntityById", params);
+
+		if (entity != null)
+			entity.setDirectory(getDataSetDirectory(id));
+
+		return entity;
+	}
+
+	protected ExcelDataSetEntity getExcelDataSetEntityById(String id)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("id", id);
+
+		ExcelDataSetEntity entity = selectOneMybatis("getExcelDataSetEntityById", params);
 
 		if (entity != null)
 			entity.setDirectory(getDataSetDirectory(id));

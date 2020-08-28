@@ -73,10 +73,10 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	private int nameRow = -1;
 
 	/** 数据行范围表达式 */
-	private String dataRowExp = null;
+	private String dataRowExp = "";
 
 	/** 数据列范围表达式 */
-	private String dataColumnExp = null;
+	private String dataColumnExp = "";
 
 	/** 是否强制作为xls文件处理 */
 	private boolean forceXls = false;
@@ -279,11 +279,12 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 			List<DataSetProperty> properties) throws DataSetException
 	{
 		POIFSFileSystem poifs = null;
+		HSSFWorkbook wb = null;
 
 		try
 		{
 			poifs = new POIFSFileSystem(file, true);
-			HSSFWorkbook wb = new HSSFWorkbook(poifs.getRoot(), true);
+			wb = new HSSFWorkbook(poifs.getRoot(), true);
 
 			Sheet sheet = wb.getSheetAt(getSheetIndex());
 
@@ -295,6 +296,7 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 		}
 		finally
 		{
+			IOUtil.close(wb);
 			IOUtil.close(poifs);
 		}
 	}

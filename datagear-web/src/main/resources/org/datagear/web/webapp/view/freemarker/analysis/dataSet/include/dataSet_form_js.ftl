@@ -64,7 +64,7 @@ po.previewOptions.url = "...";
 			height = height - 41;
 		//减去其他表单元素高度
 		height = height - po.element(".form-head").outerHeight(true);
-		po.element(".form-content > .form-item:not(.form-item-workspace)").each(function()
+		po.element(".form-content > .form-item").each(function()
 		{
 			height = height - $(this).outerHeight(true);
 		});
@@ -74,7 +74,7 @@ po.previewOptions.url = "...";
 		
 		var errorInfoHeight = 25;
 		
-		po.element(".form-item-workspace .form-item-value").height(height);
+		po.element(".workspace").css("min-height", height+"px");
 		po.element(".workspace-editor-wrapper").height(height - errorInfoHeight);
 		po.element(".workspace-operation-wrapper").height(height - errorInfoHeight);
 	};

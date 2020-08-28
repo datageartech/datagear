@@ -2111,41 +2111,67 @@ table.dataTable tbody tr td select{
 }
 
 .page-form-dataSet{}
-.page-form-dataSet .workspace-editor-wrapper{
-	display: inline-block;
-	width: 50%;
+.page-form-dataSet .workspace{
+	position: relative;
+}
+.page-form-dataSet .workspace .form-item .form-item-label{
+	vertical-align:top;
+	margin-top: 0.2em;
+}
+.page-form-dataSet .workspace .form-item .form-item-value{
+	width: 39%;
+	position: relative;
+	padding-bottom: 1.6em;
+}
+.page-form-dataSet .workspace .form-item .form-item-value input[type=text],
+.page-form-dataSet .workspace .form-item .form-item-value input[type=password],
+.page-form-dataSet .workspace .form-item .form-item-value textarea,
+.page-form-dataSet .workspace .form-item .form-item-value .input{
+	width: 90%;
+}
+.page-form-dataSet .workspace .form-item .form-item-value .fileinput-wrapper{
+	padding-top: 0.41em;
+}
+.page-form-dataSet .workspace .form-item label.error{
+	position: absolute;
+	left: 0;
+	bottom: 0;
+}
+.page-form-dataSet .workspace .workspace-editor-wrapper{
 	height: 10em;
 	margin-right: 0.3em;
 }
-.page-form-dataSet .workspace-editor-wrapper .workspace-editor{
+.page-form-dataSet .workspace .workspace-editor-wrapper .workspace-editor{
 	width: 100%;
 	height: 100%;
 }
-.page-form-dataSet .workspace-operation-wrapper{
-	position: relative;
+.page-form-dataSet .workspace .workspace-operation-wrapper{
+	position: absolute;
 	display: inline-block;
-	width: 48%;
+	width: 41%;
+	top: 0;
+	right: 0;
 	height: 10em;
 	vertical-align: top;
 }
-.page-form-dataSet .workspace-operation-wrapper.ui-widget.ui-widget-content{
+.page-form-dataSet .workspace .workspace-operation-wrapper.ui-widget.ui-widget-content{
 	border: 0;
 }
-.page-form-dataSet .workspace-operation-wrapper.ui-tabs{
+.page-form-dataSet .workspace .workspace-operation-wrapper.ui-tabs{
 	margin: 0 0;
 	padding: 0 0;
 }
-.page-form-dataSet .workspace-operation-wrapper.ui-tabs .ui-tabs-nav{
+.page-form-dataSet .workspace .workspace-operation-wrapper.ui-tabs .ui-tabs-nav{
 	border: 0;
 	background: none;
 	opacity: 0.8;
 	filter: Alpha(Opacity=80);
 }
-.page-form-dataSet .workspace-operation-wrapper.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
+.page-form-dataSet .workspace .workspace-operation-wrapper.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
 	padding-top: 0.2em;
 	padding-bottom: 0.2em;
 }
-.page-form-dataSet .workspace-operation-wrapper.ui-tabs .ui-tabs-panel{
+.page-form-dataSet .workspace .workspace-operation-wrapper.ui-tabs .ui-tabs-panel{
 	position: absolute;
 	left: 0px;
 	right: 0px;
@@ -2153,18 +2179,18 @@ table.dataTable tbody tr td select{
 	bottom: 0px;
 	padding: 0 0;
 }
-.page-form-dataSet .workspace-operation-wrapper .operation{
+.page-form-dataSet .workspace .workspace-operation-wrapper .operation{
 	position: absolute;
 	right: 0px;
 	top: -1.5em;
 }
-.page-form-dataSet .workspace-operation-wrapper .operation .ui-button.ui-button-icon-only{
+.page-form-dataSet .workspace .workspace-operation-wrapper .operation .ui-button.ui-button-icon-only{
 	height: 1.2em;
 	width: 2.5em;
 	vertical-align: top;
 	border: 0px;
 }
-.page-form-dataSet .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source{
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source{
 	position: absolute;
 	display: none;
     bottom: -4em;
@@ -2172,7 +2198,7 @@ table.dataTable tbody tr td select{
     right: 0;
     left: 0;
 }
-.page-form-dataSet .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source textarea{
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source textarea{
 	width: 100%;
 	height: 100%;
 	margin: 0 0;
@@ -2180,15 +2206,12 @@ table.dataTable tbody tr td select{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-form-dataSet .workspace-operation-wrapper .input-in-table{
+.page-form-dataSet .workspace .workspace-operation-wrapper .input-in-table{
 	width: 90%!important;
 }
-.page-form-dataSet .workspace-operation-wrapper .input-in-table.readonly{
+.page-form-dataSet .workspace .workspace-operation-wrapper .input-in-table.readonly{
 	border: none;
 	background: none;
-}
-.page-form-dataSet .form-item-workspace .error{
-	display: block;
 }
 .page-form-dataSet .preview-param-value-panel{
 	position: absolute;
@@ -2211,21 +2234,6 @@ table.dataTable tbody tr td select{
 }
 .page-form-dataSet .form-foot-placeholder{
 	height: 2.5em;
-}
-.page-form-dataSet-jsonFile{}
-.page-form-dataSet-jsonFile .form-item-workspace .form-item-label{
-	vertical-align:top;
-	margin-top: 0.3em;
-}
-.page-form-dataSet-jsonFile .form-item-workspace .form-item-value .file-display-name{
-	width: 60% !important;
-}
-.page-form-dataSet-jsonFile .form-item-workspace .form-item-value .fileinput-wrapper{
-	margin-top: 0.41em;
-}
-.page-form-dataSet-jsonFile .encoding-selectmenu-menu .ui-menu{
-	max-height: 14em;
-	overflow: auto;
 }
 
 .page-form-chart .chart-plugin{

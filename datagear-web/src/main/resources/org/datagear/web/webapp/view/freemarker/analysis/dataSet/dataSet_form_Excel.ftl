@@ -12,11 +12,11 @@ readonly 是否只读操作，允许为null
 <head>
 <#include "../../include/html_head.ftl">
 <title><#include "../../include/html_title_app_name.ftl">
-	<@spring.message code='${titleMessageKey}' /> - <@spring.message code='dataSet.dataSetType.JsonFile' />
+	<@spring.message code='${titleMessageKey}' /> - <@spring.message code='dataSet.dataSetType.Excel' />
 </title>
 </head>
 <body>
-<div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-jsonFile">
+<div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-excel">
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
@@ -24,7 +24,7 @@ readonly 是否只读操作，允许为null
 			<div class="workspace">
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dataSet.jsonFile' /></label>
+						<label><@spring.message code='dataSet.excelFile' /></label>
 					</div>
 					<div class="form-item-value">
 						<input type="hidden" id="${pageId}-originalFileName" value="${(dataSet.fileName)!''?html}" />
@@ -41,14 +41,42 @@ readonly 是否只读操作，允许为null
 				</div>
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dataSet.jsonFileEncoding' /></label>
+						<label><@spring.message code='dataSet.excel.sheetIndex' /></label>
 					</div>
 					<div class="form-item-value">
-						<select name="encoding">
-							<#list availableCharsetNames as item>
-							<option value="${item}" <#if item == dataSet.encoding>selected="selected"</#if>>${item}</option>
-							</#list>
-						</select>
+						<input type="text" name="sheetIndex" value="${(dataSet.sheetIndex)!''?html}" class="ui-widget ui-widget-content" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dataSet.excel.nameRow' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="nameRow" value="${(dataSet.nameRow)!''?html}" class="ui-widget ui-widget-content" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dataSet.excel.dataRowExp' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="dataRowExp" value="${(dataSet.dataRowExp)!''?html}" class="ui-widget ui-widget-content" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dataSet.excel.dataColumnExp' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="dataColumnExp" value="${(dataSet.dataColumnExp)!''?html}" class="ui-widget ui-widget-content" />
+					</div>
+				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label><@spring.message code='dataSet.excel.forceXls' /></label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="forceXls" value="${((dataSet.forceXls)!true)?string('true', 'false')}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
 				<#include "include/dataSet_form_html_wow.ftl" >
@@ -76,7 +104,6 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
-	po.element("select[name='encoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	po.initWorkspaceHeight();
 	
 	po.fileNameEditorValue = function(value)
@@ -112,7 +139,7 @@ readonly 是否只读操作，允许为null
 	
 	po.initPreviewParamValuePanel();
 	
-	po.previewOptions.url = po.url("previewJsonFile");
+	po.previewOptions.url = po.url("previewExcel");
 	po.previewOptions.beforePreview = function()
 	{
 		var fileName = po.fileNameEditorValue();
@@ -120,8 +147,12 @@ readonly 是否只读操作，允许为null
 		if(!fileName)
 			return false;
 		
-		this.data.dataSet.encoding = po.element("select[name='encoding']").val();
 		this.data.dataSet.fileName = fileName;
+		this.data.dataSet.sheetIndex = po.element("input[name='sheetIndex']").val();
+		this.data.dataSet.nameRow = po.element("input[name='nameRow']").val();
+		this.data.dataSet.dataRowExp = po.element("input[name='dataRowExp']").val();
+		this.data.dataSet.dataColumnExp = po.element("input[name='dataColumnExp']").val();
+		this.data.dataSet.forceXls = po.element("input[name='forceXls']").val();
 		this.data.originalFileName = po.element("#${pageId}-originalFileName").val();
 	};
 	po.previewOptions.beforeRefresh = function()
@@ -159,7 +190,7 @@ readonly 是否只读操作，允许为null
 		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
 	});
 	
-	$.validator.addMethod("dataSetJsonFilePreviewRequired", function(value, element)
+	$.validator.addMethod("dataSetExcelFilePreviewRequired", function(value, element)
 	{
 		return !po.isFileNameModified();
 	});
@@ -170,7 +201,7 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
-			"displayName" : {"required": true, "dataSetJsonFilePreviewRequired": true, "dataSetPropertiesRequired": true}
+			"displayName" : {"required": true, "dataSetExcelFilePreviewRequired": true, "dataSetPropertiesRequired": true}
 		},
 		messages :
 		{
@@ -178,7 +209,7 @@ readonly 是否只读操作，允许为null
 			"displayName" :
 			{
 				"required": "<@spring.message code='validation.required' />",
-				"dataSetJsonFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
+				"dataSetExcelFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
 				"dataSetPropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
 			}
 		},

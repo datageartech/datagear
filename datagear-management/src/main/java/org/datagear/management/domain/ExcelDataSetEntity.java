@@ -12,15 +12,15 @@ import java.util.Date;
 import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.support.JsonDirectoryFileDataSet;
+import org.datagear.analysis.support.ExcelDirectoryFileDataSet;
 
 /**
- * {@linkplain JsonDirectoryFileDataSet}实体。
+ * {@linkplain ExcelDirectoryFileDataSet}实体。
  * 
  * @author datagear@163.com
  *
  */
-public class JsonFileDataSetEntity extends JsonDirectoryFileDataSet implements DirectoryFileDataSetEntity
+public class ExcelDataSetEntity extends ExcelDirectoryFileDataSet implements DirectoryFileDataSetEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -36,13 +36,13 @@ public class JsonFileDataSetEntity extends JsonDirectoryFileDataSet implements D
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
-	public JsonFileDataSetEntity()
+	public ExcelDataSetEntity()
 	{
 		super();
 		this.createTime = new Date();
 	}
 
-	public JsonFileDataSetEntity(String id, String name, List<DataSetProperty> properties, File directory,
+	public ExcelDataSetEntity(String id, String name, List<DataSetProperty> properties, File directory,
 			String fileName, String displayName, User createUser)
 	{
 		super(id, name, properties, directory, fileName);
@@ -66,7 +66,7 @@ public class JsonFileDataSetEntity extends JsonDirectoryFileDataSet implements D
 	@Override
 	public String getDataSetType()
 	{
-		return DataSetEntity.DATA_SET_TYPE_JsonFile;
+		return DataSetEntity.DATA_SET_TYPE_Excel;
 	}
 
 	@Override

@@ -55,6 +55,26 @@ public class ExcelDirectoryFileDataSet extends AbstractExcelDataSet
 		this.fileName = fileName;
 	}
 
+	public File getDirectory()
+	{
+		return directory;
+	}
+
+	public void setDirectory(File directory)
+	{
+		this.directory = directory;
+	}
+
+	public String getFileName()
+	{
+		return fileName;
+	}
+
+	public void setFileName(String fileName)
+	{
+		this.fileName = fileName;
+	}
+
 	@Override
 	protected File getExcelFile(Map<String, ?> paramValues) throws DataSetException
 	{

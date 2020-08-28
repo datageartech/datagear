@@ -31,6 +31,9 @@ public interface DataSetEntity extends DataSet, CreateUserEntity<String>, DataPe
 	/** 数据集类型：JSON文件 */
 	String DATA_SET_TYPE_JsonFile = "JsonFile";
 
+	/** 数据集类型：Excel */
+	String DATA_SET_TYPE_Excel = "Excel";
+
 	/**
 	 * 设置名称。
 	 * 

@@ -23,12 +23,13 @@ import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractFmkTemplateDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetParamValueConverter;
-import org.datagear.analysis.support.JsonDirectoryFileDataSet;
 import org.datagear.analysis.support.JsonValueDataSet;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
 import org.datagear.management.domain.DataSetEntity;
+import org.datagear.management.domain.DirectoryFileDataSetEntity;
+import org.datagear.management.domain.ExcelDataSetEntity;
 import org.datagear.management.domain.JsonFileDataSetEntity;
 import org.datagear.management.domain.JsonValueDataSetEntity;
 import org.datagear.management.domain.Schema;
@@ -194,7 +195,38 @@ public class DataSetController extends AbstractSchemaConnController
 		checkSaveJsonFileDataSetEntity(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
-		copyToJsonFileDataSetEntityDirectoryIf(dataSet, "");
+		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
+	@RequestMapping("/addForExcel")
+	public String addForExcel(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		ExcelDataSetEntity dataSet = new ExcelDataSetEntity();
+		dataSet.setNameRow(1);
+
+		model.addAttribute("dataSet", dataSet);
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
+		model.addAttribute(KEY_FORM_ACTION, "saveAddForExcel");
+
+		return buildFormView(dataSet.getDataSetType());
+	}
+
+	@RequestMapping(value = "/saveAddForExcel", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveAddForExcel(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody ExcelDataSetEntity dataSet) throws Throwable
+	{
+		User user = WebUtils.getUser(request, response);
+
+		dataSet.setId(IDUtil.randomIdOnTime20());
+		dataSet.setCreateUser(User.copyWithoutPassword(user));
+
+		checkSaveExcelDataSetEntity(dataSet);
+
+		this.dataSetEntityService.add(user, dataSet);
+		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
 
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
 	}
@@ -261,7 +293,23 @@ public class DataSetController extends AbstractSchemaConnController
 		checkSaveJsonFileDataSetEntity(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
-		copyToJsonFileDataSetEntityDirectoryIf(dataSet, originalFileName);
+		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
+	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEditForExcel(HttpServletRequest request,
+			HttpServletResponse response, @RequestBody ExcelDataSetEntity dataSet,
+			@RequestParam("originalFileName") String originalFileName) throws Throwable
+	{
+		User user = WebUtils.getUser(request, response);
+
+		checkSaveExcelDataSetEntity(dataSet);
+
+		this.dataSetEntityService.update(user, dataSet);
+		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
 	}
@@ -474,11 +522,11 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/previewJsonFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResolvedDataSetResult previewJsonFile(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @RequestBody JsonDirectoryFileDataSetPreview preview)
+			org.springframework.ui.Model springModel, @RequestBody JsonFileDataSetEntityPreview preview)
 			throws Throwable
 	{
-		JsonDirectoryFileDataSet dataSet = preview.getDataSet();
-		setJsonDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
+		JsonFileDataSetEntity dataSet = preview.getDataSet();
+		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
 		Map<String, Object> convertedParamValues = getDataSetParamValueConverter()
 				.convert(preview.getParamValues(), dataSet.getParams());
@@ -488,7 +536,25 @@ public class DataSetController extends AbstractSchemaConnController
 		return result;
 	}
 
-	protected boolean copyToJsonFileDataSetEntityDirectoryIf(JsonFileDataSetEntity entity, String originalFileName)
+	@RequestMapping(value = "/previewExcel", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResolvedDataSetResult previewExcel(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestBody ExcelDataSetEntityPreview preview)
+			throws Throwable
+	{
+		ExcelDataSetEntity dataSet = preview.getDataSet();
+		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
+
+		Map<String, Object> convertedParamValues = getDataSetParamValueConverter()
+				.convert(preview.getParamValues(), dataSet.getParams());
+
+		ResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
+
+		return result;
+	}
+
+	protected boolean copyToDirectoryFileDataSetEntityDirectoryIf(DirectoryFileDataSetEntity entity,
+			String originalFileName)
 			throws IOException
 	{
 		String fileName = entity.getFileName();
@@ -510,7 +576,7 @@ public class DataSetController extends AbstractSchemaConnController
 		return true;
 	}
 
-	protected void setJsonDirectoryFileDataSetDirectory(JsonDirectoryFileDataSet dataSet, String originalFileName)
+	protected void setDirectoryFileDataSetDirectory(DirectoryFileDataSetEntity dataSet, String originalFileName)
 	{
 		String fileName = dataSet.getFileName();
 
@@ -576,6 +642,17 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	protected void checkSaveJsonFileDataSetEntity(JsonFileDataSetEntity dataSet)
+	{
+		checkSaveEntity(dataSet);
+
+		if (isEmpty(dataSet.getFileName()))
+			throw new IllegalInputException();
+
+		if (isEmpty(dataSet.getDisplayName()))
+			throw new IllegalInputException();
+	}
+
+	protected void checkSaveExcelDataSetEntity(ExcelDataSetEntity dataSet)
 	{
 		checkSaveEntity(dataSet);
 
@@ -665,11 +742,31 @@ public class DataSetController extends AbstractSchemaConnController
 		}
 	}
 
-	public static class JsonDirectoryFileDataSetPreview extends AbstractDataSetPreview<JsonDirectoryFileDataSet>
+	public static class JsonFileDataSetEntityPreview extends AbstractDataSetPreview<JsonFileDataSetEntity>
 	{
 		private String originalFileName;
 
-		public JsonDirectoryFileDataSetPreview()
+		public JsonFileDataSetEntityPreview()
+		{
+			super();
+		}
+
+		public String getOriginalFileName()
+		{
+			return originalFileName;
+		}
+
+		public void setOriginalFileName(String originalFileName)
+		{
+			this.originalFileName = originalFileName;
+		}
+	}
+
+	public static class ExcelDataSetEntityPreview extends AbstractDataSetPreview<ExcelDataSetEntity>
+	{
+		private String originalFileName;
+
+		public ExcelDataSetEntityPreview()
 		{
 			super();
 		}
