@@ -92,10 +92,9 @@ readonly 是否只读操作，允许为null
 		po.previewOptions.data.originalFileName = po.element("#${pageId}-originalFileName").val();
 	};
 	
-	<#if formAction == 'saveEditForJsonFile'>
-	//初始化预览数据，为po.isPreviewValueModified判断逻辑提供支持
+	<#if formAction != 'saveAddForJsonFile'>
+	//编辑、查看操作应初始化为已完成预览的状态
 	po.updatePreviewOptionsData();
-	//编辑操作默认为预览成功
 	po.previewSuccess(true);
 	</#if>
 	
