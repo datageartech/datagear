@@ -30,7 +30,6 @@ readonly 是否只读操作，允许为null
 						<input type="hidden" id="${pageId}-originalFileName" value="${(dataSet.fileName)!''?html}" />
 						<input type="hidden" name="fileName" value="${(dataSet.fileName)!''?html}" />
 						<input type="text" name="displayName" value="${(dataSet.displayName)!''?html}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
-						<input type="hidden"  id="${pageId}-workspaceEditor" value="${(dataSet.fileName)!''?html}" />
 						<#if !readonly>
 						<div class="fileinput-wrapper">
 							<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
@@ -39,7 +38,7 @@ readonly 是否只读操作，允许为null
 						</#if>
 					</div>
 				</div>
-				<div class="form-item">
+				<div class="form-item form-item-encoding">
 					<div class="form-item-label">
 						<label><@spring.message code='dataSet.jsonFileEncoding' /></label>
 					</div>
@@ -78,66 +77,56 @@ readonly 是否只读操作，允许为null
 	$.initButtons(po.element());
 	po.element("select[name='encoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	po.initWorkspaceHeight();
+	po.initWorkspaceTabs();
+	po.initDataSetPropertiesTable(po.dataSetProperties);
+	po.initDataSetParamsTable(po.dataSetParams);
+	po.initPreviewParamValuePanel();
 	
-	po.fileNameEditorValue = function(value)
+	po.updatePreviewOptionsData = function()
 	{
-		var $editor = po.element("#${pageId}-workspaceEditor");
+		var dataSet = po.previewOptions.data.dataSet;
 		
-		if(value === undefined)
-			return $editor.val();
-		else
-			$editor.val(value);
+		dataSet.fileName = po.element("input[name='fileName']").val();
+		dataSet.encoding = po.element("select[name='encoding']").val();
+		
+		po.previewOptions.data.originalFileName = po.element("#${pageId}-originalFileName").val();
 	};
+	
+	<#if formAction == 'saveEditForJsonFile'>
+	//初始化预览数据，为po.isPreviewValueModified判断逻辑提供支持
+	po.updatePreviewOptionsData();
+	//编辑操作默认为预览成功
+	po.previewSuccess(true);
+	</#if>
 	
 	po.isPreviewValueModified = function()
 	{
-		return po.isFileNameModified();
-	};
-	
-	po.isFileNameModified = function(inputValue, editorValue)
-	{
-		if(inputValue == undefined)
-			inputValue = po.element("input[name='fileName']").val();
-		if(editorValue == undefined)
-			editorValue = po.fileNameEditorValue();
+		var fileName = po.element("input[name='fileName']").val();
+		var encoding = po.element("select[name='encoding']").val();
 		
-		return po.isModifiedIgnoreBlank(inputValue, editorValue);
+		var pd = po.previewOptions.data.dataSet;
+		
+		return (pd.fileName != fileName) || (pd.encoding != encoding);
 	};
-	
-	po.initWorkspaceTabs();
-	
-	po.initDataSetPropertiesTable(po.dataSetProperties);
-	
-	po.initDataSetParamsTable(po.dataSetParams);
-	
-	po.initPreviewParamValuePanel();
 	
 	po.previewOptions.url = po.url("previewJsonFile");
 	po.previewOptions.beforePreview = function()
 	{
-		var fileName = po.fileNameEditorValue();
+		po.updatePreviewOptionsData();
 		
-		if(!fileName)
+		if(!this.data.dataSet.fileName)
 			return false;
-		
-		this.data.dataSet.encoding = po.element("select[name='encoding']").val();
-		this.data.dataSet.fileName = fileName;
-		this.data.originalFileName = po.element("#${pageId}-originalFileName").val();
 	};
 	po.previewOptions.beforeRefresh = function()
 	{
-		if(!this.data.dataSet || !this.data.dataSet.fileName)
+		if(!this.data.dataSet.fileName)
 			return false;
-	};
-	po.previewOptions.success = function(previewResponse)
-	{
-		po.element("input[name='fileName']").val(this.data.dataSet.fileName);
 	};
 	
 	po.initPreviewOperations();
 	
 	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
-
+	
 	po.element(".fileinput-button").fileupload(
 	{
 		url : po.url("uploadFile"),
@@ -145,8 +134,8 @@ readonly 是否只读操作，允许为null
 		success : function(uploadResult, textStatus, jqXHR)
 		{
 			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
+			po.element("input[name='fileName']").val(uploadResult.fileName);
 			po.element("input[name='displayName']").val(uploadResult.displayName);
-			po.element("#${pageId}-workspaceEditor").val(uploadResult.fileName);
 		}
 	})
 	.bind('fileuploadadd', function (e, data)
@@ -161,7 +150,7 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("dataSetJsonFilePreviewRequired", function(value, element)
 	{
-		return !po.isFileNameModified();
+		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
 	
 	po.form().validate(

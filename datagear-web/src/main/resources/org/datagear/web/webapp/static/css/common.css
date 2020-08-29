@@ -2235,6 +2235,9 @@ table.dataTable tbody tr td select{
 .page-form-dataSet .form-foot-placeholder{
 	height: 2.5em;
 }
+.page-form-dataSet-jsonFile .encoding-selectmenu-menu .ui-menu{
+	height: 10em;
+}
 
 .page-form-chart .chart-plugin{
 	display: inline-block;

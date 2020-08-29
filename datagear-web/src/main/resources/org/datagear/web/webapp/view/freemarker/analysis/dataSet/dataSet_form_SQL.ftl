@@ -80,21 +80,6 @@ readonly 是否只读操作，允许为null
 	
 	po.getDataSetSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };
 
-	po.isPreviewValueModified = function()
-	{
-		return po.isSqlModified();
-	};
-	
-	po.isSqlModified = function(textareaValue, editorValue)
-	{
-		if(textareaValue == undefined)
-			textareaValue = po.element("textarea[name='sql']").val();
-		if(editorValue == undefined)
-			editorValue = po.sqlEditor.getValue();
-		
-		return po.isModifiedIgnoreBlank(textareaValue, editorValue);
-	};
-	
 	po.element(".select-schema-button").click(function()
 	{
 		var options =
@@ -119,41 +104,56 @@ readonly 是否只读操作，允许为null
 	po.initSqlEditor();
 	
 	po.initWorkspaceEditor(po.sqlEditor, po.element("textarea[name='sql']").val());
-	
 	po.initWorkspaceTabs();
-	
 	po.getAddPropertyName = function()
 	{
 		var selectionRange = po.sqlEditor.getSelectionRange();
 		return (po.sqlEditor.session.getTextRange(selectionRange) || "");
 	};
 	po.initDataSetPropertiesTable(po.dataSetProperties);
-	
 	po.initDataSetParamsTable(po.dataSetParams);
-	
 	po.initPreviewParamValuePanel();
-	
-	po.previewOptions.url = po.url("previewSql");
-	po.previewOptions.beforePreview = function()
+
+	po.updatePreviewOptionsData = function()
 	{
 		var schemaId = po.getDataSetSchemaId();
 		var sql = po.sqlEditor.getValue();
 		
-		if(!schemaId || !sql)
-			return false;
+		var dataSet = po.previewOptions.data.dataSet;
 		
-		this.data.dataSet.sql = sql;
-		this.data.schemaId = schemaId;
+		dataSet.sql = sql;
+		po.previewOptions.data.schemaId = schemaId;
+	};
+	
+	<#if formAction == 'saveEditForSQL'>
+	//初始化预览数据，为po.isPreviewValueModified判断逻辑提供支持
+	po.updatePreviewOptionsData();
+	//编辑操作默认为预览成功
+	po.previewSuccess(true);
+	</#if>
+	
+	po.isPreviewValueModified = function()
+	{
+		var schemaId = po.getDataSetSchemaId();
+		var sql = po.sqlEditor.getValue();
+		
+		var pd = po.previewOptions.data.dataSet;
+		
+		return (pd.sql != sql) || (po.previewOptions.data.schemaId != schemaId);
+	};
+	
+	po.previewOptions.url = po.url("previewSql");
+	po.previewOptions.beforePreview = function()
+	{
+		po.updatePreviewOptionsData();
+		
+		if(!this.data.dataSet.sql || !this.data.schemaId)
+			return false;
 	};
 	po.previewOptions.beforeRefresh = function()
 	{
-		if(!this.data.dataSet || !this.data.dataSet.sql || !this.data.schemaId)
+		if(!this.data.dataSet.sql || !this.data.schemaId)
 			return false;
-	};
-	po.previewOptions.success = function(previewResponse)
-	{
-		po.element("textarea[name='sql']").val(this.data.dataSet.sql);
-		po.sqlEditor.focus();
 	};
 	
 	po.initPreviewOperations();
@@ -209,7 +209,7 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("dataSetSqlPreviewRequired", function(value, element)
 	{
-		return !po.isSqlModified(value);
+		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
 	
 	po.form().validate(
@@ -237,6 +237,7 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
+			formData["sql"] = po.sqlEditor.getValue();
 			
 			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,
 			function(response)

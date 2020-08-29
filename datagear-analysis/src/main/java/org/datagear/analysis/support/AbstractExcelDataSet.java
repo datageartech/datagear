@@ -8,7 +8,6 @@
 package org.datagear.analysis.support;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,7 +16,6 @@ import java.util.Map;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellReference;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -66,8 +64,8 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	protected static final RangeExpResolver RANGE_EXP_RESOLVER = RangeExpResolver
 			.valueOf(RangeExpResolver.RANGE_SPLITTER_CHAR, RangeExpResolver.RANGE_GROUP_SPLITTER_CHAR);
 
-	/** 此数据集所处的sheet索引号（以0计数） */
-	private int sheetIndex = 0;
+	/** 此数据集所处的sheet索引号（以1计数） */
+	private int sheetIndex = 1;
 
 	/** 作为名称行的行号 */
 	private int nameRow = -1;
@@ -106,10 +104,9 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	}
 
 	/**
-	 * 设置此数据集所处的sheet索引号。
+	 * 设置此数据集所处的sheet号。
 	 * 
-	 * @param sheetIndex
-	 *            索引号（以{@code 0}计数）
+	 * @param sheetIndex sheet号（以{@code 1}计数）
 	 */
 	public void setSheetIndex(int sheetIndex)
 	{
@@ -286,13 +283,17 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 			poifs = new POIFSFileSystem(file, true);
 			wb = new HSSFWorkbook(poifs.getRoot(), true);
 
-			Sheet sheet = wb.getSheetAt(getSheetIndex());
+			Sheet sheet = wb.getSheetAt(getSheetIndex() - 1);
 
 			return resolveResultForSheet(paramValues, sheet, properties);
 		}
-		catch (IOException e)
+		catch(DataSetException e)
 		{
-			throw new DataSetSourceParseException(e);
+			throw e;
+		}
+		catch(Throwable t)
+		{
+			throw new DataSetSourceParseException(t);
 		}
 		finally
 		{
@@ -322,13 +323,17 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 			pkg = OPCPackage.open(file, PackageAccess.READ);
 			wb = new XSSFWorkbook(pkg);
 
-			Sheet sheet = wb.getSheetAt(getSheetIndex());
+			Sheet sheet = wb.getSheetAt(getSheetIndex() - 1);
 
 			return resolveResultForSheet(paramValues, sheet, properties);
 		}
-		catch (IOException | InvalidFormatException e)
+		catch(DataSetException e)
 		{
-			throw new DataSetSourceParseException(e);
+			throw e;
+		}
+		catch(Throwable t)
+		{
+			throw new DataSetSourceParseException(t);
 		}
 		finally
 		{
