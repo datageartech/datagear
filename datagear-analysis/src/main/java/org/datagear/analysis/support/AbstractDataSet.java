@@ -151,7 +151,10 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 */
 	protected Object convertToPropertyDataType(Object source, DataSetProperty property)
 	{
-		return convertToPropertyDataType(source, (property == null ? null : property.getType()));
+		if (property == null)
+			return source;
+
+		return convertToPropertyDataType(source, property.getType());
 	}
 
 	/**

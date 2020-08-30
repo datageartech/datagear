@@ -101,6 +101,11 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	}
 
 	/**
+	 * 解析结果。
+	 * <p>
+	 * 如果{@linkplain #getCsvReader(Map)}返回的{@linkplain TemplateResolvedSource#hasResolvedTemplate()}，
+	 * 此方法将返回{@linkplain TemplateResolvedDataSetResult}。
+	 * </p>
 	 * 
 	 * @param paramValues
 	 * @param properties  允许为{@code null}，此时会自动解析
@@ -110,12 +115,17 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
 			throws DataSetException
 	{
-		Reader reader = null;
+		TemplateResolvedSource<Reader> reader = null;
+
 		try
 		{
 			reader = getCsvReader(paramValues);
 
-			ResolvedDataSetResult result = resolveResult(reader, properties);
+			ResolvedDataSetResult result = resolveResult(reader.getSource(), properties);
+
+			if (reader.hasResolvedTemplate())
+				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
+						reader.getResolvedTemplate());
 
 			return result;
 		}
@@ -129,7 +139,7 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 		}
 		finally
 		{
-			IOUtil.close(reader);
+			IOUtil.close(reader.getSource());
 		}
 	}
 
@@ -143,18 +153,19 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract Reader getCsvReader(Map<String, ?> paramValues) throws Throwable;
+	protected abstract TemplateResolvedSource<Reader> getCsvReader(Map<String, ?> paramValues) throws Throwable;
 
 	/**
+	 * 解析结果。
 	 * 
 	 * @param csvReader
 	 * @param properties 允许为{@code null}，此时会自动解析
 	 * @return
-	 * @throws DataSetException
+	 * @throws Throwable
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected ResolvedDataSetResult resolveResult(Reader csvReader, List<DataSetProperty> properties)
-			throws DataSetException
+			throws Throwable
 	{
 		boolean resolveProperties = (properties == null || properties.isEmpty());
 
@@ -204,8 +215,9 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	 * @param propertyNames 允许为{@code null}
 	 * @param data          允许为{@code null}
 	 * @return
+	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(List<String> propertyNames, List<List<String>> data)
+	protected ResolvedDataSetResult resolveResult(List<String> propertyNames, List<List<String>> data) throws Throwable
 	{
 		List<DataSetProperty> properties = new ArrayList<DataSetProperty>(
 				(propertyNames == null ? 0 : propertyNames.size()));
@@ -307,8 +319,9 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	 * 
 	 * @param s
 	 * @return
+	 * @throws Throwable
 	 */
-	protected Number parseNumberString(String s)
+	protected Number parseNumberString(String s) throws Throwable
 	{
 		return Double.parseDouble(s);
 	}
@@ -318,10 +331,10 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	 * @param csvRecord
 	 * @param forceIndex 是否强制使用索引号，将返回：{@code ["1"、"2"、....]}
 	 * @return
-	 * @throws DataSetException
+	 * @throws Throwable
 	 */
 	protected List<String> resolveDataSetPropertyNames(CSVRecord csvRecord, boolean forceIndex)
-			throws DataSetException
+			throws Throwable
 	{
 		int size = csvRecord.size();
 		List<String> list = new ArrayList<>(size);
@@ -346,8 +359,10 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	 * @param csvRecord
 	 * @param properties 允许为{@code null}、元素为{@code null}
 	 * @return
+	 * @throws Throwable
 	 */
 	protected List<Object> resolveCSVRecordValues(CSVRecord csvRecord, List<DataSetProperty> properties)
+			throws Throwable
 	{
 		int size = csvRecord.size();
 		List<Object> list = new ArrayList<>(size);
@@ -388,17 +403,10 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	 * 
 	 * @param reader
 	 * @return
-	 * @throws DataSetSourceParseException
+	 * @throws Throwable
 	 */
-	protected CSVParser buildCSVParser(Reader reader) throws DataSetSourceParseException
+	protected CSVParser buildCSVParser(Reader reader) throws Throwable
 	{
-		try
-		{
-			return CSVFormat.DEFAULT.withIgnoreSurroundingSpaces().parse(reader);
-		}
-		catch(Throwable t)
-		{
-			throw new DataSetSourceParseException(t);
-		}
+		return CSVFormat.DEFAULT.withIgnoreSurroundingSpaces().parse(reader);
 	}
 }

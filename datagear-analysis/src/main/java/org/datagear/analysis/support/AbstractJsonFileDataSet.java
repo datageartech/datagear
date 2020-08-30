@@ -8,15 +8,19 @@
 package org.datagear.analysis.support;
 
 import java.io.File;
+import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataSetResult;
+import org.datagear.util.IOUtil;
 
 /**
  * 抽象JSON文件数据集。
+ * <p>
+ * 注意：此类不支持<code>Freemarker</code>模板语言。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -54,11 +58,10 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 	}
 
 	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
+	protected TemplateResolvedSource<Reader> getJsonReader(Map<String, ?> paramValues) throws Throwable
 	{
-		File jsonFile = getJsonFile(paramValues);
-		Object data = getJsonDataSetSupport().resolveResultData(jsonFile, getEncoding());
-		return new DataSetResult(data);
+		File file = getJsonFile(paramValues);
+		return new TemplateResolvedSource<Reader>(IOUtil.getReader(file, this.encoding));
 	}
 
 	/**

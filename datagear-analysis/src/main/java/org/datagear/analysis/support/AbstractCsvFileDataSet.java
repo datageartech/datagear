@@ -17,6 +17,9 @@ import org.datagear.util.IOUtil;
 
 /**
  * 抽象CSV文件数据集。
+ * <p>
+ * 注意：此类不支持<code>Freemarker</code>模板语言。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -54,10 +57,10 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet
 	}
 
 	@Override
-	protected Reader getCsvReader(Map<String, ?> paramValues) throws Throwable
+	protected TemplateResolvedSource<Reader> getCsvReader(Map<String, ?> paramValues) throws Throwable
 	{
 		File file = getCsvFile(paramValues);
-		return IOUtil.getReader(file, this.encoding);
+		return new TemplateResolvedSource<Reader>(IOUtil.getReader(file, this.encoding));
 	}
 
 	/**

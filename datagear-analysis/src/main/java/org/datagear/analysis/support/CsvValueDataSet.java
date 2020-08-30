@@ -8,11 +8,15 @@ import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 
+import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.util.IOUtil;
 
 /**
  * CSV值数据集。
+ * <p>
+ * 此类的{@linkplain #getValue()}支持<code>Freemarker</code>模板语言。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -61,8 +65,15 @@ public class CsvValueDataSet extends AbstractCsvDataSet
 	}
 
 	@Override
-	protected Reader getCsvReader(Map<String, ?> paramValues) throws Throwable
+	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
 	{
-		return IOUtil.getReader(this.value);
+		return (TemplateResolvedDataSetResult) resolveResult(paramValues, null);
+	}
+
+	@Override
+	protected TemplateResolvedSource<Reader> getCsvReader(Map<String, ?> paramValues) throws Throwable
+	{
+		String csv = resolveTemplate(this.value, paramValues);
+		return new TemplateResolvedSource<Reader>(IOUtil.getReader(csv), csv);
 	}
 }
