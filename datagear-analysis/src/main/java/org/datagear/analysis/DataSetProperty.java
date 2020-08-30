@@ -114,6 +114,12 @@ public class DataSetProperty extends AbstractDataNameType implements Serializabl
 		return StringUtil.split(labelText, splitter, true);
 	}
 
+	/**
+	 * {@linkplain DataSetProperty#getType()}类型枚举。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
 	public static class DataType
 	{
 		/** 字符串 */

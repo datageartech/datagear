@@ -10,7 +10,6 @@ package org.datagear.analysis.support;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -136,12 +135,12 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	/**
 	 * 设置作为名称行的行号。
 	 * 
-	 * @param titleRow
+	 * @param nameRow
 	 *            行号，小于{@code 1}则表示无名称行。
 	 */
-	public void setNameRow(int titleRow)
+	public void setNameRow(int nameRow)
 	{
-		this.nameRow = titleRow;
+		this.nameRow = nameRow;
 	}
 
 	public String getDataRowExp()
@@ -399,7 +398,7 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 									throw new DataSetSourceParseException(
 											"No property defined for column index " + dataColIdx);
 
-								property = properties.get(dataRowIdx);
+								property = properties.get(dataColIdx);
 							}
 
 							Object value = resolvePropertyValue(cell, property);
@@ -438,33 +437,9 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 		if (resolveProperties)
 			inflateDataSetProperties(properties, propertyNames);
 
-		DataSetResult result = new DataSetResult(rowListToMap(data, properties));
+		DataSetResult result = new DataSetResult(listRowsToMapRows(data, properties));
 
 		return new ResolvedDataSetResult(result, properties);
-	}
-
-	@SuppressWarnings("unchecked")
-	protected List<Map<String, Object>> rowListToMap(List<List<Object>> data, List<DataSetProperty> dataSetProperties)
-	{
-		if (data == null)
-			return Collections.EMPTY_LIST;
-
-		List<Map<String, Object>> maps = new ArrayList<>(data.size());
-
-		for (List<Object> row : data)
-		{
-			Map<String, Object> map = new HashMap<>();
-
-			for (int i = 0; i < row.size(); i++)
-			{
-				String name = dataSetProperties.get(i).getName();
-				map.put(name, row.get(i));
-			}
-
-			maps.add(map);
-		}
-
-		return maps;
 	}
 
 	protected void inflateDataSetProperties(List<DataSetProperty> properties, List<String> propertyNames)
@@ -614,6 +589,8 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 		{
 			throw new DataSetSourceParseException(t);
 		}
+
+		cellValue = convertToPropertyDataType(cellValue, property);
 
 		return cellValue;
 	}
