@@ -19,7 +19,7 @@ import org.datagear.analysis.DataSetProperty.DataType;
  * 它支持将对象转换为{@linkplain DataSetProperty.DataType}类型的值。
  * </p>
  * <p>
- * 此类不是线程安全的。
+ * 此类的{@linkplain #convert(java.util.Map, java.util.Collection)}、{@linkplain #convert(Object, String)}不是线程安全的。
  * </p>
  * 
  * @author datagear@163.com
@@ -27,7 +27,7 @@ import org.datagear.analysis.DataSetProperty.DataType;
  */
 public class DataSetPropertyValueConverter extends DataValueConverter
 {
-	private DataFormat dataFormat = null;
+	private DataFormat dataFormat;
 
 	private SimpleDateFormat _dateFormat = null;
 	private SimpleDateFormat _timeFormat = null;
@@ -92,11 +92,11 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 					throw new DataValueConvertionException(value, type);
 			}
 		}
-		catch(DataValueConvertionException e)
+		catch (DataValueConvertionException e)
 		{
 			throw e;
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			throw new DataValueConvertionException(value, type);
 		}
@@ -109,7 +109,7 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 
 		if (value == null || value.isEmpty())
 			return null;
-		
+
 		if (DataType.BOOLEAN.equals(type))
 			return "true".equalsIgnoreCase(value) || "1".equals(value);
 		else if (DataType.NUMBER.equals(type))
@@ -147,6 +147,8 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 
 		if (DataType.STRING.equals(type))
 			return value.toString();
+		else if (DataType.NUMBER.equals(type) || DataType.INTEGER.equals(type) || DataType.DECIMAL.equals(type))
+			return (Boolean.TRUE.equals(value) ? 1 : 0);
 		else
 			throw new DataValueConvertionException(value, type);
 	}
@@ -179,7 +181,7 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 
 	protected Object convertDateValue(java.util.Date value, String type) throws Throwable
 	{
-		if (DataType.DATE.equals(type) || DataType.UNKNOWN.equals(type))
+		if (DataType.UNKNOWN.equals(type))
 			return value;
 
 		if (value == null)
@@ -193,6 +195,8 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 			return value.getTime();
 		else if (DataType.DECIMAL.equals(type))
 			return value.getTime();
+		else if (DataType.DATE.equals(type))
+			return new Date(value.getTime());
 		else if (DataType.TIME.equals(type))
 			return new Time(value.getTime());
 		else if (DataType.TIMESTAMP.equals(type))
@@ -210,7 +214,7 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 			return null;
 
 		if (DataType.STRING.equals(type))
-			return this._dateFormat.format(value);
+			return this._timeFormat.format(value);
 		else if (DataType.NUMBER.equals(type))
 			return value.getTime();
 		else if (DataType.INTEGER.equals(type))
@@ -234,7 +238,7 @@ public class DataSetPropertyValueConverter extends DataValueConverter
 			return null;
 
 		if (DataType.STRING.equals(type))
-			return this._dateFormat.format(value);
+			return this._timestampFormat.format(value);
 		else if (DataType.NUMBER.equals(type))
 			return value.getTime();
 		else if (DataType.INTEGER.equals(type))

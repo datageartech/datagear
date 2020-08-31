@@ -74,7 +74,8 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	/**
 	 * 设置作为名称行的行号。
 	 * 
-	 * @param nameRow 行号，小于{@code 1}则表示无名称行。
+	 * @param nameRow
+	 *            行号，小于{@code 1}则表示无名称行。
 	 */
 	public void setNameRow(int nameRow)
 	{
@@ -108,7 +109,8 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	 * </p>
 	 * 
 	 * @param paramValues
-	 * @param properties  允许为{@code null}，此时会自动解析
+	 * @param properties
+	 *            允许为{@code null}，此时会自动解析
 	 * @return
 	 * @throws DataSetException
 	 */
@@ -129,11 +131,11 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 
 			return result;
 		}
-		catch(DataSetException e)
+		catch (DataSetException e)
 		{
 			throw e;
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			throw new DataSetSourceParseException(t);
 		}
@@ -159,13 +161,13 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	 * 解析结果。
 	 * 
 	 * @param csvReader
-	 * @param properties 允许为{@code null}，此时会自动解析
+	 * @param properties
+	 *            允许为{@code null}，此时会自动解析
 	 * @return
 	 * @throws Throwable
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected ResolvedDataSetResult resolveResult(Reader csvReader, List<DataSetProperty> properties)
-			throws Throwable
+	protected ResolvedDataSetResult resolveResult(Reader csvReader, List<DataSetProperty> properties) throws Throwable
 	{
 		boolean resolveProperties = (properties == null || properties.isEmpty());
 
@@ -173,6 +175,8 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 
 		List<String> propertyNames = null;
 		List<List<Object>> data = new ArrayList<>();
+
+		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
 
 		int rowIdx = 0;
 		int dataRowIdx = 0;
@@ -190,9 +194,9 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 					propertyNames = resolveDataSetPropertyNames(csvRecord, true);
 
 				if (resolveProperties)
-					data.add(resolveCSVRecordValues(csvRecord, null));
+					data.add(resolveCSVRecordValues(csvRecord, null, converter));
 				else
-					data.add(resolveCSVRecordValues(csvRecord, properties));
+					data.add(resolveCSVRecordValues(csvRecord, properties, converter));
 
 				dataRowIdx++;
 			}
@@ -212,15 +216,16 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	/**
 	 * 由原始的字符串CSV数据解析{@linkplain ResolvedDataSetResult}。
 	 * 
-	 * @param propertyNames 允许为{@code null}
-	 * @param data          允许为{@code null}
+	 * @param propertyNames
+	 *            允许为{@code null}
+	 * @param data
+	 *            允许为{@code null}
 	 * @return
 	 * @throws Throwable
 	 */
 	protected ResolvedDataSetResult resolveResult(List<String> propertyNames, List<List<String>> data) throws Throwable
 	{
-		List<DataSetProperty> properties = new ArrayList<DataSetProperty>(
-				(propertyNames == null ? 0 : propertyNames.size()));
+		List<DataSetProperty> properties = new ArrayList<>((propertyNames == null ? 0 : propertyNames.size()));
 
 		if (propertyNames != null)
 		{
@@ -259,13 +264,13 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 					properties.get(entry.getKey()).setType(DataSetProperty.DataType.NUMBER);
 			}
 
-			List<List<Object>> newData = new ArrayList<List<Object>>(data.size());
+			List<List<Object>> newData = new ArrayList<>(data.size());
 
 			for (List<String> ele : data)
 			{
 				int size = Math.min(plen, ele.size());
 
-				List<Object> newEle = new ArrayList<Object>(size);
+				List<Object> newEle = new ArrayList<>(size);
 
 				for (int i = 0; i < size; i++)
 				{
@@ -308,7 +313,7 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 
 			return true;
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			return false;
 		}
@@ -329,12 +334,12 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	/**
 	 * 
 	 * @param csvRecord
-	 * @param forceIndex 是否强制使用索引号，将返回：{@code ["1"、"2"、....]}
+	 * @param forceIndex
+	 *            是否强制使用索引号，将返回：{@code ["1"、"2"、....]}
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<String> resolveDataSetPropertyNames(CSVRecord csvRecord, boolean forceIndex)
-			throws Throwable
+	protected List<String> resolveDataSetPropertyNames(CSVRecord csvRecord, boolean forceIndex) throws Throwable
 	{
 		int size = csvRecord.size();
 		List<String> list = new ArrayList<>(size);
@@ -357,12 +362,14 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	 * </p>
 	 * 
 	 * @param csvRecord
-	 * @param properties 允许为{@code null}、元素为{@code null}
+	 * @param properties
+	 *            允许为{@code null}、元素为{@code null}
+	 * @param converter
 	 * @return
 	 * @throws Throwable
 	 */
-	protected List<Object> resolveCSVRecordValues(CSVRecord csvRecord, List<DataSetProperty> properties)
-			throws Throwable
+	protected List<Object> resolveCSVRecordValues(CSVRecord csvRecord, List<DataSetProperty> properties,
+			DataSetPropertyValueConverter converter) throws Throwable
 	{
 		int size = csvRecord.size();
 		List<Object> list = new ArrayList<>(size);
@@ -379,7 +386,7 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 				list.add(rawValue);
 			else
 			{
-				Object value = convertToPropertyDataType(rawValue, property);
+				Object value = convertToPropertyDataType(converter, rawValue, property);
 				list.add(value);
 			}
 		}
@@ -390,7 +397,8 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	/**
 	 * 是否名称行
 	 * 
-	 * @param rowIndex 行索引（以{@code 0}计数）
+	 * @param rowIndex
+	 *            行索引（以{@code 0}计数）
 	 * @return
 	 */
 	protected boolean isNameRow(int rowIndex)

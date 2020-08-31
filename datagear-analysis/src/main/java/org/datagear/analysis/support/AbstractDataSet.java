@@ -37,8 +37,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	/** 属性数据转换格式 */
 	private DataFormat propertyDataFormat = null;
 
-	private DataSetPropertyValueConverter _dataSetPropertyValueConverter = null;
-
 	public AbstractDataSet()
 	{
 		super();
@@ -119,7 +117,6 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	public void setPropertyDataFormat(DataFormat propertyDataFormat)
 	{
 		this.propertyDataFormat = propertyDataFormat;
-		this._dataSetPropertyValueConverter = new DataSetPropertyValueConverter(propertyDataFormat);
 	}
 
 	@Override
@@ -145,16 +142,19 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 如果{@code property}为{@code null}，则什么也不做直接返回。
 	 * </p>
 	 * 
+	 * @param converter
 	 * @param source
-	 * @param property 允许为{@code null}
+	 * @param property
+	 *            允许为{@code null}
 	 * @return
 	 */
-	protected Object convertToPropertyDataType(Object source, DataSetProperty property)
+	protected Object convertToPropertyDataType(DataSetPropertyValueConverter converter, Object source,
+			DataSetProperty property)
 	{
 		if (property == null)
 			return source;
 
-		return convertToPropertyDataType(source, property.getType());
+		return convertToPropertyDataType(converter, source, property.getType());
 	}
 
 	/**
@@ -163,26 +163,36 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * 如果{@code propertyType}为{@code null}，则什么也不做直接返回。
 	 * </p>
 	 * 
+	 * @param converter
 	 * @param source
-	 * @param propertyType 允许为{@code null}
+	 * @param propertyType
+	 *            允许为{@code null}
 	 * @return
 	 */
-	protected Object convertToPropertyDataType(Object source, String propertyType)
+	protected Object convertToPropertyDataType(DataSetPropertyValueConverter converter, Object source,
+			String propertyType)
 	{
 		if (propertyType == null || DataSetProperty.DataType.UNKNOWN.equals(propertyType))
 			return source;
 
-		return getDataSetPropertyValueConverter().convert(source, propertyType);
+		return converter.convert(source, propertyType);
 	}
 
-	protected DataSetPropertyValueConverter getDataSetPropertyValueConverter()
+	/**
+	 * 创建一个{@linkplain DataSetPropertyValueConverter}实例。
+	 * <p>
+	 * 由于{@linkplain DataSetPropertyValueConverter}不是线程安全的，所以每次使用时要手动创建。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	protected DataSetPropertyValueConverter createDataSetPropertyValueConverter()
 	{
-		return _dataSetPropertyValueConverter;
-	}
+		DataFormat dataFormat = this.propertyDataFormat;
+		if (dataFormat == null)
+			dataFormat = new DataFormat();
 
-	protected void setDataSetPropertyValueConverter(DataSetPropertyValueConverter converter)
-	{
-		this._dataSetPropertyValueConverter = converter;
+		return new DataSetPropertyValueConverter(dataFormat);
 	}
 
 	/**

@@ -78,7 +78,8 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 	 * </p>
 	 * 
 	 * @param paramValues
-	 * @param properties  允许为{@code null}，此时会自动解析
+	 * @param properties
+	 *            允许为{@code null}，此时会自动解析
 	 * @return
 	 * @throws DataSetException
 	 */
@@ -92,17 +93,17 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 
 			ResolvedDataSetResult result = resolveResult(reader.getSource(), properties);
 
-			if(reader.hasResolvedTemplate())
+			if (reader.hasResolvedTemplate())
 				result = new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(),
 						reader.getResolvedTemplate());
 
 			return result;
 		}
-		catch(DataSetException e)
+		catch (DataSetException e)
 		{
 			throw e;
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			throw new DataSetSourceParseException(t);
 		}
@@ -127,13 +128,14 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 	/**
 	 * 解析结果。
 	 * 
-	 * @param jsonReader JSON输入流
-	 * @param properties 允许为{@code null}，此时会自动解析
+	 * @param jsonReader
+	 *            JSON输入流
+	 * @param properties
+	 *            允许为{@code null}，此时会自动解析
 	 * @return
 	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult resolveResult(Reader jsonReader, List<DataSetProperty> properties)
-			throws Throwable
+	protected ResolvedDataSetResult resolveResult(Reader jsonReader, List<DataSetProperty> properties) throws Throwable
 	{
 		boolean resolveProperties = (properties == null || properties.isEmpty());
 
@@ -148,14 +150,15 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 			properties = resolveDataSetProperties(data);
 
 		if (!resolveProperties)
-			data = convertJsonResultData(data, properties);
+			data = convertJsonResultData(data, properties, createDataSetPropertyValueConverter());
 
 		DataSetResult result = new DataSetResult(data);
 
 		return new ResolvedDataSetResult(result, properties);
 	}
 
-	protected Object convertJsonResultData(Object resultData, List<DataSetProperty> properties) throws Throwable
+	protected Object convertJsonResultData(Object resultData, List<DataSetProperty> properties,
+			DataSetPropertyValueConverter converter) throws Throwable
 	{
 		Object re = null;
 
@@ -166,7 +169,7 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 		}
 		else if (resultData instanceof Map<?, ?>)
 		{
-			Map<String, Object> reMap = new HashMap<String, Object>();
+			Map<String, Object> reMap = new HashMap<>();
 
 			@SuppressWarnings("unchecked")
 			Map<String, Object> source = (Map<String, Object>) resultData;
@@ -178,7 +181,7 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 
 				DataSetProperty property = getDataNameTypeByName(properties, name);
 
-				value = convertToPropertyDataType(value, property);
+				value = convertToPropertyDataType(converter, value, property);
 
 				reMap.put(name, value);
 			}
@@ -189,10 +192,10 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 		{
 			List<?> list = (List<?>) resultData;
 
-			List<Object> reList = new ArrayList<Object>(list.size());
+			List<Object> reList = new ArrayList<>(list.size());
 
 			for (Object ele : list)
-				reList.add(convertJsonResultData(ele, properties));
+				reList.add(convertJsonResultData(ele, properties, converter));
 
 			re = reList;
 		}
@@ -203,7 +206,7 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 			Object[] reArray = new Object[array.length];
 
 			for (int i = 0; i < array.length; i++)
-				reArray[i] = convertJsonResultData(array[i], properties);
+				reArray[i] = convertJsonResultData(array[i], properties, converter);
 
 			re = reArray;
 		}
@@ -252,7 +255,8 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 	/**
 	 * 解析JSON对象的{@linkplain DataSetProperty}。
 	 * 
-	 * @param resultData JSON对象、JSON对象数组、JSON对象列表
+	 * @param resultData
+	 *            JSON对象、JSON对象数组、JSON对象列表
 	 * @return
 	 * @throws Throwable
 	 */

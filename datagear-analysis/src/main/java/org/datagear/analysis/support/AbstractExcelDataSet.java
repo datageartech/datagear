@@ -367,6 +367,8 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 
 		List<String> propertyNames = null;
 
+		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
+
 		try
 		{
 			int rowIdx = 0;
@@ -405,7 +407,7 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 								property = properties.get(dataColIdx);
 							}
 
-							Object value = resolvePropertyValue(cell, property);
+							Object value = resolvePropertyValue(cell, property, converter);
 
 							if (resolveProperties)
 							{
@@ -544,11 +546,12 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	 * @param cell
 	 * @param property
 	 *            允许为{@code null}
+	 * @param converter
 	 * @return
 	 * @throws DataSetSourceParseException
 	 * @throws DataSetException
 	 */
-	protected Object resolvePropertyValue(Cell cell, DataSetProperty property)
+	protected Object resolvePropertyValue(Cell cell, DataSetProperty property, DataSetPropertyValueConverter converter)
 			throws DataSetSourceParseException, DataSetException
 	{
 		CellType cellType = cell.getCellTypeEnum();
@@ -594,7 +597,7 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 			throw new DataSetSourceParseException(t);
 		}
 
-		cellValue = convertToPropertyDataType(cellValue, property);
+		cellValue = convertToPropertyDataType(converter, cellValue, property);
 
 		return cellValue;
 	}
