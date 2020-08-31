@@ -18,6 +18,9 @@ import org.datagear.util.FileUtil;
 
 /**
  * 目录内Excel文件{@linkplain DataSet}。
+ * <p>
+ * 注意：此类不支持<code>Freemarker</code>模板语言。
+ * </p>
  * 
  * @author datagear@163.com
  *

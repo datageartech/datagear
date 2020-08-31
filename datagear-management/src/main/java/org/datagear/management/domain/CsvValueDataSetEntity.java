@@ -7,25 +7,21 @@
  */
 package org.datagear.management.domain;
 
-import java.io.File;
 import java.util.Date;
 import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.support.ExcelDirectoryFileDataSet;
+import org.datagear.analysis.support.CsvValueDataSet;
 
 /**
- * {@linkplain ExcelDirectoryFileDataSet}实体。
+ * {@linkplain CsvValueDataSet}实体。
  * 
  * @author datagear@163.com
  *
  */
-public class ExcelDataSetEntity extends ExcelDirectoryFileDataSet implements DirectoryFileDataSetEntity
+public class CsvValueDataSetEntity extends CsvValueDataSet implements DataSetEntity
 {
 	private static final long serialVersionUID = 1L;
-
-	/** 展示名 */
-	private String displayName;
 
 	/** 创建用户 */
 	private User createUser;
@@ -36,37 +32,24 @@ public class ExcelDataSetEntity extends ExcelDirectoryFileDataSet implements Dir
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
-	public ExcelDataSetEntity()
+	public CsvValueDataSetEntity()
 	{
 		super();
 		this.createTime = new Date();
 	}
 
-	public ExcelDataSetEntity(String id, String name, List<DataSetProperty> properties, File directory, String fileName,
-			String displayName, User createUser)
+	public CsvValueDataSetEntity(String id, String name, List<DataSetProperty> properties, String value,
+			User createUser)
 	{
-		super(id, name, properties, directory, fileName);
-		this.displayName = displayName;
+		super(id, name, properties, value);
 		this.createTime = new Date();
 		this.createUser = createUser;
 	}
 
 	@Override
-	public String getDisplayName()
-	{
-		return displayName;
-	}
-
-	@Override
-	public void setDisplayName(String displayName)
-	{
-		this.displayName = displayName;
-	}
-
-	@Override
 	public String getDataSetType()
 	{
-		return DataSetEntity.DATA_SET_TYPE_Excel;
+		return DataSetEntity.DATA_SET_TYPE_CsvValue;
 	}
 
 	@Override

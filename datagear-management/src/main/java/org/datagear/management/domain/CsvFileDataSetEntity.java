@@ -12,15 +12,15 @@ import java.util.Date;
 import java.util.List;
 
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.support.ExcelDirectoryFileDataSet;
+import org.datagear.analysis.support.CsvDirectoryFileDataSet;
 
 /**
- * {@linkplain ExcelDirectoryFileDataSet}实体。
+ * {@linkplain CsvDirectoryFileDataSet}实体。
  * 
  * @author datagear@163.com
  *
  */
-public class ExcelDataSetEntity extends ExcelDirectoryFileDataSet implements DirectoryFileDataSetEntity
+public class CsvFileDataSetEntity extends CsvDirectoryFileDataSet implements DirectoryFileDataSetEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -36,14 +36,14 @@ public class ExcelDataSetEntity extends ExcelDirectoryFileDataSet implements Dir
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
-	public ExcelDataSetEntity()
+	public CsvFileDataSetEntity()
 	{
 		super();
 		this.createTime = new Date();
 	}
 
-	public ExcelDataSetEntity(String id, String name, List<DataSetProperty> properties, File directory, String fileName,
-			String displayName, User createUser)
+	public CsvFileDataSetEntity(String id, String name, List<DataSetProperty> properties, File directory,
+			String fileName, String displayName, User createUser)
 	{
 		super(id, name, properties, directory, fileName);
 		this.displayName = displayName;
@@ -66,7 +66,7 @@ public class ExcelDataSetEntity extends ExcelDirectoryFileDataSet implements Dir
 	@Override
 	public String getDataSetType()
 	{
-		return DataSetEntity.DATA_SET_TYPE_Excel;
+		return DataSetEntity.DATA_SET_TYPE_CsvFile;
 	}
 
 	@Override

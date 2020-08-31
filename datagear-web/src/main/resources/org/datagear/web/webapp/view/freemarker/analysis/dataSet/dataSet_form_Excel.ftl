@@ -121,6 +121,7 @@ readonly 是否只读操作，允许为null
 <#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
+<#include "include/dataSet_form_js_nameRow.ftl">
 <script type="text/javascript">
 (function(po)
 {
@@ -132,56 +133,11 @@ readonly 是否只读操作，允许为null
 	po.element("#${pageId}-forceXls").buttonset();
 	po.element("#${pageId}-forceXls-${((dataSet.forceXls)!true)?string('true', 'false')}").click();
 	po.initWorkspaceHeight();
-	po.initWorkspaceTabs();
+	po.initWorkspaceTabs(true);
 	po.initDataSetPropertiesTable(po.dataSetProperties);
 	po.initDataSetParamsTable(po.dataSetParams);
 	po.initPreviewParamValuePanel();
-	
-	po.element("input[name='nameRowRadio']").on("change", function()
-	{
-		var radioVal = $(this).val();
-		var $nameRow = po.element("input[name='nameRow']");
-		var $nameRowText = po.element("input[name='nameRowText']");
-		
-		if(radioVal == "0")
-		{
-			$nameRow.val("0");
-			$nameRowText.hide();
-		}
-		else
-		{
-			var myVal = parseInt($nameRowText.val());
-			if(!myVal || myVal < 1)
-				$nameRowText.val("1");
-			
-			$nameRowText.show();
-		}
-	});
-	
-	po.nameRowValue = function(value)
-	{
-		var $nameRow = po.element("input[name='nameRow']");
-		var $nameRowText = po.element("input[name='nameRowText']");
-		
-		if(value === undefined)
-		{
-			var radioVal = po.element("input[name='nameRowRadio']:checked").val();
-			
-			if(radioVal == "0")
-				return $nameRow.val();
-			else
-				return $nameRowText.val();
-		}
-		else
-		{
-			$nameRow.val(value);
-			$nameRowText.val(value);
-			
-			po.element("input[name='nameRowRadio'][value='"+(value >= 1 ? 1 : 0)+"']").attr("checked", "checked").change();
-		}
-	};
-	
-	po.nameRowValue(${(dataSet.nameRow)!"1"});
+	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
 	
 	po.updatePreviewOptionsData = function()
 	{

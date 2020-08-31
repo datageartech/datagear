@@ -21,12 +21,15 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractFmkTemplateDataSet;
+import org.datagear.analysis.support.CsvValueDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.JsonValueDataSet;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
+import org.datagear.management.domain.CsvFileDataSetEntity;
+import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.ExcelDataSetEntity;
@@ -231,6 +234,68 @@ public class DataSetController extends AbstractSchemaConnController
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
 	}
 
+	@RequestMapping("/addForCsvValue")
+	public String addForCsvValue(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		CsvValueDataSetEntity dataSet = new CsvValueDataSetEntity();
+		dataSet.setNameRow(1);
+
+		model.addAttribute("dataSet", dataSet);
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
+		model.addAttribute(KEY_FORM_ACTION, "saveAddForCsvValue");
+
+		return buildFormView(dataSet.getDataSetType());
+	}
+
+	@RequestMapping(value = "/saveAddForCsvValue", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveAddForCsvValue(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody CsvValueDataSetEntity dataSet)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		dataSet.setId(IDUtil.randomIdOnTime20());
+		dataSet.setCreateUser(User.copyWithoutPassword(user));
+
+		checkSaveCsvValueDataSetEntity(dataSet);
+
+		this.dataSetEntityService.add(user, dataSet);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
+	@RequestMapping("/addForCsvFile")
+	public String addForCsvFile(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		CsvFileDataSetEntity dataSet = new CsvFileDataSetEntity();
+		dataSet.setNameRow(1);
+
+		model.addAttribute("dataSet", dataSet);
+		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
+		model.addAttribute(KEY_FORM_ACTION, "saveAddForCsvFile");
+
+		return buildFormView(dataSet.getDataSetType());
+	}
+
+	@RequestMapping(value = "/saveAddForCsvFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveAddForCsvFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody CsvFileDataSetEntity dataSet) throws Throwable
+	{
+		User user = WebUtils.getUser(request, response);
+
+		dataSet.setId(IDUtil.randomIdOnTime20());
+		dataSet.setCreateUser(User.copyWithoutPassword(user));
+
+		checkSaveCsvFileDataSetEntity(dataSet);
+
+		this.dataSetEntityService.add(user, dataSet);
+		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
 	@RequestMapping("/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
@@ -248,7 +313,8 @@ public class DataSetController extends AbstractSchemaConnController
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.editDataSet");
 		model.addAttribute(KEY_FORM_ACTION, "saveEditFor" + dataSet.getDataSetType());
 
-		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType()))
+		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType())
+				|| DataSetEntity.DATA_SET_TYPE_CsvFile.equals(dataSet.getDataSetType()))
 			model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 
 		return buildFormView(dataSet.getDataSetType());
@@ -300,13 +366,43 @@ public class DataSetController extends AbstractSchemaConnController
 
 	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Excel, produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<OperationMessage> saveEditForExcel(HttpServletRequest request,
-			HttpServletResponse response, @RequestBody ExcelDataSetEntity dataSet,
-			@RequestParam("originalFileName") String originalFileName) throws Throwable
+	public ResponseEntity<OperationMessage> saveEditForExcel(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody ExcelDataSetEntity dataSet, @RequestParam("originalFileName") String originalFileName)
+			throws Throwable
 	{
 		User user = WebUtils.getUser(request, response);
 
 		checkSaveExcelDataSetEntity(dataSet);
+
+		this.dataSetEntityService.update(user, dataSet);
+		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
+	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_CsvValue, produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEditForCsvValue(HttpServletRequest request,
+			HttpServletResponse response, @RequestBody CsvValueDataSetEntity dataSet)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		checkSaveCsvValueDataSetEntity(dataSet);
+
+		this.dataSetEntityService.update(user, dataSet);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
+	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_CsvFile, produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEditForCsvFile(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody CsvFileDataSetEntity dataSet, @RequestParam("originalFileName") String originalFileName)
+			throws Throwable
+	{
+		User user = WebUtils.getUser(request, response);
+
+		checkSaveCsvFileDataSetEntity(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
@@ -359,7 +455,8 @@ public class DataSetController extends AbstractSchemaConnController
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.viewDataSet");
 		model.addAttribute(KEY_READONLY, true);
 
-		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType()))
+		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType())
+				|| DataSetEntity.DATA_SET_TYPE_CsvFile.equals(dataSet.getDataSetType()))
 			model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 
 		return buildFormView(dataSet.getDataSetType());
@@ -511,8 +608,8 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		JsonValueDataSet dataSet = preview.getDataSet();
 
-		Map<String, Object> convertedParamValues = getDataSetParamValueConverter()
-				.convert(preview.getParamValues(), dataSet.getParams());
+		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
+				dataSet.getParams());
 
 		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
 
@@ -528,8 +625,8 @@ public class DataSetController extends AbstractSchemaConnController
 		JsonFileDataSetEntity dataSet = preview.getDataSet();
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
-		Map<String, Object> convertedParamValues = getDataSetParamValueConverter()
-				.convert(preview.getParamValues(), dataSet.getParams());
+		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
+				dataSet.getParams());
 
 		ResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
 
@@ -539,14 +636,44 @@ public class DataSetController extends AbstractSchemaConnController
 	@RequestMapping(value = "/previewExcel", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResolvedDataSetResult previewExcel(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model springModel, @RequestBody ExcelDataSetEntityPreview preview)
-			throws Throwable
+			org.springframework.ui.Model springModel, @RequestBody ExcelDataSetEntityPreview preview) throws Throwable
 	{
 		ExcelDataSetEntity dataSet = preview.getDataSet();
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
-		Map<String, Object> convertedParamValues = getDataSetParamValueConverter()
-				.convert(preview.getParamValues(), dataSet.getParams());
+		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
+				dataSet.getParams());
+
+		ResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
+
+		return result;
+	}
+
+	@RequestMapping(value = "/previewCsvValue", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public TemplateResolvedDataSetResult previewCsvValue(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestBody CsvValueDataSetPreview preview) throws Throwable
+	{
+		CsvValueDataSet dataSet = preview.getDataSet();
+
+		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
+				dataSet.getParams());
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
+
+		return result;
+	}
+
+	@RequestMapping(value = "/previewCsvFile", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResolvedDataSetResult previewCsvFile(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestBody CsvFileDataSetEntityPreview preview) throws Throwable
+	{
+		CsvFileDataSetEntity dataSet = preview.getDataSet();
+		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
+
+		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
+				dataSet.getParams());
 
 		ResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
 
@@ -554,8 +681,7 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	protected boolean copyToDirectoryFileDataSetEntityDirectoryIf(DirectoryFileDataSetEntity entity,
-			String originalFileName)
-			throws IOException
+			String originalFileName) throws IOException
 	{
 		String fileName = entity.getFileName();
 
@@ -653,6 +779,25 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	protected void checkSaveExcelDataSetEntity(ExcelDataSetEntity dataSet)
+	{
+		checkSaveEntity(dataSet);
+
+		if (isEmpty(dataSet.getFileName()))
+			throw new IllegalInputException();
+
+		if (isEmpty(dataSet.getDisplayName()))
+			throw new IllegalInputException();
+	}
+
+	protected void checkSaveCsvValueDataSetEntity(CsvValueDataSetEntity dataSet)
+	{
+		checkSaveEntity(dataSet);
+
+		if (isEmpty(dataSet.getValue()))
+			throw new IllegalInputException();
+	}
+
+	protected void checkSaveCsvFileDataSetEntity(CsvFileDataSetEntity dataSet)
 	{
 		checkSaveEntity(dataSet);
 
@@ -767,6 +912,52 @@ public class DataSetController extends AbstractSchemaConnController
 		private String originalFileName;
 
 		public ExcelDataSetEntityPreview()
+		{
+			super();
+		}
+
+		public String getOriginalFileName()
+		{
+			return originalFileName;
+		}
+
+		public void setOriginalFileName(String originalFileName)
+		{
+			this.originalFileName = originalFileName;
+		}
+	}
+
+	public static class CsvValueDataSetPreview extends AbstractDataSetPreview<CsvValueDataSet>
+	{
+		private String value;
+
+		public CsvValueDataSetPreview()
+		{
+			super();
+		}
+
+		public CsvValueDataSetPreview(String value)
+		{
+			super();
+			this.value = value;
+		}
+
+		public String getValue()
+		{
+			return value;
+		}
+
+		public void setValue(String value)
+		{
+			this.value = value;
+		}
+	}
+
+	public static class CsvFileDataSetEntityPreview extends AbstractDataSetPreview<CsvFileDataSetEntity>
+	{
+		private String originalFileName;
+
+		public CsvFileDataSetEntityPreview()
 		{
 			super();
 		}

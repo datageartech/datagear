@@ -48,6 +48,9 @@ import org.slf4j.LoggerFactory;
  * <p>
  * 通过{@linkplain #setNameRow(int)}可设置名称行。
  * </p>
+ * <p>
+ * 注意：此类不支持<code>Freemarker</code>模板语言。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -105,7 +108,8 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	/**
 	 * 设置此数据集所处的sheet号。
 	 * 
-	 * @param sheetIndex sheet号（以{@code 1}计数）
+	 * @param sheetIndex
+	 *            sheet号（以{@code 1}计数）
 	 */
 	public void setSheetIndex(int sheetIndex)
 	{
@@ -286,11 +290,11 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 
 			return resolveResultForSheet(paramValues, sheet, properties);
 		}
-		catch(DataSetException e)
+		catch (DataSetException e)
 		{
 			throw e;
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			throw new DataSetSourceParseException(t);
 		}
@@ -326,11 +330,11 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 
 			return resolveResultForSheet(paramValues, sheet, properties);
 		}
-		catch(DataSetException e)
+		catch (DataSetException e)
 		{
 			throw e;
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			throw new DataSetSourceParseException(t);
 		}

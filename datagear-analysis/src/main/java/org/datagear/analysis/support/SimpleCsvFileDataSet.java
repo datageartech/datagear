@@ -12,6 +12,9 @@ import org.datagear.analysis.DataSetProperty;
 
 /**
  * 简单CSV文件数据集。
+ * <p>
+ * 注意：此类不支持<code>Freemarker</code>模板语言。
+ * </p>
  * 
  * @author datagear@163.com
  *

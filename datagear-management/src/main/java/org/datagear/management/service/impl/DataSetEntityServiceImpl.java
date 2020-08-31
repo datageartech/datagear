@@ -17,6 +17,8 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.connection.ConnectionSource;
+import org.datagear.management.domain.CsvFileDataSetEntity;
+import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
 import org.datagear.management.domain.ExcelDataSetEntity;
 import org.datagear.management.domain.JsonFileDataSetEntity;
@@ -170,6 +172,10 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 				success = addJsonFileDataSetEntity((JsonFileDataSetEntity) entity);
 			else if (entity instanceof ExcelDataSetEntity)
 				success = addExcelDataSetEntity((ExcelDataSetEntity) entity);
+			else if (entity instanceof CsvValueDataSetEntity)
+				success = addCsvValueDataSetEntity((CsvValueDataSetEntity) entity);
+			else if (entity instanceof CsvFileDataSetEntity)
+				success = addCsvFileDataSetEntity((CsvFileDataSetEntity) entity);
 		}
 
 		if (success)
@@ -210,6 +216,22 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		return (updateMybatis("insertExcelDataSetEntity", params) > 0);
 	}
 
+	protected boolean addCsvValueDataSetEntity(CsvValueDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("insertCsvValueDataSetEntity", params) > 0);
+	}
+
+	protected boolean addCsvFileDataSetEntity(CsvFileDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("insertCsvFileDataSetEntity", params) > 0);
+	}
+
 	@Override
 	protected boolean update(DataSetEntity entity, Map<String, Object> params)
 	{
@@ -228,6 +250,10 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 				success = updateJsonFileDataSetEntity((JsonFileDataSetEntity) entity);
 			else if (entity instanceof ExcelDataSetEntity)
 				success = updateExcelDataSetEntity((ExcelDataSetEntity) entity);
+			else if (entity instanceof CsvValueDataSetEntity)
+				success = updateCsvValueDataSetEntity((CsvValueDataSetEntity) entity);
+			else if (entity instanceof CsvFileDataSetEntity)
+				success = updateCsvFileDataSetEntity((CsvFileDataSetEntity) entity);
 		}
 
 		if (success)
@@ -266,6 +292,22 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("entity", entity);
 
 		return (updateMybatis("updateExcelDataSetEntity", params) > 0);
+	}
+
+	protected boolean updateCsvValueDataSetEntity(CsvValueDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("updateCsvValueDataSetEntity", params) > 0);
+	}
+
+	protected boolean updateCsvFileDataSetEntity(CsvFileDataSetEntity entity)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("entity", entity);
+
+		return (updateMybatis("updateCsvFileDataSetEntity", params) > 0);
 	}
 
 	@Override
@@ -314,6 +356,10 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 			obj = getJsonFileDataSetEntityById(obj.getId());
 		else if (DataSetEntity.DATA_SET_TYPE_Excel.equals(obj.getDataSetType()))
 			obj = getExcelDataSetEntityById(obj.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_CsvValue.equals(obj.getDataSetType()))
+			obj = getCsvValueDataSetEntityById(obj.getId());
+		else if (DataSetEntity.DATA_SET_TYPE_CsvFile.equals(obj.getDataSetType()))
+			obj = getCsvFileDataSetEntityById(obj.getId());
 
 		if (obj == null)
 			return null;
@@ -371,6 +417,29 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("id", id);
 
 		ExcelDataSetEntity entity = selectOneMybatis("getExcelDataSetEntityById", params);
+
+		if (entity != null)
+			entity.setDirectory(getDataSetDirectory(id));
+
+		return entity;
+	}
+
+	protected CsvValueDataSetEntity getCsvValueDataSetEntityById(String id)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("id", id);
+
+		CsvValueDataSetEntity entity = selectOneMybatis("getCsvValueDataSetEntityById", params);
+
+		return entity;
+	}
+
+	protected CsvFileDataSetEntity getCsvFileDataSetEntityById(String id)
+	{
+		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
+		params.put("id", id);
+
+		CsvFileDataSetEntity entity = selectOneMybatis("getCsvFileDataSetEntityById", params);
 
 		if (entity != null)
 			entity.setDirectory(getDataSetDirectory(id));

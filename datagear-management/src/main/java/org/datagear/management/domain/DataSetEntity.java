@@ -34,8 +34,8 @@ public interface DataSetEntity extends DataSet, CreateUserEntity<String>, DataPe
 	/** 数据集类型：Excel */
 	String DATA_SET_TYPE_Excel = "Excel";
 
-	/** 数据集类型：CSV */
-	String DATA_SET_TYPE_Csv = "Csv";
+	/** 数据集类型：CSV值 */
+	String DATA_SET_TYPE_CsvValue = "CsvValue";
 
 	/** 数据集类型：CSV文件 */
 	String DATA_SET_TYPE_CsvFile = "CsvFile";

@@ -106,8 +106,10 @@ po.previewOptions.url = "...";
 		</#if>
 	};
 	
-	po.initWorkspaceTabs = function()
+	po.initWorkspaceTabs = function(disableParams)
 	{
+		disableParams = (disableParams == true ? true : false);
+		
 		po.element(".workspace-operation-wrapper").tabs(
 		{
 			activate: function(event, ui)
@@ -132,8 +134,14 @@ po.previewOptions.url = "...";
 				}
 			}
 		});
+		
+		if(disableParams)
+		{
+			var paramsIndex = $(".workspace-operation-nav .operation-params", po.element(".workspace-operation-wrapper")).index();
+			po.element(".workspace-operation-wrapper").tabs("disable", paramsIndex);
+		}
 	};
-
+	
 	//获取用于添加数据集属性的名
 	po.getAddPropertyName = function()
 	{
