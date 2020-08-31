@@ -7,6 +7,7 @@ package org.datagear.web.controller;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -436,6 +437,35 @@ public class DataSetController extends AbstractSchemaConnController
 		results.put("displayName", displayName);
 
 		return results;
+	}
+
+	@RequestMapping(value = "/downloadFile")
+	public void downloadFile(HttpServletRequest request, HttpServletResponse response, @RequestParam("id") String id)
+			throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		DataSetEntity dataSet = this.dataSetEntityService.getById(user, id);
+
+		if (dataSet == null)
+			throw new RecordNotFoundException();
+
+		if (!(dataSet instanceof DirectoryFileDataSetEntity))
+			throw new IllegalInputException();
+
+		DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) dataSet;
+
+		File dataSetDirectory = getDataSetEntityService().getDataSetDirectory(dataSetEntity.getId());
+		File entityFile = FileUtil.getFile(dataSetDirectory, dataSetEntity.getFileName());
+
+		String displayName = dataSetEntity.getDisplayName();
+		displayName = new String(displayName.getBytes("UTF-8"), "ISO-8859-1");
+
+		response.setCharacterEncoding("UTF-8");
+		response.setHeader("Content-Disposition", "attachment; filename=" + displayName + "");
+		OutputStream out = response.getOutputStream();
+
+		IOUtil.write(entityFile, out);
 	}
 
 	@RequestMapping("/view")

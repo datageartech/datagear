@@ -30,6 +30,11 @@ readonly 是否只读操作，允许为null
 						<input type="hidden" id="${pageId}-originalFileName" value="${(dataSet.fileName)!''?html}" />
 						<input type="hidden" name="fileName" value="${(dataSet.fileName)!''?html}" />
 						<input type="text" name="displayName" value="${(dataSet.displayName)!''?html}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
+						
+						<#if formAction != 'saveAddForExcel'>
+						<a href="${contextPath}/analysis/dataSet/downloadFile?id=${(dataSet.id)!''?html}" target="_blank" class="link"><@spring.message code='download' /></a>
+						</#if>
+						
 						<#if !readonly>
 						<div class="fileinput-wrapper">
 							<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
@@ -94,7 +99,7 @@ readonly 是否只读操作，允许为null
 					<div class="form-item-label">
 						<label><@spring.message code='dataSet.excel.forceXls' /></label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value no-padding-bottom">
 						<div id="${pageId}-forceXls">
 							<label for="${pageId}-forceXls-true"><@spring.message code='yes' /></label>
 							<input id="${pageId}-forceXls-true" type="radio" name="forceXls" value="true" />

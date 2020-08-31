@@ -2121,13 +2121,19 @@ table.dataTable tbody tr td select{
 .page-form-dataSet .workspace .form-item .form-item-value{
 	width: 39%;
 	position: relative;
-	padding-bottom: 1.6em;
+	padding-bottom: 1.4em;
+}
+.page-form-dataSet .workspace .form-item .form-item-value.no-padding-bottom{
+	padding-bottom: 0;
 }
 .page-form-dataSet .workspace .form-item .form-item-value input[type=text],
 .page-form-dataSet .workspace .form-item .form-item-value input[type=password],
 .page-form-dataSet .workspace .form-item .form-item-value textarea,
 .page-form-dataSet .workspace .form-item .form-item-value .input{
 	width: 90%;
+}
+.page-form-dataSet .workspace .form-item .form-item-value input.file-display-name{
+	width: 60%;
 }
 .page-form-dataSet .workspace .form-item .form-item-value .fileinput-wrapper{
 	padding-top: 0.41em;
