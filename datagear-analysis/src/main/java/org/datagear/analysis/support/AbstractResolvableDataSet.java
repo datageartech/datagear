@@ -50,17 +50,17 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	@Override
 	public ResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
 	{
-		return resolveResult(paramValues, getProperties());
+		return resolveResult(paramValues, null);
 	}
 
 	/**
 	 * 解析结果。
 	 * 
 	 * @param paramValues
-	 * @param properties
-	 *            允许为空，此时，应自动解析并设置返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}；
-	 *            如果不为空，直接将{@code properties}作为解析数据依据， 使用它处理结果数据，
-	 *            并设置为返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}
+	 * @param properties  允许为{@code null}/空，此时，应自动解析并设置返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}；
+	 *                    如果不为{@code null}/空，直接将{@code properties}作为解析数据依据，
+	 *                    使用它处理结果数据，
+	 *                    并设置为返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}
 	 * @return
 	 * @throws DataSetException
 	 */
