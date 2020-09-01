@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.node.ValueNode;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet implements ResolvableDataSet
+public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
 	public AbstractJsonDataSet()
 	{
@@ -51,38 +51,14 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 		super(id, name, properties);
 	}
 
-	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
-	{
-		List<DataSetProperty> properties = getProperties();
-
-		if (properties == null || properties.isEmpty())
-			throw new DataSetException("[getProperties()] must not be empty");
-
-		ResolvedDataSetResult result = resolveResult(paramValues, properties);
-
-		return result.getResult();
-	}
-
-	@Override
-	public ResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
-	{
-		return resolveResult(paramValues, null);
-	}
-
 	/**
 	 * 解析结果。
 	 * <p>
 	 * 如果{@linkplain #getJsonReader(Map)}返回的{@linkplain TemplateResolvedSource#hasResolvedTemplate()}，
 	 * 此方法将返回{@linkplain TemplateResolvedDataSetResult}。
 	 * </p>
-	 * 
-	 * @param paramValues
-	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
-	 * @return
-	 * @throws DataSetException
 	 */
+	@Override
 	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
 			throws DataSetException
 	{
@@ -318,8 +294,8 @@ public abstract class AbstractJsonDataSet extends AbstractFmkTemplateDataSet imp
 				DataSetProperty property = new DataSetProperty(entry.getKey(), type);
 
 				// JSON数值只有NUMBER类型
-				if (DataSetProperty.DataType.isInteger(property.getType())
-						|| DataSetProperty.DataType.isDecimal(property.getType()))
+				if (DataSetProperty.DataType.INTEGER.equals(property.getType())
+						|| DataSetProperty.DataType.DECIMAL.equals(property.getType()))
 					property.setType(DataSetProperty.DataType.NUMBER);
 
 				properties.add(property);

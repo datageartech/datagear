@@ -30,7 +30,7 @@ import org.datagear.util.IOUtil;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet implements ResolvableDataSet
+public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
 	/** 作为名称行的行号 */
 	private int nameRow = -1;
@@ -82,38 +82,14 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 		this.nameRow = nameRow;
 	}
 
-	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
-	{
-		List<DataSetProperty> properties = getProperties();
-
-		if (properties == null || properties.isEmpty())
-			throw new DataSetException("[getProperties()] must not be empty");
-
-		ResolvedDataSetResult result = resolveResult(paramValues, properties);
-
-		return result.getResult();
-	}
-
-	@Override
-	public ResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
-	{
-		return resolveResult(paramValues, null);
-	}
-
 	/**
 	 * 解析结果。
 	 * <p>
 	 * 如果{@linkplain #getCsvReader(Map)}返回的{@linkplain TemplateResolvedSource#hasResolvedTemplate()}，
 	 * 此方法将返回{@linkplain TemplateResolvedDataSetResult}。
 	 * </p>
-	 * 
-	 * @param paramValues
-	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
-	 * @return
-	 * @throws DataSetException
 	 */
+	@Override
 	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
 			throws DataSetException
 	{
@@ -157,15 +133,6 @@ public abstract class AbstractCsvDataSet extends AbstractFmkTemplateDataSet impl
 	 */
 	protected abstract TemplateResolvedSource<Reader> getCsvReader(Map<String, ?> paramValues) throws Throwable;
 
-	/**
-	 * 解析结果。
-	 * 
-	 * @param csvReader
-	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
-	 * @return
-	 * @throws Throwable
-	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected ResolvedDataSetResult resolveResult(Reader csvReader, List<DataSetProperty> properties) throws Throwable
 	{

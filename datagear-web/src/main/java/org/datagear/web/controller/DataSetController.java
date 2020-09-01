@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.ResolvedDataSetResult;
-import org.datagear.analysis.support.AbstractFmkTemplateDataSet;
+import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.CsvValueDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetParamValueConverter;
@@ -760,7 +760,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 	protected DataSetFmkTemplateResolver getDataSetFmkTemplateResolver()
 	{
-		return AbstractFmkTemplateDataSet.TEMPLATE_RESOLVER;
+		return AbstractDataSet.FMK_TEMPLATE_RESOLVER;
 	}
 
 	protected void checkSaveEntity(DataSetEntity dataSet)

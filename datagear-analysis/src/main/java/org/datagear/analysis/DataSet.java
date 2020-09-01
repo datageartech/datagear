@@ -72,6 +72,9 @@ public interface DataSet extends Identifiable
 
 	/**
 	 * 获取{@linkplain DataSetResult}。
+	 * <p>
+	 * 返回结果中的数据项应已转换为与{@linkplain #getProperties()}的{@linkplain DataSetProperty#getType()}类型一致。
+	 * </p>
 	 * 
 	 * @param paramValues
 	 *            由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}

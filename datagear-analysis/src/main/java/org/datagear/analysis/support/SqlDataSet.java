@@ -42,7 +42,7 @@ import org.datagear.util.resource.ConnectionFactory;
  * @author datagear@163.com
  *
  */
-public class SqlDataSet extends AbstractFmkTemplateDataSet implements ResolvableDataSet
+public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
 	protected static final JdbcSupport JDBC_SUPPORT = new JdbcSupport();
 
@@ -92,36 +92,16 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 	}
 
 	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
-	{
-		List<DataSetProperty> properties = getProperties();
-
-		if (properties == null || properties.isEmpty())
-			throw new DataSetException("[getProperties()] must not be empty");
-
-		ResolvedDataSetResult result = resolveResult(paramValues, properties);
-		return result.getResult();
-	}
-
-	@Override
 	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
 	{
 		return resolveResult(paramValues, null);
 	}
 
-	/**
-	 * 解析结果。
-	 * 
-	 * @param paramValues
-	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
-	 * @return
-	 * @throws DataSetException
-	 */
+	@Override
 	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
 			throws DataSetException
 	{
-		String sql = resolveTemplate(getSql(), paramValues);
+		String sql = resolveAsFmkTemplate(getSql(), paramValues);
 
 		Connection cn = null;
 
@@ -232,12 +212,12 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 
 				if (resolveProperties && rowIdx == 0)
 				{
-					@JDBCCompatiblity("某些驱动程序可能存在一种情况，列类型是toPropertyDataType()无法识别的，但是实际值是允许的，"
+					@JDBCCompatiblity("某些驱动程序可能存在一种情况，列类型会被toPropertyDataType()解析为DataType.UNKNOWN，但是实际值是允许的，"
 							+ "比如PostgreSQL-42.2.5驱动对于[SELECT 'aaa' as NAME]语句，结果的SQL类型是Types.OTHER，但实际值是允许的字符串")
 					boolean resolveTypeByValue = (DataType.UNKNOWN.equals(property.getType()));
 
 					if (resolveTypeByValue)
-						property.setType(resolveDataType(value));
+						property.setType(resolvePropertyDataType(value));
 				}
 
 				value = convertToPropertyDataType(converter, value, property);
@@ -265,7 +245,7 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 	 * @throws SQLException
 	 * @throws SqlDataSetUnsupportedSqlTypeException
 	 */
-	public String toPropertyDataType(SqlType sqlType, String columnName)
+	protected String toPropertyDataType(SqlType sqlType, String columnName)
 			throws SQLException, SqlDataSetUnsupportedSqlTypeException
 	{
 		String dataType = null;

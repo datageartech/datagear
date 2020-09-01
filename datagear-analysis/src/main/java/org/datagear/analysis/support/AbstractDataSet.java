@@ -27,6 +27,9 @@ import org.datagear.analysis.DataSetProperty;
  */
 public abstract class AbstractDataSet extends AbstractIdentifiable implements DataSet
 {
+	/** 默认Freemarker模板解析器 */
+	public static final DataSetFmkTemplateResolver FMK_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver();
+
 	private String name;
 
 	private List<DataSetProperty> properties;
@@ -196,12 +199,12 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 解析属性类型。
+	 * 解析{@linkplain DataSetProperty.DataType}类型。
 	 * 
 	 * @param value
 	 * @return
 	 */
-	protected String resolveDataType(Object value)
+	protected String resolvePropertyDataType(Object value)
 	{
 		return DataSetProperty.DataType.resolveDataType(value);
 	}
@@ -253,5 +256,20 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 
 		return maps;
+	}
+
+	/**
+	 * 将指定文本作为Freemarker模板解析。
+	 * 
+	 * @param text
+	 * @param paramValues
+	 * @return
+	 */
+	protected String resolveAsFmkTemplate(String text, Map<String, ?> paramValues)
+	{
+		if (text == null)
+			return null;
+
+		return FMK_TEMPLATE_RESOLVER.resolve(text, paramValues);
 	}
 }

@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet implements ResolvableDataSet
+public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractExcelDataSet.class);
 
@@ -224,33 +224,7 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 	}
 
 	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
-	{
-		List<DataSetProperty> properties = getProperties();
-
-		if (properties == null || properties.isEmpty())
-			throw new DataSetException("[getProperties()] must not be empty");
-
-		ResolvedDataSetResult result = resolve(paramValues, properties);
-		return result.getResult();
-	}
-
-	@Override
-	public ResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
-	{
-		return resolve(paramValues, null);
-	}
-
-	/**
-	 * 解析Excel结果。
-	 * 
-	 * @param paramValues
-	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
-	 * @return
-	 * @throws DataSetException
-	 */
-	protected ResolvedDataSetResult resolve(Map<String, ?> paramValues, List<DataSetProperty> properties)
+	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
 			throws DataSetException
 	{
 		File file = getExcelFile(paramValues);
@@ -481,7 +455,7 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 		if (dataRowIdx == 0)
 		{
 			// 空单元格先不处理数据类型，等待后续有非空单元格再判断
-			String dataType = (cellValue == null ? "" : resolveDataType(cellValue));
+			String dataType = (cellValue == null ? "" : resolvePropertyDataType(cellValue));
 
 			// 名称行不一定在数据行之前，所以此时可能无法确定属性名
 			property = new DataSetProperty("should-be-set-later", dataType);
@@ -492,7 +466,7 @@ public abstract class AbstractExcelDataSet extends AbstractFmkTemplateDataSet im
 			property = properties.get(dataColIdx);
 
 			if (StringUtil.isEmpty(property.getType()) && cellValue != null)
-				property.setType(resolveDataType(cellValue));
+				property.setType(resolvePropertyDataType(cellValue));
 		}
 
 		return property;
