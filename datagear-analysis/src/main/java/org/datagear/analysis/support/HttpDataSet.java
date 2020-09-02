@@ -249,7 +249,13 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	}
 
 	@Override
-	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
+	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
+	{
+		return resolveResult(paramValues, null);
+	}
+
+	@Override
+	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
 			throws DataSetException
 	{
 		CloseableHttpResponse response = null;
