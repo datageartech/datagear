@@ -13,7 +13,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,10 +54,9 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 		super();
 	}
 
-	@SuppressWarnings("unchecked")
 	public SqlDataSet(String id, String name, ConnectionFactory connectionFactory, String sql)
 	{
-		super(id, name, Collections.EMPTY_LIST);
+		super(id, name);
 		this.connectionFactory = connectionFactory;
 		this.sql = sql;
 	}

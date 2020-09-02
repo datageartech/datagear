@@ -40,10 +40,9 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		super();
 	}
 
-	@SuppressWarnings("unchecked")
 	public AbstractCsvDataSet(String id, String name)
 	{
-		super(id, name, Collections.EMPTY_LIST);
+		super(id, name);
 	}
 
 	public AbstractCsvDataSet(String id, String name, List<DataSetProperty> properties)

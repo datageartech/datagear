@@ -7,6 +7,7 @@
  */
 package org.datagear.analysis.support;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,12 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	public AbstractResolvableDataSet()
 	{
 		super();
+	}
+
+	@SuppressWarnings("unchecked")
+	public AbstractResolvableDataSet(String id, String name)
+	{
+		super(id, name, Collections.EMPTY_LIST);
 	}
 
 	public AbstractResolvableDataSet(String id, String name, List<DataSetProperty> properties)
@@ -57,10 +64,10 @@ public abstract class AbstractResolvableDataSet extends AbstractDataSet implemen
 	 * 解析结果。
 	 * 
 	 * @param paramValues
-	 * @param properties  允许为{@code null}/空，此时，应自动解析并设置返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}；
-	 *                    如果不为{@code null}/空，直接将{@code properties}作为解析数据依据，
-	 *                    使用它处理结果数据，
-	 *                    并设置为返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}
+	 * @param properties
+	 *            允许为{@code null}/空，此时，应自动解析并设置返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}；
+	 *            如果不为{@code null}/空，直接将{@code properties}作为解析数据依据， 使用它处理结果数据，
+	 *            并设置为返回结果的{@linkplain ResolvedDataSetResult#setProperties(List)}
 	 * @return
 	 * @throws DataSetException
 	 */

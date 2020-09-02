@@ -89,10 +89,9 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 		super();
 	}
 
-	@SuppressWarnings("unchecked")
 	public AbstractExcelDataSet(String id, String name)
 	{
-		super(id, name, Collections.EMPTY_LIST);
+		super(id, name);
 	}
 
 	public AbstractExcelDataSet(String id, String name, List<DataSetProperty> properties)

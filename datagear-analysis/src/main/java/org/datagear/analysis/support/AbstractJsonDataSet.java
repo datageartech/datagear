@@ -40,10 +40,9 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		super();
 	}
 
-	@SuppressWarnings("unchecked")
 	public AbstractJsonDataSet(String id, String name)
 	{
-		super(id, name, Collections.EMPTY_LIST);
+		super(id, name);
 	}
 
 	public AbstractJsonDataSet(String id, String name, List<DataSetProperty> properties)
@@ -117,10 +116,13 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 
 		JsonNode jsonNode = getObjectMapperNonStardand().readTree(jsonReader);
 
-		if (jsonNode == null || !isLegalResultDataJsonNode(jsonNode))
+		if (!isLegalResultDataJsonNode(jsonNode))
 			throw new UnsupportedJsonResultDataException("Result data must be object or object array/list");
 
-		Object data = getObjectMapperNonStardand().treeToValue(jsonNode, Object.class);
+		Object data = null;
+
+		if (jsonNode != null)
+			data = getObjectMapperNonStardand().treeToValue(jsonNode, Object.class);
 
 		if (resolveProperties)
 			properties = resolveDataSetProperties(data);
@@ -133,6 +135,15 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		return new ResolvedDataSetResult(result, properties);
 	}
 
+	/**
+	 * 
+	 * @param resultData
+	 *            允许为{@code null}
+	 * @param properties
+	 * @param converter
+	 * @return
+	 * @throws Throwable
+	 */
 	protected Object convertJsonResultData(Object resultData, List<DataSetProperty> properties,
 			DataSetPropertyValueConverter converter) throws Throwable
 	{
@@ -199,6 +210,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	 * </p>
 	 * 
 	 * @param jsonNode
+	 *            允许为{@code null}
 	 * @return
 	 */
 	protected boolean isLegalResultDataJsonNode(JsonNode jsonNode) throws Throwable
@@ -232,7 +244,7 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	 * 解析JSON对象的{@linkplain DataSetProperty}。
 	 * 
 	 * @param resultData
-	 *            JSON对象、JSON对象数组、JSON对象列表
+	 *            允许为{@code null}，JSON对象、JSON对象数组、JSON对象列表
 	 * @return
 	 * @throws Throwable
 	 */
