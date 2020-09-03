@@ -112,6 +112,9 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/** 响应类型 */
 	private String responseContentType = CONTENT_TYPE_JSON;
 
+	/** 响应数据的JSON路径 */
+	private String responseDataJsonPath = "";
+
 	public HttpDataSet()
 	{
 		super();
@@ -277,7 +280,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/**
 	 * 设置相应类型。
 	 * <p>
-	 * 目前相应类型仅支持{@linkplain #CONTENT_TYPE_JSON}。
+	 * 目前响应类型仅支持{@linkplain #CONTENT_TYPE_JSON}。
 	 * </p>
 	 * 
 	 * @param responseContentType
@@ -285,6 +288,30 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	public void setResponseContentType(String responseContentType)
 	{
 		this.responseContentType = responseContentType;
+	}
+
+	public String getResponseDataJsonPath()
+	{
+		return responseDataJsonPath;
+	}
+
+	/**
+	 * 设置响应数据的JSON路径。
+	 * <p>
+	 * 当希望返回的是响应原始JSON数据的指定JSON路径值时，可以设置此项。
+	 * </p>
+	 * <p>
+	 * 具体格式参考{@linkplain AbstractJsonDataSet#setDataJsonPath(String)}。
+	 * </p>
+	 * <p>
+	 * 默认无数据路径，将直接返回响应原始JSON数据。
+	 * </p>
+	 * 
+	 * @param responseDataJsonPath
+	 */
+	public void setResponseDataJsonPath(String responseDataJsonPath)
+	{
+		this.responseDataJsonPath = responseDataJsonPath;
 	}
 
 	@Override
@@ -312,6 +339,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 			JsonResponseHandler responseHandler = new JsonResponseHandler();
 			responseHandler.setProperties(properties);
+			responseHandler.setResponseDataJsonPath(getResponseDataJsonPath());
 
 			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
 
@@ -560,6 +588,8 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	{
 		private List<DataSetProperty> properties;
 
+		private String responseDataJsonPath = "";
+
 		public JsonResponseHandler()
 		{
 			super();
@@ -579,6 +609,16 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		public void setProperties(List<DataSetProperty> properties)
 		{
 			this.properties = properties;
+		}
+
+		public String getResponseDataJsonPath()
+		{
+			return responseDataJsonPath;
+		}
+
+		public void setResponseDataJsonPath(String responseDataJsonPath)
+		{
+			this.responseDataJsonPath = responseDataJsonPath;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -604,11 +644,15 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			if (this.properties == null || this.properties.isEmpty())
 			{
 				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(reader);
+
+				jsonDataSet.setDataJsonPath(this.responseDataJsonPath);
 				return jsonDataSet.resolve(Collections.EMPTY_MAP);
 			}
 			else
 			{
 				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(this.properties, reader);
+				jsonDataSet.setDataJsonPath(this.responseDataJsonPath);
+
 				DataSetResult result = jsonDataSet.getResult(Collections.EMPTY_MAP);
 				return new ResolvedDataSetResult(result, this.properties);
 			}

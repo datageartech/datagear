@@ -32,11 +32,11 @@ public class JsonValueDataSetTest
 		properties.add(new DataSetProperty("value", DataSetProperty.DataType.NUMBER));
 		properties.add(new DataSetProperty("size", DataSetProperty.DataType.NUMBER));
 
-		List<DataSetParam> params = new ArrayList<DataSetParam>();
+		List<DataSetParam> params = new ArrayList<>();
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 
-		JsonValueDataSet dataSet = new JsonValueDataSet("a", "a", properties,
-				"[ { name:'aaa', value: 11, size: ${size} } ]");
+		JsonValueDataSet dataSet = new JsonValueDataSet(JsonValueDataSet.class.getSimpleName(),
+				JsonValueDataSet.class.getSimpleName(), properties, "[ { name:'aaa', value: 11, size: ${size} } ]");
 		dataSet.setParams(params);
 
 		Map<String, Object> paramValues = new HashMap<>();
@@ -67,11 +67,11 @@ public class JsonValueDataSetTest
 		properties.add(new DataSetProperty("value", DataSetProperty.DataType.NUMBER));
 		properties.add(new DataSetProperty("size", DataSetProperty.DataType.STRING));
 
-		List<DataSetParam> params = new ArrayList<DataSetParam>();
+		List<DataSetParam> params = new ArrayList<>();
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 
-		JsonValueDataSet dataSet = new JsonValueDataSet("a", "a", properties,
-				"[ { name:'aaa', value: 11, size: ${size} } ]");
+		JsonValueDataSet dataSet = new JsonValueDataSet(JsonValueDataSet.class.getSimpleName(),
+				JsonValueDataSet.class.getSimpleName(), properties, "[ { name:'aaa', value: 11, size: ${size} } ]");
 		dataSet.setParams(params);
 
 		Map<String, Object> paramValues = new HashMap<>();
@@ -97,11 +97,11 @@ public class JsonValueDataSetTest
 	@Test
 	public void resolveTest_hasParam()
 	{
-		List<DataSetParam> params = new ArrayList<DataSetParam>();
+		List<DataSetParam> params = new ArrayList<>();
 		params.add(new DataSetParam("size", DataSetParam.DataType.NUMBER, true));
 
-		JsonValueDataSet dataSet = new JsonValueDataSet("a", "a",
-				"[ { name:'aaa', value: 11, size: ${size} } ]");
+		JsonValueDataSet dataSet = new JsonValueDataSet(JsonValueDataSet.class.getSimpleName(),
+				JsonValueDataSet.class.getSimpleName(), "[ { name:'aaa', value: 11, size: ${size} } ]");
 		dataSet.setParams(params);
 
 		Map<String, Object> paramValues = new HashMap<>();

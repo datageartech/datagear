@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URLDecoder;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,6 +116,19 @@ public class HttpDataSetTest
 						StringEntity responseEntity = new StringEntity(
 								"[{name: '" + PARAM_NAME_0 + "', value: '" + h0.getValue() + "'}, {name: '"
 										+ PARAM_NAME_1 + "', value: '" + h1.getValue() + "'}]",
+								ContentType.APPLICATION_JSON);
+						response.setEntity(responseEntity);
+					}
+				})
+				//
+				.register("/testResponseJsonPath", new HttpRequestHandler()
+				{
+					@Override
+					public void handle(ClassicHttpRequest request, ClassicHttpResponse response, HttpContext context)
+							throws HttpException, IOException
+					{
+						StringEntity responseEntity = new StringEntity(
+								"{ path0: { path1: [ { path2: [{name: 'aaa', value: 11}, {name: '名称b', value: 22}] } ] } }",
 								ContentType.APPLICATION_JSON);
 						response.setEntity(responseEntity);
 					}
@@ -368,6 +382,53 @@ public class HttpDataSetTest
 
 				assertEquals(PARAM_NAME_1, row.get("name"));
 				assertEquals(pv1, row.get("value"));
+			}
+		}
+	}
+
+	@Test
+	public void resolveTest_responseJsonPath() throws Throwable
+	{
+		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+				SERVER + "/testResponseJsonPath");
+		dataSet.setResponseDataJsonPath("path0.path1[0].path2");
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(Collections.emptyMap());
+		List<DataSetProperty> properties = result.getProperties();
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
+
+		{
+			assertEquals(2, properties.size());
+
+			{
+				DataSetProperty property = properties.get(0);
+				assertEquals("name", property.getName());
+				assertEquals(DataSetProperty.DataType.STRING, property.getType());
+			}
+
+			{
+				DataSetProperty property = properties.get(1);
+				assertEquals("value", property.getName());
+				assertEquals(DataSetProperty.DataType.NUMBER, property.getType());
+			}
+		}
+
+		{
+			assertEquals(2, data.size());
+
+			{
+				Map<String, Object> row = data.get(0);
+
+				assertEquals("aaa", row.get("name"));
+				assertEquals(11, ((Number) row.get("value")).intValue());
+			}
+
+			{
+				Map<String, Object> row = data.get(1);
+
+				assertEquals("名称b", row.get("name"));
+				assertEquals(22, ((Number) row.get("value")).intValue());
 			}
 		}
 	}

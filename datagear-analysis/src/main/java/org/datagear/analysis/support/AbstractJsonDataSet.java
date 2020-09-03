@@ -20,12 +20,17 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 
 /**
  * 抽象JSON数据集。
@@ -35,6 +40,13 @@ import com.fasterxml.jackson.databind.node.ValueNode;
  */
 public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
+	/** 使用Jackson的{@code JSONPath}配置 */
+	protected static final Configuration JACKSON_JSON_PATH_CONFIGURATION = Configuration.builder()
+			.jsonProvider(new JacksonJsonProvider()).mappingProvider(new JacksonMappingProvider()).build();
+
+	/** 数据JSON路径 */
+	private String dataJsonPath = "";
+
 	public AbstractJsonDataSet()
 	{
 		super();
@@ -48,6 +60,31 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 	public AbstractJsonDataSet(String id, String name, List<DataSetProperty> properties)
 	{
 		super(id, name, properties);
+	}
+
+	public String getDataJsonPath()
+	{
+		return dataJsonPath;
+	}
+
+	/**
+	 * 设置数据JSON路径。
+	 * <p>
+	 * 当希望返回的是原始JSON数据的指定JSON路径值时，可以设置此项。
+	 * </p>
+	 * <p>
+	 * 例如："stores[0].books"、"[1].stores"、"$['store']['book'][0]"、
+	 * "$.store.book[*].author"、"$..book[2]"，具体参考{@code JSONPath}相关文档。
+	 * </p>
+	 * <p>
+	 * 默认无数据路径，将直接返回原始JSON数据。
+	 * </p>
+	 * 
+	 * @param dataJsonPath
+	 */
+	public void setDataJsonPath(String dataJsonPath)
+	{
+		this.dataJsonPath = dataJsonPath;
 	}
 
 	/**
@@ -84,7 +121,8 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		}
 		finally
 		{
-			IOUtil.close(reader.getSource());
+			if (reader != null)
+				IOUtil.close(reader.getSource());
 		}
 	}
 
@@ -117,12 +155,12 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		JsonNode jsonNode = getObjectMapperNonStardand().readTree(jsonReader);
 
 		if (!isLegalResultDataJsonNode(jsonNode))
-			throw new UnsupportedJsonResultDataException("Result data must be object or object array/list");
+			throw new UnsupportedJsonResultDataException("Result data must be JSON object or array");
 
 		Object data = null;
 
 		if (jsonNode != null)
-			data = getObjectMapperNonStardand().treeToValue(jsonNode, Object.class);
+			data = readDataByJsonPath(jsonNode, getDataJsonPath());
 
 		if (resolveProperties)
 			properties = resolveDataSetProperties(data);
@@ -133,6 +171,55 @@ public abstract class AbstractJsonDataSet extends AbstractResolvableDataSet impl
 		DataSetResult result = new DataSetResult(data);
 
 		return new ResolvedDataSetResult(result, properties);
+	}
+
+	/**
+	 * 读取指定JSON路径的数据。
+	 * 
+	 * @param jsonNode
+	 *            允许为{@code null}
+	 * @param dataJsonPath
+	 *            允许为{@code null}
+	 * @return
+	 * @throws ReadJsonDataPathException
+	 * @throws Throwable
+	 */
+	protected Object readDataByJsonPath(JsonNode jsonNode, String dataJsonPath)
+			throws ReadJsonDataPathException, Throwable
+	{
+		if (jsonNode == null)
+			return null;
+
+		Object data = getObjectMapperNonStardand().treeToValue(jsonNode, Object.class);
+
+		if (data == null)
+			return null;
+
+		if (StringUtil.isEmpty(dataJsonPath))
+			return data;
+
+		String stdDataJsonPath = dataJsonPath.trim();
+
+		if (StringUtil.isEmpty(stdDataJsonPath))
+			return data;
+
+		// 转换"stores[0].books"、"[1].stores"简化模式为规范的JSONPath
+		if (!stdDataJsonPath.startsWith("$"))
+		{
+			if (stdDataJsonPath.startsWith("["))
+				stdDataJsonPath = "$" + stdDataJsonPath;
+			else
+				stdDataJsonPath = "$." + stdDataJsonPath;
+		}
+
+		try
+		{
+			return JsonPath.compile(stdDataJsonPath).read(data, JACKSON_JSON_PATH_CONFIGURATION);
+		}
+		catch (Throwable t)
+		{
+			throw new ReadJsonDataPathException(dataJsonPath, t);
+		}
 	}
 
 	/**

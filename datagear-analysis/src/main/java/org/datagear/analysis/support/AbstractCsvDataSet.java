@@ -116,7 +116,8 @@ public abstract class AbstractCsvDataSet extends AbstractResolvableDataSet imple
 		}
 		finally
 		{
-			IOUtil.close(reader.getSource());
+			if (reader != null)
+				IOUtil.close(reader.getSource());
 		}
 	}
 
