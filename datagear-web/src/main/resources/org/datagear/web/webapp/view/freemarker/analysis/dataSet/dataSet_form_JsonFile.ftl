@@ -43,6 +43,16 @@ readonly 是否只读操作，允许为null
 						</#if>
 					</div>
 				</div>
+				<div class="form-item">
+					<div class="form-item-label">
+						<label title="<@spring.message code='dataSet.jsonFile.dataJsonPath.desc' />">
+							<@spring.message code='dataSet.jsonFile.dataJsonPath' />
+						</label>
+					</div>
+					<div class="form-item-value">
+						<input type="text" name="dataJsonPath" value="${(dataSet.dataJsonPath)!''?html}" class="ui-widget ui-widget-content" />
+					</div>
+				</div>
 				<div class="form-item form-item-encoding">
 					<div class="form-item-label">
 						<label><@spring.message code='dataSet.jsonFileEncoding' /></label>
@@ -92,6 +102,7 @@ readonly 是否只读操作，允许为null
 		var dataSet = po.previewOptions.data.dataSet;
 		
 		dataSet.fileName = po.element("input[name='fileName']").val();
+		dataSet.dataJsonPath = po.element("input[name='dataJsonPath']").val();
 		dataSet.encoding = po.element("select[name='encoding']").val();
 		
 		po.previewOptions.data.originalFileName = po.element("#${pageId}-originalFileName").val();
@@ -106,11 +117,12 @@ readonly 是否只读操作，允许为null
 	po.isPreviewValueModified = function()
 	{
 		var fileName = po.element("input[name='fileName']").val();
+		var dataJsonPath = po.element("input[name='dataJsonPath']").val();
 		var encoding = po.element("select[name='encoding']").val();
 		
 		var pd = po.previewOptions.data.dataSet;
 		
-		return (pd.fileName != fileName) || (pd.encoding != encoding);
+		return (pd.fileName != fileName) || (pd.dataJsonPath != dataJsonPath) || (pd.encoding != encoding);
 	};
 	
 	po.previewOptions.url = po.url("previewJsonFile");

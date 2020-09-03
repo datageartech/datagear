@@ -43,18 +43,6 @@ readonly 是否只读操作，允许为null
 						</#if>
 					</div>
 				</div>
-				<div class="form-item form-item-encoding">
-					<div class="form-item-label">
-						<label><@spring.message code='dataSet.csvFileEncoding' /></label>
-					</div>
-					<div class="form-item-value">
-						<select name="encoding">
-							<#list availableCharsetNames as item>
-							<option value="${item}" <#if item == dataSet.encoding>selected="selected"</#if>>${item}</option>
-							</#list>
-						</select>
-					</div>
-				</div>
 				<div class="form-item">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.csv.nameRow.desc' />">
@@ -75,6 +63,18 @@ readonly 是否只读操作，允许为null
 						</span>
 						&nbsp;
 						<input type="text" name="nameRowText" value="${(dataSet.nameRow)!''?html}" class="ui-widget ui-widget-content" style="width:4.1em;" />
+					</div>
+				</div>
+				<div class="form-item form-item-encoding">
+					<div class="form-item-label">
+						<label><@spring.message code='dataSet.csvFileEncoding' /></label>
+					</div>
+					<div class="form-item-value">
+						<select name="encoding">
+							<#list availableCharsetNames as item>
+							<option value="${item}" <#if item == dataSet.encoding>selected="selected"</#if>>${item}</option>
+							</#list>
+						</select>
 					</div>
 				</div>
 				<#include "include/dataSet_form_html_wow.ftl" >
