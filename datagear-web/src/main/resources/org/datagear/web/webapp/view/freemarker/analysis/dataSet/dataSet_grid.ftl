@@ -39,12 +39,12 @@ boolean readonly 是否只读操作，默认为false
 					<div class="add-button-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow ui-front">
 						<ul class="add-button-list">
 							<li addURL="addForSql"><div><@spring.message code='dataSet.dataSetType.SQL' /></div></li>
-							<li addURL="addForExcel"><div><@spring.message code='dataSet.dataSetType.Excel' /></div></li>
 							<li addURL="addForCsvValue"><div><@spring.message code='dataSet.dataSetType.CsvValue' /></div></li>
 							<li addURL="addForCsvFile"><div><@spring.message code='dataSet.dataSetType.CsvFile' /></div></li>
+							<li addURL="addForExcel"><div><@spring.message code='dataSet.dataSetType.Excel' /></div></li>
+							<li addURL="addForHttpAPI"><div><@spring.message code='dataSet.dataSetType.HttpAPI' /></div></li>
 							<li addURL="addForJsonValue"><div><@spring.message code='dataSet.dataSetType.JsonValue' /></div></li>
 							<li addURL="addForJsonFile"><div><@spring.message code='dataSet.dataSetType.JsonFile' /></div></li>
-							<li addURL="addForHttpAPI"><div><@spring.message code='dataSet.dataSetType.HttpAPI' /></div></li>
 						</ul>
 					</div>
 				</div>
