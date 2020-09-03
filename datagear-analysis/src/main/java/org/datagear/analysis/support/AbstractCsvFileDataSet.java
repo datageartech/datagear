@@ -26,10 +26,8 @@ import org.datagear.util.IOUtil;
  */
 public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet
 {
-	public static final String DEFAULT_ENCODING = "UTF-8";
-
 	/** 文件编码 */
-	private String encoding = DEFAULT_ENCODING;
+	private String encoding = IOUtil.CHARSET_UTF_8;
 
 	public AbstractCsvFileDataSet()
 	{
@@ -60,7 +58,7 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet
 	protected TemplateResolvedSource<Reader> getCsvReader(Map<String, ?> paramValues) throws Throwable
 	{
 		File file = getCsvFile(paramValues);
-		return new TemplateResolvedSource<Reader>(IOUtil.getReader(file, this.encoding));
+		return new TemplateResolvedSource<>(IOUtil.getReader(file, this.encoding));
 	}
 
 	/**

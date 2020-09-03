@@ -81,7 +81,7 @@ public class HtmlChartPluginLoader
 	private JsonChartPluginPropertiesResolver jsonChartPluginPropertiesResolver = new JsonChartPluginPropertiesResolver();
 
 	/** 文件编码 */
-	private String encoding = "UTF-8";
+	private String encoding = IOUtil.CHARSET_UTF_8;
 
 	public HtmlChartPluginLoader()
 	{

@@ -27,10 +27,8 @@ import org.datagear.util.IOUtil;
  */
 public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 {
-	public static final String DEFAULT_ENCODING = "UTF-8";
-
 	/** 文件编码 */
-	private String encoding = DEFAULT_ENCODING;
+	private String encoding = IOUtil.CHARSET_UTF_8;
 
 	public AbstractJsonFileDataSet()
 	{
@@ -61,7 +59,7 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 	protected TemplateResolvedSource<Reader> getJsonReader(Map<String, ?> paramValues) throws Throwable
 	{
 		File file = getJsonFile(paramValues);
-		return new TemplateResolvedSource<Reader>(IOUtil.getReader(file, this.encoding));
+		return new TemplateResolvedSource<>(IOUtil.getReader(file, this.encoding));
 	}
 
 	/**

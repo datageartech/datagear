@@ -8,7 +8,6 @@
 package org.datagear.analysis.support;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.nio.charset.Charset;
@@ -45,13 +44,15 @@ import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * HTTP数据集。
  * <p>
- * 此类的{@linkplain #getUri()}、{@linkplain #getRequestContent()}支持<code>Freemarker</code>模板语言。
+ * 此类的{@linkplain #getUri()}、{@linkplain #getHeaderContent()}、{@linkplain #getRequestContent()}支持<code>Freemarker</code>模板语言。
  * </p>
  * 
  * @author datagear@163.com
@@ -59,6 +60,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class HttpDataSet extends AbstractResolvableDataSet
 {
+	protected static final Logger LOGGER = LoggerFactory.getLogger(HttpDataSet.class);
+
 	public static final String HTTP_METHOD_GET = "GET";
 
 	public static final String HTTP_METHOD_POST = "POST";
@@ -94,12 +97,14 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/** 请求方法 */
 	private String httpMethod = HTTP_METHOD_GET;
 
-	/** 请求头 */
-	@SuppressWarnings("unchecked")
-	private List<HttpHeader> headers = Collections.EMPTY_LIST;
+	/** 请求头JSON文本 */
+	private String headerContent = "";
 
 	/** 请求内容类型 */
 	private String requestContentType = CONTENT_TYPE_FORM;
+
+	/** 请求内容编码 */
+	private String requestContentCharset = IOUtil.CHARSET_UTF_8;
 
 	/** 请求内容JSON文本 */
 	private String requestContent = "";
@@ -169,14 +174,30 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		this.httpMethod = httpMethod;
 	}
 
-	public List<HttpHeader> getHeaders()
+	public String getHeaderContent()
 	{
-		return headers;
+		return headerContent;
 	}
 
-	public void setHeaders(List<HttpHeader> headers)
+	/**
+	 * 设置请求头JSON文本，格式为： <code>
+	 * <pre>
+	 * [
+	 *   {name: "...", value: "..."},
+	 *   {name: "...", value: "..."},
+	 *   ...
+	 * ]
+	 * </pre>
+	 * </code>
+	 * <p>
+	 * 请求头JSON文本支持<code>Freemarker</code>模板语言。
+	 * </p>
+	 * 
+	 * @param headerContent
+	 */
+	public void setHeaderContent(String headerContent)
 	{
-		this.headers = headers;
+		this.headerContent = headerContent;
 	}
 
 	public String getRequestContentType()
@@ -192,6 +213,24 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	public void setRequestContentType(String requestContentType)
 	{
 		this.requestContentType = requestContentType;
+	}
+
+	public String getRequestContentCharset()
+	{
+		return requestContentCharset;
+	}
+
+	/**
+	 * 设置请求内容编码。
+	 * <p>
+	 * 默认请求内容编码为{@code UTF-8}。
+	 * </p>
+	 * 
+	 * @param requestContentCharset
+	 */
+	public void setRequestContentCharset(String requestContentCharset)
+	{
+		this.requestContentCharset = requestContentCharset;
 	}
 
 	public String getRequestContent()
@@ -263,11 +302,12 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		try
 		{
 			String uri = resolveTemplateUri(paramValues);
+			String headerContent = resolveTemplateHeaderContent(paramValues);
 			String requestContent = resolveTemplateRequestContent(paramValues);
 
 			ClassicHttpRequest request = createHttpRequest(uri);
 
-			setHttpHeaders(request, getHeaders());
+			setHttpHeaders(request, headerContent);
 			setHttpEntity(request, requestContent);
 
 			JsonResponseHandler responseHandler = new JsonResponseHandler();
@@ -275,8 +315,11 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 			ResolvedDataSetResult result = this.httpClient.execute(request, responseHandler);
 
-			String templateResult = "URI:\n" + uri + "\n-----------------------------------------\n"
-					+ "Request content:\n" + requestContent;
+			String templateResult = "URI:" + System.lineSeparator() + uri //
+					+ System.lineSeparator() + "-----------------------------------------" + System.lineSeparator() //
+					+ "Headers:" + System.lineSeparator() + headerContent //
+					+ System.lineSeparator() + "-----------------------------------------" + System.lineSeparator() //
+					+ "Request content:" + System.lineSeparator() + requestContent;
 
 			return new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(), templateResult);
 		}
@@ -294,12 +337,14 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 	}
 
-	protected void setHttpHeaders(ClassicHttpRequest request, List<HttpHeader> headers) throws Throwable
+	protected void setHttpHeaders(ClassicHttpRequest request, String headerContent) throws Throwable
 	{
-		if (headers == null || headers.isEmpty())
+		if (StringUtil.isEmpty(headerContent))
 			return;
 
-		for (HttpHeader header : headers)
+		List<NameValuePair> headers = toNameValuePairs(headerContent);
+
+		for (NameValuePair header : headers)
 			request.setHeader(header.getName(), header.getValue());
 	}
 
@@ -307,8 +352,8 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	{
 		if (CONTENT_TYPE_FORM.equals(this.requestContentType))
 		{
-			List<NameValuePair> params = toRequestParams(requestContent);
-			request.setEntity(new UrlEncodedFormEntity(params));
+			List<NameValuePair> params = toNameValuePairs(requestContent);
+			request.setEntity(new UrlEncodedFormEntity(params, Charset.forName(this.requestContentCharset)));
 		}
 		else if (CONTENT_TYPE_JSON.equals(this.requestContentType))
 		{
@@ -322,6 +367,11 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	protected String resolveTemplateUri(Map<String, ?> paramValues) throws Throwable
 	{
 		return resolveAsFmkTemplate(this.uri, paramValues);
+	}
+
+	protected String resolveTemplateHeaderContent(Map<String, ?> paramValues) throws Throwable
+	{
+		return resolveAsFmkTemplate(this.headerContent, paramValues);
 	}
 
 	protected String resolveTemplateRequestContent(Map<String, ?> paramValues) throws Throwable
@@ -354,24 +404,24 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/**
 	 * 将指定JSON字符串转换为名/值列表。
 	 * 
-	 * @param requestContent
+	 * @param jsonArrayContent
 	 *            可能为{@code null}、{@code ""}
-	 * @return 空列表表示无名/值参数
+	 * @return 空列表表示无名/值
 	 * @throws Throwable
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<NameValuePair> toRequestParams(String requestContent) throws Throwable
+	protected List<NameValuePair> toNameValuePairs(String jsonArrayContent) throws Throwable
 	{
-		if (StringUtil.isEmpty(requestContent))
+		if (StringUtil.isEmpty(jsonArrayContent))
 			return Collections.EMPTY_LIST;
 
-		Object jsonObj = getObjectMapperNonStardand().readValue(requestContent, Object.class);
+		Object jsonObj = getObjectMapperNonStardand().readValue(jsonArrayContent, Object.class);
 
 		if (jsonObj == null)
 			return Collections.EMPTY_LIST;
 
 		if (!(jsonObj instanceof Collection<?>))
-			throw new DataSetException("The request content must be JSON array");
+			throw new DataSetException("The content must be JSON array");
 
 		Collection<?> collection = (Collection<?>) jsonObj;
 
@@ -398,8 +448,8 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			}
 
 			if (name == null)
-				throw new DataSetException("The request content " + idx
-						+ "-th element must be JSON object : {name: \"...\", value: \"...\"}");
+				throw new DataSetException(
+						"The content " + idx + "-th element must be JSON object : {name: \"...\", value: \"...\"}");
 
 			nameValuePairs.add(new BasicNameValuePair(name, value));
 
@@ -547,14 +597,8 @@ public class HttpDataSet extends AbstractResolvableDataSet
 				reader = IOUtil.getReader("");
 			else
 			{
-				String contentTypeStr = entity.getContentType();
-
-				ContentType contentType = ContentType.APPLICATION_JSON;
-				if (!StringUtil.isEmpty(contentTypeStr))
-					contentType = ContentType.parse(contentTypeStr);
-				Charset charset = contentType.getCharset();
-
-				reader = new InputStreamReader(entity.getContent(), charset);
+				Charset contentCharset = resolveCharset(entity, ContentType.APPLICATION_JSON.getCharset());
+				reader = IOUtil.getReader(entity.getContent(), contentCharset);
 			}
 
 			if (this.properties == null || this.properties.isEmpty())
@@ -568,6 +612,30 @@ public class HttpDataSet extends AbstractResolvableDataSet
 				DataSetResult result = jsonDataSet.getResult(Collections.EMPTY_MAP);
 				return new ResolvedDataSetResult(result, this.properties);
 			}
+		}
+
+		protected Charset resolveCharset(HttpEntity entity, Charset defaultCharset)
+		{
+			Charset contentCharset = null;
+
+			String contentTypeStr = entity.getContentType();
+
+			if (!StringUtil.isEmpty(contentTypeStr))
+			{
+				try
+				{
+					ContentType contentType = ContentType.parse(contentTypeStr);
+					contentCharset = contentType.getCharset();
+				}
+				catch (Throwable t)
+				{
+					LOGGER.warn("Default charset [" + defaultCharset + "] will be used because parse error", t);
+
+					contentCharset = defaultCharset;
+				}
+			}
+
+			return (contentCharset != null ? contentCharset : defaultCharset);
 		}
 	}
 
