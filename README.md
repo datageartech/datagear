@@ -27,7 +27,7 @@ DataGear是一款数据可视化分析平台，使用Java语言开发，采用�
 
 ## 架构图
 
-![架构图](screenshot/architecture.png)
+![http://datagear.tech/static/screenshot/architecture.png](http://datagear.tech/static/screenshot/architecture.png)
 
 ## 官网
 
@@ -47,49 +47,49 @@ QQ群：[916083747](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)
 
 数据管理
 
-![界面图片](screenshot/datamanage.png)
+![http://datagear.tech/static/screenshot/datamanage.png](http://datagear.tech/static/screenshot/datamanage.png)
 
 SQL工作台
 
-![界面图片](screenshot/sqlpad.png)
+![http://datagear.tech/static/screenshot/sqlpad.png](http://datagear.tech/static/screenshot/sqlpad.png)
 
 数据导入
 
-![界面图片](screenshot/dataimport.png)
+![http://datagear.tech/static/screenshot/dataimport.png](http://datagear.tech/static/screenshot/dataimport.png)
 
 数据导出
 
-![界面图片](screenshot/dataexport.png)
+![http://datagear.tech/static/screenshot/dataexport.png](http://datagear.tech/static/screenshot/dataexport.png)
 
 图表
 
-![界面图片](screenshot/chart.png)
+![http://datagear.tech/static/screenshot/chart.png](http://datagear.tech/static/screenshot/chart.png)
 
 图表-数据集参数
 
-![界面图片](screenshot/chart-interaction.png)
+![http://datagear.tech/static/screenshot/chart-interaction.png](http://datagear.tech/static/screenshot/chart-interaction.png)
 
 看板
 
-![界面图片](screenshot/dashboard-simple.png)
+![http://datagear.tech/static/screenshot/dashboard-simple.png](http://datagear.tech/static/screenshot/dashboard-simple.png)
 
-![界面图片](screenshot/dashboard-darkblue.png)
+![http://datagear.tech/static/screenshot/dashboard-darkblue.png](http://datagear.tech/static/screenshot/dashboard-darkblue.png)
 
 看板-图表联动
 
-![界面图片](screenshot/dashboard-map-chart-link.gif)
+![http://datagear.tech/static/screenshot/dashboard-map-chart-link.gif](http://datagear.tech/static/screenshot/dashboard-map-chart-link.gif)
 
 看板-时序图表
 
-![界面图片](screenshot/dashboard-time-series-chart.gif)
+![http://datagear.tech/static/screenshot/dashboard-time-series-chart.gif](http://datagear.tech/static/screenshot/dashboard-time-series-chart.gif)
 
 看板-钻取
 
-![界面图片](screenshot/dashboard-map-chart-hierarchy.gif)
+![http://datagear.tech/static/screenshot/dashboard-map-chart-hierarchy.gif](http://datagear.tech/static/screenshot/dashboard-map-chart-hierarchy.gif)
 
 看板-表单
 
-![界面图片](screenshot/dashboard-form.gif)
+![http://datagear.tech/static/screenshot/dashboard-form.gif](http://datagear.tech/static/screenshot/dashboard-form.gif)
 
 ## 依赖
 
@@ -123,7 +123,7 @@ SQL工作台
 	
 ## 调试注意
 
-在调试开发分支前（目前是master），建议先备份DataGear工作目录（`[用户主目录]/.datagear`），
+在调试开发分支前（`dev-*`），建议先备份DataGear工作目录（`[用户主目录]/.datagear`），
 因为开发分支程序启动时会修改DataGear工作目录，可能会导致先前使用的正式版程序、以及后续发布的正式版程序无法正常启动。
 
 调试时，系统仅会在第一次启动时升级内置数据库（Derby），如果遇到内置数据库访问异常，需要查看
