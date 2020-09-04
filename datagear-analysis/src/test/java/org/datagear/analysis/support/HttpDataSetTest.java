@@ -205,7 +205,41 @@ public class HttpDataSetTest
 	}
 
 	@Test
-	public void resolveTest_rqeuestContent_CONTENT_TYPE_FORM() throws Throwable
+	public void resolveTest_setRequestMethod_GET() throws Throwable
+	{
+		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+				SERVER + "/testSimple");
+
+		dataSet.setRequestMethod(HttpDataSet.REQUEST_METHOD_GET);
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(Collections.emptyMap());
+		List<DataSetProperty> properties = result.getProperties();
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
+
+		assertEquals(2, properties.size());
+		assertEquals(2, data.size());
+	}
+
+	@Test
+	public void resolveTest_setRequestMethod_POST() throws Throwable
+	{
+		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
+				SERVER + "/testSimple");
+
+		dataSet.setRequestMethod(HttpDataSet.REQUEST_METHOD_POST);
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(Collections.emptyMap());
+		List<DataSetProperty> properties = result.getProperties();
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> data = (List<Map<String, Object>>) result.getResult().getData();
+
+		assertEquals(2, properties.size());
+		assertEquals(2, data.size());
+	}
+
+	@Test
+	public void resolveTest_REQUEST_CONTENT_TYPE_FORM_URLENCODED() throws Throwable
 	{
 		String pv0 = "p0";
 		String pv1 = "参数值1";
@@ -265,7 +299,7 @@ public class HttpDataSetTest
 	}
 
 	@Test
-	public void resolveTest_rqeuestContent_CONTENT_TYPE_JSON() throws Throwable
+	public void resolveTest_REQUEST_CONTENT_TYPE_JSON() throws Throwable
 	{
 		String pv0 = "p0";
 		String pv1 = "参数值1";
@@ -274,7 +308,7 @@ public class HttpDataSetTest
 
 		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
 				SERVER + "/testJson");
-		dataSet.setRequestContentType(HttpDataSet.CONTENT_TYPE_JSON);
+		dataSet.setRequestContentType(HttpDataSet.REQUEST_CONTENT_TYPE_JSON);
 		dataSet.setRequestContent("[ { name: '" + PARAM_NAME_0 + "', value: '" + pv0 + "' }, { name: '" + PARAM_NAME_1
 				+ "', value: '${param}' } ]");
 		dataSet.setParams(params);
@@ -326,7 +360,7 @@ public class HttpDataSetTest
 	}
 
 	@Test
-	public void resolveTest_headerContent() throws Throwable
+	public void resolveTest_setHeaderContent() throws Throwable
 	{
 		String pv0 = "p0";
 		String pv1 = "p1";
@@ -335,7 +369,6 @@ public class HttpDataSetTest
 
 		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
 				SERVER + "/testHeader");
-		dataSet.setRequestContentType(HttpDataSet.CONTENT_TYPE_JSON);
 		dataSet.setHeaderContent("[ { name: '" + PARAM_NAME_0 + "', value: '" + pv0 + "' }, { name: '" + PARAM_NAME_1
 				+ "', value: '${param}' } ]");
 		dataSet.setParams(params);
@@ -387,7 +420,7 @@ public class HttpDataSetTest
 	}
 
 	@Test
-	public void resolveTest_responseJsonPath() throws Throwable
+	public void resolveTest_setResponseDataJsonPath() throws Throwable
 	{
 		HttpDataSet dataSet = new HttpDataSet(HttpDataSet.class.getName(), HttpDataSet.class.getName(), httpClient,
 				SERVER + "/testResponseJsonPath");

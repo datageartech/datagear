@@ -9,7 +9,6 @@ package org.datagear.analysis.support;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,12 +20,9 @@ import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.classic.methods.HttpHead;
-import org.apache.hc.client5.http.classic.methods.HttpOptions;
 import org.apache.hc.client5.http.classic.methods.HttpPatch;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
-import org.apache.hc.client5.http.classic.methods.HttpTrace;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.ClassicHttpRequest;
@@ -62,31 +58,35 @@ public class HttpDataSet extends AbstractResolvableDataSet
 {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(HttpDataSet.class);
 
-	public static final String HTTP_METHOD_GET = "GET";
+	public static final String REQUEST_METHOD_GET = "GET";
 
-	public static final String HTTP_METHOD_POST = "POST";
+	public static final String REQUEST_METHOD_POST = "POST";
 
-	public static final String HTTP_METHOD_PUT = "PUT";
+	public static final String REQUEST_METHOD_PUT = "PUT";
 
-	public static final String HTTP_METHOD_HEAD = "HEAD";
+	public static final String REQUEST_METHOD_PATCH = "PATCH";
 
-	public static final String HTTP_METHOD_PATCH = "PATCH";
+	public static final String REQUEST_METHOD_DELETE = "DELETE";
 
-	public static final String HTTP_METHOD_DELETE = "DELETE";
-
-	public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
-
-	public static final String HTTP_METHOD_TRACE = "TRACE";
-
-	/**
-	 * 内容类型：表单式的参数名/值类型
-	 */
-	public static final String CONTENT_TYPE_FORM = "application/x-www-form-urlencoded";
+	// 这些HTTP方法不适应于此
+	// public static final String REQUEST_METHOD_HEAD = "HEAD";
+	// public static final String REQUEST_METHOD_OPTIONS = "OPTIONS";
+	// public static final String REQUEST_METHOD_TRACE = "TRACE";
 
 	/**
-	 * 内容类型：JSON
+	 * 请求内容类型：表单式的参数名/值类型，对应的HTTP请求类型为：application/x-www-form-urlencoded
 	 */
-	public static final String CONTENT_TYPE_JSON = "application/json";
+	public static final String REQUEST_CONTENT_TYPE_FORM_URLENCODED = "FORM_URLENCODED";
+
+	/**
+	 * 请求内容类型：JSON，对应的HTTP请求类型为：application/json
+	 */
+	public static final String REQUEST_CONTENT_TYPE_JSON = "JSON";
+
+	/**
+	 * 响应内容类型：JSON，对应的HTTP响应类型为：application/json
+	 */
+	public static final String RESPONSE_CONTENT_TYPE_JSON = "JSON";
 
 	/** HTTP客户端 */
 	private HttpClient httpClient;
@@ -94,14 +94,14 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/** HTTP请求地址 */
 	private String uri;
 
-	/** 请求方法 */
-	private String httpMethod = HTTP_METHOD_GET;
-
 	/** 请求头JSON文本 */
 	private String headerContent = "";
 
+	/** 请求方法 */
+	private String requestMethod = REQUEST_METHOD_GET;
+
 	/** 请求内容类型 */
-	private String requestContentType = CONTENT_TYPE_FORM;
+	private String requestContentType = REQUEST_CONTENT_TYPE_FORM_URLENCODED;
 
 	/** 请求内容编码 */
 	private String requestContentCharset = IOUtil.CHARSET_UTF_8;
@@ -110,7 +110,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	private String requestContent = "";
 
 	/** 响应类型 */
-	private String responseContentType = CONTENT_TYPE_JSON;
+	private String responseContentType = RESPONSE_CONTENT_TYPE_JSON;
 
 	/** 响应数据的JSON路径 */
 	private String responseDataJsonPath = "";
@@ -162,28 +162,15 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		this.uri = uri;
 	}
 
-	public String getHttpMethod()
-	{
-		return httpMethod;
-	}
-
-	/**
-	 * 设置HTTP方法，参考{@code HTTP_METHOD_*}常量。
-	 * 
-	 * @param httpMethod
-	 */
-	public void setHttpMethod(String httpMethod)
-	{
-		this.httpMethod = httpMethod;
-	}
-
 	public String getHeaderContent()
 	{
 		return headerContent;
 	}
 
 	/**
-	 * 设置请求头JSON文本，格式为： <code>
+	 * 设置请求头JSON文本，格式应为：
+	 * <p>
+	 * <code>
 	 * <pre>
 	 * [
 	 *   {name: "...", value: "..."},
@@ -192,6 +179,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	 * ]
 	 * </pre>
 	 * </code>
+	 * </p>
 	 * <p>
 	 * 请求头JSON文本支持<code>Freemarker</code>模板语言。
 	 * </p>
@@ -203,13 +191,31 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		this.headerContent = headerContent;
 	}
 
+	public String getRequestMethod()
+	{
+		return requestMethod;
+	}
+
+	/**
+	 * 设置HTTP方法，参考{@code REQUEST_METHOD_*}常量。
+	 * 
+	 * @param requestMethod
+	 */
+	public void setRequestMethod(String requestMethod)
+	{
+		this.requestMethod = requestMethod;
+	}
+
 	public String getRequestContentType()
 	{
 		return requestContentType;
 	}
 
 	/**
-	 * 设置请求内容类型，参考{@code CONTENT_TYPE_*}。
+	 * 设置请求内容类型，允许的值为：
+	 * <p>
+	 * {@linkplain #REQUEST_CONTENT_TYPE_FORM_URLENCODED}、{@linkplain #REQUEST_CONTENT_TYPE_JSON}。
+	 * </p>
 	 * 
 	 * @param requestContentType
 	 */
@@ -244,7 +250,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/**
 	 * 设置请求内容JSON文本，为{@code null}或{@code ""}表示无请求内容。
 	 * <p>
-	 * 当{@linkplain #getRequestContentType()}为{@linkplain #CONTENT_TYPE_FORM}时，请求内容JSON文本格式应为：
+	 * 当{@linkplain #getRequestContentType()}为{@linkplain #REQUEST_CONTENT_TYPE_FORM_URLENCODED}时，请求内容JSON文本格式应为：
 	 * </p>
 	 * <code>
 	 * <pre>
@@ -259,7 +265,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	 * 其中，{@code name}表示请求参数名，{@code value}表示请求参数值。
 	 * </p>
 	 * <p>
-	 * 当{@linkplain #getRequestContentType()}为{@linkplain #CONTENT_TYPE_JSON}时，请求内容JSON文本没有特殊格式要求。
+	 * 当{@linkplain #getRequestContentType()}为{@linkplain #REQUEST_CONTENT_TYPE_JSON}时，请求内容JSON文本没有特殊格式要求。
 	 * </p>
 	 * <p>
 	 * 请求内容JSON文本支持<code>Freemarker</code>模板语言。
@@ -280,7 +286,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/**
 	 * 设置相应类型。
 	 * <p>
-	 * 目前响应类型仅支持{@linkplain #CONTENT_TYPE_JSON}。
+	 * 目前仅支持{@linkplain #RESPONSE_CONTENT_TYPE_JSON}，且是默认值。
 	 * </p>
 	 * 
 	 * @param responseContentType
@@ -378,18 +384,18 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 	protected void setHttpEntity(ClassicHttpRequest request, String requestContent) throws Throwable
 	{
-		if (CONTENT_TYPE_FORM.equals(this.requestContentType))
+		if (REQUEST_CONTENT_TYPE_FORM_URLENCODED.equals(this.requestContentType))
 		{
 			List<NameValuePair> params = toNameValuePairs(requestContent);
 			request.setEntity(new UrlEncodedFormEntity(params, Charset.forName(this.requestContentCharset)));
 		}
-		else if (CONTENT_TYPE_JSON.equals(this.requestContentType))
+		else if (REQUEST_CONTENT_TYPE_JSON.equals(this.requestContentType))
 		{
 			StringEntity entity = new StringEntity(requestContent, ContentType.APPLICATION_JSON);
 			request.setEntity(entity);
 		}
 		else
-			throw new DataSetException("HTTP request content-type [" + this.requestContentType + "] is not supported");
+			throw new DataSetException("Request content type [" + this.requestContentType + "] is not supported");
 	}
 
 	protected String resolveTemplateUri(Map<String, ?> paramValues) throws Throwable
@@ -409,31 +415,31 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 	protected ClassicHttpRequest createHttpRequest(String uri) throws Throwable
 	{
-		if (HTTP_METHOD_GET.equals(this.httpMethod))
+		if (REQUEST_METHOD_GET.equals(this.requestMethod))
 			return new HttpGet(uri);
-		else if (HTTP_METHOD_POST.equals(this.httpMethod))
+		else if (REQUEST_METHOD_POST.equals(this.requestMethod))
 			return new HttpPost(uri);
-		else if (HTTP_METHOD_PUT.equals(this.httpMethod))
+		else if (REQUEST_METHOD_PUT.equals(this.requestMethod))
 			return new HttpPut(uri);
-		else if (HTTP_METHOD_HEAD.equals(this.httpMethod))
-			return new HttpHead(uri);
-		else if (HTTP_METHOD_PATCH.equals(this.httpMethod))
+		else if (REQUEST_METHOD_PATCH.equals(this.requestMethod))
 			return new HttpPatch(uri);
-		else if (HTTP_METHOD_DELETE.equals(this.httpMethod))
+		else if (REQUEST_METHOD_DELETE.equals(this.requestMethod))
 			return new HttpDelete(uri);
-		else if (HTTP_METHOD_OPTIONS.equals(this.httpMethod))
-			return new HttpOptions(uri);
-		else if (HTTP_METHOD_TRACE.equals(this.httpMethod))
-			return new HttpTrace(uri);
+		// else if (REQUEST_METHOD_HEAD.equals(this.httpMethod))
+		// return new HttpHead(uri);
+		// else if (REQUEST_METHOD_OPTIONS.equals(this.httpMethod))
+		// return new HttpOptions(uri);
+		// else if (REQUEST_METHOD_TRACE.equals(this.httpMethod))
+		// return new HttpTrace(uri);
 		else
-			throw new DataSetException("HTTP method [" + this.httpMethod + "] is not supported");
+			throw new DataSetException("HTTP method [" + this.requestMethod + "] is not supported");
 	}
 
 	/**
 	 * 将指定JSON字符串转换为名/值列表。
 	 * 
 	 * @param jsonArrayContent
-	 *            可能为{@code null}、{@code ""}
+	 *            允许为{@code null}、{@code ""}
 	 * @return 空列表表示无名/值
 	 * @throws Throwable
 	 */
@@ -490,98 +496,6 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	protected ObjectMapper getObjectMapperNonStardand()
 	{
 		return JsonSupport.getObjectMapperNonStardand();
-	}
-
-	/**
-	 * HTTP单个请求头。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class HttpHeader implements Serializable
-	{
-		private static final long serialVersionUID = 1L;
-
-		/** 名称 */
-		private String name;
-
-		/** 值 */
-		private String value;
-
-		public HttpHeader()
-		{
-			super();
-		}
-
-		public HttpHeader(String name, String value)
-		{
-			super();
-			this.name = name;
-			this.value = value;
-		}
-
-		public String getName()
-		{
-			return name;
-		}
-
-		public void setName(String name)
-		{
-			this.name = name;
-		}
-
-		public String getValue()
-		{
-			return value;
-		}
-
-		public void setValue(String value)
-		{
-			this.value = value;
-		}
-
-		@Override
-		public int hashCode()
-		{
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((name == null) ? 0 : name.hashCode());
-			result = prime * result + ((value == null) ? 0 : value.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj)
-		{
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			HttpHeader other = (HttpHeader) obj;
-			if (name == null)
-			{
-				if (other.name != null)
-					return false;
-			}
-			else if (!name.equals(other.name))
-				return false;
-			if (value == null)
-			{
-				if (other.value != null)
-					return false;
-			}
-			else if (!value.equals(other.value))
-				return false;
-			return true;
-		}
-
-		@Override
-		public String toString()
-		{
-			return getClass().getSimpleName() + " [name=" + name + ", value=" + value + "]";
-		}
 	}
 
 	protected static class JsonResponseHandler implements HttpClientResponseHandler<ResolvedDataSetResult>
@@ -644,8 +558,8 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			if (this.properties == null || this.properties.isEmpty())
 			{
 				HttpResponseJsonDataSet jsonDataSet = new HttpResponseJsonDataSet(reader);
-
 				jsonDataSet.setDataJsonPath(this.responseDataJsonPath);
+
 				return jsonDataSet.resolve(Collections.EMPTY_MAP);
 			}
 			else
