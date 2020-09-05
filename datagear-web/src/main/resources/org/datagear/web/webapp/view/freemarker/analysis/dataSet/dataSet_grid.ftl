@@ -42,7 +42,7 @@ boolean readonly 是否只读操作，默认为false
 							<li addURL="addForCsvValue"><div><@spring.message code='dataSet.dataSetType.CsvValue' /></div></li>
 							<li addURL="addForCsvFile"><div><@spring.message code='dataSet.dataSetType.CsvFile' /></div></li>
 							<li addURL="addForExcel"><div><@spring.message code='dataSet.dataSetType.Excel' /></div></li>
-							<li addURL="addForHttpAPI"><div><@spring.message code='dataSet.dataSetType.HttpAPI' /></div></li>
+							<li addURL="addForHttp"><div><@spring.message code='dataSet.dataSetType.Http' /></div></li>
 							<li addURL="addForJsonValue"><div><@spring.message code='dataSet.dataSetType.JsonValue' /></div></li>
 							<li addURL="addForJsonFile"><div><@spring.message code='dataSet.dataSetType.JsonFile' /></div></li>
 						</ul>
@@ -203,8 +203,8 @@ boolean readonly 是否只读操作，默认为false
 			return "<@spring.message code='dataSet.dataSetType.JsonValue' />";
 		else if("${DataSetEntity.DATA_SET_TYPE_JsonFile}" == data)
 			return "<@spring.message code='dataSet.dataSetType.JsonFile' />";
-		else if("${DataSetEntity.DATA_SET_TYPE_HttpAPI}" == data)
-			return "<@spring.message code='dataSet.dataSetType.HttpAPI' />";
+		else if("${DataSetEntity.DATA_SET_TYPE_Http}" == data)
+			return "<@spring.message code='dataSet.dataSetType.Http' />";
 		else
 			return "";
 	};

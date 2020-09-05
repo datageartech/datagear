@@ -1,7 +1,7 @@
 <#--
 数据集表单页：预览、参数、属性操作区
 -->
-<div class="workspace-operation-wrapper">
+<div class="workspace-operation-wrapper light-tabs">
 	<ul class="workspace-operation-nav">
 		<li class="operation-preview"><a href="#${pageId}-previewResult"><@spring.message code='preview' /></a></li>
 		<li class="operation-params" title="<@spring.message code='dataSet.param.desc' />"><a href="#${pageId}-dataSetParams"><@spring.message code='dataSet.param' /></a></li>

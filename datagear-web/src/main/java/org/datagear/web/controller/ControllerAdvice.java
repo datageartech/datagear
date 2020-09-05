@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.support.DataSetSourceParseException;
 import org.datagear.analysis.support.SqlDataSetConnectionException;
 import org.datagear.analysis.support.SqlDataSetSqlExecutionException;
@@ -454,6 +455,17 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetConnectionException.class), exception,
 				false, exception.getMessage());
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(DataSetException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisDataSetException(HttpServletRequest request,
+			HttpServletResponse response, DataSetException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(DataSetException.class), exception,
+				true, exception.getMessage());
 
 		return getErrorView(request, response);
 	}

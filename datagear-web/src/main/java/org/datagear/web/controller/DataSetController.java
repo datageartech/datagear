@@ -34,6 +34,7 @@ import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
 import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.ExcelDataSetEntity;
+import org.datagear.management.domain.HttpDataSetEntity;
 import org.datagear.management.domain.JsonFileDataSetEntity;
 import org.datagear.management.domain.JsonValueDataSetEntity;
 import org.datagear.management.domain.Schema;
@@ -297,6 +298,36 @@ public class DataSetController extends AbstractSchemaConnController
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
 	}
 
+	@RequestMapping("/addForHttp")
+	public String addForHttp(HttpServletRequest request, org.springframework.ui.Model model)
+	{
+		HttpDataSetEntity dataSet = new HttpDataSetEntity();
+
+		model.addAttribute("dataSet", dataSet);
+		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
+		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
+		model.addAttribute(KEY_FORM_ACTION, "saveAddForHttp");
+
+		return buildFormView(dataSet.getDataSetType());
+	}
+
+	@RequestMapping(value = "/saveAddForHttp", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveAddForHttp(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody HttpDataSetEntity dataSet)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		dataSet.setId(IDUtil.randomIdOnTime20());
+		dataSet.setCreateUser(User.copyWithoutPassword(user));
+
+		checkSaveHttpDataSetEntity(dataSet);
+
+		this.dataSetEntityService.add(user, dataSet);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
 	@RequestMapping("/edit")
 	public String edit(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String id)
@@ -315,7 +346,8 @@ public class DataSetController extends AbstractSchemaConnController
 		model.addAttribute(KEY_FORM_ACTION, "saveEditFor" + dataSet.getDataSetType());
 
 		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType())
-				|| DataSetEntity.DATA_SET_TYPE_CsvFile.equals(dataSet.getDataSetType()))
+				|| DataSetEntity.DATA_SET_TYPE_CsvFile.equals(dataSet.getDataSetType())
+				|| DataSetEntity.DATA_SET_TYPE_Http.equals(dataSet.getDataSetType()))
 			model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 
 		return buildFormView(dataSet.getDataSetType());
@@ -411,6 +443,20 @@ public class DataSetController extends AbstractSchemaConnController
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
 	}
 
+	@RequestMapping(value = "/saveEditFor" + DataSetEntity.DATA_SET_TYPE_Http, produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<OperationMessage> saveEditForHttp(HttpServletRequest request, HttpServletResponse response,
+			@RequestBody HttpDataSetEntity dataSet)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		checkSaveHttpDataSetEntity(dataSet);
+
+		this.dataSetEntityService.update(user, dataSet);
+
+		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
+	}
+
 	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, Object> uploadFile(HttpServletRequest request, HttpServletResponse response,
@@ -486,7 +532,8 @@ public class DataSetController extends AbstractSchemaConnController
 		model.addAttribute(KEY_READONLY, true);
 
 		if (DataSetEntity.DATA_SET_TYPE_JsonFile.equals(dataSet.getDataSetType())
-				|| DataSetEntity.DATA_SET_TYPE_CsvFile.equals(dataSet.getDataSetType()))
+				|| DataSetEntity.DATA_SET_TYPE_CsvFile.equals(dataSet.getDataSetType())
+				|| DataSetEntity.DATA_SET_TYPE_Http.equals(dataSet.getDataSetType()))
 			model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
 
 		return buildFormView(dataSet.getDataSetType());
@@ -710,6 +757,22 @@ public class DataSetController extends AbstractSchemaConnController
 		return result;
 	}
 
+	@RequestMapping(value = "/previewHttp", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public TemplateResolvedDataSetResult previewHttp(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model springModel, @RequestBody HttpDataSetEntityPreview preview) throws Throwable
+	{
+		HttpDataSetEntity dataSet = preview.getDataSet();
+		dataSet.setHttpClient(getDataSetEntityService().getHttpClient());
+
+		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
+				dataSet.getParams());
+
+		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
+
+		return result;
+	}
+
 	protected boolean copyToDirectoryFileDataSetEntityDirectoryIf(DirectoryFileDataSetEntity entity,
 			String originalFileName) throws IOException
 	{
@@ -838,6 +901,14 @@ public class DataSetController extends AbstractSchemaConnController
 			throw new IllegalInputException();
 	}
 
+	protected void checkSaveHttpDataSetEntity(HttpDataSetEntity dataSet)
+	{
+		checkSaveEntity(dataSet);
+
+		if (isEmpty(dataSet.getUri()))
+			throw new IllegalInputException();
+	}
+
 	public static class AbstractDataSetPreview<T extends DataSet>
 	{
 		private T dataSet;
@@ -893,27 +964,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static class JsonValueDataSetPreview extends AbstractDataSetPreview<JsonValueDataSet>
 	{
-		private String value;
-
 		public JsonValueDataSetPreview()
 		{
 			super();
-		}
-
-		public JsonValueDataSetPreview(String value)
-		{
-			super();
-			this.value = value;
-		}
-
-		public String getValue()
-		{
-			return value;
-		}
-
-		public void setValue(String value)
-		{
-			this.value = value;
 		}
 	}
 
@@ -959,27 +1012,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 	public static class CsvValueDataSetPreview extends AbstractDataSetPreview<CsvValueDataSet>
 	{
-		private String value;
-
 		public CsvValueDataSetPreview()
 		{
 			super();
-		}
-
-		public CsvValueDataSetPreview(String value)
-		{
-			super();
-			this.value = value;
-		}
-
-		public String getValue()
-		{
-			return value;
-		}
-
-		public void setValue(String value)
-		{
-			this.value = value;
 		}
 	}
 
@@ -1000,6 +1035,14 @@ public class DataSetController extends AbstractSchemaConnController
 		public void setOriginalFileName(String originalFileName)
 		{
 			this.originalFileName = originalFileName;
+		}
+	}
+
+	public static class HttpDataSetEntityPreview extends AbstractDataSetPreview<HttpDataSetEntity>
+	{
+		public HttpDataSetEntityPreview()
+		{
+			super();
 		}
 	}
 

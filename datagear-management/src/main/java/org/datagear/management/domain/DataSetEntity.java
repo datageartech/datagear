@@ -41,7 +41,7 @@ public interface DataSetEntity extends DataSet, CreateUserEntity<String>, DataPe
 	String DATA_SET_TYPE_CsvFile = "CsvFile";
 
 	/** 数据集类型：HTTP接口 */
-	String DATA_SET_TYPE_HttpAPI = "HttpAPI";
+	String DATA_SET_TYPE_Http = "Http";
 
 	/**
 	 * 设置名称。

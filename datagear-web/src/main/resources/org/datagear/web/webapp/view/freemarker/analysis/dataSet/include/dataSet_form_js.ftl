@@ -57,9 +57,14 @@ po.previewOptions.url = "...";
 		return po.element(".preview-result-table-wrapper").height() - 30;
 	};
 	
-	po.initWorkspaceHeight = function()
+	po.errorInfoHeight = 25;
+	
+	po.initWorkspaceHeight = function(calFormContentHeight)
 	{
+		calFormContentHeight = (calFormContentHeight == true ? true : false);
+		
 		var height = $(window).height();
+		
 		//减去上下留白
 		height = height - height/10;
 		//减去对话框标题高度
@@ -67,19 +72,23 @@ po.previewOptions.url = "...";
 			height = height - 41;
 		//减去其他表单元素高度
 		height = height - po.element(".form-head").outerHeight(true);
+		height = height - po.element(".form-foot").outerHeight(true);
+		
+		var formContentHeight = height - 41;
+		
 		po.element(".form-content > .form-item").each(function()
 		{
 			height = height - $(this).outerHeight(true);
 		});
-		height = height - po.element(".form-foot").outerHeight(true);
 		//减去杂项高度
 		height = height - 41 - 10;
 		
-		var errorInfoHeight = 25;
-		
 		po.element(".workspace").css("min-height", height+"px");
-		po.element(".workspace-editor-wrapper").height(height - errorInfoHeight);
-		po.element(".workspace-operation-wrapper").height(height - errorInfoHeight);
+		po.element(".workspace-editor-wrapper").height(height - po.errorInfoHeight);
+		po.element(".workspace-operation-wrapper").height(height - po.errorInfoHeight);
+		
+		if(calFormContentHeight)
+			po.element(".form-content").css("max-height", formContentHeight+"px");
 	};
 	
 	po.initWorkspaceEditor = function(editor, initValue)

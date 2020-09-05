@@ -17,6 +17,8 @@ import java.util.Map;
 
 import javax.servlet.Filter;
 
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.BayeuxServer.Extension;
 import org.cometd.server.ext.AcknowledgedMessagesExtension;
@@ -233,6 +235,12 @@ public class CoreConfiguration implements InitializingBean
 		return createDirectory(environment.getProperty("directory.dataSet"), true);
 	}
 
+	@Bean
+	public CloseableHttpClient httpClient()
+	{
+		return HttpClients.createDefault();
+	}
+
 	protected File createDirectory(String directoryName, boolean createIfInexistence) throws IOException
 	{
 		DirectoryFactory bean = new DirectoryFactory();
@@ -391,7 +399,7 @@ public class CoreConfiguration implements InitializingBean
 	{
 		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory().getObject(),
 				this.connectionSource(), this.schemaService(), this.authorizationService(),
-				this.dataSetRootDirectory());
+				this.dataSetRootDirectory(), this.httpClient());
 		return bean;
 	}
 

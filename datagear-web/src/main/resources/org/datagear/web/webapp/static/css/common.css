@@ -146,7 +146,21 @@ form .form-content .form-item .input-desc{
 	display: inline-block;
 }
 form .form-content .form-item .input-desc-date{
-	
+}
+form .form-content .form-item .form-item-value .form-item{
+	width: auto;
+	display: inline-block;
+	margin-left: 2em;
+}
+form .form-content .form-item .form-item-value .form-item .form-item-label{
+	width: auto;
+}
+form .form-content .form-item .form-item-value .form-item .form-item-label label{
+	width: auto;
+}
+form .form-content .form-item .form-item-value .form-item .form-item-value{
+	width: auto;
+	margin-left: 1em;
 }
 form .form-foot{
 	text-align: center;
@@ -307,6 +321,33 @@ form .form-foot .ui-button{
 .ui-tabs .tabs-more-operation-menu.ui-menu .ui-menu-item,
 .ui-tabs .tabs-more-tab-menu.ui-menu .ui-menu-item{
 	font-size: small;
+}
+
+/*轻型选显卡*/
+.ui-tabs.light-tabs{
+	margin: 0 0;
+	padding: 0 0;
+}
+.ui-tabs.light-tabs.ui-widget.ui-widget-content{
+	border: 0;
+}
+.ui-tabs.light-tabs .ui-tabs-nav{
+	border: 0;
+	background: none;
+	opacity: 0.8;
+	filter: Alpha(Opacity=80);
+}
+.ui-tabs.light-tabs .ui-tabs-nav .ui-tabs-anchor{
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+}
+.ui-tabs.light-tabs .ui-tabs-panel{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 2.2em;
+	bottom: 0px;
+	padding: 0 0;
 }
 
 /*jquery.layout*/
@@ -2114,6 +2155,9 @@ table.dataTable tbody tr td select{
 .page-form-dataSet .workspace{
 	position: relative;
 }
+.page-form-dataSet .form-content{
+	overflow: auto;
+}
 .page-form-dataSet .workspace .form-item .form-item-label{
 	vertical-align:top;
 	margin-top: 0.2em;
@@ -2155,35 +2199,10 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	display: inline-block;
 	width: 41%;
-	top: 0;
+	top: 0.3em;
 	right: 0;
 	height: 10em;
 	vertical-align: top;
-}
-.page-form-dataSet .workspace .workspace-operation-wrapper.ui-widget.ui-widget-content{
-	border: 0;
-}
-.page-form-dataSet .workspace .workspace-operation-wrapper.ui-tabs{
-	margin: 0 0;
-	padding: 0 0;
-}
-.page-form-dataSet .workspace .workspace-operation-wrapper.ui-tabs .ui-tabs-nav{
-	border: 0;
-	background: none;
-	opacity: 0.8;
-	filter: Alpha(Opacity=80);
-}
-.page-form-dataSet .workspace .workspace-operation-wrapper.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
-	padding-top: 0.2em;
-	padding-bottom: 0.2em;
-}
-.page-form-dataSet .workspace .workspace-operation-wrapper.ui-tabs .ui-tabs-panel{
-	position: absolute;
-	left: 0px;
-	right: 0px;
-	top: 2.2em;
-	bottom: 0px;
-	padding: 0 0;
 }
 .page-form-dataSet .workspace .workspace-operation-wrapper .operation{
 	position: absolute;
@@ -2243,6 +2262,13 @@ table.dataTable tbody tr td select{
 }
 .page-form-dataSet .encoding-selectmenu-menu .ui-menu{
 	height: 10em;
+}
+.page-form-dataSet-Http .form-item-value-requestMethod .ui-selectmenu-button,
+.page-form-dataSet-Http .form-item-value-requestContentType .ui-selectmenu-button,
+.page-form-dataSet-Http .form-item-value-requestContentCharset .ui-selectmenu-button,
+.page-form-dataSet-Http .form-item-value-responseContentType .ui-selectmenu-button{
+	width: auto;
+	min-width: 6em;
 }
 
 .page-form-chart .chart-plugin{

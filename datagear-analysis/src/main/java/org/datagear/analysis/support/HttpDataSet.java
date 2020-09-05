@@ -24,7 +24,6 @@ import org.apache.hc.client5.http.classic.methods.HttpPatch;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
@@ -330,8 +329,6 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
 			throws DataSetException
 	{
-		CloseableHttpResponse response = null;
-
 		try
 		{
 			String uri = resolveTemplateUri(paramValues);
@@ -351,7 +348,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 			String templateResult = "URI:" + System.lineSeparator() + uri //
 					+ System.lineSeparator() + "-----------------------------------------" + System.lineSeparator() //
-					+ "Headers:" + System.lineSeparator() + headerContent //
+					+ "Request headers:" + System.lineSeparator() + headerContent //
 					+ System.lineSeparator() + "-----------------------------------------" + System.lineSeparator() //
 					+ "Request content:" + System.lineSeparator() + requestContent;
 
@@ -364,10 +361,6 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		catch (Throwable t)
 		{
 			throw new DataSetSourceParseException(t);
-		}
-		finally
-		{
-			IOUtil.close(response);
 		}
 	}
 
@@ -391,7 +384,9 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		}
 		else if (REQUEST_CONTENT_TYPE_JSON.equals(this.requestContentType))
 		{
-			StringEntity entity = new StringEntity(requestContent, ContentType.APPLICATION_JSON);
+			ContentType contentType = ContentType.create(ContentType.APPLICATION_JSON.getMimeType(),
+					Charset.forName(this.requestContentCharset));
+			StringEntity entity = new StringEntity(requestContent, contentType);
 			request.setEntity(entity);
 		}
 		else
@@ -415,7 +410,7 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 	protected ClassicHttpRequest createHttpRequest(String uri) throws Throwable
 	{
-		if (REQUEST_METHOD_GET.equals(this.requestMethod))
+		if (REQUEST_METHOD_GET.equals(this.requestMethod) || StringUtil.isEmpty(this.requestMethod))
 			return new HttpGet(uri);
 		else if (REQUEST_METHOD_POST.equals(this.requestMethod))
 			return new HttpPost(uri);
