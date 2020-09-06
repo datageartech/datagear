@@ -74,6 +74,7 @@ import org.datagear.persistence.PersistenceManager;
 import org.datagear.persistence.support.DefaultDialectSource;
 import org.datagear.persistence.support.DefaultPersistenceManager;
 import org.datagear.persistence.support.SqlSelectManager;
+import org.datagear.util.IOUtil;
 import org.datagear.web.cometd.CustomJacksonJSONContextServer;
 import org.datagear.web.cometd.dataexchange.DataExchangeCometdService;
 import org.datagear.web.convert.CustomFormattingConversionServiceFactoryBean;
@@ -195,6 +196,7 @@ public class CoreConfiguration implements InitializingBean
 	{
 		ResourceBundleMessageSource bean = new ResourceBundleMessageSource();
 		bean.setBasename("org.datagear.web.locales.datagear");
+		bean.setDefaultEncoding(IOUtil.CHARSET_UTF_8);
 
 		return bean;
 	}
@@ -398,8 +400,8 @@ public class CoreConfiguration implements InitializingBean
 	public DataSetEntityService dataSetEntityService() throws Exception
 	{
 		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory().getObject(),
-				this.connectionSource(), this.schemaService(), this.authorizationService(),
-				this.dataSetRootDirectory(), this.httpClient());
+				this.connectionSource(), this.schemaService(), this.authorizationService(), this.dataSetRootDirectory(),
+				this.httpClient());
 		return bean;
 	}
 
