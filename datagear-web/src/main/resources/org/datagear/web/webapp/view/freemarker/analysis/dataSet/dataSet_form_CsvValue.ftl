@@ -24,7 +24,9 @@ readonly 是否只读操作，允许为null
 			<div class="workspace">
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dataSet.csv' /></label>
+						<label title="<@spring.message code='dataSet.csv.desc' />">
+							<@spring.message code='dataSet.csv' />
+						</label>
 					</div>
 					<div class="form-item-value">
 						<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''?html}</textarea>

@@ -101,15 +101,17 @@ readonly 是否只读操作，允许为null
 			<div class="workspace">
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dataSet.http.request' /></label>
+						<label title="<@spring.message code='dataSet.http.request.desc' />">
+							<@spring.message code='dataSet.http.request' />
+						</label>
 					</div>
 					<div class="form-item-value">
 						<textarea name="requestContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.requestContent)!''?html}</textarea>
 						<textarea name="headerContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.headerContent)!''?html}</textarea>
 						<div class="workspace-editor-tabs light-tabs">
 							<ul class="workspace-editor-nav">
-								<li class="editor-requestContent" title="<@spring.message code='dataSet.http.requestContent.desc' />"><a href="#${pageId}-editor-requestContent"><@spring.message code='dataSet.http.requestContent' /></a></li>
-								<li class="editor-headerContent" title="<@spring.message code='dataSet.http.headerContent.desc' />"><a href="#${pageId}-editor-headerContent"><@spring.message code='dataSet.http.headerContent' /></a></li>
+								<li class="editor-requestContent"><a href="#${pageId}-editor-requestContent"><@spring.message code='dataSet.http.requestContent' /></a></li>
+								<li class="editor-headerContent"><a href="#${pageId}-editor-headerContent"><@spring.message code='dataSet.http.headerContent' /></a></li>
 							</ul>
 							<div id="${pageId}-editor-requestContent" class="workspace-editor-wrapper ui-widget ui-widget-content">
 								<div id="${pageId}-workspaceEditor-requestContent" class="workspace-editor"></div>

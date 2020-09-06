@@ -97,6 +97,18 @@ form .form-content .form-item .form-item-label label{
 	width: 95%;
 	overflow: hidden;
 }
+form .form-content .form-item .form-item-label label[title]{
+	position: relative;
+}
+form .form-content .form-item .form-item-label label[title]::after{
+	content: "?";
+    position: absolute;
+    margin-left: 0.2em;
+    font-size: 0.6em;
+    top: 0.3em;
+    opacity: 0.5;
+	filter: Alpha(Opacity=50);
+}
 form .form-content .form-item .form-item-value{
 	display: inline-block;
 	width: 80%;
