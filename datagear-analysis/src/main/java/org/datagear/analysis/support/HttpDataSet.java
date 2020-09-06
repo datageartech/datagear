@@ -87,6 +87,8 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	 */
 	public static final String RESPONSE_CONTENT_TYPE_JSON = "JSON";
 
+	protected static final List<NameValuePair> NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON = new ArrayList<>(0);
+
 	/** HTTP客户端 */
 	private HttpClient httpClient;
 
@@ -371,6 +373,9 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 		List<NameValuePair> headers = toNameValuePairs(headerContent);
 
+		if (headers == NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON)
+			throw new HeaderContentNotNameValueObjArrayJsonException(headerContent);
+
 		for (NameValuePair header : headers)
 			request.setHeader(header.getName(), header.getValue());
 	}
@@ -380,6 +385,10 @@ public class HttpDataSet extends AbstractResolvableDataSet
 		if (REQUEST_CONTENT_TYPE_FORM_URLENCODED.equals(this.requestContentType))
 		{
 			List<NameValuePair> params = toNameValuePairs(requestContent);
+
+			if (params == NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON)
+				throw new RequestContentNotNameValueObjArrayJsonException(requestContent);
+
 			request.setEntity(new UrlEncodedFormEntity(params, Charset.forName(this.requestContentCharset)));
 		}
 		else if (REQUEST_CONTENT_TYPE_JSON.equals(this.requestContentType))
@@ -433,30 +442,29 @@ public class HttpDataSet extends AbstractResolvableDataSet
 	/**
 	 * 将指定JSON字符串转换为名/值列表。
 	 * 
-	 * @param jsonArrayContent
+	 * @param nameValueObjJsonArray
 	 *            允许为{@code null}、{@code ""}
-	 * @return 空列表表示无名/值
+	 * @return 空列表表示无名/值，返回{@code #NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON}表示{@code nameValueObjJsonArray}格式不合法
 	 * @throws Throwable
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<NameValuePair> toNameValuePairs(String jsonArrayContent) throws Throwable
+	protected List<NameValuePair> toNameValuePairs(String nameValueObjJsonArray) throws Throwable
 	{
-		if (StringUtil.isEmpty(jsonArrayContent))
+		if (StringUtil.isEmpty(nameValueObjJsonArray))
 			return Collections.EMPTY_LIST;
 
-		Object jsonObj = getObjectMapperNonStardand().readValue(jsonArrayContent, Object.class);
+		Object jsonObj = getObjectMapperNonStardand().readValue(nameValueObjJsonArray, Object.class);
 
 		if (jsonObj == null)
 			return Collections.EMPTY_LIST;
 
 		if (!(jsonObj instanceof Collection<?>))
-			throw new DataSetException("The content must be JSON array");
+			return NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON;
 
 		Collection<?> collection = (Collection<?>) jsonObj;
 
 		List<NameValuePair> nameValuePairs = new ArrayList<>(collection.size());
 
-		int idx = 0;
 		for (Object ele : collection)
 		{
 			String name = null;
@@ -477,12 +485,9 @@ public class HttpDataSet extends AbstractResolvableDataSet
 			}
 
 			if (name == null)
-				throw new DataSetException(
-						"The content " + idx + "-th element must be JSON object : {name: \"...\", value: \"...\"}");
+				return NOT_NAME_VALUE_PAIR_OBJ_ARRAY_JSON;
 
 			nameValuePairs.add(new BasicNameValuePair(name, value));
-
-			idx++;
 		}
 
 		return nameValuePairs;

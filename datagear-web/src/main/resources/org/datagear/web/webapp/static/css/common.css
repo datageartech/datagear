@@ -2186,6 +2186,7 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	left: 0;
 	bottom: 0;
+	white-space: nowrap;
 }
 .page-form-dataSet .workspace .workspace-editor-wrapper{
 	height: 10em;
