@@ -54,10 +54,9 @@ po.previewOptions.url = "...";
 	
 	po.calWorkspaceOperationTableHeight = function()
 	{
-		return po.element(".preview-result-table-wrapper").height() - 30;
+		var tableTitleHeight = 30;
+		return po.element(".preview-result-table-wrapper").height() - tableTitleHeight;
 	};
-	
-	po.errorInfoHeight = 25;
 	
 	po.initWorkspaceHeight = function(calFormContentHeight)
 	{
@@ -83,9 +82,11 @@ po.previewOptions.url = "...";
 		//减去杂项高度
 		height = height - 41 - 10;
 		
+		var errorInfoHeight = 41 + 10;
+		
 		po.element(".workspace").css("min-height", height+"px");
-		po.element(".workspace-editor-wrapper").height(height - po.errorInfoHeight);
-		po.element(".workspace-operation-wrapper").height(height - po.errorInfoHeight);
+		po.element(".workspace-editor-wrapper").height(height - errorInfoHeight);
+		po.element(".workspace-operation-wrapper").height(height - errorInfoHeight);
 		
 		if(calFormContentHeight)
 			po.element(".form-content").css("max-height", formContentHeight+"px");
@@ -658,6 +659,31 @@ po.previewOptions.url = "...";
 				return;
 			
 			po.executePreview(false);
+		});
+		
+		po.element(".show-resolved-source-button").click(function()
+		{
+			var $panel = po.element(".result-resolved-source-panel");
+			
+			if($panel.is(":hidden"))
+			{
+				$panel.show();
+				$panel.position({ my: "right bottom", at: "right top-5", of: this });
+			}
+			else
+				$panel.hide();
+		});
+		
+		$(po.element()).on("click", function(event)
+		{
+			var $target = $(event.target);
+			
+			var $panel = po.element(".result-resolved-source-panel");
+			if(!$panel.is(":hidden"))
+			{
+				if($target.closest(".result-resolved-source").length == 0)
+					$panel.hide();
+			}
 		});
 	};
 	

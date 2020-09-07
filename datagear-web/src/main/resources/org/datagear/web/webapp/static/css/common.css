@@ -2222,21 +2222,34 @@ table.dataTable tbody tr td select{
 	right: 0px;
 	top: -1.5em;
 }
-.page-form-dataSet .workspace .workspace-operation-wrapper .operation .ui-button.ui-button-icon-only{
+.page-form-dataSet .workspace .workspace-operation-wrapper .operation .ui-button.ui-button-icon-only,
+.page-form-dataSet .workspace .show-resolved-source-button{
 	height: 1.2em;
 	width: 2.5em;
 	vertical-align: top;
 	border: 0px;
 }
 .page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source{
+	position: relative;
+	top: 0.1em;
+	display: none;
+	width: 100%;
+	text-align: right;
+}
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source-panel{
 	position: absolute;
 	display: none;
-    bottom: -4em;
-    height: 3.5em;
-    right: 0;
-    left: 0;
+	width: 90%;
+	height: 8em;
 }
-.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source textarea{
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source-panel-content{
+	position: absolute;
+	left: 0.41em;
+	top: 0.41em;
+	right: 0.41em;
+	bottom: 0.41em;
+}
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source-panel-content textarea{
 	width: 100%;
 	height: 100%;
 	margin: 0 0;
