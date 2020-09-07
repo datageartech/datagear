@@ -1664,11 +1664,12 @@
 			map = (updateOptions.geo ? updateOptions.geo.map : undefined);
 		else
 			map = (updateOptions.series && updateOptions.series.length > 0 ? updateOptions.series[0].map : undefined);
+
+		var presetMap = chart.extValue("presetMap");
 		
 		if(!map)
 		{
 			var currentMap = chart.map();
-			var presetMap = chart.extValue("presetMap");
 			
 			//通过chart.map(...)设置了新的地图
 			if(currentMap && currentMap != presetMap)
@@ -1691,6 +1692,21 @@
 				}
 				
 				map = currentMap;
+			}
+		}
+		
+		//如果更新了地图，则要重置缩放比例和中心位置，避免出现某些地图无法显示的情况
+		if(map && map != presetMap)
+		{
+			if(isGeo)
+			{
+				updateOptions.geo.center = null;
+				updateOptions.geo.zoom = 1;//此项非必须
+			}
+			else
+			{
+				updateOptions.series[0].center = null;
+				updateOptions.series[0].zoom = 1;//此项非必须
 			}
 		}
 		
