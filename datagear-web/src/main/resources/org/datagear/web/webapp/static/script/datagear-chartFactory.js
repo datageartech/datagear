@@ -2278,6 +2278,38 @@
 		return "dataGearClientElement" + nextIdSeq;
 	};
 	
+
+	/**
+	 * 将给定值按照HTML规范转义，如果不是字符串，直接返回原值。
+	 */
+	chartFactory.escapeHtml = function(value)
+	{
+		if(typeof(value) != "string")
+			return value;
+		
+		var epn = "";
+		
+		for(var i=0; i<value.length; i++)
+		{
+			var c = value.charAt(i);
+			
+			if(c == '<')
+				epn += '&lt;';
+			else if(c == '>')
+				epn += '&gt;';
+			else if(c == '&')
+				epn += '&amp;';
+			else if(c == '"')
+				epn += '&quot;';
+			else if(c == '\'')
+				epn += '&#39;';
+			else
+				epn += c;
+		}
+		
+		return epn;
+	};
+	
 	/**
 	 * 记录异常日志。
 	 * 

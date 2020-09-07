@@ -3665,7 +3665,7 @@
 				//单元格内容渲染函数
 				renderValue: function(value, type, row, meta)
 				{
-					return value;
+					return chartFactory.escapeHtml(value);
 				}
 			},
 			

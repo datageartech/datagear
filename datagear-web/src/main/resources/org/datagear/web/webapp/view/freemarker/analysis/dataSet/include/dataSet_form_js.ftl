@@ -792,7 +792,7 @@ po.previewOptions.url = "...";
 					var name = dataSetProperties[colIndex].name;
 					
 					if(setValue === undefined)
-						return row[name];
+						return chartFactory.escapeHtml(row[name]);
 					else
 						row[name] = setValue;
 				},
