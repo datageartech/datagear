@@ -59,7 +59,9 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='dataSet.http.requestContentType' /></label>
+					<label title="<@spring.message code='dataSet.http.requestContentType.desc' />">
+						<@spring.message code='dataSet.http.requestContentType' />
+					</label>
 				</div>
 				<div class="form-item-value form-item-value-requestContentType">
 					<select name="requestContentType">

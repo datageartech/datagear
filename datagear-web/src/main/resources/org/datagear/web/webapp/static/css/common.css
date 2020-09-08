@@ -2732,7 +2732,7 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	display: inline-block;
 	z-index: 10;
-	top: -0.6em;
+	bottom: -1em;
 }
 .page-form-dashboard .form-item-value-template .resize-editor-wrapper.resize-left{
 	left: -0.6em;
@@ -2741,9 +2741,9 @@ table.dataTable tbody tr td select{
 	right: -0.6em;
 }
 .page-form-dashboard .form-item-value-template .resize-editor-wrapper .ui-button.ui-button-icon-only{
-	width: 1.2em;
-	height: 1.2em;
-	padding: 0.3em 0.3em;
+	width: 1em;
+	height: 1em;
+	padding: 0 0.3em;
 	border: 0;
 }
 .page-form-dashboard .show-button{

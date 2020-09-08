@@ -36,7 +36,9 @@ readonly 是否只读操作，允许为null
 			<div class="workspace">
 				<div class="form-item">
 					<div class="form-item-label">
-						<label><@spring.message code='dataSet.sql' /></label>
+						<label title="<@spring.message code='dataSet.sql.desc' />">
+							<@spring.message code='dataSet.sql' />
+						</label>
 					</div>
 					<div class="form-item-value">
 						<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>

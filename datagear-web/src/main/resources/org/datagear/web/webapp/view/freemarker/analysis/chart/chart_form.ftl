@@ -41,7 +41,9 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='chart.chartDataSets' /></label>
+					<label title="<@spring.message code='chart.chartDataSets.desc' />">
+						<@spring.message code='chart.chartDataSets' />
+					</label>
 				</div>
 				<div class="form-item-value form-item-value-chartDataSet">
 					<input type="text" name="dataSignValidation" style="display: none" />
@@ -64,7 +66,9 @@ readonly 是否只读操作，允许为null
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='chart.updateInterval' /></label>
+					<label title="<@spring.message code='chart.updateInterval.desc' />">
+						<@spring.message code='chart.updateInterval' />
+					</label>
 				</div>
 				<div class="form-item-value">
 					<div class="updateInterval-radios">
