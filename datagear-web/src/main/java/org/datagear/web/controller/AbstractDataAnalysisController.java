@@ -275,11 +275,28 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void addHeartBeatValue(WebContext webContext)
+	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
 	{
 		String heartbeatURL = webContext.getContextPath() + "/analysis/dashboard/heartbeat";
+		heartbeatURL = addJsessionidParam(heartbeatURL, request.getSession().getId());
 
 		((Map<String, Object>) webContext.getExtraValues()).put(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);
+	}
+
+	/**
+	 * 为指定URL添加会话ID参数。
+	 * <p>
+	 * 图表、看板展示页可能会以&lt;iframe&gt;的方式嵌入外部网页中，当在跨域场景时，某些浏览器会禁用&lt;iframe&gt;内的cookie，导致会话无法保持，
+	 * 从而引起图表、看板内的ajax请求失效，此方法可以解决上述问题。
+	 * </p>
+	 * 
+	 * @param url
+	 * @param sessionId
+	 * @return
+	 */
+	protected String addJsessionidParam(String url, String sessionId)
+	{
+		return WebUtils.addJsessionidParam(url, sessionId);
 	}
 
 	protected static class SessionHtmlTplDashboardManager implements Serializable

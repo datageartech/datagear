@@ -20,6 +20,7 @@ import java.util.zip.ZipInputStream;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.Chart;
 import org.datagear.analysis.DataSetResult;
@@ -898,12 +899,15 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
+		HttpSession session = request.getSession();
+
 		String contextPath = getWebContextPath(request).get(request);
-		WebContext webContext = new WebContext(contextPath, contextPath + "/analysis/dashboard/showData",
-				contextPath + "/analysis/dashboard/loadChart");
+		WebContext webContext = new WebContext(contextPath,
+				addJsessionidParam(contextPath + "/analysis/dashboard/showData", session.getId()),
+				addJsessionidParam(contextPath + "/analysis/dashboard/loadChart", session.getId()));
 
 		webContext.setExtraValues(new HashMap<String, Object>());
-		addHeartBeatValue(webContext);
+		addHeartBeatValue(request, webContext);
 
 		return webContext;
 	}

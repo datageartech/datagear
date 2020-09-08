@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSetParam;
@@ -397,12 +398,15 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 	protected WebContext createWebContext(HttpServletRequest request)
 	{
+		HttpSession session = request.getSession();
+
 		String contextPath = getWebContextPath(request).get(request);
-		WebContext webContext = new WebContext(contextPath, contextPath + "/analysis/chart/showData",
-				contextPath + "/analysis/dashboard/loadChart");
+		WebContext webContext = new WebContext(contextPath,
+				addJsessionidParam(contextPath + "/analysis/chart/showData", session.getId()),
+				addJsessionidParam(contextPath + "/analysis/dashboard/loadChart", session.getId()));
 
 		webContext.setExtraValues(new HashMap<String, Object>());
-		addHeartBeatValue(webContext);
+		addHeartBeatValue(request, webContext);
 
 		return webContext;
 	}
