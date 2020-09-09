@@ -1440,6 +1440,20 @@
 		chart.extValue("radarIndicatorData", indicatorData);
 	};
 	
+	//行式雷达网数据处理，一行数据表示一条雷达网，行式结构为：网条目名称, [指标名, 指标值, 指标上限值]*n
+	chartSupport.radarUpdateForRowItem = function(chart, results, chartDataSet, chartDataSetIdx, result,
+			legendData, indicatorData, series)
+	{
+		
+	};
+	
+	//列式雷达网数据处理，一列数据表示一条雷达网，列式结构为：指标名, 指标上限值, [指标值]*n，其中"指标值"列名将作为网条目名称
+	chartSupport.radarUpdateForColumnItem = function(chart, results, chartDataSet, chartDataSetIdx, result,
+			legendData, indicatorData, series)
+	{
+		
+	};
+	
 	chartSupport.radarResize = function(chart)
 	{
 		chartSupport.resizeChartEcharts(chart);
