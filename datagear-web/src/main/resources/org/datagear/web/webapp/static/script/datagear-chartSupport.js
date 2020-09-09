@@ -134,6 +134,20 @@
 	};
 	
 	/**
+	 * 为数组追加单个元素、数组
+	 */
+	chartSupport.appendElement = function(array, eles)
+	{
+		if($.isArray(eles))
+		{
+			for(var i=0; i<eles.length; i++)
+				array.push(eles[i]);
+		}
+		else
+			array.push(eles);
+	};
+	
+	/**
 	 * 为源数组追加不重复的元素。
 	 * 
 	 * @param sourceArray
@@ -1400,37 +1414,18 @@
 			var result = chart.resultAt(results, i);
 			
 			var ip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.item);
-			var iv = chart.resultColumnArrays(result, ip);
-			legendData = legendData.concat(iv);
 			
-			if(i == 0)
+			//行式雷达网数据，必设置【雷达网条目名称】标记
+			if(ip)
 			{
-				var dnp = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.name);
-				var dnpv = chart.resultRowArrays(result, dnp, 0, 1);
-				dnpv = (dnpv.length > 0 ? dnpv[0] : []);
-				var dmp = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.max);
-				var dmpv = chart.resultRowArrays(result, dmp, 0, 1);
-				dmpv = (dmpv.length > 0 ? dmpv[0] : []);
-				
-				var indicatorLen = Math.min(dnp.length, dmp.length);
-				
-				for(var j=0; j<indicatorLen; j++)
-				{
-					var indicator = {name: dnpv[j], max: dmpv[j]};
-					indicatorData[j] = indicator;
-				}
+				chartSupport.radarUpdateForRowData(chart, results, signNameMap, initOptions,
+						chartDataSet, i, result, legendData, indicatorData, series)
 			}
-			
-			var dvp = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
-			var dvpv = chart.resultRowArrays(result, dvp);
-			
-			for(var j=0; j<iv.length; j++)
+			//列式雷达网数据
+			else
 			{
-				var seriesData = [ { name: iv[j], value: dvpv[j] } ];
-				
-				series.push(chartSupport.optionsSeries(initOptions, i*iv.length+j, { data: seriesData }));
-				
-				chartSupport.setChartOriginalDataInfoRange(chart, series.length-1, 0, seriesData.length, i, j);
+				chartSupport.radarUpdateForColumnData(chart, results, signNameMap, initOptions,
+						chartDataSet, i, result, legendData, indicatorData, series)
 			}
 		}
 		
@@ -1440,16 +1435,49 @@
 		chart.extValue("radarIndicatorData", indicatorData);
 	};
 	
-	//行式雷达网数据处理，一行数据表示一条雷达网，行式结构为：网条目名称, [指标名, 指标值, 指标上限值]*n
-	chartSupport.radarUpdateForRowItem = function(chart, results, chartDataSet, chartDataSetIdx, result,
-			legendData, indicatorData, series)
+	//行式雷达网数据处理，一行数据表示一条雷达网，行式结构为：雷达网条目名称, [指标名, 指标值, 指标上限值(可选)]*n
+	chartSupport.radarUpdateForRowData = function(chart, results, signNameMap, initOptions,
+			chartDataSet, chartDataSetIdx, result, legendData, indicatorData, series)
 	{
+		var ip = chart.dataSetPropertyOfSign(chartDataSet, signNameMap.item);
+		var iv = chart.resultColumnArrays(result, ip);
+		chartSupport.appendElement(legendData, iv);
 		
+		if(chartDataSetIdx == 0)
+		{
+			var np = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.name);
+			var npv = chart.resultRowArrays(result, np, 0, 1);
+			npv = (npv.length > 0 ? npv[0] : []);
+			
+			var mp = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.max);
+			var mpv = chart.resultRowArrays(result, mp, 0, 1);
+			mpv = (mpv.length > 0 ? mpv[0] : []);
+			
+			var indicatorLen = Math.min(np.length, mp.length);
+			
+			for(var j=0; j<indicatorLen; j++)
+			{
+				var indicator = {name: npv[j], max: mpv[j]};
+				indicatorData.push(indicator);
+			}
+		}
+		
+		var vp = chart.dataSetPropertiesOfSign(chartDataSet, signNameMap.value);
+		var vpv = chart.resultRowArrays(result, vp);
+		
+		for(var j=0; j<iv.length; j++)
+		{
+			var seriesData = [ { name: iv[j], value: vpv[j] } ];
+			
+			series.push(chartSupport.optionsSeries(initOptions, chartDataSetIdx*iv.length+j, { data: seriesData }));
+			
+			chartSupport.setChartOriginalDataInfoRange(chart, series.length-1, 0, seriesData.length, chartDataSetIdx, j);
+		}
 	};
 	
-	//列式雷达网数据处理，一列数据表示一条雷达网，列式结构为：指标名, 指标上限值, [指标值]*n，其中"指标值"列名将作为网条目名称
-	chartSupport.radarUpdateForColumnItem = function(chart, results, chartDataSet, chartDataSetIdx, result,
-			legendData, indicatorData, series)
+	//列式雷达网数据处理，一列【指标值】数据表示一条雷达网，列式结构为：指标名, 指标上限值(可选), [指标值]*n，其中【指标值】列名将作为雷达网条目名称
+	chartSupport.radarUpdateForColumnData = function(chart, results, signNameMap, initOptions,
+			chartDataSet, chartDataSetIdx, result, legendData, indicatorData, series)
 	{
 		
 	};

@@ -1323,7 +1323,7 @@
 	 * 
 	 * @param chartDataSet 图表数据集对象
 	 * @param dataSign 数据标记对象、标记名称
-	 * @return {...}
+	 * @return {...}、undefined
 	 */
 	chartBase.dataSetPropertyOfSign = function(chartDataSet, dataSign)
 	{
