@@ -291,36 +291,19 @@
 			return;
 		}
 		
-		var resultDatas = chart.resultDatas(chart.resultAt(chart.getUpdateResults(), originalDataIndex.chartDataSetIndex));
-		var originalData = undefined;
-		
 		var rdi = originalDataIndex.resultDataIndex;
 		
-		//索引数值
-		if(typeof(rdi) == "number")
+		if(rdi.start != null && rdi.end != null)
 		{
-			originalData = resultDatas[rdi];
-		}
-		//索引范围对象
-		else if(rdi.start != null && rdi.end != null)
-		{
-			originalData = [];
+			var rdiAry = [];
 			
 			for(var i=rdi.start; i<rdi.end; i++)
-				originalData.push(resultDatas[i]);
-		}
-		//索引数值数组
-		else if($.isArray(rdi))
-		{
-			originalData = [];
+				rdiAry.push(i);
 			
-			for(var i=0; i<rdi.length; i++)
-				originalData.push(resultDatas[rdi[i]]);
+			rdi = rdiAry;
 		}
 		
-		chart.eventOriginalData(chartEvent, originalData);
-		chart.eventOriginalChartDataSetIndex(chartEvent, originalDataIndex.chartDataSetIndex);
-		chart.eventOriginalResultDataIndex(chartEvent, rdi);
+		chart.eventOriginalInfo(chartEvent, originalDataIndex.chartDataSetIndex, rdi);
 	};
 	
 	chartSupport.setChartEventOriginalDataForChartData = function(chart, chartEvent, chartData)

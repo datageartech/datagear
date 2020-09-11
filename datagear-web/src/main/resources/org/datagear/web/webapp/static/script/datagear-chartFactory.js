@@ -1825,7 +1825,7 @@
 	 * 图表事件支持函数：获取/设置图表事件对象的数据（chartEvent.data）。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param data 可选，要设置的数据对象
+	 * @param data 可选，要设置的数据对象，绘制图表条目的数据对象：{ 数据标记名 : 数据值, ... }
 	 */
 	chartBase.eventData = function(chartEvent, data)
 	{
@@ -1839,7 +1839,7 @@
 	 * 图表事件支持函数：获取/设置图表事件对象的原始数据（chartEvent.originalData）。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalData 可选，要设置的原始数据对象
+	 * @param originalData 可选，要设置的原始数据，绘制图表条目的原始数据集结果数据，可以是单个数据对象、数据对象数组
 	 */
 	chartBase.eventOriginalData = function(chartEvent, originalData)
 	{
@@ -1850,7 +1850,7 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：获取/设置图表事件对象的原始数据对应的图表数据集索引（（chartEvent.originalChartDataSetIndex））。
+	 * 图表事件支持函数：获取/设置图表事件对象的原始数据对应的图表数据集索引（chartEvent.originalChartDataSetIndex）。
 	 * 
 	 * @param chartEvent 图表事件对象
 	 * @param originalChartDataSetIndex 可选，要设置的图表数据集索引数值
@@ -1864,10 +1864,11 @@
 	};
 	
 	/**
-	 * 图表事件支持函数：获取/设置图表事件对象的原始数据对应的结果数据索引（（chartEvent.originalResultDataIndex））。
+	 * 图表事件支持函数：获取/设置图表事件对象的原始数据在数据集结果数据中的索引（（chartEvent.originalResultDataIndex））。
 	 * 
 	 * @param chartEvent 图表事件对象
-	 * @param originalResultDataIndex 可选，要设置的结果数据索引数值
+	 * @param originalResultDataIndex 可选，要设置的结果数据索引，当chartEvent.originalData为单个对象时，应是单个索引值；
+	 * 									当chartEvent.originalData为对象数组时，应是与之对应的索引值数组
 	 */
 	chartBase.eventOriginalResultDataIndex = function(chartEvent, originalResultDataIndex)
 	{
@@ -1875,6 +1876,41 @@
 			return chartEvent["originalResultDataIndex"];
 		else
 			chartEvent["originalResultDataIndex"] = originalResultDataIndex;
+	};
+	
+	/**
+	 * 图表事件支持函数：设置图表事件对象的原始图表数据集索引、原始数据、原始数据索引。
+	 * 
+	 * @param chartEvent 图表事件对象
+	 * @param originalChartDataSetIndex 原始图表数据集索引
+	 * @param originalResultDataIndex 原始数据索引，格式允许：数值、数值数组
+	 */
+	chartBase.eventOriginalInfo = function(chartEvent, originalChartDataSetIndex, originalResultDataIndex)
+	{
+		var result = this.resultAt(this.getUpdateResults(), originalChartDataSetIndex);
+		var resultDatas = (result == null ? [] : this.resultDatas(result));
+		
+		var originalData = undefined;
+		
+		var rdi = originalResultDataIndex;
+		
+		//索引数值
+		if(typeof(rdi) == "number")
+		{
+			originalData = resultDatas[rdi];
+		}
+		//索引数值数组
+		else if($.isArray(rdi))
+		{
+			originalData = [];
+			
+			for(var i=0; i<rdi.length; i++)
+				originalData.push(resultDatas[rdi[i]]);
+		}
+		
+		this.eventOriginalData(chartEvent, originalData);
+		this.eventOriginalChartDataSetIndex(chartEvent, originalChartDataSetIndex);
+		this.eventOriginalResultDataIndex(chartEvent, rdi);
 	};
 	
 	/**
