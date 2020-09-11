@@ -3827,7 +3827,7 @@
 					}
 				},
 				//单元格内容渲染函数
-				renderValue: function(value, type, row, meta)
+				renderValue: function(value, name, rowIndex, columnIndex, row, meta)
 				{
 					return chartFactory.escapeHtml(value);
 				}
