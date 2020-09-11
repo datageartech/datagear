@@ -206,6 +206,44 @@
 		webContext: "webContext"
 	};
 	
+	/**
+	 * 获取对象的指定属性路径的值。
+	 * 
+	 * @param obj
+	 * @param propertyPath 属性路径，示例：order、order.product、[0].name、order['product'].name
+	 * @return 属性路径值，属性路径不存在则返回undefined
+	 */
+	dashboardFactory.getPropertyPathValue = function(obj, propertyPath)
+	{
+		if(obj == null)
+			return undefined;
+		
+		var value = undefined;
+		
+		//简单属性值
+		value = obj[propertyPath];
+		
+		if(value !== undefined)
+			return value;
+		
+		//构建eval表达式
+		if(propertyPath.charAt(0) == '[')
+			propertyPath = "obj" + propertyPath;
+		else
+			propertyPath = "obj." + propertyPath;
+		
+		try
+		{
+			value = eval(propertyPath);
+		}
+		catch(e)
+		{
+			value = undefined;
+		}
+		
+		return value;
+	};
+	
 	//----------------------------------------
 	// chartBaseExt start
 	//----------------------------------------
@@ -382,9 +420,10 @@
 			originalData: this.eventOriginalData(chartEvent),
 			getValue: function(name)
 			{
-				var val = this.data[name];
+				//需支持属性路径格式的name
+				var val = dashboardFactory.getPropertyPathValue(this.data, name);
 				if(val === undefined && this.originalData != null)
-					val = this.originalData[name];
+					val = dashboardFactory.getPropertyPathValue(this.originalData, name);
 				
 				return val;
 			}
@@ -1326,6 +1365,8 @@
 	 *   }
 	 * }
 	 * 
+	 * 上述【源参数名】可以是简单参数名，例如："name"、"value"，也可以是源参数对象的属性路径，例如："order.name"、"[0].name"、"['order'].product.name"
+	 * 
 	 * 图表数据集参数索引对象用于确定源参数值要设置到的目标图表数据集参数，格式为：
 	 * {
 	 *   //可选，目标图表在批量设置对象的target数组中的索引数值，默认为：0
@@ -1344,7 +1385,7 @@
 	 * }
 	 * 或者，可简写为上述图表数据集参数索引对象的"param"属性值
 	 * 
-	 * @param sourceData 源参数值对象，格式为：{ 源参数名 : 源参数值, ...} 或者 { getValue: function(name){ return ...; } }
+	 * @param sourceData 源参数值对象，格式为：{ 源参数名 : 源参数值, ...} 或者 { getValue: function(name){ return ...; } }（需支持属性路径）
 	 * @param batchSet 批量设置对象
 	 * @param sourceValueContext 可选，传递给图表数据集参数索引对象的value函数sourceValueContext参数的对象，如果为数组，则传递多个参数，默认为sourceData
 	 * @return 批量设置的图表对象数组
@@ -1367,7 +1408,8 @@
 		
 		for(var name in map)
 		{
-			var dataValue = (hasGetValueFunc ? sourceData.getValue(name) : sourceData[name]);
+			var dataValue = (hasGetValueFunc ? sourceData.getValue(name)
+					: dashboardFactory.getPropertyPathValue(sourceData, name));
 			
 			var indexes = map[name];
 			if(!$.isArray(indexes))
