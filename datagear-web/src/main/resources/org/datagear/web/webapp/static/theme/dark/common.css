@@ -247,3 +247,14 @@ table.dataTable.display tbody > tr > .selected:hover {
 	box-shadow: none;
 	-webkit-box-shadow: none;
 }
+/**年份选择器确定按钮*/
+.xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year{
+	color: #eeeeee !important;
+	border: 1px solid #666666 !important;
+    background: #555555 !important;
+}
+.xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year:hover{
+	color: #ffffff !important;
+	border: 1px solid #59b4d4 !important;
+    background: #0078a3 !important;
+}

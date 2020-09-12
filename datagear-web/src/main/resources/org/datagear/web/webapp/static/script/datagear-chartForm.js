@@ -638,6 +638,9 @@
 	
 	chartForm.datetimepicker = function($input, datetimepickerOptions, chartTheme)
 	{
+		//在这里检查并重写，避免依赖加载顺序
+		global.overwriteDateFormatter_parseDate();
+		
 		if(chartForm._datetimepickerSetLocale !== true)
 		{
 			$.datetimepicker.setLocale('zh');
@@ -663,6 +666,45 @@
 			i18n: chartForm.datetimepickerI18n
 		},
 		datetimepickerOptions);
+		
+		//初始化为年份选择器
+		var isOnlySelectYear = ("Y" == datetimepickerOptions.format || "y" == datetimepickerOptions.format);
+		if(isOnlySelectYear)
+		{
+			//显示确定按钮，用于直接选中默认年份
+			datetimepickerOptions.showApplyButton = true;
+			datetimepickerOptions.onGenerate = function(currentValue,$input)
+			{
+				var yearPickerInited = $(this).attr("yearPickerInited");
+				if(!yearPickerInited)
+				{
+					$(this).attr("yearPickerInited", "yes");
+					
+					$(".xdsoft_prev", this).hide();
+					$(".xdsoft_today_button", this).hide();
+					$(".xdsoft_month", this).hide();
+					$(".xdsoft_next", this).hide();
+					$(".xdsoft_calendar", this).hide();
+					
+					$(".xdsoft_save_selected", this).removeClass("blue-gradient-button")
+						.addClass("xdsoft_save_selected_year ui-button ui-corner-all").html(chartForm.labels.confirm);
+				}
+			};
+			datetimepickerOptions.onShow = function(currentValue,$input)
+			{
+				if(!$input.val())
+				{
+					//这样可以直接点击【确定】按钮选择默认年份
+					this.setOptions({value: currentValue});
+					$input.val("");
+				}
+			};
+			datetimepickerOptions.onChangeYear = function(currentValue,$input)
+			{
+				this.setOptions({value: currentValue});
+				$(".xdsoft_save_selected", this).click();
+			};
+		}
 		
 		$input.datetimepicker(datetimepickerOptions);
 	};
@@ -749,6 +791,14 @@
 			+"  background: "+chartTheme.highlightTheme.backgroundColor+";"
 			+"  box-shadow: none;"
 			+"  -webkit-box-shadow: none;"
+			+"} "
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year{"
+			+"  color: "+color+";"
+			+"  background: "+bgColor+";"
+			+"  border: 1px solid "+borderColor+" !important;"
+			+"} "
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year:hover{"
+			+"  background: "+hoverColor+";"
 			+"} "
 			;
 		
@@ -1291,5 +1341,140 @@
 		
 		return ($panel.length == 0 || $panel.is(":hidden"));
 	};
+})
+(this);
+
+(function(global)
+{
+	global.overwriteDateFormatter_parseDate = function()
+	{
+		if(global._overwriteDateFormatter_parseDate == true)
+			return;
+		
+		global._overwriteDateFormatter_parseDate = true;
+		
+		//重写datetimepicker的DateFormatter.prototype.parseDate函数，
+		//解决当options配置为仅选择年份（{format:'Y'}）时，选择完毕后输入框blur后，年份会被重置的的BUG
+		DateFormatter.prototype.parseDate = function(e, r) {
+	        var n, a, u, i, s, o, c, f, l, h, d = this, g = !1, m = !1, p = d.dateSettings, y = {
+	            date: null,
+	            year: null,
+	            month: null,
+	            day: null,
+	            hour: 0,
+	            min: 0,
+	            sec: 0
+	        };
+	        if (!e)
+	            return null;
+	        if (e instanceof Date)
+	            return e;
+	        if ("U" === r)
+	            return u = parseInt(e),
+	            u ? new Date(1e3 * u) : e;
+	        switch (typeof e) {
+	        case "number":
+	            return new Date(e);
+	        case "string":
+	            break;
+	        default:
+	            return null
+	        }
+	        if (n = r.match(d.validParts),
+	        !n || 0 === n.length)
+	            throw new Error("Invalid date format definition.");
+	        for (a = e.replace(d.separators, "\x00").split("\x00"),
+	        u = 0; u < a.length; u++)
+	            switch (i = a[u],
+	            s = parseInt(i),
+	            n[u]) {
+	            case "y":
+	            case "Y":
+	                if (!s)
+	                    return null;
+	                l = i.length,
+	                y.year = 2 === l ? parseInt((70 > s ? "20" : "19") + i) : s,
+	                g = !0;
+	                break;
+	            case "m":
+	            case "n":
+	            case "M":
+	            case "F":
+	                if (isNaN(s)) {
+	                    if (o = d.getMonth(i),
+	                    !(o > 0))
+	                        return null;
+	                    y.month = o
+	                } else {
+	                    if (!(s >= 1 && 12 >= s))
+	                        return null;
+	                    y.month = s
+	                }
+	                g = !0;
+	                break;
+	            case "d":
+	            case "j":
+	                if (!(s >= 1 && 31 >= s))
+	                    return null;
+	                y.day = s,
+	                g = !0;
+	                break;
+	            case "g":
+	            case "h":
+	                if (c = n.indexOf("a") > -1 ? n.indexOf("a") : n.indexOf("A") > -1 ? n.indexOf("A") : -1,
+	                h = a[c],
+	                c > -1)
+	                    f = t(h, p.meridiem[0]) ? 0 : t(h, p.meridiem[1]) ? 12 : -1,
+	                    s >= 1 && 12 >= s && f > -1 ? y.hour = s + f - 1 : s >= 0 && 23 >= s && (y.hour = s);
+	                else {
+	                    if (!(s >= 0 && 23 >= s))
+	                        return null;
+	                    y.hour = s
+	                }
+	                m = !0;
+	                break;
+	            case "G":
+	            case "H":
+	                if (!(s >= 0 && 23 >= s))
+	                    return null;
+	                y.hour = s,
+	                m = !0;
+	                break;
+	            case "i":
+	                if (!(s >= 0 && 59 >= s))
+	                    return null;
+	                y.min = s,
+	                m = !0;
+	                break;
+	            case "s":
+	                if (!(s >= 0 && 59 >= s))
+	                    return null;
+	                y.sec = s,
+	                m = !0
+	            }
+	        
+	        //----添加的内容
+	        //如果选择了年份，检查并设置月份、日的初值，使下面的：
+	        //if (g === !0 && y.year && y.month && y.day)
+	        //逻辑可以执行到
+	        if (g === !0 && y.year)
+	        {
+	        	if(!y.month)
+	        		y.month = 1;
+	        	if(!y.day)
+	        		y.day = 1;
+	        }
+	        //----添加的内容
+	        
+	        if (g === !0 && y.year && y.month && y.day)
+	            y.date = new Date(y.year,y.month - 1,y.day,y.hour,y.min,y.sec,0);
+	        else {
+	            if (m !== !0)
+	                return null;
+	            y.date = new Date(0,0,0,y.hour,y.min,y.sec,0)
+	        }
+	        return y.date
+	    };
+	}
 })
 (this);

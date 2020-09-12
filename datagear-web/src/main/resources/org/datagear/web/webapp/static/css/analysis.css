@@ -269,6 +269,17 @@
 	-webkit-transform:rotate(90deg);
 	-o-transform:rotate(90deg);
 }
+.xdsoft_datetimepicker .xdsoft_save_selected.xdsoft_save_selected_year{
+width: auto;
+padding: 0.3em 1em;
+margin-top: 3px;
+margin-right: 0.6em;
+float: right;
+border-bottom-right-radius: 3px;
+border-bottom-left-radius: 3px;
+border-top-right-radius: 3px;
+border-top-left-radius: 3px;
+}
 
 /*看板表单*/
 .dg-dashboard-form.dg-dspv-form,
