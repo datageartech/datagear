@@ -63,7 +63,7 @@
 	});
 	
 	//是否禁用日期组件输入框的浏览器自动完成功能，浏览器自动完成功能会阻挡日期选择框，默认禁用
-	chartForm.disableDatetimepickerInputAutocomplete = (chartForm.disableDatetimepickerInputAutocomplete || true);
+	chartForm.disableDateAwareInputAutocomplete = (chartForm.disableDateAwareInputAutocomplete || true);
 	
 	/**
 	 * 渲染数据集参数值表单。
@@ -400,7 +400,7 @@
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
 		
-		if(chartForm.disableDatetimepickerInputAutocomplete)
+		if(chartForm.disableDateAwareInputAutocomplete)
 			$input.attr("autocomplete", "off");
 		
 		if((dataSetParam.required+"") == "true")
@@ -441,7 +441,7 @@
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
 		
-		if(chartForm.disableDatetimepickerInputAutocomplete)
+		if(chartForm.disableDateAwareInputAutocomplete)
 			$input.attr("autocomplete", "off");
 		
 		if((dataSetParam.required+"") == "true")
@@ -481,7 +481,7 @@
 		var $input = $("<input type='text' class='dg-dspv-form-input' />").attr("name", dataSetParam.name)
 			.attr("value", (value || "")).appendTo($parent);
 		
-		if(chartForm.disableDatetimepickerInputAutocomplete)
+		if(chartForm.disableDateAwareInputAutocomplete)
 			$input.attr("autocomplete", "off");
 		
 		if((dataSetParam.required+"") == "true")
