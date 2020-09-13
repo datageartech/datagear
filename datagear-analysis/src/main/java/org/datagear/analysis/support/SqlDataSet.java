@@ -99,7 +99,7 @@ public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableD
 	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
 			throws DataSetException
 	{
-		String sql = resolveAsFmkTemplate(getSql(), paramValues);
+		String sql = resolveAsFmkTemplateIfHasParam(getSql(), paramValues);
 
 		Connection cn = null;
 

@@ -259,6 +259,21 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
+	 * 只有当{@linkplain #hasParam()}为{@code true}时才将指定文本作为Freemarker模板解析。
+	 * 
+	 * @param text
+	 * @param paramValues
+	 * @return
+	 */
+	protected String resolveAsFmkTemplateIfHasParam(String text, Map<String, ?> paramValues)
+	{
+		if (!hasParam())
+			return text;
+
+		return resolveAsFmkTemplate(text, paramValues);
+	}
+
+	/**
 	 * 将指定文本作为Freemarker模板解析。
 	 * 
 	 * @param text
