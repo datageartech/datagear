@@ -154,7 +154,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		model.addAttribute("chart", chart);
 		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(chartPluginVO));
-		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(chart.getChartDataSets()));
+		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(toChartDataSetViewObjs(chart.getChartDataSets())));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.editChart");
 		model.addAttribute(KEY_FORM_ACTION, "save");
 
@@ -209,7 +209,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 
 		model.addAttribute("chart", chart);
 		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(chartPluginVO));
-		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(chart.getChartDataSets()));
+		model.addAttribute("chartDataSets", toWriteJsonTemplateModel(toChartDataSetViewObjs(chart.getChartDataSets())));
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "chart.viewChart");
 		model.addAttribute(KEY_READONLY, true);
 
