@@ -124,7 +124,7 @@ readonly 是否只读操作，允许为null
 						</div>
 					</div>
 				</div>
-				<div class="form-item">
+				<div class="form-item form-item-responseDataJsonPath">
 					<div class="form-item-label">
 						<label title="<@spring.message code='dataSet.http.responseDataJsonPath.desc' />">
 							<@spring.message code='dataSet.http.responseDataJsonPath' />
@@ -165,8 +165,8 @@ readonly 是否只读操作，允许为null
 	po.element("select[name='responseContentType']").selectmenu({ appendTo : po.element() });
 	po.initWorkspaceHeight(true);
 	po.element(".workspace-editor-tabs").tabs();
-	var workspaceEditorGapHeight = po.element(".workspace-editor-nav").outerHeight(true) + 6;
-	po.element(".workspace-editor-tabs").height(po.element(".workspace-editor-wrapper").height());
+	var workspaceEditorGapHeight = po.element(".workspace-editor-nav").outerHeight(true) + 4;
+	po.element(".workspace-editor-tabs").height(po.element(".workspace-editor-wrapper").height() - po.element(".form-item-responseDataJsonPath").outerHeight(true));
 	po.element(".workspace-editor-wrapper").height(po.element(".workspace-editor-tabs").height() - workspaceEditorGapHeight);
 	
 	var languageTools = ace.require("ace/ext/language_tools");
