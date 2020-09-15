@@ -7,7 +7,9 @@
  */
 package org.datagear.analysis.support;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,9 @@ import org.datagear.analysis.DataSetProperty;
  */
 public abstract class AbstractDataSet extends AbstractIdentifiable implements DataSet
 {
+	/** 默认Freemarker模板解析器 */
+	public static final DataSetFmkTemplateResolver FMK_TEMPLATE_RESOLVER = new DataSetFmkTemplateResolver();
+
 	private String name;
 
 	private List<DataSetProperty> properties;
@@ -32,9 +37,13 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	@SuppressWarnings("unchecked")
 	private List<DataSetParam> params = Collections.EMPTY_LIST;
 
+	/** 属性数据转换格式 */
+	private DataFormat propertyDataFormat = null;
+
 	public AbstractDataSet()
 	{
 		super();
+		setPropertyDataFormat(new DataFormat());
 	}
 
 	public AbstractDataSet(String id, String name, List<DataSetProperty> properties)
@@ -42,6 +51,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		super(id);
 		this.name = name;
 		this.properties = properties;
+		setPropertyDataFormat(new DataFormat());
 	}
 
 	@Override
@@ -94,6 +104,24 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		return getDataNameTypeByName(this.params, name);
 	}
 
+	public DataFormat getPropertyDataFormat()
+	{
+		return propertyDataFormat;
+	}
+
+	/**
+	 * 设置属性数据转换格式。
+	 * <p>
+	 * 当{@linkplain DataSetProperty#getType()}不是结果数据的原始类型，而需要进行类型转换时，需要使用数据转换格式进行转换。
+	 * </p>
+	 * 
+	 * @param propertyDataFormat
+	 */
+	public void setPropertyDataFormat(DataFormat propertyDataFormat)
+	{
+		this.propertyDataFormat = propertyDataFormat;
+	}
+
 	@Override
 	public boolean isReady(Map<String, ?> paramValues)
 	{
@@ -109,6 +137,76 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 
 		return true;
+	}
+
+	/**
+	 * 将源对象转换为指定{@linkplain DataSetProperty.DataType}类型的对象。
+	 * <p>
+	 * 如果{@code property}为{@code null}，则什么也不做直接返回。
+	 * </p>
+	 * 
+	 * @param converter
+	 * @param source
+	 * @param property
+	 *            允许为{@code null}
+	 * @return
+	 */
+	protected Object convertToPropertyDataType(DataSetPropertyValueConverter converter, Object source,
+			DataSetProperty property)
+	{
+		if (property == null)
+			return source;
+
+		return convertToPropertyDataType(converter, source, property.getType());
+	}
+
+	/**
+	 * 将源对象转换为指定{@linkplain DataSetProperty.DataType}类型的对象。
+	 * <p>
+	 * 如果{@code propertyType}为{@code null}，则什么也不做直接返回。
+	 * </p>
+	 * 
+	 * @param converter
+	 * @param source
+	 * @param propertyType
+	 *            允许为{@code null}
+	 * @return
+	 */
+	protected Object convertToPropertyDataType(DataSetPropertyValueConverter converter, Object source,
+			String propertyType)
+	{
+		if (propertyType == null || DataSetProperty.DataType.UNKNOWN.equals(propertyType))
+			return source;
+
+		return converter.convert(source, propertyType);
+	}
+
+	/**
+	 * 创建一个{@linkplain DataSetPropertyValueConverter}实例。
+	 * <p>
+	 * 由于{@linkplain DataSetPropertyValueConverter}不是线程安全的，所以每次使用时要手动创建。
+	 * </p>
+	 * 
+	 * @return
+	 */
+	protected DataSetPropertyValueConverter createDataSetPropertyValueConverter()
+	{
+		DataFormat dataFormat = this.propertyDataFormat;
+		if (dataFormat == null)
+			dataFormat = new DataFormat();
+
+		return new DataSetPropertyValueConverter(dataFormat);
+	}
+
+	/**
+	 * 解析{@linkplain DataSetProperty.DataType}类型。
+	 * 
+	 * @param value
+	 * @return
+	 */
+	protected String resolvePropertyDataType(Object value)
+	{
+		return DataSetProperty.DataType.resolveDataType(value);
 	}
 
 	/**
@@ -132,5 +230,61 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 		}
 
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected List<Map<String, Object>> listRowsToMapRows(List<List<Object>> data, List<DataSetProperty> properties)
+	{
+		if (data == null)
+			return Collections.EMPTY_LIST;
+
+		int plen = properties.size();
+
+		List<Map<String, Object>> maps = new ArrayList<>(data.size());
+
+		for (List<Object> row : data)
+		{
+			Map<String, Object> map = new HashMap<>();
+
+			for (int i = 0; i < Math.min(plen, row.size()); i++)
+			{
+				String name = properties.get(i).getName();
+				map.put(name, row.get(i));
+			}
+
+			maps.add(map);
+		}
+
+		return maps;
+	}
+
+	/**
+	 * 只有当{@linkplain #hasParam()}为{@code true}时才将指定文本作为Freemarker模板解析。
+	 * 
+	 * @param text
+	 * @param paramValues
+	 * @return
+	 */
+	protected String resolveAsFmkTemplateIfHasParam(String text, Map<String, ?> paramValues)
+	{
+		if (!hasParam())
+			return text;
+
+		return resolveAsFmkTemplate(text, paramValues);
+	}
+
+	/**
+	 * 将指定文本作为Freemarker模板解析。
+	 * 
+	 * @param text
+	 * @param paramValues
+	 * @return
+	 */
+	protected String resolveAsFmkTemplate(String text, Map<String, ?> paramValues)
+	{
+		if (text == null)
+			return null;
+
+		return FMK_TEMPLATE_RESOLVER.resolve(text, paramValues);
 	}
 }

@@ -97,6 +97,18 @@ form .form-content .form-item .form-item-label label{
 	width: 95%;
 	overflow: hidden;
 }
+form .form-content .form-item .form-item-label label[title]{
+	position: relative;
+}
+form .form-content .form-item .form-item-label label[title]::after{
+	content: "?";
+    position: absolute;
+    margin-left: 0.2em;
+    font-size: 0.6em;
+    top: 0.3em;
+    opacity: 0.5;
+	filter: Alpha(Opacity=50);
+}
 form .form-content .form-item .form-item-value{
 	display: inline-block;
 	width: 80%;
@@ -146,7 +158,21 @@ form .form-content .form-item .input-desc{
 	display: inline-block;
 }
 form .form-content .form-item .input-desc-date{
-	
+}
+form .form-content .form-item .form-item-value .form-item{
+	width: auto;
+	display: inline-block;
+	margin-left: 2em;
+}
+form .form-content .form-item .form-item-value .form-item .form-item-label{
+	width: auto;
+}
+form .form-content .form-item .form-item-value .form-item .form-item-label label{
+	width: auto;
+}
+form .form-content .form-item .form-item-value .form-item .form-item-value{
+	width: auto;
+	margin-left: 1em;
 }
 form .form-foot{
 	text-align: center;
@@ -307,6 +333,33 @@ form .form-foot .ui-button{
 .ui-tabs .tabs-more-operation-menu.ui-menu .ui-menu-item,
 .ui-tabs .tabs-more-tab-menu.ui-menu .ui-menu-item{
 	font-size: small;
+}
+
+/*轻型选显卡*/
+.ui-tabs.light-tabs{
+	margin: 0 0;
+	padding: 0 0;
+}
+.ui-tabs.light-tabs.ui-widget.ui-widget-content{
+	border: 0;
+}
+.ui-tabs.light-tabs .ui-tabs-nav{
+	border: 0;
+	background: none;
+	opacity: 0.8;
+	filter: Alpha(Opacity=80);
+}
+.ui-tabs.light-tabs .ui-tabs-nav .ui-tabs-anchor{
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+}
+.ui-tabs.light-tabs .ui-tabs-panel{
+	position: absolute;
+	left: 0px;
+	right: 0px;
+	top: 2.2em;
+	bottom: 0px;
+	padding: 0 0;
 }
 
 /*jquery.layout*/
@@ -2111,68 +2164,92 @@ table.dataTable tbody tr td select{
 }
 
 .page-form-dataSet{}
-.page-form-dataSet .workspace-editor-wrapper{
-	display: inline-block;
-	width: 50%;
+.page-form-dataSet .workspace{
+	position: relative;
+}
+.page-form-dataSet .form-content{
+	overflow: auto;
+}
+.page-form-dataSet .workspace .form-item .form-item-label{
+	vertical-align:top;
+	margin-top: 0.2em;
+}
+.page-form-dataSet .workspace .form-item .form-item-value{
+	width: 39%;
+	position: relative;
+	padding-bottom: 1.4em;
+}
+.page-form-dataSet .workspace .form-item .form-item-value.no-padding-bottom{
+	padding-bottom: 0;
+}
+.page-form-dataSet .workspace .form-item .form-item-value input[type=text],
+.page-form-dataSet .workspace .form-item .form-item-value input[type=password],
+.page-form-dataSet .workspace .form-item .form-item-value textarea,
+.page-form-dataSet .workspace .form-item .form-item-value .input{
+	width: 90%;
+}
+.page-form-dataSet .workspace .form-item .form-item-value input.file-display-name{
+	width: 60%;
+}
+.page-form-dataSet .workspace .form-item .form-item-value .fileinput-wrapper{
+	padding-top: 0.41em;
+}
+.page-form-dataSet .workspace .form-item label.error{
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	white-space: nowrap;
+}
+.page-form-dataSet .workspace .workspace-editor-wrapper{
 	height: 10em;
 	margin-right: 0.3em;
 }
-.page-form-dataSet .workspace-editor-wrapper .workspace-editor{
+.page-form-dataSet .workspace .workspace-editor-wrapper .workspace-editor{
 	width: 100%;
 	height: 100%;
 }
-.page-form-dataSet .workspace-operation-wrapper{
-	position: relative;
+.page-form-dataSet .workspace .workspace-operation-wrapper{
+	position: absolute;
 	display: inline-block;
-	width: 48%;
+	width: 41%;
+	top: 0.3em;
+	right: 0;
 	height: 10em;
 	vertical-align: top;
 }
-.page-form-dataSet .workspace-operation-wrapper.ui-widget.ui-widget-content{
-	border: 0;
-}
-.page-form-dataSet .workspace-operation-wrapper.ui-tabs{
-	margin: 0 0;
-	padding: 0 0;
-}
-.page-form-dataSet .workspace-operation-wrapper.ui-tabs .ui-tabs-nav{
-	border: 0;
-	background: none;
-	opacity: 0.8;
-	filter: Alpha(Opacity=80);
-}
-.page-form-dataSet .workspace-operation-wrapper.ui-tabs .ui-tabs-nav .ui-tabs-anchor{
-	padding-top: 0.2em;
-	padding-bottom: 0.2em;
-}
-.page-form-dataSet .workspace-operation-wrapper.ui-tabs .ui-tabs-panel{
-	position: absolute;
-	left: 0px;
-	right: 0px;
-	top: 2.2em;
-	bottom: 0px;
-	padding: 0 0;
-}
-.page-form-dataSet .workspace-operation-wrapper .operation{
+.page-form-dataSet .workspace .workspace-operation-wrapper .operation{
 	position: absolute;
 	right: 0px;
 	top: -1.5em;
 }
-.page-form-dataSet .workspace-operation-wrapper .operation .ui-button.ui-button-icon-only{
+.page-form-dataSet .workspace .workspace-operation-wrapper .operation .ui-button.ui-button-icon-only,
+.page-form-dataSet .workspace .show-resolved-source-button{
 	height: 1.2em;
 	width: 2.5em;
 	vertical-align: top;
 	border: 0px;
 }
-.page-form-dataSet .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source{
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source{
+	position: relative;
+	top: 0.1em;
+	display: none;
+	width: 100%;
+	text-align: right;
+}
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source-panel{
 	position: absolute;
 	display: none;
-    bottom: -4em;
-    height: 3.5em;
-    right: 0;
-    left: 0;
+	width: 90%;
+	height: 8em;
 }
-.page-form-dataSet .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source textarea{
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source-panel-content{
+	position: absolute;
+	left: 0.41em;
+	top: 0.41em;
+	right: 0.41em;
+	bottom: 0.41em;
+}
+.page-form-dataSet .workspace .workspace-operation-wrapper .preview-result-table-wrapper .result-resolved-source-panel-content textarea{
 	width: 100%;
 	height: 100%;
 	margin: 0 0;
@@ -2180,15 +2257,12 @@ table.dataTable tbody tr td select{
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 }
-.page-form-dataSet .workspace-operation-wrapper .input-in-table{
+.page-form-dataSet .workspace .workspace-operation-wrapper .input-in-table{
 	width: 90%!important;
 }
-.page-form-dataSet .workspace-operation-wrapper .input-in-table.readonly{
+.page-form-dataSet .workspace .workspace-operation-wrapper .input-in-table.readonly{
 	border: none;
 	background: none;
-}
-.page-form-dataSet .form-item-workspace .error{
-	display: block;
 }
 .page-form-dataSet .preview-param-value-panel{
 	position: absolute;
@@ -2212,20 +2286,15 @@ table.dataTable tbody tr td select{
 .page-form-dataSet .form-foot-placeholder{
 	height: 2.5em;
 }
-.page-form-dataSet-jsonFile{}
-.page-form-dataSet-jsonFile .form-item-workspace .form-item-label{
-	vertical-align:top;
-	margin-top: 0.3em;
+.page-form-dataSet .encoding-selectmenu-menu .ui-menu{
+	height: 10em;
 }
-.page-form-dataSet-jsonFile .form-item-workspace .form-item-value .file-display-name{
-	width: 60% !important;
-}
-.page-form-dataSet-jsonFile .form-item-workspace .form-item-value .fileinput-wrapper{
-	margin-top: 0.41em;
-}
-.page-form-dataSet-jsonFile .encoding-selectmenu-menu .ui-menu{
-	max-height: 14em;
-	overflow: auto;
+.page-form-dataSet-Http .form-item-value-requestMethod .ui-selectmenu-button,
+.page-form-dataSet-Http .form-item-value-requestContentType .ui-selectmenu-button,
+.page-form-dataSet-Http .form-item-value-requestContentCharset .ui-selectmenu-button,
+.page-form-dataSet-Http .form-item-value-responseContentType .ui-selectmenu-button{
+	width: auto;
+	min-width: 6em;
 }
 
 .page-form-chart .chart-plugin{
@@ -2663,7 +2732,7 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	display: inline-block;
 	z-index: 10;
-	top: -0.6em;
+	bottom: -1em;
 }
 .page-form-dashboard .form-item-value-template .resize-editor-wrapper.resize-left{
 	left: -0.6em;
@@ -2672,9 +2741,9 @@ table.dataTable tbody tr td select{
 	right: -0.6em;
 }
 .page-form-dashboard .form-item-value-template .resize-editor-wrapper .ui-button.ui-button-icon-only{
-	width: 1.2em;
-	height: 1.2em;
-	padding: 0.3em 0.3em;
+	width: 1em;
+	height: 1em;
+	padding: 0 0.3em;
 	border: 0;
 }
 .page-form-dashboard .show-button{

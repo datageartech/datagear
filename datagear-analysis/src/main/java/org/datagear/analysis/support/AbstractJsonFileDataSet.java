@@ -8,25 +8,27 @@
 package org.datagear.analysis.support;
 
 import java.io.File;
+import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataSetResult;
+import org.datagear.util.IOUtil;
 
 /**
  * 抽象JSON文件数据集。
+ * <p>
+ * 注意：此类不支持<code>Freemarker</code>模板语言。
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
-public abstract class AbstractJsonFileDataSet extends AbstractJsonSourceDataSet
+public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 {
-	public static final String DEFAULT_ENCODING = "UTF-8";
-
 	/** 文件编码 */
-	private String encoding = DEFAULT_ENCODING;
+	private String encoding = IOUtil.CHARSET_UTF_8;
 
 	public AbstractJsonFileDataSet()
 	{
@@ -54,15 +56,17 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonSourceDataSet
 	}
 
 	@Override
-	protected DataSetResult getOrginalResult(Map<String, ?> paramValues) throws DataSetException
+	protected TemplateResolvedSource<Reader> getJsonReader(Map<String, ?> paramValues) throws Throwable
 	{
-		File jsonFile = getJsonFile(paramValues);
-		Object data = getJsonDataSetSupport().resolveResultData(jsonFile, getEncoding());
-		return new DataSetResult(data);
+		File file = getJsonFile(paramValues);
+		return new TemplateResolvedSource<>(IOUtil.getReader(file, this.encoding));
 	}
 
 	/**
 	 * 获取JSON文件。
+	 * <p>
+	 * 实现方法应该返回实例级不变的文件。
+	 * </p>
 	 * 
 	 * @param paramValues
 	 * @return

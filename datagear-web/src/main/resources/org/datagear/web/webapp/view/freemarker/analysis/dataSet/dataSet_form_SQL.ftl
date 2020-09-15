@@ -33,17 +33,21 @@ readonly 是否只读操作，允许为null
 					</#if>
 				</div>
 			</div>
-			<div class="form-item form-item-workspace">
-				<div class="form-item-label">
-					<label><@spring.message code='dataSet.sql' /></label>
-				</div>
-				<div class="form-item-value">
-					<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
-					<div class="workspace-editor-wrapper ui-widget ui-widget-content">
-						<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
+			<div class="workspace">
+				<div class="form-item">
+					<div class="form-item-label">
+						<label title="<@spring.message code='dataSet.sql.desc' />">
+							<@spring.message code='dataSet.sql' />
+						</label>
 					</div>
-					<#include "include/dataSet_form_html_wow.ftl" >
+					<div class="form-item-value">
+						<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
+						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
+							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
+						</div>
+					</div>
 				</div>
+				<#include "include/dataSet_form_html_wow.ftl" >
 			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">
@@ -78,21 +82,6 @@ readonly 是否只读操作，允许为null
 	
 	po.getDataSetSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };
 
-	po.isPreviewValueModified = function()
-	{
-		return po.isSqlModified();
-	};
-	
-	po.isSqlModified = function(textareaValue, editorValue)
-	{
-		if(textareaValue == undefined)
-			textareaValue = po.element("textarea[name='sql']").val();
-		if(editorValue == undefined)
-			editorValue = po.sqlEditor.getValue();
-		
-		return po.isModifiedIgnoreBlank(textareaValue, editorValue);
-	};
-	
 	po.element(".select-schema-button").click(function()
 	{
 		var options =
@@ -117,41 +106,55 @@ readonly 是否只读操作，允许为null
 	po.initSqlEditor();
 	
 	po.initWorkspaceEditor(po.sqlEditor, po.element("textarea[name='sql']").val());
-	
 	po.initWorkspaceTabs();
-	
 	po.getAddPropertyName = function()
 	{
 		var selectionRange = po.sqlEditor.getSelectionRange();
 		return (po.sqlEditor.session.getTextRange(selectionRange) || "");
 	};
 	po.initDataSetPropertiesTable(po.dataSetProperties);
-	
 	po.initDataSetParamsTable(po.dataSetParams);
-	
 	po.initPreviewParamValuePanel();
-	
-	po.previewOptions.url = po.url("previewSql");
-	po.previewOptions.beforePreview = function()
+
+	po.updatePreviewOptionsData = function()
 	{
 		var schemaId = po.getDataSetSchemaId();
 		var sql = po.sqlEditor.getValue();
 		
-		if(!schemaId || !sql)
-			return false;
+		var dataSet = po.previewOptions.data.dataSet;
 		
-		this.data.dataSet.sql = sql;
-		this.data.schemaId = schemaId;
+		dataSet.sql = sql;
+		po.previewOptions.data.schemaId = schemaId;
+	};
+	
+	<#if formAction != 'saveAddForSql'>
+	//编辑、查看操作应初始化为已完成预览的状态
+	po.updatePreviewOptionsData();
+	po.previewSuccess(true);
+	</#if>
+	
+	po.isPreviewValueModified = function()
+	{
+		var schemaId = po.getDataSetSchemaId();
+		var sql = po.sqlEditor.getValue();
+		
+		var pd = po.previewOptions.data.dataSet;
+		
+		return (pd.sql != sql) || (po.previewOptions.data.schemaId != schemaId);
+	};
+	
+	po.previewOptions.url = po.url("previewSql");
+	po.previewOptions.beforePreview = function()
+	{
+		po.updatePreviewOptionsData();
+		
+		if(!this.data.dataSet.sql || !this.data.schemaId)
+			return false;
 	};
 	po.previewOptions.beforeRefresh = function()
 	{
-		if(!this.data.dataSet || !this.data.dataSet.sql || !this.data.schemaId)
+		if(!this.data.dataSet.sql || !this.data.schemaId)
 			return false;
-	};
-	po.previewOptions.success = function(previewResponse)
-	{
-		po.element("textarea[name='sql']").val(this.data.dataSet.sql);
-		po.sqlEditor.focus();
 	};
 	
 	po.initPreviewOperations();
@@ -207,7 +210,7 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("dataSetSqlPreviewRequired", function(value, element)
 	{
-		return !po.isSqlModified(value);
+		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
 	
 	po.form().validate(
@@ -235,6 +238,7 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
+			formData["sql"] = po.sqlEditor.getValue();
 			
 			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,
 			function(response)

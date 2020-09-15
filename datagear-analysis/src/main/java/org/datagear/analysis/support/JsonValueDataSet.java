@@ -7,12 +7,13 @@
  */
 package org.datagear.analysis.support;
 
+import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataSetResult;
+import org.datagear.util.IOUtil;
 
 /**
  * JSON字符串值数据集。
@@ -55,25 +56,15 @@ public class JsonValueDataSet extends AbstractJsonDataSet
 	}
 
 	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
+	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
 	{
-		String json = resolveTemplate(this.value, paramValues);
-
-		Object data = getJsonDataSetSupport().resolveResultData(json);
-
-		return new DataSetResult(data);
+		return (TemplateResolvedDataSetResult) resolveResult(paramValues, null);
 	}
 
 	@Override
-	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
+	protected TemplateResolvedSource<Reader> getJsonReader(Map<String, ?> paramValues) throws Throwable
 	{
-		String json = resolveTemplate(this.value, paramValues);
-
-		Object data = getJsonDataSetSupport().resolveResultData(json);
-		DataSetResult result = new DataSetResult(data);
-
-		List<DataSetProperty> properties = getJsonDataSetSupport().resolveDataSetProperties(result.getData());
-
-		return new TemplateResolvedDataSetResult(result, properties, json);
+		String json = resolveAsFmkTemplateIfHasParam(this.value, paramValues);
+		return new TemplateResolvedSource<>(IOUtil.getReader(json), json);
 	}
 }

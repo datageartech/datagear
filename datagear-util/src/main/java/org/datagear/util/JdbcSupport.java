@@ -950,27 +950,16 @@ public class JdbcSupport
 	 * @return
 	 * @throws SQLException
 	 */
+	@JDBCCompatiblity("某些驱动程序可能不支持ResultSet.getObject方法，所以这里没有使用")
 	public Object getColumnValue(Connection cn, ResultSet rs, String columnName, int sqlType) throws SQLException
 	{
 		Object value = null;
 
 		switch (sqlType)
 		{
-			case Types.TINYINT:
+			case Types.ARRAY:
 			{
-				value = rs.getByte(columnName);
-				break;
-			}
-
-			case Types.SMALLINT:
-			{
-				value = rs.getShort(columnName);
-				break;
-			}
-
-			case Types.INTEGER:
-			{
-				value = rs.getInt(columnName);
+				value = rs.getArray(columnName);
 				break;
 			}
 
@@ -980,29 +969,21 @@ public class JdbcSupport
 				break;
 			}
 
-			case Types.REAL:
+			case Types.BINARY:
 			{
-				value = rs.getFloat(columnName);
-				break;
-			}
-
-			case Types.FLOAT:
-			case Types.DOUBLE:
-			{
-				value = rs.getDouble(columnName);
-				break;
-			}
-
-			case Types.DECIMAL:
-			case Types.NUMERIC:
-			{
-				value = rs.getBigDecimal(columnName);
+				value = rs.getBytes(columnName);
 				break;
 			}
 
 			case Types.BIT:
 			{
 				value = rs.getBoolean(columnName);
+				break;
+			}
+
+			case Types.BLOB:
+			{
+				value = rs.getBlob(columnName);
 				break;
 			}
 
@@ -1013,22 +994,68 @@ public class JdbcSupport
 			}
 
 			case Types.CHAR:
-			case Types.VARCHAR:
 			{
 				value = rs.getString(columnName);
 				break;
 			}
 
-			case Types.LONGVARCHAR:
+			case Types.CLOB:
 			{
-				value = rs.getCharacterStream(columnName);
+				value = rs.getClob(columnName);
 				break;
 			}
 
-			case Types.BINARY:
-			case Types.VARBINARY:
+			case Types.DATALINK:
 			{
-				value = rs.getBytes(columnName);
+				value = rs.getObject(columnName);
+				break;
+			}
+
+			case Types.DATE:
+			{
+				value = rs.getDate(columnName);
+				break;
+			}
+
+			case Types.DECIMAL:
+			{
+				value = rs.getBigDecimal(columnName);
+				break;
+			}
+
+			case Types.DISTINCT:
+			{
+				value = rs.getObject(columnName);
+				break;
+			}
+
+			case Types.DOUBLE:
+			{
+				value = rs.getDouble(columnName);
+				break;
+			}
+
+			case Types.FLOAT:
+			{
+				value = rs.getFloat(columnName);
+				break;
+			}
+
+			case Types.INTEGER:
+			{
+				value = rs.getInt(columnName);
+				break;
+			}
+
+			case Types.JAVA_OBJECT:
+			{
+				value = rs.getObject(columnName);
+				break;
+			}
+
+			case Types.LONGNVARCHAR:
+			{
+				value = rs.getNCharacterStream(columnName);
 				break;
 			}
 
@@ -1038,9 +1065,81 @@ public class JdbcSupport
 				break;
 			}
 
-			case Types.DATE:
+			case Types.LONGVARCHAR:
 			{
-				value = rs.getDate(columnName);
+				value = rs.getCharacterStream(columnName);
+				break;
+			}
+
+			case Types.NCHAR:
+			{
+				value = rs.getNString(columnName);
+				break;
+			}
+
+			case Types.NCLOB:
+			{
+				value = rs.getNClob(columnName);
+				break;
+			}
+
+			case Types.NUMERIC:
+			{
+				value = rs.getBigDecimal(columnName);
+				break;
+			}
+
+			case Types.NVARCHAR:
+			{
+				value = rs.getNString(columnName);
+				break;
+			}
+
+			case Types.OTHER:
+			{
+				value = rs.getObject(columnName);
+				break;
+			}
+
+			case Types.REAL:
+			{
+				value = rs.getFloat(columnName);
+				break;
+			}
+
+			case Types.REF:
+			{
+				value = rs.getRef(columnName);
+				break;
+			}
+
+			case Types.REF_CURSOR:
+			{
+				value = rs.getObject(columnName);
+				break;
+			}
+
+			case Types.ROWID:
+			{
+				value = rs.getRowId(columnName);
+				break;
+			}
+
+			case Types.SMALLINT:
+			{
+				value = rs.getShort(columnName);
+				break;
+			}
+
+			case Types.SQLXML:
+			{
+				value = rs.getSQLXML(columnName);
+				break;
+			}
+
+			case Types.STRUCT:
+			{
+				value = rs.getObject(columnName);
 				break;
 			}
 
@@ -1058,46 +1157,29 @@ public class JdbcSupport
 				break;
 			}
 
-			case Types.CLOB:
+			case Types.TINYINT:
 			{
-				value = rs.getClob(columnName);
+				value = rs.getByte(columnName);
 				break;
 			}
 
-			case Types.BLOB:
+			case Types.VARBINARY:
 			{
-				value = rs.getBlob(columnName);
+				value = rs.getBytes(columnName);
 				break;
 			}
 
-			case Types.NCHAR:
-			case Types.NVARCHAR:
+			case Types.VARCHAR:
 			{
-				value = rs.getNString(columnName);
-				break;
-			}
-
-			case Types.LONGNVARCHAR:
-			{
-				value = rs.getNCharacterStream(columnName);
-				break;
-			}
-
-			case Types.NCLOB:
-			{
-				value = rs.getNClob(columnName);
-				break;
-			}
-
-			case Types.SQLXML:
-			{
-				value = rs.getSQLXML(columnName);
+				value = rs.getString(columnName);
 				break;
 			}
 
 			default:
+			{
 				value = getColumnValueExt(cn, rs, columnName, sqlType);
 				break;
+			}
 		}
 
 		if (rs.wasNull())
@@ -1172,6 +1254,25 @@ public class JdbcSupport
 	}
 
 	/**
+	 * 获取列名数组。
+	 * 
+	 * @param metaData
+	 * @return
+	 * @throws SQLException
+	 */
+	public String[] getColumnNames(ResultSetMetaData metaData) throws SQLException
+	{
+		int size = metaData.getColumnCount();
+
+		String[] names = new String[size];
+
+		for (int i = 0; i < names.length; i++)
+			names[i] = getColumnName(metaData, i + 1);
+
+		return names;
+	}
+
+	/**
 	 * 获取列类型。
 	 * 
 	 * @param metaData
@@ -1186,6 +1287,25 @@ public class JdbcSupport
 		String typeName = metaData.getColumnTypeName(column);
 
 		return new SqlType(type, typeName);
+	}
+
+	/**
+	 * 获取列类型数组。
+	 * 
+	 * @param metaData
+	 * @return
+	 * @throws SQLException
+	 */
+	public SqlType[] getColumnSqlTypes(ResultSetMetaData metaData) throws SQLException
+	{
+		int size = metaData.getColumnCount();
+
+		SqlType[] sqlTypes = new SqlType[size];
+
+		for (int i = 0; i < sqlTypes.length; i++)
+			sqlTypes[i] = getColumnSqlType(metaData, i + 1);
+
+		return sqlTypes;
 	}
 
 	/**

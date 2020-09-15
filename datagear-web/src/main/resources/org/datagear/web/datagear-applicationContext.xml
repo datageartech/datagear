@@ -31,6 +31,7 @@
     			<value>org.datagear.web.locales.datagear</value>
     		</list>
     	</property>
+    	<property name="defaultEncoding" value="UTF-8" />
     </bean>
     
     <bean id="driverEntityManagerRootDirectoryFactory" class="org.datagear.web.util.DirectoryFactory" init-method="init">
@@ -225,12 +226,15 @@
 		</property>
 	</bean>
 	
+	<bean id="httpClient" class="org.apache.hc.client5.http.impl.classic.HttpClients" factory-method="createDefault" />
+	
 	<bean id="dataSetEntityService" class="org.datagear.management.service.impl.DataSetEntityServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 		<property name="connectionSource" ref="connectionSource" />
 		<property name="schemaService" ref="schemaService" />
 		<property name="authorizationService" ref="authorizationService" />
 		<property name="dataSetRootDirectory" ref="dataSetRootDirectory" />
+		<property name="httpClient" ref="httpClient" />
 	</bean>
 	
 	<bean id="directoryHtmlChartPluginManager" class="org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager">

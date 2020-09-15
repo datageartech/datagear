@@ -9,7 +9,10 @@ import java.sql.SQLException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.support.DataSetSourceParseException;
+import org.datagear.analysis.support.HeaderContentNotNameValueObjArrayJsonException;
+import org.datagear.analysis.support.RequestContentNotNameValueObjArrayJsonException;
 import org.datagear.analysis.support.SqlDataSetConnectionException;
 import org.datagear.analysis.support.SqlDataSetSqlExecutionException;
 import org.datagear.analysis.support.SqlDataSetUnsupportedSqlTypeException;
@@ -449,11 +452,44 @@ public class ControllerAdvice extends AbstractController
 
 	@ExceptionHandler(SqlDataSetConnectionException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleAnalysisSqlDataSetConnectionException(HttpServletRequest request,
-			HttpServletResponse response, SqlDataSetConnectionException exception)
+	public String handleAnalysisSqlDataSetConnectionException(HttpServletRequest request, HttpServletResponse response,
+			SqlDataSetConnectionException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(SqlDataSetConnectionException.class), exception,
 				false, exception.getMessage());
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(RequestContentNotNameValueObjArrayJsonException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisRequestContentNotNameValueObjArrayJsonException(HttpServletRequest request,
+			HttpServletResponse response, RequestContentNotNameValueObjArrayJsonException exception)
+	{
+		setOperationMessageForThrowable(request,
+				buildMessageCode(RequestContentNotNameValueObjArrayJsonException.class), exception, false);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(HeaderContentNotNameValueObjArrayJsonException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisHeaderContentNotNameValueObjArrayJsonException(HttpServletRequest request,
+			HttpServletResponse response, HeaderContentNotNameValueObjArrayJsonException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(HeaderContentNotNameValueObjArrayJsonException.class),
+				exception, false);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(DataSetException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisDataSetException(HttpServletRequest request, HttpServletResponse response,
+			DataSetException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(DataSetException.class), exception, true,
+				exception.getMessage());
 
 		return getErrorView(request, response);
 	}

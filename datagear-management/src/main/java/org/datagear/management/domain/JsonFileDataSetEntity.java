@@ -20,7 +20,7 @@ import org.datagear.analysis.support.JsonDirectoryFileDataSet;
  * @author datagear@163.com
  *
  */
-public class JsonFileDataSetEntity extends JsonDirectoryFileDataSet implements DataSetEntity
+public class JsonFileDataSetEntity extends JsonDirectoryFileDataSet implements DirectoryFileDataSetEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -51,11 +51,13 @@ public class JsonFileDataSetEntity extends JsonDirectoryFileDataSet implements D
 		this.createUser = createUser;
 	}
 
+	@Override
 	public String getDisplayName()
 	{
 		return displayName;
 	}
 
+	@Override
 	public void setDisplayName(String displayName)
 	{
 		this.displayName = displayName;

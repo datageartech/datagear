@@ -113,8 +113,8 @@ public abstract class AbstractController
 	 * 检查并补充{@linkplain DataFilterPagingQuery#getDataFilter()}。
 	 * 
 	 * @param request
-	 * @param pagingQuery
-	 * @return
+	 * @param pagingQuery 允许为{@code null}
+	 * @return 不会为{@code null}
 	 */
 	protected DataFilterPagingQuery inflateDataFilterPagingQuery(HttpServletRequest request,
 			DataFilterPagingQuery pagingQuery)
@@ -126,14 +126,20 @@ public abstract class AbstractController
 	 * 检查并补充{@linkplain DataFilterPagingQuery#getDataFilter()}。
 	 * 
 	 * @param request
-	 * @param pagingQuery
+	 * @param pagingQuery          允许为{@code null}
 	 * @param cookiePaginationSize
-	 * @return
+	 * @return 不会为{@code null}
 	 */
 	protected DataFilterPagingQuery inflateDataFilterPagingQuery(HttpServletRequest request,
 			DataFilterPagingQuery pagingQuery, String cookiePaginationSize)
 	{
-		inflatePagingQuery(request, pagingQuery, cookiePaginationSize);
+		PagingQuery pq = inflatePagingQuery(request, pagingQuery, cookiePaginationSize);
+
+		if (pagingQuery == null)
+		{
+			pagingQuery = new DataFilterPagingQuery(pq.getPage(), pq.getPageSize(), pq.getKeyword(), pq.getCondition());
+			pagingQuery.setNotLike(pq.isNotLike());
+		}
 
 		String value = pagingQuery.getDataFilter();
 
@@ -187,8 +193,8 @@ public abstract class AbstractController
 	 * 检查并补充{@linkplain PagingQuery}。
 	 * 
 	 * @param request
-	 * @param pagingQuery
-	 * @return
+	 * @param pagingQuery 允许为{@code null}
+	 * @return 不会为{@code null}
 	 */
 	protected PagingQuery inflatePagingQuery(HttpServletRequest request, PagingQuery pagingQuery)
 	{
@@ -199,18 +205,15 @@ public abstract class AbstractController
 	 * 检查并补充{@linkplain PagingQuery}。
 	 * 
 	 * @param request
-	 * @param pagingQuery
-	 * @param cookiePaginationSize
-	 *            允许为{@code null}
-	 * @return
+	 * @param pagingQuery          允许为{@code null}
+	 * @param cookiePaginationSize 允许为{@code null}
+	 * @return 不会为{@code null}
 	 */
 	protected PagingQuery inflatePagingQuery(HttpServletRequest request, PagingQuery pagingQuery,
 			String cookiePaginationSize)
 	{
-		if (pagingQuery != null)
-			return pagingQuery;
-
-		pagingQuery = new PagingQuery();
+		if (pagingQuery == null)
+			pagingQuery = new PagingQuery();
 
 		if (!isEmpty(cookiePaginationSize))
 		{

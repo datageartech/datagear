@@ -21,17 +21,21 @@ readonly 是否只读操作，允许为null
 		<div class="form-head"></div>
 		<div class="form-content">
 			<#include "include/dataSet_form_html_name.ftl">
-			<div class="form-item form-item-workspace">
-				<div class="form-item-label">
-					<label><@spring.message code='dataSet.json' /></label>
-				</div>
-				<div class="form-item-value">
-					<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''?html}</textarea>
-					<div class="workspace-editor-wrapper ui-widget ui-widget-content">
-						<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
+			<div class="workspace">
+				<div class="form-item">
+					<div class="form-item-label">
+						<label title="<@spring.message code='dataSet.json.desc' />">
+							<@spring.message code='dataSet.json' />
+						</label>
 					</div>
-					<#include "include/dataSet_form_html_wow.ftl" >
+					<div class="form-item-value">
+						<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''?html}</textarea>
+						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
+							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
+						</div>
+					</div>
 				</div>
+				<#include "include/dataSet_form_html_wow.ftl" >
 			</div>
 		</div>
 		<div class="form-foot" style="text-align:center;">
@@ -58,21 +62,6 @@ readonly 是否只读操作，允许为null
 	$.initButtons(po.element());
 	po.initWorkspaceHeight();
 
-	po.isPreviewValueModified = function()
-	{
-		return po.isValueModified();
-	};
-	
-	po.isValueModified = function(textareaValue, editorValue)
-	{
-		if(textareaValue == undefined)
-			textareaValue = po.element("textarea[name='value']").val();
-		if(editorValue == undefined)
-			editorValue = po.jsonEditor.getValue();
-		
-		return po.isModifiedIgnoreBlank(textareaValue, editorValue);
-	};
-	
 	var languageTools = ace.require("ace/ext/language_tools");
 	var JsonMode = ace.require("ace/mode/json").Mode;
 	po.jsonEditor = ace.edit("${pageId}-workspaceEditor");
@@ -80,39 +69,52 @@ readonly 是否只读操作，允许为null
 	po.jsonEditor.setShowPrintMargin(false);
 	
 	po.initWorkspaceEditor(po.jsonEditor, po.element("textarea[name='value']").val());
-	
 	po.initWorkspaceTabs();
-
 	po.getAddPropertyName = function()
 	{
 		var selectionRange = po.jsonEditor.getSelectionRange();
 		return (po.jsonEditor.session.getTextRange(selectionRange) || "");
 	};
 	po.initDataSetPropertiesTable(po.dataSetProperties);
-	
 	po.initDataSetParamsTable(po.dataSetParams);
-	
 	po.initPreviewParamValuePanel();
+
+	po.updatePreviewOptionsData = function()
+	{
+		var value = po.jsonEditor.getValue();
+		
+		var dataSet = po.previewOptions.data.dataSet;
+		
+		dataSet.value = value;
+	};
+	
+	<#if formAction != 'saveAddForJsonValue'>
+	//编辑、查看操作应初始化为已完成预览的状态
+	po.updatePreviewOptionsData();
+	po.previewSuccess(true);
+	</#if>
+	
+	po.isPreviewValueModified = function()
+	{
+		var value = po.jsonEditor.getValue();
+		
+		var pd = po.previewOptions.data.dataSet;
+		
+		return (pd.value != value);
+	};
 	
 	po.previewOptions.url = po.url("previewJsonValue");
 	po.previewOptions.beforePreview = function()
 	{
-		var value = po.jsonEditor.getValue();
+		po.updatePreviewOptionsData();
 		
-		if(!value)
+		if(!this.data.dataSet.value)
 			return false;
-		
-		this.data.dataSet.value = value;
 	};
 	po.previewOptions.beforeRefresh = function()
 	{
-		if(!this.data.dataSet || !this.data.dataSet.value)
+		if(!this.data.dataSet.value)
 			return false;
-	};
-	po.previewOptions.success = function(previewResponse)
-	{
-		po.element("textarea[name='value']").val(this.data.dataSet.value);
-		po.jsonEditor.focus();
 	};
 	
 	po.initPreviewOperations();
@@ -125,7 +127,7 @@ readonly 是否只读操作，允许为null
 	
 	$.validator.addMethod("dataSetJsonValuePreviewRequired", function(value, element)
 	{
-		return !po.isValueModified(value);
+		return !po.isPreviewValueModified() && po.previewSuccess();
 	});
 	
 	po.form().validate(
@@ -151,6 +153,7 @@ readonly 是否只读操作，允许为null
 			var formData = $.formToJson(form);
 			formData["properties"] = po.getFormDataSetProperties();
 			formData["params"] = po.getFormDataSetParams();
+			formData["value"] = po.jsonEditor.getValue();
 			
 			$.postJson("${contextPath}/analysis/dataSet/${formAction}", formData,
 			function(response)

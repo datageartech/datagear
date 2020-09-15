@@ -11,18 +11,24 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.datagear.analysis.Category;
 import org.datagear.analysis.Chart;
+import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.DashboardTheme;
+import org.datagear.analysis.DataSet;
+import org.datagear.analysis.DataSetException;
+import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.AbstractChartPlugin;
+import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.CategorizationResolver;
 import org.datagear.analysis.support.CategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
@@ -31,6 +37,8 @@ import org.datagear.util.i18n.Label;
 import org.datagear.web.util.KeywordMatcher;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 抽象插件相关的控制器。
@@ -214,6 +222,19 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		return "/analysis/chartPlugin/icon/" + plugin.getId();
 	}
 
+	protected ChartDataSetViewObj[] toChartDataSetViewObjs(ChartDataSet[] chartDataSets)
+	{
+		if (chartDataSets == null)
+			return null;
+
+		ChartDataSetViewObj[] viewObjs = new ChartDataSetViewObj[chartDataSets.length];
+
+		for (int i = 0; i < chartDataSets.length; i++)
+			viewObjs[i] = new ChartDataSetViewObj(chartDataSets[i]);
+
+		return viewObjs;
+	}
+
 	/**
 	 * {@linkplain HtmlChartPlugin}视图对象。
 	 * 
@@ -262,6 +283,72 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		public Chart renderChart(RenderContext renderContext, ChartDefinition chartDefinition) throws RenderException
 		{
 			throw new UnsupportedOperationException();
+		}
+	}
+
+	/**
+	 * {@linkplain DataSet}视图对象。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class DataSetViewObj extends AbstractDataSet
+	{
+		public DataSetViewObj()
+		{
+			super();
+		}
+
+		public DataSetViewObj(DataSet dataSet)
+		{
+			super();
+			setId(dataSet.getId());
+			setName(dataSet.getName());
+			setProperties(dataSet.getProperties());
+			setParams(dataSet.getParams());
+		}
+
+		@Override
+		public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
+		{
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	/**
+	 * {@linkplain ChartDataSet}视图对象。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class ChartDataSetViewObj extends ChartDataSet
+	{
+		public ChartDataSetViewObj()
+		{
+			super();
+		}
+
+		public ChartDataSetViewObj(ChartDataSet chartDataSet)
+		{
+			super();
+			setDataSet(new DataSetViewObj(chartDataSet.getDataSet()));
+			setPropertySigns(chartDataSet.getPropertySigns());
+			setAlias(chartDataSet.getAlias());
+			setParamValues(chartDataSet.getParamValues());
+		}
+
+		@JsonIgnore
+		@Override
+		public boolean isResultReady()
+		{
+			return false;
+		}
+
+		@JsonIgnore
+		@Override
+		public DataSetResult getResult()
+		{
+			return null;
 		}
 	}
 }

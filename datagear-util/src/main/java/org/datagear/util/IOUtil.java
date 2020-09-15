@@ -37,6 +37,10 @@ import java.util.zip.ZipOutputStream;
  */
 public class IOUtil
 {
+	public static final String CHARSET_UTF_8 = "UTF-8";
+
+	public static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
+
 	private IOUtil()
 	{
 		throw new UnsupportedOperationException();
@@ -337,24 +341,41 @@ public class IOUtil
 	 */
 	public static BufferedReader getReader(File file) throws FileNotFoundException, UnsupportedEncodingException
 	{
-		return getReader(getInputStream(file), null);
+		return getReader(getInputStream(file), (String) null);
 	}
 
 	/**
 	 * 获取输入流。
 	 * 
 	 * @param in
-	 * @param encoding
+	 * @param charset
 	 *            允许为{@code null}
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static BufferedReader getReader(InputStream in, String encoding) throws UnsupportedEncodingException
+	public static BufferedReader getReader(InputStream in, String charset) throws UnsupportedEncodingException
 	{
-		if (StringUtil.isEmpty(encoding))
+		if (StringUtil.isEmpty(charset))
 			return new BufferedReader(new InputStreamReader(in));
 		else
-			return new BufferedReader(new InputStreamReader(in, encoding));
+			return new BufferedReader(new InputStreamReader(in, charset));
+	}
+
+	/**
+	 * 获取输入流。
+	 * 
+	 * @param in
+	 * @param charset
+	 *            允许为{@code null}
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static BufferedReader getReader(InputStream in, Charset charset) throws UnsupportedEncodingException
+	{
+		if (charset == null)
+			return new BufferedReader(new InputStreamReader(in));
+		else
+			return new BufferedReader(new InputStreamReader(in, charset));
 	}
 
 	/**

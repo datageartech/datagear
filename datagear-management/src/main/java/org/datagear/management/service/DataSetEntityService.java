@@ -9,6 +9,7 @@ package org.datagear.management.service;
 
 import java.io.File;
 
+import org.apache.hc.client5.http.classic.HttpClient;
 import org.datagear.analysis.DataSet;
 import org.datagear.management.domain.DataSetEntity;
 
@@ -36,4 +37,11 @@ public interface DataSetEntityService
 	 * @return
 	 */
 	File getDataSetDirectory(String dataSetId);
+
+	/**
+	 * 获取{@linkplain HttpClient}。
+	 * 
+	 * @return
+	 */
+	HttpClient getHttpClient();
 }

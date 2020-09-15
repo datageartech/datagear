@@ -18,6 +18,9 @@ import org.datagear.util.FileUtil;
 
 /**
  * 目录内JSON文件{@linkplain DataSet}。
+ * <p>
+ * 注意：此类不支持<code>Freemarker</code>模板语言。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -73,8 +76,7 @@ public class JsonDirectoryFileDataSet extends AbstractJsonFileDataSet
 	@Override
 	protected File getJsonFile(Map<String, ?> paramValues) throws DataSetException
 	{
-		String fileName = resolveTemplate(this.fileName, paramValues);
-		File jsonFile = FileUtil.getFile(directory, fileName);
+		File jsonFile = FileUtil.getFile(this.directory, this.fileName);
 		return jsonFile;
 	}
 }

@@ -9,20 +9,27 @@ package org.datagear.analysis.support;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.Collections;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.DataSetProperty.DataType;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvableDataSet;
 import org.datagear.analysis.ResolvedDataSetResult;
+import org.datagear.util.JDBCCompatiblity;
+import org.datagear.util.JdbcSupport;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.QueryResultSet;
 import org.datagear.util.Sql;
+import org.datagear.util.SqlType;
 import org.datagear.util.resource.ConnectionFactory;
 
 /**
@@ -34,9 +41,9 @@ import org.datagear.util.resource.ConnectionFactory;
  * @author datagear@163.com
  *
  */
-public class SqlDataSet extends AbstractFmkTemplateDataSet implements ResolvableDataSet
+public class SqlDataSet extends AbstractResolvableDataSet implements ResolvableDataSet
 {
-	protected static final SqlDataSetSupport SQL_DATA_SET_SUPPORT = new SqlDataSetSupport();
+	protected static final JdbcSupport JDBC_SUPPORT = new JdbcSupport();
 
 	private ConnectionFactory connectionFactory;
 
@@ -47,10 +54,9 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 		super();
 	}
 
-	@SuppressWarnings("unchecked")
 	public SqlDataSet(String id, String name, ConnectionFactory connectionFactory, String sql)
 	{
-		super(id, name, Collections.EMPTY_LIST);
+		super(id, name);
 		this.connectionFactory = connectionFactory;
 		this.sql = sql;
 	}
@@ -84,35 +90,16 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 	}
 
 	@Override
-	public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
+	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
 	{
-		List<DataSetProperty> properties = getProperties();
-
-		if (properties == null || properties.isEmpty())
-			throw new DataSetException("[getProperties()] must not be empty");
-
-		ResolvedDataSetResult result = getResolvedDataSetResult(paramValues, properties);
-		return result.getResult();
+		return resolveResult(paramValues, null);
 	}
 
 	@Override
-	public TemplateResolvedDataSetResult resolve(Map<String, ?> paramValues) throws DataSetException
+	protected TemplateResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
+			throws DataSetException
 	{
-		return getResolvedDataSetResult(paramValues, null);
-	}
-
-	/**
-	 * 
-	 * @param paramValues
-	 * @param properties
-	 *            允许为{@code null}，此时会自动解析
-	 * @return
-	 * @throws DataSetException
-	 */
-	protected TemplateResolvedDataSetResult getResolvedDataSetResult(Map<String, ?> paramValues,
-			List<DataSetProperty> properties) throws DataSetException
-	{
-		String sql = resolveTemplate(getSql(), paramValues);
+		String sql = resolveAsFmkTemplateIfHasParam(getSql(), paramValues);
 
 		Connection cn = null;
 
@@ -120,32 +107,42 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 		{
 			cn = getConnectionFactory().get();
 		}
-		catch (Exception e)
+		catch (Throwable t)
 		{
 			JdbcUtil.closeConnection(cn);
-			throw new SqlDataSetConnectionException(e);
+			throw new SqlDataSetConnectionException(t);
 		}
 
 		Sql sqlObj = Sql.valueOf(sql);
+
+		JdbcSupport jdbcSupport = getJdbcSupport();
 
 		QueryResultSet qrs = null;
 
 		try
 		{
-			qrs = getSqlDataSetSupport().executeQuery(cn, sqlObj, ResultSet.TYPE_FORWARD_ONLY);
+			qrs = jdbcSupport.executeQuery(cn, sqlObj, ResultSet.TYPE_FORWARD_ONLY);
+		}
+		catch (Throwable t)
+		{
+			throw new SqlDataSetSqlExecutionException(sql, t);
+		}
+
+		try
+		{
 			ResultSet rs = qrs.getResultSet();
 
-			if (properties == null || properties.isEmpty())
-				properties = getSqlDataSetSupport().resolveDataSetProperties(cn, rs, null);
+			ResolvedDataSetResult result = resolveResult(cn, rs, properties);
 
-			List<Map<String, ?>> data = getSqlDataSetSupport().resolveResultData(cn, rs, properties);
-			DataSetResult result = new DataSetResult(data);
-
-			return new TemplateResolvedDataSetResult(result, properties, sql);
+			return new TemplateResolvedDataSetResult(result.getResult(), result.getProperties(), sql);
 		}
-		catch (SQLException e)
+		catch (DataSetException e)
 		{
-			throw new SqlDataSetSqlExecutionException(sql, e);
+			throw e;
+		}
+		catch (Throwable t)
+		{
+			throw new DataSetException(t);
 		}
 		finally
 		{
@@ -167,46 +164,163 @@ public class SqlDataSet extends AbstractFmkTemplateDataSet implements Resolvable
 	}
 
 	/**
+	 * 解析结果。
 	 * 
 	 * @param cn
-	 * @param sql
+	 * @param rs
 	 * @param properties
 	 *            允许为{@code null}，此时会自动解析
 	 * @return
-	 * @throws DataSetException
+	 * @throws Throwable
 	 */
-	protected ResolvedDataSetResult getResolvedDataSetResult(Connection cn, String sql,
-			List<DataSetProperty> properties) throws DataSetException
+	protected ResolvedDataSetResult resolveResult(Connection cn, ResultSet rs, List<DataSetProperty> properties)
+			throws Throwable
 	{
-		Sql sqlObj = Sql.valueOf(sql);
+		boolean resolveProperties = (properties == null || properties.isEmpty());
 
-		QueryResultSet qrs = null;
+		List<Map<String, ?>> datas = new ArrayList<>();
 
-		try
+		JdbcSupport jdbcSupport = getJdbcSupport();
+		DataSetPropertyValueConverter converter = createDataSetPropertyValueConverter();
+
+		ResultSetMetaData rsMeta = rs.getMetaData();
+		String[] colNames = jdbcSupport.getColumnNames(rsMeta);
+		SqlType[] sqlTypes = jdbcSupport.getColumnSqlTypes(rsMeta);
+
+		if (resolveProperties)
 		{
-			qrs = getSqlDataSetSupport().executeQuery(cn, sqlObj, ResultSet.TYPE_FORWARD_ONLY);
-			ResultSet rs = qrs.getResultSet();
-
-			if (properties == null || properties.isEmpty())
-				properties = getSqlDataSetSupport().resolveDataSetProperties(cn, rs, null);
-
-			List<Map<String, ?>> data = getSqlDataSetSupport().resolveResultData(cn, rs, properties);
-			DataSetResult result = new DataSetResult(data);
-
-			return new ResolvedDataSetResult(result, properties);
+			properties = new ArrayList<>(colNames.length);
+			for (int i = 0; i < colNames.length; i++)
+				properties.add(new DataSetProperty(colNames[i], toPropertyDataType(sqlTypes[i], colNames[i])));
 		}
-		catch (SQLException e)
+
+		int maxColumnSize = Math.min(colNames.length, properties.size());
+
+		int rowIdx = 0;
+
+		while (rs.next())
 		{
-			throw new SqlDataSetSqlExecutionException(sql, e);
+			Map<String, Object> row = new HashMap<>();
+
+			for (int i = 0; i < maxColumnSize; i++)
+			{
+				DataSetProperty property = properties.get(i);
+
+				Object value = jdbcSupport.getColumnValue(cn, rs, colNames[i], sqlTypes[i].getType());
+
+				if (resolveProperties && rowIdx == 0)
+				{
+					@JDBCCompatiblity("某些驱动程序可能存在一种情况，列类型会被toPropertyDataType()解析为DataType.UNKNOWN，但是实际值是允许的，"
+							+ "比如PostgreSQL-42.2.5驱动对于[SELECT 'aaa' as NAME]语句，结果的SQL类型是Types.OTHER，但实际值是允许的字符串")
+					boolean resolveTypeByValue = (DataType.UNKNOWN.equals(property.getType()));
+
+					if (resolveTypeByValue)
+						property.setType(resolvePropertyDataType(value));
+				}
+
+				value = convertToPropertyDataType(converter, value, property);
+
+				row.put(property.getName(), value);
+			}
+
+			datas.add(row);
+
+			rowIdx++;
 		}
-		finally
-		{
-			QueryResultSet.close(qrs);
-		}
+
+		DataSetResult result = new DataSetResult(datas);
+
+		return new ResolvedDataSetResult(result, properties);
 	}
 
-	protected SqlDataSetSupport getSqlDataSetSupport()
+	/**
+	 * 由SQL类型转换为{@linkplain DataSetProperty#getType()}。
+	 * 
+	 * @param sqlType
+	 * @param columnName
+	 *            允许为{@code null}，列名称
+	 * @return
+	 * @throws SQLException
+	 * @throws SqlDataSetUnsupportedSqlTypeException
+	 */
+	protected String toPropertyDataType(SqlType sqlType, String columnName)
+			throws SQLException, SqlDataSetUnsupportedSqlTypeException
 	{
-		return SQL_DATA_SET_SUPPORT;
+		String dataType = null;
+
+		int type = sqlType.getType();
+
+		switch (type)
+		{
+			// 确定不支持的类型
+			case Types.BINARY:
+			case Types.BLOB:
+			case Types.LONGVARBINARY:
+			case Types.VARBINARY:
+				throw new SqlDataSetUnsupportedSqlTypeException(sqlType, columnName);
+
+			case Types.CHAR:
+			case Types.NCHAR:
+			case Types.NVARCHAR:
+			case Types.VARCHAR:
+			{
+				dataType = DataType.STRING;
+				break;
+			}
+
+			case Types.BOOLEAN:
+			{
+				dataType = DataType.BOOLEAN;
+				break;
+			}
+
+			case Types.BIGINT:
+			case Types.BIT:
+			case Types.INTEGER:
+			case Types.SMALLINT:
+			case Types.TINYINT:
+			{
+				dataType = DataType.INTEGER;
+				break;
+			}
+
+			case Types.DECIMAL:
+			case Types.DOUBLE:
+			case Types.FLOAT:
+			case Types.NUMERIC:
+			case Types.REAL:
+			{
+				dataType = DataType.DECIMAL;
+				break;
+			}
+
+			case Types.DATE:
+			{
+				dataType = DataType.DATE;
+				break;
+			}
+
+			case Types.TIME:
+			{
+				dataType = DataType.TIME;
+				break;
+			}
+
+			case Types.TIMESTAMP:
+			{
+				dataType = DataType.TIMESTAMP;
+				break;
+			}
+
+			default:
+				dataType = DataType.UNKNOWN;
+		}
+
+		return dataType;
+	}
+
+	protected JdbcSupport getJdbcSupport()
+	{
+		return JDBC_SUPPORT;
 	}
 }

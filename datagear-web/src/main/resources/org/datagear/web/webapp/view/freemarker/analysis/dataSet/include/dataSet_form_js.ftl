@@ -28,6 +28,9 @@ po.previewOptions.url = "...";
 	
 	po.isModifiedIgnoreBlank = function(sourceVal, targetVal)
 	{
+		sourceVal = (sourceVal || "");
+		targetVal = (targetVal || "");
+		
 		sourceVal = sourceVal.replace(/\s/g, '');
 		targetVal = targetVal.replace(/\s/g, '');
 		
@@ -51,12 +54,16 @@ po.previewOptions.url = "...";
 	
 	po.calWorkspaceOperationTableHeight = function()
 	{
-		return po.element(".preview-result-table-wrapper").height() - 30;
+		var tableTitleHeight = 30;
+		return po.element(".preview-result-table-wrapper").height() - tableTitleHeight;
 	};
 	
-	po.initWorkspaceHeight = function()
+	po.initWorkspaceHeight = function(calFormContentHeight)
 	{
+		calFormContentHeight = (calFormContentHeight == true ? true : false);
+		
 		var height = $(window).height();
+		
 		//减去上下留白
 		height = height - height/10;
 		//减去对话框标题高度
@@ -64,19 +71,25 @@ po.previewOptions.url = "...";
 			height = height - 41;
 		//减去其他表单元素高度
 		height = height - po.element(".form-head").outerHeight(true);
-		po.element(".form-content > .form-item:not(.form-item-workspace)").each(function()
+		height = height - po.element(".form-foot").outerHeight(true);
+		
+		var formContentHeight = height - 41;
+		
+		po.element(".form-content > .form-item").each(function()
 		{
 			height = height - $(this).outerHeight(true);
 		});
-		height = height - po.element(".form-foot").outerHeight(true);
 		//减去杂项高度
 		height = height - 41 - 10;
 		
-		var errorInfoHeight = 25;
+		var errorInfoHeight = 41 + 10;
 		
-		po.element(".form-item-workspace .form-item-value").height(height);
+		po.element(".workspace").css("min-height", height+"px");
 		po.element(".workspace-editor-wrapper").height(height - errorInfoHeight);
 		po.element(".workspace-operation-wrapper").height(height - errorInfoHeight);
+		
+		if(calFormContentHeight)
+			po.element(".form-content").css("max-height", formContentHeight+"px");
 	};
 	
 	po.initWorkspaceEditor = function(editor, initValue)
@@ -103,8 +116,10 @@ po.previewOptions.url = "...";
 		</#if>
 	};
 	
-	po.initWorkspaceTabs = function()
+	po.initWorkspaceTabs = function(disableParams)
 	{
+		disableParams = (disableParams == true ? true : false);
+		
 		po.element(".workspace-operation-wrapper").tabs(
 		{
 			activate: function(event, ui)
@@ -129,8 +144,14 @@ po.previewOptions.url = "...";
 				}
 			}
 		});
+		
+		if(disableParams)
+		{
+			var paramsIndex = $(".workspace-operation-nav .operation-params", po.element(".workspace-operation-wrapper")).index();
+			po.element(".workspace-operation-wrapper").tabs("disable", paramsIndex);
+		}
 	};
-
+	
 	//获取用于添加数据集属性的名
 	po.getAddPropertyName = function()
 	{
@@ -572,6 +593,15 @@ po.previewOptions.url = "...";
 		success: function(previewResponse){}
 	};
 	
+	//获取、设置上一次预览是否成功
+	po.previewSuccess = function(success)
+	{
+		if(success === undefined)
+			return po._previewSuccess == true;
+		else
+			po._previewSuccess = success;
+	};
+	
 	po.destroyPreviewResultTable = function()
 	{
 		var table = po.previewResultTableElement();
@@ -581,11 +611,13 @@ po.previewOptions.url = "...";
 			table.empty();
 		}
 	};
-	
+
 	po.initPreviewOperations = function()
 	{
 		po.element(".preview-result-table-wrapper .preview-button").click(function(event)
 		{
+			var previewValueModified = po.isPreviewValueModified();
+			
 			if(po.previewOptions.beforePreview() == false)
 				return;
 			
@@ -606,7 +638,7 @@ po.previewOptions.url = "...";
 						po.previewOptions.data.dataSet.params = po.getFormDataSetParams();
 						po.previewOptions.data.paramValues = chartFactory.chartForm.getDataSetParamValueObj(this);
 						
-						po.executePreview();
+						po.executePreview(previewValueModified);
 					}
 				});
 			}
@@ -617,7 +649,7 @@ po.previewOptions.url = "...";
 				po.previewOptions.data.dataSet.params = [];
 				po.previewOptions.data.paramValues = {};
 				
-				po.executePreview();
+				po.executePreview(previewValueModified);
 			}
 		});
 		
@@ -626,11 +658,36 @@ po.previewOptions.url = "...";
 			if(po.previewOptions.beforeRefresh() == false)
 				return;
 			
-			po.executePreview();
+			po.executePreview(false);
+		});
+		
+		po.element(".show-resolved-source-button").click(function()
+		{
+			var $panel = po.element(".result-resolved-source-panel");
+			
+			if($panel.is(":hidden"))
+			{
+				$panel.show();
+				$panel.position({ my: "right bottom", at: "right top-5", of: this });
+			}
+			else
+				$panel.hide();
+		});
+		
+		$(po.element()).on("click", function(event)
+		{
+			var $target = $(event.target);
+			
+			var $panel = po.element(".result-resolved-source-panel");
+			if(!$panel.is(":hidden"))
+			{
+				if($target.closest(".result-resolved-source").length == 0)
+					$panel.hide();
+			}
 		});
 	};
 	
-	po.executePreview = function()
+	po.executePreview = function(previewValueModified)
 	{
 		if(po.previewOptions.beforeRequest() == false)
 			return;
@@ -650,9 +707,11 @@ po.previewOptions.url = "...";
 			data : po.previewOptions.data,
 			success : function(previewResponse)
 			{
+				po.previewSuccess(true);
+				
 				//如果工作区内容已变更才更新属性，防止上次保存后的属性被刷新
 				//属性表单内容为空也更新，比如用户删除了所有属性时
-				if(po.isPreviewValueModified() || !po.hasFormDataSetProperty())
+				if(previewValueModified || !po.hasFormDataSetProperty())
 					po.updateFormDataSetProperties(previewResponse.properties);
 				
 				var tableData = (previewResponse.result.data || []);
@@ -712,6 +771,10 @@ po.previewOptions.url = "...";
 				
 				po.previewOptions.success(previewResponse);
 			},
+			error: function()
+			{
+				po.previewSuccess(false);
+			},
 			complete: function()
 			{
 				$buttons.each(function()
@@ -755,7 +818,7 @@ po.previewOptions.url = "...";
 					var name = dataSetProperties[colIndex].name;
 					
 					if(setValue === undefined)
-						return row[name];
+						return chartFactory.escapeHtml(row[name]);
 					else
 						row[name] = setValue;
 				},

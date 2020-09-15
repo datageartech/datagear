@@ -16,10 +16,10 @@ import java.util.Map;
 
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
-import org.datagear.analysis.DataSetProperty.DataType;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.util.JdbcUtil;
 import org.datagear.util.resource.SimpleConnectionFactory;
+import org.datagear.util.test.DBTestSupport;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -61,10 +61,12 @@ public class SqlDataSetTest extends DBTestSupport
 
 			String sql = "SELECT ID, NAME FROM T_ACCOUNT <#if id??>WHERE ID = ${id} AND NAME != '${name}'</#if>";
 
-			List<DataSetProperty> dataSetProperties = Arrays.asList(new DataSetProperty("ID", DataType.INTEGER),
-					new DataSetProperty("NAME", DataType.STRING));
-			List<DataSetParam> dataSetParams = Arrays.asList(new DataSetParam("id", DataType.STRING, true),
-					new DataSetParam("name", DataType.STRING, true));
+			List<DataSetProperty> dataSetProperties = Arrays.asList(
+					new DataSetProperty("ID", DataSetProperty.DataType.INTEGER),
+					new DataSetProperty("NAME", DataSetProperty.DataType.STRING));
+
+			List<DataSetParam> dataSetParams = Arrays.asList(new DataSetParam("id", DataSetParam.DataType.STRING, true),
+					new DataSetParam("name", DataSetParam.DataType.STRING, true));
 
 			SqlDataSet sqlDataSet = new SqlDataSet("1", "1", dataSetProperties, connectionFactory, sql);
 			sqlDataSet.setParams(dataSetParams);

@@ -39,11 +39,59 @@
 	<insert id="insertJsonFileDataSetEntity">
 		INSERT INTO DATAGEAR_DATA_SET_JSON_FILE
 			(
-			DS_ID, DS_FILE_NAME, DS_DISPLAY_NAME
+			DS_ID, DS_FILE_NAME, DS_FILE_ENCODING, DS_DISPLAY_NAME, DS_DATA_JSON_PATH
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.fileName}, #{entity.displayName}
+			#{entity.id}, #{entity.fileName}, #{entity.encoding}, #{entity.displayName}, #{entity.dataJsonPath}
+			)
+	</insert>
+	
+	<insert id="insertExcelDataSetEntity">
+		INSERT INTO DATAGEAR_DATA_SET_EXCEL
+			(
+				DS_ID, DS_FILE_NAME, DS_DISPLAY_NAME, DS_SHEET_INDEX, DS_NAME_ROW,
+			 	DS_DATA_ROW_EXP, DS_DATA_COLUMN_EXP, DS_FORCE_XLS
+			)
+		VALUES
+			(
+				#{entity.id}, #{entity.fileName}, #{entity.displayName}, #{entity.sheetIndex}, #{entity.nameRow},
+				#{entity.dataRowExp}, #{entity.dataColumnExp}, #{entity.forceXls}
+			)
+	</insert>
+	
+	<insert id="insertCsvValueDataSetEntity">
+		INSERT INTO DATAGEAR_DATA_SET_CSV_VALUE
+			(
+			DS_ID, DS_VALUE, DS_NAME_ROW
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.value}, #{entity.nameRow}
+			)
+	</insert>
+	
+	<insert id="insertCsvFileDataSetEntity">
+		INSERT INTO DATAGEAR_DATA_SET_CSV_FILE
+			(
+			DS_ID, DS_FILE_NAME, DS_FILE_ENCODING, DS_DISPLAY_NAME, DS_NAME_ROW
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.fileName}, #{entity.encoding}, #{entity.displayName}, #{entity.nameRow}
+			)
+	</insert>
+	
+	<insert id="insertHttpDataSetEntity">
+		INSERT INTO DATAGEAR_DATA_SET_HTTP
+			(
+			DS_ID, DS_URI, DS_HEADER_CONTENT, DS_RQT_METHOD, DS_RQT_CONTENT_TYPE,
+			DS_RQT_CONTENT_CHARSET, DS_RQT_CONTENT, DS_RPS_CONTENT_TYPE, DS_RPS_DATA_JSON_PATH
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.uri}, #{entity.headerContent}, #{entity.requestMethod}, #{entity.requestContentType},
+			#{entity.requestContentCharset}, #{entity.requestContent}, #{entity.responseContentType}, #{entity.responseDataJsonPath}
 			)
 	</insert>
 	
@@ -103,7 +151,54 @@
 	<update id="updateJsonFileDataSetEntity">
 		UPDATE DATAGEAR_DATA_SET_JSON_FILE SET
 			DS_FILE_NAME = #{entity.fileName},
-			DS_DISPLAY_NAME = #{entity.displayName}
+			DS_FILE_ENCODING = #{entity.encoding},
+			DS_DISPLAY_NAME = #{entity.displayName},
+			DS_DATA_JSON_PATH = #{entity.dataJsonPath}
+		WHERE
+			DS_ID = #{entity.id}
+	</update>
+	
+	<update id="updateExcelDataSetEntity">
+		UPDATE DATAGEAR_DATA_SET_EXCEL SET
+			DS_FILE_NAME = #{entity.fileName},
+			DS_DISPLAY_NAME = #{entity.displayName},
+			DS_SHEET_INDEX = #{entity.sheetIndex},
+			DS_NAME_ROW = #{entity.nameRow},
+			DS_DATA_ROW_EXP = #{entity.dataRowExp},
+			DS_DATA_COLUMN_EXP = #{entity.dataColumnExp},
+			DS_FORCE_XLS = #{entity.forceXls}
+		WHERE
+			DS_ID = #{entity.id}
+	</update>
+	
+	<update id="updateCsvValueDataSetEntity">
+		UPDATE DATAGEAR_DATA_SET_CSV_VALUE SET
+			DS_VALUE = #{entity.value},
+			DS_NAME_ROW = #{entity.nameRow}
+		WHERE
+			DS_ID = #{entity.id}
+	</update>
+	
+	<update id="updateCsvFileDataSetEntity">
+		UPDATE DATAGEAR_DATA_SET_CSV_FILE SET
+			DS_FILE_NAME = #{entity.fileName},
+			DS_FILE_ENCODING = #{entity.encoding},
+			DS_DISPLAY_NAME = #{entity.displayName},
+			DS_NAME_ROW = #{entity.nameRow}
+		WHERE
+			DS_ID = #{entity.id}
+	</update>
+	
+	<update id="updateHttpDataSetEntity">
+		UPDATE DATAGEAR_DATA_SET_HTTP SET
+			DS_URI = #{entity.uri},
+			DS_HEADER_CONTENT = #{entity.headerContent},
+			DS_RQT_METHOD = #{entity.requestMethod},
+			DS_RQT_CONTENT_TYPE = #{entity.requestContentType},
+			DS_RQT_CONTENT_CHARSET = #{entity.requestContentCharset},
+			DS_RQT_CONTENT = #{entity.requestContent},
+			DS_RPS_CONTENT_TYPE = #{entity.responseContentType},
+			DS_RPS_DATA_JSON_PATH = #{entity.responseDataJsonPath}
 		WHERE
 			DS_ID = #{entity.id}
 	</update>
@@ -169,11 +264,79 @@
 		SELECT
 			T1.*,
 			T2.DS_FILE_NAME AS ${_iq_}fileName${_iq_},
-			T2.DS_DISPLAY_NAME AS ${_iq_}displayName${_iq_}
+			T2.DS_FILE_ENCODING AS ${_iq_}encoding${_iq_},
+			T2.DS_DISPLAY_NAME AS ${_iq_}displayName${_iq_},
+			T2.DS_DATA_JSON_PATH AS ${_iq_}dataJsonPath${_iq_}
 		FROM
 			(SELECT * FROM (<include refid="queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
 		INNER JOIN
 			DATAGEAR_DATA_SET_JSON_FILE T2
+		ON
+			T1.${_iq_}id${_iq_} = T2.DS_ID
+	</select>
+	
+	<select id="getExcelDataSetEntityById" resultType="org.datagear.management.domain.ExcelDataSetEntity">
+		SELECT
+			T1.*,
+			T2.DS_FILE_NAME AS ${_iq_}fileName${_iq_},
+			T2.DS_DISPLAY_NAME AS ${_iq_}displayName${_iq_},
+			
+			T2.DS_SHEET_INDEX AS ${_iq_}sheetIndex${_iq_},
+			T2.DS_NAME_ROW AS ${_iq_}nameRow${_iq_},
+			T2.DS_DATA_ROW_EXP AS ${_iq_}dataRowExp${_iq_},
+			T2.DS_DATA_COLUMN_EXP AS ${_iq_}dataColumnExp${_iq_},
+			T2.DS_FORCE_XLS AS ${_iq_}forceXls${_iq_}
+		FROM
+			(SELECT * FROM (<include refid="queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
+		INNER JOIN
+			DATAGEAR_DATA_SET_EXCEL T2
+		ON
+			T1.${_iq_}id${_iq_} = T2.DS_ID
+	</select>
+	
+	<select id="getCsvValueDataSetEntityById" resultType="org.datagear.management.domain.CsvValueDataSetEntity">
+		SELECT
+			T1.*,
+			T2.DS_VALUE AS ${_iq_}value${_iq_},
+			T2.DS_NAME_ROW AS ${_iq_}nameRow${_iq_}
+		FROM
+			(SELECT * FROM (<include refid="queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
+		INNER JOIN
+			DATAGEAR_DATA_SET_CSV_VALUE T2
+		ON
+			T1.${_iq_}id${_iq_} = T2.DS_ID
+	</select>
+	
+	<select id="getCsvFileDataSetEntityById" resultType="org.datagear.management.domain.CsvFileDataSetEntity">
+		SELECT
+			T1.*,
+			T2.DS_FILE_NAME AS ${_iq_}fileName${_iq_},
+			T2.DS_FILE_ENCODING AS ${_iq_}encoding${_iq_},
+			T2.DS_DISPLAY_NAME AS ${_iq_}displayName${_iq_},
+			T2.DS_NAME_ROW AS ${_iq_}nameRow${_iq_}
+		FROM
+			(SELECT * FROM (<include refid="queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
+		INNER JOIN
+			DATAGEAR_DATA_SET_CSV_FILE T2
+		ON
+			T1.${_iq_}id${_iq_} = T2.DS_ID
+	</select>
+	
+	<select id="getHttpDataSetEntityById" resultType="org.datagear.management.domain.HttpDataSetEntity">
+		SELECT
+			T1.*,
+			T2.DS_URI AS ${_iq_}uri${_iq_},
+			T2.DS_HEADER_CONTENT AS ${_iq_}headerContent${_iq_},
+			T2.DS_RQT_METHOD AS ${_iq_}requestMethod${_iq_},
+			T2.DS_RQT_CONTENT_TYPE AS ${_iq_}requestContentType${_iq_},
+			T2.DS_RQT_CONTENT_CHARSET AS ${_iq_}requestContentCharset${_iq_},
+			T2.DS_RQT_CONTENT AS ${_iq_}requestContent${_iq_},
+			T2.DS_RPS_CONTENT_TYPE AS ${_iq_}responseContentType${_iq_},
+			T2.DS_RPS_DATA_JSON_PATH AS ${_iq_}responseDataJsonPath${_iq_}
+		FROM
+			(SELECT * FROM (<include refid="queryView" />) T0 WHERE T0.${_iq_}id${_iq_} = #{id}) T1
+		INNER JOIN
+			DATAGEAR_DATA_SET_HTTP T2
 		ON
 			T1.${_iq_}id${_iq_} = T2.DS_ID
 	</select>
