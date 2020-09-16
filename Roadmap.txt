@@ -6,6 +6,7 @@
 	
 	修复分页查询设置页大小无效的BUG；
 	修复数据管理功能插入操作不支持SQL Server的IDENTITY_INSERT特性的BUG；
+	更新山东省地图；
 	
 待定：
 	
