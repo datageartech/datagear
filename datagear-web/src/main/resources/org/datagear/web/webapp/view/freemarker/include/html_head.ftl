@@ -1,5 +1,5 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="description" content="DataGear是一款数据可视化分析平台，使用Java语言开发，采用浏览器/服务器架构，支持多种数据库，主要功能包括数据管理、SQL工作台、数据导入/导出、数据集管理、图表管理、看板管理等。" />
+<meta name="description" content="DataGear是一款数据可视化分析平台，使用Java语言开发，采用浏览器/服务器架构，支持SQL、CSV、Excel、HTTP接口、JSON等多种数据源，主要功能包括数据管理、SQL工作台、数据导入/导出、数据集管理、图表管理、看板管理等。" />
 <meta name="keywords" content="DataGear, 数据可视化, data visualization, 数据分析, data analysis, 商业智能, BI, 图表, chart, 看板, dashboard" />
 <#if !isAjaxRequest>
 <#assign _hh_Version=statics['org.datagear.util.Global'].VERSION>
