@@ -574,8 +574,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -725,8 +725,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		if(horizontal)
 		{
@@ -880,9 +880,9 @@
 				}
 			]
 		},
-		chart.options(),
-		options);
-
+		options,
+		chart.options());
+		
 		chartSupport.initOptions(chart, options);
 		
 		chart.echartsInit(options);
@@ -985,8 +985,8 @@
 				}
 			]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chart.echartsInit(options);
 	};
@@ -1098,8 +1098,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -1267,8 +1267,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -1457,8 +1457,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -1673,8 +1673,8 @@
 		        }
 			]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 
 		chartSupport.initOptions(chart, options);
 		
@@ -1914,8 +1914,8 @@
 				}
 			]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.mapInitChart(chart, options);
 	};
@@ -2061,8 +2061,8 @@
 				}
 			]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.mapInitChart(chart, options);
 	};
@@ -2231,8 +2231,8 @@
 				label: { position: "right" }
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.mapInitChart(chart, options);
 	};
@@ -2513,8 +2513,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -2659,8 +2659,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -2804,8 +2804,8 @@
                 expandAndCollapse: true
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -2882,8 +2882,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -2967,8 +2967,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -3163,8 +3163,8 @@
 		        focusNodeAdjacency: 'allEdges'
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		//自适应条目宽度和间隔
 		var chartEle = chart.elementJquery();
@@ -3371,8 +3371,8 @@
                 bottom: "12%",
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -3644,8 +3644,8 @@
 				}
 			]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		var chartEle = chart.elementJquery();
 		
@@ -3836,8 +3836,8 @@
 			//DataTable图表配置项
 			"ordering": false
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		var cps = chartSupport.tableGetColumnProperties(chart, columnSign);
 		var columns = [];
@@ -4152,8 +4152,8 @@
 				}
 			}
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 	};
