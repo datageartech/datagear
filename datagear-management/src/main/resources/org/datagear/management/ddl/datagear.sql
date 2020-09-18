@@ -579,3 +579,9 @@ CREATE TABLE DATAGEAR_DATA_SET_HTTP
 );
 
 ALTER TABLE DATAGEAR_DATA_SET_HTTP ADD FOREIGN KEY (DS_ID) REFERENCES DATAGEAR_DATA_SET (DS_ID) ON DELETE CASCADE;
+
+
+-----------------------------------------
+--version[1.13.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
