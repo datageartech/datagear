@@ -60,6 +60,14 @@
 		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/chartPluginManager.js" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
 		<intercept-url pattern="${subContextPath}/analysis/chartPlugin/**" access="ROLE_ADMIN" />
 		
+		<!-- 图表、看板展示功能始终允许匿名用户访问，用于支持外部系统iframe嵌套场景 -->
+		<intercept-url pattern="${subContextPath}/analysis/chart/show/**" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/analysis/chart/showData" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/analysis/dashboard/show/**" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/analysis/dashboard/showData" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/analysis/dashboard/loadChart" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
+		<intercept-url pattern="${subContextPath}/analysis/dashboard/heartbeat" access="IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER" />
+		
 		<intercept-url pattern="${subContextPath}/login/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<intercept-url pattern="${subContextPath}/register/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
 		<intercept-url pattern="${subContextPath}/resetPassword/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
