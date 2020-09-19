@@ -213,19 +213,21 @@ public abstract class AbstractController
 			String cookiePaginationSize)
 	{
 		if (pagingQuery == null)
+		{
 			pagingQuery = new PagingQuery();
 
-		if (!isEmpty(cookiePaginationSize))
-		{
-			try
+			if (!isEmpty(cookiePaginationSize))
 			{
-				String pss = WebUtils.getCookieValue(request, cookiePaginationSize);
+				try
+				{
+					String pss = WebUtils.getCookieValue(request, cookiePaginationSize);
 
-				if (!isEmpty(pss))
-					pagingQuery.setPageSize(Integer.parseInt(pss));
-			}
-			catch (Exception e)
-			{
+					if (!isEmpty(pss))
+						pagingQuery.setPageSize(Integer.parseInt(pss));
+				}
+				catch(Exception e)
+				{
+				}
 			}
 		}
 
