@@ -444,7 +444,11 @@
 				var labeldiv=$("<div class='form-item-label' />").appendTo(itemdiv);
 				var valuediv=$("<div class='form-item-value' />").appendTo(itemdiv);
 				
-				var $label = $("<label />").html(columnName).attr("title", (column.comment || columnName)).appendTo(labeldiv);
+				var $label = $("<label />").html(columnName).appendTo(labeldiv);
+				
+				var labelTitle = (column.comment || columnName);
+				//即使labelTitle与columnName一样也显示描述，因为columnName可能超长而无法在label内容中完全显示
+				$label.attr("title", (column.comment || columnName))
 				
 				if(!$.meta.supportsColumn(column))
 				{
