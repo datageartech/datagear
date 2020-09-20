@@ -686,8 +686,9 @@ public class DataController extends AbstractSchemaConnTableController
 			}
 		}.execute();
 
-		response.setCharacterEncoding("utf-8");
-		response.setHeader("Content-Disposition", "attachment; filename=" + columnName + "");
+		response.setCharacterEncoding(IOUtil.CHARSET_UTF_8);
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + toResponseAttachmentFileName(request, response, columnName));
 
 		InputStream in = null;
 		OutputStream out = null;
@@ -735,7 +736,8 @@ public class DataController extends AbstractSchemaConnTableController
 			@RequestParam("file") String fileName) throws Throwable
 	{
 		response.setCharacterEncoding(RESPONSE_ENCODING);
-		response.setHeader("Content-Disposition", "attachment; filename=" + fileName + "");
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + toResponseAttachmentFileName(request, response, fileName));
 
 		OutputStream out = null;
 

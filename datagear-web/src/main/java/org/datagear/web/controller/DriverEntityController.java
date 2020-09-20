@@ -245,7 +245,8 @@ public class DriverEntityController extends AbstractController
 	public void export(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam(value = "id", required = false) String[] driverEntityIds) throws Exception
 	{
-		response.addHeader("Content-Disposition", "attachment;filename=drivers.zip");
+		response.addHeader("Content-Disposition",
+				"attachment;filename=" + toResponseAttachmentFileName(request, response, "drivers.zip"));
 		response.setContentType("application/octet-stream");
 
 		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());
@@ -393,8 +394,9 @@ public class DriverEntityController extends AbstractController
 	{
 		DriverEntity driverEntity = this.driverEntityManager.get(id);
 
-		response.setCharacterEncoding("UTF-8");
-		response.setHeader("Content-Disposition", "attachment; filename=" + fileName + "");
+		response.setCharacterEncoding(IOUtil.CHARSET_UTF_8);
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + toResponseAttachmentFileName(request, response, fileName));
 		OutputStream out = response.getOutputStream();
 
 		if (driverEntity != null)

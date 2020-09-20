@@ -13,11 +13,13 @@
 			<input type="hidden" name="dashboardFileName" value="" />
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='dashboard.import.selectFile' /></label>
+					<label title="<@spring.message code='dashboard.import.desc' />">
+						<@spring.message code='dashboard.import.selectFile' />
+					</label>
 				</div>
 				<div class="form-item-value">
 					<input type="hidden" name="inputForValidate" value="" />
-					<div class="fileinput-button" title="<@spring.message code='dashboard.import.desc' />">
+					<div class="fileinput-button">
 						<@spring.message code='select' /><input type="file" accept=".html, .htm, .zip" class="ignore">
 					</div>
 					<div class="upload-file-info"></div>
@@ -33,10 +35,12 @@
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='dashboard.templateName' /></label>
+					<label title="<@spring.message code='dashboard.import.templateName.desc' />">
+						<@spring.message code='dashboard.templateName' />
+					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="template" value="" class="ui-widget ui-widget-content" placeholder="<@spring.message code='dashboard.import.template.desc' />" />
+					<input type="text" name="template" value="" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 		</div>

@@ -4,6 +4,7 @@
 
 package org.datagear.web.controller;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
@@ -617,6 +619,24 @@ public abstract class AbstractController
 			return null;
 
 		return pathInfo.substring(index + pathPrefix.length());
+	}
+
+	/**
+	 * 将文件名转换为作为响应下载文件名。
+	 * <p>
+	 * 此方法会对处理中文乱码问题。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
+	protected String toResponseAttachmentFileName(HttpServletRequest request, HttpServletResponse response,
+			String fileName) throws IOException
+	{
+		return new String(fileName.getBytes(RESPONSE_ENCODING), IOUtil.CHARSET_ISO_8859_1);
 	}
 
 	/**

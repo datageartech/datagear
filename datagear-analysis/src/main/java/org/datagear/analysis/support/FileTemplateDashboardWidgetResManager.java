@@ -149,6 +149,13 @@ public class FileTemplateDashboardWidgetResManager extends AbstractTemplateDashb
 	}
 
 	@Override
+	public void copyTo(String id, File directory) throws IOException
+	{
+		File myDirectory = FileUtil.getDirectory(this.rootDirectory, id);
+		IOUtil.copy(myDirectory, directory, false);
+	}
+
+	@Override
 	public boolean containsResource(String id, String name)
 	{
 		File file = getFile(id, name, false);

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -549,6 +550,40 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute(KEY_READONLY, true);
 
 		return "/analysis/dashboard/dashboard_form";
+	}
+
+	@RequestMapping("/export")
+	public void export(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@RequestParam("id") String id) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
+
+		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+
+		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
+		dashboardWidgetResManager.copyTo(dashboard.getId(), tmpDirectory);
+
+		response.addHeader("Content-Disposition",
+				"attachment;filename=" + toResponseAttachmentFileName(request, response, dashboard.getName() + ".zip"));
+		response.setContentType("application/octet-stream");
+
+		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());
+
+		try
+		{
+			IOUtil.writeFileToZipOutputStream(zout, tmpDirectory, "");
+		}
+		finally
+		{
+			zout.flush();
+			zout.close();
+		}
 	}
 
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)

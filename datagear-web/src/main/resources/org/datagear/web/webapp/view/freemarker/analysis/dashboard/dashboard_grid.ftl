@@ -26,14 +26,19 @@ selectOperation 是否选择操作，允许为null
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 			<#else>
-				<input name="addButton" type="button" value="<@spring.message code='add' />" />
-				<input name="importButton" type="button" value="<@spring.message code='import' />" />
+				<div class="addGroup">
+					<input name="addButton" type="button" value="<@spring.message code='add' />" />
+					<select class="addGroupSelect">
+						<option value="importDashboard"><@spring.message code='import' /></option>
+					</select>
+				</div>
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />
 				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
 				<input name="showButton" type="button" value="<@spring.message code='dashboard.show' />" />
 				<#if !(currentUser.anonymous)>
 				<input name="shareButton" type="button" value="<@spring.message code='share' />" />
 				</#if>
+				<input name="exportButton" type="button" value="<@spring.message code='export' />" />
 				<input name="deleteButton" type="button" value="<@spring.message code='delete' />" />
 			</#if>
 		</div>
@@ -58,8 +63,25 @@ selectOperation 是否选择操作，允许为null
 (function(po)
 {
 	$.initButtons(po.element(".operation"));
+	po.element(".addGroupSelect").selectmenu(
+	{
+		appendTo: po.element(),
+		classes:
+		{
+	          "ui-selectmenu-button": "ui-button-icon-only splitbutton-select",
+	          "ui-selectmenu-menu": "ui-widget-shadow ui-widget ui-widget-content"
+	    },
+		select: function(event, ui)
+    	{
+    		var action = $(ui.item).attr("value");
+    		
+    		if(action == "importDashboard")
+    			po.open(po.url("import"));
+    	}
+	});
+	po.element(".addGroup").controlgroup();
 	po.initDataFilter();
-
+	
 	po.currentUser = <@writeJson var=currentUser />;
 	
 	po.url = function(action)
@@ -82,11 +104,6 @@ selectOperation 是否选择操作，允许为null
 			}
 			</#if>
 		});
-	});
-	
-	po.element("input[name=importButton]").click(function()
-	{
-		po.open(po.url("import"));
 	});
 	
 	po.element("input[name=editButton]").click(function()
@@ -136,6 +153,16 @@ selectOperation 是否选择操作，允许为null
 		{
 			var showUrl = po.url("show/"+row.id+"/");
 			window.open(showUrl, showUrl);
+		});
+	});
+
+	po.element("input[name=exportButton]").click(function()
+	{
+		po.executeOnSelect(function(row)
+		{
+			var data = {"id" : row.id};
+			
+			po.open(po.url("export"), { target: "_blank", data : data });
 		});
 	});
 	

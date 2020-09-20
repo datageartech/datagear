@@ -112,6 +112,15 @@ public interface TemplateDashboardWidgetResManager
 	void copyFrom(String id, File directory) throws IOException;
 
 	/**
+	 * 将指定{@linkplain TemplateDashboardWidget#getId()}的所有资源拷贝至目标目录。
+	 * 
+	 * @param id
+	 * @param directory
+	 * @throws IOException
+	 */
+	void copyTo(String id, File directory) throws IOException;
+
+	/**
 	 * 是否包含指定名称的资源。
 	 * 
 	 * @param id
