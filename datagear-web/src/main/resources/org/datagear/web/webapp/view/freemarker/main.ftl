@@ -1253,15 +1253,15 @@ ${detectNewVersionScript}
 			</ul>
 			<div id="${pageId}-nav-dataSource" class="ui-widget ui-widget-content schema-panel">
 				<div class="schema-panel-head">
+					<div class="schema-panel-form ui-widget ui-widget-content ui-corner-all search">
+						<form id="schemaSearchForm" action="javascript:void(0);">
+							<div id="schemaSearchSwitch" class="schema-search-switch ui-button-icon-only"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
+							<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" /></div>
+							<button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><@spring.message code='find' /></button>
+							<input name="pageSize" type="hidden" value="100" />
+						</form>
+					</div>
 					<div class="schema-panel-operation">
-						<div class="ui-widget ui-widget-content ui-corner-all search">
-							<form id="schemaSearchForm" action="javascript:void(0);">
-								<div id="schemaSearchSwitch" class="schema-search-switch"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
-								<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" /></div>
-								<button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><@spring.message code='find' /></button>
-								<input name="pageSize" type="hidden" value="100" />
-							</form>
-						</div>
 						<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 						<ul id="schemaOperationMenu" class="lightweight-menu">
 							<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
@@ -1287,6 +1287,18 @@ ${detectNewVersionScript}
 				</div>
 			</div>
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
+				<div class="dataAnalysis-panel-head">
+					<div class="analysis-project-current ui-widget ui-widget-content ui-corner-all">
+						<div class="analysis-project-current-value">我的数据分析项目
+						</div>
+						<div class="analysis-project-current-reset ui-button-icon-only">
+							<span class="ui-icon ui-icon-cancel"></span>
+						</div>
+					</div>
+					<div class="analysis-project-operation">
+						<button id="addAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-analysis-project-button" title=""><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+					</div>
+				</div>
 				<div class="dataAnalysis-panel-content">
 					<ul>
 						<li class="item-dataset" tabId="dataAnalysis-dataSet">
