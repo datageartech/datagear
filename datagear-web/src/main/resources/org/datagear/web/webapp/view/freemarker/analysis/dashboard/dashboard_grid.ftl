@@ -68,7 +68,7 @@ selectOperation 是否选择操作，允许为null
 		appendTo: po.element(),
 		classes:
 		{
-	          "ui-selectmenu-button": "ui-button-icon-only splitbutton-select",
+	          "ui-selectmenu-button": "ui-button-icon-only",
 	          "ui-selectmenu-menu": "ui-widget-shadow ui-widget ui-widget-content"
 	    },
 		select: function(event, ui)
