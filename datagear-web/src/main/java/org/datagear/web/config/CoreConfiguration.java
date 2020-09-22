@@ -47,6 +47,7 @@ import org.datagear.dataexchange.support.JsonDataImportService;
 import org.datagear.dataexchange.support.SqlDataExportService;
 import org.datagear.dataexchange.support.SqlDataImportService;
 import org.datagear.management.dbversion.DbVersionManager;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
@@ -57,6 +58,7 @@ import org.datagear.management.service.RoleUserService;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.service.UserService;
+import org.datagear.management.service.impl.AnalysisProjectServiceImpl;
 import org.datagear.management.service.impl.AuthorizationServiceImpl;
 import org.datagear.management.service.impl.DataSetEntityServiceImpl;
 import org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl;
@@ -554,6 +556,13 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
+	public AnalysisProjectService analysisProjectService() throws Exception
+	{
+		AnalysisProjectService bean = new AnalysisProjectServiceImpl(this.sqlSessionFactory().getObject());
+		return bean;
+	}
+
+	@Bean
 	public SqlHistoryService sqlHistoryService() throws Exception
 	{
 		SqlHistoryServiceImpl bean = new SqlHistoryServiceImpl(this.sqlSessionFactory().getObject());
@@ -776,6 +785,7 @@ public class CoreConfiguration implements InitializingBean
 			resourceServices.add(this.dataSetEntityService());
 			resourceServices.add(this.htmlChartWidgetEntityService());
 			resourceServices.add(this.htmlTplDashboardWidgetEntityService());
+			resourceServices.add(this.analysisProjectService());
 		}
 
 		// 处理循环依赖

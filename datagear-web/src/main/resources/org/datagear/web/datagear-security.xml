@@ -105,6 +105,7 @@
 				<beans:ref bean="dataSetEntityService" />
 				<beans:ref bean="htmlChartWidgetEntityService" />
 				<beans:ref bean="htmlTplDashboardWidgetEntityService" />
+				<beans:ref bean="analysisProjectService" />
 			</beans:list>
 		</beans:property>
 	</beans:bean>

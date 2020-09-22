@@ -23,6 +23,9 @@
 		 * 			{
 		 * 				//可选，打开目标：document.body 页面内jquery对话框；"_blank" 新网页；"_file" 文件下载
 		 * 				target : document.body,
+		 * 
+		 *              //当target是页内元素时，是否作打开为对话框，默认为：true
+		 *              asDialog: true,
 		 * 				
 		 *				//可选，传递给新页面的参数，可以在目标页面通过$.pageParam(dom)获取
 		 * 				pageParam : undefined,
@@ -39,45 +42,47 @@
 		 */
 		open : function(url, options)
 		{
-			if(options && (options.target == "_blank" || options.target == "_file"))
+			options = (options || {});
+			
+			if(options.target == "_blank")
 			{
-				if(options.target == "_blank")
+				//使用window.open()如果options.data很大的话会使URL超长导致请求失败，因而改为postOnForm
+				
+				//url = url + (options.data ? "?" + $.param(options.data) : "");
+				//window.open(url);
+				
+				$.postOnForm(url, {"data" : options.data, "target" : "_blank"});
+			}
+			else if(options.target == "_file")
+			{
+				//使用<a>标签如果options.data很大的话会使URL超长，因而改为postOnForm()方案
+				
+				/*
+				url = url + (options.data ? "?" + $.param(options.data) : "");
+				
+				//对于文件下载，采用window.open会使浏览器闪烁，而采用<a>标签不会
+				var $fileLink = $("#_file_download_link");
+				if($fileLink.length == 0)
 				{
-					//使用window.open()如果options.data很大的话会使URL超长导致请求失败，因而改为postOnForm
-					
-					//url = url + (options.data ? "?" + $.param(options.data) : "");
-					//window.open(url);
-					
-					$.postOnForm(url, {"data" : options.data, "target" : "_blank"});
+					$fileLink = $("<a />").attr("id", "_file_download_link")
+						.css("width", "0px").css("height", "0px").appendTo(document.body);
 				}
-				else
-				{
-					//使用<a>标签如果options.data很大的话会使URL超长，因而改为postOnForm()方案
-					
-					/*
-					url = url + (options.data ? "?" + $.param(options.data) : "");
-					
-					//对于文件下载，采用window.open会使浏览器闪烁，而采用<a>标签不会
-					var $fileLink = $("#_file_download_link");
-					if($fileLink.length == 0)
-					{
-						$fileLink = $("<a />").attr("id", "_file_download_link")
-							.css("width", "0px").css("height", "0px").appendTo(document.body);
-					}
-					
-					$fileLink.attr("href", url);
-					$fileLink[0].click();//$fileLink.click()无法触发下载动作
-					*/
-					
-					$.postOnForm(url, {"data" : options.data});
-				}
+				
+				$fileLink.attr("href", url);
+				$fileLink[0].click();//$fileLink.click()无法触发下载动作
+				*/
+				
+				$.postOnForm(url, {"data" : options.data});
 			}
 			else
 			{
+				var successCallback = options.success;
+				
 				options = $.extend(
 					{
 						title : undefined, 
 						target : document.body,
+						asDialog: true,
 						pageParam : undefined,
 						pinTitleButton : false,
 						modal : true,
@@ -95,14 +100,19 @@
 							if(options.pageParam)
 								$.pageParam($dialog, options.pageParam);
 							
-							$._dialog($dialog, options);
+							if(options.asDialog)
+								$._dialog($dialog, options);
+							
 							$dialog.html(data);
 							
-							if(!options.title)
+							if(options.asDialog && !options.title)
 							{
 								var title = $("> title", $dialog).text();
 								$dialog.dialog( "option", "title", title);
 							}
+							
+							if(successCallback)
+								successCallback(data, textStatus, jqXHR);
 						},
 						type : "POST"
 					});

@@ -1179,9 +1179,63 @@ ${detectNewVersionScript}
 		
 		po.bindTabsMenuHiddenEvent(po.mainTabs);
 		
+		po.element(".analysis-project-operation-group").controlgroup();
+		
 		po.element(".analysis-project-current-value").click(function()
 		{
-			po.element(".analysis-project-list-panel").toggle();
+			var panel = po.element(".analysis-project-list-panel");
+			var panelContent = $(".analysis-project-list-panel-content", panel);
+			
+			if(panel.is(":hidden"))
+			{
+				panel.show();
+				
+				var loaded = panelContent.hasClass("analysis-project-loaded");
+				
+				if(!loaded)
+				{
+					po.open(contextPath+"/analysis/project/select",
+					{
+						"target": panelContent,
+						"asDialog": false,
+						"pageParam":
+						{
+							"afterSave" : function(analysisProject)
+							{
+								console.dir(analysisProject);
+							}
+						},
+						"success": function()
+						{
+							panelContent.addClass("analysis-project-loaded");
+						}
+					});
+				}
+			}
+			else
+				panel.hide();
+		});
+		
+		po.element("#addAnalysisProjectButton").click(function()
+		{
+			po.open(contextPath+"/analysis/project/add",
+			{
+				"pageParam" :
+				{
+					"afterSave" : function(analysisProject)
+					{
+						console.dir(analysisProject);
+					}
+				}
+			});
+		});
+
+		po.element("#manageAnalysisProjectButton").click(function()
+		{
+			var options = {};
+			$.setGridPageHeightOption(options);
+			
+			po.open(contextPath+"/analysis/project/pagingQuery", options);
 		});
 		
 		po.element().on("click", function(event)
@@ -1313,10 +1367,14 @@ ${detectNewVersionScript}
 						</div>
 					</div>
 					<div class="analysis-project-operation">
-						<button id="addAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-analysis-project-button" title=""><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+						<div class="analysis-project-operation-group">
+							<button id="addAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-analysis-project-button" title=""><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+							<button id="manageAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only manage-analysis-project-button" title="<@spring.message code='manage' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='manage' /></button>
+						</div>
 					</div>
 					<div class="analysis-project-list-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
-						数据分析项目列表
+						<div class="analysis-project-list-panel-head"></div>
+						<div class="analysis-project-list-panel-content minor-dataTable"></div>
 					</div>
 				</div>
 				<div class="dataAnalysis-panel-content">

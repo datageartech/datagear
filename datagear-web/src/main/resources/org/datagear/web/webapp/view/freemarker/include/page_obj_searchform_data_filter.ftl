@@ -50,6 +50,7 @@ page_js_obj.jsp
 		
 		$ele.selectmenu(
 		{
+			appendTo: po.searchForm(),
 			change: function(event, ui)
 			{
 				var val = ui.item.value;

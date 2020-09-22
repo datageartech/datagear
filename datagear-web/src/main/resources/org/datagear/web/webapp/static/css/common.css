@@ -281,8 +281,8 @@ form .form-foot .ui-button{
 .ui-controlgroup .ui-button-icon-only{
 	width: 1em;/*减小图标宽度*/
 }
-.ui-controlgroup .ui-button-icon-only .ui-icon{
-	top: 30%;/*图标按钮，上下居中*/
+.ui-controlgroup .ui-selectmenu-button.ui-button-icon-only .ui-icon{
+	top: 30%;/*下拉选择组件的图标按钮，上下居中*/
 }
 .ui-tabs .ui-tabs-panel{
 	padding: 0.5em 0.7em;
@@ -1038,7 +1038,7 @@ table.dataTable tbody tr td select{
 .main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-current{
 	position: absolute;
 	left: 0;
-	right: 2.2em;
+	right: 4.2em;
 	top: 0.3em;
 	bottom: 0;
 	box-sizing: border-box;
@@ -1069,24 +1069,54 @@ table.dataTable tbody tr td select{
 .main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-operation{
     position: absolute;
     right: 0;
-    width: 2em;
+    width: 4em;
     top: 0.3em;
     bottom: 0;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
+    text-align: right;
 }
-.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-operation .add-analysis-project-button{
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-operation .analysis-project-operation-group{
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-operation .ui-button{
 	border: 0px;
-    width: 100%;
+    width: 2em;
     height: 100%;
 }
 .main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel{
 	position: fixed;
-	width: 41%;
-	height: 41%;
-	margin-top: 2.2em;
+	width: 60%;
+	height: 60%;
+	margin-top: 2.3em;
 	z-index: 2;
+	display: none;
+	font-size: 0.95em;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content{
+	position: absolute;
+    left: 0.41em;
+    top: 0.41em;
+    right: 0.41em;
+    bottom: 0.41em;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .dialog-content-container{
+	position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .page-grid-analysisProject.page-grid .content{
+	bottom: 2.1em;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .page-grid-analysisProject .pagination .to-page,
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .page-grid-analysisProject .pagination .label-pss{
 	display: none;
 }
 .main-page-content .dataAnalysis-panel .dataAnalysis-panel-content{
