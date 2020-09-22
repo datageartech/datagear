@@ -548,6 +548,19 @@ ${detectNewVersionScript}
 		return state;
 	};
 	
+	po.analysisProjectCurrentValue = function(analysisProject)
+	{
+		var $value = po.element(".analysis-project-current-value");
+		
+		if(analysisProject === undefined)
+			return $value.data("analysisProjectCurrentValue");
+		
+		var label = (analysisProject == null ? "" : analysisProject.name);
+		
+		$value.data("analysisProjectCurrentValue", analysisProject);
+		$value.html(label);
+	};
+	
 	po.newVersionDetected = function()
 	{
 		var detectedVersion = $.cookie("DETECTED_VERSION");
@@ -1188,6 +1201,8 @@ ${detectNewVersionScript}
 			
 			if(panel.is(":hidden"))
 			{
+				var _thisValue = this;
+				
 				panel.show();
 				
 				var loaded = panelContent.hasClass("analysis-project-loaded");
@@ -1200,9 +1215,10 @@ ${detectNewVersionScript}
 						"asDialog": false,
 						"pageParam":
 						{
-							"afterSave" : function(analysisProject)
+							"select" : function(analysisProject)
 							{
-								console.dir(analysisProject);
+								po.analysisProjectCurrentValue(analysisProject);
+								panel.hide();
 							}
 						},
 						"success": function()
@@ -1238,6 +1254,11 @@ ${detectNewVersionScript}
 			po.open(contextPath+"/analysis/project/pagingQuery", options);
 		});
 		
+		po.element(".analysis-project-current-reset").click(function()
+		{
+			po.analysisProjectCurrentValue(null);
+		});
+		
 		po.element().on("click", function(event)
 		{
 			var $p = po.element(".analysis-project-list-panel");
@@ -1249,6 +1270,8 @@ ${detectNewVersionScript}
 					$p.hide();
 			}
 		});
+		
+		po.analysisProjectCurrentValue(null);
 		
 		if(po.newVersionDetected())
 			$(".new-version-tip").css("display", "inline-block");
@@ -1360,16 +1383,15 @@ ${detectNewVersionScript}
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
 				<div class="dataAnalysis-panel-head">
 					<div class="analysis-project-current ui-widget ui-widget-content ui-corner-all">
-						<div class="analysis-project-current-value">我的数据分析项目
-						</div>
-						<div class="analysis-project-current-reset ui-button-icon-only">
+						<div class="analysis-project-current-value"></div>
+						<div class="analysis-project-current-reset ui-button-icon-only" title="<@spring.message code='main.analysisProject.currentValue.clear' />">
 							<span class="ui-icon ui-icon-cancel"></span>
 						</div>
 					</div>
 					<div class="analysis-project-operation">
 						<div class="analysis-project-operation-group">
-							<button id="addAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-analysis-project-button" title=""><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
-							<button id="manageAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only manage-analysis-project-button" title="<@spring.message code='manage' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='manage' /></button>
+							<button id="addAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-analysis-project-button" title="<@spring.message code='main.analysisProject.add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+							<button id="manageAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only manage-analysis-project-button" title="<@spring.message code='main.analysisProject.manage' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='manage' /></button>
 						</div>
 					</div>
 					<div class="analysis-project-list-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">

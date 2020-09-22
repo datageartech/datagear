@@ -230,7 +230,7 @@
 		 */
 		isInDialog : function(dom)
 		{
-			var $dialogFlag = $(dom).closest(".dialog-content-container");
+			var $dialogFlag = $(dom).closest(".dialog-content-container.ui-dialog-content");
 			
 			return ($dialogFlag && $dialogFlag.length > 0);
 		},
@@ -240,7 +240,7 @@
 		 */
 		getInDialog : function(dom)
 		{
-			var dialog = $(dom).closest(".dialog-content-container");
+			var dialog = $(dom).closest(".dialog-content-container.ui-dialog-content");
 			
 			return dialog;
 		},
