@@ -1179,6 +1179,23 @@ ${detectNewVersionScript}
 		
 		po.bindTabsMenuHiddenEvent(po.mainTabs);
 		
+		po.element(".analysis-project-current-value").click(function()
+		{
+			po.element(".analysis-project-list-panel").toggle();
+		});
+		
+		po.element().on("click", function(event)
+		{
+			var $p = po.element(".analysis-project-list-panel");
+			if(!$p.is(":hidden"))
+			{
+				var $target = $(event.target);
+				
+				if($target.closest(".analysis-project-current-value, .analysis-project-list-panel").length == 0)
+					$p.hide();
+			}
+		});
+		
 		if(po.newVersionDetected())
 			$(".new-version-tip").css("display", "inline-block");
 	});
@@ -1253,7 +1270,7 @@ ${detectNewVersionScript}
 			</ul>
 			<div id="${pageId}-nav-dataSource" class="ui-widget ui-widget-content schema-panel">
 				<div class="schema-panel-head">
-					<div class="schema-panel-form ui-widget ui-widget-content ui-corner-all search">
+					<div class="schema-panel-form ui-widget ui-widget-content ui-corner-all">
 						<form id="schemaSearchForm" action="javascript:void(0);">
 							<div id="schemaSearchSwitch" class="schema-search-switch ui-button-icon-only"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
 							<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" /></div>
@@ -1297,6 +1314,9 @@ ${detectNewVersionScript}
 					</div>
 					<div class="analysis-project-operation">
 						<button id="addAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-analysis-project-button" title=""><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+					</div>
+					<div class="analysis-project-list-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
+						数据分析项目列表
 					</div>
 				</div>
 				<div class="dataAnalysis-panel-content">

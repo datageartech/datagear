@@ -1081,6 +1081,14 @@ table.dataTable tbody tr td select{
     width: 100%;
     height: 100%;
 }
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel{
+	position: fixed;
+	width: 41%;
+	height: 41%;
+	margin-top: 2.2em;
+	z-index: 2;
+	display: none;
+}
 .main-page-content .dataAnalysis-panel .dataAnalysis-panel-content{
 	position: absolute;
     display: block;
