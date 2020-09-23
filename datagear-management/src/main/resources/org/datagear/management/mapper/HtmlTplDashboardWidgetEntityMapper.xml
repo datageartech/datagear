@@ -7,12 +7,23 @@
 		INSERT INTO DATAGEAR_HTML_DASHBOARD
 			(
 			HD_ID, HD_NAME, HD_TEMPLATE, HD_TEMPLATE_ENCODING, HD_CREATE_USER_ID,
-			HD_CREATE_TIME
+			HD_CREATE_TIME, HD_AP_ID
 			)
 		VALUES
 			(
 			#{entity.id}, #{entity.name}, #{entity.templatesJson}, #{entity.templateEncoding}, #{entity.createUser.id},
-			#{entity.createTime}
+			#{entity.createTime}, #{entity.analysisProject.id, jdbcType=VARCHAR}
+			)
+	</insert>
+	
+	<insert id="insertDataSetRelation">
+		INSERT INTO DATAGEAR_HD_DSF
+			(
+			HD_ID, DS_ID, DS_ORDER
+			)
+		VALUES
+			(
+			#{widgetId}, #{dataSetId}, #{order}
 			)
 	</insert>
 	
@@ -20,7 +31,8 @@
 		UPDATE DATAGEAR_HTML_DASHBOARD SET
 			HD_NAME = #{entity.name},
 			HD_TEMPLATE = #{entity.templatesJson},
-			HD_TEMPLATE_ENCODING = #{entity.templateEncoding}
+			HD_TEMPLATE_ENCODING = #{entity.templateEncoding},
+			HD_AP_ID = #{entity.analysisProject.id, jdbcType=VARCHAR}
 		WHERE
 			HD_ID = #{entity.id}
 	</update>
@@ -34,6 +46,12 @@
 	
 	<delete id="deleteById">
 		DELETE FROM DATAGEAR_HTML_DASHBOARD
+		WHERE
+			HD_ID = #{id}
+	</delete>
+	
+	<delete id="deleteDataSetRelationById">
+		DELETE FROM DATAGEAR_HD_DSF
 		WHERE
 			HD_ID = #{id}
 	</delete>
@@ -52,11 +70,7 @@
 			T.DATA_ID as ${_iq_}dataId${_iq_},
 			T.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
 		FROM
-			(
-				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
-				<include refid="queryViewDataPermissionId" />
-				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
-			) T
+			(<include refid="queryViewDataIdPermission" />) T
 		WHERE
 			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
 	</select>
@@ -92,23 +106,6 @@
 		<include refid="common.pagingQueryFoot" />
 	</select>
 	
-	<delete id="deleteDataSetRelationById">
-		DELETE FROM DATAGEAR_HD_DSF
-		WHERE
-			HD_ID = #{id}
-	</delete>
-	
-	<insert id="insertDataSetRelation">
-		INSERT INTO DATAGEAR_HD_DSF
-			(
-			HD_ID, DS_ID, DS_ORDER
-			)
-		VALUES
-			(
-			#{widgetId}, #{dataSetId}, #{order}
-			)
-	</insert>
-	
 	<sql id="queryViewDataPermission">
 		<choose><when test="DP_CURRENT_USER == null">
 		<include refid="queryView" />
@@ -119,16 +116,40 @@
 		FROM
 			(<include refid="queryView" />) T0
 			INNER JOIN
+			(<include refid="queryViewDataIdPermission" />) T1
+		ON
+			T0.${_iq_}id${_iq_} = T1.DATA_ID
+		WHERE
+			T1.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION}
+		</otherwise></choose>
+	</sql>
+	
+	<sql id="queryViewDataIdPermission">
+		SELECT
+			T0.HD_ID AS DATA_ID,
+			(
+				CASE
+					WHEN T2.DATA_PERMISSION IS NULL THEN T1.DATA_PERMISSION
+					WHEN T1.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION} THEN T1.DATA_PERMISSION
+					ELSE T2.DATA_PERMISSION
+				END
+			) AS DATA_PERMISSION
+		FROM
+			DATAGEAR_HTML_DASHBOARD T0
+		LEFT JOIN
 			(
 				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
 				<include refid="queryViewDataPermissionId" />
 				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
 			) T1
 		ON
-			T0.${_iq_}id${_iq_} = T1.DATA_ID
-		WHERE
-			T1.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION}
-		</otherwise></choose>
+			T0.HD_ID = T1.DATA_ID
+		LEFT JOIN
+			(
+				<include refid="org.datagear.management.domain.AnalysisProject.queryViewIdPermissionForAnalysisProjectAwareEntity" />
+			) T2
+		ON
+			T0.HD_AP_ID = T2.AP_ID
 	</sql>
 	
 	<sql id="queryViewDataPermissionId">
@@ -147,13 +168,18 @@
 			A.HD_TEMPLATE_ENCODING AS ${_iq_}templateEncoding${_iq_},
 			A.HD_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			<include refid="common.fieldsForCreateUser" />,
-			A.HD_CREATE_TIME AS ${_iq_}createTime${_iq_}
+			A.HD_CREATE_TIME AS ${_iq_}createTime${_iq_},
+			AP.*
 		FROM
 			DATAGEAR_HTML_DASHBOARD A
 		LEFT JOIN
 			DATAGEAR_USER USR
 		ON
 			A.HD_CREATE_USER_ID = USR.USER_ID
+		LEFT JOIN
+			(<include refid="org.datagear.management.domain.AnalysisProject.queryViewForAnalysisProjectAwareEntity" />) AP
+		ON
+			A.HD_AP_ID = AP.${_iq_}analysisProject.id${_iq_}
 	</sql>
 	
 	<sql id="queryCondition">

@@ -14,11 +14,13 @@ readonly 是否只读操作，允许为null
 <title><#include "../../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
 <body>
+<#include "../../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dashboard">
 	<form id="${pageId}-form" action="${contextPath}/analysis/dashboard/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(dashboard.id)!''?html}" />
+			<#include "../include/analysisProjectAware_form_select.ftl" >
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.name' /></label>
@@ -116,12 +118,12 @@ readonly 是否只读操作，允许为null
 		</div>
 	</form>
 </div>
-<#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)
 {
 	$.initButtons(po.element());
+	po.initAnalysisProject("${(dashboard.analysisProject.id)!''?js_string}", "${(dashboard.analysisProject.name)!''?js_string}");
 	var tewHeight = $(window).height()*5/9;
 	po.element(".template-editor-wrapper").height(tewHeight);
 	po.element(".form-item-value-template").height(tewHeight + 30);

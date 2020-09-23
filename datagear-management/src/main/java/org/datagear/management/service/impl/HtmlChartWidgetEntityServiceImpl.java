@@ -23,6 +23,8 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
@@ -221,6 +223,8 @@ public class HtmlChartWidgetEntityServiceImpl
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
+		params.put(AnalysisProjectAwareEntity.DATA_PERMISSION_PARAM_RESOURCE_TYPE_ANALYSIS_PROJECT,
+				AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
 		addDataPermissionParameters(params, user, getResourceType(), false, true);
 	}
 

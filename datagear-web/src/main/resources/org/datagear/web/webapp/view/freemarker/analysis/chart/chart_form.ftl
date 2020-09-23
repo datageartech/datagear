@@ -14,11 +14,13 @@ readonly 是否只读操作，允许为null
 <title><#include "../../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
 <body>
+<#include "../../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-chart">
 	<form id="${pageId}-form" action="${contextPath}/analysis/chart/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(chart.id)!''?html}" />
+			<#include "../include/analysisProjectAware_form_select.ftl" >
 			<div class="form-item">
 				<div class="form-item-label">
 					<label><@spring.message code='chart.name' /></label>
@@ -108,12 +110,12 @@ readonly 是否只读操作，允许为null
 		<div class="data-set-param-value-panel-content"></div>
 	</div>
 </div>
-<#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)
 {
 	$.initButtons(po.element());
+	po.initAnalysisProject("${(chart.analysisProject.id)!''?js_string}", "${(chart.analysisProject.name)!''?js_string}");
 	var dataSetWrapperHeight = $(window).height()/5*2;
 	po.element(".data-set-wrapper").height(dataSetWrapperHeight);
 	po.element(".form-item-value-chartDataSet").height(dataSetWrapperHeight + 35);
