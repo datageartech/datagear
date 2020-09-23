@@ -18,15 +18,13 @@ selectOperation 是否选择操作，允许为null
 <#include "../../include/page_js_obj.ftl">
 <div id="${pageId}" class="page-grid page-grid-analysisProject">
 	<div class="head">
-		<div class="search">
+		<div class="search search-analysisProject">
 			<#include "../../include/page_obj_searchform_data_filter.ftl">
 		</div>
 		<div class="operation">
 			<#if selectOperation>
 				<input name="confirmButton" type="button" class="recommended" value="<@spring.message code='confirm' />" />
-				<!--
-				<input name="viewButton" type="button" value="<@spring.message code='view' />" />
-				-->
+				<input name="viewButton" type="button" class="view-button" value="<@spring.message code='view' />" />
 			<#else>
 				<input name="addButton" type="button" value="<@spring.message code='add' />" />
 				<input name="editButton" type="button" value="<@spring.message code='edit' />" />

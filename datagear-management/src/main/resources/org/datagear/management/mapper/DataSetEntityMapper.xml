@@ -6,11 +6,13 @@
 	<insert id="insert">
 		INSERT INTO DATAGEAR_DATA_SET
 			(
-			DS_ID, DS_NAME, DS_TYPE, DS_CREATE_USER_ID, DS_CREATE_TIME
+				DS_ID, DS_NAME, DS_TYPE, DS_CREATE_USER_ID, DS_CREATE_TIME,
+				DS_AP_ID
 			)
 		VALUES
 			(
-			#{entity.id}, #{entity.name}, #{entity.dataSetType}, #{entity.createUser.id}, #{entity.createTime}
+				#{entity.id}, #{entity.name}, #{entity.dataSetType}, #{entity.createUser.id}, #{entity.createTime},
+				#{entity.analysisProject.id, jdbcType=VARCHAR}
 			)
 	</insert>
 	
@@ -121,7 +123,8 @@
 	
 	<update id="update">
 		UPDATE DATAGEAR_DATA_SET SET
-			DS_NAME = #{entity.name}
+			DS_NAME = #{entity.name},
+			DS_AP_ID = #{entity.analysisProject.id, jdbcType=VARCHAR}
 		WHERE
 			DS_ID = #{entity.id}
 	</update>
@@ -379,11 +382,7 @@
 			T.DATA_ID as ${_iq_}dataId${_iq_},
 			T.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
 		FROM
-			(
-				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
-				<include refid="queryViewDataPermissionId" />
-				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
-			) T
+			(<include refid="queryViewDataIdPermission" />) T
 		WHERE
 			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
 	</select>
@@ -428,17 +427,41 @@
 			T1.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
 		FROM
 			(<include refid="queryView" />) T0
-			INNER JOIN
+		INNER JOIN
+			(<include refid="queryViewDataIdPermission" />) T1
+		ON
+			T0.${_iq_}id${_iq_} = T1.DATA_ID
+		WHERE
+			T1.DATA_PERMISSION IS NOT NULL AND T1.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION}
+		</otherwise></choose>
+	</sql>
+	
+	<sql id="queryViewDataIdPermission">
+		SELECT
+			T0.DS_ID AS DATA_ID,
+			(
+				CASE
+					WHEN T2.DATA_PERMISSION IS NULL THEN T1.DATA_PERMISSION
+					WHEN T1.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION} THEN T1.DATA_PERMISSION
+					ELSE T2.DATA_PERMISSION
+				END
+			) AS DATA_PERMISSION
+		FROM
+			DATAGEAR_DATA_SET T0
+		LEFT JOIN
 			(
 				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
 				<include refid="queryViewDataPermissionId" />
 				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
 			) T1
 		ON
-			T0.${_iq_}id${_iq_} = T1.DATA_ID
-		WHERE
-			T1.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION}
-		</otherwise></choose>
+			T0.DS_ID = T1.DATA_ID
+		LEFT JOIN
+			(
+				<include refid="org.datagear.management.domain.AnalysisProject.queryViewIdPermissionForAnalysisProjectAwareEntity" />
+			) T2
+		ON
+			T0.DS_AP_ID = T2.AP_ID
 	</sql>
 	
 	<sql id="queryViewDataPermissionId">
@@ -456,13 +479,18 @@
 			A.DS_TYPE AS ${_iq_}dataSetType${_iq_},
 			A.DS_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
 			<include refid="common.fieldsForCreateUser" />,
-			A.DS_CREATE_TIME AS ${_iq_}createTime${_iq_}
+			A.DS_CREATE_TIME AS ${_iq_}createTime${_iq_},
+			AP.*
 		FROM
 			DATAGEAR_DATA_SET A
 		LEFT JOIN
 			DATAGEAR_USER USR
 		ON
 			A.DS_CREATE_USER_ID = USR.USER_ID
+		LEFT JOIN
+			(<include refid="org.datagear.management.domain.AnalysisProject.queryViewForAnalysisProjectAwareEntity" />) AP
+		ON
+			A.DS_AP_ID = AP.${_iq_}analysisProject.id${_iq_}
 	</sql>
 	
 	<sql id="queryCondition">

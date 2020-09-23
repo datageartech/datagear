@@ -1112,6 +1112,9 @@ table.dataTable tbody tr td select{
     right: 0;
     bottom: 0;
 }
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .page-grid-analysisProject.page-grid .head .view-button{
+	display: none;
+}
 .main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .page-grid-analysisProject.page-grid .content{
 	bottom: 2.1em;
 }

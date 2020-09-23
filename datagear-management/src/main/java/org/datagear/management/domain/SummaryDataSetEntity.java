@@ -37,6 +37,8 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
+	private AnalysisProject analysisProject = null;
+
 	public SummaryDataSetEntity()
 	{
 		super();
@@ -98,6 +100,18 @@ public class SummaryDataSetEntity extends AbstractDataSet implements DataSetEnti
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	@Override
+	public AnalysisProject getAnalysisProject()
+	{
+		return analysisProject;
+	}
+
+	@Override
+	public void setAnalysisProject(AnalysisProject analysisProject)
+	{
+		this.analysisProject = analysisProject;
 	}
 
 	@Override

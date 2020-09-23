@@ -561,6 +561,93 @@ ${detectNewVersionScript}
 		$value.html(label);
 	};
 	
+	po.initAnalysisProjectWidgets = function()
+	{
+		po.element(".analysis-project-operation-group").controlgroup();
+		
+		po.element(".analysis-project-current-value").click(function()
+		{
+			var panel = po.element(".analysis-project-list-panel");
+			var panelContent = $(".analysis-project-list-panel-content", panel);
+			
+			if(panel.is(":hidden"))
+			{
+				var _thisValue = this;
+				
+				panel.show();
+				
+				var loaded = panelContent.hasClass("analysis-project-loaded");
+				
+				if(!loaded)
+				{
+					po.open(contextPath+"/analysis/project/select",
+					{
+						"target": panelContent,
+						"asDialog": false,
+						"pageParam":
+						{
+							"select" : function(analysisProject)
+							{
+								po.analysisProjectCurrentValue(analysisProject);
+								panel.hide();
+							}
+						},
+						"success": function()
+						{
+							panelContent.addClass("analysis-project-loaded");
+						}
+					});
+				}
+				else
+				{
+					//刷新列表
+					$(".search-analysisProject form", panelContent).submit();
+				}
+			}
+			else
+				panel.hide();
+		});
+		
+		po.element("#addAnalysisProjectButton").click(function()
+		{
+			po.open(contextPath+"/analysis/project/add",
+			{
+				"pageParam" :
+				{
+					"afterSave" : function(analysisProject)
+					{
+						console.dir(analysisProject);
+					}
+				}
+			});
+		});
+
+		po.element("#manageAnalysisProjectButton").click(function()
+		{
+			var options = {};
+			$.setGridPageHeightOption(options);
+			
+			po.open(contextPath+"/analysis/project/pagingQuery", options);
+		});
+		
+		po.element(".analysis-project-current-reset").click(function()
+		{
+			po.analysisProjectCurrentValue(null);
+		});
+		
+		po.element().on("click", function(event)
+		{
+			var $p = po.element(".analysis-project-list-panel");
+			if(!$p.is(":hidden"))
+			{
+				var $target = $(event.target);
+				
+				if($target.closest(".analysis-project-current-value, .analysis-project-list-panel").length == 0)
+					$p.hide();
+			}
+		});
+	};
+	
 	po.newVersionDetected = function()
 	{
 		var detectedVersion = $.cookie("DETECTED_VERSION");
@@ -1192,85 +1279,7 @@ ${detectNewVersionScript}
 		
 		po.bindTabsMenuHiddenEvent(po.mainTabs);
 		
-		po.element(".analysis-project-operation-group").controlgroup();
-		
-		po.element(".analysis-project-current-value").click(function()
-		{
-			var panel = po.element(".analysis-project-list-panel");
-			var panelContent = $(".analysis-project-list-panel-content", panel);
-			
-			if(panel.is(":hidden"))
-			{
-				var _thisValue = this;
-				
-				panel.show();
-				
-				var loaded = panelContent.hasClass("analysis-project-loaded");
-				
-				if(!loaded)
-				{
-					po.open(contextPath+"/analysis/project/select",
-					{
-						"target": panelContent,
-						"asDialog": false,
-						"pageParam":
-						{
-							"select" : function(analysisProject)
-							{
-								po.analysisProjectCurrentValue(analysisProject);
-								panel.hide();
-							}
-						},
-						"success": function()
-						{
-							panelContent.addClass("analysis-project-loaded");
-						}
-					});
-				}
-			}
-			else
-				panel.hide();
-		});
-		
-		po.element("#addAnalysisProjectButton").click(function()
-		{
-			po.open(contextPath+"/analysis/project/add",
-			{
-				"pageParam" :
-				{
-					"afterSave" : function(analysisProject)
-					{
-						console.dir(analysisProject);
-					}
-				}
-			});
-		});
-
-		po.element("#manageAnalysisProjectButton").click(function()
-		{
-			var options = {};
-			$.setGridPageHeightOption(options);
-			
-			po.open(contextPath+"/analysis/project/pagingQuery", options);
-		});
-		
-		po.element(".analysis-project-current-reset").click(function()
-		{
-			po.analysisProjectCurrentValue(null);
-		});
-		
-		po.element().on("click", function(event)
-		{
-			var $p = po.element(".analysis-project-list-panel");
-			if(!$p.is(":hidden"))
-			{
-				var $target = $(event.target);
-				
-				if($target.closest(".analysis-project-current-value, .analysis-project-list-panel").length == 0)
-					$p.hide();
-			}
-		});
-		
+		po.initAnalysisProjectWidgets();
 		po.analysisProjectCurrentValue(null);
 		
 		if(po.newVersionDetected())

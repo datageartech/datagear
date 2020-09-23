@@ -36,6 +36,8 @@ public class ExcelDataSetEntity extends ExcelDirectoryFileDataSet implements Dir
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
+	private AnalysisProject analysisProject = null;
+
 	public ExcelDataSetEntity()
 	{
 		super();
@@ -110,5 +112,17 @@ public class ExcelDataSetEntity extends ExcelDirectoryFileDataSet implements Dir
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	@Override
+	public AnalysisProject getAnalysisProject()
+	{
+		return analysisProject;
+	}
+
+	@Override
+	public void setAnalysisProject(AnalysisProject analysisProject)
+	{
+		this.analysisProject = analysisProject;
 	}
 }

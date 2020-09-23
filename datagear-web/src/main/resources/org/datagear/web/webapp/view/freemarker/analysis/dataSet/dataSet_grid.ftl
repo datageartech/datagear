@@ -213,6 +213,7 @@ boolean readonly 是否只读操作，默认为false
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='id' />", "id", true),
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='dataSet.name' />"), "name"),
 		dataSetTypeColumn,
+		$.buildDataTablesColumnSimpleOption("<@spring.message code='analysisProject.ownerAnalysisProject' />", "analysisProject.name"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createUser' />", "createUser.realName"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='dataSet.createTime' />", "createTime")
 	];

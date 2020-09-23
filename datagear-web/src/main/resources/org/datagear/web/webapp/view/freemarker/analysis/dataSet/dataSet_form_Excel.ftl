@@ -16,6 +16,7 @@ readonly 是否只读操作，允许为null
 </title>
 </head>
 <body>
+<#include "../../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-excel">
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
@@ -123,7 +124,6 @@ readonly 是否只读操作，允许为null
 	</form>
 	<#include "include/dataSet_form_html_preview_pvp.ftl" >
 </div>
-<#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
 <#include "include/dataSet_form_js_nameRow.ftl">
@@ -134,6 +134,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
+	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
 	po.element(".nameRow-radios").controlgroup();
 	po.element("#${pageId}-forceXls").buttonset();
 	po.element("#${pageId}-forceXls-${((dataSet.forceXls)!true)?string('true', 'false')}").click();

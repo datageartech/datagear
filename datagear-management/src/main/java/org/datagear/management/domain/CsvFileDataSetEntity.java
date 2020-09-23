@@ -36,6 +36,8 @@ public class CsvFileDataSetEntity extends CsvDirectoryFileDataSet implements Dir
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
+	private AnalysisProject analysisProject = null;
+
 	public CsvFileDataSetEntity()
 	{
 		super();
@@ -110,5 +112,17 @@ public class CsvFileDataSetEntity extends CsvDirectoryFileDataSet implements Dir
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	@Override
+	public AnalysisProject getAnalysisProject()
+	{
+		return analysisProject;
+	}
+
+	@Override
+	public void setAnalysisProject(AnalysisProject analysisProject)
+	{
+		this.analysisProject = analysisProject;
 	}
 }

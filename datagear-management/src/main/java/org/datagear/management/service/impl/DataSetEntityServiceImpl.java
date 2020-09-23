@@ -18,6 +18,8 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.connection.ConnectionSource;
+import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
@@ -387,6 +389,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (obj == null)
 			return null;
 
+		DataSetEntity initObj = obj;
+
 		if (DataSetEntity.DATA_SET_TYPE_SQL.equals(obj.getDataSetType()))
 			obj = getSqlDataSetEntityById(obj.getId());
 		else if (DataSetEntity.DATA_SET_TYPE_JsonValue.equals(obj.getDataSetType()))
@@ -404,6 +408,9 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 
 		if (obj == null)
 			return null;
+
+		// 这里必须设置全限值，为了效率，上述子类的底层查询并未返回全限值
+		obj.setDataPermission(initObj.getDataPermission());
 
 		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
 		params.put("dataSetId", obj.getId());
@@ -504,6 +511,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
+		params.put(AnalysisProjectAwareEntity.DATA_PERMISSION_PARAM_RESOURCE_TYPE_ANALYSIS_PROJECT,
+				AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
 		addDataPermissionParameters(params, user, getResourceType(), false, true);
 	}
 

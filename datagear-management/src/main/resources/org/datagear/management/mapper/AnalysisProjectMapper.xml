@@ -147,4 +147,43 @@
 		<include refid="commonDataPermission.dataFilterCondition" />
 		<include refid="common.queryCondition" />
 	</sql>
+	
+	<!-- 用于外部Mapper引用的公用SQL，下面的include必须采用全名，不然会出现死循环 -->
+	<sql id="queryViewForAnalysisProjectAwareEntity">
+		SELECT
+			T.${_iq_}id${_iq_} AS ${_iq_}analysisProject.id${_iq_},
+			T.${_iq_}name${_iq_} AS ${_iq_}analysisProject.name${_iq_},
+			T.${_iq_}desc${_iq_} AS ${_iq_}analysisProject.desc${_iq_},
+			T.${_iq_}createTime${_iq_} AS ${_iq_}analysisProject.createTime${_iq_},
+			T.${_iq_}createUser.id${_iq_} AS ${_iq_}analysisProject.createUser.id${_iq_},
+			T.${_iq_}createUser.name${_iq_} AS ${_iq_}analysisProject.createUser.name${_iq_},
+			T.${_iq_}createUser.realName${_iq_} AS ${_iq_}analysisProject.createUser.realName${_iq_},
+			T.${_iq_}createUser.admin${_iq_} AS ${_iq_}analysisProject.createUser.admin${_iq_},
+			T.${_iq_}createUser.anonymous${_iq_} AS ${_iq_}analysisProject.createUser.anonymous${_iq_},
+			T.${_iq_}createUser.createTime${_iq_} AS ${_iq_}analysisProject.createUser.createTime${_iq_}
+		FROM
+			(<include refid="org.datagear.management.domain.AnalysisProject.queryView" />) T
+	</sql>
+	
+	<!--
+		 用于外部AnalysisProjectAwareEntity实体处理权限级联引用的公用SQL，下面的include必须采用全名，不然会出现死循环。
+		 注意：
+		 引用方必须传递DP_RESOURCE_TYPE_ANALYSIS_PROJECT参数，且值为：AnalysisProject.AUTHORIZATION_RESOURCE_TYPE，
+		 因为此SQL片段通常作为第二处数据权限片段被引入，会出现DP_RESOURCE_TYPE冲突而导致逻辑出错。
+	-->
+	<sql id="queryViewIdPermissionForAnalysisProjectAwareEntity">
+		<bind name="DP_RESOURCE_TYPE" value="DP_RESOURCE_TYPE_ANALYSIS_PROJECT"/>
+		SELECT
+			T.DATA_ID as AP_ID,
+			T.DATA_PERMISSION
+		FROM
+			(
+				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
+				<include refid="org.datagear.management.domain.AnalysisProject.queryViewDataPermissionId" />
+				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
+			) T
+		WHERE
+			T.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION}
+	</sql>
+	
 </mapper>

@@ -36,6 +36,8 @@ public class JsonFileDataSetEntity extends JsonDirectoryFileDataSet implements D
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
+	private AnalysisProject analysisProject = null;
+
 	public JsonFileDataSetEntity()
 	{
 		super();
@@ -110,5 +112,17 @@ public class JsonFileDataSetEntity extends JsonDirectoryFileDataSet implements D
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	@Override
+	public AnalysisProject getAnalysisProject()
+	{
+		return analysisProject;
+	}
+
+	@Override
+	public void setAnalysisProject(AnalysisProject analysisProject)
+	{
+		this.analysisProject = analysisProject;
 	}
 }

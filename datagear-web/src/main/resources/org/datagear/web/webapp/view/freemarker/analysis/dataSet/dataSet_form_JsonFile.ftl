@@ -16,6 +16,7 @@ readonly 是否只读操作，允许为null
 </title>
 </head>
 <body>
+<#include "../../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-jsonFile">
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
@@ -80,7 +81,6 @@ readonly 是否只读操作，允许为null
 	</form>
 	<#include "include/dataSet_form_html_preview_pvp.ftl" >
 </div>
-<#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
 <script type="text/javascript">
@@ -90,6 +90,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
+	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
 	po.element("select[name='encoding']").selectmenu({ appendTo : po.element(), classes : { "ui-selectmenu-menu" : "encoding-selectmenu-menu" } });
 	po.initWorkspaceHeight();
 	po.initWorkspaceTabs(true);
