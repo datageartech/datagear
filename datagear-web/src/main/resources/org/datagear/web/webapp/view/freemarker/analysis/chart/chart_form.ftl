@@ -20,14 +20,14 @@ readonly 是否只读操作，允许为null
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(chart.id)!''?html}" />
-			<#include "../include/analysisProjectAware_form_select.ftl" >
-			<div class="form-item">
+			<div class="form-item form-item-analysisProjectAware">
 				<div class="form-item-label">
 					<label><@spring.message code='chart.name' /></label>
 				</div>
 				<div class="form-item-value">
 					<input type="text" name="name" value="${(chart.name)!''?html}" class="ui-widget ui-widget-content" />
 				</div>
+				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">

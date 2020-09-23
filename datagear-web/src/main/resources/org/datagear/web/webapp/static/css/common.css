@@ -2871,3 +2871,44 @@ table.dataTable tbody tr td select{
 	top: 0.5em;
 	right: 0.5em;
 }
+
+.page-form .form-item-analysisProjectAware{
+	position: relative;
+}
+.page-form .form-item-analysisProjectAware > .form-item-value{
+	width: 40% !important;
+}
+.page-form .form-item-analysisProjectAware > .form-item-value input{
+	width: 60% !important;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject{
+	display: inline-block !important;
+	min-width: unset !important;
+	position: absolute;
+	right: 0;
+	top: -0.1em;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-label{
+	width: auto !important;
+	margin-right: 1em;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-label label{
+	width: 100%;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value{
+	display: inline-block !important;
+	width: 12.5em !important;
+	position: relative;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value input{
+	width: 10em !important;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect{
+	position: absolute;
+    right: 0.1em;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect .analysis-project-menu-root,
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect .analysis-project-menu-root > .ui-menu-item-wrapper{
+	width: 1.7em;
+	height: 1.7em;
+}
