@@ -481,29 +481,213 @@ ${detectNewVersionScript}
 		});
 	};
 	
-	po.initDataAnalysisPanelContent = function($element)
+	//定义全局AnalysisProject上下文
+	$.analysisProjectContext =
 	{
-		$element.jstree
-		(
+		ID_COOKIE_NAME: "${statics['org.datagear.web.controller.AbstractController'].KEY_ANALYSIS_PROJECT_ID}",
+		
+		//当前AnalysisProject
+		_value: null,
+		
+		//监听器
+		_listeners: [],
+		
+		/**
+		 * 初始化。
+		 * 
+		 * @param callback 可选，初始化成功回调函数，格式为：function(analysisProject){}
+		 */
+		init: function(callback)
+		{
+			var cookieId = $.cookie(this.ID_COOKIE_NAME);
+			
+			if(!cookieId)
 			{
-				"core" :
+				this.value(null);
+				callback(null);
+			}
+			else
+			{
+				var _this = this;
+				
+				$.ajax(
 				{
-					"themes" : {"dots": false, icons: true},
-					"check_callback" : true
+					url: "${contextPath}/analysis/project/getById?id=" + cookieId,
+					success: function(analysisProject)
+					{
+						_this.value(analysisProject);
+						callback(analysisProject);
+					},
+					error: function()
+					{
+						_this.value(null);
+						callback(null);
+					}
+				});
+			}
+		},
+		
+		/**
+		 * 获取、设置值。
+		 * 
+		 * @param analysisProject 要设置的AnalysisProject，允许设为null
+		 * @param notify 可选，设置时是否通知监听器，默认为true
+		 */
+		value: function(analysisProject, notify)
+		{
+			if(analysisProject === undefined)
+				return this._value;
+			
+			notify = (notify == null ? true : notify);
+			
+			var previousValue = this._value;
+			this._value = analysisProject;
+			
+			$.cookie(this.ID_COOKIE_NAME, (analysisProject == null ? "" : analysisProject.id),
+					{ expires : 365*5, path: "${contextPath}" });
+			
+			$(".analysis-project-current-value").html(analysisProject == null ? "" : analysisProject.name);
+			
+			if(notify)
+			{
+				for(var i=0; i<this._listeners.length; i++)
+					this._listeners[i].update(this._value, previousValue);
+			}
+		},
+		
+		/**
+		 * 添加监听器。
+		 * 
+		 * @param listener 监听器，格式为：function(currentAnalysisProject, previousAnalysisProject){ ... }
+		 */
+		addListener: function(listener)
+		{
+			this._listeners.push(listener);
+		}
+	};
+	
+	po.initDataAnalysisPanelIfNot = function()
+	{
+		var dap = po.element("#${pageId}-nav-dataAnalysis");
+		
+		if(dap.hasClass("dataAnalysisPanelInited"))
+			return;
+		
+		dap.addClass("dataAnalysisPanelInited");
+		
+		po.element(".analysis-project-operation-group", dap).controlgroup();
+		
+		po.element(".analysis-project-current-value", dap).click(function()
+		{
+			var panel = po.element(".analysis-project-list-panel", dap);
+			var panelContent = $(".analysis-project-list-panel-content", panel);
+			
+			if(panel.is(":hidden"))
+			{
+				var _thisValue = this;
+				
+				panel.show();
+				
+				var loaded = panelContent.hasClass("analysis-project-loaded");
+				
+				if(!loaded)
+				{
+					po.open(contextPath+"/analysis/project/select",
+					{
+						"target": panelContent,
+						"asDialog": false,
+						"pageParam":
+						{
+							"select" : function(analysisProject)
+							{
+								$.analysisProjectContext.value(analysisProject);
+								panel.hide();
+							}
+						},
+						"success": function()
+						{
+							panelContent.addClass("analysis-project-loaded");
+						}
+					});
+				}
+				else
+				{
+					//刷新列表
+					$(".search-analysisProject form", panelContent).submit();
 				}
 			}
-		)
-		.bind("select_node.jstree", function(e, data)
+			else
+				panel.hide();
+		});
+		
+		po.element("#addAnalysisProjectButton", dap).click(function()
 		{
-			var tree = $(this).jstree(true);
+			po.open(contextPath+"/analysis/project/add",
+			{
+				"pageParam" :
+				{
+					"afterSave" : function(analysisProject)
+					{
+						$.analysisProjectContext.value(analysisProject);
+					}
+				}
+			});
+		});
+		
+		po.element("#manageAnalysisProjectButton", dap).click(function()
+		{
+			var options = {};
+			$.setGridPageHeightOption(options);
 			
-			var $node = tree.get_node(data.node, true);
+			po.open(contextPath+"/analysis/project/pagingQuery", options);
+		});
+		
+		po.element(".analysis-project-current-reset", dap).click(function()
+		{
+			$.analysisProjectContext.value(null);
+		});
+		
+		po.element().on("click", function(event)
+		{
+			var $p = po.element(".analysis-project-list-panel", dap);
+			if(!$p.is(":hidden"))
+			{
+				var $target = $(event.target);
+				
+				if($target.closest(".analysis-project-current-value, .analysis-project-list-panel").length == 0)
+					$p.hide();
+			}
+		});
+		
+		$.analysisProjectContext.init(function()
+		{
+			var pc = po.element(".dataAnalysis-panel-content", dap);
 			
-			var tabId = $node.attr("tabId");
-			var tabName = $node.text();
-			var tabUrl = $("a", $node).attr("href");
-			
-			po.activeWorkTab(po.toMainTabId(tabId), tabName, "", tabUrl);
+			if(!pc.hasClass("jstree"))
+			{
+				pc.jstree
+				(
+					{
+						"core" :
+						{
+							"themes" : {"dots": false, icons: true},
+							"check_callback" : true
+						}
+					}
+				)
+				.bind("select_node.jstree", function(e, data)
+				{
+					var tree = $(this).jstree(true);
+					
+					var $node = tree.get_node(data.node, true);
+					
+					var tabId = $node.attr("tabId");
+					var tabName = $node.text();
+					var tabUrl = $("a", $node).attr("href");
+					
+					po.activeWorkTab(po.toMainTabId(tabId), tabName, "", tabUrl);
+				});
+			}
 		});
 	};
 	
@@ -546,106 +730,6 @@ ${detectNewVersionScript}
 		}
 		
 		return state;
-	};
-	
-	po.analysisProjectCurrentValue = function(analysisProject)
-	{
-		var $value = po.element(".analysis-project-current-value");
-		
-		if(analysisProject === undefined)
-			return $value.data("analysisProjectCurrentValue");
-		
-		var label = (analysisProject == null ? "" : analysisProject.name);
-		
-		$value.data("analysisProjectCurrentValue", analysisProject);
-		$value.html(label);
-	};
-	
-	po.initAnalysisProjectWidgets = function()
-	{
-		po.element(".analysis-project-operation-group").controlgroup();
-		
-		po.element(".analysis-project-current-value").click(function()
-		{
-			var panel = po.element(".analysis-project-list-panel");
-			var panelContent = $(".analysis-project-list-panel-content", panel);
-			
-			if(panel.is(":hidden"))
-			{
-				var _thisValue = this;
-				
-				panel.show();
-				
-				var loaded = panelContent.hasClass("analysis-project-loaded");
-				
-				if(!loaded)
-				{
-					po.open(contextPath+"/analysis/project/select",
-					{
-						"target": panelContent,
-						"asDialog": false,
-						"pageParam":
-						{
-							"select" : function(analysisProject)
-							{
-								po.analysisProjectCurrentValue(analysisProject);
-								panel.hide();
-							}
-						},
-						"success": function()
-						{
-							panelContent.addClass("analysis-project-loaded");
-						}
-					});
-				}
-				else
-				{
-					//刷新列表
-					$(".search-analysisProject form", panelContent).submit();
-				}
-			}
-			else
-				panel.hide();
-		});
-		
-		po.element("#addAnalysisProjectButton").click(function()
-		{
-			po.open(contextPath+"/analysis/project/add",
-			{
-				"pageParam" :
-				{
-					"afterSave" : function(analysisProject)
-					{
-						console.dir(analysisProject);
-					}
-				}
-			});
-		});
-
-		po.element("#manageAnalysisProjectButton").click(function()
-		{
-			var options = {};
-			$.setGridPageHeightOption(options);
-			
-			po.open(contextPath+"/analysis/project/pagingQuery", options);
-		});
-		
-		po.element(".analysis-project-current-reset").click(function()
-		{
-			po.analysisProjectCurrentValue(null);
-		});
-		
-		po.element().on("click", function(event)
-		{
-			var $p = po.element(".analysis-project-list-panel");
-			if(!$p.is(":hidden"))
-			{
-				var $target = $(event.target);
-				
-				if($target.closest(".analysis-project-current-value, .analysis-project-list-panel").length == 0)
-					$p.hide();
-			}
-		});
 	};
 	
 	po.newVersionDetected = function()
@@ -811,10 +895,7 @@ ${detectNewVersionScript}
 				}
 				else if(newPanel.hasClass("dataAnalysis-panel"))
 				{
-					var $element = po.element(".dataAnalysis-panel-content");
-					
-					if(!$element.hasClass("jstree"))
-						po.initDataAnalysisPanelContent($element);
+					po.initDataAnalysisPanelIfNot();
 				}
 				
 				var newTabIndex = newTab.index();
@@ -1278,9 +1359,6 @@ ${detectNewVersionScript}
 		});
 		
 		po.bindTabsMenuHiddenEvent(po.mainTabs);
-		
-		po.initAnalysisProjectWidgets();
-		po.analysisProjectCurrentValue(null);
 		
 		if(po.newVersionDetected())
 			$(".new-version-tip").css("display", "inline-block");

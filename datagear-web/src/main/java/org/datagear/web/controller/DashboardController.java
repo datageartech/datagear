@@ -50,7 +50,7 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
-import org.datagear.web.vo.DataFilterPagingQuery;
+import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -638,13 +638,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@ResponseBody
 	public PagingData<HtmlTplDashboardWidgetEntity> pagingQueryData(HttpServletRequest request,
 			HttpServletResponse response, final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
+		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlTplDashboardWidgetEntity> pagingData = this.htmlTplDashboardWidgetEntityService.pagingQuery(user,
-				pagingQuery, pagingQuery.getDataFilter());
+				pagingQuery, pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
 
 		return pagingData;
 	}

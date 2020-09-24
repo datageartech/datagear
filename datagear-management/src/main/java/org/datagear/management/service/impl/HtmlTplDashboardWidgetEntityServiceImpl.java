@@ -19,6 +19,8 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -111,6 +113,13 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 		params.put("newUserId", newUserId);
 
 		return updateMybatis("updateCreateUserId", params);
+	}
+
+	@Override
+	public PagingData<HtmlTplDashboardWidgetEntity> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter,
+			String analysisProjectId)
+	{
+		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId);
 	}
 
 	@Override

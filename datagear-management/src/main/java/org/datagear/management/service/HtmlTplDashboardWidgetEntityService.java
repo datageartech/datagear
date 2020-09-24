@@ -19,7 +19,8 @@ import org.datagear.management.domain.User;
  *
  */
 public interface HtmlTplDashboardWidgetEntityService
-		extends DataPermissionEntityService<String, HtmlTplDashboardWidgetEntity>, CreateUserEntityService
+		extends DataPermissionEntityService<String, HtmlTplDashboardWidgetEntity>, CreateUserEntityService,
+		AnalysisProjectAwareEntityService<HtmlTplDashboardWidgetEntity>
 {
 	/**
 	 * 获取渲染器。

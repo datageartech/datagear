@@ -37,7 +37,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
-import org.datagear.web.vo.DataFilterPagingQuery;
+import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -258,13 +258,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@ResponseBody
 	public PagingData<HtmlChartWidgetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
+		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
-				pagingQuery.getDataFilter());
+				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
 		setChartPluginNames(request, pagingData.getItems());
 
 		return pagingData;

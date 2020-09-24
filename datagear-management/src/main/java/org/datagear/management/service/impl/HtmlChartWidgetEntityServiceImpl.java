@@ -32,6 +32,8 @@ import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -149,6 +151,13 @@ public class HtmlChartWidgetEntityServiceImpl
 		params.put("newUserId", newUserId);
 
 		return updateMybatis("updateCreateUserId", params);
+	}
+
+	@Override
+	public PagingData<HtmlChartWidgetEntity> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter,
+			String analysisProjectId)
+	{
+		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId);
 	}
 
 	@Override

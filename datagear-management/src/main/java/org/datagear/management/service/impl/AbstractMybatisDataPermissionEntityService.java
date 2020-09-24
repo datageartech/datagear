@@ -14,6 +14,7 @@ import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.DataIdPermission;
 import org.datagear.management.domain.DataPermissionEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectAwareEntityService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.PagingData;
@@ -49,7 +50,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	@Override
 	public int getPermission(User user, ID id)
 	{
-		List<ID> ids = new ArrayList<ID>(1);
+		List<ID> ids = new ArrayList<>(1);
 		ids.add(id);
 
 		List<Integer> permissions = getPermissions(user, ids, Authorization.PERMISSION_NONE_START);
@@ -178,9 +179,26 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	{
 		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user);
+		setDataFilterParam(params, dataFilter);
 
+		return pagingQuery(pagingQuery, params);
+	}
+
+	protected void setDataFilterParam(Map<String, Object> params, String dataFilter)
+	{
 		if (!StringUtil.isEmpty(dataFilter))
 			params.put("_dataFilter", dataFilter);
+	}
+
+	protected PagingData<T> pagingQueryForAnalysisProjectId(User user, PagingQuery pagingQuery, String dataFilter,
+			String analysisProjectId)
+	{
+		Map<String, Object> params = buildParamMap();
+		addDataPermissionParameters(params, user);
+		setDataFilterParam(params, dataFilter);
+
+		if (!StringUtil.isEmpty(analysisProjectId))
+			params.put(AnalysisProjectAwareEntityService.QUERY_PARAM_ANALYSIS_PROJECT_ID, analysisProjectId);
 
 		return pagingQuery(pagingQuery, params);
 	}
@@ -201,7 +219,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 
 		List<DataIdPermission> dataPermissions = selectListMybatis("getDataIdPermissions", params);
 
-		List<Integer> re = new ArrayList<Integer>(ids.size());
+		List<Integer> re = new ArrayList<>(ids.size());
 
 		for (int i = 0, len = ids.size(); i < len; i++)
 		{

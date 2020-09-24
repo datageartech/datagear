@@ -135,6 +135,21 @@ public class AnalysisProjectController extends AbstractController
 		return "/analysis/analysisProject/analysisProject_form";
 	}
 
+	@RequestMapping(value = "/getById", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public AnalysisProject getById(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model, @RequestParam("id") String id)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		AnalysisProject analysisProject = this.analysisProjectService.getById(user, id);
+
+		if (analysisProject == null)
+			throw new RecordNotFoundException();
+
+		return analysisProject;
+	}
+
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<OperationMessage> delete(HttpServletRequest request, HttpServletResponse response,

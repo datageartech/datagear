@@ -202,7 +202,11 @@
 		AND
 		(
 			${_iq_}id${_iq_} LIKE #{queryKeyword} OR ${_iq_}name${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}analysisProject.name${_iq_} LIKE #{queryKeyword}
 		)
+		</if>
+		<if test="_analysisProjectId != null">
+		AND ${_iq_}analysisProject.id${_iq_} = #{_analysisProjectId}
 		</if>
 		<include refid="commonDataPermission.dataFilterCondition" />
 		<include refid="common.queryCondition" />

@@ -20,6 +20,7 @@ selectOperation 是否选择操作，允许为null
 	<div class="head">
 		<div class="search">
 			<#include "../../include/page_obj_searchform_data_filter.ftl">
+			<#include "../include/analysisProjectAware_grid_search.ftl">
 		</div>
 		<div class="operation">
 			<#if selectOperation>

@@ -35,6 +35,8 @@ import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -173,6 +175,13 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("newUserId", newUserId);
 
 		return updateMybatis("updateCreateUserId", params);
+	}
+
+	@Override
+	public PagingData<DataSetEntity> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter,
+			String analysisProjectId)
+	{
+		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId);
 	}
 
 	@Override

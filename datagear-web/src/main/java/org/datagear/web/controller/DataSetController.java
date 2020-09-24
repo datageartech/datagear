@@ -48,7 +48,7 @@ import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
-import org.datagear.web.vo.DataFilterPagingQuery;
+import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -624,13 +624,13 @@ public class DataSetController extends AbstractSchemaConnController
 	@ResponseBody
 	public PagingData<DataSetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
+		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<DataSetEntity> pagingData = this.dataSetEntityService.pagingQuery(user, pagingQuery,
-				pagingQuery.getDataFilter());
+				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
 
 		return pagingData;
 	}

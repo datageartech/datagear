@@ -26,6 +26,7 @@ import org.datagear.web.convert.StringToJsonConverter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
+import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -65,6 +66,8 @@ public abstract class AbstractController
 	public static final String DATA_FILTER_PARAM = DataFilterPagingQuery.PROPERTY_DATA_FILTER;
 
 	public static final String DATA_FILTER_COOKIE = "DATA_FILTER_SEARCH";
+
+	public static final String KEY_ANALYSIS_PROJECT_ID = "ANALYSIS_PROJECT_ID";
 
 	public static final String ERROR_PAGE_URL = "/error";
 
@@ -112,10 +115,37 @@ public abstract class AbstractController
 	}
 
 	/**
+	 * 检查并补充{@linkplain APIDDataFilterPagingQuery}。
+	 * 
+	 * @param request
+	 * @param pagingQuery
+	 *            允许为{@code null}
+	 * @return 不会为{@code null}
+	 */
+	protected APIDDataFilterPagingQuery inflateAPIDDataFilterPagingQuery(HttpServletRequest request,
+			APIDDataFilterPagingQuery pagingQuery)
+	{
+		DataFilterPagingQuery pq = inflateDataFilterPagingQuery(request, pagingQuery);
+
+		if (pagingQuery == null)
+		{
+			pagingQuery = new APIDDataFilterPagingQuery(pq.getPage(), pq.getPageSize(), pq.getKeyword(),
+					pq.getCondition());
+			pagingQuery.setNotLike(pq.isNotLike());
+			pagingQuery.setDataFilter(pq.getDataFilter());
+
+			pagingQuery.setAnalysisProjectId(WebUtils.getCookieValue(request, KEY_ANALYSIS_PROJECT_ID));
+		}
+
+		return pagingQuery;
+	}
+
+	/**
 	 * 检查并补充{@linkplain DataFilterPagingQuery#getDataFilter()}。
 	 * 
 	 * @param request
-	 * @param pagingQuery 允许为{@code null}
+	 * @param pagingQuery
+	 *            允许为{@code null}
 	 * @return 不会为{@code null}
 	 */
 	protected DataFilterPagingQuery inflateDataFilterPagingQuery(HttpServletRequest request,
@@ -128,7 +158,8 @@ public abstract class AbstractController
 	 * 检查并补充{@linkplain DataFilterPagingQuery#getDataFilter()}。
 	 * 
 	 * @param request
-	 * @param pagingQuery          允许为{@code null}
+	 * @param pagingQuery
+	 *            允许为{@code null}
 	 * @param cookiePaginationSize
 	 * @return 不会为{@code null}
 	 */
@@ -195,7 +226,8 @@ public abstract class AbstractController
 	 * 检查并补充{@linkplain PagingQuery}。
 	 * 
 	 * @param request
-	 * @param pagingQuery 允许为{@code null}
+	 * @param pagingQuery
+	 *            允许为{@code null}
 	 * @return 不会为{@code null}
 	 */
 	protected PagingQuery inflatePagingQuery(HttpServletRequest request, PagingQuery pagingQuery)
@@ -207,8 +239,10 @@ public abstract class AbstractController
 	 * 检查并补充{@linkplain PagingQuery}。
 	 * 
 	 * @param request
-	 * @param pagingQuery          允许为{@code null}
-	 * @param cookiePaginationSize 允许为{@code null}
+	 * @param pagingQuery
+	 *            允许为{@code null}
+	 * @param cookiePaginationSize
+	 *            允许为{@code null}
 	 * @return 不会为{@code null}
 	 */
 	protected PagingQuery inflatePagingQuery(HttpServletRequest request, PagingQuery pagingQuery,
@@ -227,7 +261,7 @@ public abstract class AbstractController
 					if (!isEmpty(pss))
 						pagingQuery.setPageSize(Integer.parseInt(pss));
 				}
-				catch(Exception e)
+				catch (Exception e)
 				{
 				}
 			}
