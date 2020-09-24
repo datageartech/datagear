@@ -41,6 +41,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPref
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingData;
@@ -93,6 +94,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
 
 	@Autowired
+	private AnalysisProjectService analysisProjectService;
+
+	@Autowired
 	private File tempDirectory;
 
 	private ServletContext servletContext;
@@ -111,6 +115,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService)
 	{
 		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
+	}
+
+	public AnalysisProjectService getAnalysisProjectService()
+	{
+		return analysisProjectService;
+	}
+
+	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
+	{
+		this.analysisProjectService = analysisProjectService;
 	}
 
 	public File getTempDirectory()
@@ -135,9 +149,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
+		setCookieAnalysisProject(request, response, dashboard);
 
 		dashboard.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
@@ -402,8 +417,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	}
 
 	@RequestMapping("/import")
-	public String impt(HttpServletRequest request, org.springframework.ui.Model model)
+	public String impt(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
+		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
+		setCookieAnalysisProject(request, response, dashboard);
+
+		model.addAttribute("dashboard", dashboard);
+
 		return "/analysis/dashboard/dashboard_import";
 	}
 
@@ -1001,5 +1021,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			resourceName = resourceName.substring(1);
 
 		return resourceName;
+	}
+
+	protected void setCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+			HtmlTplDashboardWidgetEntity entity)
+	{
+		setCookieAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 }

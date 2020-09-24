@@ -41,6 +41,7 @@ import org.datagear.management.domain.Schema;
 import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
@@ -77,6 +78,9 @@ public class DataSetController extends AbstractSchemaConnController
 	private DataSetEntityService dataSetEntityService;
 
 	@Autowired
+	private AnalysisProjectService analysisProjectService;
+
+	@Autowired
 	private File tempDirectory;
 
 	private DataSetParamValueConverter dataSetParamValueConverter = new DataSetParamValueConverter();
@@ -94,6 +98,16 @@ public class DataSetController extends AbstractSchemaConnController
 	public void setDataSetEntityService(DataSetEntityService dataSetEntityService)
 	{
 		this.dataSetEntityService = dataSetEntityService;
+	}
+
+	public AnalysisProjectService getAnalysisProjectService()
+	{
+		return analysisProjectService;
+	}
+
+	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
+	{
+		this.analysisProjectService = analysisProjectService;
 	}
 
 	public File getTempDirectory()
@@ -117,9 +131,11 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	@RequestMapping("/addForSql")
-	public String addForSql(HttpServletRequest request, org.springframework.ui.Model model)
+	public String addForSql(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
 		SqlDataSetEntity dataSet = new SqlDataSetEntity();
+		setCookieAnalysisProject(request, response, dataSet);
 
 		model.addAttribute("dataSet", dataSet);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
@@ -146,9 +162,11 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	@RequestMapping("/addForJsonValue")
-	public String addForJsonValue(HttpServletRequest request, org.springframework.ui.Model model)
+	public String addForJsonValue(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
 		JsonValueDataSetEntity dataSet = new JsonValueDataSetEntity();
+		setCookieAnalysisProject(request, response, dataSet);
 
 		model.addAttribute("dataSet", dataSet);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
@@ -175,9 +193,11 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	@RequestMapping("/addForJsonFile")
-	public String addForJsonFile(HttpServletRequest request, org.springframework.ui.Model model)
+	public String addForJsonFile(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
 		JsonFileDataSetEntity dataSet = new JsonFileDataSetEntity();
+		setCookieAnalysisProject(request, response, dataSet);
 
 		model.addAttribute("dataSet", dataSet);
 		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
@@ -206,10 +226,12 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	@RequestMapping("/addForExcel")
-	public String addForExcel(HttpServletRequest request, org.springframework.ui.Model model)
+	public String addForExcel(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
 		ExcelDataSetEntity dataSet = new ExcelDataSetEntity();
 		dataSet.setNameRow(1);
+		setCookieAnalysisProject(request, response, dataSet);
 
 		model.addAttribute("dataSet", dataSet);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
@@ -237,10 +259,12 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	@RequestMapping("/addForCsvValue")
-	public String addForCsvValue(HttpServletRequest request, org.springframework.ui.Model model)
+	public String addForCsvValue(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
 		CsvValueDataSetEntity dataSet = new CsvValueDataSetEntity();
 		dataSet.setNameRow(1);
+		setCookieAnalysisProject(request, response, dataSet);
 
 		model.addAttribute("dataSet", dataSet);
 		model.addAttribute(KEY_TITLE_MESSAGE_KEY, "dataSet.addDataSet");
@@ -267,10 +291,12 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	@RequestMapping("/addForCsvFile")
-	public String addForCsvFile(HttpServletRequest request, org.springframework.ui.Model model)
+	public String addForCsvFile(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
 		CsvFileDataSetEntity dataSet = new CsvFileDataSetEntity();
 		dataSet.setNameRow(1);
+		setCookieAnalysisProject(request, response, dataSet);
 
 		model.addAttribute("dataSet", dataSet);
 		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
@@ -299,9 +325,11 @@ public class DataSetController extends AbstractSchemaConnController
 	}
 
 	@RequestMapping("/addForHttp")
-	public String addForHttp(HttpServletRequest request, org.springframework.ui.Model model)
+	public String addForHttp(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.ui.Model model)
 	{
 		HttpDataSetEntity dataSet = new HttpDataSetEntity();
+		setCookieAnalysisProject(request, response, dataSet);
 
 		model.addAttribute("dataSet", dataSet);
 		model.addAttribute("availableCharsetNames", getAvailableCharsetNames());
@@ -771,6 +799,12 @@ public class DataSetController extends AbstractSchemaConnController
 		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
 
 		return result;
+	}
+
+	protected void setCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+			DataSetEntity entity)
+	{
+		setCookieAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 
 	protected boolean copyToDirectoryFileDataSetEntityDirectoryIf(DirectoryFileDataSetEntity entity,

@@ -31,6 +31,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPref
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
@@ -69,6 +70,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	private HtmlChartWidgetEntityService htmlChartWidgetEntityService;
 
 	@Autowired
+	private AnalysisProjectService analysisProjectService;
+
+	@Autowired
 	private ChartPluginManager chartPluginManager;
 
 	@Autowired
@@ -90,6 +94,16 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public void setHtmlChartWidgetEntityService(HtmlChartWidgetEntityService htmlChartWidgetEntityService)
 	{
 		this.htmlChartWidgetEntityService = htmlChartWidgetEntityService;
+	}
+
+	public AnalysisProjectService getAnalysisProjectService()
+	{
+		return analysisProjectService;
+	}
+
+	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
+	{
+		this.analysisProjectService = analysisProjectService;
 	}
 
 	public ChartPluginManager getChartPluginManager()
@@ -125,9 +139,10 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
+		setCookieAnalysisProject(request, response, chart);
 
 		model.addAttribute("chart", chart);
 		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(null));
@@ -448,6 +463,12 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 				}
 			}
 		}
+	}
+
+	protected void setCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+			HtmlChartWidgetEntity entity)
+	{
+		setCookieAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 
 	protected void checkSaveEntity(HtmlChartWidgetEntity chart)

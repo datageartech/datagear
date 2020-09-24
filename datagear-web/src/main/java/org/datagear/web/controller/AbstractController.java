@@ -16,6 +16,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
+import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IOUtil;
@@ -112,6 +116,34 @@ public abstract class AbstractController
 	public void setStringToJsonConverter(StringToJsonConverter stringToJsonConverter)
 	{
 		this.stringToJsonConverter = stringToJsonConverter;
+	}
+
+	protected boolean setCookieAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,
+			AnalysisProjectService analysisProjectService,
+			AnalysisProjectAwareEntity<?> entity)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		String analysisId = WebUtils.getCookieValue(request, KEY_ANALYSIS_PROJECT_ID);
+		
+		if(!isEmpty(analysisId))
+		{
+			try
+			{
+				AnalysisProject analysisProject = analysisProjectService.getById(user, analysisId);
+				
+				if(analysisProject != null)
+				{
+					entity.setAnalysisProject(analysisProject);
+					return true;
+				}
+			}
+			catch(Throwable t)
+			{
+			}
+		}
+
+		return false;
 	}
 
 	/**
