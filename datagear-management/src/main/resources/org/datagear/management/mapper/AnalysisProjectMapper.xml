@@ -23,10 +23,10 @@
 	</update>
 	
 	<update id="updateCreateUserId">
-		UPDATE DATAGEAR_DATA_SET SET
-			DS_CREATE_USER_ID = #{newUserId}
+		UPDATE DATAGEAR_ANALYSIS_PROJECT SET
+			AP_CREATE_USER_ID = #{newUserId}
 		WHERE
-			DS_CREATE_USER_ID = #{oldUserId}
+			AP_CREATE_USER_ID = #{oldUserId}
 	</update>
 	
 	<delete id="deleteById">
