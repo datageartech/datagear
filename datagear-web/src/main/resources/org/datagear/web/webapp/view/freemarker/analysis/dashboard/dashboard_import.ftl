@@ -6,12 +6,13 @@
 <title><#include "../../include/html_title_app_name.ftl"><@spring.message code='dashboard.importDashboard' /></title>
 </head>
 <body>
+<#include "../../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-importDashboard">
 	<form id="${pageId}-form" action="${contextPath}/analysis/dashboard/saveImport" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="dashboardFileName" value="" />
-			<div class="form-item">
+			<div class="form-item form-item-analysisProjectAware">
 				<div class="form-item-label">
 					<label title="<@spring.message code='dashboard.import.desc' />">
 						<@spring.message code='dashboard.import.selectFile' />
@@ -24,6 +25,8 @@
 					</div>
 					<div class="upload-file-info"></div>
 				</div>
+				<#assign readonly=false>
+				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
@@ -49,13 +52,14 @@
 		</div>
 	</form>
 </div>
-<#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)
 {
-	po.element("input:submit, input:button, input:reset, button, .fileinput-button").button();
-
+	$.initButtons(po.element());
+	po.element(".fileinput-button").button();
+	po.initAnalysisProject();
+	
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/dashboard/" + action;

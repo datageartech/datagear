@@ -38,6 +38,7 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
+import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
@@ -486,7 +487,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveImport(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("name") String name, @RequestParam("template") String template,
-			@RequestParam("dashboardFileName") String dashboardFileName) throws Exception
+			@RequestParam("dashboardFileName") String dashboardFileName,
+			@RequestParam(name = "analysisProject.id", required = false) String analysisProjectId,
+			@RequestParam(name = "analysisProject.name", required = false) String analysisProjectName) throws Exception
 	{
 		File uploadDirectory = FileUtil.getDirectory(this.tempDirectory, dashboardFileName, false);
 
@@ -515,6 +518,14 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		dashboard.setTemplateSplit(template);
 		dashboard.setTemplateEncoding(templateEncoding);
 		dashboard.setName(name);
+
+		if (!isEmpty(analysisProjectId))
+		{
+			AnalysisProject analysisProject = new AnalysisProject();
+			analysisProject.setId(analysisProjectId);
+			analysisProject.setName(analysisProjectName);
+			dashboard.setAnalysisProject(analysisProject);
+		}
 
 		checkSaveEntity(dashboard);
 
