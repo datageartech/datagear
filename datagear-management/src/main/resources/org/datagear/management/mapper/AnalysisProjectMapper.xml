@@ -148,21 +148,19 @@
 		<include refid="common.queryCondition" />
 	</sql>
 	
-	<!-- 用于外部Mapper引用的公用SQL，下面的include必须采用全名，不然会出现死循环 -->
+	<!--
+		用于外部Mapper引用的公用SQL，下面的include必须采用全名，不然会出现死循环。
+		注意：
+			为了提高查询效率，这里仅查询必要的列
+	-->
 	<sql id="queryViewForAnalysisProjectAwareEntity">
 		SELECT
-			T.${_iq_}id${_iq_} AS ${_iq_}analysisProject.id${_iq_},
-			T.${_iq_}name${_iq_} AS ${_iq_}analysisProject.name${_iq_},
-			T.${_iq_}desc${_iq_} AS ${_iq_}analysisProject.desc${_iq_},
-			T.${_iq_}createTime${_iq_} AS ${_iq_}analysisProject.createTime${_iq_},
-			T.${_iq_}createUser.id${_iq_} AS ${_iq_}analysisProject.createUser.id${_iq_},
-			T.${_iq_}createUser.name${_iq_} AS ${_iq_}analysisProject.createUser.name${_iq_},
-			T.${_iq_}createUser.realName${_iq_} AS ${_iq_}analysisProject.createUser.realName${_iq_},
-			T.${_iq_}createUser.admin${_iq_} AS ${_iq_}analysisProject.createUser.admin${_iq_},
-			T.${_iq_}createUser.anonymous${_iq_} AS ${_iq_}analysisProject.createUser.anonymous${_iq_},
-			T.${_iq_}createUser.createTime${_iq_} AS ${_iq_}analysisProject.createUser.createTime${_iq_}
+			A.AP_ID AS ${_iq_}analysisProject.id${_iq_},
+			A.AP_NAME AS ${_iq_}analysisProject.name${_iq_},
+			A.AP_CREATE_TIME AS ${_iq_}analysisProject.createTime${_iq_},
+			A.AP_CREATE_USER_ID AS ${_iq_}analysisProject.createUser.id${_iq_}
 		FROM
-			(<include refid="org.datagear.management.domain.AnalysisProject.queryView" />) T
+			DATAGEAR_ANALYSIS_PROJECT A
 	</sql>
 	
 	<!--

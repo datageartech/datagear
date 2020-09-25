@@ -512,9 +512,11 @@ ${detectNewVersionScript}
 				
 				$.ajax(
 				{
-					url: "${contextPath}/analysis/project/getById?id=" + cookieId,
+					url: "${contextPath}/analysis/project/getByIdSilently?id=" + cookieId,
 					success: function(analysisProject)
 					{
+						analysisProject = (!analysisProject ? null : analysisProject);
+						
 						_this.value(analysisProject);
 						callback(analysisProject);
 					},
@@ -551,8 +553,24 @@ ${detectNewVersionScript}
 			if(notify)
 			{
 				for(var i=0; i<this._listeners.length; i++)
-					this._listeners[i].update(this._value, previousValue);
+					this._listeners[i](this._value, previousValue);
 			}
+		},
+		
+		//获取当前值的ID。
+		valueId: function()
+		{
+			var value = this.value();
+			return (value == null ? null : value.id);
+		},
+		
+		//当前值是否是指定的值。
+		isValue: function(analysisProject)
+		{
+			var id = this.valueId();
+			var pid = (analysisProject == null ? null : analysisProject.id);
+			
+			return (id == pid);
 		},
 		
 		/**
@@ -577,6 +595,8 @@ ${detectNewVersionScript}
 		
 		po.element(".analysis-project-operation-group", dap).controlgroup();
 		
+		po.element(".analysis-project-list-panel", dap).addClass($.TOGGLABLE_TABLE_PANEL_CLASS_NAME);
+		
 		po.element(".analysis-project-current-value", dap).click(function()
 		{
 			var panel = po.element(".analysis-project-list-panel", dap);
@@ -587,6 +607,7 @@ ${detectNewVersionScript}
 				var _thisValue = this;
 				
 				panel.show();
+				$.callPanelShowCallback(panel);
 				
 				var loaded = panelContent.hasClass("analysis-project-loaded");
 				
@@ -1324,7 +1345,7 @@ ${detectNewVersionScript}
 				if(newSchemaId)
 					$(".category-bar.category-bar-"+newSchemaId, tabsNav).addClass("ui-state-active");
 				
-				$.callTabsPanelShowCallback(newPanel);
+				$.callPanelShowCallback(newPanel);
 			}
 		});
 		

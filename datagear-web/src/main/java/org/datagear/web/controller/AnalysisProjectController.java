@@ -135,17 +135,22 @@ public class AnalysisProjectController extends AbstractController
 		return "/analysis/analysisProject/analysisProject_form";
 	}
 
-	@RequestMapping(value = "/getById", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/getByIdSilently", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public AnalysisProject getById(HttpServletRequest request, HttpServletResponse response,
+	public AnalysisProject getByIdSilently(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestParam("id") String id)
 	{
 		User user = WebUtils.getUser(request, response);
 
-		AnalysisProject analysisProject = this.analysisProjectService.getById(user, id);
+		AnalysisProject analysisProject = null;
 
-		if (analysisProject == null)
-			throw new RecordNotFoundException();
+		try
+		{
+			analysisProject = this.analysisProjectService.getById(user, id);
+		}
+		catch (Throwable t)
+		{
+		}
 
 		return analysisProject;
 	}

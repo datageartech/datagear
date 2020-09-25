@@ -1425,7 +1425,7 @@ Schema schema 数据库，不允许为null
 				$(".result-message-buttons", resultOperations).show();
 			}
 			
-			$.callTabsPanelShowCallback(newPanel);
+			$.callPanelShowCallback(newPanel);
 		}
 	});
 	
