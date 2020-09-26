@@ -45,6 +45,7 @@ import org.datagear.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -511,6 +512,17 @@ public class ControllerAdvice extends AbstractController
 			PermissionDeniedException exception)
 	{
 		setOperationMessageForThrowable(request, buildMessageCode(PermissionDeniedException.class), exception, false);
+
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleDataIntegrityViolationException(HttpServletRequest request, HttpServletResponse response,
+			DataIntegrityViolationException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(DataIntegrityViolationException.class), exception,
+				true);
 
 		return getErrorView(request, response);
 	}
