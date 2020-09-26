@@ -26,10 +26,10 @@ import org.datagear.util.FileUtil;
  */
 public class CsvDirectoryFileDataSet extends AbstractCsvFileDataSet
 {
-	/** JSON文件所在的目录 */
+	/** CSV文件所在的目录 */
 	private File directory;
 
-	/** JSON文件名 */
+	/** CSV文件名 */
 	private String fileName;
 
 	public CsvDirectoryFileDataSet()

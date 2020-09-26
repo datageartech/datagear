@@ -8,51 +8,104 @@ import java.io.File;
 
 /**
  * 目录内文件数据集实体。
+ * <p>
+ * 文件有两种类型：
+ * 用户上传的文件，保存至{@linkplain #getDirectory()}内的{@linkplain #getFileName()}文件；
+ * 服务器端文件，本来就存储在服务器磁盘指定目录内的文件，
+ * </p>
  * 
  * @author datagear@163.com
  *
  */
 public interface DirectoryFileDataSetEntity extends DataSetEntity
 {
+	/** 文件类型：用户上传文件 */
+	String FILE_SOURCE_TYPE_UPLOAD = "UPLOAD";
+
+	/** 文件类型：服务器端文件 */
+	String FILE_SOURCE_TYPE_SERVER = "SERVER";
+
 	/**
-	 * 获取目录。
+	 * 获取文件源类型。
+	 * 
+	 * @return
+	 */
+	String getFileSourceType();
+
+	/**
+	 * 设置文件类型：{@linkplain #FILE_SOURCE_TYPE_UPLOAD}、{@linkplain #FILE_SOURCE_TYPE_SERVER}。
+	 * 
+	 * @param fileSourceType
+	 */
+	void setFileSourceType(String fileSourceType);
+
+	/**
+	 * 获取用户上传文件的存储目录。
 	 * 
 	 * @return
 	 */
 	File getDirectory();
 
 	/**
-	 * 设置目录。
+	 * 设置用户上传文件的存储目录。
 	 * 
 	 * @param directory
 	 */
 	void setDirectory(File directory);
 
 	/**
-	 * 获取文件名。
+	 * 获取用户上传文件的文件名。
 	 * 
 	 * @return
 	 */
 	String getFileName();
 
 	/**
-	 * 设置文件名。
+	 * 设置用户上传文件的存储文件名。
 	 * 
 	 * @param fileName
 	 */
 	void setFileName(String fileName);
 
 	/**
-	 * 获取文件展示名。
+	 * 获取用户上传文件的展示名。
 	 * 
 	 * @return
 	 */
 	String getDisplayName();
 
 	/**
-	 * 设置文件展示名。
+	 * 设置用户上传文件的文件展示名。
 	 * 
 	 * @param displayName
 	 */
 	void setDisplayName(String displayName);
+
+	/**
+	 * 获取服务器端文件所在的目录。
+	 * 
+	 * @return
+	 */
+	DataSetResDirectory getDataSetResDirectory();
+
+	/**
+	 * 设置服务器端文件所在的目录。
+	 * 
+	 * @param dataSetResDirectory
+	 */
+	void setDataSetResDirectory(DataSetResDirectory dataSetResDirectory);
+
+	/**
+	 * 获取服务器端文件的文件名（相对于{@linkplain #getDataSetResDirectory()}）。
+	 * 
+	 * @return
+	 */
+	String getDataSetResFileName();
+
+	/**
+	 * 设置服务器端文件的文件名（相对于{@linkplain #getDataSetResDirectory()}）。
+	 * 
+	 * @param fileName
+	 */
+	void setDataSetResFileName(String fileName);
 }
