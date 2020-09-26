@@ -274,6 +274,10 @@
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 	</bean>
 	
+	<bean id="dataSetResDirectoryService" class="org.datagear.management.service.impl.DataSetResDirectoryServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
 	<bean id="sqlHistoryService" class="org.datagear.management.service.impl.SqlHistoryServiceImpl">
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 	</bean>

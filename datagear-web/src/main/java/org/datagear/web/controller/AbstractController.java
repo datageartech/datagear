@@ -28,6 +28,7 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.StringToJsonConverter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
+import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -321,6 +322,46 @@ public abstract class AbstractController
 		operationMessage.setData(messageArgs);
 
 		WebUtils.setOperationMessage(request, operationMessage);
+	}
+
+	/**
+	 * 获取错误信息视图。
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	protected String getErrorView(HttpServletRequest request, HttpServletResponse response)
+	{
+		setAttributeIfIsJsonResponse(request, response);
+		return ERROR_PAGE_URL;
+	}
+
+	/**
+	 * 设置JSON响应的错误页面属性。
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	protected void setAttributeIfIsJsonResponse(HttpServletRequest request, HttpServletResponse response)
+	{
+		String expectedContentType = DeliverContentTypeExceptionHandlerExceptionResolver.getHandlerContentType(request);
+		if (expectedContentType != null && !expectedContentType.isEmpty())
+			response.setContentType(expectedContentType);
+
+		boolean isJsonResponse = WebUtils.isJsonResponse(response);
+
+		request.setAttribute("isJsonResponse", isJsonResponse);
+
+		if (isJsonResponse)
+		{
+			OperationMessage operationMessage = getOperationMessageForHttpError(request, response);
+
+			request.setAttribute(WebUtils.KEY_OPERATION_MESSAGE,
+					WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(operationMessage));
+
+			response.setContentType(CONTENT_TYPE_JSON);
+		}
 	}
 
 	/**

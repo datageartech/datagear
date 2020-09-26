@@ -51,6 +51,7 @@ import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
+import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.RoleService;
@@ -61,6 +62,7 @@ import org.datagear.management.service.UserService;
 import org.datagear.management.service.impl.AnalysisProjectServiceImpl;
 import org.datagear.management.service.impl.AuthorizationServiceImpl;
 import org.datagear.management.service.impl.DataSetEntityServiceImpl;
+import org.datagear.management.service.impl.DataSetResDirectoryServiceImpl;
 import org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.RoleServiceImpl;
@@ -559,6 +561,13 @@ public class CoreConfiguration implements InitializingBean
 	public AnalysisProjectService analysisProjectService() throws Exception
 	{
 		AnalysisProjectService bean = new AnalysisProjectServiceImpl(this.sqlSessionFactory().getObject());
+		return bean;
+	}
+
+	@Bean
+	public DataSetResDirectoryService dataSetResDirectoryService() throws Exception
+	{
+		DataSetResDirectoryService bean = new DataSetResDirectoryServiceImpl(this.sqlSessionFactory().getObject());
 		return bean;
 	}
 

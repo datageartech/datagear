@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.datagear.management.domain.DataSetResDirectory">
+
+	<insert id="insert">
+		INSERT INTO DATAGEAR_DSR_DIRECTORY
+			(
+			DD_ID, DD_DIRECTORY, DD_DESC, DD_CREATE_USER_ID, DD_CREATE_TIME
+			)
+		VALUES
+			(
+			#{entity.id}, #{entity.directory}, #{entity.desc}, #{entity.createUser.id}, #{entity.createTime}
+			)
+	</insert>
+	
+	<update id="update">
+		UPDATE DATAGEAR_DSR_DIRECTORY SET
+			DD_DIRECTORY = #{entity.directory},
+			DD_DESC = #{entity.desc}
+		WHERE
+			DD_ID = #{entity.id}
+	</update>
+	
+	<update id="updateCreateUserId">
+		UPDATE DATAGEAR_DSR_DIRECTORY SET
+			DD_CREATE_USER_ID = #{newUserId}
+		WHERE
+			DD_CREATE_USER_ID = #{oldUserId}
+	</update>
+	
+	<delete id="deleteById">
+		DELETE FROM DATAGEAR_DSR_DIRECTORY
+		WHERE
+			DD_ID = #{id}
+	</delete>
+	
+	<select id="getById" resultType="org.datagear.management.domain.DataSetResDirectory">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryViewDataPermission" />) T
+		WHERE
+			T.${_iq_}id${_iq_} = #{id}
+	</select>
+	
+	<select id="getDataIdPermissions" resultType="org.datagear.management.domain.DataIdPermission">
+		SELECT
+			T.DATA_ID as ${_iq_}dataId${_iq_},
+			T.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
+		FROM
+			(
+				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
+				<include refid="queryViewDataPermissionId" />
+				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
+			) T
+		WHERE
+			<foreach item="item" collection="ids" separator=" OR ">T.DATA_ID = #{item}</foreach>
+	</select>
+	
+	<select id="query" resultType="org.datagear.management.domain.DataSetResDirectory">
+		SELECT
+			T.*
+		FROM
+			(<include refid="queryViewDataPermission" />) T
+		WHERE
+			<include refid="queryCondition" />
+		<include refid="common.queryOrder" />
+	</select>
+	
+	<select id="pagingQueryCount" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			(<include refid="queryViewDataPermission" />) T
+		WHERE
+			<include refid="queryCondition" />
+	</select>
+	
+	<select id="pagingQuery" resultType="org.datagear.management.domain.DataSetResDirectory">
+		<include refid="common.pagingQueryHead" />
+			SELECT
+				T.*
+			FROM
+				(<include refid="queryViewDataPermission" />) T
+			WHERE
+				<include refid="queryCondition" />
+			<include refid="common.queryOrder" />
+		<include refid="common.pagingQueryFoot" />
+	</select>
+	
+	<sql id="queryViewDataPermission">
+		<choose><when test="DP_CURRENT_USER == null">
+		<include refid="queryView" />
+		</when><otherwise>
+		SELECT
+			T0.*,
+			T1.DATA_PERMISSION as ${_iq_}dataPermission${_iq_}
+		FROM
+			(<include refid="queryView" />) T0
+			INNER JOIN
+			(
+				<include refid="commonDataPermission.dataIdPermissionQueryViewHead" />
+				<include refid="queryViewDataPermissionId" />
+				<include refid="commonDataPermission.dataIdPermissionQueryViewFoot" />
+			) T1
+		ON
+			T0.${_iq_}id${_iq_} = T1.DATA_ID
+		WHERE
+			T1.DATA_PERMISSION >= ${DP_MIN_READ_PERMISSION}
+		</otherwise></choose>
+	</sql>
+	
+	<sql id="queryViewDataPermissionId">
+		SELECT
+			A.DD_ID AS DP_AUTH_DATA_ID,
+			A.DD_CREATE_USER_ID AS DP_AUTH_DATA_CREATOR_ID
+		FROM
+			DATAGEAR_DSR_DIRECTORY A
+	</sql>
+	
+	<sql id="queryView">
+		SELECT
+			A.DD_ID AS ${_iq_}id${_iq_},
+			A.DD_DIRECTORY AS ${_iq_}directory${_iq_},
+			A.DD_DESC AS ${_iq_}desc${_iq_},
+			A.DD_CREATE_TIME AS ${_iq_}createTime${_iq_},
+			A.DD_CREATE_USER_ID AS ${_iq_}createUser.id${_iq_},
+			<include refid="common.fieldsForCreateUser" />
+		FROM
+			DATAGEAR_DSR_DIRECTORY A
+		LEFT JOIN
+			DATAGEAR_USER USR
+		ON
+			A.DD_CREATE_USER_ID = USR.USER_ID
+	</sql>
+	
+	<sql id="queryCondition">
+		1 = 1
+		<if test="queryKeyword != null">
+		AND
+		(
+			${_iq_}directory${_iq_} LIKE #{queryKeyword}
+			OR ${_iq_}desc${_iq_} LIKE #{queryKeyword}
+		)
+		</if>
+		<include refid="commonDataPermission.dataFilterCondition" />
+		<include refid="common.queryCondition" />
+	</sql>
+	
+</mapper>
