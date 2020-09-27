@@ -1512,7 +1512,7 @@ ${detectNewVersionScript}
 					</div>
 					<div class="analysis-project-list-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
 						<div class="analysis-project-list-panel-head"></div>
-						<div class="analysis-project-list-panel-content minor-dataTable"></div>
+						<div class="analysis-project-list-panel-content minor-dataTable pagination-light"></div>
 					</div>
 				</div>
 				<div class="dataAnalysis-panel-content">

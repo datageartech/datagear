@@ -5,6 +5,10 @@
 package org.datagear.web.controller;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,8 +18,10 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.persistence.PagingData;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
+import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,8 +71,8 @@ public class DataSetResDirectoryController extends AbstractController
 
 	@ExceptionHandler(DataSetResDirectoryNotFoundException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleDataSetResDirectoryNotFoundException(HttpServletRequest request,
-			HttpServletResponse response, DataSetResDirectoryNotFoundException exception)
+	public String handleDataSetResDirectoryNotFoundException(HttpServletRequest request, HttpServletResponse response,
+			DataSetResDirectoryNotFoundException exception)
 	{
 		setOperationMessageForThrowable(request, "dataSetResDirectory.DataSetResDirectoryNotFoundException", exception,
 				false, exception.getDirectory());
@@ -194,8 +200,8 @@ public class DataSetResDirectoryController extends AbstractController
 	@RequestMapping(value = "/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<DataSetResDirectory> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) PagingQuery pagingQueryParam) throws Exception
+			final org.springframework.ui.Model springModel, @RequestBody(required = false) PagingQuery pagingQueryParam)
+			throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
 		final PagingQuery pagingQuery = inflatePagingQuery(request, pagingQueryParam);
@@ -203,6 +209,49 @@ public class DataSetResDirectoryController extends AbstractController
 		PagingData<DataSetResDirectory> pagingData = this.dataSetResDirectoryService.pagingQuery(user, pagingQuery);
 
 		return pagingData;
+	}
+
+	@RequestMapping(value = "/listFiles", produces = CONTENT_TYPE_JSON)
+	@ResponseBody
+	public List<FileInfo> listFiles(HttpServletRequest request, HttpServletResponse response,
+			final org.springframework.ui.Model springModel, @RequestParam("id") String id) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		DataSetResDirectory dataSetResDirectory = this.dataSetResDirectoryService.getById(user, id);
+
+		if (dataSetResDirectory == null)
+			throw new RecordNotFoundException();
+
+		List<FileInfo> fileInfos = new ArrayList<>();
+
+		File directory = FileUtil.getDirectory(dataSetResDirectory.getDirectory(), false);
+		listDataSetResDirectoryFilePaths(directory, "", fileInfos);
+
+		return fileInfos;
+	}
+
+	protected void listDataSetResDirectoryFilePaths(File directory, String parentPath, List<FileInfo> fileInfos)
+	{
+		if (!directory.exists())
+			return;
+
+		if (!directory.isDirectory())
+			return;
+
+		File[] files = directory.listFiles();
+		Arrays.sort(files, FILE_NAME_ASC_COMPARATOR);
+
+		for (File file : files)
+		{
+			String myPath = (StringUtil.isEmpty(parentPath) ? file.getName()
+					: FileUtil.concatPath(parentPath, file.getName()));
+
+			if (file.isDirectory())
+				listDataSetResDirectoryFilePaths(file, myPath, fileInfos);
+			else
+				fileInfos.add(new FileInfo(myPath));
+		}
 	}
 
 	protected void checkSaveEntity(DataSetResDirectory dataSetResDirectory)
@@ -215,4 +264,13 @@ public class DataSetResDirectoryController extends AbstractController
 		if (!directory.exists())
 			throw new DataSetResDirectoryNotFoundException(dataSetResDirectory.getDirectory());
 	}
+
+	protected static final Comparator<File> FILE_NAME_ASC_COMPARATOR = new Comparator<File>()
+	{
+		@Override
+		public int compare(File o1, File o2)
+		{
+			return o1.getName().compareTo(o2.getName());
+		}
+	};
 }

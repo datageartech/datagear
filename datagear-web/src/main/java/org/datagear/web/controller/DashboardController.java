@@ -203,6 +203,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		User user = WebUtils.getUser(request, response);
 
+		trimAnalysisProjectAwareEntityForSave(dashboard);
+
 		if (!dashboard.isTemplate(templateName))
 		{
 			List<String> templates = new ArrayList<>();
@@ -551,6 +553,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 
 		dashboard.setId(IDUtil.randomIdOnTime20());
 		dashboard.setCreateUser(user);
+
+		trimAnalysisProjectAwareEntityForSave(dashboard);
 
 		this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 

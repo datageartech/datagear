@@ -64,6 +64,7 @@
 		<intercept-url pattern="${subContextPath}/dataSetResDirectory/view" access="#{sercurityDisableAnonymous.value ? 'ROLE_USER' : 'IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER'}" />
 		<intercept-url pattern="${subContextPath}/dataSetResDirectory/select" access="#{sercurityDisableAnonymous.value ? 'ROLE_USER' : 'IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER'}" />
 		<intercept-url pattern="${subContextPath}/dataSetResDirectory/pagingQueryData" access="#{sercurityDisableAnonymous.value ? 'ROLE_USER' : 'IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER'}" />
+		<intercept-url pattern="${subContextPath}/dataSetResDirectory/listFiles" access="#{sercurityDisableAnonymous.value ? 'ROLE_USER' : 'IS_AUTHENTICATED_ANONYMOUSLY,ROLE_USER'}" />
 		<intercept-url pattern="${subContextPath}/dataSetResDirectory/**" access="ROLE_ADMIN" />
 		
 		<!-- 图表、看板展示功能始终允许匿名用户访问，用于支持外部系统iframe嵌套场景 -->

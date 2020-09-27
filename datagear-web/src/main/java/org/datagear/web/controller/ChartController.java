@@ -183,6 +183,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		User user = WebUtils.getUser(request, response);
 
+		trimAnalysisProjectAwareEntityForSave(entity);
+
 		HtmlChartPlugin paramPlugin = entity.getHtmlChartPlugin();
 
 		if (isEmpty(entity.getId()))

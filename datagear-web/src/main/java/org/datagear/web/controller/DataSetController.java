@@ -156,6 +156,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkSaveSqlDataSetEntity(dataSet);
 
+		trimAnalysisProjectAwareEntityForSave(dataSet);
+
 		this.dataSetEntityService.add(user, dataSet);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
@@ -186,6 +188,8 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
 		checkSaveJsonValueDataSetEntity(dataSet);
+
+		trimAnalysisProjectAwareEntityForSave(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
 
@@ -218,6 +222,9 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
 		checkSaveJsonFileDataSetEntity(dataSet);
+
+		trimAnalysisProjectAwareEntityForSave(dataSet);
+		trimDirectoryFileDataSetEntityForSave(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
@@ -252,6 +259,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkSaveExcelDataSetEntity(dataSet);
 
+		trimAnalysisProjectAwareEntityForSave(dataSet);
+		trimDirectoryFileDataSetEntityForSave(dataSet);
+
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
 
@@ -284,6 +294,8 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
 		checkSaveCsvValueDataSetEntity(dataSet);
+
+		trimAnalysisProjectAwareEntityForSave(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
 
@@ -318,6 +330,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkSaveCsvFileDataSetEntity(dataSet);
 
+		trimAnalysisProjectAwareEntityForSave(dataSet);
+		trimDirectoryFileDataSetEntityForSave(dataSet);
+
 		this.dataSetEntityService.add(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, "");
 
@@ -350,6 +365,8 @@ public class DataSetController extends AbstractSchemaConnController
 		dataSet.setCreateUser(User.copyWithoutPassword(user));
 
 		checkSaveHttpDataSetEntity(dataSet);
+
+		trimAnalysisProjectAwareEntityForSave(dataSet);
 
 		this.dataSetEntityService.add(user, dataSet);
 
@@ -390,6 +407,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkSaveSqlDataSetEntity(dataSet);
 
+		trimAnalysisProjectAwareEntityForSave(dataSet);
+
 		this.dataSetEntityService.update(user, dataSet);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
@@ -419,6 +438,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkSaveJsonFileDataSetEntity(dataSet);
 
+		trimAnalysisProjectAwareEntityForSave(dataSet);
+		trimDirectoryFileDataSetEntityForSave(dataSet);
+
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 
@@ -435,6 +457,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkSaveExcelDataSetEntity(dataSet);
 
+		trimAnalysisProjectAwareEntityForSave(dataSet);
+		trimDirectoryFileDataSetEntityForSave(dataSet);
+
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 
@@ -449,6 +474,8 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		checkSaveCsvValueDataSetEntity(dataSet);
+
+		trimAnalysisProjectAwareEntityForSave(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
 
@@ -465,6 +492,9 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkSaveCsvFileDataSetEntity(dataSet);
 
+		trimAnalysisProjectAwareEntityForSave(dataSet);
+		trimDirectoryFileDataSetEntityForSave(dataSet);
+
 		this.dataSetEntityService.update(user, dataSet);
 		copyToDirectoryFileDataSetEntityDirectoryIf(dataSet, originalFileName);
 
@@ -479,6 +509,8 @@ public class DataSetController extends AbstractSchemaConnController
 		User user = WebUtils.getUser(request, response);
 
 		checkSaveHttpDataSetEntity(dataSet);
+
+		trimAnalysisProjectAwareEntityForSave(dataSet);
 
 		this.dataSetEntityService.update(user, dataSet);
 
@@ -528,6 +560,14 @@ public class DataSetController extends AbstractSchemaConnController
 			throw new IllegalInputException();
 
 		DirectoryFileDataSetEntity dataSetEntity = (DirectoryFileDataSetEntity) dataSet;
+
+		// 服务端文件允许参数化文件名因而无法再这里下载文件，即便如此，也可能保存着用户之前编辑的上传文件而允许下载，所以不应启用下面的逻辑
+		// if
+		// (!DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_UPLOAD.equals(dataSetEntity.getFileSourceType()))
+		// throw new IllegalInputException();
+
+		if (isEmpty(dataSetEntity.getFileName()))
+			throw new IllegalInputException();
 
 		File dataSetDirectory = getDataSetEntityService().getDataSetDirectory(dataSetEntity.getId());
 		File entityFile = FileUtil.getFile(dataSetDirectory, dataSetEntity.getFileName());
@@ -898,10 +938,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		checkSaveEntity(dataSet);
 
-		if (isEmpty(dataSet.getFileName()))
-			throw new IllegalInputException();
-
-		if (isEmpty(dataSet.getDisplayName()))
+		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
 			throw new IllegalInputException();
 	}
 
@@ -909,10 +946,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		checkSaveEntity(dataSet);
 
-		if (isEmpty(dataSet.getFileName()))
-			throw new IllegalInputException();
-
-		if (isEmpty(dataSet.getDisplayName()))
+		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
 			throw new IllegalInputException();
 	}
 
@@ -928,10 +962,7 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		checkSaveEntity(dataSet);
 
-		if (isEmpty(dataSet.getFileName()))
-			throw new IllegalInputException();
-
-		if (isEmpty(dataSet.getDisplayName()))
+		if (isEmpty(dataSet.getFileName()) && isEmpty(dataSet.getDataSetResFileName()))
 			throw new IllegalInputException();
 	}
 

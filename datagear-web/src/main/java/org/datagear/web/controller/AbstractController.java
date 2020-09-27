@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
+import org.datagear.management.domain.DirectoryFileDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
@@ -120,31 +121,66 @@ public abstract class AbstractController
 	}
 
 	protected boolean setCookieAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,
-			AnalysisProjectService analysisProjectService,
-			AnalysisProjectAwareEntity<?> entity)
+			AnalysisProjectService analysisProjectService, AnalysisProjectAwareEntity<?> entity)
 	{
 		User user = WebUtils.getUser(request, response);
 
 		String analysisId = WebUtils.getCookieValue(request, KEY_ANALYSIS_PROJECT_ID);
-		
-		if(!isEmpty(analysisId))
+
+		if (!isEmpty(analysisId))
 		{
 			try
 			{
 				AnalysisProject analysisProject = analysisProjectService.getById(user, analysisId);
-				
-				if(analysisProject != null)
+
+				if (analysisProject != null)
 				{
 					entity.setAnalysisProject(analysisProject);
 					return true;
 				}
 			}
-			catch(Throwable t)
+			catch (Throwable t)
 			{
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * 整理保存时的{@linkplain AnalysisProjectAwareEntity}：
+	 * 如果analysisProject.id为空字符串，则应将其改为null，因为存储时相关外键不允许空字符串
+	 * 
+	 * @param entity
+	 */
+	protected void trimAnalysisProjectAwareEntityForSave(AnalysisProjectAwareEntity<?> entity)
+	{
+		if (entity == null)
+			return;
+
+		if (entity.getAnalysisProject() == null)
+			return;
+
+		if (isEmpty(entity.getAnalysisProject().getId()))
+			entity.setAnalysisProject(null);
+	}
+
+	/**
+	 * 整理保存时的{@linkplain DirectoryFileDataSetEntity}：
+	 * 如果dataSetResDirectory.id为空字符串，则应将其改为null，因为存储时相关外键不允许空字符串
+	 * 
+	 * @param entity
+	 */
+	protected void trimDirectoryFileDataSetEntityForSave(DirectoryFileDataSetEntity entity)
+	{
+		if (entity == null)
+			return;
+
+		if (entity.getDataSetResDirectory() == null)
+			return;
+
+		if (isEmpty(entity.getDataSetResDirectory().getId()))
+			entity.setDataSetResDirectory(null);
 	}
 
 	/**

@@ -1118,10 +1118,6 @@ table.dataTable tbody tr td select{
 .main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .page-grid-analysisProject.page-grid .content{
 	bottom: 2.1em;
 }
-.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .page-grid-analysisProject .pagination .to-page,
-.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .page-grid-analysisProject .pagination .label-pss{
-	display: none;
-}
 .main-page-content .dataAnalysis-panel .dataAnalysis-panel-content{
 	position: absolute;
     display: block;
@@ -2308,11 +2304,48 @@ table.dataTable tbody tr td select{
 .page-form-dataSet .workspace .form-item .form-item-value .input{
 	width: 90%;
 }
-.page-form-dataSet .workspace .form-item .form-item-value input.file-display-name{
-	width: 60%;
+.page-form-dataSet .workspace .form-item .form-item-value.form-item-value-file-input{
+	padding-bottom: 0;
 }
-.page-form-dataSet .workspace .form-item .form-item-value .fileinput-wrapper{
-	padding-top: 0.41em;
+.page-form-dataSet .ds-file-input-wrapper input[type=text]{
+	width: 60% !important;
+}
+.page-form-dataSet .ds-file-input-wrapper .row-wrapper{
+	padding-bottom: 0.41em;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value{
+	width: 100% !important;
+	margin-left: 0 !important;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value .label{
+	padding-bottom: 0.14em;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file{
+	position: relative;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file .server-file-list-panel{
+	position: absolute;
+	width: 80%;
+	height: 8em;
+	display: none;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file .server-file-list-panel .server-file-list-content{
+	position: absolute;
+	left: 0.41em;
+	top: 0.41em;
+	right: 0.41em;
+	bottom: 0.41em;
+	overflow: auto;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file .server-file-list-panel .server-file-item{
+	padding-left: 0.2em;
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+	cursor: default;
+	white-space: nowrap;
+	box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
 .page-form-dataSet .workspace .form-item label.error{
 	position: absolute;

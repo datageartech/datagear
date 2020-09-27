@@ -94,3 +94,10 @@
 	margin-right: 0px;
 	border: none;
 }
+/*轻量分页*/
+.pagination-light .pagination .to-page,
+.pagination-light .pagination .label-pss,
+.pagination-light.pagination .to-page,
+.pagination-light.pagination .label-pss{
+	display: none;
+}
