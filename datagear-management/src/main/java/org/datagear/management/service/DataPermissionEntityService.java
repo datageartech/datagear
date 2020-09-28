@@ -54,6 +54,16 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	String DATA_FILTER_VALUE_ALL = "all";
 
 	/**
+	 * {@linkplain DataPermissionEntity#getDataPermission()}的权限值标识，表明未加载实际权限值
+	 */
+	int PERMISSION_NOT_LOADED = -9;
+
+	/**
+	 * {@linkplain #getPermission(User, Object)}、{@linkplain #getPermissions(User, Object[])}的返回权限值标识，表明指定ID的记录未找到
+	 */
+	int PERMISSION_NOT_FOUND = -11;
+
+	/**
 	 * 获取数据权限资源类型。
 	 * 
 	 * @return
@@ -68,7 +78,7 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	 * 
 	 * @param user
 	 * @param id
-	 * @return
+	 * @return 可能返回{@linkplain #PERMISSION_NOT_FOUND}
 	 */
 	int getPermission(User user, ID id);
 
@@ -80,7 +90,7 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	 * 
 	 * @param user
 	 * @param ids
-	 * @return
+	 * @return 返回元素可能{@linkplain #PERMISSION_NOT_FOUND}
 	 */
 	int[] getPermissions(User user, ID[] ids);
 
@@ -180,7 +190,8 @@ public interface DataPermissionEntityService<ID, T extends DataPermissionEntity<
 	/**
 	 * 授权分页查询。
 	 * 
-	 * @param user        操作用户
+	 * @param user
+	 *            操作用户
 	 * @param pagingQuery
 	 * @param dataFilter
 	 * @return

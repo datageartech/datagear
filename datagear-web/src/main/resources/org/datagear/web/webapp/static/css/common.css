@@ -2339,13 +2339,13 @@ table.dataTable tbody tr td select{
 }
 .page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file .server-file-list-panel .server-file-item{
 	padding-left: 0.2em;
-	padding-top: 0.2em;
-	padding-bottom: 0.2em;
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
 	cursor: default;
 	white-space: nowrap;
-	box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file .server-file-list-panel .server-file-item.ui-state-active{
+	border-width: 0;
 }
 .page-form-dataSet .workspace .form-item label.error{
 	position: absolute;

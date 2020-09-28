@@ -53,7 +53,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		List<ID> ids = new ArrayList<>(1);
 		ids.add(id);
 
-		List<Integer> permissions = getPermissions(user, ids, Authorization.PERMISSION_NONE_START);
+		List<Integer> permissions = getPermissions(user, ids, PERMISSION_NOT_FOUND);
 
 		return permissions.get(0);
 	}
@@ -63,7 +63,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	{
 		List<ID> idList = Arrays.asList(ids);
 
-		List<Integer> permissions = getPermissions(user, idList, Authorization.PERMISSION_NONE_START);
+		List<Integer> permissions = getPermissions(user, idList, PERMISSION_NOT_FOUND);
 
 		int[] re = new int[permissions.size()];
 

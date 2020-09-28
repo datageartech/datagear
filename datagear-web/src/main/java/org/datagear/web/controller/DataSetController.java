@@ -29,6 +29,7 @@ import org.datagear.analysis.support.JsonValueDataSet;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
+import org.datagear.management.domain.Authorization;
 import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
@@ -42,7 +43,9 @@ import org.datagear.management.domain.SchemaConnectionFactory;
 import org.datagear.management.domain.SqlDataSetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
+import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
+import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
@@ -423,6 +426,8 @@ public class DataSetController extends AbstractSchemaConnController
 
 		checkSaveJsonValueDataSetEntity(dataSet);
 
+		trimAnalysisProjectAwareEntityForSave(dataSet);
+
 		this.dataSetEntityService.update(user, dataSet);
 
 		return buildOperationMessageSaveSuccessResponseEntity(request, dataSet);
@@ -710,29 +715,22 @@ public class DataSetController extends AbstractSchemaConnController
 	{
 		final User user = WebUtils.getUser(request, response);
 
+		final SqlDataSet dataSet = preview.getDataSet();
+
 		String schemaId = preview.getSchemaId();
 
-		TemplateResolvedDataSetResult result = new ReturnSchemaConnExecutor<TemplateResolvedDataSetResult>(request,
-				response, springModel, schemaId, true)
-		{
-			@Override
-			protected TemplateResolvedDataSetResult execute(HttpServletRequest request, HttpServletResponse response,
-					org.springframework.ui.Model springModel, Schema schema) throws Throwable
-			{
-				checkReadTableDataPermission(schema, user);
+		// 新建时操作时未创建数据集
+		boolean notFound = checkDataSetEntityIdReadPermission(user, dataSet.getId());
+		// 如果数据集已创建，则使用数据集权限；如果数据集未创建，则需使用数据源权限
+		Schema schema = (notFound ? getSchemaForUserNotNull(user, schemaId) : getSchemaNotNull(schemaId));
 
-				SqlDataSet dataSet = preview.getDataSet();
-				SchemaConnectionFactory connectionFactory = new SchemaConnectionFactory(getConnectionSource(), schema);
-				dataSet.setConnectionFactory(connectionFactory);
+		SchemaConnectionFactory connectionFactory = new SchemaConnectionFactory(getConnectionSource(), schema);
+		dataSet.setConnectionFactory(connectionFactory);
 
-				Map<String, Object> convertedParamValues = getDataSetParamValueConverter()
-						.convert(preview.getParamValues(), dataSet.getParams());
+		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
+				dataSet.getParams());
 
-				TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
-
-				return result;
-			}
-		}.execute();
+		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
 
 		return result;
 	}
@@ -751,7 +749,11 @@ public class DataSetController extends AbstractSchemaConnController
 	public TemplateResolvedDataSetResult previewJsonValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody JsonValueDataSetPreview preview) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		JsonValueDataSet dataSet = preview.getDataSet();
+
+		checkDataSetEntityIdReadPermission(user, dataSet.getId());
 
 		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
 				dataSet.getParams());
@@ -767,7 +769,12 @@ public class DataSetController extends AbstractSchemaConnController
 			org.springframework.ui.Model springModel, @RequestBody JsonFileDataSetEntityPreview preview)
 			throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		JsonFileDataSetEntity dataSet = preview.getDataSet();
+
+		checkDataSetEntityIdReadPermission(user, dataSet.getId());
+
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
 		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
@@ -783,7 +790,12 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResolvedDataSetResult previewExcel(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody ExcelDataSetEntityPreview preview) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		ExcelDataSetEntity dataSet = preview.getDataSet();
+
+		checkDataSetEntityIdReadPermission(user, dataSet.getId());
+
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
 		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
@@ -799,7 +811,11 @@ public class DataSetController extends AbstractSchemaConnController
 	public TemplateResolvedDataSetResult previewCsvValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody CsvValueDataSetPreview preview) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		CsvValueDataSet dataSet = preview.getDataSet();
+
+		checkDataSetEntityIdReadPermission(user, dataSet.getId());
 
 		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
 				dataSet.getParams());
@@ -814,7 +830,12 @@ public class DataSetController extends AbstractSchemaConnController
 	public ResolvedDataSetResult previewCsvFile(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody CsvFileDataSetEntityPreview preview) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		CsvFileDataSetEntity dataSet = preview.getDataSet();
+
+		checkDataSetEntityIdReadPermission(user, dataSet.getId());
+
 		setDirectoryFileDataSetDirectory(dataSet, preview.getOriginalFileName());
 
 		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
@@ -830,7 +851,12 @@ public class DataSetController extends AbstractSchemaConnController
 	public TemplateResolvedDataSetResult previewHttp(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @RequestBody HttpDataSetEntityPreview preview) throws Throwable
 	{
+		final User user = WebUtils.getUser(request, response);
+
 		HttpDataSetEntity dataSet = preview.getDataSet();
+
+		checkDataSetEntityIdReadPermission(user, dataSet.getId());
+
 		dataSet.setHttpClient(getDataSetEntityService().getHttpClient());
 
 		Map<String, Object> convertedParamValues = getDataSetParamValueConverter().convert(preview.getParamValues(),
@@ -839,6 +865,31 @@ public class DataSetController extends AbstractSchemaConnController
 		TemplateResolvedDataSetResult result = dataSet.resolve(convertedParamValues);
 
 		return result;
+	}
+
+	/**
+	 * 校验指定ID的读权限，
+	 * 
+	 * @param user
+	 * @param id
+	 *            允许为{@code null}
+	 * @return 返回{@code true}表明记录未找到
+	 */
+	protected boolean checkDataSetEntityIdReadPermission(User user, String id) throws PermissionDeniedException
+	{
+		boolean notFound = true;
+
+		if (!isEmpty(id))
+		{
+			int permission = this.dataSetEntityService.getPermission(user, id);
+
+			notFound = (DataPermissionEntityService.PERMISSION_NOT_FOUND == permission);
+
+			if (!notFound && !Authorization.canRead(permission))
+				throw new PermissionDeniedException();
+		}
+
+		return notFound;
 	}
 
 	protected void setCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,

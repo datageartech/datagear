@@ -120,6 +120,23 @@ public abstract class AbstractSchemaConnController extends AbstractController
 	}
 
 	/**
+	 * 获取{@linkplain Schema}。
+	 * 
+	 * @param schemaId
+	 * @return
+	 * @throws SchemaNotFoundException
+	 */
+	protected Schema getSchemaNotNull(String schemaId) throws SchemaNotFoundException
+	{
+		Schema schema = this.schemaService.getById(schemaId);
+
+		if (schema == null)
+			throw new SchemaNotFoundException(schemaId);
+
+		return schema;
+	}
+
+	/**
 	 * 获取指定{@linkplain Schema}的{@linkplain Connection}。
 	 * 
 	 * @param schema

@@ -212,7 +212,7 @@
 			{
 				var $target = $(event.target);
 				
-				if($target.closest(".form-item-value-server-file").length == 0)
+				if($target.closest(".selectServerFileBtn, .server-file-list-panel").length == 0)
 					$p.hide();
 			}
 		});
@@ -264,7 +264,7 @@
 		
 		return (value && value != "");
 	});
-
+	
 	$.validator.addMethod("dataSetUploadFilePreviewRequired", function(value, element)
 	{
 		if(!po.isFileSourceTypeUpload())
