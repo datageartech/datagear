@@ -1499,7 +1499,7 @@ ${detectNewVersionScript}
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
 				<div class="dataAnalysis-panel-head">
 					<div class="analysis-project-current ui-widget ui-widget-content ui-corner-all">
-						<div class="analysis-project-current-value"></div>
+						<div class="analysis-project-current-value" title="<@spring.message code='main.analysisProject.currentValue' />"></div>
 						<div class="analysis-project-current-reset ui-button-icon-only" title="<@spring.message code='main.analysisProject.currentValue.clear' />">
 							<span class="ui-icon ui-icon-cancel"></span>
 						</div>
