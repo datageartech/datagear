@@ -15,7 +15,6 @@ import java.util.Map;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.AbstractCsvFileDataSet;
 import org.datagear.analysis.support.CsvDirectoryFileDataSet;
-import org.datagear.util.FileUtil;
 
 /**
  * {@linkplain CsvDirectoryFileDataSet}实体。
@@ -217,23 +216,14 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	}
 
 	@Override
+	public String resolveFileNameAsFmkTemplate(String fileName, Map<String, ?> paramValues)
+	{
+		return resolveAsFmkTemplate(fileName, paramValues);
+	}
+
+	@Override
 	protected File getCsvFile(Map<String, ?> paramValues) throws Throwable
 	{
-		File file = null;
-
-		if (FILE_SOURCE_TYPE_UPLOAD.equals(this.fileSourceType))
-			file = FileUtil.getFile(this.directory, this.fileName);
-		else if (FILE_SOURCE_TYPE_SERVER.equals(this.fileSourceType))
-		{
-			// 服务器端文件名允许参数化
-			String fileName = resolveAsFmkTemplate(this.dataSetResFileName, paramValues);
-
-			File directory = FileUtil.getDirectory(this.dataSetResDirectory.getDirectory(), false);
-			file = FileUtil.getFile(directory, fileName, false);
-		}
-		else
-			throw new IllegalStateException("Unknown file source type :" + this.fileSourceType);
-
-		return file;
+		return FILE_SUPPORT.getFile(this, paramValues);
 	}
 }

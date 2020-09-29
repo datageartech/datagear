@@ -269,7 +269,7 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	 * @param paramValues
 	 * @return
 	 */
-	protected String resolveAsFmkTemplate(String text, Map<String, ?> paramValues)
+	public String resolveAsFmkTemplate(String text, Map<String, ?> paramValues)
 	{
 		// if (!hasParam())
 		// return text;

@@ -12,11 +12,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.analysis.support.AbstractJsonFileDataSet;
 import org.datagear.analysis.support.JsonDirectoryFileDataSet;
-import org.datagear.util.FileUtil;
 
 /**
  * {@linkplain JsonDirectoryFileDataSet}实体。
@@ -219,23 +217,14 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 	}
 
 	@Override
-	protected File getJsonFile(Map<String, ?> paramValues) throws DataSetException
+	public String resolveFileNameAsFmkTemplate(String fileName, Map<String, ?> paramValues)
 	{
-		File file = null;
+		return resolveAsFmkTemplate(fileName, paramValues);
+	}
 
-		if (FILE_SOURCE_TYPE_UPLOAD.equals(this.fileSourceType))
-			file = FileUtil.getFile(this.directory, this.fileName);
-		else if (FILE_SOURCE_TYPE_SERVER.equals(this.fileSourceType))
-		{
-			// 服务器端文件名允许参数化
-			String fileName = resolveAsFmkTemplate(this.dataSetResFileName, paramValues);
-
-			File directory = FileUtil.getDirectory(this.dataSetResDirectory.getDirectory(), false);
-			file = FileUtil.getFile(directory, fileName, false);
-		}
-		else
-			throw new IllegalStateException("Unknown file source type :" + this.fileSourceType);
-
-		return file;
+	@Override
+	protected File getJsonFile(Map<String, ?> paramValues) throws Throwable
+	{
+		return FILE_SUPPORT.getFile(this, paramValues);
 	}
 }

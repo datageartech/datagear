@@ -39,14 +39,18 @@
 		
 		<div class="row-wrapper form-item-value">
 			<input type="hidden" name="dataSetResDirectory.id" value="${(dataSet.dataSetResDirectory.id)!''?html}" />
-			<div class="label"><@spring.message code='dataSet.serverDirectory' /></div>
+			<div class="label">
+				<label title="<@spring.message code='dataSet.serverDirectory.desc' />" class="tip-label"><@spring.message code='dataSet.serverDirectory' /></label>
+			</div>
 			<input type="text" name="dataSetResDirectory.directory" value="${(dataSet.dataSetResDirectory.directory)!''?html}" class="ui-widget ui-widget-content" readonly="readonly" />
 			<#if !readonly>
 			<button type="button" class="selectServerDirectoryBtn"><@spring.message code='select' /></button>
 			</#if>
 		</div>
 		<div class="row-wrapper form-item-value form-item-value-server-file">
-			<div class="label"><@spring.message code='dataSet.fileInDirectory' /></div>
+			<div class="label">
+				<label title="<@spring.message code='dataSet.dataSetResFileName.desc' />" class="tip-label"><@spring.message code='dataSet.fileInDirectory' /></label>
+			</div>
 			<input type="text" name="dataSetResFileName" value="${(dataSet.dataSetResFileName)!''?html}" class="ui-widget ui-widget-content" />
 			<#if !readonly>
 			<button type="button" class="selectServerFileBtn ui-button-icon-only">
@@ -103,11 +107,13 @@
 			{
 				$upload.show();
 				$server.hide();
+				po.disableDataSetParamOperation(true);
 			}
 			else
 			{
 				$upload.hide();
 				$server.show();
+				po.disableDataSetParamOperation(false);
 			}
 		});
 		

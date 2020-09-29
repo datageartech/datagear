@@ -148,8 +148,26 @@ po.previewOptions.url = "...";
 		
 		if(disableParams)
 		{
-			var paramsIndex = $(".workspace-operation-nav .operation-params", po.element(".workspace-operation-wrapper")).index();
-			po.element(".workspace-operation-wrapper").tabs("disable", paramsIndex);
+			po.disableDataSetParamOperation(true);
+		}
+	};
+	
+	//获取、设置数据参数选项卡是否禁用
+	po.disableDataSetParamOperation = function(disable)
+	{
+		var nav = $(".workspace-operation-nav", po.element(".workspace-operation-wrapper"));
+		var paramsTab = $(".operation-params", nav);
+		
+		if(disable === undefined)
+			return paramsTab.hasClass("ui-state-disabled");
+		else
+		{
+			var paramsIndex = paramsTab.index();
+			
+			if(disable)
+				po.element(".workspace-operation-wrapper").tabs("disable", paramsIndex);
+			else
+				po.element(".workspace-operation-wrapper").tabs("enable", paramsIndex);
 		}
 	};
 	
@@ -486,6 +504,9 @@ po.previewOptions.url = "...";
 
 	po.hasFormDataSetParam = function()
 	{
+		if(po.disableDataSetParamOperation())
+			return false;
+		
 		var $names = po.element(".params-table-wrapper .dataSetParamName");
 		return ($names.length > 0);
 	};
@@ -493,6 +514,9 @@ po.previewOptions.url = "...";
 	po.getFormDataSetParams = function()
 	{
 		var params = [];
+		
+		if(po.disableDataSetParamOperation())
+			return params;
 		
 		po.element(".params-table-wrapper .dataSetParamName").each(function(i)
 		{
