@@ -33,6 +33,7 @@ import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
+import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
@@ -386,6 +387,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		if (chart == null)
 			throw new RecordNotFoundException();
+
+		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(user));
 
 		String id = chart.getId();
 
