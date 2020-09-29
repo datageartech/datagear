@@ -228,7 +228,7 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet implements Di
 		else if (FILE_SOURCE_TYPE_SERVER.equals(this.fileSourceType))
 		{
 			// 服务器端文件名允许参数化
-			String fileName = resolveAsFmkTemplateIfHasParam(this.dataSetResFileName, paramValues);
+			String fileName = resolveAsFmkTemplate(this.dataSetResFileName, paramValues);
 
 			File directory = FileUtil.getDirectory(this.dataSetResDirectory.getDirectory(), false);
 			file = FileUtil.getFile(directory, fileName, false);

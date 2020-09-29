@@ -25,7 +25,7 @@ import freemarker.template.TemplateException;
  * 专用于数据集模板且采用Freemarker作为模板语言的{@linkplain TemplateResolver}。
  * <p>
  * 此类的{@linkplain #setDataSetTemplateStandardConfig(Configuration)}定义了很多数据集模板规范，
- * 这些规范不应被更改，因为会影响用于已定义数据集的模板。
+ * 这些规范不应被更改，因为会影响用户已定义数据集的模板。
  * </p>
  * 
  * @author datagear@163.com
@@ -39,7 +39,7 @@ public class DataSetFmkTemplateResolver implements TemplateResolver
 
 	public DataSetFmkTemplateResolver()
 	{
-		this(500);
+		this(1000);
 	}
 
 	public DataSetFmkTemplateResolver(int cacheCapacity)

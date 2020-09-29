@@ -64,6 +64,9 @@ public interface DataSet extends Identifiable
 
 	/**
 	 * 给定的参数映射表是否可用于{@linkplain #getResult(Map)}。
+	 * <p>
+	 * 通常是：{@code paramValues}包含{@linkplain #getParams()}中的所有{@linkplain DataSetParam#isRequired()}参数值。
+	 * </p>
 	 * 
 	 * @param paramValues
 	 * @return
@@ -77,7 +80,9 @@ public interface DataSet extends Identifiable
 	 * </p>
 	 * 
 	 * @param paramValues
-	 *            由{@linkplain #getParams()}所描述的参数值映射表，其关键字是{@linkplain DataSetParam#getName()}
+	 *            包含{@linkplain #getParams()}所描述的参数值映射表，应是符合{@linkplain #isReady(Map)}校验的，
+	 *            其关键字是{@linkplain DataSetParam#getName()}。
+	 *            参数值映射表并不要求与{@linkplain #getParams()}一一对应，通常是包含相同、或者更多的项。
 	 * @return
 	 * @throws DataSetException
 	 */
