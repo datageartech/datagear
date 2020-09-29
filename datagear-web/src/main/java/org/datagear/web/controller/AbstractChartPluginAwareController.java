@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,17 +19,15 @@ import org.datagear.analysis.Chart;
 import org.datagear.analysis.ChartDataSet;
 import org.datagear.analysis.ChartDefinition;
 import org.datagear.analysis.DashboardTheme;
-import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.DataSign;
 import org.datagear.analysis.Icon;
 import org.datagear.analysis.RenderContext;
 import org.datagear.analysis.RenderException;
 import org.datagear.analysis.support.AbstractChartPlugin;
-import org.datagear.analysis.support.AbstractDataSet;
 import org.datagear.analysis.support.CategorizationResolver;
 import org.datagear.analysis.support.CategorizationResolver.Categorization;
+import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.html.DirectoryHtmlChartPluginManager;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.util.i18n.Label;
@@ -287,35 +284,6 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	}
 
 	/**
-	 * {@linkplain DataSet}视图对象。
-	 * 
-	 * @author datagear@163.com
-	 *
-	 */
-	public static class DataSetViewObj extends AbstractDataSet
-	{
-		public DataSetViewObj()
-		{
-			super();
-		}
-
-		public DataSetViewObj(DataSet dataSet)
-		{
-			super();
-			setId(dataSet.getId());
-			setName(dataSet.getName());
-			setProperties(dataSet.getProperties());
-			setParams(dataSet.getParams());
-		}
-
-		@Override
-		public DataSetResult getResult(Map<String, ?> paramValues) throws DataSetException
-		{
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	/**
 	 * {@linkplain ChartDataSet}视图对象。
 	 * 
 	 * @author datagear@163.com
@@ -331,7 +299,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 		public ChartDataSetViewObj(ChartDataSet chartDataSet)
 		{
 			super();
-			setDataSet(new DataSetViewObj(chartDataSet.getDataSet()));
+			setDataSet(ProfileDataSet.valueOf(chartDataSet.getDataSet()));
 			setPropertySigns(chartDataSet.getPropertySigns());
 			setAlias(chartDataSet.getAlias());
 			setParamValues(chartDataSet.getParamValues());

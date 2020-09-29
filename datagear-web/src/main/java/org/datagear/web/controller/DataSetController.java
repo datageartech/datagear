@@ -26,6 +26,7 @@ import org.datagear.analysis.support.CsvValueDataSet;
 import org.datagear.analysis.support.DataSetFmkTemplateResolver;
 import org.datagear.analysis.support.DataSetParamValueConverter;
 import org.datagear.analysis.support.JsonValueDataSet;
+import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.analysis.support.SqlDataSet;
 import org.datagear.analysis.support.TemplateContext;
 import org.datagear.analysis.support.TemplateResolvedDataSetResult;
@@ -612,27 +613,12 @@ public class DataSetController extends AbstractSchemaConnController
 		return buildFormView(dataSet.getDataSetType());
 	}
 
-	@RequestMapping(value = "/getById", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/getProfileDataSetByIds", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
-	public DataSetEntity getById(HttpServletRequest request, HttpServletResponse response,
-			org.springframework.ui.Model model, @RequestParam("id") String id)
-	{
-		User user = WebUtils.getUser(request, response);
-
-		DataSetEntity dataSet = this.dataSetEntityService.getById(user, id);
-
-		if (dataSet == null)
-			throw new RecordNotFoundException();
-
-		return dataSet;
-	}
-
-	@RequestMapping(value = "/getByIds", produces = CONTENT_TYPE_JSON)
-	@ResponseBody
-	public List<DataSetEntity> getByIds(HttpServletRequest request, HttpServletResponse response,
+	public List<ProfileDataSet> getProfileDataSetByIds(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model model, @RequestParam("id") String[] ids)
 	{
-		List<DataSetEntity> dataSets = new ArrayList<>();
+		List<ProfileDataSet> dataSets = new ArrayList<>();
 
 		if (!isEmpty(ids))
 		{
@@ -640,7 +626,7 @@ public class DataSetController extends AbstractSchemaConnController
 
 			for (String id : ids)
 			{
-				DataSetEntity dataSet = this.dataSetEntityService.getById(user, id);
+				ProfileDataSet dataSet = this.dataSetEntityService.getProfileDataSet(user, id);
 
 				if (dataSet == null)
 					throw new RecordNotFoundException();

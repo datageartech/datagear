@@ -509,7 +509,7 @@ readonly 是否只读操作，允许为null
 		
 		var data = $.getPropertyParamString(dataSets, "id");
 		
-		$.get("${contextPath}/analysis/dataSet/getByIds", data, function(dataSets)
+		$.get("${contextPath}/analysis/dataSet/getProfileDataSetByIds", data, function(dataSets)
 		{
 			var $wrapper = po.element(".data-set-wrapper");
 			

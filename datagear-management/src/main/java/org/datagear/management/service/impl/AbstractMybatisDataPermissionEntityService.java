@@ -134,6 +134,11 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 	@Override
 	public T getById(User user, ID id) throws PermissionDeniedException
 	{
+		return getById(user, id, true);
+	}
+
+	protected T getById(User user, ID id, boolean postProcessSelect) throws PermissionDeniedException
+	{
 		int permission = getPermission(user, id);
 
 		if (!Authorization.canRead(permission))
@@ -142,7 +147,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		Map<String, Object> params = buildParamMap();
 		addDataPermissionParameters(params, user);
 
-		return getById(id, params);
+		return getById(id, params, postProcessSelect);
 	}
 
 	@Override

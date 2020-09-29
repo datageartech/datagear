@@ -91,6 +91,9 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 
 	/**
 	 * 获取。
+	 * <p>
+	 * 此方法内部会执行{@linkplain #postProcessSelect(Object)}。
+	 * </p>
 	 * 
 	 * @param id
 	 * @param params
@@ -98,11 +101,27 @@ public abstract class AbstractMybatisEntityService<ID, T extends Entity<ID>> ext
 	 */
 	protected T getById(ID id, Map<String, Object> params)
 	{
+		return getById(id, params, true);
+	}
+
+	/**
+	 * 获取。
+	 * 
+	 * @param id
+	 * @param params
+	 * @param postProcessSelect
+	 *            是否内部执行{@linkplain #postProcessSelect(Object)}
+	 * @return
+	 */
+	protected T getById(ID id, Map<String, Object> params, boolean postProcessSelect)
+	{
 		addIdentifierQuoteParameter(params);
 		params.put("id", id);
 
 		T entity = selectOneMybatis("getById", params);
-		entity = postProcessSelect(entity);
+
+		if (postProcessSelect)
+			entity = postProcessSelect(entity);
 
 		return entity;
 	}

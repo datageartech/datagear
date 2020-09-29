@@ -17,6 +17,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.connection.ConnectionSource;
 import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.AnalysisProjectAwareEntity;
@@ -164,6 +165,19 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		}
 
 		return entity;
+	}
+
+	@Override
+	public ProfileDataSet getProfileDataSet(User user, String id)
+	{
+		ProfileDataSet profileDataSet = null;
+
+		DataSetEntity entity = getById(user, id, false);
+		inflateParamsAndProperties(entity);
+
+		profileDataSet = ProfileDataSet.valueOf(entity);
+
+		return profileDataSet;
 	}
 
 	@Override
@@ -421,18 +435,26 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		// 这里必须设置全限值，为了效率，上述子类的底层查询并未返回全限值
 		obj.setDataPermission(initObj.getDataPermission());
 
+		inflateParamsAndProperties(obj);
+
+		return obj;
+	}
+
+	protected void inflateParamsAndProperties(DataSetEntity dataSetEntity)
+	{
+		if (dataSetEntity == null)
+			return;
+
 		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
-		params.put("dataSetId", obj.getId());
+		params.put("dataSetId", dataSetEntity.getId());
 
 		List<DataSetPropertyPO> propertyPOs = selectListMybatis("getPropertyPOs", params);
 		List<DataSetProperty> dataSetProperties = DataSetPropertyPO.to(propertyPOs);
-		obj.setProperties(dataSetProperties);
+		dataSetEntity.setProperties(dataSetProperties);
 
 		List<DataSetParamPO> paramPOs = selectListMybatis("getParamPOs", params);
 		List<DataSetParam> dataSetParams = DataSetParamPO.to(paramPOs);
-		obj.setParams(dataSetParams);
-
-		return obj;
+		dataSetEntity.setParams(dataSetParams);
 	}
 
 	protected SqlDataSetEntity getSqlDataSetEntityById(String id)
