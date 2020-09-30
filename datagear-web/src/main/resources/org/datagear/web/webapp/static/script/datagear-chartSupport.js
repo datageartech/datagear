@@ -3801,22 +3801,22 @@
 				//行
 				"row":
 				{
+					//公用样式
+					"color": chartTheme.color,
+					
 					//偶数行样式
 					"odd":
 					{
-						"color": chartTheme.color,
 						"backgroundColor": global.chartFactory.getGradualColor(chartTheme, 0)
 					},
 					//奇数行样式
 					"even":
 					{
-						"color": chartTheme.color,
 						"backgroundColor": chartTheme.backgroundColor
 					},
 					//悬浮行样式
 					"hover":
 					{
-						"color": chartTheme.color,
 						"backgroundColor": global.chartFactory.getGradualColor(chartTheme, 0.2)
 					},
 					//选中行样式
@@ -3887,6 +3887,10 @@
 		    {
 				"emptyTable": "",
 				"zeroRecords" : ""
+			},
+			"rowCallback": function(row, data, displayNum, displayIndex, dataIndex)
+			{
+				chartSupport.tableSetTableRowStyle(row, chartOptions);
 			}
 		});
 		
@@ -3904,14 +3908,7 @@
 		
 		var dataTable = table.DataTable();
 		
-		dataTable.on("draw", function()
-		{
-			var rowNodes = $(this).DataTable().rows().nodes();
-			$(rowNodes).each(function()
-			{
-				chartSupport.tableSetTableRowStyle(this, chartOptions);
-			});
-		})
+		dataTable
 		.on("select", function(e, dt, type, indexes )
 		{
 			if(type === 'row')
@@ -4077,6 +4074,9 @@
 	
 	chartSupport.tableSetTableRowStyle = function(rowElement, chartOptions)
 	{
+		//公用样式
+		global.chartFactory.setStyles(rowElement, chartOptions.table.row);
+		
 		if($(rowElement).hasClass("odd"))
 			global.chartFactory.setStyles(rowElement, chartOptions.table.row.odd);
 		else

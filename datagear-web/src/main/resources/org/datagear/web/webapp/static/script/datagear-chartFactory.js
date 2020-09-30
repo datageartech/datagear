@@ -2116,20 +2116,27 @@
 	 * 为元素设置样式集。
 	 * 
 	 * @param element HTML元素、Jquery对象
-	 * @param stylesObj 样式对象，格式为：{ color: "...", backgroundColor: "...", fontSize: "...", ...  }
+	 * @param stylesObj 样式对象，格式为：{ color: "...", backgroundColor: "...", fontSize: "...", ...  }，不合法的项将被忽略
 	 * @return 旧样式集对象
 	 */
 	chartFactory.setStyles = function(element, stylesObj)
 	{
 		var olds = {};
-
+		
 		if(element.length > 0)
 			element = element[0];
-	
+		
 		if(stylesObj && element.style != undefined)
-		{	
+		{
 			for(var p in stylesObj)
 			{
+				var newStyle = stylesObj[p];
+				
+				//忽略不合法的项
+				var newStyleType = typeof(newStyle);
+				if(newStyleType != "string" && newStyleType != "number")
+					continue;
+				
 				olds[p] = element.style[p];
 				element.style[p] = stylesObj[p];
 			}
