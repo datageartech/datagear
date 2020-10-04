@@ -7,7 +7,8 @@
  */
 package org.datagear.web.config;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 /**
  * 安全配置。
@@ -20,10 +21,10 @@ import org.springframework.context.annotation.Configuration;
  * 
  * @author datagear@163.com
  */
-@Configuration
-public class SercurityConfiguration
+@EnableWebSecurity
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter
 {
-	public SercurityConfiguration()
+	public SecurityConfiguration()
 	{
 	}
 }
