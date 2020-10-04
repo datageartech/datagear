@@ -39,7 +39,7 @@ DataGear是一款数据可视化分析平台，使用Java语言开发，采用�
 
 ## 交流
 
-QQ群：[916083747](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)
+QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[1128360199](https://jq.qq.com/?_wv=1027&k=XkQ4ARMY)
 
 留言板：[http://www.datagear.tech/messageboard](http://www.datagear.tech/messageboard/)
 
