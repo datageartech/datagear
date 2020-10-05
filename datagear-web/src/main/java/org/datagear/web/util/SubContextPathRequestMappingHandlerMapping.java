@@ -36,10 +36,7 @@ public class SubContextPathRequestMappingHandlerMapping extends RequestMappingHa
 
 	public void setSubContextPath(String subContextPath)
 	{
-		if (!WebContextPath.isValidSubContextPath(subContextPath))
-			throw new IllegalArgumentException("[subContextPath] must be start with '/' and not end with '/'");
-
-		this.subContextPath = subContextPath;
+		this.subContextPath = WebContextPath.trimSubContextPath(subContextPath);
 	}
 
 	@Override

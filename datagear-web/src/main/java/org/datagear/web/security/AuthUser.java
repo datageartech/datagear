@@ -25,6 +25,8 @@ public class AuthUser implements UserDetails
 
 	public static final String ROLE_USER = "ROLE_USER";
 
+	public static final String ROLE_ANONYMOUS = "ROLE_ANONYMOUS";
+
 	private static final long serialVersionUID = 1L;
 
 	private final User user;
@@ -37,9 +39,15 @@ public class AuthUser implements UserDetails
 
 		this.authorities = new HashSet<GrantedAuthority>();
 
-		this.authorities.add(new SimpleGrantedAuthority(ROLE_USER));
-		if (user.isAdmin())
-			this.authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
+		if (user.isAnonymous())
+			this.authorities.add(new SimpleGrantedAuthority(ROLE_ANONYMOUS));
+		else
+		{
+			this.authorities.add(new SimpleGrantedAuthority(ROLE_USER));
+
+			if (user.isAdmin())
+				this.authorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
+		}
 	}
 
 	/**

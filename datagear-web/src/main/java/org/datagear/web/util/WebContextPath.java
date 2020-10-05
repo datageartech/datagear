@@ -28,10 +28,7 @@ public class WebContextPath
 
 	public void setSubContextPath(String subContextPath)
 	{
-		if (!isValidSubContextPath(subContextPath))
-			throw new IllegalArgumentException("[subContextPath] must be start with '/' and not end with '/'");
-
-		this.subContextPath = subContextPath;
+		this.subContextPath = trimSubContextPath(subContextPath);
 	}
 
 	/**
@@ -93,20 +90,31 @@ public class WebContextPath
 	}
 
 	/**
-	 * 是否合法的子上下文路径。
+	 * 修剪子上下文路径。
+	 * <p>
+	 * 子上下文路径格式规范：空字符串、以'/'开头且不以'/'结尾
+	 * </p>
 	 * 
 	 * @param subContextPath
 	 * @return
 	 */
-	public static boolean isValidSubContextPath(String subContextPath)
+	public static String trimSubContextPath(String subContextPath)
 	{
 		if (subContextPath == null)
-			return false;
+			return "";
+
+		subContextPath = subContextPath.trim();
 
 		if (subContextPath.isEmpty())
-			return true;
+			return subContextPath;
 
-		return subContextPath.matches("^/[^/]+(/[^/]+)*$");
+		if (!subContextPath.startsWith("/"))
+			subContextPath = "/" + subContextPath;
+
+		while (subContextPath.endsWith("/"))
+			subContextPath = subContextPath.substring(0, subContextPath.length() - 1);
+
+		return subContextPath;
 	}
 
 	/**
