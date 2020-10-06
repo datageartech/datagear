@@ -3854,7 +3854,7 @@
 			//DataTable图表配置项
 			"ordering": false,
 			
-			//轮播，格式可以为：true、false、轮播interval数值、{...}
+			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
 			carousel: carouselConfig
 		},
 		options,
@@ -3865,7 +3865,7 @@
 			carouselConfig.enable = chartOptions.carousel;
 			chartOptions.carousel = carouselConfig;
 		}
-		else if(typeof(chartOptions.carousel) == "number")
+		else if(typeof(chartOptions.carousel) == "number" || $.isFunction(chartOptions.carousel))
 		{
 			carouselConfig.enable = true;
 			carouselConfig.interval = chartOptions.carousel;
