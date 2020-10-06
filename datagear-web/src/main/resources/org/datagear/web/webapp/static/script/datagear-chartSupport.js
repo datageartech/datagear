@@ -3783,9 +3783,14 @@
 		{
 			//是否开启
 			enable: false,
-			//滚动间隔毫秒数
+			//滚动间隔毫秒数，或者返回间隔毫秒数的函数：
+			//currentRow 当前可见行
+			//visibleHeight 当前可见行的剩余可见高度
+			//height 当前可见行高度
+			//function(currentRow, visibleHeight, height){ return ...; }
 			interval: 50,
-			//滚动跨度像素数
+			//滚动跨度像素数，或者返回跨度像素数的函数：
+			//function(currentRow, visibleHeight, height){ return ...; }
 			span: 1,
 			//是否在鼠标悬停时暂停轮播
 			pauseOnHover: true
@@ -4216,8 +4221,6 @@
 	 */
 	chartSupport.tableStartCarousel = function(chart)
 	{
-		chartSupport.tableStopCarousel(chart);
-		
 		var initOptions = chartSupport.initOptions(chart);
 		var chartEle = chart.elementJquery();
 		var dataTable = chartSupport.tableGetChartDataTable(chart);
@@ -4227,44 +4230,14 @@
 		//空表格
 		if(rowCount == 0)
 			return;
-
+		
+		chartSupport.tableStopCarousel(chart);
+		chartEle.data("tableCarouselStatus", "start");
+		
 		var scrollBody = $(".dataTables_scrollBody", chartEle);
 		var scrollTable = $(".dataTable", scrollBody);
 		
-		var intervalId = setInterval(function()
-		{
-			var row0 = dataTable.row(0);
-			var $row0 = $(row0.node());
-			var row0Height = $row0.outerHeight(true);
-			
-			var row1 = dataTable.row(1);
-			var $row1 = $(row1.node());
-			var row1Height = $row1.outerHeight(true);
-			
-			var scrollTop = scrollBody.scrollTop();
-			
-			var addDatas = null;
-			
-			//必须同时移除两行，不然奇偶行会变化，导致颜色交替重绘
-			if(scrollTop > (row0Height+row1Height))
-			{
-				addDatas = [ row0.data(), row1.data() ];
-				
-				var removeRows = [0, 1];
-				dataTable.rows(removeRows).remove().draw();
-				
-				scrollTop = scrollTop - row0Height - row1Height;
-			}
-			
-			scrollTop = scrollTop + initOptions.carousel.span;
-			scrollBody.scrollTop(scrollTop);
-			
-			if(addDatas != null)
-				dataTable.rows.add(addDatas).draw();
-		},
-		initOptions.carousel.interval);
-		
-		chartSupport.tableCarouselIntervalId(chart, intervalId);
+		chartSupport.tableHandleCarousel(chart, initOptions, chartEle, dataTable, scrollBody, scrollTable);
 	};
 	
 	/**
@@ -4272,7 +4245,93 @@
 	 */
 	chartSupport.tableStopCarousel = function(chart)
 	{
+		var chartEle = chart.elementJquery();
+		chartEle.data("tableCarouselStatus", "stop");
 		chartSupport.tableCarouselIntervalId(chart, null);
+	};
+	
+	chartSupport.tableHandleCarousel = function(chart, initOptions, chartEle, dataTable, scrollBody, scrollTable)
+	{
+		var status = chartEle.data("tableCarouselStatus");
+		
+		if(status == "stop")
+			return;
+		
+		var scrollTop = scrollBody.scrollTop();
+		
+		var currentRow = null;
+		var currentRowHeight = null;
+		var currentRowVisibleHeight = null;
+		
+		var removeRowIndexes = [];
+		var addRowDatas = [];
+		
+		var offset = 0;
+		var idx = 0;
+		while(true)
+		{
+			var row0 = dataTable.row(idx);
+			var $row0 = $(row0.node());
+			var row0Height = $row0.outerHeight(true);
+			
+			//第一行仍可见
+			if(scrollTop < (offset + row0Height))
+			{
+				currentRow = row0.node();
+				currentRowHeight = row0Height;
+				currentRowVisibleHeight = offset + row0Height - scrollTop;
+				
+				break;
+			}
+			
+			var row1 = dataTable.row(idx+1);
+			var $row1 = $(row1.node());
+			var row1Height = $row1.outerHeight(true);
+			
+			//第二行仍可见
+			if(scrollTop < (offset + row0Height + row1Height))
+			{
+				currentRow = row1.node();
+				currentRowHeight = row1Height;
+				currentRowVisibleHeight = offset + row0Height + row1Height - scrollTop;
+				
+				break;
+			}
+			
+			//必须同时移除两行，不然奇偶行会变化，导致颜色交替重绘
+			removeRowIndexes.push(idx);
+			removeRowIndexes.push(idx+1);
+			addRowDatas.push(row0.data());
+			addRowDatas.push(row1.data());
+			
+			offset += row0Height + row1Height;
+			idx += 2;
+		}
+		
+		if(removeRowIndexes.length > 0)
+		{
+			dataTable.rows(removeRowIndexes).remove().draw();
+			scrollTop = scrollTop - offset;
+		}
+		
+		var span = ($.isFunction(initOptions.carousel.span) ?
+				initOptions.carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : initOptions.carousel.span);
+		
+		scrollBody.scrollTop(scrollTop + span);
+		
+		if(addRowDatas.length > 0)
+			dataTable.rows.add(addRowDatas).draw();
+		
+		var interval = ($.isFunction(initOptions.carousel.interval) ?
+				initOptions.carousel.interval(currentRow, currentRowVisibleHeight, currentRowHeight) : initOptions.carousel.interval);
+		
+		var intervalId = setTimeout(function()
+		{
+			chartSupport.tableHandleCarousel(chart, initOptions, chartEle, dataTable, scrollBody, scrollTable);
+		},
+		interval);
+		
+		chartSupport.tableCarouselIntervalId(chart, intervalId);
 	};
 	
 	/**
