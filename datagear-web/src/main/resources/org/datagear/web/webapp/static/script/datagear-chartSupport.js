@@ -4252,12 +4252,13 @@
 	
 	chartSupport.tableHandleCarousel = function(chart, initOptions, chartEle, dataTable, scrollBody, scrollTable)
 	{
-		var status = chartEle.data("tableCarouselStatus");
-		
-		if(status == "stop")
+		if(chartEle.data("tableCarouselStatus") == "stop")
 			return;
 		
-		var scrollTop = scrollBody.scrollTop();
+		//不采用设置滚动高度的方式（scrollBody.scrollTop()），因为会出现影响整个页面滚动高度的情况
+		var scrollTop = scrollTable.css("margin-top");
+		scrollTop = (scrollTop.indexOf("px") == scrollTop.length - 2 ? scrollTop.substring(0, scrollTop.length - 2) : scrollTop);
+		scrollTop = (Math.abs(parseInt(scrollTop)) || 0);
 		
 		var currentRow = null;
 		var currentRowHeight = null;
@@ -4317,7 +4318,7 @@
 		var span = ($.isFunction(initOptions.carousel.span) ?
 				initOptions.carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : initOptions.carousel.span);
 		
-		scrollBody.scrollTop(scrollTop + span);
+		scrollTable.css("margin-top", (0 - (scrollTop + span))+"px");
 		
 		if(addRowDatas.length > 0)
 			dataTable.rows.add(addRowDatas).draw();
