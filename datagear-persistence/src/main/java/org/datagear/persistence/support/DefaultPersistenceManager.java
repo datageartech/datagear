@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.datagear.connection.ConnectionOption;
 import org.datagear.meta.Column;
+import org.datagear.meta.PrimaryKey;
 import org.datagear.meta.Table;
 import org.datagear.persistence.Dialect;
 import org.datagear.persistence.DialectSource;
@@ -28,6 +29,7 @@ import org.datagear.persistence.Query;
 import org.datagear.persistence.Row;
 import org.datagear.persistence.RowMapper;
 import org.datagear.persistence.SqlParamValueMapper;
+import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.Sql;
 import org.datagear.util.SqlParamValue;
 import org.datagear.util.StringUtil;
@@ -175,9 +177,12 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 		Sql sql = Sql.valueOf().sql("UPDATE ").sql(quote(dialect, table.getName())).sql(" SET ").delimit(",");
 
 		Column[] columns = table.getColumns();
+		PrimaryKey primaryKey = table.getPrimaryKey();
 
 		try
 		{
+			int updateColumnCount = 0;
+
 			for (int i = 0; i < columns.length; i++)
 			{
 				Column column = columns[i];
@@ -195,16 +200,34 @@ public class DefaultPersistenceManager extends PersistenceSupport implements Per
 
 				SqlParamValue sqlParamValue = mapToSqlParamValue(cn, table, column, value, mapper, releasableRegistry);
 
+				@JDBCCompatiblity("某些数据库存在不允许更新自增长列或者主键列的情况（比如SQL Server的自增列），因此，如果这些列值没有改变，则不应更新")
+				boolean checkIgnoreIfEquals = (column.isAutoincrement()
+						|| (primaryKey != null && primaryKey.containsColumnName(name)));
+
+				if (checkIgnoreIfEquals && StringUtil.isEquals(sqlParamValue.getValue(), origin.get(name)))
+					continue;
+
 				if (sqlParamValue instanceof LiteralSqlParamValue)
 					sql.sqld(quote(dialect, name) + "="
 							+ addBracketIfSelectSql(((LiteralSqlParamValue) sqlParamValue).getValue()));
 				else
 					sql.sqld(quote(dialect, name) + "=?").param(sqlParamValue);
+
+				updateColumnCount++;
 			}
 
+			// 即使updateColumnCount=0也执行下面这行SQL拼接操作，确保必要的buildUniqueRecordCondition里面必要的校验逻辑执行到
 			sql.sql(" WHERE ").sql(buildUniqueRecordCondition(cn, dialect, table, origin, mapper, releasableRegistry));
 
-			return executeUpdateWrap(cn, sql);
+			if (updateColumnCount > 0)
+			{
+				return executeUpdateWrap(cn, sql);
+			}
+			else
+			{
+				// 没有需要更新的列时仍然返回1，确保返回逻辑正确
+				return 1;
+			}
 		}
 		finally
 		{
