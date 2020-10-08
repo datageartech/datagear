@@ -41,7 +41,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.sql' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
 						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
 							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>

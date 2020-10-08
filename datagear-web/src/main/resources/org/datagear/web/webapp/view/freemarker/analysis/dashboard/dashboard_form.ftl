@@ -41,7 +41,7 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.template' /></label>
 				</div>
-				<div class="form-item-value form-item-value-template">
+				<div class="form-item-value error-newline form-item-value-template">
 					<textarea name="templateContent" class="ui-widget ui-widget-content" style="display: none;">${templateContent!''?html}</textarea>
 					<div class="template-editor-wrapper">
 						<div class="template-editor-parent ui-widget ui-widget-content">
@@ -124,9 +124,7 @@ readonly 是否只读操作，允许为null
 {
 	$.initButtons(po.element());
 	po.initAnalysisProject("${(dashboard.analysisProject.id)!''?js_string}", "${(dashboard.analysisProject.name)!''?js_string}");
-	var tewHeight = $(window).height()*5/9;
-	po.element(".template-editor-wrapper").height(tewHeight);
-	po.element(".form-item-value-template").height(tewHeight + 30);
+	po.element(".form-item-value-template").height($(window).height()*5/9);
 	
 	po.templates = <@writeJson var=templates />;
 	

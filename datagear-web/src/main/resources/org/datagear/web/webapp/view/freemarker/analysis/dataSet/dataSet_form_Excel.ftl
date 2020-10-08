@@ -37,7 +37,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.excel.sheetIndex' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="text" name="sheetIndex" value="${(dataSet.sheetIndex)!''?html}" class="ui-widget ui-widget-content" style="width:41%;" />
 					</div>
 				</div>
@@ -47,7 +47,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.excel.nameRow' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''?html}" class="ui-widget ui-widget-content" />
 						<span class="nameRow-radios">
 							<label for="${pageId}-nameRow_0">
@@ -69,7 +69,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.excel.dataRowExp' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="text" name="dataRowExp" value="${(dataSet.dataRowExp)!''?html}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
@@ -79,7 +79,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.excel.dataColumnExp' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="text" name="dataColumnExp" value="${(dataSet.dataColumnExp)!''?html}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>

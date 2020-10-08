@@ -37,7 +37,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.csv.nameRow' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''?html}" class="ui-widget ui-widget-content" />
 						<span class="nameRow-radios">
 							<label for="${pageId}-nameRow_0">

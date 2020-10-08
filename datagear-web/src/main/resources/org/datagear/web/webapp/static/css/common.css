@@ -113,14 +113,16 @@ form .form-content .tip-label::after{
 form .form-content .form-item .form-item-value{
 	display: inline-block;
 	width: 80%;
-	margin-left: -0.5em;
+	margin-left: -0.71em;/*利用左侧外边距、内边距解决元素空隙问题*/
+	padding-left: 0.71em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	vertical-align: middle;
 }
-form .form-content .form-item .form-item-value.margin-left-none{
+form .form-content .form-item .form-item-value .form-item-value{
 	margin-left: 0;
+	padding-left: 0;
 }
 form .form-content .form-item .form-item-value.text-value{}
 form .form-content .form-item .form-item-value.textarea-value{}
@@ -137,8 +139,12 @@ form .form-content .form-item .form-item-value .input{
 	vertical-align: middle;
 }
 form .form-content .form-item .form-item-value input[type=text],
-form .form-content .form-item .form-item-value input[type=password]{
-	height: 1.5em;
+form .form-content .form-item .form-item-value input[type=password],
+form .form-content .form-item .form-item-value textarea{
+	padding: 0.3em 0.41em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 form .form-content .form-item .form-item-value textarea{
 	width: 60%;
@@ -149,6 +155,20 @@ form .form-content .form-item .form-item-value .binary-label-input{/*二进制�
 form .form-content .form-item label.error{
 	color: red;
 	padding-left: 0.2em;
+	white-space: nowrap;
+}
+form .form-content .form-item .form-item-value.error-newline{/*验证提示信息在新行*/
+	position: relative;
+    padding-bottom: 1.4em;
+}
+form .form-content .form-item .form-item-value.error-newline label.error{
+	position: absolute;
+	left: 0.71em;
+	bottom: 0;
+	padding-left: 0 !important;
+}
+form .form-content .form-item .form-item-value .form-item-value.error-newline label.error{
+	left: 0;
 }
 form .form-content .form-item .form-item-value input[type=text].error,
 form .form-content .form-item .form-item-value input[type=password].error,
@@ -1272,8 +1292,11 @@ table.dataTable tbody tr td select{
     width: 100%;
     height: 100%;
     border: 0;
-    padding: 0 0;
+    padding: 0 0.41em;
     margin: 0 0;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .search-form .search-condition-icon-parent{
 	position: relative;
@@ -2293,8 +2316,6 @@ table.dataTable tbody tr td select{
 }
 .page-form-dataSet .workspace .form-item .form-item-value{
 	width: 39%;
-	position: relative;
-	padding-bottom: 1.4em;
 }
 .page-form-dataSet .workspace .form-item .form-item-value.no-padding-bottom{
 	padding-bottom: 0;
@@ -2347,12 +2368,6 @@ table.dataTable tbody tr td select{
 }
 .page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file .server-file-list-panel .server-file-item.ui-state-active{
 	border-width: 0;
-}
-.page-form-dataSet .workspace .form-item label.error{
-	position: absolute;
-	left: 0;
-	bottom: 0;
-	white-space: nowrap;
 }
 .page-form-dataSet .workspace .workspace-editor-wrapper{
 	height: 10em;
@@ -2484,6 +2499,7 @@ table.dataTable tbody tr td select{
 .page-form-chart .data-set-wrapper{
 	display: inline-block;
 	width: 60%;
+	height: 100%;
 	min-height: 10em;
 	padding: 0.3em 0.3em;
 	overflow: auto;
@@ -2646,19 +2662,11 @@ table.dataTable tbody tr td select{
 .page-form-chart .data-sign-select-panel .select-panel-content .data-sign-item{
 	margin-bottom: 0.41em;
 }
-.page-form-chart .form-item-value-chartDataSet{
-	position: relative;
-}
-.page-form-chart .form-item-value-chartDataSet > .error{
-	position: absolute;
-	bottom: 0;
-	left: 0;
-}
 .page-form-chart .add-data-set-button{
 	vertical-align: top;
 	position: absolute;
 	left: 60%;
-	margin-left: 0.3em;
+	margin-left: 1em;
 }
 .page-form-chart .data-set-param-value-panel{
 	position: absolute;
@@ -2719,17 +2727,10 @@ table.dataTable tbody tr td select{
 .page-form-dashboard.max-template-editor-left form .form-content .form-item .form-item-value{
 	width: 100%;
 }
-.page-form-dashboard .form-item-value-template{
-	position: relative;
-}
-.page-form-dashboard .form-item-value-template > .error{
-	position: absolute;
-	left: 0;
-	bottom: 0;
-}
 .page-form-dashboard .template-editor-wrapper{
 	position: relative;
 	width:100%;
+	height: 100%;
 	min-height:10em;
 	display: inline-block;
 }
@@ -2931,7 +2932,7 @@ table.dataTable tbody tr td select{
 }
 .page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value{
 	display: inline-block !important;
-	width: 12.5em !important;
+	width: 13em !important;
 	position: relative;
 }
 .page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value input{
@@ -2944,5 +2945,5 @@ table.dataTable tbody tr td select{
 .page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect .analysis-project-menu-root,
 .page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect .analysis-project-menu-root > .ui-menu-item-wrapper{
 	width: 1.7em;
-	height: 1.7em;
+	height: 2em;
 }

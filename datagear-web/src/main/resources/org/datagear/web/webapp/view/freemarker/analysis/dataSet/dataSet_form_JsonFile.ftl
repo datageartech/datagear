@@ -37,7 +37,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.jsonFile.dataJsonPath' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="text" name="dataJsonPath" value="${(dataSet.dataJsonPath)!''?html}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>

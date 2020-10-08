@@ -29,7 +29,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.csv' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''?html}</textarea>
 						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
 							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>

@@ -108,7 +108,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.http.request' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<textarea name="requestContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.requestContent)!''?html}</textarea>
 						<textarea name="headerContent" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.headerContent)!''?html}</textarea>
 						<div class="workspace-editor-tabs light-tabs">
@@ -131,7 +131,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.http.responseDataJsonPath' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="text" name="responseDataJsonPath" value="${(dataSet.responseDataJsonPath)!''?html}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>

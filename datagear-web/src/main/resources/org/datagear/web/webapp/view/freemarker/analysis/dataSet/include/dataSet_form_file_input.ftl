@@ -16,7 +16,7 @@
 		 	<input type="radio" id="${pageId}-fileSourceType_1" name="fileSourceType" value="${dsffiDirectoryFileDataSetEntity.FILE_SOURCE_TYPE_SERVER}"  />
 		</span>
 	</div>
-	<div class="upload-file-input-wrapper form-item-value">
+	<div class="upload-file-input-wrapper form-item-value error-newline">
 		<input type="hidden" id="${pageId}-originalFileName" value="${(dataSet.fileName)!''?html}" />
 		
 		<input type="hidden" name="fileName" value="${(dataSet.fileName)!''?html}" />
@@ -37,7 +37,7 @@
 		<input type="hidden" id="${pageId}-originalServerDirectoryId" value="${(dataSet.dataSetResDirectory.id)!''?html}" />
 		<input type="hidden" id="${pageId}-originalServerFileName" value="${(dataSet.dataSetResFileName)!''?html}" />
 		
-		<div class="row-wrapper form-item-value">
+		<div class="row-wrapper form-item-value error-newline">
 			<input type="hidden" name="dataSetResDirectory.id" value="${(dataSet.dataSetResDirectory.id)!''?html}" />
 			<div class="label">
 				<label title="<@spring.message code='dataSet.serverDirectory.desc' />" class="tip-label"><@spring.message code='dataSet.serverDirectory' /></label>
@@ -47,7 +47,7 @@
 			<button type="button" class="selectServerDirectoryBtn"><@spring.message code='select' /></button>
 			</#if>
 		</div>
-		<div class="row-wrapper form-item-value form-item-value-server-file">
+		<div class="row-wrapper form-item-value error-newline form-item-value-server-file">
 			<div class="label">
 				<label title="<@spring.message code='dataSet.dataSetResFileName.desc' />" class="tip-label"><@spring.message code='dataSet.fileInDirectory' /></label>
 			</div>

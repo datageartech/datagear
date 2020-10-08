@@ -47,7 +47,7 @@ readonly 是否只读操作，允许为null
 						<@spring.message code='chart.chartDataSets' />
 					</label>
 				</div>
-				<div class="form-item-value form-item-value-chartDataSet">
+				<div class="form-item-value error-newline form-item-value-chartDataSet">
 					<input type="text" name="dataSignValidation" style="display: none" />
 					<div class="data-set-wrapper ui-widget ui-widget-content">
 					</div>
@@ -116,9 +116,7 @@ readonly 是否只读操作，允许为null
 {
 	$.initButtons(po.element());
 	po.initAnalysisProject("${(chart.analysisProject.id)!''?js_string}", "${(chart.analysisProject.name)!''?js_string}");
-	var dataSetWrapperHeight = $(window).height()/5*2;
-	po.element(".data-set-wrapper").height(dataSetWrapperHeight);
-	po.element(".form-item-value-chartDataSet").height(dataSetWrapperHeight + 35);
+	po.element(".form-item-value-chartDataSet").height($(window).height()/5*2);
 	
 	po.element("input[name='updateIntervalRadio']").checkboxradio({icon:false});
 	po.element(".updateInterval-radios").controlgroup();
