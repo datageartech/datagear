@@ -4040,6 +4040,7 @@
 	chartSupport.tableDestroy = function(chart)
 	{
 		var chartEle = chart.elementJquery();
+		chartSupport.tableStopCarousel(chart);
 		chartEle.removeClass("dg-chart-table");
 		chartEle.removeClass("dg-hide-title");
 		chartEle.removeClass("dg-chart-table-carousel");
