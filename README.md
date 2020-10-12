@@ -91,6 +91,16 @@ SQL工作台
 
 ![http://datagear.tech/static/screenshot/dashboard-form.gif](http://datagear.tech/static/screenshot/dashboard-form.gif)
 
+看板-表格轮播
+
+![http://datagear.tech/static/screenshot/dashboard-table-carousel.gif](http://datagear.tech/static/screenshot/dashboard-table-carousel.gif)
+
+看板-联动异步加载图表
+
+![http://datagear.tech/static/screenshot/dashboard-link-load-chart.gif](http://datagear.tech/static/screenshot/dashboard-link-load-chart.gif)
+
+[更多示例...](https://my.oschina.net/u/4035217)
+
 ## 依赖
 
 	Java 8+
