@@ -27,10 +27,15 @@ public abstract class DataValueConverter
 	public static final Pattern PATTERN_DECIMAL_NUMBER = Pattern.compile("^[^\\.]+\\.[^\\.]+$");
 
 	/**
-	 * 转换数据值映射表。
+	 * 转换数据值映射表，返回一个经转换的新映射表。
+	 * <p>
+	 * 如果{@code nameValues}中有未在{@code dataNameTypes}中定义的项，那么它将原样写入返回映射表中。
+	 * </p>
 	 * 
 	 * @param nameValues
+	 *            原始名/值映射表，允许为{@code null}
 	 * @param dataNameTypes
+	 *            名/类型集合，允许为{@code null}
 	 * @return
 	 * @throws DataValueConvertionException
 	 */
@@ -42,17 +47,20 @@ public abstract class DataValueConverter
 
 		Map<String, Object> re = new HashMap<>(nameValues);
 
-		for (DataNameType dnt : dataNameTypes)
+		if (dataNameTypes != null)
 		{
-			String name = dnt.getName();
+			for (DataNameType dnt : dataNameTypes)
+			{
+				String name = dnt.getName();
 
-			if (!nameValues.containsKey(name))
-				continue;
+				if (!nameValues.containsKey(name))
+					continue;
 
-			Object value = nameValues.get(name);
-			value = convert(value, dnt.getType());
+				Object value = nameValues.get(name);
+				value = convert(value, dnt.getType());
 
-			re.put(name, value);
+				re.put(name, value);
+			}
 		}
 
 		return re;

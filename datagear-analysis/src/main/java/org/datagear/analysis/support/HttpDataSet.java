@@ -404,17 +404,17 @@ public class HttpDataSet extends AbstractResolvableDataSet
 
 	protected String resolveTemplateUri(Map<String, ?> paramValues) throws Throwable
 	{
-		return resolveAsFmkTemplateIfHasParam(this.uri, paramValues);
+		return resolveAsFmkTemplate(this.uri, paramValues);
 	}
 
 	protected String resolveTemplateHeaderContent(Map<String, ?> paramValues) throws Throwable
 	{
-		return resolveAsFmkTemplateIfHasParam(this.headerContent, paramValues);
+		return resolveAsFmkTemplate(this.headerContent, paramValues);
 	}
 
 	protected String resolveTemplateRequestContent(Map<String, ?> paramValues) throws Throwable
 	{
-		return resolveAsFmkTemplateIfHasParam(this.requestContent, paramValues);
+		return resolveAsFmkTemplate(this.requestContent, paramValues);
 	}
 
 	protected ClassicHttpRequest createHttpRequest(String uri) throws Throwable

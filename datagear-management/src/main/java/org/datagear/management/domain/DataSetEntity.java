@@ -17,7 +17,8 @@ import org.datagear.analysis.DataSetProperty;
  * @author datagear@163.com
  *
  */
-public interface DataSetEntity extends DataSet, CreateUserEntity<String>, DataPermissionEntity<String>
+public interface DataSetEntity
+		extends DataSet, CreateUserEntity<String>, DataPermissionEntity<String>, AnalysisProjectAwareEntity<String>
 {
 	/** 授权资源类型 */
 	String AUTHORIZATION_RESOURCE_TYPE = "DataSet";

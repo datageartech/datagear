@@ -226,7 +226,20 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	protected ResolvedDataSetResult resolveResult(Map<String, ?> paramValues, List<DataSetProperty> properties)
 			throws DataSetException
 	{
-		File file = getExcelFile(paramValues);
+		File file = null;
+
+		try
+		{
+			file = getExcelFile(paramValues);
+		}
+		catch (DataSetException e)
+		{
+			throw e;
+		}
+		catch (Throwable t)
+		{
+			throw new DataSetSourceParseException(t);
+		}
 
 		ResolvedDataSetResult result = null;
 
@@ -677,8 +690,7 @@ public abstract class AbstractExcelDataSet extends AbstractResolvableDataSet imp
 	 * 
 	 * @param paramValues
 	 * @return
-	 * @throws DataSetException
+	 * @throws Throwable
 	 */
-	protected abstract File getExcelFile(Map<String, ?> paramValues) throws DataSetException;
-
+	protected abstract File getExcelFile(Map<String, ?> paramValues) throws Throwable;
 }

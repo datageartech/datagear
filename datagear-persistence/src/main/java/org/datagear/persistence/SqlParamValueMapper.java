@@ -31,6 +31,7 @@ public interface SqlParamValueMapper
 	 * @param table
 	 * @param column
 	 * @param value
+	 *            允许为{@code null}
 	 * @return
 	 * @throws SqlParamValueMapperException
 	 */

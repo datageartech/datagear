@@ -16,6 +16,7 @@ readonly 是否只读操作，允许为null
 </title>
 </head>
 <body>
+<#include "../../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet">
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
@@ -40,7 +41,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.sql' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<textarea name="sql" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.sql)!''?html}</textarea>
 						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
 							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
@@ -62,7 +63,6 @@ readonly 是否只读操作，允许为null
 	</form>
 	<#include "include/dataSet_form_html_preview_pvp.ftl" >
 </div>
-<#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <#include "../../include/page_obj_sqlEditor.ftl">
 <#include "include/dataSet_form_js.ftl">
@@ -78,6 +78,7 @@ readonly 是否只读操作，允许为null
 			+"<span class='ui-button-icon-space'> </span><@spring.message code='sqlpad.exportSqlResult' /></button>");
 	
 	$.initButtons(po.element());
+	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
 	po.initWorkspaceHeight();
 	
 	po.getDataSetSchemaId = function(){ return po.element("input[name='schemaConnectionFactory.schema.id']").val(); };

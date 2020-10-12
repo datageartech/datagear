@@ -481,29 +481,234 @@ ${detectNewVersionScript}
 		});
 	};
 	
-	po.initDataAnalysisPanelContent = function($element)
+	//定义全局AnalysisProject上下文
+	$.analysisProjectContext =
 	{
-		$element.jstree
-		(
+		ID_COOKIE_NAME: "${statics['org.datagear.web.controller.AbstractController'].KEY_ANALYSIS_PROJECT_ID}",
+		
+		//当前AnalysisProject
+		_value: null,
+		
+		//监听器
+		_listeners: [],
+		
+		/**
+		 * 初始化。
+		 * 
+		 * @param callback 可选，初始化成功回调函数，格式为：function(analysisProject){}
+		 */
+		init: function(callback)
+		{
+			var cookieId = $.cookie(this.ID_COOKIE_NAME);
+			
+			if(!cookieId)
 			{
-				"core" :
+				this.value(null);
+				callback(null);
+			}
+			else
+			{
+				var _this = this;
+				
+				$.ajax(
 				{
-					"themes" : {"dots": false, icons: true},
-					"check_callback" : true
+					url: "${contextPath}/analysis/project/getByIdSilently?id=" + cookieId,
+					success: function(analysisProject)
+					{
+						analysisProject = (!analysisProject ? null : analysisProject);
+						
+						_this.value(analysisProject);
+						callback(analysisProject);
+					},
+					error: function()
+					{
+						_this.value(null);
+						callback(null);
+					}
+				});
+			}
+		},
+		
+		/**
+		 * 获取、设置值。
+		 * 
+		 * @param analysisProject 要设置的AnalysisProject，允许设为null
+		 * @param notify 可选，设置时是否通知监听器，默认为true
+		 */
+		value: function(analysisProject, notify)
+		{
+			if(analysisProject === undefined)
+				return this._value;
+			
+			notify = (notify == null ? true : notify);
+			
+			var previousValue = this._value;
+			this._value = analysisProject;
+			
+			$.cookie(this.ID_COOKIE_NAME, (analysisProject == null ? "" : analysisProject.id),
+					{ expires : 365*5, path: "${contextPath}" });
+			
+			$(".analysis-project-current-value").html(analysisProject == null ? "" : analysisProject.name);
+			
+			if(notify)
+			{
+				for(var i=0; i<this._listeners.length; i++)
+					this._listeners[i](this._value, previousValue);
+			}
+		},
+		
+		//获取当前值的ID。
+		valueId: function()
+		{
+			var value = this.value();
+			return (value == null ? null : value.id);
+		},
+		
+		//当前值是否是指定的值。
+		isValue: function(analysisProject)
+		{
+			var id = this.valueId();
+			var pid = (analysisProject == null ? null : analysisProject.id);
+			
+			return (id == pid);
+		},
+		
+		/**
+		 * 添加监听器。
+		 * 
+		 * @param listener 监听器，格式为：function(currentAnalysisProject, previousAnalysisProject){ ... }
+		 */
+		addListener: function(listener)
+		{
+			this._listeners.push(listener);
+		}
+	};
+	
+	po.initDataAnalysisPanelIfNot = function()
+	{
+		var dap = po.element("#${pageId}-nav-dataAnalysis");
+		
+		if(dap.hasClass("dataAnalysisPanelInited"))
+			return;
+		
+		dap.addClass("dataAnalysisPanelInited");
+		
+		po.element(".analysis-project-operation-group", dap).controlgroup();
+		
+		po.element(".analysis-project-list-panel", dap).addClass($.TOGGLABLE_TABLE_PANEL_CLASS_NAME);
+		
+		po.element(".analysis-project-current-value", dap).click(function()
+		{
+			var panel = po.element(".analysis-project-list-panel", dap);
+			var panelContent = $(".analysis-project-list-panel-content", panel);
+			
+			if(panel.is(":hidden"))
+			{
+				var _thisValue = this;
+				
+				panel.show();
+				$.callPanelShowCallback(panel);
+				
+				var loaded = panelContent.hasClass("analysis-project-loaded");
+				
+				if(!loaded)
+				{
+					po.open(contextPath+"/analysis/project/select",
+					{
+						"target": panelContent,
+						"asDialog": false,
+						"pageParam":
+						{
+							"select" : function(analysisProject)
+							{
+								$.analysisProjectContext.value(analysisProject);
+								panel.hide();
+							}
+						},
+						"success": function()
+						{
+							panelContent.addClass("analysis-project-loaded");
+						}
+					});
+				}
+				else
+				{
+					//刷新列表
+					$(".search-analysisProject form", panelContent).submit();
 				}
 			}
-		)
-		.bind("select_node.jstree", function(e, data)
+			else
+				panel.hide();
+		});
+		
+		po.element("#addAnalysisProjectButton", dap).click(function()
 		{
-			var tree = $(this).jstree(true);
+			po.open(contextPath+"/analysis/project/add",
+			{
+				"pageParam" :
+				{
+					"afterSave" : function(analysisProject)
+					{
+						$.analysisProjectContext.value(analysisProject);
+					}
+				}
+			});
+		});
+		
+		po.element("#manageAnalysisProjectButton", dap).click(function()
+		{
+			var options = {};
+			$.setGridPageHeightOption(options);
 			
-			var $node = tree.get_node(data.node, true);
+			po.open(contextPath+"/analysis/project/pagingQuery", options);
+		});
+		
+		po.element(".analysis-project-current-reset", dap).click(function()
+		{
+			$.analysisProjectContext.value(null);
+		});
+		
+		po.element().on("click", function(event)
+		{
+			var $p = po.element(".analysis-project-list-panel", dap);
+			if(!$p.is(":hidden"))
+			{
+				var $target = $(event.target);
+				
+				if($target.closest(".analysis-project-current-value, .analysis-project-list-panel").length == 0)
+					$p.hide();
+			}
+		});
+		
+		$.analysisProjectContext.init(function()
+		{
+			var pc = po.element(".dataAnalysis-panel-content", dap);
 			
-			var tabId = $node.attr("tabId");
-			var tabName = $node.text();
-			var tabUrl = $("a", $node).attr("href");
-			
-			po.activeWorkTab(po.toMainTabId(tabId), tabName, "", tabUrl);
+			if(!pc.hasClass("jstree"))
+			{
+				pc.jstree
+				(
+					{
+						"core" :
+						{
+							"themes" : {"dots": false, icons: true},
+							"check_callback" : true
+						}
+					}
+				)
+				.bind("select_node.jstree", function(e, data)
+				{
+					var tree = $(this).jstree(true);
+					
+					var $node = tree.get_node(data.node, true);
+					
+					var tabId = $node.attr("tabId");
+					var tabName = $node.text();
+					var tabUrl = $("a", $node).attr("href");
+					
+					po.activeWorkTab(po.toMainTabId(tabId), tabName, "", tabUrl);
+				});
+			}
 		});
 	};
 	
@@ -636,6 +841,12 @@ ${detectNewVersionScript}
 					$.setGridPageHeightOption(options);
 					po.open(contextPath+"/user/query", options);
 				}
+				else if($item.hasClass("system-set-dataSetResDirectory-manage"))
+				{
+					var options = {};
+					$.setGridPageHeightOption(options);
+					po.open(contextPath+"/dataSetResDirectory/pagingQuery", options);
+				}
 				else if($item.hasClass("system-set-rold-manage"))
 				{
 					var options = {};
@@ -711,10 +922,7 @@ ${detectNewVersionScript}
 				}
 				else if(newPanel.hasClass("dataAnalysis-panel"))
 				{
-					var $element = po.element(".dataAnalysis-panel-content");
-					
-					if(!$element.hasClass("jstree"))
-						po.initDataAnalysisPanelContent($element);
+					po.initDataAnalysisPanelIfNot();
 				}
 				
 				var newTabIndex = newTab.index();
@@ -1143,7 +1351,7 @@ ${detectNewVersionScript}
 				if(newSchemaId)
 					$(".category-bar.category-bar-"+newSchemaId, tabsNav).addClass("ui-state-active");
 				
-				$.callTabsPanelShowCallback(newPanel);
+				$.callPanelShowCallback(newPanel);
 			}
 		});
 		
@@ -1204,6 +1412,8 @@ ${detectNewVersionScript}
 					<li class="system-set-chartPlugin-manage"><a href="javascript:void(0);"><@spring.message code='main.manageChartPlugin' /></a></li>
 					<li class="system-set-chartPlugin-upload"><a href="javascript:void(0);"><@spring.message code='main.uploadChartPlugin' /></a></li>
 					<li class="ui-widget-header"></li>
+					<li class="system-set-dataSetResDirectory-manage"><a href="javascript:void(0);"><@spring.message code='main.manageDataSetResDirectory' /></a></li>
+					<li class="ui-widget-header"></li>
 					<li class="system-set-user-manage"><a href="javascript:void(0);"><@spring.message code='main.manageUser' /></a></li>
 					<li class="system-set-user-add"><a href="javascript:void(0);"><@spring.message code='main.addUser' /></a></li>
 					<li class="system-set-rold-manage"><a href="javascript:void(0);"><@spring.message code='main.manageRole' /></a></li>
@@ -1253,15 +1463,15 @@ ${detectNewVersionScript}
 			</ul>
 			<div id="${pageId}-nav-dataSource" class="ui-widget ui-widget-content schema-panel">
 				<div class="schema-panel-head">
+					<div class="schema-panel-form ui-widget ui-widget-content ui-corner-all">
+						<form id="schemaSearchForm" action="javascript:void(0);">
+							<div id="schemaSearchSwitch" class="schema-search-switch ui-button-icon-only"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
+							<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" /></div>
+							<button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><@spring.message code='find' /></button>
+							<input name="pageSize" type="hidden" value="100" />
+						</form>
+					</div>
 					<div class="schema-panel-operation">
-						<div class="ui-widget ui-widget-content ui-corner-all search">
-							<form id="schemaSearchForm" action="javascript:void(0);">
-								<div id="schemaSearchSwitch" class="schema-search-switch"><span class="ui-icon ui-icon-calculator search-switch-icon" title="<@spring.message code='main.searchTable' />"></span></div>
-								<div class="keyword-input-parent"><input name="keyword" type="text" value="" class="ui-widget ui-widget-content keyword-input" /></div>
-								<button type="submit" class="ui-button ui-corner-all ui-widget ui-button-icon-only search-button"><span class="ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span><@spring.message code='find' /></button>
-								<input name="pageSize" type="hidden" value="100" />
-							</form>
-						</div>
 						<button id="addSchemaButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-schema-button" title="<@spring.message code='main.addSchema' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
 						<ul id="schemaOperationMenu" class="lightweight-menu">
 							<li class="schema-operation-root"><span><span class="ui-icon ui-icon-triangle-1-s"></span></span>
@@ -1287,6 +1497,24 @@ ${detectNewVersionScript}
 				</div>
 			</div>
 			<div id="${pageId}-nav-dataAnalysis" class="ui-widget ui-widget-content dataAnalysis-panel">
+				<div class="dataAnalysis-panel-head">
+					<div class="analysis-project-current ui-widget ui-widget-content ui-corner-all">
+						<div class="analysis-project-current-value" title="<@spring.message code='main.analysisProject.currentValue' />"></div>
+						<div class="analysis-project-current-reset ui-button-icon-only" title="<@spring.message code='main.analysisProject.currentValue.clear' />">
+							<span class="ui-icon ui-icon-cancel"></span>
+						</div>
+					</div>
+					<div class="analysis-project-operation">
+						<div class="analysis-project-operation-group">
+							<button id="addAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only add-analysis-project-button" title="<@spring.message code='main.analysisProject.add' />"><span class="ui-button-icon ui-icon ui-icon-plus"></span><span class="ui-button-icon-space"> </span><@spring.message code='add' /></button>
+							<button id="manageAnalysisProjectButton" class="ui-button ui-corner-all ui-widget ui-button-icon-only manage-analysis-project-button" title="<@spring.message code='main.analysisProject.manage' />"><span class="ui-button-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-button-icon-space"> </span><@spring.message code='manage' /></button>
+						</div>
+					</div>
+					<div class="analysis-project-list-panel ui-widget ui-widget-content ui-corner-all ui-widget-shadow">
+						<div class="analysis-project-list-panel-head"></div>
+						<div class="analysis-project-list-panel-content minor-dataTable pagination-light"></div>
+					</div>
+				</div>
 				<div class="dataAnalysis-panel-content">
 					<ul>
 						<li class="item-dataset" tabId="dataAnalysis-dataSet">

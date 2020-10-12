@@ -23,6 +23,7 @@ boolean readonly 是否只读操作，默认为false
 	<div class="head">
 		<div class="search">
 			<#include "../../include/page_obj_searchform_data_filter.ftl">
+			<#include "../include/analysisProjectAware_grid_search.ftl">
 		</div>
 		<div class="operation">
 			<#if selectOperation>
@@ -184,6 +185,7 @@ boolean readonly 是否只读操作，默认为false
 		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='chart.name' />"), "name"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.htmlChartPlugin' />", "chartPluginName"),
 		updateIntervalColumn,
+		$.buildDataTablesColumnSimpleOption($.buildDataTablesColumnTitleSearchable("<@spring.message code='analysisProject.ownerAnalysisProject' />"), "analysisProject.name"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createUser' />", "createUser.realName"),
 		$.buildDataTablesColumnSimpleOption("<@spring.message code='chart.createTime' />", "createTime")
 	];

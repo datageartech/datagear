@@ -23,6 +23,8 @@ import org.datagear.analysis.DataSet;
 import org.datagear.analysis.support.ChartWidget;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
+import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
@@ -30,6 +32,8 @@ import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -150,6 +154,13 @@ public class HtmlChartWidgetEntityServiceImpl
 	}
 
 	@Override
+	public PagingData<HtmlChartWidgetEntity> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter,
+			String analysisProjectId)
+	{
+		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId);
+	}
+
+	@Override
 	protected boolean add(HtmlChartWidgetEntity entity, Map<String, Object> params)
 	{
 		boolean success = super.add(entity, params);
@@ -221,6 +232,8 @@ public class HtmlChartWidgetEntityServiceImpl
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
+		params.put(AnalysisProjectAwareEntity.DATA_PERMISSION_PARAM_RESOURCE_TYPE_ANALYSIS_PROJECT,
+				AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
 		addDataPermissionParameters(params, user, getResourceType(), false, true);
 	}
 

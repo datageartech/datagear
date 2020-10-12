@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 public class HtmlChartWidgetEntity extends HtmlChartWidget
-		implements CreateUserEntity<String>, DataPermissionEntity<String>
+		implements CreateUserEntity<String>, DataPermissionEntity<String>, AnalysisProjectAwareEntity<String>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -43,6 +43,8 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
+
+	private AnalysisProject analysisProject = null;
 
 	/** 插件名称，展示用 */
 	private String chartPluginName = "";
@@ -115,6 +117,18 @@ public class HtmlChartWidgetEntity extends HtmlChartWidget
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	@Override
+	public AnalysisProject getAnalysisProject()
+	{
+		return analysisProject;
+	}
+
+	@Override
+	public void setAnalysisProject(AnalysisProject analysisProject)
+	{
+		this.analysisProject = analysisProject;
 	}
 
 	public String getChartPluginName()

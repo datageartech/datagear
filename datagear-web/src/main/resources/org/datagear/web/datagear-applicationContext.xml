@@ -149,6 +149,7 @@
 				<ref bean="dataSetEntityService" />
 				<ref bean="htmlChartWidgetEntityService" />
 				<ref bean="htmlTplDashboardWidgetEntityService" />
+				<ref bean="analysisProjectService" />
 			</list>
 		</property>
 	</bean>
@@ -267,6 +268,14 @@
 		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 		<property name="htmlTplDashboardWidgetRenderer" ref="htmlTplDashboardWidgetRenderer" />
 		<property name="authorizationService" ref="authorizationService" />
+	</bean>
+	
+	<bean id="analysisProjectService" class="org.datagear.management.service.impl.AnalysisProjectServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="dataSetResDirectoryService" class="org.datagear.management.service.impl.DataSetResDirectoryServiceImpl">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
 	</bean>
 	
 	<bean id="sqlHistoryService" class="org.datagear.management.service.impl.SqlHistoryServiceImpl">

@@ -14,18 +14,20 @@ readonly 是否只读操作，允许为null
 <title><#include "../../include/html_title_app_name.ftl"><@spring.message code='${titleMessageKey}' /></title>
 </head>
 <body>
+<#include "../../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dashboard">
 	<form id="${pageId}-form" action="${contextPath}/analysis/dashboard/${formAction}" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="id" value="${(dashboard.id)!''?html}" />
-			<div class="form-item">
+			<div class="form-item form-item-analysisProjectAware">
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.name' /></label>
 				</div>
 				<div class="form-item-value">
 					<input type="text" name="name" value="${(dashboard.name)!''?html}" class="ui-widget ui-widget-content" />
 				</div>
+				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
@@ -39,7 +41,7 @@ readonly 是否只读操作，允许为null
 				<div class="form-item-label">
 					<label><@spring.message code='dashboard.template' /></label>
 				</div>
-				<div class="form-item-value form-item-value-template">
+				<div class="form-item-value error-newline form-item-value-template">
 					<textarea name="templateContent" class="ui-widget ui-widget-content" style="display: none;">${templateContent!''?html}</textarea>
 					<div class="template-editor-wrapper">
 						<div class="template-editor-parent ui-widget ui-widget-content">
@@ -116,15 +118,13 @@ readonly 是否只读操作，允许为null
 		</div>
 	</form>
 </div>
-<#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)
 {
 	$.initButtons(po.element());
-	var tewHeight = $(window).height()*5/9;
-	po.element(".template-editor-wrapper").height(tewHeight);
-	po.element(".form-item-value-template").height(tewHeight + 30);
+	po.initAnalysisProject("${(dashboard.analysisProject.id)!''?js_string}", "${(dashboard.analysisProject.name)!''?js_string}");
+	po.element(".form-item-value-template").height($(window).height()*5/9);
 	
 	po.templates = <@writeJson var=templates />;
 	

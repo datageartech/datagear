@@ -542,7 +542,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 			{
 				Column column = readColumn(cn, metaData, schema, tableName, mrs);
 				column = postProcessColumn(cn, metaData, schema, tableName, column);
-				addColumn(columns, column);
+				addValidColumn(columns, column);
 
 				if (count != null && columns.size() == count)
 					break;
@@ -698,7 +698,7 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 				if (StringUtil.isEmpty(keyName))
 					keyName = mrs.getString("PK_NAME", "");
 
-				addName(columnNames, columnName);
+				addValidName(columnNames, columnName);
 			}
 
 			if (!columnNames.isEmpty())
@@ -748,6 +748,8 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 			while (rs.next())
 			{
+				@JDBCCompatiblity("某些驱动程序INDEX_NAME列可能为nul，但COLUMN_NAME不为null，此行应是有效的，"
+						+ "而某些驱动程序会返回INDEX_NAME和COLUMN_NAME都为null的无效行，所以，这里统一先把它们整理出来，下面再筛选过滤")
 				String keyName = mrs.getString("INDEX_NAME", "");
 				String columnName = mrs.getString("COLUMN_NAME", null);
 
@@ -763,12 +765,12 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 				else
 					keyColumnNames = keyColumnNamess.get(myIndex);
 
-				addName(keyColumnNames, columnName);
+				addValidName(keyColumnNames, columnName);
 			}
 		}
 		catch (SQLException e)
 		{
-			LOGGER.warn("return null primary key object for exception", e);
+			LOGGER.warn("return null unique key object for exception", e);
 
 			@JDBCCompatiblity("当tableName是视图时，某些驱动（比如Oracle）可能会抛出SQLSyntaxErrorException异常")
 			UniqueKey[] nullUniqueKeys = null;
@@ -781,14 +783,24 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 
 		if (!keyNames.isEmpty())
 		{
-			uniqueKeys = new UniqueKey[keyNames.size()];
+			List<UniqueKey> uks = new ArrayList<>();
 
-			for (int i = 0; i < uniqueKeys.length; i++)
+			for (int i = 0; i < keyNames.size(); i++)
 			{
 				List<String> keyColumnNames = keyColumnNamess.get(i);
-				uniqueKeys[i] = new UniqueKey(keyColumnNames.toArray(new String[keyColumnNames.size()]));
-				uniqueKeys[i].setKeyName(keyNames.get(i));
+
+				// 忽略无效的
+				if (keyColumnNames.isEmpty())
+					continue;
+
+				UniqueKey uk = new UniqueKey(keyColumnNames.toArray(new String[keyColumnNames.size()]));
+				uk.setKeyName(keyNames.get(i));
+
+				uks.add(uk);
 			}
+
+			if (!uks.isEmpty())
+				uniqueKeys = uks.toArray(new UniqueKey[uks.size()]);
 		}
 
 		return uniqueKeys;
@@ -839,8 +851,8 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 					primaryColumnNames = primaryColumnNamess.get(myIndex);
 				}
 
-				addName(columnNames, columnName);
-				addName(primaryColumnNames, primaryColumnName);
+				addValidName(columnNames, columnName);
+				addValidName(primaryColumnNames, primaryColumnName);
 			}
 		}
 		catch (SQLException e)
@@ -879,8 +891,15 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		return importKeys;
 	}
 
+	/**
+	 * 添加非空、且不重名的名称元素。
+	 * 
+	 * @param names
+	 * @param name
+	 * @return
+	 */
 	@JDBCCompatiblity("避免某些驱动程序的结果集出现非法或者重复项")
-	protected boolean addName(List<String> names, String name)
+	protected boolean addValidName(List<String> names, String name)
 	{
 		if (StringUtil.isEmpty(name) || names.indexOf(name) > -1)
 			return false;
@@ -889,8 +908,15 @@ public abstract class AbstractDevotedDBMetaResolver extends JdbcSupport implemen
 		return true;
 	}
 
+	/**
+	 * 添加非空、且不重名的列元素。
+	 * 
+	 * @param columns
+	 * @param column
+	 * @return
+	 */
 	@JDBCCompatiblity("避免某些驱动程序的结果集出现非法或者重复项")
-	protected boolean addColumn(List<Column> columns, Column column)
+	protected boolean addValidColumn(List<Column> columns, Column column)
 	{
 		if (column == null || containsColumn(columns, column.getName()))
 			return false;

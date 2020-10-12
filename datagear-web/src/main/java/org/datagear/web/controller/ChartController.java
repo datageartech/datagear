@@ -31,13 +31,15 @@ import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPref
 import org.datagear.management.domain.ChartDataSetVO;
 import org.datagear.management.domain.HtmlChartWidgetEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
+import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.persistence.PagingData;
 import org.datagear.util.IDUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
-import org.datagear.web.vo.DataFilterPagingQuery;
+import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
@@ -69,6 +71,9 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	private HtmlChartWidgetEntityService htmlChartWidgetEntityService;
 
 	@Autowired
+	private AnalysisProjectService analysisProjectService;
+
+	@Autowired
 	private ChartPluginManager chartPluginManager;
 
 	@Autowired
@@ -90,6 +95,16 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	public void setHtmlChartWidgetEntityService(HtmlChartWidgetEntityService htmlChartWidgetEntityService)
 	{
 		this.htmlChartWidgetEntityService = htmlChartWidgetEntityService;
+	}
+
+	public AnalysisProjectService getAnalysisProjectService()
+	{
+		return analysisProjectService;
+	}
+
+	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
+	{
+		this.analysisProjectService = analysisProjectService;
 	}
 
 	public ChartPluginManager getChartPluginManager()
@@ -125,9 +140,10 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		HtmlChartWidgetEntity chart = new HtmlChartWidgetEntity();
+		setCookieAnalysisProject(request, response, chart);
 
 		model.addAttribute("chart", chart);
 		model.addAttribute("chartPluginVO", toWriteJsonTemplateModel(null));
@@ -167,6 +183,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 			@RequestBody HtmlChartWidgetEntity entity)
 	{
 		User user = WebUtils.getUser(request, response);
+
+		trimAnalysisProjectAwareEntityForSave(entity);
 
 		HtmlChartPlugin paramPlugin = entity.getHtmlChartPlugin();
 
@@ -258,13 +276,13 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	@ResponseBody
 	public PagingData<HtmlChartWidgetEntity> pagingQueryData(HttpServletRequest request, HttpServletResponse response,
 			final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
+		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlChartWidgetEntity> pagingData = this.htmlChartWidgetEntityService.pagingQuery(user, pagingQuery,
-				pagingQuery.getDataFilter());
+				pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
 		setChartPluginNames(request, pagingData.getItems());
 
 		return pagingData;
@@ -370,6 +388,8 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 		if (chart == null)
 			throw new RecordNotFoundException();
 
+		ChartWidgetSourceContext.set(new ChartWidgetSourceContext(user));
+
 		String id = chart.getId();
 
 		String htmlTitle = chart.getName();
@@ -448,6 +468,12 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 				}
 			}
 		}
+	}
+
+	protected void setCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+			HtmlChartWidgetEntity entity)
+	{
+		setCookieAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 
 	protected void checkSaveEntity(HtmlChartWidgetEntity chart)

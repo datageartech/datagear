@@ -100,7 +100,8 @@ form .form-content .form-item .form-item-label label{
 form .form-content .form-item .form-item-label label[title]{
 	position: relative;
 }
-form .form-content .form-item .form-item-label label[title]::after{
+form .form-content .form-item .form-item-label label[title]::after,
+form .form-content .tip-label::after{
 	content: "?";
     position: absolute;
     margin-left: 0.2em;
@@ -112,14 +113,16 @@ form .form-content .form-item .form-item-label label[title]::after{
 form .form-content .form-item .form-item-value{
 	display: inline-block;
 	width: 80%;
-	margin-left: -0.5em;
+	margin-left: -0.71em;/*利用左侧外边距、内边距解决元素空隙问题*/
+	padding-left: 0.71em;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	-webkit-box-sizing: border-box;
 	vertical-align: middle;
 }
-form .form-content .form-item .form-item-value.margin-left-none{
+form .form-content .form-item .form-item-value .form-item-value{
 	margin-left: 0;
+	padding-left: 0;
 }
 form .form-content .form-item .form-item-value.text-value{}
 form .form-content .form-item .form-item-value.textarea-value{}
@@ -136,8 +139,12 @@ form .form-content .form-item .form-item-value .input{
 	vertical-align: middle;
 }
 form .form-content .form-item .form-item-value input[type=text],
-form .form-content .form-item .form-item-value input[type=password]{
-	height: 1.5em;
+form .form-content .form-item .form-item-value input[type=password],
+form .form-content .form-item .form-item-value textarea{
+	padding: 0.3em 0.41em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 form .form-content .form-item .form-item-value textarea{
 	width: 60%;
@@ -148,6 +155,20 @@ form .form-content .form-item .form-item-value .binary-label-input{/*二进制�
 form .form-content .form-item label.error{
 	color: red;
 	padding-left: 0.2em;
+	white-space: nowrap;
+}
+form .form-content .form-item .form-item-value.error-newline{/*验证提示信息在新行*/
+	position: relative;
+    padding-bottom: 1.4em;
+}
+form .form-content .form-item .form-item-value.error-newline label.error{
+	position: absolute;
+	left: 0.71em;
+	bottom: 0;
+	padding-left: 0 !important;
+}
+form .form-content .form-item .form-item-value .form-item-value.error-newline label.error{
+	left: 0;
 }
 form .form-content .form-item .form-item-value input[type=text].error,
 form .form-content .form-item .form-item-value input[type=password].error,
@@ -281,8 +302,8 @@ form .form-foot .ui-button{
 .ui-controlgroup .ui-button-icon-only{
 	width: 1em;/*减小图标宽度*/
 }
-.ui-controlgroup .ui-button-icon-only .ui-icon{
-	top: 30%;/*图标按钮，上下居中*/
+.ui-controlgroup .ui-selectmenu-button.ui-button-icon-only .ui-icon{
+	top: 30%;/*下拉选择组件的图标按钮，上下居中*/
 }
 .ui-tabs .ui-tabs-panel{
 	padding: 0.5em 0.7em;
@@ -897,81 +918,105 @@ table.dataTable tbody tr td select{
 }
 .main-page-content .schema-panel .schema-panel-head{
 	display: inline-block;
-	width: 100%;
+    width: 100%;
 	min-width: 15em;
-	height: 2.2em;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	padding-top: 0.3em;
+    height: 2.2em;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    position: relative;
 }
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation{
-	display: inline-block;
-	width: 100%;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	position: relative;
-	text-align: right;
-	padding-right: 1.55em;
-}
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search{
+.main-page-content .schema-panel .schema-panel-head .schema-panel-form{
 	position: absolute;
-	left: 0px;
-	right: 4.5em;
-	max-width: 14em;
+	left: 0;
+	right: 4.15em;
+	top: 0.3em;
+	bottom: 0;
+	max-width: 20em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search form{
-	position: relative;
+.main-page-content .schema-panel .schema-panel-head .schema-panel-form form{
+	position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .schema-search-switch{
-	display: inline-block;
-	float: left;
-	opacity: 0.4;
-	filter: Alpha(Opacity=40);
+.main-page-content .schema-panel .schema-panel-head .schema-panel-form .schema-search-switch{
+	position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 16px;
+	opacity: 0.5;
+	filter: Alpha(Opacity=50);
 	cursor: pointer;
 }
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .keyword-input-parent{
+.main-page-content .schema-panel .schema-panel-head .schema-panel-form .keyword-input-parent{
 	position: absolute;
 	left: 16px;
-	right: 1.4em;
+	right: 1.5em;
 	top: 0;
 	bottom: 0;
-	font-size: small;
+	font-size: 0.9em;
 }
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .keyword-input-parent .keyword-input{
+.main-page-content .schema-panel .schema-panel-head .schema-panel-form .keyword-input-parent .keyword-input{
 	width: 100%;
 	height: 100%;
 	border: 0;
 	padding: 0 0;
 }
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button.ui-button{
+.main-page-content .schema-panel .schema-panel-head .schema-panel-form .search-button.ui-button{
 	border: 0px;
-	width: 1.4em;
-	height: 1.4em;
-	margin: 0 0;
-	margin-top: -0.2em;
-	padding-left: 0;
-	padding-right: 0;
+    width: 1.4em;
+    margin: 0 0;
+    padding-left: 0;
+    padding-right: 0;
+    position: absolute;
+    right: 0;
+    height: 100%;
 }
-.main-page-content .schema-panel .schema-panel-head .schema-panel-operation .search .search-button .ui-icon{
-	opacity: 0.6;
-	filter: Alpha(Opacity=60);
+.main-page-content .schema-panel .schema-panel-head .schema-panel-form .search-button .ui-icon{
+	opacity: 0.7;
+	filter: Alpha(Opacity=70);
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation{
+	position: absolute;
+    right: 0;
+    width: 3.6em;
+    top: 0.3em;
+    bottom: 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation .add-schema-button{
 	border: 0px;
 	width: 2em;
-	height: 1.5em;
+	height: 100%;
 	margin-right: 1px;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu{
-	position: fixed;
-	z-index: 2;
-	margin-top: 0.1em;
+	position: absolute;
+    z-index: 2;
+    width: 1.5em;
+    height: 100%;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li{
+	width: 100%;
+	height: 100%;
 }
 .main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li > .ui-menu-item-wrapper{
-	width: 1.5em;
-	height: 1.5em;
+	width: 100%;
+	height: 100%;
+}
+.main-page-content .schema-panel .schema-panel-head .schema-panel-operation #schemaOperationMenu > li > .ui-menu{
+	position: fixed;
 }
 .main-page-content .schema-panel .schema-panel-content{
 	position: absolute;
@@ -1002,10 +1047,102 @@ table.dataTable tbody tr td select{
 	font-weight: bold;
 	font-style: italic;
 }
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head{
+	display: inline-block;
+	width: 100%;
+	height: 2.2em;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	position: relative;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-current{
+	position: absolute;
+	left: 0;
+	right: 4.2em;
+	top: 0.3em;
+	bottom: 0;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-current .analysis-project-current-value{
+	position: absolute;
+    left: 0.2em;
+    right: 22px;
+    top: 0.3em;
+    bottom: 0;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-current .analysis-project-current-reset{
+	position: absolute;
+    right: 1px;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    cursor: pointer;
+	opacity: 0.5;
+	filter: Alpha(Opacity=50);
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-operation{
+    position: absolute;
+    right: 0;
+    width: 4em;
+    top: 0.3em;
+    bottom: 0;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    text-align: right;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-operation .analysis-project-operation-group{
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-operation .ui-button{
+	border: 0px;
+    width: 2em;
+    height: 100%;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel{
+	position: fixed;
+	width: 60%;
+	height: 60%;
+	margin-top: 2.3em;
+	z-index: 2;
+	display: none;
+	font-size: 0.95em;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content{
+	position: absolute;
+    left: 0.41em;
+    top: 0.41em;
+    right: 0.41em;
+    bottom: 0.41em;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .dialog-content-container{
+	position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .page-grid-analysisProject.page-grid .head .view-button{
+	display: none;
+}
+.main-page-content .dataAnalysis-panel .dataAnalysis-panel-head .analysis-project-list-panel-content .page-grid-analysisProject.page-grid .content{
+	bottom: 2.1em;
+}
 .main-page-content .dataAnalysis-panel .dataAnalysis-panel-content{
 	position: absolute;
     display: block;
-    top: 0em;
+    top: 2.2em;
     bottom: 0em;
     left: 0em;
     right: 0em;
@@ -1131,7 +1268,7 @@ table.dataTable tbody tr td select{
 }
 .search-form .keyword-widget{
 	display: inline-block;
-	width: 70%;
+	width: 66%;
 	height: 2em;
 	margin-left: 0.1em;
 	vertical-align: middle;
@@ -1155,8 +1292,11 @@ table.dataTable tbody tr td select{
     width: 100%;
     height: 100%;
     border: 0;
-    padding: 0 0;
+    padding: 0 0.41em;
     margin: 0 0;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
 }
 .search-form .search-condition-icon-parent{
 	position: relative;
@@ -2176,8 +2316,6 @@ table.dataTable tbody tr td select{
 }
 .page-form-dataSet .workspace .form-item .form-item-value{
 	width: 39%;
-	position: relative;
-	padding-bottom: 1.4em;
 }
 .page-form-dataSet .workspace .form-item .form-item-value.no-padding-bottom{
 	padding-bottom: 0;
@@ -2188,17 +2326,48 @@ table.dataTable tbody tr td select{
 .page-form-dataSet .workspace .form-item .form-item-value .input{
 	width: 90%;
 }
-.page-form-dataSet .workspace .form-item .form-item-value input.file-display-name{
-	width: 60%;
+.page-form-dataSet .workspace .form-item .form-item-value.form-item-value-file-input{
+	padding-bottom: 0;
 }
-.page-form-dataSet .workspace .form-item .form-item-value .fileinput-wrapper{
-	padding-top: 0.41em;
+.page-form-dataSet .ds-file-input-wrapper input[type=text]{
+	width: 60% !important;
 }
-.page-form-dataSet .workspace .form-item label.error{
+.page-form-dataSet .ds-file-input-wrapper .row-wrapper{
+	padding-bottom: 0.41em;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value{
+	width: 100% !important;
+	margin-left: 0 !important;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value .label{
+	padding-bottom: 0.14em;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file{
+	position: relative;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file .server-file-list-panel{
 	position: absolute;
-	left: 0;
-	bottom: 0;
+	width: 80%;
+	height: 8em;
+	display: none;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file .server-file-list-panel .server-file-list-content{
+	position: absolute;
+	left: 0.41em;
+	top: 0.41em;
+	right: 0.41em;
+	bottom: 0.41em;
+	overflow: auto;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file .server-file-list-panel .server-file-item{
+	padding-left: 0.2em;
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
+	cursor: default;
 	white-space: nowrap;
+}
+.page-form-dataSet .ds-file-input-wrapper .form-item-value-server-file .server-file-list-panel .server-file-item.ui-state-active{
+	border-width: 0;
 }
 .page-form-dataSet .workspace .workspace-editor-wrapper{
 	height: 10em;
@@ -2330,6 +2499,7 @@ table.dataTable tbody tr td select{
 .page-form-chart .data-set-wrapper{
 	display: inline-block;
 	width: 60%;
+	height: 100%;
 	min-height: 10em;
 	padding: 0.3em 0.3em;
 	overflow: auto;
@@ -2492,19 +2662,11 @@ table.dataTable tbody tr td select{
 .page-form-chart .data-sign-select-panel .select-panel-content .data-sign-item{
 	margin-bottom: 0.41em;
 }
-.page-form-chart .form-item-value-chartDataSet{
-	position: relative;
-}
-.page-form-chart .form-item-value-chartDataSet > .error{
-	position: absolute;
-	bottom: 0;
-	left: 0;
-}
 .page-form-chart .add-data-set-button{
 	vertical-align: top;
 	position: absolute;
 	left: 60%;
-	margin-left: 0.3em;
+	margin-left: 1em;
 }
 .page-form-chart .data-set-param-value-panel{
 	position: absolute;
@@ -2565,17 +2727,10 @@ table.dataTable tbody tr td select{
 .page-form-dashboard.max-template-editor-left form .form-content .form-item .form-item-value{
 	width: 100%;
 }
-.page-form-dashboard .form-item-value-template{
-	position: relative;
-}
-.page-form-dashboard .form-item-value-template > .error{
-	position: absolute;
-	left: 0;
-	bottom: 0;
-}
 .page-form-dashboard .template-editor-wrapper{
 	position: relative;
 	width:100%;
+	height: 100%;
 	min-height:10em;
 	display: inline-block;
 }
@@ -2750,4 +2905,45 @@ table.dataTable tbody tr td select{
 	position: absolute;
 	top: 0.5em;
 	right: 0.5em;
+}
+
+.page-form .form-item-analysisProjectAware{
+	position: relative;
+}
+.page-form .form-item-analysisProjectAware > .form-item-value{
+	width: 40% !important;
+}
+.page-form .form-item-analysisProjectAware > .form-item-value input{
+	width: 60% !important;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject{
+	display: inline-block !important;
+	min-width: unset !important;
+	position: absolute;
+	right: 0;
+	top: -0.1em;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-label{
+	width: auto !important;
+	margin-right: 1em;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-label label{
+	width: 100%;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value{
+	display: inline-block !important;
+	width: 13em !important;
+	position: relative;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value input{
+	width: 10em !important;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect{
+	position: absolute;
+    right: 0.1em;
+}
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect .analysis-project-menu-root,
+.page-form .form-item-analysisProjectAware .form-item-analysisProject .form-item-value .analysisProjectActionSelect .analysis-project-menu-root > .ui-menu-item-wrapper{
+	width: 1.7em;
+	height: 2em;
 }

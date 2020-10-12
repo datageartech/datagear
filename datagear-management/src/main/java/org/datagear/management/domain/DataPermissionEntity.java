@@ -4,6 +4,8 @@
 
 package org.datagear.management.domain;
 
+import org.datagear.management.service.DataPermissionEntityService;
+
 /**
  * 数据权限实体。
  * 
@@ -13,8 +15,8 @@ package org.datagear.management.domain;
  */
 public interface DataPermissionEntity<ID> extends Entity<ID>
 {
-	/** 权限未加载 */
-	int PERMISSION_NOT_LOADED = -9;
+	/** 参考{@linkplain DataPermissionEntityService#PERMISSION_NOT_LOADED} */
+	int PERMISSION_NOT_LOADED = DataPermissionEntityService.PERMISSION_NOT_LOADED;
 
 	/**
 	 * 获取数据权限值。

@@ -259,29 +259,21 @@ public abstract class AbstractDataSet extends AbstractIdentifiable implements Da
 	}
 
 	/**
-	 * 只有当{@linkplain #hasParam()}为{@code true}时才将指定文本作为Freemarker模板解析。
-	 * 
-	 * @param text
-	 * @param paramValues
-	 * @return
-	 */
-	protected String resolveAsFmkTemplateIfHasParam(String text, Map<String, ?> paramValues)
-	{
-		if (!hasParam())
-			return text;
-
-		return resolveAsFmkTemplate(text, paramValues);
-	}
-
-	/**
 	 * 将指定文本作为Freemarker模板解析。
+	 * <p>
+	 * 注意：即使此数据集没有定义任何参数（{@linkplain #hasParam()}为{@code false}），此方法也必须将{@code text}作为模板解析，因为存在如下应用场景：
+	 * 用户不定义数据集参数，但却定义模板内容，之后用户自行在DataSet.getResult(Map&lt;String,?&gt;)参数映射表中传递模板内容所须的参数值。
+	 * </p>
 	 * 
 	 * @param text
 	 * @param paramValues
 	 * @return
 	 */
-	protected String resolveAsFmkTemplate(String text, Map<String, ?> paramValues)
+	public String resolveAsFmkTemplate(String text, Map<String, ?> paramValues)
 	{
+		// if (!hasParam())
+		// return text;
+
 		if (text == null)
 			return null;
 

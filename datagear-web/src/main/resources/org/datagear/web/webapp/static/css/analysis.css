@@ -46,6 +46,10 @@
 .dg-chart-table .dg-chart-table-content table.dataTable td.dataTables_empty{
 	display: none;/*隐藏初始未加载数据时的空行，避免影响样式*/
 }
+/*轮播表格隐藏竖向滚动条*/
+.dg-chart-table.dg-chart-table-carousel .dataTables_scrollBody{
+	overflow-y: hidden !important;
+}
 
 /*标签图表*/
 .dg-chart-label{

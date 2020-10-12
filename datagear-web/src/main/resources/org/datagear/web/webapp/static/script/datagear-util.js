@@ -23,6 +23,9 @@
 		 * 			{
 		 * 				//可选，打开目标：document.body 页面内jquery对话框；"_blank" 新网页；"_file" 文件下载
 		 * 				target : document.body,
+		 * 
+		 *              //当target是页内元素时，是否作打开为对话框，默认为：true
+		 *              asDialog: true,
 		 * 				
 		 *				//可选，传递给新页面的参数，可以在目标页面通过$.pageParam(dom)获取
 		 * 				pageParam : undefined,
@@ -39,45 +42,47 @@
 		 */
 		open : function(url, options)
 		{
-			if(options && (options.target == "_blank" || options.target == "_file"))
+			options = (options || {});
+			
+			if(options.target == "_blank")
 			{
-				if(options.target == "_blank")
+				//使用window.open()如果options.data很大的话会使URL超长导致请求失败，因而改为postOnForm
+				
+				//url = url + (options.data ? "?" + $.param(options.data) : "");
+				//window.open(url);
+				
+				$.postOnForm(url, {"data" : options.data, "target" : "_blank"});
+			}
+			else if(options.target == "_file")
+			{
+				//使用<a>标签如果options.data很大的话会使URL超长，因而改为postOnForm()方案
+				
+				/*
+				url = url + (options.data ? "?" + $.param(options.data) : "");
+				
+				//对于文件下载，采用window.open会使浏览器闪烁，而采用<a>标签不会
+				var $fileLink = $("#_file_download_link");
+				if($fileLink.length == 0)
 				{
-					//使用window.open()如果options.data很大的话会使URL超长导致请求失败，因而改为postOnForm
-					
-					//url = url + (options.data ? "?" + $.param(options.data) : "");
-					//window.open(url);
-					
-					$.postOnForm(url, {"data" : options.data, "target" : "_blank"});
+					$fileLink = $("<a />").attr("id", "_file_download_link")
+						.css("width", "0px").css("height", "0px").appendTo(document.body);
 				}
-				else
-				{
-					//使用<a>标签如果options.data很大的话会使URL超长，因而改为postOnForm()方案
-					
-					/*
-					url = url + (options.data ? "?" + $.param(options.data) : "");
-					
-					//对于文件下载，采用window.open会使浏览器闪烁，而采用<a>标签不会
-					var $fileLink = $("#_file_download_link");
-					if($fileLink.length == 0)
-					{
-						$fileLink = $("<a />").attr("id", "_file_download_link")
-							.css("width", "0px").css("height", "0px").appendTo(document.body);
-					}
-					
-					$fileLink.attr("href", url);
-					$fileLink[0].click();//$fileLink.click()无法触发下载动作
-					*/
-					
-					$.postOnForm(url, {"data" : options.data});
-				}
+				
+				$fileLink.attr("href", url);
+				$fileLink[0].click();//$fileLink.click()无法触发下载动作
+				*/
+				
+				$.postOnForm(url, {"data" : options.data});
 			}
 			else
 			{
+				var successCallback = options.success;
+				
 				options = $.extend(
 					{
 						title : undefined, 
 						target : document.body,
+						asDialog: true,
 						pageParam : undefined,
 						pinTitleButton : false,
 						modal : true,
@@ -95,14 +100,19 @@
 							if(options.pageParam)
 								$.pageParam($dialog, options.pageParam);
 							
-							$._dialog($dialog, options);
+							if(options.asDialog)
+								$._dialog($dialog, options);
+							
 							$dialog.html(data);
 							
-							if(!options.title)
+							if(options.asDialog && !options.title)
 							{
 								var title = $("> title", $dialog).text();
 								$dialog.dialog( "option", "title", title);
 							}
+							
+							if(successCallback)
+								successCallback(data, textStatus, jqXHR);
 						},
 						type : "POST"
 					});
@@ -220,7 +230,7 @@
 		 */
 		isInDialog : function(dom)
 		{
-			var $dialogFlag = $(dom).closest(".dialog-content-container");
+			var $dialogFlag = $(dom).closest(".dialog-content-container.ui-dialog-content");
 			
 			return ($dialogFlag && $dialogFlag.length > 0);
 		},
@@ -230,7 +240,7 @@
 		 */
 		getInDialog : function(dom)
 		{
-			var dialog = $(dom).closest(".dialog-content-container");
+			var dialog = $(dom).closest(".dialog-content-container.ui-dialog-content");
 			
 			return dialog;
 		},
@@ -1461,20 +1471,23 @@
 			}
 		},
 		
-		isResizeDataTableWhenShow : function($tabsPanel)
+		isResizeDataTableWhenShow : function($panel)
 		{
-			return ($tabsPanel.attr("resize-table-when-show") == "1");
+			return ($panel.attr("resize-table-when-show") == "1");
 		},
 		
-		setResizeDataTableWhenShow : function($tabsPanel)
+		setResizeDataTableWhenShow : function($panel)
 		{
-			$tabsPanel.attr("resize-table-when-show", "1");
+			$panel.attr("resize-table-when-show", "1");
 		},
 		
-		clearResizeDataTableWhenShow : function($tabsPanel)
+		clearResizeDataTableWhenShow : function($panel)
 		{
-			$tabsPanel.removeAttr("resize-table-when-show");
+			$panel.removeAttr("resize-table-when-show");
 		},
+		
+		/**可显示、隐藏的包含DataTable的面板样式标识*/
+		TOGGLABLE_TABLE_PANEL_CLASS_NAME : "togglable-table-panel",
 		
 		/**
 		 * 为DataTable绑定window重设大小事件。
@@ -1488,10 +1501,10 @@
 				//忽略隐藏选项卡中的表格调整，仅在选项卡显示时才调整，
 				//一是DataTables对隐藏表格的宽度计算有问题，另外，绑定太多处理函数会影响jquery.resizeable组件的效率
 				
-				var tabsPanel = $dataTable0.closest(".ui-tabs-panel");
-				if(tabsPanel.is(":hidden"))
+				var toggablePanel = $dataTable0.closest(".ui-tabs-panel, ." + $.TOGGLABLE_TABLE_PANEL_CLASS_NAME);
+				if(toggablePanel.is(":hidden"))
 				{
-					$.setResizeDataTableWhenShow(tabsPanel);
+					$.setResizeDataTableWhenShow(toggablePanel);
 					return;
 				}
 				
@@ -1514,18 +1527,18 @@
 			$(window).bind('resize', resizeHandler);
 			
 			//如果表格处于选项卡页中，则在选项卡显示时，调整表格大小
-			var tabsPanel = $(dataTableElements[0]).closest(".ui-tabs-panel");
-			if(tabsPanel.length > 0)
+			var toggablePanel = $(dataTableElements[0]).closest(".ui-tabs-panel, ." + $.TOGGLABLE_TABLE_PANEL_CLASS_NAME);
+			if(toggablePanel.length > 0)
 			{
-				tabsPanel.data("showCallback", function($tabsPanel)
+				$.bindPanelShowCallback(toggablePanel, function($panel)
 				{
-					if(!$.isResizeDataTableWhenShow(tabsPanel))
+					if(!$.isResizeDataTableWhenShow($panel))
 						return;
 					
 					var changedHeight = calChangedDataTableHeightFunc();
 					$.updateDataTableHeight(dataTableElements, changedHeight, true);
 					
-					$.clearResizeDataTableWhenShow(tabsPanel);
+					$.clearResizeDataTableWhenShow($panel);
 				});
 			}
 			
@@ -1537,13 +1550,34 @@
 			return $table.hasClass("dataTable");
 		},
 		
-		callTabsPanelShowCallback : function($tabsPanel)
+		/**
+		 * 为指定面板元素绑定显示时回调函数。
+		 */
+		bindPanelShowCallback: function($panel, callback)
 		{
-			var panelShowCallback = $tabsPanel.data("showCallback");
-			if(panelShowCallback)
-				panelShowCallback($tabsPanel);
+			var callbacks = $panel.data("_SHOW_CALLBACK");
+			if(callbacks == null)
+			{
+				callbacks = [];
+				$panel.data("_SHOW_CALLBACK", callbacks);
+			}
 			
-			var subTabs = $tabsPanel.find(".ui-tabs");
+			callbacks.push(callback);
+		},
+		
+		/**
+		 * 调用面板元素绑定的显示时回调函数。
+		 */
+		callPanelShowCallback : function($panel)
+		{
+			var callbacks = $panel.data("_SHOW_CALLBACK");
+			if(callbacks)
+			{
+				for(var i=0; i<callbacks.length; i++)
+					callbacks[i]($panel);
+			}
+			
+			var subTabs = $panel.find(".ui-tabs");
 			if(subTabs.length > 0)
 			{
 				subTabs.each(function()
@@ -1559,7 +1593,7 @@
 					
 					var subTabPanel = $("> #"+subTabId, $this);
 					
-					$.callTabsPanelShowCallback(subTabPanel);
+					$.callPanelShowCallback(subTabPanel);
 				});
 			}
 		},

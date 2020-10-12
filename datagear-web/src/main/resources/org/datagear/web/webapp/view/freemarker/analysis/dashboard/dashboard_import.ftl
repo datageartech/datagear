@@ -6,22 +6,27 @@
 <title><#include "../../include/html_title_app_name.ftl"><@spring.message code='dashboard.importDashboard' /></title>
 </head>
 <body>
+<#include "../../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-importDashboard">
 	<form id="${pageId}-form" action="${contextPath}/analysis/dashboard/saveImport" method="POST">
 		<div class="form-head"></div>
 		<div class="form-content">
 			<input type="hidden" name="dashboardFileName" value="" />
-			<div class="form-item">
+			<div class="form-item form-item-analysisProjectAware">
 				<div class="form-item-label">
-					<label><@spring.message code='dashboard.import.selectFile' /></label>
+					<label title="<@spring.message code='dashboard.import.desc' />">
+						<@spring.message code='dashboard.import.selectFile' />
+					</label>
 				</div>
 				<div class="form-item-value">
 					<input type="hidden" name="inputForValidate" value="" />
-					<div class="fileinput-button" title="<@spring.message code='dashboard.import.desc' />">
+					<div class="fileinput-button">
 						<@spring.message code='select' /><input type="file" accept=".html, .htm, .zip" class="ignore">
 					</div>
 					<div class="upload-file-info"></div>
 				</div>
+				<#assign readonly=false>
+				<#include "../include/analysisProjectAware_form_select.ftl" >
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
@@ -33,10 +38,12 @@
 			</div>
 			<div class="form-item">
 				<div class="form-item-label">
-					<label><@spring.message code='dashboard.templateName' /></label>
+					<label title="<@spring.message code='dashboard.import.templateName.desc' />">
+						<@spring.message code='dashboard.templateName' />
+					</label>
 				</div>
 				<div class="form-item-value">
-					<input type="text" name="template" value="" class="ui-widget ui-widget-content" placeholder="<@spring.message code='dashboard.import.template.desc' />" />
+					<input type="text" name="template" value="" class="ui-widget ui-widget-content" />
 				</div>
 			</div>
 		</div>
@@ -45,13 +52,14 @@
 		</div>
 	</form>
 </div>
-<#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <script type="text/javascript">
 (function(po)
 {
-	po.element("input:submit, input:button, input:reset, button, .fileinput-button").button();
-
+	$.initButtons(po.element());
+	po.element(".fileinput-button").button();
+	po.initAnalysisProject("${(dashboard.analysisProject.id)!''?js_string}", "${(dashboard.analysisProject.name)!''?js_string}");
+	
 	po.url = function(action)
 	{
 		return "${contextPath}/analysis/dashboard/" + action;

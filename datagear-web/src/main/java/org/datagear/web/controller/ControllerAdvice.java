@@ -38,13 +38,10 @@ import org.datagear.persistence.support.NoColumnDefinedException;
 import org.datagear.persistence.support.SqlParamValueSqlExpressionException;
 import org.datagear.persistence.support.SqlParamValueVariableExpressionException;
 import org.datagear.persistence.support.UnsupportedDialectException;
-import org.datagear.web.OperationMessage;
-import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
-import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
-import org.datagear.web.util.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -515,6 +512,17 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleDataIntegrityViolationException(HttpServletRequest request, HttpServletResponse response,
+			DataIntegrityViolationException exception)
+	{
+		setOperationMessageForThrowable(request, buildMessageCode(DataIntegrityViolationException.class), exception,
+				true);
+
+		return getErrorView(request, response);
+	}
+
 	@ExceptionHandler(Throwable.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public String handleThrowable(HttpServletRequest request, HttpServletResponse response, Throwable t)
@@ -529,46 +537,6 @@ public class ControllerAdvice extends AbstractController
 	{
 		setOperationMessageForThrowable(request, messageCode, t, true, t.getMessage());
 		LOGGER.error("", t);
-	}
-
-	/**
-	 * 获取错误信息视图。
-	 * 
-	 * @param request
-	 * @param response
-	 * @return
-	 */
-	protected String getErrorView(HttpServletRequest request, HttpServletResponse response)
-	{
-		setAttributeIfIsJsonResponse(request, response);
-		return ERROR_PAGE_URL;
-	}
-
-	/**
-	 * 设置JSON响应的错误页面属性。
-	 * 
-	 * @param request
-	 * @param response
-	 */
-	protected void setAttributeIfIsJsonResponse(HttpServletRequest request, HttpServletResponse response)
-	{
-		String expectedContentType = DeliverContentTypeExceptionHandlerExceptionResolver.getHandlerContentType(request);
-		if (expectedContentType != null && !expectedContentType.isEmpty())
-			response.setContentType(expectedContentType);
-
-		boolean isJsonResponse = WebUtils.isJsonResponse(response);
-
-		request.setAttribute("isJsonResponse", isJsonResponse);
-
-		if (isJsonResponse)
-		{
-			OperationMessage operationMessage = getOperationMessageForHttpError(request, response);
-
-			request.setAttribute(WebUtils.KEY_OPERATION_MESSAGE,
-					WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(operationMessage));
-
-			response.setContentType(CONTENT_TYPE_JSON);
-		}
 	}
 
 	protected String buildMessageCode(Class<? extends Throwable> clazz)

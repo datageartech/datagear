@@ -16,6 +16,7 @@ readonly 是否只读操作，允许为null
 </title>
 </head>
 <body>
+<#include "../../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet">
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
@@ -28,7 +29,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.json' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<textarea name="value" class="ui-widget ui-widget-content" style="display:none;">${(dataSet.value)!''?html}</textarea>
 						<div class="workspace-editor-wrapper ui-widget ui-widget-content">
 							<div id="${pageId}-workspaceEditor" class="workspace-editor"></div>
@@ -50,7 +51,6 @@ readonly 是否只读操作，允许为null
 	</form>
 	<#include "include/dataSet_form_html_preview_pvp.ftl" >
 </div>
-<#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
 <script type="text/javascript">
@@ -60,6 +60,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
+	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
 	po.initWorkspaceHeight();
 
 	var languageTools = ace.require("ace/ext/language_tools");

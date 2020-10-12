@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -37,8 +38,10 @@ import org.datagear.analysis.support.html.HtmlTplDashboardRenderAttr.WebContext;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidget;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer.AddPrefixHtmlTitleHandler;
+import org.datagear.management.domain.AnalysisProject;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.HtmlChartWidgetEntityService.ChartWidgetSourceContext;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.persistence.PagingData;
@@ -48,7 +51,7 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
-import org.datagear.web.vo.DataFilterPagingQuery;
+import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -91,6 +94,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	private HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService;
 
 	@Autowired
+	private AnalysisProjectService analysisProjectService;
+
+	@Autowired
 	private File tempDirectory;
 
 	private ServletContext servletContext;
@@ -109,6 +115,16 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService)
 	{
 		this.htmlTplDashboardWidgetEntityService = htmlTplDashboardWidgetEntityService;
+	}
+
+	public AnalysisProjectService getAnalysisProjectService()
+	{
+		return analysisProjectService;
+	}
+
+	public void setAnalysisProjectService(AnalysisProjectService analysisProjectService)
+	{
+		this.analysisProjectService = analysisProjectService;
 	}
 
 	public File getTempDirectory()
@@ -133,9 +149,10 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	}
 
 	@RequestMapping("/add")
-	public String add(HttpServletRequest request, org.springframework.ui.Model model)
+	public String add(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
 		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
+		setCookieAnalysisProject(request, response, dashboard);
 
 		dashboard.setTemplates(HtmlTplDashboardWidgetEntity.DEFAULT_TEMPLATES);
 		dashboard.setTemplateEncoding(HtmlTplDashboardWidget.DEFAULT_TEMPLATE_ENCODING);
@@ -185,6 +202,8 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		templateName = trimResourceName(templateName);
 
 		User user = WebUtils.getUser(request, response);
+
+		trimAnalysisProjectAwareEntityForSave(dashboard);
 
 		if (!dashboard.isTemplate(templateName))
 		{
@@ -400,8 +419,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	}
 
 	@RequestMapping("/import")
-	public String impt(HttpServletRequest request, org.springframework.ui.Model model)
+	public String impt(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model)
 	{
+		HtmlTplDashboardWidgetEntity dashboard = new HtmlTplDashboardWidgetEntity();
+		setCookieAnalysisProject(request, response, dashboard);
+
+		model.addAttribute("dashboard", dashboard);
+
 		return "/analysis/dashboard/dashboard_import";
 	}
 
@@ -485,7 +509,9 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@ResponseBody
 	public ResponseEntity<OperationMessage> saveImport(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam("name") String name, @RequestParam("template") String template,
-			@RequestParam("dashboardFileName") String dashboardFileName) throws Exception
+			@RequestParam("dashboardFileName") String dashboardFileName,
+			@RequestParam(name = "analysisProject.id", required = false) String analysisProjectId,
+			@RequestParam(name = "analysisProject.name", required = false) String analysisProjectName) throws Exception
 	{
 		File uploadDirectory = FileUtil.getDirectory(this.tempDirectory, dashboardFileName, false);
 
@@ -515,10 +541,20 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		dashboard.setTemplateEncoding(templateEncoding);
 		dashboard.setName(name);
 
+		if (!isEmpty(analysisProjectId))
+		{
+			AnalysisProject analysisProject = new AnalysisProject();
+			analysisProject.setId(analysisProjectId);
+			analysisProject.setName(analysisProjectName);
+			dashboard.setAnalysisProject(analysisProject);
+		}
+
 		checkSaveEntity(dashboard);
 
 		dashboard.setId(IDUtil.randomIdOnTime20());
 		dashboard.setCreateUser(user);
+
+		trimAnalysisProjectAwareEntityForSave(dashboard);
 
 		this.htmlTplDashboardWidgetEntityService.add(user, dashboard);
 
@@ -549,6 +585,40 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 		model.addAttribute(KEY_READONLY, true);
 
 		return "/analysis/dashboard/dashboard_form";
+	}
+
+	@RequestMapping("/export")
+	public void export(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
+			@RequestParam("id") String id) throws Exception
+	{
+		User user = WebUtils.getUser(request, response);
+
+		HtmlTplDashboardWidgetEntity dashboard = this.htmlTplDashboardWidgetEntityService.getById(user, id);
+
+		if (dashboard == null)
+			throw new RecordNotFoundException();
+
+		TemplateDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
+				.getHtmlTplDashboardWidgetRenderer().getTemplateDashboardWidgetResManager();
+
+		File tmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
+		dashboardWidgetResManager.copyTo(dashboard.getId(), tmpDirectory);
+
+		response.addHeader("Content-Disposition",
+				"attachment;filename=" + toResponseAttachmentFileName(request, response, dashboard.getName() + ".zip"));
+		response.setContentType("application/octet-stream");
+
+		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());
+
+		try
+		{
+			IOUtil.writeFileToZipOutputStream(zout, tmpDirectory, "");
+		}
+		finally
+		{
+			zout.flush();
+			zout.close();
+		}
 	}
 
 	@RequestMapping(value = "/delete", produces = CONTENT_TYPE_JSON)
@@ -592,13 +662,13 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	@ResponseBody
 	public PagingData<HtmlTplDashboardWidgetEntity> pagingQueryData(HttpServletRequest request,
 			HttpServletResponse response, final org.springframework.ui.Model springModel,
-			@RequestBody(required = false) DataFilterPagingQuery pagingQueryParam) throws Exception
+			@RequestBody(required = false) APIDDataFilterPagingQuery pagingQueryParam) throws Exception
 	{
 		User user = WebUtils.getUser(request, response);
-		final DataFilterPagingQuery pagingQuery = inflateDataFilterPagingQuery(request, pagingQueryParam);
+		final APIDDataFilterPagingQuery pagingQuery = inflateAPIDDataFilterPagingQuery(request, pagingQueryParam);
 
 		PagingData<HtmlTplDashboardWidgetEntity> pagingData = this.htmlTplDashboardWidgetEntityService.pagingQuery(user,
-				pagingQuery, pagingQuery.getDataFilter());
+				pagingQuery, pagingQuery.getDataFilter(), pagingQuery.getAnalysisProjectId());
 
 		return pagingData;
 	}
@@ -955,5 +1025,11 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 			resourceName = resourceName.substring(1);
 
 		return resourceName;
+	}
+
+	protected void setCookieAnalysisProject(HttpServletRequest request, HttpServletResponse response,
+			HtmlTplDashboardWidgetEntity entity)
+	{
+		setCookieAnalysisProjectIfValid(request, response, this.analysisProjectService, entity);
 	}
 }

@@ -285,8 +285,9 @@ public class SqlpadController extends AbstractSchemaConnController
 		if (!blobFile.exists())
 			throw new FileNotFoundException(value);
 
-		response.setCharacterEncoding("utf-8");
-		response.setHeader("Content-Disposition", "attachment; filename=BLOB");
+		response.setCharacterEncoding(IOUtil.CHARSET_UTF_8);
+		response.setHeader("Content-Disposition",
+				"attachment; filename=" + toResponseAttachmentFileName(request, response, "BLOB"));
 
 		InputStream in = null;
 		OutputStream out = null;

@@ -4,7 +4,8 @@
 
 package org.datagear.web.util;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 /**
@@ -16,15 +17,16 @@ import org.junit.Test;
 public class WebContextPathTest
 {
 	@Test
-	public void isValidSubContextPathTest()
+	public void trimSubContextPathTest()
 	{
-		Assert.assertFalse(WebContextPath.isValidSubContextPath(null));
-		Assert.assertTrue(WebContextPath.isValidSubContextPath(""));
-		Assert.assertTrue(WebContextPath.isValidSubContextPath("/abc"));
-		Assert.assertTrue(WebContextPath.isValidSubContextPath("/abc/def"));
-		Assert.assertTrue(WebContextPath.isValidSubContextPath("/abc/def/ghi"));
-		Assert.assertFalse(WebContextPath.isValidSubContextPath("/"));
-		Assert.assertFalse(WebContextPath.isValidSubContextPath("////"));
-		Assert.assertFalse(WebContextPath.isValidSubContextPath("/abc/"));
+		assertEquals("", WebContextPath.trimSubContextPath(null));
+		assertEquals("", WebContextPath.trimSubContextPath(""));
+		assertEquals("/abc", WebContextPath.trimSubContextPath("/abc"));
+		assertEquals("/abc/def", WebContextPath.trimSubContextPath("/abc/def"));
+		assertEquals("/abc/def/ghi", WebContextPath.trimSubContextPath("/abc/def/ghi"));
+		assertEquals("", WebContextPath.trimSubContextPath("/"));
+		assertEquals("", WebContextPath.trimSubContextPath("////"));
+		assertEquals("/abc", WebContextPath.trimSubContextPath("/abc/"));
+		assertEquals("/abc/def", WebContextPath.trimSubContextPath("/abc/def/"));
 	}
 }

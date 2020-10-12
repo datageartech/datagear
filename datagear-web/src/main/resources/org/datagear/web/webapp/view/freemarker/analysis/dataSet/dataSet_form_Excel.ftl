@@ -7,7 +7,7 @@ readonly 是否只读操作，允许为null
 -->
 <#assign formAction=(formAction!'#')>
 <#assign readonly=(readonly!false)>
-<#assign isAdd=(formAction == 'saveAdd')>
+<#assign isAdd=(formAction == 'saveAddForExcel')>
 <html>
 <head>
 <#include "../../include/html_head.ftl">
@@ -16,6 +16,7 @@ readonly 是否只读操作，允许为null
 </title>
 </head>
 <body>
+<#include "../../include/page_js_obj.ftl" >
 <div id="${pageId}" class="page-form page-form-dataSet page-form-dataSet-excel">
 	<form id="${pageId}-form" action="#" method="POST">
 		<div class="form-head"></div>
@@ -26,21 +27,8 @@ readonly 是否只读操作，允许为null
 					<div class="form-item-label">
 						<label><@spring.message code='dataSet.excelFile' /></label>
 					</div>
-					<div class="form-item-value">
-						<input type="hidden" id="${pageId}-originalFileName" value="${(dataSet.fileName)!''?html}" />
-						<input type="hidden" name="fileName" value="${(dataSet.fileName)!''?html}" />
-						<input type="text" name="displayName" value="${(dataSet.displayName)!''?html}" class="file-display-name ui-widget ui-widget-content" readonly="readonly" />
-						
-						<#if formAction != 'saveAddForExcel'>
-						<a href="${contextPath}/analysis/dataSet/downloadFile?id=${(dataSet.id)!''?html}" target="_blank" class="link"><@spring.message code='download' /></a>
-						</#if>
-						
-						<#if !readonly>
-						<div class="fileinput-wrapper">
-							<div class="ui-widget ui-corner-all ui-button fileinput-button"><@spring.message code='upload' /><input type="file"></div>
-							<div class="upload-file-info"></div>
-						</div>
-						</#if>
+					<div class="form-item-value form-item-value-file-input">
+						<#include "include/dataSet_form_file_input.ftl">
 					</div>
 				</div>
 				<div class="form-item">
@@ -49,7 +37,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.excel.sheetIndex' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="text" name="sheetIndex" value="${(dataSet.sheetIndex)!''?html}" class="ui-widget ui-widget-content" style="width:41%;" />
 					</div>
 				</div>
@@ -59,7 +47,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.excel.nameRow' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="hidden" name="nameRow" value="${(dataSet.nameRow)!''?html}" class="ui-widget ui-widget-content" />
 						<span class="nameRow-radios">
 							<label for="${pageId}-nameRow_0">
@@ -81,7 +69,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.excel.dataRowExp' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="text" name="dataRowExp" value="${(dataSet.dataRowExp)!''?html}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
@@ -91,7 +79,7 @@ readonly 是否只读操作，允许为null
 							<@spring.message code='dataSet.excel.dataColumnExp' />
 						</label>
 					</div>
-					<div class="form-item-value">
+					<div class="form-item-value error-newline">
 						<input type="text" name="dataColumnExp" value="${(dataSet.dataColumnExp)!''?html}" class="ui-widget ui-widget-content" />
 					</div>
 				</div>
@@ -123,7 +111,6 @@ readonly 是否只读操作，允许为null
 	</form>
 	<#include "include/dataSet_form_html_preview_pvp.ftl" >
 </div>
-<#include "../../include/page_js_obj.ftl" >
 <#include "../../include/page_obj_form.ftl">
 <#include "include/dataSet_form_js.ftl">
 <#include "include/dataSet_form_js_nameRow.ftl">
@@ -134,6 +121,7 @@ readonly 是否只读操作，允许为null
 	po.dataSetParams = <@writeJson var=dataSetParams />;
 	
 	$.initButtons(po.element());
+	po.initAnalysisProject("${(dataSet.analysisProject.id)!''?js_string}", "${(dataSet.analysisProject.name)!''?js_string}");
 	po.element(".nameRow-radios").controlgroup();
 	po.element("#${pageId}-forceXls").buttonset();
 	po.element("#${pageId}-forceXls-${((dataSet.forceXls)!true)?string('true', 'false')}").click();
@@ -143,12 +131,19 @@ readonly 是否只读操作，允许为null
 	po.initDataSetParamsTable(po.dataSetParams);
 	po.initPreviewParamValuePanel();
 	po.initNameRowOperation(${(dataSet.nameRow)!"1"});
+
+	po.initDataSetFileInput(po.url("uploadFile"), "${(dataSet.fileSourceType)!''?js_string}", ${isAdd?string("true", "false")});
 	
 	po.updatePreviewOptionsData = function()
 	{
 		var dataSet = po.previewOptions.data.dataSet;
-		
+
+		dataSet.fileSourceType = po.fileSourceTypeValue();
 		dataSet.fileName = po.element("input[name='fileName']").val();
+		dataSet.dataSetResDirectory = {};
+		dataSet.dataSetResDirectory.id = po.element("input[name='dataSetResDirectory.id']").val();
+		dataSet.dataSetResDirectory.directory = po.element("input[name='dataSetResDirectory.directory']").val();
+		dataSet.dataSetResFileName = po.element("input[name='dataSetResFileName']").val();
 		dataSet.sheetIndex = po.element("input[name='sheetIndex']").val();
 		dataSet.nameRow = po.nameRowValue();
 		dataSet.dataRowExp = po.element("input[name='dataRowExp']").val();
@@ -158,7 +153,7 @@ readonly 是否只读操作，允许为null
 		po.previewOptions.data.originalFileName = po.element("#${pageId}-originalFileName").val();
 	};
 	
-	<#if formAction != 'saveAddForExcel'>
+	<#if !isAdd>
 	//编辑、查看操作应初始化为已完成预览的状态
 	po.updatePreviewOptionsData();
 	po.previewSuccess(true);
@@ -166,6 +161,9 @@ readonly 是否只读操作，允许为null
 	
 	po.isPreviewValueModified = function()
 	{
+		var fileSourceType = po.fileSourceTypeValue();
+		var dataSetResDirectoryId = po.element("input[name='dataSetResDirectory.id']").val();
+		var dataSetResFileName = po.element("input[name='dataSetResFileName']").val();
 		var fileName = po.element("input[name='fileName']").val();
 		var sheetIndex = po.element("input[name='sheetIndex']").val();
 		var nameRow = po.nameRowValue();
@@ -174,8 +172,12 @@ readonly 是否只读操作，允许为null
 		var forceXls = po.element("input[name='forceXls']:checked").val();
 		
 		var pd = po.previewOptions.data.dataSet;
+		var dataSetResDirectory = (pd.dataSetResDirectory || {});
 		
-		return (pd.fileName != fileName) || (pd.sheetIndex != sheetIndex)
+		return (pd.fileSourceType != fileSourceType)
+			|| (po.isFileSourceTypeUpload(fileSourceType) && pd.fileName != fileName)
+			|| (po.isFileSourceTypeServer(fileSourceType) && (dataSetResDirectory.id != dataSetResDirectoryId || pd.dataSetResFileName != dataSetResFileName))
+			|| (pd.sheetIndex != sheetIndex)
 			|| (pd.nameRow != nameRow) || (pd.dataRowExp != dataRowExp)
 			|| (pd.dataColumnExp != dataColumnExp) || (pd.forceXls != forceXls);
 	};
@@ -184,40 +186,14 @@ readonly 是否只读操作，允许为null
 	po.previewOptions.beforePreview = function()
 	{
 		po.updatePreviewOptionsData();
-		
-		if(!this.data.dataSet.fileName)
-			return false;
+		return po.isPreviewDataFileValid(this.data);
 	};
 	po.previewOptions.beforeRefresh = function()
 	{
-		if(!this.data.dataSet.fileName)
-			return false;
+		return po.isPreviewDataFileValid(this.data);
 	};
 	
 	po.initPreviewOperations();
-	
-	po.fileUploadInfo = function(){ return this.element(".upload-file-info"); };
-
-	po.element(".fileinput-button").fileupload(
-	{
-		url : po.url("uploadFile"),
-		paramName : "file",
-		success : function(uploadResult, textStatus, jqXHR)
-		{
-			$.fileuploadsuccessHandlerForUploadInfo(po.fileUploadInfo(), false);
-			po.element("input[name='fileName']").val(uploadResult.fileName);
-			po.element("input[name='displayName']").val(uploadResult.displayName);
-		}
-	})
-	.bind('fileuploadadd', function (e, data)
-	{
-		po.element("input[name='displayName']").val("");
-		$.fileuploadaddHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	})
-	.bind('fileuploadprogressall', function (e, data)
-	{
-		$.fileuploadprogressallHandlerForUploadInfo(e, data, po.fileUploadInfo());
-	});
 	
 	$.validator.addMethod("dataSetExcelPreviewRequired", function(value, element)
 	{
@@ -250,7 +226,22 @@ readonly 是否只读操作，允许为null
 		rules :
 		{
 			"name" : "required",
-			"displayName" : {"required": true, "dataSetExcelPreviewRequired": true, "dataSetPropertiesRequired": true},
+			"displayName" :
+			{
+				"dataSetUploadFileNameRequired": true,
+				"dataSetUploadFilePreviewRequired": true,
+				"dataSetUploadFilePropertiesRequired": true
+			},
+			"dataSetResDirectory.directory":
+			{
+				"dataSetServerDirectoryRequired": true,
+			},
+			"dataSetResFileName":
+			{
+				"dataSetServerFileNameRequired": true,
+				"dataSetServerFilePreviewRequired": true,
+				"dataSetServerFilePropertiesRequired": true
+			},
 			"sheetIndex": {"required": true, "integer": true, "min": 1},
 			"nameRowText": {"integer": true, "min": 1},
 			"dataRowExp": {"dataSetExcelDataRowExpRegex": true},
@@ -261,9 +252,19 @@ readonly 是否只读操作，允许为null
 			"name" : "<@spring.message code='validation.required' />",
 			"displayName" :
 			{
-				"required": "<@spring.message code='validation.required' />",
-				"dataSetExcelPreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
-				"dataSetPropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
+				"dataSetUploadFileNameRequired": "<@spring.message code='validation.required' />",
+				"dataSetUploadFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
+				"dataSetUploadFilePropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
+			},
+			"dataSetResDirectory.directory":
+			{
+				"dataSetServerDirectoryRequired": "<@spring.message code='validation.required' />",
+			},
+			"dataSetResFileName":
+			{
+				"dataSetServerFileNameRequired": "<@spring.message code='validation.required' />",
+				"dataSetServerFilePreviewRequired": "<@spring.message code='dataSet.validation.previewRequired' />",
+				"dataSetServerFilePropertiesRequired": "<@spring.message code='dataSet.validation.propertiesRequired' />"
 			},
 			"sheetIndex":
 			{

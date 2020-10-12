@@ -22,7 +22,7 @@ import org.datagear.util.StringUtil;
  *
  */
 public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
-		implements CreateUserEntity<String>, DataPermissionEntity<String>
+		implements CreateUserEntity<String>, DataPermissionEntity<String>, AnalysisProjectAwareEntity<String>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -44,6 +44,8 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
+
+	private AnalysisProject analysisProject = null;
 
 	public HtmlTplDashboardWidgetEntity()
 	{
@@ -102,6 +104,18 @@ public class HtmlTplDashboardWidgetEntity extends HtmlTplDashboardWidget
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	@Override
+	public AnalysisProject getAnalysisProject()
+	{
+		return analysisProject;
+	}
+
+	@Override
+	public void setAnalysisProject(AnalysisProject analysisProject)
+	{
+		this.analysisProject = analysisProject;
 	}
 
 	/**

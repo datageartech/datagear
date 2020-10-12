@@ -17,7 +17,10 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetParam;
 import org.datagear.analysis.DataSetProperty;
+import org.datagear.analysis.support.ProfileDataSet;
 import org.datagear.connection.ConnectionSource;
+import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.CsvFileDataSetEntity;
 import org.datagear.management.domain.CsvValueDataSetEntity;
 import org.datagear.management.domain.DataSetEntity;
@@ -33,6 +36,8 @@ import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataSetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.datagear.util.FileUtil;
 import org.mybatis.spring.SqlSessionTemplate;
 
@@ -163,6 +168,19 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	@Override
+	public ProfileDataSet getProfileDataSet(User user, String id)
+	{
+		ProfileDataSet profileDataSet = null;
+
+		DataSetEntity entity = getById(user, id, false);
+		inflateParamsAndProperties(entity);
+
+		profileDataSet = ProfileDataSet.valueOf(entity);
+
+		return profileDataSet;
+	}
+
+	@Override
 	public int updateCreateUserId(String oldUserId, String newUserId)
 	{
 		Map<String, Object> params = buildParamMap();
@@ -171,6 +189,13 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		params.put("newUserId", newUserId);
 
 		return updateMybatis("updateCreateUserId", params);
+	}
+
+	@Override
+	public PagingData<DataSetEntity> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter,
+			String analysisProjectId)
+	{
+		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId);
 	}
 
 	@Override
@@ -387,6 +412,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (obj == null)
 			return null;
 
+		DataSetEntity initObj = obj;
+
 		if (DataSetEntity.DATA_SET_TYPE_SQL.equals(obj.getDataSetType()))
 			obj = getSqlDataSetEntityById(obj.getId());
 		else if (DataSetEntity.DATA_SET_TYPE_JsonValue.equals(obj.getDataSetType()))
@@ -405,18 +432,29 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 		if (obj == null)
 			return null;
 
+		// 这里必须设置全限值，为了效率，上述子类的底层查询并未返回全限值
+		obj.setDataPermission(initObj.getDataPermission());
+
+		inflateParamsAndProperties(obj);
+
+		return obj;
+	}
+
+	protected void inflateParamsAndProperties(DataSetEntity dataSetEntity)
+	{
+		if (dataSetEntity == null)
+			return;
+
 		Map<String, Object> params = buildParamMapWithIdentifierQuoteParameter();
-		params.put("dataSetId", obj.getId());
+		params.put("dataSetId", dataSetEntity.getId());
 
 		List<DataSetPropertyPO> propertyPOs = selectListMybatis("getPropertyPOs", params);
 		List<DataSetProperty> dataSetProperties = DataSetPropertyPO.to(propertyPOs);
-		obj.setProperties(dataSetProperties);
+		dataSetEntity.setProperties(dataSetProperties);
 
 		List<DataSetParamPO> paramPOs = selectListMybatis("getParamPOs", params);
 		List<DataSetParam> dataSetParams = DataSetParamPO.to(paramPOs);
-		obj.setParams(dataSetParams);
-
-		return obj;
+		dataSetEntity.setParams(dataSetParams);
 	}
 
 	protected SqlDataSetEntity getSqlDataSetEntityById(String id)
@@ -504,6 +542,8 @@ public class DataSetEntityServiceImpl extends AbstractMybatisDataPermissionEntit
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
+		params.put(AnalysisProjectAwareEntity.DATA_PERMISSION_PARAM_RESOURCE_TYPE_ANALYSIS_PROJECT,
+				AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
 		addDataPermissionParameters(params, user, getResourceType(), false, true);
 	}
 

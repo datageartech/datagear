@@ -4,6 +4,7 @@
 
 package org.datagear.web.controller;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,15 +16,23 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
+import org.datagear.management.domain.DirectoryFileDataSetEntity;
+import org.datagear.management.domain.User;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.persistence.PagingQuery;
+import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
 import org.datagear.web.convert.StringToJsonConverter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
+import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
+import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.datagear.web.vo.DataFilterPagingQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -63,6 +72,8 @@ public abstract class AbstractController
 	public static final String DATA_FILTER_PARAM = DataFilterPagingQuery.PROPERTY_DATA_FILTER;
 
 	public static final String DATA_FILTER_COOKIE = "DATA_FILTER_SEARCH";
+
+	public static final String KEY_ANALYSIS_PROJECT_ID = "ANALYSIS_PROJECT_ID";
 
 	public static final String ERROR_PAGE_URL = "/error";
 
@@ -109,11 +120,101 @@ public abstract class AbstractController
 		this.stringToJsonConverter = stringToJsonConverter;
 	}
 
+	protected boolean setCookieAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,
+			AnalysisProjectService analysisProjectService, AnalysisProjectAwareEntity<?> entity)
+	{
+		User user = WebUtils.getUser(request, response);
+
+		String analysisId = WebUtils.getCookieValue(request, KEY_ANALYSIS_PROJECT_ID);
+
+		if (!isEmpty(analysisId))
+		{
+			try
+			{
+				AnalysisProject analysisProject = analysisProjectService.getById(user, analysisId);
+
+				if (analysisProject != null)
+				{
+					entity.setAnalysisProject(analysisProject);
+					return true;
+				}
+			}
+			catch (Throwable t)
+			{
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * 整理保存时的{@linkplain AnalysisProjectAwareEntity}：
+	 * 如果analysisProject.id为空字符串，则应将其改为null，因为存储时相关外键不允许空字符串
+	 * 
+	 * @param entity
+	 */
+	protected void trimAnalysisProjectAwareEntityForSave(AnalysisProjectAwareEntity<?> entity)
+	{
+		if (entity == null)
+			return;
+
+		if (entity.getAnalysisProject() == null)
+			return;
+
+		if (isEmpty(entity.getAnalysisProject().getId()))
+			entity.setAnalysisProject(null);
+	}
+
+	/**
+	 * 整理保存时的{@linkplain DirectoryFileDataSetEntity}：
+	 * 如果dataSetResDirectory.id为空字符串，则应将其改为null，因为存储时相关外键不允许空字符串
+	 * 
+	 * @param entity
+	 */
+	protected void trimDirectoryFileDataSetEntityForSave(DirectoryFileDataSetEntity entity)
+	{
+		if (entity == null)
+			return;
+
+		if (entity.getDataSetResDirectory() == null)
+			return;
+
+		if (isEmpty(entity.getDataSetResDirectory().getId()))
+			entity.setDataSetResDirectory(null);
+	}
+
+	/**
+	 * 检查并补充{@linkplain APIDDataFilterPagingQuery}。
+	 * 
+	 * @param request
+	 * @param pagingQuery
+	 *            允许为{@code null}
+	 * @return 不会为{@code null}
+	 */
+	protected APIDDataFilterPagingQuery inflateAPIDDataFilterPagingQuery(HttpServletRequest request,
+			APIDDataFilterPagingQuery pagingQuery)
+	{
+		DataFilterPagingQuery pq = inflateDataFilterPagingQuery(request, pagingQuery);
+
+		if (pagingQuery == null)
+		{
+			pagingQuery = new APIDDataFilterPagingQuery(pq.getPage(), pq.getPageSize(), pq.getKeyword(),
+					pq.getCondition());
+			pagingQuery.setNotLike(pq.isNotLike());
+			pagingQuery.setDataFilter(pq.getDataFilter());
+
+			pagingQuery.setAnalysisProjectId(WebUtils.getCookieValue(request, KEY_ANALYSIS_PROJECT_ID));
+		}
+
+		return pagingQuery;
+	}
+
 	/**
 	 * 检查并补充{@linkplain DataFilterPagingQuery#getDataFilter()}。
 	 * 
 	 * @param request
-	 * @param pagingQuery 允许为{@code null}
+	 * @param pagingQuery
+	 *            允许为{@code null}
 	 * @return 不会为{@code null}
 	 */
 	protected DataFilterPagingQuery inflateDataFilterPagingQuery(HttpServletRequest request,
@@ -126,7 +227,8 @@ public abstract class AbstractController
 	 * 检查并补充{@linkplain DataFilterPagingQuery#getDataFilter()}。
 	 * 
 	 * @param request
-	 * @param pagingQuery          允许为{@code null}
+	 * @param pagingQuery
+	 *            允许为{@code null}
 	 * @param cookiePaginationSize
 	 * @return 不会为{@code null}
 	 */
@@ -193,7 +295,8 @@ public abstract class AbstractController
 	 * 检查并补充{@linkplain PagingQuery}。
 	 * 
 	 * @param request
-	 * @param pagingQuery 允许为{@code null}
+	 * @param pagingQuery
+	 *            允许为{@code null}
 	 * @return 不会为{@code null}
 	 */
 	protected PagingQuery inflatePagingQuery(HttpServletRequest request, PagingQuery pagingQuery)
@@ -205,27 +308,31 @@ public abstract class AbstractController
 	 * 检查并补充{@linkplain PagingQuery}。
 	 * 
 	 * @param request
-	 * @param pagingQuery          允许为{@code null}
-	 * @param cookiePaginationSize 允许为{@code null}
+	 * @param pagingQuery
+	 *            允许为{@code null}
+	 * @param cookiePaginationSize
+	 *            允许为{@code null}
 	 * @return 不会为{@code null}
 	 */
 	protected PagingQuery inflatePagingQuery(HttpServletRequest request, PagingQuery pagingQuery,
 			String cookiePaginationSize)
 	{
 		if (pagingQuery == null)
+		{
 			pagingQuery = new PagingQuery();
 
-		if (!isEmpty(cookiePaginationSize))
-		{
-			try
+			if (!isEmpty(cookiePaginationSize))
 			{
-				String pss = WebUtils.getCookieValue(request, cookiePaginationSize);
+				try
+				{
+					String pss = WebUtils.getCookieValue(request, cookiePaginationSize);
 
-				if (!isEmpty(pss))
-					pagingQuery.setPageSize(Integer.parseInt(pss));
-			}
-			catch (Exception e)
-			{
+					if (!isEmpty(pss))
+						pagingQuery.setPageSize(Integer.parseInt(pss));
+				}
+				catch (Exception e)
+				{
+				}
 			}
 		}
 
@@ -251,6 +358,46 @@ public abstract class AbstractController
 		operationMessage.setData(messageArgs);
 
 		WebUtils.setOperationMessage(request, operationMessage);
+	}
+
+	/**
+	 * 获取错误信息视图。
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	protected String getErrorView(HttpServletRequest request, HttpServletResponse response)
+	{
+		setAttributeIfIsJsonResponse(request, response);
+		return ERROR_PAGE_URL;
+	}
+
+	/**
+	 * 设置JSON响应的错误页面属性。
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	protected void setAttributeIfIsJsonResponse(HttpServletRequest request, HttpServletResponse response)
+	{
+		String expectedContentType = DeliverContentTypeExceptionHandlerExceptionResolver.getHandlerContentType(request);
+		if (expectedContentType != null && !expectedContentType.isEmpty())
+			response.setContentType(expectedContentType);
+
+		boolean isJsonResponse = WebUtils.isJsonResponse(response);
+
+		request.setAttribute("isJsonResponse", isJsonResponse);
+
+		if (isJsonResponse)
+		{
+			OperationMessage operationMessage = getOperationMessageForHttpError(request, response);
+
+			request.setAttribute(WebUtils.KEY_OPERATION_MESSAGE,
+					WriteJsonTemplateDirectiveModel.toWriteJsonTemplateModel(operationMessage));
+
+			response.setContentType(CONTENT_TYPE_JSON);
+		}
 	}
 
 	/**
@@ -615,6 +762,24 @@ public abstract class AbstractController
 			return null;
 
 		return pathInfo.substring(index + pathPrefix.length());
+	}
+
+	/**
+	 * 将文件名转换为作为响应下载文件名。
+	 * <p>
+	 * 此方法会对处理中文乱码问题。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param response
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
+	protected String toResponseAttachmentFileName(HttpServletRequest request, HttpServletResponse response,
+			String fileName) throws IOException
+	{
+		return new String(fileName.getBytes(RESPONSE_ENCODING), IOUtil.CHARSET_ISO_8859_1);
 	}
 
 	/**

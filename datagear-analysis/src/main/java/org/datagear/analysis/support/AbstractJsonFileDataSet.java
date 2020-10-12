@@ -12,7 +12,6 @@ import java.io.Reader;
 import java.util.List;
 import java.util.Map;
 
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetProperty;
 import org.datagear.util.IOUtil;
 
@@ -70,7 +69,7 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet
 	 * 
 	 * @param paramValues
 	 * @return
-	 * @throws DataSetException
+	 * @throws Throwable
 	 */
-	protected abstract File getJsonFile(Map<String, ?> paramValues) throws DataSetException;
+	protected abstract File getJsonFile(Map<String, ?> paramValues) throws Throwable;
 }

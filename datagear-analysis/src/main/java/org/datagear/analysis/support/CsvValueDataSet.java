@@ -73,7 +73,7 @@ public class CsvValueDataSet extends AbstractCsvDataSet
 	@Override
 	protected TemplateResolvedSource<Reader> getCsvReader(Map<String, ?> paramValues) throws Throwable
 	{
-		String csv = resolveAsFmkTemplateIfHasParam(this.value, paramValues);
+		String csv = resolveAsFmkTemplate(this.value, paramValues);
 		return new TemplateResolvedSource<>(IOUtil.getReader(csv), csv);
 	}
 }

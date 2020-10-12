@@ -19,6 +19,7 @@ import javax.servlet.Filter;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.BayeuxServer.Extension;
 import org.cometd.server.ext.AcknowledgedMessagesExtension;
@@ -47,9 +48,11 @@ import org.datagear.dataexchange.support.JsonDataImportService;
 import org.datagear.dataexchange.support.SqlDataExportService;
 import org.datagear.dataexchange.support.SqlDataImportService;
 import org.datagear.management.dbversion.DbVersionManager;
+import org.datagear.management.service.AnalysisProjectService;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.DataPermissionEntityService;
 import org.datagear.management.service.DataSetEntityService;
+import org.datagear.management.service.DataSetResDirectoryService;
 import org.datagear.management.service.HtmlChartWidgetEntityService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.RoleService;
@@ -57,8 +60,10 @@ import org.datagear.management.service.RoleUserService;
 import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.SqlHistoryService;
 import org.datagear.management.service.UserService;
+import org.datagear.management.service.impl.AnalysisProjectServiceImpl;
 import org.datagear.management.service.impl.AuthorizationServiceImpl;
 import org.datagear.management.service.impl.DataSetEntityServiceImpl;
+import org.datagear.management.service.impl.DataSetResDirectoryServiceImpl;
 import org.datagear.management.service.impl.HtmlChartWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.HtmlTplDashboardWidgetEntityServiceImpl;
 import org.datagear.management.service.impl.RoleServiceImpl;
@@ -102,6 +107,7 @@ import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebContextPathFilter;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.mybatis.spring.SqlSessionFactoryBean;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -202,37 +208,37 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public File driverEntityManagerRootDirectory() throws IOException
+	public File driverEntityManagerRootDirectory()
 	{
 		return createDirectory(environment.getProperty("directory.driver"), true);
 	}
 
 	@Bean
-	public File tempDirectory() throws IOException
+	public File tempDirectory()
 	{
 		return createDirectory(environment.getProperty("directory.temp"), true);
 	}
 
 	@Bean
-	public File chartPluginRootDirectory() throws IOException
+	public File chartPluginRootDirectory()
 	{
 		return createDirectory(environment.getProperty("directory.chartPlugin"), true);
 	}
 
 	@Bean
-	public File dashboardRootDirectory() throws IOException
+	public File dashboardRootDirectory()
 	{
 		return createDirectory(environment.getProperty("directory.dashboard"), true);
 	}
 
 	@Bean
-	public File resetPasswordCheckFileDirectory() throws IOException
+	public File resetPasswordCheckFileDirectory()
 	{
 		return createDirectory(environment.getProperty("directory.resetPasswordCheckFile"), true);
 	}
 
 	@Bean
-	public File dataSetRootDirectory() throws IOException
+	public File dataSetRootDirectory()
 	{
 		return createDirectory(environment.getProperty("directory.dataSet"), true);
 	}
@@ -243,12 +249,20 @@ public class CoreConfiguration implements InitializingBean
 		return HttpClients.createDefault();
 	}
 
-	protected File createDirectory(String directoryName, boolean createIfInexistence) throws IOException
+	protected File createDirectory(String directoryName, boolean createIfInexistence)
 	{
 		DirectoryFactory bean = new DirectoryFactory();
 		bean.setDirectoryName(directoryName);
 		bean.setCreateIfInexistence(createIfInexistence);
-		bean.init();
+
+		try
+		{
+			bean.init();
+		}
+		catch(IOException e)
+		{
+			throw new BeanInitializationException("Init directory [" + directoryName + "] failed", e);
+		}
 
 		return bean.getDirectory();
 	}
@@ -268,14 +282,21 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public SqlSessionFactoryBean sqlSessionFactory()
+	public SqlSessionFactory sqlSessionFactory()
 	{
 		SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
 		bean.setDataSource(this.dataSourceConfiguration.dataSource());
 		bean.setMapperLocations(
 				new Resource[] { new ClassPathResource("classpath*:org/datagear/management/mapper/*.xml") });
 
-		return bean;
+		try
+		{
+			return bean.getObject();
+		}
+		catch(Exception e)
+		{
+			throw new BeanInitializationException("Init " + SqlSessionFactory.class + " failed", e);
+		}
 	}
 
 	@Bean
@@ -286,14 +307,14 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean(destroyMethod = "releaseAll")
-	public XmlDriverEntityManager driverEntityManager() throws IOException
+	public XmlDriverEntityManager driverEntityManager()
 	{
 		XmlDriverEntityManager bean = new XmlDriverEntityManager(driverEntityManagerRootDirectory());
 		return bean;
 	}
 
 	@Bean(initMethod = "init")
-	public XmlDriverEntityManagerInitializer xmlDriverEntityManagerInitializer() throws IOException
+	public XmlDriverEntityManagerInitializer xmlDriverEntityManagerInitializer()
 	{
 		XmlDriverEntityManagerInitializer bean = new XmlDriverEntityManagerInitializer(this.driverEntityManager());
 
@@ -301,7 +322,7 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean(destroyMethod = "close")
-	public ConnectionSource connectionSource() throws IOException
+	public ConnectionSource connectionSource()
 	{
 		DefaultConnectionSource bean = new DefaultConnectionSource(this.driverEntityManager());
 		bean.setDriverChecker(new SqlDriverChecker(this.dbMetaResolver()));
@@ -357,56 +378,56 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public AuthorizationService authorizationService() throws Exception
+	public AuthorizationService authorizationService()
 	{
-		AuthorizationServiceImpl bean = new AuthorizationServiceImpl(this.sqlSessionFactory().getObject(),
+		AuthorizationServiceImpl bean = new AuthorizationServiceImpl(this.sqlSessionFactory(),
 				this.authorizationResourceServices());
 
 		return bean;
 	}
 
 	@Bean
-	public SchemaService schemaService() throws Exception
+	public SchemaService schemaService()
 	{
-		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory().getObject(), this.driverEntityManager(),
+		SchemaServiceImpl bean = new SchemaServiceImpl(this.sqlSessionFactory(), this.driverEntityManager(),
 				this.authorizationService());
 
 		return bean;
 	}
 
 	@Bean
-	public UserService userService() throws Exception
+	public UserService userService()
 	{
-		UserServiceImpl bean = new UserServiceImpl(this.sqlSessionFactory().getObject());
+		UserServiceImpl bean = new UserServiceImpl(this.sqlSessionFactory());
 		bean.setUserPasswordEncoder(this.userPasswordEncoder());
 		return bean;
 	}
 
 	@Bean
-	public RoleService roleService() throws Exception
+	public RoleService roleService()
 	{
-		RoleServiceImpl bean = new RoleServiceImpl(this.sqlSessionFactory().getObject());
+		RoleServiceImpl bean = new RoleServiceImpl(this.sqlSessionFactory());
 		return bean;
 	}
 
 	@Bean
-	public RoleUserService roleUserService() throws Exception
+	public RoleUserService roleUserService()
 	{
-		RoleUserServiceImpl bean = new RoleUserServiceImpl(this.sqlSessionFactory().getObject());
+		RoleUserServiceImpl bean = new RoleUserServiceImpl(this.sqlSessionFactory());
 		return bean;
 	}
 
 	@Bean
-	public DataSetEntityService dataSetEntityService() throws Exception
+	public DataSetEntityService dataSetEntityService()
 	{
-		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory().getObject(),
+		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(),
 				this.connectionSource(), this.schemaService(), this.authorizationService(), this.dataSetRootDirectory(),
 				this.httpClient());
 		return bean;
 	}
 
 	@Bean
-	public FileTemplateDashboardWidgetResManager templateDashboardWidgetResManager() throws IOException
+	public FileTemplateDashboardWidgetResManager templateDashboardWidgetResManager()
 	{
 		FileTemplateDashboardWidgetResManager bean = new FileTemplateDashboardWidgetResManager(
 				this.dashboardRootDirectory());
@@ -414,14 +435,14 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager() throws IOException
+	public DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager()
 	{
 		DirectoryHtmlChartPluginManager bean = new DirectoryHtmlChartPluginManager(this.chartPluginRootDirectory());
 		return bean;
 	}
 
 	@Bean(initMethod = "init")
-	public DirectoryHtmlChartPluginManagerInitializer directoryHtmlChartPluginManagerInitializer() throws IOException
+	public DirectoryHtmlChartPluginManagerInitializer directoryHtmlChartPluginManagerInitializer()
 	{
 		DirectoryHtmlChartPluginManagerInitializer bean = new DirectoryHtmlChartPluginManagerInitializer(
 				this.directoryHtmlChartPluginManager());
@@ -429,17 +450,17 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public HtmlChartWidgetEntityService htmlChartWidgetEntityService() throws Exception
+	public HtmlChartWidgetEntityService htmlChartWidgetEntityService()
 	{
 		HtmlChartWidgetEntityServiceImpl bean = new HtmlChartWidgetEntityServiceImpl(
-				this.sqlSessionFactory().getObject(), this.directoryHtmlChartPluginManager(),
+				this.sqlSessionFactory(), this.directoryHtmlChartPluginManager(),
 				this.dataSetEntityService(), this.authorizationService());
 
 		return bean;
 	}
 
 	@Bean(NAME_CHART_SHOW_HtmlTplDashboardWidgetHtmlRenderer)
-	public HtmlTplDashboardWidgetHtmlRenderer chartShowHtmlTplDashboardWidgetHtmlRenderer() throws Exception
+	public HtmlTplDashboardWidgetHtmlRenderer chartShowHtmlTplDashboardWidgetHtmlRenderer()
 	{
 		FileTemplateDashboardWidgetResManager resManager = new FileTemplateDashboardWidgetResManager(
 				this.dashboardRootDirectory());
@@ -456,7 +477,7 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean(NAME_DASHBOARD_SHOW_HtmlTplDashboardWidgetHtmlRenderer)
-	public HtmlTplDashboardWidgetHtmlRenderer htmlTplDashboardWidgetRenderer() throws Exception
+	public HtmlTplDashboardWidgetHtmlRenderer htmlTplDashboardWidgetRenderer()
 	{
 		HtmlTplDashboardWidgetHtmlRenderer bean = new HtmlTplDashboardWidgetHtmlRenderer(
 				this.templateDashboardWidgetResManager(), this.htmlChartWidgetEntityService());
@@ -544,19 +565,33 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService() throws Exception
+	public HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService()
 	{
 		HtmlTplDashboardWidgetEntityServiceImpl bean = new HtmlTplDashboardWidgetEntityServiceImpl(
-				this.sqlSessionFactory().getObject(), this.htmlTplDashboardWidgetRenderer(),
+				this.sqlSessionFactory(), this.htmlTplDashboardWidgetRenderer(),
 				this.authorizationService());
 
 		return bean;
 	}
 
 	@Bean
-	public SqlHistoryService sqlHistoryService() throws Exception
+	public AnalysisProjectService analysisProjectService()
 	{
-		SqlHistoryServiceImpl bean = new SqlHistoryServiceImpl(this.sqlSessionFactory().getObject());
+		AnalysisProjectService bean = new AnalysisProjectServiceImpl(this.sqlSessionFactory());
+		return bean;
+	}
+
+	@Bean
+	public DataSetResDirectoryService dataSetResDirectoryService()
+	{
+		DataSetResDirectoryService bean = new DataSetResDirectoryServiceImpl(this.sqlSessionFactory());
+		return bean;
+	}
+
+	@Bean
+	public SqlHistoryService sqlHistoryService()
+	{
+		SqlHistoryServiceImpl bean = new SqlHistoryServiceImpl(this.sqlSessionFactory());
 		return bean;
 	}
 
@@ -700,7 +735,7 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public SqlpadExecutionService sqlpadExecutionService() throws Exception
+	public SqlpadExecutionService sqlpadExecutionService()
 	{
 		SqlpadExecutionService bean = new SqlpadExecutionService(this.connectionSource(), this.messageSource(),
 				this.sqlpadCometdService(), this.sqlHistoryService(), this.sqlSelectManager());
@@ -747,7 +782,7 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public SchedulerFactoryBean deleteTempFileScheduler() throws IOException
+	public SchedulerFactoryBean deleteTempFileScheduler()
 	{
 		DeleteExpiredFileJob job = new DeleteExpiredFileJob(this.tempDirectory(), 1440);
 
@@ -776,6 +811,7 @@ public class CoreConfiguration implements InitializingBean
 			resourceServices.add(this.dataSetEntityService());
 			resourceServices.add(this.htmlChartWidgetEntityService());
 			resourceServices.add(this.htmlTplDashboardWidgetEntityService());
+			resourceServices.add(this.analysisProjectService());
 		}
 
 		// 处理循环依赖

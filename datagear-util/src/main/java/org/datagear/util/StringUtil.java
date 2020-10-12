@@ -98,6 +98,23 @@ public class StringUtil
 	}
 
 	/**
+	 * 判断两个对象是否相等。
+	 * 
+	 * @param a
+	 *            允许为{@code null}
+	 * @param b
+	 *            允许为{@code null}
+	 * @return
+	 */
+	public static boolean isEquals(Object a, Object b)
+	{
+		if (a == null)
+			return (b == null);
+		else
+			return a.equals(b);
+	}
+
+	/**
 	 * 拆分字符串。
 	 * 
 	 * @param text

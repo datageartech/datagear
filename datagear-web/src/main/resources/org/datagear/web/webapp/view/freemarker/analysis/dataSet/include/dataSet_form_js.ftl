@@ -58,11 +58,10 @@ po.previewOptions.url = "...";
 		return po.element(".preview-result-table-wrapper").height() - tableTitleHeight;
 	};
 	
-	po.initWorkspaceHeight = function(calFormContentHeight)
+	po.initWorkspaceHeight = function()
 	{
-		calFormContentHeight = (calFormContentHeight == true ? true : false);
-		
-		var height = $(window).height();
+		var windowHeight = $(window).height();
+		var height = windowHeight;
 		
 		//减去上下留白
 		height = height - height/10;
@@ -79,17 +78,19 @@ po.previewOptions.url = "...";
 		{
 			height = height - $(this).outerHeight(true);
 		});
+		
 		//减去杂项高度
 		height = height - 41 - 10;
 		
-		var errorInfoHeight = 41 + 10;
+		if(height < 300)
+			height = 300;
+		
+		var errorInfoHeight = 41;
 		
 		po.element(".workspace").css("min-height", height+"px");
 		po.element(".workspace-editor-wrapper").height(height - errorInfoHeight);
 		po.element(".workspace-operation-wrapper").height(height - errorInfoHeight);
-		
-		if(calFormContentHeight)
-			po.element(".form-content").css("max-height", formContentHeight+"px");
+		po.element(".form-content").css("max-height", formContentHeight+"px");
 	};
 	
 	po.initWorkspaceEditor = function(editor, initValue)
@@ -147,8 +148,26 @@ po.previewOptions.url = "...";
 		
 		if(disableParams)
 		{
-			var paramsIndex = $(".workspace-operation-nav .operation-params", po.element(".workspace-operation-wrapper")).index();
-			po.element(".workspace-operation-wrapper").tabs("disable", paramsIndex);
+			po.disableDataSetParamOperation(true);
+		}
+	};
+	
+	//获取、设置数据参数选项卡是否禁用
+	po.disableDataSetParamOperation = function(disable)
+	{
+		var nav = $(".workspace-operation-nav", po.element(".workspace-operation-wrapper"));
+		var paramsTab = $(".operation-params", nav);
+		
+		if(disable === undefined)
+			return paramsTab.hasClass("ui-state-disabled");
+		else
+		{
+			var paramsIndex = paramsTab.index();
+			
+			if(disable)
+				po.element(".workspace-operation-wrapper").tabs("disable", paramsIndex);
+			else
+				po.element(".workspace-operation-wrapper").tabs("enable", paramsIndex);
 		}
 	};
 	
@@ -485,6 +504,9 @@ po.previewOptions.url = "...";
 
 	po.hasFormDataSetParam = function()
 	{
+		if(po.disableDataSetParamOperation())
+			return false;
+		
 		var $names = po.element(".params-table-wrapper .dataSetParamName");
 		return ($names.length > 0);
 	};
@@ -492,6 +514,9 @@ po.previewOptions.url = "...";
 	po.getFormDataSetParams = function()
 	{
 		var params = [];
+		
+		if(po.disableDataSetParamOperation())
+			return params;
 		
 		po.element(".params-table-wrapper .dataSetParamName").each(function(i)
 		{

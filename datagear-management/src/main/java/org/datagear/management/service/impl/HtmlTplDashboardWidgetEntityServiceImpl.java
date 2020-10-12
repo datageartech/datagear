@@ -12,11 +12,15 @@ import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.datagear.analysis.support.html.HtmlTplDashboardWidgetRenderer;
+import org.datagear.management.domain.AnalysisProject;
+import org.datagear.management.domain.AnalysisProjectAwareEntity;
 import org.datagear.management.domain.HtmlTplDashboardWidgetEntity;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.HtmlTplDashboardWidgetEntityService;
 import org.datagear.management.service.PermissionDeniedException;
+import org.datagear.persistence.PagingData;
+import org.datagear.persistence.PagingQuery;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -112,6 +116,13 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	}
 
 	@Override
+	public PagingData<HtmlTplDashboardWidgetEntity> pagingQuery(User user, PagingQuery pagingQuery, String dataFilter,
+			String analysisProjectId)
+	{
+		return pagingQueryForAnalysisProjectId(user, pagingQuery, dataFilter, analysisProjectId);
+	}
+
+	@Override
 	protected boolean add(HtmlTplDashboardWidgetEntity entity, Map<String, Object> params)
 	{
 		boolean success = super.add(entity, params);
@@ -158,6 +169,8 @@ public class HtmlTplDashboardWidgetEntityServiceImpl
 	@Override
 	protected void addDataPermissionParameters(Map<String, Object> params, User user)
 	{
+		params.put(AnalysisProjectAwareEntity.DATA_PERMISSION_PARAM_RESOURCE_TYPE_ANALYSIS_PROJECT,
+				AnalysisProject.AUTHORIZATION_RESOURCE_TYPE);
 		addDataPermissionParameters(params, user, getResourceType(), false, true);
 	}
 

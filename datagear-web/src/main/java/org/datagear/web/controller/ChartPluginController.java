@@ -183,7 +183,8 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	public void download(HttpServletRequest request, HttpServletResponse response, org.springframework.ui.Model model,
 			@RequestParam("id") String[] ids) throws Exception
 	{
-		response.addHeader("Content-Disposition", "attachment;filename=chartPlugins.zip");
+		response.addHeader("Content-Disposition",
+				"attachment;filename=" + toResponseAttachmentFileName(request, response, "chartPlugins.zip"));
 		response.setContentType("application/octet-stream");
 
 		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());

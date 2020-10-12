@@ -33,6 +33,8 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
 	/** 权限 */
 	private int dataPermission = PERMISSION_NOT_LOADED;
 
+	private AnalysisProject analysisProject = null;
+
 	public SqlDataSetEntity()
 	{
 		super();
@@ -119,5 +121,17 @@ public class SqlDataSetEntity extends SqlDataSet implements DataSetEntity
 	public void setDataPermission(int dataPermission)
 	{
 		this.dataPermission = dataPermission;
+	}
+
+	@Override
+	public AnalysisProject getAnalysisProject()
+	{
+		return analysisProject;
+	}
+
+	@Override
+	public void setAnalysisProject(AnalysisProject analysisProject)
+	{
+		this.analysisProject = analysisProject;
 	}
 }

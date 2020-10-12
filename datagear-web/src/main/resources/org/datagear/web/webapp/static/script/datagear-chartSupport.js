@@ -574,8 +574,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -725,8 +725,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		if(horizontal)
 		{
@@ -880,9 +880,9 @@
 				}
 			]
 		},
-		chart.options(),
-		options);
-
+		options,
+		chart.options());
+		
 		chartSupport.initOptions(chart, options);
 		
 		chart.echartsInit(options);
@@ -985,8 +985,8 @@
 				}
 			]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chart.echartsInit(options);
 	};
@@ -1098,8 +1098,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -1267,8 +1267,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -1457,8 +1457,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -1673,8 +1673,8 @@
 		        }
 			]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 
 		chartSupport.initOptions(chart, options);
 		
@@ -1914,8 +1914,8 @@
 				}
 			]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.mapInitChart(chart, options);
 	};
@@ -2061,8 +2061,8 @@
 				}
 			]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.mapInitChart(chart, options);
 	};
@@ -2231,8 +2231,8 @@
 				label: { position: "right" }
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.mapInitChart(chart, options);
 	};
@@ -2513,8 +2513,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -2659,8 +2659,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -2804,8 +2804,8 @@
                 expandAndCollapse: true
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -2882,8 +2882,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -2967,8 +2967,8 @@
 				data: []
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -3163,8 +3163,8 @@
 		        focusNodeAdjacency: 'allEdges'
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		//自适应条目宽度和间隔
 		var chartEle = chart.elementJquery();
@@ -3371,8 +3371,8 @@
                 bottom: "12%",
 			}]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 		
@@ -3644,8 +3644,8 @@
 				}
 			]
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		var chartEle = chart.elementJquery();
 		
@@ -3778,6 +3778,24 @@
 		var chartEle = chart.elementJquery();
 		chartEle.addClass("dg-chart-table");
 		
+		//默认轮播配置
+		var carouselConfig =
+		{
+			//是否开启
+			enable: false,
+			//滚动间隔毫秒数，或者返回间隔毫秒数的函数：
+			//currentRow 当前可见行
+			//visibleHeight 当前可见行的剩余可见高度
+			//height 当前可见行高度
+			//function(currentRow, visibleHeight, height){ return ...; }
+			interval: 50,
+			//滚动跨度像素数，或者返回跨度像素数的函数：
+			//function(currentRow, visibleHeight, height){ return ...; }
+			span: 1,
+			//是否在鼠标悬停时暂停轮播
+			pauseOnHover: true
+		};
+		
 		//表格图表样式设置项
 		var chartOptions = $.extend(true,
 		{
@@ -3801,22 +3819,22 @@
 				//行
 				"row":
 				{
+					//公用样式
+					"color": chartTheme.color,
+					
 					//偶数行样式
 					"odd":
 					{
-						"color": chartTheme.color,
 						"backgroundColor": global.chartFactory.getGradualColor(chartTheme, 0)
 					},
 					//奇数行样式
 					"even":
 					{
-						"color": chartTheme.color,
 						"backgroundColor": chartTheme.backgroundColor
 					},
 					//悬浮行样式
 					"hover":
 					{
-						"color": chartTheme.color,
 						"backgroundColor": global.chartFactory.getGradualColor(chartTheme, 0.2)
 					},
 					//选中行样式
@@ -3834,10 +3852,28 @@
 			},
 			
 			//DataTable图表配置项
-			"ordering": false
+			"ordering": false,
+			
+			//轮播，格式可以为：true、false、轮播interval数值、轮播interval返回函数、{...}
+			carousel: carouselConfig
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
+		
+		if(chartOptions.carousel === true || chartOptions.carousel === false)
+		{
+			carouselConfig.enable = chartOptions.carousel;
+			chartOptions.carousel = carouselConfig;
+		}
+		else if(typeof(chartOptions.carousel) == "number" || $.isFunction(chartOptions.carousel))
+		{
+			carouselConfig.enable = true;
+			carouselConfig.interval = chartOptions.carousel;
+			chartOptions.carousel = carouselConfig;
+		}
+		
+		if(chartOptions.carousel.enable)
+			chartEle.addClass("dg-chart-table-carousel");
 		
 		var cps = chartSupport.tableGetColumnProperties(chart, columnSign);
 		var columns = [];
@@ -3887,6 +3923,10 @@
 		    {
 				"emptyTable": "",
 				"zeroRecords" : ""
+			},
+			"rowCallback": function(row, data, displayNum, displayIndex, dataIndex)
+			{
+				chartSupport.tableSetTableRowStyle(row, chartOptions);
 			}
 		});
 		
@@ -3904,14 +3944,7 @@
 		
 		var dataTable = table.DataTable();
 		
-		dataTable.on("draw", function()
-		{
-			var rowNodes = $(this).DataTable().rows().nodes();
-			$(rowNodes).each(function()
-			{
-				chartSupport.tableSetTableRowStyle(this, chartOptions);
-			});
-		})
+		dataTable
 		.on("select", function(e, dt, type, indexes )
 		{
 			if(type === 'row')
@@ -3942,6 +3975,9 @@
 		
 		$(dataTable.table().body()).on("mouseenter", "tr", function()
 		{
+			if(chartOptions.carousel.pauseOnHover)
+				chartSupport.tableStopCarousel(chart);
+			
 			if(!$(this).hasClass("selected"))
 				global.chartFactory.setStyles(this, chartOptions.table.row.hover);
 		})
@@ -3949,6 +3985,9 @@
 		{
 			if(!$(this).hasClass("selected"))
 				chartSupport.tableSetTableRowStyle(this, chartOptions);
+			
+			if(chartOptions.carousel.pauseOnHover && chartOptions.carousel.enable)
+				chartSupport.tableStartCarousel(chart);
 		});
 		
 		chartSupport.tableEvalDataTableBodyHeight(chartContent, dataTable);
@@ -3979,7 +4018,15 @@
 			}
 		}
 		
+		chartSupport.tableStopCarousel(chart);
+		
 		chartSupport.tableAddDataTableData(dataTable, datas, 0, false);
+		
+		if(initOptions.carousel.enable)
+		{
+			chartSupport.tablePrepareCarousel(chart);
+			chartSupport.tableStartCarousel(chart);
+		}
 	};
 	
 	chartSupport.tableResize = function(chart)
@@ -3993,8 +4040,10 @@
 	chartSupport.tableDestroy = function(chart)
 	{
 		var chartEle = chart.elementJquery();
+		chartSupport.tableStopCarousel(chart);
 		chartEle.removeClass("dg-chart-table");
 		chartEle.removeClass("dg-hide-title");
+		chartEle.removeClass("dg-chart-table-carousel");
 		$(".dg-chart-table-title", chartEle).remove();
 		$(".dg-chart-table-content", chartEle).remove();
 	};
@@ -4077,6 +4126,9 @@
 	
 	chartSupport.tableSetTableRowStyle = function(rowElement, chartOptions)
 	{
+		//公用样式
+		global.chartFactory.setStyles(rowElement, chartOptions.table.row);
+		
 		if($(rowElement).hasClass("odd"))
 			global.chartFactory.setStyles(rowElement, chartOptions.table.row.odd);
 		else
@@ -4124,6 +4176,187 @@
 			dataTable.draw();
 	};
 
+	/**
+	 * 表格准备轮播。
+	 */
+	chartSupport.tablePrepareCarousel = function(chart)
+	{
+		var initOptions = chartSupport.initOptions(chart);
+		var chartEle = chart.elementJquery();
+		var dataTable = chartSupport.tableGetChartDataTable(chart);
+		var carousel = initOptions.carousel;
+		
+		var rowCount = dataTable.rows().indexes().length;
+		
+		//空表格
+		if(rowCount == 0)
+			return;
+		
+		var scrollBody = $(".dataTables_scrollBody", chartEle);
+		var scrollTable = $(".dataTable", scrollBody);
+		
+		var scrollBodyHeight = scrollBody.height();
+		
+		while(true)
+		{
+			//必须成倍添加数据，避免出现轮播次序混乱
+			//且至少添加一倍，保证滚动平滑
+			for(var i=0; i<rowCount; i++)
+			{
+				var addData = dataTable.row(i).data();
+				dataTable.row.add(addData);
+			}
+			
+			dataTable.draw();
+			
+			var scrollTableHeight = scrollTable.height();
+			
+			//表格高度至少为容器高度两倍，保证滚动平滑
+			if(scrollTableHeight >= scrollBodyHeight*2)
+				break;
+		}
+	};
+	
+	/**
+	 * 表格开始轮播。
+	 */
+	chartSupport.tableStartCarousel = function(chart)
+	{
+		var initOptions = chartSupport.initOptions(chart);
+		var chartEle = chart.elementJquery();
+		var dataTable = chartSupport.tableGetChartDataTable(chart);
+		
+		var rowCount = dataTable.rows().indexes().length;
+		
+		//空表格
+		if(rowCount == 0)
+			return;
+		
+		chartSupport.tableStopCarousel(chart);
+		chartEle.data("tableCarouselStatus", "start");
+		
+		var scrollBody = $(".dataTables_scrollBody", chartEle);
+		var scrollTable = $(".dataTable", scrollBody);
+		
+		chartSupport.tableHandleCarousel(chart, initOptions, chartEle, dataTable, scrollBody, scrollTable);
+	};
+	
+	/**
+	 * 表格停止轮播。
+	 */
+	chartSupport.tableStopCarousel = function(chart)
+	{
+		var chartEle = chart.elementJquery();
+		chartEle.data("tableCarouselStatus", "stop");
+		chartSupport.tableCarouselIntervalId(chart, null);
+	};
+	
+	chartSupport.tableHandleCarousel = function(chart, initOptions, chartEle, dataTable, scrollBody, scrollTable)
+	{
+		if(chartEle.data("tableCarouselStatus") == "stop")
+			return;
+		
+		//不采用设置滚动高度的方式（scrollBody.scrollTop()），因为会出现影响整个页面滚动高度的情况
+		var scrollTop = scrollTable.css("margin-top");
+		scrollTop = (scrollTop.indexOf("px") == scrollTop.length - 2 ? scrollTop.substring(0, scrollTop.length - 2) : scrollTop);
+		scrollTop = (Math.abs(parseInt(scrollTop)) || 0);
+		
+		var currentRow = null;
+		var currentRowHeight = null;
+		var currentRowVisibleHeight = null;
+		
+		var removeRowIndexes = [];
+		var addRowDatas = [];
+		
+		var offset = 0;
+		var idx = 0;
+		while(true)
+		{
+			var row0 = dataTable.row(idx);
+			var $row0 = $(row0.node());
+			var row0Height = $row0.outerHeight(true);
+			
+			//第一行仍可见
+			if(scrollTop < (offset + row0Height))
+			{
+				currentRow = row0.node();
+				currentRowHeight = row0Height;
+				currentRowVisibleHeight = offset + row0Height - scrollTop;
+				
+				break;
+			}
+			
+			var row1 = dataTable.row(idx+1);
+			var $row1 = $(row1.node());
+			var row1Height = $row1.outerHeight(true);
+			
+			//第二行仍可见
+			if(scrollTop < (offset + row0Height + row1Height))
+			{
+				currentRow = row1.node();
+				currentRowHeight = row1Height;
+				currentRowVisibleHeight = offset + row0Height + row1Height - scrollTop;
+				
+				break;
+			}
+			
+			//必须同时移除两行，不然奇偶行会变化，导致颜色交替重绘
+			removeRowIndexes.push(idx);
+			removeRowIndexes.push(idx+1);
+			addRowDatas.push(row0.data());
+			addRowDatas.push(row1.data());
+			
+			offset += row0Height + row1Height;
+			idx += 2;
+		}
+		
+		if(removeRowIndexes.length > 0)
+		{
+			dataTable.rows(removeRowIndexes).remove().draw();
+			scrollTop = scrollTop - offset;
+		}
+		
+		var span = ($.isFunction(initOptions.carousel.span) ?
+				initOptions.carousel.span(currentRow, currentRowVisibleHeight, currentRowHeight) : initOptions.carousel.span);
+		
+		scrollTable.css("margin-top", (0 - (scrollTop + span))+"px");
+		
+		if(addRowDatas.length > 0)
+			dataTable.rows.add(addRowDatas).draw();
+		
+		var interval = ($.isFunction(initOptions.carousel.interval) ?
+				initOptions.carousel.interval(currentRow, currentRowVisibleHeight, currentRowHeight) : initOptions.carousel.interval);
+		
+		var intervalId = setTimeout(function()
+		{
+			chartSupport.tableHandleCarousel(chart, initOptions, chartEle, dataTable, scrollBody, scrollTable);
+		},
+		interval);
+		
+		chartSupport.tableCarouselIntervalId(chart, intervalId);
+	};
+	
+	/**
+	 * 获取、设置表格轮播定时执行ID
+	 * 
+	 * @param chart
+	 * @param intervalId 要设置的定时执行ID，为null则清除
+	 */
+	chartSupport.tableCarouselIntervalId = function(chart, intervalId)
+	{
+		var chartEle = chart.elementJquery();
+		
+		var curIntervalId = chartEle.data("tableCarouselIntervalId");
+		
+		if(intervalId === undefined)
+			return curIntervalId;
+		
+		if(curIntervalId != null)
+			clearInterval(curIntervalId);
+		
+		chartEle.data("tableCarouselIntervalId", intervalId);
+	};
+	
 	//标签卡
 	
 	chartSupport.labelRender = function(chart, nameSign, valueSign, options)
@@ -4152,8 +4385,8 @@
 				}
 			}
 		},
-		chart.options(),
-		options);
+		options,
+		chart.options());
 		
 		chartSupport.initOptions(chart, options);
 	};

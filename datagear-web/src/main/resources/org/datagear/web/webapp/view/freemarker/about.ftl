@@ -34,6 +34,14 @@
 					<a href="${Global.WEB_SITE}" target="_blank" class="link">${Global.WEB_SITE}</a>
 				</div>
 			</div>
+			<div class="form-item">
+				<div class="form-item-label">
+					<label><@spring.message code='about.license' /></label>
+				</div>
+				<div class="form-item-value">
+					<@spring.message code='app.license' />
+				</div>
+			</div>
 		</div>
 	</form>
 </div>
