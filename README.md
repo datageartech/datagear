@@ -27,7 +27,7 @@ DataGear是一款数据可视化分析平台，使用Java语言开发，采用�
 
 ## 架构图
 
-![http://www.datagear.tech/static/screenshot/architecture.png](http://www.datagear.tech/static/screenshot/architecture.png)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/architecture.png](https://gitee.com/datagear/datagear/raw/master/screenshot/architecture.png)
 
 ## 官网
 
@@ -47,57 +47,49 @@ QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[11283
 
 数据管理
 
-![http://www.datagear.tech/static/screenshot/datamanage.png](http://www.datagear.tech/static/screenshot/datamanage.png)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/datamanage.png](https://gitee.com/datagear/datagear/raw/master/screenshot/datamanage.png)
 
 SQL工作台
 
-![http://www.datagear.tech/static/screenshot/sqlpad.png](http://www.datagear.tech/static/screenshot/sqlpad.png)
-
-数据导入
-
-![http://www.datagear.tech/static/screenshot/dataimport.png](http://www.datagear.tech/static/screenshot/dataimport.png)
-
-数据导出
-
-![http://www.datagear.tech/static/screenshot/dataexport.png](http://www.datagear.tech/static/screenshot/dataexport.png)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/sqlpad.png](https://gitee.com/datagear/datagear/raw/master/screenshot/sqlpad.png)
 
 图表
 
-![http://www.datagear.tech/static/screenshot/chart.png](http://www.datagear.tech/static/screenshot/chart.png)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/chart.png](https://gitee.com/datagear/datagear/raw/master/screenshot/chart.png)
 
 图表-数据集参数
 
-![http://www.datagear.tech/static/screenshot/chart-interaction.png](http://www.datagear.tech/static/screenshot/chart-interaction.png)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/chart-interaction.png](https://gitee.com/datagear/datagear/raw/master/screenshot/chart-interaction.png)
 
 看板
 
-![http://www.datagear.tech/static/screenshot/dashboard-simple.png](http://www.datagear.tech/static/screenshot/dashboard-simple.png)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-simple.png](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-simple.png)
 
-![http://www.datagear.tech/static/screenshot/dashboard-darkblue.png](http://www.datagear.tech/static/screenshot/dashboard-darkblue.png)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-darkblue.png](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-darkblue.png)
 
 看板-图表联动
 
-![http://www.datagear.tech/static/screenshot/dashboard-map-chart-link.gif](http://www.datagear.tech/static/screenshot/dashboard-map-chart-link.gif)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-link.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-link.gif)
 
 看板-时序图表
 
-![http://www.datagear.tech/static/screenshot/dashboard-time-series-chart.gif](http://www.datagear.tech/static/screenshot/dashboard-time-series-chart.gif)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-time-series-chart.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-time-series-chart.gif)
 
 看板-钻取
 
-![http://www.datagear.tech/static/screenshot/dashboard-map-chart-hierarchy.gif](http://www.datagear.tech/static/screenshot/dashboard-map-chart-hierarchy.gif)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-hierarchy.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-map-chart-hierarchy.gif)
 
 看板-表单
 
-![http://www.datagear.tech/static/screenshot/dashboard-form.gif](http://www.datagear.tech/static/screenshot/dashboard-form.gif)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-form.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-form.gif)
 
 看板-表格轮播
 
-![http://www.datagear.tech/static/screenshot/dashboard-table-carousel.gif](http://www.datagear.tech/static/screenshot/dashboard-table-carousel.gif)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-table-carousel.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-table-carousel.gif)
 
 看板-联动异步加载图表
 
-![http://www.datagear.tech/static/screenshot/dashboard-link-load-chart.gif](http://www.datagear.tech/static/screenshot/dashboard-link-load-chart.gif)
+![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-link-load-chart.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-link-load-chart.gif)
 
 [更多示例...](https://my.oschina.net/u/4035217)
 
