@@ -63,9 +63,9 @@ SQL工作台
 
 看板
 
-![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-simple.png](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-simple.png)
-
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-darkblue.png](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-darkblue.png)
+
+![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-simple.png](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-simple.png)
 
 看板-图表联动
 
@@ -82,10 +82,6 @@ SQL工作台
 看板-表单
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-form.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-form.gif)
-
-看板-表格轮播
-
-![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-table-carousel.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-table-carousel.gif)
 
 看板-联动异步加载图表
 
