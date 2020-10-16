@@ -5,6 +5,8 @@ DataGear是一款数据可视化分析平台，使用Java语言开发，采用�
 
 ## [DataGear 1.13.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
+## [DataGear 大屏看板模板，持续更新中...](https://gitee.com/datagear/DataGearDashboardTemplate)
+
 ## 系统特点
 
 - 可管理数据库驱动
