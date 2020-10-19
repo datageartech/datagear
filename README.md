@@ -89,13 +89,7 @@ SQL工作台
 
 ![https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-link-load-chart.gif](https://gitee.com/datagear/datagear/raw/master/screenshot/dashboard-link-load-chart.gif)
 
-[更多示例...](https://my.oschina.net/u/4035217)
-
-## 依赖
-
-	Java 8+
-	Servlet 3.0+
-
+## [更多示例...](https://my.oschina.net/u/4035217)
 
 ## 模块介绍
 
@@ -128,6 +122,11 @@ SQL工作台
 
 - datagear-webappembd
   <br>系统独立应用程序组织模块，定义将系统构建为独立可执行程序的结构
+
+## 依赖
+
+	Java 8+
+	Servlet 3.0+
 
 ## 编译
 
