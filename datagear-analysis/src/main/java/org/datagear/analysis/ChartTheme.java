@@ -24,10 +24,10 @@ public class ChartTheme extends Theme implements Serializable
 	private static final long serialVersionUID = 1L;
 
 	/** 标题颜色 */
-	private String titleColor;
+	private String titleColor = "";
 
 	/** 图例颜色 */
-	private String legendColor;
+	private String legendColor = "";
 
 	/** 图形条目颜色 */
 	private String[] graphColors;
@@ -36,34 +36,34 @@ public class ChartTheme extends Theme implements Serializable
 	private String[] graphRangeColors;
 
 	/** 提示框主题 */
-	private Theme tooltipTheme;
+	private Theme tooltipTheme = null;
 
 	/** 高亮区主题 */
-	private Theme highlightTheme;
+	private Theme highlightTheme = null;
 
 	public ChartTheme()
 	{
 	}
 
-	public ChartTheme(String name, String color, String backgroundColor, String borderColor, String titleColor,
-			String legendColor, String[] graphColors, String[] graphRangeColors, Theme tooltipTheme,
-			Theme highlightTheme)
+	public ChartTheme(String name, String color, String backgroundColor, String[] graphColors,
+			String[] graphRangeColors)
 	{
-		this(name, color, backgroundColor, backgroundColor, borderColor, titleColor, legendColor, graphColors,
-				graphRangeColors, tooltipTheme, highlightTheme);
+		super(name, color, backgroundColor);
+		this.graphColors = graphColors;
+		this.graphRangeColors = graphRangeColors;
 	}
 
 	public ChartTheme(String name, String color, String backgroundColor, String actualBackgroundColor,
-			String borderColor, String titleColor, String legendColor,
-			String[] graphColors, String[] graphRangeColors, Theme tooltipTheme, Theme highlightTheme)
+			String[] graphColors, String[] graphRangeColors)
 	{
-		super(name, color, backgroundColor, actualBackgroundColor, borderColor);
-		this.titleColor = titleColor;
-		this.legendColor = legendColor;
+		super(name, color, backgroundColor, actualBackgroundColor);
 		this.graphColors = graphColors;
 		this.graphRangeColors = graphRangeColors;
-		this.tooltipTheme = tooltipTheme;
-		this.highlightTheme = highlightTheme;
+	}
+
+	public boolean hasTitleColor()
+	{
+		return (this.titleColor != null && !this.titleColor.isEmpty());
 	}
 
 	public String getTitleColor()
@@ -74,6 +74,11 @@ public class ChartTheme extends Theme implements Serializable
 	public void setTitleColor(String titleColor)
 	{
 		this.titleColor = titleColor;
+	}
+
+	public boolean hasLegendColor()
+	{
+		return (this.legendColor != null && !this.legendColor.isEmpty());
 	}
 
 	public String getLegendColor()
@@ -106,6 +111,11 @@ public class ChartTheme extends Theme implements Serializable
 		this.graphRangeColors = graphRangeColors;
 	}
 
+	public boolean hasTooltipTheme()
+	{
+		return (this.tooltipTheme != null);
+	}
+
 	public Theme getTooltipTheme()
 	{
 		return tooltipTheme;
@@ -114,6 +124,11 @@ public class ChartTheme extends Theme implements Serializable
 	public void setTooltipTheme(Theme tooltipTheme)
 	{
 		this.tooltipTheme = tooltipTheme;
+	}
+
+	public boolean hasHighlightTheme()
+	{
+		return (this.highlightTheme != null);
 	}
 
 	public Theme getHighlightTheme()

@@ -248,21 +248,24 @@
 	 */
 	chartBase._initTheme = function()
 	{
-		var theme = chartFactory.GLOBAL_CHART_THEME;
+		var globalRawTheme = chartFactory.GLOBAL_RAW_CHART_THEME;
+		var globalTheme = chartFactory.GLOBAL_CHART_THEME;
 		
-		if(!theme)
+		if(!globalRawTheme)
 		{
-			theme = this.renderContextAttr(chartFactory.renderContextAttrs.chartTheme);
+			globalRawTheme = this.renderContextAttr(chartFactory.renderContextAttrs.chartTheme);
 			
-			if(!theme)
+			if(!globalRawTheme)
 				throw new Error("The chart render context 's ["+chartFactory.renderContextAttrs.chartTheme+"] must be defined");
 			
-			theme = $.extend(true, {}, theme);
+			globalRawTheme = $.extend(true, {}, globalRawTheme);
+			this._inflateThemeActualBackgroundColor(globalRawTheme);
 			
 			var bodyThemeValue = $(document.body).attr("dg-chart-theme");
 			if(bodyThemeValue)
 			{
 				var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
+				this._inflateThemeActualBackgroundColor(bodyThemeObj);
 				
 				//@deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
 				if(bodyThemeObj.colorSecond)
@@ -273,38 +276,47 @@
 				}
 				//@deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
 				
-				this._inflateTheme(bodyThemeObj);
-				
-				theme = $.extend(true, theme, bodyThemeObj);
+				globalRawTheme = $.extend(true, globalRawTheme, bodyThemeObj);
 			}
 			
-			chartFactory.GLOBAL_CHART_THEME = theme;
+			chartFactory.GLOBAL_RAW_CHART_THEME = globalRawTheme;
+		}
+		
+		if(!globalTheme)
+		{
+			globalTheme = $.extend(true, {}, globalRawTheme);
+			this._inflateTheme(globalTheme);
+			
+			chartFactory.GLOBAL_CHART_THEME = globalTheme;
 		}
 		
 		var eleThemeValue = this.elementJquery().attr("dg-chart-theme");
+		
 		if(eleThemeValue)
 		{
 			var eleThemeObj = chartFactory.evalSilently(eleThemeValue, {});
+			this._inflateThemeActualBackgroundColor(eleThemeObj);
 			
-			this._inflateTheme(eleThemeObj);
+			var eleTheme = $.extend(true, {}, globalRawTheme, eleThemeObj);
+			this._inflateTheme(eleTheme);
 			
-			theme = $.extend(true, {}, theme, eleThemeObj);
+			this.theme(eleTheme);
 		}
-		
-		this.theme(theme);
+		else
+			this.theme(globalTheme);
+	};
+	
+	chartBase._inflateThemeActualBackgroundColor = function(theme)
+	{
+		if(theme.backgroundColor && theme.backgroundColor != "transparent")
+			theme.actualBackgroundColor = theme.backgroundColor;
 	};
 	
 	/**
-	 * 填充自定义图表主题，自动设置未定义的颜色。
+	 * 填充图表主题，自动设置未定义的颜色。
 	 */
 	chartBase._inflateTheme = function(theme)
 	{
-		if(theme.backgroundColor)
-		{
-			//允许自定义ChartTheme不设置actualBackgroundColor
-			if(!theme.actualBackgroundColor && theme.backgroundColor != "transparent")
-				theme.actualBackgroundColor = theme.backgroundColor;
-		}
 		
 		if(theme.color)
 		{
@@ -322,6 +334,38 @@
 			
 			if(!theme.borderColor)
 				theme.borderColor = chartFactory.getGradualColor(theme, 0.3);
+			
+			if(!theme.tooltipTheme)
+			{
+				var tooltipTheme =
+				{
+					name: "",
+					color: chartFactory.getGradualColor(theme, 0.1),
+					backgroundColor: chartFactory.getGradualColor(theme, 0.7),
+					actualBackgroundColor: chartFactory.getGradualColor(theme, 0.7),
+					borderColor: chartFactory.getGradualColor(theme, 0.9),
+					borderWidth: 1,
+					gradient: theme.gradient
+				};
+				
+				theme.tooltipTheme = tooltipTheme;
+			}
+
+			if(!theme.highlightTheme)
+			{
+				var highlightTheme =
+				{
+					name: "",
+					color: chartFactory.getGradualColor(theme, 0.1),
+					backgroundColor: chartFactory.getGradualColor(theme, 0.8),
+					actualBackgroundColor: chartFactory.getGradualColor(theme, 0.8),
+					borderColor: chartFactory.getGradualColor(theme, 1),
+					borderWidth: 1,
+					gradient: theme.gradient
+				};
+				
+				theme.highlightTheme = highlightTheme;
+			}
 		}
 	};
 	
@@ -2899,6 +2943,8 @@
 			},
 			"tooltip" : {
 				"backgroundColor" : chartTheme.tooltipTheme.backgroundColor,
+				"borderColor" : chartTheme.tooltipTheme.borderColor,
+				"borderWidth" : chartTheme.tooltipTheme.borderWidth,
 				"textStyle" : { color: chartTheme.tooltipTheme.color },
 				"axisPointer" : {
 					"lineStyle" : {
