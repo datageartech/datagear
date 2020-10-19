@@ -4,7 +4,6 @@
 
 package org.datagear.management.service.impl;
 
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -15,9 +14,6 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.AuthorizationService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.SchemaService;
-import org.datagear.persistence.PagingData;
-import org.datagear.persistence.PagingQuery;
-import org.datagear.persistence.Query;
 import org.mybatis.spring.SqlSessionTemplate;
 
 /**
@@ -105,16 +101,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
-	protected Schema getById(String id, Map<String, Object> params)
-	{
-		Schema schema = super.getById(id, params);
-
-		setDriverEntityActual(schema);
-
-		return schema;
-	}
-
-	@Override
 	protected boolean deleteById(String id, Map<String, Object> params)
 	{
 		boolean deleted = super.deleteById(id, params);
@@ -123,30 +109,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 			this.authorizationService.deleteByResource(Schema.AUTHORIZATION_RESOURCE_TYPE, id);
 
 		return deleted;
-	}
-
-	@Override
-	protected List<Schema> query(String statement, Query query, Map<String, Object> params)
-	{
-		List<Schema> schemas = super.query(statement, query, params);
-
-		for (Schema schema : schemas)
-			setDriverEntityActual(schema);
-
-		return schemas;
-	}
-
-	@Override
-	protected PagingData<Schema> pagingQuery(String statement, PagingQuery pagingQuery, Map<String, Object> params)
-	{
-		PagingData<Schema> pagingData = super.pagingQuery(statement, pagingQuery, params);
-
-		List<Schema> items = pagingData.getItems();
-
-		for (Schema schema : items)
-			setDriverEntityActual(schema);
-
-		return pagingData;
 	}
 
 	@Override
@@ -171,6 +133,18 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 	}
 
 	@Override
+	protected Schema postProcessSelect(Schema schema)
+	{
+		if (schema != null && schema.hasDriverEntity())
+		{
+			DriverEntity driverEntity = this.driverEntityManager.get(schema.getDriverEntity().getId());
+			schema.setDriverEntity(driverEntity);
+		}
+
+		return schema;
+	}
+
+	@Override
 	protected void checkInput(Schema entity)
 	{
 		if (isBlank(entity.getId()) || isBlank(entity.getTitle()) || isBlank(entity.getUrl()))
@@ -192,23 +166,6 @@ public class SchemaServiceImpl extends AbstractMybatisDataPermissionEntityServic
 			return;
 
 		throw new SaveSchemaUrlPermissionDeniedException();
-	}
-
-	/**
-	 * 设置{@linkplain DriverEntity}。
-	 * 
-	 * @param schema
-	 */
-	protected void setDriverEntityActual(Schema schema)
-	{
-		if (schema == null)
-			return;
-
-		if (schema.hasDriverEntity())
-		{
-			DriverEntity driverEntity = this.driverEntityManager.get(schema.getDriverEntity().getId());
-			schema.setDriverEntity(driverEntity);
-		}
 	}
 
 	@Override
