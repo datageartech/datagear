@@ -150,6 +150,7 @@
 	padding: 0.41em 0.8em;
 	user-select: text;
 	-webkit-user-select: text;
+	z-index: 100;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-head{
 	font-weight: bold;
@@ -160,6 +161,7 @@
 	overflow: auto;
 	font-size: 0.9em;
 	max-width: 41em;
+	min-height: 4.1em;
 }
 .dg-chart-setting-box .dg-chart-setting-panel .dg-chart-setting-panel-foot{
 	padding-top: 0.41em;

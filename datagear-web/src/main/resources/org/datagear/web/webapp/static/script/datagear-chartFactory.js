@@ -259,13 +259,13 @@
 				throw new Error("The chart render context 's ["+chartFactory.renderContextAttrs.chartTheme+"] must be defined");
 			
 			globalRawTheme = $.extend(true, {}, globalRawTheme);
-			this._inflateThemeActualBackgroundColor(globalRawTheme);
+			this._inflateRawTheme(globalRawTheme);
 			
 			var bodyThemeValue = $(document.body).attr("dg-chart-theme");
 			if(bodyThemeValue)
 			{
 				var bodyThemeObj = chartFactory.evalSilently(bodyThemeValue, {});
-				this._inflateThemeActualBackgroundColor(bodyThemeObj);
+				this._inflateRawTheme(bodyThemeObj);
 				
 				//@deprecated 兼容1.5.0版本的自定义ChartTheme结构，未来版本会移除
 				if(bodyThemeObj.colorSecond)
@@ -295,7 +295,7 @@
 		if(eleThemeValue)
 		{
 			var eleThemeObj = chartFactory.evalSilently(eleThemeValue, {});
-			this._inflateThemeActualBackgroundColor(eleThemeObj);
+			this._inflateRawTheme(eleThemeObj);
 			
 			var eleTheme = $.extend(true, {}, globalRawTheme, eleThemeObj);
 			this._inflateTheme(eleTheme);
@@ -306,18 +306,23 @@
 			this.theme(globalTheme);
 	};
 	
-	chartBase._inflateThemeActualBackgroundColor = function(theme)
+	/**
+	 * 填充图表主题，设置必须的原始配色。
+	 */
+	chartBase._inflateRawTheme = function(theme)
 	{
 		if(theme.backgroundColor && theme.backgroundColor != "transparent")
 			theme.actualBackgroundColor = theme.backgroundColor;
+		
+		if(theme.borderWidth && !theme.borderStyle)
+			theme.borderStyle = "solid";
 	};
 	
 	/**
-	 * 填充图表主题，自动设置未定义的颜色。
+	 * 填充图表主题，自动设置可根据前景/背景色自动生成的配色。
 	 */
 	chartBase._inflateTheme = function(theme)
 	{
-		
 		if(theme.color)
 		{
 			if(!theme.titleColor)
@@ -340,7 +345,7 @@
 				var tooltipTheme =
 				{
 					name: "",
-					color: chartFactory.getGradualColor(theme, 0.1),
+					color: chartFactory.getGradualColor(theme, 0),
 					backgroundColor: chartFactory.getGradualColor(theme, 0.7),
 					actualBackgroundColor: chartFactory.getGradualColor(theme, 0.7),
 					borderColor: chartFactory.getGradualColor(theme, 0.9),
@@ -350,13 +355,13 @@
 				
 				theme.tooltipTheme = tooltipTheme;
 			}
-
+			
 			if(!theme.highlightTheme)
 			{
 				var highlightTheme =
 				{
 					name: "",
-					color: chartFactory.getGradualColor(theme, 0.1),
+					color: chartFactory.getGradualColor(theme, 0),
 					backgroundColor: chartFactory.getGradualColor(theme, 0.8),
 					actualBackgroundColor: chartFactory.getGradualColor(theme, 0.8),
 					borderColor: chartFactory.getGradualColor(theme, 1),

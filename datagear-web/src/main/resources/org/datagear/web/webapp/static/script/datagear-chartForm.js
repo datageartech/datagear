@@ -111,7 +111,7 @@
 		var $content = $(".dg-dspv-form-content", $form);
 		var $foot = $(".dg-dspv-form-foot", $form);
 		
-		//允许自定义了表单结构
+		//允许预先自定义表单结构
 		if($head.length == 0)
 			$head = $("<div class='dg-dspv-form-head' />").prependTo($form);
 		if($content.length == 0)
