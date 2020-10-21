@@ -41,6 +41,18 @@
 	 */
 	dashboardFactory.init = function(dashboard)
 	{
+		//如果未设置图表主题，则采用看板主题里定义的图表主题
+		if(global.chartFactory.renderContextAttr(dashboard.renderContext,
+				global.chartFactory.renderContextAttrs.chartTheme) == null)
+		{
+			var dashboardTheme = global.chartFactory.renderContextAttr(dashboard.renderContext,
+					dashboardFactory.renderContextAttrs.dashboardTheme);
+			global.chartFactory.renderContextAttr(dashboard.renderContext,
+					global.chartFactory.renderContextAttrs.chartTheme, dashboardTheme.chartTheme);
+		}
+		
+		global.chartFactory.initRenderContext(dashboard.renderContext);
+		
 		this.extendChartBase();
 		this.initMapURLs();
 		$.extend(dashboard, this.dashboardBase);
@@ -546,10 +558,6 @@
 	{
 		if(!this.charts)
 			return;
-		
-		var dashboardTheme = this.renderContextAttr(dashboardFactory.renderContextAttrs.dashboardTheme);
-		this.renderContextAttr(global.chartFactory.renderContextAttrs.chartTheme,
-				dashboardTheme.chartTheme);
 		
 		for(var i=0; i<this.charts.length; i++)
 			this._initChart(this.charts[i]);
