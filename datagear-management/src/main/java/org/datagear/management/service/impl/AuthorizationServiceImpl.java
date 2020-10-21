@@ -138,11 +138,11 @@ public class AuthorizationServiceImpl extends AbstractMybatisDataPermissionEntit
 	}
 
 	@Override
-	protected Authorization getById(String id, Map<String, Object> params)
+	protected Authorization getById(String id, Map<String, Object> params, boolean postProcessSelect)
 	{
 		setAuthorizationQueryContext(params);
 
-		return super.getById(id, params);
+		return super.getById(id, params, postProcessSelect);
 	}
 
 	@Override
