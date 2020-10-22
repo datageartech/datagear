@@ -438,7 +438,10 @@ public class DataController extends AbstractSchemaConnTableController
 			{
 				checkEditTableDataPermission(schema, user);
 
-				int count = persistenceManager.delete(getConnection(), table, rows);
+				Connection cn = getConnection();
+				Dialect dialect = persistenceManager.getDialectSource().getDialect(cn);
+
+				int count = persistenceManager.delete(cn, dialect, table, rows, buildConditionSqlParamValueMapper());
 
 				checkDuplicateRecord(rows.length, count, ignoreDuplication);
 
