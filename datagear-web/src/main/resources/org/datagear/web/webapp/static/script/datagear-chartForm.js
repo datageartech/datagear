@@ -786,7 +786,8 @@
 			//选中
 			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_default,"
 			+parentSelector + " .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current,"
-			+parentSelector + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current{"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current,"
+			+parentSelector + " .xdsoft_datetimepicker .xdsoft_label>.xdsoft_select>div>.xdsoft_option.xdsoft_current{"
 			+"  color: "+chartTheme.highlightTheme.color+";"
 			+"  background: "+chartTheme.highlightTheme.backgroundColor+";"
 			+"  box-shadow: none;"
