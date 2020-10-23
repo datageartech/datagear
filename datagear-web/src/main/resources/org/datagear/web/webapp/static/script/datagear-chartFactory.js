@@ -238,7 +238,7 @@
 				var tooltipTheme =
 				{
 					name: "tooltipTheme",
-					color: chartFactory.getGradualColor(theme, 0),
+					color: theme.actualBackgroundColor,
 					backgroundColor: chartFactory.getGradualColor(theme, 0.7),
 					actualBackgroundColor: chartFactory.getGradualColor(theme, 0.7),
 					borderColor: chartFactory.getGradualColor(theme, 0.9),
@@ -254,7 +254,7 @@
 				var highlightTheme =
 				{
 					name: "highlightTheme",
-					color: chartFactory.getGradualColor(theme, 0),
+					color: theme.actualBackgroundColor,
 					backgroundColor: chartFactory.getGradualColor(theme, 0.8),
 					actualBackgroundColor: chartFactory.getGradualColor(theme, 0.8),
 					borderColor: chartFactory.getGradualColor(theme, 1),
