@@ -3,15 +3,9 @@
 DataGear是一款数据可视化分析平台，使用Java语言开发，采用浏览器/服务器架构，支持SQL、CSV、Excel、HTTP接口、JSON等多种数据源，
 主要功能包括数据管理、SQL工作台、数据导入/导出、数据集管理、图表管理、看板管理等。
 
-## [DataGear 1.13.0 已发布，欢迎官网下载使用！](http://www.datagear.tech)
+## [DataGear 1.13.1 已发布，欢迎官网下载使用！](http://www.datagear.tech)
 
 ## [DataGear 大屏看板模板，持续更新中...](https://gitee.com/datagear/DataGearDashboardTemplate)
-
-## 关于1.13.0版本数据源连接报错的问题说明
-
-1.13.0版本，如果设置了数据源编辑页面的【高级设置】-【数据源驱动程序】，将会报错无法连接。
-
-此BUG将在下一个修订版本修复，临时解决方案：将已设置的【数据源驱动程序】删除，系统会自动选择合适的驱动。
 
 ## 系统特点
 
