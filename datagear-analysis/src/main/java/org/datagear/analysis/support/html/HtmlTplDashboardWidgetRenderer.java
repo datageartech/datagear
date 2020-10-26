@@ -1006,12 +1006,21 @@ public abstract class HtmlTplDashboardWidgetRenderer extends TextParserSupport
 			out.write("  color: " + theme.getColor() + ";");
 			writeNewLine(out);
 			out.write("  background-color: " + theme.getBackgroundColor() + ";");
-			writeNewLine(out);
-			out.write("  border-color: " + theme.getBorderColor() + ";");
-			writeNewLine(out);
-			out.write("  border-width: " + borderWidth + ";");
-			writeNewLine(out);
-			out.write("  border-style: solid;");
+
+			if (theme.hasBorderColor())
+			{
+				writeNewLine(out);
+				out.write("  border-color: " + theme.getBorderColor() + ";");
+			}
+
+			if (theme.hasBorderWidth())
+			{
+				writeNewLine(out);
+				out.write("  border-width: " + borderWidth + ";");
+				writeNewLine(out);
+				out.write("  border-style: solid;");
+			}
+
 			writeNewLine(out);
 		}
 	}

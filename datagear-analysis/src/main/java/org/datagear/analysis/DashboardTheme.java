@@ -23,15 +23,16 @@ public class DashboardTheme extends Theme
 		super();
 	}
 
-	public DashboardTheme(String name, String color, String backgroundColor, String borderColor, ChartTheme chartTheme)
+	public DashboardTheme(String name, String color, String backgroundColor, ChartTheme chartTheme)
 	{
-		this(name, color, backgroundColor, backgroundColor, borderColor, chartTheme);
+		super(name, color, backgroundColor);
+		this.chartTheme = chartTheme;
 	}
 
 	public DashboardTheme(String name, String color, String backgroundColor, String actualBackgroundColor,
-			String borderColor, ChartTheme chartTheme)
+			ChartTheme chartTheme)
 	{
-		super(name, color, backgroundColor, actualBackgroundColor, borderColor);
+		super(name, color, backgroundColor, actualBackgroundColor);
 		this.chartTheme = chartTheme;
 	}
 

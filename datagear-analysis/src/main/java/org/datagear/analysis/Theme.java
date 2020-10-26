@@ -11,6 +11,11 @@ import java.io.Serializable;
 
 /**
  * 主题。
+ * <p>
+ * 主题{@linkplain #getColor()}、{@linkplain #getBackgroundColor()}是必填的，
+ * 当{@linkplain #getBackgroundColor()}为{@linkplain #COLOR_TRANSPARENT}时，{@linkplain #getActualBackgroundColor()}也是必填的，
+ * 其他项都可以由展现界面根据{@linkplain #getColor()}、{@linkplain #getActualBackgroundColor()}配合{@linkplain #getGradient()}自动生成。
+ * </p>
  * 
  * @author datagear@163.com
  *
@@ -35,10 +40,10 @@ public class Theme implements Serializable
 	private String actualBackgroundColor;
 
 	/** 边框颜色 */
-	private String borderColor;
+	private String borderColor = "";
 
 	/** 边框宽度 */
-	private String borderWidth = "0";
+	private String borderWidth = "";
 
 	/** 背景色至前景色的渐变跨度 */
 	private int gradient = 10;
@@ -48,19 +53,18 @@ public class Theme implements Serializable
 		super();
 	}
 
-	public Theme(String name, String color, String backgroundColor, String borderColor)
+	public Theme(String name, String color, String backgroundColor)
 	{
-		this(name, color, backgroundColor, backgroundColor, borderColor);
+		this(name, color, backgroundColor, backgroundColor);
 	}
 
-	public Theme(String name, String color, String backgroundColor, String actualBackgroundColor, String borderColor)
+	public Theme(String name, String color, String backgroundColor, String actualBackgroundColor)
 	{
 		super();
 		this.name = name;
 		this.color = color;
 		this.backgroundColor = backgroundColor;
 		this.setActualBackgroundColor(actualBackgroundColor);
-		this.borderColor = borderColor;
 	}
 
 	public String getName()
@@ -99,6 +103,9 @@ public class Theme implements Serializable
 	public void setBackgroundColor(String backgroundColor)
 	{
 		this.backgroundColor = backgroundColor;
+
+		if (!COLOR_TRANSPARENT.equals(backgroundColor))
+			this.actualBackgroundColor = backgroundColor;
 	}
 
 	/**
@@ -129,6 +136,11 @@ public class Theme implements Serializable
 		this.actualBackgroundColor = actualBackgroundColor;
 	}
 
+	public boolean hasBorderColor()
+	{
+		return (this.borderColor != null && !this.borderColor.isEmpty());
+	}
+
 	public String getBorderColor()
 	{
 		return borderColor;
@@ -137,6 +149,11 @@ public class Theme implements Serializable
 	public void setBorderColor(String borderColor)
 	{
 		this.borderColor = borderColor;
+	}
+
+	public boolean hasBorderWidth()
+	{
+		return (this.borderWidth != null && !this.borderWidth.isEmpty());
 	}
 
 	public String getBorderWidth()

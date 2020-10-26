@@ -255,7 +255,7 @@ public abstract class AbstractController
 		else if (DataPermissionEntityService.DATA_FILTER_VALUE_ALL.equalsIgnoreCase(value))
 			value = DataPermissionEntityService.DATA_FILTER_VALUE_ALL;
 		else
-			value = DataPermissionEntityService.DATA_FILTER_VALUE_MINE;
+			value = DataPermissionEntityService.DATA_FILTER_VALUE_ALL;
 
 		pagingQuery.setDataFilter(value);
 

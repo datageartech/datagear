@@ -85,7 +85,9 @@ readonly 是否只读操作，允许为null
 			</#if>
 			<div class="form-item" id="schemaDriverEntityFormItem">
 				<div class="form-item-label">
-					<label><@spring.message code='schema.driverEntity' /></label>
+					<label title="<@spring.message code='schema.driverEntity.desc' />">
+						<@spring.message code='schema.driverEntity' />
+					</label>
 				</div>
 				<div id="driverEntityFormItemValue" class="form-item-value">
 					<input type="hidden" id="driverEntityId" name="driverEntity.id" value="${(schema.driverEntity.id)!''?html}" />
