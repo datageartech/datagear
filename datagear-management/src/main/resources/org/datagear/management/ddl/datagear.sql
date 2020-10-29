@@ -678,3 +678,9 @@ ALTER TABLE DATAGEAR_DATA_SET_CSV_FILE ALTER COLUMN DS_FILE_SOURCE_TYPE SET NOT 
 --version[1.13.1], DO NOT EDIT THIS LINE!
 -----------------------------------------
 
+
+
+-----------------------------------------
+--version[2.0.0], DO NOT EDIT THIS LINE!
+-----------------------------------------
+
