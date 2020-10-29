@@ -15,7 +15,6 @@ import org.datagear.analysis.ChartPlugin;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
 
 /**
  * {@linkplain DirectoryHtmlChartPluginManager}单元测试类。
@@ -43,16 +42,14 @@ public class DirectoryHtmlChartPluginManagerTest
 		FileUtil.clearDirectory(managerDirectory);
 		FileUtil.clearDirectory(uploadDirectory);
 
-		try (InputStream in = new ClassPathResource(
-				"org/datagear/analysis/support/html/directoryHtmlChartPluginManagerTest/plugin.current.zip")
-						.getInputStream())
+		try (InputStream in = DirectoryHtmlChartPluginManagerTest.class.getClassLoader().getResourceAsStream(
+				"org/datagear/analysis/support/html/directoryHtmlChartPluginManagerTest/plugin.current.zip"))
 		{
 			IOUtil.write(in, FileUtil.getFile(managerDirectory, "plugin.zip"));
 		}
 
-		try (InputStream in = new ClassPathResource(
-				"org/datagear/analysis/support/html/directoryHtmlChartPluginManagerTest/plugin.upload.zip")
-						.getInputStream())
+		try (InputStream in = DirectoryHtmlChartPluginManagerTest.class.getClassLoader().getResourceAsStream(
+				"org/datagear/analysis/support/html/directoryHtmlChartPluginManagerTest/plugin.upload.zip"))
 		{
 			IOUtil.write(in, FileUtil.getFile(uploadDirectory, "plugin.zip"));
 		}
