@@ -115,8 +115,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
@@ -259,7 +259,7 @@ public class CoreConfiguration implements InitializingBean
 		{
 			bean.init();
 		}
-		catch(IOException e)
+		catch (IOException e)
 		{
 			throw new BeanInitializationException("Init directory [" + directoryName + "] failed", e);
 		}
@@ -284,16 +284,17 @@ public class CoreConfiguration implements InitializingBean
 	@Bean
 	public SqlSessionFactory sqlSessionFactory()
 	{
-		SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
-		bean.setDataSource(this.dataSourceConfiguration.dataSource());
-		bean.setMapperLocations(
-				new Resource[] { new ClassPathResource("classpath*:org/datagear/management/mapper/*.xml") });
-
 		try
 		{
+			PathMatchingResourcePatternResolver pathResolver = new PathMatchingResourcePatternResolver();
+			Resource[] mapperResources = pathResolver.getResources("classpath*:org/datagear/management/mapper/*.xml");
+
+			SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
+			bean.setDataSource(this.dataSourceConfiguration.dataSource());
+			bean.setMapperLocations(mapperResources);
 			return bean.getObject();
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			throw new BeanInitializationException("Init " + SqlSessionFactory.class + " failed", e);
 		}
@@ -420,9 +421,8 @@ public class CoreConfiguration implements InitializingBean
 	@Bean
 	public DataSetEntityService dataSetEntityService()
 	{
-		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(),
-				this.connectionSource(), this.schemaService(), this.authorizationService(), this.dataSetRootDirectory(),
-				this.httpClient());
+		DataSetEntityServiceImpl bean = new DataSetEntityServiceImpl(this.sqlSessionFactory(), this.connectionSource(),
+				this.schemaService(), this.authorizationService(), this.dataSetRootDirectory(), this.httpClient());
 		return bean;
 	}
 
@@ -452,9 +452,8 @@ public class CoreConfiguration implements InitializingBean
 	@Bean
 	public HtmlChartWidgetEntityService htmlChartWidgetEntityService()
 	{
-		HtmlChartWidgetEntityServiceImpl bean = new HtmlChartWidgetEntityServiceImpl(
-				this.sqlSessionFactory(), this.directoryHtmlChartPluginManager(),
-				this.dataSetEntityService(), this.authorizationService());
+		HtmlChartWidgetEntityServiceImpl bean = new HtmlChartWidgetEntityServiceImpl(this.sqlSessionFactory(),
+				this.directoryHtmlChartPluginManager(), this.dataSetEntityService(), this.authorizationService());
 
 		return bean;
 	}
@@ -568,8 +567,7 @@ public class CoreConfiguration implements InitializingBean
 	public HtmlTplDashboardWidgetEntityService htmlTplDashboardWidgetEntityService()
 	{
 		HtmlTplDashboardWidgetEntityServiceImpl bean = new HtmlTplDashboardWidgetEntityServiceImpl(
-				this.sqlSessionFactory(), this.htmlTplDashboardWidgetRenderer(),
-				this.authorizationService());
+				this.sqlSessionFactory(), this.htmlTplDashboardWidgetRenderer(), this.authorizationService());
 
 		return bean;
 	}

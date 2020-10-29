@@ -11,6 +11,7 @@
 	
 	<artifactId>datagear-web</artifactId>
 	<name>datagear-web</name>
+	<packaging>war</packaging>
 	
 	<properties>
 		<dist.log4j.rootLogger>INFO, A1</dist.log4j.rootLogger>
@@ -45,7 +46,27 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-    		<version>3.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-freemarker</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jetty</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -55,66 +76,31 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webmvc</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
-			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
-			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
-			<version>${spring.security.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
-			<version>${spring.security.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjweaver</artifactId>
-			<version>1.5.4</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
-			<version>10.12.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
-			<version>${DBCP.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${slf4j-log4j12.version}</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>${log4j.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -124,17 +110,15 @@
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
-			<version>${quartz.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
-			<version>${freemarker.version}</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.cometd.java</groupId>
 		    <artifactId>cometd-java-server</artifactId>
-		    <version>2.9.1</version>
+		    <version>4.0.9</version>
 		</dependency>
 	</dependencies>
 	
@@ -144,20 +128,25 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<includes>
-					<include>org/datagear/web/datagear-version.properties</include>
+					<include>datagear-version.properties</include>
 				</includes>
 				<filtering>true</filtering>
 			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
 				<excludes>
-					<exclude>org/datagear/web/datagear-version.properties</exclude>
+					<exclude>datagear-version.properties</exclude>
 				</excludes>
 				<filtering>false</filtering>
 			</resource>
 		</resources>
 		
 		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-antrun-plugin</artifactId>
@@ -172,7 +161,7 @@
 			    		</goals>
 			    		<configuration>
 			    			<tasks>
-			    				<replace file="${project.build.outputDirectory}/org/datagear/web/log4j.properties"
+			    				<replace file="${project.build.outputDirectory}/log4j.properties"
 			    					token="DEBUG, A0" value="${dist.log4j.rootLogger}" />
 			    			</tasks>
 			    		</configuration>
@@ -215,7 +204,8 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!-- This plugin's configuration is used to store Eclipse m2e settings only.
+					It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>

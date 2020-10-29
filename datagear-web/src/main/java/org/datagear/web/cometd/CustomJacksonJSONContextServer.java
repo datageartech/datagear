@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.text.ParseException;
+import java.util.List;
 
 import org.cometd.bayeux.server.ServerMessage.Mutable;
 import org.cometd.common.JSONContext;
@@ -125,7 +126,7 @@ public class CustomJacksonJSONContextServer implements JSONContext.Server
 	}
 
 	@Override
-	public String generate(Mutable[] messages)
+	public String generate(List<Mutable> messages)
 	{
 		return toJsonString(messages);
 	}

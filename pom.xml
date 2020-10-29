@@ -16,6 +16,7 @@
 		<maven.compile.target>1.8</maven.compile.target>
 		<junit.version>4.13.1</junit.version>
 		<hamcrest.version>2.2</hamcrest.version>
+		<springboot.version>2.3.4.RELEASE</springboot.version>
 		<spring.version>4.3.26.RELEASE</spring.version>
 		<spring.security.version>3.2.10.RELEASE</spring.security.version>
 		<DBCP.version>2.7.0</DBCP.version>
@@ -50,34 +51,41 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest</artifactId>
-			<version>${hamcrest.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-library</artifactId>
-			<version>${hamcrest.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.24</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-parent</artifactId>
+				<version>${springboot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -136,10 +144,10 @@ ${line.separator}
 ${line.separator}
 </echo>
 								<!-- 替换web模块datagear-version.properties中的版本号 -->
-								<replaceregexp file="datagear-web/src/main/resources/org/datagear/web/datagear-version.properties" encoding="UTF-8" match="version=\d+(\.\d+){1,2}(\-\w+){0,1}" replace="version=${project.version}"/>
+								<replaceregexp file="datagear-web/src/main/resources/datagear-version.properties" encoding="UTF-8" match="version=\d+(\.\d+){1,2}(\-\w+){0,1}" replace="version=${project.version}"/>
 								
 								<!-- 为web模块的changelog.txt添加版本号行 -->
-			    				<echo file="datagear-web/src/main/resources/org/datagear/web/changelog.txt" encoding="UTF-8" append="true">
+			    				<echo file="datagear-web/src/main/resources/changelog.txt" encoding="UTF-8" append="true">
 ${line.separator}
 -----------------------------------------
 --v${project.version}

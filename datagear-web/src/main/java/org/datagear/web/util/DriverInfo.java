@@ -169,7 +169,7 @@ public class DriverInfo implements Serializable
 		InputStream in = null;
 		try
 		{
-			in = DriverInfo.class.getClassLoader().getResourceAsStream("org/datagear/web/commonDriverInfos.json");
+			in = DriverInfo.class.getClassLoader().getResourceAsStream("commonDriverInfos.json");
 			String json = IOUtil.readString(in, "UTF-8", false);
 
 			DriverInfo[] driverInfoAry = JsonSupport.parseNonStardand(json, DriverInfo[].class);
