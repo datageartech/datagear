@@ -16,7 +16,7 @@
 		<maven.compile.target>1.8</maven.compile.target>
 		<junit.version>4.13.1</junit.version>
 		<hamcrest.version>2.2</hamcrest.version>
-		<springboot.version>2.3.4.RELEASE</springboot.version>
+		<springboot.version>2.3.5.RELEASE</springboot.version>
 		<spring.version>4.3.26.RELEASE</spring.version>
 		<spring.security.version>3.2.10.RELEASE</spring.security.version>
 		<DBCP.version>2.7.0</DBCP.version>
@@ -31,6 +31,7 @@
 		<poi.version>3.17</poi.version>
 		<poi-ooxml.version>3.17</poi-ooxml.version>
 		<quartz.version>2.3.2</quartz.version>
+		<cometd.version>4.0.9</cometd.version>
 		<maven-antrun-plugin.version>1.4</maven-antrun-plugin.version>
 	</properties>
 	
