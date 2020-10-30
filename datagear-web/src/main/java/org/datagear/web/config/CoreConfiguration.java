@@ -93,7 +93,6 @@ import org.datagear.web.json.jackson.LocaleSqlTimeSerializer;
 import org.datagear.web.json.jackson.LocaleSqlTimestampSerializer;
 import org.datagear.web.json.jackson.ObjectMapperFactory;
 import org.datagear.web.json.jackson.ObjectMapperFactory.JsonSerializerConfig;
-import org.datagear.web.scheduling.DeleteExpiredFileJob;
 import org.datagear.web.security.UserPasswordEncoderImpl;
 import org.datagear.web.sqlpad.SqlpadCometdService;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
@@ -117,11 +116,7 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
-import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -130,12 +125,6 @@ import org.springframework.web.context.support.ServletContextAttributeExporter;
 
 /**
  * 核心配置。
- * <p>
- * 依赖配置：{@linkplain PropertiesConfiguration}、{@linkplain DataSourceConfiguration}。
- * </p>
- * <p>
- * 注：依赖配置需要手动加载。
- * </p>
  * 
  * @author datagear@163.com
  */
@@ -147,16 +136,11 @@ public class CoreConfiguration implements InitializingBean
 
 	public static final String NAME_DASHBOARD_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "htmlTplDashboardWidgetRenderer";
 
-	@Autowired
 	private DataSourceConfiguration dataSourceConfiguration;
 
-	@Autowired
 	private Environment environment;
 
-	public CoreConfiguration()
-	{
-	}
-
+	@Autowired
 	public CoreConfiguration(DataSourceConfiguration dataSourceConfiguration, Environment environment)
 	{
 		super();
@@ -618,7 +602,7 @@ public class CoreConfiguration implements InitializingBean
 	}
 
 	@Bean
-	public FormattingConversionServiceFactoryBean conversionService()
+	public CustomFormattingConversionServiceFactoryBean conversionService()
 	{
 		CustomFormattingConversionServiceFactoryBean bean = new CustomFormattingConversionServiceFactoryBean();
 		return bean;
@@ -776,25 +760,6 @@ public class CoreConfiguration implements InitializingBean
 	public DataExchangeCometdService dataExchangeCometdService()
 	{
 		DataExchangeCometdService bean = new DataExchangeCometdService(this.bayeuxServer());
-		return bean;
-	}
-
-	@Bean
-	public SchedulerFactoryBean deleteTempFileScheduler()
-	{
-		DeleteExpiredFileJob job = new DeleteExpiredFileJob(this.tempDirectory(), 1440);
-
-		MethodInvokingJobDetailFactoryBean jobDetailFactory = new MethodInvokingJobDetailFactoryBean();
-		jobDetailFactory.setTargetObject(job);
-		jobDetailFactory.setTargetMethod("delete");
-
-		CronTriggerFactoryBean triggerFactory = new CronTriggerFactoryBean();
-		triggerFactory.setJobDetail(jobDetailFactory.getObject());
-		triggerFactory.setCronExpression("0 0 1 * * ?");
-
-		SchedulerFactoryBean bean = new SchedulerFactoryBean();
-		bean.setTriggers(triggerFactory.getObject());
-
 		return bean;
 	}
 

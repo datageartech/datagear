@@ -27,7 +27,7 @@ import org.datagear.util.version.VersionContent;
  */
 public class ChangelogResolver extends AbstractVersionContentReader
 {
-	public static final String CHANGELOG_CLASS_PATH = "changelog.txt";
+	public static final String CHANGELOG_CLASS_PATH = "org/datagear/web/changelog.txt";
 
 	/** 数据库SQL文件中版本号注释开头标识 */
 	public static final String VERSION_LINE_PREFIX = "--v";

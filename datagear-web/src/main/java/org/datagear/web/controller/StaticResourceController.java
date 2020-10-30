@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.datagear.web.util.WebContextPath;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
@@ -25,7 +24,8 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
  * @author datagear@163.com
  *
  */
-@Controller
+// @Controller
+@Deprecated
 public class StaticResourceController extends ResourceHttpRequestHandler
 {
 	public static final String STATIC_RESOURCE_CLASSPATH = "org/datagear/web/webapp/static/";
@@ -38,7 +38,7 @@ public class StaticResourceController extends ResourceHttpRequestHandler
 
 		this.location = new ClassPathResource(STATIC_RESOURCE_CLASSPATH);
 
-		List<Resource> locations = new ArrayList<Resource>(1);
+		List<Resource> locations = new ArrayList<>(1);
 		locations.add(this.location);
 		setLocations(locations);
 	}

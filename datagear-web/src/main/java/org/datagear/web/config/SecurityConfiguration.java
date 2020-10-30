@@ -19,40 +19,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 /**
  * 安全配置。
- * <p>
- * 依赖配置：{@linkplain PropertiesConfiguration}、{@linkplain CoreConfiguration}。
- * </p>
- * <p>
- * 注：依赖配置需要手动加载。
- * </p>
  * 
  * @author datagear@163.com
  */
 @Configuration
-@EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter
 {
 	protected static final String[] ROLES_ANONYMOUS_AND_USER = { AuthUser.ROLE_ANONYMOUS, AuthUser.ROLE_USER };
 
 	protected static final String[] ROLES_USER = { AuthUser.ROLE_USER };
 
-	@Autowired
 	private CoreConfiguration coreConfiguration;
 
-	@Autowired
 	private Environment environment;
 
-	public SecurityConfiguration()
-	{
-	}
-
+	@Autowired
 	public SecurityConfiguration(CoreConfiguration coreConfiguration, Environment environment)
 	{
 		super();
@@ -129,12 +116,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
 
 		http.authorizeRequests()
 				// 静态资源
-				.antMatchers(concatPath(subContextPath, "/static/**"))
-				.permitAll()
+				.antMatchers(concatPath(subContextPath, "/static/**")).permitAll()
 
 				// 图表、看板展示功能始终允许匿名用户访问，用于支持外部系统iframe嵌套场景
-				.antMatchers(
-						concatPath(subContextPath, "/analysis/chartPlugin/icon/*"),
+				.antMatchers(concatPath(subContextPath, "/analysis/chartPlugin/icon/*"),
 						concatPath(subContextPath, "/analysis/chartPlugin/chartPluginManager.js"),
 						concatPath(subContextPath, "/analysis/chart/show/**"),
 						concatPath(subContextPath, "/analysis/chart/showData"),
@@ -145,8 +130,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
 				.permitAll()
 
 				// 切换主题
-				.antMatchers(concatPath(subContextPath, "/changeThemeData/**"))
-				.permitAll()
+				.antMatchers(concatPath(subContextPath, "/changeThemeData/**")).permitAll()
 
 				// cometd
 				.antMatchers(concatPath(subContextPath, "/cometd/**"))
@@ -168,15 +152,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
 
 				// 用户管理
 				.antMatchers(concatPath(subContextPath, "/user/personalSet"),
-						concatPath(subContextPath, "/user/savePersonalSet"),
-						concatPath(subContextPath, "/user/select"), concatPath(subContextPath, "/user/queryData"))
-				.hasAuthority(AuthUser.ROLE_USER)
-				.antMatchers(concatPath(subContextPath, "/user/**")).hasAuthority(AuthUser.ROLE_ADMIN)
+						concatPath(subContextPath, "/user/savePersonalSet"), concatPath(subContextPath, "/user/select"),
+						concatPath(subContextPath, "/user/queryData"))
+				.hasAuthority(AuthUser.ROLE_USER).antMatchers(concatPath(subContextPath, "/user/**"))
+				.hasAuthority(AuthUser.ROLE_ADMIN)
 
 				// 角色管理
 				.antMatchers(concatPath(subContextPath, "/role/select"), concatPath(subContextPath, "/role/queryData"))
-				.hasAuthority(AuthUser.ROLE_USER)
-				.antMatchers(concatPath(subContextPath, "/role/**")).hasAuthority(AuthUser.ROLE_ADMIN)
+				.hasAuthority(AuthUser.ROLE_USER).antMatchers(concatPath(subContextPath, "/role/**"))
+				.hasAuthority(AuthUser.ROLE_ADMIN)
 
 				// 权限管理
 				.antMatchers(concatPath(subContextPath, "/authorization/**")).hasAuthority(AuthUser.ROLE_USER)
@@ -202,9 +186,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
 				.antMatchers(concatPath(subContextPath, "/dataSetResDirectory/**")).hasAuthority(AuthUser.ROLE_ADMIN)
 
 				//
-				.antMatchers(
-						concatPath(subContextPath, "/login/**"),
-						concatPath(subContextPath, "/register/**"),
+				.antMatchers(concatPath(subContextPath, "/login/**"), concatPath(subContextPath, "/register/**"),
 						concatPath(subContextPath, "/resetPassword/**"))
 				.hasAuthority(AuthUser.ROLE_ANONYMOUS)
 
@@ -212,17 +194,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
 				.antMatchers(concatPath(subContextPath, "/**"))
 				.hasAnyAuthority(disableAnonymous ? ROLES_USER : ROLES_ANONYMOUS_AND_USER)
 
-				.and()
-				.formLogin().loginPage(concatPath(subContextPath, "/login"))
+				.and().formLogin().loginPage(concatPath(subContextPath, "/login"))
 				.loginProcessingUrl(concatPath(subContextPath, "/login/doLogin")).usernameParameter("name")
-				.passwordParameter("password")
-				.successHandler(getAuthenticationSuccessHandler())
+				.passwordParameter("password").successHandler(getAuthenticationSuccessHandler())
 
 				.and().logout().logoutUrl(concatPath(subContextPath, "/logout")).invalidateHttpSession(true)
 				.logoutSuccessUrl(concatPath(subContextPath, "/"))
 
-				.and()
-				.rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
+				.and().rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
 		// TODO 配置"remember-me-parameter"为"autoLogin"
 		;
 	}

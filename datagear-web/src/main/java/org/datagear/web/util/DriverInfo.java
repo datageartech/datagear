@@ -31,6 +31,8 @@ public class DriverInfo implements Serializable
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DriverInfo.class);
 
+	public static final String COMMON_DRIVER_INFO_CLASS_PATH = "org/datagear/web/commonDriverInfos.json";
+
 	public static final String DRIVER_CLASS_FILE_SUFFIX = ".class";
 
 	private static final List<DriverInfo> COMMON_DRIVER_INFOS;
@@ -169,8 +171,8 @@ public class DriverInfo implements Serializable
 		InputStream in = null;
 		try
 		{
-			in = DriverInfo.class.getClassLoader().getResourceAsStream("commonDriverInfos.json");
-			String json = IOUtil.readString(in, "UTF-8", false);
+			in = DriverInfo.class.getClassLoader().getResourceAsStream(COMMON_DRIVER_INFO_CLASS_PATH);
+			String json = IOUtil.readString(in, IOUtil.CHARSET_UTF_8, false);
 
 			DriverInfo[] driverInfoAry = JsonSupport.parseNonStardand(json, DriverInfo[].class);
 			driverInfos = Arrays.asList(driverInfoAry);

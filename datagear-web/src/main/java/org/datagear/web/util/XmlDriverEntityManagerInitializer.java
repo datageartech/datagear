@@ -29,7 +29,7 @@ public class XmlDriverEntityManagerInitializer
 {
 	private static final Logger LOGGER = LoggerFactory.getLogger(XmlDriverEntityManagerInitializer.class);
 
-	public static final String BUILT_IN_DRIVER_ENTITY_ZIP_CLASS_PATH = "builtInDriverEntity.zip";
+	public static final String BUILT_IN_DRIVER_ENTITY_ZIP_CLASS_PATH = "org/datagear/web/builtInDriverEntity.zip";
 
 	private XmlDriverEntityManager xmlDriverEntityManager;
 

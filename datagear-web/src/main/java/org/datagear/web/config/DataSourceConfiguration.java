@@ -17,25 +17,15 @@ import org.springframework.core.env.Environment;
 
 /**
  * 数据源配置。
- * <p>
- * 依赖配置：{@linkplain PropertiesConfiguration}。
- * </p>
- * <p>
- * 注：依赖配置需要手动加载。
- * </p>
  * 
  * @author datagear@163.com
  */
 @Configuration
 public class DataSourceConfiguration
 {
-	@Autowired
 	private Environment environment;
 
-	public DataSourceConfiguration()
-	{
-	}
-
+	@Autowired
 	public DataSourceConfiguration(Environment environment)
 	{
 		super();

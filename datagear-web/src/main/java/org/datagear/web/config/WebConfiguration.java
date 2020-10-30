@@ -7,12 +7,13 @@
  */
 package org.datagear.web.config;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.datagear.util.IOUtil;
+import org.datagear.web.controller.MainController;
 import org.datagear.web.freemarker.CustomFreeMarkerView;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
@@ -23,14 +24,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.ui.context.support.ResourceBundleThemeSource;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
@@ -39,30 +47,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Web配置。
- * <p>
- * 依赖配置：{@linkplain PropertiesConfiguration}、{@linkplain DataSourceConfiguration}、{@linkplain CoreConfiguration}。
- * </p>
- * <p>
- * 注：依赖配置需要手动加载。
- * </p>
  * 
  * @author datagear@163.com
  */
 @Configuration
-@ComponentScan("org.datagear.web.controller")
-public class WebConfiguration
+@ComponentScan(basePackageClasses = MainController.class)
+public class WebConfiguration extends WebMvcConfigurationSupport
 {
-	@Autowired
 	private CoreConfiguration coreConfiguration;
 
-	@Autowired
 	private Environment environment;
 
-	public WebConfiguration()
-	{
-		super();
-	}
-
+	@Autowired
 	public WebConfiguration(CoreConfiguration coreConfiguration, Environment environment)
 	{
 		super();
@@ -90,60 +86,66 @@ public class WebConfiguration
 		this.environment = environment;
 	}
 
-	@Bean
-	public ObjectMapper objectMapper()
+	@Override
+	protected void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
-		return this.coreConfiguration.objectMapperFactory().getObjectMapper();
+		registry.addResourceHandler("/static/**").addResourceLocations("classpath:/org/datagear/web/static/");
 	}
 
-	@Bean
-	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter()
-	{
-		MappingJackson2HttpMessageConverter bean = new MappingJackson2HttpMessageConverter(this.objectMapper());
-		return bean;
-	}
-
-	@Bean
-	public ThemeChangeInterceptor themeChangeInterceptor()
-	{
-		ThemeChangeInterceptor bean = new ThemeChangeInterceptor();
-		return bean;
-	}
-
-	@Bean
-	public SubContextPathRequestMappingHandlerMapping handlerMapping()
+	@Override
+	protected RequestMappingHandlerMapping createRequestMappingHandlerMapping()
 	{
 		SubContextPathRequestMappingHandlerMapping bean = new SubContextPathRequestMappingHandlerMapping();
 		bean.setAlwaysUseFullPath(true);
 		bean.setSubContextPath(this.environment.getProperty("subContextPath"));
-		bean.setInterceptors(this.themeChangeInterceptor());
 
 		return bean;
 	}
 
-	@Bean
-	public RequestMappingHandlerAdapter handlerAdapter()
+	@Override
+	protected void addInterceptors(InterceptorRegistry registry)
 	{
-		RequestMappingHandlerAdapter bean = new RequestMappingHandlerAdapter();
+		ThemeChangeInterceptor interceptor = new ThemeChangeInterceptor();
+		registry.addInterceptor(interceptor);
+	}
 
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-		messageConverters.add(this.mappingJackson2HttpMessageConverter());
+	@Override
+	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters)
+	{
+		ObjectMapper objectMapper = this.coreConfiguration.objectMapperFactory().getObjectMapper();
+		MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
 
-		ConfigurableWebBindingInitializer webBindingInitializer = new ConfigurableWebBindingInitializer();
-		webBindingInitializer.setConversionService(this.coreConfiguration.conversionService().getObject());
+		converters.add(messageConverter);
+		super.addDefaultHttpMessageConverters(converters);
+	}
 
-		bean.setMessageConverters(messageConverters);
-		bean.setWebBindingInitializer(webBindingInitializer);
+	@Override
+	protected ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer(
+			FormattingConversionService mvcConversionService, Validator mvcValidator)
+	{
+		ConfigurableWebBindingInitializer bean = super.getConfigurableWebBindingInitializer(mvcConversionService,
+				mvcValidator);
+
+		// XXX 父类方法不会注册应用自定义的FormattingConversionService，所以这里重新设置
+
+		bean.setConversionService(this.coreConfiguration.conversionService().getObject());
 
 		return bean;
 	}
 
-	@Bean
-	public WriteJsonTemplateDirectiveModel writeJsonTemplateDirectiveModel()
+	@Override
+	protected void configureViewResolvers(ViewResolverRegistry registry)
 	{
-		WriteJsonTemplateDirectiveModel bean = new WriteJsonTemplateDirectiveModel(
-				this.coreConfiguration.objectMapperFactory());
-		return bean;
+		FreeMarkerViewResolver viewResolver = new FreeMarkerViewResolver();
+		viewResolver.setViewClass(CustomFreeMarkerView.class);
+		viewResolver.setContentType("text/html;charset=" + IOUtil.CHARSET_UTF_8);
+		viewResolver.setExposeRequestAttributes(true);
+		viewResolver.setAllowRequestOverride(true);
+		viewResolver.setCache(true);
+		viewResolver.setPrefix("");
+		viewResolver.setSuffix(".ftl");
+
+		registry.viewResolver(viewResolver);
 	}
 
 	@Bean
@@ -157,39 +159,23 @@ public class WebConfiguration
 		settings.setProperty("number_format", "#.##");
 
 		Map<String, Object> variables = new HashMap<>();
-		variables.put("writeJson", this.writeJsonTemplateDirectiveModel());
+		variables.put("writeJson", new WriteJsonTemplateDirectiveModel(this.coreConfiguration.objectMapperFactory()));
 
-		bean.setTemplateLoaderPath("classpath:org/datagear/web/webapp/view/freemarker/");
-		bean.setDefaultEncoding("UTF-8");
+		bean.setTemplateLoaderPath("classpath:org/datagear/web/templates/");
+		bean.setDefaultEncoding(IOUtil.CHARSET_UTF_8);
 		bean.setFreemarkerSettings(settings);
 		bean.setFreemarkerVariables(variables);
 
 		return bean;
 	}
 
-	@Bean
-	public FreeMarkerViewResolver freeMarkerViewResolver()
+	@Override
+	protected ExceptionHandlerExceptionResolver createExceptionHandlerExceptionResolver()
 	{
-		FreeMarkerViewResolver bean = new FreeMarkerViewResolver();
-		bean.setViewClass(CustomFreeMarkerView.class);
-		bean.setContentType("text/html;charset=UTF-8");
-		bean.setExposeRequestAttributes(true);
-		bean.setAllowRequestOverride(true);
-		bean.setCache(true);
-		bean.setPrefix("");
-		bean.setSuffix(".ftl");
-
-		return bean;
+		return new DeliverContentTypeExceptionHandlerExceptionResolver();
 	}
 
-	@Bean
-	public DeliverContentTypeExceptionHandlerExceptionResolver exceptionResolver()
-	{
-		DeliverContentTypeExceptionHandlerExceptionResolver bean = new DeliverContentTypeExceptionHandlerExceptionResolver();
-		return bean;
-	}
-
-	@Bean
+	@Bean("themeSource")
 	public ResourceBundleThemeSource themeSource()
 	{
 		ResourceBundleThemeSource bean = new ResourceBundleThemeSource();
@@ -198,21 +184,21 @@ public class WebConfiguration
 		return bean;
 	}
 
-	@Bean
+	@Bean("themeResolver")
 	public EnumCookieThemeResolver themeResolver()
 	{
 		EnumCookieThemeResolver bean = new EnumCookieThemeResolver();
 		return bean;
 	}
 
-	@Bean
+	@Bean("localeResolver")
 	public AcceptHeaderLocaleResolver localeResolver()
 	{
 		AcceptHeaderLocaleResolver bean = new AcceptHeaderLocaleResolver();
 		return bean;
 	}
 
-	@Bean
+	@Bean("multipartResolver")
 	public MultipartResolver multipartResolver()
 	{
 		CommonsMultipartResolver bean = new CommonsMultipartResolver();
