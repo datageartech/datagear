@@ -12,8 +12,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compile.source>1.8</maven.compile.source>
-		<maven.compile.target>1.8</maven.compile.target>
+		<java.version>1.8</java.version>
 		<junit.version>4.13.1</junit.version>
 		<hamcrest.version>2.2</hamcrest.version>
 		<springboot.version>2.3.5.RELEASE</springboot.version>
@@ -92,24 +91,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
 				<configuration>
-					<source>${maven.compile.source}</source>
-					<target>${maven.compile.target}</target>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
 				</configuration>
-				<executions>
-					<execution>
-						<id>compile-tests</id>
-						<phase>process-test-sources</phase>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-						<configuration>
-							<source>${maven.compile.source}</source>
-							<target>${maven.compile.target}</target>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<!-- 统一更新子模块版本号为父模块版本号插件 -->
 			<!-- mvn -N versions:update-child-modules -->
@@ -124,7 +109,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-antrun-plugin</artifactId>
-			    <version>1.4</version>
+			    <version>${maven-antrun-plugin.version}</version>
 			    <executions>
 			    	<execution>
 			    		<id>default-cli</id>
@@ -145,10 +130,10 @@ ${line.separator}
 ${line.separator}
 </echo>
 								<!-- 替换web模块datagear-version.properties中的版本号 -->
-								<replaceregexp file="datagear-web/src/main/resources/datagear-version.properties" encoding="UTF-8" match="version=\d+(\.\d+){1,2}(\-\w+){0,1}" replace="version=${project.version}"/>
+								<replaceregexp file="datagear-web/src/main/resources/org/datagear/web/datagear-version.properties" encoding="UTF-8" match="version=\d+(\.\d+){1,2}(\-\w+){0,1}" replace="version=${project.version}"/>
 								
 								<!-- 为web模块的changelog.txt添加版本号行 -->
-			    				<echo file="datagear-web/src/main/resources/changelog.txt" encoding="UTF-8" append="true">
+			    				<echo file="datagear-web/src/main/resources/org/datagear/web/changelog.txt" encoding="UTF-8" append="true">
 ${line.separator}
 -----------------------------------------
 --v${project.version}
