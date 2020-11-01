@@ -1,13 +1,23 @@
+/*
+ * Copyright (c) 2018 datagear.org. All Rights Reserved.
+ */
+
 package org.datagear.web;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
-public class DataGearServletInitializer extends SpringBootServletInitializer
+/**
+ * 应用入口。
+ * 
+ * @author datagear@163.com
+ *
+ */
+public class DGServletInitializer extends SpringBootServletInitializer
 {
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application)
 	{
-		return application.sources(DataGearApplication.class);
+		return application.sources(DGApplication.class);
 	}
 }

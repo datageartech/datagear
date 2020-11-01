@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -29,32 +30,33 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
  * @author datagear@163.com
  */
 @Configuration
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter
+@EnableWebSecurity
+public class DGSecurityConfiguration extends WebSecurityConfigurerAdapter
 {
 	protected static final String[] ROLES_ANONYMOUS_AND_USER = { AuthUser.ROLE_ANONYMOUS, AuthUser.ROLE_USER };
 
 	protected static final String[] ROLES_USER = { AuthUser.ROLE_USER };
 
-	private CoreConfiguration coreConfiguration;
+	private DGCoreConfiguration dGCoreConfiguration;
 
 	private Environment environment;
 
 	@Autowired
-	public SecurityConfiguration(CoreConfiguration coreConfiguration, Environment environment)
+	public DGSecurityConfiguration(DGCoreConfiguration dGCoreConfiguration, Environment environment)
 	{
 		super();
-		this.coreConfiguration = coreConfiguration;
+		this.dGCoreConfiguration = dGCoreConfiguration;
 		this.environment = environment;
 	}
 
-	public CoreConfiguration getCoreConfiguration()
+	public DGCoreConfiguration getCoreConfiguration()
 	{
-		return coreConfiguration;
+		return dGCoreConfiguration;
 	}
 
-	public void setCoreConfiguration(CoreConfiguration coreConfiguration)
+	public void setCoreConfiguration(DGCoreConfiguration dGCoreConfiguration)
 	{
-		this.coreConfiguration = coreConfiguration;
+		this.dGCoreConfiguration = dGCoreConfiguration;
 	}
 
 	public Environment getEnvironment()
@@ -98,10 +100,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
 	{
 		AuthenticationSuccessHandlerImpl bean = new AuthenticationSuccessHandlerImpl();
 
-		List<CreateUserEntityService> createUserEntityServices = Arrays.asList(this.coreConfiguration.schemaService(),
-				this.coreConfiguration.dataSetEntityService(), this.coreConfiguration.htmlChartWidgetEntityService(),
-				this.coreConfiguration.htmlTplDashboardWidgetEntityService(),
-				this.coreConfiguration.analysisProjectService());
+		List<CreateUserEntityService> createUserEntityServices = Arrays.asList(this.dGCoreConfiguration.schemaService(),
+				this.dGCoreConfiguration.dataSetEntityService(), this.dGCoreConfiguration.htmlChartWidgetEntityService(),
+				this.dGCoreConfiguration.htmlTplDashboardWidgetEntityService(),
+				this.dGCoreConfiguration.analysisProjectService());
 
 		bean.setCreateUserEntityServices(createUserEntityServices);
 
@@ -209,7 +211,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter
 	@Override
 	protected UserDetailsService userDetailsService()
 	{
-		UserDetailsService bean = new UserDetailsServiceImpl(this.coreConfiguration.userService());
+		UserDetailsService bean = new UserDetailsServiceImpl(this.dGCoreConfiguration.userService());
 		return bean;
 	}
 }

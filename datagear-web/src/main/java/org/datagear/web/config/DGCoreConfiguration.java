@@ -130,32 +130,32 @@ import org.springframework.web.context.support.ServletContextAttributeExporter;
  */
 @Configuration
 @EnableTransactionManagement
-public class CoreConfiguration implements InitializingBean
+public class DGCoreConfiguration implements InitializingBean
 {
 	public static final String NAME_CHART_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "chartShowHtmlTplDashboardWidgetHtmlRenderer";
 
 	public static final String NAME_DASHBOARD_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "htmlTplDashboardWidgetRenderer";
 
-	private DataSourceConfiguration dataSourceConfiguration;
+	private DGDataSourceConfiguration dGDataSourceConfiguration;
 
 	private Environment environment;
 
 	@Autowired
-	public CoreConfiguration(DataSourceConfiguration dataSourceConfiguration, Environment environment)
+	public DGCoreConfiguration(DGDataSourceConfiguration dGDataSourceConfiguration, Environment environment)
 	{
 		super();
-		this.dataSourceConfiguration = dataSourceConfiguration;
+		this.dGDataSourceConfiguration = dGDataSourceConfiguration;
 		this.environment = environment;
 	}
 
-	public DataSourceConfiguration getDataSourceConfiguration()
+	public DGDataSourceConfiguration getDataSourceConfiguration()
 	{
-		return dataSourceConfiguration;
+		return dGDataSourceConfiguration;
 	}
 
-	public void setDataSourceConfiguration(DataSourceConfiguration dataSourceConfiguration)
+	public void setDataSourceConfiguration(DGDataSourceConfiguration dGDataSourceConfiguration)
 	{
-		this.dataSourceConfiguration = dataSourceConfiguration;
+		this.dGDataSourceConfiguration = dGDataSourceConfiguration;
 	}
 
 	public Environment getEnvironment()
@@ -254,14 +254,14 @@ public class CoreConfiguration implements InitializingBean
 	@Bean(initMethod = "upgrade")
 	public DbVersionManager dbVersionManager()
 	{
-		DbVersionManager bean = new DbVersionManager(this.dataSourceConfiguration.dataSource());
+		DbVersionManager bean = new DbVersionManager(this.dGDataSourceConfiguration.dataSource());
 		return bean;
 	}
 
 	@Bean
 	public PlatformTransactionManager transactionManager()
 	{
-		DataSourceTransactionManager bean = new DataSourceTransactionManager(this.dataSourceConfiguration.dataSource());
+		DataSourceTransactionManager bean = new DataSourceTransactionManager(this.dGDataSourceConfiguration.dataSource());
 		return bean;
 	}
 
@@ -274,7 +274,7 @@ public class CoreConfiguration implements InitializingBean
 			Resource[] mapperResources = pathResolver.getResources("classpath*:org/datagear/management/mapper/*.xml");
 
 			SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
-			bean.setDataSource(this.dataSourceConfiguration.dataSource());
+			bean.setDataSource(this.dGDataSourceConfiguration.dataSource());
 			bean.setMapperLocations(mapperResources);
 			return bean.getObject();
 		}

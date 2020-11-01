@@ -22,30 +22,30 @@ import org.springframework.scheduling.annotation.Scheduled;
  */
 @Configuration
 @EnableScheduling
-public class SchedulingConfiguration
+public class DGSchedulingConfiguration
 {
-	private CoreConfiguration coreConfiguration;
+	private DGCoreConfiguration dGCoreConfiguration;
 
 	@Autowired
-	public SchedulingConfiguration(CoreConfiguration coreConfiguration)
+	public DGSchedulingConfiguration(DGCoreConfiguration dGCoreConfiguration)
 	{
-		this.coreConfiguration = coreConfiguration;
+		this.dGCoreConfiguration = dGCoreConfiguration;
 	}
 
-	public CoreConfiguration getCoreConfiguration()
+	public DGCoreConfiguration getCoreConfiguration()
 	{
-		return coreConfiguration;
+		return dGCoreConfiguration;
 	}
 
-	public void setCoreConfiguration(CoreConfiguration coreConfiguration)
+	public void setCoreConfiguration(DGCoreConfiguration dGCoreConfiguration)
 	{
-		this.coreConfiguration = coreConfiguration;
+		this.dGCoreConfiguration = dGCoreConfiguration;
 	}
 
 	@Bean
 	public DeleteExpiredFileJob deleteTempFileJob()
 	{
-		DeleteExpiredFileJob bean = new DeleteExpiredFileJob(this.coreConfiguration.tempDirectory(), 1440);
+		DeleteExpiredFileJob bean = new DeleteExpiredFileJob(this.dGCoreConfiguration.tempDirectory(), 1440);
 		return bean;
 	}
 
