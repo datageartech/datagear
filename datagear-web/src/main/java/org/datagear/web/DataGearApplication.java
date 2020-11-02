@@ -7,6 +7,7 @@ package org.datagear.web;
 import org.datagear.web.config.WebMvcConfigurerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 
 /**
  * 应用入口。
@@ -14,7 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author datagear@163.com
  *
  */
-@SpringBootApplication(scanBasePackageClasses = WebMvcConfigurerConfig.class)
+@SpringBootApplication(scanBasePackageClasses = WebMvcConfigurerConfig.class, exclude = ErrorMvcAutoConfiguration.class)
 public class DataGearApplication
 {
 	public static void main(String[] args)

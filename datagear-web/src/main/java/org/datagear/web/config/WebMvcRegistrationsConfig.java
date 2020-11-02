@@ -4,8 +4,8 @@
 
 package org.datagear.web.config;
 
-import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
-import org.datagear.web.util.SubContextPathRequestMappingHandlerMapping;
+import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
+import org.datagear.web.config.support.SubContextPathRequestMappingHandlerMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Configuration;

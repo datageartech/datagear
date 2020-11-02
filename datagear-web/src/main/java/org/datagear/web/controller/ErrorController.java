@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.web.OperationMessage;
 import org.datagear.web.util.WebUtils;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author datagear@163.com
  *
  */
-// @Controller
+@Controller
 public class ErrorController extends AbstractController
 {
 	public ErrorController()

@@ -16,10 +16,10 @@ import org.datagear.web.security.AuthenticationSuccessHandlerImpl;
 import org.datagear.web.security.UserDetailsServiceImpl;
 import org.datagear.web.util.WebContextPath;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -30,7 +30,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
  * @author datagear@163.com
  */
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
 	protected static final String[] ROLES_ANONYMOUS_AND_USER = { AuthUser.ROLE_ANONYMOUS, AuthUser.ROLE_USER };
@@ -114,6 +113,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 	{
 		String subContextPath = getSubContextPath();
 		boolean disableAnonymous = isDisableAnonymous();
+
+		// 默认是开启CSRF的，系统目前没有提供相关支持，所以这里需禁用
+		http.csrf().disable();
 
 		http.authorizeRequests()
 				// 静态资源
@@ -207,8 +209,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 		;
 	}
 
+	@Bean
 	@Override
-	protected UserDetailsService userDetailsService()
+	public UserDetailsService userDetailsServiceBean() throws Exception
 	{
 		UserDetailsService bean = new UserDetailsServiceImpl(this.coreConfig.userService());
 		return bean;

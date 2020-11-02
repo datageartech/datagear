@@ -27,9 +27,9 @@ import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
 import org.datagear.web.OperationMessage;
+import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.convert.StringToJsonConverter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
-import org.datagear.web.util.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -78,10 +78,10 @@ public abstract class AbstractController
 	public static final String ERROR_PAGE_URL = "/error";
 
 	@Autowired
-	private MessageSource messageSource;
+	private ConversionService conversionService;
 
 	@Autowired
-	private ConversionService conversionService;
+	private MessageSource messageSource;
 
 	private StringToJsonConverter stringToJsonConverter = new StringToJsonConverter();
 

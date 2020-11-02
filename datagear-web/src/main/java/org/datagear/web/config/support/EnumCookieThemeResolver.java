@@ -5,11 +5,12 @@
 /**
  * 
  */
-package org.datagear.web.util;
+package org.datagear.web.config.support;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.datagear.web.util.Themes;
 import org.springframework.web.servlet.theme.CookieThemeResolver;
 
 /**
