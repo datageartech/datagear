@@ -20,28 +20,28 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  *
  */
 @Configuration
-public class DGWebMvcRegistrations implements WebMvcRegistrations
+public class WebMvcRegistrationsConfig implements WebMvcRegistrations
 {
-	private DGCoreConfiguration dGCoreConfiguration;
+	private CoreConfig coreConfig;
 
 	private Environment environment;
 
 	@Autowired
-	public DGWebMvcRegistrations(DGCoreConfiguration dGCoreConfiguration, Environment environment)
+	public WebMvcRegistrationsConfig(CoreConfig coreConfig, Environment environment)
 	{
 		super();
-		this.dGCoreConfiguration = dGCoreConfiguration;
+		this.coreConfig = coreConfig;
 		this.environment = environment;
 	}
 
-	public DGCoreConfiguration getCoreConfiguration()
+	public CoreConfig getCoreConfig()
 	{
-		return dGCoreConfiguration;
+		return coreConfig;
 	}
 
-	public void setCoreConfiguration(DGCoreConfiguration dGCoreConfiguration)
+	public void setCoreConfig(CoreConfig coreConfig)
 	{
-		this.dGCoreConfiguration = dGCoreConfiguration;
+		this.coreConfig = coreConfig;
 	}
 
 	public Environment getEnvironment()

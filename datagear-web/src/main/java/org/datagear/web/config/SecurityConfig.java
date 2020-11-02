@@ -31,32 +31,32 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
  */
 @Configuration
 @EnableWebSecurity
-public class DGSecurityConfiguration extends WebSecurityConfigurerAdapter
+public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
 	protected static final String[] ROLES_ANONYMOUS_AND_USER = { AuthUser.ROLE_ANONYMOUS, AuthUser.ROLE_USER };
 
 	protected static final String[] ROLES_USER = { AuthUser.ROLE_USER };
 
-	private DGCoreConfiguration dGCoreConfiguration;
+	private CoreConfig coreConfig;
 
 	private Environment environment;
 
 	@Autowired
-	public DGSecurityConfiguration(DGCoreConfiguration dGCoreConfiguration, Environment environment)
+	public SecurityConfig(CoreConfig coreConfig, Environment environment)
 	{
 		super();
-		this.dGCoreConfiguration = dGCoreConfiguration;
+		this.coreConfig = coreConfig;
 		this.environment = environment;
 	}
 
-	public DGCoreConfiguration getCoreConfiguration()
+	public CoreConfig getCoreConfig()
 	{
-		return dGCoreConfiguration;
+		return coreConfig;
 	}
 
-	public void setCoreConfiguration(DGCoreConfiguration dGCoreConfiguration)
+	public void setCoreConfig(CoreConfig coreConfig)
 	{
-		this.dGCoreConfiguration = dGCoreConfiguration;
+		this.coreConfig = coreConfig;
 	}
 
 	public Environment getEnvironment()
@@ -100,10 +100,9 @@ public class DGSecurityConfiguration extends WebSecurityConfigurerAdapter
 	{
 		AuthenticationSuccessHandlerImpl bean = new AuthenticationSuccessHandlerImpl();
 
-		List<CreateUserEntityService> createUserEntityServices = Arrays.asList(this.dGCoreConfiguration.schemaService(),
-				this.dGCoreConfiguration.dataSetEntityService(), this.dGCoreConfiguration.htmlChartWidgetEntityService(),
-				this.dGCoreConfiguration.htmlTplDashboardWidgetEntityService(),
-				this.dGCoreConfiguration.analysisProjectService());
+		List<CreateUserEntityService> createUserEntityServices = Arrays.asList(this.coreConfig.schemaService(),
+				this.coreConfig.dataSetEntityService(), this.coreConfig.htmlChartWidgetEntityService(),
+				this.coreConfig.htmlTplDashboardWidgetEntityService(), this.coreConfig.analysisProjectService());
 
 		bean.setCreateUserEntityServices(createUserEntityServices);
 
@@ -211,7 +210,7 @@ public class DGSecurityConfiguration extends WebSecurityConfigurerAdapter
 	@Override
 	protected UserDetailsService userDetailsService()
 	{
-		UserDetailsService bean = new UserDetailsServiceImpl(this.dGCoreConfiguration.userService());
+		UserDetailsService bean = new UserDetailsServiceImpl(this.coreConfig.userService());
 		return bean;
 	}
 }

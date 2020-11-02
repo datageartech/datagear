@@ -19,31 +19,31 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupp
  * 
  * @author datagear@163.com
  */
-//@Configuration(proxyBeanMethods = false)
-//@EnableWebMvc
-//@ComponentScan(basePackageClasses = MainController.class)
-public class DGWebConfiguration extends WebMvcConfigurationSupport
+// @Configuration(proxyBeanMethods = false)
+// @EnableWebMvc
+// @ComponentScan(basePackageClasses = MainController.class)
+public class WebConfig extends WebMvcConfigurationSupport
 {
-	private DGCoreConfiguration dGCoreConfiguration;
+	private CoreConfig coreConfig;
 
 	private Environment environment;
 
 	@Autowired
-	public DGWebConfiguration(DGCoreConfiguration dGCoreConfiguration, Environment environment)
+	public WebConfig(CoreConfig coreConfig, Environment environment)
 	{
 		super();
-		this.dGCoreConfiguration = dGCoreConfiguration;
+		this.coreConfig = coreConfig;
 		this.environment = environment;
 	}
 
-	public DGCoreConfiguration getCoreConfiguration()
+	public CoreConfig getCoreConfig()
 	{
-		return dGCoreConfiguration;
+		return coreConfig;
 	}
 
-	public void setCoreConfiguration(DGCoreConfiguration dGCoreConfiguration)
+	public void setCoreConfig(CoreConfig coreConfig)
 	{
-		this.dGCoreConfiguration = dGCoreConfiguration;
+		this.coreConfig = coreConfig;
 	}
 
 	public Environment getEnvironment()
@@ -65,7 +65,7 @@ public class DGWebConfiguration extends WebMvcConfigurationSupport
 
 		// XXX 父类方法不会注册应用自定义的FormattingConversionService，所以这里重新设置
 
-		bean.setConversionService(this.dGCoreConfiguration.conversionService().getObject());
+		bean.setConversionService(this.coreConfig.conversionService().getObject());
 
 		return bean;
 	}

@@ -4,7 +4,7 @@
 
 package org.datagear.web;
 
-import org.datagear.web.config.DGWebMvcConfigurer;
+import org.datagear.web.config.WebMvcConfigurerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -14,11 +14,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author datagear@163.com
  *
  */
-@SpringBootApplication(scanBasePackageClasses = DGWebMvcConfigurer.class)
-public class DGApplication
+@SpringBootApplication(scanBasePackageClasses = WebMvcConfigurerConfig.class)
+public class DataGearApplication
 {
 	public static void main(String[] args)
 	{
-		SpringApplication.run(DGApplication.class, args);
+		SpringApplication.run(DataGearApplication.class, args);
 	}
 }

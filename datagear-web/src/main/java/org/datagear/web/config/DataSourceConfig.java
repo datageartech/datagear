@@ -21,12 +21,12 @@ import org.springframework.core.env.Environment;
  * @author datagear@163.com
  */
 @Configuration
-public class DGDataSourceConfiguration
+public class DataSourceConfig
 {
 	private Environment environment;
 
 	@Autowired
-	public DGDataSourceConfiguration(Environment environment)
+	public DataSourceConfig(Environment environment)
 	{
 		super();
 		this.environment = environment;

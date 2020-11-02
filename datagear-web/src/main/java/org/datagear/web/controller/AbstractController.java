@@ -686,28 +686,56 @@ public abstract class AbstractController
 			if (statusCode == null)
 				statusCode = response.getStatus();
 
-			String message = (String) request.getAttribute("javax.servlet.error.message");
-
-			String statusCodeKey = "error.httpError";
-
-			if (statusCode != null)
-			{
-				int sc = statusCode.intValue();
-				statusCodeKey += "." + sc;
-			}
-
-			try
-			{
-				message = getMessage(request, statusCodeKey, new Object[0]);
-			}
-			catch (Throwable t)
-			{
-			}
-
-			operationMessage = OperationMessage.valueOfFail(statusCodeKey, message);
+			operationMessage = buildOperationMessageForHttpError(request, statusCode);
 		}
 
 		return operationMessage;
+	}
+
+	/**
+	 * 获取HTTP错误时的{@linkplain OperationMessage}。
+	 * 
+	 * @param request
+	 * @param statusCode
+	 *            允许为{@code null}
+	 * @return
+	 */
+	protected OperationMessage getOperationMessageForHttpError(HttpServletRequest request, Integer statusCode)
+	{
+		OperationMessage operationMessage = WebUtils.getOperationMessage(request);
+
+		if (operationMessage == null)
+			operationMessage = buildOperationMessageForHttpError(request, statusCode);
+
+		return operationMessage;
+	}
+
+	/**
+	 * 构建HTTP错误的{@linkplain OperationMessage}。
+	 * 
+	 * @param request
+	 * @param statusCode
+	 *            允许为{@code null}
+	 * @return
+	 */
+	protected OperationMessage buildOperationMessageForHttpError(HttpServletRequest request, Integer statusCode)
+	{
+		String message = (String) request.getAttribute("javax.servlet.error.message");
+
+		String statusCodeKey = "error.httpError";
+
+		if (statusCode != null)
+			statusCodeKey += "." + statusCode.intValue();
+
+		try
+		{
+			message = getMessage(request, statusCodeKey, new Object[0]);
+		}
+		catch (Throwable t)
+		{
+		}
+
+		return OperationMessage.valueOfFail(statusCodeKey, message);
 	}
 
 	/**

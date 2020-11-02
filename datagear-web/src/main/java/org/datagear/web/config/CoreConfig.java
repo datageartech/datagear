@@ -118,7 +118,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.context.support.ServletContextAttributeExporter;
@@ -130,32 +129,32 @@ import org.springframework.web.context.support.ServletContextAttributeExporter;
  */
 @Configuration
 @EnableTransactionManagement
-public class DGCoreConfiguration implements InitializingBean
+public class CoreConfig implements InitializingBean
 {
 	public static final String NAME_CHART_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "chartShowHtmlTplDashboardWidgetHtmlRenderer";
 
 	public static final String NAME_DASHBOARD_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "htmlTplDashboardWidgetRenderer";
 
-	private DGDataSourceConfiguration dGDataSourceConfiguration;
+	private DataSourceConfig dataSourceConfig;
 
 	private Environment environment;
 
 	@Autowired
-	public DGCoreConfiguration(DGDataSourceConfiguration dGDataSourceConfiguration, Environment environment)
+	public CoreConfig(DataSourceConfig dataSourceConfig, Environment environment)
 	{
 		super();
-		this.dGDataSourceConfiguration = dGDataSourceConfiguration;
+		this.dataSourceConfig = dataSourceConfig;
 		this.environment = environment;
 	}
 
-	public DGDataSourceConfiguration getDataSourceConfiguration()
+	public DataSourceConfig getDataSourceConfig()
 	{
-		return dGDataSourceConfiguration;
+		return dataSourceConfig;
 	}
 
-	public void setDataSourceConfiguration(DGDataSourceConfiguration dGDataSourceConfiguration)
+	public void setDataSourceConfig(DataSourceConfig dataSourceConfig)
 	{
-		this.dGDataSourceConfiguration = dGDataSourceConfiguration;
+		this.dataSourceConfig = dataSourceConfig;
 	}
 
 	public Environment getEnvironment()
@@ -254,14 +253,14 @@ public class DGCoreConfiguration implements InitializingBean
 	@Bean(initMethod = "upgrade")
 	public DbVersionManager dbVersionManager()
 	{
-		DbVersionManager bean = new DbVersionManager(this.dGDataSourceConfiguration.dataSource());
+		DbVersionManager bean = new DbVersionManager(this.dataSourceConfig.dataSource());
 		return bean;
 	}
 
 	@Bean
 	public PlatformTransactionManager transactionManager()
 	{
-		DataSourceTransactionManager bean = new DataSourceTransactionManager(this.dGDataSourceConfiguration.dataSource());
+		DataSourceTransactionManager bean = new DataSourceTransactionManager(this.dataSourceConfig.dataSource());
 		return bean;
 	}
 
@@ -274,7 +273,7 @@ public class DGCoreConfiguration implements InitializingBean
 			Resource[] mapperResources = pathResolver.getResources("classpath*:org/datagear/management/mapper/*.xml");
 
 			SqlSessionFactoryBean bean = new SqlSessionFactoryBean();
-			bean.setDataSource(this.dGDataSourceConfiguration.dataSource());
+			bean.setDataSource(this.dataSourceConfig.dataSource());
 			bean.setMapperLocations(mapperResources);
 			return bean.getObject();
 		}
@@ -345,7 +344,11 @@ public class DGCoreConfiguration implements InitializingBean
 	@Bean
 	public PasswordEncoder passwordEncoder()
 	{
-		StandardPasswordEncoder bean = new StandardPasswordEncoder();
+		@SuppressWarnings("deprecation")
+		org.springframework.security.crypto.password.StandardPasswordEncoder bean =
+				//
+				new org.springframework.security.crypto.password.StandardPasswordEncoder();
+
 		return bean;
 	}
 

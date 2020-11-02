@@ -9,21 +9,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.datagear.util.IOUtil;
+import org.datagear.web.OperationMessage;
+import org.datagear.web.controller.AbstractController;
 import org.datagear.web.controller.MainController;
 import org.datagear.web.freemarker.CustomFreeMarkerView;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.EnumCookieThemeResolver;
+import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorViewResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.ui.context.support.ResourceBundleThemeSource;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
@@ -43,28 +51,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Configuration
 @ComponentScan(basePackageClasses = MainController.class)
-public class DGWebMvcConfigurer implements WebMvcConfigurer
+public class WebMvcConfigurerConfig implements WebMvcConfigurer
 {
-	private DGCoreConfiguration dGCoreConfiguration;
+	private CoreConfig coreConfig;
 
 	private Environment environment;
 
 	@Autowired
-	public DGWebMvcConfigurer(DGCoreConfiguration dGCoreConfiguration, Environment environment)
+	public WebMvcConfigurerConfig(CoreConfig coreConfig, Environment environment)
 	{
 		super();
-		this.dGCoreConfiguration = dGCoreConfiguration;
+		this.coreConfig = coreConfig;
 		this.environment = environment;
 	}
 
-	public DGCoreConfiguration getCoreConfiguration()
+	public CoreConfig getCoreConfig()
 	{
-		return dGCoreConfiguration;
+		return coreConfig;
 	}
 
-	public void setCoreConfiguration(DGCoreConfiguration dGCoreConfiguration)
+	public void setCoreConfig(CoreConfig coreConfig)
 	{
-		this.dGCoreConfiguration = dGCoreConfiguration;
+		this.coreConfig = coreConfig;
 	}
 
 	public Environment getEnvironment()
@@ -93,7 +101,7 @@ public class DGWebMvcConfigurer implements WebMvcConfigurer
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
-		ObjectMapper objectMapper = this.dGCoreConfiguration.objectMapperFactory().getObjectMapper();
+		ObjectMapper objectMapper = this.coreConfig.objectMapperFactory().getObjectMapper();
 		MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
 
 		converters.add(messageConverter);
@@ -125,7 +133,7 @@ public class DGWebMvcConfigurer implements WebMvcConfigurer
 		settings.setProperty("number_format", "#.##");
 
 		Map<String, Object> variables = new HashMap<>();
-		variables.put("writeJson", new WriteJsonTemplateDirectiveModel(this.dGCoreConfiguration.objectMapperFactory()));
+		variables.put("writeJson", new WriteJsonTemplateDirectiveModel(this.coreConfig.objectMapperFactory()));
 
 		bean.setTemplateLoaderPath("classpath:org/datagear/web/templates/");
 		bean.setDefaultEncoding(IOUtil.CHARSET_UTF_8);
@@ -163,5 +171,34 @@ public class DGWebMvcConfigurer implements WebMvcConfigurer
 	{
 		CommonsMultipartResolver bean = new CommonsMultipartResolver();
 		return bean;
+	}
+
+	@Bean
+	public ErrorViewResolver errorViewResolver()
+	{
+		CustomErrorViewResolver bean = new CustomErrorViewResolver();
+		return bean;
+	}
+
+	/**
+	 * 自定义{@linkplain ErrorViewResolver}。
+	 * 
+	 * @author datagear@163.com
+	 *
+	 */
+	public static class CustomErrorViewResolver extends AbstractController implements ErrorViewResolver
+	{
+		public CustomErrorViewResolver()
+		{
+		}
+
+		@Override
+		public ModelAndView resolveErrorView(HttpServletRequest request, HttpStatus status, Map<String, Object> model)
+		{
+			OperationMessage operationMessage = getOperationMessageForHttpError(request, status.value());
+			WebUtils.setOperationMessage(request, operationMessage);
+
+			return new ModelAndView("error", model, status);
+		}
 	}
 }

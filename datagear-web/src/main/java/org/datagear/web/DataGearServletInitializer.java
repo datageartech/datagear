@@ -13,11 +13,11 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  * @author datagear@163.com
  *
  */
-public class DGServletInitializer extends SpringBootServletInitializer
+public class DataGearServletInitializer extends SpringBootServletInitializer
 {
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application)
 	{
-		return application.sources(DGApplication.class);
+		return application.sources(DataGearApplication.class);
 	}
 }

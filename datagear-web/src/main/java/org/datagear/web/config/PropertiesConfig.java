@@ -33,9 +33,9 @@ import org.springframework.context.annotation.PropertySource;
 		"classpath:org/datagear/web/datagear-version.properties" },
 		// 上面的扩展配置都是可选的，所以这里要设为true
 		ignoreResourceNotFound = true, encoding = "UTF-8")
-public class DGPropertiesConfiguration
+public class PropertiesConfig
 {
-	public DGPropertiesConfiguration()
+	public PropertiesConfig()
 	{
 	}
 }
