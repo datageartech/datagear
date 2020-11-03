@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.datagear.analysis.support.JsonSupport;
-import org.datagear.web.json.jackson.ObjectMapperFactory;
+import org.datagear.web.json.jackson.ObjectMapperBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,7 +30,7 @@ import freemarker.template.utility.DeepUnwrap;
  */
 public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 {
-	private ObjectMapperFactory objectMapperFactory;
+	private ObjectMapperBuilder objectMapperBuilder;
 
 	private ObjectMapper _objectMapper;
 
@@ -39,23 +39,21 @@ public class WriteJsonTemplateDirectiveModel implements TemplateDirectiveModel
 		super();
 	}
 
-	public WriteJsonTemplateDirectiveModel(ObjectMapperFactory objectMapperFactory)
+	public WriteJsonTemplateDirectiveModel(ObjectMapperBuilder objectMapperBuilder)
 	{
 		super();
-		this.objectMapperFactory = objectMapperFactory;
-		this._objectMapper = this.objectMapperFactory.getObjectMapper();
-		JsonSupport.disableAutoCloseTargetFeature(this._objectMapper);
+		setObjectMapperBuilder(objectMapperBuilder);
 	}
 
-	public ObjectMapperFactory getObjectMapperFactory()
+	public ObjectMapperBuilder getObjectMapperBuilder()
 	{
-		return objectMapperFactory;
+		return objectMapperBuilder;
 	}
 
-	public void setObjectMapperFactory(ObjectMapperFactory objectMapperFactory)
+	public void setObjectMapperBuilder(ObjectMapperBuilder objectMapperBuilder)
 	{
-		this.objectMapperFactory = objectMapperFactory;
-		this._objectMapper = this.objectMapperFactory.getObjectMapper();
+		this.objectMapperBuilder = objectMapperBuilder;
+		this._objectMapper = this.objectMapperBuilder.build();
 		JsonSupport.disableAutoCloseTargetFeature(this._objectMapper);
 	}
 

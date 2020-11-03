@@ -10,10 +10,10 @@ import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.server.AbstractService;
 import org.datagear.persistence.support.SqlSelectResult;
 import org.datagear.util.SqlScriptParser.SqlStatement;
-import org.datagear.web.OperationMessage;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SQLExecutionStat;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlCommand;
 import org.datagear.web.sqlpad.SqlpadExecutionService.SqlResultType;
+import org.datagear.web.util.OperationMessage;
 
 /**
  * SQL工作台cometd服务。

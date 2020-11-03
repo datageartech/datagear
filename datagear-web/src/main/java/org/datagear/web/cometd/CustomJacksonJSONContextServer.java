@@ -18,7 +18,7 @@ import org.cometd.common.JacksonJSONContext;
 import org.cometd.server.ServerMessageImpl;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.util.IOUtil;
-import org.datagear.web.json.jackson.ObjectMapperFactory;
+import org.datagear.web.json.jackson.ObjectMapperBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,7 +35,7 @@ public class CustomJacksonJSONContextServer implements JSONContext.Server
 {
 	public static final String DEFAULT_ENCODING = "UTF-8";
 
-	private ObjectMapperFactory objectMapperFactory;
+	private ObjectMapperBuilder objectMapperBuilder;
 
 	private String encoding = DEFAULT_ENCODING;
 
@@ -46,23 +46,21 @@ public class CustomJacksonJSONContextServer implements JSONContext.Server
 		super();
 	}
 
-	public CustomJacksonJSONContextServer(ObjectMapperFactory objectMapperFactory)
+	public CustomJacksonJSONContextServer(ObjectMapperBuilder objectMapperBuilder)
 	{
 		super();
-		this.objectMapperFactory = objectMapperFactory;
-		this._objectMapper = this.objectMapperFactory.getObjectMapper();
-		JsonSupport.disableAutoCloseTargetFeature(this._objectMapper);
+		setObjectMapperBuilder(objectMapperBuilder);
 	}
 
-	public ObjectMapperFactory getObjectMapperFactory()
+	public ObjectMapperBuilder getObjectMapperBuilder()
 	{
-		return objectMapperFactory;
+		return objectMapperBuilder;
 	}
 
-	public void setObjectMapperFactory(ObjectMapperFactory objectMapperFactory)
+	public void setObjectMapperBuilder(ObjectMapperBuilder objectMapperBuilder)
 	{
-		this.objectMapperFactory = objectMapperFactory;
-		this._objectMapper = this.objectMapperFactory.getObjectMapper();
+		this.objectMapperBuilder = objectMapperBuilder;
+		this._objectMapper = this.objectMapperBuilder.build();
 		JsonSupport.disableAutoCloseTargetFeature(this._objectMapper);
 	}
 

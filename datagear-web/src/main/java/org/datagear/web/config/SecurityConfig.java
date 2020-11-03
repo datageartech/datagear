@@ -23,6 +23,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 /**
  * 安全配置。
@@ -215,5 +216,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 	{
 		UserDetailsService bean = new UserDetailsServiceImpl(this.coreConfig.userService());
 		return bean;
+	}
+
+	@Bean
+	public StrictHttpFirewall httpFirewall()
+	{
+		StrictHttpFirewall firewall = new StrictHttpFirewall();
+
+		// 看板有些功能需要URL中允许分号（;）
+		// 参考：AbstractDataAnalysisController.addJsessionidParam(String, String)，
+		// 因此这里需要设置为允许，不然功能将无法使用
+		firewall.setAllowSemicolon(true);
+		return firewall;
 	}
 }

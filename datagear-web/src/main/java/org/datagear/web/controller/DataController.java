@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,13 +41,13 @@ import org.datagear.util.FileInfo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
-import org.datagear.web.OperationMessage;
-import org.datagear.web.convert.StringToJsonConverter;
 import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
 import org.datagear.web.format.SqlTimestampFormatter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
+import org.datagear.web.json.jackson.ObjectMapperBuilder;
+import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
@@ -63,6 +61,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 数据管理控制器。
@@ -101,6 +101,10 @@ public class DataController extends AbstractSchemaConnTableController
 
 	@Autowired
 	private SqlTimeFormatter sqlTimeFormatter;
+
+	private ObjectMapperBuilder objectMapperBuilder;
+
+	private ObjectMapper _objectMapper;
 
 	public DataController()
 	{
@@ -165,6 +169,18 @@ public class DataController extends AbstractSchemaConnTableController
 	public void setSqlTimeFormatter(SqlTimeFormatter sqlTimeFormatter)
 	{
 		this.sqlTimeFormatter = sqlTimeFormatter;
+	}
+
+	public ObjectMapperBuilder getObjectMapperBuilder()
+	{
+		return objectMapperBuilder;
+	}
+
+	@Autowired
+	public void setObjectMapperBuilder(ObjectMapperBuilder objectMapperBuilder)
+	{
+		this.objectMapperBuilder = objectMapperBuilder;
+		this._objectMapper = this.objectMapperBuilder.build();
 	}
 
 	@RequestMapping("/{schemaId}/{tableName}/query")
@@ -660,11 +676,12 @@ public class DataController extends AbstractSchemaConnTableController
 	@RequestMapping(value = "/{schemaId}/{tableName}/downloadColumnValue")
 	public void downloadColumnValue(HttpServletRequest request, HttpServletResponse response,
 			org.springframework.ui.Model springModel, @PathVariable("schemaId") String schemaId,
-			@PathVariable("tableName") String tableName, @RequestParam("data") JsonObject rowJson,
+			@PathVariable("tableName") String tableName, @RequestParam("data") String rowJsonStr,
 			@RequestParam("columnName") final String columnName) throws Throwable
 	{
 		final User user = WebUtils.getUser(request, response);
-		final Row row = convertToRow(rowJson);
+		@SuppressWarnings("unchecked")
+		final Row row = convertToRow(this._objectMapper.readValue(rowJsonStr, Map.class));
 
 		final DefaultLOBRowMapper rowMapper = new DefaultLOBRowMapper();
 		rowMapper.setReadActualClobRows(0);
@@ -790,32 +807,6 @@ public class DataController extends AbstractSchemaConnTableController
 
 		for (int i = 0; i < list.size(); i++)
 			rows[i] = convertToRow((list.get(i)));
-
-		return rows;
-	}
-
-	protected Row convertToRow(JsonObject json)
-	{
-		Map<String, Object> map = StringToJsonConverter.toStringValueMap(json);
-
-		if (map == null)
-			return null;
-
-		return new Row(map);
-	}
-
-	@SuppressWarnings("unchecked")
-	protected Row[] convertToRows(JsonArray json)
-	{
-		List<Object> list = StringToJsonConverter.toStringValueList(json);
-
-		if (list == null)
-			return null;
-
-		Row[] rows = new Row[list.size()];
-
-		for (int i = 0; i < list.size(); i++)
-			rows[i] = new Row(((Map<String, ?>) list.get(i)));
 
 		return rows;
 	}

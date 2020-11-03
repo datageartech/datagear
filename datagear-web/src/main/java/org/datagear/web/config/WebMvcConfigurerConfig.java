@@ -95,10 +95,26 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
-		ObjectMapper objectMapper = this.coreConfig.objectMapperFactory().getObjectMapper();
+		int oldIndex = -1;
+
+		for (int i = 0; i < converters.size(); i++)
+		{
+			HttpMessageConverter<?> converter = converters.get(i);
+
+			if (converter instanceof MappingJackson2HttpMessageConverter)
+			{
+				oldIndex = i;
+				break;
+			}
+		}
+
+		ObjectMapper objectMapper = this.coreConfig.objectMapperBuilder().build();
 		MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter(objectMapper);
 
-		converters.add(messageConverter);
+		if (oldIndex > -1)
+			converters.add(oldIndex, messageConverter);
+		else
+			converters.add(messageConverter);
 	}
 
 	@Override
@@ -127,7 +143,7 @@ public class WebMvcConfigurerConfig implements WebMvcConfigurer
 		settings.setProperty("number_format", "#.##");
 
 		Map<String, Object> variables = new HashMap<>();
-		variables.put("writeJson", new WriteJsonTemplateDirectiveModel(this.coreConfig.objectMapperFactory()));
+		variables.put("writeJson", new WriteJsonTemplateDirectiveModel(this.coreConfig.objectMapperBuilder()));
 
 		bean.setTemplateLoaderPath("classpath:org/datagear/web/templates/");
 		bean.setDefaultEncoding(IOUtil.CHARSET_UTF_8);

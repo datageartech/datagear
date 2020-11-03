@@ -82,7 +82,6 @@ import org.datagear.persistence.support.SqlSelectManager;
 import org.datagear.util.IOUtil;
 import org.datagear.web.cometd.CustomJacksonJSONContextServer;
 import org.datagear.web.cometd.dataexchange.DataExchangeCometdService;
-import org.datagear.web.convert.CustomFormattingConversionServiceFactoryBean;
 import org.datagear.web.format.DateFormatter;
 import org.datagear.web.format.SqlDateFormatter;
 import org.datagear.web.format.SqlTimeFormatter;
@@ -91,8 +90,8 @@ import org.datagear.web.json.jackson.LocaleDateSerializer;
 import org.datagear.web.json.jackson.LocaleSqlDateSerializer;
 import org.datagear.web.json.jackson.LocaleSqlTimeSerializer;
 import org.datagear.web.json.jackson.LocaleSqlTimestampSerializer;
-import org.datagear.web.json.jackson.ObjectMapperFactory;
-import org.datagear.web.json.jackson.ObjectMapperFactory.JsonSerializerConfig;
+import org.datagear.web.json.jackson.ObjectMapperBuilder;
+import org.datagear.web.json.jackson.ObjectMapperBuilder.JsonSerializerConfig;
 import org.datagear.web.security.UserPasswordEncoderImpl;
 import org.datagear.web.sqlpad.SqlpadCometdService;
 import org.datagear.web.sqlpad.SqlpadExecutionService;
@@ -116,6 +115,8 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -168,6 +169,84 @@ public class CoreConfig implements InitializingBean
 	}
 
 	@Bean
+	public MessageSource messageSource()
+	{
+		ResourceBundleMessageSource bean = new ResourceBundleMessageSource();
+		bean.setBasename("org.datagear.web.messages.messages");
+		bean.setDefaultEncoding(IOUtil.CHARSET_UTF_8);
+
+		return bean;
+	}
+
+	@Bean
+	public SqlDateFormatter sqlDateFormatter()
+	{
+		return new SqlDateFormatter();
+	}
+
+	@Bean
+	public SqlTimeFormatter sqlTimeFormatter()
+	{
+		return new SqlTimeFormatter();
+	}
+
+	@Bean
+	public SqlTimestampFormatter sqlTimestampFormatter()
+	{
+		return new SqlTimestampFormatter();
+	}
+
+	@Bean
+	public DateFormatter dateFormatter()
+	{
+		return new DateFormatter();
+	}
+
+	@Bean
+	public FormattingConversionService conversionService()
+	{
+		DefaultFormattingConversionService bean = new DefaultFormattingConversionService(false);
+
+		bean.addFormatter(this.sqlDateFormatter());
+		bean.addFormatter(this.sqlTimeFormatter());
+		bean.addFormatter(this.sqlTimestampFormatter());
+		bean.addFormatter(this.dateFormatter());
+
+		DefaultFormattingConversionService.addDefaultFormatters(bean);
+
+		return bean;
+	}
+
+	@Bean
+	public ObjectMapperBuilder objectMapperBuilder()
+	{
+		ObjectMapperBuilder bean = new ObjectMapperBuilder();
+
+		LocaleDateSerializer localeDateSerializer = new LocaleDateSerializer();
+		localeDateSerializer.setDateFormatter(this.dateFormatter());
+
+		LocaleSqlDateSerializer localeSqlDateSerializer = new LocaleSqlDateSerializer();
+		localeSqlDateSerializer.setSqlDateFormatter(this.sqlDateFormatter());
+
+		LocaleSqlTimeSerializer localeSqlTimeSerializer = new LocaleSqlTimeSerializer();
+		localeSqlTimeSerializer.setSqlTimeFormatter(this.sqlTimeFormatter());
+
+		LocaleSqlTimestampSerializer localeSqlTimestampSerializer = new LocaleSqlTimestampSerializer();
+		localeSqlTimestampSerializer.setSqlTimestampFormatter(this.sqlTimestampFormatter());
+
+		List<JsonSerializerConfig> jsonSerializerConfigs = new ArrayList<>();
+
+		jsonSerializerConfigs.add(new JsonSerializerConfig(java.util.Date.class, localeDateSerializer));
+		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Date.class, localeSqlDateSerializer));
+		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Time.class, localeSqlTimeSerializer));
+		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Timestamp.class, localeSqlTimestampSerializer));
+
+		bean.setJsonSerializerConfigs(jsonSerializerConfigs);
+
+		return bean;
+	}
+
+	@Bean
 	public Filter webContextPathFilter()
 	{
 		WebContextPathFilter bean = new WebContextPathFilter();
@@ -176,16 +255,6 @@ public class CoreConfig implements InitializingBean
 		webContextPath.setSubContextPath(environment.getProperty("subContextPath"));
 
 		bean.setWebContextPath(webContextPath);
-
-		return bean;
-	}
-
-	@Bean
-	public MessageSource messageSource()
-	{
-		ResourceBundleMessageSource bean = new ResourceBundleMessageSource();
-		bean.setBasename("org.datagear.web.messages.messages");
-		bean.setDefaultEncoding(IOUtil.CHARSET_UTF_8);
 
 		return bean;
 	}
@@ -581,89 +650,6 @@ public class CoreConfig implements InitializingBean
 	}
 
 	@Bean
-	public SqlDateFormatter sqlDateFormatter()
-	{
-		return new SqlDateFormatter();
-	}
-
-	@Bean
-	public SqlTimeFormatter sqlTimeFormatter()
-	{
-		return new SqlTimeFormatter();
-	}
-
-	@Bean
-	public SqlTimestampFormatter sqlTimestampFormatter()
-	{
-		return new SqlTimestampFormatter();
-	}
-
-	@Bean
-	public DateFormatter dateFormatter()
-	{
-		return new DateFormatter();
-	}
-
-	@Bean
-	public CustomFormattingConversionServiceFactoryBean conversionService()
-	{
-		CustomFormattingConversionServiceFactoryBean bean = new CustomFormattingConversionServiceFactoryBean();
-		return bean;
-	}
-
-	@Bean
-	public LocaleDateSerializer localeDateSerializer()
-	{
-		LocaleDateSerializer bean = new LocaleDateSerializer();
-		bean.setDateFormatter(this.dateFormatter());
-
-		return bean;
-	}
-
-	@Bean
-	public LocaleSqlDateSerializer localeSqlDateSerializer()
-	{
-		LocaleSqlDateSerializer bean = new LocaleSqlDateSerializer();
-		bean.setSqlDateFormatter(this.sqlDateFormatter());
-
-		return bean;
-	}
-
-	@Bean
-	public LocaleSqlTimeSerializer localeSqlTimeSerializer()
-	{
-		LocaleSqlTimeSerializer bean = new LocaleSqlTimeSerializer();
-		bean.setSqlTimeFormatter(this.sqlTimeFormatter());
-
-		return bean;
-	}
-
-	@Bean
-	public LocaleSqlTimestampSerializer localeSqlTimestampSerializer()
-	{
-		LocaleSqlTimestampSerializer bean = new LocaleSqlTimestampSerializer();
-		bean.setSqlTimestampFormatter(this.sqlTimestampFormatter());
-
-		return bean;
-	}
-
-	@Bean
-	public ObjectMapperFactory objectMapperFactory()
-	{
-		ObjectMapperFactory bean = new ObjectMapperFactory();
-
-		List<JsonSerializerConfig> jsonSerializerConfigs = new ArrayList<>();
-
-		jsonSerializerConfigs.add(new JsonSerializerConfig(java.util.Date.class, this.localeDateSerializer()));
-		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Date.class, this.localeSqlDateSerializer()));
-		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Time.class, this.localeSqlTimeSerializer()));
-		jsonSerializerConfigs
-				.add(new JsonSerializerConfig(java.sql.Timestamp.class, this.localeSqlTimestampSerializer()));
-
-		return bean;
-	}
-
-	@Bean
 	public ChangelogResolver changelogResolver()
 	{
 		return new ChangelogResolver();
@@ -694,7 +680,7 @@ public class CoreConfig implements InitializingBean
 		options.put("logLevel", 3);
 		options.put("timeout", 30000);
 		options.put("maxInterval", 120000);
-		options.put("jsonContext", new CustomJacksonJSONContextServer(this.objectMapperFactory()));
+		options.put("jsonContext", new CustomJacksonJSONContextServer(this.objectMapperBuilder()));
 
 		List<Extension> extensions = new ArrayList<>();
 		extensions.add(new AcknowledgedMessagesExtension());

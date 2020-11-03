@@ -16,7 +16,7 @@ import org.datagear.management.service.RoleService;
 import org.datagear.management.service.RoleUserService;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
-import org.datagear.web.OperationMessage;
+import org.datagear.web.util.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

@@ -15,7 +15,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.UserService;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IDUtil;
-import org.datagear.web.OperationMessage;
+import org.datagear.web.util.OperationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

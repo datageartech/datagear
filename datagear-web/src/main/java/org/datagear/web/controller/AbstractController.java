@@ -26,10 +26,9 @@ import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IOUtil;
 import org.datagear.util.JDBCCompatiblity;
 import org.datagear.util.StringUtil;
-import org.datagear.web.OperationMessage;
 import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
-import org.datagear.web.convert.StringToJsonConverter;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
+import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
@@ -83,8 +82,6 @@ public abstract class AbstractController
 	@Autowired
 	private MessageSource messageSource;
 
-	private StringToJsonConverter stringToJsonConverter = new StringToJsonConverter();
-
 	public AbstractController()
 	{
 		super();
@@ -108,16 +105,6 @@ public abstract class AbstractController
 	public void setConversionService(ConversionService conversionService)
 	{
 		this.conversionService = conversionService;
-	}
-
-	public StringToJsonConverter getStringToJsonConverter()
-	{
-		return stringToJsonConverter;
-	}
-
-	public void setStringToJsonConverter(StringToJsonConverter stringToJsonConverter)
-	{
-		this.stringToJsonConverter = stringToJsonConverter;
 	}
 
 	protected boolean setCookieAnalysisProjectIfValid(HttpServletRequest request, HttpServletResponse response,

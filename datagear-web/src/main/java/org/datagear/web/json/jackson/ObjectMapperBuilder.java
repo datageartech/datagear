@@ -16,16 +16,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 /**
- * {@linkplain ObjectMapper}工厂。
+ * {@linkplain ObjectMapper}构建器。
  * 
  * @author datagear@163.com
  *
  */
-public class ObjectMapperFactory
+public class ObjectMapperBuilder
 {
 	private List<JsonSerializerConfig> jsonSerializerConfigs;
 
-	public ObjectMapperFactory()
+	public ObjectMapperBuilder()
 	{
 	}
 
@@ -40,12 +40,12 @@ public class ObjectMapperFactory
 	}
 
 	/**
-	 * 获取{@linkplain ObjectMapper}对象。
+	 * 构建新{@linkplain ObjectMapper}对象。
 	 * 
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public ObjectMapper getObjectMapper()
+	public ObjectMapper build()
 	{
 		ObjectMapper objectMapper = JsonSupport.create();
 		JsonSupport.setWriteJsonFeatures(objectMapper);
@@ -53,7 +53,7 @@ public class ObjectMapperFactory
 
 		if (this.jsonSerializerConfigs != null && !this.jsonSerializerConfigs.isEmpty())
 		{
-			SimpleModule module = new SimpleModule(ObjectMapperFactory.class.getSimpleName());
+			SimpleModule module = new SimpleModule(ObjectMapperBuilder.class.getSimpleName());
 
 			for (JsonSerializerConfig sc : this.jsonSerializerConfigs)
 			{

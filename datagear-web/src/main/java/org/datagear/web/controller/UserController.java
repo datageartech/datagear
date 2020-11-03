@@ -14,7 +14,7 @@ import org.datagear.management.service.SchemaService;
 import org.datagear.management.service.UserService;
 import org.datagear.persistence.PagingQuery;
 import org.datagear.util.IDUtil;
-import org.datagear.web.OperationMessage;
+import org.datagear.web.util.OperationMessage;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

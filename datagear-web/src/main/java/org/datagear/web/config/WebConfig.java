@@ -65,7 +65,7 @@ public class WebConfig extends WebMvcConfigurationSupport
 
 		// XXX 父类方法不会注册应用自定义的FormattingConversionService，所以这里重新设置
 
-		bean.setConversionService(this.coreConfig.conversionService().getObject());
+		bean.setConversionService(this.coreConfig.conversionService());
 
 		return bean;
 	}

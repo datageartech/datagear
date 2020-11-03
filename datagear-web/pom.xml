@@ -11,9 +11,10 @@
 	
 	<artifactId>datagear-web</artifactId>
 	<name>datagear-web</name>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	
 	<properties>
+		<failOnMissingWebXml>false</failOnMissingWebXml>
 		<dist.log4j.rootLogger>INFO, A1</dist.log4j.rootLogger>
 	</properties>
 	
@@ -73,11 +74,13 @@
 			<artifactId>spring-boot-starter-jetty</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!--
 		<dependency>
 		    <groupId>org.glassfish</groupId>
 		    <artifactId>javax.json</artifactId>
 		    <version>${javax.json.version}</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
