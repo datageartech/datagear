@@ -5,10 +5,8 @@
 package org.datagear.web.config;
 
 import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 /**
@@ -20,38 +18,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 @Configuration
 public class WebMvcRegistrationsConfig implements WebMvcRegistrations
 {
-	private CoreConfig coreConfig;
-
-	private Environment environment;
-
-	@Autowired
-	public WebMvcRegistrationsConfig(CoreConfig coreConfig, Environment environment)
-	{
-		super();
-		this.coreConfig = coreConfig;
-		this.environment = environment;
-	}
-
-	public CoreConfig getCoreConfig()
-	{
-		return coreConfig;
-	}
-
-	public void setCoreConfig(CoreConfig coreConfig)
-	{
-		this.coreConfig = coreConfig;
-	}
-
-	public Environment getEnvironment()
-	{
-		return environment;
-	}
-
-	public void setEnvironment(Environment environment)
-	{
-		this.environment = environment;
-	}
-
 	@Override
 	public ExceptionHandlerExceptionResolver getExceptionHandlerExceptionResolver()
 	{

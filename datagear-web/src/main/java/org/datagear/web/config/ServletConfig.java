@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.Ordered;
-import org.springframework.core.env.Environment;
 import org.springframework.web.context.support.ServletContextAttributeExporter;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
@@ -34,14 +33,11 @@ public class ServletConfig
 {
 	private CoreConfig coreConfig;
 
-	private Environment environment;
-
 	@Autowired
-	public ServletConfig(CoreConfig coreConfig, Environment environment)
+	public ServletConfig(CoreConfig coreConfig)
 	{
 		super();
 		this.coreConfig = coreConfig;
-		this.environment = environment;
 	}
 
 	public CoreConfig getCoreConfig()
@@ -52,16 +48,6 @@ public class ServletConfig
 	public void setCoreConfig(CoreConfig coreConfig)
 	{
 		this.coreConfig = coreConfig;
-	}
-
-	public Environment getEnvironment()
-	{
-		return environment;
-	}
-
-	public void setEnvironment(Environment environment)
-	{
-		this.environment = environment;
 	}
 
 	@Bean
