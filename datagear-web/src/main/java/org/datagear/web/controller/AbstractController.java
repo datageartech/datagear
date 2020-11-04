@@ -29,7 +29,6 @@ import org.datagear.util.StringUtil;
 import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
 import org.datagear.web.freemarker.WriteJsonTemplateDirectiveModel;
 import org.datagear.web.util.OperationMessage;
-import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
 import org.datagear.web.vo.APIDDataFilterPagingQuery;
 import org.datagear.web.vo.DataFilterPagingQuery;
@@ -247,17 +246,6 @@ public abstract class AbstractController
 		pagingQuery.setDataFilter(value);
 
 		return pagingQuery;
-	}
-
-	/**
-	 * 获取当前请求的{@linkplain WebContextPath}。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	protected WebContextPath getWebContextPath(HttpServletRequest request)
-	{
-		return WebContextPath.getWebContextPath(request);
 	}
 
 	/**

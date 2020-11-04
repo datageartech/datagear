@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.datagear.web.util.WebContextPath;
 import org.datagear.web.util.WebUtils;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerView;
 
@@ -52,7 +51,7 @@ public class CustomFreeMarkerView extends FreeMarkerView
 	{
 		super.exposeHelpers(model, request);
 
-		model.put(VAR_CONTEXT_PATH, WebContextPath.getWebContextPath(request).get(request));
+		model.put(VAR_CONTEXT_PATH, WebUtils.getContextPath(request));
 		model.put(VAR_IS_AJAX_REQUEST, WebUtils.isAjaxRequest(request));
 
 		model.put(VAR_PAGE_ID, WebUtils.generatePageId());

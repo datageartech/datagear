@@ -15,8 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.Filter;
-
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -101,8 +99,6 @@ import org.datagear.web.util.DirectoryFactory;
 import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.TableCache;
-import org.datagear.web.util.WebContextPath;
-import org.datagear.web.util.WebContextPathFilter;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -121,7 +117,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.context.support.ServletContextAttributeExporter;
 
 /**
  * 核心配置。
@@ -242,19 +237,6 @@ public class CoreConfig implements InitializingBean
 		jsonSerializerConfigs.add(new JsonSerializerConfig(java.sql.Timestamp.class, localeSqlTimestampSerializer));
 
 		bean.setJsonSerializerConfigs(jsonSerializerConfigs);
-
-		return bean;
-	}
-
-	@Bean
-	public Filter webContextPathFilter()
-	{
-		WebContextPathFilter bean = new WebContextPathFilter();
-
-		WebContextPath webContextPath = new WebContextPath();
-		webContextPath.setSubContextPath(environment.getProperty("subContextPath"));
-
-		bean.setWebContextPath(webContextPath);
 
 		return bean;
 	}
@@ -659,17 +641,6 @@ public class CoreConfig implements InitializingBean
 	public BayeuxServer bayeuxServer()
 	{
 		return buildBayeuxServerFactory().getBayeuxServer();
-	}
-
-	@Bean
-	public ServletContextAttributeExporter bayeuxServerServletContextAttributeExporter()
-	{
-		ServletContextAttributeExporter bean = new ServletContextAttributeExporter();
-
-		Map<String, Object> attributes = new HashMap<>();
-		attributes.put("org.cometd.bayeux", this.bayeuxServer());
-
-		return bean;
 	}
 
 	protected BayeuxServerFactory buildBayeuxServerFactory()

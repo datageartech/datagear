@@ -277,7 +277,7 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	@SuppressWarnings("unchecked")
 	protected void addHeartBeatValue(HttpServletRequest request, WebContext webContext)
 	{
-		String heartbeatURL = webContext.getContextPath() + "/analysis/dashboard/heartbeat";
+		String heartbeatURL = WebUtils.getContextPath(request) + "/analysis/dashboard/heartbeat";
 		heartbeatURL = addJsessionidParam(heartbeatURL, request.getSession().getId());
 
 		((Map<String, Object>) webContext.getExtraValues()).put(DASHBOARD_HEARTBEAT_URL_NAME, heartbeatURL);

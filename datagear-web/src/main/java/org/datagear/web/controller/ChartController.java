@@ -420,7 +420,7 @@ public class ChartController extends AbstractChartPluginAwareController implemen
 	{
 		HttpSession session = request.getSession();
 
-		String contextPath = getWebContextPath(request).get(request);
+		String contextPath = WebUtils.getContextPath(request);
 		WebContext webContext = new WebContext(contextPath,
 				addJsessionidParam(contextPath + "/analysis/chart/showData", session.getId()),
 				addJsessionidParam(contextPath + "/analysis/dashboard/loadChart", session.getId()));

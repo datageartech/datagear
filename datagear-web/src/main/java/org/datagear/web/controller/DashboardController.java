@@ -971,7 +971,7 @@ public class DashboardController extends AbstractDataAnalysisController implemen
 	{
 		HttpSession session = request.getSession();
 
-		String contextPath = getWebContextPath(request).get(request);
+		String contextPath = WebUtils.getContextPath(request);
 		WebContext webContext = new WebContext(contextPath,
 				addJsessionidParam(contextPath + "/analysis/dashboard/showData", session.getId()),
 				addJsessionidParam(contextPath + "/analysis/dashboard/loadChart", session.getId()));

@@ -5,13 +5,11 @@
 package org.datagear.web.config;
 
 import org.datagear.web.config.support.DeliverContentTypeExceptionHandlerExceptionResolver;
-import org.datagear.web.config.support.SubContextPathRequestMappingHandlerMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcRegistrations;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 /**
  * Web配置。
@@ -52,16 +50,6 @@ public class WebMvcRegistrationsConfig implements WebMvcRegistrations
 	public void setEnvironment(Environment environment)
 	{
 		this.environment = environment;
-	}
-
-	@Override
-	public RequestMappingHandlerMapping getRequestMappingHandlerMapping()
-	{
-		SubContextPathRequestMappingHandlerMapping bean = new SubContextPathRequestMappingHandlerMapping();
-		bean.setAlwaysUseFullPath(true);
-		bean.setSubContextPath(this.environment.getProperty("subContextPath"));
-
-		return bean;
 	}
 
 	@Override

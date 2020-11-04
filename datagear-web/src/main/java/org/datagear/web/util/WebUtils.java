@@ -51,6 +51,17 @@ public class WebUtils
 	public static final String KEY_PARENT_PAGE_ID = "parentPageId";
 
 	/**
+	 * 获取应用上下文路径。
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public static String getContextPath(HttpServletRequest request)
+	{
+		return request.getContextPath();
+	}
+
+	/**
 	 * 获取当前用户（认证用户或者匿名用户）。
 	 * <p>
 	 * 此方法不会返回{@code null}。
@@ -200,7 +211,7 @@ public class WebUtils
 			int age, String path)
 	{
 		if (StringUtil.isEmpty(path))
-			path = WebContextPath.getWebContextPath(request).get(request);
+			path = getContextPath(request);
 
 		Cookie cookie = new Cookie(name, value);
 		cookie.setPath(path);

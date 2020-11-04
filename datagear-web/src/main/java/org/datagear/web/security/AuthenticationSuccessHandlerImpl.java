@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.datagear.management.domain.User;
 import org.datagear.management.service.CreateUserEntityService;
-import org.datagear.web.util.WebContextPath;
+import org.datagear.util.StringUtil;
 import org.datagear.web.util.WebUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -49,7 +49,13 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 	{
 		mergeAnonymousUserEntities(request, response, authentication);
 
-		response.sendRedirect(WebContextPath.getWebContextPath(request).concat(request, "/"));
+		String redirectPath = WebUtils.getContextPath(request);
+
+		// 当应用无上下文路径时，redirectPath将是空字符串，此时会导致跳转至本页面，所以这里处理为"/"，确保跳转至首页
+		if (StringUtil.isEmpty(redirectPath))
+			redirectPath = "/";
+
+		response.sendRedirect(redirectPath);
 	}
 
 	/**
