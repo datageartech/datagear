@@ -163,13 +163,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
 				.and().logout().logoutUrl("/logout").invalidateHttpSession(true).logoutSuccessUrl("/")
 
 				.and().rememberMe().key("REMEMBER_ME_KEY").tokenValiditySeconds(60 * 60 * 24 * 365)
-		// TODO 配置"remember-me-parameter"为"autoLogin"
-		;
+				.rememberMeParameter("rememberMe").rememberMeCookieName("REMEMBER_ME");
 	}
 
 	@Bean
 	@Override
-	public UserDetailsService userDetailsServiceBean() throws Exception
+	public UserDetailsService userDetailsService()
 	{
 		UserDetailsService bean = new UserDetailsServiceImpl(this.coreConfig.userService());
 		return bean;

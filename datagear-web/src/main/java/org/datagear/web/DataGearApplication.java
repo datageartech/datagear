@@ -39,12 +39,8 @@ public class DataGearApplication
 		@Override
 		public void printBanner(Environment environment, Class<?> sourceClass, PrintStream out)
 		{
-			List<String> lines = buildBannerLines(
-					"",
-					Global.PRODUCT_NAME_EN + " - v" + Global.VERSION,
-					Global.WEB_SITE,
-					"",
-					"(^_^)");
+			List<String> lines = buildBannerLines("", Global.PRODUCT_NAME_EN + " - v" + Global.VERSION, Global.WEB_SITE,
+					"", "(^_^)");
 
 			for (String line : lines)
 				out.println(line);
@@ -60,9 +56,10 @@ public class DataGearApplication
 			while (border.length() <= maxLen)
 				border = border + BORDER;
 
-			List<String> lines = new ArrayList<String>();
+			List<String> lines = new ArrayList<>();
 			lines.add("+" + border + "+");
 
+			// 每一行都居中显示
 			for (String content : contents)
 			{
 				int spaces = border.length() - content.length();

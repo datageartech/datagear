@@ -43,8 +43,8 @@
 				<input type="reset" value="<@spring.message code='reset' />" />
 			</div>
 			<div class="form-foot small-text" style="text-align:right;">
-				<label for="auto-login-checkbox"><@spring.message code='login.autoLogin' /></label>
-	   			<input type="checkbox" id="auto-login-checkbox" name="autoLogin" value="1" />
+				<label for="remember-me-checkbox"><@spring.message code='login.rememberMe' /></label>
+	   			<input type="checkbox" id="remember-me-checkbox" name="rememberMe" value="1" />
 	   			<a class="link" href="${contextPath}/resetPassword"><@spring.message code='login.fogetPassword' /></a>
 			</div>
 		</form>
@@ -57,7 +57,7 @@
 {
 	//需要先渲染按钮，不然对话框尺寸不合适，出现滚动条
 	$.initButtons(po.element());
-	$("input[name=autoLogin]", po.element()).checkboxradio({icon:true});
+	$("input[name=rememberMe]", po.element()).checkboxradio({icon:true});
 	
 	var dialog=po.element(".page-form").dialog({
 		appendTo: po.element(),
