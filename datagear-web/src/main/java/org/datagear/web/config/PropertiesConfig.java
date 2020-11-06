@@ -16,23 +16,7 @@ import org.springframework.context.annotation.PropertySource;
  * @author datagear@163.com
  */
 @Configuration
-@PropertySource(value = {
-		// 基础配置
-		"classpath:org/datagear/web/datagear.properties",
-		// 预留扩展配置，Web应用内的自定义配置文件
-		"/WEB-INF/datagear.properties",
-		// 预留扩展配置，Web应用内的自定义配置文件
-		"/WEB-INF/config/datagear.properties",
-		// 预留扩展配置，程序运行目录的自定义配置文件
-		"file:datagear.properties",
-		// 预留扩展配置，程序运行目录的自定义配置文件
-		"file:config/datagear.properties",
-		// 预留扩展配置，应用数据目录的自定义配置文件
-		"file:${user.home}/.datagear/datagear.properties",
-		// 版本号配置
-		"classpath:org/datagear/web/datagear-version.properties" },
-		// 上面的扩展配置都是可选的，所以这里要设为true
-		ignoreResourceNotFound = true, encoding = "UTF-8")
+@PropertySource(value = "classpath:org/datagear/web/application.properties", encoding = "UTF-8")
 public class PropertiesConfig
 {
 	public PropertiesConfig()
