@@ -15,7 +15,12 @@
 	
 	<properties>
 		<failOnMissingWebXml>false</failOnMissingWebXml>
-		<dist.log4j.rootLogger>INFO, A1</dist.log4j.rootLogger>
+		<productName>datagear-${project.version}</productName>
+		<productNameJar>${productName}.jar</productNameJar>
+		<productNameWar>${productName}.war</productNameWar>
+		<dist.target.folderName>${productName}-bin</dist.target.folderName>
+		<dist.target.dir>${project.build.directory}/${dist.target.folderName}</dist.target.dir>
+		<dist.package.target.dir>${project.build.directory}/${dist.target.folderName}-package</dist.package.target.dir>
 	</properties>
 	
 	<dependencies>
@@ -107,28 +112,19 @@
 	</dependencies>
 	
 	<build>
-		
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<includes>
-					<include>datagear-version.properties</include>
-				</includes>
-				<filtering>true</filtering>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-				<excludes>
-					<exclude>datagear-version.properties</exclude>
-				</excludes>
-				<filtering>false</filtering>
-			</resource>
-		</resources>
+		<finalName>${productName}</finalName>
 		
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			
 			<plugin>
@@ -136,21 +132,6 @@
 			    <artifactId>maven-antrun-plugin</artifactId>
 			    <version>${maven-antrun-plugin.version}</version>
 			    <executions>
-			    	<!-- 打包前修改log4j的日志设置 -->
-			    	<execution>
-			    		<id>updateLog4jLevelToError</id>
-			    		<phase>prepare-package</phase>
-			    		<goals>
-			    			<goal>run</goal>
-			    		</goals>
-			    		<configuration>
-			    			<tasks>
-			    				<replace file="${project.build.outputDirectory}/log4j.properties"
-			    					token="DEBUG, A0" value="${dist.log4j.rootLogger}" />
-			    			</tasks>
-			    		</configuration>
-			    	</execution>
-			    	
 			    	<!-- 拷贝LICENSE文件 -->
 			    	<execution>
 			    		<id>copyLICENSE</id>
@@ -167,62 +148,80 @@
 			    </executions>
 			</plugin>
 			
-			<!-- 构建日期 -->
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.1</version>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+			    <version>${maven-antrun-plugin.version}</version>
 				<executions>
 					<execution>
-						<phase>validate</phase>
+						<id>clearDistDirectory</id>
+						<phase>prepare-package</phase>
 						<goals>
-							<goal>create-timestamp</goal>
-						</goals>	
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<delete dir="${dist.target.dir}" includeEmptyDirs="true" />
+								<mkdir dir="${dist.target.dir}"/>
+								<delete dir="${dist.package.target.dir}" includeEmptyDirs="true" />
+								<mkdir dir="${dist.package.target.dir}" />
+							</tasks>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<timestampFormat>yyyy-MM-dd HH:mm</timestampFormat>
-					<timestampPropertyName>buildtimestamp</timestampPropertyName>
-				</configuration>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>prepareDistResources</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${dist.target.dir}/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>dist</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+			    <version>${maven-antrun-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>buildDistPackage</id>
+						<phase>package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<copy file="${project.build.directory}/${productName}.war" tofile="${dist.target.dir}/${productNameJar}" />
+								<mkdir dir="${dist.target.dir}/logs"/>
+								<copy file="../LICENSE" todir="${dist.target.dir}" />
+								
+								<zip destfile="${dist.package.target.dir}/${productName}.zip" basedir="${project.build.directory}" includes="${dist.target.folderName}/**/*" />
+								<copy file="${project.build.directory}/${productNameWar}.original" tofile="${dist.package.target.dir}/${productNameWar}" />
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!-- This plugin's configuration is used to store Eclipse m2e settings only.
-					It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											buildnumber-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.1,)
-										</versionRange>
-										<goals>
-											<goal>
-												create-timestamp
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 </project>

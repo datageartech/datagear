@@ -36,8 +36,6 @@
     	<module>datagear-util</module>
 		<module>datagear-analysis</module>
 		<module>datagear-web</module>
-		<module>datagear-webapp</module>
-		<module>datagear-webappembd</module>
 	</modules>
 	
 	<dependencies>
@@ -63,6 +61,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.24</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -122,9 +121,6 @@ ${line.separator}
 -----------------------------------------
 ${line.separator}
 </echo>
-								<!-- 替换web模块datagear-version.properties中的版本号 -->
-								<replaceregexp file="datagear-web/src/main/resources/org/datagear/web/datagear-version.properties" encoding="UTF-8" match="version=\d+(\.\d+){1,2}(\-\w+){0,1}" replace="version=${project.version}"/>
-								
 								<!-- 为web模块的changelog.txt添加版本号行 -->
 			    				<echo file="datagear-web/src/main/resources/org/datagear/web/changelog.txt" encoding="UTF-8" append="true">
 ${line.separator}
@@ -133,18 +129,6 @@ ${line.separator}
 -----------------------------------------
 ${line.separator}
 </echo>
-								<!-- 替换web模块readme.txt中的版本号 -->
-								<replaceregexp file="datagear-webapp/src/main/webapp/readme.txt" encoding="UTF-8" match="DataGear\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="DataGear-v${project.version}"/>
-								
-								<!-- 替换webappembd模块readme.txt中的版本号 -->
-								<replaceregexp file="datagear-webappembd/src/main/dist/readme.txt" encoding="UTF-8" match="DataGear\-v\d+(\.\d+){1,2}(\-\w+){0,1}" replace="DataGear-v${project.version}"/>
-								
-								<!-- 替换webappembd模块startup.bat中的版本号 -->
-								<replaceregexp file="datagear-webappembd/src/main/dist/startup.bat" encoding="UTF-8" match="datagear\-webappembd\-\d+(\.\d+){1,2}(\-\w+){0,1}" replace="datagear-webappembd-${project.version}"/>
-								
-								<!-- 替换webappembd模块startup.sh中的版本号 -->
-								<replaceregexp file="datagear-webappembd/src/main/dist/startup.sh" encoding="UTF-8" match="datagear\-webappembd\-\d+(\.\d+){1,2}(\-\w+){0,1}" replace="datagear-webappembd-${project.version}"/>
-								
 			    			</tasks>
 			    		</configuration>
 			    	</execution>
