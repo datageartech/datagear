@@ -3,7 +3,7 @@
 JAVA_HOME=$JAVA_HOME
 JAVA_OPTS=$JAVA_OPTS
 
-APP_MAIN="${project.build.finalName}.jar"
+APP_MAIN="${productNameJar}"
 
 APP_PID=0
 

@@ -1,1 +1,1 @@
-java -jar ${project.build.finalName}.jar
+java -jar ${productNameJar}

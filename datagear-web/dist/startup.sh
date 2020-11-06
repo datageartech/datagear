@@ -4,7 +4,7 @@ JAVA_HOME=$JAVA_HOME
 JAVA_OPTS=$JAVA_OPTS
 JAVA_VERSION=""
 
-APP_MAIN="${project.build.finalName}.jar"
+APP_MAIN="${productNameJar}"
 
 APP_PID=0
 
@@ -46,9 +46,9 @@ else
 	echo "starting..."
 	
 	if [ -n "$JAVA_HOME" ]; then
-		nohup $JAVA_HOME/bin/java $JAVA_OPTS -cp $APP_CLASSPATH $APP_MAIN >/dev/null 2>&1 &
+		nohup $JAVA_HOME/bin/java $JAVA_OPTS -jar $APP_MAIN >/dev/null 2>&1 &
 	else
-		nohup java $JAVA_OPTS -cp $APP_CLASSPATH $APP_MAIN >/dev/null 2>&1 &
+		nohup java $JAVA_OPTS -jar $APP_MAIN >/dev/null 2>&1 &
 	fi
 	
 	readAppPID
