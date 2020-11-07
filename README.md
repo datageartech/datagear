@@ -117,18 +117,12 @@ SQL工作台
   <br>系统常用工具集模块
 
 - datagear-web
-  <br>系统业务web模块，定义web控制器、操作页面
-
-- datagear-webapp
-  <br>系统Web应用程序组织模块，定义将系统构建为标准WAR程序包的结构
-
-- datagear-webappembd
-  <br>系统独立应用程序组织模块，定义将系统构建为独立可执行程序的结构
+  <br>系统web模块，定义web控制器、操作页面
 
 ## 依赖
 
 	Java 8+
-	Servlet 3.0+
+	Servlet 3.1+
 
 ## 编译
 
@@ -139,21 +133,12 @@ SQL工作台
 	（不执行单元测试编译，无需预先配置单元测试环境）
 	mvn clean package -DskipTests
 
-## 运行
-
-	cd datagear-webappembd/target/datagear-[version]
-	
-	（Linux环境）
-	./startup.sh
-	
-	（windows环境）
-	startup.bat
+编译完成后，将在`datagear-web/target/datagear-[version]-packages/`内生成程序包。
 
 ## 调试
 	
 	1. 将datagear以maven工程导入至IDE工具；
-	2. 将datagear-webapp作为Web应用添加至servlet容器（比如Tomcat）；
-	3. 以调试模式运行Servlet容器。
+	2. 以调试模式运行datagear-web模块的：org.datagear.web.DataGearApplication
 	
 ## 调试注意
 
