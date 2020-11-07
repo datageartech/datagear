@@ -139,6 +139,7 @@ SQL工作台
 	
 	1. 将datagear以maven工程导入至IDE工具；
 	2. 以调试模式运行datagear-web模块的：org.datagear.web.DataGearApplication
+	3. 打开浏览器，输入：http://localhost:50401
 	
 ## 调试注意
 
