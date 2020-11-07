@@ -3,16 +3,18 @@
 JAVA_HOME=$JAVA_HOME
 JAVA_OPTS=$JAVA_OPTS
 
+ECHO_PREFIX="[DataGear] :"
+
 APP_MAIN="${productNameJar}"
 
 APP_PID=0
 
 if [ -n "$JAVA_HOME" ]; then
-	echo "using JAVA_HOME '$JAVA_HOME'"
+	echo "$ECHO_PREFIX using JAVA_HOME '$JAVA_HOME'"
 else
 	java -version
 	echo ""
-	echo "using previous java runtime"
+	echo "$ECHO_PREFIX using previous java runtime"
 fi
 
 readAppPID()
@@ -39,14 +41,14 @@ readAppPID()
 readAppPID
 
 if [ $APP_PID -ne 0 ]; then
-	echo "stopping... (PID=$APP_PID)"
+	echo "$ECHO_PREFIX stopping... (PID=$APP_PID)"
 	kill -9 $APP_PID
 	if [ $? -eq 0 ]; then
-		echo "stopping [OK]"
+		echo "$ECHO_PREFIX stopping [OK]"
 	else
-		echo "stopping [Failed]"
+		echo "$ECHO_PREFIX stopping [Failed]"
 	fi
 else
-	echo "application is not running"
-	echo "stopping [Failed]"
+	echo "$ECHO_PREFIX application is not running"
+	echo "$ECHO_PREFIX stopping [Failed]"
 fi

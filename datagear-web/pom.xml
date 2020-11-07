@@ -18,9 +18,8 @@
 		<productName>datagear-${project.version}</productName>
 		<productNameJar>${productName}.jar</productNameJar>
 		<productNameWar>${productName}.war</productNameWar>
-		<dist.target.folderName>${productName}-bin</dist.target.folderName>
-		<dist.target.dir>${project.build.directory}/${dist.target.folderName}</dist.target.dir>
-		<dist.package.target.dir>${project.build.directory}/${dist.target.folderName}-package</dist.package.target.dir>
+		<dist.target.dir>${project.build.directory}/${productName}-bin/${productName}</dist.target.dir>
+		<dist.package.target.dir>${project.build.directory}/${productName}-packages</dist.package.target.dir>
 	</properties>
 	
 	<dependencies>
@@ -129,27 +128,6 @@
 			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-antrun-plugin</artifactId>
-			    <version>${maven-antrun-plugin.version}</version>
-			    <executions>
-			    	<!-- 拷贝LICENSE文件 -->
-			    	<execution>
-			    		<id>copyLICENSE</id>
-			    		<phase>prepare-package</phase>
-			    		<goals>
-			    			<goal>run</goal>
-			    		</goals>
-			    		<configuration>
-			    			<tasks>
-			    				<copy file="../LICENSE" todir="${project.build.outputDirectory}" />
-			    			</tasks>
-			    		</configuration>
-			    	</execution>
-			    </executions>
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 			    <version>${maven-antrun-plugin.version}</version>
 				<executions>
@@ -176,6 +154,26 @@
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>prepareWarResources</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/${productName}/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>dist/war</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>readme.txt</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					
+					<execution>
 						<id>prepareDistResources</id>
 						<phase>prepare-package</phase>
 						<goals>
@@ -185,7 +183,7 @@
 							<outputDirectory>${dist.target.dir}/</outputDirectory>
 							<resources>
 								<resource>
-									<directory>dist</directory>
+									<directory>dist/bin</directory>
 									<filtering>true</filtering>
 									<includes>
 										<include>**/*</include>
@@ -203,6 +201,19 @@
 			    <version>${maven-antrun-plugin.version}</version>
 				<executions>
 					<execution>
+			    		<id>prepareWarLICENSE</id>
+			    		<phase>prepare-package</phase>
+			    		<goals>
+			    			<goal>run</goal>
+			    		</goals>
+			    		<configuration>
+			    			<tasks>
+			    				<copy file="../LICENSE" todir="${project.build.directory}/${productName}" />
+			    			</tasks>
+			    		</configuration>
+			    	</execution>
+			    	
+					<execution>
 						<id>buildDistPackage</id>
 						<phase>package</phase>
 						<goals>
@@ -214,7 +225,7 @@
 								<mkdir dir="${dist.target.dir}/logs"/>
 								<copy file="../LICENSE" todir="${dist.target.dir}" />
 								
-								<zip destfile="${dist.package.target.dir}/${productName}.zip" basedir="${project.build.directory}" includes="${dist.target.folderName}/**/*" />
+								<zip destfile="${dist.package.target.dir}/${productName}.zip" basedir="${project.build.directory}/${productName}-bin" includes="${productName}/**/*" />
 								<copy file="${project.build.directory}/${productNameWar}.original" tofile="${dist.package.target.dir}/${productNameWar}" />
 							</tasks>
 						</configuration>
