@@ -712,7 +712,7 @@ public class CoreConfig implements InitializingBean
 	@Bean
 	public GenericDataExchangeService dataExchangeService()
 	{
-		GenericDataExchangeService bean = new GenericDataExchangeService(this.devotedDataExchangeServices());
+		GenericDataExchangeService bean = new GenericDataExchangeService();
 		return bean;
 	}
 
@@ -741,6 +741,7 @@ public class CoreConfig implements InitializingBean
 		{
 			List<DevotedDataExchangeService<?>> devotedDataExchangeServices = this.devotedDataExchangeServices();
 			devotedDataExchangeServices.add(this.batchDataExchangeService());
+			this.dataExchangeService().setDevotedDataExchangeServices(devotedDataExchangeServices);
 		}
 	}
 }
