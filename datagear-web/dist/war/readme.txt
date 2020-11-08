@@ -13,6 +13,8 @@ DataGear是一款数据可视化分析平台，使用Java语言开发，采用�
 
 示例：https://my.oschina.net/u/4035217
 
-源码：https://gitee.com/datagear/datagear
+源码：
+	https://gitee.com/datagear/datagear
+	https://github.com/datageartech/datagear
 
 大屏模板：https://gitee.com/datagear/DataGearDashboardTemplate

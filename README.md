@@ -45,6 +45,12 @@ QQ群：[916083747（已满）](https://jq.qq.com/?_wv=1027&k=ODxiKOOy)、[11283
 
 留言板：[http://www.datagear.tech/messageboard](http://www.datagear.tech/messageboard/)
 
+## 源码
+
+Gitee：[https://gitee.com/datagear/datagear](https://gitee.com/datagear/datagear)
+
+Github：[https://github.com/datageartech/datagear](https://github.com/datageartech/datagear)
+
 ## 界面
 
 数据管理
