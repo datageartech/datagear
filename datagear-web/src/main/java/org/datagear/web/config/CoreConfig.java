@@ -113,10 +113,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * 核心配置。
@@ -124,7 +121,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author datagear@163.com
  */
 @Configuration
-@EnableTransactionManagement
 public class CoreConfig implements InitializingBean
 {
 	public static final String NAME_CHART_SHOW_HtmlTplDashboardWidgetHtmlRenderer = "chartShowHtmlTplDashboardWidgetHtmlRenderer";
@@ -305,13 +301,6 @@ public class CoreConfig implements InitializingBean
 	public DbVersionManager dbVersionManager()
 	{
 		DbVersionManager bean = new DbVersionManager(this.dataSourceConfig.dataSource());
-		return bean;
-	}
-
-	@Bean
-	public PlatformTransactionManager transactionManager()
-	{
-		DataSourceTransactionManager bean = new DataSourceTransactionManager(this.dataSourceConfig.dataSource());
 		return bean;
 	}
 
