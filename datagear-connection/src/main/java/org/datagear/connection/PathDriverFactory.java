@@ -153,8 +153,8 @@ public class PathDriverFactory
 				throw new PathDriverFactoryException(
 						"No Driver named [" + driverClassName + "] found in [" + this.path + "]");
 
-			if (LOGGER.isInfoEnabled())
-				LOGGER.info("Get JDBC driver [" + driverClassName + "] in path [" + this.path + "]");
+			if (LOGGER.isDebugEnabled())
+				LOGGER.debug("Get JDBC driver [" + driverClassName + "] in path [" + this.path + "]");
 
 			return driver;
 		}

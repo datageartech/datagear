@@ -14,11 +14,12 @@
 	<tx:advice id="txAdvice" transaction-manager="txManager">
 		<tx:attributes>
 			<tx:method name="get*" read-only="true" />
+			<tx:method name="load*" read-only="true" />
 			<tx:method name="find*" read-only="true" />
 			<tx:method name="query*" read-only="true" />
 			<tx:method name="pagingQuery*" read-only="true" />
 			<tx:method name="exists*" read-only="true" />
-			<tx:method name="isExists*" read-only="true" />
+			<tx:method name="is*" read-only="true" />
 			<tx:method name="*" />
 		</tx:attributes>
 	</tx:advice>

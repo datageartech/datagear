@@ -13,6 +13,7 @@ import org.datagear.web.config.WebMvcConfigurerConfig;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.core.env.Environment;
 
@@ -22,7 +23,11 @@ import org.springframework.core.env.Environment;
  * @author datagear@163.com
  *
  */
-@SpringBootApplication(scanBasePackageClasses = WebMvcConfigurerConfig.class, exclude = ErrorMvcAutoConfiguration.class)
+@SpringBootApplication(scanBasePackageClasses = WebMvcConfigurerConfig.class, exclude = {
+		// 错误页面完全自定义
+		ErrorMvcAutoConfiguration.class,
+		// Freemarker完全自定义
+		FreeMarkerAutoConfiguration.class })
 public class DataGearApplication
 {
 	public static void main(String[] args)

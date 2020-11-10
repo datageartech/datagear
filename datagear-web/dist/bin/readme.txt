@@ -13,10 +13,9 @@ DataGear是一款数据可视化分析平台，使用Java语言开发，采用�
 	Windows:
 	startup.bat
 	
-	然后打开浏览器，输入服务地址：
+	打开浏览器，输入服务地址：
 	http://[IP地址]:50401
 	开始使用。
-
 
 官网：http://www.datagear.tech
 

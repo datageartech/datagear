@@ -21,7 +21,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  *
  */
 @Configuration
-@ImportResource("org/datagear/web/transactionConfig.xml")
+@ImportResource("classpath:org/datagear/web/transactionConfig.xml")
 public class TransactionConfig
 {
 	/** transactionConfig.xml中使用此Bean名 */

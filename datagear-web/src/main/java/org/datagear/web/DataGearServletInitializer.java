@@ -16,9 +16,13 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  */
 public class DataGearServletInitializer extends SpringBootServletInitializer
 {
+	/** 系统作为war包部署至Servlet容器时加载配置项标识，参考：application-war.properties */
+	public static final String PROFILE_WAR = "war";
+
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application)
 	{
+		application.profiles(PROFILE_WAR);
 		return application.sources(DataGearApplication.class).banner(new DataGearBanner());
 	}
 }

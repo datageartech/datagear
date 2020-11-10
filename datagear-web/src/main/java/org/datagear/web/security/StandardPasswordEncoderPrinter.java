@@ -6,6 +6,7 @@ package org.datagear.web.security;
 
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 
+@SuppressWarnings("deprecation")
 public class StandardPasswordEncoderPrinter
 {
 	private static StandardPasswordEncoder standardPasswordEncoder = new StandardPasswordEncoder();
