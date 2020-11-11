@@ -637,9 +637,6 @@ public class CoreConfig implements InitializingBean
 		BayeuxServerFactory bean = new BayeuxServerFactory();
 
 		Map<String, Object> options = new HashMap<>();
-		options.put("logLevel", 3);
-		options.put("timeout", 30000);
-		options.put("maxInterval", 120000);
 		options.put("jsonContext", new CustomJacksonJSONContextServer(this.objectMapperBuilder()));
 
 		List<Extension> extensions = new ArrayList<>();

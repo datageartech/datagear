@@ -23,11 +23,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -1673,15 +1674,16 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		HttpSession session = request.getSession();
 
-		Hashtable<String, BatchDataExchangeInfo> map = null;
+		ConcurrentMap<String, BatchDataExchangeInfo> map = null;
 
 		synchronized (session)
 		{
-			map = (Hashtable<String, BatchDataExchangeInfo>) session.getAttribute(KEY_SESSION_BatchDataExchangeInfoMap);
+			map = (ConcurrentMap<String, BatchDataExchangeInfo>) session
+					.getAttribute(KEY_SESSION_BatchDataExchangeInfoMap);
 
 			if (map == null)
 			{
-				map = new Hashtable<>();
+				map = new ConcurrentHashMap<>();
 				session.setAttribute(KEY_SESSION_BatchDataExchangeInfoMap, map);
 			}
 		}
@@ -1701,7 +1703,7 @@ public class DataExchangeController extends AbstractSchemaConnController
 	{
 		HttpSession session = request.getSession();
 
-		Hashtable<String, BatchDataExchangeInfo> map = (Hashtable<String, BatchDataExchangeInfo>) session
+		ConcurrentMap<String, BatchDataExchangeInfo> map = (ConcurrentMap<String, BatchDataExchangeInfo>) session
 				.getAttribute(KEY_SESSION_BatchDataExchangeInfoMap);
 
 		if (map == null)

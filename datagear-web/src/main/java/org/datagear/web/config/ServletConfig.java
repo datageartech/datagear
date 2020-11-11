@@ -67,11 +67,13 @@ public class ServletConfig
 
 	@Bean
 	@DependsOn("bayeuxServerServletContextAttributeExporter")
-	public ServletRegistrationBean<CometDServlet> cometdServletRegistrationBean()
+	public ServletRegistrationBean<CometDServlet> CometDServletRegistrationBean()
 	{
-		CometDServlet cometdServlet = new CometDServlet();
-		ServletRegistrationBean<CometDServlet> bean = new ServletRegistrationBean<>(cometdServlet, "/cometd/*");
+		CometDServlet cometDServlet = new CometDServlet();
+		ServletRegistrationBean<CometDServlet> bean = new ServletRegistrationBean<>(cometDServlet, "/cometd/*");
 		bean.setName(CometDServlet.class.getSimpleName());
+		bean.setLoadOnStartup(1);
+		bean.setAsyncSupported(true);
 
 		return bean;
 	}

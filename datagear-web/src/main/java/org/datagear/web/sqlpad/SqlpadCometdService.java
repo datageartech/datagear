@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.cometd.bayeux.MarkedReference;
+import org.cometd.bayeux.Promise;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.server.AbstractService;
@@ -38,7 +39,7 @@ public class SqlpadCometdService extends AbstractService
 	 */
 	public void sendStartMessage(ServerChannel channel, int sqlCount)
 	{
-		channel.publish(getServerSession(), new StartMessageData(sqlCount));
+		channel.publish(getServerSession(), new StartMessageData(sqlCount), Promise.noop());
 	}
 
 	/**
@@ -51,7 +52,7 @@ public class SqlpadCometdService extends AbstractService
 	public void sendSqlSuccessMessage(ServerChannel channel, SqlStatement sqlStatement, int sqlStatementIndex)
 	{
 		channel.publish(getServerSession(),
-				new SqlSuccessMessageData(sqlStatement, sqlStatementIndex, SqlResultType.NONE));
+				new SqlSuccessMessageData(sqlStatement, sqlStatementIndex, SqlResultType.NONE), Promise.noop());
 	}
 
 	/**
@@ -69,7 +70,7 @@ public class SqlpadCometdService extends AbstractService
 				SqlResultType.UPDATE_COUNT);
 		sqlSuccessMessageData.setUpdateCount(updateCount);
 
-		channel.publish(getServerSession(), sqlSuccessMessageData);
+		channel.publish(getServerSession(), sqlSuccessMessageData, Promise.noop());
 	}
 
 	/**
@@ -87,7 +88,7 @@ public class SqlpadCometdService extends AbstractService
 				SqlResultType.RESULT_SET);
 		sqlSuccessMessageData.setSqlSelectResult(sqlSelectResult);
 
-		channel.publish(getServerSession(), sqlSuccessMessageData);
+		channel.publish(getServerSession(), sqlSuccessMessageData, Promise.noop());
 	}
 
 	/**
@@ -104,7 +105,7 @@ public class SqlpadCometdService extends AbstractService
 	{
 		SQLExceptionMessageData messageData = new SQLExceptionMessageData(sqlStatement, sqlStatementIndex, content);
 
-		channel.publish(getServerSession(), messageData);
+		channel.publish(getServerSession(), messageData, Promise.noop());
 	}
 
 	/**
@@ -120,7 +121,7 @@ public class SqlpadCometdService extends AbstractService
 	{
 		SQLExceptionMessageData messageData = new SQLExceptionMessageData(sqlStatement, sqlStatementIndex, content);
 
-		channel.publish(getServerSession(), messageData);
+		channel.publish(getServerSession(), messageData, Promise.noop());
 	}
 
 	/**
@@ -137,7 +138,7 @@ public class SqlpadCometdService extends AbstractService
 		if (trace)
 			messageData.setDetailTrace(t);
 
-		channel.publish(getServerSession(), messageData);
+		channel.publish(getServerSession(), messageData, Promise.noop());
 	}
 
 	/**
@@ -149,7 +150,7 @@ public class SqlpadCometdService extends AbstractService
 	public void sendExceptionMessage(ServerChannel channel, String content)
 	{
 		ExceptionMessageData messageData = new ExceptionMessageData(content);
-		channel.publish(getServerSession(), messageData);
+		channel.publish(getServerSession(), messageData, Promise.noop());
 	}
 
 	/**
@@ -161,7 +162,7 @@ public class SqlpadCometdService extends AbstractService
 	 */
 	public void sendSqlCommandMessage(ServerChannel channel, SqlCommand sqlCommand, String content)
 	{
-		channel.publish(getServerSession(), new SqlCommandMessageData(sqlCommand, content));
+		channel.publish(getServerSession(), new SqlCommandMessageData(sqlCommand, content), Promise.noop());
 	}
 
 	/**
@@ -178,7 +179,7 @@ public class SqlpadCometdService extends AbstractService
 		SqlCommandMessageData sqlCommandMessageData = new SqlCommandMessageData(sqlCommand, content);
 		sqlCommandMessageData.setSqlExecutionStat(sqlExecutionStat);
 
-		channel.publish(getServerSession(), sqlCommandMessageData);
+		channel.publish(getServerSession(), sqlCommandMessageData, Promise.noop());
 	}
 
 	/**
@@ -189,7 +190,7 @@ public class SqlpadCometdService extends AbstractService
 	 */
 	public void sendTextMessage(ServerChannel channel, String text)
 	{
-		channel.publish(getServerSession(), new TextMessageData(text));
+		channel.publish(getServerSession(), new TextMessageData(text), Promise.noop());
 	}
 
 	/**
@@ -204,7 +205,7 @@ public class SqlpadCometdService extends AbstractService
 		TextMessageData textMessageData = new TextMessageData(text);
 		textMessageData.setCssClass(cssClass);
 
-		channel.publish(getServerSession(), textMessageData);
+		channel.publish(getServerSession(), textMessageData, Promise.noop());
 	}
 
 	/**
@@ -221,7 +222,7 @@ public class SqlpadCometdService extends AbstractService
 		textMessageData.setCssClass(cssClass);
 		textMessageData.setSqlExecutionStat(sqlExecutionStat);
 
-		channel.publish(getServerSession(), textMessageData);
+		channel.publish(getServerSession(), textMessageData, Promise.noop());
 	}
 
 	/**
@@ -234,7 +235,7 @@ public class SqlpadCometdService extends AbstractService
 	 */
 	public void sendFinishMessage(ServerChannel channel)
 	{
-		channel.publish(getServerSession(), new FinishMessageData());
+		channel.publish(getServerSession(), new FinishMessageData(), Promise.noop());
 	}
 
 	/**
@@ -251,18 +252,7 @@ public class SqlpadCometdService extends AbstractService
 		FinishMessageData finishMessageData = new FinishMessageData();
 		finishMessageData.setSqlExecutionStat(sqlExecutionStat);
 
-		channel.publish(getServerSession(), finishMessageData);
-	}
-
-	/**
-	 * 获取指定ID的消息通道。
-	 * 
-	 * @param channelId
-	 * @return
-	 */
-	public ServerChannel getChannel(String channelId)
-	{
-		return getBayeux().getChannel(channelId);
+		channel.publish(getServerSession(), finishMessageData, Promise.noop());
 	}
 
 	/**

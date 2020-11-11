@@ -20,7 +20,7 @@ page_js_obj.jsp
 			
 			cometd.configure(
 			{
-				/*logLevel : "debug",*/
+				//logLevel : "debug",
 				url : "${contextPath}/cometd"
 			});
 			

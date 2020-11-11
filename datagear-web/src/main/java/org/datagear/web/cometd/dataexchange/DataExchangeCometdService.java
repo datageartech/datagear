@@ -5,6 +5,7 @@
 package org.datagear.web.cometd.dataexchange;
 
 import org.cometd.bayeux.MarkedReference;
+import org.cometd.bayeux.Promise;
 import org.cometd.bayeux.server.BayeuxServer;
 import org.cometd.bayeux.server.ServerChannel;
 import org.cometd.server.AbstractService;
@@ -30,7 +31,7 @@ public class DataExchangeCometdService extends AbstractService
 	 */
 	public void sendMessage(ServerChannel channel, DataExchangeMessage message)
 	{
-		channel.publish(getServerSession(), message);
+		channel.publish(getServerSession(), message, Promise.noop());
 	}
 
 	/**
